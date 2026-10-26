@@ -180,7 +180,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - WallConfigData.cs  -- the whole config.json object model: WallConfigData, POIData, PositionData, taxonomy entries
         - SelectFilterSearchSettings.cs  -- SearchSettings, FilterSettings, ResultsSettings, MinimapSettings, VoiceSettings, each field's limits; SelectFilterSearchOptions = every option string
         - TaxonomyNames.cs  -- ); the one lookup the card, results, filter chips, search sources, suggestions and demos use
-        - CardConfigData.cs  -- CardSettings
+        - CardConfigData.cs  -- CardSettings (+ components: CardComponentSettings, the shared components' wall defaults -- the Open Row's emphasis); POICardData.last_block_number (the card's block-key memory)
         - PoiSubtitle.cs  -- Of(poi, taxonomy, withLevel)
         - WallConfigLoader.cs  -- reads config.json from StreamingAssets and deserializes it
         - DevLog.cs  -- + DevLog.Detail / IsOn: per-item / per-frame detail lines, off by default, one line each (no stack trace); ticked in TileStories > Detail Logs
@@ -220,7 +220,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
       - UI/  -- the visitor-facing UI, one folder per render target (_3.3 R15): World-UGUI, Screen-UITK, Any-UITK, Shared
         - Screen/  [Screen-UITK]  -- UI Toolkit on the screen panel (a UIDocument on the one PanelSettings): what the visitor sees laid over the camera
           - Cards/  [Screen-UITK]  -- the POI Detail Card, a bottom sheet of content blocks
-            - CardIcons.cs  -- that PoiCard.uss shows and places per key (show_on_wall, time, access, location, info, ticket, light); Create / SetKey / KeyOf; used by the actions
+            - CardIcons.cs  -- that PoiCard.uss shows and places per key (show_on_wall, time, access, location, info, ticket, light); Create / SetKey / KeyOf; used by the actions; VectorGlyph shapes, the story's Azulejo ornament and QuoteOpen mark among them (a Solid outline is filled, never stroked)
             - CardTokenColours.cs  -- TryResolve(from, token): a colour token read BY NAME (a family's ColorToken is data)
             - CardImage.cs  -- Plain C#: one picture of the card -- a clipped frame, the picture as a background image, the "picture unavailable" words (CardStrings) instead of a
             - Navigation/  -- moving inside the open card: the controller every nav element drives, and the elements
@@ -260,7 +260,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
             - TakeoverView.cs  -- Plain C#: the full-screen view over the card (the sheet's sibling in the layer, carrying the token classes): Back + breadcrumb (card title > name), a
             - BlockFullView.cs  -- Plain C#, sheet-owned: "open in full view" for ANY block -- PageFor(entry, context) binds a SECOND view of the kind from the BlockViewPool into the
             - ZoomPanSurface.cs  -- Plain C#: the pinch-zoom + pan surface zoom_image already drew, factored out so the gallery lightbox reuses it (ZoomPanRule underneath, unchanged)
-            - IBlockView.cs  -- + BlockBindContext
+            - IBlockView.cs  -- IBlockView + BlockBindContext (DevGallery: the Phase A gallery's card only) + IBlockHost (FullHeight: what a preview's cap is a share of)
             - PoiCardHost.cs  -- selection bus -> BlockStackBuilder -> the sheet; closes through the bus
             - CardOwners.cs  -- Plain C#: the wall card's owners kept together so PoiCardHost only wires them -- the ONE audio owner + its mini-player (CardAudioCoordinator), the
             - CardTapOutside.cs  -- Plain C#: a tap on empty camera space closes the card -- remembers a press, judges the release (CardTapRule, ScreenUIHit), waits out the zoom's
@@ -294,7 +294,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
             - CompactRowView.cs  -- The generic compact row: one button for the line
             - ClipLengthReader.cs  -- The length of the audio / video clip a block names, loaded through the caller's media scope, once per path; MinutesOf = ReadingTimeRule over it
             - BlockViewPool.cs  -- The card's block views pooled per kind (Take / Return / CreatedCount): the stack's and the full view's second view come from the one pool.
-            - CardTextView.cs  -- its paragraphs come from an ElementPool.
+            - CardTextView.cs  -- its paragraphs come from an ElementPool; Leading (a rich-text line-height from a component's own token) and DropCapFlow (DropCapRule: the words of two lines beside a raised letter, the rest full width under it)
             - CardStringTable.cs  -- 
             - CardStrings.asset  -- The framework CardStringTable (en + pt): close, fun_fact_label/hint, status_heading/unknown_mark/unknown/percent, sources_heading/verified/draft
             - PoiCard.uss  -- The card CONTAINER only (6C split): layer, sheet, grabber, close X, header slot (collapsed look), stack, block slot + heading + gap, footer; written
@@ -373,6 +373,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
             - Shapes/  -- 4 non-circle symbol silhouettes: diamond, hexagon, rounded square, star
           - GuideCharacter/  [World-UGUI] [EMPTY SCAFFOLD]  -- the guide character overlay
         - Blocks/  [Any-UITK]  -- one view per block kind, grouped by family
+          - ComposedBlockView.cs  -- the view of every composed kind (the story): on the card its Preview (ElementPreviewRule's rows capped at --ts-preview-max of IBlockHost.FullHeight, cut with a fade, the Open Row; a tap opens the page), in the full view its Page (every row); rows drawn by their element components, pooled; a row with no component draws nothing (a plate in the gallery)
           - About/
             - About.uss  -- The about family's looks (header, status, facts, texts, fun facts, quotes, steps, swatches, actions)
             - HeaderBlockView.cs  -- and subtitle; variants compact / text_only; (7A) the picture looks' HeroPart
@@ -433,8 +434,20 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
             - Guides.uss  -- the guides family's looks (the round play/pause button, scrubber, speed chip, captions line, the hero_chip's thin progress line)
             - AudioGuideBlockView.cs  -- audio_guide: player
             - AudioScrubber.cs  -- the player look's seek bar: a pointer-captured drag seeks (Position, never scrolls the stack), the fill tracks AudioTimeRule's fraction
-        - Components/  [Any-UITK]  -- UI Toolkit pieces that draw on ANY panel, screen or world; filled by the story slice (S2)
+        - Components/  [Any-UITK]  -- UI Toolkit pieces that draw on ANY panel, screen or world (UiRenderTargetGuardTests): the element components and the Open Row
           - README.txt  -- what a component is and the rule it keeps (UiRenderTargetGuardTests)
+          - IElementComponent.cs  -- the element component contract (a VisualElement: Bind(ElementRow, ElementBindContext) / Unbind) + ElementBindContext (block context, element, style row, surface, compact, family token; StyleOf) + ElementSurface
+          - ElementComponentPool.cs  -- a composed view's components pooled per element kind (Take / Return / CreatedCount)
+          - ElementStyle.cs  -- a row's closed style options as classes (tone, size, alignment, preview), SizeOf (compact = small), the --ts-el-leading token reader and WithLeading, Capitals
+          - LineElement.cs  -- title, eyebrow (tracked capitals), heading: one run of words, the display face for title / heading
+          - ProseElement.cs  -- lede and paragraph over CardTextView (glossary words), the paragraph's flowing drop cap in the family colour
+          - CalloutElement.cs  -- callout: a box with a leading bar, an optional small-capitals title and its text; the tone is the box's
+          - PullQuoteElement.cs  -- pull quote: a vector quotation mark, the words in the display face, the attribution, a closing bar; the tone colours mark and bar
+          - ListElement.cs  -- list: one item per line, drawn bullets or numbers; ItemsOf
+          - DividerElement.cs  -- divider: a hairline, or the azulejo ornament (a vector) in the family colour between two hairlines
+          - SpacerElement.cs  -- spacer: room on the spacing scale
+          - OpenRowView.cs  -- the shared Open Row: words + minutes + chevron, a whole touch target; emphasis plain / nudge (the chevron steps) / shine (a per-glyph tint sweep, PostProcessTextVertices, to --ts-accent-shine); Clock; Reduce Motion = plain
+          - Components.uss  -- the components' looks, theme tokens + their own --ts-el-* tokens (sizes, leading, gaps, page inset, --ts-preview-max); every option a class; the rhythm between rows by pair
         - Theme/  [Shared]  -- The app theme: ONE source (a ThemeAsset) of every colour and scale the UI Toolkit screens draw with, generated into USS and read by C#
           - ThemeAsset.cs  -- the ScriptableObject: key, default mode, shared ThemeTokenSet
           - ThemeResolver.cs  -- plain C#: a theme's values in one mode for C# (TryColour, TryNumber; a mode's value wins over a shared one), read from the asset, never from a stylesheet
@@ -485,6 +498,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - CardGalleryDefinitions.Ar.cs  -- show_on_wall entries
         - CardGalleryDefinitions.Meta.cs  -- sources entries
         - CardGalleryDefinitions.Navigation.cs  -- nav_bento's one entry (a Required Tiles field: a heading-only block would show nothing) with two companion Rich Text blocks added by Setup as closed
+        - CardGalleryDefinitions.Story.cs  -- the story entries: the magazine, a short and a tall story, a sheet per text and structure element (a row per style option, SheetRowsOf), the Open Row's three emphases, a Custom preview, the media rows (gallery plates)
         - CardGalleryHarness.cs  -- Shows one gallery entry at a time on the real PoiCardSheetView in a phone-width frame (the PanelSettings reference width); Left/Right step, Space
         - HotspotPinRule.cs  -- Pure (Runtime/Blocks): JumpTarget(opensBlock, jumpTargets) -- the block a hotspot pin jumps to, "" when it opens its own text
         - CardNavGalleryDefinitions.cs  -- + edge_scrubber in ElementKeys and the edge slot in Wall
@@ -504,7 +518,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - BlockKindDefinition.cs  -- ShowsFor + NotShownForPoiNote (a kind with nothing to show for a POI; 6B: ShowsFor(poi, block, wallPois)), FooterVariants; (6C) the common fields; OwnFields, and a composing kind's Preview surface fields (BlockSurfaces) after its own
         - BlockRegistry.cs  -- Register refuses a broken or duplicate kind (Validate: also a second / nested Elements field, a surface key; ValidateFields shared with ElementRegistry), TryGet, CreateView; (8A) Validate also refuses a show-after-viewed field that is not one of
         - BuiltInBlocks.cs  -- + the shared long-text help; the definitions and their constants live in one partial per family (6C split)
-        - BuiltInBlocks.About.cs  -- header (+ Show Level; 7A: the picture looks and their fields, HeaderImageVariants, HeaderShowsPicture), status, quick_facts, rich_text, fun_fact
+        - BuiltInBlocks.About.cs  -- header (+ Show Level; 7A: the picture looks and their fields, HeaderImageVariants, HeaderShowsPicture), status, quick_facts, rich_text, fun_fact; story (the composed kind: its Page field, OpenWordsKey)
         - BuiltInBlocks.Stories.cs  -- timeline, person, story_chapters, compare_points (OtherPoi, default heading compare_heading)
         - BuiltInBlocks.Visit.cs  -- practical_info (PracticalInfoIcons); (7B) wall_locator (strip / neighbours, no fields), today_map (static / bridge; map, lat, lng, maps_url), related
         - BuiltInBlocks.Meta.cs  -- sources (default heading sources_heading)
@@ -638,16 +652,18 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - Elements/  -- composed blocks as data and pure rules (_3.3 R14, R17; _3.1 5.5): element rows under reserved keys, no new serialized member
           - ElementOptions.cs  -- every shared option string + Editor labels: preview modes, motions, strengths, taps, ref scopes, components, Open Row emphases; OneOf
           - ElementKindDefinition.cs  -- one element kind (key, name, icon, category, sub-fields, closed style lists, media kind + count, motion / tap choices, weight, preview role, search fields)
-          - ElementRegistry.cs  -- the BlockRegistry pattern for elements: Shared (BuiltInElements), Register refuses broken / duplicate, TryGet, Validate
-          - BuiltInElements.cs  -- the 14 v1 elements (title ... spacer) with their style options and defaults
+          - ElementRegistry.cs  -- the BlockRegistry pattern for elements: Shared (BuiltInElements), Register(definition, component factory) refuses broken / duplicate, TryGet, HasComponent / CreateComponent, Validate
+          - BuiltInElements.cs  -- the 14 v1 elements (title ... spacer) with their style options and defaults; ComponentOf (the text and structure elements' components; none for the media elements until S2b)
           - ElementRow.cs  -- ElementRow (typed view of a BlockItemData row: id, element, motion, strength, tap, validated, ref, media; Create / CreateRef / Duplicate) + ElementMedia
           - ElementRef.cs  -- a reference {scope page | block | shared, block, row}
           - BlockSurfaces.cs  -- the Preview surface's common fields, Page / Preview rows, mode, hand-set minutes, OverrideOf (ComponentOverride), RowsToValidate, TakeRowId (never reused)
           - ElementRefRule.cs  -- ElementScope (holder, the POI's blocks, the shared pool) + Resolve / ContentOf: one level, Broken with its reason
-          - ElementPreviewRule.cs  -- Automatic (first picture + title + text in Page order) / Custom (own, linked, broken); UsedPageRows
-          - ElementRules.cs  -- Minutes (200 wpm + media weights, hand-set wins), FirstWords, SearchWords (not indexed), TapOf
+          - ElementPreviewRule.cs  -- Automatic (first picture + title -- the eyebrow right before it with it, TitleLead -- + text in Page order) / Custom (own, linked, broken); UsedPageRows
+          - ElementRules.cs  -- Minutes (200 wpm + media weights, hand-set wins), FirstWords (the first title row, else the first words), SearchWords (not indexed), TapOf
           - ElementMotionRule.cs  -- EffectOf (Auto = the element's own) and ReducedOf (Reduce Motion: reveal -> cross-fade, else still)
           - ElementValidation.cs  -- problems named by surface + row (unknown element, required empty, media, broken ref, blank / repeated id); RowIsComplete
+          - DropCapRule.cs  -- Split: the words of N lines beside a drop cap and the rest under it (greedy, by a measure; a glossary mark one word); Words
+          - OpenRowMotionRule.cs  -- the Open Row's motion: Effective (Reduce Motion = plain), the nudge's keyframes, the shine band's centre and amount
       - Circuits/  [EMPTY SCAFFOLD]  -- circuit state machine and entry-point resolution
       - Telemetry/  [EMPTY SCAFFOLD]  -- analytics events and consent
       - AI/  [EMPTY SCAFFOLD]  -- optional AI features, feature-flagged
@@ -778,7 +794,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
             - EditorNotice.cs  -- the one queue for short informational messages (locked edit, hidden facing change, nothing to clear, rejected rename, validation report); an
             - NoticePopup.cs  -- content: one notice as a message box -- the text, then one bottom row: "Don't show this again" on the left (advisory notices only), the default OK on
           - IdentityDeleteGuard.cs  -- EditorDecision question before deleting a row POIs still reference
-          - TaxonomyRowKeys.cs  -- the never-repeating generated key of every taxonomy row
+          - TaxonomyRowKeys.cs  -- the never-repeating generated key of every taxonomy row; TakeBlockKey / SeedBlockKeyMemory (a card's block keys: one past its high-water mark, never a deleted key again)
           - KeywordListText.cs  -- 
           - DefaultCategoryStyles.cs  -- seeds 6 heritage categories into an empty config
           - DefaultBadgeCategories.cs  -- seeds 4 damage levels
@@ -895,6 +911,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
             - ElementPreviewRuleTests.cs  -- Automatic in Page order through reorders, deletes, links, broken rows; Custom own / linked / broken; the mode switch
             - ElementRulesTests.cs  -- minutes counted from the source texts, first words, search words, tap, motion + reduce; ReadingTimeRule / BlockSummaryRule / CompactRowRule / BlockStackBuilder on the story
             - ElementValidationTests.cs  -- each problem named by surface, row, element and field; ids unique across Page and Preview; an id problem never hides content
+            - DropCapRuleTests.cs  -- the cut by lines, a short paragraph whole, a glossary mark one word, a word wider than the line
         - MarkerHierarchyResolverTests.cs (incl. Marker Label Style resolution and StyleOf clamping), MarkerLayoutTests.cs, MarkerLayoutPxConversionTests.cs  -- size and layout math
         - ClusterGroupingTests.cs, ClusterReconcileTests.cs, ClusterPrefabTests.cs  -- cluster grouping and prefab contract
         - DisplacementComputeTests.cs, DisplacementAlgorithmTest.cs, DisplacementHysteresisTests.cs, DisplacementTieBreakStrategyTests.cs, DisplacementSettingsDefaultsTests.cs  -- displacement math and defaults
@@ -1057,6 +1074,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - CardNavGalleryTests.FullView.cs  -- partial: Phase A of the full view's breadcrumb and chips over the five cases
         - CardNavGalleryTests.Facets.cs  -- partial: Phase A of the facet chips on drawer_tree and grid_overlay over the five cases
         - CardGalleryTests.cs  -- 
+        - CardStoryGalleryTests.cs  -- Phase A of the story on the gallery card: every element x every option x light / dark on its page (real tap), fit and >= 7:1 on the render; the preview's cap, fade and Open Row; the three emphases as frame sequences; Custom preview; media plates; reuse
         - CardSettingsGalleryTests.cs  -- Phase A of the language chip: finger-sized, readable, level with and left of the X, a real tap re-shows the entry in the other language (and back)
         - CardTrackGalleryTests.cs  -- Phase A of the swipe tracks: the horizontal timeline and the related carousel never show a card cut in half at rest or at the end of the swipe, the
         - PoiCardLanguageSceneTests.cs  -- Phase B on the REAL LivingRoomScene: a real tap on the chip shows The Lamp's card in Portuguese in place (stop and scroll kept) and back, the pick
@@ -1078,6 +1096,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - BackgroundSafeInput.cs  -- Test helper: a copy of InputSystem.settings that keeps real devices working whichever application has the focus
         - PoiCardRealAudioTests.cs  -- The REAL AudioSource + the real ~200s PT clip (castelo_s_jorge_guide_pt.mp3): real taps play / pause / seek / change speed, closing the card with
         - PoiCardPortugueseTests.cs  -- The Lamp's PT render read item by item: every non-ASCII glyph its PT card content uses (c-cedilla, a / e / i / o / u with accents, A with an accent)
+        - PoiCardStorySceneTests.cs  -- Phase B on the REAL scene: The Painting's story preview capped with its Open Row in EN / PT, light / dark; a real tap opens the page, sibling chips turn, Back returns
       - EditMode/  [EMPTY SCAFFOLD]  -- legacy folder, superseded by Tests/Editor
   - StreamingAssets/
     - LivingRoom/

@@ -38,6 +38,46 @@ namespace TileStories.Editor
         // Not a taxonomy table either: a wall's navigation Groups (_3.2 section 3), which a Families row points at by key
         public const string GroupPrefix = "group_";
 
+        // The key of a NEW block of `card` (_3.1 5.2: block_N, never reused): one past the highest N the card ever handed out
+        // (last_block_number) or any of its blocks holds now (a hand-edited file, a file older than the memory), whichever is higher --
+        // NextFree alone gave a deleted LAST key out again. Records the number it hands out
+        public static string TakeBlockKey(POICardData card)
+        {
+            int highest = card.last_block_number;
+            if (card.blocks != null)
+                foreach (var block in card.blocks)
+                    highest = Math.Max(highest, BlockNumber(block?.key));
+            card.last_block_number = highest + 1;
+            return BlockPrefix + card.last_block_number;
+        }
+
+        // Bring every card's key memory up to the highest block_N it holds (a file written before the memory existed, or edited by
+        // hand): without it, deleting the last block of a card loaded that way handed its key out again. Called once on load, never while
+        // drawing. Returns how many cards it raised
+        public static int SeedBlockKeyMemory(WallConfigData config)
+        {
+            if (config?.pois == null) return 0;
+            int raised = 0;
+            foreach (var poi in config.pois)
+            {
+                if (poi?.card?.blocks == null) continue;
+                int highest = poi.card.last_block_number;
+                foreach (var block in poi.card.blocks) highest = Math.Max(highest, BlockNumber(block?.key));
+                if (highest == poi.card.last_block_number) continue;
+                poi.card.last_block_number = highest;
+                raised++;
+            }
+            return raised;
+        }
+
+        // The N of a key block_N, 0 for anything else
+        public static int BlockNumber(string key)
+        {
+            if (string.IsNullOrEmpty(key) || !key.StartsWith(BlockPrefix, StringComparison.Ordinal)) return 0;
+            return int.TryParse(key.Substring(BlockPrefix.Length), System.Globalization.NumberStyles.None,
+                System.Globalization.CultureInfo.InvariantCulture, out int n) ? n : 0;
+        }
+
         // Give every row of every table a key of its own: a blank key, or one an earlier row already has (only a
         // hand-edited file gets there -- "+ Add" never repeats one), gets NextFree. The FIRST row keeps a shared key,
         // so the POIs using it keep showing what they showed (the runtime also finds the first row). POIs are never

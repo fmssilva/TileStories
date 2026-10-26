@@ -14,8 +14,9 @@ namespace TileStories.Tests
     {
         // The grounds text is drawn on: a block, a button / chip, the app ground, the chrome bar
         public static readonly string[] Surfaces = { "--ts-surface", "--ts-surface-2", "--ts-bg", "--ts-bar" };
-        // Every colour a text is written in (the card's sheets: color: var(...)); accent is used as a text colour too
-        public static readonly string[] TextRoles = { "--ts-ink", "--ts-ink-2", "--ts-ink-3", "--ts-accent-text", "--ts-accent", "--ts-correct", "--ts-wrong" };
+        // Every colour a text is written in (the card's sheets: color: var(...)); accent is used as a text colour too, and the Open Row's
+        // shine is the brightest colour its words take
+        public static readonly string[] TextRoles = { "--ts-ink", "--ts-ink-2", "--ts-ink-3", "--ts-accent-text", "--ts-accent", "--ts-accent-shine", "--ts-correct", "--ts-wrong" };
         // The body text roles APCA judges
         public static readonly string[] BodyRoles = { "--ts-ink", "--ts-ink-2" };
         // Marks that carry meaning without words: a meaningful border, the focus ring, an accent outline, the status fallback rings

@@ -61,20 +61,34 @@ namespace TileStories
             return result;
         }
 
-        // The first row of each role, in Page order
+        // The first row of each role, in Page order; a title lead (an eyebrow) right before the title taken comes with it, just above it
         private static void Automatic(Result result, ElementScope scope, ElementRegistry elements)
         {
             var taken = new HashSet<ElementPreviewRole>();
+            // - the row just before this one, when it is a title lead (else null): only a lead touching the title joins
+            (BlockItemData Row, BlockItemData Content)? lead = null;
             foreach (var row in BlockSurfaces.PageRows(scope.Holder, scope.HolderKind))
             {
                 var content = ElementRefRule.ContentOf(row, scope);
-                if (content.IsBroken || elements == null || !elements.TryGet(new ElementRow(content.Target).Kind, out var element)) continue;
+                if (content.IsBroken || elements == null || !elements.TryGet(new ElementRow(content.Target).Kind, out var element))
+                {
+                    lead = null;
+                    continue;
+                }
                 var role = element.PreviewRole;
-                if (role == ElementPreviewRole.None || !taken.Add(role)) continue;
-                string id = new ElementRow(row).Id;
-                result.Entries.Add(new Entry(row, content.Target, Source.Page, ElementRefRule.Problem.None, id));
-                result.UsedPageRows.Add(id);
+                var before = lead;
+                lead = role == ElementPreviewRole.TitleLead ? (row, content.Target) : null;
+                if (role == ElementPreviewRole.None || role == ElementPreviewRole.TitleLead || !taken.Add(role)) continue;
+                if (role == ElementPreviewRole.Title && before.HasValue) Add(result, before.Value.Row, before.Value.Content);
+                Add(result, row, content.Target);
             }
+        }
+
+        private static void Add(Result result, BlockItemData row, BlockItemData content)
+        {
+            string id = new ElementRow(row).Id;
+            result.Entries.Add(new Entry(row, content, Source.Page, ElementRefRule.Problem.None, id));
+            result.UsedPageRows.Add(id);
         }
 
         // The Preview Rows as listed, links resolved

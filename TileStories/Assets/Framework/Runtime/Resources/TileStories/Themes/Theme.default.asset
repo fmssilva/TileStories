@@ -204,6 +204,10 @@ MonoBehaviour:
       - name: --ts-accent-text
         value: {r: 0.11764706, g: 0.22745098, b: 0.5411765, a: 1}
         note: 
+      - name: --ts-accent-shine
+        value: {r: 0.13333334, g: 0.27450982, b: 0.6666667, a: 1}
+        note: 'The Open Row shine (R14.8): the brightest colour a light sweeping across the
+          words gives them; >= 7:1 on every surface like any text (D1)'
       - name: --ts-accent-2
         value: {r: 0.7882353, g: 0.63529414, b: 0.15294118, a: 1}
         note: 
@@ -543,6 +547,10 @@ MonoBehaviour:
       - name: --ts-accent-text
         value: {r: 0.9490196, g: 0.70980394, b: 0.26666668, a: 1}
         note: 
+      - name: --ts-accent-shine
+        value: {r: 1, g: 0.94509804, b: 0.78431374, a: 1}
+        note: 'The Open Row shine (R14.8): the brightest colour a light sweeping across the
+          words gives them; >= 7:1 on every surface like any text (D1)'
       - name: --ts-accent-2
         value: {r: 0.7058824, g: 0.47058824, b: 0.15686275, a: 1}
         note: 
@@ -1039,3 +1047,4 @@ MonoBehaviour:
     - .nav-grid__open-title
     - .nav-rails__title-words
     - .card-section-opener__name
+    - .ts-el--display

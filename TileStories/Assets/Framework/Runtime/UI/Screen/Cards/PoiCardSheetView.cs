@@ -76,6 +76,8 @@ namespace TileStories
 
         public SheetStopRule.Stop Stop { get; private set; } = SheetStopRule.Stop.Dismissed;
         public SheetStopRule.Stops Stops { get; private set; }
+        // IBlockHost: the full stop's height (what a preview's cap is a share of)
+        public float FullHeight => Stops.Full;
         public bool IsOpen => Stop != SheetStopRule.Stop.Dismissed;
         // The height the sheet is set to (it animates there); a drag writes it directly
         public float TargetHeight { get; private set; }

@@ -223,6 +223,8 @@ namespace TileStories.Editor.Tests
             yield return CardRow("card_settings.demo_card", c => { c.card_settings.demo_card.enabled = true; c.card_settings.demo_card.poi_id = DefaultPoi; });
             yield return CardRow("card_settings.preview_language", c => c.card_settings.preview_language = "pt");
             yield return CardRow("card_settings.default_mode", c => c.card_settings.default_mode = CardOptions.ModeDark);
+            // _3.3 S2a: the shared components' wall defaults (the Open Row's emphasis): an open story's row draws the new one
+            yield return CardRow("card_settings.components", c => c.card_settings.components.open_row_emphasis = ElementOptions.EmphasisShine);
             yield return CardRow("pois[].card", c => P(c).card.blocks.Add(new BlockInstanceData { key = "block_live_sync", kind = "show_on_wall" }));
         }
 

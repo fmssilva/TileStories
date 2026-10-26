@@ -67,6 +67,12 @@ namespace TileStories
         // A fact's own heading ("Lost in a day"): what is behind the tap. Blank = the card's "Did you know?" (Card Texts)
         public const string FunFactHeadingField = "heading";
 
+        // The story (_3.3 R14, R17): a page COMPOSED by the wall developer row by row -- titles, paragraphs, quotes, pictures (the element
+        // rows of its Page) -- shown on the card as its Preview (capped, faded, the Open Row) and whole in its own page
+        public const string StoryKind = "story";
+        public const string StoryMagazine = "magazine";
+        public const string StoryPageField = "page";
+
         public const string PullQuoteKind = "pull_quote";
         public const string PullQuoteSerif = "serif";
         public const string PullQuoteMinimal = "minimal";
@@ -494,6 +500,35 @@ namespace TileStories
         };
 
         // Tier 1: text in paragraphs, with glossary words
+        // _3.3 S2a: the first composed kind. Its Page is an Elements field; the Preview surface's fields follow it (BlockSurfaces)
+        public static readonly BlockKindDefinition Story = new()
+        {
+            Key = StoryKind,
+            IconKey = CardIcons.Book,
+            Family = BuiltInFamilies.About,
+            Format = CardOptions.FormatRead,
+            LabelKey = CardStrings.Keys.KindStory,
+            OpenWordsKey = CardStrings.Keys.OpenRowStory,
+            DisplayName = "Story",
+            Help = "A story told like a magazine page, composed row by row: an eyebrow, a title, a lede, paragraphs (one may raise its " +
+                   "first letter), headings, highlighted boxes, pull quotes, lists, dividers, and pictures and video. The card shows its " +
+                   "PREVIEW -- Automatic: the Page's first picture, its eyebrow and title and its first text, cut at about half the card " +
+                   "with a fade and the Open Row (Read the story, its reading time) -- and a tap on it opens the whole Page in the " +
+                   "card's full view. Reading Time 0 counts the minutes from the rows.",
+            Variants = new[] { StoryMagazine },
+            DefaultVariant = StoryMagazine,
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
+            Fields = new[]
+            {
+                new BlockFieldDefinition
+                {
+                    Key = StoryPageField, Type = BlockFieldType.Elements, Label = "Page", Required = true,
+                    Help = "The story's rows, in order: the whole page a visitor reads once the preview is opened. Each row is one " +
+                           "element with its own content and style.",
+                },
+            },
+        };
+
         public static readonly BlockKindDefinition RichText = new()
         {
             Key = RichTextKind,

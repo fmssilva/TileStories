@@ -17,17 +17,52 @@ namespace TileStories.Editor.Tests
         private ElementPreviewRule.Result Preview() => ElementPreviewRule.Of(_s.Scope, _s.Elements);
 
         [Test]
-        public void Automatic_TakesTheFirstPicture_Title_AndText_InPageOrder()
+        public void Automatic_TakesTheFirstPicture_Title_AndText_InPageOrder_TheEyebrowWithItsTitle()
         {
             var preview = Preview();
             Assert.AreEqual(ElementOptions.PreviewAutomatic, preview.Mode, "a block that stores no mode is Automatic");
-            CollectionAssert.AreEqual(new[] { _s.Picture.Id, _s.Title.Id, _s.Lede.Id }, preview.Entries.Select(e => e.PageRowId));
-            CollectionAssert.AreEqual(new[] { _s.Picture.Id, _s.Title.Id, _s.Lede.Id }, preview.UsedPageRows);
+            // - the eyebrow sits right before the title: it leads into it (the prototype's preview: picture, eyebrow, title, lede)
+            CollectionAssert.AreEqual(new[] { _s.Picture.Id, _s.Eyebrow.Id, _s.Title.Id, _s.Lede.Id }, preview.Entries.Select(e => e.PageRowId));
+            CollectionAssert.AreEqual(new[] { _s.Picture.Id, _s.Eyebrow.Id, _s.Title.Id, _s.Lede.Id }, preview.UsedPageRows);
             Assert.IsTrue(preview.Entries.All(e => e.Source == ElementPreviewRule.Source.Page && e.Content == e.Row));
-            // - the eyebrow, the later paragraph, the carousel and the divider are not the preview's
-            CollectionAssert.DoesNotContain(preview.UsedPageRows, _s.Eyebrow.Id);
+            // - the later paragraph, the carousel and the divider are not the preview's
             CollectionAssert.DoesNotContain(preview.UsedPageRows, _s.Paragraph.Id);
             CollectionAssert.DoesNotContain(preview.UsedPageRows, _s.Carousel.Id);
+        }
+
+        // A title lead joins only the title it touches: moved away from the title, or with no title at all, it is not the preview's; a
+        // second eyebrow before a later title the preview does not take joins nothing
+        [Test]
+        public void Automatic_AnEyebrowJoins_OnlyRightBeforeTheTitleTaken()
+        {
+            var rows = _s.PageValue.items;
+            // - the eyebrow moved after the lede: the title has no lead now
+            rows.Remove(_s.Eyebrow.Data);
+            rows.Insert(rows.IndexOf(_s.Lede.Data) + 1, _s.Eyebrow.Data);
+            CollectionAssert.AreEqual(new[] { _s.Picture.Id, _s.Title.Id, _s.Lede.Id }, Preview().UsedPageRows, "an eyebrow away from the title stays out");
+
+            // - eyebrow, lede, title: a row between them, so the title the preview takes has no lead
+            rows.Remove(_s.Eyebrow.Data);
+            rows.Insert(rows.IndexOf(_s.Title.Data), _s.Eyebrow.Data);
+            rows.Remove(_s.Title.Data);
+            rows.Insert(rows.IndexOf(_s.Lede.Data) + 1, _s.Title.Data);
+            CollectionAssert.AreEqual(new[] { _s.Picture.Id, _s.Lede.Id, _s.Title.Id }, Preview().UsedPageRows, "a row between the eyebrow and the title parts them");
+            rows.Remove(_s.Title.Data);
+            rows.Insert(rows.IndexOf(_s.Lede.Data), _s.Title.Data);
+
+            // - back before the title, and a heading with its own eyebrow later: only the first title's lead comes
+            rows.Remove(_s.Eyebrow.Data);
+            rows.Insert(rows.IndexOf(_s.Title.Data), _s.Eyebrow.Data);
+            var secondEyebrow = _s.AddPage(BuiltInElements.Eyebrow);
+            var heading = _s.AddPage(BuiltInElements.Heading);
+            CollectionAssert.AreEqual(new[] { _s.Picture.Id, _s.Eyebrow.Id, _s.Title.Id, _s.Lede.Id }, Preview().UsedPageRows);
+            CollectionAssert.DoesNotContain(Preview().UsedPageRows, secondEyebrow.Id);
+            CollectionAssert.DoesNotContain(Preview().UsedPageRows, heading.Id);
+
+            // - no title at all: the eyebrow leads nowhere
+            rows.Remove(_s.Title.Data);
+            rows.Remove(heading.Data);
+            CollectionAssert.AreEqual(new[] { _s.Picture.Id, _s.Lede.Id }, Preview().UsedPageRows, "an eyebrow alone is never the preview");
         }
 
         [Test]
@@ -37,19 +72,20 @@ namespace TileStories.Editor.Tests
             var rows = _s.PageValue.items;
             rows.Remove(_s.Carousel.Data);
             rows.Insert(0, _s.Carousel.Data);
-            CollectionAssert.AreEqual(new[] { _s.Carousel.Id, _s.Title.Id, _s.Lede.Id }, Preview().UsedPageRows);
+            CollectionAssert.AreEqual(new[] { _s.Carousel.Id, _s.Eyebrow.Id, _s.Title.Id, _s.Lede.Id }, Preview().UsedPageRows);
 
-            // - the lede deleted: the paragraph is the first text now; both pictures deleted: no picture, two rows
+            // - the lede deleted: the paragraph is the first text now; both pictures deleted: no picture
             rows.Remove(_s.Lede.Data);
             rows.Remove(_s.Carousel.Data);
             rows.Remove(_s.Picture.Data);
-            CollectionAssert.AreEqual(new[] { _s.Title.Id, _s.Paragraph.Id }, Preview().UsedPageRows);
+            CollectionAssert.AreEqual(new[] { _s.Eyebrow.Id, _s.Title.Id, _s.Paragraph.Id }, Preview().UsedPageRows);
 
-            // - a heading above the title: the first TITLE-LIKE row in Page order is the heading
+            // - a heading above everything: the first TITLE-LIKE row in Page order is the heading, and the eyebrow (before the title the
+            //   preview no longer takes) stays out
             var heading = _s.AddPage(BuiltInElements.Heading);
             rows.Remove(heading.Data);
             rows.Insert(0, heading.Data);
-            Assert.AreEqual(heading.Id, Preview().UsedPageRows[0]);
+            CollectionAssert.AreEqual(new[] { heading.Id, _s.Paragraph.Id }, Preview().UsedPageRows);
         }
 
         [Test]
@@ -105,7 +141,7 @@ namespace TileStories.Editor.Tests
             mode.value = ElementOptions.PreviewCustom;
             _s.AddPreview(ElementRow.CreateRef(_s.Block, ElementRef.ToPage(_s.Title.Id)));
             mode.value = ElementOptions.PreviewAutomatic;
-            Assert.AreEqual(3, Preview().Entries.Count);
+            Assert.AreEqual(4, Preview().Entries.Count, "picture, eyebrow, title, lede");
             Assert.AreEqual(1, BlockSurfaces.PreviewRows(_s.Block).Count, "the Custom rows wait, stored, for the next switch");
             mode.value = "carousel_only";
             Assert.AreEqual(ElementOptions.PreviewAutomatic, Preview().Mode);

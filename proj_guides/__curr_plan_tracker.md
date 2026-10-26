@@ -1,51 +1,28 @@
-# Plan tracker -- _3.3 R16 row 4: S1 the elements core (data, registry, rules; no view)
+# Plan tracker -- _3.3 S2a: the text components, the story kind and the Open Row
 
-HEAD ba9b2cb (tree clean but proj_guides/__AI_worker.md, 0 commits ahead of origin). Baseline: none (the folder-layout block closed
-with full EditMode 2121 + full PlayMode 1310, 0 failed). Brief = approval. Do not commit (the Architect commits). Re-read this file
-after a compaction.
+Brief: R16 row 5. Baseline: none (HEAD 2ddd76f; S1 full EditMode 2192 + 277 targeted PlayMode green).
 
 ## GATE
-- [x] git push: 0 commits ahead of origin/master -> nothing to push
-- [x] Game-view capture TestEvidence/Gate/gate_s1_gameview.png opened: the wall scene (room scan + painting) renders
-- [x] POI Editor capture TestEvidence/Gate/gate_s1_poieditor.png opened: the window only (a first try caught a browser: deleted); 0 capture windows left
-- [x] Tree compiles: forced compile, Editor.log ExitCode 0, zero `error CS`
-- [x] Oswald Bold SDF.asset / Roboto-Bold SDF.asset unmodified
-- [x] Ask Unity's place (4.2.3 c) before the first test run; wait on the Editor log's `[TestRun] ended`
-
-## Audit facts (verified on disk)
-- Config written by JsonUtility.ToJson(prettyPrint); shipped config round-trips BYTE-IDENTICAL today (687082 chars, 97 blocks, 149 item rows).
-  JsonUtility writes every serializable field incl. empty lists -> any NEW serialized field on BlockItemData / BlockInstanceData / POIData /
-  POICardData changes every row / block / POI on save. Hence: all S1 data under RESERVED KEYS inside the existing classes.
-- Block keys come from TaxonomyRowKeys.NextFree (Editor): a deleted LAST key is handed out again (not "never reused") -> report, do not fix.
-- Card text does not feed search today (__mixed_TODOs 413, a _2.6 decision) -> ElementRules.SearchWords built, not wired into POISearchIndex.
-- Fixture POI: painting (Ribeira Palace): header, quick_facts, rich_text, person, timeline, gallery (paco pictures), ... media LivingRoom/CardMedia.
-
-## Decisions (autonomous)
-1. Storage: element row = BlockItemData with reserved sub-field keys id / element / motion / strength / tap / validated / ref_scope / ref_block /
-   ref_row + repeated `media` entries (asset, text = caption per language, value = credit). Typed wrappers: ElementRow, ElementMedia, ElementRef.
-2. Surface data = common fields appended AFTER a kind's own fields when it declares an Elements field: preview_mode, preview_rows,
-   component_overrides (open_row = the Open Row override). Reading time = the existing `minutes` (0 = Auto from rows).
-3. Ids el_N never reused: high-water mark in the reserved block value element_last_id.
-4. shared_elements: NOT a POIData field yet (byte-identity); ElementRefRule takes the shared pool as a parameter (empty today).
-5. ElementRegistry standalone with Shared (NavElementRegistry precedent); BuiltInElements fills it.
-6. Wire ReadingTimeRule + BlockSummaryRule + BlockStackBuilder (required Elements, no complete row); ElementMotionRule (Auto + Reduce Motion).
+- [x] push: 0 ahead, nothing to push
+- [x] captures: TestEvidence/Gate/gate_game_view-1.png + gate_poi_editor.png (opened, correct, no window left)
+- [x] compile: forced, ExitCode 0, 0 error CS after the offset
+- [x] SDF fonts unmodified
 
 ## Steps
-- [x] 1. Data: BlockFieldType.Elements; BlockKindDefinition surface fields + keys; BlockRegistry Elements validation; HasContent;
-         ElementOptions, ElementRow (+ElementMedia), ElementRef, BlockSurfaces (+ id rule) -- compile
-- [x] 2. Registry: ElementKindDefinition, ElementRegistry (Validate, Shared), BuiltInElements (14 v1 elements, defaults), ElementRow.Create /
-         CreateRef / Duplicate -- compile
-- [x] 3. Rules: ElementRefRule (+ElementScope), ElementPreviewRule, ElementRules (minutes, first words, search words, to-validate),
-         ElementMotionRule, ElementValidation; wire ReadingTimeRule, BlockSummaryRule, BlockStackBuilder -- compile
-- [x] 4. Tests (Tests/Editor/Blocks/Elements/): PaintingStory fixture; ElementDataRoundTripTests (byte-identical x2, old config, full block,
-         ids); ElementRegistryTests; ElementRefRuleTests; ElementPreviewRuleTests; ElementRulesTests (+ composition); ElementValidationTests
-- [x] 5. Run: new tests -> full EditMode -> mutation proofs (one per rule file) -> full EditMode again
-- [x] 6. Targeted PlayMode (background): LivingRoomConfigIntegrationTests, PoiCardSceneTests + grep hits of the changed rules
-- [x] 7. Docs: _3.1 (5.3 + elements data), _3.3 (R16 row 4 + Build log), 10-structure (own lines), 40-testing RUN TIMES if moved
-- [ ] 8. LivingRoomScene open, final report (60-finishing 6.4)
+1. [x] PART 1 -- POICardData.last_block_number + TaxonomyRowKeys.TakeBlockKey / SeedBlockKeyMemory (LoadConfig); AddCardBlock + CardStarters; 3 EditMode tests + 2 mutants killed; both configs migrated through the Editor's save
+2. [x] Theme -- .ts-el--display, --ts-accent-shine (light 8.32 on surface / 7.3 on surface-2; dark ~14), TextRoles audit; USS regenerated
+3. [x] Rules -- DropCapRule (4 tests, mutant killed); ElementPreviewRule TitleLead (eyebrow joins its title; a surviving mutant found a missing case, added, killed); ElementRules.FirstWords = the title row first (S1 tests re-based)
+4. [x] Components layer -- IElementComponent, ElementBindContext, ElementComponentPool, ElementStyle, Components.uss; ElementRegistry factories; CardTextView Leading + DropCapFlow; CardIcons Azulejo / QuoteOpen
+5. [x] The 10 components (7 classes)
+6. [x] OpenRowView + OpenRowMotionRule; CardStrings kind_story / open_row_story / open_row_meta; card_settings.components.open_row_emphasis (default nudge)
+7. [x] ComposedBlockView + story kind; IBlockHost.FullHeight; BlockBindContext.DevGallery; Components.uss in the three scenes' blockStyles
+8. [x] Phase A -- CardGalleryDefinitions.Story.cs + CardStoryGalleryTests 35/35 (background); captures judged
+9. [x] PART 5 -- The Painting's story block_19 via LoadConfig / AddCardBlock / SaveConfig / Copy (EN + PT from the shipped rich text)
+10. [x] Phase B -- PoiCardStorySceneTests 6/6 (background)
+11. [x] Full EditMode (first pass 2201: 6 re-bases fixed) -> targeted Card|Poi|Theme|Section 1120 (0 failed) -> FULL PlayMode 1372 (1 red, not reproduced: InterleavedSpy) -> full EditMode 2202 (1 red, not reproduced: ConfigUndoGrouping slider)
+12. [x] Docs: 10-structure.md, 40-testing RUN TIMES counts, _3.1 5.2 / 5.5, _3.3 Build log + R16 row; final report
 
-## Results so far
-- New fixtures 71/71 (after one test-order fix); full EditMode 2192, 0 failed, 1 skipped (recorder), background both ends, 185 s
-- Mutation: 7 mutants (one per rule file) all killed by their own tests, restored, full EditMode green again
-- Docs: _3.1 5.3 + 5.5; _3.3 R16 row 4 + Build log S1 (PlayMode line pending); _3.2 Reading Time sentence; 10-structure; 40-testing RUN TIMES
-- Targeted PlayMode 277/277 (8 fixtures), ~22 min, background both ends
+## Notes / re-bases
+- line-height tag = % of the FACE's line (not CSS): tokens converted (paragraph 123 = CSS 1.6)
+- the page clipped at its left by a -32 bleed: the fit test measured the 390 frame, not the visible page -> new assertion, proven red with the old bleed
+- EditMode re-bases: BlockKindRoundTripTests (Elements filler), ElementRegistryTests (the story composes), DetailCardEditorTabTests (Elements left to S3 by name; components edit; count 44), LiveSyncFieldMatrixTests (components row), LivingRoomSceneWiringTests (Components/ folder; app sheet last)

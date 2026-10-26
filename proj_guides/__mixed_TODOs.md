@@ -815,3 +815,12 @@ character set -- but the panel draws in the CARD fonts (Atkinson / Fraunces, Lat
 `ShippedTextGlyphTests` checks every shipped string against both marker fonts. Scope it: strings a MARKER can show (POI names, level
 names, marker labels) -> the marker fonts; card strings -> the card fonts. Then the framework can ship native names for more
 languages (es, fr, de, it...) without rebuilding the marker atlases.
+
+## Watched flakes (2026-10-26, seen in `_3.3` S2a's full runs; each green alone)
+
+- `ConfigUndoGroupingTests.DraggingASlider_IsOneUndoStep` -- red once in a background full EditMode run AFTER H1 made the drag one
+  editor tick: the one-tick gesture did not remove every cause. Next sighting: run the H1 recorder on that run to see what moved
+  between the drag's events.
+- `PoiCardInterleavedSpySceneTests.TheLamp_RealDragsDownTheWholeCard_...` ("drag 20 at 6279") -- red once in a background full
+  PlayMode run, green in the targeted run and 7/7 alone. Likely a drag landing during the sheet's settle (the "wait on the condition,
+  not on seconds" rule of `40-testing.md`): check the walk waits for the stack to rest between drags.

@@ -1,0 +1,457 @@
+/* The UI components (_3.3 R14.2, R17.5): the element components a composed block draws its rows with, the Open Row and the composed view.
+   Written only with the theme's tokens (T2) and the components' own T3 tokens below, which default to theme tokens or to a value on the
+   4 / 8 scale (D7). Drawn on any panel (R15.2): nothing here names the card's sheet. Sizes: the prototype's magazine page (_3.3.1).
+   --ts-el-leading (per element, read by its component): the lines' pitch as a percentage of the FACE's own line height -- TextCore's
+   rich-text line-height, not CSS's percentage of the type size. Atkinson's own line is about 1.3 of its size, Fraunces' about 1.25, so the
+   prototype's CSS 1.6 is 123 here (measured on the render: CardStoryGalleryTests). */
+
+.ts-composed,
+.ts-el,
+.ts-open-row {
+    /* Type sizes per element and size option (small / medium / large) */
+    --ts-el-title-s: var(--ts-size-title);
+    --ts-el-title-m: 28px;
+    --ts-el-title-l: 32px;
+    --ts-el-heading-s: var(--ts-size-heading);
+    --ts-el-heading-m: var(--ts-size-title);
+    --ts-el-heading-l: 28px;
+    --ts-el-eyebrow-s: 13px;
+    --ts-el-eyebrow-m: var(--ts-size-caption);
+    --ts-el-eyebrow-l: var(--ts-size-body);
+    --ts-el-lede-s: 17px;
+    --ts-el-lede-m: var(--ts-size-lede);
+    --ts-el-lede-l: 21px;
+    --ts-el-body-s: 15px;
+    --ts-el-body-m: 17px;
+    --ts-el-body-l: var(--ts-size-lede);
+    --ts-el-quote-s: var(--ts-size-heading);
+    --ts-el-quote-m: var(--ts-size-quote);
+    --ts-el-quote-l: var(--ts-size-title);
+    --ts-el-dropcap-s: 52px;
+    --ts-el-dropcap-m: 60px;
+    --ts-el-dropcap-l: 68px;
+    /* The space between two rows, and the tighter pairs (an eyebrow over its title, a heading over its text) */
+    --ts-el-gap: var(--ts-space-4);
+    --ts-el-gap-tight: var(--ts-space-1);
+    --ts-el-gap-heading: var(--ts-space-2);
+    --ts-el-gap-section: var(--ts-space-6);
+    /* The page's side margin; the block's own side margin (--ts-space-4) it takes back so the page fills the full view's width */
+    --ts-el-page-inset: var(--ts-space-4);
+    --ts-el-page-bleed: -16px;
+    /* The spacer's sizes */
+    --ts-el-space-s: var(--ts-space-4);
+    --ts-el-space-m: var(--ts-space-6);
+    --ts-el-space-l: 48px;
+    /* A whole touch target (the Open Row) */
+    --ts-el-touch: 48px;
+    /* The preview's cap: a share of the card's full height (_3.3 R10.2), read by ComposedBlockView */
+    --ts-preview-max: 0.5;
+}
+
+/* ---------------- a row ---------------- */
+
+.ts-el {
+    margin: var(--ts-el-gap) 0 0 0;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+/* (the pairs' tighter gaps and the first row's none: at the end of this sheet, two classes, so they win over a kind's own margin) */
+
+/* The words of a one-line element and of the long texts: every tone colours the WORDS (Family is painted from code: the block's family) */
+.ts-el__text,
+.ts-el .ts-el__paragraph,
+.ts-el-list__words,
+.ts-el-list__number {
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+.ts-el .ts-el__paragraph {
+    margin-bottom: var(--ts-space-3);
+}
+
+.ts-el--tone-accent .ts-el__text,
+.ts-el--tone-accent .ts-el__paragraph,
+.ts-el--tone-accent .ts-el-list__words,
+.ts-el--tone-accent .ts-el-list__number {
+    color: var(--ts-accent-text);
+}
+
+/* Inverse: light words on a dark plate (the page's ink as the ground) */
+.ts-el--tone-inverse.ts-el-title,
+.ts-el--tone-inverse.ts-el-eyebrow,
+.ts-el--tone-inverse.ts-el-heading,
+.ts-el--tone-inverse.ts-el-lede,
+.ts-el--tone-inverse.ts-el-paragraph,
+.ts-el--tone-inverse.ts-el-list,
+.ts-el--tone-inverse.ts-el-callout,
+.ts-el--tone-inverse.ts-el-pull-quote {
+    background-color: var(--ts-ink);
+    border-radius: var(--ts-radius-m);
+    padding: var(--ts-space-3) var(--ts-space-4);
+}
+
+.ts-el--tone-inverse .ts-el__text,
+.ts-el--tone-inverse .ts-el__paragraph,
+.ts-el--tone-inverse .ts-el-list__words,
+.ts-el--tone-inverse .ts-el-list__number,
+.ts-el--tone-inverse .ts-el-callout__title,
+.ts-el--tone-inverse .ts-el-pull-quote__attribution {
+    color: var(--ts-surface);
+}
+
+.ts-el--align-center .ts-el__text,
+.ts-el--align-center .ts-el__paragraph,
+.ts-el--align-center .ts-el-pull-quote__attribution {
+    -unity-text-align: upper-center;
+}
+
+/* ---------------- title, eyebrow, heading ---------------- */
+
+.ts-el-title {
+    --ts-el-leading: 90;
+}
+
+.ts-el-title .ts-el__text {
+    -unity-font-style: bold;
+}
+
+.ts-el-title.ts-el--size-s .ts-el__text { font-size: var(--ts-el-title-s); }
+.ts-el-title.ts-el--size-m .ts-el__text { font-size: var(--ts-el-title-m); }
+.ts-el-title.ts-el--size-l .ts-el__text { font-size: var(--ts-el-title-l); }
+
+.ts-el-heading {
+    --ts-el-leading: 92;
+    margin-top: var(--ts-el-gap-section);
+}
+
+.ts-el-heading .ts-el__text {
+    -unity-font-style: bold;
+}
+
+.ts-el-heading.ts-el--size-s .ts-el__text { font-size: var(--ts-el-heading-s); }
+.ts-el-heading.ts-el--size-m .ts-el__text { font-size: var(--ts-el-heading-m); }
+.ts-el-heading.ts-el--size-l .ts-el__text { font-size: var(--ts-el-heading-l); }
+
+.ts-el-eyebrow .ts-el__text {
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+}
+
+.ts-el-eyebrow.ts-el--size-s .ts-el__text { font-size: var(--ts-el-eyebrow-s); }
+.ts-el-eyebrow.ts-el--size-m .ts-el__text { font-size: var(--ts-el-eyebrow-m); }
+.ts-el-eyebrow.ts-el--size-l .ts-el__text { font-size: var(--ts-el-eyebrow-l); }
+
+/* ---------------- lede, paragraph ---------------- */
+
+.ts-el-lede {
+    --ts-el-leading: 109;
+}
+
+.ts-el-lede .ts-el__paragraph {
+    -unity-font-style: normal;
+}
+
+.ts-el-lede.ts-el--size-s .ts-el__paragraph { font-size: var(--ts-el-lede-s); }
+.ts-el-lede.ts-el--size-m .ts-el__paragraph { font-size: var(--ts-el-lede-m); }
+.ts-el-lede.ts-el--size-l .ts-el__paragraph { font-size: var(--ts-el-lede-l); }
+
+.ts-el-paragraph {
+    --ts-el-leading: 123;
+}
+
+.ts-el-paragraph.ts-el--size-s .ts-el__paragraph { font-size: var(--ts-el-body-s); }
+.ts-el-paragraph.ts-el--size-m .ts-el__paragraph { font-size: var(--ts-el-body-m); }
+.ts-el-paragraph.ts-el--size-l .ts-el__paragraph { font-size: var(--ts-el-body-l); }
+
+/* The drop cap: the display face's letter in the family colour, as tall as the two lines beside it; the words beside it and under it
+   read as ONE paragraph (no paragraph gap between them) */
+/* Its box is exactly the two lines beside it (the size x 1.6 pitch, twice), so the rest starts right under them; the letter is lifted to
+   the first line's top (the face's ascent sits above the letter) and padded on its right so the box holds its overhang */
+.ts-el-paragraph .card-text__dropcap {
+    -unity-font-style: normal;
+    color: var(--ts-accent-text);
+    margin: 0 var(--ts-space-2) 0 0;
+    padding: 0 var(--ts-space-1) 0 0;
+    -unity-text-align: upper-left;
+    overflow: visible;
+}
+
+.ts-el-paragraph.ts-el--size-s .card-text__dropcap { font-size: var(--ts-el-dropcap-s); height: 48px; margin-top: -8px; }
+.ts-el-paragraph.ts-el--size-m .card-text__dropcap { font-size: var(--ts-el-dropcap-m); height: 54px; margin-top: -10px; }
+.ts-el-paragraph.ts-el--size-l .card-text__dropcap { font-size: var(--ts-el-dropcap-l); height: 61px; margin-top: -11px; }
+
+.ts-el-paragraph .card-text__beside-cap--flow {
+    margin-bottom: 0;
+}
+
+/* ---------------- callout ---------------- */
+
+.ts-el-callout {
+    --ts-el-leading: 119;
+    flex-direction: row;
+    background-color: var(--ts-surface);
+    border-width: 1px;
+    border-color: var(--ts-hair);
+    border-radius: var(--ts-radius-m);
+    overflow: hidden;
+    margin-top: var(--ts-space-5);
+}
+
+.ts-el-callout__bar {
+    width: 6px;
+    flex-shrink: 0;
+    background-color: var(--ts-line);
+}
+
+.ts-el-callout__body {
+    flex-grow: 1;
+    flex-shrink: 1;
+    padding: var(--ts-space-4) var(--ts-space-4) var(--ts-space-1) var(--ts-space-4);
+}
+
+.ts-el-callout__title {
+    font-size: var(--ts-el-eyebrow-s);
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0 0 var(--ts-space-2) 0;
+    padding: 0;
+}
+
+.ts-el-callout.ts-el--tone-neutral {
+    background-color: var(--ts-surface-2);
+    border-color: var(--ts-surface-2);
+}
+
+.ts-el-callout.ts-el--tone-accent .ts-el-callout__bar { background-color: var(--ts-accent); }
+.ts-el-callout.ts-el--tone-accent .ts-el-callout__title { color: var(--ts-accent-text); }
+.ts-el-callout.ts-el--tone-accent .ts-el__paragraph { color: var(--ts-ink); }
+.ts-el-callout.ts-el--tone-inverse { padding: 0; border-color: var(--ts-ink); }
+/* the dark plate is the highlight: no bar (a light edge on its rounded corner read as a flaw) */
+.ts-el-callout.ts-el--tone-inverse .ts-el-callout__bar { display: none; }
+
+.ts-el-callout.ts-el--size-s .ts-el__paragraph { font-size: var(--ts-el-body-s); }
+.ts-el-callout.ts-el--size-m .ts-el__paragraph { font-size: var(--ts-el-body-m); }
+.ts-el-callout.ts-el--size-l .ts-el__paragraph { font-size: var(--ts-el-body-l); }
+
+/* ---------------- pull quote ---------------- */
+
+.ts-el-pull-quote {
+    --ts-el-leading: 104;
+    margin-top: var(--ts-space-5);
+    align-items: flex-start;
+}
+
+.ts-el-pull-quote.ts-el--align-center {
+    align-items: center;
+}
+
+.ts-el-pull-quote__mark {
+    width: 56px;
+    height: 44px;
+    color: var(--ts-line);
+    margin: 0 0 var(--ts-space-1) 0;
+}
+
+.ts-el-pull-quote__words {
+    align-self: stretch;
+}
+
+.ts-el-pull-quote .ts-el__paragraph {
+    margin-bottom: var(--ts-space-2);
+}
+
+.ts-el-pull-quote.ts-el--size-s .ts-el__paragraph { font-size: var(--ts-el-quote-s); }
+.ts-el-pull-quote.ts-el--size-m .ts-el__paragraph { font-size: var(--ts-el-quote-m); }
+.ts-el-pull-quote.ts-el--size-l .ts-el__paragraph { font-size: var(--ts-el-quote-l); }
+
+.ts-el-pull-quote__attribution {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    margin: 0 0 var(--ts-space-2) 0;
+    padding: 0;
+}
+
+.ts-el-pull-quote__bar {
+    width: 48px;
+    height: 3px;
+    border-radius: 2px;
+    background-color: var(--ts-line);
+}
+
+.ts-el-pull-quote.ts-el--tone-accent .ts-el-pull-quote__mark { color: var(--ts-accent-text); }
+.ts-el-pull-quote.ts-el--tone-accent .ts-el-pull-quote__bar { background-color: var(--ts-accent); }
+.ts-el-pull-quote.ts-el--tone-inverse .ts-el-pull-quote__mark { color: var(--ts-surface); }
+.ts-el-pull-quote.ts-el--tone-inverse .ts-el-pull-quote__bar { background-color: var(--ts-surface); }
+.ts-el-pull-quote.ts-el--tone-accent .ts-el__paragraph,
+.ts-el-pull-quote.ts-el--tone-neutral .ts-el__paragraph,
+.ts-el-pull-quote.ts-el--tone-family .ts-el__paragraph {
+    color: var(--ts-ink);
+}
+
+/* ---------------- list ---------------- */
+
+.ts-el-list {
+    --ts-el-leading: 119;
+}
+
+.ts-el-list__item {
+    flex-direction: row;
+    align-items: flex-start;
+    margin: 0 0 var(--ts-space-2) 0;
+}
+
+.ts-el-list__bullet {
+    width: 6px;
+    height: 6px;
+    border-radius: 3px;
+    background-color: var(--ts-ink);
+    margin: 10px var(--ts-space-3) 0 var(--ts-space-1);
+    flex-shrink: 0;
+}
+
+.ts-el--tone-accent .ts-el-list__bullet { background-color: var(--ts-accent-text); }
+.ts-el--tone-inverse .ts-el-list__bullet { background-color: var(--ts-surface); }
+
+.ts-el-list__number {
+    min-width: 24px;
+    margin: 0 var(--ts-space-1) 0 0;
+    -unity-font-style: bold;
+}
+
+.ts-el-list__words {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.ts-el-list.ts-el--size-s .ts-el-list__words, .ts-el-list.ts-el--size-s .ts-el-list__number { font-size: var(--ts-el-body-s); }
+.ts-el-list.ts-el--size-m .ts-el-list__words, .ts-el-list.ts-el--size-m .ts-el-list__number { font-size: var(--ts-el-body-m); }
+.ts-el-list.ts-el--size-l .ts-el-list__words, .ts-el-list.ts-el--size-l .ts-el-list__number { font-size: var(--ts-el-body-l); }
+
+/* ---------------- divider, spacer ---------------- */
+
+.ts-el-divider {
+    flex-direction: row;
+    align-items: center;
+    margin-top: var(--ts-el-gap-section);
+    min-height: 34px;
+}
+
+.ts-el-divider__line {
+    flex-grow: 1;
+    height: 2px;
+    background-color: var(--ts-hair);
+}
+
+.ts-el-divider__ornament {
+    width: 34px;
+    height: 34px;
+    margin: 0 var(--ts-space-3);
+    color: var(--ts-accent-text);
+    flex-shrink: 0;
+}
+
+.ts-el-spacer { margin-top: 0; }
+.ts-el-spacer.ts-el--size-s { height: var(--ts-el-space-s); }
+.ts-el-spacer.ts-el--size-m { height: var(--ts-el-space-m); }
+.ts-el-spacer.ts-el--size-l { height: var(--ts-el-space-l); }
+
+/* ---------------- the developer's gallery: an element whose component is not built yet ---------------- */
+
+.ts-el-unbuilt {
+    margin: var(--ts-el-gap) 0 0 0;
+    padding: var(--ts-space-4);
+    border-width: 1px;
+    border-color: var(--ts-line);
+    border-radius: var(--ts-radius-m);
+    background-color: var(--ts-surface-2);
+    color: var(--ts-ink);
+    font-size: var(--ts-size-caption);
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+/* ---------------- the Open Row ---------------- */
+
+.ts-open-row {
+    --ts-open-row-shine: var(--ts-accent-shine);
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--ts-el-touch);
+    margin: var(--ts-space-1) 0 0 0;
+    padding: 0;
+}
+
+.ts-open-row__words {
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-accent-text);
+    white-space: normal;
+    flex-shrink: 1;
+    margin: 0;
+    padding: 0;
+}
+
+.ts-open-row__chevron {
+    width: 18px;
+    height: 18px;
+    color: var(--ts-accent-text);
+    rotate: -90deg;
+    flex-shrink: 0;
+    margin: 0 0 0 var(--ts-space-2);
+}
+
+/* ---------------- the composed view: preview on the card, page in the full view ---------------- */
+
+.ts-composed__clip {
+    overflow: hidden;
+}
+
+.ts-composed__rows {
+    flex-shrink: 0;
+}
+
+/* The cut: the surface's colour ramping in over the last lines (hero_scrim.png's 0 -> 1 alpha ramp, tinted) */
+.ts-composed__fade {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 48px;
+    background-image: url("/Assets/Framework/Runtime/UI/Blocks/Media/hero_scrim.png");
+    -unity-background-image-tint-color: var(--ts-surface);
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+/* The page fills the full view's width like a magazine page: it takes back a block's own side margin (the full view's own padding stays:
+   past it the page's scroll clips) -- its rows keep their own inset below */
+.ts-composed.ts-composed--page {
+    margin: 0 var(--ts-el-page-bleed);
+}
+
+/* The page: the rows at the page's side margin, and room at its foot */
+.ts-composed__page {
+    padding: var(--ts-space-5) var(--ts-el-page-inset) 48px var(--ts-el-page-inset);
+    background-color: var(--ts-surface);
+}
+
+/* ---------------- the rhythm between rows, by pair (ComposedBlockView marks each row with the kind before it) ---------------- */
+
+.ts-el.ts-el--after-eyebrow {
+    margin-top: var(--ts-el-gap-tight);
+}
+
+.ts-el.ts-el--after-heading {
+    margin-top: var(--ts-el-gap-heading);
+}
+
+.ts-el.ts-el--first {
+    margin-top: 0;
+}

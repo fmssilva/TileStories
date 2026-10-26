@@ -48,6 +48,18 @@ namespace TileStories
         // The mode the app opens in on this wall (Detail Card > Card Container > Default Mode, _3.3 P4.4b): "light" (default) | "dark"
         // (CardOptions.Modes). A visitor's own pick in the card's Aa settings wins (ThemeModeRule); a config that never wrote it opens light
         public string default_mode = CardOptions.ModeLight;
+        // The shared card components' wall defaults (_3.3 R17.5, Detail Card > Card Components): what every block draws unless its own
+        // Component Overrides row says otherwise
+        public CardComponentSettings components = new();
+    }
+
+    // The shared card components (_3.3 R17.5): one value per component the wall sets once; a block overrides it in its Component Overrides
+    [Serializable]
+    public class CardComponentSettings
+    {
+        // The Open Row's emphasis (_3.3 R14.8): "plain" | "nudge" (default: the chevron steps towards the page -- it says "open me" without
+        // a glow, so the card keeps ONE glowing element, D5) | "shine" (ElementOptions.OpenRowEmphases). Reduce Motion always shows plain
+        public string open_row_emphasis = ElementOptions.EmphasisNudge;
     }
 
     // Detail Card > Navigation (_3.2 section 3): how a visitor moves inside ONE open card. Each field lands with the code
@@ -237,6 +249,9 @@ namespace TileStories
     public class POICardData
     {
         public List<BlockInstanceData> blocks = new();
+        // The highest N of a block_N key the Editor ever handed out on this card (TaxonomyRowKeys.TakeBlockKey): a deleted block's key is
+        // never given to a new block, so what the visitor's device saved for the old one (an answer, a Contents tick) never lands on it
+        public int last_block_number;
     }
 
     // One block on one POI's card

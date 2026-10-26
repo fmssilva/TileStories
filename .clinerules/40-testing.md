@@ -92,7 +92,7 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 failures does not.
 
 **Which tests, when (three levels).** RUN TIMES (the Worker REPLACES these numbers after a full run when one moved by more than
-~10 %; no history, `00-process.md`): full EditMode ~3 min (2192 tests); full PlayMode ~80 min (1310 tests incl. gated
+~10 %; no history, `00-process.md`): full EditMode ~3 min (2202 tests); full PlayMode ~77 min (1372 tests incl. gated
 skips), in the background; the targeted set selected by the name regex (Card|Poi|Search|Theme|Zoom|Marker|LodWallScene|
 LayoutStruggle|LivingRoom|Family|Typeface|Hero|Section) in `group_names` ~60-70 min (~1180 tests) -- the MCP job lists at most 25
 failures, so a red-heavy run hides the rest: re-run the hidden fixtures; one PlayMode fixture 15-60 s (CardGalleryTests ~9 min,

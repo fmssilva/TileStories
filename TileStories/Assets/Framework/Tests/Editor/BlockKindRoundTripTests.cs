@@ -74,6 +74,18 @@ namespace TileStories.Editor.Tests
                         v.items.Add(item);
                     }
                     break;
+                case BlockFieldType.Elements:
+                    // - a composed kind's rows (_3.3 S2a): a title and a paragraph, each with its id, its element and its words
+                    foreach (string element in new[] { BuiltInElements.Title, BuiltInElements.Paragraph })
+                    {
+                        var row = new BlockItemData();
+                        row.fields.Add(new BlockItemFieldValue { key = ElementRow.IdKey, value = BlockSurfaces.RowIdPrefix + (v.items.Count + 1) });
+                        row.fields.Add(new BlockItemFieldValue { key = ElementRow.ElementKey, value = element });
+                        row.fields.Add(new BlockItemFieldValue { key = BuiltInElements.TextField,
+                            text = Languages.Select(l => new LocalizedEntry { lang = l, value = TextOf(f.Key + element, l) }).ToList() });
+                        v.items.Add(row);
+                    }
+                    break;
             }
             return v;
         }
@@ -173,6 +185,15 @@ namespace TileStories.Editor.Tests
                                 Assert.AreEqual(TextOf(sub.Key + row, lang), read.ItemText(items[row], sub.Key), where + " row " + row + "." + sub.Key);
                         }
                     break;
+                case BlockFieldType.Elements:
+                {
+                    var rows = read.Items(f.Key).Select(r => new ElementRow(r)).ToList();
+                    CollectionAssert.AreEqual(new[] { BuiltInElements.Title, BuiltInElements.Paragraph }, rows.Select(r => r.Kind), where + ": both element rows, in order");
+                    CollectionAssert.AreEqual(new[] { "el_1", "el_2" }, rows.Select(r => r.Id), where + ": their ids");
+                    foreach (var row in rows)
+                        Assert.AreEqual(TextOf(f.Key + row.Kind, lang), read.ItemText(row.Data, BuiltInElements.TextField), where + " " + row.Kind);
+                    break;
+                }
             }
         }
     }

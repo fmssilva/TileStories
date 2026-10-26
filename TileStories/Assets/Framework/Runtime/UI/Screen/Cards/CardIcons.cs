@@ -106,23 +106,29 @@ namespace TileStories
         // ---- vector glyphs (8A-fix): shapes USS borders cannot draw, painted with Painter2D ----
 
         // The shapes a VectorGlyph draws
-        public enum Shape { Tick, Cross, Star, ThumbUp, ThumbDown, Play, Pause, Stop, FullScreen, Chevron, Gear }
+        public enum Shape { Tick, Cross, Star, ThumbUp, ThumbDown, Play, Pause, Stop, FullScreen, Chevron, Gear, Azulejo, QuoteOpen }
 
-        // One outline of a shape, in 0..1 units of the glyph's square. `Points` are joined in order; a `Closed` outline can be filled.
+        // One outline of a shape, in 0..1 units of the glyph's square. `Points` are joined in order; a `Closed` outline can be filled; a
+        // `Solid` one is always filled and never stroked (the azulejo's centre dot, a quotation mark)
         public readonly struct Outline
         {
             public readonly Vector2[] Points;
             public readonly bool Closed;
+            public readonly bool Solid;
 
-            public Outline(Vector2[] points, bool closed)
+            public Outline(Vector2[] points, bool closed, bool solid = false)
             {
                 Points = points;
-                Closed = closed;
+                Closed = closed || solid;
+                Solid = solid;
             }
         }
 
-        // The line width of a shape as a share of the glyph's side: a stroke that scales with the glyph, so it needs no token
-        public static float StrokeUnits(Shape shape) => shape == Shape.Tick || shape == Shape.Cross || shape == Shape.FullScreen || shape == Shape.Chevron ? 0.13f : 0.07f;
+        // The line width of a shape as a share of the glyph's side: a stroke that scales with the glyph, so it needs no token. The ornament
+        // is drawn fine, like the prototype's tile (1.6 of 34)
+        public static float StrokeUnits(Shape shape) =>
+            shape == Shape.Tick || shape == Shape.Cross || shape == Shape.FullScreen || shape == Shape.Chevron ? 0.13f
+            : shape == Shape.Azulejo ? 0.05f : 0.07f;
 
         // The outlines of `shape` in 0..1 units (pure, so a test can check every point stays inside the glyph)
         public static IReadOnlyList<Outline> OutlinesOf(Shape shape)
@@ -165,6 +171,10 @@ namespace TileStories
                     return new[] { new Outline(new[] { new Vector2(0.18f, 0.36f), new Vector2(0.50f, 0.68f), new Vector2(0.82f, 0.36f) }, false) };
                 case Shape.Gear:
                     return GearOutlines();
+                case Shape.Azulejo:
+                    return AzulejoOutlines();
+                case Shape.QuoteOpen:
+                    return new[] { new Outline(QuoteMark(0.30f), true, solid: true), new Outline(QuoteMark(0.66f), true, solid: true) };
                 case Shape.ThumbUp:
                     return ThumbOutlines(false);
                 default:
@@ -210,6 +220,50 @@ namespace TileStories
             var circle = new Vector2[16];
             for (int i = 0; i < circle.Length; i++) circle[i] = GearPoint(i * 360f / circle.Length, hole);
             return new[] { new Outline(wheel, true), new Outline(circle, true) };
+        }
+
+        // A small tile ornament (_3.3 S2a, the story's divider; the prototype's azulejo): a square tile, a four-pointed flower inside it whose
+        // petals curve in towards the centre, and a dot at the centre
+        private static Outline[] AzulejoOutlines()
+        {
+            var tile = new[] { new Vector2(0.03f, 0.03f), new Vector2(0.97f, 0.03f), new Vector2(0.97f, 0.97f), new Vector2(0.03f, 0.97f) };
+            // - the prototype's path on a 34 grid: from each point to the next through two control points that pull the side inwards
+            var flower = new List<Vector2> { new(0.50f, 0.12f) };
+            AddCubic(flower, new(0.50f, 0.12f), new(0.62f, 0.32f), new(0.68f, 0.38f), new(0.88f, 0.50f));
+            AddCubic(flower, new(0.88f, 0.50f), new(0.68f, 0.62f), new(0.62f, 0.68f), new(0.50f, 0.88f));
+            AddCubic(flower, new(0.50f, 0.88f), new(0.38f, 0.68f), new(0.32f, 0.62f), new(0.12f, 0.50f));
+            AddCubic(flower, new(0.12f, 0.50f), new(0.32f, 0.38f), new(0.38f, 0.32f), new(0.50f, 0.12f));
+            var dot = new Vector2[12];
+            for (int i = 0; i < dot.Length; i++) dot[i] = GearPoint(i * 360f / dot.Length, 0.09f);
+            return new[] { new Outline(tile, true), new Outline(flower.ToArray(), true), new Outline(dot, true, solid: true) };
+        }
+
+        // One opening quotation mark's comma, its round head centred at x `cx` low in the box and its tail rising to the right
+        private static Vector2[] QuoteMark(float cx)
+        {
+            const float r = 0.13f, cy = 0.62f;
+            var points = new List<Vector2>();
+            // - the head: a circle from its right side round the bottom and the left to its top (y grows downwards)
+            for (int i = 0; i <= 9; i++)
+            {
+                float a = (i * 30f) * Mathf.Deg2Rad;
+                points.Add(new Vector2(cx + r * Mathf.Cos(a), cy + r * Mathf.Sin(a)));
+            }
+            // - the tail: from the head's top up and to the right, then back down its inner edge to the head
+            AddCurve(points, points[points.Count - 1], new Vector2(cx - 0.02f, cy - 0.32f), new Vector2(cx + 0.14f, cy - 0.40f));
+            AddCurve(points, new Vector2(cx + 0.14f, cy - 0.40f), new Vector2(cx + 0.05f, cy - 0.28f), new Vector2(cx + r, cy));
+            return points.ToArray();
+        }
+
+        // Append the points of a cubic curve from `from` (already in the list) through `c1`, `c2` to `to`
+        private static void AddCubic(List<Vector2> points, Vector2 from, Vector2 c1, Vector2 c2, Vector2 to)
+        {
+            const int steps = 8;
+            for (int i = 1; i <= steps; i++)
+            {
+                float t = i / (float)steps, u = 1f - t;
+                points.Add(u * u * u * from + 3f * u * u * t * c1 + 3f * u * t * t * c2 + t * t * t * to);
+            }
         }
 
         private static Vector2 GearPoint(float degrees, float radius) =>
@@ -312,8 +366,8 @@ namespace TileStories
                         else painter.LineTo(at);
                     }
                     if (outline.Closed) painter.ClosePath();
-                    if (outline.Closed && _filled) painter.Fill();
-                    painter.Stroke();
+                    if ((outline.Closed && _filled) || outline.Solid) painter.Fill();
+                    if (!outline.Solid) painter.Stroke();
                 }
             }
         }

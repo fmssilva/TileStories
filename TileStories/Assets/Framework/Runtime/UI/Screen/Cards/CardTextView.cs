@@ -8,9 +8,15 @@ namespace TileStories
     // underlined links, and ONE definition panel that opens under the paragraph whose word was tapped (tap the word
     // again, or the panel, to close it). The first paragraph can be a lede or start with a raised initial (drop cap).
     // Shared by every block that shows long text; plain C#, labels reused across binds. Styled by CardParts.uss.
+    // DropCapFlow (_3.3 S2a, the story's paragraph): the initial raised beside the first DropCapLines lines only, the rest of the
+    // paragraph running the full width under it (DropCapRule cuts it once the paragraph has a width). Leading: the lines' height as a
+    // percentage of the type size (a rich-text line-height; 0 = the face's own), handed in by a component from its own USS token.
     public sealed class CardTextView
     {
-        public enum FirstParagraph { Normal, Lede, DropCap }
+        public enum FirstParagraph { Normal, Lede, DropCap, DropCapFlow }
+
+        // How many lines sit beside a flowing drop cap (the raised letter's height in lines of the paragraph)
+        public const int DropCapLines = 2;
 
         public VisualElement Root { get; }
         // The paragraph labels in order (the drop cap's paragraph label is the one beside the initial)
@@ -22,10 +28,19 @@ namespace TileStories
         // The glossary term whose definition is open, or null
         public string OpenTerm { get; private set; }
 
+        // The lines' height in percent of the type size (0 = the face's own): set before Bind
+        public float Leading { get; set; }
+        // A flowing drop cap's two parts: the words beside the letter and the rest of the paragraph under it (null when none is shown)
+        public Label FlowBeside { get; private set; }
+        public Label FlowUnder { get; private set; }
+
         private readonly string _paragraphClass;
         private readonly VisualElement _capRow;
         private readonly ElementPool<Label> _paragraphs;
         private CardGlossary _glossary;
+        // The first paragraph after its initial, cut again whenever the room beside the letter changes
+        private string _flowText;
+        private float _flowWidth = -1f;
 
         public CardTextView(string paragraphClass)
         {
@@ -33,6 +48,8 @@ namespace TileStories
             _paragraphs = new ElementPool<Label>(NewParagraph, label =>
             {
                 label.RemoveFromClassList("card-text__beside-cap");
+                label.RemoveFromClassList(FlowClass);
+                label.style.display = StyleKeyword.Null;
                 label.RemoveFromHierarchy();
             });
             Root = new VisualElement();
@@ -65,7 +82,25 @@ namespace TileStories
                 string text = paragraphs[i];
                 var label = _paragraphs.Take();
                 label.EnableInClassList("card-text__lede", i == 0 && first == FirstParagraph.Lede);
-                if (i == 0 && first == FirstParagraph.DropCap && TrySplitInitial(text, out string initial, out string rest))
+                if (i == 0 && first == FirstParagraph.DropCapFlow && TrySplitInitial(text, out string flowInitial, out string flowRest))
+                {
+                    // - beside the letter until the first layout gives it a width, then cut (Flow)
+                    DropCap.text = flowInitial;
+                    label.text = RichText(flowRest);
+                    label.AddToClassList("card-text__beside-cap");
+                    label.AddToClassList(FlowClass);
+                    _capRow.Add(label);
+                    Root.Add(_capRow);
+                    FlowBeside = label;
+                    FlowUnder = _paragraphs.Take();
+                    FlowUnder.text = "";
+                    FlowUnder.style.display = DisplayStyle.None;
+                    Root.Add(FlowUnder);
+                    _flowText = flowRest;
+                    _flowWidth = -1f;
+                    Flow();
+                }
+                else if (i == 0 && first == FirstParagraph.DropCap && TrySplitInitial(text, out string initial, out string rest))
                 {
                     DropCap.text = initial;
                     label.text = RichText(rest);
@@ -88,6 +123,27 @@ namespace TileStories
             DropCap.text = "";
             _capRow.RemoveFromHierarchy();
             _glossary = null;
+            FlowBeside = FlowUnder = null;
+            _flowText = null;
+        }
+
+        // The class a flowing drop cap's beside part wears (its width is the row's, never its words')
+        public const string FlowClass = "card-text__beside-cap--flow";
+
+        // Cut the flowing paragraph for the room beside the letter now: the words of DropCapLines lines beside it, the rest under it. Only a
+        // change of that room cuts again -- the words' own height never feeds back into the width, so this cannot loop
+        private void Flow()
+        {
+            if (FlowBeside == null || _flowText == null) return;
+            float width = FlowBeside.contentRect.width;
+            if (float.IsNaN(width) || !(width > 0f) || UnityEngine.Mathf.Abs(width - _flowWidth) < 0.5f) return;
+            _flowWidth = width;
+            var beside = FlowBeside;
+            var cut = DropCapRule.Split(_flowText, width, DropCapLines,
+                run => beside.MeasureTextSize(run, 0f, VisualElement.MeasureMode.Undefined, 0f, VisualElement.MeasureMode.Undefined).x);
+            beside.text = RichText(cut.Beside);
+            FlowUnder.text = cut.Under.Length > 0 ? RichText(cut.Under) : "";
+            FlowUnder.style.display = cut.Under.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
         // Open the definition of `term` under paragraph `index` (the same term again closes it)
@@ -116,8 +172,12 @@ namespace TileStories
             DefinitionPanel.RemoveFromHierarchy();
         }
 
-        private string RichText(string paragraph) =>
-            GlossaryMarkup.ToRichText(GlossaryMarkup.Parse(paragraph), t => _glossary != null && _glossary.Knows(t));
+        private string RichText(string paragraph)
+        {
+            string text = GlossaryMarkup.ToRichText(GlossaryMarkup.Parse(paragraph), t => _glossary != null && _glossary.Knows(t));
+            // - USS has no line height: TextCore's rich-text tag carries it, its percentage a component's token (never typed here)
+            return ElementStyle.WithLeading(text, Leading);
+        }
 
         // The first letter of a paragraph that starts with plain text (a paragraph starting with a [[term]] has none)
         private static bool TrySplitInitial(string paragraph, out string initial, out string rest)
@@ -136,6 +196,11 @@ namespace TileStories
             label.AddToClassList("card-text__paragraph");
             label.AddToClassList(_paragraphClass);
             label.RegisterCallback<PointerUpLinkTagEvent>(evt => ToggleTerm(evt.linkID, evt.linkText, at));
+            // - a flowing drop cap is cut again when the room beside its letter changes (only the beside part's width counts)
+            label.RegisterCallback<GeometryChangedEvent>(_ =>
+            {
+                if (label == FlowBeside) Flow();
+            });
             return label;
         }
     }

@@ -109,6 +109,7 @@ namespace TileStories
             AddPlaceInAr(list);
             AddAudioGuides(list);
             AddNavBento(list);
+            AddStories(list);
             AddHeadings(list);
             return list;
         }

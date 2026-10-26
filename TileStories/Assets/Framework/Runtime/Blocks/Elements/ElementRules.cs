@@ -6,7 +6,7 @@ namespace TileStories
     // What a composed block says about itself, read from its rows (_3.3 R14.3, R14.6, R14.8), pure:
     //   - Minutes:    the Reading Time set by hand, else Auto -- the Page's words at WordsPerMinute plus each media item's weight
     //                 (ElementKindDefinition.SecondsPerMedia), rounded UP to whole minutes; 0 for a Page with nothing in it
-    //   - FirstWords: the first Page row with words, as one line (the BlockSummaryRule shape)
+    //   - FirstWords: the Page's first title row's words, else the first row with words, as one line (the BlockSummaryRule shape)
     //   - SearchWords: every language's words of the text fields each element lists for search, plus its media captions (never credits),
     //                 from the Page's and the Custom preview's OWN rows -- a reference's words belong to the row it points at
     //   - TapOf:      what a tap on a row does, against what its element offers
@@ -33,10 +33,20 @@ namespace TileStories
             return seconds <= 0f ? 0 : Mathf.CeilToInt(seconds / 60f);
         }
 
-        // The first words of the Page (the first row whose element has a text field with words), one line; "" when none
+        // The block in one line: the words of its Page's first TITLE row (a title or a heading: what a story is called -- the full view's
+        // breadcrumb, a compact row, a contents line), else the first row with words; one line, "" when none
         public static string FirstWords(ElementScope scope, ElementRegistry elements, string language, string fallback)
         {
             var read = new BlockFieldReader(null, language, fallback);
+            foreach (var (row, element) in PageContent(scope, elements))
+            {
+                if (element.PreviewRole != ElementPreviewRole.Title || element.Fields == null) continue;
+                foreach (var field in element.Fields)
+                {
+                    string title = BlockSummaryRule.IsTextField(field) ? BlockSummaryRule.OneLine(read.ItemText(row, field.Key)) : "";
+                    if (title.Length > 0) return title;
+                }
+            }
             foreach (var (row, element) in PageContent(scope, elements))
             {
                 if (element.Fields == null) continue;

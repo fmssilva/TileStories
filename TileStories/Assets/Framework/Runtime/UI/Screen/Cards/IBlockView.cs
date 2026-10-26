@@ -71,6 +71,9 @@ namespace TileStories
         // BlockFullView). A view whose owner is keyed by the block (a 3D / 360 preview slot) asks for a slot of its own, and a view that offers
         // its own full screen (a video) does not offer it again from there. Every other view binds exactly as on the card
         public bool FullView;
+        // Developer-only: this card is the Phase A gallery's (CardGalleryHarness, Editor only). A composed block then marks each row whose
+        // element has no component yet with a "not built yet" plate; a visitor's card leaves such a row out. Never set by the wall's host
+        public bool DevGallery;
 
         // The registered service of type T, or null when there is none: a kind that needs a service treats null as "nothing to show"
         public T Service<T>() where T : class => Services?.Get<T>();
@@ -97,6 +100,10 @@ namespace TileStories
         // Where the card rests now (peek / half / full): a live preview that animates on its own pauses while
         // SheetStopRule.RevealsBlocks is false, since its stage is hidden under the sheet
         SheetStopRule.Stop Stop { get; }
+
+        // The height the card reads in at its tallest (the sheet's full stop, measured): what a block's preview is capped at a share of
+        // (_3.3 R10.2, --ts-preview-max); 0 while nothing is measured
+        float FullHeight { get; }
 
         void ShowOnWall();
 

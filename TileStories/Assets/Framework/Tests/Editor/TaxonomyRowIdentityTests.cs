@@ -59,6 +59,97 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("field_4", TaxonomyRowKeys.NextFree(fields, f => f.key, "field_"));
         }
 
+        // ---- a card's block keys: never handed out twice, even after the LAST block was deleted (_3.1 5.2) ----
+
+        private const string ShippedConfigPath = "Assets/Apps/LivingRoom/config.json";
+
+        // The Painting of a fresh copy of the shipped config, and the highest N of its blocks' keys
+        private static (POIData Painting, int Highest) ShippedPainting()
+        {
+            var config = JsonUtility.FromJson<WallConfigData>(System.IO.File.ReadAllText(ShippedConfigPath));
+            var painting = config.pois.Single(p => p.id == "painting");
+            int highest = painting.card.blocks.Max(b => TaxonomyRowKeys.BlockNumber(b.key));
+            Assert.Greater(highest, 1, "precondition: The Painting's card holds numbered blocks");
+            return (painting, highest);
+        }
+
+        // Delete the block with the highest key, then take a key: the deleted one is never given again -- NextFree handed it out, so a
+        // visitor's saved answer or Contents tick for the old block would have landed on the new one
+        [Test]
+        public void TakeBlockKey_NeverHandsOutADeletedLastKey_OnTheShippedPainting()
+        {
+            var (painting, highest) = ShippedPainting();
+            string last = TaxonomyRowKeys.BlockPrefix + highest;
+            painting.card.blocks.RemoveAll(b => b.key == last);
+            Assert.AreEqual(last, TaxonomyRowKeys.NextFree(painting.card.blocks, b => b.key, TaxonomyRowKeys.BlockPrefix),
+                "precondition (the S1 finding): the old generator hands the deleted last key out again");
+
+            // - the load step brings the memory up to the highest key the file held (here: the one just deleted)
+            painting.card.last_block_number = 0;
+            painting.card.blocks.Add(new BlockInstanceData { key = last, kind = BuiltInBlocks.RichTextKind });
+            var wall = new WallConfigData { pois = new List<POIData> { painting } };
+            Assert.AreEqual(1, TaxonomyRowKeys.SeedBlockKeyMemory(wall), "a card with no memory is raised once");
+            Assert.AreEqual(0, TaxonomyRowKeys.SeedBlockKeyMemory(wall), "...and never again");
+            Assert.AreEqual(highest, painting.card.last_block_number);
+            painting.card.blocks.RemoveAll(b => b.key == last);
+            string next = TaxonomyRowKeys.TakeBlockKey(painting.card);
+            Assert.AreEqual(TaxonomyRowKeys.BlockPrefix + (highest + 1), next, "one past the highest ever handed out");
+            Assert.AreEqual(highest + 1, painting.card.last_block_number, "and remembered");
+
+            // - delete the new last one too: still never again
+            painting.card.blocks.Add(new BlockInstanceData { key = next, kind = BuiltInBlocks.RichTextKind });
+            painting.card.blocks.RemoveAll(b => b.key == next);
+            Assert.AreEqual(TaxonomyRowKeys.BlockPrefix + (highest + 2), TaxonomyRowKeys.TakeBlockKey(painting.card));
+        }
+
+        // A file with no memory, or a hand-edited one holding a key past it, starts past the highest key it holds; a key not of the
+        // block_N shape counts as nothing
+        [Test]
+        public void TakeBlockKey_StartsPastEveryKeyTheCardHolds()
+        {
+            var card = new POICardData();
+            Assert.AreEqual("block_1", TaxonomyRowKeys.TakeBlockKey(card), "an empty card");
+            card = new POICardData { last_block_number = 3 };
+            card.blocks.Add(new BlockInstanceData { key = "block_9" });
+            card.blocks.Add(new BlockInstanceData { key = "hero" });
+            card.blocks.Add(null);
+            Assert.AreEqual("block_10", TaxonomyRowKeys.TakeBlockKey(card), "a held key past the memory wins");
+            card = new POICardData { last_block_number = 12 };
+            card.blocks.Add(new BlockInstanceData { key = "block_2" });
+            Assert.AreEqual("block_13", TaxonomyRowKeys.TakeBlockKey(card), "the memory past every held key wins");
+        }
+
+        // The real Editor flow: the window's LoadConfig of the SHIPPED file, the last block of The Painting deleted, "+ Add block"
+        // (AddCardBlock) -- then a Card Starter replacing every block: no new key repeats any key the card held
+        [Test]
+        public void LoadDeleteAdd_AndCardStarter_NeverReuseAKey_OnTheShippedPainting()
+        {
+            int highest = ShippedPainting().Highest;
+            string last = TaxonomyRowKeys.BlockPrefix + highest;
+            var window = ScriptableObject.CreateInstance<POIEditorToolWindow>();
+            POIData painting;
+            try
+            {
+                typeof(POIEditorToolWindow).GetMethod("LoadConfig", Instance).Invoke(window, null);
+                var config = (WallConfigData)typeof(POIEditorToolWindow).GetField("_config", Instance).GetValue(window);
+                painting = config.pois.Single(p => p.id == "painting");
+                Assert.AreEqual(highest, painting.card.last_block_number, "LoadConfig seeds the card's memory from its keys");
+                painting.card.blocks.RemoveAll(b => b.key == last);
+                Assert.IsTrue(BlockRegistry.Shared.TryGet(BuiltInBlocks.RichTextKind, out var richText));
+                window.AddCardBlock(painting, richText);
+                Assert.AreEqual(TaxonomyRowKeys.BlockPrefix + (highest + 1), painting.card.blocks.Last().key, "+ Add block after the last was deleted");
+            }
+            finally { Object.DestroyImmediate(window); }
+
+            var held = painting.card.blocks.Select(b => b.key).ToList();
+            held.Add(last);
+            CardStarters.Apply(painting, CardStarters.All.First(s => !s.IsEmpty));
+            Assert.IsNotEmpty(painting.card.blocks, "precondition: the starter wrote blocks");
+            foreach (var block in painting.card.blocks)
+                CollectionAssert.DoesNotContain(held, block.key, "a starter's block never takes a key the card held");
+            Assert.AreEqual(painting.card.blocks.Count, painting.card.blocks.Select(b => b.key).Distinct().Count(), "and its own keys are distinct");
+        }
+
         // ---- who still points at a row (the delete guard's count), one rule per table ----
 
         [Test]

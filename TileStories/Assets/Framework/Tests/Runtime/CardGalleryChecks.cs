@@ -69,6 +69,36 @@ namespace TileStories.Tests
             finally { Object.Destroy(tex); }
         }
 
+        // The pixel a screen capture holds at a panel position (one pixel, no patch)
+        public static Color ScreenPixel(Texture2D shot, VisualElement inPanel, Vector2 panelPoint)
+        {
+            var origin = RuntimePanelUtils.ScreenToPanel(inPanel.panel, Vector2.zero);
+            float unit = RuntimePanelUtils.ScreenToPanel(inPanel.panel, Vector2.right).x - origin.x;
+            var screen = (panelPoint - origin) / unit;
+            return shot.GetPixel(Mathf.FloorToInt(screen.x), shot.height - 1 - Mathf.FloorToInt(screen.y));
+        }
+
+        // A text's colour against its REAL ground on a render (_3.3 D1, the section opener's method): the ground just outside the words'
+        // box -- above, below, before, after, `margin` panel units away, where their letters' edges sit -- each read on the capture; the
+        // worst ratio and where it was. A point outside the capture or outside `within` (the visible part) is not judged
+        public static (float Ratio, string At) WordsOnRender(Texture2D shot, Label words, Rect within, float margin = 2f)
+        {
+            float worst = float.MaxValue;
+            string at = "";
+            var box = words.worldBound;
+            foreach (var p in new[] { new Vector2(box.center.x, box.yMin - margin), new Vector2(box.center.x, box.yMax + margin),
+                         new Vector2(box.xMin - margin, box.center.y), new Vector2(box.xMax + margin, box.center.y) })
+            {
+                if (!within.Contains(p)) continue;
+                var ground = ScreenPixel(shot, words, p);
+                float ratio = UIAccessibility.ContrastRatio(ground, words.resolvedStyle.color);
+                if (ratio >= worst) continue;
+                worst = ratio;
+                at = p + " ground " + (Color32)ground + " words " + (Color32)words.resolvedStyle.color;
+            }
+            return (worst, at);
+        }
+
         // Show a block entry that is NOT in CardGalleryDefinitions.All (an app's own), exactly as the harness shows one of its own
         public static void ShowEntry(CardGalleryHarness harness, CardGalleryDefinitions.Entry entry)
         {

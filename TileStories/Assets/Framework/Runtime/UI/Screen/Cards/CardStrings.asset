@@ -1063,6 +1063,27 @@ MonoBehaviour:
       value: Sources
     - lang: pt
       value: Fontes
+  - key: kind_story
+    where: The name of the story block (a page composed of titles, paragraphs, quotes and pictures) as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Story
+    - lang: pt
+      value: "Hist\xF3ria"
+  - key: open_row_story
+    where: The last line of a story's preview on the card, before its reading time and a chevron; a tap opens the whole story. A verb and its object, as an invitation.
+    text:
+    - lang: en
+      value: Read the story
+    - lang: pt
+      value: "Ler a hist\xF3ria"
+  - key: open_row_meta
+    where: The last line of a block's preview that opens its page ({0} = the words of that line, e.g. Read the story; {1} = its reading time, e.g. 4 min).
+    text:
+    - lang: en
+      value: "{0} \xB7 {1}"
+    - lang: pt
+      value: "{0} \xB7 {1}"
   - key: nav_group_discover
     where: The name of the default navigation group that joins the About and Stories families. A segment of the Segmented navigation shows it.
     text:

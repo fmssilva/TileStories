@@ -103,7 +103,9 @@ namespace TileStories.Tests
         {
             const string cards = "Assets/Framework/Runtime/UI/Screen/Cards";
             const string blocks = "Assets/Framework/Runtime/UI/Blocks";
-            var onDisk = new[] { cards, blocks }.SelectMany(folder => System.IO.Directory.GetFiles(folder, "*.uss", System.IO.SearchOption.AllDirectories))
+            // - the components the composed blocks draw with (_3.3 S2a): their sheet is a card sheet like a family's
+            const string components = "Assets/Framework/Runtime/UI/Components";
+            var onDisk = new[] { cards, blocks, components }.SelectMany(folder => System.IO.Directory.GetFiles(folder, "*.uss", System.IO.SearchOption.AllDirectories))
                 .Select(p => p.Replace('\\', '/'))
                 .Where(p => p != cards + "/CardTokens.uss" && p != cards + "/PoiCard.uss")
                 .OrderBy(p => p).ToList();

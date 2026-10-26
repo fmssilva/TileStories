@@ -34,6 +34,11 @@
     flex-shrink: 1;
 }
 
+/* A flowing drop cap's words beside the letter: the row's room, never its words' width (CardTextView cuts the words to it) */
+.card-text__beside-cap--flow {
+    flex-basis: 0;
+}
+
 .card-text__definition {
     background-color: var(--ts-surface-2);
     border-radius: var(--ts-radius-m);

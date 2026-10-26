@@ -190,9 +190,17 @@ namespace TileStories.Editor.Tests
             twiceWithAPage.Fields = new[] { Page("page"), new BlockFieldDefinition { Key = BlockSurfaces.PreviewModeField, Type = BlockFieldType.Toggle, Label = "x" } };
             StringAssert.Contains("two fields are keyed 'preview_mode'", BlockRegistry.Validate(twiceWithAPage));
 
-            // - no shipped kind composes: each keeps exactly the fields it had, and BlockSurfaces sees no Page on it
+            // - the one shipped composing kind is the story (_3.3 S2a): its own Page, then the surface fields; every other kind keeps exactly the
+            //   fields it had, and BlockSurfaces sees no Page on it
             foreach (var kind in BlockRegistry.Shared.All)
             {
+                if (kind.Key == BuiltInBlocks.StoryKind)
+                {
+                    Assert.IsTrue(BlockSurfaces.Composes(kind), "the story composes");
+                    CollectionAssert.AreEqual(new[] { "heading", "minutes", BuiltInBlocks.StoryPageField }.Concat(BlockSurfaces.FieldKeys), kind.Fields.Select(f => f.Key),
+                        "the story: the common fields, its Page, then the Preview surface");
+                    continue;
+                }
                 Assert.IsFalse(BlockSurfaces.Composes(kind), kind.Key);
                 Assert.IsFalse(kind.Fields.Any(f => BlockSurfaces.FieldKeys.Contains(f.Key)), kind.Key + " carries no surface field");
                 Assert.IsFalse(kind.Fields.Any(f => f.Type == BlockFieldType.Elements), kind.Key);

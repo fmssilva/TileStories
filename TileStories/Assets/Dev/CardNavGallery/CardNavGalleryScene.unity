@@ -247,6 +247,7 @@ MonoBehaviour:
   - {fileID: 7433441132597879392, guid: 8b3843ed3a2d5984a9c456c9075dbb94, type: 3}
   - {fileID: 7433441132597879392, guid: 7ed548ec2a821a34a80e3df104a01c59, type: 3}
   - {fileID: 7433441132597879392, guid: 03aa97f39f807924a8e5631bcdceda11, type: 3}
+  - {fileID: 7433441132597879392, guid: 87110c145da2f4345bfa6c06fdfabac5, type: 3}
   strings: {fileID: 11400000, guid: d7a0473454ee7e24588c88b2d1b18b1f, type: 2}
   stepsBlockEntries: 0
 --- !u!114 &1479729995

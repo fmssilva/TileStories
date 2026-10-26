@@ -229,6 +229,12 @@ namespace TileStories
             public const string KindNavRails = "kind_nav_rails";
             public const string KindNavBento = "kind_nav_bento";
             public const string KindSources = "kind_sources";
+            public const string KindStory = "kind_story";
+
+            // The Open Row (_3.3 R14.8, the shared last line of a preview that opens a page): a kind's default words (the story's "Read the
+            // story"), and the line "{0} · {1}" joining them to the reading time
+            public const string OpenRowStory = "open_row_story";
+            public const string OpenRowMeta = "open_row_meta";
 
             // The words a visitor reads for each of the framework's default navigation Groups (_3.2 section 3, the segmented element): a
             // wall's own Groups row reads its own label first; these name the four rows a wall gets with no Groups of its own
@@ -309,7 +315,7 @@ namespace TileStories
                 KindActions, KindGallery, KindBeforeAfter, KindZoomImage, KindHotspotImage, KindVideo, KindModel3D, KindPanorama360,
                 KindAudioGuide, KindTimeline, KindPerson, KindStoryChapters, KindComparePoints, KindDialogue, KindShowOnWall, KindPlaceInAr,
                 KindKnowledgeCheck, KindPoll, KindCollect, KindPracticalInfo, KindWallLocator, KindTodayMap, KindRelated, KindFeedback, KindNavIconGrid,
-                KindNavContents, KindNavRails, KindNavBento, KindSources,
+                KindNavContents, KindNavRails, KindNavBento, KindSources, KindStory, OpenRowStory, OpenRowMeta,
                 NavGroupDiscover, NavGroupWatch, NavGroupExplore, NavGroupVisit,
                 NavMore, NavNextUp, NavNextUpPosition, NavNextButton, NavNextUpDone,
                 NavMenu, NavMenuByPurpose, NavMenuByFormat, NavMenuAll,

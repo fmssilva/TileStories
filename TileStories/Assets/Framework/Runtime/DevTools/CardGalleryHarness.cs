@@ -183,6 +183,8 @@ namespace TileStories
                 Audio = AudioService, Video = VideoService, Preview = PreviewService, ArPlacement = ArPlacementService,
             };
             var context = CardContextBuilder.Build(hostParts, poi, wall, settings, Language, strings != null ? strings.Entries() : null, StringSources.Entries());
+            // - developer-only (this harness is Editor-only): a composed block marks the rows whose element has no component yet
+            context.DevGallery = true;
             Sheet.Hide();
             Sheet.Show(stack.Entries, context, SheetStopRule.Stop.Peek, settings.container.half_max_ratio);
             Sheet.SetStop(stop);

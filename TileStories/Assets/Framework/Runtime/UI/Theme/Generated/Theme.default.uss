@@ -38,6 +38,9 @@
     /* Accent: the heritage option of the accent knob (light cobalt, dark gold) */
     --ts-accent: rgb(30, 58, 138);
     --ts-accent-text: rgb(30, 58, 138);
+    /* The Open Row shine (R14.8): the brightest colour a light sweeping across the words gives them; >= 7:1 on every surface
+       like any text (D1) */
+    --ts-accent-shine: rgb(34, 70, 170);
     --ts-accent-2: rgb(201, 162, 39);
     /* Lines: a border that means something (>= 4.5:1 on the surfaces) */
     --ts-line: rgb(111, 102, 90);
@@ -221,6 +224,9 @@
     /* Accent: the heritage option of the accent knob (light cobalt, dark gold) */
     --ts-accent: rgb(242, 181, 68);
     --ts-accent-text: rgb(242, 181, 68);
+    /* The Open Row shine (R14.8): the brightest colour a light sweeping across the words gives them; >= 7:1 on every surface
+       like any text (D1) */
+    --ts-accent-shine: rgb(255, 241, 200);
     --ts-accent-2: rgb(180, 120, 40);
     /* Lines: a border that means something (>= 4.5:1 on the surfaces) */
     --ts-line: rgb(154, 145, 129);
@@ -387,6 +393,7 @@
 .ts-app.ts-theme-default .nav-menu__title,
 .ts-app.ts-theme-default .nav-grid__open-title,
 .ts-app.ts-theme-default .nav-rails__title-words,
-.ts-app.ts-theme-default .card-section-opener__name {
+.ts-app.ts-theme-default .card-section-opener__name,
+.ts-app.ts-theme-default .ts-el--display {
     -unity-font-definition: var(--ts-font-display);
 }

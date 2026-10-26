@@ -53,11 +53,18 @@ namespace TileStories.Editor.Tests
         }
 
         [Test]
-        public void FirstWords_AreThePagesFirstWordsInTheLanguage_GlossaryMarksAsTheirWords()
+        public void FirstWords_AreTheTitlesWords_ElseThePagesFirstWords_InTheLanguage_GlossaryMarksAsTheirWords()
         {
+            // - what a story is called: its title, even after the eyebrow above it
+            Assert.AreEqual(BlockFieldReader.Pick(PaintingStory.TextOf(_s.Header, BlockStackBuilder.HeaderTitleField), "en", "en"),
+                ElementRules.FirstWords(_s.Scope, _s.Elements, "en", "en"), "the title row names the story");
+            Assert.AreEqual(BlockFieldReader.Pick(PaintingStory.TextOf(_s.Header, BlockStackBuilder.HeaderTitleField), "pt", "en"),
+                ElementRules.FirstWords(_s.Scope, _s.Elements, "pt", "en"));
+
+            // - no title row: the first words (the picture has none: the eyebrow's)
+            _s.PageValue.items.Remove(_s.Title.Data);
             Assert.AreEqual(BlockFieldReader.Pick(PaintingStory.TextOf(_s.Header, "eyebrow"), "en", "en"), ElementRules.FirstWords(_s.Scope, _s.Elements, "en", "en"),
-                "the picture has no words: the eyebrow's are the first");
-            Assert.AreEqual(BlockFieldReader.Pick(PaintingStory.TextOf(_s.Header, "eyebrow"), "pt", "en"), ElementRules.FirstWords(_s.Scope, _s.Elements, "pt", "en"));
+                "with no title, the first row with words");
             _s.Eyebrow.Field(BuiltInElements.TextField).text[0].value = "[[Ribeira|ribeira palace]]  by\nthe river";
             Assert.AreEqual("Ribeira by the river", ElementRules.FirstWords(_s.Scope, _s.Elements, "en", "en"));
         }
@@ -124,7 +131,7 @@ namespace TileStories.Editor.Tests
         public void TheCardsReadingTimeAndSummaryRules_ReadAComposedBlocksRows()
         {
             Assert.AreEqual(ExpectedMinutes("en"), ReadingTimeRule.Minutes(_s.Kind, _s.Block, 0f), "the contents list's and section's minutes");
-            Assert.AreEqual(BlockFieldReader.Pick(PaintingStory.TextOf(_s.Header, "eyebrow"), "pt", "en"), BlockSummaryRule.FirstWords(_s.Block, _s.Kind, "pt", "en"));
+            Assert.AreEqual(BlockFieldReader.Pick(PaintingStory.TextOf(_s.Header, BlockStackBuilder.HeaderTitleField), "pt", "en"), BlockSummaryRule.FirstWords(_s.Block, _s.Kind, "pt", "en"));
             PaintingStory.Value(_s.Block, BlockKindDefinition.HeadingField).text = new List<LocalizedEntry> { new() { lang = "en", value = "The story" } };
             Assert.AreEqual("The story", BlockSummaryRule.FirstWords(_s.Block, _s.Kind, "en", "en"), "a heading still comes first");
 
@@ -143,7 +150,7 @@ namespace TileStories.Editor.Tests
             var entry = built.Entries.Single(e => e.Instance.key == PaintingStory.StoryBlockKey);
             var table = AssetDatabase.LoadAssetAtPath<CardStringTable>("Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset").Entries();
             var row = CompactRowRule.Of(entry, _s.Blocks, "en", "en", new CardStrings(table, null, null, "en", "en").Get);
-            Assert.AreEqual(BlockFieldReader.Pick(PaintingStory.TextOf(_s.Header, "eyebrow"), "en", "en"), row.Words);
+            Assert.AreEqual(BlockFieldReader.Pick(PaintingStory.TextOf(_s.Header, BlockStackBuilder.HeaderTitleField), "en", "en"), row.Words, "the compact row names the story by its title");
             Assert.IsTrue(row.FromFirstWords);
             Assert.AreEqual(ExpectedMinutes("en"), row.Minutes);
             StringAssert.Contains(ExpectedMinutes("en").ToString(), row.Meta, "the row's second line names the minutes");

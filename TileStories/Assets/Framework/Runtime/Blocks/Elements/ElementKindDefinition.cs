@@ -5,8 +5,9 @@ namespace TileStories
     // Where an element sits in the Editor's "+ Add element" menu (_3.3 R14.2)
     public enum ElementCategory { Text, Media, Structure }
 
-    // The part an element can play in an Automatic preview (ElementPreviewRule, R14.3): the preview's picture, its title, its text -- or none
-    public enum ElementPreviewRole { None, Picture, Title, Text }
+    // The part an element can play in an Automatic preview (ElementPreviewRule, R14.3): the preview's picture, its title, its text -- or none.
+    // TitleLead: words that lead into a title (an eyebrow) -- they join the preview only when they sit right before the title it takes
+    public enum ElementPreviewRole { None, Picture, Title, Text, TitleLead }
 
     // One element kind (_3.3 R14.1): the ONE description of a row of an Elements field. The Editor's element table, the validator, the rules
     // (preview, reading time, summary, search, motion) and, from S2, the component that draws it all read it -- so an element an app

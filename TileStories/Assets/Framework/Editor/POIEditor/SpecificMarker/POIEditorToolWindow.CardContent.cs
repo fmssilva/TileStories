@@ -338,7 +338,7 @@ namespace TileStories.Editor
             poi.card.blocks ??= new List<BlockInstanceData>();
             var block = new BlockInstanceData
             {
-                key = TaxonomyRowKeys.NextFree(poi.card.blocks, b => b.key, TaxonomyRowKeys.BlockPrefix),
+                key = TaxonomyRowKeys.TakeBlockKey(poi.card),
                 kind = kind.Key,
                 variant = "",
                 display = kind.DisplayModes[0],

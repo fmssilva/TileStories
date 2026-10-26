@@ -119,6 +119,8 @@ namespace TileStories.Editor.Tests
                 else if (f.FieldType == typeof(List<BlockKindSetting>)) edits.Add((f.Name, s => s.kinds.Add(new BlockKindSetting { kind = "header", default_variant = "compact" })));
                 else if (f.FieldType == typeof(List<CardStringEntry>)) edits.Add((f.Name, s => POIEditorToolWindow.SetCardTextOverride(s, CardStrings.Keys.Close, "pt", "Sair")));
                 else if (f.FieldType == typeof(List<GlossaryEntry>)) edits.Add((f.Name, s => s.glossary.Add(new GlossaryEntry { term = "keep" })));
+                else if (f.FieldType == typeof(CardComponentSettings))
+                    edits.Add((f.Name, s => s.components.open_row_emphasis = ElementOptions.EmphasisShine));
                 else if (f.FieldType == typeof(CardDemoSettings))
                     foreach (var d in typeof(CardDemoSettings).GetFields(BindingFlags.Public | BindingFlags.Instance))
                     {
@@ -170,8 +172,8 @@ namespace TileStories.Editor.Tests
                     }
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(9 + 8 + 23 + 3, edits.Count,
-                "every card_settings field (walked by reflection) has an edit: 9 wall-level + 8 container + 23 navigation + 3 demo card");
+            Assert.AreEqual(9 + 1 + 8 + 23 + 3, edits.Count,
+                "every card_settings field (walked by reflection) has an edit: 9 wall-level + 1 components + 8 container + 23 navigation + 3 demo card");
 
             foreach (var (name, change) in edits)
             {
@@ -2854,6 +2856,9 @@ namespace TileStories.Editor.Tests
                 Assert.IsFalse(string.IsNullOrWhiteSpace(kind.Help), kind.Key + " has a (i) text");
                 foreach (var field in kind.Fields)
                 {
+                    // - a composed kind's rows (Elements: the story's Page and Preview Rows) are edited in the element table, _3.3 S3's; until then
+                    //   the field draws one info line (_3.1 5.3). The ONE field type this guard leaves to a later block, by name
+                    if (field.Type == BlockFieldType.Elements) continue;
                     Assert.IsTrue(POIEditorToolWindow.HasBlockFieldDrawer(field.Type), kind.Key + "." + field.Key + ": no Editor drawer for " + field.Type);
                     Assert.IsFalse(string.IsNullOrWhiteSpace(field.Label), kind.Key + "." + field.Key + " has a label");
                     Assert.IsFalse(string.IsNullOrWhiteSpace(field.Help), kind.Key + "." + field.Key + " has a (i) text");

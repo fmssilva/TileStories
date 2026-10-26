@@ -5,10 +5,12 @@ namespace TileStories
 {
     // Every element kind a composed block's rows may name (_3.3 R14.1): the BlockRegistry pattern one level down. BuiltInElements registers
     // the framework's v1 set into Shared; an app registers its own the same way (ElementRegistry.Shared.Register) with zero Framework edits,
-    // and tests build their own instance. The views join at S2 (the components): this registry holds the definitions only.
+    // and tests build their own instance. Each element is registered with the factory of the component that draws it (R14.2), or without
+    // one while its component is not built (the media elements before _3.3 S2b): a row of it then draws nothing for a visitor.
     public sealed class ElementRegistry
     {
         private readonly List<ElementKindDefinition> _elements = new();
+        private readonly Dictionary<string, Func<IElementComponent>> _components = new();
 
         // The app's registry: the framework's elements plus whatever the app registered
         public static ElementRegistry Shared
@@ -30,13 +32,23 @@ namespace TileStories
 
         // Add an element. A broken definition or a second one with the same key is refused: a silent replace would hide a clash between an
         // app's element and a framework one
-        public void Register(ElementKindDefinition definition)
+        public void Register(ElementKindDefinition definition) => Register(definition, null);
+
+        // Add an element with the factory of its component (null: not drawn yet)
+        public void Register(ElementKindDefinition definition, Func<IElementComponent> componentFactory)
         {
             string problem = Validate(definition);
             if (problem != null) throw new ArgumentException("[Elements] cannot register element '" + definition?.Key + "': " + problem);
             if (TryGet(definition.Key, out _)) throw new ArgumentException("[Elements] element '" + definition.Key + "' is already registered");
             _elements.Add(definition);
+            if (componentFactory != null) _components[definition.Key] = componentFactory;
         }
+
+        // Whether this element has a component that draws it
+        public bool HasComponent(string key) => key != null && _components.ContainsKey(key);
+
+        // A new component of this element, or null for an element that is not registered or not drawn yet
+        public IElementComponent CreateComponent(string key) => key != null && _components.TryGetValue(key, out var f) ? f() : null;
 
         public bool TryGet(string key, out ElementKindDefinition definition)
         {

@@ -83,6 +83,8 @@ namespace TileStories.Editor
             int repairedKeys = TaxonomyRowKeys.RepairKeys(_config);
             if (repairedKeys > 0)
                 Debug.Log($"[POIEditor] gave {repairedKeys} taxonomy row(s) a missing or repeated key; Save to keep it");
+            // - a card's block-key memory starts at the highest key it holds, so a deleted last block's key is never handed out again
+            TaxonomyRowKeys.SeedBlockKeyMemory(_config);
             // - a file without Priority (older, or written by a script) loads 0 = "unset"; store the order the runtime
             //   already gives it, so the Priority cell never rewrites it while drawing (it used to write 1 = top)
             int filledPriorities = FillUnsetLevelPriorities(_config.hierarchy_levels);

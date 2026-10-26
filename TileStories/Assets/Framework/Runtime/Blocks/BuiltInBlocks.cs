@@ -24,6 +24,8 @@ namespace TileStories
             registry.Register(Status, () => new StatusBlockView());
             registry.Register(QuickFacts, () => new QuickFactsBlockView());
             registry.Register(RichText, () => new RichTextBlockView());
+            // - a composed view reads its kind's family and the other blocks' Pages through the registry it is registered in
+            registry.Register(Story, () => new ComposedBlockView(registry, ElementRegistry.Shared));
             registry.Register(FunFact, () => new FunFactBlockView());
             registry.Register(PullQuote, () => new PullQuoteBlockView());
             registry.Register(ProcessSteps, () => new ProcessStepsBlockView());

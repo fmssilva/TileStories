@@ -68,18 +68,32 @@ namespace TileStories
         private const string LongTextHelp = "Leave an empty line between paragraphs. Write [[word]] to link a word to its Glossary entry.";
         private const string CaptionHelp = " Each picture may carry a caption in every wall language and a credit line.";
 
-        // Register the v1 set into `registry`, in the order the "+ Add element" menu lists them
+        // Register the v1 set into `registry`, in the order the "+ Add element" menu lists them, each with its component
         public static void Register(ElementRegistry registry)
         {
-            foreach (var element in All()) registry.Register(element);
+            foreach (var element in All()) registry.Register(element, ComponentOf(element.Key));
         }
+
+        // The factory of an element's component (_3.3 S2a: the text and structure elements); null for the media elements, whose components
+        // are _3.3 S2b's -- a row of one draws nothing on a visitor's card until then
+        public static System.Func<IElementComponent> ComponentOf(string key) => key switch
+        {
+            Title or Eyebrow or Heading => () => new LineElement(key),
+            Lede or Paragraph => () => new ProseElement(key),
+            Callout => () => new CalloutElement(),
+            PullQuote => () => new PullQuoteElement(),
+            List => () => new ListElement(),
+            Divider => () => new DividerElement(),
+            Spacer => () => new SpacerElement(),
+            _ => null,
+        };
 
         // The v1 set, new definitions each call
         public static IReadOnlyList<ElementKindDefinition> All() => new[]
         {
             Text(Title, "Title", CardIcons.Book, ElementPreviewRole.Title, BlockFieldType.LocalizedText,
                 "The story's title, the largest words of the page.", ToneNeutral, SizeLarge),
-            Text(Eyebrow, "Eyebrow", CardIcons.Info, ElementPreviewRole.None, BlockFieldType.LocalizedText,
+            Text(Eyebrow, "Eyebrow", CardIcons.Info, ElementPreviewRole.TitleLead, BlockFieldType.LocalizedText,
                 "A few small words above a title that set the scene (a place, a date, a theme).", ToneFamily, SizeSmall),
             Text(Heading, "Heading", CardIcons.Sources, ElementPreviewRole.Title, BlockFieldType.LocalizedText,
                 "A heading that opens a new part of the page.", ToneNeutral, SizeMedium),

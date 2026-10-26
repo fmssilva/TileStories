@@ -15,6 +15,7 @@ namespace TileStories.Editor.Tests
         private sealed class StubHost : IBlockHost
         {
             public SheetStopRule.Stop Stop => SheetStopRule.Stop.Half;
+            public float FullHeight => 0f;
             public void ShowOnWall() { }
             public void ShowHeaderAtPeek() { }
             public void SelectPoi(string poiId) { }

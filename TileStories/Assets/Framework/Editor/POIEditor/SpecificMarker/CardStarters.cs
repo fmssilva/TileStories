@@ -106,15 +106,16 @@ namespace TileStories.Editor
             var replaced = poi.card?.blocks ?? new List<BlockInstanceData>();
             if (starter.IsEmpty && replaced.Count == 0) return;
 
-            // - every key the point has held in this card, old and new: NextFree skips them all
-            var taken = new List<BlockInstanceData>(replaced);
+            // - the card's key memory covers every key it ever held, the replaced blocks' included (TakeBlockKey reads them while they
+            //   are still the card's)
+            poi.card ??= new POICardData();
             var blocks = new List<BlockInstanceData>(starter.Entries.Count);
             foreach (var entry in starter.Entries)
             {
                 BlockRegistry.Shared.TryGet(entry.Kind, out var definition);
                 var block = new BlockInstanceData
                 {
-                    key = TaxonomyRowKeys.NextFree(taken, b => b.key, TaxonomyRowKeys.BlockPrefix),
+                    key = TaxonomyRowKeys.TakeBlockKey(poi.card),
                     kind = entry.Kind,
                     variant = entry.Variant,
                     // - the kind's first display, as "+ Add block" gives a new block
@@ -123,9 +124,7 @@ namespace TileStories.Editor
                 foreach (var (field, option) in entry.Choices)
                     block.fields.Add(new BlockFieldValue { key = field, value = option });
                 blocks.Add(block);
-                taken.Add(block);
             }
-            poi.card ??= new POICardData();
             poi.card.blocks = blocks;
         }
 

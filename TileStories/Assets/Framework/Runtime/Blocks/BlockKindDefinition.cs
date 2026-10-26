@@ -24,6 +24,9 @@ namespace TileStories
         // The words a visitor reads for the kind (_3.2 step 6): a CardStrings key -- the framework's table for a built-in kind, the app's own
         // table for an app kind -- so a chip of the card's navigation names it in the visitor's language. Never the Editor's DisplayName
         public string LabelKey;
+        // The words of the kind's Open Row (_3.3 R14.8: "Read the story"), a CardStrings key like LabelKey; null = the kind draws no Open Row
+        // (a block's Component Overrides row may still give its own words)
+        public string OpenWordsKey;
         // The Editor's name for the kind ("Header")
         public string DisplayName;
         // The Editor (i) text of the kind
