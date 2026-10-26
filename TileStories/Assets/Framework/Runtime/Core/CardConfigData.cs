@@ -60,6 +60,10 @@ namespace TileStories
         // The Open Row's emphasis (_3.3 R14.8): "plain" | "nudge" (default: the chevron steps towards the page -- it says "open me" without
         // a glow, so the card keeps ONE glowing element, D5) | "shine" (ElementOptions.OpenRowEmphases). Reduce Motion always shows plain
         public string open_row_emphasis = ElementOptions.EmphasisNudge;
+        // The Page Chrome's parts (_3.3 R17.5): the block page's one-line breadcrumb beside its Back chevron, and the Previous / Next row at
+        // the page's foot. Both on by default; a block overrides them in its Component Overrides row (PageChromeRule)
+        public bool page_chrome_breadcrumb = true;
+        public bool page_chrome_prev_next = true;
     }
 
     // Detail Card > Navigation (_3.2 section 3): how a visitor moves inside ONE open card. Each field lands with the code

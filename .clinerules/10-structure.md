@@ -180,7 +180,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - WallConfigData.cs  -- the whole config.json object model: WallConfigData, POIData, PositionData, taxonomy entries
         - SelectFilterSearchSettings.cs  -- SearchSettings, FilterSettings, ResultsSettings, MinimapSettings, VoiceSettings, each field's limits; SelectFilterSearchOptions = every option string
         - TaxonomyNames.cs  -- ); the one lookup the card, results, filter chips, search sources, suggestions and demos use
-        - CardConfigData.cs  -- CardSettings (+ components: CardComponentSettings, the shared components' wall defaults -- the Open Row's emphasis); POICardData.last_block_number (the card's block-key memory)
+        - CardConfigData.cs  -- CardSettings (+ components: CardComponentSettings, the shared components' wall defaults -- the Open Row's emphasis, the Page Chrome's breadcrumb and Previous / Next switches); POICardData.last_block_number (the card's block-key memory)
         - PoiSubtitle.cs  -- Of(poi, taxonomy, withLevel)
         - WallConfigLoader.cs  -- reads config.json from StreamingAssets and deserializes it
         - DevLog.cs  -- + DevLog.Detail / IsOn: per-item / per-frame detail lines, off by default, one line each (no stack trace); ticked in TileStories > Detail Logs
@@ -257,8 +257,8 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
               - NavChipRow.cs  -- A NavStrip of NavChips for given kinds: marks the kind of CurrentBlock, a tap = JumpToBlock(kind's first target)
               - NavFacetBar.cs  -- The facet chips of drawer_tree and grid_overlay: one NavStrip row of 48 px chips (Up to 2 / 5 min, No headphones / camera / network, the formats) +
               - Navigation.uss  -- The navigation elements' look, --ts-* tokens only (the tabs: touch-token minimums, nowrap words, the underline bar, the bold current label); in every
-            - TakeoverView.cs  -- Plain C#: the full-screen view over the card (the sheet's sibling in the layer, carrying the token classes): Back + breadcrumb (card title > section > name), a chip per sibling page, the page drawn through ITakeoverPage; GoBack (the button, the system Back) returns to the block page it was opened over (Open's returnTo), Close never does
-            - BlockFullView.cs  -- Plain C#, sheet-owned: "open in full view" for ANY block -- PageFor(entry, context) binds a SECOND view of the kind from the BlockViewPool into the takeover's page, among its siblings; a section page (bento); ReturnTo(offset) puts a page the visitor comes back to at the scroll they left it; a composing kind's section heading hidden (its own title)
+            - TakeoverView.cs  -- Plain C#: the full-screen view over the card (the sheet's sibling in the layer, carrying the token classes, no side padding of its own): the Page Chrome's PageTopBar (Back chevron + the one-line breadcrumb card title > section > name; ApplyChrome shows / hides the breadcrumb), a chip per sibling page, the page drawn through ITakeoverPage; GoBack (the button, the system Back) returns to the block page it was opened over (Open's returnTo), Close never does
+            - BlockFullView.cs  -- Plain C#, sheet-owned: "open in full view" for ANY block -- PageFor(entry, context) binds a SECOND view of the kind from the BlockViewPool into the takeover's page, among its siblings; a section page (bento); ReturnTo(offset) puts a page the visitor comes back to at the scroll they left it; a composing kind's section heading hidden (its own title); each page asks PageChromeRule for ITS block's chrome (the takeover's breadcrumb, the PageFootView Previous / Next row at the end of the page's scroll)
             - ZoomPanSurface.cs  -- Plain C#: the pinch-zoom + pan surface zoom_image already drew, factored out so the gallery lightbox reuses it (ZoomPanRule underneath, unchanged)
             - IBlockView.cs  -- IBlockView + BlockBindContext + IBlockHost (FullHeight: what a preview's cap is a share of) + ITakeoverPage (Turn, WhenPageLeaves) + the TakeoverPageDrawer delegate it is handed (a block never names the TakeoverView, R15.2)
             - PoiCardHost.cs  -- selection bus -> BlockStackBuilder -> the sheet; closes through the bus
@@ -447,6 +447,8 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - DividerElement.cs  -- divider: a hairline, or the azulejo ornament (a vector) in the family colour between two hairlines
           - SpacerElement.cs  -- spacer: room on the spacing scale
           - OpenRowView.cs  -- the shared Open Row: words + minutes + chevron, a whole touch target; emphasis plain / nudge (the chevron steps) / shine (a per-glyph tint sweep, PostProcessTextVertices, to --ts-accent-shine); Clock; Reduce Motion = plain
+          - PageTopBar.cs  -- the Page Chrome's top bar: a 44 pt round Back chevron (tooltip = accessible name) + the breadcrumb on ONE line (point > section > page, the page's name last and bold; the section a tap target), each part's width from PageCrumbFitRule (middle cut first, then the point's); ShowBreadcrumb(false) = the arrow alone
+          - PageFootView.cs  -- the Page Chrome's foot: two cards, Previous (left) and Next (right), the small label over the neighbouring page's name; a missing neighbour keeps its place undrawn; the host decides what a tap turns to
           - MediaFrame.cs  -- MediaFrame (one media item's clipped frame: a CardImage in its proportion -- ElementMediaRule.FrameAspect or a fixed one -- rectangle or arch, its Picture what motion moves) + MediaCaption (caption + credit, each hidden when empty)
           - PictureElement.cs  -- picture: one MediaFrame + its words; inset / full bleed, rectangle / arch; on the page a tap opens the PictureViewer (the row's Tap); an Automatic preview without its words
           - PicturePairElement.cs  -- picture pair: two frames at ElementMediaRule.PairAspect side by side with their words; on the page a tap opens both in the viewer at the one tapped
@@ -574,6 +576,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - NavScrollRule.cs  -- Pure: _3.2 4.4 -- Range, TargetOffset (slot top clamped to [0, range]), CurrentSection
           - ReadingTimeRule.cs  -- Pure: Minutes(kind, instance, clipSeconds) -- a clip kind: the clip's length rounded up to whole minutes; a composing kind: ElementRules.Minutes; else the Reading Time field
           - NavFacetRule.cs  -- Pure: BlockFacts (format, minutes, needs), NavFacets (the visitor's format / time limit / withouts), the ONE rule drawer_tree and grid_overlay read
+          - PageCrumbFitRule.cs  -- Pure: Widths(natural, available, floor) of the page breadcrumb's three parts -- the middle part is cut first, then the point's, the page's name last
           - NavFitRule.cs  -- Pure: CountsFit(words, counts, gap, room) -- the Segmented element's Show Counts: a count goes when it cannot sit beside its word, never the word
           - CompactRowRule.cs  -- Pure: the compact row's words for a stack entry -- heading, else the kind's default heading, else BlockSummaryRule's first words (FromFirstWords)
           - SectionSheetRule.cs  -- Pure: the scroll's chapters -- Runs (consecutive blocks of one family; bare for a family that opens no section), Looks; a family's colour names (InkOf, GlassOf, LightOf, Light2Of, SweepOf)
@@ -672,6 +675,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - ElementValidation.cs  -- problems named by surface + row (unknown element, required empty, media, broken ref, blank / repeated id); RowIsComplete
           - DropCapRule.cs  -- Split: the words of N lines beside a drop cap and the rest under it (greedy, by a measure; a glossary mark one word); Words
           - OpenRowMotionRule.cs  -- the Open Row's motion: Effective (Reduce Motion = plain), the nudge's keyframes, the shine band's centre and amount
+          - PageChromeRule.cs  -- PageChromeChoice (breadcrumb, Previous / Next) + Wall(components) / Of(components, block): the wall's defaults unless the block's Page Chrome override is on
       - Circuits/  [EMPTY SCAFFOLD]  -- circuit state machine and entry-point resolution
       - Telemetry/  [EMPTY SCAFFOLD]  -- analytics events and consent
       - AI/  [EMPTY SCAFFOLD]  -- optional AI features, feature-flagged
@@ -764,6 +768,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - NavigationPresets.cs  -- Editor-only DATA: the nine presets of _3.2 section 8
           - NavigationWarningRule.cs  -- + EdgeUnderALayoutThatOwnsIt; an Edge the layout keeps off the card is no third bar
           - POIEditorToolWindow.CardNavigationGroups.cs  -- The Groups table
+          - POIEditorToolWindow.CardComponents.cs  -- Detail Card > Card Components: the wall's defaults of the shared card components (card_settings.components); the Page Chrome row (Breadcrumb, Previous / Next) with its (i) and Test guides
           - POIEditorToolWindow.CardTexts.cs  -- Detail Card > Card Texts: one row per framework / app card text (named by its wording), a field per wall language; FrameworkCardStrings
           - POIEditorToolWindow.CardGlossary.cs  -- Detail Card > Glossary: a Term + its definition per language per word, + Add term
           - POIEditorToolWindow.CardDefaultMedia.cs  -- Detail Card > Default Media: the wall's own CardMediaLibrary path and the Framework defaults table
@@ -919,6 +924,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
             - ElementPreviewRuleTests.cs  -- Automatic in Page order through reorders, deletes, links, broken rows; Custom own / linked / broken; the mode switch
             - ElementRulesTests.cs  -- minutes counted from the source texts, first words, search words, tap, motion + reduce; ReadingTimeRule / BlockSummaryRule / CompactRowRule / BlockStackBuilder on the story
             - ElementValidationTests.cs  -- each problem named by surface, row, element and field; ids unique across Page and Preview; an id problem never hides content
+            - PageChromeRuleTests.cs  -- PageCrumbFitRule (fits whole; the middle part cut first, the point's next, the name last; floors; an absent part stays 0) and PageChromeRule (the wall's choice, a block's override on / off with its values kept, another component's override ignored, a config from before it reads both on)
             - DropCapRuleTests.cs  -- the cut by lines, a short paragraph whole, a glossary mark one word, a word wider than the line
             - ElementMotionRuleTests.cs  -- the enter line (+-0.5 px), stagger and its cap, a reveal frame by frame (0.1 s over 1 s), parallax inside its room, zoom / pan there and back, the one Mover, Reduce Motion still; FrameAspect / ArchRadius; NavStripRule.SnapOffset
         - MarkerHierarchyResolverTests.cs (incl. Marker Label Style resolution and StyleOf clamping), MarkerLayoutTests.cs, MarkerLayoutPxConversionTests.cs  -- size and layout math
@@ -991,6 +997,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
             - CardMenuOverlayTests.cs  -- The overlay owner on a REAL sheet with The Lamp: its layer between the sheet and the full view, one thing open at a time
             - BlockFullViewTests.cs  -- The full view on a real sheet with The Lamp: a second pooled view through its own scope while the card's stays bound, the page-leave order
             - BentoLayoutSheetTests.cs  -- The bento layout on a REAL sheet with The Lamp's card and media, no panel: every target set aside and the sources kept, a tile per section
+            - PageChromeSheetTests.cs  -- The Page Chrome on a REAL sheet (The Lamp, The Painting), no panel: the Back arrow's tooltip in EN + PT, the foot's neighbours and its end cards, no foot for a page alone, the wall's two switches, a story's own override for its page only
             - FullViewSiblingsSheetTests.cs  -- The full view among its siblings on a REAL sheet with The Lamp, no panel: a Media block opens as one page of 14 at its own place
             - CardFullViewOpenerTests.cs  -- CardFullViewOpener on a REAL sheet with The Lamp, no panel -- the edges the sheet-level full view tests do not reach: a same-point rebind that
             - FloatingSlotTests.cs  -- The floating slot on a REAL sheet with The Lamp's card: its layer order (sheet, scrim, row, menu layer, full view), the Floating Button per wall pick
@@ -1106,7 +1113,8 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - BackgroundSafeInput.cs  -- Test helper: a copy of InputSystem.settings that keeps real devices working whichever application has the focus
         - PoiCardRealAudioTests.cs  -- The REAL AudioSource + the real ~200s PT clip (castelo_s_jorge_guide_pt.mp3): real taps play / pause / seek / change speed, closing the card with
         - PoiCardPortugueseTests.cs  -- The Lamp's PT render read item by item: every non-ASCII glyph its PT card content uses (c-cedilla, a / e / i / o / u with accents, A with an accent)
-        - PoiCardStorySceneTests.cs  -- Phase B on the REAL scene: The Painting's story preview (hero picture edge to edge, eyebrow + title + lede, no slot heading) capped with its Open Row in EN / PT, light / dark; a real tap opens the page (17 rows drawn, pictures loaded, captions in the card's language), sibling chips turn, Back returns; real carousel swipes; a real tap on the video poster opens the existing player and Back returns to the page; the gated motion cost (TestEvidence/Story/MEASURING)
+        - PoiCardPageChromeSceneTests.cs  -- Phase A + B of the Page Chrome on the REAL scene: the top bar on one line for a short, a long and a very long title (EN + PT, light + dark: the middle part cut first, the name last and bold, >= 7:1, a 44 pt Back); a real tap on Back returns at the same scroll; real taps on Previous / Next; a full-bleed picture's left and right PIXELS at the phone's edges with the text at its 16 pt gutter; the gallery's page wears the same chrome; The Painting's story video plays in place (TestEvidence/Card/PageChrome/)
+        - PoiCardStorySceneTests.cs  -- Phase B on the REAL scene: The Painting's story preview (hero picture edge to edge, eyebrow + title + lede, no slot heading) capped with its Open Row in EN / PT, light / dark; a real tap opens the page (17 rows drawn, pictures loaded, captions in the card's language), sibling chips turn, Back returns; real carousel swipes; the gated motion cost (TestEvidence/Story/MEASURING)
       - EditMode/  [EMPTY SCAFFOLD]  -- legacy folder, superseded by Tests/Editor
   - StreamingAssets/
     - LivingRoom/

@@ -410,7 +410,14 @@ namespace TileStories.Tests
                     yield return null;
                 }
                 yield return CardTestInput.Settle(0.2f);
-                foreach (string target in Nav.Model.Sections[index].Targets) Assert.IsTrue(Nav.HasViewed(target), target + " read on the page");
+                foreach (string target in Nav.Model.Sections[index].Targets)
+                {
+                    var slot = Sheet.FullView.SectionSlotOf(target);
+                    Assert.IsTrue(Nav.HasViewed(target), target + " read on the page -- slot " + (slot == null ? "none" : slot.layout.ToString()) + ", offset " + page.scrollOffset.y +
+                        ", content " + page.contentContainer.layout.height + ", viewport " + page.contentViewport.layout.height + ", section " + Sheet.FullView.SectionKey +
+                        ", highValue " + page.verticalScroller.highValue + ", range " +
+                        NavScrollRule.Range(page.contentContainer.layout.height, page.contentViewport.layout.height) + ", scroll " + page.worldBound);
+                }
                 yield return PressEscape();
             }
 

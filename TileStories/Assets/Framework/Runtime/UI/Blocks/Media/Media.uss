@@ -434,88 +434,14 @@
     top: 0;
     right: 0;
     bottom: 0;
-    padding: var(--ts-space-4);
     background-color: var(--ts-bg);
 }
 
-.card-takeover__bar {
-    flex-direction: row;
-    align-items: center;
-}
-
-.card-takeover__back {
-    background-color: var(--ts-surface-2);
-    color: var(--ts-ink);
-    border-width: 0;
-    font-size: var(--ts-size-body);
-    margin: 0;
-}
-
-/* the breadcrumb (_3.2 step 16): the card's title > the section pill > the page's name, wrapping onto more lines -- never clipped */
-.card-takeover__crumb {
-    flex-grow: 1;
-    flex-shrink: 1;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    margin-left: var(--ts-space-3);
-}
-
-.card-takeover__crumb-part {
-    flex-shrink: 1;
-    margin: 0;
-    padding: 0;
-    font-size: var(--ts-size-caption);
-    color: var(--ts-ink-2);
-    white-space: normal;
-}
-
-/* the step between two parts: the card's chevron (pointing down) turned to point onward */
-.card-takeover__crumb-arrow {
-    flex-shrink: 0;
-    width: var(--ts-icon-size);
-    height: var(--ts-icon-size);
-    margin: 0 var(--ts-space-1);
-    color: var(--ts-ink-2);
-    rotate: -90deg;
-}
-
-.card-takeover__crumb-name {
-    color: var(--ts-ink);
-    -unity-font-style: bold;
-}
-
-/* the section: a pill a finger can hit (it moves the card to that section), its family icon beside its words */
-.card-takeover__crumb-section {
-    flex-direction: row;
-    align-items: center;
-    flex-shrink: 1;
-    min-height: var(--ts-touch-target);
-    min-width: var(--ts-touch-target);
-    margin: 0;
-    padding: 0 var(--ts-space-3);
-    border-width: 0;
-    border-radius: var(--ts-pill-radius);
-    background-color: var(--ts-surface-2);
-}
-
-.card-takeover__crumb-icon {
-    flex-shrink: 0;
-    margin: 0 var(--ts-space-2) 0 0;
-}
-
-.card-takeover__crumb-section-words {
-    margin: 0;
-    padding: 0;
-    font-size: var(--ts-size-caption);
-    -unity-font-style: bold;
-    color: var(--ts-ink);
-    white-space: normal;
-}
-
+/* The view has no side padding of its own: the top bar and a block page's scroll reach the phone's edges (a full-bleed picture meets them),
+   and every other page keeps the 16 pt gutter here, on the page */
 .card-takeover__page {
     flex-grow: 1;
-    margin: var(--ts-space-4) 0;
+    margin: var(--ts-space-4) var(--ts-space-4);
 }
 
 /* the chips: ONE line clipped at the screen's width (TakeoverView's NavStrip moves the row, the current chip always in view). The row starts at
@@ -525,6 +451,7 @@
     flex-direction: row;
     flex-shrink: 0;
     overflow: hidden;
+    margin: 0 var(--ts-space-4) var(--ts-space-4) var(--ts-space-4);
 }
 
 .card-takeover__chips {

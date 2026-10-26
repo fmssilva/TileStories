@@ -439,7 +439,9 @@ namespace TileStories.Tests
                 for (int f = 1; f < opacities.Count; f++) Assert.GreaterOrEqual(opacities[f][r], opacities[f - 1][r] - 1e-4f, "row " + r + ": the opacity never drops");
             float done = ElementMotionRule.RevealDuration + ElementMotionRule.StaggerDelay(2);
             for (int f = 0; f < opacities.Count; f++)
-                if (f * 0.1f >= done + 1e-3f) CollectionAssert.AreEqual(new[] { 1f, 1f, 1f }, opacities[f], "frame " + f + ": all at rest");
+                if (f * 0.1f >= done + 1e-3f)
+                    CollectionAssert.AreEqual(new[] { 1f, 1f, 1f }, opacities[f], "frame " + f + ": all at rest (every frame: " +
+                        string.Join(" | ", opacities.Select(o => string.Join(",", o.Select(v => v.ToString("0.000"))))) + ")");
             Assert.AreEqual(0f, first[0].resolvedStyle.translate.y, 0.01f, "at rest: in its place");
 
             // - the row below the fold: scrolled to the view's centre (past the enter line) at t, it reveals from t
@@ -455,7 +457,9 @@ namespace TileStories.Tests
             page.Motion.Tick();
             yield return null;
             Assert.That(below.resolvedStyle.opacity, Is.InRange(0.5f, 0.99f), "halfway: past half-faded (decelerating)");
-            _time = 5f + ElementMotionRule.RevealDuration;
+            // - rows that enter in the same tick follow one by one, Stagger apart: how many enter with `below` (the row before it may enter in the
+            //   same scroll) depends on the view's height, so "at rest" is the whole reveal PLUS the longest stagger, never a hand-counted 1
+            _time = 5f + ElementMotionRule.RevealDuration + ElementMotionRule.StaggerDelay(ElementMotionRule.MaxStaggerSteps);
             page.Motion.Tick();
             yield return null;
             Assert.AreEqual(1f, below.resolvedStyle.opacity, 1e-3f, "at rest");

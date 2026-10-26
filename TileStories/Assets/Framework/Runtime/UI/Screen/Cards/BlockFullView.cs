@@ -26,6 +26,11 @@ namespace TileStories
 
         private readonly TakeoverView _takeover;
         private readonly BlockViewPool _views;
+        // The Page Chrome's foot (Previous / Next), built once and put at the end of the page's scroll while the chrome shows it
+        private readonly PageFootView _foot = new();
+
+        // The foot of the open block page (in the page's scroll only while it is shown)
+        public PageFootView Foot => _foot;
 
         // The class a section page's content wears, and each of its blocks' slot
         public const string SectionClass = "card-full-view__section";
@@ -143,8 +148,26 @@ namespace TileStories
                 container.Add(Scroll);
                 View = view;
                 BlockKey = entry.Instance.key;
+                // - the Page Chrome of THIS block: the wall's choice unless the block overrides it (the breadcrumb is the takeover's bar, the
+                //   Previous / Next row the foot of this page's scroll)
+                var chrome = PageChromeRule.Of(context.Settings?.components, entry.Instance);
+                _takeover.ApplyChrome(chrome);
+                ShowFoot(chrome, context.Strings);
                 takeover.WhenPageLeaves(() => Release(kind, view));
             };
+        }
+
+        // The foot of the open block page: Previous / Next cards at the end of the scroll, each turning to the neighbouring page (the sibling
+        // swipe and the chips stay as they are). None when the chrome hides it or the block has no sibling
+        private void ShowFoot(PageChromeChoice chrome, CardStrings strings)
+        {
+            int page = _takeover.PageIndex, last = _takeover.PageCount - 1;
+            if (!chrome.PrevNext || last < 1) return;
+            string previous = page > 0 ? _takeover.NameOf(page - 1) : null;
+            string next = page < last ? _takeover.NameOf(page + 1) : null;
+            _foot.Show(strings?.Get(CardStrings.Keys.PagePrevious), previous, () => _takeover.Turn(-1),
+                strings?.Get(CardStrings.Keys.PageNext), next, () => _takeover.Turn(1));
+            Scroll.Add(_foot);
         }
 
         // The page drawer that binds a whole section (`sectionKey`): each of `entries` (its targets, in order) under the words `headingOf` gives
@@ -266,6 +289,7 @@ namespace TileStories
             view.Unbind();
             view.Root.RemoveFromClassList(BlockClass);
             view.Root.RemoveFromHierarchy();
+            _foot.RemoveFromHierarchy();
             _views.Return(kind, view);
             if (View != view) return;
             View = null;

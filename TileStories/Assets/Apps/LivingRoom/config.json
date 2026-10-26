@@ -11125,7 +11125,7 @@
                                                 "text": [],
                                                 "number": 0.0,
                                                 "flag": false,
-                                                "value": "open_player",
+                                                "value": "play_in_place",
                                                 "asset": "",
                                                 "asset_by_language": []
                                             },
@@ -14530,7 +14530,9 @@
         "preview_language": "",
         "default_mode": "light",
         "components": {
-            "open_row_emphasis": "nudge"
+            "open_row_emphasis": "nudge",
+            "page_chrome_breadcrumb": true,
+            "page_chrome_prev_next": true
         }
     },
     "search_demo": {

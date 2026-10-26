@@ -6,12 +6,13 @@ namespace TileStories
 {
 
     // The full-screen view over the card (_3.1 section 4, "Takeover"; first user: the gallery's lightbox, step 7). It
-    // covers the whole card layer above the sheet: a bar with the way back and the breadcrumb, one chip per sibling page, and the page itself,
+    // covers the whole card layer above the sheet: the Page Chrome's top bar (a Back chevron and the one-line breadcrumb, PageTopBar), one chip per sibling page, and the page itself,
     // drawn by whoever opened it (TakeoverPageDrawer). The sheet underneath is never rebound, so closing returns to the same stop and scroll
     // position. The view loads through its OWN media scope: switching page gives the previous page's files back, closing gives back everything.
-    //   - the breadcrumb (_3.2 step 16) is the card's title, then -- for a block of the card's map -- its SECTION as a tappable pill (icon and
-    //     words, a whole touch target: SectionTapped, which the sheet turns into the card's one jump), then the page's own name, which follows
-    //     the page shown ("Castle > Media > 360"); it wraps, never clips
+    //   - the breadcrumb (_3.2 step 16, _3.3 S2c) is the card's title, then -- for a block of the card's map -- its SECTION as tappable words
+    //     (a whole touch target: SectionTapped, which the sheet turns into the card's one jump), then the page's own name, bold, which follows
+    //     the page shown ("Castle > Media > 360"); ONE line, the middle part cut with an ellipsis first (PageCrumbFitRule); a wall or a block
+    //     may hide it (PageChromeChoice), the Back arrow then stands alone
     //   - the chips are ONE line clipped at the screen's width (NavStrip: the current chip is centred, so the next one is always a tap away), each a whole touch
     //     target named by its page; the current one is bold with a ring as well as filled -- never colour alone
     //   - Back (the button, the system Back: GoBack) returns to what the view was opened over when its opener named it -- a picture's viewer
@@ -29,28 +30,21 @@ namespace TileStories
         // The icon and the words inside chip `page` (null before the chip exists): what a test reads to know what a chip says
         public VisualElement ChipIcon(int page) => page >= 0 && page < _chipIcons.Count ? _chipIcons[page] : null;
         public Label ChipWords(int page) => page >= 0 && page < _chipWords.Count ? _chipWords[page] : null;
-        public Button Back { get; }
-        // The breadcrumb: its row, the card's title, the section pill (hidden for a page of no section) and the page's name
-        public VisualElement Crumb { get; }
-        public Label CrumbTitle { get; }
-        public Button CrumbSection { get; }
-        public Label CrumbSectionWords { get; }
-        public Label CrumbName { get; }
-        // The whole breadcrumb as a visitor reads it ("St George's Castle > Media > 360")
-        public string CrumbText
-        {
-            get
-            {
-                var parts = new List<string>();
-                foreach (var part in new[] { CrumbTitle.text, SectionShown ? CrumbSectionWords.text : "", NameRepeatsSection ? "" : CrumbName.text })
-                    if (!string.IsNullOrEmpty(part)) parts.Add(part);
-                return string.Join(" > ", parts);
-            }
-        }
-        public bool SectionShown => CrumbSection.style.display.value != DisplayStyle.None;
-        // The page's name says nothing the section does not (a block with no heading of its own is named by its kind's words, often the
-        // section's: "Listen > Listen"): it is left out
-        public bool NameRepeatsSection => SectionShown && string.Equals(CrumbName.text?.Trim(), CrumbSectionWords.text?.Trim(), StringComparison.OrdinalIgnoreCase);
+        // The top bar (the Page Chrome's): the Back chevron and the breadcrumb -- its row, the card's title, the section (hidden for a page of
+        // no section) and the page's name
+        public PageTopBar Bar { get; }
+        public Button Back => Bar.Back;
+        public VisualElement Crumb => Bar.Crumb;
+        public Label CrumbTitle => Bar.Point;
+        public Button CrumbSection => Bar.Section;
+        public Label CrumbSectionWords => Bar.SectionWords;
+        public Label CrumbName => Bar.Name;
+        // The whole breadcrumb as a visitor reads it ("St George's Castle > Media > 360"; empty while the chrome hides it)
+        public string CrumbText => Bar.CrumbText;
+        public bool SectionShown => Bar.SectionShown;
+        public bool NameRepeatsSection => Bar.NameRepeatsSection;
+        // What the open page's chrome shows (the wall's default, or the block's own choice: PageChromeRule)
+        public PageChromeChoice Chrome { get; private set; } = PageChromeChoice.Both;
         // The row of chips (one per page) inside its clipped strip
         public VisualElement Chips => _chipStrip.Row;
         public VisualElement ChipStrip => _chipStrip.Viewport;
@@ -70,9 +64,6 @@ namespace TileStories
         private readonly List<VisualElement> _chipIcons = new();
         private readonly List<Label> _chipWords = new();
         private readonly NavStrip _chipStrip;
-        private readonly VisualElement _firstArrow;
-        private readonly VisualElement _secondArrow;
-        private readonly VisualElement _sectionIcon;
         // What the open page asked to run when it leaves the screen (WhenPageLeaves), run before its files are given back
         private readonly List<Action> _leaving = new();
         private ScopedMediaSource _media;
@@ -92,29 +83,7 @@ namespace TileStories
             Root.AddToClassList("ts-card");
             Root.AddToClassList("ts-theme-default");
             Root.AddToClassList("card-takeover");
-            var bar = new VisualElement();
-            bar.AddToClassList("card-takeover__bar");
-            Back = new Button(GoBack) { name = "poi-card-takeover-back" };
-            Back.AddToClassList("card-takeover__back");
-            Back.AddToClassList("card-pill");
-            Crumb = new VisualElement { name = "poi-card-takeover-crumb" };
-            Crumb.AddToClassList("card-takeover__crumb");
-            CrumbTitle = CrumbLabel("card-takeover__crumb-title");
-            _firstArrow = Arrow();
-            CrumbSection = new Button(() => SectionTapped?.Invoke()) { name = "poi-card-takeover-section" };
-            CrumbSection.AddToClassList("card-takeover__crumb-section");
-            _sectionIcon = CardIcons.Create();
-            _sectionIcon.pickingMode = PickingMode.Ignore;
-            _sectionIcon.AddToClassList("card-takeover__crumb-icon");
-            CrumbSectionWords = new Label { pickingMode = PickingMode.Ignore };
-            CrumbSectionWords.AddToClassList("card-takeover__crumb-section-words");
-            CrumbSection.Add(_sectionIcon);
-            CrumbSection.Add(CrumbSectionWords);
-            _secondArrow = Arrow();
-            CrumbName = CrumbLabel("card-takeover__crumb-name");
-            foreach (var part in new VisualElement[] { CrumbTitle, _firstArrow, CrumbSection, _secondArrow, CrumbName }) Crumb.Add(part);
-            bar.Add(Back);
-            bar.Add(Crumb);
+            Bar = new PageTopBar(GoBack, () => SectionTapped?.Invoke());
             _chipStrip = new NavStrip("poi-card-takeover-chips", "card-takeover__chips-strip", "card-takeover__chips");
             // - the chips are reused from one opening to the next: right after Open they still carry the LAST layout (the row had shrunk to
             //   nothing when they left it), so a centring asked then measures a stale row. Centre again once the row is really laid out (found
@@ -126,38 +95,21 @@ namespace TileStories
             });
             Page = new VisualElement { name = "poi-card-takeover-page" };
             Page.AddToClassList("card-takeover__page");
-            Root.Add(bar);
+            Root.Add(Bar);
             Root.Add(Page);
             Root.Add(_chipStrip.Viewport);
             layer.Add(Root);
-            ShowSection(null, null);
             Root.style.display = DisplayStyle.None;
-        }
-
-        // The step between two parts: the card's chevron glyph turned to point onward (a drawing, not a word: nothing to translate)
-        private static VisualElement Arrow()
-        {
-            var arrow = CardIcons.CreateVector(CardIcons.Shape.Chevron);
-            arrow.pickingMode = PickingMode.Ignore;
-            arrow.AddToClassList("card-takeover__crumb-arrow");
-            return arrow;
-        }
-
-        private static Label CrumbLabel(string cls)
-        {
-            var label = new Label { pickingMode = PickingMode.Ignore };
-            label.AddToClassList("card-takeover__crumb-part");
-            label.AddToClassList(cls);
-            return label;
         }
 
         // Open over the card: the breadcrumb starts with `title` and ends with `nameOfPage(page)` for the page shown; `pageCount` pages (a chip
         // each when more than one, named by its page), at `start`. No section until ShowSection names one. `iconOfPage` (optional) gives a
         // CardIcons key per page: such a chip shows that icon instead of a number, and the chip of the page being read adds the page's name
         // beside it (a block's siblings: its kind's icon says what each one is); null or a null key keeps the page number. `returnTo` (optional):
-        // what Back opens again once this view closes (the block's page it was opened over)
+        // what Back opens again once this view closes (the block's page it was opened over). `chrome` (optional): what the Page Chrome shows
+        // until a page of a block says otherwise (ApplyChrome); null = both parts
         public void Open(string title, Func<int, string> nameOfPage, int pageCount, int start, IMediaSource cardMedia, TakeoverPageDrawer draw,
-            CardStrings strings, Func<int, string> iconOfPage = null, Action returnTo = null)
+            CardStrings strings, Func<int, string> iconOfPage = null, Action returnTo = null, PageChromeChoice? chrome = null)
         {
             Close();
             if (pageCount <= 0 || draw == null) return;
@@ -166,9 +118,9 @@ namespace TileStories
             _draw = draw;
             _nameOfPage = nameOfPage;
             PageCount = pageCount;
-            CrumbTitle.text = title ?? "";
-            ShowSection(null, null);
-            Back.text = strings?.Get(CardStrings.Keys.TakeoverBack) ?? "";
+            Bar.SetTrail(title, null, "");
+            ApplyChrome(chrome ?? PageChromeChoice.Both);
+            Bar.SetBackName(strings?.Get(CardStrings.Keys.PageBack) ?? "");
             for (int i = 0; i < pageCount; i++)
             {
                 if (i >= _chips.Count)
@@ -206,28 +158,18 @@ namespace TileStories
             ShowPage(start);
         }
 
-        // The breadcrumb's middle segment: the section the page belongs to in the card's map (its words and family icon), or none (null words)
-        public void ShowSection(string words, string iconKey)
+        // The breadcrumb's middle segment: the section the page belongs to in the card's map (its words), or none (null words)
+        public void ShowSection(string words) => Bar.SetTrail(CrumbTitle.text, words, CrumbName.text);
+
+        // What the Page Chrome shows now: the breadcrumb beside the Back arrow (the foot's Previous / Next row is BlockFullView's)
+        public void ApplyChrome(PageChromeChoice chrome)
         {
-            bool shown = !string.IsNullOrEmpty(words);
-            CrumbSectionWords.text = shown ? words : "";
-            CrumbSection.tooltip = CrumbSectionWords.text;
-            CardIcons.SetKey(_sectionIcon, iconKey);
-            _sectionIcon.style.display = shown && iconKey != null ? DisplayStyle.Flex : DisplayStyle.None;
-            CrumbSection.style.display = shown ? DisplayStyle.Flex : DisplayStyle.None;
-            ShowArrows();
+            Chrome = chrome;
+            Bar.ShowBreadcrumb(chrome.Breadcrumb);
         }
 
-        // An arrow only between two parts that are there
-        private void ShowArrows()
-        {
-            bool title = CrumbTitle.text.Length > 0, section = SectionShown, name = CrumbName.text.Length > 0 && !NameRepeatsSection;
-            CrumbName.style.display = name ? DisplayStyle.Flex : DisplayStyle.None;
-            _firstArrow.style.display = title && (section || name) ? DisplayStyle.Flex : DisplayStyle.None;
-            _secondArrow.style.display = section && name ? DisplayStyle.Flex : DisplayStyle.None;
-        }
-
-        private string NameOf(int page) => _nameOfPage?.Invoke(page) ?? "";
+        // The name of page `page` (what its chip, the breadcrumb and a foot card say)
+        public string NameOf(int page) => _nameOfPage?.Invoke(page) ?? "";
 
         // Show page `page` (clamped): the previous page's files go back first; the breadcrumb names it and its chip is marked and brought into view
         public void ShowPage(int page)
@@ -237,8 +179,7 @@ namespace TileStories
             LeavePage();
             _media.ReleaseAll();
             Page.Clear();
-            CrumbName.text = NameOf(PageIndex);
-            ShowArrows();
+            Bar.SetName(NameOf(PageIndex));
             _draw(this, Page, _media, PageIndex);
             for (int i = 0; i < PageCount; i++)
             {

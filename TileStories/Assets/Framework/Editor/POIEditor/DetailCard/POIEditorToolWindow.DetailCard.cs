@@ -47,6 +47,7 @@ namespace TileStories.Editor
             _showCardContainer = DrawFramedFoldout(ref _showCardContainer, DrawCardContainerSection, "Card Container", CardContainerSectionColor);
             _showCardNavigation = DrawFramedFoldout(ref _showCardNavigation, DrawCardNavigationSection, "Navigation", CardNavigationSectionColor);
             _showCardBlockLibrary = DrawFramedFoldout(ref _showCardBlockLibrary, DrawBlockLibrarySection, "Block Library", BlockLibrarySectionColor);
+            _showCardComponents = DrawFramedFoldout(ref _showCardComponents, DrawCardComponentsSection, "Card Components", CardComponentsSectionColor);
             _showCardTexts = DrawFramedFoldout(ref _showCardTexts, DrawCardTextsSection, "Card Texts", CardTextsSectionColor);
             _showCardGlossary = DrawFramedFoldout(ref _showCardGlossary, DrawCardGlossarySection, "Glossary", CardGlossarySectionColor);
             _showCardDefaultMedia = DrawFramedFoldout(ref _showCardDefaultMedia, DrawCardDefaultMediaSection, "Default Media", CardDefaultMediaSectionColor);

@@ -13,58 +13,49 @@
 So start by reading them all. 
 
 
-## `And now: _3.3 POI Card Look, Feel & Motion -- S2b the media components and every row's motion`
+
+## `And now: _3.3 POI Card Look, Feel & Motion -- S2c the Page Chrome and edge-to-edge block pages`
 
 GATE: `git push` if the branch is ahead of origin (report how many commits). Take one Unity capture (Game view AND the POI
 Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. Check the two
-SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`): `git checkout --` them if modified. Baseline: none (HEAD 0ed5b7c; S2a
-closed with its targeted set 1120/0 failed; its full runs each had one non-reproduced red, logged as watched flakes in
-`__mixed_TODOs.md`). Ask about Unity's place with `40-testing.md` 4.2.3's a / b / c actions, word for word; WAIT for runs as 4.2.5
-says. Never disable a tool's safety check (`50-terminal_and_tools.md` 5.2).
+SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`): `git checkout --` them if modified. Baseline: none (HEAD 8ccec31; S2b
+closed with full PlayMode 1404 and full EditMode 2212, background, 0 failed). Ask about Unity's place with `40-testing.md` 4.2.3's
+a / b / c actions, word for word; WAIT for runs as 4.2.5 says. Never disable a tool's safety check (`50-terminal_and_tools.md` 5.2).
 
-Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- R16 row 5b (this block + its review fix), R14.2 (media elements
-and their style options: width inset / full-bleed, frame rectangle / arch), R17.3 (one motion value per row: Auto / None / Reveal /
-Slide in / Parallax / Slow zoom / Pan + strength; Auto = the theme's default per element; Reduce Motion = the rule: movement off,
-pictures still, glass and rim frozen), R17.4 (tap per element: picture -> the viewer, video -> play in place / the player), R6 (motion
-rules: transform / opacity only, one moving thing in view, durations from the scale), R10.5 (gesture rule: horizontal belongs to the
-block), R11 v4 (pictures move inside their frames), the P4.4b review row (carousels App Store style: the first item aligned with the
-text inset, the strip full width so items bleed when scrolled), the "Resting-end review" row (the content glides with the returning
-bar), the S1 + S2a Build log entries.
-The visual target: `proj_guides/_3.3.1_Prototype/Story.dc.html` and `Main.dc.html` (v4): the media markup, `.kb`, `par.*`, the `.el`
-reveal, the carousel strip.
-REQUIRED READING: `_3.1_POI_Card_Blocks.md` (the media scope and owners: video one at a time, the takeover; `CardImage`),
-`.clinerules/40-testing.md` 4.2, 4.2.4b, 4.4, 4.5.
-WORKER MODEL: Opus-class -- media owners, motion on the stack, gestures, frame sequences.
-TEST PLAN: no baseline. Phase A gallery + targeted Card / Poi / Theme / Section fixtures first, then the FULL PlayMode run (row motion
-touches the stack's elements), then full EditMode. Background runs (action c).
+Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- R16 row 5c (this block) and the "S2b review" row above it
+(decisions 1 and 5), R17.5 (shared chrome components: wall default in Detail Card > Card Components, per-block override; Page Chrome's
+row), R15.2 (Components are any-panel), the S2a + S2b Build log entries.
+The visual target: `proj_guides/_3.3.1_Prototype/Main.dc.html` (v4) -- the page overlay's top bar (a Back chevron in a 44 pt round
+target + "Ribeira Palace › About › The story" on ONE line, the last part bold) and the page's foot (a Previous / Next row of two
+cards). Today's look to replace: `TileStories/TestEvidence/Card/Story/painting_page_top_en_light.png` ("Back" as text, a two-line
+breadcrumb).
+REQUIRED READING: `_3.2_POI_Card_Navigation.md` -- the full view's breadcrumb and sibling swipe (keep both behaviours), `_3.1` the full
+view (`BlockFullView`, `TakeoverView`, `CardFullViewOpener`); `_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section 0 (a Card
+Components row is added); `.clinerules/40-testing.md` 4.2, 4.2.4b, 4.5.
+WORKER MODEL: Sonnet-class -- one shared component on an existing, tested full view; a clear target; Editor rows by the pattern.
+TEST PLAN: no baseline. Targeted full-view / Card / Poi / Story fixtures first, then the FULL PlayMode run (the full view is shared by
+every block page), then full EditMode. Background runs (action c).
 
-PART 1 -- review fix: a composed block's preview shows no slot heading above its own title (`TestEvidence/Card/Story/
-magazine_preview_dark.png`: "About the Story" over "Two hundred and fifty years by the river").
-PART 2 -- media components (`Runtime/UI/Components/`, host-agnostic, the R15.2 guard): picture (caption + credit; inset / full-bleed;
-rectangle / arch frame; `aspect-ratio`), picture pair, carousel (App Store style; swipe = the block's gesture), video (poster + play +
-duration; a tap plays through the EXISTING video owner and its takeover -- never a second player). Media read through the element's
-media list (`ElementRow.Media`) and the card's media scope (released when unbound). The "not built yet" plate goes away.
-PART 3 -- motion on every row (one value per row, R17.3): Reveal (fade + rise as the row enters, rows following one by one), Slide in,
-Parallax (a picture inside its clipped frame, ~0.1x of the distance to the viewport centre, strength subtle / strong), Slow zoom and Pan
-(pictures only, slow, stop off-screen); Auto = the theme's default per element. Only transform / opacity; one moving thing per view;
-Reduce Motion = all still (the rule, no per-row switch). The block's entry (rise + fade) and the content gliding with the returning
-bottom bar (the resting-end jump). Pure rules for the maths (parallax offset, reveal threshold, stagger) with EditMode tests.
-PART 4 -- the test wall: The Painting's story gets its media rows from the real content (the hero picture full-bleed with parallax, the
-palace front inset with caption, the opera ruins full-bleed, the picture pair before / today, the carousel, the video poster), as in
-the prototype's magazine.
-TESTS: Phase A: every media element x its styles x light / dark (fit, nothing clipped at 390, captions >= 7:1); frame sequences (every
-0.1 s over 1 s) of a reveal, a parallax scroll, a slow zoom; reduce motion = identical frames. Phase B on The Painting's real card: the
-preview with its picture, the page with all rows, a real swipe on the carousel (horizontal = the block, vertical = the card), a real
-tap on the video poster opens the existing takeover and Back returns; EN + PT; light + dark. Cost: batches and UI ms with the page's
-motion running (the Build log), the device check still owed.
-VISUALS: the story's page and preview side by side with the prototype's, light + dark; the frame sequences. Open each and judge it as
-design.
-
-DOCS as current truth: `_3.1`, `_3.3` Build log, `10-structure.md` (only your lines).
-OUT OF SCOPE: the Page Chrome (S2c), the Editor (S3), 3D / 360 elements (later sets), the visitor's reduce-motion switch.
-Stop when the story's page reads as the prototype's magazine WITH its media and motion on the real card in both modes, the targeted
+PART 1 -- the Page Chrome component (`Runtime/UI/Components/`, host-agnostic): top bar = Back chevron (44 pt round target, accessible
+name "Back to the card" / PT) + ONE-line breadcrumb (POI › family › block; the last part bold; when it does not fit, the MIDDLE part
+is ellipsised first, then the POI's); foot = Previous / Next as two cards (label "Previous" / "Next" + the sibling's title), the
+existing sibling swipe unchanged. Every block page (story, gallery, timeline, quiz, sources...) uses it; today's text "Back" and the
+two-line breadcrumb go.
+PART 2 -- configuration: Detail Card > **Card Components** (new section, `_5.1` rules): one row "Page Chrome" with the wall's default
+(breadcrumb on / off, Previous / Next on / off) + (i); the block's override through `BlockSurfaces` component overrides (R17.5, the
+`_2.0` label-style pattern: off = the wall's, values kept). Undo / live sync / real-input Editor test.
+PART 3 -- edge to edge: on a block page a full-bleed element (picture, video, carousel strip) reaches the PHONE's edges; the 16 pt
+gutter stays for text. The Painting's story video row: tap = Play In Place (S2b review 5).
+TESTS: Phase A: the chrome on a long and a short title, EN + PT, light + dark (one line, nothing clipped at 390, contrast); Phase B on
+The Painting: open the story page, a real tap on Back returns to the card at the same scroll; Previous / Next by real taps; a
+full-bleed picture's left / right pixels at the phone's edges.
+VISUALS: the story page top and foot, before / after, light + dark, EN + PT; one other block's page (the gallery). Open and judge.
+DOCS as current truth: `_3.3` Build log, `_5.1` (the Card Components section), `10-structure.md` (only your lines).
+OUT OF SCOPE: the element table and templates (S3); other shared components (they come with the kind that uses them).
+Stop when every block page wears the new chrome, full bleed reaches the phone's edges, the Card Components row works, the targeted
 fixtures, the full PlayMode run and full EditMode are green. Finish with the final report of `.clinerules/60-finishing.md` 6.4 and END
 with the developer's review questions. Do not commit: the Architect commits after the review.
+
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

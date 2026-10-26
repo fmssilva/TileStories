@@ -1373,6 +1373,41 @@ namespace TileStories.Editor.Tests
             Assert.IsFalse(_window.Config.card_settings.container.reduce_motion, "Ctrl+Z");
         }
 
+        // Detail Card > Card Components > Page Chrome (_3.3 S2c): both parts are drawn ON in the shipped wall (the file written before them reads
+        // the schema defaults) and drawing writes nothing; a real click on each turns it off and the rule the card reads follows; each click is
+        // one history step, Ctrl+Z / Ctrl+Y walk them
+        [UnityTest]
+        public IEnumerator ThePageChromeRows_AreDrawnOn_RealClicksTurnEachOff_TheCardsRuleFollows_AndCtrlZ()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardComponents");
+            OpenTab("DetailCard");
+            yield return _window.WaitForRepaint();
+            _window.RectOf("Breadcrumb");
+            _window.RectOf("Previous / Next");
+            Assert.IsFalse(_window.Unsaved, "drawing the rows writes nothing");
+            var wall = _window.Config.card_settings.components;
+            Assert.IsTrue(wall.page_chrome_breadcrumb && wall.page_chrome_prev_next, "both parts are on in the shipped wall");
+            Assert.IsTrue(PageChromeRule.Wall(wall).Breadcrumb && PageChromeRule.Wall(wall).PrevNext);
+
+            _window.Click("Breadcrumb");
+            yield return _window.WaitForRepaint();
+            Assert.IsFalse(_window.Config.card_settings.components.page_chrome_breadcrumb, "a real click turned the breadcrumb off");
+            Assert.IsTrue(_window.Config.card_settings.components.page_chrome_prev_next, "and only it");
+            Assert.IsFalse(PageChromeRule.Wall(_window.Config.card_settings.components).Breadcrumb, "the rule the card reads follows");
+            _window.Click("Previous / Next");
+            yield return _window.WaitForRepaint();
+            Assert.IsFalse(_window.Config.card_settings.components.page_chrome_prev_next, "a real click turned Previous / Next off");
+            Assert.IsTrue(_window.Unsaved);
+
+            yield return _window.PressUndo();
+            Assert.IsTrue(_window.Config.card_settings.components.page_chrome_prev_next, "Ctrl+Z: Previous / Next back");
+            Assert.IsFalse(_window.Config.card_settings.components.page_chrome_breadcrumb, "one step at a time");
+            yield return _window.PressUndo();
+            Assert.IsTrue(_window.Config.card_settings.components.page_chrome_breadcrumb, "Ctrl+Z: the breadcrumb back");
+            yield return _window.PressRedo();
+            Assert.IsFalse(_window.Config.card_settings.components.page_chrome_breadcrumb, "Ctrl+Y");
+        }
+
         // ---------------- Detail Card > Navigation (_3.2 step 1) ----------------
 
         // The Navigation section's Block Order row: the shipped wall never wrote it, so it reads the default; drawing writes

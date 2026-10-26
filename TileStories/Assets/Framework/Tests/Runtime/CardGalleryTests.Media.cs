@@ -264,7 +264,9 @@ namespace TileStories.Tests
             Assert.IsTrue(takeover.IsOpen, "a real tap on a picture opens it full screen");
             Assert.AreEqual(2, takeover.PageIndex, "...at that picture");
             Assert.AreEqual("Gate > Gallery", takeover.CrumbText, "the breadcrumb: card title > the gallery");
-            Assert.AreEqual("Back", takeover.Back.text);
+            Assert.AreEqual("", takeover.Back.text, "the Back arrow draws no word");
+            Assert.AreEqual(sheet.Context.Strings.Get(CardStrings.Keys.PageBack), takeover.Back.tooltip, "its tooltip is its accessible name (the card's own words)");
+            Assert.IsNotEmpty(takeover.Back.tooltip);
             Assert.AreEqual(4, takeover.Chips.childCount, "a chip per sibling picture");
             Assert.IsTrue(takeover.Chips[2].ClassListContains("card-takeover__chip--current"));
             Assert.AreEqual(sheet.Layer.worldBound, takeover.Root.worldBound, "full screen over the card's whole layer");

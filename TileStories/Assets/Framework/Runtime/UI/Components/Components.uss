@@ -611,3 +611,180 @@
 .ts-el.ts-el--first {
     margin-top: 0;
 }
+
+/* ---------------- the Page Chrome: the page's top bar and its foot (PageTopBar, PageFootView; _3.3 R17.5, S2c) ---------------- */
+
+.ts-page-bar,
+.ts-page-foot {
+    /* The Back chevron's round target (WCAG 2.5.5: 44) and its radius, half of it; the foot's cards: least height and the gap between */
+    --ts-page-back: 44px;
+    --ts-page-back-radius: 22px;
+    --ts-page-card-min: 60px;
+    --ts-page-card-gap: 10px;
+}
+
+/* The top bar: the Back chevron, then the breadcrumb on ONE line (nowrap; PageCrumbFitRule sets each part's width, an ellipsis cuts the rest) */
+.ts-page-bar {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    padding: var(--ts-space-2) var(--ts-space-3) var(--ts-space-2) var(--ts-space-2);
+    border-bottom-width: var(--ts-line-width);
+    border-bottom-color: var(--ts-hair);
+}
+
+.ts-page-bar__back {
+    flex-shrink: 0;
+    width: var(--ts-page-back);
+    height: var(--ts-page-back);
+    margin: 0 var(--ts-space-2) 0 0;
+    padding: 0;
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    border-radius: var(--ts-page-back-radius);
+    background-color: var(--ts-surface-2);
+    align-items: center;
+    justify-content: center;
+}
+
+/* the card's chevron points down: turned to point back */
+.ts-page-bar__back-chevron {
+    width: var(--ts-icon-size);
+    height: var(--ts-icon-size);
+    color: var(--ts-ink);
+    rotate: 90deg;
+}
+
+.ts-page-bar__crumb {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.ts-page-bar__part {
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0;
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* the page's own name: the last part, bold and in full ink */
+.ts-page-bar__name {
+    color: var(--ts-ink);
+    -unity-font-style: bold;
+}
+
+/* the section: plain words that are also a whole touch target (it moves the card to that section) */
+.ts-page-bar__section {
+    flex-shrink: 0;
+    flex-direction: row;
+    align-items: center;
+    min-height: var(--ts-page-back);
+    min-width: var(--ts-page-back);
+    margin: 0;
+    padding: 0 var(--ts-space-1);
+    border-width: 0;
+    background-color: var(--ts-clear);
+    overflow: hidden;
+}
+
+.ts-page-bar__section-words {
+    color: var(--ts-ink-2);
+}
+
+/* the step between two parts: the card's chevron (pointing down) turned to point onward */
+.ts-page-bar__arrow {
+    flex-shrink: 0;
+    width: var(--ts-icon-size);
+    height: var(--ts-icon-size);
+    margin: 0 var(--ts-space-1);
+    color: var(--ts-ink-2);
+    rotate: -90deg;
+}
+
+/* The foot: two cards side by side at the end of the page */
+.ts-page-foot {
+    flex-direction: row;
+    flex-shrink: 0;
+    margin-top: var(--ts-space-6);
+}
+
+.ts-page-foot__card {
+    flex-grow: 1;
+    flex-basis: 0;
+    flex-direction: row;
+    align-items: center;
+    min-height: var(--ts-page-card-min);
+    margin: 0 var(--ts-page-card-gap) 0 0;
+    padding: var(--ts-space-3);
+    border-width: var(--ts-choice-border);
+    border-color: var(--ts-line);
+    border-radius: var(--ts-radius-m);
+    background-color: var(--ts-clear);
+    color: var(--ts-ink);
+}
+
+.ts-page-foot__card--next {
+    margin: 0;
+    justify-content: flex-end;
+}
+
+.ts-page-foot__column {
+    flex-grow: 1;
+    flex-shrink: 1;
+    margin: 0 var(--ts-space-2);
+}
+
+.ts-page-foot__column--end {
+    align-items: flex-end;
+}
+
+.ts-page-foot__label {
+    margin: 0;
+    padding: 0;
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+}
+
+.ts-page-foot__name {
+    margin: 0;
+    padding: 0;
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+}
+
+.ts-page-foot__chevron {
+    flex-shrink: 0;
+    width: var(--ts-icon-size);
+    height: var(--ts-icon-size);
+    color: var(--ts-ink);
+}
+
+.ts-page-foot__chevron--previous {
+    rotate: 90deg;
+}
+
+.ts-page-foot__chevron--next {
+    rotate: -90deg;
+}
+
+/* the foot's words sit on the side of their card: Previous's at the left, Next's at the right */
+.ts-page-foot__label,
+.ts-page-foot__name {
+    -unity-text-align: middle-left;
+}
+
+.ts-page-foot__column--end .ts-page-foot__label,
+.ts-page-foot__column--end .ts-page-foot__name {
+    -unity-text-align: middle-right;
+}

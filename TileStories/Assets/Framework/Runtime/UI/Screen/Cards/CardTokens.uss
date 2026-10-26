@@ -21,6 +21,8 @@
     /* how far a picture / carousel / strip / track reaches past the frame's side padding (--ts-space-4): minus that padding, so it
        meets the frame's inner edge (P4.4b part 2) */
     --ts-frame-bleed: -16px;
+    /* The block page's scroll reaches the phone's edges: minus the takeover page's side margin (--ts-space-4) */
+    --ts-page-bleed: -16px;
     /* The section sheets (_3.3 P4.4c1, SectionSheets): how far a sheet is laid over the one before (a negative top margin, on the 8
        grid: the prototype's ~14), and the opener's full-width line */
     --ts-section-overlap: -16px;

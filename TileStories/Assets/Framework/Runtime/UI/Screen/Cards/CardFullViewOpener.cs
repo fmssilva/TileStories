@@ -73,7 +73,8 @@ namespace TileStories
             // - never stacked: the full view replaces what was open over the card
             _sheet.Overlay.Close();
             _crumbSection = -1;
-            _sheet.Takeover.Open(title, nameOfPage, pageCount, startPage, context.Media, drawPage, context.Strings, iconOfPage, returnTo);
+            _sheet.Takeover.Open(title, nameOfPage, pageCount, startPage, context.Media, drawPage, context.Strings, iconOfPage, returnTo,
+                PageChromeRule.Wall(context.Settings?.components));
         }
 
         // What Back returns to when a block asks for the full-screen view from inside its page (_3.3 S2b: a story's picture opens its viewer, its
@@ -122,7 +123,7 @@ namespace TileStories
             var strings = _sheet.Context.Strings;
             string words = strings != null && section.LabelKey != null ? strings.Get(section.LabelKey) : "";
             _crumbSection = index;
-            _sheet.Takeover.ShowSection(string.IsNullOrEmpty(words) ? section.Key : words, section.IconKey);
+            _sheet.Takeover.ShowSection(string.IsNullOrEmpty(words) ? section.Key : words);
         }
 
         // The visitor tapped the breadcrumb's section: the card's ONE jump to that section (the full view closes on Jumped; in bento the jump

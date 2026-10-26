@@ -842,11 +842,15 @@
    so a video or a 3D / 360 stage (their --full classes) fills it and a long text reads to its end */
 .card-full-view {
     flex-grow: 1;
+    margin-left: var(--ts-page-bleed);
+    margin-right: var(--ts-page-bleed);
 }
 
-/* its content is at least the viewport's height (set from the measured viewport, BlockFullView) */
-.card-full-view > .unity-scroll-view__content-viewport > .unity-scroll-view__content-container {
-    flex-grow: 1;
+/* the scroll reaches the phone's edges (the page's own gutter taken back above), and the text keeps the gutter here -- a full-bleed
+   element takes it back again. (The content is at least the viewport's height through BlockFullView's measured min-height, not here.) */
+.card-full-view > .unity-scroll-view__content-and-vertical-scroll-container > .unity-scroll-view__content-viewport > .unity-scroll-view__content-container {
+    padding-left: var(--ts-space-4);
+    padding-right: var(--ts-space-4);
 }
 
 .card-full-view__block {

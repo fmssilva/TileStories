@@ -20,6 +20,9 @@ namespace TileStories
         public const string OverrideKey = "override";
         public const string WordsKey = "words";
         public const string EmphasisKey = "emphasis";
+        // ... and the Page Chrome's own values: whether the breadcrumb and the Previous / Next row are shown (ElementOptions.ChromeParts)
+        public const string BreadcrumbKey = "breadcrumb";
+        public const string PrevNextKey = "prev_next";
 
         // The highest row number this block ever handed out (TakeRowId): not a field -- nothing to edit -- the id rule's memory
         public const string LastRowIdValue = "element_last_id";
@@ -71,6 +74,20 @@ namespace TileStories
                     Options = ElementOptions.OpenRowEmphases, OptionLabels = ElementOptions.OpenRowEmphasisLabels, ChoiceDefault = ElementOptions.EmphasisPlain,
                     ShownWhen = FieldShownWhen.Choice(ComponentKey, ElementOptions.ComponentOpenRow),
                     Help = "Plain, Nudge (the chevron moves) or Shine (a light crosses the words). Reduce Motion always shows Plain.",
+                },
+                new BlockFieldDefinition
+                {
+                    Key = BreadcrumbKey, Type = BlockFieldType.Choice, Label = "Breadcrumb",
+                    Options = ElementOptions.ChromeParts, OptionLabels = ElementOptions.ChromePartLabels, ChoiceDefault = ElementOptions.ChromeShown,
+                    ShownWhen = FieldShownWhen.Choice(ComponentKey, ElementOptions.ComponentPageChrome),
+                    Help = "The page's one-line trail beside the Back arrow (point, section, block). Hidden: the page shows the Back arrow alone.",
+                },
+                new BlockFieldDefinition
+                {
+                    Key = PrevNextKey, Type = BlockFieldType.Choice, Label = "Previous / Next",
+                    Options = ElementOptions.ChromeParts, OptionLabels = ElementOptions.ChromePartLabels, ChoiceDefault = ElementOptions.ChromeShown,
+                    ShownWhen = FieldShownWhen.Choice(ComponentKey, ElementOptions.ComponentPageChrome),
+                    Help = "The two cards at the foot of the page that turn to the neighbouring block. Hidden: swiping and the chips still turn it.",
                 },
             },
         };
@@ -191,5 +208,11 @@ namespace TileStories
         // The Open Row's emphasis, plain when unset or unknown
         public string Emphasis => ElementOptions.OneOf(Row == null ? null : new BlockFieldReader(null, null, null).ItemValue(Row, BlockSurfaces.EmphasisKey),
             ElementOptions.OpenRowEmphases);
+        // The Page Chrome's breadcrumb / Previous / Next row, shown unless the row says hidden (a row with none stored reads shown)
+        public bool BreadcrumbShown => PartShown(BlockSurfaces.BreadcrumbKey);
+        public bool PrevNextShown => PartShown(BlockSurfaces.PrevNextKey);
+
+        private bool PartShown(string key) => ElementOptions.OneOf(Row == null ? null : new BlockFieldReader(null, null, null).ItemValue(Row, key),
+            ElementOptions.ChromeParts) == ElementOptions.ChromeShown;
     }
 }

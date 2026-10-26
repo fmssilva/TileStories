@@ -59,8 +59,10 @@ namespace TileStories
             public const string GalleryName = "gallery_name";
             // "{0} pictures" under a stacked gallery ({0} = how many)
             public const string GalleryCount = "gallery_count";
-            // The full-screen view's way back to the card
-            public const string TakeoverBack = "takeover_back";
+            // The full-screen view's Back arrow (its tooltip and accessible name: the arrow draws no word), and the Page Chrome's two foot cards
+            public const string PageBack = "page_back";
+            public const string PagePrevious = "page_previous";
+            public const string PageNext = "page_next";
             // The hint under a zoom_image picture
             public const string ZoomHint = "zoom_hint";
             // The hint under a hotspot_image picture (tap a spot)
@@ -299,7 +301,7 @@ namespace TileStories
             {
                 Close, FunFactLabel, FunFactHint, StatusHeading, StatusUnknownMark, StatusUnknown, StatusPercent,
                 SourcesHeading, SourcesVerified, SourcesDraft, TimelineNow, StoryChapterOf, StoryPrevious, StoryNext, CompareHeading,
-                MediaUnavailable, HeaderThen, HeaderNow, BeforeLabel, AfterLabel, GalleryName, GalleryCount, TakeoverBack, ZoomHint,
+                MediaUnavailable, HeaderThen, HeaderNow, BeforeLabel, AfterLabel, GalleryName, GalleryCount, PageBack, PagePrevious, PageNext, ZoomHint,
                 HotspotHint, WallLocatorHeading, WallLocatorYou,
                 TodayMapHeading, TodayMapDirections, TodayMapThen, TodayMapNow, TodayMapCoordinates, RelatedHeading,
                 KnowledgeCheckHeading, KnowledgeQuestionOf, KnowledgeCorrect, KnowledgeWrong, KnowledgeTrue, KnowledgeFalse, KnowledgeSwipeHint,

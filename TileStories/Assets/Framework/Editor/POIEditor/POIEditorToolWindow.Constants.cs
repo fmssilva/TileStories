@@ -242,6 +242,7 @@ namespace TileStories.Editor
         // Detail Card > Navigation (_3.2): between Card Container's amber and the Block Library's deeper orange
         private static readonly Color CardNavigationSectionColor = new Color(0.88f, 0.55f, 0.18f);
         private static readonly Color BlockLibrarySectionColor = new Color(0.80f, 0.45f, 0.15f);
+        private static readonly Color CardComponentsSectionColor = new Color(0.75f, 0.50f, 0.18f);
         private static readonly Color CardTextsSectionColor = new Color(0.70f, 0.55f, 0.20f);
         private static readonly Color CardGlossarySectionColor = new Color(0.60f, 0.50f, 0.25f);
         private static readonly Color CardDefaultMediaSectionColor = new Color(0.50f, 0.45f, 0.30f);

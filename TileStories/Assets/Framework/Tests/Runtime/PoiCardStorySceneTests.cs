@@ -17,8 +17,7 @@ namespace TileStories.Tests
     //   - a real tap opens its PAGE in the full view: every row in order, drawn, every picture loaded, every caption in the card's language,
     //     the breadcrumb naming the story; Previous / Next by real taps on the sibling chips; Back returns to the card at its stop and scroll
     //   - the carousel: a real sideways finger moves its strip (an item rests on the margin) and not the page; an up / down one scrolls the page
-    //   - the video: a real tap on its poster opens the card's existing full-screen player over the ONE video owner's playback; Back returns
-    //     to the page, the video paused
+    //   - the video: its tap (play in place) is PoiCardPageChromeSceneTests'; the player look is CardStoryMediaGalleryTests'
     //   - light and dark, English and Portuguese renders (TestEvidence/Card/Story/painting_*), for the eye beside the prototype
     //   - the gated cost of the page's motion (TestEvidence/Story/MEASURING): batches and UI Toolkit's CPU with the rows moving vs still
     public class PoiCardStorySceneTests : SearchSceneFixture
@@ -281,46 +280,6 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.4f);
             Assert.Greater(PageScroll.scrollOffset.y, page0 + 40f, "a real up / down finger on the carousel scrolled the page");
             Assert.AreEqual(strip0, strip.Offset, 0.5f, "...and left the strip");
-        }
-
-        // The video: a real tap on its poster opens the card's existing full-screen player over the ONE video owner's playback; Back returns to
-        // the page and the video pauses -- in English and Portuguese (the breadcrumb names the video in the card's language)
-        [UnityTest]
-        public IEnumerator ARealTapOnTheVideoPoster_OpensTheExistingPlayer_AndBackReturnsToThePage([Values("en", "pt")] string language)
-        {
-            yield return Open(language, CardOptions.ModeLight);
-            ComposedBlockView preview = null, page = null;
-            yield return Preview(v => preview = v);
-            yield return OpenPage(preview, v => page = v);
-            var blockKey = Sheet.FullView.BlockKey;
-            var video = page.Shown.Select(s => s.Component).OfType<VideoElement>().Single();
-            Assert.AreEqual(ElementOptions.TapOpenPlayer, video.Tap, "the shipped row opens the player");
-            var track = video.Track;
-            var owner = Sheet.Context.Video;
-            Assert.IsNotNull(owner, "precondition: the card has its video owner");
-            PageScroll.ScrollTo(video.Teaser);
-            yield return CardTestInput.Settle(0.2f);
-            float offset = PageScroll.scrollOffset.y;
-            Assert.IsTrue(PageScroll.contentViewport.worldBound.Contains(video.Teaser.worldBound.center), "precondition: the poster is in view");
-            yield return CardTestInput.Tap(video.Teaser.panel, video.Teaser.worldBound.center);
-            yield return CardTestInput.Settle(0.3f);
-
-            var takeover = Sheet.Takeover;
-            Assert.IsTrue(takeover.IsOpen && !Sheet.FullView.IsOpen, "the player opened in the full-screen view (the page made way)");
-            Assert.IsNotNull(takeover.Page.Q(className: "card-video--full"), "the video block's own full-screen player");
-            Assert.IsTrue(owner.IsCurrent(track), "the card's ONE video owner holds the story's clip");
-            Assert.AreEqual(CardVideoState.Playing, owner.State, "...and plays it");
-            StringAssert.Contains(track.Title, takeover.CrumbText, "the breadcrumb names the video in " + language);
-            yield return Grab("painting_video_player_" + language);
-
-            yield return CardTestInput.Tap(takeover.Back.panel, takeover.Back.worldBound.center);
-            yield return CardTestInput.Settle(0.4f);
-            Assert.IsTrue(Sheet.FullView.IsOpen && Sheet.FullView.BlockKey == blockKey, "Back returned to the story's page");
-            Assert.AreEqual(offset, PageScroll.scrollOffset.y, 1f, "...at the poster the visitor left");
-            Assert.IsTrue(owner.IsCurrent(track) && owner.State == CardVideoState.Paused, "the video paused");
-            yield return CardTestInput.Tap(takeover.Back.panel, takeover.Back.worldBound.center);
-            yield return CardTestInput.Settle(0.3f);
-            Assert.IsFalse(takeover.IsOpen, "a second Back: the card");
         }
 
         // ---------------- the gated cost of the page's motion ----------------

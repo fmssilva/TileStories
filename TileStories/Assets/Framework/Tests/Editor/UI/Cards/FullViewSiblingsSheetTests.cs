@@ -61,7 +61,7 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(sheet.Stack.HeaderView.TitleText + " > " + mediaWords + " > " + sheet.Nav.RowOf("block_58").Words, takeover.CrumbText,
                 "the breadcrumb: the card, the section, the block");
             Assert.IsTrue(takeover.SectionShown);
-            Assert.AreEqual(section.IconKey, CardIcons.KeyOf(takeover.CrumbSection.Children().First()), "the section's family icon");
+            Assert.AreEqual(mediaWords, takeover.CrumbSection.tooltip, "the section is words only in the one-line breadcrumb (its tooltip names it)");
             Assert.AreEqual(DisplayStyle.Flex, takeover.ChipStrip.style.display.value, "chips drawn");
             Assert.AreEqual(siblings.Count, takeover.Chips.childCount, "a chip per sibling");
             for (int i = 0; i < siblings.Count; i++)
@@ -77,7 +77,9 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(next, sheet.FullView.BlockKey, "the next sibling");
             // - block_58 and block_59 are both 3D models: the pool hands the SAME view back, unbound and bound again (never instantiated anew)
             Assert.AreEqual(first.GetType(), sheet.FullView.View.GetType(), "precondition: two blocks of one kind");
-            Assert.AreEqual(1, sheet.FullView.Scroll.contentContainer.childCount, "ONE view on the page: the previous binding left it");
+            Assert.AreEqual(1, sheet.FullView.Scroll.contentContainer.Children().Count(c => c.ClassListContains(BlockFullView.BlockClass)),
+                "ONE view on the page: the previous binding left it");
+            Assert.AreEqual(1, sheet.FullView.Scroll.contentContainer.Children().Count(c => c == sheet.FullView.Foot), "and ONE Page Chrome foot at its end");
             Assert.AreNotSame(sheet.Stack.ViewOfBlock(next), sheet.FullView.View, "a second view, never the card's own");
             StringAssert.EndsWith(" > " + mediaWords + " > " + sheet.Nav.RowOf(next).Words, takeover.CrumbText, "the breadcrumb follows");
             Assert.IsTrue(takeover.Chips[at + 1].ClassListContains(TakeoverView.CurrentChipClass), "and the chip");

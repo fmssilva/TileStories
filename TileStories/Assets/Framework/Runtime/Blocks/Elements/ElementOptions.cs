@@ -47,8 +47,15 @@ namespace TileStories
 
         // The shared chrome components a block may override (BlockSurfaces.ComponentOverridesField, R17.5); the Open Row first
         public const string ComponentOpenRow = "open_row";
-        public static readonly string[] Components = { ComponentOpenRow };
-        public static readonly string[] ComponentLabels = { "Open Row" };
+        public const string ComponentPageChrome = "page_chrome";
+        public static readonly string[] Components = { ComponentOpenRow, ComponentPageChrome };
+        public static readonly string[] ComponentLabels = { "Open Row", "Page Chrome" };
+
+        // A part of the Page Chrome a block shows or hides (the breadcrumb, the Previous / Next row): shown is the default
+        public const string ChromeShown = "shown";
+        public const string ChromeHidden = "hidden";
+        public static readonly string[] ChromeParts = { ChromeShown, ChromeHidden };
+        public static readonly string[] ChromePartLabels = { "Shown", "Hidden" };
 
         // The Open Row's emphasis (R14.8): plain, the chevron nudges, a light sweeps across the words. Reduce Motion: plain
         public const string EmphasisPlain = "plain";

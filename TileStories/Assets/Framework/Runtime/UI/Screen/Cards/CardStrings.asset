@@ -181,13 +181,27 @@ MonoBehaviour:
       value: '{0} pictures'
     - lang: pt
       value: '{0} imagens'
-  - key: takeover_back
-    where: The button of the full-screen view that goes back to the card.
+  - key: page_back
+    where: The Back arrow of the full-screen view (its tooltip and accessible name; the arrow shows no word).
     text:
     - lang: en
-      value: Back
+      value: Back to the card
     - lang: pt
-      value: Voltar
+      value: Voltar ao cartão
+  - key: page_previous
+    where: The small label of the Previous card at the foot of a block page (above the neighbouring block's name).
+    text:
+    - lang: en
+      value: Previous
+    - lang: pt
+      value: Anterior
+  - key: page_next
+    where: The small label of the Next card at the foot of a block page (above the neighbouring block's name).
+    text:
+    - lang: en
+      value: Next
+    - lang: pt
+      value: Seguinte
   - key: zoom_hint
     where: The hint under a Zoom Image picture.
     text:

@@ -1,41 +1,30 @@
-# Plan tracker -- _3.3 S2b: the media components and every row's motion
+# Plan tracker -- _3.3 S2c: the Page Chrome and edge-to-edge block pages
 
-Brief: R16 row 5b. Baseline: none (HEAD 0ed5b7c; S2a targeted 1120 / 0 failed; its full runs' two reds are watched flakes).
+Brief: `_3.3` R16 row 5c, S2b review decisions 1 + 5, R17.5. Base: HEAD 8ccec31 (S2b closed: full PlayMode 1404, full EditMode 2212).
+Worker re-reads this file after a compaction. Tick `[x]` as steps close.
 
 ## GATE
-- [x] push: 0 ahead, nothing to push
-- [x] captures: TestEvidence/Gate/gate_game_view-2.png (Game view, LivingRoom scan + The Painting) + gate_poi_editor.png (window only; closed, 0 left)
-- [x] compile: last Tundra ExitCode 0 (the 36 old error CS lines are an earlier session's, before it)
-- [x] SDF fonts unmodified
+- [x] 0 commits ahead of origin (nothing to push)
+- [x] Game view + POI Editor captures taken and opened (TestEvidence/Card/PageChrome/gate_game.png, gate_editor.png)
+- [x] Tree compiles (Editor.log: last compile ExitCode 0, no error CS after it)
+- [x] Oswald Bold SDF / Roboto-Bold SDF unmodified (git status clean for them)
+- [ ] Unity place for runs: 4.2.3 action c, asked before each background run
 
 ## Decisions (autonomous)
-- media components + the motion driver in Components/ (any panel); maths in pure ElementMotionRule / ElementMediaRule
-- ONE clock-driven C# driver per composed view (ElementMotion): transform / opacity only; scroll found by GetFirstAncestorOfType<ScrollView>
-- Reduce Motion = every effect still (reveal included: "identical frames"); ReducedOf drops CrossFade
-- element taps only on the Page surface; on the preview the whole block opens the page; carousel swipes on both
-- PictureViewer (shared lightbox page) used by the gallery and the picture elements; TakeoverPageDrawer takes ITakeoverPage -> gallery's R15.2 allow-list line removed
-- TakeoverView.GoBack: a takeover opened over a block's page returns to that page (its scroll kept) on Back; Close (jumps, card close) never returns
-- carousel = NavStrip + opt-in snap (NavStripRule.SnapOffset), first item on the 16 pt text inset, strip full width
-- block entry (rise + fade) for composed blocks only (the story's preview)
-- content glides with the returning bar: CardChromeView eases the scroll offset over the bar's own transition duration (ScrollView scrolls by translate: no second translate)
-- the "not built yet" plate + BlockBindContext.DevGallery deleted
-- review fix: a composing kind's slot heading hidden on the card (words kept for navigation)
+- Components `PageTopBar` + `PageFootView` (Runtime/UI/Components/, VisualElements, host-agnostic); pure `PageChromeRule` (wall default + block override) and `PageCrumbFitRule` (which part is ellipsised first) in Runtime/Blocks/Elements/.
+- TakeoverView keeps its public surface (Back, Crumb*, CrumbText, ShowSection, SectionTapped, chips); it builds the PageTopBar. Back is a 44 pt round chevron; its tooltip = accessible name (CardStrings `page_back`, replaces `takeover_back`).
+- Foot lives at the END of the page's scroll (as the prototype), built by BlockFullView.PageFor; Previous / Next call takeover.Turn(+-1). Sibling chips + swipe stay as they are (question for the developer).
+- Config: `card_settings.components.page_chrome_breadcrumb` / `page_chrome_prev_next` (bool, default true). Block override = BlockSurfaces component `page_chrome` (Choice shown / hidden per part; composing kinds only: the only kinds that carry the Component Overrides field today).
+- Edge to edge: takeover root padding 0; the page keeps the 16 pt gutter through `.card-takeover__page`; the block-page Scroll bleeds out by `--ts-page-bleed` and its content container takes the gutter back, so a full-bleed element reaches the phone's edges while text keeps 16 pt.
+- The Painting's story video row: tap `play_in_place` (config.json + StreamingAssets copy, one token).
 
 ## Steps
-1. [x] Review fix -- BlockStackView heading class for composing kinds (+ section page); test
-2. [x] Pure rules -- ElementMotionRule (Entered, Stagger, Reveal pose, Parallax, Zoom, Pan, Mover, reduce), ElementMediaRule (frame aspect), NavStripRule.SnapOffset, CardChromeRule.GlideOffset; EditMode tests + mutants
-3. [x] Media components -- PictureElement, PicturePairElement, CarouselElement, VideoElement, PictureViewer; ITakeoverPage; GoBack + return in CardFullViewOpener; guard allow-list; plate removed; Components.uss media looks
-4. [x] Motion -- ElementMotion driver in ComposedBlockView (rows + block entry), Finish/Tick seams; CardChromeView glide
-5. [x] Phase A -- gallery media entries + CardStoryMediaGalleryTests (every media element x style x mode; frame sequences reveal / parallax / slow zoom; reduce = identical; real taps / swipes); existing story tests re-based
-6. [x] PART 4 -- The Painting's story media rows through the Editor's config path (EN + PT)
-7. [x] Phase B -- PoiCardStorySceneTests extended (preview picture, page rows, carousel swipe h/v, video tap -> takeover -> Back to the page; EN/PT; light/dark) + gated cost measurement
-8. [x] Runs -- full EditMode; targeted Card|Poi|Theme|Section; FULL PlayMode; full EditMode (all background)
-9. [x] Docs -- _3.1 5.5 / 3, _3.3 Build log + R16 row, 10-structure.md, RUN TIMES; final report; LivingRoomScene open
-
-## Notes / re-bases
-- full EditMode 2212 / 0 failed / 1 skipped (recorder) after the config write; rules 45/45; mutants: Mover + stagger cap killed, the enter line's < vs <= an equivalent mutant (float boundary): test judges +-0.5 px
-- Phase A: CardStoryMediaGalleryTests 21/21 + CardStoryGalleryTests re-based (Finish() before judging renders; plate test removed); Phase B: PoiCardStorySceneTests 13 + gated cost (skipped until MEASURING) -- story fixtures 66/66 + 1 gated skip
-- found by the captures: preview clip cut the full bleed (clip now bleeds, rows take the margin back); preview captions removed on the compact preview; badge words on their own plate (the contrast helper reads outside the label)
-- found by red tests: an unbound pooled VideoElement held the player panel (removed); TokenPx reads no component token (page padding read instead)
-- runs: targeted Card|Poi|Theme|Section 1154 (2 red: gallery heading check fixed; sticky action not reproduced, watched); FULL PlayMode 1404 / 0 failed / 49 gated; full EditMode 2212 / 0 failed; cost: motion 261.8 batches / 0.366 ms vs still 261.8 / 0.365 ms
-- review question: full bleed reaches the PAGE edge (16..374), the full view's own gutter stays (S2c Page Chrome)
+- [x] 1. Data + pure rules: CardComponentSettings fields, ElementOptions.ComponentPageChrome, BlockSurfaces fields + ComponentOverride readers, PageChromeRule, PageCrumbFitRule; EditMode tests (rule edges, round trip, old config)
+- [x] 2. Components: PageTopBar, PageFootView, USS tokens/classes, CardStrings (page_back, page_previous, page_next EN/PT)
+- [x] 3. Wire: TakeoverView on PageTopBar, BlockFullView foot + per-block chrome, CardFullViewOpener passes the wall default; edge-to-edge USS; fix tests that read the old chrome
+- [x] 4. Editor: Detail Card > Card Components section (Page Chrome row, (i), Test guide), live sync, DrawingNeverWrites, real-click Editor test, undo
+- [x] 5. Painting video tap = Play In Place (config copies) + test
+- [x] 6. PlayMode: Phase A gallery (long / short title, EN + PT, light + dark, 390 px, contrast), Phase B The Painting (real Back tap keeps scroll, real Previous / Next taps, full-bleed pixels at the phone's edges, gallery page)
+- [x] 7a. Targeted set (793) green apart from explained environment items (saved visitor mode, leaked sensor count, bento flake, reveal re-based)
+- [ ] 7b. FULL PlayMode (background, started 266098535 log offset), then reload the domain, then full EditMode
+- [ ] 8. Final captures judged (after the foot alignment + Back ring tweaks); docs done (_3.3 Build log numbers to fill, _5.1, _3.1, _3.2, 10-structure); LivingRoom scene ready; final report (60-finishing 6.4)
