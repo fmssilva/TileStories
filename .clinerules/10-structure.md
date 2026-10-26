@@ -498,11 +498,11 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - ManualArWall.cs  -- A stand-in IArWall for the gallery and tests: its own frame at the origin, IsLocalised settable (raises LocalisationChanged), an optional viewer, a
         - ManualPreviewStage.cs  -- A fake IPreviewStage that never touches the scene: loads (and fails) synchronously, counts loads/failures/alive handles; what CardPreviewServiceTests
       - Blocks/  -- the per-POI content block system, pure C#
-        - BlockFieldDefinition.cs  -- + one field's schema
+        - BlockFieldDefinition.cs  -- BlockFieldType (Elements = typed element rows, _3.1 5.5) + one field's schema
         - FieldShownWhen.cs  -- When the Editor draws a block field: Looks(variants) / Choice(field, options) / Filled(field) over the block's own values
         - FieldVisibilityRule.cs  -- Pure: the one judge of ShownWhen -- ResolvedVariant (own, else the Block Library's), Choice via BlockLibraryRule.Choice, IsShown for a block field
-        - BlockKindDefinition.cs  -- ShowsFor + NotShownForPoiNote (a kind with nothing to show for a POI; 6B: ShowsFor(poi, block, wallPois)), FooterVariants; (6C) the common fields
-        - BlockRegistry.cs  -- Register refuses a broken or duplicate kind (Validate), TryGet, CreateView; (8A) Validate also refuses a show-after-viewed field that is not one of
+        - BlockKindDefinition.cs  -- ShowsFor + NotShownForPoiNote (a kind with nothing to show for a POI; 6B: ShowsFor(poi, block, wallPois)), FooterVariants; (6C) the common fields; OwnFields, and a composing kind's Preview surface fields (BlockSurfaces) after its own
+        - BlockRegistry.cs  -- Register refuses a broken or duplicate kind (Validate: also a second / nested Elements field, a surface key; ValidateFields shared with ElementRegistry), TryGet, CreateView; (8A) Validate also refuses a show-after-viewed field that is not one of
         - BuiltInBlocks.cs  -- + the shared long-text help; the definitions and their constants live in one partial per family (6C split)
         - BuiltInBlocks.About.cs  -- header (+ Show Level; 7A: the picture looks and their fields, HeaderImageVariants, HeaderShowsPicture), status, quick_facts, rich_text, fun_fact
         - BuiltInBlocks.Stories.cs  -- timeline, person, story_chapters, compare_points (OtherPoi, default heading compare_heading)
@@ -522,7 +522,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - ActionsRule.cs  -- Pure: which buttons an actions block draws (a known action; the sticky look only the first), the CardStrings key an action with no words of its own
         - RepeatedActionRule.cs  -- Pure: the actions the SHOWN blocks of a card offer more than once (Actions buttons, the pinned sticky one, Show On Wall blocks), each with every
         - BlockRefRule.cs  -- Pure: where a BlockRef can take the visitor -- JumpTargets(entries, isRevealed) = the shown blocks of the scrolling stack
-        - BlockStackBuilder.cs  -- required field empty, a required Items field with no complete row (NoCompleteRow, 6B), a required picture MediaPathRule refuses (InvalidMedia, 7A)
+        - BlockStackBuilder.cs  -- required field empty, a required Items field or Elements Page with no complete row (NoCompleteRow), a required picture MediaPathRule refuses (InvalidMedia, 7A)
         - BlockFieldReader.cs  -- HasContent per type; ItemValue
         - SheetStopRule.cs  -- / full stop heights, Open At, where a released drag or flick snaps (or closes); CoversScreenTop (6C: only full); RevealsBlocks
         - HeroRule.cs  -- Pure: the bar and the hero -- Height (max(min, Half - Peek)), BarShowsTitle (Peek, or the hero's title scrolled away), InView / VisiblePart
@@ -551,7 +551,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - BuiltInFamilies.cs  -- The families that have kinds as constants (the ONE home for each name, read by every BlockKindDefinition.Family) + Register(registry), called by
           - NavOntologyRule.cs  -- Pure: the collapse rules of _3.2 2.5 -- IsTarget
           - NavScrollRule.cs  -- Pure: _3.2 4.4 -- Range, TargetOffset (slot top clamped to [0, range]), CurrentSection
-          - ReadingTimeRule.cs  -- Pure: Minutes(kind, instance, clipSeconds) -- a clip kind: the clip's length rounded up to whole minutes; else the Reading Time field
+          - ReadingTimeRule.cs  -- Pure: Minutes(kind, instance, clipSeconds) -- a clip kind: the clip's length rounded up to whole minutes; a composing kind: ElementRules.Minutes; else the Reading Time field
           - NavFacetRule.cs  -- Pure: BlockFacts (format, minutes, needs), NavFacets (the visitor's format / time limit / withouts), the ONE rule drawer_tree and grid_overlay read
           - NavFitRule.cs  -- Pure: CountsFit(words, counts, gap, room) -- the Segmented element's Show Counts: a count goes when it cannot sit beside its word, never the word
           - CompactRowRule.cs  -- Pure: the compact row's words for a stack entry -- heading, else the kind's default heading, else BlockSummaryRule's first words (FromFirstWords)
@@ -634,7 +634,20 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - PlacedModelChipRule.cs  -- Pure: what the placed-model chip says -- Hidden (Placed Model Control none, no card, nothing stands) / ThisCard (Remove) / OtherCard (no Remove); an
         - TimeCodeRule.cs  -- Pure: the ONE reading of a Time field ("90", "1:30", "1:02:03"; minutes / seconds after a colon below 60), never an exception
         - BlockDisplayRule.cs  -- Pure: an instance's display (inline / takeover) when its kind offers it, else the kind's first mode
-        - BlockSummaryRule.cs  -- Pure: FirstWords(block, kind, language, fallback) -- a block in one line
+        - BlockSummaryRule.cs  -- Pure: FirstWords(block, kind, language, fallback) -- a block in one line (a Page's rows through ElementRules; never a surface field)
+        - Elements/  -- composed blocks as data and pure rules (_3.3 R14, R17; _3.1 5.5): element rows under reserved keys, no new serialized member
+          - ElementOptions.cs  -- every shared option string + Editor labels: preview modes, motions, strengths, taps, ref scopes, components, Open Row emphases; OneOf
+          - ElementKindDefinition.cs  -- one element kind (key, name, icon, category, sub-fields, closed style lists, media kind + count, motion / tap choices, weight, preview role, search fields)
+          - ElementRegistry.cs  -- the BlockRegistry pattern for elements: Shared (BuiltInElements), Register refuses broken / duplicate, TryGet, Validate
+          - BuiltInElements.cs  -- the 14 v1 elements (title ... spacer) with their style options and defaults
+          - ElementRow.cs  -- ElementRow (typed view of a BlockItemData row: id, element, motion, strength, tap, validated, ref, media; Create / CreateRef / Duplicate) + ElementMedia
+          - ElementRef.cs  -- a reference {scope page | block | shared, block, row}
+          - BlockSurfaces.cs  -- the Preview surface's common fields, Page / Preview rows, mode, hand-set minutes, OverrideOf (ComponentOverride), RowsToValidate, TakeRowId (never reused)
+          - ElementRefRule.cs  -- ElementScope (holder, the POI's blocks, the shared pool) + Resolve / ContentOf: one level, Broken with its reason
+          - ElementPreviewRule.cs  -- Automatic (first picture + title + text in Page order) / Custom (own, linked, broken); UsedPageRows
+          - ElementRules.cs  -- Minutes (200 wpm + media weights, hand-set wins), FirstWords, SearchWords (not indexed), TapOf
+          - ElementMotionRule.cs  -- EffectOf (Auto = the element's own) and ReducedOf (Reduce Motion: reveal -> cross-fade, else still)
+          - ElementValidation.cs  -- problems named by surface + row (unknown element, required empty, media, broken ref, blank / repeated id); RowIsComplete
       - Circuits/  [EMPTY SCAFFOLD]  -- circuit state machine and entry-point resolution
       - Telemetry/  [EMPTY SCAFFOLD]  -- analytics events and consent
       - AI/  [EMPTY SCAFFOLD]  -- optional AI features, feature-flagged
@@ -874,6 +887,14 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - CardAudioServiceTests.cs  -- CardAudioService against a ManualAudioOutput: play / pause / seek / speed, state machine, switch-or-queue when a second POI's audio starts, fade
           - TextChecks.cs  -- PUBLIC helpers: EditorTextChecks.AssertAscii (labels / help / where-notes; proven to fail on an accent) and VisitorTextChecks.AssertValid / Problem
           - TextChecksTests.cs  -- AssertAscii / AssertValid on real and broken strings; EveryVisitorText_OfTheShippedLivingRoomCards_IsValid_InBothConfigCopies walks both config.json
+          - Elements/  -- the composed blocks' data and rules on The Painting's own shipped content
+            - PaintingStory.cs  -- fixture: The Painting's story as a composed block (a test kind with an Elements Page in a fresh BlockRegistry), its 7 Page rows from the shipped header / text / gallery + a second composed block
+            - ElementDataRoundTripTests.cs  -- both shipped configs byte-identical even after every block is read through the element accessors; an old block; the whole story value by value; ids never reused; Duplicate
+            - ElementRegistryTests.cs  -- the v1 list, born-filled rows of all 14, one refusal per Validate rule, an app's own element, BlockRegistry's Elements rules (no shipped kind carries a surface field)
+            - ElementRefRuleTests.cs  -- page / block / shared scopes, ref-to-ref broken in each, every broken reason
+            - ElementPreviewRuleTests.cs  -- Automatic in Page order through reorders, deletes, links, broken rows; Custom own / linked / broken; the mode switch
+            - ElementRulesTests.cs  -- minutes counted from the source texts, first words, search words, tap, motion + reduce; ReadingTimeRule / BlockSummaryRule / CompactRowRule / BlockStackBuilder on the story
+            - ElementValidationTests.cs  -- each problem named by surface, row, element and field; ids unique across Page and Preview; an id problem never hides content
         - MarkerHierarchyResolverTests.cs (incl. Marker Label Style resolution and StyleOf clamping), MarkerLayoutTests.cs, MarkerLayoutPxConversionTests.cs  -- size and layout math
         - ClusterGroupingTests.cs, ClusterReconcileTests.cs, ClusterPrefabTests.cs  -- cluster grouping and prefab contract
         - DisplacementComputeTests.cs, DisplacementAlgorithmTest.cs, DisplacementHysteresisTests.cs, DisplacementTieBreakStrategyTests.cs, DisplacementSettingsDefaultsTests.cs  -- displacement math and defaults

@@ -105,6 +105,7 @@ namespace TileStories
                 case BlockFieldType.Asset:
                     return !string.IsNullOrWhiteSpace(value.asset);
                 case BlockFieldType.Items:
+                case BlockFieldType.Elements:
                     return value.items != null && value.items.Count > 0;
                 default:
                     return true; // a number or a toggle always has a value

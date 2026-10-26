@@ -9,6 +9,7 @@ namespace TileStories
     //   - a kind with nothing to show for this POI    -> skipped (NotForThisPoint, BlockKindDefinition.ShowsFor)
     //   - a required field with nothing in it         -> skipped (MissingRequired)
     //   - a required Items field with no complete row -> skipped (NoCompleteRow, BlockFieldReader.ItemIsComplete)
+    //   - a required Elements Page with no complete row -> skipped (NoCompleteRow, ElementValidation.RowIsComplete)
     //   - a required Asset whose path MediaPathRule refuses (outside the media folder, wrong file type)
     //                                                 -> skipped (InvalidMedia)
     //   - a second header                             -> skipped (ExtraHeader)
@@ -100,7 +101,7 @@ namespace TileStories
                         result.Skipped.Add(new Skipped(instance, SkipReason.NotForThisPoint));
                         continue;
                     }
-                    var (emptyField, emptyReason) = FirstEmptyRequiredField(instance, definition);
+                    var (emptyField, emptyReason) = FirstEmptyRequiredField(poi, instance, definition, registry);
                     if (emptyField != null)
                     {
                         result.Skipped.Add(new Skipped(instance, emptyReason, emptyField));
@@ -222,8 +223,10 @@ namespace TileStories
             };
         }
 
-        // The first required field that leaves the block with nothing to show, and why (empty / no complete row)
-        private static (string Field, SkipReason Reason) FirstEmptyRequiredField(BlockInstanceData instance, BlockKindDefinition definition)
+        // The first required field that leaves the block with nothing to show, and why (empty / no complete row; a required Elements Page
+        // with no row the card can show -- ElementValidation.RowIsComplete, references resolved on this POI -- is NoCompleteRow too)
+        private static (string Field, SkipReason Reason) FirstEmptyRequiredField(POIData poi, BlockInstanceData instance, BlockKindDefinition definition,
+            BlockRegistry registry)
         {
             if (definition.Fields == null) return (null, default);
             foreach (var field in definition.Fields)
@@ -238,6 +241,12 @@ namespace TileStories
                     return (field.Key, SkipReason.InvalidMedia);
                 if (field.Type == BlockFieldType.Items && !value.items.Exists(item => BlockFieldReader.ItemIsComplete(item, field.ItemFields)))
                     return (field.Key, SkipReason.NoCompleteRow);
+                if (field.Type == BlockFieldType.Elements)
+                {
+                    var scope = ElementScope.Of(poi, instance, registry);
+                    if (!value.items.Exists(row => ElementValidation.RowIsComplete(row, scope, ElementRegistry.Shared)))
+                        return (field.Key, SkipReason.NoCompleteRow);
+                }
             }
             return (null, default);
         }

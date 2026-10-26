@@ -32,8 +32,9 @@ namespace TileStories
         // Used when an instance names no variant or one this kind does not have
         public string DefaultVariant;
         // Every field of the kind: the common ones it carries (CommonFieldsOf: the heading, and Reading Time unless the kind reads a
-        // clip or is never a contents row), then the kind's own. A kind sets only its own; one that declares a common key itself is
-        // refused by BlockRegistry.Validate (two fields, one key).
+        // clip or is never a contents row), then the kind's own, then -- for a kind whose own fields hold an Elements field (its Page) --
+        // the Preview surface's (BlockSurfaces.Definitions, _3.3 R17.1). A kind sets only its own; one that declares a common or a surface
+        // key itself is refused by BlockRegistry.Validate (two fields, one key).
         public IReadOnlyList<BlockFieldDefinition> Fields
         {
             // - merged on the first read, not in the setter: an object initializer may set ClipLengthField / OffersReadingTime AFTER
@@ -44,6 +45,9 @@ namespace TileStories
         }
         private IReadOnlyList<BlockFieldDefinition> _ownFields;
         private IReadOnlyList<BlockFieldDefinition> _fields;
+
+        // The fields the kind declared itself (Fields without the common and surface ones)
+        public IReadOnlyList<BlockFieldDefinition> OwnFields => _ownFields ?? System.Array.Empty<BlockFieldDefinition>();
 
         // The key of one of the kind's Asset fields holding an audio or video clip (null = none): the clip's own length is the block's
         // reading time, so the kind carries no Reading Time field (audio_guide, video). BlockRegistry.Validate checks it names such a field
@@ -114,6 +118,8 @@ namespace TileStories
         {
             var all = new List<BlockFieldDefinition>(CommonFieldsOf());
             if (own != null) all.AddRange(own);
+            // - after the own fields: the Page comes before the Preview (R17.7), and a block's first words stay its Page's
+            if (BlockSurfaces.Composes(this)) all.AddRange(BlockSurfaces.Definitions);
             return all;
         }
 

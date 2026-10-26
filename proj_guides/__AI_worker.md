@@ -14,53 +14,61 @@ So start by reading them all.
 
 
 
-
-
-## `And now: _3.3 POI Card Look, Feel & Motion -- the UI folder layout, the render-target guard, the spike out of the repo`
+## `And now: _3.3 POI Card Look, Feel & Motion -- S1 the elements core (data, registry, rules; no view)`
 
 GATE: `git push` if the branch is ahead of origin (report how many commits). Take one Unity capture (Game view AND the POI
 Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. Check the two
-SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`): `git checkout --` them if modified. Baseline: none (HEAD b505825; the
-last block closed with full PlayMode 1336 and full EditMode 2119, background, 0 failed). Ask about Unity's place with
-`40-testing.md` 4.2.3's a / b / c actions, word for word; WAIT for runs as 4.2.5 says.
+SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`): `git checkout --` them if modified. Baseline: none (HEAD ba9b2cb; the
+folder-layout block closed with full EditMode 2121 and full PlayMode 1310, 0 failed). Ask about Unity's place with `40-testing.md`
+4.2.3's a / b / c actions, word for word; WAIT for runs as 4.2.5 says. Never disable a tool's safety check (`50-terminal_and_tools.md` 5.2).
 
-Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- R15 (render targets: World-UGUI, Screen-UITK, Any-UITK, Shared;
-R15.2 the guard; R15.3), R16 row 3b (this block: move INSIDE Unity, then fix every path written as a string), the "Resting-end review"
-row (item 3: the spike leaves). `.clinerules/00-process.md` "version 0, never logs" and `60-finishing.md` 6.3 (how `10-structure.md`
-is updated).
-REQUIRED READING: `.clinerules/10-structure.md` (all), `.clinerules/40-testing.md` 4.2.
-WORKER MODEL: Sonnet-class -- mechanical moves with a clear target tree, string-path fixes, one guard test with an explicit rule.
-TEST PLAN: no baseline. After the moves: full EditMode, then the FULL PlayMode run (test infrastructure and paths are shared
-ground). Background runs (action c).
+Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- R14 (all: R14.1 elements as typed rows of a new `Elements` field
+type, R14.2 the v1 element list and style options, R14.3 preview selection / reading time / summary / search from rows, R14.4
+templates are presets copied -- S3, R14.6 what changes in `_3.1`), R14.8 (Open Row, reading time as a BLOCK field, Validated per row),
+R17 (all: R17.1 Page + Preview surfaces, Automatic / Custom, linked and own rows; R17.2 parts of fixed kinds and "More content";
+R17.3 one motion value per row + Reduce Motion as a rule; R17.4 tap per element; R17.5 shared chrome component overrides; R17.6 the
+data S1 owns; R17.7 Page first; R17.8 generic references: page | block | shared, one level, broken = warning), R16 (this is row 4, S1).
+REQUIRED READING: `proj_guides/_3.1_POI_Card_Blocks.md` -- the block data model (`BlockInstanceData`, `BlockFieldValue`, `BlockItemData`,
+the no-recursion JsonUtility rule), the registry (`BlockKindDefinition`, `BlockRegistry`, an app registering its own kind), validation,
+`BlockSummaryRule`, Reading Time, search keywords; `.clinerules/00-process.md` (Framework Completeness; "version 0, never logs"),
+`20-code-quality.md`, `40-testing.md` 4.2.
+WORKER MODEL: Opus-class -- a new data model and its rules, which every later step of the slice builds on.
+TEST PLAN: no baseline. EditMode only for the new code (pure rules + JSON round trip + validation), then the full EditMode suite. No
+full PlayMode run owed IF the shipped LivingRoom config round-trips BYTE-IDENTICAL through the new data classes (prove it) and no
+runtime view changes; then close on the targeted PlayMode fixtures that load the wall's config (LivingRoomConfigIntegrationTests +
+the PoiCardSceneTests family), named in the report. It rides on the folder block's full run; the next one falls due in 3 blocks.
 
-THE TARGET TREE (`Assets/Framework/Runtime/UI/`; namespaces do NOT change -- C# binds by type, not path):
-- `Screen/` (UI Toolkit, screen panels): `Cards/` (today's `Cards/` WITHOUT `Cards/Blocks/`), `Search/` (today's `Navigation/`: search,
-  voice, view modes -- renamed so it is never confused with the card's own navigation), `Zoom/`, `Filter/`, `Minimap/`, `Results/`,
-  and the empty scaffolds `Onboarding/`, `Scanning/`, `Sharing/`, `Gamification/`, `Circuits/`.
-- `World/` (UGUI on world canvases): `Markers/`, and the empty scaffold `GuideCharacter/`.
-- `Blocks/` (UI Toolkit, ANY panel -- screen or world): today's `Cards/Blocks/` (every family's views + USS).
-- `Components/` (UI Toolkit, ANY panel): new, empty but for a README line (S2 fills it).
-- `Theme/`, `Shared/`: stay at the UI root (shared by both systems / every panel).
+GOAL: everything the story slice needs as DATA and PURE RULES, so S2 (views) and S3 (Editor) only draw it. Nothing visible changes.
 
-PART 1 -- move with Unity's own API (`AssetDatabase.MoveAsset` / `MoveAssetToTrash` through the MCP, one folder at a time, `.meta`
-and GUIDs kept; NEVER a file-system move). Then grep the WHOLE repo (code, USS `url()`, UXML, `.asset` / `.unity` text, tests that scan
-folders, `Resources.Load` paths, the Editor's asset paths, `.clinerules/`, `proj_guides/`) for every old path and fix it. Compile clean,
-0 missing references (check the console and the scene / prefab references).
-PART 2 -- the R15.2 guard (EditMode, one test file): files under `Blocks/` and `Components/` never name a sheet / host type
-(`PoiCardSheetView`, `PoiCardHost`, `NavController`, `TakeoverView`, `BlockStackView`, `CardChromeView`, the screen PanelSettings) nor
-`Screen.width / height`; no `UnityEngine.UI` / `TMPro` in any UI Toolkit folder; no `UnityEngine.UIElements` in `World/`. Each EXISTING
-violation the scan finds goes into ONE explicit allow-list with a reason per line (they are S2's work to remove) -- do not refactor
-views here. Mutation proof (add a forbidden reference, red with the file name; remove it).
-PART 3 -- delete `Assets/Dev/StyleSpike/` (and its gate code / `MEASURING` mention in the tests and in `40-testing.md`) with Unity's API;
-`UssVariableChainTests` and anything Framework uses must not depend on it (prove: compile + the suites).
-PART 4 -- docs, as CURRENT TRUTH (no history): `10-structure.md` (the moved tree, one line per folder / file, each UI folder tagged
-World-UGUI / Screen-UITK / Any-UITK / Shared), `_3.3` R15 (the folders now exist; drop "No mass move of folders now"), every guide path
-your grep found.
+PART 1 -- data (`Runtime/Blocks/Elements/` for the element code; the config classes where they live today):
+1. `BlockFieldType.Elements`: rows stored as `BlockItemData` (the same JSON shape and Editor machinery) + per row: a stable `id`
+   (`el_N`, generated, never reused within its block -- the block-key rule), its element kind, its sub-fields, an optional media
+   list (asset + caption EN/PT + credit; a separate class, still no recursion), `motion` (Auto | None | Reveal | Slide in | Parallax
+   | Slow zoom | Pan) + `strength` (subtle | strong), `tap` where the element offers one, the developer-only `validated` flag.
+2. The block's Preview surface (R17.1): `preview_mode` (automatic | custom), `preview_rows` (an own element row OR a `ref`), the Open
+   Row override (inherit | override + words + emphasis), `reading_time` (auto | minutes).
+3. A row `ref` = `{ scope: page | block | shared, block, row }` (R17.8), even though S3 only edits `page` refs; the POI-level
+   `shared_elements` list exists as data (empty) for phase 2.
+4. Shared-component overrides on the block (R17.5): a list of `{ component, override, values }`, only Open Row used now.
+Old configs load unchanged (no field = no rows); the shipped config round-trips byte-identical.
+PART 2 -- registry and v1 element schemas: `ElementKindDefinition` (key, label, icon, category Text / Media / Structure, sub-field
+schema, style options as CLOSED lists, the motion and tap choices it offers, its reading weight, what it gives search) +
+`ElementRegistry` (the BlockRegistry pattern; an app can register its own element) + the built-in v1 set of R14.2: title, eyebrow,
+heading, lede, paragraph (drop cap option), callout (tone), pull quote, list, picture, picture pair, carousel, video, divider
+(line / azulejo), spacer -- with default values (a new row is born filled with good defaults, R14.8).
+PART 3 -- pure rules (one file each, EditMode tests with mutation proof):
+- `ElementRefRule`: resolves a ref in its scope; one level only (a ref to a ref is invalid); a missing target = Broken with the reason.
+- `ElementPreviewRule`: Automatic = the first picture-like row + the first title-like row + the first text row, in Page order; Custom =
+  the rows as listed, refs resolved; the result lists which Page rows the preview uses (the Editor's "P" marks).
+- `ElementRules`: reading time from the rows (words per minute + a weight per media element) unless the block sets minutes; the summary
+  (first words, the `BlockSummaryRule` shape); the search keywords (text rows, both languages).
+- Validation: unknown element kind, a required sub-field empty, a broken ref, a duplicated row id -> problems with the row named.
+PART 4 -- docs as current truth: `_3.1` (the new field type and data), `_3.3` Build log, `10-structure.md` (only your lines).
 
-OUT OF SCOPE: renaming namespaces or types; refactoring any view; any look or behaviour change.
-Stop when the tree matches the target, nothing references an old path, the guard is green with its allow-list, the spike is gone,
-full EditMode and the full PlayMode run are green. Finish with the final report of `.clinerules/60-finishing.md` 6.4. Do not commit:
-the Architect commits after the review.
+OUT OF SCOPE: any view or USS (S2), the `story` kind's registration (S2, with its view), the Editor (S3), templates (S3).
+Stop when the data round-trips, the rules and validation are green with mutation proof, the full EditMode suite and the named PlayMode
+fixtures are green. Finish with the final report of `.clinerules/60-finishing.md` 6.4. Do not commit: the Architect commits after the review.
+
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

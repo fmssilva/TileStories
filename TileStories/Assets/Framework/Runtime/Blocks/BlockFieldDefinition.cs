@@ -17,6 +17,7 @@ namespace TileStories
         Url,                // value: a web link the card may open (http / https: WebLinkRule), one for every language
         Time,               // value: a time in a clip, "1:30" / "90" / "1:02:03" (TimeCodeRule), one for every language
         BlockRef,           // value: the key of another block of the SAME POI's card (BlockRefRule: does the card scroll to it?)
+        Elements,           // items: TYPED rows, each naming its element kind (ElementRow over BlockItemData, ElementRegistry; _3.3 R14.1)
     }
 
     // One field of a block kind: the schema the view, the Editor drawer and the validator all read

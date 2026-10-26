@@ -137,10 +137,16 @@ namespace TileStories
             if (d.ShowAfterViewedField != null && d.Field(d.ShowAfterViewedField)?.Type != BlockFieldType.Toggle)
                 return "its show-after-viewed field '" + d.ShowAfterViewedField + "' is not one of its Toggle fields";
             // - a common key is the card's, even on a kind that does not carry that common field (a clip kind and 'minutes'): a kind's
-            //   own field under it would read as Reading Time to every other reader
-            for (int i = d.CommonFieldsOf().Count; i < d.Fields.Count; i++)
-                if (Contains(BlockKindDefinition.CommonFieldKeys, d.Fields[i].Key))
-                    return "its own field '" + d.Fields[i].Key + "' takes a key every kind shares";
+            //   own field under it would read as Reading Time to every other reader. The surface keys likewise (_3.3 R17.1)
+            int pages = 0;
+            foreach (var own in d.OwnFields)
+            {
+                if (Contains(BlockKindDefinition.CommonFieldKeys, own.Key) || Contains(BlockSurfaces.FieldKeys, own.Key))
+                    return "its own field '" + own.Key + "' takes a key every kind shares";
+                if (own.Type == BlockFieldType.Elements) pages++;
+            }
+            // - ONE Page per block: a reference names a block and a row, never a field (ElementRef)
+            if (pages > 1) return "it declares " + pages + " Elements fields, but a kind has one Page";
             if (d.ClipLengthField != null)
             {
                 var clip = d.Field(d.ClipLengthField);
@@ -150,7 +156,9 @@ namespace TileStories
             return null;
         }
 
-        private static string ValidateFields(IReadOnlyList<BlockFieldDefinition> fields, bool allowItems, IReadOnlyList<string> variants)
+        // What is wrong with a field list (a kind's, an Items field's rows, an element kind's sub-fields: ElementRegistry), or null.
+        // allowItems false = the fields of ONE row, where Items and Elements cannot nest
+        internal static string ValidateFields(IReadOnlyList<BlockFieldDefinition> fields, bool allowItems, IReadOnlyList<string> variants)
         {
             if (fields == null) return "no field list";
             var keys = new HashSet<string>();
@@ -176,6 +184,12 @@ namespace TileStories
                     if (f.ItemFields == null || f.ItemFields.Count == 0) return "Items field '" + f.Key + "' has no item fields";
                     string inner = ValidateFields(f.ItemFields, allowItems: false, variants);
                     if (inner != null) return inner;
+                }
+                if (f.Type == BlockFieldType.Elements)
+                {
+                    if (!allowItems) return "Elements field '" + f.Key + "' inside a row (rows cannot nest)";
+                    // - a row's fields come from the element kind it names (ElementRegistry), never from the field
+                    if (f.ItemFields != null) return "Elements field '" + f.Key + "' lists item fields, but each row's fields come from its element kind";
                 }
             }
             foreach (var f in fields)
