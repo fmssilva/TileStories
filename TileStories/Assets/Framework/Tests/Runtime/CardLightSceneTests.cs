@@ -370,6 +370,102 @@ namespace TileStories.Tests
             Assert.Less(Difference(a, b), 0.02f, "under Reduce Motion the rim light stands still");
         }
 
+        // Points along the MIDDLE of the lit block's metal band on its four sides (panel units), past the rounded corners
+        private static List<Vector2> BandPoints(VisualElement slot, float band)
+        {
+            var bound = slot.worldBound;
+            float line = slot.resolvedStyle.borderTopWidth, inset = line + band / 2f, corner = slot.resolvedStyle.borderTopLeftRadius + 4f;
+            var points = new List<Vector2>();
+            for (float x = bound.xMin + corner; x < bound.xMax - corner; x += 3f)
+            {
+                points.Add(new Vector2(x, bound.yMin + inset));
+                points.Add(new Vector2(x, bound.yMax - inset));
+            }
+            for (float y = bound.yMin + corner; y < bound.yMax - corner; y += 3f)
+            {
+                points.Add(new Vector2(bound.xMin + inset, y));
+                points.Add(new Vector2(bound.xMax - inset, y));
+            }
+            return points;
+        }
+
+        // The luminance (0..1, sRGB) of each point as drawn now
+        private static IEnumerator Luminances(VisualElement under, List<Vector2> points, System.Action<float[]> got)
+        {
+            yield return new WaitForEndOfFrame();
+            var tex = ScreenCapture.CaptureScreenshotAsTexture();
+            try
+            {
+                var origin = RuntimePanelUtils.ScreenToPanel(under.panel, Vector2.zero);
+                float unit = RuntimePanelUtils.ScreenToPanel(under.panel, Vector2.right).x - origin.x;
+                var values = new float[points.Count];
+                for (int i = 0; i < points.Count; i++)
+                {
+                    var screen = (points[i] - origin) / unit;
+                    var c = tex.GetPixel(Mathf.RoundToInt(screen.x), tex.height - 1 - Mathf.RoundToInt(screen.y));
+                    values[i] = 0.2126f * c.r + 0.7152f * c.g + 0.0722f * c.b;
+                }
+                got(values);
+            }
+            finally { Object.Destroy(tex); }
+        }
+
+        // _3.3 S4a: the light rides the rim's whole metal band (3 pt on light metal, the band the theme gives the mode) and is clearly visible
+        // travelling round the block being read -- measured as each band point's brightness swing over one turn of the clock (12 frames);
+        // dark metal keeps its quieter light (a narrower band, a smaller swing)
+        [UnityTest]
+        public IEnumerator TheRimLight_RidesTheWholeMetalBand_AndIsClearlyVisible_TravellingRoundTheBlock()
+        {
+            yield return OpenFull("lamp");
+            Stack.Scroll.scrollOffset = new Vector2(0f, 700f);
+            yield return CardTestInput.Settle(0.6f);
+            var report = new List<string>();
+            var swings = new Dictionary<string, (float Max, float Share)>();
+            foreach (string mode in new[] { CardOptions.ModeLight, CardOptions.ModeDark })
+            {
+                if (mode == CardOptions.ModeDark)
+                {
+                    yield return TapMode(mode);
+                    Stack.Scroll.scrollOffset = new Vector2(0f, 700f);
+                    yield return CardTestInput.Settle(0.6f);
+                }
+                var slot = Stack.RimLight.LitSlot;
+                Assert.IsNotNull(slot, "precondition: a block is lit");
+                var rim = slot.Q(className: BlockFrame.RimClass);
+                float band = rim.resolvedStyle.borderTopWidth, line = slot.resolvedStyle.borderTopWidth;
+                Assert.IsTrue(ThemeController.TryResolverFor(slot, out var theme), "precondition: under the theme");
+                Assert.AreEqual(mode == CardOptions.ModeLight ? 3f : 1f, band, 0.01f, "the metal band the theme gives " + mode + " (--ts-rim-band)");
+                Assert.AreEqual(Mathf.Max(2f * line, band), Stack.Light.SweepBand(Stack.RimLight.Layer), 0.01f, "the light rides that band (never under two lines)");
+                var points = BandPoints(slot, Mathf.Max(2f * line, band));
+                var low = new float[points.Count];
+                var high = new float[points.Count];
+                for (int i = 0; i < points.Count; i++) { low[i] = float.MaxValue; high[i] = float.MinValue; }
+                for (int frame = 0; frame < 12; frame++)
+                {
+                    SetClock(frame * CardLight.SweepPeriod / 12f);
+                    float[] values = null;
+                    yield return Luminances(slot, points, v => values = v);
+                    for (int i = 0; i < points.Count; i++) { low[i] = Mathf.Min(low[i], values[i]); high[i] = Mathf.Max(high[i], values[i]); }
+                }
+                float max = 0f;
+                int seen = 0;
+                for (int i = 0; i < points.Count; i++)
+                {
+                    float swing = high[i] - low[i];
+                    max = Mathf.Max(max, swing);
+                    if (swing >= 40f / 255f) seen++;
+                }
+                float share = (float)seen / points.Count;
+                swings[mode] = (max, share);
+                report.Add($"{mode}: band {band} pt (light rides {Mathf.Max(2f * line, band)}), {points.Count} band points over one turn: largest swing {max * 255f:0} / 255, {share:P0} of the band swing >= 40 / 255");
+            }
+            System.IO.File.WriteAllText(TestEvidence.PathFor("Light", "band_swing.txt"), string.Join("\n", report) + "\n");
+            Debug.Log("[Card] " + string.Join(" | ", report));
+            Assert.GreaterOrEqual(swings[CardOptions.ModeLight].Max, 100f / 255f, "light: the light brightens the band clearly where it passes (" + report[0] + ")");
+            Assert.GreaterOrEqual(swings[CardOptions.ModeLight].Share, 0.3f, "light: it is seen travelling round most of the band, not one spot (" + report[0] + ")");
+            Assert.Less(swings[CardOptions.ModeDark].Max, swings[CardOptions.ModeLight].Max, "dark keeps its quieter light (" + report[1] + ")");
+        }
+
         // Evidence for the visual check: the first sheet's glass and the lit block's rim every 0.5 s of clock over 6 s, light and dark, a
         // contact sheet per sequence; the reduce-motion still frames; the light moving to the next block on scroll
         [UnityTest]

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -397,6 +398,61 @@ namespace TileStories.Tests
             Assert.AreEqual(KnowledgeCheckRule.ChoiceTrue, quiz.Chosen, "a real sideways swipe answered True");
             Assert.AreEqual(before, stack.Scroll.scrollOffset.y, 2f, "a sideways swipe does not scroll the stack");
             yield return Capture("Card_Lamp_KnowledgeCheck_TrueFalse_RealSwipe");
+        }
+
+        // ---------------- a block page's Back (_3.3 S4a: the Back arrow closed the WHOLE card) ----------------
+
+        // The Painting's story page opened by a real finger on its preview, then a real finger on the page's Back arrow: the card is open
+        // again, at its stop and its scroll, the story in view -- even where the arrow sits over the camera (the strip above the sheet at
+        // Full): the release lands on the camera once the page has closed, and that tap was the arrow's, never a tap on empty space
+        [UnityTest]
+        public IEnumerator ARealTapOnAStoryPagesBack_ReturnsToTheCard_AtItsScroll_AndNeverClosesIt(
+            [Values(CardOptions.FullHeightCameraStrip, CardOptions.FullHeightTop)] string fullHeight)
+        {
+            var copy = ConfigCopy();
+            copy.card_settings.container.full_height = fullHeight;
+            Session.ApplyCardSettings(copy);
+            yield return CardTestInput.Settle(0.3f);
+            SelectionEventBus.Select("painting");
+            yield return CardTestInput.Settle();
+            var sheet = Card.Sheet;
+            sheet.SetStop(SheetStopRule.Stop.Full);
+            yield return CardTestInput.Settle();
+            string storyKey = ConfigCopy().pois.First(p => p.id == "painting").card.blocks.Single(b => b.kind == BuiltInBlocks.StoryKind).key;
+            var story = sheet.Stack.ViewOfBlock(storyKey) as ComposedBlockView;
+            Assert.IsNotNull(story, "precondition: The Painting's story is on its card");
+            var scroll = sheet.Stack.Scroll;
+            scroll.ScrollTo(story.Root);
+            yield return CardTestInput.Settle(0.3f);
+            story.Motion.Finish();
+            float offset = scroll.scrollOffset.y;
+            Assert.Greater(offset, 0f, "precondition: the card is scrolled down to its story");
+            Assert.IsTrue(scroll.contentViewport.worldBound.Contains(story.OpenRow.worldBound.center), "precondition: the Open Row is in view");
+            float window = Session.ZoomSettings.double_tap_window_s;
+            BeginTestTime();
+
+            yield return Tap(ScreenPointOf(story.OpenRow));
+            yield return CardTestInput.Settle(0.3f);
+            var takeover = sheet.Takeover;
+            Assert.IsTrue(takeover.IsOpen, "a real finger on the preview opened the story's page");
+            Assert.IsFalse(Card.ClosePending, "...and a tap on the card is never a tap on empty space");
+
+            var back = takeover.Back;
+            bool overTheCamera = back.worldBound.center.y < sheet.Root.worldBound.yMin;
+            // - the case the bug lived in: with a camera strip the arrow sits over the camera, the sheet below it
+            if (fullHeight == CardOptions.FullHeightCameraStrip) Assert.IsTrue(overTheCamera, "precondition: Back sits over the camera strip");
+            yield return Tap(ScreenPointOf(back));
+            // - the zoom's double-tap window passes on the test's clock: a close the release had wrongly set off would fall due here
+            yield return Advance(window * 2f);
+            yield return CardTestInput.Settle(0.3f);
+
+            Assert.IsFalse(takeover.IsOpen, "the Back arrow closed the page");
+            Assert.IsTrue(sheet.IsOpen, "...and the card is still open" + (overTheCamera ? " (the arrow sat over the camera strip)" : ""));
+            Assert.AreEqual("painting", SelectionEventBus.CurrentPoiId, "the point is still selected");
+            Assert.IsFalse(Card.ClosePending, "no close is waiting");
+            Assert.AreEqual(SheetStopRule.Stop.Full, sheet.Stop, "at the stop it was at");
+            Assert.AreEqual(offset, scroll.scrollOffset.y, 1f, "at the scroll it was at");
+            Assert.IsTrue(scroll.contentViewport.worldBound.Overlaps(story.Root.worldBound), "with the story in view");
         }
     }
 }

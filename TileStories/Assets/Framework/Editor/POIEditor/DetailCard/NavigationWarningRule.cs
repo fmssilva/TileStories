@@ -50,6 +50,29 @@ namespace TileStories.Editor
             return new BusiestCard(best, at);
         }
 
+        // The card that shows the most Navigation Bar groups (_3.3 S4a review): a card shows only the groups it has blocks of, so a wall's
+        // long table may still fit every phone. Built only when the table is long enough to matter (a stack build per point)
+        public static BusiestCard BusiestBar(CardSettings settings, IReadOnlyList<POIData> pois, BlockRegistry registry)
+        {
+            int best = 0, at = -1;
+            if (pois == null || registry == null) return new BusiestCard(0, -1);
+            var items = NavBarRule.Items(settings?.navigation, registry);
+            for (int i = 0; i < pois.Count; i++)
+            {
+                if (pois[i]?.card?.blocks == null || pois[i].card.blocks.Count == 0) continue;
+                var entries = BlockStackBuilder.Build(pois[i], settings, registry, pois).Entries;
+                var model = CardNavModel.Build(entries, registry, settings);
+                if (!model.ShowsNavigation) continue;
+                var family = new Dictionary<string, string>();
+                foreach (var entry in entries) family[entry.Instance.key] = entry.Definition.Family;
+                int groups = NavBarRule.Entries(items, model.Targets, t => family.TryGetValue(t, out string f) ? f : null).Count;
+                if (groups <= best) continue;
+                best = groups;
+                at = i;
+            }
+            return new BusiestCard(best, at);
+        }
+
         // The Progress Map is the Top Bar the card draws and the busiest card has more sections than its pieces can show a share for.
         // `sections` is asked only once the choice itself says it matters: a card's map costs a stack build per point
         public static bool ProgressMapOutgrown(CardNavigationSettings nav, System.Func<int> sections) =>

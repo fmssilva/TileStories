@@ -13,6 +13,14 @@
 }
 
 .card-header__title {
+    /* a glass pill hugging the words (S4a review): the floating bar is clear but for it */
+    align-self: flex-start;
+    max-width: 100%;
+    background-color: var(--ts-bar-pill);
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    border-radius: var(--ts-radius-xl);
+    padding: var(--ts-space-1) var(--ts-space-3);
     font-size: var(--ts-size-heading);
     -unity-font-style: bold;
     color: var(--ts-ink);
@@ -20,7 +28,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     margin: 0;
-    padding: 0;
     opacity: 0;
     translate: 0 var(--ts-space-2);
     transition-property: opacity, translate;

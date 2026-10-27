@@ -12,44 +12,50 @@
   .clinerules\60-finishing.md
 So start by reading them all. 
 
-## `And now: _3.3 POI Card Look, Feel & Motion -- S3b block templates, the Card Starter and the story Editor's last rows`
+
+## `And now: _3.3 POI Card Look, Feel & Motion -- S4a the first story review's fixes`
 
 GATE: `git push` if the branch is ahead of origin (report how many commits). Take one Unity capture (Game view AND the POI
 Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. Check the two
-SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`): `git checkout --` them if modified. Baseline: none (HEAD dcab058; S3a
-closed with full EditMode 2261 green; its full PlayMode run's 2 reds were re-based and are green alone -- THIS block's full run
-confirms them). Ask about Unity's place with `40-testing.md` 4.2.3's a / b / c actions, word for word; WAIT for runs as 4.2.5 says.
-Never disable a tool's safety check (`50-terminal_and_tools.md` 5.2). Editor captures in the DARK skin (the developer's).
+SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`): `git checkout --` them if modified. Baseline: none (HEAD 3190b96; S3b
+closed with full PlayMode 1431 and full EditMode 2279, 0 failed). Ask about Unity's place with `40-testing.md` 4.2.3's a / b / c
+actions, word for word; WAIT for runs as 4.2.5 says. Never disable a tool's safety check. Editor captures in the dark skin.
 
-Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- R16 row 6b (this block) and the "S3a review" row (decisions 1
-and 5), R14.4 (templates are PRESETS, copied into the POI; "Re-apply template" adds the template's missing rows without touching
-content; built-in ones ship as code like Card Starters; a wall may save its own in `card_settings.block_templates`), R14.5 (the Block
-Library's Templates table), R17.1 (Preview Tap), R6 / R17.3 (the block's entry), the S3a Build log entry.
-REQUIRED READING (all lines): `proj_guides/_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section 0; `_3.1_POI_Card_Blocks.md` the Block
-Library and the Card Starter (how they write values today, one undo step); `.clinerules/40-testing.md` 4.2, 4.2.3, 4.5.
-WORKER MODEL: Opus-class -- new config data (templates), Editor surfaces across two tabs, real-input tests.
-TEST PLAN: no baseline. EditMode real-window tests + targeted PlayMode first, then the FULL PlayMode run (it also confirms S3a's two
-re-based fixtures), then full EditMode.
+Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- "S4 review, first round" (THIS block: the developer's points,
+with the screenshots described there), R18 (the review guide), R11 v3-v4 (hero, metal rim), R9 D1 / D2 (>= 7:1 text at the worst
+pixel; block edge >= 3:1), R10.2 (the preview cap), the P4.4a / P4.4b / 4c2 / S2b / S2c Build log entries (hero, frame, rim light,
+preview, page chrome).
+The visual target: `proj_guides/_3.3.1_Prototype/Main.dc.html` (v4: the hero, the `.rim` metal and its sweep) and `Story.dc.html` (the
+story preview's picture flush with the block's top).
+REQUIRED READING: `.clinerules/40-testing.md` 4.2, 4.2.4b, 4.5; `_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section 0 (one new row).
+WORKER MODEL: Opus-class -- the sheet's Full stop, the hero, the frame and a navigation bug.
+TEST PLAN: no baseline. Targeted fixtures first (back / full view, sheet stops, hero, frame, story), then the FULL PlayMode run -- shared
+ground: the sheet's Full STOP changes --, then full EditMode. Background runs (action c).
 
-PART 1 -- Detail Card > Block Library > TEMPLATES table: built-in "Story -- magazine" (the shipped story's row structure, empty
-content, good styles) and "Story -- short" (title, lede, paragraph, picture); the wall's own templates: "Save as template" on a block in
-Card Content, rename, delete (danger affordance + confirm), edit a template's rows with the SAME element table as Card Content (reuse,
-no copy). Data: `card_settings.block_templates` (a template = kind + its rows' structure and styles, no content).
-PART 2 -- using them: Card Content's "+ Add block" offers "from a template" -> COPIES its rows into the new block (fresh row ids); the
-block header shows "Template: <name>" + "Re-apply" (adds the template's rows the block lacks, by structure, never touching existing
-rows or content; one undo step; tells what it added). The Card Starter offers the templates beside its block sets.
-PART 3 -- the S3a review rows: Preview **Tap** (open the page / nothing; the story's default: open the page) and **Block entry** (rises
-in / none) as real settings with runtime + (i); every style option with MORE than 4 choices becomes one compact dropdown (4 or fewer stay
-buttons).
-TESTS: real-window Editor tests for save / rename / delete / edit a template, add from a template, Re-apply (adds only what is missing),
-the Card Starter's offer; each with Ctrl+Z; the new Tap / Block entry on the real card (Phase B); the dropdown with real input.
-Captures (dark skin): the Templates table, a template being edited, "+ Add block" from a template, Re-apply's result.
-DOCS as current truth: `_5.1`, `_3.1` (templates), `_3.3` Build log, `10-structure.md` (only your lines).
-OUT OF SCOPE: live-linked templates (rejected, R14.4); POI-level shared elements (phase 2); new element kinds.
-Stop when templates work end to end with undo and live sync, the two settings run on the real card, the targeted fixtures, the full
-PlayMode run (with S3a's re-based fixtures inside it) and full EditMode are green. Finish with the final report of
-`.clinerules/60-finishing.md` 6.4 and END with the developer's review questions. Do not commit: the Architect commits after the review.
-
+PART 1 -- BUG: on a block page, the top bar's Back arrow closes the WHOLE card (back to the live camera). It must return to the card,
+at the scroll it was at, with the block in view. Find why (which handler, which close path), fix it at its source, and add the Phase B
+test that would have caught it (open the story's page by a real tap, a real tap on Back -> the card is open at the same offset).
+PART 2 -- full height: a wall setting "Full Height" (To The Top -- default -- / Leave A Camera Strip) with (i): at Full the sheet
+rises to the top of the safe area; the grabber, the drag down and Back keep working. Measure the stops before / after.
+PART 3 -- the hero: the picture starts directly under the nav strip (no glass band between them); its height = the picture's own
+proportion at full width, clamped to a sensible min / max (state them); the dark shade only behind the words (a local gradient
+over the text block, the rest of the picture untouched); slightly smaller eyebrow / title / line; Listen = a compact pill (headphones
+icon + time, accessible name "Listen, 3:11"). Text >= 7:1 at its worst pixel on every hero picture of the test wall (a bright
+picture strengthens the shade locally, never weakens the text).
+PART 4 -- the block frame in light mode: more 3D -- clearer brushed-metal bands and a top highlight / soft bevel; the block's EDGE
+contrast carried by a dark outer hairline + shadow, so the moving rim light can ride a wider band (2-3 pt) and be clearly visible
+travelling round the block being read. Dark mode keeps its subtler look. Measure: edge >= 3:1 over the sunny-wall stand-in; the
+light's band visible (pixel delta in a frame sequence).
+PART 5 -- the story preview: its first picture flush with the block's top and sides (rounded with the block); the title NEVER faded
+or cut by the cap -- the picture's height gives way first so title + at least one lede line + the Open Row fit.
+PART 6 -- The Painting: delete its old rich-text "The story" block (through the Editor's config path); keep the magazine story.
+TESTS: Phase B for the Back bug and the full height; Phase A for the hero (each picture, EN / PT, light / dark), the frame (light /
+dark, frame sequence of the light), the story preview (title fully visible at the cap). Captures of each, before / after.
+DOCS as current truth: `_3.3` Build log, `_5.1` (Full Height row), `10-structure.md` (only your lines).
+OUT OF SCOPE: the S3b review's Editor fix list (next block); any new kind.
+Stop when every point above is done and measured, the targeted fixtures, the full PlayMode run and full EditMode are green. Finish
+with the final report of `.clinerules/60-finishing.md` 6.4 and END with the developer's review questions. Do not commit: the
+Architect commits after the review.
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

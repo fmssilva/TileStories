@@ -170,13 +170,27 @@ namespace TileStories.Tests
             return first == slot ? sheet : slot;
         }
 
+        // The foot of the chrome floating over the stack's view, read from the screen like the sheet measures it (BlockStackView.LandingInset):
+        // the top strip's foot while an element is bound in it, else the bar's
+        public static float LandingInsetOf(ScrollView scroll)
+        {
+            var root = scroll.parent;
+            var top = root?.Q("poi-card-nav-top");
+            var header = root?.Q("poi-card-header");
+            bool strip = top != null && top.resolvedStyle.display == DisplayStyle.Flex && top.childCount > 0;
+            float foot = strip ? top.layout.yMax : header != null ? header.layout.yMax : 0f;
+            return float.IsNaN(foot) ? 0f : Mathf.Max(0f, foot - scroll.layout.yMin);
+        }
+
         public static int UnderTheSpyLine(ScrollView scroll, System.Collections.Generic.IEnumerable<VisualElement> slots)
         {
             var viewport = scroll.contentViewport.worldBound;
             float offset = scroll.scrollOffset.y;
+            // - _3.3 S4a: the spy reads from the landing line, under the chrome floating over the view (the card's LandingTop does too)
+            float inset = LandingInsetOf(scroll);
             // - _3.3 P4.4c1: a section's place is where its chapter starts -- the sheet's top, when its first block is the sheet's first shown
             var tops = slots.Select(s => s == null || !IsShown(s, scroll.contentContainer) ? float.PositiveInfinity
-                : ChapterStart(s).worldBound.yMin - viewport.yMin + offset).ToList();
+                : ChapterStart(s).worldBound.yMin - viewport.yMin + offset - inset).ToList();
             return NavScrollRule.CurrentSection(tops, offset, scroll.contentContainer.layout.height, scroll.contentViewport.layout.height);
         }
 
@@ -230,6 +244,23 @@ namespace TileStories.Tests
                 _ => PointerMoveEvent.GetPooled(e),
             };
             using (evt) panel.visualTree.SendEvent(evt);
+        }
+
+        // _3.3 S4a: the hero is the screen and no chrome cuts it -- the top strip, the bottom bar and the footer come once the visitor scrolled
+        // it away (CardChromeRule's hero layer; the floating strip after the bars and its own height). A test of the chrome at Full scrolls
+        // the hero just out of the view first, then lets the chrome decide
+        public static IEnumerator PastTheHero(PoiCardSheetView sheet)
+        {
+            var header = sheet.Stack.HeaderView;
+            float bottom = header != null ? header.HeroBottom() : float.NaN;
+            var scroll = sheet.Stack.Scroll;
+            float past = float.IsNaN(bottom) ? 0f : bottom;
+            // - just past it, then a small move back up (a reader looking for the bottom area Hide While Scrolling slid away), the hero still away
+            scroll.scrollOffset = new Vector2(0f, past + 40f);
+            for (int frame = 0; frame < 20; frame++) yield return null;
+            scroll.scrollOffset = new Vector2(0f, past + 10f);
+            for (int frame = 0; frame < 20; frame++) yield return null;
+            yield return Settle(0.3f);
         }
 
         // A real finger reads the card down until its hero has left the viewport (_3.3 P4.4a: the footer waits for the hero), then a small

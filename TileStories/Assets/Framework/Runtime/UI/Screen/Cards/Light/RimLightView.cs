@@ -91,8 +91,8 @@ namespace TileStories
         {
             Layer.RemoveFromHierarchy();
             if (LitSlot == null) return;
-            // - after the frame's two parts (BlockFrame.Build: shadow, rim band), before everything the block draws
-            LitSlot.Insert(System.Math.Min(2, LitSlot.childCount), Layer);
+            // - after the frame's parts (BlockFrame.Build: shadow, rim band, groove), before everything the block draws
+            LitSlot.Insert(System.Math.Min(BlockFrame.PartCount, LitSlot.childCount), Layer);
             _light.Sweep(Layer, _stack.Sheets.SheetOf(LitSlot)?.Family?.ColorToken);
             Layer.style.opacity = 0f;
             // - one frame at 0 first, so the transition has a start to run from

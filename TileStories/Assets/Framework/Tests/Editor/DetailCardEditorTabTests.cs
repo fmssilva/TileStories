@@ -162,6 +162,8 @@ namespace TileStories.Editor.Tests
                             {
                                 key = "group_5", label = new List<LocalizedEntry> { new() { lang = "en", value = "Read" }, new() { lang = "pt", value = "Ler" } },
                             })));
+                        else if (n.FieldType == typeof(CardNavBarSettings))
+                            edits.Add((n.Name, s => s.navigation.bar.indicator = CardOptions.NavBarIndicatorUnderline));
                         else Assert.Fail("no edit for navigation field " + n.Name);
                     }
                 else if (f.FieldType == typeof(CardContainerSettings))
@@ -169,13 +171,19 @@ namespace TileStories.Editor.Tests
                     {
                         if (c.FieldType == typeof(bool)) edits.Add((c.Name, s => c.SetValue(s.container, !(bool)c.GetValue(s.container))));
                         else if (c.FieldType == typeof(float)) edits.Add((c.Name, s => c.SetValue(s.container, 0.3f)));
-                        else if (c.FieldType == typeof(string)) edits.Add((c.Name, s => c.SetValue(s.container, c.Name == "open_stop" ? CardOptions.StopHalf : CardOptions.AudioQueue)));
+                        else if (c.FieldType == typeof(string)) edits.Add((c.Name, s => c.SetValue(s.container, c.Name switch
+                        {
+                            // - another stop than the wall's own (the shipped wall may open at either)
+                            "open_stop" => (string)c.GetValue(s.container) == CardOptions.StopHalf ? CardOptions.StopPeek : CardOptions.StopHalf,
+                            "full_height" => CardOptions.FullHeightCameraStrip,
+                            _ => CardOptions.AudioQueue,
+                        })));
                         else Assert.Fail("no edit for container field " + c.Name);
                     }
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(10 + 1 + 8 + 23 + 3, edits.Count,
-                "every card_settings field (walked by reflection) has an edit: 10 wall-level (block_templates the 10th) + 1 components + 8 container + 23 navigation + 3 demo card");
+            Assert.AreEqual(10 + 1 + 9 + 24 + 3, edits.Count,
+                "every card_settings field (walked by reflection) has an edit: 10 wall-level (block_templates the 10th) + 1 components + 9 container (full_height the 9th) + 24 navigation (bar the 24th) + 3 demo card");
 
             foreach (var (name, change) in edits)
             {
@@ -415,6 +423,28 @@ namespace TileStories.Editor.Tests
             Assert.IsTrue(_window.Unsaved, "the pick is an edit");
             yield return _window.PressUndo();
             Assert.AreEqual(CardOptions.ModeLight, _window.Config.card_settings.default_mode, "Ctrl+Z: light again");
+        }
+
+        // Detail Card > Card Container on the REAL window (_3.3 S4a): the Full Height row and its (i) are drawn, drawing writes nothing, a pick of
+        // Leave A Camera Strip is an edit, Ctrl+Z gives To The Top back
+        [UnityTest]
+        public IEnumerator TheFullHeightRow_IsDrawnWithItsHelp_APickIsAnEdit_AndCtrlZUndoesIt()
+        {
+            var config = TwoPoiConfig();
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            OpenTab("DetailCard");
+            yield return _window.WaitForRepaint();
+            var drawn = new List<(string Title, Rect Rect)>();
+            yield return HelpTitlesDrawn(drawn);
+            CollectionAssert.Contains(drawn.Select(d => d.Title).ToList(), "Full Height", "Card Container draws the Full Height row with its (i)");
+            Assert.IsFalse(_window.Unsaved, "drawing the row writes nothing");
+            Assert.AreEqual(CardOptions.FullHeightTop, _window.Config.card_settings.container.full_height, "a new wall rises to the top");
+
+            Pick(() => _window.Config.card_settings.container.full_height = CardOptions.FullHeightCameraStrip);
+            Assert.AreEqual(CardOptions.FullHeightCameraStrip, _window.Config.card_settings.container.full_height);
+            Assert.IsTrue(_window.Unsaved, "the pick is an edit");
+            yield return _window.PressUndo();
+            Assert.AreEqual(CardOptions.FullHeightTop, _window.Config.card_settings.container.full_height, "Ctrl+Z: To The Top again");
         }
 
         // Specific Marker > Card Content on the REAL window: an open block draws the Emphasis row with its (i) after its Display; a pick of
@@ -1790,8 +1820,10 @@ namespace TileStories.Editor.Tests
             var nav = _window.Config.card_settings.navigation;
             Assert.AreEqual(CardOptions.LayoutScroll, nav.layout, "the shipped wall never set Layout: Scroll");
             var titles = drawn.Select(d => d.Title).ToList();
-            // - section 7's order since step 17b: the Preset (where a wall author starts), then Layout, the first of the rows it writes
-            CollectionAssert.AreEqual(new[] { "Preset", "Layout" }, titles.Take(2).ToList(), "the Preset row first, Layout right under it");
+            // - section 7's order since step 17b: the Preset (where a wall author starts), then Layout, the first of the rows it writes -- after
+            //   the Navigation Bar component (_3.3 S4a review: its title and Enabled, the bar off here)
+            CollectionAssert.AreEqual(new[] { "Navigation Bar", "Enabled", "Preset", "Layout" }, titles.Take(4).ToList(),
+                "the Navigation Bar first, then the Preset row, Layout right under it");
             CollectionAssert.DoesNotContain(titles, "Open One At A Time", "Scroll: no accordion option");
             CollectionAssert.AreEqual(new[] { "Scroll", "Accordion", "Tabs", "Pages", "Bento" }, CardOptions.LayoutLabels, "named, never the stored words");
             CollectionAssert.AreEqual(new[] { CardOptions.LayoutScroll, CardOptions.LayoutAccordion, CardOptions.LayoutTabs, CardOptions.LayoutPages,
@@ -2966,7 +2998,10 @@ namespace TileStories.Editor.Tests
         [UnityTest]
         public IEnumerator ShowDemoCard_ARealClickTurnsItOn_TheChoicesAreStored_TheBuildGuardSeesIt_AndEachEditUndoes()
         {
-            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardContainer");
+            // - the framework default, whatever point the shipped wall last previewed (the wall's own choice must not leak in, 40-testing)
+            var config = ShippedConfig();
+            config.card_settings.demo_card.poi_id = "";
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
             OpenTab("DetailCard");
             yield return _window.WaitForRepaint();
             _window.RectOf("Show demo card");

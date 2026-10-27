@@ -59,6 +59,8 @@ namespace TileStories.Tests
             var copy = ConfigCopy();
             _shippedLanguages ??= new List<string>(copy.card_settings.languages);
             copy.card_settings.navigation = JsonUtility.FromJson<CardNavigationSettings>(JsonUtility.ToJson(ShippedNavigation));
+            // - the wall's preset rows (its tabs, its Menu); the wall's Navigation Bar is measured by PoiCardNavBarSceneTests
+            copy.card_settings.navigation.bar.enabled = false;
             copy.card_settings.languages = language == "en" ? new List<string>(_shippedLanguages) : new List<string> { language, "en" };
             edit?.Invoke(copy);
             Session.ApplyCardSettings(copy);
@@ -185,7 +187,7 @@ namespace TileStories.Tests
                 yield return Landed();
                 var slot = Sheet.Stack.SlotOfBlock(block);
                 if (Sheet.Stack.LandingTop(slot) <= Range - OnePixel)
-                    Assert.AreEqual(0f, Sheet.Stack.LandingElement(slot).worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, tab.Label.text + ": its section's top meets the viewport's top");
+                    Assert.AreEqual(Sheet.Stack.LandingInset, Sheet.Stack.LandingElement(slot).worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, tab.Label.text + ": its section's top meets the viewport's top");
                 else
                     Assert.AreEqual(Range, Scroll.scrollOffset.y, OnePixel, tab.Label.text + ": a late section clamps at the end of the range");
                 Assert.AreEqual(jumps + 1, NavJumps.Count, tab.Label.text + ": one nav_jump");

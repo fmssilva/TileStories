@@ -3,7 +3,8 @@ using UnityEngine;
 namespace TileStories
 {
     // Where the card sheet rests (_3.1 section 4): peek (the compact header), half (<= Half Height Max of the
-    // available height) and full (the available height minus a top gap), and where a released drag snaps.
+    // available height) and full (the available height minus the top gap the wall's Full Height leaves: FullTopGap), and where a
+    // released drag snaps.
     // Heights are in the card panel's own units; the view measures its container and hands them in.
     public static class SheetStopRule
     {
@@ -49,6 +50,12 @@ namespace TileStories
             float half = Mathf.Clamp(available * ratio, peek, full);
             return new Stops(peek, half, full);
         }
+
+        // The gap the Full stop leaves above the sheet for the wall's Full Height (_3.3 S4a): none for To The Top -- the sheet reaches the top
+        // of the safe area the layer already keeps --, `cameraStripGap` (the card's --ts-sheet-top-gap) for Leave A Camera Strip. An unknown
+        // or empty choice is the default, To The Top
+        public static float FullTopGap(string fullHeight, float cameraStripGap) =>
+            fullHeight == CardOptions.FullHeightCameraStrip ? Mathf.Max(0f, cameraStripGap) : 0f;
 
         // Whether the sheet resting at `stop` covers the top of the screen, where the search bar sits (_3.1 step 6C): only
         // full does -- half is capped at 40% of the height. What sits there steps aside (SearchPanelsRule's topCovered).

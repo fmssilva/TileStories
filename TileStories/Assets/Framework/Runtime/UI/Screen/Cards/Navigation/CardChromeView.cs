@@ -116,6 +116,11 @@ namespace TileStories
                 // - the hero holds the actions while it is in view (CardChromeRule's 4th layer); its edge in content coordinates
                 HeroBottom = stack.HeaderView?.HeroBottom() ?? float.NaN,
                 ScrollOffset = stack.Scroll.scrollOffset.y,
+                // - the strip floats over the stack since _3.3 S4a's review (PoiCard.uss); the Navigation Bar brings its own Show / Hide
+                TopFloats = true,
+                TopAlways = BarOn && NavBarRule.Show(_nav.bar) == CardOptions.NavBarShowAlways,
+                TopHidesOnScroll = BarOn && NavBarRule.HideOnScroll(_nav.bar) == CardOptions.NavBarHideDown,
+                BottomNavAfterHero = BarOn && NavBarRule.Show(_nav.bar) == CardOptions.NavBarShowAfterHero,
             };
             var chrome = CardChromeRule.Decide(input);
             // - the area comes back at the end: its height leaves the viewport on the next layout, and the end must stay in view above it
@@ -134,6 +139,14 @@ namespace TileStories
             stack.Footer.EnableInClassList(FooterHiddenClass, chrome.Bottom && !chrome.Footer);
         }
 
+        // The Navigation Bar is on (its Show / Hide While Scrolling replace the wall's own for the chrome)
+        private bool BarOn => NavBarRule.Enabled(_nav);
+
+        // What hides with the scroll: the bar's own choice while it is on, else the wall's Hide While Scrolling
+        private string HideOnScroll() =>
+            BarOn ? (NavBarRule.HideOnScroll(_nav.bar) == CardOptions.NavBarHideDown ? CardOptions.HideOnScrollDown : CardOptions.HideOnScrollNever)
+                : _nav?.hide_on_scroll;
+
         // The stack scrolled: one more move for the scroll's memory, then a new decision
         private void OnScrolled(float offset)
         {
@@ -143,7 +156,7 @@ namespace TileStories
             // - the end is the range without the area: once back at the end it stays within its own height of it
             float area = BottomShown ? _sheet.BottomArea.layout.height : 0f;
             Scroll = CardChromeRule.Next(Scroll, CardChromeRule.ReaderDelta(delta, _sheet.Nav.IsJumping), CardChromeRule.AtTop(offset),
-                CardChromeRule.AtEnd(offset, scroll.contentContainer.layout.height, scroll.contentViewport.layout.height, area), _nav?.hide_on_scroll);
+                CardChromeRule.AtEnd(offset, scroll.contentContainer.layout.height, scroll.contentViewport.layout.height, area), HideOnScroll());
             Apply();
         }
 

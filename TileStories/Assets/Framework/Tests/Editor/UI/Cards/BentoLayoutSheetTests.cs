@@ -33,6 +33,8 @@ namespace TileStories.Editor.Tests
         {
             var wall = JsonUtility.FromJson<WallConfigData>(File.ReadAllText("Assets/Apps/LivingRoom/config.json"));
             wall.card_settings.navigation.layout = CardOptions.LayoutBento;
+            // - the Navigation Bar at the framework default (off): the layout's own top slot is measured, never the wall's bar (40-testing)
+            wall.card_settings.navigation.bar = new CardNavBarSettings();
             more?.Invoke(wall.card_settings.navigation);
             return wall;
         }

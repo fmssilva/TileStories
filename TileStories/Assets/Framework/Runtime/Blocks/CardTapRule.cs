@@ -5,7 +5,8 @@ namespace TileStories
     // "Tap on empty camera space closes the card" (_3.1 section 4) as pure rules. A press-and-release counts as a
     // TAP only when the finger barely moved and did not linger (a drag or a long press looks at the wall, it does
     // not close anything); it closes the card only when nothing the EventSystem knows (a marker, the card, the
-    // search UI) was under it.
+    // search UI) was under it -- at the press or at the release (`anythingUnderTap`): a tap that landed on a button
+    // is the button's, even when the button's own click took away what was under the finger before it lifted.
     public static class CardTapRule
     {
         // Movement allowed for a tap, as a share of the screen height (about a fingertip's wobble)

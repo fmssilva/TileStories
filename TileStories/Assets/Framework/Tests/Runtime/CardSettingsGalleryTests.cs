@@ -104,8 +104,11 @@ namespace TileStories.Tests
             Assert.IsTrue(Sheet.Root.ClassListContains("poi-card--has-settings"));
             Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(aa.worldBound.width, aa.worldBound.height), "finger-sized: " + aa.worldBound);
             float onePixel = CardGalleryChecks.OnePixel(aa);
-            Assert.AreEqual(CardTestInput.TokenPx("--ts-touch-target"), aa.worldBound.width, onePixel + 0.01f, "as wide as the touch-target token");
-            Assert.GreaterOrEqual(CardTestInput.Contrast(Sheet.SettingsGlyph.resolvedStyle.color, CardTestInput.EffectiveBackground(aa)), 7f, "the gear reads at 7:1 (D1)");
+            // - _3.3 S4a review: the slim bar's height, a bare mark on the bar's own see-through ground (or white over the hero's top shade)
+            Assert.AreEqual(CardTestInput.TokenPx("--ts-bar-height"), aa.worldBound.width, onePixel + 0.01f, "as wide as the bar is tall");
+            if (!Sheet.Root.ClassListContains(BlockStackView.BarsOnHeroClass))
+                Assert.GreaterOrEqual(CardTestInput.Contrast(Sheet.SettingsGlyph.resolvedStyle.color, CardTestInput.EffectiveBackground(Sheet.Stack.HeaderSlot)), 7f,
+                    "the gear reads at 7:1 on the bar's ground (D1)");
 
             Rect close = Sheet.CloseButton.worldBound, aaRect = aa.worldBound, card = Sheet.Root.worldBound;
             Assert.LessOrEqual(aaRect.xMax, close.xMin + 0.01f, "Aa sits left of the X, never over it: " + aaRect + " vs " + close);

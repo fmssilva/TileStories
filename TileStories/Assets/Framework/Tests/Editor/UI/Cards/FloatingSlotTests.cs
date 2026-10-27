@@ -24,8 +24,15 @@ namespace TileStories.Editor.Tests
         private ScopedMediaSource _media;
         private ArPlacementService _placement;
 
-        private static WallConfigData Shipped() =>
-            JsonUtility.FromJson<WallConfigData>(File.ReadAllText("Assets/Apps/LivingRoom/config.json"));
+        // - the Navigation Bar at the framework default (off): these tests measure the elements, never the wall's own bar (40-testing)
+        private static WallConfigData Shipped()
+        {
+            var config = JsonUtility.FromJson<WallConfigData>(File.ReadAllText("Assets/Apps/LivingRoom/config.json"));
+            config.card_settings.navigation.bar = new CardNavBarSettings();
+            // - ...and the placed model's chip at its framework default (the wall may turn it off)
+            config.card_settings.navigation.placed_model_control = CardOptions.PlacedModelChip;
+            return config;
+        }
 
         // The shipped wall with `floating` as its Floating Button, no Top Bar, the blocks Grouped By Family (8 sections on The Lamp)
         private static WallConfigData With(string floating, string menu = CardOptions.NavNone, int barSlots = 5)

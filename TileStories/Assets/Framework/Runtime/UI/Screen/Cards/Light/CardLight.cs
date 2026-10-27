@@ -117,7 +117,8 @@ namespace TileStories
         }
 
         // The material's size in points; the sweep's also its rounded edge (the block's radius inside the rim's outer line) and the band it
-        // lights (the rim's inner band, just inside that line: the outer line is the block's measured edge and never lit)
+        // lights: the rim's metal band, just inside that line (the outer line is the block's measured edge and never lit) -- as wide as the
+        // band the theme gives the mode (--ts-rim-band, read off the rim part), never under two lines (_3.3 S4a)
         private static void Resize(Layer layer)
         {
             var rect = layer.Element.layout;
@@ -126,11 +127,21 @@ namespace TileStories
                 layer.Material.SetVector(SizeId, new Vector4(rect.width, rect.height, 0f, 0f));
                 return;
             }
-            var block = layer.Element.parent?.resolvedStyle;
+            var slot = layer.Element.parent;
+            var block = slot?.resolvedStyle;
             float line = block?.borderTopWidth ?? 1f;
             float radius = Mathf.Max(0f, (block?.borderTopLeftRadius ?? 0f) - line);
-            float band = 2f * line;
+            float rimBand = slot?.Q(className: BlockFrame.RimClass)?.resolvedStyle.borderTopWidth ?? 0f;
+            float band = Mathf.Max(2f * line, float.IsNaN(rimBand) ? 0f : rimBand);
             layer.Material.SetVector(SizeId, new Vector4(rect.width, rect.height, radius, band));
+        }
+
+        // The band the sweep on `element` lights now (points; 0 when it is no sweep layer): what the frame tests read
+        public float SweepBand(VisualElement element)
+        {
+            foreach (var layer in _layers)
+                if (layer.Element == element && layer.Sweep) return layer.Material.GetVector(SizeId).w;
+            return 0f;
         }
 
         private void PaintColours()
@@ -146,6 +157,9 @@ namespace TileStories
             {
                 layer.Material.SetVector(SweepId, Linear(element, SectionSheetRule.SweepOf(layer.Token)));
                 layer.Material.SetFloat(ArcId, Arc(element));
+                // - a mode switch changes the rim's band too (wider on light metal): no geometry change says so, and the new width
+                //   resolves on the next layout pass
+                element.schedule.Execute(() => Resize(layer));
                 return;
             }
             layer.Material.SetVector(HueId, Linear(element, layer.Token == null ? null : SectionSheetRule.LightOf(layer.Token)));

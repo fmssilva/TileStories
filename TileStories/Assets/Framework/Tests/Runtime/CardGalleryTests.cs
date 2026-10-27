@@ -122,9 +122,12 @@ namespace TileStories.Tests
             {
                 var subtitle = header.HeroPart.Q<Label>("card-header-subtitle");
                 Assert.LessOrEqual(subtitle.worldBound.xMax, card.xMax + 0.5f, "the subtitle wraps inside the card");
-                // - the hero fills what Half shows (HeroRule.Height) and grows when its words need more (never squashed): the title always
+                // - the hero takes its picture's proportion within its range (HeroRule.Height) and grows when its words need more (never squashed): the title always
                 //   starts inside the card; a long title + line may push the line under Half's edge (the gallery's long entries), Full shows it all
-                Assert.Less(header.HeroTitle.worldBound.yMin, card.yMax, "the hero's title starts inside the card at " + entry.Stop);
+                // - _3.3 S4a review: a picture's words sit FIXED at the hero's foot (the whole sheet at Full), so at Half they are still below
+                //   the card's edge -- Half shows the picture's top; Full shows them
+                if (!(header.HasPicture && entry.Stop == SheetStopRule.Stop.Half))
+                    Assert.Less(header.HeroTitle.worldBound.yMin, card.yMax, "the hero's title starts inside the card at " + entry.Stop);
                 if (entry.Stop == SheetStopRule.Stop.Full)
                     Assert.LessOrEqual(subtitle.worldBound.yMax, card.yMax + 0.5f, "the whole subtitle is visible at full");
             }
@@ -140,11 +143,22 @@ namespace TileStories.Tests
             Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(sheet.CloseButton.worldBound.width, sheet.CloseButton.worldBound.height),
                 "the X is " + sheet.CloseButton.worldBound.size + ", below 44x44");
             Assert.AreEqual("Close", sheet.CloseButton.tooltip, "the X is named from the framework string table");
+            // - _3.3 S4a review: the X is a bare mark on a clear button, on the bar's row. Over the hero's picture it is the white mark on the
+            //   top shade (the picture behind it is measured on renders); elsewhere it reads against the bar's own see-through ground, over
+            //   the darkest possible backdrop (3:1, a UI component)
+            bool onHero = sheet.Root.ClassListContains(BlockStackView.BarsOnHeroClass);
+            Color behind = CardTestInput.EffectiveBackground(sheet.Stack.HeaderSlot);
             foreach (var bar in sheet.CloseButton.Query(className: "poi-card__close-bar").ToList())
             {
                 Assert.IsTrue(sheet.CloseButton.worldBound.Contains(bar.worldBound.center), "the X's bars cross inside the button");
-                Assert.GreaterOrEqual(UIAccessibility.ContrastRatio(bar.resolvedStyle.backgroundColor, sheet.CloseButton.resolvedStyle.backgroundColor),
-                    UIAccessibility.MinRatioLargeTextOrUIComponent, "the X reads against its button (3:1, a UI component)");
+                if (onHero)
+                {
+                    Assert.AreEqual(Color.white, bar.resolvedStyle.backgroundColor, "over the picture: the X is the white mark");
+                    Assert.AreEqual(1f, sheet.TopShade.resolvedStyle.opacity, 0.01f, "...on the top shade");
+                }
+                else
+                    Assert.GreaterOrEqual(UIAccessibility.ContrastRatio(bar.resolvedStyle.backgroundColor, behind),
+                        UIAccessibility.MinRatioLargeTextOrUIComponent, "the X reads against the bar's ground (3:1, a UI component)");
             }
 
             yield return Render("Card_" + entry.Name);

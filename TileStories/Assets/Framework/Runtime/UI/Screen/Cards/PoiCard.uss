@@ -38,11 +38,17 @@
 
 /* The grab zone at the top: a full-width, finger-sized drag target with a small bar in its middle */
 .poi-card__handle {
-    flex-shrink: 0;
-    background-color: var(--ts-bar);
-    height: var(--ts-space-5);
+    /* FLOATING over the stack since _3.3 S4a's review (PoiCardSheetView brings the chrome to the front): the grab row is a strip at the
+       sheet's top (clear over the hero's picture, like the bar), the grabber hanging in it; the bar overlaps it */
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: var(--ts-handle-height);
+    background-color: var(--ts-bar-glass);
+    transition-property: background-color;
+    transition-duration: var(--ts-duration);
     align-items: center;
-    /* the bar (opaque since _3.3 P4.4b) overlaps the zone's foot by --ts-bar-overlap: the grabber hangs at its top, above the bar */
     justify-content: flex-start;
     padding-top: var(--ts-space-1);
 }
@@ -56,34 +62,77 @@
 
 .poi-card__close {
     position: absolute;
-    top: var(--ts-space-2);
+    top: var(--ts-bar-top);
     right: var(--ts-space-2);
-    width: var(--ts-touch-target);
-    height: var(--ts-touch-target);
+    width: var(--ts-bar-height);
+    height: var(--ts-bar-height);
     margin: 0;
     font-size: var(--ts-size-body);
     color: var(--ts-ink);
-    background-color: var(--ts-surface-2);
+    background-color: var(--ts-clear);
     border-color: var(--ts-line);
-    border-width: var(--ts-line-width);
+    border-width: 0;
     border-radius: var(--ts-touch-target);
+}
+
+/* The bars over the hero's picture (BlockStackView.BarsOnHeroClass): the marks turn white over a soft dark fade from the sheet's top --
+   the picture under them can be anything, the fade keeps them readable without a box */
+.poi-card__top-shade {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: var(--ts-top-shade-height);
+    background-image: url("top_shade.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-background-image-tint-color: var(--ts-top-shade);
+    border-top-left-radius: var(--ts-radius-l);
+    border-top-right-radius: var(--ts-radius-l);
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: var(--ts-duration);
+}
+
+.poi-card--bars-on-hero .poi-card__top-shade {
+    opacity: 1;
+}
+
+/* Clear only over the picture: anywhere else (Peek over the camera, a plate header, the blocks scrolling under) the grab row and the bar
+   keep their see-through bar ground (their own rules), so their marks always read -- the iOS bar's material once content scrolls under */
+.poi-card--bars-on-hero .poi-card__handle,
+.poi-card--bars-on-hero .poi-card__header {
+    background-color: var(--ts-clear);
+}
+
+.poi-card--bars-on-hero .poi-card__close-bar,
+.poi-card--bars-on-hero .poi-card__menu-button .card-icon__bar,
+.poi-card--bars-on-hero .poi-card__menu-button .card-icon__dot {
+    background-color: var(--ts-on-scrim);
+}
+
+.poi-card--bars-on-hero .poi-card__settings-glyph {
+    color: var(--ts-on-scrim);
+}
+
+.poi-card--bars-on-hero .poi-card__grabber {
+    background-color: var(--ts-on-scrim);
 }
 
 /* The card's settings (P4.4b; a gear since part 2): the same round button as the X, left of it, the gear the size of the X's mark */
 .poi-card__settings {
     position: absolute;
-    top: var(--ts-space-2);
+    top: var(--ts-bar-top);
     right: var(--ts-settings-button-right);
-    width: var(--ts-touch-target);
-    height: var(--ts-touch-target);
+    width: var(--ts-bar-height);
+    height: var(--ts-bar-height);
     margin: 0;
     padding: 0;
     align-items: center;
     justify-content: center;
     color: var(--ts-ink);
-    background-color: var(--ts-surface-2);
+    background-color: var(--ts-clear);
     border-color: var(--ts-line);
-    border-width: var(--ts-line-width);
+    border-width: 0;
     border-radius: var(--ts-touch-target);
 }
 
@@ -102,17 +151,17 @@
    there only while the card has a Menu */
 .poi-card__menu-button {
     position: absolute;
-    top: var(--ts-space-2);
+    top: var(--ts-bar-top);
     right: var(--ts-menu-button-right);
-    width: var(--ts-touch-target);
-    height: var(--ts-touch-target);
+    width: var(--ts-bar-height);
+    height: var(--ts-bar-height);
     margin: 0;
     padding: 0;
     align-items: center;
     justify-content: center;
-    background-color: var(--ts-surface-2);
+    background-color: var(--ts-clear);
     border-color: var(--ts-line);
-    border-width: var(--ts-line-width);
+    border-width: 0;
     border-radius: var(--ts-touch-target);
 }
 
@@ -194,6 +243,7 @@
     top: 50%;
     width: var(--ts-icon-size);
     height: var(--ts-icon-stroke);
+    border-radius: var(--ts-icon-stroke);
     translate: -50% -50%;
     background-color: var(--ts-ink);
 }
@@ -206,15 +256,20 @@
     rotate: -45deg;
 }
 
-/* The pinned header slot (never scrolls): the BAR -- one row as tall as the round buttons and lined up with them (it rises into the grab
-   zone by --ts-bar-overlap), so the peek stop ends where the buttons do and nothing it holds can move a stop (_3.3 P4.4a) */
+/* The pinned header slot (never scrolls): the BAR -- one row as tall as the round buttons and lined up with them, so the peek stop ends
+   where the buttons do and nothing it holds can move a stop (_3.3 P4.4a). FLOATING and slim since S4a's review: clear over the hero's
+   picture (BarsOnHeroClass), the see-through bar ground anywhere else; its title on a pill once it shows */
 .poi-card__header {
-    flex-shrink: 0;
-    background-color: var(--ts-bar);
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: var(--ts-bar-top);
+    background-color: var(--ts-bar-glass);
+    transition-property: background-color;
+    transition-duration: var(--ts-duration);
     flex-direction: row;
-    height: var(--ts-touch-target);
-    margin-top: var(--ts-bar-overlap);
-    padding-left: var(--ts-space-5);
+    height: var(--ts-bar-height);
+    padding-left: var(--ts-space-4);
     padding-right: var(--ts-header-end);
 }
 
@@ -397,26 +452,43 @@
 /* The top navigation slot (_3.2 step 5a, NavSlots): between the header and the stack, never scrolling; opaque, with a line under it so
    the blocks scrolling past read as passing under it. Its element's own look is Navigation.uss */
 .poi-card__nav-top {
-    flex-shrink: 0;
-    background-color: var(--ts-surface);
-    border-bottom-width: var(--ts-line-width);
-    border-color: var(--ts-line);
+    /* FLOATING (S4a review): a pill under the bar, its tabs inside -- out of the flow, so its coming never moves the stack. Opaque (the
+       bar's ground): the older elements' words keep their contrast; the Navigation Bar draws its own fill (.poi-card__nav-top--bar) */
+    position: absolute;
+    left: var(--ts-space-3);
+    right: var(--ts-space-3);
+    top: var(--ts-nav-float-top);
+    background-color: var(--ts-bar);
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-glass-edge);
+    border-radius: var(--ts-radius-xl);
+    overflow: hidden;
+    transition-property: opacity, translate;
+    transition-duration: var(--ts-duration);
+    transition-timing-function: var(--ts-ease);
 }
 
 /* The strip hidden by CardChromeRule (CardChromeView): out of the flow, so the stack gets its room, but still laid out, so its height
    stays known for the next decision */
-.poi-card__nav-top--hidden {
-    position: absolute;
+/* holding the Navigation Bar (NavBarView): the host is clear and full width -- the bar draws its own shape, fill and margins, and its
+   raised indicator may rise past the host's top */
+.poi-card__nav-top--bar {
     left: 0;
     right: 0;
-    visibility: hidden;
+    background-color: var(--ts-clear);
+    border-width: 0;
+    border-radius: 0;
+    overflow: visible;
 }
 
-/* Under a shown strip the first block keeps a gap below the hairline (without it its heading sat ~4 px under the line, _3.2 step 6).
-   The gap scrolls with the content, so a block a jump lands on sits flush like any block scrolled to the top; CardChromeView sets
-   the class and reads the blocks' height without it */
-.poi-card--nav-top-shown .poi-card__stack .unity-scroll-view__content-container {
-    padding-top: var(--ts-space-3);
+.poi-card__nav-bottom--bar {
+    background-color: var(--ts-clear);
+    border-top-width: 0;
+}
+
+.poi-card__nav-top--hidden {
+    opacity: 0;
+    visibility: hidden;
 }
 
 /* The pages layout (CardPagerView, step 14): the page is inset by the peek, where the next page's cue shows; while a released page slides
@@ -488,24 +560,38 @@
 }
 
 .card-block-frame__shadow,
-.card-block-frame__rim {
+.card-block-frame__rim,
+.card-block-frame__groove {
     display: none;
     position: absolute;
 }
 
-/* the inner band: light where the light falls (top, left), shade opposite -- the brushed-metal edge, 1 px inside the outer line */
+/* the metal band just inside the outer line (_3.3 S4a): light where the light falls (top, left), shade opposite -- a bevel, as wide as
+   the mode's --ts-rim-band (3 on light metal, where the moving light rides it; a hairline on dark) */
 .card-block-slot--framed > .card-block-frame__rim {
     display: flex;
     left: 0;
     top: 0;
     right: 0;
     bottom: 0;
-    border-width: var(--ts-line-width);
+    border-width: var(--ts-rim-band);
     border-top-color: var(--ts-metal-hi);
     border-left-color: var(--ts-metal-hi);
     border-bottom-color: var(--ts-metal-lo);
     border-right-color: var(--ts-metal-lo);
     border-radius: var(--ts-radius-l);
+}
+
+/* the groove: one thin metal line just inside the band, against the surface -- the brushed bands (clear on dark metal) */
+.card-block-slot--framed > .card-block-frame__groove {
+    display: flex;
+    left: var(--ts-rim-band);
+    top: var(--ts-rim-band);
+    right: var(--ts-rim-band);
+    bottom: var(--ts-rim-band);
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-metal-groove);
+    border-radius: var(--ts-frame-groove-radius);
 }
 
 /* the shadow: an outer-only 9-slice (card_block_shadow.png: transparent over the block, so it never greys the surface) laid around
@@ -535,6 +621,7 @@
 
 /* quiet: the hairline edge alone -- no rim band, no shadow -- and a smaller title (meta blocks such as sources) */
 .card-block-slot--quiet > .card-block-frame__rim,
+.card-block-slot--quiet > .card-block-frame__groove,
 .card-block-slot--quiet > .card-block-frame__shadow {
     display: none;
 }

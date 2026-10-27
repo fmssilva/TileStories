@@ -159,6 +159,9 @@ namespace TileStories.Editor.Tests
             }
             nav.families.Add(new CardFamilySetting { family = "media", order = 7, at_end = true, group = "watch" });
             nav.groups.Add(new CardNavGroup { key = "group_1", label = new List<LocalizedEntry> { new() { lang = "en", value = "Mine" } } });
+            // - the Navigation Bar (_3.3 S4a review): no preset writes it
+            nav.bar.enabled = true;
+            nav.bar.indicator = CardOptions.NavBarIndicatorRaised;
             // - the seven rows then hold something no preset writes, so Apply is the only thing that can move them
             return nav;
         }
@@ -170,8 +173,10 @@ namespace TileStories.Editor.Tests
             foreach (var field in typeof(CardNavigationSettings).GetFields(PublicFields))
             {
                 object value = field.GetValue(nav);
+                // - a list by its rows, a settings object (the Navigation Bar) by its JSON, a value by itself
                 map[field.Name] = value is IEnumerable list && !(value is string)
                     ? "[" + string.Join("|", list.Cast<object>().Select(JsonUtility.ToJson)) + "]"
+                    : value != null && field.FieldType.IsClass && !(value is string) ? JsonUtility.ToJson(value)
                     : value?.ToString() ?? "null";
             }
             return map;

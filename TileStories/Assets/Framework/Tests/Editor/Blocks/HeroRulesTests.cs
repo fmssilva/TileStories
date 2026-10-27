@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace TileStories.Editor.Tests
 {
@@ -11,13 +12,23 @@ namespace TileStories.Editor.Tests
     {
         private static SheetStopRule.Stops LampStops => new(57f, 337.6f, 796f);
 
+        // _3.3 S4a review: the hero is the whole sheet at Full -- its picture runs up under the floating bars (never under the card's
+        // minimum) -- and its words sit at its foot, whatever the stop
         [Test]
-        public void TheHero_FillsWhatHalfShowsUnderTheBar_NeverUnderItsMinimum()
+        public void TheHero_IsTheWholeSheetAtFull_ItsWordsAtItsFoot()
         {
-            Assert.AreEqual(337.6f - 57f, HeroRule.Height(LampStops, 280f), 0.001f, "Half's view under the bar (the 390 x 844 phone)");
-            Assert.AreEqual(280f, HeroRule.Height(new SheetStopRule.Stops(57f, 300f, 700f), 280f), 0.001f, "a short Half: the minimum");
-            Assert.AreEqual(280f, HeroRule.Height(new SheetStopRule.Stops(57f, float.NaN, 700f), 280f), 0.001f, "not measured yet: the minimum");
+            var top = new SheetStopRule.Stops(57f, 337.6f, 844f);
+            Assert.AreEqual(844f - 57f, HeroRule.FullView(top), 0.001f, "To The Top on the 390 x 844 phone: 787 under the bar");
+            Assert.AreEqual(844f, HeroRule.Height(top, 200f), 0.001f, "the hero is the whole sheet, the bars floating over it");
+            Assert.AreEqual(796f, HeroRule.Height(LampStops, 200f), 0.001f, "with a camera strip: its Full");
+            Assert.AreEqual(200f, HeroRule.Height(new SheetStopRule.Stops(57f, 150f, 200f), 200f), 0.001f, "a tiny screen: never under the minimum");
+            Assert.AreEqual(200f, HeroRule.Height(new SheetStopRule.Stops(57f, float.NaN, float.NaN), 200f), 0.001f, "not measured yet: the minimum");
             Assert.AreEqual(0f, HeroRule.Height(new SheetStopRule.Stops(0f, 0f, 0f), -5f), 0.001f, "nothing negative");
+
+            Assert.AreEqual(337.6f - 57f, HeroRule.HalfView(top), 0.001f, "Half's view under the bar");
+            Assert.AreEqual(844f, HeroRule.WordsBottom(844f), 0.001f, "the words end at the hero's foot");
+            Assert.AreEqual(0f, HeroRule.WordsBottom(float.NaN), 0.001f, "not measured yet: nothing");
+            Assert.AreEqual(0f, HeroRule.WordsBottom(-5f), 0.001f, "nothing negative");
         }
 
         [Test]
@@ -59,10 +70,11 @@ namespace TileStories.Editor.Tests
         public void ThePan_CrossesTheWholePictureAndBack_OncePerPeriod_EasedAtBothEnds()
         {
             const float overflow = 400f;
-            float half = HeroMotionRule.PanPeriod / 2f;
+            float period = HeroMotionRule.PeriodFor(overflow);
+            float half = period / 2f;
             Assert.AreEqual(0f, HeroMotionRule.PanOffset(HeroMotionRule.Pan, false, 0f, overflow), 0.001f, "starts at the picture's left edge");
             Assert.AreEqual(-overflow, HeroMotionRule.PanOffset(HeroMotionRule.Pan, false, half, overflow), 0.001f, "half way: its right edge");
-            Assert.AreEqual(0f, HeroMotionRule.PanOffset(HeroMotionRule.Pan, false, HeroMotionRule.PanPeriod, overflow), 0.001f, "and back");
+            Assert.AreEqual(0f, HeroMotionRule.PanOffset(HeroMotionRule.Pan, false, period, overflow), 0.001f, "and back");
             Assert.AreEqual(-overflow / 2f, HeroMotionRule.PanOffset(HeroMotionRule.Pan, false, half / 2f, overflow), 0.001f, "the middle at a quarter");
             float early = -HeroMotionRule.PanOffset(HeroMotionRule.Pan, false, half * 0.1f, overflow);
             Assert.Less(early, overflow * 0.1f, "eased: slower than linear near the end (" + early + ")");
@@ -74,6 +86,35 @@ namespace TileStories.Editor.Tests
                 Assert.LessOrEqual(x, last + 0.0001f, "always moving the same way on the way there (t " + t + ")");
                 last = x;
             }
+        }
+
+        // _3.3 S4a: a full-screen hero crops a wide picture a lot -- the pan's period grows with its way, so it never slides faster than
+        // MaxPanSpeed; Pan And Zoom drifts AND pushes in on that same period; both are "moving", both still under Reduce Motion
+        [Test]
+        public void ThePanNeverSlidesFasterThanAWalk_AndPanAndZoom_DriftsAndPushesInTogether()
+        {
+            Assert.AreEqual(HeroMotionRule.PanPeriod, HeroMotionRule.PeriodFor(100f), 0.001f, "a short way: the 26 s period");
+            Assert.AreEqual(2f * 1010f / HeroMotionRule.MaxPanSpeed, HeroMotionRule.PeriodFor(1010f), 0.001f, "the castle cropped to 390 x 787: slower");
+            Assert.AreEqual(HeroMotionRule.PanPeriod, HeroMotionRule.PeriodFor(float.NaN), 0.001f);
+            // - the fastest the picture moves over a whole period, sampled finely: never above the limit (the ease's peak is 1.5x linear)
+            foreach (float overflow in new[] { 100f, 400f, 1010f })
+            {
+                float period = HeroMotionRule.PeriodFor(overflow), fastest = 0f, step = period / 2000f;
+                for (float t = 0f; t < period; t += step)
+                    fastest = Mathf.Max(fastest, Mathf.Abs(HeroMotionRule.PanOffset(HeroMotionRule.Pan, false, t + step, overflow)
+                                                           - HeroMotionRule.PanOffset(HeroMotionRule.Pan, false, t, overflow)) / step);
+                Assert.LessOrEqual(fastest, HeroMotionRule.MaxPanSpeed * 1.5f + 0.01f, "overflow " + overflow + ": its fastest moment " + fastest + " pt/s");
+            }
+            const float way = 1010f;
+            float half = HeroMotionRule.PeriodFor(way) / 2f;
+            Assert.AreEqual(HeroMotionRule.PanOffset(HeroMotionRule.Pan, false, half * 0.3f, way),
+                HeroMotionRule.PanOffset(HeroMotionRule.PanZoom, false, half * 0.3f, way), 0.001f, "pan and zoom drifts as pan does");
+            Assert.AreEqual(HeroMotionRule.ZoomMax, HeroMotionRule.Scale(HeroMotionRule.PanZoom, false, half, way), 0.0001f, "...and is pushed in at the far end");
+            Assert.AreEqual(1f, HeroMotionRule.Scale(HeroMotionRule.PanZoom, false, 0f, way), 0.0001f, "...and not at the start");
+            Assert.IsTrue(HeroMotionRule.Moves(HeroMotionRule.PanZoom, false));
+            Assert.IsFalse(HeroMotionRule.Moves(HeroMotionRule.PanZoom, true), "reduce motion: still");
+            Assert.AreEqual(-way / 2f, HeroMotionRule.PanOffset(HeroMotionRule.PanZoom, true, half * 0.3f, way), 0.001f, "...at its centre");
+            Assert.AreEqual(1f, HeroMotionRule.Scale(HeroMotionRule.PanZoom, true, half, way), 0.0001f, "...not pushed in");
         }
 
         [Test]
@@ -106,12 +147,15 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(280f, HeroMotionRule.Parallax(1000f, 280f, false), 0.001f, "never past its frame");
             Assert.AreEqual(0f, HeroMotionRule.Parallax(-20f, 280f, false), 0.001f, "an overscroll at the top does not lift it");
             Assert.AreEqual(0f, HeroMotionRule.Parallax(100f, 280f, true), 0.001f, "reduce motion");
-            Assert.AreEqual(-18f, HeroMotionRule.TextRise(100f, false), 0.001f, "the words rise");
+            Assert.AreEqual(-25f, HeroMotionRule.TextRise(100f, false), 0.001f, "the words rise past the scroll (they outrun the picture)");
             Assert.AreEqual(0f, HeroMotionRule.TextRise(100f, true), 0.001f);
-            Assert.AreEqual(1f, HeroMotionRule.TextOpacity(0f, false), 0.001f);
-            Assert.AreEqual(0.5f, HeroMotionRule.TextOpacity(HeroMotionRule.TextFadeDistance / 2f, false), 0.001f, "fading");
-            Assert.AreEqual(0f, HeroMotionRule.TextOpacity(1000f, false), 0.001f, "gone");
-            Assert.AreEqual(1f, HeroMotionRule.TextOpacity(1000f, true), 0.001f, "reduce motion: whole");
+            // - the fade is by the words' place in the view: whole until they near the chrome's foot (60 here), gone as they reach it
+            Assert.AreEqual(1f, HeroMotionRule.TextOpacity(700f, 60f, false), 0.001f, "low on the picture: whole");
+            Assert.AreEqual(1f, HeroMotionRule.TextOpacity(60f + HeroMotionRule.TextFadeSpan, 60f, false), 0.001f, "...until the fade's span");
+            Assert.AreEqual(0.5f, HeroMotionRule.TextOpacity(60f + HeroMotionRule.TextFadeSpan / 2f, 60f, false), 0.001f, "fading near the top");
+            Assert.AreEqual(0f, HeroMotionRule.TextOpacity(40f, 60f, false), 0.001f, "under the chrome: gone");
+            Assert.AreEqual(1f, HeroMotionRule.TextOpacity(40f, 60f, true), 0.001f, "reduce motion: whole");
+            Assert.AreEqual(1f, HeroMotionRule.TextOpacity(float.NaN, 60f, false), 0.001f, "not laid out: whole");
         }
 
         private static BlockStackBuilder.Entry Entry(BlockKindDefinition kind, string variant, string key) =>
@@ -189,8 +233,8 @@ namespace TileStories.Editor.Tests
             var motion = kind.Field(BuiltInBlocks.HeaderHeroMotionField);
             Assert.IsNotNull(motion, "Hero Motion");
             Assert.AreEqual(BlockFieldType.Choice, motion.Type);
-            CollectionAssert.AreEqual(new[] { HeroMotionRule.Pan, HeroMotionRule.Zoom, HeroMotionRule.None }, motion.Options);
-            Assert.AreEqual(HeroMotionRule.Pan, motion.ChoiceDefault, "pan by default");
+            CollectionAssert.AreEqual(new[] { HeroMotionRule.PanZoom, HeroMotionRule.Pan, HeroMotionRule.Zoom, HeroMotionRule.None }, motion.Options);
+            Assert.AreEqual(HeroMotionRule.PanZoom, motion.ChoiceDefault, "pan and zoom by default (_3.3 S4a)");
             Assert.IsTrue(motion.LibraryDefault, "a wall may set its default in the Block Library");
             Assert.IsFalse(string.IsNullOrEmpty(motion.Help), "its (i)");
             Assert.AreEqual(BlockFieldType.LocalizedText, kind.Field(BuiltInBlocks.HeaderEyebrowField)?.Type, "Eyebrow, per language");

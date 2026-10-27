@@ -143,6 +143,8 @@ namespace TileStories.Tests
                 CardTestInput.TokenPx("--ts-sheet-top-gap"));
             Assert.AreEqual(expected.Half, withStrip.Half, 0.01f, "half comes from the peek and the Half Height Max");
             Assert.AreEqual(expected.Full, withStrip.Full, 0.01f, "full leaves the top gap");
+            // - the hero is the screen at rest: the chrome comes once it is scrolled away (_3.3 S4a)
+            yield return CardTestInput.PastTheHero(Sheet);
             Assert.IsTrue(InTheCard(Sheet.Slots.Top), "the strip shows at Full");
             Assert.GreaterOrEqual(Sheet.Slots.Top.worldBound.yMin, Sheet.Stack.PeekPart.worldBound.yMax - 0.5f, "and sits under the header's peek part");
             Assert.LessOrEqual(Sheet.Slots.Top.worldBound.yMax, Scroll.worldBound.yMin + 0.5f, "above the stack, outside its scroll");
@@ -189,7 +191,7 @@ namespace TileStories.Tests
 
                 var section = Nav.Model.Sections[i];
                 var slot = Sheet.Stack.SlotOfBlock(section.Targets[0]);
-                float top = Sheet.Stack.LandingElement(slot).worldBound.yMin - Scroll.contentViewport.worldBound.yMin;
+                float top = Sheet.Stack.LandingElement(slot).worldBound.yMin - Scroll.contentViewport.worldBound.yMin - Sheet.Stack.LandingInset;
                 Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop, section.Key + ": the card stays at Full");
                 if (Sheet.Stack.LandingTop(slot) <= Range - OnePixel)
                     Assert.AreEqual(0f, top, OnePixel, section.Key + ": its first block's top meets the viewport's top");
@@ -319,6 +321,8 @@ namespace TileStories.Tests
         {
             float touch = CardTestInput.TokenPx("--ts-touch-target");
             yield return Open(Lamp, SheetStopRule.Stop.Full);
+            // - the hero is the screen at rest: the chrome comes once it is scrolled away (_3.3 S4a)
+            yield return CardTestInput.PastTheHero(Sheet);
             Assert.IsTrue(InTheCard(Sheet.Slots.Top), "precondition: the strip shows at Full");
             var card = Sheet.Root.worldBound;
             Assert.GreaterOrEqual(Tabs.Viewport.worldBound.xMin, card.xMin - 0.5f, "full: the strip starts inside the card");

@@ -16,6 +16,8 @@ namespace TileStories
         public VisualElement Layer { get; }
         public VisualElement Root { get; }
         public VisualElement Handle { get; }
+        // The soft fade behind the bars while they float over the hero's picture
+        public VisualElement TopShade { get; }
         public Button CloseButton { get; }
         // The settings button beside the X (_3.3 P4.4b, replaces the language chip of 15.3.2; a gear since part 2): opens the visitor's
         // settings -- language, light / dark
@@ -88,9 +90,11 @@ namespace TileStories
         // The shown card's stack entries: what its navigation model is rebuilt from when a waiting block is revealed
         private IReadOnlyList<BlockStackBuilder.Entry> _entries;
         private float _topGap;
-        // --ts-hero-min-height: the hero is never shorter than this, whatever Half shows (HeroRule.Height)
+        // --ts-hero-min-height: the hero is never shorter than this, whatever the stops (HeroRule.Height)
         private float _heroMin;
         private float _halfMaxRatio = CardContainerSettings.HalfMaxRatioMax;
+        // The shown card's Full Height (CardOptions.FullHeights): whether the Full stop leaves the camera strip (_topGap) above it
+        private string _fullHeight = CardOptions.FullHeightTop;
 
         // The shown card's media source and texts: what the full-screen view loads through and words its way back with
         private BlockBindContext _context;
@@ -117,6 +121,11 @@ namespace TileStories
             grabber.AddToClassList("poi-card__grabber");
             Handle.Add(grabber);
             Root.Add(Handle);
+            // - a soft dark fade at the top while the bars float over the hero's picture, so their white marks read on any picture (no
+            //   finger: the stack under it still scrolls)
+            TopShade = new VisualElement { name = "poi-card-top-shade", pickingMode = PickingMode.Ignore };
+            TopShade.AddToClassList("poi-card__top-shade");
+            Root.Add(TopShade);
 
             _registry = registry;
             Stack = new BlockStackView(Root, Root, registry);
@@ -156,6 +165,8 @@ namespace TileStories
             SettingsButton = new Button(ToggleSettings) { name = "poi-card-settings" };
             SettingsButton.AddToClassList("poi-card__settings");
             SettingsGlyph = CardIcons.CreateVector(CardIcons.Shape.Gear);
+            // - solid, on the button's faint disc (S4a review: the mark carries the button, not a rim)
+            SettingsGlyph.Filled = true;
             SettingsGlyph.AddToClassList("poi-card__settings-glyph");
             SettingsButton.Add(SettingsGlyph);
             Root.Add(SettingsButton);
@@ -170,6 +181,11 @@ namespace TileStories
             CardIcons.SetKey(menuIcon, CardIcons.Menu);
             MenuButton.Add(menuIcon);
             Root.Add(MenuButton);
+            // - the chrome FLOATS over the stack (_3.3 S4a review): the shade, the grab row, the bar and the top strip are out of the flow
+            //   (PoiCard.uss) and drawn over the scroll, the round buttons over them -- so the stack starts at the sheet's top, the hero's
+            //   picture runs up behind the bars and nothing jumps when the strip comes
+            foreach (var floating in new[] { TopShade, Handle, Stack.HeaderSlot, Slots.Top, CloseButton, SettingsButton, MenuButton })
+                floating.BringToFront();
 
             Layer.Add(Root);
             Takeover = new TakeoverView(Layer);
@@ -184,6 +200,7 @@ namespace TileStories
             Root.RegisterCallback<CustomStyleResolvedEvent>(OnCustomStyle);
             Layer.RegisterCallback<GeometryChangedEvent>(_ => RecomputeStops());
             Stack.HeaderSlot.RegisterCallback<GeometryChangedEvent>(_ => RecomputeStops());
+            Slots.Top.RegisterCallback<GeometryChangedEvent>(_ => RecomputeStops());
             Hide();
         }
 
@@ -192,6 +209,7 @@ namespace TileStories
         public void Show(IReadOnlyList<BlockStackBuilder.Entry> entries, BlockBindContext context, SheetStopRule.Stop openStop, float halfMaxRatio)
         {
             _halfMaxRatio = halfMaxRatio;
+            _fullHeight = context.Settings?.container?.full_height ?? CardOptions.FullHeightTop;
             CloseButton.tooltip = context.Strings?.Get(CardStrings.Keys.Close) ?? "";
             ShowSettingsButton(context);
             context.Host ??= this;
@@ -423,9 +441,12 @@ namespace TileStories
             //   re-attached by every rebind and reads a stale world rect until the next layout pass (Show measures right after the bind)
             var slot = Stack.HeaderSlot;
             float peek = float.IsNaN(slot.layout.yMax) ? 0f : slot.layout.yMax + slot.resolvedStyle.marginBottom;
-            Stops = SheetStopRule.Compute(available, peek, _halfMaxRatio, _topGap);
-            // - the hero fills what Half shows under the bar (never under its minimum): it follows the stops, never feeds them
-            Stack.HeaderView?.SetHeroHeight(HeroRule.Height(Stops, _heroMin));
+            Stops = SheetStopRule.Compute(available, peek, _halfMaxRatio, SheetStopRule.FullTopGap(_fullHeight, _topGap));
+            // - the hero fills Full's view under the bar, its words at its foot: it follows the stops, never feeds them
+            // - the content starts under the floating bars; a jump lands a block under the bars and the strip
+            Stack.SetInsets(peek, Slots.TopView != null && !float.IsNaN(Slots.Top.layout.yMax) ? Slots.Top.layout.yMax : peek);
+            float hero = HeroRule.Height(Stops, _heroMin);
+            Stack.HeaderView?.SetHeroLayout(hero, HeroRule.WordsBottom(hero), Stack.TopInset);
             if (IsOpen && !Drag.IsDragging) ApplyHeight(Stops.HeightOf(Stop));
             // - the chrome's room is the stop's height: new stops can give it room, or take it
             Chrome?.Apply();

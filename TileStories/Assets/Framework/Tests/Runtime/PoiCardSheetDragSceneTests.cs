@@ -165,6 +165,8 @@ namespace TileStories.Tests
             yield return Open(SheetStopRule.Stop.Full);
             var tabs = Sheet.Slots.TopView as TextTabsNavView;
             Assert.IsNotNull(tabs, "precondition: Text Tabs in the top strip");
+            // - the hero is the screen at rest: the chrome comes once it is scrolled away (_3.3 S4a)
+            yield return CardTestInput.PastTheHero(Sheet);
             Assert.IsTrue(Sheet.Chrome.TopShown, "precondition: the strip shows at Full");
             var panel = Sheet.Root.panel;
             Vector2 at = tabs.Tabs[0].Button.worldBound.center;

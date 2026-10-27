@@ -99,6 +99,8 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle();
             Assert.AreEqual(stop, Sheet.Stop, "precondition: the card rests at " + stop);
             yield return Rested();
+            // - _3.3 S4a: at Full the hero is the screen and the bottom chrome waits for it: read just past it
+            if (stop == SheetStopRule.Stop.Full) yield return CardTestInput.PastTheHero(Sheet);
         }
 
         // The sheet's height animates in real time: every measure waits for it to rest at its stop's height
@@ -171,7 +173,7 @@ namespace TileStories.Tests
         {
             var slot = Sheet.Stack.SlotOfBlock(block);
             if (Sheet.Stack.LandingTop(slot) <= Range - OnePixel)
-                Assert.AreEqual(0f, Sheet.Stack.LandingElement(slot).worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, name + ": its block's top meets the viewport's top (slot y "
+                Assert.AreEqual(Sheet.Stack.LandingInset, Sheet.Stack.LandingElement(slot).worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, name + ": its block's top meets the viewport's top (slot y "
                     + Sheet.Stack.LandingTop(slot) + ", offset " + Scroll.scrollOffset.y + ", range " + Range + ", viewport " + Scroll.contentViewport.layout.height
                     + ", footer " + Sheet.Chrome.FooterShown + ", bar " + Sheet.Chrome.BottomNavShown + ", jumping " + Sheet.Nav.IsJumping + ")");
             else
@@ -193,6 +195,8 @@ namespace TileStories.Tests
                 yield return UseTheElement(element);
                 yield return Rested();
                 Assert.AreEqual(element, Sheet.Slots.BottomKey, "precondition: " + element + " is in the bottom slot");
+                // - the hero is the screen at rest: the chrome comes once it is scrolled away (_3.3 S4a)
+                yield return CardTestInput.PastTheHero(Sheet);
                 Assert.IsTrue(Chrome.BottomNavShown, element + ": shows at Full");
                 Assert.GreaterOrEqual(BarSlot.worldBound.yMin, Sheet.Stack.PeekPart.worldBound.yMax, element + ": far under the header's peek part");
                 foreach (var stop in new[] { SheetStopRule.Stop.Full, SheetStopRule.Stop.Half, SheetStopRule.Stop.Peek })
@@ -326,6 +330,8 @@ namespace TileStories.Tests
         {
             yield return UseTheElement(BuiltInNavElements.Dock);
             yield return Open(SheetStopRule.Stop.Full);
+            // - the hero is the screen at rest: the chrome comes once it is scrolled away (_3.3 S4a)
+            yield return CardTestInput.PastTheHero(Sheet);
             Assert.IsTrue(Chrome.BottomShown && Chrome.BottomNavShown && OnScreen(BarSlot), "precondition: the dock shows at Full");
             yield return CardGalleryChecks.Render("Nav_Lamp_dock_full_390");
             yield return DragStack(-300f);

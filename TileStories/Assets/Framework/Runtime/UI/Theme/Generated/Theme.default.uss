@@ -24,9 +24,26 @@
     --ts-on-scrim: rgb(255, 255, 255);
     /* The hero's eyebrow over the scrim (a warm white) */
     --ts-on-scrim-2: rgb(241, 233, 218);
+    /* The soft glow behind the hero's words (_3.3 S4a: tints hero_glow.png, a fade with no edge): transparent, the picture
+       stays the hero; the halo round the letters carries the contrast */
+    --ts-hero-glow: rgba(10, 8, 6, 0.72);
+    /* The dark halo hugging every letter of the hero (its text-shadow): the picture right around a word is darkened, so the
+       word reads over a bright sky */
+    --ts-text-halo: rgba(0, 0, 0, 0.85);
     /* The card's chrome ground: the grabber row, the bar, the top strip, the footer -- opaque, so their words never sit on the
        glass */
     --ts-bar: rgb(255, 255, 255);
+    /* The see-through bars (_3.3 S4a review): the grab row, the bar and the navigation strips over the picture -- light enough
+       to show it, dense enough that the bar's ink keeps >= 7:1 over the worst (black or white) behind it */
+    --ts-bar-glass: rgba(255, 255, 255, 0.6);
+    /* The round buttons' ground on a see-through bar (X, settings, menu): a faint disc, no rim -- the solid mark carries the
+       button */
+    --ts-button-glass: rgba(20, 17, 13, 0.07);
+    /* The pill behind the floating bar title (S4a review): nearly opaque, so the title reads over any block passing under it */
+    --ts-bar-pill: rgba(255, 255, 255, 0.9);
+    /* The fade from the sheet top while the floating bars sit on the hero picture (tints top_shade.png): their white marks
+       read on any picture */
+    --ts-top-shade: rgba(0, 0, 0, 0.5);
     /* The sheet's ground between the blocks (R11 tinted glass: light clear, dark smoked): tints card_glass.png, a vertical
        alpha ramp, so the top is clearer; this alpha is the ramp's foot */
     --ts-glass-ground: rgba(244, 240, 232, 0.62);
@@ -54,8 +71,10 @@
     --ts-metal-edge: rgb(67, 60, 50);
     /* The rim's inner band where the light falls (top, left) */
     --ts-metal-hi: rgb(255, 255, 255);
-    /* The rim's inner band in shade (bottom, right) */
-    --ts-metal-lo: rgb(201, 191, 175);
+    /* The rim's band in shade (bottom, right): with the hi side a clear bevel the moving light reads on (_3.3 S4a) */
+    --ts-metal-lo: rgb(138, 130, 118);
+    /* The thin groove just inside the rim's band (_3.3 S4a): a second metal line against the surface, the brushed bands */
+    --ts-metal-groove: rgb(176, 168, 155);
     /* A block's shadow (tints card_block_shadow.png). Light only: a shadow is invisible on a dark ground (R8 S7), dark gets
        its depth from the surface tone */
     --ts-elevation-1: rgba(20, 17, 13, 0.2);
@@ -152,6 +171,8 @@
     --ts-family-navigation-light: rgba(150, 175, 60, 0.549019635);
     --ts-family-navigation-light-2: rgba(200, 215, 120, 0.4509804);
     --ts-family-navigation-sweep: rgb(255, 255, 255);
+    /* The rim's metal band, the band the moving light rides (_3.3 S4a: wider in light so the light reads) */
+    --ts-rim-band: 3px;
     /* The rim light's width in degrees of its turn (R11 v3: narrower on dark metal) */
     --ts-rim-sweep-arc: 62;
     --ts-line-width: 1px;
@@ -162,9 +183,9 @@
     --ts-size-lede: 19px;
     --ts-size-heading: 20px;
     /* The hero's title over its picture (_3.3 R11, P4.4a), the display face */
-    --ts-size-hero: 46px;
+    --ts-size-hero: 40px;
     /* The hero's title on a phone (HeroRule.IsNarrow, under 400 pt wide) */
-    --ts-size-hero-narrow: 40px;
+    --ts-size-hero-narrow: 34px;
     --ts-size-dropcap: 48px;
     --ts-size-quote: 22px;
     /* Shape */
@@ -210,9 +231,26 @@
     --ts-on-scrim: rgb(255, 255, 255);
     /* The hero's eyebrow over the scrim (a warm white) */
     --ts-on-scrim-2: rgb(241, 233, 218);
+    /* The soft glow behind the hero's words (_3.3 S4a: tints hero_glow.png, a fade with no edge): transparent, the picture
+       stays the hero; the halo round the letters carries the contrast */
+    --ts-hero-glow: rgba(10, 8, 6, 0.72);
+    /* The dark halo hugging every letter of the hero (its text-shadow): the picture right around a word is darkened, so the
+       word reads over a bright sky */
+    --ts-text-halo: rgba(0, 0, 0, 0.85);
     /* The card's chrome ground: the grabber row, the bar, the top strip, the footer -- opaque, so their words never sit on the
        glass */
     --ts-bar: rgb(28, 26, 23);
+    /* The see-through bars (_3.3 S4a review): the grab row, the bar and the navigation strips over the picture -- light enough
+       to show it, dense enough that the bar's ink keeps >= 7:1 over the worst (black or white) behind it */
+    --ts-bar-glass: rgba(28, 26, 23, 0.78);
+    /* The round buttons' ground on a see-through bar (X, settings, menu): a faint disc, no rim -- the solid mark carries the
+       button */
+    --ts-button-glass: rgba(255, 255, 255, 0.12);
+    /* The pill behind the floating bar title (S4a review): nearly opaque, so the title reads over any block passing under it */
+    --ts-bar-pill: rgba(28, 26, 23, 0.9);
+    /* The fade from the sheet top while the floating bars sit on the hero picture (tints top_shade.png): their white marks
+       read on any picture */
+    --ts-top-shade: rgba(0, 0, 0, 0.5);
     /* The sheet's ground between the blocks (R11 tinted glass: light clear, dark smoked): tints card_glass.png, a vertical
        alpha ramp, so the top is clearer; this alpha is the ramp's foot */
     --ts-glass-ground: rgba(16, 15, 13, 0.8);
@@ -242,6 +280,8 @@
     --ts-metal-hi: rgb(74, 68, 59);
     /* The rim's inner band in shade (bottom, right) */
     --ts-metal-lo: rgb(36, 33, 29);
+    /* No groove on dark metal: the dark frame keeps its quieter look (_3.3 S4a) */
+    --ts-metal-groove: rgba(0, 0, 0, 0);
     /* A block's shadow (tints card_block_shadow.png). Light only: a shadow is invisible on a dark ground (R8 S7), dark gets
        its depth from the surface tone */
     --ts-elevation-1: rgba(0, 0, 0, 0);
@@ -338,6 +378,8 @@
     --ts-family-navigation-light: rgba(150, 175, 60, 0.419607848);
     --ts-family-navigation-light-2: rgba(200, 215, 120, 0.298039228);
     --ts-family-navigation-sweep: rgba(200, 215, 120, 0.4509804);
+    /* The rim's metal band: a hairline on dark metal (the subtler look) */
+    --ts-rim-band: 1px;
     /* The rim light's width in degrees of its turn (R11 v3: narrower on dark metal) */
     --ts-rim-sweep-arc: 40;
     --ts-line-width: 1px;
@@ -348,9 +390,9 @@
     --ts-size-lede: 19px;
     --ts-size-heading: 20px;
     /* The hero's title over its picture (_3.3 R11, P4.4a), the display face */
-    --ts-size-hero: 46px;
+    --ts-size-hero: 40px;
     /* The hero's title on a phone (HeroRule.IsNarrow, under 400 pt wide) */
-    --ts-size-hero-narrow: 40px;
+    --ts-size-hero-narrow: 34px;
     --ts-size-dropcap: 48px;
     --ts-size-quote: 22px;
     /* Shape */

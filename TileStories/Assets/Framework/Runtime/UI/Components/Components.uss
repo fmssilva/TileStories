@@ -58,6 +58,9 @@
     --ts-el-carousel-gap: 10px;
     /* The preview's cap: a share of the card's full height (_3.3 R10.2), read by ComposedBlockView */
     --ts-preview-max: 0.5;
+    /* The shortest the preview's opening picture gets when it gives way so the title stays whole under the cap (_3.3 S4a, PreviewFitRule):
+       a plain number (panel units) read by ComposedBlockView */
+    --ts-preview-picture-min: 120;
 }
 
 /* ---------------- a row ---------------- */
@@ -572,6 +575,14 @@
 .card-block-slot--framed .ts-composed__clip > .ts-composed__rows {
     padding-left: var(--ts-el-page-inset);
     padding-right: var(--ts-el-page-inset);
+}
+
+/* A preview that opens with a full-bleed picture (_3.3 S4a): the clip pulls up over the frame's top padding, so the picture sits flush with
+   the block's top as well as its sides, its top corners rounded with the frame's inner corner (the clip's overflow masks it) */
+.card-block-slot--framed .ts-composed--picture-first > .ts-composed__preview > .ts-composed__clip {
+    margin-top: var(--ts-frame-bleed);
+    border-top-left-radius: var(--ts-frame-inner-radius);
+    border-top-right-radius: var(--ts-frame-inner-radius);
 }
 
 /* The cut: the surface's colour ramping in over the last lines (hero_scrim.png's 0 -> 1 alpha ramp, tinted) */

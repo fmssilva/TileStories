@@ -100,6 +100,8 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle();
             Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop, "precondition: the card rests at Full");
             Assert.AreEqual(element, Sheet.Slots.TopKey, "precondition: the slot holds " + element);
+            // - the hero is the screen at rest: the chrome comes once it is scrolled away (_3.3 S4a)
+            yield return CardTestInput.PastTheHero(Sheet);
             Assert.IsTrue(Sheet.Chrome.TopShown, "precondition: the strip shows at Full");
             Assert.AreEqual(56, Model.TargetCount, "precondition: The Lamp's 56 targets");
         }
@@ -254,7 +256,7 @@ namespace TileStories.Tests
             var slot = Sheet.Stack.SlotOfBlock(item.Block);
             Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop, item.Name + ": the card stays at Full");
             if (Sheet.Stack.LandingTop(slot) <= Range - OnePixel)
-                Assert.AreEqual(0f, Sheet.Stack.LandingElement(slot).worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, item.Name + ": its block's top meets the viewport's top");
+                Assert.AreEqual(Sheet.Stack.LandingInset, Sheet.Stack.LandingElement(slot).worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, item.Name + ": its block's top meets the viewport's top");
             else
                 Assert.AreEqual(Range, Scroll.scrollOffset.y, OnePixel, item.Name + ": a late block clamps at the end of the range");
             Assert.AreEqual(jumpsBefore + 1, NavJumps.Count, item.Name + ": one nav_jump");

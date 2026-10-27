@@ -49,12 +49,12 @@ MonoBehaviour:
       note: 
     - name: --ts-size-hero
       value:
-        value: 46
+        value: 40
         unit: 0
       note: The hero's title over its picture (_3.3 R11, P4.4a), the display face
     - name: --ts-size-hero-narrow
       value:
-        value: 40
+        value: 34
         unit: 0
       note: The hero's title on a phone (HeroRule.IsNarrow, under 400 pt wide)
     - name: --ts-size-dropcap
@@ -175,10 +175,31 @@ MonoBehaviour:
       - name: --ts-on-scrim-2
         value: {r: 0.94509804, g: 0.9137255, b: 0.85490197, a: 1}
         note: The hero's eyebrow over the scrim (a warm white)
+      - name: --ts-hero-glow
+        value: {r: 0.039215688, g: 0.03137255, b: 0.023529412, a: 0.72}
+        note: 'The soft glow behind the hero''s words (_3.3 S4a: tints hero_glow.png, a
+          fade with no edge): transparent, the picture stays the hero; the halo round
+          the letters carries the contrast'
+      - name: --ts-text-halo
+        value: {r: 0, g: 0, b: 0, a: 0.85}
+        note: 'The dark halo hugging every letter of the hero (its text-shadow): the
+          picture right around a word is darkened, so the word reads over a bright sky'
       - name: --ts-bar
         value: {r: 1, g: 1, b: 1, a: 1}
         note: 'The card''s chrome ground: the grabber row, the bar, the top strip,
           the footer -- opaque, so their words never sit on the glass'
+      - name: --ts-bar-glass
+        value: {r: 1, g: 1, b: 1, a: 0.6}
+        note: 'The see-through bars (_3.3 S4a review): the grab row, the bar and the navigation strips over the picture -- light enough to show it, dense enough that the bar''s ink keeps >= 7:1 over the worst (black or white) behind it'
+      - name: --ts-button-glass
+        value: {r: 0.078431375, g: 0.06666667, b: 0.050980393, a: 0.07}
+        note: 'The round buttons'' ground on a see-through bar (X, settings, menu): a faint disc, no rim -- the solid mark carries the button'
+      - name: --ts-bar-pill
+        value: {r: 1, g: 1, b: 1, a: 0.9}
+        note: 'The pill behind the floating bar title (S4a review): nearly opaque, so the title reads over any block passing under it'
+      - name: --ts-top-shade
+        value: {r: 0, g: 0, b: 0, a: 0.5}
+        note: 'The fade from the sheet top while the floating bars sit on the hero picture (tints top_shade.png): their white marks read on any picture'
       - name: --ts-glass-ground
         value: {r: 0.95686275, g: 0.9411765, b: 0.9098039, a: 0.62}
         note: 'The sheet''s ground between the blocks (R11 tinted glass: light clear,
@@ -233,8 +254,13 @@ MonoBehaviour:
         value: {r: 1, g: 1, b: 1, a: 1}
         note: The rim's inner band where the light falls (top, left)
       - name: --ts-metal-lo
-        value: {r: 0.7882353, g: 0.7490196, b: 0.6862745, a: 1}
-        note: The rim's inner band in shade (bottom, right)
+        value: {r: 0.5411765, g: 0.50980395, b: 0.4627451, a: 1}
+        note: 'The rim''s band in shade (bottom, right): with the hi side a clear bevel
+          the moving light reads on (_3.3 S4a)'
+      - name: --ts-metal-groove
+        value: {r: 0.6901961, g: 0.65882355, b: 0.60784316, a: 1}
+        note: 'The thin groove just inside the rim''s band (_3.3 S4a): a second metal
+          line against the surface, the brushed bands'
       - name: --ts-elevation-1
         value: {r: 0.078431375, g: 0.06666667, b: 0.050980393, a: 0.2}
         note: 'A block''s shadow (tints card_block_shadow.png). Light only: a shadow
@@ -473,7 +499,13 @@ MonoBehaviour:
       - name: --ts-family-navigation-sweep
         value: {r: 1, g: 1, b: 1, a: 1}
         note: 
-      lengths: []
+      lengths:
+      - name: --ts-rim-band
+        value:
+          value: 3
+          unit: 0
+        note: 'The rim''s metal band, the band the moving light rides (_3.3 S4a: wider
+          in light so the light reads)'
       numbers:
       - name: --ts-rim-sweep-arc
         value: 62
@@ -518,10 +550,31 @@ MonoBehaviour:
       - name: --ts-on-scrim-2
         value: {r: 0.94509804, g: 0.9137255, b: 0.85490197, a: 1}
         note: The hero's eyebrow over the scrim (a warm white)
+      - name: --ts-hero-glow
+        value: {r: 0.039215688, g: 0.03137255, b: 0.023529412, a: 0.72}
+        note: 'The soft glow behind the hero''s words (_3.3 S4a: tints hero_glow.png, a
+          fade with no edge): transparent, the picture stays the hero; the halo round
+          the letters carries the contrast'
+      - name: --ts-text-halo
+        value: {r: 0, g: 0, b: 0, a: 0.85}
+        note: 'The dark halo hugging every letter of the hero (its text-shadow): the
+          picture right around a word is darkened, so the word reads over a bright sky'
       - name: --ts-bar
         value: {r: 0.10980392, g: 0.101960786, b: 0.09019608, a: 1}
         note: 'The card''s chrome ground: the grabber row, the bar, the top strip,
           the footer -- opaque, so their words never sit on the glass'
+      - name: --ts-bar-glass
+        value: {r: 0.10980392, g: 0.101960786, b: 0.09019608, a: 0.78}
+        note: 'The see-through bars (_3.3 S4a review): the grab row, the bar and the navigation strips over the picture -- light enough to show it, dense enough that the bar''s ink keeps >= 7:1 over the worst (black or white) behind it'
+      - name: --ts-button-glass
+        value: {r: 1, g: 1, b: 1, a: 0.12}
+        note: 'The round buttons'' ground on a see-through bar (X, settings, menu): a faint disc, no rim -- the solid mark carries the button'
+      - name: --ts-bar-pill
+        value: {r: 0.10980392, g: 0.101960786, b: 0.09019608, a: 0.9}
+        note: 'The pill behind the floating bar title (S4a review): nearly opaque, so the title reads over any block passing under it'
+      - name: --ts-top-shade
+        value: {r: 0, g: 0, b: 0, a: 0.5}
+        note: 'The fade from the sheet top while the floating bars sit on the hero picture (tints top_shade.png): their white marks read on any picture'
       - name: --ts-glass-ground
         value: {r: 0.062745094, g: 0.05882353, b: 0.050980393, a: 0.8}
         note: 'The sheet''s ground between the blocks (R11 tinted glass: light clear,
@@ -578,6 +631,10 @@ MonoBehaviour:
       - name: --ts-metal-lo
         value: {r: 0.14117648, g: 0.12941177, b: 0.11372549, a: 1}
         note: The rim's inner band in shade (bottom, right)
+      - name: --ts-metal-groove
+        value: {r: 0, g: 0, b: 0, a: 0}
+        note: 'No groove on dark metal: the dark frame keeps its quieter look (_3.3
+          S4a)'
       - name: --ts-elevation-1
         value: {r: 0, g: 0, b: 0, a: 0}
         note: 'A block''s shadow (tints card_block_shadow.png). Light only: a shadow
@@ -816,7 +873,12 @@ MonoBehaviour:
       - name: --ts-family-navigation-sweep
         value: {r: 0.78431374, g: 0.84313726, b: 0.47058824, a: 0.4509804}
         note: 
-      lengths: []
+      lengths:
+      - name: --ts-rim-band
+        value:
+          value: 1
+          unit: 0
+        note: 'The rim''s metal band: a hairline on dark metal (the subtler look)'
       numbers:
       - name: --ts-rim-sweep-arc
         value: 40

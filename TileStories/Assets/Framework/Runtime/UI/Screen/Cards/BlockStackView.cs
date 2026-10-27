@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace TileStories
@@ -32,6 +33,27 @@ namespace TileStories
         public BlockViewPool Views { get; }
 
         private readonly BlockRegistry _registry;
+        private readonly VisualElement _sheetRoot;
+        // The bars float over the hero's picture: white marks on a soft top shade (PoiCard.uss)
+        public const string BarsOnHeroClass = "poi-card--bars-on-hero";
+
+        // The chrome floats over the stack (_3.3 S4a review): TopInset is the bars' foot (the content starts under them, the hero's picture
+        // runs up behind them), LandingInset the foot of everything floating there (the bars and the top strip): where a jump lands a block
+        // and where the hero's words finish fading. Set by the sheet from its measured layout
+        public float TopInset { get; private set; }
+        public float LandingInset { get; private set; }
+
+        public void SetInsets(float top, float landing)
+        {
+            TopInset = Mathf.Max(0f, float.IsNaN(top) ? 0f : top);
+            LandingInset = Mathf.Max(TopInset, float.IsNaN(landing) ? 0f : landing);
+            Scroll.contentContainer.style.paddingTop = TopInset;
+            if (HeaderView != null)
+            {
+                HeaderView.FadeTop = LandingInset;
+                HeaderView.OnStackScrolled(Scroll.scrollOffset.y);
+            }
+        }
         // The scroll's chapters: every scroll slot sits in its family's glass sheet (_3.3 P4.4c1), so a slot's layout is relative to its
         // sheet -- TopInScroll is the one way to its place in the scroll
         public SectionSheets Sheets { get; }
@@ -214,7 +236,8 @@ namespace TileStories
         // Where the scroll rests for a jump to this slot (its top meets the viewport's top): the first block a sheet shows lands on the
         // SHEET's top, its opener in view (R10.7: the opener names the chapter it opens); any other block on its own top. NaN when not in
         // the scroll
-        public float LandingTop(VisualElement slot) => TopInScroll(LandingElement(slot));
+        // (_3.3 S4a review: under the chrome floating over the view -- LandingInset -- so it lands in sight)
+        public float LandingTop(VisualElement slot) => TopInScroll(LandingElement(slot)) - LandingInset;
 
         // The element whose top a jump to this slot puts at the viewport's top: its section sheet for the sheet's first shown block, else
         // the slot itself
@@ -291,6 +314,7 @@ namespace TileStories
         public BlockStackView(VisualElement headerParent, VisualElement scrollParent, BlockRegistry registry)
         {
             _registry = registry;
+            _sheetRoot = headerParent;
             Views = new BlockViewPool(registry);
             HeaderSlot = new VisualElement { name = "poi-card-header" };
             HeaderSlot.AddToClassList("poi-card__header");
@@ -312,6 +336,7 @@ namespace TileStories
             scrollParent.Add(Footer);
             Scroll.verticalScroller.valueChanged += _ =>
             {
+                if (HeaderView != null) HeaderView.FadeTop = LandingInset;
                 HeaderView?.OnStackScrolled(Scroll.scrollOffset.y);
                 UpdateBarTitle();
                 UpdateContentSeen();
@@ -360,8 +385,10 @@ namespace TileStories
         {
             var header = HeaderView;
             var stop = _context?.Host?.Stop ?? SheetStopRule.Stop.Peek;
-            BarShowsTitle = header == null || HeroRule.BarShowsTitle(stop, Scroll.scrollOffset.y, header.HeroTitleBottom());
+            // - the hero's title is gone once it passed under the floating bars (their foot is TopInset down the view)
+            BarShowsTitle = header == null || HeroRule.BarShowsTitle(stop, Scroll.scrollOffset.y + TopInset, header.HeroTitleBottom());
             header?.SetBarTitleShown(BarShowsTitle);
+            _sheetRoot.EnableInClassList(BarsOnHeroClass, header != null && header.HasPicture && !BarShowsTitle);
         }
 
         // Show these entries (BlockStackBuilder's output), each bound with `context` and its own variant -- a compact one (its own display, or

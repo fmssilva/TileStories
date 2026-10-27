@@ -84,11 +84,11 @@ namespace TileStories.Tests
             yield return CardGalleryChecks.PixelAt(surface, surface.worldBound.center, got);
         }
 
-        // The hero's picture (poster or loop) where no word or scrim covers it: its upper part (_3.3 P4.4a)
+        // The hero's picture (poster or loop) where no word or glow covers it: its upper part (_3.3 P4.4a, S4a)
         private static IEnumerator PictureColourIn(HeaderBlockView header, System.Action<Color> got)
         {
             var hero = header.HeroPart.worldBound;
-            Assert.Greater(header.Foot.worldBound.yMin - header.Scrim.worldBound.height - hero.yMin, 24f, "precondition: a band of picture above the scrim");
+            Assert.Greater(header.Glow.worldBound.yMin - hero.yMin, 24f, "precondition: a band of picture above the words' glow");
             yield return CardGalleryChecks.PixelAt(header.HeroPart, new Vector2(hero.center.x, hero.yMin + 12f), got);
         }
 

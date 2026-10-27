@@ -124,6 +124,27 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(SheetStopRule.Stop.Peek, SheetStopRule.Snap(s, 140f, flick * 0.5f, 800f), "under the flick speed it is a normal release");
         }
 
+        // _3.3 S4a: the wall's Full Height -- To The Top leaves no gap (the sheet reaches the safe area's top), Leave A Camera Strip the card's
+        // top gap; anything else (an old or hand-edited value) is the default; only Full moves
+        [Test]
+        public void FullTopGap_ToTheTopIsNone_ACameraStripIsTheGap_AnUnknownChoiceIsTheDefault_AndOnlyFullMoves()
+        {
+            Assert.AreEqual(0f, SheetStopRule.FullTopGap(CardOptions.FullHeightTop, 48f), "To The Top");
+            Assert.AreEqual(48f, SheetStopRule.FullTopGap(CardOptions.FullHeightCameraStrip, 48f), "Leave A Camera Strip");
+            foreach (string other in new[] { null, "", "full", "TOP" })
+                Assert.AreEqual(0f, SheetStopRule.FullTopGap(other, 48f), "'" + other + "' reads as the default");
+            Assert.AreEqual(0f, SheetStopRule.FullTopGap(CardOptions.FullHeightCameraStrip, -5f), "a negative gap is none");
+            CollectionAssert.AreEqual(new[] { "To The Top", "Leave A Camera Strip" }, CardOptions.FullHeightLabels, "a label per option, in order");
+            Assert.AreEqual(CardOptions.FullHeights.Length, CardOptions.FullHeightLabels.Length);
+
+            var top = SheetStopRule.Compute(844f, 57f, 0.40f, SheetStopRule.FullTopGap(CardOptions.FullHeightTop, 48f));
+            var strip = SheetStopRule.Compute(844f, 57f, 0.40f, SheetStopRule.FullTopGap(CardOptions.FullHeightCameraStrip, 48f));
+            Assert.AreEqual(844f, top.Full, 1e-4f, "To The Top: the whole available height");
+            Assert.AreEqual(796f, strip.Full, 1e-4f, "a camera strip of 48");
+            Assert.AreEqual(top.Peek, strip.Peek);
+            Assert.AreEqual(top.Half, strip.Half);
+        }
+
         // ---------------- CardTapRule ----------------
 
         [Test]
@@ -142,6 +163,21 @@ namespace TileStories.Editor.Tests
             Assert.IsFalse(CardTapRule.ShouldDismiss(true, dismissOnTapOutside: false, true, false), "Tap Outside Closes off");
             Assert.IsFalse(CardTapRule.ShouldDismiss(true, true, isTap: false, false), "a drag across the wall");
             Assert.IsFalse(CardTapRule.ShouldDismiss(cardOpen: false, true, true, false), "no card open");
+        }
+
+        // _3.3 S4a: a tap belongs to what was under its PRESS -- a block page's Back closes the page on the release, and the same point then
+        // shows the camera. The real CardTapOutside with no zoom (it closes at once) and no EventSystem in Edit Mode, so the release lands on
+        // nothing: only the press decides
+        [Test]
+        public void CardTapOutside_ATapThatLandedOnSomething_NeverClosesTheCard_EvenWhenItsReleaseFindsNothing()
+        {
+            int closes = 0;
+            var tapOutside = new CardTapOutside(() => 0f, () => new CardSettings(), () => null, () => true, () => closes++);
+            var at = new Vector2(40f, 40f);
+            Assert.IsFalse(tapOutside.HandleScreenTap(at, at, 0f, 0.1f, pressedOnSomething: true), "the press landed on a button: the button's tap");
+            Assert.AreEqual(0, closes, "...the card stays open");
+            Assert.IsTrue(tapOutside.HandleScreenTap(at, at, 1f, 1.1f, pressedOnSomething: false), "a press and a release on nothing: a tap on empty space");
+            Assert.AreEqual(1, closes, "...closes the card");
         }
 
         // _3.1 step 7B: only a whole web address ever reaches the device (today_map's Directions)

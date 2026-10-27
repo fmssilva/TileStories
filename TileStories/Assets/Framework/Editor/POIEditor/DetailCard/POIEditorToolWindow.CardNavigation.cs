@@ -1,6 +1,7 @@
 // POIEditorToolWindow.CardNavigation.cs
 //
-// Partial: Detail Card > Navigation (_3.2_POI_Card_Navigation.md section 7) -- how a visitor moves inside ONE open card. First the Preset
+// Partial: Detail Card > Navigation (_3.2_POI_Card_Navigation.md section 7) -- how a visitor moves inside ONE open card. First the
+// Navigation Bar component (_3.3 S4a review, POIEditorToolWindow.CardNavigationBar.cs: while it is on the Elements rows are hidden), then the Preset
 // (step 17a; first since 17b: where a wall author starts; it writes rows of several groups, so it sits above them), then five groups, each
 // under a sub-heading and each ONE responsibility (the audit's section 4), the rows inside a group in section 7's order:
 //   - Shape: Layout (with its warnings), Block Order, the Families table (Order with reorder arrows, Family, At The End, Group, one (i) on its
@@ -72,6 +73,11 @@ namespace TileStories.Editor
                 return busiest.Sections;
             }
 
+            // - the Navigation Bar first (_3.3 S4a review): the one bar the wall configures as a whole; while on, it replaces the Elements
+            DrawNavigationBarComponent(nav);
+            bool barOn = NavBarRule.Enabled(nav);
+            GUILayout.Space(TableGapBetweenGroups);
+
             // - the Preset first -- it is where a wall author STARTS, then adjusts the rows under it (decided at the 17a review). It sits above
             //   the sub-headings: it writes rows of several of them
             DrawNavigationPresetRow(nav);
@@ -116,51 +122,58 @@ namespace TileStories.Editor
             nav.min_blocks = DrawIntSliderField("Show Navigation From", nav.min_blocks, CardNavigationSettings.MinBlocksMin, CardNavigationSettings.MinBlocksMax,
                 CardShowNavigationFromHelp);
             nav.show_at = DrawPopupField("Show Navigation At", nav.show_at, CardOptions.ShowNavigationAts, CardOptions.ShowNavigationAtLabels, CardShowNavigationAtHelp);
-            nav.hide_on_scroll = DrawPopupField("Hide While Scrolling", nav.hide_on_scroll, CardOptions.HideOnScrolls, CardOptions.HideOnScrollLabels,
-                CardHideWhileScrollingHelp);
+            // - the bar's own Hide While Scrolling replaces this one while it is on (the value is kept)
+            if (!barOn)
+                nav.hide_on_scroll = DrawPopupField("Hide While Scrolling", nav.hide_on_scroll, CardOptions.HideOnScrolls, CardOptions.HideOnScrollLabels,
+                    CardHideWhileScrollingHelp);
 
-            // ---- Elements: what sits in each slot of the card ----
+            // ---- Elements: what sits in each slot of the card (the Navigation Bar replaces them while it is on) ----
             DrawNavigationSubHeading(NavGroupElements);
-            var (topKeys, topLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Top);
-            // - a reference popup: a key no registered element has (an app element taken out) stays as "<key> (missing)", never swapped.
-            //   Hidden where the layout picks the top bar itself (Pages: the Family Pager; Bento: none, the tiles are the map), keeping its
-            //   value for the day the wall picks another layout -- the card's own rule, so the row and the card agree
-            if (!CardLayoutRule.LayoutPicksTheTopBar(nav))
+            if (barOn) DrawNavigationMessage(CardNavBarOnNotice, MessageType.Info);
+            else
             {
-                nav.top = DrawReferencePopupField("Top Bar", nav.top, topKeys, topLabels, allowNone: false, CardTopBarHelp(NavElementRegistry.Shared));
-                if (NavigationWarningRule.ProgressMapOutgrown(nav, BusiestSections))
-                    DrawNavigationMessage(CardProgressMapWarning(NavigationCardName(busiest.PoiIndex), busiest.Sections), MessageType.Warning);
+                var (topKeys, topLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Top);
+                // - a reference popup: a key no registered element has (an app element taken out) stays as "<key> (missing)", never swapped.
+                //   Hidden where the layout picks the top bar itself (Pages: the Family Pager; Bento: none, the tiles are the map), keeping its
+                //   value for the day the wall picks another layout -- the card's own rule, so the row and the card agree
+                if (!CardLayoutRule.LayoutPicksTheTopBar(nav))
+                {
+                    nav.top = DrawReferencePopupField("Top Bar", nav.top, topKeys, topLabels, allowNone: false, CardTopBarHelp(NavElementRegistry.Shared));
+                    if (NavigationWarningRule.ProgressMapOutgrown(nav, BusiestSections))
+                        DrawNavigationMessage(CardProgressMapWarning(NavigationCardName(busiest.PoiIndex), busiest.Sections), MessageType.Warning);
+                }
+                var (bottomKeys, bottomLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Bottom);
+                nav.bottom = DrawReferencePopupField("Bottom Bar", nav.bottom, bottomKeys, bottomLabels, allowNone: false, CardBottomBarHelp(NavElementRegistry.Shared));
+                // - the Menu right after the two bars (its button sits in the header; a bar's More opens it)
+                var (menuKeys, menuLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Menu);
+                nav.menu = DrawReferencePopupField("Menu", nav.menu, menuKeys, menuLabels, allowNone: false, CardMenuHelp(NavElementRegistry.Shared));
+                // - the Floating Button after the Menu (the round button above the card's top-right edge, step 9)
+                var (floatingKeys, floatingLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Floating);
+                nav.floating = DrawReferencePopupField("Floating Button", nav.floating, floatingKeys, floatingLabels, allowNone: false,
+                    CardFloatingButtonHelp(NavElementRegistry.Shared));
+                // - the Edge after the Floating Button (the dots down the right edge of the content, step 10)
+                var (edgeKeys, edgeLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Edge);
+                nav.edge = DrawReferencePopupField("Edge", nav.edge, edgeKeys, edgeLabels, allowNone: false, CardEdgeHelp(NavElementRegistry.Shared));
+                // - an Edge the layout keeps off the card says why, right under its row (the value is kept for another layout)
+                if (NavigationWarningRule.EdgeUnderALayoutThatOwnsIt(nav))
+                    DrawNavigationMessage(CardEdgeOwnedByLayoutWarning(CardLayoutRule.Layout(nav)), MessageType.Warning);
+                // - the third bar: the Edge is the last of the three rows, so the warning sits under it
+                if (NavigationWarningRule.MoreThanTwoBars(nav))
+                    DrawNavigationMessage(CardMoreThanTwoBarsWarning, MessageType.Warning);
+                // - Auto Nav Block after the Edge (a nav block put after the header of every long card, step 11a). Its choices
+                //   are the registered kinds of the navigation family, so a nav block an app (or a later step) registers is listed with no edit here
+                var (autoKeys, autoLabels) = AutoNavBlockOptions(BlockRegistry.Shared);
+                nav.auto_nav_block = DrawReferencePopupField("Auto Nav Block", nav.auto_nav_block, autoKeys, autoLabels, allowNone: false,
+                    CardAutoNavBlockHelp(BlockRegistry.Shared));
             }
-            var (bottomKeys, bottomLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Bottom);
-            nav.bottom = DrawReferencePopupField("Bottom Bar", nav.bottom, bottomKeys, bottomLabels, allowNone: false, CardBottomBarHelp(NavElementRegistry.Shared));
-            // - the Menu right after the two bars (its button sits in the header; a bar's More opens it)
-            var (menuKeys, menuLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Menu);
-            nav.menu = DrawReferencePopupField("Menu", nav.menu, menuKeys, menuLabels, allowNone: false, CardMenuHelp(NavElementRegistry.Shared));
-            // - the Floating Button after the Menu (the round button above the card's top-right edge, step 9)
-            var (floatingKeys, floatingLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Floating);
-            nav.floating = DrawReferencePopupField("Floating Button", nav.floating, floatingKeys, floatingLabels, allowNone: false,
-                CardFloatingButtonHelp(NavElementRegistry.Shared));
-            // - the Edge after the Floating Button (the dots down the right edge of the content, step 10)
-            var (edgeKeys, edgeLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Edge);
-            nav.edge = DrawReferencePopupField("Edge", nav.edge, edgeKeys, edgeLabels, allowNone: false, CardEdgeHelp(NavElementRegistry.Shared));
-            // - an Edge the layout keeps off the card says why, right under its row (the value is kept for another layout)
-            if (NavigationWarningRule.EdgeUnderALayoutThatOwnsIt(nav))
-                DrawNavigationMessage(CardEdgeOwnedByLayoutWarning(CardLayoutRule.Layout(nav)), MessageType.Warning);
-            // - the third bar: the Edge is the last of the three rows, so the warning sits under it
-            if (NavigationWarningRule.MoreThanTwoBars(nav))
-                DrawNavigationMessage(CardMoreThanTwoBarsWarning, MessageType.Warning);
-            // - Auto Nav Block after the Edge (a nav block put after the header of every long card, step 11a). Its choices
-            //   are the registered kinds of the navigation family, so a nav block an app (or a later step) registers is listed with no edit here
-            var (autoKeys, autoLabels) = AutoNavBlockOptions(BlockRegistry.Shared);
-            nav.auto_nav_block = DrawReferencePopupField("Auto Nav Block", nav.auto_nav_block, autoKeys, autoLabels, allowNone: false,
-                CardAutoNavBlockHelp(BlockRegistry.Shared));
 
             // ---- How They Look: what the elements draw (a row an element does not read is hidden, and so is a group left with none) ----
             // - a display option shows while EITHER bar reads it: both bars follow the same wall setting
-            bool showsLabels = topElement != null && topElement.ReadsLabels || bottomElement != null && bottomElement.ReadsLabels;
-            bool showsCounts = topElement != null && topElement.ShowsCounts || bottomElement != null && bottomElement.ShowsCounts;
+            //   (none of them while the Navigation Bar is on: it has its own Labels)
+            bool showsLabels = !barOn && (topElement != null && topElement.ReadsLabels || bottomElement != null && bottomElement.ReadsLabels);
+            bool showsCounts = !barOn && (topElement != null && topElement.ShowsCounts || bottomElement != null && bottomElement.ShowsCounts);
             // - a bar's slots, or the radial's arc (its items cap at Bar Slots like a bar's)
-            bool showsSlots = bottomElement != null && bottomElement.ReadsBarSlots || floatingElement != null && floatingElement.ReadsBarSlots;
+            bool showsSlots = !barOn && (bottomElement != null && bottomElement.ReadsBarSlots || floatingElement != null && floatingElement.ReadsBarSlots);
             // - Open One At A Time is an accordion option (hidden elsewhere, keeping its value)
             bool showsOneOpen = CardLayoutRule.Layout(nav) == CardOptions.LayoutAccordion;
             if (showsLabels || showsCounts || showsSlots || showsOneOpen) DrawNavigationSubHeading(NavGroupLook);

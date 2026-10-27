@@ -53,7 +53,8 @@ namespace TileStories.Tests
         private VisualElement Slot(string blockKey) => Sheet.Stack.SlotOfBlock(blockKey);
 
         // Where a slot's top sits in the viewport (0 = at its top), from the two elements' own screen rects
-        private float TopInViewport(string blockKey) => Sheet.Stack.LandingElement(Slot(blockKey)).worldBound.yMin - Scroll.contentViewport.worldBound.yMin;
+        private float TopInViewport(string blockKey) => Sheet.Stack.LandingElement(Slot(blockKey)).worldBound.yMin - Scroll.contentViewport.worldBound.yMin
+            - Sheet.Stack.LandingInset;
 
         private List<CardEvent> NavJumps => _events.Raised.Where(e => e.Kind == CardEventKinds.NavJump).ToList();
 

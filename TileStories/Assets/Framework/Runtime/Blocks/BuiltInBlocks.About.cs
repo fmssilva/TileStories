@@ -170,13 +170,15 @@ namespace TileStories
                 {
                     Key = HeaderHeroMotionField, Type = BlockFieldType.Choice, Label = "Hero Motion",
                     ShownWhen = FieldShownWhen.Looks(HeaderImageParallax),
-                    Options = new[] { HeroMotionRule.Pan, HeroMotionRule.Zoom, HeroMotionRule.None },
-                    OptionLabels = new[] { "Pan", "Zoom", "None" },
-                    ChoiceDefault = HeroMotionRule.Pan,
+                    Options = new[] { HeroMotionRule.PanZoom, HeroMotionRule.Pan, HeroMotionRule.Zoom, HeroMotionRule.None },
+                    OptionLabels = new[] { "Pan And Zoom", "Pan", "Zoom", "None" },
+                    ChoiceDefault = HeroMotionRule.PanZoom,
                     LibraryDefault = true,
-                    Help = "Image Parallax only. How the hero's picture moves by itself. Pan (default): a picture wider than the hero " +
-                           "slides slowly across its whole width and back (26 s), so the whole building shows; a picture no wider than " +
-                           "the hero stays still. Zoom: a slow push-in and back. None: still. With Reduce Motion on (Card Container) the " +
+                    Help = "Image Parallax only. How the hero's picture moves by itself. The hero fills the screen, so a wide picture is " +
+                           "cropped at its sides. Pan And Zoom (default): it drifts slowly across its whole width and back while it gently " +
+                           "pushes in. Pan: the drift alone. A picture no wider than the hero does not drift. Zoom: a slow push-in and back. " +
+                           "None: still. The drift never goes faster than a slow walk across the screen, however wide the picture. With " +
+                           "Reduce Motion on (Card Container) the " +
                            "picture always stays still at its centre. Whatever this says, the picture also moves a little slower than " +
                            "the scroll (parallax), except with Reduce Motion. Empty: the Block Library's default for this kind.",
                 },

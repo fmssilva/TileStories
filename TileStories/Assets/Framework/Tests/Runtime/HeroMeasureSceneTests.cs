@@ -31,6 +31,8 @@ namespace TileStories.Tests
             var hero = sheet.Stack.HeaderView;
             var realClock = hero.Clock;
             hero.Clock = () => 0f;
+            // - and the card's moving light (glass, rim) and the live wall behind the glass hold still too, or no render ever settles
+            CardTestInput.HoldTheWallStill(sheet);
             if (menu == CardOptions.NavNone) Assert.IsNull(sheet.Slots.MenuView, "precondition: no Menu");
             else Assert.AreEqual(menu, sheet.Slots.MenuKey, "precondition: the card's Menu");
 

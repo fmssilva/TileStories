@@ -465,6 +465,8 @@ namespace TileStories.Editor.Tests
         public IEnumerator PreviewNavigation_ARealClickTurnsTheDemoCardOnAtFull_OnTheChosenPoint_AndOneCtrlZPutsItBack()
         {
             var config = ShippedConfig();
+            // - the framework default, whatever point the shipped wall last previewed (the wall's own choice must not leak in, 40-testing)
+            config.card_settings.demo_card.poi_id = "";
             Assert.IsFalse(config.card_settings.demo_card.enabled, "precondition: the demo card is off");
             Assert.AreEqual(CardOptions.StopHalf, config.card_settings.demo_card.stop, "precondition: its stop is the default, Half");
             OpenNavigation(config);

@@ -135,7 +135,8 @@ namespace TileStories.Editor.Tests
             Assert.AreSame(sheet.Nav.Model, view.Model, "and to the model the controller drives");
             Assert.AreEqual(1, view.Model.Sections.Count, "precondition: three About blocks make one section");
             Assert.AreSame(sheet.Slots.Top, view.Root.parent, "its root sits in the top slot");
-            Assert.AreEqual(sheet.Root.IndexOf(sheet.Stack.Scroll) - 1, sheet.Root.IndexOf(sheet.Slots.Top), "the slot sits right before the stack's ScrollView");
+            // - the strip FLOATS over the stack since _3.3 S4a's review: out of the flow, drawn after (over) the stack's ScrollView
+            Assert.Greater(sheet.Root.IndexOf(sheet.Slots.Top), sheet.Root.IndexOf(sheet.Stack.Scroll), "the slot is drawn over the stack's ScrollView");
             Assert.Less(sheet.Root.IndexOf(sheet.Stack.HeaderSlot), sheet.Root.IndexOf(sheet.Slots.Top), "and after the header");
 
             ShowCard(sheet, TextPoi("another_point", 4), wall);

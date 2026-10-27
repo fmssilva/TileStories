@@ -72,9 +72,9 @@ namespace TileStories.Tests
                 "the sheet no longer declares a theme colour itself (it would hide the theme's modes)");
 
             // - the six roots that carry the card's token classes: each sits under the marked root and paints with the theme's values
-            // - the sheet has no ground of its own since P4.4b: its chrome rows paint the opaque bar, the stack between blocks is glass
+            // - the sheet has no ground of its own since P4.4b: its bar is see-through glass (S4a review), the stack between blocks is glass
             AssertPaints(sheet.Root.resolvedStyle.backgroundColor, "--ts-clear", "the sheet");
-            AssertPaints(sheet.Stack.HeaderSlot.resolvedStyle.backgroundColor, "--ts-bar", "the bar");
+            AssertPaints(sheet.Stack.HeaderSlot.resolvedStyle.backgroundColor, "--ts-bar-glass", "the bar");
             AssertPaints(sheet.Stack.Scroll.resolvedStyle.unityBackgroundImageTintColor, "--ts-glass-ground", "the glass between blocks");
             AssertPaints(Card.AudioCoordinator.Mini.Root.resolvedStyle.backgroundColor, "--ts-surface", "the mini-player");
             AssertPaints(sheet.Overlay.Scrim.resolvedStyle.backgroundColor, "--ts-scrim", "the menu layer's scrim");

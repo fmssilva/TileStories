@@ -19,8 +19,13 @@ namespace TileStories.Editor.Tests
         private const string FrameworkStringsPath = "Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset";
         private const string Lamp = "lamp";
 
-        private static WallConfigData Shipped() =>
-            JsonUtility.FromJson<WallConfigData>(File.ReadAllText("Assets/Apps/LivingRoom/config.json"));
+        // - the Navigation Bar at the framework default (off): these tests measure the elements, never the wall's own bar (40-testing)
+        private static WallConfigData Shipped()
+        {
+            var config = JsonUtility.FromJson<WallConfigData>(File.ReadAllText("Assets/Apps/LivingRoom/config.json"));
+            config.card_settings.navigation.bar = new CardNavBarSettings();
+            return config;
+        }
 
         // The shipped wall with `bottom` as its Bottom Bar (and `menu` as its Menu), no Top Bar, the blocks Grouped By Family (8 sections:
         // four in the bar, More with four)

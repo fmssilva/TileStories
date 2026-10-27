@@ -8,8 +8,10 @@ namespace TileStories
     //   - on the card: the PREVIEW -- ElementPreviewRule's rows (Automatic: the Page's picture, eyebrow + title, first text, every text at its
     //     smallest size; Custom: the listed rows, a linked row in its own style), capped at --ts-preview-max of the card's full height
     //     (IBlockHost.FullHeight, the measured full stop: a USS percentage does not resolve inside the ScrollView, R10.2) and cut with a
-    //     fade into the surface when it is taller, then the Open Row. A tap anywhere on it opens the page, or only on the Open Row when the
-    //     block's Tap is Nothing (R17.4); it rises onto the card unless its Block Entry is None (R17.3)
+    //     fade into the surface when it is taller, then the Open Row -- never through its title: the opening picture gives way first
+    //     (PreviewFitRule, _3.3 S4a). A full-bleed picture that opens it sits flush with the frame's top and sides (PictureFirstClass).
+    //     A tap anywhere on it opens the page, or only on the Open Row when the block's Tap is Nothing (R17.4); it rises onto the card
+    //     unless its Block Entry is None (R17.3)
     //   - in the full view (BlockBindContext.FullView): the PAGE -- every row in order
     // Each row is drawn by its element's component (ElementRegistry, pooled per kind); a row of an element with no component, or a broken
     // reference, draws nothing. The rhythm between rows is the stylesheet's, by pair: each row wears the class of the kind before it
@@ -21,8 +23,13 @@ namespace TileStories
         public const string RootClass = "ts-composed";
         public const string AfterClassPrefix = "ts-el--after-";
         public const string FirstClass = "ts-el--first";
+        // A preview that opens with a full-bleed picture: the picture flush with the block frame's top and sides (Components.uss)
+        public const string PictureFirstClass = "ts-composed--picture-first";
+        private const string FullBleedRowClass = "ts-el--width-full-bleed";
         // The preview's cap: a share of the card's full height (the view's own token, Components.uss)
         private static readonly CustomStyleProperty<float> PreviewMaxProperty = new("--ts-preview-max");
+        // The shortest the preview's opening picture gets when it gives way to the title (Components.uss)
+        private static readonly CustomStyleProperty<float> PictureMinProperty = new("--ts-preview-picture-min");
 
         public VisualElement Root { get; }
         // The preview's parts: the tappable whole, the clip that caps the rows, the rows, the fade over the cut, the Open Row
@@ -41,6 +48,8 @@ namespace TileStories
         // The preview's cap in panel units (NaN while there is none: no host height yet, or the page) and whether the rows were cut at it
         public float Cap { get; private set; } = float.NaN;
         public bool IsCut { get; private set; }
+        // The height the opening picture gave way to (NaN: its own proportion)
+        public float PictureHeight { get; private set; } = float.NaN;
         // The pool of this view's components (what a test reads to see reuse)
         public ElementComponentPool Components { get; }
         // The rows' motion (and, on the card, the block's entry): what a test drives through its Clock / Tick / Finish
@@ -53,6 +62,9 @@ namespace TileStories
         private BlockInstanceData _instance;
         private BlockBindContext _context;
         private float _previewMax;
+        private float _pictureMin;
+        // The picture frame whose height this view set (given back on unbind: the component is pooled)
+        private VisualElement _shortened;
 
         public ComposedBlockView(BlockRegistry blocks, ElementRegistry elements)
         {
@@ -92,6 +104,7 @@ namespace TileStories
             Root.RegisterCallback<CustomStyleResolvedEvent>(_ =>
             {
                 _previewMax = Root.customStyle.TryGetValue(PreviewMaxProperty, out float share) ? share : 0f;
+                _pictureMin = Root.customStyle.TryGetValue(PictureMinProperty, out float floor) ? floor : 0f;
                 Fit();
             });
             // - the cap follows the rows' own height and the card's measured height: never the clip's (it is what the cap sets)
@@ -126,6 +139,8 @@ namespace TileStories
         public void Unbind()
         {
             Motion.Unbind();
+            SetPictureHeight(null, float.NaN, 0f);
+            Root.RemoveFromClassList(PictureFirstClass);
             foreach (var (kind, component) in _bound)
             {
                 component.Unbind();
@@ -166,6 +181,9 @@ namespace TileStories
                 var styleRow = entry.Source == ElementPreviewRule.Source.Linked ? entry.Row : null;
                 AddRow(Rows, new ElementRow(entry.Row), new ElementRow(entry.Content), styleRow, ElementSurface.Preview, compact, familyToken);
             }
+            // - a full-bleed picture first: flush with the frame's top and sides, rounded with it (an inset one keeps the frame's padding)
+            Root.EnableInClassList(PictureFirstClass, _shown.Count > 0 && _shown[0].Component is PictureElement
+                                                      && _shown[0].Component.Root.ClassListContains(FullBleedRowClass));
             ShowOpenRow(scope);
         }
 
@@ -231,8 +249,65 @@ namespace TileStories
                 : OpenRow.layout.height + OpenRow.resolvedStyle.marginTop + OpenRow.resolvedStyle.marginBottom;
             if (float.IsNaN(openRow)) return;
             float room = Mathf.Max(0f, Cap - openRow);
+            FitPicture(rows, room);
             // - half a pixel: a layout that lands exactly on the cap is not cut
-            SetCut(rows > room + 0.5f, room);
+            SetCut(rows > room + PreviewFitRule.Tolerance, room);
+        }
+
+        // The title is never cut or faded by the cap: the opening picture gives way first (PreviewFitRule), measured as if the picture had
+        // its own proportion -- what an earlier shortening took is added back, so the answer never feeds back on itself
+        private void FitPicture(float rows, float room)
+        {
+            var picture = _shown.Count > 0 ? _shown[0].Component as PictureElement : null;
+            var title = RowOf(BuiltInElements.Title);
+            if (picture == null || title == null)
+            {
+                SetPictureHeight(null, float.NaN, 0f);
+                return;
+            }
+            var frame = picture.Frame.Root;
+            float width = frame.layout.width, aspect = picture.Frame.Aspect;
+            if (float.IsNaN(width) || width <= 0f || !(aspect > 0f)) return;
+            // - text is measured only on a panel (off one it has no DPI to measure with)
+            if (Root.panel == null) return;
+            float natural = width / aspect;
+            float taken = float.IsNaN(PictureHeight) ? 0f : natural - frame.layout.height;
+            var lede = RowOf(BuiltInElements.Lede) as ProseElement;
+            float ledeLine = lede != null && lede.Text.Paragraphs.Count > 0
+                ? lede.Text.Paragraphs[0].MeasureTextSize("A", 0f, VisualElement.MeasureMode.Undefined, 0f, VisualElement.MeasureMode.Undefined).y
+                : float.NaN;
+            float keep = PreviewFitRule.KeepBottom(title.Root.layout.yMax + taken, Fade.resolvedStyle.height,
+                lede != null ? lede.Root.layout.y + taken : float.NaN, ledeLine);
+            SetPictureHeight(frame, PreviewFitRule.PictureHeight(rows + taken, room, keep, natural, _pictureMin), aspect);
+        }
+
+        // The component of the first shown row of `element` (null: none)
+        private IElementComponent RowOf(string element)
+        {
+            foreach (var shown in _shown)
+                if (shown.Content.Kind == element) return shown.Component;
+            return null;
+        }
+
+        // Give the opening picture `height` (NaN: its own proportion back); the frame keeps its proportion only while no height is set
+        private void SetPictureHeight(VisualElement frame, float height, float aspect)
+        {
+            if (float.IsNaN(height))
+            {
+                if (_shortened != null)
+                {
+                    _shortened.style.height = StyleKeyword.Null;
+                    if (aspect > 0f) _shortened.style.aspectRatio = new StyleRatio(aspect);
+                }
+                _shortened = null;
+                PictureHeight = float.NaN;
+                return;
+            }
+            if (!float.IsNaN(PictureHeight) && Mathf.Abs(height - PictureHeight) <= PreviewFitRule.Tolerance) return;
+            _shortened = frame;
+            frame.style.aspectRatio = StyleKeyword.Null;
+            frame.style.height = height;
+            PictureHeight = height;
         }
 
         private void SetCut(bool cut, float room)

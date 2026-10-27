@@ -9,8 +9,8 @@ namespace TileStories
     // one audio drawn twice, and the block redraws on the owner's Changed (a state, a seek, the speed, and every tick while playing).
     //   player    -- a round play / pause button, the title and "time / length", the scrubber, a speed chip, a captions switch and the
     //                caption line of the moment (from the clip's .vtt through VttRule)
-    //   hero_chip -- the hero's Listen button (_3.3 P4.4a, HeroActionsRule): the same play / pause button and "Listen m:ss" (the clip's
-    //                length; while it is the owner's current audio, "Listen" and "time / length"); BlockKindDefinition.PinnedTopVariants keeps
+    //   hero_chip -- the hero's Listen pill (_3.3 P4.4a, S4a, HeroActionsRule): headphones and the clip's length (named "Listen, m:ss"); while
+    //                it is the owner's current audio, the play / pause mark and the running time); BlockKindDefinition.PinnedTopVariants keeps
     //                it out of the stack -- the hero is its place, and the hero binds ANY audio guide of the card in this look
     // The clip is loaded through the block's own scope only to know its length; the owner loads it again (through the card's source)
     // when it plays, so it lives on after this block is unbound. A clip that cannot be loaded shows "Audio unavailable" and stays quiet.
@@ -20,6 +20,8 @@ namespace TileStories
         public VisualElement Root { get; }
         public Button PlayButton { get; }
         public CardIcons.VectorGlyph PlayGlyph { get; }
+        // The hero's Listen pill draws headphones instead of the play mark while it is not playing (_3.3 S4a: a play mark alone reads as video)
+        public VisualElement ListenIcon { get; }
         public Label Title { get; }
         public Label TimeText { get; }
         public Label Note { get; }
@@ -56,6 +58,11 @@ namespace TileStories
             PlayGlyph.Filled = true;
             PlayGlyph.AddToClassList("card-audio__glyph");
             PlayButton.Add(PlayGlyph);
+            ListenIcon = CardIcons.Create();
+            CardIcons.SetKey(ListenIcon, CardIcons.Listen);
+            ListenIcon.AddToClassList("card-audio__listen-icon");
+            ListenIcon.style.display = DisplayStyle.None;
+            PlayButton.Add(ListenIcon);
             PlayButton.clicked += () => _audio?.Toggle(Track);
 
             var words = new VisualElement { pickingMode = PickingMode.Ignore };
@@ -177,14 +184,17 @@ namespace TileStories
             Root.EnableInClassList("card-audio--unavailable", !ClipAvailable);
 
             TimeText.text = length > 0f ? AudioTimeRule.Format(position) + " / " + AudioTimeRule.Format(length) : AudioTimeRule.Format(position);
-            // - the hero's Listen is a compact pill (_3.3 P4.4b part 2, one action row): the play mark and ONE time -- the guide's length, then
-            //   the running time while it is the audio; its name keeps the words ("Listen 2:44") for a screen reader and a long press
-            if (Variant == BuiltInBlocks.AudioGuideHeroChip)
+            // - the hero's Listen is a compact pill (_3.3 P4.4b part 2, S4a): headphones and ONE time -- the guide's length; while it plays the
+            //   pause mark and the running time; its name keeps the words ("Listen, 2:44") for a screen reader and a long press
+            bool heroChip = Variant == BuiltInBlocks.AudioGuideHeroChip;
+            ListenIcon.style.display = heroChip && !playing ? DisplayStyle.Flex : DisplayStyle.None;
+            PlayGlyph.style.display = heroChip && !playing ? DisplayStyle.None : DisplayStyle.Flex;
+            if (heroChip)
             {
                 string lengthWords = length > 0f ? AudioTimeRule.Format(length) : "";
                 Title.text = current ? AudioTimeRule.Format(position) : lengthWords;
                 TimeText.style.display = DisplayStyle.None;
-                if (!playing) PlayButton.tooltip = string.Format(_strings?.Get(CardStrings.Keys.HeroListen) ?? "{0}", lengthWords).Trim();
+                if (!playing) PlayButton.tooltip = string.Format(_strings?.Get(CardStrings.Keys.HeroListen) ?? "{0}", lengthWords).Trim().TrimEnd(',');
             }
             Scrubber.SetFraction(AudioTimeRule.Fraction(position, length));
             SpeedChip.text = AudioSpeedRule.Label(_audio != null ? _audio.Speed : AudioSpeedRule.Normal);

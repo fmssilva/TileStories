@@ -232,7 +232,8 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
               - NavElementRegistry.cs  -- NavElementDefinition (key, slot, Editor label, (i) help), NavSlotKeys (Top; Built = the slots the sheet draws) and NavElementRegistry
               - BuiltInNavElements.cs  -- The framework's elements registered into Shared: text_tabs (top), with their Editor label and help
               - CardChromeView.cs  -- Shows / hides the card's chrome (the top strip, the bottom area = the sticky footer) as CardChromeRule decides, and keeps the stack's end in view when the bottom area comes back at the end (KeepTheEnd): the content GLIDES there with the area, over the area's own transition (CardChromeRule.GlideOffset; at once under Reduce Motion; a finger ends it)
-              - NavSlots.cs  -- The sheet's navigation slots (top today): a strip inserted in the sheet root between the header and the stack ScrollView
+              - NavSlots.cs  -- The sheet's navigation slots (+ the Navigation Bar: BindBar, in place of every element while it is on): a strip inserted in the sheet root between the header and the stack ScrollView
+              - NavBarView.cs  -- The Navigation Bar (_3.3 S4a review): ONE configurable bar of the card's groups (NavBarRule.Entries), bound by NavSlots into the top or bottom host while card_settings.navigation.bar is on; shape / fill / indicator (pill, underline, raised, none; sliding) as classes + inline numbers, colours painted from the theme; a tap = NavController.JumpToBlock
               - TextTabsNavView.cs  -- text_tabs: one Button per model section (its CardStrings word), the current one underlined AND bold (CurrentClass), a tap = NavController.JumpTo
               - TabsNavView.cs  -- The tabs text_tabs and icon_tabs share: a NavStrip of NavTabs, one per section, its word (and its family's icon, tinted by NavTint, per Labels), Show
               - IconTabsNavView.cs  -- icon_tabs: TabsNavView with icons (an element key of its own when icon_tabs_chips holds one)
@@ -288,6 +289,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
             - CardVisitorSettingsView.cs  -- the card's settings panel the gear opens: Language
             - card_block_shadow.png  -- 96 x 96 outer-only soft shadow (transparent over the block), 9-sliced at 36 (16 margin + 20 radius), tinted by --ts-elevation-1/2; written by a script
             - card_glass.png  -- 4 x 256 white alpha ramp (0.45 top -> 1 foot), the stack's glass, tinted by --ts-glass-ground; written by a script
+            - top_shade.png  -- 4 x 128 white alpha fade (dense top -> nothing), the shade behind the floating bars over the hero, tinted by --ts-top-shade; written by a script
             - SheetDrag.cs  -- Plain C#: the sheet's vertical drag -- the grabber and the header capture the finger at touch-down, the top slot's SwipeGrab only once a move is
             - CardFullViewOpener.cs  -- Plain C#: what opens in the full view over the card -- OpenFullView among siblings, OpenTakeover (a takeover asked from inside a block's page returns to that page on Back, at its scroll: ReturnToThePageOpenNow), the bento section page, the breadcrumb's section jump, reopening over a rebind
             - BlockStackView.cs  -- + a pinned Footer for FooterVariants (sticky actions), views pooled per kind, one ScopedMediaSource per bound view released on unbind; (6C) every
@@ -403,6 +405,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
             - SourcesBlockView.cs  -- sources: title + author + licence rows under the stack's heading (default: CardStrings sources_heading); list / with_confidence
           - Media/  -- The media family
             - Media.uss  -- CardImage, the header hero looks, the gallery looks, TakeoverView, before / after, zoom
+            - hero_glow.png  -- 128 x 64 white alpha fade with no edge: the glow behind the hero's words block, tinted by --ts-hero-glow; written by a script
             - hero_scrim.png  -- 4 x 256 white alpha ramp (0 -> 1, smoothstep), the graded scrim above the hero's words, tinted by --ts-scrim-hero; written by a script
             - GalleryBlockView.cs  -- gallery: carousel (swipe track + dots) / grid (two per row) / filmstrip (large + strip; a small one picks, the old large picture given back at once) / stack; a tap opens the shared PictureViewer
             - BeforeAfterBlockView.cs  -- before_after: slider -- After under Before cut at the handle, a pointer-captured drag moves it (Position, never scrolls the stack), labels from the
@@ -548,7 +551,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - BlockStackBuilder.cs  -- required field empty, a required Items field or Elements Page with no complete row (NoCompleteRow), a required picture MediaPathRule refuses (InvalidMedia, 7A)
         - BlockFieldReader.cs  -- HasContent per type; ItemValue
         - SheetStopRule.cs  -- / full stop heights, Open At, where a released drag or flick snaps (or closes); CoversScreenTop (6C: only full); RevealsBlocks
-        - HeroRule.cs  -- Pure: the bar and the hero -- Height (max(min, Half - Peek)), BarShowsTitle (Peek, or the hero's title scrolled away), InView / VisiblePart
+        - HeroRule.cs  -- Pure: the bar and the hero -- Height (max(min, Full): the whole sheet, under the floating bars), WordsBottom (the hero's foot), BarShowsTitle (Peek, or the hero's title scrolled away), InView / VisiblePart
         - HeroMotionRule.cs  -- Pure: hero_motion (pan / zoom / none) -- Phase (26 s there and back, eased), PanOffset, Scale, Parallax (0.45), TextRise / TextOpacity; Reduce Motion
         - HeroActionsRule.cs  -- Pure: Of(entries) -> the hero's Primary (the first footer Actions block) and Listen (the first pinned-top audio guide, else the first audio guide)
         - HeroTitleFitRule.cs  -- Pure: Lines (a title wrapped greedily into a width by a measure), NeedsNotice (3+ lines), AdvanceWidth
@@ -593,6 +596,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - NavRailRule.cs  -- Pure: SwipesToEnd (one swipe = one viewport of travel), MostCells(step, viewport, maxSwipes), Of(targets, ...) -> Plan(Cards, HasAll): every block
           - BentoTileRule.cs  -- Pure: Tiles(rows, selfKey, jumpTargets) drops a row with no block, the bento itself, or a block BlockRefRule's jump targets lack; OpensOf
           - NavGroupRule.cs  -- Pure: the navigation Groups -- Groups(nav): the wall's rows or the four defaults
+          - NavBarRule.cs  -- Pure: the Navigation Bar -- Items (the wall's Bar Groups rows or one per navigable family, DefaultRows), Entries (a card's groups with targets, the table's order), EntryOf, Words, Shows (on + navigation + 2 groups), every option read with its default
           - NavLabelRule.cs  -- Pure: Labels (icon / text / icon and text) -- ShowsIcon / ShowsWords; an item with no icon (a format) always shows its words
           - NextUpRule.cs  -- + ShowsPosition(layout): false under pages (the Family Pager's N of M is the one counter)
           - BarSheetRule.cs  -- Pure: OpensKinds(tappedSection, currentSection, kindCount) -- bar_sheet's tap: a second tap on the CURRENT section with two kinds or more
@@ -669,6 +673,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - ElementRef.cs  -- a reference {scope page | block | shared, block, row}
           - BlockSurfaces.cs  -- the Preview surface's common fields (mode, rows, tap, entry, overrides), Page / Preview rows, mode, PreviewTap / PreviewEntry, TemplateOf / SetTemplate (the block's template key), hand-set minutes, OverrideOf (ComponentOverride), RowsToValidate, TakeRowId (never reused)
           - ElementRefRule.cs  -- ElementScope (holder, the POI's blocks, the shared pool) + Resolve / ContentOf: one level, Broken with its reason
+          - PreviewFitRule.cs  -- Pure: the story preview's picture gives way first so the title is never cut by the cap (KeepBottom, PictureHeight)
           - ElementPreviewRule.cs  -- Automatic (first picture + title -- the eyebrow right before it with it, TitleLead -- + text in Page order) / Custom (own, linked, broken); UsedPageRows
           - ElementRules.cs  -- Minutes (200 wpm + media weights, hand-set wins), FirstWords (the first title row, else the first words), HasOwnTitle (the page breadcrumb leaves the name out), SearchWords (not indexed), TapOf
           - ElementMotionRule.cs  -- the motion maths: EffectOf (Auto = the element's own), ReducedOf (Reduce Motion: every effect still), Entered (the 92 % enter line), StaggerDelay, RevealProgress / EnterPose (reveal, slide in), ParallaxOffset, ZoomScale, PanOffset, Mover (the one row that moves by itself)
@@ -776,6 +781,8 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - NavigationPresets.cs  -- Editor-only DATA: the nine presets of _3.2 section 8
           - NavigationWarningRule.cs  -- + EdgeUnderALayoutThatOwnsIt; an Edge the layout keeps off the card is no third bar
           - POIEditorToolWindow.CardNavigationGroups.cs  -- The Groups table
+          - POIEditorToolWindow.CardNavigationBar.cs  -- Detail Card > Navigation > Navigation Bar (first component): Enabled, Bar Look, Chosen Group, Where And When, the Bar Groups table (folding rows, + Add group, Reset To The Families, warnings); texts in ...CardNavigationBarHelp.cs
+          - POIEditorToolWindow.CardNavigationBarHelp.cs  -- The Navigation Bar's (i) texts and its notice (app-agnostic)
           - POIEditorToolWindow.CardComponents.cs  -- Detail Card > Card Components: the wall's defaults of the shared card components (card_settings.components): the Open Row's emphasis (a segment row) first, then the Page Chrome row (Breadcrumb, Previous / Next), with its (i) and Test guides
           - POIEditorToolWindow.CardTexts.cs  -- Detail Card > Card Texts: one row per framework / app card text (named by its wording), a field per wall language; FrameworkCardStrings
           - POIEditorToolWindow.CardGlossary.cs  -- Detail Card > Glossary: a Term + its definition per language per word, + Add term
@@ -847,6 +854,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - NavigationPresetsTests.cs  -- The presets as data: the nine of section 8's table in order (typed once in the test from the guide), every element a preset names registered for the
         - NavigationWarningRuleTests.cs  -- The warnings' conditions at their edges
         - NavigationPresetEditorTabTests.cs  -- + the five groups read from the real window and the Edge warning under Pages / Accordion
+        - NavigationBarEditorTabTests.cs  -- the real window: the Navigation Bar first, off by default; on, its four sub-components replace the Elements (one undo step); the Bar Groups table writes nothing until its first real click, which writes every default row (one undo step); a real move / hide and the warning
         - CardStartersTests.cs  -- The Card Starter as data on a real empty point (The Camera): kinds, looks and preset choices registered; no content written; every empty required
         - CardStarterEditorTabTests.cs  -- The real window: the Card Starter row first and drawing it writes nothing; a real click on every set into an empty point asks nothing, writes exactly
         - ShippedWall.cs  -- The shipped LivingRoom config with the card's navigation at the framework default, for EditMode tests that measure the framework's navigation rows
@@ -899,6 +907,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - BentoLayoutRuleTests.cs  -- The tile arithmetic: every section count 1..10
           - FullViewSiblingRuleTests.cs  -- On the shipped wall: The Lamp's Media block has its 14 Media siblings in the stack's order (the same list from any of them), Listen
           - NavBottomElementRulesTests.cs  -- Tier 0 on the shipped Lamp / Military / Religious: NextUpRule
+          - NavBarRuleTests.cs  -- Tier 0 of NavBarRule: the default groups, a wall's rows (hidden, merged, blanks), the shipped Ribeira Palace's groups through the real stack, EntryOf, words, every option's default
           - NavTopElementRulesTests.cs  -- Tier 0 on the shipped Lamp: default Groups 25 / 15 / 7 / 9, a wall's own rows and a Families row's group, group words; sections' icons / tokens
           - NavFloatingRulesTests.cs  -- Tier 0 at the run's 390 x 844 frame: FloatingSlotRule (peek / half a gap above, Full flush; Shown; Dims), FabFanRule, RadialMenuRule
           - FamilyIconAndWordsTests.cs  -- Every registered family (an app's too) has an icon the set draws and a token a stylesheet defines, >= 3:1 on --ts-surface; every icon of the set is
@@ -1067,6 +1076,8 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - TypefaceMeasureTests.cs  -- Measuring instrument of a TYPE change, gated by TestEvidence/Typeface/MEASURING (its word = the phase, before / after): the P4.1 gallery renders + a
         - HeroMeasureSceneTests.cs  -- Measuring instrument of the header / hero, gated by TestEvidence/Hero/MEASURING (LookMeasure): The Lamp and The Painting x EN / PT x no Menu /
         - PoiCardHeroSceneTests.cs  -- Phase B on the REAL scene: the bar one row whatever the language or Menu (stops unchanged, live push), the whole hero in view at Half with the card's
+        - PoiCardFullHeightSceneTests.cs  -- Phase B: Full Height To The Top vs Leave A Camera Strip on the real sheet (_3.3 S4a)
+        - PoiCardNavBarSceneTests.cs  -- Phase B on the real scene: the Navigation Bar's groups, floating under the title bar after the hero with no jump, a tap landing under the chrome and marking the group, each indicator x floating / full width / bottom, a merged group, off again; renders in TestEvidence/NavBar/
         - ThemePixelSetTests.cs  -- [Explicit] measuring instrument for a change that must move no pixel: 12 gallery renders (CardNavGalleryScene) + The Lamp at Half / Full
         - TestEvidence.cs  -- PUBLIC: Root (TileStories/TestEvidence, next to Assets/) and PathFor(domain, fileName) (creates TestEvidence/<domain>/): the ONE place every test
         - IsolatedVisitorState.cs  -- PUBLIC: while it lives DeviceStateStore.Current is a memory store of its own (never the developer's PlayerPrefs); each test assembly's SetUpFixture holds one for the run, SearchSceneFixture a fresh one per test

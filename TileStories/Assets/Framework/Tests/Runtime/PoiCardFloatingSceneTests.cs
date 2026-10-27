@@ -74,6 +74,8 @@ namespace TileStories.Tests
             nav.menu = menu;
             nav.max_slots = 5;
             if (placedModelControl != null) nav.placed_model_control = placedModelControl;
+            // - the floating slot rests in the camera strip Full leaves (_3.3 S4a: Full Height = Leave A Camera Strip; To The Top leaves none)
+            copy.card_settings.container.full_height = CardOptions.FullHeightCameraStrip;
             // - English keeps the shipped languages (the language chip is part of the header the stops are measured with); another language
             //   leads, English after it. Read from the shipped wall each time, so an earlier push never leaks into the next
             _shippedLanguages ??= new List<string>(ConfigCopy().card_settings.languages);
@@ -119,7 +121,7 @@ namespace TileStories.Tests
             string block = Model.Sections[section].Targets[0];
             var slot = Sheet.Stack.SlotOfBlock(block);
             if (Sheet.Stack.LandingTop(slot) <= Range - OnePixel)
-                Assert.AreEqual(0f, Sheet.Stack.LandingElement(slot).worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, name + ": its first block's top meets the viewport's top");
+                Assert.AreEqual(Sheet.Stack.LandingInset, Sheet.Stack.LandingElement(slot).worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, name + ": its first block's top meets the viewport's top");
             else
                 Assert.AreEqual(Range, Scroll.scrollOffset.y, OnePixel, name + ": a late block clamps at the end of the range");
         }

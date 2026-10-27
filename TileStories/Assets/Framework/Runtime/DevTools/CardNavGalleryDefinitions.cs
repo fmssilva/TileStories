@@ -139,6 +139,8 @@ namespace TileStories
             wall.card_settings.navigation.bottom = slot == NavSlotKeys.Bottom ? entry.ElementKey : CardOptions.NavNone;
             wall.card_settings.navigation.menu = slot == NavSlotKeys.Menu ? entry.ElementKey : CardOptions.NavNone;
             wall.card_settings.navigation.floating = slot == NavSlotKeys.Floating ? entry.ElementKey : CardOptions.NavNone;
+            // - a Floating Button rests in the camera strip Full leaves (_3.3 S4a: Full Height = Leave A Camera Strip; To The Top leaves none)
+            if (slot == NavSlotKeys.Floating) wall.card_settings.container.full_height = CardOptions.FullHeightCameraStrip;
             wall.card_settings.navigation.edge = slot == NavSlotKeys.Edge ? entry.ElementKey : CardOptions.NavNone;
             // - a nav block comes in through Auto Nav Block (the builder's own step), every slot empty; one that needs authored content (the
             //   bento) cannot: Poi() authors it into the card

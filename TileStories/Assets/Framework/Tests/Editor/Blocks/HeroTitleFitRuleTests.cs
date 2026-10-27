@@ -47,8 +47,9 @@ namespace TileStories.Editor.Tests
         {
             Assert.IsTrue(HeroTitleMeasure.TryLine(out var font, out float size, out float width), "the theme, its display face and the panel are found");
             StringAssert.StartsWith("Fraunces", font.faceInfo.familyName, "the display role (R12.3)");
-            Assert.AreEqual(40f, size, 0.01f, "--ts-size-hero-narrow: a phone is narrower than HeroRule.NarrowBelow");
             var theme = UnityEditor.AssetDatabase.LoadAssetAtPath<ThemeAsset>(HeroTitleMeasure.ThemePath);
+            float narrow = theme.Shared.lengths.Single(t => t.name == HeroTitleMeasure.SizeToken).value.value;
+            Assert.AreEqual(narrow, size, 0.01f, "--ts-size-hero-narrow (read from the theme): a phone is narrower than HeroRule.NarrowBelow");
             float footPadding = theme.Shared.lengths.Single(t => t.name == HeroTitleMeasure.FootPaddingToken).value.value;
             Assert.AreEqual(390f - 2f * footPadding, width, 0.01f, "the 390 pt reference width less the foot's --ts-space-5 each side (the real label's width: "
                 + "PoiCardHeroSceneTests.TheTitleFitRule_...)");

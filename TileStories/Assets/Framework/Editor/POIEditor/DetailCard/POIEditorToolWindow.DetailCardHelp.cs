@@ -55,6 +55,11 @@ namespace TileStories.Editor
             "The most of the screen height the Half stop may cover (0.25 to 0.40). Keeps the wall visible above the card; " +
             "dragging up again opens it full.";
 
+        private const string CardFullHeightHelp =
+            "How high the card rises at its Full stop. To The Top (the default): up to the top of the screen, below the phone's status bar " +
+            "and notch; the card's tinted glass keeps the camera view showing through it. Leave A Camera Strip: it stops short of the top " +
+            "and leaves a strip of the live camera view above it. Either way the grabber, a drag down and Back lower the card again.";
+
         private const string CardTapOutsideHelp =
             "A tap on empty camera space closes the card and clears the selection. A tap on a marker still selects that marker; " +
             "a drag across the view never closes it. The X and a swipe down always close it.";
@@ -175,6 +180,8 @@ namespace TileStories.Editor
             "CARD CONTAINER\n" +
             "- Tap a marker: the card opens at Open At (Peek: the title and the category chip only).\n" +
             "- Drag the grabber or the title up: Half, never taller than Half Height Max; drag again: full.\n" +
+            "- Full Height: at full, To The Top reaches the top of the screen; set Leave A Camera Strip and the open card drops to leave a " +
+            "strip of the camera above it, at once. Drag the grabber down or press Back: the card lowers to Half either way.\n" +
             "- Close it three ways: the X; drag it down below the title; tap empty camera space (only while Tap Outside Closes is on).\n" +
             "- Tap another marker while it is open: the card keeps its height and shows the new point.\n" +
             "- Enable Detail Card off: a tap still selects the marker, no card opens.\n" +
@@ -247,6 +254,8 @@ namespace TileStories.Editor
             "CARD CONTAINER\n" +
             "- Swipe the card up and down with a real finger: it follows the finger, a quick flick goes one stop further.\n" +
             "- The X and the grabber are easy to reach with one thumb; the card clears the home indicator.\n" +
+            "- Full Height To The Top: at full the card's top sits just under the status bar and the notch, nothing of it hidden; the " +
+            "grabber still takes a thumb.\n" +
             "- Read the title and the chip outdoors in bright light.\n" +
             "- Placed Model Control: place a model at a real wall and lower the card to its title. Read the chip over the camera image " +
             "against a bright patch of the wall (a white tile, a window) and against a dark one: its words and its edge stay readable " +

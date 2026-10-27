@@ -4,10 +4,12 @@ using UnityEngine.InputSystem;
 
 namespace TileStories
 {
-    // A tap on empty camera space closes the card (_3.1 section 4), kept out of PoiCardHost (15.4.2): it remembers a press, judges the
-    // release (CardTapRule: short and still, on nothing -- ScreenUIHit), and while zoom is on waits out the zoom's double-tap window
-    // (TapOutsideDismissal) so a double tap zooms instead. Plain C#: the host feeds it the pointer every frame; a test calls HandleScreenTap
-    // with real positions and times on its own clock.
+    // A tap on empty camera space closes the card (_3.1 section 4), kept out of PoiCardHost (15.4.2): it remembers a press -- and whether
+    // anything was under it THEN --, judges the release (CardTapRule: short and still, on nothing at either end -- ScreenUIHit), and while
+    // zoom is on waits out the zoom's double-tap window (TapOutsideDismissal) so a double tap zooms instead. Plain C#: the host feeds it the
+    // pointer every frame; a test calls HandleScreenTap with real positions and times on its own clock.
+    //   - why the press is judged at the press: a button can hide what it sits on when it is clicked (a block page's Back closes the full
+    //     view on the release), so at the release the same point may show the camera; the tap was the button's all the same
     public sealed class CardTapOutside
     {
         private readonly TapOutsideDismissal _dismissal = new();
@@ -19,6 +21,7 @@ namespace TileStories
         private Vector2 _pressPosition;
         private float _pressTime;
         private bool _pressed;
+        private bool _pressedOnSomething;
 
         // The clock taps are timed on, the wall's card and zoom settings (Tap Outside Closes, the double-tap window), whether the card is open,
         // and what closing it means (the host clears the selection through the bus)
@@ -47,22 +50,28 @@ namespace TileStories
                 _pressed = true;
                 _pressPosition = pointer.position.ReadValue();
                 _pressTime = _clock();
+                _pressedOnSomething = ScreenUIHit.IsOverAnything(_pressPosition);
             }
             else if (_pressed && pointer.press.wasReleasedThisFrame)
             {
                 _pressed = false;
-                HandleScreenTap(_pressPosition, pointer.position.ReadValue(), _pressTime, _clock());
+                HandleScreenTap(_pressPosition, pointer.position.ReadValue(), _pressTime, _clock(), _pressedOnSomething);
             }
         }
 
         // A press at `down` released at `up` (screen pixels, times on the clock). A tap on empty camera space closes the card -- at once while
         // zoom is off, else once the zoom's double-tap window passes with no second tap (IsPending meanwhile). True when it closed NOW.
-        public bool HandleScreenTap(Vector2 down, Vector2 up, float downTime, float upTime)
+        // What was under the press is read now (the screen as it is), as a caller holding no earlier reading sees it
+        public bool HandleScreenTap(Vector2 down, Vector2 up, float downTime, float upTime) =>
+            HandleScreenTap(down, up, downTime, upTime, ScreenUIHit.IsOverAnything(down));
+
+        // The same, with whether anything was under the press when it landed (the poll's own reading, taken at the press)
+        public bool HandleScreenTap(Vector2 down, Vector2 up, float downTime, float upTime, bool pressedOnSomething)
         {
             var zoom = _zoom();
             bool isTap = CardTapRule.IsTap(down, up, downTime, upTime, Screen.height);
             bool closes = CardTapRule.ShouldDismiss(_cardOpen(), _settings()?.container.dismiss_on_tap_outside ?? true,
-                isTap, isTap && ScreenUIHit.IsOverAnything(up));
+                isTap, isTap && (pressedOnSomething || ScreenUIHit.IsOverAnything(up)));
             float window = TapOutsideDismissal.DelayFor(zoom);
             _dismissal.OnTap(upTime, up, closes, window, zoom?.double_tap_move_tolerance_px ?? 0f);
             // - zoom off: no second tap can make it a double tap, so there is nothing to wait for

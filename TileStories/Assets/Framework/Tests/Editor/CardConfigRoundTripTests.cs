@@ -87,6 +87,8 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("", s.media_resources_path);
             Assert.AreEqual(CardOptions.StopPeek, s.container.open_stop, "opens at peek, never auto-expanded");
             Assert.AreEqual(0.40f, s.container.half_max_ratio, 1e-6);
+            // - _3.3 S4a: an old config rises to the top at Full (the default)
+            Assert.AreEqual(CardOptions.FullHeightTop, s.container.full_height);
             Assert.IsTrue(s.container.dismiss_on_tap_outside);
             Assert.IsTrue(s.container.keep_audio_on_close);
             CollectionAssert.IsEmpty(s.kinds, "no Block Library rows = every kind enabled with its default variant");

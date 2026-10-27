@@ -246,6 +246,8 @@ namespace TileStories.Tests
             });
             yield return OpenTheLamp();
             Assert.AreEqual(BuiltInNavElements.Segmented, Sheet.Slots.TopKey, "precondition: the slot holds the segmented element");
+            // - the hero is the screen at rest: the chrome comes once it is scrolled away (_3.3 S4a)
+            yield return CardTestInput.PastTheHero(Sheet);
             Assert.IsTrue(Sheet.Chrome.TopShown, "precondition: the strip shows at Full");
             var view = (SegmentedNavView)Sheet.Slots.TopView;
             Assert.AreEqual(4, view.Segments.Count, "precondition: the framework's four groups");

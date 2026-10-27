@@ -8,7 +8,8 @@ namespace TileStories
     //     language, Menu or title length moves a stop; it shows the title only while the hero's does not (SetBarTitleShown)
     //   - the HERO (HeroPart, first in what scrolls -- BlockStackView places it): the eyebrow, the title in the display face, the subtitle
     //     and, at its foot, the card's actions (Actions: the stack binds them, HeroActionsRule). The picture looks draw it over the
-    //     picture, full width, on a graded scrim; Text Only and Compact draw it as a plain plate (Compact: the title alone)
+    //     picture, full width and the whole of Full's view tall (HeroRule.Height: the picture cropped to cover it), the words minimal on a soft
+    //     glow, ending where Half's view ends (HeroRule.WordsBottom); Text Only and Compact draw it as a plain plate (Compact: the title alone)
     //       image_parallax -- the picture moves as Hero Motion says (pan / zoom / none) and slower than the scroll (HeroMotionRule)
     //       split_then_now -- Picture (then) beside Second Picture (now), each with its CardStrings label
     //       spotlight_crop -- Picture enlarged around the focus point with a ring on it (SpotlightCropRule)
@@ -24,13 +25,14 @@ namespace TileStories
         public VisualElement Root { get; }
         public VisualElement PeekPart => Root;
         // The hero, first in the scroll (always, a plate for the text looks): its frame (picture looks) and the moving part inside it, then
-        // the FOOT -- the words and the actions row on a solid scrim, with a short graded scrim fading into the picture above them (the
-        // scrim follows the words, so every word sits on the dense part whatever the hero's height or the title's lines)
+        // the FOOT -- the words and the actions row, minimal on the picture (_3.3 S4a, a premium website's hero): no plate, a soft
+        // transparent GLOW behind the words' block (a radial fade, no rectangle) and a dark halo hugging every letter (the words' own text
+        // shadow, Media.uss) -- what keeps them readable over a bright picture; the rest of the picture is untouched
         public VisualElement HeroPart { get; }
         public VisualElement Frame { get; }
         public VisualElement Media { get; }
         public VisualElement Foot { get; }
-        public VisualElement Scrim { get; }
+        public VisualElement Glow { get; }
         public VisualElement Text { get; }
         public VisualElement Actions { get; }
         public Label Eyebrow { get; }
@@ -84,6 +86,10 @@ namespace TileStories
         private Vector2 _placedFor;
         private ICardVideo _video;
         private IVisualElementScheduledItem _tick;
+        // The layout the stops gave (SetHeroLayout)
+        private float _heroHeight;
+        private float _wordsBottom;
+        private float _underBars;
 
         public HeaderBlockView()
         {
@@ -102,12 +108,13 @@ namespace TileStories
             Frame.Add(Media);
             Foot = new VisualElement { name = "card-hero-foot", pickingMode = PickingMode.Ignore };
             Foot.AddToClassList("card-hero__foot");
-            Scrim = new VisualElement { name = "card-hero-scrim", pickingMode = PickingMode.Ignore };
-            Scrim.AddToClassList("card-hero__scrim");
-            Foot.Add(Scrim);
 
             Text = new VisualElement { name = "card-hero-text", pickingMode = PickingMode.Ignore };
             Text.AddToClassList("card-hero__text");
+            // - the glow behind the words block (the words, Listen and the actions): out of the flow, reaching past it on every side (Media.uss)
+            Glow = new VisualElement { name = "card-hero-glow", pickingMode = PickingMode.Ignore };
+            Glow.AddToClassList("card-hero__glow");
+            Foot.Add(Glow);
             Eyebrow = new Label { name = "card-hero-eyebrow", pickingMode = PickingMode.Ignore };
             Eyebrow.AddToClassList("card-hero__eyebrow");
             HeroTitle = new Label { name = "card-hero-title", pickingMode = PickingMode.Ignore };
@@ -137,6 +144,8 @@ namespace TileStories
             LoopFrames.AddToClassList("card-hero__loop");
             ModelView = new ModelTurntableBlockView();
             ModelView.Root.AddToClassList("card-hero__model");
+            // - the words' fade reads their place in the view: placed again once they are laid out (at rest too, with no scroll to say so)
+            Foot.RegisterCallback<GeometryChangedEvent>(_ => OnStackScrolled(_scrollY));
             Frame.RegisterCallback<GeometryChangedEvent>(evt =>
             {
                 // - only a new frame size re-places the picture (its own new size must never feed back into the frame's)
@@ -144,6 +153,10 @@ namespace TileStories
             });
             HeroPart.RegisterCallback<GeometryChangedEvent>(evt => HeroPart.EnableInClassList(NarrowClass, HeroRule.IsNarrow(evt.newRect.width)));
         }
+
+        // The hero frame's height and where its words end (from its top) as the stops gave them last (NaN while it has none: the plate)
+        public float HeroHeight { get; private set; } = float.NaN;
+        public float WordsBottom { get; private set; } = float.NaN;
 
         public string TitleText => _title.text;
         public string SubtitleText => _subtitle.text;
@@ -167,6 +180,8 @@ namespace TileStories
 
             BindHero(instance, context, read);
             HasHero = true;
+            // - a picture look or the plate is known now: the layout the stops gave applies to it
+            ApplyHeroLayout();
         }
 
         public void Unbind()
@@ -183,10 +198,27 @@ namespace TileStories
         // The bar shows the title (HeroRule.BarShowsTitle): at Peek, and once the hero's title scrolled away
         public void SetBarTitleShown(bool shown) => Root.EnableInClassList(BarTitleShownClass, shown);
 
-        // The hero frame's height (HeroRule.Height, from the sheet's stops) -- a MINIMUM: words that need more make it taller, never squashed
-        // into one another; the plate keeps its own
-        public void SetHeroHeight(float height) =>
-            HeroPart.style.minHeight = HasPicture && !float.IsNaN(height) && height > 0f ? height : StyleKeyword.Null;
+        // The hero's layout from the sheet's stops (HeroRule): its height -- a MINIMUM: words that need more make it taller, never squashed --
+        // and where its words and actions end, `wordsBottom` from its top (the foot keeps the rest of the picture under it); the plate
+        // keeps its own
+        public void SetHeroLayout(float height, float wordsBottom, float underBars = 0f)
+        {
+            _heroHeight = height;
+            _wordsBottom = wordsBottom;
+            _underBars = Mathf.Max(0f, float.IsNaN(underBars) ? 0f : underBars);
+            ApplyHeroLayout();
+        }
+
+        private void ApplyHeroLayout()
+        {
+            bool shown = HasPicture && _heroHeight > 0f;
+            HeroHeight = shown ? _heroHeight : float.NaN;
+            WordsBottom = shown ? Mathf.Clamp(_wordsBottom, 0f, _heroHeight) : float.NaN;
+            HeroPart.style.minHeight = shown ? _heroHeight : new StyleLength(StyleKeyword.Null);
+            // - a picture rises under the floating bars (the stack's top inset): it starts at the sheet's top edge; a plate stays below them
+            HeroPart.style.marginTop = shown ? -_underBars : new StyleLength(StyleKeyword.Null);
+            Foot.style.marginBottom = shown ? _heroHeight - WordsBottom : new StyleLength(StyleKeyword.Null);
+        }
 
         // The bottom of the hero's title as drawn (risen by the scroll), in the stack's content coordinates: what the bar's title waits for
         public float HeroTitleBottom()
@@ -194,6 +226,17 @@ namespace TileStories
             if (HeroPart.panel == null) return float.NaN;
             float bottom = HeroPart.layout.y + Foot.layout.y + Text.layout.y + HeroTitle.layout.yMax + TextRise;
             return bottom;
+        }
+
+        // The foot of the chrome floating over the stack's view (the bars, a shown strip), from the view's top: where the words finish fading
+        public float FadeTop { get; set; }
+
+        // The words block's top as drawn, from the stack's view top, for this scroll (NaN before layout)
+        private float WordsTopInView(float scrollY)
+        {
+            if (HeroPart.panel == null) return float.NaN;
+            float top = HeroPart.layout.y + Foot.layout.y;
+            return float.IsNaN(top) ? float.NaN : top - scrollY + TextRise;
         }
 
         // The hero's bottom edge in the stack's content coordinates (NaN when it is not in the stack)
@@ -204,10 +247,11 @@ namespace TileStories
         {
             _scrollY = scrollY;
             if (!HasHero) return;
+            // - the words block moves as one, Listen and the actions with the words: it rises past the picture, and fades near the top
             TextRise = HeroMotionRule.TextRise(scrollY, _reduceMotion);
-            TextOpacity = HeroMotionRule.TextOpacity(scrollY, _reduceMotion);
-            Text.style.translate = new Translate(0f, TextRise);
-            Text.style.opacity = TextOpacity;
+            TextOpacity = HeroMotionRule.TextOpacity(WordsTopInView(scrollY), FadeTop, _reduceMotion);
+            Foot.style.translate = new Translate(0f, TextRise);
+            Foot.style.opacity = TextOpacity;
             if (_variant == BuiltInBlocks.HeaderImageParallax) PlaceMedia();
         }
 
@@ -325,9 +369,12 @@ namespace TileStories
             _scrollY = 0f;
             Media.style.translate = StyleKeyword.Null;
             Media.style.scale = StyleKeyword.Null;
-            Text.style.translate = StyleKeyword.Null;
-            Text.style.opacity = StyleKeyword.Null;
+            Foot.style.translate = StyleKeyword.Null;
+            Foot.style.opacity = StyleKeyword.Null;
             HeroPart.style.minHeight = StyleKeyword.Null;
+            HeroPart.style.marginTop = StyleKeyword.Null;
+            Foot.style.marginBottom = StyleKeyword.Null;
+            HeroHeight = WordsBottom = float.NaN;
             foreach (var e in new[] { Picture.Root.style, SecondPicture.Root.style })
             {
                 e.width = StyleKeyword.Null;
@@ -374,7 +421,7 @@ namespace TileStories
         {
             float now = Clock?.Invoke() ?? 0f;
             PanOffset = HeroMotionRule.PanOffset(Motion, _reduceMotion, now, Overflow);
-            ZoomScale = HeroMotionRule.Scale(Motion, _reduceMotion, now);
+            ZoomScale = HeroMotionRule.Scale(Motion, _reduceMotion, now, Overflow);
             ParallaxOffset = HeroMotionRule.Parallax(_scrollY, Frame.layout.height, _reduceMotion);
             Media.style.translate = new Translate(PanOffset, ParallaxOffset);
             Media.style.scale = new Scale(new Vector2(ZoomScale, ZoomScale));

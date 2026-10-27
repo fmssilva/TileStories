@@ -79,36 +79,38 @@
     border-radius: 0;
 }
 
-/* the FOOT: the words and the actions on the solid scrim, and above it the graded scrim (a white alpha ramp tinted by the same colour)
-   fading into the picture -- the scrim follows the words, so each word sits on the dense part. Both MEASURED on the render: every word
-   keeps 7:1 at its worst pixel on every hero picture (D1 as amended, PoiCardHeroSceneTests) */
+/* the FOOT: the words and the actions, minimal on the picture (_3.3 S4a, a premium website's hero) -- no plate: a soft transparent GLOW
+   behind the words' block (hero_glow.png, a fade with no edge, tinted by --ts-hero-glow) and a dark halo hugging every letter (the words'
+   text-shadow, --ts-text-halo). MEASURED on the render: every word against the picture right around its letters, on every hero picture of
+   the wall (PoiCardHeroSceneTests) */
 .card-hero__foot {
     flex-shrink: 0;
-    padding: 0 var(--ts-space-5) var(--ts-space-2) var(--ts-space-5);
-    background-color: var(--ts-scrim-hero);
+    padding: 0 0 var(--ts-hero-words-inset) 0;
 }
 
-.card-hero__scrim {
+.card-hero__glow {
     position: absolute;
     left: 0;
     right: 0;
-    bottom: 100%;
-    height: var(--ts-hero-scrim-fade);
-    background-image: url("hero_scrim.png");
+    top: var(--ts-hero-glow-out-top);
+    bottom: var(--ts-hero-glow-out-bottom);
+    background-image: url("hero_glow.png");
     -unity-background-scale-mode: stretch-to-fill;
-    -unity-background-image-tint-color: var(--ts-scrim-hero);
+    -unity-background-image-tint-color: var(--ts-hero-glow);
 }
 
-/* the words: eyebrow, the title in the display face, one line */
+/* the words: eyebrow, the title in the display face, one line -- the hero's side gutter, a halo round every letter */
 .card-hero__text {
-    margin-bottom: var(--ts-space-2);
+    margin-bottom: var(--ts-space-3);
+    padding: 0 var(--ts-space-5);
 }
 
 .card-hero__eyebrow {
-    font-size: var(--ts-size-caption);
+    font-size: var(--ts-hero-eyebrow-size);
     -unity-font-style: bold;
     letter-spacing: 1px;
     color: var(--ts-on-scrim-2);
+    text-shadow: 0 1px var(--ts-text-halo-blur) var(--ts-text-halo);
     /* a kicker: one line, cut only when it truly does not fit */
     white-space: nowrap;
     overflow: hidden;
@@ -121,6 +123,7 @@
     font-size: var(--ts-size-hero);
     -unity-font-style: bold;
     color: var(--ts-on-scrim);
+    text-shadow: 0 1px var(--ts-text-halo-blur) var(--ts-text-halo);
     white-space: normal;
     margin: 0 0 var(--ts-space-1) 0;
     padding: 0;
@@ -131,8 +134,9 @@
 }
 
 .card-hero__subtitle {
-    font-size: var(--ts-size-body);
+    font-size: var(--ts-hero-line-size);
     color: var(--ts-on-scrim);
+    text-shadow: 0 1px var(--ts-text-halo-blur) var(--ts-text-halo);
     white-space: normal;
     margin: 0;
     padding: 0;
@@ -145,20 +149,20 @@
     display: none;
 }
 
-/* the actions row at the foot: the card's ONE focal action (accent fill, D5) and Listen as a compact outline pill ("play m:ss") */
-/* ONE row always (P4.4b part 2: two stacked rows hid the Lamp's picture): the pill keeps its size, the focal action takes the rest and
-   cuts its words with "..." only when they truly cannot fit */
+/* the actions row under the words: the card's focal action as a thin outline (the "Book Now" of a website's hero) and Listen as a small
+   headphones mark + time, no box -- each still a whole touch target. ONE row always (P4.4b part 2) */
 .card-hero__actions {
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
+    padding: 0 var(--ts-space-5);
 }
 
 .card-hero__primary {
-    flex-grow: 1;
+    flex-grow: 0;
     flex-shrink: 1;
     min-width: 0;
-    margin: 0 var(--ts-space-2) var(--ts-space-2) 0;
+    margin: 0 var(--ts-space-4) 0 0;
     padding: 0;
     border-top-width: 0;
     background-color: var(--ts-clear);
@@ -168,41 +172,70 @@
     margin: 0;
     padding: 0 var(--ts-space-4);
     justify-content: center;
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-on-scrim);
     border-radius: var(--ts-pill-radius);
+    background-color: var(--ts-hero-glow);
 }
 
 .card-hero__primary .card-action__label {
+    color: var(--ts-on-scrim);
+    text-shadow: 0 1px var(--ts-text-halo-blur) var(--ts-text-halo);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
+.card-hero__primary .card-action .card-icon__frame {
+    border-color: var(--ts-on-scrim);
+}
+
+.card-hero__primary .card-action .card-icon__bar,
+.card-hero__primary .card-action .card-icon__dot {
+    background-color: var(--ts-on-scrim);
+}
+
 .card-hero__listen {
     flex-shrink: 0;
-    margin: 0 0 var(--ts-space-2) 0;
-    padding: 0 var(--ts-space-4) 0 0;
-    border-width: var(--ts-hero-outline-width);
-    border-color: var(--ts-on-scrim);
-    border-radius: var(--ts-pill-radius);
+    margin: 0;
+    padding: 0 var(--ts-space-2) 0 0;
+    border-width: 0;
     background-color: var(--ts-clear);
 }
 
-/* Listen alone (no sticky action on the card): it takes the row (the stack marks the row, USS has no :first-child) */
-.card-hero__actions--listen-only .card-hero__listen {
-    flex-grow: 1;
+.card-hero__listen .card-audio__listen-icon .card-icon__glyph {
+    width: var(--ts-hero-listen-icon);
+    height: var(--ts-hero-listen-icon);
+}
+
+.card-hero__listen .card-audio__listen-icon .card-icon__frame {
+    border-color: var(--ts-on-scrim);
+}
+
+/* at this small size the ear cups are drawn fuller than the set's (at the set's 24 % they were no wider than the band's stroke: a bare arch) */
+.card-hero__listen .card-audio__listen-icon .card-icon__bar {
+    background-color: var(--ts-on-scrim);
+    top: 46%;
+    width: 32%;
+    height: 50%;
 }
 
 .card-hero__listen .card-audio__play {
+    width: var(--ts-hero-listen-target);
     background-color: var(--ts-clear);
 }
 
 .card-hero__listen .card-audio__glyph {
+    width: var(--ts-hero-listen-icon);
+    height: var(--ts-hero-listen-icon);
     color: var(--ts-on-scrim);
 }
 
 .card-hero__listen .card-audio__title,
 .card-hero__listen .card-audio__time {
+    font-size: var(--ts-hero-listen-text);
     color: var(--ts-on-scrim);
+    text-shadow: 0 1px var(--ts-text-halo-blur) var(--ts-text-halo);
     white-space: nowrap;
 }
 
@@ -223,8 +256,22 @@
     background-color: var(--ts-bar);
 }
 
-.card-hero--plate .card-hero__scrim {
+.card-hero--plate .card-hero__glow {
     display: none;
+}
+
+/* on the plate the words need no glow or halo of their own, nor a gutter beside the foot's */
+.card-hero--plate .card-hero__text,
+.card-hero--plate .card-hero__actions {
+    padding: 0;
+}
+
+.card-hero--plate .card-hero__eyebrow,
+.card-hero--plate .card-hero__title,
+.card-hero--plate .card-hero__subtitle,
+.card-hero--plate .card-hero__listen .card-audio__title,
+.card-hero--plate .card-hero__primary .card-action__label {
+    text-shadow: none;
 }
 
 .card-hero--plate .card-hero__eyebrow {
@@ -242,7 +289,34 @@
 }
 
 .card-hero--plate .card-hero__listen {
-    border-color: var(--ts-line);
+    background-color: var(--ts-clear);
+}
+
+/* on the plate the focal action keeps the card's accent fill (a white outline would vanish on the bar's ground) */
+.card-hero--plate .card-hero__primary .card-action {
+    border-width: 0;
+    background-color: var(--ts-accent);
+}
+
+.card-hero--plate .card-hero__primary .card-action__label {
+    color: var(--ts-on-accent);
+}
+
+.card-hero--plate .card-hero__primary .card-action .card-icon__frame {
+    border-color: var(--ts-on-accent);
+}
+
+.card-hero--plate .card-hero__primary .card-action .card-icon__bar,
+.card-hero--plate .card-hero__primary .card-action .card-icon__dot {
+    background-color: var(--ts-on-accent);
+}
+
+.card-hero--plate .card-hero__listen .card-audio__listen-icon .card-icon__frame {
+    border-color: var(--ts-ink);
+}
+
+.card-hero--plate .card-hero__listen .card-audio__listen-icon .card-icon__bar {
+    background-color: var(--ts-ink);
 }
 
 .card-hero--plate .card-hero__listen .card-audio__glyph,

@@ -74,6 +74,14 @@ namespace TileStories
             // The hero's bottom edge in the stack's content coordinates (NaN: no hero) and the stack's scroll offset
             public float HeroBottom;
             public float ScrollOffset;
+            // _3.3 S4a review: the top strip FLOATS over the stack (it takes no room, so the floor never hides it): it comes once the hero's
+            // part in view leaves it room -- the visitor began scrolling the picture away -- or at once with TopAlways (the Navigation Bar's
+            // Show = Always). TopHidesOnScroll: the scroll that hides the bottom area hides it too (the bar's Hide While Scrolling, at the top)
+            public bool TopFloats;
+            public bool TopAlways;
+            public bool TopHidesOnScroll;
+            // The bottom bar waits for the hero like a floating strip does (the Navigation Bar at the bottom, Show = After The Hero)
+            public bool BottomNavAfterHero;
         }
 
         public readonly struct Chrome
@@ -121,6 +129,11 @@ namespace TileStories
             bool top = input.HasTop && NavShownAt(input.Stop, input.ShowAt);
             bool nav = input.HasBottomNav && NavShownAt(input.Stop, input.ShowAt);
             float heroSeen = HeroRule.VisiblePart(input.ScrollOffset, input.HeroBottom);
+            float room0 = input.SheetHeight - input.HeaderHeight;
+            // - a floating strip: no floor; it waits for the hero (unless Always) and goes with the scroll when its bar says so
+            if (input.TopFloats && top)
+                top = (input.TopAlways || float.IsNaN(room0) || heroSeen <= room0 - input.TopHeight) && !(input.TopHidesOnScroll && input.ScrollHidesBottom);
+            if (input.BottomNavAfterHero && nav && !float.IsNaN(room0)) nav = heroSeen <= room0 - input.BottomNavHeight;
             // - the hero shows the card's actions while it is in view: the sticky footer comes once it scrolled away
             bool footer = input.HasFooter && heroSeen <= 0f;
             bool bottom = (footer || nav) && IsAboveTheTitle(input.Stop) && !input.ScrollHidesBottom;
@@ -128,7 +141,7 @@ namespace TileStories
             float room = input.SheetHeight - input.HeaderHeight;
             // - not laid out yet: no floor to apply, the next measure decides
             if (float.IsNaN(room)) return new Chrome(top, bottom, nav, footer);
-            if (top && room - input.TopHeight - (bottom ? bottomHeight : 0f) < Need(input.ContentHeight, Mathf.Max(MinStackViewport, heroSeen))) top = false;
+            if (top && !input.TopFloats && room - input.TopHeight - (bottom ? bottomHeight : 0f) < Need(input.ContentHeight, Mathf.Max(MinStackViewport, heroSeen))) top = false;
             if (bottom && room - bottomHeight < Need(input.ContentHeight, Mathf.Max(MinStackViewportUnderFooter, heroSeen))) bottom = false;
             return new Chrome(top, bottom, nav, footer);
         }

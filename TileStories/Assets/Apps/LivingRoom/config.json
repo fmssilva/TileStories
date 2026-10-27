@@ -6,7 +6,7 @@
     "badge_shape": "circle",
     "marker_outline_mode": "uniform",
     "outline_uniform_color_hex": "#E3BD72",
-    "marker_use_badge": true,
+    "marker_use_badge": false,
     "badge_corner": "top_right",
     "badge_size_ratio": 0.36000001430511477,
     "ring_size_ratio": 1.1799999475479127,
@@ -9053,7 +9053,7 @@
             "id": "painting",
             "name": "Ribeira Palace",
             "category": "royal_government",
-            "editor_rotation_deg": 0.0,
+            "editor_rotation_deg": 271.0,
             "editor_rotation_x_deg": 0.0,
             "editor_rotation_z_deg": 0.0,
             "position": {
@@ -9061,7 +9061,7 @@
                 "y": 0.0,
                 "z": 0.0
             },
-            "position_verified": true,
+            "position_verified": false,
             "summary": "Royal palace on the river, lost in 1755",
             "search_keywords": [
                 "Paço da Ribeira"
@@ -9073,7 +9073,7 @@
             "badge_category": "intact",
             "status_level_key": "intact",
             "hierarchy_level_key": "level_1",
-            "has_custom_symbol": false,
+            "has_custom_symbol": true,
             "custom_symbol_key": "",
             "card": {
                 "blocks": [
@@ -9147,7 +9147,7 @@
                                 "number": 0.0,
                                 "flag": false,
                                 "value": "",
-                                "asset": "images/paco_hero.jpg",
+                                "asset": "images/ribeira_palace_hero.jpg",
                                 "asset_by_language": [],
                                 "items": []
                             }
@@ -9439,63 +9439,6 @@
                                         ]
                                     }
                                 ]
-                            }
-                        ]
-                    },
-                    {
-                        "key": "block_3",
-                        "kind": "rich_text",
-                        "variant": "lede",
-                        "display": "inline",
-                        "emphasis": "normal",
-                        "fields": [
-                            {
-                                "key": "heading",
-                                "text": [
-                                    {
-                                        "lang": "en",
-                                        "value": "The story"
-                                    },
-                                    {
-                                        "lang": "pt",
-                                        "value": "A história"
-                                    }
-                                ],
-                                "number": 0.0,
-                                "flag": false,
-                                "value": "",
-                                "asset": "",
-                                "asset_by_language": [],
-                                "items": []
-                            },
-                            {
-                                "key": "minutes",
-                                "text": [],
-                                "number": 2.0,
-                                "flag": false,
-                                "value": "",
-                                "asset": "",
-                                "asset_by_language": [],
-                                "items": []
-                            },
-                            {
-                                "key": "body",
-                                "text": [
-                                    {
-                                        "lang": "en",
-                                        "value": "For about 250 years the kings of Portugal lived by the river, in a palace that opened straight onto the Tagus. It is gone now, but the square that took its place still carries its name.\n\nWhen King Manuel I found the old castle on the hill too cramped for a court that was growing rich on the sea trade, he moved down to the water's edge. The new palace stood beside the docks where ships from India and Brazil unloaded spices, sugar and gold, so the king could watch the fleet come in from his own windows. Offices, a chapel, workshops and the royal archive grew around it, and the palace became the true centre of the kingdom.\n\nLater kings kept adding to it. In the 1580s, under Philip I, who ruled Portugal and Spain together, the river front received a new facade and a domed corner tower, the Torreão, that sailors saw long before they saw the city. Inside were a famous library of tens of thousands of books, paintings, maps, and a royal opera house, the Ópera do Tejo, opened only eight months before the end.\n\nOn the morning of 1 November 1755, All Saints' Day, an earthquake shook the palace, a wave came up the river and fire finished what was left. The royal family was away from the building that morning, but the library, the archive and almost everything inside were lost. Lisbon was rebuilt on a strict new plan, and where the palace had stood an open square was laid out, facing the river like a grand front door: the Praça do Comércio."
-                                    },
-                                    {
-                                        "lang": "pt",
-                                        "value": "Durante cerca de 250 anos, os reis de Portugal viveram junto ao rio, num palácio que se abria diretamente sobre o Tejo. Já não existe, mas a praça que ficou no seu lugar ainda guarda o seu nome.\n\nQuando D. Manuel I achou o velho castelo no alto pequeno demais para uma corte que enriquecia com o comércio marítimo, desceu até à beira da água. O novo paço ficava junto das docas onde os navios da Índia e do Brasil descarregavam especiarias, açúcar e ouro, e o rei podia ver a frota chegar das suas próprias janelas. À volta dele cresceram gabinetes, uma capela, oficinas e o arquivo real, e o paço tornou-se o verdadeiro centro do reino.\n\nOs reis seguintes foram acrescentando obra. Na década de 1580, com Filipe I, que reinava em Portugal e em Espanha, a frente ribeirinha ganhou uma nova fachada e um torreão de cúpula que os marinheiros avistavam muito antes de verem a cidade. Lá dentro havia uma célebre biblioteca com dezenas de milhares de livros, pinturas, mapas e uma ópera real, a Ópera do Tejo, inaugurada apenas oito meses antes do fim.\n\nNa manhã de 1 de novembro de 1755, dia de Todos os Santos, um terramoto abalou o paço, uma vaga subiu o rio e o fogo acabou o que restava. A família real estava fora do edifício nessa manhã, mas a biblioteca, o arquivo e quase tudo o que havia lá dentro perderam-se. Lisboa foi reconstruída segundo um plano rigoroso e, no lugar do paço, traçou-se uma praça aberta ao rio, como uma grande porta de entrada: a Praça do Comércio."
-                                    }
-                                ],
-                                "number": 0.0,
-                                "flag": false,
-                                "value": "",
-                                "asset": "",
-                                "asset_by_language": [],
-                                "items": []
                             }
                         ]
                     },
@@ -14366,7 +14309,7 @@
         "custom_up_x": 0.0,
         "custom_up_y": 1.0,
         "custom_up_z": 0.0,
-        "facing_mode": "always_facing_camera",
+        "facing_mode": "wall_fixed",
         "facing_basis": "view_plane",
         "update_mode": "every_frame",
         "update_interval_s": 0.05000000074505806,
@@ -14445,8 +14388,9 @@
         "media_resources_path": "LivingRoom/CardMedia",
         "default_media_library_resources_path": "",
         "container": {
-            "open_stop": "peek",
+            "open_stop": "half",
             "half_max_ratio": 0.4000000059604645,
+            "full_height": "top",
             "dismiss_on_tap_outside": true,
             "keep_audio_on_close": true,
             "audio_when_another_starts": "switch",
@@ -14458,26 +14402,48 @@
             "block_order": "by_family",
             "families": [],
             "group_by": "family",
-            "min_blocks": 8,
+            "min_blocks": 6,
             "max_slots": 5,
             "follow_scroll": true,
             "jump_raises_to": "full",
             "jump_motion": "smooth",
             "back_button": "step_down",
-            "top": "icon_tabs_chips",
+            "top": "icon_tabs",
             "bottom": "none",
-            "menu": "drawer_tree",
+            "menu": "none",
             "floating": "none",
             "edge": "none",
             "auto_nav_block": "none",
-            "placed_model_control": "chip",
+            "placed_model_control": "none",
             "show_at": "half_and_full",
             "hide_on_scroll": "down",
             "labels": "icon_and_text",
             "show_counts": false,
             "groups": [],
             "layout": "scroll",
-            "accordion_one_open": false
+            "accordion_one_open": false,
+            "bar": {
+                "enabled": true,
+                "position": "under_title",
+                "show": "after_hero",
+                "hide_on_scroll": "never",
+                "shape": "floating",
+                "corner_radius": 26.0,
+                "side_margin": 12.0,
+                "height": 56.0,
+                "fill": "glass",
+                "fill_opacity": 1.0,
+                "border": true,
+                "shadow": true,
+                "indicator": "pill",
+                "slide_indicator": true,
+                "bold_selected": true,
+                "enlarge_selected": false,
+                "selected_color": "group",
+                "idle_color": "muted",
+                "labels": "icon_and_text",
+                "items": []
+            }
         },
         "kinds": [],
         "strings": [],
@@ -14524,7 +14490,7 @@
         ],
         "demo_card": {
             "enabled": false,
-            "poi_id": "",
+            "poi_id": "painting",
             "stop": "half"
         },
         "preview_language": "",

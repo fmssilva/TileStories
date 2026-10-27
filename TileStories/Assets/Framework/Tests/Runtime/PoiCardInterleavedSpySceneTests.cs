@@ -171,7 +171,7 @@ namespace TileStories.Tests
             yield return Landed();
 
             var first = sheets[0].Root;
-            Assert.AreEqual(Scroll.contentViewport.worldBound.yMin, first.worldBound.yMin, OnePixel, family + ": the FIRST sheet's top meets the viewport's top");
+            Assert.AreEqual(Scroll.contentViewport.worldBound.yMin + Sheet.Stack.LandingInset, first.worldBound.yMin, OnePixel, family + ": the FIRST sheet's top meets the viewport's top");
             Assert.IsTrue(Scroll.contentViewport.worldBound.Contains(sheets[0].Opener.Pill.worldBound.center), family + ": its opener in view");
             Assert.AreEqual(section, Nav.Current, family + ": marked once landed");
             Assert.AreEqual(section, OnScreen(), family + ": the section on screen");

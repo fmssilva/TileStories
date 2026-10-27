@@ -1230,7 +1230,7 @@ namespace TileStories.Tests
             Assert.Greater(range, 100f, "precondition: the stack really scrolls (range " + range.ToString("F0") + ")");
             var slot = sheet.Stack.SlotOfBlock(block);
             if (sheet.Stack.LandingTop(slot) <= range - onePixel)
-                Assert.AreEqual(0f, sheet.Stack.LandingElement(slot).worldBound.yMin - scroll.contentViewport.worldBound.yMin, onePixel, what + ": its top meets the viewport's top");
+                Assert.AreEqual(sheet.Stack.LandingInset, sheet.Stack.LandingElement(slot).worldBound.yMin - scroll.contentViewport.worldBound.yMin, onePixel, what + ": its top meets the viewport's top");
             else
                 Assert.AreEqual(range, scroll.scrollOffset.y, onePixel, what + ": a late block clamps at the end of the range");
         }

@@ -21,6 +21,10 @@
     /* how far a picture / carousel / strip / track reaches past the frame's side padding (--ts-space-4): minus that padding, so it
        meets the frame's inner edge (P4.4b part 2) */
     --ts-frame-bleed: -16px;
+    /* the frame's inner corner (_3.3 S4a): the block radius (--ts-radius-l 20) less the outer line (1) -- where a picture flush with the
+       block's top rounds with it; and the groove's, less the light metal band (3) too (ThemeFrameSceneTests checks both pairs) */
+    --ts-frame-inner-radius: 19px;
+    --ts-frame-groove-radius: 16px;
     /* The block page's scroll reaches the phone's edges: minus the takeover page's side margin (--ts-space-4) */
     --ts-page-bleed: -16px;
     /* The section sheets (_3.3 P4.4c1, SectionSheets): how far a sheet is laid over the one before (a negative top margin, on the 8
@@ -28,8 +32,9 @@
     --ts-section-overlap: -16px;
     --ts-section-line: 2px;
 
-    /* Sheet layout: the smallest tap target (WCAG 2.5.5 asks 44), the grabber bar, and the gap the full stop
-       leaves above the sheet. --ts-sheet-top-gap is read by PoiCardSheetView as a plain number (panel units). */
+    /* Sheet layout: the smallest tap target (WCAG 2.5.5 asks 44), the grabber bar, and the camera strip the full stop
+       leaves above the sheet when the wall's Full Height is Leave A Camera Strip (To The Top leaves none, SheetStopRule.FullTopGap).
+       --ts-sheet-top-gap is read by PoiCardSheetView as a plain number (panel units). */
     --ts-touch-target: 48px;
     --ts-grabber-width: 40px;
     --ts-grabber-height: 4px;
@@ -92,9 +97,8 @@
     --ts-timeline-now: 16px;
     --ts-timeline-cell: 160px;
 
-    /* The bar (_3.3 P4.4a): the header slot rises into the grab zone by this much so its one row lines up with the round buttons (grab
-       zone 24 - the buttons' top gap 8), and its title keeps clear of the X (X width + both gaps) */
-    --ts-bar-overlap: -16px;
+    /* The bar (_3.3 P4.4a): its title keeps clear of the X (X width + both gaps); its place and height are the floating chrome's
+       (--ts-bar-top, --ts-bar-height) */
     --ts-header-end: 64px;
 
     /* A person's monogram (the photo's place until Tier 2 images) */
@@ -105,12 +109,34 @@
 
     /* Tier 2 pictures (Media.uss): a block picture's frame, the gallery's small pictures and prints,
        the spotlight ring, the before / after handle, the full-screen view's picture area */
-    /* The hero (_3.3 P4.4a): never shorter than this, whatever the Half stop shows (HeroRule.Height). A plain number (panel units) read by
-       PoiCardSheetView on this card root; the outline of its Listen button */
-    --ts-hero-min-height: 280;
+    /* The hero (_3.3 P4.4a, S4a): the whole of Full's view under the bar, never shorter than this (HeroRule.Height). A plain number (panel
+       units) read by PoiCardSheetView on this card root; the outline of its Listen button on the plate */
+    --ts-hero-min-height: 200;
     --ts-hero-outline-width: 2px;
-    /* the graded scrim above the hero's words, fading into the picture (Media.uss, .card-hero__scrim) */
-    --ts-hero-scrim-fade: 96px;
+    /* the soft glow behind the hero's words: how far it reaches above and below their block (Media.uss, .card-hero__glow) */
+    --ts-hero-glow-out-top: -56px;
+    --ts-hero-glow-out-bottom: -72px;
+    /* the dark halo round every letter of the hero (the text-shadow's blur; its colour is the theme's --ts-text-halo) */
+    --ts-text-halo-blur: 10px;
+    /* the hero's kicker and its one line (the title is the theme's --ts-size-hero / -narrow) */
+    --ts-hero-eyebrow-size: 12px;
+    --ts-hero-line-size: 15px;
+    /* Listen on the hero: a small headphones mark and time, no box -- the mark and the words small, the target still a finger's */
+    --ts-hero-listen-icon: 16px;
+    --ts-hero-listen-text: 13px;
+    --ts-hero-listen-target: 44px;
+    /* the gap under the hero's last row (Listen, the actions) and the foot of what the sheet shows: the words sit low, the picture clear */
+    --ts-hero-words-inset: 4px;
+    /* the floating chrome (S4a review): the grab row, the slim bar's top and height, the strip's top (the bar's foot + a gap), the fade
+       behind the bars over the hero's picture */
+    --ts-handle-height: 20px;
+    --ts-bar-top: 6px;
+    --ts-bar-height: 44px;
+    --ts-nav-float-top: 54px;
+    --ts-top-shade-height: 120px;
+    /* minus --ts-space-3 (the gap a shown strip leaves above the first block, PoiCard.uss): the hero's picture starts flush under the strip.
+       A USS length cannot be negated, so the pair is checked by PoiCardHeroSceneTests (the hero's top on the strip's bottom) */
+    --ts-hero-strip-pull: -12px;
     --ts-media-height: 220px;
     --ts-thumb-size: 64px;
     --ts-grid-cell-height: 120px;

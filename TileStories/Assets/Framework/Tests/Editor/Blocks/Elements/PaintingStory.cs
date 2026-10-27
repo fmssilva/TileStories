@@ -7,8 +7,8 @@ using UnityEngine;
 namespace TileStories.Editor.Tests
 {
     // The Painting's story as a composed block (_3.3 R14.7: the story slice's point), made from The Painting's OWN shipped content on a
-    // fresh copy of the shipped config (never saved): its header's picture, eyebrow and title, its rich text's first paragraph as the lede
-    // and the rest as a paragraph, its gallery's four pictures with their captions and credits as a carousel, then a divider. The composed
+    // fresh copy of the shipped config (never saved): its header's picture, eyebrow and title, its shipped story's lede as the lede and its
+    // story's paragraphs as ONE paragraph, its gallery's four pictures with their captions and credits as a carousel, then a divider. The composed
     // kind is registered the way an app registers one (a BlockKindDefinition with an Elements Page into a fresh BlockRegistry), because the
     // framework's own `story` kind arrives with its view at S2. Expected values are read from the shipped blocks, never typed again.
     internal sealed class PaintingStory
@@ -23,7 +23,6 @@ namespace TileStories.Editor.Tests
         public const string SecondBlockKey = "block_story_2";
         // The Painting's shipped blocks the story is made from
         public const string HeaderKey = "block_1";
-        public const string TextKey = "block_3";
         public const string GalleryKey = "block_5";
 
         public WallConfigData Config;
@@ -33,6 +32,8 @@ namespace TileStories.Editor.Tests
         public BlockKindDefinition Kind;
         public BlockInstanceData Block;
         public BlockInstanceData Second;
+        // The shipped blocks it is made from: the header, The Painting's own story (the framework's story kind: its lede and paragraphs
+        // are the texts), the gallery
         public BlockInstanceData Header, Text, Gallery;
         // The Page rows in order: Picture el_1, Eyebrow el_2, Title el_3, Lede el_4, Paragraph el_5, Carousel el_6, Divider el_7
         public ElementRow Picture, Eyebrow, Title, Lede, Paragraph, Carousel, Divider;
@@ -66,7 +67,7 @@ namespace TileStories.Editor.Tests
             s.Painting = s.Config.pois.Single(p => p.id == PaintingId);
             s.Kind = s.Blocks.TryGet(StoryKindKey, out var kind) ? kind : null;
             s.Header = s.Painting.card.blocks.Single(b => b.key == HeaderKey);
-            s.Text = s.Painting.card.blocks.Single(b => b.key == TextKey);
+            s.Text = s.Painting.card.blocks.Single(b => b.kind == BuiltInBlocks.StoryKind);
             s.Gallery = s.Painting.card.blocks.Single(b => b.key == GalleryKey);
 
             s.Block = new BlockInstanceData { key = StoryBlockKey, kind = StoryKindKey };
@@ -78,9 +79,9 @@ namespace TileStories.Editor.Tests
             s.Title = s.AddPage(BuiltInElements.Title);
             SetText(s.Title, BuiltInElements.TextField, TextOf(s.Header, BlockStackBuilder.HeaderTitleField));
             s.Lede = s.AddPage(BuiltInElements.Lede);
-            SetText(s.Lede, BuiltInElements.TextField, FirstParagraph(TextOf(s.Text, BuiltInBlocks.RichTextBodyField)));
+            SetText(s.Lede, BuiltInElements.TextField, Copy(StoryRows(s.Text, BuiltInElements.Lede).First().Field(BuiltInElements.TextField).text));
             s.Paragraph = s.AddPage(BuiltInElements.Paragraph);
-            SetText(s.Paragraph, BuiltInElements.TextField, LaterParagraphs(TextOf(s.Text, BuiltInBlocks.RichTextBodyField)));
+            SetText(s.Paragraph, BuiltInElements.TextField, Joined(StoryRows(s.Text, BuiltInElements.Paragraph)));
             s.Carousel = s.AddPage(BuiltInElements.Carousel);
             foreach (var picture in s.GalleryPictures())
                 s.Carousel.AddMedia(Sub(picture, BuiltInBlocks.GalleryImageField).asset, Copy(Sub(picture, BuiltInBlocks.GalleryCaptionField).text),
@@ -144,14 +145,20 @@ namespace TileStories.Editor.Tests
 
         private static BlockItemFieldValue Sub(BlockItemData row, string key) => row.fields.Find(f => f.key == key) ?? new BlockItemFieldValue { key = key };
 
-        // Each language's first paragraph / its later paragraphs (paragraphs are separated by an empty line)
-        private static List<LocalizedEntry> FirstParagraph(List<LocalizedEntry> body) =>
-            body.Select(e => new LocalizedEntry { lang = e.lang, value = Paragraphs(e.value)[0] }).ToList();
+        // The shipped story's Page rows of one element, in order
+        private static List<ElementRow> StoryRows(BlockInstanceData story, string element) =>
+            BlockSurfaces.PageRows(story, BuiltInBlocks.Story).Select(r => new ElementRow(r)).Where(r => r.Kind == element).ToList();
 
-        private static List<LocalizedEntry> LaterParagraphs(List<LocalizedEntry> body) =>
-            body.Select(e => new LocalizedEntry { lang = e.lang, value = string.Join("\n\n", Paragraphs(e.value).Skip(1)) }).ToList();
-
-        public static string[] Paragraphs(string text) =>
-            text.Replace("\r\n", "\n").Split(new[] { "\n\n" }, System.StringSplitOptions.RemoveEmptyEntries);
+        // Each language's words of these rows, one paragraph after another (separated by an empty line)
+        private static List<LocalizedEntry> Joined(List<ElementRow> rows)
+        {
+            var languages = rows.SelectMany(r => r.Field(BuiltInElements.TextField).text).Select(e => e.lang).Distinct().ToList();
+            Assert.IsNotEmpty(languages, "precondition: the shipped story has paragraphs with words");
+            return languages.Select(lang => new LocalizedEntry
+            {
+                lang = lang,
+                value = string.Join("\n\n", rows.Select(r => r.Field(BuiltInElements.TextField).text.FirstOrDefault(e => e.lang == lang)?.value).Where(v => !string.IsNullOrEmpty(v))),
+            }).ToList();
+        }
     }
 }

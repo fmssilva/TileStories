@@ -356,6 +356,16 @@ namespace TileStories
                 painter.lineJoin = LineJoin.Round;
                 painter.lineCap = LineCap.Round;
                 Vector2 origin = new Vector2(box.x + (box.width - side) * 0.5f, box.y + (box.height - side) * 0.5f);
+                // - a filled gear is ONE solid with its hub punched out (the wheel and the hole in one path, odd-even), stroked round
+                //   so its teeth read soft, like the system's settings mark
+                if (_filled && _shape == Shape.Gear)
+                {
+                    painter.BeginPath();
+                    foreach (var outline in OutlinesOf(_shape)) Trace(painter, outline, origin, side);
+                    painter.Fill(FillRule.OddEven);
+                    painter.Stroke();
+                    return;
+                }
                 foreach (var outline in OutlinesOf(_shape))
                 {
                     painter.BeginPath();
@@ -369,6 +379,17 @@ namespace TileStories
                     if ((outline.Closed && _filled) || outline.Solid) painter.Fill();
                     if (!outline.Solid) painter.Stroke();
                 }
+            }
+
+            private static void Trace(Painter2D painter, Outline outline, Vector2 origin, float side)
+            {
+                for (int i = 0; i < outline.Points.Length; i++)
+                {
+                    Vector2 at = origin + outline.Points[i] * side;
+                    if (i == 0) painter.MoveTo(at);
+                    else painter.LineTo(at);
+                }
+                if (outline.Closed) painter.ClosePath();
             }
         }
     }

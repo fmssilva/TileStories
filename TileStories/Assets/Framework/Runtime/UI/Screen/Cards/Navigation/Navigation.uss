@@ -84,6 +84,24 @@
     display: flex;
 }
 
+/* in the floating icon strip (S4a review) the chosen tab sits on a soft pill, its underline a short mark under the pill's words */
+.nav-tabs__tab--icon {
+    border-radius: var(--ts-radius-l);
+    margin: var(--ts-space-1) 0;
+}
+
+.nav-tabs__tab--icon.nav-tabs__tab--current,
+.nav-tabs__tab--icon.nav-tabs__tab--current:hover,
+.nav-tabs__tab--icon.nav-tabs__tab--current:active {
+    background-color: var(--ts-button-glass);
+}
+
+.nav-tabs__tab--icon .nav-tabs__underline {
+    left: 40%;
+    right: 40%;
+    bottom: var(--ts-space-1);
+}
+
 /* Show Counts: an item's block count, after its words, quieter than them */
 .nav-item__count {
     font-size: var(--ts-size-caption);
@@ -1597,4 +1615,140 @@
     font-size: var(--ts-size-title);
     -unity-font-style: bold;
     color: var(--ts-ink);
+}
+
+/* ---- the Navigation Bar (NavBarView, _3.3 S4a review): ONE configurable bar of the card's groups ----
+   The bar's numbers (side margin, height, corner radius) and its colours (the fill's share, each group's colour) are set inline from
+   card_settings.navigation.bar; everything else is a class here. Its host is clear (PoiCard.uss .poi-card__nav-top--bar): the bar draws
+   itself, and the raised indicator may rise past its top edge. */
+.nav-bar {
+    overflow: visible;
+}
+
+.nav-bar--bottom {
+    margin-bottom: var(--ts-space-2);
+}
+
+/* a soft shadow under the bar (light only: --ts-elevation-1 is clear in dark mode) */
+.nav-bar__shadow {
+    position: absolute;
+    left: var(--ts-frame-shadow-out);
+    top: var(--ts-frame-shadow-out);
+    right: var(--ts-frame-shadow-out);
+    bottom: var(--ts-frame-shadow-out);
+    background-image: url("../card_block_shadow.png");
+    -unity-background-image-tint-color: var(--ts-elevation-1);
+    -unity-slice-left: var(--ts-frame-shadow-slice);
+    -unity-slice-top: var(--ts-frame-shadow-slice);
+    -unity-slice-right: var(--ts-frame-shadow-slice);
+    -unity-slice-bottom: var(--ts-frame-shadow-slice);
+    display: none;
+}
+
+.nav-bar--shadow > .nav-bar__shadow {
+    display: flex;
+}
+
+/* the fill (its colour inline: the theme's bar colour at the setting's share) and the hairline round it */
+.nav-bar__ground {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    border-width: 0;
+    border-color: var(--ts-glass-edge);
+}
+
+.nav-bar--border > .nav-bar__ground {
+    border-width: var(--ts-line-width);
+}
+
+.nav-bar__row {
+    flex-direction: row;
+    align-items: stretch;
+    padding: 0 var(--ts-space-1);
+}
+
+/* one group: its whole share of the bar is the tap target, never under the touch token */
+.nav-bar__item {
+    flex-grow: 1;
+    flex-basis: 0;
+    min-width: var(--ts-touch-target);
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    border-radius: 0;
+    background-color: var(--ts-clear);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.nav-bar__item:hover,
+.nav-bar__item:active {
+    background-color: var(--ts-clear);
+}
+
+.nav-bar__icon {
+    transition-property: scale, translate;
+    transition-duration: var(--ts-duration);
+    transition-timing-function: var(--ts-ease);
+}
+
+.nav-bar__label {
+    font-size: var(--ts-size-caption);
+    -unity-font-style: normal;
+    color: var(--ts-ink-2);
+    white-space: nowrap;
+    margin: 2px 0 0 0;
+    padding: 0;
+}
+
+/* the chosen group: its words bolder and full ink (with the indicator: never colour alone) */
+.nav-bar__item--chosen .nav-bar__label {
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+}
+
+/* Bold Chosen Icon: the icon's strokes heavier (the icon set reads its stroke from this token) */
+.nav-bar--bold .nav-bar__item--chosen .nav-bar__icon {
+    --ts-icon-stroke: 2.6px;
+}
+
+.nav-bar--enlarge .nav-bar__item--chosen .nav-bar__icon {
+    scale: 1.18 1.18;
+}
+
+/* the indicator: a pill behind the chosen group by default, its colour inline (a wash of the chosen colour) */
+.nav-bar__indicator {
+    position: absolute;
+    top: 6px;
+    bottom: 6px;
+    border-radius: var(--ts-radius-l);
+}
+
+.nav-bar--slide .nav-bar__indicator {
+    transition-property: left, width;
+    transition-duration: var(--ts-duration);
+    transition-timing-function: var(--ts-ease);
+}
+
+.nav-bar--indicator-underline .nav-bar__indicator {
+    top: auto;
+    bottom: 5px;
+    height: 3px;
+    border-radius: 2px;
+}
+
+/* Raised: a disc of the bar's own ground rising past its top edge, the chosen icon lifted into it -- the bar bulging under the group */
+.nav-bar--indicator-raised .nav-bar__indicator {
+    top: -16px;
+    bottom: auto;
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-glass-edge);
+}
+
+.nav-bar--indicator-raised .nav-bar__item--chosen .nav-bar__icon {
+    translate: 0 -14px;
 }

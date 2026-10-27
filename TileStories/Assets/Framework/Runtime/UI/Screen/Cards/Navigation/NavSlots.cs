@@ -40,6 +40,11 @@ namespace TileStories
         public VisualElement Edge { get; }
         public INavElementView EdgeView { get; private set; }
         public string EdgeKey { get; private set; }
+        // The Navigation Bar (_3.3 S4a review): one view, bound into the top or the bottom host while card_settings.navigation.bar is on --
+        // the card then draws no other navigation element (their settings are kept). TopView / BottomView name it while it is there
+        public NavBarView Bar { get; } = new NavBarView();
+        public const string TopBarClass = "poi-card__nav-top--bar";
+        public const string BottomBarClass = "poi-card__nav-bottom--bar";
 
         private readonly NavElementRegistry _registry;
         private readonly Dictionary<string, ElementPool<INavElementView>> _pools = new();
@@ -72,6 +77,11 @@ namespace TileStories
             Unbind();
             if (model == null) return;
             var settings = context?.Settings?.navigation;
+            if (NavBarRule.Enabled(settings))
+            {
+                BindBar(model, nav, context, settings);
+                return;
+            }
             var top = BindSlot(Top, NavSlotRule.TopElement(settings, model, ElementOf(NavSlotKeys.Top)), model, nav, context);
             TopView = top.View;
             TopKey = top.Key;
@@ -93,9 +103,46 @@ namespace TileStories
             }
         }
 
+        // The bar in its host (the top one under the title bar, or the bottom one), when the card shows navigation and two groups at least
+        private void BindBar(CardNavModel model, NavController nav, BlockBindContext context, CardNavigationSettings settings)
+        {
+            Bar.Bind(model, nav, context);
+            if (!NavBarRule.Shows(settings, model.ShowsNavigation, Bar.Entries.Count))
+            {
+                Bar.Unbind();
+                return;
+            }
+            bool bottom = NavBarRule.AtBottom(settings.bar);
+            var host = bottom ? Bottom : Top;
+            host.Add(Bar.Root);
+            host.style.display = DisplayStyle.Flex;
+            Top.EnableInClassList(TopBarClass, !bottom);
+            Bottom.EnableInClassList(BottomBarClass, bottom);
+            if (bottom)
+            {
+                BottomView = Bar;
+                BottomKey = NavBarView.ElementKey;
+            }
+            else
+            {
+                TopView = Bar;
+                TopKey = NavBarView.ElementKey;
+            }
+        }
+
         // Every slot empty again (the card closed, or is rebinding)
         public void Unbind()
         {
+            bool barBound = TopKey == NavBarView.ElementKey || BottomKey == NavBarView.ElementKey;
+            if (barBound)
+            {
+                Bar.Unbind();
+                Bar.Root.RemoveFromHierarchy();
+                if (TopKey == NavBarView.ElementKey) TopKey = null;
+                if (BottomKey == NavBarView.ElementKey) BottomKey = null;
+            }
+            Top.RemoveFromClassList(TopBarClass);
+            Bottom.RemoveFromClassList(BottomBarClass);
             if (TopKey != null) _pools[TopKey].ReleaseAll();
             if (BottomKey != null) _pools[BottomKey].ReleaseAll();
             if (MenuKey != null) _pools[MenuKey].ReleaseAll();

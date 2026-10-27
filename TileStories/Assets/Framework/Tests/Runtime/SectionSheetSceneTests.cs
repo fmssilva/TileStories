@@ -214,7 +214,7 @@ namespace TileStories.Tests
                 for (int frame = 0; frame < 600 && Sheet.Nav.IsJumping; frame++) yield return null;
                 yield return CardTestInput.Settle(0.2f);
                 if (Stack.TopInScroll(sheet.Root) > Range - OnePixel) continue;
-                Assert.AreEqual(Scroll.contentViewport.worldBound.yMin, sheet.Root.worldBound.yMin, OnePixel, model.Sections[i].Key + ": the sheet's top meets the viewport's top");
+                Assert.AreEqual(Scroll.contentViewport.worldBound.yMin + Card.Sheet.Stack.LandingInset, sheet.Root.worldBound.yMin, OnePixel, model.Sections[i].Key + ": the sheet's top meets the viewport's top");
                 Assert.IsTrue(Scroll.contentViewport.worldBound.Contains(sheet.Opener.Pill.worldBound.center), model.Sections[i].Key + ": its opener is in view");
                 Assert.AreEqual(i, Sheet.Nav.Current, model.Sections[i].Key + ": the spy names the section landed on");
                 checkedSections++;

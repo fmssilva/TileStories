@@ -91,7 +91,8 @@ namespace TileStories.Editor.Tests
             CollectionAssert.AreEqual(new[] { 0, 1, 2, 3 }, RowsMarkedP(), "P on the picture, eyebrow, title and lede the Automatic preview takes");
             Assert.AreEqual("Picture #1, Eyebrow #2, Title #3, Lede #4", ShowsLine, "the Preview's live line");
             _window.RectOf("Story preview shows#0");
-            _window.RectOf("Card block validation#3");
+            // - the block row's validation words, probed by the story's own row in The Painting's list (never a typed index)
+            _window.RectOf("Card block validation#" + _window.Config.pois.Single(p => p.id == Poi).card.blocks.FindIndex(b => b.key == StoryKey));
             Assert.AreEqual(17, BlockSurfaces.RowsToValidate(Story, Kind));
             Assert.AreEqual("17 to validate", POIEditorToolWindow.StoryValidationWords(17));
             Assert.AreEqual("all validated", POIEditorToolWindow.StoryValidationWords(0));

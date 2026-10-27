@@ -266,7 +266,7 @@ namespace TileStories.Tests
             Assert.AreEqual(BuiltInFamilies.Media, jump.Value, "to Media");
             Assert.AreEqual(media, Nav.Current, "the card is at Media");
             string firstOfMedia = Nav.Model.Sections[media].Targets[0];
-            Assert.AreEqual(Scroll.contentViewport.worldBound.yMin, Stack.LandingElement(Stack.SlotOfBlock(firstOfMedia)).worldBound.yMin, OnePixel,
+            Assert.AreEqual(Scroll.contentViewport.worldBound.yMin + Stack.LandingInset, Stack.LandingElement(Stack.SlotOfBlock(firstOfMedia)).worldBound.yMin, OnePixel,
                 "Media's chapter (its sheet, its first block's landing: _3.3 P4.4c1) at the top of the card");
         }
 

@@ -63,8 +63,8 @@ namespace TileStories.Editor.Tests
         {
             Assert.AreEqual(ElementRefRule.Problem.MissingRow, ElementRefRule.Resolve(ElementRef.ToPage("el_99"), _s.Scope).Problem, "no such row");
             Assert.AreEqual(ElementRefRule.Problem.MissingBlock, ElementRefRule.Resolve(ElementRef.ToBlock("block_404", "el_1"), _s.Scope).Problem, "no such block");
-            // - The Painting's shipped rich text exists but composes nothing: it has no Page to point into
-            Assert.AreEqual(ElementRefRule.Problem.NoPage, ElementRefRule.Resolve(ElementRef.ToBlock(PaintingStory.TextKey, "el_1"), _s.Scope).Problem, "a block with no Page");
+            // - The Painting's shipped gallery exists but composes nothing: it has no Page to point into
+            Assert.AreEqual(ElementRefRule.Problem.NoPage, ElementRefRule.Resolve(ElementRef.ToBlock(PaintingStory.GalleryKey, "el_1"), _s.Scope).Problem, "a block with no Page");
             Assert.AreEqual(ElementRefRule.Problem.UnknownScope, ElementRefRule.Resolve(new ElementRef("elsewhere", "", _s.Title.Id), _s.Scope).Problem);
             Assert.AreEqual(ElementRefRule.Problem.MissingRow, ElementRefRule.Resolve(ElementRef.ToPage(""), _s.Scope).Problem, "a blank row id");
             // - a deleted row: the link that named it breaks; it never jumps to a neighbour

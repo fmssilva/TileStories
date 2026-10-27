@@ -42,6 +42,8 @@ namespace TileStories.Editor.Tests
         public static WallConfigData Wall(int families)
         {
             var config = JsonUtility.FromJson<WallConfigData>(File.ReadAllText("Assets/Apps/LivingRoom/config.json"));
+            // - the Navigation Bar at the framework default (off): these warnings are the elements', never the wall's bar (40-testing)
+            config.card_settings.navigation.bar = new CardNavBarSettings();
             var poi = new POIData { id = PoiId, name = "Many Sections" };
             for (int i = 1; i <= families; i++)
                 poi.card.blocks.Add(new BlockInstanceData { key = "block_f" + i, kind = "fixture_kind_" + i });

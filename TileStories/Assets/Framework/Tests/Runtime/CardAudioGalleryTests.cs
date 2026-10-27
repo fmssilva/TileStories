@@ -268,7 +268,7 @@ namespace TileStories.Tests
             Assert.IsTrue(chip.Root.ClassListContains(BlockStackView.HeroListenClass));
             // - _3.3 P4.4b part 2: a compact pill -- the play mark and the clip's length; the words live in its name
             Assert.AreEqual("0:12", chip.Title.text, "the clip's length, before it plays");
-            Assert.AreEqual("Listen 0:12", chip.PlayButton.tooltip, "its name: Listen and the length");
+            Assert.AreEqual("Listen, 0:12", chip.PlayButton.tooltip, "its name: Listen and the length (_3.3 S4a: hero_listen \"Listen, {0}\")");
             Assert.AreEqual(DisplayStyle.None, chip.TimeText.resolvedStyle.display, "one time on the pill, never a second line");
             Assert.AreEqual(DisplayStyle.None, chip.Root.Q<VisualElement>(className: "card-audio__chips").resolvedStyle.display, "no speed chip or captions switch on the chip");
             Assert.AreEqual(DisplayStyle.None, chip.CaptionLine.resolvedStyle.display, "no caption line either");
