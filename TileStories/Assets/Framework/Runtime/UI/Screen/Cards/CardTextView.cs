@@ -135,6 +135,13 @@ namespace TileStories
         private void Flow()
         {
             if (FlowBeside == null || _flowText == null) return;
+            // - off a panel nothing can be measured (Unity warns for each word run: thousands of log lines while a live edit rebinds an
+            //   open page): cut once it is on one (a label that comes back at its old size gets no geometry change to do it)
+            if (FlowBeside.panel == null)
+            {
+                FlowBeside.RegisterCallbackOnce<AttachToPanelEvent>(_ => Flow());
+                return;
+            }
             float width = FlowBeside.contentRect.width;
             if (float.IsNaN(width) || !(width > 0f) || UnityEngine.Mathf.Abs(width - _flowWidth) < 0.5f) return;
             _flowWidth = width;

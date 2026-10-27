@@ -150,6 +150,33 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(sheet.FullView.Scroll.contentContainer.childCount, 1, "just the page");
         }
 
+        // The S2c review: a page that shows a big title of its own (the story) is named by its CONTEXT, "point > section"; a neighbour
+        // without one (a rich text) ends with its name again, on the same open view
+        [Test]
+        public void TheStorysPage_IsNamedByItsContextAlone_ANeighbourWithoutATitleEndsWithItsName()
+        {
+            var wall = Shipped();
+            var painting = wall.pois.Single(p => p.id == PaintingStory.PaintingId);
+            string storyKey = painting.card.blocks.Single(b => b.kind == "story").key;
+            var sheet = Sheet();
+            ShowCard(sheet, wall, PaintingStory.PaintingId);
+            var siblings = FullViewSiblingRule.Siblings(sheet.Nav.Model, BlockRegistry.Shared, storyKey).ToList();
+            Assert.GreaterOrEqual(siblings.Count, 2, "precondition: the story has neighbours to turn to");
+            sheet.OpenFullView(storyKey);
+            var bar = sheet.Takeover.Bar;
+            Assert.IsTrue(sheet.Takeover.SectionShown, "precondition: the story's page names its section");
+            Assert.AreEqual(bar.Point.text + " > " + bar.SectionWords.text, sheet.Takeover.CrumbText, "the story: point > section, nothing after");
+            Assert.IsFalse(bar.NameShown, "the page's name is left out");
+            Assert.AreEqual(DisplayStyle.None, bar.Name.style.display.value, "and not drawn");
+
+            int at = siblings.IndexOf(storyKey);
+            sheet.Takeover.ShowPage(at == 0 ? 1 : at - 1);
+            string neighbour = sheet.FullView.BlockKey;
+            Assert.AreNotEqual(storyKey, neighbour);
+            Assert.IsTrue(bar.NameShown, "a neighbour with no title of its own is named again");
+            StringAssert.EndsWith(sheet.Takeover.NameOf(sheet.Takeover.PageIndex), sheet.Takeover.CrumbText, "its trail ends with its name");
+        }
+
         [Test]
         public void ABlocksOwnOverride_ReplacesTheWallsChoiceForThatBlocksPageOnly()
         {

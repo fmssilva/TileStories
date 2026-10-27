@@ -6,7 +6,7 @@ namespace TileStories
 {
     // The result view switch (spec _2.6 section 10): List | Map | Highlight. "Map" is offered only while
     // the minimap is enabled. The starting view is the wall's default_result_view, or -- when
-    // remember_last_view is on -- the view this device chose last time (PlayerPrefs).
+    // remember_last_view is on -- the view this device chose last time (the device's store, DeviceStateStore: PlayerPrefs in the app).
     // Plain C#: built into the parent the search UI hands it; styled by SearchUI.uss.
     public sealed class ViewModeControl
     {
@@ -42,8 +42,8 @@ namespace TileStories
         {
             _results = results ?? new ResultsSettings();
             _map.style.display = minimapEnabled ? DisplayStyle.Flex : DisplayStyle.None;
-            string start = _results.remember_last_view
-                ? PlayerPrefs.GetString(LastViewPrefsKey, _results.default_view)
+            string start = _results.remember_last_view && DeviceStateStore.Current.TryGet(LastViewPrefsKey, out string last)
+                ? last
                 : _results.default_view;
             Mode = StartingView(ViewModeParser.Parse(start), minimapEnabled);
             RefreshSegments();
@@ -59,10 +59,7 @@ namespace TileStories
             if (mode == Mode) return;
             Mode = mode;
             if (_results != null && _results.remember_last_view)
-            {
-                PlayerPrefs.SetString(LastViewPrefsKey, ViewModeParser.ToString(mode));
-                PlayerPrefs.Save();
-            }
+                DeviceStateStore.Current.Set(LastViewPrefsKey, ViewModeParser.ToString(mode));
             RefreshSegments();
             Changed?.Invoke(mode);
         }

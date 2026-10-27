@@ -211,7 +211,9 @@ namespace TileStories.Tests
                 }
             }
             string title = BlockFieldReader.Pick(rows.First(r => r.Kind == BuiltInElements.Title).Field(BuiltInElements.TextField).text, language, "en");
-            StringAssert.Contains(title, takeover.CrumbText, "the breadcrumb names the story by its title");
+            // - the page shows the story's title in large type: the breadcrumb carries only the context (the S2c review)
+            StringAssert.DoesNotContain(title, takeover.CrumbText, "the breadcrumb does not repeat the story's title");
+            StringAssert.StartsWith(Sheet.Stack.HeaderView.TitleText, takeover.CrumbText, "it starts with the point");
             yield return Grab("painting_page_top_" + language + "_" + mode);
             foreach (int at in new[] { 5, 9, 13, 15, 16 })
             {

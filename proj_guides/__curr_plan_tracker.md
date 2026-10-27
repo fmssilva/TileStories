@@ -1,30 +1,44 @@
-# Plan tracker -- _3.3 S2c: the Page Chrome and edge-to-edge block pages
+# Plan tracker -- _3.3 S3a: the story's Editor (the Page's element table and the Preview) + the S2c review fixes
 
-Brief: `_3.3` R16 row 5c, S2b review decisions 1 + 5, R17.5. Base: HEAD 8ccec31 (S2b closed: full PlayMode 1404, full EditMode 2212).
+Brief: `_3.3` R16 row 6 + "S2c review" row, R17.1/.3/.4/.5/.7, R14.5/.8. Base: HEAD b8ce380 (S2c closed: full EditMode 2234, full PlayMode 1429).
 Worker re-reads this file after a compaction. Tick `[x]` as steps close.
 
 ## GATE
 - [x] 0 commits ahead of origin (nothing to push)
-- [x] Game view + POI Editor captures taken and opened (TestEvidence/Card/PageChrome/gate_game.png, gate_editor.png)
-- [x] Tree compiles (Editor.log: last compile ExitCode 0, no error CS after it)
-- [x] Oswald Bold SDF / Roboto-Bold SDF unmodified (git status clean for them)
-- [ ] Unity place for runs: 4.2.3 action c, asked before each background run
+- [x] Game view + POI Editor captures taken and opened (TestEvidence/Editor/S3a/gate_game.png, gate_editor.png); capture window closed, none left
+- [x] Tree compiles (forced compile: ExitCode 0, Tundra build success, no error CS after it)
+- [x] Oswald Bold SDF / Roboto-Bold SDF unmodified
+- [x] Unity's place asked before each run / capture (4.2.3 a / b / c, word for word)
+- Note: the Editor runs the DARK (Pro) skin, not the light one the brief names: captures show the skin as set; flagged in the report
 
 ## Decisions (autonomous)
-- Components `PageTopBar` + `PageFootView` (Runtime/UI/Components/, VisualElements, host-agnostic); pure `PageChromeRule` (wall default + block override) and `PageCrumbFitRule` (which part is ellipsised first) in Runtime/Blocks/Elements/.
-- TakeoverView keeps its public surface (Back, Crumb*, CrumbText, ShowSection, SectionTapped, chips); it builds the PageTopBar. Back is a 44 pt round chevron; its tooltip = accessible name (CardStrings `page_back`, replaces `takeover_back`).
-- Foot lives at the END of the page's scroll (as the prototype), built by BlockFullView.PageFor; Previous / Next call takeover.Turn(+-1). Sibling chips + swipe stay as they are (question for the developer).
-- Config: `card_settings.components.page_chrome_breadcrumb` / `page_chrome_prev_next` (bool, default true). Block override = BlockSurfaces component `page_chrome` (Choice shown / hidden per part; composing kinds only: the only kinds that carry the Component Overrides field today).
-- Edge to edge: takeover root padding 0; the page keeps the 16 pt gutter through `.card-takeover__page`; the block-page Scroll bleeds out by `--ts-page-bleed` and its content container takes the gutter back, so a full-bleed element reaches the phone's edges while text keeps 16 pt.
-- The Painting's story video row: tap `play_in_place` (config.json + StreamingAssets copy, one token).
+- Where: the Elements field gets its drawer in the generic block-field drawer (any composing kind), new partials in `Editor/POIEditor/SpecificMarker/`
+  (ComposedBlock, ElementTable, ElementRowEditor, ElementPreview, ComposedBlockHelp); pure edit operations `ElementEdits` (Editor assembly).
+- How: an edit is decided while drawing and applied AFTER the row loop (inside the tab's DrawConfigMutationScope: undo / unsaved / live).
+- Controls: segmented toolbars for every closed list (real-clickable); "+ Add element" = an inline palette grouped Text / Media / Structure.
+- Marks: built-in icons TestPassed / TestFailed (ASCII labels only); a category colour chip + 2-letter tag per element; a thumbnail for picture / video rows.
+- Custom preview: switching to Custom (or "Use in the preview" while Automatic) seeds links to the current automatic picks.
+- Overrides (Open Row, Page Chrome): the _2.0 pattern -- on seeds from the wall's values, off keeps the block's.
+- Card Components gains the Open Row row (emphasis), first (R17.6).
+- Test hygiene: `DeviceStateStore.Current` (PlayerPrefs default) read by the card, recent searches, last view, the Editor's reset; every test
+  assembly's SetUpFixture swaps a MemoryCardStateStore for the run; a source scan guards it; the developer's saved mode read before / after the full run.
+- Breadcrumb: the page's name is dropped when the page shows its own title (pure `ElementRules.HasOwnTitle`).
+- Not built (no data / runtime, not in the brief): the mock's Page Opening, Preview Tap / Idle demo / block-entry Motion rows.
 
 ## Steps
-- [x] 1. Data + pure rules: CardComponentSettings fields, ElementOptions.ComponentPageChrome, BlockSurfaces fields + ComponentOverride readers, PageChromeRule, PageCrumbFitRule; EditMode tests (rule edges, round trip, old config)
-- [x] 2. Components: PageTopBar, PageFootView, USS tokens/classes, CardStrings (page_back, page_previous, page_next EN/PT)
-- [x] 3. Wire: TakeoverView on PageTopBar, BlockFullView foot + per-block chrome, CardFullViewOpener passes the wall default; edge-to-edge USS; fix tests that read the old chrome
-- [x] 4. Editor: Detail Card > Card Components section (Page Chrome row, (i), Test guide), live sync, DrawingNeverWrites, real-click Editor test, undo
-- [x] 5. Painting video tap = Play In Place (config copies) + test
-- [x] 6. PlayMode: Phase A gallery (long / short title, EN + PT, light + dark, 390 px, contrast), Phase B The Painting (real Back tap keeps scroll, real Previous / Next taps, full-bleed pixels at the phone's edges, gallery page)
-- [x] 7a. Targeted set (793) green apart from explained environment items (saved visitor mode, leaked sensor count, bento flake, reveal re-based)
-- [ ] 7b. FULL PlayMode (background, started 266098535 log offset), then reload the domain, then full EditMode
-- [ ] 8. Final captures judged (after the foot alignment + Back ring tweaks); docs done (_3.3 Build log numbers to fill, _5.1, _3.1, _3.2, 10-structure); LivingRoom scene ready; final report (60-finishing 6.4)
+- [x] 1a. Breadcrumb context: ElementRules.HasOwnTitle + PageTopBar name switch + BlockFullView; tests (rule, sheet)
+- [x] 1b. In-place video (test re-based: scroll to the button; PlayMode re-run due): full-screen button -> the card's player; test
+- [x] 1c. DeviceStateStore + SetUpFixtures + fixtures cleaned + source-scan guard
+- [x] 2. ElementEdits (pure) + EditMode tests on The Painting's story
+- [x] 3. Page section: table, open row + accordions, add palette, header validate, Page Chrome override, Motion table
+- [x] 4. Preview section: Automatic Shows, Custom linked / own / broken, Open Row override, reading time; Card Components Open Row row
+- [x] 5. Real-window Editor tests (every action + Ctrl+Z), DrawingNeverWrites extended, Phase B live sync on the real card
+- [x] 6. Captures of every state, judged
+- [x] 7. Runs: targeted EditMode/PlayMode, FULL PlayMode (background), full EditMode
+- [x] 8. Docs (_5.1, _3.3 Build log, 10-structure, 40-testing rule), LivingRoom scene ready, final report + review questions
+
+## Notes
+- PoiCardSceneTests.ARealTapOnTheStickyAction red in the first targeted run (1034 > 845): S2b's known red; re-run alone owed.
+- Segments: SelectionGrid cells sit a margin apart; a probe that ignored it clicked into the gap (fixed). Motion segments say Auto; the note says what Auto plays.
+- Targeted PlayMode 202/0/1 skip (behind). FULL PlayMode 1430: 2 red (state-leak tests, re-based, 20/20 alone). Full EditMode 2261: 2260/0/1 skip.
+- Sentinels (mode dark, language pt, a recent search) survived the full PlayMode run; removed after (PlayerPrefs were empty before).

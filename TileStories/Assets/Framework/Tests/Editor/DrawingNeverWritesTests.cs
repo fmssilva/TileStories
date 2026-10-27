@@ -33,6 +33,23 @@ namespace TileStories.Editor.Tests
                 foreach (var poi in config.pois)
                     foreach (var block in poi.card?.blocks ?? new List<BlockInstanceData>())
                         blockFoldouts[poi.id + "/" + block.key] = true;
+                // - a composed block's every part open as well: the Motion table, the palettes, the link list, and every element row (Page and
+                //   Preview) with its Look / Motion / Tap
+                var composed = (Dictionary<string, bool>)type.GetField("_composedOpen", Instance).GetValue(host.Editor);
+                foreach (var poi in config.pois)
+                    foreach (var block in poi.card?.blocks ?? new List<BlockInstanceData>())
+                    {
+                        foreach (string part in new[] { "motion", "page/add", "preview/link", "preview/add" })
+                            composed[POIEditorToolWindow.ComposedKey(poi.id, block.key, part)] = true;
+                        foreach (var field in block.fields ?? new List<BlockFieldValue>())
+                            foreach (var row in field?.items ?? new List<BlockItemData>())
+                            {
+                                string id = new ElementRow(row).Id;
+                                if (string.IsNullOrEmpty(id)) continue;
+                                foreach (string part in new[] { "", "/Look", "/Motion", "/Tap" })
+                                    composed[POIEditorToolWindow.ComposedKey(poi.id, block.key, "row/" + id + part)] = true;
+                            }
+                    }
                 var tabField = type.GetField("_selectedTab", Instance);
                 tabField.SetValue(host.Editor, System.Enum.Parse(tabField.FieldType, tab));
 
@@ -60,6 +77,31 @@ namespace TileStories.Editor.Tests
                 Assert.IsTrue(config.pois.Any(p => p.card.blocks.Count > 0), "precondition: authored card blocks are drawn too");
                 yield return DrawEverything(config, tab, changes);
             }
+            CollectionAssert.IsEmpty(changes, "drawing changed the config:\n" + string.Join("\n", changes));
+        }
+
+        // The story's states the shipped wall does not hold -- a Custom preview with a link, an own row and a BROKEN link, both overrides on,
+        // minutes set by hand -- drawn with every part open: nothing changes either (_3.3 S3a)
+        [UnityTest]
+        public IEnumerator AStoryWithACustomPreview_ABrokenLink_AndItsOverridesOn_IsNeverChangedByDrawing()
+        {
+            var config = JsonUtility.FromJson<WallConfigData>(File.ReadAllText("Assets/Apps/LivingRoom/config.json"));
+            var painting = config.pois.Single(p => p.id == "painting");
+            var story = painting.card.blocks.Single(b => b.kind == BuiltInBlocks.StoryKind);
+            Assert.IsTrue(BlockRegistry.Shared.TryGet(BuiltInBlocks.StoryKind, out var kind));
+            var scope = ElementScope.Of(painting, story, BlockRegistry.Shared);
+            ElementEdits.UseInPreview(scope, ElementRegistry.Shared, "el_8", linked: true);
+            ElementEdits.UseInPreview(scope, ElementRegistry.Shared, "el_3", linked: false);
+            var page = ElementEdits.PageList(story, kind);
+            page.RemoveAll(r => new ElementRow(r).Id == "el_8");
+            ElementEdits.SetOverride(story, ElementOptions.ComponentOpenRow, true, config.card_settings.components);
+            ElementEdits.SetOverride(story, ElementOptions.ComponentPageChrome, true, config.card_settings.components);
+            ElementEdits.SetMinutes(story, 7);
+            Assert.AreEqual(1, ElementPreviewRule.Of(scope, ElementRegistry.Shared).Entries.Count(e => e.Source == ElementPreviewRule.Source.Broken),
+                "precondition: one broken link");
+
+            var changes = new List<string>();
+            yield return DrawEverything(config, "SpecificMarker", changes);
             CollectionAssert.IsEmpty(changes, "drawing changed the config:\n" + string.Join("\n", changes));
         }
 

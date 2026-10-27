@@ -6,7 +6,8 @@ using UnityEngine.UIElements;
 namespace TileStories
 {
     // The Page Chrome's top bar (_3.3 R17.5, S2c): a Back chevron in a 44 pt round target and the breadcrumb on ONE line -- "point > section >
-    // page", the page's own name last and bold ("Ribeira Palace > About > The story"). The section is a tap target when the page belongs to
+    // page", the page's own name last and bold ("Castle > Media > 360"); a page with a big title of its own (a story) leaves its name out, the
+    // trail is then the context alone ("Ribeira Palace > About", ShowName). The section is a tap target when the page belongs to
     // one (the host decides what the tap does). When the line is too long the MIDDLE part is cut with an ellipsis first, then the point's,
     // the name last (PageCrumbFitRule). The Back arrow draws no word: its tooltip is its accessible name. Host-agnostic (R15.2): the
     // callbacks are the host's, nothing here names the sheet or the full view. Styled by Components.uss.
@@ -27,6 +28,9 @@ namespace TileStories
         // The page's name says nothing the section does not (a block with no heading of its own is named by its kind's words, often the
         // section's: "Listen > Listen"): it is left out
         public bool NameRepeatsSection => SectionShown && string.Equals(Name.text?.Trim(), SectionWords.text?.Trim(), StringComparison.OrdinalIgnoreCase);
+        // Whether the trail ends with the page's own name: off for a page that shows a big title of its own (a story), whose trail then
+        // carries only the context, "point > section" (the host decides)
+        public bool NameShown { get; private set; } = true;
 
         // The whole breadcrumb as a visitor reads it ("St George's Castle > Media > 360"); empty while it is hidden
         public string CrumbText
@@ -35,7 +39,7 @@ namespace TileStories
             {
                 if (!BreadcrumbShown) return "";
                 var parts = new List<string>();
-                foreach (var part in new[] { Point.text, SectionShown ? SectionWords.text : "", NameRepeatsSection ? "" : Name.text })
+                foreach (var part in new[] { Point.text, SectionShown ? SectionWords.text : "", NameRepeatsSection || !NameShown ? "" : Name.text })
                     if (!string.IsNullOrEmpty(part)) parts.Add(part);
                 return string.Join(" > ", parts);
             }
@@ -106,10 +110,17 @@ namespace TileStories
             Parts();
         }
 
+        // Whether the trail ends with the page's name (off: the page carries a big title of its own)
+        public void ShowName(bool shown)
+        {
+            NameShown = shown;
+            Parts();
+        }
+
         // Each part and arrow only where there is something on both sides of it
         private void Parts()
         {
-            bool point = Point.text.Length > 0, section = SectionShown, name = Name.text.Length > 0 && !NameRepeatsSection;
+            bool point = Point.text.Length > 0, section = SectionShown, name = NameShown && Name.text.Length > 0 && !NameRepeatsSection;
             Point.style.display = point ? DisplayStyle.Flex : DisplayStyle.None;
             Name.style.display = name ? DisplayStyle.Flex : DisplayStyle.None;
             _firstArrow.style.display = point && (section || name) ? DisplayStyle.Flex : DisplayStyle.None;

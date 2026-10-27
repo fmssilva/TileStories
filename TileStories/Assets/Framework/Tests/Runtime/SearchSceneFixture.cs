@@ -37,9 +37,9 @@ namespace TileStories.Tests
         private readonly List<string> _unexpectedErrors = new();
         // "Layout update is struggling" fails the test that logged it, from the load to the end of the unload (the collector above stops sooner)
         private readonly LayoutStruggleGuard _layoutGuard = new();
-        private string _savedRecent;
-        private string _wallIdForLanguage;
-        private string _savedLanguage = "";
+        // The visitor's saved state for THIS test (recent searches, last view, the card's language and mode): fresh before the scene
+        // loads -- the card reads it when it first binds -- and never the developer's PlayerPrefs
+        private IsolatedVisitorState _visitorState;
 
         private void CollectUnexpectedErrors(string message, string stack, LogType type)
         {
@@ -54,9 +54,7 @@ namespace TileStories.Tests
             LogAssert.ignoreFailingMessages = true;
             _unexpectedErrors.Clear();
             Application.logMessageReceived += CollectUnexpectedErrors;
-            _savedRecent = PlayerPrefs.GetString(RecentSearchesManager.PREFS_KEY, null);
-            PlayerPrefs.DeleteKey(RecentSearchesManager.PREFS_KEY);
-            PlayerPrefs.DeleteKey(ViewModeControl.LastViewPrefsKey);
+            _visitorState = new IsolatedVisitorState();
             SelectionEventBus.ResetState();
             _layoutGuard.Begin(ScenePath);
 #if UNITY_EDITOR
@@ -86,11 +84,6 @@ namespace TileStories.Tests
             Assert.IsNotNull(Card, "the wall scene has the POI Detail Card (PoiCard object with a PoiCardHost)");
             Assert.IsNotNull(Card.Sheet, "precondition: the card was built when it bound to the wall");
             Cam = Camera.main;
-            // - the visitor's saved card language (PlayerPrefs, per wall) is the developer's own: a run starts from "none picked" and gives it back
-            _wallIdForLanguage = Session.SearchConfig.wall_id;
-            var savedLanguage = new CardLocalState(new PlayerPrefsCardStateStore(), _wallIdForLanguage);
-            _savedLanguage = savedLanguage.Language();
-            savedLanguage.SetLanguage("");
             // - LOD off: every POI stays visible, so what a test sees is the search's doing alone
             Session.ApplyLodSettings(new LodSettings { enabled = false });
             // - the card's navigation pinned to the FRAMEWORK default: a fixture measures the framework, never the preset the demo wall
@@ -113,16 +106,14 @@ namespace TileStories.Tests
             ARZoomState.SetZoom(1f, 1f, 4f);
             MarkerHierarchyResolver.ResetToDefaults();
             StatusRamp.ResetToDefaults();
-            if (_savedRecent == null) PlayerPrefs.DeleteKey(RecentSearchesManager.PREFS_KEY);
-            else PlayerPrefs.SetString(RecentSearchesManager.PREFS_KEY, _savedRecent);
-            PlayerPrefs.DeleteKey(ViewModeControl.LastViewPrefsKey);
-            if (_wallIdForLanguage != null) new CardLocalState(new PlayerPrefsCardStateStore(), _wallIdForLanguage).SetLanguage(_savedLanguage);
 
             var wallScene = SceneManager.GetSceneByPath(ScenePath);
             SceneManager.SetActiveScene(SceneManager.CreateScene("AfterSearchSceneTest"));
             if (wallScene.IsValid() && wallScene.isLoaded)
                 yield return SceneManager.UnloadSceneAsync(wallScene);
             yield return null;
+            _visitorState?.Dispose();
+            _visitorState = null;
             _layoutGuard.End();
             CollectionAssert.IsEmpty(_unexpectedErrors, "the wall scene logged errors");
         }
@@ -134,6 +125,18 @@ namespace TileStories.Tests
                 .GetField("_config", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                 .GetValue(Session);
             return JsonUtility.FromJson<WallConfigData>(JsonUtility.ToJson(config));
+        }
+
+        // How many of a point's blocks wait for its card to be read (Show After Reading): on a test's fresh visitor state nothing was read, so
+        // their slots are hidden -- a test that walks every slot of the scroll measures the others
+        protected int BlocksWaitingToBeRead(string poiId)
+        {
+            int waiting = 0;
+            foreach (var block in ConfigCopy().pois.First(p => p.id == poiId).card.blocks)
+                if (BlockRegistry.Shared.TryGet(block.kind, out var kind) && kind.ShowAfterViewedField != null
+                    && new BlockFieldReader(block, null, null).Flag(kind.ShowAfterViewedField))
+                    waiting++;
+            return waiting;
         }
 
         // Edit the Select, Filter & Search settings and push them live (WallSession.ApplySearchSettings)

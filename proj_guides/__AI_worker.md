@@ -13,49 +13,54 @@
 So start by reading them all. 
 
 
-
-## `And now: _3.3 POI Card Look, Feel & Motion -- S2c the Page Chrome and edge-to-edge block pages`
+## `And now: _3.3 POI Card Look, Feel & Motion -- S3a the story's Editor: the Page's element table and the Preview`
 
 GATE: `git push` if the branch is ahead of origin (report how many commits). Take one Unity capture (Game view AND the POI
 Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. Check the two
-SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`): `git checkout --` them if modified. Baseline: none (HEAD 8ccec31; S2b
-closed with full PlayMode 1404 and full EditMode 2212, background, 0 failed). Ask about Unity's place with `40-testing.md` 4.2.3's
-a / b / c actions, word for word; WAIT for runs as 4.2.5 says. Never disable a tool's safety check (`50-terminal_and_tools.md` 5.2).
+SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`): `git checkout --` them if modified. Baseline: none (HEAD b8ce380; S2c
+closed with full EditMode 2234 and full PlayMode 1429, one non-reproduced layout-struggle red). Ask about Unity's place with
+`40-testing.md` 4.2.3's a / b / c actions, word for word (EditMode runs with real-click Editor tests: action a); WAIT for runs as 4.2.5
+says. Never disable a tool's safety check (`50-terminal_and_tools.md` 5.2).
 
-Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- R16 row 5c (this block) and the "S2b review" row above it
-(decisions 1 and 5), R17.5 (shared chrome components: wall default in Detail Card > Card Components, per-block override; Page Chrome's
-row), R15.2 (Components are any-panel), the S2a + S2b Build log entries.
-The visual target: `proj_guides/_3.3.1_Prototype/Main.dc.html` (v4) -- the page overlay's top bar (a Back chevron in a 44 pt round
-target + "Ribeira Palace › About › The story" on ONE line, the last part bold) and the page's foot (a Previous / Next row of two
-cards). Today's look to replace: `TileStories/TestEvidence/Card/Story/painting_page_top_en_light.png` ("Back" as text, a two-line
-breadcrumb).
-REQUIRED READING: `_3.2_POI_Card_Navigation.md` -- the full view's breadcrumb and sibling swipe (keep both behaviours), `_3.1` the full
-view (`BlockFullView`, `TakeoverView`, `CardFullViewOpener`); `_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section 0 (a Card
-Components row is added); `.clinerules/40-testing.md` 4.2, 4.2.4b, 4.5.
-WORKER MODEL: Sonnet-class -- one shared component on an existing, tested full view; a clear target; Editor rows by the pattern.
-TEST PLAN: no baseline. Targeted full-view / Card / Poi / Story fixtures first, then the FULL PlayMode run (the full view is shared by
-every block page), then full EditMode. Background runs (action c).
+Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- R16 row 6 (S3a: this block) and the "S2c review" row (its three
+fixes), R17.1 + R17.7 (Page section FIRST, then Preview; the Automatic preview recomputed and shown live; Custom with linked / own rows;
+Use in the preview / Copy / Unlink; broken links = warning rows), R17.3 (the Motion table: one line per row, the SAME field as the row's
+accordion, the reduced fallback read-only), R17.4 (Tap per element where it offers one), R14.5 + R14.8 (the element table, Style as an
+INLINE accordion -- no floating popup --, a new row born fully expanded with its defaults, the Validated column, reading time Auto /
+minutes), R17.5 (component overrides: Open Row and Page Chrome), the S1 / S2a / S2b / S2c Build log entries (build on `ElementRow`,
+`BlockSurfaces`, `ElementPreviewRule`, the Card Components section).
+The visual target: `proj_guides/_3.3.1_Prototype/StoryEditor.dc.html` (the redrawn mock: Page then Preview, the P column, Validated,
+Look / Motion / Tap accordions, the Motion table, Automatic / Custom with linked rows).
+REQUIRED READING (all lines): `proj_guides/_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section 0 (every Editor rule: rows, (i),
+warnings, popups, undo / redo, unsaved, live Play Mode sync, captures); `.clinerules/40-testing.md` 4.2, 4.2.3 (one-tick gestures for
+Editor-window tests), 4.2.4b, 4.5; `_2.0_Labels_And_Fonts_Design.md` §4 (the override-switch pattern).
+WORKER MODEL: Opus-class -- a large IMGUI Editor surface on a new data model, real-input tests, design judgement on captures.
+TEST PLAN: no baseline. EditMode real-window Editor tests + targeted PlayMode (live sync on the real card) first, then the FULL PlayMode
+run (the wall's data and the Editor are shared ground), then full EditMode.
 
-PART 1 -- the Page Chrome component (`Runtime/UI/Components/`, host-agnostic): top bar = Back chevron (44 pt round target, accessible
-name "Back to the card" / PT) + ONE-line breadcrumb (POI › family › block; the last part bold; when it does not fit, the MIDDLE part
-is ellipsised first, then the POI's); foot = Previous / Next as two cards (label "Previous" / "Next" + the sibling's title), the
-existing sibling swipe unchanged. Every block page (story, gallery, timeline, quiz, sources...) uses it; today's text "Back" and the
-two-line breadcrumb go.
-PART 2 -- configuration: Detail Card > **Card Components** (new section, `_5.1` rules): one row "Page Chrome" with the wall's default
-(breadcrumb on / off, Previous / Next on / off) + (i); the block's override through `BlockSurfaces` component overrides (R17.5, the
-`_2.0` label-style pattern: off = the wall's, values kept). Undo / live sync / real-input Editor test.
-PART 3 -- edge to edge: on a block page a full-bleed element (picture, video, carousel strip) reaches the PHONE's edges; the 16 pt
-gutter stays for text. The Painting's story video row: tap = Play In Place (S2b review 5).
-TESTS: Phase A: the chrome on a long and a short title, EN + PT, light + dark (one line, nothing clipped at 390, contrast); Phase B on
-The Painting: open the story page, a real tap on Back returns to the card at the same scroll; Previous / Next by real taps; a
-full-bleed picture's left / right pixels at the phone's edges.
-VISUALS: the story page top and foot, before / after, light + dark, EN + PT; one other block's page (the gallery). Open and judge.
-DOCS as current truth: `_3.3` Build log, `_5.1` (the Card Components section), `10-structure.md` (only your lines).
-OUT OF SCOPE: the element table and templates (S3); other shared components (they come with the kind that uses them).
-Stop when every block page wears the new chrome, full bleed reaches the phone's edges, the Card Components row works, the targeted
-fixtures, the full PlayMode run and full EditMode are green. Finish with the final report of `.clinerules/60-finishing.md` 6.4 and END
-with the developer's review questions. Do not commit: the Architect commits after the review.
-
+PART 1 -- the S2c review fixes: (1) the Page Chrome's breadcrumb carries the CONTEXT "POI > section"; the page's own name is added only
+when the page has no big title of its own (the story has one); (2) an in-place video keeps a full-screen button to the card's player;
+(3) TEST HYGIENE: no test reads or clears the developer's saved visitor state (light / dark in PlayerPrefs, `CardLocalState`): tests use
+an isolated store; prove the developer's saved mode survives a full run.
+PART 2 -- Specific Marker > Card Content, a story block: the PAGE section first -- the element table as in the mock (icon, kind, first
+words or a thumbnail, the live "P" marks, Validated ✓ / ✕ toggles, move up / down + drag, duplicate, delete with the shared danger
+affordance, "+ Add element" grouped by category); a row opens its content fields (EN / PT, media pickers) + inline accordions Look /
+Motion / Tap; a new row opens fully expanded with its defaults, its empty fields marked; the block header shows "✕ N to validate" /
+"✓ all validated"; the Page Chrome override; the Motion table. Then the PREVIEW section: Automatic with "Shows: picture #1 · title #3 ·
+lede #4", following every Page edit; Custom with linked rows (from a Page row: "Use in the preview (linked)" / "Copy to the preview"; on
+a linked row: "Unlink (make a copy)"; a broken link = a warning row with Unlink / Remove), own rows; the Open Row override; reading
+time Auto / minutes.
+PART 3 -- every edit through `DrawConfigMutationScope`: undo / redo, the unsaved flag, live Play Mode sync onto the real card (edit a
+row's text, its tone, its motion, reorder, delete -- the card follows).
+TESTS: real-window Editor tests for every action (one-tick gestures, 4.2.3); undo of each; the live sync on the real card (Phase B);
+the Automatic preview's "Shows" and P marks after reorder / delete; a broken link's warning. Captures of every state (the table
+closed / a row open with each accordion / the Motion table / Automatic / Custom with a broken link), light Editor skin as the developer
+uses.
+DOCS as current truth: `_5.1` (the story's Card Content rows), `_3.3` Build log, `10-structure.md` (only your lines).
+OUT OF SCOPE: templates and Card Starter (S3b); the POI-level shared elements (phase 2); any new element kind.
+Stop when a developer can compose and restyle The Painting's story entirely in the Editor with undo and live sync, the S2c fixes are
+in, the targeted fixtures, the full PlayMode run and full EditMode are green. Finish with the final report of
+`.clinerules/60-finishing.md` 6.4 and END with the developer's review questions. Do not commit: the Architect commits after the review.
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

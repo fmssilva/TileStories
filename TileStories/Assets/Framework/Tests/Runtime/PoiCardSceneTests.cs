@@ -547,7 +547,7 @@ namespace TileStories.Tests
         private RecordingCardEvents _cardEvents;
 
         // The card of these tests remembers in memory, so a run never touches the developer's own saved answers (one test below
-        // uses the real PlayerPrefs store, cleans up after itself and says so)
+        // reads the host's own state: the device store, which the run isolates too)
         [UnitySetUp]
         public IEnumerator UseAnInMemoryCardState()
         {
@@ -576,40 +576,30 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.15f);
         }
 
-        // _3.1 step 8A: the card's own state, when nothing replaces it, is PlayerPrefs scoped by the wall's id: a real answer
-        // reaches PlayerPrefs under the scoped key. It touches the developer's PlayerPrefs, so it puts back exactly what was there
+        // _3.1 step 8A: the card's own state, when nothing replaces it, is the DEVICE's store scoped by the wall's id -- PlayerPrefs in the
+        // app (DeviceStateStore.App), this test's own store in a run, never the developer's: a real answer reaches it under the scoped key
         [UnityTest]
-        public IEnumerator TheCardsOwnState_IsPlayerPrefsScopedByTheWall_ARealAnswerReachesIt()
+        public IEnumerator TheCardsOwnState_IsTheDeviceStoreScopedByTheWall_ARealAnswerReachesIt()
         {
+            Assert.IsInstanceOf<PlayerPrefsCardStateStore>(DeviceStateStore.App, "the app keeps the visitor's state in PlayerPrefs");
+            var device = DeviceStateStore.Current as MemoryCardStateStore;
+            Assert.IsNotNull(device, "precondition: the run gave the device a store of its own, never the developer's PlayerPrefs");
             string wall = Session.SearchConfig.wall_id;
-            var real = new CardLocalState(new PlayerPrefsCardStateStore(), wall);
-            string answerKey = real.KeyOf("lamp", "block_43", "answer-0");
-            string indexKey = CardLocalState.KeyPrefix + wall + ".index";
-            string answerBefore = PlayerPrefs.HasKey(answerKey) ? PlayerPrefs.GetString(answerKey) : null;
-            string indexBefore = PlayerPrefs.HasKey(indexKey) ? PlayerPrefs.GetString(indexKey) : null;
-            try
-            {
-                PlayerPrefs.DeleteKey(answerKey);
-                Card.State = null; // - the host builds its own on the next selection: the app's
-                yield return OpenFull("lamp");
-                var quiz = Quizzes()[0];
-                Assert.IsFalse(quiz.Answered, "precondition: nothing saved under the key");
-                yield return ScrollAndTap(quiz.Choices[1].Button);
-                Assert.AreEqual("Correct!", quiz.Verdict.text);
-                Assert.IsTrue(PlayerPrefs.HasKey(answerKey), "the answer is in PlayerPrefs under wall.poi.block.slot");
-                Assert.AreEqual("1", PlayerPrefs.GetString(answerKey));
-                Assert.AreEqual(wall, Card.State.WallId, "the host's state is this wall's");
+            string answerKey = new CardLocalState(device, wall).KeyOf("lamp", "block_43", "answer-0");
+            Assert.IsFalse(device.TryGet(answerKey, out _), "precondition: nothing saved under the key");
+            Card.State = null; // - the host builds its own on the next selection: the device's
+            yield return OpenFull("lamp");
+            var quiz = Quizzes()[0];
+            Assert.IsFalse(quiz.Answered, "precondition: not answered");
+            yield return ScrollAndTap(quiz.Choices[1].Button);
+            Assert.AreEqual("Correct!", quiz.Verdict.text);
+            Assert.IsTrue(device.TryGet(answerKey, out string stored), "the answer is in the device store under wall.poi.block.slot");
+            Assert.AreEqual("1", stored);
+            Assert.AreEqual(wall, Card.State.WallId, "the host's state is this wall's");
 
-                SelectionEventBus.Clear();
-                yield return OpenFull("lamp");
-                Assert.AreEqual(1, Quizzes()[0].Index, "a new bind reads it back from PlayerPrefs: opens on question 2");
-            }
-            finally
-            {
-                if (answerBefore == null) PlayerPrefs.DeleteKey(answerKey); else PlayerPrefs.SetString(answerKey, answerBefore);
-                if (indexBefore == null) PlayerPrefs.DeleteKey(indexKey); else PlayerPrefs.SetString(indexKey, indexBefore);
-                PlayerPrefs.Save();
-            }
+            SelectionEventBus.Clear();
+            yield return OpenFull("lamp");
+            Assert.AreEqual(1, Quizzes()[0].Index, "a new bind reads it back from the device store: opens on question 2");
         }
 
         private T Only<T>() where T : class, IBlockView => Sheet.Stack.BoundViews.OfType<T>().Single();

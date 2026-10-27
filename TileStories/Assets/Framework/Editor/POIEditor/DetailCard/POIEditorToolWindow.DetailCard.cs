@@ -136,7 +136,7 @@ namespace TileStories.Editor
         {
             var s = _config.card_settings;
             s.preview_language = language == CardLanguageRule.Fallback(s.languages) ? "" : language ?? "";
-            new CardLocalState(new PlayerPrefsCardStateStore(), _config.wall_id).SetLanguage("");
+            new CardLocalState(DeviceStateStore.Current, _config.wall_id).SetLanguage("");
         }
 
         internal void SetCardDemoPoi(string poiId) => _config.card_settings.demo_card.poi_id = poiId ?? "";
@@ -155,10 +155,10 @@ namespace TileStories.Editor
         }
 
         // Forget every answer, vote, revealed question and contents tick this wall's cards stored on this computer (CardLocalState.ResetAll
-        // over the same PlayerPrefs the app uses) and say how many entries went, the ticks named apart. Never touches the config.
+        // over the device store the app uses, DeviceStateStore) and say how many entries went, the ticks named apart. Never touches the config.
         internal int ResetSavedCardState()
         {
-            var state = new CardLocalState(new PlayerPrefsCardStateStore(), _config?.wall_id);
+            var state = new CardLocalState(DeviceStateStore.Current, _config?.wall_id);
             int ticks = state.CountViewed();
             int removed = state.ResetAll();
             EditorNotice.Queue("Saved card state cleared", CardStateResetMessage(removed, ticks));

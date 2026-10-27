@@ -196,9 +196,13 @@ namespace TileStories.Tests
             var bar = takeover.Bar;
             var rows = BlockSurfaces.PageRows(block, BuiltInBlocks.Story).Select(r => new ElementRow(r)).ToList();
             string title = BlockFieldReader.Pick(rows.First(r => r.Kind == BuiltInElements.Title).Field(BuiltInElements.TextField).text, language, "en");
-            StringAssert.StartsWith(Sheet.Stack.HeaderView.TitleText, takeover.CrumbText, "the breadcrumb starts with the point");
-            StringAssert.EndsWith(title, takeover.CrumbText, "...and ends with the story's own name");
-            Assert.AreEqual(bar.Back.worldBound.center.y, bar.Name.worldBound.center.y, 2f, "one line: the name is on the arrow's row");
+            // - the story shows its own big title, so the trail is the context alone: point > section (the S2c review)
+            Assert.IsTrue(takeover.SectionShown, "precondition: the story belongs to a section of the card's map");
+            Assert.AreEqual(Sheet.Stack.HeaderView.TitleText + " > " + bar.SectionWords.text, takeover.CrumbText,
+                "the breadcrumb is the point and the section, nothing after");
+            StringAssert.DoesNotContain(title, takeover.CrumbText, "the story's title is not repeated: the page shows it in large type");
+            Assert.AreEqual(DisplayStyle.None, bar.Name.resolvedStyle.display, "the name part is not drawn");
+            Assert.AreEqual(bar.Back.worldBound.center.y, bar.Section.worldBound.center.y, 2f, "one line: the trail is on the arrow's row");
             Assert.LessOrEqual(bar.Crumb.layout.height, bar.Back.layout.height + 1f);
             yield return Grab("story_page_top_" + language + "_" + mode);
 
@@ -393,6 +397,44 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.3f);
             Assert.IsFalse(Sheet.Takeover.IsOpen, "Back closed the page");
             Assert.AreNotEqual(CardVideoState.Playing, owner.State, "leaving the page paused the clip");
+        }
+
+        // The S2c review (5): a video playing in place keeps a full-screen button; a real tap on it opens the card's player over the SAME
+        // playback (still the story's clip, still playing), and Back returns to the story's page
+        [UnityTest]
+        public IEnumerator TheStoryVideo_PlayingInPlace_ARealTapOnFullScreen_OpensTheCardsPlayer_OnTheSamePlayback_BackReturnsToThePage()
+        {
+            yield return Open("en", CardOptions.ModeLight);
+            ComposedBlockView page = null;
+            yield return OpenStoryPage((_, g) => page = g);
+            var blockKey = Sheet.FullView.BlockKey;
+            var video = page.Shown.Select(s => s.Component).OfType<VideoElement>().Single();
+            var owner = Sheet.Context.Video;
+            PageScroll.ScrollTo(video.Teaser);
+            yield return CardTestInput.Settle(0.2f);
+            yield return CardTestInput.Tap(video.Teaser.panel, video.Teaser.worldBound.center);
+            yield return CardTestInput.Settle(0.3f);
+            Assert.IsTrue(video.PlaysInPlace, "precondition: the clip plays in place");
+            var track = video.Track;
+            var button = video.Panel.FullScreenButton;
+            Assert.AreEqual(DisplayStyle.Flex, button.resolvedStyle.display, "the in-place player shows its full-screen button");
+            // - the player's controls sit under its picture: the visitor scrolls them into view first
+            PageScroll.ScrollTo(button);
+            yield return CardTestInput.Settle(0.2f);
+            Assert.IsTrue(PageScroll.contentViewport.worldBound.Contains(button.worldBound.center), "precondition: the button is in view (" +
+                button.worldBound + " in " + PageScroll.contentViewport.worldBound + ")");
+
+            yield return CardTestInput.Tap(button.panel, button.worldBound.center);
+            yield return CardTestInput.Settle(0.3f);
+            Assert.IsNotNull(Sheet.Takeover.Page.Q(className: "card-video--full"), "the card's full-screen player opened");
+            Assert.IsTrue(owner.IsCurrent(track), "on the same clip");
+            Assert.AreEqual(CardVideoState.Playing, owner.State, "still playing: the same playback, not a new start");
+            yield return Grab("story_video_full_screen");
+
+            yield return CardTestInput.Tap(Sheet.Takeover.Back.panel, Sheet.Takeover.Back.worldBound.center);
+            yield return CardTestInput.Settle(0.3f);
+            Assert.IsTrue(Sheet.FullView.IsOpen && Sheet.FullView.BlockKey == blockKey, "Back returns to the story's page");
+            Assert.AreNotEqual(CardVideoState.Playing, owner.State, "leaving the player paused the clip");
         }
     }
 }

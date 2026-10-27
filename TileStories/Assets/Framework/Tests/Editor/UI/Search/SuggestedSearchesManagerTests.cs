@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using NUnit.Framework;
-using UnityEngine; // PlayerPrefs cleanup for order-independent tests
 
 namespace TileStories.Tests
 {
@@ -10,15 +9,14 @@ namespace TileStories.Tests
     public class SuggestedSearchesManagerTests
     {
         private WallConfigData _config;
+        private IsolatedVisitorState _device;
 
         [SetUp]
         public void SetUp()
         {
-            // PlayerPrefs is the persistence backing for RecentSearchesManager,
-            // which SuggestedSearchesManager reads in RecentFirst mode. Wipe it
-            // before every test so execution order cannot leak state between
-            // tests (matches the isolation discipline in RecentSearchesManagerTests).
-            PlayerPrefs.DeleteKey(RecentSearchesManager.PREFS_KEY);
+            // The device store backs RecentSearchesManager, which SuggestedSearchesManager reads in RecentFirst mode: each test
+            // starts on an empty one of its own, so execution order cannot leak state and the developer's PlayerPrefs are never touched
+            _device = new IsolatedVisitorState();
 
             _config = new WallConfigData
             {
@@ -35,10 +33,7 @@ namespace TileStories.Tests
         }
 
         [TearDown]
-        public void TearDown()
-        {
-            PlayerPrefs.DeleteKey(RecentSearchesManager.PREFS_KEY);
-        }
+        public void TearDown() => _device.Dispose();
 
         [Test]
         public void CategoryDistribution_SortedByCountDescThenName()

@@ -11,8 +11,9 @@ namespace TileStories
     // position. The view loads through its OWN media scope: switching page gives the previous page's files back, closing gives back everything.
     //   - the breadcrumb (_3.2 step 16, _3.3 S2c) is the card's title, then -- for a block of the card's map -- its SECTION as tappable words
     //     (a whole touch target: SectionTapped, which the sheet turns into the card's one jump), then the page's own name, bold, which follows
-    //     the page shown ("Castle > Media > 360"); ONE line, the middle part cut with an ellipsis first (PageCrumbFitRule); a wall or a block
-    //     may hide it (PageChromeChoice), the Back arrow then stands alone
+    //     the page shown ("Castle > Media > 360") -- left out while the page shows a big title of its own (ShowPageName: a story); ONE line,
+    //     the middle part cut with an ellipsis first (PageCrumbFitRule); a wall or a block may hide it (PageChromeChoice), the Back arrow then
+    //     stands alone
     //   - the chips are ONE line clipped at the screen's width (NavStrip: the current chip is centred, so the next one is always a tap away), each a whole touch
     //     target named by its page; the current one is bold with a ring as well as filled -- never colour alone
     //   - Back (the button, the system Back: GoBack) returns to what the view was opened over when its opener named it -- a picture's viewer
@@ -119,6 +120,7 @@ namespace TileStories
             _nameOfPage = nameOfPage;
             PageCount = pageCount;
             Bar.SetTrail(title, null, "");
+            Bar.ShowName(true);
             ApplyChrome(chrome ?? PageChromeChoice.Both);
             Bar.SetBackName(strings?.Get(CardStrings.Keys.PageBack) ?? "");
             for (int i = 0; i < pageCount; i++)
@@ -167,6 +169,10 @@ namespace TileStories
             Chrome = chrome;
             Bar.ShowBreadcrumb(chrome.Breadcrumb);
         }
+
+        // Whether the breadcrumb ends with the page's name: off while the page shows a big title of its own (the trail is then the context,
+        // "point > section"); every opening starts with it on
+        public void ShowPageName(bool shown) => Bar.ShowName(shown);
 
         // The name of page `page` (what its chip, the breadcrumb and a foot card say)
         public string NameOf(int page) => _nameOfPage?.Invoke(page) ?? "";

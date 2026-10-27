@@ -110,6 +110,9 @@ namespace TileStories.Editor
                     //   whole text in its tooltip). The flexible cell stops at the capped row's end; an open row shows its fields instead
                     GUILayout.Space(TableGapBetweenGroups);
                     Rect summaryRect = GUILayoutUtility.GetRect(0f, EditorGUIUtility.singleLineHeight, EditorStyles.miniLabel, GUILayout.ExpandWidth(true));
+                    // - a block that composes its page says, open or closed, how many of its rows wait for the developer's check (R14.8)
+                    if (definition != null && BlockSurfaces.Composes(definition))
+                        summaryRect = DrawStoryValidationStatus(summaryRect, BlockSurfaces.RowsToValidate(block, definition), i);
                     if (!open && definition != null && Event.current.type == EventType.Repaint)
                     {
                         string summary = BlockSummaryRule.FirstWords(block, definition, FirstLanguageOf(settings.languages), FirstLanguageOf(settings.languages));

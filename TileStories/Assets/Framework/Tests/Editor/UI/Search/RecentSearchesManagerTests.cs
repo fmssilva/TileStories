@@ -7,17 +7,14 @@ namespace TileStories.Tests
     // persistence round-trip and whitespace handling (spec _2.6 section 13).
     public class RecentSearchesManagerTests
     {
+        // Each test starts on an empty device store of its own: never the developer's PlayerPrefs (DeviceStateStore)
+        private IsolatedVisitorState _device;
+
         [SetUp]
-        public void SetUp()
-        {
-            PlayerPrefs.DeleteKey(RecentSearchesManager.PREFS_KEY);
-        }
+        public void SetUp() => _device = new IsolatedVisitorState();
 
         [TearDown]
-        public void TearDown()
-        {
-            PlayerPrefs.DeleteKey(RecentSearchesManager.PREFS_KEY);
-        }
+        public void TearDown() => _device.Dispose();
 
         [Test]
         public void Add_InsertsAtFront_RecencyOrdered()
@@ -106,7 +103,7 @@ namespace TileStories.Tests
         [Test]
         public void CorruptedJson_DoesNotThrow_StartsEmpty()
         {
-            PlayerPrefs.SetString(RecentSearchesManager.PREFS_KEY, "{ not valid json");
+            _device.Store.Set(RecentSearchesManager.PREFS_KEY, "{ not valid json");
             var mgr = new RecentSearchesManager();
             Assert.AreEqual(0, mgr.Entries.Count);
         }

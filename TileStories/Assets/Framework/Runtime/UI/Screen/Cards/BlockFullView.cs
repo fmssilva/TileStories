@@ -152,10 +152,18 @@ namespace TileStories
                 //   Previous / Next row the foot of this page's scroll)
                 var chrome = PageChromeRule.Of(context.Settings?.components, entry.Instance);
                 _takeover.ApplyChrome(chrome);
+                // - a page that shows its own big title (a story's title row) is not named again: the trail is its context, point > section
+                _takeover.ShowPageName(!ShowsItsOwnTitle(entry, full));
                 ShowFoot(chrome, context.Strings);
                 takeover.WhenPageLeaves(() => Release(kind, view));
             };
         }
+
+        // Whether `entry`'s page draws a title of its own in the language it is bound in: a composing kind whose Page holds a title-like row
+        private static bool ShowsItsOwnTitle(BlockStackBuilder.Entry entry, BlockBindContext bound) =>
+            BlockSurfaces.Composes(entry.Definition)
+            && ElementRules.HasOwnTitle(new ElementScope(entry.Instance, entry.Definition, bound.Poi?.card?.blocks, null, null), ElementRegistry.Shared,
+                bound.Language, bound.FallbackLanguage);
 
         // The foot of the open block page: Previous / Next cards at the end of the scroll, each turning to the neighbouring page (the sibling
         // swipe and the chips stay as they are). None when the chrome hides it or the block has no sibling

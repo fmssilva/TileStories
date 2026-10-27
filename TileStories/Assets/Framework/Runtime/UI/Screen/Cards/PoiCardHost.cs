@@ -57,8 +57,8 @@ namespace TileStories
         private CardTapOutside _tapOutside;
         private readonly CardDemoOpener _demo = new();
 
-        // What the visitor did on this wall's cards (answers, votes, revealed blocks, the language picked): PlayerPrefs, scoped by the
-        // wall's id. A test hands its own (over a MemoryCardStateStore) so a run never touches the developer's saved answers
+        // What the visitor did on this wall's cards (answers, votes, revealed blocks, the language and mode picked): the device's store
+        // (DeviceStateStore.Current: PlayerPrefs in the app, a test run's own store in a test), scoped by the wall's id. A test may hand its own
         internal CardLocalState State { get; set; }
 
         // Where the cards report what the visitor did (feedback): a log line until the telemetry work replaces it
@@ -219,7 +219,7 @@ namespace TileStories
         private CardLocalState StateOfThisWall()
         {
             string wallId = wallSession.SearchConfig?.wall_id ?? "";
-            if (State == null || State.WallId != wallId) State = new CardLocalState(new PlayerPrefsCardStateStore(), wallId);
+            if (State == null || State.WallId != wallId) State = new CardLocalState(DeviceStateStore.Current, wallId);
             return State;
         }
 

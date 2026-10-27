@@ -286,6 +286,11 @@ application is a broken test, not a flaky one.
   `ShippedNavigation`) -- and an EditMode test of the framework's navigation rows loads `ShippedWall.WithFrameworkNavigation()`. A test whose
   subject IS the wall's choice pushes it back (`PoiCardPaintingSceneTests`). When a new wall setting starts to differ from the framework default
   and a fixture breaks on it, pin it in the same place -- never re-baseline the suite to the demo wall's taste.
+- **A run never reads or clears the developer's own saved visitor state.** What a visitor's device remembers (the card's answers, votes, language,
+  light / dark; recent searches; the last result view) is read only through `DeviceStateStore.Current`: each test assembly's `[SetUpFixture]` gives
+  the run its own memory store (`IsolatedVisitorState`), and `SearchSceneFixture` a fresh one per test BEFORE the scene loads (the card reads it at its
+  first bind). Never read, clear or restore PlayerPrefs in a test (`VisitorStateIsolationTests` fails on it). Why: a "dark" picked while playing by
+  hand coloured a test's card.
 - **Measure relative to the thing itself, and prove the precondition.** An offset is measured from the element's own rest
   position, not from a neighbour whose distance depends on the screen (`DisplacementLabelTests`); a tap first scrolls its target
   into view and asserts it is inside the visible part (`CardVideoGalleryTests.TapInView` -- `ScrollTo(block)` on a block taller

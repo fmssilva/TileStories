@@ -61,7 +61,11 @@ namespace TileStories.Tests
             Color surface = default;
             Assert.IsTrue(ThemeController.TryResolverFor(stack.Scroll, out var theme) && theme.TryColour("--ts-surface", out surface),
                 "precondition: the card sits under the theme");
-            foreach (var slot in scrollSlots)
+            // - a block that waits for the card to be read is hidden on this test's fresh visitor state (framed, but not laid out): the shown
+            //   ones are measured
+            Assert.AreEqual(BlocksWaitingToBeRead("lamp"), scrollSlots.Count(s => s.resolvedStyle.display == DisplayStyle.None),
+                "precondition: only the blocks that wait to be read are hidden");
+            foreach (var slot in scrollSlots.Where(s => s.resolvedStyle.display != DisplayStyle.None))
             {
                 Assert.IsTrue(slot.ClassListContains(BlockFrame.FramedClass), slot.name + ": every block of the scroll is framed");
                 Assert.AreEqual(surface, slot.resolvedStyle.backgroundColor, "the frame is the theme's opaque surface");

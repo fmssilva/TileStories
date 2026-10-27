@@ -40,6 +40,14 @@ namespace TileStories
         public int Count => _moving.Count;
         public VisualElement Mover { get; private set; }
 
+        // The effect bound for the row drawn by `root` ("" when that row moves in no way: none, or not bound here)
+        public string EffectOf(VisualElement root)
+        {
+            foreach (var m in _moving)
+                if (ReferenceEquals(m.Root, root)) return m.Effect ?? "";
+            return "";
+        }
+
         private readonly VisualElement _owner;
         private readonly List<Moving> _moving = new();
         private readonly IVisualElementScheduledItem _tick;

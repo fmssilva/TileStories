@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
+using TileStories.Tests;
 using UnityEngine.UIElements;
 
 namespace TileStories.Editor.Tests
@@ -173,10 +174,9 @@ namespace TileStories.Editor.Tests
         [Test]
         public void ViewModeControl_StartsFromTheSetting_OrTheRememberedView()
         {
-            string saved = PlayerPrefs.GetString(ViewModeControl.LastViewPrefsKey, null);
-            try
+            // - the device's memory of the last view, of this test alone (never the developer's PlayerPrefs)
+            using (var device = new IsolatedVisitorState())
             {
-                PlayerPrefs.DeleteKey(ViewModeControl.LastViewPrefsKey);
                 var control = new ViewModeControl(new VisualElement());
                 control.Configure(new ResultsSettings { default_view = "camera_highlight" }, true);
                 Assert.AreEqual(ViewMode.CameraHighlight, control.Mode, "Default View");
@@ -191,15 +191,11 @@ namespace TileStories.Editor.Tests
                 var reopened = new ViewModeControl(new VisualElement());
                 reopened.Configure(remember, true);
                 Assert.AreEqual(ViewMode.Minimap, reopened.Mode, "Remember Last View: the device's last choice");
+                Assert.IsTrue(device.Store.TryGet(ViewModeControl.LastViewPrefsKey, out _), "remembered in the device store");
 
                 var forget = new ResultsSettings { default_view = "list", remember_last_view = false };
                 reopened.Configure(forget, true);
                 Assert.AreEqual(ViewMode.List, reopened.Mode, "Remember Last View off: always Default View");
-            }
-            finally
-            {
-                if (saved == null) PlayerPrefs.DeleteKey(ViewModeControl.LastViewPrefsKey);
-                else PlayerPrefs.SetString(ViewModeControl.LastViewPrefsKey, saved);
             }
         }
 

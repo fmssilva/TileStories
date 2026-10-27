@@ -69,6 +69,35 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("Ribeira by the river", ElementRules.FirstWords(_s.Scope, _s.Elements, "en", "en"));
         }
 
+        // The page breadcrumb's question (the S2c review): does the Page show a title of its own? A title-like row with words in the
+        // language (or its fallback) -- a heading counts, an empty one does not, a link plays its target's part
+        [Test]
+        public void HasOwnTitle_IsATitleLikeRowWithWords_InTheLanguageOrItsFallback()
+        {
+            Assert.IsTrue(ElementRules.HasOwnTitle(_s.Scope, _s.Elements, "en", "en"), "the story's title row");
+            Assert.IsTrue(ElementRules.HasOwnTitle(_s.Scope, _s.Elements, "pt", "en"), "in Portuguese too");
+            var titleText = _s.Title.Field(BuiltInElements.TextField).text;
+            titleText.RemoveAll(e => e.lang == "pt");
+            Assert.IsTrue(ElementRules.HasOwnTitle(_s.Scope, _s.Elements, "pt", "en"), "a missing language falls back to the wall's first");
+
+            _s.PageValue.items.Remove(_s.Title.Data);
+            Assert.IsFalse(BlockSurfaces.PageRows(_s.Block, _s.Kind).Any(r => new ElementRow(r).Kind == BuiltInElements.Heading),
+                "precondition: the fixture has no heading");
+            Assert.IsFalse(ElementRules.HasOwnTitle(_s.Scope, _s.Elements, "en", "en"), "no title row: the page needs its name");
+
+            var heading = _s.AddPage(BuiltInElements.Heading);
+            Assert.IsFalse(ElementRules.HasOwnTitle(_s.Scope, _s.Elements, "en", "en"), "an empty heading is no title");
+            PaintingStory.SetText(heading, BuiltInElements.TextField, new List<LocalizedEntry> { new() { lang = "en", value = "Two centuries" } });
+            Assert.IsTrue(ElementRules.HasOwnTitle(_s.Scope, _s.Elements, "en", "en"), "a heading with words is one");
+
+            _s.PageValue.items.Remove(heading.Data);
+            _s.PageValue.items.Add(_s.Title.Data);
+            var link = _s.AddPage(BuiltInElements.Spacer);
+            link.SetRef(ElementRef.ToPage(_s.Title.Id));
+            _s.PageValue.items.Remove(_s.Title.Data);
+            Assert.IsFalse(ElementRules.HasOwnTitle(_s.Scope, _s.Elements, "en", "en"), "a link to a row that is gone shows nothing");
+        }
+
         [Test]
         public void SearchWords_AreEveryLanguagesTextAndCaptions_NeverCredits_NoRepeats_ReferencesAddNothing()
         {

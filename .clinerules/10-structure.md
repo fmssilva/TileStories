@@ -302,7 +302,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
             - CardTokens.uss  -- The --ts-* design tokens on .ts-card.ts-theme-default: the default Stone & Gold dark preset
           - Search/  [Screen-UITK]  -- the search UI host and stylesheet, the search bar, the result-set rules, view switching, voice (UI Toolkit)
             - SearchOverlayView.cs  -- plain C# view: the search bar (field with placeholder, Mic, Filters (n), Map), suggestions under an empty field, the listen bar; dynamic = scheduler
-            - RecentSearchesManager.cs  -- persists and replays recent queries
+            - RecentSearchesManager.cs  -- persists and replays recent queries, in the device's store (DeviceStateStore), never PlayerPrefs itself
             - SuggestedSearchesManager.cs  -- derives suggestions from the live POI set so they never go stale
             - ResultSetCoordinator.cs  -- pure: Compute(index, pois, query, facets, settings) -> ResultSetState (active, ranked results, ids, no-results message, relax suggestion) -- the ONE
             - SearchPanelsRule.cs  -- + the ViewMode enum
@@ -447,13 +447,13 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - DividerElement.cs  -- divider: a hairline, or the azulejo ornament (a vector) in the family colour between two hairlines
           - SpacerElement.cs  -- spacer: room on the spacing scale
           - OpenRowView.cs  -- the shared Open Row: words + minutes + chevron, a whole touch target; emphasis plain / nudge (the chevron steps) / shine (a per-glyph tint sweep, PostProcessTextVertices, to --ts-accent-shine); Clock; Reduce Motion = plain
-          - PageTopBar.cs  -- the Page Chrome's top bar: a 44 pt round Back chevron (tooltip = accessible name) + the breadcrumb on ONE line (point > section > page, the page's name last and bold; the section a tap target), each part's width from PageCrumbFitRule (middle cut first, then the point's); ShowBreadcrumb(false) = the arrow alone
+          - PageTopBar.cs  -- the Page Chrome's top bar: a 44 pt round Back chevron (tooltip = accessible name) + the breadcrumb on ONE line (point > section > page, the page's name last and bold; ShowName(false) for a page with a big title of its own: point > section; the section a tap target), each part's width from PageCrumbFitRule (middle cut first, then the point's); ShowBreadcrumb(false) = the arrow alone
           - PageFootView.cs  -- the Page Chrome's foot: two cards, Previous (left) and Next (right), the small label over the neighbouring page's name; a missing neighbour keeps its place undrawn; the host decides what a tap turns to
           - MediaFrame.cs  -- MediaFrame (one media item's clipped frame: a CardImage in its proportion -- ElementMediaRule.FrameAspect or a fixed one -- rectangle or arch, its Picture what motion moves) + MediaCaption (caption + credit, each hidden when empty)
           - PictureElement.cs  -- picture: one MediaFrame + its words; inset / full bleed, rectangle / arch; on the page a tap opens the PictureViewer (the row's Tap); an Automatic preview without its words
           - PicturePairElement.cs  -- picture pair: two frames at ElementMediaRule.PairAspect side by side with their words; on the page a tap opens both in the viewer at the one tapped
           - CarouselElement.cs  -- carousel: a snapping NavStrip of frames at CarouselAspect with their words (App Store style: full bleed, the first item on the text's margin; sideways = the strip, up / down = the page); a swipe is its only gesture
-          - VideoElement.cs  -- video: a teaser (poster frame of the clip's proportion, play disc, caption + length badge on its own plate, credit); on the page a tap plays through the card's ONE video owner -- in place (VideoPanel) or in the full-screen player (the takeover); leaving pauses what it played
+          - VideoElement.cs  -- video: a teaser (poster frame of the clip's proportion, play disc, caption + length badge on its own plate, credit); on the page a tap plays through the card's ONE video owner -- in place (VideoPanel, with its full-screen button to the card's player over the same playback) or in the full-screen player (the takeover); leaving pauses what it played
           - PictureViewer.cs  -- the shared full-screen picture viewer (the gallery's lightbox page): Open(host, name, pictures, start) -- a ZoomPanSurface per page (a swipe turns, two fingers look closer), caption + credit under it
           - ElementMotion.cs  -- one composed view's motion on its own Clock (Tick / Finish / Start for tests): entering rows hidden until past the enter line then revealed one by one, parallax pictures with the scroll, the ONE slow zoom / pan nearest the centre (Mover), the preview's entry; transform / opacity only; Reduce Motion = all still
           - Components.uss  -- the components' looks, theme tokens + their own --ts-el-* tokens (sizes, leading, gaps, page inset, the media's radius / caption / credit / overscan / carousel cell, --ts-preview-max); every option a class; a moving picture overhangs its frame (ts-el--moves-picture); the rhythm between rows by pair
@@ -606,7 +606,8 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - State/  -- The card's local state and its events seam
           - ICardStateStore.cs  -- string keys to string values (TryGet / Set / Remove): what CardLocalState keeps its state in
           - MemoryCardStateStore.cs  -- forgets everything with the app: the Phase A gallery's and the scene tests' store, so a run never touches the developer's saved answers
-          - PlayerPrefsCardStateStore.cs  -- the app's store: PlayerPrefs, every write saved at once
+          - PlayerPrefsCardStateStore.cs  -- the app's store: PlayerPrefs, every write saved at once (DeviceStateStore.App; nothing else names PlayerPrefs: VisitorStateIsolationTests)
+          - DeviceStateStore.cs  -- where this device keeps its visitor's state (the card's answers / votes / language / mode, recent searches, the last view): App (PlayerPrefs) and Current, what every reader uses -- a test run's own store in a test (IsolatedVisitorState)
           - CardLocalState.cs  -- the ONE store of what a visitor did on the cards on this device: Answer / SetAnswer (per question row), Vote / SetVote, Seen / MarkSeen, Language /
           - ICardEvents.cs  -- the telemetry seam: ICardEvents.Raise(CardEvent), CardEvent (kind, wall, POI, block, look, value), CardEventKinds (feedback); no backend
           - IPollResults.cs  -- Where a poll would get other visitors' votes (TryGet by wall + POI + block -> counts per authored row); NoPollResults, the only implementation today
@@ -669,7 +670,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - BlockSurfaces.cs  -- the Preview surface's common fields, Page / Preview rows, mode, hand-set minutes, OverrideOf (ComponentOverride), RowsToValidate, TakeRowId (never reused)
           - ElementRefRule.cs  -- ElementScope (holder, the POI's blocks, the shared pool) + Resolve / ContentOf: one level, Broken with its reason
           - ElementPreviewRule.cs  -- Automatic (first picture + title -- the eyebrow right before it with it, TitleLead -- + text in Page order) / Custom (own, linked, broken); UsedPageRows
-          - ElementRules.cs  -- Minutes (200 wpm + media weights, hand-set wins), FirstWords (the first title row, else the first words), SearchWords (not indexed), TapOf
+          - ElementRules.cs  -- Minutes (200 wpm + media weights, hand-set wins), FirstWords (the first title row, else the first words), HasOwnTitle (the page breadcrumb leaves the name out), SearchWords (not indexed), TapOf
           - ElementMotionRule.cs  -- the motion maths: EffectOf (Auto = the element's own), ReducedOf (Reduce Motion: every effect still), Entered (the 92 % enter line), StaggerDelay, RevealProgress / EnterPose (reveal, slide in), ParallaxOffset, ZoomScale, PanOffset, Mover (the one row that moves by itself)
           - ElementMediaRule.cs  -- a media frame's shape: FrameAspect (the picture's own proportion, 4:5 to 2:1), PairAspect 4:3, CarouselAspect 3:2, ArchRadius (a half circle as wide as the frame)
           - ElementValidation.cs  -- problems named by surface + row (unknown element, required empty, media, broken ref, blank / repeated id); RowIsComplete
@@ -757,6 +758,11 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - PoiRotationResolver.cs  -- pure Facing X/Y/Z math: angles to quaternion, angle normalisation, IsSameOrientation (compare rotations as orientations, never euler triples)
           - ReferencePopupOptions.cs  -- ", the rows, a stale key kept as "<key> (missing)") and its index <-> key mapping; missingLabel (6B) for a reference whose key the window never shows
           - POIEditorToolWindow.CardContent.cs  -- open rows through BlockFieldDrawer, the not-shown reason under a row, a warning for [[terms]] the Glossary lacks
+          - POIEditorToolWindow.ComposedBlock.cs  -- a block that composes its page (the story), Card Content: its Page -- the element table (grip / drag, open, number, icon or thumbnail, name + first words, the live P, Validated, up / down / duplicate / delete), the inline add palette by category, the Page Chrome override, the Motion table -- then its Preview; the block row's "N to validate"; DrawSegmentRow (wrapping segments, one probe each)
+          - POIEditorToolWindow.ElementRowEditor.cs  -- an OPEN element row: its content (texts per language, an empty required one marked; media items with file, caption, credit) and its Look / Motion / Tap inline accordions; a Page row's Use in the preview (linked) / Copy to the preview
+          - POIEditorToolWindow.ElementPreview.cs  -- a composed block's Preview: Automatic with its live Shows line, Custom's table (links, own rows, a broken link as a warning row with Unlink / Remove, + Link a Page row, + Add own row), the Open Row override, Reading Time Auto / by hand
+          - POIEditorToolWindow.ComposedBlockHelp.cs  -- every (i) text and tooltip of the composed block's Editor (ASCII, app-agnostic)
+          - ElementEdits.cs  -- pure: every edit the composed block's Editor makes -- add, duplicate, move, remove (rows and media items), the preview's mode (Custom starts as Automatic showed it), use in the preview linked / copied, unlink, the overrides on (seeded from the wall) / off, minutes
           - POIEditorToolWindow.CardStarter.cs  -- Specific Marker > Card Content > Card Starter: the row (a popup-looking button naming the set the blocks follow, Start from scratch or Custom)
           - CardStarters.cs  -- Editor-only DATA: the Card Starter's sets (Simple point, Rich point, AR point, Start from scratch), each a list of kinds with their looks and preset
           - Icons/  -- add, delete, edit and focus button PNGs
@@ -768,7 +774,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - NavigationPresets.cs  -- Editor-only DATA: the nine presets of _3.2 section 8
           - NavigationWarningRule.cs  -- + EdgeUnderALayoutThatOwnsIt; an Edge the layout keeps off the card is no third bar
           - POIEditorToolWindow.CardNavigationGroups.cs  -- The Groups table
-          - POIEditorToolWindow.CardComponents.cs  -- Detail Card > Card Components: the wall's defaults of the shared card components (card_settings.components); the Page Chrome row (Breadcrumb, Previous / Next) with its (i) and Test guides
+          - POIEditorToolWindow.CardComponents.cs  -- Detail Card > Card Components: the wall's defaults of the shared card components (card_settings.components): the Open Row's emphasis (a segment row) first, then the Page Chrome row (Breadcrumb, Previous / Next), with its (i) and Test guides
           - POIEditorToolWindow.CardTexts.cs  -- Detail Card > Card Texts: one row per framework / app card text (named by its wording), a field per wall language; FrameworkCardStrings
           - POIEditorToolWindow.CardGlossary.cs  -- Detail Card > Glossary: a Term + its definition per language per word, + Add term
           - POIEditorToolWindow.CardDefaultMedia.cs  -- Detail Card > Default Media: the wall's own CardMediaLibrary path and the Framework defaults table
@@ -922,6 +928,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
             - ElementRegistryTests.cs  -- the v1 list, born-filled rows of all 14, one refusal per Validate rule, an app's own element, BlockRegistry's Elements rules (no shipped kind carries a surface field)
             - ElementRefRuleTests.cs  -- page / block / shared scopes, ref-to-ref broken in each, every broken reason
             - ElementPreviewRuleTests.cs  -- Automatic in Page order through reorders, deletes, links, broken rows; Custom own / linked / broken; the mode switch
+            - ElementEditsTests.cs  -- ElementEdits on The Painting's shipped story: add with defaults and ids never reused, duplicate, move / remove with the Automatic preview following, Custom seeded from Automatic, linked vs copied, Unlink (a broken link too), overrides seeded from the wall, minutes
             - ElementRulesTests.cs  -- minutes counted from the source texts, first words, search words, tap, motion + reduce; ReadingTimeRule / BlockSummaryRule / CompactRowRule / BlockStackBuilder on the story
             - ElementValidationTests.cs  -- each problem named by surface, row, element and field; ids unique across Page and Preview; an id problem never hides content
             - PageChromeRuleTests.cs  -- PageCrumbFitRule (fits whole; the middle part cut first, the point's next, the name last; floors; an absent part stays 0) and PageChromeRule (the wall's choice, a block's override on / off with its values kept, another component's override ignored, a config from before it reads both on)
@@ -950,11 +957,14 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - PoiRotationResolverTests.cs, PoiFocusResolverTests.cs, PositionTabsTests.cs  -- per-POI editor math and Position foldout shape
         - PoiFacingLockAndSyncTests.cs  -- Facing X/Y/Z: orientation-based scene sync, Verified lock on facing, marker-edit detector, auto-reveal state, real IMGUI slider rows, LivingRoom
         - EditorNoticeTests.cs  -- notice queue timing (discrete vs drag), validation report text, hide/reset of notices, converted call sites
-        - TestDialogGuard.cs  -- SetUpFixture OUTSIDE any namespace (so it covers both test namespaces): EditorDecision answers Cancel and notice popups stay off for the whole
+        - TestDialogGuard.cs  -- SetUpFixture OUTSIDE any namespace (so it covers both test namespaces): EditorDecision answers Cancel and notice popups stay off for the whole run, and the visitor's saved state is the run's own store (IsolatedVisitorState)
         - PoiFacingModesAndLifecycleTests.cs  -- per-mode/per-axis visibility on a real POI_Marker prefab under preview, preview warnings vs real pipeline, gizmo under preview, verify/unverify
         - HierarchyLevelKeyValidationTests.cs, HierarchyLevelSizeRangeTests.cs  -- config validation
         - MessagesNameRowsNotKeysTests.cs  -- on a config breaking every rule: no POI id or generated key in any finding, POIs by list title, rows by name, a deleted row quoted as its dropdown
-        - DrawingNeverWritesTests.cs  -- opened on the REAL window: the shipped wall and a file without the optional fields
+        - DrawingNeverWritesTests.cs  -- opened on the REAL window: the shipped wall (every block and composed row part open), a story with a Custom preview, a broken link and both overrides on, and a file without the optional fields
+        - StoryEditorTabTests.cs  -- the story's Editor on the REAL window with real clicks, a real drag and real typing on The Painting's shipped story, each with Ctrl+Z: Page then Preview, P marks and Shows after reorder / delete / drag, Validated, duplicate / delete (ids never reused), the palette and a row born open, Look / Motion / Tap, the Motion table, Custom / linked / copy / broken / Unlink / Remove, both overrides, Reading Time, Card Components' Open Row, the texts' ASCII guard
+        - LivePlayModeStoryEditorTests.cs  -- Phase B: in Play Mode on the real wall with The Painting's story page open, real edits in the real window (words, tone, motion, a reorder, a delete) show on the OPEN page; Ctrl+Z walks them back
+        - VisitorStateIsolationTests.cs  -- the run keeps the visitor's state in its own store; the source names PlayerPrefs only in the store and its own test (a scan proven on planted lines)
         - TaxonomyRowIdentityTests.cs  -- NextFree never repeats a key; CountReferences per table; real "+ Add" / trash clicks give unused keys; real typing in the Category, Badge and Keyword
         - ConfigUndoGroupingTests.cs  -- the slider drag runs inside one editor tick (PaintNow between its events)
         - PoiEditorWindowHost.cs  -- Resize(width) / Width / RootScreen: lay the window out at another width (the OS clamps the host to the screen) ReplaceText types a
@@ -997,7 +1007,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
             - CardMenuOverlayTests.cs  -- The overlay owner on a REAL sheet with The Lamp: its layer between the sheet and the full view, one thing open at a time
             - BlockFullViewTests.cs  -- The full view on a real sheet with The Lamp: a second pooled view through its own scope while the card's stays bound, the page-leave order
             - BentoLayoutSheetTests.cs  -- The bento layout on a REAL sheet with The Lamp's card and media, no panel: every target set aside and the sources kept, a tile per section
-            - PageChromeSheetTests.cs  -- The Page Chrome on a REAL sheet (The Lamp, The Painting), no panel: the Back arrow's tooltip in EN + PT, the foot's neighbours and its end cards, no foot for a page alone, the wall's two switches, a story's own override for its page only
+            - PageChromeSheetTests.cs  -- The Page Chrome on a REAL sheet (The Lamp, The Painting), no panel: the Back arrow's tooltip in EN + PT, the foot's neighbours and its end cards, no foot for a page alone, the wall's two switches, a story's own override for its page only, the story's trail point > section (its name left out) while a neighbour without a title is named
             - FullViewSiblingsSheetTests.cs  -- The full view among its siblings on a REAL sheet with The Lamp, no panel: a Media block opens as one page of 14 at its own place
             - CardFullViewOpenerTests.cs  -- CardFullViewOpener on a REAL sheet with The Lamp, no panel -- the edges the sheet-level full view tests do not reach: a same-point rebind that
             - FloatingSlotTests.cs  -- The floating slot on a REAL sheet with The Lamp's card: its layer order (sheet, scrim, row, menu layer, full view), the Floating Button per wall pick
@@ -1032,7 +1042,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - OrientationWallSessionIntegrationTests.cs  -- real WallSession.SpawnPOIs orientation wiring + hierarchy override + real-marker occlusion check
         - OrientationLiveUpdateTests.cs  -- live orientation changes on a RUNNING wall: real rotations of real markers and a real cluster after real frames
         - OrientationClusterIntegrationTests.cs  -- real LODController cluster spawn path gets MarkerBillboard.Configure; cluster rotation changes when camera rotates
-        - SearchSceneFixture.cs  -- Shared set-up: the REAL LivingRoomScene
+        - SearchSceneFixture.cs  -- Shared set-up: the REAL LivingRoomScene, a fresh visitor-state store per test (IsolatedVisitorState) taken before the load, LOD off and the framework navigation pinned; BlocksWaitingToBeRead (Show After Reading slots hidden on that fresh state)
         - LayoutStruggleGuard.cs  -- PUBLIC: turns UI Toolkit's "Layout update is struggling" error into a failure of the test whose scene logged it -- Begin(scene) before the load
         - LayoutStruggleGuardTests.cs  -- The guard alone, no scene, Unity's own line: heard in each phase -> named; other errors, a line that only mentions the words, one after Finish, one
         - PoiCardSheetDragSceneTests.cs  -- SheetDrag on the REAL LivingRoomScene with The Lamp, real touch events and the drag's own Clock: the height IS the finger's travel while held
@@ -1055,6 +1065,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - PoiCardHeroSceneTests.cs  -- Phase B on the REAL scene: the bar one row whatever the language or Menu (stops unchanged, live push), the whole hero in view at Half with the card's
         - ThemePixelSetTests.cs  -- [Explicit] measuring instrument for a change that must move no pixel: 12 gallery renders (CardNavGalleryScene) + The Lamp at Half / Full
         - TestEvidence.cs  -- PUBLIC: Root (TileStories/TestEvidence, next to Assets/) and PathFor(domain, fileName) (creates TestEvidence/<domain>/): the ONE place every test
+        - IsolatedVisitorState.cs  -- PUBLIC: while it lives DeviceStateStore.Current is a memory store of its own (never the developer's PlayerPrefs); each test assembly's SetUpFixture holds one for the run, SearchSceneFixture a fresh one per test
         - TestRunRecorder.cs  -- DEV tool, OFF by default (EditorPrefs switch, menu TileStories > Dev > Record Test Runs): Write appends one event line (time, kind, detail) to
         - TestEvidenceTests.cs  -- 
         - PoiCardLiveUpdateTests.cs  -- On the REAL LivingRoomScene, through WallSession.ApplyCardSettings (what LivePlayModeCardApplier hands over): an edited heading shows on the open
@@ -1113,7 +1124,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - BackgroundSafeInput.cs  -- Test helper: a copy of InputSystem.settings that keeps real devices working whichever application has the focus
         - PoiCardRealAudioTests.cs  -- The REAL AudioSource + the real ~200s PT clip (castelo_s_jorge_guide_pt.mp3): real taps play / pause / seek / change speed, closing the card with
         - PoiCardPortugueseTests.cs  -- The Lamp's PT render read item by item: every non-ASCII glyph its PT card content uses (c-cedilla, a / e / i / o / u with accents, A with an accent)
-        - PoiCardPageChromeSceneTests.cs  -- Phase A + B of the Page Chrome on the REAL scene: the top bar on one line for a short, a long and a very long title (EN + PT, light + dark: the middle part cut first, the name last and bold, >= 7:1, a 44 pt Back); a real tap on Back returns at the same scroll; real taps on Previous / Next; a full-bleed picture's left and right PIXELS at the phone's edges with the text at its 16 pt gutter; the gallery's page wears the same chrome; The Painting's story video plays in place (TestEvidence/Card/PageChrome/)
+        - PoiCardPageChromeSceneTests.cs  -- Phase A + B of the Page Chrome on the REAL scene: the top bar on one line for a short, a long and a very long title (EN + PT, light + dark: the middle part cut first, the name last and bold, >= 7:1, a 44 pt Back); a real tap on Back returns at the same scroll; real taps on Previous / Next; a full-bleed picture's left and right PIXELS at the phone's edges with the text at its 16 pt gutter; the gallery's page wears the same chrome; The Painting's story video plays in place and its full-screen button opens the card's player on the same playback, Back returns to the page (TestEvidence/Card/PageChrome/)
         - PoiCardStorySceneTests.cs  -- Phase B on the REAL scene: The Painting's story preview (hero picture edge to edge, eyebrow + title + lede, no slot heading) capped with its Open Row in EN / PT, light / dark; a real tap opens the page (17 rows drawn, pictures loaded, captions in the card's language), sibling chips turn, Back returns; real carousel swipes; the gated motion cost (TestEvidence/Story/MEASURING)
       - EditMode/  [EMPTY SCAFFOLD]  -- legacy folder, superseded by Tests/Editor
   - StreamingAssets/

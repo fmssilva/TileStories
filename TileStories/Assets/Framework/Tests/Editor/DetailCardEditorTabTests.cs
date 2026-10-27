@@ -2891,9 +2891,7 @@ namespace TileStories.Editor.Tests
                 Assert.IsFalse(string.IsNullOrWhiteSpace(kind.Help), kind.Key + " has a (i) text");
                 foreach (var field in kind.Fields)
                 {
-                    // - a composed kind's rows (Elements: the story's Page and Preview Rows) are edited in the element table, _3.3 S3's; until then
-                    //   the field draws one info line (_3.1 5.3). The ONE field type this guard leaves to a later block, by name
-                    if (field.Type == BlockFieldType.Elements) continue;
+                    // - a composed kind's rows (Elements: the story's Page and Preview Rows) are drawn by the element table (_3.3 S3a)
                     Assert.IsTrue(POIEditorToolWindow.HasBlockFieldDrawer(field.Type), kind.Key + "." + field.Key + ": no Editor drawer for " + field.Type);
                     Assert.IsFalse(string.IsNullOrWhiteSpace(field.Label), kind.Key + "." + field.Key + " has a label");
                     Assert.IsFalse(string.IsNullOrWhiteSpace(field.Help), kind.Key + "." + field.Key + " has a (i) text");
@@ -3007,7 +3005,7 @@ namespace TileStories.Editor.Tests
         {
             var config = ShippedConfig();
             config.wall_id = "preview_language_test_" + Guid.NewGuid().ToString("N");
-            var saved = new CardLocalState(new PlayerPrefsCardStateStore(), config.wall_id);
+            var saved = new CardLocalState(DeviceStateStore.Current, config.wall_id);
             try
             {
                 config.card_settings.languages = new List<string> { "en", "pt" };
@@ -3067,8 +3065,8 @@ namespace TileStories.Editor.Tests
         {
             string wall = "reset_test_" + Guid.NewGuid().ToString("N");
             string otherWall = "reset_test_other_" + Guid.NewGuid().ToString("N");
-            var mine = new CardLocalState(new PlayerPrefsCardStateStore(), wall);
-            var theirs = new CardLocalState(new PlayerPrefsCardStateStore(), otherWall);
+            var mine = new CardLocalState(DeviceStateStore.Current, wall);
+            var theirs = new CardLocalState(DeviceStateStore.Current, otherWall);
             try
             {
                 mine.SetAnswer("poi_1", "block_1", 0, 2);
@@ -3115,7 +3113,7 @@ namespace TileStories.Editor.Tests
         public void ResetSavedCardState_ReturnsHowManyEntriesWentAndSaysItInAnotherNotice()
         {
             string wall = "reset_test_" + Guid.NewGuid().ToString("N");
-            var state = new CardLocalState(new PlayerPrefsCardStateStore(), wall);
+            var state = new CardLocalState(DeviceStateStore.Current, wall);
             try
             {
                 var config = TwoPoiConfig();

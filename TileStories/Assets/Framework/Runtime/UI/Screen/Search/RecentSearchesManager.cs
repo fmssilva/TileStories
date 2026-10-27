@@ -5,11 +5,11 @@ using UnityEngine;
 namespace TileStories
 {
     // Device-local, recency-ordered history of recent search queries, persisted
-    // via PlayerPrefs as a small JSON blob (spec _2.6 section 13). Plain C# class
+    // in the device's store (DeviceStateStore: PlayerPrefs in the app) as a small JSON blob (spec _2.6 section 13). Plain C# class
     // -- no MonoBehaviour, no scene, so it is directly unit-testable.
     public sealed class RecentSearchesManager
     {
-        // PlayerPrefs key for the persisted recent-searches blob.
+        // The device store's key for the persisted recent-searches blob.
         public const string PREFS_KEY = "TileStories.recent_searches";
 
         // Cap on stored queries (select_filter_search.results.recent_count); 0 = remember nothing
@@ -47,11 +47,11 @@ namespace TileStories
             Save();
         }
 
-        // Re-read persisted entries from PlayerPrefs. Called once at construction.
+        // Re-read persisted entries from the device's store. Called once at construction.
         private void Load()
         {
             _entries.Clear();
-            string json = PlayerPrefs.GetString(PREFS_KEY, string.Empty);
+            DeviceStateStore.Current.TryGet(PREFS_KEY, out string json);
             if (string.IsNullOrEmpty(json))
                 return;
 
@@ -77,12 +77,11 @@ namespace TileStories
             TrimToMax();
         }
 
-        // Persist entries to PlayerPrefs as a JSON array wrapper.
+        // Persist entries to the device's store as a JSON array wrapper.
         private void Save()
         {
             var payload = new Payload { items = _entries.ToArray() };
-            PlayerPrefs.SetString(PREFS_KEY, JsonUtility.ToJson(payload));
-            PlayerPrefs.Save();
+            DeviceStateStore.Current.Set(PREFS_KEY, JsonUtility.ToJson(payload));
         }
 
         // Enforce the recency-count cap from the newest end.

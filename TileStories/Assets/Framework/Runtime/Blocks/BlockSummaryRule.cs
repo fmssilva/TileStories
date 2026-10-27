@@ -49,11 +49,11 @@ namespace TileStories
             return false;
         }
 
-        internal static bool IsTextField(BlockFieldDefinition field) =>
+        public static bool IsTextField(BlockFieldDefinition field) =>
             field.Type == BlockFieldType.LocalizedText || field.Type == BlockFieldType.LocalizedLongText;
 
         // A text as one line: glossary marks as their words, line breaks and runs of spaces as one space
-        internal static string OneLine(string text)
+        public static string OneLine(string text)
         {
             if (string.IsNullOrWhiteSpace(text)) return "";
             var words = GlossaryMarkup.PlainText(text).Split((char[])null, System.StringSplitOptions.RemoveEmptyEntries);

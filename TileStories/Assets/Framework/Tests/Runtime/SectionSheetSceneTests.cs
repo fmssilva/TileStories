@@ -85,7 +85,11 @@ namespace TileStories.Tests
             yield return Open("lamp");
             float inset = CardTestInput.TokenPx("--ts-space-4");
             float width = Scroll.contentContainer.layout.width - 2f * inset;
-            foreach (var slot in Scroll.contentContainer.Query(className: BlockFrame.FramedClass).ToList())
+            // - a block that waits for the card to be read is hidden on this test's fresh visitor state: the shown ones are measured
+            var slots = Scroll.contentContainer.Query(className: BlockFrame.FramedClass).ToList();
+            Assert.AreEqual(BlocksWaitingToBeRead("lamp"), slots.Count(s => s.resolvedStyle.display == DisplayStyle.None),
+                "precondition: only the blocks that wait to be read are hidden");
+            foreach (var slot in slots.Where(s => s.resolvedStyle.display != DisplayStyle.None))
                 Assert.AreEqual(width, slot.layout.width, 0.01f, slot.name + ": a block keeps the width the frame's inset gave it");
             var bare = Stack.Sheets.All.Where(s => s.Run.Bare).ToList();
             Assert.AreEqual(1, bare.Count, "precondition: the icon grid is the one navigation run");

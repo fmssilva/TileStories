@@ -8,7 +8,8 @@ namespace TileStories
     // proportion (inset or full bleed, rectangle or arch), a play button over it and a badge with its caption and length -- then its credit.
     // It never plays anything itself: the card's ONE video owner (BlockBindContext.Video) does, so the story's video is the same playback the
     // card's video block would draw, never a second player. On the PAGE a tap does what the row's Tap says (R17.4):
-    //   - Play In Place (the default): the teaser gives way to the shared VideoPanel, drawing the owner's playback where the poster was
+    //   - Play In Place (the default): the teaser gives way to the shared VideoPanel, drawing the owner's playback where the poster was; its
+    //     full-screen button opens the card's player over the same playback (the S2c review), Back returns to the page
     //   - Open The Player: the card's full-screen view opens with a VideoPanel over the same playback (the video block's takeover), and Back
     //     returns to the page; leaving that player pauses the video, as nothing else on the page would show it
     // On the preview the whole block is the tap (it opens the page): the teaser takes no finger. Leaving the page while the video plays in
@@ -61,6 +62,7 @@ namespace TileStories
             Poster.Root.Add(Badge);
             Teaser.Add(Poster.Root);
             Panel = new VideoPanel("ts-el-video__panel");
+            Panel.FullScreenRequested += OnFullScreen;
             Words = new MediaCaption();
             Add(Teaser);
             Add(Panel.Root);
@@ -131,11 +133,19 @@ namespace TileStories
             if (video == null || Track == null) return;
             if (Tap == ElementOptions.TapPlayInPlace)
             {
-                Panel.Bind(Track, video, _context.Block.Media, _posterPath, ClipLength, null, false, null, _context.Block.Strings, false);
+                // - the full-screen button only where a full view can open (a host)
+                Panel.Bind(Track, video, _context.Block.Media, _posterPath, ClipLength, null, false, null, _context.Block.Strings,
+                    offerFullScreen: _context.Block.Host != null);
                 ShowInPlace(true);
                 if (!video.IsCurrent(Track) || video.PlayingLoop || video.State != CardVideoState.Playing) video.Toggle(Track);
             }
             else if (Tap == ElementOptions.TapOpenPlayer) OpenPlayer();
+        }
+
+        // The in-place player's full-screen button: the same playback goes on in the card's player (it was playing, so it keeps playing there)
+        private void OnFullScreen()
+        {
+            if (PlaysInPlace && Track != null && _context?.Block?.Host != null && _context.Block.Video != null) OpenPlayer();
         }
 
         // The card's full-screen view with a player over the owner's playback; the video starts once the page is up (opening the view lets

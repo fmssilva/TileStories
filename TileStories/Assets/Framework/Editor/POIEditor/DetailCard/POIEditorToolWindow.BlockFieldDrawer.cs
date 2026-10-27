@@ -24,7 +24,9 @@ namespace TileStories.Editor
             type == BlockFieldType.LocalizedText || type == BlockFieldType.LocalizedLongText || type == BlockFieldType.Items
             || type == BlockFieldType.Choice || type == BlockFieldType.Color || type == BlockFieldType.Toggle
             || type == BlockFieldType.PoiRef || type == BlockFieldType.Asset || type == BlockFieldType.Number || type == BlockFieldType.Url
-            || type == BlockFieldType.Time || type == BlockFieldType.BlockRef;
+            || type == BlockFieldType.Time || type == BlockFieldType.BlockRef
+            // - a composing kind's Page and Custom preview: the element table (ComposedBlock.cs)
+            || type == BlockFieldType.Elements;
 
         // Every field of one block of `poi`, as its kind defines them. `built`: the POI's card as BlockStackBuilder builds it (a BlockRef
         // field says where its pick leads from it)
@@ -40,8 +42,11 @@ namespace TileStories.Editor
             // - the frame's variant is every block's, not a field of its kind: the first row of an open block
             block.emphasis = DrawPopupField("Emphasis", BlockFrame.EmphasisOf(block.emphasis), CardOptions.Emphases, CardOptions.EmphasisLabels,
                 CardBlockEmphasisHelp, IndentLevel1);
+            bool composes = BlockSurfaces.Composes(definition);
             foreach (var field in definition.Fields)
             {
+                // - a composing kind's Page, its Preview fields and its Reading Time are drawn as its two surfaces, after its other rows
+                if (composes && IsSurfaceField(field)) continue;
                 // - a field the block's look or options do not use is not drawn; its value stays (hiding is drawing, never writing)
                 if (!FieldVisibilityRule.IsShown(field, block, definition, _config.card_settings)) continue;
                 if (!HasBlockFieldDrawer(field.Type))
@@ -92,14 +97,24 @@ namespace TileStories.Editor
                     DrawLocalizedRows(field, languages, IndentLevel1, "Block field " + field.Key, blockIndex,
                         lang => LocalizedValue(block, field.Key, lang), (lang, text) => SetLocalizedValue(block, field.Key, lang, text));
             }
+            if (composes) DrawComposedSurfaces(block, definition, poi, languages);
         }
 
-        // A localized field: its label + (i), then one row per wall language (a text area for long text)
+        // A field a composing kind's two surfaces draw: its Page (Elements), the Preview's fields, Reading Time
+        private static bool IsSurfaceField(BlockFieldDefinition field)
+        {
+            if (field.Type == BlockFieldType.Elements || field.Key == BlockKindDefinition.MinutesDefinition.Key) return true;
+            foreach (string key in BlockSurfaces.FieldKeys) if (field.Key == key) return true;
+            return false;
+        }
+
+        // A localized field: its label + (i), then one row per wall language (a text area for long text). `markEmpty`: the label says the
+        // field is required and still empty, in the warning colour (a new element row's fields to fill)
         private static void DrawLocalizedRows(BlockFieldDefinition field, List<string> languages, float indent, string probeName, int probeIndex,
-            Func<string, string> get, Action<string, string> set)
+            Func<string, string> get, Action<string, string> set, bool markEmpty = false)
         {
             DrawEditorRow(out float labelRow, out _, indent);
-            GUILayout.Label(field.Label + (field.Required ? " (required)" : ""), EditorStyles.miniBoldLabel,
+            GUILayout.Label(field.Label + (markEmpty ? " (required, empty)" : field.Required ? " (required)" : ""), markEmpty ? StoryEmptyStyle : EditorStyles.miniBoldLabel,
                 GUILayout.Width(Mathf.Max(40f, labelRow - 36f)), GUILayout.ExpandWidth(false));
             HelpInfoButton.Draw(field.Label, field.Help);
             EditorRowEnd();

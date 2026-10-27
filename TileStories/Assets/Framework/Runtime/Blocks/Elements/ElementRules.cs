@@ -9,6 +9,7 @@ namespace TileStories
     //   - FirstWords: the Page's first title row's words, else the first row with words, as one line (the BlockSummaryRule shape)
     //   - SearchWords: every language's words of the text fields each element lists for search, plus its media captions (never credits),
     //                 from the Page's and the Custom preview's OWN rows -- a reference's words belong to the row it points at
+    //   - HasOwnTitle: whether the Page shows a title of its own (the page breadcrumb then leaves the page's name out)
     //   - TapOf:      what a tap on a row does, against what its element offers
     // A Page reference counts as its target (ElementRefRule); a broken one, or a row of an unknown element, counts as nothing.
     public static class ElementRules
@@ -37,16 +38,9 @@ namespace TileStories
         // breadcrumb, a compact row, a contents line), else the first row with words; one line, "" when none
         public static string FirstWords(ElementScope scope, ElementRegistry elements, string language, string fallback)
         {
+            string title = TitleWords(scope, elements, language, fallback);
+            if (title.Length > 0) return title;
             var read = new BlockFieldReader(null, language, fallback);
-            foreach (var (row, element) in PageContent(scope, elements))
-            {
-                if (element.PreviewRole != ElementPreviewRole.Title || element.Fields == null) continue;
-                foreach (var field in element.Fields)
-                {
-                    string title = BlockSummaryRule.IsTextField(field) ? BlockSummaryRule.OneLine(read.ItemText(row, field.Key)) : "";
-                    if (title.Length > 0) return title;
-                }
-            }
             foreach (var (row, element) in PageContent(scope, elements))
             {
                 if (element.Fields == null) continue;
@@ -55,6 +49,27 @@ namespace TileStories
                     if (!BlockSummaryRule.IsTextField(field)) continue;
                     string text = BlockSummaryRule.OneLine(read.ItemText(row, field.Key));
                     if (text.Length > 0) return text;
+                }
+            }
+            return "";
+        }
+
+        // Whether the block's Page shows a title of its own (a title-like row with words): its page needs no name in the breadcrumb, which
+        // then carries only the context, "point > section" (the S2c review)
+        public static bool HasOwnTitle(ElementScope scope, ElementRegistry elements, string language, string fallback) =>
+            TitleWords(scope, elements, language, fallback).Length > 0;
+
+        // The words of the Page's first title-like row (a title or a heading) that has some, as one line; "" when none
+        private static string TitleWords(ElementScope scope, ElementRegistry elements, string language, string fallback)
+        {
+            var read = new BlockFieldReader(null, language, fallback);
+            foreach (var (row, element) in PageContent(scope, elements))
+            {
+                if (element.PreviewRole != ElementPreviewRole.Title || element.Fields == null) continue;
+                foreach (var field in element.Fields)
+                {
+                    string title = BlockSummaryRule.IsTextField(field) ? BlockSummaryRule.OneLine(read.ItemText(row, field.Key)) : "";
+                    if (title.Length > 0) return title;
                 }
             }
             return "";
