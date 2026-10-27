@@ -13,49 +13,64 @@
 So start by reading them all. 
 
 
-## `And now: _3.3 POI Card Look, Feel & Motion -- S4a the first story review's fixes`
 
-GATE: `git push` if the branch is ahead of origin (report how many commits). Take one Unity capture (Game view AND the POI
-Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. Check the two
-SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`): `git checkout --` them if modified. Baseline: none (HEAD 3190b96; S3b
-closed with full PlayMode 1431 and full EditMode 2279, 0 failed). Ask about Unity's place with `40-testing.md` 4.2.3's a / b / c
-actions, word for word; WAIT for runs as 4.2.5 says. Never disable a tool's safety check. Editor captures in the dark skin.
+## `And now: Test tiers -- BLOCK / CORE / FULL (the first Test Suite Review, audit + the tiers + the biggest savings)`
 
-Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- "S4 review, first round" (THIS block: the developer's points,
-with the screenshots described there), R18 (the review guide), R11 v3-v4 (hero, metal rim), R9 D1 / D2 (>= 7:1 text at the worst
-pixel; block edge >= 3:1), R10.2 (the preview cap), the P4.4a / P4.4b / 4c2 / S2b / S2c Build log entries (hero, frame, rim light,
-preview, page chrome).
-The visual target: `proj_guides/_3.3.1_Prototype/Main.dc.html` (v4: the hero, the `.rim` metal and its sweep) and `Story.dc.html` (the
-story preview's picture flush with the block's top).
-REQUIRED READING: `.clinerules/40-testing.md` 4.2, 4.2.4b, 4.5; `_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section 0 (one new row).
-WORKER MODEL: Opus-class -- the sheet's Full stop, the hero, the frame and a navigation bug.
-TEST PLAN: no baseline. Targeted fixtures first (back / full view, sheet stops, hero, frame, story), then the FULL PlayMode run -- shared
-ground: the sheet's Full STOP changes --, then full EditMode. Background runs (action c).
+GATE: `git push` if the branch is ahead of origin (report how many commits). Confirm the tree compiles; if not, STOP and report.
+Check the two SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`): `git checkout --` them if modified. Leave `IPCE/` alone
+(not this project). Ask about Unity's place with `40-testing.md` 4.2.3's a / b / c actions, word for word; WAIT for runs as 4.2.5
+says. Never disable a tool's safety check.
+BASELINE: HEAD a46bcc2 (S4a: the page Back, Full Height, the premium hero, the Navigation Bar) was committed WITHOUT a known full-run
+result. Known reds there: full EditMode 6 tests reading the developer's own LivingRoom config (the LiveSync badge x5,
+LivePlayModeNavigationPreset) + 9 DetailCard navigation tests doubled by an order-dependent leaked window. This block's FULL runs
+are also S4a's verification: a red that is a PRODUCT bug of S4a -> fix it if it is small and clear (say so), else STOP that test's
+work and report it.
 
-PART 1 -- BUG: on a block page, the top bar's Back arrow closes the WHOLE card (back to the live camera). It must return to the card,
-at the scroll it was at, with the block in view. Find why (which handler, which close path), fix it at its source, and add the Phase B
-test that would have caught it (open the story's page by a real tap, a real tap on Back -> the card is open at the same offset).
-PART 2 -- full height: a wall setting "Full Height" (To The Top -- default -- / Leave A Camera Strip) with (i): at Full the sheet
-rises to the top of the safe area; the grabber, the drag down and Back keep working. Measure the stops before / after.
-PART 3 -- the hero: the picture starts directly under the nav strip (no glass band between them); its height = the picture's own
-proportion at full width, clamped to a sensible min / max (state them); the dark shade only behind the words (a local gradient
-over the text block, the rest of the picture untouched); slightly smaller eyebrow / title / line; Listen = a compact pill (headphones
-icon + time, accessible name "Listen, 3:11"). Text >= 7:1 at its worst pixel on every hero picture of the test wall (a bright
-picture strengthens the shade locally, never weakens the text).
-PART 4 -- the block frame in light mode: more 3D -- clearer brushed-metal bands and a top highlight / soft bevel; the block's EDGE
-contrast carried by a dark outer hairline + shadow, so the moving rim light can ride a wider band (2-3 pt) and be clearly visible
-travelling round the block being read. Dark mode keeps its subtler look. Measure: edge >= 3:1 over the sunny-wall stand-in; the
-light's band visible (pixel delta in a frame sequence).
-PART 5 -- the story preview: its first picture flush with the block's top and sides (rounded with the block); the title NEVER faded
-or cut by the cap -- the picture's height gives way first so title + at least one lede line + the Open Row fit.
-PART 6 -- The Painting: delete its old rich-text "The story" block (through the Editor's config path); keep the magazine story.
-TESTS: Phase B for the Back bug and the full height; Phase A for the hero (each picture, EN / PT, light / dark), the frame (light /
-dark, frame sequence of the light), the story preview (title fully visible at the cap). Captures of each, before / after.
-DOCS as current truth: `_3.3` Build log, `_5.1` (Full Height row), `10-structure.md` (only your lines).
-OUT OF SCOPE: the S3b review's Editor fix list (next block); any new kind.
-Stop when every point above is done and measured, the targeted fixtures, the full PlayMode run and full EditMode are green. Finish
-with the final report of `.clinerules/60-finishing.md` 6.4 and END with the developer's review questions. Do not commit: the
-Architect commits after the review.
+Spec (read ALL lines): `proj_guides/skills/Test_Suite_Review.md` (this block = its first run, AUDIT + FIX), `.clinerules/40-testing.md`
+(all of section 4), the watched flakes in `proj_guides/__mixed_TODOs.md`.
+WORKER MODEL: Opus-class -- test infrastructure every fixture stands on.
+GOAL (the developer's): every block's tests run in a few minutes and test that block; every 3-4 blocks a CORE run of ~30 min;
+every ~12 blocks the FULL suite, ~90 min at most.
+
+PART 1 -- measure. Make `TestRunRecorder` write each run's per-FIXTURE times (fixture, tests, passed / failed / skipped, seconds)
+to `TestEvidence/Harness/fixture_times.csv`, overwritten per run. Then one FULL PlayMode run + full EditMode (background, action
+c) on the baseline: the time table AND S4a's verdict. Rank the fixtures by time.
+PART 2 -- the CORE tier: `[Category("Core")]` on the tests that guard each domain's critical paths -- at least: open a card by a
+real tap and close it; the sheet's stops and drag; the block page and Back; the Navigation Bar (jump, the chosen group follows the
+scroll); the hero and the theme (light / dark); the story block and its page; audio play / stop; markers, search and zoom; the
+Editor's live sync and a config round trip; the visitor-state isolation. Where a fixture is slow, put the category on its
+cheapest test that proves the path, not on the class. Time it with `category_names: ["Core"]`; target 25-30 min; list each Core
+test and the path it guards in `_Test_Suite_1.md`.
+PART 3 -- the BLOCK tier: any PlayMode fixture over ~3 min is a block's bottleneck: split it by subject or slim it (Test_Suite_Review
+step 2: scene once per fixture, waits on conditions, a matrix cut to one case per behaviour + the pairs that really interact,
+duplicates merged). Never drop a real bug's regression or a contract guard (tokens, fields, render targets, contrast); say what
+proves each removed case now. Do the largest savings that fit this block; the rest goes in `_Test_Suite_1.md`'s fix list, in
+block-sized chunks with the expected saving each.
+PART 4 -- the reds and the flake: the order-dependent leaked window that doubles the 9 DetailCard navigation tests (find what
+leaves it open, fix it at the source -- 4.2.3); every test that reads the developer's own LivingRoom config choices instead of its
+own fixture config (the LiveSync badge x5, LivePlayModeNavigationPreset, any other the full runs show): make it own its data, so a
+developer's edit of the wall never turns a test red. The watched flakes: cause or a named quarantine.
+PART 5 -- the rule. Rewrite `40-testing.md` 4.2 "Which tests, when" as current truth, replacing its levels with:
+  "**Which tests, when (three tiers).** RUN TIMES (replaced after a run when a number moved > ~10 %): full EditMode ~N min; CORE ~N
+  min; FULL PlayMode ~N min; per-fixture times in `TestEvidence/Harness/fixture_times.csv`.
+  - **BLOCK -- every block, after each change:** compile, the full EditMode suite, then the PlayMode fixtures of the changed code
+    (the feature's own + every fixture that greps for the changed type, method or config key), named one by one in `test_names`;
+    a few minutes. A block closes on this tier unless its TEST PLAN says CORE or FULL.
+  - **CORE -- `category_names: ["Core"]`, ~30 min, background:** every 3rd-4th block, and at the end of a block on SHARED GROUND
+    (the definition below).
+  - **FULL -- everything, <= 90 min, background:** every ~12 blocks with the maintenance, before a domain close-out, a device
+    session or a build.
+  - A wider tier confirms, never discovers: green on BLOCK before CORE, green on CORE before FULL. The report names the tier, its
+    counts, and the blocks since the last CORE and the last FULL."
+  Keep the SHARED GROUND definition (shorten it), the `test_names` JSON-array note, the 25-failures note and the gated MEASUREMENTS
+  note; drop the "fourth block" full-run rule and every sentence the tiers replace.
+TEST PLAN: the FULL run of Part 1 (baseline + S4a verdict); at the end one CORE run (timed) and one FULL PlayMode + full EditMode
+run, all green, background (action c).
+RESULT: `proj_guides/_Test_Suite_1.md` (time table before / after, the Core list, findings, the fix list, S4a's verdict). DOCS:
+`40-testing.md` as above, `10-structure.md` (only your lines).
+OUT OF SCOPE: product code (only test code and the recorder) except the small S4a fixes above; new features.
+Stop when Parts 1-5 are done, CORE and FULL are timed and green. Finish with `.clinerules/60-finishing.md` 6.4's final report and
+END with the developer's review questions. Do not commit: the Architect commits after the review.
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

@@ -102,17 +102,21 @@ namespace TileStories.Editor.Tests
 
                 // - the window the developer edits in: the config the scene runs, Detail Card > Navigation open
                 var config = JsonUtility.FromJson<WallConfigData>(File.ReadAllText(Path.Combine(Application.streamingAssetsPath, "LivingRoom/config.json")));
+                // - the Navigation Bar at the framework default (off): while it is on it replaces every element a preset places,
+                //   and the demo wall turns it on; the first pick below pushes this to the running card
+                config.card_settings.navigation.bar.enabled = new CardNavBarSettings().enabled;
                 _window = new PoiEditorWindowHost(config, "_showCardNavigation");
                 var tabField = typeof(POIEditorToolWindow).GetField("_selectedTab", Instance);
                 _window.SetWindowField("_selectedTab", Enum.Parse(tabField.FieldType, "DetailCard"));
                 yield return _window.WaitForRepaint();
 
-                // - the wall runs its OWN preset (since _3.2 step 17b the demo wall writes one): every other one is picked from there
-                var start = NavigationPresets.Matching(config.card_settings.navigation);
-                Assert.IsNotNull(start, "precondition: the shipped wall's seven rows are a named preset");
-                AssertCardShows(sheet, session, start, "before any pick (" + start.Label + ")");
-                Assert.IsNotNull(sheet.Slots.TopView, "precondition: the wall's preset shows a strip on this card");
+                // - the test's OWN start, never the demo wall's navigation (its developer's choice, which may match no preset --
+                //   40-testing 4.2.3): a real pick of Long read, a strip of tabs on this card; every other one is picked from there
                 var longRead = NavigationPresets.All[0];
+                yield return PickPreset(0);
+                var start = longRead;
+                AssertCardShows(sheet, session, start, "the test's start (" + start.Label + ")");
+                Assert.IsNotNull(sheet.Slots.TopView, "precondition: Long read shows a strip on this card");
 
                 // - every other preset, one real pick at a time: the card follows, one Ctrl+Z gives the wall's own back
                 for (int i = 0; i < NavigationPresets.All.Count; i++)

@@ -87,9 +87,18 @@ namespace TileStories.Tests
 
         private static bool IsShown(VisualElement e) => e.resolvedStyle.display == DisplayStyle.Flex;
 
-        // A part of the chrome takes its place in the card: in the flow and visible (CardChromeView hides it out of the flow, not with display)
+        // The strip shows over the card: displayed, visible and not marked hidden -- it FLOATS over the stack since _3.3 S4a (absolute
+        // whether shown or not), so CardChromeView's hidden class is what says it went
         private static bool InTheCard(VisualElement e) =>
-            IsShown(e) && e.resolvedStyle.visibility == Visibility.Visible && e.resolvedStyle.position == Position.Relative;
+            IsShown(e) && e.resolvedStyle.visibility == Visibility.Visible && !e.ClassListContains(CardChromeView.TopHiddenClass);
+
+        // At Full the hero is the screen and the strip waits for it (_3.3 S4a): a test of the strip reads the hero away first
+        private IEnumerator OpenWithTheStrip(string poiId)
+        {
+            yield return Open(poiId, SheetStopRule.Stop.Full);
+            yield return CardTestInput.PastTheHero(Sheet);
+            Assert.IsTrue(InTheCard(Sheet.Slots.Top), "precondition: the strip shows at Full once the hero is read");
+        }
 
         // The section the reader is in, read from the SCREEN: the spy's own rule over each section's first slot as drawn
         private int SectionUnderTheSpyLine() =>
@@ -139,15 +148,18 @@ namespace TileStories.Tests
             Assert.Greater(withStrip.Peek, 0f, "precondition: the peek was measured");
             float onePixel = OnePixel;
             Assert.AreEqual(MeasuredPeek(), withStrip.Peek, onePixel, "the peek stop is the header's open top part");
-            var expected = SheetStopRule.Compute(Sheet.Layer.layout.height, withStrip.Peek, ConfigCopy().card_settings.container.half_max_ratio,
-                CardTestInput.TokenPx("--ts-sheet-top-gap"));
+            var container = ConfigCopy().card_settings.container;
+            var expected = SheetStopRule.Compute(Sheet.Layer.layout.height, withStrip.Peek, container.half_max_ratio,
+                SheetStopRule.FullTopGap(container.full_height, CardTestInput.TokenPx("--ts-sheet-top-gap")));
             Assert.AreEqual(expected.Half, withStrip.Half, 0.01f, "half comes from the peek and the Half Height Max");
-            Assert.AreEqual(expected.Full, withStrip.Full, 0.01f, "full leaves the top gap");
+            Assert.AreEqual(expected.Full, withStrip.Full, 0.01f, "full leaves the gap the wall's Full Height asks for");
             // - the hero is the screen at rest: the chrome comes once it is scrolled away (_3.3 S4a)
             yield return CardTestInput.PastTheHero(Sheet);
             Assert.IsTrue(InTheCard(Sheet.Slots.Top), "the strip shows at Full");
             Assert.GreaterOrEqual(Sheet.Slots.Top.worldBound.yMin, Sheet.Stack.PeekPart.worldBound.yMax - 0.5f, "and sits under the header's peek part");
-            Assert.LessOrEqual(Sheet.Slots.Top.worldBound.yMax, Scroll.worldBound.yMin + 0.5f, "above the stack, outside its scroll");
+            // - it floats OVER the stack's top and takes no room from it (_3.3 S4a: CardChromeRule's TopFloats)
+            Assert.GreaterOrEqual(Sheet.Slots.Top.worldBound.yMin, Scroll.worldBound.yMin - 0.5f, "it floats over the stack, inside its top edge");
+            Assert.LessOrEqual(Sheet.Slots.Top.worldBound.yMax, Scroll.worldBound.yMax + 0.5f, "and inside its bottom edge");
 
             Sheet.SetStop(SheetStopRule.Stop.Peek);
             yield return CardTestInput.Settle();
@@ -175,7 +187,7 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator ARealTapOnEveryTab_LandsItsSectionsFirstBlockAtTheViewportTop_AndMarksIt()
         {
-            yield return Open(Lamp, SheetStopRule.Stop.Full);
+            yield return OpenWithTheStrip(Lamp);
             Assert.AreEqual(Lamp, Card.ShownPoiId, "the real host shows The Lamp's card");
             Assert.IsNotNull(Tabs, "precondition: the strip is there");
             Assert.AreEqual(Nav.Model.Sections.Count, Tabs.Tabs.Count, "one tab per section of the model");
@@ -235,7 +247,7 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator ARealSidewaysDragOnTheStrip_ScrollsTheStrip_AndNotTheCard()
         {
-            yield return Open(Lamp, SheetStopRule.Stop.Full);
+            yield return OpenWithTheStrip(Lamp);
             float max = NavStripRule.MaxOffset(Tabs.Row.layout.width, Tabs.Viewport.contentRect.width);
             Assert.Greater(max, 100f, "precondition: the strip is wider than the screen (" + Tabs.Row.layout.width + " in " + Tabs.Viewport.contentRect.width + ")");
             Assert.AreEqual(0f, Tabs.Offset, "precondition: the strip starts at its start");
@@ -267,7 +279,7 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator ADownDragOnTheStrip_LowersTheSheet_LikeTheHeader()
         {
-            yield return Open(Lamp, SheetStopRule.Stop.Full);
+            yield return OpenWithTheStrip(Lamp);
             int jumps = NavJumps.Count;
             float offset = Tabs.Offset;
             yield return CardTestInput.Drag(Tabs.Tabs[0].Button, Sheet.Stops.Full - Sheet.Stops.Half, slowSheet: Sheet);
@@ -297,7 +309,8 @@ namespace TileStories.Tests
             yield return Push(c => c.card_settings.navigation.min_blocks = 2);
             Assert.IsNotNull(Tabs, "Show Navigation From 2: the short card has its strip");
             Assert.AreEqual(Nav.Model.Sections.Count, Tabs.Tabs.Count);
-            Assert.IsTrue(InTheCard(Sheet.Slots.Top));
+            yield return CardTestInput.PastTheHero(Sheet);
+            Assert.IsTrue(InTheCard(Sheet.Slots.Top), "and it shows once its hero is read");
             var labels = Tabs.Tabs.Select(t => t.Label.text).ToList();
             var strings = new CardStrings(Card.StringTable.Entries(), CardStringSources.Shared.Entries(), ConfigCopy().card_settings.strings, "en", "en");
             CollectionAssert.AreEqual(Nav.Model.Sections.Select(s => strings.Get(s.LabelKey)).ToList(), labels, "each tab says its section's word");

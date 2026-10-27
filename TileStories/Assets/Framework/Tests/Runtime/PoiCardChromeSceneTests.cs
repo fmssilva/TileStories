@@ -35,9 +35,25 @@ namespace TileStories.Tests
 
         private float Viewport => Scroll.contentViewport.layout.height;
 
+        // What the stack may take at this stop: the whole sheet under its own top -- the header and the strip FLOAT over it since _3.3 S4a,
+        // so only the bottom area (in the flow) takes room from it
+        private float StackRoom => Sheet.Stops.HeightOf(Sheet.Stop) - Scroll.layout.yMin;
+
         // A part of the chrome takes its place in the card: in the flow, visible
         private static bool InTheCard(VisualElement e) =>
             e.resolvedStyle.display == DisplayStyle.Flex && e.resolvedStyle.visibility == Visibility.Visible && e.resolvedStyle.position == Position.Relative;
+
+        // The strip shows over the card: displayed, visible, not marked hidden -- it FLOATS over the stack since _3.3 S4a (absolute whether
+        // shown or not), so CardChromeView's hidden class is what says it went
+        private static bool StripShown(VisualElement strip) =>
+            strip.resolvedStyle.display == DisplayStyle.Flex && strip.resolvedStyle.visibility == Visibility.Visible
+            && !strip.ClassListContains(CardChromeView.TopHiddenClass);
+
+        // What the chrome decided from, for a precondition's message
+        private string ChromeState() =>
+            Sheet.Stop + ": offset " + Scroll.scrollOffset.y.ToString("F0") + ", hero bottom " + Sheet.Stack.HeaderView.HeroBottom().ToString("F0")
+            + ", top " + Chrome.TopShown + ", bottom " + Chrome.BottomShown + ", footer " + Chrome.FooterShown + ", travel "
+            + Chrome.Scroll.Travel.ToString("F0") + ", hidden by the scroll " + Chrome.Scroll.BottomHidden + "; " + Parts();
 
         // The footer is where a thumb can reach it: inside the card's visible bottom edge
         private bool FooterOnScreen => Footer.worldBound.yMax <= Sheet.Root.worldBound.yMax + OnePixel && Footer.worldBound.yMin < Sheet.Root.worldBound.yMax - OnePixel;
@@ -83,7 +99,8 @@ namespace TileStories.Tests
         // A real finger drags the stack by `dy` panel units (negative = up the screen = further down the card), then lets it settle
         private IEnumerator DragStack(float dy)
         {
-            var viewport = Scroll.contentViewport.worldBound;
+            // - the part a finger reaches: under the floating header and strip (_3.3 S4a), above the bottom area
+            var viewport = CardTestInput.ReachableStack(Sheet);
             // - 20 px in from the edge the finger moves away from, or the middle of a viewport shorter than that (Half with its footer)
             float inset = Mathf.Min(20f, viewport.height * 0.5f);
             float startY = dy < 0f ? viewport.yMax - inset : viewport.yMin + inset;
@@ -122,13 +139,15 @@ namespace TileStories.Tests
             var header = Sheet.Stack.HeaderView;
             Assert.IsFalse(Chrome.TopShown, "no strip over the hero at Half");
             Assert.IsFalse(Chrome.BottomShown, "no sticky bar while the hero, which shows the action, is in view");
+            // - _3.3 S4a: the hero is the whole sheet at Full (HeroRule.Height), its words and the action at its foot; Half shows its top part
             Rect hero = header.HeroPart.worldBound, view = Scroll.contentViewport.worldBound;
-            Assert.AreEqual(view.height, hero.height, OnePixel, "the hero is as tall as what Half shows: " + Parts());
-            Assert.GreaterOrEqual(hero.yMin, view.yMin - OnePixel, "the whole hero in view: its top");
-            Assert.LessOrEqual(hero.yMax, view.yMax + OnePixel, "...and its foot");
+            Assert.AreEqual(HeroRule.Height(Sheet.Stops, 0f), hero.height, OnePixel, "the hero is as tall as the sheet at Full: " + Parts());
+            Assert.AreEqual(view.yMin, hero.yMin, OnePixel, "its top is in view at Half");
+            Assert.Greater(hero.yMax, view.yMax + OnePixel, "...and it runs on under Half's foot");
             var heroAction = header.Actions.Q<Button>(className: "card-action");
             Assert.IsNotNull(heroAction, "the hero shows the card's action");
-            Assert.IsTrue(view.Contains(heroAction.worldBound.min) && view.Contains(heroAction.worldBound.max - Vector2.one * OnePixel), "...wholly on screen: " + heroAction.worldBound);
+            Assert.LessOrEqual(heroAction.worldBound.yMax, hero.yMax + OnePixel, "the action sits in the hero's foot: " + heroAction.worldBound + " in " + hero);
+            Assert.Greater(heroAction.worldBound.yMin, hero.center.y, "...in its lower half (HeroRule.WordsBottom)");
 
             yield return ReadPastTheHero();
             float footer = Footer.layout.height, room = Room;
@@ -139,7 +158,7 @@ namespace TileStories.Tests
             var button = Footer.Q<Button>();
             Assert.IsNotNull(button, "the footer holds its button");
             Assert.IsTrue(button.worldBound.yMax <= Sheet.Root.worldBound.yMax + OnePixel, "the whole button is on screen: " + button.worldBound);
-            Assert.AreEqual(room - footer - (Chrome.TopShown ? Strip.layout.height : 0f), Viewport, OnePixel, "the stack keeps the room the chrome leaves: " + Parts());
+            Assert.AreEqual(StackRoom - footer, Viewport, OnePixel, "the stack keeps all but the footer (the strip floats over it): " + Parts());
             Assert.GreaterOrEqual(Viewport, CardChromeRule.MinStackViewportUnderFooter - OnePixel, "at least one line: " + Parts());
             // - and something to read there, really drawn: a block of the card is inside the viewport
             Assert.IsTrue(Scroll.contentContainer.Children().Any(c => c.worldBound.Overlaps(Scroll.contentViewport.worldBound) && c != header.HeroPart),
@@ -159,18 +178,18 @@ namespace TileStories.Tests
             Assert.GreaterOrEqual(Room - Strip.layout.height - (Chrome.BottomShown ? Bottom.layout.height : 0f), CardChromeRule.MinStackViewport,
                 "precondition: the hero read leaves room for strip + floor: " + Parts());
             Assert.IsTrue(Chrome.TopShown, "the strip is back at Half");
-            Assert.IsTrue(InTheCard(Strip), "and takes its place in the card");
+            Assert.IsTrue(StripShown(Strip), "and shows over the card");
             Assert.GreaterOrEqual(Viewport, CardChromeRule.MinStackViewport - OnePixel, "never under the floor");
 
             yield return Push(c => c.card_settings.navigation.show_at = CardOptions.ShowNavFullOnly);
             Assert.IsFalse(HeroRule.InView(Scroll.scrollOffset.y, Sheet.Stack.HeaderView.HeroBottom()), "precondition: the live edit kept the scroll past the hero");
             Assert.IsFalse(Chrome.TopShown, "Full Only: no strip at Half, room or not");
-            Assert.IsFalse(InTheCard(Strip));
+            Assert.IsFalse(StripShown(Strip));
             Sheet.SetStop(SheetStopRule.Stop.Full);
             yield return CardTestInput.Settle();
             yield return Rested();
             Assert.IsTrue(Chrome.TopShown, "Full Only: the strip at Full");
-            Assert.IsTrue(InTheCard(Strip));
+            Assert.IsTrue(StripShown(Strip));
         }
 
         // ---------------- peek ----------------
@@ -180,13 +199,13 @@ namespace TileStories.Tests
         {
             yield return Open(Lamp, SheetStopRule.Stop.Full);
             yield return ReadPastTheHero();
-            Assert.IsTrue(Chrome.TopShown && Chrome.BottomShown, "precondition: both show at Full once the hero is read");
+            Assert.IsTrue(Chrome.TopShown && Chrome.BottomShown, "precondition: both show at Full once the hero is read: " + ChromeState());
             Sheet.SetStop(SheetStopRule.Stop.Peek);
             yield return CardTestInput.Settle();
             yield return Rested();
             Assert.IsFalse(Chrome.TopShown, "no strip at peek");
             Assert.IsFalse(Chrome.BottomShown, "no footer at peek");
-            Assert.IsFalse(InTheCard(Strip));
+            Assert.IsFalse(StripShown(Strip));
             Assert.IsFalse(InTheCard(Bottom));
             Assert.IsTrue(FooterBelowTheCard, "the footer is below the card's edge");
         }
@@ -201,11 +220,11 @@ namespace TileStories.Tests
             yield return Open(Lamp, SheetStopRule.Stop.Full);
             // - _3.3 P4.4a: at the top the hero shows the action, the footer waits: read past the hero first
             yield return ReadPastTheHero();
-            Assert.IsTrue(Chrome.BottomShown, "precondition: the footer shows at Full once the hero is read");
+            Assert.IsTrue(Chrome.BottomShown, "precondition: the footer shows at Full once the hero is read: " + ChromeState());
             Assert.IsTrue(FooterOnScreen, "precondition: and is on screen " + Footer.worldBound + " in " + Sheet.Root.worldBound);
             Assert.Greater(NavScrollRule.Range(Scroll.contentContainer.layout.height, Viewport), 1000f, "precondition: the stack really scrolls");
             float footer = Footer.layout.height, strip = Strip.layout.height;
-            Assert.AreEqual(Room - strip - footer, Viewport, OnePixel, "precondition: the stack has the room the strip and the footer leave");
+            Assert.AreEqual(StackRoom - footer, Viewport, OnePixel, "precondition: the stack has all but the footer (the strip floats over it)");
 
             // - the room is re-read after the drag: the viewport is measured against it, not against the viewport before the drag
             yield return DragStack(-300f);
@@ -213,14 +232,14 @@ namespace TileStories.Tests
             Assert.IsFalse(Chrome.BottomShown, "moving down hid the footer");
             Assert.IsTrue(Chrome.TopShown, "the strip stays: it is the map");
             Assert.IsTrue(FooterBelowTheCard, "the footer slid below the card's edge");
-            Assert.AreEqual(Room - strip, Viewport, OnePixel, "and its height went to the stack: all the room under the header but the strip");
+            Assert.AreEqual(StackRoom, Viewport, OnePixel, "and its height went to the stack: the whole sheet under the floating header and strip");
 
             float offset = Scroll.scrollOffset.y;
             yield return DragStack(60f);
             Assert.Less(Scroll.scrollOffset.y, offset - CardChromeRule.ShowAfterTravel, "precondition: the drag moved back up past the threshold");
             Assert.IsTrue(Chrome.BottomShown, "moving up brought it back");
             Assert.IsTrue(FooterOnScreen, "on screen again " + Footer.worldBound);
-            Assert.AreEqual(Room - strip - footer, Viewport, OnePixel, "and the stack gave its height back");
+            Assert.AreEqual(StackRoom - footer, Viewport, OnePixel, "and the stack gave its height back");
         }
 
         // The share of the card that shows content at Full, once the reader has moved down: higher with the default (the footer gave
@@ -232,6 +251,8 @@ namespace TileStories.Tests
             AssertTheDefaults();
             yield return Open(Lamp, SheetStopRule.Stop.Full);
             float atRest = Viewport / Sheet.Root.layout.height;
+            // - _3.3 S4a: the hero is the screen and holds the action, so the footer waits for it; both readings start past it
+            yield return ReadPastTheHero();
             yield return DragStack(-300f);
             Assert.Greater(Scroll.scrollOffset.y, 0f, "precondition: scrolled down");
             float down = Viewport / Sheet.Root.layout.height;
@@ -240,9 +261,10 @@ namespace TileStories.Tests
             yield return Push(c => c.card_settings.navigation.hide_on_scroll = CardOptions.HideOnScrollNever);
             Sheet.Stack.Scroll.scrollOffset = Vector2.zero;
             yield return CardTestInput.Settle();
+            yield return ReadPastTheHero();
             yield return DragStack(-300f);
             Assert.Greater(Scroll.scrollOffset.y, 0f, "precondition: scrolled down with Never too");
-            Assert.IsTrue(Chrome.BottomShown, "Never: the footer stays");
+            Assert.IsTrue(Chrome.BottomShown, "Never: the footer stays: " + ChromeState());
             float never = Viewport / Sheet.Root.layout.height;
             Debug.Log("[Card] Lamp content share at Full: at rest " + atRest.ToString("P1") + ", scrolled down " + down.ToString("P1")
                 + " (Hide While Scrolling = down) vs " + never.ToString("P1") + " (never)");

@@ -2,6 +2,7 @@ using System.IO;
 using TileStories.Tests;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -9,7 +10,8 @@ namespace TileStories.Editor.Tests
 {
     // The Editor half of TestRunRecorder: subscribes to the Editor events after every domain load and writes them (the
     // recorder itself drops every line while its switch is OFF), watches imports, and marks the run's start and end --
-    // called by the run's one hook, TestRunBoundary -- writing TestRunReport's jump table when a run ends
+    // called by the run's one hook, TestRunBoundary -- writing TestRunReport's jump table when a run ends; and after EVERY run,
+    // switch ON or OFF, the per-fixture times (FixtureTimes -> TestRunRecorder.FixtureTimesPath)
     [InitializeOnLoad]
     public static class TestRunRecorderHooks
     {
@@ -28,6 +30,43 @@ namespace TileStories.Editor.Tests
             SceneManager.sceneLoaded += (scene, mode) => TestRunRecorder.Write(TestRunRecorder.Scene, "loaded " + scene.path + " " + mode);
             EditorSceneManager.sceneOpened += (scene, mode) => TestRunRecorder.Write(TestRunRecorder.Scene, "opened " + scene.path + " " + mode);
             TestRunRecorder.Write(TestRunRecorder.Domain, "loaded, playing=" + EditorApplication.isPlayingOrWillChangePlaymode);
+            // - registered again after every domain load: the Test Framework keeps a PlayMode run's results across the reloads
+            //   and hands the whole tree to RunFinished once the run is back in Edit Mode
+            ScriptableObject.CreateInstance<TestRunnerApi>().RegisterCallbacks(new FixtureTimesWriter());
+        }
+
+        // After every run (switch ON or OFF): the run's per-fixture times, overwriting the last run's file
+        private sealed class FixtureTimesWriter : ICallbacks
+        {
+            public void RunStarted(ITestAdaptor testsToRun) { }
+            public void TestStarted(ITestAdaptor test) { }
+            public void TestFinished(ITestResultAdaptor result) { }
+
+            public void RunFinished(ITestResultAdaptor result)
+            {
+                var rows = FixtureTimes.Rows(NodeOf(result));
+                File.WriteAllText(TestRunRecorder.FixtureTimesPath, FixtureTimes.ToCsv(rows));
+                Debug.Log("[TestRun] fixture times: " + rows.Count + " fixtures -> " + TestRunRecorder.FixtureTimesPath);
+            }
+
+            // The Test Framework's result tree as FixtureTimes' plain nodes (an inconclusive test counts as skipped: it did not pass)
+            private static FixtureTimes.Node NodeOf(ITestResultAdaptor result)
+            {
+                var node = new FixtureTimes.Node
+                {
+                    FullName = result.Test.FullName,
+                    IsSuite = result.Test.IsSuite,
+                    HasType = result.Test.TypeInfo != null,
+                    HasMethod = result.Test.Method != null,
+                    Seconds = result.Duration,
+                    Passed = result.PassCount,
+                    Failed = result.FailCount,
+                    Skipped = result.SkipCount + result.InconclusiveCount,
+                };
+                if (result.HasChildren)
+                    foreach (var child in result.Children) node.Children.Add(NodeOf(child));
+                return node;
+            }
         }
 
         // The window Unity's keys go to right now (type and title), or none

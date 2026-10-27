@@ -79,14 +79,18 @@ namespace TileStories.Editor.Tests
             yield return R("category_styles[].icon_key", c => Cat(c).icon_key = "IconMilitary");
         }
 
+        // A badge row measures the badge, so it turns the badge on first: the demo wall's own Use Badge is its developer's choice
+        // and a test never rides on it (40-testing 4.2.3, "A fixture measures the framework, not the demo wall's choices")
+        private static Row BadgeRow(string field, Action<WallConfigData> edit) => R(field, edit, c => c.marker_use_badge = true);
+
         private static IEnumerable<Row> BadgeRows()
         {
-            yield return R("marker_use_badge", c => c.marker_use_badge = false);
-            yield return R("badge_shape", c => c.badge_shape = "hexagon");
-            yield return R("badge_corner", c => c.badge_corner = "bottom_left");
-            yield return R("badge_size_ratio", c => c.badge_size_ratio = 0.48f);
-            yield return R("badge_categories[].color_hex", c => Badge(c).color_hex = "#00FFFF");
-            yield return R("badge_categories[].icon_key", c => Badge(c).icon_key = "IconMilitary");
+            yield return BadgeRow("marker_use_badge", c => c.marker_use_badge = false);
+            yield return BadgeRow("badge_shape", c => c.badge_shape = "hexagon");
+            yield return BadgeRow("badge_corner", c => c.badge_corner = "bottom_left");
+            yield return BadgeRow("badge_size_ratio", c => c.badge_size_ratio = 0.48f);
+            yield return BadgeRow("badge_categories[].color_hex", c => Badge(c).color_hex = "#00FFFF");
+            yield return BadgeRow("badge_categories[].icon_key", c => Badge(c).icon_key = "IconMilitary");
         }
 
         private static IEnumerable<Row> OutlineRows()
@@ -182,7 +186,7 @@ namespace TileStories.Editor.Tests
             yield return R("pois[].has_custom_symbol", c => P(c).has_custom_symbol = true, setup: c => P(c).custom_symbol_key = "IconMilitary");
             yield return R("pois[].custom_symbol_key", c => P(c).custom_symbol_key = "IconReligious",
                 setup: c => { P(c).has_custom_symbol = true; P(c).custom_symbol_key = "IconMilitary"; });
-            yield return R("pois[].badge_category", c => P(c).badge_category = "destroyed");
+            yield return BadgeRow("pois[].badge_category", c => P(c).badge_category = "destroyed");
             yield return R("pois[].has_status", c => P(c).has_status = false);
             yield return R("pois[].status_level_key", c => P(c).status_level_key = "destroyed");
             yield return R("pois[].status_pct", c => P(c).status_pct = 100f, setup: c => P(c).status_level_key = null);

@@ -25,6 +25,8 @@ namespace TileStories.Tests
 
         public static string LogPath => TestEvidence.PathFor("Harness", "TestRunRecorder.log");
         public static string ReportPath => TestEvidence.PathFor("Harness", "TestRunRecorder_report.txt");
+        // - written after EVERY run, switch ON or OFF (one small file; the tiers of 40-testing 4.2 are planned on it)
+        public static string FixtureTimesPath => TestEvidence.PathFor("Harness", "fixture_times.csv");
 
 #if UNITY_EDITOR
         public static bool IsOn

@@ -96,16 +96,19 @@ namespace TileStories.Tests
         {
             Rect last = default;
             int still = 0;
+            // - "in view" = where a finger reaches it: not under the floating header or strip (_3.3 S4a), not under the bottom area
             for (int frame = 0; frame < 240 && still < 3; frame++)
             {
-                if (!Scroll.contentViewport.worldBound.Contains(target.worldBound.center)) Scroll.ScrollTo(target);
+                var reach = CardTestInput.ReachableStack(Sheet);
+                if (!reach.Contains(target.worldBound.center))
+                    Scroll.scrollOffset = new Vector2(0f, Scroll.scrollOffset.y + target.worldBound.center.y - reach.center.y);
                 yield return null;
                 var now = target.worldBound;
-                still = now == last && Scroll.contentViewport.worldBound.Contains(now.center) ? still + 1 : 0;
+                still = now == last && CardTestInput.ReachableStack(Sheet).Contains(now.center) ? still + 1 : 0;
                 last = now;
             }
-            Assert.IsTrue(Scroll.contentViewport.worldBound.Contains(target.worldBound.center),
-                "precondition: " + target.name + " is inside the visible part of the card: " + target.worldBound + " in " + Scroll.contentViewport.worldBound);
+            Assert.IsTrue(CardTestInput.ReachableStack(Sheet).Contains(target.worldBound.center),
+                "precondition: " + target.name + " is inside the reachable part of the card: " + target.worldBound + " in " + CardTestInput.ReachableStack(Sheet));
         }
 
         // A real tap on a compact row's line, scrolled into view and still first
@@ -122,6 +125,10 @@ namespace TileStories.Tests
         private IEnumerator TapTab(int index)
         {
             Assert.IsNotNull(Tabs, "precondition: the top slot holds Text Tabs");
+            // - _3.3 S4a: the strip is chrome and waits for the hero (the screen at Full): a reader taps a tab once the picture is read away
+            if (Sheet.Slots.Top.ClassListContains(CardChromeView.TopHiddenClass)) yield return CardTestInput.PastTheHero(Sheet);
+            Assert.IsFalse(Sheet.Slots.Top.ClassListContains(CardChromeView.TopHiddenClass), "precondition: the strip shows (offset "
+                + Scroll.scrollOffset.y + ", hero bottom " + Sheet.Stack.HeaderView?.HeroBottom() + ")");
             var tab = Tabs.Tabs.Single(t => t.Index == index);
             var visible = Tabs.Viewport.worldBound;
             var rect = tab.Button.worldBound;

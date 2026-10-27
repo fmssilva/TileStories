@@ -263,6 +263,21 @@ namespace TileStories.Tests
             yield return Settle(0.3f);
         }
 
+        // The part of the stack's viewport a finger reaches: the stack runs UNDER the floating header and strip since _3.3 S4a (a finger
+        // there takes the sheet or a tab, not the stack), and stops at the bottom area while it shows. Where a test drags the stack or
+        // taps a block, and what "in view" means for a tap target
+        public static Rect ReachableStack(PoiCardSheetView sheet)
+        {
+            var view = sheet.Stack.Scroll.contentViewport.worldBound;
+            float top = Mathf.Max(view.yMin, sheet.Stack.HeaderSlot.worldBound.yMax);
+            var strip = sheet.Slots.Top;
+            if (strip.resolvedStyle.display == DisplayStyle.Flex && !strip.ClassListContains(CardChromeView.TopHiddenClass))
+                top = Mathf.Max(top, strip.worldBound.yMax);
+            float bottom = view.yMax;
+            if (!sheet.BottomArea.ClassListContains(CardChromeView.BottomHiddenClass)) bottom = Mathf.Min(bottom, sheet.BottomArea.worldBound.yMin);
+            return Rect.MinMaxRect(view.xMin, top, view.xMax, Mathf.Max(top, bottom));
+        }
+
         // A real finger reads the card down until its hero has left the viewport (_3.3 P4.4a: the footer waits for the hero), then a small
         // move back up -- reading down hid the bottom area (Hide While Scrolling = down), a move up past ShowAfterTravel is the reader
         // looking for it -- with the hero still out of view. `dragStack` is the fixture's own real drag of the stack (dy: - = down the card)
