@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ribeira Palace card</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;500;600;700&amp;family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&amp;display=swap">
+<style>
+body{margin:0}
+a{color:inherit}a:hover{color:inherit}
+.ts-scroll::-webkit-scrollbar{display:none}
+.ts-row::-webkit-scrollbar{display:none}
+.ts-btn{font:inherit;background:none;border:none;padding:0;margin:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+@keyframes ts-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #0d1014; font-family: 'Atkinson Hyperlegible Next', system-ui, sans-serif; color: {{t.ink}};">
+
+<img src="/_blob/26c99e73815c8d93e19c722dc1f0acc2" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(3px) saturate(1.1); transform: scale(1.08);">
+
+<div class="ts-scroll" ref="{{r.scroller}}" onScroll="{{onScroll}}" style="position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none;">
+
+<section aria-label="Ribeira Palace" style="position: relative; height: {{heroH}}px; overflow: hidden; background: #1a2230;">
+<img src="/_blob/8d774b563e8ae87b3501447da5b8dd51" alt="The Terreiro do Paco with the Ribeira Palace along the river front" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; object-position: 57% 50%; transform: translateY({{heroShift}}px) scale(1.06); transform-origin: 50% 0;">
+<div style="position: absolute; left: 0; right: 0; top: 0; height: 150px; background: linear-gradient(to bottom, rgba(6,10,18,0.42), rgba(6,10,18,0));"></div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 64%; background: linear-gradient(to top, rgba(6,10,18,0.86) 0%, rgba(6,10,18,0.62) 38%, rgba(6,10,18,0.18) 72%, rgba(6,10,18,0) 100%);"></div>
+<div style="position: absolute; left: 50%; top: 8px; width: 36px; height: 4px; margin-left: -18px; border-radius: 2px; background: rgba(255,255,255,0.55);"></div>
+
+<div style="position: absolute; left: 24px; right: 24px; bottom: {{wordsBottom}}px; color: #ffffff; opacity: {{wordsOp}}; transform: translateY({{wordsShift}}px); display: flex; flex-direction: column; gap: 14px;">
+<div style="font-size: 12px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.88;">Lisbon · c. 1500 – 1755</div>
+<h1 style="margin: 0; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 50px; line-height: 0.98; letter-spacing: -0.015em;">Ribeira<br>Palace</h1>
+<p style="margin: 0; font-size: 17px; line-height: 1.45; max-width: 300px; opacity: 0.94;">The royal palace on the Tagus, lost to the earthquake of 1755.</p>
+<div style="display: flex; align-items: center; gap: 18px; margin-top: 6px;">
+<button class="ts-btn" onClick="{{toggle}}" aria-label="Listen, 3:11" style="height: 44px; padding: 0 18px 0 14px; border-radius: 22px; border: 1px solid rgba(255,255,255,0.7); background: rgba(255,255,255,0.10); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: #ffffff; display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600;">
+<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 15v-3a8 8 0 0 1 16 0v3M4.5 14h2a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1zM17.5 14h2a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1z" style="fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;"></path></svg>
+<span>Listen</span>
+<span style="opacity: 0.75; font-weight: 500;">3:11</span>
+</button>
+<button class="ts-btn" onClick="{{toStory}}" style="height: 44px; color: #ffffff; display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600;">
+<span>Read the story</span>
+<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" style="fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;"></path></svg>
+</button>
+</div>
+</div>
+
+<sc-if value="{{chevron}}" hint-placeholder-val="{{true}}">
+<div style="position: absolute; left: 50%; bottom: 22px; margin-left: -12px; color: rgba(255,255,255,0.8); animation: ts-bob 2.4s ease-in-out infinite; opacity: {{wordsOp}};">
+<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M6 9l6 6 6-6" style="fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;"></path></svg>
+</div>
+</sc-if>
+</section>
+
+<div style="position: relative; margin-top: -28px; border-radius: 28px 28px 0 0; background: {{sheetBg}}; backdrop-filter: blur(30px) saturate(1.2); -webkit-backdrop-filter: blur(30px) saturate(1.2); padding: {{sheetPad}}; padding-bottom: 150px;">
+
+<section ref="{{r.about}}" aria-label="About" style="{{sec.first}}">
+<div style="font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: {{t.accent}};">At a glance</div>
+<h2 style="margin: 12px 0 14px; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 31px; line-height: 1.08; letter-spacing: -0.01em;">The king’s house on the river</h2>
+<p style="margin: 0; font-size: 17px; line-height: 1.6; color: {{t.ink}};">For about 250 years the kings of Portugal lived by the river, in a palace that opened straight onto the Tagus. It is gone now, but the square that took its place still carries its name.</p>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 20px; margin-top: 26px;">
+<sc-for list="{{facts}}" as="f" hint-placeholder-count="6">
+<div style="padding: 14px 0 16px; border-top: 1px solid {{t.hair}};">
+<div style="font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: {{t.muted}};">{{f.k}}</div>
+<div style="margin-top: 6px; font-family: 'Fraunces', Georgia, serif; font-size: 19px; line-height: 1.2;">{{f.v}}</div>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section ref="{{r.story}}" aria-label="Story" style="{{sec.next}}">
+<div style="font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: {{t.accent}};">The story · 2 min read</div>
+<h2 style="margin: 12px 0 22px; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 31px; line-height: 1.08; letter-spacing: -0.01em;">Gold, spices and a view of the fleet</h2>
+<figure style="margin: 0 {{bleed}} 0; ">
+<img src="/_blob/cbe978a49410d85cb951fe687f0ae057" alt="The Terreiro do Paco and the palace before the earthquake" style="display: block; width: 100%; height: 236px; object-fit: cover;">
+<figcaption style="padding: 10px 24px 0; font-size: 13px; line-height: 1.4; color: {{t.muted}};">The square and the palace before 1755. Anonymous, public domain.</figcaption>
+</figure>
+<p style="margin: 22px 0 0; font-size: 17px; line-height: 1.6;"><span style="float: left; font-family: 'Fraunces', Georgia, serif; font-size: 58px; line-height: 0.9; margin: 4px 8px 0 0; color: {{t.accent}};">W</span>hen King Manuel I found the old castle on the hill too cramped for a court growing rich on the sea trade, he moved down to the water’s edge. The new palace stood beside the docks where ships from India and Brazil unloaded spices, sugar and gold.</p>
+<blockquote style="margin: 26px 0 0; padding: 0 0 0 18px; border-left: 2px solid {{t.accent}}; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-size: 23px; line-height: 1.3;">So the king could watch the fleet come in from his own windows.</blockquote>
+<a href="#" style="margin-top: 24px; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 16px; font-weight: 700; text-decoration: none; color: {{t.ink}};">Continue reading<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" style="fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;"></path></svg></a>
+</section>
+
+<section ref="{{r.media}}" aria-label="Media" style="{{sec.next}}">
+<div style="font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: {{t.accent}};">Pictures · 5</div>
+<h2 style="margin: 12px 0 20px; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 31px; line-height: 1.08; letter-spacing: -0.01em;">The palace in pictures</h2>
+<div class="ts-row" style="margin: 0 {{bleed}}; padding: 0 24px; display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 24px; scrollbar-width: none;">
+<sc-for list="{{gallery}}" as="g" hint-placeholder-count="5">
+<figure style="margin: 0; flex: 0 0 248px; scroll-snap-align: start;">
+<img src="{{g.src}}" alt="{{g.alt}}" style="display: block; width: 248px; height: 316px; object-fit: cover; border-radius: 16px;">
+<figcaption style="margin-top: 10px; font-size: 13px; line-height: 1.4; color: {{t.muted}};">{{g.cap}}</figcaption>
+</figure>
+</sc-for>
+<div style="flex: 0 0 12px;"></div>
+</div>
+<a href="#" style="margin-top: 14px; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 16px; font-weight: 700; text-decoration: none; color: {{t.ink}};">All pictures<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" style="fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;"></path></svg></a>
+</section>
+
+<section ref="{{r.timeline}}" aria-label="Timeline" style="{{sec.next}}">
+<div style="font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: {{t.accent}};">Timeline</div>
+<h2 style="margin: 12px 0 22px; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 31px; line-height: 1.08; letter-spacing: -0.01em;">Two and a half centuries</h2>
+<div class="ts-row" style="margin: 0 {{bleed}}; padding: 0 24px; display: flex; gap: 0; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 24px; scrollbar-width: none;">
+<sc-for list="{{events}}" as="e" hint-placeholder-count="5">
+<div style="flex: 0 0 214px; padding-right: 22px; scroll-snap-align: start; position: relative;">
+<div style="height: 1px; background: {{t.hair}}; margin-right: -22px;"></div>
+<div style="position: absolute; left: 0; top: -4px; width: 9px; height: 9px; border-radius: 5px; background: {{t.accent}};"></div>
+<div style="margin-top: 20px; font-family: 'Fraunces', Georgia, serif; font-size: 26px; line-height: 1; color: {{t.accent}};">{{e.y}}</div>
+<div style="margin-top: 10px; font-size: 16px; font-weight: 700; line-height: 1.3;">{{e.h}}</div>
+<div style="margin-top: 6px; font-size: 15px; line-height: 1.5; color: {{t.muted}};">{{e.p}}</div>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section ref="{{r.listen}}" aria-label="Listen" style="{{sec.next}}">
+<div style="font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: {{t.accent}};">Audio guide</div>
+<h2 style="margin: 12px 0 22px; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 31px; line-height: 1.08; letter-spacing: -0.01em;">Hear the palace</h2>
+<div style="display: flex; align-items: center; gap: 16px;">
+<button class="ts-btn" onClick="{{toggle}}" aria-label="{{playLabel}}" style="flex: 0 0 56px; width: 56px; height: 56px; border-radius: 28px; background: {{t.accent}}; color: {{t.onAccent}}; display: flex; align-items: center; justify-content: center;">
+<sc-if value="{{playing}}" hint-placeholder-val="{{false}}">
+<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" style="fill: currentColor;"></path></svg>
+</sc-if>
+<sc-if value="{{paused}}" hint-placeholder-val="{{true}}">
+<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8.5 5.5v13l10-6.5z" style="fill: currentColor;"></path></svg>
+</sc-if>
+</button>
+<div style="flex: 1; min-width: 0;">
+<div style="font-size: 17px; font-weight: 700;">The Ribeira Palace</div>
+<div style="margin-top: 2px; font-size: 14px; color: {{t.muted}};">Narrated · English</div>
+<div style="margin-top: 12px; height: 3px; border-radius: 2px; background: {{t.hair}}; overflow: hidden;">
+<div style="height: 100%; width: {{pct}}%; background: {{t.accent}}; transition: width 1s linear;"></div>
+</div>
+<div style="margin-top: 6px; display: flex; justify-content: space-between; font-size: 13px; color: {{t.muted}};"><span>{{elapsed}}</span><span>3:11</span></div>
+</div>
+</div>
+</section>
+
+<section ref="{{r.quiz}}" aria-label="Quiz" style="{{sec.next}}">
+<div style="font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: {{t.accent}};">Quick question</div>
+<h2 style="margin: 12px 0 18px; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 27px; line-height: 1.12; letter-spacing: -0.01em;">What stands where the palace stood?</h2>
+<sc-for list="{{opts}}" as="o" hint-placeholder-count="3">
+<button class="ts-btn" onClick="{{o.pick}}" style="width: 100%; min-height: 56px; margin-top: 10px; padding: 0 18px; border-radius: 16px; border: 1px solid {{o.border}}; background: {{o.bg}}; color: {{o.color}}; display: flex; align-items: center; justify-content: space-between; text-align: left; font-size: 17px; font-weight: 600;">
+<span>{{o.text}}</span>
+<span style="font-size: 13px; font-weight: 700; color: {{o.markColor}};">{{o.mark}}</span>
+</button>
+</sc-for>
+<sc-if value="{{answered}}" hint-placeholder-val="{{false}}">
+<p style="margin: 16px 0 0; font-size: 16px; line-height: 1.55; color: {{t.muted}};">The Praça do Comércio. Rebuilt Lisbon laid out an open square where the palace had stood, facing the river like a grand front door.</p>
+</sc-if>
+</section>
+
+<div style="padding: 36px 24px 0; font-size: 13px; line-height: 1.5; color: {{t.muted}};">Pictures: Dirk Stoop c. 1662, anonymous before 1755, Jacques Philippe Le Bas 1757 and others, via Wikimedia Commons.</div>
+</div>
+</div>
+
+<div style="position: absolute; left: 0; right: 0; top: 0; height: 64px; background: {{band.bg}}; backdrop-filter: {{band.blur}}; -webkit-backdrop-filter: {{band.blur}}; border-bottom: 1px solid {{band.line}}; transition: background 0.3s ease, border-color 0.3s ease;"></div>
+<div style="position: absolute; left: 16px; right: 16px; top: 14px; height: 36px; display: flex; align-items: center; justify-content: space-between;">
+<button class="ts-btn" aria-label="Close" style="width: 36px; height: 36px; border-radius: 18px; background: {{ch.bg}}; border: 1px solid {{ch.line}}; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); color: {{ch.ink}}; display: flex; align-items: center; justify-content: center; filter: {{ch.shadow}}; transition: background 0.3s ease, color 0.3s ease;">
+<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" style="fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round;"></path></svg>
+</button>
+<div style="font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 17px; color: {{t.ink}}; opacity: {{titleOp}}; transition: opacity 0.3s ease;">Ribeira Palace</div>
+<button class="ts-btn" aria-label="Card settings" style="width: 36px; height: 36px; border-radius: 18px; background: {{ch.bg}}; border: 1px solid {{ch.line}}; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); color: {{ch.ink}}; display: flex; align-items: center; justify-content: center; filter: {{ch.shadow}}; transition: background 0.3s ease, color 0.3s ease;">
+<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M4 8h9M18 8h2M4 16h3M11 16h9M15.5 8a2 2 0 1 0 0 0.01M9 16a2 2 0 1 0 0 0.01" style="fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round;"></path></svg>
+</button>
+</div>
+
+<nav aria-label="Card sections" style="position: absolute; left: {{nav.left}}px; width: {{nav.w}}px; height: {{nav.wrapH}}px; top: {{nav.top}}; bottom: {{nav.bottom}}; transform: {{nav.hide}}; opacity: {{nav.op}}; transition: transform 0.45s cubic-bezier(.3,1.2,.5,1), opacity 0.3s ease, left 0.4s ease, width 0.4s ease;">
+<div style="position: absolute; inset: 0; transform: {{nav.flip}};">
+<svg viewBox="{{nav.vb}}" width="{{nav.w}}" height="{{nav.wrapH}}" aria-hidden="true" style="position: absolute; inset: 0; overflow: visible; opacity: {{nav.shadowOp}}; filter: blur(12px); transform: translateY(6px);">
+<path d="{{nav.path}}" style="d: path('{{nav.path}}'); fill: rgba(0,0,0,0.22); transition: d 0.5s cubic-bezier(.3,1.4,.5,1);"></path>
+</svg>
+<div style="position: absolute; inset: 0; clip-path: path('{{nav.path}}'); background: {{nav.fill}}; backdrop-filter: {{nav.blur}}; -webkit-backdrop-filter: {{nav.blur}}; transition: clip-path 0.5s cubic-bezier(.3,1.4,.5,1), background 0.3s ease;"></div>
+<svg viewBox="{{nav.vb}}" width="{{nav.w}}" height="{{nav.wrapH}}" aria-hidden="true" style="position: absolute; inset: 0; overflow: visible;">
+<path d="{{nav.path}}" style="d: path('{{nav.path}}'); fill: none; stroke: {{nav.stroke}}; stroke-width: 1; transition: d 0.5s cubic-bezier(.3,1.4,.5,1), stroke 0.3s ease;"></path>
+</svg>
+</div>
+<div style="position: absolute; left: 0; right: 0; top: {{nav.itemsTop}}px; height: {{nav.h}}px;">
+<sc-if value="{{nav.pill}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; left: {{nav.pillLeft}}px; width: {{nav.pillW}}px; top: 6px; height: {{nav.pillH}}px; border-radius: {{nav.pillR}}px; background: {{nav.pillBg}}; transition: left 0.45s cubic-bezier(.3,1.3,.5,1);"></div>
+</sc-if>
+<sc-if value="{{nav.underline}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; left: {{nav.lineLeft}}px; width: 22px; top: {{nav.lineTop}}px; height: 2px; border-radius: 1px; background: {{nav.sel}}; transition: left 0.4s cubic-bezier(.3,1.3,.5,1);"></div>
+</sc-if>
+<sc-if value="{{nav.ball}}" hint-placeholder-val="{{true}}">
+<div style="position: absolute; left: {{nav.ballLeft}}px; top: {{nav.ballTop}}px; width: {{nav.ballSize}}px; height: {{nav.ballSize}}px; border-radius: 50%; background: {{nav.ballBg}}; color: {{nav.ballInk}}; display: flex; align-items: center; justify-content: center; box-shadow: {{nav.ballShadow}}; transition: left 0.5s cubic-bezier(.3,1.4,.5,1), top 0.3s ease, width 0.3s ease, height 0.3s ease, background 0.3s ease;">
+<svg viewBox="0 0 24 24" width="{{nav.ballIcon}}" height="{{nav.ballIcon}}" aria-hidden="true"><path d="{{nav.ballD}}" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"></path></svg>
+</div>
+</sc-if>
+<div style="position: absolute; left: {{nav.padX}}px; right: {{nav.padX}}px; top: 0; bottom: 0; display: flex;">
+<sc-for list="{{nav.items}}" as="it" hint-placeholder-count="6">
+<button class="ts-btn" onClick="{{it.tap}}" aria-label="{{it.label}}" aria-current="{{it.current}}" style="flex: 1 1 0; min-width: 0; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: {{it.color}}; transition: color 0.3s ease;">
+<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" style="display: {{it.iconDisplay}}; opacity: {{it.iconOp}}; transition: opacity 0.2s ease;"><path d="{{it.d}}" style="fill: none; stroke: currentColor; stroke-width: {{it.sw}}; stroke-linecap: round; stroke-linejoin: round;"></path></svg>
+<span style="display: {{it.textDisplay}}; font-size: {{it.fs}}px; font-weight: {{it.weight}}; letter-spacing: 0.01em; white-space: nowrap;">{{it.label}}</span>
+</button>
+</sc-for>
+</div>
+</div>
+</nav>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{
+"mode":{"editor":"enum","options":["light","dark"],"default":"light","section":"Look"},
+"heroHeight":{"editor":"enum","options":["full","tall"],"default":"full","section":"Look"},
+"blocks":{"editor":"enum","options":["open","cards"],"default":"open","section":"Look"},
+"sheetGlass":{"editor":"range","min":0.75,"max":1,"step":0.01,"default":0.81,"section":"Look"},
+"chrome":{"editor":"enum","options":["glass","bare"],"default":"glass","section":"Look"},
+"navPosition":{"editor":"enum","options":["bottom","top"],"default":"bottom","section":"Navigation Bar"},
+"navShape":{"editor":"enum","options":["floating","full"],"default":"floating","section":"Navigation Bar"},
+"navFill":{"editor":"enum","options":["glass","solid","clear"],"default":"solid","section":"Navigation Bar"},
+"indicator":{"editor":"enum","options":["raised","pill","underline","none"],"default":"raised","section":"Navigation Bar"},
+"chosenIcon":{"editor":"enum","options":["plain","filled"],"default":"plain","section":"Navigation Bar"},
+"labels":{"editor":"enum","options":["icon_text","icon","text","selected"],"default":"icon_text","section":"Navigation Bar"},
+"chosenColour":{"editor":"enum","options":["accent","ink"],"default":"accent","section":"Navigation Bar"},
+"boldChosen":{"editor":"boolean","default":true,"section":"Navigation Bar"},
+"navShow":{"editor":"enum","options":["always","after_hero"],"default":"always","section":"Navigation Bar"},
+"hideOnScroll":{"editor":"boolean","default":false,"section":"Navigation Bar"},
+"$preview":{"width":390,"height":844}
+}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { st: 0, active: 0, hidden: false, answer: -1, playing: false, elapsed: 0 };
+    this.keys = ['about', 'story', 'media', 'timeline', 'listen', 'quiz'];
+    this.secs = {};
+    this.scroller = null;
+    this.lastSt = 0;
+    this.lockUntil = 0;
+    this.timer = null;
+    const self = this;
+    this.r = { scroller: function (el) { self.scroller = el; } };
+    this.keys.forEach(function (k) { self.r[k] = function (el) { self.secs[k] = el; }; });
+  }
+
+  componentWillUnmount() {
+    if (this.timer) clearInterval(this.timer);
+  }
+
+  heroH() {
+    return (this.props.heroHeight ?? 'full') === 'full' ? 844 : 690;
+  }
+
+  topIn(el) {
+    let y = 0;
+    while (el && el !== this.scroller) { y += el.offsetTop; el = el.offsetParent; }
+    return y;
+  }
+
+  jump(i) {
+    const sec = this.secs[this.keys[i]];
+    if (!sec || !this.scroller) return;
+    const top = (this.props.navPosition ?? 'bottom') === 'top' ? 132 : 72;
+    this.lockUntil = Date.now() + 800;
+    this.setState({ active: i, hidden: false });
+    this.scroller.scrollTo({ top: Math.max(0, this.topIn(sec) - top), behavior: 'smooth' });
+  }
+
+  renderVals() {
+    const p = this.props, s = this.state, self = this;
+    const L = (p.mode ?? 'light') === 'light';
+    const pos = p.navPosition ?? 'bottom';
+    const shape = p.navShape ?? 'floating';
+    const fill = p.navFill ?? 'solid';
+    const ind = p.indicator ?? 'raised';
+    const labels = p.labels ?? 'icon_text';
+    const show = p.navShow ?? 'always';
+    const chosen = p.chosenColour ?? 'accent';
+    const bold = p.boldChosen ?? true;
+    const blocks = p.blocks ?? 'open';
+    const chrome = p.chrome ?? 'glass';
+    const op = p.sheetGlass ?? 0.81;
+    const hideOnScroll = p.hideOnScroll ?? false;
+    const heroH = this.heroH();
+
+    const t = L ? {
+      ink: '#141414', muted: '#4A4743', hair: 'rgba(20,20,20,0.13)', accent: '#1F4E9C', onAccent: '#FFFFFF',
+      accentSoft: 'rgba(31,78,156,0.09)', wrong: 'rgba(20,20,20,0.35)',
+      sheet: 'rgba(248,246,242,' + op + ')', sheetCards: 'rgba(236,233,227,' + op + ')', card: '#FFFFFF',
+      glass: 'rgba(250,248,244,0.66)', solid: '#FBFAF7', chromeBg: 'rgba(250,248,244,0.72)'
+    } : {
+      ink: '#F3F1EC', muted: '#BBB7AF', hair: 'rgba(255,255,255,0.14)', accent: '#9DBBFF', onAccent: '#0C1730',
+      accentSoft: 'rgba(157,187,255,0.13)', wrong: 'rgba(255,255,255,0.35)',
+      sheet: 'rgba(15,16,18,' + op + ')', sheetCards: 'rgba(8,9,10,' + op + ')', card: '#1B1C1F',
+      glass: 'rgba(26,27,30,0.62)', solid: '#17181B', chromeBg: 'rgba(26,27,30,0.66)'
+    };
+
+    // ---- the sections: open (a website's flow) or soft cards ----
+    const cards = blocks === 'cards';
+    const sec = cards ? {
+      first: 'margin: 0 12px; padding: 28px 22px; background: ' + t.card + '; border-radius: 24px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 10px 28px rgba(0,0,0,0.06);',
+      next: 'margin: 12px 12px 0; padding: 28px 22px; background: ' + t.card + '; border-radius: 24px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 10px 28px rgba(0,0,0,0.06);'
+    } : {
+      first: 'padding: 40px 24px 44px;',
+      next: 'padding: 44px 24px; border-top: 1px solid ' + t.hair + ';'
+    };
+
+    // ---- the Navigation Bar ----
+    const groups = [
+      { label: 'About', d: 'M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0M12 11v5M12 7.6v.4' },
+      { label: 'Story', d: 'M3 5.5c3-1 6-1 9 1v13c-3-2-6-2-9-1zM21 5.5c-3-1-6-1-9 1v13c3-2 6-2 9-1z' },
+      { label: 'Media', d: 'M5.5 5h13a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM7.5 10a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0M20.5 15.5l-5-4.5-9.5 8' },
+      { label: 'Timeline', d: 'M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0M12 7v5l3.2 2' },
+      { label: 'Listen', d: 'M4 15v-3a8 8 0 0 1 16 0v3M4.5 14h2a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1zM17.5 14h2a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1z' },
+      { label: 'Quiz', d: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM18.5 15.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z' }
+    ];
+    const floating = shape === 'floating';
+    const W = floating ? 358 : 390;
+    const H = labels === 'icon_text' ? 62 : 52;
+    const safe = (!floating && pos === 'bottom') ? 20 : 0;
+    const Hb = H + safe;
+    const A = 26, padX = 10, n = groups.length;
+    const iw = (W - 2 * padX) / n;
+    const act = s.active;
+    const cx = padX + iw * (act + 0.5);
+    const raised = ind === 'raised';
+    const amp = raised ? 16 : 0, bw = 25;
+    const r = floating ? (raised ? 18 : H / 2) : 0;
+    const bx = Math.min(Math.max(cx, r + bw + 1), W - r - bw - 1);
+    const f = function (v) { return Math.round(v * 10) / 10; };
+    const B = A + Hb;
+    const path = 'M ' + f(r) + ' ' + A + ' L ' + f(bx - bw) + ' ' + A
+      + ' C ' + f(bx - bw * 0.45) + ' ' + A + ' ' + f(bx - bw * 0.62) + ' ' + (A - amp) + ' ' + f(bx) + ' ' + (A - amp)
+      + ' C ' + f(bx + bw * 0.62) + ' ' + (A - amp) + ' ' + f(bx + bw * 0.45) + ' ' + A + ' ' + f(bx + bw) + ' ' + A
+      + ' L ' + f(W - r) + ' ' + A + ' Q ' + W + ' ' + A + ' ' + W + ' ' + f(A + r)
+      + ' L ' + W + ' ' + f(B - r) + ' Q ' + W + ' ' + B + ' ' + f(W - r) + ' ' + B
+      + ' L ' + f(r) + ' ' + B + ' Q 0 ' + B + ' 0 ' + f(B - r)
+      + ' L 0 ' + f(A + r) + ' Q 0 ' + A + ' ' + f(r) + ' ' + A + ' Z';
+
+    const gap = floating ? 20 : 0;
+    const barTop = pos === 'top' ? 64 : 844 - gap - Hb;
+    const onHero = pos === 'top' ? (s.st + barTop + H < heroH - 24) : (s.st + barTop < heroH - 24);
+    const visible = (show === 'always' || s.st > heroH * 0.55) && !s.hidden;
+    const overImage = onHero && fill !== 'solid';
+    const selCol = overImage ? '#FFFFFF' : (chosen === 'accent' ? t.accent : t.ink);
+    const idle = overImage ? 'rgba(255,255,255,0.80)' : t.muted;
+    const navFill = fill === 'glass' ? (onHero ? 'rgba(14,18,26,0.34)' : t.glass)
+      : fill === 'solid' ? t.solid : (onHero ? 'transparent' : t.sheet.replace(/[\d.]+\)$/, '0.97)'));
+    const navStroke = fill === 'glass' ? (onHero ? 'rgba(255,255,255,0.30)' : t.hair)
+      : fill === 'solid' ? t.hair : (onHero ? 'transparent' : t.hair);
+    const navBlur = fill === 'glass' ? 'blur(22px) saturate(1.6)' : (fill === 'clear' && !onHero ? 'blur(18px)' : 'none');
+    // A shadow only under a solid bar: under glass it shows through as a grey haze
+    const shadowOp = floating && fill === 'solid' ? 1 : 0;
+    const filledIcon = (p.chosenIcon ?? 'plain') === 'filled' && labels !== 'text';
+    const ball = raised || filledIcon;
+    const ballSize = raised ? 44 : 32;
+    const colH = 22 + (labels === 'icon_text' || labels === 'selected' ? 17 : 0);
+    const iconCy = (H - colH) / 2 + 11;
+
+    const items = groups.map(function (g, i) {
+      const sel = i === act;
+      const showText = labels === 'icon_text' || labels === 'text' || (labels === 'selected' && sel);
+      return {
+        label: g.label, d: g.d, current: sel ? 'true' : 'false',
+        tap: function () { self.jump(i); },
+        iconDisplay: labels === 'text' ? 'none' : 'block',
+        iconOp: ball && sel ? 0 : 1,
+        textDisplay: showText ? 'block' : 'none',
+        color: sel ? selCol : idle,
+        sw: sel && bold ? 2.2 : 1.6,
+        weight: sel ? 700 : 500,
+        fs: labels === 'text' ? 14 : 11
+      };
+    });
+
+    const nav = {
+      w: W, left: floating ? 16 : 0, h: H, wrapH: B, padX: padX,
+      vb: '0 0 ' + W + ' ' + B, path: path,
+      top: pos === 'top' ? (barTop + 'px') : 'auto',
+      bottom: pos === 'top' ? 'auto' : (gap + 'px'),
+      flip: pos === 'top' ? 'scaleY(-1)' : 'none',
+      itemsTop: pos === 'top' ? 0 : A,
+      hide: visible ? 'translateY(0)' : (pos === 'top' ? 'translateY(-180%)' : 'translateY(140%)'),
+      op: visible ? 1 : 0,
+      fill: navFill, stroke: navStroke, blur: navBlur, shadowOp: shadowOp, sel: selCol,
+      items: items,
+      pill: ind === 'pill', pillLeft: f(padX + iw * act + 3), pillW: f(iw - 6), pillH: H - 12, pillR: f((H - 12) / 2),
+      pillBg: overImage ? 'rgba(255,255,255,0.20)' : t.accentSoft,
+      underline: ind === 'underline', lineLeft: f(cx - 11), lineTop: H - 7,
+      ball: ball, ballSize: ballSize, ballIcon: raised ? 22 : 18, ballLeft: f(cx - ballSize / 2),
+      ballTop: raised ? (pos === 'top' ? H - 22 : -22) : f(iconCy - ballSize / 2),
+      ballShadow: raised ? '0 6px 16px rgba(0,0,0,0.22)' : 'none',
+      ballBg: overImage ? '#FFFFFF' : (chosen === 'accent' ? t.accent : t.ink),
+      ballInk: overImage ? '#1F4E9C' : (chosen === 'accent' ? t.onAccent : (L ? '#FFFFFF' : '#141414')),
+      ballD: groups[act].d
+    };
+
+    // ---- the top chrome: two small marks, the title once the hero is read ----
+    const chromeOnHero = s.st < heroH - 70;
+    const ch = {
+      bg: chrome === 'bare' ? 'transparent' : (chromeOnHero ? 'rgba(255,255,255,0.16)' : t.chromeBg),
+      line: chrome === 'bare' ? 'transparent' : (chromeOnHero ? 'rgba(255,255,255,0.32)' : t.hair),
+      ink: chromeOnHero ? '#FFFFFF' : t.ink,
+      shadow: chrome === 'bare' && chromeOnHero ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))' : 'none'
+    };
+    const band = chromeOnHero
+      ? { bg: 'transparent', blur: 'none', line: 'transparent' }
+      : { bg: t.glass, blur: 'blur(22px) saturate(1.5)', line: t.hair };
+
+    // ---- the hero: the words at its foot, a little parallax ----
+    const navOnHeroFoot = pos === 'bottom' && show === 'always';
+    const quizOpts = ['A cathedral', 'The Praça do Comércio', 'The city harbour'];
+    const answered = s.answer >= 0;
+    const mm = Math.floor(s.elapsed / 60), ss = s.elapsed % 60;
+
+    return {
+      t: t, r: this.r, sec: sec, nav: nav, ch: ch, band: band,
+      heroH: heroH,
+      heroShift: f(Math.min(s.st, heroH) * 0.35),
+      wordsOp: f(Math.max(0, 1 - s.st / (heroH * 0.45))),
+      wordsShift: f(-s.st * 0.12),
+      wordsBottom: navOnHeroFoot ? gap + Hb + 44 : 76,
+      chevron: !navOnHeroFoot,
+      titleOp: s.st > heroH - 110 ? 1 : 0,
+      sheetBg: cards ? t.sheetCards : t.sheet,
+      sheetPad: cards ? '12px 0 0' : '0',
+      bleed: cards ? '-22px' : '-24px',
+      onScroll: function (e) {
+        const el = e.currentTarget;
+        const st = el.scrollTop;
+        let a = 0;
+        self.keys.forEach(function (k, i) {
+          const node = self.secs[k];
+          if (node && self.topIn(node) - 240 <= st) a = i;
+        });
+        if (st + el.clientHeight >= el.scrollHeight - 4) a = self.keys.length - 1;
+        let hidden = self.state.hidden;
+        if (self.props.hideOnScroll ?? false) {
+          if (st > self.lastSt + 6 && st > self.heroH()) hidden = true;
+          else if (st < self.lastSt - 6) hidden = false;
+        } else hidden = false;
+        self.lastSt = st;
+        const locked = Date.now() < self.lockUntil;
+        self.setState({ st: st, active: locked ? self.state.active : a, hidden: hidden });
+      },
+      toStory: function () { self.jump(1); },
+      toggle: function () {
+        if (self.state.playing) {
+          clearInterval(self.timer); self.timer = null;
+          self.setState({ playing: false });
+        } else {
+          self.timer = setInterval(function () {
+            const e = Math.min(191, self.state.elapsed + 1);
+            self.setState({ elapsed: e });
+            if (e >= 191) { clearInterval(self.timer); self.timer = null; self.setState({ playing: false }); }
+          }, 1000);
+          self.setState({ playing: true });
+        }
+      },
+      playing: s.playing, paused: !s.playing,
+      playLabel: s.playing ? 'Pause' : 'Play the audio guide',
+      pct: f(s.elapsed / 191 * 100),
+      elapsed: mm + ':' + (ss < 10 ? '0' : '') + ss,
+      facts: [
+        { k: 'Built', v: 'From c. 1500' }, { k: 'Built for', v: 'King Manuel I' },
+        { k: 'Remodelled', v: '1580s, Philip I' }, { k: 'Royal home', v: 'About 250 years' },
+        { k: 'Lost', v: '1 November 1755' }, { k: 'Stood where', v: 'Praça do Comércio' }
+      ],
+      gallery: [
+        { src: '/_blob/ae92dae9b3d1a5f647df8cdc24af741c', alt: 'A royal procession in the Terreiro do Paco, 1662', cap: 'A royal procession in the square, 1662' },
+        { src: '/_blob/fc2e1a0022364dfb0d92289ca305f1b2', alt: 'Ruins of the Opera do Tejo, 1757', cap: 'Ruins of the Ópera do Tejo, 1757' },
+        { src: '/_blob/e28c3d5862d645d2e43d24a0c977e340', alt: 'The palace front and garden, print of 1687', cap: 'The palace front and garden, 1687' },
+        { src: '/_blob/b8881b85644cd73e5dc1eb32104726f3', alt: 'The Praca do Comercio from the river today', cap: 'The Praça do Comércio today' },
+        { src: '/_blob/26c99e73815c8d93e19c722dc1f0acc2', alt: 'Azulejo detail of ships at the Ribeira das Naus', cap: 'Azulejo: ships at the Ribeira das Naus' }
+      ],
+      events: [
+        { y: 'c. 1500', h: 'The king moves to the river', p: 'Manuel I builds a new palace beside the docks, away from the old castle on the hill.' },
+        { y: '1580s', h: 'The domed tower rises', p: 'Philip I gives the palace a new river front and its corner tower, the Torreão.' },
+        { y: 'Mar 1755', h: 'The opera opens', p: 'The Ópera do Tejo opens its doors, eight months before the end.' },
+        { y: 'Nov 1755', h: 'Earthquake, wave, fire', p: 'The palace, its library and its archive are lost in one morning.' },
+        { y: 'After 1755', h: 'A square on the river', p: 'Rebuilt Lisbon lays out the Praça do Comércio where the palace stood.' }
+      ],
+      opts: quizOpts.map(function (q, i) {
+        const right = i === 1, picked = i === s.answer;
+        return {
+          text: q,
+          pick: function () { self.setState({ answer: i }); },
+          border: !answered ? t.hair : (right ? t.accent : (picked ? t.wrong : t.hair)),
+          bg: answered && right ? t.accentSoft : 'transparent',
+          color: answered && !right ? t.muted : t.ink,
+          mark: !answered ? '' : (right ? 'Correct' : (picked ? 'Not this one' : '')),
+          markColor: right ? t.accent : t.muted
+        };
+      }),
+      answered: answered
+    };
+  }
+}
+</script>
+</body>
+</html>

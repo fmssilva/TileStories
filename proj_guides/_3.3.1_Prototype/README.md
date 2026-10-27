@@ -6,6 +6,8 @@ The interactive design prototype the `_3.3` re-plan was judged on (R9-R11 of `_3
 - **Live version:** https://claude.ai/artifact/2XsT5Ro1REGK4rRrS5vedc (a Design canvas, private to the developer; artboard
   "Ribeira Palace - card flow", phone 390 x 844, Play to interact). Versions: v1 (P3 gate), v2 (living glass, motion), v3 (metal
   rim, hero over the picture), v4 (panning hero, pictures inside blocks, "All pictures") -- this folder holds **v4**.
+- **The premium target (v5):** `Premium_v5.dc.html`, live at https://claude.ai/artifact/PA3i3ZEx5UyESzmhgX157p (one interactive
+  artboard, its Tweaks = the Look and Navigation Bar options of `_3.3` "S4 review, third round"). It supersedes v4's look where they differ.
 - **Files here:** `Main.dc.html` (the artboard's whole source: markup, styles, the logic class), `canvas.json` (the canvas
   index). They run only inside the Design canvas (its `support.js` runtime and its uploaded pictures); this copy is the record.
 - **Tweaks in the canvas:** mode (light / dark), glass (tinted / frosted / solid), fonts, preview cap, reduce motion.
