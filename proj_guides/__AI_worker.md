@@ -12,55 +12,44 @@
   .clinerules\60-finishing.md
 So start by reading them all. 
 
-
-## `And now: _3.3 POI Card Look, Feel & Motion -- S3a the story's Editor: the Page's element table and the Preview`
+## `And now: _3.3 POI Card Look, Feel & Motion -- S3b block templates, the Card Starter and the story Editor's last rows`
 
 GATE: `git push` if the branch is ahead of origin (report how many commits). Take one Unity capture (Game view AND the POI
 Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. Check the two
-SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`): `git checkout --` them if modified. Baseline: none (HEAD b8ce380; S2c
-closed with full EditMode 2234 and full PlayMode 1429, one non-reproduced layout-struggle red). Ask about Unity's place with
-`40-testing.md` 4.2.3's a / b / c actions, word for word (EditMode runs with real-click Editor tests: action a); WAIT for runs as 4.2.5
-says. Never disable a tool's safety check (`50-terminal_and_tools.md` 5.2).
+SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`): `git checkout --` them if modified. Baseline: none (HEAD dcab058; S3a
+closed with full EditMode 2261 green; its full PlayMode run's 2 reds were re-based and are green alone -- THIS block's full run
+confirms them). Ask about Unity's place with `40-testing.md` 4.2.3's a / b / c actions, word for word; WAIT for runs as 4.2.5 says.
+Never disable a tool's safety check (`50-terminal_and_tools.md` 5.2). Editor captures in the DARK skin (the developer's).
 
-Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- R16 row 6 (S3a: this block) and the "S2c review" row (its three
-fixes), R17.1 + R17.7 (Page section FIRST, then Preview; the Automatic preview recomputed and shown live; Custom with linked / own rows;
-Use in the preview / Copy / Unlink; broken links = warning rows), R17.3 (the Motion table: one line per row, the SAME field as the row's
-accordion, the reduced fallback read-only), R17.4 (Tap per element where it offers one), R14.5 + R14.8 (the element table, Style as an
-INLINE accordion -- no floating popup --, a new row born fully expanded with its defaults, the Validated column, reading time Auto /
-minutes), R17.5 (component overrides: Open Row and Page Chrome), the S1 / S2a / S2b / S2c Build log entries (build on `ElementRow`,
-`BlockSurfaces`, `ElementPreviewRule`, the Card Components section).
-The visual target: `proj_guides/_3.3.1_Prototype/StoryEditor.dc.html` (the redrawn mock: Page then Preview, the P column, Validated,
-Look / Motion / Tap accordions, the Motion table, Automatic / Custom with linked rows).
-REQUIRED READING (all lines): `proj_guides/_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section 0 (every Editor rule: rows, (i),
-warnings, popups, undo / redo, unsaved, live Play Mode sync, captures); `.clinerules/40-testing.md` 4.2, 4.2.3 (one-tick gestures for
-Editor-window tests), 4.2.4b, 4.5; `_2.0_Labels_And_Fonts_Design.md` §4 (the override-switch pattern).
-WORKER MODEL: Opus-class -- a large IMGUI Editor surface on a new data model, real-input tests, design judgement on captures.
-TEST PLAN: no baseline. EditMode real-window Editor tests + targeted PlayMode (live sync on the real card) first, then the FULL PlayMode
-run (the wall's data and the Editor are shared ground), then full EditMode.
+Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- R16 row 6b (this block) and the "S3a review" row (decisions 1
+and 5), R14.4 (templates are PRESETS, copied into the POI; "Re-apply template" adds the template's missing rows without touching
+content; built-in ones ship as code like Card Starters; a wall may save its own in `card_settings.block_templates`), R14.5 (the Block
+Library's Templates table), R17.1 (Preview Tap), R6 / R17.3 (the block's entry), the S3a Build log entry.
+REQUIRED READING (all lines): `proj_guides/_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section 0; `_3.1_POI_Card_Blocks.md` the Block
+Library and the Card Starter (how they write values today, one undo step); `.clinerules/40-testing.md` 4.2, 4.2.3, 4.5.
+WORKER MODEL: Opus-class -- new config data (templates), Editor surfaces across two tabs, real-input tests.
+TEST PLAN: no baseline. EditMode real-window tests + targeted PlayMode first, then the FULL PlayMode run (it also confirms S3a's two
+re-based fixtures), then full EditMode.
 
-PART 1 -- the S2c review fixes: (1) the Page Chrome's breadcrumb carries the CONTEXT "POI > section"; the page's own name is added only
-when the page has no big title of its own (the story has one); (2) an in-place video keeps a full-screen button to the card's player;
-(3) TEST HYGIENE: no test reads or clears the developer's saved visitor state (light / dark in PlayerPrefs, `CardLocalState`): tests use
-an isolated store; prove the developer's saved mode survives a full run.
-PART 2 -- Specific Marker > Card Content, a story block: the PAGE section first -- the element table as in the mock (icon, kind, first
-words or a thumbnail, the live "P" marks, Validated ✓ / ✕ toggles, move up / down + drag, duplicate, delete with the shared danger
-affordance, "+ Add element" grouped by category); a row opens its content fields (EN / PT, media pickers) + inline accordions Look /
-Motion / Tap; a new row opens fully expanded with its defaults, its empty fields marked; the block header shows "✕ N to validate" /
-"✓ all validated"; the Page Chrome override; the Motion table. Then the PREVIEW section: Automatic with "Shows: picture #1 · title #3 ·
-lede #4", following every Page edit; Custom with linked rows (from a Page row: "Use in the preview (linked)" / "Copy to the preview"; on
-a linked row: "Unlink (make a copy)"; a broken link = a warning row with Unlink / Remove), own rows; the Open Row override; reading
-time Auto / minutes.
-PART 3 -- every edit through `DrawConfigMutationScope`: undo / redo, the unsaved flag, live Play Mode sync onto the real card (edit a
-row's text, its tone, its motion, reorder, delete -- the card follows).
-TESTS: real-window Editor tests for every action (one-tick gestures, 4.2.3); undo of each; the live sync on the real card (Phase B);
-the Automatic preview's "Shows" and P marks after reorder / delete; a broken link's warning. Captures of every state (the table
-closed / a row open with each accordion / the Motion table / Automatic / Custom with a broken link), light Editor skin as the developer
-uses.
-DOCS as current truth: `_5.1` (the story's Card Content rows), `_3.3` Build log, `10-structure.md` (only your lines).
-OUT OF SCOPE: templates and Card Starter (S3b); the POI-level shared elements (phase 2); any new element kind.
-Stop when a developer can compose and restyle The Painting's story entirely in the Editor with undo and live sync, the S2c fixes are
-in, the targeted fixtures, the full PlayMode run and full EditMode are green. Finish with the final report of
+PART 1 -- Detail Card > Block Library > TEMPLATES table: built-in "Story -- magazine" (the shipped story's row structure, empty
+content, good styles) and "Story -- short" (title, lede, paragraph, picture); the wall's own templates: "Save as template" on a block in
+Card Content, rename, delete (danger affordance + confirm), edit a template's rows with the SAME element table as Card Content (reuse,
+no copy). Data: `card_settings.block_templates` (a template = kind + its rows' structure and styles, no content).
+PART 2 -- using them: Card Content's "+ Add block" offers "from a template" -> COPIES its rows into the new block (fresh row ids); the
+block header shows "Template: <name>" + "Re-apply" (adds the template's rows the block lacks, by structure, never touching existing
+rows or content; one undo step; tells what it added). The Card Starter offers the templates beside its block sets.
+PART 3 -- the S3a review rows: Preview **Tap** (open the page / nothing; the story's default: open the page) and **Block entry** (rises
+in / none) as real settings with runtime + (i); every style option with MORE than 4 choices becomes one compact dropdown (4 or fewer stay
+buttons).
+TESTS: real-window Editor tests for save / rename / delete / edit a template, add from a template, Re-apply (adds only what is missing),
+the Card Starter's offer; each with Ctrl+Z; the new Tap / Block entry on the real card (Phase B); the dropdown with real input.
+Captures (dark skin): the Templates table, a template being edited, "+ Add block" from a template, Re-apply's result.
+DOCS as current truth: `_5.1`, `_3.1` (templates), `_3.3` Build log, `10-structure.md` (only your lines).
+OUT OF SCOPE: live-linked templates (rejected, R14.4); POI-level shared elements (phase 2); new element kinds.
+Stop when templates work end to end with undo and live sync, the two settings run on the real card, the targeted fixtures, the full
+PlayMode run (with S3a's re-based fixtures inside it) and full EditMode are green. Finish with the final report of
 `.clinerules/60-finishing.md` 6.4 and END with the developer's review questions. Do not commit: the Architect commits after the review.
+
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

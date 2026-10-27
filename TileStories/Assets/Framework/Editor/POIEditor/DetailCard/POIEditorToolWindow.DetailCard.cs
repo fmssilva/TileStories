@@ -243,6 +243,9 @@ namespace TileStories.Editor
                 DrawBlockLibraryFieldDefaults(kind, i);
             }
 
+            // - the wall's block templates (_3.3 R14.5): ready-made compositions a point's block is made from
+            DrawBlockTemplatesTable();
+
             DrawDomainTestSubSection(_blockLibraryTest, BlockLibrarySceneTestGuide, BlockLibraryPlaymodeTestGuide, BlockLibraryDeviceTestGuide);
         }
 

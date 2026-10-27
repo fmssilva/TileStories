@@ -92,7 +92,7 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 failures does not.
 
 **Which tests, when (three levels).** RUN TIMES (the Worker REPLACES these numbers after a full run when one moved by more than
-~10 %; no history, `00-process.md`): full EditMode ~3 min (2212 tests); full PlayMode ~81 min (1404 tests incl. gated
+~10 %; no history, `00-process.md`): full EditMode ~3.3 min (2279 tests); full PlayMode ~82 min (1431 tests incl. gated
 skips), in the background; the targeted set selected by the name regex (Card|Poi|Search|Theme|Zoom|Marker|LodWallScene|
 LayoutStruggle|LivingRoom|Family|Typeface|Hero|Section) in `group_names` ~60-70 min (~1180 tests; `Card|Poi|Theme|Section` alone ~73 min, 1154) -- the MCP job lists at most 25
 failures, so a red-heavy run hides the rest: re-run the hidden fixtures; one PlayMode fixture 15-60 s (CardGalleryTests ~9 min,
@@ -102,8 +102,8 @@ PoiCardSceneTests ~4 min). Only the full PlayMode suite is expensive, so it runs
   that exercise the changed code: the fixture(s) of the feature itself plus any fixture that reaches it through a seam
   (grep `Tests/` for the changed type or method). Pass the class names as a JSON array in `test_names`
   (`["TileStories.Tests.CardVideoGalleryTests", ...]`; a comma-separated string runs 0 tests).
-- **Full PlayMode -- at these points only (it costs ~30 min of the developer's machine, so it is planned, not reflexive;
-  it does NOT close every block):**
+- **Full PlayMode -- at these points only (it costs ~80 min of the developer's machine, so it is planned, not reflexive;
+  it does NOT close every block -- most blocks close on the targeted set below):**
   - the opening baseline, ONLY when the tree differs from the last commit whose full runs were green (a clean tree on a green
     commit needs no second baseline; say which commit you trusted);
   - at the end of a block that touched SHARED GROUND -- anything every fixture stands on: test infrastructure
@@ -111,15 +111,16 @@ PoiCardSceneTests ~4 min). Only the full PlayMode suite is expensive, so it runs
     tokens (`CardTokens.uss`), the STOPS, LAYOUT or binding lifecycle of the sheet / stack / host, or a registry or pure rule
     a whole domain reads (`BlockRegistry`, `BlockStackBuilder`, `CardNavModel`). Adding a view inside a slot that already
     exists, or an input handler beside the ones already there, is NOT that: pay the full run where the CONTAINER changes, not
-    every time something is put in it (`_3.2` steps 1-5 are the worked example);
+    every time something is put in it. NOT shared ground either: Editor-only code (a POI Editor row, table or popup -- EditMode
+    tests it), a new config field that old configs load unchanged, a new kind or element in its own files, docs;
   - at the end of the FOURTH block since the last one, whatever those blocks touched -- so a regression is never more than
     four blocks deep and a bisect never longer than that;
   - before a domain close-out (`skills/Domain_Review.md`), before a device session or a build, and whenever the Architect's
     brief asks for one (its TEST PLAN line). Report every full run with its count.
 - **A block that closes WITHOUT a full PlayMode run** closes on the full EditMode suite (always -- it is cheap) plus every
   PlayMode fixture that reaches the changed code: the feature's own fixtures, plus every fixture that greps for the changed
-  type, method or config key, named one by one in the report. For a change the card alone can feel, that set is every
-  PlayMode fixture whose name holds Card or Poi (about 450 of the 793 tests, ~12 min against ~31) -- still name them. The report also says which full run the block rides on (the
+  type, method or config key, named one by one in the report -- typically 5-30 fixtures, 10-30 min. A broad name pattern
+  (`Card|Poi|...`) is NOT a targeted set: it now holds most of the suite and costs nearly a full run. The report also says which full run the block rides on (the
   commit and its counts) and in how many blocks the next full run falls due.
 - **Background runs** (Unity not in front, 4.2.3) are owed where a TODO or a fixture's subject asks for them (one targeted
   fixture). Every FULL PlayMode run is taken with Unity in the background unless the brief asks for the front: it frees the

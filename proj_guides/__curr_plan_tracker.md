@@ -1,44 +1,29 @@
-# Plan tracker -- _3.3 S3a: the story's Editor (the Page's element table and the Preview) + the S2c review fixes
+# Current plan tracker -- _3.3 S3b: block templates, the Card Starter's offer, the story Editor's last rows
 
-Brief: `_3.3` R16 row 6 + "S2c review" row, R17.1/.3/.4/.5/.7, R14.5/.8. Base: HEAD b8ce380 (S2c closed: full EditMode 2234, full PlayMode 1429).
-Worker re-reads this file after a compaction. Tick `[x]` as steps close.
+Brief: `proj_guides/__AI_worker.md`. Spec: `_3.3` R16 row 6b, the S3a review row (1, 5), R14.4, R14.5, R17.1, R17.3.
 
 ## GATE
-- [x] 0 commits ahead of origin (nothing to push)
-- [x] Game view + POI Editor captures taken and opened (TestEvidence/Editor/S3a/gate_game.png, gate_editor.png); capture window closed, none left
-- [x] Tree compiles (forced compile: ExitCode 0, Tundra build success, no error CS after it)
-- [x] Oswald Bold SDF / Roboto-Bold SDF unmodified
-- [x] Unity's place asked before each run / capture (4.2.3 a / b / c, word for word)
-- Note: the Editor runs the DARK (Pro) skin, not the light one the brief names: captures show the skin as set; flagged in the report
+- [x] UnityMCP works (telemetry_status ok); branch 0 ahead of origin (nothing to push)
+- [x] Captures: `TestEvidence/Gate/S3b_gate_gameview.png`, `S3b_gate_poi_editor.png` (dark skin) opened; capture window closed
+- [x] Compile: forced, `ExitCode: 0`, 0 `error CS`
+- [x] SDF fonts unmodified
 
 ## Decisions (autonomous)
-- Where: the Elements field gets its drawer in the generic block-field drawer (any composing kind), new partials in `Editor/POIEditor/SpecificMarker/`
-  (ComposedBlock, ElementTable, ElementRowEditor, ElementPreview, ComposedBlockHelp); pure edit operations `ElementEdits` (Editor assembly).
-- How: an edit is decided while drawing and applied AFTER the row loop (inside the tab's DrawConfigMutationScope: undo / unsaved / live).
-- Controls: segmented toolbars for every closed list (real-clickable); "+ Add element" = an inline palette grouped Text / Media / Structure.
-- Marks: built-in icons TestPassed / TestFailed (ASCII labels only); a category colour chip + 2-letter tag per element; a thumbnail for picture / video rows.
-- Custom preview: switching to Custom (or "Use in the preview" while Automatic) seeds links to the current automatic picks.
-- Overrides (Open Row, Page Chrome): the _2.0 pattern -- on seeds from the wall's values, off keeps the block's.
-- Card Components gains the Open Row row (emphasis), first (R17.6).
-- Test hygiene: `DeviceStateStore.Current` (PlayerPrefs default) read by the card, recent searches, last view, the Editor's reset; every test
-  assembly's SetUpFixture swaps a MemoryCardStateStore for the run; a source scan guards it; the developer's saved mode read before / after the full run.
-- Breadcrumb: the page's name is dropped when the page shows its own title (pure `ElementRules.HasOwnTitle`).
-- Not built (no data / runtime, not in the brief): the mock's Page Opening, Preview Tap / Idle demo / block-entry Motion rows.
+1. A template = `{ key, name, block }`, the block a content-free BlockInstanceData: every story edit / table is reused as is.
+2. Re-apply matches by STRUCTURE (element-kind order, LCS), adds the missing rows in their template place, fresh ids, content never touched.
+3. Wall template keys `template_N`, never handed out while a block references them; built-ins `builtin_story_magazine` / `builtin_story_short`.
+4. Card Starter: a template pick ADDS one block (no question, one undo); the sets still replace.
+5. A segment row with > 4 options = a compact inline dropdown (popup-styled button + inline list): real-click testable.
+6. Preview Tap = Nothing: the Open Row still opens the page.
 
 ## Steps
-- [x] 1a. Breadcrumb context: ElementRules.HasOwnTitle + PageTopBar name switch + BlockFullView; tests (rule, sheet)
-- [x] 1b. In-place video (test re-based: scroll to the button; PlayMode re-run due): full-screen button -> the card's player; test
-- [x] 1c. DeviceStateStore + SetUpFixtures + fixtures cleaned + source-scan guard
-- [x] 2. ElementEdits (pure) + EditMode tests on The Painting's story
-- [x] 3. Page section: table, open row + accordions, add palette, header validate, Page Chrome override, Motion table
-- [x] 4. Preview section: Automatic Shows, Custom linked / own / broken, Open Row override, reading time; Card Components Open Row row
-- [x] 5. Real-window Editor tests (every action + Ctrl+Z), DrawingNeverWrites extended, Phase B live sync on the real card
-- [x] 6. Captures of every state, judged
-- [x] 7. Runs: targeted EditMode/PlayMode, FULL PlayMode (background), full EditMode
-- [x] 8. Docs (_5.1, _3.3 Build log, 10-structure, 40-testing rule), LivingRoom scene ready, final report + review questions
-
-## Notes
-- PoiCardSceneTests.ARealTapOnTheStickyAction red in the first targeted run (1034 > 845): S2b's known red; re-run alone owed.
-- Segments: SelectionGrid cells sit a margin apart; a probe that ignored it clicked into the gap (fixed). Motion segments say Auto; the note says what Auto plays.
-- Targeted PlayMode 202/0/1 skip (behind). FULL PlayMode 1430: 2 red (state-leak tests, re-based, 20/20 alone). Full EditMode 2261: 2260/0/1 skip.
-- Sentinels (mode dark, language pt, a recent search) survived the full PlayMode run; removed after (PlayerPrefs were empty before).
+- [x] 1 Data: BlockTemplateData + card_settings.block_templates; BlockSurfaces template value + preview_tap / preview_entry; ElementOptions; migrate shipped configs (one key added, nothing else)
+- [x] 2 BlockTemplates.cs (pure): built-ins, CopyStructure, SaveAs, NewBlock, Reapply (LCS), NextKey; BlockTemplatesTests 6/6
+- [x] 3 Element table reuse (owner + template mode); Block Library > Templates table (open/edit, rename, duplicate, delete+confirm)
+- [x] 4 Card Content: Template line (Re-apply, Save as template), "+ From a template...", Card Starter offer (picker: several separators)
+- [x] 5 Compact dropdown for > 4 options; Preview Tap + Block Entry rows + ComposedBlockView runtime
+- [x] 6 BlockTemplateEditorTabTests 10/10, DrawingNeverWrites +1, LivePlayModeStoryEditorTests +1; re-based: StoryEditorTabTests (dropdown), CardStarterEditorTabTests (row count), ElementRegistryTests (field list)
+- [x] 7 PlayMode Phase B (PoiCardStorySceneTests +1; found: the Open Row picks nothing -> Tap Nothing judged by position); targeted 4 fixtures 94 run, re-run of the fixed one 10/10 (+1 gated skip), Unity behind
+- [x] 8 Captures (dark): TestEvidence/Editor/S3b/1_templates_table_editing, 2_templates_table, 3_add_block_from_template, 3b_add_row, 4_reapply_result
+- [x] 9 FULL PlayMode 1431: 1381 passed, 0 failed, 50 gated skips (82 min, behind); full EditMode 2279: 2278 passed, 0 failed, 1 skip (after adding the two guards' entries for block_templates)
+- [x] 10 Docs: _5.1, _3.1, _3.3 Build log + R16 row, 10-structure, 40-testing RUN TIMES; final report; LivingRoom scene ready

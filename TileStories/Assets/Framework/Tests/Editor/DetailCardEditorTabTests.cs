@@ -119,6 +119,8 @@ namespace TileStories.Editor.Tests
                 else if (f.FieldType == typeof(List<BlockKindSetting>)) edits.Add((f.Name, s => s.kinds.Add(new BlockKindSetting { kind = "header", default_variant = "compact" })));
                 else if (f.FieldType == typeof(List<CardStringEntry>)) edits.Add((f.Name, s => POIEditorToolWindow.SetCardTextOverride(s, CardStrings.Keys.Close, "pt", "Sair")));
                 else if (f.FieldType == typeof(List<GlossaryEntry>)) edits.Add((f.Name, s => s.glossary.Add(new GlossaryEntry { term = "keep" })));
+                else if (f.FieldType == typeof(List<BlockTemplateData>))
+                    edits.Add((f.Name, s => s.block_templates.Add(new BlockTemplateData { key = "template_9", name = "Kept", block = new BlockInstanceData { kind = "story" } })));
                 else if (f.FieldType == typeof(CardComponentSettings))
                     edits.Add((f.Name, s => s.components.open_row_emphasis = ElementOptions.EmphasisShine));
                 else if (f.FieldType == typeof(CardDemoSettings))
@@ -172,8 +174,8 @@ namespace TileStories.Editor.Tests
                     }
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(9 + 1 + 8 + 23 + 3, edits.Count,
-                "every card_settings field (walked by reflection) has an edit: 9 wall-level + 1 components + 8 container + 23 navigation + 3 demo card");
+            Assert.AreEqual(10 + 1 + 8 + 23 + 3, edits.Count,
+                "every card_settings field (walked by reflection) has an edit: 10 wall-level (block_templates the 10th) + 1 components + 8 container + 23 navigation + 3 demo card");
 
             foreach (var (name, change) in edits)
             {

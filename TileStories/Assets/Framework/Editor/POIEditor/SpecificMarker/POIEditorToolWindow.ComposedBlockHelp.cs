@@ -34,6 +34,38 @@ namespace TileStories.Editor
             "steps to the next effect the element offers (Auto plays the element's own, shown in brackets), the second chip its strength. " +
             "Reduce Motion is not a choice: every row is simply still for a visitor who asks for less motion, shown here so you can see it.";
 
+        // ---------------- block templates (Detail Card > Block Library > Templates; a block's Template line) ----------------
+
+        private const string BlockTemplatesHelp =
+            "Ready-made blocks to start from: each template is a list of element rows with their looks, motion and tap, and NO words or files. " +
+            "Card Content > + From a template (or Card Starter) adds a block that COPIES the rows: the point then owns them, and editing a " +
+            "template later never changes a block made from it (its Template line offers Re-apply). The built-in ones cannot be changed: " +
+            "Duplicate one to make your own. Make one from a block you like with that block's Save as template; rename it here; open it to " +
+            "edit its rows with the same table as a block's Page; delete it with its trash button (the blocks made from it keep their rows).";
+
+        private const string TemplateRowsHelp =
+            "The template's rows, in the order a block made from it gets them: the same table as a block's Page. Add, move, duplicate and " +
+            "delete rows, and open one to set its Look, Motion and Tap. A template holds no words or files: those are written in each block.";
+
+        private const string TemplateBuiltInNote = "Built in: its rows cannot be changed. Duplicate it to make your own copy to edit.";
+
+        private const string StoryTemplateHelp =
+            "The template this block was made from (Detail Card > Block Library > Templates). The block owns its rows: nothing changes when " +
+            "the template does. Re-apply adds the template's rows this block lacks -- matched by their order of elements, each added empty in " +
+            "its place -- and never touches a row the block has or its words; a message says what it added, and Ctrl+Z takes it back. Save " +
+            "as template makes a new template of this block's rows (their looks and motion, no words or files) and names it here.";
+
+        private const string TemplatePickerSuitsPrefix = "Adds one block: ";
+
+        private const string StoryPreviewTapHelp =
+            "What a tap on the preview does on the card. Open The Page (the default): a tap anywhere on the preview -- its picture, its words, " +
+            "the Open Row -- opens the block's page. Nothing: only the Open Row opens the page, so a tap on the picture or the words while " +
+            "scrolling does nothing.";
+
+        private const string StoryPreviewEntryHelp =
+            "How the preview enters the card the first time it scrolls into view. Rises In (the default): it fades in and rises a little, as " +
+            "one block (its rows' own reveals are part of it). None: it is simply there. Reduce Motion always shows it still, whatever is set here.";
+
         private const string StoryPreviewMarkTooltip = "P: the preview shows this row (it changes as you reorder or delete rows).";
         private const string StoryValidatedTooltip = "Your own check of each row: a red cross until you mark it, a green check after. Never shown to a visitor.";
         private const string StoryValidatedOnTooltip = "Validated: click to mark this row to check again.";

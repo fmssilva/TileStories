@@ -248,6 +248,43 @@ namespace TileStories.Tests
 
         // The carousel on the real page: a real sideways finger moves the strip and rests an item on the margin, the page stays; an up / down
         // finger that starts on it scrolls the page and leaves the strip (R10.5)
+        // _3.3 S3b on the real card: the story's Preview Tap and Block Entry, set through the live seam the POI Editor uses. Tap Nothing: a real
+        // tap on the preview's picture opens nothing, a real tap on its Open Row still opens the page. Block Entry None: the rebound preview is
+        // simply there -- no entry bound, at full opacity and rest position without being finished; the shipped default rises in
+        [UnityTest]
+        public IEnumerator ThePreviewsTapNothing_OpensOnlyFromItsOpenRow_AndBlockEntryNone_IsSimplyThere_OnTheRealCard()
+        {
+            yield return Open("en", CardOptions.ModeLight);
+            ComposedBlockView preview = null;
+            yield return Preview(v => preview = v);
+            Assert.AreEqual(ElementOptions.MotionReveal, preview.Motion.EffectOf(preview.Root), "the shipped default: the preview rises in");
+
+            var copy = ConfigCopy();
+            var story = copy.pois.Single(p => p.id == Painting).card.blocks.Single(b => b.kind == BuiltInBlocks.StoryKind);
+            Assert.AreEqual(ElementOptions.PreviewTapOpenPage, BlockSurfaces.PreviewTap(story), "precondition: the shipped story opens its page on a tap");
+            story.fields.Add(new BlockFieldValue { key = BlockSurfaces.PreviewTapField, value = ElementOptions.PreviewTapNone });
+            story.fields.Add(new BlockFieldValue { key = BlockSurfaces.PreviewEntryField, value = ElementOptions.PreviewEntryNone });
+            Session.ApplyCardSettings(copy);
+            yield return CardTestInput.Settle(0.3f);
+
+            // - Block Entry None, read BEFORE any Finish: nothing bound to move the block, and it stands at rest
+            var rebound = (ComposedBlockView)Sheet.Stack.ViewOfBlock(story.key);
+            Assert.AreEqual("", rebound.Motion.EffectOf(rebound.Root), "Block Entry None: no entry bound to the preview");
+            Assert.AreEqual(1f, rebound.Root.resolvedStyle.opacity, 0.001f, "it is simply there: full opacity");
+            Assert.AreEqual(0f, rebound.Root.resolvedStyle.translate.y, OnePixel, "...at its rest position");
+
+            // - Tap Nothing: a real finger on the preview's picture opens nothing; on the Open Row it opens the page
+            yield return Preview(v => preview = v);
+            var picture = preview.Shown.First(s => s.Content.Kind == BuiltInElements.Picture).Component.Root;
+            yield return CardTestInput.TapInView(Scroll, picture);
+            yield return CardTestInput.Settle(0.3f);
+            Assert.IsFalse(Sheet.FullView.IsOpen, "Tap Nothing: a real tap on the preview's picture opens nothing");
+            yield return CardTestInput.TapInView(Scroll, preview.OpenRow);
+            yield return CardTestInput.Settle(0.3f);
+            Assert.IsTrue(Sheet.FullView.IsOpen, "a real tap on the Open Row still opens the page");
+            Assert.AreEqual(story.key, Sheet.FullView.BlockKey, "...the story's");
+        }
+
         [UnityTest]
         public IEnumerator TheCarousel_ARealSidewaysFingerMovesTheStrip_AnUpDownOneScrollsThePage()
         {

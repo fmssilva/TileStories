@@ -63,12 +63,14 @@ namespace TileStories.Editor.Tests
             _window.Click("Card Starter");
             var popup = EditorPopup.FindOpen(CardStarters.PickerKind);
             Assert.IsNotNull(popup, "a real click on the Card Starter button opens the picker");
-            for (int frame = 0; frame < 90 && seen.Count < CardStarters.All.Count; frame++)
+            // - one row per starter, then one per block template (S3b: the templates offered beside the sets)
+            int expected = CardStarters.All.Count + BlockTemplates.All(_window.Config.card_settings, ElementRegistry.Shared).Count;
+            for (int frame = 0; frame < 90 && seen.Count < expected; frame++)
             {
                 popup.Repaint();
                 yield return null;
             }
-            Assert.AreEqual(CardStarters.All.Count, seen.Count, "the picker drew one row per starter");
+            Assert.AreEqual(expected, seen.Count, "the picker drew one row per starter and per template");
             for (int i = 0; i < seen.Count; i++) rows.Add(seen[i]);
         }
 

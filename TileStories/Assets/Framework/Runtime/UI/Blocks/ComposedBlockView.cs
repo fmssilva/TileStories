@@ -8,7 +8,8 @@ namespace TileStories
     //   - on the card: the PREVIEW -- ElementPreviewRule's rows (Automatic: the Page's picture, eyebrow + title, first text, every text at its
     //     smallest size; Custom: the listed rows, a linked row in its own style), capped at --ts-preview-max of the card's full height
     //     (IBlockHost.FullHeight, the measured full stop: a USS percentage does not resolve inside the ScrollView, R10.2) and cut with a
-    //     fade into the surface when it is taller, then the Open Row. A tap anywhere on it opens the page (R17.4)
+    //     fade into the surface when it is taller, then the Open Row. A tap anywhere on it opens the page, or only on the Open Row when the
+    //     block's Tap is Nothing (R17.4); it rises onto the card unless its Block Entry is None (R17.3)
     //   - in the full view (BlockBindContext.FullView): the PAGE -- every row in order
     // Each row is drawn by its element's component (ElementRegistry, pooled per kind); a row of an element with no component, or a broken
     // reference, draws nothing. The rhythm between rows is the stylesheet's, by pair: each row wears the class of the kind before it
@@ -78,8 +79,9 @@ namespace TileStories
             OpenRow = new OpenRowView();
             Preview.Add(Clip);
             Preview.Add(OpenRow);
-            // - the whole preview is the target: the picture, the words, the Open Row (R13.1's cover button, R17.4)
-            Preview.AddManipulator(new Clickable(OpenPage));
+            // - the whole preview is the target: the picture, the words, the Open Row (R13.1's cover button, R17.4) -- unless the block's Tap
+            //   is Nothing, where only a tap on the Open Row opens the page (OpensFrom)
+            Preview.AddManipulator(new Clickable(evt => { if (OpensFrom(evt)) OpenPage(); }));
 
             Page = new VisualElement { name = "ts-composed-page", pickingMode = PickingMode.Ignore };
             Page.AddToClassList(RootClass + "__page");
@@ -111,8 +113,10 @@ namespace TileStories
             var scope = ElementScope.Of(context.Poi, instance, _blocks);
             string familyToken = FamilyTokenOf(scope.HolderKind);
             Motion.Bind(context.ReduceMotion);
-            // - the block's entry: the preview rises onto the card as one (R17.1 "Block entry: Rise")
-            if (!IsPage) Motion.Add(Root, null, ElementOptions.MotionReveal, ElementOptions.StrengthSubtle);
+            // - the block's entry: the preview rises onto the card as one (R17.1 "Block entry: Rises In"), or is simply there (None); its rows'
+            //   own entering effects are the entry's either way (AddRow)
+            if (!IsPage && BlockSurfaces.PreviewEntry(instance) == ElementOptions.PreviewEntryRise)
+                Motion.Add(Root, null, ElementOptions.MotionReveal, ElementOptions.StrengthSubtle);
             if (IsPage) DrawPage(scope, familyToken);
             else DrawPreview(scope, familyToken);
             Fit();
@@ -236,6 +240,17 @@ namespace TileStories
             IsCut = cut;
             Clip.style.maxHeight = cut ? room : new StyleLength(StyleKeyword.Null);
             Fade.style.display = cut ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        // Whether a tap opens the page: anywhere on the preview (Tap: Open The Page), or only where the Open Row is (Tap: Nothing -- the page is
+        // never out of reach). By the tap's POSITION: the Open Row picks nothing itself (the whole preview takes the finger), so no event ever
+        // targets it
+        private bool OpensFrom(EventBase evt)
+        {
+            if (_instance == null || BlockSurfaces.PreviewTap(_instance) == ElementOptions.PreviewTapOpenPage) return true;
+            if (OpenRow.resolvedStyle.display == DisplayStyle.None) return false;
+            Vector2? at = evt is IPointerEvent pointer ? (Vector2)pointer.position : evt is IMouseEvent mouse ? mouse.mousePosition : (Vector2?)null;
+            return at.HasValue && OpenRow.worldBound.Contains(at.Value);
         }
 
         // A tap on the preview: the block's page in the card's full view

@@ -170,7 +170,7 @@ namespace TileStories.Editor.Tests
         {
             var story = PaintingStory.StoryKind();
             Assert.IsNull(BlockRegistry.Validate(story));
-            CollectionAssert.AreEqual(new[] { "heading", "minutes", "page", "preview_mode", "preview_rows", "component_overrides" }, story.Fields.Select(f => f.Key),
+            CollectionAssert.AreEqual(new[] { "heading", "minutes", "page", "preview_mode", "preview_rows", "preview_tap", "preview_entry", "component_overrides" }, story.Fields.Select(f => f.Key),
                 "the common fields, the Page, then the Preview surface (Page first, R17.7)");
 
             var twoPages = PaintingStory.StoryKind();

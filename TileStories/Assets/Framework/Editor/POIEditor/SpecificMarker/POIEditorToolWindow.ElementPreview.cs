@@ -33,7 +33,20 @@ namespace TileStories.Editor
                 DrawStoryCustomRows(poi, block, kind, scope, elements, preview, pageRows, languages);
 
             DrawStoryOpenRow(block, languages);
+            DrawStoryPreviewChoice(block, "Tap", BlockSurfaces.PreviewTapField, BlockSurfaces.PreviewTap(block), ElementOptions.PreviewTaps,
+                ElementOptions.PreviewTapLabels, StoryPreviewTapHelp, "Story preview tap");
+            DrawStoryPreviewChoice(block, "Block Entry", BlockSurfaces.PreviewEntryField, BlockSurfaces.PreviewEntry(block), ElementOptions.PreviewEntries,
+                ElementOptions.PreviewEntryLabels, StoryPreviewEntryHelp, "Story preview entry");
             DrawStoryReadingTime(block, scope, elements, languages);
+        }
+
+        // One of the preview's own closed choices (Tap, Block Entry: R17.1, R17.3) as a segment row; a pick writes the block's field
+        private void DrawStoryPreviewChoice(BlockInstanceData block, string label, string field, string current, string[] options, string[] labels,
+            string help, string probe)
+        {
+            int at = System.Array.IndexOf(options, current);
+            int picked = DrawSegmentRow(label, at, labels, help, IndentLevel1, probe, 0);
+            if (picked >= 0 && picked != at) StoryQueue(() => ElementEdits.SetChoice(block, field, options[picked]));
         }
 
         // Automatic: which Page rows the preview shows now, by element and number, and that it follows the Page
@@ -77,7 +90,7 @@ namespace TileStories.Editor
                 int pageNumber = row.IsRef ? IndexOfRow(pageRows, row.Ref.Row) + 1 : 0;
                 DrawStoryPreviewRow(poi, block, rows, i, row, content, element, broken, pageNumber, languages);
                 if (!broken && IsComposedOpen(ComposedKey(poi.id, block.key, "row/" + row.Id), false))
-                    DrawElementRowPanel(poi, block, scope, elements, row, content, element, isLink: row.IsRef, pageNumber, "Story preview", i, languages);
+                    DrawElementRowPanel(poi.id, block, scope, elements, row, content, element, isLink: row.IsRef, pageNumber, "Story preview", i, languages);
             }
 
             // - link a Page row: the rows not linked yet, one button each
@@ -118,7 +131,7 @@ namespace TileStories.Editor
                     EditorRowEnd();
                 }
             // - the same palette as the Page's, its pick added to the preview's own rows
-            if (adding) DrawStoryPalette(poi, block, addKey, "Story preview add", element => ElementEdits.Add(block, ElementEdits.PreviewList(block), element));
+            if (adding) DrawStoryPalette(poi.id, block, addKey, "Story preview add", element => ElementEdits.Add(block, ElementEdits.PreviewList(block), element));
         }
 
         // One Custom preview row's line: [link / own / warning] [chevron] [#] what it shows, Validated, up / down, Unlink, delete

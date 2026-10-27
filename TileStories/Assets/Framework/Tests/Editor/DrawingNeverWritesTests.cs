@@ -50,6 +50,19 @@ namespace TileStories.Editor.Tests
                                     composed[POIEditorToolWindow.ComposedKey(poi.id, block.key, "row/" + id + part)] = true;
                             }
                     }
+                // - every block template open (Detail Card > Block Library > Templates), each of its rows with its parts, and its palette (_3.3 S3b)
+                foreach (var template in BlockTemplates.All(config.card_settings, ElementRegistry.Shared))
+                {
+                    string owner = POIEditorToolWindow.TemplateOwner(template.key);
+                    foreach (string part in new[] { "open", "motion", "page/add" }) composed[POIEditorToolWindow.ComposedKey(owner, "", part)] = true;
+                    foreach (var row in BlockTemplates.RowsOf(template))
+                        foreach (string part in new[] { "", "/Look", "/Motion", "/Tap" })
+                            composed[POIEditorToolWindow.ComposedKey(owner, "", "row/" + new ElementRow(row).Id + part)] = true;
+                }
+                // - every compact dropdown open (a picture's motion effects), its list of options drawn
+                for (int i = 0; i < 40; i++)
+                    foreach (string table in new[] { "Story page", "Story preview", "Template page" })
+                        composed["dropdown/" + table + " motion effect#" + i] = true;
                 var tabField = type.GetField("_selectedTab", Instance);
                 tabField.SetValue(host.Editor, System.Enum.Parse(tabField.FieldType, tab));
 
@@ -102,6 +115,31 @@ namespace TileStories.Editor.Tests
 
             var changes = new List<string>();
             yield return DrawEverything(config, "SpecificMarker", changes);
+            CollectionAssert.IsEmpty(changes, "drawing changed the config:\n" + string.Join("\n", changes));
+        }
+
+        // A wall with templates of its own (one edited, one deleted that a block still names), a block made from a template, a story with Tap
+        // Nothing and Block Entry None -- every template, block and part open on both tabs that draw them: nothing changes (_3.3 S3b)
+        [UnityTest]
+        public IEnumerator TemplatesAndThePreviewsTapAndEntry_WithEverythingOpen_AreNeverChangedByDrawing()
+        {
+            var config = JsonUtility.FromJson<WallConfigData>(File.ReadAllText("Assets/Apps/LivingRoom/config.json"));
+            var painting = config.pois.Single(p => p.id == "painting");
+            var story = painting.card.blocks.Single(b => b.kind == BuiltInBlocks.StoryKind);
+            Assert.IsTrue(BlockRegistry.Shared.TryGet(BuiltInBlocks.StoryKind, out var kind));
+            var saved = BlockTemplates.SaveAs(config.card_settings, config.pois, story, kind, "Mine", ElementRegistry.Shared);
+            BlockTemplates.Duplicate(config.card_settings, config.pois, BlockTemplates.BuiltIn(ElementRegistry.Shared)[1], ElementRegistry.Shared);
+            var camera = config.pois.Single(p => p.id == "camera");
+            camera.card ??= new POICardData();
+            camera.card.blocks.Add(BlockTemplates.NewBlock(camera.card, BlockTemplates.BuiltIn(ElementRegistry.Shared)[0], ElementRegistry.Shared));
+            BlockTemplates.Remove(config.card_settings, saved.key);
+            ElementEdits.SetChoice(story, BlockSurfaces.PreviewTapField, ElementOptions.PreviewTapNone);
+            ElementEdits.SetChoice(story, BlockSurfaces.PreviewEntryField, ElementOptions.PreviewEntryNone);
+            Assert.AreEqual(saved.key, BlockSurfaces.TemplateOf(story), "precondition: the story names a deleted template");
+
+            var changes = new List<string>();
+            foreach (string tab in new[] { "SpecificMarker", "DetailCard" })
+                yield return DrawEverything(JsonUtility.FromJson<WallConfigData>(JsonUtility.ToJson(config)), tab, changes);
             CollectionAssert.IsEmpty(changes, "drawing changed the config:\n" + string.Join("\n", changes));
         }
 

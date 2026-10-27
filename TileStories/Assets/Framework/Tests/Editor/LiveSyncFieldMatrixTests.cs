@@ -311,6 +311,9 @@ namespace TileStories.Editor.Tests
             // every field live in SearchFilterEditorTabTests (fingerprints) and SearchSceneTests / SearchDemoTests (PlayMode)
             { "select_filter_search", "SearchSceneTests" }, { "search_demo", "SearchDemoTests" },
             { "search_fields", "SearchFilterEditorTabTests" }, { "synonym_groups", "SearchFilterEditorTabTests" },
+            // Block templates are Editor presets the card never reads; a block made from one is a pois[].card edit, live like any
+            // (LivePlayModeStoryEditorTests.FromATemplate_...)
+            { "card_settings.block_templates", "Editor-only presets: no runtime reader (LivePlayModeStoryEditorTests)" },
         };
 
         [Test]

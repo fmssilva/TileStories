@@ -11,6 +11,20 @@ namespace TileStories
         public static readonly string[] PreviewModes = { PreviewAutomatic, PreviewCustom };
         public static readonly string[] PreviewModeLabels = { "Automatic", "Custom" };
 
+        // What a tap on a block's preview does (BlockSurfaces.PreviewTapField, R17.1 / R17.4): open the block's page, or nothing (the Open
+        // Row still opens it, so the page is never out of reach)
+        public const string PreviewTapOpenPage = "open_page";
+        public const string PreviewTapNone = "none";
+        public static readonly string[] PreviewTaps = { PreviewTapOpenPage, PreviewTapNone };
+        public static readonly string[] PreviewTapLabels = { "Open The Page", "Nothing" };
+
+        // How a block's preview enters the card (BlockSurfaces.PreviewEntryField, R6 M2, R17.3): it rises in as one, or is simply there.
+        // Reduce Motion always shows it still
+        public const string PreviewEntryRise = "rise";
+        public const string PreviewEntryNone = "none";
+        public static readonly string[] PreviewEntries = { PreviewEntryRise, PreviewEntryNone };
+        public static readonly string[] PreviewEntryLabels = { "Rises In", "None" };
+
         // A row's motion effect (ElementRow.Motion, R17.3). Auto = the element's own default (ElementKindDefinition.AutoMotion), so a
         // developer only touches the exceptions. What Reduce Motion turns each into is a rule, never a choice (ElementMotionRule)
         public const string MotionAuto = "auto";

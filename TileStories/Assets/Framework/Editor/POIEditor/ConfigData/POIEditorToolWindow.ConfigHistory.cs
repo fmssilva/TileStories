@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -63,21 +64,57 @@ namespace TileStories.Editor
                 return -1;
             }
             return new NamedOptionPickerPopup(NavigationPresets.PickerKind, NavigationPresets.PickerTitle, NavigationPresets.PickerOptions(),
-                NavigationPresets.Recommended, InUse,
+                new[] { NavigationPresets.Recommended }, InUse,
                 index => ApplyPopupEdit(() => NavigationPresets.Apply(_config.card_settings.navigation ??= new CardNavigationSettings(), NavigationPresets.All[index])),
                 IsStillEditing(_config));
         }
 
         // _3.2 step 17b: the Card Starter picker of one point. A pick goes through ApplyCardStarter: the question first on a point with
         // blocks, then the starter inside ONE mutation scope. The point is held by id and found again on every pick; the picker closes once
-        // the config it was opened on is replaced (undo, reload) or the point is gone
+        // the config it was opened on is replaced (undo, reload) or the point is gone. After the sets and Start from scratch, under a second
+        // line, the wall's block templates (_3.3 R14.5): a template pick ADDS one block made from it (no question: nothing is replaced, and
+        // it is one undo step), where a set replaces the point's blocks
         private NamedOptionPickerPopup CreateCardStarterPickerPopup(string poiId)
         {
             POIData Point() => _config?.pois?.Find(p => p != null && p.id == poiId);
             var stillEditing = IsStillEditing(_config);
-            return new NamedOptionPickerPopup(CardStarters.PickerKind, CardStarters.PickerTitle, CardStarters.PickerOptions(),
-                CardStarters.SeparatorBefore, () => CardStarters.IndexOf(CardStarters.Matching(Point())),
-                index => ApplyCardStarter(poiId, CardStarters.All[index]),
+            var options = new List<NamedOptionPickerPopup.Option>(CardStarters.PickerOptions());
+            var templateKeys = new List<string>();
+            foreach (var template in BlockTemplates.All(_config?.card_settings, ElementRegistry.Shared))
+            {
+                options.Add(new NamedOptionPickerPopup.Option("+ " + BlockTemplates.NameOf(template),
+                    TemplatePickerSuitsPrefix + BlockTemplates.Describe(template, ElementRegistry.Shared) + ". The card's blocks stay."));
+                templateKeys.Add(template.key);
+            }
+            int sets = CardStarters.All.Count;
+            return new NamedOptionPickerPopup(CardStarters.PickerKind, CardStarters.PickerTitle, options,
+                new[] { CardStarters.SeparatorBefore, sets }, () => CardStarters.IndexOf(CardStarters.Matching(Point())),
+                index =>
+                {
+                    if (index < sets) ApplyCardStarter(poiId, CardStarters.All[index]);
+                    else ApplyPopupEdit(() => AddCardBlockFromTemplate(poiId, templateKeys[index - sets]));
+                },
+                () => stillEditing() && Point() != null);
+        }
+
+        // Card Content's "+ From a template...": the wall's block templates (the built-ins, a line, the wall's own); a pick adds ONE block made
+        // from it to the point, in one undo step. The point is held by id; the picker closes once the config or the point is gone
+        private NamedOptionPickerPopup CreateBlockTemplatePickerPopup(string poiId)
+        {
+            POIData Point() => _config?.pois?.Find(p => p != null && p.id == poiId);
+            var stillEditing = IsStillEditing(_config);
+            var templates = BlockTemplates.All(_config?.card_settings, ElementRegistry.Shared);
+            var options = new List<NamedOptionPickerPopup.Option>();
+            var keys = new List<string>();
+            int builtIns = 0;
+            foreach (var template in templates)
+            {
+                options.Add(new NamedOptionPickerPopup.Option(BlockTemplates.NameOf(template), BlockTemplates.Describe(template, ElementRegistry.Shared)));
+                keys.Add(template.key);
+                if (BlockTemplates.IsBuiltIn(template.key)) builtIns++;
+            }
+            return new NamedOptionPickerPopup(BlockTemplates.PickerKind, BlockTemplates.PickerTitle, options, new[] { builtIns }, () => -1,
+                index => ApplyPopupEdit(() => AddCardBlockFromTemplate(poiId, keys[index])),
                 () => stillEditing() && Point() != null);
         }
 

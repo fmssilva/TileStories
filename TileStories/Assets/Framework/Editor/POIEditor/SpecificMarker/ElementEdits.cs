@@ -193,6 +193,9 @@ namespace TileStories.Editor
             return made;
         }
 
+        // One of the block's own Choice fields (the preview's Tap, its Block Entry) set to `option`
+        public static void SetChoice(BlockInstanceData block, string key, string option) => Ensure(block, key).value = option ?? "";
+
         // Reading Time: 0 = Auto (computed from the Page), else the minutes set by hand
         public static void SetMinutes(BlockInstanceData block, int minutes) =>
             Ensure(block, BlockKindDefinition.MinutesDefinition.Key).number = Mathf.Max(0, minutes);

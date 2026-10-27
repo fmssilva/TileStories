@@ -58,7 +58,8 @@ namespace TileStories.Editor
             var elements = ElementRegistry.Shared;
             var preview = ElementPreviewRule.Of(scope, elements);
             _composedEdit = null;
-            DrawStoryPage(poi, block, kind, scope, elements, preview, languages);
+            DrawStoryTemplateRow(poi, block, kind, elements);
+            DrawStoryPage(poi.id, block, kind, scope, elements, preview, languages, template: false);
             DrawStoryPreview(poi, block, kind, scope, elements, preview, languages);
             // - room before the next block's row: the two surfaces are a long panel
             GUILayout.Space(10f);
@@ -68,36 +69,100 @@ namespace TileStories.Editor
             edit?.Invoke();
         }
 
+        // ---------------- the Template line ----------------
+
+        // The block's Template line (R14.4): the template it was made from -- Re-apply adds back the template's rows it lacks -- and Save as
+        // template, which makes one of this block's rows. Both are queued like every structural edit (one click, one undo step)
+        private void DrawStoryTemplateRow(POIData poi, BlockInstanceData block, BlockKindDefinition kind, ElementRegistry elements)
+        {
+            string key = BlockSurfaces.TemplateOf(block);
+            var template = BlockTemplates.Find(_config.card_settings, elements, key);
+            string words = key.Length == 0 ? "None" : template == null ? "(a deleted template)" : BlockTemplates.NameOf(template);
+            DrawEditorRow(out float rowWidth, out _, IndentLevel1);
+            EditorGUILayout.PrefixLabel("Template");
+            float value = Mathf.Max(80f, rowWidth - EditorGUIUtility.labelWidth - 36f);
+            float reapplyWidth = template != null ? 64f : 0f;
+            float saveWidth = 112f;
+            float nameWidth = Mathf.Max(20f, value - saveWidth - reapplyWidth - (template != null ? 8f : 4f));
+            GUILayout.Label(new GUIContent(words, words), template == null && key.Length > 0 ? StoryEmptyStyle : EditorStyles.boldLabel,
+                GUILayout.Width(nameWidth), GUILayout.ExpandWidth(false));
+            ReportTableCellRect("Story template name", 0);
+            if (template != null)
+            {
+                if (GUILayout.Button(new GUIContent("Re-apply", "Add the template's rows this block lacks; nothing it has is touched"), EditorStyles.miniButton,
+                        GUILayout.Width(reapplyWidth)))
+                    StoryQueue(() => ReapplyBlockTemplate(block, kind, template));
+                ReportTableCellRect("Story template reapply", 0);
+            }
+            if (GUILayout.Button(new GUIContent("Save as template", "Make a new template of this block's rows: their looks and motion, no words or files"),
+                    EditorStyles.miniButton, GUILayout.Width(saveWidth)))
+                StoryQueue(() => SaveBlockAsTemplate(poi, block, kind));
+            ReportTableCellRect("Story template save", 0);
+            HelpInfoButton.Draw("Template", StoryTemplateHelp);
+            EditorRowEnd();
+        }
+
+        // Re-apply: the template's missing rows added (BlockTemplates.Reapply), then a notice saying which (the result of the developer's click)
+        private void ReapplyBlockTemplate(BlockInstanceData block, BlockKindDefinition kind, BlockTemplateData template)
+        {
+            var added = BlockTemplates.Reapply(block, kind, template, ElementRegistry.Shared);
+            EditorNotice.Queue("Re-apply template", BlockTemplates.ReapplyMessage(BlockTemplates.NameOf(template), added, ElementRegistry.Shared), 0f, null);
+        }
+
+        // Save as template: a new template of the wall named after the block's kind and point, the block now made from it; a notice says where
+        // to rename it
+        private void SaveBlockAsTemplate(POIData poi, BlockInstanceData block, BlockKindDefinition kind)
+        {
+            _config.card_settings ??= new CardSettings();
+            string name = kind.DisplayName + " -- " + (string.IsNullOrWhiteSpace(poi.name) ? "a point" : poi.name);
+            var template = BlockTemplates.SaveAs(_config.card_settings, _config.pois, block, kind, name, ElementRegistry.Shared);
+            int rows = BlockTemplates.RowsOf(template).Count;
+            EditorNotice.Queue("Saved as a template", "\"" + template.name + "\" holds this block's " + (rows == 1 ? "1 row" : rows + " rows") +
+                " (their looks and motion, no words or files). Rename, edit or delete it in Detail Card > Block Library > Templates; " +
+                "+ From a template adds a block made from it.", 0f, null);
+        }
+
         // ---------------- the Page ----------------
 
-        private void DrawStoryPage(POIData poi, BlockInstanceData block, BlockKindDefinition kind, ElementScope scope, ElementRegistry elements,
-            ElementPreviewRule.Result preview, List<string> languages)
+        // The Page's element table -- or, with `template`, a block TEMPLATE's rows (Detail Card > Block Library > Templates): the same table,
+        // drag, palette and Motion table, without what a template has no use for (the P and Validated marks, content, Page Chrome). `owner`
+        // names whose UI state it is (a POI's id, or TemplateOwner); `preview` may be null for a template
+        private void DrawStoryPage(string owner, BlockInstanceData block, BlockKindDefinition kind, ElementScope scope, ElementRegistry elements,
+            ElementPreviewRule.Result preview, List<string> languages, bool template)
         {
             var rows = BlockSurfaces.PageRows(block, kind);
-            string note = rows.Count + (rows.Count == 1 ? " row" : " rows") + ", the block's own page";
-            if (!DrawComposedFoldout(ComposedKey(poi.id, block.key, "page"), true, "Page", note, StoryPageHelp, IndentLevel1, "Story page section")) return;
+            string probe = template ? TemplatePageProbe : StoryPageProbe;
+            string note = rows.Count + (rows.Count == 1 ? " row" : " rows") + (template ? ", their looks and motion (no content)" : ", the block's own page");
+            if (!DrawComposedFoldout(ComposedKey(owner, block.key, "page"), true, template ? "Rows" : "Page", note, template ? TemplateRowsHelp : StoryPageHelp,
+                    IndentLevel1, probe + " section")) return;
 
-            DrawStoryTableHeader(true);
-            string table = ComposedKey(poi.id, block.key, "page");
+            DrawStoryTableHeader(page: !template, marks: !template);
+            string table = ComposedKey(owner, block.key, "page");
             int dragId = GUIUtility.GetControlID(FocusType.Passive);
             var lines = new List<Rect>();
             for (int i = 0; i < rows.Count; i++)
             {
                 var row = new ElementRow(rows[i]);
                 elements.TryGet(row.Kind, out var element);
-                bool usedByPreview = preview.UsedPageRows.Contains(row.Id);
-                lines.Add(DrawStoryPageRow(poi, block, kind, rows, i, row, element, usedByPreview, table, dragId, languages));
-                if (IsComposedOpen(ComposedKey(poi.id, block.key, "row/" + row.Id), false))
-                    DrawElementRowPanel(poi, block, scope, elements, row, row, element, isLink: false, pageNumber: 0, "Story page", i, languages);
+                bool usedByPreview = !template && preview.UsedPageRows.Contains(row.Id);
+                lines.Add(DrawStoryPageRow(owner, block, kind, rows, i, row, element, usedByPreview, table, dragId, languages, template));
+                if (IsComposedOpen(ComposedKey(owner, block.key, "row/" + row.Id), false))
+                    DrawElementRowPanel(owner, block, scope, elements, row, row, element, isLink: false, pageNumber: 0, probe, i, languages, template);
             }
             HandleStoryDrag(dragId, table, lines, block, kind);
-            DrawStoryAddRow(poi, block, "page", "Story page add", element => ElementEdits.Add(block, ElementEdits.PageList(block, kind), element));
-            DrawStoryPageChromeRow(block);
-            DrawStoryMotionTable(poi, block, kind, rows, elements);
+            DrawStoryAddRow(owner, block, "page", probe + " add", element => ElementEdits.Add(block, ElementEdits.PageList(block, kind), element));
+            if (!template) DrawStoryPageChromeRow(block);
+            DrawStoryMotionTable(owner, block, kind, rows, elements, template ? TemplateMotionProbe : StoryMotionProbe);
         }
 
-        // The table's header line: the columns' names (the Preview mark is "P" on the Page, "Link" on the Preview)
-        private void DrawStoryTableHeader(bool page)
+        private const string StoryPageProbe = "Story page";
+        private const string TemplatePageProbe = "Template page";
+        private const string StoryMotionProbe = "Story motion";
+        private const string TemplateMotionProbe = "Template motion";
+
+        // The table's header line: the columns' names (the Preview mark is "P" on the Page, "Link" on the Preview); a template's table has
+        // neither mark
+        private void DrawStoryTableHeader(bool page, bool marks = true)
         {
             var r = StoryRowRect(IndentLevel1, EditorGUIUtility.singleLineHeight);
             var style = EditorStyles.miniLabel;
@@ -105,17 +170,19 @@ namespace TileStories.Editor
             GUI.Label(new Rect(x, r.y, StoryNumberWidth, r.height), "#", style);
             x += StoryNumberWidth;
             GUI.Label(new Rect(x, r.y, 120f, r.height), "Element", style);
+            if (!marks) return;
             float right = r.xMax - (StoryCell * 4f + StoryGap * 3f + TableGapBeforeDelete);
             GUI.Label(new Rect(right - StoryMarkWidth * 2f - StoryGap, r.y, StoryMarkWidth + 6f, r.height), new GUIContent(page ? "P" : "", StoryPreviewMarkTooltip), style);
             GUI.Label(new Rect(right - StoryMarkWidth - 4f, r.y, StoryMarkWidth + 24f, r.height), new GUIContent("Valid.", StoryValidatedTooltip), style);
         }
 
         // One Page row's line; returns its rect (what a drag measures against)
-        private Rect DrawStoryPageRow(POIData poi, BlockInstanceData block, BlockKindDefinition kind, IReadOnlyList<BlockItemData> rows, int i, ElementRow row,
-            ElementKindDefinition element, bool usedByPreview, string table, int dragId, List<string> languages)
+        private Rect DrawStoryPageRow(string owner, BlockInstanceData block, BlockKindDefinition kind, IReadOnlyList<BlockItemData> rows, int i, ElementRow row,
+            ElementKindDefinition element, bool usedByPreview, string table, int dragId, List<string> languages, bool template)
         {
+            string probe = template ? TemplatePageProbe : StoryPageProbe;
             var r = StoryRowRect(IndentLevel1, StoryRowHeight);
-            string rowKey = ComposedKey(poi.id, block.key, "row/" + row.Id);
+            string rowKey = ComposedKey(owner, block.key, "row/" + row.Id);
             bool open = IsComposedOpen(rowKey, false);
             if (Event.current.type == EventType.Repaint && open) EditorGUI.DrawRect(r, StoryOpenRowTint);
             float x = r.x;
@@ -123,7 +190,7 @@ namespace TileStories.Editor
             // - the drag handle: press and drag the row to another place
             var handle = new Rect(x, r.y, StoryHandleWidth, r.height);
             DrawStoryHandle(handle);
-            ReportTableCellRect("Story page handle", i, handle);
+            ReportTableCellRect(probe + " handle", i, handle);
             if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && handle.Contains(Event.current.mousePosition))
             {
                 GUIUtility.hotControl = dragId;
@@ -136,7 +203,7 @@ namespace TileStories.Editor
 
             var chevron = new Rect(x, r.y + 2f, StoryCell - 6f, r.height - 4f);
             bool toggled = StoryChevron(chevron, open);
-            ReportTableCellRect("Story page open", i, chevron);
+            ReportTableCellRect(probe + " open", i, chevron);
             x += StoryCell;
             GUI.Label(new Rect(x, r.y, StoryNumberWidth, r.height), (i + 1).ToString(), EditorStyles.miniLabel);
             x += StoryNumberWidth;
@@ -153,34 +220,39 @@ namespace TileStories.Editor
 
             // - the element: icon (or the picture itself), name, first words; a click opens the row like the chevron
             var cell = new Rect(x, r.y, Mathf.Max(0f, mark.x - StoryGap - x), r.height);
+            // - a template's row has no marks: its element cell runs on to the up arrow
+            if (template) cell.width = Mathf.Max(0f, up.x - StoryGap - x);
             if (GUI.Button(cell, GUIContent.none, GUIStyle.none)) toggled = !open;
-            ReportTableCellRect("Story page element", i, cell);
-            DrawStoryElementCell(cell, row, element, languages);
+            ReportTableCellRect(probe + " element", i, cell);
+            DrawStoryElementCell(cell, row, element, languages, template);
 
             // - reported only where it is drawn: what a test reads to know which rows wear the P
             if (usedByPreview)
             {
                 GUI.Label(mark, new GUIContent("P", StoryPreviewMarkTooltip), StoryMarkStyle);
-                ReportTableCellRect("Story page preview mark", i, mark);
+                ReportTableCellRect(probe + " preview mark", i, mark);
             }
-            if (DrawStoryValidatedButton(valid, row)) row.SetValidated(!row.Validated);
-            ReportTableCellRect("Story page validated", i, valid);
+            if (!template)
+            {
+                if (DrawStoryValidatedButton(valid, row)) row.SetValidated(!row.Validated);
+                ReportTableCellRect(probe + " validated", i, valid);
+            }
             using (new EditorGUI.DisabledScope(i == 0))
                 if (GUI.Button(up, "^", EditorStyles.miniButton)) StoryQueue(() => ElementEdits.Move(ElementEdits.PageList(block, kind), i, i - 1));
-            ReportTableCellRect("Story page up", i, up);
+            ReportTableCellRect(probe + " up", i, up);
             using (new EditorGUI.DisabledScope(i >= rows.Count - 1))
                 if (GUI.Button(down, "v", EditorStyles.miniButton)) StoryQueue(() => ElementEdits.Move(ElementEdits.PageList(block, kind), i, i + 1));
-            ReportTableCellRect("Story page down", i, down);
+            ReportTableCellRect(probe + " down", i, down);
             if (DrawIconButton(duplicate, StoryDuplicateIcon, "Duplicate this row"))
                 StoryQueue(() =>
                 {
                     var copy = ElementEdits.Duplicate(block, ElementEdits.PageList(block, kind), i);
-                    OpenComposedRow(poi.id, block.key, copy.Id);
+                    OpenComposedRow(owner, block.key, copy.Id);
                 });
-            ReportTableCellRect("Story page duplicate", i, duplicate);
+            ReportTableCellRect(probe + " duplicate", i, duplicate);
             if (DeleteButton.Draw(delete, "Delete row " + (i + 1) + (element != null ? " (" + element.DisplayName + ")" : "")))
                 StoryQueue(() => ElementEdits.Remove(ElementEdits.PageList(block, kind), i));
-            ReportTableCellRect("Story page delete", i, delete);
+            ReportTableCellRect(probe + " delete", i, delete);
 
             if (toggled != open) _composedOpen[rowKey] = toggled;
             return r;
@@ -226,9 +298,9 @@ namespace TileStories.Editor
         }
 
         // "+ Add element", then (open) the palette: a line per category of its elements' buttons; a pick adds the row born fully open
-        private void DrawStoryAddRow(POIData poi, BlockInstanceData block, string surface, string probe, Func<ElementKindDefinition, ElementRow> add)
+        private void DrawStoryAddRow(string owner, BlockInstanceData block, string surface, string probe, Func<ElementKindDefinition, ElementRow> add)
         {
-            string key = ComposedKey(poi.id, block.key, surface + "/add");
+            string key = ComposedKey(owner, block.key, surface + "/add");
             bool open = IsComposedOpen(key, false);
             DrawEditorRow(out float rowWidth, out _, IndentLevel1);
             if (GUILayout.Button(open ? "- Close the element list" : "+ Add element", GUILayout.Width(Mathf.Max(40f, rowWidth - 36f)), GUILayout.ExpandWidth(false)))
@@ -236,12 +308,12 @@ namespace TileStories.Editor
             ReportTableCellRect(probe, 0);
             HelpInfoButton.Draw("Add element", StoryAddElementHelp);
             EditorRowEnd();
-            if (open) DrawStoryPalette(poi, block, key, probe, add);
+            if (open) DrawStoryPalette(owner, block, key, probe, add);
         }
 
         // The element palette: a line per category (Text, Media, Structure) of its elements' buttons; a pick adds the row born fully open
         // and closes the palette (`key` is its open state)
-        private void DrawStoryPalette(POIData poi, BlockInstanceData block, string key, string probe, Func<ElementKindDefinition, ElementRow> add)
+        private void DrawStoryPalette(string owner, BlockInstanceData block, string key, string probe, Func<ElementKindDefinition, ElementRow> add)
         {
             foreach (ElementCategory category in Enum.GetValues(typeof(ElementCategory)))
             {
@@ -267,7 +339,7 @@ namespace TileStories.Editor
                         StoryQueue(() =>
                         {
                             var row = add(picked);
-                            OpenComposedRow(poi.id, block.key, row.Id);
+                            OpenComposedRow(owner, block.key, row.Id);
                             _composedOpen[key] = false;
                         });
                     }
@@ -310,10 +382,11 @@ namespace TileStories.Editor
 
         // The Page's choreography (R17.3): the page's own line, then one line per row -- the SAME motion value as the row's Motion part, a
         // click on the chip steps to the next effect the element offers -- and what Reduce Motion makes of it, read-only
-        private void DrawStoryMotionTable(POIData poi, BlockInstanceData block, BlockKindDefinition kind, IReadOnlyList<BlockItemData> rows, ElementRegistry elements)
+        private void DrawStoryMotionTable(string owner, BlockInstanceData block, BlockKindDefinition kind, IReadOnlyList<BlockItemData> rows, ElementRegistry elements,
+            string probe)
         {
-            if (!DrawComposedFoldout(ComposedKey(poi.id, block.key, "motion"), false, "Motion", "the page's choreography, one line per row",
-                    StoryMotionTableHelp, IndentLevel1, "Story motion section")) return;
+            if (!DrawComposedFoldout(ComposedKey(owner, block.key, "motion"), false, "Motion", "the page's choreography, one line per row",
+                    StoryMotionTableHelp, IndentLevel1, probe + " section")) return;
             var first = StoryRowRect(IndentLevel2, EditorGUIUtility.singleLineHeight);
             float nameWidth = Mathf.Min(220f, first.width * 0.38f);
             float reducedWidth = 110f;
@@ -338,12 +411,12 @@ namespace TileStories.Editor
                 var strengthChip = new Rect(effectChip.xMax + StoryGap, r.y + 1f, chipsWidth * 0.38f - StoryGap, EditorGUIUtility.singleLineHeight);
                 if (GUI.Button(effectChip, new GUIContent(StoryMotionWords(row, element), StoryMotionChipTooltip), EditorStyles.miniButton))
                     row.SetMotion(StoryNextOf(element.MotionChoices, row.Motion), row.Strength);
-                ReportTableCellRect("Story motion effect", i, effectChip);
+                ReportTableCellRect(probe + " effect", i, effectChip);
                 bool still = ElementMotionRule.EffectOf(row, element) == ElementOptions.MotionNone;
                 using (new EditorGUI.DisabledScope(still))
                     if (GUI.Button(strengthChip, StoryLabel(ElementOptions.Strengths, ElementOptions.StrengthLabels, row.Strength), EditorStyles.miniButton))
                         row.SetMotion(row.Motion, StoryNextOf(ElementOptions.Strengths, row.Strength));
-                ReportTableCellRect("Story motion strength", i, strengthChip);
+                ReportTableCellRect(probe + " strength", i, strengthChip);
                 GUI.Label(new Rect(r.xMax - reducedWidth, r.y, reducedWidth, r.height), new GUIContent(still ? "Reduced: -" : "Reduced: still", StoryReducedTooltip),
                     EditorStyles.miniLabel);
             }
@@ -405,12 +478,13 @@ namespace TileStories.Editor
         // A labelled row whose value is one of a few options, all in view: segments of one width (the widest label's), as many per line as
         // the value column holds -- they WRAP onto more lines rather than cut a word (the mock's chips) -- one real click picks; its (i) in
         // the row's (i) column. Each segment reports its own rect (probe + " " + its number). Returns the picked index; the caller writes
-        // only a changed one (drawing never writes)
-        private static int DrawSegmentRow(string label, int current, string[] labels, string help, float indent, string probe, int probeIndex)
+        // only a changed one (drawing never writes). MORE than SegmentRowMaxOptions options is one compact dropdown instead (DrawDropdownRow)
+        private int DrawSegmentRow(string label, int current, string[] labels, string help, float indent, string probe, int probeIndex)
         {
             DrawEditorRow(out float rowWidth, out _, indent);
             EditorGUILayout.PrefixLabel(label);
             float width = Mathf.Max(40f, rowWidth - EditorGUIUtility.labelWidth - 36f);
+            if (labels.Length > SegmentRowMaxOptions) return DrawDropdownRow(label, current, labels, help, indent, probe, probeIndex, width);
             var (columns, lines) = SegmentLayout(labels, width);
             // - the grid lays its cells out as GUI.SelectionGrid does: each cell the style's fixed height, the style's margin between two
             //   cells (a probe that ignored the gap pointed a test's click INTO it, where nothing takes it)
@@ -430,6 +504,44 @@ namespace TileStories.Editor
             EditorRowEnd();
             return picked;
         }
+
+        // A closed choice with more options than fit as segments (the S3a review: more than 4, e.g. a picture's 7 motion effects): a
+        // popup-looking button naming the current option; a click opens the options as a list right under it (in the window, so a real click
+        // picks one -- a native menu cannot be clicked by a test), a pick closes it. Opened on the row already begun by DrawSegmentRow
+        private int DrawDropdownRow(string label, int current, string[] labels, string help, float indent, string probe, int probeIndex, float width)
+        {
+            string key = "dropdown/" + probe + "#" + probeIndex;
+            bool open = IsComposedOpen(key, false);
+            var button = GUILayoutUtility.GetRect(width, EditorGUIUtility.singleLineHeight, EditorStyles.popup, GUILayout.Width(width), GUILayout.ExpandWidth(false));
+            string shown = current >= 0 && current < labels.Length ? labels[current] : "";
+            if (GUI.Button(button, shown, EditorStyles.popup)) _composedOpen[key] = !open;
+            ReportTableCellRect(probe, probeIndex, button);
+            HelpInfoButton.Draw(label, help);
+            EditorRowEnd();
+            if (!open) return current;
+
+            int picked = current;
+            for (int k = 0; k < labels.Length; k++)
+            {
+                DrawEditorRow(out _, out _, indent);
+                // - an empty label of the label column's width: the list starts under the button
+                EditorGUILayout.PrefixLabel(" ");
+                var item = GUILayoutUtility.GetRect(width, EditorGUIUtility.singleLineHeight, EditorStyles.miniButton, GUILayout.Width(width), GUILayout.ExpandWidth(false));
+                bool on = k == current;
+                // - a click on any option flips its toggle: that is the pick (the current one too: it just closes the list)
+                if (GUI.Toggle(item, on, labels[k], EditorStyles.miniButton) != on)
+                {
+                    picked = k;
+                    _composedOpen[key] = false;
+                }
+                ReportTableCellRect(probe + " " + k, probeIndex, item);
+                EditorRowEnd();
+            }
+            return picked;
+        }
+
+        // The most options a choice shows as segments side by side; more is a dropdown (the S3a review)
+        internal const int SegmentRowMaxOptions = 4;
 
         // How segments of these labels lay out in `width`: as many columns as fit the widest label whole, and the lines that takes
         internal static (int Columns, int Lines) SegmentLayout(string[] labels, float width)
@@ -453,7 +565,7 @@ namespace TileStories.Editor
         }
 
         // The element cell of a table line: its icon (a picture row shows its picture), its name, its first words
-        private void DrawStoryElementCell(Rect cell, ElementRow row, ElementKindDefinition element, List<string> languages)
+        private void DrawStoryElementCell(Rect cell, ElementRow row, ElementKindDefinition element, List<string> languages, bool template = false)
         {
             var icon = new Rect(cell.x, cell.y + 2f, StoryRowHeight - 4f, StoryRowHeight - 4f);
             if (Event.current.type == EventType.Repaint)
@@ -470,9 +582,11 @@ namespace TileStories.Editor
             float nameWidth = Mathf.Min(EditorStyles.boldLabel.CalcSize(new GUIContent(name)).x + 4f, cell.width * 0.45f);
             var nameRect = new Rect(icon.xMax + 6f, cell.y, nameWidth, cell.height);
             GUI.Label(nameRect, name, EditorStyles.boldLabel);
-            string summary = StoryRowSummary(row, element, FirstLanguageOf(languages));
+            // - a template's row holds no words: its line says its look instead
+            string summary = template ? (element?.StyleFields != null && element.StyleFields.Count > 0 ? LookSummary(row, element) : "")
+                : StoryRowSummary(row, element, FirstLanguageOf(languages));
             var summaryRect = new Rect(nameRect.xMax + 4f, cell.y, Mathf.Max(0f, cell.xMax - nameRect.xMax - 4f), cell.height);
-            bool empty = summary.Length == 0;
+            bool empty = summary.Length == 0 && !template;
             GUI.Label(summaryRect, new GUIContent(empty ? StoryEmptyWords : FitWithEllipsis(summary, summaryRect.width, EditorStyles.miniLabel), summary),
                 empty ? StoryEmptyStyle : EditorStyles.miniLabel);
         }

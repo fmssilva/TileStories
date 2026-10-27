@@ -80,7 +80,8 @@ domain items -> the domain guide's `## TODOs` (tagged with the step that picks t
   the tree moved since the last green commit), that the FULL EditMode suite closes every block, and whether this block also
   owes a full PlayMode run (`40-testing.md` 4.2: it does when the block touches shared ground -- test infrastructure,
   `WallSession`, `PanelSettings`, the tokens, the sheet / stack / host, a registry or a rule a whole domain reads -- or when
-  it is the fourth block since the last full run, or before a close-out, a device session or a build). When it does not, name
+  it is the fourth block since the last full run, or before a close-out, a device session or a build). Write WHICH shared-ground item
+  the block touches when you say a full run is owed -- Editor-only work and additive config fields are not. When it does not, name
   in the brief the targeted PlayMode fixtures that close it instead, and the full run it rides on. Count the blocks since the
   last full PlayMode run in your answer, and say which block the next one falls on. Full runs are taken with Unity in the
   background unless you ask for the front.

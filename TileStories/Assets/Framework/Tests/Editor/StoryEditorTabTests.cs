@@ -239,6 +239,9 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(BuiltInElements.FrameArch, Row("el_12").Value(BuiltInElements.FrameStyle));
             Assert.AreEqual(steps + 2, _window.UndoStepsLeft, "frame: its own step");
             int slowZoom = Array.IndexOf(ElementOptions.Motions, ElementOptions.MotionSlowZoom);
+            // - a picture's 7 effects are one dropdown (S3b): a real click opens its list, a real click on an option picks it
+            yield return Click("Story page motion effect#0");
+            Assert.AreEqual(steps + 2, _window.UndoStepsLeft, "opening the list writes nothing");
             yield return Click("Story page motion effect " + slowZoom + "#0");
             Assert.AreEqual(ElementOptions.MotionSlowZoom, Row("el_12").Motion);
             Assert.AreEqual(steps + 3, _window.UndoStepsLeft, "effect: its own step");

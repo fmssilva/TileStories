@@ -17,8 +17,9 @@ namespace TileStories.Editor
     {
         // The open panel of `row`: `content` is the row whose content shows (the row itself, or a link's Page row); `pageNumber` names that
         // Page row for a link (1-based); `probe` + `index` name its controls for the tests
-        private void DrawElementRowPanel(POIData poi, BlockInstanceData block, ElementScope scope, ElementRegistry elements, ElementRow row, ElementRow content,
-            ElementKindDefinition element, bool isLink, int pageNumber, string probe, int index, List<string> languages)
+        // `owner` names whose UI state it is (a POI's id, or a template's); a `template` row shows its parts only: a template holds no content
+        private void DrawElementRowPanel(string owner, BlockInstanceData block, ElementScope scope, ElementRegistry elements, ElementRow row, ElementRow content,
+            ElementKindDefinition element, bool isLink, int pageNumber, string probe, int index, List<string> languages, bool template = false)
         {
             if (element == null)
             {
@@ -26,13 +27,13 @@ namespace TileStories.Editor
                 return;
             }
             if (isLink) DrawStoryNote("Its content is Page row " + pageNumber + "'s: edit it there. This row sets its own look and motion.", IndentLevel2);
-            else
+            else if (!template)
             {
                 DrawElementContent(row, element, probe, index, languages);
                 if (element.Media != MediaKind.None) DrawElementMedia(row, element, probe, index, languages);
             }
 
-            string rowKey = ComposedKey(poi.id, block.key, "row/" + row.Id);
+            string rowKey = ComposedKey(owner, block.key, "row/" + row.Id);
             if (element.StyleFields != null && element.StyleFields.Count > 0 && DrawStoryPart(rowKey, StoryPartLook, LookSummary(row, element), StoryLookHelp, probe, index))
                 foreach (var style in element.StyleFields)
                 {
@@ -76,8 +77,9 @@ namespace TileStories.Editor
                 if (picked >= 0 && picked != at) row.SetValue(ElementRow.TapKey, taps[picked]);
             }
 
+            if (template) return;
             if (!isLink) DrawElementProblems(scope, elements, row);
-            if (!isLink && probe == "Story page")
+            if (!isLink && probe == StoryPageProbe)
             {
                 DrawEditorRow(out float rowWidth, out _, IndentLevel2);
                 float half = (Mathf.Max(80f, rowWidth - 36f) - 4f) / 2f;
@@ -93,7 +95,7 @@ namespace TileStories.Editor
                     StoryQueue(() =>
                     {
                         var copy = ElementEdits.UseInPreview(scope, elements, id, linked: false);
-                        OpenComposedRow(poi.id, block.key, copy.Id);
+                        OpenComposedRow(owner, block.key, copy.Id);
                     });
                 }
                 ReportTableCellRect(probe + " copy", index);

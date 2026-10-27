@@ -12,6 +12,9 @@ namespace TileStories
     {
         public const string PreviewModeField = "preview_mode";
         public const string PreviewRowsField = "preview_rows";
+        // What a tap on the preview does and how the preview enters the card (R17.1, R17.4, R17.3)
+        public const string PreviewTapField = "preview_tap";
+        public const string PreviewEntryField = "preview_entry";
         public const string ComponentOverridesField = "component_overrides";
 
         // A component override row's sub-fields: which component, whether the block overrides it (off = the wall's, values kept -- the
@@ -27,6 +30,9 @@ namespace TileStories
         // The highest row number this block ever handed out (TakeRowId): not a field -- nothing to edit -- the id rule's memory
         public const string LastRowIdValue = "element_last_id";
         public const string RowIdPrefix = "el_";
+        // The key of the block template this block was made from (Detail Card > Block Library > Templates, R14.4): not a field either --
+        // the Editor's Template line and Re-apply read it; the card never does
+        public const string TemplateValue = "template";
 
         public static readonly BlockFieldDefinition PreviewModeDefinition = new()
         {
@@ -42,6 +48,23 @@ namespace TileStories
             ShownWhen = FieldShownWhen.Choice(PreviewModeField, ElementOptions.PreviewCustom),
             Help = "The Custom preview, in order: a linked row shows a Page row's content with its own style (edit the content once, on the " +
                    "Page); an own row holds content only the preview shows. A linked row whose Page row is gone is shown as a warning.",
+        };
+
+        public static readonly BlockFieldDefinition PreviewTapDefinition = new()
+        {
+            Key = PreviewTapField, Type = BlockFieldType.Choice, Label = "Tap",
+            Options = ElementOptions.PreviewTaps, OptionLabels = ElementOptions.PreviewTapLabels, ChoiceDefault = ElementOptions.PreviewTapOpenPage,
+            Help = "What a tap on the preview does. Open The Page (the default): a tap anywhere on it -- the picture, the words, the Open Row -- " +
+                   "opens the block's page. Nothing: only the Open Row opens the page, so a tap on the picture or the words while scrolling " +
+                   "does nothing.",
+        };
+
+        public static readonly BlockFieldDefinition PreviewEntryDefinition = new()
+        {
+            Key = PreviewEntryField, Type = BlockFieldType.Choice, Label = "Block Entry",
+            Options = ElementOptions.PreviewEntries, OptionLabels = ElementOptions.PreviewEntryLabels, ChoiceDefault = ElementOptions.PreviewEntryRise,
+            Help = "How the preview enters the card the first time it scrolls into view. Rises In (the default): it fades in and rises a " +
+                   "little, as one. None: it is simply there. Reduce Motion always shows it still.",
         };
 
         public static readonly BlockFieldDefinition ComponentOverridesDefinition = new()
@@ -93,8 +116,11 @@ namespace TileStories
         };
 
         // The surface fields, in the order a composing kind carries them after its own
-        public static readonly IReadOnlyList<BlockFieldDefinition> Definitions = new[] { PreviewModeDefinition, PreviewRowsDefinition, ComponentOverridesDefinition };
-        public static readonly IReadOnlyList<string> FieldKeys = new[] { PreviewModeField, PreviewRowsField, ComponentOverridesField };
+        public static readonly IReadOnlyList<BlockFieldDefinition> Definitions = new[]
+        {
+            PreviewModeDefinition, PreviewRowsDefinition, PreviewTapDefinition, PreviewEntryDefinition, ComponentOverridesDefinition,
+        };
+        public static readonly IReadOnlyList<string> FieldKeys = new[] { PreviewModeField, PreviewRowsField, PreviewTapField, PreviewEntryField, ComponentOverridesField };
 
         // The kind's Page: its one OWN Elements field (BlockRegistry refuses a second), or null for a kind that composes nothing
         public static BlockFieldDefinition PageFieldOf(BlockKindDefinition kind)
@@ -120,6 +146,30 @@ namespace TileStories
         // automatic | custom; a block that stores none (or an unknown word) is Automatic
         public static string PreviewMode(BlockInstanceData block) =>
             ElementOptions.OneOf(new BlockFieldReader(block, null, null).Value(PreviewModeField), ElementOptions.PreviewModes);
+
+        // open_page | none; a block that stores none (or an unknown word) opens its page
+        public static string PreviewTap(BlockInstanceData block) =>
+            ElementOptions.OneOf(new BlockFieldReader(block, null, null).Value(PreviewTapField), ElementOptions.PreviewTaps);
+
+        // rise | none; a block that stores none (or an unknown word) rises in
+        public static string PreviewEntry(BlockInstanceData block) =>
+            ElementOptions.OneOf(new BlockFieldReader(block, null, null).Value(PreviewEntryField), ElementOptions.PreviewEntries);
+
+        // The key of the template the block was made from ("" = none)
+        public static string TemplateOf(BlockInstanceData block) => StoredValue(block, TemplateValue)?.value ?? "";
+
+        // Record (or, with "", forget) the template the block was made from
+        public static void SetTemplate(BlockInstanceData block, string templateKey)
+        {
+            var stored = StoredValue(block, TemplateValue);
+            if (stored == null)
+            {
+                if (string.IsNullOrEmpty(templateKey)) return;
+                block.fields ??= new List<BlockFieldValue>();
+                block.fields.Add(stored = new BlockFieldValue { key = TemplateValue });
+            }
+            stored.value = templateKey ?? "";
+        }
 
         // The minutes set by hand in Reading Time, 0 = Auto (ElementRules computes them from the Page)
         public static int MinutesSetByHand(BlockInstanceData block) =>

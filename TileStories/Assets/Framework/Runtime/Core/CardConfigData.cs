@@ -51,6 +51,23 @@ namespace TileStories
         // The shared card components' wall defaults (_3.3 R17.5, Detail Card > Card Components): what every block draws unless its own
         // Component Overrides row says otherwise
         public CardComponentSettings components = new();
+        // The wall's own block templates (_3.3 R14.4, Detail Card > Block Library > Templates): named compositions of element rows with their
+        // looks and no content. A block made from one COPIES its rows (a preset: nothing stays linked); the framework's built-in templates
+        // ship as Editor code beside them. Empty = none of the wall's own
+        public List<BlockTemplateData> block_templates = new();
+    }
+
+    // One block template of the wall (_3.3 R14.4): a PRESET -- "+ Add block" from it copies its rows into the point's new block, and the
+    // block's "Re-apply" adds back the template rows it lacks. The card never reads it
+    [Serializable]
+    public class BlockTemplateData
+    {
+        // Generated template_N, never shown; a block made from it stores it (BlockSurfaces.TemplateValue), so a rename touches no block
+        public string key;
+        // The developer's name for it: the Templates table, the "+ Add block" picker, a block's Template line
+        public string name = "";
+        // The composition: a block of a composing kind whose Page rows hold each element's look, motion and tap -- never content
+        public BlockInstanceData block = new();
     }
 
     // The shared card components (_3.3 R17.5): one value per component the wall sets once; a block overrides it in its Component Overrides

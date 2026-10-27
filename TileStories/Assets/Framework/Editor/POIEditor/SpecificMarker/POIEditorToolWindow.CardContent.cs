@@ -207,12 +207,31 @@ namespace TileStories.Editor
             _newCardBlockKindIndex = Mathf.Clamp(_newCardBlockKindIndex, 0, kinds.Count - 1);
 
             DrawEditorRow(out float rowWidth, out _);
-            float half = (rowWidth - 4f) / 2f;
-            _newCardBlockKindIndex = EditorGUILayout.Popup(_newCardBlockKindIndex, labels, GUILayout.Width(half), GUILayout.ExpandWidth(false));
-            if (GUILayout.Button("+ Add block", GUILayout.Width(half), GUILayout.ExpandWidth(false)))
+            float third = (rowWidth - 8f) / 3f;
+            _newCardBlockKindIndex = EditorGUILayout.Popup(_newCardBlockKindIndex, labels, GUILayout.Width(third), GUILayout.ExpandWidth(false));
+            if (GUILayout.Button("+ Add block", GUILayout.Width(third), GUILayout.ExpandWidth(false)))
                 AddCardBlock(poi, kinds[_newCardBlockKindIndex]);
             ReportTableCellRect("Card add block", 0);
+            // - or a block made from a template (_3.3 R14.5): its rows copied, ready to fill
+            if (GUILayout.Button(new GUIContent("+ From a template...", "Add a block made from one of Detail Card > Block Library > Templates"),
+                    GUILayout.Width(third), GUILayout.ExpandWidth(false)))
+                EditorPopup.ShowAt(CreateBlockTemplatePickerPopup(poi.id), GUILayoutUtility.GetLastRect());
+            ReportTableCellRect("Card add from template", 0);
             EditorRowEnd();
+        }
+
+        // Add to `poiId`'s card ONE block made from template `templateKey` (BlockTemplates.NewBlock: its rows copied, fresh ids, no content),
+        // open in the table. Called inside a mutation scope (the picker's ApplyPopupEdit): one undo step
+        internal void AddCardBlockFromTemplate(string poiId, string templateKey)
+        {
+            var poi = _config?.pois?.Find(p => p != null && p.id == poiId);
+            var template = BlockTemplates.Find(_config?.card_settings, ElementRegistry.Shared, templateKey);
+            if (poi == null || template == null) return;
+            poi.card ??= new POICardData();
+            poi.card.blocks ??= new List<BlockInstanceData>();
+            var block = BlockTemplates.NewBlock(poi.card, template, ElementRegistry.Shared);
+            poi.card.blocks.Add(block);
+            _cardBlockFoldouts[poi.id + "/" + block.key] = true;
         }
 
         // The [[terms]] of a block's long texts (every language, item rows included) that the wall's Glossary lacks

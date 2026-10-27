@@ -14533,7 +14533,8 @@
             "open_row_emphasis": "nudge",
             "page_chrome_breadcrumb": true,
             "page_chrome_prev_next": true
-        }
+        },
+        "block_templates": []
     },
     "search_demo": {
         "enabled": false,
