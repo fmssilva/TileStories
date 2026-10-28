@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Section edge</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 100%; position: relative; display: {{display}};">
+
+<sc-if value="{{hair}}" hint-placeholder-val="{{false}}">
+<div aria-hidden="true" style="height: 1px; margin: 0 24px; background: {{hairCol}};"></div>
+</sc-if>
+
+<sc-if value="{{orn}}" hint-placeholder-val="{{false}}">
+<div aria-hidden="true" style="display: flex; align-items: center; justify-content: center; gap: 12px; padding: 4px 0 8px; color: {{solid}};">
+<div style="width: 72px; height: 1px; background: currentColor; opacity: 0.6;"></div>
+<div style="width: 22px; height: 22px; color: {{solid}};">
+<svg viewBox="0 0 24 24" width="22" height="22" style="display: block;"><rect width="24" height="24" style="fill: currentColor; opacity: 0.16;"></rect><path d="M0 0H7A7 7 0 0 1 0 7ZM24 0V7A7 7 0 0 1 17 0ZM24 24H17A7 7 0 0 1 24 17ZM0 24V17A7 7 0 0 1 7 24Z" style="fill: currentColor; opacity: 0.55;"></path><path d="M12 3.2C14.8 6.6 14.8 9.4 12 12C9.2 9.4 9.2 6.6 12 3.2ZM20.8 12C17.4 14.8 14.6 14.8 12 12C14.6 9.2 17.4 9.2 20.8 12ZM12 20.8C9.2 17.4 9.2 14.6 12 12C14.8 14.6 14.8 17.4 12 20.8ZM3.2 12C6.6 9.2 9.4 9.2 12 12C9.4 14.8 6.6 14.8 3.2 12Z" style="fill: currentColor;"></path><circle cx="12" cy="12" r="1.7" style="fill: {{paper}};"></circle></svg>
+</div>
+<div style="width: 72px; height: 1px; background: currentColor; opacity: 0.6;"></div>
+</div>
+</sc-if>
+
+<sc-if value="{{az}}" hint-placeholder-val="{{false}}">
+<div aria-hidden="true" style="width: 100%; overflow: hidden;">
+<div style="display: flex; gap: 1px; width: {{stripW}}px; animation: {{anim}};">
+<sc-for list="{{tiles}}" as="tl" hint-placeholder-count="16">
+<div style="flex: 0 0 24px; height: 24px; color: {{tl.col}}; opacity: {{tl.op}}; transform: {{tl.tf}}; transition: transform 0.7s cubic-bezier(.3,1.35,.5,1) {{tl.delay}}, opacity 0.4s ease {{tl.delay}};">
+<svg viewBox="0 0 24 24" width="24" height="24" style="display: block;"><rect width="24" height="24" style="fill: currentColor; opacity: 0.16;"></rect><path d="M0 0H7A7 7 0 0 1 0 7ZM24 0V7A7 7 0 0 1 17 0ZM24 24H17A7 7 0 0 1 24 17ZM0 24V17A7 7 0 0 1 7 24Z" style="fill: currentColor; opacity: 0.55;"></path><path d="M12 3.2C14.8 6.6 14.8 9.4 12 12C9.2 9.4 9.2 6.6 12 3.2ZM20.8 12C17.4 14.8 14.6 14.8 12 12C14.6 9.2 17.4 9.2 20.8 12ZM12 20.8C9.2 17.4 9.2 14.6 12 12C14.8 14.6 14.8 17.4 12 20.8ZM3.2 12C6.6 9.2 9.4 9.2 12 12C9.4 14.8 6.6 14.8 3.2 12Z" style="fill: currentColor;"></path><circle cx="12" cy="12" r="1.7" style="fill: {{tl.paper}};"></circle></svg>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{mos}}" hint-placeholder-val="{{false}}">
+<div aria-hidden="true" style="width: 100%; overflow: hidden;">
+<div style="width: {{mosW}}px; height: 28px; animation: {{anim}};">
+<svg viewBox="{{mosVb}}" width="{{mosW}}" height="28" style="display: block;">
+<sc-for list="{{cells}}" as="m" hint-placeholder-count="40">
+<rect x="{{m.x}}" y="{{m.y}}" width="6" height="6" rx="1.5" style="fill: {{m.fill}}; opacity: {{m.op}}; transition: opacity 0.5s ease {{m.delay}};"></rect>
+</sc-for>
+</svg>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{wave}}" hint-placeholder-val="{{false}}">
+<svg aria-hidden="true" viewBox="0 0 390 30" width="390" height="30" preserveAspectRatio="none" style="display: block; width: 100%; margin-top: {{waveGap}}px; transform: {{waveTf}}; transform-origin: 50% 100%; transition: transform 0.9s cubic-bezier(.3,1.3,.5,1);">
+<path d="M0 30V17C48 4 98 2 150 12S262 30 318 20S372 6 390 10V30Z" style="fill: {{tintCol}};"></path>
+</svg>
+</sc-if>
+
+<sc-if value="{{tileStart}}" hint-placeholder-val="{{false}}">
+<div aria-hidden="true" style="width: 100%; overflow: hidden; margin-top: {{waveGap}}px;">
+<div style="display: flex; gap: 1px; width: 400px;">
+<sc-for list="{{startTiles}}" as="tl" hint-placeholder-count="16">
+<div style="flex: 0 0 24px; height: 24px; color: {{tl.col}}; opacity: {{tl.op}}; transform: {{tl.tf}}; transition: transform 0.7s cubic-bezier(.3,1.35,.5,1) {{tl.delay}}, opacity 0.4s ease {{tl.delay}};">
+<svg viewBox="0 0 24 24" width="24" height="24" style="display: block;"><rect width="24" height="24" style="fill: currentColor; opacity: 0.16;"></rect><path d="M0 0H7A7 7 0 0 1 0 7ZM24 0V7A7 7 0 0 1 17 0ZM24 24H17A7 7 0 0 1 24 17ZM0 24V17A7 7 0 0 1 7 24Z" style="fill: currentColor; opacity: 0.55;"></path><path d="M12 3.2C14.8 6.6 14.8 9.4 12 12C9.2 9.4 9.2 6.6 12 3.2ZM20.8 12C17.4 14.8 14.6 14.8 12 12C14.6 9.2 17.4 9.2 20.8 12ZM12 20.8C9.2 17.4 9.2 14.6 12 12C14.8 14.6 14.8 17.4 12 20.8ZM3.2 12C6.6 9.2 9.4 9.2 12 12C9.4 14.8 6.6 14.8 3.2 12Z" style="fill: currentColor;"></path><circle cx="12" cy="12" r="1.7" style="fill: {{tl.paper}};"></circle></svg>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{
+"cfg":{"editor":null},
+"$preview":{"width":390,"height":80}
+}'>
+class Component extends DCLogic {
+  renderVals() {
+    const c = this.props.cfg ?? { show: true, kind: 'azulejo', start: 'wave', rgb: '31,78,156', a: 0.12, motion: 'still', seen: true, hair: 'rgba(20,20,20,0.13)', paper: 'rgb(248,246,242)' };
+    const show = c.show !== false;
+    const kind = c.kind ?? 'none';
+    const start = c.start ?? 'plain';
+    const rgb = c.rgb ?? '31,78,156';
+    const a = c.a ?? 0.12;
+    const drift = c.motion === 'drift';
+    const reveal = c.motion === 'reveal';
+    const seen = !reveal || !!c.seen;
+    const solid = 'rgb(' + rgb + ')';
+    const paper = c.paper ?? 'rgb(248,246,242)';
+
+    // the azulejo strip: 24 px tiles with a 1 px joint; "reveal" turns each tile in, one after the other, when the section comes into view
+    const tileList = function (count, stagger) {
+      const out = [];
+      for (let i = 0; i < count; i++) {
+        out.push({
+          col: solid, paper: paper,
+          op: seen ? 1 : 0,
+          tf: seen ? 'perspective(240px) rotateY(0deg)' : 'perspective(240px) rotateY(88deg)',
+          delay: (reveal ? i * stagger : 0) + 'ms'
+        });
+      }
+      return out;
+    };
+
+    // the mosaic: 7 px tesserae in 4 rows, a band that weaves along a sine (period 14 columns, so the drift loops without a seam)
+    const cols = drift ? 112 : 56;
+    const cells = [];
+    for (let col = 0; col < cols; col++) {
+      const mid = 1.5 + 1.45 * Math.sin(2 * Math.PI * col / 14);
+      for (let row = 0; row < 4; row++) {
+        const d = Math.abs(row - mid);
+        const alpha = d < 0.8 ? 0.92 : (d < 1.7 ? 0.42 : 0.14);
+        cells.push({
+          x: col * 7, y: row * 7,
+          fill: 'rgba(' + rgb + ',' + alpha + ')',
+          op: seen ? 1 : 0,
+          delay: (reveal ? (col % 56) * 14 : 0) + 'ms'
+        });
+      }
+    }
+
+    const hasDivider = kind !== 'none';
+    return {
+      display: show ? 'block' : 'none',
+      hair: show && kind === 'hairline', hairCol: c.hair ?? 'rgba(20,20,20,0.13)',
+      orn: show && kind === 'ornament', solid: solid, paper: paper,
+      az: show && kind === 'azulejo', tiles: tileList(drift ? 32 : 16, 45), stripW: drift ? 800 : 400,
+      anim: drift ? 'ts-drift 40s linear infinite' : 'none',
+      mos: show && kind === 'mosaic', cells: cells, mosW: cols * 7, mosVb: '0 0 ' + (cols * 7) + ' 28',
+      wave: show && start === 'wave', tintCol: 'rgba(' + rgb + ',' + a + ')',
+      waveTf: seen ? 'scaleY(1)' : 'scaleY(0.15)',
+      waveGap: hasDivider ? 40 : 0,
+      tileStart: show && start === 'tiles', startTiles: tileList(16, 35)
+    };
+  }
+}
+</script>
+</body>
+</html>
