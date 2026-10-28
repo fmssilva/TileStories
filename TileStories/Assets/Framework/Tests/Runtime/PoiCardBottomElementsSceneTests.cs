@@ -134,7 +134,8 @@ namespace TileStories.Tests
         // A real finger drags the stack by `dy` panel units (negative = up the screen = further down the card), then lets it settle
         private IEnumerator DragStack(float dy)
         {
-            var viewport = Scroll.contentViewport.worldBound;
+            // - the part a finger reaches: under the floating header and strip (_3.3 S4a), above the bottom area
+            var viewport = CardTestInput.ReachableStack(Sheet);
             float inset = Mathf.Min(20f, viewport.height * 0.5f);
             float startY = dy < 0f ? viewport.yMax - inset : viewport.yMin + inset;
             yield return CardTestInput.TouchDrag(Scroll.panel, new Vector2(viewport.center.x, startY), new Vector2(0f, dy));
@@ -275,6 +276,9 @@ namespace TileStories.Tests
             // - a real tap on a slot moves the card; the widened item is then the section the screen shows
             yield return ScrollToTop();
             Assert.AreEqual(0, SectionUnderTheSpyLine(), "precondition: back at the top");
+            // - _3.3 S4a: at the top the hero is the screen and the dock waits for it -- read just past it
+            yield return CardTestInput.PastTheHero(Sheet);
+            Assert.IsTrue(Chrome.BottomNavShown, "precondition: past the hero the dock shows");
             var tab = Dock.Items[2];
             Assert.IsTrue(OnScreen(tab.Button), "precondition: the third slot is on screen");
             int jumpsBefore = NavJumps.Count;
@@ -548,7 +552,9 @@ namespace TileStories.Tests
             Assert.GreaterOrEqual(NextUp.Caption.layout.width + 0.5f, caption.x, "the finished words are whole at 390 px");
             yield return CardGalleryChecks.Render("Nav_Lamp_next_up_end_pt_390");
             yield return ScrollToTop();
-            Assert.IsTrue(Chrome.BottomNavShown, "precondition: the drags up brought the bar back");
+            // - _3.3 S4a: at the top the hero is the screen and the bar waits for it -- read just past it
+            yield return CardTestInput.PastTheHero(Sheet);
+            Assert.IsTrue(Chrome.BottomNavShown, "precondition: back up the card, past the hero, the bar shows");
             Assert.IsFalse(NextUp.Finished, "back up the card the bar names a block again");
             Assert.IsTrue(CardTestInput.IsShown(NextUp.Next, Sheet.Root), "with its Next button");
             Assert.IsNotEmpty(NextUp.Heading.text);

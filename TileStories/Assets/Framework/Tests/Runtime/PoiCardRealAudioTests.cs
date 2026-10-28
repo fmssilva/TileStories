@@ -35,11 +35,13 @@ namespace TileStories.Tests
 
             SelectionEventBus.Select("lamp");
             yield return CardTestInput.Settle();
-            // - the chip is the hero's Listen (_3.3 P4.4a): the hero is in view from Half
-            Sheet.SetStop(SheetStopRule.Stop.Half);
+            // - the chip is the hero's Listen: since _3.3 S4a it sits at the hero's foot, in view at Full
+            Sheet.SetStop(SheetStopRule.Stop.Full);
             yield return CardTestInput.Settle();
-            for (int frame = 0; frame < 600 && Mathf.Abs(Sheet.Root.layout.height - Sheet.Stops.Half) > 0.5f; frame++) yield return null;
+            for (int frame = 0; frame < 600 && Mathf.Abs(Sheet.Root.layout.height - Sheet.Stops.Full) > 0.5f; frame++) yield return null;
             var chip = Sheet.Stack.HeroActionViews.OfType<AudioGuideBlockView>().Single(v => v.Variant == BuiltInBlocks.AudioGuideHeroChip);
+            Assert.IsTrue(Sheet.Stack.Scroll.contentViewport.worldBound.Contains(chip.PlayButton.worldBound.center), "precondition: Listen is in view: "
+                + chip.PlayButton.worldBound + " in " + Sheet.Stack.Scroll.contentViewport.worldBound);
             yield return Tap(chip.PlayButton);
             yield return null;
             Assert.AreEqual(CardAudioState.Playing, Card.Audio.State);

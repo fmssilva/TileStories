@@ -99,16 +99,19 @@ namespace TileStories.Tests
             var scroll = Stack.Scroll;
             Rect last = default;
             int still = 0;
+            // - "in view" = where a finger reaches it: not under the floating header or strip (_3.3 S4a), not under the bottom area
             for (int frame = 0; frame < 240 && still < 3; frame++)
             {
-                if (!scroll.contentViewport.worldBound.Contains(target.worldBound.center)) scroll.ScrollTo(target);
+                var reach = CardTestInput.ReachableStack(Sheet);
+                if (!reach.Contains(target.worldBound.center))
+                    scroll.scrollOffset = new Vector2(0f, scroll.scrollOffset.y + target.worldBound.center.y - reach.center.y);
                 yield return null;
                 var now = target.worldBound;
-                still = now == last && scroll.contentViewport.worldBound.Contains(now.center) ? still + 1 : 0;
+                still = now == last && CardTestInput.ReachableStack(Sheet).Contains(now.center) ? still + 1 : 0;
                 last = now;
             }
-            Assert.IsTrue(scroll.contentViewport.worldBound.Contains(target.worldBound.center),
-                "precondition: " + target.name + " is inside the visible part of the card: " + target.worldBound + " in " + scroll.contentViewport.worldBound);
+            Assert.IsTrue(CardTestInput.ReachableStack(Sheet).Contains(target.worldBound.center),
+                "precondition: " + target.name + " is inside the reachable part of the card: " + target.worldBound + " in " + CardTestInput.ReachableStack(Sheet));
             Assert.AreEqual(3, still, "precondition: " + target.name + " holds still before the tap");
         }
 

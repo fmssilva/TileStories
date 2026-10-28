@@ -79,6 +79,9 @@ namespace TileStories.Tests
         {
             for (int guard = 0; guard < 20 && Nav.Current != index; guard++)
             {
+                // - _3.3 S4a: the strip is chrome and waits for the hero -- read just past it before a finger goes to it
+                if (!Sheet.Chrome.TopShown) yield return CardTestInput.PastTheHero(Sheet);
+                Assert.IsTrue(Sheet.Chrome.TopShown, "precondition: past the hero the strip shows");
                 VisualElement button;
                 if (Sheet.Slots.TopView is FamilyPagerNavView pager) button = pager.Next;
                 else if (Sheet.Slots.TopView is TabsNavView tabs) button = tabs.Tabs.First(t => t.Index == index).Button;

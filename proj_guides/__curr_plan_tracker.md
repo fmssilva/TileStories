@@ -60,20 +60,74 @@ so the demo wall's Navigation Bar ON does NOT reach these fixtures (bar off ther
 - Chrome precondition messages now carry ChromeState() (offset, hero bottom, shown parts, scroll memory)
 - Layout.TapTab: reads the hero away when the strip is hidden, requires it shown; InViewAndStill = ReachableStack
 - Results (BLOCK, Unity behind/behind): TextTabs 7/7, Layout 6/6, Chrome 6/6
+- Group 1 (8 fixtures, behind/behind): TopElements 15/15 and HeroMeasure 8/8 green as they stand; 27 reds in the other six:
+  - BottomBar / BottomElements / Menu DragStack: pattern 3 (ReachableStack) -- the up-moves started on the floating header (7 reds)
+  - Menu.TheLampsStops "a touch target wide 48, was 44": S4a sized the round bar buttons --ts-bar-height (44, PoiCard.uss); expected
+    from that token + a >= 44 pt guard (WCAG 2.5.5)
+  - NavBlock.ARealTapOnEveryTile "tile 7 on screen": the hero is Full's whole view, the grid after it -- each tile scrolled to the
+    middle of ReachableStack, asserted there before the real tap
+  - Hero.EveryWordOfTheHero x16 (1.3-1.5:1; the render: no scrim under the words at the hero's foot) -> [Ignore] hero contrast
+  - second pass: BottomBar Room -> StackRoom (pattern 4); BottomElements / NavBlock / Pages: PastTheHero before a strip or bar tap
+    (pattern 2); all four green (BottomBar 8/8, BottomElements 8/8, NavBlock 6/6, Pages 11/11)
+- Group 2 (RestingEnd, NavOptions, PoiCardScene, SearchSettingsField, TapZoom, PlaceInAr, NavScene, Model3D): RestingEnd 11 + 5
+  gated skips, NavOptions 27/27, SearchSettingsField 33/33, NavScene 18/18 green as they stand
+  - WALL CHOICE (new): the demo wall opens at Half since S4a (container.open_stop "half"; framework "peek"): SearchSceneFixture
+    now pins card_settings.container to the framework default too (ShippedContainer keeps the wall's) -- 4 "opens at Peek" reds
+  - PoiCardScene.DraggingUp: Half shows the hero's top, the hero runs on under Half's foot; Full's gap = FullTopGap(full_height)
+  - TapZoom true/false: IntoReach (pattern 3) before both fingers; the sideways answer under watch (diagnostic message)
+  - Model3D header drag: the finger in the middle of the stage's reachable part (the hero's centre is below Half's screen)
+  - PlaceInAr: ScrollAndTap into reach (pattern 3); the X tap that does not close: diagnostic (what the X's centre hits)
+- Wide run (34 fixtures) + two follow-ups: 17 green as they stand; re-based / fixed:
+  - pattern 2 (strip / bar waits for the hero) in Painting, NavCombinations.TurnTo, ShowAfterReading.TapTab, BottomElements, NavBlock, Pages
+  - pattern 3, now ONE shared helper: CardTestInput.IntoReach / TapInReach (to the reach's middle, then three frames still -- a set offset
+    never stops a running fling); used by NavBlock, PlaceInAr, TapZoom, NavContents, Bento; Expandable.InViewAndStill = Layout's
+  - ThemeFrame edge contrast: "in view" = ReachableStack (it measured the chrome over a block)
+  - Listen at the hero's foot: RealAudio / VideoScene open at Full; Audio "Listen, 2:44" + its stop Full (test renamed ...AtFull...)
+  - Bento Community row: the rule's height, >= the minimum (Full 844 gives it 68, not 64)
+  - CardLight: past the hero; rim layer index = BlockFrame.PartCount (S4a added the groove); CardVideoGallery poster under the top shade
+  - WALL CHOICE: MarkerConfigDrivesMarker owns marker_use_badge = true
+  - PRODUCT (S4a, small, fixed): PoiCardSheetView landing inset measured from the stack's top (was the sheet's: 1 px low, the spy
+    disagreed with the screen at a boundary -- InterleavedSpy "10741: 2 vs 3", screen 104 / card 105); CardLight's sweep band read
+    from the theme for the mode shown (after a mode switch the rim's resolved width was the old mode's: dark lit a 3 px band)
+  - PRODUCT (S4a, reported, not fixed: design choice) F1: at Full (no top gap) the floating placed-model chip lies over the X
+    (panel.Pick at the X = poi-card-chip-remove) -> two PlaceInAr tests [Ignore] F1
+  - CONTRAST F2: the gear on the S4a see-through bar 6.6:1 -> CardSettingsGallery gear test [Ignore] F2 (premium design block)
+  - QUARANTINE F4: TapZoom true/false swipe -- vertical and sideways never pass in one run under real fingers since S4a
 
 ## NEXT (exact next sub-step for the following session)
-- Run the remaining 48 red fixtures of pm_before.csv in groups of ~8 (background), read every message, apply the five patterns,
-  log each re-base here; hero-contrast asserts -> [Ignore("Hero contrast below 7:1 -- _3.3 open, fixed in the premium design
-  block")] on exactly those tests; a real product bug -> fix if small and clear, else list it with evidence.
-- Biggest red fixtures by count: HeroScene 16, PoiCardSceneTests 8, RestingEnd 5 (+5 skipped), TopElements 5, BottomElements 4,
-  NavOptions 4, Menu 4, Pages 4, HeroMeasure 4, CardNavGallery 4. The 9 "doubled DetailCard navigation" reds did NOT show in the
-  baseline (full EditMode DetailCardEditorTabTests 75/75): watch for them in the FULL runs.
-- Then Parts 2 (Core), 3 (slim: CardGalleryTests 907 s, CardNavGalleryTests 564 s, RestingEnd 256 s, PoiCardSceneTests 249 s), 5, the
-  closing CORE + FULL runs.
+State: tree compiles (0 error CS); full EditMode 2298 / 0 failed / 1 skipped (3.5 min, behind / behind). Every red fixture of
+pm_before.csv has been run again after its re-base and is green, except what the last confirm run reports (CardGallery /
+CardNavGallery / CardLight / CardVideoGallery: see the final report). Named skips: Hero contrast x16, F1 x2 (PlaceInAr), F2 (gear), F3
+(CardLight band), F4 (TapZoom true / false), F5 (fab_dial contrast, Assert.Ignore inside the case). Nothing committed.
+1. Part 2 -- tag [Category("Core")] (a NUnit attribute, `using NUnit.Framework;`):
+   - CLASS level (fast fixtures, ~14.6 min at baseline): PoiCardSheetDragSceneTests, PoiCardThemeSceneTests, PoiCardNavBarSceneTests,
+     PoiCardAudioSceneTests, PoiCardStorySceneTests, MarkerConfigDrivesMarkerTests, ARZoomCameraFovTests, ARZoomRoutingTests,
+     LivingRoomConfigIntegrationTests, ThemePipelineTests, PoiCardLanguageSceneTests, PoiCardChromeSceneTests, PoiCardTextTabsSceneTests,
+     PoiCardLayoutSceneTests, SectionSheetSceneTests, PoiCardExpandableSceneTests, PoiCardVideoSceneTests, PoiCardModel3DSceneTests,
+     PoiCardPanoramaSceneTests, PoiCardBottomBarSceneTests, PoiCardFullViewSiblingsSceneTests, PoiCardLiveUpdateTests, LodRealPipelineTests,
+     OrientationWallSessionIntegrationTests, DisplacementSettingsRealMarkerTests, PoiCardFullHeightSceneTests, PoiCardFloatingSceneTests,
+     PoiCardPaintingSceneTests, LodWallSceneTests, SearchDemoTests, MarkerViewRuntimeTests
+   - METHOD level (slow fixtures): PoiCardSceneTests {ARealMarkerTap_OpensTheCard_ForThatPoi, TheX_ClosesTheCard_AndClearsTheSelection,
+     DraggingUp_GoesToHalf_AtMost40Percent_ThenFull, PullingTheCardDownBelowPeek_ClosesIt, ATapOnEmptyCameraSpace_Closes_ButATapOnTheCardOrAMarkerDoesNot};
+     PoiCardHeroSceneTests {AtFull_TheWholeHeroIsTheScreen_..., ARealTapOnTheHerosAction_...}; PoiCardPageChromeSceneTests
+     {TheStoryPage_ARealTapOnBack_..., TheFoot_RealTapsOnNextAndPrevious_...}; PoiCardNavSceneTests {AJumpFromPeek_..., ARealFingerDrag_MovesTheSpy_...};
+     SearchSceneTests {ATypedQuery_..., ARealMarkerTap_Selects_..., SelectingAndFiltering_NeverUndoEachOther}; EditMode:
+     LiveSyncFieldMatrixTests.LiveEdit_ReachesTheRunningMarker, CardConfigRoundTripTests.EveryCardField_WalkedByReflection_...,
+     VisitorStateIsolationTests.ThisRun_KeepsTheVisitorsStateInAStoreOfItsOwn_...
+   - time it: run_tests PlayMode + EditMode with category_names ["Core"] (background); write the list + paths into _Test_Suite_1.md section 3
+2. Part 4 rest -- the "doubled DetailCard" reds never showed this session (EditMode 2298 / 0 twice). Lead found: PoiEditorWindowHost.Host.Editor is
+   STATIC -- a host window left open by any test paints the NEXT test's editor too (rect probes then hold the wrong window's rects). Fix at the
+   source: the constructor closes every leftover Host (Resources.FindObjectsOfTypeAll<Host>) and a TearDown-level check fails the test that leaked
+   one; then find the leaker (a test that reassigns its host without Close). Watched flakes: InterleavedSpy "drag 20" family -> IntoReach's
+   wait-until-still is the cause's fix for taps; the walk's own DragStack still waits on seconds (Settle 0.6) -- switch it to a still condition.
+3. Part 3 -- slim CardGalleryTests (608 s now) and CardNavGalleryTests (483 s): one case per behaviour (Test_Suite_Review step 2); RestingEnd 252 s,
+   PoiCardSceneTests 210 s next. Write the fix list into _Test_Suite_1.md section 5 with each chunk's expected saving.
+4. Closing: CORE run (timed, background) then FULL PlayMode + full EditMode (background); fill _Test_Suite_1.md @AFTER@ / @CORE@ / @FLAKES@ /
+   @FIXLIST@ and 40-testing.md's CORE time; LivingRoomScene open; the 6.4 report with the review questions (F1 placement, F2/F5 contrast, F3).
 
 ## P4 -- reds and flakes
 - [ ] leaked window doubling the 9 DetailCard navigation tests: find the opener, fix at source
-- [ ] tests reading the developer's LivingRoom choices (LiveSync badge x5, LivePlayModeNavigationPreset, others the runs show): own data
+- [x] tests reading the developer's LivingRoom choices: LiveSync badge x5, NavPreset (EditMode); the container's open stop (SearchSceneFixture pin), Use Badge (MarkerConfigDrivesMarker)
 - [ ] watched flakes: cause or named quarantine
 
 ## P2 -- CORE
@@ -85,9 +139,9 @@ so the demo wall's Navigation Bar ON does NOT reach these fixtures (bar off ther
 - [ ] rest -> fix list in block-sized chunks with expected saving
 
 ## P5 -- docs
-- [ ] 40-testing.md 4.2 "Which tests, when (three tiers)"
+- [x] 40-testing.md 4.2 "Which tests, when (three tiers)" (CORE time pending its first run)
 - [ ] _Test_Suite_1.md (times before / after, Core list, findings, fix list, S4a verdict)
-- [ ] 10-structure.md lines (FixtureTimes.cs, FixtureTimesTests.cs, changed lines)
+- [x] 10-structure.md lines (FixtureTimes.cs, FixtureTimesTests.cs, TestRunRecorderHooks, SearchSceneFixture, CardTestInput)
 
 ## Closing
 - [ ] CORE run timed + green (background)

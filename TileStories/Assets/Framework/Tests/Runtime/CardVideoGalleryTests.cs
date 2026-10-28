@@ -88,8 +88,10 @@ namespace TileStories.Tests
         private static IEnumerator PictureColourIn(HeaderBlockView header, System.Action<Color> got)
         {
             var hero = header.HeroPart.worldBound;
-            Assert.Greater(header.Glow.worldBound.yMin - hero.yMin, 24f, "precondition: a band of picture above the words' glow");
-            yield return CardGalleryChecks.PixelAt(header.HeroPart, new Vector2(hero.center.x, hero.yMin + 12f), got);
+            // - _3.3 S4a: the top shade darkens the hero's top behind the floating bars -- the picture is read under its foot
+            float top = CardTestInput.UnderTheTopShade(header.HeroPart);
+            Assert.Greater(header.Glow.worldBound.yMin - top, 24f, "precondition: a band of bare picture between the top shade and the words' glow");
+            yield return CardGalleryChecks.PixelAt(header.HeroPart, new Vector2(hero.center.x, top + 12f), got);
         }
 
         private static bool Near(Color a, Color b) => Mathf.Abs(a.r - b.r) < 0.05f && Mathf.Abs(a.g - b.g) < 0.05f && Mathf.Abs(a.b - b.b) < 0.05f;

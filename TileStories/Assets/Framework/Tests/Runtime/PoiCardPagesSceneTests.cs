@@ -453,6 +453,9 @@ namespace TileStories.Tests
             var bar = Sheet.Slots.BottomView as BottomBarNavView;
             Assert.IsNotNull(bar, "precondition: the Bottom Bar is drawn");
             Assert.AreEqual(BuiltInNavElements.FamilyPager, Sheet.Slots.TopKey, "the pager stays at the top beside a bottom bar");
+            // - _3.3 S4a: the bottom bar is chrome and waits for the hero -- read just past it before tapping a slot
+            yield return CardTestInput.PastTheHero(Sheet);
+            Assert.IsTrue(Sheet.Chrome.BottomNavShown, "precondition: past the hero the bar shows");
             for (int i = bar.Items.Count - 1; i >= 1; i--)
             {
                 var slot = bar.Items[i].Button;

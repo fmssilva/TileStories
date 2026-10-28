@@ -62,14 +62,18 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle();
             Assert.AreEqual(SheetStopRule.Stop.Half, Sheet.Stop);
             Assert.LessOrEqual(Sheet.Root.resolvedStyle.height, Sheet.Layer.layout.height * 0.40f + 1f, "half never passes 40% of the screen");
-            var subtitle = Header.HeroPart.Q<Label>("card-header-subtitle");
-            Assert.LessOrEqual(subtitle.worldBound.yMax, Sheet.Root.worldBound.yMax + 1f, "half shows the hero's subtitle");
+            // - _3.3 S4a: the hero is the whole sheet at Full, its words at its foot -- Half shows the hero's top, the words wait below
+            Rect hero = Header.HeroPart.worldBound, view = Sheet.Stack.Scroll.contentViewport.worldBound;
+            Assert.AreEqual(view.yMin, hero.yMin, 1f, "half shows the hero's top");
+            Assert.Greater(hero.yMax, view.yMax + 1f, "...and the hero runs on under Half's foot");
             yield return Capture("Card_Lamp_Half");
 
             yield return CardTestInput.Drag(Sheet.Handle, -(Sheet.Stops.Full - Sheet.Stops.Half), slowSheet: Sheet);
             yield return CardTestInput.Settle();
             Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop);
-            Assert.AreEqual(Sheet.Layer.layout.height - Sheet.Stops.Full, 48f, 1f, "full leaves the token's top gap (--ts-sheet-top-gap)");
+            var container = ConfigCopy().card_settings.container;
+            Assert.AreEqual(SheetStopRule.FullTopGap(container.full_height, CardTestInput.TokenPx("--ts-sheet-top-gap")),
+                Sheet.Layer.layout.height - Sheet.Stops.Full, 1f, "full leaves the gap the wall's Full Height asks for");
             Assert.AreEqual("lamp", SelectionEventBus.CurrentPoiId, "dragging never changes the selection");
             yield return Capture("Card_Lamp_Full");
         }

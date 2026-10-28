@@ -19,8 +19,9 @@ namespace TileStories.Tests
     // its WallSession, mock camera, EventSystem, zoom rig and SearchUI object with SearchUIHost + SearchUI.uss,
     // the shipped config) is loaded, the tests act the way a visitor or the live Editor push does (real
     // raycast taps, real panel events, WallSession.ApplySearchSettings / ApplySearchDemo), and it is unloaded
-    // after. Renders of the real Game view (UI included) are saved as TestEvidence/Search/Search_*.png. Two wall settings are pinned for
-    // every test: LOD off, and the card's navigation at the framework default (the wall's own preset stays in ShippedNavigation).
+    // after. Renders of the real Game view (UI included) are saved as TestEvidence/Search/Search_*.png. Wall settings pinned for every
+    // test: LOD off, and the card's navigation and container at the framework default (the wall's own kept in ShippedNavigation /
+    // ShippedContainer).
     // A "Layout update is struggling" line from the load to the end of the unload fails the test (LayoutStruggleGuard).
     public abstract class SearchSceneFixture
     {
@@ -33,6 +34,8 @@ namespace TileStories.Tests
         // The navigation the shipped wall sets (card_settings.navigation, null = the framework default). SetUp pins every fixture to the
         // framework default instead; a test about the wall's own choice pushes this back
         protected CardNavigationSettings ShippedNavigation;
+        // The card container the shipped wall sets (open stop, Half's cap, Full Height...), pinned to the framework default the same way
+        protected CardContainerSettings ShippedContainer;
         protected Camera Cam;
         private readonly List<string> _unexpectedErrors = new();
         // "Layout update is struggling" fails the test that logged it, from the load to the end of the unload (the collector above stops sooner)
@@ -91,6 +94,9 @@ namespace TileStories.Tests
             var config = ConfigCopy();
             ShippedNavigation = config.card_settings.navigation;
             config.card_settings.navigation = new CardNavigationSettings();
+            // - the card's container too (the demo wall opens at Half since _3.3 S4a; the framework at Peek)
+            ShippedContainer = config.card_settings.container;
+            config.card_settings.container = new CardContainerSettings();
             Session.ApplyCardSettings(config);
             yield return Wait(0.8f);
             _layoutGuard.Phase("the test");

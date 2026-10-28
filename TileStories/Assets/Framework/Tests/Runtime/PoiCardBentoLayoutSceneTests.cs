@@ -236,7 +236,10 @@ namespace TileStories.Tests
                 int listen = SectionIndex(BuiltInFamilies.Guides);
                 int community = SectionIndex(BuiltInFamilies.Community);
                 Assert.Greater(Bento.Tiles[listen].Button.worldBound.width, host.width * 1f / 15f + OnePixel, "Listen is wider than its 1-of-15 share: the minimum won");
-                Assert.AreEqual(minHeight, Bento.Tiles[community].Button.worldBound.height, OnePixel, "Community's row keeps the minimum height");
+                // - its height is the rule's share of the room, never under the minimum (how much above it depends on Full's height: 844 since S4a)
+                float communityHeight = Bento.Tiles[community].Button.worldBound.height;
+                Assert.GreaterOrEqual(communityHeight, minHeight - OnePixel, "Community's row keeps at least the minimum height");
+                Assert.AreEqual(placed.Tiles.First(t => t.Section == community).Height, communityHeight, OnePixel, "...and the height the rule gives its row");
                 Assert.IsEmpty(Bento.Tiles[community].ShownLines.ToList(), "a tile at its minimum shows no names: its title and count only");
                 var leadNames = Bento.Tiles[about].ShownLines.ToList();
                 Assert.GreaterOrEqual(leadNames.Count, 3, "the lead shows several of its blocks' names (" + leadNames.Count + ")");
@@ -448,7 +451,8 @@ namespace TileStories.Tests
             Assert.AreEqual(DisplayStyle.None, Sheet.Slots.Top.resolvedStyle.display, "nothing drawn there");
             Assert.LessOrEqual(Scroll.worldBound.yMin, Stack.HeaderSlot.worldBound.yMax + OnePixel, "the stack (and its tiles) starts right under the title");
             var first = Bento.Tiles[0].Button;
-            yield return CardTestInput.Tap(first.panel, first.worldBound.center);
+            // - _3.3 S4a: the hero is Full's whole view and the tiles come after it -- tap the tile where a finger reaches it
+            yield return CardTestInput.TapInReach(Sheet, first);
             yield return CardTestInput.Settle(0.3f);
             Assert.AreEqual(Nav.Model.Sections[0].Key, Sheet.FullView.SectionKey, "a real tap on a tile still opens its section");
             yield return PressEscape();

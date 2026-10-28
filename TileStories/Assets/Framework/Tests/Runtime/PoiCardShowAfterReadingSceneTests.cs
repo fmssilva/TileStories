@@ -84,6 +84,9 @@ namespace TileStories.Tests
         {
             var tabs = Sheet.Slots.TopView as TextTabsNavView;
             Assert.IsNotNull(tabs, "precondition: the top slot holds Text Tabs");
+            // - _3.3 S4a: the strip is chrome and waits for the hero -- read just past it before a finger goes to it
+            if (!Sheet.Chrome.TopShown) yield return CardTestInput.PastTheHero(Sheet);
+            Assert.IsTrue(Sheet.Chrome.TopShown, "precondition: past the hero the strip shows");
             var tab = tabs.Tabs.Single(t => t.Index == index);
             var visible = tabs.Viewport.worldBound;
             var rect = tab.Button.worldBound;

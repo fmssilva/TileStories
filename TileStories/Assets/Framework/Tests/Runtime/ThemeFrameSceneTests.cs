@@ -167,9 +167,10 @@ namespace TileStories.Tests
             var shot = ScreenCapture.CaptureScreenshotAsTexture();
             try
             {
-                var viewport = Card.Sheet.Stack.Scroll.contentViewport.worldBound;
+                // - "in view" = not under the floating header, strip or bottom area that draw over the stack since _3.3 S4a
+                var viewport = CardTestInput.ReachableStack(Card.Sheet);
                 var slots = FramedSlots().Where(s => viewport.Contains(s.worldBound.min) && viewport.Contains(s.worldBound.max)).ToList();
-                Assert.Greater(slots.Count, 0, "precondition: at least one whole block is in view to measure");
+                Assert.Greater(slots.Count, 0, "precondition: at least one whole block is in view to measure, clear of the chrome: " + viewport);
                 float worst = float.MaxValue; string worstAt = "";
                 foreach (var slot in slots)
                     foreach (var (outside, line, inside) in EdgeSamples(slot.worldBound))

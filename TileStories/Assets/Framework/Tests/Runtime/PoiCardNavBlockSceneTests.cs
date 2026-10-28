@@ -174,8 +174,9 @@ namespace TileStories.Tests
             {
                 Scroll.scrollOffset = Vector2.zero;
                 yield return CardTestInput.Settle(0.3f);
+                // - _3.3 S4a: the hero is Full's whole view and the grid comes after it -- bring the tile to the middle of what a finger reaches
+                yield return CardTestInput.IntoReach(Sheet, Tiles(GridSlot)[i]);
                 var tile = Tiles(GridSlot)[i];
-                Assert.IsTrue(Scroll.contentViewport.worldBound.Contains(tile.worldBound.center), "precondition: tile " + i + " is on screen");
                 _events.Raised.Clear();
                 yield return TouchTap(tile.worldBound.center);
                 yield return Landed();
@@ -223,6 +224,9 @@ namespace TileStories.Tests
                 Assert.AreEqual(auto != CardOptions.NavNone, GridSlot != null, "precondition: the grid is " + (auto == CardOptions.NavNone ? "out" : "in"));
                 var tabs = (TabsNavView)Sheet.Slots.TopView;
                 Assert.IsNotNull(tabs, "precondition: the default Top Bar is drawn at Full");
+                // - _3.3 S4a: the strip is chrome and waits for the hero -- read just past it before tapping a tab
+                yield return CardTestInput.PastTheHero(Sheet);
+                Assert.IsTrue(Sheet.Chrome.TopShown, "precondition: past the hero the strip shows");
                 for (int target = 1; target < tabs.Tabs.Count; target++)
                 {
                     tabs.Strip.Show(tabs.Tabs[target].Button);

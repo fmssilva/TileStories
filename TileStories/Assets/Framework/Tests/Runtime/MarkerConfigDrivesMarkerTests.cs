@@ -86,6 +86,8 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator NoBadgeCategoryPoi_KnownStatus_FallsBackToStatusColouredBadge()
         {
+            // - the test owns its badge switch: the demo wall's own Use Badge is the developer's choice and may be off
+            _config.marker_use_badge = true;
             var ws = BuildAndSpawn();
             yield return null;
             var marker = ws.SpawnedMarkers.First(m => m.name == "dev_marker_nobadge");

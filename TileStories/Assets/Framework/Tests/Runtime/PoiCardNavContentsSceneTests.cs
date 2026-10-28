@@ -176,10 +176,8 @@ namespace TileStories.Tests
         {
             var title = View.Sections.Single(t => t.SectionKey == sectionKey);
             var line = title.Header.Toggle;
-            float top = line.worldBound.yMin - Scroll.contentContainer.worldBound.yMin;
-            Scroll.scrollOffset = new Vector2(0f, Mathf.Max(0f, top - Viewport * 0.5f));
-            yield return CardTestInput.Settle(0.3f);
-            Assert.IsTrue(Scroll.contentViewport.worldBound.Contains(line.worldBound.center), "precondition: " + sectionKey + "'s title is on screen");
+            // - where a finger reaches it (_3.3 S4a: the floating header and strip cover the stack's top)
+            yield return CardTestInput.IntoReach(Sheet, line);
             yield return TouchTap(line.worldBound.center);
         }
 
@@ -290,10 +288,8 @@ namespace TileStories.Tests
 
             // - a real tap opens the middle row: its content comes into the card under its line
             var row3 = Sheet.Stack.CompactRowOf("block_3");
-            Scroll.ScrollTo(row3.Toggle);
-            yield return CardTestInput.Settle(0.5f);
-            Assert.IsTrue(Scroll.contentViewport.worldBound.Contains(row3.Toggle.worldBound.center), "precondition: the row's line is in view");
-            yield return CardTestInput.Tap(row3.Toggle.panel, row3.Toggle.worldBound.center);
+            // - where a finger reaches it (_3.3 S4a: ScrollTo alone can leave it under the floating header and strip)
+            yield return CardTestInput.TapInReach(Sheet, row3.Toggle);
             yield return CardTestInput.Settle(0.3f);
             Assert.IsTrue(Sheet.Stack.IsExpanded("block_3"), "the real tap opened it");
             var content = Sheet.Stack.ViewOfBlock("block_3").Root;

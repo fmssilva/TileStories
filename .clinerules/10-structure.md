@@ -844,7 +844,9 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - DevLogTests.cs  -- a domain that is off writes nothing (other domains on included), a ticked one writes exactly its line with no stack trace, every domain has its own
         - TestEvidenceRuleTests.cs  -- 
         - TestRunBoundary.cs  -- The run's ONE assembly-level hook ([assembly: PrebuildSetup / PostBuildCleanup], collected for every run from this assembly, one of each allowed)
-        - TestRunRecorderHooks.cs  -- The Editor half of TestRunRecorder ([InitializeOnLoad]): focusChanged (with the Editor log offset), windowFocusChanged (with the managed caller)
+        - TestRunRecorderHooks.cs  -- The Editor half of TestRunRecorder ([InitializeOnLoad]): focusChanged (with the Editor log offset), windowFocusChanged (with the managed caller); after EVERY run (switch or not) writes TestEvidence/Harness/fixture_times.csv through FixtureTimes
+        - FixtureTimes.cs  -- Pure: a run's result tree -> one row per fixture (tests, passed, failed, skipped, seconds), slowest first -> the CSV the tiers' RUN TIMES are read from
+        - FixtureTimesTests.cs  -- FixtureTimes on hand-built result trees: rows per fixture, counts and times, the order, the CSV text
         - TestRunReport.cs  -- Pure: the recorder's log -> the LAST run's focus gains, each in its test and phase
         - TestRunReportTests.cs  -- The report on a recorded-format log (last run only, phases, between, context window, no RunStart = a sentence), the switch gates the file and a line
         - UssVariableChainTests.cs  -- Pins the USS variable behaviour the token tiers stand on, on a real EditorWindow panel: --a: var(--b) 2 and 3 deep, var(--x, fallback) only when
@@ -1055,14 +1057,14 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - OrientationWallSessionIntegrationTests.cs  -- real WallSession.SpawnPOIs orientation wiring + hierarchy override + real-marker occlusion check
         - OrientationLiveUpdateTests.cs  -- live orientation changes on a RUNNING wall: real rotations of real markers and a real cluster after real frames
         - OrientationClusterIntegrationTests.cs  -- real LODController cluster spawn path gets MarkerBillboard.Configure; cluster rotation changes when camera rotates
-        - SearchSceneFixture.cs  -- Shared set-up: the REAL LivingRoomScene, a fresh visitor-state store per test (IsolatedVisitorState) taken before the load, LOD off and the framework navigation pinned; BlocksWaitingToBeRead (Show After Reading slots hidden on that fresh state)
+        - SearchSceneFixture.cs  -- Shared set-up: the REAL LivingRoomScene, a fresh visitor-state store per test (IsolatedVisitorState) taken before the load, LOD off and the card's navigation and container at the framework default (the wall's kept in ShippedNavigation / ShippedContainer); BlocksWaitingToBeRead (Show After Reading slots hidden on that fresh state)
         - LayoutStruggleGuard.cs  -- PUBLIC: turns UI Toolkit's "Layout update is struggling" error into a failure of the test whose scene logged it -- Begin(scene) before the load
         - LayoutStruggleGuardTests.cs  -- The guard alone, no scene, Unity's own line: heard in each phase -> named; other errors, a line that only mentions the words, one after Finish, one
         - PoiCardSheetDragSceneTests.cs  -- SheetDrag on the REAL LivingRoomScene with The Lamp, real touch events and the drag's own Clock: the height IS the finger's travel while held
         - SearchSceneTests.cs  -- selection x filter, every setting pushed live, minimap, voice, recent -> suggestion, contrast + tap targets
         - SearchDemoTests.cs  -- on the running index and through the UI, each demo control ([CoversField] search_demo.*), filters on the demo (category chip, Material field chip)
         - SearchSettingsFieldTests.cs  -- CoversFieldAttribute, and CoverageGuard_EveryFieldHasARealTest (reflection: a field no test names fails)
-        - CardTestInput.cs  -- Settle (wait out the sheet transition), blended text contrast, EffectiveBackground (composited), IsShown, BackgroundPictureName; Wheel (6C); DragFrom
+        - CardTestInput.cs  -- Settle (wait out the sheet transition), blended text contrast, EffectiveBackground (composited), IsShown, BackgroundPictureName; Wheel (6C); DragFrom; the floating chrome: PastTheHero / ReadPastTheHero, ReachableStack (where a finger lands), IntoReach / TapInReach (the one way to put a finger on the stack: to the reach's middle, still), UnderTheTopShade
         - CardGalleryChecks.cs  -- The generic Phase A checks of one block entry as PUBLIC helpers
         - CardGalleryTests.Expandable.cs  -- Phase A: EVERY framework kind (BuiltInBlocks into a fresh registry, never a hand list) through AssertCompactAndExpanded; a kind with no gallery entry
         - ThemePipelineTests.cs  -- The theme end to end on the REAL LivingRoomScene: every UIDocument marked ts-app / default / dark on a panel whose theme is TileStoriesTheme; every

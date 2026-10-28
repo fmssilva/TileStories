@@ -167,7 +167,9 @@ namespace TileStories.Tests
             Assert.AreNotEqual(new CardNavigationSettings().top + new CardNavigationSettings().menu, Sheet.Slots.TopKey + (Sheet.Slots.MenuKey ?? CardOptions.NavNone),
                 "the wall's own choice, not the framework default (the reason this fixture undoes the pin)");
             Assert.GreaterOrEqual(Model.TargetCount, ShippedNavigation.min_blocks, "precondition: a card long enough for navigation");
-            Assert.IsTrue(Sheet.Chrome.TopShown, "the strip shows at Full");
+            // - _3.3 S4a: the strip is chrome and waits for the hero; read past it, the wall's strip shows
+            yield return CardTestInput.PastTheHero(Sheet);
+            Assert.IsTrue(Sheet.Chrome.TopShown, "the strip shows at Full once the hero is read");
         }
 
         [UnityTest]
@@ -177,6 +179,9 @@ namespace TileStories.Tests
             var tabs = Tabs();
             Assert.AreEqual(Model.Sections.Count, tabs.Tabs.Count, "one tab per section");
             Assert.Greater(Range, 100f, "precondition: the card really scrolls (range " + Range + ")");
+            // - _3.3 S4a: the strip is chrome and waits for the hero -- read just past it before a finger goes to it
+            if (!Sheet.Chrome.TopShown) yield return CardTestInput.PastTheHero(Sheet);
+            Assert.IsTrue(Sheet.Chrome.TopShown, "precondition: past the hero the strip shows");
             // - last first: a tap that only worked from the top would pass a top-down walk on its first tab
             foreach (var tab in tabs.Tabs.Reverse())
             {

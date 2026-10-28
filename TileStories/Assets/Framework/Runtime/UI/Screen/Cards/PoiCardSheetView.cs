@@ -443,8 +443,10 @@ namespace TileStories
             float peek = float.IsNaN(slot.layout.yMax) ? 0f : slot.layout.yMax + slot.resolvedStyle.marginBottom;
             Stops = SheetStopRule.Compute(available, peek, _halfMaxRatio, SheetStopRule.FullTopGap(_fullHeight, _topGap));
             // - the hero fills Full's view under the bar, its words at its foot: it follows the stops, never feeds them
-            // - the content starts under the floating bars; a jump lands a block under the bars and the strip
-            Stack.SetInsets(peek, Slots.TopView != null && !float.IsNaN(Slots.Top.layout.yMax) ? Slots.Top.layout.yMax : peek);
+            // - the content starts under the floating bars; a jump lands a block under the bars and the strip -- the strip's foot measured
+            //   from the stack's own top (the landing is an offset in the stack's view, and the stack does not start at the sheet's y 0)
+            float stackTop = float.IsNaN(Stack.Scroll.layout.yMin) ? 0f : Stack.Scroll.layout.yMin;
+            Stack.SetInsets(peek, Slots.TopView != null && !float.IsNaN(Slots.Top.layout.yMax) ? Slots.Top.layout.yMax - stackTop : peek);
             float hero = HeroRule.Height(Stops, _heroMin);
             Stack.HeaderView?.SetHeroLayout(hero, HeroRule.WordsBottom(hero), Stack.TopInset);
             if (IsOpen && !Drag.IsDragging) ApplyHeight(Stops.HeightOf(Stop));

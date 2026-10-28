@@ -278,7 +278,8 @@ namespace TileStories.Tests
                 Scroll.scrollOffset = new Vector2(0f, Mathf.Min(offset, Range));
                 yield return null;
                 int old = CardTestInput.UnderTheSpyLine(Scroll, Model.Sections.Select(s => Stack.SlotOfBlock(s.Targets[0])));
-                Assert.AreEqual(old, Nav.Current, poi + " at " + Scroll.scrollOffset.y.ToString("F0") + ": the old reading's section");
+                Assert.AreEqual(old, Nav.Current, poi + " at " + Scroll.scrollOffset.y.ToString("F0") + ": the old reading's section (the screen's landing inset "
+                    + CardTestInput.LandingInsetOf(Scroll) + ", the card's " + Stack.LandingInset + ", the stack's top " + Scroll.layout.yMin + ")");
                 Assert.AreEqual(old, OnScreen(), poi + " at " + Scroll.scrollOffset.y.ToString("F0") + ": the runs' reading agrees");
                 seen.Add(old);
                 compared++;

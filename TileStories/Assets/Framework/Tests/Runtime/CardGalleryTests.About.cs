@@ -442,7 +442,7 @@ namespace TileStories.Tests
             Assert.IsTrue(header.HasHero);
             // - a point inside the hero shows the picture itself (its own colour, not the frame's or the card's)
             // - in the hero's upper part: its words and their scrim cover its foot (_3.3 P4.4a)
-            yield return PixelAt(header.HeroPart, new Vector2(header.HeroPart.worldBound.center.x + 10f, header.HeroPart.worldBound.yMin + 14f), c => AssertColour(PictureColour("wide.png"), c, "the hero shows wide.png"));
+            yield return PixelAt(header.HeroPart, new Vector2(header.HeroPart.worldBound.center.x + 10f, CardTestInput.UnderTheTopShade(header.HeroPart) + 14f) /* _3.3 S4a: under the top shade */, c => AssertColour(PictureColour("wide.png"), c, "the hero shows wide.png"));
             float scrollRange = stack.Scroll.contentContainer.layout.height - stack.Scroll.contentViewport.layout.height;
             Assert.Greater(scrollRange, 8f, "precondition: the real body gives the stack genuine scroll range");
             float frameTop = header.HeroPart.worldBound.yMin, pictureTop = header.Picture.Root.worldBound.yMin, titleTop = header.PeekPart.worldBound.yMin;
@@ -494,8 +494,8 @@ namespace TileStories.Tests
             Assert.AreEqual("Then", header.ThenLabel.text);
             Assert.AreEqual("Now", header.NowLabel.text);
             Assert.IsTrue(then.Contains(header.ThenLabel.worldBound.center) && now.Contains(header.NowLabel.worldBound.center), "each label on its own half");
-            yield return PixelAt(header.HeroPart, new Vector2(then.center.x, then.yMin + 12f), c => AssertColour(PictureColour("then.png"), c, "left half"));
-            yield return PixelAt(header.HeroPart, new Vector2(now.center.x, now.yMin + 12f), c => AssertColour(PictureColour("now.png"), c, "right half"));
+            yield return PixelAt(header.HeroPart, new Vector2(then.center.x, Mathf.Max(then.yMin, CardTestInput.UnderTheTopShade(header.HeroPart)) + 12f) /* _3.3 S4a: under the top shade */, c => AssertColour(PictureColour("then.png"), c, "left half"));
+            yield return PixelAt(header.HeroPart, new Vector2(now.center.x, Mathf.Max(now.yMin, CardTestInput.UnderTheTopShade(header.HeroPart)) + 12f) /* _3.3 S4a: under the top shade */, c => AssertColour(PictureColour("now.png"), c, "right half"));
         }
 
         [UnityTest]

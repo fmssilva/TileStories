@@ -158,7 +158,8 @@ namespace TileStories.Tests
         // A real finger drags the stack by `dy` panel units (negative = further down the card), then lets it settle
         private IEnumerator DragStack(float dy)
         {
-            var viewport = Scroll.contentViewport.worldBound;
+            // - the part a finger reaches: under the floating header and strip (_3.3 S4a), above the bottom area
+            var viewport = CardTestInput.ReachableStack(Sheet);
             float inset = Mathf.Min(20f, viewport.height * 0.5f);
             float startY = dy < 0f ? viewport.yMax - inset : viewport.yMin + inset;
             yield return CardTestInput.TouchDrag(Scroll.panel, new Vector2(viewport.center.x, startY), new Vector2(0f, dy));
@@ -226,9 +227,11 @@ namespace TileStories.Tests
                 // - the button: a whole touch target, inside the card, in the header's row, left of the language chip and the X, the title's
                 //   end clear of it
                 var button = Sheet.MenuButton.worldBound;
-                float touch = CardTestInput.TokenPx("--ts-touch-target");
-                Assert.AreEqual(touch, button.width, OnePixel, "a touch target wide");
-                Assert.AreEqual(touch, button.height, OnePixel, "and tall");
+                // - _3.3 S4a: the round buttons are the floating bar's height (--ts-bar-height), never below a 44 pt touch target (WCAG 2.5.5)
+                float size = CardTestInput.TokenPx("--ts-bar-height");
+                Assert.GreaterOrEqual(size, 44f, "--ts-bar-height keeps a 44 pt touch target");
+                Assert.AreEqual(size, button.width, OnePixel, "the bar's height wide");
+                Assert.AreEqual(size, button.height, OnePixel, "and tall");
                 Assert.IsTrue(Sheet.Root.worldBound.Contains(button.center), "inside the card");
                 Assert.LessOrEqual(button.xMax, Sheet.CloseButton.worldBound.xMin + OnePixel, "left of the X");
                 Assert.LessOrEqual(button.xMax, Sheet.SettingsButton.worldBound.xMin + OnePixel, "left of the Aa button");

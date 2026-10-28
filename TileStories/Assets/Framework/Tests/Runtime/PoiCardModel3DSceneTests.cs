@@ -133,7 +133,13 @@ namespace TileStories.Tests
             yield return Capture("Religious_Header_Model_Half");
 
             float before = model.State.Yaw;
-            yield return CardTestInput.DragFrom(model.Frame.panel, model.Frame.worldBound.center, new Vector2(120f, 0f));
+            // - _3.3 S4a: the hero is the whole sheet at Full, so Half shows only its top -- the finger goes down in the middle of the stage's
+            //   part a finger reaches, not at the stage's centre (below the screen)
+            var reach = CardTestInput.ReachableStack(Sheet);
+            var frame = model.Frame.worldBound;
+            float top = Mathf.Max(frame.yMin, reach.yMin), bottom = Mathf.Min(frame.yMax, reach.yMax);
+            Assert.Greater(bottom - top, 40f, "precondition: a finger's room of the stage is reachable at Half: " + frame + " in " + reach);
+            yield return CardTestInput.DragFrom(model.Frame.panel, new Vector2(frame.center.x, (top + bottom) / 2f), new Vector2(120f, 0f));
             yield return null;
             Assert.AreNotEqual(before, model.State.Yaw, "a real one-finger drag rotates the header's model");
 

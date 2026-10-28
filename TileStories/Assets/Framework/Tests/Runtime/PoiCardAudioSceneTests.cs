@@ -121,7 +121,7 @@ namespace TileStories.Tests
             Assert.IsNull(Sheet.Stack.SlotOf(chip), "with no slot of its own");
             Assert.AreSame(Header.PeekPart, Sheet.Stack.PeekPart, "the peek stop is the bar");
             Assert.AreEqual("2:44", chip.Title.text, "the compact pill: the real length (164.52 s)");
-            Assert.AreEqual("Listen 2:44", chip.PlayButton.tooltip, "its name: Listen and the length");
+            Assert.AreEqual("Listen, 2:44", chip.PlayButton.tooltip, "its name: Listen and the length");
             Assert.IsTrue(chip.ClipAvailable, "the real narration loaded through the wall's Media Folder");
             Assert.AreEqual("0:00 / 2:44", chip.TimeText.text, "its real length: 164.52 s");
             Assert.AreEqual(CardAudioState.Idle, _audio.State, "opening a card plays nothing by itself");
@@ -168,7 +168,7 @@ namespace TileStories.Tests
         // ---------------- playing ----------------
 
         [UnityTest]
-        public IEnumerator ARealTapOnTheHerosListenAtHalf_Plays_TheCaptionsFollowTheClipTime_AndARealScrubMovesThemWithIt()
+        public IEnumerator ARealTapOnTheHerosListenAtFull_Plays_TheCaptionsFollowTheClipTime_AndARealScrubMovesThemWithIt()
         {
             yield return SelectAtFull("lamp");
             yield return Tap(Chip.PlayButton);
@@ -177,7 +177,7 @@ namespace TileStories.Tests
             Assert.AreEqual(GuidePath, _audio.Current.ClipPath);
             Assert.IsTrue(_out.IsPlaying);
             Assert.AreEqual("guide_castle_en", _out.Clip.name, "the real clip is what the device plays");
-            Assert.AreEqual(SheetStopRule.Stop.Half, Sheet.Stop, "the card stayed at Half");
+            Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop, "the card stayed at Full (_3.3 S4a: Listen sits at the hero's foot, in view at Full)");
             Advance(6f);
             Assert.AreEqual("0:06 / 2:44", Chip.TimeText.text);
             yield return Capture("Lamp_Audio_Half_Playing");

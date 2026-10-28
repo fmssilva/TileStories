@@ -278,6 +278,46 @@ namespace TileStories.Tests
             return Rect.MinMaxRect(view.xMin, top, view.xMax, Mathf.Max(top, bottom));
         }
 
+        // Scroll an element of the card's stack to the middle of ReachableStack and prove it is there AND still: ScrollTo alone brings it only
+        // just into the viewport, which can leave it under the floating header or strip, or behind the bottom area (_3.3 S4a); and setting the
+        // offset does not stop a fling that is still running -- a finger put on a moving stack is the stack's (it stops the fling), never the
+        // block's. So it waits on the condition (three frames unmoved inside the reach), placing it again while the stack drifts
+        public static IEnumerator IntoReach(PoiCardSheetView sheet, VisualElement e)
+        {
+            var scroll = sheet.Stack.Scroll;
+            Rect last = default;
+            int still = 0;
+            for (int frame = 0; frame < 240 && still < 3; frame++)
+            {
+                var reach = ReachableStack(sheet);
+                if (!reach.Contains(e.worldBound.center) || Mathf.Abs(e.worldBound.center.y - reach.center.y) > reach.height * 0.25f)
+                    scroll.scrollOffset = new Vector2(0f, scroll.scrollOffset.y + e.worldBound.center.y - reach.center.y);
+                yield return null;
+                var now = e.worldBound;
+                still = now == last && ReachableStack(sheet).Contains(now.center) ? still + 1 : 0;
+                last = now;
+            }
+            Assert.IsTrue(ReachableStack(sheet).Contains(e.worldBound.center), "precondition: " + e.name + " is where a finger reaches: "
+                + e.worldBound + " in " + ReachableStack(sheet));
+            Assert.AreEqual(3, still, "precondition: " + e.name + " holds still before the finger (no fling left running)");
+        }
+
+        // Where a picture at the card's top can be read bare: under the top shade's foot (_3.3 S4a: a dark fade behind the floating bars over
+        // the hero's top), or the element's own top when no shade shows
+        public static float UnderTheTopShade(VisualElement e)
+        {
+            var shade = e.panel.visualTree.Q("poi-card-top-shade");
+            bool shown = shade != null && shade.resolvedStyle.display == DisplayStyle.Flex && shade.resolvedStyle.opacity > 0f;
+            return shown ? Mathf.Max(e.worldBound.yMin, shade.worldBound.yMax) : e.worldBound.yMin;
+        }
+
+        // A real tap on an element of the card's stack, brought where a finger reaches first (IntoReach)
+        public static IEnumerator TapInReach(PoiCardSheetView sheet, VisualElement e)
+        {
+            yield return IntoReach(sheet, e);
+            yield return Tap(e.panel, e.worldBound.center);
+        }
+
         // A real finger reads the card down until its hero has left the viewport (_3.3 P4.4a: the footer waits for the hero), then a small
         // move back up -- reading down hid the bottom area (Hide While Scrolling = down), a move up past ShowAfterTravel is the reader
         // looking for it -- with the hero still out of view. `dragStack` is the fixture's own real drag of the stack (dy: - = down the card)

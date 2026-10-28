@@ -91,52 +91,30 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 (e.g. "59/59") as the acceptance criterion — counts change as tests are added; zero
 failures does not.
 
-**Which tests, when (three levels).** RUN TIMES (the Worker REPLACES these numbers after a full run when one moved by more than
-~10 %; no history, `00-process.md`): full EditMode ~3.3 min (2279 tests); full PlayMode ~82 min (1431 tests incl. gated
-skips), in the background; the targeted set selected by the name regex (Card|Poi|Search|Theme|Zoom|Marker|LodWallScene|
-LayoutStruggle|LivingRoom|Family|Typeface|Hero|Section) in `group_names` ~60-70 min (~1180 tests; `Card|Poi|Theme|Section` alone ~73 min, 1154) -- the MCP job lists at most 25
-failures, so a red-heavy run hides the rest: re-run the hidden fixtures; one PlayMode fixture 15-60 s (CardGalleryTests ~9 min,
-PoiCardSceneTests ~4 min). Only the full PlayMode suite is expensive, so it runs at the points where its answer matters:
+**Which tests, when (three tiers).** RUN TIMES (replaced after a run when a number moved > ~10 %): full EditMode ~3.5 min (2298 tests); CORE not yet
+timed (its first run sets it, target ~30 min); FULL PlayMode ~89 min (1461 tests); per-fixture times in `TestEvidence/Harness/fixture_times.csv` (`TestRunRecorder` writes it after every run).
 
-- **Inner loop -- after each change:** compile, then the FULL EditMode suite (it is cheap), then only the PlayMode fixtures
-  that exercise the changed code: the fixture(s) of the feature itself plus any fixture that reaches it through a seam
-  (grep `Tests/` for the changed type or method). Pass the class names as a JSON array in `test_names`
-  (`["TileStories.Tests.CardVideoGalleryTests", ...]`; a comma-separated string runs 0 tests).
-- **Full PlayMode -- at these points only (it costs ~80 min of the developer's machine, so it is planned, not reflexive;
-  it does NOT close every block -- most blocks close on the targeted set below):**
-  - the opening baseline, ONLY when the tree differs from the last commit whose full runs were green (a clean tree on a green
-    commit needs no second baseline; say which commit you trusted);
-  - at the end of a block that touched SHARED GROUND -- anything every fixture stands on: test infrastructure
-    (`CardTestInput`, `SearchSceneFixture`, the harnesses, `FixedFrameForTheRun`), `WallSession`, `PanelSettings`, the card
-    tokens (`CardTokens.uss`), the STOPS, LAYOUT or binding lifecycle of the sheet / stack / host, or a registry or pure rule
-    a whole domain reads (`BlockRegistry`, `BlockStackBuilder`, `CardNavModel`). Adding a view inside a slot that already
-    exists, or an input handler beside the ones already there, is NOT that: pay the full run where the CONTAINER changes, not
-    every time something is put in it. NOT shared ground either: Editor-only code (a POI Editor row, table or popup -- EditMode
-    tests it), a new config field that old configs load unchanged, a new kind or element in its own files, docs;
-  - at the end of the FOURTH block since the last one, whatever those blocks touched -- so a regression is never more than
-    four blocks deep and a bisect never longer than that;
-  - before a domain close-out (`skills/Domain_Review.md`), before a device session or a build, and whenever the Architect's
-    brief asks for one (its TEST PLAN line). Report every full run with its count.
-- **A block that closes WITHOUT a full PlayMode run** closes on the full EditMode suite (always -- it is cheap) plus every
-  PlayMode fixture that reaches the changed code: the feature's own fixtures, plus every fixture that greps for the changed
-  type, method or config key, named one by one in the report -- typically 5-30 fixtures, 10-30 min. A broad name pattern
-  (`Card|Poi|...`) is NOT a targeted set: it now holds most of the suite and costs nearly a full run. The report also says which full run the block rides on (the
-  commit and its counts) and in how many blocks the next full run falls due.
-- **Background runs** (Unity not in front, 4.2.3) are owed where a TODO or a fixture's subject asks for them (one targeted
-  fixture). Every FULL PlayMode run is taken with Unity in the background unless the brief asks for the front: it frees the
-  developer's machine for the half hour and keeps the focus-independence of 4.2.3 continuously proven, which is what the
-  old "one background full run every third block" bought separately.
+- **BLOCK -- every block, after each change:** compile, the full EditMode suite, then the PlayMode fixtures of the changed code
+  (the feature's own + every fixture that greps for the changed type, method or config key), named one by one in `test_names`;
+  a few minutes. A block closes on this tier unless its TEST PLAN says CORE or FULL.
+- **CORE -- `category_names: ["Core"]`, ~30 min, background:** every 3rd-4th block, and at the end of a block on SHARED GROUND
+  (the definition below).
+- **FULL -- everything, <= 90 min, background:** every ~12 blocks with the maintenance, before a domain close-out, a device
+  session or a build.
+- A wider tier confirms, never discovers: green on BLOCK before CORE, green on CORE before FULL. The report names the tier, its
+  counts, and the blocks since the last CORE and the last FULL.
 
-- **What the full run holds:** every PlayMode assembly's tests, except the MEASUREMENTS, which skip themselves (reported as skipped)
-  unless their local switch file `TestEvidence/<domain>/MEASURING` exists -- the gated look / cost instruments. `[Explicit]` does not
-  keep a test out of the unfiltered MCP run, and MCP cannot exclude a category.
-- **A full PlayMode run confirms, it never discovers.** Before starting one, the block must already be green on its own
-  targeted set (the fixtures the brief named, plus what a grep for the changed types finds). A full run started on a block
-  that was never run against its own card fixtures spends half an hour finding what twelve minutes would have found, and it
-  ends the block red. If the targeted set is red, fix it and re-run it -- then start the full run.
-
-A targeted run replaces the block-end full run only where the rule above allows it. It never replaces the shared-ground run,
-the fourth-block run or a run the brief asks for: a fixture you did not think of is exactly what the full run is for.
+- **SHARED GROUND:** what every fixture stands on -- the test infrastructure (`CardTestInput`, `SearchSceneFixture`, the harnesses,
+  `FixedFrameForTheRun`), `WallSession`, `PanelSettings`, the card tokens, the sheet / stack / host's stops, layout or binding
+  lifecycle, a registry or pure rule a whole domain reads (`BlockRegistry`, `BlockStackBuilder`, `CardNavModel`). Not shared ground: a
+  view in a slot that exists, Editor-only code, a config field old configs load unchanged, a new kind in its own files, docs.
+- **The Core category** (`[Category("Core")]`) sits on the cheapest test that proves each domain's critical path, never on a slow
+  class; the list and the path each test guards: `proj_guides/_Test_Suite_<n>.md`. A block that adds a critical path tags its test.
+- **`test_names` is a JSON array** of class names (`["TileStories.Tests.CardVideoGalleryTests", ...]`); a comma-separated string
+  runs 0 tests.
+- **The MCP job lists at most 25 failures:** after a red-heavy run, re-run the fixtures past the 25th by name.
+- **MEASUREMENTS** skip themselves (reported as skipped) unless their local switch file `TestEvidence/<domain>/MEASURING` exists --
+  the gated look / cost instruments. `[Explicit]` does not keep a test out of the unfiltered MCP run, and MCP cannot exclude a category.
 
 **Fallback — batch-mode (only when MCP is unavailable).** In this workspace,
 batch-mode Unity frequently exits with return code 1 and produces no test XML — this

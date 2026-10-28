@@ -55,9 +55,9 @@ namespace TileStories.Tests
 
         private float Range => NavScrollRule.Range(Scroll.contentContainer.layout.height, Scroll.contentViewport.layout.height);
 
-        private float HeaderBottom => Sheet.Stack.HeaderSlot.layout.yMax + Sheet.Stack.HeaderSlot.resolvedStyle.marginBottom;
-
-        private float Room => Sheet.Stops.HeightOf(Sheet.Stop) - HeaderBottom;
+        // The stack's room at the stop: from the stack's top to the sheet's foot -- since _3.3 S4a the header and the strip float over the
+        // stack, only the bottom area takes room from it
+        private float StackRoom => Sheet.Stops.HeightOf(Sheet.Stop) - Scroll.layout.yMin;
 
         private float Viewport => Scroll.contentViewport.layout.height;
 
@@ -128,7 +128,8 @@ namespace TileStories.Tests
         // A real finger drags the stack by `dy` panel units (negative = up the screen = further down the card), then lets it settle
         private IEnumerator DragStack(float dy)
         {
-            var viewport = Scroll.contentViewport.worldBound;
+            // - the part a finger reaches: under the floating header and strip (_3.3 S4a), above the bottom area
+            var viewport = CardTestInput.ReachableStack(Sheet);
             float inset = Mathf.Min(20f, viewport.height * 0.5f);
             float startY = dy < 0f ? viewport.yMax - inset : viewport.yMin + inset;
             yield return CardTestInput.TouchDrag(Scroll.panel, new Vector2(viewport.center.x, startY), new Vector2(0f, dy));
@@ -224,7 +225,7 @@ namespace TileStories.Tests
             float footer = Footer.layout.height, bar = BarSlot.layout.height;
             Assert.LessOrEqual(Footer.worldBound.yMax, BarSlot.worldBound.yMin + OnePixel, "the footer sits above the bar: the CTA nearest the content");
             Assert.AreEqual(Sheet.Root.worldBound.yMax, BarSlot.worldBound.yMax, OnePixel, "the bar closes the card, in the thumb zone");
-            Assert.AreEqual(Room - Sheet.Slots.Top.layout.height - footer - bar, Viewport, OnePixel, "the stack has what strip, footer and bar leave: " + Parts());
+            Assert.AreEqual(StackRoom - footer - bar, Viewport, OnePixel, "the stack has what footer and bar leave (the strip floats over it): " + Parts());
             yield return CardGalleryChecks.Render("Nav_Lamp_bottom_bar_full_390");
 
             Scroll.scrollOffset = Vector2.zero;
@@ -232,7 +233,7 @@ namespace TileStories.Tests
             Sheet.SetStop(SheetStopRule.Stop.Half);
             yield return CardTestInput.Settle();
             yield return Rested();
-            float room = Room;
+            float room = StackRoom;
             // - _3.3 P4.4a: back at the top, Half shows the whole hero -- the footer waits for it and the bar would cut it, so the pair gives
             //   way together (once the hero is read, Half's 281 px under the 48 px bar hold both: PoiCardChromeSceneTests)
             Assert.AreEqual(0f, Scroll.scrollOffset.y, 0.5f, "precondition: at the top of the card");
@@ -268,14 +269,14 @@ namespace TileStories.Tests
             Assert.IsFalse(Chrome.BottomNavShown, "the bar with it");
             Assert.IsTrue(BelowTheCard(Footer), "the footer slid below the card's edge: " + Parts());
             Assert.IsTrue(BelowTheCard(BarSlot), "and the bar too");
-            Assert.AreEqual(Room, Viewport, OnePixel, "both heights went to the stack (no Top Bar here)");
+            Assert.AreEqual(StackRoom, Viewport, OnePixel, "both heights went to the stack");
 
             float offset = Scroll.scrollOffset.y;
             yield return DragStack(60f);
             Assert.Less(Scroll.scrollOffset.y, offset - CardChromeRule.ShowAfterTravel, "precondition: the drag moved back up past the threshold");
             Assert.IsTrue(Chrome.BottomShown && Chrome.BottomNavShown, "moving up brought both back");
             Assert.IsTrue(OnScreen(Footer) && OnScreen(BarSlot), "both on screen again: " + Parts());
-            Assert.AreEqual(Room - footer - bar, Viewport, OnePixel, "and the stack gave both heights back");
+            Assert.AreEqual(StackRoom - footer - bar, Viewport, OnePixel, "and the stack gave both heights back");
         }
 
         [UnityTest]
