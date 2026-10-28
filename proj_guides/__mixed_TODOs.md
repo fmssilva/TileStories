@@ -828,3 +828,22 @@ languages (es, fr, de, it...) without rebuilding the marker atlases.
   once in a background targeted run: The Lamp's hero action below the sheet right after OpenFull; green alone, in its fixture (56 / 56)
   and in the next full PlayMode run, all in the background. Likely the same family: a read before the sheet rests at Full -- check that
   OpenFull waits for the stop's rest height before the hero is measured.
+
+## The Guide -- the hero's audio grows into a guided tour of the POI (developer, 2026-10-28; a future domain, after `_3.3`)
+
+Today the hero has one Listen pill (an audio track). The target is a GUIDE that can present the whole card by itself:
+- **Teaser / intro (~1 min) from the hero:** narrated audio over a short sequence built from the hero -- slides of the POI's pictures
+  with captions, short video clips, the Ken Burns zoom only as one of the effects -- not a still picture.
+- **Lean-back tour:** after the intro the card scrolls by itself through the blocks, each block's part of the narration timed to it
+  (the nav bar's chosen group follows). The visitor "reads the whole card" passively. Story-mode conventions: a visible progress line,
+  pause on touch, tap right / left = next / previous part, a drag = the visitor takes over (the tour pauses, "Resume tour" offered).
+- **Deterministic first:** the tour is authored (script + timings per block, per language), so it is the same, checked, every time.
+- **A mascot** later voices the guide (an animated character, the wall's own), for warmth and for children; one guide voice per wall.
+- **Ask the guide:** a button interrupts the tour to type, speak or send a photo ("what is this on the wall?"); an AI guide answers
+  in voice and / or text, grounded ONLY in the wall's own approved content (no invented facts), then offers to continue the tour.
+- **Research (2026-10-28):** AI museum guides with voice / chat Q&A and photo questions already ship (Convo Guide, SeeMuseums,
+  Thinktank Birmingham's browser guide, Mori Art Museum's artlas guide on Claude); the Computer History Museum x Meta Aria demo lets
+  the visitor interrupt the narration at any time. Mascot / character guides are case studies (Museo Naval Madrid, Fluxguide avatars):
+  more fun reported, no controlled evidence of better learning -- keep the mascot optional. Risks: auto-play takes pacing from the
+  visitor (always a clear pause / take-over), motion cost on phones, AI answers outside the approved sources.
+- Plan it as its own domain with `skills/Domain_Planning.md` (the authored tour first, then the mascot, then Ask the guide).
