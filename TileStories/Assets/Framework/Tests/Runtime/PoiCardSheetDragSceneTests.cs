@@ -13,6 +13,7 @@ namespace TileStories.Tests
     //   - the SPEED decides, not only the distance: the same 30 units up from Peek stay at Peek slowly and reach Half as a flick
     //   - a drag past the top holds at Full; one pulled below 60 % of the peek closes the card through CloseRequested, as the X does
     //   - the top strip takes nothing at touch-down; once a move is clearly vertical the sheet follows it from where the finger went down
+    [Category("Core")]
     public class PoiCardSheetDragSceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";

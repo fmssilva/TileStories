@@ -145,6 +145,7 @@ namespace TileStories.Tests
 
         // _3.3 S4a review: the hero is the whole sheet at Full (its picture runs up under the floating bars) and its words block -- Listen and
         // the card's action with it -- sits at its foot, whatever the stop (so Half shows the picture's top; Full the whole hero)
+        [Category("Core")]
         [UnityTest]
         public IEnumerator AtFull_TheWholeHeroIsTheScreen_WithTheCardsActionsAtItsFoot_AndTheStickyBarWaits(
             [Values("lamp", "painting")] string poi, [Values("en", "pt")] string language)
@@ -207,6 +208,7 @@ namespace TileStories.Tests
 
         // ---------------- real taps ----------------
 
+        [Category("Core")]
         [UnityTest]
         public IEnumerator ARealTapOnTheHerosAction_ShowsThePointOnTheWall_TheCardLowersAndTheSelectionStays()
         {

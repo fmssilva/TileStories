@@ -10,6 +10,7 @@ namespace TileStories.Tests
     // The theme pipeline end to end on the REAL wall scene (_3.3 P4.1, R12.1): the theme asset -> the generated stylesheet -> the shared
     // PanelSettings' theme (TileStoriesTheme.tss) -> every screen's marked root -> what the card paints, and C# (ThemeResolver) reading
     // the SAME values the panel resolved. The composition test of 40-testing 4.2.1: each piece has its own tests, this one proves they meet.
+    [Category("Core")]
     public class ThemePipelineTests : SearchSceneFixture
     {
         private static ThemeAsset Theme => ThemeController.Load(ThemeController.DefaultThemeKey);

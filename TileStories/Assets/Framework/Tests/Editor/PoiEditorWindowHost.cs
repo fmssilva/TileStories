@@ -18,14 +18,21 @@ namespace TileStories.Editor.Tests
         private sealed class Host : EditorWindow
         {
             public static POIEditorToolWindow Editor;
+            public static Host Current;
             public static Vector2 RootScreen;
             public static int Repaints;
+            // True only while THIS test's host paints: the rect probes are static, so any other POI Editor that paints (a host an
+            // earlier test left open, a real window left open, the developer's own) would otherwise write its rects over this one's
+            public static bool Painting;
 
             private void OnGUI()
             {
-                if (Editor == null) return;
+                // - a host an earlier test left open paints nothing: it shares Editor and would probe it at its own screen place
+                if (Editor == null || this != Current) return;
                 RootScreen = GUIUtility.GUIToScreenPoint(Vector2.zero);
-                typeof(POIEditorToolWindow).GetMethod("OnGUI", Instance).Invoke(Editor, null);
+                Painting = true;
+                try { typeof(POIEditorToolWindow).GetMethod("OnGUI", Instance).Invoke(Editor, null); }
+                finally { Painting = false; }
                 if (Event.current.type == EventType.Repaint) Repaints++;
             }
         }
@@ -54,12 +61,15 @@ namespace TileStories.Editor.Tests
                 AssetDatabase.LoadAssetAtPath<SpriteKeyLibrary>("Assets/Framework/Runtime/UI/World/Markers/IconLibrary.asset"));
             type.GetField(sectionFoldoutField, Instance).SetValue(Editor, true);
 
-            POIEditorToolWindow.TableCellRectProbe = (table, row, rect) => ScreenRects[table + "#" + row] = GUIUtility.GUIToScreenRect(rect);
-            POIEditorToolWindow.FieldRowRectProbe = (label, rect) => ScreenRects[label] = GUIUtility.GUIToScreenRect(rect);
+            POIEditorToolWindow.TableCellRectProbe = (table, row, rect) => { if (Host.Painting) ScreenRects[table + "#" + row] = GUIUtility.GUIToScreenRect(rect); };
+            POIEditorToolWindow.FieldRowRectProbe = (label, rect) => { if (Host.Painting) ScreenRects[label] = GUIUtility.GUIToScreenRect(rect); };
 
+            // - a host an earlier test left open is closed first (the test that left it failed in its own Close, below)
+            foreach (var left in Resources.FindObjectsOfTypeAll<Host>()) left.Close();
             Host.Editor = Editor;
             Host.Repaints = 0;
             _host = ScriptableObject.CreateInstance<Host>();
+            Host.Current = _host;
             _host.ShowUtility();
             _host.position = new Rect(40f, 40f, 1800f, 900f);
             // - an IMGUI text field only takes keystrokes while its window has focus
@@ -75,6 +85,13 @@ namespace TileStories.Editor.Tests
             GUIUtility.hotControl = 0;
             if (_host != null) _host.Close();
             if (Editor != null) Object.DestroyImmediate(Editor);
+            Host.Current = null;
+            // - Close runs in the test's TearDown: a host still open here is one this test opened and never closed (a second
+            //   PoiEditorWindowHost over the first), and it would paint into the next test's probes
+            var left = Resources.FindObjectsOfTypeAll<Host>();
+            foreach (var host in left) host.Close();
+            Assert.IsEmpty(left, "the test leaves no host window behind (40-testing 4.2.3): it opened a second PoiEditorWindowHost "
+                + "without closing the first");
         }
 
         // Lay out and paint `window` NOW, inside this editor tick (EditorWindow.RepaintImmediately, internal): a gesture sent as

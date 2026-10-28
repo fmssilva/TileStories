@@ -249,6 +249,7 @@ namespace TileStories.Editor.Tests
             else Assert.Fail("no live-sync nudge for " + field.FieldType + " " + field.Name);
         }
 
+        [Category("Core")]
         [TestCaseSource(nameof(AllRows))]
         public void LiveEdit_ReachesTheRunningMarker(Row row)
         {

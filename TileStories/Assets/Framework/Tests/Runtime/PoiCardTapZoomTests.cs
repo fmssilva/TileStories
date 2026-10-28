@@ -347,7 +347,7 @@ namespace TileStories.Tests
         // stack. With REAL fingers: a vertical drag that starts on the statement scrolls the stack and answers nothing; a sideways
         // swipe from the same place answers True and does not scroll.
         [UnityTest]
-        [Ignore("Quarantine -- _Test_Suite_1.md F4: since S4a the vertical and the sideways halves never pass in one run under real Input System fingers; owner: the next card block")]
+        [Ignore("S4a finding -- _Test_Suite_1.md F4: since S4a the vertical and the sideways halves never pass in one run under real Input System fingers; owner: the next card block")]
         public IEnumerator TheLampsTrueFalseStatement_ARealVerticalFingerScrollsTheStack_AndAnswersNothing_ARealSidewaysSwipeAnswers()
         {
             // - the answer goes into a memory store: a test run must never write the developer's saved answers

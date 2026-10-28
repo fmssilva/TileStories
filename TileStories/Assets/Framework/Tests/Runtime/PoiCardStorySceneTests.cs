@@ -20,6 +20,7 @@ namespace TileStories.Tests
     //   - the video: its tap (play in place) is PoiCardPageChromeSceneTests'; the player look is CardStoryMediaGalleryTests'
     //   - light and dark, English and Portuguese renders (TestEvidence/Card/Story/painting_*), for the eye beside the prototype
     //   - the gated cost of the page's motion (TestEvidence/Story/MEASURING): batches and UI Toolkit's CPU with the rows moving vs still
+    [Category("Core")]
     public class PoiCardStorySceneTests : SearchSceneFixture
     {
         private const string Painting = "painting";

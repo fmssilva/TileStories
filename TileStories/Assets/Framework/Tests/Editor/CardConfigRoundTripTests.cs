@@ -52,6 +52,7 @@ namespace TileStories.Editor.Tests
             }
         }
 
+        [Category("Core")]
         [Test]
         public void EveryCardField_WalkedByReflection_SurvivesAJsonRoundTrip()
         {

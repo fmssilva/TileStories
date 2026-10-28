@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 namespace TileStories.Tests
 {
+    [Category("Core")]
     public class MarkerViewRuntimeTests
     {
         [UnityTest]

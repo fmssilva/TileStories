@@ -12,6 +12,7 @@ namespace TileStories.Tests
     // drag turns the view right on the card), and block_61, the gyro look with Start Heading 90, Display Takeover (a teaser on the card, the
     // viewer full screen through a second slot; this machine has no attitude sensor, so the gyro look behaves as dragging and says so).
     // Closing the card releases every slot (PreviewService.ReleaseAll through PoiCardHost.Close): nothing of a sphere is left behind.
+    [Category("Core")]
     public class PoiCardPanoramaSceneTests : SearchSceneFixture
     {
         private PoiCardSheetView Sheet => Card.Sheet;

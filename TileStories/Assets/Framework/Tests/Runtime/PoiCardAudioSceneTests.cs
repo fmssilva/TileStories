@@ -13,6 +13,7 @@ namespace TileStories.Tests
     // Lamp - Military a chip on a 20 s generated tone, Lamp - Economic a player on the long English promotion. Every action is a real
     // tap or drag on the panel. Only the sound DEVICE is a stand-in (a silent ManualAudioOutput) and the fade's clock a number, so the
     // 200 s narration never costs 200 s of waiting; PoiCardRealAudioTests puts the real AudioSource under the same card.
+    [Category("Core")]
     public class PoiCardAudioSceneTests : SearchSceneFixture
     {
         private const string GuidePath = "audio/guide_castle_en.mp3";

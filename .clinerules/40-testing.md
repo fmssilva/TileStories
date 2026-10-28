@@ -91,13 +91,13 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 (e.g. "59/59") as the acceptance criterion — counts change as tests are added; zero
 failures does not.
 
-**Which tests, when (three tiers).** RUN TIMES (replaced after a run when a number moved > ~10 %): full EditMode ~3.5 min (2298 tests); CORE not yet
-timed (its first run sets it, target ~30 min); FULL PlayMode ~89 min (1461 tests); per-fixture times in `TestEvidence/Harness/fixture_times.csv` (`TestRunRecorder` writes it after every run).
+**Which tests, when (three tiers).** RUN TIMES (replaced after a run when a number moved > ~10 %): full EditMode ~3.9 min (2298 tests); CORE ~17.5 min
+(PlayMode 227 tests 17.0 min + EditMode 118 tests 20 s); FULL PlayMode ~82 min (1339 tests); per-fixture times in `TestEvidence/Harness/fixture_times.csv` (`TestRunRecorder` writes it after every run).
 
 - **BLOCK -- every block, after each change:** compile, the full EditMode suite, then the PlayMode fixtures of the changed code
   (the feature's own + every fixture that greps for the changed type, method or config key), named one by one in `test_names`;
   a few minutes. A block closes on this tier unless its TEST PLAN says CORE or FULL.
-- **CORE -- `category_names: ["Core"]`, ~30 min, background:** every 3rd-4th block, and at the end of a block on SHARED GROUND
+- **CORE -- `category_names: ["Core"]`, PlayMode then EditMode, ~18 min, background:** every 3rd-4th block, and at the end of a block on SHARED GROUND
   (the definition below).
 - **FULL -- everything, <= 90 min, background:** every ~12 blocks with the maintenance, before a domain close-out, a device
   session or a build.

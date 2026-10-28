@@ -51,6 +51,7 @@ namespace TileStories.Editor.Tests
                 .Where(p => p.StartsWith("Assets/Framework/") || p.StartsWith("Assets/Apps/"))
                 .Select(p => (p, File.ReadAllText(p)));
 
+        [Category("Core")]
         [Test]
         public void ThisRun_KeepsTheVisitorsStateInAStoreOfItsOwn_NeverTheAppsPlayerPrefs()
         {

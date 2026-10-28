@@ -12,6 +12,7 @@ namespace TileStories.Tests
     // family the card has blocks of), floating under the title bar with no jump of the stack when it comes, after the hero; a tap lands the
     // group's first block under the floating chrome and marks the group (the indicator under it); each indicator, the full-width shape and
     // the bottom position; a merged group; the bar off again -> the old elements. Renders in TestEvidence/NavBar/.
+    [Category("Core")]
     public class PoiCardNavBarSceneTests : SearchSceneFixture
     {
         private PoiCardSheetView Sheet => Card.Sheet;

@@ -22,6 +22,7 @@ namespace TileStories.Tests
     //     a real drag inside never moves it; a section put away lets its media go (the preview slot, the playing video); with neither bar
     //     the card uses Text Tabs; a card with nothing to switch between scrolls
     //   - renders at 390 px in English and Portuguese: both layouts
+    [Category("Core")]
     public class PoiCardLayoutSceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";

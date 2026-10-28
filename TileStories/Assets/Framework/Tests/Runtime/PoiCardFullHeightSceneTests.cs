@@ -12,6 +12,7 @@ namespace TileStories.Tests
     //     layer inside it); Leave A Camera Strip: the card's --ts-sheet-top-gap of camera above it; Peek and Half never move
     //   - either way the visitor can still lower it: a real drag down on the grabber (real touch events, the drag's own clock) and the
     //     system Back each take it from Full to Half; the X closes it
+    [Category("Core")]
     public class PoiCardFullHeightSceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";

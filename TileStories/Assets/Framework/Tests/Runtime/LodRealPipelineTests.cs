@@ -17,6 +17,7 @@ namespace TileStories.Tests
     // real POI_Cluster prefab, seen by a real MainCamera rendering into a fixed portrait target (so
     // pixel sizes are deterministic). The lamp family (6 POIs within 30 cm) is the crowded region.
     // Every assertion reads what the visitor would see: CanvasGroup alpha, root scale, cluster views.
+    [Category("Core")]
     public class LodRealPipelineTests
     {
         private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab";

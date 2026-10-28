@@ -87,63 +87,40 @@ so the demo wall's Navigation Bar ON does NOT reach these fixtures (bar off ther
   - CardLight: past the hero; rim layer index = BlockFrame.PartCount (S4a added the groove); CardVideoGallery poster under the top shade
   - WALL CHOICE: MarkerConfigDrivesMarker owns marker_use_badge = true
   - PRODUCT (S4a, small, fixed): PoiCardSheetView landing inset measured from the stack's top (was the sheet's: 1 px low, the spy
-    disagreed with the screen at a boundary -- InterleavedSpy "10741: 2 vs 3", screen 104 / card 105); CardLight's sweep band read
-    from the theme for the mode shown (after a mode switch the rim's resolved width was the old mode's: dark lit a 3 px band)
+    disagreed with the screen at a boundary -- InterleavedSpy "10741: 2 vs 3", screen 104 / card 105). CardLight's sweep band read
+    from the theme was tried for F3 and changed nothing: reverted, F3 stays open (named skip)
   - PRODUCT (S4a, reported, not fixed: design choice) F1: at Full (no top gap) the floating placed-model chip lies over the X
     (panel.Pick at the X = poi-card-chip-remove) -> two PlaceInAr tests [Ignore] F1
   - CONTRAST F2: the gear on the S4a see-through bar 6.6:1 -> CardSettingsGallery gear test [Ignore] F2 (premium design block)
-  - QUARANTINE F4: TapZoom true/false swipe -- vertical and sideways never pass in one run under real fingers since S4a
+  - FINDING F4 (named [Ignore]): TapZoom true/false swipe -- vertical and sideways never pass in one run under real fingers since S4a
 
 ## NEXT (exact next sub-step for the following session)
-State: tree compiles (0 error CS); full EditMode 2298 / 0 failed / 1 skipped (3.5 min, behind / behind). Every red fixture of
-pm_before.csv has been run again after its re-base and is green, except what the last confirm run reports (CardGallery /
-CardNavGallery / CardLight / CardVideoGallery: see the final report). Named skips: Hero contrast x16, F1 x2 (PlaceInAr), F2 (gear), F3
-(CardLight band), F4 (TapZoom true / false), F5 (fab_dial contrast, Assert.Ignore inside the case). Nothing committed.
-1. Part 2 -- tag [Category("Core")] (a NUnit attribute, `using NUnit.Framework;`):
-   - CLASS level (fast fixtures, ~14.6 min at baseline): PoiCardSheetDragSceneTests, PoiCardThemeSceneTests, PoiCardNavBarSceneTests,
-     PoiCardAudioSceneTests, PoiCardStorySceneTests, MarkerConfigDrivesMarkerTests, ARZoomCameraFovTests, ARZoomRoutingTests,
-     LivingRoomConfigIntegrationTests, ThemePipelineTests, PoiCardLanguageSceneTests, PoiCardChromeSceneTests, PoiCardTextTabsSceneTests,
-     PoiCardLayoutSceneTests, SectionSheetSceneTests, PoiCardExpandableSceneTests, PoiCardVideoSceneTests, PoiCardModel3DSceneTests,
-     PoiCardPanoramaSceneTests, PoiCardBottomBarSceneTests, PoiCardFullViewSiblingsSceneTests, PoiCardLiveUpdateTests, LodRealPipelineTests,
-     OrientationWallSessionIntegrationTests, DisplacementSettingsRealMarkerTests, PoiCardFullHeightSceneTests, PoiCardFloatingSceneTests,
-     PoiCardPaintingSceneTests, LodWallSceneTests, SearchDemoTests, MarkerViewRuntimeTests
-   - METHOD level (slow fixtures): PoiCardSceneTests {ARealMarkerTap_OpensTheCard_ForThatPoi, TheX_ClosesTheCard_AndClearsTheSelection,
-     DraggingUp_GoesToHalf_AtMost40Percent_ThenFull, PullingTheCardDownBelowPeek_ClosesIt, ATapOnEmptyCameraSpace_Closes_ButATapOnTheCardOrAMarkerDoesNot};
-     PoiCardHeroSceneTests {AtFull_TheWholeHeroIsTheScreen_..., ARealTapOnTheHerosAction_...}; PoiCardPageChromeSceneTests
-     {TheStoryPage_ARealTapOnBack_..., TheFoot_RealTapsOnNextAndPrevious_...}; PoiCardNavSceneTests {AJumpFromPeek_..., ARealFingerDrag_MovesTheSpy_...};
-     SearchSceneTests {ATypedQuery_..., ARealMarkerTap_Selects_..., SelectingAndFiltering_NeverUndoEachOther}; EditMode:
-     LiveSyncFieldMatrixTests.LiveEdit_ReachesTheRunningMarker, CardConfigRoundTripTests.EveryCardField_WalkedByReflection_...,
-     VisitorStateIsolationTests.ThisRun_KeepsTheVisitorsStateInAStoreOfItsOwn_...
-   - time it: run_tests PlayMode + EditMode with category_names ["Core"] (background); write the list + paths into _Test_Suite_1.md section 3
-2. Part 4 rest -- the "doubled DetailCard" reds never showed this session (EditMode 2298 / 0 twice). Lead found: PoiEditorWindowHost.Host.Editor is
-   STATIC -- a host window left open by any test paints the NEXT test's editor too (rect probes then hold the wrong window's rects). Fix at the
-   source: the constructor closes every leftover Host (Resources.FindObjectsOfTypeAll<Host>) and a TearDown-level check fails the test that leaked
-   one; then find the leaker (a test that reassigns its host without Close). Watched flakes: InterleavedSpy "drag 20" family -> IntoReach's
-   wait-until-still is the cause's fix for taps; the walk's own DragStack still waits on seconds (Settle 0.6) -- switch it to a still condition.
-3. Part 3 -- slim CardGalleryTests (608 s now) and CardNavGalleryTests (483 s): one case per behaviour (Test_Suite_Review step 2); RestingEnd 252 s,
-   PoiCardSceneTests 210 s next. Write the fix list into _Test_Suite_1.md section 5 with each chunk's expected saving.
-4. Closing: CORE run (timed, background) then FULL PlayMode + full EditMode (background); fill _Test_Suite_1.md @AFTER@ / @CORE@ / @FLAKES@ /
-   @FIXLIST@ and 40-testing.md's CORE time; LivingRoomScene open; the 6.4 report with the review questions (F1 placement, F2/F5 contrast, F3).
+State: T1 closed (second session), nothing committed. FULL PlayMode 1339 / 0 failed / 67 skipped, 82.1 min (was 89.0 min, 142 failed);
+full EditMode 2298 / 0 failed / 1 skipped, 3.9 min; CORE 227 + 118 tests, ~17.5 min. Skips: 25 named findings with owners + 42 measurements (_Test_Suite_1.md 2).
+1. The Architect reviews and commits T1.
+2. Next test-suite block = _Test_Suite_1.md section 5 chunk 1: the gallery scene loaded once per fixture (CardGalleryTests 573-759 s,
+   CardNavGalleryTests 404-499 s, CardStoryGalleryTests 80 s). Measure first: one fixture with include_details, split scene load vs case.
+3. F1 / F2 / F3 / F5 / hero contrast belong to the premium design block; F4 (TapZoom true / false) to the next card block.
 
 ## P4 -- reds and flakes
-- [ ] leaked window doubling the 9 DetailCard navigation tests: find the opener, fix at source
+- [x] leaked window doubling the 9 DetailCard navigation tests: find the opener, fix at source
 - [x] tests reading the developer's LivingRoom choices: LiveSync badge x5, NavPreset (EditMode); the container's open stop (SearchSceneFixture pin), Use Badge (MarkerConfigDrivesMarker)
-- [ ] watched flakes: cause or named quarantine
+- [x] watched flakes: cause or a named skip carrying its finding id
 
 ## P2 -- CORE
-- [ ] [Category("Core")] on the cheapest test per critical path (brief's list)
-- [ ] time CORE (category_names Core), target 25-30 min
+- [x] [Category("Core")] on the cheapest test per critical path (brief's list)
+- [x] time CORE (category_names Core), target 25-30 min
 
 ## P3 -- BLOCK
-- [ ] fixtures > ~3 min: split / slim (largest savings that fit), every removed case's proof named
-- [ ] rest -> fix list in block-sized chunks with expected saving
+- [x] fixtures > ~3 min: split / slim (largest savings that fit), every removed case's proof named
+- [x] rest -> fix list in block-sized chunks with expected saving
 
 ## P5 -- docs
-- [x] 40-testing.md 4.2 "Which tests, when (three tiers)" (CORE time pending its first run)
-- [ ] _Test_Suite_1.md (times before / after, Core list, findings, fix list, S4a verdict)
+- [x] 40-testing.md 4.2 "Which tests, when (three tiers)" (CORE ~17.5 min, FULL ~82 min)
+- [x] _Test_Suite_1.md (times before / after, Core list, findings, fix list, S4a verdict)
 - [x] 10-structure.md lines (FixtureTimes.cs, FixtureTimesTests.cs, TestRunRecorderHooks, SearchSceneFixture, CardTestInput)
 
 ## Closing
-- [ ] CORE run timed + green (background)
-- [ ] FULL EditMode + PlayMode green (background)
-- [ ] LivingRoomScene open, final report 6.4 + review questions
+- [x] CORE run timed + green (background)
+- [x] FULL EditMode + PlayMode green (background)
+- [x] LivingRoomScene open, final report 6.4 + review questions

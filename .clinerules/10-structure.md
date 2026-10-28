@@ -982,7 +982,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - VisitorStateIsolationTests.cs  -- the run keeps the visitor's state in its own store; the source names PlayerPrefs only in the store and its own test (a scan proven on planted lines)
         - TaxonomyRowIdentityTests.cs  -- NextFree never repeats a key; CountReferences per table; real "+ Add" / trash clicks give unused keys; real typing in the Category, Badge and Keyword
         - ConfigUndoGroupingTests.cs  -- the slider drag runs inside one editor tick (PaintNow between its events)
-        - PoiEditorWindowHost.cs  -- Resize(width) / Width / RootScreen: lay the window out at another width (the OS clamps the host to the screen) ReplaceText types a
+        - PoiEditorWindowHost.cs  -- only THIS host's paint reaches the static rect probes (a leftover host or another POI Editor paints nothing into them); Close fails the test that left a host open; Resize(width) / Width / RootScreen: lay the window out at another width (the OS clamps the host to the screen) ReplaceText types a
         - PoiEditorWindowHostTests.cs  -- The typing harness under a focus theft on a known editor tick
         - HierarchyDesignAuthoringTests.cs  -- Hierarchy Levels: guide-contract (ASCII, app-agnostic, every column group named), a forbidden-terms scan over every hierarchy + labels help/guide
         - HierarchyPriorityAndPickerTests.cs  -- a new POI's default level by Priority (HighestPriorityLevelKey, keyed rows counted like the runtime), NextLowestPriority, FillUnsetLevelPriorities
@@ -1064,7 +1064,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - SearchSceneTests.cs  -- selection x filter, every setting pushed live, minimap, voice, recent -> suggestion, contrast + tap targets
         - SearchDemoTests.cs  -- on the running index and through the UI, each demo control ([CoversField] search_demo.*), filters on the demo (category chip, Material field chip)
         - SearchSettingsFieldTests.cs  -- CoversFieldAttribute, and CoverageGuard_EveryFieldHasARealTest (reflection: a field no test names fails)
-        - CardTestInput.cs  -- Settle (wait out the sheet transition), blended text contrast, EffectiveBackground (composited), IsShown, BackgroundPictureName; Wheel (6C); DragFrom; the floating chrome: PastTheHero / ReadPastTheHero, ReachableStack (where a finger lands), IntoReach / TapInReach (the one way to put a finger on the stack: to the reach's middle, still), UnderTheTopShade
+        - CardTestInput.cs  -- Settle (wait out the sheet transition), blended text contrast, EffectiveBackground (composited), IsShown, BackgroundPictureName; Wheel (6C); DragFrom; the floating chrome: PastTheHero / ReadPastTheHero, ReachableStack (where a finger lands), IntoReach / TapInReach (the one way to put a finger on the stack: to the reach's middle, still), UntilStill (wait for the stack's rest, not seconds), UnderTheTopShade
         - CardGalleryChecks.cs  -- The generic Phase A checks of one block entry as PUBLIC helpers
         - CardGalleryTests.Expandable.cs  -- Phase A: EVERY framework kind (BuiltInBlocks into a fresh registry, never a hand list) through AssertCompactAndExpanded; a kind with no gallery entry
         - ThemePipelineTests.cs  -- The theme end to end on the REAL LivingRoomScene: every UIDocument marked ts-app / default / dark on a panel whose theme is TileStoriesTheme; every

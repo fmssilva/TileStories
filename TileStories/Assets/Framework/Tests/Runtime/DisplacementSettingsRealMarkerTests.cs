@@ -11,6 +11,7 @@ namespace TileStories.Tests
     // swapped live through WallSession.ApplyDisplacementSettings (the POI Editor's live push seam) on the
     // displacement demo's crowded groups, evaluated by the real LODController, read back from the markers'
     // labels, roots and leader lines -- plus renders saved under TestEvidence/Displacement for the vision pass.
+    [Category("Core")]
     public class DisplacementSettingsRealMarkerTests : DisplacementDemoFixture
     {
         private IEnumerator StartDemo(DisplacementSettings settings)

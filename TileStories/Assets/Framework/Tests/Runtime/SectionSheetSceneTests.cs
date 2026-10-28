@@ -16,6 +16,7 @@ namespace TileStories.Tests
     // the family with its blocks' count and minutes, in both languages, its words on the pill (D8), not sticky; a jump to a section lands
     // on its sheet's top with the opener in view and the spy naming it; the layouts (pages: the opener is the page's title; tabs; accordion;
     // bento); the opener's words >= 7:1 on the RENDER in both modes; captures for the eye.
+    [Category("Core")]
     public class SectionSheetSceneTests : SearchSceneFixture
     {
         private PoiCardSheetView Sheet => Card.Sheet;

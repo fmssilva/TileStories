@@ -22,6 +22,7 @@ namespace TileStories.Tests
     //   - the breadcrumb's section pill, tapped for real, closes the full view and moves the card to that section (one nav_jump, "breadcrumb")
     //   - a family of one (Listen) draws no chips, and a real swipe there turns nothing
     //   - renders: the Media full view with the breadcrumb and the chips, EN and PT, and Listen's with none
+    [Category("Core")]
     public class PoiCardFullViewSiblingsSceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";

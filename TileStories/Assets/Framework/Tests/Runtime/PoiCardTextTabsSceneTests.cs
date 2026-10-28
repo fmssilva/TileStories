@@ -14,6 +14,7 @@ namespace TileStories.Tests
     // sideways drag scrolls the strip and not the card, an up / down one moves the sheet; a card below Show Navigation From has no
     // strip; Top Bar and Show Navigation From are live. Since step 5b the strip shows where CardChromeRule allows it: at The Lamp's Half
     // (open header) the floor hides it, so the strip's own tests act at Full; PoiCardChromeSceneTests owns what shows at which stop.
+    [Category("Core")]
     public partial class PoiCardTextTabsSceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";

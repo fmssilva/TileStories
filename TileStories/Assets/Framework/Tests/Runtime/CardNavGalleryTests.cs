@@ -23,7 +23,13 @@ namespace TileStories.Tests
         private const string ScenePath = "Assets/Dev/CardNavGallery/CardNavGalleryScene.unity";
         private CardNavGalleryHarness _harness;
 
-        private static string[] EntryNames => CardNavGalleryDefinitions.All.Where(e => !e.IsBlock && e.Layout == null).Select(e => e.Name).ToArray();
+        private static string[] EntryNames => CardNavGalleryDefinitions.All.Where(e => !e.IsBlock && e.Layout == null && IsElementCase(e)).Select(e => e.Name).ToArray();
+
+        // One case per behaviour (_Test_Suite_1.md section 5) for the elements: pt_long is the eight-section card with the longest words (it
+        // scrolls, overflows, and judges fit at 390), one_family draws nothing and two_families is the fewest sections that draw (rule 2.5.7).
+        // big is pt_long's card in English (proven by pt_long: same sections, longer words), small lies between the two thresholds (proven by
+        // two_families and pt_long); both stay in the gallery scene, and the layouts, the nav blocks and the cases' own tests keep all five
+        private static bool IsElementCase(CardNavGalleryDefinitions.Entry e) => e.Case.Key != "big" && e.Case.Key != "small";
 
         // What each element promises beyond the shared checks, by key: adding an element = a row in the definitions + its check here
         private static readonly Dictionary<string, System.Action<CardNavGalleryHarness, CardNavGalleryDefinitions.Entry>> ElementChecks = new()

@@ -20,6 +20,7 @@ namespace TileStories.Tests
     //     view of the block works again
     //   - a language switch, a live edit and Reduce Motion with the full view open: it stays, redrawn; another point closes it
     //   - renders at 390 px in English and Portuguese: the rows, one open, the full view
+    [Category("Core")]
     public class PoiCardExpandableSceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";

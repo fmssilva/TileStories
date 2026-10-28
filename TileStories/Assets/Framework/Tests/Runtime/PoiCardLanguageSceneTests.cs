@@ -13,6 +13,7 @@ namespace TileStories.Tests
     // Lamp's card in the other language in place (the sheet's stop and the stack's scroll kept), the pick is remembered for the wall's other
     // points, a text missing in the shown language reads the wall's FIRST language (and the other way round), and the developer's Preview
     // Language moves the open card live. The card's state is an in-memory store: the run never touches the developer's saved pick.
+    [Category("Core")]
     public class PoiCardLanguageSceneTests : SearchSceneFixture
     {
         private PoiCardSheetView Sheet => Card.Sheet;

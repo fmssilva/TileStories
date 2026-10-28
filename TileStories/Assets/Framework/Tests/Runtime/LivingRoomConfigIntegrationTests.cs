@@ -10,6 +10,7 @@ namespace TileStories.Tests
     // StreamingAssets/LivingRoom/config.json loads, deserialises, and every POI's
     // hierarchy_level_key resolves against the baked level table -- i.e. the
     // editor -> StreamingAssets -> runtime contract holds.
+    [Category("Core")]
     public class LivingRoomConfigIntegrationTests
     {
         [UnityTest]

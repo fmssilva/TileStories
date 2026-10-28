@@ -11,6 +11,7 @@ namespace TileStories.Tests
     // EditMode the same AddComponent defers Awake and clobbers the injected reference.
     // ARZoomState is the global zoom state observed directly. Pure UXML/USS/tap-target /
     // gating coverage stays in ZoomControlViewEditModeTests (where AssetDatabase works).
+    [Category("Core")]
     public class ARZoomRoutingTests
     {
         [Test]

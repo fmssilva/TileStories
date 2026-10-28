@@ -179,6 +179,7 @@ namespace TileStories.Tests
 
         // ---------------- Phase B: The Painting ----------------
 
+        [Category("Core")]
         [UnityTest]
         public IEnumerator TheStoryPage_ARealTapOnBack_ReturnsToTheCard_AtTheSameStopAndScroll_TheBarReadsOnOneLine(
             [Values("en", "pt")] string language, [Values("light", "dark")] string mode)
@@ -214,6 +215,7 @@ namespace TileStories.Tests
             Assert.AreSame(preview, Sheet.Stack.ViewOfBlock(block.key), "the preview stayed bound");
         }
 
+        [Category("Core")]
         [UnityTest]
         public IEnumerator TheFoot_RealTapsOnNextAndPrevious_TurnThePage_AndTheCardsNameTheNeighbours([Values("en", "pt")] string language,
             [Values("light", "dark")] string mode)

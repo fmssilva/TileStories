@@ -37,6 +37,7 @@ namespace TileStories.Tests
             yield return Capture("Idle");
         }
 
+        [Category("Core")]
         [UnityTest]
         public IEnumerator ATypedQuery_ListMapAndMarkersShowTheSameSet()
         {
@@ -151,6 +152,7 @@ namespace TileStories.Tests
             yield return Capture("View_Highlight");
         }
 
+        [Category("Core")]
         [UnityTest]
         public IEnumerator ARealMarkerTap_Selects_DimsTheOthers_OpensTheCard_AndASecondTapClears()
         {
@@ -180,6 +182,7 @@ namespace TileStories.Tests
             Assert.IsFalse(Card.Sheet.IsOpen, "the card closes");
         }
 
+        [Category("Core")]
         [UnityTest]
         public IEnumerator SelectingAndFiltering_NeverUndoEachOther()
         {

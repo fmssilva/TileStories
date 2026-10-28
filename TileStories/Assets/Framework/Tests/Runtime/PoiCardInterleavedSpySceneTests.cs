@@ -120,14 +120,17 @@ namespace TileStories.Tests
             var marks = new List<string> { KeyOf(Nav.Current) };
             int drags = 0, stillAtTheEnd = 0;
             // - until the card's end is in view and the stack stops moving
-            while (stillAtTheEnd < 3 && drags < 200)
+            while (stillAtTheEnd < 3 && drags < 400)
             {
-                // - measured before every drag: near the end the footer and the bottom bar come back and the viewport shrinks, so a finger
-                //   placed by the first screen's viewport would land on the bar, not on the stack
+                // - measured before every drag: near the end the footer and the bottom bar come back and the reach shrinks, so a finger
+                //   placed by the first screen's viewport would land on the bar, not on the stack (CardTestInput.ReachableStack)
                 var viewport = Scroll.contentViewport.worldBound;
+                var reach = CardTestInput.ReachableStack(Sheet);
                 float before = Scroll.scrollOffset.y;
-                yield return CardTestInput.TouchDrag(Scroll.panel, new Vector2(viewport.center.x, viewport.yMax - 40f), new Vector2(0f, -viewport.height * 0.2f));
-                yield return CardTestInput.Settle(0.5f);
+                // - a short step: the stack now flings to its rest before the marks are read, and a reading step longer than the
+                //   shortest run (Listen: one block) would pass it between two readings
+                yield return CardTestInput.TouchDrag(Scroll.panel, new Vector2(reach.center.x, reach.yMax - 40f), new Vector2(0f, -viewport.height * 0.08f));
+                yield return CardTestInput.UntilStill(Sheet);
                 drags++;
                 if (AtTheEnd()) stillAtTheEnd += Scroll.scrollOffset.y > before + OnePixel ? 0 : 1;
                 else Assert.Greater(Scroll.scrollOffset.y, before, "precondition: drag " + drags + " scrolled the stack (range " + Range.ToString("F1")

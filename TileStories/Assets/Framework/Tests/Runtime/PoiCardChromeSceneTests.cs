@@ -12,6 +12,7 @@ namespace TileStories.Tests
     // real drag down the card slides the sticky footer away and a real drag up brings it back; nothing shows at peek; the share of the
     // card that shows content at Full rises while scrolling down, against the same card with Hide While Scrolling = Never; a header that
     // collapsed while reading gives Half its strip back; Show Navigation At = Full Only is live and only hides more.
+    [Category("Core")]
     public class PoiCardChromeSceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";

@@ -33,11 +33,27 @@ The top 20 hold 61 of the 89 min (68 %); the two Phase A galleries alone 24.5 mi
 | PoiCardFacetSceneTests | 8 | 71 |
 | CardStoryMediaGalleryTests | 21 | 69 |
 
-**After (this block, fixture by fixture -- no FULL run yet):** every fixture red in the baseline was re-run green after its re-base, in
-background BLOCK-tier groups (behind / behind each); full EditMode 2298 / 0 failed / 1 skipped, 3.5 min. The galleries timed again:
-CardGalleryTests 818 s, CardNavGalleryTests 584 s (the run-to-run spread is ~10 %: 608 / 483 s in another run). Named skips that stand for
-findings, not passing tests: Hero words contrast x16, F1 x2, F2 x1, F3 x1, F4 x1, F5 x4 (fab_dial cases). The FULL time after is the next
-session's closing run.
+**After** (second session's closing FULL, Unity behind / behind): 102 fixtures, 1339 tests, **0 failed**, 67 skipped, **82.1 min**
+(`TestEvidence/Harness/pm_after.csv`). The 122 fewer tests are the gallery cuts (section 5). The 67 skips are 25 findings (section 2's
+table) and 42 measurements that run only on demand. Full EditMode: 2298 / 0 failed / 1 skipped, 3.9 min.
+
+| fixture | tests | before s | after s |
+|---|---|---|---|
+| CardGalleryTests | 308 | 907 | 573 |
+| CardNavGalleryTests | 119 | 564 | 404 |
+| PoiCardRestingEndSceneTests | 16 | 256 | 244 |
+| PoiCardInterleavedSpySceneTests | 7 | 77 | 238 |
+| PoiCardSceneTests | 56 | 249 | 222 |
+| PoiCardTopElementsSceneTests | 15 | 178 | 219 |
+| PoiCardBottomElementsSceneTests | 8 | 108 | 170 |
+| PoiCardNavOptionsSceneTests | 27 | 150 | 148 |
+| PoiCardPageChromeSceneTests | 28 | 145 | 128 |
+| SearchSettingsFieldTests | 33 | 127 | 110 |
+| PoiCardHeroSceneTests | 34 | 142 | 69 |
+
+Read with care: the baseline ran 142 reds, and a red stops early, so a fixture that was red then and green now can look slower
+(TopElements, BottomElements). InterleavedSpy is slower by design: the walk waits for the stack to rest (section 4). The gallery times
+swing ~10-30 % from run to run (CardGallery 573-818 s across this session's three runs).
 
 ## 2. S4a's verdict
 
@@ -50,26 +66,59 @@ badge switch.
 
 S4a product faults the runs found:
 - **Fixed (small, clear):** the landing inset was measured in the sheet's frame and used in the stack's (the stack starts at y 1): a jump
-  landed 1 px under the strip and the spy disagreed with the screen at a section boundary (`PoiCardSheetView.RecomputeStops`). The rim
-  light's band after a light / dark switch kept the old mode's width (dark lit a 3 px band on a 1 px rim): `CardLight.Resize` now reads
-  `--ts-rim-band` for the mode shown.
+  landed 1 px under the strip and the spy disagreed with the screen at a section boundary (`PoiCardSheetView.RecomputeStops`).
+- **F3, not fixed:** the rim light's band after a light / dark switch keeps the old mode's width (dark lights a 3 px band on a 1 px rim).
+  A first fix (`CardLight.Resize` reading `--ts-rim-band` for the mode shown) did not change the result and was reverted.
 - **F1, not fixed (a design choice):** at Full -- since S4a flush with the screen's top -- the floating placed-model chip lies over the
   card's X (`panel.Pick` at the X = `poi-card-chip-remove`): a visitor who taps X removes the model instead of closing. The two
   PlaceInAr tests that reach it are `[Ignore]` F1 until a block decides where the chip goes at Full (under the bar, hidden, or a gap).
 - **F2, contrast:** the gear on S4a's see-through bar measures 6.6:1 (< 7:1); with the hero words (no scrim at the hero's foot,
   1.3-1.5:1) these are the open `_3.3` contrast items of the premium design block: `[Ignore]` with that reason.
 
+Every named skip, its finding and its owner (the Architect's answers, second session). A named `[Ignore]` / `Assert.Ignore` carries the
+finding id; there is no Quarantine category.
+
+| skip | where | finding | owner |
+|---|---|---|---|
+| x16 | PoiCardHeroSceneTests.EveryWordOfTheHero_... | hero words 1.3-1.5:1, no scrim at the hero's foot | premium design block (must fix) |
+| x2 | PoiCardPlaceInArSceneTests (TheLamp_ThePlacedArch..., KeepModelOnSwitch_...) | F1: at Full the placed-model chip lies over the X. Rule: no floating chip ever lies over a chrome mark; at Full the chip sits under the chrome row | premium design block (rebuilds the chrome) |
+| x1 | CardSettingsGalleryTests (the gear) | F2: gear 6.6:1 on the see-through bar | premium design block (must fix) |
+| x1 | CardLightSceneTests.TheRimLight_RidesTheWholeMetalBand_... | F3: dark-mode band keeps the light mode's width | premium design block |
+| x1 | PoiCardTapZoomTests.TheLampsTrueFalseStatement_... | F4: vertical and sideways halves never pass in one run since S4a | the next card block |
+| x4 | CardNavGalleryTests (fab_dial cases, Assert.Ignore) | F5: dial pill words 1.11:1 | premium design block (must fix) |
+| x29 | Typeface (12+4), SectionSheet (6), RestingEnd (5), CardLight (1), Story (1) measure tests | not a finding: a measurement, runs when its `MEASURING` file exists | the block that measures |
+| x13 | ThemePixelSet gallery (12) + scene (1), `[Explicit]` | not a finding: a pixel-set measurement, run by name before and after a change that must move no pixel | the block that changes the theme |
+
 ## 3. The Core list (`[Category("Core")]`)
 
-Not tagged yet (the next session's first sub-step): the list -- class level on 31 fast fixtures (~14.6 min at baseline), method level on
-the slow ones -- is in `__curr_plan_tracker.md` NEXT 1, by critical path: open by a real marker tap and close (X, swipe down, empty tap):
-PoiCardSceneTests; stops and drag: PoiCardSceneTests.DraggingUp_..., PoiCardSheetDragSceneTests; the block page and Back:
-PoiCardPageChromeSceneTests.TheStoryPage_ARealTapOnBack_...; the Navigation Bar (jump, the group follows the scroll): PoiCardNavBarSceneTests,
-PoiCardNavSceneTests.ARealFingerDrag_MovesTheSpy_...; the hero and light / dark: PoiCardHeroSceneTests.AtFull_..., PoiCardThemeSceneTests; the
-story and its page: PoiCardStorySceneTests; audio play / stop: PoiCardAudioSceneTests; markers, search, zoom: MarkerConfigDrivesMarkerTests,
-MarkerViewRuntimeTests, SearchSceneTests (3), SearchDemoTests, ARZoomCameraFovTests, ARZoomRoutingTests, LodRealPipelineTests, LodWallSceneTests;
-the Editor's live sync and a config round trip: LiveSyncFieldMatrixTests.LiveEdit_ReachesTheRunningMarker, CardConfigRoundTripTests,
-PoiCardLiveUpdateTests; the visitor-state isolation: VisitorStateIsolationTests.
+**Tagged and timed (second session):** 48 `[Category("Core")]` attributes, 31 on classes and 17 on methods.
+First run, Unity behind both ways, all green:
+- PlayMode: 227 tests, 0 failed, 1 skipped (the story measurement, gated on a file), **17.0 min**.
+- EditMode: 118 tests, 0 failed, **20 s**.
+- CORE total **~17.5 min**, against the brief's 25-30 min target. The Architect accepted ~20 min: widen it only for a missing critical path.
+- Per-fixture times: `TestEvidence/Harness/core_first.csv`. Slowest: Floating 87 s, SectionSheet 71 s, LiveUpdate 63 s, BottomBar 61 s, Story 58 s.
+
+Run it with `run_tests` `category_names: ["Core"]`, PlayMode then EditMode. The class-level tags are on these 31 fast fixtures:
+PoiCardSheetDragSceneTests, PoiCardThemeSceneTests, PoiCardNavBarSceneTests, PoiCardAudioSceneTests, PoiCardStorySceneTests,
+MarkerConfigDrivesMarkerTests, ARZoomCameraFovTests, ARZoomRoutingTests, LivingRoomConfigIntegrationTests, ThemePipelineTests,
+PoiCardLanguageSceneTests, PoiCardChromeSceneTests, PoiCardTextTabsSceneTests, PoiCardLayoutSceneTests, SectionSheetSceneTests,
+PoiCardExpandableSceneTests, PoiCardVideoSceneTests, PoiCardModel3DSceneTests, PoiCardPanoramaSceneTests, PoiCardBottomBarSceneTests,
+PoiCardFullViewSiblingsSceneTests, PoiCardLiveUpdateTests, LodRealPipelineTests, OrientationWallSessionIntegrationTests,
+DisplacementSettingsRealMarkerTests, PoiCardFullHeightSceneTests, PoiCardFloatingSceneTests, PoiCardPaintingSceneTests, LodWallSceneTests,
+SearchDemoTests, MarkerViewRuntimeTests. The method-level tags are on the slow fixtures, by critical path:
+
+- open by a real marker tap, and close (X, swipe down, empty tap): PoiCardSceneTests {ARealMarkerTap_OpensTheCard_ForThatPoi,
+  TheX_ClosesTheCard_..., PullingTheCardDownBelowPeek_ClosesIt, ATapOnEmptyCameraSpace_Closes_...}
+- stops and drag: PoiCardSceneTests.DraggingUp_GoesToHalf_AtMost40Percent_ThenFull (+ PoiCardSheetDragSceneTests, class)
+- the hero: PoiCardHeroSceneTests {AtFull_TheWholeHeroIsTheScreen_..., ARealTapOnTheHerosAction_...}
+- the block page, Back and Next / Previous: PoiCardPageChromeSceneTests {TheStoryPage_ARealTapOnBack_..., TheFoot_RealTapsOnNextAndPrevious_...}
+- navigation (a jump, the spy follows a real finger): PoiCardNavSceneTests {AJumpFromPeek_..., ARealFingerDrag_MovesTheSpy_...}
+  (+ PoiCardNavBarSceneTests, class)
+- search (a typed query, a marker tap, select and filter): SearchSceneTests {ATypedQuery_..., ARealMarkerTap_Selects_...,
+  SelectingAndFiltering_NeverUndoEachOther}
+- the Editor (EditMode): LiveSyncFieldMatrixTests.LiveEdit_ReachesTheRunningMarker (its rows, 116 cases),
+  CardConfigRoundTripTests.EveryCardField_WalkedByReflection_SurvivesAJsonRoundTrip,
+  VisitorStateIsolationTests.ThisRun_KeepsTheVisitorsStateInAStoreOfItsOwn_NeverTheAppsPlayerPrefs
 
 ## 4. Findings
 
@@ -79,21 +128,49 @@ PoiCardLiveUpdateTests; the visitor-state isolation: VisitorStateIsolationTests.
   rewritten when the chrome changed. `CardTestInput.IntoReach` / `TapInReach` are now the one way to put a finger on the stack, and
   they wait until the stack is still (a set offset never stops a running fling).
 - **Assert messages that name the setup** (the X's picked element, the two landing insets) turned two hour-long guesses into one run.
-- **F4 quarantine:** `PoiCardTapZoomTests.TheLampsTrueFalseStatement_...` -- since S4a the vertical and the sideways halves never pass
+- **F4:** `PoiCardTapZoomTests.TheLampsTrueFalseStatement_...` -- since S4a the vertical and the sideways halves never pass
   in one run under real Input System fingers; `[Ignore]` with that name, owner: the next card block.
-- **Watched flakes:** `InterleavedSpy` (the "drag 20" sighting) was a deterministic 1 px landing difference (fixed, product) plus taps on a moving stack
-(IntoReach waits until still); `PoiCardSceneTests.ARealTapOnTheStickyAction` (OpenFull read before rest) -- the fixture's Rested waits on the
-stop's height, green 56 / 56 once after its re-base (not yet watched over several runs); `ConfigUndoGroupingTests` slider drag -- green in both full EditMode runs, still
-watched. The "9 doubled DetailCard navigation" reds never showed (EditMode 2298 / 0 twice); the lead (a static host slot) is in the tracker.
+- **Watched flakes, second session:**
+  - **The doubled DetailCard reds -- cause found and fixed at the source.** `PoiEditorWindowHost` sent the POI Editor's rect probes
+    through two static hooks, so any other POI Editor that painted wrote its rects over the test's: a host an earlier test left open
+    (`Host.Editor` is static, so it painted the current test's editor at its own screen place), a real POI Editor window left open, or
+    the developer's own POI Editor. The probes now record only while this test's host paints, and a leftover host paints nothing. The
+    constructor closes leftovers, and `Close` (called in every user's TearDown) fails the test that left one open.
+  - No test leaks one today: a code search found no test that opens two hosts, and full EditMode is 2298 / 0 with the check on. The
+    doubling could not be reproduced, so the fix is proven by mechanism, not by a red that turned green.
+  - **InterleavedSpy walk:** its drags now wait on `CardTestInput.UntilStill` (three frames unmoved), not `Settle(0.6)`. With the fling
+    running to its end, a 20 % step passed Listen (one block) between two readings: the step is now 8 % of the viewport. Green; 102
+    drags, 240 s (was 160 s).
+  - **`PoiCardSceneTests.ARealTapOnTheStickyAction`:** green in this session's closing FULL (1339 / 0 failed); still watched.
+  - **`ConfigUndoGroupingTests` slider drag:** green in all four full EditMode runs; still watched.
+- **Two silent Painting tests.** `TheTabsWithChipsStrip_...` and `WhereTheChromeHidesTheStrip_...` read the wall's top element through
+  `Assume`. When the developer moved the wall to icon tabs, they turned Inconclusive, and Inconclusive does not fail a run. They now
+  set tabs with chips themselves, assert it, and are re-based on pattern 2. A wall-choice `Assume` hides a test; this was the only one
+  left.
 
 ## 5. Fix list (block-sized chunks, expected saving)
 
-1. **CardGalleryTests (818 s) -- one block:** a case per behaviour per block kind (each look once at its worst stop and language), the
-   exhaustive entry x stop x language matrix kept as the gallery's renders, not as asserts. Expected saving ~8-10 min. Keep: every contract
-   guard (fields, tokens, render targets, contrast) and every past bug's regression.
-2. **CardNavGalleryTests (584 s) -- one block:** the five cases cut to the pairs that interact (big x pt_long for fit, two_families for
-   collapse), the rest one case. Expected ~5 min.
-3. **PoiCardRestingEndSceneTests (252 s) + PoiCardSceneTests (210 s) -- one block:** the scene loaded once per fixture where tests share
-   no state; the resting-end strokes wait on the stack's rest condition, not seconds. Expected ~3-4 min.
-4. **Shared input helpers:** the remaining fixture-local DragStack copies (Chrome, BottomBar, BottomElements, Menu, InterleavedSpy) onto one
-   CardTestInput drag that waits until still. No time saving; removes the flake family.
+Done this session (one case per behaviour; the whole entry matrix stays in the gallery scenes for the eye):
+- **CardGalleryTests, 392 -> 308 cases, 818 -> 759 s.**
+  - Headers: each look keeps its long texts at every stop and every other content at Full. A dropped short or no-subtitle entry at
+    Peek / Half is proven by the long one at that stop, plus its own content at Full.
+  - Blocks: each kind keeps every content once (at its first look), and each look keeps its long entry. A dropped (look, content)
+    entry is proven by those two.
+- **CardNavGalleryTests, 157 -> 119 cases, 584 -> 499 s** (404 s in the closing FULL; CardGalleryTests 573 s). The elements, their menus and the full view keep pt_long, one_family and
+  two_families. big is proven by pt_long (same sections, longer words), small by two_families and pt_long. Layouts, nav blocks and the
+  per-case tests keep all five.
+- **The saving is smaller than planned (~2.4 min, not ~13).** A case's cost is mostly the scene load in `[UnitySetUp]` and the render,
+  not its asserts, so cutting cases saves little per case. The next lever is the scene loaded once per fixture (chunk 1 below).
+
+Still to do (each a block):
+1. **Gallery scene once per fixture (CardGalleryTests 759 s, CardNavGalleryTests 499 s, CardStoryGalleryTests 98 s):** load the scene in
+   a `[UnitySetUp]` guarded by "not loaded yet" and reset the harness between cases (`Show` already rebuilds the card). Measure first: one
+   fixture's per-test durations (`include_details`). Expected ~5-8 min if the load is half of each case.
+2. **PoiCardRestingEndSceneTests (256 s) + PoiCardSceneTests (249 s):** the resting-end strokes wait on `UntilStill`, not seconds; the
+   wall scene once per fixture where tests share no state. Expected ~3-4 min.
+3. **PoiCardTopElementsSceneTests (178 s), PoiCardNavOptionsSceneTests (150 s), PoiCardPageChromeSceneTests (145 s):** `Settle(n)` waits
+   replaced by conditions (`UntilStill`, the sheet's stop height), each fixture timed before and after. Expected ~2-3 min.
+4. **Shared input helpers:** the fixture-local DragStack copies (Chrome, BottomBar, BottomElements, Menu) onto one CardTestInput drag that
+   starts inside `ReachableStack` and ends on `UntilStill`. No time saving; removes the flake family.
+5. **PoiCardInterleavedSpySceneTests (238 s, was 77 s):** the walk's 8 % steps each wait for rest. Step by the stack's next block
+   boundary instead of a fixed share of the viewport (one drag per block, not per 8 %). Expected ~2 min.

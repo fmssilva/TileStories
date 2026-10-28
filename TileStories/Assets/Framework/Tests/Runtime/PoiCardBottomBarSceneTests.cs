@@ -19,6 +19,7 @@ namespace TileStories.Tests
     //   - after real drags the bar marks the slot of the section on screen (More for one in its list)
     //   - a real drag down hides the footer AND the bar together, a drag up brings both back; nothing at peek
     //   - in Portuguese every slot is a whole touch target with its whole word
+    [Category("Core")]
     public class PoiCardBottomBarSceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";

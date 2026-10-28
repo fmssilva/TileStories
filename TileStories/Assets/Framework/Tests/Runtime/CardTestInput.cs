@@ -302,6 +302,23 @@ namespace TileStories.Tests
             Assert.AreEqual(3, still, "precondition: " + e.name + " holds still before the finger (no fling left running)");
         }
 
+        // Wait until the stack stops moving (three frames unmoved): a released drag flings on, and a reading taken mid-fling is the
+        // fling's, not the rest's -- the condition, not a number of seconds
+        public static IEnumerator UntilStill(PoiCardSheetView sheet)
+        {
+            var scroll = sheet.Stack.Scroll;
+            float last = float.NaN;
+            int still = 0;
+            for (int frame = 0; frame < 600 && still < 3; frame++)
+            {
+                yield return null;
+                float now = scroll.scrollOffset.y;
+                still = Mathf.Abs(now - last) < 0.01f ? still + 1 : 0;
+                last = now;
+            }
+            Assert.AreEqual(3, still, "precondition: the stack comes to rest (offset " + scroll.scrollOffset.y.ToString("F1") + ")");
+        }
+
         // Where a picture at the card's top can be read bare: under the top shade's foot (_3.3 S4a: a dark fade behind the floating bars over
         // the hero's top), or the element's own top when no shade shows
         public static float UnderTheTopShade(VisualElement e)

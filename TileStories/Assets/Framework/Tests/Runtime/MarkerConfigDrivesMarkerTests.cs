@@ -17,6 +17,7 @@ namespace TileStories.Tests
     // POIs never exercise -- no status axis, no badge category, no hierarchy level, a custom symbol.
     // Companion to OrientationWallSessionIntegrationTests (same build pattern) and MarkerGalleryTests
     // (fabricated data instead of the real config).
+    [Category("Core")]
     public class MarkerConfigDrivesMarkerTests
     {
         private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab";

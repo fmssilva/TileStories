@@ -13,6 +13,7 @@ namespace TileStories.Tests
     // LivePlayModeCardTests) rebinds the open card in place -- new text, a block added or deleted, another look -- with the sheet's stop and
     // the stack's scroll kept, and never touches a POI's name, category, summary or keywords. Then the developer-only demo card: off by
     // default, and when on it opens the chosen POI's card at the chosen stop by itself.
+    [Category("Core")]
     public class PoiCardLiveUpdateTests : SearchSceneFixture
     {
         private PoiCardSheetView Sheet => Card.Sheet;

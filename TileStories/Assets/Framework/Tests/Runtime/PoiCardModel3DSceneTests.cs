@@ -13,6 +13,7 @@ namespace TileStories.Tests
     // second slot); block_59, the LivingRoom-only `146267-LivingRoom2-tex.glb` test fixture (a real room scan, never
     // a Framework default), stays Display Inline with Fit Visible (a real one-finger drag rotates it right on the card). Closing the
     // card releases every slot (PreviewService.ReleaseAll through PoiCardHost.Close).
+    [Category("Core")]
     public class PoiCardModel3DSceneTests : SearchSceneFixture
     {
         private PoiCardSheetView Sheet => Card.Sheet;

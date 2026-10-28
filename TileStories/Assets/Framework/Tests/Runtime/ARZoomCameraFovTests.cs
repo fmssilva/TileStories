@@ -14,6 +14,7 @@ namespace TileStories.Tests
     // SetZoomImmediate / SetZoomAnimated and asserts the real Camera.fieldOfView
     // follows. Without this, prior "zoom math" suites only ever tested the number,
     // never the visual zoom the spec section 9 promises.
+    [Category("Core")]
     public class ARZoomCameraFovTests
     {
         private GameObject _zoomGO;

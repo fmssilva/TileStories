@@ -11,6 +11,7 @@ namespace TileStories.Tests
     // for the wall's own id (never the developer's PlayerPrefs): the app opens light by default; a real tap on Aa then on Dark re-colours
     // every screen by its mode class WITHOUT rebuilding the card (the same views, the same stop, the same scroll); the pick is remembered
     // and wins over the wall's Default Mode, which a live edit moves while no pick is saved.
+    [Category("Core")]
     public class PoiCardThemeSceneTests : SearchSceneFixture
     {
         private PoiCardSheetView Sheet => Card.Sheet;

@@ -12,6 +12,7 @@ namespace TileStories.Tests
     // WallSession.ApplySearchDemo -- the seam the Editor's live push calls -- and searched through the real
     // search UI. Each demo control is changed alone and what really changed on the real markers is asserted;
     // every test case is found by its query; zoom-on-select runs on the real clump and a real cluster tap.
+    [Category("Core")]
     public class SearchDemoTests : SearchSceneFixture
     {
         private SearchDemoSettings Demo(System.Action<SearchDemoSettings> edit = null)

@@ -13,6 +13,7 @@ namespace TileStories.Tests
     // is the video loop. Every action is a real tap on the panel. Only the video DEVICE is a stand-in (a ManualVideoOutput that decodes nothing)
     // and the audio device a silent one, so the 200 s clip never costs 200 s of waiting; PoiCardRealVideoTests puts the real VideoPlayer under
     // the same card.
+    [Category("Core")]
     public class PoiCardVideoSceneTests : SearchSceneFixture
     {
         private const string ClipPath = "video/lisbon_square_castle_55s.mp4";

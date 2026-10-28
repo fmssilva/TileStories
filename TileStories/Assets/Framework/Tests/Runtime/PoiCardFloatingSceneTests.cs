@@ -20,6 +20,7 @@ namespace TileStories.Tests
     //     sheet, the topmost thing at its own centre -- and at half and full, in English and Portuguese; a real Remove takes the model away and
     //     the chip goes; on another point's card it names the point, offers no Remove, and a real tap on it opens the card that placed it;
     //     Placed Model Control = None hides it, live; it reads over a bright and a dark camera frame
+    [Category("Core")]
     public class PoiCardFloatingSceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";

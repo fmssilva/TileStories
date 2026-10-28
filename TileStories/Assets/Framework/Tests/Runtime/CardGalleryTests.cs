@@ -22,8 +22,31 @@ namespace TileStories.Tests
         private const string ScenePath = "Assets/Dev/CardGallery/CardGalleryScene.unity";
         private CardGalleryHarness _harness;
 
-        private static string[] HeaderEntryNames => CardGalleryDefinitions.All.Where(e => e.IsHeader).Select(e => e.Name).ToArray();
-        private static string[] BlockEntryNames => CardGalleryDefinitions.All.Where(e => !e.IsHeader).Select(e => e.Name).ToArray();
+        // One case per behaviour (_Test_Suite_1.md section 5); the whole entry matrix stays in the gallery scene for the eye.
+        // - headers: per look, the long texts at every stop (the worst fit at each) and every other content at Full. A dropped short or
+        //   no-subtitle entry at Peek / Half is proven by the long one at that stop (same look, same asserts, longer words) and by its own
+        //   content at Full (whether the subtitle shows is the look's rule, not the stop's)
+        private static string[] HeaderEntryNames => CardGalleryDefinitions.All
+            .Where(e => e.IsHeader && (e.Content == "long" || e.Stop == SheetStopRule.Stop.Full)).Select(e => e.Name).ToArray();
+
+        // - blocks: per kind, every content once (at its first look: a row left out, a missing file, no question is the kind's builder's
+        //   rule, the same under every look, and that first entry carries the gallery's heading); per look, its long entry (its first when it
+        //   has none): the look's worst fit, contrast and targets. A dropped (look, content) entry is proven by those two
+        private static string[] BlockEntryNames
+        {
+            get
+            {
+                var blocks = CardGalleryDefinitions.All.Where(e => !e.IsHeader).ToList();
+                var kept = new System.Collections.Generic.HashSet<string>();
+                foreach (var kind in blocks.GroupBy(e => e.Kind))
+                {
+                    foreach (var content in kind.GroupBy(e => e.Content)) kept.Add(content.First().Name);
+                    foreach (var look in kind.GroupBy(e => e.Variant))
+                        kept.Add(look.Any(e => e.Content == "long") ? look.First(e => e.Content == "long").Name : look.First().Name);
+                }
+                return blocks.Where(e => kept.Contains(e.Name)).Select(e => e.Name).ToArray();
+            }
+        }
 
         private static int IndexOf(string name) => CardGalleryDefinitions.All.ToList().FindIndex(e => e.Name == name);
 

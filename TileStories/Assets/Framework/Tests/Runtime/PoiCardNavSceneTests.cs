@@ -106,6 +106,7 @@ namespace TileStories.Tests
 
         // ---------------- jumps ----------------
 
+        [Category("Core")]
         [UnityTest]
         public IEnumerator AJumpFromPeek_RaisesTheCardToFullFirst_ThenLandsALateFamilysFirstBlockAtTheViewportTop_AndReportsOneNavJump()
         {
@@ -253,6 +254,7 @@ namespace TileStories.Tests
             Assert.AreNotEqual(target, Nav.Current, "precondition met: the drag really left the section");
         }
 
+        [Category("Core")]
         [UnityTest]
         public IEnumerator ARealFingerDrag_MovesTheSpy_ToTheSectionOnScreen_AtThreeOffsets()
         {

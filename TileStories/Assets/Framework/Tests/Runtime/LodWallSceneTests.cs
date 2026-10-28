@@ -22,6 +22,7 @@ namespace TileStories.Tests
     // could see that the field spawned INSIDE the room mesh (invisible) and that its yaw_only markers were
     // turned edge-on. These tests look through the scene's own camera, render real pixels, and fail on
     // either. Renders are saved under TestEvidence/Lod as LodDemoFieldScene_*.png.
+    [Category("Core")]
     public class LodWallSceneTests
     {
         private const string ScenePath = "Assets/Apps/LivingRoom/LivingRoomScene.unity";

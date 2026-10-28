@@ -16,7 +16,7 @@ namespace TileStories.Tests
     public partial class CardNavGalleryTests
     {
         private static string[] MenuEntryNames => CardNavGalleryDefinitions.All
-            .Where(e => !e.IsBlock && e.Layout == null && (e.ElementKey == BuiltInNavElements.DrawerTree || e.ElementKey == BuiltInNavElements.GridOverlay))
+            .Where(e => !e.IsBlock && e.Layout == null && (e.ElementKey == BuiltInNavElements.DrawerTree || e.ElementKey == BuiltInNavElements.GridOverlay) && IsElementCase(e))
             .Select(e => e.Name).ToArray();
 
         // Whether a button lies wholly inside the strip's visible part (one pixel of slack: Rect.Contains drops the far edges)

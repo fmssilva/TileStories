@@ -18,7 +18,7 @@ namespace TileStories.Tests
     public partial class CardNavGalleryTests
     {
         private static string[] FullViewCaseNames => CardNavGalleryDefinitions.All
-            .Where(e => !e.IsBlock && e.Layout == null && e.ElementKey == BuiltInNavElements.TextTabs).Select(e => e.Name).ToArray();
+            .Where(e => !e.IsBlock && e.Layout == null && e.ElementKey == BuiltInNavElements.TextTabs && IsElementCase(e)).Select(e => e.Name).ToArray();
 
         [UnityTest]
         public IEnumerator EveryCase_TheFullViewsBreadcrumbAndChips_AreWhole_TouchSized_AndTheCurrentIsMarkedByMoreThanColour(

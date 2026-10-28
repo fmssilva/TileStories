@@ -19,6 +19,7 @@ namespace TileStories.Tests
     //   - the mark follows real drags of the stack
     //   - Lamp - Residential draws all four in-flow nav kinds at once (section 8.1's demo point)
     //   - renders at 390 px: The Painting in EN and PT at Half and Full, and each nav kind of Lamp - Residential
+    [Category("Core")]
     public class PoiCardPaintingSceneTests : SearchSceneFixture
     {
         private const string Painting = "painting";
@@ -234,10 +235,15 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator TheTabsWithChipsStrip_KeepsOneHeight_OverASectionWithChipsAndOneWithout()
         {
+            // - the test owns its strip: the wall's top element is the developer's choice (it was tabs with chips when this was written)
+            yield return Push(c => c.card_settings.navigation.top = BuiltInNavElements.IconTabsChips);
             yield return Open(Painting, SheetStopRule.Stop.Full);
-            Assume.That(Sheet.Slots.TopView, Is.InstanceOf<IconTabsChipsNavView>(), "the wall's top element is tabs with chips");
+            Assert.IsInstanceOf<IconTabsChipsNavView>(Sheet.Slots.TopView, "precondition: the strip is tabs with chips");
             var both = (IconTabsChipsNavView)Sheet.Slots.TopView;
             var tabs = both.Tabs;
+            // - _3.3 S4a: at Full the strip waits for the hero (a tap on a hidden strip's tab lands nowhere)
+            yield return CardTestInput.PastTheHero(Sheet);
+            Assert.IsTrue(Sheet.Chrome.TopShown, "precondition: the strip shows once the hero is read");
             int withChips = Model.Sections.ToList().FindIndex(s => NavOntologyRule.OffersAKindChoice(s.Kinds.Count));
             int without = Model.Sections.ToList().FindIndex(s => !NavOntologyRule.OffersAKindChoice(s.Kinds.Count));
             Assert.GreaterOrEqual(withChips, 0, "precondition: a section with two kinds or more");
@@ -268,8 +274,10 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator WhereTheChromeHidesTheStrip_TheChipRowHidesWithIt_AndShowsWithItAtFull()
         {
+            // - the test owns its strip: the wall's top element is the developer's choice (it was tabs with chips when this was written)
+            yield return Push(c => c.card_settings.navigation.top = BuiltInNavElements.IconTabsChips);
             yield return Open(Painting, SheetStopRule.Stop.Peek);
-            Assume.That(Sheet.Slots.TopView, Is.InstanceOf<IconTabsChipsNavView>(), "the wall's top element is tabs with chips");
+            Assert.IsInstanceOf<IconTabsChipsNavView>(Sheet.Slots.TopView, "precondition: the strip is tabs with chips");
             var both = (IconTabsChipsNavView)Sheet.Slots.TopView;
             Assert.IsFalse(Sheet.Chrome.TopShown, "precondition: at Peek the chrome hides the strip (never at peek)");
             Assert.GreaterOrEqual(both.ChipsSection, 0, "precondition: the first section has chips bound");
@@ -278,7 +286,9 @@ namespace TileStories.Tests
 
             Sheet.SetStop(SheetStopRule.Stop.Full);
             yield return CardTestInput.Settle(0.5f);
-            Assert.IsTrue(Sheet.Chrome.TopShown, "precondition: the strip shows at Full");
+            // - _3.3 S4a: at Full the strip waits for the hero
+            yield return CardTestInput.PastTheHero(Sheet);
+            Assert.IsTrue(Sheet.Chrome.TopShown, "precondition: the strip shows at Full once the hero is read");
             Assert.AreEqual(Visibility.Visible, both.Chips.Root.resolvedStyle.visibility, "with the strip shown, the chips show");
         }
 

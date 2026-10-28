@@ -23,6 +23,7 @@ namespace TileStories.Tests
     // then invoking the private SpawnPOIs() directly - this avoids racing the real
     // LoadConfigCoroutine/IWallTracker lifecycle, which every other integration test in this
     // codebase also avoids for the same reason.
+    [Category("Core")]
     public class OrientationWallSessionIntegrationTests
     {
         private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab";

@@ -54,6 +54,7 @@ namespace TileStories.Tests
             yield return Capture("Card_Lamp_Peek");
         }
 
+        [Category("Core")]
         [UnityTest]
         public IEnumerator DraggingUp_GoesToHalf_AtMost40Percent_ThenFull()
         {
@@ -180,6 +181,7 @@ namespace TileStories.Tests
             Assert.IsFalse(stack.BarShowsTitle, "another POI's card opens with its hero carrying the title");
         }
 
+        [Category("Core")]
         [UnityTest]
         public IEnumerator TheX_ClosesTheCard_AndClearsTheSelection()
         {
@@ -192,6 +194,7 @@ namespace TileStories.Tests
             Assert.AreEqual(Session.SpawnedMarkers.Count, MarkersAt(1f).Count, "every marker back to full");
         }
 
+        [Category("Core")]
         [UnityTest]
         public IEnumerator PullingTheCardDownBelowPeek_ClosesIt()
         {
@@ -202,6 +205,7 @@ namespace TileStories.Tests
             Assert.IsFalse(Sheet.IsOpen);
         }
 
+        [Category("Core")]
         [UnityTest]
         public IEnumerator ATapOnEmptyCameraSpace_Closes_ButATapOnTheCardOrAMarkerDoesNot()
         {
@@ -521,6 +525,7 @@ namespace TileStories.Tests
             Assert.AreEqual(0, Card.Media.LoadedCount, "a closed card holds no media");
         }
 
+        [Category("Core")]
         [UnityTest]
         public IEnumerator ARealMarkerTap_OpensTheCard_ForThatPoi()
         {
