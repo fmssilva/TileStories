@@ -129,7 +129,9 @@ namespace TileStories.Tests
             Assert.IsTrue(Header.BarTitleShown, "at Peek the bar shows the title");
             Assert.AreEqual(WhiteSpace.NoWrap, title.resolvedStyle.whiteSpace, "one line");
             Assert.Less(title.worldBound.height, title.resolvedStyle.fontSize * 2f, "...drawn as one line");
-            Assert.LessOrEqual(title.worldBound.xMax, Sheet.SettingsButton.worldBound.xMin + OnePixel, "it ends before the buttons");
+            Assert.LessOrEqual(title.worldBound.xMax, Sheet.SettingsButton.worldBound.xMin + OnePixel, "it ends before settings");
+            Assert.GreaterOrEqual(title.worldBound.xMin, Sheet.CloseButton.worldBound.xMax - OnePixel, "...and starts after the X (v5: X left, settings right)");
+            Assert.AreEqual(Sheet.Root.worldBound.center.x, title.worldBound.center.x, OnePixel, "...centred on the card");
 
             yield return Push(c => c.card_settings.navigation.menu = BuiltInNavElements.DrawerTree);
             Assert.AreEqual(DisplayStyle.Flex, Sheet.MenuButton.resolvedStyle.display, "precondition: the Menu's button shows");
@@ -367,7 +369,6 @@ namespace TileStories.Tests
         // RIGHT AROUND ITS LETTERS (a ring 2-3 px about its strokes, as drawn: where the halo and the glow darken the picture), at the worst
         // such pixel
         [UnityTest]
-        [Ignore("Hero contrast below 7:1 -- _3.3 open, fixed in the premium design block")]
         public IEnumerator EveryWordOfTheHero_ReadsAgainstThePictureRightAroundItsLetters([ValueSource(nameof(HeroPictures))] string poi,
             [Values("en", "pt")] string language, [Values("light", "dark")] string mode)
         {
@@ -405,44 +406,10 @@ namespace TileStories.Tests
                     {
                         var area = ThemePixelSet.ScreenRectOf(l, drawn);
                         Assert.Greater(area.width * area.height, 0, "precondition: " + l.name + " covers pixels");
-                        Color32[] a = drawn.GetPixels32(), b = under.GetPixels32();
-                        // - the letters: drawn pixels that changed when the letters went AND carry the text's colour (a halo pixel changes
-                        //   too, but dark)
-                        Color32 ink = colours[l];
-                        var letter = new bool[area.width * area.height];
-                        int letters = 0;
-                        for (int y = 0; y < area.height; y++)
-                            for (int x = 0; x < area.width; x++)
-                            {
-                                int i = (area.y + y) * drawn.width + area.x + x;
-                                bool changed = Mathf.Abs(a[i].r - b[i].r) + Mathf.Abs(a[i].g - b[i].g) + Mathf.Abs(a[i].b - b[i].b) > 60;
-                                bool inked = Mathf.Abs(a[i].r - ink.r) + Mathf.Abs(a[i].g - ink.g) + Mathf.Abs(a[i].b - ink.b) < 90;
-                                if (changed && inked) { letter[y * area.width + x] = true; letters++; }
-                            }
+                        // - each word against the picture RIGHT AROUND its letters, as drawn (the shade and the halo are part of it): the
+                        //   worst pixel of the ring 2-3 px out from its strokes (ThemePixelSet.RingContrast)
+                        var (ratio, worst, letters) = ThemePixelSet.RingContrast(drawn, under, area, colours[l]);
                         Assert.Greater(letters, 0, "precondition: '" + l.text + "' draws letters");
-                        // - the worst pixel of the RING about the letters (2-3 px out: past the antialiased edge, a blend of ink and ground),
-                        //   as DRAWN -- the halo and the glow are part of what the letter is read against
-                        Color worst = Color.black;
-                        float worstLum = -1f;
-                        bool Within(int x, int y, int reach)
-                        {
-                            for (int dy = -reach; dy <= reach; dy++)
-                                for (int dx = -reach; dx <= reach; dx++)
-                                {
-                                    int nx = x + dx, ny = y + dy;
-                                    if (nx >= 0 && ny >= 0 && nx < area.width && ny < area.height && letter[ny * area.width + nx]) return true;
-                                }
-                            return false;
-                        }
-                        for (int y = 0; y < area.height; y++)
-                            for (int x = 0; x < area.width; x++)
-                            {
-                                if (letter[y * area.width + x] || Within(x, y, 1) || !Within(x, y, 3)) continue;
-                                var c = (Color)a[(area.y + y) * drawn.width + area.x + x];
-                                float lum = 0.2126f * Lin(c.r) + 0.7152f * Lin(c.g) + 0.0722f * Lin(c.b);
-                                if (lum > worstLum) { worstLum = lum; worst = c; }
-                            }
-                        float ratio = UIAccessibility.ContrastRatio(colours[l], worst);
                         string what = l.name.Length > 0 ? l.name : l.ClassListContains("card-audio__title") ? "listen" : "action";
                         if (ratio < worstOfAll) { worstOfAll = ratio; worstWhat = $"{what} '{l.text}' at drift {share:0.00}"; }
                         report.Add($"{poi} {language} {mode} drift {share:0.00} {what}: {ratio:0.00}:1 (worst pixel about its letters {(Color32)worst})");
@@ -491,59 +458,66 @@ namespace TileStories.Tests
             Assert.IsFalse(Sheet.Chrome.TopShown, "back at the top: the hero is the screen again");
         }
 
-        // The glow lies only behind the words: the hero drawn with and without it differs within the glow's own bounds and nowhere else --
-        // a fade, never a rectangle: its edges fade to nothing, and the picture above it is untouched
+        // v5's words shade lies only behind the words: the hero drawn with and without it differs from the shade's top down and nowhere above
+        // it; it fades in (its top rows change almost nothing), then holds its measured floor behind every word and down to the hero's foot;
+        // the band between the top shade's foot and the shade's top is the bare picture
         [UnityTest]
-        public IEnumerator TheGlow_LiesOnlyBehindTheWords_AndFadesToNothing_ThePictureElsewhereIsUntouched([Values("lamp", "painting")] string poi)
+        public IEnumerator TheWordsShade_LiesOnlyBehindTheWords_FadesInAboveThem_ThePictureAboveIsClean([Values("lamp", "painting")] string poi)
         {
-            // - at Full: the words (and their glow) sit at the hero's foot (S4a review)
+            // - at Full: the words (and their shade) sit at the hero's foot (S4a review)
             yield return Open(poi, "en", SheetStopRule.Stop.Full);
             Header.Clock = () => 0f;
             Header.Animate();
             Assert.AreEqual(0f, Header.Foot.resolvedStyle.backgroundColor.a, 0.001f, "the foot itself is clear");
             Assert.AreEqual(0f, Header.Text.resolvedStyle.backgroundColor.a, 0.001f, "no plate behind the words");
-            Assert.That(Header.Glow.resolvedStyle.unityBackgroundImageTintColor.a, Is.InRange(0.2f, 0.8f), "a see-through glow");
+            // - the pair a USS length cannot express as one: the shade reaches up exactly its ramp's height
+            Assert.AreEqual(-CardTestInput.TokenPx("--ts-hero-shade-ramp"), Header.Shade.resolvedStyle.top, OnePixel, "the shade starts one ramp above the words");
+            var floor = Header.Shade.Q("card-hero-shade-floor");
+            Assert.That(floor.resolvedStyle.backgroundColor.a, Is.GreaterThanOrEqualTo(0.9f), "the floor behind the words is the measured scrim");
+            var hero = Header.HeroPart.worldBound;
+            var shade = Header.Shade.worldBound;
+            Assert.LessOrEqual(shade.yMin, Header.Foot.worldBound.yMin - CardTestInput.TokenPx("--ts-hero-shade-ramp") + OnePixel, "the ramp ends where the words start");
+            Assert.GreaterOrEqual(shade.yMax, hero.yMax, "the floor reaches the hero's foot");
+            float topShadeFoot = CardTestInput.UnderTheTopShade(Header.HeroPart);
+            Assert.Greater(shade.yMin - topShadeFoot, hero.height / 4f, "a clean band of picture between the two shades: " + topShadeFoot + " .. " + shade.yMin);
             Texture2D with = null, without = null;
             try
             {
                 var labels = Header.HeroPart.Query<Label>().ToList();
                 foreach (var l in labels) l.style.visibility = Visibility.Hidden;
                 Header.Actions.style.visibility = Visibility.Hidden;
-                yield return ThemePixelSet.GrabStill("glow_" + poi, Header.HeroPart, r => with = r);
-                Header.Glow.style.visibility = Visibility.Hidden;
-                yield return ThemePixelSet.GrabStill("noglow_" + poi, Header.HeroPart, r => without = r);
-                Header.Glow.style.visibility = StyleKeyword.Null;
+                yield return ThemePixelSet.GrabStill("shade_" + poi, Header.HeroPart, r => with = r);
+                Header.Shade.style.visibility = Visibility.Hidden;
+                yield return ThemePixelSet.GrabStill("noshade_" + poi, Header.HeroPart, r => without = r);
+                Header.Shade.style.visibility = StyleKeyword.Null;
                 foreach (var l in labels) l.style.visibility = StyleKeyword.Null;
                 Header.Actions.style.visibility = StyleKeyword.Null;
-                System.IO.File.WriteAllBytes(TestEvidence.PathFor(Domain + "/glow", poi + "_with.png"), with.EncodeToPNG());
-                System.IO.File.WriteAllBytes(TestEvidence.PathFor(Domain + "/glow", poi + "_without.png"), without.EncodeToPNG());
+                System.IO.File.WriteAllBytes(TestEvidence.PathFor(Domain + "/shade", poi + "_with.png"), with.EncodeToPNG());
+                System.IO.File.WriteAllBytes(TestEvidence.PathFor(Domain + "/shade", poi + "_without.png"), without.EncodeToPNG());
 
-                // - the glow's bounds in the render (rows bottom-up), a pixel of rounding about them. The render is the hero CUT to the
-                //   screen (at Half most of the hero lies below it): its bottom row is the hero's top plus the render's height
+                // - the shade's top in the render (rows bottom-up), a pixel of rounding about it. The render is the hero cut to the screen:
+                //   its bottom row is the hero's top plus the render's height
                 float perPixel = ThemePixelSet.PanelUnitsPerPixel(Header.HeroPart);
-                var hero = Header.HeroPart.worldBound;
-                var glow = Header.Glow.worldBound;
                 float renderBottom = hero.yMin + with.height * perPixel;
                 int Row(float y) => Mathf.RoundToInt((renderBottom - y) / perPixel);
-                int Col(float x) => Mathf.RoundToInt((x - hero.xMin) / perPixel);
-                int top = Row(glow.yMin) + 1, foot = Row(glow.yMax) - 1, left = Col(glow.xMin) - 1, right = Col(glow.xMax) + 1;
-                Assert.Greater(glow.yMin - hero.yMin, 0f, "precondition: the glow starts below the hero's top");
+                int top = Row(shade.yMin) + 1, wordsTop = Row(Header.Foot.worldBound.yMin);
                 Color32[] a = with.GetPixels32(), b = without.GetPixels32();
-                int changedOutside = 0, changedInside = 0, edgeChanged = 0;
+                int changedAbove = 0, firstRowsChanged = 0, darkenedBehindWords = 0, behindWords = 0;
                 for (int y = 0; y < with.height; y++)
                     for (int x = 0; x < with.width; x++)
                     {
                         int i = y * with.width + x;
                         int delta = Mathf.Abs(a[i].r - b[i].r) + Mathf.Abs(a[i].g - b[i].g) + Mathf.Abs(a[i].b - b[i].b);
-                        bool inside = y <= top && y >= foot && x >= left && x <= right;
-                        if (!inside) { if (delta > 6) changedOutside++; continue; }
-                        if (delta > 6) changedInside++;
-                        // - its outer rows and its far right column: a fade ends in (almost) nothing, a rectangle would end in its full tint
-                        if ((y >= top - 1 || y <= foot + 1 || x >= right - 1) && delta > 12) edgeChanged++;
+                        if (y > top) { if (delta > 6) changedAbove++; continue; }
+                        // - its first rows: a ramp starts from (almost) nothing, a rectangle would start at its full tint
+                        if (y >= top - 1 && delta > 12) firstRowsChanged++;
+                        // - behind the words: every pixel the picture had light enough to darken is darkened
+                        if (y <= wordsTop && b[i].r + b[i].g + b[i].b > 60) { behindWords++; if (a[i].r + a[i].g + a[i].b < (b[i].r + b[i].g + b[i].b) / 2) darkenedBehindWords++; }
                     }
-                Assert.Greater(changedInside, with.width * 10, "the glow darkens the picture behind the words");
-                Assert.AreEqual(0, changedOutside, "not one pixel of the picture changes outside the glow");
-                Assert.AreEqual(0, edgeChanged, "the glow fades to nothing at its edges: no rectangle");
+                Assert.AreEqual(0, changedAbove, "not one pixel of the picture changes above the shade");
+                Assert.AreEqual(0, firstRowsChanged, "the shade fades in: no rectangle edge at its top");
+                Assert.Greater(behindWords, with.width * 10, "precondition: picture behind the words to judge");
+                Assert.AreEqual(behindWords, darkenedBehindWords, "behind the words the picture is at most half as bright: the floor");
             }
             finally
             {
@@ -568,6 +542,5 @@ namespace TileStories.Tests
             Assert.AreEqual(CardTestInput.TokenPx("--ts-hero-listen-text"), listen.Title.resolvedStyle.fontSize, 0.01f, "the time in small words");
         }
 
-        private static float Lin(float c) => c <= 0.03928f ? c / 12.92f : Mathf.Pow((c + 0.055f) / 1.055f, 2.4f);
     }
 }

@@ -148,7 +148,6 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
-        [Ignore("S4a product bug: at Full (no top gap) the floating placed-model chip lies over the X -- _Test_Suite_1.md F1, fixed in its own block")]
         public IEnumerator TheLamp_ThePlacedArchShowsInTheGameView_RemoveTakesItAway_ASecondReplacesIt_LosingTheWallDisables_ClosingLeavesNothing()
         {
             yield return OpenFull("lamp");
@@ -239,6 +238,37 @@ namespace TileStories.Tests
             finally { Lamp.card.blocks.Remove(second); }
         }
 
+        // _Test_Suite_1.md F1 (a visitor bug): no floating chip ever lies over a chrome mark. With a model placed (the chip shows), at every
+        // stop a finger on the centre of the X and of settings lands on THAT mark -- panel.Pick, the hit test a real tap uses -- and at Full
+        // the chip rests under the chrome row
+        [UnityTest]
+        public IEnumerator WithAModelPlaced_AtEveryStop_AFingerOnTheXOrSettingsLandsOnThatMark_NeverOnTheChip()
+        {
+            yield return OpenFull("lamp");
+            yield return ScrollAndTap(View().Button);
+            Assert.IsNotNull(Placement.Placed, "precondition: a real tap placed the arch");
+            foreach (var stop in new[] { SheetStopRule.Stop.Peek, SheetStopRule.Stop.Half, SheetStopRule.Stop.Full })
+            {
+                Sheet.SetStop(stop);
+                yield return CardTestInput.Settle();
+                Assert.IsTrue(Sheet.Floating.Chip.IsShown, "precondition: the placed-model chip shows at " + stop);
+                foreach (var mark in new VisualElement[] { Sheet.CloseButton, Sheet.SettingsButton })
+                {
+                    var picked = mark.panel.Pick(mark.worldBound.center);
+                    string chain = "";
+                    for (var e = picked; e != null && chain.Length < 200; e = e.parent) chain += (e.name.Length > 0 ? e.name : e.GetType().Name) + " < ";
+                    Assert.IsTrue(picked != null && (picked == mark || mark.Contains(picked)),
+                        stop + ": a finger on " + mark.name + "'s centre lands on it, not on " + chain + " (chip " + Sheet.Floating.Chip.Root.worldBound + ")");
+                }
+                var chip = Sheet.Floating.Chip.Root.worldBound;
+                Assert.IsFalse(chip.Overlaps(Sheet.CloseButton.worldBound) || chip.Overlaps(Sheet.SettingsButton.worldBound),
+                    stop + ": the chip " + chip + " clear of the chrome row's buttons");
+            }
+            yield return Capture("PlaceInAr_Lamp_ChipAtFull");
+            Placement.Remove();
+            yield return CardTestInput.Settle();
+        }
+
         // ---------------- Keep Model On Switch (15.2.4), Phase B ----------------
 
         // The room scan, loaded BY PATH from the wall's media folder: unlike a `default:` arch (a static library reference, never counted) it is
@@ -318,7 +348,6 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
-        [Ignore("S4a product bug: at Full (no top gap) the floating placed-model chip lies over the X -- _Test_Suite_1.md F1, fixed in its own block")]
         public IEnumerator KeepModelOnSwitch_OnInTheBlockLibrary_TheModelSurvivesAnotherPointAndAClosedCard_UntilARealTapOnRemoveFromRoom()
         {
             SetWallKeepDefault(true);

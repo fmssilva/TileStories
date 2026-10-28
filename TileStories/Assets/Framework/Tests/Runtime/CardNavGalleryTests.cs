@@ -1627,10 +1627,12 @@ namespace TileStories.Tests
                     label.text + ": whole inside the card layer " + button.worldBound + " in " + layer);
                 var size = label.MeasureTextSize(label.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined);
                 Assert.GreaterOrEqual(label.layout.width + 0.5f, size.x, "'" + label.text + "': whole, never cut");
-                float contrast = CardTestInput.Contrast(label.resolvedStyle.color, CardTestInput.EffectiveBackground(label));
-                if (key == BuiltInNavElements.FabDial && contrast < UIAccessibility.MinRatioNormalText)
-                    Assert.Ignore("Dial pill contrast " + contrast.ToString("F2") + ":1 since S4a -- _Test_Suite_1.md F5, the premium design block");
-                Assert.GreaterOrEqual(contrast, UIAccessibility.MinRatioNormalText, "'" + label.text + "' reads at 4.5:1 (" + contrast.ToString("F2") + ")");
+                var ground = CardTestInput.EffectiveBackground(label);
+                float contrast = CardTestInput.Contrast(label.resolvedStyle.color, ground);
+                // - the dial's pills are words on their own surface (_3.3 D1: text >= 7:1); the radial's words keep the 4.5:1 of a label
+                float least = key == BuiltInNavElements.FabDial ? 7f : UIAccessibility.MinRatioNormalText;
+                Assert.GreaterOrEqual(contrast, least, "'" + label.text + "' reads at " + least + ":1 (" + contrast.ToString("F2") + ": ink " +
+                    (Color32)label.resolvedStyle.color + " on " + (Color32)ground + ", its pill " + (Color32)button.resolvedStyle.backgroundColor + ")");
                 for (int j = i + 1; j < items.Count; j++)
                 {
                     var a = items[i].Button.worldBound;

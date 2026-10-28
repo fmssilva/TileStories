@@ -50,19 +50,19 @@
     --ts-chip-words-max: 220px;
     /* What a part not reached yet fades to (the progress map's pieces ahead of the one being read) */
     --ts-ahead-opacity: 0.35;
-    /* The language chip sits left of the close X (X width + both gaps); with it the header keeps its end clear of the chip (chip right
-       offset + chip width + a gap) */
-    --ts-settings-button-right: 64px;
-    /* The Aa settings panel's width and the outline of its current choice (_3.3 P4.4b) */
+    /* The settings panel's width and the outline of its current choice (_3.3 P4.4b) */
     --ts-settings-width: 240px;
     --ts-chosen-border: 2px;
-    --ts-header-end-with-settings: 120px;
-    /* The menu button (_3.2 step 8) sits left of the X, or left of the language chip when there is one (one more button width + gap);
-       the header keeps its end clear of it the same way */
-    --ts-menu-button-right: 64px;
-    --ts-menu-button-right-with-settings: 120px;
-    --ts-header-end-with-menu: 120px;
-    --ts-header-end-with-settings-and-menu: 176px;
+    /* The chrome (_3.3 S4 third round, v5): each touch target's inset from the sheet's side, so its disc sits v5's 16 pt in; the disc
+       (and its radius, half of it) and the thin mark inside it */
+    --ts-chrome-inset: 12px;
+    --ts-chrome-disc: 36px;
+    --ts-chrome-disc-radius: 18px;
+    --ts-chrome-mark: 16px;
+    /* The menu button (_3.2 step 8) sits left of the settings disc (its inset + one touch target); with it the bar keeps both ends clear
+       of the buttons the same way, so its title stays centred */
+    --ts-menu-button-right: 56px;
+    --ts-header-end-with-menu: 104px;
     /* The menus over the card (_3.2 step 8). The drawer takes most of a phone's width and never more than a comfortable reading column
        (so on a tablet it stays a drawer); a kind's line starts under its section's words (row padding + icon + its gap). The grid's tiles
        are two touch targets tall: big thumbs, a kiosk's size */
@@ -97,8 +97,8 @@
     --ts-timeline-now: 16px;
     --ts-timeline-cell: 160px;
 
-    /* The bar (_3.3 P4.4a): its title keeps clear of the X (X width + both gaps); its place and height are the floating chrome's
-       (--ts-bar-top, --ts-bar-height) */
+    /* The bar (_3.3 P4.4a): its centred title keeps clear of the X and of settings at both ends (the inset + one touch target + a gap); its
+       place and height are the floating chrome's (--ts-bar-top, --ts-bar-height) */
     --ts-header-end: 64px;
 
     /* A person's monogram (the photo's place until Tier 2 images) */
@@ -113,9 +113,12 @@
        units) read by PoiCardSheetView on this card root; the outline of its Listen button on the plate */
     --ts-hero-min-height: 200;
     --ts-hero-outline-width: 2px;
-    /* the soft glow behind the hero's words: how far it reaches above and below their block (Media.uss, .card-hero__glow) */
-    --ts-hero-glow-out-top: -56px;
-    --ts-hero-glow-out-bottom: -72px;
+    /* the shade behind the hero's words (Media.uss, .card-hero__shade; v5's "a shade behind the words only"): its ramp's height above the
+       words' block and the same reach upwards (a USS length cannot be negated: PoiCardHeroSceneTests checks the pair), and how far its
+       floor reaches under the block -- past the hero's foot, so the words rising on a scroll never lift it off the picture */
+    --ts-hero-shade-ramp: 96px;
+    --ts-hero-shade-out-top: -96px;
+    --ts-hero-shade-out-bottom: -480px;
     /* the dark halo round every letter of the hero (the text-shadow's blur; its colour is the theme's --ts-text-halo) */
     --ts-text-halo-blur: 10px;
     /* the hero's kicker and its one line (the title is the theme's --ts-size-hero / -narrow) */
@@ -133,7 +136,7 @@
     --ts-bar-top: 6px;
     --ts-bar-height: 44px;
     --ts-nav-float-top: 54px;
-    --ts-top-shade-height: 120px;
+    --ts-top-shade-height: 150px;
     /* minus --ts-space-3 (the gap a shown strip leaves above the first block, PoiCard.uss): the hero's picture starts flush under the strip.
        A USS length cannot be negated, so the pair is checked by PoiCardHeroSceneTests (the hero's top on the strip's bottom) */
     --ts-hero-strip-pull: -12px;

@@ -80,12 +80,12 @@ finding id; there is no Quarantine category.
 
 | skip | where | finding | owner |
 |---|---|---|---|
-| x16 | PoiCardHeroSceneTests.EveryWordOfTheHero_... | hero words 1.3-1.5:1, no scrim at the hero's foot | premium design block (must fix) |
-| x2 | PoiCardPlaceInArSceneTests (TheLamp_ThePlacedArch..., KeepModelOnSwitch_...) | F1: at Full the placed-model chip lies over the X. Rule: no floating chip ever lies over a chrome mark; at Full the chip sits under the chrome row | premium design block (rebuilds the chrome) |
-| x1 | CardSettingsGalleryTests (the gear) | F2: gear 6.6:1 on the see-through bar | premium design block (must fix) |
-| x1 | CardLightSceneTests.TheRimLight_RidesTheWholeMetalBand_... | F3: dark-mode band keeps the light mode's width | premium design block |
+| -- | PoiCardHeroSceneTests.EveryWordOfTheHero_... (16) | FIXED in Premium P1: v5's words shade (ramp + the --ts-scrim-hero floor); 8.29-19.65:1 on the render | -- |
+| -- | PoiCardPlaceInArSceneTests (TheLamp_ThePlacedArch..., KeepModelOnSwitch_...) | F1 FIXED in Premium P1: FloatingSlotRule puts the slot under the chrome row when it cannot rest above the sheet; guarded by WithAModelPlaced_AtEveryStop_AFingerOnTheXOrSettingsLandsOnThatMark (panel.Pick at Peek / Half / Full) | -- |
+| -- | CardSettingsGalleryTests (the settings mark) | F2 FIXED in Premium P1: the sliders mark in a glass disc, >= 7:1 over black and white in both modes (the dark glass floor raised 0.66 -> 0.72); over the hero 8.48-15.30:1 on the render (PoiCardChromeMarksSceneTests) | -- |
+| -- | CardLightSceneTests.TheRimLight_RidesTheWholeMetalBand_... | F3 FIXED in Premium P1: the band was read back from a style pass that had not run (and the theme resolver held no lengths); CardLight now asks the theme (ThemeResolver.TryPixels) on every paint | -- |
 | x1 | PoiCardTapZoomTests.TheLampsTrueFalseStatement_... | F4: vertical and sideways halves never pass in one run since S4a | the next card block |
-| x4 | CardNavGalleryTests (fab_dial cases, Assert.Ignore) | F5: dial pill words 1.11:1 | premium design block (must fix) |
+| -- | CardNavGalleryTests (fab_dial cases) | F5 FIXED in Premium P1: the icon strip's marked-tab glass (two classes) out-ranked the dial pill's surface; the dial's words now asserted at 7:1 | -- |
 | x29 | Typeface (12+4), SectionSheet (6), RestingEnd (5), CardLight (1), Story (1) measure tests | not a finding: a measurement, runs when its `MEASURING` file exists | the block that measures |
 | x13 | ThemePixelSet gallery (12) + scene (1), `[Explicit]` | not a finding: a pixel-set measurement, run by name before and after a change that must move no pixel | the block that changes the theme |
 

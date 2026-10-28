@@ -106,7 +106,10 @@ namespace TileStories
         // ---- vector glyphs (8A-fix): shapes USS borders cannot draw, painted with Painter2D ----
 
         // The shapes a VectorGlyph draws
-        public enum Shape { Tick, Cross, Star, ThumbUp, ThumbDown, Play, Pause, Stop, FullScreen, Chevron, Gear, Azulejo, QuoteOpen }
+        public enum Shape { Tick, Cross, Star, ThumbUp, ThumbDown, Play, Pause, Stop, FullScreen, Chevron, Gear, Azulejo, QuoteOpen, Close, Sliders }
+
+        // The card's chrome marks (Close, Sliders): the premium target's thin 1.5 stroke on a 16 mark (_3.3 S4 third round, v5)
+        public const float ChromeStrokeUnits = 1.5f / 16f;
 
         // One outline of a shape, in 0..1 units of the glyph's square. `Points` are joined in order; a `Closed` outline can be filled; a
         // `Solid` one is always filled and never stroked (the azulejo's centre dot, a quotation mark)
@@ -127,7 +130,8 @@ namespace TileStories
         // The line width of a shape as a share of the glyph's side: a stroke that scales with the glyph, so it needs no token. The ornament
         // is drawn fine, like the prototype's tile (1.6 of 34)
         public static float StrokeUnits(Shape shape) =>
-            shape == Shape.Tick || shape == Shape.Cross || shape == Shape.FullScreen || shape == Shape.Chevron ? 0.13f
+            shape == Shape.Close || shape == Shape.Sliders ? ChromeStrokeUnits
+            : shape == Shape.Tick || shape == Shape.Cross || shape == Shape.FullScreen || shape == Shape.Chevron ? 0.13f
             : shape == Shape.Azulejo ? 0.05f : 0.07f;
 
         // The outlines of `shape` in 0..1 units (pure, so a test can check every point stays inside the glyph)
@@ -171,6 +175,15 @@ namespace TileStories
                     return new[] { new Outline(new[] { new Vector2(0.18f, 0.36f), new Vector2(0.50f, 0.68f), new Vector2(0.82f, 0.36f) }, false) };
                 case Shape.Gear:
                     return GearOutlines();
+                case Shape.Close:
+                    // - the card's X (v5: 6.5 .. 17.5 of 24): two crossed strokes, smaller than the Cross so the thin line reads as a mark
+                    return new[]
+                    {
+                        new Outline(new[] { new Vector2(6.5f / 24f, 6.5f / 24f), new Vector2(17.5f / 24f, 17.5f / 24f) }, false),
+                        new Outline(new[] { new Vector2(17.5f / 24f, 6.5f / 24f), new Vector2(6.5f / 24f, 17.5f / 24f) }, false),
+                    };
+                case Shape.Sliders:
+                    return SlidersOutlines();
                 case Shape.Azulejo:
                     return AzulejoOutlines();
                 case Shape.QuoteOpen:
@@ -220,6 +233,25 @@ namespace TileStories
             var circle = new Vector2[16];
             for (int i = 0; i < circle.Length; i++) circle[i] = GearPoint(i * 360f / circle.Length, hole);
             return new[] { new Outline(wheel, true), new Outline(circle, true) };
+        }
+
+        // The card's settings (the premium target, v5: "sliders", not a gear -- the sign of things to adjust): two tracks, each broken by
+        // its round knob, the upper knob right of centre, the lower one left (v5's path on a 24 grid)
+        private static Outline[] SlidersOutlines()
+        {
+            const float u = 1f / 24f;
+            Outline Line(float x0, float x1, float y) => new(new[] { new Vector2(x0 * u, y * u), new Vector2(x1 * u, y * u) }, false);
+            Outline Knob(float cx, float cy)
+            {
+                var ring = new Vector2[16];
+                for (int i = 0; i < ring.Length; i++)
+                {
+                    float a = i * Mathf.PI * 2f / ring.Length;
+                    ring[i] = new Vector2((cx + 2f * Mathf.Cos(a)) * u, (cy + 2f * Mathf.Sin(a)) * u);
+                }
+                return new Outline(ring, true);
+            }
+            return new[] { Line(4f, 13f, 8f), Line(18f, 20f, 8f), Knob(15.5f, 8f), Line(4f, 7f, 16f), Line(11f, 20f, 16f), Knob(9f, 16f) };
         }
 
         // A small tile ornament (_3.3 S2a, the story's divider; the prototype's azulejo): a square tile, a four-pointed flower inside it whose

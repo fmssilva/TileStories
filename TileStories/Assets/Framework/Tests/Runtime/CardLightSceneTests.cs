@@ -416,7 +416,6 @@ namespace TileStories.Tests
         // travelling round the block being read -- measured as each band point's brightness swing over one turn of the clock (12 frames);
         // dark metal keeps its quieter light (a narrower band, a smaller swing)
         [UnityTest]
-        [Ignore("S4a product bug: after a light / dark switch the sweep keeps the old mode's band width (dark lights 3 px on a 1 px rim) -- _Test_Suite_1.md F3")]
         public IEnumerator TheRimLight_RidesTheWholeMetalBand_AndIsClearlyVisible_TravellingRoundTheBlock()
         {
             yield return OpenFull("lamp");

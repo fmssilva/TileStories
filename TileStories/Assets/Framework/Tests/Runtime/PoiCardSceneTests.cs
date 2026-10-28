@@ -343,8 +343,9 @@ namespace TileStories.Tests
         {
             Assert.IsNotNull(Card.StringTable, "the scene's card has the framework string table");
             yield return Select("lamp");
-            Assert.AreEqual("", Sheet.CloseButton.text, "no glyph in code: the X is drawn by the style sheet");
-            Assert.AreEqual(2, Sheet.CloseButton.Query(className: "poi-card__close-bar").ToList().Count, "two crossed bars");
+            Assert.AreEqual("", Sheet.CloseButton.text, "no words on it: the mark says it");
+            Assert.AreEqual(CardIcons.Shape.Close, Sheet.CloseGlyph.Kind, "the X is a drawn mark (v5)");
+            Assert.IsTrue(Sheet.CloseButton.Contains(Sheet.CloseGlyph), "drawn on the button");
             Assert.AreEqual("Close", Sheet.CloseButton.tooltip, "framework English");
 
             SelectionEventBus.Clear();

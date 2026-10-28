@@ -120,6 +120,27 @@ namespace TileStories.Tests
             return result;
         }
 
+        // The ground an element's own and its ancestors' see-through backgrounds make over `backdrop` (what lies behind the card: the darkest
+        // and the lightest a camera can show), blended in LINEAR light as the project renders -- an alpha dims less than its number says
+        // (_3.3 section 2). Stops at the first opaque one, or at `upTo` (exclusive: the card layer, under which only the camera lies)
+        public static Color GroundOver(VisualElement element, Color backdrop, VisualElement upTo = null)
+        {
+            var chain = new System.Collections.Generic.List<Color>();
+            for (var e = element; e != null && e != upTo; e = e.parent)
+            {
+                var c = e.resolvedStyle.backgroundColor;
+                chain.Add(c);
+                if (c.a >= 0.999f) break;
+            }
+            Color result = backdrop.linear;
+            for (int i = chain.Count - 1; i >= 0; i--)
+            {
+                var c = chain[i].linear;
+                result = Color.Lerp(result, new Color(c.r, c.g, c.b, 1f), chain[i].a);
+            }
+            return result.gamma;
+        }
+
         // The name of the picture an element's background draws (a sprite or a texture), or null
         public static string BackgroundPictureName(VisualElement element)
         {

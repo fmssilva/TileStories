@@ -13,8 +13,8 @@
 }
 
 .card-header__title {
-    /* a glass pill hugging the words (S4a review): the floating bar is clear but for it */
-    align-self: flex-start;
+    /* a glass pill hugging the words (S4a review): the floating bar is clear but for it; centred between the X and settings (v5) */
+    align-self: center;
     max-width: 100%;
     background-color: var(--ts-bar-pill);
     border-width: var(--ts-line-width);

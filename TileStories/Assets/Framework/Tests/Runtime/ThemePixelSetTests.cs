@@ -219,6 +219,51 @@ namespace TileStories.Tests
             int yBottom = Mathf.Clamp(Mathf.FloorToInt((r.yMax - origin.y) / unit), 0, shot.height);
             return new RectInt(xMin, shot.height - yBottom, xMax - xMin, yBottom - yTop);
         }
+
+        // The contrast of drawn ink against what it is READ against, on two renders of the same frame: `drawn` with the ink, `under` with
+        // the ink made clear (everything else the same). The ink's pixels: changed between the two AND moved towards `ink` (an antialiased
+        // edge too: a thin stroke is mostly edge, and a partly covered pixel is ink, never ground; a halo changes too, but away from it).
+        // The ground: the RING 2-3 px out from those pixels (past the antialiased edge), as drawn -- a halo or a shade is part of it. The
+        // worst (lightest for light ink, darkest for dark ink) ring pixel decides. (0, ...) when `area` holds no ink: the caller asserts
+        internal static (float Ratio, Color Worst, int InkPixels) RingContrast(Texture2D drawn, Texture2D under, RectInt area, Color ink)
+        {
+            Color32[] a = drawn.GetPixels32(), b = under.GetPixels32();
+            Color32 ink32 = ink;
+            int ToInk(Color32 c) => Mathf.Abs(c.r - ink32.r) + Mathf.Abs(c.g - ink32.g) + Mathf.Abs(c.b - ink32.b);
+            var inked = new bool[area.width * area.height];
+            int count = 0;
+            for (int y = 0; y < area.height; y++)
+                for (int x = 0; x < area.width; x++)
+                {
+                    int i = (area.y + y) * drawn.width + area.x + x;
+                    bool changed = Mathf.Abs(a[i].r - b[i].r) + Mathf.Abs(a[i].g - b[i].g) + Mathf.Abs(a[i].b - b[i].b) > 60;
+                    if (changed && ToInk(a[i]) < ToInk(b[i]) - 60) { inked[y * area.width + x] = true; count++; }
+                }
+            if (count == 0) return (0f, Color.clear, 0);
+            bool Within(int x, int y, int reach)
+            {
+                for (int dy = -reach; dy <= reach; dy++)
+                    for (int dx = -reach; dx <= reach; dx++)
+                    {
+                        int nx = x + dx, ny = y + dy;
+                        if (nx >= 0 && ny >= 0 && nx < area.width && ny < area.height && inked[ny * area.width + nx]) return true;
+                    }
+                return false;
+            }
+            float Luminance(Color c) => 0.2126f * c.linear.r + 0.7152f * c.linear.g + 0.0722f * c.linear.b;
+            bool lightInk = Luminance(ink) > 0.18f;
+            Color worst = lightInk ? Color.black : Color.white;
+            float worstLum = lightInk ? -1f : 2f;
+            for (int y = 0; y < area.height; y++)
+                for (int x = 0; x < area.width; x++)
+                {
+                    if (inked[y * area.width + x] || Within(x, y, 1) || !Within(x, y, 3)) continue;
+                    var c = (Color)a[(area.y + y) * drawn.width + area.x + x];
+                    float lum = Luminance(c);
+                    if (lightInk ? lum > worstLum : lum < worstLum) { worstLum = lum; worst = c; }
+                }
+            return (UIAccessibility.ContrastRatio(ink, worst), worst, count);
+        }
     }
 
     // The gallery part of the set: block looks over the token colours (hero header, text, status ramp, media, a quiz, the audio player), the

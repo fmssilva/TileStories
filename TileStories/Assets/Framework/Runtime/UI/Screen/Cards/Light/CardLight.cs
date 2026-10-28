@@ -20,6 +20,8 @@ namespace TileStories
         public const string SweepMaterialPath = "TileStories/Card/RimSweep";
         // The rim light's width in degrees of its turn, per mode (the theme's number: narrower on dark metal)
         public const string SweepArcToken = "--ts-rim-sweep-arc";
+        // The rim's metal band per mode (the theme's number: 3 on light metal, a hairline on dark), the band the sweep lights
+        public const string RimBandToken = "--ts-rim-band";
         // One turn of the rim light, in seconds (the prototype's 5 s spin)
         public const float SweepPeriod = 5f;
         private const long TickMs = 33;
@@ -118,10 +120,12 @@ namespace TileStories
 
         // The material's size in points; the sweep's also its rounded edge (the block's radius inside the rim's outer line) and the band it
         // lights: the rim's metal band, just inside that line (the outer line is the block's measured edge and never lit) -- as wide as the
-        // band the theme gives the mode (--ts-rim-band, read off the rim part), never under two lines (_3.3 S4a)
+        // band the theme gives the mode shown (--ts-rim-band), never under two lines (_3.3 S4a)
         private static void Resize(Layer layer)
         {
             var rect = layer.Element.layout;
+            // - not laid out yet (painted before its first layout pass): its geometry change sizes it
+            if (float.IsNaN(rect.width) || float.IsNaN(rect.height)) return;
             if (!layer.Sweep)
             {
                 layer.Material.SetVector(SizeId, new Vector4(rect.width, rect.height, 0f, 0f));
@@ -131,9 +135,17 @@ namespace TileStories
             var block = slot?.resolvedStyle;
             float line = block?.borderTopWidth ?? 1f;
             float radius = Mathf.Max(0f, (block?.borderTopLeftRadius ?? 0f) - line);
-            float rimBand = slot?.Q(className: BlockFrame.RimClass)?.resolvedStyle.borderTopWidth ?? 0f;
-            float band = Mathf.Max(2f * line, float.IsNaN(rimBand) ? 0f : rimBand);
+            float band = Mathf.Max(2f * line, RimBand(layer.Element, slot));
             layer.Material.SetVector(SizeId, new Vector4(rect.width, rect.height, radius, band));
+        }
+
+        // The rim's metal band in the mode shown NOW: the theme's number, never the rim part's resolved border -- that one is the last
+        // style pass's, so right after a mode switch (and in a slot the light just moved into) it still holds the old mode's width
+        private static float RimBand(VisualElement element, VisualElement slot)
+        {
+            if (ThemeController.TryResolverFor(element, out var theme) && theme.TryPixels(RimBandToken, out float band)) return band;
+            float drawn = slot?.Q(className: BlockFrame.RimClass)?.resolvedStyle.borderTopWidth ?? 0f;
+            return float.IsNaN(drawn) ? 0f : drawn;
         }
 
         // The band the sweep on `element` lights now (points; 0 when it is no sweep layer): what the frame tests read
@@ -157,9 +169,9 @@ namespace TileStories
             {
                 layer.Material.SetVector(SweepId, Linear(element, SectionSheetRule.SweepOf(layer.Token)));
                 layer.Material.SetFloat(ArcId, Arc(element));
-                // - a mode switch changes the rim's band too (wider on light metal): no geometry change says so, and the new width
-                //   resolves on the next layout pass
-                element.schedule.Execute(() => Resize(layer));
+                // - a mode switch changes the rim's band too (wider on light metal), and a move into a slot of the same size raises no
+                //   geometry change: the band is set here, from the theme, every time the sweep is painted
+                Resize(layer);
                 return;
             }
             layer.Material.SetVector(HueId, Linear(element, layer.Token == null ? null : SectionSheetRule.LightOf(layer.Token)));

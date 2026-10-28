@@ -233,8 +233,8 @@ namespace TileStories.Tests
                 Assert.AreEqual(size, button.width, OnePixel, "the bar's height wide");
                 Assert.AreEqual(size, button.height, OnePixel, "and tall");
                 Assert.IsTrue(Sheet.Root.worldBound.Contains(button.center), "inside the card");
-                Assert.LessOrEqual(button.xMax, Sheet.CloseButton.worldBound.xMin + OnePixel, "left of the X");
-                Assert.LessOrEqual(button.xMax, Sheet.SettingsButton.worldBound.xMin + OnePixel, "left of the Aa button");
+                Assert.GreaterOrEqual(button.xMin, Sheet.CloseButton.worldBound.xMax - OnePixel, "right of the X (v5: the X at the left)");
+                Assert.LessOrEqual(button.xMax, Sheet.SettingsButton.worldBound.xMin + OnePixel, "left of the settings button");
                 Assert.AreEqual(Sheet.CloseButton.worldBound.yMin, button.yMin, OnePixel, "in the X's row");
                 var title = ((HeaderBlockView)Sheet.Stack.BoundViews[0]).Root.Q<Label>(className: "card-header__title");
                 Assert.IsNotNull(title, "precondition: the header's title");

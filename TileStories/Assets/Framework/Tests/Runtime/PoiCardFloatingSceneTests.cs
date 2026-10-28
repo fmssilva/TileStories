@@ -207,11 +207,14 @@ namespace TileStories.Tests
                     var slot = Floating.Root.worldBound;
                     var sheet = Sheet.Root.worldBound;
                     if (float.IsNaN(gap)) gap = CardTestInput.TokenPx("--ts-space-2");
-                    if (stop == SheetStopRule.Stop.Full)
+                    if (stop == SheetStopRule.Stop.Full && sheet.yMin - Sheet.Layer.worldBound.yMin >= slot.height - OnePixel)
                     {
-                        Assert.AreEqual(sheet.yMin, slot.yMax, OnePixel, floating + " at Full: flush on the sheet's top edge");
+                        Assert.AreEqual(sheet.yMin, slot.yMax, OnePixel, floating + " at Full with a camera strip: flush on the sheet's top edge");
                         Assert.AreEqual(Sheet.Layer.worldBound.yMin, slot.yMin, OnePixel, floating + " at Full: in the top gap, not off the screen");
                     }
+                    else if (stop == SheetStopRule.Stop.Full)
+                        // - Full to the top: no room above the sheet -- the slot rests a gap under the chrome row, never over the X (F1)
+                        Assert.AreEqual(Sheet.CloseButton.worldBound.yMax + gap, slot.yMin, OnePixel, floating + " at Full to the top: a gap under the chrome row");
                     else Assert.AreEqual(sheet.yMin - gap, slot.yMax, OnePixel, floating + " at " + stop + ": a gap above the sheet's top edge");
                     var fab = floating == BuiltInNavElements.FabDial ? Dial.Fab : Radial.Fab;
                     AssertWhollyOnScreen(fab.Button.worldBound, floating + " at " + stop);

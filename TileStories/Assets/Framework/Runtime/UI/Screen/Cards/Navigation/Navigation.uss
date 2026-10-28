@@ -883,6 +883,16 @@
     background-color: var(--ts-surface);
 }
 
+/* the pill keeps its own surface in every state: a tab's hover / press and the icon strip's marked tab (two classes) clear or glass a
+   tab's ground, and the dial's words would then sit on whatever is behind the floating slot (_Test_Suite_1.md F5) */
+.nav-dial__item:hover,
+.nav-dial__item:active,
+.nav-dial__item.nav-tabs__tab--current,
+.nav-dial__item.nav-tabs__tab--current:hover,
+.nav-dial__item.nav-tabs__tab--current:active {
+    background-color: var(--ts-surface);
+}
+
 .nav-dial__item .nav-tabs__icon {
     margin: 0 var(--ts-space-2) 0 0;
 }

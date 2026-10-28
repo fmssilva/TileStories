@@ -24,8 +24,7 @@
     --ts-on-scrim: rgb(255, 255, 255);
     /* The hero's eyebrow over the scrim (a warm white) */
     --ts-on-scrim-2: rgb(241, 233, 218);
-    /* The soft glow behind the hero's words (_3.3 S4a: tints hero_glow.png, a fade with no edge): transparent, the picture
-       stays the hero; the halo round the letters carries the contrast */
+    /* The ground of the hero's focal action (its thin outline button): a dark see-through fill over the picture */
     --ts-hero-glow: rgba(10, 8, 6, 0.72);
     /* The dark halo hugging every letter of the hero (its text-shadow): the picture right around a word is darkened, so the
        word reads over a bright sky */
@@ -44,6 +43,15 @@
     /* The fade from the sheet top while the floating bars sit on the hero picture (tints top_shade.png): their white marks
        read on any picture */
     --ts-top-shade: rgba(0, 0, 0, 0.5);
+    /* The chrome discs after the hero (_3.3 S4 third round, v5): the X and settings on light glass (smoked in dark), the mark
+       in the card's ink */
+    --ts-chrome-glass: rgba(250, 248, 244, 0.72);
+    /* The chrome discs over the hero's picture: DARK glass, the same in both modes. No backdrop blur in UI Toolkit, and the
+       project blends in LINEAR light: a white mark keeps 7:1 over a white sky only on a ground of luminance <= 0.10, measured
+       on the render (PoiCardChromeMarksSceneTests) */
+    --ts-chrome-glass-hero: rgba(10, 8, 6, 0.86);
+    /* The light rim of a chrome disc over the hero (v5): it draws the disc's edge over a dark picture */
+    --ts-chrome-line-hero: rgba(255, 255, 255, 0.32);
     /* The sheet's ground between the blocks (R11 tinted glass: light clear, dark smoked): tints card_glass.png, a vertical
        alpha ramp, so the top is clearer; this alpha is the ramp's foot */
     --ts-glass-ground: rgba(244, 240, 232, 0.62);
@@ -231,8 +239,7 @@
     --ts-on-scrim: rgb(255, 255, 255);
     /* The hero's eyebrow over the scrim (a warm white) */
     --ts-on-scrim-2: rgb(241, 233, 218);
-    /* The soft glow behind the hero's words (_3.3 S4a: tints hero_glow.png, a fade with no edge): transparent, the picture
-       stays the hero; the halo round the letters carries the contrast */
+    /* The ground of the hero's focal action (its thin outline button): a dark see-through fill over the picture */
     --ts-hero-glow: rgba(10, 8, 6, 0.72);
     /* The dark halo hugging every letter of the hero (its text-shadow): the picture right around a word is darkened, so the
        word reads over a bright sky */
@@ -251,6 +258,15 @@
     /* The fade from the sheet top while the floating bars sit on the hero picture (tints top_shade.png): their white marks
        read on any picture */
     --ts-top-shade: rgba(0, 0, 0, 0.5);
+    /* The chrome discs after the hero (_3.3 S4 third round, v5): the X and settings on light glass (smoked in dark), the mark
+       in the card's ink */
+    --ts-chrome-glass: rgba(26, 27, 30, 0.72);
+    /* The chrome discs over the hero's picture: DARK glass, the same in both modes. No backdrop blur in UI Toolkit, and the
+       project blends in LINEAR light: a white mark keeps 7:1 over a white sky only on a ground of luminance <= 0.10, measured
+       on the render (PoiCardChromeMarksSceneTests) */
+    --ts-chrome-glass-hero: rgba(10, 8, 6, 0.86);
+    /* The light rim of a chrome disc over the hero (v5): it draws the disc's edge over a dark picture */
+    --ts-chrome-line-hero: rgba(255, 255, 255, 0.32);
     /* The sheet's ground between the blocks (R11 tinted glass: light clear, dark smoked): tints card_glass.png, a vertical
        alpha ramp, so the top is clearer; this alpha is the ramp's foot */
     --ts-glass-ground: rgba(16, 15, 13, 0.8);

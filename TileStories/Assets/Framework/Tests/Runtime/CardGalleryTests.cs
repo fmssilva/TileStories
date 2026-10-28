@@ -138,7 +138,8 @@ namespace TileStories.Tests
             Rect frame = _harness.Frame.worldBound, card = sheet.Root.worldBound;
             Assert.AreEqual(frame.width, card.width, 0.5f, "the sheet spans the phone-width frame");
             var title = header.Root.Q<Label>("card-header-title");
-            Assert.LessOrEqual(title.worldBound.xMax, sheet.CloseButton.worldBound.xMin + 0.5f, "the bar's title ends before the X");
+            Assert.GreaterOrEqual(title.worldBound.xMin, sheet.CloseButton.worldBound.xMax - 0.5f, "the bar's title starts after the X (v5: the X at the left)");
+            Assert.LessOrEqual(title.worldBound.xMax, sheet.SettingsButton.worldBound.xMin + 0.5f, "...and ends before settings");
             Assert.AreEqual(WhiteSpace.NoWrap, title.resolvedStyle.whiteSpace, "...on one line");
             Assert.LessOrEqual(header.PeekPart.worldBound.yMax, card.yMin + sheet.Stops.Peek + 0.5f, "peek shows the whole bar");
             if (entry.Stop != SheetStopRule.Stop.Peek && subtitleExpected)
@@ -166,22 +167,25 @@ namespace TileStories.Tests
             Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(sheet.CloseButton.worldBound.width, sheet.CloseButton.worldBound.height),
                 "the X is " + sheet.CloseButton.worldBound.size + ", below 44x44");
             Assert.AreEqual("Close", sheet.CloseButton.tooltip, "the X is named from the framework string table");
-            // - _3.3 S4a review: the X is a bare mark on a clear button, on the bar's row. Over the hero's picture it is the white mark on the
-            //   top shade (the picture behind it is measured on renders); elsewhere it reads against the bar's own see-through ground, over
-            //   the darkest possible backdrop (3:1, a UI component)
+            // - _3.3 S4 third round (v5): the X is a thin mark in a 36 pt glass disc centred in its touch target. Over the hero's picture the
+            //   white mark on the DARK hero glass (its 7:1 over the picture is measured on renders, PoiCardChromeMarksSceneTests); elsewhere
+            //   the card's ink on the light glass
             bool onHero = sheet.Root.ClassListContains(BlockStackView.BarsOnHeroClass);
-            Color behind = CardTestInput.EffectiveBackground(sheet.Stack.HeaderSlot);
-            foreach (var bar in sheet.CloseButton.Query(className: "poi-card__close-bar").ToList())
+            var disc = sheet.CloseGlyph.parent;
+            Assert.IsTrue(disc.ClassListContains(PoiCardSheetView.MarkDiscClass), "the X sits in its disc");
+            Assert.AreEqual(CardTestInput.TokenPx("--ts-chrome-disc"), disc.worldBound.width, 0.5f, "a 36 pt disc");
+            Assert.AreEqual(sheet.CloseButton.worldBound.center.x, disc.worldBound.center.x, 0.5f, "centred in its touch target");
+            if (onHero)
             {
-                Assert.IsTrue(sheet.CloseButton.worldBound.Contains(bar.worldBound.center), "the X's bars cross inside the button");
-                if (onHero)
-                {
-                    Assert.AreEqual(Color.white, bar.resolvedStyle.backgroundColor, "over the picture: the X is the white mark");
-                    Assert.AreEqual(1f, sheet.TopShade.resolvedStyle.opacity, 0.01f, "...on the top shade");
-                }
-                else
-                    Assert.GreaterOrEqual(UIAccessibility.ContrastRatio(bar.resolvedStyle.backgroundColor, behind),
-                        UIAccessibility.MinRatioLargeTextOrUIComponent, "the X reads against the bar's ground (3:1, a UI component)");
+                Assert.AreEqual(Color.white, sheet.CloseGlyph.resolvedStyle.color, "over the picture: the white mark");
+                Assert.AreEqual(1f, sheet.TopShade.resolvedStyle.opacity, 0.01f, "...under the top shade");
+            }
+            else
+            {
+                // - the disc's glass over the bar's, over the darkest and the lightest backdrop: the mark keeps 7:1 on both (D1)
+                foreach (var backdrop in new[] { Color.black, Color.white })
+                    Assert.GreaterOrEqual(CardTestInput.Contrast(sheet.CloseGlyph.resolvedStyle.color, CardTestInput.GroundOver(disc, CardTestInput.GroundOver(sheet.Stack.HeaderSlot, backdrop, sheet.Layer), sheet.Layer)), 7f,
+                        "the X reads at 7:1 on its glass over " + backdrop);
             }
 
             yield return Render("Card_" + entry.Name);

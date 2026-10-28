@@ -220,7 +220,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
       - UI/  -- the visitor-facing UI, one folder per render target (_3.3 R15): World-UGUI, Screen-UITK, Any-UITK, Shared
         - Screen/  [Screen-UITK]  -- UI Toolkit on the screen panel (a UIDocument on the one PanelSettings): what the visitor sees laid over the camera
           - Cards/  [Screen-UITK]  -- the POI Detail Card, a bottom sheet of content blocks
-            - CardIcons.cs  -- that PoiCard.uss shows and places per key (show_on_wall, time, access, location, info, ticket, light); Create / SetKey / KeyOf; used by the actions; VectorGlyph shapes, the story's Azulejo ornament and QuoteOpen mark among them (a Solid outline is filled, never stroked)
+            - CardIcons.cs  -- that PoiCard.uss shows and places per key (show_on_wall, time, access, location, info, ticket, light); Create / SetKey / KeyOf; used by the actions; VectorGlyph shapes, the story's Azulejo ornament and QuoteOpen mark among them (a Solid outline is filled, never stroked), the chrome's Close and Sliders marks (ChromeStrokeUnits: 1.5 on a 16 mark)
             - CardTokenColours.cs  -- TryResolve(from, token): a colour token read BY NAME (a family's ColorToken is data)
             - CardImage.cs  -- Plain C#: one picture of the card -- a clipped frame, the picture as a background image, the "picture unavailable" words (CardStrings) instead of a
             - Navigation/  -- moving inside the open card: the controller every nav element drives, and the elements
@@ -277,11 +277,11 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
             - MiniPlayerView.cs  -- The mini-player bar on the wall while a card's audio plays on after the card closed (Keep Audio Playing): play/pause, title + time as one tap target
             - PlacedModelChipView.cs  -- The placed-model chip in the card's floating slot, mirroring the mini-player: no placement state, draws the ONE ICardArPlacement through
             - CardAudioCoordinator.cs  -- Joins the audio owner to the card's comings and goings so PoiCardHost stays thin: CardShown / CardClosed apply MiniPlayerRule.StopsWithCard
-            - PoiCardSheetView.cs  -- Plain C#: the card's bottom sheet, a WIRING class: builds the layer, the grabber, the bar with the title, the settings gear and the X
+            - PoiCardSheetView.cs  -- Plain C#: the card's bottom sheet, a WIRING class: builds the layer, the grabber, the bar with the centred title, the chrome marks (the X at the left, settings at the right: each a touch-target button holding a 36 pt glass disc and a VectorGlyph, AddMark; CloseGlyph / SettingsGlyph) and wires the stack, slots, chrome, overlay and full view
             - BlockFrame.cs  -- the universal block frame: Build adds the rim band + the outer-only shadow parts to a slot, Apply frames a scroll slot with its emphasis
             - SectionSheets.cs  -- the card's chapters in the scroll: SectionSheetRule cuts the scroll's blocks into runs of one family, each WRAPPED in one pooled glass sheet with its living-glass layer (CardLight; ShowLightsNear draws it only near the view)
             - Light/  -- the card's moving light: two UI Shader Graphs and their owners
-              - CardLight.cs  -- Plain C#, one per BlockStackView: a material copy per painted element (Glass / Sweep), theme colours by name in linear + repaint on a mode switch, size, the injectable Clock into _Clock every 33 ms, ReduceMotion = _Animate 0
+              - CardLight.cs  -- Plain C#, one per BlockStackView: a material copy per painted element (Glass / Sweep), theme colours by name in linear + repaint on a mode switch, size and the sweep's band (--ts-rim-band from the theme for the mode shown, RimBand), the injectable Clock into _Clock every 33 ms, ReduceMotion = _Animate 0
               - RimLightView.cs  -- Plain C#: ONE rim light in the block LitBlockRule names, moved on scroll with a fade (out, move, in), behind the block's content
               - SectionGlass.shadergraph  -- generated JSON (the S4 spike's shape): the prototype's three drifting lights per ~720 pt band of a sheet, _Hue / _Hue2 / _Size / _Clock / _Animate / _Seed
               - RimSweep.shadergraph  -- generated JSON: a conic highlight (268 / 306 / 330 deg, Arc wide) turning per _Period, drawn only in the rim's band inside the rounded edge (SDF)
@@ -405,7 +405,6 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
             - SourcesBlockView.cs  -- sources: title + author + licence rows under the stack's heading (default: CardStrings sources_heading); list / with_confidence
           - Media/  -- The media family
             - Media.uss  -- CardImage, the header hero looks, the gallery looks, TakeoverView, before / after, zoom
-            - hero_glow.png  -- 128 x 64 white alpha fade with no edge: the glow behind the hero's words block, tinted by --ts-hero-glow; written by a script
             - hero_scrim.png  -- 4 x 256 white alpha ramp (0 -> 1, smoothstep), the graded scrim above the hero's words, tinted by --ts-scrim-hero; written by a script
             - GalleryBlockView.cs  -- gallery: carousel (swipe track + dots) / grid (two per row) / filmstrip (large + strip; a small one picks, the old large picture given back at once) / stack; a tap opens the shared PictureViewer
             - BeforeAfterBlockView.cs  -- before_after: slider -- After under Before cut at the handle, a pointer-captured drag moves it (Position, never scrolls the stack), labels from the
@@ -462,7 +461,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - Components.uss  -- the components' looks, theme tokens + their own --ts-el-* tokens (sizes, leading, gaps, page inset, the media's radius / caption / credit / overscan / carousel cell, --ts-preview-max); every option a class; a moving picture overhangs its frame (ts-el--moves-picture); the rhythm between rows by pair
         - Theme/  [Shared]  -- The app theme: ONE source (a ThemeAsset) of every colour and scale the UI Toolkit screens draw with, generated into USS and read by C#
           - ThemeAsset.cs  -- the ScriptableObject: key, default mode, shared ThemeTokenSet
-          - ThemeResolver.cs  -- plain C#: a theme's values in one mode for C# (TryColour, TryNumber; a mode's value wins over a shared one), read from the asset, never from a stylesheet
+          - ThemeResolver.cs  -- plain C#: a theme's values in one mode for C# (TryColour, TryNumber, TryPixels for px lengths; a mode's value wins over a shared one), read from the asset, never from a stylesheet
           - ThemeModeRule.cs  -- Pure: the mode shown -- the visitor's pick > the wall's Default Mode > the theme's, each only when the theme has it
           - ThemeController.cs  -- marks a UIDocument root ts-app ts-theme-<key> ts-mode-<mode> (Apply: PoiCardHost, SearchUIHost, ZoomControlView, CardGalleryHarness); Load(key) from
           - TileStoriesTheme.tss  -- PanelSettings.themeUss: imports unity-theme://default + Generated/Theme.default.uss
@@ -602,7 +601,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - BarSheetRule.cs  -- Pure: OpensKinds(tappedSection, currentSection, kindCount) -- bar_sheet's tap: a second tap on the CURRENT section with two kinds or more
           - ProgressMapRule.cs  -- Pure: Widths(counts, minimums, available) -- the progress map's pieces sized by target count, none under its minimum (water-filling), every minimum
           - EdgeScrubberRule.cs  -- Pure: Fits (every dot a full touch target in the viewport), Layout (the centred column) and IndexAt
-          - FloatingSlotRule.cs  -- Pure: FloatingSlotRule.Bottom (a gap above the sheet's top edge, never past the layer's top), Shown, Dims
+          - FloatingSlotRule.cs  -- Pure: FloatingSlotRule.Bottom (a gap above the sheet's top edge, never past the layer's top; when it cannot rest on or above the sheet -- Full to the top -- a gap under the chrome row, never over the X or settings), Shown, Dims
           - RadialMenuRule.cs  -- Pure: the radial's arc in the left half-plane -- Layout
           - CardNavModel.cs  -- Pure: the map of one open card every nav element reads -- Build(stack entries, registry, CardSettings, isRevealed) -> GroupBy, Sections
         - KnowledgeCheckRule.cs  -- Pure: which question rows a knowledge_check look can show
@@ -911,7 +910,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - NavBottomElementRulesTests.cs  -- Tier 0 on the shipped Lamp / Military / Religious: NextUpRule
           - NavBarRuleTests.cs  -- Tier 0 of NavBarRule: the default groups, a wall's rows (hidden, merged, blanks), the shipped Ribeira Palace's groups through the real stack, EntryOf, words, every option's default
           - NavTopElementRulesTests.cs  -- Tier 0 on the shipped Lamp: default Groups 25 / 15 / 7 / 9, a wall's own rows and a Families row's group, group words; sections' icons / tokens
-          - NavFloatingRulesTests.cs  -- Tier 0 at the run's 390 x 844 frame: FloatingSlotRule (peek / half a gap above, Full flush; Shown; Dims), FabFanRule, RadialMenuRule
+          - NavFloatingRulesTests.cs  -- Tier 0 at the run's 390 x 844 frame: FloatingSlotRule (peek / half a gap above, flush in a camera strip at Full, under the chrome row at Full to the top, a sweep of every sheet height never over the chrome row; Shown; Dims), FabFanRule, RadialMenuRule
           - FamilyIconAndWordsTests.cs  -- Every registered family (an app's too) has an icon the set draws and a token a stylesheet defines, >= 3:1 on --ts-surface; every icon of the set is
           - NavBackRuleTests.cs  -- Tier 0 of NavBackRule: one stop down per press and the close at Peek, the full view first at every stop, the whole walk in four presses then Back
           - EdgeScrubberRuleTests.cs  -- Tier 0 on The Lamp's real section count: Fits, the centred tiling column, IndexAt at centres / boundaries / a sweep, the ends and the overshoot
@@ -1033,7 +1032,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
             - ThemeUssStaleTests.cs  -- the committed Theme.default.uss equals what ThemeUssGenerator makes of the committed asset NOW (first differing line in the message); a changed asset
             - ThemeTokenGuardTests.cs  -- every var() name the card's (framework + app), search's and zoom's sheets use is defined by the theme or by that screen's own sheets
             - ThemeContrastTests.cs  -- ThemeContrastAudit: every text >= 7:1 on every ground, marks / family fills >= 4.5:1, ink on fill >= 7:1, body APCA >= 75, per mode and per accent
-            - ThemeModeRuleTests.cs  -- ThemeModeRule's order and unknown modes
+            - ThemeModeRuleTests.cs  -- ThemeModeRule's order and unknown modes; the resolver's px lengths (the rim band per mode)
         - MarkerAssets/  [EMPTY SCAFFOLD]  -- fixtures for marker asset tests
       - Runtime/  -- PlayMode suite: anything needing a scene, a camera, coroutines or Destroy
         - TileStories.Tests.asmdef  -- refs TileStories, nunit, UnityEngine.UI
@@ -1064,7 +1063,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - SearchSceneTests.cs  -- selection x filter, every setting pushed live, minimap, voice, recent -> suggestion, contrast + tap targets
         - SearchDemoTests.cs  -- on the running index and through the UI, each demo control ([CoversField] search_demo.*), filters on the demo (category chip, Material field chip)
         - SearchSettingsFieldTests.cs  -- CoversFieldAttribute, and CoverageGuard_EveryFieldHasARealTest (reflection: a field no test names fails)
-        - CardTestInput.cs  -- Settle (wait out the sheet transition), blended text contrast, EffectiveBackground (composited), IsShown, BackgroundPictureName; Wheel (6C); DragFrom; the floating chrome: PastTheHero / ReadPastTheHero, ReachableStack (where a finger lands), IntoReach / TapInReach (the one way to put a finger on the stack: to the reach's middle, still), UntilStill (wait for the stack's rest, not seconds), UnderTheTopShade
+        - CardTestInput.cs  -- Settle (wait out the sheet transition), blended text contrast, EffectiveBackground (composited), GroundOver (see-through layers over a backdrop in LINEAR light), IsShown, BackgroundPictureName; Wheel (6C); DragFrom; the floating chrome: PastTheHero / ReadPastTheHero, ReachableStack (where a finger lands), IntoReach / TapInReach (the one way to put a finger on the stack: to the reach's middle, still), UntilStill (wait for the stack's rest, not seconds), UnderTheTopShade
         - CardGalleryChecks.cs  -- The generic Phase A checks of one block entry as PUBLIC helpers
         - CardGalleryTests.Expandable.cs  -- Phase A: EVERY framework kind (BuiltInBlocks into a fresh registry, never a hand list) through AssertCompactAndExpanded; a kind with no gallery entry
         - ThemePipelineTests.cs  -- The theme end to end on the REAL LivingRoomScene: every UIDocument marked ts-app / default / dark on a panel whose theme is TileStoriesTheme; every
@@ -1078,9 +1077,10 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - TypefaceMeasureTests.cs  -- Measuring instrument of a TYPE change, gated by TestEvidence/Typeface/MEASURING (its word = the phase, before / after): the P4.1 gallery renders + a
         - HeroMeasureSceneTests.cs  -- Measuring instrument of the header / hero, gated by TestEvidence/Hero/MEASURING (LookMeasure): The Lamp and The Painting x EN / PT x no Menu /
         - PoiCardHeroSceneTests.cs  -- Phase B on the REAL scene: the bar one row whatever the language or Menu (stops unchanged, live push), the whole hero in view at Half with the card's
+        - PoiCardChromeMarksSceneTests.cs  -- Phase B of the premium chrome on the REAL scene: the X and settings marks >= 7:1 on the real render (ThemePixelSet.RingContrast) over every hero picture of the wall, light / dark, at Peek / Half / Full and after the hero; the renders in TestEvidence/Premium/P1/
         - PoiCardFullHeightSceneTests.cs  -- Phase B: Full Height To The Top vs Leave A Camera Strip on the real sheet (_3.3 S4a)
         - PoiCardNavBarSceneTests.cs  -- Phase B on the real scene: the Navigation Bar's groups, floating under the title bar after the hero with no jump, a tap landing under the chrome and marking the group, each indicator x floating / full width / bottom, a merged group, off again; renders in TestEvidence/NavBar/
-        - ThemePixelSetTests.cs  -- [Explicit] measuring instrument for a change that must move no pixel: 12 gallery renders (CardNavGalleryScene) + The Lamp at Half / Full
+        - ThemePixelSetTests.cs  -- [Explicit] measuring instrument for a change that must move no pixel: 12 gallery renders (CardNavGalleryScene) + The Lamp at Half / Full; ThemePixelSet also holds GrabStill, ScreenRectOf and RingContrast (ink against the ring 2-3 px round its strokes, as drawn: the hero's words, the chrome marks)
         - TestEvidence.cs  -- PUBLIC: Root (TileStories/TestEvidence, next to Assets/) and PathFor(domain, fileName) (creates TestEvidence/<domain>/): the ONE place every test
         - IsolatedVisitorState.cs  -- PUBLIC: while it lives DeviceStateStore.Current is a memory store of its own (never the developer's PlayerPrefs); each test assembly's SetUpFixture holds one for the run, SearchSceneFixture a fresh one per test
         - TestRunRecorder.cs  -- DEV tool, OFF by default (EditorPrefs switch, menu TileStories > Dev > Record Test Runs): Write appends one event line (time, kind, detail) to
@@ -1120,7 +1120,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - CardGalleryTests.cs  -- 
         - CardStoryGalleryTests.cs  -- Phase A of the story on the gallery card: every text element x every option x light / dark on its page (real tap), fit and >= 7:1 on the render (motion settled first); the preview's cap, fade, Open Row and no slot heading; the three emphases as frame sequences; Custom preview; reuse
         - CardStoryMediaGalleryTests.cs  -- Phase A of the story's media and motion on the gallery card: every media element x width x frame x mode on its page (proportion, shape, bleed, >= 7:1 words); real taps (picture -> viewer -> Back to the page at its scroll, the pair, video in place / player through the one owner) and swipes (carousel h / v); frame sequences of a reveal, a parallax scroll, a slow zoom, the preview's entry; Reduce Motion = identical frames
-        - CardSettingsGalleryTests.cs  -- Phase A of the language chip: finger-sized, readable, level with and left of the X, a real tap re-shows the entry in the other language (and back)
+        - CardSettingsGalleryTests.cs  -- Phase A of the visitor's settings: the sliders mark in its 36 pt glass disc at the bar's right, level with the X, finger-sized, >= 7:1 on its glass over the bar's over black and white (light / dark); real taps pick a language (2 and 3 languages); the title between the marks
         - CardTrackGalleryTests.cs  -- Phase A of the swipe tracks: the horizontal timeline and the related carousel never show a card cut in half at rest or at the end of the swipe, the
         - PoiCardLanguageSceneTests.cs  -- Phase B on the REAL LivingRoomScene: a real tap on the chip shows The Lamp's card in Portuguese in place (stop and scroll kept) and back, the pick
         - CardAudioGalleryTests.cs  -- Every audio_guide entry (both looks x short / long / no captions / no speed / unavailable) through the generic checks + real taps: play / pause, a

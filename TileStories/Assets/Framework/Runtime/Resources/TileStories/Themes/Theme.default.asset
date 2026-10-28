@@ -177,9 +177,8 @@ MonoBehaviour:
         note: The hero's eyebrow over the scrim (a warm white)
       - name: --ts-hero-glow
         value: {r: 0.039215688, g: 0.03137255, b: 0.023529412, a: 0.72}
-        note: 'The soft glow behind the hero''s words (_3.3 S4a: tints hero_glow.png, a
-          fade with no edge): transparent, the picture stays the hero; the halo round
-          the letters carries the contrast'
+        note: 'The ground of the hero''s focal action (its thin outline button): a dark
+          see-through fill over the picture'
       - name: --ts-text-halo
         value: {r: 0, g: 0, b: 0, a: 0.85}
         note: 'The dark halo hugging every letter of the hero (its text-shadow): the
@@ -200,6 +199,20 @@ MonoBehaviour:
       - name: --ts-top-shade
         value: {r: 0, g: 0, b: 0, a: 0.5}
         note: 'The fade from the sheet top while the floating bars sit on the hero picture (tints top_shade.png): their white marks read on any picture'
+      - name: --ts-chrome-glass
+        value: {r: 0.98039216, g: 0.972549, b: 0.95686275, a: 0.72}
+        note: 'The chrome discs after the hero (_3.3 S4 third round, v5): the X and
+          settings on light glass (smoked in dark), the mark in the card''s ink'
+      - name: --ts-chrome-glass-hero
+        value: {r: 0.039215688, g: 0.03137255, b: 0.023529412, a: 0.86}
+        note: 'The chrome discs over the hero''s picture: DARK glass, the same in
+          both modes. No backdrop blur in UI Toolkit, and the project blends in
+          LINEAR light: a white mark keeps 7:1 over a white sky only on a ground of
+          luminance <= 0.10, measured on the render (PoiCardChromeMarksSceneTests)'
+      - name: --ts-chrome-line-hero
+        value: {r: 1, g: 1, b: 1, a: 0.32}
+        note: 'The light rim of a chrome disc over the hero (v5): it draws the disc''s
+          edge over a dark picture'
       - name: --ts-glass-ground
         value: {r: 0.95686275, g: 0.9411765, b: 0.9098039, a: 0.62}
         note: 'The sheet''s ground between the blocks (R11 tinted glass: light clear,
@@ -552,9 +565,8 @@ MonoBehaviour:
         note: The hero's eyebrow over the scrim (a warm white)
       - name: --ts-hero-glow
         value: {r: 0.039215688, g: 0.03137255, b: 0.023529412, a: 0.72}
-        note: 'The soft glow behind the hero''s words (_3.3 S4a: tints hero_glow.png, a
-          fade with no edge): transparent, the picture stays the hero; the halo round
-          the letters carries the contrast'
+        note: 'The ground of the hero''s focal action (its thin outline button): a dark
+          see-through fill over the picture'
       - name: --ts-text-halo
         value: {r: 0, g: 0, b: 0, a: 0.85}
         note: 'The dark halo hugging every letter of the hero (its text-shadow): the
@@ -575,6 +587,20 @@ MonoBehaviour:
       - name: --ts-top-shade
         value: {r: 0, g: 0, b: 0, a: 0.5}
         note: 'The fade from the sheet top while the floating bars sit on the hero picture (tints top_shade.png): their white marks read on any picture'
+      - name: --ts-chrome-glass
+        value: {r: 0.101960786, g: 0.105882354, b: 0.11764706, a: 0.72}
+        note: 'The chrome discs after the hero (_3.3 S4 third round, v5): the X and
+          settings on light glass (smoked in dark), the mark in the card''s ink'
+      - name: --ts-chrome-glass-hero
+        value: {r: 0.039215688, g: 0.03137255, b: 0.023529412, a: 0.86}
+        note: 'The chrome discs over the hero''s picture: DARK glass, the same in
+          both modes. No backdrop blur in UI Toolkit, and the project blends in
+          LINEAR light: a white mark keeps 7:1 over a white sky only on a ground of
+          luminance <= 0.10, measured on the render (PoiCardChromeMarksSceneTests)'
+      - name: --ts-chrome-line-hero
+        value: {r: 1, g: 1, b: 1, a: 0.32}
+        note: 'The light rim of a chrome disc over the hero (v5): it draws the disc''s
+          edge over a dark picture'
       - name: --ts-glass-ground
         value: {r: 0.062745094, g: 0.05882353, b: 0.050980393, a: 0.8}
         note: 'The sheet''s ground between the blocks (R11 tinted glass: light clear,

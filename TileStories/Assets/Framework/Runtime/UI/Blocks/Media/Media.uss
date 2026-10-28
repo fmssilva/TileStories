@@ -79,24 +79,36 @@
     border-radius: 0;
 }
 
-/* the FOOT: the words and the actions, minimal on the picture (_3.3 S4a, a premium website's hero) -- no plate: a soft transparent GLOW
-   behind the words' block (hero_glow.png, a fade with no edge, tinted by --ts-hero-glow) and a dark halo hugging every letter (the words'
-   text-shadow, --ts-text-halo). MEASURED on the render: every word against the picture right around its letters, on every hero picture of
-   the wall (PoiCardHeroSceneTests) */
+/* the FOOT: the words and the actions, minimal on the picture (_3.3 S4a; the premium target, v5) -- no plate: a SHADE behind the words'
+   block only -- a ramp fading in above them (hero_scrim.png's 0 -> 1 grade), then the solid floor behind them and down past the hero's
+   foot, both --ts-scrim-hero (the floor measured against pure white) -- and a dark halo hugging every letter (the words' text-shadow,
+   --ts-text-halo). MEASURED on the render: every word against the picture right around its letters, on every hero picture of the wall
+   (PoiCardHeroSceneTests); the picture between the top shade and this one stays clean */
 .card-hero__foot {
     flex-shrink: 0;
     padding: 0 0 var(--ts-hero-words-inset) 0;
 }
 
-.card-hero__glow {
+/* out of the flow: from a ramp's height above the words to far below them (the hero clips it at its foot, also while the words rise) */
+.card-hero__shade {
     position: absolute;
     left: 0;
     right: 0;
-    top: var(--ts-hero-glow-out-top);
-    bottom: var(--ts-hero-glow-out-bottom);
-    background-image: url("hero_glow.png");
+    top: var(--ts-hero-shade-out-top);
+    bottom: var(--ts-hero-shade-out-bottom);
+}
+
+.card-hero__shade-ramp {
+    flex-shrink: 0;
+    height: var(--ts-hero-shade-ramp);
+    background-image: url("hero_scrim.png");
     -unity-background-scale-mode: stretch-to-fill;
-    -unity-background-image-tint-color: var(--ts-hero-glow);
+    -unity-background-image-tint-color: var(--ts-scrim-hero);
+}
+
+.card-hero__shade-floor {
+    flex-grow: 1;
+    background-color: var(--ts-scrim-hero);
 }
 
 /* the words: eyebrow, the title in the display face, one line -- the hero's side gutter, a halo round every letter */
@@ -256,11 +268,11 @@
     background-color: var(--ts-bar);
 }
 
-.card-hero--plate .card-hero__glow {
+.card-hero--plate .card-hero__shade {
     display: none;
 }
 
-/* on the plate the words need no glow or halo of their own, nor a gutter beside the foot's */
+/* on the plate the words need no shade or halo of their own, nor a gutter beside the foot's */
 .card-hero--plate .card-hero__text,
 .card-hero--plate .card-hero__actions {
     padding: 0;

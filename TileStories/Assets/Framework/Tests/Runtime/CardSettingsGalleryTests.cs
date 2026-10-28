@@ -86,35 +86,50 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle();
         }
 
+        // _3.3 S4 third round (v5) + _Test_Suite_1.md F2: settings is a thin "sliders" mark in a 36 pt glass disc at the bar's right, level with
+        // the X at its left, a whole touch target; off the hero its mark reads at 7:1 on its glass over the darkest AND the lightest backdrop
+        // (over the hero's picture it is measured on the render: PoiCardChromeMarksSceneTests)
         [UnityTest]
-        [Ignore("Bar contrast below 7:1 (the S4a see-through bar) -- _3.3 open, _Test_Suite_1.md F2, fixed in the premium design block")]
-        public IEnumerator TheSettingsButton_IsAGear_FingerSized_Readable_AndLevelWithAndLeftOfTheX()
+        public IEnumerator TheSettingsButton_IsASlidersMarkInAGlassDisc_FingerSized_ReadsAt7To1_LevelWithTheX_AtTheRight([Values("light", "dark")] string mode)
         {
+            ThemeController.SetMode(mode);
             _harness.Show(IndexOf(HeaderEntryNames[0]));
             yield return CardTestInput.Settle();
 
-            var aa = Sheet.SettingsButton;
-            Assert.AreEqual(DisplayStyle.Flex, aa.resolvedStyle.display, "the settings button shows");
-            // - P4.4b part 2: a gear, the universal settings sign (no "Aa" words); its name comes from the card's texts
-            Assert.AreEqual("", aa.text, "no words on it: the gear says it");
-            Assert.AreEqual(CardIcons.Shape.Gear, Sheet.SettingsGlyph.Kind, "the drawn mark is the gear");
-            Assert.AreSame(aa, Sheet.SettingsGlyph.parent, "drawn on the button");
-            Assert.AreEqual(CardTestInput.TokenPx("--ts-icon-size"), Sheet.SettingsGlyph.worldBound.width, CardGalleryChecks.OnePixel(aa) + 0.01f, "the X's mark size");
-            Assert.IsTrue(aa.worldBound.Contains(Sheet.SettingsGlyph.worldBound.center), "centred in the button");
-            Assert.AreEqual("Card settings", aa.tooltip, "its name for a screen reader and a long press");
-            Assert.IsTrue(Sheet.Root.ClassListContains("poi-card--has-settings"));
-            Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(aa.worldBound.width, aa.worldBound.height), "finger-sized: " + aa.worldBound);
-            float onePixel = CardGalleryChecks.OnePixel(aa);
-            // - _3.3 S4a review: the slim bar's height, a bare mark on the bar's own see-through ground (or white over the hero's top shade)
-            Assert.AreEqual(CardTestInput.TokenPx("--ts-bar-height"), aa.worldBound.width, onePixel + 0.01f, "as wide as the bar is tall");
-            if (!Sheet.Root.ClassListContains(BlockStackView.BarsOnHeroClass))
-                Assert.GreaterOrEqual(CardTestInput.Contrast(Sheet.SettingsGlyph.resolvedStyle.color, CardTestInput.EffectiveBackground(Sheet.Stack.HeaderSlot)), 7f,
-                    "the gear reads at 7:1 on the bar's ground (D1)");
+            var button = Sheet.SettingsButton;
+            var glyph = Sheet.SettingsGlyph;
+            var disc = glyph.parent;
+            float onePixel = CardGalleryChecks.OnePixel(button);
+            Assert.AreEqual(DisplayStyle.Flex, button.resolvedStyle.display, "the settings button shows");
+            Assert.AreEqual("", button.text, "no words on it: the mark says it");
+            Assert.AreEqual(CardIcons.Shape.Sliders, glyph.Kind, "the drawn mark is the sliders, not a gear (v5)");
+            Assert.IsFalse(glyph.Filled, "a thin outline mark");
+            Assert.AreEqual("Card settings", button.tooltip, "its name for a screen reader and a long press");
+            // - the sizes from their tokens: a 44 pt target, a 36 pt disc centred in it, a 16 pt mark centred in that, a 1.5 stroke
+            Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(button.worldBound.width, button.worldBound.height), "finger-sized: " + button.worldBound);
+            Assert.AreEqual(CardTestInput.TokenPx("--ts-bar-height"), button.worldBound.width, onePixel + 0.01f, "as wide as the bar is tall");
+            Assert.IsTrue(disc.ClassListContains(PoiCardSheetView.MarkDiscClass) && disc.parent == button, "the mark sits in the button's disc");
+            Assert.AreEqual(CardTestInput.TokenPx("--ts-chrome-disc"), disc.worldBound.width, onePixel + 0.01f, "a 36 pt disc");
+            Assert.AreEqual(disc.worldBound.width / 2f, disc.resolvedStyle.borderTopLeftRadius, 0.01f, "round");
+            Assert.AreEqual(button.worldBound.center.x, disc.worldBound.center.x, onePixel, "the disc centred in the target");
+            Assert.AreEqual(CardTestInput.TokenPx("--ts-chrome-mark"), glyph.worldBound.width, onePixel + 0.01f, "a 16 pt mark");
+            Assert.AreEqual(disc.worldBound.center.y, glyph.worldBound.center.y, onePixel, "centred in the disc");
+            Assert.AreEqual(1.5f, glyph.worldBound.width * CardIcons.StrokeUnits(glyph.Kind), 0.01f, "v5's thin 1.5 stroke");
+            // - off the hero (this entry has no picture): the card's ink on the disc's glass over the bar's, over the darkest and the lightest
+            //   backdrop
+            Assert.IsFalse(Sheet.Root.ClassListContains(BlockStackView.BarsOnHeroClass), "precondition: the bar is off the hero");
+            foreach (var backdrop in new[] { Color.black, Color.white })
+            {
+                float contrast = CardTestInput.Contrast(glyph.resolvedStyle.color, CardTestInput.GroundOver(disc, CardTestInput.GroundOver(Sheet.Stack.HeaderSlot, backdrop, Sheet.Layer), Sheet.Layer));
+                Assert.GreaterOrEqual(contrast, 7f, mode + ": the mark reads at 7:1 on its glass over " + backdrop + " (" + contrast.ToString("F2") + ", D1)");
+            }
 
-            Rect close = Sheet.CloseButton.worldBound, aaRect = aa.worldBound, card = Sheet.Root.worldBound;
-            Assert.LessOrEqual(aaRect.xMax, close.xMin + 0.01f, "Aa sits left of the X, never over it: " + aaRect + " vs " + close);
-            Assert.GreaterOrEqual(aaRect.xMin, card.xMin, "inside the card");
-            Assert.AreEqual(close.yMin, aaRect.yMin, onePixel + 0.01f, "level with the X");
+            // - v5's places: the X at the left, settings at the right, level, each its inset from the card's side
+            Rect close = Sheet.CloseButton.worldBound, settings = button.worldBound, card = Sheet.Root.worldBound;
+            Assert.Less(close.xMax, settings.xMin, "the X at the left, settings at the right: " + close + " vs " + settings);
+            Assert.AreEqual(close.yMin, settings.yMin, onePixel + 0.01f, "level with the X");
+            Assert.AreEqual(close.xMin - card.xMin, card.xMax - settings.xMax, onePixel, "the same inset from each side");
+            Assert.AreEqual(CardTestInput.TokenPx("--ts-chrome-inset"), close.xMin - card.xMin, onePixel, "the X its inset from the left");
         }
 
         [UnityTest]
@@ -141,7 +156,7 @@ namespace TileStories.Tests
             yield return OpenSettings();
             Assert.AreEqual("Idioma", Sheet.Settings.Root.Q<Label>(className: "card-settings__group-title").text, "the settings speak Portuguese too");
             Assert.AreEqual("Definições do cartão", Sheet.Settings.Root.Q<Label>(className: "card-settings__title").text, "its title too");
-            Assert.AreEqual("Definições do cartão", Sheet.SettingsButton.tooltip, "and the gear's name");
+            Assert.AreEqual("Definições do cartão", Sheet.SettingsButton.tooltip, "and the settings mark's name");
             Assert.AreEqual("English", Sheet.Settings.Choice("en").text, "a language keeps its own name in a Portuguese card");
             Assert.AreEqual("Português", Sheet.Settings.Choice("pt").text);
             yield return TapChoice("en");
@@ -191,7 +206,8 @@ namespace TileStories.Tests
             var title = header.Root.Q<Label>("card-header-title");
             var aa = Sheet.SettingsButton;
             Assert.AreEqual(DisplayStyle.Flex, aa.resolvedStyle.display, "precondition: Aa shows on " + name);
-            Assert.LessOrEqual(title.worldBound.xMax, aa.worldBound.xMin + 0.5f, name + ": the title ends before Aa, never under it: " + title.worldBound + " vs " + aa.worldBound);
+            Assert.LessOrEqual(title.worldBound.xMax, aa.worldBound.xMin + 0.5f, name + ": the title ends before settings, never under it: " + title.worldBound + " vs " + aa.worldBound);
+            Assert.GreaterOrEqual(title.worldBound.xMin, Sheet.CloseButton.worldBound.xMax - 0.5f, name + ": and starts after the X: " + title.worldBound);
         }
 
         [UnityTest]

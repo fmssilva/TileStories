@@ -11,6 +11,7 @@ namespace TileStories
     {
         private readonly Dictionary<string, Color> _colours = new();
         private readonly Dictionary<string, float> _numbers = new();
+        private readonly Dictionary<string, float> _pixels = new();
 
         public ThemeResolver(ThemeTokenSet shared, ThemeTokenSet mode)
         {
@@ -25,6 +26,16 @@ namespace TileStories
                 if (!string.IsNullOrEmpty(token.name)) _colours[token.name] = token.value;
             foreach (var token in set.numbers)
                 if (!string.IsNullOrEmpty(token.name)) _numbers[token.name] = token.value;
+            // - a share of an element's size means nothing without the element: only px lengths are read
+            foreach (var token in set.lengths)
+                if (!string.IsNullOrEmpty(token.name) && token.value.unit == ThemeLengthUnit.Px) _pixels[token.name] = token.value.value;
+        }
+
+        // The px length `token` has in this mode (the rim's band); false when the theme holds no such px length
+        public bool TryPixels(string token, out float pixels)
+        {
+            pixels = 0f;
+            return !string.IsNullOrEmpty(token) && _pixels.TryGetValue(token, out pixels);
         }
 
         // The number `token` has in this mode (a material's setting: the rim light's arc); false when the theme holds no such number

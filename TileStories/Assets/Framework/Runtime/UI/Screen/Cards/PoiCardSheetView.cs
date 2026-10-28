@@ -19,11 +19,16 @@ namespace TileStories
         // The soft fade behind the bars while they float over the hero's picture
         public VisualElement TopShade { get; }
         public Button CloseButton { get; }
-        // The settings button beside the X (_3.3 P4.4b, replaces the language chip of 15.3.2; a gear since part 2): opens the visitor's
-        // settings -- language, light / dark
+        // The X drawn on it (CardIcons.Shape.Close, in its glass disc, coloured by USS)
+        public CardIcons.VectorGlyph CloseGlyph { get; }
+        // The settings button at the bar's right (_3.3 P4.4b; the premium target's "sliders" mark): opens the visitor's settings --
+        // language, light / dark
         public Button SettingsButton { get; }
-        // The gear drawn on it (CardIcons.Shape.Gear, coloured by USS)
+        // The sliders drawn on it (CardIcons.Shape.Sliders, in its glass disc, coloured by USS)
         public CardIcons.VectorGlyph SettingsGlyph { get; }
+        // The chrome marks' classes (PoiCard.uss): the 36 pt glass disc and the thin mark in it
+        public const string MarkDiscClass = "poi-card__mark-disc";
+        public const string MarkClass = "poi-card__mark";
         // The visitor's settings panel the settings button opens over the card (in the overlay layer)
         public CardVisitorSettingsView Settings { get; }
         public BlockStackView Stack { get; }
@@ -148,27 +153,18 @@ namespace TileStories
             Pager = new CardPagerView(Root, Stack.Scroll, Layout, Nav);
             Bento = new CardBentoView(Stack, Layout, Nav);
 
-            // - no glyph: the X is two crossed bars drawn by PoiCard.uss; its name (tooltip) comes from CardStrings
+            // - the premium target's chrome (_3.3 S4 third round, v5): the X at the left, settings at the right, each a small glass DISC with a
+            //   thin mark inside a whole touch target (the button); no words on either: the name (tooltip) comes from CardStrings
             CloseButton = new Button(RequestClose) { name = "poi-card-close" };
             CloseButton.AddToClassList("poi-card__close");
-            foreach (string bar in new[] { "poi-card__close-bar--a", "poi-card__close-bar--b" })
-            {
-                var stroke = new VisualElement { pickingMode = PickingMode.Ignore };
-                stroke.AddToClassList("poi-card__close-bar");
-                stroke.AddToClassList(bar);
-                CloseButton.Add(stroke);
-            }
+            CloseGlyph = AddMark(CloseButton, CardIcons.Shape.Close);
             Root.Add(CloseButton);
 
-            // - a gear (the universal "settings" sign, P4.4b part 2: a "more" mark would read "more actions" beside the Menu's bars); its
-            //   name comes from CardStrings; a second tap while its settings are open closes them
+            // - "sliders", not a gear (v5: the sign of things to adjust -- language, light / dark); a second tap while its settings are open
+            //   closes them
             SettingsButton = new Button(ToggleSettings) { name = "poi-card-settings" };
             SettingsButton.AddToClassList("poi-card__settings");
-            SettingsGlyph = CardIcons.CreateVector(CardIcons.Shape.Gear);
-            // - solid, on the button's faint disc (S4a review: the mark carries the button, not a rim)
-            SettingsGlyph.Filled = true;
-            SettingsGlyph.AddToClassList("poi-card__settings-glyph");
-            SettingsButton.Add(SettingsGlyph);
+            SettingsGlyph = AddMark(SettingsButton, CardIcons.Shape.Sliders);
             Root.Add(SettingsButton);
             Settings = new CardVisitorSettingsView();
             Settings.LanguagePicked += code => LanguageRequested?.Invoke(code);
@@ -262,6 +258,19 @@ namespace TileStories
             Chrome.Bind(_context.Settings?.navigation, _context.ReduceMotion);
         }
 
+        // A chrome mark on `button`: the glass disc centred in the touch target, the vector mark centred in the disc (PoiCard.uss sizes
+        // and colours both, over the hero and after it)
+        private static CardIcons.VectorGlyph AddMark(Button button, CardIcons.Shape shape)
+        {
+            var disc = new VisualElement { name = button.name + "-disc", pickingMode = PickingMode.Ignore };
+            disc.AddToClassList(MarkDiscClass);
+            var glyph = CardIcons.CreateVector(shape);
+            glyph.AddToClassList(MarkClass);
+            disc.Add(glyph);
+            button.Add(disc);
+            return glyph;
+        }
+
         // The header's menu button exists only while the card has a Menu element; its name is the menu's (CardStrings)
         private void ShowMenuButton()
         {
@@ -271,7 +280,7 @@ namespace TileStories
             Root.EnableInClassList("poi-card--has-menu", shown);
         }
 
-        // The settings button is on every card: even with one language there is the mode to choose. No words on it: the gear says it,
+        // The settings button is on every card: even with one language there is the mode to choose. No words on it: the mark says it,
         // its name ("Card settings") is for a screen reader and a long press
         private void ShowSettingsButton(BlockBindContext context)
         {

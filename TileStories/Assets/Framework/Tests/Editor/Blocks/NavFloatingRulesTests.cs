@@ -24,7 +24,7 @@ namespace TileStories.Editor.Tests
         // The room around the button's centre when the sheet rests at this height
         private static RadialMenuRule.Room RoomAt(float sheetHeight)
         {
-            float bottom = FloatingSlotRule.Bottom(sheetHeight, Layer, Button, Gap);
+            float bottom = FloatingSlotRule.Bottom(sheetHeight, Layer, Button, Gap, Chrome);
             float centreY = Layer - bottom - Button / 2f;
             return new RadialMenuRule.Room(centreY, Layer - centreY, Width - Margin - Button / 2f, Margin + Button / 2f);
         }
@@ -33,18 +33,50 @@ namespace TileStories.Editor.Tests
 
         // ---------------- FloatingSlotRule ----------------
 
+        // The chrome row's foot under the sheet's top edge: --ts-bar-top 6 + --ts-bar-height 44
+        private const float Chrome = 50f;
+
         [Test]
-        public void TheSlot_RestsAGapAboveTheSheetAtPeekAndHalf_AndFlushInTheTopGapAtFull()
+        public void TheSlot_RestsAGapAboveTheSheetAtPeekAndHalf_AndFlushInTheCameraStripAtFull()
         {
-            Assert.AreEqual(195f + Gap, FloatingSlotRule.Bottom(195f, Layer, Button, Gap), 1e-3f, "peek: 8 px above the sheet's top edge");
-            Assert.AreEqual(337.6f + Gap, FloatingSlotRule.Bottom(337.6f, Layer, Button, Gap), 1e-3f, "half: the same, higher");
-            // - Full leaves 48 px above the sheet (--ts-sheet-top-gap): the slot rests there, its top on the layer's top, flush on the sheet
-            Assert.AreEqual(Layer - Button, FloatingSlotRule.Bottom(796f, Layer, Button, Gap), 1e-3f, "full: never past the layer's top");
+            Assert.AreEqual(195f + Gap, FloatingSlotRule.Bottom(195f, Layer, Button, Gap, Chrome), 1e-3f, "peek: 8 px above the sheet's top edge");
+            Assert.AreEqual(337.6f + Gap, FloatingSlotRule.Bottom(337.6f, Layer, Button, Gap, Chrome), 1e-3f, "half: the same, higher");
+            // - Full with a camera strip leaves 48 px above the sheet (--ts-sheet-top-gap): the slot rests there, flush on the sheet
+            Assert.AreEqual(Layer - Button, FloatingSlotRule.Bottom(796f, Layer, Button, Gap, Chrome), 1e-3f, "full with a strip: never past the layer's top");
             Assert.AreEqual(796f, Layer - Button, 1e-3f, "precondition: at Full the sheet's top IS the slot's bottom (flush, no overlap)");
             // - a dragged sheet is followed exactly, a closed one (0) leaves the slot a gap above the bottom
-            Assert.AreEqual(500f + Gap, FloatingSlotRule.Bottom(500f, Layer, Button, Gap), 1e-3f);
-            Assert.AreEqual(Gap, FloatingSlotRule.Bottom(0f, Layer, Button, Gap), 1e-3f);
-            Assert.AreEqual(0f, FloatingSlotRule.Bottom(900f, 40f, Button, Gap), 1e-3f, "a layer shorter than the slot: pinned to the bottom, never negative");
+            Assert.AreEqual(500f + Gap, FloatingSlotRule.Bottom(500f, Layer, Button, Gap, Chrome), 1e-3f);
+            Assert.AreEqual(Gap, FloatingSlotRule.Bottom(0f, Layer, Button, Gap, Chrome), 1e-3f);
+        }
+
+        // _Test_Suite_1.md F1: at Full to the top the slot cannot rest above the sheet; it rests a gap UNDER the chrome row, never over the X
+        [Test]
+        public void AtFullToTheTop_TheSlotRestsUnderTheChromeRow_AGapBelowItsFoot()
+        {
+            float bottom = FloatingSlotRule.Bottom(Layer, Layer, Button, Gap, Chrome);
+            float top = Layer - bottom - Button;
+            Assert.AreEqual(Chrome + Gap, top, 1e-3f, "its top a gap under the chrome row's foot");
+            // - a sheet a few points short of the screen's top: the slot would hang over the sheet's top edge -- under the row too
+            float nearly = Layer - 20f;
+            float topNearly = Layer - FloatingSlotRule.Bottom(nearly, Layer, Button, Gap, Chrome) - Button;
+            Assert.AreEqual(Layer - nearly + Chrome + Gap, topNearly, 1e-3f, "under the row of a sheet that leaves too little room above it");
+        }
+
+        // The rule's promise as a sweep: at every sheet height (a drag passes through all of them) the slot never overlaps the chrome row
+        // (the sheet's top edge down to the row's foot), and it is never off the layer
+        [Test]
+        public void AtEverySheetHeight_TheSlotNeverOverlapsTheChromeRow_AndStaysOnTheLayer()
+        {
+            for (float sheet = 0f; sheet <= Layer; sheet += 0.5f)
+            {
+                float bottom = FloatingSlotRule.Bottom(sheet, Layer, Button, Gap, Chrome);
+                float slotTop = Layer - bottom - Button, slotFoot = Layer - bottom;
+                float rowTop = Layer - sheet, rowFoot = rowTop + Chrome;
+                Assert.IsTrue(slotFoot <= rowTop + 1e-3f || slotTop >= rowFoot - 1e-3f,
+                    "sheet " + sheet + ": the slot " + slotTop + ".." + slotFoot + " overlaps the chrome row " + rowTop + ".." + rowFoot);
+                Assert.GreaterOrEqual(slotTop, -1e-3f, "sheet " + sheet + ": on the layer (top)");
+                Assert.GreaterOrEqual(bottom, 0f, "sheet " + sheet + ": on the layer (bottom)");
+            }
         }
 
         [Test]

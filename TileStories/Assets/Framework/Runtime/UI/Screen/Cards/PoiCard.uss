@@ -60,19 +60,59 @@
     background-color: var(--ts-ink-3);
 }
 
+/* The chrome (_3.3 S4 third round, the premium target v5): the X at the bar's LEFT, settings at its right, the title centred between
+   them. Each button is a whole touch target, clear; the visible part is a small glass DISC with a thin mark (.poi-card__mark-disc) */
 .poi-card__close {
     position: absolute;
     top: var(--ts-bar-top);
-    right: var(--ts-space-2);
+    left: var(--ts-chrome-inset);
     width: var(--ts-bar-height);
     height: var(--ts-bar-height);
     margin: 0;
-    font-size: var(--ts-size-body);
-    color: var(--ts-ink);
+    padding: 0;
+    align-items: center;
+    justify-content: center;
     background-color: var(--ts-clear);
-    border-color: var(--ts-line);
     border-width: 0;
     border-radius: var(--ts-touch-target);
+}
+
+.poi-card__close:hover,
+.poi-card__close:active,
+.poi-card__settings:hover,
+.poi-card__settings:active {
+    background-color: var(--ts-clear);
+}
+
+/* after the hero: v5's light glass (smoked in dark), a hairline round it, the mark in the card's ink */
+.poi-card__mark-disc {
+    width: var(--ts-chrome-disc);
+    height: var(--ts-chrome-disc);
+    border-radius: var(--ts-chrome-disc-radius);
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-hair);
+    background-color: var(--ts-chrome-glass);
+    align-items: center;
+    justify-content: center;
+    transition-property: background-color, border-color;
+    transition-duration: var(--ts-duration);
+}
+
+.poi-card__mark {
+    width: var(--ts-chrome-mark);
+    height: var(--ts-chrome-mark);
+    color: var(--ts-ink);
+}
+
+/* over the hero's picture: white marks on a DARK glass disc with v5's light rim -- the disc, not the picture, is what a mark reads
+   against (no backdrop blur in UI Toolkit: a white mark keeps 7:1 over a white sky only on a dark ground, measured on the render) */
+.poi-card--bars-on-hero .poi-card__mark-disc {
+    background-color: var(--ts-chrome-glass-hero);
+    border-color: var(--ts-chrome-line-hero);
+}
+
+.poi-card--bars-on-hero .poi-card__mark {
+    color: var(--ts-on-scrim);
 }
 
 /* The bars over the hero's picture (BlockStackView.BarsOnHeroClass): the marks turn white over a soft dark fade from the sheet's top --
@@ -110,45 +150,27 @@
     background-color: var(--ts-on-scrim);
 }
 
-.poi-card--bars-on-hero .poi-card__settings-glyph {
-    color: var(--ts-on-scrim);
-}
-
 .poi-card--bars-on-hero .poi-card__grabber {
     background-color: var(--ts-on-scrim);
 }
 
-/* The card's settings (P4.4b; a gear since part 2): the same round button as the X, left of it, the gear the size of the X's mark */
+/* The card's settings (P4.4b; the premium target's "sliders" mark): the same disc as the X, at the bar's right */
 .poi-card__settings {
     position: absolute;
     top: var(--ts-bar-top);
-    right: var(--ts-settings-button-right);
+    right: var(--ts-chrome-inset);
     width: var(--ts-bar-height);
     height: var(--ts-bar-height);
     margin: 0;
     padding: 0;
     align-items: center;
     justify-content: center;
-    color: var(--ts-ink);
     background-color: var(--ts-clear);
-    border-color: var(--ts-line);
     border-width: 0;
     border-radius: var(--ts-touch-target);
 }
 
-.poi-card__settings-glyph {
-    width: var(--ts-icon-size);
-    height: var(--ts-icon-size);
-    color: var(--ts-ink);
-}
-
-/* With the button the header's end stays clear of it, so a long title wraps before it, not under it */
-.poi-card--has-settings .poi-card__header {
-    padding-right: var(--ts-header-end-with-settings);
-}
-
-/* The menu button (_3.2 step 8): the same round button as the X, left of it -- or left of the language chip -- with three bars; it is
-   there only while the card has a Menu */
+/* The menu button (_3.2 step 8): a round button with three bars, left of the settings disc; it is there only while the card has a Menu */
 .poi-card__menu-button {
     position: absolute;
     top: var(--ts-bar-top);
@@ -165,16 +187,10 @@
     border-radius: var(--ts-touch-target);
 }
 
-.poi-card--has-settings .poi-card__menu-button {
-    right: var(--ts-menu-button-right-with-settings);
-}
-
+/* the title stays centred: with the Menu's button the bar keeps the same room at both ends */
 .poi-card--has-menu .poi-card__header {
+    padding-left: var(--ts-header-end-with-menu);
     padding-right: var(--ts-header-end-with-menu);
-}
-
-.poi-card--has-menu.poi-card--has-settings .poi-card__header {
-    padding-right: var(--ts-header-end-with-settings-and-menu);
 }
 
 /* ---- the visitor's settings (_3.3 P4.4b, CardVisitorSettingsView): a small panel hanging from the Aa button, in the overlay layer ---- */
@@ -268,8 +284,9 @@
     transition-property: background-color;
     transition-duration: var(--ts-duration);
     flex-direction: row;
+    justify-content: center;
     height: var(--ts-bar-height);
-    padding-left: var(--ts-space-4);
+    padding-left: var(--ts-header-end);
     padding-right: var(--ts-header-end);
 }
 

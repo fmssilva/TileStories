@@ -10,7 +10,8 @@ namespace TileStories
     //     edge could not live inside it. It sits right BEFORE the card's menu layer (CardMenuOverlay) in the card layer: over the sheet,
     //     under an open menu and the full view, by child order alone
     //   - it follows the sheet's top edge on every geometry change of the sheet (each frame of its height transition and of a drag), where
-    //     FloatingSlotRule.Bottom says: a gap above the sheet, never off the screen (at Full it rests in the sheet's top gap)
+    //     FloatingSlotRule.Bottom says: a gap above the sheet, never off the screen (in a camera strip's gap at Full), never over the chrome
+    //     row (at Full to the top: under it)
     //   - it shows over an open card only, and only while it holds something (FloatingSlotRule.Shown)
     //   - while its element holds something open (the dial's column, the radial's arc) a scrim of its own, right UNDER it, dims the card and
     //     the camera view, so the open items read against it and not over the card's own words; a tap on the scrim closes them. (The menu
@@ -104,7 +105,9 @@ namespace TileStories
         {
             float sheet = _sheet.Root.layout.height, layer = _sheet.Layer.layout.height, slot = Root.layout.height;
             if (float.IsNaN(sheet) || float.IsNaN(layer)) return;
-            float bottom = FloatingSlotRule.Bottom(sheet, layer, float.IsNaN(slot) ? 0f : slot, _gap);
+            // - the chrome row's foot in the sheet's frame: the X's button (the row's buttons share its top and height)
+            float chrome = _sheet.CloseButton.layout.yMax;
+            float bottom = FloatingSlotRule.Bottom(sheet, layer, float.IsNaN(slot) ? 0f : slot, _gap, float.IsNaN(chrome) ? 0f : chrome);
             // - only a real move is written: writing the same value would raise another geometry change for nothing
             if (Root.style.bottom.keyword != StyleKeyword.Undefined || Mathf.Abs(Root.style.bottom.value.value - bottom) > 0.01f)
                 Root.style.bottom = bottom;
