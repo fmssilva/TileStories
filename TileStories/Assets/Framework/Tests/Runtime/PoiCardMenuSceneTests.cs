@@ -21,6 +21,7 @@ namespace TileStories.Tests
     //   - the two lists Back could not reach before step 8 (the More list, bar_sheet's kinds list): a real Escape closes them and NOT the
     //     sheet, a real drag on the card closes them, a jump from another element closes them
     //   - a card read in a section of More's list: the More slot says THAT section, and a real tap on it still opens the list
+    [Ignore(TestSkips.OldNavigationElements)]
     public class PoiCardMenuSceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";

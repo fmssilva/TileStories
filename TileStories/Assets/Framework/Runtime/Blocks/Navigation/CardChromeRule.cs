@@ -82,6 +82,9 @@ namespace TileStories
             public bool TopHidesOnScroll;
             // The bottom bar waits for the hero like a floating strip does (the Navigation Bar at the bottom, Show = After The Hero)
             public bool BottomNavAfterHero;
+            // The bottom bar FLOATS over the stack's foot (the Navigation Bar at the bottom, v5): it takes no room from the stack, so the
+            // floor never hides it -- over the hero too, where it lies on the picture
+            public bool BottomNavFloats;
         }
 
         public readonly struct Chrome
@@ -142,7 +145,9 @@ namespace TileStories
             // - not laid out yet: no floor to apply, the next measure decides
             if (float.IsNaN(room)) return new Chrome(top, bottom, nav, footer);
             if (top && !input.TopFloats && room - input.TopHeight - (bottom ? bottomHeight : 0f) < Need(input.ContentHeight, Mathf.Max(MinStackViewport, heroSeen))) top = false;
-            if (bottom && room - bottomHeight < Need(input.ContentHeight, Mathf.Max(MinStackViewportUnderFooter, heroSeen))) bottom = false;
+            // - the floor weighs only what takes room from the stack: a footer, an in-flow bar -- never a bar floating over the stack's foot
+            bool takesRoom = footer || nav && !input.BottomNavFloats;
+            if (bottom && takesRoom && room - bottomHeight < Need(input.ContentHeight, Mathf.Max(MinStackViewportUnderFooter, heroSeen))) bottom = false;
             return new Chrome(top, bottom, nav, footer);
         }
 
@@ -150,12 +155,12 @@ namespace TileStories
         public static float Viewport(Input input, Chrome chrome) =>
             input.SheetHeight - input.HeaderHeight - (chrome.Top ? input.TopHeight : 0f) - (chrome.Bottom ? BottomHeight(input, chrome.Footer, chrome.BottomNav) : 0f);
 
-        // The bottom area's height with or without its bar: the footer (when it holds a block) and the bar under it
+        // The bottom area's height with or without its bar: the footer (when it holds a block) and the bar under it (a floating bar: none)
         public static float BottomHeight(Input input, bool withNav) => BottomHeight(input, true, withNav);
 
         // ... and with or without its footer (the footer waits for the hero, layer 4)
         public static float BottomHeight(Input input, bool withFooter, bool withNav) =>
-            (withFooter && input.HasFooter ? input.FooterHeight : 0f) + (withNav ? input.BottomNavHeight : 0f);
+            (withFooter && input.HasFooter ? input.FooterHeight : 0f) + (withNav && !input.BottomNavFloats ? input.BottomNavHeight : 0f);
 
         // The stop a navigation element (the top strip, the bottom bar) may show at: Full always, Half unless the wall says Full Only,
         // never at peek

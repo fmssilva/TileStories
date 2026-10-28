@@ -1627,57 +1627,30 @@
     color: var(--ts-ink);
 }
 
-/* ---- the Navigation Bar (NavBarView, _3.3 S4a review): ONE configurable bar of the card's groups ----
-   The bar's numbers (side margin, height, corner radius) and its colours (the fill's share, each group's colour) are set inline from
-   card_settings.navigation.bar; everything else is a class here. Its host is clear (PoiCard.uss .poi-card__nav-top--bar): the bar draws
-   itself, and the raised indicator may rise past its top edge. */
+/* ---- the Navigation Bar (NavBarView, _3.3 S4 third round, v5): ONE configurable bar of the card's groups ----
+   The bar itself is PAINTED (the surface: one path with its fill, hairline, shadow and the raised bump; NavBarShapeRule) and its colours
+   come from the theme in C#; its numbers are the card's --ts-navbar-* tokens. Here: the items' row, the words, the icons, the disc, the
+   pill and the underline. Its host is clear (PoiCard.uss .poi-card__nav-top--bar / .poi-card__nav-bottom--bar). */
 .nav-bar {
     overflow: visible;
 }
 
-.nav-bar--bottom {
-    margin-bottom: var(--ts-space-2);
-}
-
-/* a soft shadow under the bar (light only: --ts-elevation-1 is clear in dark mode) */
-.nav-bar__shadow {
-    position: absolute;
-    left: var(--ts-frame-shadow-out);
-    top: var(--ts-frame-shadow-out);
-    right: var(--ts-frame-shadow-out);
-    bottom: var(--ts-frame-shadow-out);
-    background-image: url("../card_block_shadow.png");
-    -unity-background-image-tint-color: var(--ts-elevation-1);
-    -unity-slice-left: var(--ts-frame-shadow-slice);
-    -unity-slice-top: var(--ts-frame-shadow-slice);
-    -unity-slice-right: var(--ts-frame-shadow-slice);
-    -unity-slice-bottom: var(--ts-frame-shadow-slice);
-    display: none;
-}
-
-.nav-bar--shadow > .nav-bar__shadow {
-    display: flex;
-}
-
-/* the fill (its colour inline: the theme's bar colour at the setting's share) and the hairline round it */
-.nav-bar__ground {
+.nav-bar__surface {
     position: absolute;
     left: 0;
     top: 0;
     right: 0;
     bottom: 0;
-    border-width: 0;
-    border-color: var(--ts-glass-edge);
 }
 
-.nav-bar--border > .nav-bar__ground {
-    border-width: var(--ts-line-width);
-}
-
+/* the bar's own band: placed and sized by NavBarView (under the room at the bottom, on top at Top) */
 .nav-bar__row {
+    position: absolute;
+    left: 0;
+    right: 0;
     flex-direction: row;
     align-items: stretch;
-    padding: 0 var(--ts-space-1);
+    padding: 0 var(--ts-navbar-pad);
 }
 
 /* one group: its whole share of the bar is the tap target, never under the touch token */
@@ -1700,65 +1673,90 @@
     background-color: var(--ts-clear);
 }
 
+/* v5: a thin line icon, a heavier one on the chosen group under Bold Chosen Icon (v5's 1.6 / 2.2 SVG strokes, set apart enough that the
+   borders UI Toolkit snaps to whole pixels still differ: 1.4 / 2.6) */
 .nav-bar__icon {
-    transition-property: scale, translate;
-    transition-duration: var(--ts-duration);
-    transition-timing-function: var(--ts-ease);
+    width: var(--ts-navbar-icon);
+    height: var(--ts-navbar-icon);
+    --ts-icon-stroke: 1.4px;
 }
 
-.nav-bar__label {
-    font-size: var(--ts-size-caption);
-    -unity-font-style: normal;
-    color: var(--ts-ink-2);
-    white-space: nowrap;
-    margin: 2px 0 0 0;
-    padding: 0;
-}
-
-/* the chosen group: its words bolder and full ink (with the indicator: never colour alone) */
-.nav-bar__item--chosen .nav-bar__label {
-    -unity-font-style: bold;
-    color: var(--ts-ink);
-}
-
-/* Bold Chosen Icon: the icon's strokes heavier (the icon set reads its stroke from this token) */
 .nav-bar--bold .nav-bar__item--chosen .nav-bar__icon {
     --ts-icon-stroke: 2.6px;
 }
 
-.nav-bar--enlarge .nav-bar__item--chosen .nav-bar__icon {
-    scale: 1.18 1.18;
+/* Bold Chosen Icon wherever the chosen icon is drawn: in the disc too (Raised, Filled) */
+.nav-bar--bold .nav-bar__disc-icon {
+    --ts-icon-stroke: 2.6px;
 }
 
-/* the indicator: a pill behind the chosen group by default, its colour inline (a wash of the chosen colour) */
-.nav-bar__indicator {
+.nav-bar__label {
+    font-size: var(--ts-navbar-label);
+    -unity-font-style: normal;
+    white-space: nowrap;
+    margin: var(--ts-space-1) 0 0 0;
+    padding: 0;
+}
+
+/* words alone: larger, no icon above them */
+.nav-bar--labels-text .nav-bar__label {
+    font-size: var(--ts-navbar-label-text);
+    margin: 0;
+}
+
+/* At Top the bar is the bottom bar mirrored: its bump hangs below it, so each group's icon sits at the bottom (the disc's side) and its
+   words above it -- the hanging disc never covers the chosen group's words */
+.nav-bar--top .nav-bar__item {
+    flex-direction: column-reverse;
+}
+
+.nav-bar--top .nav-bar__label {
+    margin: 0 0 var(--ts-space-1) 0;
+}
+
+/* Clear over the hero: no ground at all, so the white words carry the hero's own dark halo hugging every letter (as the hero's words do)
+   -- they read on any picture, measured on the render (PoiCardNavBarSceneTests) */
+.nav-bar--over-hero.nav-bar--fill-clear .nav-bar__label {
+    text-shadow: 0 1px var(--ts-text-halo-blur) var(--ts-text-halo);
+}
+
+/* the chosen group: its words bolder (with the indicator: never colour alone) */
+.nav-bar__item--chosen .nav-bar__label {
+    -unity-font-style: bold;
+}
+
+/* the disc carrying the chosen icon: Raised's (rising out of the bump) or Filled's (at the icon's place); colours inline */
+.nav-bar__disc {
     position: absolute;
-    top: 6px;
-    bottom: 6px;
-    border-radius: var(--ts-radius-l);
+    align-items: center;
+    justify-content: center;
 }
 
-.nav-bar--slide .nav-bar__indicator {
-    transition-property: left, width;
-    transition-duration: var(--ts-duration);
-    transition-timing-function: var(--ts-ease);
+.nav-bar__disc-icon {
+    width: var(--ts-navbar-disc-icon-filled);
+    height: var(--ts-navbar-disc-icon-filled);
+    --ts-icon-stroke: 2px;
 }
 
-.nav-bar--indicator-underline .nav-bar__indicator {
-    top: auto;
-    bottom: 5px;
-    height: 3px;
-    border-radius: 2px;
+.nav-bar--indicator-raised .nav-bar__disc-icon {
+    width: var(--ts-navbar-disc-icon-raised);
+    height: var(--ts-navbar-disc-icon-raised);
 }
 
-/* Raised: a disc of the bar's own ground rising past its top edge, the chosen icon lifted into it -- the bar bulging under the group */
-.nav-bar--indicator-raised .nav-bar__indicator {
-    top: -16px;
-    bottom: auto;
-    border-width: var(--ts-line-width);
-    border-color: var(--ts-glass-edge);
+/* the pill behind the chosen group (a wash of its colour) and the underline under it */
+.nav-bar__pill {
+    position: absolute;
+    top: var(--ts-space-1);
+    bottom: var(--ts-space-1);
+    border-radius: var(--ts-radius-xl);
 }
 
-.nav-bar--indicator-raised .nav-bar__item--chosen .nav-bar__icon {
-    translate: 0 -14px;
+.nav-bar__underline {
+    position: absolute;
+    /* centred on its left edge (NavBarView sets left to the chosen group's centre) */
+    translate: -50% 0;
+    bottom: var(--ts-space-1);
+    width: var(--ts-navbar-icon);
+    height: var(--ts-tab-underline);
+    border-radius: var(--ts-tab-underline);
 }

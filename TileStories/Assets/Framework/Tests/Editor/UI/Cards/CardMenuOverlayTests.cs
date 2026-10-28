@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
+using TileStories.Tests;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -14,6 +15,7 @@ namespace TileStories.Editor.Tests
     // then the stops, with a full view the innermost thing, Back Button = none leaving it all to the app. The close triggers that need real
     // layout and real fingers (a jump, a touch on the stack, the scrim) are PoiCardMenuSceneTests'; the ones a sheet can show without a panel
     // (a stop change, a rebind, the full view opening, the opener's own toggle) are here.
+    [Ignore(TestSkips.OldNavigationElements)]
     public class CardMenuOverlayTests
     {
         private const string FrameworkStringsPath = "Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset";

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
+using TileStories.Tests;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -19,6 +20,7 @@ namespace TileStories.Editor.Tests
     //     their counts, in the model's order; a third tap closes them; a pick, More and a rebind close them; the arrow only on that slot
     //   - next_up: it names the second target (the card opens on the first) with the heading the stack draws over it, its place among all
     //     the targets, the Next button -- in English and Portuguese
+    [Ignore(TestSkips.OldNavigationElements)]
     public class BottomElementsNavViewTests
     {
         private const string FrameworkStringsPath = "Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset";

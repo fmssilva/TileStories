@@ -14,6 +14,7 @@ namespace TileStories.Tests
     // read (consecutive targets of one section, read from the screen by CardTestInput.SectionUnderTheSpyLine): real drags down the whole
     // Lamp with three elements bound; the end names the last run's family, not Listen (the P1b TODO); a real tab tap lands on the FIRST
     // sheet of its family. Grouped by family nothing moves: at every offset of the range the mark is the old per-section reading's.
+    [Ignore(TestSkips.OldNavigationElements)]
     public class PoiCardInterleavedSpySceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";

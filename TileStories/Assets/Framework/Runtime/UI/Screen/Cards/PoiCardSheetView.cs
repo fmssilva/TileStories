@@ -18,6 +18,10 @@ namespace TileStories
         public VisualElement Handle { get; }
         // The soft fade behind the bars while they float over the hero's picture
         public VisualElement TopShade { get; }
+        // The band behind the chrome row once the hero is read, as the card's Top Band says (v6: Fade -- the sheet's colour fading out, no
+        // edge -- or Glass -- a dense band with a hairline at its foot); gone over the hero's picture
+        public VisualElement ChromeBand { get; }
+        public const string ChromeBandGlassClass = "poi-card__chrome-band--glass";
         public Button CloseButton { get; }
         // The X drawn on it (CardIcons.Shape.Close, in its glass disc, coloured by USS)
         public CardIcons.VectorGlyph CloseGlyph { get; }
@@ -91,12 +95,18 @@ namespace TileStories
 
         private static readonly CustomStyleProperty<float> TopGapProperty = new("--ts-sheet-top-gap");
         private static readonly CustomStyleProperty<float> HeroMinProperty = new("--ts-hero-min-height");
+        private static readonly CustomStyleProperty<float> BarClearProperty = new("--ts-navbar-clear");
+        private static readonly CustomStyleProperty<float> BarHeroMarginProperty = new("--ts-navbar-hero-margin");
         private readonly BlockRegistry _registry;
         // The shown card's stack entries: what its navigation model is rebuilt from when a waiting block is revealed
         private IReadOnlyList<BlockStackBuilder.Entry> _entries;
         private float _topGap;
         // --ts-hero-min-height: the hero is never shorter than this, whatever the stops (HeroRule.Height)
         private float _heroMin;
+        // --ts-navbar-clear: what a Navigation Bar floating at the bottom from the start takes off the hero's foot (its words rise above it);
+        // --ts-navbar-hero-margin: how far the hero must reach past the bar for the bar to lie on the picture (NavBarRule.OverHero)
+        private float _barClear;
+        private float _barHeroMargin;
         private float _halfMaxRatio = CardContainerSettings.HalfMaxRatioMax;
         // The shown card's Full Height (CardOptions.FullHeights): whether the Full stop leaves the camera strip (_topGap) above it
         private string _fullHeight = CardOptions.FullHeightTop;
@@ -131,6 +141,10 @@ namespace TileStories
             TopShade = new VisualElement { name = "poi-card-top-shade", pickingMode = PickingMode.Ignore };
             TopShade.AddToClassList("poi-card__top-shade");
             Root.Add(TopShade);
+            // - after the hero the chrome row sits on ONE dense glass band (no block text through it); over the picture it is clear
+            ChromeBand = new VisualElement { name = "poi-card-chrome-band", pickingMode = PickingMode.Ignore };
+            ChromeBand.AddToClassList("poi-card__chrome-band");
+            Root.Add(ChromeBand);
 
             _registry = registry;
             Stack = new BlockStackView(Root, Root, registry);
@@ -180,7 +194,7 @@ namespace TileStories
             // - the chrome FLOATS over the stack (_3.3 S4a review): the shade, the grab row, the bar and the top strip are out of the flow
             //   (PoiCard.uss) and drawn over the scroll, the round buttons over them -- so the stack starts at the sheet's top, the hero's
             //   picture runs up behind the bars and nothing jumps when the strip comes
-            foreach (var floating in new[] { TopShade, Handle, Stack.HeaderSlot, Slots.Top, CloseButton, SettingsButton, MenuButton })
+            foreach (var floating in new[] { TopShade, ChromeBand, Handle, Stack.HeaderSlot, Slots.Top, CloseButton, SettingsButton, MenuButton })
                 floating.BringToFront();
 
             Layer.Add(Root);
@@ -197,6 +211,8 @@ namespace TileStories
             Layer.RegisterCallback<GeometryChangedEvent>(_ => RecomputeStops());
             Stack.HeaderSlot.RegisterCallback<GeometryChangedEvent>(_ => RecomputeStops());
             Slots.Top.RegisterCallback<GeometryChangedEvent>(_ => RecomputeStops());
+            // - the Navigation Bar turns white on dark glass while it lies on the hero's picture: asked again on every scroll
+            Stack.Scroll.verticalScroller.valueChanged += _ => UpdateBarOverHero();
             Hide();
         }
 
@@ -206,6 +222,7 @@ namespace TileStories
         {
             _halfMaxRatio = halfMaxRatio;
             _fullHeight = context.Settings?.container?.full_height ?? CardOptions.FullHeightTop;
+            ChromeBand.EnableInClassList(ChromeBandGlassClass, context.Settings?.container?.top_band == CardOptions.TopBandGlass);
             CloseButton.tooltip = context.Strings?.Get(CardStrings.Keys.Close) ?? "";
             ShowSettingsButton(context);
             context.Host ??= this;
@@ -256,6 +273,18 @@ namespace TileStories
             Floating.Refresh();
             ShowMenuButton();
             Chrome.Bind(_context.Settings?.navigation, _context.ReduceMotion);
+            UpdateBarOverHero();
+        }
+
+        // Tell the Navigation Bar whether it lies on the hero's picture now (NavBarRule.OverHero, both in the panel's frame)
+        private void UpdateBarOverHero()
+        {
+            var bar = Slots.Bar;
+            if (Slots.TopKey != NavBarView.ElementKey && Slots.BottomKey != NavBarView.ElementKey) return;
+            var header = Stack.HeaderView;
+            float heroBottom = header != null && header.HasPicture && header.HeroPart.panel != null ? header.HeroPart.worldBound.yMax : float.NaN;
+            var band = bar.Row.worldBound;
+            bar.SetOverHero(!float.IsNaN(band.yMin) && NavBarRule.OverHero(NavBarRule.AtBottom(bar.Settings), band.yMin, band.yMax, heroBottom, _barHeroMargin));
         }
 
         // A chrome mark on `button`: the glass disc centred in the touch target, the vector mark centred in the disc (PoiCard.uss sizes
@@ -437,6 +466,7 @@ namespace TileStories
             Stack.UpdateBarTitle();
             Chrome?.Apply();
             Floating?.Refresh();
+            UpdateBarOverHero();
             StopChanged?.Invoke(stop);
         }
 
@@ -457,10 +487,13 @@ namespace TileStories
             float stackTop = float.IsNaN(Stack.Scroll.layout.yMin) ? 0f : Stack.Scroll.layout.yMin;
             Stack.SetInsets(peek, Slots.TopView != null && !float.IsNaN(Slots.Top.layout.yMax) ? Slots.Top.layout.yMax - stackTop : peek);
             float hero = HeroRule.Height(Stops, _heroMin);
-            Stack.HeaderView?.SetHeroLayout(hero, HeroRule.WordsBottom(hero), Stack.TopInset);
+            // - the words at the foot of what the visitor SEES at this stop (v6), above a Navigation Bar floating at the bottom from the start
+            float barClear = NavBarRule.ClearsHeroFoot(_context?.Settings?.navigation) ? _barClear : 0f;
+            Stack.HeaderView?.SetHeroLayout(hero, HeroRule.WordsBottom(hero, HeroRule.VisibleAt(Stops, Stop), barClear), Stack.TopInset);
             if (IsOpen && !Drag.IsDragging) ApplyHeight(Stops.HeightOf(Stop));
             // - the chrome's room is the stop's height: new stops can give it room, or take it
             Chrome?.Apply();
+            UpdateBarOverHero();
         }
 
         // Set the sheet's height (a rest stop, or the finger's height during a drag -- SheetDrag)
@@ -480,6 +513,12 @@ namespace TileStories
             }
             // - a jump glides as long as the sheet takes to rise: both are --ts-duration (never read mid-drag, where the drag class zeroes it)
             if (!Drag.IsDragging) Nav.Duration = HeightTransitionSeconds();
+            if (evt.customStyle.TryGetValue(BarHeroMarginProperty, out float margin)) _barHeroMargin = margin;
+            if (evt.customStyle.TryGetValue(BarClearProperty, out float clear) && !Mathf.Approximately(clear, _barClear))
+            {
+                _barClear = clear;
+                RecomputeStops();
+            }
             if (evt.customStyle.TryGetValue(TopGapProperty, out float gap) && !Mathf.Approximately(gap, _topGap))
             {
                 _topGap = gap;

@@ -1,12 +1,11 @@
 // POIEditorToolWindow.CardNavigationBar.cs
 //
-// Partial: Detail Card > Navigation > Navigation Bar (_3.3 S4a review) -- the FIRST component of the Navigation section: ONE configurable bar
-// of the card's groups (card_settings.navigation.bar, NavBarView). Its Enabled row, then four sub-components, each under a sub-heading:
-//   - Bar Look: Shape, Corner Radius, Side Margin, Height, Fill, Fill Opacity, Border, Shadow
-//   - Chosen Group: Indicator, Slide Indicator, Bold Chosen Icon, Enlarge Chosen Icon, Chosen Colour, Other Groups' Colour, Labels
-//   - Where And When: Position, Show, Hide While Scrolling
-//   - Bar Groups: one folding row per group (Shown, its name, ^ / v, delete), opened: its Name per language, Icon, Chosen Icon, Colour and
-//     Families; "+ Add group", "Reset To The Families", and the warnings (a family in no group, too many groups for a phone)
+// Partial: Detail Card > Navigation > Navigation Bar (_3.3 S4 third round, v5) -- the FIRST component of the Navigation section: ONE
+// configurable bar of the card's groups (card_settings.navigation.bar, NavBarView). Its rows mirror v5's Tweaks "Navigation Bar" -- same names,
+// same order, same defaults (NavigationBarRows): Enabled, Position, Shape, Fill, Indicator, Chosen Icon, Labels, Chosen Colour, Bold Chosen
+// Icon, Show, Hide While Scrolling -- then the Bar Groups table: one folding row per group (Shown, its number and name, ^ / v, delete),
+// opened: its Name per language, Icon, Chosen Icon, Colour and Families; "+ Add group", "Reset To The Families", and the warnings (a family
+// in no group, too many groups for a phone)
 // While the bar is on, the section's Elements rows are hidden (the card draws the bar instead; their values are kept). Drawing never writes:
 // a wall with no Bar Groups rows sees one group per family, and its first edit of the table writes them all (MaterializeBarItems).
 // The (i) texts live in POIEditorToolWindow.CardNavigationBarHelp.cs.
@@ -19,7 +18,13 @@ namespace TileStories.Editor
 {
     public partial class POIEditorToolWindow
     {
-        internal static readonly string[] NavigationBarSubTitles = { "Bar Look", "Chosen Group", "Where And When", "Bar Groups" };
+        // The component's rows, in v5's order (the Tweaks "Navigation Bar"): what the tests read the window against
+        internal static readonly string[] NavigationBarRows =
+        {
+            "Enabled", "Position", "Shape", "Fill", "Indicator", "Chosen Icon", "Labels", "Chosen Colour", "Bold Chosen Icon", "Show",
+            "Hide While Scrolling",
+        };
+        internal const string NavigationBarGroupsTitle = "Bar Groups";
         // The groups the developer unfolded in the Bar Groups table (by key; a session's view state, never saved)
         private readonly HashSet<string> _openBarGroups = new HashSet<string>();
         // Wider than this many groups, a phone gives each one under 60 points (390 / 7): the words of a group crowd
@@ -36,52 +41,42 @@ namespace TileStories.Editor
             bar.enabled = DrawToggleField("Enabled", bar.enabled, CardNavBarEnabledHelp);
             if (!bar.enabled) return;
 
-            DrawNavigationBarSubHeading(0);
-            bar.shape = DrawPopupField("Shape", bar.shape, CardOptions.NavBarShapes, CardOptions.NavBarShapeLabels, CardNavBarShapeHelp);
-            // - a full-width bar has no corners and no margin: the two rows would change nothing
-            if (NavBarRule.Shape(bar) == CardOptions.NavBarFloating)
+            // - v5's rows, in its order, each SHOWING what the card draws (NavBarRule: an old "under_title" shows as Top) and writing only a
+            //   real pick, so drawing an old config never rewrites it
+            void Popup(string label, string shown, string[] keys, string[] names, string help, System.Action<string> set)
             {
-                bar.corner_radius = DrawSliderField("Corner Radius", bar.corner_radius, 0f, CardNavBarSettings.CornerRadiusMax, CardNavBarCornerRadiusHelp);
-                bar.side_margin = DrawSliderField("Side Margin", bar.side_margin, 0f, CardNavBarSettings.SideMarginMax, CardNavBarSideMarginHelp);
+                string picked = DrawPopupField(label, shown, keys, names, help);
+                if (picked != shown) set(picked);
             }
-            bar.height = DrawSliderField("Height", bar.height, CardNavBarSettings.HeightMin, CardNavBarSettings.HeightMax, CardNavBarHeightHelp);
-            bar.fill = DrawPopupField("Fill", bar.fill, CardOptions.NavBarFills, CardOptions.NavBarFillLabels, CardNavBarFillHelp);
-            if (NavBarRule.Fill(bar) != CardOptions.NavBarClear)
-            {
-                bar.fill_opacity = DrawSliderField("Fill Opacity", bar.fill_opacity, CardNavBarSettings.FillOpacityMin, 1f, CardNavBarFillOpacityHelp);
-                bar.border = DrawToggleField("Border", bar.border, CardNavBarBorderHelp);
-                bar.shadow = DrawToggleField("Shadow", bar.shadow, CardNavBarShadowHelp);
-            }
-
-            DrawNavigationBarSubHeading(1);
-            bar.indicator = DrawPopupField("Indicator", bar.indicator, CardOptions.NavBarIndicators, CardOptions.NavBarIndicatorLabels, CardNavBarIndicatorHelp);
-            if (NavBarRule.Indicator(bar) != CardOptions.NavBarIndicatorNone)
-                bar.slide_indicator = DrawToggleField("Slide Indicator", bar.slide_indicator, CardNavBarSlideHelp);
+            Popup("Position", NavBarRule.Position(bar), CardOptions.NavBarPositions, CardOptions.NavBarPositionLabels, CardNavBarPositionHelp,
+                v => bar.position = v);
+            Popup("Shape", NavBarRule.Shape(bar), CardOptions.NavBarShapes, CardOptions.NavBarShapeLabels, CardNavBarShapeHelp, v => bar.shape = v);
+            Popup("Fill", NavBarRule.Fill(bar), CardOptions.NavBarFills, CardOptions.NavBarFillLabels, CardNavBarFillHelp, v => bar.fill = v);
+            Popup("Indicator", NavBarRule.Indicator(bar), CardOptions.NavBarIndicators, CardOptions.NavBarIndicatorLabels, CardNavBarIndicatorHelp,
+                v => bar.indicator = v);
+            Popup("Chosen Icon", NavBarRule.ChosenIcon(bar), CardOptions.NavBarChosenIcons, CardOptions.NavBarChosenIconLabels,
+                CardNavBarChosenIconHelp, v => bar.chosen_icon = v);
+            Popup("Labels", NavBarRule.Labels(bar), CardOptions.NavBarLabels, CardOptions.NavBarLabelLabels, CardNavBarLabelsHelp, v => bar.labels = v);
+            Popup("Chosen Colour", NavBarRule.SelectedColour(bar), CardOptions.NavBarSelectedColours, CardOptions.NavBarSelectedColourLabels,
+                CardNavBarChosenColourHelp, v => bar.selected_color = v);
             bar.bold_selected = DrawToggleField("Bold Chosen Icon", bar.bold_selected, CardNavBarBoldHelp);
-            bar.enlarge_selected = DrawToggleField("Enlarge Chosen Icon", bar.enlarge_selected, CardNavBarEnlargeHelp);
-            bar.selected_color = DrawPopupField("Chosen Colour", bar.selected_color, CardOptions.NavBarSelectedColours, CardOptions.NavBarSelectedColourLabels,
-                CardNavBarChosenColourHelp);
-            bar.idle_color = DrawPopupField("Other Groups' Colour", bar.idle_color, CardOptions.NavBarIdleColours, CardOptions.NavBarIdleColourLabels,
-                CardNavBarIdleColourHelp);
-            bar.labels = DrawPopupField("Labels", bar.labels, CardOptions.NavBarLabels, CardOptions.NavBarLabelLabels, CardNavBarLabelsHelp);
+            Popup("Show", NavBarRule.Show(bar), CardOptions.NavBarShows, CardOptions.NavBarShowLabels, CardNavBarShowHelp, v => bar.show = v);
+            bool hides = NavBarRule.HidesWhileScrolling(bar);
+            if (DrawToggleField("Hide While Scrolling", hides, CardNavBarHideHelp) != hides)
+                bar.hide_on_scroll = hides ? CardOptions.NavBarHideNever : CardOptions.NavBarHideDown;
 
-            DrawNavigationBarSubHeading(2);
-            bar.position = DrawPopupField("Position", bar.position, CardOptions.NavBarPositions, CardOptions.NavBarPositionLabels, CardNavBarPositionHelp);
-            bar.show = DrawPopupField("Show", bar.show, CardOptions.NavBarShows, CardOptions.NavBarShowLabels, CardNavBarShowHelp);
-            bar.hide_on_scroll = DrawPopupField("Hide While Scrolling", bar.hide_on_scroll, CardOptions.NavBarHides, CardOptions.NavBarHideLabels,
-                CardNavBarHideHelp);
-
-            DrawNavigationBarSubHeading(3);
+            DrawNavigationBarSubHeading();
             DrawBarGroupsTable(nav);
         }
 
-        private void DrawNavigationBarSubHeading(int index)
+        // The Bar Groups table's sub-heading
+        private void DrawNavigationBarSubHeading()
         {
             GUILayout.Space(TableGapBetweenGroups);
             DrawEditorRow(out float rowWidth, out _, IndentLevel1);
-            GUILayout.Label(NavigationBarSubTitles[index], EditorStyles.miniBoldLabel, GUILayout.Width(Mathf.Max(40f, rowWidth - 36f)), GUILayout.ExpandWidth(false));
+            GUILayout.Label(NavigationBarGroupsTitle, EditorStyles.miniBoldLabel, GUILayout.Width(Mathf.Max(40f, rowWidth - 36f)), GUILayout.ExpandWidth(false));
             if (NavigationGroupProbe != null && Event.current.type == EventType.Repaint)
-                NavigationGroupProbe(NavigationBarSubTitles[index], GUILayoutUtility.GetLastRect());
+                NavigationGroupProbe(NavigationBarGroupsTitle, GUILayoutUtility.GetLastRect());
             EditorRowEnd();
         }
 

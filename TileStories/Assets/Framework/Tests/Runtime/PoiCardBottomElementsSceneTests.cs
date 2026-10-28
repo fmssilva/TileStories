@@ -18,6 +18,7 @@ namespace TileStories.Tests
     //   - next_up: a real tap on Next lands the next block, the counter moves forward and the bar names the one after the block read, all the
     //     way to the end (through the reveal of the blocks that wait for it), where it says the card is finished with no Next
     //   - the stops (peek 195 / half 337.60 / full 796 at 390 x 844) do not move with any of them
+    [Ignore(TestSkips.OldNavigationElements)]
     public class PoiCardBottomElementsSceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";

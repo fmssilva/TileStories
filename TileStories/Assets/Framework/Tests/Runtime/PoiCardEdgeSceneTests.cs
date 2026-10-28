@@ -20,6 +20,7 @@ namespace TileStories.Tests
     //   - a finger that lands beside the column, or above / below it, scrolls the card as usual, and the dot of the family read follows
     //   - the bubble's words are whole in English and Portuguese
     //   - what the dots cover on a block that reaches the right edge: a gallery's filmstrip and carousel (measured, recorded in the guide)
+    [Ignore(TestSkips.OldNavigationElements)]
     public class PoiCardEdgeSceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";

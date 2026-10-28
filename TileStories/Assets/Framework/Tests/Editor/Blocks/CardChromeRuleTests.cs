@@ -50,6 +50,29 @@ namespace TileStories.Editor.Tests
             return state;
         }
 
+        // ---------------- the Navigation Bar floating at the bottom (v5) ----------------
+
+        [Test]
+        public void AFloatingBottomBar_ShowsOverTheWholeHero_ItTakesNoRoom_WhileAnInFlowBarWaitsForTheHero()
+        {
+            // - at rest on the hero: the whole view is hero (it ends far below the view)
+            var input = LampWithBar(SheetStopRule.Stop.Full);
+            input.HasTop = false;
+            input.HeroBottom = 2000f;
+            input.ScrollOffset = 0f;
+            var inFlow = CardChromeRule.Decide(input);
+            Assert.IsFalse(inFlow.Bottom, "an in-flow bar would take room from the hero: the floor keeps it away");
+            input.BottomNavFloats = true;
+            var floating = CardChromeRule.Decide(input);
+            Assert.IsTrue(floating.Bottom, "a floating bar takes no room: it lies on the hero from the start");
+            Assert.IsTrue(floating.BottomNav);
+            Assert.IsFalse(floating.Footer, "the hero still holds the actions: the sticky footer waits");
+            Assert.AreEqual(CardChromeRule.BottomHeight(input, true, false), CardChromeRule.BottomHeight(input, true, true),
+                "the floating bar adds nothing to the bottom area's height");
+            input.BottomNavAfterHero = true;
+            Assert.IsFalse(CardChromeRule.Decide(input).BottomNav, "Show After The Hero: it still waits for the hero");
+        }
+
         // ---------------- the stop and Show Navigation At ----------------
 
         [Test]

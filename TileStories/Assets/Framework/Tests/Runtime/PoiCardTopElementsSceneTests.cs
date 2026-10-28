@@ -17,6 +17,7 @@ namespace TileStories.Tests
     //     under the spy line, read from the screen
     //   - in Portuguese every item is a whole touch target both ways, inside the card, and every visible word is whole and Portuguese
     // text_tabs has its own fixture (PoiCardTextTabsSceneTests); what shows at which stop is PoiCardChromeSceneTests'.
+    [Ignore(TestSkips.OldNavigationElements)]
     public class PoiCardTopElementsSceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";

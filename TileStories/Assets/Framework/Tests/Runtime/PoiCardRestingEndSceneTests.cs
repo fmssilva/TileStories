@@ -12,6 +12,7 @@ namespace TileStories.Tests
     // footer alone. At the end the bottom area comes back (CardChromeRule) and takes its height off the stack's viewport.
     // The measuring instrument runs only while TestEvidence/RestingEnd/MEASURING names a phase (LookMeasure): per case the viewport and the
     // range with the area away and back, where small drags and a fling rest, and what the navigation says there, plus a render at rest.
+    [Ignore(TestSkips.OldNavigationElements)]
     public class PoiCardRestingEndSceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";

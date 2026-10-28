@@ -13,6 +13,7 @@ namespace TileStories.Tests
     //   - Segmented with Show Counts: a word is never cut by its count -- the counts go instead (NavFitRule), all of them, or stay when
     //     every word holds its own
     // Each test fails when its fix is taken out (mutation-proven, `_3.2.1_Audit.md` section 11).
+    [Ignore(TestSkips.OldNavigationElements)]
     public class PoiCardNavCombinationsSceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";

@@ -45,9 +45,8 @@
     right: 0;
     top: 0;
     height: var(--ts-handle-height);
-    background-color: var(--ts-bar-glass);
-    transition-property: background-color;
-    transition-duration: var(--ts-duration);
+    /* clear: the chrome band under it carries the ground (after the hero), the picture shows through it over the hero */
+    background-color: var(--ts-clear);
     align-items: center;
     justify-content: flex-start;
     padding-top: var(--ts-space-1);
@@ -137,11 +136,38 @@
     opacity: 1;
 }
 
-/* Clear only over the picture: anywhere else (Peek over the camera, a plate header, the blocks scrolling under) the grab row and the bar
-   keep their see-through bar ground (their own rules), so their marks always read -- the iOS bar's material once content scrolls under */
-.poi-card--bars-on-hero .poi-card__handle,
-.poi-card--bars-on-hero .poi-card__header {
-    background-color: var(--ts-clear);
+/* The chrome band (_3.3 S4 third round, v6): what the whole chrome row -- the grab row, the X, the title, settings -- sits on wherever the
+   bars are not on the hero's picture (Peek over the camera, a plate header, the blocks scrolling under); the card's Top Band picks it
+   (PoiCardSheetView). FADE, the default: the sheet's own colour, solid through the row, then fading to nothing (card_top_fade.png's alpha
+   ramp, tinted --ts-top-fade) -- the content dissolves under it, no edge, no blur. No block text reads behind the marks and the title,
+   which keep 7:1 (PoiCardChromeMarksSceneTests). Gone over the picture */
+.poi-card__chrome-band {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: var(--ts-top-fade-height);
+    background-image: url("card_top_fade.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-background-image-tint-color: var(--ts-top-fade);
+    border-top-left-radius: var(--ts-radius-l);
+    border-top-right-radius: var(--ts-radius-l);
+    opacity: 1;
+    transition-property: opacity;
+    transition-duration: var(--ts-duration);
+}
+
+/* GLASS (Top Band = Glass): a dense glass band as tall as the row, a hairline at its foot */
+.poi-card__chrome-band--glass {
+    height: var(--ts-chrome-band-height);
+    background-image: none;
+    background-color: var(--ts-chrome-band);
+    border-bottom-width: var(--ts-line-width);
+    border-color: var(--ts-hair);
+}
+
+.poi-card--bars-on-hero .poi-card__chrome-band {
+    opacity: 0;
 }
 
 .poi-card--bars-on-hero .poi-card__close-bar,
@@ -274,15 +300,14 @@
 
 /* The pinned header slot (never scrolls): the BAR -- one row as tall as the round buttons and lined up with them, so the peek stop ends
    where the buttons do and nothing it holds can move a stop (_3.3 P4.4a). FLOATING and slim since S4a's review: clear over the hero's
-   picture (BarsOnHeroClass), the see-through bar ground anywhere else; its title on a pill once it shows */
+   picture (BarsOnHeroClass), on the chrome band anywhere else; its title bare on the band once it shows (v5) */
 .poi-card__header {
     position: absolute;
     left: 0;
     right: 0;
     top: var(--ts-bar-top);
-    background-color: var(--ts-bar-glass);
-    transition-property: background-color;
-    transition-duration: var(--ts-duration);
+    /* clear: the chrome band behind the row is its ground */
+    background-color: var(--ts-clear);
     flex-direction: row;
     justify-content: center;
     height: var(--ts-bar-height);
@@ -498,9 +523,20 @@
     overflow: visible;
 }
 
-.poi-card__nav-bottom--bar {
+/* The Navigation Bar at the bottom (v5): FLOATING over the stack's foot, right above the sticky footer (or the sheet's foot without one) --
+   out of the flow, so the stack runs under it and over the hero it lies on the picture; the stack keeps its end clear of it */
+/* (two classes: it must win over .poi-card__nav-bottom's opaque ground, declared further down) */
+.poi-card__nav-bottom.poi-card__nav-bottom--bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 100%;
     background-color: var(--ts-clear);
     border-top-width: 0;
+}
+
+.poi-card--bar-bottom .poi-card__stack .unity-scroll-view__content-container {
+    padding-bottom: var(--ts-navbar-clearance);
 }
 
 .poi-card__nav-top--hidden {

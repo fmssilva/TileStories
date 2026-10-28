@@ -1,46 +1,41 @@
-# Plan tracker -- Premium P1: the top of the card (hero contrast, the v5 chrome, F1 / F2 / F3 / F5)
+# Plan tracker -- Premium P2: the Navigation Bar to v5, and the card's top after the hero
 
-Brief: `__AI_worker.md` (Premium P1). Spec: `_3.3` "S4 review, third round" (Look, Chrome), R11; `_3.3.1_Prototype/Premium_v5.dc.html`;
-`_Test_Suite_1.md` section 2. Baseline: HEAD a11c3ad green (CORE 0 failed; FULL PM 1339 / 0 / 67 skipped; EM 2298 / 0). Do not commit.
+Brief: `__AI_worker.md` (Premium P2). Spec: `_3.3` "S4 review, third round" (Navigation Bar, Chrome, Section separation), R11;
+`_3.3.1_Prototype/Premium_v5.dc.html` (nav markup, CSS, renderVals). Baseline: HEAD de82b7a (P1 a3a54d6 + rules). Do not commit.
+TEST PLAN: BLOCK only -- full EditMode + NavBarRuleTests, NavigationBarEditorTabTests, PoiCardNavBarSceneTests,
+PoiCardChromeMarksSceneTests, PoiCardHeroSceneTests + new fixtures. No CORE, no FULL.
 
 ## GATE
 - [x] branch 0 ahead of origin (nothing to push); SDF fonts unmodified; IPCE/ left alone
-- [x] compile clean (Editor.log: 0 error CS, Tundra success, ExitCode 0)
-- [x] Unity's place asked (40-testing 4.2.3 c) before the first PlayMode run
+- [x] compile clean before any run (Editor.log: 0 error CS, Tundra success, ExitCode 0)
+- [x] Unity's place asked (4.2.3 c, "Pronto")
 
-## Decisions (autonomous)
-- v5 layout: X left, title centred, settings right (Menu button left of settings); stops unchanged (--ts-bar-top / --ts-bar-height);
-  a 44 pt touch target holds the 36 pt disc
-- over the hero the disc is DARK glass (white marks >= 7:1 over a white sky needs a dark ground in linear blending; no blur in UITK);
-  after the hero v5's light glass + hairline, ink marks
-- the words shade = hero_scrim.png ramp + the --ts-scrim-hero floor (0.94, measured vs pure white), in the hero's foot; hero_glow.png
-  removed; top shade 150 px (v5)
-- marks = VectorGlyph Shape.Close / Shape.Sliders, stroke 1.5 on a 16 mark
-- "bare marks": no existing chrome setting fits -> noted for P2's Look component
-- the bar title keeps its pill (no blur), centred
+## Decisions
+- (developer) the OLD navigation elements (top / bottom / menu / floating / edge elements, presets) are rebuilt later like the bar:
+  their fixtures are switched off with ONE shared [Ignore] reason (skipped, not deleted); only the good elements are tested now
+- extra S4a knobs removed (corner_radius, side_margin, height, fill_opacity, border, shadow, slide_indicator, enlarge_selected,
+  idle_color): the Editor mirrors v5 exactly; JsonUtility ignores the old keys, so old configs load
+- NavBarRule.Pick takes an explicit default (Chosen Icon lists Plain / Filled, default Filled)
+- 6 default groups: About, Stories, Media (+ AR), Listen, Play (+ Community), Visit
+- over the hero a non-solid bar reuses P1's --ts-chrome-glass-hero / --ts-chrome-line-hero (white on dark glass)
+- the raised bump = one Painter2D path in generateVisualContent, animated by its x (ease-out-back); Reduce Motion = jump
+- "no block text behind the band": ink seen through the band vs surface seen through it < 1.25:1
 
 ## Steps
-1. [x] Diagnose F3 + F5 with runs (un-ignored, red expected): confirm root causes
-2. [x] PART 1 hero shades: HeaderBlockView Shade (ramp + floor), Media.uss, CardTokens (fade / reach), top shade 150; delete
-       hero_glow.png; un-ignore the 16 hero-word tests; the glow test -> the shades test; CardVideoGalleryTests Glow -> Shade
-3. [x] PART 2 chrome: CardIcons Close + Sliders; PoiCardSheetView marks (button > disc > glyph); PoiCard.uss (v5 layout, glass on /
-       after the hero); theme tokens --ts-chrome-glass, --ts-chrome-glass-hero, --ts-chrome-line-hero (both modes) + regenerate USS;
-       About.uss title centred; tests: CardSettingsGallery F2 (un-ignored, 7:1 on the composite over black AND white), the X tests
-       (CardGalleryTests, PoiCardSceneTests), Menu / title-end positions, the marks' 7:1 on the REAL render at every stop x mode x
-       darkest / lightest hero (ring helper shared with the hero words test)
-4. [x] F5: dial pill background under :hover / :active; the dial's words asserted at 7:1; Assert.Ignore removed
-5. [x] PART 3 F1: FloatingSlotRule.Bottom(+ chromeBottom): under the chrome row when it cannot rest above the sheet; FloatingSlot passes
-       the X's foot; EditMode rule tests (sweep: never over the chrome row); PlayMode: panel.Pick at X / settings centres = that mark at
-       Peek / Half / Full with a model placed; un-ignore the two F1 tests; Full-flush assertions re-based
-6. [x] PART 4 F3: fix at the source; un-ignore
-7. [x] Renders: real Game view, light + dark, Peek / Half / Full, darkest + lightest hero, chip at Full, after the hero ->
-       TestEvidence/Premium/P1/; looked at, item by item
-8. [x] BLOCK (narrowed by the developer: full EditMode 2301 / 0 failed; PlayMode hero + chrome marks + Navigation Bar + story 115 / 0 failed; the stopped wider run: 455 / 749 with 0 failed): full EditMode + named fixtures (PoiCardHeroSceneTests, CardSettingsGalleryTests, CardNavGalleryTests, CardLightSceneTests,
-       PoiCardPlaceInArSceneTests, PoiCardFloatingSceneTests, CardGalleryTests, CardVideoGalleryTests, PoiCardSceneTests,
-       PoiCardMenuSceneTests, PoiCardChromeSceneTests, PoiCardThemeSceneTests, PoiCardNavBarSceneTests, ThemePipelineTests)
-9. [x] docs (CORE not run: the developer narrowed the runs) -- docs: _3.3 build log, _Test_Suite_1 skips table, 10-structure lines, report 6.4
-
-## Contrast table (before -> after)
-- hero words: 1.3-1.5:1 (title / line), eyebrow 1.67-1.93 -> 8.29-19.65:1 (worst: the painting's eyebrow)
-- settings mark on the bar (F2): 6.6:1 -> >= 7:1 on its glass over black and white; 8.48-15.30:1 on the render at every stop
-- dial pill words (F5): 1.11:1 -> >= 7:1 (the pill keeps --ts-surface)
+1. [x] Data + rule: CardNavBarSettings in v5 order + defaults, CardOptions lists / labels, NavBarRule readers (Pick with default,
+       under_title -> top), 6 default groups, CardNavigationSettings.top = none; both LivingRoom configs
+2. [x] NavBarShapeRule (pure path + overshoot) + EditMode tests; NavBarRuleTests updated (defaults, old JSON loads, 6 groups)
+3. [x] Old-element fixtures: shared skip reason, [Ignore] on each; full EditMode green
+4. [x] NavBarView rebuilt (surface path, disc, pill / underline, chosen icon, labels, colours, over-the-hero, bold); NavSlots /
+       USS; hero words lift over a bottom Always bar
+5. [x] PART 4 chrome band (PoiCardSheetView, PoiCard.uss, theme token --ts-chrome-band both modes + regenerate), title pill gone
+6. [x] Editor component flat in v5 order + Bar Groups table; help texts; NavigationBarEditorTabTests (+ live sync)
+7. [x] PlayMode: PoiCardNavBarSceneTests rewritten, PoiCardChromeMarksSceneTests band test; renders -> TestEvidence/Premium/P2/;
+       Editor captures (dark skin); look at each
+   EditMode (full, Unity behind): 2313 / 2246 passed / 0 failed / 67 skipped (66 TestSkips.OldNavigationElements + the recorder's own)
+8. [x] BLOCK runs: full EditMode 2315 / 2248 / 0 failed / 67 skipped; PlayMode NavBar 34/34, NavBar+ChromeMarks+Hero 88 (87 + the one fixed by --ts-navbar-glass 0.98, then NavBar 34/34)
+8b. [x] ADDENDUM (developer, 2026-10-28; v6 Main.dc.html): PART 4 replaced -- Top Band Fade (default; sheet colour, ramp 0.99 -> 0 over
+       104 pt, no hairline) / Glass (the built band) in card_settings.container.top_band + Card Container row; PART 5 -- the hero's words at
+       the foot of the VISIBLE sheet (Half and Full), above a bottom bar; tests: band per value, words inside the visible sheet + 7:1
+   Done before the addendum: Editor capture TestEvidence/Premium/P2/editor_navbar_1.png (dark skin; Families popup ~15 pt out of line)
+9. [x] docs: _3.3 build log, _Test_Suite_1 skips, 10-structure lines; LivingRoomScene ready; report 6.4

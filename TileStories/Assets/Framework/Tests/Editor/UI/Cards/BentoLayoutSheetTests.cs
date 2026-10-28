@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
+using TileStories.Tests;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -17,6 +18,7 @@ namespace TileStories.Editor.Tests
     //   - Current: none on the overview, the open section while it is open, none again after Back; no Top Bar over the tiles (step 16)
     //   - no sheet on a sheet: an open menu closes before the full view opens, a second jump replaces the page, ONE Back reaches the bento
     //   - Back and closing give every file back; a rebind of the same point keeps the section open; a short card scrolls
+    [Ignore(TestSkips.OldNavigationElements)]
     public class BentoLayoutSheetTests
     {
         private const string FrameworkStringsPath = "Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset";

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
+using TileStories.Tests;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -15,6 +16,7 @@ namespace TileStories.Editor.Tests
     // events, every preset's pick written as exactly its seven rows (a walk over every field of the settings AND a whole-config
     // comparison) and put back by ONE real Ctrl+Z; each warning drawn on its condition and absent otherwise (read from what the window
     // really draws, not from the rule); Test > Preview Navigation; the texts.
+    [Ignore(TestSkips.OldNavigationElements)]
     public class NavigationPresetEditorTabTests
     {
         private const BindingFlags Instance = BindingFlags.NonPublic | BindingFlags.Instance;

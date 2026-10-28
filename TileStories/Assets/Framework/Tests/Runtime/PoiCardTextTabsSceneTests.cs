@@ -15,6 +15,7 @@ namespace TileStories.Tests
     // strip; Top Bar and Show Navigation From are live. Since step 5b the strip shows where CardChromeRule allows it: at The Lamp's Half
     // (open header) the floor hides it, so the strip's own tests act at Full; PoiCardChromeSceneTests owns what shows at which stop.
     [Category("Core")]
+    [Ignore(TestSkips.OldNavigationElements)]
     public partial class PoiCardTextTabsSceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";

@@ -70,6 +70,7 @@ namespace TileStories.Editor
                 c.half_max_ratio = DrawSliderField("Half Height Max", c.half_max_ratio, CardContainerSettings.HalfMaxRatioMin,
                     CardContainerSettings.HalfMaxRatioMax, CardHalfHeightHelp);
                 c.full_height = DrawPopupField("Full Height", c.full_height, CardOptions.FullHeights, CardOptions.FullHeightLabels, CardFullHeightHelp);
+                c.top_band = DrawPopupField("Top Band", c.top_band, CardOptions.TopBands, CardOptions.TopBandLabels, CardTopBandHelp);
                 c.dismiss_on_tap_outside = DrawToggleField("Tap Outside Closes", c.dismiss_on_tap_outside, CardTapOutsideHelp);
                 c.keep_audio_on_close = DrawToggleField("Keep Audio Playing", c.keep_audio_on_close, CardKeepAudioHelp);
                 c.audio_when_another_starts = DrawPopupField("Audio Overlap", c.audio_when_another_starts, CardOptions.AudioModes, CardOptions.AudioModeLabels, CardAudioSwitchHelp);

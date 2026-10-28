@@ -7,7 +7,8 @@ namespace TileStories
     // line and the card's actions on it (a plain plate for the text-only looks). The view measures, these answer:
     //   - Height: the whole view Full shows under the bar (FullView: Full - Peek, the bar being all the peek stop holds; _3.3 S4a: the hero
     //     is the screen, its picture cropped to cover it), never under the card's minimum
-    //   - WordsBottom: the hero's words and actions end at its foot (S4a review): the picture above them clear, their place fixed
+    //   - WordsBottom: the hero's words and actions end at the foot of what the visitor SEES of it (v6): at Full the hero's own foot, at
+    //     Half the foot of the half sheet -- above a Navigation Bar floating at the bottom (its clearance)
     //   - BarShowsTitle: the bar shows the title only while the hero's title is not on screen -- at Peek (the hero is below the sheet's
     //     edge), and once the visitor scrolled the hero's title away; at the top of Half and Full the hero carries it
     //   - InView: whether any of the hero is still in the stack's viewport (the sticky bar waits until it is not, CardChromeRule)
@@ -36,9 +37,23 @@ namespace TileStories
         public static float Height(SheetStopRule.Stops stops, float minHeight) =>
             Mathf.Max(Mathf.Max(0f, minHeight), float.IsNaN(stops.Full) ? 0f : stops.Full);
 
-        // Where the hero's words and actions end, from the hero's top: at its foot, whatever the stop (_3.3 S4a review: the words keep their
-        // place on the picture; Media.uss's --ts-hero-words-inset is the gap under them)
+        // Where the hero's words and actions end, from the hero's top: at its foot (Media.uss's --ts-hero-words-inset is the gap under them)
         public static float WordsBottom(float heroHeight) => Mathf.Max(0f, float.IsNaN(heroHeight) ? 0f : heroHeight);
+
+        // ... at the foot of what the visitor SEES (_3.3 S4 third round, v6 wordsBottom): the hero's top is the sheet's top, so the sheet's
+        // rest height at its stop (`visible`) is what shows of it -- the words end there (never past the hero's own foot), `clearance` above
+        // it when a Navigation Bar floats at the bottom from the start. NaN-safe: an unmeasured sheet shows the whole hero
+        public static float WordsBottom(float heroHeight, float visible, float clearance)
+        {
+            float hero = WordsBottom(heroHeight);
+            float seen = float.IsNaN(visible) || visible <= 0f ? hero : Mathf.Min(hero, visible);
+            return Mathf.Max(0f, seen - Mathf.Max(0f, float.IsNaN(clearance) ? 0f : clearance));
+        }
+
+        // The sheet height the hero's words follow at a stop: the stop's own at Half and Full; at Peek (only the bar shows) and closed, Half's
+        // -- so the words are already where the next stop up shows them
+        public static float VisibleAt(SheetStopRule.Stops stops, SheetStopRule.Stop stop) =>
+            stop == SheetStopRule.Stop.Full ? stops.Full : stops.Half;
 
         // Whether the bar shows the title: at Peek always; at Half / Full once the hero's title (its bottom edge, in the stack's content
         // coordinates, as drawn: risen by the scroll) has left the viewport's top. Not laid out yet (NaN) = the hero still carries it

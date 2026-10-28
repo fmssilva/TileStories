@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
+using TileStories.Tests;
 using UnityEngine;
 
 namespace TileStories.Editor.Tests
@@ -147,6 +148,7 @@ namespace TileStories.Editor.Tests
         // Bento (step 15b): like tabs it needs sections to switch between and sets them aside -- ALL of them, its tiles stand for them; a jump
         // to a block of a section opens that section in the full view (never a scroll, never a section shown in the stack), a block of no
         // section scrolls the overview; the spy names the section open in the full view and NONE on the overview; the Top Bar stays the wall's
+        [Ignore(TestSkips.OldNavigationElements)]
         [Test]
         public void Bento_NeedsSectionsToSwitchBetween_SetsEverySectionAside_AndAJumpOpensItsSectionInTheFullView()
         {

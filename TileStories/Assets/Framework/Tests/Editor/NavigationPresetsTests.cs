@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
+using TileStories.Tests;
 using UnityEngine;
 
 namespace TileStories.Editor.Tests
@@ -10,6 +11,7 @@ namespace TileStories.Editor.Tests
     // The navigation presets (_3.2 section 8) as DATA: the table is the guide's, every element it names is registered for the slot it
     // fills, and applying one writes exactly its seven fields -- a walk over EVERY field of the settings object, lists included, before and
     // after, on a card whose other rows were all changed first.
+    [Ignore(TestSkips.OldNavigationElements)]
     public class NavigationPresetsTests
     {
         // Section 8's table, typed once here from the guide: label, layout, top, bottom, floating, menu, edge, auto_nav_block

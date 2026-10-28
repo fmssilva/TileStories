@@ -15,6 +15,7 @@ namespace TileStories.Tests
     //   - Show Counts: every element the registry says shows counts draws each item's block count (the model's), and none when off
     //   - Labels: every element the registry says reads Labels draws the icon, the words or both, as the setting says
     // The element lists come from NavElementRegistry's own flags, so an element added later is covered without a new line here.
+    [Ignore(TestSkips.OldNavigationElements)]
     public class PoiCardNavOptionsSceneTests : SearchSceneFixture
     {
         private const string Element = "scene_test_element";

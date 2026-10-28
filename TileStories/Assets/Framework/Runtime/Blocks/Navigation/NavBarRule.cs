@@ -1,11 +1,10 @@
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace TileStories
 {
-    // The Navigation Bar (_3.3 S4a review), pure: what NavBarView draws from card_settings.navigation.bar and the card's map.
-    //   - Items: the wall's Bar Groups rows, or -- with none -- one group per family a visitor can navigate to (InNav), in the families'
-    //     effective order (the Families table's), each with its family's words, icon and colour
+    // The Navigation Bar (_3.3 S4 third round, v5), pure: what NavBarView draws from card_settings.navigation.bar and the card's map.
+    //   - Items: the wall's Bar Groups rows, or -- with none -- the framework's six groups (DefaultRows: one per navigable family, in the
+    //     families' effective order, AR inside Media and Community inside Play), each with its first family's words, icon and colour
     //   - Entries: the groups ONE card shows -- a shown row with at least one target of its families on this card, in the table's order (a
     //     bar is a fixed map, like an app's tab bar: its order never follows the scroll); each lands on its first target in the stack
     //   - EntryOf: the group a block belongs to (its family's first shown row), -1 for none
@@ -68,15 +67,28 @@ namespace TileStories
             return items;
         }
 
-        // The rows a wall with no table of its own reads (and the table's first edit writes): one per navigable family, in their order
+        // The families a default group takes in beside its own (the joiner -> the family whose group it joins): six groups, so each keeps
+        // a phone's comfortable width (390 / 6) -- AR's blocks show the point (Media), Community's ask the visitor something (Play)
+        public static readonly IReadOnlyDictionary<string, string> DefaultJoins = new Dictionary<string, string>
+        {
+            { BuiltInFamilies.Ar, BuiltInFamilies.Media },
+            { BuiltInFamilies.Community, BuiltInFamilies.Play },
+        };
+
+        // The rows a wall with no table of its own reads (and the table's first edit writes): one per navigable family in their order, a
+        // joiner (DefaultJoins) inside its host's row when the host is navigable too -- an app's own family gets a row of its own
         public static List<CardNavBarItem> DefaultRows(CardNavigationSettings nav, BlockRegistry registry)
         {
             var rows = new List<CardNavBarItem>();
+            var navigable = new List<FamilyDefinition>();
             foreach (var family in FamiliesInOrder(nav, registry))
-            {
-                if (!family.InNav) continue;
-                rows.Add(new CardNavBarItem { key = family.Key, families = new List<string> { family.Key } });
-            }
+                if (family.InNav) navigable.Add(family);
+            bool Hosted(FamilyDefinition family) =>
+                DefaultJoins.TryGetValue(family.Key, out string host) && navigable.Exists(f => f.Key == host);
+            foreach (var family in navigable)
+                if (!Hosted(family)) rows.Add(new CardNavBarItem { key = family.Key, families = new List<string> { family.Key } });
+            foreach (var family in navigable)
+                if (Hosted(family)) rows.Find(row => row.key == DefaultJoins[family.Key]).families.Add(family.Key);
             return rows;
         }
 
@@ -161,25 +173,36 @@ namespace TileStories
 
         // ---- the options, each read with its default ----
 
-        public static string Position(CardNavBarSettings bar) => Pick(bar?.position, CardOptions.NavBarPositions);
+        // Position: a pre-v5 "under_title" is Top
+        public static string Position(CardNavBarSettings bar) =>
+            bar?.position == CardOptions.NavBarUnderTitle ? CardOptions.NavBarTop : Pick(bar?.position, CardOptions.NavBarPositions, CardOptions.NavBarBottom);
         public static bool AtBottom(CardNavBarSettings bar) => Position(bar) == CardOptions.NavBarBottom;
-        public static string Show(CardNavBarSettings bar) => Pick(bar?.show, CardOptions.NavBarShows);
-        public static string HideOnScroll(CardNavBarSettings bar) => Pick(bar?.hide_on_scroll, CardOptions.NavBarHides);
-        public static string Shape(CardNavBarSettings bar) => Pick(bar?.shape, CardOptions.NavBarShapes);
-        public static string Fill(CardNavBarSettings bar) => Pick(bar?.fill, CardOptions.NavBarFills);
-        public static string Indicator(CardNavBarSettings bar) => Pick(bar?.indicator, CardOptions.NavBarIndicators);
-        public static string SelectedColour(CardNavBarSettings bar) => Pick(bar?.selected_color, CardOptions.NavBarSelectedColours);
-        public static string IdleColour(CardNavBarSettings bar) => Pick(bar?.idle_color, CardOptions.NavBarIdleColours);
-        public static string Labels(CardNavBarSettings bar) => Pick(bar?.labels, CardOptions.NavBarLabels);
+        public static string Shape(CardNavBarSettings bar) => Pick(bar?.shape, CardOptions.NavBarShapes, CardOptions.NavBarFloating);
+        public static bool Floating(CardNavBarSettings bar) => Shape(bar) == CardOptions.NavBarFloating;
+        public static string Fill(CardNavBarSettings bar) => Pick(bar?.fill, CardOptions.NavBarFills, CardOptions.NavBarSolid);
+        public static string Indicator(CardNavBarSettings bar) => Pick(bar?.indicator, CardOptions.NavBarIndicators, CardOptions.NavBarIndicatorRaised);
+        public static bool Raised(CardNavBarSettings bar) => Indicator(bar) == CardOptions.NavBarIndicatorRaised;
+        public static string ChosenIcon(CardNavBarSettings bar) => Pick(bar?.chosen_icon, CardOptions.NavBarChosenIcons, CardOptions.NavBarChosenIconFilled);
+        public static string Labels(CardNavBarSettings bar) => Pick(bar?.labels, CardOptions.NavBarLabels, CardOptions.NavBarLabelsIconAndText);
+        public static string SelectedColour(CardNavBarSettings bar) =>
+            Pick(bar?.selected_color, CardOptions.NavBarSelectedColours, CardOptions.NavBarColourAccent);
+        public static bool BoldChosen(CardNavBarSettings bar) => bar?.bold_selected ?? true;
+        public static string Show(CardNavBarSettings bar) => Pick(bar?.show, CardOptions.NavBarShows, CardOptions.NavBarShowAlways);
+        public static string HideOnScroll(CardNavBarSettings bar) => Pick(bar?.hide_on_scroll, CardOptions.NavBarHides, CardOptions.NavBarHideNever);
+        public static bool HidesWhileScrolling(CardNavBarSettings bar) => HideOnScroll(bar) == CardOptions.NavBarHideDown;
 
-        // The numbers, held to their ranges (a full-width bar has no radius and no margin)
-        public static float CornerRadius(CardNavBarSettings bar) =>
-            Shape(bar) == CardOptions.NavBarFullWidth ? 0f : Mathf.Clamp(bar?.corner_radius ?? 26f, 0f, CardNavBarSettings.CornerRadiusMax);
-        public static float SideMargin(CardNavBarSettings bar) =>
-            Shape(bar) == CardOptions.NavBarFullWidth ? 0f : Mathf.Clamp(bar?.side_margin ?? 12f, 0f, CardNavBarSettings.SideMarginMax);
-        public static float Height(CardNavBarSettings bar) =>
-            Mathf.Clamp(bar?.height ?? 56f, CardNavBarSettings.HeightMin, CardNavBarSettings.HeightMax);
-        public static float FillOpacity(CardNavBarSettings bar) => Mathf.Clamp(bar?.fill_opacity ?? 1f, CardNavBarSettings.FillOpacityMin, 1f);
+        // Whether the bar lies on the hero's picture (v5): at the bottom while the hero reaches `margin` below the bar's top edge, at Top while
+        // it reaches that far below the bar's foot -- all in one frame; a card with no picture hero (NaN) never
+        public static bool OverHero(bool atBottom, float barTop, float barBottom, float heroBottom, float margin) =>
+            !float.IsNaN(heroBottom) && (atBottom ? barTop : barBottom) < heroBottom - margin;
+
+        // Whether the hero's words rise clear of the bar: it floats at the bottom from the very start (Always), over the hero's foot
+        public static bool ClearsHeroFoot(CardNavigationSettings nav) =>
+            Enabled(nav) && AtBottom(nav.bar) && Show(nav.bar) == CardOptions.NavBarShowAlways;
+
+        // The chosen group wears a disc: the raised bump's, or Filled's at the icon's own place -- never on a bar of words alone (v5)
+        public static bool ChosenDisc(CardNavBarSettings bar) =>
+            Raised(bar) || ChosenIcon(bar) == CardOptions.NavBarChosenIconFilled && Labels(bar) != CardOptions.NavBarLabelsText;
 
         // Whether an item shows its icon / its words (a group with no icon always shows its words)
         public static bool ShowsIcon(string labels, bool hasIcon) => hasIcon && labels != CardOptions.NavBarLabelsText;
@@ -187,11 +210,11 @@ namespace TileStories
             !hasIcon || labels == CardOptions.NavBarLabelsIconAndText || labels == CardOptions.NavBarLabelsText
             || labels == CardOptions.NavBarLabelsSelectedOnly && chosen;
 
-        private static string Pick(string value, string[] options)
+        private static string Pick(string value, string[] options, string fallback)
         {
             foreach (string option in options)
                 if (option == value) return value;
-            return options[0];
+            return fallback;
         }
 
         // Every registered family in its effective order (the wall's Families row when it has one, else the registered default), stable

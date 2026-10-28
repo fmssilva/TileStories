@@ -45,8 +45,11 @@ namespace TileStories
         public NavBarView Bar { get; } = new NavBarView();
         public const string TopBarClass = "poi-card__nav-top--bar";
         public const string BottomBarClass = "poi-card__nav-bottom--bar";
+        // On the sheet's root while the bar floats at the bottom: the stack keeps its end clear of it (PoiCard.uss)
+        public const string SheetBarBottomClass = "poi-card--bar-bottom";
 
         private readonly NavElementRegistry _registry;
+        private readonly VisualElement _sheetRoot;
         private readonly Dictionary<string, ElementPool<INavElementView>> _pools = new();
 
         // `sheetRoot`: the sheet's root; `stackScroll`: the stack's ScrollView inside it, which the top slot goes right before and whose
@@ -55,6 +58,7 @@ namespace TileStories
         public NavSlots(VisualElement sheetRoot, ScrollView stackScroll, VisualElement bottomArea, VisualElement floating, NavElementRegistry registry)
         {
             _registry = registry;
+            _sheetRoot = sheetRoot;
             Floating = floating;
             Top = new VisualElement { name = "poi-card-nav-top" };
             Top.AddToClassList("poi-card__nav-top");
@@ -103,7 +107,8 @@ namespace TileStories
             }
         }
 
-        // The bar in its host (the top one under the title bar, or the bottom one), when the card shows navigation and two groups at least
+        // The bar in its host (the top one under the chrome row, or the bottom one, floating over the stack's foot), when the card shows
+        // navigation and two groups at least
         private void BindBar(CardNavModel model, NavController nav, BlockBindContext context, CardNavigationSettings settings)
         {
             Bar.Bind(model, nav, context);
@@ -118,6 +123,7 @@ namespace TileStories
             host.style.display = DisplayStyle.Flex;
             Top.EnableInClassList(TopBarClass, !bottom);
             Bottom.EnableInClassList(BottomBarClass, bottom);
+            _sheetRoot.EnableInClassList(SheetBarBottomClass, bottom);
             if (bottom)
             {
                 BottomView = Bar;
@@ -143,6 +149,7 @@ namespace TileStories
             }
             Top.RemoveFromClassList(TopBarClass);
             Bottom.RemoveFromClassList(BottomBarClass);
+            _sheetRoot.RemoveFromClassList(SheetBarBottomClass);
             if (TopKey != null) _pools[TopKey].ReleaseAll();
             if (BottomKey != null) _pools[BottomKey].ReleaseAll();
             if (MenuKey != null) _pools[MenuKey].ReleaseAll();

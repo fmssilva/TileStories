@@ -121,6 +121,7 @@ namespace TileStories
                 TopAlways = BarOn && NavBarRule.Show(_nav.bar) == CardOptions.NavBarShowAlways,
                 TopHidesOnScroll = BarOn && NavBarRule.HideOnScroll(_nav.bar) == CardOptions.NavBarHideDown,
                 BottomNavAfterHero = BarOn && NavBarRule.Show(_nav.bar) == CardOptions.NavBarShowAfterHero,
+                BottomNavFloats = BarOn && NavBarRule.AtBottom(_nav.bar),
             };
             var chrome = CardChromeRule.Decide(input);
             // - the area comes back at the end: its height leaves the viewport on the next layout, and the end must stay in view above it

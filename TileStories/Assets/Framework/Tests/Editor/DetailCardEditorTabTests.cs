@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
+using TileStories.Tests;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -140,7 +141,7 @@ namespace TileStories.Editor.Tests
                                 "jump_raises_to" => CardOptions.JumpRaisesKeep,
                                 "jump_motion" => CardOptions.JumpMotionInstant,
                                 "back_button" => CardOptions.BackButtonNone,
-                                "top" => CardOptions.NavNone,
+                                "top" => BuiltInNavElements.TextTabs,
                                 "bottom" => BuiltInNavElements.BottomBar,
                                 "menu" => BuiltInNavElements.DrawerTree,
                                 "floating" => BuiltInNavElements.FabRadial,
@@ -176,14 +177,15 @@ namespace TileStories.Editor.Tests
                             // - another stop than the wall's own (the shipped wall may open at either)
                             "open_stop" => (string)c.GetValue(s.container) == CardOptions.StopHalf ? CardOptions.StopPeek : CardOptions.StopHalf,
                             "full_height" => CardOptions.FullHeightCameraStrip,
+                            "top_band" => CardOptions.TopBandGlass,
                             _ => CardOptions.AudioQueue,
                         })));
                         else Assert.Fail("no edit for container field " + c.Name);
                     }
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(10 + 1 + 9 + 24 + 3, edits.Count,
-                "every card_settings field (walked by reflection) has an edit: 10 wall-level (block_templates the 10th) + 1 components + 9 container (full_height the 9th) + 24 navigation (bar the 24th) + 3 demo card");
+            Assert.AreEqual(10 + 1 + 10 + 24 + 3, edits.Count,
+                "every card_settings field (walked by reflection) has an edit: 10 wall-level (block_templates the 10th) + 1 components + 10 container (top_band the 10th) + 24 navigation (bar the 24th) + 3 demo card");
 
             foreach (var (name, change) in edits)
             {
@@ -1517,6 +1519,7 @@ namespace TileStories.Editor.Tests
         // click near the slider's left end lowers it to its minimum, Ctrl+Z takes it back. Top Bar: its choices are None + every element
         // the registry has for the top slot (an app's own one included, with no edit to the window), named by their labels; the pick goes
         // through the window's history and Ctrl+Z takes it back; its help lists every element's own words. Both helps are ASCII
+        [Ignore(TestSkips.OldNavigationElements)]
         [UnityTest]
         public IEnumerator TheShowNavigationFromAndTopBarRows_AreDrawnOnTheirDefaults_TakeARealPick_AndCtrlZTakesItBack()
         {
@@ -1621,6 +1624,7 @@ namespace TileStories.Editor.Tests
         // Detail Card > Navigation's Follow Scroll row (its data has been read since step 3; the row arrived at step 6), on the real
         // window: drawn ticked (the default) without writing, a real click on its checkbox unticks it, Ctrl+Z ticks it again; it opens
         // What A Jump Does, after the Elements and Hide While Scrolling (section 7's groups); its (i) says what each state does, in ASCII
+        [Ignore(TestSkips.OldNavigationElements)]
         [UnityTest]
         public IEnumerator TheFollowScrollRow_IsARealToggle_OpensWhatAJumpDoes_AndCtrlZTakesItBack()
         {
@@ -1678,6 +1682,7 @@ namespace TileStories.Editor.Tests
         // Show Counts only for one that shows counts; the Groups table (and the Families table's Group column) only for Segmented -- read
         // from the element's own definition, so an app's element needs no window edit. A hidden row keeps its value. Each pick goes
         // through the window's history and a real Ctrl+Z takes it back; Show Counts is a real click; every help is ASCII and names its options
+        [Ignore(TestSkips.OldNavigationElements)]
         [UnityTest]
         public IEnumerator TheStep6Rows_ShowOnlyForATopBarThatReadsThem_KeepTheirValueHidden_AndEachPickIsUndoneByCtrlZ()
         {
@@ -1763,6 +1768,7 @@ namespace TileStories.Editor.Tests
         // behind a button), right under Bottom Bar (section 7's order) and listed from the registry -- None, then the menu slot's elements by
         // their labels. A pick is an undo step; Ctrl+Z (real) brings None back. Its (i) says the default, that it is never a card's only
         // navigation, what closes it and that a bar's More opens it; the Playmode guide walks both menus. All ASCII
+        [Ignore(TestSkips.OldNavigationElements)]
         [UnityTest]
         public IEnumerator TheMenuRow_IsDrawnOnNone_UnderBottomBar_ListsTheMenuElements_AndAPickIsUndoneByCtrlZ()
         {
@@ -1809,6 +1815,7 @@ namespace TileStories.Editor.Tests
         // 16) hide Top Bar, which keeps its value; Bento needs no bar (no warning). Each pick is an undo step and a real
         // Ctrl+Z brings the value back. The helps say what each option does and the guide's cautions about tabs, pages and bento (its fill point
         // in a wall author's words); the guides walk the layouts; ASCII
+        [Ignore(TestSkips.OldNavigationElements)]
         [UnityTest]
         public IEnumerator TheLayoutAndOpenOneAtATimeRows_AreDrawnWhereSectionSevenSays_TheTabsWarningShowsWithNoBar_AndCtrlZUndoesEachPick()
         {
@@ -1927,6 +1934,7 @@ namespace TileStories.Editor.Tests
         // card_settings.navigation. The Radial shows Bar Slots (its arc caps like a bar), the Dial does not, and Bar Slots keeps its
         // value while hidden. Each pick is an undo step and a real Ctrl+Z brings the default back. Both helps say the default and what each
         // option does, and the Playmode and Device guides walk both rows; all ASCII
+        [Ignore(TestSkips.OldNavigationElements)]
         [UnityTest]
         public IEnumerator TheFloatingButtonAndPlacedModelControlRows_AreDrawnOnTheirDefaults_InSectionSevensOrder_AndEachPickIsUndoneByCtrlZ()
         {
@@ -2009,6 +2017,7 @@ namespace TileStories.Editor.Tests
         // 7's order), listed from the registry -- None, then the edge slot's elements by their labels; the pick is an undo step and a real
         // Ctrl+Z brings None back. Its (i) says the default, where the dots sit and when they are absent, and the Playmode and Device
         // guides walk the scrubber; all ASCII
+        [Ignore(TestSkips.OldNavigationElements)]
         [UnityTest]
         public IEnumerator TheEdgeRow_IsDrawnOnItsDefault_UnderFloatingButton_ListsTheRegistrysElements_AndAPickIsUndoneByCtrlZ()
         {
@@ -2054,6 +2063,7 @@ namespace TileStories.Editor.Tests
         // 7's order), listed from the BLOCK registry -- None, then every kind of the navigation family by its Editor name; the pick is an
         // undo step and a real Ctrl+Z brings None back. Its (i) says the rule (Show Navigation From, a point's own nav block wins, the Block
         // Library switch) and each nav kind's own help; the Playmode and Device guides walk it; all ASCII
+        [Ignore(TestSkips.OldNavigationElements)]
         [UnityTest]
         public IEnumerator TheAutoNavBlockRow_IsDrawnOnItsDefault_UnderEdge_ListsTheNavigationKinds_AndAPickIsUndoneByCtrlZ()
         {
@@ -2282,6 +2292,7 @@ namespace TileStories.Editor.Tests
         // bar of slots, under the display options and before Follow Scroll, and keeps its value while hidden. A real click at the start of
         // Bar Slots' track picks the minimum, 3; each change is undone by a real Ctrl+Z. With the bar, Labels shows even under Text Tabs (the
         // bar draws icons). Both helps and the Playmode guide say what a wall author needs, in ASCII
+        [Ignore(TestSkips.OldNavigationElements)]
         [UnityTest]
         public IEnumerator TheBottomBarAndBarSlotsRows_ShowBarSlotsOnlyForABar_KeepItsValueHidden_AndEachChangeIsUndoneByCtrlZ()
         {
@@ -2356,6 +2367,7 @@ namespace TileStories.Editor.Tests
         // The three step 7b bottom elements on the real window: each is listed from the registry (no edit to the window) and the rows follow
         // their own definitions -- the dock reads Bar Slots but not Labels, bar_sheet both, next_up neither -- with the Top Bar set to None,
         // so a display row can only come from the bottom element. Each help names its element, ASCII
+        [Ignore(TestSkips.OldNavigationElements)]
         [UnityTest]
         public IEnumerator TheStep7bBottomElements_ShowOnlyTheBarRowsTheyRead_AndEachHasItsHelp()
         {

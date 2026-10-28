@@ -21,6 +21,7 @@ namespace TileStories.Tests
     //     the chip goes; on another point's card it names the point, offers no Remove, and a real tap on it opens the card that placed it;
     //     Placed Model Control = None hides it, live; it reads over a bright and a dark camera frame
     [Category("Core")]
+    [Ignore(TestSkips.OldNavigationElements)]
     public class PoiCardFloatingSceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";

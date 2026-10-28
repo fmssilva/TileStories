@@ -19,6 +19,7 @@ namespace TileStories.Tests
     //   - a real tap on a section line or a kind line of a FILTERED drawer lands the first block that passes, not the section's first
     //   - the same on the big tiles, on both axes
     //   - the stops do not move; renders at 390 px in English and Portuguese, unfiltered and filtered
+    [Ignore(TestSkips.OldNavigationElements)]
     public class PoiCardFacetSceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";

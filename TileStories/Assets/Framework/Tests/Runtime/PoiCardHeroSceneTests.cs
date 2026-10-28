@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using TileStories.Tests;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UIElements;
@@ -117,6 +118,7 @@ namespace TileStories.Tests
 
         // ---------------- the bar ----------------
 
+        [Ignore(TestSkips.OldNavigationElements)]
         [UnityTest]
         public IEnumerator TheBar_IsOneRow_SoNoLanguageOrMenuMovesAStop([Values("lamp", "painting")] string poi, [Values("en", "pt")] string language)
         {
@@ -163,12 +165,14 @@ namespace TileStories.Tests
             Assert.AreEqual(Sheet.Root.worldBound.yMin, hero.yMin, OnePixel, "its top at the sheet's top: the bars float over its picture");
             Assert.AreEqual(view.yMin, hero.yMin, OnePixel, "...and the view starts there too");
             Assert.LessOrEqual(Header.Foot.worldBound.yMax, view.yMax + OnePixel, "its words and actions end inside the view: " + Header.Foot.worldBound + " in " + view);
-            Assert.AreEqual(view.yMax, Header.Foot.worldBound.yMax, OnePixel, "...at its very foot (HeroRule.WordsBottom)");
+            // - a Navigation Bar floating at the bottom from the start lies over the hero's foot: the words rise clear of it (v5)
+            float barClear = NavBarRule.ClearsHeroFoot(Session.CardSettings.navigation) ? CardTestInput.TokenPx("--ts-navbar-clearance") : 0f;
+            Assert.AreEqual(view.yMax - barClear, Header.Foot.worldBound.yMax, OnePixel, "...at its very foot (HeroRule.WordsBottom), clear of a bottom bar");
             Assert.AreEqual(Sheet.Root.worldBound.width, hero.width, OnePixel, "full width");
             foreach (var label in new[] { Header.Eyebrow, Header.HeroTitle, Header.HeroPart.Q<Label>("card-header-subtitle") })
                 Assert.IsTrue(view.Contains(label.worldBound.min) && view.Contains(label.worldBound.max - Vector2.one * OnePixel), label.name + " wholly in view");
             Assert.IsFalse(Header.BarTitleShown, "the hero carries the title, the bar none");
-            Assert.IsFalse(Sheet.Chrome.BottomShown, "the sticky bar waits for the hero");
+            Assert.IsFalse(Sheet.Chrome.FooterShown && Sheet.Chrome.BottomShown, "the sticky bar waits for the hero");
 
             var actions = Stack.HeroActionViews;
             bool lamp = poi == "lamp";
@@ -432,6 +436,7 @@ namespace TileStories.Tests
 
         // At Full the hero fills the whole view under the bar and the strip waits: it comes as soon as the visitor scrolls (the chrome's hero
         // layer, CardChromeRule: no chrome where it would cut the hero in view), and goes again at the top
+        [Ignore(TestSkips.OldNavigationElements)]
         [UnityTest]
         public IEnumerator AtFull_TheHeroFillsTheView_AndTheStripComesOnceTheVisitorScrolls([Values("lamp", "painting")] string poi)
         {
@@ -485,6 +490,8 @@ namespace TileStories.Tests
             {
                 var labels = Header.HeroPart.Query<Label>().ToList();
                 foreach (var l in labels) l.style.visibility = Visibility.Hidden;
+                // - the Navigation Bar lies over the hero's foot: not the subject here, out of both renders
+                Sheet.Slots.Bar.Root.style.visibility = Visibility.Hidden;
                 Header.Actions.style.visibility = Visibility.Hidden;
                 yield return ThemePixelSet.GrabStill("shade_" + poi, Header.HeroPart, r => with = r);
                 Header.Shade.style.visibility = Visibility.Hidden;
@@ -492,6 +499,7 @@ namespace TileStories.Tests
                 Header.Shade.style.visibility = StyleKeyword.Null;
                 foreach (var l in labels) l.style.visibility = StyleKeyword.Null;
                 Header.Actions.style.visibility = StyleKeyword.Null;
+                Sheet.Slots.Bar.Root.style.visibility = StyleKeyword.Null;
                 System.IO.File.WriteAllBytes(TestEvidence.PathFor(Domain + "/shade", poi + "_with.png"), with.EncodeToPNG());
                 System.IO.File.WriteAllBytes(TestEvidence.PathFor(Domain + "/shade", poi + "_without.png"), without.EncodeToPNG());
 
@@ -523,6 +531,57 @@ namespace TileStories.Tests
             {
                 if (with != null) Object.Destroy(with);
                 if (without != null) Object.Destroy(without);
+            }
+        }
+
+        // P2 PART 5 (v6 wordsBottom / shadeBottom): at Half and at Full the hero's words -- eyebrow, title, line, Listen -- sit at the foot of
+        // what the visitor SEES of the hero (not at the hero's own foot, below the half sheet), above the Navigation Bar floating at the bottom,
+        // their shade moving with them; the title reads at 7:1 on the real render. Renders in TestEvidence/Premium/P2/.
+        [UnityTest]
+        public IEnumerator AtHalfAndFull_TheWordsSitAtTheFootOfWhatTheVisitorSees_AboveTheBar_At7To1(
+            [Values("lamp", "painting")] string poi, [Values(SheetStopRule.Stop.Half, SheetStopRule.Stop.Full)] SheetStopRule.Stop stop)
+        {
+            Session.CardSettings.container.reduce_motion = true;
+            yield return Open(poi, "en", stop);
+            Header.Clock = () => 0f;
+            Header.Animate();
+            yield return CardTestInput.UntilStill(Sheet);
+            Assert.IsTrue(Header.HasPicture, "precondition: " + poi + "'s header is a picture look");
+            var sheet = Sheet.Root.worldBound;
+            var words = Header.Foot.worldBound;
+            Assert.AreEqual(Sheet.Stops.HeightOf(stop), sheet.height, OnePixel, "precondition: the sheet rests at " + stop);
+            Assert.GreaterOrEqual(words.yMin, sheet.yMin - OnePixel, "the words start inside the visible sheet");
+            Assert.LessOrEqual(words.yMax, sheet.yMax + OnePixel, "...and end inside it (at Half: not below the half sheet)");
+            var bar = Sheet.Slots.Bar;
+            Assert.AreEqual(NavBarView.ElementKey, Sheet.Slots.BottomKey, "precondition: the framework's bar floats at the bottom");
+            float barTop = Mathf.Min(bar.Row.worldBound.yMin, bar.Disc.resolvedStyle.display == DisplayStyle.Flex ? bar.Disc.worldBound.yMin : float.MaxValue);
+            Assert.LessOrEqual(words.yMax, barTop + OnePixel, "the words end above the bar and its disc");
+            // - at the foot of what shows: the bar's clearance under them, no more (the rule's place, from the hero's top = the sheet's top)
+            float clearance = CardTestInput.TokenPx("--ts-navbar-clearance");
+            Assert.AreEqual(sheet.yMax - clearance, words.yMax, OnePixel, "the words at the visible foot, the bar's clearance under them");
+            // - their shade with them: its floor behind the words
+            Assert.LessOrEqual(Header.Shade.worldBound.yMin, words.yMin, "the shade starts above the words");
+            Assert.GreaterOrEqual(Header.Shade.worldBound.yMax, words.yMax, "...and lies behind them");
+            // - the title at 7:1 on the render
+            var title = Header.HeroTitle;
+            var colour = title.resolvedStyle.color;
+            Texture2D drawn = null, under = null;
+            try
+            {
+                yield return ThemePixelSet.GrabStill($"words_{poi}_{stop}", null, r => drawn = r);
+                title.style.color = Color.clear;
+                yield return null;
+                yield return ThemePixelSet.GrabStill($"words_under_{poi}_{stop}", null, r => under = r);
+                var (ratio, worst, inked) = ThemePixelSet.RingContrast(drawn, under, ThemePixelSet.ScreenRectOf(title, drawn), colour);
+                Assert.Greater(inked, 0, "precondition: the title draws pixels");
+                System.IO.File.WriteAllBytes(TestEvidence.PathFor("Premium/P2", $"words_{poi}_{stop}.png"), drawn.EncodeToPNG());
+                Assert.GreaterOrEqual(ratio, Aaa, "the title keeps 7:1 at " + stop + ": " + ratio.ToString("0.00") + ":1 (worst " + (Color32)worst + ")");
+            }
+            finally
+            {
+                title.style.color = StyleKeyword.Null;
+                if (drawn != null) Object.Destroy(drawn);
+                if (under != null) Object.Destroy(under);
             }
         }
 

@@ -13,14 +13,10 @@
 }
 
 .card-header__title {
-    /* a glass pill hugging the words (S4a review): the floating bar is clear but for it; centred between the X and settings (v5) */
+    /* bare words on the chrome band (v5: no pill, no outline), centred between the X and settings */
     align-self: center;
     max-width: 100%;
-    background-color: var(--ts-bar-pill);
-    border-width: var(--ts-line-width);
-    border-color: var(--ts-line);
-    border-radius: var(--ts-radius-xl);
-    padding: var(--ts-space-1) var(--ts-space-3);
+    padding: 0;
     font-size: var(--ts-size-heading);
     -unity-font-style: bold;
     color: var(--ts-ink);

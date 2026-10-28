@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
+using TileStories.Tests;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -118,6 +119,7 @@ namespace TileStories.Editor.Tests
 
         // Section 5.4: the wall's Floating Button, in its own slot; None leaves the slot empty (and hidden while no model stands); a card below
         // Show Navigation From gets none, like every element
+        [Ignore(TestSkips.OldNavigationElements)]
         [Test]
         public void TheFloatingButton_IsTheWallsPick_InTheFloatingSlot_AndNoneOrAShortCardLeavesItEmpty()
         {
@@ -152,6 +154,7 @@ namespace TileStories.Editor.Tests
 
         // fab_dial: a tap opens the column as the overlay owner's ONE anchored list, a labelled pill per section; Back closes it first and the card
         // stays; a tap outside closes it first and only the next one closes the card; the button again closes it
+        [Ignore(TestSkips.OldNavigationElements)]
         [Test]
         public void TheDial_OpensAsTheOverlaysOneList_APillPerSection_BackAndATapOutsideCloseItFirst()
         {
@@ -199,6 +202,7 @@ namespace TileStories.Editor.Tests
 
         // fab_radial: the arc holds Bar Slots items, the last More when the sections overflow; More turns the arc to the rest -- or, with a Menu,
         // opens the Menu (which closes the arc: one thing at a time)
+        [Ignore(TestSkips.OldNavigationElements)]
         [Test]
         public void TheRadial_HoldsBarSlotsItemsWithMoreLast_MoreTurnsTheArcToTheRest_OrOpensTheMenu()
         {

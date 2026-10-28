@@ -295,7 +295,14 @@ namespace TileStories.Tests
             if (strip.resolvedStyle.display == DisplayStyle.Flex && !strip.ClassListContains(CardChromeView.TopHiddenClass))
                 top = Mathf.Max(top, strip.worldBound.yMax);
             float bottom = view.yMax;
-            if (!sheet.BottomArea.ClassListContains(CardChromeView.BottomHiddenClass)) bottom = Mathf.Min(bottom, sheet.BottomArea.worldBound.yMin);
+            if (!sheet.BottomArea.ClassListContains(CardChromeView.BottomHiddenClass))
+            {
+                bottom = Mathf.Min(bottom, sheet.BottomArea.worldBound.yMin);
+                // - the Navigation Bar floats over the stack's foot, above the bottom area (its host holds the bar and the bump's room)
+                var floating = sheet.Slots.Bottom;
+                if (floating.ClassListContains(NavSlots.BottomBarClass) && floating.resolvedStyle.display == DisplayStyle.Flex)
+                    bottom = Mathf.Min(bottom, floating.worldBound.yMin);
+            }
             return Rect.MinMaxRect(view.xMin, top, view.xMax, Mathf.Max(top, bottom));
         }
 

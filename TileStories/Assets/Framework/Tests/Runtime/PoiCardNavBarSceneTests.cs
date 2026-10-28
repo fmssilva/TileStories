@@ -8,46 +8,62 @@ using UnityEngine.UIElements;
 
 namespace TileStories.Tests
 {
-    // The Navigation Bar on the real scene (_3.3 S4a review, NavBarView): the Ribeira Palace's card with the bar on -- its groups (one per
-    // family the card has blocks of), floating under the title bar with no jump of the stack when it comes, after the hero; a tap lands the
-    // group's first block under the floating chrome and marks the group (the indicator under it); each indicator, the full-width shape and
-    // the bottom position; a merged group; the bar off again -> the old elements. Renders in TestEvidence/NavBar/.
+    // The Navigation Bar on the REAL scene (_3.3 S4 third round, v5; NavBarView) with the Ribeira Palace's card and real input:
+    //   - the framework's default bar: floating at the bottom, Solid with its shadow, Raised (the edge bent into a bump under the chosen
+    //     group, its icon riding up in a filled accent disc), over the hero from the start -- the hero's words rise clear of it
+    //   - a real tap on a group jumps there; the bump and the disc slide to it with an overshoot, and follow real drags of the stack
+    //   - every option value changes what the visitor sees (one case per value), and the pairs that interact: Raised x Top (the bump hangs
+    //     down), Fill x over the hero (a non-solid bar turns white on dark glass, Clear transparent there and solid after it)
+    //   - the labels read at 7:1 on the real render on every fill, over the hero and after it, light and dark, Bottom and Top
+    //   - an old config's "under_title" reads as Top on the running card; a merged group; the bar off
+    // Renders in TestEvidence/Premium/P2/.
     [Category("Core")]
     public class PoiCardNavBarSceneTests : SearchSceneFixture
     {
+        private const string Domain = "Premium/P2";
+        private const string Painting = "painting";
+        private const float Aaa = 7f;
+
         private PoiCardSheetView Sheet => Card.Sheet;
         private BlockStackView Stack => Sheet.Stack;
         private ScrollView Scroll => Stack.Scroll;
         private NavBarView Bar => Sheet.Slots.Bar;
         private float OnePixel => Sheet.Layer.panel.visualTree.layout.height / Screen.height;
-        private const string Domain = "NavBar";
-        private const string Painting = "painting";
 
-        private IEnumerator Push(System.Action<WallConfigData> edit)
+        [UnityTearDown]
+        public IEnumerator BackToLight()
+        {
+            ThemeController.SetMode(CardOptions.ModeLight);
+            yield return null;
+        }
+
+        private IEnumerator Push(System.Action<CardNavBarSettings> look)
         {
             var copy = ConfigCopy();
-            edit(copy);
+            copy.card_settings.navigation.bar = new CardNavBarSettings();
+            look?.Invoke(copy.card_settings.navigation.bar);
             Session.ApplyCardSettings(copy);
             yield return CardTestInput.Settle(0.3f);
         }
 
-        private IEnumerator OpenWithTheBar(System.Action<CardNavBarSettings> look = null)
+        // The Ribeira Palace's card at Full, scrolled to the top (the hero), the bar as `look` sets it on the framework's default
+        private IEnumerator Open(System.Action<CardNavBarSettings> look = null)
         {
             CardTestInput.HoldTheWallStill(Sheet);
-            yield return Push(c =>
-            {
-                c.card_settings.navigation.bar.enabled = true;
-                look?.Invoke(c.card_settings.navigation.bar);
-            });
-            SelectionEventBus.Select(Painting);
+            yield return Push(look);
+            // - a card already open on the point is rebound by the push (selecting it again would close it)
+            if (!Sheet.IsOpen || Card.ShownPoiId != Painting) SelectionEventBus.Select(Painting);
             yield return CardTestInput.Settle();
+            Scroll.scrollOffset = Vector2.zero;
             Assert.IsTrue(Sheet.IsOpen, "precondition: the Ribeira Palace's card is open");
             Sheet.SetStop(SheetStopRule.Stop.Full);
             yield return CardTestInput.Settle(0.6f);
             // - the hero's pan and zoom stand at time 0, so a render of the card holds still
             Stack.HeaderView.Clock = () => 0f;
             Stack.HeaderView.Animate();
-            yield return null;
+            yield return CardTestInput.UntilStill(Sheet);
+            Assert.IsTrue(Sheet.Slots.TopKey == NavBarView.ElementKey || Sheet.Slots.BottomKey == NavBarView.ElementKey, "precondition: the bar is on the card");
+            yield return UntilSettled();
         }
 
         // Scroll the stack to `y` and let the chrome decide
@@ -55,118 +71,408 @@ namespace TileStories.Tests
         {
             Scroll.scrollOffset = new Vector2(0f, y);
             yield return null;
-            yield return null;
             yield return CardTestInput.Settle(0.4f);
+            yield return UntilSettled();
         }
 
-        private bool TopShown => !Sheet.Slots.Top.ClassListContains(CardChromeView.TopHiddenClass) && Sheet.Slots.Top.resolvedStyle.display == DisplayStyle.Flex;
+        // Past the hero: the bar no longer lies on its picture
+        private IEnumerator PastTheHero() => ScrollTo(Stack.HeaderView.HeroBottom() + 240f);
+
+        // The indicators at rest (the slide over)
+        private IEnumerator UntilSettled()
+        {
+            for (int i = 0; i < 120 && Bar.Sliding; i++) yield return null;
+            Assert.IsFalse(Bar.Sliding, "precondition: the indicator came to rest");
+        }
+
+        private bool BottomShown => !Sheet.BottomArea.ClassListContains(CardChromeView.BottomHiddenClass);
+        private Rect Band => Bar.Row.worldBound;
+        private float Highest => Bar.PaintedPath.SelectMany(PointsOf).Min(p => p.y);
+        private float Lowest => Bar.PaintedPath.SelectMany(PointsOf).Max(p => p.y);
+
+        private static IEnumerable<Vector2> PointsOf(NavBarShapeRule.Command c)
+        {
+            if (c.Op == NavBarShapeRule.Op.Close) yield break;
+            yield return c.P1;
+            if (c.Op == NavBarShapeRule.Op.Quad || c.Op == NavBarShapeRule.Op.Cubic) yield return c.P2;
+            if (c.Op == NavBarShapeRule.Op.Cubic) yield return c.P3;
+        }
+
+        private static Color Theme(VisualElement from, string token)
+        {
+            Assert.IsTrue(CardTokenColours.TryResolve(from, token, out Color c), "precondition: the theme has " + token);
+            return c;
+        }
+
+        private static void AreSame(Color expected, Color actual, string what) =>
+            Assert.Less(((Vector4)expected - (Vector4)actual).magnitude, 0.01f, what + ": expected " + (Color32)expected + ", drawn " + (Color32)actual);
 
         [UnityTest]
-        public IEnumerator TheBar_HoldsTheCardsGroups_FloatsUnderTheTitleBar_AndComesAfterTheHero_WithNoJump()
+        public IEnumerator TheDefaultBar_FloatsAtTheBottom_SolidRaisedFilled_OverTheHero_TheHerosWordsClearOfIt()
         {
-            yield return OpenWithTheBar();
-            Assert.AreEqual(NavBarView.ElementKey, Sheet.Slots.TopKey, "the bar is the top slot's element");
-            Assert.AreSame(Sheet.Slots.Top, Bar.Root.parent, "...in the top host, under the title bar");
+            yield return Open();
+            Assert.AreEqual(NavBarView.ElementKey, Sheet.Slots.BottomKey, "the default bar is the bottom slot's element");
+            Assert.IsNull(Sheet.Slots.TopKey, "...no top element (the old Top Bar defaults to none)");
+            Assert.IsNull(Sheet.Slots.MenuKey);
+            Assert.IsNull(Sheet.Slots.FloatingKey);
+            Assert.IsNull(Sheet.Slots.EdgeKey);
             Assert.GreaterOrEqual(Bar.Items.Count, NavBarRule.MinEntries, "the card's groups");
-            Assert.AreEqual(Bar.Entries.Count, Bar.Items.Count);
-            var families = Sheet.Nav.Model.Targets.Select(t => { Sheet.Nav.TryGetEntry(t, out var e); return e.Definition.Family; }).Distinct().ToList();
-            foreach (var entry in Bar.Entries) CollectionAssert.Contains(families, entry.Item.Key, "a group of a family the card has blocks of");
-            Assert.IsNull(Sheet.Slots.MenuKey, "no menu while the bar is on");
-            Assert.IsNull(Sheet.Slots.FloatingKey, "...no floating button");
-            Assert.IsNull(Sheet.Slots.EdgeKey, "...no edge");
-
-            Assert.IsFalse(TopShown, "at rest the hero is the screen: the bar waits (After The Hero)");
-            float viewport = Scroll.layout.height;
-            yield return LookMeasure.Render(Domain, "bar", "rest_full", Sheet.Root);
-            yield return ScrollTo(Stack.HeaderView.HeroHeight * 0.5f);
-            Assert.IsTrue(TopShown, "the visitor scrolled the picture away: the bar comes");
-            Assert.AreEqual(viewport, Scroll.layout.height, OnePixel, "it floats: the stack keeps its size, nothing jumps");
-            var bar = Bar.Root.worldBound;
-            var title = Stack.HeaderSlot.worldBound;
-            Assert.GreaterOrEqual(bar.yMin, title.yMax - OnePixel, "it sits under the title bar");
-            float margin = NavBarRule.SideMargin(Bar.Settings);
-            Assert.AreEqual(Sheet.Root.worldBound.xMin + margin, bar.xMin, OnePixel, "floating: inset by its side margin");
-            yield return LookMeasure.Render(Domain, "bar", "scrolled_pill", Sheet.Root);
+            Assert.IsTrue(BottomShown, "Show Always: there at rest");
+            Assert.IsTrue(Bar.OverHero, "at rest it lies on the hero's picture");
+            Assert.IsFalse(Bar.OverImage, "Solid stays solid over the hero");
+            // - it floats: inset by its side gap, over the stack's foot (the stack runs under it)
+            var sheet = Sheet.Root.worldBound;
+            Assert.Greater(Band.xMin, sheet.xMin + 4f, "floating: inset from the side");
+            Assert.AreEqual(sheet.xMax - Band.xMax, Band.xMin - sheet.xMin, OnePixel, "...the same on both sides");
+            Assert.Less(Band.yMax, sheet.yMax - 4f, "...a gap above the screen's foot");
+            Assert.Greater(Scroll.worldBound.yMax, Band.yMin, "the stack runs under the bar (it floats, out of the flow)");
+            // - Solid: the shadow, the opaque bar colour
+            Assert.IsTrue(Bar.PaintedShadow, "Solid + Floating: the shadow");
+            AreSame(Theme(Bar.Root, "--ts-bar"), Bar.PaintedFill, "the fill");
+            // - Raised + Filled: the bump under the chosen group and the disc riding up in it
+            Assert.GreaterOrEqual(Bar.ChosenIndex, 0, "a group is chosen");
+            Assert.Less(Highest, Bar.Room - 1f, "the edge bends up into a bump");
+            Assert.AreEqual(DisplayStyle.Flex, Bar.Disc.resolvedStyle.display, "the disc");
+            Assert.Less(Bar.Disc.worldBound.yMin, Band.yMin - 4f, "...rides up past the bar's edge");
+            Assert.AreEqual(Bar.Items[Bar.ChosenIndex].Button.worldBound.center.x, Bar.Disc.worldBound.center.x, 1f, "...over the chosen group");
+            AreSame(Theme(Bar.Root, "--ts-accent"), Bar.Disc.resolvedStyle.backgroundColor, "the disc in the accent");
+            Assert.AreEqual(0f, Bar.Items[Bar.ChosenIndex].Icon.resolvedStyle.opacity, 0.01f, "the chosen icon rides in the disc, not twice");
+            // - the hero's words (and its actions) finish above the bar and its disc
+            var header = Stack.HeaderView;
+            Assert.LessOrEqual(header.Foot.worldBound.yMax, Bar.Disc.worldBound.yMin + OnePixel, "the hero's words rise clear of the bar (v5)");
+            yield return Save("default_bottom_light_OverTheHero");
         }
 
         [UnityTest]
-        public IEnumerator ATap_LandsTheGroupsFirstBlockUnderTheChrome_AndMarksIt_TheIndicatorUnderIt()
+        public IEnumerator ARealTap_JumpsToTheGroup_TheBumpSlidesThereWithAnOvershoot_AndFollowsRealDrags()
         {
-            yield return OpenWithTheBar();
-            yield return ScrollTo(Stack.HeaderView.HeroHeight);
-            int last = Bar.Items.Count - 1;
-            Bar.Tap(last);
-            yield return CardTestInput.Settle(1.2f);
-            Assert.AreEqual(last, Bar.ChosenIndex, "the group tapped is the chosen one");
-            Assert.IsTrue(Bar.Items[last].Button.ClassListContains(NavBarView.ChosenClass));
-            Assert.AreEqual(1, Bar.Items.Count(i => i.Button.ClassListContains(NavBarView.ChosenClass)), "...and no other");
+            yield return Open();
+            yield return PastTheHero();
+            int from = Bar.ChosenIndex, last = Bar.Items.Count - 1;
+            Assert.Less(from, last, "precondition: the last group is not the chosen one");
+            float target = Bar.Items[last].Button.worldBound.center.x - Bar.Root.worldBound.xMin;
+            var button = Bar.Items[last].Button;
+            // - a real tap on the last group's button, then every frame of the slide sampled
+            float furthest = float.MinValue;
+            yield return CardTestInput.Tap(button.panel, button.worldBound.center);
+            for (int i = 0; i < 90 && (Bar.Sliding || i < 2); i++)
+            {
+                furthest = Mathf.Max(furthest, Bar.Centre);
+                yield return null;
+            }
+            yield return CardTestInput.Settle(1f);
+            yield return UntilSettled();
+            Assert.AreEqual(last, Bar.ChosenIndex, "the tapped group is the chosen one");
+            Assert.Greater(furthest, target + 1f, "the bump passed its target on the way (v5's overshoot)");
+            Assert.AreEqual(target, Bar.Centre, 0.5f, "...and settled on it");
             string first = Bar.Entries[last].FirstTarget;
-            var slot = Stack.SlotOfBlock(first);
-            Assert.AreEqual(Stack.LandingTop(slot), Scroll.scrollOffset.y, 2f, "the jump rests on the group's first block");
-            float under = Sheet.Slots.Top.worldBound.yMax;
-            Assert.GreaterOrEqual(slot.worldBound.yMin + 2f, Stack.Scroll.worldBound.yMin + Stack.LandingInset - OnePixel,
-                "...under the floating bars and the strip, in sight");
-            Assert.AreEqual(Bar.Items[last].Button.worldBound.center.x, Bar.Indicator.worldBound.center.x, 1f, "the indicator under the chosen group");
-            var label = Bar.Items[last].Label;
-            Assert.AreEqual(FontStyle.Bold, label.resolvedStyle.unityFontStyleAndWeight, "the chosen words bolder (never colour alone)");
-            yield return LookMeasure.Render(Domain, "bar", "tapped_last", Sheet.Root);
+            Assert.AreEqual(Stack.LandingTop(Stack.SlotOfBlock(first)), Scroll.scrollOffset.y, 2f, "the jump rests on the group's first block");
+            Assert.AreEqual(button.worldBound.center.x, Bar.Disc.worldBound.center.x, 1f, "the disc over the tapped group");
+            var peak = Bar.PaintedPath[2].P3;
+            Assert.AreEqual(Highest, peak.y, 0.01f, "precondition: the path's highest point is the bump's peak");
+            Assert.Less(Mathf.Abs(peak.x - target), button.worldBound.width * 0.5f, "the bump's peak under the tapped group (held clear of the corner)");
+            Assert.AreEqual(FontStyle.Bold, Bar.Items[last].Label.resolvedStyle.unityFontStyleAndWeight, "the chosen words bolder (never colour alone)");
+            yield return Save("tapped_last_light");
+
+            // - real drags back up the card: the chosen group follows the scroll, and the disc follows the chosen group
+            for (int i = 0; i < 8 && Bar.ChosenIndex == last; i++)
+            {
+                var reach = CardTestInput.ReachableStack(Sheet);
+                yield return CardTestInput.TouchDrag(Scroll.panel, new Vector2(reach.center.x, reach.yMin + 40f), new Vector2(0f, reach.height * 0.6f));
+                yield return CardTestInput.UntilStill(Sheet);
+            }
+            yield return CardTestInput.Settle(1f);
+            yield return UntilSettled();
+            Assert.Less(Bar.ChosenIndex, last, "after real drags up the card, an earlier group is the one being read");
+            Assert.AreEqual(Bar.Items[Bar.ChosenIndex].Button.worldBound.center.x, Bar.Disc.worldBound.center.x, 1f, "the disc followed it");
+        }
+
+        // One case per option value: what each value draws, read off the running card
+        private static IEnumerable<string> OptionValues() => new[]
+        {
+            "position=bottom", "position=top", "shape=floating", "shape=full_width", "fill=solid", "fill=glass", "fill=clear",
+            "indicator=raised", "indicator=pill", "indicator=underline", "indicator=none", "chosen_icon=plain", "chosen_icon=filled",
+            "labels=icon_and_text", "labels=icon", "labels=text", "labels=selected_only", "selected_color=accent", "selected_color=ink",
+            "selected_color=group", "bold=on", "bold=off", "show=always", "show=after_hero", "hide=off", "hide=on",
+        };
+
+        [UnityTest]
+        public IEnumerator EveryOptionValue_ChangesWhatTheVisitorSees([ValueSource(nameof(OptionValues))] string option)
+        {
+            string key = option.Split('=')[0], value = option.Split('=')[1];
+            // - the indicator / chosen icon / labels / colour cases on the pill, so the chosen icon is in its own place to read
+            bool onPill = key == "chosen_icon" || key == "bold" || key == "selected_color";
+            yield return Open(b =>
+            {
+                if (onPill) b.indicator = CardOptions.NavBarIndicatorPill;
+                switch (key)
+                {
+                    case "position": b.position = value; break;
+                    case "shape": b.shape = value; break;
+                    case "fill": b.fill = value; break;
+                    case "indicator": b.indicator = value; break;
+                    case "chosen_icon": b.chosen_icon = value; break;
+                    case "labels": b.labels = value; break;
+                    case "selected_color": b.selected_color = value; break;
+                    case "bold":
+                        b.bold_selected = value == "on";
+                        // - the chosen icon in its own place, where its lines are measured
+                        b.chosen_icon = CardOptions.NavBarChosenIconPlain;
+                        break;
+                    case "show": b.show = value; break;
+                    case "hide": b.hide_on_scroll = value == "on" ? CardOptions.NavBarHideDown : CardOptions.NavBarHideNever; break;
+                }
+            });
+            var sheet = Sheet.Root.worldBound;
+            var chosen = Bar.Items[Bar.ChosenIndex];
+            switch (option)
+            {
+                case "position=bottom":
+                    Assert.AreEqual(NavBarView.ElementKey, Sheet.Slots.BottomKey);
+                    Assert.Greater(Band.center.y, sheet.center.y, "at the bottom of the card");
+                    break;
+                case "position=top":
+                    Assert.AreEqual(NavBarView.ElementKey, Sheet.Slots.TopKey, "in the top host");
+                    Assert.Less(Band.center.y, sheet.center.y, "at the top of the card");
+                    // - the chrome row is the X and the title's row (the Fade band runs on below it, fading out over what lies there)
+                    Assert.GreaterOrEqual(Band.yMin, Mathf.Max(Sheet.CloseButton.worldBound.yMax, Stack.HeaderSlot.worldBound.yMax) - OnePixel,
+                        "under the chrome row");
+                    break;
+                case "shape=floating":
+                    Assert.AreEqual(sheet.width - 2f * (Band.xMin - sheet.xMin), Band.width, OnePixel, "inset the same on both sides");
+                    Assert.Greater(Band.xMin - sheet.xMin, 4f);
+                    break;
+                case "shape=full_width":
+                    Assert.AreEqual(sheet.width, Band.width, OnePixel, "edge to edge");
+                    Assert.IsTrue(Bar.PaintedPath.Any(c => c.Op == NavBarShapeRule.Op.Move && Mathf.Abs(c.P1.x) < 0.01f), "square corners: the path starts at x 0");
+                    Assert.IsFalse(Bar.PaintedShadow, "full width: no shadow");
+                    break;
+                case "fill=solid":
+                    Assert.IsTrue(Bar.PaintedShadow, "the shadow only under Solid");
+                    Assert.AreEqual(1f, Bar.PaintedFill.a, 0.01f, "opaque");
+                    break;
+                case "fill=glass":
+                    Assert.IsFalse(Bar.PaintedShadow, "no shadow under glass (it shows through as a grey haze)");
+                    Assert.Less(Bar.PaintedFill.a, 1f, "see-through");
+                    Assert.IsTrue(Bar.OverImage, "over the hero: white on dark glass");
+                    AreSame(Theme(Bar.Root, "--ts-chrome-glass-hero"), Bar.PaintedFill, "the dark glass over the hero");
+                    yield return PastTheHero();
+                    AreSame(Theme(Bar.Root, "--ts-navbar-glass"), Bar.PaintedFill, "the bar's glass after it");
+                    break;
+                case "fill=clear":
+                    Assert.IsFalse(Bar.PaintedShadow);
+                    Assert.AreEqual(0f, Bar.PaintedFill.a, 0.001f, "transparent over the hero");
+                    AreSame(Theme(Bar.Root, "--ts-on-scrim"), chosen.Label.resolvedStyle.color, "...its words white on the picture");
+                    yield return PastTheHero();
+                    AreSame(Theme(Bar.Root, "--ts-bar"), Bar.PaintedFill, "solid after the hero");
+                    break;
+                case "indicator=raised":
+                    Assert.Less(Highest, Bar.Room - 1f, "the bump");
+                    Assert.Less(Bar.Disc.worldBound.yMin, Band.yMin, "the disc rides up past the edge");
+                    break;
+                case "indicator=pill":
+                    Assert.AreEqual(Bar.Room, Highest, 0.01f, "a flat edge");
+                    Assert.AreEqual(DisplayStyle.Flex, Bar.Pill.resolvedStyle.display, "the pill");
+                    Assert.AreEqual(chosen.Button.worldBound.center.x, Bar.Pill.worldBound.center.x, 1f, "...behind the chosen group");
+                    Assert.AreEqual(DisplayStyle.None, Bar.Underline.resolvedStyle.display);
+                    break;
+                case "indicator=underline":
+                    Assert.AreEqual(Bar.Room, Highest, 0.01f, "a flat edge");
+                    Assert.AreEqual(DisplayStyle.Flex, Bar.Underline.resolvedStyle.display, "the underline");
+                    Assert.AreEqual(chosen.Button.worldBound.center.x, Bar.Underline.worldBound.center.x, 1f, "...under the chosen group");
+                    Assert.Greater(Bar.Underline.worldBound.center.y, chosen.Label.worldBound.yMax - OnePixel, "...below its words");
+                    break;
+                case "indicator=none":
+                    Assert.AreEqual(Bar.Room, Highest, 0.01f, "a flat edge");
+                    Assert.AreEqual(DisplayStyle.None, Bar.Pill.resolvedStyle.display);
+                    Assert.AreEqual(DisplayStyle.None, Bar.Underline.resolvedStyle.display);
+                    Assert.AreEqual(FontStyle.Bold, chosen.Label.resolvedStyle.unityFontStyleAndWeight, "still marked by its bolder words");
+                    break;
+                case "chosen_icon=plain":
+                    Assert.AreEqual(DisplayStyle.None, Bar.Disc.resolvedStyle.display, "no disc");
+                    Assert.AreEqual(1f, chosen.Icon.resolvedStyle.opacity, 0.01f, "the chosen icon in its place");
+                    break;
+                case "chosen_icon=filled":
+                    Assert.AreEqual(DisplayStyle.Flex, Bar.Disc.resolvedStyle.display, "an accent disc");
+                    Assert.AreEqual(chosen.Icon.worldBound.center.y, Bar.Disc.worldBound.center.y, 1f, "...at the icon's own place");
+                    Assert.AreEqual(chosen.Icon.worldBound.center.x, Bar.Disc.worldBound.center.x, 1f);
+                    Assert.Less(Bar.Disc.worldBound.width, Bar.BarHeight, "Filled's smaller disc, inside the bar");
+                    break;
+                case "labels=icon_and_text":
+                    Assert.IsTrue(Bar.Items.All(i => i.Label.resolvedStyle.display == DisplayStyle.Flex), "every word");
+                    Assert.IsTrue(Bar.Items.Where(i => i != chosen).All(i => i.Icon.resolvedStyle.display == DisplayStyle.Flex), "every icon");
+                    break;
+                case "labels=icon":
+                    Assert.IsTrue(Bar.Items.All(i => i.Label.resolvedStyle.display == DisplayStyle.None), "no words");
+                    Assert.AreEqual(Bar.BarHeight, Band.height, OnePixel, "the shorter bar (no row of words)");
+                    break;
+                case "labels=text":
+                    Assert.IsTrue(Bar.Items.All(i => i.Icon.resolvedStyle.display == DisplayStyle.None), "no icons");
+                    Assert.IsTrue(Bar.Items.All(i => i.Label.resolvedStyle.display == DisplayStyle.Flex), "every word");
+                    Assert.AreEqual(DisplayStyle.Flex, Bar.Disc.resolvedStyle.display, "Raised still rides its disc");
+                    break;
+                case "labels=selected_only":
+                    Assert.AreEqual(DisplayStyle.Flex, chosen.Label.resolvedStyle.display, "the chosen group's words");
+                    Assert.IsTrue(Bar.Items.Where(i => i != chosen).All(i => i.Label.resolvedStyle.display == DisplayStyle.None), "...only");
+                    break;
+                case "selected_color=accent":
+                    AreSame(Theme(Bar.Root, "--ts-accent"), chosen.Label.resolvedStyle.color, "the chosen words in the accent");
+                    break;
+                case "selected_color=ink":
+                    AreSame(Theme(Bar.Root, "--ts-ink"), chosen.Label.resolvedStyle.color, "the chosen words in the ink");
+                    AreSame(Theme(Bar.Root, "--ts-ink"), Bar.Disc.resolvedStyle.backgroundColor, "...and the disc");
+                    break;
+                case "selected_color=group":
+                    AreSame(Theme(Bar.Root, Bar.Entries[Bar.ChosenIndex].Item.ColorToken), Bar.Disc.resolvedStyle.backgroundColor, "the disc in the group's colour");
+                    AreSame(Theme(Bar.Root, "--ts-ink"), chosen.Label.resolvedStyle.color, "...its words stay text colour");
+                    break;
+                case "bold=on":
+                case "bold=off":
+                    Assert.AreEqual(value == "on", Bar.Root.ClassListContains("nav-bar--bold"));
+                    // - the heavier stroke is pixels: the chosen icon's ink on the render, bold against plain
+                    yield return CompareIconInk(value == "on");
+                    break;
+                case "show=always":
+                    Assert.IsTrue(BottomShown, "there at rest, over the hero");
+                    break;
+                case "show=after_hero":
+                    Assert.IsFalse(BottomShown, "at rest the hero is the screen: the bar waits");
+                    yield return ScrollTo(Stack.HeaderView.HeroHeight * 0.7f);
+                    Assert.IsTrue(BottomShown, "the hero scrolled away: the bar comes");
+                    break;
+                case "hide=off":
+                case "hide=on":
+                    yield return PastTheHero();
+                    for (int i = 0; i < 3; i++)
+                    {
+                        // - real finger strokes down the card, inside the part of the stack a finger reaches
+                        var reach = CardTestInput.ReachableStack(Sheet);
+                        yield return CardTestInput.TouchDrag(Scroll.panel, new Vector2(reach.center.x, reach.yMax - 40f), new Vector2(0f, -reach.height * 0.3f));
+                        if (value == "on" && !BottomShown) break;
+                    }
+                    yield return CardTestInput.Settle(0.6f);
+                    Assert.AreEqual(value == "off", BottomShown, value == "on" ? "reading down: it slides away" : "off: it stays while reading down");
+                    break;
+            }
+            yield return Save("option_" + key + "_" + value);
+        }
+
+        // The chosen icon's ink on the render: bold draws more of it than plain (both rendered, the same card, the same group)
+        private IEnumerator CompareIconInk(bool boldNow)
+        {
+            int Ink(Texture2D t, RectInt r, Color ground)
+            {
+                int count = 0;
+                for (int y = r.yMin; y < r.yMax; y++)
+                    for (int x = r.xMin; x < r.xMax; x++)
+                        if (((Vector4)t.GetPixel(x, y) - (Vector4)ground).magnitude > 0.25f) count++;
+                return count;
+            }
+            Texture2D a = null, b = null;
+            var icon = Bar.Items[Bar.ChosenIndex].Icon;
+            try
+            {
+                yield return ThemePixelSet.GrabStill("bold_" + boldNow, Sheet.Root, r => a = r);
+                Bar.Root.EnableInClassList("nav-bar--bold", !boldNow);
+                yield return null;
+                yield return null;
+                yield return ThemePixelSet.GrabStill("bold_" + !boldNow, Sheet.Root, r => b = r);
+                var area = ThemePixelSet.ScreenRectOf(icon, a);
+                var ground = a.GetPixel(area.xMin, area.yMin);
+                int now = Ink(a, area, ground), other = Ink(b, area, ground);
+                Assert.Greater(now + other, 0, "precondition: the icon draws pixels");
+                if (boldNow) Assert.Greater(now, other * 1.1f, "bold draws heavier lines than plain (" + now + " vs " + other + " px)");
+                else Assert.Less(now * 1.1f, other, "plain draws thinner lines than bold (" + now + " vs " + other + " px)");
+            }
+            finally
+            {
+                Bar.Root.EnableInClassList("nav-bar--bold", boldNow);
+                if (a != null) Object.Destroy(a);
+                if (b != null) Object.Destroy(b);
+            }
         }
 
         [UnityTest]
-        public IEnumerator EachIndicator_AndTheFullWidthShape_AndTheBottomPosition_DrawAsSet(
-            [Values(CardOptions.NavBarIndicatorPill, CardOptions.NavBarIndicatorUnderline, CardOptions.NavBarIndicatorRaised, CardOptions.NavBarIndicatorNone)] string indicator)
+        public IEnumerator RaisedAtTop_TheBumpHangsDown_TheDiscBelowTheBarsFoot()
         {
-            yield return OpenWithTheBar(b =>
-            {
-                b.indicator = indicator;
-                b.show = CardOptions.NavBarShowAlways;
-            });
-            Assert.IsTrue(TopShown, "Show = Always: the bar is there at rest, over the hero");
-            Bar.Tap(1);
-            yield return CardTestInput.Settle(1.2f);
-            Assert.IsTrue(Bar.Root.ClassListContains("nav-bar--indicator-" + indicator));
-            bool drawn = indicator != CardOptions.NavBarIndicatorNone;
-            Assert.AreEqual(drawn ? DisplayStyle.Flex : DisplayStyle.None, Bar.Indicator.resolvedStyle.display, "the indicator drawn unless None");
-            if (indicator == CardOptions.NavBarIndicatorRaised)
-                Assert.Less(Bar.Indicator.worldBound.yMin, Bar.Root.worldBound.yMin - 4f, "raised: the disc rises past the bar's top edge");
-            if (indicator == CardOptions.NavBarIndicatorUnderline)
-                Assert.LessOrEqual(Bar.Indicator.worldBound.height, 4f, "underline: a short line");
-            yield return LookMeasure.Render(Domain, "indicators", indicator, Sheet.Root);
-
-            yield return Push(c =>
-            {
-                var b = c.card_settings.navigation.bar;
-                b.enabled = true;
-                b.indicator = indicator;
-                b.show = CardOptions.NavBarShowAlways;
-                b.shape = CardOptions.NavBarFullWidth;
-            });
-            yield return CardTestInput.Settle(0.4f);
-            Assert.AreEqual(Sheet.Root.worldBound.width, Bar.Root.worldBound.width, OnePixel, "full width: edge to edge");
-            Assert.AreEqual(0f, Bar.Ground.resolvedStyle.borderTopLeftRadius, 0.01f, "...square");
-            yield return LookMeasure.Render(Domain, "indicators", indicator + "_full_width", Sheet.Root);
-
-            yield return Push(c =>
-            {
-                var b = c.card_settings.navigation.bar;
-                b.enabled = true;
-                b.indicator = indicator;
-                b.show = CardOptions.NavBarShowAlways;
-                b.position = CardOptions.NavBarBottom;
-            });
-            yield return CardTestInput.Settle(0.4f);
-            Assert.AreEqual(NavBarView.ElementKey, Sheet.Slots.BottomKey, "the bar in the bottom host");
-            Assert.IsNull(Sheet.Slots.TopKey, "...and none at the top");
-            Assert.Greater(Bar.Root.worldBound.center.y, Sheet.Root.worldBound.center.y, "at the bottom of the card");
-            yield return LookMeasure.Render(Domain, "indicators", indicator + "_bottom", Sheet.Root);
+            yield return Open(b => b.position = CardOptions.NavBarTop);
+            yield return PastTheHero();
+            Assert.AreEqual(Bar.BarHeight + Bar.BumpHeight, Lowest, 0.01f, "the path's lowest point is the bump, its height below the bar's foot");
+            Assert.AreEqual(0f, Highest, 0.01f, "...its top edge straight");
+            Assert.AreEqual(Band.yMax, Bar.Disc.worldBound.center.y, 1f, "the disc hangs on the bar's foot, in the bump");
+            Assert.AreEqual(Bar.Items[Bar.ChosenIndex].Button.worldBound.center.x, Bar.Disc.worldBound.center.x, 1f, "...under the chosen group");
+            yield return Save("raised_top_light_AfterTheHero");
         }
 
         [UnityTest]
-        public IEnumerator AMergedGroup_LeadsToTheFirstBlockOfAnyOfItsFamilies_AndTheBarOffBringsTheOldElementsBack()
+        public IEnumerator TheLabels_ReadAt7To1_OnTheRealRender_OnEveryFill_OverTheHeroAndAfterIt(
+            [Values(CardOptions.NavBarBottom, CardOptions.NavBarTop)] string position, [Values("light", "dark")] string mode)
         {
-            yield return OpenWithTheBar(b =>
+            ThemeController.SetMode(mode);
+            Session.CardSettings.container.reduce_motion = true;
+            var report = new List<string>();
+            float worst = float.MaxValue;
+            string worstWhat = "";
+            foreach (string fill in CardOptions.NavBarFills)
             {
-                b.show = CardOptions.NavBarShowAlways;
+                yield return Open(b =>
+                {
+                    b.position = position;
+                    b.fill = fill;
+                    // - Labels Text On The Chosen would leave words out: every word read
+                    b.labels = CardOptions.NavBarLabelsIconAndText;
+                });
+                // - the push re-applies the wall's Default Mode: the mode measured is set after it, and proven
+                ThemeController.SetMode(mode);
+                yield return CardTestInput.Settle(0.2f);
+                Assert.AreEqual(mode, ThemeController.CurrentMode, "precondition: the card shows " + mode);
+                foreach (bool overHero in new[] { true, false })
+                {
+                    if (!overHero) yield return PastTheHero();
+                    else yield return ScrollTo(0f);
+                    if (overHero && !Bar.OverHero)
+                    {
+                        // - the Top bar lies on the hero only while the picture reaches past its foot: at the top of the card it does
+                        Assert.Fail("precondition: at the top of the card the " + position + " bar lies on the hero (" + fill + ")");
+                    }
+                    Assert.AreEqual(overHero, Bar.OverHero, "precondition: the bar is " + (overHero ? "" : "not ") + "over the hero");
+                    string place = overHero ? "OverTheHero" : "AfterTheHero";
+                    var labels = Bar.Items.Select(i => i.Label).Where(l => l.resolvedStyle.display == DisplayStyle.Flex).ToList();
+                    var colours = labels.ToDictionary(l => l, l => l.resolvedStyle.color);
+                    Texture2D drawn = null, under = null;
+                    try
+                    {
+                        yield return ThemePixelSet.GrabStill($"labels_{position}_{fill}_{mode}_{place}", null, r => drawn = r);
+                        foreach (var l in labels) l.style.color = Color.clear;
+                        yield return null;
+                        yield return ThemePixelSet.GrabStill($"labels_under_{position}_{fill}_{mode}_{place}", null, r => under = r);
+                        foreach (var l in labels)
+                        {
+                            var (ratio, worstPixel, inked) = ThemePixelSet.RingContrast(drawn, under, ThemePixelSet.ScreenRectOf(l, drawn), colours[l]);
+                            Assert.Greater(inked, 0, "precondition: the words '" + l.text + "' draw pixels");
+                            report.Add($"{position} {fill} {mode} {place} '{l.text}': {ratio:0.00}:1 (worst {(Color32)worstPixel}, words {(Color32)colours[l]})");
+                            if (ratio < worst) { worst = ratio; worstWhat = $"'{l.text}' {position} {fill} {mode} {place}"; }
+                        }
+                        System.IO.File.WriteAllBytes(TestEvidence.PathFor(Domain, $"labels_{position}_{fill}_{mode}_{place}.png"), drawn.EncodeToPNG());
+                    }
+                    finally
+                    {
+                        foreach (var l in labels) l.style.color = colours[l];
+                        if (drawn != null) Object.Destroy(drawn);
+                        if (under != null) Object.Destroy(under);
+                    }
+                }
+            }
+            System.IO.File.AppendAllText(TestEvidence.PathFor(Domain, "labels_ratios.txt"), string.Join("\n", report) + "\n");
+            Assert.GreaterOrEqual(worst, Aaa, "every group's words keep 7:1 against what they are drawn over -- worst: " + worstWhat + "\n" + string.Join("\n", report));
+        }
+
+        [UnityTest]
+        public IEnumerator AnOldConfigsUnderTitle_ShowsTheBarAtTop_AMergedGroupLandsOnEitherFamily_AndOffTakesTheBarAway()
+        {
+            yield return Open(b =>
+            {
+                b.position = CardOptions.NavBarUnderTitle;
                 b.items = new List<CardNavBarItem>
                 {
                     new() { key = "group_1", families = new List<string> { BuiltInFamilies.Media, BuiltInFamilies.Guides },
@@ -174,6 +480,7 @@ namespace TileStories.Tests
                     new() { key = BuiltInFamilies.About, families = new List<string> { BuiltInFamilies.About } },
                 };
             });
+            Assert.AreEqual(NavBarView.ElementKey, Sheet.Slots.TopKey, "an old config's under_title is Top on the running card");
             Assert.AreEqual(2, Bar.Items.Count, "the two groups the wall made");
             Assert.That(Bar.Items[0].Label.text, Is.EqualTo("Watch").Or.EqualTo("Ver"), "the group's own words");
             string first = Sheet.Nav.Model.Targets.First(t =>
@@ -182,12 +489,21 @@ namespace TileStories.Tests
                 return e.Definition.Family == BuiltInFamilies.Media || e.Definition.Family == BuiltInFamilies.Guides;
             });
             Assert.AreEqual(first, Bar.Entries[0].FirstTarget, "the merged group lands on the first block of either family");
-            yield return LookMeasure.Render(Domain, "bar", "merged", Sheet.Root);
 
-            yield return Push(c => c.card_settings.navigation.bar.enabled = false);
+            yield return Push(b => b.enabled = false);
             yield return CardTestInput.Settle(0.4f);
-            Assert.AreNotEqual(NavBarView.ElementKey, Sheet.Slots.TopKey, "off: the bar is gone");
-            Assert.IsNull(Bar.Root.parent, "...out of the card");
+            Assert.IsNull(Bar.Root.parent, "off: the bar is out of the card");
+            Assert.IsFalse(Sheet.Root.ClassListContains(NavSlots.SheetBarBottomClass), "...and the stack's end no longer keeps clear of it");
+        }
+
+        // The card as the visitor sees it now -> TestEvidence/Premium/P2/<name>.png
+        private IEnumerator Save(string name)
+        {
+            Texture2D shot = null;
+            yield return ThemePixelSet.GrabStill(name, null, r => shot = r);
+            if (shot == null) yield break;
+            System.IO.File.WriteAllBytes(TestEvidence.PathFor(Domain, name + ".png"), shot.EncodeToPNG());
+            Object.Destroy(shot);
         }
     }
 }

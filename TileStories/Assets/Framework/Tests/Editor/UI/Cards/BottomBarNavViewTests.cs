@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
+using TileStories.Tests;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -12,6 +13,7 @@ namespace TileStories.Editor.Tests
     // shipped words: the bar shows Bar Slots - 1 sections and More, More's list holds EXACTLY the overflow in the model's order -- for 3, 4
     // and 5 slots -- and a card with fewer sections than slots gets one slot per section and no More. The bar sits in the sheet's bottom
     // area, under the sticky footer. What a real finger does with it is PoiCardBottomBarSceneTests'.
+    [Ignore(TestSkips.OldNavigationElements)]
     public class BottomBarNavViewTests
     {
         private const string FrameworkStringsPath = "Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset";

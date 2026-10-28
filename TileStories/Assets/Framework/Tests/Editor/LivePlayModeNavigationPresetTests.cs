@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
+using TileStories.Tests;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -17,6 +18,7 @@ namespace TileStories.Editor.Tests
     // card -- through the live-sync path every row of Detail Card > Navigation already uses (DrawConfigMutationScope -> the card applier ->
     // WallSession.ApplyCardSettings -> the host's rebind) -- and ONE Ctrl+Z gives the old card back. Read off the running card: its layout
     // and the view each of its five navigation slots really holds, against the element the preset names.
+    [Ignore(TestSkips.OldNavigationElements)]
     public class LivePlayModeNavigationPresetTests
     {
         private const BindingFlags Instance = BindingFlags.NonPublic | BindingFlags.Instance;

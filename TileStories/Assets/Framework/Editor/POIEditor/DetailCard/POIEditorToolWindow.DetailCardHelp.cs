@@ -55,6 +55,12 @@ namespace TileStories.Editor
             "The most of the screen height the Half stop may cover (0.25 to 0.40). Keeps the wall visible above the card; " +
             "dragging up again opens it full.";
 
+        private const string CardTopBandHelp =
+            "What the card's top row (the close and settings marks, the card's title) sits on once the visitor scrolled past the hero's " +
+            "picture. Fade (the default): the card's own colour, solid behind the row, then fading to nothing below it, so the content " +
+            "dissolves under the row with no edge. Glass: a dense glass band with a thin line at its foot. Over the hero's picture neither " +
+            "shows: the marks sit on the picture.";
+
         private const string CardFullHeightHelp =
             "How high the card rises at its Full stop. To The Top (the default): up to the top of the screen, below the phone's status bar " +
             "and notch; the card's tinted glass keeps the camera view showing through it. Leave A Camera Strip: it stops short of the top " +

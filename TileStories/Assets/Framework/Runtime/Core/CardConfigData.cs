@@ -110,9 +110,10 @@ namespace TileStories
         // Back Button: "step_down" (the default: each system Back press undoes the innermost thing -- the full view, then an open menu or
         // list over the card, then one stop down, then closes the card, NavBackRule) | "none" (Back is left to the app) (CardOptions.BackButtons)
         public string back_button = CardOptions.BackButtonStepDown;
-        // Top Bar: the element in the strip under the header (a NavElementRegistry key of the top slot, "text_tabs" the default) |
-        // "none" (CardOptions.NavNone). A key nothing registered draws no strip (the Editor shows it as missing)
-        public string top = BuiltInNavElements.TextTabs;
+        // Top Bar: the element in the strip under the header (a NavElementRegistry key of the top slot: text_tabs, ...) | "none"
+        // (CardOptions.NavNone, the default: the Navigation Bar is the card's way round). A key nothing registered draws no strip (the Editor
+        // shows it as missing)
+        public string top = CardOptions.NavNone;
         // Bottom Bar: the element under the stack, BELOW the sticky CTA footer, in the thumb zone (a NavElementRegistry key of the bottom
         // slot) | "none" (CardOptions.NavNone, the default). The footer and the bar are ONE bottom area for CardChromeRule
         public string bottom = CardOptions.NavNone;
@@ -154,9 +155,9 @@ namespace TileStories
         public string layout = CardOptions.LayoutScroll;
         // Open One At A Time (accordion only): opening a row closes the others
         public bool accordion_one_open = false;
-        // The Navigation Bar (_3.3 S4a review, Detail Card > Navigation > Navigation Bar): ONE configurable bar of the card's groups -- its
-        // look, its selection effects, where it sits and when it shows, and its groups table. While it is on the card draws it in place of
-        // the Top Bar / Bottom Bar / Menu / Floating Button / Edge elements (their values are kept). Off in a config that never wrote it
+        // The Navigation Bar (_3.3 S4 third round, Detail Card > Navigation > Navigation Bar): ONE configurable bar of the card's groups --
+        // where it sits, its shape and fill, how the chosen group shows, when it shows, and its groups table. While it is on (the default)
+        // the card draws it in place of the Top Bar / Bottom Bar / Menu / Floating Button / Edge elements (their values are kept)
         public CardNavBarSettings bar = new();
 
         public const int MinBlocksMin = 2;
@@ -189,58 +190,41 @@ namespace TileStories
         public List<LocalizedEntry> label = new();
     }
 
-    // The Navigation Bar as a whole (_3.3 S4a review): what NavBarView draws and NavBarRule reads. Every choice is a CardOptions.NavBar*
-    // key; an unknown value reads as the first (the default) of its list, so the Editor row and the card always agree
+    // The Navigation Bar as a whole (_3.3 S4 third round, v5's Tweaks "Navigation Bar", in that order): what NavBarView draws and NavBarRule
+    // reads. Every choice is a CardOptions.NavBar* key; an unknown value reads as the option's default, so the Editor row and the card agree.
+    // A config written before v5 loads unchanged: its "under_title" reads as Top, and the keys v5 dropped (corner_radius, fill_opacity, ...)
+    // are simply not read
     [Serializable]
     public class CardNavBarSettings
     {
-        public bool enabled = false;
-        // ---- where and when ----
-        // Position: "under_title" (the default: floating just under the card's title bar) | "bottom" (at the bottom of the screen)
-        public string position = CardOptions.NavBarUnderTitle;
-        // Show: "after_hero" (the default: it comes once the visitor scrolls the hero's picture away, so the hero stays clean) | "always"
-        public string show = CardOptions.NavBarShowAfterHero;
-        // Hide While Scrolling: "never" (the default) | "down" (it slides away while the visitor reads down, back on a move up)
-        public string hide_on_scroll = CardOptions.NavBarHideNever;
-        // ---- the bar's shape and fill ----
+        // On by default: the bar is the visitor's main way round the card (the old Top / Bottom / Menu / Floating / Edge elements default
+        // to none, and are drawn only while it is off)
+        public bool enabled = true;
+        // Position: "bottom" (the default: floating over the screen's foot, in the thumb zone) | "top" (under the chrome row)
+        public string position = CardOptions.NavBarBottom;
         // Shape: "floating" (the default: a rounded bar inset from the screen's sides) | "full_width" (edge to edge, square corners)
         public string shape = CardOptions.NavBarFloating;
-        // Corner radius and side margin of a floating bar (panel units), and the bar's height (its items' row)
-        public float corner_radius = 26f;
-        public float side_margin = 12f;
-        public float height = 56f;
-        // Fill: "glass" (the default: the theme's see-through bar colour) | "solid" (the theme's opaque bar colour) | "clear" (no fill)
-        public string fill = CardOptions.NavBarGlass;
-        // How much of the fill's own opacity is kept (1 = the theme's colour as it is)
-        public float fill_opacity = 1f;
-        // A hairline round the bar, and a soft shadow under it
-        public bool border = true;
-        public bool shadow = true;
-        // ---- the chosen group ----
-        // Indicator: "pill" (the default: a soft pill behind the chosen group) | "underline" | "raised" (a disc lifting the chosen icon
-        // above the bar's edge) | "none"
-        public string indicator = CardOptions.NavBarIndicatorPill;
-        // The indicator slides from group to group (off: it jumps)
-        public bool slide_indicator = true;
-        // The chosen group's icon drawn bolder, and a little larger
-        public bool bold_selected = true;
-        public bool enlarge_selected = false;
-        // The chosen group's colour: "group" (the default: its row's colour) | "accent" | "ink"
-        public string selected_color = CardOptions.NavBarColourGroup;
-        // The other groups' colour: "muted" (the default: the theme's quiet ink) | "group" (each its own colour)
-        public string idle_color = CardOptions.NavBarIdleMuted;
-        // Labels: "icon_and_text" (the default) | "icon" | "text" | "selected_only" (every icon, and the chosen group's word)
+        // Fill: "solid" (the default: the theme's opaque bar colour, the only fill with a shadow) | "glass" (see-through) | "clear"
+        // (transparent over the hero, solid after it)
+        public string fill = CardOptions.NavBarSolid;
+        // Indicator: "raised" (the default: the bar's edge bends into a bump under the chosen group, its icon riding up in an accent disc)
+        // | "pill" | "underline" | "none"
+        public string indicator = CardOptions.NavBarIndicatorRaised;
+        // Chosen Icon: "filled" (the default: an accent disc behind the chosen icon at its own place, with any indicator) | "plain"
+        public string chosen_icon = CardOptions.NavBarChosenIconFilled;
+        // Labels: "icon_and_text" (the default) | "icon" | "text" | "selected_only" (every icon, and the chosen group's words)
         public string labels = CardOptions.NavBarLabelsIconAndText;
-        // ---- the groups ----
-        // The Bar Groups table, in the bar's order. Empty = one group per family a visitor can navigate to (NavBarRule.DefaultItems); the
-        // first edit of the table writes them all, so their order is the wall's from then on
+        // Chosen Colour: "accent" (the default) | "ink" | "group" (its row's colour)
+        public string selected_color = CardOptions.NavBarColourAccent;
+        // Bold Chosen Icon: the chosen group's icon drawn with a heavier stroke
+        public bool bold_selected = true;
+        // Show: "always" (the default) | "after_hero" (it comes once the visitor scrolled the hero's picture away)
+        public string show = CardOptions.NavBarShowAlways;
+        // Hide While Scrolling: "never" (the default, off) | "down" (on: it slides away while the visitor reads down, back on a move up)
+        public string hide_on_scroll = CardOptions.NavBarHideNever;
+        // The Bar Groups table, in the bar's order. Empty = the framework's six groups (NavBarRule.DefaultRows); the first edit of the table
+        // writes them all, so their order is the wall's from then on
         public List<CardNavBarItem> items = new();
-
-        public const float CornerRadiusMax = 40f;
-        public const float SideMarginMax = 32f;
-        public const float HeightMin = 44f;
-        public const float HeightMax = 80f;
-        public const float FillOpacityMin = 0.2f;
     }
 
     // One row of the Bar Groups table: a group of the bar -- the families whose blocks it leads to, its words, its two icons and its colour
@@ -300,6 +284,10 @@ namespace TileStories
         // How high the Full stop rises: "top" (the top of the safe area) or "camera_strip" (short of it by the card's --ts-sheet-top-gap);
         // CardOptions.FullHeights, SheetStopRule.FullTopGap. An old config loads as top
         public string full_height = CardOptions.FullHeightTop;
+        // What the chrome row (the X, the title, settings) sits on once the hero is read (_3.3 S4 third round, v6): "fade" (the default: the
+        // sheet's own colour, opaque through the row, then fading to nothing -- no edge) | "glass" (a dense glass band with a hairline at its
+        // foot); CardOptions.TopBands. An old config loads as fade
+        public string top_band = CardOptions.TopBandFade;
         // A tap on empty camera space closes the card (and clears the selection)
         public bool dismiss_on_tap_outside = true;
         // Audio started in the card keeps playing in a mini-player after the card closes (Tier 4)
@@ -434,49 +422,58 @@ namespace TileStories
         public static readonly string[] FullHeights = { FullHeightTop, FullHeightCameraStrip };
         public static readonly string[] FullHeightLabels = { "To The Top", "Leave A Camera Strip" };
 
-        // The Navigation Bar's choices (CardNavBarSettings, _3.3 S4a review) and the Editor's words for them; the first of each list is the
-        // default an unknown value reads as
-        public const string NavBarUnderTitle = "under_title";
+        // What the chrome row sits on after the hero (CardContainerSettings.top_band, v6), and the Editor's words; the first is the default
+        public const string TopBandFade = "fade";
+        public const string TopBandGlass = "glass";
+        public static readonly string[] TopBands = { TopBandFade, TopBandGlass };
+        public static readonly string[] TopBandLabels = { "Fade", "Glass" };
+
+        // The Navigation Bar's choices (CardNavBarSettings, _3.3 S4 third round = v5's Tweaks) and the Editor's words for them, each list
+        // in v5's order; an unknown value reads as the option's default (NavBarRule)
         public const string NavBarBottom = "bottom";
-        public static readonly string[] NavBarPositions = { NavBarUnderTitle, NavBarBottom };
-        public static readonly string[] NavBarPositionLabels = { "Under The Title Bar", "Bottom Of The Screen" };
-        public const string NavBarShowAfterHero = "after_hero";
-        public const string NavBarShowAlways = "always";
-        public static readonly string[] NavBarShows = { NavBarShowAfterHero, NavBarShowAlways };
-        public static readonly string[] NavBarShowLabels = { "After The Hero", "Always" };
-        public const string NavBarHideNever = "never";
-        public const string NavBarHideDown = "down";
-        public static readonly string[] NavBarHides = { NavBarHideNever, NavBarHideDown };
-        public static readonly string[] NavBarHideLabels = { "Never", "While Reading Down" };
+        public const string NavBarTop = "top";
+        // A config written before v5 calls Top "under_title": it reads as Top (NavBarRule.Position)
+        public const string NavBarUnderTitle = "under_title";
+        public static readonly string[] NavBarPositions = { NavBarBottom, NavBarTop };
+        public static readonly string[] NavBarPositionLabels = { "Bottom", "Top" };
         public const string NavBarFloating = "floating";
         public const string NavBarFullWidth = "full_width";
         public static readonly string[] NavBarShapes = { NavBarFloating, NavBarFullWidth };
         public static readonly string[] NavBarShapeLabels = { "Floating", "Full Width" };
-        public const string NavBarGlass = "glass";
         public const string NavBarSolid = "solid";
+        public const string NavBarGlass = "glass";
         public const string NavBarClear = "clear";
-        public static readonly string[] NavBarFills = { NavBarGlass, NavBarSolid, NavBarClear };
-        public static readonly string[] NavBarFillLabels = { "Glass", "Solid", "Clear" };
+        public static readonly string[] NavBarFills = { NavBarSolid, NavBarGlass, NavBarClear };
+        public static readonly string[] NavBarFillLabels = { "Solid", "Glass", "Clear" };
+        public const string NavBarIndicatorRaised = "raised";
         public const string NavBarIndicatorPill = "pill";
         public const string NavBarIndicatorUnderline = "underline";
-        public const string NavBarIndicatorRaised = "raised";
         public const string NavBarIndicatorNone = "none";
-        public static readonly string[] NavBarIndicators = { NavBarIndicatorPill, NavBarIndicatorUnderline, NavBarIndicatorRaised, NavBarIndicatorNone };
-        public static readonly string[] NavBarIndicatorLabels = { "Pill", "Underline", "Raised", "None" };
-        public const string NavBarColourGroup = "group";
-        public const string NavBarColourAccent = "accent";
-        public const string NavBarColourInk = "ink";
-        public static readonly string[] NavBarSelectedColours = { NavBarColourGroup, NavBarColourAccent, NavBarColourInk };
-        public static readonly string[] NavBarSelectedColourLabels = { "Group Colour", "Accent", "Ink" };
-        public const string NavBarIdleMuted = "muted";
-        public static readonly string[] NavBarIdleColours = { NavBarIdleMuted, NavBarColourGroup };
-        public static readonly string[] NavBarIdleColourLabels = { "Muted", "Group Colour" };
+        public static readonly string[] NavBarIndicators = { NavBarIndicatorRaised, NavBarIndicatorPill, NavBarIndicatorUnderline, NavBarIndicatorNone };
+        public static readonly string[] NavBarIndicatorLabels = { "Raised", "Pill", "Underline", "None" };
+        public const string NavBarChosenIconPlain = "plain";
+        public const string NavBarChosenIconFilled = "filled";
+        public static readonly string[] NavBarChosenIcons = { NavBarChosenIconPlain, NavBarChosenIconFilled };
+        public static readonly string[] NavBarChosenIconLabels = { "Plain", "Filled" };
         public const string NavBarLabelsIconAndText = "icon_and_text";
         public const string NavBarLabelsIcon = "icon";
         public const string NavBarLabelsText = "text";
         public const string NavBarLabelsSelectedOnly = "selected_only";
         public static readonly string[] NavBarLabels = { NavBarLabelsIconAndText, NavBarLabelsIcon, NavBarLabelsText, NavBarLabelsSelectedOnly };
-        public static readonly string[] NavBarLabelLabels = { "Icon And Text", "Icon Only", "Text Only", "Text On The Chosen Group" };
+        public static readonly string[] NavBarLabelLabels = { "Icon And Text", "Icon", "Text", "Text On The Chosen" };
+        public const string NavBarColourAccent = "accent";
+        public const string NavBarColourInk = "ink";
+        public const string NavBarColourGroup = "group";
+        public static readonly string[] NavBarSelectedColours = { NavBarColourAccent, NavBarColourInk, NavBarColourGroup };
+        public static readonly string[] NavBarSelectedColourLabels = { "Accent", "Ink", "Group" };
+        public const string NavBarShowAlways = "always";
+        public const string NavBarShowAfterHero = "after_hero";
+        public static readonly string[] NavBarShows = { NavBarShowAlways, NavBarShowAfterHero };
+        public static readonly string[] NavBarShowLabels = { "Always", "After The Hero" };
+        // Hide While Scrolling, a switch in the Editor: off = "never", on = "down" (it slides away while the visitor reads down)
+        public const string NavBarHideNever = "never";
+        public const string NavBarHideDown = "down";
+        public static readonly string[] NavBarHides = { NavBarHideNever, NavBarHideDown };
 
         // What starting an audio does while another plays (CardContainerSettings.audio_when_another_starts), and the Editor's words for them
         public const string AudioSwitch = "switch";

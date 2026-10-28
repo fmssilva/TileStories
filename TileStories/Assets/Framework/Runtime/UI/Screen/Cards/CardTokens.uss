@@ -137,6 +137,40 @@
     --ts-bar-height: 44px;
     --ts-nav-float-top: 54px;
     --ts-top-shade-height: 150px;
+    /* the chrome band after the hero (PoiCard.uss): the grab row and the bar row (--ts-bar-top + --ts-bar-height) and a little under them,
+       down to where a Top bar / strip floats (--ts-nav-float-top) */
+    --ts-chrome-band-height: 54px;
+    /* the FADE band (Top Band = Fade, v6): solid through the chrome row (56 of card_top_fade.png's 104 rows), then fading to nothing */
+    --ts-top-fade-height: 104px;
+    /* The Navigation Bar (_3.3 S4 third round, v5's numbers): plain numbers (panel units) NavBarView reads on this card root for the ONE
+       path it paints (NavBarShapeRule) -- the bar's height with words and without, a floating bar's inset from the sides and its gap above
+       the screen's foot, the room above the edge the raised bump and its disc rise into, the bump's height and half its foot, a floating
+       raised bar's corner (any other floating bar is a stadium), the raised disc and its rise above the edge, Filled's disc at the icon */
+    --ts-navbar-height: 62;
+    --ts-navbar-height-compact: 52;
+    --ts-navbar-inset: 16;
+    --ts-navbar-gap: 20;
+    --ts-navbar-room: 26;
+    --ts-navbar-bump: 16;
+    --ts-navbar-bump-half: 25;
+    --ts-navbar-raised-radius: 18;
+    --ts-navbar-disc-raised: 44;
+    --ts-navbar-disc-rise: 22;
+    --ts-navbar-disc-filled: 32;
+    /* what a bar floating at the bottom takes off the stack's foot and the hero's words: its gap + height + room (20 + 62 + 26), so the
+       last block and the words stay clear of it and of the raised disc; a plain number for the hero's words (PoiCardSheetView), a length
+       for the stack's padding (PoiCard.uss) */
+    --ts-navbar-clear: 108;
+    --ts-navbar-clearance: 108px;
+    /* how far the hero must reach past the bar for the bar to count as lying on the picture (v5's 24), a plain number */
+    --ts-navbar-hero-margin: 24;
+    /* ...and its lengths: the items' side padding, an icon (and the raised disc's, Filled's), the words under an icon and words alone */
+    --ts-navbar-pad: 10px;
+    --ts-navbar-icon: 22px;
+    --ts-navbar-disc-icon-raised: 22px;
+    --ts-navbar-disc-icon-filled: 18px;
+    --ts-navbar-label: 11px;
+    --ts-navbar-label-text: 14px;
     /* minus --ts-space-3 (the gap a shown strip leaves above the first block, PoiCard.uss): the hero's picture starts flush under the strip.
        A USS length cannot be negated, so the pair is checked by PoiCardHeroSceneTests (the hero's top on the strip's bottom) */
     --ts-hero-strip-pull: -12px;

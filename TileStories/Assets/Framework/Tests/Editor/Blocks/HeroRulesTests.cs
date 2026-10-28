@@ -10,6 +10,23 @@ namespace TileStories.Editor.Tests
     // at its foot), the chrome's hero layer (CardChromeRule) and the header's new fields
     public class HeroRulesTests
     {
+        [Test]
+        public void TheWords_EndAtTheFootOfWhatTheVisitorSees_AboveAFloatingBottomBar()
+        {
+            // - a hero 844 tall (the whole sheet at Full), Half 337, a bar clearance of 108
+            Assert.AreEqual(844f, HeroRule.WordsBottom(844f, 844f, 0f), 0.001f, "Full, no bar: the hero's own foot");
+            Assert.AreEqual(736f, HeroRule.WordsBottom(844f, 844f, 108f), 0.001f, "Full: above the bar");
+            Assert.AreEqual(337f, HeroRule.WordsBottom(844f, 337f, 0f), 0.001f, "Half: the half sheet's foot, not the hero's");
+            Assert.AreEqual(229f, HeroRule.WordsBottom(844f, 337f, 108f), 0.001f, "Half: above the bar");
+            Assert.AreEqual(844f, HeroRule.WordsBottom(844f, 900f, 0f), 0.001f, "never past the hero's own foot");
+            Assert.AreEqual(844f, HeroRule.WordsBottom(844f, float.NaN, 0f), 0.001f, "unmeasured: the whole hero");
+            Assert.AreEqual(0f, HeroRule.WordsBottom(844f, 50f, 108f), 0.001f, "never above the hero's top");
+            var stops = new SheetStopRule.Stops(57f, 337f, 844f);
+            Assert.AreEqual(844f, HeroRule.VisibleAt(stops, SheetStopRule.Stop.Full));
+            Assert.AreEqual(337f, HeroRule.VisibleAt(stops, SheetStopRule.Stop.Half));
+            Assert.AreEqual(337f, HeroRule.VisibleAt(stops, SheetStopRule.Stop.Peek), "at Peek the words wait where Half shows them");
+        }
+
         private static SheetStopRule.Stops LampStops => new(57f, 337.6f, 796f);
 
         // _3.3 S4a review: the hero is the whole sheet at Full -- its picture runs up under the floating bars (never under the card's

@@ -46,10 +46,21 @@
     /* The chrome discs after the hero (_3.3 S4 third round, v5): the X and settings on light glass (smoked in dark), the mark
        in the card's ink */
     --ts-chrome-glass: rgba(250, 248, 244, 0.72);
-    /* The chrome discs over the hero's picture: DARK glass, the same in both modes. No backdrop blur in UI Toolkit, and the
-       project blends in LINEAR light: a white mark keeps 7:1 over a white sky only on a ground of luminance <= 0.10, measured
-       on the render (PoiCardChromeMarksSceneTests) */
-    --ts-chrome-glass-hero: rgba(10, 8, 6, 0.86);
+    /* The band behind the chrome row after the hero (_3.3 S4 third round, v5: light glass, the title centred, a hairline at
+       its foot): DENSE, so no block text reads through it (no backdrop blur in UI Toolkit) and the marks and the title keep
+       7:1 over anything scrolling under it (PoiCardChromeMarksSceneTests) */
+    --ts-chrome-band: rgba(250, 248, 244, 0.94);
+    /* The fade band behind the chrome row after the hero (_3.3 S4 third round, v6 Top Band = Fade): the sheet's own colour,
+       opaque (the ramp card_top_fade.png carries the alpha: solid through the row, then fading to nothing, no edge) */
+    --ts-top-fade: rgb(244, 240, 232);
+    /* A Glass Navigation Bar once the hero is read (_3.3 S4 third round): v5's light glass in light mode; in dark, smoked
+       glass dense enough that its light words keep 7:1 over a bright picture scrolling under it -- no backdrop blur in UI
+       Toolkit (PoiCardNavBarSceneTests, measured on the render) */
+    --ts-navbar-glass: rgba(250, 248, 244, 0.72);
+    /* The chrome discs and a Glass Navigation Bar over the hero's picture: DARK glass, the same in both modes. No backdrop
+       blur in UI Toolkit, and the project blends in LINEAR light: a white mark keeps 7:1 over a white sky only on a ground of
+       luminance <= 0.10, measured on the render (PoiCardChromeMarksSceneTests) */
+    --ts-chrome-glass-hero: rgba(10, 8, 6, 0.92);
     /* The light rim of a chrome disc over the hero (v5): it draws the disc's edge over a dark picture */
     --ts-chrome-line-hero: rgba(255, 255, 255, 0.32);
     /* The sheet's ground between the blocks (R11 tinted glass: light clear, dark smoked): tints card_glass.png, a vertical
@@ -261,10 +272,21 @@
     /* The chrome discs after the hero (_3.3 S4 third round, v5): the X and settings on light glass (smoked in dark), the mark
        in the card's ink */
     --ts-chrome-glass: rgba(26, 27, 30, 0.72);
-    /* The chrome discs over the hero's picture: DARK glass, the same in both modes. No backdrop blur in UI Toolkit, and the
-       project blends in LINEAR light: a white mark keeps 7:1 over a white sky only on a ground of luminance <= 0.10, measured
-       on the render (PoiCardChromeMarksSceneTests) */
-    --ts-chrome-glass-hero: rgba(10, 8, 6, 0.86);
+    /* The band behind the chrome row after the hero (_3.3 S4 third round, v5: light glass, the title centred, a hairline at
+       its foot): DENSE, so no block text reads through it (no backdrop blur in UI Toolkit) and the marks and the title keep
+       7:1 over anything scrolling under it (PoiCardChromeMarksSceneTests) */
+    --ts-chrome-band: rgba(26, 27, 30, 0.99);
+    /* The fade band behind the chrome row after the hero (_3.3 S4 third round, v6 Top Band = Fade): the sheet's own colour,
+       opaque (the ramp card_top_fade.png carries the alpha: solid through the row, then fading to nothing, no edge) */
+    --ts-top-fade: rgb(16, 15, 13);
+    /* A Glass Navigation Bar once the hero is read (_3.3 S4 third round): v5's light glass in light mode; in dark, smoked
+       glass dense enough that its light words keep 7:1 over a bright picture scrolling under it -- no backdrop blur in UI
+       Toolkit (PoiCardNavBarSceneTests, measured on the render) */
+    --ts-navbar-glass: rgba(26, 27, 30, 0.98);
+    /* The chrome discs and a Glass Navigation Bar over the hero's picture: DARK glass, the same in both modes. No backdrop
+       blur in UI Toolkit, and the project blends in LINEAR light: a white mark keeps 7:1 over a white sky only on a ground of
+       luminance <= 0.10, measured on the render (PoiCardChromeMarksSceneTests) */
+    --ts-chrome-glass-hero: rgba(10, 8, 6, 0.92);
     /* The light rim of a chrome disc over the hero (v5): it draws the disc's edge over a dark picture */
     --ts-chrome-line-hero: rgba(255, 255, 255, 0.32);
     /* The sheet's ground between the blocks (R11 tinted glass: light clear, dark smoked): tints card_glass.png, a vertical

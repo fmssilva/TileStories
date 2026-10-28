@@ -4,17 +4,22 @@ using UnityEngine.UIElements;
 
 namespace TileStories
 {
-    // The Navigation Bar (_3.3 S4a review): ONE bar of the card's groups, as card_settings.navigation.bar configures it -- its shape (floating
-    // or full width), its fill (glass, solid, clear, and how much of it), its hairline and shadow, and how the chosen group shows (a pill, an
-    // underline or a raised disc that slides between groups; a bolder or larger icon, its own chosen icon; its colour). NOT a registry
-    // element: NavSlots binds it into the top host (under the title bar) or the bottom host when the bar is on, and the card draws no other
-    // navigation element then. The groups (NavBarRule.Entries) and the chosen one (the controller's CurrentBlock) are the rule's; a tap
-    // jumps to the group's first block through the controller. The chosen group is marked by its shape AND its bolder words, never colour alone.
+    // The Navigation Bar (_3.3 S4 third round, v5): ONE bar of the card's groups, as card_settings.navigation.bar configures it. NOT a registry
+    // element: NavSlots binds it into the bottom host (floating over the screen's foot) or the top host (under the chrome row) while the bar
+    // is on, and the card draws no other navigation element then.
+    //   - the SURFACE paints the bar as ONE path (NavBarShapeRule, Painter2D in generateVisualContent): its fill, its hairline and -- under
+    //     Solid and Floating only -- its shadow; under Raised its edge bends into a bump at the chosen group (hanging down at Top)
+    //   - the DISC carries the chosen icon: riding up in the bump (Raised), or at the icon's own place (Filled); the pill / underline sit
+    //     behind / under the chosen group; all of them follow ONE animated centre that slides with v5's overshoot (Reduce Motion: at once)
+    //   - over the hero a non-solid bar turns white on dark glass (SetOverHero, the sheet's call); Clear is transparent there, solid after it
+    // The groups (NavBarRule.Entries) and the chosen one (the controller's CurrentBlock) are the rule's; a tap jumps to the group's first block
+    // through the controller. The chosen group is marked by its shape AND its bolder words, never colour alone.
     public sealed class NavBarView : INavElementView
     {
         public const string ElementKey = "nav_bar";
         public const string ItemClass = "nav-bar__item";
         public const string ChosenClass = "nav-bar__item--chosen";
+        public const string OverHeroClass = "nav-bar--over-hero";
 
         // One group's button: its icon and its words
         public sealed class Item
@@ -34,60 +39,109 @@ namespace TileStories
         }
 
         public VisualElement Root { get; }
-        public VisualElement Shadow { get; }
+        // The painted bar (fill, hairline, shadow, the bump)
+        public VisualElement Surface { get; }
         public VisualElement Row { get; }
-        public VisualElement Indicator { get; }
+        public VisualElement Pill { get; }
+        public VisualElement Underline { get; }
+        public VisualElement Disc { get; }
+        public VisualElement DiscIcon { get; }
         public IReadOnlyList<Item> Items => _items.Shown;
         public IReadOnlyList<NavBarRule.Entry> Entries => _entries;
         // The chosen group (-1 = none)
         public int ChosenIndex { get; private set; } = -1;
         public CardNavBarSettings Settings { get; private set; }
+        // Whether the bar sits over the hero's picture now (the sheet decides, SetOverHero)
+        public bool OverHero { get; private set; }
+
+        // What was painted last, for tests and the look: the path (in the bar's box), its fill and hairline, the shadow, the bump's centre
+        public IReadOnlyList<NavBarShapeRule.Command> PaintedPath { get; private set; } = new List<NavBarShapeRule.Command>();
+        public Color PaintedFill { get; private set; }
+        public Color PaintedLine { get; private set; }
+        public bool PaintedShadow { get; private set; }
+        // The chosen group's centre the indicators follow (in the bar's box), now and where it slides to
+        public float Centre { get; private set; } = float.NaN;
+        public float CentreTarget { get; private set; } = float.NaN;
+        public bool Sliding => _slide != null && _sliding;
+        // Reduce Motion: the indicators jump; the time the slide reads (real time unless a test hands its own)
+        public bool ReduceMotion { get; set; }
+        public System.Func<float> Clock { get; set; } = () => Time.unscaledTime;
+
+        // The bar's numbers (CardTokens.uss --ts-navbar-*, read on the card root)
+        public float BarHeight { get; private set; }
+        public float Room { get; private set; }
+        public float BarWidth => Root.layout.width;
+        public float DiscSize { get; private set; }
+        // How high the raised bump rises (or hangs, at Top)
+        public float BumpHeight => Token(BumpToken);
+
+        private static readonly CustomStyleProperty<float> HeightToken = new("--ts-navbar-height");
+        private static readonly CustomStyleProperty<float> CompactHeightToken = new("--ts-navbar-height-compact");
+        private static readonly CustomStyleProperty<float> InsetToken = new("--ts-navbar-inset");
+        private static readonly CustomStyleProperty<float> GapToken = new("--ts-navbar-gap");
+        private static readonly CustomStyleProperty<float> RoomToken = new("--ts-navbar-room");
+        private static readonly CustomStyleProperty<float> BumpToken = new("--ts-navbar-bump");
+        private static readonly CustomStyleProperty<float> BumpHalfToken = new("--ts-navbar-bump-half");
+        private static readonly CustomStyleProperty<float> RaisedRadiusToken = new("--ts-navbar-raised-radius");
+        private static readonly CustomStyleProperty<float> RaisedDiscToken = new("--ts-navbar-disc-raised");
+        private static readonly CustomStyleProperty<float> DiscRiseToken = new("--ts-navbar-disc-rise");
+        private static readonly CustomStyleProperty<float> FilledDiscToken = new("--ts-navbar-disc-filled");
 
         private readonly ElementPool<Item> _items;
         private List<NavBarRule.Entry> _entries = new();
         private NavController _nav;
         private CardStrings _strings;
+        private IVisualElementScheduledItem _slide;
+        private bool _sliding;
+        private float _slideFrom, _slideStart;
 
         public NavBarView()
         {
             Root = new VisualElement { name = "nav-bar" };
             Root.AddToClassList("nav-bar");
-            Shadow = new VisualElement { name = "nav-bar-shadow", pickingMode = PickingMode.Ignore };
-            Shadow.AddToClassList("nav-bar__shadow");
-            Root.Add(Shadow);
-            var ground = new VisualElement { name = "nav-bar-ground", pickingMode = PickingMode.Ignore };
-            ground.AddToClassList("nav-bar__ground");
-            Root.Add(ground);
-            Ground = ground;
+            Surface = new VisualElement { name = "nav-bar-surface", pickingMode = PickingMode.Ignore };
+            Surface.AddToClassList("nav-bar__surface");
+            Surface.generateVisualContent += PaintSurface;
+            Root.Add(Surface);
             Row = new VisualElement { name = "nav-bar-row" };
             Row.AddToClassList("nav-bar__row");
             Root.Add(Row);
-            // - the one indicator: out of the flow, under the items, moved to the chosen one (sliding when the bar says so)
-            Indicator = new VisualElement { name = "nav-bar-indicator", pickingMode = PickingMode.Ignore };
-            Indicator.AddToClassList("nav-bar__indicator");
-            Row.Add(Indicator);
+            // - the pill and the underline: out of the flow, under the items, at the chosen one
+            Pill = new VisualElement { name = "nav-bar-pill", pickingMode = PickingMode.Ignore };
+            Pill.AddToClassList("nav-bar__pill");
+            Row.Add(Pill);
+            Underline = new VisualElement { name = "nav-bar-underline", pickingMode = PickingMode.Ignore };
+            Underline.AddToClassList("nav-bar__underline");
+            Row.Add(Underline);
+            // - the disc over everything: under Raised it rises past the bar's edge; a finger on it reaches the chosen group's button below
+            Disc = new VisualElement { name = "nav-bar-disc", pickingMode = PickingMode.Ignore };
+            Disc.AddToClassList("nav-bar__disc");
+            DiscIcon = CardIcons.Create();
+            DiscIcon.AddToClassList("nav-bar__disc-icon");
+            Disc.Add(DiscIcon);
+            Root.Add(Disc);
             _items = new ElementPool<Item>(NewItem, item => item.Button.RemoveFromHierarchy());
-            // - colours painted inline follow the mode, and the indicator follows the items' layout
-            Root.RegisterCallback<AttachToPanelEvent>(_ => { ThemeController.ModeChanged -= Paint; ThemeController.ModeChanged += Paint; Paint(); });
-            Root.RegisterCallback<DetachFromPanelEvent>(_ => ThemeController.ModeChanged -= Paint);
-            Row.RegisterCallback<GeometryChangedEvent>(_ => PlaceIndicator());
+            // - colours follow the mode, numbers the card's tokens, the indicators the items' layout
+            Root.RegisterCallback<AttachToPanelEvent>(_ => { ThemeController.ModeChanged -= OnModeChanged; ThemeController.ModeChanged += OnModeChanged; Refresh(); });
+            Root.RegisterCallback<DetachFromPanelEvent>(_ => ThemeController.ModeChanged -= OnModeChanged);
+            Row.RegisterCallback<GeometryChangedEvent>(_ => Place(false));
+            // - the card's tokens resolve with its first layout: read them then; a new width redraws the path
+            Root.RegisterCallback<GeometryChangedEvent>(_ => { if (BarHeight <= 0f) Refresh(); else Draw(); });
+            _slide = Root.schedule.Execute(SlideFrame).Every(16);
+            _slide.Pause();
         }
-
-        // The bar's fill: the ground under the items (the raised disc takes its colour)
-        public VisualElement Ground { get; }
 
         public void Bind(CardNavModel model, NavController nav, BlockBindContext context)
         {
             Unbind();
             _nav = nav;
             _strings = context?.Strings;
+            ReduceMotion = context?.ReduceMotion ?? false;
             var navSettings = context?.Settings?.navigation;
             Settings = navSettings?.bar ?? new CardNavBarSettings();
-            var registry = BlockRegistry.Shared;
-            var items = NavBarRule.Items(navSettings, registry);
+            var items = NavBarRule.Items(navSettings, BlockRegistry.Shared);
             _entries = NavBarRule.Entries(items, model?.Targets, block =>
                 nav != null && nav.TryGetEntry(block, out var entry) ? entry.Definition.Family : null);
-            ApplyLook();
             for (int i = 0; i < _entries.Count; i++)
             {
                 var item = _items.Take();
@@ -96,6 +150,8 @@ namespace TileStories
                 item.Button.tooltip = item.Label.text;
                 Row.Add(item.Button);
             }
+            Disc.BringToFront();
+            Refresh();
             if (nav != null)
             {
                 nav.CurrentBlockChanged += OnCurrentBlockChanged;
@@ -111,6 +167,8 @@ namespace TileStories
             _items.ReleaseAll();
             _entries = new List<NavBarRule.Entry>();
             ChosenIndex = -1;
+            Centre = CentreTarget = float.NaN;
+            StopSlide();
         }
 
         // A tap on a group: the card moves to its first block
@@ -119,6 +177,18 @@ namespace TileStories
             if (index < 0 || index >= _entries.Count || _nav == null) return false;
             return _nav.JumpToBlock(_entries[index].FirstTarget, ElementKey);
         }
+
+        // The sheet says whether the bar is over the hero's picture (NavBarRule.OverHero): a non-solid bar turns white on dark glass there
+        public void SetOverHero(bool overHero)
+        {
+            if (overHero == OverHero) return;
+            OverHero = overHero;
+            Root.EnableInClassList(OverHeroClass, overHero);
+            Paint();
+        }
+
+        // A non-solid bar over the hero: white words on dark glass (or on the hero itself, Clear)
+        public bool OverImage => OverHero && NavBarRule.Fill(Settings) != CardOptions.NavBarSolid;
 
         private Item NewItem(int index)
         {
@@ -133,6 +203,8 @@ namespace TileStories
             return new Item(index, button, icon, label);
         }
 
+        private void OnModeChanged() => Paint();
+
         private void OnCurrentBlockChanged(string block)
         {
             int index = NavBarRule.EntryOf(_entries, block);
@@ -141,11 +213,13 @@ namespace TileStories
             Choose(index);
         }
 
-        // Mark one group: its class, its chosen icon, its words' display, its colour, and the indicator under it
+        // Mark one group: its class, its chosen icon, its words' display; the indicators slide to it
         private void Choose(int index)
         {
+            bool first = ChosenIndex < 0 || float.IsNaN(Centre);
             ChosenIndex = index;
             string labels = NavBarRule.Labels(Settings);
+            bool disc = NavBarRule.ChosenDisc(Settings);
             foreach (var item in _items.Shown)
             {
                 bool chosen = item.Index == index;
@@ -155,126 +229,248 @@ namespace TileStories
                 bool hasIcon = !string.IsNullOrEmpty(key);
                 CardIcons.SetKey(item.Icon, key);
                 item.Icon.style.display = NavBarRule.ShowsIcon(labels, hasIcon) ? DisplayStyle.Flex : DisplayStyle.None;
+                // - the disc carries the chosen icon: its own place stays (the words do not move), the icon only goes unseen
+                item.Icon.style.opacity = chosen && disc ? 0f : 1f;
                 item.Label.style.display = NavBarRule.ShowsWords(labels, hasIcon, chosen) ? DisplayStyle.Flex : DisplayStyle.None;
             }
+            if (index >= 0) CardIcons.SetKey(DiscIcon, _entries[index].Item.SelectedIcon);
             Paint();
-            PlaceIndicator();
+            Place(!first);
         }
 
-        // The bar's look from its settings: classes for what USS draws, inline numbers for what the developer sets
-        private void ApplyLook()
+        // The settings and the card's numbers: classes for what USS draws, the box for the path
+        private void Refresh()
         {
-            var bar = Settings;
-            string shape = NavBarRule.Shape(bar), fill = NavBarRule.Fill(bar), indicator = NavBarRule.Indicator(bar);
-            foreach (string option in CardOptions.NavBarShapes) Root.EnableInClassList("nav-bar--" + option, option == shape);
-            foreach (string option in CardOptions.NavBarFills) Root.EnableInClassList("nav-bar--fill-" + option, option == fill);
-            foreach (string option in CardOptions.NavBarIndicators) Root.EnableInClassList("nav-bar--indicator-" + option, option == indicator);
-            Root.EnableInClassList("nav-bar--bottom", NavBarRule.AtBottom(bar));
-            Root.EnableInClassList("nav-bar--border", bar.border && fill != CardOptions.NavBarClear);
-            Root.EnableInClassList("nav-bar--shadow", bar.shadow && fill != CardOptions.NavBarClear);
-            Root.EnableInClassList("nav-bar--slide", bar.slide_indicator);
-            Root.EnableInClassList("nav-bar--bold", bar.bold_selected);
-            Root.EnableInClassList("nav-bar--enlarge", bar.enlarge_selected);
-            float radius = NavBarRule.CornerRadius(bar), margin = NavBarRule.SideMargin(bar), height = NavBarRule.Height(bar);
-            Root.style.marginLeft = margin;
-            Root.style.marginRight = margin;
-            Row.style.height = height;
-            foreach (var part in new[] { Root, Ground, Shadow })
-            {
-                part.style.borderTopLeftRadius = radius;
-                part.style.borderTopRightRadius = radius;
-                part.style.borderBottomLeftRadius = radius;
-                part.style.borderBottomRightRadius = radius;
-            }
+            var bar = Settings ?? new CardNavBarSettings();
+            string labels = NavBarRule.Labels(bar);
+            BarHeight = Token(labels == CardOptions.NavBarLabelsIconAndText ? HeightToken : CompactHeightToken);
+            Room = Token(RoomToken);
+            bool bottom = NavBarRule.AtBottom(bar), floating = NavBarRule.Floating(bar);
+            foreach (string option in CardOptions.NavBarShapes) Root.EnableInClassList("nav-bar--" + option, option == NavBarRule.Shape(bar));
+            foreach (string option in CardOptions.NavBarFills) Root.EnableInClassList("nav-bar--fill-" + option, option == NavBarRule.Fill(bar));
+            foreach (string option in CardOptions.NavBarIndicators) Root.EnableInClassList("nav-bar--indicator-" + option, option == NavBarRule.Indicator(bar));
+            foreach (string option in CardOptions.NavBarLabels) Root.EnableInClassList("nav-bar--labels-" + option, option == labels);
+            Root.EnableInClassList("nav-bar--bottom", bottom);
+            Root.EnableInClassList("nav-bar--top", !bottom);
+            Root.EnableInClassList("nav-bar--bold", NavBarRule.BoldChosen(bar));
+            Root.EnableInClassList("nav-bar--filled", NavBarRule.ChosenIcon(bar) == CardOptions.NavBarChosenIconFilled);
+            float inset = floating ? Token(InsetToken) : 0f;
+            Root.style.marginLeft = inset;
+            Root.style.marginRight = inset;
+            Root.style.marginBottom = floating && bottom ? Token(GapToken) : 0f;
+            Root.style.height = Room + BarHeight;
+            // - the items' row is the bar itself: under the room at the bottom (the bump rises into it), on top at Top (it hangs below)
+            Row.style.top = bottom ? Room : 0f;
+            Row.style.height = BarHeight;
+            DiscSize = NavBarRule.Raised(bar) ? Token(RaisedDiscToken) : Token(FilledDiscToken);
+            Disc.style.width = Disc.style.height = DiscSize;
+            Disc.style.borderTopLeftRadius = Disc.style.borderTopRightRadius =
+                Disc.style.borderBottomLeftRadius = Disc.style.borderBottomRightRadius = DiscSize * 0.5f;
+            Paint();
+            Place(false);
         }
 
-        // The colours: the ground (the theme's bar colour for the fill, its opacity kept by the setting's share), each group's icon and words
-        // (chosen: its colour as the setting says; the others muted or their own), the indicator (a soft wash of the chosen colour)
+        // The colours: the surface's fill and hairline (by fill, over the hero or after it), each group's icon and words, the disc and pill
         private void Paint()
         {
             var bar = Settings;
             if (bar == null) return;
             string fill = NavBarRule.Fill(bar);
-            string groundToken = fill == CardOptions.NavBarSolid ? "--ts-bar" : fill == CardOptions.NavBarGlass ? "--ts-bar-glass" : null;
-            if (groundToken != null && CardTokenColours.TryResolve(Root, groundToken, out Color ground))
-            {
-                ground.a *= NavBarRule.FillOpacity(bar);
-                Ground.style.backgroundColor = ground;
-            }
-            else Ground.style.backgroundColor = StyleKeyword.Null;
+            bool overImage = OverImage;
+            // - Clear over the hero: transparent at the Bottom (it lies on the hero words' own shade); at Top no shade reaches it there, so it
+            //   lies in the dark scrim -- a stronger shade, never weaker words (the words' 7:1 rule, measured on the render)
+            string fillToken = fill == CardOptions.NavBarSolid ? "--ts-bar"
+                : fill == CardOptions.NavBarGlass ? (OverHero ? "--ts-chrome-glass-hero" : "--ts-navbar-glass")
+                : !OverHero ? "--ts-bar" : NavBarRule.AtBottom(bar) ? null : "--ts-scrim-hero";
+            string lineToken = fill == CardOptions.NavBarGlass && OverHero ? "--ts-chrome-line-hero" : fill == CardOptions.NavBarClear && OverHero ? null : "--ts-hair";
+            PaintedFill = Colour(fillToken);
+            PaintedLine = Colour(lineToken);
+            PaintedShadow = NavBarRule.Floating(bar) && fill == CardOptions.NavBarSolid;
 
-            string selected = NavBarRule.SelectedColour(bar), idle = NavBarRule.IdleColour(bar);
-            Color? chosenColour = null;
+            string selected = NavBarRule.SelectedColour(bar);
+            Color white = Colour("--ts-on-scrim");
+            Color chosenColour = overImage ? white : Colour(ChosenToken(selected, ChosenIndex));
+            Color idle = overImage ? white : Colour("--ts-ink-2");
             foreach (var item in _items.Shown)
             {
                 bool chosen = item.Index == ChosenIndex;
-                string token = chosen ? SelectedToken(selected, _entries[item.Index].Item)
-                    : idle == CardOptions.NavBarColourGroup ? _entries[item.Index].Item.ColorToken : "--ts-ink-2";
-                bool resolved = CardTokenColours.TryResolve(Root, token, out Color colour);
-                CardIcons.Tint(item.Icon, resolved ? colour : (Color?)null);
-                // - the words stay ink (>= 7:1 on the bar); only the chosen group's take its colour when that is the ink or the accent text
-                item.Label.style.color = chosen && resolved && selected != CardOptions.NavBarColourGroup ? new StyleColor(colour) : new StyleColor(StyleKeyword.Null);
-                if (chosen && resolved) chosenColour = colour;
+                CardIcons.Tint(item.Icon, chosen ? chosenColour : idle);
+                // - the words stay ink on a group colour (a family colour is a mark, not a text colour); accent / ink words are text colours
+                Color words = chosen ? (overImage ? white : selected == CardOptions.NavBarColourGroup ? Colour("--ts-ink") : chosenColour) : idle;
+                item.Label.style.color = words;
             }
-            string indicator = NavBarRule.Indicator(bar);
-            if (indicator == CardOptions.NavBarIndicatorRaised)
-            {
-                // - the raised disc is the bar lifting under the chosen icon: the bar's own ground, opaque enough to read as one piece
-                var disc = Ground.resolvedStyle.backgroundColor;
-                if (CardTokenColours.TryResolve(Root, fill == CardOptions.NavBarClear ? "--ts-bar-glass" : groundToken, out Color fillColour)) disc = fillColour;
-                disc.a = Mathf.Max(disc.a, 0.92f);
-                Indicator.style.backgroundColor = disc;
-            }
-            else if (chosenColour.HasValue)
-            {
-                var wash = chosenColour.Value;
-                wash.a = indicator == CardOptions.NavBarIndicatorUnderline ? 1f : 0.16f;
-                Indicator.style.backgroundColor = wash;
-            }
-            else Indicator.style.backgroundColor = StyleKeyword.Null;
+            // - the disc: the chosen colour with its ink on it (white over the hero with the dark scrim's colour on it, both modes)
+            Color discInk = overImage ? Opaque(Colour("--ts-scrim-hero"))
+                : selected == CardOptions.NavBarColourInk ? Colour("--ts-surface") : Colour("--ts-on-accent");
+            Disc.style.backgroundColor = chosenColour;
+            CardIcons.Tint(DiscIcon, discInk);
+            var wash = chosenColour;
+            wash.a = overImage ? 0.2f : 0.12f;
+            Pill.style.backgroundColor = wash;
+            Underline.style.backgroundColor = chosenColour;
+            Surface.MarkDirtyRepaint();
         }
 
-        private static string SelectedToken(string selected, NavBarRule.Item item) =>
-            selected == CardOptions.NavBarColourAccent ? "--ts-accent" : selected == CardOptions.NavBarColourInk ? "--ts-ink" : item.ColorToken ?? "--ts-accent";
+        // The token of the chosen group's colour: the accent, the ink, or its row's colour
+        private string ChosenToken(string selected, int index) =>
+            selected == CardOptions.NavBarColourInk ? "--ts-ink"
+            : selected == CardOptions.NavBarColourGroup && index >= 0 && index < _entries.Count && !string.IsNullOrEmpty(_entries[index].Item.ColorToken)
+                ? _entries[index].Item.ColorToken
+                : "--ts-accent";
 
-        // The indicator under the chosen group's button (none chosen, or the None indicator: hidden). Its box per kind is USS's (height,
-        // radius); its place and width are the chosen button's
-        private void PlaceIndicator()
+        // The indicators to the chosen group's centre: sliding there (v5's overshoot) or at once (Reduce Motion, the first mark)
+        private void Place(bool slide)
         {
-            string indicator = NavBarRule.Indicator(Settings);
-            bool shown = indicator != CardOptions.NavBarIndicatorNone && ChosenIndex >= 0 && ChosenIndex < _items.Shown.Count;
-            Indicator.style.display = shown ? DisplayStyle.Flex : DisplayStyle.None;
-            if (!shown) return;
-            var box = _items.Shown[ChosenIndex].Button.layout;
-            if (float.IsNaN(box.width) || box.width <= 0f) return;
-            float width, left;
-            if (indicator == CardOptions.NavBarIndicatorUnderline)
+            bool shown = ChosenIndex >= 0 && ChosenIndex < _items.Shown.Count;
+            var box = shown ? _items.Shown[ChosenIndex].Button.layout : default;
+            if (!shown || float.IsNaN(box.width) || box.width <= 0f)
             {
-                width = Mathf.Min(box.width * 0.4f, 28f);
-                left = box.center.x - width * 0.5f;
+                Draw();
+                return;
             }
-            else if (indicator == CardOptions.NavBarIndicatorRaised)
+            CentreTarget = Row.layout.x + box.center.x;
+            if (!slide || ReduceMotion || float.IsNaN(Centre))
             {
-                width = Mathf.Min(box.width, NavBarRule.Height(Settings));
-                left = box.center.x - width * 0.5f;
-                Indicator.style.height = width;
-                Indicator.style.borderTopLeftRadius = Indicator.style.borderTopRightRadius =
-                    Indicator.style.borderBottomLeftRadius = Indicator.style.borderBottomRightRadius = width * 0.5f;
+                StopSlide();
+                Centre = CentreTarget;
             }
-            else
+            else if (!Mathf.Approximately(Centre, CentreTarget))
             {
-                width = box.width;
-                left = box.x;
+                _slideFrom = Centre;
+                _slideStart = Clock();
+                _sliding = true;
+                _slide.Resume();
             }
-            if (indicator != CardOptions.NavBarIndicatorRaised)
+            Draw();
+        }
+
+        // One frame of the slide
+        private void SlideFrame()
+        {
+            if (!_sliding) return;
+            float t = (Clock() - _slideStart) / NavBarShapeRule.SlideSeconds;
+            Centre = Mathf.LerpUnclamped(_slideFrom, CentreTarget, NavBarShapeRule.Slide(t));
+            if (t >= 1f) StopSlide();
+            Draw();
+        }
+
+        private void StopSlide()
+        {
+            _sliding = false;
+            _slide?.Pause();
+            if (!float.IsNaN(CentreTarget)) Centre = CentreTarget;
+        }
+
+        // Everything the centre moves: the path (the bump), the disc, the pill and the underline
+        private void Draw()
+        {
+            var bar = Settings ?? new CardNavBarSettings();
+            string indicator = NavBarRule.Indicator(bar);
+            bool chosen = ChosenIndex >= 0 && !float.IsNaN(Centre);
+            bool bottom = NavBarRule.AtBottom(bar), raised = indicator == CardOptions.NavBarIndicatorRaised;
+            float width = BarWidth;
+            if (!float.IsNaN(width) && width > 0f)
             {
-                // - the raised disc's own box let go: the pill and the underline take theirs from USS
-                Indicator.style.height = StyleKeyword.Null;
-                Indicator.style.borderTopLeftRadius = Indicator.style.borderTopRightRadius =
-                    Indicator.style.borderBottomLeftRadius = Indicator.style.borderBottomRightRadius = StyleKeyword.Null;
+                float radius = NavBarShapeRule.Radius(NavBarRule.Floating(bar), raised, BarHeight, Token(RaisedRadiusToken));
+                float bumpHalf = Token(BumpHalfToken);
+                float bumpX = NavBarShapeRule.BumpX(chosen ? Centre : width * 0.5f, width, radius, bumpHalf);
+                var path = NavBarShapeRule.Path(width, BarHeight, Room, radius, raised && chosen ? Token(BumpToken) : 0f, bumpHalf, bumpX);
+                PaintedPath = bottom ? path : NavBarShapeRule.Mirror(path, Room + BarHeight);
+                Surface.MarkDirtyRepaint();
             }
-            Indicator.style.left = left;
-            Indicator.style.width = width;
+
+            bool disc = chosen && NavBarRule.ChosenDisc(bar);
+            Disc.style.display = disc ? DisplayStyle.Flex : DisplayStyle.None;
+            if (disc)
+            {
+                Disc.style.left = Centre - DiscSize * 0.5f;
+                if (raised)
+                    // - rising out of the bump: its centre on the bar's edge less the rise (mirrored at Top: below the bar's foot)
+                    Disc.style.top = bottom ? Room - Token(DiscRiseToken) : BarHeight + Token(DiscRiseToken) - DiscSize;
+                else
+                {
+                    var icon = _items.Shown[ChosenIndex].Icon.layout;
+                    var button = _items.Shown[ChosenIndex].Button.layout;
+                    float iconCentre = Row.layout.y + button.y + icon.center.y;
+                    Disc.style.top = float.IsNaN(iconCentre) ? Row.layout.y : iconCentre - DiscSize * 0.5f;
+                }
+            }
+            bool pill = chosen && indicator == CardOptions.NavBarIndicatorPill;
+            Pill.style.display = pill ? DisplayStyle.Flex : DisplayStyle.None;
+            bool underline = chosen && indicator == CardOptions.NavBarIndicatorUnderline;
+            Underline.style.display = underline ? DisplayStyle.Flex : DisplayStyle.None;
+            if (chosen && (pill || underline))
+            {
+                float itemWidth = _items.Shown[ChosenIndex].Button.layout.width;
+                float local = Centre - Row.layout.x;
+                if (pill)
+                {
+                    Pill.style.left = local - itemWidth * 0.5f + 3f;
+                    Pill.style.width = Mathf.Max(0f, itemWidth - 6f);
+                }
+                else Underline.style.left = local;
+            }
+        }
+
+        // The surface: the shadow (offset copies, faint), the fill, the hairline -- one path
+        private void PaintSurface(MeshGenerationContext mgc)
+        {
+            if (PaintedPath.Count == 0) return;
+            var painter = mgc.painter2D;
+            if (PaintedShadow && PaintedFill.a > 0f)
+            {
+                // - no blur in Painter2D: a few faint copies a little lower read as a soft shadow under the bar's foot
+                var shade = Colour("--ts-elevation-1");
+                shade.a *= 0.3f;
+                for (int i = 1; i <= 3; i++) Trace(painter, PaintedPath, new Vector2(0f, i * 2f), shade, null);
+            }
+            Trace(painter, PaintedPath, Vector2.zero, PaintedFill.a > 0f ? PaintedFill : (Color?)null, PaintedLine.a > 0f ? PaintedLine : (Color?)null);
+        }
+
+        private static void Trace(Painter2D painter, IReadOnlyList<NavBarShapeRule.Command> path, Vector2 offset, Color? fill, Color? line)
+        {
+            if (fill == null && line == null) return;
+            painter.BeginPath();
+            foreach (var c in path)
+            {
+                switch (c.Op)
+                {
+                    case NavBarShapeRule.Op.Move: painter.MoveTo(c.P1 + offset); break;
+                    case NavBarShapeRule.Op.Line: painter.LineTo(c.P1 + offset); break;
+                    case NavBarShapeRule.Op.Quad: painter.QuadraticCurveTo(c.P1 + offset, c.P2 + offset); break;
+                    case NavBarShapeRule.Op.Cubic: painter.BezierCurveTo(c.P1 + offset, c.P2 + offset, c.P3 + offset); break;
+                    case NavBarShapeRule.Op.Close: painter.ClosePath(); break;
+                }
+            }
+            if (fill.HasValue)
+            {
+                painter.fillColor = fill.Value;
+                painter.Fill();
+            }
+            if (line.HasValue)
+            {
+                painter.strokeColor = line.Value;
+                painter.lineWidth = 1f;
+                painter.Stroke();
+            }
+        }
+
+        // A theme colour by name; nothing (fully transparent) for no name or when the bar sits under no theme yet
+        private Color Colour(string token) =>
+            token != null && CardTokenColours.TryResolve(Root, token, out Color colour) ? colour : default;
+
+        private static Color Opaque(Color colour)
+        {
+            colour.a = 1f;
+            return colour;
+        }
+
+        // A plain-number token read on the card root (.ts-card), 0 when the bar sits under none
+        private float Token(CustomStyleProperty<float> token)
+        {
+            for (var e = Root.parent; e != null; e = e.parent)
+                if (e.ClassListContains("ts-card")) return e.customStyle.TryGetValue(token, out float value) ? value : 0f;
+            return 0f;
         }
     }
 }

@@ -12,7 +12,8 @@ namespace TileStories.Tests
     // settings marks read at 7:1 against what they are drawn over -- measured on the real Game view's render, not on token arithmetic: over
     // the hero's picture (white marks on the dark hero glass, the top shade above the picture) and after it (the card's ink on the light
     // glass), for every hero picture of the test wall (its darkest and its lightest among them), light and dark, at every stop. Each
-    // stop's render is the evidence the visual check reads (TestEvidence/Premium/P1/).
+    // stop's render is the evidence the visual check reads (TestEvidence/Premium/P1/). After the hero the chrome row sits on one dense band
+    // (no text through it, the title bare and at 7:1; TestEvidence/Premium/P2/).
     public class PoiCardChromeMarksSceneTests : SearchSceneFixture
     {
         private const string Domain = "Premium/P1";
@@ -102,6 +103,121 @@ namespace TileStories.Tests
             System.IO.File.AppendAllText(TestEvidence.PathFor(Domain, "marks_ratios.txt"), string.Join("\n", report) + "\n");
             Debug.Log("[Card] Chrome marks " + poi + " " + mode + ": worst " + worstOfAll.ToString("0.00") + ":1 (" + worstWhat + ")");
             Assert.GreaterOrEqual(worstOfAll, Aaa, "the X and settings keep 7:1 against what they are drawn over -- worst: " + worstWhat + "\n" + string.Join("\n", report));
+        }
+
+        // The chrome row after the hero (_3.3 S4 third round, v6; P2 PART 4 + its addendum), per Top Band: FADE (the default) -- the sheet's own
+        // colour, solid through the row, fading to nothing below it, no hairline -- or GLASS -- a dense band with a hairline at its foot. Either
+        // way the block text under the row never reads (ink seen through it against the surface seen through it stays under 1.25:1, blended
+        // in linear light as the project renders, at the row's lowest line), the title is bare (no pill, no outline) and at 7:1 on the real
+        // render; over the hero the band is gone. Renders in TestEvidence/Premium/P2/.
+        [UnityTest]
+        public IEnumerator AfterTheHero_TheChromeRowSitsOnItsTopBand_NoTextThroughIt_TheTitleBare_At7To1(
+            [Values("painting", "lamp")] string poi, [Values("light", "dark")] string mode,
+            [Values(CardOptions.TopBandFade, CardOptions.TopBandGlass)] string topBand)
+        {
+            const string P2 = "Premium/P2";
+            ThemeController.SetMode(mode);
+            Session.CardSettings.container.reduce_motion = true;
+            var copy = ConfigCopy();
+            copy.card_settings.container.reduce_motion = true;
+            copy.card_settings.container.top_band = topBand;
+            Session.ApplyCardSettings(copy);
+            yield return CardTestInput.Settle(0.3f);
+            // - the push re-applies the wall's Default Mode: the mode measured is set after it, and proven
+            ThemeController.SetMode(mode);
+            yield return null;
+            Assert.AreEqual(mode, ThemeController.CurrentMode, "precondition: the card shows " + mode);
+            bool fade = topBand == CardOptions.TopBandFade;
+            CardTestInput.HoldTheWallStill(Sheet);
+            SelectionEventBus.Select(poi);
+            yield return CardTestInput.Settle();
+            Sheet.SetStop(SheetStopRule.Stop.Full);
+            yield return CardTestInput.Settle();
+            var band = Sheet.ChromeBand;
+            Assert.IsTrue(Sheet.Root.ClassListContains(BlockStackView.BarsOnHeroClass), "precondition: at the top of Full the chrome is on the hero");
+            Assert.Less(band.resolvedStyle.opacity, 0.01f, "over the hero the band is gone (the picture shows to the top)");
+            Assert.AreEqual(!fade, band.ClassListContains(PoiCardSheetView.ChromeBandGlassClass), "the band the wall's Top Band picks");
+
+            var scroll = Sheet.Stack.Scroll;
+            float range = scroll.contentContainer.layout.height - scroll.contentViewport.layout.height;
+            Assert.Greater(range, Header.HeroBottom() + 200f, "precondition: " + poi + "'s card scrolls its hero away");
+            scroll.scrollOffset = new Vector2(0f, Header.HeroBottom() + 200f);
+            yield return CardTestInput.Settle();
+            yield return CardTestInput.UntilStill(Sheet);
+            Assert.IsFalse(Sheet.Root.ClassListContains(BlockStackView.BarsOnHeroClass), "precondition: past the hero");
+
+            // - the band covers the whole chrome row: from the sheet's top to below the marks and the title
+            var row = band.worldBound;
+            Assert.AreEqual(Sheet.Root.worldBound.yMin, row.yMin, OnePixel, "from the sheet's top");
+            Assert.AreEqual(Sheet.Root.worldBound.width, row.width, OnePixel, "edge to edge");
+            Assert.GreaterOrEqual(row.yMax, Sheet.CloseButton.worldBound.yMax - OnePixel, "below the X's touch target");
+            Assert.GreaterOrEqual(row.yMax, Sheet.Stack.HeaderSlot.worldBound.yMax - OnePixel, "below the title's row");
+            Assert.Greater(band.resolvedStyle.opacity, 0.99f, "past the hero the band shows");
+            Assert.IsTrue(CardTokenColours.TryResolve(band, "--ts-ink", out Color ink), "precondition: the theme's ink");
+            Assert.IsTrue(CardTokenColours.TryResolve(band, "--ts-surface", out Color surface), "precondition: the theme's surface");
+            float through;
+            if (fade)
+            {
+                Assert.AreEqual(0f, band.resolvedStyle.borderBottomWidth, 0.001f, "Fade: no hairline, no edge");
+                // - the ramp's real alpha (card_top_fade.png, its source) at the row's lowest line, and at its foot
+                var ramp = new Texture2D(2, 2);
+                ramp.LoadImage(System.IO.File.ReadAllBytes("Assets/Framework/Runtime/UI/Screen/Cards/card_top_fade.png"));
+                float rowFoot = Mathf.Max(Sheet.CloseButton.worldBound.yMax, Sheet.Stack.HeaderSlot.worldBound.yMax) - row.yMin;
+                int rampRow = Mathf.Clamp(Mathf.FloorToInt(rowFoot / row.height * ramp.height), 0, ramp.height - 1);
+                float alpha = ramp.GetPixel(0, ramp.height - 1 - rampRow).a;
+                float footAlpha = ramp.GetPixel(0, 0).a;
+                Object.Destroy(ramp);
+                Assert.Less(footAlpha, 0.02f, "the content dissolves under it: the ramp ends at nothing");
+                Assert.Greater(row.height, rowFoot + 24f, "...below the row, over a fade of its own");
+                var tint = band.resolvedStyle.unityBackgroundImageTintColor;
+                Color Over(Color under)
+                {
+                    var t = tint.linear;
+                    var u = under.linear;
+                    return Color.Lerp(u, new Color(t.r, t.g, t.b, 1f), alpha * tint.a).gamma;
+                }
+                through = CardTestInput.Contrast(Over(ink), Over(surface));
+            }
+            else
+            {
+                Assert.Greater(band.resolvedStyle.borderBottomWidth, 0f, "Glass: a hairline at its foot");
+                through = CardTestInput.Contrast(CardTestInput.GroundOver(band, ink, Sheet.Root), CardTestInput.GroundOver(band, surface, Sheet.Root));
+            }
+            Assert.Less(through, 1.25f, "block text under the band: " + through.ToString("0.00") + ":1 against its own page, seen through the band");
+            // - the handle and the bar row are clear: the band is the ONE ground
+            Assert.Less(Sheet.Handle.resolvedStyle.backgroundColor.a, 0.01f, "the grab row adds no second glass");
+            Assert.Less(Sheet.Stack.HeaderSlot.Q(className: "poi-card__header")?.resolvedStyle.backgroundColor.a ?? 0f, 0.01f, "nor the bar row");
+
+            // - the title bare: no outline, no pill
+            var title = Header.Root.Q<Label>(className: "card-header__title");
+            Assert.IsNotNull(title, "precondition: the bar's title");
+            Assert.IsTrue(Header.BarTitleShown, "precondition: past the hero the bar shows the title");
+            Assert.AreEqual(0f, title.resolvedStyle.borderTopWidth + title.resolvedStyle.borderBottomWidth + title.resolvedStyle.borderLeftWidth
+                + title.resolvedStyle.borderRightWidth, 0.001f, "no outline round the title");
+            Assert.Less(title.resolvedStyle.backgroundColor.a, 0.01f, "no pill behind it");
+
+            // - the title at 7:1 on the real render (its ink against the band and whatever lies under it, as drawn)
+            var titleColour = title.resolvedStyle.color;
+            Texture2D drawn = null, under = null;
+            try
+            {
+                yield return ThemePixelSet.GrabStill($"band_{poi}_{mode}", null, r => drawn = r);
+                title.style.color = Color.clear;
+                yield return null;
+                yield return ThemePixelSet.GrabStill($"band_under_{poi}_{mode}", null, r => under = r);
+                var (ratio, worst, inked) = ThemePixelSet.RingContrast(drawn, under, ThemePixelSet.ScreenRectOf(title, drawn), titleColour);
+                Assert.Greater(inked, 0, "precondition: the title draws pixels");
+                System.IO.File.WriteAllBytes(TestEvidence.PathFor(P2, $"{poi}_{mode}_{topBand}_AfterTheHero.png"), drawn.EncodeToPNG());
+                System.IO.File.AppendAllText(TestEvidence.PathFor(P2, "band_ratios.txt"),
+                    $"{poi} {mode} {topBand}: title {ratio:0.00}:1 (worst {(Color32)worst}), text through the band {through:0.00}:1\n");
+                Assert.GreaterOrEqual(ratio, Aaa, "the title keeps 7:1 on the band: " + ratio.ToString("0.00") + ":1 (worst pixel " + (Color32)worst + ")");
+            }
+            finally
+            {
+                title.style.color = StyleKeyword.Null;
+                if (drawn != null) Object.Destroy(drawn);
+                if (under != null) Object.Destroy(under);
+            }
         }
     }
 }

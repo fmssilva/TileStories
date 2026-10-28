@@ -13,64 +13,46 @@
 So start by reading them all. 
 
 
+## `And now: Premium P2 -- the Navigation Bar to v5, and the card's top after the hero`
 
-## `And now: Test tiers -- BLOCK / CORE / FULL (the first Test Suite Review, audit + the tiers + the biggest savings)`
+GATE: `git push` if the branch is ahead of origin (report how many commits). Confirm the tree compiles (zero error CS) BEFORE any
+run (40-testing 4.2.5 "Compile clean before every run"); if not, STOP and report. Check the two SDF fonts (`Oswald Bold SDF.asset`,
+`Roboto-Bold SDF.asset`): `git checkout --` them if modified. Leave `IPCE/` alone. Ask about Unity's place with 4.2.3's a / b / c
+actions, word for word. Never disable a tool's safety check.
+BASELINE: HEAD = the P1 commit a3a54d6 (+ a rules commit). No baseline run.
+THE DEVELOPER IS REVIEWING THE CARD COMPONENT BY COMPONENT (hero -> Navigation Bar -> story): this block runs ONLY the Navigation
+Bar's and the chrome's tests + full EditMode; everything else only has to compile. No CORE, no FULL.
+Spec (read ALL lines): `_3.3_POI_Card_Styles.md` "S4 review, third round" (Navigation Bar options + defaults, Chrome, Section
+separation), the prototype `_3.3.1_Prototype/Premium_v5.dc.html` (the Navigation Bar markup, CSS and its `renderVals()` logic:
+the raised path, the ball, sizes, motion -- the reference, not code to port), `_3.3` R11 (UI Toolkit mechanisms).
+WORKER MODEL: Opus-class -- a new drawn shape (the raised bump) and the visitor's main way round the card.
 
-GATE: `git push` if the branch is ahead of origin (report how many commits). Confirm the tree compiles; if not, STOP and report.
-Check the two SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`): `git checkout --` them if modified. Leave `IPCE/` alone
-(not this project). Ask about Unity's place with `40-testing.md` 4.2.3's a / b / c actions, word for word; WAIT for runs as 4.2.5
-says. Never disable a tool's safety check.
-BASELINE: HEAD a46bcc2 (S4a: the page Back, Full Height, the premium hero, the Navigation Bar) was committed WITHOUT a known full-run
-result. Known reds there: full EditMode 6 tests reading the developer's own LivingRoom config (the LiveSync badge x5,
-LivePlayModeNavigationPreset) + 9 DetailCard navigation tests doubled by an order-dependent leaked window. This block's FULL runs
-are also S4a's verification: a red that is a PRODUCT bug of S4a -> fix it if it is small and clear (say so), else STOP that test's
-work and report it.
-
-Spec (read ALL lines): `proj_guides/skills/Test_Suite_Review.md` (this block = its first run, AUDIT + FIX), `.clinerules/40-testing.md`
-(all of section 4), the watched flakes in `proj_guides/__mixed_TODOs.md`.
-WORKER MODEL: Opus-class -- test infrastructure every fixture stands on.
-GOAL (the developer's): every block's tests run in a few minutes and test that block; every 3-4 blocks a CORE run of ~30 min;
-every ~12 blocks the FULL suite, ~90 min at most.
-
-PART 1 -- measure. Make `TestRunRecorder` write each run's per-FIXTURE times (fixture, tests, passed / failed / skipped, seconds)
-to `TestEvidence/Harness/fixture_times.csv`, overwritten per run. Then one FULL PlayMode run + full EditMode (background, action
-c) on the baseline: the time table AND S4a's verdict. Rank the fixtures by time.
-PART 2 -- the CORE tier: `[Category("Core")]` on the tests that guard each domain's critical paths -- at least: open a card by a
-real tap and close it; the sheet's stops and drag; the block page and Back; the Navigation Bar (jump, the chosen group follows the
-scroll); the hero and the theme (light / dark); the story block and its page; audio play / stop; markers, search and zoom; the
-Editor's live sync and a config round trip; the visitor-state isolation. Where a fixture is slow, put the category on its
-cheapest test that proves the path, not on the class. Time it with `category_names: ["Core"]`; target 25-30 min; list each Core
-test and the path it guards in `_Test_Suite_1.md`.
-PART 3 -- the BLOCK tier: any PlayMode fixture over ~3 min is a block's bottleneck: split it by subject or slim it (Test_Suite_Review
-step 2: scene once per fixture, waits on conditions, a matrix cut to one case per behaviour + the pairs that really interact,
-duplicates merged). Never drop a real bug's regression or a contract guard (tokens, fields, render targets, contrast); say what
-proves each removed case now. Do the largest savings that fit this block; the rest goes in `_Test_Suite_1.md`'s fix list, in
-block-sized chunks with the expected saving each.
-PART 4 -- the reds and the flake: the order-dependent leaked window that doubles the 9 DetailCard navigation tests (find what
-leaves it open, fix it at the source -- 4.2.3); every test that reads the developer's own LivingRoom config choices instead of its
-own fixture config (the LiveSync badge x5, LivePlayModeNavigationPreset, any other the full runs show): make it own its data, so a
-developer's edit of the wall never turns a test red. The watched flakes: cause or a named quarantine.
-PART 5 -- the rule. Rewrite `40-testing.md` 4.2 "Which tests, when" as current truth, replacing its levels with:
-  "**Which tests, when (three tiers).** RUN TIMES (replaced after a run when a number moved > ~10 %): full EditMode ~N min; CORE ~N
-  min; FULL PlayMode ~N min; per-fixture times in `TestEvidence/Harness/fixture_times.csv`.
-  - **BLOCK -- every block, after each change:** compile, the full EditMode suite, then the PlayMode fixtures of the changed code
-    (the feature's own + every fixture that greps for the changed type, method or config key), named one by one in `test_names`;
-    a few minutes. A block closes on this tier unless its TEST PLAN says CORE or FULL.
-  - **CORE -- `category_names: ["Core"]`, ~30 min, background:** every 3rd-4th block, and at the end of a block on SHARED GROUND
-    (the definition below).
-  - **FULL -- everything, <= 90 min, background:** every ~12 blocks with the maintenance, before a domain close-out, a device
-    session or a build.
-  - A wider tier confirms, never discovers: green on BLOCK before CORE, green on CORE before FULL. The report names the tier, its
-    counts, and the blocks since the last CORE and the last FULL."
-  Keep the SHARED GROUND definition (shorten it), the `test_names` JSON-array note, the 25-failures note and the gated MEASUREMENTS
-  note; drop the "fourth block" full-run rule and every sentence the tiers replace.
-TEST PLAN: the FULL run of Part 1 (baseline + S4a verdict); at the end one CORE run (timed) and one FULL PlayMode + full EditMode
-run, all green, background (action c).
-RESULT: `proj_guides/_Test_Suite_1.md` (time table before / after, the Core list, findings, the fix list, S4a's verdict). DOCS:
-`40-testing.md` as above, `10-structure.md` (only your lines).
-OUT OF SCOPE: product code (only test code and the recorder) except the small S4a fixes above; new features.
-Stop when Parts 1-5 are done, CORE and FULL are timed and green. Finish with `.clinerules/60-finishing.md` 6.4's final report and
-END with the developer's review questions. Do not commit: the Architect commits after the review.
+PART 1 -- the Navigation Bar's options = v5's Tweaks "Navigation Bar", in that order, in `CardNavBarSettings` + NavBarRule +
+NavBarView: Position (Bottom / Top -- Top sits under the chrome row; the old "under_title" value loads as Top), Shape (Floating /
+Full Width), Fill (Solid / Glass / Clear -- the shadow ONLY under Solid; Clear = transparent over the hero, solid after it), Indicator
+(Raised / Pill / Underline / None), Chosen Icon (Plain / Filled = an accent disc at the icon's own place, with any indicator), Labels
+(Icon And Text / Icon / Text / Text On The Chosen), Chosen Colour (Accent / Ink; keep Group if it exists), Bold Chosen Icon, Show
+(Always / After The Hero), Hide While Scrolling. Old configs load unchanged.
+DEFAULTS (framework AND the LivingRoom wall): Bar on; Bottom, Floating, Solid, Raised, Filled, Icon And Text, Accent, Bold on,
+Always, Hide off. With the bar on, the old Top / Bottom / Menu / Floating / Edge elements default to none (kept, not deleted).
+PART 2 -- Raised: the bar's edge bends into a bump under the chosen group and its icon rides up in a filled accent disc; both
+slide to the next group with a small overshoot; at Top the bump hangs down. Draw it as one path (Painter2D in
+generateVisualContent -- check the API with unity_reflect), animated by the bump's x; no image per state. Over the hero a
+non-solid bar turns white-on-dark-glass. Labels >= 7:1 on every fill, over the hero and after it.
+PART 3 -- the Editor component "Navigation Bar" mirrors PART 1 exactly (same names, same order, same defaults) + the Bar Groups
+table complete: one row per group -- shown, order, name per language, icon, chosen icon, colour, families; the 6 groups by default;
+add / remove a group. Messages name things, never ids.
+PART 4 -- the card's top after the hero (the P1 render painting_dark_AfterTheHero.png): block text shows behind the X and the
+title, and the title has a pill outline. The chrome row after the hero gets a dense glass band (v5: light glass, title centred,
+a hairline at its foot) -- no block text visible behind it, marks and title >= 7:1. Find and remove the title's outline.
+TESTS (real taps, real renders): every option changes what the visitor sees (one case per option value, not the whole matrix + the
+pairs that interact: Raised x Top, Fill x over-the-hero); a real tap on a group jumps there and the indicator / bump follows the
+scroll; the Editor table edits reach the running card (live sync); old config loads. Renders light + dark, Bottom and Top, over the
+hero and after it, saved in TestEvidence/Premium/P2/; Editor captures in the dark skin. Look at each one yourself.
+TEST PLAN: BLOCK only -- full EditMode + NavBarRuleTests, NavigationBarEditorTabTests, PoiCardNavBarSceneTests,
+PoiCardChromeMarksSceneTests, PoiCardHeroSceneTests and any new fixture of this block, by name.
+REPORT (6.4): what changed, the renders' paths, the counts, REVIEW QUESTIONS for the developer with the renders to look at.
+Do not commit.
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
