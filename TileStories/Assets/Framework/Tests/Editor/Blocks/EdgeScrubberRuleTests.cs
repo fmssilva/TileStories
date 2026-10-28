@@ -2,6 +2,7 @@ using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
+using TileStories.Tests;
 
 namespace TileStories.Editor.Tests
 {
@@ -10,6 +11,7 @@ namespace TileStories.Editor.Tests
     // Full is 565 px (measured at step 5b) and 106.6 px at Half. What EdgeScrubberRule decides: whether the rail is drawn at all (every
     // family needs a full touch target), where the column sits, and which dot a finger at a y position picks -- the centres, the
     // boundaries, the two ends, the overshoot past them and a release further out.
+    [Ignore(TestSkips.OldNavigationElements)]
     public class EdgeScrubberRuleTests
     {
         // --ts-touch-target

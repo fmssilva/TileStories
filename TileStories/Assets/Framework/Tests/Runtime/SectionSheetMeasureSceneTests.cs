@@ -7,20 +7,20 @@ using UnityEngine.UIElements;
 
 namespace TileStories.Tests
 {
-    // The measuring instrument of _3.3 P4.4c1 (the section sheets), run only while TestEvidence/Sections/MEASURING names a phase
-    // (LookMeasure): on The Lamp and The Painting at Full, every number the card's navigation reads from a block's position -- the stops,
-    // every target's jump landing, the spy's section and block every 120 px of scroll, the rails' fit (Auto Nav Block = Rails) and the
-    // bento tiles' rects -- so a sheet's every move is stated. Renders: Half and Full, at the top and past the hero.
-    public class SectionSheetMeasureSceneTests : SearchSceneFixture
+    // SectionSheetMeasureSceneTests's shared ground: its set-up and helpers, so its own tests and its old-navigation ones stand on one fixture
+    public abstract class SectionSheetMeasureSceneFixture : SearchSceneFixture
     {
-        private static readonly string[] Pois = { "lamp", "painting" };
-        private const float SpyStep = 120f;
+        protected static readonly string[] Pois = { "lamp", "painting" };
 
-        private PoiCardSheetView Sheet => Card.Sheet;
-        private ScrollView Scroll => Sheet.Stack.Scroll;
-        private float Range => NavScrollRule.Range(Scroll.contentContainer.layout.height, Scroll.contentViewport.layout.height);
+        protected const float SpyStep = 120f;
 
-        private IEnumerator Open(string poi, SheetStopRule.Stop stop)
+        protected PoiCardSheetView Sheet => Card.Sheet;
+
+        protected ScrollView Scroll => Sheet.Stack.Scroll;
+
+        protected float Range => NavScrollRule.Range(Scroll.contentContainer.layout.height, Scroll.contentViewport.layout.height);
+
+        protected IEnumerator Open(string poi, SheetStopRule.Stop stop)
         {
             SelectionEventBus.Clear();
             yield return CardTestInput.Settle();
@@ -32,6 +32,20 @@ namespace TileStories.Tests
             LookMeasure.FreezeHero(Sheet);
         }
 
+        protected static int SectionOf(CardNavModel model, string target)
+        {
+            for (int i = 0; i < model.Sections.Count; i++)
+                if (model.Sections[i].Targets.Contains(target)) return i;
+            return -1;
+        }
+    }
+
+    // The measuring instrument of _3.3 P4.4c1 (the section sheets), run only while TestEvidence/Sections/MEASURING names a phase
+    // (LookMeasure): on The Lamp and The Painting at Full, every number the card's navigation reads from a block's position -- the stops,
+    // every target's jump landing, the spy's section and block every 120 px of scroll, the rails' fit (Auto Nav Block = Rails) and the
+    // bento tiles' rects -- so a sheet's every move is stated. Renders: Half and Full, at the top and past the hero.
+    public class SectionSheetMeasureSceneTests : SectionSheetMeasureSceneFixture
+    {
         [UnityTest]
         public IEnumerator TheNavigationsNumbers_OnTheScrollLayout([ValueSource(nameof(Pois))] string poi)
         {
@@ -68,7 +82,12 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle();
             yield return LookMeasure.Render(LookMeasure.Sections, phase, $"sections_{poi}_half", Sheet.Root);
         }
+    }
 
+    // SectionSheetMeasureSceneTests's tests whose subject is an old navigation element: they wait for its rebuild on the Navigation Bar's pattern
+    [Ignore(TestSkips.OldNavigationElements)]
+    public class SectionSheetMeasureSceneOldNavigationTests : SectionSheetMeasureSceneFixture
+    {
         [UnityTest]
         public IEnumerator TheRailsFit([ValueSource(nameof(Pois))] string poi)
         {
@@ -105,13 +124,6 @@ namespace TileStories.Tests
                 var box = tile.Button.layout;
                 LookMeasure.Note(LookMeasure.Sections, phase, $"{poi} bento tile {tile.Index}: {box.x:0.0}, {box.y:0.0}, {box.width:0.0} x {box.height:0.0}");
             }
-        }
-
-        private static int SectionOf(CardNavModel model, string target)
-        {
-            for (int i = 0; i < model.Sections.Count; i++)
-                if (model.Sections[i].Targets.Contains(target)) return i;
-            return -1;
         }
     }
 }

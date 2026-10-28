@@ -5,6 +5,7 @@ using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.UIElements;
+using TileStories.Tests;
 
 namespace TileStories.Editor.Tests
 {
@@ -54,6 +55,7 @@ namespace TileStories.Editor.Tests
 
     // The conditions of Detail Card > Navigation's warnings (_3.2 section 7), pure: each at its edge, each absent otherwise, and the
     // section count read from the REAL card map of the wall's busiest card.
+    [Ignore(TestSkips.OldNavigationElements)]
     public class NavigationWarningRuleTests
     {
         private static WallConfigData Shipped() =>

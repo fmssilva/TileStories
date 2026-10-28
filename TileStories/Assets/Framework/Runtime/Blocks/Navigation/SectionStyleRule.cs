@@ -58,9 +58,13 @@ namespace TileStories
             string start = System.Array.IndexOf(CardOptions.SectionStarts, groupStart) >= 0 ? groupStart
                 : Vary(s) == CardOptions.SectionVaryByGroup ? ByGroupStarts[Mathf.Max(0, groupIndex) % ByGroupStarts.Length]
                 : Start(s);
-            string divider = position == 0 ? CardOptions.SectionDividerNone : Divider(s);
+            // - one ornament per boundary (_3.3 P3a review f): a Tiles or Wave Start IS the boundary's ornament, so no divider stands before it
+            string divider = position == 0 || OrnamentStart(start) ? CardOptions.SectionDividerNone : Divider(s);
             return new Style(start, divider, Colour(s), Intensity(s), Motion(s));
         }
+
+        // A Start drawn as an ornament of its own (the tile row, the wave): it takes the divider's place
+        public static bool OrnamentStart(string start) => start == CardOptions.SectionStartTiles || start == CardOptions.SectionStartWave;
 
         // The theme colour a section's tint takes: its group's colour, the accent, or the neutral
         public static string TintToken(string colour, string groupColourToken) =>

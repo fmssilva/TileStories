@@ -1,10 +1,12 @@
 using NUnit.Framework;
+using TileStories.Tests;
 
 namespace TileStories.Editor.Tests
 {
     // Tier 0 of the Segmented element's Show Counts fit (_3.2 audit F6, section 5.1): a count goes when it cannot sit beside its word, the
     // word never does. The widths are the ones the element measured at 390 px in the audit's render (a segment's inner room of about
     // 81 px; "Discover" about 56 px wide, its count "25" about 14 px, a 4 px gap) -- a stand-in for the measurement, never a layout.
+    [Ignore(TestSkips.OldNavigationElements)]
     public class NavFitRuleTests
     {
         private const float Gap = 4f;

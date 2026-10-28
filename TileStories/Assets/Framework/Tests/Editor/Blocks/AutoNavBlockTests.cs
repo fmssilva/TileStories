@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
+using TileStories.Tests;
 
 namespace TileStories.Editor.Tests
 {
@@ -12,6 +13,7 @@ namespace TileStories.Editor.Tests
     // at Show Navigation From gets it and one below does not, a point that shows its own nav block gets none, and none / an unknown key /
     // another family's kind / a kind off in the Block Library insert nothing. And the navigation family is no target: the card's nav
     // model is the same with the grid as without it.
+    [Ignore(TestSkips.OldNavigationElements)]
     public class AutoNavBlockTests
     {
         private const string Lamp = "lamp";

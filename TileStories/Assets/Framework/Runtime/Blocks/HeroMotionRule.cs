@@ -11,7 +11,8 @@ namespace TileStories
     //   - Zoom (hero_motion = zoom): a slow push-in to ZoomMax and back over PanPeriod
     //   - Parallax: the picture moves at ParallaxFactor of the scroll inside its frame (a window with depth)
     //   - Text: the hero's words block (kicker, title, line, Listen and the actions, as one) rises faster than the scroll (TextRiseFactor
-    //     more) and fades only near the top of the view: over the TextFadeSpan just under the chrome floating there (_3.3 S4a review)
+    //     more) and fades only as the visitor's scroll carries it up to the chrome floating at the top -- whole at rest at every stop
+    //     (_3.3 S4a review, P3a review b)
     //   - Reduce motion: the picture still at its centre, no zoom, no parallax, the words still and whole
     public static class HeroMotionRule
     {
@@ -88,13 +89,20 @@ namespace TileStories
         public static float TextRise(float scrollY, bool reduceMotion) =>
             reduceMotion || float.IsNaN(scrollY) ? 0f : -Mathf.Max(0f, scrollY) * TextRiseFactor;
 
-        // `wordsTop`: the words block's top as drawn, from the view's top; `fadeTop`: the foot of the chrome floating over the view. Whole
-        // until the block comes within TextFadeSpan of that foot, gone as it reaches it
-        public static float TextOpacity(float wordsTop, float fadeTop, bool reduceMotion)
+        // The least scroll the words fade over, when they rest close under the chrome (a fade over less would read as a blink)
+        public const float MinFadeSpan = 40f;
+
+        // `restTop`: the words block's top at rest (no scroll), `nowTop`: as drawn now, both from the view's top; `fadeTop`: the foot of the
+        // chrome floating over the view. At rest the words are WHOLE wherever the stop puts them (_3.3 P3a review b): only the visitor's scroll
+        // fades them -- over the last TextFadeSpan it carries them before the chrome's foot, or over the whole way there when they rest nearer
+        // (never less than MinFadeSpan), gone as they reach it
+        public static float TextOpacity(float restTop, float nowTop, float fadeTop, bool reduceMotion)
         {
-            if (reduceMotion || float.IsNaN(wordsTop)) return 1f;
-            float above = wordsTop - (float.IsNaN(fadeTop) ? 0f : Mathf.Max(0f, fadeTop));
-            return Mathf.Clamp01(above / TextFadeSpan);
+            if (reduceMotion || float.IsNaN(restTop) || float.IsNaN(nowTop)) return 1f;
+            float room = restTop - (float.IsNaN(fadeTop) ? 0f : Mathf.Max(0f, fadeTop));
+            float travel = Mathf.Max(0f, restTop - nowTop);
+            float span = Mathf.Clamp(room, MinFadeSpan, TextFadeSpan);
+            return Mathf.Clamp01((Mathf.Max(room, span) - travel) / span);
         }
     }
 }

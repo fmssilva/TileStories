@@ -5,142 +5,199 @@ using UnityEngine;
 
 namespace TileStories.Editor.Tests
 {
-    // Tier 0 of the Navigation Bar's drawn shape (NavBarShapeRule, v5's renderVals): the ONE path's bump at the chosen group (its peak, its
-    // feet on the edge, a top corner giving way beside it), the flat edge without Raised, the corners per shape, the mirror at Top (the bump hangs down),
-    // and the slide's overshoot. v5's numbers at the phone's frame: a floating bar 358 wide, 62 high, 26 of room, an 18 bump 38 half wide (P3: wider and deeper than its 40 disc).
+    // Tier 0 of the Navigation Bar's drawn shape (NavBarShapeRule; _3.3 P3a review a: the Raised bump is FLUID): the bell's peak exactly on
+    // the disc's top (+-0.5), its crest the disc's own arc (no band of bar above the disc), the tangent continuous at every join (no corner
+    // anywhere), each side monotonic, wide soft shoulders, the first and last groups as smooth as a middle one, the flat edge without Raised,
+    // the corners per shape, the mirror at Top (the bell hangs down) and the slide's overshoot. The numbers are the card's, read from
+    // CardTokens.uss (never retyped), at the phone's frame: a floating bar 358 wide.
     public class NavBarShapeRuleTests
     {
-        private const float W = 358f, H = 62f, Room = 26f, Bump = 18f, Half = 38f, Raised = 18f;
+        private const float W = 358f;
+        // One drawn path's tolerance: half a pixel (the brief's +-0.5) for positions; half a degree for a tangent's turn at a join
+        private const float HalfPixel = 0.5f, SmoothDegrees = 0.5f;
 
-        private static IEnumerable<Vector2> Points(List<NavBarShapeRule.Command> path)
+        private static float Token(string name)
         {
-            foreach (var c in path)
+            string tokens = System.IO.File.ReadAllText("Assets/Framework/Runtime/UI/Screen/Cards/CardTokens.uss");
+            var m = System.Text.RegularExpressions.Regex.Match(tokens, "--ts-navbar-" + name + @":\s*([0-9.]+)");
+            Assert.IsTrue(m.Success, "the token --ts-navbar-" + name);
+            return float.Parse(m.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        private static float Room => Token("room");
+        private static float H => Token("height");
+        private static float Bump => Token("bump");
+        private static float Half => Token("bump-half");
+        private static float Disc => Token("disc-raised") * 0.5f;
+        private static float Corner => NavBarShapeRule.Radius(true, true, H, Token("raised-radius"));
+
+        // The six default groups on the bar's 10 pt padded row: their centres
+        private static float GroupCentre(int i) => 10f + (W - 20f) / 6f * (i + 0.5f);
+
+        private static List<NavBarShapeRule.Command> Bell(float x) =>
+            NavBarShapeRule.Path(W, H, Room, Corner, Bump, Half, NavBarShapeRule.BumpX(x, W, Disc), Disc);
+
+        // The path as its drawn pieces: each a list of control points from its start (lines 2, quads 3, cubics 4)
+        private static List<Vector2[]> Pieces(List<NavBarShapeRule.Command> path)
+        {
+            var pieces = new List<Vector2[]>();
+            var at = path[0].P1;
+            foreach (var c in path.Skip(1))
+            {
                 switch (c.Op)
                 {
-                    case NavBarShapeRule.Op.Move:
-                    case NavBarShapeRule.Op.Line: yield return c.P1; break;
-                    case NavBarShapeRule.Op.Quad: yield return c.P1; yield return c.P2; break;
-                    case NavBarShapeRule.Op.Cubic: yield return c.P1; yield return c.P2; yield return c.P3; break;
+                    case NavBarShapeRule.Op.Line: pieces.Add(new[] { at, c.P1 }); break;
+                    case NavBarShapeRule.Op.Quad: pieces.Add(new[] { at, c.P1, c.P2 }); break;
+                    case NavBarShapeRule.Op.Cubic: pieces.Add(new[] { at, c.P1, c.P2, c.P3 }); break;
+                    case NavBarShapeRule.Op.Close: if (Vector2.Distance(at, path[0].P1) > 1e-3f) pieces.Add(new[] { at, path[0].P1 }); continue;
                 }
-        }
-
-        [Test]
-        public void Raised_BendsTheEdgeIntoABump_PeakingAtTheGroup_ItsFeetOnTheEdge_TheRestOfTheBarUntouched()
-        {
-            float r = NavBarShapeRule.Radius(true, true, H, Raised);
-            float x = NavBarShapeRule.BumpX(150f, W, r, Half);
-            var path = NavBarShapeRule.Path(W, H, Room, r, Bump, Half, x);
-            var points = Points(path).ToList();
-            Assert.AreEqual(Room - Bump, points.Min(p => p.y), 1e-4f, "the highest point is the bump's peak, Bump above the edge");
-            var peak = path[2].P3;
-            Assert.AreEqual(new Vector2(150f, Room - Bump), peak, "the peak sits over the group's centre");
-            Assert.AreEqual(new Vector2(150f - Half, Room), path[1].P1, "the left foot on the edge");
-            Assert.AreEqual(new Vector2(150f + Half, Room), path[3].P3, "the right foot on the edge");
-            Assert.AreEqual(Room + H, points.Max(p => p.y), 1e-4f, "the bar's foot");
-            Assert.AreEqual(0f, points.Min(p => p.x), 1e-4f);
-            Assert.AreEqual(W, points.Max(p => p.x), 1e-4f);
-            Assert.AreEqual(NavBarShapeRule.Op.Move, path[0].Op);
-            Assert.AreEqual(NavBarShapeRule.Op.Close, path[path.Count - 1].Op, "one closed path");
-            Assert.AreEqual(path[0].P1, path[path.Count - 2].P2, "it ends where it began");
-        }
-
-        [Test]
-        public void ABumpNearASide_TakesThatTopCornersRoom_SoItSitsUnderTheFirstAndLastGroups()
-        {
-            float r = NavBarShapeRule.Radius(true, true, H, Raised);
-            Assert.AreEqual(Half + 1f, NavBarShapeRule.BumpX(10f, W, r, Half), "near the left side: its foot stays inside the bar");
-            Assert.AreEqual(W - Half - 1f, NavBarShapeRule.BumpX(W - 10f, W, r, Half), "near the right side");
-            Assert.AreEqual(179f, NavBarShapeRule.BumpX(179f, W, r, Half), "a middle group: where it is");
-            // - the first of six groups on the 10 pt padded row: centre 10 + 338 / 12 = 38.2 -- the bump is drawn there (1 pt inside at most)
-            float first = 10f + (W - 20f) / 6f * 0.5f;
-            float x = NavBarShapeRule.BumpX(first, W, r, Half);
-            Assert.AreEqual(first, x, 1f, "the first group's bump sits under it, not held off by the corner");
-            var path = NavBarShapeRule.Path(W, H, Room, r, Bump, Half, x);
-            float foot = x - Half;
-            Assert.AreEqual(new Vector2(foot, Room), path[0].P1, "the top-left corner shrank to the room left beside the bump's foot");
-            Assert.AreEqual(new Vector2(0f, Room + foot), path[path.Count - 3].P1, "...on the side too: a smaller quarter turn");
-            Assert.AreEqual(new Vector2(W - r, Room), path[4].P1, "the far corner keeps its own radius");
-            // - no bump (another indicator): both corners keep theirs, wherever the centre is
-            var flat = NavBarShapeRule.Path(W, H, Room, r, 0f, Half, x);
-            Assert.AreEqual(new Vector2(r, Room), flat[0].P1, "a flat edge keeps the corner");
-            Assert.AreEqual(r, NavBarShapeRule.TopCorner(r, 40f));
-            Assert.AreEqual(5f, NavBarShapeRule.TopCorner(r, 5f));
-            Assert.AreEqual(0f, NavBarShapeRule.TopCorner(r, -3f));
-        }
-
-        [Test]
-        public void TheBump_IsWiderAndDeeperThanItsDisc_SoTheEdgeBendsRoundIt()
-        {
-            // - P3's numbers, read from the card's tokens file (never retyped): a 76 x 18 bump round a 40 disc
-            string tokens = System.IO.File.ReadAllText("Assets/Framework/Runtime/UI/Screen/Cards/CardTokens.uss");
-            float Read(string name)
-            {
-                var m = System.Text.RegularExpressions.Regex.Match(tokens, "--ts-navbar-" + name + @":\s*([0-9.]+)");
-                Assert.IsTrue(m.Success, "the token --ts-navbar-" + name);
-                return float.Parse(m.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
+                at = c.End;
             }
-            float half = Read("bump-half"), bump = Read("bump"), disc = Read("disc-raised"), gap = Read("disc-gap"), room = Read("room");
-            Assert.AreEqual(Half, half, "this fixture's numbers are the card's");
-            Assert.AreEqual(Bump, bump);
-            Assert.Greater(half * 2f, disc + 30f, "the bump's foot reaches well past the disc on both sides (15 pt each at least)");
-            Assert.GreaterOrEqual(bump, 18f, "deep enough to read as a bend");
-            Assert.GreaterOrEqual(gap, 4f, "a ring of bar round the disc's top wide enough to see");
-            float top = NavBarShapeRule.DiscTop(room, bump, gap);
-            Assert.AreEqual(room - bump + gap, top, 1e-4f, "the disc's top a gap under the bump's peak");
-            Assert.GreaterOrEqual(top, 0f, "...inside the bar's box: the room holds it");
+            return pieces;
         }
 
-        // _3.3 P3a: the bump is a CUT-OUT round the disc -- every point of its outline above the edge clears the disc by the gap (one
-        // physical pixel of tolerance for the curve's sampling), so the bar's colour shows all round the disc's top, never a disc on a flat edge
-        [Test]
-        public void TheBumpsOutline_RunsRoundTheDisc_AGapAwayAllAlongIt()
+        private static Vector2 At(Vector2[] p, float t)
         {
-            string tokens = System.IO.File.ReadAllText("Assets/Framework/Runtime/UI/Screen/Cards/CardTokens.uss");
-            float Read(string name) => float.Parse(System.Text.RegularExpressions.Regex.Match(tokens, "--ts-navbar-" + name + @":\s*([0-9.]+)").Groups[1].Value,
-                System.Globalization.CultureInfo.InvariantCulture);
-            float bump = Read("bump"), half = Read("bump-half"), disc = Read("disc-raised"), gap = Read("disc-gap"), room = Read("room");
-            const float x = 200f;
-            var path = NavBarShapeRule.Path(W, H, room, NavBarShapeRule.Radius(true, true, H, Raised), bump, half, x);
-            var centre = new Vector2(x, NavBarShapeRule.DiscTop(room, bump, gap) + disc * 0.5f);
-            int sampled = 0;
-            foreach (var c in path.Where(c => c.Op == NavBarShapeRule.Op.Cubic))
+            float u = 1f - t;
+            return p.Length == 2 ? u * p[0] + t * p[1]
+                : p.Length == 3 ? u * u * p[0] + 2f * u * t * p[1] + t * t * p[2]
+                : u * u * u * p[0] + 3f * u * u * t * p[1] + 3f * u * t * t * p[2] + t * t * t * p[3];
+        }
+
+        // The direction a piece leaves its start / arrives at its end (the first control point that is not on the end itself)
+        private static Vector2 Leaving(Vector2[] p) => (p.Skip(1).First(q => Vector2.Distance(q, p[0]) > 1e-5f) - p[0]).normalized;
+        private static Vector2 Arriving(Vector2[] p) => (p[p.Length - 1] - p.Take(p.Length - 1).Reverse().First(q => Vector2.Distance(q, p[p.Length - 1]) > 1e-5f)).normalized;
+
+        private static List<Vector2> Samples(List<NavBarShapeRule.Command> path, int perPiece = 100) =>
+            Pieces(path).SelectMany(p => Enumerable.Range(0, perPiece + 1).Select(i => At(p, i / (float)perPiece))).ToList();
+
+        [Test]
+        public void TheBellsPeak_IsExactlyTheDiscsTop_OverTheDiscsCentre_ForEveryGroup()
+        {
+            float discTop = NavBarShapeRule.DiscTop(Room, Bump);
+            Assert.GreaterOrEqual(discTop, 0f, "precondition: the room holds the disc");
+            for (int g = 0; g < 6; g++)
             {
-                var from = path[path.IndexOf(c) - 1];
-                var p0 = from.Op == NavBarShapeRule.Op.Cubic ? from.P3 : from.P1;
-                for (float s = 0f; s <= 1f; s += 0.02f)
+                float x = GroupCentre(g);
+                var points = Samples(Bell(x));
+                var peak = points.OrderBy(p => p.y).First();
+                Assert.AreEqual(discTop, peak.y, HalfPixel, "group " + g + ": the highest point is the disc's top -- no band of bar above it");
+                Assert.AreEqual(x, peak.x, HalfPixel, "group " + g + ": ...over the disc's centre");
+                Assert.AreEqual(Room + H, points.Max(p => p.y), 1e-3f, "the bar's foot");
+                Assert.AreEqual(0f, points.Min(p => p.x), 1e-3f);
+                Assert.AreEqual(W, points.Max(p => p.x), 1e-3f);
+            }
+        }
+
+        // The crest IS the disc's arc: above the edge the outline never cuts into the disc, and near the peak it runs ON the disc's outline
+        // (the bar hugs the disc's top and leaves it only as the bell falls)
+        [Test]
+        public void TheCrest_RunsOnTheDiscsOutline_AndTheBellNeverCutsIntoTheDisc()
+        {
+            float x = GroupCentre(2);
+            var centre = new Vector2(x, NavBarShapeRule.DiscTop(Room, Bump) + Disc);
+            float leaveY = NavBarShapeRule.DiscTop(Room, Bump) + Disc * (1f - Mathf.Cos(NavBarShapeRule.LeaveAngle(Bump, Disc)));
+            int onArc = 0;
+            foreach (var p in Samples(Bell(x)).Where(p => p.y < Room))
+            {
+                float d = Vector2.Distance(p, centre);
+                Assert.GreaterOrEqual(d, Disc - HalfPixel, "the outline at " + p + " stays outside the disc");
+                if (p.y <= leaveY - 1e-3f)
                 {
-                    float u = 1f - s;
-                    var p = u * u * u * p0 + 3f * u * u * s * c.P1 + 3f * u * s * s * c.P2 + s * s * s * c.P3;
-                    if (p.y >= room) continue;
-                    sampled++;
-                    Assert.GreaterOrEqual(Vector2.Distance(p, centre), disc * 0.5f + gap - 1f, "the outline at " + p + " stays a gap off the disc");
+                    onArc++;
+                    Assert.AreEqual(Disc, d, HalfPixel, "the crest at " + p + " is the disc's own outline");
                 }
             }
-            Assert.Greater(sampled, 50, "precondition: the bump's outline above the edge was walked");
-            Assert.AreEqual(room - bump, Points(path).Min(p => p.y), 1e-4f, "...and rises the bump's full height over the disc's centre");
+            Assert.Greater(onArc, 50, "precondition: the crest was walked");
+            Assert.Greater(NavBarShapeRule.LeaveAngle(Bump, Disc) * Mathf.Rad2Deg, 30f, "the bar hugs a real part of the disc's top, not a point");
+        }
+
+        // C1: wherever two pieces meet, the second leaves in the direction the first arrived -- a middle group, the first and last of six,
+        // a disc pushed against either side, and the mirror at Top
+        [Test]
+        public void TheOutline_HasNoCorner_AtAnyJoin_ForEveryGroup_NearASide_AndAtTop()
+        {
+            var centres = Enumerable.Range(0, 6).Select(GroupCentre).Concat(new[] { Disc, W - Disc, Disc + 3f }).ToList();
+            foreach (float x in centres)
+                foreach (bool top in new[] { false, true })
+                {
+                    var path = Bell(x);
+                    if (top) path = NavBarShapeRule.Mirror(path, Room + H);
+                    var pieces = Pieces(path);
+                    for (int i = 0; i < pieces.Count; i++)
+                    {
+                        var next = pieces[(i + 1) % pieces.Count];
+                        float turn = Vector2.Angle(Arriving(pieces[i]), Leaving(next));
+                        Assert.Less(turn, SmoothDegrees, $"centre {x:0.0} {(top ? "Top" : "Bottom")}: a corner of {turn:0.00} deg at {pieces[i][pieces[i].Length - 1]}");
+                    }
+                }
+        }
+
+        // From each foot to the peak the bell only rises (and from the peak to the far foot only falls), and it never turns back sideways
+        [Test]
+        public void EachSideOfTheBell_IsMonotonic_FromItsFootToThePeak()
+        {
+            foreach (float x in new[] { GroupCentre(0), GroupCentre(2), GroupCentre(5) })
+            {
+                var edge = Samples(Bell(x)).Where(p => p.y <= Room + 1e-3f && p.x > 0f && p.x < W).ToList();
+                // - the top edge in the path's order runs left to right
+                for (int i = 1; i < edge.Count; i++)
+                {
+                    Assert.GreaterOrEqual(edge[i].x, edge[i - 1].x - 1e-3f, $"centre {x:0.0}: the edge never turns back at {edge[i]}");
+                    if (edge[i].x <= x) Assert.LessOrEqual(edge[i].y, edge[i - 1].y + 1e-3f, $"centre {x:0.0}: the left side only rises, at {edge[i]}");
+                    else if (edge[i - 1].x >= x) Assert.GreaterOrEqual(edge[i].y, edge[i - 1].y - 1e-3f, $"centre {x:0.0}: the right side only falls, at {edge[i]}");
+                }
+            }
+        }
+
+        // Wide soft shoulders: the bell's feet stand Half from the disc's centre, well past the disc (a middle group); near a side the
+        // shoulder narrows into the top corner, which keeps its radius while the shoulder still fits beside it
+        [Test]
+        public void TheShoulders_AreWide_AndNearASideTheyNarrowIntoTheCorner()
+        {
+            Assert.Greater(Half, Disc * 2f, "the bell is over twice as wide as the disc: wide soft shoulders");
+            float x = GroupCentre(2);
+            // - the feet: where the first shoulder (cubic) leaves the edge and where the last one lands on it (a soft landing: flat for its
+            //   last few points, so the feet are read from the path, not from where the outline visibly rises)
+            var cubics = Pieces(Bell(x)).Where(p => p.Length == 4).ToList();
+            Assert.AreEqual(4, cubics.Count, "precondition: two shoulders and the crest's two arcs");
+            Assert.Less(Vector2.Distance(new Vector2(x - Half, Room), cubics[0][0]), 1e-3f, "a middle group: the left foot Half from the centre, on the edge " + cubics[0][0]);
+            Assert.Less(Vector2.Distance(new Vector2(x + Half, Room), cubics[3][3]), 1e-3f, "...and the right one " + cubics[3][3]);
+            // - the first group: its shoulder shorter, the corner whole beside it; the far corner untouched
+            var first = Bell(GroupCentre(0));
+            Assert.AreEqual(new Vector2(0f, Room + Corner), first[0].P1, "the first group: the top-left corner keeps its radius");
+            Assert.Less(Samples(first).Where(p => p.y < Room - 1e-3f).Min(p => p.x), GroupCentre(0) - Disc * 0.5f,
+                "...and the shoulder still falls past the disc's side");
+            // - a disc against the side: the corner gives way, the outline stays smooth (the C1 test)
+            Assert.Less(Bell(Disc)[0].P1.y, Room + Corner, "a disc at the side: the corner gives way to the shoulder");
+            Assert.AreEqual(Disc, NavBarShapeRule.BumpX(2f, W, Disc), "the bell's centre holds the disc inside the bar");
+            Assert.AreEqual(W - Disc, NavBarShapeRule.BumpX(W - 2f, W, Disc));
+            Assert.AreEqual(179f, NavBarShapeRule.BumpX(179f, W, Disc), "anywhere else: the disc's own centre");
         }
 
         [Test]
         public void WithoutRaised_TheEdgeIsFlat_AndTheCornersFollowTheShape()
         {
-            var flat = NavBarShapeRule.Path(W, H, Room, H * 0.5f, 0f, Half, 179f);
-            Assert.AreEqual(Room, Points(flat).Where(p => p.y < Room + 1f).Min(p => p.y), 1e-4f, "no point above the edge");
-            Assert.AreEqual(H * 0.5f, NavBarShapeRule.Radius(true, false, H, Raised), "floating, no bump: a stadium");
-            Assert.AreEqual(Raised, NavBarShapeRule.Radius(true, true, H, Raised), "floating under Raised: v5's smaller corner");
-            Assert.AreEqual(0f, NavBarShapeRule.Radius(false, true, H, Raised), "full width: square");
-            Assert.AreEqual(0f, NavBarShapeRule.Radius(false, false, H, Raised));
+            var flat = NavBarShapeRule.Path(W, H, Room, H * 0.5f, 0f, Half, 179f, Disc);
+            Assert.AreEqual(Room, Samples(flat).Min(p => p.y), 1e-3f, "no point above the edge");
+            float raised = Token("raised-radius");
+            Assert.AreEqual(H * 0.5f, NavBarShapeRule.Radius(true, false, H, raised), "floating, no bump: a stadium");
+            Assert.AreEqual(raised, NavBarShapeRule.Radius(true, true, H, raised), "floating under Raised: v5's smaller corner");
+            Assert.AreEqual(0f, NavBarShapeRule.Radius(false, true, H, raised), "full width: square");
+            Assert.AreEqual(0f, NavBarShapeRule.Radius(false, false, H, raised));
         }
 
         [Test]
-        public void AtTop_ThePathIsMirrored_TheBumpHangsBelowTheBarsFoot()
+        public void AtTop_ThePathIsMirrored_TheBellHangsBelowTheBarsFoot_ItsLowestPointTheDiscsFoot()
         {
-            float r = NavBarShapeRule.Radius(true, true, H, Raised);
-            var path = NavBarShapeRule.Path(W, H, Room, r, Bump, Half, 200f);
+            float x = GroupCentre(3);
+            var path = Bell(x);
             var top = NavBarShapeRule.Mirror(path, Room + H);
-            var points = Points(top).ToList();
-            Assert.AreEqual(0f, points.Min(p => p.y), 1e-4f, "the bar's top edge at the box's top");
-            Assert.AreEqual(H + Bump, points.Max(p => p.y), 1e-4f, "the lowest point is the bump, Bump below the bar's foot (at H)");
-            Assert.AreEqual(new Vector2(200f, H + Bump), top[2].P3, "under the group");
+            var points = Samples(top);
+            Assert.AreEqual(0f, points.Min(p => p.y), 1e-3f, "the bar's top edge at the box's top");
+            var lowest = points.OrderByDescending(p => p.y).First();
+            Assert.AreEqual(H + Bump, lowest.y, HalfPixel, "the lowest point is the bell's, Bump below the bar's foot (at H) -- the disc's foot");
+            Assert.AreEqual(x, lowest.x, HalfPixel, "...under the group");
             Assert.AreEqual(path.Count, top.Count);
         }
 

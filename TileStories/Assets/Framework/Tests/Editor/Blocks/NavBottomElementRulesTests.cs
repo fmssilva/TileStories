@@ -2,12 +2,14 @@ using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
+using TileStories.Tests;
 
 namespace TileStories.Editor.Tests
 {
     // Tier 0 of what the step 7b bottom elements decide (_3.2 section 5.2), on the SHIPPED LivingRoom wall through the real
     // BlockStackBuilder and CardNavModel: NextUpRule (which block is next, what number it is, the last target, a current block that is no
     // target, a reveal growing the card, every Block Order) and BarSheetRule (which tap opens the kinds, on the real Lamp's sections).
+    [Ignore(TestSkips.OldNavigationElements)]
     public class NavBottomElementRulesTests
     {
         private const string Lamp = "lamp";

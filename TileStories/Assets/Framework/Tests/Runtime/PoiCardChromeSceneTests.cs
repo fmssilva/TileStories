@@ -7,62 +7,62 @@ using UnityEngine.UIElements;
 
 namespace TileStories.Tests
 {
-    // The card's chrome (_3.2 step 5b, CardChromeRule + CardChromeView) on the REAL LivingRoomScene, The Lamp's real card, the wall's
-    // DEFAULT navigation settings and real input: at Half the stack has its reading space back (the 0 px Half of step 5a is gone); a
-    // real drag down the card slides the sticky footer away and a real drag up brings it back; nothing shows at peek; the share of the
-    // card that shows content at Full rises while scrolling down, against the same card with Hide While Scrolling = Never; a header that
-    // collapsed while reading gives Half its strip back; Show Navigation At = Full Only is live and only hides more.
-    [Category("Core")]
-    public class PoiCardChromeSceneTests : SearchSceneFixture
+    // PoiCardChromeSceneTests's shared ground: its set-up and helpers, so its own tests and its old-navigation ones stand on one fixture
+    public abstract class PoiCardChromeSceneFixture : SearchSceneFixture
     {
-        private const string Lamp = "lamp";
+        protected const string Lamp = "lamp";
 
-        private PoiCardSheetView Sheet => Card.Sheet;
-        private ScrollView Scroll => Sheet.Stack.Scroll;
-        private VisualElement Strip => Sheet.Slots.Top;
-        private VisualElement Footer => Sheet.Stack.Footer;
+        protected PoiCardSheetView Sheet => Card.Sheet;
+
+        protected ScrollView Scroll => Sheet.Stack.Scroll;
+
+        protected VisualElement Strip => Sheet.Slots.Top;
+
+        protected VisualElement Footer => Sheet.Stack.Footer;
+
         // The part that slides and gives way: the bottom area the footer sits in (step 7a), with the bottom bar when there is one
-        private VisualElement Bottom => Sheet.BottomArea;
-        private CardChromeView Chrome => Sheet.Chrome;
+        protected VisualElement Bottom => Sheet.BottomArea;
+
+        protected CardChromeView Chrome => Sheet.Chrome;
 
         // One screen pixel in panel units: the run's pinned frame decides it, so it is measured, not assumed
-        private float OnePixel => Sheet.Layer.panel.visualTree.layout.height / Screen.height;
+        protected float OnePixel => Sheet.Layer.panel.visualTree.layout.height / Screen.height;
 
         // Everything above the strip, in the sheet's own frame (what CardChromeRule calls the header): the grab zone and the header
-        private float HeaderBottom => Sheet.Stack.HeaderSlot.layout.yMax + Sheet.Stack.HeaderSlot.resolvedStyle.marginBottom;
+        protected float HeaderBottom => Sheet.Stack.HeaderSlot.layout.yMax + Sheet.Stack.HeaderSlot.resolvedStyle.marginBottom;
 
         // The room a stop leaves under the header: what the stack and the chrome share
-        private float Room => Sheet.Stops.HeightOf(Sheet.Stop) - HeaderBottom;
+        protected float Room => Sheet.Stops.HeightOf(Sheet.Stop) - HeaderBottom;
 
-        private float Viewport => Scroll.contentViewport.layout.height;
+        protected float Viewport => Scroll.contentViewport.layout.height;
 
         // What the stack may take at this stop: the whole sheet under its own top -- the header and the strip FLOAT over it since _3.3 S4a,
         // so only the bottom area (in the flow) takes room from it
-        private float StackRoom => Sheet.Stops.HeightOf(Sheet.Stop) - Scroll.layout.yMin;
+        protected float StackRoom => Sheet.Stops.HeightOf(Sheet.Stop) - Scroll.layout.yMin;
 
         // A part of the chrome takes its place in the card: in the flow, visible
-        private static bool InTheCard(VisualElement e) =>
+        protected static bool InTheCard(VisualElement e) =>
             e.resolvedStyle.display == DisplayStyle.Flex && e.resolvedStyle.visibility == Visibility.Visible && e.resolvedStyle.position == Position.Relative;
 
         // The strip shows over the card: displayed, visible, not marked hidden -- it FLOATS over the stack since _3.3 S4a (absolute whether
         // shown or not), so CardChromeView's hidden class is what says it went
-        private static bool StripShown(VisualElement strip) =>
+        protected static bool StripShown(VisualElement strip) =>
             strip.resolvedStyle.display == DisplayStyle.Flex && strip.resolvedStyle.visibility == Visibility.Visible
             && !strip.ClassListContains(CardChromeView.TopHiddenClass);
 
         // What the chrome decided from, for a precondition's message
-        private string ChromeState() =>
+        protected string ChromeState() =>
             Sheet.Stop + ": offset " + Scroll.scrollOffset.y.ToString("F0") + ", hero bottom " + Sheet.Stack.HeaderView.HeroBottom().ToString("F0")
             + ", top " + Chrome.TopShown + ", bottom " + Chrome.BottomShown + ", footer " + Chrome.FooterShown + ", travel "
             + Chrome.Scroll.Travel.ToString("F0") + ", hidden by the scroll " + Chrome.Scroll.BottomHidden + "; " + Parts();
 
         // The footer is where a thumb can reach it: inside the card's visible bottom edge
-        private bool FooterOnScreen => Footer.worldBound.yMax <= Sheet.Root.worldBound.yMax + OnePixel && Footer.worldBound.yMin < Sheet.Root.worldBound.yMax - OnePixel;
+        protected bool FooterOnScreen => Footer.worldBound.yMax <= Sheet.Root.worldBound.yMax + OnePixel && Footer.worldBound.yMin < Sheet.Root.worldBound.yMax - OnePixel;
 
         // ... or slid below the card's clipped bottom edge, out of reach and out of sight
-        private bool FooterBelowTheCard => Footer.worldBound.yMin >= Sheet.Root.worldBound.yMax - OnePixel;
+        protected bool FooterBelowTheCard => Footer.worldBound.yMin >= Sheet.Root.worldBound.yMax - OnePixel;
 
-        private IEnumerator Open(string poiId, SheetStopRule.Stop stop)
+        protected IEnumerator Open(string poiId, SheetStopRule.Stop stop)
         {
             SelectionEventBus.Select(poiId);
             yield return CardTestInput.Settle();
@@ -74,7 +74,7 @@ namespace TileStories.Tests
 
         // The sheet's height animates over --ts-duration (real time): a slow frame rate (Unity in the background) can end a frame-count
         // settle mid-rise. Every measure waits for the sheet to rest at its stop's height, and says so with numbers when it does not
-        private IEnumerator Rested()
+        protected IEnumerator Rested()
         {
             float rest = Sheet.Stops.HeightOf(Sheet.Stop);
             for (int frame = 0; frame < 600 && Mathf.Abs(Sheet.Root.layout.height - rest) > OnePixel; frame++) yield return null;
@@ -83,13 +83,13 @@ namespace TileStories.Tests
         }
 
         // Where every part of the sheet sits, for a failure message
-        private string Parts() =>
+        protected string Parts() =>
             "root " + Sheet.Root.layout + ", handle " + Sheet.Handle.layout + ", header " + Sheet.Stack.HeaderSlot.layout + ", strip "
             + Strip.layout + " (" + Strip.resolvedStyle.position + "), stack " + Scroll.layout + ", viewport " + Scroll.contentViewport.layout
             + ", footer " + Footer.layout + " (" + Footer.resolvedStyle.position + ")";
 
         // Push an edit the way the Editor's live applier does: a private copy of the running config, through the wall's own seam
-        private IEnumerator Push(System.Action<WallConfigData> edit)
+        protected IEnumerator Push(System.Action<WallConfigData> edit)
         {
             var copy = ConfigCopy();
             edit(copy);
@@ -98,7 +98,7 @@ namespace TileStories.Tests
         }
 
         // A real finger drags the stack by `dy` panel units (negative = up the screen = further down the card), then lets it settle
-        private IEnumerator DragStack(float dy)
+        protected IEnumerator DragStack(float dy)
         {
             // - the part a finger reaches: under the floating header and strip (_3.3 S4a), above the bottom area
             var viewport = CardTestInput.ReachableStack(Sheet);
@@ -110,28 +110,69 @@ namespace TileStories.Tests
         }
 
         // The shared reading past the hero (CardTestInput.ReadPastTheHero), then the sheet at rest
-        private IEnumerator ReadPastTheHero()
+        protected IEnumerator ReadPastTheHero()
         {
             yield return CardTestInput.ReadPastTheHero(Sheet, DragStack);
             yield return Rested();
         }
 
         // The wall's own navigation settings are the defaults: what every assertion here is about
-        private void AssertTheDefaults()
+        protected void AssertTheDefaults()
         {
             var nav = ConfigCopy().card_settings.navigation;
             Assert.AreEqual(BuiltInNavElements.TextTabs, nav.top, "precondition: the default Top Bar");
             Assert.AreEqual(CardOptions.ShowNavHalfAndFull, nav.show_at, "precondition: the default Show Navigation At");
             Assert.AreEqual(CardOptions.HideOnScrollDown, nav.hide_on_scroll, "precondition: the default Hide While Scrolling");
         }
+    }
 
+    // The card's chrome (_3.2 step 5b, CardChromeRule + CardChromeView) on the REAL LivingRoomScene, The Lamp's real card, the wall's
+    // DEFAULT navigation settings and real input: at Half the stack has its reading space back (the 0 px Half of step 5a is gone); a
+    // real drag down the card slides the sticky footer away and a real drag up brings it back; nothing shows at peek; the share of the
+    // card that shows content at Full rises while scrolling down, against the same card with Hide While Scrolling = Never; a header that
+    // collapsed while reading gives Half its strip back; Show Navigation At = Full Only is live and only hides more.
+    [Category("Core")]
+    public class PoiCardChromeSceneTests : PoiCardChromeSceneFixture
+    {
+        // ---------------- peek ----------------
+
+        // (the bottom area holds the footer and the floating Navigation Bar since _3.3 S4 third round; the old strip is the bar's now)
+        [UnityTest]
+        public IEnumerator NothingShowsAtPeek()
+        {
+            yield return Open(Lamp, SheetStopRule.Stop.Full);
+            yield return ReadPastTheHero();
+            Assert.IsTrue(Chrome.BottomShown, "precondition: the bottom area shows at Full once the hero is read: " + ChromeState());
+            Sheet.SetStop(SheetStopRule.Stop.Peek);
+            yield return CardTestInput.Settle();
+            yield return Rested();
+            Assert.IsFalse(Chrome.BottomShown, "no footer and no bar at peek");
+            Assert.IsFalse(InTheCard(Bottom));
+            Assert.IsTrue(FooterBelowTheCard, "the footer is below the card's edge");
+        }
+
+        // Reduce motion: the footer jumps instead of sliding (no transition left on it)
+        [UnityTest]
+        public IEnumerator ReduceMotion_MakesTheFooterJump()
+        {
+            yield return Push(c => c.card_settings.container.reduce_motion = true);
+            yield return Open(Lamp, SheetStopRule.Stop.Full);
+            Assert.IsTrue(Sheet.Root.ClassListContains(CardChromeView.InstantClass), "the card says instant");
+            foreach (var duration in Bottom.resolvedStyle.transitionDuration)
+                Assert.AreEqual(0f, duration.value, "no slide on the bottom area (the footer in it)");
+        }
+    }
+
+    // PoiCardChromeSceneTests's tests whose subject is an old navigation element: they wait for its rebuild on the Navigation Bar's pattern
+    [Ignore(TestSkips.OldNavigationElements)]
+    public class PoiCardChromeSceneOldNavigationTests : PoiCardChromeSceneFixture
+    {
         // ---------------- Half: the reading space is back ----------------
 
         // The Lamp at Half with the DEFAULT settings (_3.3 P4.4a): the hero fills what Half shows under the bar -- picture, title, line and
         // the card's action at its foot -- so neither the strip nor the sticky bar shows; once the visitor reads past the hero the sticky bar
         // comes (its "Show me where it is" is often why the card was opened) over at least one line, the strip only where the floor allows
         [UnityTest]
-        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator TheLampAtHalf_ShowsItsWholeHeroWithItsAction_AndTheStickyBarOnceTheHeroIsRead()
         {
             AssertTheDefaults();
@@ -171,7 +212,6 @@ namespace TileStories.Tests
         // While the hero fills Half there is no room for the strip; reading past it gives the strip back where the floor allows (the map
         // comes back), and Show Navigation At = Full Only -- live -- hides it there anyway: the wall's option hides more, never less
         [UnityTest]
-        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator TheHeroReadAway_GivesHalfItsStripBack_AndFullOnlyHidesItThere_Live()
         {
             AssertTheDefaults();
@@ -195,28 +235,10 @@ namespace TileStories.Tests
             Assert.IsTrue(StripShown(Strip));
         }
 
-        // ---------------- peek ----------------
-
-        // (the bottom area holds the footer and the floating Navigation Bar since _3.3 S4 third round; the old strip is the bar's now)
-        [UnityTest]
-        public IEnumerator NothingShowsAtPeek()
-        {
-            yield return Open(Lamp, SheetStopRule.Stop.Full);
-            yield return ReadPastTheHero();
-            Assert.IsTrue(Chrome.BottomShown, "precondition: the bottom area shows at Full once the hero is read: " + ChromeState());
-            Sheet.SetStop(SheetStopRule.Stop.Peek);
-            yield return CardTestInput.Settle();
-            yield return Rested();
-            Assert.IsFalse(Chrome.BottomShown, "no footer and no bar at peek");
-            Assert.IsFalse(InTheCard(Bottom));
-            Assert.IsTrue(FooterBelowTheCard, "the footer is below the card's edge");
-        }
-
         // ---------------- Hide While Scrolling ----------------
 
         // A real drag down the card slides the footer away and gives its height to the stack; a real drag back up brings it back
         [UnityTest]
-        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator ARealDragDown_HidesTheFooter_AndADragUpBringsItBack()
         {
             AssertTheDefaults();
@@ -249,7 +271,6 @@ namespace TileStories.Tests
         // its room) than with Hide While Scrolling = Never on the same card after the same drag -- relative, never a pixel constant.
         // Also renders the default's picture (Full, scrolled down, footer gone)
         [UnityTest]
-        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator TheContentShareAtFull_RisesWhileScrollingDown_AgainstHideWhileScrollingNever()
         {
             AssertTheDefaults();
@@ -275,17 +296,6 @@ namespace TileStories.Tests
             Assert.Greater(down, never, "the default shows more content while reading down");
             Assert.AreEqual(Footer.layout.height / Sheet.Root.layout.height, down - never, OnePixel / Sheet.Root.layout.height,
                 "by exactly the footer's share (both headers collapsed the same way)");
-        }
-
-        // Reduce motion: the footer jumps instead of sliding (no transition left on it)
-        [UnityTest]
-        public IEnumerator ReduceMotion_MakesTheFooterJump()
-        {
-            yield return Push(c => c.card_settings.container.reduce_motion = true);
-            yield return Open(Lamp, SheetStopRule.Stop.Full);
-            Assert.IsTrue(Sheet.Root.ClassListContains(CardChromeView.InstantClass), "the card says instant");
-            foreach (var duration in Bottom.resolvedStyle.transitionDuration)
-                Assert.AreEqual(0f, duration.value, "no slide on the bottom area (the footer in it)");
         }
     }
 }

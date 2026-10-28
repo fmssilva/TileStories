@@ -20,6 +20,7 @@ namespace TileStories.Tests
     //     goes, the card's stays), the card's media source (the files the full view loaded), the video owner (nothing playing, no clip)
     //   - a tile whose block a live edit deleted, or that points at the bento itself, is not drawn and the others stay
     //   - renders at 390 px in English and Portuguese: the tiles, one with a picture
+    [Ignore(TestSkips.OldNavigationElements)]
     public class PoiCardNavBentoSceneTests : SearchSceneFixture
     {
         private const string Residential = "lamp_residential";

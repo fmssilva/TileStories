@@ -152,7 +152,12 @@ namespace TileStories
             ChromeBand = new VisualElement { name = "poi-card-chrome-band", pickingMode = PickingMode.Ignore };
             ChromeBand.AddToClassList("poi-card__chrome-band");
             ChromeBand.AddManipulator(TopFade);
-            ChromeBand.RegisterCallback<GeometryChangedEvent>(_ => PaintTopFade());
+            // - the band's height is where a jump lands (RecomputeStops): a band laid out or resized moves the landing with it
+            ChromeBand.RegisterCallback<GeometryChangedEvent>(_ =>
+            {
+                PaintTopFade();
+                RecomputeStops();
+            });
             ChromeBand.RegisterCallback<AttachToPanelEvent>(_ => { ThemeController.ModeChanged -= PaintTopFade; ThemeController.ModeChanged += PaintTopFade; });
             ChromeBand.RegisterCallback<DetachFromPanelEvent>(_ => ThemeController.ModeChanged -= PaintTopFade);
             Root.Add(ChromeBand);
@@ -495,10 +500,13 @@ namespace TileStories
             float peek = float.IsNaN(slot.layout.yMax) ? 0f : slot.layout.yMax + slot.resolvedStyle.marginBottom;
             Stops = SheetStopRule.Compute(available, peek, _halfMaxRatio, SheetStopRule.FullTopGap(_fullHeight, _topGap));
             // - the hero fills Full's view under the bar, its words at its foot: it follows the stops, never feeds them
-            // - the content starts under the floating bars; a jump lands a block under the bars and the strip -- the strip's foot measured
-            //   from the stack's own top (the landing is an offset in the stack's view, and the stack does not start at the sheet's y 0)
+            // - the content starts under the floating bars; a jump lands a block under the bars, the strip AND the Top Band's whole fade (_3.3
+            //   P3a review e: a section's Start lands whole, never dissolved in the band) -- each foot measured from the stack's own top (the
+            //   landing is an offset in the stack's view, and the stack does not start at the sheet's y 0)
             float stackTop = float.IsNaN(Stack.Scroll.layout.yMin) ? 0f : Stack.Scroll.layout.yMin;
-            Stack.SetInsets(peek, Slots.TopView != null && !float.IsNaN(Slots.Top.layout.yMax) ? Slots.Top.layout.yMax - stackTop : peek);
+            float landing = Slots.TopView != null && !float.IsNaN(Slots.Top.layout.yMax) ? Slots.Top.layout.yMax - stackTop : peek;
+            if (!float.IsNaN(ChromeBand.layout.yMax)) landing = Mathf.Max(landing, ChromeBand.layout.yMax - stackTop);
+            Stack.SetInsets(peek, landing);
             float hero = HeroRule.Height(Stops, _heroMin);
             // - the words at the foot of what the visitor SEES at this stop (v6), above a Navigation Bar floating at the bottom from the start
             float barClear = NavBarRule.ClearsHeroFoot(_context?.Settings?.navigation) ? _barClear : 0f;

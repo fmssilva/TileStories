@@ -90,6 +90,43 @@ namespace TileStories.Tests
         private float Highest => Bar.PaintedPath.SelectMany(PointsOf).Min(p => p.y);
         private float Lowest => Bar.PaintedPath.SelectMany(PointsOf).Max(p => p.y);
 
+        // The painted outline as points along its curves (a cubic's control points can lie off the curve: sample it)
+        private List<Vector2> Outline()
+        {
+            var points = new List<Vector2>();
+            var at = Bar.PaintedPath[0].P1;
+            foreach (var c in Bar.PaintedPath.Skip(1))
+            {
+                if (c.Op == NavBarShapeRule.Op.Close) continue;
+                for (int i = 1; i <= 60; i++)
+                {
+                    float t = i / 60f, u = 1f - t;
+                    points.Add(c.Op == NavBarShapeRule.Op.Line ? Vector2.Lerp(at, c.P1, t)
+                        : c.Op == NavBarShapeRule.Op.Quad ? u * u * at + 2f * u * t * c.P1 + t * t * c.P2
+                        : u * u * u * at + 3f * u * u * t * c.P1 + 3f * u * t * t * c.P2 + t * t * t * c.P3);
+                }
+                at = c.End;
+            }
+            return points;
+        }
+
+        // The bell's peak in the bar's box: its highest point at the Bottom, its lowest at Top (it hangs down)
+        private Vector2 Peak(bool bottom) => bottom ? Outline().OrderBy(p => p.y).First() : Outline().OrderByDescending(p => p.y).First();
+
+        // Where the outline's bump side crosses x (box units): the top edge at the Bottom, the foot at Top -- between the two samples of
+        // that side that bracket x (a long flat line is sampled sparsely)
+        private float EdgeAt(float x, bool bottom)
+        {
+            var side = Outline().Where(p => bottom ? p.y <= Bar.Room + 0.01f : p.y >= Bar.BarHeight - 0.01f)
+                .GroupBy(p => Mathf.Round(p.x * 100f)).Select(g => bottom ? g.OrderBy(p => p.y).First() : g.OrderByDescending(p => p.y).First())
+                .OrderBy(p => p.x).ToList();
+            int i = side.FindIndex(p => p.x >= x);
+            Assert.Greater(i, 0, "precondition: the outline's bump side spans x " + x);
+            var a = side[i - 1];
+            var b = side[i];
+            return b.x - a.x < 1e-4f ? b.y : Mathf.Lerp(a.y, b.y, (x - a.x) / (b.x - a.x));
+        }
+
         private static IEnumerable<Vector2> PointsOf(NavBarShapeRule.Command c)
         {
             if (c.Op == NavBarShapeRule.Op.Close) yield break;
@@ -168,9 +205,9 @@ namespace TileStories.Tests
             string first = Bar.Entries[last].FirstTarget;
             Assert.AreEqual(Stack.LandingTop(Stack.SlotOfBlock(first)), Scroll.scrollOffset.y, 2f, "the jump rests on the group's first block");
             Assert.AreEqual(button.worldBound.center.x, Bar.Disc.worldBound.center.x, 1f, "the disc over the tapped group");
-            var peak = Bar.PaintedPath[2].P3;
-            Assert.AreEqual(Highest, peak.y, 0.01f, "precondition: the path's highest point is the bump's peak");
-            Assert.Less(Mathf.Abs(peak.x - target), button.worldBound.width * 0.5f, "the bump's peak under the tapped group (held clear of the corner)");
+            var peak = Peak(true);
+            Assert.AreEqual(NavBarShapeRule.DiscTop(Bar.Room, Bar.BumpHeight), peak.y, 0.5f, "the bell's peak is the disc's top");
+            Assert.AreEqual(Bar.Disc.worldBound.center.x - Bar.Root.worldBound.xMin, peak.x, 0.5f, "...over the disc, on the tapped group");
             Assert.AreEqual(FontStyle.Bold, Bar.Items[last].Label.resolvedStyle.unityFontStyleAndWeight, "the chosen words bolder (never colour alone)");
             yield return Save("tapped_last_light");
 
@@ -282,9 +319,9 @@ namespace TileStories.Tests
                 string what = $"{position} {mode} '{Bar.Items[Bar.ChosenIndex].Label.text}'";
                 Assert.AreEqual(centre, Bar.Centre, 0.5f, what + ": the indicators' centre came to the chosen group");
                 Assert.AreEqual(button.worldBound.center.x, Bar.Disc.worldBound.center.x, 1f, what + ": the disc sits on the chosen group");
-                float peak = Bar.PaintedPath[2].P3.x;
-                float expected = NavBarShapeRule.BumpX(centre, Bar.Root.layout.width, Bar.CornerRadius, Bar.BumpHalf);
-                Assert.AreEqual(expected, peak, 0.5f, what + ": the bump's peak is drawn under the chosen group (held clear of the corners)");
+                var peak = Peak(position == CardOptions.NavBarBottom);
+                float expected = NavBarShapeRule.BumpX(centre, Bar.Root.layout.width, Bar.RaisedDiscRadius);
+                Assert.AreEqual(expected, peak.x, 0.5f, what + ": the bell's peak is drawn under the chosen group, over its disc");
                 yield return Save($"follows_{position}_{mode}_{Bar.ChosenIndex}", "Premium/P3");
             }
             visited.Sort();
@@ -293,48 +330,84 @@ namespace TileStories.Tests
             Assert.GreaterOrEqual(checkedAtRest.Count, Bar.Items.Count - 1, $"{position} {mode}: the indicators judged at rest on almost every group (" + checkedAtRest.Count + ")");
         }
 
-        // _3.3 P3a: Raised is a CUT-OUT round the disc on the render, Bottom and Top -- at the chosen group's centre the bar's edge rises (the
-        // bar's fill shows in the ring between the disc and the bump's peak, the hero beyond the peak), while well beside the bump the edge
-        // stays flat (the hero shows where the ring is over the bump). Read on the solid default bar over the hero (its fill opaque, the
-        // picture behind it never the bar's colour)
+        // _3.3 P3a review (a): Raised is ONE fluid bell on the render, Bottom and Top, light and dark -- the disc's top IS the bell's peak (3 pt
+        // beyond it: the hero, no band of bar over the disc), the bar follows the painted bell down its shoulder (1.5 pt inside: the bar's
+        // fill; 1.5 pt outside: the hero), and well beside the bell the edge is flat. Read on the solid default bar over the hero (its fill
+        // opaque, the picture behind it never the bar's colour). Renders zoomed on the bell in TestEvidence/Premium/P3b/
         [UnityTest]
-        public IEnumerator TheRaisedBump_IsACutOutRoundTheDisc_TheEdgeRisesAtTheChosenGroup_OnTheRender([Values("bottom", "top")] string position)
+        public IEnumerator TheRaisedBump_IsOneBellWhosePeakIsTheDiscsTop_OnTheRender([Values("bottom", "top")] string position,
+            [Values("light", "dark")] string mode)
         {
             yield return Open(b => b.position = position);
+            ThemeController.SetMode(mode);
+            yield return CardTestInput.Settle(0.2f);
+            Assert.AreEqual(mode, ThemeController.CurrentMode, "precondition: the card shows " + mode);
             Assert.IsTrue(Bar.OverHero, "precondition: the bar lies on the hero's picture");
             Assert.AreEqual(DisplayStyle.Flex, Bar.Disc.resolvedStyle.display, "precondition: the raised disc");
             bool bottom = position == CardOptions.NavBarBottom;
             var box = Bar.Surface.worldBound;
-            float edge = bottom ? Bar.Room : Bar.BarHeight, rise = bottom ? -1f : 1f;
-            float cx = box.xMin + Bar.Centre;
-            float peak = box.yMin + edge + rise * Bar.BumpHeight;
+            float rise = bottom ? -1f : 1f;
+            var peak = Peak(bottom);
             var disc = Bar.Disc.worldBound;
-            float discEnd = bottom ? disc.yMin : disc.yMax;
-            Assert.AreEqual(cx, disc.center.x, 1f, "precondition: the disc on the chosen group");
-            float ring = Mathf.Abs(discEnd - peak);
-            Assert.GreaterOrEqual(ring, 4f, "the disc sits a ring of bar inside the bump's peak (" + ring + " pt)");
-            Texture2D shot = null;
-            yield return ThemePixelSet.GrabStill("raised_cutout_" + position, null, r => shot = r);
+            float cx = box.xMin + peak.x, peakY = box.yMin + peak.y;
+            Assert.AreEqual(cx, disc.center.x, 1f, "the bell is centred on the disc");
+            Assert.AreEqual(peakY, bottom ? disc.yMin : disc.yMax, 0.5f, "the bell's peak is the disc's " + (bottom ? "top" : "foot") + ": no band of bar beyond it");
+            Texture2D shot = null, bare = null;
+            yield return ThemePixelSet.GrabStill($"raised_bell_{position}_{mode}", null, r => shot = r);
+            // - the same frame without the bar's painted surface: a pixel the bar did not change is the hero's, whatever its colour
+            Bar.Surface.style.visibility = Visibility.Hidden;
+            yield return null;
+            yield return ThemePixelSet.GrabStill($"raised_bell_bare_{position}_{mode}", null, r => bare = r);
+            Bar.Surface.style.visibility = StyleKeyword.Null;
             try
             {
                 var origin = RuntimePanelUtils.ScreenToPanel(Bar.Root.panel, Vector2.zero);
                 float unit = ThemePixelSet.PanelUnitsPerPixel(Bar.Root);
-                Color At(float x, float y) => shot.GetPixel(Mathf.RoundToInt((x - origin.x) / unit), shot.height - 1 - Mathf.RoundToInt((y - origin.y) / unit));
+                Vector2Int Px(float x, float y) => new(Mathf.RoundToInt((x - origin.x) / unit), shot.height - 1 - Mathf.RoundToInt((y - origin.y) / unit));
+                Color At(Texture2D t, float x, float y) { var p = Px(x, y); return t.GetPixel(p.x, p.y); }
                 float Off(Color a, Color b) => ((Vector4)a - (Vector4)b).magnitude;
                 var fill = Bar.PaintedFill;
-                // - in the ring, half way between the bump's peak and the disc: the bar's own fill
-                var inRing = At(cx, (peak + discEnd) * 0.5f);
-                Assert.Less(Off(inRing, fill), 0.04f, position + ": the bar's fill in the ring over the disc " + (Color32)inRing + " (fill " + (Color32)fill + ")");
+                // - the bar's fill: the solid default fill, exactly; no bar: the bare frame's pixel, unchanged (the shadow under the foot at Top
+                //   is the bar's too, so "not the fill" also reads as no bar there)
+                void IsBar(float x, float y, string what) =>
+                    Assert.Less(Off(At(shot, x, y), fill), 0.04f, $"{position} {mode}: {what} the bar's fill " + (Color32)At(shot, x, y) + " (fill " + (Color32)fill + ")");
+                void NoBar(float x, float y, string what) =>
+                    Assert.IsTrue(Off(At(shot, x, y), At(bare, x, y)) < 0.03f || Off(At(shot, x, y), fill) > 0.04f,
+                        $"{position} {mode}: {what} no bar " + (Color32)At(shot, x, y) + " (bare " + (Color32)At(bare, x, y) + ", fill " + (Color32)fill + ")");
                 // - 3 pt beyond the peak: no bar (the hero)
-                var beyond = At(cx, peak + rise * 3f);
-                Assert.Greater(Off(beyond, fill), 0.04f, position + ": beyond the bump's peak the bar ends " + (Color32)beyond);
-                // - the same height, well beside the bump (its foot plus 20): the edge is flat there, the ring's height is the hero's
-                float side = Bar.Centre > box.width * 0.5f ? cx - Bar.BumpHalf - 20f : cx + Bar.BumpHalf + 20f;
-                var flat = At(side, (peak + discEnd) * 0.5f);
-                Assert.Greater(Off(flat, fill), 0.04f, position + ": beside the bump the edge stays flat " + (Color32)flat);
-                System.IO.File.WriteAllBytes(TestEvidence.PathFor("Premium/P3", "raised_cutout_" + position + ".png"), shot.EncodeToPNG());
+                NoBar(cx, peakY + rise * 3f, "3 pt beyond the disc's top");
+                // - down the shoulder on the open side (past the disc: 26 and 38 pt from its centre), the bar's edge where the bell was painted:
+                //   3 pt inside it the fill, 3 pt outside the hero (clear of the hairline's antialiasing)
+                float side = Bar.Centre > box.width * 0.5f ? -1f : 1f;
+                foreach (float along in new[] { 26f, 38f })
+                {
+                    float x = peak.x + side * along, edge = box.yMin + EdgeAt(x, bottom);
+                    Assert.AreNotEqual(bottom ? Bar.Room : Bar.BarHeight, EdgeAt(x, bottom), "precondition: " + along + " pt out the shoulder still rises");
+                    IsBar(box.xMin + x, edge - rise * 3f, "inside the shoulder at " + along + " pt");
+                    NoBar(box.xMin + x, edge + rise * 3f, "outside the shoulder at " + along + " pt");
+                }
+                // - well beside the bell (its foot plus 20): the edge is flat, 3 pt beyond it the hero
+                float flatX = peak.x + side * (Bar.BumpHalf + 20f);
+                Assert.AreEqual(bottom ? Bar.Room : Bar.BarHeight, EdgeAt(flatX, bottom), 0.01f, "precondition: the edge is flat beside the bell");
+                NoBar(box.xMin + flatX, box.yMin + (bottom ? Bar.Room : Bar.BarHeight) + rise * 3f, "beside the bell, over the flat edge");
+                System.IO.File.WriteAllBytes(TestEvidence.PathFor("Premium/P3b", $"raised_bell_{position}_{mode}.png"), shot.EncodeToPNG());
+                // - the bell zoomed x4 for the eye (the developer's sketch is compared on it)
+                int px = Mathf.RoundToInt((cx - origin.x) / unit), py = shot.height - 1 - Mathf.RoundToInt((peakY - origin.y) / unit);
+                int w = Mathf.RoundToInt((Bar.BumpHalf * 2f + 40f) / unit), h = Mathf.RoundToInt(70f / unit);
+                int x0 = Mathf.Clamp(px - w / 2, 0, shot.width - w), y0 = Mathf.Clamp(bottom ? py - h + Mathf.RoundToInt(16f / unit) : py - Mathf.RoundToInt(16f / unit), 0, shot.height - h);
+                var zoom = new Texture2D(w * 4, h * 4, TextureFormat.RGBA32, false);
+                for (int y = 0; y < h * 4; y++)
+                    for (int x = 0; x < w * 4; x++)
+                        zoom.SetPixel(x, y, shot.GetPixel(x0 + x / 4, y0 + y / 4));
+                zoom.Apply();
+                System.IO.File.WriteAllBytes(TestEvidence.PathFor("Premium/P3b", $"raised_bell_{position}_{mode}_zoom.png"), zoom.EncodeToPNG());
+                Object.Destroy(zoom);
             }
-            finally { Object.Destroy(shot); }
+            finally
+            {
+                Object.Destroy(shot);
+                Object.Destroy(bare);
+            }
         }
 
         // One case per option value: what each value draws, read off the running card
@@ -549,8 +622,7 @@ namespace TileStories.Tests
             yield return PastTheHero();
             Assert.AreEqual(Bar.BarHeight + Bar.BumpHeight, Lowest, 0.01f, "the path's lowest point is the bump, its height below the bar's foot");
             Assert.AreEqual(0f, Highest, 0.01f, "...its top edge straight");
-            float gap = CardTestInput.TokenPx("--ts-navbar-disc-gap");
-            Assert.AreEqual(Band.yMax + Bar.BumpHeight - gap, Bar.Disc.worldBound.yMax, 1f, "the disc hangs in the bump, its foot a ring of bar above the bump's lowest point");
+            Assert.AreEqual(Band.yMax + Bar.BumpHeight, Bar.Disc.worldBound.yMax, 1f, "the disc hangs in the bell, its foot the bell's lowest point");
             Assert.Greater(Bar.Disc.worldBound.yMax, Band.yMax + 4f, "...below the bar's foot");
             Assert.AreEqual(Bar.Items[Bar.ChosenIndex].Button.worldBound.center.x, Bar.Disc.worldBound.center.x, 1f, "...under the chosen group");
             yield return Save("raised_top_light_AfterTheHero");

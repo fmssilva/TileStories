@@ -214,7 +214,8 @@ namespace TileStories.Tests
             {
                 var s = c.sections;
                 if (key == "start") s.start = value;
-                if (key == "divider") { s.divider = value; s.divider_image = "images/paco_gallery_1"; }
+                // - a divider stands only before a start that is no ornament of its own (one ornament per boundary): read on a Fade start
+                if (key == "divider") { s.divider = value; s.divider_image = "images/paco_gallery_1"; s.start = CardOptions.SectionStartFade; }
                 if (key == "colour") s.colour = value;
                 if (key == "motion") s.motion = value;
                 if (key == "vary") s.vary = value;
@@ -265,7 +266,8 @@ namespace TileStories.Tests
                     if (value == CardOptions.SectionDividerAzulejo) Assert.AreEqual(second.Edge.layout.width, second.DividerTiles.layout.width, 1f, "a strip of tiles across");
                     if (value == CardOptions.SectionDividerMosaic || value == CardOptions.SectionDividerImage)
                         Assert.IsNotNull(second.DividerStrip.resolvedStyle.backgroundImage.texture, value + ": the strip's picture repeated");
-                    if (drawn) Assert.AreEqual(DisplayStyle.Flex, second.Gap.resolvedStyle.display, "a drawn start keeps its gap under a divider");
+                    // - one ornament per boundary: the divider stands before a plain start (Fade here), which draws no row of its own
+                    Assert.AreEqual(DisplayStyle.None, second.StartTiles.resolvedStyle.display, value + ": no tile row under the divider");
                     break;
                 case "colour":
                     string token = SectionStyleRule.TintToken(value, sections[1].Group.ColorToken);
@@ -413,11 +415,13 @@ namespace TileStories.Tests
                 }
                 yield return EveryTileOfTheStartRowIsDrawnWhole(last, reduce ? "reduced" : "revealed");
             }
-            // - Drift: the Start turns in once and rests; the DIVIDER slides (10 pt a second); Reduce Motion holds both still
+            // - Drift: the Start turns in once and rests; the DIVIDER slides (10 pt a second); Reduce Motion holds both still. One ornament per
+            //   boundary: the Tiles Start is read on the default card (no divider before it), the sliding divider before a Fade start
             foreach (bool reduce in new[] { false, true })
             {
                 yield return Open(c => { c.sections.motion = CardOptions.SectionMotionDrift; c.sections.divider = CardOptions.SectionDividerAzulejo; c.container.reduce_motion = reduce; });
                 var section = Sections[1];
+                Assert.AreEqual(DisplayStyle.None, section.Open.Divider.resolvedStyle.display, "a Tiles start stands alone: no divider before it");
                 double now = 0;
                 yield return ShowSection(section);
                 section.Open.Show(section.Run, section.Open.Style, section.Open.Position, section.Group.ColorToken, section.Open.Name.text, null, reduce, true);
@@ -427,11 +431,22 @@ namespace TileStories.Tests
                 now = 1.3;
                 for (int f = 0; f < 3; f++) yield return null;
                 Assert.AreEqual(0f, section.Open.StartTileOptions.Offset, "the Start never slides: it rests");
-                if (reduce) Assert.AreEqual(0f, section.Open.DividerTileOptions.Offset, "Reduce Motion: the divider holds still");
-                else Assert.AreEqual(13f, section.Open.DividerTileOptions.Offset, 0.5f, "Drift: the divider's tiles slide 10 pt a second");
                 now = 3.0;
                 for (int f = 0; f < 3; f++) yield return null;
                 Assert.AreEqual(1f, section.Open.StartTileOptions.AlphaOf?.Invoke(15) ?? 1f, 1e-4f, "...and the Start stays whole");
+
+                yield return Open(c => { c.sections.motion = CardOptions.SectionMotionDrift; c.sections.divider = CardOptions.SectionDividerAzulejo; c.sections.start = CardOptions.SectionStartFade; c.container.reduce_motion = reduce; });
+                section = Sections[1];
+                Assert.AreEqual(DisplayStyle.Flex, section.Open.Divider.resolvedStyle.display, "precondition: before a Fade start the divider is drawn");
+                now = 0;
+                yield return ShowSection(section);
+                section.Open.Show(section.Run, section.Open.Style, section.Open.Position, section.Group.ColorToken, section.Open.Name.text, null, reduce, true);
+                section.Open.Clock = () => now;
+                section.Open.Entered();
+                now = 1.3;
+                for (int f = 0; f < 3; f++) yield return null;
+                if (reduce) Assert.AreEqual(0f, section.Open.DividerTileOptions.Offset, "Reduce Motion: the divider holds still");
+                else Assert.AreEqual(13f, section.Open.DividerTileOptions.Offset, 0.5f, "Drift: the divider's tiles slide 10 pt a second");
             }
         }
 
@@ -549,6 +564,53 @@ namespace TileStories.Tests
                 }
             System.IO.File.WriteAllText(TestEvidence.PathFor(Domain, "contrast_ratios.txt"), string.Join("\n", report) + "\n");
             Assert.GreaterOrEqual(worst, Aaa, "every eyebrow and body text keeps 7:1 -- worst: " + worstWhat + "\n" + string.Join("\n", report));
+        }
+
+        // _3.3 P3a review (e): a REAL tap on each Navigation Bar group lands its section's Start fully below the Top Band -- the tile row's top
+        // at the band's foot (one pixel), never dissolved in its fade -- with the band as Fade and as Glass. A section the scroll's end clamps
+        // lands lower, never higher. Renders in TestEvidence/Premium/P3b/
+        [UnityTest]
+        public IEnumerator ARealJumpToEachGroup_LandsItsStartWholeBelowTheTopBand([Values(CardOptions.TopBandFade, CardOptions.TopBandGlass)] string band)
+        {
+            yield return Open(c => c.container.top_band = band);
+            var bar = Sheet.Slots.Bar;
+            Assert.IsNotNull(bar, "precondition: the default Navigation Bar");
+            Assert.Greater(bar.Entries.Count, 2, "precondition: the Ribeira Palace has several groups");
+            float onePixel = Sheet.Layer.panel.visualTree.layout.height / Screen.height;
+            int landed = 0;
+            for (int i = 1; i < bar.Entries.Count; i++)
+            {
+                var button = bar.Items[i].Button;
+                yield return CardTestInput.TouchDrag(Sheet.Root.panel, button.worldBound.center, Vector2.zero, frames: 1);
+                yield return CardTestInput.Settle(0.8f);
+                yield return CardTestInput.UntilStill(Sheet);
+                var slot = Stack.SlotOfBlock(bar.Entries[i].FirstTarget);
+                var section = Stack.Sheets.SheetOf(slot);
+                Assert.IsNotNull(section, "precondition: group " + i + "'s first block sits in an open section");
+                Assert.IsTrue(Stack.Sheets.IsFirstShown(slot), "precondition: the jump lands the section, its Start in view");
+                Assert.IsFalse(Sheet.Root.Q(className: BlockStackView.BarsOnHeroClass) != null || Sheet.Root.ClassListContains(BlockStackView.BarsOnHeroClass),
+                    "precondition: past the hero, the Top Band is drawn");
+                var start = section.Open.Edge.worldBound;
+                float bandFoot = Sheet.ChromeBand.worldBound.yMax;
+                string what = $"{band} group {i} '{bar.Items[i].Label.text}'";
+                Assert.GreaterOrEqual(start.yMin, bandFoot - onePixel, what + ": the Start's top below the Top Band's foot (" + start.yMin + " vs " + bandFoot + ")");
+                float range = Scroll.contentContainer.layout.height - Scroll.contentViewport.layout.height;
+                if (Scroll.scrollOffset.y < range - 1f)
+                {
+                    Assert.AreEqual(bandFoot, start.yMin, onePixel, what + ": ...right under it, not lower");
+                    landed++;
+                }
+                CardTestInput.HoldSectionsStill(Sheet);
+                yield return CardTestInput.UntilStill(Sheet);
+                Texture2D shot = null;
+                yield return ThemePixelSet.GrabStill($"jump_{band}_{i}", null, r => shot = r);
+                if (shot != null)
+                {
+                    System.IO.File.WriteAllBytes(TestEvidence.PathFor("Premium/P3b", $"jump_{band}_{i}.png"), shot.EncodeToPNG());
+                    Object.Destroy(shot);
+                }
+            }
+            Assert.Greater(landed, 0, "precondition: at least one group lands unclamped by the scroll's end");
         }
     }
 }

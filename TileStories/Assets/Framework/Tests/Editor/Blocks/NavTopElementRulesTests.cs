@@ -3,31 +3,104 @@ using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
+using TileStories.Tests;
 
 namespace TileStories.Editor.Tests
 {
-    // Tier 0 of what the step 6 top elements read (_3.2 sections 2.5, 3 and 5.1), on the SHIPPED LivingRoom wall through the real
-    // BlockStackBuilder and the shared registry: the Groups (rule 2.5.6 -- the defaults, a wall's own rows, a family moved to another
-    // group, one left in none, the words), the model's icons, colours, kind words and lookups, the progress map's segment widths, Labels,
-    // and which elements rule 2.5.7 draws for a card.
-    public class NavTopElementRulesTests
+    // NavTopElementRulesTests's shared ground: its set-up and helpers, so its own tests and its old-navigation ones stand on one fixture
+    public abstract class NavTopElementRulesFixture
     {
-        private const string Lamp = "lamp";
+        protected const string Lamp = "lamp";
 
-        private static WallConfigData Shipped(string blockOrder = CardOptions.BlockOrderByFamily)
+        protected static WallConfigData Shipped(string blockOrder = CardOptions.BlockOrderByFamily)
         {
             var config = JsonUtility.FromJson<WallConfigData>(File.ReadAllText("Assets/Apps/LivingRoom/config.json"));
             config.card_settings.navigation.block_order = blockOrder;
             return config;
         }
 
-        private static CardNavModel Model(WallConfigData config, string poiId = Lamp) =>
+        protected static CardNavModel Model(WallConfigData config, string poiId = Lamp) =>
             CardNavModel.Build(BlockStackBuilder.Build(config.pois.Single(p => p.id == poiId), config.card_settings, BlockRegistry.Shared, config.pois).Entries,
                 BlockRegistry.Shared, config.card_settings);
 
-        private static CardStrings Strings(string language) =>
+        protected static CardStrings Strings(string language) =>
             new(CardStringTableChecks.FrameworkEntries(), CardStringSources.Shared.Entries(), null, language, "en");
 
+        protected static NavElementDefinition Element(string key)
+        {
+            Assert.IsTrue(NavElementRegistry.Shared.TryGet(key, out var definition), key + " is registered");
+            return definition;
+        }
+    }
+
+    // Tier 0 of what the step 6 top elements read (_3.2 sections 2.5, 3 and 5.1), on the SHIPPED LivingRoom wall through the real
+    // BlockStackBuilder and the shared registry: the Groups (rule 2.5.6 -- the defaults, a wall's own rows, a family moved to another
+    // group, one left in none, the words), the model's icons, colours, kind words and lookups, the progress map's segment widths, Labels,
+    // and which elements rule 2.5.7 draws for a card.
+    public class NavTopElementRulesTests : NavTopElementRulesFixture
+    {
+        // ---------------- the model's icons, colours, kinds and lookups ----------------
+
+        [Test]
+        public void EverySection_CarriesItsFamilysIconAndColour_AndAFormatSectionNeither()
+        {
+            var config = Shipped();
+            var model = Model(config);
+            foreach (var section in model.Sections)
+            {
+                BlockRegistry.Shared.TryGetFamily(section.Key, out var family);
+                Assert.AreEqual(family.IconKey, section.IconKey, section.Key);
+                Assert.AreEqual(family.ColorToken, section.ColorToken, section.Key);
+                foreach (var kind in section.Kinds)
+                {
+                    BlockRegistry.Shared.TryGet(kind.Key, out var definition);
+                    Assert.AreEqual(definition.LabelKey, kind.LabelKey, kind.Key + ": its words");
+                    Assert.AreEqual(family.ColorToken, kind.ColorToken, kind.Key + ": its family's colour");
+                }
+            }
+
+            config.card_settings.navigation.group_by = CardOptions.GroupByFormat;
+            var byFormat = Model(config);
+            foreach (var section in byFormat.Sections)
+            {
+                Assert.IsNull(section.IconKey, section.Key + ": a format has no icon");
+                Assert.IsNull(section.ColorToken, section.Key + ": nor a colour");
+                foreach (var kind in section.Kinds) Assert.IsNotNull(kind.ColorToken, kind.Key + ": a kind keeps its family's colour under a format");
+            }
+            CollectionAssert.AreEqual(model.Groups.Select(g => g.Count), byFormat.Groups.Select(g => g.Count), "Groups merge FAMILIES whatever Group By says");
+        }
+
+        // Targets is every target in the stack's order; SectionOf / KindOf / GroupOf agree with the sections, kinds and groups that hold it,
+        // in the authored order too (families interleave there); a block that is no target is in nothing
+        [Test]
+        public void EveryTarget_IsFoundInItsSectionKindAndGroup_InEveryBlockOrder()
+        {
+            foreach (string order in CardOptions.BlockOrders)
+            {
+                var config = Shipped(order);
+                var model = Model(config);
+                var stack = BlockStackBuilder.Build(config.pois.Single(p => p.id == Lamp), config.card_settings, BlockRegistry.Shared, config.pois).Entries;
+                CollectionAssert.AreEqual(stack.Select(e => e.Instance.key).Where(model.Targets.Contains), model.Targets, order + ": the stack's order");
+                foreach (string target in model.Targets)
+                {
+                    var section = model.Sections[model.SectionOf(target)];
+                    CollectionAssert.Contains(section.Targets, target, order + ": " + target + " in its section");
+                    CollectionAssert.Contains(model.KindOf(target).Targets, target, order + ": in its kind");
+                    CollectionAssert.Contains(section.Kinds, model.KindOf(target), order + ": a kind of that section");
+                    CollectionAssert.Contains(model.Groups[model.GroupOf(target)].Targets, target, order + ": in its group");
+                }
+                string sources = stack.First(e => e.Definition.Family == BuiltInFamilies.Meta).Instance.key;
+                Assert.AreEqual(-1, model.SectionOf(sources), order + ": Sources is no target");
+                Assert.IsNull(model.KindOf(sources));
+                Assert.AreEqual(-1, model.GroupOf(sources));
+            }
+        }
+    }
+
+    // NavTopElementRulesTests's tests whose subject is an old navigation element: they wait for its rebuild on the Navigation Bar's pattern
+    [Ignore(TestSkips.OldNavigationElements)]
+    public class NavTopElementRulesOldNavigationTests : NavTopElementRulesFixture
+    {
         // ---------------- Groups (rule 2.5.6) ----------------
 
         // The wall writes no Groups: the framework's four, in order, holding the eight families of section 3 -- The Lamp's 56 targets merge
@@ -94,63 +167,6 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("group_9", NavGroupRule.Words(new NavGroupRule.Group("group_9", null, null), Strings("en")), "nothing at all: the key");
         }
 
-        // ---------------- the model's icons, colours, kinds and lookups ----------------
-
-        [Test]
-        public void EverySection_CarriesItsFamilysIconAndColour_AndAFormatSectionNeither()
-        {
-            var config = Shipped();
-            var model = Model(config);
-            foreach (var section in model.Sections)
-            {
-                BlockRegistry.Shared.TryGetFamily(section.Key, out var family);
-                Assert.AreEqual(family.IconKey, section.IconKey, section.Key);
-                Assert.AreEqual(family.ColorToken, section.ColorToken, section.Key);
-                foreach (var kind in section.Kinds)
-                {
-                    BlockRegistry.Shared.TryGet(kind.Key, out var definition);
-                    Assert.AreEqual(definition.LabelKey, kind.LabelKey, kind.Key + ": its words");
-                    Assert.AreEqual(family.ColorToken, kind.ColorToken, kind.Key + ": its family's colour");
-                }
-            }
-
-            config.card_settings.navigation.group_by = CardOptions.GroupByFormat;
-            var byFormat = Model(config);
-            foreach (var section in byFormat.Sections)
-            {
-                Assert.IsNull(section.IconKey, section.Key + ": a format has no icon");
-                Assert.IsNull(section.ColorToken, section.Key + ": nor a colour");
-                foreach (var kind in section.Kinds) Assert.IsNotNull(kind.ColorToken, kind.Key + ": a kind keeps its family's colour under a format");
-            }
-            CollectionAssert.AreEqual(model.Groups.Select(g => g.Count), byFormat.Groups.Select(g => g.Count), "Groups merge FAMILIES whatever Group By says");
-        }
-
-        // Targets is every target in the stack's order; SectionOf / KindOf / GroupOf agree with the sections, kinds and groups that hold it,
-        // in the authored order too (families interleave there); a block that is no target is in nothing
-        [Test]
-        public void EveryTarget_IsFoundInItsSectionKindAndGroup_InEveryBlockOrder()
-        {
-            foreach (string order in CardOptions.BlockOrders)
-            {
-                var config = Shipped(order);
-                var model = Model(config);
-                var stack = BlockStackBuilder.Build(config.pois.Single(p => p.id == Lamp), config.card_settings, BlockRegistry.Shared, config.pois).Entries;
-                CollectionAssert.AreEqual(stack.Select(e => e.Instance.key).Where(model.Targets.Contains), model.Targets, order + ": the stack's order");
-                foreach (string target in model.Targets)
-                {
-                    var section = model.Sections[model.SectionOf(target)];
-                    CollectionAssert.Contains(section.Targets, target, order + ": " + target + " in its section");
-                    CollectionAssert.Contains(model.KindOf(target).Targets, target, order + ": in its kind");
-                    CollectionAssert.Contains(section.Kinds, model.KindOf(target), order + ": a kind of that section");
-                    CollectionAssert.Contains(model.Groups[model.GroupOf(target)].Targets, target, order + ": in its group");
-                }
-                string sources = stack.First(e => e.Definition.Family == BuiltInFamilies.Meta).Instance.key;
-                Assert.AreEqual(-1, model.SectionOf(sources), order + ": Sources is no target");
-                Assert.IsNull(model.KindOf(sources));
-                Assert.AreEqual(-1, model.GroupOf(sources));
-            }
-        }
-
         // ---------------- rule 2.5.7 per element ----------------
 
         // Text tabs need two sections, segmented two GROUPS, kind chips nothing more than navigation itself: a wall that puts every family in
@@ -191,12 +207,6 @@ namespace TileStories.Editor.Tests
             Assert.IsTrue(NavSlotRule.OffersAChoice(chips, one), "the kind chips list kinds: drawn");
             Assert.IsTrue(NavOntologyRule.OffersAKindChoice(one.Sections[0].Kinds.Count), "two kinds there: a chips row has a choice");
             Assert.IsFalse(NavOntologyRule.OffersAKindChoice(1), "one chip would only repeat its tab");
-        }
-
-        private static NavElementDefinition Element(string key)
-        {
-            Assert.IsTrue(NavElementRegistry.Shared.TryGet(key, out var definition), key + " is registered");
-            return definition;
         }
 
         // ---------------- progress_map's widths ----------------

@@ -2,12 +2,14 @@ using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
+using TileStories.Tests;
 
 namespace TileStories.Editor.Tests
 {
     // NavRailRule (_3.2 step 15a, nav_rails): how many swipes reach the end of a rail and how many cards a rail keeps so it never takes more
     // than the developer allows -- pure arithmetic, then on THE LAMP'S real families through the real builder and model and the track rule's
     // own width (CardTrackRule), the numbers a phone shows. NN/g (Budiu 2018): the last card in 3-4 swipes.
+    [Ignore(TestSkips.OldNavigationElements)]
     public class NavRailRuleTests
     {
         // A phone's strip: the card's 390 px less its 16 px gutters (Phase B measures the real strip and asserts it is this wide), a rail

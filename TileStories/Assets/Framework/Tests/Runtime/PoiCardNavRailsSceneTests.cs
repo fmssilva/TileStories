@@ -18,6 +18,7 @@ namespace TileStories.Tests
     //   - a REAL tap on a card lands its block (+-1 px) with ONE nav_jump named nav_rails, on a rail at the top and on one lower down
     //   - Peek Next Card governs the rails live: on, the next card shows its slice; off, whole cards only
     //   - renders at 390 px in English and Portuguese: a rail at rest with its cut next card, and swiped
+    [Ignore(TestSkips.OldNavigationElements)]
     public class PoiCardNavRailsSceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";

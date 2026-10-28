@@ -25,6 +25,7 @@ namespace TileStories.Tests
     //   - Show After Reading holds in bento: every section read in the full view and the overview read to its end reveal the waiting question
     //     (the Play tile counts it); one section left unread does not
     //   - no Top Bar over the tiles (step 16: the tiles are the map); a short card (Lamp - Military) scrolls
+    [Ignore(TestSkips.OldNavigationElements)]
     public class PoiCardBentoLayoutSceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";

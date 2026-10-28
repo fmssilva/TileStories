@@ -166,13 +166,33 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(0f, HeroMotionRule.Parallax(100f, 280f, true), 0.001f, "reduce motion");
             Assert.AreEqual(-25f, HeroMotionRule.TextRise(100f, false), 0.001f, "the words rise past the scroll (they outrun the picture)");
             Assert.AreEqual(0f, HeroMotionRule.TextRise(100f, true), 0.001f);
-            // - the fade is by the words' place in the view: whole until they near the chrome's foot (60 here), gone as they reach it
-            Assert.AreEqual(1f, HeroMotionRule.TextOpacity(700f, 60f, false), 0.001f, "low on the picture: whole");
-            Assert.AreEqual(1f, HeroMotionRule.TextOpacity(60f + HeroMotionRule.TextFadeSpan, 60f, false), 0.001f, "...until the fade's span");
-            Assert.AreEqual(0.5f, HeroMotionRule.TextOpacity(60f + HeroMotionRule.TextFadeSpan / 2f, 60f, false), 0.001f, "fading near the top");
-            Assert.AreEqual(0f, HeroMotionRule.TextOpacity(40f, 60f, false), 0.001f, "under the chrome: gone");
-            Assert.AreEqual(1f, HeroMotionRule.TextOpacity(40f, 60f, true), 0.001f, "reduce motion: whole");
-            Assert.AreEqual(1f, HeroMotionRule.TextOpacity(float.NaN, 60f, false), 0.001f, "not laid out: whole");
+            // - the fade is the SCROLL's (_3.3 P3a review b): whole at rest wherever the words rest, gone as the scroll brings them to the
+            //   chrome's foot (60 here)
+            float span = HeroMotionRule.TextFadeSpan;
+            Assert.AreEqual(1f, HeroMotionRule.TextOpacity(700f, 700f, 60f, false), 0.001f, "low on the picture, at rest: whole");
+            Assert.AreEqual(1f, HeroMotionRule.TextOpacity(700f, 60f + span, 60f, false), 0.001f, "...until the scroll brings them within the span");
+            Assert.AreEqual(0.5f, HeroMotionRule.TextOpacity(700f, 60f + span / 2f, 60f, false), 0.001f, "fading near the top");
+            Assert.AreEqual(0f, HeroMotionRule.TextOpacity(700f, 40f, 60f, false), 0.001f, "under the chrome: gone");
+            // - words that REST close under the chrome (a Half stop): whole at rest, the fade spread over the whole way there
+            foreach (float rest in new[] { 60f + span - 1f, 120f, 70f, 61f, 60f, 20f })
+                Assert.AreEqual(1f, HeroMotionRule.TextOpacity(rest, rest, 60f, false), 0.001f, "at rest " + rest + " pt down: whole");
+            Assert.AreEqual(0.5f, HeroMotionRule.TextOpacity(160f, 110f, 60f, false), 0.001f, "resting 100 over the foot: half way there, half faded");
+            Assert.AreEqual(0f, HeroMotionRule.TextOpacity(160f, 60f, 60f, false), 0.001f, "...gone at the foot");
+            Assert.AreEqual(0.5f, HeroMotionRule.TextOpacity(70f, 70f - HeroMotionRule.MinFadeSpan / 2f, 60f, false), 0.001f,
+                "resting nearer than the least span: the fade still takes MinFadeSpan of scroll, never a blink");
+            for (float rest = 20f; rest <= 800f; rest += 7f)
+            {
+                float last = 1f;
+                for (float travel = 0f; travel <= 900f; travel += 5f)
+                {
+                    float now = HeroMotionRule.TextOpacity(rest, rest - travel, 60f, false);
+                    Assert.LessOrEqual(now, last + 1e-5f, $"rest {rest}: never brighter as the words climb (travel {travel})");
+                    last = now;
+                }
+                Assert.AreEqual(0f, last, 1e-5f, $"rest {rest}: gone once carried far enough");
+            }
+            Assert.AreEqual(1f, HeroMotionRule.TextOpacity(700f, 40f, 60f, true), 0.001f, "reduce motion: whole");
+            Assert.AreEqual(1f, HeroMotionRule.TextOpacity(float.NaN, 60f, 60f, false), 0.001f, "not laid out: whole");
         }
 
         private static BlockStackBuilder.Entry Entry(BlockKindDefinition kind, string variant, string key) =>

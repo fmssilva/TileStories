@@ -6,27 +6,25 @@ using UnityEngine.UIElements;
 
 namespace TileStories.Tests
 {
-    // SheetDrag (_3.2 chunk D: the sheet's vertical drag, out of PoiCardSheetView) on the REAL LivingRoomScene with The Lamp's card, real
-    // touch events sent to the panel, and the drag's own clock (SheetDrag.Clock) so a "slow" or a "fast" move is what the test says:
-    //   - while the finger is down the sheet's height IS the finger's travel (panel units, exact) and the drag class is on; a slow release
-    //     snaps to the nearest stop and takes the class off
-    //   - the SPEED decides, not only the distance: the same 30 units up from Peek stay at Peek slowly and reach Half as a flick
-    //   - a drag past the top holds at Full; one pulled below 60 % of the peek closes the card through CloseRequested, as the X does
-    //   - the top strip takes nothing at touch-down; once a move is clearly vertical the sheet follows it from where the finger went down
-    [Category("Core")]
-    public class PoiCardSheetDragSceneTests : SearchSceneFixture
+    // PoiCardSheetDragSceneTests's shared ground: its set-up and helpers, so its own tests and its old-navigation ones stand on one fixture
+    public abstract class PoiCardSheetDragSceneFixture : SearchSceneFixture
     {
-        private const string Lamp = "lamp";
-        private const string DraggingClass = "poi-card--dragging";
-        // A slow move's time per event (s): 30 units in 0.1 s is 300 units/s, far under a flick (1.2 heights/s, ~1000 at 844)
-        private const float SlowStep = 0.1f;
-        // A fast move's time per event (s): 15 units in 0.01 s is 1500 units/s, over a flick at any phone height up to 1250
-        private const float FastStep = 0.01f;
-        // A float's rounding on panel coordinates: the height is the start plus the finger's travel, nothing else
-        private const float Exact = 0.01f;
+        protected const string Lamp = "lamp";
 
-        private PoiCardSheetView Sheet => Card.Sheet;
-        private float _now;
+        protected const string DraggingClass = "poi-card--dragging";
+
+        // A slow move's time per event (s): 30 units in 0.1 s is 300 units/s, far under a flick (1.2 heights/s, ~1000 at 844)
+        protected const float SlowStep = 0.1f;
+
+        // A fast move's time per event (s): 15 units in 0.01 s is 1500 units/s, over a flick at any phone height up to 1250
+        protected const float FastStep = 0.01f;
+
+        // A float's rounding on panel coordinates: the height is the start plus the finger's travel, nothing else
+        protected const float Exact = 0.01f;
+
+        protected PoiCardSheetView Sheet => Card.Sheet;
+
+        protected float _now;
 
         [UnitySetUp]
         public IEnumerator TheDragsOwnClock()
@@ -43,7 +41,7 @@ namespace TileStories.Tests
             yield break;
         }
 
-        private IEnumerator Open(SheetStopRule.Stop stop)
+        protected IEnumerator Open(SheetStopRule.Stop stop)
         {
             SelectionEventBus.Select(Lamp);
             yield return CardTestInput.Settle();
@@ -54,13 +52,24 @@ namespace TileStories.Tests
         }
 
         // Move the finger to `at`, `seconds` of the drag's clock after the last event
-        private IEnumerator MoveTo(IPanel panel, Vector2 at, float seconds)
+        protected IEnumerator MoveTo(IPanel panel, Vector2 at, float seconds)
         {
             _now += seconds;
             CardTestInput.TouchMove(panel, at);
             yield return null;
         }
+    }
 
+    // SheetDrag (_3.2 chunk D: the sheet's vertical drag, out of PoiCardSheetView) on the REAL LivingRoomScene with The Lamp's card, real
+    // touch events sent to the panel, and the drag's own clock (SheetDrag.Clock) so a "slow" or a "fast" move is what the test says:
+    //   - while the finger is down the sheet's height IS the finger's travel (panel units, exact) and the drag class is on; a slow release
+    //     snaps to the nearest stop and takes the class off
+    //   - the SPEED decides, not only the distance: the same 30 units up from Peek stay at Peek slowly and reach Half as a flick
+    //   - a drag past the top holds at Full; one pulled below 60 % of the peek closes the card through CloseRequested, as the X does
+    //   - the top strip takes nothing at touch-down; once a move is clearly vertical the sheet follows it from where the finger went down
+    [Category("Core")]
+    public class PoiCardSheetDragSceneTests : PoiCardSheetDragSceneFixture
+    {
         [UnityTest]
         public IEnumerator WhileTheFingerIsDown_TheSheetFollowsItExactly_AndASlowReleaseSnapsToTheNearestStop()
         {
@@ -155,7 +164,12 @@ namespace TileStories.Tests
             Assert.IsTrue(closeAsked, "the release asked to close, through the same event as the X");
             Assert.IsFalse(Sheet.IsOpen, "and the card closed");
         }
+    }
 
+    // PoiCardSheetDragSceneTests's tests whose subject is an old navigation element: they wait for its rebuild on the Navigation Bar's pattern
+    [Ignore(TestSkips.OldNavigationElements)]
+    public class PoiCardSheetDragSceneOldNavigationTests : PoiCardSheetDragSceneFixture
+    {
         [UnityTest]
         public IEnumerator TheTopStrip_TakesNothingAtTouchDown_AndOnceTheMoveIsVertical_TheSheetFollowsIt()
         {

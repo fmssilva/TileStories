@@ -8,7 +8,8 @@ namespace TileStories
     // element: NavSlots binds it into the bottom host (floating over the screen's foot) or the top host (under the chrome row) while the bar
     // is on, and the card draws no other navigation element then.
     //   - the SURFACE paints the bar as ONE path (NavBarShapeRule, Painter2D in generateVisualContent): its fill, its hairline and -- under
-    //     Solid and Floating only -- its shadow; under Raised its edge bends into a bump at the chosen group (hanging down at Top)
+    //     Solid and Floating only -- its shadow; under Raised its edge rises into one smooth bell at the chosen group, its peak the disc's
+    //     top (hanging down at Top)
     //   - the DISC carries the chosen icon: riding up in the bump (Raised), or at the icon's own place (Filled); the pill / underline sit
     //     behind / under the chosen group; all of them follow ONE animated centre that slides with v5's overshoot (Reduce Motion: at once)
     //   - over the hero a non-solid bar turns white on dark glass (SetOverHero, the sheet's call); Clear is transparent there, solid after it
@@ -74,8 +75,10 @@ namespace TileStories
         public float DiscSize { get; private set; }
         // How high the raised bump rises (or hangs, at Top)
         public float BumpHeight => Token(BumpToken);
-        // Half the bump's foot, and the corner the bump is held clear of (NavBarShapeRule.BumpX)
+        // Half the bump's foot: how far its soft shoulders reach from the disc's centre
         public float BumpHalf => Token(BumpHalfToken);
+        // The raised disc's radius: the bell's crest is its arc
+        public float RaisedDiscRadius => Token(RaisedDiscToken) * 0.5f;
         public float CornerRadius => NavBarShapeRule.Radius(NavBarRule.Floating(Settings), NavBarRule.Raised(Settings), BarHeight, Token(RaisedRadiusToken));
 
         private static readonly CustomStyleProperty<float> HeightToken = new("--ts-navbar-height");
@@ -87,7 +90,6 @@ namespace TileStories
         private static readonly CustomStyleProperty<float> BumpHalfToken = new("--ts-navbar-bump-half");
         private static readonly CustomStyleProperty<float> RaisedRadiusToken = new("--ts-navbar-raised-radius");
         private static readonly CustomStyleProperty<float> RaisedDiscToken = new("--ts-navbar-disc-raised");
-        private static readonly CustomStyleProperty<float> DiscGapToken = new("--ts-navbar-disc-gap");
         private static readonly CustomStyleProperty<float> FilledDiscToken = new("--ts-navbar-disc-filled");
 
         private readonly ElementPool<Item> _items;
@@ -386,12 +388,13 @@ namespace TileStories
             bool chosen = ChosenIndex >= 0 && !float.IsNaN(Centre);
             bool bottom = NavBarRule.AtBottom(bar), raised = indicator == CardOptions.NavBarIndicatorRaised;
             float width = BarWidth;
+            // - the bell is centred on the raised disc, the disc held inside the bar: one centre for both, so they never part near a side
+            float bellX = float.IsNaN(width) ? Centre : NavBarShapeRule.BumpX(chosen ? Centre : width * 0.5f, width, RaisedDiscRadius);
             if (!float.IsNaN(width) && width > 0f)
             {
                 float radius = NavBarShapeRule.Radius(NavBarRule.Floating(bar), raised, BarHeight, Token(RaisedRadiusToken));
-                float bumpHalf = Token(BumpHalfToken);
-                float bumpX = NavBarShapeRule.BumpX(chosen ? Centre : width * 0.5f, width, radius, bumpHalf);
-                var path = NavBarShapeRule.Path(width, BarHeight, Room, radius, raised && chosen ? Token(BumpToken) : 0f, bumpHalf, bumpX);
+                var path = NavBarShapeRule.Path(width, BarHeight, Room, radius, raised && chosen ? Token(BumpToken) : 0f, Token(BumpHalfToken),
+                    bellX, RaisedDiscRadius);
                 PaintedPath = bottom ? path : NavBarShapeRule.Mirror(path, Room + BarHeight);
                 Surface.MarkDirtyRepaint();
             }
@@ -400,12 +403,12 @@ namespace TileStories
             Disc.style.display = disc ? DisplayStyle.Flex : DisplayStyle.None;
             if (disc)
             {
-                Disc.style.left = Centre - DiscSize * 0.5f;
+                Disc.style.left = (raised ? bellX : Centre) - DiscSize * 0.5f;
                 if (raised)
-                    // - inside the bump: its top a ring of bar under the bump's peak (NavBarShapeRule.DiscTop; mirrored at Top: its foot that
-                    //   ring above the bump's lowest point)
-                    Disc.style.top = bottom ? NavBarShapeRule.DiscTop(Room, Token(BumpToken), Token(DiscGapToken))
-                        : Room + BarHeight - NavBarShapeRule.DiscTop(Room, Token(BumpToken), Token(DiscGapToken)) - DiscSize;
+                    // - its top is the bell's peak, the bell's crest its own outline (NavBarShapeRule.DiscTop; mirrored at Top: its foot the
+                    //   bell's lowest point)
+                    Disc.style.top = bottom ? NavBarShapeRule.DiscTop(Room, Token(BumpToken))
+                        : Room + BarHeight - NavBarShapeRule.DiscTop(Room, Token(BumpToken)) - DiscSize;
                 else
                 {
                     var icon = _items.Shown[ChosenIndex].Icon.layout;

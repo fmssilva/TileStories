@@ -10,14 +10,8 @@ using UnityEngine.UIElements;
 
 namespace TileStories.Tests
 {
-    // The card's chapters on the REAL LivingRoomScene (_3.3 P4.4c1, R11, R10.7; SectionSheets): The Lamp's scroll blocks sit on glass sheets
-    // by family -- a new sheet wherever the family changes (its framework-default order interleaves families), the navigation family on the
-    // plain ground; each sheet tinted with its family's glass and laid over the one before; the opener (a filled family pill + a line) names
-    // the family with its blocks' count and minutes, in both languages, its words on the pill (D8), not sticky; a jump to a section lands
-    // on its sheet's top with the opener in view and the spy naming it; the layouts (pages: the opener is the page's title; tabs; accordion;
-    // bento); the opener's words >= 7:1 on the RENDER in both modes; captures for the eye.
-    [Category("Core")]
-    public class SectionSheetSceneTests : SearchSceneFixture
+    // SectionSheetSceneTests's shared ground: its set-up and helpers, so its own tests and its old-navigation ones stand on one fixture
+    public abstract class SectionSheetSceneFixture : SearchSceneFixture
     {
         // This fixture's subject is the CARDS look (the family glass sheets, the block frame, the moving light): the framework's default is
         // Open since _3.3 P3, so the look measured here is pinned to Cards after SearchSceneFixture's own pins
@@ -30,12 +24,17 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.3f);
         }
 
-        private PoiCardSheetView Sheet => Card.Sheet;
-        private BlockStackView Stack => Sheet.Stack;
-        private ScrollView Scroll => Stack.Scroll;
-        private float OnePixel => Sheet.Layer.panel.visualTree.layout.height / Screen.height;
-        private float Range => NavScrollRule.Range(Scroll.contentContainer.layout.height, Scroll.contentViewport.layout.height);
-        private List<SectionSheets.Sheet> Shown => Stack.Sheets.All.Where(s => s.Look.Shown).ToList();
+        protected PoiCardSheetView Sheet => Card.Sheet;
+
+        protected BlockStackView Stack => Sheet.Stack;
+
+        protected ScrollView Scroll => Stack.Scroll;
+
+        protected float OnePixel => Sheet.Layer.panel.visualTree.layout.height / Screen.height;
+
+        protected float Range => NavScrollRule.Range(Scroll.contentContainer.layout.height, Scroll.contentViewport.layout.height);
+
+        protected List<SectionSheets.Sheet> Shown => Stack.Sheets.All.Where(s => s.Look.Shown).ToList();
 
         [UnityTearDown]
         public IEnumerator RestoreTheMode()
@@ -44,7 +43,7 @@ namespace TileStories.Tests
             yield return null;
         }
 
-        private IEnumerator Open(string poi, SheetStopRule.Stop stop = SheetStopRule.Stop.Full)
+        protected IEnumerator Open(string poi, SheetStopRule.Stop stop = SheetStopRule.Stop.Full)
         {
             SelectionEventBus.Clear();
             yield return CardTestInput.Settle();
@@ -55,7 +54,7 @@ namespace TileStories.Tests
             Assert.IsTrue(Sheet.IsOpen, "precondition: " + poi + "'s card is open");
         }
 
-        private IEnumerator UseLayout(string layout)
+        protected IEnumerator UseLayout(string layout)
         {
             var copy = ConfigCopy();
             copy.card_settings.navigation.layout = layout;
@@ -63,6 +62,46 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.3f);
         }
 
+        // The minutes a sheet's shown blocks give (their Reading Time; a clip's length is never loaded for it), read from the wall's config
+        protected int MinutesOf(SectionSheets.Sheet sheet)
+        {
+            int minutes = 0;
+            foreach (var block in Session.SearchPois.First(p => p.id == "painting").card.blocks)
+            {
+                var slot = Stack.SlotOfBlock(block.key);
+                if (slot == null || !sheet.Slots.Contains(slot) || slot.resolvedStyle.display != DisplayStyle.Flex) continue;
+                Assert.IsTrue(Stack.TryGetEntryOfBlock(block.key, out var entry), "precondition: " + block.key + " is bound");
+                minutes += ReadingTimeRule.Minutes(entry.Definition, entry.Instance, 0f);
+            }
+            return minutes;
+        }
+
+        protected static IEnumerator Grab(string name)
+        {
+            yield return new WaitForEndOfFrame();
+            var shot = ScreenCapture.CaptureScreenshotAsTexture();
+            File.WriteAllBytes(TestEvidence.PathFor("Sections/look", name + ".png"), shot.EncodeToPNG());
+            Object.Destroy(shot);
+        }
+
+        protected Color PixelAt(Texture2D shot, Vector2 panelPoint)
+        {
+            float scale = shot.width / Sheet.Layer.panel.visualTree.layout.width;
+            int x = Mathf.Clamp(Mathf.FloorToInt(panelPoint.x * scale), 0, shot.width - 1);
+            int y = Mathf.Clamp(shot.height - 1 - Mathf.FloorToInt(panelPoint.y * scale), 0, shot.height - 1);
+            return shot.GetPixel(x, y);
+        }
+    }
+
+    // The card's chapters on the REAL LivingRoomScene (_3.3 P4.4c1, R11, R10.7; SectionSheets): The Lamp's scroll blocks sit on glass sheets
+    // by family -- a new sheet wherever the family changes (its framework-default order interleaves families), the navigation family on the
+    // plain ground; each sheet tinted with its family's glass and laid over the one before; the opener (a filled family pill + a line) names
+    // the family with its blocks' count and minutes, in both languages, its words on the pill (D8), not sticky; a jump to a section lands
+    // on its sheet's top with the opener in view and the spy naming it; the layouts (pages: the opener is the page's title; tabs; accordion;
+    // bento); the opener's words >= 7:1 on the RENDER in both modes; captures for the eye.
+    [Category("Core")]
+    public class SectionSheetSceneTests : SectionSheetSceneFixture
+    {
         // ---------------- structure ----------------
 
         [UnityTest]
@@ -84,30 +123,6 @@ namespace TileStories.Tests
             // - the framework's default order interleaves The Lamp's families: Visit comes back after Media, so it has two sheets
             Assert.GreaterOrEqual(sheets.Count(s => s.Run.Family == "visit"), 2, "a family that comes back opens a new sheet (interleaved families)");
             Assert.AreEqual(sheets.Sum(s => s.Slots.Count), scrollSlots.Count, "and nothing is left off a sheet");
-        }
-
-        // The width the blocks had before the sheets: the frame's 16 pt inset (the sheet's padding now), the 1 px sheet edge drawn as a part
-        [UnityTest]
-        public IEnumerator ABlockOnASheet_KeepsTheFramesWidth_AndTheNavigationFamilyIsABareSheet()
-        {
-            var copy = ConfigCopy();
-            copy.card_settings.navigation.auto_nav_block = BuiltInBlocks.NavIconGridKind;
-            Session.ApplyCardSettings(copy);
-            yield return CardTestInput.Settle(0.3f);
-            yield return Open("lamp");
-            float inset = CardTestInput.TokenPx("--ts-space-4");
-            float width = Scroll.contentContainer.layout.width - 2f * inset;
-            // - a block that waits for the card to be read is hidden on this test's fresh visitor state: the shown ones are measured
-            var slots = Scroll.contentContainer.Query(className: BlockFrame.FramedClass).ToList();
-            Assert.AreEqual(BlocksWaitingToBeRead("lamp"), slots.Count(s => s.resolvedStyle.display == DisplayStyle.None),
-                "precondition: only the blocks that wait to be read are hidden");
-            foreach (var slot in slots.Where(s => s.resolvedStyle.display != DisplayStyle.None))
-                Assert.AreEqual(width, slot.layout.width, 0.01f, slot.name + ": a block keeps the width the frame's inset gave it");
-            var bare = Stack.Sheets.All.Where(s => s.Run.Bare).ToList();
-            Assert.AreEqual(1, bare.Count, "precondition: the icon grid is the one navigation run");
-            Assert.AreEqual(DisplayStyle.None, bare[0].Opener.Root.resolvedStyle.display, "a nav run has no opener");
-            Assert.AreEqual(0f, bare[0].Root.resolvedStyle.backgroundColor.a, "and no glass: the plain ground");
-            Assert.AreEqual(0, Scroll.contentContainer.IndexOf(Stack.HeaderView.HeroPart), "the hero still opens the scroll, the glass starts below it (R11 v4)");
         }
 
         [UnityTest]
@@ -156,20 +171,6 @@ namespace TileStories.Tests
                 Assert.AreEqual(fill, opener.Line.resolvedStyle.backgroundColor, sheet.Run.Family + ": the line in the family's colour");
                 Assert.Greater(opener.Line.worldBound.width, sheet.Root.worldBound.width * 0.2f, sheet.Run.Family + ": the line runs on to the sheet's edge");
             }
-        }
-
-        // The minutes a sheet's shown blocks give (their Reading Time; a clip's length is never loaded for it), read from the wall's config
-        private int MinutesOf(SectionSheets.Sheet sheet)
-        {
-            int minutes = 0;
-            foreach (var block in Session.SearchPois.First(p => p.id == "painting").card.blocks)
-            {
-                var slot = Stack.SlotOfBlock(block.key);
-                if (slot == null || !sheet.Slots.Contains(slot) || slot.resolvedStyle.display != DisplayStyle.Flex) continue;
-                Assert.IsTrue(Stack.TryGetEntryOfBlock(block.key, out var entry), "precondition: " + block.key + " is bound");
-                minutes += ReadingTimeRule.Minutes(entry.Definition, entry.Instance, 0f);
-            }
-            return minutes;
         }
 
         [UnityTest]
@@ -234,6 +235,80 @@ namespace TileStories.Tests
             Assert.Greater(checkedSections, 3, "precondition: several sections landed unclamped");
         }
 
+        // ---------------- render ----------------
+
+        // The opener's words on the RENDER: around its name and meta, the pill's worst pixel against the words' colour >= 7:1, in both modes
+        [UnityTest]
+        public IEnumerator TheOpenersWords_ClearSevenToOne_OnTheRender_InBothModes([Values("light", "dark")] string mode)
+        {
+            yield return Open("painting");
+            CardTestInput.HoldTheWallStill(Sheet);
+            ThemeController.SetMode(mode);
+            Scroll.scrollOffset = new Vector2(0f, Stack.TopInScroll(Shown[1].Root) - 200f);
+            yield return CardTestInput.Settle();
+            yield return new WaitForEndOfFrame();
+            var shot = ScreenCapture.CaptureScreenshotAsTexture();
+            try
+            {
+                var viewport = Scroll.contentViewport.worldBound;
+                var inView = Shown.Where(s => viewport.Contains(s.Opener.Pill.worldBound.min) && viewport.Contains(s.Opener.Pill.worldBound.max)).ToList();
+                Assert.Greater(inView.Count, 0, "precondition: an opener is in view to measure");
+                float worst = float.MaxValue; string at = "";
+                foreach (var sheet in inView)
+                    foreach (var words in new[] { sheet.Opener.Name, sheet.Opener.Meta })
+                    {
+                        var box = words.worldBound;
+                        var pill = sheet.Opener.Pill.worldBound;
+                        // - the pill's ground right around the words (above, below, before, after): where their letters' edges sit
+                        foreach (var p in new[] { new Vector2(box.center.x, Mathf.Lerp(pill.yMin, box.yMin, 0.5f)), new Vector2(box.center.x, Mathf.Lerp(box.yMax, pill.yMax, 0.5f)),
+                                     new Vector2(box.xMin - 2f, box.center.y), new Vector2(box.xMax + 2f, box.center.y) })
+                        {
+                            float ratio = UIAccessibility.ContrastRatio(PixelAt(shot, p), words.resolvedStyle.color);
+                            if (ratio < worst) { worst = ratio; at = sheet.Run.Family + " " + words.name + " at " + p + " " + (Color32)PixelAt(shot, p); }
+                        }
+                    }
+                File.WriteAllBytes(TestEvidence.PathFor("Sections", "opener_render_" + mode + ".png"), shot.EncodeToPNG());
+                File.AppendAllText(TestEvidence.PathFor("Sections", "opener_contrast.txt"), $"{mode}: worst opener words {worst:0.00}:1 -- {at}\n");
+                Assert.GreaterOrEqual(worst, UIAccessibility.MinRatioEnhancedText, mode + ": the opener's words on its pill, worst point -- " + at);
+            }
+            finally { Object.Destroy(shot); }
+        }
+
+        // For the eye: The Lamp and The Painting, light and dark, Half and Full, two scroll positions across a section boundary; the pages layout
+        [UnityTest]
+        public IEnumerator TheChapters_AreRendered_ForTheEye([Values("lamp", "painting")] string poi)
+        {
+            foreach (string mode in CardOptions.Modes)
+            {
+                yield return Open(poi, SheetStopRule.Stop.Half);
+                CardTestInput.HoldTheWallStill(Sheet);
+                ThemeController.SetMode(mode);
+                var boundary = Shown[1].Root;
+                Scroll.scrollOffset = new Vector2(0f, Stack.TopInScroll(boundary) - 120f);
+                yield return CardTestInput.Settle();
+                yield return Grab($"{poi}_{mode}_half_boundary");
+                Sheet.SetStop(SheetStopRule.Stop.Full);
+                yield return CardTestInput.Settle();
+                Scroll.scrollOffset = new Vector2(0f, Stack.TopInScroll(boundary) - 400f);
+                yield return CardTestInput.Settle();
+                yield return Grab($"{poi}_{mode}_full_before_boundary");
+                Scroll.scrollOffset = new Vector2(0f, Stack.TopInScroll(Shown[2].Root) - 60f);
+                yield return CardTestInput.Settle();
+                yield return Grab($"{poi}_{mode}_full_next_boundary");
+            }
+            yield return UseLayout(CardOptions.LayoutPages);
+            yield return Open(poi);
+            CardTestInput.HoldTheWallStill(Sheet);
+            Scroll.scrollOffset = new Vector2(0f, Stack.TopInScroll(Shown[0].Root) - 40f);
+            yield return CardTestInput.Settle();
+            yield return Grab($"{poi}_light_pages");
+        }
+    }
+
+    // SectionSheetSceneTests's tests whose subject is an old navigation element: they wait for its rebuild on the Navigation Bar's pattern
+    [Ignore(TestSkips.OldNavigationElements)]
+    public class SectionSheetSceneOldNavigationTests : SectionSheetSceneFixture
+    {
         // ---------------- layouts ----------------
 
         // The opener in each layout (_3.3 R16, decided at the P4.4c1 review): pages -- the opener IS the page's title and the Family Pager keeps
@@ -241,7 +316,6 @@ namespace TileStories.Tests
         // words (the strip names the section): no name, no meta, no pill -- the family's coloured line alone, the sheet's full width (the 4c1b
         // review: an icon-only pill read as a stray badge); accordion and bento as P4.4c1 left them
         [UnityTest]
-        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator Pages_TheOpenerIsThePagesTitle_ThePagerKeepsItsCounter_TabsOpenerSaysNoWords_AccordionAndBentoAsBefore()
         {
             var words = new CardStrings(Card.StringTable.Entries(), CardStringSources.Shared.Entries(), null, "en", "en");
@@ -314,89 +388,28 @@ namespace TileStories.Tests
                 "bento: every target is set aside for the tiles -- a sheet left in the stack holds no target (the Sources under the tiles)");
         }
 
-        // ---------------- render ----------------
-
-        // The opener's words on the RENDER: around its name and meta, the pill's worst pixel against the words' colour >= 7:1, in both modes
+        // The width the blocks had before the sheets: the frame's 16 pt inset (the sheet's padding now), the 1 px sheet edge drawn as a part
         [UnityTest]
-        public IEnumerator TheOpenersWords_ClearSevenToOne_OnTheRender_InBothModes([Values("light", "dark")] string mode)
+        public IEnumerator ABlockOnASheet_KeepsTheFramesWidth_AndTheNavigationFamilyIsABareSheet()
         {
-            yield return Open("painting");
-            CardTestInput.HoldTheWallStill(Sheet);
-            ThemeController.SetMode(mode);
-            Scroll.scrollOffset = new Vector2(0f, Stack.TopInScroll(Shown[1].Root) - 200f);
-            yield return CardTestInput.Settle();
-            yield return new WaitForEndOfFrame();
-            var shot = ScreenCapture.CaptureScreenshotAsTexture();
-            try
-            {
-                var viewport = Scroll.contentViewport.worldBound;
-                var inView = Shown.Where(s => viewport.Contains(s.Opener.Pill.worldBound.min) && viewport.Contains(s.Opener.Pill.worldBound.max)).ToList();
-                Assert.Greater(inView.Count, 0, "precondition: an opener is in view to measure");
-                float worst = float.MaxValue; string at = "";
-                foreach (var sheet in inView)
-                    foreach (var words in new[] { sheet.Opener.Name, sheet.Opener.Meta })
-                    {
-                        var box = words.worldBound;
-                        var pill = sheet.Opener.Pill.worldBound;
-                        // - the pill's ground right around the words (above, below, before, after): where their letters' edges sit
-                        foreach (var p in new[] { new Vector2(box.center.x, Mathf.Lerp(pill.yMin, box.yMin, 0.5f)), new Vector2(box.center.x, Mathf.Lerp(box.yMax, pill.yMax, 0.5f)),
-                                     new Vector2(box.xMin - 2f, box.center.y), new Vector2(box.xMax + 2f, box.center.y) })
-                        {
-                            float ratio = UIAccessibility.ContrastRatio(PixelAt(shot, p), words.resolvedStyle.color);
-                            if (ratio < worst) { worst = ratio; at = sheet.Run.Family + " " + words.name + " at " + p + " " + (Color32)PixelAt(shot, p); }
-                        }
-                    }
-                File.WriteAllBytes(TestEvidence.PathFor("Sections", "opener_render_" + mode + ".png"), shot.EncodeToPNG());
-                File.AppendAllText(TestEvidence.PathFor("Sections", "opener_contrast.txt"), $"{mode}: worst opener words {worst:0.00}:1 -- {at}\n");
-                Assert.GreaterOrEqual(worst, UIAccessibility.MinRatioEnhancedText, mode + ": the opener's words on its pill, worst point -- " + at);
-            }
-            finally { Object.Destroy(shot); }
-        }
-
-        // For the eye: The Lamp and The Painting, light and dark, Half and Full, two scroll positions across a section boundary; the pages layout
-        [UnityTest]
-        public IEnumerator TheChapters_AreRendered_ForTheEye([Values("lamp", "painting")] string poi)
-        {
-            foreach (string mode in CardOptions.Modes)
-            {
-                yield return Open(poi, SheetStopRule.Stop.Half);
-                CardTestInput.HoldTheWallStill(Sheet);
-                ThemeController.SetMode(mode);
-                var boundary = Shown[1].Root;
-                Scroll.scrollOffset = new Vector2(0f, Stack.TopInScroll(boundary) - 120f);
-                yield return CardTestInput.Settle();
-                yield return Grab($"{poi}_{mode}_half_boundary");
-                Sheet.SetStop(SheetStopRule.Stop.Full);
-                yield return CardTestInput.Settle();
-                Scroll.scrollOffset = new Vector2(0f, Stack.TopInScroll(boundary) - 400f);
-                yield return CardTestInput.Settle();
-                yield return Grab($"{poi}_{mode}_full_before_boundary");
-                Scroll.scrollOffset = new Vector2(0f, Stack.TopInScroll(Shown[2].Root) - 60f);
-                yield return CardTestInput.Settle();
-                yield return Grab($"{poi}_{mode}_full_next_boundary");
-            }
-            yield return UseLayout(CardOptions.LayoutPages);
-            yield return Open(poi);
-            CardTestInput.HoldTheWallStill(Sheet);
-            Scroll.scrollOffset = new Vector2(0f, Stack.TopInScroll(Shown[0].Root) - 40f);
-            yield return CardTestInput.Settle();
-            yield return Grab($"{poi}_light_pages");
-        }
-
-        private static IEnumerator Grab(string name)
-        {
-            yield return new WaitForEndOfFrame();
-            var shot = ScreenCapture.CaptureScreenshotAsTexture();
-            File.WriteAllBytes(TestEvidence.PathFor("Sections/look", name + ".png"), shot.EncodeToPNG());
-            Object.Destroy(shot);
-        }
-
-        private Color PixelAt(Texture2D shot, Vector2 panelPoint)
-        {
-            float scale = shot.width / Sheet.Layer.panel.visualTree.layout.width;
-            int x = Mathf.Clamp(Mathf.FloorToInt(panelPoint.x * scale), 0, shot.width - 1);
-            int y = Mathf.Clamp(shot.height - 1 - Mathf.FloorToInt(panelPoint.y * scale), 0, shot.height - 1);
-            return shot.GetPixel(x, y);
+            var copy = ConfigCopy();
+            copy.card_settings.navigation.auto_nav_block = BuiltInBlocks.NavIconGridKind;
+            Session.ApplyCardSettings(copy);
+            yield return CardTestInput.Settle(0.3f);
+            yield return Open("lamp");
+            float inset = CardTestInput.TokenPx("--ts-space-4");
+            float width = Scroll.contentContainer.layout.width - 2f * inset;
+            // - a block that waits for the card to be read is hidden on this test's fresh visitor state: the shown ones are measured
+            var slots = Scroll.contentContainer.Query(className: BlockFrame.FramedClass).ToList();
+            Assert.AreEqual(BlocksWaitingToBeRead("lamp"), slots.Count(s => s.resolvedStyle.display == DisplayStyle.None),
+                "precondition: only the blocks that wait to be read are hidden");
+            foreach (var slot in slots.Where(s => s.resolvedStyle.display != DisplayStyle.None))
+                Assert.AreEqual(width, slot.layout.width, 0.01f, slot.name + ": a block keeps the width the frame's inset gave it");
+            var bare = Stack.Sheets.All.Where(s => s.Run.Bare).ToList();
+            Assert.AreEqual(1, bare.Count, "precondition: the icon grid is the one navigation run");
+            Assert.AreEqual(DisplayStyle.None, bare[0].Opener.Root.resolvedStyle.display, "a nav run has no opener");
+            Assert.AreEqual(0f, bare[0].Root.resolvedStyle.backgroundColor.a, "and no glass: the plain ground");
+            Assert.AreEqual(0, Scroll.contentContainer.IndexOf(Stack.HeaderView.HeroPart), "the hero still opens the scroll, the glass starts below it (R11 v4)");
         }
     }
 }

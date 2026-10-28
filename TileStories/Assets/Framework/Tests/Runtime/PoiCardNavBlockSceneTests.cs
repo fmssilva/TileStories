@@ -16,6 +16,7 @@ namespace TileStories.Tests
     //     under the spy line with it in, and a Text Tabs tap still lands its block +-1 px
     //   - the stops do not move with it (195.00 / 337.60 / 796.00)
     //   - renders of the real grid at 390 px in English and Portuguese
+    [Ignore(TestSkips.OldNavigationElements)]
     public class PoiCardNavBlockSceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";

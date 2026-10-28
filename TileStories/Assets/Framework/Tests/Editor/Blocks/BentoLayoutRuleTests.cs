@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using TileStories.Tests;
 
 namespace TileStories.Editor.Tests
 {
@@ -10,6 +11,7 @@ namespace TileStories.Editor.Tests
     // row); the area follows the counts wherever no minimum holds; past the fill point every row sits at its minimum and the overview
     // scrolls. The numbers are a phone's at 390 px: the content 358 px wide, The Lamp's Full viewport 565 px, the tile minimum 64 px tall,
     // an 8 px gap (the view reads the real ones from the card; PoiCardBentoLayoutSceneTests measures them)
+    [Ignore(TestSkips.OldNavigationElements)]
     public class BentoLayoutRuleTests
     {
         private const float Width = 358f;

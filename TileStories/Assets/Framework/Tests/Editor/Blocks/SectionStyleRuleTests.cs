@@ -41,6 +41,31 @@ namespace TileStories.Editor.Tests
             CollectionAssert.AreEqual(new[] { "None", "Hairline", "Ornament", "Azulejo", "Mosaic", "Image" }, CardOptions.SectionDividerLabels);
         }
 
+        // _3.3 P3a review (f): one ornament per boundary -- a Tiles or Wave Start replaces the divider before it, at every level it comes
+        // from (the card's Start, Vary, a group's Section Style); Plain, Bands and Fade keep it, and the first section never has one
+        [Test]
+        public void ATilesOrWaveStart_ReplacesTheDividerBeforeIt_ThePlainerStartsKeepIt()
+        {
+            foreach (string divider in CardOptions.SectionDividers)
+                foreach (string start in CardOptions.SectionStarts)
+                {
+                    var s = new CardSectionSettings { start = start, divider = divider };
+                    bool ornament = start == CardOptions.SectionStartTiles || start == CardOptions.SectionStartWave;
+                    Assert.AreEqual(ornament, SectionStyleRule.OrnamentStart(start), start);
+                    Assert.AreEqual(ornament ? CardOptions.SectionDividerNone : divider, SectionStyleRule.Of(s, 2, 2, "").Divider,
+                        $"{start} start, {divider} divider: one ornament per boundary");
+                    Assert.AreEqual(CardOptions.SectionDividerNone, SectionStyleRule.Of(s, 0, 0, "").Divider, "never before the first section");
+                }
+            var card = new CardSectionSettings { start = CardOptions.SectionStartFade, divider = CardOptions.SectionDividerMosaic };
+            Assert.AreEqual(CardOptions.SectionDividerNone, SectionStyleRule.Of(card, 1, 1, CardOptions.SectionStartTiles).Divider,
+                "a group's own Tiles takes its divider away, for that group alone");
+            Assert.AreEqual(CardOptions.SectionDividerMosaic, SectionStyleRule.Of(card, 2, 2, "").Divider, "...the card's Fade sections keep theirs");
+            card.vary = CardOptions.SectionVaryByGroup;
+            CollectionAssert.AreEqual(new[] { "mosaic", "none", "none", "mosaic" },
+                Enumerable.Range(1, 4).Select(g => SectionStyleRule.Of(card, g, g - 1, "").Divider), "By Group: fade keeps it, wave and tiles replace it");
+            Assert.AreEqual(CardOptions.SectionDividerNone, SectionStyleRule.Divider(new CardSectionSettings()), "precondition: the default card has no divider");
+        }
+
         [Test]
         public void TheNearestLevelWins_TheGroupsSectionStyle_OverVary_OverTheCardsStart_AndTheFirstSectionHasNoDivider()
         {
@@ -53,7 +78,7 @@ namespace TileStories.Editor.Tests
                 Enumerable.Range(0, 6).Select(g => SectionStyleRule.Of(s, g, g, "").Start), "By Group: v6's walk, group by group");
             Assert.AreEqual(CardOptions.SectionStartPlain, SectionStyleRule.Of(s, 2, 2, CardOptions.SectionStartPlain).Start, "...the group's own still wins");
             Assert.AreEqual(CardOptions.SectionDividerNone, SectionStyleRule.Of(s, 0, 0, "").Divider, "nothing stands before the first section");
-            Assert.AreEqual(CardOptions.SectionDividerAzulejo, SectionStyleRule.Of(s, 1, 1, "").Divider);
+            Assert.AreEqual(CardOptions.SectionDividerAzulejo, SectionStyleRule.Of(s, 3, 3, "").Divider, "a Fade start keeps the card's divider");
             Assert.AreEqual("--ts-family-about", SectionStyleRule.TintToken(CardOptions.SectionColourGroup, "--ts-family-about"));
             Assert.AreEqual(SectionStyleRule.AccentToken, SectionStyleRule.TintToken(CardOptions.SectionColourAccent, "--ts-family-about"));
             Assert.AreEqual(SectionStyleRule.NeutralToken, SectionStyleRule.TintToken(CardOptions.SectionColourNeutral, "--ts-family-about"));

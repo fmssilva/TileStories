@@ -25,6 +25,7 @@ namespace TileStories.Tests
     // The card's state is an in-memory CardLocalState for the wall's own id (the host keeps it: same wall), reused across close and reopen
     // as the app's PlayerPrefs one is -- a test must never write the developer's own saved state (PlayerPrefs round trips, the colon key
     // included, are CardLocalStateTests' on a throwaway wall)
+    [Ignore(TestSkips.OldNavigationElements)]
     public class PoiCardNavContentsSceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";

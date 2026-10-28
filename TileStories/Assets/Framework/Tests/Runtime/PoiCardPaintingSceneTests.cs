@@ -9,38 +9,36 @@ using UnityEngine.UIElements;
 
 namespace TileStories.Tests
 {
-    // Phase B of _3.2 step 17b on the REAL LivingRoomScene with real touches: the demo point. The Painting (the Ribeira Palace on the
-    // panel) was given its card with the Card Starter's Rich point set plus hand editing, and the wall writes its OWN navigation (a
-    // preset applied in Detail Card > Navigation) -- so this fixture, alone among the card fixtures, undoes SearchSceneFixture's pin to the
-    // framework default and measures what the wall ships (ShippedNavigation):
-    //   - every authored block of The Painting shows, in the order the card's own builder gives, its title in English and Portuguese
-    //   - the wall's top element and menu are the ones on the card, and the strip shows at Full
-    //   - a REAL tap on every tab lands its section's first block at the viewport top (+-1 px), ONE nav_jump each, the tab marked
-    //   - the mark follows real drags of the stack
-    //   - Lamp - Residential draws all four in-flow nav kinds at once (section 8.1's demo point)
-    //   - renders at 390 px: The Painting in EN and PT at Half and Full, and each nav kind of Lamp - Residential
-    [Category("Core")]
-    public class PoiCardPaintingSceneTests : SearchSceneFixture
+    // PoiCardPaintingSceneTests's shared ground: its set-up and helpers, so its own tests and its old-navigation ones stand on one fixture
+    public abstract class PoiCardPaintingSceneFixture : SearchSceneFixture
     {
-        private const string Painting = "painting";
-        private const string Residential = "lamp_residential";
+        protected const string Painting = "painting";
 
-        private PoiCardSheetView Sheet => Card.Sheet;
-        private NavController Nav => Sheet.Nav;
-        private CardNavModel Model => Nav.Model;
-        private ScrollView Scroll => Sheet.Stack.Scroll;
-        private float OnePixel => Sheet.Layer.panel.visualTree.layout.height / Screen.height;
-        private float Range => NavScrollRule.Range(Scroll.contentContainer.layout.height, Scroll.contentViewport.layout.height);
+        protected const string Residential = "lamp_residential";
 
-        private sealed class RecordingCardEvents : ICardEvents
+        protected PoiCardSheetView Sheet => Card.Sheet;
+
+        protected NavController Nav => Sheet.Nav;
+
+        protected CardNavModel Model => Nav.Model;
+
+        protected ScrollView Scroll => Sheet.Stack.Scroll;
+
+        protected float OnePixel => Sheet.Layer.panel.visualTree.layout.height / Screen.height;
+
+        protected float Range => NavScrollRule.Range(Scroll.contentContainer.layout.height, Scroll.contentViewport.layout.height);
+
+        protected sealed class RecordingCardEvents : ICardEvents
         {
             public readonly List<CardEvent> Raised = new();
             public void Raise(CardEvent cardEvent) => Raised.Add(cardEvent);
         }
 
-        private RecordingCardEvents _events;
-        private List<string> _shippedLanguages;
-        private List<CardEvent> NavJumps => _events.Raised.Where(e => e.Kind == CardEventKinds.NavJump).ToList();
+        protected RecordingCardEvents _events;
+
+        protected List<string> _shippedLanguages;
+
+        protected List<CardEvent> NavJumps => _events.Raised.Where(e => e.Kind == CardEventKinds.NavJump).ToList();
 
         [UnitySetUp]
         public IEnumerator UseAnInMemoryCardStateRecordTheEventsAndTheWallsOwnNavigation()
@@ -55,7 +53,7 @@ namespace TileStories.Tests
         // ---------------- helpers ----------------
 
         // The wall as it ships -- its own navigation back over the fixture's pin -- in `language` first, pushed through the live seam
-        private IEnumerator Push(Action<WallConfigData> edit, string language = "en")
+        protected IEnumerator Push(Action<WallConfigData> edit, string language = "en")
         {
             var copy = ConfigCopy();
             _shippedLanguages ??= new List<string>(copy.card_settings.languages);
@@ -68,7 +66,7 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.3f);
         }
 
-        private IEnumerator Open(string poi, SheetStopRule.Stop stop)
+        protected IEnumerator Open(string poi, SheetStopRule.Stop stop)
         {
             if (SelectionEventBus.CurrentPoiId != poi)
             {
@@ -88,7 +86,7 @@ namespace TileStories.Tests
         }
 
         // The tabs of the wall's top element (a tab bar, or the tab row of tabs-with-chips)
-        private TabsNavView Tabs()
+        protected TabsNavView Tabs()
         {
             var view = Sheet.Slots.TopView;
             if (view is IconTabsChipsNavView both) return both.Tabs;
@@ -96,7 +94,7 @@ namespace TileStories.Tests
             return (TabsNavView)view;
         }
 
-        private IEnumerator Landed()
+        protected IEnumerator Landed()
         {
             for (int frame = 0; frame < 600 && Nav.IsJumping; frame++) yield return null;
             Assert.IsFalse(Nav.IsJumping, "the jump came to rest");
@@ -104,11 +102,11 @@ namespace TileStories.Tests
         }
 
         // The section the reader is in, read from the SCREEN: the spy's own rule over each section's first slot as drawn
-        private int SectionUnderTheSpyLine() =>
+        protected int SectionUnderTheSpyLine() =>
             CardTestInput.SectionUnderTheSpyLine(Scroll, Model, Sheet.Stack.SlotOfBlock);
 
         // A tab wholly inside its strip's visible part, after a real sideways drag of the strip when it is not
-        private IEnumerator BringIntoView(TabsNavView tabs, Button tab)
+        protected IEnumerator BringIntoView(TabsNavView tabs, Button tab)
         {
             var visible = tabs.Strip.Viewport.worldBound;
             var rect = tab.worldBound;
@@ -120,7 +118,21 @@ namespace TileStories.Tests
             rect = tab.worldBound;
             Assert.IsTrue(rect.xMin >= visible.xMin - 0.5f && rect.xMax <= visible.xMax + 0.5f, "precondition: the tab is inside its strip " + rect + " in " + visible);
         }
+    }
 
+    // Phase B of _3.2 step 17b on the REAL LivingRoomScene with real touches: the demo point. The Painting (the Ribeira Palace on the
+    // panel) was given its card with the Card Starter's Rich point set plus hand editing, and the wall writes its OWN navigation (a
+    // preset applied in Detail Card > Navigation) -- so this fixture, alone among the card fixtures, undoes SearchSceneFixture's pin to the
+    // framework default and measures what the wall ships (ShippedNavigation):
+    //   - every authored block of The Painting shows, in the order the card's own builder gives, its title in English and Portuguese
+    //   - the wall's top element and menu are the ones on the card, and the strip shows at Full
+    //   - a REAL tap on every tab lands its section's first block at the viewport top (+-1 px), ONE nav_jump each, the tab marked
+    //   - the mark follows real drags of the stack
+    //   - Lamp - Residential draws all four in-flow nav kinds at once (section 8.1's demo point)
+    //   - renders at 390 px: The Painting in EN and PT at Half and Full, and each nav kind of Lamp - Residential
+    [Category("Core")]
+    public class PoiCardPaintingSceneTests : PoiCardPaintingSceneFixture
+    {
         // ---------------- The Painting's card ----------------
 
         [UnityTest]
@@ -159,8 +171,37 @@ namespace TileStories.Tests
             Assert.AreEqual(ConfigCopy().pois.Single(p => p.id == Painting).name, Session.SearchPois.Single(p => p.id == Painting).name, "the card never renames the point");
         }
 
+        // ---------------- Lamp - Residential: the whole domain on one card ----------------
+
         [UnityTest]
-        [Ignore(TestSkips.OldNavigationElements)]
+        public IEnumerator LampResidential_DrawsAllFourInFlowNavKinds_AtOnce()
+        {
+            yield return Open(Residential, SheetStopRule.Stop.Full);
+            var bound = Sheet.Stack.BoundViews.ToList();
+            Assert.AreEqual(1, bound.OfType<NavBentoBlockView>().Count(), "the bento (since 15a)");
+            Assert.AreEqual(1, bound.OfType<NavIconGridBlockView>().Count(), "an icon grid");
+            Assert.AreEqual(1, bound.OfType<NavContentsBlockView>().Count(), "a contents list");
+            Assert.AreEqual(1, bound.OfType<NavRailsBlockView>().Count(), "rails");
+            var config = ConfigCopy();
+            var poi = config.pois.Single(p => p.id == Residential);
+            Assert.IsEmpty(BlockStackBuilder.Build(poi, config.card_settings, BlockRegistry.Shared, config.pois).Skipped, "nothing of its card is left out");
+
+            foreach (var view in new IBlockView[] { bound.OfType<NavBentoBlockView>().Single(), bound.OfType<NavIconGridBlockView>().Single(),
+                         bound.OfType<NavContentsBlockView>().Single(), bound.OfType<NavRailsBlockView>().Single() })
+            {
+                Scroll.ScrollTo(view.Root);
+                yield return CardTestInput.Settle(0.4f);
+                Assert.Greater(view.Root.layout.height, 0f, view.GetType().Name + ": drawn, not empty");
+                yield return CardGalleryChecks.Render("Residential_" + view.GetType().Name + "_full_390");
+            }
+        }
+    }
+
+    // PoiCardPaintingSceneTests's tests whose subject is an old navigation element: they wait for its rebuild on the Navigation Bar's pattern
+    [Ignore(TestSkips.OldNavigationElements)]
+    public class PoiCardPaintingSceneOldNavigationTests : PoiCardPaintingSceneFixture
+    {
+        [UnityTest]
         public IEnumerator TheWallsOwnNavigation_IsTheOneOnThePaintingsCard()
         {
             yield return Open(Painting, SheetStopRule.Stop.Full);
@@ -175,7 +216,6 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
-        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator ARealTapOnEveryTab_LandsItsSection_AtTheViewportTop_OneJumpEach_AndTheTabIsMarked()
         {
             yield return Open(Painting, SheetStopRule.Stop.Full);
@@ -207,7 +247,6 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
-        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator ARealDragOfThePaintingsCard_MovesTheMark_ToTheSectionOnScreen()
         {
             yield return Open(Painting, SheetStopRule.Stop.Full);
@@ -293,31 +332,6 @@ namespace TileStories.Tests
             yield return CardTestInput.PastTheHero(Sheet);
             Assert.IsTrue(Sheet.Chrome.TopShown, "precondition: the strip shows at Full once the hero is read");
             Assert.AreEqual(Visibility.Visible, both.Chips.Root.resolvedStyle.visibility, "with the strip shown, the chips show");
-        }
-
-        // ---------------- Lamp - Residential: the whole domain on one card ----------------
-
-        [UnityTest]
-        public IEnumerator LampResidential_DrawsAllFourInFlowNavKinds_AtOnce()
-        {
-            yield return Open(Residential, SheetStopRule.Stop.Full);
-            var bound = Sheet.Stack.BoundViews.ToList();
-            Assert.AreEqual(1, bound.OfType<NavBentoBlockView>().Count(), "the bento (since 15a)");
-            Assert.AreEqual(1, bound.OfType<NavIconGridBlockView>().Count(), "an icon grid");
-            Assert.AreEqual(1, bound.OfType<NavContentsBlockView>().Count(), "a contents list");
-            Assert.AreEqual(1, bound.OfType<NavRailsBlockView>().Count(), "rails");
-            var config = ConfigCopy();
-            var poi = config.pois.Single(p => p.id == Residential);
-            Assert.IsEmpty(BlockStackBuilder.Build(poi, config.card_settings, BlockRegistry.Shared, config.pois).Skipped, "nothing of its card is left out");
-
-            foreach (var view in new IBlockView[] { bound.OfType<NavBentoBlockView>().Single(), bound.OfType<NavIconGridBlockView>().Single(),
-                         bound.OfType<NavContentsBlockView>().Single(), bound.OfType<NavRailsBlockView>().Single() })
-            {
-                Scroll.ScrollTo(view.Root);
-                yield return CardTestInput.Settle(0.4f);
-                Assert.Greater(view.Root.layout.height, 0f, view.GetType().Name + ": drawn, not empty");
-                yield return CardGalleryChecks.Render("Residential_" + view.GetType().Name + "_full_390");
-            }
         }
     }
 }

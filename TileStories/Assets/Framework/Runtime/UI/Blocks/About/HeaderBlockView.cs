@@ -246,6 +246,9 @@ namespace TileStories
             return float.IsNaN(top) ? float.NaN : top - scrollY + TextRise;
         }
 
+        // The words block's top with no scroll (and so no rise), from the stack's view top (NaN before layout)
+        private float WordsTopAtRest() => HeroPart.panel == null ? float.NaN : HeroPart.layout.y + Foot.layout.y;
+
         // The hero's bottom edge in the stack's content coordinates (NaN when it is not in the stack)
         public float HeroBottom() => HeroPart.panel == null ? float.NaN : HeroPart.layout.yMax;
 
@@ -256,7 +259,8 @@ namespace TileStories
             if (!HasHero) return;
             // - the words block moves as one, Listen and the actions with the words: it rises past the picture, and fades near the top
             TextRise = HeroMotionRule.TextRise(scrollY, _reduceMotion);
-            TextOpacity = HeroMotionRule.TextOpacity(WordsTopInView(scrollY), FadeTop, _reduceMotion);
+            // - the fade is the scroll's alone: whole at rest wherever the stop puts the words (_3.3 P3a review b)
+            TextOpacity = HeroMotionRule.TextOpacity(WordsTopAtRest(), WordsTopInView(scrollY), FadeTop, _reduceMotion);
             Foot.style.translate = new Translate(0f, TextRise);
             Foot.style.opacity = TextOpacity;
             if (_variant == BuiltInBlocks.HeaderImageParallax) PlaceMedia();

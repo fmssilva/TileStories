@@ -11,35 +11,34 @@ using UnityEngine.UIElements;
 
 namespace TileStories.Tests
 {
-    // Phase B of step 13 (_3.2 section 6.1, the accordion and tabs layouts) on the REAL LivingRoomScene with real taps, real drags and a
-    // real Escape, and the card's REAL owners (the preview stage loading the real glb; the video owner over a stand-in picture device, as in
-    // every video scene test). The layout is pushed through the live seam, as the POI Editor's Layout row does. Asserted on the stack, the
-    // controller and the OWNERS, never on pixels:
-    //   - accordion: every target of The Lamp is a row holding no view and no file; a real tap opens one (its view and the preview owner's
-    //     slot), with Open One At A Time a second tap closes the first (the owner gives its slot back) and the tapped row keeps its place; a
-    //     real tap on a tab opens that section's first row and lands it; Escape folds the row opened last before the sheet moves
-    //   - tabs: one section at a time, the others set aside (no view, no file); a real tap on a tab shows its section and the spy names it,
-    //     a real drag inside never moves it; a section put away lets its media go (the preview slot, the playing video); with neither bar
-    //     the card uses Text Tabs; a card with nothing to switch between scrolls
-    //   - renders at 390 px in English and Portuguese: both layouts
-    [Category("Core")]
-    public class PoiCardLayoutSceneTests : SearchSceneFixture
+    // PoiCardLayoutSceneTests's shared ground: its set-up and helpers, so its own tests and its old-navigation ones stand on one fixture
+    public abstract class PoiCardLayoutSceneFixture : SearchSceneFixture
     {
-        private const string Lamp = "lamp";
-        private const string LampMilitary = "lamp_military";
+        protected const string Lamp = "lamp";
 
-        private PoiCardSheetView Sheet => Card.Sheet;
-        private BlockStackView Stack => Sheet.Stack;
-        private NavController Nav => Sheet.Nav;
-        private ScrollView Scroll => Stack.Scroll;
-        private TextTabsNavView Tabs => Sheet.Slots.TopView as TextTabsNavView;
-        private float OnePixel => Sheet.Layer.panel.visualTree.layout.height / Screen.height;
-        private float Range => NavScrollRule.Range(Scroll.contentContainer.layout.height, Scroll.contentViewport.layout.height);
+        protected const string LampMilitary = "lamp_military";
 
-        private ManualVideoOutput _videoOut;
-        private CardVideoService _video;
-        private BackgroundSafeInput _backgroundInput;
-        private Keyboard _keyboard;
+        protected PoiCardSheetView Sheet => Card.Sheet;
+
+        protected BlockStackView Stack => Sheet.Stack;
+
+        protected NavController Nav => Sheet.Nav;
+
+        protected ScrollView Scroll => Stack.Scroll;
+
+        protected TextTabsNavView Tabs => Sheet.Slots.TopView as TextTabsNavView;
+
+        protected float OnePixel => Sheet.Layer.panel.visualTree.layout.height / Screen.height;
+
+        protected float Range => NavScrollRule.Range(Scroll.contentContainer.layout.height, Scroll.contentViewport.layout.height);
+
+        protected ManualVideoOutput _videoOut;
+
+        protected CardVideoService _video;
+
+        protected BackgroundSafeInput _backgroundInput;
+
+        protected Keyboard _keyboard;
 
         [UnitySetUp]
         public IEnumerator UseAStandInPictureDevice()
@@ -67,7 +66,7 @@ namespace TileStories.Tests
         // ---------------- helpers ----------------
 
         // The wall's navigation edited and pushed through the live seam, as a POI Editor row does
-        private IEnumerator UseNavigation(Action<CardNavigationSettings> edit)
+        protected IEnumerator UseNavigation(Action<CardNavigationSettings> edit)
         {
             var copy = ConfigCopy();
             edit(copy.card_settings.navigation);
@@ -75,7 +74,7 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.3f);
         }
 
-        private IEnumerator OpenFull(string poi)
+        protected IEnumerator OpenFull(string poi)
         {
             if (SelectionEventBus.CurrentPoiId != poi)
             {
@@ -93,7 +92,7 @@ namespace TileStories.Tests
         }
 
         // `target` in the card's view and still for three frames (a long scroll collapses the header for a few frames after it)
-        private IEnumerator InViewAndStill(VisualElement target)
+        protected IEnumerator InViewAndStill(VisualElement target)
         {
             Rect last = default;
             int still = 0;
@@ -113,7 +112,7 @@ namespace TileStories.Tests
         }
 
         // A real tap on a compact row's line, scrolled into view and still first
-        private IEnumerator TapRow(string key)
+        protected IEnumerator TapRow(string key)
         {
             var row = Stack.CompactRowOf(key);
             Assert.IsNotNull(row, "precondition: " + key + " is drawn as a compact row");
@@ -123,7 +122,7 @@ namespace TileStories.Tests
         }
 
         // A real tap on the Text Tabs word of section `index` (dragged into the strip's view first, sideways like a thumb)
-        private IEnumerator TapTab(int index)
+        protected IEnumerator TapTab(int index)
         {
             Assert.IsNotNull(Tabs, "precondition: the top slot holds Text Tabs");
             // - _3.3 S4a: the strip is chrome and waits for the hero (the screen at Full): a reader taps a tab once the picture is read away
@@ -146,7 +145,7 @@ namespace TileStories.Tests
         }
 
         // A real press and release of Escape on an Input System keyboard (where Android's Back arrives), under BackgroundSafeInput
-        private IEnumerator PressEscape()
+        protected IEnumerator PressEscape()
         {
             if (_keyboard == null)
             {
@@ -160,7 +159,7 @@ namespace TileStories.Tests
         }
 
         // A block's top lands at the viewport's top (relative, one pixel), or the card's end clamps it
-        private void AssertLanded(string block, string name)
+        protected void AssertLanded(string block, string name)
         {
             var slot = Stack.SlotOfBlock(block);
             if (Sheet.Stack.LandingTop(slot) <= Range - OnePixel)
@@ -169,8 +168,23 @@ namespace TileStories.Tests
                 Assert.AreEqual(Range, Scroll.scrollOffset.y, OnePixel, name + ": a late block clamps at the end of the range");
         }
 
-        private int SectionIndex(string family) => Nav.Model.Sections.ToList().FindIndex(s => s.Key == family);
+        protected int SectionIndex(string family) => Nav.Model.Sections.ToList().FindIndex(s => s.Key == family);
+    }
 
+    // Phase B of step 13 (_3.2 section 6.1, the accordion and tabs layouts) on the REAL LivingRoomScene with real taps, real drags and a
+    // real Escape, and the card's REAL owners (the preview stage loading the real glb; the video owner over a stand-in picture device, as in
+    // every video scene test). The layout is pushed through the live seam, as the POI Editor's Layout row does. Asserted on the stack, the
+    // controller and the OWNERS, never on pixels:
+    //   - accordion: every target of The Lamp is a row holding no view and no file; a real tap opens one (its view and the preview owner's
+    //     slot), with Open One At A Time a second tap closes the first (the owner gives its slot back) and the tapped row keeps its place; a
+    //     real tap on a tab opens that section's first row and lands it; Escape folds the row opened last before the sheet moves
+    //   - tabs: one section at a time, the others set aside (no view, no file); a real tap on a tab shows its section and the spy names it,
+    //     a real drag inside never moves it; a section put away lets its media go (the preview slot, the playing video); with neither bar
+    //     the card uses Text Tabs; a card with nothing to switch between scrolls
+    //   - renders at 390 px in English and Portuguese: both layouts
+    [Category("Core")]
+    public class PoiCardLayoutSceneTests : PoiCardLayoutSceneFixture
+    {
         // ---------------- the accordion ----------------
 
         [UnityTest]
@@ -215,9 +229,13 @@ namespace TileStories.Tests
             yield return PressEscape();
             Assert.AreEqual(SheetStopRule.Stop.Half, Sheet.Stop, "nothing open: the next Escape lowers the card");
         }
+    }
 
+    // PoiCardLayoutSceneTests's tests whose subject is an old navigation element: they wait for its rebuild on the Navigation Bar's pattern
+    [Ignore(TestSkips.OldNavigationElements)]
+    public class PoiCardLayoutSceneOldNavigationTests : PoiCardLayoutSceneFixture
+    {
         [UnityTest]
-        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator Accordion_ARealTapOnATab_OpensThatSectionsFirstRow_AndLandsIt_AndOpenRowsOpenIndependentlyByDefault()
         {
             yield return UseNavigation(nav => nav.layout = CardOptions.LayoutAccordion);
@@ -242,7 +260,6 @@ namespace TileStories.Tests
         // ---------------- tabs ----------------
 
         [UnityTest]
-        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator Tabs_ShowOneSectionAtATime_ARealTabTapShowsAnother_TheSpyNamesIt_AndARealDragInsideNeverMovesIt()
         {
             yield return UseNavigation(nav => nav.layout = CardOptions.LayoutTabs);
@@ -286,7 +303,6 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
-        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator Tabs_ASectionPutAway_LetsItsMediaGo_ThePreviewSlotAndThePlayingVideo()
         {
             yield return UseNavigation(nav => nav.layout = CardOptions.LayoutTabs);
@@ -325,7 +341,6 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
-        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator Tabs_WithNeitherBar_UsesTextTabs_AndACardWithNothingToSwitchBetweenScrolls()
         {
             yield return UseNavigation(nav => { nav.layout = CardOptions.LayoutTabs; nav.top = CardOptions.NavNone; nav.bottom = CardOptions.NavNone; });
@@ -354,7 +369,6 @@ namespace TileStories.Tests
         // ---------------- what it looks like ----------------
 
         [UnityTest]
-        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator Renders_TheLampInEachLayout_InEnglishAndPortuguese()
         {
             foreach (string language in new[] { "en", "pt" })

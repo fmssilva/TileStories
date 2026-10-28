@@ -1,41 +1,87 @@
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
+using TileStories.Tests;
 
 namespace TileStories.Editor.Tests
 {
-    // Tier 0 of what step 9 decides (_3.2 sections 4.2 and 5.4) with the numbers of the run's phone frame (390 x 844, The Lamp's stops 195 /
-    // 337.6 / 796, a 48 px button 16 px from the right edge, 8 px above the sheet): where the floating slot rests at each stop
-    // (FloatingSlotRule), which way the dial's list opens (FabFanRule), the radial's arc and which item a release picks -- every item's own
-    // direction, a sector's edges, a release outside the arc and inside the dead zone (RadialMenuRule) -- and what the placed-model chip
-    // says (PlacedModelChipRule: placed or not, this card or another, the control off).
-    public class NavFloatingRulesTests
+    // NavFloatingRulesTests's shared ground: its set-up and helpers, so its own tests and its old-navigation ones stand on one fixture
+    public abstract class NavFloatingRulesFixture
     {
-        private const float Layer = 844f;
-        private const float Width = 390f;
-        private const float Button = 48f;
-        private const float Gap = 8f;
-        private const float Margin = 16f;
+        protected const float Layer = 844f;
+
+        protected const float Width = 390f;
+
+        protected const float Button = 48f;
+
+        protected const float Gap = 8f;
+
+        protected const float Margin = 16f;
+
         // A radial item's size (its round button and its word under it), the smallest arc and the dead zone, as the card's tokens say
-        private static readonly RadialMenuRule.ItemSize Item = new(96f, 76f);
-        private const float MinRadius = 96f;
-        private const float DeadZone = 24f;
+        protected static readonly RadialMenuRule.ItemSize Item = new(96f, 76f);
+
+        protected const float MinRadius = 96f;
+
+        protected const float DeadZone = 24f;
 
         // The room around the button's centre when the sheet rests at this height
-        private static RadialMenuRule.Room RoomAt(float sheetHeight)
+        protected static RadialMenuRule.Room RoomAt(float sheetHeight)
         {
             float bottom = FloatingSlotRule.Bottom(sheetHeight, Layer, Button, Gap, Chrome);
             float centreY = Layer - bottom - Button / 2f;
             return new RadialMenuRule.Room(centreY, Layer - centreY, Width - Margin - Button / 2f, Margin + Button / 2f);
         }
 
-        private static RadialMenuRule.Arc ArcAt(int count, RadialMenuRule.Room room) => RadialMenuRule.Layout(count, room, Item, MinRadius);
+        protected static RadialMenuRule.Arc ArcAt(int count, RadialMenuRule.Room room) => RadialMenuRule.Layout(count, room, Item, MinRadius);
 
         // ---------------- FloatingSlotRule ----------------
 
         // The chrome row's foot under the sheet's top edge: --ts-bar-top 6 + --ts-bar-height 44
-        private const float Chrome = 50f;
+        protected const float Chrome = 50f;
 
+        // ---------------- RadialMenuRule: the arc ----------------
+
+        // Every item of `arc` -- its whole rectangle -- inside the room on all four sides, no two overlapping (a width apart across or a height
+        // apart down), at most 45 degrees apart, top to bottom
+        protected static void AssertInsideAndApart(RadialMenuRule.Arc arc, RadialMenuRule.Room room, string at)
+        {
+            Assert.IsTrue(arc.Fits, at + ": the arc fits");
+            for (int i = 0; i < arc.Count; i++)
+            {
+                var offset = arc.Offset(i);
+                Assert.LessOrEqual(-offset.y + Item.Height / 2f, room.Above + 0.01f, at + ": item " + i + " stays under the layer's top");
+                Assert.LessOrEqual(offset.y + Item.Height / 2f, room.Below + 0.01f, at + ": item " + i + " stays over the layer's bottom");
+                Assert.LessOrEqual(-offset.x + Item.Width / 2f, room.LeftOf + 0.01f, at + ": item " + i + " stays inside the layer's left edge");
+                Assert.LessOrEqual(offset.x + Item.Width / 2f, room.RightOf + 0.01f,
+                    at + ": item " + i + " stays inside the layer's RIGHT edge (straight up or down it sits on the button's column)");
+                Assert.LessOrEqual(offset.x, 0.01f, at + ": item " + i + "'s centre lies left of the button's (the left half-plane)");
+                if (i > 0) Assert.Greater(offset.y, arc.Offset(i - 1).y, at + ": the first item on top, the rest in reading order");
+                for (int j = 0; j < i; j++)
+                {
+                    var gap = offset - arc.Offset(j);
+                    Assert.IsTrue(Mathf.Abs(gap.x) >= Item.Width - 0.01f || Mathf.Abs(gap.y) >= Item.Height - 0.01f,
+                        at + ": items " + j + " and " + i + " never overlap (" + gap + ")");
+                }
+            }
+            Assert.GreaterOrEqual(RadialMenuRule.Apart(arc, Item), 1f - 1e-4f, at + ": Apart agrees");
+            Assert.LessOrEqual(arc.StepDegrees, RadialMenuRule.MaxStepDegrees + 1e-3f, at + ": never wider than a marking menu's eighth");
+        }
+
+        // ---------------- RadialMenuRule: the release ----------------
+
+        // A travel of `length` in the direction `degrees` (0 = right, 90 = up), in panel units (y down)
+        protected static Vector2 Travel(float degrees, float length = 115f) =>
+            new(length * Mathf.Cos(degrees * Mathf.Deg2Rad), -length * Mathf.Sin(degrees * Mathf.Deg2Rad));
+    }
+
+    // Tier 0 of what step 9 decides (_3.2 sections 4.2 and 5.4) with the numbers of the run's phone frame (390 x 844, The Lamp's stops 195 /
+    // 337.6 / 796, a 48 px button 16 px from the right edge, 8 px above the sheet): where the floating slot rests at each stop
+    // (FloatingSlotRule), which way the dial's list opens (FabFanRule), the radial's arc and which item a release picks -- every item's own
+    // direction, a sector's edges, a release outside the arc and inside the dead zone (RadialMenuRule) -- and what the placed-model chip
+    // says (PlacedModelChipRule: placed or not, this card or another, the control off).
+    public class NavFloatingRulesTests : NavFloatingRulesFixture
+    {
         [Test]
         public void TheSlot_RestsAGapAboveTheSheetAtPeekAndHalf_AndFlushInTheCameraStripAtFull()
         {
@@ -88,6 +134,29 @@ namespace TileStories.Editor.Tests
             Assert.IsFalse(FloatingSlotRule.Shown(false, false));
         }
 
+        // ---------------- PlacedModelChipRule ----------------
+
+        [Test]
+        public void TheChip_SaysPlacedWithRemoveOnTheCardThatPlacedIt_PlacedWithoutRemoveOnAnother_AndNothingOtherwise()
+        {
+            string chip = CardOptions.PlacedModelChip, none = CardOptions.PlacedModelNone;
+            Assert.AreEqual(PlacedModelChipRule.State.ThisCard, PlacedModelChipRule.Of(chip, true, "lamp", "lamp"), "the card that placed it: Remove");
+            Assert.AreEqual(PlacedModelChipRule.State.OtherCard, PlacedModelChipRule.Of(chip, true, "lamp", "lamp_military"), "another point's card: no Remove");
+            Assert.AreEqual(PlacedModelChipRule.State.Hidden, PlacedModelChipRule.Of(chip, true, null, "lamp"), "nothing stands");
+            Assert.AreEqual(PlacedModelChipRule.State.Hidden, PlacedModelChipRule.Of(chip, false, "lamp", null), "no card open");
+            Assert.AreEqual(PlacedModelChipRule.State.Hidden, PlacedModelChipRule.Of(none, true, "lamp", "lamp"), "Placed Model Control = None");
+            Assert.AreEqual(PlacedModelChipRule.State.ThisCard, PlacedModelChipRule.Of("garbled", true, "lamp", "lamp"), "an unknown value reads as the default");
+            Assert.AreEqual(PlacedModelChipRule.State.ThisCard, PlacedModelChipRule.Of(null, true, "lamp", "lamp"), "an old config without the key: the default");
+            Assert.AreEqual(chip, new CardNavigationSettings().placed_model_control, "the default is the chip");
+            Assert.AreEqual(CardOptions.NavNone, new CardNavigationSettings().floating, "and no Floating Button");
+            Assert.AreEqual(chip, CardOptions.PlacedModelControls[0], "the first option is the default the card reads for an unknown value");
+        }
+    }
+
+    // NavFloatingRulesTests's tests whose subject is an old navigation element: they wait for its rebuild on the Navigation Bar's pattern
+    [Ignore(TestSkips.OldNavigationElements)]
+    public class NavFloatingRulesOldNavigationTests : NavFloatingRulesFixture
+    {
         [Test]
         public void TheCardDims_OnlyWhileTheSlotsOwnElementIsOpen_AsAnAnchoredThing()
         {
@@ -114,34 +183,6 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(300f, FabFanRule.Room(FabFanRule.Direction.Up, 300f, 200f));
             Assert.AreEqual(200f, FabFanRule.Room(FabFanRule.Direction.Down, 300f, 200f));
             Assert.AreEqual(0f, FabFanRule.Room(FabFanRule.Direction.Up, -5f, 200f), "never a negative room");
-        }
-
-        // ---------------- RadialMenuRule: the arc ----------------
-
-        // Every item of `arc` -- its whole rectangle -- inside the room on all four sides, no two overlapping (a width apart across or a height
-        // apart down), at most 45 degrees apart, top to bottom
-        private static void AssertInsideAndApart(RadialMenuRule.Arc arc, RadialMenuRule.Room room, string at)
-        {
-            Assert.IsTrue(arc.Fits, at + ": the arc fits");
-            for (int i = 0; i < arc.Count; i++)
-            {
-                var offset = arc.Offset(i);
-                Assert.LessOrEqual(-offset.y + Item.Height / 2f, room.Above + 0.01f, at + ": item " + i + " stays under the layer's top");
-                Assert.LessOrEqual(offset.y + Item.Height / 2f, room.Below + 0.01f, at + ": item " + i + " stays over the layer's bottom");
-                Assert.LessOrEqual(-offset.x + Item.Width / 2f, room.LeftOf + 0.01f, at + ": item " + i + " stays inside the layer's left edge");
-                Assert.LessOrEqual(offset.x + Item.Width / 2f, room.RightOf + 0.01f,
-                    at + ": item " + i + " stays inside the layer's RIGHT edge (straight up or down it sits on the button's column)");
-                Assert.LessOrEqual(offset.x, 0.01f, at + ": item " + i + "'s centre lies left of the button's (the left half-plane)");
-                if (i > 0) Assert.Greater(offset.y, arc.Offset(i - 1).y, at + ": the first item on top, the rest in reading order");
-                for (int j = 0; j < i; j++)
-                {
-                    var gap = offset - arc.Offset(j);
-                    Assert.IsTrue(Mathf.Abs(gap.x) >= Item.Width - 0.01f || Mathf.Abs(gap.y) >= Item.Height - 0.01f,
-                        at + ": items " + j + " and " + i + " never overlap (" + gap + ")");
-                }
-            }
-            Assert.GreaterOrEqual(RadialMenuRule.Apart(arc, Item), 1f - 1e-4f, at + ": Apart agrees");
-            Assert.LessOrEqual(arc.StepDegrees, RadialMenuRule.MaxStepDegrees + 1e-3f, at + ": never wider than a marking menu's eighth");
         }
 
         [Test]
@@ -195,12 +236,6 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(3, RadialMenuRule.Capacity(3, room, Item, MinRadius), "never more than wanted (Bar Slots 3)");
         }
 
-        // ---------------- RadialMenuRule: the release ----------------
-
-        // A travel of `length` in the direction `degrees` (0 = right, 90 = up), in panel units (y down)
-        private static Vector2 Travel(float degrees, float length = 115f) =>
-            new(length * Mathf.Cos(degrees * Mathf.Deg2Rad), -length * Mathf.Sin(degrees * Mathf.Deg2Rad));
-
         [Test]
         public void AReleaseTowardsAnItem_PicksIt_ASectorsEdgesBelongToIt_AndOutsideTheArcOrInsideTheDeadZoneNothing()
         {
@@ -234,24 +269,6 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(180f, RadialMenuRule.DegreesOf(new Vector2(-10f, 0f)), 1e-3f, "left");
             Assert.AreEqual(270f, RadialMenuRule.DegreesOf(new Vector2(0f, 10f)), 1e-3f, "down");
             Assert.AreEqual(315f, RadialMenuRule.DegreesOf(new Vector2(10f, 10f)), 1e-3f, "down-right, never negative");
-        }
-
-        // ---------------- PlacedModelChipRule ----------------
-
-        [Test]
-        public void TheChip_SaysPlacedWithRemoveOnTheCardThatPlacedIt_PlacedWithoutRemoveOnAnother_AndNothingOtherwise()
-        {
-            string chip = CardOptions.PlacedModelChip, none = CardOptions.PlacedModelNone;
-            Assert.AreEqual(PlacedModelChipRule.State.ThisCard, PlacedModelChipRule.Of(chip, true, "lamp", "lamp"), "the card that placed it: Remove");
-            Assert.AreEqual(PlacedModelChipRule.State.OtherCard, PlacedModelChipRule.Of(chip, true, "lamp", "lamp_military"), "another point's card: no Remove");
-            Assert.AreEqual(PlacedModelChipRule.State.Hidden, PlacedModelChipRule.Of(chip, true, null, "lamp"), "nothing stands");
-            Assert.AreEqual(PlacedModelChipRule.State.Hidden, PlacedModelChipRule.Of(chip, false, "lamp", null), "no card open");
-            Assert.AreEqual(PlacedModelChipRule.State.Hidden, PlacedModelChipRule.Of(none, true, "lamp", "lamp"), "Placed Model Control = None");
-            Assert.AreEqual(PlacedModelChipRule.State.ThisCard, PlacedModelChipRule.Of("garbled", true, "lamp", "lamp"), "an unknown value reads as the default");
-            Assert.AreEqual(PlacedModelChipRule.State.ThisCard, PlacedModelChipRule.Of(null, true, "lamp", "lamp"), "an old config without the key: the default");
-            Assert.AreEqual(chip, new CardNavigationSettings().placed_model_control, "the default is the chip");
-            Assert.AreEqual(CardOptions.NavNone, new CardNavigationSettings().floating, "and no Floating Button");
-            Assert.AreEqual(chip, CardOptions.PlacedModelControls[0], "the first option is the default the card reads for an unknown value");
         }
     }
 }

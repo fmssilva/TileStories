@@ -166,19 +166,18 @@
     /* The Navigation Bar (_3.3 S4 third round, v5's numbers): plain numbers (panel units) NavBarView reads on this card root for the ONE
        path it paints (NavBarShapeRule) -- the bar's height with words and without, a floating bar's inset from the sides and its gap above
        the screen's foot, the room above the edge the raised bump and its disc rise into, the bump's height and half its foot, a floating
-       raised bar's corner (any other floating bar is a stadium), the raised disc and the ring of bar between its top and the bump's peak,
-       Filled's disc at the icon. The bump is WIDER than its disc (_3.3 P3: 76 x 18 round a 40 disc) and the disc sits INSIDE it, a
-       6 pt ring of bar round its top: a cut-out around the disc, never a disc on a flat bar (_3.3 P3a) */
+       raised bar's corner (any other floating bar is a stadium), the raised disc, Filled's disc at the icon. The bump is ONE smooth bell
+       (_3.3 P3a review a): its peak is the raised disc's top (room - bump = 14: no band of bar above the disc), its crest the disc's own
+       arc, its feet 50 from the disc's centre -- wide soft shoulders, 2.5 times the disc */
     --ts-navbar-height: 62;
     --ts-navbar-height-compact: 52;
     --ts-navbar-inset: 16;
     --ts-navbar-gap: 20;
     --ts-navbar-room: 26;
-    --ts-navbar-bump: 18;
-    --ts-navbar-bump-half: 38;
+    --ts-navbar-bump: 12;
+    --ts-navbar-bump-half: 50;
     --ts-navbar-raised-radius: 18;
     --ts-navbar-disc-raised: 40;
-    --ts-navbar-disc-gap: 6;
     --ts-navbar-disc-filled: 32;
     /* what a bar floating at the bottom takes off the stack's foot and the hero's words: its gap + height + room (20 + 62 + 26), so the
        last block and the words stay clear of it and of the raised disc; a plain number for the hero's words (PoiCardSheetView), a length

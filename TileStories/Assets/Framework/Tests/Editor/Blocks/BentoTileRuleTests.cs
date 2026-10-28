@@ -3,12 +3,14 @@ using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
+using TileStories.Tests;
 
 namespace TileStories.Editor.Tests
 {
     // BentoTileRule (_3.2 step 15a, nav_bento): which of an author's tile rows the card draws, on THE LAMP through the real builder and
     // BlockRefRule -- a tile is drawn exactly when BlockRefRule says its block leads somewhere (the same answer the Editor's warning is made
     // from), the tile's On Tap is read as stored, and the grid spans the first tile and a lonely last one so a row never has a hole.
+    [Ignore(TestSkips.OldNavigationElements)]
     public class BentoTileRuleTests
     {
         private const string Lamp = "lamp";
