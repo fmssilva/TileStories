@@ -111,13 +111,19 @@ and Phase B tests, captures and docs -- plus small review fixes. About 3-8 new f
 the sub-steps (e.g. 10A.2b.1, .2, .3) so the Worker can report and commit after each. If a block would need two new owners, it
 is two blocks.
 
-**Worker model (state it in every brief):** pick the cheapest model that can do the block well. The Worker must use tools
-reliably (Unity MCP, files) and must SEE images (the captures are its visual check), so a text-only model is never enough.
-- Opus-class (strongest): a new owner / service / architectural piece, cross-cutting refactors, 3D / AR / math-heavy work, or a
+**Worker model and effort (state both in every brief):** pick the cheapest pair that can do the block well -- a model
+(Haiku / Sonnet / Opus) AND an effort level (Low / Medium / High / Max). The Worker must use tools reliably (Unity MCP, files)
+and must SEE images (the captures are its visual check), so a text-only model is never enough.
+- Opus: a new owner / service / architectural piece, cross-cutting refactors, 3D / AR / math-heavy or visual-design work, or a
   block after a session that failed or produced subtle bugs.
-- Sonnet-class: new kinds that follow an existing pattern closely, review fixes, Editor rows, fixtures, docs.
-- Smaller / cheaper models (Haiku-class or others): only mechanical, well-specified edits (renames, doc sync, moving files)
-  with a narrow test to run; not for anything that needs design judgement or visual checks.
+- Sonnet: new kinds that follow an existing pattern closely, review fixes, Editor rows, fixtures, docs.
+- Haiku: only mechanical, well-specified edits (renames, doc sync, moving files) with a narrow test to run; never for design
+  judgement or visual checks.
+- Effort: Low = mechanical edits, doc sync. Medium = the default for a pattern-following block. High = debugging reds across
+  fixtures, layout / timing bugs, a new piece with several moving parts, visual tuning. Max = only after a High session failed on
+  the same problem, or a hard root-cause hunt (a race, a flaky real-input test) -- it costs more and fills the budget sooner.
+- The Architect names its own pair too when it changes: Opus Medium for reviews, briefs and commits; Opus High for a domain plan,
+  a design study (prototypes) or a hard review decision.
 
 **References check (before writing the brief):** list what the Worker must READ, not only what it may consult: the domain
 guide's TODOs + status + the sections of the step, and the rule sections the block will hit (Editor rows -> `_5.1` section 0;
@@ -156,7 +162,7 @@ REQUIRED READING (all lines): <the exact sections the block touches -- always `_
 section "0. Guidelines" when the block adds or changes any POI Editor row, table, popup or capture; `40-testing.md` 4.2.3 + 4.5
 when it adds real-input tests or captures; any other guide whose rules apply>.
 Context only: <other guides>.
-WORKER MODEL: <Opus-class / Sonnet-class / smaller, and why in a few words>.
+WORKER MODEL: <Haiku / Sonnet / Opus> + effort <Low / Medium / High / Max>, and why in a few words.
 TEST PLAN: <baseline full run needed? / full EditMode + PlayMode once at the end / background full run: yes or no>.
 
 PART 1 -- <fixes>: numbered, each = what + where + the test that proves it + recapture.
@@ -171,7 +177,7 @@ Commit only if the developer asks.
 
 8. **Your tasks now** -- the LAST lines of the answer, after the brief, as a short checklist for the developer: WHERE WE ARE
    (the domain, the current block group and what it is for, this block, what comes after it until the domain closes), which block the
-   brief is for, where to paste it (`__AI_worker.md`, inside `# claude agent`), which model to pick (named plainly, e.g. "Opus"),
+   brief is for, where to paste it (`__AI_worker.md`, inside `# claude agent`), which model AND effort to pick (named plainly, e.g. "Opus, High"),
    new Worker session or not, where Unity must be while it runs (`40-testing.md` 4.2.3: the a / b / c action, word for word, per
    phase of the block), commit status (done by me / you commit with message "..." / nothing to commit), and any decision
    or file waiting on them. Never leave these only inside a table or the brief.
