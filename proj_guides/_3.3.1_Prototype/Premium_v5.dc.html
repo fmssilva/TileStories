@@ -228,8 +228,8 @@ a{color:inherit}a:hover{color:inherit}
 "mode":{"editor":"enum","options":["light","dark"],"default":"light","section":"Look"},
 "heroHeight":{"editor":"enum","options":["full","tall"],"default":"full","section":"Look"},
 "blocks":{"editor":"enum","options":["open","cards"],"default":"open","section":"Look"},
-"separator":{"editor":"enum","options":["hairline","space","bands","ornament","chapters"],"default":"hairline","section":"Look"},
-"familyColours":{"editor":"boolean","default":false,"section":"Look"},
+"separator":{"editor":"enum","options":["hairline","space","bands","ornament","chapters"],"default":"bands","section":"Look"},
+"familyColours":{"editor":"boolean","default":true,"section":"Look"},
 "imageBreak":{"editor":"boolean","default":false,"section":"Look"},
 "sheetGlass":{"editor":"range","min":0.75,"max":1,"step":0.01,"default":0.81,"section":"Look"},
 "chrome":{"editor":"enum","options":["glass","bare"],"default":"glass","section":"Look"},
@@ -315,8 +315,8 @@ class Component extends DCLogic {
     // ---- the sections: open (a website's flow) or soft cards ----
     const cards = blocks === 'cards';
     // How open sections are told apart: a hairline, space alone, tinted bands, an ornament, chapter numbers
-    const sepKind = p.separator ?? 'hairline';
-    const famOn = p.familyColours ?? false;
+    const sepKind = p.separator ?? 'bands';
+    const famOn = p.familyColours ?? true;
     const keys = this.keys;
     const fam = L
       ? { about: '#1F4E9C', story: '#9A3B12', media: '#0E6B6B', timeline: '#865400', listen: '#5A3E9E', quiz: '#2E6A2E' }
