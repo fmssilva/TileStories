@@ -99,6 +99,8 @@ failures does not.
   a few minutes. A block closes on this tier unless its TEST PLAN says CORE or FULL.
   In a review phase (a domain's look reworked block after block) BLOCK's PlayMode half is ALL 17 card fixtures, every block: a
   changed shared look breaks fixtures no grep names.
+  Tests stay on scope: a block's own tests run every OTHER component at its default (e.g. the card's Navigation Bar at Bottom with
+  its default look); another component's option matrix lives only in that component's own fixture, so it is never re-run for nothing.
 - **CORE -- `category_names: ["Core"]`, PlayMode then EditMode, ~18 min, background:** every 3rd-4th block, and at the end of a block on SHARED GROUND
   (the definition below).
 - **FULL -- everything, <= 90 min, background:** every ~12 blocks with the maintenance, before a domain close-out, a device
