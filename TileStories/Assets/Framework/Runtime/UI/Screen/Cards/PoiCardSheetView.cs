@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TileStories.LookKit;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -22,6 +23,12 @@ namespace TileStories
         // edge -- or Glass -- a dense band with a hairline at its foot); gone over the hero's picture
         public VisualElement ChromeBand { get; }
         public const string ChromeBandGlassClass = "poi-card__chrome-band--glass";
+        // Top Band Fade (_3.3 P2 review (b), the Look Kit's Fade): the sheet's own colour (--ts-top-fade), solid through the chrome row's foot
+        // (--ts-top-fade-solid), then fading to nothing at the band's foot (--ts-top-fade-height); no stops under Glass
+        public FadePainter TopFade { get; } = new(new FadeOptions(null));
+        public const float TopFadeSolidAlpha = 0.99f;
+        private static readonly CustomStyleProperty<float> TopFadeSolidToken = new("--ts-top-fade-solid");
+        private bool _topBandGlass;
         public Button CloseButton { get; }
         // The X drawn on it (CardIcons.Shape.Close, in its glass disc, coloured by USS)
         public CardIcons.VectorGlyph CloseGlyph { get; }
@@ -144,6 +151,10 @@ namespace TileStories
             // - after the hero the chrome row sits on ONE dense glass band (no block text through it); over the picture it is clear
             ChromeBand = new VisualElement { name = "poi-card-chrome-band", pickingMode = PickingMode.Ignore };
             ChromeBand.AddToClassList("poi-card__chrome-band");
+            ChromeBand.AddManipulator(TopFade);
+            ChromeBand.RegisterCallback<GeometryChangedEvent>(_ => PaintTopFade());
+            ChromeBand.RegisterCallback<AttachToPanelEvent>(_ => { ThemeController.ModeChanged -= PaintTopFade; ThemeController.ModeChanged += PaintTopFade; });
+            ChromeBand.RegisterCallback<DetachFromPanelEvent>(_ => ThemeController.ModeChanged -= PaintTopFade);
             Root.Add(ChromeBand);
 
             _registry = registry;
@@ -222,7 +233,9 @@ namespace TileStories
         {
             _halfMaxRatio = halfMaxRatio;
             _fullHeight = context.Settings?.container?.full_height ?? CardOptions.FullHeightTop;
-            ChromeBand.EnableInClassList(ChromeBandGlassClass, context.Settings?.container?.top_band == CardOptions.TopBandGlass);
+            _topBandGlass = context.Settings?.container?.top_band == CardOptions.TopBandGlass;
+            ChromeBand.EnableInClassList(ChromeBandGlassClass, _topBandGlass);
+            PaintTopFade();
             CloseButton.tooltip = context.Strings?.Get(CardStrings.Keys.Close) ?? "";
             ShowSettingsButton(context);
             context.Host ??= this;
@@ -534,5 +547,23 @@ namespace TileStories
                 return duration.unit == TimeUnit.Millisecond ? duration.value / 1000f : duration.value;
             return 0f;
         }
-    }
+    
+        // The Top Band's fade in the theme's colour for the mode shown, its solid line and its foot (none under Glass: the band is the glass)
+        private void PaintTopFade()
+        {
+            float height = ChromeBand.layout.height;
+            if (_topBandGlass || float.IsNaN(height) || !CardTokenColours.TryResolve(ChromeBand, "--ts-top-fade", out Color colour))
+            {
+                TopFade.Options = new FadeOptions(null);
+                return;
+            }
+            float solid = 0f;
+            for (var e = ChromeBand.parent; e != null; e = e.parent)
+                if (e.ClassListContains("ts-card")) { e.customStyle.TryGetValue(TopFadeSolidToken, out solid); break; }
+            colour.a = TopFadeSolidAlpha;
+            var clear = colour;
+            clear.a = 0f;
+            TopFade.Options = new FadeOptions(new List<FadeStop> { new(0f, colour), new(Mathf.Min(solid, height), colour), new(height, clear) });
+        }
+}
 }

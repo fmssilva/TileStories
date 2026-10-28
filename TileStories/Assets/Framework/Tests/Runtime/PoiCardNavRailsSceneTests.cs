@@ -109,19 +109,15 @@ namespace TileStories.Tests
                 Assert.AreEqual(Range, Scroll.scrollOffset.y, OnePixel, name + ": a late block clamps at the end of the range");
         }
 
-        // A rail scrolled into the visible part of the card, with its whole strip inside it (a drag or a tap on it needs the finger on it)
+        // A rail scrolled where a finger reaches it (the stack runs under the chrome row and the floating bar), with its whole strip inside
+        // the reach (a drag or a tap on it needs the finger on it)
         private IEnumerator BringIntoView(NavRailsBlockView.Rail rail)
         {
-            // - scrolling a card whose header collapses moves the viewport itself: scroll, let it settle, and scroll again to the settled place
-            for (int pass = 0; pass < 2; pass++)
-            {
-                Scroll.ScrollTo(rail.Root);
-                yield return CardTestInput.Settle(0.3f);
-            }
-            var viewport = Scroll.contentViewport.worldBound;
+            yield return CardTestInput.IntoReach(Sheet, rail.Strip.Viewport);
+            var reach = CardTestInput.ReachableStack(Sheet);
             var strip = rail.Strip.Viewport.worldBound;
-            Assert.IsTrue(viewport.Contains(strip.center) && viewport.Contains(new Vector2(strip.xMin + 2f, strip.yMax - 2f)),
-                "precondition: the rail's strip " + strip + " is inside the visible part " + viewport + " (offset " + Scroll.scrollOffset.y + " of " + Range + ")");
+            Assert.IsTrue(reach.Contains(new Vector2(strip.xMin + 2f, strip.yMin + 2f)) && reach.Contains(new Vector2(strip.xMax - 2f, strip.yMax - 2f)),
+                "precondition: the rail's strip " + strip + " is inside the reach " + reach + " (offset " + Scroll.scrollOffset.y + " of " + Range + ")");
         }
 
         // A real tap by a touch pointer on a point of the card layer

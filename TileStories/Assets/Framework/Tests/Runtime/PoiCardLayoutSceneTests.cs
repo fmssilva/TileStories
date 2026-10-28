@@ -217,6 +217,7 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
+        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator Accordion_ARealTapOnATab_OpensThatSectionsFirstRow_AndLandsIt_AndOpenRowsOpenIndependentlyByDefault()
         {
             yield return UseNavigation(nav => nav.layout = CardOptions.LayoutAccordion);
@@ -241,6 +242,7 @@ namespace TileStories.Tests
         // ---------------- tabs ----------------
 
         [UnityTest]
+        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator Tabs_ShowOneSectionAtATime_ARealTabTapShowsAnother_TheSpyNamesIt_AndARealDragInsideNeverMovesIt()
         {
             yield return UseNavigation(nav => nav.layout = CardOptions.LayoutTabs);
@@ -284,6 +286,7 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
+        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator Tabs_ASectionPutAway_LetsItsMediaGo_ThePreviewSlotAndThePlayingVideo()
         {
             yield return UseNavigation(nav => nav.layout = CardOptions.LayoutTabs);
@@ -322,6 +325,7 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
+        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator Tabs_WithNeitherBar_UsesTextTabs_AndACardWithNothingToSwitchBetweenScrolls()
         {
             yield return UseNavigation(nav => { nav.layout = CardOptions.LayoutTabs; nav.top = CardOptions.NavNone; nav.bottom = CardOptions.NavNone; });
@@ -350,6 +354,7 @@ namespace TileStories.Tests
         // ---------------- what it looks like ----------------
 
         [UnityTest]
+        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator Renders_TheLampInEachLayout_InEnglishAndPortuguese()
         {
             foreach (string language in new[] { "en", "pt" })

@@ -128,6 +128,23 @@
     --ts-family-visit-ink: rgb(255, 255, 255);
     --ts-family-community-ink: rgb(255, 255, 255);
     --ts-family-navigation-ink: rgb(255, 255, 255);
+    /* A family's words on an open section (_3.3 P3): the eyebrow -- the family's hue moved to 7:1 over every Start at
+       Intensity max (0.20), over a black and a white camera (ThemeContrastTests) */
+    --ts-family-meta-text: rgb(56, 51, 44);
+    --ts-family-about-text: rgb(83, 41, 2);
+    --ts-family-media-text: rgb(18, 52, 97);
+    --ts-family-guides-text: rgb(22, 59, 33);
+    --ts-family-stories-text: rgb(88, 31, 65);
+    --ts-family-ar-text: rgb(6, 58, 55);
+    --ts-family-play-text: rgb(98, 27, 16);
+    --ts-family-visit-text: rgb(56, 45, 89);
+    --ts-family-community-text: rgb(76, 45, 0);
+    --ts-family-navigation-text: rgb(45, 56, 8);
+    /* The card's ground under OPEN sections (_3.3 P3, Look Blocks = Open): the sheet's own colour, dense -- no backdrop blur
+       in UI Toolkit, and text sits on it: 7:1 over a black or white camera */
+    --ts-sheet-open: rgba(248, 246, 242, 0.92);
+    /* A section's tint under Sections > Colour = Neutral (v6) */
+    --ts-section-neutral: rgb(107, 99, 89);
     /* A section's glass sheet (R11, P4.4c1): the mode's glass ground mixed with the family's hue, translucent; blocks stay
        opaque on it, text never sits on it (D8) */
     --ts-family-meta-glass: rgba(223, 218, 208, 0.55);
@@ -197,6 +214,8 @@
     --ts-line-width: 1px;
     /* Type */
     --ts-size-body: 16px;
+    /* The body inside an OPEN section (Look Blocks = Open, v6's 17 pt prose on the open ground) */
+    --ts-size-body-open: 17px;
     --ts-size-title: 24px;
     --ts-size-caption: 14px;
     --ts-size-lede: 19px;
@@ -354,6 +373,23 @@
     --ts-family-visit-ink: rgb(20, 17, 13);
     --ts-family-community-ink: rgb(20, 17, 13);
     --ts-family-navigation-ink: rgb(20, 17, 13);
+    /* A family's words on an open section (_3.3 P3): the eyebrow -- the family's hue moved to 7:1 over every Start at
+       Intensity max (0.20), over a black and a white camera (ThemeContrastTests) */
+    --ts-family-meta-text: rgb(219, 214, 204);
+    --ts-family-about-text: rgb(241, 208, 179);
+    --ts-family-media-text: rgb(197, 216, 243);
+    --ts-family-guides-text: rgb(185, 224, 193);
+    --ts-family-stories-text: rgb(238, 205, 223);
+    --ts-family-ar-text: rgb(176, 223, 218);
+    --ts-family-play-text: rgb(247, 205, 196);
+    --ts-family-visit-text: rgb(218, 210, 245);
+    --ts-family-community-text: rgb(238, 210, 167);
+    --ts-family-navigation-text: rgb(206, 221, 150);
+    /* The card's ground under OPEN sections (_3.3 P3, Look Blocks = Open): the sheet's own colour, dense -- no backdrop blur
+       in UI Toolkit, and text sits on it: 7:1 over a black or white camera */
+    --ts-sheet-open: rgba(15, 16, 18, 0.99);
+    /* A section's tint under Sections > Colour = Neutral (v6) */
+    --ts-section-neutral: rgb(207, 200, 188);
     /* A section's glass sheet (R11, P4.4c1): the mode's glass ground mixed with the family's hue, translucent; blocks stay
        opaque on it, text never sits on it (D8) */
     --ts-family-meta-glass: rgba(40, 38, 33, 0.7);
@@ -423,6 +459,8 @@
     --ts-line-width: 1px;
     /* Type */
     --ts-size-body: 16px;
+    /* The body inside an OPEN section (Look Blocks = Open, v6's 17 pt prose on the open ground) */
+    --ts-size-body-open: 17px;
     --ts-size-title: 24px;
     --ts-size-caption: 14px;
     --ts-size-lede: 19px;

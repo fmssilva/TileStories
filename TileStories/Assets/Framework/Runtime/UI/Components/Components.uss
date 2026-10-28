@@ -170,17 +170,19 @@
     -unity-font-style: normal;
 }
 
-.ts-el-lede.ts-el--size-s .ts-el__paragraph { font-size: var(--ts-el-lede-s); }
-.ts-el-lede.ts-el--size-m .ts-el__paragraph { font-size: var(--ts-el-lede-m); }
-.ts-el-lede.ts-el--size-l .ts-el__paragraph { font-size: var(--ts-el-lede-l); }
+/* (four classes: a row's Size option wins over the open section's body size, PoiCard.uss, wherever the sheets load) */
+.ts-el.ts-el-lede.ts-el--size-s .ts-el__paragraph { font-size: var(--ts-el-lede-s); }
+.ts-el.ts-el-lede.ts-el--size-m .ts-el__paragraph { font-size: var(--ts-el-lede-m); }
+.ts-el.ts-el-lede.ts-el--size-l .ts-el__paragraph { font-size: var(--ts-el-lede-l); }
 
 .ts-el-paragraph {
     --ts-el-leading: 123;
 }
 
-.ts-el-paragraph.ts-el--size-s .ts-el__paragraph { font-size: var(--ts-el-body-s); }
-.ts-el-paragraph.ts-el--size-m .ts-el__paragraph { font-size: var(--ts-el-body-m); }
-.ts-el-paragraph.ts-el--size-l .ts-el__paragraph { font-size: var(--ts-el-body-l); }
+/* (four classes: a row's Size option wins over the open section's body size, PoiCard.uss, wherever the sheets load) */
+.ts-el.ts-el-paragraph.ts-el--size-s .ts-el__paragraph { font-size: var(--ts-el-body-s); }
+.ts-el.ts-el-paragraph.ts-el--size-m .ts-el__paragraph { font-size: var(--ts-el-body-m); }
+.ts-el.ts-el-paragraph.ts-el--size-l .ts-el__paragraph { font-size: var(--ts-el-body-l); }
 
 /* The drop cap: the display face's letter in the family colour, as tall as the two lines beside it; the words beside it and under it
    read as ONE paragraph (no paragraph gap between them) */

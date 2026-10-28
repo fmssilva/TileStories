@@ -22,8 +22,7 @@ namespace TileStories.Tests
             Assert.AreEqual("castle_then", numbered.Image.Texture?.name, "the picture from the wall's own media folder (the historic panel, its own file: the header counts castle_hero alone)");
             Assert.AreEqual(5, numbered.Spots.Count, "the five authored spots");
             Assert.AreEqual("Explore the panel", Sheet.Stack.HeadingOf(numbered).text, "its authored heading");
-            Sheet.Stack.Scroll.ScrollTo(numbered.Root);
-            yield return CardTestInput.Settle(0.2f);
+            yield return CardTestInput.IntoReach(Sheet, numbered.Spots[1].Pin);
             Rect picture = numbered.Image.Root.worldBound;
             Assert.AreEqual(picture.x + 0.73f * picture.width, numbered.Spots[1].Pin.worldBound.center.x, 1f, "the tall tower's spot: 0.73 across the picture");
             Assert.AreEqual(picture.y + 0.06f * picture.height, numbered.Spots[1].Pin.worldBound.center.y, 1f, "...and 0.06 down it");
@@ -40,8 +39,7 @@ namespace TileStories.Tests
             Assert.AreEqual(-1, numbered.OpenIndex, "a second tap closes it");
 
             var loupes = hotspots[1];
-            Sheet.Stack.Scroll.ScrollTo(loupes.Root);
-            yield return CardTestInput.Settle(0.2f);
+            yield return CardTestInput.IntoReach(Sheet, loupes.Spots[3].Loupe);
             Assert.AreEqual(5, loupes.Loupes.childCount, "a close-up per spot");
             yield return CardTestInput.Tap(loupes.Root.panel, loupes.Spots[3].Loupe.worldBound.center);
             yield return CardTestInput.Settle(0.1f);
@@ -54,8 +52,7 @@ namespace TileStories.Tests
             yield return OpenFull("lamp");
             numbered = Sheet.Stack.BoundViews.OfType<HotspotImageBlockView>().First();
             Assert.AreEqual("Toque num ponto para saber mais", numbered.Hint.text, "the framework's Portuguese hint");
-            Sheet.Stack.Scroll.ScrollTo(numbered.Root);
-            yield return CardTestInput.Settle(0.2f);
+            yield return CardTestInput.IntoReach(Sheet, numbered.Spots[1].Pin);
             yield return CardTestInput.Tap(numbered.Root.panel, numbered.Spots[1].Pin.worldBound.center);
             yield return CardTestInput.Settle(0.1f);
             Assert.AreEqual("Uma torre alta", numbered.DetailTitle.text, "the wall's Portuguese title");
@@ -92,6 +89,9 @@ namespace TileStories.Tests
                 foreach (var shot in g.Shots) Assert.IsNotNull(shot.Image.Texture, "every gallery picture of the fixture loaded (" + shot.Image.Path + ")");
 
             var target = grid.Shots[1].Box;
+            yield return CardTestInput.IntoReach(Sheet, target);
+            // - where the visitor left the card: the scroll the finger tapped at
+            scroll = Sheet.Stack.Scroll.scrollOffset.y;
             yield return CardTestInput.Tap(target.panel, target.worldBound.center);
             yield return CardTestInput.Settle(0.2f);
             var takeover = Sheet.Takeover;
@@ -130,6 +130,7 @@ namespace TileStories.Tests
             Assert.AreEqual("Today", slider.AfterLabel.text);
             Assert.AreEqual("paco_before_1755", slider.Before.Texture.name);
             Assert.AreEqual("paco_after_today", slider.After.Texture.name);
+            yield return CardTestInput.IntoReach(Sheet, slider.Frame);
             float scroll = Sheet.Stack.Scroll.scrollOffset.y;
             Rect frame = slider.Frame.worldBound;
             yield return CardTestInput.DragFrom(slider.Frame.panel, frame.center, new Vector2(-frame.width * 0.35f, 0f));

@@ -278,7 +278,7 @@ namespace TileStories
                 : float.NaN;
             float keep = PreviewFitRule.KeepBottom(title.Root.layout.yMax + taken, Fade.resolvedStyle.height,
                 lede != null ? lede.Root.layout.y + taken : float.NaN, ledeLine);
-            SetPictureHeight(frame, PreviewFitRule.PictureHeight(rows + taken, room, keep, natural, _pictureMin), aspect);
+            SetPictureHeight(frame, PreviewFitRule.PictureHeight(rows + taken, room, keep, natural, _pictureMin, !float.IsNaN(PictureHeight)), aspect);
         }
 
         // The component of the first shown row of `element` (null: none)
@@ -303,7 +303,8 @@ namespace TileStories
                 PictureHeight = float.NaN;
                 return;
             }
-            if (!float.IsNaN(PictureHeight) && Mathf.Abs(height - PictureHeight) <= PreviewFitRule.Tolerance) return;
+            // - a new height within the snap of the one set is the same picture laid out (rewriting it would only chase the rounding)
+            if (!float.IsNaN(PictureHeight) && Mathf.Abs(height - PictureHeight) <= PreviewFitRule.SnapBand) return;
             _shortened = frame;
             frame.style.aspectRatio = StyleKeyword.Null;
             frame.style.height = height;

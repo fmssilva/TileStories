@@ -102,6 +102,30 @@ namespace TileStories.Editor.Tests
             Assert.IsTrue(Nav.bar.enabled, "one real Ctrl+Z turns it on again");
         }
 
+        // The Families dropdown of an opened group starts and ends where the Icon and Colour dropdowns above it do (it sat ~15 pt to the
+        // right: a bare PrefixLabel kept the full label column under the row's indent)
+        [UnityTest]
+        public IEnumerator AnOpenedGroup_ItsFamiliesDropdown_LinesUpWithItsIconAndColourDropdowns()
+        {
+            OpenNavigation();
+            Unfold(NavBarRule.DefaultRows(Nav, BlockRegistry.Shared)[0].key);
+            var columns = new List<(string Label, Rect Rect)>();
+            POIEditorToolWindow.FieldRowRectProbe = (label, rect) => columns.Add((label, rect));
+            try { yield return Draw(); }
+            finally { POIEditorToolWindow.FieldRowRectProbe = null; }
+            Rect Column(string label)
+            {
+                var found = columns.Where(c => c.Label == label).ToList();
+                Assert.AreEqual(1, found.Count, "precondition: one " + label + " row drawn (one group opened)");
+                return found[0].Rect;
+            }
+            Rect icon = Column("Icon"), colour = Column("Colour"), families = Column("Families");
+            Assert.AreEqual(icon.x, colour.x, 0.5f, "precondition: Icon and Colour share their value column");
+            Assert.AreEqual(colour.x, families.x, 0.5f, "the Families dropdown starts where the Colour dropdown does");
+            Assert.AreEqual(colour.xMax, families.xMax, 0.5f, "...and ends where it does (both leave room for the (i))");
+            Assert.Greater(families.y, colour.y, "precondition: Families is the row under Colour");
+        }
+
         [UnityTest]
         public IEnumerator AnOldConfig_DrawsItsUnderTitleAsTop_AndDrawingNeverRewritesIt_APickWritesOnlyItsRow()
         {

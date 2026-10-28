@@ -74,6 +74,9 @@ namespace TileStories
         public float DiscSize { get; private set; }
         // How high the raised bump rises (or hangs, at Top)
         public float BumpHeight => Token(BumpToken);
+        // Half the bump's foot, and the corner the bump is held clear of (NavBarShapeRule.BumpX)
+        public float BumpHalf => Token(BumpHalfToken);
+        public float CornerRadius => NavBarShapeRule.Radius(NavBarRule.Floating(Settings), NavBarRule.Raised(Settings), BarHeight, Token(RaisedRadiusToken));
 
         private static readonly CustomStyleProperty<float> HeightToken = new("--ts-navbar-height");
         private static readonly CustomStyleProperty<float> CompactHeightToken = new("--ts-navbar-height-compact");
@@ -84,7 +87,7 @@ namespace TileStories
         private static readonly CustomStyleProperty<float> BumpHalfToken = new("--ts-navbar-bump-half");
         private static readonly CustomStyleProperty<float> RaisedRadiusToken = new("--ts-navbar-raised-radius");
         private static readonly CustomStyleProperty<float> RaisedDiscToken = new("--ts-navbar-disc-raised");
-        private static readonly CustomStyleProperty<float> DiscRiseToken = new("--ts-navbar-disc-rise");
+        private static readonly CustomStyleProperty<float> DiscGapToken = new("--ts-navbar-disc-gap");
         private static readonly CustomStyleProperty<float> FilledDiscToken = new("--ts-navbar-disc-filled");
 
         private readonly ElementPool<Item> _items;
@@ -97,7 +100,9 @@ namespace TileStories
 
         public NavBarView()
         {
-            Root = new VisualElement { name = "nav-bar" };
+            // - the root spans the bump's room and the bar: only the bar's band (the row) and the disc take a finger, the clear room above
+            //   the bar's edge is the card's
+            Root = new VisualElement { name = "nav-bar", pickingMode = PickingMode.Ignore };
             Root.AddToClassList("nav-bar");
             Surface = new VisualElement { name = "nav-bar-surface", pickingMode = PickingMode.Ignore };
             Surface.AddToClassList("nav-bar__surface");
@@ -113,9 +118,11 @@ namespace TileStories
             Underline = new VisualElement { name = "nav-bar-underline", pickingMode = PickingMode.Ignore };
             Underline.AddToClassList("nav-bar__underline");
             Row.Add(Underline);
-            // - the disc over everything: under Raised it rises past the bar's edge; a finger on it reaches the chosen group's button below
-            Disc = new VisualElement { name = "nav-bar-disc", pickingMode = PickingMode.Ignore };
+            // - the disc over everything: under Raised it rises past the bar's edge; a finger on it is a tap on the chosen group, as its
+            //   button below would be
+            Disc = new VisualElement { name = "nav-bar-disc" };
             Disc.AddToClassList("nav-bar__disc");
+            Disc.AddManipulator(new Clickable(() => Tap(ChosenIndex)));
             DiscIcon = CardIcons.Create();
             DiscIcon.AddToClassList("nav-bar__disc-icon");
             Disc.Add(DiscIcon);
@@ -127,8 +134,9 @@ namespace TileStories
             Row.RegisterCallback<GeometryChangedEvent>(_ => Place(false));
             // - the card's tokens resolve with its first layout: read them then; a new width redraws the path
             Root.RegisterCallback<GeometryChangedEvent>(_ => { if (BarHeight <= 0f) Refresh(); else Draw(); });
-            _slide = Root.schedule.Execute(SlideFrame).Every(16);
-            _slide.Pause();
+            // - a slide still under way when the bar is re-hosted (every bind takes it off its slot and puts it back) starts again on its new
+            //   panel: its scheduled frames belonged to the old one
+            Root.RegisterCallback<AttachToPanelEvent>(_ => { if (_sliding) RunSlide(); });
         }
 
         public void Bind(CardNavModel model, NavController nav, BlockBindContext context)
@@ -339,7 +347,7 @@ namespace TileStories
                 _slideFrom = Centre;
                 _slideStart = Clock();
                 _sliding = true;
-                _slide.Resume();
+                RunSlide();
             }
             Draw();
         }
@@ -354,10 +362,19 @@ namespace TileStories
             Draw();
         }
 
+        // The slide's frames, made fresh for each slide on the panel the bar sits on now: never ONE item kept paused across the re-hosts every
+        // bind makes (a frozen slide leaves the bump and the disc where it began -- the first group)
+        private void RunSlide()
+        {
+            _slide?.Pause();
+            _slide = Root.schedule.Execute(SlideFrame).Every(16);
+        }
+
         private void StopSlide()
         {
             _sliding = false;
             _slide?.Pause();
+            _slide = null;
             if (!float.IsNaN(CentreTarget)) Centre = CentreTarget;
         }
 
@@ -385,8 +402,10 @@ namespace TileStories
             {
                 Disc.style.left = Centre - DiscSize * 0.5f;
                 if (raised)
-                    // - rising out of the bump: its centre on the bar's edge less the rise (mirrored at Top: below the bar's foot)
-                    Disc.style.top = bottom ? Room - Token(DiscRiseToken) : BarHeight + Token(DiscRiseToken) - DiscSize;
+                    // - inside the bump: its top a ring of bar under the bump's peak (NavBarShapeRule.DiscTop; mirrored at Top: its foot that
+                    //   ring above the bump's lowest point)
+                    Disc.style.top = bottom ? NavBarShapeRule.DiscTop(Room, Token(BumpToken), Token(DiscGapToken))
+                        : Room + BarHeight - NavBarShapeRule.DiscTop(Room, Token(BumpToken), Token(DiscGapToken)) - DiscSize;
                 else
                 {
                     var icon = _items.Shown[ChosenIndex].Icon.layout;

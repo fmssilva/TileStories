@@ -306,6 +306,18 @@ namespace TileStories.Tests
             return Rect.MinMaxRect(view.xMin, top, view.xMax, Mathf.Max(top, bottom));
         }
 
+        // The part of the stack a visitor SEES bare: ReachableStack below the chrome band while it shows (_3.3 P2: past the hero the band
+        // behind the chrome row dissolves the blocks under it on purpose; a finger reaches through it -- it ignores the pointer -- an eye
+        // does not). Where a test measures what a block looks like
+        public static Rect VisibleStack(PoiCardSheetView sheet)
+        {
+            var reach = ReachableStack(sheet);
+            var band = sheet.ChromeBand;
+            if (band.resolvedStyle.display == DisplayStyle.None || band.resolvedStyle.opacity < 0.01f) return reach;
+            float top = Mathf.Max(reach.yMin, band.worldBound.yMax);
+            return Rect.MinMaxRect(reach.xMin, top, reach.xMax, Mathf.Max(top, reach.yMax));
+        }
+
         // Scroll an element of the card's stack to the middle of ReachableStack and prove it is there AND still: ScrollTo alone brings it only
         // just into the viewport, which can leave it under the floating header or strip, or behind the bottom area (_3.3 S4a); and setting the
         // offset does not stop a fling that is still running -- a finger put on a moving stack is the stack's (it stops the fling), never the
@@ -328,6 +340,19 @@ namespace TileStories.Tests
             Assert.IsTrue(ReachableStack(sheet).Contains(e.worldBound.center), "precondition: " + e.name + " is where a finger reaches: "
                 + e.worldBound + " in " + ReachableStack(sheet));
             Assert.AreEqual(3, still, "precondition: " + e.name + " holds still before the finger (no fling left running)");
+        }
+
+        // Every open section's motion done and held before a render: a Reveal under way finished (a section that has not entered stays
+        // hidden), the clocks frozen at this moment -- a Drift stands where it is, and a section entering later never turns in under a grab
+        // (an uncapped run draws GrabStill's frames faster than a Reveal's 1.4 s)
+        public static void HoldSectionsStill(PoiCardSheetView sheet)
+        {
+            double at = Time.realtimeSinceStartupAsDouble;
+            foreach (var section in sheet.Stack.Sheets.All)
+            {
+                section.Open.Finish();
+                section.Open.Clock = () => at;
+            }
         }
 
         // Wait until the stack stops moving (three frames unmoved): a released drag flings on, and a reading taken mid-fling is the

@@ -32,9 +32,10 @@ namespace TileStories.Editor.Tests
             var navigable = BlockRegistry.Shared.Families.Where(f => f.InNav).OrderBy(f => f.Order).Select(f => f.Key).ToList();
             var hosts = navigable.Where(f => !NavBarRule.DefaultJoins.ContainsKey(f)).ToList();
             CollectionAssert.AreEqual(hosts, items.Select(i => i.Key).ToList(), "one per family that joins no other, in order");
-            var builtIn = new[] { BuiltInFamilies.About, BuiltInFamilies.Media, BuiltInFamilies.Guides, BuiltInFamilies.Stories,
+            // - _3.3 P2 review (d): About, Stories, Media, Listen, Play, Visit
+            var builtIn = new[] { BuiltInFamilies.About, BuiltInFamilies.Stories, BuiltInFamilies.Media, BuiltInFamilies.Guides,
                 BuiltInFamilies.Play, BuiltInFamilies.Visit };
-            CollectionAssert.AreEqual(builtIn, items.Select(i => i.Key).Where(builtIn.Contains).ToList(), "the framework's six groups, in order");
+            CollectionAssert.AreEqual(builtIn, items.Select(i => i.Key).ToList(), "the framework's six groups, exactly and in order");
             CollectionAssert.AreEqual(new[] { BuiltInFamilies.Media, BuiltInFamilies.Ar }, items.Single(i => i.Key == BuiltInFamilies.Media).Families,
                 "AR's blocks show the point: in Media, after it");
             CollectionAssert.AreEqual(new[] { BuiltInFamilies.Play, BuiltInFamilies.Community }, items.Single(i => i.Key == BuiltInFamilies.Play).Families,

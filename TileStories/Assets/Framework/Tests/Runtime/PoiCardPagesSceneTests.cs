@@ -204,17 +204,17 @@ namespace TileStories.Tests
             yield return OpenFull(Lamp);
             Assert.AreEqual(CardOptions.LayoutPages, Sheet.Layout.Effective, "precondition: The Lamp is drawn in pages");
             Assert.IsTrue(Pager.IsOn && Sheet.Root.ClassListContains(CardPagerView.PagedClass), "the pager is on");
-            Assert.AreEqual(BuiltInNavElements.FamilyPager, Sheet.Slots.TopKey, "the top slot holds the Family Pager (the Top Bar is Text Tabs)");
             Assert.AreEqual(0, Page, "the first page shows first");
             AssertShowsOnly(0, "opened");
             Assert.Greater(Range, 100f, "precondition: the first page is taller than the viewport, so it really scrolls (range " + Range + ")");
 
             // - CLEARLY VERTICAL: the page scrolls; it never moves sideways and never turns
             float y0 = Scroll.scrollOffset.y;
-            var viewport = Scroll.contentViewport.worldBound;
-            var down = new Vector2(viewport.center.x, viewport.yMin + viewport.height * 0.8f);
+            // - inside the reach: the floating bar covers the viewport's foot
+            var reach = CardTestInput.ReachableStack(Sheet);
+            var down = new Vector2(reach.center.x, reach.yMin + reach.height * 0.8f);
             bool movedSideways = false;
-            yield return HandDrag(down, Line(Vector2.zero, new Vector2(0f, -viewport.height * 0.5f), 16), _ => movedSideways |= Pager.Offset != 0f);
+            yield return HandDrag(down, Line(Vector2.zero, new Vector2(0f, -reach.height * 0.5f), 16), _ => movedSideways |= Pager.Offset != 0f);
             Assert.Greater(Scroll.scrollOffset.y, y0 + 10f, "a vertical drag scrolled the page (" + y0 + " -> " + Scroll.scrollOffset.y + ")");
             Assert.IsFalse(movedSideways, "and the page never followed it sideways");
             Assert.AreEqual(0, Page, "nor turned");
@@ -363,8 +363,7 @@ namespace TileStories.Tests
             float least = 0f;
             yield return HandDrag(LeftPoint(), Line(Vector2.zero, new Vector2(Pager.PageWidth * 0.6f, 0f), 10), _ => least = Mathf.Max(least, Pager.Offset));
             Assert.AreEqual(Pager.PageWidth * 0.6f * SwipePageRule.EdgeResistance, least, 1f, "towards no page the first page only gives a fraction");
-            Assert.AreEqual(Visibility.Hidden, FamilyPager.Previous.resolvedStyle.visibility, "the first page offers no way back");
-            Assert.AreEqual(DisplayStyle.None, Pager.PeekBack.resolvedStyle.display, "and nothing peeks before it");
+            Assert.AreEqual(DisplayStyle.None, Pager.PeekBack.resolvedStyle.display, "nothing peeks before the first page");
             yield return Rested();
             Assert.AreEqual(0, Page, "the first page stays the first");
 
@@ -372,15 +371,14 @@ namespace TileStories.Tests
             yield return Rested();
             Assert.AreEqual(1, Page, "a long swipe still turns ONE page");
 
-            // - to the last page with real taps on the chevron, then try past it
+            // - to the last page with real swipes (one swipe, one page), then try past it
             for (int i = Page; i < count - 1; i++)
             {
-                yield return CardTestInput.Tap(FamilyPager.Next.panel, FamilyPager.Next.worldBound.center);
+                yield return HandDrag(EdgePoint(), Line(Vector2.zero, new Vector2(-Pager.PageWidth * 0.6f, 0f), 10));
                 yield return Rested();
             }
             Assert.AreEqual(count - 1, Page, "precondition: the last page");
-            Assert.AreEqual(Visibility.Hidden, FamilyPager.Next.resolvedStyle.visibility, "the last page offers no way on");
-            Assert.AreEqual(DisplayStyle.None, Pager.Peek.resolvedStyle.display, "and no next page peeks");
+            Assert.AreEqual(DisplayStyle.None, Pager.Peek.resolvedStyle.display, "no next page peeks after the last");
             int jumps = NavJumps.Count;
             yield return HandDrag(EdgePoint(), Line(Vector2.zero, new Vector2(-Pager.PageWidth * 0.6f, 0f), 10));
             yield return Rested();
@@ -391,6 +389,7 @@ namespace TileStories.Tests
         // ---------------- the Family Pager, the spy, other elements ----------------
 
         [UnityTest]
+        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator TheFamilyPager_NamesThePageShown_ItsChevronsTurnOnePage_AndTheNextPagePeeksAtTheEdge()
         {
             yield return UsePages();
@@ -446,6 +445,7 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
+        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator AJumpFromABottomBarSlot_TurnsToItsPage_AndLandsItsFirstBlock()
         {
             yield return UsePages(nav => nav.bottom = BuiltInNavElements.BottomBar);
@@ -502,8 +502,10 @@ namespace TileStories.Tests
             foreach (string key in Nav.Model.Sections[media].Targets)
                 Assert.AreEqual(0, Stack.HeldMediaOf(key), key + ": no file held while its page is left");
 
-            yield return CardTestInput.Tap(FamilyPager.Previous.panel, FamilyPager.Previous.worldBound.center);
+            // - a real swipe back to Media (to the right, from the page's left side)
+            yield return HandDrag(LeftPoint(), Line(Vector2.zero, new Vector2(Pager.PageWidth * 0.6f, 0f), 10));
             yield return Rested();
+            Assert.AreEqual(media, Page, "the swipe back turned to Media");
             CollectionAssert.Contains(Card.PreviewService.HeldKeys, "block_59", "back on Media: the slot is taken again");
         }
 
@@ -534,8 +536,7 @@ namespace TileStories.Tests
 
             var stage = Stack.BoundViews.OfType<ModelTurntableBlockView>().FirstOrDefault(v => v.Display == CardOptions.DisplayInline);
             Assert.IsNotNull(stage, "precondition: the Media page has the inline 3D stage");
-            Scroll.ScrollTo(stage.Frame);
-            yield return CardTestInput.Settle(0.4f);
+            yield return CardTestInput.IntoReach(Sheet, stage.Frame);
             float yaw = stage.State.Yaw;
             followed = false;
             yield return HandDrag(stage.Frame.worldBound.center, Line(Vector2.zero, new Vector2(-150f, 0f), 10), _ => followed |= Pager.Offset != 0f);
@@ -565,7 +566,6 @@ namespace TileStories.Tests
             Assert.AreEqual(DisplayStyle.None, Pager.Peek.resolvedStyle.display);
             foreach (string key in Nav.Model.Targets)
                 Assert.IsNotNull(Stack.ViewOfBlock(key), key + " drawn again in the one scroll");
-            Assert.AreEqual(BuiltInNavElements.TextTabs, Sheet.Slots.TopKey, "and the Top Bar the wall picked is back");
         }
 
         // ---------------- the arriving page (_3.2 step 15a, Part 1: the step 14 mid-swipe finding) ----------------
@@ -634,6 +634,7 @@ namespace TileStories.Tests
         // ---------------- what it looks like ----------------
 
         [UnityTest]
+        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator Renders_TheLampInPages_AtRest_MidSwipe_AndThePager_InEnglishAndPortuguese()
         {
             yield return UsePages();

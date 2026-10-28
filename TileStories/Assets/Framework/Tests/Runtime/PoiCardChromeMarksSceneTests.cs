@@ -70,6 +70,7 @@ namespace TileStories.Tests
                     yield return CardTestInput.Settle();
                 }
                 yield return CardTestInput.UntilStill(Sheet);
+                CardTestInput.HoldSectionsStill(Sheet);
                 bool onHero = Sheet.Root.ClassListContains(BlockStackView.BarsOnHeroClass);
                 // - the place is what it says: the marks over the picture at Half and Full at the top, off it at Peek and past the hero
                 Assert.AreEqual(place == Place.Half || place == Place.Full, onHero, "precondition: at " + place + " the marks are " + (onHero ? "" : "not ") + "over the hero");
@@ -144,6 +145,7 @@ namespace TileStories.Tests
             scroll.scrollOffset = new Vector2(0f, Header.HeroBottom() + 200f);
             yield return CardTestInput.Settle();
             yield return CardTestInput.UntilStill(Sheet);
+            CardTestInput.HoldSectionsStill(Sheet);
             Assert.IsFalse(Sheet.Root.ClassListContains(BlockStackView.BarsOnHeroClass), "precondition: past the hero");
 
             // - the band covers the whole chrome row: from the sheet's top to below the marks and the title
@@ -159,17 +161,16 @@ namespace TileStories.Tests
             if (fade)
             {
                 Assert.AreEqual(0f, band.resolvedStyle.borderBottomWidth, 0.001f, "Fade: no hairline, no edge");
-                // - the ramp's real alpha (card_top_fade.png, its source) at the row's lowest line, and at its foot
-                var ramp = new Texture2D(2, 2);
-                ramp.LoadImage(System.IO.File.ReadAllBytes("Assets/Framework/Runtime/UI/Screen/Cards/card_top_fade.png"));
+                // - the fade's own stops (the Look Kit's Fade the band draws: its source) at the row's lowest line, and at its foot
+                var stops = Sheet.TopFade.Options.Stops;
+                Assert.Greater(stops.Count, 1, "precondition: Fade draws a ramp");
                 float rowFoot = Mathf.Max(Sheet.CloseButton.worldBound.yMax, Sheet.Stack.HeaderSlot.worldBound.yMax) - row.yMin;
-                int rampRow = Mathf.Clamp(Mathf.FloorToInt(rowFoot / row.height * ramp.height), 0, ramp.height - 1);
-                float alpha = ramp.GetPixel(0, ramp.height - 1 - rampRow).a;
-                float footAlpha = ramp.GetPixel(0, 0).a;
-                Object.Destroy(ramp);
+                var tint = LookKit.FadeRule.ColourAt(stops, rowFoot);
+                float alpha = 1f;
+                float footAlpha = LookKit.FadeRule.ColourAt(stops, row.height, below: false).a;
                 Assert.Less(footAlpha, 0.02f, "the content dissolves under it: the ramp ends at nothing");
-                Assert.Greater(row.height, rowFoot + 24f, "...below the row, over a fade of its own");
-                var tint = band.resolvedStyle.unityBackgroundImageTintColor;
+                Assert.Greater(row.height, rowFoot + 20f, "...below the row, over a fade of its own");
+                Assert.LessOrEqual(row.height, rowFoot + 28f, "...a SHORT one (_3.3 P2 review (b): no wide white area): " + (row.height - rowFoot) + " pt under the row");
                 Color Over(Color under)
                 {
                     var t = tint.linear;

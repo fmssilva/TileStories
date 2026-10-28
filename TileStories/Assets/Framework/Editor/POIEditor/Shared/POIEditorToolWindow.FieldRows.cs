@@ -75,7 +75,10 @@ namespace TileStories.Editor
             int idx = Array.IndexOf(options, current);
             if (idx < 0) idx = 0;
             using (new FieldLabelWidthCompensationScope(extraIndentPixels))
+            {
                 idx = EditorGUILayout.Popup(label, idx, labels, GUILayout.Width(FieldWidth(rowWidth, helpText)), GUILayout.ExpandWidth(false));
+                ReportValueColumn(label);
+            }
             DrawRowHelp(label, helpText);
             EditorRowEnd();
             return idx >= 0 ? options[idx] : current;
@@ -103,6 +106,15 @@ namespace TileStories.Editor
         // Test seam: reports a slider or toggle row's rect (label, rect) on Repaint, so a test can drag / click the real control.
         // Null in production, so zero cost (same idea as TableCellRectProbe).
         internal static Action<string, Rect> FieldRowRectProbe;
+
+        // Report the last labelled control's VALUE column (right of the label column; called inside its label-width scope): where its field
+        // starts, what a test compares between rows that must line up
+        internal static void ReportValueColumn(string label)
+        {
+            if (FieldRowRectProbe == null || Event.current.type != EventType.Repaint) return;
+            Rect r = GUILayoutUtility.GetLastRect();
+            FieldRowRectProbe(label, new Rect(r.x + EditorGUIUtility.labelWidth, r.y, r.width - EditorGUIUtility.labelWidth, r.height));
+        }
 
         internal static float DrawSliderField(string label, float value, float min, float max, string helpText = "", float extraIndentPixels = 0f)
         {

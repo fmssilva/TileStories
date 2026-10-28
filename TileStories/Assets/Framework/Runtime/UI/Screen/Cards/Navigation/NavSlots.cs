@@ -121,6 +121,8 @@ namespace TileStories
             var host = bottom ? Bottom : Top;
             host.Add(Bar.Root);
             host.style.display = DisplayStyle.Flex;
+            // - the host is clear and full width (the bar draws its own margins): its gutters and the gap under the bar are the card's
+            host.pickingMode = PickingMode.Ignore;
             Top.EnableInClassList(TopBarClass, !bottom);
             Bottom.EnableInClassList(BottomBarClass, bottom);
             _sheetRoot.EnableInClassList(SheetBarBottomClass, bottom);
@@ -149,6 +151,8 @@ namespace TileStories
             }
             Top.RemoveFromClassList(TopBarClass);
             Bottom.RemoveFromClassList(BottomBarClass);
+            Top.pickingMode = PickingMode.Position;
+            Bottom.pickingMode = PickingMode.Position;
             _sheetRoot.RemoveFromClassList(SheetBarBottomClass);
             if (TopKey != null) _pools[TopKey].ReleaseAll();
             if (BottomKey != null) _pools[BottomKey].ReleaseAll();

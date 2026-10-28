@@ -44,8 +44,7 @@ namespace TileStories.Tests
             StringAssert.Contains("Torres de menagem", first.text, "the Portuguese words shown for the glossary entry ([[Torres de menagem|keep]])");
             StringAssert.Contains("coroam a colina", first.text);
 
-            Sheet.Stack.Scroll.ScrollTo(plain.Root);
-            yield return CardTestInput.Settle(0.2f);
+            yield return CardTestInput.IntoReach(Sheet, first);
             var onWord = new Vector2(first.worldBound.xMin + 12f, first.worldBound.yMin + first.resolvedStyle.fontSize * 0.6f);
             yield return CardTestInput.Tap(first.panel, onWord);
             Assert.AreEqual("keep", plain.Body.OpenTerm, "a real tap on the linked word");
@@ -83,9 +82,7 @@ namespace TileStories.Tests
             Assert.AreEqual("Toque para ver", flip.Hint.text);
             Assert.IsFalse(flip.Revealed);
 
-            Sheet.Stack.Scroll.ScrollTo(fun[0].Root);
-            yield return CardTestInput.Settle(0.2f);
-            yield return CardTestInput.Tap(flip.Box.panel, flip.Box.worldBound.center);
+            yield return CardTestInput.TapInReach(Sheet, flip.Box);
             yield return null;
             Assert.IsTrue(flip.Revealed, "a real tap on the card reveals the fact");
             StringAssert.Contains("H\u00e1 pav\u00f5es nos jardins do castelo", flip.Text.Paragraphs[0].text);

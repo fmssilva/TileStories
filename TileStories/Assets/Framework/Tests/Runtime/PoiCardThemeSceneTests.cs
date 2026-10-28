@@ -44,6 +44,8 @@ namespace TileStories.Tests
                     Assert.AreEqual(m == mode, root.ClassListContains(ThemeController.ModeClassPrefix + m), "a screen's root in " + mode + ": " + root.name);
         }
 
+        private const string OpenGround = "--ts-sheet-open";
+
         [UnityTest]
         public IEnumerator TheAppOpensLight_ARealTapOnDark_RecoloursWithoutARebuild_TheScrollKept_AndThePickIsRemembered()
         {
@@ -51,9 +53,11 @@ namespace TileStories.Tests
             yield return OpenFull("lamp");
             AssertEveryScreenIn(CardOptions.ModeLight);
             Color lightSurface = default, darkSurface = default;
-            Assert.IsTrue(ThemeController.TryResolverFor(Sheet.Stack.Scroll, out var light) && light.TryColour("--ts-surface", out lightSurface), "precondition: under the theme");
-            var slot = Sheet.Stack.Scroll.contentContainer.Query(className: BlockFrame.FramedClass).First();
-            Assert.AreEqual(lightSurface, slot.resolvedStyle.backgroundColor, "precondition: a block wears the light surface");
+            // - the Open look (the default): the blocks lie open on the stack's own ground
+            Assert.IsTrue(ThemeController.TryResolverFor(Sheet.Stack.Scroll, out var light) && light.TryColour(OpenGround, out lightSurface), "precondition: under the theme");
+            var slot = Sheet.Root.Q(className: BlockStackView.OpenStackClass);
+            Assert.IsNotNull(slot, "precondition: the card shows the Open look");
+            Assert.AreEqual(lightSurface, slot.resolvedStyle.backgroundColor, "precondition: the open ground in the light colour");
 
             Sheet.Stack.Scroll.scrollOffset = new Vector2(0f, 900f);
             yield return CardTestInput.Settle();
@@ -70,8 +74,8 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle();
 
             AssertEveryScreenIn(CardOptions.ModeDark);
-            Assert.IsTrue(ThemeController.TryResolverFor(Sheet.Stack.Scroll, out var darkTheme) && darkTheme.TryColour("--ts-surface", out darkSurface), "under the dark theme");
-            Assert.AreEqual(darkSurface, slot.resolvedStyle.backgroundColor, "the same block re-coloured to the dark surface");
+            Assert.IsTrue(ThemeController.TryResolverFor(Sheet.Stack.Scroll, out var darkTheme) && darkTheme.TryColour(OpenGround, out darkSurface), "under the dark theme");
+            Assert.AreEqual(darkSurface, slot.resolvedStyle.backgroundColor, "the same ground re-coloured to the dark one");
             Assert.AreNotEqual(lightSurface, darkSurface);
             CollectionAssert.AreEqual(viewsBefore, Sheet.Stack.BoundViews.ToList(), "nothing was rebuilt: the very same views");
             Assert.AreEqual(scrolled, Sheet.Stack.Scroll.scrollOffset.y, 0.5f, "the scroll stayed where the reader was");

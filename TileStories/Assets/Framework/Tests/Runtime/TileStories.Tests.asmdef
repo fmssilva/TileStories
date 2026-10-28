@@ -6,6 +6,7 @@
     ],
     "references": [
         "TileStories",
+        "TileStories.LookKit",
         "nunit",
         "UnityEngine.UI",
         "Unity.InputSystem"

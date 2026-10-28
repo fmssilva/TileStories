@@ -18,6 +18,17 @@ namespace TileStories.Tests
     // Editor numbers rank variants on one machine; a phone's cost is the device check (S9). Written to TestEvidence/Light/cost.txt.
     public class CardLightMeasureSceneTests : SearchSceneFixture
     {
+        // This fixture's subject is the CARDS look (the family glass sheets, the block frame, the moving light): the framework's default is
+        // Open since _3.3 P3, so the look measured here is pinned to Cards after SearchSceneFixture's own pins
+        [UnitySetUp]
+        public IEnumerator PinTheCardsLook()
+        {
+            var config = ConfigCopy();
+            config.card_settings.container.blocks = CardOptions.BlocksCards;
+            Session.ApplyCardSettings(config);
+            yield return CardTestInput.Settle(0.3f);
+        }
+
         private const int Frames = 60;
         private PoiCardSheetView Sheet => Card.Sheet;
         private BlockStackView Stack => Sheet.Stack;

@@ -130,6 +130,9 @@ namespace TileStories
         public const string CompactSlotClass = "card-block-slot--compact";
         // The class a slot heading wears over a block that draws its own title (a composed kind): hidden, its words kept for navigation
         public const string OwnTitleClass = "card-block-heading--own-title";
+        // Look Blocks = Open (_3.3 P3): a scroll block sits open on its section (no frame), the stack on the dense open ground
+        public const string OpenSlotClass = "card-block-slot--open";
+        public const string OpenStackClass = "poi-card__stack--open";
 
         // Whether the pinned bar shows the card's title now (HeroRule.BarShowsTitle: at Peek, or the hero's title scrolled away)
         public bool BarShowsTitle { get; private set; }
@@ -231,6 +234,20 @@ namespace TileStories
                 top += e.layout.y;
             }
             return float.NaN;
+        }
+
+        // Whether the scroll's places are final: the stop shows the blocks, and the hero (a card with a picture hero) stands at the height the
+        // sheet gave it -- the sheet sets it after the first layout pass, and until then every block sits a hero's height too high (an open
+        // section far down the card read as "in view" right after a bind)
+        public bool LaidOut
+        {
+            get
+            {
+                if (_context?.Host != null && !SheetStopRule.RevealsBlocks(_context.Host.Stop)) return false;
+                var hero = HeaderView;
+                if (hero == null || !hero.HasHero || !hero.HasPicture) return true;
+                return !float.IsNaN(hero.HeroHeight) && hero.HeroPart.layout.height >= hero.HeroHeight - 1f;
+            }
         }
 
         // Where the scroll rests for a jump to this slot (its top meets the viewport's top): the first block a sheet shows lands on the
@@ -408,6 +425,8 @@ namespace TileStories
             var state = context.State;
             IsRevealed = key => _revealedHere.Contains(key) || (state?.Seen(poiId, key) ?? false);
             var navigation = context.Settings?.navigation;
+            bool open = SectionStyleRule.IsOpen(context.Settings?.container);
+            Scroll.EnableInClassList(OpenStackClass, open);
             Light.SetReduceMotion(context.ReduceMotion);
             // - the scroll's slots go into their section sheets once they are all bound (Sheets.Build), in stack order
             var scrollSlots = new List<VisualElement>();
@@ -435,7 +454,8 @@ namespace TileStories
                 var parent = header ? HeaderSlot
                     : entry.Definition.IsFooter(entry.Variant) ? Footer : Scroll.contentContainer;
                 // - a block of the scroll sits in its frame; the bar and the footer are chrome, not blocks
-                BlockFrame.Apply(b.Slot.Root, inScroll, entry.Instance?.emphasis);
+                BlockFrame.Apply(b.Slot.Root, inScroll && !open, entry.Instance?.emphasis);
+                b.Slot.Root.EnableInClassList(OpenSlotClass, inScroll && open);
                 if (inScroll)
                 {
                     scrollSlots.Add(b.Slot.Root);

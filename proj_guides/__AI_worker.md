@@ -13,46 +13,49 @@
 So start by reading them all. 
 
 
-## `And now: Premium P2 -- the Navigation Bar to v5, and the card's top after the hero`
 
-GATE: `git push` if the branch is ahead of origin (report how many commits). Confirm the tree compiles (zero error CS) BEFORE any
-run (40-testing 4.2.5 "Compile clean before every run"); if not, STOP and report. Check the two SDF fonts (`Oswald Bold SDF.asset`,
-`Roboto-Bold SDF.asset`): `git checkout --` them if modified. Leave `IPCE/` alone. Ask about Unity's place with 4.2.3's a / b / c
-actions, word for word. Never disable a tool's safety check.
-BASELINE: HEAD = the P1 commit a3a54d6 (+ a rules commit). No baseline run.
-THE DEVELOPER IS REVIEWING THE CARD COMPONENT BY COMPONENT (hero -> Navigation Bar -> story): this block runs ONLY the Navigation
-Bar's and the chrome's tests + full EditMode; everything else only has to compile. No CORE, no FULL.
-Spec (read ALL lines): `_3.3_POI_Card_Styles.md` "S4 review, third round" (Navigation Bar options + defaults, Chrome, Section
-separation), the prototype `_3.3.1_Prototype/Premium_v5.dc.html` (the Navigation Bar markup, CSS and its `renderVals()` logic:
-the raised path, the ball, sizes, motion -- the reference, not code to port), `_3.3` R11 (UI Toolkit mechanisms).
-WORKER MODEL: Opus-class -- a new drawn shape (the raised bump) and the visitor's main way round the card.
+vCONTINUATION -- P3a (finish the open sections green; commit point). Read proj_guides/__curr_plan_tracker.md "HANDOFF" first.
+GATE: as before (MCP, push state, SDF fonts, compile clean before every run, Unity c).
+Developer's answers to your 3 questions (defaults unless the developer overrides): Intensity cap 0.20 + the -text eyebrow colours = OK;
+the group column overrides only the Start, and Drift does NOT move the Start row (Drift = dividers only; the Start reveals once, then
+rests); the 17 pt body = a theme-level token --ts-size-body-open (Theme asset -> generated USS), no exception in the theme guard.
+PART 1 -- the HANDOFF reds 1-5, in that order (layout writes from callbacks; Reveal gated on a laid-out stack; the Sections fixture's
+own bugs; smaller strokes for RealDragsToEachGroupInTurn; finish motion before GrabStill). Re-run Sections + NavBar + Hero + ChromeMarks.
+PART 2 -- attribute the 10 un-attributed fixtures WITHOUT a checkout or stash: run them once with the card look forced to Cards (one
+temporary switch, reverted after). Green under Cards = P3's Open default: a test about blocks/pages that is not about the look pins
+Cards in its setup; a test about what the visitor sees is updated to Open. Still red under Cards = P2's: the old Top Bar elements go
+under TestSkips.OldNavigationElements, anything else is fixed. Write the split in the tracker.
+PART 3 -- renders I looked at: (a) follows_bottom_light_3: the Listen / Play Start tile rows show only 2 tiles at the right edge --
+the full row must show once revealed (test: every tile of a revealed Start row is visible, alpha 1, inside the card width);
+(b) zoom the Bottom bar in follows_bottom_*: the Raised bump must be a visible cut-out around the disc, as at Top -- if it is a disc on a
+flat bar, fix it and add a pixel test (the bar's top edge rises at the chosen item's centre).
+PART 4 -- --ts-size-body-open = 17 and used inside open sections; 7:1 still measured.
+PART 5 -- PlayMode BLOCK (all 17 fixtures) green, full EditMode green, LOOK at the renders (start_*, divider_*, follows_*, contrast_*)
+and say what you saw; the Editor capture of Detail Card > Sections in the dark skin. CORE stays deferred to the end of the review.
+Report; the Architect commits ("Add the Look Kit and open card sections with v6's Sections options"). PART 5 Local Shade and PART 9 FAB
+go to P3b.
 
-PART 1 -- the Navigation Bar's options = v5's Tweaks "Navigation Bar", in that order, in `CardNavBarSettings` + NavBarRule +
-NavBarView: Position (Bottom / Top -- Top sits under the chrome row; the old "under_title" value loads as Top), Shape (Floating /
-Full Width), Fill (Solid / Glass / Clear -- the shadow ONLY under Solid; Clear = transparent over the hero, solid after it), Indicator
-(Raised / Pill / Underline / None), Chosen Icon (Plain / Filled = an accent disc at the icon's own place, with any indicator), Labels
-(Icon And Text / Icon / Text / Text On The Chosen), Chosen Colour (Accent / Ink; keep Group if it exists), Bold Chosen Icon, Show
-(Always / After The Hero), Hide While Scrolling. Old configs load unchanged.
-DEFAULTS (framework AND the LivingRoom wall): Bar on; Bottom, Floating, Solid, Raised, Filled, Icon And Text, Accent, Bold on,
-Always, Hide off. With the bar on, the old Top / Bottom / Menu / Floating / Edge elements default to none (kept, not deleted).
-PART 2 -- Raised: the bar's edge bends into a bump under the chosen group and its icon rides up in a filled accent disc; both
-slide to the next group with a small overshoot; at Top the bump hangs down. Draw it as one path (Painter2D in
-generateVisualContent -- check the API with unity_reflect), animated by the bump's x; no image per state. Over the hero a
-non-solid bar turns white-on-dark-glass. Labels >= 7:1 on every fill, over the hero and after it.
-PART 3 -- the Editor component "Navigation Bar" mirrors PART 1 exactly (same names, same order, same defaults) + the Bar Groups
-table complete: one row per group -- shown, order, name per language, icon, chosen icon, colour, families; the 6 groups by default;
-add / remove a group. Messages name things, never ids.
-PART 4 -- the card's top after the hero (the P1 render painting_dark_AfterTheHero.png): block text shows behind the X and the
-title, and the title has a pill outline. The chrome row after the hero gets a dense glass band (v5: light glass, title centred,
-a hairline at its foot) -- no block text visible behind it, marks and title >= 7:1. Find and remove the title's outline.
-TESTS (real taps, real renders): every option changes what the visitor sees (one case per option value, not the whole matrix + the
-pairs that interact: Raised x Top, Fill x over-the-hero); a real tap on a group jumps there and the indicator / bump follows the
-scroll; the Editor table edits reach the running card (live sync); old config loads. Renders light + dark, Bottom and Top, over the
-hero and after it, saved in TestEvidence/Premium/P2/; Editor captures in the dark skin. Look at each one yourself.
-TEST PLAN: BLOCK only -- full EditMode + NavBarRuleTests, NavigationBarEditorTabTests, PoiCardNavBarSceneTests,
-PoiCardChromeMarksSceneTests, PoiCardHeroSceneTests and any new fixture of this block, by name.
-REPORT (6.4): what changed, the renders' paths, the counts, REVIEW QUESTIONS for the developer with the renders to look at.
-Do not commit.
+
+»» e ok às 3 recomendações
+
+»» e na pratica isto foi a tarefa anterior, agora é sim para fazer isto:
+vCONTINUATION 2 -- P3a (close it green; commit point). Read proj_guides/__curr_plan_tracker.md "HANDOFF" first.
+GATE: as before (MCP, push state: origin has be33c64 "Name the model and the effort level in every brief" -- pull nothing, it is only
+__AI_Architect.md; SDF fonts; compile clean before every run; Unity c).
+WORKER MODEL: Opus + effort High (real-input reds across fixtures, layout/timing bugs).
+NEW RULE for the review phase: BLOCK = full EditMode + ALL 17 card PlayMode fixtures, every block (P2 shipped reds in fixtures it did
+not run). Record this in __curr_plan_tracker.md and .clinerules/40-testing.md next to the BLOCK tier (one line).
+PART 1 -- ThemeFrame and SectionSheet by name: read the messages, fix.
+PART 2 -- the P2 real-input reds (PoiCardScene 16, NavRails 4, CardLight 1): first suspect the floating bottom Navigation Bar under the
+tap / drag point. Fix the TEST's aim where the bar now legitimately covers it (aim at the visible part, as a visitor would); fix the
+CODE where the bar wrongly eats input meant for the card. Say which, per test.
+PART 3 -- the old navigation elements: Layout 5, Pages 8, NavBlock 1, Painting 3 -> [Ignore(TestSkips.OldNavigationElements)], each
+checked to be really about the replaced elements (anything else is fixed, not skipped).
+PART 4 -- confirm the 5 "P3's" (PoiCardScene 2, Painting 2, Theme 1) after the fixes; fix what stays red. Re-run the edited Reveal test.
+PART 5 -- BLOCK: full EditMode + all 17 fixtures, green. LOOK at the renders after the fixes (start_*, divider_*, follows_* zoomed
+on the bump, contrast_*) and say what you saw; the Editor capture of Detail Card > Sections in the dark skin (Unity b for it).
+_3.3 build log + _Test_Suite doc. Report with ONE commit message covering P3a (the Architect commits). Then STOP: P3b (Local Shade +
+FAB) is the next brief.
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

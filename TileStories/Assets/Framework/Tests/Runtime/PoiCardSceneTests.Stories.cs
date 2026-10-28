@@ -19,10 +19,7 @@ namespace TileStories.Tests
             Assert.AreEqual("Cap\u00edtulo 1 de 3", story.Counter.text, "the framework's Portuguese counter");
             Assert.AreEqual("O cerco", story.Title.text);
             Assert.AreEqual("Seguinte", story.Next.Q<Label>().text);
-            Sheet.Stack.Scroll.ScrollTo(story.Root);
-            yield return CardTestInput.Settle(0.2f);
-
-            yield return CardTestInput.Tap(story.Next.panel, story.Next.worldBound.center);
+            yield return CardTestInput.TapInReach(Sheet, story.Next);
             yield return null;
             Assert.AreEqual("Cap\u00edtulo 2 de 3", story.Counter.text, "a real tap on Seguinte");
             Assert.AreEqual("O pal\u00e1cio", story.Title.text);
@@ -55,12 +52,7 @@ namespace TileStories.Tests
                 {
                     if (chapter > 0)
                     {
-                        if (!Sheet.Stack.Scroll.contentViewport.worldBound.Contains(story.Next.worldBound.center))
-                        {
-                            Sheet.Stack.Scroll.ScrollTo(story.Next);
-                            yield return CardTestInput.Settle(0.2f);
-                        }
-                        yield return CardTestInput.Tap(story.Next.panel, story.Next.worldBound.center);
+                        yield return CardTestInput.TapInReach(Sheet, story.Next);
                         yield return CardTestInput.Settle(0.1f);
                     }
                     Assert.AreEqual(chapter, story.Index, language + ": a real tap on Next turned to chapter " + (chapter + 1));

@@ -213,8 +213,8 @@ namespace TileStories.Tests
                 Assert.AreEqual(SectionUnderTheSpyLine(), Nav.Current, "offset " + Scroll.scrollOffset.y.ToString("F0") + ": the section on screen");
             }
 
-            // - a Text Tabs tap (the default Top Bar) lands its family's first block the same way with the grid as without it: a fresh card at
-            //   Full each time, a real tap on the tab of every family
+            // - a tap on the Navigation Bar (the card's navigation by default) lands its group's first block the same way with the grid as
+            //   without it: a fresh card at Full each time, a real tap on every group
             foreach (string auto in new[] { CardOptions.NavNone, BuiltInBlocks.NavIconGridKind })
             {
                 yield return UseAuto(auto);
@@ -222,18 +222,15 @@ namespace TileStories.Tests
                 yield return CardTestInput.Settle();
                 yield return Open(Lamp, SheetStopRule.Stop.Full);
                 Assert.AreEqual(auto != CardOptions.NavNone, GridSlot != null, "precondition: the grid is " + (auto == CardOptions.NavNone ? "out" : "in"));
-                var tabs = (TabsNavView)Sheet.Slots.TopView;
-                Assert.IsNotNull(tabs, "precondition: the default Top Bar is drawn at Full");
-                // - _3.3 S4a: the strip is chrome and waits for the hero -- read just past it before tapping a tab
+                Assert.AreEqual(NavBarView.ElementKey, Sheet.Slots.BottomKey, "precondition: the default Navigation Bar is drawn at Full");
+                var bar = Sheet.Slots.Bar;
                 yield return CardTestInput.PastTheHero(Sheet);
-                Assert.IsTrue(Sheet.Chrome.TopShown, "precondition: past the hero the strip shows");
-                for (int target = 1; target < tabs.Tabs.Count; target++)
+                for (int target = 1; target < bar.Items.Count; target++)
                 {
-                    tabs.Strip.Show(tabs.Tabs[target].Button);
-                    yield return CardTestInput.Settle(0.3f);
-                    yield return TouchTap(tabs.Tabs[target].Button.worldBound.center);
+                    Assert.IsFalse(Sheet.BottomArea.ClassListContains(CardChromeView.BottomHiddenClass), "precondition: the bar shows before group " + target + "'s tap");
+                    yield return TouchTap(bar.Items[target].Button.worldBound.center);
                     yield return Landed();
-                    AssertLanded(Model.Sections[target].Targets[0], Model.Sections[target].Key + " from its tab (" + auto + ")");
+                    AssertLanded(bar.Entries[target].FirstTarget, bar.Entries[target].FirstTarget + " from its group (" + auto + ")");
                 }
             }
         }

@@ -18,6 +18,17 @@ namespace TileStories.Tests
     // sampled point; the glare render (35 % white, P0 S2c) of the card in both modes.
     public class ThemeFrameSceneTests : SearchSceneFixture
     {
+        // This fixture's subject is the CARDS look (the family glass sheets, the block frame, the moving light): the framework's default is
+        // Open since _3.3 P3, so the look measured here is pinned to Cards after SearchSceneFixture's own pins
+        [UnitySetUp]
+        public IEnumerator PinTheCardsLook()
+        {
+            var config = ConfigCopy();
+            config.card_settings.container.blocks = CardOptions.BlocksCards;
+            Session.ApplyCardSettings(config);
+            yield return CardTestInput.Settle(0.3f);
+        }
+
         // The P0 S5 camera stand-in: the shared gallery backdrop, a sunny azulejo wall
         private const string PhotoPath = "Assets/Dev/MarkerGallery/Backdrops/backdrop.png";
         // How far outside / inside a block's edge a sample is taken: past the 1 px outer line and the rim band (two points of the panel)
@@ -167,8 +178,9 @@ namespace TileStories.Tests
             var shot = ScreenCapture.CaptureScreenshotAsTexture();
             try
             {
-                // - "in view" = not under the floating header, strip or bottom area that draw over the stack since _3.3 S4a
-                var viewport = CardTestInput.ReachableStack(Card.Sheet);
+                // - "in view" = not under the floating header, strip or bottom area that draw over the stack since _3.3 S4a, nor under the
+                //   chrome band past the hero (_3.3 P2: it dissolves the content under the chrome row on purpose)
+                var viewport = CardTestInput.VisibleStack(Card.Sheet);
                 var slots = FramedSlots().Where(s => viewport.Contains(s.worldBound.min) && viewport.Contains(s.worldBound.max)).ToList();
                 Assert.Greater(slots.Count, 0, "precondition: at least one whole block is in view to measure, clear of the chrome: " + viewport);
                 float worst = float.MaxValue; string worstAt = "";

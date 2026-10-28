@@ -18,6 +18,17 @@ namespace TileStories.Tests
     // Frame sequences (every 0.5 s of clock over 6 s) and the move on scroll are saved under TestEvidence/Light/ for the visual check.
     public class CardLightSceneTests : SearchSceneFixture
     {
+        // This fixture's subject is the CARDS look (the family glass sheets, the block frame, the moving light): the framework's default is
+        // Open since _3.3 P3, so the look measured here is pinned to Cards after SearchSceneFixture's own pins
+        [UnitySetUp]
+        public IEnumerator PinTheCardsLook()
+        {
+            var config = ConfigCopy();
+            config.card_settings.container.blocks = CardOptions.BlocksCards;
+            Session.ApplyCardSettings(config);
+            yield return CardTestInput.Settle(0.3f);
+        }
+
         private PoiCardSheetView Sheet => Card.Sheet;
         private BlockStackView Stack => Sheet.Stack;
         private CardLight Light => Stack.Light;
@@ -248,9 +259,10 @@ namespace TileStories.Tests
             {
                 VisualElement before = Stack.RimLight.LitSlot;
                 float offsetBefore = Stack.Scroll.scrollOffset.y;
-                var viewport = Stack.Scroll.contentViewport.worldBound;
-                // - a real finger stroke up the viewport (a phone's ScrollView scrolls by touch)
-                yield return CardTestInput.TouchDrag(Stack.Scroll.panel, new Vector2(viewport.center.x, viewport.yMax - 40f), new Vector2(0f, -viewport.height * 0.35f));
+                // - a real finger stroke up the part of the stack a finger reaches (a phone's ScrollView scrolls by touch; the floating bar
+                //   covers the viewport's foot)
+                var reach = CardTestInput.ReachableStack(Sheet);
+                yield return CardTestInput.TouchDrag(Stack.Scroll.panel, new Vector2(reach.center.x, reach.yMax - 40f), new Vector2(0f, -reach.height * 0.35f));
                 Assert.Greater(Stack.Scroll.scrollOffset.y, offsetBefore + 20f, "precondition: drag " + drag + " really scrolled the stack (" + offsetBefore + " -> " + Stack.Scroll.scrollOffset.y + ")");
                 // - the frame the light changes block: it fades out where it was, never jumps
                 if (Stack.RimLight.LitSlot != before && Stack.RimLight.Layer.parent == before && Stack.RimLight.Layer.resolvedStyle.opacity < 1f) sawFade = true;

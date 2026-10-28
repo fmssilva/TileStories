@@ -97,6 +97,8 @@ failures does not.
 - **BLOCK -- every block, after each change:** compile, the full EditMode suite, then the PlayMode fixtures of the changed code
   (the feature's own + every fixture that greps for the changed type, method or config key), named one by one in `test_names`;
   a few minutes. A block closes on this tier unless its TEST PLAN says CORE or FULL.
+  In a review phase (a domain's look reworked block after block) BLOCK's PlayMode half is ALL 17 card fixtures, every block: a
+  changed shared look breaks fixtures no grep names.
 - **CORE -- `category_names: ["Core"]`, PlayMode then EditMode, ~18 min, background:** every 3rd-4th block, and at the end of a block on SHARED GROUND
   (the definition below).
 - **FULL -- everything, <= 90 min, background:** every ~12 blocks with the maintenance, before a domain close-out, a device

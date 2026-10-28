@@ -86,9 +86,9 @@ namespace TileStories.Editor.Tests
             BuiltInFamilies.Register(registry);
 
             CollectionAssert.AreEqual(
-                new[] { "about", "media", "guides", "stories", "ar", "play", "visit", "community", "navigation", "meta" },
+                new[] { "about", "stories", "media", "ar", "guides", "play", "community", "visit", "navigation", "meta" },
                 registry.Families.Select(f => f.Key), "the ten families that have kinds today, in canvas order");
-            CollectionAssert.AreEqual(new[] { 10, 20, 30, 40, 50, 60, 70, 80, 85, 90 }, registry.Families.Select(f => f.Order),
+            CollectionAssert.AreEqual(new[] { 10, 20, 30, 35, 40, 60, 65, 70, 85, 90 }, registry.Families.Select(f => f.Order),
                 "gaps of ten, so an app can slot its own family between any two; navigation (step 11a) at 85, between community and meta");
 
             CollectionAssert.AreEqual(new[] { "meta" }, registry.Families.Where(f => f.AtEnd).Select(f => f.Key),

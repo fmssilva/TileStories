@@ -160,6 +160,7 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
+        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator TheWallsOwnNavigation_IsTheOneOnThePaintingsCard()
         {
             yield return Open(Painting, SheetStopRule.Stop.Full);
@@ -174,6 +175,7 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
+        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator ARealTapOnEveryTab_LandsItsSection_AtTheViewportTop_OneJumpEach_AndTheTabIsMarked()
         {
             yield return Open(Painting, SheetStopRule.Stop.Full);
@@ -205,6 +207,7 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
+        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator ARealDragOfThePaintingsCard_MovesTheMark_ToTheSectionOnScreen()
         {
             yield return Open(Painting, SheetStopRule.Stop.Full);

@@ -4,7 +4,8 @@
     "references": [
         "Unity.InputSystem",
         "Immersal.Core",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "TileStories.LookKit"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

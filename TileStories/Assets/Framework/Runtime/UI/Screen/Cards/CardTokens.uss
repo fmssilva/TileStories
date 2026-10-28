@@ -140,22 +140,45 @@
     /* the chrome band after the hero (PoiCard.uss): the grab row and the bar row (--ts-bar-top + --ts-bar-height) and a little under them,
        down to where a Top bar / strip floats (--ts-nav-float-top) */
     --ts-chrome-band-height: 54px;
-    /* the FADE band (Top Band = Fade, v6): solid through the chrome row (56 of card_top_fade.png's 104 rows), then fading to nothing */
-    --ts-top-fade-height: 104px;
+    /* the FADE band (Top Band = Fade, _3.3 P2 review (b)): solid through the chrome row's foot (a plain number, PoiCardSheetView.TopFade),
+       then a short fade to nothing -- no wide white area */
+    --ts-top-fade-height: 76px;
+    --ts-top-fade-solid: 52;
+    /* OPEN sections (_3.3 P3, v6's Sections): the side gutter (and minus it: a picture's bleed to the screen's edges), the section's top over its
+       eyebrow (the first's a little less), its foot, the space over a block after the first, the eyebrow and its 28 x 3 rule,
+       the start's tiles (24 with 1 pt joints, top corners 24) and wave, the gap a drawn start keeps under a divider, the ornament's tile and lines */
+    --ts-open-gutter: 24px;
+    --ts-open-bleed: -24px;
+    --ts-open-section-top: 48px;
+    --ts-open-section-top-first: 40px;
+    --ts-open-section-foot: 56px;
+    --ts-open-block-gap: 24px;
+    --ts-open-eyebrow: 12px;
+    --ts-open-eyebrow-tracking: 1.9px;
+    --ts-open-rule-width: 28px;
+    --ts-open-rule-height: 3px;
+    --ts-open-tile: 24px;
+    --ts-open-tile-radius: 24px;
+    --ts-open-wave: 30px;
+    --ts-open-divider-gap: 40px;
+    --ts-open-ornament-tile: 22px;
+    --ts-open-ornament-line: 72px;
     /* The Navigation Bar (_3.3 S4 third round, v5's numbers): plain numbers (panel units) NavBarView reads on this card root for the ONE
        path it paints (NavBarShapeRule) -- the bar's height with words and without, a floating bar's inset from the sides and its gap above
        the screen's foot, the room above the edge the raised bump and its disc rise into, the bump's height and half its foot, a floating
-       raised bar's corner (any other floating bar is a stadium), the raised disc and its rise above the edge, Filled's disc at the icon */
+       raised bar's corner (any other floating bar is a stadium), the raised disc and the ring of bar between its top and the bump's peak,
+       Filled's disc at the icon. The bump is WIDER than its disc (_3.3 P3: 76 x 18 round a 40 disc) and the disc sits INSIDE it, a
+       6 pt ring of bar round its top: a cut-out around the disc, never a disc on a flat bar (_3.3 P3a) */
     --ts-navbar-height: 62;
     --ts-navbar-height-compact: 52;
     --ts-navbar-inset: 16;
     --ts-navbar-gap: 20;
     --ts-navbar-room: 26;
-    --ts-navbar-bump: 16;
-    --ts-navbar-bump-half: 25;
+    --ts-navbar-bump: 18;
+    --ts-navbar-bump-half: 38;
     --ts-navbar-raised-radius: 18;
-    --ts-navbar-disc-raised: 44;
-    --ts-navbar-disc-rise: 22;
+    --ts-navbar-disc-raised: 40;
+    --ts-navbar-disc-gap: 6;
     --ts-navbar-disc-filled: 32;
     /* what a bar floating at the bottom takes off the stack's foot and the hero's words: its gap + height + room (20 + 62 + 26), so the
        last block and the words stay clear of it and of the raised disc; a plain number for the hero's words (PoiCardSheetView), a length
@@ -167,7 +190,7 @@
     /* ...and its lengths: the items' side padding, an icon (and the raised disc's, Filled's), the words under an icon and words alone */
     --ts-navbar-pad: 10px;
     --ts-navbar-icon: 22px;
-    --ts-navbar-disc-icon-raised: 22px;
+    --ts-navbar-disc-icon-raised: 20px;
     --ts-navbar-disc-icon-filled: 18px;
     --ts-navbar-label: 11px;
     --ts-navbar-label-text: 14px;

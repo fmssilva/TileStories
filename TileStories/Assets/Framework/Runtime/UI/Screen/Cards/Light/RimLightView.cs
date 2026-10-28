@@ -41,8 +41,8 @@ namespace TileStories
         public void Update()
         {
             var scroll = _stack.Scroll;
-            // - the same scroll moment decides which sheets draw their glass (only those near the view cost anything)
-            _stack.Sheets.ShowLightsNear(scroll.scrollOffset.y, scroll.contentViewport.layout.height);
+            // - the same scroll moment decides which sheets draw their glass (only those near the view cost anything) and which open sections entered
+            _stack.Sheets.OnScrolled(scroll.scrollOffset.y, scroll.contentViewport.layout.height, _stack.LaidOut);
             _blocks.Clear();
             _candidates.Clear();
             foreach (var sheet in _stack.Sheets.All)

@@ -4,7 +4,8 @@
 // configurable bar of the card's groups (card_settings.navigation.bar, NavBarView). Its rows mirror v5's Tweaks "Navigation Bar" -- same names,
 // same order, same defaults (NavigationBarRows): Enabled, Position, Shape, Fill, Indicator, Chosen Icon, Labels, Chosen Colour, Bold Chosen
 // Icon, Show, Hide While Scrolling -- then the Bar Groups table: one folding row per group (Shown, its number and name, ^ / v, delete),
-// opened: its Name per language, Icon, Chosen Icon, Colour and Families; "+ Add group", "Reset To The Families", and the warnings (a family
+// opened: its Name per language, Icon, Chosen Icon, Colour, Families and Section Style (its sections' Start on an open card, CardSections.cs);
+// "+ Add group", "Reset To The Families", and the warnings (a family
 // in no group, too many groups for a phone)
 // While the bar is on, the section's Elements rows are hidden (the card draws the bar instead; their values are kept). Drawing never writes:
 // a wall with no Bar Groups rows sees one group per family, and its first edit of the table writes them all (MaterializeBarItems).
@@ -139,6 +140,7 @@ namespace TileStories.Editor
                 string colour = DrawPopupField("Colour", item.color ?? "", colourKeys, colourLabels, CardNavBarGroupColourHelp, IndentLevel1);
                 if (colour != (item.color ?? "")) MaterializeBarItems(nav)[row].color = colour;
                 DrawBarGroupFamilies(nav, item, row);
+                DrawBarGroupSectionStyle(nav, item, row);
             }
 
             DrawEditorRow(out float addRow, out _, IndentLevel1);
@@ -182,9 +184,15 @@ namespace TileStories.Editor
                 if (item.families != null && item.families.Contains(families[f].Key)) mask |= 1 << f;
             }
             DrawEditorRow(out float rowWidth, out _, IndentLevel1);
-            EditorGUILayout.PrefixLabel("Families");
-            int picked = EditorGUILayout.MaskField(mask, names, GUILayout.Width(Mathf.Max(40f, rowWidth - EditorGUIUtility.labelWidth - 36f)),
-                GUILayout.ExpandWidth(false));
+            int picked;
+            // - the labelled field the Icon / Colour rows above draw (DrawPopupField), with the same label column under the indent: a bare
+            //   PrefixLabel kept the full label width and set the dropdown ~15 pt right of theirs
+            using (new FieldLabelWidthCompensationScope(IndentLevel1))
+            {
+                picked = EditorGUILayout.MaskField("Families", mask, names, GUILayout.Width(FieldWidth(rowWidth, CardNavBarGroupFamiliesHelp)),
+                    GUILayout.ExpandWidth(false));
+                ReportValueColumn("Families");
+            }
             ReportTableCellRect("Bar group families", row);
             HelpInfoButton.Draw("Families", CardNavBarGroupFamiliesHelp);
             EditorRowEnd();

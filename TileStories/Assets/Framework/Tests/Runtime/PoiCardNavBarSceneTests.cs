@@ -187,6 +187,156 @@ namespace TileStories.Tests
             Assert.AreEqual(Bar.Items[Bar.ChosenIndex].Button.worldBound.center.x, Bar.Disc.worldBound.center.x, 1f, "the disc followed it");
         }
 
+        // The bar's clear room is the card's: its host is full width and the bar draws its own margins, so the gutters beside the bar, the gap
+        // under it and the room above its edge show the card -- a finger there lands on the card (a real stroke scrolls the stack), while the
+        // bar's band and its disc still take their taps (the disc = the chosen group)
+        [UnityTest]
+        public IEnumerator TheBarsClearRoom_IsTheCards_ARealStrokeThereScrollsTheStack_TheBandAndTheDiscStillTakeTheirTaps()
+        {
+            yield return Open();
+            yield return PastTheHero();
+            Assert.IsTrue(BottomShown, "precondition: the bar shows");
+            var panel = Sheet.Layer.panel;
+            var band = Band;
+            int chosen = Bar.ChosenIndex;
+            Assert.GreaterOrEqual(chosen, 0, "precondition: a group is chosen");
+            // - above the group furthest from the chosen one: no bump rises there
+            int far = chosen < Bar.Items.Count / 2 ? Bar.Items.Count - 1 : 0;
+            var spots = new (string name, Vector2 at)[]
+            {
+                ("the gutter left of the bar", new Vector2(band.xMin - 8f, band.center.y)),
+                ("the gutter right of the bar", new Vector2(band.xMax + 8f, band.center.y)),
+                ("the room above the bar's edge", new Vector2(Bar.Items[far].Button.worldBound.center.x, band.yMin - 12f)),
+                ("the gap under the bar", new Vector2(band.center.x, band.yMax + 8f)),
+            };
+            foreach (var (name, at) in spots)
+            {
+                Assert.IsTrue(Scroll.contentViewport.worldBound.Contains(at), "precondition: " + name + " " + at + " lies over the stack " + Scroll.contentViewport.worldBound);
+                var picked = panel.Pick(at);
+                Assert.IsTrue(picked == Scroll.contentContainer || Scroll.contentContainer.Contains(picked), name + ": a finger lands on the card, not on " + picked?.name);
+                // - a real stroke started there, up the card: the stack scrolls
+                float before = Scroll.scrollOffset.y;
+                yield return CardTestInput.TouchDrag(panel, at, new Vector2(0f, -120f));
+                yield return CardTestInput.UntilStill(Sheet);
+                Assert.Greater(Scroll.scrollOffset.y, before + 20f, name + ": a real stroke from there scrolled the stack (" + before + " -> " + Scroll.scrollOffset.y + ")");
+                yield return PastTheHero();
+                yield return CardTestInput.Settle(0.6f);
+            }
+
+            // - the band: a group's button under the finger
+            var button = Bar.Items[far].Button;
+            var onBand = panel.Pick(button.worldBound.center);
+            Assert.IsTrue(onBand == button || button.Contains(onBand), "the band: the group's own button takes the finger, not " + onBand?.name);
+            // - the disc where it rises past the band's edge: a real tap there is a tap on the chosen group
+            chosen = Bar.ChosenIndex;
+            var discTop = new Vector2(Bar.Disc.worldBound.center.x, (Bar.Disc.worldBound.yMin + band.yMin) * 0.5f);
+            Assert.Less(Bar.Disc.worldBound.yMin, band.yMin - 4f, "precondition: the disc rises past the band's edge");
+            var onDisc = panel.Pick(discTop);
+            Assert.IsTrue(onDisc == Bar.Disc || Bar.Disc.Contains(onDisc), "the disc above the band takes the finger, not " + onDisc?.name);
+            string first = Bar.Entries[chosen].FirstTarget;
+            yield return CardTestInput.Tap(panel, discTop);
+            yield return CardTestInput.Settle(1f);
+            yield return UntilSettled();
+            Assert.AreEqual(Stack.LandingTop(Stack.SlotOfBlock(first)), Scroll.scrollOffset.y, 2f, "a real tap on the disc jumps to the chosen group's first block");
+        }
+
+        // The P2 review's bug (_3.3 fourth round > P2 review (c)): the bump and the disc follow the chosen group on every scroll, not only the
+        // first. The card is pushed live twice before reading (a live push rebinds: the bar is taken off its slot and put back), then real
+        // finger strokes walk it down group by group; at each new group, once the slide rests, the bump's peak is where the rule puts it for
+        // that group's centre and the disc sits on the group. Bottom and Top, light and dark
+        [UnityTest]
+        public IEnumerator RealDragsToEachGroupInTurn_TheBumpAndTheDiscFollowTheChosenGroup(
+            [Values(CardOptions.NavBarBottom, CardOptions.NavBarTop)] string position, [Values(CardOptions.ModeLight, CardOptions.ModeDark)] string mode)
+        {
+            yield return Open(b => b.position = position);
+            yield return Push(b => b.position = position);
+            ThemeController.SetMode(mode);
+            yield return CardTestInput.Settle(0.2f);
+            Assert.AreEqual(mode, ThemeController.CurrentMode, "precondition: the card shows " + mode);
+            Assert.AreEqual(0, Bar.ChosenIndex, "precondition: at the top of the card the first group is chosen (" + position + ")");
+            var visited = new List<int> { 0 };
+            var checkedAtRest = new HashSet<int>();
+            for (int stroke = 0; stroke < 100 && Bar.ChosenIndex < Bar.Items.Count - 1; stroke++)
+            {
+                // - short strokes, and the chosen group read on every frame of the stroke and of its fling: a short section (one
+                //   block) passed within a stroke was chosen on the way -- a reading only at rest missed it
+                var reach = CardTestInput.ReachableStack(Sheet);
+                var drag = CardTestInput.TouchDrag(Scroll.panel, new Vector2(reach.center.x, reach.yMax - 40f), new Vector2(0f, -reach.height * 0.15f));
+                while (drag.MoveNext())
+                {
+                    if (!visited.Contains(Bar.ChosenIndex)) visited.Add(Bar.ChosenIndex);
+                    yield return drag.Current;
+                }
+                var rest = CardTestInput.UntilStill(Sheet);
+                while (rest.MoveNext())
+                {
+                    if (!visited.Contains(Bar.ChosenIndex)) visited.Add(Bar.ChosenIndex);
+                    yield return rest.Current;
+                }
+                if (!visited.Contains(Bar.ChosenIndex)) visited.Add(Bar.ChosenIndex);
+                // - the indicators judged on each group the strokes come to REST on (once each)
+                if (!checkedAtRest.Add(Bar.ChosenIndex)) continue;
+                yield return UntilSettled();
+                var button = Bar.Items[Bar.ChosenIndex].Button;
+                float centre = button.worldBound.center.x - Bar.Root.worldBound.xMin;
+                string what = $"{position} {mode} '{Bar.Items[Bar.ChosenIndex].Label.text}'";
+                Assert.AreEqual(centre, Bar.Centre, 0.5f, what + ": the indicators' centre came to the chosen group");
+                Assert.AreEqual(button.worldBound.center.x, Bar.Disc.worldBound.center.x, 1f, what + ": the disc sits on the chosen group");
+                float peak = Bar.PaintedPath[2].P3.x;
+                float expected = NavBarShapeRule.BumpX(centre, Bar.Root.layout.width, Bar.CornerRadius, Bar.BumpHalf);
+                Assert.AreEqual(expected, peak, 0.5f, what + ": the bump's peak is drawn under the chosen group (held clear of the corners)");
+                yield return Save($"follows_{position}_{mode}_{Bar.ChosenIndex}", "Premium/P3");
+            }
+            visited.Sort();
+            CollectionAssert.AreEqual(Enumerable.Range(0, Bar.Items.Count).ToList(), visited,
+                $"{position} {mode}: real strokes down the card chose every group in turn");
+            Assert.GreaterOrEqual(checkedAtRest.Count, Bar.Items.Count - 1, $"{position} {mode}: the indicators judged at rest on almost every group (" + checkedAtRest.Count + ")");
+        }
+
+        // _3.3 P3a: Raised is a CUT-OUT round the disc on the render, Bottom and Top -- at the chosen group's centre the bar's edge rises (the
+        // bar's fill shows in the ring between the disc and the bump's peak, the hero beyond the peak), while well beside the bump the edge
+        // stays flat (the hero shows where the ring is over the bump). Read on the solid default bar over the hero (its fill opaque, the
+        // picture behind it never the bar's colour)
+        [UnityTest]
+        public IEnumerator TheRaisedBump_IsACutOutRoundTheDisc_TheEdgeRisesAtTheChosenGroup_OnTheRender([Values("bottom", "top")] string position)
+        {
+            yield return Open(b => b.position = position);
+            Assert.IsTrue(Bar.OverHero, "precondition: the bar lies on the hero's picture");
+            Assert.AreEqual(DisplayStyle.Flex, Bar.Disc.resolvedStyle.display, "precondition: the raised disc");
+            bool bottom = position == CardOptions.NavBarBottom;
+            var box = Bar.Surface.worldBound;
+            float edge = bottom ? Bar.Room : Bar.BarHeight, rise = bottom ? -1f : 1f;
+            float cx = box.xMin + Bar.Centre;
+            float peak = box.yMin + edge + rise * Bar.BumpHeight;
+            var disc = Bar.Disc.worldBound;
+            float discEnd = bottom ? disc.yMin : disc.yMax;
+            Assert.AreEqual(cx, disc.center.x, 1f, "precondition: the disc on the chosen group");
+            float ring = Mathf.Abs(discEnd - peak);
+            Assert.GreaterOrEqual(ring, 4f, "the disc sits a ring of bar inside the bump's peak (" + ring + " pt)");
+            Texture2D shot = null;
+            yield return ThemePixelSet.GrabStill("raised_cutout_" + position, null, r => shot = r);
+            try
+            {
+                var origin = RuntimePanelUtils.ScreenToPanel(Bar.Root.panel, Vector2.zero);
+                float unit = ThemePixelSet.PanelUnitsPerPixel(Bar.Root);
+                Color At(float x, float y) => shot.GetPixel(Mathf.RoundToInt((x - origin.x) / unit), shot.height - 1 - Mathf.RoundToInt((y - origin.y) / unit));
+                float Off(Color a, Color b) => ((Vector4)a - (Vector4)b).magnitude;
+                var fill = Bar.PaintedFill;
+                // - in the ring, half way between the bump's peak and the disc: the bar's own fill
+                var inRing = At(cx, (peak + discEnd) * 0.5f);
+                Assert.Less(Off(inRing, fill), 0.04f, position + ": the bar's fill in the ring over the disc " + (Color32)inRing + " (fill " + (Color32)fill + ")");
+                // - 3 pt beyond the peak: no bar (the hero)
+                var beyond = At(cx, peak + rise * 3f);
+                Assert.Greater(Off(beyond, fill), 0.04f, position + ": beyond the bump's peak the bar ends " + (Color32)beyond);
+                // - the same height, well beside the bump (its foot plus 20): the edge is flat there, the ring's height is the hero's
+                float side = Bar.Centre > box.width * 0.5f ? cx - Bar.BumpHalf - 20f : cx + Bar.BumpHalf + 20f;
+                var flat = At(side, (peak + discEnd) * 0.5f);
+                Assert.Greater(Off(flat, fill), 0.04f, position + ": beside the bump the edge stays flat " + (Color32)flat);
+                System.IO.File.WriteAllBytes(TestEvidence.PathFor("Premium/P3", "raised_cutout_" + position + ".png"), shot.EncodeToPNG());
+            }
+            finally { Object.Destroy(shot); }
+        }
+
         // One case per option value: what each value draws, read off the running card
         private static IEnumerable<string> OptionValues() => new[]
         {
@@ -399,7 +549,9 @@ namespace TileStories.Tests
             yield return PastTheHero();
             Assert.AreEqual(Bar.BarHeight + Bar.BumpHeight, Lowest, 0.01f, "the path's lowest point is the bump, its height below the bar's foot");
             Assert.AreEqual(0f, Highest, 0.01f, "...its top edge straight");
-            Assert.AreEqual(Band.yMax, Bar.Disc.worldBound.center.y, 1f, "the disc hangs on the bar's foot, in the bump");
+            float gap = CardTestInput.TokenPx("--ts-navbar-disc-gap");
+            Assert.AreEqual(Band.yMax + Bar.BumpHeight - gap, Bar.Disc.worldBound.yMax, 1f, "the disc hangs in the bump, its foot a ring of bar above the bump's lowest point");
+            Assert.Greater(Bar.Disc.worldBound.yMax, Band.yMax + 4f, "...below the bar's foot");
             Assert.AreEqual(Bar.Items[Bar.ChosenIndex].Button.worldBound.center.x, Bar.Disc.worldBound.center.x, 1f, "...under the chosen group");
             yield return Save("raised_top_light_AfterTheHero");
         }
@@ -497,12 +649,12 @@ namespace TileStories.Tests
         }
 
         // The card as the visitor sees it now -> TestEvidence/Premium/P2/<name>.png
-        private IEnumerator Save(string name)
+        private IEnumerator Save(string name, string domain = Domain)
         {
             Texture2D shot = null;
             yield return ThemePixelSet.GrabStill(name, null, r => shot = r);
             if (shot == null) yield break;
-            System.IO.File.WriteAllBytes(TestEvidence.PathFor(Domain, name + ".png"), shot.EncodeToPNG());
+            System.IO.File.WriteAllBytes(TestEvidence.PathFor(domain, name + ".png"), shot.EncodeToPNG());
             Object.Destroy(shot);
         }
     }

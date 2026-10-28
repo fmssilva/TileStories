@@ -55,6 +55,38 @@ namespace TileStories
         // looks and no content. A block made from one COPIES its rows (a preset: nothing stays linked); the framework's built-in templates
         // ship as Editor code beside them. Empty = none of the wall's own
         public List<BlockTemplateData> block_templates = new();
+        // The card's sections (_3.3 fourth round, v6's Tweaks "Sections"; Detail Card > Sections): how each section of an OPEN card begins,
+        // what stands between two of them, their colour, how strong it is and how it moves. Under Look Cards (container.blocks) none of it
+        // draws. An old config loads with v6's defaults
+        public CardSectionSettings sections = new();
+    }
+
+    // The Sections options (v6's Tweaks "Sections", same names, order and defaults): every choice a CardOptions.Section* key, an unknown value
+    // read as its default (SectionStyleRule). A Bar Groups row's Section Style overrides Start for its group (the nearest level wins)
+    [Serializable]
+    public class CardSectionSettings
+    {
+        // Start: how a section begins -- "plain" | "bands" (every other section on a faint tint) | "fade" (its colour fading down) | "wave"
+        // (a soft swell, then the fade) | "tiles" (the default: a row of azulejo tiles, rounded top corners, then the fade)
+        public string start = CardOptions.SectionStartTiles;
+        // Divider: what stands between two sections -- "none" (the default) | "hairline" | "ornament" (one tile between two lines) |
+        // "azulejo" (a strip of tiles) | "mosaic" (woven tesserae) | "image" (the developer's own tileable strip, Divider Image)
+        public string divider = CardOptions.SectionDividerNone;
+        // Divider Image: a tileable strip picture, a path under the card's Media Folder (read only with Divider Image)
+        public string divider_image = "";
+        // Colour: the tint a section begins in -- "group" (the default: its Navigation Bar group's colour) | "accent" | "neutral"
+        public string colour = CardOptions.SectionColourGroup;
+        // Intensity: how strong the tint is where the section begins (IntensityMin..IntensityMax; v6's 0.30 is out of reach: 7:1 for the
+        // words over it, measured)
+        public float intensity = 0.12f;
+        // Motion: "still" | "reveal" (the default: the tiles turn in one after the other as the section enters the view) | "drift" (the
+        // same turn, then the divider's tiles or strip slide slowly sideways; the start rests). The card's Reduce Motion always shows them still
+        public string motion = CardOptions.SectionMotionReveal;
+        // Vary: "same" (the default: every section begins with Start) | "by_group" (Fade, Wave, Tiles in turn, group by group)
+        public string vary = CardOptions.SectionVarySame;
+
+        public const float IntensityMin = 0.04f;
+        public const float IntensityMax = 0.20f;
     }
 
     // One block template of the wall (_3.3 R14.4): a PRESET -- "+ Add block" from it copies its rows into the point's new block, and the
@@ -244,6 +276,9 @@ namespace TileStories
         public string color = "";
         // The families (FamilyDefinition keys) whose blocks the group leads to: a tap lands on the first of them on the card
         public List<string> families = new();
+        // Section Style: how this group's sections begin on an open card (a Sections Start: plain / bands / fade / wave / tiles); "" = the
+        // card's (Detail Card > Sections)
+        public string section_style = "";
     }
 
     // The developer-only demo card: which POI's card opens on its own, and at which stop
@@ -288,6 +323,9 @@ namespace TileStories
         // sheet's own colour, opaque through the row, then fading to nothing -- no edge) | "glass" (a dense glass band with a hairline at its
         // foot); CardOptions.TopBands. An old config loads as fade
         public string top_band = CardOptions.TopBandFade;
+        // Blocks (v6's Look): "open" (the default: sections open on the sheet -- no frames, each block its own heading, pictures edge to edge,
+        // a hairline between blocks; Detail Card > Sections styles them) | "cards" (each family on its glass sheet, every block in its frame)
+        public string blocks = CardOptions.BlocksOpen;
         // A tap on empty camera space closes the card (and clears the selection)
         public bool dismiss_on_tap_outside = true;
         // Audio started in the card keeps playing in a mini-player after the card closes (Tier 4)
@@ -427,6 +465,44 @@ namespace TileStories
         public const string TopBandGlass = "glass";
         public static readonly string[] TopBands = { TopBandFade, TopBandGlass };
         public static readonly string[] TopBandLabels = { "Fade", "Glass" };
+
+        // Blocks (CardContainerSettings.blocks, v6's Look) and the Editor's words; the first is the default
+        public const string BlocksOpen = "open";
+        public const string BlocksCards = "cards";
+        public static readonly string[] Blocks = { BlocksOpen, BlocksCards };
+        public static readonly string[] BlockLabels = { "Open", "Cards" };
+
+        // The Sections options (CardSectionSettings, v6's Tweaks "Sections") and the Editor's words, each list in v6's order
+        public const string SectionStartPlain = "plain";
+        public const string SectionStartBands = "bands";
+        public const string SectionStartFade = "fade";
+        public const string SectionStartWave = "wave";
+        public const string SectionStartTiles = "tiles";
+        public static readonly string[] SectionStarts = { SectionStartPlain, SectionStartBands, SectionStartFade, SectionStartWave, SectionStartTiles };
+        public static readonly string[] SectionStartLabels = { "Plain", "Bands", "Fade", "Wave", "Tiles" };
+        public const string SectionDividerNone = "none";
+        public const string SectionDividerHairline = "hairline";
+        public const string SectionDividerOrnament = "ornament";
+        public const string SectionDividerAzulejo = "azulejo";
+        public const string SectionDividerMosaic = "mosaic";
+        public const string SectionDividerImage = "image";
+        public static readonly string[] SectionDividers =
+            { SectionDividerNone, SectionDividerHairline, SectionDividerOrnament, SectionDividerAzulejo, SectionDividerMosaic, SectionDividerImage };
+        public static readonly string[] SectionDividerLabels = { "None", "Hairline", "Ornament", "Azulejo", "Mosaic", "Image" };
+        public const string SectionColourGroup = "group";
+        public const string SectionColourAccent = "accent";
+        public const string SectionColourNeutral = "neutral";
+        public static readonly string[] SectionColours = { SectionColourGroup, SectionColourAccent, SectionColourNeutral };
+        public static readonly string[] SectionColourLabels = { "Group", "Accent", "Neutral" };
+        public const string SectionMotionStill = "still";
+        public const string SectionMotionReveal = "reveal";
+        public const string SectionMotionDrift = "drift";
+        public static readonly string[] SectionMotions = { SectionMotionStill, SectionMotionReveal, SectionMotionDrift };
+        public static readonly string[] SectionMotionLabels = { "Still", "Reveal", "Drift" };
+        public const string SectionVarySame = "same";
+        public const string SectionVaryByGroup = "by_group";
+        public static readonly string[] SectionVaries = { SectionVarySame, SectionVaryByGroup };
+        public static readonly string[] SectionVaryLabels = { "Same", "By Group" };
 
         // The Navigation Bar's choices (CardNavBarSettings, _3.3 S4 third round = v5's Tweaks) and the Editor's words for them, each list
         // in v5's order; an unknown value reads as the option's default (NavBarRule)

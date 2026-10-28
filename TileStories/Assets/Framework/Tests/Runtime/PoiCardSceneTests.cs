@@ -568,12 +568,10 @@ namespace TileStories.Tests
             yield break;
         }
 
-        // Scroll `target` into view, then a real tap on its centre (a block taller than what shows: the visitor scrolls first)
+        // Scroll `target` where a finger reaches it (not under the chrome row or the floating bar), then a real tap on its centre
         private IEnumerator ScrollAndTap(VisualElement target)
         {
-            Sheet.Stack.Scroll.ScrollTo(target);
-            yield return CardTestInput.Settle(0.2f);
-            yield return CardTestInput.Tap(target.panel, target.worldBound.center);
+            yield return CardTestInput.TapInReach(Sheet, target);
             yield return null;
         }
 

@@ -138,8 +138,9 @@
 
 /* The chrome band (_3.3 S4 third round, v6): what the whole chrome row -- the grab row, the X, the title, settings -- sits on wherever the
    bars are not on the hero's picture (Peek over the camera, a plate header, the blocks scrolling under); the card's Top Band picks it
-   (PoiCardSheetView). FADE, the default: the sheet's own colour, solid through the row, then fading to nothing (card_top_fade.png's alpha
-   ramp, tinted --ts-top-fade) -- the content dissolves under it, no edge, no blur. No block text reads behind the marks and the title,
+   (PoiCardSheetView). FADE, the default: the sheet's own colour, solid through the row, then fading to nothing over a short fade
+   (PoiCardSheetView.TopFade: the Look Kit's Fade in --ts-top-fade, --ts-top-fade-solid / -height) -- the content dissolves under it, no
+   edge, no blur. No block text reads behind the marks and the title,
    which keep 7:1 (PoiCardChromeMarksSceneTests). Gone over the picture */
 .poi-card__chrome-band {
     position: absolute;
@@ -147,9 +148,6 @@
     right: 0;
     top: 0;
     height: var(--ts-top-fade-height);
-    background-image: url("card_top_fade.png");
-    -unity-background-scale-mode: stretch-to-fill;
-    -unity-background-image-tint-color: var(--ts-top-fade);
     border-top-left-radius: var(--ts-radius-l);
     border-top-right-radius: var(--ts-radius-l);
     opacity: 1;
@@ -160,7 +158,6 @@
 /* GLASS (Top Band = Glass): a dense glass band as tall as the row, a hairline at its foot */
 .poi-card__chrome-band--glass {
     height: var(--ts-chrome-band-height);
-    background-image: none;
     background-color: var(--ts-chrome-band);
     border-bottom-width: var(--ts-line-width);
     border-color: var(--ts-hair);
@@ -930,4 +927,147 @@
 /* Reduce motion: the bottom area jumps */
 .poi-card--chrome-instant .poi-card__bottom {
     transition-duration: 0s;
+}
+
+/* ---- OPEN sections (_3.3 fourth round, v6's Sections; Look Blocks = Open: SectionSheets + OpenSectionView) ----
+   No glass, no frame, no opener: the stack on the dense open ground; each section its edge (divider, start), its tinted ground (the Look
+   Kit's Fade, painted inline), its eyebrow, then its blocks open -- the side gutter v6's 24, a hairline and space between two blocks.
+   Off an open sheet the open parts never draw */
+.poi-card__stack--open {
+    background-image: none;
+    background-color: var(--ts-sheet-open);
+}
+
+.card-open-section__ground,
+.card-open-section__edge,
+.card-open-section__eyebrow {
+    display: none;
+}
+
+.card-section--open {
+    padding: 0 0 var(--ts-open-section-foot) 0;
+    margin-top: 0;
+    border-radius: 0;
+}
+
+.card-section--open > .card-section__shadow,
+.card-section--open > .card-section__light,
+.card-section--open > .card-section__edge,
+.card-section--open > .card-section-opener {
+    display: none;
+}
+
+.card-section--open > .card-open-section__ground {
+    display: flex;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.card-section--open > .card-open-section__edge {
+    display: flex;
+    flex-direction: column;
+}
+
+.card-section--open > .card-open-section__eyebrow {
+    display: flex;
+    margin: var(--ts-open-section-top) var(--ts-open-gutter) 0 var(--ts-open-gutter);
+}
+
+.card-section--open-first > .card-open-section__eyebrow {
+    margin-top: var(--ts-open-section-top-first);
+}
+
+.card-open-section__divider--hairline {
+    height: var(--ts-line-width);
+    margin: 0 var(--ts-open-gutter);
+}
+
+.card-open-section__divider--ornament {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: var(--ts-space-1) 0 var(--ts-space-2) 0;
+}
+
+.card-open-section__divider-line {
+    width: var(--ts-open-ornament-line);
+    height: var(--ts-line-width);
+    margin: 0 var(--ts-space-3);
+}
+
+.card-open-section__divider-tiles {
+    height: var(--ts-open-tile);
+    flex-grow: 1;
+}
+
+.card-open-section__divider--ornament > .card-open-section__divider-tiles {
+    width: var(--ts-open-ornament-tile);
+    height: var(--ts-open-ornament-tile);
+    flex-grow: 0;
+}
+
+.card-open-section__divider-strip {
+    flex-grow: 1;
+}
+
+.card-open-section__gap {
+    height: var(--ts-open-divider-gap);
+}
+
+.card-open-section__start-tiles {
+    height: var(--ts-open-tile);
+    overflow: hidden;
+    border-top-left-radius: var(--ts-open-tile-radius);
+    border-top-right-radius: var(--ts-open-tile-radius);
+}
+
+.card-open-section__start-tiles-row {
+    flex-grow: 1;
+}
+
+.card-open-section__start-wave {
+    height: var(--ts-open-wave);
+}
+
+.card-open-section__rule {
+    width: var(--ts-open-rule-width);
+    height: var(--ts-open-rule-height);
+    border-radius: var(--ts-open-rule-height);
+    margin-bottom: var(--ts-space-3);
+}
+
+.card-open-section__name {
+    font-size: var(--ts-open-eyebrow);
+    -unity-font-style: bold;
+    letter-spacing: var(--ts-open-eyebrow-tracking);
+    margin: 0 0 var(--ts-space-3) 0;
+    padding: 0;
+    white-space: normal;
+}
+
+.card-section--open > .card-block-slot--open {
+    margin: 0 var(--ts-open-gutter) var(--ts-block-gap) var(--ts-open-gutter);
+}
+
+.card-section--open > .card-block-slot--follows {
+    border-top-width: var(--ts-line-width);
+    border-color: var(--ts-hair);
+    padding-top: var(--ts-open-block-gap);
+}
+
+/* the body inside an open section: v6's 17 pt prose (the theme's --ts-size-body-open; three classes, so a block sheet's own paragraph rule
+   never undoes it), the lede keeping its own size; a composed block's paragraph keeps its row's Size option (Components.uss, four classes) */
+.card-section--open > .card-block-slot--open .card-text__paragraph {
+    font-size: var(--ts-size-body-open);
+}
+
+.card-section--open > .card-block-slot--open .card-text__lede {
+    font-size: var(--ts-size-lede);
+}
+.card-block-slot--open .card-block-bleed {
+    margin-left: var(--ts-open-bleed);
+    margin-right: var(--ts-open-bleed);
 }

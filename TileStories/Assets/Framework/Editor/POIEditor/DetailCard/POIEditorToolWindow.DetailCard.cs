@@ -45,6 +45,7 @@ namespace TileStories.Editor
             if (_config == null) return;
             _config.card_settings ??= new CardSettings();
             _showCardContainer = DrawFramedFoldout(ref _showCardContainer, DrawCardContainerSection, "Card Container", CardContainerSectionColor);
+            _showCardSections = DrawFramedFoldout(ref _showCardSections, DrawCardSectionsSection, "Sections", CardSectionsSectionColor);
             _showCardNavigation = DrawFramedFoldout(ref _showCardNavigation, DrawCardNavigationSection, "Navigation", CardNavigationSectionColor);
             _showCardBlockLibrary = DrawFramedFoldout(ref _showCardBlockLibrary, DrawBlockLibrarySection, "Block Library", BlockLibrarySectionColor);
             _showCardComponents = DrawFramedFoldout(ref _showCardComponents, DrawCardComponentsSection, "Card Components", CardComponentsSectionColor);
@@ -71,6 +72,7 @@ namespace TileStories.Editor
                     CardContainerSettings.HalfMaxRatioMax, CardHalfHeightHelp);
                 c.full_height = DrawPopupField("Full Height", c.full_height, CardOptions.FullHeights, CardOptions.FullHeightLabels, CardFullHeightHelp);
                 c.top_band = DrawPopupField("Top Band", c.top_band, CardOptions.TopBands, CardOptions.TopBandLabels, CardTopBandHelp);
+                c.blocks = DrawPopupField("Blocks", c.blocks, CardOptions.Blocks, CardOptions.BlockLabels, CardBlocksHelp);
                 c.dismiss_on_tap_outside = DrawToggleField("Tap Outside Closes", c.dismiss_on_tap_outside, CardTapOutsideHelp);
                 c.keep_audio_on_close = DrawToggleField("Keep Audio Playing", c.keep_audio_on_close, CardKeepAudioHelp);
                 c.audio_when_another_starts = DrawPopupField("Audio Overlap", c.audio_when_another_starts, CardOptions.AudioModes, CardOptions.AudioModeLabels, CardAudioSwitchHelp);

@@ -52,12 +52,12 @@ namespace TileStories.Editor.Tests
         {
             var registry = new BlockRegistry();
             BuiltInFamilies.Register(registry);
-            registry.RegisterFamily(new FamilyDefinition { Key = "wall_tour", Order = 35, LabelKey = "f_wall_tour" });
-            registry.Register(Kind("guide_clip", BuiltInFamilies.Guides), () => null);     // guides = 30
-            registry.Register(Kind("chapter", BuiltInFamilies.Stories), () => null);       // stories = 40
-            registry.Register(Kind("tour_stop", "wall_tour"), () => null);                 // app      = 35
+            registry.RegisterFamily(new FamilyDefinition { Key = "wall_tour", Order = 45, LabelKey = "f_wall_tour" });
+            registry.Register(Kind("guide_clip", BuiltInFamilies.Guides), () => null);     // guides = 40
+            registry.Register(Kind("chapter", BuiltInFamilies.Play), () => null);          // play = 60
+            registry.Register(Kind("tour_stop", "wall_tour"), () => null);                 // app    = 45
             CollectionAssert.AreEqual(new[] { "guide_clip", "tour_stop", "chapter" }, registry.Ordered.Select(k => k.Key),
-                "Order 35 lands between guides (30) and stories (40), however late it was registered");
+                "Order 45 lands between guides (40) and play (60), however late it was registered");
         }
 
         [Test]
@@ -83,7 +83,7 @@ namespace TileStories.Editor.Tests
         {
             var registry = new BlockRegistry();
             BuiltInBlocks.Register(registry);
-            CollectionAssert.AreEqual(new[] { "about", "media", "guides", "stories", "ar", "play", "visit", "community", "navigation", "meta" },
+            CollectionAssert.AreEqual(new[] { "about", "stories", "media", "ar", "guides", "play", "community", "visit", "navigation", "meta" },
                 registry.Ordered.Select(k => k.Family).Distinct(), "the canvas order of _3.2 section 2.2");
             var families = registry.Ordered.Select(k => k.Family).ToList();
             var seen = new System.Collections.Generic.List<string>();

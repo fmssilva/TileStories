@@ -38,8 +38,7 @@ namespace TileStories.Tests
             Assert.AreEqual("lamp_religious", neighbours.RightPoiId, "...and on the right");
             var military = Session.SearchPois.First(p => p.id == "lamp_military");
             Assert.AreEqual(BlockStackBuilder.CardTitleOf(military, "en", "en"), neighbours.LeftTitle.text, "named by its card title");
-            Sheet.Stack.Scroll.ScrollTo(neighbours.Root);
-            yield return CardTestInput.Settle(0.2f);
+            yield return CardTestInput.IntoReach(Sheet, neighbours.Left);
 
             var raised = new System.Collections.Generic.List<string>();
             System.Action<string> probe = raised.Add;
@@ -80,9 +79,7 @@ namespace TileStories.Tests
             Assert.AreEqual("38.71390, -9.13340", map.Coordinates.text, "the castle's coordinates");
             Assert.AreEqual(BackgroundSizeType.Contain, map.Map.Picture.resolvedStyle.backgroundSize.sizeType, "the map shows whole (a crop could hide the pin)");
             Assert.AreEqual("Where it is today", Sheet.Stack.HeadingOf(map).text);
-            Sheet.Stack.Scroll.ScrollTo(map.Root);
-            yield return CardTestInput.Settle(0.2f);
-            yield return CardTestInput.Tap(map.Root.panel, map.Directions.worldBound.center);
+            yield return CardTestInput.TapInReach(Sheet, map.Directions);
             yield return null;
             var authored = Session.SearchPois.First(p => p.id == "lamp").card.blocks.First(b => b.kind == BuiltInBlocks.TodayMapKind)
                 .fields.First(f => f.key == BuiltInBlocks.TodayMapUrlField).value;
@@ -115,7 +112,7 @@ namespace TileStories.Tests
             SelectionEventBus.OnMarkerSelected += probe;
             try
             {
-                yield return CardTestInput.Tap(target.panel, target.worldBound.center);
+                yield return CardTestInput.TapInReach(Sheet, target);
                 yield return CardTestInput.Settle();
             }
             finally { SelectionEventBus.OnMarkerSelected -= probe; }

@@ -131,6 +131,7 @@ namespace TileStories.Tests
         // the card's action at its foot -- so neither the strip nor the sticky bar shows; once the visitor reads past the hero the sticky bar
         // comes (its "Show me where it is" is often why the card was opened) over at least one line, the strip only where the floor allows
         [UnityTest]
+        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator TheLampAtHalf_ShowsItsWholeHeroWithItsAction_AndTheStickyBarOnceTheHeroIsRead()
         {
             AssertTheDefaults();
@@ -170,6 +171,7 @@ namespace TileStories.Tests
         // While the hero fills Half there is no room for the strip; reading past it gives the strip back where the floor allows (the map
         // comes back), and Show Navigation At = Full Only -- live -- hides it there anyway: the wall's option hides more, never less
         [UnityTest]
+        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator TheHeroReadAway_GivesHalfItsStripBack_AndFullOnlyHidesItThere_Live()
         {
             AssertTheDefaults();
@@ -195,18 +197,17 @@ namespace TileStories.Tests
 
         // ---------------- peek ----------------
 
+        // (the bottom area holds the footer and the floating Navigation Bar since _3.3 S4 third round; the old strip is the bar's now)
         [UnityTest]
         public IEnumerator NothingShowsAtPeek()
         {
             yield return Open(Lamp, SheetStopRule.Stop.Full);
             yield return ReadPastTheHero();
-            Assert.IsTrue(Chrome.TopShown && Chrome.BottomShown, "precondition: both show at Full once the hero is read: " + ChromeState());
+            Assert.IsTrue(Chrome.BottomShown, "precondition: the bottom area shows at Full once the hero is read: " + ChromeState());
             Sheet.SetStop(SheetStopRule.Stop.Peek);
             yield return CardTestInput.Settle();
             yield return Rested();
-            Assert.IsFalse(Chrome.TopShown, "no strip at peek");
-            Assert.IsFalse(Chrome.BottomShown, "no footer at peek");
-            Assert.IsFalse(StripShown(Strip));
+            Assert.IsFalse(Chrome.BottomShown, "no footer and no bar at peek");
             Assert.IsFalse(InTheCard(Bottom));
             Assert.IsTrue(FooterBelowTheCard, "the footer is below the card's edge");
         }
@@ -215,6 +216,7 @@ namespace TileStories.Tests
 
         // A real drag down the card slides the footer away and gives its height to the stack; a real drag back up brings it back
         [UnityTest]
+        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator ARealDragDown_HidesTheFooter_AndADragUpBringsItBack()
         {
             AssertTheDefaults();
@@ -247,6 +249,7 @@ namespace TileStories.Tests
         // its room) than with Hide While Scrolling = Never on the same card after the same drag -- relative, never a pixel constant.
         // Also renders the default's picture (Full, scrolled down, footer gone)
         [UnityTest]
+        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator TheContentShareAtFull_RisesWhileScrollingDown_AgainstHideWhileScrollingNever()
         {
             AssertTheDefaults();

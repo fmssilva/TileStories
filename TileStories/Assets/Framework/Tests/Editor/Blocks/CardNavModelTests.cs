@@ -65,10 +65,10 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(56, model.TargetCount);
             CollectionAssert.AreEqual(new[]
             {
-                BuiltInFamilies.About, BuiltInFamilies.Media, BuiltInFamilies.Guides, BuiltInFamilies.Stories,
-                BuiltInFamilies.Ar, BuiltInFamilies.Play, BuiltInFamilies.Visit, BuiltInFamilies.Community,
+                BuiltInFamilies.About, BuiltInFamilies.Stories, BuiltInFamilies.Media, BuiltInFamilies.Ar,
+                BuiltInFamilies.Guides, BuiltInFamilies.Play, BuiltInFamilies.Community, BuiltInFamilies.Visit,
             }, Keys(model.Sections), "8 sections in the families' order (by_family: the stack's order IS the family order)");
-            CollectionAssert.AreEqual(new[] { 18, 14, 1, 7, 3, 4, 7, 2 }, model.Sections.Select(s => s.Count));
+            CollectionAssert.AreEqual(new[] { 18, 7, 14, 3, 1, 4, 2, 7 }, model.Sections.Select(s => s.Count));
             Assert.AreEqual(56, model.Sections.Sum(s => s.Count), "the counts add up to the targets");
             Assert.IsTrue(model.ShowsNavigation, "56 targets >= Show Navigation From (8)");
 
@@ -327,7 +327,7 @@ namespace TileStories.Editor.Tests
         {
             var registry = new BlockRegistry();
             BuiltInBlocks.Register(registry);
-            registry.RegisterFamily(new FamilyDefinition { Key = "workshop", Order = 35, LabelKey = "app_family_workshop" });
+            registry.RegisterFamily(new FamilyDefinition { Key = "workshop", Order = 45, LabelKey = "app_family_workshop" });
             registry.Register(new BlockKindDefinition
             {
                 Key = "workshop_note", Family = "workshop", Format = CardOptions.FormatRead, IconKey = CardIcons.Book, DisplayName = "Workshop note",
@@ -346,8 +346,8 @@ namespace TileStories.Editor.Tests
             CollectionAssert.AreEqual(new[] { "block_app_1", "block_app_2" }, workshop.Targets);
             CollectionAssert.AreEqual(new[] { "workshop_note" }, workshop.Kinds.Select(k => k.Key));
             Assert.AreEqual("app_family_workshop", workshop.LabelKey, "the app's own label key");
-            Assert.AreEqual(keys.IndexOf(BuiltInFamilies.Guides) + 1, keys.IndexOf("workshop"), "right after Listen (30)");
-            Assert.AreEqual(keys.IndexOf("workshop") + 1, keys.IndexOf(BuiltInFamilies.Stories), "right before Stories (40)");
+            Assert.AreEqual(keys.IndexOf(BuiltInFamilies.Guides) + 1, keys.IndexOf("workshop"), "right after Listen (40)");
+            Assert.AreEqual(keys.IndexOf("workshop") + 1, keys.IndexOf(BuiltInFamilies.Play), "right before Play (60)");
         }
 
         // Show Navigation From on the real counts: exactly at Lamp - Military's 4 targets (inside the 2..30 range), and the clamp --
@@ -374,8 +374,8 @@ namespace TileStories.Editor.Tests
             CollectionAssert.AreEqual(Keys(model.Sections.Take(inBar)), Keys(model.BarSections), "the first sections fill the bar");
             CollectionAssert.AreEqual(Keys(model.Sections.Skip(inBar)), Keys(model.MoreSections), "More lists exactly the others, in order");
             if (maxSlots == 5)
-                CollectionAssert.AreEqual(new[] { BuiltInFamilies.Ar, BuiltInFamilies.Play, BuiltInFamilies.Visit, BuiltInFamilies.Community },
-                    Keys(model.MoreSections), "the default 5 slots: About, Media, Listen, Stories + More");
+                CollectionAssert.AreEqual(new[] { BuiltInFamilies.Guides, BuiltInFamilies.Play, BuiltInFamilies.Community, BuiltInFamilies.Visit },
+                    Keys(model.MoreSections), "the default 5 slots: About, Stories, Media, AR + More");
         }
 
         // When the sections fit, no More: the Block Library switches off AR and Play's kinds -> 6 sections; Community too -> 5
@@ -387,7 +387,7 @@ namespace TileStories.Editor.Tests
                          BuiltInBlocks.PollKind, BuiltInBlocks.CollectKind, BuiltInBlocks.FeedbackKind })
                 config.card_settings.kinds.Add(new BlockKindSetting { kind = kind, enabled = false });
             var model = Model(config, Lamp);
-            Assert.AreEqual(5, model.Sections.Count, "precondition: About, Media, Listen, Stories, Visit");
+            Assert.AreEqual(5, model.Sections.Count, "precondition: About, Stories, Media, Listen, Visit");
             CollectionAssert.AreEqual(Keys(model.Sections), Keys(model.BarSections), "5 sections in 5 slots");
             CollectionAssert.IsEmpty(model.MoreSections, "nothing overflows, so no More slot");
 

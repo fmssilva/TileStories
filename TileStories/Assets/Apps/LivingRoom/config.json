@@ -14392,6 +14392,7 @@
             "half_max_ratio": 0.4000000059604645,
             "full_height": "top",
             "top_band": "fade",
+            "blocks": "open",
             "dismiss_on_tap_outside": true,
             "keep_audio_on_close": true,
             "audio_when_another_starts": "switch",
@@ -14493,7 +14494,16 @@
             "page_chrome_breadcrumb": true,
             "page_chrome_prev_next": true
         },
-        "block_templates": []
+        "block_templates": [],
+        "sections": {
+            "start": "tiles",
+            "divider": "none",
+            "divider_image": "",
+            "colour": "group",
+            "intensity": 0.11999999731779099,
+            "motion": "reveal",
+            "vary": "same"
+        }
     },
     "search_demo": {
         "enabled": false,

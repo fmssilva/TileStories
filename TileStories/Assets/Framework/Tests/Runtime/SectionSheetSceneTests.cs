@@ -19,6 +19,17 @@ namespace TileStories.Tests
     [Category("Core")]
     public class SectionSheetSceneTests : SearchSceneFixture
     {
+        // This fixture's subject is the CARDS look (the family glass sheets, the block frame, the moving light): the framework's default is
+        // Open since _3.3 P3, so the look measured here is pinned to Cards after SearchSceneFixture's own pins
+        [UnitySetUp]
+        public IEnumerator PinTheCardsLook()
+        {
+            var config = ConfigCopy();
+            config.card_settings.container.blocks = CardOptions.BlocksCards;
+            Session.ApplyCardSettings(config);
+            yield return CardTestInput.Settle(0.3f);
+        }
+
         private PoiCardSheetView Sheet => Card.Sheet;
         private BlockStackView Stack => Sheet.Stack;
         private ScrollView Scroll => Stack.Scroll;
@@ -230,6 +241,7 @@ namespace TileStories.Tests
         // words (the strip names the section): no name, no meta, no pill -- the family's coloured line alone, the sheet's full width (the 4c1b
         // review: an icon-only pill read as a stray badge); accordion and bento as P4.4c1 left them
         [UnityTest]
+        [Ignore(TestSkips.OldNavigationElements)]
         public IEnumerator Pages_TheOpenerIsThePagesTitle_ThePagerKeepsItsCounter_TabsOpenerSaysNoWords_AccordionAndBentoAsBefore()
         {
             var words = new CardStrings(Card.StringTable.Entries(), CardStringSources.Shared.Entries(), null, "en", "en");

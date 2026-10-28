@@ -27,16 +27,19 @@ namespace TileStories
         // Register every built-in family into `registry`, before its kinds
         public static void Register(BlockRegistry registry)
         {
+            // - the order a card reads in and its Navigation Bar shows (_3.3 P2 review (d)): About, Stories, Media, Listen, Play, Visit --
+            //   AR right after Media and Community right after Play, the families the bar's default groups take in (NavBarRule.DefaultJoins),
+            //   so a group's blocks stay one run of the scroll
             registry.RegisterFamily(Family(About, 10, CardStrings.Keys.FamilyAbout, CardIcons.Info));
-            registry.RegisterFamily(Family(Media, 20, CardStrings.Keys.FamilyMedia, CardIcons.Picture));
-            // - "Listen", not "Guides": its only kind is the audio guide. The KEY stays `guides` (data identity).
-            registry.RegisterFamily(Family(Guides, 30, CardStrings.Keys.FamilyGuides, CardIcons.Listen));
-            registry.RegisterFamily(Family(Stories, 40, CardStrings.Keys.FamilyStories, CardIcons.Book));
+            registry.RegisterFamily(Family(Stories, 20, CardStrings.Keys.FamilyStories, CardIcons.Book));
+            registry.RegisterFamily(Family(Media, 30, CardStrings.Keys.FamilyMedia, CardIcons.Picture));
             // - the AR family's icon is the target the show-on-wall button already wears: "see it there"
-            registry.RegisterFamily(Family(Ar, 50, CardStrings.Keys.FamilyAr, CardIcons.ShowOnWall));
+            registry.RegisterFamily(Family(Ar, 35, CardStrings.Keys.FamilyAr, CardIcons.ShowOnWall));
+            // - "Listen", not "Guides": its only kind is the audio guide. The KEY stays `guides` (data identity).
+            registry.RegisterFamily(Family(Guides, 40, CardStrings.Keys.FamilyGuides, CardIcons.Listen));
             registry.RegisterFamily(Family(Play, 60, CardStrings.Keys.FamilyPlay, CardIcons.Play));
+            registry.RegisterFamily(Family(Community, 65, CardStrings.Keys.FamilyCommunity, CardIcons.People));
             registry.RegisterFamily(Family(Visit, 70, CardStrings.Keys.FamilyVisit, CardIcons.Location));
-            registry.RegisterFamily(Family(Community, 80, CardStrings.Keys.FamilyCommunity, CardIcons.People));
             // - the nav blocks (an icon grid, a contents list): in the card's flow, never a target of its navigation
             var navigation = Family(Navigation, 85, CardStrings.Keys.FamilyNavigation, CardIcons.Grid);
             navigation.InNav = false;

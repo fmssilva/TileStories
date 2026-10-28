@@ -6,11 +6,11 @@ using UnityEngine;
 namespace TileStories.Editor.Tests
 {
     // Tier 0 of the Navigation Bar's drawn shape (NavBarShapeRule, v5's renderVals): the ONE path's bump at the chosen group (its peak, its
-    // feet on the edge, clear of the corners), the flat edge without Raised, the corners per shape, the mirror at Top (the bump hangs down),
-    // and the slide's overshoot. v5's numbers at the phone's frame: a floating bar 358 wide, 62 high, 26 of room, a 16 bump 25 half wide.
+    // feet on the edge, a top corner giving way beside it), the flat edge without Raised, the corners per shape, the mirror at Top (the bump hangs down),
+    // and the slide's overshoot. v5's numbers at the phone's frame: a floating bar 358 wide, 62 high, 26 of room, an 18 bump 38 half wide (P3: wider and deeper than its 40 disc).
     public class NavBarShapeRuleTests
     {
-        private const float W = 358f, H = 62f, Room = 26f, Bump = 16f, Half = 25f, Raised = 18f;
+        private const float W = 358f, H = 62f, Room = 26f, Bump = 18f, Half = 38f, Raised = 18f;
 
         private static IEnumerable<Vector2> Points(List<NavBarShapeRule.Command> path)
         {
@@ -45,17 +45,79 @@ namespace TileStories.Editor.Tests
         }
 
         [Test]
-        public void TheBump_StaysClearOfTheCorners_AtTheFirstAndLastGroups()
+        public void ABumpNearASide_TakesThatTopCornersRoom_SoItSitsUnderTheFirstAndLastGroups()
         {
             float r = NavBarShapeRule.Radius(true, true, H, Raised);
-            Assert.AreEqual(r + Half + 1f, NavBarShapeRule.BumpX(10f, W, r, Half), "near the left corner: held off it");
-            Assert.AreEqual(W - r - Half - 1f, NavBarShapeRule.BumpX(W - 10f, W, r, Half), "near the right corner");
+            Assert.AreEqual(Half + 1f, NavBarShapeRule.BumpX(10f, W, r, Half), "near the left side: its foot stays inside the bar");
+            Assert.AreEqual(W - Half - 1f, NavBarShapeRule.BumpX(W - 10f, W, r, Half), "near the right side");
             Assert.AreEqual(179f, NavBarShapeRule.BumpX(179f, W, r, Half), "a middle group: where it is");
-            // - the first of six groups on the 10 pt padded row: centre 10 + 338 / 12 = 38.2 > 44 (the clamp) -> held at 44
+            // - the first of six groups on the 10 pt padded row: centre 10 + 338 / 12 = 38.2 -- the bump is drawn there (1 pt inside at most)
             float first = 10f + (W - 20f) / 6f * 0.5f;
-            Assert.Greater(NavBarShapeRule.BumpX(first, W, r, Half), first, "the first group's bump moves in, never up the corner");
-            var path = NavBarShapeRule.Path(W, H, Room, r, Bump, Half, NavBarShapeRule.BumpX(first, W, r, Half));
-            Assert.GreaterOrEqual(path[1].P1.x, r, "the left foot after the corner's end");
+            float x = NavBarShapeRule.BumpX(first, W, r, Half);
+            Assert.AreEqual(first, x, 1f, "the first group's bump sits under it, not held off by the corner");
+            var path = NavBarShapeRule.Path(W, H, Room, r, Bump, Half, x);
+            float foot = x - Half;
+            Assert.AreEqual(new Vector2(foot, Room), path[0].P1, "the top-left corner shrank to the room left beside the bump's foot");
+            Assert.AreEqual(new Vector2(0f, Room + foot), path[path.Count - 3].P1, "...on the side too: a smaller quarter turn");
+            Assert.AreEqual(new Vector2(W - r, Room), path[4].P1, "the far corner keeps its own radius");
+            // - no bump (another indicator): both corners keep theirs, wherever the centre is
+            var flat = NavBarShapeRule.Path(W, H, Room, r, 0f, Half, x);
+            Assert.AreEqual(new Vector2(r, Room), flat[0].P1, "a flat edge keeps the corner");
+            Assert.AreEqual(r, NavBarShapeRule.TopCorner(r, 40f));
+            Assert.AreEqual(5f, NavBarShapeRule.TopCorner(r, 5f));
+            Assert.AreEqual(0f, NavBarShapeRule.TopCorner(r, -3f));
+        }
+
+        [Test]
+        public void TheBump_IsWiderAndDeeperThanItsDisc_SoTheEdgeBendsRoundIt()
+        {
+            // - P3's numbers, read from the card's tokens file (never retyped): a 76 x 18 bump round a 40 disc
+            string tokens = System.IO.File.ReadAllText("Assets/Framework/Runtime/UI/Screen/Cards/CardTokens.uss");
+            float Read(string name)
+            {
+                var m = System.Text.RegularExpressions.Regex.Match(tokens, "--ts-navbar-" + name + @":\s*([0-9.]+)");
+                Assert.IsTrue(m.Success, "the token --ts-navbar-" + name);
+                return float.Parse(m.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
+            }
+            float half = Read("bump-half"), bump = Read("bump"), disc = Read("disc-raised"), gap = Read("disc-gap"), room = Read("room");
+            Assert.AreEqual(Half, half, "this fixture's numbers are the card's");
+            Assert.AreEqual(Bump, bump);
+            Assert.Greater(half * 2f, disc + 30f, "the bump's foot reaches well past the disc on both sides (15 pt each at least)");
+            Assert.GreaterOrEqual(bump, 18f, "deep enough to read as a bend");
+            Assert.GreaterOrEqual(gap, 4f, "a ring of bar round the disc's top wide enough to see");
+            float top = NavBarShapeRule.DiscTop(room, bump, gap);
+            Assert.AreEqual(room - bump + gap, top, 1e-4f, "the disc's top a gap under the bump's peak");
+            Assert.GreaterOrEqual(top, 0f, "...inside the bar's box: the room holds it");
+        }
+
+        // _3.3 P3a: the bump is a CUT-OUT round the disc -- every point of its outline above the edge clears the disc by the gap (one
+        // physical pixel of tolerance for the curve's sampling), so the bar's colour shows all round the disc's top, never a disc on a flat edge
+        [Test]
+        public void TheBumpsOutline_RunsRoundTheDisc_AGapAwayAllAlongIt()
+        {
+            string tokens = System.IO.File.ReadAllText("Assets/Framework/Runtime/UI/Screen/Cards/CardTokens.uss");
+            float Read(string name) => float.Parse(System.Text.RegularExpressions.Regex.Match(tokens, "--ts-navbar-" + name + @":\s*([0-9.]+)").Groups[1].Value,
+                System.Globalization.CultureInfo.InvariantCulture);
+            float bump = Read("bump"), half = Read("bump-half"), disc = Read("disc-raised"), gap = Read("disc-gap"), room = Read("room");
+            const float x = 200f;
+            var path = NavBarShapeRule.Path(W, H, room, NavBarShapeRule.Radius(true, true, H, Raised), bump, half, x);
+            var centre = new Vector2(x, NavBarShapeRule.DiscTop(room, bump, gap) + disc * 0.5f);
+            int sampled = 0;
+            foreach (var c in path.Where(c => c.Op == NavBarShapeRule.Op.Cubic))
+            {
+                var from = path[path.IndexOf(c) - 1];
+                var p0 = from.Op == NavBarShapeRule.Op.Cubic ? from.P3 : from.P1;
+                for (float s = 0f; s <= 1f; s += 0.02f)
+                {
+                    float u = 1f - s;
+                    var p = u * u * u * p0 + 3f * u * u * s * c.P1 + 3f * u * s * s * c.P2 + s * s * s * c.P3;
+                    if (p.y >= room) continue;
+                    sampled++;
+                    Assert.GreaterOrEqual(Vector2.Distance(p, centre), disc * 0.5f + gap - 1f, "the outline at " + p + " stays a gap off the disc");
+                }
+            }
+            Assert.Greater(sampled, 50, "precondition: the bump's outline above the edge was walked");
+            Assert.AreEqual(room - bump, Points(path).Min(p => p.y), 1e-4f, "...and rises the bump's full height over the disc's centre");
         }
 
         [Test]

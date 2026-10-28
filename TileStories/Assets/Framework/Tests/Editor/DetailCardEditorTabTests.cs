@@ -178,14 +178,17 @@ namespace TileStories.Editor.Tests
                             "open_stop" => (string)c.GetValue(s.container) == CardOptions.StopHalf ? CardOptions.StopPeek : CardOptions.StopHalf,
                             "full_height" => CardOptions.FullHeightCameraStrip,
                             "top_band" => CardOptions.TopBandGlass,
+                            "blocks" => CardOptions.BlocksCards,
                             _ => CardOptions.AudioQueue,
                         })));
                         else Assert.Fail("no edit for container field " + c.Name);
                     }
+                else if (f.FieldType == typeof(CardSectionSettings))
+                    edits.Add((f.Name, s => s.sections.start = CardOptions.SectionStartWave));
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(10 + 1 + 10 + 24 + 3, edits.Count,
-                "every card_settings field (walked by reflection) has an edit: 10 wall-level (block_templates the 10th) + 1 components + 10 container (top_band the 10th) + 24 navigation (bar the 24th) + 3 demo card");
+            Assert.AreEqual(11 + 1 + 11 + 24 + 3, edits.Count,
+                "every card_settings field (walked by reflection) has an edit: 11 wall-level (sections the 11th) + 1 components + 11 container (blocks the 11th) + 24 navigation (bar the 24th) + 3 demo card");
 
             foreach (var (name, change) in edits)
             {
@@ -2142,8 +2145,8 @@ namespace TileStories.Editor.Tests
             Assert.GreaterOrEqual(row, 0, "the kind is in the registry the window reads");
             Assert.AreEqual(BuiltInFamilies.Navigation, ordered[row].Family);
             int afterFamily = ordered.FindIndex(row, k => k.Family != BuiltInFamilies.Navigation);
-            Assert.AreEqual(BuiltInFamilies.Meta, ordered[afterFamily].Family, "the Block Library lists the navigation run between community and the Sources (Order 85)");
-            Assert.AreEqual(BuiltInFamilies.Community, ordered[ordered.FindIndex(k => k.Family == BuiltInFamilies.Navigation) - 1].Family);
+            Assert.AreEqual(BuiltInFamilies.Meta, ordered[afterFamily].Family, "the Block Library lists the navigation run between visit and the Sources (Order 85)");
+            Assert.AreEqual(BuiltInFamilies.Visit, ordered[ordered.FindIndex(k => k.Family == BuiltInFamilies.Navigation) - 1].Family);
             yield return _window.ScrollTo("Block Library enabled#" + row);
             _window.Click("Block Library enabled#" + row);
             yield return _window.WaitForRepaint();
@@ -2530,18 +2533,18 @@ namespace TileStories.Editor.Tests
             var nav = _window.Config.card_settings.navigation;
             var before = _window.Editor.FamiliesInEffectiveOrder(nav).Select(f => f.Key).ToList();
             Assert.AreEqual("about", before[0]);
-            Assert.AreEqual("media", before[1], "precondition: media follows about");
+            Assert.AreEqual("stories", before[1], "precondition: stories follows about");
 
             yield return _window.ScrollTo("Family down#0");
             _window.Click("Family down#0");
             yield return _window.WaitForRepaint();
 
             var after = _window.Editor.FamiliesInEffectiveOrder(_window.Config.card_settings.navigation).Select(f => f.Key).ToList();
-            Assert.AreEqual("media", after[0], "a real click moved about down past media");
+            Assert.AreEqual("stories", after[0], "a real click moved about down past stories");
             Assert.AreEqual("about", after[1]);
             CollectionAssert.AreEqual(before.Skip(2), after.Skip(2), "nothing below the two swapped families moved");
             Assert.IsTrue(_window.Unsaved);
-            CollectionAssert.AreEquivalent(new[] { "about", "media" },
+            CollectionAssert.AreEquivalent(new[] { "about", "stories" },
                 _window.Config.card_settings.navigation.families.Select(f => f.family),
                 "only the two families the developer really moved got a row");
 
