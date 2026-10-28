@@ -88,6 +88,10 @@ domain items -> the domain guide's `## TODOs` (tagged with the step that picks t
 - **Test tiers in the brief's TEST PLAN line (`40-testing.md` 4.2):** every block BLOCK (a few minutes); every 3rd-4th block,
   and a block on shared ground, CORE (~30 min); every ~12 blocks and at the milestones (domain close-out, device session, build)
   FULL (~90 min). Count the blocks since the last CORE and the last FULL in every answer.
+  **While the developer reviews the card component by component** (from 2026-10-28: the hero, the Navigation Bar, the story, then
+  the next ones), every block runs only BLOCK -- the fixtures of the component under review + full EditMode; everything else
+  only has to compile. CORE and FULL wait for the end of that review (one CORE, then one FULL), so say in every answer how many
+  blocks the deferred CORE now covers.
 - **Maintenance cadence:** every ~12 blocks (with that FULL run, and before a domain close-out) the next block is MAINTENANCE, in
   this order: `skills/Test_Suite_Review.md` (faster, still trustworthy), `skills/Code_Health_Review.md` (simple, in its place, no
   dead / duplicated / speculative code), then `skills/Guidelines_Review.md` (rules true, short, no history). Count the blocks

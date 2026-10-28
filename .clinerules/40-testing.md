@@ -318,6 +318,11 @@ and a domain reload in the middle of a test run does not pause it: it destroys i
 `TestJobRunner`, the MCP job stays "running" with nothing behind it (an orphan: every later `run_tests` is refused), and
 the aborted run leaves `Assets/InitTestScene<guid>.unity` behind; a `refresh_unity` sent while a PlayMode job is still going can cost Editor restarts.
 
+- **Compile clean before every run.** Save every file first, then `refresh_unity` and `read_console` (Error): zero `error CS`,
+  and `editor_state` `compilation.is_compiling` false. Only then `run_tests`. A file saved after that compile (a new test file,
+  an `execute_code` that writes an asset) recompiles under the run and kills it -- compile again first. A run that never starts,
+  reports 0 tests or stays "running" with nothing in the Editor log: read the console for `error CS` before anything else
+  (a red compile leaves the old assemblies, so tests run old code or none).
 - **Serialize.** Edit -> `refresh_unity` -> `run_tests` -> wait for the run's end (the next bullet: the Editor log's
   `[TestRun] ended`; a short run with Unity in FRONT may use `get_test_job` with `wait_timeout` 60, which nudges nothing while
   Unity is focused) -> `get_test_job` says `succeeded` / `failed` -> only then the next edit, refresh, `execute_code` that saves
