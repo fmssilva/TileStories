@@ -14,26 +14,32 @@ So start by reading them all.
 
 
 ## `And now:`
-P3c (continued, 3) -- the halo for Half, Raised Depth, group-coloured icons; close green and committed (`_3.3` fourth round >
-"P3c review" and "P3c review, second pass" a + c; the tracker's HANDOFF).
-GATE: as before (MCP; push: origin = fbc2f36; SDF fonts; compile clean before every run, editor_state confirms a run STARTED and
-Play Mode is off; Unity c, b for captures). Continue on the uncommitted tree.
-WORKER MODEL: Opus + effort High.
-TEST PLAN: BLOCK = full EditMode + the 14 card fixtures on the FINAL state (none has run on this tree yet).
-PART 1 -- the Half decision = (c) + (a): a two-layer halo (a second label behind each word: a close dark outline/shadow + a wider soft
-glow; one owner in HeroWordsOnPicture, no copies elsewhere), so the adaptive tone needs less; whatever tone remains at Half may reach
-the visible strip's top -- the far-side ~0 test runs at Full only; at Half test that the tone is lower than before the halo (log both
-numbers). Every word >= 4.5:1 everywhere as today. Show the developer the Half and Full renders (light hero, dark hero) and ask once:
-accepted?
-PART 2 -- Raised Depth (as written in the tracker): slider -1..+1, default +1, 0 flat, < 0 a cradle; rule + Editor row (i) + config +
-live push; rule tests at -1/-0.5/0/0.5/1; pixel test at -1/0/+1, Bottom and Top.
-PART 3 -- Icon Colour: Group (default) / Accent / Neutral: icons in the group's -text tone (>= 4.5:1 on every bar fill), the chosen disc
-in the group colour with its icon >= 4.5:1, labels ink 7:1; Editor row (i); render test per group, light and dark.
-PART 4 -- docs (_3.3 build log, _Test_Suite_1, 10-structure for the new and deleted files, the old ramp note on --ts-scrim-hero),
-BLOCK, LOOK at the renders (Editor rows in the dark skin). Report with one commit message covering all of P3c. STOP.
-OUT OF SCOPE (P3d): the Reveal both ways, Tint Depth, the FAB.
-
-
+P3d -- the Reveal both ways, Tint Depth, the "Show me where it is" FAB (`_3.3` fourth round > "P2 review" e, "P3c review" c-d,
+"P3c review, second pass" b).
+GATE: as before (MCP; push: origin = aaa2c1f, nothing to push; SDF fonts; compile clean before every run, editor_state confirms a
+run STARTED and Play Mode is off; Unity c, b for captures).
+WORKER MODEL: Opus + effort High (scroll-driven motion with real drags, a new floating control).
+SUBAGENTS: per 00-process (ceiling Opus + medium; Unity single owner) -- e.g. a Haiku Explore for "where does the sticky action /
+the floating slot live", a Haiku pass over long test logs.
+TEST PLAN: BLOCK = full EditMode + the 14 card fixtures (the tracker's list) on the FINAL state. CORE stays deferred.
+PART 1 -- the Start row's Reveal follows its position BOTH ways: progress 0 as the row clears the Navigation Bar's top, 1 when it is a
+third of the way up the visible card; tiles turn in order with the progress; scrolling back up turns them out, down plays again.
+Motion > Replay: Every Pass (default) / Once (once whole, stays whole). Reduce Motion = whole at once. Editor row (i) + config + live
+push. Tests with REAL drags: half-way -> about half the tiles turned; a third up -> all; back down past the bar -> turned out (Every
+Pass) / still whole (Once); Reduce Motion whole throughout.
+PART 2 -- Tint Depth: Sections > Tint Depth (pt), default 120: the section's tint fades from its top to 0 over that depth, then the
+paper (not the whole block coloured). Editor row (i) + config + live push. Test on the render: tint at the section's top, ~0 at the
+depth and below; the eyebrow and body still >= 7:1.
+PART 3 -- "Show me where it is" as a FAB: a 56 pt disc (the accent; its locate mark >= 4.5:1 on it; label / name "Show me where it
+is"), bottom right, 12 pt above the Navigation Bar; it follows the bar (Bottom / Top, Hide While Scrolling, the safe area), over the
+hero and after it; a 44+ target; it never covers the bar's items or the hero's words. With the bar at Bottom the hero's own
+"Show me where it is" pill and the old sticky action are off by default (kept as options). Tests: a REAL tap shows the point on the
+wall at Half and Full; its rect never meets the bar's items; light and dark renders.
+PART 4 -- one check from the review: the unchosen bar labels look pale grey in TestEvidence/Premium/P3c/depth/review_depth.png --
+measure them on a full-size render (light and dark, every fill): >= 7:1 (ink) or fix.
+PART 5 -- docs (_3.3 build log, _Test_Suite_1, 10-structure), BLOCK, LOOK at the renders and the Editor rows (dark skin), report
+(with the Subagents line) and one commit message. STOP with one AskUserQuestion.
+OUT OF SCOPE: retiring the old navigation (the next block), the story block.
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`
