@@ -161,6 +161,9 @@ namespace TileStories.Editor.Tests
                 ("Bold Chosen Icon", () => Nav.bar.bold_selected = false, () => !NavBarRule.BoldChosen(Nav.bar)),
                 ("Show", () => Nav.bar.show = CardOptions.NavBarShowAfterHero, () => NavBarRule.Show(Nav.bar) == CardOptions.NavBarShowAfterHero),
                 ("Hide While Scrolling", () => Nav.bar.hide_on_scroll = CardOptions.NavBarHideDown, () => NavBarRule.HidesWhileScrolling(Nav.bar)),
+                ("Locate Button", () => Nav.bar.locate_button = false, () => !NavBarRule.LocateButton(Nav.bar)),
+                ("Sticky Action", () => Nav.bar.sticky_action = CardOptions.NavBarStickyShown,
+                    () => NavBarRule.StickyAction(Nav.bar) == CardOptions.NavBarStickyShown),
             };
             foreach (var pick in picks)
             {

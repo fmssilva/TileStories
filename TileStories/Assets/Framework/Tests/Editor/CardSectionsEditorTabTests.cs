@@ -57,7 +57,8 @@ namespace TileStories.Editor.Tests
             yield return Draw();
             Assert.IsFalse(_window.Unsaved, "drawing writes nothing");
             var rows = POIEditorToolWindow.CardSectionsRows;
-            CollectionAssert.AreEqual(new[] { "Start", "Divider", "Colour", "Intensity", "Motion", "Vary" }, rows, "v6's Tweaks \"Sections\"");
+            CollectionAssert.AreEqual(new[] { "Start", "Divider", "Colour", "Intensity", "Tint Depth", "Motion", "Replay", "Vary" }, rows,
+                "v6's Tweaks \"Sections\" + the P3c review's Tint Depth and Replay");
             for (int i = 0; i < rows.Length; i++)
             {
                 CollectionAssert.Contains(Titles, rows[i], "the " + rows[i] + " row");
@@ -90,6 +91,54 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(JsonUtility.ToJson(picked), JsonUtility.ToJson(Card.sections), "only Divider changed");
             yield return _window.PressUndo();
             Assert.AreEqual(before, JsonUtility.ToJson(Card.sections), "one real Ctrl+Z takes it back");
+        }
+
+        // P3d: Tint Depth a slider right after Intensity -- a REAL drag along its track (press, moves, release in one editor tick) writes the
+        // depth the card reads, as ONE undo step; Replay right after Motion, only while the tiles turn (Reveal, Drift), a pick one undo step
+        [UnityTest]
+        public IEnumerator TintDepth_ARealDragWritesIt_OneUndoStep_AndReplayShowsOnlyWhereTheTilesTurn()
+        {
+            Open("_showCardSections");
+            yield return Draw();
+            Assert.IsFalse(_window.Unsaved, "drawing writes nothing");
+            Assert.Less(Row("Intensity"), Row("Tint Depth"), "Tint Depth right after Intensity");
+            Assert.Less(Row("Tint Depth"), Row("Motion"));
+            Assert.Less(Row("Motion"), Row("Replay"), "Replay right after Motion");
+            Assert.Less(Row("Replay"), Row("Vary"));
+            Assert.AreEqual(120f, SectionStyleRule.TintDepth(Card.sections), "precondition: the default depth");
+
+            int steps = _window.UndoStepsLeft;
+            Rect row = _window.RectOf("Tint Depth");
+            float y = row.center.y, startX = row.xMax - 70f;
+            _window.Send(new Event { type = EventType.MouseDown, button = 0, clickCount = 1, mousePosition = _window.Local(new Vector2(startX, y)) });
+            _window.PaintNow();
+            for (int i = 1; i <= 6; i++)
+            {
+                _window.Send(new Event { type = EventType.MouseDrag, button = 0, mousePosition = _window.Local(new Vector2(startX + 20f * i, y)), delta = new Vector2(20f, 0f) });
+                _window.PaintNow();
+            }
+            _window.Send(new Event { type = EventType.MouseUp, button = 0, clickCount = 1, mousePosition = _window.Local(new Vector2(startX + 120f, y)) });
+            _window.PaintNow();
+            yield return _window.WaitForRepaint();
+            float dragged = SectionStyleRule.TintDepth(Card.sections);
+            Assert.Greater(dragged, 120f, "the drag deepened the tint");
+            Assert.LessOrEqual(dragged, CardSectionSettings.TintDepthMax, "...inside its range");
+            Assert.AreEqual(dragged, Card.sections.tint_depth, 1e-4f, "the card reads what the slider wrote");
+            Assert.AreEqual(steps + 1, _window.UndoStepsLeft, "a whole drag = one undo step");
+            yield return _window.PressUndo();
+            Assert.AreEqual(120f, SectionStyleRule.TintDepth(Card.sections), 1e-4f, "one Ctrl+Z puts 120 back");
+
+            steps = _window.UndoStepsLeft;
+            Pick(() => Card.sections.replay = CardOptions.SectionReplayOnce);
+            yield return Draw();
+            Assert.AreEqual(CardOptions.SectionReplayOnce, SectionStyleRule.Replay(Card.sections), "Replay Once written");
+            Assert.AreEqual(steps + 1, _window.UndoStepsLeft, "one undo step");
+            Pick(() => Card.sections.motion = CardOptions.SectionMotionStill);
+            yield return Draw();
+            CollectionAssert.DoesNotContain(Titles, "Replay", "under Still nothing turns: no Replay row");
+            Pick(() => Card.sections.motion = CardOptions.SectionMotionDrift);
+            yield return Draw();
+            CollectionAssert.Contains(Titles, "Replay", "Drift turns the tiles in too: the row is back");
         }
 
         [UnityTest]

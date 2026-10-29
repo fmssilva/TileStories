@@ -70,6 +70,16 @@ namespace TileStories.Editor
             "On: the bar slides away while the visitor scrolls down to read, and comes back on a move up or at the top or end of the card. "
             + "Off (the default): it stays. (It also replaces the section's own Hide While Scrolling for the card's sticky button.)";
 
+        private const string CardNavBarLocateHelp =
+            "On (the default): every open card shows a round \"Show me where it is\" button at its bottom right, just above the bar, over the " +
+            "picture and after it, at Half and Full. A tap lowers the card so the point's marker shows on the wall. It slides away with the " +
+            "bar under Hide While Scrolling, and the picture's words leave room for it. Off: no button.";
+
+        private const string CardNavBarStickyHelp =
+            "The card's sticky action: an Actions block in its Sticky look, drawn on the picture and pinned at the card's foot. Automatic (the " +
+            "default): left out while the bar is at the Bottom, where the Locate Button and the bar stand; drawn with the bar at the Top. " +
+            "Shown: always drawn. Hidden: never drawn.";
+
         private const string CardNavBarGroupsHelp =
             "Bar Groups: each group of the bar, in its order (^ / v move one). A group leads to the blocks of its Families -- a tap lands on "
             + "the first of them on the card -- and a card shows only the groups it has blocks of. Open a group to name it in every "

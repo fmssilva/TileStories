@@ -21,8 +21,14 @@ namespace TileStories.Editor.Tests
         private const string Lamp = "lamp";
         private const string LampMilitary = "lamp_military";
 
-        private static WallConfigData Shipped() =>
-            JsonUtility.FromJson<WallConfigData>(File.ReadAllText("Assets/Apps/LivingRoom/config.json"));
+        // - the sticky call to action drawn (Sticky Action Shown): the rows' counts below include the footer CTA and its hero view, which
+        //   the default bottom bar's Automatic leaves out (_3.3 P3d) -- this fixture measures the rows, not the bar
+        private static WallConfigData Shipped()
+        {
+            var wall = JsonUtility.FromJson<WallConfigData>(File.ReadAllText("Assets/Apps/LivingRoom/config.json"));
+            wall.card_settings.navigation.bar.sticky_action = CardOptions.NavBarStickyShown;
+            return wall;
+        }
 
         // The shipped wall with every block of every point set to `display` (an in-memory copy: display is content, never an identity field)
         private static WallConfigData AllAs(string display)

@@ -10,8 +10,10 @@ namespace TileStories
     // band), and its eyebrow -- the 28 x 3 rule in its group's colour over the group's name in that colour's words. Every piece is the Look
     // Kit's (Fade, Tile Row, Wave, Strip, Reveal, Drift); this view only resolves the theme's colours by name (repainting on a mode switch)
     // and places them. The section's blocks are the sheet's, after the eyebrow. Plain C#, owned by its SectionSheets.Sheet.
-    //   - the Reveal starts once, the first time the section enters the view (Entered: SectionSheets asks on every scroll); Drift slides the
-    //     divider while it is shown (the Start rests); Reduce Motion = still and whole
+    //   - the Reveal follows the Start row's place: SectionSheets hands its progress up the view on every scroll (Scrolled; 0 as it clears the
+    //     Navigation Bar, 1 a third of the way up) and the tiles turn in order with it -- out again on the way back (Replay Every Pass), or
+    //     whole for good once whole (Once); Drift slides the divider from the first time the row shows (the Start rests); Reduce Motion =
+    //     still and whole
     public sealed class OpenSectionView
     {
         public const string RootClass = "card-open-section";
@@ -45,9 +47,9 @@ namespace TileStories
         // What it shows now, for the tests and the look
         public SectionStyleRule.Style Style { get; private set; }
         public int Position { get; private set; }
-        public bool Revealed { get; private set; }
-        public float RevealElapsed => _reveal.Elapsed;
-        public bool RevealRunning => _reveal.Running;
+        // The Reveal's progress the row shows now (0 unturned .. 1 whole; 1 whenever the section does not reveal)
+        public float Progress { get; private set; }
+        public bool Revealed => Progress >= 1f;
         public bool Drifting => _drift.Running;
         public float DriftOffset { get; private set; }
         public Color TintColour { get; private set; }
@@ -57,11 +59,11 @@ namespace TileStories
         public WaveOptions WaveOptions => _wave.Options;
         public FadeOptions GroundOptions => _ground.Options;
 
-        // The injectable clock of its motion (tests hand their own)
+        // The injectable clock of the Drift (tests hand their own; the Reveal reads no time)
         public System.Func<double> Clock
         {
-            get => _reveal.Clock;
-            set { _reveal.Clock = value; _drift.Clock = value; }
+            get => _drift.Clock;
+            set => _drift.Clock = value;
         }
 
         private readonly VisualElement _host;
@@ -69,7 +71,6 @@ namespace TileStories
         private readonly TileRowPainter _startTiles = new(new TileRowOptions());
         private readonly TileRowPainter _dividerTiles = new(new TileRowOptions());
         private readonly WavePainter _wave = new(new WaveOptions());
-        private readonly KitTicker _reveal;
         private readonly KitTicker _drift;
         private readonly RevealOptions _revealOptions = new();
         private readonly DriftOptions _driftOptions = new();
@@ -117,7 +118,6 @@ namespace TileStories
             // - the ground fills the section; its tint starts under the edge (the divider and the start's shape) -- the Fade's stops follow the
             //   edge's height, a repaint only (a style written from a geometry event costs the panel another layout pass per section)
             Edge.RegisterCallback<GeometryChangedEvent>(_ => PlaceGround());
-            _reveal = new KitTicker(Edge, RevealFrame);
             _drift = new KitTicker(Edge, DriftFrame);
             // - painted colours do not follow a mode class: paint again on a mode switch, while on a panel
             Edge.RegisterCallback<AttachToPanelEvent>(_ => { ThemeController.ModeChanged -= Paint; ThemeController.ModeChanged += Paint; Paint(); });
@@ -163,38 +163,35 @@ namespace TileStories
             StartTiles.style.display = style.Start == CardOptions.SectionStartTiles ? DisplayStyle.Flex : DisplayStyle.None;
             StartWave.style.display = style.Start == CardOptions.SectionStartWave ? DisplayStyle.Flex : DisplayStyle.None;
 
-            Revealed = false;
-            _reveal.Stop();
+            // - a revealing row waits unturned until the first scroll moment places it; every other look is whole at once
+            Progress = Reveals ? 0f : 1f;
             _drift.Stop();
             DriftOffset = 0f;
             Paint();
         }
 
-        // The section entered the view (SectionSheets, on a scroll): the Reveal starts the first time; Drift runs from the first show
-        public void Entered()
+        // One scroll moment (SectionSheets): the row's progress up the view -- what it shows follows it (Once: whole stays whole); Drift
+        // starts the first time the row shows
+        public void Scrolled(float progress)
         {
-            if (Revealed) return;
-            Revealed = true;
-            if (Reveals) _reveal.Start();
-            else Finish();
-            if (Style.Motion == CardOptions.SectionMotionDrift && !_reduceMotion) _drift.Start();
+            float shown = Reveals ? RevealRule.Held(Progress, progress, Style.Once) : 1f;
+            if (Style.Motion == CardOptions.SectionMotionDrift && !_reduceMotion && progress > 0f && !_drift.Running) _drift.Start();
+            if (Mathf.Approximately(shown, Progress)) return;
+            Progress = shown;
+            ApplyReveal();
         }
 
-        // Whether the section's pieces turn in as it enters: Reveal, and Drift (which then slides its divider), never under Reduce Motion
+        // Whether the section's pieces turn in with the scroll: Reveal, and Drift (which then slides its divider), never under Reduce Motion
         private bool Reveals => (Style.Motion == CardOptions.SectionMotionReveal || Style.Motion == CardOptions.SectionMotionDrift) && !_reduceMotion;
 
-        // Every piece whole now (tests; Reduce Motion)
+        // Every piece whole now (tests): the next scroll moment reads the row's place again
         public void Finish()
         {
-            _reveal.Stop();
-            ApplyReveal(float.PositiveInfinity);
+            Progress = 1f;
+            ApplyReveal();
         }
 
-        public void Stop()
-        {
-            _reveal.Stop();
-            _drift.Stop();
-        }
+        public void Stop() => _drift.Stop();
 
         // The colours from the theme the section sits under (none -- clear -- before it sits under a theme): the tint over the sheet's own colour, the start's and divider's tiles, the
         // eyebrow's rule and words
@@ -236,7 +233,7 @@ namespace TileStories
             // - the rule keeps the GROUP's colour whatever Colour tints the start (v6: the eyebrow is the group's)
             Rule.style.backgroundColor = Colour(_groupToken, tint);
             Name.style.color = TextColour;
-            ApplyReveal(Revealed && !_reveal.Running ? float.PositiveInfinity : _reveal.Elapsed);
+            ApplyReveal();
         }
 
         private void PlaceGround()
@@ -259,28 +256,28 @@ namespace TileStories
             _ground.Options = new FadeOptions(stops);
         }
 
-        private void RevealFrame(float elapsed)
+        // Each piece at the row's Progress: the start's tiles one after the other, the divider's tiles too (each row by its own count), the
+        // wave rising, a strip fading in -- all of it whole at 1, unturned at 0
+        private void ApplyReveal()
         {
-            ApplyReveal(elapsed);
-            if (elapsed >= RevealRule.Length(TileRule.CountFor(Edge.layout.width, TileRule.Unit, 1f), _revealOptions)) _reveal.Stop();
-        }
-
-        // Each piece at `elapsed` of the Reveal: the start's tiles one after the other, the divider's tiles too, the wave rising, a strip fading
-        // in; before the section entered (Reveal) everything waits hidden
-        private void ApplyReveal(float elapsed)
-        {
-            float at = !Reveals ? float.PositiveInfinity : Revealed ? elapsed : float.NegativeInfinity;
-            System.Func<int, float> turn = i => float.IsPositiveInfinity(at) ? 1f : float.IsNegativeInfinity(at) ? 0f : RevealRule.Turn(i, at, _revealOptions);
-            System.Func<int, float> alpha = i => float.IsPositiveInfinity(at) ? 1f : float.IsNegativeInfinity(at) ? 0f : RevealRule.Alpha(i, at, _revealOptions);
-            _startTiles.Options.ScaleOf = turn;
-            _startTiles.Options.AlphaOf = alpha;
-            _dividerTiles.Options.ScaleOf = turn;
-            _dividerTiles.Options.AlphaOf = alpha;
+            float p = Progress;
+            // - each row's count read when it paints (laid out by then): the last tile ends its turn at 1 whatever the width
+            _startTiles.Options.ScaleOf = i => p >= 1f ? 1f : RevealRule.Turn(i, CountOf(StartTilesRow, _startTiles.Options), p, _revealOptions);
+            _startTiles.Options.AlphaOf = i => p >= 1f ? 1f : RevealRule.Alpha(i, CountOf(StartTilesRow, _startTiles.Options), p, _revealOptions);
+            _dividerTiles.Options.ScaleOf = i => p >= 1f ? 1f : RevealRule.Turn(i, CountOf(DividerTiles, _dividerTiles.Options), p, _revealOptions);
+            _dividerTiles.Options.AlphaOf = i => p >= 1f ? 1f : RevealRule.Alpha(i, CountOf(DividerTiles, _dividerTiles.Options), p, _revealOptions);
             _startTiles.Repaint();
             _dividerTiles.Repaint();
-            _wave.Options.Rise = Mathf.Lerp(0.15f, 1f, Mathf.Clamp01(turn(0)));
+            _wave.Options.Rise = Mathf.Lerp(0.15f, 1f, Mathf.Clamp01(RevealRule.Turn(0, 1, p, _revealOptions)));
             _wave.Repaint();
-            DividerStrip.style.opacity = alpha(0);
+            DividerStrip.style.opacity = RevealRule.Alpha(0, 1, p, _revealOptions);
+        }
+
+        // How many tiles a row draws across its width now (none before it is laid out)
+        private static int CountOf(VisualElement row, TileRowOptions o)
+        {
+            float width = row.contentRect.width;
+            return float.IsNaN(width) ? 0 : TileRule.CountFor(width, o.Size, o.Joint);
         }
 
         // Drift slides the DIVIDER only (its tiles, its mosaic or picture strip); the Start reveals once, then rests

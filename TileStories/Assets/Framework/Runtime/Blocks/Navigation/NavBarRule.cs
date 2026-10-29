@@ -207,6 +207,19 @@ namespace TileStories
         public static string Show(CardNavBarSettings bar) => Pick(bar?.show, CardOptions.NavBarShows, CardOptions.NavBarShowAlways);
         public static string HideOnScroll(CardNavBarSettings bar) => Pick(bar?.hide_on_scroll, CardOptions.NavBarHides, CardOptions.NavBarHideNever);
         public static bool HidesWhileScrolling(CardNavBarSettings bar) => HideOnScroll(bar) == CardOptions.NavBarHideDown;
+        // Locate Button: the card's "Show me where it is" button (LocateFabRule), on unless turned off
+        public static bool LocateButton(CardNavBarSettings bar) => bar?.locate_button ?? true;
+        public static string StickyAction(CardNavBarSettings bar) => Pick(bar?.sticky_action, CardOptions.NavBarStickyActions, CardOptions.NavBarStickyAuto);
+
+        // Whether the card draws its sticky call to action (an Actions block in its footer look) -- in the hero and in the footer: Shown /
+        // Hidden as picked; Automatic leaves it out while the bar floats at the bottom (the Locate Button and the bar stand where the footer
+        // would). With the bar off it is drawn, as before the bar
+        public static bool StickyActionShown(CardNavigationSettings nav)
+        {
+            if (!Enabled(nav)) return true;
+            string sticky = StickyAction(nav.bar);
+            return sticky == CardOptions.NavBarStickyShown || sticky == CardOptions.NavBarStickyAuto && !AtBottom(nav.bar);
+        }
 
         // Whether the bar lies on the hero's picture (v5): at the bottom while the hero reaches `margin` below the bar's top edge, at Top while
         // it reaches that far below the bar's foot -- all in one frame; a card with no picture hero (NaN) never

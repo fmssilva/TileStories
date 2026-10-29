@@ -81,6 +81,11 @@ namespace TileStories
         // The raised disc's radius: the bell's crest is its arc
         public float RaisedDiscRadius => Token(RaisedDiscToken) * 0.5f;
         public float CornerRadius => NavBarShapeRule.Radius(NavBarRule.Floating(Settings), NavBarRule.Raised(Settings), BarHeight, Token(RaisedRadiusToken));
+        // Where the bar's band rests above its host's foot (at the bottom: its height and the gap under a floating bar) -- its place whether
+        // it shows or Hide While Scrolling slid it away
+        public float FootClearance => NavBarRule.AtBottom(Settings) ? BarHeight + (NavBarRule.Floating(Settings) ? Token(GapToken) : 0f) : 0f;
+        // The bar's highest point above its host's foot at the bottom: its band, or under Raised the disc's top (its centre on the flat edge)
+        public float HighestAboveFoot => FootClearance + (NavBarRule.AtBottom(Settings) && NavBarRule.Raised(Settings) ? RaisedDiscRadius : 0f);
 
         private static readonly CustomStyleProperty<float> HeightToken = new("--ts-navbar-height");
         private static readonly CustomStyleProperty<float> CompactHeightToken = new("--ts-navbar-height-compact");

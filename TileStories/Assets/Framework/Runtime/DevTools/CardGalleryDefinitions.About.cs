@@ -260,9 +260,12 @@ namespace TileStories
             var partial = new[] { ("", BuiltInBlocks.ActionShowOnWall), ("Listen", "listen"), ("See it on the wall", BuiltInBlocks.ActionShowOnWall) };
             foreach (var variant in BuiltInBlocks.Actions.Variants)
             {
-                list.Add(new Entry(BuiltInBlocks.ActionsKind, variant, "short", ActionsBlock(variant, one)));
-                list.Add(new Entry(BuiltInBlocks.ActionsKind, variant, "long", ActionsBlock(variant, many)));
-                list.Add(new Entry(BuiltInBlocks.ActionsKind, variant, "partial", ActionsBlock(variant, partial)));
+                // - the Sticky look is this entry's subject: drawn even under the default bottom bar (Sticky Action Automatic leaves it out there)
+                System.Action<WallConfigData> sticky = variant == BuiltInBlocks.ActionsStickyCta
+                    ? wall => wall.card_settings.navigation.bar.sticky_action = CardOptions.NavBarStickyShown : null;
+                list.Add(new Entry(BuiltInBlocks.ActionsKind, variant, "short", ActionsBlock(variant, one), wallSetup: sticky));
+                list.Add(new Entry(BuiltInBlocks.ActionsKind, variant, "long", ActionsBlock(variant, many), wallSetup: sticky));
+                list.Add(new Entry(BuiltInBlocks.ActionsKind, variant, "partial", ActionsBlock(variant, partial), wallSetup: sticky));
             }
         }
 

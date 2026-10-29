@@ -1,70 +1,58 @@
-# Plan tracker -- P3c (continued, 3): the halo for Half, Raised Depth, Icon Colour; close green
+# Plan tracker -- P3d: the Reveal both ways, Tint Depth, the "Show me where it is" FAB
 
-Brief: `proj_guides/__AI_worker.md` "P3c (continued, 3)" (`_3.3` fourth round > "P3c review" b and "P3c review, second pass" a + c).
-Contrast policy: words over a picture >= 4.5:1, all else 7:1 (icons on the bar >= 4.5:1). Worker: Opus, effort High.
-TEST PLAN: BLOCK = full EditMode + the 14 card fixtures (list at the end) on the FINAL state. STOP after the report.
-OUT OF SCOPE (P3d): the Reveal both ways (Motion > Replay), Tint Depth, the FAB.
+Brief: `proj_guides/__AI_worker.md` "P3d" (`_3.3` fourth round > "P2 review" e, "P3c review" c-d, "P3c review, second pass" b).
+Worker: Opus, effort High. TEST PLAN: BLOCK = full EditMode + the card fixtures (list at the end) on the FINAL state. CORE deferred.
+OUT OF SCOPE: retiring the old navigation (next block), the story block.
 
 ## GATE
-- [x] MCP live (telemetry_status ok); origin = HEAD = fbc2f36, nothing to push; SDF fonts unmodified (git status clean under both Fonts/)
-- [x] Play Mode off; compile clean (last Tundra ExitCode 0, the log's `error CS` lines older than it; console 0 errors); no InitTestScene
-- [x] baseline full EditMode on the uncommitted tree: 2346 / 2194 passed / 0 failed / 152 skipped, 205 s, Unity behind both ends
-- [ ] captures (Unity b): POI Editor rows in the dark skin; Game-view renders
+- [x] MCP live (telemetry_status ok); origin = HEAD = a663ec1 (the brief commit), nothing to push; SDF fonts unmodified (git clean under both Fonts/)
+- [x] Play Mode off; compile clean (last ExitCode 0 after the log's old `error CS` lines); no InitTestScene
+- [x] baseline full EditMode (Unity c): 2352 / 2200 passed / 0 failed / 152 skipped, 295 s, Unity behind both ends
+- [x] captures (Unity b): TestEvidence/Editor/p3d_rows.png (dark skin); Game-view renders TestEvidence/Premium/P3d/
 
-## PART 1 -- the halo for Half: (c) a two-layer halo + (a) the far-side check at Full only -- DONE (the developer's picks below)
-- [x] InkRects.ShownLabels (the one rule of which labels carry ink); HeroWordsOnPicture owns the SECOND layer: a halo layer in the tone
-      layer holding one pooled back label per shown word (same words, face, size, box; the box grown by the SDF reach so a cut eyebrow
-      never clips its glow); Media.uss .card-hero__halo (outline --ts-text-halo-wide-width 1.5px + glow --ts-text-halo-wide-blur 18px)
-- [x] FINDING -> developer pick "Wider atlas": the glow could not reach past the font SDF (padding 6 @ 48 pt = 0.125 em); FontAtlasBuilder
-      UiAtlasPadding 18 / UiAtlasSize 2048 for the 4 UITK theme assets (TMP untouched; glyphs 290 / 325 as before)
-- [x] FINDING -> developer pick "Keep halo, (a)": measured on the render the halo takes 0.10-0.26 off the title's brightest ring pixel but
-      0.00-0.02 off the eyebrow / Listen time (~2 px reach on 12 px text, whatever outline width): no credit counted; the credit code removed
-- [x] far-side ~0 at Full only; the looks read at Full; every word >= 4.5:1 unchanged
-- [x] developer review of the renders (TestEvidence/Premium/P3c/review_words_on_picture.png): (1) the tone's reach is taste -> Tone Spread,
-      a header Number field 0.4..1.5 (default 1), HeroWordsRule.Spread / Layer(spread); (2) BUG: scrolling, the tone layer rose with the
-      words and bared the picture's foot under a hard edge -> the layer stays, Rise(rise) moves its anchor and the halo layer
-- [x] EditMode LookKitRulesTests 13 / 13 (ToneSpread_...), FieldVisibilityRuleTests (Tone Spread in every picture look): 24 / 24
-- [x] PlayMode PoiCardHeroSceneTests 58 / 58 (Unity behind): TheHalo_IsTwoLayers_..., Scrolling_TheToneRisesWithTheWords_..._NoCutEdge,
-      ToneSpread_LessDarkensLessOfThePicture_AndEveryWordStillReads (196945 vs 260492 px darkened), far side at Full
+## Decisions (autonomous)
+- Reveal progress on the Start row's (the edge's) BOTTOM: 0 at the bottom bar's resting band top (no bottom bar: the viewport's foot),
+  1 a third of the viewport up from its foot; each tile its own 25 % window of the travel, in order. Once = once whole, stays whole.
+- Tint Depth 40..340 (default 120), from under the Start row; Bands keeps its whole-section flat tint.
+- FAB: only while the bar is on, Half / Full (not Peek); 12 above the bar's highest point (the raised disc's top) or 12 above the foot
+  / a shown footer; hides with Hide While Scrolling; the hero's words column ends 12 before it (lifting them breaks Half).
+- Sticky Action: Automatic (default: off while the bar is at the Bottom) / Shown / Hidden; Locate Button on / off.
 
-## PART 4 -- DONE: docs (_3.3 build log, _Test_Suite_1, 10-structure, the --ts-scrim-hero note + the regenerated USS); BLOCK on the final
-## tree: full EditMode 2352 / 2200 / 0 / 152 (257 s), 14 card fixtures 272 / 272 (30.3 min), both Unity behind; the Editor rows captured in
-## the dark skin (TestEvidence/Editor/p3c_navbar_rows.png); LivingRoomScene open, Play Mode off. STOP.
+## PART 1 -- the Reveal both ways (Motion > Replay)
+- [x] LookKit/Reveal.cs: RevealOptions (Window, FadeShare, Ease, ReduceMotion) / RevealRule (Progress, Held, TileProgress, Turn, Alpha)
+- [x] CardSectionSettings.replay + CardOptions.SectionReplay* + SectionStyleRule.Replay; Style.Replay
+- [x] OpenSectionView.Scrolled(progress) (no reveal ticker; Drift starts the first time p > 0); SectionSheets.OnScrolled(footInset);
+      BlockStackView.FootInset (the sheet: the bar's FootClearance at Bottom); RimLightView passes it
+- [x] Editor: Sections > Replay after Motion (hidden under Still), (i); CardSectionsRows
+- [x] EditMode: LookKitRulesTests (reveal), SectionStyleRuleTests (Replay), CardSectionsEditorTabTests (Replay row)
+- [x] PlayMode PoiCardSectionsSceneTests: REAL drags -- half ~ half the tiles, a third up all, back down past the bar 0 (Every Pass) /
+      16 (Once); Reduce Motion whole throughout
 
-## PART 2 + 3 -- DONE: Raised Depth (rule, config, live push, Editor slider) and Icon Colour (rule, config, Editor row, Chosen Colour
-## default Group; the shipped bar moved to Group and given the two new fields). EditMode NavBarShapeRuleTests / NavBarRuleTests /
-## NavigationBarEditorTabTests 32 / 32; LivePlayModeNavigationBarTests 2 / 2; PlayMode PoiCardNavBarSceneTests 46 / 47 -> the red one the
-## old default (an accent disc), its assertion moved to the group's colour; icons >= 9.48:1, disc icons 7.50-9.12:1
+## PART 2 -- Tint Depth
+- [x] CardSectionSettings.tint_depth = 120 (40..340); SectionStyleRule.TintDepth; AmountAt / Stops over it (FadeLength gone)
+- [x] Editor: Sections > Tint Depth slider after Intensity, (i)
+- [x] EditMode: SectionStyleRuleTests (default, clamp, old config, amounts at 0 / depth / below)
+- [x] PlayMode: on the render tint at the ground's top, ~paper at the depth and below; eyebrow + body >= 7:1 (existing test)
+- [x] Live push (Phase B): a real Tint Depth drag + a Replay pick in the real window reach the open card; Ctrl+Z
 
-## PART 2 -- Raised Depth (slider -1..+1, default +1; 0 flat; < 0 a cradle)
-- [ ] CardNavBarSettings.raised_depth = 1; NavBarRule.RaisedDepth (clamped, NaN = 1)
-- [ ] NavBarShapeRule.EdgeRise (depth R above 0, depth (R + gap) below) + CrestRadius (R / R + gap); Path takes a SIGNED rise -- a cradle
-      is the bell mirrored about the flat edge (concentric with the disc at -1); --ts-navbar-cradle-gap; the disc never moves
-- [ ] NavBarView: the path at EdgeRise, the disc at its own place (BellHeight)
-- [ ] Editor: "Raised Depth" slider after Indicator, only under Raised, (i); drawing never writes
-- [ ] EditMode: NavBarShapeRuleTests at -1 / -0.5 / 0 / 0.5 / 1; NavBarRuleTests default / clamp / old config; NavigationBarEditorTabTests
-      (rows, a real slider drag = one undo step, hidden without Raised)
-- [ ] Live push: LivePlayModeNavigationBarTests -- a real drag of Raised Depth in the window reaches the open card
-- [ ] PlayMode PoiCardNavBarSceneTests: pixels at -1 / 0 / +1, Bottom and Top
+## PART 3 -- the FAB (+ the gallery's Sticky-look entries pin Sticky Action Shown: their subject)
+- [x] CardNavBarSettings.locate_button = true, sticky_action = "auto"; CardOptions.NavBarSticky*; NavBarRule.LocateButton / StickyActionShown
+- [x] LocateFabRule (Shown, Bottom, WordsClear); LocateFabView (56 accent disc, the show_on_wall mark in --ts-on-accent, 44+ target,
+      tooltip = show_on_wall_button, a tap = ShowOnWall); tokens --ts-fab-size / --ts-fab-gap; USS
+- [x] Sheet wiring (construct, bind, place, hide with the scroll); hero words right clear; stack drops footer + hero Primary when off
+- [x] Editor: Navigation Bar > Locate Button, Sticky Action after Hide While Scrolling, (i); NavigationBarRows
+- [x] EditMode: LocateFabRuleTests, NavBarRuleTests (defaults), NavigationBarEditorTabTests (rows, picks one undo step)
+- [x] PlayMode PoiCardLocateFabSceneTests: real tap at Half / Full -> Peek, selection kept; never meets the bar's items (every chosen
+      group, Bottom / Top) or the hero's words (Half / Full); 44+; Hide While Scrolling; light / dark renders, mark >= 4.5:1; sticky matrix
 
-## PART 3 -- Icon Colour: Group (default) / Accent / Neutral
-- [ ] CardNavBarSettings.icon_color = "group"; CardOptions.NavBarIconColours / labels; Chosen Colour's default = Group (the disc in its
-      group's colour by default); NavBarRule.IconColour, IconToken (group's -text / --ts-accent-text / --ts-ink-2), DiscInkToken (the
-      group's -ink / --ts-on-accent / --ts-surface); NavBarView.Paint (labels stay ink / ink-2)
-- [ ] Editor: "Icon Colour" after Labels, (i)
-- [ ] EditMode: NavBarRuleTests (defaults, tokens; every group's -text >= 4.5:1 on --ts-bar and its -ink >= 4.5:1 on its colour, light /
-      dark, from the theme); NavigationBarEditorTabTests (row + pick)
-- [ ] PlayMode PoiCardNavBarSceneTests: icon_color cases; per group on the render, light / dark, every fill: icons >= 4.5:1, the disc
-      its group's colour with its icon >= 4.5:1
+## PART 4 -- the unchosen labels on a full-size render (light / dark, every fill): >= 7:1 or fix
+- [x] the labels test writes a fresh file per case, chosen / unchosen marked; last run's worst unchosen 8.41:1 (bottom glass light)
+- [x] re-measured in BLOCK: 120 unchosen readings, worst 8.41:1, all >= 7:1 -- no fix
 
-## PART 4 -- docs, BLOCK, looks, report
-- [ ] _3.3 build log; _Test_Suite_1; 10-structure (InkRects, PictureLuminance, LookKit/Tone.cs, HeroWordsRule.cs, HeroWordsOnPicture.cs,
-      images/night_hero.png; the changed lines); Theme.default.asset's --ts-scrim-hero note (regenerate the USS)
-- [ ] BLOCK: full EditMode + the 14 card fixtures (+ LivePlayModeNavigationBarTests) on the final state
-- [ ] LOOK: Editor rows in the dark skin; the renders
-- [ ] report with ONE commit message for all of P3c; LivingRoomScene open, ready to play
+## PART 5 -- DONE: docs (_3.3 build log, _Test_Suite_1, 10-structure, _5.1's bar rows), BLOCK (full EditMode 2358 / 2206 / 0 / 152; card fixtures 286 + hero re-runs 67 / 67), LOOK, report
 
 ## The card PlayMode fixtures of BLOCK
 PoiCardSectionsSceneTests, PoiCardNavBarSceneTests, PoiCardHeroSceneTests, PoiCardChromeMarksSceneTests, PoiCardSceneTests, CardLightSceneTests,
 ThemeFrameSceneTests, SectionSheetSceneTests, PoiCardLayoutSceneTests, PoiCardPagesSceneTests, PoiCardPaintingSceneTests, PoiCardThemeSceneTests,
-PoiCardChromeSceneTests, PoiCardPageChromeSceneTests (14)
+PoiCardChromeSceneTests, PoiCardPageChromeSceneTests (14) + PoiCardLocateFabSceneTests (new) + EditMode-hosted live: LivePlayModeNavigationBarTests,
+LivePlayModeCardSectionsTests (new)

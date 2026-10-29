@@ -116,6 +116,9 @@ namespace TileStories.Tests
                 {
                     var header = config.pois.First(p => p.id == "lamp").card.blocks.First(b => b.kind == BuiltInBlocks.HeaderKind);
                     header.fields.First(f => f.key == BlockStackBuilder.HeaderTitleField).text.First(t => t.lang == "en").value = title;
+                    // - what HeroTitleMeasure assumes is the phone's whole line: no Locate Button beside the words (its column narrows a
+                    //   row it reaches; the notice does not count it yet, _3.3 P3d)
+                    config.card_settings.navigation.bar.locate_button = false;
                 });
                 if (!Sheet.IsOpen) yield return Open("lamp", "en", SheetStopRule.Stop.Half);
                 yield return CardTestInput.Settle(0.2f);
@@ -127,7 +130,9 @@ namespace TileStories.Tests
                 float size = label.resolvedStyle.fontSize, width = label.contentRect.width;
                 // - what the Editor assumes (HeroTitleMeasure): the narrow hero size, the 390 pt line less --ts-space-5 each side
                 Assert.AreEqual(CardTestInput.TokenPx("--ts-size-hero-narrow"), size, 0.01f, "a phone's hero uses the narrow size");
-                Assert.AreEqual(Sheet.Root.worldBound.width - 2f * CardTestInput.TokenPx("--ts-space-5"), width, OnePixel, "the line is the phone less the foot's padding");
+                Assert.AreEqual(Sheet.Root.worldBound.width - 2f * CardTestInput.TokenPx("--ts-space-5"), width, OnePixel, "the line is the phone less the foot's padding"
+                    + " (the words' foot " + Header.Text.worldBound.yMax + ", their actions " + Header.Actions.resolvedStyle.display + " to " + Header.Actions.worldBound.yMax
+                    + ", the Locate Button " + Sheet.Locate.Root.worldBound + " shown " + Sheet.Locate.IsShown + ", stop " + Sheet.Stop + ")");
                 int predicted = HeroTitleFitRule.Lines(title, width, run => HeroTitleFitRule.AdvanceWidth(font, size, run));
                 if (float.IsNaN(oneLine)) oneLine = label.contentRect.height;
                 int drawn = Mathf.RoundToInt(label.contentRect.height / oneLine);
@@ -149,6 +154,10 @@ namespace TileStories.Tests
         public IEnumerator AtFull_TheWholeHeroIsTheScreen_WithTheCardsActionsAtItsFoot_AndTheStickyBarWaits(
             [Values("lamp", "painting")] string poi, [Values("en", "pt")] string language)
         {
+            // - the card's actions at the hero's foot are this test's subject: the sticky one drawn (Sticky Action Automatic leaves it out
+            //   under the default bottom bar, _3.3 P3d) and the whole row theirs (no Locate Button beside it: it stands for the same action)
+            Session.CardSettings.navigation.bar.sticky_action = CardOptions.NavBarStickyShown;
+            Session.CardSettings.navigation.bar.locate_button = false;
             yield return Open(poi, language, SheetStopRule.Stop.Full);
             Header.Clock = () => 0f;
             Header.Animate();
@@ -213,7 +222,8 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator ARealTapOnTheHerosAction_ShowsThePointOnTheWall_TheCardLowersAndTheSelectionStays()
         {
-            // - at Full: the words block, the action with it, sits at the hero's foot (S4a review)
+            // - at Full: the words block, the action with it, sits at the hero's foot (S4a review); the sticky action drawn (its subject)
+            Session.CardSettings.navigation.bar.sticky_action = CardOptions.NavBarStickyShown;
             yield return Open("lamp", "en", SheetStopRule.Stop.Full);
             var button = ((ActionsBlockView)Stack.HeroActionViews[0]).Actions.Single().Button;
             yield return CardTestInput.Tap(button.panel, button.worldBound.center);

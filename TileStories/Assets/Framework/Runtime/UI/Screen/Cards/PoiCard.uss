@@ -83,6 +83,41 @@
     background-color: var(--ts-clear);
 }
 
+/* The Locate Button ("Show me where it is", _3.3 P3d, LocateFabView): the accent disc at the sheet's bottom right -- its size, bottom and
+   inset are placed by C# (LocateFabRule over the card's tokens); it slides away with the bar under Hide While Scrolling */
+.poi-card__fab,
+.poi-card__fab:hover,
+.poi-card__fab:active {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--ts-accent);
+}
+
+.poi-card__fab {
+    transition-property: translate, opacity;
+    transition-duration: var(--ts-duration);
+    transition-timing-function: var(--ts-ease);
+}
+
+.poi-card__fab--hidden {
+    translate: 0 150%;
+    opacity: 0;
+}
+
+.poi-card--chrome-instant .poi-card__fab {
+    transition-duration: 0s;
+}
+
+.poi-card__fab-mark {
+    width: var(--ts-fab-icon);
+    height: var(--ts-fab-icon);
+    --ts-icon-stroke: 2px;
+}
+
 /* after the hero: v5's light glass (smoked in dark), a hairline round it, the mark in the card's ink */
 .poi-card__mark-disc {
     width: var(--ts-chrome-disc);

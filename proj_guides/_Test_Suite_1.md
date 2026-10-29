@@ -148,6 +148,11 @@ SearchDemoTests, MarkerViewRuntimeTests. The method-level tags are on the slow f
   (~242 s), PoiCardNavBarSceneTests -> 47 tests (~486 s; its class Core tag now carries the depth and icon renders too, ~3 min of CORE);
   LivePlayModeNavigationBarTests +1 (enters Play Mode, ~25 s, EditMode suite). A PlayMode run is refused while the Editor is in Play
   Mode: check `editor_state` `play_mode` before `run_tests` (a run was refused once while the developer had pressed Play).
+- **P3d** added PoiCardLocateFabSceneTests (9 tests, ~63 s; a card fixture of BLOCK from now on) and LivePlayModeCardSectionsTests (enters Play
+  Mode, ~14 s, EditMode suite); PoiCardSectionsSceneTests 33 tests (~367 s: real-stroke Reveal walks, Tint Depth renders). Watched: the live
+  test's real Tint Depth drag took 2 undo steps once in a full EditMode run (1 in every run of its own); it now records the count
+  (`TestEvidence/Editor/live_tint_depth_drag_steps.txt`) and walks Ctrl+Z by it -- the grouping's fixture, ConfigUndoGroupingTests, stays green.
+  The bar labels' ratios are written fresh per case (`labels_ratios_<position>_<mode>.txt`): the old appended file mixed runs.
 - **Two silent Painting tests.** `TheTabsWithChipsStrip_...` and `WhereTheChromeHidesTheStrip_...` read the wall's top element through
   `Assume`. When the developer moved the wall to icon tabs, they turned Inconclusive, and Inconclusive does not fail a run. They now
   set tabs with chips themselves, assert it, and are re-based on pattern 2. A wall-choice `Assume` hides a test; this was the only one

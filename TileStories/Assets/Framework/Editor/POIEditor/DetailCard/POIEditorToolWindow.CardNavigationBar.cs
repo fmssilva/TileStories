@@ -3,7 +3,7 @@
 // Partial: Detail Card > Navigation > Navigation Bar (_3.3 S4 third round, v5) -- the FIRST component of the Navigation section: ONE
 // configurable bar of the card's groups (card_settings.navigation.bar, NavBarView). Its rows mirror v5's Tweaks "Navigation Bar" -- same names,
 // same order, same defaults (NavigationBarRows): Enabled, Position, Shape, Fill, Indicator (+ Raised Depth under Raised), Chosen Icon, Labels,
-// Icon Colour, Chosen Colour, Bold Chosen Icon, Show, Hide While Scrolling -- then the Bar Groups table: one folding row per group (Shown, its number and name, ^ / v, delete),
+// Icon Colour, Chosen Colour, Bold Chosen Icon, Show, Hide While Scrolling, Locate Button, Sticky Action -- then the Bar Groups table: one folding row per group (Shown, its number and name, ^ / v, delete),
 // opened: its Name per language, Icon, Chosen Icon, Colour, Families and Section Style (its sections' Start on an open card, CardSections.cs);
 // "+ Add group", "Reset To The Families", and the warnings (a family
 // in no group, too many groups for a phone)
@@ -23,7 +23,7 @@ namespace TileStories.Editor
         internal static readonly string[] NavigationBarRows =
         {
             "Enabled", "Position", "Shape", "Fill", "Indicator", "Raised Depth", "Chosen Icon", "Labels", "Icon Colour", "Chosen Colour",
-            "Bold Chosen Icon", "Show", "Hide While Scrolling",
+            "Bold Chosen Icon", "Show", "Hide While Scrolling", "Locate Button", "Sticky Action",
         };
         internal const string NavigationBarGroupsTitle = "Bar Groups";
         // The groups the developer unfolded in the Bar Groups table (by key; a session's view state, never saved)
@@ -74,6 +74,11 @@ namespace TileStories.Editor
             bool hides = NavBarRule.HidesWhileScrolling(bar);
             if (DrawToggleField("Hide While Scrolling", hides, CardNavBarHideHelp) != hides)
                 bar.hide_on_scroll = hides ? CardOptions.NavBarHideNever : CardOptions.NavBarHideDown;
+            // - the card's "Show me where it is" button and the old sticky action it replaces under a bottom bar (_3.3 P3d)
+            bool locate = NavBarRule.LocateButton(bar);
+            if (DrawToggleField("Locate Button", locate, CardNavBarLocateHelp) != locate) bar.locate_button = !locate;
+            Popup("Sticky Action", NavBarRule.StickyAction(bar), CardOptions.NavBarStickyActions, CardOptions.NavBarStickyActionLabels,
+                CardNavBarStickyHelp, v => bar.sticky_action = v);
 
             DrawNavigationBarSubHeading();
             DrawBarGroupsTable(nav);

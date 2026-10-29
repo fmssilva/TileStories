@@ -250,6 +250,10 @@ namespace TileStories
             }
         }
 
+        // How far above the viewport's foot the chrome floating over it begins (a Navigation Bar at the bottom: its band's resting top), asked
+        // on every scroll moment -- where an open section's Start has cleared it (SectionSheets.OnScrolled). The sheet sets it; none = 0
+        public System.Func<float> FootInset { get; set; } = () => 0f;
+
         // Where the scroll rests for a jump to this slot (its top meets the viewport's top): the first block a sheet shows lands on the
         // SHEET's top, its opener in view (R10.7: the opener names the chapter it opens); any other block on its own top. NaN when not in
         // the scroll
@@ -431,10 +435,14 @@ namespace TileStories
             // - the scroll's slots go into their section sheets once they are all bound (Sheets.Build), in stack order
             var scrollSlots = new List<VisualElement>();
             var scrollEntries = new List<BlockStackBuilder.Entry>();
+            // - the sticky call to action (a footer look) is left out where the bar's Sticky Action says (Automatic: under a bottom bar, where
+            //   the Locate Button stands): no footer, no hero pill
+            bool sticky = NavBarRule.StickyActionShown(navigation);
             foreach (var entry in entries)
             {
                 // - a block pinned to the top (the hero_chip look) lives in the hero's action row now (BindHeroActions): no slot
                 if (entry.Definition.IsPinnedTop(entry.Variant)) continue;
+                if (!sticky && entry.Definition.IsFooter(entry.Variant)) continue;
                 bool header = _bound.Count == 0 && entry.Definition.Key == BuiltInBlocks.HeaderKind;
                 bool inScroll = !header && !entry.Definition.IsFooter(entry.Variant);
                 bool compact = inScroll && CardLayoutRule.ShowsCompact(navigation, entry, _registry);
@@ -486,6 +494,7 @@ namespace TileStories
             var header = HeaderView;
             if (header == null) return;
             var picks = HeroActionsRule.Of(entries);
+            if (!NavBarRule.StickyActionShown(context.Settings?.navigation)) picks = new HeroActionsRule.Picks(-1, picks.Listen);
             if (picks.HasPrimary) BindHeroView(header, entries[picks.Primary], entries[picks.Primary].Variant, HeroPrimaryClass, context);
             if (picks.HasListen) BindHeroView(header, entries[picks.Listen], BuiltInBlocks.AudioGuideHeroChip, HeroListenClass, context);
             header.Actions.style.display = _heroViews.Count > 0 ? DisplayStyle.Flex : DisplayStyle.None;

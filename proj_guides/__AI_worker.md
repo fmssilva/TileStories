@@ -13,7 +13,7 @@
 So start by reading them all. 
 
 
-## `And now:`
+## `And now: domain proj_guides\_3.3_POI_Card_Styles.md`
 P3d -- the Reveal both ways, Tint Depth, the "Show me where it is" FAB (`_3.3` fourth round > "P2 review" e, "P3c review" c-d,
 "P3c review, second pass" b).
 GATE: as before (MCP; push: origin = aaa2c1f, nothing to push; SDF fonts; compile clean before every run, editor_state confirms a

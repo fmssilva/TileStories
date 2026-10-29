@@ -74,6 +74,8 @@ namespace TileStories
         public FloatingSlot Floating { get; }
         // The vertical drag on the grabber, the header and the top strip: the height follows the finger, the release snaps or closes
         public SheetDrag Drag { get; }
+        // The "Show me where it is" button at the sheet's bottom right (_3.3 P3d, LocateFabRule): placed with the chrome (PlaceLocate)
+        public LocateFabView Locate { get; }
         // What opens in the full view (a block among its siblings, a lightbox, a bento section) and what reopens over a same-point rebind
         public CardFullViewOpener FullViewOpener { get; }
 
@@ -179,6 +181,8 @@ namespace TileStories
             // - the floating slot is a layer of its own (the sheet clips what it holds); its element host is the floating slot's
             Floating = new FloatingSlot(this);
             Slots = new NavSlots(Root, Stack.Scroll, BottomArea, Floating.Elements, navElements ?? NavElementRegistry.Shared);
+            // - an open section's Start begins its Reveal once it clears a Navigation Bar floating at the stack's foot
+            Stack.FootInset = () => Slots.BottomKey == NavBarView.ElementKey ? Slots.Bar.FootClearance : 0f;
             Chrome = new CardChromeView(this);
             Pager = new CardPagerView(Root, Stack.Scroll, Layout, Nav);
             Bento = new CardBentoView(Stack, Layout, Nav);
@@ -207,10 +211,12 @@ namespace TileStories
             CardIcons.SetKey(menuIcon, CardIcons.Menu);
             MenuButton.Add(menuIcon);
             Root.Add(MenuButton);
+            Locate = new LocateFabView(ShowOnWall);
+            Root.Add(Locate.Root);
             // - the chrome FLOATS over the stack (_3.3 S4a review): the shade, the grab row, the bar and the top strip are out of the flow
             //   (PoiCard.uss) and drawn over the scroll, the round buttons over them -- so the stack starts at the sheet's top, the hero's
             //   picture runs up behind the bars and nothing jumps when the strip comes
-            foreach (var floating in new[] { TopShade, ChromeBand, Handle, Stack.HeaderSlot, Slots.Top, CloseButton, SettingsButton, MenuButton })
+            foreach (var floating in new[] { TopShade, ChromeBand, Handle, Stack.HeaderSlot, Slots.Top, CloseButton, SettingsButton, MenuButton, Locate.Root })
                 floating.BringToFront();
 
             Layer.Add(Root);
@@ -242,6 +248,7 @@ namespace TileStories
             ChromeBand.EnableInClassList(ChromeBandGlassClass, _topBandGlass);
             PaintTopFade();
             CloseButton.tooltip = context.Strings?.Get(CardStrings.Keys.Close) ?? "";
+            Locate.Bind(context.Strings);
             ShowSettingsButton(context);
             context.Host ??= this;
             // - before the old card's full view closes: what of it stays over a rebind of the same point
@@ -303,6 +310,30 @@ namespace TileStories
             float heroBottom = header != null && header.HasPicture && header.HeroPart.panel != null ? header.HeroPart.worldBound.yMax : float.NaN;
             var band = bar.Row.worldBound;
             bar.SetOverHero(!float.IsNaN(band.yMin) && NavBarRule.OverHero(NavBarRule.AtBottom(bar.Settings), band.yMin, band.yMax, heroBottom, _barHeroMargin));
+        }
+
+        // Place the Locate Button as LocateFabRule says, over what lies under it now -- a bar floating at the bottom (over the bottom area: its
+        // highest point, the raised disc's top), a sticky footer shown there -- and tell the hero how much of its right its words leave to it.
+        // CardChromeView calls it with every decision of the chrome (a stop, a scroll, a part resized)
+        internal void PlaceLocate()
+        {
+            var nav = _context?.Settings?.navigation;
+            bool areaIn = !BottomArea.ClassListContains(CardChromeView.BottomHiddenClass);
+            float area = areaIn && !float.IsNaN(BottomArea.layout.height) ? BottomArea.layout.height : 0f;
+            bool barBottom = Slots.BottomKey == NavBarView.ElementKey;
+            float bottom = LocateFabRule.Bottom(barBottom ? area + Slots.Bar.HighestAboveFoot : float.NaN, area, Locate.Gap);
+            Locate.Apply(LocateFabRule.Shown(nav, Stop, false), LocateFabRule.Shown(nav, Stop, Chrome?.Scroll.BottomHidden ?? false), bottom);
+            // - the words' room follows the button being ON, never the stop or the scroll: measured at rest in the hero's own frame (the
+            //   button's top in the sheet, less where the hero starts in it with the stack unscrolled -- drawn place plus the scroll, which
+            //   moves the content by a translation: every offset of the scroll view's own parts is in it)
+            bool on = NavBarRule.Enabled(nav) && NavBarRule.LocateButton(nav.bar);
+            var header = Stack.HeaderView;
+            if (header == null || header.HeroPart.panel == null) return;
+            float heroTop = header.HeroPart.worldBound.yMin - Root.worldBound.yMin + Stack.Scroll.scrollOffset.y;
+            // - the sheet's REST height at its stop, like the words' own place (SetHeroLayout): a sheet still rising or being dragged never
+            //   puts a row beside the button for a moment and leaves it narrowed there
+            float buttonTop = Stops.HeightOf(Stop) - bottom - Locate.Size - heroTop;
+            header.SetWordsClear(LocateFabRule.WordsClear(on, Locate.Size, Locate.Inset, Locate.Gap), buttonTop);
         }
 
         // A chrome mark on `button`: the glass disc centred in the touch target, the vector mark centred in the disc (PoiCard.uss sizes

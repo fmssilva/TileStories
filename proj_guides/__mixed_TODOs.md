@@ -847,3 +847,9 @@ Today the hero has one Listen pill (an audio track). The target is a GUIDE that 
   more fun reported, no controlled evidence of better learning -- keep the mascot optional. Risks: auto-play takes pacing from the
   visitor (always a clear pause / take-over), motion cost on phones, AI answers outside the approved sources.
 - Plan it as its own domain with `skills/Domain_Planning.md` (the authored tour first, then the mascot, then Ask the guide).
+
+## Wall content folders: by POI, then by type (2026-10-29, from the `_4.1` Explore phase)
+Move each wall's runtime files from by-type (`CardMedia/images`, `audio`...) to `Resources/<Wall>/Wall/` + `Resources/<Wall>/POIs/<poi_id>/<type>/`,
+with the POI Editor creating folders, copying added files, moving shared ones and applying import settings by folder. Full
+analysis and the target tree: `_4.1.1_World_Design_Research.md` section 4.9. One block, through the Editor (no shim), after the
+`_3.3` component review and before `_4.1` world content; it touches the card domains' media paths.

@@ -193,6 +193,12 @@
     --ts-navbar-disc-icon-filled: 18px;
     --ts-navbar-label: 11px;
     --ts-navbar-label-text: 14px;
+    /* The Locate Button ("Show me where it is", _3.3 P3d, LocateFabView): the disc's size and its gap above what lies under it (the bar's
+       highest point, a footer, the sheet's foot) -- plain numbers LocateFabRule reads; its side inset is the bar's (--ts-navbar-inset) --
+       and the locate mark's length */
+    --ts-fab-size: 56;
+    --ts-fab-gap: 12;
+    --ts-fab-icon: 24px;
     /* minus --ts-space-3 (the gap a shown strip leaves above the first block, PoiCard.uss): the hero's picture starts flush under the strip.
        A USS length cannot be negated, so the pair is checked by PoiCardHeroSceneTests (the hero's top on the strip's bottom) */
     --ts-hero-strip-pull: -12px;

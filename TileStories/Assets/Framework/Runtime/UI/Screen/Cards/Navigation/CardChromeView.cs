@@ -138,6 +138,8 @@ namespace TileStories
             // - the bar keeps its place while the whole area slides away (it goes with it); hidden on its own only where the area stays
             _sheet.Slots.Bottom.EnableInClassList(BottomNavHiddenClass, chrome.Bottom && !chrome.BottomNav);
             stack.Footer.EnableInClassList(FooterHiddenClass, chrome.Bottom && !chrome.Footer);
+            // - the Locate Button goes with this decision: placed over what it left at the bottom, slid away with the bar
+            _sheet.PlaceLocate();
         }
 
         // The Navigation Bar is on (its Show / Hide While Scrolling replace the wall's own for the chrome)

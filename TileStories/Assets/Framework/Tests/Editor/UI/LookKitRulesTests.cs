@@ -9,7 +9,7 @@ namespace TileStories.Editor.Tests
 {
     // Tier 0 of the Look Kit's rules (_3.3 fourth round, P3), pure: the Fade's ramp (stops, hard edges, ends held, cuts), the tile's path (v6's
     // parts, inside its square, the petals turned, the Reveal's squeeze about the centre line), the Wave's path (v6's S handles reflected),
-    // the Mosaic (v6's band, a seamless period), the Reveal (stagger, overshoot, Reduce Motion, the enter line) and the Drift (a seamless
+    // the Mosaic (v6's band, a seamless period), the Reveal (the row's place both ways, the tiles in order, Once, Reduce Motion) and the Drift (a seamless
     // loop, Reduce Motion still). And the kit's boundary: its assembly references nothing of the project, its sources name no card type
     public class LookKitRulesTests
     {
@@ -268,43 +268,62 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(Mathf.RoundToInt(MosaicRule.AlphaOf(0, 0) * 255f), pixels[(h - 1 - 6) * w + 6].a, 1, "the first cell's middle");
         }
 
+        // The Reveal follows the row's PLACE (_3.3 P3c review c, second pass b): 0 as its bottom clears the start line (a bar's top), 1 a third
+        // up the view; the tiles turn in order with it, the same function both ways (scrolling back turns them out); Once keeps a whole row
+        // whole; Reduce Motion is whole throughout
         [Test]
-        public void TheReveal_StaggersEachPiece_OverShootsAndSettles_AndReduceMotionShowsEverythingAtOnce()
+        public void TheReveal_FollowsTheRowsPlaceBothWays_TheTilesTurnInOrder_OnceStaysWhole_AndReduceMotionIsWhole()
         {
             var o = new RevealOptions();
-            Assert.AreEqual(0.045f, o.Stagger, "~45 ms from one tile to the next (the brief)");
-            Assert.AreEqual(0f, RevealRule.Turn(0, 0f, o), "the first tile starts at nothing");
-            Assert.AreEqual(0f, RevealRule.Turn(3, 0.13f, o), "the fourth waits its 135 ms");
-            Assert.Greater(RevealRule.Turn(3, 0.14f, o), 0f, "...then turns");
-            float peak = 0f;
-            for (float t = 0f; t <= 0.7f; t += 0.01f) peak = Mathf.Max(peak, RevealRule.Turn(0, t, o));
-            Assert.Greater(peak, 1.01f, "v6's cubic-bezier(.3, 1.35, .5, 1) passes whole");
-            Assert.AreEqual(1f, RevealRule.Turn(0, 0.7f, o), 1e-4f, "...and settles at its 0.7 s");
-            Assert.AreEqual(1f, RevealRule.Alpha(0, 0.4f, o), 1e-4f, "faded in after 0.4 s");
-            Assert.AreEqual(15 * 0.045f + 0.7f, RevealRule.Length(16, o), 1e-4f, "16 tiles: the last starts 675 ms in");
-            // - once faded in a piece STAYS in: every tile whole at the Reveal's end and after (the ease's parabola fell back to 0 past twice
-            //   the fade, and a finished row showed only its last two tiles)
-            for (int i = 0; i < 16; i++)
+            // - the travel at the phone's Full: a 844 view, a bar's band resting 82 above its foot
+            float start = 844f - 82f, end = RevealRule.EndLine(844f, o);
+            Assert.AreEqual(844f * 2f / 3f, end, 1e-3f, "the end line a third of the way up the view");
+            Assert.AreEqual(0f, RevealRule.Progress(start + 30f, start, end), "under the bar's top: nothing yet");
+            Assert.AreEqual(0f, RevealRule.Progress(start, start, end), "just clearing it: 0");
+            Assert.AreEqual(0.5f, RevealRule.Progress((start + end) * 0.5f, start, end), 1e-5f, "half way up the travel: 0.5");
+            Assert.AreEqual(1f, RevealRule.Progress(end, start, end), 1e-5f, "a third up: 1");
+            Assert.AreEqual(1f, RevealRule.Progress(10f, start, end), "higher still: 1");
+            Assert.AreEqual(0f, RevealRule.Progress(float.NaN, start, end), "not laid out: never");
+            Assert.AreEqual(1f, RevealRule.Progress(99f, 100f, 300f), "a start line over the end (a tall bar) still has a travel: no division by 0");
+
+            // - 16 tiles (the phone's 390): in order, each over a quarter of the travel; half way up = half of them past half their turn
+            const int n = 16;
+            int PastHalf(float p) => Enumerable.Range(0, n).Count(i => RevealRule.PieceProgress(i, n, p, o) >= 0.5f);
+            Assert.AreEqual(0, PastHalf(0f), "at 0 none");
+            Assert.AreEqual(8, PastHalf(0.5f), "half way: half the tiles");
+            Assert.AreEqual(n, PastHalf(1f), "at 1 all");
+            for (float p = 0f; p <= 1f; p += 0.01f)
+                for (int i = 1; i < n; i++)
+                    Assert.GreaterOrEqual(RevealRule.PieceProgress(i - 1, n, p, o), RevealRule.PieceProgress(i, n, p, o), "in order at " + p);
+            for (int i = 0; i < n; i++)
             {
-                Assert.AreEqual(1f, RevealRule.Alpha(i, RevealRule.Length(16, o), o), 1e-4f, "tile " + i + " drawn whole at the end");
-                Assert.AreEqual(1f, RevealRule.Alpha(i, 60f, o), 1e-4f, "tile " + i + " a minute later");
+                Assert.AreEqual(0f, RevealRule.Turn(i, n, 0f, o), "tile " + i + " unturned at 0");
+                Assert.AreEqual(0f, RevealRule.Alpha(i, n, 0f, o), "...and unseen");
+                Assert.AreEqual(1f, RevealRule.Turn(i, n, 1f, o), 1e-4f, "tile " + i + " whole at 1 (the last ends its window there)");
+                Assert.AreEqual(1f, RevealRule.Alpha(i, n, 1f, o), 1e-4f, "...at alpha 1");
+                // - the alpha never falls back while the progress rises (the ease is clamped before the parabola)
                 float last = 0f;
-                for (float t = 0f; t <= 2f; t += 0.01f)
+                for (float p = 0f; p <= 1f; p += 0.01f)
                 {
-                    float a = RevealRule.Alpha(i, t, o);
-                    Assert.GreaterOrEqual(a, last - 1e-5f, "tile " + i + " never fades back out (at " + t + " s)");
+                    float a = RevealRule.Alpha(i, n, p, o);
+                    Assert.GreaterOrEqual(a, last - 1e-5f, "tile " + i + " fades in monotonically (at " + p + ")");
                     last = a;
                 }
             }
+            float peak = 0f;
+            for (float p = 0f; p <= 1f; p += 0.005f) peak = Mathf.Max(peak, RevealRule.Turn(0, n, p, o));
+            Assert.Greater(peak, 1.01f, "v6's cubic-bezier(.3, 1.35, .5, 1) passes whole on the way");
+            // - both ways: the same place gives the same tiles, whichever way the visitor came to it
+            Assert.AreEqual(RevealRule.Turn(5, n, 0.4f, o), RevealRule.Turn(5, n, 0.4f, o));
+
+            // - Replay: Every Pass follows the place, Once keeps a whole row whole (a row not yet whole still follows it)
+            Assert.AreEqual(0.2f, RevealRule.Held(1f, 0.2f, false), 1e-6f, "Every Pass: back down, the tiles turn out");
+            Assert.AreEqual(1f, RevealRule.Held(1f, 0.2f, true), "Once: whole stays whole");
+            Assert.AreEqual(0.2f, RevealRule.Held(0.6f, 0.2f, true), 1e-6f, "Once, not yet whole: it follows");
+
             var still = new RevealOptions { ReduceMotion = true };
-            Assert.AreEqual(1f, RevealRule.Turn(15, 0f, still), "Reduce Motion: every tile whole at once");
-            Assert.AreEqual(1f, RevealRule.Alpha(15, 0f, still));
-            Assert.AreEqual(0f, RevealRule.Length(16, still));
-            // - the enter line: the section's top above the view's foot by the margin
-            Assert.IsFalse(RevealRule.Entered(1000f, 200f, 800f, 30f), "top at 800 in an 800 view: not yet");
-            Assert.IsFalse(RevealRule.Entered(971f, 200f, 800f, 30f), "771 in: still not past the 30 margin");
-            Assert.IsTrue(RevealRule.Entered(969f, 200f, 800f, 30f), "769 in: entered");
-            Assert.IsFalse(RevealRule.Entered(float.NaN, 0f, 800f, 30f), "not laid out: never");
+            Assert.AreEqual(1f, RevealRule.Turn(15, n, 0f, still), "Reduce Motion: every tile whole at once");
+            Assert.AreEqual(1f, RevealRule.Alpha(15, n, 0f, still));
             Assert.AreEqual(1f, Easing.CubicBezier(0.3f, 1.35f, 0.5f, 1f, 1f));
         }
 

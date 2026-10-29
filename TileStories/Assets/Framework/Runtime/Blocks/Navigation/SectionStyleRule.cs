@@ -12,8 +12,7 @@ namespace TileStories
     {
         // The Starts Vary By Group walks, group by group (v6: about fade, story wave, media tiles, ...)
         public static readonly string[] ByGroupStarts = { CardOptions.SectionStartFade, CardOptions.SectionStartWave, CardOptions.SectionStartTiles };
-        // How far down a section the tint fades out (v6's 340 px), and Bands' share of the intensity (v6: 0.7)
-        public const float FadeLength = 340f;
+        // Bands' share of the intensity (v6: 0.7)
         public const float BandsShare = 0.7f;
         // The theme colours a section paints by name: neutral's tint, and a group colour's words ("<token>-text")
         public const string NeutralToken = "--ts-section-neutral";
@@ -28,14 +27,20 @@ namespace TileStories
             public readonly string Colour;
             public readonly float Intensity;
             public readonly string Motion;
+            // How far down the tint fades (pt) and whether a whole row stays whole (Replay Once)
+            public readonly float TintDepth;
+            public readonly bool Once;
 
-            public Style(string start, string divider, string colour, float intensity, string motion)
+            public Style(string start, string divider, string colour, float intensity, string motion,
+                float tintDepth = CardSectionSettings.TintDepthDefault, bool once = false)
             {
                 Start = start;
                 Divider = divider;
                 Colour = colour;
                 Intensity = intensity;
                 Motion = motion;
+                TintDepth = tintDepth;
+                Once = once;
             }
 
             public bool HasTint => Start != CardOptions.SectionStartPlain;
@@ -49,6 +54,11 @@ namespace TileStories
         public static string Vary(CardSectionSettings s) => Pick(s?.vary, CardOptions.SectionVaries, CardOptions.SectionVarySame);
         public static float Intensity(CardSectionSettings s) =>
             Mathf.Clamp(s?.intensity ?? 0.12f, CardSectionSettings.IntensityMin, CardSectionSettings.IntensityMax);
+        public static string Replay(CardSectionSettings s) => Pick(s?.replay, CardOptions.SectionReplays, CardOptions.SectionReplayEveryPass);
+        // Tint Depth in its range; an unreadable one (NaN) is the default
+        public static float TintDepth(CardSectionSettings s) =>
+            s == null || float.IsNaN(s.tint_depth) ? CardSectionSettings.TintDepthDefault
+            : Mathf.Clamp(s.tint_depth, CardSectionSettings.TintDepthMin, CardSectionSettings.TintDepthMax);
         public static bool IsOpen(CardContainerSettings c) => Pick(c?.blocks, CardOptions.Blocks, CardOptions.BlocksOpen) == CardOptions.BlocksOpen;
 
         // The section at `position` (0 = the card's first section) of the group at `groupIndex` in the bar's order, whose row's Section Style
@@ -60,7 +70,7 @@ namespace TileStories
                 : Start(s);
             // - one ornament per boundary (_3.3 P3a review f): a Tiles or Wave Start IS the boundary's ornament, so no divider stands before it
             string divider = position == 0 || OrnamentStart(start) ? CardOptions.SectionDividerNone : Divider(s);
-            return new Style(start, divider, Colour(s), Intensity(s), Motion(s));
+            return new Style(start, divider, Colour(s), Intensity(s), Motion(s), TintDepth(s), Replay(s) == CardOptions.SectionReplayOnce);
         }
 
         // A Start drawn as an ornament of its own (the tile row, the wave): it takes the divider's place
@@ -73,12 +83,12 @@ namespace TileStories
             : string.IsNullOrEmpty(groupColourToken) ? AccentToken : groupColourToken;
 
         // How strong the tint is at `y` down the section's ground (0 at its top): Bands flat (every other section only), the others fading out
-        // over FadeLength (a smooth ease, like v6's straight CSS gradient seen through the sRGB mix); Plain none
+        // over the style's Tint Depth (v6's straight CSS gradient, seen through the sRGB mix), then the paper; Plain none
         public static float AmountAt(Style style, int position, float y)
         {
             if (!style.HasTint || y < 0f) return 0f;
             if (style.Start == CardOptions.SectionStartBands) return position % 2 == 1 ? style.Intensity * BandsShare : 0f;
-            return style.Intensity * Mathf.Clamp01(1f - y / FadeLength);
+            return style.Intensity * Mathf.Clamp01(1f - y / Mathf.Max(1f, style.TintDepth));
         }
 
         // The colour (and alpha) to draw over `sheet` so that the panel's LINEAR blend lands exactly on v6's sRGB mix of the two at `amount`:
@@ -130,7 +140,7 @@ namespace TileStories
             const int samples = 8;
             for (int i = 0; i <= samples; i++)
             {
-                float y = FadeLength * i / samples;
+                float y = style.TintDepth * i / samples;
                 stops.Add((top + y, AmountAt(style, position, y)));
             }
             return stops;

@@ -79,14 +79,24 @@ namespace TileStories
         // Intensity: how strong the tint is where the section begins (IntensityMin..IntensityMax; v6's 0.30 is out of reach: 7:1 for the
         // words over it, measured)
         public float intensity = 0.12f;
-        // Motion: "still" | "reveal" (the default: the tiles turn in one after the other as the section enters the view) | "drift" (the
-        // same turn, then the divider's tiles or strip slide slowly sideways; the start rests). The card's Reduce Motion always shows them still
+        // Tint Depth (pt): how far down the section its tint fades to nothing, from under its Start, then the paper (TintDepthMin..TintDepthMax).
+        // Bands keeps its flat tint over the whole section
+        public float tint_depth = 120f;
+        // Motion: "still" | "reveal" (the default: the Start's tiles turn in one after the other as the row travels up the view -- from clearing
+        // the Navigation Bar to a third of the way up) | "drift" (the same turn, then the divider's tiles or strip slide slowly sideways; the
+        // start rests). The card's Reduce Motion always shows them still
         public string motion = CardOptions.SectionMotionReveal;
+        // Replay (under Reveal and Drift): "every_pass" (the default: the tiles follow the row both ways -- out as it goes back down past the
+        // bar, in again on the way up) | "once" (once whole, the row stays whole)
+        public string replay = CardOptions.SectionReplayEveryPass;
         // Vary: "same" (the default: every section begins with Start) | "by_group" (Fade, Wave, Tiles in turn, group by group)
         public string vary = CardOptions.SectionVarySame;
 
         public const float IntensityMin = 0.04f;
         public const float IntensityMax = 0.20f;
+        public const float TintDepthMin = 40f;
+        public const float TintDepthMax = 340f;
+        public const float TintDepthDefault = 120f;
     }
 
     // One block template of the wall (_3.3 R14.4): a PRESET -- "+ Add block" from it copies its rows into the point's new block, and the
@@ -258,6 +268,11 @@ namespace TileStories
         public string show = CardOptions.NavBarShowAlways;
         // Hide While Scrolling: "never" (the default, off) | "down" (on: it slides away while the visitor reads down, back on a move up)
         public string hide_on_scroll = CardOptions.NavBarHideNever;
+        // Locate Button (_3.3 P3d): the card's "Show me where it is" button at the bottom right, over the hero and after it (on by default)
+        public bool locate_button = true;
+        // Sticky Action: the card's sticky call to action (an Actions block in its footer look) in the hero and the footer -- "auto" (the
+        // default: left out while the bar is at the Bottom, where the Locate Button and the bar stand) | "shown" | "hidden"
+        public string sticky_action = CardOptions.NavBarStickyAuto;
         // The Bar Groups table, in the bar's order. Empty = the framework's six groups (NavBarRule.DefaultRows); the first edit of the table
         // writes them all, so their order is the wall's from then on
         public List<CardNavBarItem> items = new();
@@ -503,6 +518,10 @@ namespace TileStories
         public const string SectionMotionDrift = "drift";
         public static readonly string[] SectionMotions = { SectionMotionStill, SectionMotionReveal, SectionMotionDrift };
         public static readonly string[] SectionMotionLabels = { "Still", "Reveal", "Drift" };
+        public const string SectionReplayEveryPass = "every_pass";
+        public const string SectionReplayOnce = "once";
+        public static readonly string[] SectionReplays = { SectionReplayEveryPass, SectionReplayOnce };
+        public static readonly string[] SectionReplayLabels = { "Every Pass", "Once" };
         public const string SectionVarySame = "same";
         public const string SectionVaryByGroup = "by_group";
         public static readonly string[] SectionVaries = { SectionVarySame, SectionVaryByGroup };
@@ -559,6 +578,11 @@ namespace TileStories
         public const string NavBarHideNever = "never";
         public const string NavBarHideDown = "down";
         public static readonly string[] NavBarHides = { NavBarHideNever, NavBarHideDown };
+        public const string NavBarStickyAuto = "auto";
+        public const string NavBarStickyShown = "shown";
+        public const string NavBarStickyHidden = "hidden";
+        public static readonly string[] NavBarStickyActions = { NavBarStickyAuto, NavBarStickyShown, NavBarStickyHidden };
+        public static readonly string[] NavBarStickyActionLabels = { "Automatic", "Shown", "Hidden" };
 
         // What starting an audio does while another plays (CardContainerSettings.audio_when_another_starts), and the Editor's words for them
         public const string AudioSwitch = "switch";

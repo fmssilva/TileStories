@@ -232,6 +232,31 @@ namespace TileStories
             Foot.style.marginBottom = shown ? _heroHeight - WordsBottom : new StyleLength(StyleKeyword.Null);
         }
 
+        // The room at the hero's right its words leave to a button standing there (the card's Locate Button, LocateFabRule.WordsClear): `right`
+        // from the hero's right edge, for the rows that reach down beside it -- whose foot at rest lies below `buttonTop` (the button's top in
+        // the hero's own frame). The words grow UP from a fixed foot, so a row's foot never moves with its width: the actions row beside the
+        // button takes the room, the words over it keep the whole width (a title narrowed for nothing wraps a line more and lifts the eyebrow
+        // into the picture's brightest part). 0 = none; a plate (no picture) keeps its own, its words sit at the card's top
+        public void SetWordsClear(float right, float buttonTop)
+        {
+            bool on = HasPicture && right > 0f && !float.IsNaN(buttonTop);
+            float foot = Foot.layout.y, beside = buttonTop + BesideTolerance;
+            ClearRow(Text, on && foot + Text.layout.yMax > beside, right);
+            ClearRow(Actions, on && Actions.resolvedStyle.display != DisplayStyle.None && foot + Actions.layout.yMax > beside, right);
+        }
+
+        // How far a row's box may reach past the button's top and still count as above it: one point, the foot of a text box is its
+        // descent's room, never ink -- the card's own numbers put the words' text 1 pt over the button's top, where a sub-pixel layout
+        // would otherwise flip the title between one line and two
+        public const float BesideTolerance = 1f;
+
+        // One row's right side: its own gutter grown to the button's room, or back to the stylesheet's
+        private static void ClearRow(VisualElement row, bool beside, float right)
+        {
+            var wanted = beside ? new StyleLength(right) : new StyleLength(StyleKeyword.Null);
+            if (row.style.paddingRight != wanted) row.style.paddingRight = wanted;
+        }
+
         // The bottom of the hero's title as drawn (risen by the scroll), in the stack's content coordinates: what the bar's title waits for
         public float HeroTitleBottom()
         {

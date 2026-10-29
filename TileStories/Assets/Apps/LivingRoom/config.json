@@ -14438,6 +14438,8 @@
                 "bold_selected": true,
                 "show": "always",
                 "hide_on_scroll": "never",
+                "locate_button": true,
+                "sticky_action": "auto",
                 "items": []
             }
         },
@@ -14503,7 +14505,9 @@
             "divider_image": "",
             "colour": "group",
             "intensity": 0.11999999731779099,
+            "tint_depth": 120.0,
             "motion": "reveal",
+            "replay": "every_pass",
             "vary": "same"
         }
     },

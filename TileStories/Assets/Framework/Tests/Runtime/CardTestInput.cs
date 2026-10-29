@@ -342,17 +342,13 @@ namespace TileStories.Tests
             Assert.AreEqual(3, still, "precondition: " + e.name + " holds still before the finger (no fling left running)");
         }
 
-        // Every open section's motion done and held before a render: a Reveal under way finished (a section that has not entered stays
-        // hidden), the clocks frozen at this moment -- a Drift stands where it is, and a section entering later never turns in under a grab
-        // (an uncapped run draws GrabStill's frames faster than a Reveal's 1.4 s)
+        // Every open section held still before a render: the Drift clocks frozen at this moment, so a sliding divider stands where it is. The
+        // Reveal needs no hold: it is a function of the row's place, so a still scroll is a still row (the stack held still: UntilStill)
         public static void HoldSectionsStill(PoiCardSheetView sheet)
         {
             double at = Time.realtimeSinceStartupAsDouble;
             foreach (var section in sheet.Stack.Sheets.All)
-            {
-                section.Open.Finish();
                 section.Open.Clock = () => at;
-            }
         }
 
         // Wait until the stack stops moving (three frames unmoved): a released drag flings on, and a reading taken mid-fling is the

@@ -14,7 +14,8 @@ namespace TileStories.Tests
     //     (Tiles) and its eyebrow (the 28 x 3 rule in the group's colour over its name), its blocks open with a hairline between two
     //   - every option value changes what the visitor sees (one case per value), the pairs that interact (Start x Colour on the render,
     //     Motion x Reduce Motion), the group's Section Style over the card's Start, Cards keeping today's framed look
-    //   - Reveal fires when a REAL drag brings a section into view, and not before
+    //   - the Reveal follows the Start row's place under REAL drags, both ways (Replay Every Pass / Once), Reduce Motion whole throughout
+    //   - Tint Depth: a band under the Start fading to the paper at its depth, on the render
     //   - every eyebrow and body text >= 7:1 on the render over every Start at Intensity max, light and dark
     // Renders in TestEvidence/Premium/P3/.
     public class PoiCardSectionsSceneTests : SearchSceneFixture
@@ -65,12 +66,12 @@ namespace TileStories.Tests
             Stack.Sheets.All.Where(s => s.Root.ClassListContains(SectionSheets.OpenClass) && s.Root.resolvedStyle.display == DisplayStyle.Flex
                 && s.Open.Edge.resolvedStyle.display == DisplayStyle.Flex).ToList();
 
-        // Scroll a section's top just under the floating chrome, every section's motion finished (a still picture to read)
+        // Scroll a section's top just under the floating chrome -- its Start row high in the view, so its Reveal is whole -- the motion held
+        // still (a still picture to read)
         private IEnumerator ShowSection(SectionSheets.Sheet section)
         {
             Scroll.scrollOffset = new Vector2(0f, Stack.TopInScroll(section.Root) - Stack.LandingInset);
             yield return CardTestInput.Settle(0.3f);
-            foreach (var s in Sections) s.Open.Entered();
             CardTestInput.HoldSectionsStill(Sheet);
             yield return CardTestInput.UntilStill(Sheet);
         }
@@ -157,7 +158,8 @@ namespace TileStories.Tests
                 int barIndex = bar.Entries.ToList().FindIndex(e => e.Item.Key == sections[i].Group.Key);
                 Assert.AreEqual(bar.Items[barIndex].Label.text.ToUpperInvariant(), o.Name.text, what + ": the group's name, the bar's own words in capitals");
                 TintedAt(sections[i], 0.12f, what + ": the fade at Intensity 0.12 where it begins");
-                Assert.AreEqual(SectionStyleRule.FadeLength, o.GroundOptions.Stops.Last().Offset - o.GroundOptions.Stops.First().Offset, 0.5f, what + ": over 340");
+                Assert.AreEqual(CardSectionSettings.TintDepthDefault, o.GroundOptions.Stops.Last().Offset - o.GroundOptions.Stops.First().Offset, 0.5f,
+                    what + ": over Tint Depth's 120");
                 // - blocks inside a section: apart by space and a hairline
                 var shown = sections[i].Slots.Where(s => s.resolvedStyle.display == DisplayStyle.Flex).ToList();
                 for (int b = 1; b < shown.Count; b++)
@@ -367,86 +369,201 @@ namespace TileStories.Tests
             }
         }
 
-        // Reveal fires when a REAL drag brings a section into view, and not before; Reduce Motion shows it whole at once; Drift slides, and
-        // Reduce Motion holds it still
+        // How many of a section's Start tiles have turned at least half way now, and whether every one is whole (turned and at alpha 1)
+        private static int TurnedTiles(SectionSheets.Sheet section, int count) =>
+            Enumerable.Range(0, count).Count(i => (section.Open.StartTileOptions.ScaleOf?.Invoke(i) ?? 1f) >= 0.5f);
+        private static bool AllWhole(SectionSheets.Sheet section, int count) =>
+            Enumerable.Range(0, count).All(i => Mathf.Abs((section.Open.StartTileOptions.ScaleOf?.Invoke(i) ?? 1f) - 1f) < 1e-3f
+                && Mathf.Abs((section.Open.StartTileOptions.AlphaOf?.Invoke(i) ?? 1f) - 1f) < 1e-3f);
+
+        // The Reveal's progress the row's place gives, measured on the screen and NOT asked of the card: 0 as the Start row's bottom clears
+        // the Navigation Bar's top (its band, as drawn), 1 once it is a third of the way up the visible card (the stack's viewport)
+        private float MeasuredProgress(SectionSheets.Sheet section)
+        {
+            float rowBottom = section.Open.Edge.worldBound.yMax;
+            float barTop = Sheet.Slots.Bar.Row.worldBound.yMin;
+            var view = Scroll.contentViewport.worldBound;
+            float third = view.yMax - view.height / 3f;
+            return Mathf.Clamp01((barTop - rowBottom) / (barTop - third));
+        }
+
+        // P3d PART 1 (the P3c review c, second pass b) with REAL finger strokes: the Start row's tiles turn in order with its place -- none
+        // while it is under the Navigation Bar, about half of them half way up its travel, all of them a third of the way up the card; real
+        // strokes back down past the bar turn them out again (Replay Every Pass) or leave them whole (Once); Reduce Motion whole throughout.
+        // Renders of the half-way row in TestEvidence/Premium/P3d/
         [UnityTest]
-        public IEnumerator ARealDrag_BringsASectionIntoView_AndOnlyThenItsTilesTurnIn_ReduceMotionShowsThemAtOnce_DriftSlidesUnlessReduced()
+        public IEnumerator RealDrags_TheStartRowsTilesFollowItsPlace_BothWays_EveryPassOrOnce_ReduceMotionWholeThroughout(
+            [Values(CardOptions.SectionReplayEveryPass, CardOptions.SectionReplayOnce, "reduce")] string pass)
+        {
+            bool reduce = pass == "reduce", once = pass == CardOptions.SectionReplayOnce;
+            yield return Open(c =>
+            {
+                c.container.reduce_motion = reduce;
+                if (once) c.sections.replay = CardOptions.SectionReplayOnce;
+            });
+            var bar = Sheet.Slots.Bar;
+            Assert.IsNotNull(bar.Root.parent, "precondition: the default Navigation Bar floats at the bottom");
+            var section = Sections[1];
+            int count = LookKit.TileRule.CountFor(section.Open.StartTilesRow.contentRect.width, section.Open.StartTileOptions.Size, section.Open.StartTileOptions.Joint);
+            Assert.AreEqual(16, count, "precondition: 16 tiles across the phone's 390");
+            Assert.Greater(section.Open.Edge.worldBound.yMax, bar.Row.worldBound.yMin, "precondition: at the card's top the row is under the bar's top");
+            Assert.AreEqual(reduce ? count : 0, TurnedTiles(section, count), reduce ? "Reduce Motion: whole before it moved" : "under the bar: no tile turned");
+
+            // - small real strokes up the card (each moves the stack ~1.7x the finger: about a fifth of the row's travel), the reading taken
+            //   at rest after each, until the row is past a third of the way up
+            var readings = new List<(float P, int Turned)>();
+            float halfP = float.NaN;
+            int halfTurned = -1;
+            for (int stroke = 0; stroke < 60 && MeasuredProgress(section) < 1f; stroke++)
+            {
+                var reach = CardTestInput.ReachableStack(Sheet);
+                yield return CardTestInput.TouchDrag(Scroll.panel, new Vector2(reach.center.x, reach.center.y), new Vector2(0f, -22f));
+                yield return CardTestInput.UntilStill(Sheet);
+                float p = MeasuredProgress(section);
+                int turned = TurnedTiles(section, count);
+                readings.Add((p, turned));
+                if (reduce) Assert.IsTrue(AllWhole(section, count), "Reduce Motion: whole throughout (at " + p.ToString("0.00") + ")");
+                if (!reduce && p > 0.3f && p < 0.7f && (float.IsNaN(halfP) || Mathf.Abs(p - 0.5f) < Mathf.Abs(halfP - 0.5f)))
+                {
+                    halfP = p;
+                    halfTurned = turned;
+                    yield return SaveRow(section, pass + "_half");
+                }
+            }
+            string log = string.Join(", ", readings.Select(r => r.P.ToString("0.00") + ":" + r.Turned));
+            Assert.GreaterOrEqual(MeasuredProgress(section), 1f, "precondition: real strokes carried the row a third of the way up (" + log + ")");
+            if (!reduce)
+            {
+                Assert.IsFalse(float.IsNaN(halfP), "precondition: a rest half way up the travel (0.3 .. 0.7): " + log);
+                Assert.AreEqual(count * halfP, halfTurned, 3f, "half way up (" + halfP.ToString("0.00") + "): about half the tiles turned -- " + log);
+                // - in order with the place: more of the travel never turns fewer tiles
+                for (int i = 1; i < readings.Count; i++)
+                    if (readings[i].P >= readings[i - 1].P) Assert.GreaterOrEqual(readings[i].Turned, readings[i - 1].Turned, "the tiles follow the place: " + log);
+            }
+            Assert.IsTrue(AllWhole(section, count), "a third of the way up: every tile whole");
+
+            // - real strokes back DOWN the card until the row is under the bar's top again
+            for (int stroke = 0; stroke < 60 && MeasuredProgress(section) > 0f; stroke++)
+            {
+                var reach = CardTestInput.ReachableStack(Sheet);
+                yield return CardTestInput.TouchDrag(Scroll.panel, new Vector2(reach.center.x, reach.yMin + 20f), new Vector2(0f, 60f));
+                yield return CardTestInput.UntilStill(Sheet);
+                if (reduce) Assert.IsTrue(AllWhole(section, count), "Reduce Motion: whole on the way back too");
+            }
+            Assert.AreEqual(0f, MeasuredProgress(section), "precondition: real strokes brought the row back under the bar");
+            if (reduce || once) Assert.IsTrue(AllWhole(section, count), (once ? "Once" : "Reduce Motion") + ": still whole under the bar");
+            else Assert.AreEqual(0, TurnedTiles(section, count), "Every Pass: back under the bar, the tiles turned out");
+        }
+
+        // The Start row as drawn now, saved for the look
+        private IEnumerator SaveRow(SectionSheets.Sheet section, string name)
+        {
+            CardTestInput.HoldSectionsStill(Sheet);
+            Texture2D shot = null;
+            yield return ThemePixelSet.GrabStill("reveal_" + name, null, r => shot = r);
+            if (shot == null) yield break;
+            System.IO.File.WriteAllBytes(TestEvidence.PathFor("Premium/P3d", "reveal_" + name + ".png"), shot.EncodeToPNG());
+            Object.Destroy(shot);
+        }
+
+        // A revealed Start row shows every tile on the render; Drift slides the divider, the Start rests; Reduce Motion holds both still. One
+        // ornament per boundary: the Tiles Start is read on the default card (no divider before it), the sliding divider before a Fade start
+        [UnityTest]
+        public IEnumerator ARevealedRow_DrawsEveryTile_DriftSlidesTheDividerUnlessReduced_TheStartRests()
         {
             foreach (bool reduce in new[] { false, true })
             {
-                // - a fresh card each pass: a live push keeps the open card's scroll, and the pass before ended with the last section in view
-                SelectionEventBus.Clear();
-                yield return CardTestInput.Settle();
-                yield return Open(c => { c.container.reduce_motion = reduce; });
-                double now = 0;
-                foreach (var s in Sections) s.Open.Clock = () => now;
-                var last = Sections.Last();
-                float viewport = Scroll.contentViewport.layout.height;
-                Assert.Greater(Stack.TopInScroll(last.Root), viewport * 2f, "precondition: the last section is far below the view");
-                Assert.IsFalse(last.Open.Revealed, "not in view yet: not revealed");
-                if (!reduce) Assert.AreEqual(0f, last.Open.StartTileOptions.ScaleOf(0), "...its tiles wait unturned");
-                // - real finger strokes down the card until the last section's top is in the view
-                for (int stroke = 0; stroke < 80 && !last.Open.Revealed; stroke++)
-                {
-                    float top = Stack.TopInScroll(last.Root) - Scroll.scrollOffset.y;
-                    Assert.IsFalse(last.Open.Revealed, "never before its top is in the view (top " + top + " of " + viewport + ")");
-                    var reach = CardTestInput.ReachableStack(Sheet);
-                    yield return CardTestInput.TouchDrag(Scroll.panel, new Vector2(reach.center.x, reach.yMax - 40f), new Vector2(0f, -reach.height * 0.3f));
-                    yield return CardTestInput.UntilStill(Sheet);
-                }
-                Assert.IsTrue(last.Open.Revealed, "a real drag brought it into view: revealed");
-                Assert.Less(Stack.TopInScroll(last.Root) - Scroll.scrollOffset.y, viewport, "...with its top really in the view");
-                if (reduce)
-                {
-                    Assert.IsFalse(last.Open.RevealRunning, "Reduce Motion: no turn runs");
-                    Assert.AreEqual(1f, last.Open.StartTileOptions.ScaleOf(15), "...every tile whole at once");
-                }
-                else
-                {
-                    Assert.IsTrue(last.Open.RevealRunning, "the turn runs");
-                    now = 0.1;
-                    yield return null;
-                    yield return null;
-                    float first = last.Open.StartTileOptions.ScaleOf(0), fifth = last.Open.StartTileOptions.ScaleOf(4);
-                    Assert.Greater(first, fifth, "staggered: the first tile ahead of the fifth at 0.1 s (" + first + " / " + fifth + ")");
-                    now = 2.0;
-                    for (int f = 0; f < 3; f++) yield return null;
-                    Assert.IsFalse(last.Open.RevealRunning, "the turn ran its course");
-                }
-                yield return EveryTileOfTheStartRowIsDrawnWhole(last, reduce ? "reduced" : "revealed");
+                yield return Open(c => c.container.reduce_motion = reduce);
+                var row = Sections[1];
+                yield return ShowSection(row);
+                yield return EveryTileOfTheStartRowIsDrawnWhole(row, reduce ? "reduced" : "revealed");
             }
-            // - Drift: the Start turns in once and rests; the DIVIDER slides (10 pt a second); Reduce Motion holds both still. One ornament per
-            //   boundary: the Tiles Start is read on the default card (no divider before it), the sliding divider before a Fade start
             foreach (bool reduce in new[] { false, true })
             {
                 yield return Open(c => { c.sections.motion = CardOptions.SectionMotionDrift; c.sections.divider = CardOptions.SectionDividerAzulejo; c.container.reduce_motion = reduce; });
                 var section = Sections[1];
                 Assert.AreEqual(DisplayStyle.None, section.Open.Divider.resolvedStyle.display, "a Tiles start stands alone: no divider before it");
                 double now = 0;
-                yield return ShowSection(section);
-                section.Open.Show(section.Run, section.Open.Style, section.Open.Position, section.Group.ColorToken, section.Open.Name.text, null, reduce, true);
-                section.Open.Clock = () => now;
-                section.Open.Entered();
-                Assert.AreEqual(!reduce, section.Open.RevealRunning, reduce ? "Reduce Motion: no turn" : "Drift turns the Start in first, as Reveal");
+                foreach (var s in Sections) s.Open.Clock = () => now;
+                Scroll.scrollOffset = new Vector2(0f, Stack.TopInScroll(section.Root) - Stack.LandingInset);
+                yield return CardTestInput.Settle(0.3f);
                 now = 1.3;
                 for (int f = 0; f < 3; f++) yield return null;
                 Assert.AreEqual(0f, section.Open.StartTileOptions.Offset, "the Start never slides: it rests");
-                now = 3.0;
-                for (int f = 0; f < 3; f++) yield return null;
-                Assert.AreEqual(1f, section.Open.StartTileOptions.AlphaOf?.Invoke(15) ?? 1f, 1e-4f, "...and the Start stays whole");
+                Assert.IsTrue(AllWhole(section, 16), "...and is whole up there");
 
                 yield return Open(c => { c.sections.motion = CardOptions.SectionMotionDrift; c.sections.divider = CardOptions.SectionDividerAzulejo; c.sections.start = CardOptions.SectionStartFade; c.container.reduce_motion = reduce; });
                 section = Sections[1];
                 Assert.AreEqual(DisplayStyle.Flex, section.Open.Divider.resolvedStyle.display, "precondition: before a Fade start the divider is drawn");
                 now = 0;
-                yield return ShowSection(section);
-                section.Open.Show(section.Run, section.Open.Style, section.Open.Position, section.Group.ColorToken, section.Open.Name.text, null, reduce, true);
-                section.Open.Clock = () => now;
-                section.Open.Entered();
+                // - the push re-showed the sections while the card still held the pass before's scroll (this row in view): its drift began on
+                //   that pass's clock. Stopped here, it starts again on the test's clock the moment the row shows below
+                foreach (var s in Sections)
+                {
+                    s.Open.Clock = () => now;
+                    s.Open.Stop();
+                }
+                Scroll.scrollOffset = new Vector2(0f, Stack.TopInScroll(section.Root) - Stack.LandingInset);
+                yield return CardTestInput.Settle(0.3f);
+                Assert.AreEqual(!reduce, section.Open.Drifting, reduce ? "Reduce Motion: no drift" : "Drift runs once the row shows");
                 now = 1.3;
                 for (int f = 0; f < 3; f++) yield return null;
                 if (reduce) Assert.AreEqual(0f, section.Open.DividerTileOptions.Offset, "Reduce Motion: the divider holds still");
                 else Assert.AreEqual(13f, section.Open.DividerTileOptions.Offset, 0.5f, "Drift: the divider's tiles slide 10 pt a second");
+            }
+        }
+
+        // P3d PART 2 (the P3c review d): the tint is a band under the Start that fades to the paper at Tint Depth -- read on the RENDER, the
+        // same pixel at the same scroll in renders that differ ONLY in the tint (the blocks over the ground identical, so they cancel out):
+        //   - right under the Start the tint is there (the default depth at Intensity max vs min)
+        //   - the default 120 still tints at 60 where a 40 depth is the paper; at 130 both are the paper
+        //   - 340 still tints at 160 where 120 is the paper; at 380 both are the paper
+        // Light and dark (TestEvidence/Premium/P3d/)
+        [UnityTest]
+        public IEnumerator TheTint_IsABandUnderTheStart_FadingToThePaperAtTintDepth_OnTheRender([Values("light", "dark")] string mode)
+        {
+            var shots = new Dictionary<string, Texture2D>();
+            RectInt ground = default;
+            float px = 1f, groundTop = 0f;
+            try
+            {
+                foreach (var (name, depth, intensity) in new[]
+                {
+                    ("min", CardSectionSettings.TintDepthMin, CardSectionSettings.IntensityMax),
+                    ("default", CardSectionSettings.TintDepthDefault, CardSectionSettings.IntensityMax),
+                    ("max", CardSectionSettings.TintDepthMax, CardSectionSettings.IntensityMax),
+                    ("faint", CardSectionSettings.TintDepthDefault, CardSectionSettings.IntensityMin),
+                })
+                {
+                    yield return Open(c => { c.sections.tint_depth = depth; c.sections.intensity = intensity; });
+                    ThemeController.SetMode(mode);
+                    yield return CardTestInput.Settle(0.2f);
+                    var section = Sections[1];
+                    yield return ShowSection(section);
+                    Assert.AreEqual(depth, section.Open.Style.TintDepth, "precondition: the card reads Tint Depth " + depth);
+                    Texture2D shot = null;
+                    yield return ThemePixelSet.GrabStill($"tint_{name}_{mode}", null, r => shot = r);
+                    Assert.IsNotNull(shot, "precondition: a render");
+                    shots[name] = shot;
+                    ground = ThemePixelSet.ScreenRectOf(section.Open.Ground, shot);
+                    px = 1f / ThemePixelSet.PanelUnitsPerPixel(section.Open.Ground);
+                    groundTop = section.Open.Edge.layout.height;
+                    System.IO.File.WriteAllBytes(TestEvidence.PathFor("Premium/P3d", $"tint_{name}_{mode}.png"), shot.EncodeToPNG());
+                }
+                // - the right gutter (no words there), `y` down the ground from under the Start
+                Color At(string shot, float y) => shots[shot].GetPixel(Mathf.RoundToInt(ground.xMax - 8f * px), Mathf.RoundToInt(ground.yMax - (groundTop + y) * px));
+                float Diff(string a, string b, float y) => ((Vector4)At(a, y) - (Vector4)At(b, y)).magnitude;
+                string Pair(string a, string b, float y) => " (" + (Color32)At(a, y) + " / " + (Color32)At(b, y) + " at " + y + ")";
+                const float Same = 2.5f / 255f, Tinted = 4f / 255f;
+                Assert.Greater(Diff("default", "faint", 4f), Tinted, "right under the Start the tint is there" + Pair("default", "faint", 4f));
+                Assert.Greater(Diff("default", "min", 60f), Tinted, "120 still tints at 60, where 40 is the paper" + Pair("default", "min", 60f));
+                Assert.Less(Diff("default", "min", 130f), Same, "at 130 both are the paper: 120's tint ended at its depth" + Pair("default", "min", 130f));
+                Assert.Greater(Diff("max", "default", 160f), Tinted, "340 still tints at 160, where 120 is the paper" + Pair("max", "default", 160f));
+                Assert.Less(Diff("max", "default", 380f), Same, "at 380 both are the paper" + Pair("max", "default", 380f));
+            }
+            finally
+            {
+                foreach (var t in shots.Values) Object.Destroy(t);
             }
         }
 

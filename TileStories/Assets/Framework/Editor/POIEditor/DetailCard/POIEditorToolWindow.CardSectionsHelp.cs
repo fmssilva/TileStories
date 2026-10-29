@@ -37,13 +37,22 @@ namespace TileStories.Editor
             "every section. Neutral: a quiet warm grey. The group's name keeps its own colour either way.";
 
         private const string CardSectionsIntensityHelp =
-            "How strong the tint is where a section begins (it fades out about 340 points down). The highest value still keeps every word " +
-            "over it at 7:1 in light and dark.";
+            "How strong the tint is where a section begins (it fades out over Tint Depth). The highest value still keeps every word over it " +
+            "at 7:1 in light and dark.";
+
+        private const string CardSectionsTintDepthHelp =
+            "How far down a section its tint reaches, in points (120 by default): the colour fades from under the section's start to nothing " +
+            "at this depth, and the rest of the section is the plain paper. Bands ignores it: its tint covers the whole section.";
 
         private const string CardSectionsMotionHelp =
-            "Still: nothing moves. Reveal (the default): the tiles turn in one after the other the first time their section comes into view. " +
-            "Drift: the tiles turn in as with Reveal, then the divider's tiles or strip slide slowly sideways; the start rests. " +
-            "The card's Reduce Motion (Card Container) always shows them still.";
+            "Still: nothing moves. Reveal (the default): as the visitor scrolls, the start's tiles turn in one after the other -- from the " +
+            "moment the row clears the Navigation Bar until it is a third of the way up the card. Drift: the tiles turn in as with Reveal, " +
+            "then the divider's tiles or strip slide slowly sideways; the start rests. The card's Reduce Motion (Card Container) always shows " +
+            "them still and whole.";
+
+        private const string CardSectionsReplayHelp =
+            "Every Pass (the default): the tiles follow the row both ways -- scrolling back down turns them out again, and they turn in once " +
+            "more on the way up. Once: once the row has been whole it stays whole.";
 
         private const string CardSectionsVaryHelp =
             "Same (the default): every section begins with Start. By Group: Fade, Wave and Tiles in turn, group after group. A group's own " +
@@ -64,9 +73,10 @@ namespace TileStories.Editor
 
         private const string CardSectionsPlaymodeTestGuide =
             "Play Mode: with a card open at Full, change Start, Divider, Colour and Intensity here and watch each section of the open card " +
-            "change at once. Set Motion to Reveal, scroll the card back to its top, then drag down: each section's tiles turn in as it comes " +
-            "into view. Card Container > Reduce Motion on shows them still and whole. In Navigation > Bar Groups, open a group and set its " +
-            "Section Style: only that group's sections change.";
+            "change at once. Set Motion to Reveal, scroll the card back to its top, then drag slowly: each section's tiles turn in as its " +
+            "row rises from the Navigation Bar to a third of the way up; drag back and they turn out (Replay Every Pass) or stay whole (Once). " +
+            "Change Tint Depth: the tint under each start grows or shrinks. Card Container > Reduce Motion on shows the tiles still and whole. " +
+            "In Navigation > Bar Groups, open a group and set its Section Style: only that group's sections change.";
 
         private const string CardSectionsDeviceTestGuide =
             "Device: open a point's card outdoors in bright light and in a dark room, in light and dark mode, at Intensity's highest value: " +

@@ -2,7 +2,8 @@
 //
 // Partial: Detail Card > Sections (_3.3 fourth round, v6's Tweaks "Sections") -- how each section of an OPEN card looks
 // (card_settings.sections, SectionStyleRule): its rows mirror v6's -- same names, order and defaults (CardSectionsRows): Start, Divider,
-// Colour, Intensity, Motion, Vary; Divider Image's picture under Divider when it is Image. Each row SHOWS what the card draws (an unknown or
+// Colour, Intensity, Tint Depth, Motion, Replay (under Reveal / Drift), Vary; Divider Image's picture under Divider when it is Image. Each
+// row SHOWS what the card draws (an unknown or
 // out-of-range value as the rule reads it) and writes only a real pick, so drawing an old config never rewrites it. Under Look Blocks =
 // Cards (Card Container) none of it draws: a note says so. A group's own Start is the Bar Groups table's Section Style (Navigation).
 // The (i) texts and Test guides live in POIEditorToolWindow.CardSectionsHelp.cs.
@@ -15,7 +16,7 @@ namespace TileStories.Editor
     public partial class POIEditorToolWindow
     {
         // The component's rows, in v6's order (the Tweaks "Sections"): what the tests read the window against
-        internal static readonly string[] CardSectionsRows = { "Start", "Divider", "Colour", "Intensity", "Motion", "Vary" };
+        internal static readonly string[] CardSectionsRows = { "Start", "Divider", "Colour", "Intensity", "Tint Depth", "Motion", "Replay", "Vary" };
         private readonly TestGuideState _cardSectionsTest = new TestGuideState();
 
         private void DrawCardSectionsSection()
@@ -46,8 +47,15 @@ namespace TileStories.Editor
             float intensity = SectionStyleRule.Intensity(sections);
             float slid = DrawSliderField("Intensity", intensity, CardSectionSettings.IntensityMin, CardSectionSettings.IntensityMax, CardSectionsIntensityHelp);
             if (!Mathf.Approximately(slid, intensity)) sections.intensity = slid;
+            float depth = SectionStyleRule.TintDepth(sections);
+            float deep = DrawSliderField("Tint Depth", depth, CardSectionSettings.TintDepthMin, CardSectionSettings.TintDepthMax, CardSectionsTintDepthHelp);
+            if (!Mathf.Approximately(deep, depth)) sections.tint_depth = deep;
             Popup("Motion", SectionStyleRule.Motion(sections), CardOptions.SectionMotions, CardOptions.SectionMotionLabels, CardSectionsMotionHelp,
                 v => sections.motion = v);
+            // - Replay only where the tiles turn (Reveal, Drift): under Still there is nothing to play again
+            if (SectionStyleRule.Motion(sections) != CardOptions.SectionMotionStill)
+                Popup("Replay", SectionStyleRule.Replay(sections), CardOptions.SectionReplays, CardOptions.SectionReplayLabels, CardSectionsReplayHelp,
+                    v => sections.replay = v);
             Popup("Vary", SectionStyleRule.Vary(sections), CardOptions.SectionVaries, CardOptions.SectionVaryLabels, CardSectionsVaryHelp,
                 v => sections.vary = v);
 

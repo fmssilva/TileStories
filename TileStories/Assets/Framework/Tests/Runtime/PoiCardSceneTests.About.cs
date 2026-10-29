@@ -199,6 +199,8 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator ARealTapOnTheStickyAction_ShowsThePointOnTheWall_TheCardLowersAndTheSelectionStays()
         {
+            // - the sticky action is this test's subject: drawn (Sticky Action Automatic leaves it out under the default bottom bar, _3.3 P3d)
+            LiveSettings.navigation.bar.sticky_action = CardOptions.NavBarStickyShown;
             yield return OpenFull("lamp");
             // - _3.3 P4.4a: at the top of the card the sticky action is drawn in the hero (the footer waits for it to scroll away)
             var sticky = (ActionsBlockView)Sheet.Stack.HeroActionViews[0];
@@ -224,6 +226,8 @@ namespace TileStories.Tests
             var stickyBlock = lampConfig.card.blocks.First(b => b.kind == BuiltInBlocks.ActionsKind && b.variant == BuiltInBlocks.ActionsStickyCta);
             var stickyRow = new BlockFieldReader(stickyBlock, null, null).Items(BuiltInBlocks.ActionsItemsField).Single();
             Assert.AreEqual("", new BlockFieldReader(stickyBlock, null, null).ItemText(stickyRow, BuiltInBlocks.ActionsLabelField), "precondition: the fixture's sticky button has no words of its own");
+            // - the sticky footer is this test's subject: drawn (Sticky Action Automatic leaves it out under the default bottom bar, _3.3 P3d)
+            LiveSettings.navigation.bar.sticky_action = CardOptions.NavBarStickyShown;
 
             foreach (var (language, expected) in new[] { ("en", "Show me where it is"), ("pt", "Mostra-me onde fica") })
             {

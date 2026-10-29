@@ -698,7 +698,8 @@ namespace TileStories.Tests
                         {
                             var (ratio, worstPixel, inked) = ThemePixelSet.RingContrast(drawn, under, ThemePixelSet.ScreenRectOf(l, drawn), colours[l]);
                             Assert.Greater(inked, 0, "precondition: the words '" + l.text + "' draw pixels");
-                            report.Add($"{position} {fill} {mode} {place} '{l.text}': {ratio:0.00}:1 (worst {(Color32)worstPixel}, words {(Color32)colours[l]})");
+                            string role = l.parent.ClassListContains(NavBarView.ChosenClass) ? "chosen" : "unchosen";
+                            report.Add($"{position} {fill} {mode} {place} {role} '{l.text}': {ratio:0.00}:1 (worst {(Color32)worstPixel}, words {(Color32)colours[l]})");
                             if (ratio < worst) { worst = ratio; worstWhat = $"'{l.text}' {position} {fill} {mode} {place}"; }
                         }
                         System.IO.File.WriteAllBytes(TestEvidence.PathFor(Domain, $"labels_{position}_{fill}_{mode}_{place}.png"), drawn.EncodeToPNG());
@@ -711,7 +712,8 @@ namespace TileStories.Tests
                     }
                 }
             }
-            System.IO.File.AppendAllText(TestEvidence.PathFor(Domain, "labels_ratios.txt"), string.Join("\n", report) + "\n");
+            // - one fresh file per case (a file appended run after run mixed old measurements with the new)
+            System.IO.File.WriteAllText(TestEvidence.PathFor(Domain, $"labels_ratios_{position}_{mode}.txt"), string.Join("\n", report) + "\n");
             Assert.GreaterOrEqual(worst, Aaa, "every group's words keep 7:1 against what they are drawn over -- worst: " + worstWhat + "\n" + string.Join("\n", report));
         }
 

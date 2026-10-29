@@ -168,21 +168,24 @@ namespace TileStories
 
         // One scroll moment (offset, viewport: the scroll's). Cards: draw a sheet's living glass only while the sheet is within half a viewport
         // of the visible part -- an off-screen material still costs a SetPass and a batch every frame (P4.4c2, measured on The Lamp: 15
-        // sheets lit 7.9 -> 40 SetPass, only those in view 13.8); null hands the decision back to the stylesheet. Open: a section shown whose
-        // top came into the view has entered it (its Reveal starts, once: RevealRule.Entered) -- only once the scroll's places are final
+        // sheets lit 7.9 -> 40 SetPass, only those in view 13.8); null hands the decision back to the stylesheet. Open: each shown section's
+        // Start row (its edge) travels up the view -- its progress (RevealRule.Progress) from the moment its bottom clears the line `footInset`
+        // above the view's foot (a Navigation Bar floating there) to a third of the way up -- read only once the scroll's places are final
         // (`laidOut`, BlockStackView.LaidOut)
-        public void OnScrolled(float offset, float viewport, bool laidOut)
+        public void OnScrolled(float offset, float viewport, float footInset, bool laidOut)
         {
             float margin = viewport * 0.5f;
+            float startLine = viewport - Mathf.Max(0f, footInset), endLine = LookKit.RevealRule.EndLine(viewport, RevealShape);
             foreach (var sheet in _sheets)
             {
                 var r = sheet.Root.layout;
                 if (IsOpen)
                 {
                     sheet.Light.style.display = DisplayStyle.None;
-                    if (laidOut && sheet.Root.style.display != DisplayStyle.None && !float.IsNaN(r.height) && r.height > 0f
-                        && LookKit.RevealRule.Entered(r.yMin, offset, viewport, EnterMargin))
-                        sheet.Open.Entered();
+                    var edge = sheet.Open.Edge;
+                    if (laidOut && sheet.Root.style.display != DisplayStyle.None && edge.style.display != DisplayStyle.None
+                        && !float.IsNaN(r.height) && r.height > 0f && !float.IsNaN(edge.layout.yMax))
+                        sheet.Open.Scrolled(LookKit.RevealRule.Progress(r.yMin + edge.layout.yMax - offset, startLine, endLine));
                     continue;
                 }
                 bool near = !float.IsNaN(r.height) && r.yMax > offset - margin && r.yMin < offset + viewport + margin;
@@ -190,8 +193,8 @@ namespace TileStories
             }
         }
 
-        // How far into the view an open section must come to have entered it (v6: 30)
-        private static readonly float EnterMargin = new LookKit.RevealOptions().EnterMargin;
+        // The Reveal's travel (its end line's share of the view)
+        private static readonly LookKit.RevealOptions RevealShape = new();
 
         // An open section shown at `position` among the shown sections (-1: it continues the one before -- no edge, no eyebrow): its parts,
         // shown again only when what they show changed (a re-show restarts the Reveal)
@@ -216,7 +219,8 @@ namespace TileStories
             string colour = sheet.GroupIndex >= 0 ? sheet.Group.ColorToken : sheet.Family?.ColorToken;
             string name = sheet.GroupIndex >= 0 ? NavBarRule.Words(sheet.Group, _context?.Strings)
                 : sheet.Family?.LabelKey != null && _words != null ? _words(sheet.Family.LabelKey) : sheet.Run.Family;
-            string shownNow = string.Join("|", style.Start, style.Divider, style.Colour, style.Intensity, style.Motion, position, colour, name, OpenerWords);
+            string shownNow = string.Join("|", style.Start, style.Divider, style.Colour, style.Intensity, style.Motion, style.TintDepth, style.Once,
+                position, colour, name, OpenerWords);
             if (shownNow == sheet.Shown) return;
             sheet.Shown = shownNow;
             sheet.Open.Show(sheet.Run, style, position, colour, name, DividerImage(style), _context?.ReduceMotion ?? false, OpenerWords);

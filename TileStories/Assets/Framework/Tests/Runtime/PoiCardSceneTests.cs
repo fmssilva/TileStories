@@ -373,6 +373,8 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator TheLamp_IsTheFullCard_EveryKindAndVariantOfTiers1To4_InCatalogOrder()
         {
+            // - every kind and variant drawn, the Sticky look included (Sticky Action Automatic leaves it out under the default bottom bar)
+            LiveSettings.navigation.bar.sticky_action = CardOptions.NavBarStickyShown;
             yield return OpenFull("lamp");
             // - a kind the wall's own app registered (LivingRoom's size_comparison, _3.1 step 11) is that app's to test, not the framework
             //   catalog's: this list is what BuiltInBlocks registers
@@ -412,6 +414,8 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator TheLamp_EveryBlockShowsItsHeadingAboveIt_InTheCardsLanguage_AndEveryGapIsTheOneToken()
         {
+            // - every block of the card, the sticky footer included (Sticky Action Automatic leaves it out under the default bottom bar)
+            LiveSettings.navigation.bar.sticky_action = CardOptions.NavBarStickyShown;
             yield return OpenFull("lamp");
             // - the question that waits for the reading is revealed the way a visitor does it, so every slot can be measured
             yield return ReadTheWholeCard();

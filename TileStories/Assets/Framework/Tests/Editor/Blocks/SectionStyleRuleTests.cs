@@ -6,7 +6,7 @@ namespace TileStories.Editor.Tests
 {
     // Tier 0 of SectionStyleRule (_3.3 fourth round, P3): v6's defaults and every option read with its default, an old config loading
     // unchanged, the three levels (the group's Section Style over Vary over the card's Start), no divider before the first section, the
-    // tint's amounts (Bands every other section, the fade over 340), the sRGB mix painted exactly through the panel's linear blend, and the
+    // tint's amounts (Bands every other section, the fade over Tint Depth), Replay, the sRGB mix painted exactly through the panel's linear blend, and the
     // contrast the Intensity cap keeps -- every eyebrow token and the body ink at 7:1 over every Start at Intensity max, light and dark,
     // over a black and a white camera (the theme's own values)
     public class SectionStyleRuleTests
@@ -21,6 +21,10 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(0.12f, SectionStyleRule.Intensity(s), 1e-6f);
             Assert.AreEqual(CardOptions.SectionMotionReveal, SectionStyleRule.Motion(s));
             Assert.AreEqual(CardOptions.SectionVarySame, SectionStyleRule.Vary(s));
+            Assert.AreEqual(CardOptions.SectionReplayEveryPass, SectionStyleRule.Replay(s), "P3d: Replay Every Pass");
+            Assert.AreEqual(120f, SectionStyleRule.TintDepth(s), "P3d: Tint Depth 120");
+            Assert.IsFalse(SectionStyleRule.Of(s, 1, 1, "").Once);
+            Assert.AreEqual(120f, SectionStyleRule.Of(s, 1, 1, "").TintDepth);
             Assert.IsTrue(SectionStyleRule.IsOpen(new CardContainerSettings()), "Blocks Open by default");
             // - a config written before P3 has no sections, no blocks, no Section Style: it loads as the defaults
             var old = JsonUtility.FromJson<CardSettings>("{\"container\":{\"open_stop\":\"half\"},\"navigation\":{\"bar\":{\"items\":[{\"key\":\"about\",\"families\":[\"about\"]}]}}}");
@@ -28,8 +32,19 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(CardOptions.BlocksOpen, old.container.blocks);
             Assert.AreEqual("", old.navigation.bar.items[0].section_style);
             Assert.AreEqual(CardOptions.StopHalf, old.container.open_stop, "its own values kept");
+            // - a P3c config has sections without Replay or Tint Depth: it loads them as the defaults
+            var p3c = JsonUtility.FromJson<CardSettings>("{\"sections\":{\"start\":\"wave\",\"motion\":\"drift\"}}");
+            Assert.AreEqual(CardOptions.SectionStartWave, p3c.sections.start, "its own Start kept");
+            Assert.AreEqual(CardOptions.SectionReplayEveryPass, SectionStyleRule.Replay(p3c.sections));
+            Assert.AreEqual(120f, SectionStyleRule.TintDepth(p3c.sections));
+            Assert.IsTrue(SectionStyleRule.Of(new CardSectionSettings { replay = CardOptions.SectionReplayOnce }, 1, 1, "").Once, "Once read");
+            Assert.AreEqual(CardSectionSettings.TintDepthMin, SectionStyleRule.TintDepth(new CardSectionSettings { tint_depth = 2f }), "clamped low");
+            Assert.AreEqual(CardSectionSettings.TintDepthMax, SectionStyleRule.TintDepth(new CardSectionSettings { tint_depth = 900f }), "clamped high");
+            Assert.AreEqual(120f, SectionStyleRule.TintDepth(new CardSectionSettings { tint_depth = float.NaN }), "unreadable = the default");
             // - an unknown value reads as the default; intensity clamped to the cap
-            var odd = new CardSectionSettings { start = "zigzag", divider = "?", colour = "pink", motion = "spin", vary = "x", intensity = 0.3f };
+            var odd = new CardSectionSettings { start = "zigzag", divider = "?", colour = "pink", motion = "spin", vary = "x", intensity = 0.3f, replay = "twice" };
+            Assert.AreEqual(CardOptions.SectionReplayEveryPass, SectionStyleRule.Replay(odd));
+            CollectionAssert.AreEqual(new[] { "Every Pass", "Once" }, CardOptions.SectionReplayLabels);
             Assert.AreEqual(CardOptions.SectionStartTiles, SectionStyleRule.Start(odd));
             Assert.AreEqual(CardOptions.SectionDividerNone, SectionStyleRule.Divider(odd));
             Assert.AreEqual(CardOptions.SectionColourGroup, SectionStyleRule.Colour(odd));
@@ -85,22 +100,30 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("--ts-family-about-text", SectionStyleRule.TextOf("--ts-family-about"), "the eyebrow's words: the colour's text token");
         }
 
+        // The P3c review (d): the tint is a short band under the section's start, fading over Tint Depth (120 by default), then the paper --
+        // at every depth the slider reaches; Bands keeps its flat whole-section tint; Plain none
         [Test]
-        public void TheTint_FadesOverV6s340_BandsTintEveryOtherSectionFlat_PlainNone()
+        public void TheTint_FadesOverTintDepth_ThenThePaper_BandsTintEveryOtherSectionFlat_PlainNone()
         {
-            var tiles = SectionStyleRule.Of(new CardSectionSettings { intensity = 0.2f }, 1, 1, "");
-            Assert.AreEqual(0.2f, SectionStyleRule.AmountAt(tiles, 1, 0f), 1e-6f, "the intensity where it begins");
-            Assert.AreEqual(0.1f, SectionStyleRule.AmountAt(tiles, 1, 170f), 1e-6f, "half way down the fade");
-            Assert.AreEqual(0f, SectionStyleRule.AmountAt(tiles, 1, 340f), 1e-6f, "gone at 340");
-            var bands = SectionStyleRule.Of(new CardSectionSettings { start = CardOptions.SectionStartBands, intensity = 0.2f }, 1, 1, "");
-            Assert.AreEqual(0.14f, SectionStyleRule.AmountAt(bands, 1, 600f), 1e-6f, "an odd section: flat at 0.7 of it, all the way down");
+            foreach (float depth in new[] { CardSectionSettings.TintDepthMin, 120f, CardSectionSettings.TintDepthMax })
+            {
+                var tiles = SectionStyleRule.Of(new CardSectionSettings { intensity = 0.2f, tint_depth = depth }, 1, 1, "");
+                Assert.AreEqual(0.2f, SectionStyleRule.AmountAt(tiles, 1, 0f), 1e-6f, depth + ": the intensity where it begins");
+                Assert.AreEqual(0.1f, SectionStyleRule.AmountAt(tiles, 1, depth * 0.5f), 1e-6f, depth + ": half at half the depth");
+                Assert.AreEqual(0f, SectionStyleRule.AmountAt(tiles, 1, depth), 1e-6f, depth + ": gone at the depth");
+                Assert.AreEqual(0f, SectionStyleRule.AmountAt(tiles, 1, depth + 200f), depth + ": the paper below it");
+                var stops = SectionStyleRule.Stops(tiles, 1, 24f);
+                Assert.AreEqual((24f, 0f), stops[0], "clear above the ground's top");
+                Assert.AreEqual(0.2f, stops[1].Amount, 1e-6f, "the intensity right under the start");
+                Assert.AreEqual(24f + depth, stops.Last().Offset, 1e-4f, depth + ": the fade ends the depth under it");
+                Assert.AreEqual(0f, stops.Last().Amount, 1e-6f, "...at nothing");
+            }
+            var bands = SectionStyleRule.Of(new CardSectionSettings { start = CardOptions.SectionStartBands, intensity = 0.2f, tint_depth = 40f }, 1, 1, "");
+            Assert.AreEqual(0.14f, SectionStyleRule.AmountAt(bands, 1, 600f), 1e-6f, "an odd section: flat at 0.7 of it, all the way down, whatever the depth");
             Assert.AreEqual(0f, SectionStyleRule.AmountAt(bands, 2, 0f), "an even one: none");
             var plain = SectionStyleRule.Of(new CardSectionSettings { start = CardOptions.SectionStartPlain }, 1, 1, "");
             Assert.IsFalse(plain.HasTint);
             Assert.AreEqual(0, SectionStyleRule.Stops(plain, 1, 0f).Count, "plain draws no tint");
-            var stops = SectionStyleRule.Stops(tiles, 1, 24f);
-            Assert.AreEqual((24f, 0f), stops[0], "clear above the ground's top");
-            Assert.AreEqual(24f + 340f, stops.Last().Offset, 1e-4f, "the fade ends 340 under it");
         }
 
         [Test]
