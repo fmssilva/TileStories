@@ -119,6 +119,8 @@ The last message of a session, in English, short, in this order (the durable rec
 **Close every session with one `AskUserQuestion`** (Architect and Worker alike), AFTER the report is written: it rings the
 developer's alarm at once (`50-terminal_and_tools.md` alert hook), so they know the chat has finished. One short question with
 real options, e.g. "Block done -- what next?" (Review the report / Questions first). Not a way to ask for approval the brief already gave.
+Write every real question in the chat text; the popup may only point to them ("Answer the questions in the chat to continue").
+The developer often closes it to reply in text with pictures: a closed popup is not a "no" -- wait for their message.
 
 The learning summaries given along the way (the teaching notes of `__AI_worker.md`) are separate: they explain how and why
 for the developer to learn; this report states what is true now.

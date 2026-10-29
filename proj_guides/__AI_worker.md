@@ -14,32 +14,41 @@ So start by reading them all.
 
 
 ## `And now: domain proj_guides\_3.3_POI_Card_Styles.md`
-P3d -- the Reveal both ways, Tint Depth, the "Show me where it is" FAB (`_3.3` fourth round > "P2 review" e, "P3c review" c-d,
-"P3c review, second pass" b).
-GATE: as before (MCP; push: origin = aaa2c1f, nothing to push; SDF fonts; compile clean before every run, editor_state confirms a
-run STARTED and Play Mode is off; Unity c, b for captures).
-WORKER MODEL: Opus + effort High (scroll-driven motion with real drags, a new floating control).
-SUBAGENTS: per 00-process (ceiling Opus + medium; Unity single owner) -- e.g. a Haiku Explore for "where does the sticky action /
-the floating slot live", a Haiku pass over long test logs.
-TEST PLAN: BLOCK = full EditMode + the 14 card fixtures (the tracker's list) on the FINAL state. CORE stays deferred.
-PART 1 -- the Start row's Reveal follows its position BOTH ways: progress 0 as the row clears the Navigation Bar's top, 1 when it is a
-third of the way up the visible card; tiles turn in order with the progress; scrolling back up turns them out, down plays again.
-Motion > Replay: Every Pass (default) / Once (once whole, stays whole). Reduce Motion = whole at once. Editor row (i) + config + live
-push. Tests with REAL drags: half-way -> about half the tiles turned; a third up -> all; back down past the bar -> turned out (Every
-Pass) / still whole (Once); Reduce Motion whole throughout.
-PART 2 -- Tint Depth: Sections > Tint Depth (pt), default 120: the section's tint fades from its top to 0 over that depth, then the
-paper (not the whole block coloured). Editor row (i) + config + live push. Test on the render: tint at the section's top, ~0 at the
-depth and below; the eyebrow and body still >= 7:1.
-PART 3 -- "Show me where it is" as a FAB: a 56 pt disc (the accent; its locate mark >= 4.5:1 on it; label / name "Show me where it
-is"), bottom right, 12 pt above the Navigation Bar; it follows the bar (Bottom / Top, Hide While Scrolling, the safe area), over the
-hero and after it; a 44+ target; it never covers the bar's items or the hero's words. With the bar at Bottom the hero's own
-"Show me where it is" pill and the old sticky action are off by default (kept as options). Tests: a REAL tap shows the point on the
-wall at Half and Full; its rect never meets the bar's items; light and dark renders.
-PART 4 -- one check from the review: the unchosen bar labels look pale grey in TestEvidence/Premium/P3c/depth/review_depth.png --
-measure them on a full-size render (light and dark, every fill): >= 7:1 (ink) or fix.
-PART 5 -- docs (_3.3 build log, _Test_Suite_1, 10-structure), BLOCK, LOOK at the renders and the Editor rows (dark skin), report
-(with the Subagents line) and one commit message. STOP with one AskUserQuestion.
-OUT OF SCOPE: retiring the old navigation (the next block), the story block.
+P3e -- a bright, high-contrast page again; the Locate Button rebuilt as a floating pin (`_3.3` fourth round > "P3d review" a + b).
+GATE: as before (MCP; push: origin = the Architect's last commit, nothing to push; SDF fonts; compile clean before every run,
+editor_state confirms a run STARTED and Play Mode is off; Unity c, b for captures).
+WORKER MODEL: Opus + effort High (a contrast regression across the card, a new animated control with Editor options).
+SUBAGENTS: per 00-process (ceiling Opus + medium; Unity single owner) -- e.g. a Haiku Explore to list every place the UITK theme fonts
+and the halo copies are used.
+TEST PLAN: BLOCK = full EditMode + the card fixtures (the tracker's list + LocateFab) on the FINAL state. CORE stays deferred.
+PART 1 (BLOCKER) -- contrast back to high. Measured by the Architect on the 1x renders: the timeline body's darkest pixel was 43 at P3,
+104 at P3d (titles unchanged) -- body text went grey after P3c's wider atlas (padding 18 on the four UITK theme fonts). And the
+developer's capture shows the hero picture's texture through the sheet after the hero, whole sections tinted, and a huge faint
+"Ribeira Pa..." ghost behind the story's picture (the hero title's halo copy escaping the hero?).
+  1a. Text: every text uses the normal-padding font assets again; the wide-padding atlas only for the halo copies (separate assets,
+      named as such). Test: body / caption / label ink on the 1x render at least as dark as at P3 (darkest pixel <= 50 on paper, light)
+      and >= 7:1 measured, light and dark.
+  1b. Ground: after the hero the sheet is solid paper -- no picture, texture or veil through it; the group tint only over Tint Depth
+      from a section's top (Bands look excepted). Test: ground pixels at mid-section = the paper token (+-2), light and dark, every
+      Start / Colour; the hero picture's pixels never appear below the hero.
+  1c. Ghost: find what draws "Ribeira Pa..." below the hero; nothing of the hero's words (or their halo copies) exists outside the
+      hero. Test: after scrolling past the hero, no hero-word element (or copy) is visible or has a rect in the viewport.
+  Show the developer the before / after renders (the developer's capture spot: About facts + the story preview) and continue.
+PART 2 -- Locate Button rebuilt (study `proj_guides/_3.3.1_Prototype/Locate Button Study.html`). Detail Card > Locate Button rows,
+each with (i), config + live push:
+  Style = Floating Pin / Pin + Label (default) / Glass + Ping; Colour = AR Teal (default) / Fresh Green / Cyan / Accent (tokens, light
+  and dark); Size = the Navigation Bar's icon size (default) up to 2x; Float = on (default) / off.
+  The pin: a 3D-looking map pin (gradient body, white inner disc, a thin darker rim >= 4.5:1 on what is under it) drawn as a vector
+  (VectorImage or Painter2D; no literal colours). Float = a slow bob (~7 pt, ~2.6 s, eased) with a shadow on the bar that shrinks
+  as the pin rises; Reduce Motion = still. Pin + Label: "Find it on the wall" (localised, CardStrings; PT too) on a light chip at rest,
+  folding away after the visitor's first scroll, the pin staying. Glass + Ping: a light glass disc holding the pin, a soft ring every
+  ~3 s. Hit area 44+ pt whatever the size; place as today (right, above the bar, follows the bar / Hide While Scrolling / safe area);
+  a tap lowers the card to Peek. Tests: a REAL tap at Half and Full -> Peek + the point on the wall; per Style x Colour renders light
+  and dark; the label folds after a real drag; the float moves the pin with motion on and not with Reduce Motion; the rim >= 4.5:1
+  and the label >= 7:1 on the render; never over the bar's items or the hero's words.
+PART 3 -- docs (_3.3 build log, _Test_Suite_1, 10-structure), BLOCK, LOOK at the renders + the Editor rows (dark skin), report with the
+Subagents line and one commit message. STOP with one AskUserQuestion.
+OUT OF SCOPE: retiring the old navigation (next block), the story block.
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`
