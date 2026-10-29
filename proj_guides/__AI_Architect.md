@@ -177,8 +177,9 @@ SUBAGENTS: <per 00-process (ceiling Opus + medium; Unity single owner) / none th
 TEST PLAN: <baseline full run needed? / full EditMode + PlayMode once at the end / background full run: yes or no>.
 
 PART 1 -- <fixes>: numbered, each = what + where + the test that proves it + recapture.
-PART 2 -- <new work>: per kind / step: WHAT (behaviour + acceptance), HOW (reuse first; decisions already taken), TESTS (pure
-EditMode + Phase A gallery + Phase B real scene with real input), VISUALS (captures to take and check).
+PART 2 -- <new work>: per kind / step: WHAT (behaviour + acceptance), HOW (reuse first; decisions already taken), LOOK (the design
+pass BEFORE the PlayMode tests: the captures to take, what "good" means, any developer checkpoint), then TESTS (pure EditMode +
+Phase A gallery + Phase B real scene with real input) written against the accepted look.
 
 Rules as before: <the domain's standing rules>. OUT OF SCOPE: <nearby ideas not to build>.
 Stop when <condition> is green. Update <docs>. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.

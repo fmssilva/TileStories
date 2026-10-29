@@ -570,6 +570,12 @@ require a per-item answer citing what is actually observed:
 A holistic summary answer to a checklist prompt is itself a sign the check wasn't
 done properly — reject it and re-ask item by item if that's what comes back.
 
+**Look before you test (the order of work, `00-process.md` ACT MODE 2):** a new or changed visible element goes build -> compile ->
+captures and design fixes -> PlayMode tests. The design pass uses quick captures of the real scene (no fixture needed: the Unity MCP
+screenshot of the Game view at the stop, or a throwaway capture call), light and dark, judged item by item; only when it looks right
+are the PlayMode tests written and run -- they pin the accepted look (real input, edge cases, motion, contrast as seen). A brief may
+add a developer checkpoint here: show the renders, ask once, then test.
+
 **Visual verification is the agent's job, not the developer's.** The agent is vision-capable and the
 developer keeps the Unity Editor open and unobstructed during agent sessions. So every change with a visible
 result -- a POI Editor row, table or popup, a Game-view render, a demo grid, a card, a marker -- is captured

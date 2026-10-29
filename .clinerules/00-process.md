@@ -93,5 +93,14 @@ Prepare a reviewed, on-disk-verified plan before writing code.
 
 ### ACT MODE
 1. **Strict scope lock:** implement exactly the planned task; no unsolicited refactor, formatting cleanup, or extra features.
-2. **Incremental + verified:** write only the files the step needs, then per step: implement -> add/run the tests that genuinely exercise it -> compile + run tests -> read the mechanical result. Stop when the plan is fully verified; don't keep polishing past it.
+2. **Build -> compile -> LOOK -> test, in that order, per step** (write only the files the step needs):
+   1. **Build** it where the structure map says it belongs (reuse first).
+   2. **Compile clean** (`40-testing.md` 4.2.5).
+   3. **Look and polish BEFORE the PlayMode tests** (anything visible): capture it in the real scene (light and dark, the stops
+      it lives at, over the hero and on paper), judge it as a designer -- modern, premium, minimalist, immersive, the motion right
+      -- fix and capture again until it is good. The PlayMode tests are written against the ACCEPTED design, never before it:
+      a test suite run on a look that is about to change is wasted time.
+   4. **Test:** EditMode for the pure rules (fast, any time), then the PlayMode tests that pin the details -- real input, edge
+      cases, motion, contrast as seen -- then the block's tier.
+   Stop when the plan is fully verified; don't keep polishing past it.
 3. **Teach as you go:** after each meaningful step (a feature, a test, a debug session), leave a short plain-language "learning summary" of what changed and why -- like a developer's own notes, not a report. The durable handoff is the 60-finishing.md §6.4 chat summary.

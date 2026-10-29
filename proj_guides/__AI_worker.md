@@ -14,40 +14,29 @@ So start by reading them all.
 
 
 ## `And now: domain proj_guides\_3.3_POI_Card_Styles.md`
-P3e -- a bright, high-contrast page again; the Locate Button rebuilt as a floating pin (`_3.3` fourth round > "P3d review" a + b).
-GATE: as before (MCP; push: origin = the Architect's last commit, nothing to push; SDF fonts; compile clean before every run,
-editor_state confirms a run STARTED and Play Mode is off; Unity c, b for captures).
-WORKER MODEL: Opus + effort High (a contrast regression across the card, a new animated control with Editor options).
-SUBAGENTS: per 00-process (ceiling Opus + medium; Unity single owner) -- e.g. a Haiku Explore to list every place the UITK theme fonts
-and the halo copies are used.
-TEST PLAN: BLOCK = full EditMode + the card fixtures (the tracker's list + LocateFab) on the FINAL state. CORE stays deferred.
-PART 1 (BLOCKER) -- contrast back to high. Measured by the Architect on the 1x renders: the timeline body's darkest pixel was 43 at P3,
-104 at P3d (titles unchanged) -- body text went grey after P3c's wider atlas (padding 18 on the four UITK theme fonts). And the
-developer's capture shows the hero picture's texture through the sheet after the hero, whole sections tinted, and a huge faint
-"Ribeira Pa..." ghost behind the story's picture (the hero title's halo copy escaping the hero?).
-  1a. Text: every text uses the normal-padding font assets again; the wide-padding atlas only for the halo copies (separate assets,
-      named as such). Test: body / caption / label ink on the 1x render at least as dark as at P3 (darkest pixel <= 50 on paper, light)
-      and >= 7:1 measured, light and dark.
-  1b. Ground: after the hero the sheet is solid paper -- no picture, texture or veil through it; the group tint only over Tint Depth
-      from a section's top (Bands look excepted). Test: ground pixels at mid-section = the paper token (+-2), light and dark, every
-      Start / Colour; the hero picture's pixels never appear below the hero.
-  1c. Ghost: find what draws "Ribeira Pa..." below the hero; nothing of the hero's words (or their halo copies) exists outside the
-      hero. Test: after scrolling past the hero, no hero-word element (or copy) is visible or has a rect in the viewport.
-  Show the developer the before / after renders (the developer's capture spot: About facts + the story preview) and continue.
-PART 2 -- Locate Button rebuilt (study `proj_guides/_3.3.1_Prototype/Locate Button Study.html`). Detail Card > Locate Button rows,
-each with (i), config + live push:
-  Style = Floating Pin / Pin + Label (default) / Glass + Ping; Colour = AR Teal (default) / Fresh Green / Cyan / Accent (tokens, light
-  and dark); Size = the Navigation Bar's icon size (default) up to 2x; Float = on (default) / off.
-  The pin: a 3D-looking map pin (gradient body, white inner disc, a thin darker rim >= 4.5:1 on what is under it) drawn as a vector
-  (VectorImage or Painter2D; no literal colours). Float = a slow bob (~7 pt, ~2.6 s, eased) with a shadow on the bar that shrinks
-  as the pin rises; Reduce Motion = still. Pin + Label: "Find it on the wall" (localised, CardStrings; PT too) on a light chip at rest,
-  folding away after the visitor's first scroll, the pin staying. Glass + Ping: a light glass disc holding the pin, a soft ring every
-  ~3 s. Hit area 44+ pt whatever the size; place as today (right, above the bar, follows the bar / Hide While Scrolling / safe area);
-  a tap lowers the card to Peek. Tests: a REAL tap at Half and Full -> Peek + the point on the wall; per Style x Colour renders light
-  and dark; the label folds after a real drag; the float moves the pin with motion on and not with Reduce Motion; the rim >= 4.5:1
-  and the label >= 7:1 on the render; never over the bar's items or the hero's words.
-PART 3 -- docs (_3.3 build log, _Test_Suite_1, 10-structure), BLOCK, LOOK at the renders + the Editor rows (dark skin), report with the
-Subagents line and one commit message. STOP with one AskUserQuestion.
+P3e (continued) -- the locate pin at the Navigation Bar's icon size, the hero words untouched, the 17 reds green; commit point
+(`_3.3` fourth round > "P3d review" b; the tracker's HANDOFF).
+GATE: as before (MCP; push: origin = the Architect's last commit; SDF fonts; compile clean before every run, editor_state confirms a
+run STARTED and Play Mode is off; Unity c for runs, b for captures). Continue on the uncommitted tree.
+WORKER MODEL: Opus + effort High.
+SUBAGENTS: per 00-process (ceiling Opus + medium; Unity single owner).
+NEW ORDER OF WORK (`00-process.md` ACT MODE 2, `40-testing.md` "Look before you test"): build -> compile -> LOOK and polish with
+captures -> only then the PlayMode tests, written against the accepted look.
+TEST PLAN: BLOCK = full EditMode + the 16 card fixtures (the tracker's 14 + LocateFab + BrightPage) on the FINAL state.
+PART 1 -- size and place (the developer asked for the Navigation Bar's icon size; 54 pt was not it): Size default = the bar's icon
+size (1x), range up to 2x; the hit area stays 44+ pt and is transparent. The pin sits right, above the bar, and NEVER narrows or moves
+the hero's words: the words keep their full width and place at every stop. The label shows only where it fits beside the words' real
+ink; otherwise only the pin shows. LOOK: captures at Half and Full, over the hero and on paper, light and dark, The Lamp, the Painting,
+the Ribeira Palace; the float as a frame sequence. Fix until it looks right, then PART 2.
+PART 2 -- contrast of the pin over a picture: the rim reads 1-2:1 there. The pin is a non-text control, so it needs >= 3:1 (WCAG 1.4.11)
+for its outline against what is under it: measure the white inner disc and the drop-shadow / glow edge against the picture; strengthen
+the dark halo under the pin over pictures until one of them reaches 3:1 on every hero (light and dark). On paper the rim already reads
+5.56:1+.
+PART 3 -- the 17 reds, per the HANDOFF, after PARTs 1-2 (most should go with PART 1): Hero (8, the words' rows), TheHalo_IsTwoLayers
+(2: expect the Halo twin face), LocateFab (7: the pin inside its target at every size; the Painting's label room). Then full EditMode +
+the 16 fixtures green.
+PART 4 -- the Editor rows' dark-skin capture; docs; report with the Subagents line and one commit message covering all of P3e. STOP
+with one AskUserQuestion.
 OUT OF SCOPE: retiring the old navigation (next block), the story block.
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
@@ -120,11 +109,10 @@ After the plan, lets continue for the implementation. You are now already in ACT
 ### 2.3. Iterative Execution Cycle
 For every step/group of sub-tasks execute the following cycle:
 1. **Read:** Confirm the step to do next (ground in the ./proj_guides/__curr_plan_tracker.md file if the plan is there). 
-2. **Implement Code:** Write or modify only the files strictly required for that step/task. Maintain clear alignment with .clinerules.
-3. **Implement Tests:** per .clinerules/40-testing.md, see which layers of tests you should implement and what each one specifically needs to check for this task — don't plan a boilerplate list of tests. Only the ones real needed for fast and robust developement. 
-4. **Verify Code** Compile code and execute Edit/Playmode tests to confirm everything is ok. 
-5. **Run Tests** Run the necessary tests you implemented - TESTS THAT ACTUALLY CONFIRM IF THINGS WORK OK FOR REAL, LIKE IF THE USER WAS CLICKING AND DOING THEM - NO MOCK TESTS. 
-- 5b. **Look at it:** for anything with a visible result (POI Editor rows/tables/popups, Game-view renders, demo grids, the card), capture it and check it yourself with an item-by-item checklist (.clinerules/40-testing.md 4.5, "Visual verification is the agent's job"). Unity is open and unobstructed for this. Fix what the capture shows and capture again. Never report "not looked at".
+2. **Implement Code:** Write or modify only the files strictly required for that step/task, where the structure map says it belongs (reuse first). Maintain clear alignment with .clinerules.
+3. **Compile:** refresh, zero `error CS`, the assemblies rebuilt (.clinerules/40-testing.md 4.2.5).
+4. **Look and polish FIRST (before any PlayMode test):** for anything with a visible result (the card, a render, POI Editor rows / tables / popups), run it and take several captures (light and dark, the stops it lives at, over the hero and on paper, the motion as a short frame sequence) and judge them as a designer: modern, premium, minimalist, immersive, a "wow", motion that feels alive, nothing clipped, contrast right. Fix and capture again until it looks good (.clinerules/40-testing.md 4.5, "Look before you test"). Unity is open and unobstructed for this. Never report "not looked at".
+5. **Implement and Run Tests:** only once the design is accepted -- EditMode for the pure rules, then the PlayMode tests that pin the details: real input as a visitor would do it, edge cases, motion and effects, contrast as seen (.clinerules/40-testing.md: the layers each test really needs, no boilerplate) - TESTS THAT ACTUALLY CONFIRM IF THINGS WORK OK FOR REAL, LIKE IF THE USER WAS CLICKING AND DOING THEM - NO MOCK TESTS. Then the block's tier.
 6. **Learning Summary** present a "Learning Summary" for these steps we just did in chat, for me to keep track of what is beeing done, with all important details BUT in a concise manner, like i explained above. 
 
 Repeat steps 1–6 until every step/group of sub-tasks in the plan is done. 
