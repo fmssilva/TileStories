@@ -14,32 +14,29 @@ So start by reading them all.
 
 
 ## `And now: domain proj_guides\_3.3_POI_Card_Styles.md`
-P3e (continued) -- the locate pin at the chosen disc's size, floating over the card, the 17 reds green; commit point
-(`_3.3` fourth round > "P3d review" b; the tracker's HANDOFF).
+R1 -- retire the old navigation elements (the developer accepted the inventory: `_3.3` fourth round > "The old navigation elements
+-- inventory" + "P3c review, second pass" d) + one Reduce Motion fix.
 GATE: as before (MCP; push: origin = the Architect's last commit; SDF fonts; compile clean before every run, editor_state confirms a
-run STARTED and Play Mode is off; Unity c for runs, b for captures). Continue on the uncommitted tree.
-WORKER MODEL: Opus + effort High.
-SUBAGENTS: per 00-process (ceiling Opus + medium; Unity single owner).
-NEW ORDER OF WORK (`00-process.md` ACT MODE 2, `40-testing.md` "Look before you test"): build -> compile -> LOOK and polish with
-captures -> only then the PlayMode tests, written against the accepted look.
-TEST PLAN: BLOCK = full EditMode + the 16 card fixtures (the tracker's 14 + LocateFab + BrightPage) on the FINAL state.
-PART 1 -- size and place (developer, 2026-10-29): Size default = the chosen group's disc (40 pt, 1x), range 0.6x-2x in the Editor;
-the hit area stays 44+ pt and is transparent. The pin FLOATS: it lives in the card's floating layer (absolutely positioned, drawn
-after the sheet -- UI Toolkit has no z-index, the draw order is the hierarchy order), so it takes NO layout room and NEVER narrows,
-wraps or moves the hero's words or any block. Remove the rule that narrows the words' rows for the button. It may sometimes cover a
-bit of text (an edge case the visitor scrolls past) -- accepted. The label ("Find it on the wall") still shows only where it does not
-cover the hero's words at rest; otherwise only the pin shows. LOOK: captures at Half and Full, over the hero and on paper, light and
-dark, The Lamp, the Painting, the Ribeira Palace; the float as a frame sequence. Fix until it looks right, then PART 2.
-PART 2 -- contrast of the pin over a picture: the rim reads 1-2:1 there. The pin is a non-text control, so it needs >= 3:1 (WCAG 1.4.11)
-for its outline against what is under it: measure the white inner disc and the drop-shadow / glow edge against the picture; strengthen
-the dark halo under the pin over pictures until one of them reaches 3:1 on every hero (light and dark). On paper the rim already reads
-5.56:1+.
-PART 3 -- the 17 reds, per the HANDOFF, after PARTs 1-2 (most should go with PART 1): Hero (8, the words' rows), TheHalo_IsTwoLayers
-(2: expect the Halo twin face), LocateFab (7: the pin inside its target at every size; the Painting's label room). Then full EditMode +
-the 16 fixtures green.
-PART 4 -- the Editor rows' dark-skin capture; docs; report with the Subagents line and one commit message covering all of P3e. STOP
-with one AskUserQuestion.
-OUT OF SCOPE: retiring the old navigation (next block), the story block.
+run STARTED and Play Mode is off; Unity c). No opening test run (`00-process.md` PLAN 2).
+WORKER MODEL: Opus + effort Medium (a wide but well-specified removal; no new design).
+SUBAGENTS: per 00-process -- a Haiku Explore is a good fit to list every reference of each retired element (code, USS, config keys,
+Editor rows, help text, presets, tests, docs) before deleting.
+TEST PLAN: BLOCK = full EditMode + the 16 card fixtures (the tracker's list). The registry is shared ground: the deferred CORE (end of the
+review) covers it.
+PART 1 -- RETIRE (delete code, USS, Editor rows / options / help, config keys and their readers, presets, tests, docs and the
+10-structure lines), per the inventory: Text Tabs, Tabs / Icon Tabs, Segmented (+ its Groups table: the bar's Bar Groups replace it),
+Bottom Bar, Dock, Edge Scrubber, Fab Dial, Fab Radial, Grid Overlay, the in-flow Icon Grid / Rails / Bento / Auto Nav blocks, the Bento
+layout. No shims (`00-process.md`): an old config naming a retired element loads cleanly (unknown value -> the Navigation Bar default),
+with ONE EditMode test for that. The shipped configs (both copies) are re-saved through the classes.
+PART 2 -- KEEP for a later rebuild (code stays, fixtures stay skipped under TestSkips.OldNavigationElements, NOT offered in the
+Editor until rebuilt): Kind Chips / Icon Tabs + Chips, Bar Sheet, Progress Map, Family Pager, Next Up, Drawer Tree + the menu overlay +
+facet chips, Contents, Navigation Presets. Write each as a line in `_3.3` "## TODOs" ([rebuild] tag, what it becomes, from the inventory).
+PART 3 -- Reduce Motion stops the header's 3D turntable (TODO [R1]): `HeaderBlockView` no longer forces Auto Spin on under Reduce Motion.
+Test: Reduce Motion on -> the turntable's angle is unchanged over 2 s; off -> it turns.
+PART 4 -- LOOK: the POI Editor's Detail Card / Navigation tabs in the dark skin (no retired option left, nothing empty or misaligned);
+the card at Half and Full (nothing changed for the visitor). Then BLOCK green, docs (_3.3 build log, _Test_Suite_1 -- the removed
+fixtures, 10-structure), report with the Subagents line and one commit message. STOP with one AskUserQuestion.
+OUT OF SCOPE: the story block, rebuilding any kept element.
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`
@@ -58,7 +55,7 @@ Before you start executing and implementing things, perform a critical review of
 
 *Read File:* for big files use `read_file` paginate with `start_line`/`end_line`__ (1-indexed) on the same path. for binary prefabs use the MCP `manage_prefabs get_hierarchy` to get live Unity-resolved structure
 
-- Confirm project compile and all unit/editor/player mode test pass via Unity MCP (if unity MCP is not available STOP immediately and report).
+- Confirm the project compiles via Unity MCP (if unity MCP is not available STOP immediately and report). Do NOT run a baseline test suite at the start: the last commit is green (the Architect only commits green trees); run one only if the brief's TEST PLAN asks for it.
 
 ### 1.3. Online & Technical Research (If Needed)
 If a decision genuinely needs outside confirmation (Unity patterns, package APIs, platform constraints...), search or inspect local node_modules documentation rather than relying on memory.

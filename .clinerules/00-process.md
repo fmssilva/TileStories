@@ -83,10 +83,12 @@ Never report a feature, fix, rendering, visual, or behavioral task as completed 
 ### PLAN MODE
 Prepare a reviewed, on-disk-verified plan before writing code.
 1. **Re-ground:** read the relevant `.clinerules/` (00/10/20/30/40/50/60) and the structure map (`10-structure.md`).
-2. **Deep audit + baseline:** open the files that actually exist for this task; a prior
+2. **Deep audit + compile:** open the files that actually exist for this task; a prior
    "we built X / X doesn't exist" claim is unverified until seen on disk. Find gaps, typos,
-   and misalignments with the rules. Confirm the project compiles and the existing tests
-   pass BEFORE changing anything; if the tooling to do that is unavailable, stop and say so.
+   and misalignments with the rules. Confirm the project compiles BEFORE changing anything; if the
+   tooling to do that is unavailable, stop and say so. No opening test run: the Architect commits
+   only green trees, so the last commit IS the baseline -- run one only when the brief's TEST PLAN
+   asks for it (e.g. the tree moved since the last green commit).
 3. **Architecture Level (where it lives):** map folder/assembly/component scope, weigh 3 distinct structural options with trade-offs, state the choice and why.
 4. **Implementation Level (how it works):** weigh 3 concrete options (event-driven vs direct call, ScriptableObject vs hardcoded, ...), pick the simplest robust one.
 5. **Execution plan + decisions:** itemized TODO incl. testing steps. Separate the choices you made autonomously (clear winner) from any real trade-off needing the developer's pick -- block only on the latter; otherwise present the plan and proceed to ACT.

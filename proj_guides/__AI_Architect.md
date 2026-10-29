@@ -165,7 +165,7 @@ Architect chat (what is done, what moved to which guide, open risks) and start t
 GATE: `git push` if the branch is ahead of origin (report how many commits). Take one Unity capture (Game view AND the POI
 Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. Check the two
 SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`): TMP dirties their atlases on its own, so `git checkout --` them
-if they are modified, in EVERY block, not only the one that noticed. Re-verify the baseline as the TEST PLAN below says.
+if they are modified, in EVERY block, not only the one that noticed. No opening test run unless the TEST PLAN below asks for one.
 
 Domain spec (read ALL lines): <guide path> -- start with "## TODOs" (<tags>) and the status table (<done>; <planned>).
 REQUIRED READING (all lines): <the exact sections the block touches -- always `_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" +
@@ -174,7 +174,7 @@ when it adds real-input tests or captures; any other guide whose rules apply>.
 Context only: <other guides>.
 WORKER MODEL: <Haiku / Sonnet / Opus> + effort <Low / Medium / High / Max>, and why in a few words.
 SUBAGENTS: <per 00-process (ceiling Opus + medium; Unity single owner) / none this block / the task to delegate>.
-TEST PLAN: <baseline full run needed? / full EditMode + PlayMode once at the end / background full run: yes or no>.
+TEST PLAN: <opening baseline: none (default; the last commit is green) or why one is needed / the closing tier: BLOCK, CORE or FULL>.
 
 PART 1 -- <fixes>: numbered, each = what + where + the test that proves it + recapture.
 PART 2 -- <new work>: per kind / step: WHAT (behaviour + acceptance), HOW (reuse first; decisions already taken), LOOK (the design
