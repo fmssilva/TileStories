@@ -42,9 +42,22 @@ namespace TileStories.Editor
             "What each group shows: Icon And Text (the default), the Icon alone, the Text alone, or every icon with the Text On The Chosen "
             + "group only. A group with no icon always shows its word; an icon alone is still named for a screen reader.";
 
+        private const string CardNavBarRaisedDepthHelp =
+            "Raised only. How far the bar's edge bends at the chosen group, from -1 to +1. +1 (the default): a bell rising round the disc, "
+            + "its top on the disc's top. Between 0 and 1: a lower bell, the disc standing above it. 0: a flat bar, the disc half above its "
+            + "edge. Below 0: a cradle -- the edge dips down round the disc, at -1 following the disc's shape with a small gap. The disc "
+            + "itself never moves.";
+
+        private const string CardNavBarIconColourHelp =
+            "The colour of the groups' icons on the bar. Group (the default): each icon in its group's own Colour (Bar Groups), in the "
+            + "darker tone of that colour made for reading on the bar. Accent: every icon in the theme's accent. Neutral: every icon in the "
+            + "quiet text colour. The groups' words always stay text colour. Over the hero's picture a see-through bar shows every icon "
+            + "white.";
+
         private const string CardNavBarChosenColourHelp =
-            "The chosen group's colour (its icon, its disc, its word). Accent (the default): the theme's accent. Ink: the theme's text "
-            + "colour. Group: each group's own Colour from Bar Groups (its word then stays text colour, readable on the bar).";
+            "The chosen group's colour (its disc, pill or underline, and a plain chosen icon). Group (the default): each group's own Colour "
+            + "from Bar Groups, the disc's icon in that colour's own ink; its word stays text colour, readable on the bar. Accent: the "
+            + "theme's accent. Ink: the theme's text colour.";
 
         private const string CardNavBarBoldHelp =
             "On (the default): the chosen group's icon is drawn with heavier lines.";
@@ -75,8 +88,8 @@ namespace TileStories.Editor
             + "the disc, the colour and Bold Chosen Icon mark it.";
 
         private const string CardNavBarGroupColourHelp =
-            "The group's colour, one of the theme's: it paints the chosen group when Chosen Colour is Group. Its Family's Colour: the first "
-            + "family's own.";
+            "The group's colour, one of the theme's: its icon on the bar when Icon Colour is Group, and the chosen group's disc when Chosen "
+            + "Colour is Group (both the defaults). Its Family's Colour: the first family's own.";
 
         private const string CardNavBarGroupFamiliesHelp =
             "The families whose blocks this group leads to. Pick several to merge them into one group. A family in two groups belongs to "

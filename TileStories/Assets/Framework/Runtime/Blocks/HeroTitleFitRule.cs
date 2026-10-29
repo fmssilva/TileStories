@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using FontAsset = UnityEngine.TextCore.Text.FontAsset;
 
 namespace TileStories
@@ -14,28 +15,47 @@ namespace TileStories
 
         // The lines `title` wraps to at `width`: words kept whole and joined by one space while the run fits; a single word wider than the
         // line takes as many lines as it is wide (the text engine breaks it). 0 for an empty title or a width with no room
-        public static int Lines(string title, float width, Func<string, float> measure)
+        public static int Lines(string title, float width, Func<string, float> measure) => LineWidths(title, width, measure).Count;
+
+        // The same wrap, each line's measured ink width (from its first word's start to its last word's end)
+        public static List<float> LineWidths(string text, float width, Func<string, float> measure)
         {
-            if (string.IsNullOrWhiteSpace(title) || !(width > 0f) || measure == null) return 0;
-            var words = title.Split((char[])null, StringSplitOptions.RemoveEmptyEntries);
-            int lines = 0;
+            var widths = new List<float>();
+            foreach (var line in LineWords(text, width, measure))
+                widths.Add(line.Count == 0 ? 0f : line[line.Count - 1].X + line[line.Count - 1].Width);
+            return widths;
+        }
+
+        // The same wrap, word by word (the Local Shade hugs each word's ink, not the label's full-width box): per line, each word's start
+        // from the line's start (the run up to it, less the word itself) and its own width. A word broken over lines fills every line but its
+        // last, which keeps what is left of it
+        public static List<List<(float X, float Width)>> LineWords(string text, float width, Func<string, float> measure)
+        {
+            var lines = new List<List<(float X, float Width)>>();
+            if (string.IsNullOrWhiteSpace(text) || !(width > 0f) || measure == null) return lines;
+            var words = text.Split((char[])null, StringSplitOptions.RemoveEmptyEntries);
             string line = "";
+            var current = new List<(float X, float Width)>();
             foreach (string word in words)
             {
                 string candidate = line.Length == 0 ? word : line + " " + word;
-                if (measure(candidate) <= width)
+                float candidateWidth = measure(candidate);
+                float alone = measure(word);
+                if (candidateWidth <= width)
                 {
                     line = candidate;
+                    current.Add((Math.Max(0f, candidateWidth - alone), alone));
                     continue;
                 }
-                if (line.Length > 0) lines++;
+                if (line.Length > 0) lines.Add(current);
                 // - a word longer than the whole line: the engine breaks it over as many lines as it needs, the last one stays open
-                float alone = measure(word);
                 int extra = alone > width ? (int)Math.Ceiling(alone / width) - 1 : 0;
-                lines += extra;
+                for (int i = 0; i < extra; i++) lines.Add(new List<(float X, float Width)> { (0f, width) });
                 line = word;
+                current = new List<(float X, float Width)> { (0f, alone - extra * width) };
             }
-            return lines + 1;
+            lines.Add(current);
+            return lines;
         }
 
         // Whether a title of `lines` lines earns the Editor's notice

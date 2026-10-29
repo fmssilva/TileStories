@@ -84,14 +84,17 @@ namespace TileStories.Tests
             yield return CardGalleryChecks.PixelAt(surface, surface.worldBound.center, got);
         }
 
-        // The hero's picture (poster or loop) where no word or shade covers it: its upper part (_3.3 P4.4a, S4a, v5)
+        // The hero's picture (poster or loop) where no word or tone covers it: its upper part (_3.3 P4.4a, S4a, v5)
         private static IEnumerator PictureColourIn(HeaderBlockView header, System.Action<Color> got)
         {
             var hero = header.HeroPart.worldBound;
             // - _3.3 S4a: the top shade darkens the hero's top behind the floating bars -- the picture is read under its foot
             float top = CardTestInput.UnderTheTopShade(header.HeroPart);
-            Assert.Greater(header.Shade.worldBound.yMin - top, 24f, "precondition: a band of bare picture between the top shade and the words' shade");
-            yield return CardGalleryChecks.PixelAt(header.HeroPart, new Vector2(hero.center.x, top + 12f), got);
+            var at = new Vector2(hero.center.x, top + 12f);
+            var tone = header.Words.Painter.Options;
+            float laid = tone == null ? 0f : LookKit.ToneRule.PageAlpha(tone, at - header.ToneLayer.worldBound.position);
+            Assert.Less(laid, 0.01f, "precondition: Words On Picture's tone lays nothing where the picture is read (" + laid + ")");
+            yield return CardGalleryChecks.PixelAt(header.HeroPart, at, got);
         }
 
         private static bool Near(Color a, Color b) => Mathf.Abs(a.r - b.r) < 0.05f && Mathf.Abs(a.g - b.g) < 0.05f && Mathf.Abs(a.b - b.b) < 0.05f;

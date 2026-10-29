@@ -154,6 +154,8 @@ namespace TileStories.Editor.Tests
                 ("Chosen Icon", () => Nav.bar.chosen_icon = CardOptions.NavBarChosenIconPlain,
                     () => NavBarRule.ChosenIcon(Nav.bar) == CardOptions.NavBarChosenIconPlain),
                 ("Labels", () => Nav.bar.labels = CardOptions.NavBarLabelsIcon, () => NavBarRule.Labels(Nav.bar) == CardOptions.NavBarLabelsIcon),
+                ("Icon Colour", () => Nav.bar.icon_color = CardOptions.NavBarIconNeutral,
+                    () => NavBarRule.IconColour(Nav.bar) == CardOptions.NavBarIconNeutral),
                 ("Chosen Colour", () => Nav.bar.selected_color = CardOptions.NavBarColourInk,
                     () => NavBarRule.SelectedColour(Nav.bar) == CardOptions.NavBarColourInk),
                 ("Bold Chosen Icon", () => Nav.bar.bold_selected = false, () => !NavBarRule.BoldChosen(Nav.bar)),
@@ -169,6 +171,47 @@ namespace TileStories.Editor.Tests
                 Assert.AreEqual(steps + 1, _window.UndoStepsLeft, pick.Row + ": one undo step");
                 CollectionAssert.Contains(RowTitles, pick.Row, pick.Row + " still drawn after the pick");
             }
+        }
+
+        // Raised Depth (the P3c review b): a slider right under Indicator, only while Indicator is Raised; drawing it writes nothing; a REAL
+        // drag along its track (press, moves, release inside one editor tick) writes the depth the card reads, as ONE undo step, and one
+        // Ctrl+Z puts it back
+        [UnityTest]
+        public IEnumerator RaisedDepth_IsASliderUnderRaisedOnly_ARealDragWritesIt_OneUndoStep()
+        {
+            OpenNavigation();
+            yield return Draw();
+            Assert.IsFalse(_window.Unsaved, "drawing writes nothing");
+            Assert.IsTrue(NavBarRule.Raised(Nav.bar), "precondition: Raised, the default indicator");
+            Assert.Less(Row("Indicator"), Row("Raised Depth"), "right under Indicator");
+            Assert.Less(Row("Raised Depth"), Row("Chosen Icon"));
+            Assert.AreEqual(1f, NavBarRule.RaisedDepth(Nav.bar), "precondition: the full bell");
+
+            int steps = _window.UndoStepsLeft;
+            Rect row = _window.RectOf("Raised Depth");
+            float y = row.center.y, startX = row.xMax - 70f;
+            _window.Send(new Event { type = EventType.MouseDown, button = 0, clickCount = 1, mousePosition = _window.Local(new Vector2(startX, y)) });
+            _window.PaintNow();
+            for (int i = 1; i <= 6; i++)
+            {
+                _window.Send(new Event { type = EventType.MouseDrag, button = 0, mousePosition = _window.Local(new Vector2(startX - 20f * i, y)), delta = new Vector2(-20f, 0f) });
+                _window.PaintNow();
+            }
+            _window.Send(new Event { type = EventType.MouseUp, button = 0, clickCount = 1, mousePosition = _window.Local(new Vector2(startX - 120f, y)) });
+            _window.PaintNow();
+            yield return _window.WaitForRepaint();
+            float dragged = NavBarRule.RaisedDepth(Nav.bar);
+            Assert.Less(dragged, 1f, "the drag lowered the depth");
+            Assert.GreaterOrEqual(dragged, -1f, "...inside its range");
+            Assert.AreEqual(dragged, Nav.bar.raised_depth, 1e-5f, "the card reads what the slider wrote");
+            Assert.AreEqual(steps + 1, _window.UndoStepsLeft, "a whole drag = one undo step");
+            yield return _window.PressUndo();
+            Assert.AreEqual(1f, NavBarRule.RaisedDepth(Nav.bar), 1e-5f, "one Ctrl+Z puts the full bell back");
+
+            Pick(() => Nav.bar.indicator = CardOptions.NavBarIndicatorPill);
+            yield return Draw();
+            CollectionAssert.DoesNotContain(RowTitles, "Raised Depth", "under Pill there is no bump to deepen: no row");
+            CollectionAssert.Contains(RowTitles, "Icon Colour", "Icon Colour stays");
         }
 
         [UnityTest]

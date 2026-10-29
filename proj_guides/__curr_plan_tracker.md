@@ -1,69 +1,70 @@
-# Plan tracker -- Premium P3b: old navigation out of the runs, a fluid bump, steady hero words
+# Plan tracker -- P3c (continued, 3): the halo for Half, Raised Depth, Icon Colour; close green
 
-Brief: `proj_guides/__AI_worker.md` + "P3b" pasted in chat (developer's P3a review, `_3.3` fourth round > "P3a review" a-f).
-BASELINE: HEAD b89c9d7 = origin. Worker: Opus, effort High. STOP after the report: P3c = Local Shade on the bar's labels + the FAB.
-RULE (review phase): BLOCK = full EditMode + the card PlayMode fixtures (the list below, minus the fixtures now skipped whole).
+Brief: `proj_guides/__AI_worker.md` "P3c (continued, 3)" (`_3.3` fourth round > "P3c review" b and "P3c review, second pass" a + c).
+Contrast policy: words over a picture >= 4.5:1, all else 7:1 (icons on the bar >= 4.5:1). Worker: Opus, effort High.
+TEST PLAN: BLOCK = full EditMode + the 14 card fixtures (list at the end) on the FINAL state. STOP after the report.
+OUT OF SCOPE (P3d): the Reveal both ways (Motion > Replay), Tint Depth, the FAB.
 
 ## GATE
-- [x] Unity MCP: telemetry_status ok
-- [x] git: HEAD = origin/master = b89c9d7, fetch brought nothing; nothing to push
-- [x] fonts: no font / SDF asset in git status
-- [x] compile clean: forced compile, ExitCode 0, zero error CS
-- [x] baseline full EditMode: 2339 / 2272 / 0 failed / 67 skipped (Unity behind; a first try found Unity left in Play Mode: stopped, re-run)
-- [x] Unity c asked before the first PlayMode run (Pronto); no Editor capture this block (no Editor change)
+- [x] MCP live (telemetry_status ok); origin = HEAD = fbc2f36, nothing to push; SDF fonts unmodified (git status clean under both Fonts/)
+- [x] Play Mode off; compile clean (last Tundra ExitCode 0, the log's `error CS` lines older than it; console 0 errors); no InitTestScene
+- [x] baseline full EditMode on the uncommitted tree: 2346 / 2194 passed / 0 failed / 152 skipped, 205 s, Unity behind both ends
+- [ ] captures (Unity b): POI Editor rows in the dark skin; Game-view renders
 
-## PART 1 -- old navigation out of the runs (fixture level)
-- [x] scratch tool split_fixture.py: X -> abstract XFixture (set-up + helpers, private -> protected) + X (its own tests, same name) +
-      XOldNavigationTests ([Ignore(TestSkips.OldNavigationElements)])
-- [x] whole fixtures skipped (the old element IS the subject): EditMode EdgeScrubberRuleTests, NavBottomElementRulesTests, NavFitRuleTests,
-      NavRailRuleTests, BentoTileRuleTests, BentoLayoutRuleTests, AutoNavBlockTests, NavigationWarningRuleTests; PlayMode
-      PoiCardNavContentsSceneTests, PoiCardNavRailsSceneTests, PoiCardNavBentoSceneTests, PoiCardBentoLayoutSceneTests, PoiCardNavBlockSceneTests
-- [x] mixed fixtures split (test-level skips -> the sibling fixture): DetailCardEditorTabTests, NavElementRegistryTests, FloatingSlotTests,
-      CardLayoutRuleTests (+ TabsWithNoBar), PoiCardChromeSceneTests, PoiCardHeroSceneTests, PoiCardLayoutSceneTests, PoiCardPagesSceneTests,
-      PoiCardPaintingSceneTests, SectionSheetSceneTests; newly: NavTopElementRulesTests (Groups / progress map / rule 7 / Labels),
-      NavFloatingRulesTests (dial, radial, dims), SectionSheetMeasureSceneTests (rails, bento), PoiCardSheetDragSceneTests (the top strip)
-- [x] scope: HeroMeasureSceneTests measures the default only (no Menu matrix: the bar draws no menu)
-- [x] grep: no test outside an old-navigation fixture writes top / bottom / menu / floating / edge / auto_nav_block, none outside the bar's own
-      fixtures writes a bar option
-- [x] inventory in `_3.3` (one line per element: what it is, what the bar covers, rebuild / retire); `_Test_Suite_1.md` section 2
-- [x] compile + full EditMode (skips moved, nothing red)
+## PART 1 -- the halo for Half: (c) a two-layer halo + (a) the far-side check at Full only -- DONE (the developer's picks below)
+- [x] InkRects.ShownLabels (the one rule of which labels carry ink); HeroWordsOnPicture owns the SECOND layer: a halo layer in the tone
+      layer holding one pooled back label per shown word (same words, face, size, box; the box grown by the SDF reach so a cut eyebrow
+      never clips its glow); Media.uss .card-hero__halo (outline --ts-text-halo-wide-width 1.5px + glow --ts-text-halo-wide-blur 18px)
+- [x] FINDING -> developer pick "Wider atlas": the glow could not reach past the font SDF (padding 6 @ 48 pt = 0.125 em); FontAtlasBuilder
+      UiAtlasPadding 18 / UiAtlasSize 2048 for the 4 UITK theme assets (TMP untouched; glyphs 290 / 325 as before)
+- [x] FINDING -> developer pick "Keep halo, (a)": measured on the render the halo takes 0.10-0.26 off the title's brightest ring pixel but
+      0.00-0.02 off the eyebrow / Listen time (~2 px reach on 12 px text, whatever outline width): no credit counted; the credit code removed
+- [x] far-side ~0 at Full only; the looks read at Full; every word >= 4.5:1 unchanged
+- [x] developer review of the renders (TestEvidence/Premium/P3c/review_words_on_picture.png): (1) the tone's reach is taste -> Tone Spread,
+      a header Number field 0.4..1.5 (default 1), HeroWordsRule.Spread / Layer(spread); (2) BUG: scrolling, the tone layer rose with the
+      words and bared the picture's foot under a hard edge -> the layer stays, Rise(rise) moves its anchor and the halo layer
+- [x] EditMode LookKitRulesTests 13 / 13 (ToneSpread_...), FieldVisibilityRuleTests (Tone Spread in every picture look): 24 / 24
+- [x] PlayMode PoiCardHeroSceneTests 58 / 58 (Unity behind): TheHalo_IsTwoLayers_..., Scrolling_TheToneRisesWithTheWords_..._NoCutEdge,
+      ToneSpread_LessDarkensLessOfThePicture_AndEveryWordStillReads (196945 vs 260492 px darkened), far side at Full
 
-## PART 2 -- the Raised bump is a fluid bell (P3a review a)
-- [x] NavBarShapeRule.Path: crest = the disc's own top arc (peak = the disc's top, tangent there flat), left at the angle where the bell leaves it,
-      then a soft shoulder to the edge (C1 at every join); near a side the shoulder narrows into the top corner (corner shrinks only as needed)
-- [x] tokens: --ts-navbar-bump 18 -> 12 (peak = disc top 14 at room 26), --ts-navbar-bump-half 38 -> 50 (wide shoulders), --ts-navbar-disc-gap
-      removed (DiscTop(room, bump) = the bell's peak)
-- [x] NavBarView: the bell centred on the disc (Centre), disc radius passed
-- [x] EditMode NavBarShapeRuleTests rewritten: peak = disc top +-0.5; C1 at every join; monotonic each side; the disc's top arc IS the outline;
-      first / last group smooth; mirror at Top; flat without Raised
-- [x] PlayMode NavBar fixture: the disc-gap test -> the peak on the disc's top (Bottom / Top, light / dark renders); zoomed renders looked at
+## PART 4 -- DONE: docs (_3.3 build log, _Test_Suite_1, 10-structure, the --ts-scrim-hero note + the regenerated USS); BLOCK on the final
+## tree: full EditMode 2352 / 2200 / 0 / 152 (257 s), 14 card fixtures 272 / 272 (30.3 min), both Unity behind; the Editor rows captured in
+## the dark skin (TestEvidence/Editor/p3c_navbar_rows.png); LivingRoomScene open, Play Mode off. STOP.
 
-## PART 3 -- the hero's words at Half (P3a review b)
-- [x] MEASURE first: resolved opacity of eyebrow / title / line / Listen at Half, no scroll; ring contrast on the real hero (Ribeira Palace)
-- [x] HeroMotionRule.TextOpacity: driven by the scroll only (whole at rest wherever the stop puts the words; fades as the scroll carries them
-      to the chrome's foot); EditMode tests
-- [x] PlayMode: open at Half, no scroll -> opacity 1 and >= 7:1; a real scroll -> the opacity the rule gives for that offset
-- [x] Local Shade NOT built: after the fix every word >= 7:1 as seen (9.09-14.48:1); before: opacity 0.029 at Half, 1.04-1.06:1
+## PART 2 + 3 -- DONE: Raised Depth (rule, config, live push, Editor slider) and Icon Colour (rule, config, Editor row, Chosen Colour
+## default Group; the shipped bar moved to Group and given the two new fields). EditMode NavBarShapeRuleTests / NavBarRuleTests /
+## NavigationBarEditorTabTests 32 / 32; LivePlayModeNavigationBarTests 2 / 2; PlayMode PoiCardNavBarSceneTests 46 / 47 -> the red one the
+## old default (an accent disc), its assertion moved to the group's colour; icons >= 9.48:1, disc icons 7.50-9.12:1
 
-## PART 4 -- a jump lands below the Top Band; one ornament per boundary (P3a review e, f)
-- [x] PoiCardSheetView: LandingInset = max(the strip's foot, the Top Band's foot); hero words finish fading there too
-- [x] SectionStyleRule.Of: a Tiles / Wave Start takes the Divider's place (none before it); EditMode test
-- [x] PlayMode (Sections fixture): a jump to each section lands its Start's top at or below the band's foot; a Divider before Fade / Plain
-      still shows, none before Tiles / Wave
+## PART 2 -- Raised Depth (slider -1..+1, default +1; 0 flat; < 0 a cradle)
+- [ ] CardNavBarSettings.raised_depth = 1; NavBarRule.RaisedDepth (clamped, NaN = 1)
+- [ ] NavBarShapeRule.EdgeRise (depth R above 0, depth (R + gap) below) + CrestRadius (R / R + gap); Path takes a SIGNED rise -- a cradle
+      is the bell mirrored about the flat edge (concentric with the disc at -1); --ts-navbar-cradle-gap; the disc never moves
+- [ ] NavBarView: the path at EdgeRise, the disc at its own place (BellHeight)
+- [ ] Editor: "Raised Depth" slider after Indicator, only under Raised, (i); drawing never writes
+- [ ] EditMode: NavBarShapeRuleTests at -1 / -0.5 / 0 / 0.5 / 1; NavBarRuleTests default / clamp / old config; NavigationBarEditorTabTests
+      (rows, a real slider drag = one undo step, hidden without Raised)
+- [ ] Live push: LivePlayModeNavigationBarTests -- a real drag of Raised Depth in the window reaches the open card
+- [ ] PlayMode PoiCardNavBarSceneTests: pixels at -1 / 0 / +1, Bottom and Top
 
-## PART 5 -- BLOCK, look, report
-- [ ] compile; full EditMode; the card fixtures (list below)
-- [ ] renders looked at (bump zoomed Bottom / Top light / dark; hero at Half; a section after a jump)
-- [ ] `_3.3` build log + inventory, `_Test_Suite_1.md`, `10-structure.md` lines; LivingRoomScene open; report + ONE commit message
+## PART 3 -- Icon Colour: Group (default) / Accent / Neutral
+- [ ] CardNavBarSettings.icon_color = "group"; CardOptions.NavBarIconColours / labels; Chosen Colour's default = Group (the disc in its
+      group's colour by default); NavBarRule.IconColour, IconToken (group's -text / --ts-accent-text / --ts-ink-2), DiscInkToken (the
+      group's -ink / --ts-on-accent / --ts-surface); NavBarView.Paint (labels stay ink / ink-2)
+- [ ] Editor: "Icon Colour" after Labels, (i)
+- [ ] EditMode: NavBarRuleTests (defaults, tokens; every group's -text >= 4.5:1 on --ts-bar and its -ink >= 4.5:1 on its colour, light /
+      dark, from the theme); NavigationBarEditorTabTests (row + pick)
+- [ ] PlayMode PoiCardNavBarSceneTests: icon_color cases; per group on the render, light / dark, every fill: icons >= 4.5:1, the disc
+      its group's colour with its icon >= 4.5:1
+
+## PART 4 -- docs, BLOCK, looks, report
+- [ ] _3.3 build log; _Test_Suite_1; 10-structure (InkRects, PictureLuminance, LookKit/Tone.cs, HeroWordsRule.cs, HeroWordsOnPicture.cs,
+      images/night_hero.png; the changed lines); Theme.default.asset's --ts-scrim-hero note (regenerate the USS)
+- [ ] BLOCK: full EditMode + the 14 card fixtures (+ LivePlayModeNavigationBarTests) on the final state
+- [ ] LOOK: Editor rows in the dark skin; the renders
+- [ ] report with ONE commit message for all of P3c; LivingRoomScene open, ready to play
 
 ## The card PlayMode fixtures of BLOCK
 PoiCardSectionsSceneTests, PoiCardNavBarSceneTests, PoiCardHeroSceneTests, PoiCardChromeMarksSceneTests, PoiCardSceneTests, CardLightSceneTests,
 ThemeFrameSceneTests, SectionSheetSceneTests, PoiCardLayoutSceneTests, PoiCardPagesSceneTests, PoiCardPaintingSceneTests, PoiCardThemeSceneTests,
-PoiCardChromeSceneTests, PoiCardPageChromeSceneTests (14; PoiCardNavRailsSceneTests and PoiCardNavBlockSceneTests now skipped whole,
-PoiCardRestingEndSceneTests already was)
-
-## Results so far
-- EditMode after the block: 2341 / 2189 / 0 failed / 152 skipped (Unity behind both ends)
-- the 9 reds of the first targeted run were the tests' aim (EdgeAt sparse samples, a dark hero pixel near the dark fill, the hairline's AA at
-  1.5 pt; a divider "gap" assertion (f) made obsolete) -- corrected; 25 / 25 green by name
-- hero words measured before / after: TestEvidence/Premium/P3b/hero_words_at_rest_BEFORE.txt / hero_words_at_rest.txt
+PoiCardChromeSceneTests, PoiCardPageChromeSceneTests (14)

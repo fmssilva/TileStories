@@ -3,8 +3,8 @@
 > **This copy sits next to the imported media** (`CardMedia/`, P1b). The paths below are the same here as in the gather folder
 > `proj_guides/detail_card/content/`, except these rows, whose files stayed THERE and are not in the build: `images/castle_peacock.jpg`
 > (gathered, not used by the wall), the narration scripts `audio/*.txt`, `text/` and `tools/`. Checked against the folder 2026-10-22
-> (P1b part 2): every other row's file is here, and every file here has its row (`placeholder_hero.png`, `lamp_tone.*` and `models/` are
-> this project's own fixtures, listed in `README.txt`).
+> (P1b part 2): every other row's file is here, and every file here has its row (`placeholder_hero.png`, `images/night_hero.png`,
+> `lamp_tone.*` and `models/` are this project's own fixtures, listed in `README.txt`).
 
 Retrieved 2026-10-22 by the P1a Worker. One row per file. Author and licence come from the file's Commons record (API `extmetadata`),
 not from memory. "Changes" says what was done to the original. Nothing here is "all rights reserved" and nothing comes from a search

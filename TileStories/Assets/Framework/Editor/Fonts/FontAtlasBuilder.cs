@@ -26,6 +26,10 @@ namespace TileStories.Editor
         public const int SamplingPointSize = 48;
         public const int AtlasPadding = 6;
         public const int AtlasSize = 1024;
+        // - the UI Toolkit assets: a text-shadow or outline reaches only as far as the SDF does (the padding, 18 / 48 = 0.375 em: the hero's
+        //   halo 4-5 px round a 12 px eyebrow, ~11 px round its title -- 6 cut it at 1.5 px), so their page doubles to hold the wider cells
+        public const int UiAtlasPadding = 18;
+        public const int UiAtlasSize = 2048;
 
         // The typographic punctuation the app's texts use: curly quotes, en / em dash, ellipsis, middle dot, the affordance arrow
         public const string Typographic = "“”‘’–—…·›";
@@ -98,7 +102,7 @@ namespace TileStories.Editor
             var asset = AssetDatabase.LoadAssetAtPath<FontAsset>(path);
             if (asset == null)
             {
-                asset = FontAsset.CreateFontAsset(font, SamplingPointSize, AtlasPadding, GlyphRenderMode.SDFAA, AtlasSize, AtlasSize,
+                asset = FontAsset.CreateFontAsset(font, SamplingPointSize, UiAtlasPadding, GlyphRenderMode.SDFAA, UiAtlasSize, UiAtlasSize,
                     TextCoreAtlasPopulationMode.Dynamic, false);
                 asset.name = Path.GetFileNameWithoutExtension(path);
                 AssetDatabase.CreateAsset(asset, path);
@@ -107,6 +111,13 @@ namespace TileStories.Editor
             else
             {
                 asset.atlasPopulationMode = TextCoreAtlasPopulationMode.Dynamic;
+                // - an old asset takes the UI padding and page before it is cleared, so the refill packs its glyphs with them (the asset's
+                //   own setters are internal: its serialized fields, the Editor's way)
+                var serialized = new SerializedObject(asset);
+                serialized.FindProperty("m_AtlasPadding").intValue = UiAtlasPadding;
+                serialized.FindProperty("m_AtlasWidth").intValue = UiAtlasSize;
+                serialized.FindProperty("m_AtlasHeight").intValue = UiAtlasSize;
+                serialized.ApplyModifiedPropertiesWithoutUndo();
                 asset.ClearFontAssetData(false);
             }
             asset.TryAddCharacters(characters, out string missing);

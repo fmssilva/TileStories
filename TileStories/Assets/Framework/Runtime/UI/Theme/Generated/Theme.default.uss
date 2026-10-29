@@ -14,11 +14,11 @@
        frame (about 144) */
     --ts-scrim: rgba(0, 0, 0, 0.7);
     --ts-hero-fade: rgba(244, 240, 232, 0.9);
-    /* The hero's scrim behind its words (solid) and the tint of the ramp above them (hero_scrim.png holds the grade). The
-       project blends in LINEAR light, so the alpha is chosen against the WORST pixel any picture can have, pure white: at 0.94
-       the ground stays at luminance 0.062 and the eyebrow (--ts-on-scrim-2) keeps 7.7:1, the title 9.3:1, over any picture
-       (ThemeContrastTests; 0.92 left the eyebrow 6.7:1 over The Lamp's sky once its actions took one row, P4.4b part 2). The
-       same in both modes: the hero is a picture */
+    /* The dark of the hero: the colour of Words On Picture's tone and scrim (their strength is the picture's own, worked out
+       per hero), the ground of a Clear Navigation Bar at Top over the hero, and the ink of the bar's disc there. The alpha is
+       that ground's: the project blends in LINEAR light, so it is chosen against the WORST pixel any picture can have, pure
+       white -- at 0.94 the ground stays at luminance 0.062 and the white words keep 7:1 over any picture (ThemeContrastTests).
+       The same in both modes: the hero is a picture */
     --ts-scrim-hero: rgba(10, 8, 6, 0.94);
     /* The hero's title, line and outline button over the scrim */
     --ts-on-scrim: rgb(255, 255, 255);
@@ -259,11 +259,11 @@
        frame (about 144) */
     --ts-scrim: rgba(0, 0, 0, 0.7);
     --ts-hero-fade: rgba(16, 15, 13, 0.9);
-    /* The hero's scrim behind its words (solid) and the tint of the ramp above them (hero_scrim.png holds the grade). The
-       project blends in LINEAR light, so the alpha is chosen against the WORST pixel any picture can have, pure white: at 0.94
-       the ground stays at luminance 0.062 and the eyebrow (--ts-on-scrim-2) keeps 7.7:1, the title 9.3:1, over any picture
-       (ThemeContrastTests; 0.92 left the eyebrow 6.7:1 over The Lamp's sky once its actions took one row, P4.4b part 2). The
-       same in both modes: the hero is a picture */
+    /* The dark of the hero: the colour of Words On Picture's tone and scrim (their strength is the picture's own, worked out
+       per hero), the ground of a Clear Navigation Bar at Top over the hero, and the ink of the bar's disc there. The alpha is
+       that ground's: the project blends in LINEAR light, so it is chosen against the WORST pixel any picture can have, pure
+       white -- at 0.94 the ground stays at luminance 0.062 and the white words keep 7:1 over any picture (ThemeContrastTests).
+       The same in both modes: the hero is a picture */
     --ts-scrim-hero: rgba(10, 8, 6, 0.94);
     /* The hero's title, line and outline button over the scrim */
     --ts-on-scrim: rgb(255, 255, 255);

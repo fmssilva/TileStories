@@ -6,10 +6,11 @@ namespace TileStories
     // The Navigation Bar's drawn shape (_3.3 S4 third round, v5's renderVals; P3a review: a FLUID bump), pure: the ONE path the bar's surface
     // paints, and the motion its raised bump slides with.
     //   - Path: the bar's outline in its own box (x right, y down, panel units): a rounded rectangle whose top edge (at y = room) rises into one
-    //     smooth bell centred on the chosen group's disc. The bell's crest IS the disc's top arc (its peak exactly at the disc's top, no band of
-    //     bar above it); it leaves the disc where the bar has fallen LeaveShare of the bell and lands on the edge in a wide soft shoulder. Every
-    //     join is tangent-continuous (C1). A bump of 0 is the flat edge, so one path draws every indicator. At Top the path is mirrored in its
-    //     box (Mirror): the bell hangs down
+    //     smooth bell centred on the chosen group's disc. The bell's height comes from the disc (BellHeight: the disc's centre on the flat
+    //     edge, a fish-eye bell); its crest IS the disc's top arc (its peak exactly at the disc's top, no band of bar above it), hugging the
+    //     disc's outline to HugDegrees each side, then it lands on the edge in a wide soft shoulder. Every join is tangent-continuous (C1).
+    //     A bump of 0 is the flat edge, so one path draws every indicator; a negative one is a cradle (Raised Depth below 0: EdgeRise), the
+    //     bell mirrored about the flat edge. At Top the path is mirrored in its box (Mirror): the bell hangs down
     //   - Radius: a floating bar's corner (a stadium, or v5's smaller corner under Raised so the bell has a straight edge to rise from)
     //   - BumpX: the bell's centre = the disc's, only held so the disc stays inside the bar; near a side the shoulder narrows into the top corner
     //     (the corner gives way only when the shoulder has no room left), so the first and last groups stay smooth
@@ -18,10 +19,10 @@ namespace TileStories
     {
         // How long the bump (and the disc riding it) takes to slide to the next group
         public const float SlideSeconds = 0.5f;
-        // The share of the bell's height the crest follows the disc's arc down before the shoulder takes over
+        // How far down the disc's outline the crest hugs it, each side of its top (P3b review: the developer's red line, ~50 deg)
+        public const float HugDegrees = 50f;
+        // A bell shallower than the hug (a small disc's): the crest follows the arc down this share of the bell, so a shoulder is left
         public const float LeaveShare = 0.6f;
-        // The steepest the bell leaves the disc (from the top of its arc): past it a deep bell would hang on the disc's sides
-        public const float MaxLeaveDegrees = 70f;
         // How far the shoulder's foot handle reaches back along the edge, as a share of the room it has: the softness of the landing
         public const float ShoulderEase = 0.55f;
 
@@ -53,23 +54,45 @@ namespace TileStories
         public static float BumpX(float centre, float width, float discRadius) =>
             width < discRadius * 2f ? width * 0.5f : Mathf.Clamp(centre, discRadius, width - discRadius);
 
+        // How high the bell rises above the flat edge: the disc's radius -- the disc's centre sits on the edge, so the bell is as deep as the
+        // disc drawn (never a fixed number that leaves the disc standing above a shallow bell)
+        public static float BellHeight(float discRadius) => Mathf.Max(0f, discRadius);
+
+        // Raised Depth (the P3c review b), -1..+1: how far the edge rises at the disc -- above 0 a bell `depth` of the disc's radius high
+        // (+1: its peak the disc's top), 0 the flat edge, below 0 a CRADLE dipping |depth| of (radius + gap) under the edge (-1: concentric
+        // with the disc, `gap` round it). The disc never moves: its centre stays on the flat edge
+        public static float EdgeRise(float depth, float discRadius, float gap)
+        {
+            float d = float.IsNaN(depth) ? 1f : Mathf.Clamp(depth, -1f, 1f);
+            return d >= 0f ? d * BellHeight(discRadius) : d * (BellHeight(discRadius) + Mathf.Max(0f, gap));
+        }
+
+        // The arc the bell's crest follows (a rise above 0: the disc's own outline) or the cradle's trough (below 0: the disc's outline grown
+        // by the gap)
+        public static float CrestRadius(float rise, float discRadius, float gap) =>
+            rise >= 0f ? Mathf.Max(0f, discRadius) : Mathf.Max(0f, discRadius) + Mathf.Max(0f, gap);
+
         // The raised disc's top in the bar's box (bottom bar: y down from the box's top, the edge at `room`): the bell's peak
         public static float DiscTop(float room, float bump) => room - bump;
 
-        // The angle (radians, from the top of the disc) where the bell leaves the disc's arc for its shoulder
+        // The angle (radians, from the top of the disc) where the bell leaves the disc's arc for its shoulder: HugDegrees, or less when the
+        // bell is too shallow to fall below that point (then LeaveShare of its height)
         public static float LeaveAngle(float bump, float discRadius)
         {
             if (!(bump > 0f) || !(discRadius > 0f)) return 0f;
-            float cos = Mathf.Clamp(1f - LeaveShare * bump / discRadius, Mathf.Cos(MaxLeaveDegrees * Mathf.Deg2Rad), 1f);
-            return Mathf.Acos(cos);
+            float shallow = Mathf.Acos(Mathf.Clamp(1f - LeaveShare * bump / discRadius, -1f, 1f));
+            return Mathf.Min(HugDegrees * Mathf.Deg2Rad, shallow);
         }
 
         // The outline of a bar `width` x `height` whose top edge sits `room` down its box, corners `radius`, a bell `bump` high and `bumpHalf`
-        // half wide round a disc of `discRadius` centred at bumpX
+        // half wide whose crest is an arc of `discRadius` centred at bumpX (CrestRadius); a NEGATIVE bump is a cradle -- the same bell mirrored
+        // about the flat edge, dipping into the bar (its shoulders and every join as smooth as the bell's)
         public static List<Command> Path(float width, float height, float room, float radius, float bump, float bumpHalf, float bumpX, float discRadius)
         {
             float a = room, b = room + height, r = Mathf.Clamp(radius, 0f, height * 0.5f);
             var path = new List<Command>();
+            bool cradle = bump < 0f;
+            bump = Mathf.Abs(bump);
             if (!(bump > 0f) || !(discRadius > 0f))
             {
                 // - a flat edge: the rounded rectangle alone
@@ -100,11 +123,19 @@ namespace TileStories
             var footL = new Vector2(leaveL.x - left.Span, a);
             if (footL.x - left.Corner > 1e-3f) path.Add(new Command(Op.Line, footL));
             // - the left shoulder up to the disc, the crest over its top, the right shoulder down
+            int edgeFrom = path.Count;
             path.Add(new Command(Op.Cubic, footL + new Vector2(left.Handle, 0f), leaveL + left.Reach * new Vector2(-cos, sin), leaveL));
             path.Add(new Command(Op.Cubic, leaveL + k * new Vector2(cos, -sin), peak - new Vector2(k, 0f), peak));
             path.Add(new Command(Op.Cubic, peak + new Vector2(k, 0f), leaveR - k * new Vector2(cos, sin), leaveR));
             var footR = new Vector2(leaveR.x + right.Span, a);
             path.Add(new Command(Op.Cubic, leaveR + right.Reach * new Vector2(cos, sin), footR - new Vector2(right.Handle, 0f), footR));
+            // - a cradle: those four pieces mirrored about the flat edge (y = a): the bell turned into a dip, its feet still on the edge
+            if (cradle)
+            {
+                Vector2 Down(Vector2 p) => new(p.x, 2f * a - p.y);
+                for (int i = edgeFrom; i < path.Count; i++)
+                    path[i] = new Command(path[i].Op, Down(path[i].P1), Down(path[i].P2), Down(path[i].P3));
+            }
             // - the edge on to the right corner, the corner, then the rest of the bar
             if (width - right.Corner - footR.x > 1e-3f) path.Add(new Command(Op.Line, new Vector2(width - right.Corner, a)));
             path.Add(new Command(Op.Quad, new Vector2(width, a), new Vector2(width, a + right.Corner)));
@@ -131,8 +162,9 @@ namespace TileStories
         {
             // - the least span that keeps the shoulder monotone: its leave handle's own horizontal reach
             float least = reach * cos;
-            // - the corner keeps its radius while the shoulder still fits beside it; past that it gives way, never the shoulder's smoothness
-            float corner = room - radius >= least ? radius : Mathf.Clamp(room - least, 0f, radius);
+            // - the corner keeps its radius while the shoulder still fits beside it; past that it gives way, never the shoulder's smoothness --
+            //   down to half the room at most, so a disc against the side keeps a round corner (never a point) and a short shoulder
+            float corner = room - radius >= least ? radius : Mathf.Clamp(room - least, Mathf.Min(radius, room * 0.5f), radius);
             float span = Mathf.Max(0f, Mathf.Min(wanted, room - corner));
             // - a disc almost at the side: the leave handle shortens to half the room (still along the arc's tangent), so the foot keeps a
             //   handle of its own and lands flat -- a short shoulder, never a kink

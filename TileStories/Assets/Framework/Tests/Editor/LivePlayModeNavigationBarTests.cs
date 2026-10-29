@@ -128,5 +128,93 @@ namespace TileStories.Editor.Tests
             }
             yield return new ExitPlayMode();
         }
+
+        // Raised Depth and Icon Colour live (the P3c review b, second pass c): while Play Mode runs, a REAL drag of the Raised Depth slider
+        // in the real window down to its least turns the open card's bump into a cradle (the painted edge dips into the bar under the chosen
+        // group, the disc where it was); Icon Colour picked Neutral reaches the running bar; Ctrl+Z walks both back
+        [UnityTest]
+        public IEnumerator RaisedDepthAndIconColour_WhilePlayModeRuns_ReachTheOpenCard_AndCtrlZWalksThemBack()
+        {
+            LogAssert.ignoreFailingMessages = true;
+            Assert.IsFalse(EditorApplication.isPlaying, "precondition: Edit Mode");
+            yield return new EnterPlayMode(expectDomainReload: false);
+            try
+            {
+                yield return EditorSceneManager.LoadSceneAsyncInPlayMode(WallScenePath, new LoadSceneParameters(LoadSceneMode.Single));
+                var editorRig = GameObject.Find("POIEditorRig");
+                if (editorRig != null) UnityEngine.Object.Destroy(editorRig);
+                WallSession session = null;
+                PoiCardHost card = null;
+                for (int i = 0; i < 900 && (session == null || session.SearchPois.Count == 0 || card == null || card.Sheet == null); i++)
+                {
+                    session = UnityEngine.Object.FindFirstObjectByType<WallSession>();
+                    card = UnityEngine.Object.FindFirstObjectByType<PoiCardHost>();
+                    yield return null;
+                }
+                Assert.IsNotNull(session, "the wall scene runs a WallSession");
+                SelectionEventBus.Select("painting");
+                yield return Frames(20);
+                var sheet = card.Sheet;
+                sheet.SetStop(SheetStopRule.Stop.Full);
+                yield return Frames(20);
+                Assert.IsTrue(sheet.IsOpen, "the Ribeira Palace's card is open");
+                var bar = sheet.Slots.Bar;
+                Assert.IsTrue(NavBarRule.Raised(bar.Settings), "precondition: the shipped wall's bar is Raised");
+                Assert.Greater(bar.BumpHeight, 0f, "precondition: a bell");
+                var discBefore = bar.Disc.layout;
+
+                var config = JsonUtility.FromJson<WallConfigData>(File.ReadAllText(Path.Combine(Application.streamingAssetsPath, "LivingRoom/config.json")));
+                _window = new PoiEditorWindowHost(config, "_showCardNavigation");
+                var tabField = typeof(POIEditorToolWindow).GetField("_selectedTab", Instance);
+                _window.SetWindowField("_selectedTab", Enum.Parse(tabField.FieldType, "DetailCard"));
+                yield return _window.WaitForRepaint();
+
+                // - a real drag along the slider's track, far to its left end, inside one editor tick
+                yield return _window.ScrollTo("Raised Depth");
+                Rect row = _window.RectOf("Raised Depth");
+                float y = row.center.y, startX = row.xMax - 70f;
+                _window.Send(new Event { type = EventType.MouseDown, button = 0, clickCount = 1, mousePosition = _window.Local(new Vector2(startX, y)) });
+                _window.PaintNow();
+                for (int i = 1; i <= 10; i++)
+                {
+                    _window.Send(new Event { type = EventType.MouseDrag, button = 0, mousePosition = _window.Local(new Vector2(startX - 60f * i, y)), delta = new Vector2(-60f, 0f) });
+                    _window.PaintNow();
+                }
+                _window.Send(new Event { type = EventType.MouseUp, button = 0, clickCount = 1, mousePosition = _window.Local(new Vector2(startX - 600f, y)) });
+                _window.PaintNow();
+                yield return _window.WaitForRepaint();
+                yield return Frames(20);
+                Assert.AreEqual(NavBarRule.RaisedDepthMin, _window.Config.card_settings.navigation.bar.raised_depth, 1e-4f, "precondition: the drag reached the slider's least");
+                bar = sheet.Slots.Bar;
+                Assert.AreEqual(NavBarRule.RaisedDepthMin, NavBarRule.RaisedDepth(bar.Settings), 1e-4f, "the running bar reads the depth");
+                Assert.Less(bar.BumpHeight, 0f, "...a cradle");
+                // - the bump's pieces end on the edge or at its extreme: the deepest of them above the bar's middle is the cradle's trough
+                float trough = bar.PaintedPath.Where(c => c.Op == NavBarShapeRule.Op.Cubic).Select(c => c.P3.y)
+                    .Where(py => py < bar.Room + bar.BarHeight * 0.5f).Max();
+                Assert.Greater(trough, bar.Room + 1f, "the painted edge dips into the bar");
+                Assert.AreEqual(discBefore.y, bar.Disc.layout.y, 0.5f, "the disc never moves");
+
+                // - Icon Colour: Neutral, through the window's own edit path
+                typeof(POIEditorToolWindow).GetMethod("DrawConfigMutationScope", Instance).Invoke(_window.Editor,
+                    new object[] { (Action)(() => _window.Config.card_settings.navigation.bar.icon_color = CardOptions.NavBarIconNeutral), false });
+                yield return _window.WaitForRepaint();
+                yield return Frames(20);
+                Assert.AreEqual(CardOptions.NavBarIconNeutral, NavBarRule.IconColour(sheet.Slots.Bar.Settings), "the running bar reads Icon Colour");
+
+                yield return _window.PressUndo();
+                yield return Frames(20);
+                Assert.AreEqual(CardOptions.NavBarIconGroup, NavBarRule.IconColour(sheet.Slots.Bar.Settings), "Ctrl+Z: Group again");
+                yield return _window.PressUndo();
+                yield return Frames(20);
+                Assert.AreEqual(1f, NavBarRule.RaisedDepth(sheet.Slots.Bar.Settings), 1e-4f, "Ctrl+Z: the full bell again");
+                Assert.Greater(sheet.Slots.Bar.BumpHeight, 0f, "...a bell on the card");
+            }
+            finally
+            {
+                _window?.Close();
+                _window = null;
+            }
+            yield return new ExitPlayMode();
+        }
     }
 }

@@ -242,12 +242,16 @@ namespace TileStories
         // Indicator: "raised" (the default: the bar's edge bends into a bump under the chosen group, its icon riding up in an accent disc)
         // | "pill" | "underline" | "none"
         public string indicator = CardOptions.NavBarIndicatorRaised;
+        // Raised Depth (under Raised): -1..+1 -- +1 (the default) the bell hugging the disc, 0 a flat bar, below 0 a cradle dipping round it
+        public float raised_depth = 1f;
         // Chosen Icon: "filled" (the default: an accent disc behind the chosen icon at its own place, with any indicator) | "plain"
         public string chosen_icon = CardOptions.NavBarChosenIconFilled;
         // Labels: "icon_and_text" (the default) | "icon" | "text" | "selected_only" (every icon, and the chosen group's words)
         public string labels = CardOptions.NavBarLabelsIconAndText;
-        // Chosen Colour: "accent" (the default) | "ink" | "group" (its row's colour)
-        public string selected_color = CardOptions.NavBarColourAccent;
+        // Icon Colour: "group" (the default: every icon in its group's readable -text tone) | "accent" | "neutral" (the idle ink)
+        public string icon_color = CardOptions.NavBarIconGroup;
+        // Chosen Colour (the chosen group's disc / pill / underline): "group" (the default: its row's colour) | "accent" | "ink"
+        public string selected_color = CardOptions.NavBarColourGroup;
         // Bold Chosen Icon: the chosen group's icon drawn with a heavier stroke
         public bool bold_selected = true;
         // Show: "always" (the default) | "after_hero" (it comes once the visitor scrolled the hero's picture away)
@@ -542,6 +546,11 @@ namespace TileStories
         public const string NavBarColourGroup = "group";
         public static readonly string[] NavBarSelectedColours = { NavBarColourAccent, NavBarColourInk, NavBarColourGroup };
         public static readonly string[] NavBarSelectedColourLabels = { "Accent", "Ink", "Group" };
+        public const string NavBarIconGroup = "group";
+        public const string NavBarIconAccent = "accent";
+        public const string NavBarIconNeutral = "neutral";
+        public static readonly string[] NavBarIconColours = { NavBarIconGroup, NavBarIconAccent, NavBarIconNeutral };
+        public static readonly string[] NavBarIconColourLabels = { "Group", "Accent", "Neutral" };
         public const string NavBarShowAlways = "always";
         public const string NavBarShowAfterHero = "after_hero";
         public static readonly string[] NavBarShows = { NavBarShowAlways, NavBarShowAfterHero };

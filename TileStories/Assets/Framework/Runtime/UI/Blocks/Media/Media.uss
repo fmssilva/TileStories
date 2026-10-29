@@ -79,36 +79,69 @@
     border-radius: 0;
 }
 
-/* the FOOT: the words and the actions, minimal on the picture (_3.3 S4a; the premium target, v5) -- no plate: a SHADE behind the words'
-   block only -- a ramp fading in above them (hero_scrim.png's 0 -> 1 grade), then the solid floor behind them and down past the hero's
-   foot, both --ts-scrim-hero (the floor measured against pure white) -- and a dark halo hugging every letter (the words' text-shadow,
-   --ts-text-halo). MEASURED on the render: every word against the picture right around its letters, on every hero picture of the wall
-   (PoiCardHeroSceneTests); the picture between the top shade and this one stays clean */
+/* the FOOT: the words and the actions, minimal on the picture (_3.3 S4a; the premium target, v5) -- no plate. Words On Picture (_3.3 P3c
+   addendum, HeroWordsRule): a HALO on every letter (a close 1 px shade -- the text's outline, --ts-text-halo-close-width -- and a soft glow --
+   the text-shadow, --ts-text-halo) and a TONE on the picture (the layer below), only as strong as 4.5:1 needs. MEASURED on the render:
+   every word against the picture right around its letters, on every hero picture of the wall (PoiCardHeroSceneTests) */
 .card-hero__foot {
     flex-shrink: 0;
     padding: 0 0 var(--ts-hero-words-inset) 0;
 }
 
-/* out of the flow: from a ramp's height above the words to far below them (the hero clips it at its foot, also while the words rise) */
-.card-hero__shade {
+/* Words On Picture's layer: the whole hero over its picture, under its words (HeroWordsOnPicture paints the tone or the scrim on it) */
+.card-hero__tone {
     position: absolute;
     left: 0;
+    top: 0;
     right: 0;
-    top: var(--ts-hero-shade-out-top);
-    bottom: var(--ts-hero-shade-out-bottom);
+    bottom: 0;
 }
 
-.card-hero__shade-ramp {
-    flex-shrink: 0;
-    height: var(--ts-hero-shade-ramp);
-    background-image: url("hero_scrim.png");
-    -unity-background-scale-mode: stretch-to-fill;
-    -unity-background-image-tint-color: var(--ts-scrim-hero);
+/* the halo's SECOND layer (HeroWordsOnPicture): a back label under every word, the same words in the halo's colour with a close outline
+   and a wide soft glow -- hidden behind the words' own letters, it darkens the picture round them a second time (both reach only as far
+   as the font's SDF does: FontAtlasBuilder.UiAtlasPadding) */
+.card-hero__halo-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
 }
 
-.card-hero__shade-floor {
-    flex-grow: 1;
-    background-color: var(--ts-scrim-hero);
+.card-hero__halo {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    color: var(--ts-text-halo);
+    -unity-text-outline-width: var(--ts-text-halo-wide-width);
+    -unity-text-outline-color: var(--ts-text-halo);
+    text-shadow: 0 1px var(--ts-text-halo-wide-blur) var(--ts-text-halo);
+}
+
+.card-hero--no-halo .card-hero__halo-layer {
+    display: none;
+}
+
+/* the halo's close shade on every word of the hero (its glow is each word's text-shadow below) */
+.card-hero__eyebrow,
+.card-hero__title,
+.card-hero__subtitle,
+.card-hero__listen .card-audio__title,
+.card-hero__listen .card-audio__time,
+.card-hero__primary .card-action__label {
+    -unity-text-outline-width: var(--ts-text-halo-close-width);
+    -unity-text-outline-color: var(--ts-text-halo);
+}
+
+/* Edge Scrim: the words bare on their scrim (no glow, no close shade) */
+.card-hero--no-halo .card-hero__eyebrow,
+.card-hero--no-halo .card-hero__title,
+.card-hero--no-halo .card-hero__subtitle,
+.card-hero--no-halo .card-hero__listen .card-audio__title,
+.card-hero--no-halo .card-hero__listen .card-audio__time,
+.card-hero--no-halo .card-hero__primary .card-action__label {
+    text-shadow: none;
+    -unity-text-outline-width: 0;
 }
 
 /* the words: eyebrow, the title in the display face, one line -- the hero's side gutter, a halo round every letter */
@@ -282,8 +315,10 @@
 .card-hero--plate .card-hero__title,
 .card-hero--plate .card-hero__subtitle,
 .card-hero--plate .card-hero__listen .card-audio__title,
+.card-hero--plate .card-hero__listen .card-audio__time,
 .card-hero--plate .card-hero__primary .card-action__label {
     text-shadow: none;
+    -unity-text-outline-width: 0;
 }
 
 .card-hero--plate .card-hero__eyebrow {

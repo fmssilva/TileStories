@@ -149,7 +149,7 @@ namespace TileStories.Editor.Tests
         }
 
         [Test]
-        public void TheDefaults_AreV5s_AndEveryOption_ReadsItsDefault_ForAnUnknownValue()
+        public void TheDefaults_AreV5sAndTheP3cReviews_AndEveryOption_ReadsItsDefault_ForAnUnknownValue()
         {
             var fresh = new CardNavBarSettings();
             Assert.AreEqual(CardOptions.NavBarBottom, NavBarRule.Position(fresh));
@@ -158,7 +158,10 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(CardOptions.NavBarIndicatorRaised, NavBarRule.Indicator(fresh));
             Assert.AreEqual(CardOptions.NavBarChosenIconFilled, NavBarRule.ChosenIcon(fresh));
             Assert.AreEqual(CardOptions.NavBarLabelsIconAndText, NavBarRule.Labels(fresh));
-            Assert.AreEqual(CardOptions.NavBarColourAccent, NavBarRule.SelectedColour(fresh));
+            // - the P3c review, second pass c: the chosen disc in its group's colour, every icon in its group's tone; Raised's full bell
+            Assert.AreEqual(CardOptions.NavBarColourGroup, NavBarRule.SelectedColour(fresh));
+            Assert.AreEqual(CardOptions.NavBarIconGroup, NavBarRule.IconColour(fresh));
+            Assert.AreEqual(1f, NavBarRule.RaisedDepth(fresh));
             Assert.IsTrue(NavBarRule.BoldChosen(fresh));
             Assert.AreEqual(CardOptions.NavBarShowAlways, NavBarRule.Show(fresh));
             Assert.IsFalse(NavBarRule.HidesWhileScrolling(fresh));
@@ -168,12 +171,14 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(NavBarRule.Indicator(fresh), fresh.indicator);
             Assert.AreEqual(NavBarRule.ChosenIcon(fresh), fresh.chosen_icon);
             Assert.AreEqual(NavBarRule.SelectedColour(fresh), fresh.selected_color);
+            Assert.AreEqual(NavBarRule.IconColour(fresh), fresh.icon_color);
+            Assert.AreEqual(NavBarRule.RaisedDepth(fresh), fresh.raised_depth);
             Assert.AreEqual(NavBarRule.Show(fresh), fresh.show);
 
             var unknown = new CardNavBarSettings
             {
                 position = "x", shape = "x", fill = "x", indicator = "x", chosen_icon = "x", labels = "x", selected_color = "x", show = "x",
-                hide_on_scroll = "x",
+                hide_on_scroll = "x", icon_color = "x",
             };
             Assert.AreEqual(NavBarRule.Position(fresh), NavBarRule.Position(unknown));
             Assert.AreEqual(NavBarRule.Shape(fresh), NavBarRule.Shape(unknown));
@@ -182,6 +187,7 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(NavBarRule.ChosenIcon(fresh), NavBarRule.ChosenIcon(unknown), "Plain is listed first, Filled stays the default");
             Assert.AreEqual(NavBarRule.Labels(fresh), NavBarRule.Labels(unknown));
             Assert.AreEqual(NavBarRule.SelectedColour(fresh), NavBarRule.SelectedColour(unknown));
+            Assert.AreEqual(NavBarRule.IconColour(fresh), NavBarRule.IconColour(unknown));
             Assert.AreEqual(NavBarRule.Show(fresh), NavBarRule.Show(unknown));
             Assert.AreEqual(NavBarRule.HideOnScroll(fresh), NavBarRule.HideOnScroll(unknown));
             Assert.IsTrue(NavBarRule.AtBottom(fresh));
@@ -195,6 +201,7 @@ namespace TileStories.Editor.Tests
             CollectionAssert.AreEqual(new[] { "Plain", "Filled" }, CardOptions.NavBarChosenIconLabels);
             CollectionAssert.AreEqual(new[] { "Icon And Text", "Icon", "Text", "Text On The Chosen" }, CardOptions.NavBarLabelLabels);
             CollectionAssert.AreEqual(new[] { "Accent", "Ink", "Group" }, CardOptions.NavBarSelectedColourLabels);
+            CollectionAssert.AreEqual(new[] { "Group", "Accent", "Neutral" }, CardOptions.NavBarIconColourLabels);
             CollectionAssert.AreEqual(new[] { "Always", "After The Hero" }, CardOptions.NavBarShowLabels);
         }
 
@@ -285,6 +292,67 @@ namespace TileStories.Editor.Tests
             Assert.IsFalse(NavBarRule.ShowsWords(CardOptions.NavBarLabelsIcon, true, true));
             Assert.IsTrue(NavBarRule.ShowsWords(CardOptions.NavBarLabelsSelectedOnly, true, true), "the chosen group's words");
             Assert.IsFalse(NavBarRule.ShowsWords(CardOptions.NavBarLabelsSelectedOnly, true, false), "...the others' not");
+        }
+
+        // Raised Depth (the P3c review b): +1 by default, an old config without it reads +1, a value outside -1..+1 is held at its end, an
+        // unreadable one is the default
+        [Test]
+        public void RaisedDepth_DefaultsToTheFullBell_AnOldConfigReadsIt_AndItIsHeldInsideMinusOneToOne()
+        {
+            Assert.AreEqual(1f, NavBarRule.RaisedDepth(null), "no bar: the default");
+            var old = JsonUtility.FromJson<CardNavBarSettings>("{\"enabled\": true, \"indicator\": \"raised\"}");
+            Assert.AreEqual(1f, NavBarRule.RaisedDepth(old), "a config written before Raised Depth: the full bell");
+            foreach (var (value, read) in new[] { (-1f, -1f), (-0.5f, -0.5f), (0f, 0f), (0.5f, 0.5f), (1f, 1f), (-3f, -1f), (2f, 1f) })
+                Assert.AreEqual(read, NavBarRule.RaisedDepth(new CardNavBarSettings { raised_depth = value }), "raised_depth " + value);
+            Assert.AreEqual(1f, NavBarRule.RaisedDepth(new CardNavBarSettings { raised_depth = float.NaN }), "unreadable: the default");
+        }
+
+        // Icon Colour (the P3c review, second pass c), on the theme's own values in both modes: Group -- every icon in its group's -text tone
+        // (a family's, the accent's), each >= 4.5:1 on the solid bar (--ts-bar, the default fill and Clear's after the hero); the chosen disc
+        // in the group's colour with the ink made for it (InkOn: the family's -ink, the accent's on-accent) at >= 4.5:1; Accent -- the
+        // accent's text tone; Neutral -- the idle ink. The render tests read the other fills
+        [Test]
+        public void IconColour_GroupIconsReadOnTheBar_AndTheChosenDiscsInkReadsOnItsColour_InBothModes()
+        {
+            Assert.AreEqual("--ts-family-media-text", NavBarRule.IconToken(CardOptions.NavBarIconGroup, "--ts-family-media"));
+            Assert.AreEqual("--ts-accent-text", NavBarRule.IconToken(CardOptions.NavBarIconGroup, "--ts-accent"), "a group coloured by the accent");
+            Assert.AreEqual("--ts-ink-2", NavBarRule.IconToken(CardOptions.NavBarIconGroup, ""), "a group with no colour: the idle ink");
+            Assert.AreEqual("--ts-accent-text", NavBarRule.IconToken(CardOptions.NavBarIconAccent, "--ts-family-media"));
+            Assert.AreEqual("--ts-ink-2", NavBarRule.IconToken(CardOptions.NavBarIconNeutral, "--ts-family-media"));
+            Assert.AreEqual("--ts-family-media-ink", NavBarRule.InkOn("--ts-family-media"));
+            Assert.AreEqual("--ts-on-accent", NavBarRule.InkOn("--ts-accent"));
+
+            var theme = UnityEditor.AssetDatabase.LoadAssetAtPath<ThemeAsset>("Assets/Framework/Runtime/Resources/TileStories/Themes/Theme.default.asset");
+            Assert.IsNotNull(theme, "precondition: the framework theme");
+            // - every colour a Bar Groups row can wear: each registered family's and the accent (the Colour popup's choices)
+            var colours = BlockRegistry.Shared.Families.Select(f => "--ts-family-" + f.Key).Distinct().Append("--ts-accent").ToList();
+            Assert.GreaterOrEqual(colours.Count, 8, "precondition: the families are registered");
+            float worstIcon = float.MaxValue, worstDisc = float.MaxValue;
+            string worstIconWhat = "", worstDiscWhat = "";
+            foreach (string mode in CardOptions.Modes)
+            {
+                var r = theme.ResolverFor(mode);
+                Color Of(string token)
+                {
+                    Assert.IsTrue(r.TryColour(token, out Color c), mode + ": the theme has " + token);
+                    return new Color(c.r, c.g, c.b, 1f);
+                }
+                Color bar = Of("--ts-bar");
+                foreach (string colour in colours)
+                    foreach (string option in CardOptions.NavBarIconColours)
+                    {
+                        string token = NavBarRule.IconToken(option, colour);
+                        float icon = UIAccessibility.ContrastRatio(Of(token), bar);
+                        if (icon < worstIcon) { worstIcon = icon; worstIconWhat = $"{mode} {option}: {token} on --ts-bar"; }
+                    }
+                foreach (string colour in colours)
+                {
+                    float disc = UIAccessibility.ContrastRatio(Of(NavBarRule.InkOn(colour)), Of(colour));
+                    if (disc < worstDisc) { worstDisc = disc; worstDiscWhat = $"{mode}: {NavBarRule.InkOn(colour)} on {colour}"; }
+                }
+            }
+            Assert.GreaterOrEqual(worstIcon, 4.5f, "every icon reads on the bar -- worst: " + worstIconWhat + " = " + worstIcon.ToString("0.00") + ":1");
+            Assert.GreaterOrEqual(worstDisc, 4.5f, "every chosen disc's icon reads on it -- worst: " + worstDiscWhat + " = " + worstDisc.ToString("0.00") + ":1");
         }
     }
 }

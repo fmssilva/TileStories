@@ -12,6 +12,8 @@ namespace TileStories
         public const string HeaderTextOnly = "text_only";
         public const string HeaderEyebrowField = "eyebrow";
         public const string HeaderHeroMotionField = "hero_motion";
+        public const string HeaderWordsOnPictureField = "words_on_picture";
+        public const string HeaderToneSpreadField = "tone_spread";
         // Tier 2: the looks with a picture under the title (the hero, BlockStackView puts it at the top of the scroll)
         public const string HeaderImageParallax = "image_parallax";
         public const string HeaderSplitThenNow = "split_then_now";
@@ -181,6 +183,32 @@ namespace TileStories
                            "Reduce Motion on (Card Container) the " +
                            "picture always stays still at its centre. Whatever this says, the picture also moves a little slower than " +
                            "the scroll (parallax), except with Reduce Motion. Empty: the Block Library's default for this kind.",
+                },
+                new BlockFieldDefinition
+                {
+                    Key = HeaderWordsOnPictureField, Type = BlockFieldType.Choice, Label = "Words On Picture",
+                    ShownWhen = FieldShownWhen.Looks(HeaderImageParallax, HeaderSplitThenNow, HeaderSpotlightCrop, HeaderVideoLoop, HeaderModelTurntable),
+                    Options = HeroWordsRule.Options,
+                    OptionLabels = HeroWordsRule.Labels,
+                    ChoiceDefault = HeroWordsRule.ToneHalo,
+                    LibraryDefault = true,
+                    Help = "The picture looks only. How the hero's words stay readable on its picture. Tone + Halo (default): a soft shade " +
+                           "hugs every letter, and a very wide, very soft darkening falls off from the corner where the words sit -- it " +
+                           "reads as light, not as a shape. Edge Scrim: no halo; the picture darkens up from the words' foot. Halo Only: " +
+                           "the letters' shade alone, nothing on the picture. The darkening is only as strong as the picture under the " +
+                           "words needs for every word to read at 4.5:1: a dark picture gets almost none. Empty: the Block Library's " +
+                           "default for this kind.",
+                },
+                new BlockFieldDefinition
+                {
+                    Key = HeaderToneSpreadField, Type = BlockFieldType.Number, Label = "Tone Spread",
+                    NumberMin = HeroWordsRule.SpreadMin, NumberMax = HeroWordsRule.SpreadMax, NumberDefault = HeroWordsRule.SpreadDefault,
+                    ShownWhen = FieldShownWhen.Looks(HeaderImageParallax, HeaderSplitThenNow, HeaderSpotlightCrop, HeaderVideoLoop, HeaderModelTurntable),
+                    Help = "The picture looks, with Tone + Halo or Edge Scrim. How far the darkening behind the words reaches over the " +
+                           "picture: 1 (default) the designed fall-off; lower, it ends sooner round the words and more of the picture stays " +
+                           "bare; higher, it fades out over more of the picture. It never shrinks past the words themselves, and its " +
+                           "strength still adapts so every word reads at 4.5:1. At Half the words fill most of what shows, so the change " +
+                           "is clearest at Full. Halo Only draws no darkening, so it ignores this.",
                 },
                 new BlockFieldDefinition
                 {

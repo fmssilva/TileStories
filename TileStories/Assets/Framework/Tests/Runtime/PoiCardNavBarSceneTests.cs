@@ -10,7 +10,7 @@ namespace TileStories.Tests
 {
     // The Navigation Bar on the REAL scene (_3.3 S4 third round, v5; NavBarView) with the Ribeira Palace's card and real input:
     //   - the framework's default bar: floating at the bottom, Solid with its shadow, Raised (the edge bent into a bump under the chosen
-    //     group, its icon riding up in a filled accent disc), over the hero from the start -- the hero's words rise clear of it
+    //     group, its icon riding up in a disc of its group's colour), over the hero from the start -- the hero's words rise clear of it
     //   - a real tap on a group jumps there; the bump and the disc slide to it with an overshoot, and follow real drags of the stack
     //   - every option value changes what the visitor sees (one case per value), and the pairs that interact: Raised x Top (the bump hangs
     //     down), Fill x over the hero (a non-solid bar turns white on dark glass, Clear transparent there and solid after it)
@@ -172,7 +172,8 @@ namespace TileStories.Tests
             Assert.AreEqual(DisplayStyle.Flex, Bar.Disc.resolvedStyle.display, "the disc");
             Assert.Less(Bar.Disc.worldBound.yMin, Band.yMin - 4f, "...rides up past the bar's edge");
             Assert.AreEqual(Bar.Items[Bar.ChosenIndex].Button.worldBound.center.x, Bar.Disc.worldBound.center.x, 1f, "...over the chosen group");
-            AreSame(Theme(Bar.Root, "--ts-accent"), Bar.Disc.resolvedStyle.backgroundColor, "the disc in the accent");
+            // - the P3c review, second pass c: Chosen Colour's default is Group -- the disc in the chosen group's own colour
+            AreSame(Theme(Bar.Root, Bar.Entries[Bar.ChosenIndex].Item.ColorToken), Bar.Disc.resolvedStyle.backgroundColor, "the disc in its group's colour");
             Assert.AreEqual(0f, Bar.Items[Bar.ChosenIndex].Icon.resolvedStyle.opacity, 0.01f, "the chosen icon rides in the disc, not twice");
             // - the hero's words (and its actions) finish above the bar and its disc
             var header = Stack.HeaderView;
@@ -330,10 +331,12 @@ namespace TileStories.Tests
             Assert.GreaterOrEqual(checkedAtRest.Count, Bar.Items.Count - 1, $"{position} {mode}: the indicators judged at rest on almost every group (" + checkedAtRest.Count + ")");
         }
 
-        // _3.3 P3a review (a): Raised is ONE fluid bell on the render, Bottom and Top, light and dark -- the disc's top IS the bell's peak (3 pt
-        // beyond it: the hero, no band of bar over the disc), the bar follows the painted bell down its shoulder (1.5 pt inside: the bar's
-        // fill; 1.5 pt outside: the hero), and well beside the bell the edge is flat. Read on the solid default bar over the hero (its fill
-        // opaque, the picture behind it never the bar's colour). Renders zoomed on the bell in TestEvidence/Premium/P3b/
+        // _3.3 P3a / P3b reviews: Raised is ONE fluid fish-eye bell on the render, Bottom and Top, light and dark -- the disc's top IS the
+        // bell's peak (3 pt beyond it: the hero, no band of bar over the disc); seen from beyond, the first thing drawn is the disc's top at
+        // the item's centre (+-1 px) and its outline at 0.6 of its radius (+-3 px): the bar hugs it there; the bar follows the painted bell
+        // down a shoulder that rises visibly beside the disc (1.5 pt inside: the bar's fill; outside: the hero), and well beside the bell the
+        // edge is flat. Read on the solid default bar over the hero (the wall's own bar: the shipped LivingRoom one is this default). Renders
+        // zoomed on the bell in TestEvidence/Premium/P3c/
         [UnityTest]
         public IEnumerator TheRaisedBump_IsOneBellWhosePeakIsTheDiscsTop_OnTheRender([Values("bottom", "top")] string position,
             [Values("light", "dark")] string mode)
@@ -354,11 +357,13 @@ namespace TileStories.Tests
             Assert.AreEqual(peakY, bottom ? disc.yMin : disc.yMax, 0.5f, "the bell's peak is the disc's " + (bottom ? "top" : "foot") + ": no band of bar beyond it");
             Texture2D shot = null, bare = null;
             yield return ThemePixelSet.GrabStill($"raised_bell_{position}_{mode}", null, r => shot = r);
-            // - the same frame without the bar's painted surface: a pixel the bar did not change is the hero's, whatever its colour
+            // - the same frame without the bar's painted surface and its disc: a pixel neither changed is the hero's, whatever its colour
             Bar.Surface.style.visibility = Visibility.Hidden;
+            Bar.Disc.style.visibility = Visibility.Hidden;
             yield return null;
             yield return ThemePixelSet.GrabStill($"raised_bell_bare_{position}_{mode}", null, r => bare = r);
             Bar.Surface.style.visibility = StyleKeyword.Null;
+            Bar.Disc.style.visibility = StyleKeyword.Null;
             try
             {
                 var origin = RuntimePanelUtils.ScreenToPanel(Bar.Root.panel, Vector2.zero);
@@ -376,9 +381,28 @@ namespace TileStories.Tests
                         $"{position} {mode}: {what} no bar " + (Color32)At(shot, x, y) + " (bare " + (Color32)At(bare, x, y) + ", fill " + (Color32)fill + ")");
                 // - 3 pt beyond the peak: no bar (the hero)
                 NoBar(cx, peakY + rise * 3f, "3 pt beyond the disc's top");
+                // - walking in from 8 pt beyond the disc, the first pixel that is not the hero's: the disc's own outline, no band of bar first
+                //   (one pixel at the centre: the antialiased edge; three at 0.6 R, the brief's)
+                float discR = Bar.RaisedDiscRadius;
+                float FirstDrawn(float x, float expected)
+                {
+                    for (float y = expected + rise * 8f, steps = 0; steps < 16f / unit; steps++, y -= rise * unit)
+                        if (Off(At(shot, x, y), At(bare, x, y)) > 0.1f) return y;
+                    Assert.Fail($"{position} {mode}: nothing drawn within 8 pt of the disc's outline at x {x}");
+                    return float.NaN;
+                }
+                float discTop = bottom ? disc.yMin : disc.yMax;
+                Assert.AreEqual(discTop, FirstDrawn(cx, discTop), unit, $"{position} {mode}: at the item's centre the first thing drawn is the disc's top");
+                foreach (float s in new[] { -1f, 1f })
+                {
+                    float x = cx + s * 0.6f * discR, outline = disc.center.y + rise * 0.8f * discR;
+                    Assert.AreEqual(outline, FirstDrawn(x, outline), 3f * unit, $"{position} {mode}: at {s * 0.6f} R the bar hugs the disc's outline");
+                }
                 // - down the shoulder on the open side (past the disc: 26 and 38 pt from its centre), the bar's edge where the bell was painted:
-                //   3 pt inside it the fill, 3 pt outside the hero (clear of the hairline's antialiasing)
+                //   3 pt inside it the fill, 3 pt outside the hero (clear of the hairline's antialiasing); at the disc's side (one radius out) it
+                //   stands a quarter of the disc's radius off the flat edge at least: a shoulder the eye sees, not one hidden under the disc
                 float side = Bar.Centre > box.width * 0.5f ? -1f : 1f;
+                Assert.Greater(Mathf.Abs(EdgeAt(peak.x + side * discR, bottom) - (bottom ? Bar.Room : Bar.BarHeight)), 0.25f * discR, "the shoulder rises visibly beside the disc");
                 foreach (float along in new[] { 26f, 38f })
                 {
                     float x = peak.x + side * along, edge = box.yMin + EdgeAt(x, bottom);
@@ -390,7 +414,7 @@ namespace TileStories.Tests
                 float flatX = peak.x + side * (Bar.BumpHalf + 20f);
                 Assert.AreEqual(bottom ? Bar.Room : Bar.BarHeight, EdgeAt(flatX, bottom), 0.01f, "precondition: the edge is flat beside the bell");
                 NoBar(box.xMin + flatX, box.yMin + (bottom ? Bar.Room : Bar.BarHeight) + rise * 3f, "beside the bell, over the flat edge");
-                System.IO.File.WriteAllBytes(TestEvidence.PathFor("Premium/P3b", $"raised_bell_{position}_{mode}.png"), shot.EncodeToPNG());
+                System.IO.File.WriteAllBytes(TestEvidence.PathFor("Premium/P3c", $"raised_bell_{position}_{mode}.png"), shot.EncodeToPNG());
                 // - the bell zoomed x4 for the eye (the developer's sketch is compared on it)
                 int px = Mathf.RoundToInt((cx - origin.x) / unit), py = shot.height - 1 - Mathf.RoundToInt((peakY - origin.y) / unit);
                 int w = Mathf.RoundToInt((Bar.BumpHalf * 2f + 40f) / unit), h = Mathf.RoundToInt(70f / unit);
@@ -400,7 +424,7 @@ namespace TileStories.Tests
                     for (int x = 0; x < w * 4; x++)
                         zoom.SetPixel(x, y, shot.GetPixel(x0 + x / 4, y0 + y / 4));
                 zoom.Apply();
-                System.IO.File.WriteAllBytes(TestEvidence.PathFor("Premium/P3b", $"raised_bell_{position}_{mode}_zoom.png"), zoom.EncodeToPNG());
+                System.IO.File.WriteAllBytes(TestEvidence.PathFor("Premium/P3c", $"raised_bell_{position}_{mode}_zoom.png"), zoom.EncodeToPNG());
                 Object.Destroy(zoom);
             }
             finally
@@ -516,7 +540,7 @@ namespace TileStories.Tests
                     Assert.AreEqual(1f, chosen.Icon.resolvedStyle.opacity, 0.01f, "the chosen icon in its place");
                     break;
                 case "chosen_icon=filled":
-                    Assert.AreEqual(DisplayStyle.Flex, Bar.Disc.resolvedStyle.display, "an accent disc");
+                    Assert.AreEqual(DisplayStyle.Flex, Bar.Disc.resolvedStyle.display, "a filled disc");
                     Assert.AreEqual(chosen.Icon.worldBound.center.y, Bar.Disc.worldBound.center.y, 1f, "...at the icon's own place");
                     Assert.AreEqual(chosen.Icon.worldBound.center.x, Bar.Disc.worldBound.center.x, 1f);
                     Assert.Less(Bar.Disc.worldBound.width, Bar.BarHeight, "Filled's smaller disc, inside the bar");
@@ -689,6 +713,158 @@ namespace TileStories.Tests
             }
             System.IO.File.AppendAllText(TestEvidence.PathFor(Domain, "labels_ratios.txt"), string.Join("\n", report) + "\n");
             Assert.GreaterOrEqual(worst, Aaa, "every group's words keep 7:1 against what they are drawn over -- worst: " + worstWhat + "\n" + string.Join("\n", report));
+        }
+
+        // Raised Depth on the render (the P3c review b) at -1 / 0 / +1, Bottom and Top: the disc stands where it stands at +1 whatever the
+        // depth; over the disc's centre the painted edge is at the depth's extreme -- the bell's peak (+1), the flat edge (0), the cradle's
+        // trough (-1: the gap under the disc) -- with the bar's fill 3 pt inside it and no bar 3 pt outside (the disc hidden in both renders,
+        // so the bar's own shape is read). Renders in TestEvidence/Premium/P3c/depth/
+        [UnityTest]
+        public IEnumerator RaisedDepth_OnTheRender_ABellAFlatEdgeOrACradle_TheDiscNeverMoves([Values("bottom", "top")] string position)
+        {
+            Rect? discAtOne = null;
+            foreach (float depth in new[] { 1f, 0f, -1f })
+            {
+                yield return Open(b => { b.position = position; b.raised_depth = depth; });
+                yield return PastTheHero();
+                bool bottom = position == CardOptions.NavBarBottom;
+                Assert.AreEqual(depth, NavBarRule.RaisedDepth(Bar.Settings), 1e-4f, "precondition: the depth on the card");
+                Assert.AreEqual(DisplayStyle.Flex, Bar.Disc.resolvedStyle.display, "precondition: the raised disc");
+                var disc = Bar.Disc.worldBound;
+                discAtOne ??= disc;
+                Assert.AreEqual(discAtOne.Value.y, disc.y, OnePixel, $"depth {depth}: the disc never moves");
+                Assert.AreEqual(discAtOne.Value.center.x, disc.center.x, OnePixel);
+
+                var box = Bar.Surface.worldBound;
+                float rise = Bar.BumpHeight;
+                Assert.AreEqual(NavBarShapeRule.EdgeRise(depth, Bar.RaisedDiscRadius, CardTestInput.TokenPx("--ts-navbar-cradle-gap")), rise, 1e-3f, "the rule's rise");
+                // - the edge over the disc's centre, in the bar's box (bottom: y down from the room; Top: mirrored), and which way is "out"
+                float edge = bottom ? box.yMin + Bar.Room - rise : box.yMin + Bar.BarHeight + rise;
+                float outward = bottom ? -1f : 1f;
+                Texture2D shot = null, bare = null;
+                Bar.Disc.style.visibility = Visibility.Hidden;
+                try
+                {
+                    yield return null;
+                    yield return ThemePixelSet.GrabStill($"depth_{position}_{depth}", null, r => shot = r);
+                    Bar.Surface.style.visibility = Visibility.Hidden;
+                    yield return null;
+                    yield return ThemePixelSet.GrabStill($"depth_bare_{position}_{depth}", null, r => bare = r);
+                    var origin = RuntimePanelUtils.ScreenToPanel(Bar.Root.panel, Vector2.zero);
+                    float unit = ThemePixelSet.PanelUnitsPerPixel(Bar.Root);
+                    Color At(Texture2D t, float x, float y) => t.GetPixel(Mathf.RoundToInt((x - origin.x) / unit), shot.height - 1 - Mathf.RoundToInt((y - origin.y) / unit));
+                    float Off(Color a, Color b) => ((Vector4)a - (Vector4)b).magnitude;
+                    var fill = Bar.PaintedFill;
+                    float cx = disc.center.x;
+                    Assert.Less(Off(At(shot, cx, edge - outward * 3f), fill), 0.04f, $"{position} depth {depth}: 3 pt inside the edge, the bar's fill");
+                    var outside = At(shot, cx, edge + outward * 3f);
+                    Assert.IsTrue(Off(outside, At(bare, cx, edge + outward * 3f)) < 0.03f || Off(outside, fill) > 0.04f,
+                        $"{position} depth {depth}: 3 pt outside the edge, no bar " + (Color32)outside);
+                    System.IO.File.WriteAllBytes(TestEvidence.PathFor("Premium/P3c/depth", $"{position}_{depth:0}.png"), shot.EncodeToPNG());
+                }
+                finally
+                {
+                    Bar.Disc.style.visibility = StyleKeyword.Null;
+                    Bar.Surface.style.visibility = StyleKeyword.Null;
+                    if (shot != null) Object.Destroy(shot);
+                    if (bare != null) Object.Destroy(bare);
+                }
+                yield return Save($"depth_{position}_{depth:0}", "Premium/P3c/depth");
+            }
+        }
+
+        // Icon Colour on the render (the P3c review, second pass c), light and dark: Group (the default) -- every idle icon in its group's
+        // -text tone, >= 4.5:1 against what it is drawn over on every fill after the hero (and Solid over it); each group chosen in turn (a
+        // tap on it), its disc wears the group's colour and the disc's icon reads >= 4.5:1 on it; Accent / Neutral -- every idle icon in the
+        // accent's text tone / the idle ink, >= 4.5:1. The labels' 7:1 is TheLabels_ReadAt7To1_... Renders in TestEvidence/Premium/P3c/icons/
+        [UnityTest]
+        public IEnumerator IconColour_EveryGroupsIconReadsOnEveryFill_AndEachChosenDiscWearsItsGroup_LightAndDark([Values("light", "dark")] string mode)
+        {
+            Session.CardSettings.container.reduce_motion = true;
+            var report = new List<string>();
+            float worst = float.MaxValue;
+            string worstWhat = "";
+            void Note(string what, float ratio)
+            {
+                report.Add($"{what}: {ratio:0.00}:1");
+                if (ratio < worst) { worst = ratio; worstWhat = what; }
+            }
+            // - the idle icons: every option on Solid after the hero, Group on every fill (after the hero; Solid over it too)
+            var cases = CardOptions.NavBarFills.Select(f => (Fill: f, Icons: CardOptions.NavBarIconGroup, OverHero: false))
+                .Append((CardOptions.NavBarSolid, CardOptions.NavBarIconGroup, true))
+                .Append((CardOptions.NavBarSolid, CardOptions.NavBarIconAccent, false))
+                .Append((CardOptions.NavBarSolid, CardOptions.NavBarIconNeutral, false));
+            foreach (var (fill, icons, overHero) in cases)
+            {
+                yield return Open(b => { b.fill = fill; b.icon_color = icons; b.labels = CardOptions.NavBarLabelsIconAndText; });
+                ThemeController.SetMode(mode);
+                yield return CardTestInput.Settle(0.2f);
+                Assert.AreEqual(mode, ThemeController.CurrentMode, "precondition: the card shows " + mode);
+                if (!overHero) yield return PastTheHero();
+                Assert.AreEqual(overHero, Bar.OverHero, "precondition: the bar is " + (overHero ? "" : "not ") + "over the hero");
+                var idle = Bar.Items.Where(i => i.Index != Bar.ChosenIndex && i.Icon.resolvedStyle.display == DisplayStyle.Flex).ToList();
+                Assert.GreaterOrEqual(idle.Count, 3, "precondition: idle icons to read");
+                Texture2D drawn = null, under = null;
+                try
+                {
+                    yield return ThemePixelSet.GrabStill($"icons_{fill}_{icons}_{mode}_{overHero}", null, r => drawn = r);
+                    foreach (var i in idle) i.Icon.style.visibility = Visibility.Hidden;
+                    yield return null;
+                    yield return ThemePixelSet.GrabStill($"icons_under_{fill}_{icons}_{mode}_{overHero}", null, r => under = r);
+                    foreach (var i in idle)
+                    {
+                        string token = NavBarRule.IconToken(icons, Bar.Entries[i.Index].Item.ColorToken);
+                        Color ink = Theme(Bar.Root, token);
+                        var (ratio, _, inked) = ThemePixelSet.RingContrast(drawn, under, ThemePixelSet.ScreenRectOf(i.Icon, drawn), ink);
+                        Assert.Greater(inked, 0, $"precondition: '{i.Label.text}''s icon draws in {token} ({fill}, {icons}, {mode})");
+                        Note($"{mode} {fill} {icons}{(overHero ? " over the hero" : "")} '{i.Label.text}' icon ({token})", ratio);
+                    }
+                    System.IO.File.WriteAllBytes(TestEvidence.PathFor("Premium/P3c/icons", $"{fill}_{icons}_{mode}{(overHero ? "_over" : "")}.png"), drawn.EncodeToPNG());
+                }
+                finally
+                {
+                    foreach (var i in idle) i.Icon.style.visibility = StyleKeyword.Null;
+                    if (drawn != null) Object.Destroy(drawn);
+                    if (under != null) Object.Destroy(under);
+                }
+            }
+
+            // - each group chosen in turn (Solid, the defaults): its disc in its group's colour, the disc's icon readable on it
+            yield return Open(b => b.labels = CardOptions.NavBarLabelsIconAndText);
+            ThemeController.SetMode(mode);
+            yield return CardTestInput.Settle(0.2f);
+            yield return PastTheHero();
+            for (int g = 0; g < Bar.Entries.Count; g++)
+            {
+                Assert.IsTrue(Bar.Tap(g), "precondition: group " + g + " takes a tap");
+                yield return CardTestInput.Settle(0.6f);
+                yield return UntilSettled();
+                if (Bar.ChosenIndex != g) continue; // - a short last group whose landing marks the one before: read the groups it marks
+                string colour = Bar.Entries[g].Item.ColorToken;
+                AreSame(Theme(Bar.Root, colour), Bar.Disc.resolvedStyle.backgroundColor, $"{mode}: group {g}'s disc in its colour");
+                Color ink = Theme(Bar.Root, NavBarRule.InkOn(colour));
+                Texture2D drawn = null, under = null;
+                try
+                {
+                    yield return ThemePixelSet.GrabStill($"disc_{g}_{mode}", null, r => drawn = r);
+                    Bar.DiscIcon.style.visibility = Visibility.Hidden;
+                    yield return null;
+                    yield return ThemePixelSet.GrabStill($"disc_under_{g}_{mode}", null, r => under = r);
+                    var (ratio, _, inked) = ThemePixelSet.RingContrast(drawn, under, ThemePixelSet.ScreenRectOf(Bar.DiscIcon, drawn), ink);
+                    Assert.Greater(inked, 0, "precondition: group " + g + "'s disc icon draws");
+                    Note($"{mode} group {g} '{Bar.Items[g].Label.text}' disc icon ({NavBarRule.InkOn(colour)} on {colour})", ratio);
+                    System.IO.File.WriteAllBytes(TestEvidence.PathFor("Premium/P3c/icons", $"disc_{g}_{mode}.png"), drawn.EncodeToPNG());
+                }
+                finally
+                {
+                    Bar.DiscIcon.style.visibility = StyleKeyword.Null;
+                    if (drawn != null) Object.Destroy(drawn);
+                    if (under != null) Object.Destroy(under);
+                }
+            }
+            Assert.GreaterOrEqual(report.Count(r => r.Contains("disc icon")), 3, "precondition: discs of at least three groups read\n" + string.Join("\n", report));
+            System.IO.File.AppendAllText(TestEvidence.PathFor("Premium/P3c/icons", "ratios.txt"), string.Join("\n", report) + "\n");
+            Assert.GreaterOrEqual(worst, 4.5f, "every icon reads at 4.5:1 -- worst: " + worstWhat + "\n" + string.Join("\n", report));
         }
 
         [UnityTest]

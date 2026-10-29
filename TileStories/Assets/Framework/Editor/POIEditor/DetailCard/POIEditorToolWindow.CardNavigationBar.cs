@@ -2,8 +2,8 @@
 //
 // Partial: Detail Card > Navigation > Navigation Bar (_3.3 S4 third round, v5) -- the FIRST component of the Navigation section: ONE
 // configurable bar of the card's groups (card_settings.navigation.bar, NavBarView). Its rows mirror v5's Tweaks "Navigation Bar" -- same names,
-// same order, same defaults (NavigationBarRows): Enabled, Position, Shape, Fill, Indicator, Chosen Icon, Labels, Chosen Colour, Bold Chosen
-// Icon, Show, Hide While Scrolling -- then the Bar Groups table: one folding row per group (Shown, its number and name, ^ / v, delete),
+// same order, same defaults (NavigationBarRows): Enabled, Position, Shape, Fill, Indicator (+ Raised Depth under Raised), Chosen Icon, Labels,
+// Icon Colour, Chosen Colour, Bold Chosen Icon, Show, Hide While Scrolling -- then the Bar Groups table: one folding row per group (Shown, its number and name, ^ / v, delete),
 // opened: its Name per language, Icon, Chosen Icon, Colour, Families and Section Style (its sections' Start on an open card, CardSections.cs);
 // "+ Add group", "Reset To The Families", and the warnings (a family
 // in no group, too many groups for a phone)
@@ -22,8 +22,8 @@ namespace TileStories.Editor
         // The component's rows, in v5's order (the Tweaks "Navigation Bar"): what the tests read the window against
         internal static readonly string[] NavigationBarRows =
         {
-            "Enabled", "Position", "Shape", "Fill", "Indicator", "Chosen Icon", "Labels", "Chosen Colour", "Bold Chosen Icon", "Show",
-            "Hide While Scrolling",
+            "Enabled", "Position", "Shape", "Fill", "Indicator", "Raised Depth", "Chosen Icon", "Labels", "Icon Colour", "Chosen Colour",
+            "Bold Chosen Icon", "Show", "Hide While Scrolling",
         };
         internal const string NavigationBarGroupsTitle = "Bar Groups";
         // The groups the developer unfolded in the Bar Groups table (by key; a session's view state, never saved)
@@ -55,9 +55,18 @@ namespace TileStories.Editor
             Popup("Fill", NavBarRule.Fill(bar), CardOptions.NavBarFills, CardOptions.NavBarFillLabels, CardNavBarFillHelp, v => bar.fill = v);
             Popup("Indicator", NavBarRule.Indicator(bar), CardOptions.NavBarIndicators, CardOptions.NavBarIndicatorLabels, CardNavBarIndicatorHelp,
                 v => bar.indicator = v);
+            // - Raised's own depth, right under it (the P3c review b): only while the indicator is Raised
+            if (NavBarRule.Raised(bar))
+            {
+                float depth = NavBarRule.RaisedDepth(bar);
+                float picked = DrawSliderField("Raised Depth", depth, NavBarRule.RaisedDepthMin, NavBarRule.RaisedDepthMax, CardNavBarRaisedDepthHelp);
+                if (!Mathf.Approximately(picked, depth)) bar.raised_depth = picked;
+            }
             Popup("Chosen Icon", NavBarRule.ChosenIcon(bar), CardOptions.NavBarChosenIcons, CardOptions.NavBarChosenIconLabels,
                 CardNavBarChosenIconHelp, v => bar.chosen_icon = v);
             Popup("Labels", NavBarRule.Labels(bar), CardOptions.NavBarLabels, CardOptions.NavBarLabelLabels, CardNavBarLabelsHelp, v => bar.labels = v);
+            Popup("Icon Colour", NavBarRule.IconColour(bar), CardOptions.NavBarIconColours, CardOptions.NavBarIconColourLabels, CardNavBarIconColourHelp,
+                v => bar.icon_color = v);
             Popup("Chosen Colour", NavBarRule.SelectedColour(bar), CardOptions.NavBarSelectedColours, CardOptions.NavBarSelectedColourLabels,
                 CardNavBarChosenColourHelp, v => bar.selected_color = v);
             bar.bold_selected = DrawToggleField("Bold Chosen Icon", bar.bold_selected, CardNavBarBoldHelp);

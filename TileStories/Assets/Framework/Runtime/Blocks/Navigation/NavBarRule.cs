@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace TileStories
 {
@@ -182,10 +183,26 @@ namespace TileStories
         public static string Fill(CardNavBarSettings bar) => Pick(bar?.fill, CardOptions.NavBarFills, CardOptions.NavBarSolid);
         public static string Indicator(CardNavBarSettings bar) => Pick(bar?.indicator, CardOptions.NavBarIndicators, CardOptions.NavBarIndicatorRaised);
         public static bool Raised(CardNavBarSettings bar) => Indicator(bar) == CardOptions.NavBarIndicatorRaised;
+        // Raised Depth, -1..+1 (NavBarShapeRule.EdgeRise): an unreadable one is the default, +1
+        public const float RaisedDepthMin = -1f, RaisedDepthMax = 1f, RaisedDepthDefault = 1f;
+        public static float RaisedDepth(CardNavBarSettings bar) =>
+            bar == null || float.IsNaN(bar.raised_depth) ? RaisedDepthDefault : Mathf.Clamp(bar.raised_depth, RaisedDepthMin, RaisedDepthMax);
         public static string ChosenIcon(CardNavBarSettings bar) => Pick(bar?.chosen_icon, CardOptions.NavBarChosenIcons, CardOptions.NavBarChosenIconFilled);
         public static string Labels(CardNavBarSettings bar) => Pick(bar?.labels, CardOptions.NavBarLabels, CardOptions.NavBarLabelsIconAndText);
         public static string SelectedColour(CardNavBarSettings bar) =>
-            Pick(bar?.selected_color, CardOptions.NavBarSelectedColours, CardOptions.NavBarColourAccent);
+            Pick(bar?.selected_color, CardOptions.NavBarSelectedColours, CardOptions.NavBarColourGroup);
+        public static string IconColour(CardNavBarSettings bar) => Pick(bar?.icon_color, CardOptions.NavBarIconColours, CardOptions.NavBarIconGroup);
+
+        // The token an idle group's icon is drawn in on the bar (Icon Colour): its group's -text tone (the colour's readable tone: a family's
+        // -text, the accent's --ts-accent-text; a group with no colour the idle ink), the accent's text tone, or the idle ink
+        public static string IconToken(string iconColour, string groupColourToken) =>
+            iconColour == CardOptions.NavBarIconAccent ? "--ts-accent-text"
+            : iconColour == CardOptions.NavBarIconGroup && !string.IsNullOrEmpty(groupColourToken) ? groupColourToken + "-text"
+            : "--ts-ink-2";
+
+        // The token of the ink drawn ON a colour (the chosen disc's icon): the accent's --ts-on-accent, a family colour's own -ink
+        public static string InkOn(string colourToken) =>
+            string.IsNullOrEmpty(colourToken) || colourToken == "--ts-accent" ? "--ts-on-accent" : colourToken + "-ink";
         public static bool BoldChosen(CardNavBarSettings bar) => bar?.bold_selected ?? true;
         public static string Show(CardNavBarSettings bar) => Pick(bar?.show, CardOptions.NavBarShows, CardOptions.NavBarShowAlways);
         public static string HideOnScroll(CardNavBarSettings bar) => Pick(bar?.hide_on_scroll, CardOptions.NavBarHides, CardOptions.NavBarHideNever);

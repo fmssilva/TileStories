@@ -77,6 +77,16 @@ namespace TileStories
                 ? 1f + (ZoomMax - 1f) * Phase(time, motion == PanZoom ? PeriodFor(overflow) : PanPeriod)
                 : 1f;
 
+        // Every place the picture can stand by itself: the pan's two ends (the still offset twice when it does not pan) and the zoom's most
+        // (1 when it does not zoom) -- what lies under the words at some moment lies between these (Words On Picture's strength, HeroWordsOnPicture)
+        public static (float PanFrom, float PanTo, float ZoomMost) Sweep(string motion, bool reduceMotion, float overflow)
+        {
+            bool pans = Pans(motion) && !reduceMotion;
+            float still = PanOffset(motion, reduceMotion, 0f, overflow);
+            float room = float.IsNaN(overflow) ? 0f : Mathf.Max(0f, overflow);
+            return (pans ? 0f : still, pans ? -room : still, Zooms(motion) && !reduceMotion ? ZoomMax : 1f);
+        }
+
         // The picture's slide down inside its frame for the stack's scroll (never past the frame); reduce motion: none
         public static float Parallax(float scrollY, float frameHeight, bool reduceMotion)
         {

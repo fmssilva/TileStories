@@ -8,8 +8,8 @@ namespace TileStories
     //     language, Menu or title length moves a stop; it shows the title only while the hero's does not (SetBarTitleShown)
     //   - the HERO (HeroPart, first in what scrolls -- BlockStackView places it): the eyebrow, the title in the display face, the subtitle
     //     and, at its foot, the card's actions (Actions: the stack binds them, HeroActionsRule). The picture looks draw it over the
-    //     picture, full width and the whole of Full's view tall (HeroRule.Height: the picture cropped to cover it), the words minimal on their own
-    //     shade, ending where Half's view ends (HeroRule.WordsBottom); Text Only and Compact draw it as a plain plate (Compact: the title alone)
+    //     picture, full width and the whole of Full's view tall (HeroRule.Height: the picture cropped to cover it), the words minimal on the
+    //     picture as Words On Picture says (HeroWordsOnPicture), ending where Half's view ends (HeroRule.WordsBottom); Text Only and Compact draw it as a plain plate (Compact: the title alone)
     //       image_parallax -- the picture moves as Hero Motion says (pan / zoom / none) and slower than the scroll (HeroMotionRule)
     //       split_then_now -- Picture (then) beside Second Picture (now), each with its CardStrings label
     //       spotlight_crop -- Picture enlarged around the focus point with a ring on it (SpotlightCropRule)
@@ -25,14 +25,15 @@ namespace TileStories
         public VisualElement Root { get; }
         public VisualElement PeekPart => Root;
         // The hero, first in the scroll (always, a plate for the text looks): its frame (picture looks) and the moving part inside it, then
-        // the FOOT -- the words and the actions row, minimal on the picture (_3.3 S4a; the premium target, v5): no plate, a SHADE behind
-        // the words' block only (a ramp fading in above them, the measured floor behind them, down to the hero's foot) and a dark halo
-        // hugging every letter (Media.uss) -- what keeps them >= 7:1 over any picture; the picture between the top shade and this one is clean
+        // the FOOT -- the words and the actions row, minimal on the picture (_3.3 S4a; the premium target, v5): no plate; Words On Picture
+        // (_3.3 P3c addendum: a halo on the letters, a soft tone falling off from their corner, only as strong as 4.5:1 needs)
         public VisualElement HeroPart { get; }
         public VisualElement Frame { get; }
         public VisualElement Media { get; }
         public VisualElement Foot { get; }
-        public VisualElement Shade { get; }
+        // Words On Picture (HeroWordsRule): the layer over the picture, under the words (the tone or the scrim), and its owner
+        public VisualElement ToneLayer { get; }
+        public HeroWordsOnPicture Words { get; }
         public VisualElement Text { get; }
         public VisualElement Actions { get; }
         public Label Eyebrow { get; }
@@ -111,17 +112,6 @@ namespace TileStories
 
             Text = new VisualElement { name = "card-hero-text", pickingMode = PickingMode.Ignore };
             Text.AddToClassList("card-hero__text");
-            // - the shade behind the words block (the words, Listen and the actions) and only there: out of the flow, a ramp fading in above
-            //   the words, then the solid floor down past the hero's foot (Media.uss); it rises and fades with the words
-            Shade = new VisualElement { name = "card-hero-shade", pickingMode = PickingMode.Ignore };
-            Shade.AddToClassList("card-hero__shade");
-            var ramp = new VisualElement { name = "card-hero-shade-ramp", pickingMode = PickingMode.Ignore };
-            ramp.AddToClassList("card-hero__shade-ramp");
-            var floor = new VisualElement { name = "card-hero-shade-floor", pickingMode = PickingMode.Ignore };
-            floor.AddToClassList("card-hero__shade-floor");
-            Shade.Add(ramp);
-            Shade.Add(floor);
-            Foot.Add(Shade);
             Eyebrow = new Label { name = "card-hero-eyebrow", pickingMode = PickingMode.Ignore };
             Eyebrow.AddToClassList("card-hero__eyebrow");
             HeroTitle = new Label { name = "card-hero-title", pickingMode = PickingMode.Ignore };
@@ -136,6 +126,12 @@ namespace TileStories
             Actions.AddToClassList("card-hero__actions");
             Foot.Add(Text);
             Foot.Add(Actions);
+            // - Words On Picture's layer (_3.3 P3c addendum): over the picture (the frame goes in first at bind), under the words; the whole
+            //   hero's size, its gradient anchored at the words' corner; it rises and fades with them
+            ToneLayer = new VisualElement { name = "card-hero-tone", pickingMode = PickingMode.Ignore };
+            ToneLayer.AddToClassList("card-hero__tone");
+            Words = new HeroWordsOnPicture(ToneLayer);
+            HeroPart.Add(ToneLayer);
             HeroPart.Add(Foot);
 
             Picture = new CardImage("card-hero__picture");
@@ -152,7 +148,16 @@ namespace TileStories
             ModelView = new ModelTurntableBlockView();
             ModelView.Root.AddToClassList("card-hero__model");
             // - the words' fade reads their place in the view: placed again once they are laid out (at rest too, with no scroll to say so)
-            Foot.RegisterCallback<GeometryChangedEvent>(_ => OnStackScrolled(_scrollY));
+            Foot.RegisterCallback<GeometryChangedEvent>(_ =>
+            {
+                OnStackScrolled(_scrollY);
+                // - a new stop moves the foot, never the words inside it: the layer follows them here
+                FitWords();
+            });
+            // - the layer follows the words: a longer title, another language, a stop that re-lays them
+            Text.RegisterCallback<GeometryChangedEvent>(_ => FitWords());
+            Actions.RegisterCallback<GeometryChangedEvent>(_ => FitWords());
+            ToneLayer.RegisterCallback<GeometryChangedEvent>(_ => FitWords());
             Frame.RegisterCallback<GeometryChangedEvent>(evt =>
             {
                 // - only a new frame size re-places the picture (its own new size must never feed back into the frame's)
@@ -252,6 +257,21 @@ namespace TileStories
         // The hero's bottom edge in the stack's content coordinates (NaN when it is not in the stack)
         public float HeroBottom() => HeroPart.panel == null ? float.NaN : HeroPart.layout.yMax;
 
+        // Fit Words On Picture to the words as laid out now (each word, Listen's icon and words) over the picture they lie on: a still
+        // picture is read for the strength; a video's frames, the turntable or the split's two pictures get the look's own strength
+        private void FitWords()
+        {
+            if (!HasPicture) return;
+            bool still = _variant != BuiltInBlocks.HeaderModelTurntable && _variant != BuiltInBlocks.HeaderSplitThenNow && !LoopShowsFrames;
+            Words.Fit(WordsOnPicture, ToneSpread, HeroPart, new[] { Text, Actions }, still ? Picture : null, Media, Frame, Motion, _reduceMotion,
+                Overflow, TextRise);
+        }
+
+        // The look of the words on the picture (the header's Words On Picture, else the Block Library's default) and how far its darkening
+        // reaches (the header's Tone Spread)
+        public string WordsOnPicture { get; private set; } = HeroWordsRule.ToneHalo;
+        public float ToneSpread { get; private set; } = HeroWordsRule.SpreadDefault;
+
         // The stack scrolled to `scrollY`: the picture lags behind (image_parallax), the words rise and fade
         public void OnStackScrolled(float scrollY)
         {
@@ -263,6 +283,10 @@ namespace TileStories
             TextOpacity = HeroMotionRule.TextOpacity(WordsTopAtRest(), WordsTopInView(scrollY), FadeTop, _reduceMotion);
             Foot.style.translate = new Translate(0f, TextRise);
             Foot.style.opacity = TextOpacity;
+            // - the layer stays over the whole hero (moving its box would bare the picture's foot under a hard edge): its gradient and the
+            //   halo rise with the words
+            Words.Rise(TextRise);
+            ToneLayer.style.opacity = TextOpacity;
             if (_variant == BuiltInBlocks.HeaderImageParallax) PlaceMedia();
         }
 
@@ -280,7 +304,11 @@ namespace TileStories
             HeroPart.EnableInClassList(PlateClass, !HasPicture);
             HeroPart.Insert(0, Frame);
             Frame.style.display = HasPicture ? DisplayStyle.Flex : DisplayStyle.None;
+            ToneLayer.style.display = HasPicture ? DisplayStyle.Flex : DisplayStyle.None;
             if (!HasPicture) return;
+            WordsOnPicture = HeroWordsRule.Of(BlockLibraryRule.Choice(context.Settings, BuiltInBlocks.Header,
+                BuiltInBlocks.Header.Field(BuiltInBlocks.HeaderWordsOnPictureField), read));
+            ToneSpread = HeroWordsRule.Spread(read.Number(BuiltInBlocks.Header.Field(BuiltInBlocks.HeaderToneSpreadField)));
             _variant = context.Variant;
             HeroPart.AddToClassList("card-hero--" + _variant);
             if (_variant == BuiltInBlocks.HeaderModelTurntable)
@@ -349,11 +377,14 @@ namespace TileStories
         // video_loop: show the loop's frames while THIS header's loop holds the player and has a frame, else the poster
         private void RefreshLoop()
         {
-            LoopShowsFrames = _video != null && LoopTrack != null && _video.PlayingLoop && _video.IsCurrent(LoopTrack) && _video.HasFrame
+            bool showedFrames = LoopShowsFrames;
+            LoopShowsFrames =_video != null && LoopTrack != null && _video.PlayingLoop && _video.IsCurrent(LoopTrack) && _video.HasFrame
                               && _video.Texture is RenderTexture;
             LoopFrames.style.backgroundImage = LoopShowsFrames ? new StyleBackground(Background.FromRenderTexture((RenderTexture)_video.Texture)) : StyleKeyword.Null;
             // - the texture's pixels change every frame without UI Toolkit knowing: ask for a repaint
             if (LoopShowsFrames) LoopFrames.MarkDirtyRepaint();
+            // - poster <-> frames: what the words lie on changed
+            if (showedFrames != LoopShowsFrames) FitWords();
         }
 
         private void ClearHero()
@@ -382,6 +413,10 @@ namespace TileStories
             Media.style.scale = StyleKeyword.Null;
             Foot.style.translate = StyleKeyword.Null;
             Foot.style.opacity = StyleKeyword.Null;
+            ToneLayer.style.opacity = StyleKeyword.Null;
+            Words.Rise(0f);
+            Words.Painter.Options = null;
+            HeroPart.RemoveFromClassList(HeroWordsOnPicture.NoHaloClass);
             HeroPart.style.minHeight = StyleKeyword.Null;
             HeroPart.style.marginTop = StyleKeyword.Null;
             Foot.style.marginBottom = StyleKeyword.Null;
@@ -425,6 +460,8 @@ namespace TileStories
                 Picture.Root.style.width = width;
                 PlaceMedia();
             }
+            // - the picture's place (and the pan's room) is known now: the shade reads what lies under the words
+            FitWords();
         }
 
         // Move the picture: the pan / zoom of this moment and the parallax of the scroll (HeroMotionRule), transform only

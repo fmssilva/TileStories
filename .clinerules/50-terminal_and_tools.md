@@ -9,6 +9,9 @@
 ---
 
 ## 5.2. Tool Usage Guidelines
+- **Alert hook:** `.claude/hooks/alert.ps1` + `alarm-loop.ps1` ring the developer on `AskUserQuestion`, a permission prompt, or a
+  chat idle ~1 min after its turn. A real decision for the developer goes through `AskUserQuestion` (it rings at once). Never trigger
+  the hook on purpose or edit it without being asked.
 - **Strict Parameter Compliance:** Always verify tool schemas before executing. Never emit missing required parameters (e.g., `path` for `read_file` or `write_to_file`; or 'regex' for `search_files`).
 - **Error Handling & Pivot Strategy:**
   - If a tool execution fails or returns an error response, analyze the error output immediately.

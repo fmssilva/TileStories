@@ -113,14 +113,13 @@
        units) read by PoiCardSheetView on this card root; the outline of its Listen button on the plate */
     --ts-hero-min-height: 200;
     --ts-hero-outline-width: 2px;
-    /* the shade behind the hero's words (Media.uss, .card-hero__shade; v5's "a shade behind the words only"): its ramp's height above the
-       words' block and the same reach upwards (a USS length cannot be negated: PoiCardHeroSceneTests checks the pair), and how far its
-       floor reaches under the block -- past the hero's foot, so the words rising on a scroll never lift it off the picture */
-    --ts-hero-shade-ramp: 96px;
-    --ts-hero-shade-out-top: -96px;
-    --ts-hero-shade-out-bottom: -480px;
-    /* the dark halo round every letter of the hero (the text-shadow's blur; its colour is the theme's --ts-text-halo) */
-    --ts-text-halo-blur: 10px;
+    /* Words On Picture's halo round every letter of the hero (_3.3 P3c addendum): its soft glow (the text-shadow's blur; its colour is the
+       theme's --ts-text-halo) and its close shade (the text's outline, in that same colour: its width) */
+    --ts-text-halo-blur: 8px;
+    --ts-text-halo-close-width: 0.5px;
+    /* ...and its second layer, a back label under every word: a fuller outline round its letters and a wider glow (the same colour) */
+    --ts-text-halo-wide-width: 1.5px;
+    --ts-text-halo-wide-blur: 18px;
     /* the hero's kicker and its one line (the title is the theme's --ts-size-hero / -narrow) */
     --ts-hero-eyebrow-size: 12px;
     --ts-hero-line-size: 15px;
@@ -165,19 +164,20 @@
     --ts-open-ornament-line: 72px;
     /* The Navigation Bar (_3.3 S4 third round, v5's numbers): plain numbers (panel units) NavBarView reads on this card root for the ONE
        path it paints (NavBarShapeRule) -- the bar's height with words and without, a floating bar's inset from the sides and its gap above
-       the screen's foot, the room above the edge the raised bump and its disc rise into, the bump's height and half its foot, a floating
-       raised bar's corner (any other floating bar is a stadium), the raised disc, Filled's disc at the icon. The bump is ONE smooth bell
-       (_3.3 P3a review a): its peak is the raised disc's top (room - bump = 14: no band of bar above the disc), its crest the disc's own
-       arc, its feet 50 from the disc's centre -- wide soft shoulders, 2.5 times the disc */
+       the screen's foot, the room above the edge the raised bump and its disc rise into, half the bump's foot, a floating raised bar's
+       corner (any other floating bar is a stadium), the raised disc, Filled's disc at the icon. The bump is ONE smooth fish-eye bell
+       whose height is the raised disc's radius (NavBarShapeRule.BellHeight: the disc's centre on the edge, so the room must exceed it):
+       its peak the disc's top, its crest hugging the disc's outline to 50 deg, its feet 50 from the disc's centre -- wide soft shoulders */
     --ts-navbar-height: 62;
     --ts-navbar-height-compact: 52;
     --ts-navbar-inset: 16;
     --ts-navbar-gap: 20;
     --ts-navbar-room: 26;
-    --ts-navbar-bump: 12;
     --ts-navbar-bump-half: 50;
     --ts-navbar-raised-radius: 18;
     --ts-navbar-disc-raised: 40;
+    /* Raised Depth below 0: the cradle's gap round the disc (at -1 the dip is concentric with it, this far out) */
+    --ts-navbar-cradle-gap: 4;
     --ts-navbar-disc-filled: 32;
     /* what a bar floating at the bottom takes off the stack's foot and the hero's words: its gap + height + room (20 + 62 + 26), so the
        last block and the words stay clear of it and of the raised disc; a plain number for the hero's words (PoiCardSheetView), a length

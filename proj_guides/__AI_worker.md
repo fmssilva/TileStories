@@ -13,30 +13,25 @@
 So start by reading them all. 
 
 
-
-P3b -- clean the old navigation out of the runs, a fluid bump, steady hero words (developer's P3a review, 2026-10-28;
-`_3.3` "fourth round" > "P3a review" a-f; `.clinerules/40-testing.md` 4.2 "Tests stay on scope").
-GATE: as before (MCP, push: origin = b89c9d7, pull nothing new; SDF fonts; compile clean before every run; Unity c, b for captures).
-WORKER MODEL: Opus + effort High (curve geometry, a hero diagnosis, a broad test cleanup).
-PART 1 (URGENT) -- old navigation out of the runs: every fixture / test whose subject is an old navigation element (all but the
-Navigation Bar: Text Tabs, Tabs, Icon Tabs, Chips, Segmented, Dock, Rails, Bento, Grid Overlay, Drawer Tree, Fab Dial / Radial, Edge
-Scrubber, Next Up, Progress Map, Family Pager, Bar Sheet, Bottom Bar, the menu overlay...) gets a FIXTURE-level
-[Ignore(TestSkips.OldNavigationElements)] (split a mixed fixture: what is about the card itself stays and runs on the default bar).
-Keep the code. Write an inventory in `_3.3` (one line each: what it is, what the Navigation Bar already covers, recommend rebuild /
-retire) for the developer. Then apply "tests stay on scope": card fixtures that are not about navigation run on the default bar only.
-PART 2 -- the Raised bump is fluid (P3a review a): one smooth bell (C1-continuous, no corners), wide soft shoulders, its peak exactly at
-the disc's top outline (no band of bar above the disc: --ts-navbar-disc-gap -> 0 at the top), the bar hugging the disc's sides only as
-the bell falls; near a side it stays smooth. Pure rule in NavBarShapeRule + EditMode tests (peak y = disc top +-0.5; slope continuous;
-monotonic each side); pixel test at Bottom and Top, light and dark; zoomed renders compared with the developer's sketch.
-PART 3 -- the hero's words at Half (b): measure first (resolved opacity of eyebrow / title / line / Listen at Half, at rest; contrast on
-the real LivingRoom hero). At rest they are opacity 1 at every stop; any fade follows the visitor's scroll only. If contrast < 7:1 at
-Half, build the Local Shade (kit effect, a feathered shade around each text element) for the hero's words here. Test: open at Half, no
-scroll -> opacity 1 and >= 7:1; scroll -> the fade follows the offset.
-PART 4 -- a jump lands a section's Start fully below the Top Band (e); one ornament per boundary: a Tiles / Wave Start replaces the
-Divider before it (f). Tests for both.
-PART 5 -- BLOCK (full EditMode + the card fixtures; the list in the tracker minus the fixtures now skipped whole; RestingEnd is
-already skipped -- name the list as it stands), LOOK at the renders, report with one commit message. STOP: P3c = Local Shade on the
-bar's labels + the "Show me where it is" FAB.
+## `And now:`
+P3c (continued, 3) -- the halo for Half, Raised Depth, group-coloured icons; close green and committed (`_3.3` fourth round >
+"P3c review" and "P3c review, second pass" a + c; the tracker's HANDOFF).
+GATE: as before (MCP; push: origin = fbc2f36; SDF fonts; compile clean before every run, editor_state confirms a run STARTED and
+Play Mode is off; Unity c, b for captures). Continue on the uncommitted tree.
+WORKER MODEL: Opus + effort High.
+TEST PLAN: BLOCK = full EditMode + the 14 card fixtures on the FINAL state (none has run on this tree yet).
+PART 1 -- the Half decision = (c) + (a): a two-layer halo (a second label behind each word: a close dark outline/shadow + a wider soft
+glow; one owner in HeroWordsOnPicture, no copies elsewhere), so the adaptive tone needs less; whatever tone remains at Half may reach
+the visible strip's top -- the far-side ~0 test runs at Full only; at Half test that the tone is lower than before the halo (log both
+numbers). Every word >= 4.5:1 everywhere as today. Show the developer the Half and Full renders (light hero, dark hero) and ask once:
+accepted?
+PART 2 -- Raised Depth (as written in the tracker): slider -1..+1, default +1, 0 flat, < 0 a cradle; rule + Editor row (i) + config +
+live push; rule tests at -1/-0.5/0/0.5/1; pixel test at -1/0/+1, Bottom and Top.
+PART 3 -- Icon Colour: Group (default) / Accent / Neutral: icons in the group's -text tone (>= 4.5:1 on every bar fill), the chosen disc
+in the group colour with its icon >= 4.5:1, labels ink 7:1; Editor row (i); render test per group, light and dark.
+PART 4 -- docs (_3.3 build log, _Test_Suite_1, 10-structure for the new and deleted files, the old ramp note on --ts-scrim-hero),
+BLOCK, LOOK at the renders (Editor rows in the dark skin). Report with one commit message covering all of P3c. STOP.
+OUT OF SCOPE (P3d): the Reveal both ways, Tint Depth, the FAB.
 
 
 
@@ -144,7 +139,7 @@ Per ./.clinerules/50-terminal_and_tools.md:
   long runs without polling (`40-testing.md` 4.2.5 "Wait without burning tokens"): every poll re-reads the whole session.
 
 ### 2.5. Hard Stop
-When you complete all the Iterative Execution Cycles for each step/task in the plan AND WE ACHIEVE AND TESTED WITH REAL TEST THAT ALL FEATURES WORK, ALL CONFIG PARAMS WORK AND ALL TESTS PASS, so then **STOP immediately**. Output the final learning summary, PUT the "LivingRoom Sene" to be ready to play in unity (not the test scenes tc...), and STOP. 
+When you complete all the Iterative Execution Cycles for each step/task in the plan AND WE ACHIEVE AND TESTED WITH REAL TEST THAT ALL FEATURES WORK, ALL CONFIG PARAMS WORK AND ALL TESTS PASS, so then **STOP immediately**. Output the final learning summary, PUT the "LivingRoom Sene" to be ready to play in unity (not the test scenes tc...), and STOP with one `AskUserQuestion` (`60-finishing.md` 6.4) so the developer's alarm rings. 
 
 
 ## `DURING THE WHOLE PROCESS: BE A TEACHER!!! - GIVE LEARNING SUMMARIES`

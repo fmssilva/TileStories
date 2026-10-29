@@ -73,8 +73,9 @@ namespace TileStories
         public float Room { get; private set; }
         public float BarWidth => Root.layout.width;
         public float DiscSize { get; private set; }
-        // How high the raised bump rises (or hangs, at Top)
-        public float BumpHeight => Token(BumpToken);
+        // How far the edge rises at the chosen group (or hangs, at Top): Raised Depth's share of the raised disc's own size -- below 0 a
+        // cradle dipping into the bar (NavBarShapeRule.EdgeRise)
+        public float BumpHeight => NavBarShapeRule.EdgeRise(NavBarRule.RaisedDepth(Settings), RaisedDiscRadius, Token(CradleGapToken));
         // Half the bump's foot: how far its soft shoulders reach from the disc's centre
         public float BumpHalf => Token(BumpHalfToken);
         // The raised disc's radius: the bell's crest is its arc
@@ -86,11 +87,11 @@ namespace TileStories
         private static readonly CustomStyleProperty<float> InsetToken = new("--ts-navbar-inset");
         private static readonly CustomStyleProperty<float> GapToken = new("--ts-navbar-gap");
         private static readonly CustomStyleProperty<float> RoomToken = new("--ts-navbar-room");
-        private static readonly CustomStyleProperty<float> BumpToken = new("--ts-navbar-bump");
         private static readonly CustomStyleProperty<float> BumpHalfToken = new("--ts-navbar-bump-half");
         private static readonly CustomStyleProperty<float> RaisedRadiusToken = new("--ts-navbar-raised-radius");
         private static readonly CustomStyleProperty<float> RaisedDiscToken = new("--ts-navbar-disc-raised");
         private static readonly CustomStyleProperty<float> FilledDiscToken = new("--ts-navbar-disc-filled");
+        private static readonly CustomStyleProperty<float> CradleGapToken = new("--ts-navbar-cradle-gap");
 
         private readonly ElementPool<Item> _items;
         private List<NavBarRule.Entry> _entries = new();
@@ -200,6 +201,7 @@ namespace TileStories
         // A non-solid bar over the hero: white words on dark glass (or on the hero itself, Clear)
         public bool OverImage => OverHero && NavBarRule.Fill(Settings) != CardOptions.NavBarSolid;
 
+
         private Item NewItem(int index)
         {
             var button = new Button(() => Tap(index)) { name = "nav-bar-item-" + index };
@@ -287,8 +289,8 @@ namespace TileStories
             if (bar == null) return;
             string fill = NavBarRule.Fill(bar);
             bool overImage = OverImage;
-            // - Clear over the hero: transparent at the Bottom (it lies on the hero words' own shade); at Top no shade reaches it there, so it
-            //   lies in the dark scrim -- a stronger shade, never weaker words (the words' 7:1 rule, measured on the render)
+            // - Clear over the hero: transparent at the Bottom, its labels with the hero words' halo (Navigation.uss); at Top it lies
+            //   in the dark scrim -- a stronger shade, never weaker words (the words' 7:1 rule, measured on the render)
             string fillToken = fill == CardOptions.NavBarSolid ? "--ts-bar"
                 : fill == CardOptions.NavBarGlass ? (OverHero ? "--ts-chrome-glass-hero" : "--ts-navbar-glass")
                 : !OverHero ? "--ts-bar" : NavBarRule.AtBottom(bar) ? null : "--ts-scrim-hero";
@@ -297,21 +299,24 @@ namespace TileStories
             PaintedLine = Colour(lineToken);
             PaintedShadow = NavBarRule.Floating(bar) && fill == CardOptions.NavBarSolid;
 
-            string selected = NavBarRule.SelectedColour(bar);
+            string selected = NavBarRule.SelectedColour(bar), iconColour = NavBarRule.IconColour(bar);
             Color white = Colour("--ts-on-scrim");
             Color chosenColour = overImage ? white : Colour(ChosenToken(selected, ChosenIndex));
             Color idle = overImage ? white : Colour("--ts-ink-2");
             foreach (var item in _items.Shown)
             {
                 bool chosen = item.Index == ChosenIndex;
-                CardIcons.Tint(item.Icon, chosen ? chosenColour : idle);
+                // - an idle icon in Icon Colour's readable tone (its group's -text by default); the words stay ink
+                Color icon = overImage ? white : Colour(NavBarRule.IconToken(iconColour, _entries[item.Index].Item.ColorToken));
+                CardIcons.Tint(item.Icon, chosen ? chosenColour : icon);
                 // - the words stay ink on a group colour (a family colour is a mark, not a text colour); accent / ink words are text colours
                 Color words = chosen ? (overImage ? white : selected == CardOptions.NavBarColourGroup ? Colour("--ts-ink") : chosenColour) : idle;
                 item.Label.style.color = words;
             }
-            // - the disc: the chosen colour with its ink on it (white over the hero with the dark scrim's colour on it, both modes)
+            // - the disc: the chosen colour with the ink made for it on it -- a group colour's own -ink, the accent's on-accent (white over
+            //   the hero with the dark scrim's colour on it, both modes)
             Color discInk = overImage ? Opaque(Colour("--ts-scrim-hero"))
-                : selected == CardOptions.NavBarColourInk ? Colour("--ts-surface") : Colour("--ts-on-accent");
+                : selected == CardOptions.NavBarColourInk ? Colour("--ts-surface") : Colour(NavBarRule.InkOn(ChosenToken(selected, ChosenIndex)));
             Disc.style.backgroundColor = chosenColour;
             CardIcons.Tint(DiscIcon, discInk);
             var wash = chosenColour;
@@ -393,8 +398,9 @@ namespace TileStories
             if (!float.IsNaN(width) && width > 0f)
             {
                 float radius = NavBarShapeRule.Radius(NavBarRule.Floating(bar), raised, BarHeight, Token(RaisedRadiusToken));
-                var path = NavBarShapeRule.Path(width, BarHeight, Room, radius, raised && chosen ? Token(BumpToken) : 0f, Token(BumpHalfToken),
-                    bellX, RaisedDiscRadius);
+                float rise = raised && chosen ? BumpHeight : 0f;
+                var path = NavBarShapeRule.Path(width, BarHeight, Room, radius, rise, Token(BumpHalfToken),
+                    bellX, NavBarShapeRule.CrestRadius(rise, RaisedDiscRadius, Token(CradleGapToken)));
                 PaintedPath = bottom ? path : NavBarShapeRule.Mirror(path, Room + BarHeight);
                 Surface.MarkDirtyRepaint();
             }
@@ -405,10 +411,12 @@ namespace TileStories
             {
                 Disc.style.left = (raised ? bellX : Centre) - DiscSize * 0.5f;
                 if (raised)
-                    // - its top is the bell's peak, the bell's crest its own outline (NavBarShapeRule.DiscTop; mirrored at Top: its foot the
-                    //   bell's lowest point)
-                    Disc.style.top = bottom ? NavBarShapeRule.DiscTop(Room, Token(BumpToken))
-                        : Room + BarHeight - NavBarShapeRule.DiscTop(Room, Token(BumpToken)) - DiscSize;
+                {
+                    // - its centre on the flat edge whatever the depth (at +1 its top is the bell's peak, the crest its own outline; mirrored
+                    //   at Top: its foot the bell's lowest point)
+                    float discTop = NavBarShapeRule.DiscTop(Room, NavBarShapeRule.BellHeight(RaisedDiscRadius));
+                    Disc.style.top = bottom ? discTop : Room + BarHeight - discTop - DiscSize;
+                }
                 else
                 {
                     var icon = _items.Shown[ChosenIndex].Icon.layout;

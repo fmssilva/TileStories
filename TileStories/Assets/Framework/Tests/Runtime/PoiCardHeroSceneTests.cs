@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using TileStories.LookKit;
 using TileStories.Tests;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -24,7 +25,8 @@ namespace TileStories.Tests
 
         protected const string Domain = "Hero";
 
-        protected const float Aaa = 7f;
+        // The hero's words over a picture read at 4.5:1 (the project's contrast policy for words over a picture; the cloud is worked out for it)
+        protected const float HeroWordsMinRatio = HeroWordsOnPicture.WordsRatio;
 
         protected ManualAudioOutput _out;
 
@@ -77,7 +79,7 @@ namespace TileStories.Tests
             field.value = value;
         }
 
-        // ---------------- the words: 7:1 against the picture about their letters ----------------
+        // ---------------- the words: 4.5:1 against the picture about their letters ----------------
 
         protected static IEnumerable<string> HeroPictures() => new[] { "lamp", "painting", "lamp_military", "lamp_religious" };
 
@@ -94,7 +96,7 @@ namespace TileStories.Tests
     // visitor scrolls -- its words and actions whole at Half (the PT Lamp's "Mostra-me onde fica" included) while the sticky bar waits; real
     // taps on the hero's action and Listen do what the card's own blocks do; the drift, the zoom, the parallax and the words' rise run on
     // the test's clock and stop under Reduce Motion (frame sequences saved for the eye); the glow lies only behind the words, a fade with no
-    // edge; and every word keeps 7:1 against the picture right about its letters on every hero picture of the wall, EN / PT, light / dark
+    // edge; and every word keeps 4.5:1 against the picture right about its letters on every hero picture of the wall, EN / PT, light / dark
     public class PoiCardHeroSceneTests : PoiCardHeroSceneFixture
     {
         // ---------------- the title's lines (P4.4b part 2) ----------------
@@ -356,14 +358,15 @@ namespace TileStories.Tests
         // such pixel
         [UnityTest]
         public IEnumerator EveryWordOfTheHero_ReadsAgainstThePictureRightAroundItsLetters([ValueSource(nameof(HeroPictures))] string poi,
-            [Values("en", "pt")] string language, [Values("light", "dark")] string mode)
+            [Values("en", "pt")] string language, [Values("light", "dark")] string mode,
+            [Values(SheetStopRule.Stop.Half, SheetStopRule.Stop.Full)] SheetStopRule.Stop stop)
         {
             // - the looks that move by themselves are measured still: the video loop on its poster, the turntable at rest (Reduce Motion);
             //   the image parallax across its drift (start, a quarter, the far side)
             bool pans = poi == "lamp" || poi == "painting";
             if (!pans) yield return Push(c => c.card_settings.container.reduce_motion = true);
             ThemeController.SetMode(mode);
-            yield return Open(poi, language, SheetStopRule.Stop.Full);
+            yield return Open(poi, language, stop);
             Assert.IsTrue(Header.HasPicture, "precondition: " + poi + " has a hero picture");
             float t = 0f;
             Header.Clock = () => t;
@@ -384,10 +387,10 @@ namespace TileStories.Tests
                 Texture2D drawn = null, under = null;
                 try
                 {
-                    yield return ThemePixelSet.GrabStill($"words_{poi}_{language}_{mode}_{share}", null, r => drawn = r);
+                    yield return ThemePixelSet.GrabStill($"words_{poi}_{language}_{mode}_{stop}_{share}", null, r => drawn = r);
                     // - the letters made clear, their halo kept: what is under and around each letter
                     foreach (var l in words) l.style.color = new Color(colours[l].r, colours[l].g, colours[l].b, 0f);
-                    yield return ThemePixelSet.GrabStill($"under_{poi}_{language}_{mode}_{share}", null, r => under = r);
+                    yield return ThemePixelSet.GrabStill($"under_{poi}_{language}_{mode}_{stop}_{share}", null, r => under = r);
                     foreach (var l in words)
                     {
                         var area = ThemePixelSet.ScreenRectOf(l, drawn);
@@ -398,9 +401,9 @@ namespace TileStories.Tests
                         Assert.Greater(letters, 0, "precondition: '" + l.text + "' draws letters");
                         string what = l.name.Length > 0 ? l.name : l.ClassListContains("card-audio__title") ? "listen" : "action";
                         if (ratio < worstOfAll) { worstOfAll = ratio; worstWhat = $"{what} '{l.text}' at drift {share:0.00}"; }
-                        report.Add($"{poi} {language} {mode} drift {share:0.00} {what}: {ratio:0.00}:1 (worst pixel about its letters {(Color32)worst})");
+                        report.Add($"{poi} {language} {mode} {stop} drift {share:0.00} {what}: {ratio:0.00}:1 (worst pixel about its letters {(Color32)worst})");
                     }
-                    System.IO.File.WriteAllBytes(TestEvidence.PathFor(Domain + "/words", $"{poi}_{language}_{mode}_{share:0.00}.png"), drawn.EncodeToPNG());
+                    System.IO.File.WriteAllBytes(TestEvidence.PathFor(Domain + "/words", $"{poi}_{language}_{mode}_{stop}_{share:0.00}.png"), drawn.EncodeToPNG());
                 }
                 finally
                 {
@@ -410,86 +413,518 @@ namespace TileStories.Tests
                 }
             }
             System.IO.File.AppendAllText(TestEvidence.PathFor(Domain + "/words", "ratios.txt"), string.Join("\n", report) + "\n");
-            Debug.Log("[Card] Hero words " + poi + " " + language + " " + mode + ": worst " + worstOfAll.ToString("0.00") + ":1 (" + worstWhat + ")");
-            Assert.GreaterOrEqual(worstOfAll, Aaa, "every word of the hero keeps 7:1 against the picture about its letters -- worst: " + worstWhat);
+            Debug.Log("[Card] Hero words " + poi + " " + language + " " + mode + " " + stop + " strength " + Header.Words.Strength.ToString("0.00") + ": worst " + worstOfAll.ToString("0.00") + ":1 (" + worstWhat + ")");
+            Assert.GreaterOrEqual(worstOfAll, HeroWordsMinRatio, "every word of the hero keeps 4.5:1 against the picture about its letters -- worst: " + worstWhat);
         }
 
-        // v5's words shade lies only behind the words: the hero drawn with and without it differs from the shade's top down and nowhere above
-        // it; it fades in (its top rows change almost nothing), then holds its measured floor behind every word and down to the hero's foot;
-        // the band between the top shade's foot and the shade's top is the bare picture
-        [UnityTest]
-        public IEnumerator TheWordsShade_LiesOnlyBehindTheWords_FadesInAboveThem_ThePictureAboveIsClean([Values("lamp", "painting")] string poi)
+        // What Words On Picture's layer laid on the picture, read off two renders of the same hero (with / without the layer, the words and the
+        // bar out of both): per pixel the alpha the panel blended (linear light: A = (bare - laid) / (bare - shade), where the bare picture is
+        // bright enough to tell) -- at the words (each word grown by the ring a reader sees), next to what the layer's own rule says it draws
+        // there, and over the hero's far side (its top-right quarter as seen); the bare picture's mean brightness at the words
+        protected sealed class ToneMeasure
         {
-            // - at Full: the words (and their shade) sit at the hero's foot (S4a review)
-            yield return Open(poi, "en", SheetStopRule.Stop.Full);
-            Header.Clock = () => 0f;
-            Header.Animate();
-            Assert.AreEqual(0f, Header.Foot.resolvedStyle.backgroundColor.a, 0.001f, "the foot itself is clear");
-            Assert.AreEqual(0f, Header.Text.resolvedStyle.backgroundColor.a, 0.001f, "no plate behind the words");
-            // - the pair a USS length cannot express as one: the shade reaches up exactly its ramp's height
-            Assert.AreEqual(-CardTestInput.TokenPx("--ts-hero-shade-ramp"), Header.Shade.resolvedStyle.top, OnePixel, "the shade starts one ramp above the words");
-            var floor = Header.Shade.Q("card-hero-shade-floor");
-            Assert.That(floor.resolvedStyle.backgroundColor.a, Is.GreaterThanOrEqualTo(0.9f), "the floor behind the words is the measured scrim");
+            public float Strength, AtWords, Expected, FarSide, Ground;
+            // How many of the hero's pixels the layer visibly darkens (a laid alpha over 0.05, where the bare picture can tell)
+            public int Words, Far, Laid;
+        }
+
+        protected IEnumerator MeasureTone(string poi, SheetStopRule.Stop stop, System.Action<ToneMeasure> result)
+        {
+            var layer = Header.Words.Painter.Options;
+            var m = new ToneMeasure { Strength = Header.Words.Strength };
+            float shadeY = layer != null ? ToneRule.Luminance(layer.Colour) : 0f;
+            var box = Header.ToneLayer.worldBound;
+            var words = Header.Words.Inks.Where(i => i.IsWord).Select(i => new Rect(i.Rect.position + box.position, i.Rect.size)).ToList();
+            Assert.GreaterOrEqual(words.Count, 1, "precondition: the hero's words hand their ink");
             var hero = Header.HeroPart.worldBound;
-            var shade = Header.Shade.worldBound;
-            Assert.LessOrEqual(shade.yMin, Header.Foot.worldBound.yMin - CardTestInput.TokenPx("--ts-hero-shade-ramp") + OnePixel, "the ramp ends where the words start");
-            Assert.GreaterOrEqual(shade.yMax, hero.yMax, "the floor reaches the hero's foot");
-            float topShadeFoot = CardTestInput.UnderTheTopShade(Header.HeroPart);
-            Assert.Greater(shade.yMin - topShadeFoot, hero.height / 4f, "a clean band of picture between the two shades: " + topShadeFoot + " .. " + shade.yMin);
             Texture2D with = null, without = null;
+            var labels = Header.HeroPart.Query<Label>().ToList();
             try
             {
-                var labels = Header.HeroPart.Query<Label>().ToList();
                 foreach (var l in labels) l.style.visibility = Visibility.Hidden;
-                // - the Navigation Bar lies over the hero's foot: not the subject here, out of both renders
                 Sheet.Slots.Bar.Root.style.visibility = Visibility.Hidden;
                 Header.Actions.style.visibility = Visibility.Hidden;
-                yield return ThemePixelSet.GrabStill("shade_" + poi, Header.HeroPart, r => with = r);
-                Header.Shade.style.visibility = Visibility.Hidden;
-                yield return ThemePixelSet.GrabStill("noshade_" + poi, Header.HeroPart, r => without = r);
-                Header.Shade.style.visibility = StyleKeyword.Null;
-                foreach (var l in labels) l.style.visibility = StyleKeyword.Null;
-                Header.Actions.style.visibility = StyleKeyword.Null;
-                Sheet.Slots.Bar.Root.style.visibility = StyleKeyword.Null;
-                System.IO.File.WriteAllBytes(TestEvidence.PathFor(Domain + "/shade", poi + "_with.png"), with.EncodeToPNG());
-                System.IO.File.WriteAllBytes(TestEvidence.PathFor(Domain + "/shade", poi + "_without.png"), without.EncodeToPNG());
+                yield return ThemePixelSet.GrabStill("tone_" + poi, Header.HeroPart, r => with = r);
+                Header.ToneLayer.style.visibility = Visibility.Hidden;
+                yield return ThemePixelSet.GrabStill("notone_" + poi, Header.HeroPart, r => without = r);
+                System.IO.File.WriteAllBytes(TestEvidence.PathFor("Premium/P3c/tone", $"{poi}_{stop}_with.png"), with.EncodeToPNG());
+                System.IO.File.WriteAllBytes(TestEvidence.PathFor("Premium/P3c/tone", $"{poi}_{stop}_without.png"), without.EncodeToPNG());
 
-                // - the shade's top in the render (rows bottom-up), a pixel of rounding about it. The render is the hero cut to the screen:
-                //   its bottom row is the hero's top plus the render's height
+                // - a render pixel's centre in the panel (the render is the hero cut to the screen, rows bottom-up)
                 float perPixel = ThemePixelSet.PanelUnitsPerPixel(Header.HeroPart);
-                float renderBottom = hero.yMin + with.height * perPixel;
-                int Row(float y) => Mathf.RoundToInt((renderBottom - y) / perPixel);
-                int top = Row(shade.yMin) + 1, wordsTop = Row(Header.Foot.worldBound.yMin);
+                float renderBottom = hero.yMin + with.height * perPixel, seenHeight = with.height * perPixel;
+                Vector2 Panel(int x, int y) => new(hero.xMin + (x + 0.5f) * perPixel, renderBottom - (y + 0.5f) * perPixel);
+                float ring = HeroWordsOnPicture.Ring;
                 Color32[] a = with.GetPixels32(), b = without.GetPixels32();
-                int changedAbove = 0, firstRowsChanged = 0, darkenedBehindWords = 0, behindWords = 0;
+                double atWords = 0, expected = 0, far = 0, ground = 0;
+                int read = 0;
                 for (int y = 0; y < with.height; y++)
                     for (int x = 0; x < with.width; x++)
                     {
                         int i = y * with.width + x;
-                        int delta = Mathf.Abs(a[i].r - b[i].r) + Mathf.Abs(a[i].g - b[i].g) + Mathf.Abs(a[i].b - b[i].b);
-                        if (y > top) { if (delta > 6) changedAbove++; continue; }
-                        // - its first rows: a ramp starts from (almost) nothing, a rectangle would start at its full tint
-                        if (y >= top - 1 && delta > 12) firstRowsChanged++;
-                        // - behind the words: every pixel the picture had light enough to darken is darkened
-                        if (y <= wordsTop && b[i].r + b[i].g + b[i].b > 60) { behindWords++; if (a[i].r + a[i].g + a[i].b < (b[i].r + b[i].g + b[i].b) / 2) darkenedBehindWords++; }
+                        var p = Panel(x, y);
+                        float bare = ToneRule.Luminance(b[i]), laid = ToneRule.Luminance(a[i]);
+                        bool readable = bare - shadeY > 0.05f;
+                        float alpha = readable ? Mathf.Clamp01((bare - laid) / (bare - shadeY)) : 0f;
+                        if (alpha > 0.05f) m.Laid++;
+                        if (words.Any(r => p.x >= r.xMin - ring && p.x <= r.xMax + ring && p.y >= r.yMin - ring && p.y <= r.yMax + ring))
+                        {
+                            m.Words++;
+                            ground += bare;
+                            if (readable)
+                            {
+                                read++;
+                                atWords += alpha;
+                                expected += layer != null ? ToneRule.AlphaAt(layer, p - box.position) : 0f;
+                            }
+                        }
+                        else if (p.x > hero.xMin + hero.width * 0.75f && p.y < hero.yMin + seenHeight * 0.25f && readable)
+                        {
+                            m.Far++;
+                            far += alpha;
+                        }
                     }
-                Assert.AreEqual(0, changedAbove, "not one pixel of the picture changes above the shade");
-                Assert.AreEqual(0, firstRowsChanged, "the shade fades in: no rectangle edge at its top");
-                Assert.Greater(behindWords, with.width * 10, "precondition: picture behind the words to judge");
-                Assert.AreEqual(behindWords, darkenedBehindWords, "behind the words the picture is at most half as bright: the floor");
+                m.AtWords = read > 0 ? (float)(atWords / read) : 0f;
+                m.Expected = read > 0 ? (float)(expected / read) : 0f;
+                m.FarSide = m.Far > 0 ? (float)(far / m.Far) : float.NaN;
+                m.Ground = m.Words > 0 ? (float)(ground / m.Words) : float.NaN;
+                System.IO.File.AppendAllText(TestEvidence.PathFor("Premium/P3c/tone", "measures.txt"),
+                    $"{poi} {stop} {Header.Words.Mode}: strength {m.Strength:0.000}, laid at the words {m.AtWords:0.000} (the rule's {m.Expected:0.000}) " +
+                    $"over {read} px, far side {m.FarSide:0.0000} over {m.Far} px, bare ground {m.Ground:0.000}\n");
             }
             finally
             {
+                Header.ToneLayer.style.visibility = StyleKeyword.Null;
+                foreach (var l in labels) l.style.visibility = StyleKeyword.Null;
+                Header.Actions.style.visibility = StyleKeyword.Null;
+                Sheet.Slots.Bar.Root.style.visibility = StyleKeyword.Null;
+                if (with != null) Object.Destroy(with);
+                if (without != null) Object.Destroy(without);
+            }
+            result(m);
+        }
+
+        // The P3c addendum's Words On Picture at its default, Tone + Halo: the words wear the halo (a close shade and a glow); the tone the
+        // panel lays at the words is the one its rule draws at the strength the hero worked out (+-0.06: 8-bit renders); over the hero's far
+        // side it lays ~nothing (light falling off, no edge) -- at FULL, where the hero is the screen (the P3c review, second pass a: at Half
+        // the visible strip is mostly words and what tone remains may reach its top; Half's own check is the next test). Renders and measures
+        // in TestEvidence/Premium/P3c/tone/
+        [UnityTest]
+        public IEnumerator TheTone_IsDrawnAtTheWorkedOutStrength_AtTheWords_AndIsNothingAtTheFarSide([Values("lamp", "painting")] string poi,
+            [Values(SheetStopRule.Stop.Full)] SheetStopRule.Stop stop)
+        {
+            yield return Open(poi, "en", stop);
+            Header.Clock = () => 0f;
+            Header.Animate();
+            yield return null;
+            Assert.AreEqual(HeroWordsRule.ToneHalo, Header.WordsOnPicture, "precondition: the default look");
+            Assert.IsFalse(Header.HeroPart.ClassListContains(HeroWordsOnPicture.NoHaloClass), "Tone + Halo: the words wear the halo");
+            Assert.Greater(Header.HeroTitle.resolvedStyle.unityTextOutlineWidth, 0f, "...its close shade (the outline)");
+            Assert.AreEqual(0f, Header.Foot.resolvedStyle.backgroundColor.a, 0.001f, "no plate behind the words");
+            var layer = Header.Words.Painter.Options;
+            Assert.IsNotNull(layer, "precondition: the tone is drawn");
+            Assert.AreEqual(ToneShape.Radial, layer.Shape);
+            Assert.AreEqual(Header.Words.Strength, layer.Strength, 1e-5f, "the painter draws the strength the hero worked out");
+            ToneMeasure m = null;
+            yield return MeasureTone(poi, stop, r => m = r);
+            Assert.Greater(m.Words, 200, "precondition: picture under the words");
+            Assert.AreEqual(m.Expected, m.AtWords, 0.06f, $"{poi} {stop}: at the words the panel lays what the tone's rule draws");
+            Assert.Greater(m.Far, 500, "precondition: picture on the far side");
+            Assert.Less(m.FarSide, 0.01f, $"{poi} {stop}: the tone's alpha at the far side ~0 ({m.FarSide:0.0000})");
+        }
+
+        // The halo's second layer (the P3c review, second pass a): a back label under EVERY word of the hero -- the same words, in the same
+        // box (+-1 px), inside the tone layer (so it rises and fades with the words) -- and what the two layers lay in the ring a reader sees
+        // round the letters (2-3 px out, ThemePixelSet.RingContrast's ring), MEASURED on the render under Halo Only (no tone darkening the
+        // picture there): the halo on against the halo off, the letters made clear in both, on The Lamp and The Painting at Full over their
+        // bright pictures. Round the title it takes a visible share off the ring's brightest pixel (measured 0.10-0.26); round the small
+        // words it reaches ~2 px only (the font's SDF reach), so the tone never counts on it: every word's number is logged
+        // (TestEvidence/Premium/P3c/halo/cover.txt). Halo Only keeps the second layer; Edge Scrim draws none
+        [UnityTest]
+        public IEnumerator TheHalo_IsTwoLayers_ABackLabelUnderEveryWord_AndOnTheRenderItDarkensTheRingRoundTheTitle([Values("lamp", "painting")] string poi)
+        {
+            yield return Open(poi, "en", SheetStopRule.Stop.Full);
+            Header.Clock = () => 0f;
+            Header.Animate();
+            yield return null;
+            yield return null;
+            var words = new List<Label>();
+            InkRects.ShownLabels(Header.Text, words);
+            InkRects.ShownLabels(Header.Actions, words);
+            Assert.GreaterOrEqual(words.Count, 2, "precondition: the hero's words (at least the eyebrow and the title)");
+            var backs = Header.Words.HaloLabels;
+            Assert.AreEqual(words.Count, backs.Count, "a back label under every word");
+            Assert.AreEqual(Header.ToneLayer, Header.Words.HaloLayer.parent, "...in the tone layer: it rises and fades with the words");
+            for (int i = 0; i < words.Count; i++)
+            {
+                var front = words[i];
+                var back = backs[i];
+                Assert.AreEqual(front.text, back.text, "the same words");
+                Assert.IsTrue(back.ClassListContains(HeroWordsOnPicture.HaloClass), "...drawn as the halo");
+                Assert.AreEqual(CardTestInput.TokenPx("--ts-text-halo-wide-width"), back.resolvedStyle.unityTextOutlineWidth, 0.01f,
+                    "'" + front.text + "': the back label's close outline");
+                Assert.AreEqual(front.resolvedStyle.fontSize, back.resolvedStyle.fontSize, 0.01f, "'" + front.text + "': the same size");
+                Assert.AreEqual(front.resolvedStyle.unityFontDefinition.fontAsset, back.resolvedStyle.unityFontDefinition.fontAsset, "...the same face");
+                var box = front.LocalToWorld(front.contentRect);
+                // - its CONTENT box (its own box is grown by the halo's reach, so a cut word clips past its glow)
+                var under = back.LocalToWorld(back.contentRect);
+                Assert.AreEqual(box.xMin, under.xMin, OnePixel, "'" + front.text + "': the back label lies under the word");
+                Assert.AreEqual(box.yMin, under.yMin, OnePixel);
+                Assert.AreEqual(box.width, under.width, OnePixel);
+                Assert.AreEqual(box.height, under.height, OnePixel);
+            }
+
+            // - the cover is the halo's own: read under Halo Only (no tone darkening the picture at the words), the same words
+            yield return Push(c => SetHeaderField(c, poi, BuiltInBlocks.HeaderWordsOnPictureField, HeroWordsRule.HaloOnly));
+            SelectionEventBus.Clear();
+            yield return CardTestInput.Settle();
+            yield return Open(poi, "en", SheetStopRule.Stop.Full);
+            Header.Clock = () => 0f;
+            Header.Animate();
+            yield return null;
+            Assert.IsNull(Header.Words.Painter.Options, "precondition: Halo Only lays no tone");
+            words.Clear();
+            InkRects.ShownLabels(Header.Text, words);
+            InkRects.ShownLabels(Header.Actions, words);
+            Assert.AreEqual(words.Count, Header.Words.HaloLabels.Count, "Halo Only: a back label under every word");
+            // - three renders: as drawn (to find the letters), the letters clear with the halo (both layers), the letters clear without it
+            var colours = words.ToDictionary(l => l, l => l.resolvedStyle.color);
+            Texture2D drawn = null, haloed = null, bare = null;
+            var report = new List<string>();
+            float title = float.NaN;
+            try
+            {
+                yield return ThemePixelSet.GrabStill($"halo_{poi}", null, r => drawn = r);
+                foreach (var l in words) l.style.color = new Color(colours[l].r, colours[l].g, colours[l].b, 0f);
+                yield return ThemePixelSet.GrabStill($"halo_clear_{poi}", null, r => haloed = r);
+                Header.HeroPart.AddToClassList(HeroWordsOnPicture.NoHaloClass);
+                yield return null;
+                yield return ThemePixelSet.GrabStill($"halo_off_{poi}", null, r => bare = r);
+                Assert.IsTrue(CardTokenColours.TryResolve(Header.HeroPart, "--ts-text-halo", out Color halo), "precondition: the theme's halo colour");
+                float haloY = ToneRule.Luminance(new Color(halo.r, halo.g, halo.b, 1f));
+                foreach (var l in words)
+                {
+                    var (cover, ring) = RingCover(drawn, haloed, bare, ThemePixelSet.ScreenRectOf(l, drawn), colours[l], haloY);
+                    Assert.Greater(ring, 20, "precondition: '" + l.text + "' has a ring of picture bright enough to read the halo on");
+                    report.Add($"{poi} Full '{l.text}': the halo takes {cover:0.000} off the ring's brightest pixel ({ring} px in the ring)");
+                    if (l == Header.HeroTitle) title = cover;
+                }
+                System.IO.File.WriteAllBytes(TestEvidence.PathFor("Premium/P3c/halo", $"{poi}_Full_halo.png"), drawn.EncodeToPNG());
+                System.IO.File.WriteAllBytes(TestEvidence.PathFor("Premium/P3c/halo", $"{poi}_Full_halo_clear.png"), haloed.EncodeToPNG());
+                System.IO.File.WriteAllBytes(TestEvidence.PathFor("Premium/P3c/halo", $"{poi}_Full_halo_off.png"), bare.EncodeToPNG());
+            }
+            finally
+            {
+                Header.HeroPart.RemoveFromClassList(HeroWordsOnPicture.NoHaloClass);
+                foreach (var l in words) l.style.color = StyleKeyword.Null;
+                if (drawn != null) Object.Destroy(drawn);
+                if (haloed != null) Object.Destroy(haloed);
+                if (bare != null) Object.Destroy(bare);
+            }
+            System.IO.File.AppendAllText(TestEvidence.PathFor("Premium/P3c/halo", "cover.txt"), string.Join("\n", report) + "\n");
+            Debug.Log("[Card] Halo cover " + poi + ": the title " + title.ToString("0.000") + "\n" + string.Join("\n", report));
+            Assert.IsFalse(float.IsNaN(title), "precondition: the title was measured");
+            // - a twentieth: five times an 8-bit render's noise (~0.01), under the 0.10-0.26 measured round the title across runs (the pan's
+            //   start frame lands the brightest texel a pixel either way)
+            Assert.GreaterOrEqual(title, 0.05f, "the two-layer halo darkens the ring round the title's letters\n" + string.Join("\n", report));
+
+            // - Edge Scrim draws no second layer
+            yield return Push(c => SetHeaderField(c, poi, BuiltInBlocks.HeaderWordsOnPictureField, HeroWordsRule.EdgeScrim));
+            SelectionEventBus.Clear();
+            yield return CardTestInput.Settle();
+            yield return Open(poi, "en", SheetStopRule.Stop.Full);
+            Assert.AreEqual(HeroWordsRule.EdgeScrim, Header.WordsOnPicture, "precondition: the look pushed live");
+            Assert.AreEqual(DisplayStyle.None, Header.Words.HaloLayer.resolvedStyle.display, "Edge Scrim: no second layer");
+            Assert.AreEqual(0, Header.Words.HaloLabels.Count, "...and no back label");
+        }
+
+        // What the halo takes off the BRIGHTEST pixel of the ring 2-3 px round the letters of one word (the ring of ThemePixelSet.RingContrast:
+        // the letters found where `drawn` differs from `haloed` toward the ink) -- the pixel a word's contrast is judged on, and the one the
+        // tone's strength is worked out for (the brightest picture under the word): the drawn alpha of the halo's colour (luminance `haloY`)
+        // that brings the ring's brightest bare pixel (`bare`) down to its brightest haloed one (`haloed`). A ring pixel the glow barely
+        // reaches over a dark part of the picture never decides it
+        private static (float Cover, int Ring) RingCover(Texture2D drawn, Texture2D haloed, Texture2D bare, RectInt area, Color ink, float haloY)
+        {
+            Color32[] a = drawn.GetPixels32(), h = haloed.GetPixels32(), b = bare.GetPixels32();
+            Color32 ink32 = ink;
+            int ToInk(Color32 c) => Mathf.Abs(c.r - ink32.r) + Mathf.Abs(c.g - ink32.g) + Mathf.Abs(c.b - ink32.b);
+            var inked = new bool[area.width * area.height];
+            for (int y = 0; y < area.height; y++)
+                for (int x = 0; x < area.width; x++)
+                {
+                    int i = (area.y + y) * drawn.width + area.x + x;
+                    bool changed = Mathf.Abs(a[i].r - h[i].r) + Mathf.Abs(a[i].g - h[i].g) + Mathf.Abs(a[i].b - h[i].b) > 60;
+                    if (changed && ToInk(a[i]) < ToInk(h[i]) - 60) inked[y * area.width + x] = true;
+                }
+            bool Within(int x, int y, int reach)
+            {
+                for (int dy = -reach; dy <= reach; dy++)
+                    for (int dx = -reach; dx <= reach; dx++)
+                    {
+                        int nx = x + dx, ny = y + dy;
+                        if (nx >= 0 && ny >= 0 && nx < area.width && ny < area.height && inked[ny * area.width + nx]) return true;
+                    }
+                return false;
+            }
+            float brightestBare = 0f, brightestHaloed = 0f;
+            int ring = 0;
+            for (int y = 0; y < area.height; y++)
+                for (int x = 0; x < area.width; x++)
+                {
+                    if (inked[y * area.width + x] || Within(x, y, 1) || !Within(x, y, 3)) continue;
+                    int i = (area.y + y) * drawn.width + area.x + x;
+                    ring++;
+                    brightestBare = Mathf.Max(brightestBare, ToneRule.Luminance((Color)b[i]));
+                    brightestHaloed = Mathf.Max(brightestHaloed, ToneRule.Luminance((Color)h[i]));
+                }
+            // - a ring with no bright picture to tell the halo on (0.1 over the halo's own luminance) proves nothing: no ring
+            if (brightestBare - haloY < 0.1f) return (0f, 0);
+            return (Mathf.Clamp01((brightestBare - brightestHaloed) / (brightestBare - haloY)), ring);
+        }
+
+        // The look's options, each drawing what it says (Words On Picture pushed live, The Painting at Full -- where the far-side check
+        // holds): Edge Scrim -- no halo (no glow, no outline) and a scrim rising from the words' foot (darker at the words than over the far
+        // side); Halo Only -- the halo and nothing on the picture (the layer draws nothing: the two renders are the same)
+        [UnityTest]
+        public IEnumerator EveryWordsOnPictureLook_DrawsWhatItSays()
+        {
+            foreach (string look in new[] { HeroWordsRule.EdgeScrim, HeroWordsRule.HaloOnly })
+            {
+                yield return Push(c => SetHeaderField(c, "painting", BuiltInBlocks.HeaderWordsOnPictureField, look));
+                SelectionEventBus.Clear();
+                yield return CardTestInput.Settle();
+                yield return Open("painting", "en", SheetStopRule.Stop.Full);
+                Header.Clock = () => 0f;
+                Header.Animate();
+                yield return null;
+                Assert.AreEqual(look, Header.WordsOnPicture, "the look pushed live");
+                ToneMeasure m = null;
+                yield return MeasureTone("painting_" + look, SheetStopRule.Stop.Full, r => m = r);
+                if (look == HeroWordsRule.EdgeScrim)
+                {
+                    Assert.IsTrue(Header.HeroPart.ClassListContains(HeroWordsOnPicture.NoHaloClass), "Edge Scrim: no halo");
+                    Assert.AreEqual(0f, Header.HeroTitle.resolvedStyle.unityTextOutlineWidth, 0.001f, "...no close shade");
+                    Assert.AreEqual(ToneShape.Edge, Header.Words.Painter.Options.Shape, "...a scrim");
+                    Assert.Greater(m.AtWords, 0.1f, "the scrim darkens the picture at the words");
+                    Assert.Less(m.FarSide, 0.01f, "...and nothing far above them");
+                }
+                else
+                {
+                    Assert.IsFalse(Header.HeroPart.ClassListContains(HeroWordsOnPicture.NoHaloClass), "Halo Only: the halo");
+                    Assert.IsNull(Header.Words.Painter.Options, "...and no layer");
+                    Assert.Less(m.AtWords, 0.01f, "nothing laid on the picture");
+                }
+            }
+        }
+
+        // The developer's P3c review of the renders: scrolling, the words rise faster than the picture -- the tone's darkening rises with them
+        // but the layer stays over the whole hero, so the picture's foot under the risen words keeps its darkening: on the render, where the
+        // layer's foot used to end (the hero's foot + the rise) the darkening runs on with no step (less than 0.08 of alpha across 8 px, a step
+        // the eye sees). The Painting at Full, scrolled 140 by the stack
+        [UnityTest]
+        public IEnumerator Scrolling_TheToneRisesWithTheWords_AndThePicturesFootKeepsItsDarkening_NoCutEdge()
+        {
+            yield return Open("painting", "en", SheetStopRule.Stop.Full);
+            Header.Clock = () => 0f;
+            Header.Animate();
+            Scroll.scrollOffset = new Vector2(0f, 140f);
+            yield return null;
+            yield return null;
+            Assert.AreEqual(140f, Scroll.scrollOffset.y, 0.5f, "precondition: the stack scrolls that far");
+            Assert.Less(Header.TextRise, -10f, "precondition: the words rose past the picture");
+            var layer = Header.Words.Painter.Options;
+            Assert.IsNotNull(layer, "precondition: the tone is drawn");
+            Assert.AreEqual(0f, Header.ToneLayer.resolvedStyle.translate.y, 0.01f, "the layer itself never rises");
+            Assert.AreEqual(Header.HeroPart.worldBound.yMax, Header.ToneLayer.worldBound.yMax, OnePixel, "...it covers the hero to its foot");
+            Assert.AreEqual(Header.TextRise, Header.Words.Risen, 0.01f, "its gradient rises with the words");
+            Assert.AreEqual(Header.TextRise, Header.Words.HaloLayer.resolvedStyle.translate.y, 0.01f, "...and the halo with them");
+
+            // - two renders, words and bar out: with the layer and without it; the laid alpha down columns across the words' side
+            float cut = Header.HeroPart.worldBound.yMax + Header.TextRise;
+            Assert.Less(cut, Sheet.Root.worldBound.yMax - 20f, "precondition: the old cut line lies on the screen");
+            float shadeY = ToneRule.Luminance(layer.Colour);
+            var labels = Header.HeroPart.Query<Label>().ToList();
+            Texture2D with = null, without = null;
+            try
+            {
+                foreach (var l in labels) l.style.visibility = Visibility.Hidden;
+                Sheet.Slots.Bar.Root.style.visibility = Visibility.Hidden;
+                Header.Actions.style.visibility = Visibility.Hidden;
+                yield return ThemePixelSet.GrabStill("scrolled_tone", null, r => with = r);
+                Header.ToneLayer.style.visibility = Visibility.Hidden;
+                yield return ThemePixelSet.GrabStill("scrolled_notone", null, r => without = r);
+                System.IO.File.WriteAllBytes(TestEvidence.PathFor("Premium/P3c/tone", "painting_scrolled_with.png"), with.EncodeToPNG());
+                var origin = RuntimePanelUtils.ScreenToPanel(Header.HeroPart.panel, Vector2.zero);
+                float unit = ThemePixelSet.PanelUnitsPerPixel(Header.HeroPart);
+                float Laid(float x, float y)
+                {
+                    int px = Mathf.RoundToInt((x - origin.x) / unit), py = with.height - 1 - Mathf.RoundToInt((y - origin.y) / unit);
+                    float bare = ToneRule.Luminance(without.GetPixel(px, py)), laid = ToneRule.Luminance(with.GetPixel(px, py));
+                    return bare - shadeY > 0.05f ? Mathf.Clamp01((bare - laid) / (bare - shadeY)) : float.NaN;
+                }
+                var hero = Header.HeroPart.worldBound;
+                int read = 0;
+                foreach (float share in new[] { 0.1f, 0.2f, 0.3f, 0.4f })
+                {
+                    float x = hero.xMin + hero.width * share, above = Laid(x, cut - 4f), below = Laid(x, cut + 4f);
+                    if (float.IsNaN(above) || float.IsNaN(below)) continue;
+                    read++;
+                    Assert.Less(Mathf.Abs(above - below), 0.08f, $"at {share:0.0} across: the darkening runs on past the old cut ({above:0.000} above, {below:0.000} below)");
+                    Assert.Greater(below, 0.02f, $"at {share:0.0} across: the picture's foot under the risen words is still darkened");
+                }
+                Assert.GreaterOrEqual(read, 2, "precondition: picture bright enough to read the darkening on, round the old cut");
+            }
+            finally
+            {
+                Header.ToneLayer.style.visibility = StyleKeyword.Null;
+                foreach (var l in labels) l.style.visibility = StyleKeyword.Null;
+                Header.Actions.style.visibility = StyleKeyword.Null;
+                Sheet.Slots.Bar.Root.style.visibility = StyleKeyword.Null;
                 if (with != null) Object.Destroy(with);
                 if (without != null) Object.Destroy(without);
             }
         }
 
+        // Tone Spread (the header's field, pushed live): on The Painting at Full the least spread lays its darkening over fewer of the hero's
+        // pixels than the most, both drawn at the strength the hero works out -- and at the least, every word still reads at 4.5:1 on the
+        // render (the grow keeps the words in the dense part; the strength adapts)
+        [UnityTest]
+        public IEnumerator ToneSpread_LessDarkensLessOfThePicture_AndEveryWordStillReads()
+        {
+            var laid = new Dictionary<float, int>();
+            foreach (float spread in new[] { HeroWordsRule.SpreadMax, HeroWordsRule.SpreadMin })
+            {
+                yield return Push(c =>
+                {
+                    var header = c.pois.First(p => p.id == "painting").card.blocks.First(b => b.kind == BuiltInBlocks.HeaderKind);
+                    var field = header.fields.Find(f => f.key == BuiltInBlocks.HeaderToneSpreadField);
+                    if (field == null) header.fields.Add(field = new BlockFieldValue { key = BuiltInBlocks.HeaderToneSpreadField });
+                    field.number = spread;
+                });
+                SelectionEventBus.Clear();
+                yield return CardTestInput.Settle();
+                yield return Open("painting", "en", SheetStopRule.Stop.Full);
+                Header.Clock = () => 0f;
+                Header.Animate();
+                yield return null;
+                Assert.AreEqual(spread, Header.ToneSpread, 1e-4f, "the spread pushed live");
+                ToneMeasure m = null;
+                yield return MeasureTone("painting_spread_" + spread.ToString("0.0"), SheetStopRule.Stop.Full, r => m = r);
+                laid[spread] = m.Laid;
+                Assert.AreEqual(m.Expected, m.AtWords, 0.06f, "spread " + spread + ": at the words the panel lays what the rule draws");
+            }
+            Debug.Log($"[Card] Tone Spread on The Painting at Full: {laid[HeroWordsRule.SpreadMin]} px darkened at {HeroWordsRule.SpreadMin}, " +
+                      $"{laid[HeroWordsRule.SpreadMax]} px at {HeroWordsRule.SpreadMax}");
+            Assert.Less(laid[HeroWordsRule.SpreadMin], laid[HeroWordsRule.SpreadMax], "less spread darkens less of the picture");
+
+            // - at the least spread every word still reads (the card is open at it now)
+            var words = new List<Label>();
+            InkRects.ShownLabels(Header.Text, words);
+            InkRects.ShownLabels(Header.Actions, words);
+            var colours = words.ToDictionary(l => l, l => l.resolvedStyle.color);
+            Texture2D drawn = null, under = null;
+            try
+            {
+                yield return ThemePixelSet.GrabStill("spread_least_words", null, r => drawn = r);
+                foreach (var l in words) l.style.color = new Color(colours[l].r, colours[l].g, colours[l].b, 0f);
+                yield return ThemePixelSet.GrabStill("spread_least_under", null, r => under = r);
+                foreach (var l in words)
+                {
+                    var (ratio, _, letters) = ThemePixelSet.RingContrast(drawn, under, ThemePixelSet.ScreenRectOf(l, drawn), colours[l]);
+                    Assert.Greater(letters, 0, "precondition: '" + l.text + "' draws letters");
+                    Assert.GreaterOrEqual(ratio, HeroWordsMinRatio, "at the least spread '" + l.text + "' reads " + ratio.ToString("0.00") + ":1");
+                }
+                System.IO.File.WriteAllBytes(TestEvidence.PathFor("Premium/P3c/tone", "painting_spread_least_Full.png"), drawn.EncodeToPNG());
+            }
+            finally
+            {
+                foreach (var l in words) l.style.color = StyleKeyword.Null;
+                if (drawn != null) Object.Destroy(drawn);
+                if (under != null) Object.Destroy(under);
+            }
+        }
+
+        // The P3c addendum's ADAPTIVE tone: on every hero of the wall at Half the tone is only as strong as its picture needs -- the hero whose
+        // picture under the words is darkest gets less than the one whose picture is lightest; a truly dark picture gets none at all
+        [UnityTest]
+        public IEnumerator ADarkHero_GetsLessToneThanALightOne_TheToneIsOnlyAsStrongAsThePictureNeeds()
+        {
+            var measured = new List<(string Poi, ToneMeasure M)>();
+            foreach (string poi in HeroPictures())
+            {
+                // - every picture read still (Reduce Motion: the picture at its centre, the video loop on its poster), so what lies under the
+                //   words is what is compared -- a pan would carry a dark spot's words over the picture's bright parts too
+                yield return Push(c => c.card_settings.container.reduce_motion = true);
+                SelectionEventBus.Clear();
+                yield return CardTestInput.Settle();
+                yield return Open(poi, "en", SheetStopRule.Stop.Half);
+                Header.Clock = () => 0f;
+                Header.Animate();
+                yield return null;
+                ToneMeasure m = null;
+                yield return MeasureTone(poi, SheetStopRule.Stop.Half, r => m = r);
+                // - a look with no still picture (the turntable) draws the most the tone gives, by design: not a picture to compare
+                if (!Header.Words.ReadsPicture)
+                {
+                    Assert.AreEqual(1f / Header.Words.Painter.Options.Peak, m.Strength, 1e-4f, poi + ": nothing still to read, a full peak");
+                    continue;
+                }
+                Assert.IsFalse(float.IsNaN(m.Ground), "precondition: " + poi + "'s picture under the words read");
+                measured.Add((poi, m));
+            }
+            Assert.GreaterOrEqual(measured.Count, 2, "precondition: two heroes with a still picture to compare");
+            string table = string.Join("\n", measured.Select(x => $"{x.Poi}: bare ground {x.M.Ground:0.000}, strength {x.M.Strength:0.000}, laid at the words {x.M.AtWords:0.000}"));
+            var darkest = measured.OrderBy(x => x.M.Ground).First();
+            var lightest = measured.OrderBy(x => x.M.Ground).Last();
+            Assert.Greater(lightest.M.Ground - darkest.M.Ground, 0.05f, "precondition: the wall's heroes differ in brightness under the words\n" + table);
+            Assert.Less(darkest.M.AtWords, lightest.M.AtWords, $"the dark hero ({darkest.Poi}) gets less tone than the light one ({lightest.Poi})\n" + table);
+            Assert.Less(darkest.M.Strength, lightest.M.Strength, "...because it needs less\n" + table);
+
+            // - every hero of the wall has bright spots under its words: a truly DARK picture (the night-blue fixture, pushed live as The
+            //   Lamp's hero) gets no tone at all -- and its words still read past 4.5:1 on the render
+            yield return Push(c =>
+            {
+                c.card_settings.container.reduce_motion = true;
+                var image = c.pois.First(p => p.id == "lamp").card.blocks.First(b => b.kind == BuiltInBlocks.HeaderKind)
+                    .fields.First(f => f.key == BuiltInBlocks.HeaderImageField);
+                image.asset = "images/night_hero.png";
+            });
+            SelectionEventBus.Clear();
+            yield return CardTestInput.Settle();
+            yield return Open("lamp", "en", SheetStopRule.Stop.Half);
+            Assert.AreEqual("images/night_hero.png", Header.Picture.Path, "precondition: the dark fixture is the hero");
+            Assert.IsTrue(Header.Words.ReadsPicture, "precondition: a still picture read");
+            Assert.AreEqual(0f, Header.Words.Strength, 1e-5f, "a dark picture: no tone at all\n" + table);
+            ToneMeasure night = null;
+            yield return MeasureTone("night", SheetStopRule.Stop.Half, r => night = r);
+            Assert.Less(night.Ground, darkest.M.Ground, "precondition: darker than every hero of the wall");
+            Assert.Less(night.AtWords, 0.01f, "...and the panel lays none");
+            var title = Header.HeroTitle;
+            var colour = title.resolvedStyle.color;
+            Texture2D drawn = null, under = null;
+            try
+            {
+                yield return ThemePixelSet.GrabStill("night_title", null, r => drawn = r);
+                title.style.color = new Color(colour.r, colour.g, colour.b, 0f);
+                yield return ThemePixelSet.GrabStill("night_title_under", null, r => under = r);
+                var (ratio, worst, inked) = ThemePixelSet.RingContrast(drawn, under, ThemePixelSet.ScreenRectOf(title, drawn), colour);
+                Assert.Greater(inked, 0, "precondition: the title draws pixels");
+                Assert.GreaterOrEqual(ratio, HeroWordsMinRatio, "unshaded on the dark picture the title reads " + ratio.ToString("0.00") + ":1");
+                System.IO.File.WriteAllBytes(TestEvidence.PathFor("Premium/P3c/tone", "night_Half.png"), drawn.EncodeToPNG());
+            }
+            finally
+            {
+                title.style.color = StyleKeyword.Null;
+                if (drawn != null) Object.Destroy(drawn);
+                if (under != null) Object.Destroy(under);
+            }
+        }
+
         // P2 PART 5 (v6 wordsBottom / shadeBottom): at Half and at Full the hero's words -- eyebrow, title, line, Listen -- sit at the foot of
         // what the visitor SEES of the hero (not at the hero's own foot, below the half sheet), above the Navigation Bar floating at the bottom,
-        // their shade moving with them; the title reads at 7:1 on the real render. Renders in TestEvidence/Premium/P2/.
+        // their shade moving with them; the title reads at 4.5:1 on the real render. Renders in TestEvidence/Premium/P2/.
         [UnityTest]
-        public IEnumerator AtHalfAndFull_TheWordsSitAtTheFootOfWhatTheVisitorSees_AboveTheBar_At7To1(
+        public IEnumerator AtHalfAndFull_TheWordsSitAtTheFootOfWhatTheVisitorSees_AboveTheBar_AtTheWordsRatio(
             [Values("lamp", "painting")] string poi, [Values(SheetStopRule.Stop.Half, SheetStopRule.Stop.Full)] SheetStopRule.Stop stop)
         {
             Session.CardSettings.container.reduce_motion = true;
@@ -510,10 +945,13 @@ namespace TileStories.Tests
             // - at the foot of what shows: the bar's clearance under them, no more (the rule's place, from the hero's top = the sheet's top)
             float clearance = CardTestInput.TokenPx("--ts-navbar-clearance");
             Assert.AreEqual(sheet.yMax - clearance, words.yMax, OnePixel, "the words at the visible foot, the bar's clearance under them");
-            // - their shade with them: its floor behind the words
-            Assert.LessOrEqual(Header.Shade.worldBound.yMin, words.yMin, "the shade starts above the words");
-            Assert.GreaterOrEqual(Header.Shade.worldBound.yMax, words.yMax, "...and lies behind them");
-            // - the title at 7:1 on the render
+            // - their tone with them: anchored at the words' foot, as laid out at this stop
+            var tone = Header.Words.Painter.Options;
+            Assert.IsNotNull(tone, "precondition: the tone is drawn");
+            float inkFoot = Header.Words.Inks.Max(i => i.Rect.yMax) + Header.ToneLayer.worldBound.yMin;
+            Assert.LessOrEqual(inkFoot, words.yMax + OnePixel, "precondition: the ink lies inside the words' block");
+            Assert.AreEqual(inkFoot, tone.Anchor.y + Header.ToneLayer.worldBound.yMin, OnePixel, "the tone anchored at the words' ink foot, at this stop");
+            // - the title at 4.5:1 on the render
             var title = Header.HeroTitle;
             var colour = title.resolvedStyle.color;
             Texture2D drawn = null, under = null;
@@ -526,7 +964,7 @@ namespace TileStories.Tests
                 var (ratio, worst, inked) = ThemePixelSet.RingContrast(drawn, under, ThemePixelSet.ScreenRectOf(title, drawn), colour);
                 Assert.Greater(inked, 0, "precondition: the title draws pixels");
                 System.IO.File.WriteAllBytes(TestEvidence.PathFor("Premium/P2", $"words_{poi}_{stop}.png"), drawn.EncodeToPNG());
-                Assert.GreaterOrEqual(ratio, Aaa, "the title keeps 7:1 at " + stop + ": " + ratio.ToString("0.00") + ":1 (worst " + (Color32)worst + ")");
+                Assert.GreaterOrEqual(ratio, HeroWordsMinRatio, "the title keeps 4.5:1 at " + stop + ": " + ratio.ToString("0.00") + ":1 (worst " + (Color32)worst + ")");
             }
             finally
             {
@@ -554,10 +992,10 @@ namespace TileStories.Tests
 
         // _3.3 P3a review (b): at rest (no scroll) the hero's words -- eyebrow, title, line, Listen -- are WHOLE at Half and at Full, with the
         // card's motion ON (Reduce Motion would hide the fade): their resolved opacity (the product up to the sheet) is 1 and the ink the
-        // visitor sees (the words' colour at that opacity over the ring's worst ground pixel) reads >= 7:1 on the real render; a scroll then
+        // visitor sees (the words' colour at that opacity over the ring's worst ground pixel) reads >= 4.5:1 on the real render; a scroll then
         // fades them exactly as HeroMotionRule says for that offset, never brighter as they climb. Measurements in TestEvidence/Premium/P3b/
         [UnityTest]
-        public IEnumerator AtRest_TheWordsAreWholeAt7To1_AtHalfAndFull_AndOnlyTheScrollFadesThem([Values("lamp", "painting")] string poi,
+        public IEnumerator AtRest_TheWordsAreWholeAtTheWordsRatio_AtHalfAndFull_AndOnlyTheScrollFadesThem([Values("lamp", "painting")] string poi,
             [Values(SheetStopRule.Stop.Half, SheetStopRule.Stop.Full)] SheetStopRule.Stop stop)
         {
             Assert.IsFalse(Session.CardSettings.container.reduce_motion, "precondition: the card's motion is on (the default)");
@@ -612,7 +1050,7 @@ namespace TileStories.Tests
             System.IO.File.AppendAllText(TestEvidence.PathFor("Premium/P3b", "hero_words_at_rest.txt"), string.Join("\n", report) + "\n");
             foreach (var e in labels.Cast<VisualElement>().Append(listen.Root))
                 Assert.AreEqual(1f, Seen(e), 0.001f, $"{poi} {stop}: at rest '{(e is Label l ? l.text : "Listen")}' is whole\n" + string.Join("\n", report));
-            Assert.GreaterOrEqual(worst, Aaa, $"{poi} {stop}: every word reads >= 7:1 as seen\n" + string.Join("\n", report));
+            Assert.GreaterOrEqual(worst, HeroWordsMinRatio, $"{poi} {stop}: every word reads >= 4.5:1 as seen\n" + string.Join("\n", report));
 
             // - the scroll fades them, as the rule says for each offset, never brighter as they climb
             float restTop = Header.HeroPart.layout.y + Header.Foot.layout.y;

@@ -152,19 +152,20 @@ namespace TileStories.Editor.Tests
         {
             var kind = BuiltInBlocks.Header;
             string title = BlockStackBuilder.HeaderTitleField, subtitle = BlockStackBuilder.HeaderSubtitleField, eyebrow = BuiltInBlocks.HeaderEyebrowField,
-                picture = BuiltInBlocks.HeaderImageField, heading = BlockKindDefinition.HeadingField;
+                picture = BuiltInBlocks.HeaderImageField, heading = BlockKindDefinition.HeadingField,
+                words = BuiltInBlocks.HeaderWordsOnPictureField, spread = BuiltInBlocks.HeaderToneSpreadField;
             var expected = new Dictionary<string, string[]>
             {
-                // - _3.3 P4.4a: the hero's Eyebrow after the title in the Editor (the title stays the block's summary; not Compact), Hero Motion for Image Parallax only;
+                // - _3.3 P4.4a: the hero's Eyebrow after the title in the Editor (the title stays the block's summary; not Compact), Hero Motion for Image Parallax only, Words On Picture and its Tone Spread for every picture look (_3.3 P3c addendum);
                 //   the category chip and its Show Level are gone (Quick Facts > Show Category)
                 [BuiltInBlocks.HeaderCompact] = new[] { heading, title },
                 [BuiltInBlocks.HeaderTextOnly] = new[] { heading, title, eyebrow, subtitle },
-                [BuiltInBlocks.HeaderImageParallax] = new[] { heading, title, eyebrow, subtitle, picture, BuiltInBlocks.HeaderHeroMotionField },
-                [BuiltInBlocks.HeaderSplitThenNow] = new[] { heading, title, eyebrow, subtitle, picture, BuiltInBlocks.HeaderSecondImageField },
-                [BuiltInBlocks.HeaderSpotlightCrop] = new[] { heading, title, eyebrow, subtitle, picture, BuiltInBlocks.HeaderFocusXField, BuiltInBlocks.HeaderFocusYField, BuiltInBlocks.HeaderZoomField },
-                [BuiltInBlocks.HeaderVideoLoop] = new[] { heading, title, eyebrow, subtitle, picture, BuiltInBlocks.HeaderLoopClipField },
+                [BuiltInBlocks.HeaderImageParallax] = new[] { heading, title, eyebrow, subtitle, picture, BuiltInBlocks.HeaderHeroMotionField, words, spread },
+                [BuiltInBlocks.HeaderSplitThenNow] = new[] { heading, title, eyebrow, subtitle, picture, words, spread, BuiltInBlocks.HeaderSecondImageField },
+                [BuiltInBlocks.HeaderSpotlightCrop] = new[] { heading, title, eyebrow, subtitle, picture, words, spread, BuiltInBlocks.HeaderFocusXField, BuiltInBlocks.HeaderFocusYField, BuiltInBlocks.HeaderZoomField },
+                [BuiltInBlocks.HeaderVideoLoop] = new[] { heading, title, eyebrow, subtitle, picture, words, spread, BuiltInBlocks.HeaderLoopClipField },
                 // - the picture is the turntable's Fallback (HeaderBlockView hands it to the model view)
-                [BuiltInBlocks.HeaderModelTurntable] = new[] { heading, title, eyebrow, subtitle, picture, BuiltInBlocks.HeaderModelField, BuiltInBlocks.HeaderModelFitField },
+                [BuiltInBlocks.HeaderModelTurntable] = new[] { heading, title, eyebrow, subtitle, picture, words, spread, BuiltInBlocks.HeaderModelField, BuiltInBlocks.HeaderModelFitField },
             };
             CollectionAssert.AreEquivalent(kind.Variants, expected.Keys, "every look is checked");
             foreach (var pair in expected)

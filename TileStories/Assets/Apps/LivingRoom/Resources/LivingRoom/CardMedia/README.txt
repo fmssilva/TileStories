@@ -46,4 +46,6 @@ lisbon_square_castle_55s.vtt, lisbon_square_castle_55s_pt.vtt -- three cues that
 lisbon_square_castle_poster.jpg -- the inline video's poster: a frame at 10 s (852x480)
 
 placeholder_hero.png        -- 512x288 generated gradient (CC0): the media seam's fixture file (MediaSourceTests, PoiCardSceneTests)
+images/night_hero.png       -- 600x800 generated night-blue tile pattern (CC0, brightest luminance ~0.07): the DARK hero fixture -- white words
+                               read over 4.5:1 on it unshaded, so the Local Shade lays none (PoiCardHeroSceneTests); no point shows it
 models/146267-LivingRoom2-tex.glb -- the room scan: model_3d's LivingRoom-only fixture (The Lamp's block_59)

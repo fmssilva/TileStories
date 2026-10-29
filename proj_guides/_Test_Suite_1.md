@@ -144,6 +144,10 @@ SearchDemoTests, MarkerViewRuntimeTests. The method-level tags are on the slow f
     drags, 240 s (was 160 s).
   - **`PoiCardSceneTests.ARealTapOnTheStickyAction`:** green in this session's closing FULL (1339 / 0 failed); still watched.
   - **`ConfigUndoGroupingTests` slider drag:** green in all four full EditMode runs; still watched.
+- **P3c grew two card fixtures with render tests** (Words On Picture, Raised Depth, Icon Colour): PoiCardHeroSceneTests 34 -> 58 tests
+  (~242 s), PoiCardNavBarSceneTests -> 47 tests (~486 s; its class Core tag now carries the depth and icon renders too, ~3 min of CORE);
+  LivePlayModeNavigationBarTests +1 (enters Play Mode, ~25 s, EditMode suite). A PlayMode run is refused while the Editor is in Play
+  Mode: check `editor_state` `play_mode` before `run_tests` (a run was refused once while the developer had pressed Play).
 - **Two silent Painting tests.** `TheTabsWithChipsStrip_...` and `WhereTheChromeHidesTheStrip_...` read the wall's top element through
   `Assume`. When the developer moved the wall to icon tabs, they turned Inconclusive, and Inconclusive does not fail a run. They now
   set tabs with chips themselves, assert it, and are re-based on pattern 2. A wall-choice `Assume` hides a test; this was the only one

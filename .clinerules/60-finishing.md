@@ -108,12 +108,17 @@ The last message of a session, in English, short, in this order (the durable rec
    caused is the headline of the report, not a footnote in a test's configuration:** say what it means for a visitor ("the
    shipped default leaves the card with no content at Half"), then what you did about it.
 4. **What I looked at** -- the captures, judged.
+   **Subagents** -- each one used: its task, model and effort, and whether its result held up.
 5. **Not verified** -- what was not independently re-verified this session, and why (6.1); never blur "re-ran it" with "the
    plan file said so".
 6. **Commit** -- one short, natural commit message (one line, imperative, ~50-72 characters, no step codes). When the developer
    asks you to commit: `git add -A`, then `git commit -m "<that one line>"` -- no body, no `Co-Authored-By`
    or other trailer (`.claude/settings.json` sets `attribution.commit` to ""), then `git push` at once (every commit is
    pushed; if the push fails, say so and why). At the start of a session (the GATE), push any commits the branch is ahead by.
+
+**Close every session with one `AskUserQuestion`** (Architect and Worker alike), AFTER the report is written: it rings the
+developer's alarm at once (`50-terminal_and_tools.md` alert hook), so they know the chat has finished. One short question with
+real options, e.g. "Block done -- what next?" (Review the report / Questions first). Not a way to ask for approval the brief already gave.
 
 The learning summaries given along the way (the teaching notes of `__AI_worker.md`) are separate: they explain how and why
 for the developer to learn; this report states what is true now.

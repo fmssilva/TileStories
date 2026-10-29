@@ -3,8 +3,8 @@
 Two agents share these rules:
 - **Architect** (a review chat): verifies the last block on disk, decides, keeps the guides in sync, commits, and writes the next
   block's brief. Its own procedure: `proj_guides/__AI_Architect.md`. It does not write code.
-- **Worker** (a fresh Claude Code session per block): plans the block, then builds it. Its own procedure: `proj_guides/__AI_worker.md`
-  with the brief pasted into it. Moment-specific procedures: `proj_guides/skills/`.
+- **Worker** (a fresh Claude Code session per block): plans the block, then builds it. Its own procedure: `proj_guides/__AI_worker.md`,
+  the brief in its `## And now:` section (written there by the Architect). Moment-specific procedures: `proj_guides/skills/`.
 
 Both work in two modes, always in this order:
 - **PLAN MODE:** read, audit the code on disk, weigh options, write the plan. No file modifications except the plan tracker.
@@ -12,6 +12,26 @@ Both work in two modes, always in this order:
 
 After a context compaction, re-read the brief and `proj_guides/__curr_plan_tracker.md` (the Worker's plan for the current block)
 before continuing.
+
+### Delegating to subagents (both agents)
+A subagent (the `Agent` tool) has its own context; only its final report comes back. Use it to keep your own context small, the agent
+deciding case by case:
+- **Delegate** a self-contained task whose answer fits in ~40 lines and that would otherwise fill your context with material you need
+  only a conclusion from (many file reads, web pages, long logs). **Do not delegate** what is quicker inline, what needs the developer
+  (decisions, reviews), commits, or edits to the guides.
+- **Smallest model and effort that does it well; ceiling Opus + medium** (High-effort work stays with the caller). Haiku + low
+  (`Explore` when read-only): find usages, list files, pull the failures out of a long log. Sonnet + medium: web research (links and
+  short descriptions; pictures saved to the scratchpad, named by path), an audit of files against one rule, a doc draft, mechanical
+  edits from an exact spec. Opus + medium: compare options for a self-contained problem, implement one isolated, well-specified unit
+  (a pure rule and its EditMode tests). A weak result -> re-run once a rung higher, not patched inline.
+- **The brief** gives the goal, the exact paths to read (only the rule sections the task needs -- never the whole session procedure of
+  `__AI_worker.md`), what it must NOT do (no edits for research, no Unity, no commits, no git), and the output shape: verdict first,
+  evidence as `file:line` or URLs, a length cap.
+- **Verification stays with the caller:** a subagent's report is input, not proof (Evidence Discipline). Code it wrote: read the diff,
+  compile and run the tests yourself. Research: spot-check the key claims before deciding.
+- **Unity has one owner:** one Editor, one UnityMCP. Only one agent drives Unity at a time (compiles, runs, Play Mode, captures); a
+  subagent does Unity work only while its caller waits on it. No worktrees for Unity work (no Editor attached).
+- The final report (`60-finishing.md` 6.4) lists every subagent used, with its model and effort.
 
 ---
 

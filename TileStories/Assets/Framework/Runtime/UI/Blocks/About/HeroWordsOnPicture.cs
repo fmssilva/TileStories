@@ -1,0 +1,252 @@
+using System.Collections.Generic;
+using TileStories.LookKit;
+using UnityEngine;
+using UnityEngine.UIElements;
+
+namespace TileStories
+{
+    // How the hero's words stand on its picture (_3.3 P3c addendum, Words On Picture; HeroWordsRule). Plain C#, owned by HeaderBlockView:
+    //   - the halo, TWO layers (_3.3 P3c review, second pass a: UI Toolkit draws one text-shadow a label): the words' own close 1 px shade + a
+    //     soft glow (Media.uss), and behind them the second layer HERE -- one back label per shown word (HaloLayer, in the tone layer, so it
+    //     rises and fades with the words), the same words in the same face and box with a close dark outline and a wide soft glow. Edge
+    //     Scrim takes both off (NoHaloClass). The halo reaches only as far as the font's SDF does (~2 px round 12 px words, measured): it is
+    //     the look's, never counted by the strength below
+    //   - the layer: the Look Kit's TonePainter on Layer (over the picture, under the words), its gradient placed by HeroWordsRule.Layer round
+    //     the words' foot as they are laid out (InkRects)
+    //   - the strength: per word, the brightest spot of the picture under it (the word grown by the ring a reader sees round its letters, at
+    //     every place the picture's own motion takes it: HeroMotionRule.Sweep) gives the alpha that word needs for WordsRatio
+    //     (ToneRule.NeededAlpha); the layer is drawn at the least strength that gives every word its need at the word's farthest corner,
+    //     never past a full peak. A dark picture gets almost none; no still picture to read (a video's frames, the turntable): a full peak,
+    //     the most it gives (the ground under the words is unknown)
+    public sealed class HeroWordsOnPicture
+    {
+        // Words over a picture read at 4.5:1 at least (the project's contrast policy: 7:1 everywhere else)
+        public const float WordsRatio = 4.5f;
+        // The ratio the strength is worked out for: a little over WordsRatio -- the picture is read at its drawn size, where the blit's
+        // filtering softens its brightest texels a touch, and the render rounds to 8 bits (exactly 4.5 measured 4.49 on The Painting at Full)
+        public const float WorkedRatio = 4.75f;
+        // How far round its letters a word is read against the picture (a ring a few points out: the measured ring is 2-3 px)
+        public const float Ring = 4f;
+        // The hero's class while its words go WITHOUT the halo (Edge Scrim; Media.uss takes their glow and close shade off)
+        public const string NoHaloClass = "card-hero--no-halo";
+        // The second layer's classes (Media.uss): the layer, and each back label
+        public const string HaloLayerClass = "card-hero__halo-layer";
+        public const string HaloClass = "card-hero__halo";
+        // How far a glow can reach round a letter, in ems: the UI font atlases' SDF spread (FontAtlasBuilder.UiAtlasPadding 18 / 48 pt)
+        public const float HaloReach = 0.375f;
+        private const string ColourToken = "--ts-scrim-hero";
+
+        public VisualElement Layer { get; }
+        public TonePainter Painter { get; }
+        // The halo's second layer and its back labels, one per shown word label (in the order the words were found)
+        public VisualElement HaloLayer { get; }
+        public IReadOnlyList<Label> HaloLabels => _shownHalo;
+        public string Mode { get; private set; } = HeroWordsRule.ToneHalo;
+        // The strength worked out last, whether a still picture was read for it, the picture's brightness, the words' ink
+        public float Strength { get; private set; } = 1f;
+        public bool ReadsPicture { get; private set; }
+        public PictureLuminance Luminance { get; private set; }
+        public IReadOnlyList<Ink> Inks => _inks;
+
+        private readonly List<Ink> _inks = new();
+        private readonly List<Label> _words = new();
+        private readonly List<Label> _halo = new();
+        private readonly List<Label> _shownHalo = new();
+        // The gradient's anchor with the words at rest (Rise moves it from here)
+        private Vector2 _restAnchor;
+
+        public HeroWordsOnPicture(VisualElement layer)
+        {
+            Layer = layer;
+            Painter = new TonePainter();
+            layer.AddManipulator(Painter);
+            // - in the tone layer: over the tone (its children draw after its own mesh), under the words, risen and faded with them
+            HaloLayer = new VisualElement { name = "card-hero-halo", pickingMode = PickingMode.Ignore };
+            HaloLayer.AddToClassList(HaloLayerClass);
+            layer.Add(HaloLayer);
+        }
+
+        // How far the words have risen with the scroll (HeroMotionRule.TextRise), where the gradient and the halo stand now
+        public float Risen { get; private set; }
+
+        // Fit to the words under `wordRoots` over `picture` standing in `media` (the transformed layer of `frame`) as `motion` moves it, in
+        // the look `mode` at `spread` (Tone Spread), on the hero `hero` (which wears the halo class), the words risen by `rise` now; `picture`
+        // null = nothing still to read
+        public void Fit(string mode, float spread, VisualElement hero, IEnumerable<VisualElement> wordRoots, CardImage picture,
+            VisualElement media, VisualElement frame, string motion, bool reduceMotion, float overflow, float rise)
+        {
+            Mode = HeroWordsRule.Of(mode);
+            bool halo = HeroWordsRule.HasHalo(Mode);
+            hero.EnableInClassList(NoHaloClass, !halo);
+            _inks.Clear();
+            _words.Clear();
+            foreach (var root in wordRoots)
+            {
+                InkRects.Collect(root, Layer, _inks);
+                InkRects.ShownLabels(root, _words);
+            }
+            // - the ink as the words stand at rest (the layer itself never rises: Rise moves its gradient)
+            for (int i = 0; i < _inks.Count; i++)
+                _inks[i] = new Ink(new Rect(_inks[i].Rect.x, _inks[i].Rect.y - rise, _inks[i].Rect.width, _inks[i].Rect.height), _inks[i].Colour, _inks[i].IsWord);
+            Rise(rise);
+            LayHalo(halo);
+            var box = Layer.contentRect;
+            if (_inks.Count == 0 || !(box.width > 0f) || !ThemeController.TryResolverFor(Layer, out var theme) || !theme.TryColour(ColourToken, out Color colour))
+            {
+                Painter.Options = null;
+                return;
+            }
+            colour.a = 1f;
+            var words = _inks[0].Rect;
+            foreach (var ink in _inks) words = Rect.MinMaxRect(Mathf.Min(words.xMin, ink.Rect.xMin), Mathf.Min(words.yMin, ink.Rect.yMin),
+                Mathf.Max(words.xMax, ink.Rect.xMax), Mathf.Max(words.yMax, ink.Rect.yMax));
+            var layer = HeroWordsRule.Layer(Mode, box.width, box.yMin, words, colour, spread);
+            if (layer == null)
+            {
+                Strength = 0f;
+                ReadsPicture = false;
+                Painter.Options = null;
+                return;
+            }
+            layer.Strength = StrengthOver(layer, picture, media, frame, HeroMotionRule.Sweep(motion, reduceMotion, overflow));
+            // - nothing still to read (a video's frames, the turntable): the ground is unknown, so the most the layer gives (a full peak)
+            if (!ReadsPicture) layer.Strength = 1f / Mathf.Max(1e-4f, layer.Peak);
+            Strength = layer.Strength;
+            _restAnchor = layer.Anchor;
+            layer.Anchor = _restAnchor + new Vector2(0f, Risen);
+            Painter.Options = layer;
+        }
+
+        // The words rose by `rise` (the scroll): the gradient's anchor and the halo go with them, the layer stays over the whole hero -- so
+        // the picture's foot under the risen words keeps its darkening, never a bare strip under a hard edge
+        public void Rise(float rise)
+        {
+            Risen = float.IsNaN(rise) ? 0f : rise;
+            HaloLayer.style.translate = new Translate(0f, Risen);
+            var layer = Painter.Options;
+            if (layer == null) return;
+            layer.Anchor = _restAnchor + new Vector2(0f, Risen);
+            Painter.Options = layer;
+        }
+
+        // The second layer: a back label under every shown word label, the same words in the same face and box (its class draws them dark
+        // with the wide glow); none while the look has no halo (the hero's NoHaloClass also hides the layer: USS only, never an inline
+        // display, which would win over the class)
+        private void LayHalo(bool shown)
+        {
+            _shownHalo.Clear();
+            int used = shown ? _words.Count : 0;
+            for (int i = 0; i < used; i++)
+            {
+                if (i == _halo.Count)
+                {
+                    var made = new Label { pickingMode = PickingMode.Ignore };
+                    made.AddToClassList(HaloClass);
+                    _halo.Add(made);
+                }
+                var back = _halo[i];
+                Mirror(_words[i], back);
+                if (back.parent != HaloLayer) HaloLayer.Add(back);
+                _shownHalo.Add(back);
+            }
+            for (int i = used; i < _halo.Count; i++) _halo[i].RemoveFromHierarchy();
+        }
+
+        // `back` as `front` lays its words: its text, face, size, weight, spacing, alignment, wrap and cut, over its content box (the halo
+        // layer's space -- the words and the layer rise together, so the box holds)
+        private void Mirror(Label front, Label back)
+        {
+            var s = front.resolvedStyle;
+            back.text = front.text;
+            back.style.unityFontDefinition = s.unityFontDefinition;
+            back.style.fontSize = s.fontSize;
+            back.style.unityFontStyleAndWeight = s.unityFontStyleAndWeight;
+            back.style.letterSpacing = s.letterSpacing;
+            back.style.wordSpacing = s.wordSpacing;
+            back.style.unityTextAlign = s.unityTextAlign;
+            back.style.whiteSpace = s.whiteSpace;
+            back.style.textOverflow = s.textOverflow;
+            back.style.overflow = s.textOverflow == TextOverflow.Ellipsis ? Overflow.Hidden : Overflow.Visible;
+            var box = front.contentRect;
+            var min = front.ChangeCoordinatesTo(HaloLayer, box.min);
+            // - not laid out yet: nothing to lie under (the words' own layout fits it again)
+            bool placed = box.width > 0f && box.height > 0f && !float.IsNaN(min.x);
+            back.style.display = placed ? DisplayStyle.Flex : DisplayStyle.None;
+            if (!placed) return;
+            // - the box grown by the halo's reach on every side, its content the word's own: a cut word (ellipsis: overflow hidden) clips
+            //   at the reach, never through its own glow
+            float reach = HaloReach * s.fontSize;
+            back.style.left = min.x - reach;
+            back.style.top = min.y - reach;
+            back.style.width = box.width + 2f * reach;
+            back.style.height = box.height + 2f * reach;
+            back.style.paddingLeft = back.style.paddingRight = back.style.paddingTop = back.style.paddingBottom = reach;
+        }
+
+        // The least strength that gives every word its need, over the picture's sweep (the peak's own strength, 1, with nothing to read)
+        private float StrengthOver(ToneOptions layer, CardImage picture, VisualElement media, VisualElement frame,
+            (float PanFrom, float PanTo, float ZoomMost) sweep)
+        {
+            ReadsPicture = false;
+            var texture = picture?.Texture;
+            var surface = picture?.Picture;
+            if (texture == null || surface == null || surface.panel == null) return 1f;
+            var box = surface.contentRect;
+            if (!(box.width > 0f) || !(box.height > 0f)) return 1f;
+            // - the picture as drawn: scale-and-crop (cover) in its element, centred
+            float scale = Mathf.Max(box.width / texture.width, box.height / texture.height);
+            var drawn = new Rect((box.width - texture.width * scale) * 0.5f, (box.height - texture.height * scale) * 0.5f, texture.width * scale, texture.height * scale);
+            int cellsX = Mathf.Max(1, Mathf.Min(texture.width, Mathf.CeilToInt(drawn.width)));
+            int cellsY = Mathf.Max(1, Mathf.Min(texture.height, Mathf.CeilToInt(drawn.height)));
+            if (Luminance == null || Luminance.Source != texture || Luminance.Width != cellsX || Luminance.Height != cellsY)
+                Luminance = PictureLuminance.Read(texture, cellsX, cellsY);
+            if (Luminance == null) return 1f;
+
+            float shadeY = ToneRule.Luminance(layer.Colour), peak = layer.Peak;
+            var centre = media.layout.size * 0.5f;
+            float most = 0f;
+            foreach (var ink in _inks)
+            {
+                if (!ink.IsWord) continue;
+                var r = ink.Rect;
+                var ringed = Rect.MinMaxRect(r.xMin - Ring, r.yMin - Ring, r.xMax + Ring, r.yMax + Ring);
+                float ground = GroundUnder(ringed, media, frame, surface, drawn, centre, sweep);
+                if (float.IsNaN(ground)) continue;
+                ReadsPicture = true;
+                float needed = ToneRule.NeededAlpha(ground, ToneRule.Luminance(ink.Colour), shadeY, WorkedRatio);
+                // - the layer's weakest point over the word: its farthest corner from the anchor
+                float stops = float.MaxValue;
+                foreach (var corner in new[] { ringed.min, ringed.max, new Vector2(ringed.xMin, ringed.yMax), new Vector2(ringed.xMax, ringed.yMin) })
+                    stops = Mathf.Min(stops, ToneRule.StopAlpha(layer.Stops, ToneRule.Distance(layer, corner)));
+                most = Mathf.Max(most, ToneRule.StrengthFor(needed, stops, peak));
+            }
+            return ReadsPicture ? most : 1f;
+        }
+
+        // The brightest luminance of the picture under `rect` (the layer's space) at every place the motion stands it: the media layer
+        // translated by the pan and scaled about its centre (frame point p shows the layer's point c + (p - pan - c) / zoom), the union of the
+        // four extremes, carried into the picture element and its drawn texture
+        private float GroundUnder(Rect rect, VisualElement media, VisualElement frame, VisualElement surface, Rect drawn, Vector2 centre,
+            (float PanFrom, float PanTo, float ZoomMost) sweep)
+        {
+            var min = Layer.ChangeCoordinatesTo(frame, rect.min);
+            var max = Layer.ChangeCoordinatesTo(frame, rect.max);
+            float xMin = float.MaxValue, yMin = float.MaxValue, xMax = float.MinValue, yMax = float.MinValue;
+            foreach (float pan in new[] { sweep.PanFrom, sweep.PanTo })
+                foreach (float zoom in new[] { 1f, sweep.ZoomMost })
+                    foreach (var p in new[] { min, max })
+                    {
+                        var m = centre + (p - new Vector2(pan, 0f) - centre) / zoom;
+                        xMin = Mathf.Min(xMin, m.x);
+                        yMin = Mathf.Min(yMin, m.y);
+                        xMax = Mathf.Max(xMax, m.x);
+                        yMax = Mathf.Max(yMax, m.y);
+                    }
+            var a = media.ChangeCoordinatesTo(surface, new Vector2(xMin, yMin)) - drawn.position;
+            var b = media.ChangeCoordinatesTo(surface, new Vector2(xMax, yMax)) - drawn.position;
+            var uv = Rect.MinMaxRect(Mathf.Min(a.x, b.x) / drawn.width, Mathf.Min(a.y, b.y) / drawn.height,
+                Mathf.Max(a.x, b.x) / drawn.width, Mathf.Max(a.y, b.y) / drawn.height);
+            return Luminance.MaxIn(uv);
+        }
+    }
+}

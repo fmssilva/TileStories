@@ -125,6 +125,11 @@ and must SEE images (the captures are its visual check), so a text-only model is
 - The Architect names its own pair too when it changes: Opus Medium for reviews, briefs and commits; Opus High for a domain plan,
   a design study (prototypes) or a hard review decision.
 
+**Subagents (`00-process.md` "Delegating to subagents"):** the Architect may delegate research and audits (Haiku / Sonnet rungs)
+before deciding, and spot-checks what comes back; it never delegates the verdict, a commit or a guide edit. Each brief carries a
+`SUBAGENTS:` line -- "per 00-process (ceiling Opus + medium; Unity single owner)", narrowed when needed ("none this block", or the
+task the Worker is expected to delegate).
+
 **References check (before writing the brief):** list what the Worker must READ, not only what it may consult: the domain
 guide's TODOs + status + the sections of the step, and the rule sections the block will hit (Editor rows -> `_5.1` section 0;
 tests with real input or captures -> `40-testing.md` 4.2.3 / 4.5; dev-only switches -> `20-code-quality.md`; live Play Mode ->
@@ -140,13 +145,18 @@ Architect chat (what is done, what moved to which guide, open risks) and start t
 
 ## 6. Answer (in this order, short)
 
-1. **Developer's direct questions** -- answered first.
+1. **Developer's direct questions** -- answered first. A real decision the developer must take (a product / architecture trade-off)
+   goes through `AskUserQuestion` (the alert hook rings at once), after the rest of the answer is written.
 2. **Verdict** -- ready to build on / fix first / rework, with the evidence that decided it.
 3. **Findings** -- by class; what you wrote into which file.
 4. **Where the domain stands** -- done / next / remaining, one line each.
 5. **Commit** -- yes/no + message - did you do it or the user has to do?
 6. **Guidelines update and sync?** -- apply Guide hygiene (section 0) first. Then: -- should we update something in the guidelines to force next steps to execute something or in certain way or some new default procedure...? (proj_guides\__AI_Architect.md, proj_guides\__AI_worker.md, .clinerules) if yes, change the guidelines AND TELL IN CHAT EXACTLY YOUR ADITION OR REPLACEMENT FOR USER CONFIRMATION. 
-7. **Worker brief** -- one ready-to-paste block -- this block will be pasted inside the `# claude agent` main command for each new session, in the file `proj_guides\__AI_worker.md`:
+7. **Worker brief** -- write it YOURSELF into `proj_guides/__AI_worker.md`, replacing only the body of its `## And now:` section
+   (nothing else in that file changes). In the chat give a 3-6 line summary of the brief (its parts and the decisions in it), not the
+   whole block: the developer reads the brief in the file, clears or opens the Worker chat and starts it. Never send it with
+   `SendMessage` (the Worker's fresh context needs the developer's `/clear` anyway, and that is the developer's checkpoint). The
+   brief's shape:
 
 
 ```markdown
@@ -163,6 +173,7 @@ section "0. Guidelines" when the block adds or changes any POI Editor row, table
 when it adds real-input tests or captures; any other guide whose rules apply>.
 Context only: <other guides>.
 WORKER MODEL: <Haiku / Sonnet / Opus> + effort <Low / Medium / High / Max>, and why in a few words.
+SUBAGENTS: <per 00-process (ceiling Opus + medium; Unity single owner) / none this block / the task to delegate>.
 TEST PLAN: <baseline full run needed? / full EditMode + PlayMode once at the end / background full run: yes or no>.
 
 PART 1 -- <fixes>: numbered, each = what + where + the test that proves it + recapture.
@@ -177,9 +188,11 @@ Commit only if the developer asks.
 
 8. **Your tasks now** -- the LAST lines of the answer, after the brief, as a short checklist for the developer: WHERE WE ARE
    (the domain, the current block group and what it is for, this block, what comes after it until the domain closes), which block the
-   brief is for, where to paste it (`__AI_worker.md`, inside `# claude agent`), which model AND effort to pick (named plainly, e.g. "Opus, High"),
+   brief is for (already written into `__AI_worker.md` `## And now:`), which model AND effort to pick (named plainly, e.g. "Opus, High"),
    new Worker session or not, where Unity must be while it runs (`40-testing.md` 4.2.3: the a / b / c action, word for word, per
    phase of the block), commit status (done by me / you commit with message "..." / nothing to commit), and any decision
    or file waiting on them. Never leave these only inside a table or the brief.
+9. **Close with `AskUserQuestion`** (`60-finishing.md` 6.4): one short question after the answer -- the real pending decision if there
+   is one, else "Ready for the Worker?" -- so the alarm rings at once.
 
 Principle: the review is only as good as its evidence; the plan is only as good as its smallness.

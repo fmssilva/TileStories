@@ -15,6 +15,159 @@ namespace TileStories.Editor.Tests
     {
         private static readonly Color Blue = new(0.1f, 0.3f, 0.6f, 1f);
 
+        // The Tone (_3.3 P3c addendum, Words On Picture): the prototype's gradients exactly -- the radial tone .55 at its anchor, .32 / .10 at
+        // 38 / 62 % of its ellipse, nothing past 80 %, never rising going out along any ray; the edge scrim .66 at and below its anchor,
+        // nothing past 66 % up, the same at every x; the strength scales every stop (never past 1); and what the panel DRAWS is the page's gamma
+        // darkening reproduced in linear light (1 - (1 - a)^2.2): the tone looks as dark as the prototype, not paler
+        [Test]
+        public void TheTone_IsThePrototypesGradient_DrawnAsDarkAsThePageDrawsIt()
+        {
+            var tone = HeroWordsRule.Layer(HeroWordsRule.ToneHalo, 390f, 0f, new Rect(24f, 560f, 120f, 40f), Color.black);
+            Assert.AreEqual(ToneShape.Radial, tone.Shape);
+            Assert.AreEqual(new Vector2(78f, 600f), tone.Anchor, "20 % across, at the words' foot");
+            Assert.Less(Vector2.Distance(new Vector2(507f, 450f), tone.Reach), 1e-3f, "130 % of the width, 75 % of the height seen down to the words' foot");
+            Vector2 Along(float r, float angle) => tone.Anchor + new Vector2(Mathf.Cos(angle) * tone.Reach.x, -Mathf.Sin(angle) * tone.Reach.y) * r;
+            foreach (float angle in new[] { 0f, 0.6f, 1.2f, Mathf.PI * 0.5f, 2.5f })
+            {
+                Assert.AreEqual(0.55f, ToneRule.PageAlpha(tone, Along(0f, angle)), 1e-4f, "at the anchor: .55");
+                Assert.AreEqual(0.32f, ToneRule.PageAlpha(tone, Along(0.38f, angle)), 1e-4f, "38 %: .32");
+                Assert.AreEqual(0.10f, ToneRule.PageAlpha(tone, Along(0.62f, angle)), 1e-4f, "62 %: .10");
+                Assert.AreEqual(0f, ToneRule.PageAlpha(tone, Along(0.80f, angle)), 1e-4f, "80 %: nothing");
+                Assert.AreEqual(0f, ToneRule.PageAlpha(tone, Along(1.2f, angle)), 1e-6f, "past it: nothing");
+                float last = 1f;
+                for (float r = 0f; r <= 1f; r += 0.01f)
+                {
+                    float a = ToneRule.PageAlpha(tone, Along(r, angle));
+                    Assert.LessOrEqual(a, last + 1e-6f, "never rising going out, at " + r);
+                    last = a;
+                }
+            }
+            Assert.AreEqual(1f - Mathf.Pow(0.45f, 2.2f), ToneRule.AlphaAt(tone, tone.Anchor), 1e-4f, "drawn as the page's gamma darkening: .55 -> .83");
+            Assert.AreEqual(0.4f, ToneRule.Page(ToneRule.Drawn(0.4f)), 1e-5f, "Drawn and Page undo each other");
+            tone.Strength = 0.5f;
+            Assert.AreEqual(0.275f, ToneRule.PageAlpha(tone, tone.Anchor), 1e-4f, "the strength scales every stop");
+            tone.Strength = 3f;
+            Assert.AreEqual(1f, ToneRule.PageAlpha(tone, tone.Anchor), 1e-6f, "never past full");
+
+            var scrim = HeroWordsRule.Layer(HeroWordsRule.EdgeScrim, 390f, 0f, new Rect(24f, 560f, 120f, 40f), Color.black);
+            Assert.AreEqual(ToneShape.Edge, scrim.Shape);
+            foreach (float x in new[] { 0f, 200f, 390f })
+            {
+                Assert.AreEqual(0.66f, ToneRule.PageAlpha(scrim, new Vector2(x, 640f)), 1e-4f, "below the words' foot: .66");
+                Assert.AreEqual(0.66f, ToneRule.PageAlpha(scrim, new Vector2(x, 600f)), 1e-4f, "at it: .66");
+                Assert.AreEqual(0.30f, ToneRule.PageAlpha(scrim, new Vector2(x, 600f - 0.36f * 600f)), 1e-4f, "36 % up: .30");
+                Assert.AreEqual(0f, ToneRule.PageAlpha(scrim, new Vector2(x, 600f - 0.66f * 600f)), 1e-4f, "66 % up: nothing");
+            }
+            // - words reaching far from the corner: the ellipse grows, its shape kept, until their farthest corner lies at the 38 % stop
+            var tall = HeroWordsRule.Layer(HeroWordsRule.ToneHalo, 390f, 0f, new Rect(24f, 420f, 340f, 180f), Color.black);
+            Assert.AreEqual(507f / 450f, tall.Reach.x / tall.Reach.y, 1e-3f, "the prototype's shape kept");
+            Assert.Greater(tall.Reach.x, 507f, "...grown");
+            Assert.AreEqual(HeroWordsRule.ToneDense, ToneRule.Distance(tall, new Vector2(364f, 420f)), 1e-3f, "the farthest word corner at the 38 % stop");
+            Assert.IsNull(HeroWordsRule.Layer(HeroWordsRule.HaloOnly, 390f, 0f, new Rect(24f, 560f, 120f, 40f), Color.black), "Halo Only: nothing on the picture");
+            Assert.AreEqual(HeroWordsRule.ToneHalo, HeroWordsRule.Of("anything"), "an unknown look reads as the default");
+            Assert.IsTrue(HeroWordsRule.HasHalo(HeroWordsRule.ToneHalo) && HeroWordsRule.HasHalo(HeroWordsRule.HaloOnly) && !HeroWordsRule.HasHalo(HeroWordsRule.EdgeScrim));
+        }
+
+        // Tone Spread (the header's field): the tone's ellipse and the scrim's rise are the prototype's times the spread -- smaller ends the
+        // darkening sooner, larger fades it over more -- clamped to its range (an unset 0 = the default); and however small, never past the
+        // words: the grow still puts their farthest corner inside the dense part
+        [Test]
+        public void ToneSpread_ScalesTheReach_InsideItsRange_AndNeverShrinksPastTheWords()
+        {
+            var words = new Rect(24f, 560f, 120f, 40f);
+            var one = HeroWordsRule.Layer(HeroWordsRule.ToneHalo, 390f, 0f, words, Color.black);
+            foreach (float spread in new[] { HeroWordsRule.SpreadMin, 0.7f, 1f, 1.3f, HeroWordsRule.SpreadMax })
+            {
+                var tone = HeroWordsRule.Layer(HeroWordsRule.ToneHalo, 390f, 0f, words, Color.black, spread);
+                var grown = tone.Reach.x > one.Reach.x * spread + 1e-3f;
+                if (!grown) Assert.AreEqual(one.Reach.x * spread, tone.Reach.x, 1e-3f, "spread " + spread + ": the reach times the spread");
+                Assert.AreEqual(one.Reach.x / one.Reach.y, tone.Reach.x / tone.Reach.y, 1e-3f, "...its shape kept");
+                foreach (var corner in new[] { words.min, words.max, new Vector2(words.xMax, words.yMin), new Vector2(words.xMin, words.yMax) })
+                    Assert.LessOrEqual(ToneRule.Distance(tone, corner), HeroWordsRule.ToneDense + 1e-3f, "spread " + spread + ": every word corner in the dense part");
+                var scrim = HeroWordsRule.Layer(HeroWordsRule.EdgeScrim, 390f, 0f, words, Color.black, spread);
+                Assert.AreEqual(Mathf.Max(600f * spread, 40f / HeroWordsRule.ScrimDense), scrim.Reach.y, 1e-3f, "spread " + spread + ": the scrim's rise");
+            }
+            var least = HeroWordsRule.Layer(HeroWordsRule.ToneHalo, 390f, 0f, words, Color.black, HeroWordsRule.SpreadMin);
+            Assert.Less(least.Reach.x, one.Reach.x, "the least spread reaches less than the default");
+            Assert.AreEqual(HeroWordsRule.SpreadMin, HeroWordsRule.Spread(0.01f), "below the range: its least");
+            Assert.AreEqual(HeroWordsRule.SpreadMax, HeroWordsRule.Spread(9f), "above it: its most");
+            Assert.AreEqual(HeroWordsRule.SpreadDefault, HeroWordsRule.Spread(0f), "unset: the default");
+            Assert.AreEqual(HeroWordsRule.SpreadDefault, HeroWordsRule.Spread(float.NaN), "unreadable: the default");
+            // - the field the Editor draws carries the same range and default
+            var field = BuiltInBlocks.Header.Field(BuiltInBlocks.HeaderToneSpreadField);
+            Assert.AreEqual(BlockFieldType.Number, field.Type);
+            Assert.AreEqual(HeroWordsRule.SpreadMin, field.NumberMin);
+            Assert.AreEqual(HeroWordsRule.SpreadMax, field.NumberMax);
+            Assert.AreEqual(HeroWordsRule.SpreadDefault, field.NumberDefault);
+        }
+
+        // The tone's strength from the picture (ADAPTIVE): the alpha a word needs is the least that keeps it at the ratio in the panel's linear
+        // blend (worked back through the blend, the ratio lands exactly; a ground already dark enough needs none; a shade too weak for the
+        // ground gives all it has); the strength draws that need where the stops give less than their peak, and never turns the peak past full
+        [Test]
+        public void TheTonesStrength_IsTheLeastThatKeepsEveryWordAtTheRatio_ZeroOnADarkGround()
+        {
+            var shade = new Color(0.04f, 0.03f, 0.02f, 1f);
+            float white = ToneRule.Luminance(Color.white), shadeY = ToneRule.Luminance(shade);
+            Assert.AreEqual(1f, white, 1e-4f);
+            foreach (float ground in new[] { 0.25f, 0.5f, 0.8f, 1f })
+            {
+                float a = ToneRule.NeededAlpha(ground, white, shadeY, 4.5f);
+                float left = ground * (1f - a) + shadeY * a;
+                Assert.AreEqual(4.5f, (white + 0.05f) / (left + 0.05f), 0.01f, "ground " + ground + ": exactly 4.5:1, never more shade than that");
+            }
+            Assert.AreEqual(0f, ToneRule.NeededAlpha(0.15f, white, shadeY, 4.5f), "a dark ground (1.05 / 0.2 = 5.25:1 already): none");
+            Assert.AreEqual(1f, ToneRule.NeededAlpha(1f, white, 0.5f, 4.5f), "a shade lighter than the ratio allows: all of it");
+            Assert.AreEqual(1f, ToneRule.NeededAlpha(float.NaN, white, shadeY, 4.5f), "nothing read: all of it");
+
+            Assert.AreEqual(0f, ToneRule.StrengthFor(0f, 0.32f, 0.55f), "no need: no tone");
+            float need = 0.6f;
+            float s = ToneRule.StrengthFor(need, 0.32f, 0.55f);
+            Assert.AreEqual(need, ToneRule.Drawn(s * 0.32f), 1e-4f, "at a word the stops give .32: the strength draws exactly its need");
+            Assert.AreEqual(1f / 0.55f, ToneRule.StrengthFor(0.99f, 0.05f, 0.55f), 1e-4f, "a word the stops barely reach: capped at a full peak");
+            Assert.AreEqual(1f / 0.55f, ToneRule.StrengthFor(0.5f, 0f, 0.55f), 1e-4f, "a word past the stops: the cap");
+        }
+
+        // The ink of a wrapped text (HeroTitleFitRule.LineWords; the Local Shade hugs these): greedy, each word at its place in its line and
+        // its own width; LineWidths and Lines read the same wrap
+        [Test]
+        public void LineWords_AreEachWordsPlaceAndWidth_LineByLine_AndLineWidthsAndLinesCountThem()
+        {
+            float Measure(string run) => run.Length * 10f;
+            var lines = HeroTitleFitRule.LineWords("Ribeira Palace Lisbon", 150f, Measure);
+            Assert.AreEqual(2, lines.Count, "\"Ribeira Palace\" (14 chars) fits 150, \"Lisbon\" wraps");
+            CollectionAssert.AreEqual(new[] { (0f, 70f), (80f, 60f) }, lines[0], "Ribeira at 0, Palace after its space");
+            CollectionAssert.AreEqual(new[] { (0f, 60f) }, lines[1]);
+            CollectionAssert.AreEqual(new[] { 140f, 60f }, HeroTitleFitRule.LineWidths("Ribeira Palace Lisbon", 150f, Measure));
+            CollectionAssert.AreEqual(new[] { 140f }, HeroTitleFitRule.LineWidths("Ribeira Palace", 400f, Measure), "a short title: one line, its own width");
+            CollectionAssert.AreEqual(new[] { 50f, 50f, 20f }, HeroTitleFitRule.LineWidths("Lisboaaaaaaa", 50f, Measure), "a word wider than the line fills it, the rest on its last line");
+            Assert.AreEqual(0, HeroTitleFitRule.LineWords(" ", 100f, Measure).Count, "empty: no line");
+            Assert.AreEqual(2, HeroTitleFitRule.Lines("Ribeira Palace Lisbon", 150f, Measure));
+        }
+
+        // A picture's brightness read back (PictureLuminance: a card's pictures are not CPU-readable): a picture white at its top and black
+        // at its foot reads 1 at the top and 0 at the foot -- rows the right way up -- and a grey square reads its own luminance
+        [Test]
+        public void PictureLuminance_ReadsAPicturesBrightnessTheRightWayUp()
+        {
+            var picture = new Texture2D(8, 8, TextureFormat.RGBA32, false);
+            var grey = new Color(0.5f, 0.5f, 0.5f, 1f);
+            for (int y = 0; y < 8; y++)
+                for (int x = 0; x < 8; x++)
+                    // - a texture's row 0 is its FOOT: rows 4..7 are the top half
+                    picture.SetPixel(x, y, y >= 4 ? Color.white : x < 4 ? grey : Color.black);
+            picture.Apply();
+            try
+            {
+                var read = PictureLuminance.Read(picture, 8, 8);
+                Assert.AreEqual(1f, read.MaxIn(new Rect(0f, 0f, 1f, 0.5f)), 0.02f, "the top half is white");
+                Assert.AreEqual(ToneRule.Luminance(grey), read.MaxIn(new Rect(0f, 0.5f, 0.5f, 0.5f)), 0.02f, "the foot's left quarter: its grey");
+                Assert.AreEqual(0f, read.MaxIn(new Rect(0.5f, 0.5f, 0.5f, 0.5f)), 0.02f, "the foot's right quarter: black");
+                Assert.IsNaN(read.MaxIn(new Rect(1.2f, 0f, 0.5f, 1f)), "outside the picture: nothing read");
+            }
+            finally { Object.DestroyImmediate(picture); }
+        }
+
         [Test]
         public void TheFade_IsStraightBetweenItsStops_HoldsItsEnds_AndCutsAHardEdgeWhereTwoStopsMeet()
         {

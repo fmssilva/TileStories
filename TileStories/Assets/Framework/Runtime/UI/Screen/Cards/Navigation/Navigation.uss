@@ -1714,10 +1714,12 @@
     margin: 0 0 var(--ts-space-1) 0;
 }
 
-/* Clear over the hero: no ground at all, so the white words carry the hero's own dark halo hugging every letter (as the hero's words do)
-   -- they read on any picture, measured on the render (PoiCardNavBarSceneTests) */
+/* Clear over the hero: no ground at all, so the white words carry the hero words' halo (Words On Picture: the soft glow and the close
+   shade) -- they read on any picture, measured on the render (PoiCardNavBarSceneTests) */
 .nav-bar--over-hero.nav-bar--fill-clear .nav-bar__label {
     text-shadow: 0 1px var(--ts-text-halo-blur) var(--ts-text-halo);
+    -unity-text-outline-width: var(--ts-text-halo-close-width);
+    -unity-text-outline-color: var(--ts-text-halo);
 }
 
 /* the chosen group: its words bolder (with the indicator: never colour alone) */
