@@ -89,5 +89,39 @@ namespace TileStories.Editor.Tests
                 }
             }
         }
+
+        // The two UI atlases of every face (_3.3 P3e): the one every text draws keeps the TIGHT SDF (a wide one greyed the body ink); the
+        // halo twin -- only the hero words' back labels -- the wide one, static, with exactly the same characters and the same weight
+        // table among the twins; the theme stylesheet names both
+        [Test]
+        public void EveryThemeFace_DrawsTextFromATightAtlas_AndItsHaloTwinFromAWideOne_TheThemeNamingBoth()
+        {
+            foreach (string ttf in FontAtlasBuilder.SourceFonts())
+            {
+                var ui = AssetDatabase.LoadAssetAtPath<FontAsset>(FontAtlasBuilder.UiPathFor(ttf));
+                var halo = AssetDatabase.LoadAssetAtPath<FontAsset>(FontAtlasBuilder.HaloPathFor(ttf));
+                Assert.IsNotNull(halo, ttf + ": its halo twin exists (TileStories > Fonts > Rebuild Theme Font Atlases)");
+                Assert.AreSame(halo, FontAtlasBuilder.HaloTwinOf(ui), ui.name + ": HaloTwinOf finds it");
+                Assert.AreEqual(FontAtlasBuilder.UiAtlasPadding, ui.atlasPadding, ui.name + ": the tight SDF");
+                Assert.AreEqual(6, FontAtlasBuilder.UiAtlasPadding, "the text atlases keep the markers' padding (6 at 48 pt)");
+                Assert.AreEqual(FontAtlasBuilder.HaloAtlasPadding, halo.atlasPadding, halo.name + ": the wide SDF");
+                Assert.AreEqual(HeroWordsOnPicture.HaloReach, FontAtlasBuilder.HaloAtlasPadding / (float)FontAtlasBuilder.SamplingPointSize, 1e-4f,
+                    "the halo's reach is the halo atlas's spread");
+                Assert.AreEqual(TextCoreAtlasPopulationMode.Static, halo.atlasPopulationMode, halo.name + " is Static");
+                CollectionAssert.AreEquivalent(ui.characterTable.Select(c => c.unicode), halo.characterTable.Select(c => c.unicode),
+                    halo.name + " holds exactly its face's characters");
+                var weights = new SerializedObject(ui).FindProperty("m_FontWeightTable");
+                var haloWeights = new SerializedObject(halo).FindProperty("m_FontWeightTable");
+                for (int i = 0; i < weights.arraySize; i++)
+                {
+                    var face = weights.GetArrayElementAtIndex(i).FindPropertyRelative("regularTypeface").objectReferenceValue as FontAsset;
+                    var twin = haloWeights.GetArrayElementAtIndex(i).FindPropertyRelative("regularTypeface").objectReferenceValue as FontAsset;
+                    Assert.AreSame(face == null ? null : FontAtlasBuilder.HaloTwinOf(face), twin, halo.name + ": weight " + (i * 100) + " is its face's twin");
+                }
+            }
+            string uss = System.IO.File.ReadAllText("Assets/Framework/Runtime/UI/Theme/Generated/Theme.default.uss");
+            StringAssert.Contains("--ts-font-body-halo: url(\"/Assets/Framework/Runtime/UI/Theme/Fonts/AtkinsonHyperlegibleNext/AtkinsonHyperlegibleNext-Regular UITK Halo.asset\")", uss);
+            StringAssert.Contains("--ts-font-display-halo: url(\"/Assets/Framework/Runtime/UI/Theme/Fonts/Fraunces/Fraunces-SemiBold UITK Halo.asset\")", uss);
+        }
     }
 }

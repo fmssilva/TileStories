@@ -243,6 +243,8 @@ namespace TileStories.Editor
         private static readonly Color CardSectionsSectionColor = new Color(0.35f, 0.62f, 0.95f);
         // Detail Card > Navigation (_3.2): between Card Container's amber and the Block Library's deeper orange
         private static readonly Color CardNavigationSectionColor = new Color(0.88f, 0.55f, 0.18f);
+        // Detail Card > Locate Button: under Navigation, the pin's AR teal
+        private static readonly Color CardLocateSectionColor = new Color(0.10f, 0.66f, 0.54f);
         private static readonly Color BlockLibrarySectionColor = new Color(0.80f, 0.45f, 0.15f);
         private static readonly Color CardComponentsSectionColor = new Color(0.75f, 0.50f, 0.18f);
         private static readonly Color CardTextsSectionColor = new Color(0.70f, 0.55f, 0.20f);

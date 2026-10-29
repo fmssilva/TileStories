@@ -91,7 +91,7 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 (e.g. "59/59") as the acceptance criterion — counts change as tests are added; zero
 failures does not.
 
-**Which tests, when (three tiers).** RUN TIMES (replaced after a run when a number moved > ~10 %): full EditMode ~3.5 min (2341 tests); CORE ~17.5 min
+**Which tests, when (three tiers).** RUN TIMES (replaced after a run when a number moved > ~10 %): full EditMode ~4.5 min (2368 tests); CORE ~17.5 min
 (PlayMode 227 tests 17.0 min + EditMode 118 tests 20 s); FULL PlayMode ~82 min (1339 tests); per-fixture times in `TestEvidence/Harness/fixture_times.csv` (`TestRunRecorder` writes it after every run).
 
 - **BLOCK -- every block, after each change:** compile, the full EditMode suite, then the PlayMode fixtures of the changed code

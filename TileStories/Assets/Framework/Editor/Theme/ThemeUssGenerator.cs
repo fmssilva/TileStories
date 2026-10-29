@@ -81,6 +81,9 @@ namespace TileStories.Editor
             text.Append(root).Append(" {\n");
             text.Append("    --ts-font-body: ").Append(FontUrl(theme, type.bodyFont)).Append(";\n");
             text.Append("    --ts-font-display: ").Append(FontUrl(theme, type.displayFont)).Append(";\n");
+            // - the wide-SDF twins only the hero words' halo copies draw with (HeroWordsOnPicture)
+            text.Append("    --ts-font-body-halo: ").Append(FontUrl(theme, type.bodyFont, halo: true)).Append(";\n");
+            text.Append("    --ts-font-display-halo: ").Append(FontUrl(theme, type.displayFont, halo: true)).Append(";\n");
             text.Append("    -unity-font-definition: var(--ts-font-body);\n");
             text.Append("}\n");
             if (type.displaySelectors.Count == 0) return;
@@ -96,13 +99,15 @@ namespace TileStories.Editor
             text.Append("}\n");
         }
 
-        // url("/Assets/...") of the UI Toolkit face of `key` -- refused when the key has none (a TMP asset given to UI Toolkit blanks the
-        // label silently, R8 S2; a markers-only key cannot be a type role)
-        private static string FontUrl(ThemeAsset theme, string key)
+        // url("/Assets/...") of the UI Toolkit face of `key` (or its halo twin) -- refused when the key has none (a TMP asset given to UI
+        // Toolkit blanks the label silently, R8 S2; a markers-only key cannot be a type role)
+        private static string FontUrl(ThemeAsset theme, string key, bool halo = false)
         {
             var asset = theme.Type.fontLibrary.GetUiFont(key);
             if (asset == null)
                 throw new ArgumentException(theme.Key + "/type: font key '" + key + "' has no UI Toolkit font in " + theme.Type.fontLibrary.name);
+            if (halo && (asset = FontAtlasBuilder.HaloTwinOf(asset)) == null)
+                throw new ArgumentException(theme.Key + "/type: font key '" + key + "' has no halo twin (TileStories > Fonts > Rebuild Theme Font Atlases)");
             return "url(\"/" + AssetDatabase.GetAssetPath(asset) + "\")";
         }
 

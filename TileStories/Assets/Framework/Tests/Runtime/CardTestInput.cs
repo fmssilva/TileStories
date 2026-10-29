@@ -285,7 +285,8 @@ namespace TileStories.Tests
         }
 
         // The part of the stack's viewport a finger reaches: the stack runs UNDER the floating header and strip since _3.3 S4a (a finger
-        // there takes the sheet or a tab, not the stack), and stops at the bottom area while it shows. Where a test drags the stack or
+        // there takes the sheet or a tab, not the stack), and stops at the bottom area while it shows and at the floating bar and Locate
+        // Button over its foot. Where a test drags the stack or
         // taps a block, and what "in view" means for a tap target
         public static Rect ReachableStack(PoiCardSheetView sheet)
         {
@@ -302,6 +303,13 @@ namespace TileStories.Tests
                 var floating = sheet.Slots.Bottom;
                 if (floating.ClassListContains(NavSlots.BottomBarClass) && floating.resolvedStyle.display == DisplayStyle.Flex)
                     bottom = Mathf.Min(bottom, floating.worldBound.yMin);
+            }
+            // - the Locate Button floats over the stack's foot in its own layer: a finger landing on it (or its chip) presses it, never the stack
+            var locate = sheet.Locate;
+            if (locate.IsShown)
+            {
+                bottom = Mathf.Min(bottom, locate.Root.worldBound.yMin);
+                if (locate.LabelShown) bottom = Mathf.Min(bottom, locate.Chip.worldBound.yMin);
             }
             return Rect.MinMaxRect(view.xMin, top, view.xMax, Mathf.Max(top, bottom));
         }
@@ -342,13 +350,15 @@ namespace TileStories.Tests
             Assert.AreEqual(3, still, "precondition: " + e.name + " holds still before the finger (no fling left running)");
         }
 
-        // Every open section held still before a render: the Drift clocks frozen at this moment, so a sliding divider stands where it is. The
+        // Every open section and the Locate Button held still before a render: the Drift clocks frozen at this moment, so a sliding divider stands where it is. The
         // Reveal needs no hold: it is a function of the row's place, so a still scroll is a still row (the stack held still: UntilStill)
         public static void HoldSectionsStill(PoiCardSheetView sheet)
         {
             double at = Time.realtimeSinceStartupAsDouble;
             foreach (var section in sheet.Stack.Sheets.All)
                 section.Open.Clock = () => at;
+            // - the Locate Button floats on its own clock too: held where it stands
+            sheet.Locate.Clock = () => at;
         }
 
         // Wait until the stack stops moving (three frames unmoved): a released drag flings on, and a reading taken mid-fling is the
@@ -407,6 +417,8 @@ namespace TileStories.Tests
             var light = sheet.Stack.Light;
             light.Clock = () => 0f;
             light.Tick();
+            // - the Locate Button's float at rest (a test that moves it hands its own clock after this)
+            sheet.Locate.Clock = () => 0d;
             var root = sheet.Layer.parent;
             if (root == null || root.Q("test-still-backdrop") != null) return;
             var backdrop = new VisualElement { name = "test-still-backdrop", pickingMode = PickingMode.Ignore };

@@ -413,9 +413,60 @@ MonoBehaviour:
         value: {r: 0.17647059, g: 0.21960784, b: 0.03137255, a: 1}
         note: 
       - name: --ts-sheet-open
-        value: {r: 0.97254902, g: 0.96470588, b: 0.94901961, a: 0.92}
+        value: {r: 0.97254902, g: 0.96470588, b: 0.94901961, a: 1}
         note: 'The card''s ground under OPEN sections (_3.3 P3, Look Blocks = Open): the sheet''s own colour,
-          dense -- no backdrop blur in UI Toolkit, and text sits on it: 7:1 over a black or white camera'
+          solid paper -- nothing of the camera, the wall or its markers shows through it'
+      - name: --ts-locate-teal-hi
+        value: {r: 0.49803922, g: 0.89019608, b: 0.76862745, a: 1}
+        note: 'The Locate Button''s pin (teal): the light top of its body'
+      - name: --ts-locate-teal-lo
+        value: {r: 0.05490196, g: 0.60392157, b: 0.48627451, a: 1}
+        note: 'the deep foot of its body and the dot in its disc'
+      - name: --ts-locate-teal-rim
+        value: {r: 0.03137255, g: 0.42352941, b: 0.33725490, a: 1}
+        note: 'its thin rim: >= 4.5:1 on the paper (a deep rim on the light paper)'
+      - name: --ts-locate-green-hi
+        value: {r: 0.72156863, g: 0.93725490, b: 0.47843137, a: 1}
+        note: 'The Locate Button''s pin (green): the light top of its body'
+      - name: --ts-locate-green-lo
+        value: {r: 0.24705882, g: 0.61960784, b: 0.17254902, a: 1}
+        note: 'the deep foot of its body and the dot in its disc'
+      - name: --ts-locate-green-rim
+        value: {r: 0.15686275, g: 0.43137255, b: 0.10980392, a: 1}
+        note: 'its thin rim: >= 4.5:1 on the paper (a deep rim on the light paper)'
+      - name: --ts-locate-cyan-hi
+        value: {r: 0.54509804, g: 0.89411765, b: 1.00000000, a: 1}
+        note: 'The Locate Button''s pin (cyan): the light top of its body'
+      - name: --ts-locate-cyan-lo
+        value: {r: 0.03921569, g: 0.51764706, b: 0.72156863, a: 1}
+        note: 'the deep foot of its body and the dot in its disc'
+      - name: --ts-locate-cyan-rim
+        value: {r: 0.02745098, g: 0.41568627, b: 0.58039216, a: 1}
+        note: 'its thin rim: >= 4.5:1 on the paper (a deep rim on the light paper)'
+      - name: --ts-locate-disc
+        value: {r: 1.00000000, g: 1.00000000, b: 1.00000000, a: 1}
+        note: 'The pin''s white inner disc (its centre)'
+      - name: --ts-locate-disc-edge
+        value: {r: 0.90588235, g: 0.92549020, b: 0.91372549, a: 1}
+        note: 'the inner disc''s soft edge'
+      - name: --ts-locate-shadow
+        value: {r: 0.00000000, g: 0.00000000, b: 0.00000000, a: 0.28}
+        note: 'The pin''s shadow on the bar (breathing with Float)'
+      - name: --ts-locate-halo
+        value: {r: 0.00000000, g: 0.00000000, b: 0.00000000, a: 0.8}
+        note: 'The dark halo round the pin while it lies on a picture: its edge >= 3:1 on any picture (WCAG 1.4.11)'
+      - name: --ts-locate-chip
+        value: {r: 1.00000000, g: 1.00000000, b: 1.00000000, a: 0.96}
+        note: 'The light chip under "Find it on the wall" (light in both modes)'
+      - name: --ts-locate-chip-ink
+        value: {r: 0.07058824, g: 0.23137255, b: 0.19607843, a: 1}
+        note: 'the chip''s words: >= 7:1 on it'
+      - name: --ts-locate-glass
+        value: {r: 1.00000000, g: 1.00000000, b: 1.00000000, a: 0.78}
+        note: 'Glass + Ping: the light glass disc holding the pin'
+      - name: --ts-locate-glass-line
+        value: {r: 1.00000000, g: 1.00000000, b: 1.00000000, a: 0.95}
+        note: 'the glass disc''s bright edge'
       - name: --ts-section-neutral
         value: {r: 0.41960784, g: 0.38823529, b: 0.34901961, a: 1}
         note: 'A section''s tint under Sections > Colour = Neutral (v6)'
@@ -855,9 +906,60 @@ MonoBehaviour:
         value: {r: 0.80784314, g: 0.86666667, b: 0.58823529, a: 1}
         note: 
       - name: --ts-sheet-open
-        value: {r: 0.05882353, g: 0.0627451, b: 0.07058824, a: 0.99}
+        value: {r: 0.05882353, g: 0.0627451, b: 0.07058824, a: 1}
         note: 'The card''s ground under OPEN sections (_3.3 P3, Look Blocks = Open): the sheet''s own colour,
-          dense -- no backdrop blur in UI Toolkit, and text sits on it: 7:1 over a black or white camera'
+          solid paper -- nothing of the camera, the wall or its markers shows through it'
+      - name: --ts-locate-teal-hi
+        value: {r: 0.49803922, g: 0.89019608, b: 0.76862745, a: 1}
+        note: 'The Locate Button''s pin (teal): the light top of its body'
+      - name: --ts-locate-teal-lo
+        value: {r: 0.05490196, g: 0.60392157, b: 0.48627451, a: 1}
+        note: 'the deep foot of its body and the dot in its disc'
+      - name: --ts-locate-teal-rim
+        value: {r: 0.49803922, g: 0.89019608, b: 0.76862745, a: 1}
+        note: 'its thin rim: >= 4.5:1 on the paper (a light rim on the dark paper)'
+      - name: --ts-locate-green-hi
+        value: {r: 0.72156863, g: 0.93725490, b: 0.47843137, a: 1}
+        note: 'The Locate Button''s pin (green): the light top of its body'
+      - name: --ts-locate-green-lo
+        value: {r: 0.24705882, g: 0.61960784, b: 0.17254902, a: 1}
+        note: 'the deep foot of its body and the dot in its disc'
+      - name: --ts-locate-green-rim
+        value: {r: 0.72156863, g: 0.93725490, b: 0.47843137, a: 1}
+        note: 'its thin rim: >= 4.5:1 on the paper (a light rim on the dark paper)'
+      - name: --ts-locate-cyan-hi
+        value: {r: 0.54509804, g: 0.89411765, b: 1.00000000, a: 1}
+        note: 'The Locate Button''s pin (cyan): the light top of its body'
+      - name: --ts-locate-cyan-lo
+        value: {r: 0.03921569, g: 0.51764706, b: 0.72156863, a: 1}
+        note: 'the deep foot of its body and the dot in its disc'
+      - name: --ts-locate-cyan-rim
+        value: {r: 0.54509804, g: 0.89411765, b: 1.00000000, a: 1}
+        note: 'its thin rim: >= 4.5:1 on the paper (a light rim on the dark paper)'
+      - name: --ts-locate-disc
+        value: {r: 1.00000000, g: 1.00000000, b: 1.00000000, a: 1}
+        note: 'The pin''s white inner disc (its centre)'
+      - name: --ts-locate-disc-edge
+        value: {r: 0.90588235, g: 0.92549020, b: 0.91372549, a: 1}
+        note: 'the inner disc''s soft edge'
+      - name: --ts-locate-shadow
+        value: {r: 0.00000000, g: 0.00000000, b: 0.00000000, a: 0.5}
+        note: 'The pin''s shadow on the bar (breathing with Float)'
+      - name: --ts-locate-halo
+        value: {r: 0.00000000, g: 0.00000000, b: 0.00000000, a: 0.8}
+        note: 'The dark halo round the pin while it lies on a picture: its edge >= 3:1 on any picture (WCAG 1.4.11)'
+      - name: --ts-locate-chip
+        value: {r: 1.00000000, g: 1.00000000, b: 1.00000000, a: 0.96}
+        note: 'The light chip under "Find it on the wall" (light in both modes)'
+      - name: --ts-locate-chip-ink
+        value: {r: 0.07058824, g: 0.23137255, b: 0.19607843, a: 1}
+        note: 'the chip''s words: >= 7:1 on it'
+      - name: --ts-locate-glass
+        value: {r: 1.00000000, g: 1.00000000, b: 1.00000000, a: 0.78}
+        note: 'Glass + Ping: the light glass disc holding the pin'
+      - name: --ts-locate-glass-line
+        value: {r: 1.00000000, g: 1.00000000, b: 1.00000000, a: 0.95}
+        note: 'the glass disc''s bright edge'
       - name: --ts-section-neutral
         value: {r: 0.81176471, g: 0.78431373, b: 0.7372549, a: 1}
         note: 'A section''s tint under Sections > Colour = Neutral (v6)'

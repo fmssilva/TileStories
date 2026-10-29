@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TileStories.LookKit;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -117,6 +118,9 @@ namespace TileStories
         private float _barClear;
         private float _barHeroMargin;
         private float _halfMaxRatio = CardContainerSettings.HalfMaxRatioMax;
+        // The point the Locate Button was last bound for (a new one shows its words again), and the hero words' ink its chip keeps clear of
+        private string _locatePoiId;
+        private readonly List<Ink> _heroInk = new();
         // The shown card's Full Height (CardOptions.FullHeights): whether the Full stop leaves the camera strip (_topGap) above it
         private string _fullHeight = CardOptions.FullHeightTop;
 
@@ -212,14 +216,18 @@ namespace TileStories
             MenuButton.Add(menuIcon);
             Root.Add(MenuButton);
             Locate = new LocateFabView(ShowOnWall);
-            Root.Add(Locate.Root);
+            // - the chip's room judged again once it is laid out (its words' width)
+            Locate.Chip.RegisterCallback<GeometryChangedEvent>(_ => FitLocateLabel());
             // - the chrome FLOATS over the stack (_3.3 S4a review): the shade, the grab row, the bar and the top strip are out of the flow
             //   (PoiCard.uss) and drawn over the scroll, the round buttons over them -- so the stack starts at the sheet's top, the hero's
             //   picture runs up behind the bars and nothing jumps when the strip comes
-            foreach (var floating in new[] { TopShade, ChromeBand, Handle, Stack.HeaderSlot, Slots.Top, CloseButton, SettingsButton, MenuButton, Locate.Root })
+            foreach (var floating in new[] { TopShade, ChromeBand, Handle, Stack.HeaderSlot, Slots.Top, CloseButton, SettingsButton, MenuButton })
                 floating.BringToFront();
 
             Layer.Add(Root);
+            // - the Locate Button's own layer right after the sheet: drawn over all of it, never clipped by it, taking none of its room;
+            //   under the floating slot, an open menu and the full view (added after it)
+            Layer.Add(Locate.Layer);
             Takeover = new TakeoverView(Layer);
             FullView = new BlockFullView(Takeover, Stack.Views);
             FullViewOpener = new CardFullViewOpener(this, registry);
@@ -235,6 +243,14 @@ namespace TileStories
             Slots.Top.RegisterCallback<GeometryChangedEvent>(_ => RecomputeStops());
             // - the Navigation Bar turns white on dark glass while it lies on the hero's picture: asked again on every scroll
             Stack.Scroll.verticalScroller.valueChanged += _ => UpdateBarOverHero();
+            // - the visitor's first scroll of the card folds the Locate Button's words away (a scroll back to the top keeps them folded)
+            Stack.Scroll.verticalScroller.valueChanged += offset => { if (offset > 1f) Locate.Scrolled(); };
+            // - the pin's halo and its chip's room follow the hero under them: a scroll, the content, the sheet or the button laid out again
+            //   (a hero still settling at the last chrome decision would leave either judged on where it was)
+            Stack.Scroll.verticalScroller.valueChanged += _ => FollowTheHero();
+            Stack.Scroll.contentContainer.RegisterCallback<GeometryChangedEvent>(_ => FollowTheHero());
+            Locate.Root.RegisterCallback<GeometryChangedEvent>(_ => FollowTheHero());
+            Root.RegisterCallback<GeometryChangedEvent>(_ => FollowTheHero());
             Hide();
         }
 
@@ -248,7 +264,6 @@ namespace TileStories
             ChromeBand.EnableInClassList(ChromeBandGlassClass, _topBandGlass);
             PaintTopFade();
             CloseButton.tooltip = context.Strings?.Get(CardStrings.Keys.Close) ?? "";
-            Locate.Bind(context.Strings);
             ShowSettingsButton(context);
             context.Host ??= this;
             // - before the old card's full view closes: what of it stays over a rebind of the same point
@@ -274,6 +289,10 @@ namespace TileStories
                 ? Layout.ParkedAtBind(CardNavModel.Build(entries, _registry, context.Settings, key => state?.Seen(poiId, key) ?? false), context)
                 : null;
             Stack.Bind(entries, context, parked);
+            // - after the stack bound: its own scroll back to the top (a new card) is no scroll of the visitor's. A newly selected point shows
+            //   the Locate Button's words again; a rebind of the same point (a live edit, a language) keeps them as the visitor left them
+            Locate.Bind(context.Strings, context.Settings?.locate, context.ReduceMotion, context.Poi?.id != _locatePoiId);
+            _locatePoiId = context.Poi?.id;
             BindNav();
             Root.style.display = DisplayStyle.Flex;
             SetStop(IsOpen ? Stop : openStop);
@@ -313,8 +332,9 @@ namespace TileStories
         }
 
         // Place the Locate Button as LocateFabRule says, over what lies under it now -- a bar floating at the bottom (over the bottom area: its
-        // highest point, the raised disc's top), a sticky footer shown there -- and tell the hero how much of its right its words leave to it.
-        // CardChromeView calls it with every decision of the chrome (a stop, a scroll, a part resized)
+        // highest point, the raised disc's top), a sticky footer shown there. It floats in its own layer: the hero's words and the blocks
+        // never move for it, only its chip gives way to the words (FitLocateLabel). CardChromeView calls it with every decision of the
+        // chrome (a stop, a scroll, a part resized)
         internal void PlaceLocate()
         {
             var nav = _context?.Settings?.navigation;
@@ -323,17 +343,40 @@ namespace TileStories
             bool barBottom = Slots.BottomKey == NavBarView.ElementKey;
             float bottom = LocateFabRule.Bottom(barBottom ? area + Slots.Bar.HighestAboveFoot : float.NaN, area, Locate.Gap);
             Locate.Apply(LocateFabRule.Shown(nav, Stop, false), LocateFabRule.Shown(nav, Stop, Chrome?.Scroll.BottomHidden ?? false), bottom);
-            // - the words' room follows the button being ON, never the stop or the scroll: measured at rest in the hero's own frame (the
-            //   button's top in the sheet, less where the hero starts in it with the stack unscrolled -- drawn place plus the scroll, which
-            //   moves the content by a translation: every offset of the scroll view's own parts is in it)
-            bool on = NavBarRule.Enabled(nav) && NavBarRule.LocateButton(nav.bar);
+            FollowTheHero();
+        }
+
+        // The Locate Button over the hero as it stands now: its halo on the picture, its chip only clear of the words' ink
+        private void FollowTheHero()
+        {
+            JudgeLocateOverPicture();
+            FitLocateLabel();
+        }
+
+        // On the hero's picture as drawn now the pin wears its dark halo (LocateFabRule.OverPicture). Judged again whenever either moves: a
+        // chrome decision, a scroll (the hero rises), the stack's content or the button laid out (a hero laid out after the last decision)
+        private void JudgeLocateOverPicture()
+        {
             var header = Stack.HeaderView;
-            if (header == null || header.HeroPart.panel == null) return;
-            float heroTop = header.HeroPart.worldBound.yMin - Root.worldBound.yMin + Stack.Scroll.scrollOffset.y;
-            // - the sheet's REST height at its stop, like the words' own place (SetHeroLayout): a sheet still rising or being dragged never
-            //   puts a row beside the button for a moment and leaves it narrowed there
-            float buttonTop = Stops.HeightOf(Stop) - bottom - Locate.Size - heroTop;
-            header.SetWordsClear(LocateFabRule.WordsClear(on, Locate.Size, Locate.Inset, Locate.Gap), buttonTop);
+            var picture = header != null && header.HasPicture && header.HeroPart.panel != null ? header.HeroPart.worldBound : Rect.zero;
+            Locate.Pin.OverPicture = LocateFabRule.OverPicture(Locate.Pin.worldBound, picture);
+        }
+
+        // The Locate Button's chip shows only clear of the hero's words (their ink, in the sheet's space, where they stand now): where they
+        // reach across it the card shows the pin alone -- the words keep the pin's room only, never the chip's
+        private void FitLocateLabel()
+        {
+            var header = Stack.HeaderView;
+            if (header == null || header.Foot.panel == null || float.IsNaN(Locate.Chip.layout.width))
+            {
+                Locate.SetLabelRoom(true);
+                return;
+            }
+            _heroInk.Clear();
+            InkRects.Collect(header.Foot, Root, _heroInk);
+            var chip = Locate.Chip.worldBound;
+            var inSheet = new Rect(chip.x - Root.worldBound.x, chip.y - Root.worldBound.y, chip.width, chip.height);
+            Locate.SetLabelRoom(LocateFabRule.LabelFits(inSheet, _heroInk.Select(i => i.Rect), Locate.ChipGap));
         }
 
         // A chrome mark on `button`: the glass disc centred in the touch target, the vector mark centred in the disc (PoiCard.uss sizes
@@ -410,6 +453,8 @@ namespace TileStories
             Drag?.Forget();
             ApplyHeight(0f);
             Root.style.display = DisplayStyle.None;
+            // - the Locate Button floats in its own layer: the sheet's display does not hide it
+            Locate?.Apply(false, false, 0f);
         }
 
         // A block asked to see the POI on the wall: lower the card to peek (the selection and its marker stay)

@@ -140,9 +140,43 @@
     --ts-family-visit-text: rgb(56, 45, 89);
     --ts-family-community-text: rgb(76, 45, 0);
     --ts-family-navigation-text: rgb(45, 56, 8);
-    /* The card's ground under OPEN sections (_3.3 P3, Look Blocks = Open): the sheet's own colour, dense -- no backdrop blur
-       in UI Toolkit, and text sits on it: 7:1 over a black or white camera */
-    --ts-sheet-open: rgba(248, 246, 242, 0.92);
+    /* The card's ground under OPEN sections (_3.3 P3, Look Blocks = Open): the sheet's own colour, solid paper -- nothing of
+       the camera, the wall or its markers shows through it */
+    --ts-sheet-open: rgb(248, 246, 242);
+    /* The Locate Button's pin (teal): the light top of its body */
+    --ts-locate-teal-hi: rgb(127, 227, 196);
+    /* the deep foot of its body and the dot in its disc */
+    --ts-locate-teal-lo: rgb(14, 154, 124);
+    /* its thin rim: >= 4.5:1 on the paper (a deep rim on the light paper) */
+    --ts-locate-teal-rim: rgb(8, 108, 86);
+    /* The Locate Button's pin (green): the light top of its body */
+    --ts-locate-green-hi: rgb(184, 239, 122);
+    /* the deep foot of its body and the dot in its disc */
+    --ts-locate-green-lo: rgb(63, 158, 44);
+    /* its thin rim: >= 4.5:1 on the paper (a deep rim on the light paper) */
+    --ts-locate-green-rim: rgb(40, 110, 28);
+    /* The Locate Button's pin (cyan): the light top of its body */
+    --ts-locate-cyan-hi: rgb(139, 228, 255);
+    /* the deep foot of its body and the dot in its disc */
+    --ts-locate-cyan-lo: rgb(10, 132, 184);
+    /* its thin rim: >= 4.5:1 on the paper (a deep rim on the light paper) */
+    --ts-locate-cyan-rim: rgb(7, 106, 148);
+    /* The pin's white inner disc (its centre) */
+    --ts-locate-disc: rgb(255, 255, 255);
+    /* the inner disc's soft edge */
+    --ts-locate-disc-edge: rgb(231, 236, 233);
+    /* The pin's shadow on the bar (breathing with Float) */
+    --ts-locate-shadow: rgba(0, 0, 0, 0.28);
+    /* The dark halo round the pin while it lies on a picture: its edge >= 3:1 on any picture (WCAG 1.4.11) */
+    --ts-locate-halo: rgba(0, 0, 0, 0.8);
+    /* The light chip under "Find it on the wall" (light in both modes) */
+    --ts-locate-chip: rgba(255, 255, 255, 0.96);
+    /* the chip's words: >= 7:1 on it */
+    --ts-locate-chip-ink: rgb(18, 59, 50);
+    /* Glass + Ping: the light glass disc holding the pin */
+    --ts-locate-glass: rgba(255, 255, 255, 0.78);
+    /* the glass disc's bright edge */
+    --ts-locate-glass-line: rgba(255, 255, 255, 0.95);
     /* A section's tint under Sections > Colour = Neutral (v6) */
     --ts-section-neutral: rgb(107, 99, 89);
     /* A section's glass sheet (R11, P4.4c1): the mode's glass ground mixed with the family's hue, translucent; blocks stay
@@ -385,9 +419,43 @@
     --ts-family-visit-text: rgb(218, 210, 245);
     --ts-family-community-text: rgb(238, 210, 167);
     --ts-family-navigation-text: rgb(206, 221, 150);
-    /* The card's ground under OPEN sections (_3.3 P3, Look Blocks = Open): the sheet's own colour, dense -- no backdrop blur
-       in UI Toolkit, and text sits on it: 7:1 over a black or white camera */
-    --ts-sheet-open: rgba(15, 16, 18, 0.99);
+    /* The card's ground under OPEN sections (_3.3 P3, Look Blocks = Open): the sheet's own colour, solid paper -- nothing of
+       the camera, the wall or its markers shows through it */
+    --ts-sheet-open: rgb(15, 16, 18);
+    /* The Locate Button's pin (teal): the light top of its body */
+    --ts-locate-teal-hi: rgb(127, 227, 196);
+    /* the deep foot of its body and the dot in its disc */
+    --ts-locate-teal-lo: rgb(14, 154, 124);
+    /* its thin rim: >= 4.5:1 on the paper (a light rim on the dark paper) */
+    --ts-locate-teal-rim: rgb(127, 227, 196);
+    /* The Locate Button's pin (green): the light top of its body */
+    --ts-locate-green-hi: rgb(184, 239, 122);
+    /* the deep foot of its body and the dot in its disc */
+    --ts-locate-green-lo: rgb(63, 158, 44);
+    /* its thin rim: >= 4.5:1 on the paper (a light rim on the dark paper) */
+    --ts-locate-green-rim: rgb(184, 239, 122);
+    /* The Locate Button's pin (cyan): the light top of its body */
+    --ts-locate-cyan-hi: rgb(139, 228, 255);
+    /* the deep foot of its body and the dot in its disc */
+    --ts-locate-cyan-lo: rgb(10, 132, 184);
+    /* its thin rim: >= 4.5:1 on the paper (a light rim on the dark paper) */
+    --ts-locate-cyan-rim: rgb(139, 228, 255);
+    /* The pin's white inner disc (its centre) */
+    --ts-locate-disc: rgb(255, 255, 255);
+    /* the inner disc's soft edge */
+    --ts-locate-disc-edge: rgb(231, 236, 233);
+    /* The pin's shadow on the bar (breathing with Float) */
+    --ts-locate-shadow: rgba(0, 0, 0, 0.5);
+    /* The dark halo round the pin while it lies on a picture: its edge >= 3:1 on any picture (WCAG 1.4.11) */
+    --ts-locate-halo: rgba(0, 0, 0, 0.8);
+    /* The light chip under "Find it on the wall" (light in both modes) */
+    --ts-locate-chip: rgba(255, 255, 255, 0.96);
+    /* the chip's words: >= 7:1 on it */
+    --ts-locate-chip-ink: rgb(18, 59, 50);
+    /* Glass + Ping: the light glass disc holding the pin */
+    --ts-locate-glass: rgba(255, 255, 255, 0.78);
+    /* the glass disc's bright edge */
+    --ts-locate-glass-line: rgba(255, 255, 255, 0.95);
     /* A section's tint under Sections > Colour = Neutral (v6) */
     --ts-section-neutral: rgb(207, 200, 188);
     /* A section's glass sheet (R11, P4.4c1): the mode's glass ground mixed with the family's hue, translucent; blocks stay
@@ -496,6 +564,8 @@
 .ts-app.ts-theme-default {
     --ts-font-body: url("/Assets/Framework/Runtime/UI/Theme/Fonts/AtkinsonHyperlegibleNext/AtkinsonHyperlegibleNext-Regular UITK.asset");
     --ts-font-display: url("/Assets/Framework/Runtime/UI/Theme/Fonts/Fraunces/Fraunces-SemiBold UITK.asset");
+    --ts-font-body-halo: url("/Assets/Framework/Runtime/UI/Theme/Fonts/AtkinsonHyperlegibleNext/AtkinsonHyperlegibleNext-Regular UITK Halo.asset");
+    --ts-font-display-halo: url("/Assets/Framework/Runtime/UI/Theme/Fonts/Fraunces/Fraunces-SemiBold UITK Halo.asset");
     -unity-font-definition: var(--ts-font-body);
 }
 

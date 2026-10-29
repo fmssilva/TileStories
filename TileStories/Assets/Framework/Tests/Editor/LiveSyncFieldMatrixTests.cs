@@ -231,6 +231,8 @@ namespace TileStories.Editor.Tests
             yield return CardRow("card_settings.components", c => c.card_settings.components.open_row_emphasis = ElementOptions.EmphasisShine);
             // _3.3 P3: the open sections' look (v6's Sections): a live Start reaches the open card's sections
             yield return CardRow("card_settings.sections", c => c.card_settings.sections.start = CardOptions.SectionStartWave);
+            // _3.3 P3e: the Locate Button's look: a live Style reaches the open card's pin
+            yield return CardRow("card_settings.locate", c => c.card_settings.locate.style = CardOptions.LocateGlassPing);
             yield return CardRow("pois[].card", c => P(c).card.blocks.Add(new BlockInstanceData { key = "block_live_sync", kind = "show_on_wall" }));
         }
 

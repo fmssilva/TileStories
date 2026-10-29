@@ -478,6 +478,14 @@ MonoBehaviour:
       value: Also nearby
     - lang: pt
       value: "Tamb\xE9m perto"
+  - key: locate_label
+    where: The words on the light chip beside the Locate Button's pin (Style Pin +
+      Label), shown when the card opens and folded away once the visitor scrolls.
+    text:
+    - lang: en
+      value: Find it on the wall
+    - lang: pt
+      value: Encontra-o na parede
   - key: open_block_button
     where: An Actions button that opens another block of the same card, when the
       button has no words of its own and the block it opens has no heading.

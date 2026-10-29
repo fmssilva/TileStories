@@ -300,6 +300,7 @@ namespace TileStories.Editor
         [SerializeField] private bool _showCardContainer = false;
         [SerializeField] private bool _showCardSections = false;
         [SerializeField] private bool _showCardNavigation = false;
+        [SerializeField] private bool _showCardLocate = false;
         [SerializeField] private bool _showCardBlockLibrary = false;
         [SerializeField] private bool _showCardComponents = false;
         [SerializeField] private bool _showCardTexts = false;

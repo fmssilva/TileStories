@@ -12,8 +12,9 @@ using TextCoreAtlasPopulationMode = UnityEngine.TextCore.Text.AtlasPopulationMod
 
 namespace TileStories.Editor
 {
-    // Builds the app's font assets (_3.3 R12.3, P4.3): for every .ttf under Runtime/UI/Theme/Fonts, a TextMeshPro asset (the markers) and a
-    // TextCore asset (every UI Toolkit panel) beside it -- "<name> TMP.asset" / "<name> UITK.asset" -- both STATIC: a dynamic asset writes
+    // Builds the app's font assets (_3.3 R12.3, P4.3): for every .ttf under Runtime/UI/Theme/Fonts, a TextMeshPro asset (the markers), a
+    // TextCore asset (every UI Toolkit panel) and its wide-SDF halo twin (only the hero words' back labels) beside it -- "<name> TMP.asset" /
+    // "<name> UITK.asset" / "<name> UITK Halo.asset" -- all STATIC: a dynamic asset writes
     // each glyph it meets back into the file (P0 S2: 5.8 KB -> 2.1 MB) and git sees it change on every Editor launch. Their characters:
     // printable ASCII, Latin-1, Latin Extended-A, the app's typographic punctuation and every character the app and the wall ship
     // (ShippedTextCharacters) -- each one the face has. Then each theme's type roles are written into the UI assets' weight tables (a bold
@@ -26,10 +27,15 @@ namespace TileStories.Editor
         public const int SamplingPointSize = 48;
         public const int AtlasPadding = 6;
         public const int AtlasSize = 1024;
-        // - the UI Toolkit assets: a text-shadow or outline reaches only as far as the SDF does (the padding, 18 / 48 = 0.375 em: the hero's
-        //   halo 4-5 px round a 12 px eyebrow, ~11 px round its title -- 6 cut it at 1.5 px), so their page doubles to hold the wider cells
-        public const int UiAtlasPadding = 18;
-        public const int UiAtlasSize = 2048;
+        // - the UI Toolkit assets every text draws with: the same tight SDF as the markers' (a wide one softens small text's edges -- body
+        //   ink measured grey at padding 18)
+        public const int UiAtlasPadding = 6;
+        public const int UiAtlasSize = 1024;
+        // - the HALO assets, only the hero words' back labels draw with them: a text-shadow or outline reaches only as far as the SDF does
+        //   (the padding, 18 / 48 = 0.375 em: the halo 4-5 px round a 12 px eyebrow, ~11 px round its title), so their page doubles to
+        //   hold the wider cells
+        public const int HaloAtlasPadding = 18;
+        public const int HaloAtlasSize = 2048;
 
         // The typographic punctuation the app's texts use: curly quotes, en / em dash, ellipsis, middle dot, the affordance arrow
         public const string Typographic = "“”‘’–—…·›";
@@ -47,6 +53,15 @@ namespace TileStories.Editor
 
         public static string TmpPathFor(string ttfPath) => Path.ChangeExtension(ttfPath, null).Replace('\\', '/') + " TMP.asset";
         public static string UiPathFor(string ttfPath) => Path.ChangeExtension(ttfPath, null).Replace('\\', '/') + " UITK.asset";
+        public static string HaloPathFor(string ttfPath) => Path.ChangeExtension(ttfPath, null).Replace('\\', '/') + " UITK Halo.asset";
+
+        // The halo twin of a UI asset (the same face's "<name> UITK Halo.asset" beside it), null when it has none
+        public static FontAsset HaloTwinOf(FontAsset ui)
+        {
+            string path = ui == null ? null : AssetDatabase.GetAssetPath(ui);
+            if (string.IsNullOrEmpty(path) || !path.EndsWith(" UITK.asset")) return null;
+            return AssetDatabase.LoadAssetAtPath<FontAsset>(path.Substring(0, path.Length - " UITK.asset".Length) + " UITK Halo.asset");
+        }
 
         public static string[] SourceFonts() =>
             Directory.GetFiles(FontsFolder, "*.ttf", SearchOption.AllDirectories).Select(p => p.Replace('\\', '/')).OrderBy(p => p).ToArray();
@@ -59,13 +74,14 @@ namespace TileStories.Editor
             foreach (string ttf in SourceFonts())
             {
                 BuildTmp(ttf, characters);
-                BuildUi(ttf, characters);
+                BuildUi(ttf, characters, UiPathFor(ttf), UiAtlasPadding, UiAtlasSize);
+                BuildUi(ttf, characters, HaloPathFor(ttf), HaloAtlasPadding, HaloAtlasSize);
             }
             AssetDatabase.SaveAssets();
             foreach (string guid in AssetDatabase.FindAssets("t:ThemeAsset"))
                 WireWeights(AssetDatabase.LoadAssetAtPath<ThemeAsset>(AssetDatabase.GUIDToAssetPath(guid)));
             AssetDatabase.SaveAssets();
-            Debug.Log("[Fonts] rebuilt " + SourceFonts().Length + " faces x 2 assets, " + characters.Length + " characters asked");
+            Debug.Log("[Fonts] rebuilt " + SourceFonts().Length + " faces x 3 assets, " + characters.Length + " characters asked");
         }
 
         // The TextMeshPro asset of `ttfPath`, static, holding every character of `characters` the face has
@@ -94,15 +110,15 @@ namespace TileStories.Editor
             return asset;
         }
 
-        // The TextCore asset of `ttfPath` (UI Toolkit), static, holding every character of `characters` the face has
-        public static FontAsset BuildUi(string ttfPath, string characters)
+        // A TextCore asset of `ttfPath` (UI Toolkit) at `path` with its SDF `padding` on `size` pages, static, holding every character of
+        // `characters` the face has
+        public static FontAsset BuildUi(string ttfPath, string characters, string path, int padding, int size)
         {
             var font = LoadFont(ttfPath);
-            string path = UiPathFor(ttfPath);
             var asset = AssetDatabase.LoadAssetAtPath<FontAsset>(path);
             if (asset == null)
             {
-                asset = FontAsset.CreateFontAsset(font, SamplingPointSize, UiAtlasPadding, GlyphRenderMode.SDFAA, UiAtlasSize, UiAtlasSize,
+                asset = FontAsset.CreateFontAsset(font, SamplingPointSize, padding, GlyphRenderMode.SDFAA, size, size,
                     TextCoreAtlasPopulationMode.Dynamic, false);
                 asset.name = Path.GetFileNameWithoutExtension(path);
                 AssetDatabase.CreateAsset(asset, path);
@@ -111,12 +127,12 @@ namespace TileStories.Editor
             else
             {
                 asset.atlasPopulationMode = TextCoreAtlasPopulationMode.Dynamic;
-                // - an old asset takes the UI padding and page before it is cleared, so the refill packs its glyphs with them (the asset's
+                // - an old asset takes the padding and page before it is cleared, so the refill packs its glyphs with them (the asset's
                 //   own setters are internal: its serialized fields, the Editor's way)
                 var serialized = new SerializedObject(asset);
-                serialized.FindProperty("m_AtlasPadding").intValue = UiAtlasPadding;
-                serialized.FindProperty("m_AtlasWidth").intValue = UiAtlasSize;
-                serialized.FindProperty("m_AtlasHeight").intValue = UiAtlasSize;
+                serialized.FindProperty("m_AtlasPadding").intValue = padding;
+                serialized.FindProperty("m_AtlasWidth").intValue = size;
+                serialized.FindProperty("m_AtlasHeight").intValue = size;
                 serialized.ApplyModifiedPropertiesWithoutUndo();
                 asset.ClearFontAssetData(false);
             }
@@ -141,10 +157,17 @@ namespace TileStories.Editor
             }
             var regular = Ui(type.bodyFont);
             var body = new Dictionary<int, FontAsset> { [4] = regular, [5] = Ui(type.bodyMediumFont), [7] = Ui(type.bodyBoldFont) };
-            foreach (var asset in body.Values.Distinct()) WriteWeightTable(asset, body);
             var display = Ui(type.displayFont);
-            WriteWeightTable(display, new Dictionary<int, FontAsset> { [Mathf.Clamp(type.displayWeight / 100, 1, 9)] = display, [7] = display });
+            var displayWeights = new Dictionary<int, FontAsset> { [Mathf.Clamp(type.displayWeight / 100, 1, 9)] = display, [7] = display };
+            // - the halo twins get the same table among themselves: a bold word's back label draws the bold halo cut
+            foreach (var faces in new[] { body, displayWeights, Twins(body), Twins(displayWeights) })
+                foreach (var asset in faces.Values.Distinct()) WriteWeightTable(asset, faces);
         }
+
+        // The same weight table over each face's halo twin (a face with none is refused: the halo would draw the wrong cut)
+        private static Dictionary<int, FontAsset> Twins(Dictionary<int, FontAsset> faces) =>
+            faces.ToDictionary(pair => pair.Key, pair => HaloTwinOf(pair.Value)
+                ?? throw new InvalidOperationException("[Fonts] " + pair.Value.name + " has no \" UITK Halo.asset\" twin beside it"));
 
         // The asset's weight table: exactly `upright` (index -> face), every other slot empty; italics are not shipped
         private static void WriteWeightTable(FontAsset asset, Dictionary<int, FontAsset> upright)

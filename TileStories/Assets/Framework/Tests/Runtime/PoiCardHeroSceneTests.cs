@@ -116,9 +116,7 @@ namespace TileStories.Tests
                 {
                     var header = config.pois.First(p => p.id == "lamp").card.blocks.First(b => b.kind == BuiltInBlocks.HeaderKind);
                     header.fields.First(f => f.key == BlockStackBuilder.HeaderTitleField).text.First(t => t.lang == "en").value = title;
-                    // - what HeroTitleMeasure assumes is the phone's whole line: no Locate Button beside the words (its column narrows a
-                    //   row it reaches; the notice does not count it yet, _3.3 P3d)
-                    config.card_settings.navigation.bar.locate_button = false;
+                    // - the Locate Button stays ON: it floats over the card, so the title keeps the phone's whole line HeroTitleMeasure assumes
                 });
                 if (!Sheet.IsOpen) yield return Open("lamp", "en", SheetStopRule.Stop.Half);
                 yield return CardTestInput.Settle(0.2f);
@@ -574,7 +572,11 @@ namespace TileStories.Tests
                 Assert.AreEqual(CardTestInput.TokenPx("--ts-text-halo-wide-width"), back.resolvedStyle.unityTextOutlineWidth, 0.01f,
                     "'" + front.text + "': the back label's close outline");
                 Assert.AreEqual(front.resolvedStyle.fontSize, back.resolvedStyle.fontSize, 0.01f, "'" + front.text + "': the same size");
-                Assert.AreEqual(front.resolvedStyle.unityFontDefinition.fontAsset, back.resolvedStyle.unityFontDefinition.fontAsset, "...the same face");
+                // - the same face in its halo twin (FontAtlasBuilder: "<face> UITK Halo", the wide SDF only the glow needs, _3.3 P3e)
+                var frontFace = front.resolvedStyle.unityFontDefinition.fontAsset;
+                var backFace = back.resolvedStyle.unityFontDefinition.fontAsset;
+                Assert.IsNotNull(frontFace, "precondition: '" + front.text + "' draws a UI Toolkit font asset");
+                Assert.AreEqual(frontFace.name + " Halo", backFace?.name, "'" + front.text + "': the back label draws the word's face's halo twin");
                 var box = front.LocalToWorld(front.contentRect);
                 // - its CONTENT box (its own box is grown by the halo's reach, so a cut word clips past its glow)
                 var under = back.LocalToWorld(back.contentRect);

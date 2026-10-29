@@ -353,10 +353,12 @@ namespace TileStories.Editor.Tests
                     }
                 else if (f.FieldType == typeof(CardSectionSettings))
                     edits.Add((f.Name, s => s.sections.start = CardOptions.SectionStartWave));
+                else if (f.FieldType == typeof(CardLocateSettings))
+                    edits.Add((f.Name, s => s.locate.style = CardOptions.LocateGlassPing));
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(11 + 1 + 11 + 24 + 3, edits.Count,
-                "every card_settings field (walked by reflection) has an edit: 11 wall-level (sections the 11th) + 1 components + 11 container (blocks the 11th) + 24 navigation (bar the 24th) + 3 demo card");
+            Assert.AreEqual(12 + 1 + 11 + 24 + 3, edits.Count,
+                "every card_settings field (walked by reflection) has an edit: 12 wall-level (sections the 11th, locate the 12th) + 1 components + 11 container (blocks the 11th) + 24 navigation (bar the 24th) + 3 demo card");
 
             foreach (var (name, change) in edits)
             {

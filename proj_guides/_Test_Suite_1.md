@@ -153,6 +153,16 @@ SearchDemoTests, MarkerViewRuntimeTests. The method-level tags are on the slow f
   test's real Tint Depth drag took 2 undo steps once in a full EditMode run (1 in every run of its own); it now records the count
   (`TestEvidence/Editor/live_tint_depth_drag_steps.txt`) and walks Ctrl+Z by it -- the grouping's fixture, ConfigUndoGroupingTests, stays green.
   The bar labels' ratios are written fresh per case (`labels_ratios_<position>_<mode>.txt`): the old appended file mixed runs.
+- **P3e** rewrote PoiCardLocateFabSceneTests for the pin (17 tests, ~240 s: every Style x Colour rendered light / dark over the paper and the
+  hero) and added PoiCardBrightPageSceneTests (4 tests, ~90 s: 30 Start x Colour x mode ground renders) -- both card fixtures of BLOCK from
+  now on -- and CardLocateEditorTabTests / LivePlayModeCardLocateTests (enters Play Mode, ~19 s) to the EditMode suite. SHARED GROUND touched:
+  `CardTestInput.HoldTheWallStill` / `HoldSectionsStill` now also freeze the Locate Button's float -- a still render needs every clock held, and
+  a floating pin made every `GrabStill` of the card wait out its 29 frames ("the picture never held still"). A new moving part of the card
+  joins those two helpers the same day. The pin then moved to its own layer over the card: PoiCardLocateFabSceneTests 25 tests (~300 s; the
+  hero words unchanged with the button off, the float inside its target at Size 0.6 / 2, the halo's edge or the disc >= 3:1 on every hero picture
+  light / dark, Half / Full). SHARED GROUND touched: `CardTestInput.ReachableStack` stops above the shown Locate Button and its chip (a finger
+  there presses it) -- the NavBar's real strokes started on the chip once the 1x pin lowered it. A still render of a TURNTABLE hero (the Sacred
+  Arch turns under Reduce Motion) waits for stillness only where it measures (`PoiCardLocateFabSceneTests.GrabStillAround`).
 - **Two silent Painting tests.** `TheTabsWithChipsStrip_...` and `WhereTheChromeHidesTheStrip_...` read the wall's top element through
   `Assume`. When the developer moved the wall to icon tabs, they turned Inconclusive, and Inconclusive does not fail a run. They now
   set tabs with chips themselves, assert it, and are re-based on pattern 2. A wall-choice `Assume` hides a test; this was the only one

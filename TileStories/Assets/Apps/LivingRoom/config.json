@@ -14509,6 +14509,12 @@
             "motion": "reveal",
             "replay": "every_pass",
             "vary": "same"
+        },
+        "locate": {
+            "style": "pin_label",
+            "colour": "ar_teal",
+            "size": 1.0,
+            "float_motion": true
         }
     },
     "search_demo": {

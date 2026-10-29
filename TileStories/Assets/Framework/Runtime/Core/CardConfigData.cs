@@ -59,6 +59,29 @@ namespace TileStories
         // what stands between two of them, their colour, how strong it is and how it moves. Under Look Cards (container.blocks) none of it
         // draws. An old config loads with v6's defaults
         public CardSectionSettings sections = new();
+        // The Locate Button's look (_3.3 P3d review b; Detail Card > Locate Button): the card's "Show me where it is" pin. Whether it shows
+        // at all is the Navigation Bar's Locate Button switch (navigation.bar.locate_button). An old config loads with the defaults
+        public CardLocateSettings locate = new();
+    }
+
+    // The Locate Button's options (LocateFabRule reads each with its default; an unknown value is read as the default)
+    [Serializable]
+    public class CardLocateSettings
+    {
+        // Style: "pin" (a floating map pin) | "pin_label" (the default: the pin with "Find it on the wall" on a light chip at rest, folding
+        // away once the visitor scrolls) | "glass_ping" (the pin on a light glass disc, a soft ring going out every few seconds)
+        public string style = CardOptions.LocatePinLabel;
+        // Colour: the pin's -- "ar_teal" (the default) | "fresh_green" | "cyan" | "accent" (the theme's accent); theme tokens, light and dark
+        public string colour = CardOptions.LocateTeal;
+        // Size: the pin's height as a share of the Navigation Bar's CHOSEN group's disc (SizeDefault 1: as big as the disc, 40 pt; 0.6 to
+        // twice it); the touch target round it is never under 44 pt
+        public float size = SizeDefault;
+        // Float: the pin bobs slowly over the bar, its shadow breathing with it (on by default); the card's Reduce Motion keeps it still
+        public bool float_motion = true;
+
+        public const float SizeMin = 0.6f;
+        public const float SizeMax = 2f;
+        public const float SizeDefault = 1f;
     }
 
     // The Sections options (v6's Tweaks "Sections", same names, order and defaults): every choice a CardOptions.Section* key, an unknown value
@@ -526,6 +549,19 @@ namespace TileStories
         public const string SectionVaryByGroup = "by_group";
         public static readonly string[] SectionVaries = { SectionVarySame, SectionVaryByGroup };
         public static readonly string[] SectionVaryLabels = { "Same", "By Group" };
+
+        // The Locate Button's choices (CardLocateSettings, _3.3 P3d review b) and the Editor's words for them
+        public const string LocatePin = "pin";
+        public const string LocatePinLabel = "pin_label";
+        public const string LocateGlassPing = "glass_ping";
+        public static readonly string[] LocateStyles = { LocatePin, LocatePinLabel, LocateGlassPing };
+        public static readonly string[] LocateStyleLabels = { "Floating Pin", "Pin + Label", "Glass + Ping" };
+        public const string LocateTeal = "ar_teal";
+        public const string LocateGreen = "fresh_green";
+        public const string LocateCyan = "cyan";
+        public const string LocateAccent = "accent";
+        public static readonly string[] LocateColours = { LocateTeal, LocateGreen, LocateCyan, LocateAccent };
+        public static readonly string[] LocateColourLabels = { "AR Teal", "Fresh Green", "Cyan", "Accent" };
 
         // The Navigation Bar's choices (CardNavBarSettings, _3.3 S4 third round = v5's Tweaks) and the Editor's words for them, each list
         // in v5's order; an unknown value reads as the option's default (NavBarRule)

@@ -83,8 +83,18 @@
     background-color: var(--ts-clear);
 }
 
-/* The Locate Button ("Show me where it is", _3.3 P3d, LocateFabView): the accent disc at the sheet's bottom right -- its size, bottom and
-   inset are placed by C# (LocateFabRule over the card's tokens); it slides away with the bar under Hide While Scrolling */
+/* The Locate Button ("Show me where it is", _3.3 P3d review b, LocateFabView): a map pin floating at the sheet's bottom right in a clear
+   touch target -- the parts' sizes, its bottom and inset are placed by C# (LocateFabRule over the card's tokens), the pin painted from
+   the theme (LocatePin); it slides away with the bar under Hide While Scrolling. It floats in its own layer after the sheet (the card
+   layer's whole area, no finger of its own): it never takes room in the sheet */
+.poi-card-locate {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
 .poi-card__fab,
 .poi-card__fab:hover,
 .poi-card__fab:active {
@@ -92,9 +102,7 @@
     margin: 0;
     padding: 0;
     border-width: 0;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--ts-accent);
+    background-color: var(--ts-clear);
 }
 
 .poi-card__fab {
@@ -108,14 +116,69 @@
     opacity: 0;
 }
 
-.poi-card--chrome-instant .poi-card__fab {
+/* Reduce Motion: it slides at once, like the chrome (the sheet's instant class does not reach its layer) */
+.poi-card__fab--instant {
     transition-duration: 0s;
 }
 
-.poi-card__fab-mark {
-    width: var(--ts-fab-icon);
-    height: var(--ts-fab-icon);
-    --ts-icon-stroke: 2px;
+.poi-card__fab-shadow,
+.poi-card__fab-float,
+.poi-card__fab-pin,
+.poi-card__fab-glass,
+.poi-card__fab-chip {
+    position: absolute;
+}
+
+/* the shadow lies on the touch target's foot (C# sizes it and breathes it with the float) */
+.poi-card__fab-shadow {
+    bottom: 0;
+}
+
+/* Glass + Ping: the light glass disc holding the pin, its bright edge; the ping ring over it (scaled and faded by C#) */
+.poi-card__fab-glass {
+    left: 0;
+    top: 0;
+    background-color: var(--ts-locate-glass);
+    border-width: 1px;
+    border-color: var(--ts-locate-glass-line);
+}
+
+.poi-card__fab-ping {
+    position: absolute;
+    left: -1px;
+    top: -1px;
+    right: -1px;
+    bottom: -1px;
+    border-width: 2px;
+}
+
+/* Pin + Label: "Find it on the wall" on a light chip (both modes), folding away towards the pin once the visitor scrolls */
+.poi-card__fab-chip {
+    margin: 0;
+    padding: 0 var(--ts-space-4);
+    -unity-text-align: middle-center;
+    white-space: nowrap;
+    font-size: var(--ts-fab-chip-text);
+    -unity-font-style: bold;
+    color: var(--ts-locate-chip-ink);
+    background-color: var(--ts-locate-chip);
+    border-width: 2px;
+    transition-property: opacity, translate;
+    transition-duration: 0.3s;
+    transition-timing-function: ease-out;
+}
+
+.poi-card__fab-chip--folded {
+    opacity: 0;
+    translate: 10px 0;
+}
+
+.poi-card__fab-chip--no-room {
+    visibility: hidden;
+}
+
+.poi-card__fab--instant .poi-card__fab-chip {
+    transition-duration: 0s;
 }
 
 /* after the hero: v5's light glass (smoked in dark), a hairline round it, the mark in the card's ink */

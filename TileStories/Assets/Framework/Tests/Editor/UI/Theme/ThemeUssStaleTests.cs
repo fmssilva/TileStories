@@ -98,8 +98,9 @@ namespace TileStories.Tests
                     mode.key + ": one rule on the root ThemeController marks");
         }
 
-        // The type roles (_3.3 P4.3, R12.3): the two faces as tokens on the marked root, pointing at the UI Toolkit assets of the theme's
-        // keys (read from the library, not re-typed); the body face as the root's font; the display face on exactly the asset's selectors
+        // The type roles (_3.3 P4.3, R12.3): the two faces (and their halo twins) as tokens on the marked root, pointing at the UI Toolkit
+        // assets of the theme's keys (read from the library, not re-typed); the body face as the root's font; the display face on exactly
+        // the asset's selectors
         [Test]
         public void TheTypeRoles_AreGenerated_BodyOnTheRoot_DisplayOnExactlyItsSelectors()
         {
@@ -115,13 +116,17 @@ namespace TileStories.Tests
             string root = ".ts-app.ts-theme-" + theme.Key;
             int rule = lines.IndexOf(root + " {");
             Assert.GreaterOrEqual(rule, 0, "one rule on the theme's root, whatever the mode");
+            // - each face's halo twin beside it (only the hero words' back labels draw it, _3.3 P3e)
+            string Halo(string ui) => ui.Substring(0, ui.Length - " UITK.asset".Length) + " UITK Halo.asset";
             CollectionAssert.AreEqual(new[]
             {
                 "    --ts-font-body: url(\"/" + body + "\");",
                 "    --ts-font-display: url(\"/" + display + "\");",
+                "    --ts-font-body-halo: url(\"/" + Halo(body) + "\");",
+                "    --ts-font-display-halo: url(\"/" + Halo(display) + "\");",
                 "    -unity-font-definition: var(--ts-font-body);",
                 "}",
-            }, lines.Skip(rule + 1).Take(4).ToList(), "the root rule: both faces as tokens, the body face as every text's font");
+            }, lines.Skip(rule + 1).Take(6).ToList(), "the root rule: both faces and their halo twins as tokens, the body face as every text's font");
 
             var displayed = lines.Where(l => l.StartsWith(root + " .")).Select(l => l.Substring(root.Length + 1).TrimEnd(',', ' ', '{')).ToList();
             CollectionAssert.AreEqual(type.displaySelectors, displayed, "the display rule lists exactly the asset's selectors, in order");

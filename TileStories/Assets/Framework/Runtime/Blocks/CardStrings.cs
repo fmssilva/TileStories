@@ -115,6 +115,8 @@ namespace TileStories
             // show_on_wall: its button, and the caption over the neighbours of the with_neighbours look
             public const string ShowOnWallButton = "show_on_wall_button";
             public const string ShowOnWallNearby = "show_on_wall_nearby";
+            // the Locate Button: the words on its chip (Style Pin + Label), beside the pin at rest
+            public const string LocateLabel = "locate_label";
             // actions: an Open Block button with no words of its own whose target has no heading either (_3.2 step 4)
             public const string OpenBlockButton = "open_block_button";
             // audio_guide and the mini-player (step 9A): the names of the play / pause button, the speed chip, the captions switch and the
@@ -308,7 +310,7 @@ namespace TileStories
                 KnowledgePrevious, KnowledgeNext,
                 FeedbackThumbsQuestion, FeedbackStarsQuestion, FeedbackThumbUp, FeedbackThumbDown, FeedbackStar, FeedbackThanks,
                 PollYourChoice, PollThanks, PollPercent, CollectHeading, CollectAdd, CollectCollected, CollectProgress,
-                DialogueContinue, DialogueAgain, DialogueYou, ShowOnWallButton, ShowOnWallNearby, OpenBlockButton,
+                DialogueContinue, DialogueAgain, DialogueYou, ShowOnWallButton, ShowOnWallNearby, LocateLabel, OpenBlockButton,
                 AudioPlay, AudioPause, AudioSpeed, AudioCaptions, AudioSeek, AudioQueued, AudioUnavailable, MiniPlayerOpen,
                 MiniPlayerStop, VideoFullScreen, VideoUnavailable, VideoChapters, Model3DHint, Model3DLoading,
                 Panorama360DragHint, Panorama360GyroHint, Panorama360Loading, PlaceInArButton, PlaceInArRemove, PlaceInArPlaced, PlaceInArNotLocalised,
