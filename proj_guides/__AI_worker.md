@@ -14,7 +14,7 @@ So start by reading them all.
 
 
 ## `And now: domain proj_guides\_3.3_POI_Card_Styles.md`
-P3e (continued) -- the locate pin at the Navigation Bar's icon size, the hero words untouched, the 17 reds green; commit point
+P3e (continued) -- the locate pin at the chosen disc's size, floating over the card, the 17 reds green; commit point
 (`_3.3` fourth round > "P3d review" b; the tracker's HANDOFF).
 GATE: as before (MCP; push: origin = the Architect's last commit; SDF fonts; compile clean before every run, editor_state confirms a
 run STARTED and Play Mode is off; Unity c for runs, b for captures). Continue on the uncommitted tree.
@@ -23,11 +23,13 @@ SUBAGENTS: per 00-process (ceiling Opus + medium; Unity single owner).
 NEW ORDER OF WORK (`00-process.md` ACT MODE 2, `40-testing.md` "Look before you test"): build -> compile -> LOOK and polish with
 captures -> only then the PlayMode tests, written against the accepted look.
 TEST PLAN: BLOCK = full EditMode + the 16 card fixtures (the tracker's 14 + LocateFab + BrightPage) on the FINAL state.
-PART 1 -- size and place (the developer asked for the Navigation Bar's icon size; 54 pt was not it): Size default = the bar's icon
-size (1x), range up to 2x; the hit area stays 44+ pt and is transparent. The pin sits right, above the bar, and NEVER narrows or moves
-the hero's words: the words keep their full width and place at every stop. The label shows only where it fits beside the words' real
-ink; otherwise only the pin shows. LOOK: captures at Half and Full, over the hero and on paper, light and dark, The Lamp, the Painting,
-the Ribeira Palace; the float as a frame sequence. Fix until it looks right, then PART 2.
+PART 1 -- size and place (developer, 2026-10-29): Size default = the chosen group's disc (40 pt, 1x), range 0.6x-2x in the Editor;
+the hit area stays 44+ pt and is transparent. The pin FLOATS: it lives in the card's floating layer (absolutely positioned, drawn
+after the sheet -- UI Toolkit has no z-index, the draw order is the hierarchy order), so it takes NO layout room and NEVER narrows,
+wraps or moves the hero's words or any block. Remove the rule that narrows the words' rows for the button. It may sometimes cover a
+bit of text (an edge case the visitor scrolls past) -- accepted. The label ("Find it on the wall") still shows only where it does not
+cover the hero's words at rest; otherwise only the pin shows. LOOK: captures at Half and Full, over the hero and on paper, light and
+dark, The Lamp, the Painting, the Ribeira Palace; the float as a frame sequence. Fix until it looks right, then PART 2.
 PART 2 -- contrast of the pin over a picture: the rim reads 1-2:1 there. The pin is a non-text control, so it needs >= 3:1 (WCAG 1.4.11)
 for its outline against what is under it: measure the white inner disc and the drop-shadow / glow edge against the picture; strengthen
 the dark halo under the pin over pictures until one of them reaches 3:1 on every hero (light and dark). On paper the rim already reads
