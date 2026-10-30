@@ -579,6 +579,17 @@
     padding-right: var(--ts-el-page-inset);
 }
 
+/* ...and in an OPEN section (no frame: the clip bleeds by the open gutter) the rows take that gutter back, so the words stand on the
+   column every open block's words stand on; the cut fades into the open sheet's paper, not a framed block's surface */
+.card-block-slot--open .ts-composed__clip > .ts-composed__rows {
+    padding-left: var(--ts-open-gutter);
+    padding-right: var(--ts-open-gutter);
+}
+
+.card-block-slot--open .ts-composed__fade {
+    -unity-background-image-tint-color: var(--ts-sheet-open);
+}
+
 /* A preview that opens with a full-bleed picture (_3.3 S4a): the clip pulls up over the frame's top padding, so the picture sits flush with
    the block's top as well as its sides, its top corners rounded with the frame's inner corner (the clip's overflow masks it) */
 .card-block-slot--framed .ts-composed--picture-first > .ts-composed__preview > .ts-composed__clip {

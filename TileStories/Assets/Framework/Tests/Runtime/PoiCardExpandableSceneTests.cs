@@ -192,8 +192,11 @@ namespace TileStories.Tests
             var keys = LampKeys();
             var rows = keys.Where(k => Stack.CompactRowOf(k) != null).ToList();
             Assert.AreEqual(59, rows.Count, "every scrolling block of The Lamp is a row (62 less the header, the pinned chip, the footer CTA)");
-            Assert.AreEqual(2, Stack.BoundViews.Count, "only the header and the sticky CTA bind a stack view");
-            Assert.AreEqual(2, Stack.HeroActionViews.Count, "and the hero its two: the sticky action and Listen (the hero chip, _3.3 P4.4a)");
+            // - the default Navigation Bar floats at the bottom, where the Locate Button stands: Sticky Action Automatic leaves the sticky CTA
+            //   out of the card (no footer, no hero pill, _3.3 P3d)
+            Assert.IsFalse(NavBarRule.StickyActionShown(Live.navigation), "precondition: the default bar leaves the sticky call to action out");
+            Assert.AreEqual(1, Stack.BoundViews.Count, "only the header binds a stack view");
+            Assert.AreEqual(1, Stack.HeroActionViews.Count, "and the hero its one: Listen (the hero chip, _3.3 P4.4a)");
             foreach (string key in rows)
             {
                 Assert.IsNull(Stack.ViewOfBlock(key), key + ": no view");

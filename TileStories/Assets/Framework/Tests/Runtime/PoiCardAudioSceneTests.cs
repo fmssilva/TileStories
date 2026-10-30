@@ -93,12 +93,6 @@ namespace TileStories.Tests
                 + " started the narration (sheet " + Sheet.Root.layout.height + " of Full " + Sheet.Stops.Full + ")");
         }
 
-        private IEnumerator ScrollTo(IBlockView view)
-        {
-            Sheet.Stack.Scroll.ScrollTo(Sheet.Stack.SlotOf(view));
-            yield return CardTestInput.Settle(0.2f);
-        }
-
         private static IEnumerator Tap(VisualElement e)
         {
             yield return CardTestInput.Tap(e.panel, e.worldBound.center);
@@ -157,10 +151,9 @@ namespace TileStories.Tests
             Assert.AreEqual("0:00 / 3:11", player.TimeText.text, "the other English guide's real length: 191.40 s");
             Assert.AreEqual(0, player.Cues.Count);
             Assert.AreEqual(DisplayStyle.None, player.CaptionsButton.style.display.value, "no captions file: no switch");
-            yield return ScrollTo(player);
             foreach (string speed in new[] { "1.25x", "1.5x", "2x", "0.5x", "0.75x", "1x" })
             {
-                yield return Tap(player.SpeedChip);
+                yield return CardTestInput.TapInReach(Sheet, player.SpeedChip);
                 Assert.AreEqual(speed, player.SpeedChip.text, "the Wide list: half speed to double");
             }
             Assert.AreEqual("Portugal, promotional audio", player.Title.text);
@@ -187,13 +180,13 @@ namespace TileStories.Tests
             var player = Player;
             Assert.AreEqual(CardIcons.Shape.Pause, player.PlayGlyph.Kind, "the player shows what the chip started");
             Assert.AreEqual("0:06 / 2:44", player.TimeText.text);
-            yield return ScrollTo(player);
-            yield return Tap(player.CaptionsButton);
-            Assert.IsTrue(player.CaptionsShown);
+            yield return CardTestInput.TapInReach(Sheet, player.CaptionsButton);
+            Assert.IsTrue(player.CaptionsShown, "a real tap switched the captions on");
             Advance(6f);
             Assert.AreEqual(CaptionOf2, player.CaptionLine.text, "at 0:12 the second caption (7.17 s to 14.12 s), the cue of that moment");
             yield return Capture("Lamp_Audio_Player_Captions");
 
+            yield return CardTestInput.IntoReach(Sheet, player.Scrubber.Root);
             Rect bar = player.Scrubber.Root.worldBound;
             yield return CardTestInput.Tap(player.Root.panel, new Vector2(bar.x + bar.width * 0.5f, bar.center.y));
             Assert.AreEqual(82.26f, _audio.Position, 1.5f, "a real press in the middle of the bar: half of the 164.52 s");
@@ -409,8 +402,7 @@ namespace TileStories.Tests
             Assert.AreEqual(GuidePath, _audio.Current.ClipPath, "the narration plays on, untouched");
             Assert.AreEqual(1, _out.LoadCount);
 
-            yield return ScrollTo(player);
-            yield return Tap(player.PlayButton);
+            yield return CardTestInput.TapInReach(Sheet, player.PlayButton);
             Assert.AreEqual(EnglishPath, _audio.Current.ClipPath, "asked for: the English clip is the current audio (Switch)");
             Advance(0.5f);
             Assert.AreEqual("guide_paco_en", _out.Clip.name, "after the fade it is what plays");
@@ -470,10 +462,9 @@ namespace TileStories.Tests
             var player = Player;
             Assert.AreEqual("Ouça", Sheet.Stack.HeadingOf(player).text);
             Assert.AreEqual("Legendas", player.CaptionsButton.text);
-            yield return ScrollTo(player);
-            yield return Tap(player.PlayButton);
+            yield return CardTestInput.TapInReach(Sheet, player.PlayButton);
             Assert.AreEqual("Pausar", player.PlayButton.tooltip);
-            yield return Tap(player.CaptionsButton);
+            yield return CardTestInput.TapInReach(Sheet, player.CaptionsButton);
             // - _3.3 P1b: Per Language media -- the Portuguese card plays the Portuguese narration and shows its own captions
             Assert.AreEqual("audio/guide_castle_pt.mp3", _audio.Current.ClipPath, "the Portuguese card asked for the Portuguese file");
             Assert.AreEqual("guide_castle_pt", _out.Clip.name, "and the device plays it");

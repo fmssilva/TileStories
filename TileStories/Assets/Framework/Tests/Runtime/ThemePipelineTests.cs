@@ -75,7 +75,13 @@ namespace TileStories.Tests
             // - the six roots that carry the card's token classes: each sits under the marked root and paints with the theme's values
             // - the sheet has no ground of its own since P4.4b: its bar is see-through glass (S4a review), the stack between blocks is glass
             AssertPaints(sheet.Root.resolvedStyle.backgroundColor, "--ts-clear", "the sheet");
-            AssertPaints(sheet.Stack.HeaderSlot.resolvedStyle.backgroundColor, "--ts-bar-glass", "the bar");
+            // - the title bar is clear since P2: the chrome band behind the row is its ground
+            AssertPaints(sheet.Stack.HeaderSlot.resolvedStyle.backgroundColor, "--ts-clear", "the title bar");
+            // - the Navigation Bar is painted in C# (one path: fill and hairline), its colours read by name from the theme it sits under
+            var bar = sheet.Slots.Bar;
+            Assert.AreEqual(CardOptions.NavBarSolid, NavBarRule.Fill(bar.Settings), "precondition: the framework default bar is Solid");
+            AssertPaints(bar.PaintedFill, "--ts-bar", "the Navigation Bar's fill");
+            AssertPaints(bar.PaintedLine, "--ts-hair", "the Navigation Bar's hairline");
             AssertPaints(sheet.Stack.Scroll.resolvedStyle.unityBackgroundImageTintColor, "--ts-glass-ground", "the glass between blocks");
             AssertPaints(Card.AudioCoordinator.Mini.Root.resolvedStyle.backgroundColor, "--ts-surface", "the mini-player");
             AssertPaints(sheet.Overlay.Scrim.resolvedStyle.backgroundColor, "--ts-scrim", "the menu layer's scrim");

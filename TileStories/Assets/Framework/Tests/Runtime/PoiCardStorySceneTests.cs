@@ -64,14 +64,14 @@ namespace TileStories.Tests
             Assert.AreEqual(language, Sheet.Context.Language, "precondition: the card speaks " + language);
         }
 
-        // The story's view on the card, scrolled into view, its entry settled
+        // The story's view on the card, brought where a finger reaches it (the middle of ReachableStack, held still: a tap on it then
+        // scrolls no further, so the offset read after this is the one Back gives back), its entry settled
         private IEnumerator Preview(System.Action<ComposedBlockView> got)
         {
             var block = StoryBlock(out _);
             var view = Sheet.Stack.ViewOfBlock(block.key);
             Assert.IsInstanceOf<ComposedBlockView>(view, "the story block is on The Painting's card, drawn by the composed view");
-            Scroll.ScrollTo(view.Root);
-            yield return CardTestInput.Settle(0.3f);
+            yield return CardTestInput.IntoReach(Sheet, view.Root);
             ((ComposedBlockView)view).Motion.Finish();
             got((ComposedBlockView)view);
         }
@@ -79,7 +79,7 @@ namespace TileStories.Tests
         // A real tap on the preview: the page in the full view, its rows' motion settled
         private IEnumerator OpenPage(ComposedBlockView preview, System.Action<ComposedBlockView> got)
         {
-            yield return CardTestInput.TapInView(Scroll, preview.Preview);
+            yield return CardTestInput.TapInReach(Sheet, preview.Preview);
             yield return CardTestInput.Settle(0.3f);
             Assert.IsTrue(Sheet.FullView.IsOpen, "a real tap on the preview opened the full view");
             var page = (ComposedBlockView)Sheet.FullView.View;
@@ -129,6 +129,14 @@ namespace TileStories.Tests
             Assert.Greater(margin, 0f, "precondition: the rows keep the text's margin");
             Assert.AreEqual(preview.Root.worldBound.width + 2f * margin, picture.Frame.Root.worldBound.width, 1f, "the hero runs to the frame's edges");
             Assert.AreEqual(preview.Root.worldBound.xMin - margin, picture.Frame.Root.worldBound.xMin, 1f, "...from its left edge");
+            // - the words on the card's text column (C1: open sections, the default, once left them on the bleed's edge, 24 px out of it):
+            //   where the block itself starts and its Open Row stands; the cut fades into the open sheet's paper it lies on
+            Assert.IsTrue(SectionStyleRule.IsOpen(Session.CardSettings.container), "precondition: the framework default -- the blocks open");
+            var titleRow = preview.Shown[2].Component.Root;
+            Assert.AreEqual(preview.Root.worldBound.xMin, titleRow.worldBound.xMin, 1f, "the title starts on the text's margin");
+            Assert.AreEqual(preview.OpenRow.worldBound.xMin, titleRow.worldBound.xMin, 1f, "...the column its Open Row stands on");
+            Assert.IsTrue(CardTokenColours.TryResolve(preview.Root, "--ts-sheet-open", out Color paper), "precondition: the theme has the open sheet's paper");
+            Assert.AreEqual((Color32)paper, (Color32)preview.Fade.resolvedStyle.unityBackgroundImageTintColor, "the cut fades into the open sheet's paper");
             string Words(ElementRow row) => BlockFieldReader.Pick(row.Field(BuiltInElements.TextField).text, language, "en");
             Assert.AreEqual(Words(rows.First(r => r.Kind == BuiltInElements.Title)), Shown(((LineElement)preview.Shown[2].Component).Text.text), "the title in " + language);
             Assert.AreEqual(Words(rows.First(r => r.Kind == BuiltInElements.Lede)), Shown(((ProseElement)preview.Shown[3].Component).Text.Paragraphs[0].text), "the lede in " + language);
@@ -277,10 +285,10 @@ namespace TileStories.Tests
             // - Tap Nothing: a real finger on the preview's picture opens nothing; on the Open Row it opens the page
             yield return Preview(v => preview = v);
             var picture = preview.Shown.First(s => s.Content.Kind == BuiltInElements.Picture).Component.Root;
-            yield return CardTestInput.TapInView(Scroll, picture);
+            yield return CardTestInput.TapInReach(Sheet, picture);
             yield return CardTestInput.Settle(0.3f);
             Assert.IsFalse(Sheet.FullView.IsOpen, "Tap Nothing: a real tap on the preview's picture opens nothing");
-            yield return CardTestInput.TapInView(Scroll, preview.OpenRow);
+            yield return CardTestInput.TapInReach(Sheet, preview.OpenRow);
             yield return CardTestInput.Settle(0.3f);
             Assert.IsTrue(Sheet.FullView.IsOpen, "a real tap on the Open Row still opens the page");
             Assert.AreEqual(story.key, Sheet.FullView.BlockKey, "...the story's");

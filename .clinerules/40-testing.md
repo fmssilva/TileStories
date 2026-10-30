@@ -91,7 +91,7 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 (e.g. "59/59") as the acceptance criterion — counts change as tests are added; zero
 failures does not.
 
-**Which tests, when (three tiers).** RUN TIMES (replaced after a run when a number moved > ~10 %): full EditMode ~6 min (2240 tests); CORE ~17.5 min
+**Which tests, when (three tiers).** RUN TIMES (replaced after a run when a number moved > ~10 %): full EditMode ~7 min (2240 tests); CORE ~17.5 min
 (PlayMode 227 tests 17.0 min + EditMode 118 tests 20 s); FULL PlayMode ~82 min (1339 tests); per-fixture times in `TestEvidence/Harness/fixture_times.csv` (`TestRunRecorder` writes it after every run).
 
 - **BLOCK -- every block, after each change:** compile, the full EditMode suite, then the PlayMode fixtures of the changed code
@@ -275,9 +275,10 @@ application is a broken test, not a flaky one.
   first bind). Never read, clear or restore PlayerPrefs in a test (`VisitorStateIsolationTests` fails on it). Why: a "dark" picked while playing by
   hand coloured a test's card.
 - **Measure relative to the thing itself, and prove the precondition.** An offset is measured from the element's own rest
-  position, not from a neighbour whose distance depends on the screen (`DisplacementLabelTests`); a tap first scrolls its target
-  into view and asserts it is inside the visible part (`CardVideoGalleryTests.TapInView` -- `ScrollTo(block)` on a block taller
-  than the viewport lines up its far edge); an "empty spot" is empty under a whole finger (22 px around it,
+  position, not from a neighbour whose distance depends on the screen (`DisplacementLabelTests`); a tap on the real card's stack goes
+  through `CardTestInput.TapInReach` (the target to the middle of `ReachableStack`, held still) -- the Navigation Bar and the Locate
+  Button float over the stack's foot, exactly where a bare `ScrollTo` leaves a target, and the finger lands on the bar;
+  `TapInView` (the viewport only) is for a ScrollView nothing floats over; an "empty spot" is empty under a whole finger (22 px around it,
   `SearchSceneFixture.IsEmptyAround`), not one pixel; a test about scrolling asserts the stack really scrolls (content taller
   than the viewport at the stop it uses), never a 0 that proves nothing.
 - A capture that keeps catching a neighbouring panel is fixed by restoring the default layout (`Window/Layouts/Default`

@@ -155,8 +155,11 @@ namespace TileStories.Tests
             yield return OpenFull("lamp");
             var views = Sheet.Stack.BoundViews.ToList();
             Assert.AreEqual(2, views.OfType<SourcesBlockView>().Count(), "precondition: both Sources blocks are shown");
-            // - _3.3 P4.4a: the hero chip is the hero's Listen, not a stack view
-            Assert.AreEqual(lamp.card.blocks.Count, views.Count + Sheet.Stack.HeroActionViews.OfType<AudioGuideBlockView>().Count(), "nothing was dropped by ordering them");
+            // - _3.3 P4.4a: the hero chip is the hero's Listen, not a stack view; _3.3 P3d: the sticky call to action is left out under the
+            //   default bottom bar (Sticky Action Automatic), by that rule, not by the ordering
+            int leftOut = NavBarRule.StickyActionShown(Session.CardSettings.navigation) ? 0
+                : lamp.card.blocks.Count(b => b.kind == BuiltInBlocks.ActionsKind && b.variant == BuiltInBlocks.ActionsStickyCta);
+            Assert.AreEqual(lamp.card.blocks.Count - leftOut, views.Count + Sheet.Stack.HeroActionViews.OfType<AudioGuideBlockView>().Count(), "nothing was dropped by ordering them");
             Assert.Greater(ShownFamilies().Distinct().Count(), 3, "precondition: the Lamp's card really spans several families");
 
             // the default behaves exactly as Sources At The End did
@@ -187,8 +190,8 @@ namespace TileStories.Tests
             // by_family: one contiguous run per family, in the registered family order, Sources last
             yield return Push(c => c.card_settings.navigation.block_order = CardOptions.BlockOrderByFamily);
             var families = ShownFamilies();
-            Assert.AreEqual(lamp.card.blocks.Count, families.Count + Sheet.Stack.HeroActionViews.OfType<AudioGuideBlockView>().Count(),
-                "by_family: still every block, only reordered (the hero chip: the hero's Listen, _3.3 P4.4a)");
+            Assert.AreEqual(lamp.card.blocks.Count - leftOut, families.Count + Sheet.Stack.HeroActionViews.OfType<AudioGuideBlockView>().Count(),
+                "by_family: still every block, only reordered (the hero chip: the hero's Listen, _3.3 P4.4a; the sticky CTA left out as above)");
             foreach (string family in families.Distinct())
             {
                 var at = PositionsOf(family);

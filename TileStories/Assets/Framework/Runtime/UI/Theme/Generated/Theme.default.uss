@@ -32,9 +32,6 @@
     /* The card's chrome ground: the grabber row, the bar, the top strip, the footer -- opaque, so their words never sit on the
        glass */
     --ts-bar: rgb(255, 255, 255);
-    /* The see-through bars (_3.3 S4a review): the grab row, the bar and the navigation strips over the picture -- light enough
-       to show it, dense enough that the bar's ink keeps >= 7:1 over the worst (black or white) behind it */
-    --ts-bar-glass: rgba(255, 255, 255, 0.6);
     /* The round buttons' ground on a see-through bar (X, settings, menu): a faint disc, no rim -- the solid mark carries the
        button */
     --ts-button-glass: rgba(20, 17, 13, 0.07);
@@ -311,9 +308,6 @@
     /* The card's chrome ground: the grabber row, the bar, the top strip, the footer -- opaque, so their words never sit on the
        glass */
     --ts-bar: rgb(28, 26, 23);
-    /* The see-through bars (_3.3 S4a review): the grab row, the bar and the navigation strips over the picture -- light enough
-       to show it, dense enough that the bar's ink keeps >= 7:1 over the worst (black or white) behind it */
-    --ts-bar-glass: rgba(28, 26, 23, 0.78);
     /* The round buttons' ground on a see-through bar (X, settings, menu): a faint disc, no rim -- the solid mark carries the
        button */
     --ts-button-glass: rgba(255, 255, 255, 0.12);
