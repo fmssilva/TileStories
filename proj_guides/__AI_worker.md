@@ -14,33 +14,28 @@ So start by reading them all.
 
 
 ## `And now: domain proj_guides\_3.3_POI_Card_Styles.md`
-M1 -- clean the test ground so every card block from now on iterates fast and stays isolated (developer, 2026-10-30).
-This is NOT an audit for its own sake: its targets are (1) a component block (the story, then each block) tests in a few minutes on its
-own fixtures + EditMode; (2) one change to a block kind is made in ONE place of the test data, not in many near-identical POIs;
-(3) no test spends time on something old, retired or no longer true. Every finding must serve one of these three, or it is dropped.
-Method: AUDIT first (this session, nothing changed), then the developer picks, then FIX chunks (the next sessions). Skill steps from
-`proj_guides/skills/Test_Suite_Review.md` where they help.
-GATE: as before (MCP; push: origin = the Architect's last commit; SDF fonts; compile clean). No opening test run; per-fixture times come
-from the last FULL logs (C2); only if no log holds them, ONE FULL in the background (Unity c) with TestRunRecorder on.
-WORKER MODEL: Opus + effort Medium (an audit with judgement, no product code).
-SUBAGENTS: per 00-process -- good fits: Haiku to pull per-fixture times from the logs; Sonnet + medium to inventory the POIs / blocks of
-the LivingRoom and test configs; Sonnet + medium to list skipped tests with reasons and tests that prove the same thing twice.
-TEST PLAN: none (audit).
-PART 1 -- the TEST DATA (target 2): inventory every POI of the shipped LivingRoom wall and of the test / gallery configs (the Lamp set,
-the Painting, the Camera, Alfama, the gallery card, the generated fixtures): which block kinds each holds, which tests read it, which
-POIs are near-duplicates (same kinds, same content). Propose the SMALLEST set that still covers every kind, option and edge case the
-tests need -- e.g. one reference card per purpose (the full "golden" card, the many-markers wall, the edge-case card) -- and the plan to
-move the tests onto it. Never lose a case a test needs (name it).
-PART 2 -- OLD and USELESS tests (target 3): every skipped test and fixture by reason (163 PlayMode skips), with a verdict -- delete
-(retired, superseded design, the kept nav elements whose rebuild will write new tests on the bar's pattern) or keep (owner + reason);
-tests of superseded designs still running (the old Top Bar, the Cards look where Open is the default, old sticky action, ...); option
-matrices outside their component's own fixture (`40-testing.md` 4.2 "Tests stay on scope"); duplicates.
-PART 3 -- the COMPONENT MAP (target 1): a table component -> its fixtures (hero, Navigation Bar, sections, locate pin, story, each block
-kind, pages, chrome, Editor tabs) with today's time; the per-component BLOCK selection the next blocks will use; the slow fixtures in
-it and the cheapest proof that keeps each guarantee. Keep CORE true and near its time.
-RESULT: `proj_guides/_Test_Suite_2.md`: the three parts above, then a FIX list in block-sized chunks, each with its expected effect on
-the three targets (minutes saved, places-to-edit removed, tests deleted). AUDIT ONLY. Report with the Subagents line. STOP with one
-AskUserQuestion; the Architect and the developer pick the chunks.
+M2 -- fast, honest test runs: FIX chunks F1 + F2 + F4 + F11 of `proj_guides/_Test_Suite_2.md` (the developer chose the order:
+first the runs, then the golden card M3 = F3 + F6, then each block moves onto it = F7).
+GATE: as before (MCP; push: origin = the Architect's last commit; SDF fonts; compile clean before every run, editor_state confirms a run
+STARTED and Play Mode is off; Unity c). No opening test run.
+WORKER MODEL: Opus + effort Medium (test infrastructure from an exact audit; no product code).
+SUBAGENTS: per 00-process -- a Haiku pass to list every reference of each file / class F1 deletes (structure map, _Test_Suite_1, other
+tests, DevTools) fits well.
+TEST PLAN: full EditMode (with and without the split assembly, F11); CORE once (F2, F4 change what it holds) in the background.
+PART 1 -- F1, retire the old-navigation tests exactly as 2.1 lists (the 129 PlayMode + 31 EditMode skipped tests, the whole files,
+the `*OldNavigationTests` classes, the empty skeletons, `TestSkips.cs`, the NavigationElements cases, the Editor tab's old sweep). The
+kept nav elements' code stays; their rebuild will write new tests on the bar's pattern (the `_3.3` [rebuild] TODOs say so -- add that
+line to each). Structure map + `_Test_Suite_1.md` rows.
+PART 2 -- F2, re-aim CORE: the NavBar class tag onto 2-3 methods, SectionSheetScene's off, the Open sections' cheapest default test on;
+CORE guards the SHIPPED default. `_Test_Suite_1.md` section 3 rewritten as current truth.
+PART 3 -- F4, the per-component selection: PROVE `group_names` selects one kind's gallery cases (run it, show the count); tag
+`CardSmoke` (one cheapest test per card component); `40-testing.md` 4.2: the review-phase BLOCK becomes "full EditMode + the
+component's selection (`_Test_Suite_2.md` 3.2, kept current there) + CardSmoke"; RUN TIMES updated.
+PART 4 -- F11, the EditMode half: the six LivePlayMode* fixtures into their own test assembly (a block runs the rest by
+`assembly_names`; CORE / FULL run all); NavBarShapeRuleTests sampled where its asserts look (measure why it takes 40 s first).
+PART 5 -- the times after (EditMode per block, CORE), docs, report with the Subagents line and one commit message. STOP with one
+AskUserQuestion.
+OUT OF SCOPE: F3 (the golden card -- next block), F5, F6-F10, any product code.
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`
