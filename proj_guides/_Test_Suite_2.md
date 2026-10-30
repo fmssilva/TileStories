@@ -53,7 +53,7 @@ A block added, removed or reordered on the reference card means editing those fi
 Palace's gallery block", never `"block_56"`. Adding, moving or removing a block then edits the config only; the helper's own EditMode test
 asserts the golden card holds every registered kind exactly once (so a new kind is caught the day it is registered).
 
-### 1.4 What the Ribeira Palace must GAIN (one block each, default look, Ribeira content)
+### 1.4 What the Ribeira Palace must GAIN (one block each, default look, Ribeira content) -- built in M3 (section 4)
 From the move map (S2, section 6), with the tests each unlocks: video (inline + chapters) ~11, place_in_ar ~10, model_3d (inline +
 takeover) ~9, audio_guide `hero_chip` ~9, actions `sticky_cta` ~8 (the sticky action option), rich_text ~6, size_comparison ~5 (app kind),
 story_chapters ~4, panorama_360 (drag + gyro) ~3, show_on_wall ~3, status ~3, feedback 3, poll 2, hotspot_image `loupes` 2, collect,
@@ -163,7 +163,7 @@ stops x options) cost 5-60 s each. So the slow tests are **rendered option matri
 
 ### 3.2 The component map -- component -> its fixtures (today's s) -> its BLOCK selection
 
-KEPT CURRENT (`40-testing.md` 4.2 points here). A block on a component runs, after the EditMode half (`40-testing.md` 4.2: the suite
+KEPT CURRENT (`40-testing.md` 4.2 points here). Single-card fixtures run on the golden card through `ReferenceCard` (F3). A block on a component runs, after the EditMode half (`40-testing.md` 4.2: the suite
 without the Live assembly), its row's **selection** -- the fixtures in ONE `test_names` run (full class names: `TileStories.Tests.<X>`,
 the app's `TileStories.LivingRoom.Tests.<X>`), its gallery cases in ONE `group_names` run (a regex over the FULL test name, parameters
 included; proven on quick_facts: `CardGalleryTests\..*\("quick_facts` ran exactly its 5 looks + its compact row, 6 / 6) -- then
@@ -174,7 +174,7 @@ included; proven on quick_facts: `CardGalleryTests\..*\("quick_facts` ran exactl
 | Sheet: stops, drag, close, tap outside | PoiCardSceneTests' generic ~15 tests (~70), SheetDrag 17, FullHeight 20, TapZoom 41 | `test_names` PoiCardSceneTests, PoiCardSheetDragSceneTests, PoiCardFullHeightSceneTests, PoiCardTapZoomTests | ~5.5 min |
 | Hero (the header block) | Hero 295, gallery headers 92, ChromeMarks' hero half ~50 | `test_names` PoiCardHeroSceneTests, PoiCardChromeMarksSceneTests; `group_names` `CardGalleryTests\.EveryHeader` (40) | ~8 min (~5 after F5) |
 | Chrome: X, settings, top band, bottom area | Chrome 13, ChromeMarks 97, CardSettingsGallery 20, Theme 11 | `test_names` PoiCardChromeSceneTests, PoiCardChromeMarksSceneTests, CardSettingsGalleryTests, PoiCardThemeSceneTests | ~2.5 min |
-| Navigation Bar + NavController | NavBar 543, Nav 106 | `test_names` PoiCardNavBarSceneTests, PoiCardNavSceneTests | ~11 min (~6.5 after F5) |
+| Navigation Bar + NavController (+ the Sticky Action option) | NavBar 543, Nav 106 | `test_names` PoiCardNavBarSceneTests, PoiCardNavSceneTests | ~11 min (~6.5 after F5) |
 | Open sections (the default container) | Sections 388, BrightPage 100 | `test_names` PoiCardSectionsSceneTests, PoiCardBrightPageSceneTests | ~8 min (~5.5 after F5) |
 | Cards look (the other container) | SectionSheet 64, CardLight 59, ThemeFrame 30 | `test_names` SectionSheetSceneTests, CardLightSceneTests, ThemeFrameSceneTests | ~2.5 min |
 | Locate pin | Locate 310 | `test_names` PoiCardLocateFabSceneTests | ~5 min (~3.5 after F5) |
@@ -254,7 +254,26 @@ Never dropped: the regression of a real past bug, the contract guards (tokens, f
 
 **Done (M2, 2026-10-30): F1, F2, F4, F11, and F10's two deletions** (SectionSheetMeasureSceneTests, CardLightMeasureSceneTests) -- section
 3.6. Not held from the audit: DetailCardEditorTabTests 312-314 are no old-element sweep but the reflection walk's edits of the live
-`top` / `bottom` / `menu` config fields (every card_settings field undoes / redoes / survives Save): kept. Next: F3 + F6 (M3, the golden card).
+`top` / `bottom` / `menu` config fields (every card_settings field undoes / redoes / survives Save): kept.
+
+**Done (M3, 2026-10-30): F3 + F6, and the Editor log chunk.**
+- F3: the Ribeira Palace holds every registered kind (37 blocks, block_20..38 new, real content from `PACO_RIBEIRA_text.md`, developer
+  accepted; stand-ins named in `_3.3` TODOs) save `nav_contents` (kept for its rebuild; `ReferenceCard.KeptOffTheGoldenCard`); block_15
+  Show After Reading; block_6 (fun_fact) moved up so About is one section at the default order. `ReferenceCard`
+  (`Tests/Runtime/ReferenceCard.cs`: Golden, BlockOf(kind[, look]), SecondCard, Edge.*) + `ReferenceCardTests` (6). "Exactly once" holds
+  per kind + look, not per kind: block_14 / 15 / 16 are three knowledge_check looks. No test names a Ribeira block key now (the 4 sites:
+  StoryKey x3, PaintingStory's header / gallery). The tests that knew a number of the 18-block card read it from the card now (BrightPage's
+  spot, Painting's scroll order, Collect's total, Sections' Reveal start and body set, CardNavModel's interleaved About built in its test).
+- F6: the sticky action's PlayMode home is `PoiCardNavBarSceneTests.StickyActionShown_...` (golden card: hero row with Listen, words whole
+  EN / PT, the pinned footer's Show On Wall words, a real tap); its matrix `NavBarRuleTests` (moved from LocateFabRuleTests with the
+  Locate Button default); the forcing is gone from Hero x2 and PoiCardSceneTests x2; Locate's sticky matrix, Hero's forced tap,
+  PoiCardSceneTests.About's two sticky tests, the pinned-footer duplicate and NavBarScene's under_title half deleted; Core moved from
+  Hero's forced tap to Locate's real pin tap (the shipped default's way); Chrome's ReduceMotion_MakesTheBottomAreaJump. Not held:
+  Sections' "default is Open" duplicate (that test asserts only what renders).
+- The Editor log: 135.7 of a full EditMode run's ~140 MB was ONE Unity warning ("DPI setting of a visual element that is not on a
+  panel", 11 994 x with stack traces; 21 741 x in a CORE PlayMode run): a live push rebinds a view before the stack attaches it and the
+  hero (HeaderBlockView.FitWords) and the app's size_comparison measured text off the panel. Both wait for the panel now
+  (AttachToPanelEvent); `PoiCardLiveUpdateTests.ALivePush_RefitsTheHerosWordsOnceOnThePanel_...` red (6 warnings) -> green (0).
 
 Each chunk: its target(s), its effect (minutes saved / places-to-edit removed / tests deleted), its tier. Recommended order: F1, F2, F4
 (they make every later block cheap), F3 before the first moved kind, then F7 with each block; F5 / F6 any time; F8, F9 later.

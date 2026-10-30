@@ -9224,6 +9224,91 @@
                         ]
                     },
                     {
+                        "key": "block_20",
+                        "kind": "status",
+                        "variant": "ring",
+                        "display": "inline",
+                        "emphasis": "normal",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Condition"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Estado"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_21",
+                        "kind": "rich_text",
+                        "variant": "plain",
+                        "display": "inline",
+                        "emphasis": "normal",
+                        "fields": [
+                            {
+                                "key": "minutes",
+                                "text": [],
+                                "number": 1.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Books and an opera house"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Livros e uma ópera"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "body",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "The royal library was one of the great collections of Europe. Tradition puts it at about 70,000 volumes, kept in the same building as paintings, maps and the royal archive. For a court enriched by the sea trade, it was a collection to match the fleet at the docks.\n\nNext to the palace stood the Ópera do Tejo, the royal opera house. It opened on 2 March 1755 and was counted among the grandest in Europe. Barely eight months later the earthquake brought it down, and its ruins were engraved in 1757. Almost nothing of the library survived that day."
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "A biblioteca real era uma das grandes coleções da Europa. A tradição fala em cerca de 70 000 volumes, guardados no mesmo edifício que as pinturas, os mapas e o arquivo real. Para uma corte enriquecida pelo comércio marítimo, era uma coleção à altura da frota nas docas.\n\nJunto ao paço ficava a Ópera do Tejo, o teatro de ópera real. Abriu a 2 de março de 1755 e era tida como uma das mais grandiosas da Europa. Apenas oito meses depois o terramoto deitou-a abaixo, e as suas ruínas foram gravadas em 1757. Quase nada da biblioteca sobreviveu a esse dia."
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
                         "key": "block_19",
                         "kind": "story",
                         "variant": "",
@@ -10906,6 +10991,794 @@
                         ]
                     },
                     {
+                        "key": "block_22",
+                        "kind": "pull_quote",
+                        "variant": "serif",
+                        "display": "inline",
+                        "emphasis": "normal",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "A view from the window"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Uma vista da janela"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "quote",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "The new palace stood beside the docks where ships from India and Brazil unloaded spices, sugar and gold, so the king could watch the fleet come in from his own windows."
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "O novo paço ficava junto das docas onde os navios da Índia e do Brasil descarregavam especiarias, açúcar e ouro, e o rei podia ver a frota chegar das suas próprias janelas."
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "author",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "From the card's story"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Da história deste cartão"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "source",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": ""
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": ""
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_23",
+                        "kind": "process_steps",
+                        "variant": "numbered",
+                        "display": "inline",
+                        "emphasis": "normal",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "From palace to square"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Do paço à praça"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "steps",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The earthquake"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O terramoto"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "On the morning of 1 November 1755, All Saints' Day, the ground shook the palace."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Na manhã de 1 de novembro de 1755, dia de Todos os Santos, o chão abalou o paço."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The wave"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A vaga"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "A wave came up the river from the Tagus."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Uma vaga subiu o rio a partir do Tejo."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The fire"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O fogo"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Fire finished what was left. The library, the archive and almost everything inside were lost."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O fogo acabou o que restava. A biblioteca, o arquivo e quase tudo o que havia lá dentro perderam-se."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "A strict new plan"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Um plano rigoroso"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Lisbon was rebuilt on a strict new plan, and an open square was laid out facing the river."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Lisboa foi reconstruída segundo um plano rigoroso e traçou-se uma praça aberta ao rio."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The statue of 1775"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A estátua de 1775"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "In 1775 the statue of Joseph I was unveiled in the new Praça do Comércio."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Em 1775 foi inaugurada a estátua de D. José I na nova Praça do Comércio."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_24",
+                        "kind": "swatches",
+                        "variant": "grid",
+                        "display": "inline",
+                        "emphasis": "normal",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Colours of the tile panel"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "As cores do painel de azulejos"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "swatches",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "name",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Deep cobalt"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Cobalto profundo"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "colour",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "#203766",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "note",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The drawing: the ships and the water"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O desenho: os navios e a água"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "name",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Washed blue"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Azul aguado"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "colour",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "#7789A1",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "note",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The thin strokes of the sky and the waves"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Os traços finos do céu e das ondas"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "name",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Glaze white"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Branco do vidrado"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "colour",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "#BBB7AD",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "note",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The tin glaze, aged by three centuries"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O vidrado de estanho, envelhecido por três séculos"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_25",
+                        "kind": "actions",
+                        "variant": "sticky_cta",
+                        "display": "inline",
+                        "emphasis": "normal",
+                        "fields": [
+                            {
+                                "key": "actions",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "label",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "action",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "show_on_wall",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_26",
+                        "kind": "size_comparison",
+                        "variant": "",
+                        "display": "inline",
+                        "emphasis": "normal",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "How big is it?"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Qual é o tamanho?"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "object",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "smartphone",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "width_cm",
+                                "text": [],
+                                "number": 60.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "height_cm",
+                                "text": [],
+                                "number": 45.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "poi_label",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "This picture"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Este quadro"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "caption",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "About three phones tall: 45 cm, against roughly 15 cm for a phone."
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Cerca de três telemóveis de altura: 45 cm, contra os cerca de 15 cm de um telemóvel."
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_6",
+                        "kind": "fun_fact",
+                        "variant": "flip",
+                        "display": "inline",
+                        "emphasis": "normal",
+                        "fields": [
+                            {
+                                "key": "facts",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "heading",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Lost in a day"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Perdida num dia"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The royal library is said to have held around 70,000 books, one of the richest collections in Europe. Almost none survived 1 November 1755."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Diz-se que a biblioteca real guardava cerca de 70 000 livros, uma das coleções mais ricas da Europa. Quase nenhum sobreviveu a 1 de novembro de 1755."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "heading",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "A name that stayed"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Um nome que ficou"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Many Lisboetas still call the Praça do Comércio by its old name, Terreiro do Paço, which means \"palace yard\"."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Muitos lisboetas ainda chamam à Praça do Comércio pelo nome antigo, Terreiro do Paço, que quer dizer \"pátio do paço\"."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "heading",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Eight months of music"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Oito meses de música"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The Ópera do Tejo opened in March 1755 and was said to be one of the grandest opera houses in Europe. It stood for eight months."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A Ópera do Tejo abriu em março de 1755 e dizia-se ser um dos teatros de ópera mais grandiosos da Europa. Durou oito meses."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
                         "key": "block_17",
                         "kind": "person",
                         "variant": "card",
@@ -11384,6 +12257,496 @@
                                         ]
                                     }
                                 ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_27",
+                        "kind": "story_chapters",
+                        "variant": "segmented",
+                        "display": "inline",
+                        "emphasis": "normal",
+                        "fields": [
+                            {
+                                "key": "minutes",
+                                "text": [],
+                                "number": 5.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Centuries by the river"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Séculos junto ao rio"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "chapters",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "By the river, c. 1500"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Junto ao rio, c. 1500"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "body",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Manuel I left the old castle on the hill and built a new palace at the water's edge. From its windows the king could see ships arriving at the docks, and offices, a chapel and the royal archive soon grew around it."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "D. Manuel I deixou o velho castelo no alto e construiu um novo paço à beira da água. Das janelas, o rei via chegar os navios às docas, e à volta cresceram depressa gabinetes, uma capela e o arquivo real."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Tower and library, 1580s"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Torre e biblioteca, anos 1580"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "body",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Under Philip I, who ruled Portugal and Spain, the palace gained a new river front and the domed Torreão. Sailors spotted the tower long before they saw the city itself. Inside were a famous library, paintings and maps."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Com Filipe I, que reinava em Portugal e em Espanha, o paço ganhou uma nova frente ribeirinha e o Torreão de cúpula. Os marinheiros avistavam a torre muito antes de verem a própria cidade. Lá dentro estavam uma célebre biblioteca, pinturas e mapas."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "1 November 1755"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "1 de novembro de 1755"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "body",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "An earthquake struck on All Saints' Day, then a wave rose from the river and fire spread. The royal family was elsewhere, but the library, the archive and nearly all the rest were gone by the end of the day."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Um terramoto abalou a cidade no dia de Todos os Santos, depois veio uma vaga do rio e o fogo alastrou. A família real estava noutro lugar, mas a biblioteca, o arquivo e quase tudo o resto perderam-se num só dia."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The square of 1775"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A praça de 1775"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "body",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The rebuilt city put an open square where the palace had been, facing the river. In 1775 the statue of Joseph I was unveiled there, and it became the heart of the rebuilt city. Many Lisboetas still say Terreiro do Paço, the palace yard."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A cidade reconstruída pôs uma praça aberta ao rio no lugar do paço. Em 1775 foi inaugurada ali a estátua de D. José I, e a praça tornou-se o coração da cidade reconstruída. Muitos lisboetas ainda dizem Terreiro do Paço, o pátio do paço."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_28",
+                        "kind": "dialogue",
+                        "variant": "choices",
+                        "display": "inline",
+                        "emphasis": "normal",
+                        "fields": [
+                            {
+                                "key": "lines",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "speaker",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The palace guide"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A guia do paço"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "line",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Welcome to the Terreiro do Paço. Do you know what that name means?"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Boas-vindas ao Terreiro do Paço. Sabe o que quer dizer este nome?"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "choice_1",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "No, tell me"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Não, conte-me"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "reply_1",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Terreiro is an open yard and Paço is the palace: the palace yard."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Terreiro é um pátio aberto e paço é o palácio: o pátio do paço."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "choice_2",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Yes, palace yard"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Sim, pátio do paço"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "reply_2",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Then you already know where you are standing."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Então já sabe onde está."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "speaker",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The palace guide"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A guia do paço"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "line",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "A royal palace stood here for about 250 years, with the docks right beside it."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Aqui existiu um paço real durante cerca de 250 anos, com as docas mesmo ao lado."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "speaker",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The palace guide"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A guia do paço"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "line",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "On 1 November 1755 an earthquake, a wave and a fire took it all in one day."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A 1 de novembro de 1755, um terramoto, uma vaga e um incêndio levaram tudo num só dia."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "speaker",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The palace guide"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A guia do paço"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "line",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Look around: the square that replaced it opens to the river like a front door."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Olhe à volta: a praça que o substituiu abre-se ao rio como uma porta de entrada."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_29",
+                        "kind": "compare_points",
+                        "variant": "rings",
+                        "display": "inline",
+                        "emphasis": "normal",
+                        "fields": [
+                            {
+                                "key": "other",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "lamp",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "axis",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "status",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
                             }
                         ]
                     },
@@ -12105,142 +13468,264 @@
                         ]
                     },
                     {
-                        "key": "block_6",
-                        "kind": "fun_fact",
-                        "variant": "flip",
+                        "key": "block_30",
+                        "kind": "video",
+                        "variant": "inline",
                         "display": "inline",
                         "emphasis": "normal",
                         "fields": [
                             {
-                                "key": "facts",
-                                "text": [],
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "The square today, on film"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "A praça hoje, em vídeo"
+                                    }
+                                ],
                                 "number": 0.0,
                                 "flag": false,
                                 "value": "",
                                 "asset": "",
                                 "asset_by_language": [],
-                                "items": [
+                                "items": []
+                            },
+                            {
+                                "key": "clip",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "video/lisbon_square_castle_55s.mp4",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "poster",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "video/lisbon_square_castle_poster.jpg",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "captions",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "video/lisbon_square_castle_55s.vtt",
+                                "asset_by_language": [
                                     {
-                                        "fields": [
-                                            {
-                                                "key": "heading",
-                                                "text": [
-                                                    {
-                                                        "lang": "en",
-                                                        "value": "Lost in a day"
-                                                    },
-                                                    {
-                                                        "lang": "pt",
-                                                        "value": "Perdida num dia"
-                                                    }
-                                                ],
-                                                "number": 0.0,
-                                                "flag": false,
-                                                "value": "",
-                                                "asset": "",
-                                                "asset_by_language": []
-                                            },
-                                            {
-                                                "key": "text",
-                                                "text": [
-                                                    {
-                                                        "lang": "en",
-                                                        "value": "The royal library is said to have held around 70,000 books, one of the richest collections in Europe. Almost none survived 1 November 1755."
-                                                    },
-                                                    {
-                                                        "lang": "pt",
-                                                        "value": "Diz-se que a biblioteca real guardava cerca de 70 000 livros, uma das coleções mais ricas da Europa. Quase nenhum sobreviveu a 1 de novembro de 1755."
-                                                    }
-                                                ],
-                                                "number": 0.0,
-                                                "flag": false,
-                                                "value": "",
-                                                "asset": "",
-                                                "asset_by_language": []
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        "fields": [
-                                            {
-                                                "key": "heading",
-                                                "text": [
-                                                    {
-                                                        "lang": "en",
-                                                        "value": "A name that stayed"
-                                                    },
-                                                    {
-                                                        "lang": "pt",
-                                                        "value": "Um nome que ficou"
-                                                    }
-                                                ],
-                                                "number": 0.0,
-                                                "flag": false,
-                                                "value": "",
-                                                "asset": "",
-                                                "asset_by_language": []
-                                            },
-                                            {
-                                                "key": "text",
-                                                "text": [
-                                                    {
-                                                        "lang": "en",
-                                                        "value": "Many Lisboetas still call the Praça do Comércio by its old name, Terreiro do Paço, which means \"palace yard\"."
-                                                    },
-                                                    {
-                                                        "lang": "pt",
-                                                        "value": "Muitos lisboetas ainda chamam à Praça do Comércio pelo nome antigo, Terreiro do Paço, que quer dizer \"pátio do paço\"."
-                                                    }
-                                                ],
-                                                "number": 0.0,
-                                                "flag": false,
-                                                "value": "",
-                                                "asset": "",
-                                                "asset_by_language": []
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        "fields": [
-                                            {
-                                                "key": "heading",
-                                                "text": [
-                                                    {
-                                                        "lang": "en",
-                                                        "value": "Eight months of music"
-                                                    },
-                                                    {
-                                                        "lang": "pt",
-                                                        "value": "Oito meses de música"
-                                                    }
-                                                ],
-                                                "number": 0.0,
-                                                "flag": false,
-                                                "value": "",
-                                                "asset": "",
-                                                "asset_by_language": []
-                                            },
-                                            {
-                                                "key": "text",
-                                                "text": [
-                                                    {
-                                                        "lang": "en",
-                                                        "value": "The Ópera do Tejo opened in March 1755 and was said to be one of the grandest opera houses in Europe. It stood for eight months."
-                                                    },
-                                                    {
-                                                        "lang": "pt",
-                                                        "value": "A Ópera do Tejo abriu em março de 1755 e dizia-se ser um dos teatros de ópera mais grandiosos da Europa. Durou oito meses."
-                                                    }
-                                                ],
-                                                "number": 0.0,
-                                                "flag": false,
-                                                "value": "",
-                                                "asset": "",
-                                                "asset_by_language": []
-                                            }
-                                        ]
+                                        "lang": "pt",
+                                        "value": "video/lisbon_square_castle_55s_pt.vtt"
                                     }
-                                ]
+                                ],
+                                "items": []
+                            },
+                            {
+                                "key": "title",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Lisbon, the square and the castle"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Lisboa, a praça e o castelo"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_31",
+                        "kind": "model_3d",
+                        "variant": "turntable",
+                        "display": "inline",
+                        "emphasis": "normal",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "In 3D (stand-in model)"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Em 3D (modelo provisório)"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "model",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "default:azulejo_arch",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "title",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "A tiled arch (stand-in model)"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Um arco de azulejos (modelo provisório)"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_32",
+                        "kind": "panorama_360",
+                        "variant": "drag",
+                        "display": "inline",
+                        "emphasis": "normal",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "A tiled room (stand-in panorama)"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Uma sala de azulejos (panorama provisório)"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "panorama",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "default:tiled_room_360",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "title",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "A tiled room (stand-in panorama)"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Uma sala de azulejos (panorama provisório)"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_33",
+                        "kind": "show_on_wall",
+                        "variant": "button",
+                        "display": "inline",
+                        "emphasis": "normal",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Find it on the wall"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Encontre-o na parede"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_34",
+                        "kind": "place_in_ar",
+                        "variant": "button",
+                        "display": "inline",
+                        "emphasis": "normal",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "A tiled arch in your room (stand-in model)"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Um arco de azulejos na sua sala (modelo provisório)"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "model",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "default:azulejo_arch",
+                                "asset_by_language": [],
+                                "items": []
                             }
                         ]
                     },
@@ -12765,6 +14250,16 @@
                                         ]
                                     }
                                 ]
+                            },
+                            {
+                                "key": "show_after_viewed",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": true,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
                             }
                         ]
                     },
@@ -12892,6 +14387,208 @@
                         ]
                     },
                     {
+                        "key": "block_35",
+                        "kind": "poll",
+                        "variant": "bars",
+                        "display": "inline",
+                        "emphasis": "normal",
+                        "fields": [
+                            {
+                                "key": "question",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Which would you most like to have seen?"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "O que gostaria mais de ter visto?"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "options",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The royal library"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A biblioteca real"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The Ópera do Tejo"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A Ópera do Tejo"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The domed tower (Torreão)"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A torre de cúpula (Torreão)"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The fleet arriving at the docks"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A frota a chegar às docas"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_36",
+                        "kind": "collect",
+                        "variant": "add_to_story",
+                        "display": "inline",
+                        "emphasis": "normal",
+                        "fields": [
+                            {
+                                "key": "item_name",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Stamp of the Ribeira Palace"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Selo do Paço da Ribeira"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "series",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Castles and towers"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Castelos e torres"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_37",
+                        "kind": "feedback",
+                        "variant": "thumbs",
+                        "display": "inline",
+                        "emphasis": "normal",
+                        "fields": [
+                            {
+                                "key": "question",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Did this card bring the palace back to life?"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Este cartão fez o paço voltar à vida?"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
                         "key": "block_18",
                         "kind": "today_map",
                         "variant": "static",
@@ -12947,6 +14644,241 @@
                         "display": "inline",
                         "emphasis": "normal",
                         "fields": []
+                    },
+                    {
+                        "key": "block_38",
+                        "kind": "practical_info",
+                        "variant": "rows",
+                        "display": "inline",
+                        "emphasis": "normal",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Visit the site"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Visite o local"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
+                                "key": "rows",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "icon",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "location",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Where"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Onde"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Praça do Comércio, Lisbon"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Praça do Comércio, Lisboa"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "icon",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "time",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Open"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Aberto"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "A public square, open every day at all hours"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Uma praça pública, aberta todos os dias a qualquer hora"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "icon",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "ticket",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Cost"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Preço"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Free"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Gratuito"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "icon",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "info",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Nearby"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Perto"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Cais das Colunas and the Arco da Rua Augusta"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Cais das Colunas e Arco da Rua Augusta"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
                     },
                     {
                         "key": "block_8",
@@ -13405,7 +15337,7 @@
                         ]
                     }
                 ],
-                "last_block_number": 19
+                "last_block_number": 38
             }
         },
         {

@@ -22,8 +22,6 @@ namespace TileStories.Tests
         private const string Domain = "Premium/P3e";
         private const string Painting = "painting";
         private const float Aaa = 7f;
-        // - the developer's capture spot: the last About facts above the story preview
-        private const float FactsAndStory = 1800f;
         // - the darkest body pixel the P3 renders had (the Architect's 43; 104 with the wide atlas)
         private const int DarkestBodyInk = 50;
         // - one render step either side (8-bit rounding of the blend) plus one: the brief's +-2
@@ -41,7 +39,17 @@ namespace TileStories.Tests
         }
 
         // The Ribeira Palace's card at Full on the framework's card defaults (`edit` over them), in `mode`, scrolled to `offset`, still
-        private IEnumerator Open(string mode, float offset, System.Action<CardSettings> edit = null)
+        private IEnumerator Open(string mode, float offset, System.Action<CardSettings> edit = null) => Open(mode, () => offset, edit);
+
+        // The developer's capture spot: the last About facts in the middle of the view (their block's foot, read from the card's layout)
+        private float FactsAndStory()
+        {
+            var facts = Stack.SlotOfBlock(ReferenceCard.BlockOf(BuiltInBlocks.QuickFactsKind));
+            return facts.worldBound.yMax - Scroll.contentContainer.worldBound.yMin - Scroll.contentViewport.layout.height * 0.5f;
+        }
+
+        // The same, the offset worked out once the card is open at Full
+        private IEnumerator Open(string mode, System.Func<float> offset, System.Action<CardSettings> edit = null)
         {
             CardTestInput.HoldTheWallStill(Sheet);
             var copy = ConfigCopy();
@@ -55,7 +63,7 @@ namespace TileStories.Tests
             Sheet.SetStop(SheetStopRule.Stop.Full);
             ThemeController.SetMode(mode);
             yield return CardTestInput.Settle(0.6f);
-            Scroll.scrollOffset = new Vector2(0f, offset);
+            Scroll.scrollOffset = new Vector2(0f, offset());
             yield return CardTestInput.Settle(0.3f);
             CardTestInput.HoldSectionsStill(Sheet);
             yield return CardTestInput.UntilStill(Sheet);
@@ -85,7 +93,7 @@ namespace TileStories.Tests
         {
             yield return Open(mode, FactsAndStory);
             var texts = ReadTexts();
-            Assert.Greater(texts.Count, 8, "precondition: the facts and the story preview's words are in view (" + texts.Count + ")");
+            Assert.Greater(texts.Count, 8, "precondition: the About facts and the words after them are in view (" + texts.Count + ")");
             var ink = Theme(Sheet.Root, "--ts-ink");
             bool light = mode == CardOptions.ModeLight;
             var colours = texts.ToDictionary(l => l, l => l.resolvedStyle.color);

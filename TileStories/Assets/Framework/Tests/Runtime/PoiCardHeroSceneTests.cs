@@ -11,8 +11,8 @@ using UnityEngine.UIElements;
 namespace TileStories.Tests
 {
     // The header's hero on the REAL LivingRoomScene (_3.3 P4.4a, S4a; HeroRule / HeroMotionRule / HeroActionsRule): the hero is the
-    // screen at Full, its words and actions whole at Half (the PT Lamp's "Mostra-me onde fica" included) while the sticky bar waits; real
-    // taps on the hero's action and Listen do what the card's own blocks do; the drift, the zoom, the parallax and the words' rise run on
+    // screen at Full, its words and Listen whole at Half (the hero's sticky action is the Navigation Bar's option: its fixture's); a real
+    // tap on Listen does what the card's own block does; the drift, the zoom, the parallax and the words' rise run on
     // the test's clock and stop under Reduce Motion (frame sequences saved for the eye); the glow lies only behind the words, a fade with no
     // edge; and every word keeps 4.5:1 against the picture right about its letters on every hero picture of the wall, EN / PT, light / dark
     public class PoiCardHeroSceneTests : SearchSceneFixture
@@ -138,19 +138,15 @@ namespace TileStories.Tests
             Assert.GreaterOrEqual(counted[2], HeroTitleFitRule.NoticeAtLines, "precondition: a title past the notice's threshold (" + counted[2] + " lines)");
         }
 
-        // ---------------- Full: the whole hero is the screen, the card's actions at its foot ----------------
+        // ---------------- Full: the whole hero is the screen, Listen at its foot ----------------
 
-        // _3.3 S4a review: the hero is the whole sheet at Full (its picture runs up under the floating bars) and its words block -- Listen and
-        // the card's action with it -- sits at its foot, whatever the stop (so Half shows the picture's top; Full the whole hero)
+        // _3.3 S4a review: the hero is the whole sheet at Full (its picture runs up under the floating bars) and its words block -- Listen with
+        // it -- sits at its foot, whatever the stop (so Half shows the picture's top; Full the whole hero); on the default bar
         [Category("Core")]
         [UnityTest]
-        public IEnumerator AtFull_TheWholeHeroIsTheScreen_WithTheCardsActionsAtItsFoot_AndTheStickyBarWaits(
+        public IEnumerator AtFull_TheWholeHeroIsTheScreen_WithListenAtItsFoot(
             [Values("lamp", "painting")] string poi, [Values("en", "pt")] string language)
         {
-            // - the card's actions at the hero's foot are this test's subject: the sticky one drawn (Sticky Action Automatic leaves it out
-            //   under the default bottom bar, _3.3 P3d) and the whole row theirs (no Locate Button beside it: it stands for the same action)
-            Session.CardSettings.navigation.bar.sticky_action = CardOptions.NavBarStickyShown;
-            Session.CardSettings.navigation.bar.locate_button = false;
             yield return Open(poi, language, SheetStopRule.Stop.Full);
             Header.Clock = () => 0f;
             Header.Animate();
@@ -169,22 +165,9 @@ namespace TileStories.Tests
             foreach (var label in new[] { Header.Eyebrow, Header.HeroTitle, Header.HeroPart.Q<Label>("card-header-subtitle") })
                 Assert.IsTrue(view.Contains(label.worldBound.min) && view.Contains(label.worldBound.max - Vector2.one * OnePixel), label.name + " wholly in view");
             Assert.IsFalse(Header.BarTitleShown, "the hero carries the title, the bar none");
-            Assert.IsFalse(Sheet.Chrome.FooterShown && Sheet.Chrome.BottomShown, "the sticky bar waits for the hero");
 
             var actions = Stack.HeroActionViews;
-            bool lamp = poi == "lamp";
-            Assert.AreEqual(lamp ? 2 : 1, actions.Count, lamp ? "the sticky action and Listen" : "Listen alone (no sticky action on this card)");
-            if (lamp)
-            {
-                var primary = (ActionsBlockView)actions[0];
-                var button = primary.Actions.Single().Button;
-                Assert.IsTrue(primary.Root.ClassListContains(BlockStackView.HeroPrimaryClass));
-                Assert.AreEqual(language == "en" ? "Show me where it is" : "Mostra-me onde fica", primary.Actions.Single().Label.text);
-                Assert.IsTrue(view.Contains(button.worldBound.min) && view.Contains(button.worldBound.max - Vector2.one * OnePixel),
-                    "the card's action is on screen (the P4.3 finding: PT lost it): " + button.worldBound + " in " + view);
-                Assert.Less(button.Q<Label>().worldBound.height, button.Q<Label>().resolvedStyle.fontSize * 2f, "its words on one line");
-                Assert.AreEqual(1, Stack.Footer.Query<Button>(className: "card-action").ToList().Count, "the footer still holds the same action for later");
-            }
+            Assert.AreEqual(1, actions.Count, "Listen alone: the default bar leaves the sticky action out");
             var listen = actions.OfType<AudioGuideBlockView>().Single();
             Assert.AreEqual(BuiltInBlocks.AudioGuideHeroChip, listen.Variant);
             // - P4.4b part 2, S4a: the compact pill -- headphones and the guide's length, the words in its name ("Listen, 3:11")
@@ -194,37 +177,10 @@ namespace TileStories.Tests
             Assert.AreEqual(CardIcons.Listen, CardIcons.KeyOf(listen.ListenIcon));
             Assert.AreEqual(DisplayStyle.None, listen.PlayGlyph.resolvedStyle.display, "...instead of the play mark (it could read as a video)");
             Assert.IsTrue(view.Contains(listen.PlayButton.worldBound.center), "Listen is on screen");
-            if (lamp)
-            {
-                // - ONE action row (the Architect's review of P4.4a: two stacked rows hid the Lamp's picture)
-                var primary = actions[0].Root;
-                var words = ((ActionsBlockView)actions[0]).Actions.Single().Label;
-                Assert.AreEqual(primary.worldBound.center.y, listen.Root.worldBound.center.y, OnePixel, "the focal action and Listen share one row: "
-                    + primary.worldBound + " / " + listen.Root.worldBound);
-                Assert.LessOrEqual(primary.worldBound.xMax, listen.Root.worldBound.xMin + OnePixel, "Listen sits beside it, never over it");
-                Assert.IsTrue(hero.Contains(primary.worldBound.min) && hero.Contains(listen.Root.worldBound.max - Vector2.one * OnePixel), "both inside the hero");
-                float wants = words.MeasureTextSize(words.text, 0f, VisualElement.MeasureMode.Undefined, 0f, VisualElement.MeasureMode.Undefined).x;
-                Assert.LessOrEqual(wants, words.contentRect.width + OnePixel, "the focal words are whole at 390 pt (" + wants + " in " + words.contentRect.width + ")");
-            }
             yield return LookMeasure.Render(Domain, "check", $"full_{poi}_{language}", Sheet.Root);
         }
 
         // ---------------- real taps ----------------
-
-        [Category("Core")]
-        [UnityTest]
-        public IEnumerator ARealTapOnTheHerosAction_ShowsThePointOnTheWall_TheCardLowersAndTheSelectionStays()
-        {
-            // - at Full: the words block, the action with it, sits at the hero's foot (S4a review); the sticky action drawn (its subject)
-            Session.CardSettings.navigation.bar.sticky_action = CardOptions.NavBarStickyShown;
-            yield return Open("lamp", "en", SheetStopRule.Stop.Full);
-            var button = ((ActionsBlockView)Stack.HeroActionViews[0]).Actions.Single().Button;
-            yield return CardTestInput.Tap(button.panel, button.worldBound.center);
-            yield return CardTestInput.Settle();
-            Assert.AreEqual(SheetStopRule.Stop.Peek, Sheet.Stop, "Show me where it is: the card lowers to Peek");
-            Assert.AreEqual("lamp", SelectionEventBus.CurrentPoiId, "the selection stays");
-            Assert.IsTrue(Header.BarTitleShown, "and the bar carries the title");
-        }
 
         [UnityTest]
         public IEnumerator ARealTapOnListen_PlaysTheCardsGuide_AndAgainPausesIt()

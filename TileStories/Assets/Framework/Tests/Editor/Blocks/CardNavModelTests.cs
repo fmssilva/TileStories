@@ -5,6 +5,7 @@ using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.UIElements;
+using TileStories.Tests;
 
 namespace TileStories.Editor.Tests
 {
@@ -412,14 +413,20 @@ namespace TileStories.Editor.Tests
                 Assert.AreEqual(model.Sections[s].Targets[0], model.Runs.First(r => r.Section == s).FirstTarget, model.Sections[s].Key + ": its first target opens its first run");
         }
 
-        // The Painting at the default order: its fun fact (About) comes back after Media -- interleaved too, by one block
+        // At the default order one block is enough to interleave: the golden card's fun fact (About) authored after its zoom picture comes
+        // back as a second About run, right after Media (the case is built here: the shipped card keeps About together)
         [Test]
-        public void ThePainting_AtTheDefaultOrder_AboutComesBackForItsFunFact()
+        public void AtTheDefaultOrder_OneAboutBlockAuthoredAfterMedia_OpensAboutAgain()
         {
-            var model = Model(ShippedEndFamiliesLast(), "painting");
+            var config = ShippedEndFamiliesLast();
+            var golden = config.pois.Single(p => p.id == ReferenceCard.Golden);
+            var fun = golden.card.blocks.Single(b => b.key == ReferenceCard.BlockOf(BuiltInBlocks.FunFactKind));
+            golden.card.blocks.Remove(fun);
+            golden.card.blocks.Insert(golden.card.blocks.FindIndex(b => b.key == ReferenceCard.BlockOf(BuiltInBlocks.ZoomImageKind)) + 1, fun);
+            var model = Model(config, ReferenceCard.Golden);
             var keys = RunKeys(model);
             Assert.AreEqual(2, keys.Count(k => k == "about"), "About: its facts and story, then the fun fact after the pictures");
-            Assert.AreEqual("block_6", model.Runs.Where((r, i) => keys[i] == "about").Last().FirstTarget, "the second About run is the fun fact");
+            Assert.AreEqual(fun.key, model.Runs.Where((r, i) => keys[i] == "about").Last().FirstTarget, "the second About run is the fun fact");
             Assert.AreEqual("media", keys[keys.LastIndexOf("about") - 1], "right after Media");
         }
 

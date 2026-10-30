@@ -176,10 +176,12 @@ namespace TileStories.Tests
             Assert.AreEqual("Your story", Sheet.Stack.HeadingOf(collect).text, "no heading written: the card's default");
             Assert.AreEqual("Castles and towers", collect.Series.text);
             Assert.AreEqual("Stamp of the castle", collect.ItemName.text);
-            Assert.AreEqual(1, collect.Total, "the wall's config has ONE collect block");
-            Assert.AreEqual("0 of 1 collected", collect.Progress.text);
+            int wall = Session.SearchPois.Sum(p => p.card?.blocks.Count(b => b.kind == BuiltInBlocks.CollectKind) ?? 0);
+            Assert.Greater(wall, 0, "precondition: the wall's config holds collect blocks");
+            Assert.AreEqual(wall, collect.Total, "the wall's config's collect blocks");
+            Assert.AreEqual($"0 of {wall} collected", collect.Progress.text);
 
-            // - another point of the running wall gets a collect block (in memory: the wall's own points have none): the total is 2
+            // - another point of the running wall gets a collect block (in memory): the total is one more
             var other = Session.SearchPois.First(p => p.id == "lamp_military");
             other.card.blocks.Add(new BlockInstanceData { key = "block_99", kind = BuiltInBlocks.CollectKind, variant = BuiltInBlocks.CollectAddToStory });
             try
@@ -187,12 +189,12 @@ namespace TileStories.Tests
                 SelectionEventBus.Clear();
                 yield return OpenFull("lamp");
                 collect = Only<CollectBlockView>();
-                Assert.AreEqual(2, collect.Total, "counted from the config, not a constant");
-                Assert.AreEqual("0 of 2 collected", collect.Progress.text);
+                Assert.AreEqual(wall + 1, collect.Total, "counted from the config, not a constant");
+                Assert.AreEqual($"0 of {wall + 1} collected", collect.Progress.text);
                 yield return ScrollAndTap(collect.Add);
                 Assert.IsTrue(collect.IsCollected);
                 Assert.AreEqual("In your story", collect.AddLabel.text);
-                Assert.AreEqual("1 of 2 collected", collect.Progress.text);
+                Assert.AreEqual($"1 of {wall + 1} collected", collect.Progress.text);
                 Assert.IsTrue(collect.StampStar.Filled);
                 Assert.AreEqual(1, _cardEvents.Raised.Count(e => e.Kind == CardEventKinds.Collect));
                 Assert.IsTrue(Card.State.Collected("lamp", "block_49"));
@@ -205,13 +207,13 @@ namespace TileStories.Tests
                 yield return OpenFull("lamp");
                 collect = Only<CollectBlockView>();
                 Assert.IsTrue(collect.IsCollected);
-                Assert.AreEqual("1 of 2 collected", collect.Progress.text);
+                Assert.AreEqual($"1 of {wall + 1} collected", collect.Progress.text);
 
-                // - the other point's own card counts the same wall: 1 of 2, its own item not yet collected
+                // - the other point's own card counts the same wall, its own item not yet collected
                 SelectionEventBus.Clear();
                 yield return OpenFull("lamp_military");
                 var military = Only<CollectBlockView>();
-                Assert.AreEqual("1 of 2 collected", military.Progress.text, "the count is the wall's, whichever card shows it");
+                Assert.AreEqual($"1 of {wall + 1} collected", military.Progress.text, "the count is the wall's, whichever card shows it");
                 Assert.IsFalse(military.IsCollected);
 
                 // - Portuguese
@@ -224,7 +226,7 @@ namespace TileStories.Tests
                 Assert.AreEqual("Selo do castelo", collect.ItemName.text);
                 Assert.AreEqual("Castelos e torres", collect.Series.text);
                 Assert.AreEqual("Adicionar \u00e0 minha hist\u00f3ria", collect.AddLabel.text);
-                Assert.AreEqual("0 de 2 recolhidos", collect.Progress.text);
+                Assert.AreEqual($"0 de {wall + 1} recolhidos", collect.Progress.text);
             }
             finally
             {

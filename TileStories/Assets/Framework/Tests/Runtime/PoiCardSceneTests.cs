@@ -373,8 +373,7 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator TheLamp_IsTheFullCard_EveryKindAndVariantOfTiers1To4_InCatalogOrder()
         {
-            // - every kind and variant drawn, the Sticky look included (Sticky Action Automatic leaves it out under the default bottom bar)
-            LiveSettings.navigation.bar.sticky_action = CardOptions.NavBarStickyShown;
+            // - on the default bar: Sticky Action Automatic leaves the sticky look out (the option is the Navigation Bar fixture's)
             yield return OpenFull("lamp");
             // - a kind the wall's own app registered (LivingRoom's size_comparison, _3.1 step 11) is that app's to test, not the framework
             //   catalog's: this list is what BuiltInBlocks registers
@@ -390,22 +389,20 @@ namespace TileStories.Tests
                 "knowledge_check", "knowledge_check", "knowledge_check", "poll", "collect", "feedback", "feedback", "dialogue", "show_on_wall", "show_on_wall",
                 // - _3.3 P4.4a: the hero_chip audio guide is the hero's Listen (HeroActionViews), only the player is in the stack
                 "audio_guide",
-                "actions", "actions", "actions", "sources", "sources",
+                "actions", "actions", "sources", "sources",
                 // - the sources were authored before the actions: the card still ends with them (Sources At The End, 15.2.1)
                 // - Tier 5 (10A.2b.3 on): the Lamp's own model_3d, panorama_360 and place_in_ar fixtures, excluded from THIS list on purpose
                 //   (its own name says Tiers 1 to 4) rather than folded in as more rows every time a later tier adds one
             }, ShownKinds().Where(k => builtIn.TryGet(k, out _) && k != BuiltInBlocks.Model3DKind && k != BuiltInBlocks.Panorama360Kind
                 && k != BuiltInBlocks.PlaceInArKind).ToList(),
-                "one block per kind and variant of Tiers 1 to 4, nothing skipped");
+                "one block per kind and variant of Tiers 1 to 4 (the sticky look left out by the default bar), nothing skipped");
             var lampConfig = Session.SearchPois.First(p => p.id == "lamp");
             CollectionAssert.IsEmpty(BlockStackBuilder.Build(lampConfig, LiveSettings, BlockRegistry.Shared, Session.SearchPois).Skipped, "no authored block skipped");
             var variants = Sheet.Stack.BoundViews.Select(v => v.Root.GetClasses().FirstOrDefault(c => c.Contains("--"))).Where(c => c != null).ToList();
             foreach (string look in new[] { "card-timeline--vertical", "card-timeline--horizontal", "card-person--row", "card-person--card" })
                 CollectionAssert.Contains(variants, look, "each variant on the card");
-            var sticky = Sheet.Stack.BoundViews.OfType<ActionsBlockView>().Last();
-            Assert.AreEqual(Sheet.Stack.Footer, Sheet.Stack.SlotOf(sticky).parent, "the sticky actions are pinned to the footer");
-            CollectionAssert.AreEqual(new[] { typeof(ActionsBlockView), typeof(AudioGuideBlockView) }, Sheet.Stack.HeroActionViews.Select(v => v.GetType()),
-                "the hero holds the sticky action and Listen (the hero chip)");
+            CollectionAssert.AreEqual(new[] { typeof(AudioGuideBlockView) }, Sheet.Stack.HeroActionViews.Select(v => v.GetType()),
+                "the hero holds Listen (the hero chip)");
         }
 
         // _3.1 step 6C: every block of The Lamp shows its authored heading above it (a kind with a default heading --
@@ -414,8 +411,6 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator TheLamp_EveryBlockShowsItsHeadingAboveIt_InTheCardsLanguage_AndEveryGapIsTheOneToken()
         {
-            // - every block of the card, the sticky footer included (Sticky Action Automatic leaves it out under the default bottom bar)
-            LiveSettings.navigation.bar.sticky_action = CardOptions.NavBarStickyShown;
             yield return OpenFull("lamp");
             // - the question that waits for the reading is revealed the way a visitor does it, so every slot can be measured
             yield return ReadTheWholeCard();
@@ -426,8 +421,10 @@ namespace TileStories.Tests
             // - the card's order, not the authored one: the sources close the card (Sources At The End)
             var built = BlockStackBuilder.Build(lampConfig, LiveSettings, BlockRegistry.Shared, Session.SearchPois).Entries;
             Assert.AreEqual(lampConfig.card.blocks.Count, built.Count, "precondition: every authored block is on the card");
-            // - _3.3 P4.4a: a pinned-top look (the hero chip) is the hero's Listen, with no slot or heading of its own
-            var stackOrder = built.Where(e => !e.Definition.IsPinnedTop(e.Variant)).ToList();
+            // - _3.3 P4.4a: a pinned-top look (the hero chip) is the hero's Listen, with no slot or heading of its own; the default bar's Sticky
+            //   Action (Automatic) leaves the footer look out
+            bool sticky = NavBarRule.StickyActionShown(LiveSettings.navigation);
+            var stackOrder = built.Where(e => !e.Definition.IsPinnedTop(e.Variant) && (sticky || !e.Definition.IsFooter(e.Variant))).ToList();
             Assert.AreEqual(stackOrder.Count, views.Count, "precondition: every block shown, in the card's order");
             float gap = -1f;
             int headed = 0;

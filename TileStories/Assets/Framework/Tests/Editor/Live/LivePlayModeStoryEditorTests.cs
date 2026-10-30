@@ -8,6 +8,7 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using TileStories.Tests;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.UIElements;
@@ -22,8 +23,8 @@ namespace TileStories.Editor.Tests
     {
         private const BindingFlags Instance = BindingFlags.NonPublic | BindingFlags.Instance;
         private const string WallScenePath = "Assets/Apps/LivingRoom/LivingRoomScene.unity";
-        private const string Poi = "painting";
-        private const string StoryKey = "block_19";
+        private const string Poi = ReferenceCard.Golden;
+        private static readonly string StoryKey = ReferenceCard.BlockOf(BuiltInBlocks.StoryKind);
         private PoiEditorWindowHost _window;
         private PoiCardSheetView _sheet;
 

@@ -15,13 +15,14 @@ namespace TileStories.Tests
     //   - every option value changes what the visitor sees (one case per value), and the pairs that interact: Raised x Top (the bump hangs
     //     down), Fill x over the hero (a non-solid bar turns white on dark glass, Clear transparent there and solid after it)
     //   - the labels read at 7:1 on the real render on every fill, over the hero and after it, light and dark, Bottom and Top
-    //   - an old config's "under_title" reads as Top on the running card; a merged group; the bar off
+    //   - a merged group; the bar off; Sticky Action Shown brings the old sticky action back (hero + footer, the Show On Wall words) and
+    //     a real tap on it shows the point on the wall (the option's owner; its matrix is NavBarRuleTests')
     // Renders in TestEvidence/Premium/P2/. Core: the default bar, and a real tap that jumps and real drags the bar follows -- the option
     // matrix and the renders are this component's own BLOCK selection, never CORE's.
     public class PoiCardNavBarSceneTests : SearchSceneFixture
     {
         private const string Domain = "Premium/P2";
-        private const string Painting = "painting";
+        private const string Painting = ReferenceCard.Golden;
         private const float Aaa = 7f;
 
         private PoiCardSheetView Sheet => Card.Sheet;
@@ -37,20 +38,22 @@ namespace TileStories.Tests
             yield return null;
         }
 
-        private IEnumerator Push(System.Action<CardNavBarSettings> look)
+        // The bar as `look` sets it on the framework's default (and the card's other settings as `card` sets them), pushed to the running card
+        private IEnumerator Push(System.Action<CardNavBarSettings> look, System.Action<CardSettings> card = null)
         {
             var copy = ConfigCopy();
             copy.card_settings.navigation.bar = new CardNavBarSettings();
             look?.Invoke(copy.card_settings.navigation.bar);
+            card?.Invoke(copy.card_settings);
             Session.ApplyCardSettings(copy);
             yield return CardTestInput.Settle(0.3f);
         }
 
         // The Ribeira Palace's card at Full, scrolled to the top (the hero), the bar as `look` sets it on the framework's default
-        private IEnumerator Open(System.Action<CardNavBarSettings> look = null)
+        private IEnumerator Open(System.Action<CardNavBarSettings> look = null, System.Action<CardSettings> card = null)
         {
             CardTestInput.HoldTheWallStill(Sheet);
-            yield return Push(look);
+            yield return Push(look, card);
             // - a card already open on the point is rebound by the push (selecting it again would close it)
             if (!Sheet.IsOpen || Card.ShownPoiId != Painting) SelectionEventBus.Select(Painting);
             yield return CardTestInput.Settle();
@@ -871,11 +874,10 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
-        public IEnumerator AnOldConfigsUnderTitle_ShowsTheBarAtTop_AMergedGroupLandsOnEitherFamily_AndOffTakesTheBarAway()
+        public IEnumerator AMergedGroupLandsOnEitherFamily_AndOffTakesTheBarAway()
         {
             yield return Open(b =>
             {
-                b.position = CardOptions.NavBarUnderTitle;
                 b.items = new List<CardNavBarItem>
                 {
                     new() { key = "group_1", families = new List<string> { BuiltInFamilies.Media, BuiltInFamilies.Guides },
@@ -883,7 +885,6 @@ namespace TileStories.Tests
                     new() { key = BuiltInFamilies.About, families = new List<string> { BuiltInFamilies.About } },
                 };
             });
-            Assert.AreEqual(NavBarView.ElementKey, Sheet.Slots.TopKey, "an old config's under_title is Top on the running card");
             Assert.AreEqual(2, Bar.Items.Count, "the two groups the wall made");
             Assert.That(Bar.Items[0].Label.text, Is.EqualTo("Watch").Or.EqualTo("Ver"), "the group's own words");
             string first = Sheet.Nav.Model.Targets.First(t =>
@@ -897,6 +898,43 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.4f);
             Assert.IsNull(Bar.Root.parent, "off: the bar is out of the card");
             Assert.IsFalse(Sheet.Root.ClassListContains(NavSlots.SheetBarBottomClass), "...and the stack's end no longer keeps clear of it");
+        }
+
+        // Sticky Action (_3.3 P3d; its matrix is NavBarRuleTests'): Automatic leaves the old sticky action out under the bottom bar -- no
+        // footer, no action on the hero; Shown brings it back on the golden card's Sticky look, in the hero at the top of the card (ONE row
+        // with Listen, its words whole at 390 pt: the P4.3 / P4.4a findings) and as the pinned footer, saying the Show On Wall block's words
+        // in each language (it has none of its own); a real tap on it shows the point on the wall: the card lowers, the selection stays
+        [UnityTest]
+        public IEnumerator StickyActionShown_BringsTheStickyActionBack_InTheShowOnWallWords_AndARealTapShowsThePointOnTheWall()
+        {
+            yield return Open();
+            Assert.AreEqual(0, Stack.Footer.childCount, "the default (Automatic under the bottom bar): no sticky footer");
+            Assert.IsFalse(Stack.HeroActionViews.OfType<ActionsBlockView>().Any(), "...and no sticky action on the hero");
+
+            foreach (var (language, words) in new[] { ("pt", "Mostra-me onde fica"), ("en", "Show me where it is") })
+            {
+                yield return Open(b => b.sticky_action = CardOptions.NavBarStickyShown, c => c.languages = new List<string> { language, "en" });
+                var footer = Stack.BoundViews.OfType<ActionsBlockView>().Single(v => Stack.SlotOf(v).parent == Stack.Footer);
+                Assert.AreEqual(words, footer.Actions.Single().Label.text, language + ": the pinned footer says the action's words");
+                Assert.AreEqual(words, Stack.BoundViews.OfType<ShowOnWallBlockView>().Single().ButtonLabel.text, language + ": the Show On Wall block the same");
+                var primary = (ActionsBlockView)Stack.HeroActionViews[0];
+                var listen = Stack.HeroActionViews.OfType<AudioGuideBlockView>().Single();
+                var label = primary.Actions.Single().Label;
+                Assert.AreEqual(words, label.text, language + ": at the top of the card the sticky action is the hero's");
+                Assert.IsTrue(primary.Root.ClassListContains(BlockStackView.HeroPrimaryClass));
+                Assert.AreEqual(primary.Root.worldBound.center.y, listen.Root.worldBound.center.y, OnePixel, language + ": one row with Listen: "
+                    + primary.Root.worldBound + " / " + listen.Root.worldBound);
+                Assert.LessOrEqual(primary.Root.worldBound.xMax, listen.Root.worldBound.xMin + OnePixel, language + ": Listen beside it, never over it");
+                float wants = label.MeasureTextSize(label.text, 0f, VisualElement.MeasureMode.Undefined, 0f, VisualElement.MeasureMode.Undefined).x;
+                Assert.LessOrEqual(wants, label.contentRect.width + OnePixel, language + ": its words whole at 390 pt (" + wants + " in " + label.contentRect.width + ")");
+                yield return Save("sticky_action_shown_" + language, "Card/M3");
+            }
+            var button = ((ActionsBlockView)Stack.HeroActionViews[0]).Actions.Single().Button;
+            Assert.Less(button.worldBound.yMax, Band.yMin, "precondition: the hero's action stands clear of the bar");
+            yield return CardTestInput.Tap(button.panel, button.worldBound.center);
+            yield return CardTestInput.Settle();
+            Assert.AreEqual(SheetStopRule.Stop.Peek, Sheet.Stop, "the card lowers to its title");
+            Assert.AreEqual(Painting, SelectionEventBus.CurrentPoiId, "the point stays selected: its marker stays highlighted on the wall");
         }
 
         // The card as the visitor sees it now -> TestEvidence/Premium/P2/<name>.png

@@ -54,6 +54,39 @@ namespace TileStories.Tests
 
         // ---------------- the open card follows the edit ----------------
 
+        // A live push rebinds the open card's views before the stack attaches them again: the hero's Words On Picture fits only once its
+        // view is on a panel (a text measure off a panel has no DPI -- Unity warned once per word with a stack trace, ~136 MB of the
+        // Editor log per full EditMode run) and fits again after the attach, the same words measured and the tone painted
+        [UnityTest]
+        public IEnumerator ALivePush_RefitsTheHerosWordsOnceOnThePanel_MeasuringNoTextOffIt()
+        {
+            yield return OpenFull(ReferenceCard.Golden);
+            var header = Sheet.Stack.HeaderView;
+            int wordsBefore = header.Words.Inks.Count(i => i.IsWord);
+            Assert.Greater(wordsBefore, 3, "precondition: the golden card's hero words are fitted on the open card");
+            var offPanel = new List<string>();
+            void Hear(string message, string stack, LogType type)
+            {
+                if (message.Contains("not on a panel")) offPanel.Add(message);
+            }
+            Application.logMessageReceived += Hear;
+            try
+            {
+                yield return Push(c => SetHeading(c.pois.Single(p => p.id == ReferenceCard.Golden).card.blocks
+                    .Single(b => b.key == ReferenceCard.BlockOf(BuiltInBlocks.QuickFactsKind)), "Pushed live"));
+                yield return CardTestInput.Settle(0.3f);
+            }
+            finally
+            {
+                Application.logMessageReceived -= Hear;
+            }
+            CollectionAssert.IsEmpty(offPanel, "no text measured off a panel while the push rebound the card");
+            header = Sheet.Stack.HeaderView;
+            Assert.IsNotNull(header.HeroPart.panel, "precondition: the rebound hero is on the panel again");
+            Assert.AreEqual(wordsBefore, header.Words.Inks.Count(i => i.IsWord), "the same words measured after the attach");
+            Assert.IsNotNull(header.Words.Painter.Options, "and the tone painted round them again");
+        }
+
         [UnityTest]
         public IEnumerator AnEditedText_ShowsOnTheOpenCard_TheStopAndTheScrollAndThePointAreKept()
         {

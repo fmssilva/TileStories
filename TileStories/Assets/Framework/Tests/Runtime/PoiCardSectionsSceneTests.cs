@@ -105,6 +105,13 @@ namespace TileStories.Tests
             Assert.Less(((Vector4)expected - (Vector4)strongest).magnitude, 0.01f, what + ": expected " + (Color32)expected + ", drawn " + (Color32)strongest);
         }
 
+        // A label of a pull quote block (its words are display text)
+        private static bool InPullQuote(VisualElement e)
+        {
+            for (var at = e; at != null; at = at.parent) if (at.ClassListContains("card-quote")) return true;
+            return false;
+        }
+
         private static void AreSame(Color expected, Color actual, string what) =>
             Assert.Less(((Vector4)expected - (Vector4)actual).magnitude, 0.01f, what + ": expected " + (Color32)expected + ", drawn " + (Color32)actual);
 
@@ -171,7 +178,8 @@ namespace TileStories.Tests
             // - PART 4: the body inside an open section is the theme's open size (17), the lede its own
             var paragraphs = slots.SelectMany(s => s.Query<Label>(className: "card-text__paragraph").ToList())
                 .Where(l => !l.ClassListContains("card-text__lede") && l.resolvedStyle.display == DisplayStyle.Flex).ToList();
-            var prose = paragraphs.Where(l => !l.ClassListContains("ts-el__paragraph")).ToList();
+            // - a pull quote's words are display text (its serif look is larger by design), never body
+            var prose = paragraphs.Where(l => !l.ClassListContains("ts-el__paragraph") && !InPullQuote(l)).ToList();
             Assert.Greater(prose.Count, 2, "precondition: the card's blocks draw body paragraphs");
             float open = CardTestInput.TokenPx("--ts-size-body-open");
             Assert.AreEqual(17f, open, "the theme's open body size");
@@ -406,9 +414,13 @@ namespace TileStories.Tests
             var bar = Sheet.Slots.Bar;
             Assert.IsNotNull(bar.Root.parent, "precondition: the default Navigation Bar floats at the bottom");
             var section = Sections[1];
+            // - the golden card's About is long: the row brought to the bar's top edge first (under it, no tile turned), the strokes then
+            //   carry it up its whole travel
+            Scroll.scrollOffset += new Vector2(0f, section.Open.StartTilesRow.worldBound.yMin - (bar.Row.worldBound.yMin + 4f));
+            yield return CardTestInput.UntilStill(Sheet);
             int count = LookKit.TileRule.CountFor(section.Open.StartTilesRow.contentRect.width, section.Open.StartTileOptions.Size, section.Open.StartTileOptions.Joint);
             Assert.AreEqual(16, count, "precondition: 16 tiles across the phone's 390");
-            Assert.Greater(section.Open.Edge.worldBound.yMax, bar.Row.worldBound.yMin, "precondition: at the card's top the row is under the bar's top");
+            Assert.Greater(section.Open.Edge.worldBound.yMax, bar.Row.worldBound.yMin, "precondition: the row is under the bar's top");
             Assert.AreEqual(reduce ? count : 0, TurnedTiles(section, count), reduce ? "Reduce Motion: whole before it moved" : "under the bar: no tile turned");
 
             // - small real strokes up the card (each moves the stack ~1.7x the finger: about a fifth of the row's travel), the reading taken

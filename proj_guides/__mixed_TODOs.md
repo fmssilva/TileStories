@@ -824,10 +824,10 @@ languages (es, fr, de, it...) without rebuilding the marker atlases.
 - `PoiCardInterleavedSpySceneTests.TheLamp_RealDragsDownTheWholeCard_...` ("drag 20 at 6279") -- red once in a background full
   PlayMode run, green in the targeted run and 7/7 alone. Likely a drag landing during the sheet's settle (the "wait on the condition,
   not on seconds" rule of `40-testing.md`): check the walk waits for the stack to rest between drags.
-- `PoiCardSceneTests.ARealTapOnTheStickyAction_ShowsThePointOnTheWall_...` ("in reach on the full card: 1001 > 845", `_3.3` S2b) -- red
-  once in a background targeted run: The Lamp's hero action below the sheet right after OpenFull; green alone, in its fixture (56 / 56)
-  and in the next full PlayMode run, all in the background. Likely the same family: a read before the sheet rests at Full -- check that
-  OpenFull waits for the stop's rest height before the hero is measured.
+- The sticky action's real tap ("in reach on the full card: 1001 > 845", `_3.3` S2b) -- red once in a background targeted run when it
+  was `PoiCardSceneTests.ARealTapOnTheStickyAction_...` on The Lamp (a read before the sheet rested at Full). It lives now in
+  `PoiCardNavBarSceneTests.StickyActionShown_...` on the golden card, whose `Open` waits for the stack and the bar's indicator to rest
+  before any read; still watched.
 
 ## The Guide -- the hero's audio grows into a guided tour of the POI (developer, 2026-10-28; a future domain, after `_3.3`)
 

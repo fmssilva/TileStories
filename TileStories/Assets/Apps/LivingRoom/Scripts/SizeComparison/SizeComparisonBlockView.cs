@@ -58,6 +58,8 @@ namespace TileStories.LivingRoom
             Root.Add(Caption);
             // - the stage only has a width once the card lays it out (and a new one when the phone turns): size the shapes then
             Stage.RegisterCallback<GeometryChangedEvent>(_ => Layout());
+            // - a view bound before the stack attaches it measures its names only once it is on a panel
+            Stage.RegisterCallback<AttachToPanelEvent>(_ => Layout());
         }
 
         private static VisualElement Slot(string variantClass)
@@ -117,10 +119,11 @@ namespace TileStories.LivingRoom
             ObjectKnown = false;
         }
 
-        // Size the two shapes, their slots and their names for the stage as it is now (nothing to do before it has a size: the geometry
-        // event comes back here)
+        // Size the two shapes, their slots and their names for the stage as it is now (nothing to do before it has a size, nor off a panel,
+        // where a text measure has no DPI to read: the geometry and attach events come back here)
         private void Layout()
         {
+            if (Stage.panel == null) return;
             float gap = ObjectKnown ? ObjectSlot.resolvedStyle.marginLeft : 0f;
             if (!SizeComparisonRule.TryFit(Stage.contentRect.width, Stage.contentRect.height, gap, _poiCm, ObjectKnown ? _objectCm : (Vector2?)null,
                     NaturalWidth(PoiName), ObjectKnown ? NaturalWidth(ObjectName) : 0f, out var shapes)) return;

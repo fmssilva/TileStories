@@ -110,7 +110,8 @@ LodWallSceneTests, SearchDemoTests, MarkerViewRuntimeTests. The method-level tag
 - open by a real marker tap, and close (X, swipe down, empty tap): PoiCardSceneTests {ARealMarkerTap_OpensTheCard_ForThatPoi,
   TheX_ClosesTheCard_..., PullingTheCardDownBelowPeek_ClosesIt, ATapOnEmptyCameraSpace_Closes_...}
 - stops and drag: PoiCardSceneTests.DraggingUp_GoesToHalf_AtMost40Percent_ThenFull (+ PoiCardSheetDragSceneTests, class)
-- the hero: PoiCardHeroSceneTests {AtFull_TheWholeHeroIsTheScreen_..., ARealTapOnTheHerosAction_...}
+- the hero: PoiCardHeroSceneTests.AtFull_TheWholeHeroIsTheScreen_WithListenAtItsFoot
+- "show me where it is" (the Locate pin, the shipped default's way; the old sticky action is an option of the bar): PoiCardLocateFabSceneTests.ARealTap_ShowsThePointOnTheWall_AtHalfAndFull
 - the block page, Back and Next / Previous: PoiCardPageChromeSceneTests {TheStoryPage_ARealTapOnBack_..., TheFoot_RealTapsOnNextAndPrevious_...}
 - navigation (a jump, the spy follows a real finger): PoiCardNavSceneTests {AJumpFromPeek_..., ARealFingerDrag_MovesTheSpy_...}
 - the Navigation Bar (the default bar; a real tap jumps, real drags the bar follows): PoiCardNavBarSceneTests
@@ -145,7 +146,7 @@ LodWallSceneTests, SearchDemoTests, MarkerViewRuntimeTests. The method-level tag
   - **InterleavedSpy walk:** its drags now wait on `CardTestInput.UntilStill` (three frames unmoved), not `Settle(0.6)`. With the fling
     running to its end, a 20 % step passed Listen (one block) between two readings: the step is now 8 % of the viewport. Green; 102
     drags, 240 s (was 160 s).
-  - **`PoiCardSceneTests.ARealTapOnTheStickyAction`:** green in this session's closing FULL (1339 / 0 failed); still watched.
+  - **The sticky action's real tap** (now `PoiCardNavBarSceneTests.StickyActionShown_...`, the golden card): still watched.
   - **`ConfigUndoGroupingTests` slider drag:** green in all four full EditMode runs; still watched.
 - **P3c grew two card fixtures with render tests** (Words On Picture, Raised Depth, Icon Colour): PoiCardHeroSceneTests 34 -> 58 tests
   (~242 s), PoiCardNavBarSceneTests -> 47 tests (~486 s; its class Core tag now carries the depth and icon renders too, ~3 min of CORE);

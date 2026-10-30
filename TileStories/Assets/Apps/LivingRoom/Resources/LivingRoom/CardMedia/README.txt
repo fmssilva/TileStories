@@ -19,7 +19,8 @@ paco_before_1755.jpg        -- before_after BEFORE + image_choice option 1: the 
 paco_after_today.jpg        -- before_after AFTER + image_choice option 2: Praca do Comercio today (Dguendel, CC BY 4.0)
 paco_hotspots.jpg           -- hotspot_image: the palace before 1755, uncropped (anonymous, PD)
 paco_map.jpg                -- today_map: OpenStreetMap tiles, pin on the square (ODbL, attribution drawn on the picture)
-azulejo_detail.jpg          -- zoom_image (both points): ships at the Ribeira das Naus, Grande Panorama de Lisboa (RickMorais, CC BY-SA 4.0)
+azulejo_detail.jpg          -- zoom_image (both points): ships at the Ribeira das Naus, Grande Panorama de Lisboa (RickMorais, CC BY-SA 4.0);
+                               the Ribeira Palace's swatches are sampled from it (#203766, #7789A1, #BBB7AD)
 castle_hero.jpg             -- The Lamp's hero (2048x1152): towers and walls (deror_avi, CC BY-SA 3.0)
 castle_then.jpg             -- the castle on the Grande Panorama tile panel (RickMorais, CC BY-SA 4.0): hotspot_image + split_then_now THEN
 castle_now.jpg              -- the castle hill from the river (Massimo Catarinella, CC BY 3.0): split_then_now NOW
@@ -41,7 +42,8 @@ lamp_tone.wav, lamp_tone.vtt -- generated PLACEHOLDER tone (20 s, four sections,
 video/ (_3.3 P1b)
 lisbon_square_castle_55s.mp4 -- 54.9 s, 854x480, ambient sound: three own-work clips by deror_avi joined (CC BY-SA 3.0): the square, the
                                view from the castle, performers in the castle. Audio resampled 16 -> 44.1 kHz for the Windows importer.
-                               3.8 MB in a build
+                               3.8 MB in a build. The Lamp's video blocks and the Ribeira Palace's (the square is where the palace stood;
+                               a STAND-IN until a clip of the palace's own story exists: _3.3 TODOs)
 lisbon_square_castle_55s.vtt, lisbon_square_castle_55s_pt.vtt -- three cues that DESCRIBE the picture (EN; PT = the Per Language file)
 lisbon_square_castle_poster.jpg -- the inline video's poster: a frame at 10 s (852x480)
 

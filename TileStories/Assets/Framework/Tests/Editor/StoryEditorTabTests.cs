@@ -6,6 +6,7 @@ using System.Reflection;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using TileStories.Tests;
 using UnityEngine.TestTools;
 
 namespace TileStories.Editor.Tests
@@ -17,8 +18,8 @@ namespace TileStories.Editor.Tests
     public class StoryEditorTabTests
     {
         private const BindingFlags Instance = BindingFlags.NonPublic | BindingFlags.Instance;
-        private const string Poi = "painting";
-        private const string StoryKey = "block_19";
+        private const string Poi = ReferenceCard.Golden;
+        private static readonly string StoryKey = ReferenceCard.BlockOf(BuiltInBlocks.StoryKind);
         private PoiEditorWindowHost _window;
 
         [TearDown]

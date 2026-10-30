@@ -109,20 +109,20 @@ namespace TileStories.Tests
             Sheet.SetStop(SheetStopRule.Stop.Peek);
             yield return CardTestInput.Settle();
             yield return Rested();
-            Assert.IsFalse(Chrome.BottomShown, "no footer and no bar at peek");
+            Assert.IsFalse(Chrome.BottomShown, "no bar and no footer at peek");
             Assert.IsFalse(InTheCard(Bottom));
             Assert.IsTrue(FooterBelowTheCard, "the footer is below the card's edge");
         }
 
-        // Reduce motion: the footer jumps instead of sliding (no transition left on it)
+        // Reduce motion: the bottom area (the bar, a sticky footer) jumps instead of sliding (no transition left on it)
         [UnityTest]
-        public IEnumerator ReduceMotion_MakesTheFooterJump()
+        public IEnumerator ReduceMotion_MakesTheBottomAreaJump()
         {
             yield return Push(c => c.card_settings.container.reduce_motion = true);
             yield return Open(Lamp, SheetStopRule.Stop.Full);
             Assert.IsTrue(Sheet.Root.ClassListContains(CardChromeView.InstantClass), "the card says instant");
             foreach (var duration in Bottom.resolvedStyle.transitionDuration)
-                Assert.AreEqual(0f, duration.value, "no slide on the bottom area (the footer in it)");
+                Assert.AreEqual(0f, duration.value, "no slide on the bottom area");
         }
     }
 }

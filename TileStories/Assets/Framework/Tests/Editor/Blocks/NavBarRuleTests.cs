@@ -9,10 +9,18 @@ namespace TileStories.Editor.Tests
     // Tier 0 of the Navigation Bar (_3.3 S4 third round, NavBarRule): the six default groups (one per navigable family in the families'
     // order, AR inside Media, Community inside Play), a wall's own rows (hidden, merged, their blanks filled from the first family), the groups
     // ONE card shows -- on the SHIPPED Ribeira Palace through the real BlockStackBuilder and CardNavModel -- the group a block belongs to, the
-    // words, v5's defaults (an unknown value reads as its default), a pre-v5 config read unchanged, the disc and the over-the-hero rule.
+    // words, v5's defaults (an unknown value reads as its default), a pre-v5 config read unchanged, the disc and the over-the-hero rule;
+    // the Locate Button and Sticky Action rows (their defaults, a config from before them, Sticky Action's matrix).
     public class NavBarRuleTests
     {
-        private const string Painting = "painting";
+        private const string Painting = TileStories.Tests.ReferenceCard.Golden;
+
+        private static CardNavigationSettings Nav(System.Action<CardNavBarSettings> edit = null)
+        {
+            var nav = new CardNavigationSettings { bar = new CardNavBarSettings() };
+            edit?.Invoke(nav.bar);
+            return nav;
+        }
 
         private static WallConfigData Shipped() =>
             JsonUtility.FromJson<WallConfigData>(File.ReadAllText("Assets/Apps/LivingRoom/config.json"));
@@ -201,6 +209,32 @@ namespace TileStories.Editor.Tests
             CollectionAssert.AreEqual(new[] { "Accent", "Ink", "Group" }, CardOptions.NavBarSelectedColourLabels);
             CollectionAssert.AreEqual(new[] { "Group", "Accent", "Neutral" }, CardOptions.NavBarIconColourLabels);
             CollectionAssert.AreEqual(new[] { "Always", "After The Hero" }, CardOptions.NavBarShowLabels);
+        }
+
+        // The Locate Button row: on by default, and a config written before P3d (no locate_button, no sticky_action) loads it on with Sticky
+        // Action Automatic
+        [Test]
+        public void TheLocateButton_IsOnByDefault_AndAConfigFromBeforeIt_LoadsItOn_WithStickyActionAutomatic()
+        {
+            Assert.IsTrue(NavBarRule.LocateButton(Nav().bar), "on by default");
+            var old = JsonUtility.FromJson<CardNavBarSettings>("{\"position\":\"bottom\"}");
+            Assert.IsTrue(NavBarRule.LocateButton(old), "an old config: on");
+            Assert.AreEqual(CardOptions.NavBarStickyAuto, NavBarRule.StickyAction(old), "...Sticky Action Automatic");
+        }
+
+        // Sticky Action: Automatic leaves the old sticky action out only while the bar floats at the bottom; Shown / Hidden as picked; with the
+        // bar off it is drawn as before the bar; an unknown value reads Automatic
+        [Test]
+        public void TheStickyAction_IsOffUnderABottomBar_ByDefault_KeptAsAnOption()
+        {
+            Assert.IsFalse(NavBarRule.StickyActionShown(Nav()), "the default (bar at the Bottom, Automatic): off");
+            Assert.IsTrue(NavBarRule.StickyActionShown(Nav(b => b.position = CardOptions.NavBarTop)), "the bar at Top, Automatic: drawn");
+            Assert.IsTrue(NavBarRule.StickyActionShown(Nav(b => b.sticky_action = CardOptions.NavBarStickyShown)), "Shown under a bottom bar");
+            Assert.IsFalse(NavBarRule.StickyActionShown(Nav(b => { b.position = CardOptions.NavBarTop; b.sticky_action = CardOptions.NavBarStickyHidden; })), "Hidden at Top");
+            Assert.IsTrue(NavBarRule.StickyActionShown(Nav(b => { b.enabled = false; b.sticky_action = CardOptions.NavBarStickyHidden; })), "the bar off: drawn as before");
+            Assert.IsTrue(NavBarRule.StickyActionShown(null), "no navigation settings: drawn");
+            Assert.AreEqual(CardOptions.NavBarStickyAuto, NavBarRule.StickyAction(new CardNavBarSettings { sticky_action = "sometimes" }), "unknown = Automatic");
+            CollectionAssert.AreEqual(new[] { "Automatic", "Shown", "Hidden" }, CardOptions.NavBarStickyActionLabels);
         }
 
         [Test]

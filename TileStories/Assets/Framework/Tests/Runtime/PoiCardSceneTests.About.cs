@@ -8,8 +8,8 @@ using UnityEngine.UIElements;
 namespace TileStories.Tests
 {
     // Phase B of the about family on the real LivingRoomScene: The Lamp's rich_text (and its glossary in Portuguese), quick_facts, fun_fact,
-    // pull_quote, status (the marker's own ring), the header chip and picture looks, and the sticky action. The fixture, its SetUp and the shared
-    // helpers are in PoiCardSceneTests.cs.
+    // pull_quote, status (the marker's own ring), the header chip and picture looks (the sticky action is the Navigation Bar's option: its
+    // fixture's). The fixture, its SetUp and the shared helpers are in PoiCardSceneTests.cs.
     public partial class PoiCardSceneTests
     {
         [UnityTest]
@@ -194,53 +194,6 @@ namespace TileStories.Tests
             Assert.AreEqual(authored, facts.Facts.Count, "No: the authored facts alone");
             Assert.AreEqual("Style", facts.Facts[0].Label.text, "...the first authored one first");
             Assert.IsNull(Header.Root.Q(className: "card-chip"), "and the header never names the category");
-        }
-
-        [UnityTest]
-        public IEnumerator ARealTapOnTheStickyAction_ShowsThePointOnTheWall_TheCardLowersAndTheSelectionStays()
-        {
-            // - the sticky action is this test's subject: drawn (Sticky Action Automatic leaves it out under the default bottom bar, _3.3 P3d)
-            LiveSettings.navigation.bar.sticky_action = CardOptions.NavBarStickyShown;
-            yield return OpenFull("lamp");
-            // - _3.3 P4.4a: at the top of the card the sticky action is drawn in the hero (the footer waits for it to scroll away)
-            var sticky = (ActionsBlockView)Sheet.Stack.HeroActionViews[0];
-            var button = sticky.Actions.Single().Button;
-            Assert.AreEqual("Show me where it is", sticky.Actions[0].Label.text);
-            Assert.LessOrEqual(button.worldBound.yMax, Sheet.Root.worldBound.yMax + 1f, "precondition: in reach on the full card");
-            yield return Capture("Card_Lamp_Actions");
-
-            yield return CardTestInput.Tap(button.panel, button.worldBound.center);
-            yield return CardTestInput.Settle();
-            Assert.AreEqual(SheetStopRule.Stop.Peek, Sheet.Stop, "the card lowers to its title");
-            Assert.AreEqual("lamp", SelectionEventBus.CurrentPoiId, "the point stays selected: its marker stays highlighted on the wall");
-            Assert.IsTrue(Marker("lamp").IsVisible);
-            yield return Capture("Card_Lamp_ShowOnWall");
-        }
-
-        // 15.2.2 on the real scene: The Lamp's sticky footer carries no words of its own, so it reads the framework's Show On Wall words -- the
-        // same action says the same thing on the footer and on the Show On Wall block, in each language (PT used to read two ways)
-        [UnityTest]
-        public IEnumerator TheLamp_TheStickyFooterAndTheShowOnWallBlock_SayTheSameWords_InEnglishAndInPortuguese()
-        {
-            var lampConfig = Session.SearchPois.First(p => p.id == "lamp");
-            var stickyBlock = lampConfig.card.blocks.First(b => b.kind == BuiltInBlocks.ActionsKind && b.variant == BuiltInBlocks.ActionsStickyCta);
-            var stickyRow = new BlockFieldReader(stickyBlock, null, null).Items(BuiltInBlocks.ActionsItemsField).Single();
-            Assert.AreEqual("", new BlockFieldReader(stickyBlock, null, null).ItemText(stickyRow, BuiltInBlocks.ActionsLabelField), "precondition: the fixture's sticky button has no words of its own");
-            // - the sticky footer is this test's subject: drawn (Sticky Action Automatic leaves it out under the default bottom bar, _3.3 P3d)
-            LiveSettings.navigation.bar.sticky_action = CardOptions.NavBarStickyShown;
-
-            foreach (var (language, expected) in new[] { ("en", "Show me where it is"), ("pt", "Mostra-me onde fica") })
-            {
-                SelectionEventBus.Clear();
-                LiveSettings.languages = new System.Collections.Generic.List<string> { language, "en" };
-                yield return OpenFull("lamp");
-                var sticky = Sheet.Stack.BoundViews.OfType<ActionsBlockView>().Last();
-                var wallButton = Sheet.Stack.BoundViews.OfType<ShowOnWallBlockView>().First();
-                Assert.AreEqual(expected, sticky.Actions.Single().Label.text, language + ": the footer's words are the action's own");
-                Assert.AreEqual(expected, wallButton.ButtonLabel.text, language + ": the same words on the Show On Wall block");
-                Assert.AreEqual(Sheet.Stack.Footer, Sheet.Stack.SlotOf(sticky).parent, language + ": and it is still the pinned footer");
-                yield return Capture("Card_Lamp_StickyWording_" + language);
-            }
         }
 
         [UnityTest]

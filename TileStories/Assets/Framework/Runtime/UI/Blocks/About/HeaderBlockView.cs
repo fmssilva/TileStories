@@ -158,6 +158,7 @@ namespace TileStories
             Text.RegisterCallback<GeometryChangedEvent>(_ => FitWords());
             Actions.RegisterCallback<GeometryChangedEvent>(_ => FitWords());
             ToneLayer.RegisterCallback<GeometryChangedEvent>(_ => FitWords());
+            HeroPart.RegisterCallback<AttachToPanelEvent>(_ => FitWords());
             Frame.RegisterCallback<GeometryChangedEvent>(evt =>
             {
                 // - only a new frame size re-places the picture (its own new size must never feed back into the frame's)
@@ -261,7 +262,9 @@ namespace TileStories
         // picture is read for the strength; a video's frames, the turntable or the split's two pictures get the look's own strength
         private void FitWords()
         {
-            if (!HasPicture) return;
+            // - off a panel no word is drawn and a text measure has no DPI to read (Unity warns, once per word): the stack binds a view
+            //   before it attaches it, so the fit waits for the attach (AttachToPanelEvent) and the layout after it
+            if (!HasPicture || HeroPart.panel == null) return;
             bool still = _variant != BuiltInBlocks.HeaderModelTurntable && _variant != BuiltInBlocks.HeaderSplitThenNow && !LoopShowsFrames;
             Words.Fit(WordsOnPicture, ToneSpread, HeroPart, new[] { Text, Actions }, still ? Picture : null, Media, Frame, Motion, _reduceMotion,
                 Overflow, TextRise);

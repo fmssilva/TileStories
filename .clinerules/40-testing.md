@@ -91,8 +91,8 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 (e.g. "59/59") as the acceptance criterion — counts change as tests are added; zero
 failures does not.
 
-**Which tests, when (three tiers).** RUN TIMES (replaced after a run when a number moved > ~10 %): BLOCK's EditMode half ~2.0 min (2200 tests, without
-the Live assembly); full EditMode ~3.4 min (2211 tests); CardSmoke ~1.4 min (22 tests); CORE ~12.2 min (PlayMode 175 tests 12.0 min + EditMode 120 tests
+**Which tests, when (three tiers).** RUN TIMES (replaced after a run when a number moved > ~10 %): BLOCK's EditMode half ~3.0 min (2207 tests, without
+the Live assembly); full EditMode ~4.4 min (2218 tests); CardSmoke ~1.3 min (22 tests); CORE ~12.2 min (PlayMode 175 tests 12.0 min + EditMode 120 tests
 14 s); FULL PlayMode ~76 min (1155 tests); per-fixture times in `TestEvidence/Harness/fixture_times.csv` (`TestRunRecorder` writes it after every run).
 
 - **BLOCK -- every block, after each change:** compile, the EditMode half, then the PlayMode fixtures of the changed code
@@ -379,6 +379,10 @@ grown one session's log to 823 MB.
   Warnings, errors and exceptions keep their stack traces.
 - Per-item / per-frame detail goes through `DevLog.Detail(LogDomain.X, ...)` (20-code-quality 2.1), off by default, so a test
   run writes only one-line summaries, warnings and errors. Deleting the log file fixes nothing: the cost is writing it.
+- A view measures text (`MeasureTextSize`) or reads its layout only while its element is on a panel (`panel != null`, then
+  `AttachToPanelEvent` / `GeometryChangedEvent`): the stack binds a pooled view before it attaches it, and a measure off a panel makes
+  Unity warn once per word with a stack trace -- that one warning was ~136 MB of every full EditMode run.
+  `PoiCardLiveUpdateTests.ALivePush_RefitsTheHerosWordsOnceOnThePanel_...` listens for it.
 
 ### 4.3 Asset Database Refresh Discipline
 

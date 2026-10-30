@@ -98,10 +98,14 @@ namespace TileStories.Tests
                 Assert.AreEqual(Title(language), header.TitleText, language + ": the card's title");
                 // - the stack's own order: each block's slot below the one before, in the builder's order (Sources included, which is
                 //   no navigation target: its family is left out of navigation)
-                var slots = built.Entries.Skip(1).Select(e => Sheet.Stack.SlotOfBlock(e.Instance.key)).ToList();
+                //   -- a footer look (the sticky action) is pinned outside the scroll, shown or not; a block waiting for the card to be read
+                //   (Show After Reading, a fresh visitor) is hidden until then
+                var scrolled = built.Entries.Skip(1).Where(e => !e.Definition.IsFooter(e.Variant) && !(e.Definition.ShowAfterViewedField != null
+                    && new BlockFieldReader(e.Instance, null, null).Flag(e.Definition.ShowAfterViewedField))).ToList();
+                var slots = scrolled.Select(e => Sheet.Stack.SlotOfBlock(e.Instance.key)).ToList();
                 Assert.IsTrue(slots.All(s => s != null), language + ": every block under the header has its slot in the stack");
                 for (int i = 1; i < slots.Count; i++)
-                    Assert.Greater(slots[i].worldBound.yMin, slots[i - 1].worldBound.yMin, language + ": " + built.Entries[i + 1].Instance.kind + " comes after " + built.Entries[i].Instance.kind);
+                    Assert.Greater(slots[i].worldBound.yMin, slots[i - 1].worldBound.yMin, language + ": " + scrolled[i].Instance.kind + " comes after " + scrolled[i - 1].Instance.kind);
                 yield return CardGalleryChecks.Render("Painting_" + language + "_full_390");
                 Sheet.SetStop(SheetStopRule.Stop.Half);
                 yield return CardTestInput.Settle(0.5f);

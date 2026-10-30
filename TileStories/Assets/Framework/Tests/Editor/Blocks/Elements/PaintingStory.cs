@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
+using TileStories.Tests;
 
 namespace TileStories.Editor.Tests
 {
@@ -15,15 +16,15 @@ namespace TileStories.Editor.Tests
     {
         public const string ConfigPath = "Assets/Apps/LivingRoom/config.json";
         public const string StreamingConfigPath = "Assets/StreamingAssets/LivingRoom/config.json";
-        public const string PaintingId = "painting";
+        public const string PaintingId = ReferenceCard.Golden;
         public const string StoryKindKey = "test_story";
         public const string PageField = "page";
         public const string StoryBlockKey = "block_story";
         // The second composed block of The Painting: what a scope-block reference points into
         public const string SecondBlockKey = "block_story_2";
         // The Painting's shipped blocks the story is made from
-        public const string HeaderKey = "block_1";
-        public const string GalleryKey = "block_5";
+        public static readonly string HeaderKey = ReferenceCard.BlockOf(BuiltInBlocks.HeaderKind);
+        public static readonly string GalleryKey = ReferenceCard.BlockOf(BuiltInBlocks.GalleryKind);
 
         public WallConfigData Config;
         public POIData Painting;

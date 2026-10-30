@@ -20,7 +20,6 @@ namespace TileStories.Tests
     //   - every Style x Colour rendered, light and dark: the rim >= 4.5:1 on the paper (over the hero measured and reported), the label
     //     >= 7:1 on its chip; on every hero picture its dark halo's edge or its white disc >= 3:1 (WCAG 1.4.11), no halo on the paper
     //   - it follows the bar: at Top over the sheet's foot; Hide While Scrolling slides it away and back with REAL strokes
-    //   - the old sticky action (The Lamp's): off under the bottom bar by default, back with Sticky Action Shown or the bar at Top
     // Renders in TestEvidence/Premium/P3e/.
     public class PoiCardLocateFabSceneTests : SearchSceneFixture
     {
@@ -193,7 +192,9 @@ namespace TileStories.Tests
         }
 
         // A REAL tap on the pin shows the point on the wall: the card lowers to Peek, the point still selected (its marker stays), at Half and at
-        // Full; at Peek the button is gone (the wall is in view). A tap on the chip does the same
+        // Full; at Peek the button is gone (the wall is in view). A tap on the chip does the same. Core: the shipped default's "show me where
+        // it is" (the old sticky action is off under the default bar)
+        [Category("Core")]
         [UnityTest]
         public IEnumerator ARealTap_ShowsThePointOnTheWall_AtHalfAndFull([Values("half", "full")] string at, [Values("pin", "chip")] string on)
         {
@@ -638,30 +639,6 @@ namespace TileStories.Tests
             Assert.IsFalse(Sheet.BottomArea.ClassListContains(CardChromeView.BottomHiddenClass), "precondition: a move up brought the bar back");
             Assert.IsTrue(Fab.IsShown, "...and the button");
             Assert.AreEqual(BarTop - 12f, Fab.Root.worldBound.yMax, OnePixel, "...at its place over the bar");
-        }
-
-        // The old sticky action (The Lamp's Show On Wall in the Sticky look): off by default under the bottom bar -- no footer, no pill on the
-        // hero -- and kept as options: Sticky Action Shown brings both back under the bottom bar; with the bar at Top, Automatic draws them
-        [UnityTest]
-        public IEnumerator TheOldStickyAction_IsOffUnderTheBottomBar_ByDefault_AndComesBackAsAnOption()
-        {
-            int HeroPrimaries() => Stack.HeaderView.Actions.Children().Count(c => c.ClassListContains(BlockStackView.HeroPrimaryClass));
-
-            yield return Open(poi: Lamp);
-            Assert.AreEqual(0, Stack.Footer.childCount, "the default: no sticky footer");
-            Assert.AreEqual(0, HeroPrimaries(), "...and no pill on the hero");
-            Assert.IsTrue(Fab.IsShown, "the Locate Button stands for it");
-
-            yield return Open(c => c.navigation.bar.sticky_action = CardOptions.NavBarStickyShown, poi: Lamp);
-            Assert.AreEqual(1, Stack.Footer.childCount, "Sticky Action Shown: the footer back");
-            Assert.AreEqual(1, HeroPrimaries(), "...and the hero's pill");
-
-            yield return Open(c => c.navigation.bar.position = CardOptions.NavBarTop, poi: Lamp);
-            Assert.AreEqual(1, Stack.Footer.childCount, "the bar at Top, Automatic: the footer drawn");
-            Assert.AreEqual(1, HeroPrimaries(), "...and the hero's pill");
-
-            yield return Open(c => c.navigation.bar.sticky_action = CardOptions.NavBarStickyHidden, poi: Lamp);
-            Assert.AreEqual(0, Stack.Footer.childCount, "Hidden: none");
         }
 
         private Color Theme(string token)

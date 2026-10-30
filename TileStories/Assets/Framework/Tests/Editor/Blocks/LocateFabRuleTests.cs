@@ -6,8 +6,8 @@ namespace TileStories.Editor.Tests
 {
     // Tier 0 of the Locate Button (_3.3 P2 review e, P3d): LocateFabRule -- shown at Half and Full only while the bar and its Locate Button
     // are on and the scroll is not hiding the bar; its bottom over the bar's highest point (the raised disc's top) or a sticky footer or the
-    // foot, at the card's numbers; the touch target holding everything that floats in it at every size -- and NavBarRule's Locate Button / Sticky Action defaults and matrix, an old config,
-    // the touch target and the mark's 4.5:1 on the accent from the theme's own values, light and dark
+    // foot, at the card's numbers; the touch target holding everything that floats in it at every size; the mark's 4.5:1 on the accent from
+    // the theme's own values, light and dark (NavBarRule's Locate Button / Sticky Action rows: NavBarRuleTests)
     public class LocateFabRuleTests
     {
         private static CardNavigationSettings Nav(System.Action<CardNavBarSettings> edit = null)
@@ -30,7 +30,6 @@ namespace TileStories.Editor.Tests
         public void ItShows_AtHalfAndFull_WhileTheBarAndItsLocateButtonAreOn_AndNotWhileTheScrollHidesTheBar()
         {
             var nav = Nav();
-            Assert.IsTrue(NavBarRule.LocateButton(nav.bar), "on by default");
             Assert.IsFalse(LocateFabRule.Shown(nav, SheetStopRule.Stop.Peek, false), "Peek: the wall is already in view");
             Assert.IsTrue(LocateFabRule.Shown(nav, SheetStopRule.Stop.Half, false), "Half");
             Assert.IsTrue(LocateFabRule.Shown(nav, SheetStopRule.Stop.Full, false), "Full");
@@ -40,10 +39,6 @@ namespace TileStories.Editor.Tests
             Assert.IsFalse(LocateFabRule.Shown(Nav(b => b.enabled = false), SheetStopRule.Stop.Full, false), "the bar off: its rows (this one) with it");
             Assert.IsFalse(LocateFabRule.Shown(null, SheetStopRule.Stop.Full, false), "no navigation settings");
             Assert.IsTrue(LocateFabRule.Shown(Nav(b => b.position = CardOptions.NavBarTop), SheetStopRule.Stop.Half, false), "the bar at Top: still there");
-            // - a config written before P3d has no locate_button: it loads on
-            var old = JsonUtility.FromJson<CardNavBarSettings>("{\"position\":\"bottom\"}");
-            Assert.IsTrue(NavBarRule.LocateButton(old), "an old config: on");
-            Assert.AreEqual(CardOptions.NavBarStickyAuto, NavBarRule.StickyAction(old), "...Sticky Action Automatic");
         }
 
         // Its bottom at the card's numbers: 12 over the raised disc's top (gap 20 + bar 62 + the disc's radius 20 = 102 above the foot), over
@@ -180,21 +175,6 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(0f, LocateFabRule.Ping(2.5f, true).Alpha, "then nothing until the next");
             Assert.AreEqual(0.8f, LocateFabRule.Ping(3.2f, true).Alpha, 1e-4f, "the next ring every 3.2 s");
             Assert.AreEqual(0f, LocateFabRule.Ping(0.5f, false).Alpha, "still: no ring");
-        }
-
-        // Sticky Action: Automatic leaves the old sticky action out only while the bar floats at the bottom; Shown / Hidden as picked; with the
-        // bar off it is drawn as before the bar; an unknown value reads Automatic
-        [Test]
-        public void TheStickyAction_IsOffUnderABottomBar_ByDefault_KeptAsAnOption()
-        {
-            Assert.IsFalse(NavBarRule.StickyActionShown(Nav()), "the default (bar at the Bottom, Automatic): off");
-            Assert.IsTrue(NavBarRule.StickyActionShown(Nav(b => b.position = CardOptions.NavBarTop)), "the bar at Top, Automatic: drawn");
-            Assert.IsTrue(NavBarRule.StickyActionShown(Nav(b => b.sticky_action = CardOptions.NavBarStickyShown)), "Shown under a bottom bar");
-            Assert.IsFalse(NavBarRule.StickyActionShown(Nav(b => { b.position = CardOptions.NavBarTop; b.sticky_action = CardOptions.NavBarStickyHidden; })), "Hidden at Top");
-            Assert.IsTrue(NavBarRule.StickyActionShown(Nav(b => { b.enabled = false; b.sticky_action = CardOptions.NavBarStickyHidden; })), "the bar off: drawn as before");
-            Assert.IsTrue(NavBarRule.StickyActionShown(null), "no navigation settings: drawn");
-            Assert.AreEqual(CardOptions.NavBarStickyAuto, NavBarRule.StickyAction(new CardNavBarSettings { sticky_action = "sometimes" }), "unknown = Automatic");
-            CollectionAssert.AreEqual(new[] { "Automatic", "Shown", "Hidden" }, CardOptions.NavBarStickyActionLabels);
         }
 
         // Every Colour's tokens exist in both modes; its rim >= 4.5:1 on the paper; the chip's words >= 7:1 on the chip laid over black and
