@@ -14,30 +14,32 @@ So start by reading them all.
 
 
 ## `And now: domain proj_guides\_3.3_POI_Card_Styles.md`
-C1 -- the 16 CORE PlayMode reds, then the review's CORE and FULL green (the tracker's HANDOFF 2026-10-30; `40-testing.md` 4.2).
-GATE: as before (MCP; push: origin = the Architect's last commit, R1 is committed; SDF fonts; compile clean before every run,
-editor_state confirms a run STARTED and Play Mode is off; Unity c). No opening test run.
-WORKER MODEL: Opus + effort High (real-input reds across fixtures from several blocks).
-SUBAGENTS: per 00-process -- a Haiku pass to pull the failing asserts and their lines out of the long logs fits well.
-TEST PLAN: the 16 by name after each fix group; then CORE (PlayMode + EditMode) green; then ONE FULL in the background. These close
-the card review's deferred CORE (P1 to R1, 8 blocks).
-NO baseline stash: whose block caused a red does not change the fix. Fix each where it belongs; say per test what was wrong (code or
-the test's aim) and which block's change exposed it, when you can tell.
-PART 1 -- taps that do nothing (Video x6, Audio x2, Story x5): first check what is over the tap point -- the locate pin's floating layer
-(`LocateFabView.Layer`: it must be PickingMode.Ignore except the pin's own 44+ pt target), the Navigation Bar, the chrome band. A CODE
-fix if a transparent layer eats input meant for the card (with one PlayMode test: a real tap on a block under the layer's empty area
-reaches the block); a TEST fix if the target sits under the bar (aim at its visible part: TapInReach / IntoReach). Story's "rows keep the
-text's margin: 0" -- check whether open sections (P3) dropped the preview's side margin; fix the code if the visitor sees text touching
-the edge (LOOK at it first), else the test.
-PART 2 -- Expandable + LiveUpdate (one bound view short on The Lamp): the sticky CTA is off under a bottom bar since P3d (Sticky Action =
-Automatic). Decide per test: a test about the sticky CTA pins Sticky Action Shown (as P3d did for 9 tests); a count of the card's views
-is updated to today's default.
-PART 3 -- ThemePipelineTests (the bar paints --ts-bar-glass): the bar was restyled in P2 and no USS reads that token. Make the test
-check the tokens the Navigation Bar really paints with today; delete a theme token nothing uses (and its guard rows) -- no dead tokens.
-PART 4 -- CORE green, then ONE FULL in the background (Unity c). A red in FULL outside the card: fix it if it is small and clearly ours,
-else report it. Docs: _3.3 build log (CORE and FULL counts), _Test_Suite_1 if tests moved, 10-structure if files changed. Report with
-the Subagents line and one commit message. STOP with one AskUserQuestion.
-OUT OF SCOPE: the story block's redesign, any new feature.
+C2 -- the 50 FULL PlayMode reds, then FULL green (the tracker's HANDOFF after C1; `40-testing.md` 4.2).
+GATE: as before (MCP; push: origin = the Architect's last commit, C1 committed; SDF fonts; compile clean before every run,
+editor_state confirms a run STARTED and Play Mode is off; Unity c). Restart Unity first if the developer has not (Editor.log 3.7 GB,
+4.2.6). No opening test run.
+WORKER MODEL: Opus + effort High.
+SUBAGENTS: per 00-process -- a Haiku pass to group the 50 failure messages from the FULL log, and one to list every remaining
+TapInView / bare-ScrollTo-then-tap caller in the PlayMode tests, fit well.
+TEST PLAN: each group by name after its fix; then ONE FULL in the background (PlayMode + EditMode) green. That closes the card review's FULL.
+PART 1 -- the bar-tap aims (7: Hotspot, OpenBlockAndBack, TapZoom, PlaceInAr, the video gallery's full screen): move EVERY remaining
+caller of the old tap-in-view path to TapInReach / IntoReach (the list from the subagent, not only the 7 reds), in the right order:
+into reach, read the state, then tap.
+PART 2 -- the header-title contrast (40 at 1.12:1): read what the test measures. If it reads the title against the wrong ground (the bar
+has been clear since P4.4b), measure as SEEN (the title's ink against the pixels really under it, as the ChromeMarks tests do). If the
+title really is unreadable somewhere, LOOK at it and fix the code.
+PART 3 -- the settings disc in dark mode (2.76:1 over white): a design fix, not a test fix. The settings mark wears the same treatment as
+the X (its glass disc and mark), so it reaches >= 4.5:1 (a meaningful icon) on every hero and on paper, light and dark. LOOK first
+(captures over the brightest hero), then the test.
+PART 4 -- ThemeType: the "UITK Halo" twin is intended (d3df243): the test accepts the halo assets for the halo copies only.
+PART 5 -- PullQuote both 17 px: the open sections' body size (--ts-size-body-open) flattened the quote's sizes. LOOK at both quotes in an
+open section; fix the code so each quote style keeps its own size (the minimal and serif quotes differ as designed); the test stays.
+PART 6 -- the five tokens with no reader by name (--ts-bar-pill, --ts-focus, --ts-glass-opacity, --ts-hero-fade, --ts-weight-body):
+grep var() in every USS and every C# lookup by name; delete the ones truly unused (both modes, the generator's source, the guard rows),
+keep and name the reader of any that is used.
+PART 7 -- FULL green in the background; docs (_3.3 build log with the FULL counts, _Test_Suite_1 if tests moved, 10-structure if files
+changed). Report with the Subagents line and one commit message. STOP with one AskUserQuestion.
+OUT OF SCOPE: the story block's redesign, new features.
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`
