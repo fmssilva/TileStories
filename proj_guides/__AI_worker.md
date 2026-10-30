@@ -14,24 +14,33 @@ So start by reading them all.
 
 
 ## `And now: domain proj_guides\_3.3_POI_Card_Styles.md`
-M1 -- maintenance, part 1: the Test Suite Review, AUDIT mode (skill `proj_guides/skills/Test_Suite_Review.md`; the first
-maintenance ever -- the card review's FULL is green at the Architect's last commit).
-GATE: as before (MCP; push: origin = the Architect's last commit; SDF fonts; compile clean). No opening test run, and NO test run at all
-unless step 1 needs per-fixture times that no log holds (then ONE FULL in the background, Unity c, with TestRunRecorder on).
+M1 -- clean the test ground so every card block from now on iterates fast and stays isolated (developer, 2026-10-30).
+This is NOT an audit for its own sake: its targets are (1) a component block (the story, then each block) tests in a few minutes on its
+own fixtures + EditMode; (2) one change to a block kind is made in ONE place of the test data, not in many near-identical POIs;
+(3) no test spends time on something old, retired or no longer true. Every finding must serve one of these three, or it is dropped.
+Method: AUDIT first (this session, nothing changed), then the developer picks, then FIX chunks (the next sessions). Skill steps from
+`proj_guides/skills/Test_Suite_Review.md` where they help.
+GATE: as before (MCP; push: origin = the Architect's last commit; SDF fonts; compile clean). No opening test run; per-fixture times come
+from the last FULL logs (C2); only if no log holds them, ONE FULL in the background (Unity c) with TestRunRecorder on.
 WORKER MODEL: Opus + effort Medium (an audit with judgement, no product code).
-SUBAGENTS: per 00-process -- good fits: a Haiku pass to pull the per-fixture times out of the last FULL logs; a Sonnet + medium pass to
-list the skipped tests and fixtures with their skip reasons; a Sonnet + medium pass to find tests that prove the same thing twice.
-TEST PLAN: none beyond the GATE's compile (this is an audit).
-FOCUS (add to the skill's steps):
-- The 163 skipped PlayMode tests: list them by reason. Those under TestSkips.OldNavigationElements guard elements kept for a later
-  rebuild -- propose for each: keep skipped (the rebuild is planned), or delete (the rebuild will write new tests on the bar's pattern).
-  No skip without an owner and a reason.
-- The option matrices that "Tests stay on scope" (`40-testing.md` 4.2) now forbids outside their component's own fixture.
-- CORE's ~18 min and FULL's ~76 min: the top 20 fixtures by time and the cheapest proof that keeps each guarantee.
-- The tap helpers: TapInReach / IntoReach are the rule; any leftover pattern that taps where the bar floats.
-RESULT: `proj_guides/_Test_Suite_1.md` gains (or a new `_Test_Suite_2.md` if _1 is the inventory) the time table, the findings and a
-fix list in block-sized chunks with the expected saving each -- AUDIT ONLY, no test changed. Report with the Subagents line. STOP with
-one AskUserQuestion. The Architect then picks the chunks with the developer.
+SUBAGENTS: per 00-process -- good fits: Haiku to pull per-fixture times from the logs; Sonnet + medium to inventory the POIs / blocks of
+the LivingRoom and test configs; Sonnet + medium to list skipped tests with reasons and tests that prove the same thing twice.
+TEST PLAN: none (audit).
+PART 1 -- the TEST DATA (target 2): inventory every POI of the shipped LivingRoom wall and of the test / gallery configs (the Lamp set,
+the Painting, the Camera, Alfama, the gallery card, the generated fixtures): which block kinds each holds, which tests read it, which
+POIs are near-duplicates (same kinds, same content). Propose the SMALLEST set that still covers every kind, option and edge case the
+tests need -- e.g. one reference card per purpose (the full "golden" card, the many-markers wall, the edge-case card) -- and the plan to
+move the tests onto it. Never lose a case a test needs (name it).
+PART 2 -- OLD and USELESS tests (target 3): every skipped test and fixture by reason (163 PlayMode skips), with a verdict -- delete
+(retired, superseded design, the kept nav elements whose rebuild will write new tests on the bar's pattern) or keep (owner + reason);
+tests of superseded designs still running (the old Top Bar, the Cards look where Open is the default, old sticky action, ...); option
+matrices outside their component's own fixture (`40-testing.md` 4.2 "Tests stay on scope"); duplicates.
+PART 3 -- the COMPONENT MAP (target 1): a table component -> its fixtures (hero, Navigation Bar, sections, locate pin, story, each block
+kind, pages, chrome, Editor tabs) with today's time; the per-component BLOCK selection the next blocks will use; the slow fixtures in
+it and the cheapest proof that keeps each guarantee. Keep CORE true and near its time.
+RESULT: `proj_guides/_Test_Suite_2.md`: the three parts above, then a FIX list in block-sized chunks, each with its expected effect on
+the three targets (minutes saved, places-to-edit removed, tests deleted). AUDIT ONLY. Report with the Subagents line. STOP with one
+AskUserQuestion; the Architect and the developer pick the chunks.
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`
