@@ -316,12 +316,13 @@ namespace TileStories
                 Media.Add(ModelView.Root);
                 // - the SAME turntable a model_3d block binds, given a synthetic instance keyed off the header's own
                 // fields (Model, Picture-as-Fallback) so ModelView never needs to know it is inside a header. Auto Spin
-                // is always on here (no authored toggle for the header, unlike the block's own field) and the display
-                // resolves to Model3D's default (inline): a header teaser/takeover is not offered.
+                // is on here (no authored toggle for the header, unlike the block's own field) -- except under Reduce Motion,
+                // where the model stands still until a finger turns it -- and the display resolves to Model3D's default
+                // (inline): a header teaser/takeover is not offered.
                 var modelInstance = new BlockInstanceData { key = (instance?.key ?? "") + "::header_model" };
                 modelInstance.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Model3DModelField, asset = read.ValidAsset(BuiltInBlocks.HeaderModelField, MediaKind.Model) });
                 modelInstance.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Model3DFallbackField, asset = read.ValidAsset(BuiltInBlocks.HeaderImageField, MediaKind.Image) });
-                modelInstance.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Model3DAutoSpinField, flag = true });
+                modelInstance.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Model3DAutoSpinField, flag = !context.ReduceMotion });
                 // - the header's own Fit, read against the HEADER's Block Library default (not model_3d's)
                 modelInstance.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Model3DFitField, value = BlockLibraryRule.Choice(context.Settings,
                     BuiltInBlocks.Header, BuiltInBlocks.Header.Field(BuiltInBlocks.HeaderModelFitField), read) });

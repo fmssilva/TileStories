@@ -67,13 +67,12 @@ namespace TileStories.Editor.Tests
                 Assert.IsNull(section.ColorToken, section.Key + ": nor a colour");
                 foreach (var kind in section.Kinds) Assert.IsNotNull(kind.ColorToken, kind.Key + ": a kind keeps its family's colour under a format");
             }
-            CollectionAssert.AreEqual(model.Groups.Select(g => g.Count), byFormat.Groups.Select(g => g.Count), "Groups merge FAMILIES whatever Group By says");
         }
 
-        // Targets is every target in the stack's order; SectionOf / KindOf / GroupOf agree with the sections, kinds and groups that hold it,
+        // Targets is every target in the stack's order; SectionOf / KindOf agree with the sections and kinds that hold it,
         // in the authored order too (families interleave there); a block that is no target is in nothing
         [Test]
-        public void EveryTarget_IsFoundInItsSectionKindAndGroup_InEveryBlockOrder()
+        public void EveryTarget_IsFoundInItsSectionAndKind_InEveryBlockOrder()
         {
             foreach (string order in CardOptions.BlockOrders)
             {
@@ -87,12 +86,10 @@ namespace TileStories.Editor.Tests
                     CollectionAssert.Contains(section.Targets, target, order + ": " + target + " in its section");
                     CollectionAssert.Contains(model.KindOf(target).Targets, target, order + ": in its kind");
                     CollectionAssert.Contains(section.Kinds, model.KindOf(target), order + ": a kind of that section");
-                    CollectionAssert.Contains(model.Groups[model.GroupOf(target)].Targets, target, order + ": in its group");
                 }
                 string sources = stack.First(e => e.Definition.Family == BuiltInFamilies.Meta).Instance.key;
                 Assert.AreEqual(-1, model.SectionOf(sources), order + ": Sources is no target");
                 Assert.IsNull(model.KindOf(sources));
-                Assert.AreEqual(-1, model.GroupOf(sources));
             }
         }
     }
@@ -103,111 +100,7 @@ namespace TileStories.Editor.Tests
     {
         // ---------------- Groups (rule 2.5.6) ----------------
 
-        // The wall writes no Groups: the framework's four, in order, holding the eight families of section 3 -- The Lamp's 56 targets merge
-        // into Discover 25 (About 18 + Stories 7), Watch 15 (Media 14 + Listen 1), Explore 7 (In AR 3 + Play 4), Visit 9 (Visit 7 + Community 2)
-        [Test]
-        public void TheDefaultGroups_MergeTheLampsEightFamilies_IntoFourInTheStacksOrder()
-        {
-            var config = Shipped();
-            Assert.IsEmpty(config.card_settings.navigation.groups, "precondition: the shipped wall has no Groups rows");
-            CollectionAssert.AreEqual(NavGroupRule.DefaultKeys, NavGroupRule.Groups(config.card_settings.navigation).Select(g => g.Key));
-            var model = Model(config);
-            Assert.AreEqual(56, model.TargetCount, "precondition: section 4.4's 56 targets");
-            CollectionAssert.AreEqual(new[] { NavGroupRule.Discover, NavGroupRule.Watch, NavGroupRule.Explore, NavGroupRule.Visit }, model.Groups.Select(g => g.Key));
-            CollectionAssert.AreEqual(new[] { 25, 15, 7, 9 }, model.Groups.Select(g => g.Count));
-            Assert.AreEqual(model.TargetCount, model.Groups.Sum(g => g.Count), "every target is in exactly one group");
-            foreach (var group in model.Groups)
-                CollectionAssert.AreEqual(model.Targets.Where(group.Targets.Contains), group.Targets, group.Key + ": its targets in the stack's order");
-            Assert.AreEqual(BuiltInFamilies.Stories, model.Sections[model.SectionOf(model.Groups[0].Targets.Last())].Key, "Discover ends with a Stories block");
-        }
-
-        // A wall's own rows replace the four; a Families row moves a family to another group; a family whose group the wall does not
-        // have (and an app family with no row) is in none, and a group with no target is hidden
-        [Test]
-        public void AWallsOwnGroups_AndAFamilysRow_DecideTheMerge_AndAGroupWithNoTargetIsHidden()
-        {
-            var config = Shipped();
-            var nav = config.card_settings.navigation;
-            nav.groups = new List<CardNavGroup>
-            {
-                new() { key = "group_1", label = new List<LocalizedEntry> { new() { lang = "en", value = "Read" } } },
-                new() { key = NavGroupRule.Watch },
-                new() { key = "group_3" },
-            };
-            nav.families.Add(new CardFamilySetting { family = BuiltInFamilies.About, order = 10, group = "group_1" });
-            nav.families.Add(new CardFamilySetting { family = BuiltInFamilies.Stories, order = 40, group = "group_1" });
-
-            Assert.AreEqual("group_1", NavGroupRule.GroupOf(BuiltInFamilies.About, nav), "the row's group");
-            Assert.AreEqual(NavGroupRule.Watch, NavGroupRule.GroupOf(BuiltInFamilies.Media, nav), "no row: its default, which this wall kept");
-            Assert.IsNull(NavGroupRule.GroupOf(BuiltInFamilies.Play, nav), "its default (Explore) is not one of this wall's groups: none");
-            Assert.IsNull(NavGroupRule.GroupOf("app_family", nav), "an app family with no row: none");
-            Assert.IsNull(NavGroupRule.DefaultGroupOf("app_family"));
-
-            var model = Model(config);
-            CollectionAssert.AreEqual(new[] { "group_1", NavGroupRule.Watch }, model.Groups.Select(g => g.Key), "group_3 has no family: hidden");
-            CollectionAssert.AreEqual(new[] { 25, 15 }, model.Groups.Select(g => g.Count));
-            string playBlock = model.Sections.Single(s => s.Key == BuiltInFamilies.Play).Targets[0];
-            Assert.AreEqual(-1, model.GroupOf(playBlock), "a Play block is in no group of this wall");
-            Assert.GreaterOrEqual(model.SectionOf(playBlock), 0, "but still in its section");
-        }
-
-        // A group's words: the wall's own in the card's language (then the fallback), else the framework's word for a default key, else the key
-        [Test]
-        public void AGroupsWords_AreTheWallsOwn_ThenTheFrameworksForItsKey_ThenItsKey()
-        {
-            var own = new NavGroupRule.Group("group_1", new List<LocalizedEntry> { new() { lang = "en", value = "Read" }, new() { lang = "pt", value = "Ler" } }, null);
-            Assert.AreEqual("Ler", NavGroupRule.Words(own, Strings("pt")));
-            Assert.AreEqual("Read", NavGroupRule.Words(own, Strings("en")));
-            var englishOnly = new NavGroupRule.Group("group_1", new List<LocalizedEntry> { new() { lang = "en", value = "Read" } }, null);
-            Assert.AreEqual("Read", NavGroupRule.Words(englishOnly, Strings("pt")), "no Portuguese words: the fallback's");
-
-            var defaults = NavGroupRule.Groups(null);
-            Assert.AreEqual("Descobrir", NavGroupRule.Words(defaults[0], Strings("pt")), "a default row: the framework's word in Portuguese");
-            Assert.AreEqual("Discover", NavGroupRule.Words(defaults[0], Strings("en")));
-            Assert.AreEqual("group_9", NavGroupRule.Words(new NavGroupRule.Group("group_9", null, null), Strings("en")), "nothing at all: the key");
-        }
-
         // ---------------- rule 2.5.7 per element ----------------
-
-        // Text tabs need two sections, segmented two GROUPS, kind chips nothing more than navigation itself: a wall that puts every family in
-        // one group keeps its tabs and loses its segments; a one-family card keeps its kind chips
-        [Test]
-        public void Rule7_CountsWhatEachElementChoosesBetween()
-        {
-            var config = Shipped();
-            var nav = config.card_settings.navigation;
-            var tabs = Element(BuiltInNavElements.TextTabs);
-            var segmented = Element(BuiltInNavElements.Segmented);
-            var chips = Element(BuiltInNavElements.KindChips);
-            Assert.AreEqual(NavChoice.Sections, tabs.Choice);
-            Assert.AreEqual(NavChoice.Groups, segmented.Choice);
-            Assert.AreEqual(NavChoice.Blocks, chips.Choice);
-            Assert.AreEqual(NavChoice.Sections, Element(BuiltInNavElements.IconTabs).Choice);
-            Assert.AreEqual(NavChoice.Sections, Element(BuiltInNavElements.IconTabsChips).Choice);
-            Assert.AreEqual(NavChoice.Sections, Element(BuiltInNavElements.ProgressMap).Choice);
-
-            var model = Model(config);
-            Assert.IsTrue(NavSlotRule.OffersAChoice(segmented, model), "four groups: segmented is drawn");
-            nav.groups = new List<CardNavGroup> { new() { key = "group_1" } };
-            foreach (var family in BlockRegistry.Shared.Families) nav.families.Add(new CardFamilySetting { family = family.Key, order = family.Order, group = "group_1" });
-            model = Model(config);
-            Assert.AreEqual(1, model.Groups.Count, "precondition: every family in one group");
-            Assert.AreEqual(8, model.Sections.Count, "and still eight sections");
-            Assert.IsFalse(NavSlotRule.OffersAChoice(segmented, model), "one segment is not a choice");
-            Assert.IsTrue(NavSlotRule.OffersAChoice(tabs, model), "the tabs still have eight");
-
-            var oneFamily = Shipped();
-            oneFamily.card_settings.navigation.min_blocks = 2;
-            var lamp = oneFamily.pois.Single(p => p.id == Lamp);
-            lamp.card.blocks.RemoveAll(b => b.kind != BuiltInBlocks.HeaderKind && b.kind != BuiltInBlocks.RichTextKind && b.kind != BuiltInBlocks.QuickFactsKind);
-            var one = Model(oneFamily);
-            Assert.AreEqual(1, one.Sections.Count, "precondition: an About-only card");
-            Assert.IsTrue(one.ShowsNavigation, "precondition: with navigation from 2");
-            Assert.IsFalse(NavSlotRule.OffersAChoice(tabs, one), "one tab is not a choice");
-            Assert.IsTrue(NavSlotRule.OffersAChoice(chips, one), "the kind chips list kinds: drawn");
-            Assert.IsTrue(NavOntologyRule.OffersAKindChoice(one.Sections[0].Kinds.Count), "two kinds there: a chips row has a choice");
-            Assert.IsFalse(NavOntologyRule.OffersAKindChoice(1), "one chip would only repeat its tab");
-        }
 
         // ---------------- progress_map's widths ----------------
 

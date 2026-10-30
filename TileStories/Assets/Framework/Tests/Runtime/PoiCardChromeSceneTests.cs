@@ -120,7 +120,7 @@ namespace TileStories.Tests
         protected void AssertTheDefaults()
         {
             var nav = ConfigCopy().card_settings.navigation;
-            Assert.AreEqual(BuiltInNavElements.TextTabs, nav.top, "precondition: the default Top Bar");
+            Assert.AreEqual(CardOptions.NavNone, nav.top, "precondition: the default Top Bar (none: the Navigation Bar is the way round)");
             Assert.AreEqual(CardOptions.ShowNavHalfAndFull, nav.show_at, "precondition: the default Show Navigation At");
             Assert.AreEqual(CardOptions.HideOnScrollDown, nav.hide_on_scroll, "precondition: the default Hide While Scrolling");
         }

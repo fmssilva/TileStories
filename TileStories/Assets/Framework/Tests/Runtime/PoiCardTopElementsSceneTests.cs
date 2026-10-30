@@ -16,7 +16,7 @@ namespace TileStories.Tests
     //   - after each of six real drags of the stack, the element marks what the screen shows: the section / kind / group of the block
     //     under the spy line, read from the screen
     //   - in Portuguese every item is a whole touch target both ways, inside the card, and every visible word is whole and Portuguese
-    // text_tabs has its own fixture (PoiCardTextTabsSceneTests); what shows at which stop is PoiCardChromeSceneTests'.
+    // What shows at which stop is PoiCardChromeSceneTests'.
     [Ignore(TestSkips.OldNavigationElements)]
     public class PoiCardTopElementsSceneTests : SearchSceneFixture
     {
@@ -24,7 +24,7 @@ namespace TileStories.Tests
 
         private static readonly string[] Elements =
         {
-            BuiltInNavElements.IconTabs, BuiltInNavElements.IconTabsChips, BuiltInNavElements.KindChips, BuiltInNavElements.Segmented,
+            BuiltInNavElements.IconTabsChips, BuiltInNavElements.KindChips,
             BuiltInNavElements.ProgressMap,
         };
 
@@ -140,11 +140,6 @@ namespace TileStories.Tests
                 case KindChipsNavView chips:
                     items.AddRange(Chips(chips.Row));
                     break;
-                case SegmentedNavView segmented:
-                    foreach (var s in segmented.Segments)
-                        items.Add(new Item(s.Label.text, s.Button, null, Model.Groups[s.Index].Targets[0],
-                            () => s.Button.ClassListContains(SegmentedNavView.CurrentClass)));
-                    break;
                 case ProgressMapNavView map:
                     foreach (var s in map.Segments)
                         items.Add(new Item(Model.Sections[s.Index].Key, s.Button, map.Strip, Model.Sections[s.Index].Targets[0],
@@ -206,10 +201,6 @@ namespace TileStories.Tests
                     var marked = chips.Row.Chips.Where(c => c.Button.ClassListContains(NavChip.CurrentClass)).ToList();
                     Assert.AreEqual(1, marked.Count, when + ": one chip marked");
                     Assert.AreEqual(Model.KindOf(block), marked[0].Kind, when + ": the chip of the kind on screen");
-                    break;
-                case SegmentedNavView segmented:
-                    Assert.AreEqual(Model.GroupOf(block), segmented.CurrentIndex, when + ": the segment of the group on screen");
-                    Assert.AreEqual(1, segmented.Segments.Count(s => s.Button.ClassListContains(SegmentedNavView.CurrentClass)), when + ": one segment marked");
                     break;
                 case ProgressMapNavView map:
                     Assert.AreEqual(SectionUnderTheSpyLine(), map.CurrentIndex, when + ": the piece of the section on screen");
@@ -341,7 +332,6 @@ namespace TileStories.Tests
             string words = element switch
             {
                 BuiltInNavElements.KindChips => ((KindChipsNavView)Sheet.Slots.TopView).Row.Chips[0].Label.text,
-                BuiltInNavElements.Segmented => ((SegmentedNavView)Sheet.Slots.TopView).Segments[0].Label.text,
                 BuiltInNavElements.ProgressMap => ((ProgressMapNavView)Sheet.Slots.TopView).Segments[0].Button.tooltip,
                 BuiltInNavElements.IconTabsChips => ((IconTabsChipsNavView)Sheet.Slots.TopView).Tabs.Tabs[0].Label.text,
                 _ => ((TabsNavView)Sheet.Slots.TopView).Tabs[0].Label.text,
@@ -349,7 +339,6 @@ namespace TileStories.Tests
             string expected = element switch
             {
                 BuiltInNavElements.KindChips => Model.Sections[0].Kinds[0].Key == BuiltInBlocks.RichTextKind ? "Texto" : null,
-                BuiltInNavElements.Segmented => "Descobrir",
                 _ => "Sobre",
             };
             if (expected != null) Assert.AreEqual(expected, words, "the first item reads in Portuguese");

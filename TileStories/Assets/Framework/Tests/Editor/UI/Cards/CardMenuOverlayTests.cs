@@ -78,26 +78,6 @@ namespace TileStories.Editor.Tests
             Assert.AreSame(sheet.Overlay.Scrim.parent, sheet.Overlay.Root, "the scrim is the layer's");
         }
 
-        // The card's context hands every element the ONE owner: the bar opens its list through it
-        [Test]
-        public void TheBarsMoreList_OpensThroughTheOwner_AndItsToggleClosesItThere()
-        {
-            var sheet = Sheet();
-            ShowCard(sheet, With(BuiltInNavElements.BottomBar));
-            var bar = (BottomBarNavView)sheet.Slots.BottomView;
-            Assert.IsTrue(bar.HasMore, "precondition: The Lamp's 8 sections overflow 5 slots");
-
-            bar.OpenMore();
-            Assert.IsTrue(bar.MoreOpen, "More opens its list");
-            Assert.AreEqual(BottomBarNavView.MoreListKey, sheet.Overlay.OpenKey, "as the one thing open over the card");
-            Assert.IsFalse(sheet.Overlay.IsModal, "anchored in place: no scrim");
-            Assert.AreEqual(DisplayStyle.None, sheet.Overlay.Root.style.display.value, "the layer stays hidden for an anchored list");
-
-            bar.OpenMore();
-            Assert.IsFalse(bar.MoreOpen, "More again closes it (the opener's own toggle)");
-            Assert.IsFalse(sheet.Overlay.IsOpen, "and the owner knows");
-        }
-
         // One at a time: the kinds list and More's list of bar_sheet are both the owner's, and opening one closes the other
         [Test]
         public void OneAtATime_TheKindsListAndMoresList_CloseEachOther()
@@ -123,31 +103,6 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(BarSheetNavView.KindsListKey, sheet.Overlay.OpenKey);
         }
 
-        // The acceptance walk: with a list open over a Full card, Back closes the list and NOT the sheet; the second Back lowers the sheet
-        [Test]
-        public void Back_WithTheMoreListOpen_ClosesTheList_AndTheSheetStays_ThenTheStopsStepDown()
-        {
-            var sheet = Sheet();
-            ShowCard(sheet, With(BuiltInNavElements.BottomBar));
-            var bar = (BottomBarNavView)sheet.Slots.BottomView;
-            bool closedCard = false;
-            sheet.CloseRequested += () => closedCard = true;
-            bar.OpenMore();
-            Assert.IsTrue(bar.MoreOpen, "precondition: the list is open");
-
-            Assert.IsTrue(sheet.Back(), "the card takes the press");
-            Assert.IsFalse(bar.MoreOpen, "the first Back closes the list");
-            Assert.AreEqual(SheetStopRule.Stop.Full, sheet.Stop, "and the sheet stays at Full");
-
-            Assert.IsTrue(sheet.Back());
-            Assert.AreEqual(SheetStopRule.Stop.Half, sheet.Stop, "the second Back lowers the sheet");
-            Assert.IsTrue(sheet.Back());
-            Assert.AreEqual(SheetStopRule.Stop.Peek, sheet.Stop);
-            Assert.IsFalse(closedCard, "precondition: still open at Peek");
-            Assert.IsTrue(sheet.Back());
-            Assert.IsTrue(closedCard, "at Peek Back closes the card, like the X");
-        }
-
         // The same for bar_sheet's kinds list: the two lists Back could not reach before step 8
         [Test]
         public void Back_WithTheKindsListOpen_ClosesTheList_AndTheSheetStays()
@@ -163,51 +118,6 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(SheetStopRule.Stop.Full, sheet.Stop, "and the sheet stays at Full");
             Assert.IsTrue(sheet.Back());
             Assert.AreEqual(SheetStopRule.Stop.Half, sheet.Stop, "then the sheet goes down");
-        }
-
-        // A full view never stacks over another sheet: it opening closes the list, and then Back closes the full view, then lowers
-        [Test]
-        public void TheFullViewOpening_ClosesTheList_AndBackThenClosesTheFullViewFirst()
-        {
-            var sheet = Sheet();
-            ShowCard(sheet, With(BuiltInNavElements.BottomBar));
-            var bar = (BottomBarNavView)sheet.Slots.BottomView;
-            bar.OpenMore();
-            Assert.IsTrue(bar.MoreOpen, "precondition: the list is open");
-
-            sheet.OpenTakeover("Gallery", 1, 0, (view, container, media, page) => { });
-            Assert.IsTrue(sheet.Takeover.IsOpen, "precondition: the full view opened");
-            Assert.IsFalse(bar.MoreOpen, "the full view replaced the list: never stacked");
-            Assert.IsFalse(sheet.Overlay.IsOpen);
-
-            Assert.IsTrue(sheet.Back());
-            Assert.IsFalse(sheet.Takeover.IsOpen, "the first Back closes the full view");
-            Assert.AreEqual(SheetStopRule.Stop.Full, sheet.Stop, "the card stays");
-            Assert.IsTrue(sheet.Back());
-            Assert.AreEqual(SheetStopRule.Stop.Half, sheet.Stop, "the second lowers it");
-        }
-
-        // The sheet resting at another stop and every rebind close what is open (a list left open in a bottom area the stop hides would make
-        // the next Back a press that does nothing the visitor can see)
-        [Test]
-        public void AStopChange_AndARebind_EachCloseTheList()
-        {
-            var sheet = Sheet();
-            var wall = With(BuiltInNavElements.BottomBar);
-            ShowCard(sheet, wall);
-            var bar = (BottomBarNavView)sheet.Slots.BottomView;
-
-            bar.OpenMore();
-            sheet.SetStop(SheetStopRule.Stop.Half);
-            Assert.IsFalse(bar.MoreOpen, "the sheet moved to Half: the list closed");
-            Assert.IsFalse(sheet.Overlay.IsOpen);
-
-            sheet.SetStop(SheetStopRule.Stop.Full);
-            bar.OpenMore();
-            Assert.IsTrue(bar.MoreOpen, "precondition: open again");
-            ShowCard(sheet, wall);
-            Assert.IsFalse(sheet.Overlay.IsOpen, "a rebind (a live edit, another point, a language) closes it");
-            Assert.IsFalse(((BottomBarNavView)sheet.Slots.BottomView).MoreOpen);
         }
 
         private static CardStrings Words(string language) =>
@@ -284,72 +194,6 @@ namespace TileStories.Editor.Tests
             Assert.IsTrue(drawer.SectionRows[0].Button.ClassListContains(NavTab.CurrentClass), "the section being read (the first) is marked");
         }
 
-        // The grid: one tile per section with its count, on the wall's axis; the switch shows the formats (the model's pivot, CardNavModel.By);
-        // a section with several kinds opens them IN PLACE with a way back; the menu closing brings it back to every section
-        [Test]
-        public void TheGrid_ShowsTheSections_PivotsToTheFormats_OpensKindsInPlace_AndComesBackToAllSections()
-        {
-            var sheet = Sheet();
-            ShowCard(sheet, With(CardOptions.NavNone, BuiltInNavElements.GridOverlay));
-            var grid = (GridOverlayNavView)sheet.Slots.MenuView;
-            var model = sheet.Nav.Model;
-            var words = Words("en");
-            Assert.AreEqual(CardOptions.GroupByFamily, grid.Axis, "it opens on the wall's Group By");
-            Assert.IsTrue(grid.ByPurpose.ClassListContains(GridOverlayNavView.OptionCurrentClass), "Purpose marked");
-            Assert.AreEqual(model.Sections.Count, grid.Tiles.Count, "a tile per section");
-            for (int i = 0; i < model.Sections.Count; i++)
-            {
-                Assert.AreEqual(words.Get(model.Sections[i].LabelKey), grid.Tiles[i].Label.text);
-                Assert.AreEqual(model.Sections[i].Count.ToString(), grid.Tiles[i].Count.text);
-                Assert.AreEqual(model.Sections[i].IconKey, CardIcons.KeyOf(grid.Tiles[i].Icon), "the family's icon");
-            }
-
-            grid.ShowAxis(CardOptions.GroupByFormat);
-            var formats = model.By(CardOptions.GroupByFormat);
-            Assert.IsTrue(grid.ByFormat.ClassListContains(GridOverlayNavView.OptionCurrentClass), "Format marked");
-            Assert.IsFalse(grid.ByPurpose.ClassListContains(GridOverlayNavView.OptionCurrentClass));
-            Assert.AreEqual(6, grid.Tiles.Count, "the six formats");
-            CollectionAssert.AreEqual(formats.Sections.Select(s => words.Get(s.LabelKey)), grid.Tiles.Select(t => t.Label.text), "read from the model's pivot");
-            Assert.IsTrue(grid.Tiles.All(t => t.Icon.style.display.value == DisplayStyle.None), "a format has no icon: its words name it");
-
-            grid.ShowAxis(CardOptions.GroupByFamily);
-            int several = model.Sections.ToList().FindIndex(s => s.Kinds.Count >= 2);
-            grid.PickTile(several);
-            Assert.AreEqual(several, grid.OpenSection, "a section with several kinds opens them in place");
-            Assert.AreEqual(model.Sections[several].Kinds.Count, grid.Tiles.Count, "one tile per kind");
-            Assert.AreEqual(DisplayStyle.Flex, grid.BackRow.style.display.value, "with the way back");
-            Assert.AreEqual(words.Get(CardStrings.Keys.NavMenuAll), grid.All.text);
-            Assert.AreEqual(words.Get(model.Sections[several].LabelKey), grid.OpenTitle.text, "and the section's words");
-            grid.OpenKinds(-1);
-            Assert.AreEqual(model.Sections.Count, grid.Tiles.Count, "All sections brings every tile back");
-            Assert.AreEqual(DisplayStyle.None, grid.BackRow.style.display.value);
-
-            Assert.IsTrue(sheet.Overlay.OpenMenu());
-            grid.PickTile(several);
-            sheet.Overlay.Close();
-            Assert.AreEqual(-1, grid.OpenSection, "closed: it opens again on every section");
-        }
-
-        // The seam 7a left open: with a Menu set, a bar's More opens THAT menu instead of its small list; without one, the small list
-        [Test]
-        public void WithAMenu_TheBarsMoreOpensTheMenu_AndWithoutOne_ItsSmallList()
-        {
-            var sheet = Sheet();
-            ShowCard(sheet, With(BuiltInNavElements.BottomBar, BuiltInNavElements.GridOverlay));
-            var bar = (BottomBarNavView)sheet.Slots.BottomView;
-            bar.OpenMore();
-            Assert.AreEqual(BuiltInNavElements.GridOverlay, sheet.Overlay.OpenKey, "More opened the Menu");
-            Assert.IsTrue(sheet.Overlay.IsModal);
-            Assert.IsFalse(bar.MoreOpen, "and not the small list");
-
-            sheet.Overlay.Close();
-            ShowCard(sheet, With(BuiltInNavElements.BottomBar));
-            bar = (BottomBarNavView)sheet.Slots.BottomView;
-            bar.OpenMore();
-            Assert.IsTrue(bar.MoreOpen, "no Menu: the small list");
-            Assert.AreEqual(BottomBarNavView.MoreListKey, sheet.Overlay.OpenKey);
-        }
-
         // One at a time across the two kinds: a list open in place closes when the menu opens over the card
         [Test]
         public void OpeningTheMenu_ClosesAnOpenList()
@@ -364,18 +208,5 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(BuiltInNavElements.DrawerTree, sheet.Overlay.OpenKey);
         }
 
-        // Back Button = none leaves the press to the app even with a list open: the list stays as it was
-        [Test]
-        public void BackButtonNone_LeavesThePressToTheApp_AndTheListStaysOpen()
-        {
-            var sheet = Sheet();
-            ShowCard(sheet, With(BuiltInNavElements.BottomBar, back: CardOptions.BackButtonNone));
-            var bar = (BottomBarNavView)sheet.Slots.BottomView;
-            bar.OpenMore();
-
-            Assert.IsFalse(sheet.Back(), "Back is the app's");
-            Assert.IsTrue(bar.MoreOpen, "nothing closed");
-            Assert.AreEqual(SheetStopRule.Stop.Full, sheet.Stop);
-        }
     }
 }

@@ -13,7 +13,7 @@ namespace TileStories
         // Size `cells` for `track`'s strip as it is laid out now (nothing happens before it has a size: the cell token's width shows)
         public static void Apply(ScrollView track, IReadOnlyList<VisualElement> cells, bool peekNext) => Apply(track.contentViewport, cells, peekNext);
 
-        // The same for a strip that is a plain clipped viewport (NavStrip, the rails of nav_rails: a ScrollView would take a mostly vertical
+        // The same for a strip that is a plain clipped viewport (a NavStrip: a ScrollView would take a mostly vertical
         // drag) -- the width the cells may fill is the viewport's content width. Returns the cell width it set (0 when it set none)
         public static float Apply(VisualElement viewport, IReadOnlyList<VisualElement> cells, bool peekNext)
         {

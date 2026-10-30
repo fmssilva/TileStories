@@ -9,8 +9,6 @@ namespace TileStories
     {
         // the card's sections (families, or formats): tabs, a bar, a progress map
         Sections,
-        // the wall's Groups (families merged, rule 2.5.6): the segmented element
-        Groups,
         // kinds or blocks (kind chips, a contents list): rule 2.5.7 does not apply
         Blocks,
     }
@@ -49,7 +47,7 @@ namespace TileStories
     }
 
     // The slots of the sheet a navigation element can sit in (_3.2 section 4.2). Only the BUILT ones are listed: an element for a slot
-    // the sheet does not draw yet would never show, so the registry refuses it (floating, menu and edge join with their steps)
+    // the sheet does not draw would never show, so the registry refuses it
     public static class NavSlotKeys
     {
         // The strip between the header and the stack
@@ -59,12 +57,7 @@ namespace TileStories
         // The card layer over the sheet, below the full view: opened by the header's menu button (and by a bar's More), drawn on a scrim by
         // the card's overlay owner, CardMenuOverlay (_3.2 section 5.3, step 8)
         public const string Menu = "menu";
-        // A row just above the sheet's top-right edge, at every stop, in the card layer under the menu layer (the card's FloatingSlot, beside
-        // the placed-model chip): one round button that opens the sections (_3.2 section 5.4, step 9)
-        public const string Floating = "floating";
-        // Absolute over the stack's viewport, down its right edge: family dots to drag along or tap (_3.2 section 5.5, step 10)
-        public const string Edge = "edge";
-        public static readonly IReadOnlyList<string> Built = new[] { Top, Bottom, Menu, Floating, Edge };
+        public static readonly IReadOnlyList<string> Built = new[] { Top, Bottom, Menu };
     }
 
     // Every navigation element the card can show, with the view that draws it -- the same shape as BlockRegistry: BuiltInNavElements

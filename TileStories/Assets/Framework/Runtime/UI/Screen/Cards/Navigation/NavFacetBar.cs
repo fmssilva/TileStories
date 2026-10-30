@@ -5,8 +5,8 @@ using UnityEngine.UIElements;
 
 namespace TileStories
 {
-    // The facet chips of a card's menu (_3.2 section 5.8, step 18): one row of chips that narrows what drawer_tree and grid_overlay already
-    // list -- reading time (Up to 2 / 5 min), what the visitor does without (No headphones / camera / network) and the formats -- and a Clear
+    // The facet chips of a card's menu (_3.2 section 5.8, step 18): one row of chips that narrows what drawer_tree already
+    // lists -- reading time (Up to 2 / 5 min), what the visitor does without (No headphones / camera / network) and the formats -- and a Clear
     // chip while any is on. Nothing new is listed and nothing is drawn outside the two menus: a chip only changes which of the card's blocks
     // the menu counts and jumps to.
     // It decides nothing: NavFacetRule says which chips the card offers and which blocks pass, this view draws them and holds the visitor's

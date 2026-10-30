@@ -7,7 +7,7 @@
 // opened: its Name per language, Icon, Chosen Icon, Colour, Families and Section Style (its sections' Start on an open card, CardSections.cs);
 // "+ Add group", "Reset To The Families", and the warnings (a family
 // in no group, too many groups for a phone)
-// While the bar is on, the section's Elements rows are hidden (the card draws the bar instead; their values are kept). Drawing never writes:
+// Drawing never writes:
 // a wall with no Bar Groups rows sees one group per family, and its first edit of the table writes them all (MaterializeBarItems).
 // The (i) texts live in POIEditorToolWindow.CardNavigationBarHelp.cs.
 
@@ -302,6 +302,13 @@ namespace TileStories.Editor
                         + "their words crowd. Hide a group, merge two, or set Labels to Icon Only.");
             }
             return notes;
+        }
+
+        // The wall's languages, the first one first ("en" for a wall that lists none)
+        private List<string> WallLanguages()
+        {
+            var languages = _config.card_settings?.languages;
+            return languages != null && languages.Count > 0 ? languages : new List<string> { "en" };
         }
     }
 }

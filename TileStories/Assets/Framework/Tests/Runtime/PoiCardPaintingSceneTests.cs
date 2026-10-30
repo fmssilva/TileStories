@@ -128,8 +128,8 @@ namespace TileStories.Tests
     //   - the wall's top element and menu are the ones on the card, and the strip shows at Full
     //   - a REAL tap on every tab lands its section's first block at the viewport top (+-1 px), ONE nav_jump each, the tab marked
     //   - the mark follows real drags of the stack
-    //   - Lamp - Residential draws all four in-flow nav kinds at once (section 8.1's demo point)
-    //   - renders at 390 px: The Painting in EN and PT at Half and Full, and each nav kind of Lamp - Residential
+    //   - Lamp - Residential draws its contents block and nothing of its card is left out
+    //   - renders at 390 px: The Painting in EN and PT at Half and Full, and Lamp - Residential's contents block
     [Category("Core")]
     public class PoiCardPaintingSceneTests : PoiCardPaintingSceneFixture
     {
@@ -174,26 +174,20 @@ namespace TileStories.Tests
         // ---------------- Lamp - Residential: the whole domain on one card ----------------
 
         [UnityTest]
-        public IEnumerator LampResidential_DrawsAllFourInFlowNavKinds_AtOnce()
+        public IEnumerator LampResidential_DrawsItsContentsBlock_AndNothingOfItsCardIsLeftOut()
         {
             yield return Open(Residential, SheetStopRule.Stop.Full);
             var bound = Sheet.Stack.BoundViews.ToList();
-            Assert.AreEqual(1, bound.OfType<NavBentoBlockView>().Count(), "the bento (since 15a)");
-            Assert.AreEqual(1, bound.OfType<NavIconGridBlockView>().Count(), "an icon grid");
-            Assert.AreEqual(1, bound.OfType<NavContentsBlockView>().Count(), "a contents list");
-            Assert.AreEqual(1, bound.OfType<NavRailsBlockView>().Count(), "rails");
+            Assert.AreEqual(1, bound.OfType<NavContentsBlockView>().Count(), "a contents list, its one in-flow nav block");
             var config = ConfigCopy();
             var poi = config.pois.Single(p => p.id == Residential);
             Assert.IsEmpty(BlockStackBuilder.Build(poi, config.card_settings, BlockRegistry.Shared, config.pois).Skipped, "nothing of its card is left out");
 
-            foreach (var view in new IBlockView[] { bound.OfType<NavBentoBlockView>().Single(), bound.OfType<NavIconGridBlockView>().Single(),
-                         bound.OfType<NavContentsBlockView>().Single(), bound.OfType<NavRailsBlockView>().Single() })
-            {
-                Scroll.ScrollTo(view.Root);
-                yield return CardTestInput.Settle(0.4f);
-                Assert.Greater(view.Root.layout.height, 0f, view.GetType().Name + ": drawn, not empty");
-                yield return CardGalleryChecks.Render("Residential_" + view.GetType().Name + "_full_390");
-            }
+            var view = bound.OfType<NavContentsBlockView>().Single();
+            Scroll.ScrollTo(view.Root);
+            yield return CardTestInput.Settle(0.4f);
+            Assert.Greater(view.Root.layout.height, 0f, "the contents list: drawn, not empty");
+            yield return CardGalleryChecks.Render("Residential_" + nameof(NavContentsBlockView) + "_full_390");
         }
     }
 

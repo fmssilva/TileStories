@@ -228,10 +228,7 @@ namespace TileStories
             public const string KindTodayMap = "kind_today_map";
             public const string KindRelated = "kind_related";
             public const string KindFeedback = "kind_feedback";
-            public const string KindNavIconGrid = "kind_nav_icon_grid";
             public const string KindNavContents = "kind_nav_contents";
-            public const string KindNavRails = "kind_nav_rails";
-            public const string KindNavBento = "kind_nav_bento";
             public const string KindSources = "kind_sources";
             public const string KindStory = "kind_story";
 
@@ -242,12 +239,6 @@ namespace TileStories
             // A composed block's video poster: its caption joined to its length ("The square today · 0:55", _3.3 S2b)
             public const string MediaBadge = "media_badge";
 
-            // The words a visitor reads for each of the framework's default navigation Groups (_3.2 section 3, the segmented element): a
-            // wall's own Groups row reads its own label first; these name the four rows a wall gets with no Groups of its own
-            public const string NavGroupDiscover = "nav_group_discover";
-            public const string NavGroupWatch = "nav_group_watch";
-            public const string NavGroupExplore = "nav_group_explore";
-            public const string NavGroupVisit = "nav_group_visit";
             // The last slot of a navigation bar when the card has more sections than Bar Slots (_3.2 step 7a): it opens the rest
             public const string NavMore = "nav_more";
             // The Up next bar (_3.2 step 7b): its small line, "{0} of {1}" (place, total), its Next button, and what it says at the last block
@@ -255,16 +246,10 @@ namespace TileStories
             public const string NavNextUpPosition = "nav_next_up_position";
             public const string NavNextButton = "nav_next_button";
             public const string NavNextUpDone = "nav_next_up_done";
-            // The card's Menu (_3.2 step 8): the header button's name and the menu's title; the grid's Purpose / Format switch and its way
-            // back from one section's kinds to every section
+            // The card's Menu (_3.2 step 8): the header button's name and the menu's title
             public const string NavMenu = "nav_menu";
-            public const string NavMenuByPurpose = "nav_menu_by_purpose";
-            public const string NavMenuByFormat = "nav_menu_by_format";
-            public const string NavMenuAll = "nav_menu_all";
-            // The card's floating slot (_3.2 step 9): the round button that opens the sections (fab_dial, fab_radial); the placed-model chip's
-            // Remove on the card that placed the model, and its words on another point's card ({0} = that point's name; "Placed by the wall"
-            // on the placing card is place_in_ar_placed)
-            public const string NavFab = "nav_fab";
+            // The card's floating slot (_3.2 step 9): the placed-model chip's Remove on the card that placed the model, and its words on another
+            // point's card ({0} = that point's name; "Placed by the wall" on the placing card is place_in_ar_placed)
             public const string PlacedModelRemove = "placed_model_remove";
             public const string PlacedModelOther = "placed_model_other";
             // The contents list (nav_contents, _3.2 step 11b): a row's time ("{0} min", {0} = whole minutes) and what a row the visitor has had
@@ -288,9 +273,6 @@ namespace TileStories
             public const string NavPagerPosition = "nav_pager_position";
             public const string NavPagerPrevious = "nav_pager_previous";
             public const string NavPagerNext = "nav_pager_next";
-            // The last card of a rail that holds fewer cards than its section has blocks (nav_rails, _3.2 step 15a): "All {0}" ({0} = how many
-            // blocks the section holds); a tap moves the card to the section
-            public const string NavRailsAll = "nav_rails_all";
             // The facet chips of the card's menus (_3.2 step 18): a reading-time limit ("Up to {0} min", {0} = minutes), what the visitor does
             // without ("No headphones / camera / network": the blocks that need it are left out) and the chip that switches every facet off
             public const string NavFacetUpTo = "nav_facet_up_to";
@@ -320,16 +302,13 @@ namespace TileStories
                 KindHeader, KindStatus, KindQuickFacts, KindRichText, KindFunFact, KindPullQuote, KindProcessSteps, KindSwatches,
                 KindActions, KindGallery, KindBeforeAfter, KindZoomImage, KindHotspotImage, KindVideo, KindModel3D, KindPanorama360,
                 KindAudioGuide, KindTimeline, KindPerson, KindStoryChapters, KindComparePoints, KindDialogue, KindShowOnWall, KindPlaceInAr,
-                KindKnowledgeCheck, KindPoll, KindCollect, KindPracticalInfo, KindWallLocator, KindTodayMap, KindRelated, KindFeedback, KindNavIconGrid,
-                KindNavContents, KindNavRails, KindNavBento, KindSources, KindStory, OpenRowStory, OpenRowMeta, MediaBadge,
-                NavGroupDiscover, NavGroupWatch, NavGroupExplore, NavGroupVisit,
+                KindKnowledgeCheck, KindPoll, KindCollect, KindPracticalInfo, KindWallLocator, KindTodayMap, KindRelated, KindFeedback,
+                KindNavContents, KindSources, KindStory, OpenRowStory, OpenRowMeta, MediaBadge,
                 NavMore, NavNextUp, NavNextUpPosition, NavNextButton, NavNextUpDone,
-                NavMenu, NavMenuByPurpose, NavMenuByFormat, NavMenuAll,
-                NavFab, PlacedModelRemove, PlacedModelOther,
+                NavMenu, PlacedModelRemove, PlacedModelOther,
                 NavContentsMinutes, NavContentsRead, NavContentsSectionRead,
                 CompactMeta, CompactOpen, CompactClose, FullViewOpen, SectionOpenerBlock, SectionOpenerBlocks,
                 NavPagerPosition, NavPagerPrevious, NavPagerNext,
-                NavRailsAll,
                 NavFacetUpTo, NavFacetNoHeadphones, NavFacetNoCamera, NavFacetNoNetwork, NavFacetClear,
             };
         }

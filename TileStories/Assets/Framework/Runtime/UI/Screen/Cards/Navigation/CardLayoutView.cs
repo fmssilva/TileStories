@@ -10,9 +10,6 @@ namespace TileStories
     //   - tabs / pages: one section shown (pages: one page; CardPagerView turns them sideways); a jump first shows the section of its
     //     block; the scroll-spy names the shown section; a rebind of the same point keeps the section shown, another point starts at its first
     //   - any layout: a jump to a block drawn as a closed row opens that row first
-    //   - bento (step 15b): every section set aside (CardBentoView's tiles stand for them); a jump to a block of a section opens that section
-    //     in the full view (the sheet's OpenSectionView, handed over as SectionOpener) -- the section open there is what the spy names, none
-    //     on the overview; a rebind of the same point keeps it open (the sheet reopens it by key)
     public sealed class CardLayoutView
     {
         private readonly BlockStackView _stack;
@@ -28,15 +25,6 @@ namespace TileStories
         // The index in the model's Sections of the section tabs shows (-1 in any other layout)
         public int ShownSection { get; private set; } = -1;
 
-        // Bento: the section open in the full view (-1 on the overview), its key, and the block it opened at
-        public int OpenSection { get; private set; } = -1;
-        public string OpenSectionKey { get; private set; }
-        public string OpenBlock { get; private set; }
-        // Raised when the section open in the full view changes (opened, closed): what the controller's spy follows
-        public event Action Changed;
-        // Opens section i in the full view, landing on a block (null: its top): the sheet's, which owns the full view. False when it opened nothing
-        internal Func<int, string, bool> SectionOpener { get; set; }
-
         public CardLayoutView(BlockStackView stack)
         {
             _stack = stack;
@@ -49,7 +37,7 @@ namespace TileStories
         {
             string effective = CardLayoutRule.Effective(context?.Settings?.navigation, model);
             if (!CardLayoutRule.ParksSections(effective)) return null;
-            int shown = CardLayoutRule.OpensSectionsInFullView(effective) ? -1 : SectionToShow(model, context?.Poi?.id);
+            int shown = SectionToShow(model, context?.Poi?.id);
             return key => !CardLayoutRule.ShowsWith(SectionOf(model, key), shown);
         }
 
@@ -64,17 +52,6 @@ namespace TileStories
             Effective = CardLayoutRule.Effective(_settings, model);
             // - the openers' words follow the layout (tabs: none); the parking below refreshes the sheets with it
             _stack.Sheets.OpenerWords = CardLayoutRule.OpenerShowsWords(Effective);
-            // - bento: no section in the stack; a section open in the full view is found again by key (a reveal rebuilt the model)
-            if (CardLayoutRule.OpensSectionsInFullView(Effective))
-            {
-                ShownSection = -1;
-                _shownKey = null;
-                OpenSection = IndexOf(model, OpenSectionKey);
-                if (OpenSection < 0) ClearOpen();
-                _stack.SetParked(key => SectionOf(model, key) >= 0);
-                return;
-            }
-            ClearOpen();
             if (CardLayoutRule.ParksSections(Effective) && shown >= 0) Show(shown);
             else
             {
@@ -92,47 +69,8 @@ namespace TileStories
             _poi = null;
             _shownKey = null;
             ShownSection = -1;
-            ClearOpen();
             Effective = CardOptions.LayoutScroll;
             _stack.Sheets.OpenerWords = true;
-        }
-
-        // Bento: open section `index` in the full view, landing on `blockKey` (null: its top). False in any other layout or when nothing opened
-        public bool OpenSectionView(int index, string blockKey)
-        {
-            if (_model == null || !CardLayoutRule.OpensSectionsInFullView(Effective) || index < 0 || index >= _model.Sections.Count) return false;
-            if (SectionOpener == null || !SectionOpener(index, blockKey)) return false;
-            OpenSection = index;
-            OpenSectionKey = _model.Sections[index].Key;
-            OpenBlock = blockKey ?? _model.Sections[index].Targets[0];
-            Changed?.Invoke();
-            return true;
-        }
-
-        // Bento: open again the section that was open before a rebind of the same point (by key; nothing when the card no longer has it)
-        public bool ReopenSection(string sectionKey) => OpenSectionView(IndexOf(_model, sectionKey), null);
-
-        // Bento: the full view closed -- back on the overview, no section being read
-        public void SectionViewClosed()
-        {
-            if (OpenSection < 0 && OpenSectionKey == null) return;
-            ClearOpen();
-            Changed?.Invoke();
-        }
-
-        private void ClearOpen()
-        {
-            OpenSection = -1;
-            OpenSectionKey = null;
-            OpenBlock = null;
-        }
-
-        private static int IndexOf(CardNavModel model, string sectionKey)
-        {
-            if (model == null || sectionKey == null) return -1;
-            for (int i = 0; i < model.Sections.Count; i++)
-                if (model.Sections[i].Key == sectionKey) return i;
-            return -1;
         }
 
         // Tabs: show section `index` -- its blocks get their views back, every other section's are set aside
@@ -154,18 +92,16 @@ namespace TileStories
             if (CardLayoutRule.OpensRowBeforeJump(closedRow)) _stack.Expand(blockKey);
         }
 
-        // The section the scroll-spy names, from what it measured (bento: the one open in the full view)
-        public int SpySection(int measured) =>
-            CardLayoutRule.SpySection(Effective, CardLayoutRule.OpensSectionsInFullView(Effective) ? OpenSection : ShownSection, measured);
+        // The section the scroll-spy names, from what it measured
+        public int SpySection(int measured) => CardLayoutRule.SpySection(Effective, ShownSection, measured);
 
-        // The target the block spy names, from what it measured (bento: the block the full view opened at; tabs and pages: a block of the
-        // section shown, never one of a section set aside)
+        // The target the block spy names, from what it measured (tabs and pages: a block of the section shown, never one of a section set aside)
         public string SpyBlock(string measured)
         {
             bool shownValid = _model != null && ShownSection >= 0 && ShownSection < _model.Sections.Count;
             string first = shownValid ? _model.Sections[ShownSection].Targets[0] : null;
             bool onShown = shownValid && measured != null && SectionOf(_model, measured) == ShownSection;
-            return CardLayoutRule.SpyBlock(Effective, OpenBlock, measured, onShown, first);
+            return CardLayoutRule.SpyBlock(Effective, measured, onShown, first);
         }
 
         // Each section as the card's reading sees it (ContentSeenRule.HasReadCard): shown now, or set aside -- and then read to its end when

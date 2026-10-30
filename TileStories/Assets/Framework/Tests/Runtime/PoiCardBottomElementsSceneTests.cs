@@ -11,8 +11,6 @@ namespace TileStories.Tests
     // Phase B of the step 7b bottom elements (_3.2 section 5.2) on the REAL LivingRoomScene with The Lamp's real card (56 targets, 8 families,
     // its sticky footer, Grouped By Family) and real fingers (CardTestInput, 4.2.3's focus settings); each element is made the wall's Bottom
     // Bar through the live seam (the Editor's own path):
-    //   - dock: after real drags through the card the widened item is the section ON SCREEN (the spy's, never a tap's), the pill never
-    //     grows past the card -- in Portuguese at 3, 4 and 5 slots -- and it slides away and back with the footer, never hiding itself
     //   - bar_sheet: a real tap on another family jumps and opens nothing; a second real tap on the current one opens ITS kinds (the card
     //     does not move), a real tap on a kind lands its block and closes the list, a one-kind family opens nothing -- every step by taps
     //   - next_up: a real tap on Next lands the next block, the counter moves forward and the bar names the one after the block read, all the
@@ -29,7 +27,6 @@ namespace TileStories.Tests
         private ScrollView Scroll => Sheet.Stack.Scroll;
         private CardChromeView Chrome => Sheet.Chrome;
         private VisualElement BarSlot => Sheet.Slots.Bottom;
-        private DockNavView Dock => Sheet.Slots.BottomView as DockNavView;
         private BarSheetNavView BarSheet => Sheet.Slots.BottomView as BarSheetNavView;
         private NextUpNavView NextUp => Sheet.Slots.BottomView as NextUpNavView;
 
@@ -187,12 +184,12 @@ namespace TileStories.Tests
         // The bottom slot is under the header's peek part, whichever element it holds: the stops are the same with each of the three new
         // elements set as with none (5a's standard: peek 195.00 / half 337.60 / full 796.00 at 390 x 844) -- measured at Full, Half and Peek
         [UnityTest]
-        public IEnumerator TheLampsStops_DoNotMove_WithAnyOfTheThreeNewElementsSet()
+        public IEnumerator TheLampsStops_DoNotMove_WithAnyOfTheBottomElementsSet()
         {
             Assert.AreEqual(CardOptions.NavNone, ConfigCopy().card_settings.navigation.bottom, "precondition: the shipped wall has no Bottom Bar");
             yield return Open(SheetStopRule.Stop.Full);
             var unset = Sheet.Stops;
-            foreach (string element in new[] { BuiltInNavElements.Dock, BuiltInNavElements.BarSheet, BuiltInNavElements.NextUp })
+            foreach (string element in new[] { BuiltInNavElements.BarSheet, BuiltInNavElements.NextUp })
             {
                 yield return UseTheElement(element);
                 yield return Rested();
@@ -215,143 +212,7 @@ namespace TileStories.Tests
                 yield return CardTestInput.Settle();
             }
             Debug.Log("[Card] Lamp stops at " + Sheet.Layer.layout.size + ": peek " + unset.Peek.ToString("F2") + ", half " + unset.Half.ToString("F2")
-                + ", full " + unset.Full.ToString("F2") + " (dock, bar_sheet, next_up set and unset)");
-        }
-
-        // ---------------- dock ----------------
-
-        private bool WordsShown(NavTab slot) => slot.Label.parent.resolvedStyle.display == DisplayStyle.Flex;
-
-        // The dock widens the section ON SCREEN: its slot (or More for a section in More's list) and no other shows its word beside its icon,
-        // wider than every other, the pill inside the card
-        private void AssertTheDockWidensTheScreen(string when)
-        {
-            int section = SectionUnderTheSpyLine();
-            var slots = Dock.Items.Append(Dock.More).ToList();
-            int expected = section < Dock.Items.Count ? section : Dock.Items.Count;
-            Assert.AreEqual(section, Dock.CurrentIndex, when + ": the dock follows the section on screen");
-            for (int i = 0; i < slots.Count; i++)
-            {
-                bool marked = i == expected;
-                Assert.AreEqual(marked, slots[i].Button.ClassListContains(NavTab.CurrentClass), when + ": slot " + i + " marked");
-                Assert.AreEqual(marked, WordsShown(slots[i]), when + ": slot " + i + " says its word only while it is the section on screen");
-                if (!marked) Assert.Less(slots[i].Button.layout.width, slots[expected].Button.layout.width, when + ": slot " + i + " is narrower than the widened one");
-            }
-            var pill = Dock.Bar.worldBound;
-            Assert.LessOrEqual(pill.width, Sheet.Root.worldBound.width + OnePixel, when + ": the pill is no wider than the card");
-            Assert.GreaterOrEqual(pill.xMin, Sheet.Root.worldBound.xMin - OnePixel, when + ": and inside it");
-            Assert.LessOrEqual(pill.xMax, Sheet.Root.worldBound.xMax + OnePixel, when + ": (right)");
-        }
-
-        // Real drags down the card -- until the reader has been through at least three sections -- and after EACH the widened item is the
-        // slot of the section on screen: the widening travels with the reader's scroll. A real tap on a slot only moves the card; the
-        // widened item is then the one the SCREEN shows (the spy's), which a short landed block can make the next family's, never a tap's own
-        [UnityTest]
-        public IEnumerator ARealDragThroughSections_MovesTheWidenedItem_WithTheSpy_NotTheTap()
-        {
-            yield return UseTheElement(BuiltInNavElements.Dock);
-            yield return Open(SheetStopRule.Stop.Full);
-            Assert.AreEqual(BuiltInNavElements.Dock, Sheet.Slots.BottomKey);
-            Assert.Greater(Range, 1000f, "precondition: the stack really scrolls");
-            AssertTheDockWidensTheScreen("at the top");
-            var seen = new List<int> { Dock.CurrentIndex };
-            for (int drag = 0; drag < 40 && seen.Distinct().Count() < 4; drag++)
-            {
-                var viewport = Scroll.contentViewport.worldBound;
-                float before = Scroll.scrollOffset.y;
-                yield return CardTestInput.TouchDrag(Scroll.panel, new Vector2(viewport.center.x, viewport.yMax - 40f), new Vector2(0f, -viewport.height * 0.6f));
-                yield return CardTestInput.Settle(0.6f);
-                Assert.Greater(Scroll.scrollOffset.y, before, "precondition: the real drag scrolled the stack");
-                AssertTheDockWidensTheScreen("after drag " + (drag + 1));
-                if (Dock.CurrentIndex != seen[seen.Count - 1]) seen.Add(Dock.CurrentIndex);
-            }
-            Assert.GreaterOrEqual(seen.Distinct().Count(), 3, "the widening moved through at least three sections with the reader: " + string.Join(", ", seen));
-            CollectionAssert.AreEqual(seen.OrderBy(s => s), seen, "and only forward, as the reader read down");
-            yield return DragStack(60f);
-            Assert.IsTrue(Chrome.BottomNavShown, "precondition: a drag up brought the dock back");
-            AssertTheDockWidensTheScreen("with the dock back");
-            var marked = Dock.Items.Append(Dock.More).First(s => s.Button.ClassListContains(NavTab.CurrentClass));
-            Assert.IsTrue(CardTestInput.IsShown(marked.Label, Sheet.Root), "its word is on screen, beside its icon");
-            yield return CardGalleryChecks.Render("Nav_Lamp_dock_scrolled_390");
-
-            // - a real tap on a slot moves the card; the widened item is then the section the screen shows
-            yield return ScrollToTop();
-            Assert.AreEqual(0, SectionUnderTheSpyLine(), "precondition: back at the top");
-            // - _3.3 S4a: at the top the hero is the screen and the dock waits for it -- read just past it
-            yield return CardTestInput.PastTheHero(Sheet);
-            Assert.IsTrue(Chrome.BottomNavShown, "precondition: past the hero the dock shows");
-            var tab = Dock.Items[2];
-            Assert.IsTrue(OnScreen(tab.Button), "precondition: the third slot is on screen");
-            int jumpsBefore = NavJumps.Count;
-            yield return Tap(tab.Button, tab.Label.text);
-            yield return Landed();
-            AssertLanded(Model.Sections[2].Targets[0], tab.Label.text);
-            Assert.AreEqual(jumpsBefore + 1, NavJumps.Count, "one nav_jump");
-            Assert.AreEqual(BuiltInNavElements.Dock, NavJumps.Last().Variant, "naming the dock");
-            AssertTheDockWidensTheScreen("after a tap on " + tab.Label.text);
-            Assert.IsTrue(Chrome.BottomNavShown, "the dock the visitor just used stays (a jump is no reading)");
-        }
-
-        // The pill never grows past the card with the Portuguese labels, at every Bar Slots from 3 to 5, whichever section is read: a real
-        // tap on every slot, and on a row of More's list, then the widest state measured; rendered Nav_Lamp_dock_pt_full_390
-        [UnityTest, Timeout(600000)]
-        public IEnumerator InPortuguese_ThePillNeverGrowsPastTheCard_AtEveryBarSlots_AndEverySlotIsATouchTarget()
-        {
-            float touch = CardTestInput.TokenPx("--ts-touch-target");
-            float widest = 0f;
-            foreach (int slots in new[] { 5, 4, 3 })
-            {
-                yield return UseTheElement(BuiltInNavElements.Dock, slots, "pt");
-                yield return Open(SheetStopRule.Stop.Full);
-                Assert.AreEqual("Fechar", Sheet.CloseButton.tooltip, "precondition: the card reads in Portuguese");
-                Assert.AreEqual(390f, Sheet.Layer.panel.visualTree.layout.width, OnePixel, "precondition: the run's 390 px frame");
-                Assert.AreEqual(slots - 1, Dock.Items.Count, slots + " slots: that many sections and More");
-                Assert.AreEqual("Sobre", Dock.Items[0].Label.text, "the first slot reads in Portuguese");
-                for (int i = Dock.Items.Count - 1; i >= 0; i--)
-                {
-                    var slot = Dock.Items[i];
-                    Assert.GreaterOrEqual(slot.Button.layout.width, touch - OnePixel, slot.Label.text + ": wide enough to tap");
-                    Assert.GreaterOrEqual(slot.Button.layout.height, touch - OnePixel, slot.Label.text + ": tall enough to tap");
-                    yield return Tap(slot.Button, slot.Label.text);
-                    yield return Landed();
-                    AssertTheDockWidensTheScreen(slots + " slots, after a tap on " + slot.Label.text);
-                    var marked = Dock.Items.Append(Dock.More).First(s => s.Button.ClassListContains(NavTab.CurrentClass));
-                    var words = marked.Label.MeasureTextSize(marked.Label.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined);
-                    Assert.GreaterOrEqual(marked.Label.layout.width + 0.5f, words.x, "'" + marked.Label.text + "': whole, never cut");
-                    widest = Mathf.Max(widest, Dock.Bar.worldBound.width);
-                }
-                Assert.IsTrue(Dock.HasMore, "the Lamp's eight sections overflow " + slots + " slots");
-                Assert.GreaterOrEqual(Dock.More.Button.layout.width, touch - OnePixel, "More: wide enough to tap");
-                if (slots == 5) yield return CardGalleryChecks.Render("Nav_Lamp_dock_pt_full_390");
-            }
-            Debug.Log("[Card] Dock in Portuguese at 390 px, 3 to 5 slots: widest pill " + widest.ToString("F1") + " px");
-            Assert.LessOrEqual(widest, Sheet.Root.worldBound.width + OnePixel, "never past the card");
-        }
-
-        // The dock hides on scroll down with the footer and comes back on a drag up -- that is the area's job (CardChromeRule); the view
-        // itself never hides: still bound, still displayed, only slid below the card's edge. Nothing at peek
-        [UnityTest]
-        public IEnumerator TheDock_SlidesAwayWithTheArea_OnARealDragDown_AndBack_AndNothingShowsAtPeek()
-        {
-            yield return UseTheElement(BuiltInNavElements.Dock);
-            yield return Open(SheetStopRule.Stop.Full);
-            // - the hero is the screen at rest: the chrome comes once it is scrolled away (_3.3 S4a)
-            yield return CardTestInput.PastTheHero(Sheet);
-            Assert.IsTrue(Chrome.BottomShown && Chrome.BottomNavShown && OnScreen(BarSlot), "precondition: the dock shows at Full");
-            yield return CardGalleryChecks.Render("Nav_Lamp_dock_full_390");
-            yield return DragStack(-300f);
-            Assert.Greater(Scroll.scrollOffset.y, CardChromeRule.HideAfterTravel, "precondition: the drag moved down past the threshold");
-            Assert.IsFalse(Chrome.BottomNavShown, "moving down hid the area with the dock");
-            Assert.IsTrue(BelowTheCard(BarSlot), "the dock slid below the card's edge");
-            Assert.IsNotNull(Dock, "the view is still bound: the area hid it, not the view");
-            Assert.AreNotEqual(DisplayStyle.None, Dock.Root.style.display.value, "and still displayed");
-            yield return DragStack(60f);
-            Assert.IsTrue(Chrome.BottomNavShown && OnScreen(BarSlot), "a drag up brought it back");
-            Sheet.SetStop(SheetStopRule.Stop.Peek);
-            yield return CardTestInput.Settle();
-            yield return Rested();
-            Assert.IsFalse(Chrome.BottomNavShown, "nothing at peek");
-            Assert.IsTrue(BelowTheCard(BarSlot), "the dock is below the card's edge at peek");
+                + ", full " + unset.Full.ToString("F2") + " (bar_sheet, next_up set and unset)");
         }
 
         // ---------------- bar_sheet ----------------

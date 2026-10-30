@@ -187,6 +187,41 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle();
         }
 
+        // _3.3 R1: Reduce Motion stops the header's turntable. With it on, Lamp - Religious's header model stands still for the whole auto-spin
+        // pause and 2 s past it (no tick asked: its idle clock does not move either); with it off, the same wait sees it turn -- the positive
+        // control that the clock and the spin CAN run here. Pushed through the live seam, the card opened after it
+        [UnityTest]
+        public IEnumerator LampReligious_HeaderTurntable_StandsStillUnderReduceMotion_AndTurnsWithout([Values(true, false)] bool reduceMotion)
+        {
+            var copy = ConfigCopy();
+            copy.card_settings.container.reduce_motion = reduceMotion;
+            Session.ApplyCardSettings(copy);
+            yield return CardTestInput.Settle(0.3f);
+            SelectionEventBus.Select("lamp_religious");
+            yield return CardTestInput.Settle();
+            Sheet.SetStop(SheetStopRule.Stop.Half);
+            yield return CardTestInput.Settle(0.4f);
+            var model = ((HeaderBlockView)Sheet.Stack.BoundViews[0]).ModelView;
+            for (int i = 0; i < 120 && !model.ShowsModel; i++) yield return null;
+            Assert.IsTrue(model.ShowsModel, "precondition: the real stage rendered the header's model at Half");
+
+            float yaw = model.State.Yaw, idle = model.State.IdleSeconds;
+            float wait = TurntableRule.AutoSpinResumeAfter + 2f;
+            float start = Time.unscaledTime;
+            // - waits end on a condition (the model turned), never past the pause + 2 s
+            while (Time.unscaledTime - start < wait && Mathf.Approximately(yaw, model.State.Yaw)) yield return null;
+            if (reduceMotion)
+            {
+                Assert.AreEqual(yaw, model.State.Yaw, 0f, "Reduce Motion: the header's turntable did not turn in " + wait + " s");
+                Assert.AreEqual(idle, model.State.IdleSeconds, 0f, "and asked for no tick (its idle clock stands)");
+            }
+            else
+                Assert.AreNotEqual(yaw, model.State.Yaw, "without Reduce Motion the same model turned within " + wait + " s (idle " + model.State.IdleSeconds + ")");
+
+            SelectionEventBus.Clear();
+            yield return CardTestInput.Settle();
+        }
+
         // The same law for a model block IN the stack (the Lamp's inline room scan, Auto Spin on): it ticks at half with the block
         // in view, stops when the card is lowered to peek (the block is then only a stage under the sheet), and stops when it is
         // scrolled out of the viewport at half.

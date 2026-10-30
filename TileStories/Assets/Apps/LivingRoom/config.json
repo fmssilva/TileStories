@@ -8387,169 +8387,6 @@
             "card": {
                 "blocks": [
                     {
-                        "key": "block_6",
-                        "kind": "nav_bento",
-                        "variant": "tiles",
-                        "display": "inline",
-                        "emphasis": "normal",
-                        "fields": [
-                            {
-                                "key": "heading",
-                                "text": [
-                                    {
-                                        "lang": "en",
-                                        "value": "Start here"
-                                    },
-                                    {
-                                        "lang": "pt",
-                                        "value": "Comece aqui"
-                                    }
-                                ],
-                                "number": 0.0,
-                                "flag": false,
-                                "value": "",
-                                "asset": "",
-                                "asset_by_language": [],
-                                "items": []
-                            },
-                            {
-                                "key": "tiles",
-                                "text": [],
-                                "number": 0.0,
-                                "flag": false,
-                                "value": "",
-                                "asset": "",
-                                "asset_by_language": [],
-                                "items": [
-                                    {
-                                        "fields": [
-                                            {
-                                                "key": "target",
-                                                "text": [],
-                                                "number": 0.0,
-                                                "flag": false,
-                                                "value": "block_2",
-                                                "asset": "",
-                                                "asset_by_language": []
-                                            },
-                                            {
-                                                "key": "words",
-                                                "text": [
-                                                    {
-                                                        "lang": "en",
-                                                        "value": "The houses"
-                                                    },
-                                                    {
-                                                        "lang": "pt",
-                                                        "value": "As casas"
-                                                    }
-                                                ],
-                                                "number": 0.0,
-                                                "flag": false,
-                                                "value": "",
-                                                "asset": "",
-                                                "asset_by_language": []
-                                            },
-                                            {
-                                                "key": "picture",
-                                                "text": [],
-                                                "number": 0.0,
-                                                "flag": false,
-                                                "value": "",
-                                                "asset": "images/castle_then.jpg",
-                                                "asset_by_language": []
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        "fields": [
-                                            {
-                                                "key": "target",
-                                                "text": [],
-                                                "number": 0.0,
-                                                "flag": false,
-                                                "value": "block_4",
-                                                "asset": "",
-                                                "asset_by_language": []
-                                            },
-                                            {
-                                                "key": "words",
-                                                "text": [
-                                                    {
-                                                        "lang": "en",
-                                                        "value": "Watch the film"
-                                                    },
-                                                    {
-                                                        "lang": "pt",
-                                                        "value": "Ver o filme"
-                                                    }
-                                                ],
-                                                "number": 0.0,
-                                                "flag": false,
-                                                "value": "",
-                                                "asset": "",
-                                                "asset_by_language": []
-                                            },
-                                            {
-                                                "key": "picture",
-                                                "text": [],
-                                                "number": 0.0,
-                                                "flag": false,
-                                                "value": "",
-                                                "asset": "images/castle_photo_2.jpg",
-                                                "asset_by_language": []
-                                            },
-                                            {
-                                                "key": "opens",
-                                                "text": [],
-                                                "number": 0.0,
-                                                "flag": false,
-                                                "value": "full_view",
-                                                "asset": "",
-                                                "asset_by_language": []
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        "fields": [
-                                            {
-                                                "key": "target",
-                                                "text": [],
-                                                "number": 0.0,
-                                                "flag": false,
-                                                "value": "block_5",
-                                                "asset": "",
-                                                "asset_by_language": []
-                                            },
-                                            {
-                                                "key": "opens",
-                                                "text": [],
-                                                "number": 0.0,
-                                                "flag": false,
-                                                "value": "full_view",
-                                                "asset": "",
-                                                "asset_by_language": []
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        "fields": [
-                                            {
-                                                "key": "target",
-                                                "text": [],
-                                                "number": 0.0,
-                                                "flag": false,
-                                                "value": "block_3",
-                                                "asset": "",
-                                                "asset_by_language": []
-                                            }
-                                        ]
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
                         "key": "block_2",
                         "kind": "rich_text",
                         "variant": "plain",
@@ -8836,34 +8673,6 @@
                         ]
                     },
                     {
-                        "key": "block_8",
-                        "kind": "nav_icon_grid",
-                        "variant": "",
-                        "display": "inline",
-                        "emphasis": "normal",
-                        "fields": [
-                            {
-                                "key": "heading",
-                                "text": [
-                                    {
-                                        "lang": "en",
-                                        "value": "Sections"
-                                    },
-                                    {
-                                        "lang": "pt",
-                                        "value": "Secções"
-                                    }
-                                ],
-                                "number": 0.0,
-                                "flag": false,
-                                "value": "",
-                                "asset": "",
-                                "asset_by_language": [],
-                                "items": []
-                            }
-                        ]
-                    },
-                    {
                         "key": "block_9",
                         "kind": "nav_contents",
                         "variant": "",
@@ -8880,34 +8689,6 @@
                                     {
                                         "lang": "pt",
                                         "value": "Índice"
-                                    }
-                                ],
-                                "number": 0.0,
-                                "flag": false,
-                                "value": "",
-                                "asset": "",
-                                "asset_by_language": [],
-                                "items": []
-                            }
-                        ]
-                    },
-                    {
-                        "key": "block_10",
-                        "kind": "nav_rails",
-                        "variant": "",
-                        "display": "inline",
-                        "emphasis": "normal",
-                        "fields": [
-                            {
-                                "key": "heading",
-                                "text": [
-                                    {
-                                        "lang": "en",
-                                        "value": "More to explore"
-                                    },
-                                    {
-                                        "lang": "pt",
-                                        "value": "Mais para explorar"
                                     }
                                 ],
                                 "number": 0.0,
@@ -14413,15 +14194,11 @@
             "top": "none",
             "bottom": "none",
             "menu": "none",
-            "floating": "none",
-            "edge": "none",
-            "auto_nav_block": "none",
             "placed_model_control": "none",
             "show_at": "half_and_full",
             "hide_on_scroll": "down",
             "labels": "icon_and_text",
             "show_counts": false,
-            "groups": [],
             "layout": "scroll",
             "accordion_one_open": false,
             "bar": {

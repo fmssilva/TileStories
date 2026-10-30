@@ -102,7 +102,7 @@ namespace TileStories
         }
     }
 
-    // The top of a menu over the card (drawer_tree, grid_overlay; _3.2 step 8): its title and a visible close X -- a menu on a scrim keeps a
+    // The top of a menu over the card (drawer_tree; _3.2 step 8): its title and a visible close X -- a menu on a scrim keeps a
     // way out the visitor can see, not only Back and the scrim (NN/g bottom sheets, Laubheimer 2023). The X is the card's own (two crossed
     // bars, PoiCard.uss), named by CardStrings' Close
     public sealed class NavMenuHeader
@@ -135,56 +135,6 @@ namespace TileStories
         {
             Title.text = strings?.Get(CardStrings.Keys.NavMenu) ?? "";
             Close.tooltip = strings?.Get(CardStrings.Keys.Close) ?? "";
-        }
-    }
-
-    // The round Floating Button of fab_dial and fab_radial (_3.2 section 5.4, step 9): a dark disc with a light edge (it floats over the camera
-    // image, bright or dark) and the sections icon in the accent colour; while what it opened is open, the icon turns into the card's X (the
-    // same two crossed bars as the close button), so the same button closes it. Root is the area round the button: what a SwipeGrab watches
-    // (the button inside it takes the press, the area claims a slide), and what an element hangs its list or arc on.
-    public sealed class NavFab
-    {
-        public const string OpenClass = "nav-fab--open";
-
-        public readonly VisualElement Root;
-        public readonly Button Button;
-        public readonly VisualElement Icon;
-
-        public NavFab(string namePrefix, Action clicked)
-        {
-            Root = new VisualElement { name = namePrefix + "-area" };
-            Root.AddToClassList("nav-fab");
-            Button = new Button(clicked) { name = namePrefix + "-button" };
-            Button.AddToClassList("nav-fab__button");
-            Icon = CardIcons.Create();
-            CardIcons.SetKey(Icon, CardIcons.Menu);
-            Icon.AddToClassList("nav-fab__icon");
-            Button.Add(Icon);
-            foreach (string bar in new[] { "poi-card__close-bar--a", "poi-card__close-bar--b" })
-            {
-                var stroke = new VisualElement { pickingMode = PickingMode.Ignore };
-                stroke.AddToClassList("poi-card__close-bar");
-                stroke.AddToClassList(bar);
-                stroke.AddToClassList("nav-fab__close-bar");
-                Button.Add(stroke);
-            }
-            Root.Add(Button);
-        }
-
-        public bool IsOpen => Root.ClassListContains(OpenClass);
-
-        // The button's name in the card's language (what a screen reader and a long press read)
-        public void Words(CardStrings strings) => Button.tooltip = strings?.Get(CardStrings.Keys.NavFab) ?? "";
-
-        // Show the X while what it opened is open, the sections icon otherwise
-        public void SetOpen(bool open) => Root.EnableInClassList(OpenClass, open);
-
-        // The card layer's bounds (what a list or an arc must stay inside): the nearest card layer above the button, else the whole panel
-        public Rect LayerBounds()
-        {
-            for (var up = Root.parent; up != null; up = up.parent)
-                if (up.ClassListContains("poi-card-layer")) return up.worldBound;
-            return Root.panel?.visualTree.worldBound ?? Rect.zero;
         }
     }
 

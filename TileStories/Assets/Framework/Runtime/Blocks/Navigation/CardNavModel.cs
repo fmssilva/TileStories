@@ -5,16 +5,15 @@ namespace TileStories
 {
     // The map of ONE open card (_3.2 section 4.1): what every navigation element shows and where each of its items jumps.
     // Built from the stack BlockStackBuilder made (the blocks the card really shows, in the order it shows them), so the
-    // elements never compute structure themselves -- tabs, chips, segments, a bottom bar, a drawer and a contents list all read
+    // elements never compute structure themselves -- tabs, chips, a bar, a drawer and a contents list all read
     // this one model, the "one result set every surface shows" rule of the search domain applied to the card.
     //
     //   Section (L1) -- a family (group_by = family, the default) or a format (group_by = format), with its CardStrings label and,
     //                   for a family, its icon and colour token
     //   Kind    (L2) -- the kinds of that section that have a target here, with their words and their family's colour
     //   Target  (L3) -- the key of one block a jump can land on (NavOntologyRule.IsTarget)
-    //   Group        -- the wall's Groups (rule 2.5.6, NavGroupRule): FAMILIES merged, whatever Group By says (the segmented element)
     //
-    // Sections and groups come in the order the stack shows their first target: with Block Order by_family that IS the families'
+    // Sections come in the order the stack shows their first target: with Block Order by_family that IS the families'
     // order, and with any other order an element's items still follow what the visitor scrolls through. Kinds keep that order
     // inside a section, targets the stack's. It is rebuilt, never patched: on every Show and when a waiting block is revealed.
     public sealed class CardNavModel
@@ -87,27 +86,10 @@ namespace TileStories
             }
         }
 
-        // One of the wall's Groups that has a target on this card (rule 6): its words and the targets of every family in it
-        public sealed class Group
-        {
-            public readonly NavGroupRule.Group Definition;
-            public readonly IReadOnlyList<string> Targets;
-            public string Key => Definition.Key;
-            public int Count => Targets.Count;
-
-            public Group(NavGroupRule.Group definition, IReadOnlyList<string> targets)
-            {
-                Definition = definition;
-                Targets = targets;
-            }
-        }
-
         // CardOptions.GroupByFamily or GroupByFormat (NavOntologyRule.GroupBy: anything else reads as family)
         public readonly string GroupBy;
         // Rule 2: only sections with a target, never an empty one
         public readonly IReadOnlyList<Section> Sections;
-        // Rule 6: only the groups with a target; a family in no group of this wall is in none of them
-        public readonly IReadOnlyList<Group> Groups;
         // Every target, in the stack's order (what a spy that follows single blocks reads)
         public readonly IReadOnlyList<string> Targets;
         public int TargetCount => Targets.Count;
@@ -119,18 +101,14 @@ namespace TileStories
         public readonly IReadOnlyList<Section> BarSections;
         public readonly IReadOnlyList<Section> MoreSections;
 
-        // Where each target sits: its section, its kind inside it, its group (-1 = none)
-        private readonly Dictionary<string, (int Section, int Kind, int Group)> _place;
-        // The same card on the other axis (By): built on first ask, from the same entries, by the same Build
-        private Func<string, CardNavModel> _buildOn;
-        private CardNavModel _pivot;
+        // Where each target sits: its section and its kind inside it
+        private readonly Dictionary<string, (int Section, int Kind)> _place;
 
-        private CardNavModel(string groupBy, List<Section> sections, List<Group> groups, List<string> targets,
-            Dictionary<string, (int, int, int)> place, CardNavigationSettings settings)
+        private CardNavModel(string groupBy, List<Section> sections, List<string> targets, Dictionary<string, (int, int)> place,
+            CardNavigationSettings settings)
         {
             GroupBy = groupBy;
             Sections = sections;
-            Groups = groups;
             Targets = targets;
             _place = place;
             Runs = RunsOf(targets, place);
@@ -147,31 +125,13 @@ namespace TileStories
         public Kind KindOf(string blockKey) =>
             blockKey != null && _place.TryGetValue(blockKey, out var at) ? Sections[at.Section].Kinds[at.Kind] : null;
 
-        // The index in Groups of the group a target belongs to, -1 for none (no target, or its family is in no group of this wall)
-        public int GroupOf(string blockKey) => blockKey != null && _place.TryGetValue(blockKey, out var at) ? at.Group : -1;
-
-        // The same card's map with its sections on `groupBy` (CardOptions.GroupByFamily / GroupByFormat): this model on its own axis, else
-        // the pivot -- the SAME targets regrouped by Build itself, so an element that switches axis (grid_overlay's Purpose / Format, step 8)
-        // never regroups blocks on its own. Everything but the sections (targets, groups, ShowsNavigation, bar / More) is the same card's
-        public CardNavModel By(string groupBy)
-        {
-            string axis = groupBy == CardOptions.GroupByFormat ? CardOptions.GroupByFormat : CardOptions.GroupByFamily;
-            if (axis == GroupBy) return this;
-            if (_pivot == null)
-            {
-                _pivot = _buildOn(axis);
-                _pivot._pivot = this;
-            }
-            return _pivot;
-        }
-
         // The model of the card these stack entries make. `isRevealed` says whether a block's ShowAfterViewed gate has opened
         // (the host passes CardLocalState.Seen for this POI); null = none has, so every such block is still waiting.
         public static CardNavModel Build(IReadOnlyList<BlockStackBuilder.Entry> entries, BlockRegistry registry, CardSettings settings,
             Func<string, bool> isRevealed = null) =>
             Build(entries, registry, settings, isRevealed, NavOntologyRule.GroupBy(settings?.navigation));
 
-        // The model with its sections on `groupBy`, whatever the wall's Group By says (By's pivot)
+        // The model with its sections on `groupBy`
         private static CardNavModel Build(IReadOnlyList<BlockStackBuilder.Entry> entries, BlockRegistry registry, CardSettings settings,
             Func<string, bool> isRevealed, string groupBy)
         {
@@ -180,10 +140,7 @@ namespace TileStories
             var targetsOf = new Dictionary<string, List<string>>();
             var kindsOf = new Dictionary<string, List<BlockKindDefinition>>();
             var kindTargets = new Dictionary<(string Section, string Kind), List<string>>();
-            var groupOrder = new List<string>();
-            var groupTargets = new Dictionary<string, List<string>>();
             var targets = new List<string>();
-            var groupOfTarget = new Dictionary<string, string>();
 
             if (entries != null)
                 foreach (var entry in entries)
@@ -206,20 +163,9 @@ namespace TileStories
                     ofSection.Add(block);
                     ofKind.Add(block);
                     targets.Add(block);
-
-                    // - rule 6: the block's FAMILY merges into its group, whatever the sections are
-                    string group = NavGroupRule.GroupOf(kind.Family, nav);
-                    if (group == null) continue;
-                    if (!groupTargets.TryGetValue(group, out var ofGroup))
-                    {
-                        groupOrder.Add(group);
-                        groupTargets[group] = ofGroup = new List<string>();
-                    }
-                    ofGroup.Add(block);
-                    groupOfTarget[block] = group;
                 }
 
-            var place = new Dictionary<string, (int, int, int)>();
+            var place = new Dictionary<string, (int, int)>();
             var sections = new List<Section>(order.Count);
             foreach (string key in order)
             {
@@ -230,33 +176,18 @@ namespace TileStories
                 {
                     registry.TryGetFamily(kind.Family, out var kindFamily);
                     var kindBlocks = kindTargets[(key, kind.Key)];
-                    foreach (string block in kindBlocks) place[block] = (sections.Count, kinds.Count, -1);
+                    foreach (string block in kindBlocks) place[block] = (sections.Count, kinds.Count);
                     kinds.Add(new Kind(kind.Key, kind.LabelKey, kindFamily?.ColorToken, kindBlocks));
                 }
                 sections.Add(new Section(key, LabelKeyOf(key, groupBy, registry), byFamily ? family?.IconKey : null,
                     byFamily ? family?.ColorToken : null, kinds, targetsOf[key]));
             }
 
-            var definitions = new Dictionary<string, NavGroupRule.Group>();
-            foreach (var definition in NavGroupRule.Groups(nav)) definitions[definition.Key] = definition;
-            var groups = new List<Group>(groupOrder.Count);
-            foreach (string key in groupOrder)
-            {
-                foreach (string block in groupTargets[key])
-                {
-                    var (s, k, _) = place[block];
-                    place[block] = (s, k, groups.Count);
-                }
-                groups.Add(new Group(definitions[key], groupTargets[key]));
-            }
-            return new CardNavModel(groupBy, sections, groups, targets, place, nav)
-            {
-                _buildOn = axis => Build(entries, registry, settings, isRevealed, axis),
-            };
+            return new CardNavModel(groupBy, sections, targets, place, nav);
         }
 
         // Cut the targets (stack order) into runs: a new run wherever the section changes from the target before
-        private static List<Run> RunsOf(List<string> targets, Dictionary<string, (int Section, int Kind, int Group)> place)
+        private static List<Run> RunsOf(List<string> targets, Dictionary<string, (int Section, int Kind)> place)
         {
             var runs = new List<Run>();
             int previous = -1;

@@ -4,9 +4,9 @@ using UnityEngine;
 
 namespace TileStories
 {
-    // What opens in the full view over the card (_3.2 steps 12, 15b, 16): a block among its siblings, a block's own pages (a gallery's
-    // lightbox), a bento section as one page; the breadcrumb's section and the jump its tap makes; and, over a rebind of the SAME point,
-    // the block or section that was open, opened again
+    // What opens in the full view over the card (_3.2 steps 12, 16): a block among its siblings, a block's own pages (a gallery's
+    // lightbox); the breadcrumb's section and the jump its tap makes; and, over a rebind of the SAME point, the block that was open,
+    // opened again
     public sealed class CardFullViewOpener
     {
         private readonly PoiCardSheetView _sheet;
@@ -15,21 +15,11 @@ namespace TileStories
         private int _crumbSection = -1;
         // What was open before a rebind of the same point, opened again once the card is bound (null = nothing)
         private string _reopenBlock;
-        private string _reopenSection;
 
         public CardFullViewOpener(PoiCardSheetView sheet, BlockRegistry registry)
         {
             _sheet = sheet;
             _registry = registry;
-            // - bento: a jump opens its section in the full view; what the visitor reads there counts as read, and closing it is the overview
-            //   again (the reading asked again: the card may now have been read to its end)
-            sheet.Layout.SectionOpener = OpenSectionView;
-            sheet.FullView.Viewed += sheet.Nav.ViewedInFullView;
-            sheet.FullView.SectionLeft += () =>
-            {
-                sheet.Layout.SectionViewClosed();
-                if (sheet.IsOpen) sheet.Stack.ReadAgain();
-            };
             // - a jump moves the card under the full view: the visitor would see nothing of it, so the full view closes (an Open Block
             //   button or a hotspot pin used inside it lands on the card)
             sheet.Nav.Jumped += sheet.Takeover.Close;
@@ -43,18 +33,15 @@ namespace TileStories
             var fullView = _sheet.FullView;
             bool samePoint = fullView.IsOpen && next.Poi?.id != null && next.Poi?.id == _sheet.Context?.Poi?.id;
             _reopenBlock = samePoint ? fullView.BlockKey : null;
-            _reopenSection = samePoint ? fullView.SectionKey : null;
         }
 
         // Once the card is bound again: reopen what KeepAcrossRebind remembered, once. A block the rebind dropped (a live edit deleted it)
-        // is not reopened: OpenFullView finds no entry; a section only while the card is still drawn as bento and still has it
+        // is not reopened: OpenFullView finds no entry
         public void ReopenAfterRebind()
         {
-            string block = _reopenBlock, section = _reopenSection;
+            string block = _reopenBlock;
             _reopenBlock = null;
-            _reopenSection = null;
             if (block != null) OpenFullView(block);
-            else if (section != null) _sheet.Layout.ReopenSection(section);
         }
 
         // A block asked for the full-screen view: the breadcrumb starts with this card's title and ends with `name`
@@ -92,7 +79,7 @@ namespace TileStories
             };
         }
 
-        // A block asked for its full view (an open compact row's button, a bento tile): the page holds a second view of its kind, one page per
+        // A block asked for its full view (an open compact row's button): the page holds a second view of its kind, one page per
         // SIBLING (FullViewSiblingRule: its section's blocks that support the full view, a swipe or a chip away), each named by the words its
         // compact row shows; the breadcrumb names the section between the card's title and the block (_3.2 step 16). A key that is not on this
         // card opens nothing
@@ -126,30 +113,10 @@ namespace TileStories
             _sheet.Takeover.ShowSection(string.IsNullOrEmpty(words) ? section.Key : words);
         }
 
-        // The visitor tapped the breadcrumb's section: the card's ONE jump to that section (the full view closes on Jumped; in bento the jump
-        // opens the section's page instead) -- no second path
+        // The visitor tapped the breadcrumb's section: the card's ONE jump to that section (the full view closes on Jumped) -- no second path
         private void JumpToCrumbSection()
         {
             if (_sheet.IsOpen && _crumbSection >= 0) _sheet.Nav.JumpTo(_crumbSection, TakeoverView.CrumbElementKey);
-        }
-
-        // Bento: section `index` of the card's map in the full view -- its targets one under the other, landing on `landingKey` (null: its
-        // top); the breadcrumb ends with the section's words. CardLayoutView asks (SectionOpener); false when nothing could be drawn
-        private bool OpenSectionView(int index, string landingKey)
-        {
-            var model = _sheet.Nav.Model;
-            var context = _sheet.Context;
-            if (!_sheet.IsOpen || context == null || model == null || index < 0 || index >= model.Sections.Count) return false;
-            var section = model.Sections[index];
-            var stack = _sheet.Stack;
-            var entries = new List<BlockStackBuilder.Entry>();
-            foreach (string target in section.Targets)
-                if (stack.TryGetEntryOfBlock(target, out var entry)) entries.Add(entry);
-            if (entries.Count == 0) return false;
-            string words = context.Strings != null && section.LabelKey != null ? context.Strings.Get(section.LabelKey) : "";
-            OpenPages(_ => string.IsNullOrEmpty(words) ? section.Key : words, 1, 0,
-                _sheet.FullView.SectionPageFor(entries, section.Key, stack.HeadingOfBlock, context, landingKey));
-            return _sheet.FullView.IsOpen;
         }
     }
 }

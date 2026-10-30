@@ -856,16 +856,3 @@
 .card-full-view__block {
     flex-grow: 1;
 }
-
-/* a SECTION in the full view (the bento layout, _3.2 step 15b): its blocks one under the other like the card's, each under its heading. A
-   view bound for the full view grows to the page when it is alone on it (a video, a 3D / 360 stage); stacked here it keeps the card's
-   media height */
-.card-full-view__section {
-    padding-top: var(--ts-space-3);
-}
-
-.card-full-view__section-block .card-video--full .card-video__surface,
-.card-full-view__section-block .card-preview--full .card-preview__frame {
-    height: var(--ts-media-height);
-    flex-grow: 0;
-}

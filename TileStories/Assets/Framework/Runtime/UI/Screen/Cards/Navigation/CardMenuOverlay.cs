@@ -5,7 +5,7 @@ namespace TileStories
 {
     // The card's ONE overlay owner (_3.2 sections 4.2 and 5.3, step 8): the `menu` layer of the card, over the sheet and BELOW the full view
     // (TakeoverView), and the one place that decides what is open over the card and when it closes. ONE thing at a time, of two kinds:
-    //   - a MENU (the wall's Menu element: drawer_tree, grid_overlay): modal -- a scrim over the whole card and the element's panel on it
+    //   - a MENU (the wall's Menu element: drawer_tree): modal -- a scrim over the whole card and the element's panel on it
     //   - an ANCHORED list (a bar's More list, bar_sheet's kinds list): drawn in place by its element (above the bar, sliding with the bottom
     //     area), no scrim -- the card behind stays readable and scrollable, so a scroll is one of the ways it closes
     // Every open thing closes the same ways, here and nowhere else: system Back (NavBackRule, after the full view and before the sheet goes

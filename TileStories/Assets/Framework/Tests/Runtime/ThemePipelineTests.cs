@@ -79,12 +79,11 @@ namespace TileStories.Tests
             AssertPaints(sheet.Stack.Scroll.resolvedStyle.unityBackgroundImageTintColor, "--ts-glass-ground", "the glass between blocks");
             AssertPaints(Card.AudioCoordinator.Mini.Root.resolvedStyle.backgroundColor, "--ts-surface", "the mini-player");
             AssertPaints(sheet.Overlay.Scrim.resolvedStyle.backgroundColor, "--ts-scrim", "the menu layer's scrim");
-            AssertPaints(sheet.Floating.Scrim.resolvedStyle.backgroundColor, "--ts-scrim", "the floating slot's scrim");
             AssertPaints(sheet.Takeover.Root.resolvedStyle.backgroundColor, "--ts-bg", "the full view");
             // - the scales arrive the same way (a hidden root, like the floating slot here, has no layout to read: the shown sheet is measured)
             Assert.AreEqual(CardTestInput.TokenPx("--ts-line-width"), sheet.Root.resolvedStyle.borderTopWidth, 0.01f, "the sheet's top edge is the theme's --ts-line-width");
             Assert.AreEqual(CardTestInput.TokenPx("--ts-radius-l"), sheet.Root.resolvedStyle.borderTopLeftRadius, 0.01f, "its corners are the theme's --ts-radius-l");
-            foreach (var root in new[] { sheet.Root, Card.AudioCoordinator.Mini.Root, sheet.Overlay.Root, sheet.Floating.Root, sheet.Floating.Scrim, sheet.Takeover.Root })
+            foreach (var root in new[] { sheet.Root, Card.AudioCoordinator.Mini.Root, sheet.Overlay.Root, sheet.Floating.Root, sheet.Takeover.Root })
                 Assert.IsTrue(ThemeController.TryResolverFor(root, out _), root.name + ": sits under the marked root (C# finds its theme)");
         }
 

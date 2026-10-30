@@ -381,11 +381,6 @@ namespace TileStories.Tests
             Assert.IsTrue(Shown.All(s => s.Look.Opener || s.Look.Continues), "each family's rows open with its opener");
             foreach (var sheet in Shown.Where(s => s.Look.Opener))
                 Assert.AreEqual(words.Get(sheet.Family.LabelKey), sheet.Opener.Name.text, "accordion " + sheet.Run.Family + ": the opener names its family, as before");
-
-            yield return UseLayout(CardOptions.LayoutBento);
-            yield return Open("painting");
-            Assert.IsTrue(Shown.All(s => s.Slots.All(slot => Sheet.Nav.Model.Targets.All(t => Stack.SlotOfBlock(t) != slot || slot.resolvedStyle.display == DisplayStyle.None))),
-                "bento: every target is set aside for the tiles -- a sheet left in the stack holds no target (the Sources under the tiles)");
         }
 
         // The width the blocks had before the sheets: the frame's 16 pt inset (the sheet's padding now), the 1 px sheet edge drawn as a part
@@ -393,7 +388,7 @@ namespace TileStories.Tests
         public IEnumerator ABlockOnASheet_KeepsTheFramesWidth_AndTheNavigationFamilyIsABareSheet()
         {
             var copy = ConfigCopy();
-            copy.card_settings.navigation.auto_nav_block = BuiltInBlocks.NavIconGridKind;
+            copy.pois.Find(p => p.id == "lamp").card.blocks.Insert(1, new BlockInstanceData { key = "block_900", kind = BuiltInBlocks.NavContentsKind });
             Session.ApplyCardSettings(copy);
             yield return CardTestInput.Settle(0.3f);
             yield return Open("lamp");
@@ -406,7 +401,7 @@ namespace TileStories.Tests
             foreach (var slot in slots.Where(s => s.resolvedStyle.display != DisplayStyle.None))
                 Assert.AreEqual(width, slot.layout.width, 0.01f, slot.name + ": a block keeps the width the frame's inset gave it");
             var bare = Stack.Sheets.All.Where(s => s.Run.Bare).ToList();
-            Assert.AreEqual(1, bare.Count, "precondition: the icon grid is the one navigation run");
+            Assert.AreEqual(1, bare.Count, "precondition: the contents block is the one navigation run");
             Assert.AreEqual(DisplayStyle.None, bare[0].Opener.Root.resolvedStyle.display, "a nav run has no opener");
             Assert.AreEqual(0f, bare[0].Root.resolvedStyle.backgroundColor.a, "and no glass: the plain ground");
             Assert.AreEqual(0, Scroll.contentContainer.IndexOf(Stack.HeaderView.HeroPart), "the hero still opens the scroll, the glass starts below it (R11 v4)");

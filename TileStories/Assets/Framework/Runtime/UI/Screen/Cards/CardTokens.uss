@@ -1,6 +1,6 @@
 /* The POI Detail Card's OWN tokens (_3.3 R12.2, T3): its sizes -- the sheet's layout, every block's and navigation element's
    measures -- and the plain numbers C# reads from the card's root (--ts-sheet-top-gap, --ts-hero-min-height,
-   --ts-track-peek, --ts-bento-*, --ts-radial-*, --ts-float-gap). They sit on the card's roots (.ts-card) because a custom property
+   --ts-track-peek, --ts-float-gap). They sit on the card's roots (.ts-card) because a custom property
    is only in the customStyle of the element that DECLARES it (_3.3 R8 S1).
    Every colour and every theme scale (type sizes, radii, spacing, line width, motion) is NOT here: it is the app theme's (T1 / T2),
    generated from Resources/TileStories/Themes/Theme.default.asset into Theme/Generated/Theme.default.uss and inherited from the
@@ -64,14 +64,10 @@
     --ts-menu-button-right: 56px;
     --ts-header-end-with-menu: 104px;
     /* The menus over the card (_3.2 step 8). The drawer takes most of a phone's width and never more than a comfortable reading column
-       (so on a tablet it stays a drawer); a kind's line starts under its section's words (row padding + icon + its gap). The grid's tiles
-       are two touch targets tall: big thumbs, a kiosk's size */
+       (so on a tablet it stays a drawer); a kind's line starts under its section's words (row padding + icon + its gap) */
     --ts-drawer-width: 85%;
     --ts-drawer-max-width: 360px;
     --ts-drawer-kind-indent: 46px;
-    --ts-grid-tile-height: 96px;
-    /* The grid's panel is as tall as its tiles, never taller than this share of the screen (it keeps the scrim above it to tap) */
-    --ts-grid-max-height: 88%;
 
     /* Line icons drawn in USS (the close X): their length and stroke */
     --ts-icon-size: 18px;
@@ -236,16 +232,6 @@
     /* related (Visit.uss): a carousel card's width and picture height */
     --ts-related-card: 140px;
     --ts-related-picture: 96px;
-    /* nav_rails and nav_bento (Navigation.uss, _3.2 step 15a): a rail card's narrowest width (CardTrackFit stretches the cards to a whole
-       number across the strip) and a bento tile's picture height */
-    --ts-rail-card: 140px;
-    --ts-bento-picture: 120px;
-    /* the bento LAYOUT (Navigation.uss, CardBentoView, _3.2 step 15b): a tile's lowest height (its icon and words over its count, more
-       than a touch target) and the gap between tiles, a plain number (panel units, no "px") read by CardBentoView on this card root */
-    --ts-bento-tile-min-height: 64px;
-    --ts-bento-gap: 8;
-    /* ...and the narrowest a tile's list of block names is shown in (a plain number): a name cut to a few letters is noise, not a cue */
-    --ts-bento-names-min-width: 140;
     /* The swipe tracks (timeline, related) with Peek Next Card: the slice of the next card shown at rest, read as a plain number (panel
        units, no "px": a CustomStyleProperty<float> does not parse a dimension) by CardTrackFit on this card root, like --ts-sheet-top-gap;
        small enough that two whole cards still fit the phone strip beside it */
@@ -283,24 +269,8 @@
        light line round a dark surface, so it reads over a bright frame (the dark surface) AND a dark one (the light line) */
     --ts-float-gap: 8;
     --ts-float-edge-width: 2px;
-    /* the dial's list (fab_dial): never wider than this */
-    --ts-dial-max-width: 280px;
-    /* the radial's arc (fab_radial, RadialMenuRule; plain numbers read by C#): one item's size -- its round button and its word under it,
-       wide enough for the longest family word (Portuguese "Comunidade"), so two neighbours never overlap -- the smallest arc, and the dead
-       zone a slide must leave before its direction counts (the button's own radius: the finger has left the button) */
-    --ts-radial-item-width: 96;
-    --ts-radial-item-height: 76;
-    --ts-radial-min-radius: 96;
-    --ts-radial-dead-zone: 24;
     /* the pages layout (step 14): how much of the NEXT page shows at the right edge of a page at rest -- the cue that the card turns
        sideways (a carousel's half-cut item); wide enough for its family icon (--ts-icon-size) with a margin either side. CardPagerView
        reads it back from the stack's content inset, so it lives only here */
     --ts-page-peek: 32px;
-    /* the edge scrubber's dots (edge_scrubber, step 10): each dot sits in a --ts-touch-target square (its tap target, tiling the column)
-       and is a small dark disc with a light edge (it floats over the content, light or dark) holding a disc of its family's colour; the
-       family being read is a larger disc with an accent edge AND a larger colour disc -- never colour alone */
-    --ts-edge-disc: 24px;
-    --ts-edge-fill: 12px;
-    --ts-edge-disc-current: 32px;
-    --ts-edge-fill-current: 18px;
 }

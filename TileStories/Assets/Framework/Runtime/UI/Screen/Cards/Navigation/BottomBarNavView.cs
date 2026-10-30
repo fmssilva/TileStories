@@ -3,7 +3,7 @@ using UnityEngine.UIElements;
 
 namespace TileStories
 {
-    // The bottom_bar navigation element (_3.2 section 5.2, canvas B1, L1): a bar in the thumb zone with up to Bar Slots sections, each an
+    // The bar bar_sheet is built on (_3.2 section 5.2, canvas B1, L1): a bar in the thumb zone with up to Bar Slots sections, each an
     // icon tab (its family's icon in its colour, its word; Labels picks icon, word or both) sharing the width equally. When the card has
     // more sections than slots the last slot is More (NavOntologyRule.SectionsInBar, read through the model's BarSections /
     // MoreSections): a tap opens a small list of the sections that did not fit, just above the bar -- inside the bottom area, so it slides
@@ -14,10 +14,9 @@ namespace TileStories
     // and every rebind there, one rule for everything open over the card; the bar keeps only its own toggle (More again).
     // Views only: built from NavTab, NavTint and the model, no shared part of its own.
     //
-    // Step 7b: the dock and bar_sheet are THIN SUBCLASSES of this bar (the way icon_tabs is of TabsNavView) -- the same slots, More and mark,
-    // one thing each changes: the dock only LOOKS different (its stylesheet widens the marked item and hides the others' words), bar_sheet
-    // decides a tap differently. The protected members below are exactly those seams.
-    public class BottomBarNavView : INavElementView
+    // bar_sheet is a THIN SUBCLASS of this bar -- the same slots, More and mark; it decides a tap differently. The protected members below
+    // are exactly that seam.
+    public abstract class BottomBarNavView : INavElementView
     {
         // On the root while the More list is open
         public const string MoreOpenClass = "nav-bar--more-open";
@@ -57,10 +56,6 @@ namespace TileStories
         private CardStrings _strings;
         private string _labels;
 
-        public BottomBarNavView() : this(BuiltInNavElements.BottomBar)
-        {
-        }
-
         protected BottomBarNavView(string elementKey)
         {
             ElementKey = elementKey;
@@ -86,10 +81,6 @@ namespace TileStories
             _tint = new NavTint(Root);
             ShowMore(false);
         }
-
-        // Whether the Labels setting decides what a slot shows (the bar). False: the element's own stylesheet decides which words show
-        // and when (the dock widens the marked item to icon + words), so the view leaves display alone
-        protected virtual bool LabelsFollowTheSetting => true;
 
         public virtual void Bind(CardNavModel model, NavController nav, BlockBindContext context)
         {
@@ -193,20 +184,11 @@ namespace TileStories
             _tint.Icon(tab.Icon, section.ColorToken);
         }
 
-        // Which of a tab's icon and words show. By the Labels setting (the bar); else left to the stylesheet, except a list row, which is
-        // read as a list and always says its words
+        // Which of a tab's icon and words show: by the Labels setting, except a list row, which is read as a list and always says its words
         private void ShowLabels(NavTab tab, bool hasIcon, string labels, bool alwaysWords)
         {
-            if (LabelsFollowTheSetting)
-            {
-                tab.Icon.style.display = NavLabelRule.ShowsIcon(labels, hasIcon) ? DisplayStyle.Flex : DisplayStyle.None;
-                tab.Label.style.display = alwaysWords || NavLabelRule.ShowsWords(labels, hasIcon) ? DisplayStyle.Flex : DisplayStyle.None;
-                return;
-            }
-            if (hasIcon) tab.Icon.style.display = StyleKeyword.Null;
-            else tab.Icon.style.display = DisplayStyle.None;
-            if (alwaysWords) tab.Label.style.display = DisplayStyle.Flex;
-            else tab.Label.style.display = StyleKeyword.Null;
+            tab.Icon.style.display = NavLabelRule.ShowsIcon(labels, hasIcon) ? DisplayStyle.Flex : DisplayStyle.None;
+            tab.Label.style.display = alwaysWords || NavLabelRule.ShowsWords(labels, hasIcon) ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
         // The spy moved: mark the bar's slot of that section -- More for one in the overflow -- and its row in the list

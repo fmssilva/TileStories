@@ -204,7 +204,7 @@ namespace TileStories.Tests
             yield return Open(SheetStopRule.Stop.Full);
             var unset = Sheet.Stops;
             Assert.AreEqual(DisplayStyle.None, Sheet.MenuButton.resolvedStyle.display, "no Menu: no button");
-            foreach (string menu in new[] { BuiltInNavElements.DrawerTree, BuiltInNavElements.GridOverlay })
+            foreach (string menu in new[] { BuiltInNavElements.DrawerTree })
             {
                 yield return Push(c => c.card_settings.navigation.menu = menu);
                 yield return Rested();
@@ -248,7 +248,7 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator TheLampsMenus_RenderAt390_WithTheHeadersButton_InEachLanguage([Values("en", "pt")] string language)
         {
-            yield return UseNavigation(BuiltInNavElements.TextTabs, CardOptions.NavNone, BuiltInNavElements.DrawerTree, language);
+            yield return UseNavigation(BuiltInNavElements.KindChips, CardOptions.NavNone, BuiltInNavElements.DrawerTree, language);
             yield return Open(SheetStopRule.Stop.Full);
             Assert.AreEqual(DisplayStyle.Flex, Sheet.SettingsButton.resolvedStyle.display, "precondition: the Aa button shows");
             yield return CardGalleryChecks.Render("Nav_Lamp_menu_button_" + language + "_390");
@@ -256,14 +256,6 @@ namespace TileStories.Tests
             Assert.AreEqual(BuiltInNavElements.DrawerTree, Overlay.OpenKey, "precondition: the drawer is open");
             yield return CardGalleryChecks.Render("Nav_Lamp_drawer_tree_" + language + "_390");
             yield return PressEscape();
-
-            yield return Push(c => c.card_settings.navigation.menu = BuiltInNavElements.GridOverlay);
-            yield return Tap(Sheet.MenuButton, "the menu button");
-            Assert.AreEqual(BuiltInNavElements.GridOverlay, Overlay.OpenKey, "precondition: the tiles are open");
-            yield return CardGalleryChecks.Render("Nav_Lamp_grid_overlay_" + language + "_390");
-            var grid = (GridOverlayNavView)Sheet.Slots.MenuView;
-            yield return Tap(grid.ByFormat, "By Format");
-            yield return CardGalleryChecks.Render("Nav_Lamp_grid_overlay_format_" + language + "_390");
         }
 
         // ---------------- the drawer ----------------
@@ -273,7 +265,7 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator ARealTapOnTheMenuButton_OpensTheDrawer_ARealTapOnAKindLandsItsBlock_AndTheDrawerCloses()
         {
-            yield return UseNavigation(BuiltInNavElements.TextTabs, CardOptions.NavNone, BuiltInNavElements.DrawerTree);
+            yield return UseNavigation(BuiltInNavElements.KindChips, CardOptions.NavNone, BuiltInNavElements.DrawerTree);
             yield return Open(SheetStopRule.Stop.Full);
             yield return Tap(Sheet.MenuButton, "the menu button");
             Assert.AreEqual(BuiltInNavElements.DrawerTree, Overlay.OpenKey, "the menu button opened the drawer");
@@ -300,7 +292,7 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator ARealTapOnTheScrim_ClosesTheDrawer_AndTheCardKeepsItsScroll()
         {
-            yield return UseNavigation(BuiltInNavElements.TextTabs, CardOptions.NavNone, BuiltInNavElements.DrawerTree);
+            yield return UseNavigation(BuiltInNavElements.KindChips, CardOptions.NavNone, BuiltInNavElements.DrawerTree);
             yield return Open(SheetStopRule.Stop.Full);
             yield return DragStack(-300f);
             yield return Still();
@@ -326,7 +318,7 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator RealEscape_ClosesTheDrawerFirst_AndTheSheetStays_TheNextLowersTheSheet()
         {
-            yield return UseNavigation(BuiltInNavElements.TextTabs, CardOptions.NavNone, BuiltInNavElements.DrawerTree);
+            yield return UseNavigation(BuiltInNavElements.KindChips, CardOptions.NavNone, BuiltInNavElements.DrawerTree);
             yield return Open(SheetStopRule.Stop.Full);
             yield return Tap(Sheet.MenuButton, "the menu button");
             Assert.IsTrue(Overlay.IsOpen, "precondition: the drawer is open");
@@ -340,79 +332,7 @@ namespace TileStories.Tests
 
         // ---------------- More opens the Menu; the big tiles with real taps ----------------
 
-        // The seam 7a left open: with a Menu set, a real tap on a bar's More opens THAT menu (here the big tiles), never its small list. Then
-        // the tiles with real taps: By Format turns them into formats, a section with several kinds opens them in place, a kind lands its block
-        [UnityTest]
-        public IEnumerator WithAMenu_ARealTapOnMore_OpensTheTiles_AndRealTapsOnTheTilesLandABlock()
-        {
-            yield return UseNavigation(CardOptions.NavNone, BuiltInNavElements.BottomBar, BuiltInNavElements.GridOverlay);
-            yield return Open(SheetStopRule.Stop.Full);
-            var bar = (BottomBarNavView)Sheet.Slots.BottomView;
-            Assert.IsTrue(bar.HasMore, "precondition: eight families overflow five slots");
-            yield return Tap(bar.More.Button, "More");
-            Assert.AreEqual(BuiltInNavElements.GridOverlay, Overlay.OpenKey, "More opened the Menu");
-            Assert.IsFalse(bar.MoreOpen, "not the small list");
-            var grid = (GridOverlayNavView)Sheet.Slots.MenuView;
-            Assert.AreEqual(Model.Sections.Count, grid.Tiles.Count, "a tile per family");
-
-            yield return Tap(grid.ByFormat, "By Format");
-            Assert.AreEqual(CardOptions.GroupByFormat, grid.Axis, "the switch went to Format");
-            CollectionAssert.AreEqual(Model.By(CardOptions.GroupByFormat).Sections.Select(s => Words().Get(s.LabelKey)), grid.Tiles.Select(t => t.Label.text),
-                "the formats' tiles");
-            yield return Tap(grid.ByPurpose, "By Purpose");
-
-            int several = Model.Sections.ToList().FindIndex(s => s.Kinds.Count >= 2 && s.Kinds.Any(k => k.Targets[0] != s.Targets[0]));
-            Assert.GreaterOrEqual(several, 0, "precondition: a family with several kinds");
-            yield return Tap(grid.Tiles[several].Button, Model.Sections[several].Key + "'s tile", grid.Scroll);
-            Assert.AreEqual(several, grid.OpenSection, "its kinds opened in place");
-            Assert.IsTrue(Overlay.IsOpen, "and the tiles stayed open");
-            var kinds = Model.Sections[several].Kinds;
-            int kind = kinds.ToList().FindIndex(k => k.Targets[0] != Model.Sections[several].Targets[0]);
-            yield return Tap(grid.Tiles[kind].Button, kinds[kind].Key + "'s tile", grid.Scroll);
-            Assert.IsFalse(Overlay.IsOpen, "a kind's tile moved the card and closed the tiles");
-            yield return Landed();
-            AssertLanded(kinds[kind].Targets[0], kinds[kind].Key);
-            Assert.AreEqual(BuiltInNavElements.GridOverlay, NavJumps.Last().Variant, "reported as the tiles'");
-        }
-
         // ---------------- the two lists Back could not reach (PART 1) ----------------
-
-        // The More list (no Menu): a real Escape closes it and NOT the sheet; a real drag on the card closes it; a tap on a tab of the Top Bar
-        // (a jump from another element) closes it. Before step 8 Back lowered the sheet under the open list and a scroll left it open
-        [UnityTest]
-        public IEnumerator TheMoreList_ClosesOnARealEscape_NotTheSheet_OnARealDrag_AndOnAnotherElementsJump()
-        {
-            yield return UseNavigation(BuiltInNavElements.TextTabs, BuiltInNavElements.BottomBar, CardOptions.NavNone);
-            yield return Open(SheetStopRule.Stop.Full);
-            var bar = (BottomBarNavView)Sheet.Slots.BottomView;
-            // - the hero is the screen at rest: the chrome comes once it is scrolled away (_3.3 S4a)
-            yield return CardTestInput.PastTheHero(Sheet);
-            Assert.IsTrue(Sheet.Chrome.BottomNavShown, "precondition: the bar shows at Full");
-
-            yield return Tap(bar.More.Button, "More");
-            Assert.IsTrue(bar.MoreOpen, "precondition: More's list is open");
-            yield return PressEscape();
-            Assert.IsFalse(bar.MoreOpen, "Escape closed the list");
-            Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop, "and not the sheet");
-
-            yield return Tap(bar.More.Button, "More");
-            Assert.IsTrue(bar.MoreOpen, "precondition: open again");
-            float before = Scroll.scrollOffset.y;
-            yield return DragStack(-120f);
-            Assert.Greater(Scroll.scrollOffset.y, before + 50f, "precondition: the drag scrolled the card");
-            Assert.IsFalse(bar.MoreOpen, "a scroll closed the list");
-            Assert.IsFalse(Overlay.IsOpen);
-
-            // - back near the top so the bar is on screen again (Hide While Scrolling slid it away), then the list and a tab
-            yield return DragStack(400f);
-            Assert.IsTrue(Sheet.Chrome.BottomShown, "precondition: the bar is back");
-            yield return Tap(bar.More.Button, "More");
-            Assert.IsTrue(bar.MoreOpen, "precondition: open again");
-            var tabs = (TextTabsNavView)Sheet.Slots.TopView;
-            yield return Tap(tabs.Tabs[1].Button, "the second tab");
-            Assert.IsFalse(bar.MoreOpen, "another element's jump closed the list");
-            yield return Landed();
-        }
 
         // bar_sheet's kinds list: a real Escape closes it and the sheet stays; the next lowers the sheet
         [UnityTest]
@@ -440,7 +360,7 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator ASectionReadInMoresList_ShowsItsWordInTheSlot_AndARealTapStillOpensTheList([Values("en", "pt")] string language)
         {
-            yield return UseNavigation(CardOptions.NavNone, BuiltInNavElements.BottomBar, CardOptions.NavNone, language);
+            yield return UseNavigation(CardOptions.NavNone, BuiltInNavElements.BarSheet, CardOptions.NavNone, language);
             yield return Open(SheetStopRule.Stop.Full);
             var bar = (BottomBarNavView)Sheet.Slots.BottomView;
             var words = Words(language);

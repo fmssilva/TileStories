@@ -132,19 +132,6 @@ namespace TileStories
 
         public bool HasVariant(string variant) => Variants != null && variant != null && ContainsString(Variants, variant);
 
-        // Whether the kind has a Required field: a block of it holds nothing to show until an author fills that field in (BlockStackBuilder skips
-        // it while empty), so the card cannot put one in by itself -- what Detail Card > Navigation > Auto Nav Block never offers
-        public bool NeedsAuthoredContent
-        {
-            get
-            {
-                if (Fields == null) return false;
-                for (int i = 0; i < Fields.Count; i++)
-                    if (Fields[i].Required) return true;
-                return false;
-            }
-        }
-
         // The field definition with this key, or null
         public BlockFieldDefinition Field(string key)
         {

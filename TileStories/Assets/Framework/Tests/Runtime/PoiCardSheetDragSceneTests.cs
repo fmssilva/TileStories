@@ -165,39 +165,4 @@ namespace TileStories.Tests
             Assert.IsFalse(Sheet.IsOpen, "and the card closed");
         }
     }
-
-    // PoiCardSheetDragSceneTests's tests whose subject is an old navigation element: they wait for its rebuild on the Navigation Bar's pattern
-    [Ignore(TestSkips.OldNavigationElements)]
-    public class PoiCardSheetDragSceneOldNavigationTests : PoiCardSheetDragSceneFixture
-    {
-        [UnityTest]
-        public IEnumerator TheTopStrip_TakesNothingAtTouchDown_AndOnceTheMoveIsVertical_TheSheetFollowsIt()
-        {
-            var copy = ConfigCopy();
-            copy.card_settings.navigation.top = BuiltInNavElements.TextTabs;
-            Session.ApplyCardSettings(copy);
-            yield return CardTestInput.Settle(0.3f);
-            yield return Open(SheetStopRule.Stop.Full);
-            var tabs = Sheet.Slots.TopView as TextTabsNavView;
-            Assert.IsNotNull(tabs, "precondition: Text Tabs in the top strip");
-            // - the hero is the screen at rest: the chrome comes once it is scrolled away (_3.3 S4a)
-            yield return CardTestInput.PastTheHero(Sheet);
-            Assert.IsTrue(Sheet.Chrome.TopShown, "precondition: the strip shows at Full");
-            var panel = Sheet.Root.panel;
-            Vector2 at = tabs.Tabs[0].Button.worldBound.center;
-
-            CardTestInput.TouchDown(panel, at);
-            yield return null;
-            Assert.IsFalse(Sheet.Drag.IsDragging, "touch-down on a tab: nothing is the sheet's yet (it may still be a tap)");
-            Assert.AreEqual(Sheet.Stops.Full, Sheet.TargetHeight, Exact);
-            yield return MoveTo(panel, at + new Vector2(0f, 30f), SlowStep);
-            yield return MoveTo(panel, at + new Vector2(0f, 60f), SlowStep);
-            Assert.IsTrue(Sheet.Drag.IsDragging, "a clearly vertical move is the sheet's");
-            Assert.AreEqual(Sheet.Stops.Full - 60f, Sheet.TargetHeight, Exact, "the height follows the finger from where it went down");
-            CardTestInput.TouchUp(panel, at + new Vector2(0f, 60f));
-            yield return CardTestInput.Settle();
-            Assert.IsFalse(Sheet.Drag.IsDragging);
-            Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop, "60 slow units down from Full stay at Full (Half is " + (Sheet.Stops.Full - Sheet.Stops.Half) + " away)");
-        }
-    }
 }

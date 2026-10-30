@@ -129,8 +129,6 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(CardOptions.NavNone, nav.top, "with the bar on, the old Top Bar defaults to none");
             Assert.AreEqual(CardOptions.NavNone, nav.bottom);
             Assert.AreEqual(CardOptions.NavNone, nav.menu);
-            Assert.AreEqual(CardOptions.NavNone, nav.floating);
-            Assert.AreEqual(CardOptions.NavNone, nav.edge);
             Assert.IsTrue(NavBarRule.Shows(nav, true, 2));
             Assert.IsFalse(NavBarRule.Shows(nav, true, 1), "one group is no choice");
             Assert.IsFalse(NavBarRule.Shows(nav, false, 6), "a short card stays clean (Show Navigation From)");
@@ -244,8 +242,6 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(CardOptions.NavNone, nav.top);
             Assert.AreEqual(CardOptions.NavNone, nav.bottom);
             Assert.AreEqual(CardOptions.NavNone, nav.menu);
-            Assert.AreEqual(CardOptions.NavNone, nav.floating);
-            Assert.AreEqual(CardOptions.NavNone, nav.edge);
         }
 
         [Test]

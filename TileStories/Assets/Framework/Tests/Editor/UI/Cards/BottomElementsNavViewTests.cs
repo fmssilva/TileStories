@@ -71,54 +71,6 @@ namespace TileStories.Editor.Tests
 
         // ---------------- dock ----------------
 
-        // The dock is the bar's slots and More, wearing the dock class; the Labels setting does not touch what shows (the stylesheet widens
-        // the marked item and hides the other words): a slot's icon and word are left to it, a More list row always says its word
-        [TestCase(null)]
-        [TestCase("icon")]
-        [TestCase("text")]
-        public void TheDock_IsTheBarsSlotsAndMore_WithTheDockClass_AndLabelsDoesNotDecideItsWords(string labels)
-        {
-            var wall = With(BuiltInNavElements.Dock);
-            if (labels != null) wall.card_settings.navigation.labels = labels;
-            var sheet = ShowLamp(wall);
-            var model = sheet.Nav.Model;
-            Assert.AreEqual(BuiltInNavElements.Dock, sheet.Slots.BottomKey, "the wall's Bottom Bar is in the bottom slot");
-            var dock = (DockNavView)sheet.Slots.BottomView;
-            Assert.IsInstanceOf<BottomBarNavView>(dock, "a bar: slots, More and the mark are its own");
-            Assert.IsTrue(dock.Root.ClassListContains(DockNavView.DockClass), "the stylesheet's hook for the pill");
-            Assert.AreEqual("nav-dock", dock.Root.name);
-            Assert.AreEqual(4, dock.Items.Count, "the default 5 slots: four sections and More");
-            Assert.IsTrue(dock.HasMore);
-            CollectionAssert.AreEqual(model.Sections.Take(4).Select(s => Words("en").Get(s.LabelKey)), dock.Items.Select(t => t.Label.text),
-                "the first sections by their words (an icon-only slot still names itself: its tooltip)");
-            CollectionAssert.AreEqual(dock.Items.Select(t => t.Label.text), dock.Items.Select(t => t.Button.tooltip), "every slot's tooltip is its word");
-            foreach (var slot in dock.Items.Append(dock.More))
-            {
-                Assert.AreEqual(StyleKeyword.Null, slot.Label.style.display.keyword, slot.Label.text + ": the stylesheet decides the word (Labels = " + (labels ?? "default") + ")");
-                Assert.AreEqual(StyleKeyword.Null, slot.Icon.style.display.keyword, slot.Label.text + ": and the icon");
-            }
-            Assert.AreEqual(4, dock.MoreRows.Count, "More lists the four sections that did not fit");
-            foreach (var row in dock.MoreRows)
-                Assert.AreEqual(DisplayStyle.Flex, row.Label.style.display.value, row.Label.text + ": a list row always says its word");
-            Assert.IsTrue(dock.Items[0].Button.ClassListContains(NavTab.CurrentClass), "the card opens on its first section: that slot is the marked one");
-            Assert.AreEqual(1, dock.Items.Count(t => t.Button.ClassListContains(NavTab.CurrentClass)), "and only it");
-        }
-
-        // The bar is unchanged by the refactor that opened it up: its own words are still driven by Labels
-        [Test]
-        public void TheBottomBar_StillObeysLabels_AfterTheDockAndBarSheetWereBuiltOnIt()
-        {
-            var wall = With(BuiltInNavElements.BottomBar);
-            wall.card_settings.navigation.labels = "icon";
-            var bar = (BottomBarNavView)ShowLamp(wall).Slots.BottomView;
-            Assert.AreSame(typeof(BottomBarNavView), bar.GetType(), "precondition: the plain bar, not a subclass");
-            foreach (var tab in bar.Items)
-            {
-                Assert.AreEqual(DisplayStyle.None, tab.Label.style.display.value, tab.Index + ": Labels = icon hides the word");
-                Assert.AreEqual(DisplayStyle.Flex, tab.Icon.style.display.value, tab.Index + ": and keeps the icon");
-            }
-        }
-
         // ---------------- bar_sheet ----------------
 
         private static BarSheetNavView BarSheet(PoiCardSheetView sheet) => (BarSheetNavView)sheet.Slots.BottomView;

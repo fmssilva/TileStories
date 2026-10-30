@@ -62,7 +62,7 @@ namespace TileStories.Editor.Tests
         public void UpNextShowsItsPlace_EverywhereButUnderPages_WhereThePagerIsTheCardsOneCounter()
         {
             Assert.IsFalse(NextUpRule.ShowsPosition(CardOptions.LayoutPages), "pages: the pager counts");
-            foreach (string layout in new[] { CardOptions.LayoutScroll, CardOptions.LayoutAccordion, CardOptions.LayoutTabs, CardOptions.LayoutBento })
+            foreach (string layout in new[] { CardOptions.LayoutScroll, CardOptions.LayoutAccordion, CardOptions.LayoutTabs })
                 Assert.IsTrue(NextUpRule.ShowsPosition(layout), layout + ": no other counter on that screen");
         }
 

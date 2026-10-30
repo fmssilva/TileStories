@@ -628,10 +628,10 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator AJumpFromABottomBarSlot_TurnsToItsPage_AndLandsItsFirstBlock()
         {
-            yield return UsePages(nav => nav.bottom = BuiltInNavElements.BottomBar);
+            yield return UsePages(nav => nav.bottom = BuiltInNavElements.BarSheet);
             yield return OpenFull(Lamp);
             var bar = Sheet.Slots.BottomView as BottomBarNavView;
-            Assert.IsNotNull(bar, "precondition: the Bottom Bar is drawn");
+            Assert.IsNotNull(bar, "precondition: the Bar With Kinds is drawn");
             Assert.AreEqual(BuiltInNavElements.FamilyPager, Sheet.Slots.TopKey, "the pager stays at the top beside a bottom bar");
             // - _3.3 S4a: the bottom bar is chrome and waits for the hero -- read just past it before tapping a slot
             yield return CardTestInput.PastTheHero(Sheet);
@@ -645,7 +645,7 @@ namespace TileStories.Tests
                 Assert.AreEqual(i, FamilyPager.CurrentIndex, "and the pager names it");
                 AssertShowsOnly(i, "after bar slot " + i);
                 AssertLanded(Nav.Model.Sections[i].Targets[0], "slot " + i + "'s first block");
-                Assert.AreEqual(BuiltInNavElements.BottomBar, NavJumps.Last().Variant);
+                Assert.AreEqual(BuiltInNavElements.BarSheet, NavJumps.Last().Variant);
             }
         }
 

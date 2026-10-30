@@ -18,8 +18,7 @@ namespace TileStories
     // the POI's name and summary -- so a POI with no card still gets a card, with zero authoring. What follows is
     // ordered by the wall's Block Order (_3.2 section 2.3, Detail Card > Navigation), applied after the skip rules:
     // authored, end_families_last (the default: the At The End families, Sources among them, close the card) or
-    // by_family (each family one contiguous run, by its effective order). Last, the wall's Auto Nav Block (_3.2 section 3) may add ONE
-    // nav block right after the header (InsertAutoNavBlock) -- a step of its own, after the order, so it can never move another block.
+    // by_family (each family one contiguous run, by its effective order).
     public static class BlockStackBuilder
     {
         public enum SkipReason { UnknownKind, KindDisabled, NotForThisPoint, MissingRequired, NoCompleteRow, InvalidMedia, ExtraHeader }
@@ -65,12 +64,6 @@ namespace TileStories
         // The field keys of the header made from the POI's name and summary
         public const string HeaderTitleField = "title";
         public const string HeaderSubtitleField = "subtitle";
-
-        // The key of a block Auto Nav Block inserted (it is in no config): "auto:" + its kind. An authored key is generated as block_N and
-        // never holds a ':', so the two can never collide -- and it is the same on every open, so what keys off a block (a BlockRef, the
-        // spy, CardLocalState) sees one stable block
-        public const string AutoNavBlockKeyPrefix = "auto:";
-        public static string AutoNavBlockKey(string kind) => AutoNavBlockKeyPrefix + kind;
 
         // `wallPois`: the wall's POIs, for kinds that point at another POI (compare_points); null = no other POI resolves
         public static Result Build(POIData poi, CardSettings settings, BlockRegistry registry, IReadOnlyList<POIData> wallPois = null)
@@ -121,35 +114,7 @@ namespace TileStories
             // - the header is the card's identity: it stays first whatever Block Order says (_3.2 2.3)
             if (header.HasValue) result.Entries.Add(header.Value);
             result.Entries.AddRange(InBlockOrder(body, settings, registry));
-            InsertAutoNavBlock(result.Entries, settings, registry);
             return result;
-        }
-
-        // Auto Nav Block (_3.2 section 3, step 11a): the wall's nav block, inserted right after the header -- in second place whatever Block
-        // Order said -- when ALL of these hold, else the stack is left exactly as it was:
-        //   - the wall names a registered kind of the navigation family (none / blank / unknown / another family's kind = nothing)
-        //   - that kind is on in the Block Library
-        //   - the card shows no nav block of its own (an authored one, in the stack, wins: never two)
-        //   - the card has at least Show Navigation From targets, counted as a first open sees them (nothing revealed yet), so a reveal
-        //     never adds or removes it (NavOntologyRule: the same targets and threshold every navigation element reads)
-        private static void InsertAutoNavBlock(List<Entry> entries, CardSettings settings, BlockRegistry registry)
-        {
-            string kind = settings?.navigation?.auto_nav_block;
-            if (string.IsNullOrEmpty(kind) || kind == CardOptions.NavNone || entries.Count == 0) return;
-            if (registry == null || !registry.TryGet(kind, out var definition) || definition.Family != BuiltInFamilies.Navigation) return;
-            // - a kind that needs authored content (nav_bento's tiles) would be an empty block here: the card never puts it in by itself
-            if (definition.NeedsAuthoredContent) return;
-            if (!BlockLibraryRule.IsEnabled(settings, definition.Key)) return;
-            int targets = 0;
-            foreach (var entry in entries)
-            {
-                if (entry.Definition.Family == BuiltInFamilies.Navigation) return;
-                if (NavOntologyRule.IsTarget(entry, registry, null)) targets++;
-            }
-            if (!NavOntologyRule.ShowsNavigation(targets, settings.navigation)) return;
-            var instance = new BlockInstanceData { key = AutoNavBlockKey(definition.Key), kind = definition.Key };
-            // - after the header, which the builder always puts first
-            entries.Insert(1, new Entry(instance, definition, BlockLibraryRule.DefaultVariant(settings, definition), synthesized: true));
         }
 
         // The body in the wall's Block Order (_3.2 section 2.3), applied AFTER the skip rules so a skipped block

@@ -42,8 +42,7 @@ namespace TileStories.Tests
 
     // The measuring instrument of _3.3 P4.4c1 (the section sheets), run only while TestEvidence/Sections/MEASURING names a phase
     // (LookMeasure): on The Lamp and The Painting at Full, every number the card's navigation reads from a block's position -- the stops,
-    // every target's jump landing, the spy's section and block every 120 px of scroll, the rails' fit (Auto Nav Block = Rails) and the
-    // bento tiles' rects -- so a sheet's every move is stated. Renders: Half and Full, at the top and past the hero.
+    // every target's jump landing, the spy's section and block every 120 px of scroll -- so a sheet's every move is stated. Renders: Half and Full, at the top and past the hero.
     public class SectionSheetMeasureSceneTests : SectionSheetMeasureSceneFixture
     {
         [UnityTest]
@@ -88,42 +87,6 @@ namespace TileStories.Tests
     [Ignore(TestSkips.OldNavigationElements)]
     public class SectionSheetMeasureSceneOldNavigationTests : SectionSheetMeasureSceneFixture
     {
-        [UnityTest]
-        public IEnumerator TheRailsFit([ValueSource(nameof(Pois))] string poi)
-        {
-            string phase = LookMeasure.RequirePhase(LookMeasure.Sections);
-            var copy = ConfigCopy();
-            copy.card_settings.navigation.auto_nav_block = BuiltInBlocks.NavRailsKind;
-            Session.ApplyCardSettings(copy);
-            yield return CardTestInput.Settle(0.3f);
-            yield return Open(poi, SheetStopRule.Stop.Full);
-            var view = Sheet.Stack.BoundViews.OfType<NavRailsBlockView>().SingleOrDefault();
-            Assert.IsNotNull(view, "precondition: Auto Nav Block = Rails puts the rails on " + poi);
-            foreach (var rail in view.Rails)
-            {
-                var cards = rail.Root.Query<Button>().ToList().Where(b => b.resolvedStyle.display == DisplayStyle.Flex).ToList();
-                var strip = rail.Strip.Viewport.worldBound;
-                int whole = cards.Count(c => c.worldBound.xMin >= strip.xMin - 0.5f && c.worldBound.xMax <= strip.xMax + 0.5f);
-                LookMeasure.Note(LookMeasure.Sections, phase, $"{poi} rail {rail.SectionKey}: strip x {strip.xMin:0.0} w {strip.width:0.0}; " +
-                    $"card w {(cards.Count > 0 ? cards[0].worldBound.width : 0f):0.0}; cards {cards.Count}, whole in view {whole}");
-            }
-        }
 
-        [UnityTest]
-        public IEnumerator TheBentoTiles([ValueSource(nameof(Pois))] string poi)
-        {
-            string phase = LookMeasure.RequirePhase(LookMeasure.Sections);
-            var copy = ConfigCopy();
-            copy.card_settings.navigation.layout = CardOptions.LayoutBento;
-            Session.ApplyCardSettings(copy);
-            yield return CardTestInput.Settle(0.3f);
-            yield return Open(poi, SheetStopRule.Stop.Full);
-            Assert.IsTrue(Sheet.Bento.IsOn, "precondition: the bento layout is on");
-            foreach (var tile in Sheet.Bento.Tiles)
-            {
-                var box = tile.Button.layout;
-                LookMeasure.Note(LookMeasure.Sections, phase, $"{poi} bento tile {tile.Index}: {box.x:0.0}, {box.y:0.0}, {box.width:0.0} x {box.height:0.0}");
-            }
-        }
     }
 }

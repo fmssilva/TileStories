@@ -4,8 +4,7 @@ using UnityEngine.UIElements;
 namespace TileStories
 {
     // The card's FLOATING slot (_3.2 sections 4.2 and 5.4, step 9): a row in the card layer resting just above the sheet's top-right edge at
-    // every stop -- the placed-model chip on its left, the wall's Floating Button element (fab_dial, fab_radial) on its right. It costs no
-    // reading space, so the chrome floor never applies to it.
+    // every stop, holding the placed-model chip. It costs no reading space, so the chrome floor never applies to it.
     //   - a LAYER, not a part of the sheet: the sheet clips what it holds (its rounded top, its slid-away bottom area), so a row above its
     //     edge could not live inside it. It sits right BEFORE the card's menu layer (CardMenuOverlay) in the card layer: over the sheet,
     //     under an open menu and the full view, by child order alone
@@ -13,18 +12,10 @@ namespace TileStories
     //     FloatingSlotRule.Bottom says: a gap above the sheet, never off the screen (in a camera strip's gap at Full), never over the chrome
     //     row (at Full to the top: under it)
     //   - it shows over an open card only, and only while it holds something (FloatingSlotRule.Shown)
-    //   - while its element holds something open (the dial's column, the radial's arc) a scrim of its own, right UNDER it, dims the card and
-    //     the camera view, so the open items read against it and not over the card's own words; a tap on the scrim closes them. (The menu
-    //     layer's scrim cannot: it lies over the slot.) A floating element opens under its own element key (FloatingSlotRule.Dims)
-    // The sheet owns one; NavSlots binds the element into Elements, the sheet binds the chip with the card's context.
+    // The sheet owns one and binds the chip with the card's context.
     public sealed class FloatingSlot
     {
         public VisualElement Root { get; }
-        // The dim behind an open floating element: the card layer's child right under Root
-        public VisualElement Scrim { get; }
-        public bool IsDimmed => Scrim.style.display == DisplayStyle.Flex;
-        // Where the Floating Button element is drawn (NavSlots binds it here)
-        public VisualElement Elements { get; }
         public PlacedModelChipView Chip { get; }
 
         public bool IsShown => Root.style.display == DisplayStyle.Flex;
@@ -37,7 +28,7 @@ namespace TileStories
         public FloatingSlot(PoiCardSheetView sheet)
         {
             _sheet = sheet;
-            // - never takes a finger itself: a tap beside the chip and the button reaches the camera view under it
+            // - never takes a finger itself: a tap beside the chip reaches the camera view under it
             Root = new VisualElement { name = "poi-card-floating", pickingMode = PickingMode.Ignore };
             // - the card's own tokens live on these classes (CardTokens.uss: its gap is read here), the theme's arrive from the app root;
             //   the slot is the sheet's sibling, like the menu layer
@@ -47,17 +38,7 @@ namespace TileStories
             Chip = new PlacedModelChipView();
             Chip.Redrawn += Refresh;
             Root.Add(Chip.Root);
-            Elements = new VisualElement { name = "poi-card-floating-element", pickingMode = PickingMode.Ignore };
-            Elements.AddToClassList("poi-card-floating__element");
-            Elements.style.display = DisplayStyle.None;
-            Root.Add(Elements);
             Root.style.display = DisplayStyle.None;
-            Scrim = new VisualElement { name = "poi-card-floating-scrim" };
-            Scrim.AddToClassList("ts-card");
-            Scrim.AddToClassList("ts-theme-default");
-            Scrim.AddToClassList("card-menu__scrim");
-            Scrim.AddManipulator(new Clickable(() => _sheet.Overlay?.Close()));
-            Scrim.style.display = DisplayStyle.None;
 
             // - every geometry change of the sheet (its animated height, a drag, the layer resized) or of the slot itself (the chip came) re-places it
             sheet.Root.RegisterCallback<GeometryChangedEvent>(_ => Place());
@@ -66,17 +47,8 @@ namespace TileStories
             Root.RegisterCallback<CustomStyleResolvedEvent>(OnCustomStyle);
         }
 
-        // Put the slot (and its scrim right under it) in the card layer right before the menu layer: over the sheet, under an open menu and the
-        // full view; the scrim follows what the overlay owner holds open
-        public void InsertUnder(CardMenuOverlay overlay)
-        {
-            _sheet.Layer.Insert(_sheet.Layer.IndexOf(overlay.Root), Scrim);
-            _sheet.Layer.Insert(_sheet.Layer.IndexOf(overlay.Root), Root);
-            overlay.Changed += () => Dim(overlay);
-        }
-
-        private void Dim(CardMenuOverlay overlay) =>
-            Scrim.style.display = FloatingSlotRule.Dims(overlay.OpenKey, overlay.IsModal, _sheet.Slots?.FloatingKey) ? DisplayStyle.Flex : DisplayStyle.None;
+        // Put the slot in the card layer right before the menu layer: over the sheet, under an open menu and the full view
+        public void InsertUnder(CardMenuOverlay overlay) => _sheet.Layer.Insert(_sheet.Layer.IndexOf(overlay.Root), Root);
 
         // The open card's context: the chip draws the AR placement owner for this card's point, in its words
         public void Bind(BlockBindContext context)
@@ -92,11 +64,10 @@ namespace TileStories
             Refresh();
         }
 
-        // Show the slot over an open card while it holds the chip or an element, and put it where the rule says
+        // Show the slot over an open card while it holds the chip, and put it where the rule says
         public void Refresh()
         {
-            bool holds = Chip.IsShown || _sheet.Slots?.FloatingView != null;
-            Root.style.display = FloatingSlotRule.Shown(_sheet.IsOpen, holds) ? DisplayStyle.Flex : DisplayStyle.None;
+            Root.style.display = FloatingSlotRule.Shown(_sheet.IsOpen, Chip.IsShown) ? DisplayStyle.Flex : DisplayStyle.None;
             Place();
         }
 

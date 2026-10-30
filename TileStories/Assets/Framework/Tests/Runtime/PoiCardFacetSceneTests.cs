@@ -201,7 +201,7 @@ namespace TileStories.Tests
             yield return UseMenu(CardOptions.NavNone);
             yield return OpenTheLamp(SheetStopRule.Stop.Full);
             var own = Sheet.Stops;
-            foreach (string menu in new[] { BuiltInNavElements.DrawerTree, BuiltInNavElements.GridOverlay })
+            foreach (string menu in new[] { BuiltInNavElements.DrawerTree })
             {
                 yield return UseMenu(menu);
                 foreach (var stop in new[] { SheetStopRule.Stop.Full, SheetStopRule.Stop.Half, SheetStopRule.Stop.Peek })
@@ -342,71 +342,18 @@ namespace TileStories.Tests
 
         // ---------------- the big tiles ----------------
 
-        [UnityTest]
-        public IEnumerator TheTiles_RealTapsOnChips_NarrowThemOnBothAxes_AndATapLandsTheFirstBlockThatPasses()
-        {
-            yield return UseMenu(BuiltInNavElements.GridOverlay);
-            yield return OpenTheLamp(SheetStopRule.Stop.Full);
-            yield return OpenTheMenu();
-            var grid = (GridOverlayNavView)Sheet.Slots.MenuView;
-            var bar = grid.Facets;
-            var noCamera = Keep(e => !NeedsAny(e, CardOptions.NeedCamera));
-            var camera = Model.Targets.Except(noCamera).ToList();
-            Assert.GreaterOrEqual(camera.Count, 2, "precondition: The Lamp's place in AR and show on wall blocks");
-            yield return TapChip(bar, c => c.Dimension == NavFacetRule.Dimension.Without && c.Value == CardOptions.NeedCamera, "No camera");
-
-            // - Purpose: a tile per family that keeps a block, each counting only what is kept
-            var byFamily = Enumerable.Range(0, Model.Sections.Count).Where(s => Model.Sections[s].Targets.Any(noCamera.Contains)).ToList();
-            Assert.AreEqual(byFamily.Count, grid.Tiles.Count, "a tile per family that keeps a block");
-            for (int i = 0; i < byFamily.Count; i++)
-                Assert.AreEqual(Model.Sections[byFamily[i]].Targets.Count(noCamera.Contains).ToString(), grid.Tiles[i].Count.text, "tile " + i + " counts only the kept blocks");
-            Assert.AreEqual(noCamera.Count, grid.Tiles.Sum(t => int.Parse(t.Count.text)), "the counts add up to the kept blocks");
-
-            // - Format: the same chips filter the other axis
-            yield return Tap(grid.ByFormat, "By Format");
-            var formats = Model.By(CardOptions.GroupByFormat);
-            var byFormat = Enumerable.Range(0, formats.Sections.Count).Where(s => formats.Sections[s].Targets.Any(noCamera.Contains)).ToList();
-            Assert.AreEqual(byFormat.Count, grid.Tiles.Count, "the Format side is narrowed by the same chip");
-            Assert.AreEqual(noCamera.Count, grid.Tiles.Sum(t => int.Parse(t.Count.text)), "and counts the same blocks");
-            yield return Tap(grid.ByPurpose, "By Purpose");
-
-            // - the In AR family is all camera: no tile for it with No camera on, and it is back with Clear
-            Assert.IsFalse(Enumerable.Range(0, grid.Tiles.Count).Any(i => Model.Sections[byFamily[i]].Key == BuiltInFamilies.Ar), "In AR left the tiles");
-            yield return TapClear(bar);
-            Assert.AreEqual(Model.Sections.Count, grid.Tiles.Count, "Clear: a tile per family again");
-
-            // - a real tap on a tile whose first block does NOT pass lands the first one that does (a section with one kind left goes straight)
-            var fast = Keep(e => { int m = MinutesOf(e); return m >= 1 && m <= NavFacetRule.MediumMinutes; });
-            yield return TapChip(bar, c => c.Dimension == NavFacetRule.Dimension.Time && c.Minutes == 5, "Up to 5 min");
-            var kept = Enumerable.Range(0, Model.Sections.Count).Where(s => Model.Sections[s].Targets.Any(fast.Contains)).ToList();
-            Assert.AreEqual(kept.Count, grid.Tiles.Count, "a tile per family that keeps a timed block");
-            int tile = kept.FindIndex(s => !NavOntologyRule.OffersAKindChoice(Model.Sections[s].Kinds.Count(k => k.Targets.Any(fast.Contains)))
-                && !fast.Contains(Model.Sections[s].Targets[0]));
-            Assert.GreaterOrEqual(tile, 0, "precondition: a family with one kept kind whose first block is not timed (Media: its videos)");
-            var section = Model.Sections[kept[tile]];
-            string expected = section.Targets.First(fast.Contains);
-            int before = NavJumps.Count;
-            yield return Tap(grid.Tiles[tile].Button, "tile " + tile, grid.Scroll);
-            Assert.IsFalse(Overlay.IsOpen, "the pick closed the tiles");
-            yield return Landed();
-            AssertLanded(expected, section.Key);
-            Assert.AreEqual(before + 1, NavJumps.Count, "one nav_jump");
-            Assert.AreEqual(expected, NavJumps.Last().BlockKey, "the first block that passes, not " + section.Targets[0]);
-            Assert.AreEqual(BuiltInNavElements.GridOverlay, NavJumps.Last().Variant);
-        }
-
         // ---------------- renders ----------------
 
         [UnityTest]
         public IEnumerator TheMenusWithFacets_RenderAt390_UnfilteredAndFiltered_InEnglishAndPortuguese([Values("en", "pt")] string language)
         {
-            foreach (string menu in new[] { BuiltInNavElements.DrawerTree, BuiltInNavElements.GridOverlay })
+            foreach (string menu in new[] { BuiltInNavElements.DrawerTree })
             {
                 yield return UseMenu(menu, language);
                 yield return OpenTheLamp(SheetStopRule.Stop.Full);
                 yield return OpenTheMenu();
                 var view = Sheet.Slots.MenuView;
-                var bar = view is DrawerTreeNavView drawer ? drawer.Facets : ((GridOverlayNavView)view).Facets;
+                var bar = ((DrawerTreeNavView)view).Facets;
                 yield return CardGalleryChecks.Render("Nav_Lamp_" + menu + "_facets_rest_" + language + "_390");
                 yield return TapChip(bar, c => c.Dimension == NavFacetRule.Dimension.Time && c.Minutes == 5, "Up to 5 min");
                 yield return TapChip(bar, c => c.Dimension == NavFacetRule.Dimension.Without && c.Value == CardOptions.NeedHeadphones, "No headphones");

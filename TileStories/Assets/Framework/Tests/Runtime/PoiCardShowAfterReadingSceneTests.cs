@@ -40,6 +40,8 @@ namespace TileStories.Tests
         {
             var copy = ConfigCopy();
             copy.card_settings.navigation.layout = layout;
+            // - the tabs and pages layouts' own switch, the Family Pager, draws only while the Navigation Bar is off
+            copy.card_settings.navigation.bar.enabled = false;
             Session.ApplyCardSettings(copy);
             yield return CardTestInput.Settle(0.3f);
         }
@@ -77,27 +79,6 @@ namespace TileStories.Tests
                 yield return CardTestInput.Wheel(Scroll, 12f);
             yield return CardTestInput.Settle(0.3f);
             Assert.GreaterOrEqual(Scroll.scrollOffset.y, Range - ContentSeenRule.EndTolerance - OnePixel, "precondition: " + what + " read to its end");
-        }
-
-        // A real tap on the Text Tabs word of section `index` (dragged into the strip's view first, sideways like a thumb)
-        private IEnumerator TapTab(int index)
-        {
-            var tabs = Sheet.Slots.TopView as TextTabsNavView;
-            Assert.IsNotNull(tabs, "precondition: the top slot holds Text Tabs");
-            // - _3.3 S4a: the strip is chrome and waits for the hero -- read just past it before a finger goes to it
-            if (!Sheet.Chrome.TopShown) yield return CardTestInput.PastTheHero(Sheet);
-            Assert.IsTrue(Sheet.Chrome.TopShown, "precondition: past the hero the strip shows");
-            var tab = tabs.Tabs.Single(t => t.Index == index);
-            var visible = tabs.Viewport.worldBound;
-            var rect = tab.Button.worldBound;
-            if (rect.xMin < visible.xMin - 0.5f || rect.xMax > visible.xMax + 0.5f)
-            {
-                yield return CardTestInput.TouchDrag(Sheet.Root.panel, visible.center, new Vector2(visible.center.x - rect.center.x, 0f));
-                yield return null;
-            }
-            yield return CardTestInput.Tap(tab.Button.panel, tab.Button.worldBound.center);
-            yield return Rested();
-            Assert.AreEqual(index, Sheet.Layout.ShownSection, "precondition: a real tap showed section " + index);
         }
 
         // A real tap on the Family Pager's chevron towards section `index`, as many times as it takes
@@ -162,7 +143,7 @@ namespace TileStories.Tests
             yield return UseLayout(CardOptions.LayoutTabs);
             yield return OpenFull();
             Assert.AreEqual(CardOptions.LayoutTabs, Sheet.Layout.Effective, "precondition: The Lamp is drawn in tabs");
-            yield return ReadSectionBySection(TapTab);
+            yield return ReadSectionBySection(TurnTo);
         }
 
         [UnityTest]

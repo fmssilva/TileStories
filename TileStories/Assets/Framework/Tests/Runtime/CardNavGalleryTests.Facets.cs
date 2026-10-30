@@ -8,15 +8,15 @@ using UnityEngine.UIElements;
 
 namespace TileStories.Tests
 {
-    // Phase A of the in-card facets (_3.2 step 18, section 5.8): the two menus that hold the chips, drawer_tree and grid_overlay, over the
-    // five fixture cases. Each menu's chip row is exactly the chips NavFacetRule offers for the case's blocks (the row is hidden when the
+    // Phase A of the in-card facets (_3.2 step 18, section 5.8): the menu that holds the chips, drawer_tree, over the five fixture
+    // cases. Each menu's chip row is exactly the chips NavFacetRule offers for the case's blocks (the row is hidden when the
     // rule offers none); every chip is a full touch target with its words whole; a REAL tap (panel pointer events) on a chip narrows the
     // menu to exactly the blocks the rule keeps -- the sections and kinds listed, their counts -- marks the chip by a border AND bolder
     // words and brings a Clear chip; a real tap on Clear gives the whole list back. Rendered Nav_<key>_<case>_filtered.png.
     public partial class CardNavGalleryTests
     {
         private static string[] MenuEntryNames => CardNavGalleryDefinitions.All
-            .Where(e => !e.IsBlock && e.Layout == null && (e.ElementKey == BuiltInNavElements.DrawerTree || e.ElementKey == BuiltInNavElements.GridOverlay) && IsElementCase(e))
+            .Where(e => !e.IsBlock && e.Layout == null && e.ElementKey == BuiltInNavElements.DrawerTree && IsElementCase(e))
             .Select(e => e.Name).ToArray();
 
         // Whether a button lies wholly inside the strip's visible part (one pixel of slack: Rect.Contains drops the far edges)
@@ -26,7 +26,7 @@ namespace TileStories.Tests
             return box.xMin >= visible.xMin - slack && box.xMax <= visible.xMax + slack && box.yMin >= visible.yMin - slack && box.yMax <= visible.yMax + slack;
         }
 
-        private static NavFacetBar FacetsOf(INavElementView menu) => menu is DrawerTreeNavView drawer ? drawer.Facets : ((GridOverlayNavView)menu).Facets;
+        private static NavFacetBar FacetsOf(INavElementView menu) => ((DrawerTreeNavView)menu).Facets;
 
         // What the menu must list under these facets: per section (the model's index) the blocks that pass, per kind too
         private static List<(int Section, List<string> Passing)> ExpectedSections(CardNavModel model, NavFacetBar bar, NavFacets facets) =>
@@ -37,28 +37,21 @@ namespace TileStories.Tests
         private static void AssertTheMenuListsExactly(INavElementView menu, CardNavModel model, NavFacetBar bar, NavFacets facets, string when)
         {
             var expected = ExpectedSections(model, bar, facets);
-            if (menu is DrawerTreeNavView drawer)
-            {
-                Assert.AreEqual(expected.Count, drawer.SectionRows.Count, when + ": a line per section that still has a block that passes, no other");
-                for (int i = 0; i < expected.Count; i++)
-                {
-                    Assert.AreEqual(expected[i].Section, drawer.SectionOf(i), when + ": line " + i + " is the right section");
-                    Assert.AreEqual(expected[i].Passing.Count.ToString(), drawer.SectionRows[i].Count.text, when + ": its count follows the filter");
-                }
-                int kinds = expected.Sum(x =>
-                {
-                    int left = model.Sections[x.Section].Kinds.Count(k => NavFacetRule.Passing(k.Targets, bar.FactsOf, facets).Count > 0);
-                    return NavOntologyRule.OffersAKindChoice(left) ? left : 0;
-                });
-                Assert.AreEqual(kinds, drawer.KindRows.Count, when + ": the kinds listed are the kinds with a block that passes");
-                foreach (var (row, section, kind) in drawer.KindRows)
-                    Assert.AreEqual(NavFacetRule.Passing(kind.Targets, bar.FactsOf, facets).Count.ToString(), row.Count.text, when + ": a kind's count follows the filter");
-                return;
-            }
-            var grid = (GridOverlayNavView)menu;
-            Assert.AreEqual(expected.Count, grid.Tiles.Count, when + ": a tile per section that still has a block that passes");
+            var drawer = (DrawerTreeNavView)menu;
+            Assert.AreEqual(expected.Count, drawer.SectionRows.Count, when + ": a line per section that still has a block that passes, no other");
             for (int i = 0; i < expected.Count; i++)
-                Assert.AreEqual(expected[i].Passing.Count.ToString(), grid.Tiles[i].Count.text, when + ": tile " + i + " counts only what passes");
+            {
+                Assert.AreEqual(expected[i].Section, drawer.SectionOf(i), when + ": line " + i + " is the right section");
+                Assert.AreEqual(expected[i].Passing.Count.ToString(), drawer.SectionRows[i].Count.text, when + ": its count follows the filter");
+            }
+            int kinds = expected.Sum(x =>
+            {
+                int left = model.Sections[x.Section].Kinds.Count(k => NavFacetRule.Passing(k.Targets, bar.FactsOf, facets).Count > 0);
+                return NavOntologyRule.OffersAKindChoice(left) ? left : 0;
+            });
+            Assert.AreEqual(kinds, drawer.KindRows.Count, when + ": the kinds listed are the kinds with a block that passes");
+            foreach (var (row, section, kind) in drawer.KindRows)
+                Assert.AreEqual(NavFacetRule.Passing(kind.Targets, bar.FactsOf, facets).Count.ToString(), row.Count.text, when + ": a kind's count follows the filter");
         }
 
         [UnityTest]
@@ -127,13 +120,6 @@ namespace TileStories.Tests
             var on = bar.Chips.Single(c => c.Button.ClassListContains(NavChip.CurrentClass));
             Assert.AreEqual(FontStyle.Bold, on.Label.resolvedStyle.unityFontStyleAndWeight, name + ": the chip that is on is marked by weight, not colour alone");
             Assert.Greater(on.Button.Q(className: "nav-chip__pill").resolvedStyle.borderTopWidth, 0f, name + ": and by a border");
-            if (menu is GridOverlayNavView grid)
-            {
-                grid.ShowAxis(CardOptions.GroupByFormat);
-                var byFormat = ExpectedSections(model.By(CardOptions.GroupByFormat), bar, facets);
-                Assert.AreEqual(byFormat.Count, grid.Tiles.Count, name + ": the Format side is filtered by the same chips");
-                grid.ShowAxis(CardOptions.GroupByFamily);
-            }
             yield return CardGalleryChecks.Render(name + "_filtered");
 
             // - a REAL tap on Clear (the last chip) gives the whole list back

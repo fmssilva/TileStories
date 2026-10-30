@@ -6,14 +6,14 @@ namespace TileStories
     //   - the wall's choice for the slot (Top Bar, Bottom Bar), "none" or blank = nothing; a key no element of that slot is registered under =
     //     nothing (the Editor names it missing), never a guess at another element
     //   - a card below Show Navigation From holds no element at all (the model's ShowsNavigation, rule 3 of 2.5)
-    //   - an element is not drawn where what it chooses between has fewer than two options (rule 7 of 2.5): sections for tabs, groups
-    //     for the segmented element; an element that lists kinds or blocks is drawn on a one-family card too
+    //   - an element is not drawn where what it chooses between has fewer than two options (rule 7 of 2.5): sections for tabs; an
+    //     element that lists kinds or blocks is drawn on a one-family card too
     // WHEN a held element shows -- the stop, the scroll, the room the stop has -- is CardChromeRule's.
     public static class NavSlotRule
     {
         // The key of the element the top slot holds for this card, or null for none. `topElement`: the definition registered under a
         // key for the TOP slot, null when there is none (NavElementRegistry). The wall's Top Bar, except a tabs card with neither bar, which
-        // gets Text Tabs (CardLayoutRule.TopElement: a tabs card always has a way between its sections)
+        // gets the Family Pager (CardLayoutRule.TopElement: a tabs card always has a way between its sections)
         public static string TopElement(CardNavigationSettings nav, CardNavModel model, Func<string, NavElementDefinition> topElement) =>
             Element(CardLayoutRule.TopElement(nav), model, topElement);
 
@@ -26,17 +26,6 @@ namespace TileStories
         // the definition registered under a key for the MENU slot, null when there is none
         public static string MenuElement(CardNavigationSettings nav, CardNavModel model, Func<string, NavElementDefinition> menuElement) =>
             Element((nav ?? new CardNavigationSettings()).menu, model, menuElement);
-
-        // The key of the Floating Button element this card offers (the round button above the sheet's top-right edge), or null for none.
-        // `floatingElement`: the definition registered under a key for the FLOATING slot, null when there is none
-        public static string FloatingElement(CardNavigationSettings nav, CardNavModel model, Func<string, NavElementDefinition> floatingElement) =>
-            Element((nav ?? new CardNavigationSettings()).floating, model, floatingElement);
-
-        // The key of the Edge element this card offers (family dots down the right edge of the stack's viewport), or null for none.
-        // `edgeElement`: the definition registered under a key for the EDGE slot, null when there is none. None where the layout owns the edge
-        // (pages, accordion: CardLayoutRule.LayoutOwnsTheEdge)
-        public static string EdgeElement(CardNavigationSettings nav, CardNavModel model, Func<string, NavElementDefinition> edgeElement) =>
-            CardLayoutRule.LayoutOwnsTheEdge(nav) ? null : Element((nav ?? new CardNavigationSettings()).edge, model, edgeElement);
 
         // One slot's answer: the wall's pick for it, when the card shows navigation, the slot has such an element and it has a choice here
         private static string Element(string key, CardNavModel model, Func<string, NavElementDefinition> elementOfSlot)
@@ -51,12 +40,7 @@ namespace TileStories
         // Rule 7: does this card give the element something to choose between?
         public static bool OffersAChoice(NavElementDefinition element, CardNavModel model)
         {
-            switch (element.Choice)
-            {
-                case NavChoice.Sections: return NavOntologyRule.OffersASectionChoice(model.Sections.Count);
-                case NavChoice.Groups: return NavOntologyRule.OffersASectionChoice(model.Groups.Count);
-                default: return true;
-            }
+            return element.Choice != NavChoice.Sections || NavOntologyRule.OffersASectionChoice(model.Sections.Count);
         }
     }
 }

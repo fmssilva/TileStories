@@ -76,7 +76,7 @@ namespace TileStories
         public bool TryGetEntry(string blockKey, out BlockStackBuilder.Entry entry) => _stack.TryGetEntryOfBlock(blockKey, out entry);
 
         // What the compact row says about a block of the card in the card's language (words, family icon, format and minutes): what a part
-        // that names other blocks draws -- the pages' arriving cue, a rail's card, a bento tile
+        // that names other blocks draws -- the pages' arriving cue
         public CompactRowRule.Row RowOf(string blockKey) =>
             _stack.RowOfBlock(blockKey, _context?.Language, _context?.FallbackLanguage, _context?.Strings != null ? _context.Strings.Get : null);
 
@@ -91,29 +91,9 @@ namespace TileStories
         // Whether this target was in view earlier in this binding (TargetViewed raised for it)
         public bool HasViewed(string blockKey) => blockKey != null && _viewed.Contains(blockKey);
 
-        // A target the visitor had in view OUTSIDE the stack -- a section page of the full view (bento, BlockFullView.Viewed): remembered and
-        // raised like one seen in the scroll, so the card's reading and the contents list's ticks do not depend on the layout
-        internal void ViewedInFullView(string blockKey)
-        {
-            if (Model == null || blockKey == null || _viewed.Contains(blockKey) || IndexOfTarget(blockKey) < 0) return;
-            _viewed.Add(blockKey);
-            TargetViewed?.Invoke(blockKey);
-        }
-
         // The card's layout (_3.2 step 13), handed over by the sheet: asked before every jump where to go (tabs shows the block's section, a
-        // closed row opens; bento opens the block's section in the full view) and what the spy names (tabs: the section shown; bento: the
-        // section open in the full view, none on the overview). Null = the plain scroll
-        internal CardLayoutView Layout
-        {
-            get => _layout;
-            set
-            {
-                if (_layout != null) _layout.Changed -= UpdateSpy;
-                _layout = value;
-                if (_layout != null) _layout.Changed += UpdateSpy;
-            }
-        }
-        private CardLayoutView _layout;
+        // closed row opens) and what the spy names (tabs: the section shown). Null = the plain scroll
+        internal CardLayoutView Layout { get; set; }
 
         // How long a smooth jump glides, in seconds: --ts-duration, handed over by the sheet once the card's tokens resolve
         public float Duration { get; internal set; }
@@ -219,18 +199,6 @@ namespace TileStories
 
         private bool Jump(string blockKey, int sectionIndex, string sectionKey, string elementKey, bool landsAtOnce = false)
         {
-            // - bento: a block of a section is never in the scroll -- its section opens in the full view instead (what was open over the card
-            //   closes first: one sheet over the card, never a second); the spy names that section while it is open
-            if (Layout != null && CardLayoutRule.JumpOpensSection(Layout.Effective, sectionIndex))
-            {
-                EndJump();
-                Jumped?.Invoke();
-                if (!Layout.OpenSectionView(sectionIndex, blockKey)) return false;
-                SetCurrent(sectionIndex);
-                SetCurrentBlock(IndexOfTarget(blockKey));
-                Report(blockKey, sectionKey, elementKey);
-                return true;
-            }
             // - the layout first (CardLayoutRule): a block in a section tabs does not show is set aside, a closed row shows only its line
             Layout?.PrepareJump(blockKey, sectionIndex);
             if (ScrollingSlot(blockKey) == null) return false;

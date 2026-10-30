@@ -187,12 +187,15 @@ namespace TileStories.Editor.Tests
             var config = ShippedWall.WithFrameworkNavigation();
             var poi = config.pois.Single(p => p.id == "lamp_residential");
             config.card_settings.navigation.block_order = CardOptions.BlockOrderEndFamiliesLast;
+            var contents = poi.card.blocks.Single(b => b.kind == BuiltInBlocks.NavContentsKind);
+            poi.card.blocks.Remove(contents);
+            poi.card.blocks.Insert(0, contents); // its Contents authored first, so blocks of other families follow it
             List<BlockStackBuilder.Entry> Entries() => BlockStackBuilder.Build(poi, config.card_settings, BlockRegistry.Shared, config.pois).Entries;
             bool IsNav(BlockStackBuilder.Entry e) => e.Definition.Family == BuiltInFamilies.Navigation;
             bool ClosesTheCard(BlockStackBuilder.Entry e) => BlockRegistry.Shared.TryGetFamily(e.Definition.Family, out var f) && f.AtEnd;
 
             var before = Entries();
-            Assert.GreaterOrEqual(before.Count(IsNav), 2, "precondition: the point authors nav blocks of its own");
+            Assert.GreaterOrEqual(before.Count(IsNav), 1, "precondition: the point authors a nav block of its own (its Contents)");
             int firstNav = before.FindIndex(IsNav);
             Assert.IsTrue(before.Skip(firstNav).Any(e => !IsNav(e) && !ClosesTheCard(e)),
                 "precondition: with the framework's default, blocks of other families follow the first nav block");

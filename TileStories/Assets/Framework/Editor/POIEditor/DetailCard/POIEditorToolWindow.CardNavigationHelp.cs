@@ -1,7 +1,7 @@
 // POIEditorToolWindow.CardNavigationHelp.cs
 //
-// Partial: every text of Detail Card > Navigation -- option labels, (i) help texts and the Scene / Playmode /
-// Device Test guides. Its own file because DetailCardHelp.cs already carries the whole rest of the tab.
+// Partial: every text of Detail Card > Navigation outside the Navigation Bar component -- (i) help texts, the notes and the Scene /
+// Playmode / Device Test guides. Its own file because DetailCardHelp.cs already carries the whole rest of the tab.
 // Framework-authored and app-agnostic: they name Editor Tab controls, never a project doc, a code file or one
 // wall's own content (_5.1_Editor_Tab.md, "Domain Manual Tests").
 
@@ -23,165 +23,46 @@ namespace TileStories.Editor
             "looking ('what do I want?'), not a file type, and every block kind belongs to one. " +
             "Order: the up and down arrows move a family past its neighbour. At The End: the family's blocks close the " +
             "card instead of staying where they were written -- this is what End Families Last moves. " +
-            "Group (only with the Segmented Top Bar): the group of the Groups table whose segment leads to this family's blocks; " +
-            "(no group) leaves them out of the segments. " +
-            "A family you never change keeps the order, the tick and the group it comes with, and nothing is written to this wall " +
+            "A family you never change keeps the order and the tick it comes with, and nothing is written to this wall " +
             "until you really change one, so a family added later needs no edit here.";
 
         private const string CardGroupByHelp =
-            "What the Top Bar's tabs (and its progress pieces) stand for. Family (the default): the visitor's reason for looking -- " +
-            "About, Media, Stories... -- each with its icon and colour. Format: how a block is taken in -- Read, Look, Watch, Listen, " +
-            "Immersive, Interact -- the same blocks sorted another way; a format has no icon, so its tab always shows its word. " +
-            "The Segmented bar always shows Groups of families, whatever this says.";
-
-        private const string CardLabelsHelp =
-            "What each tab of the Top Bar, and each slot of the Bottom Bar or the Bar With Kinds, shows (the Dock ignores it: its " +
-            "marked slot always shows icon and word, the others icon only). Icon And Text (the default): the family's icon, in " +
-            "its colour, above its word -- " +
-            "easiest to scan and to read. Icon: the icon alone, for the narrowest bar; its word is still read out by a screen " +
-            "reader and shown on a long press. Text: the word alone. A tab with no icon (Group By = Format) always shows its word.";
-
-        private const string CardShowCountsHelp =
-            "Whether each tab, chip or segment of the Top Bar shows how many blocks it leads to, as a small number after its word. " +
-            "Off (the default) keeps the bar quiet; on helps a visitor judge where most of a long card is. On the Segmented bar, when a " +
-            "group's word and its number do not fit side by side in a segment, no segment shows its number: the numbers go, never the words.";
-
-        private const string CardBarSlotsHelp =
-            "How many slots the Bottom Bar, the Dock and the Bar With Kinds have, from 3 to 5 (default 5): a bar at the bottom of a phone holds three to five " +
-            "destinations before its words get too small to read and its slots too narrow for a thumb. A card with more sections " +
-            "than slots turns the last slot into More, which lists the sections that did not fit just above the bar. A card with " +
-            "fewer sections than slots shows one slot per section and no More. The Radial Floating Button holds the same number of " +
-            "items on its arc, its last one More the same way: fewer, wider items are easier to hit with a slide.";
-
-        // What Bottom Bar's (i) says: the slot, None, then every element an app can put there -- read from the registry, like Top Bar's
-        private static string CardBottomBarHelp(NavElementRegistry registry)
-        {
-            var text = new System.Text.StringBuilder(
-                "What the bar at the bottom of the card shows, under the buttons pinned to the card's bottom (an Actions block with " +
-                "the sticky_cta look), where a thumb reaches. It appears only on cards with at least Show Navigation From blocks, at " +
-                "the heights Show Navigation At allows. The pinned buttons and this bar are one bottom area: they slide away and come " +
-                "back together (Hide While Scrolling), and where a height leaves too little room to read, both give way together. " +
-                "None (the default): no bar. It can be used with a Top Bar or instead of one.");
-            foreach (var element in registry.OfSlot(NavSlotKeys.Bottom)) text.Append(' ').Append(element.Help);
-            return text.ToString();
-        }
-
-        private static string CardMenuHelp(NavElementRegistry registry)
-        {
-            var text = new System.Text.StringBuilder(
-                "What opens over the card from a menu button in its header (three bars, beside the close button), on a darkened card " +
-                "behind it. It appears only on cards with at least Show Navigation From blocks. One menu or list is open at a time, and it " +
-                "closes when the visitor picks a place, taps the close button or the darkened card, scrolls the card, or presses Back " +
-                "(Back closes the menu first; the next Back lowers the card). With a Bottom Bar whose sections do not all fit, its More " +
-                "slot opens this menu instead of its small list. None (the default): no menu button. A menu hides the card's map behind " +
-                "a button, so it is never a card's only navigation: use it beside a Top Bar or a Bottom Bar.");
-            foreach (var element in registry.OfSlot(NavSlotKeys.Menu)) text.Append(' ').Append(element.Help);
-            return text.ToString();
-        }
-
-        // What Floating Button's (i) says: the slot, None, then every element an app can put there -- read from the registry
-        private static string CardFloatingButtonHelp(NavElementRegistry registry)
-        {
-            var text = new System.Text.StringBuilder(
-                "One round button that floats just above the card's top-right edge, at every height of the card, and opens the card's " +
-                "sections. It costs no reading space and needs no bar, so it suits a card read over the camera view. It appears only on " +
-                "cards with at least Show Navigation From blocks. What it opens closes when the visitor picks a section, taps the button " +
-                "again, presses Back, taps the card or the camera view beside it; a Menu opened over the card covers it. None (the " +
-                "default): no button.");
-            foreach (var element in registry.OfSlot(NavSlotKeys.Floating)) text.Append(' ').Append(element.Help);
-            return text.ToString();
-        }
-
-        // What Edge's (i) says: the slot, None, then every element an app can put there -- read from the registry
-        private static string CardEdgeHelp(NavElementRegistry registry)
-        {
-            var text = new System.Text.StringBuilder(
-                "What is drawn down the right edge of the card's content, over it. It appears only on cards with at least Show Navigation " +
-                "From blocks, and only where the content area is tall enough for every one of its tap targets: so it is absent when the " +
-                "card is low (at its title height, or at half height under a tall title) and on a card with more sections than fit. It " +
-                "lies over the right edge of any block that reaches it, so it is not on by default; use it beside, not instead of, a bar " +
-                "when a card must be navigable at every height. Under Layout = Pages or Accordion nothing is drawn on the edge, whatever is " +
-                "picked here: Pages turn on a swipe from that edge and show the next page there, and each Accordion line ends in the arrow " +
-                "that says it opens. None (the default): nothing on the edge.");
-            foreach (var element in registry.OfSlot(NavSlotKeys.Edge)) text.Append(' ').Append(element.Help);
-            return text.ToString();
-        }
-
-        // What Auto Nav Block's (i) says: the rule, None, then every nav block an app can pick -- read from the registry
-        private static string CardAutoNavBlockHelp(BlockRegistry registry)
-        {
-            var text = new System.Text.StringBuilder(
-                "A navigation block the card puts right after its title block, on every card with at least Show Navigation From blocks -- " +
-                "so a long card opens with a map of itself, with no block to add point by point. A point that already has a navigation " +
-                "block of its own in Specific Marker > Card Content keeps its own and gets no second one; a shorter card gets none. The " +
-                "block is not listed in Card Content (it belongs to no point) and switching its kind off in the Block Library leaves it " +
-                "out everywhere. None (the default): no card gets one. The choices differ in what they show: Icon Grid is a quick " +
-                "map of the card's sections, one tile each -- good for a visitor who scans and jumps; Contents lists every block with " +
-                "its minutes and ticks what was already read -- good for a long card read in several visits; Rails shows a swipeable row of " +
-                "cards for each section -- good for a visitor who browses. Highlights (a few tiles an author picks) is not offered here: its " +
-                "tiles are authored point by point in Card Content, and a card that adds one by itself would have none to show.");
-            foreach (var kind in registry.Ordered)
-                if (kind.Family == BuiltInFamilies.Navigation && !kind.NeedsAuthoredContent) text.Append(' ').Append(kind.DisplayName).Append(": ").Append(kind.Help);
-            return text.ToString();
-        }
-
-        private const string CardGroupsHelp =
-            "The groups the Segmented Top Bar shows as equal segments that always fit the screen -- three or four work best. " +
-            "Each family joins one in the Families table's Group column. A wall with no groups of its own gets four framework " +
-            "default suggestions (Discover, Watch, Explore, Visit), which you may rename or delete; the first edit here writes them " +
-            "to this wall. A group with no block on a card is left out of that card, and a card whose blocks all fall in one group " +
-            "gets no segments.";
-
-        private const string CardGroupNameHelp =
-            "What a visitor reads on this group's segment, in each language of the wall. Keep it to one short word: four of them " +
-            "share the screen's width.";
+            "What the card's sections are: what the Tabs and Pages layouts show one at a time, and what the card says is being read. " +
+            "Family (the default): the visitor's reason for looking -- About, Media, Stories... Format: how a block is taken in -- " +
+            "Read, Look, Watch, Listen, Immersive, Interact -- the same blocks sorted another way. The Navigation Bar always shows " +
+            "its own groups (its Bar Groups table), whatever this says.";
 
         private const string CardShowNavigationFromHelp =
-            "How many blocks a card needs before it shows any navigation (the Top Bar). A block counts when a visitor could be taken " +
-            "to it: not the title block, not a block pinned under the title or to the bottom, not a block still waiting for Show After " +
-            "Reading, and not a block of a family that is left out of navigation (the Sources). A shorter card shows no navigation at " +
-            "all and simply scrolls -- a list of shortcuts on a short card only adds length. Default 8.";
+            "How many blocks a card needs before it shows any navigation (the Navigation Bar). A block counts when a visitor could be " +
+            "taken to it: not the title block, not a block pinned under the title or to the bottom, not a block still waiting for Show " +
+            "After Reading, and not a block of a family that is left out of navigation (the Sources). A shorter card shows no " +
+            "navigation at all and simply scrolls -- a list of shortcuts on a short card only adds length. Default 8.";
 
         private const string CardShowNavigationAtHelp =
-            "At which heights of the card the Top Bar may show; never while only the card's title shows. Half And Full (the default): " +
-            "at half and at full height. Full Only: at full height only, so half height keeps all its room for the content. " +
-            "The card may also hide the bar BY ITSELF, and that is on purpose, not a fault: at a height where the title, the bar and the " +
-            "buttons pinned to the card's bottom (an Actions block with the sticky_cta look) would leave less than a heading and two " +
-            "lines of content, the card leaves the bar out first: the bottom buttons are often why the card was opened, and the bar is " +
-            "one drag to full height away. The buttons stay while at least one line of content still shows; with a Bottom Bar, the " +
-            "buttons and the Bottom Bar are measured together and give way together. The bar comes back " +
-            "as soon as there is room: at full height, or once the title shrinks to one line while the visitor reads. Full Only can " +
-            "hide the bar more, never bring it back where there is no room.";
+            "At which heights of the card a Navigation Bar at the Top may show; never while only the card's title shows. Half And Full " +
+            "(the default): at half and at full height. Full Only: at full height only, so half height keeps all its room for the " +
+            "content. The card may also hide the bar BY ITSELF, and that is on purpose, not a fault: at a height where the title, the " +
+            "bar and the buttons pinned to the card's bottom would leave less than a heading and two lines of content, the card leaves " +
+            "the bar out first. The bar comes back as soon as there is room. Full Only can hide the bar more, never bring it back where " +
+            "there is no room. A bar at the Bottom floats over the content and is not affected.";
 
         private const string CardFollowScrollHelp =
-            "Whether the Top Bar marks the part of the card the visitor is reading. On (the default): as the visitor scrolls, the mark " +
-            "moves to the family (or group, or kind) whose blocks are in view, and the strip slides to keep it visible. Off: the mark " +
-            "moves only when the visitor taps an item, so the bar reads as a fixed menu rather than a map of where they are.";
+            "Whether the navigation marks the part of the card the visitor is reading. On (the default): as the visitor scrolls, the " +
+            "chosen group of the Navigation Bar moves to the one whose blocks are in view. Off: the mark moves only when the visitor taps " +
+            "a group, so the bar reads as a fixed menu rather than a map of where they are.";
 
         private const string CardHideWhileScrollingHelp =
-            "What the bottom of the card does while the visitor reads. When Scrolling Down (the default): the buttons pinned to the " +
-            "card's bottom (an Actions block with the sticky_cta look) slide away once the visitor has scrolled down by about a " +
-            "finger's travel, giving their room to the content, and come back as soon as the visitor scrolls up a little, or reaches " +
-            "the top or the end of the card. A tap's small wobble never hides them. A Bottom Bar slides with them: they are one " +
-            "area. The Top Bar always stays: it is the visitor's map of the card. Never: the bottom stays where it is while the " +
-            "visitor reads.";
-
-        // What Top Bar's (i) says: the slot, None, then every element an app can put there, each in its own words -- read from the
-        // registry, so an element an app registers explains itself here with no edit to this file
-        private static string CardTopBarHelp(NavElementRegistry registry)
-        {
-            var text = new System.Text.StringBuilder(
-                "What the strip under the card's title shows, at the heights Show Navigation At allows (never while only the title " +
-                "shows). It appears only on cards with at least Show Navigation From blocks. None: no strip, the card only scrolls.");
-            foreach (var element in registry.OfSlot(NavSlotKeys.Top)) text.Append(' ').Append(element.Help);
-            return text.ToString();
-        }
+            "What the bottom of the card does while the visitor reads, with the Navigation Bar off (while it is on, its own Hide While " +
+            "Scrolling decides). When Scrolling Down (the default): the buttons pinned to the card's bottom (an Actions block with the " +
+            "sticky_cta look) slide away once the visitor has scrolled down by about a finger's travel, giving their room to the " +
+            "content, and come back as soon as the visitor scrolls up a little, or reaches the top or the end of the card. A tap's " +
+            "small wobble never hides them. Never: the bottom stays where it is while the visitor reads.";
 
         private const string CardJumpRaisesHelp =
-            "What the card does before it moves to a block that a visitor asked for (an Open Block button of an Actions block today; " +
-            "the navigation tabs and bars later). Full (the default): the card first rises to its full height, then moves -- at half " +
-            "height only a few lines show, too little to land on. Keep Its Stop: the card stays as high as the visitor left it and " +
-            "only moves its content, for a wall that wants the camera view to stay in sight.";
+            "What the card does before it moves to a block that a visitor asked for (a group of the Navigation Bar, an Open Block " +
+            "button of an Actions block). Full (the default): the card first rises to its full height, then moves -- at half height " +
+            "only a few lines show, too little to land on. Keep Its Stop: the card stays as high as the visitor left it and only " +
+            "moves its content, for a wall that wants the camera view to stay in sight.";
 
         private const string CardJumpMotionHelp =
             "How the card moves to a block a visitor asked for. Smooth (the default): the content glides there in the same time the " +
@@ -193,29 +74,14 @@ namespace TileStories.Editor
             "block the navigation can lead to is one line (its icon, its heading or first words, its kind of content and minutes); a " +
             "tap opens it in place and the page does not move, another tap folds it, and Back folds the line opened last. Nothing " +
             "of a folded line is loaded, so a long card opens light. Suits a card visitors skim to pick one or two things (Open One " +
-            "At A Time keeps it to one). Tabs: one section of the card at a time -- the Top Bar or the Bottom Bar switches between " +
-            "them, and the other sections are put away (nothing of them is loaded). The sources and nav blocks show with every " +
-            "section. Avoid Tabs when visitors must compare things that sit in different sections: they cannot see both at once. " +
-            "Pages: each section is a page the visitor turns sideways -- a swipe, or the arrows of the Family Pager, which takes the " +
-            "place of the Top Bar and names the page -- and scrolls up and down inside; the edge of the next page shows at the right " +
-            "as the cue. Only a clearly sideways swipe turns a page, so reading down never does by accident, and like Tabs the pages " +
-            "put away are not loaded. Offer it for a short card read section by section, like a story, and never as a wall's only " +
-            "layout: a visitor who has always scrolled down can be lost when a card suddenly turns sideways, and may not notice " +
-            "there are more pages. " +
-            "Bento: the card opens on its sections as tiles -- each with its icon, its name and how many blocks it holds -- the " +
-            "section with the most blocks the largest, the others sized by their blocks; a tap opens that section over the card, its " +
-            "blocks one under the other, and Back returns to the tiles. Nothing of a section is loaded until it is opened. Suits a " +
-            "point visitors explore by topic rather than read from top to bottom. The tiles are the card's map, so Bento draws no " +
-            "Top Bar (the row goes and keeps its value for another layout). On a phone the tiles fill the card while it has " +
-            "about 13 sections or fewer; with more, every tile keeps its smallest size and the visitor scrolls the tiles. A tile is " +
-            "never smaller than a finger and its name, so a section of one or two blocks beside a large one shows the sizes only " +
-            "roughly, and never taller than what it holds: a card with few sections leaves the room under its tiles empty instead " +
-            "of stretching them. At Half the tiles are at their smallest and the card scrolls. " +
-            "A card with fewer blocks than Show Navigation From, or with one section, always scrolls.";
-
-        private const string CardTabsWithoutABarWarning =
-            "Tabs needs a way to switch sections, and Top Bar and Bottom Bar are both None: the card uses Text Tabs at the top. " +
-            "Pick a Top Bar or a Bottom Bar to choose another.";
+            "At A Time keeps it to one). Tabs: one section of the card at a time -- a tap on a group of the Navigation Bar switches " +
+            "between them, and the other sections are put away (nothing of them is loaded). The sources show with every section. " +
+            "Avoid Tabs when visitors must compare things that sit in different sections: they cannot see both at once. " +
+            "Pages: each section is a page the visitor turns sideways with a swipe, and scrolls up and down inside; the edge of the " +
+            "next page shows at the right as the cue. Only a clearly sideways swipe turns a page, so reading down never does by " +
+            "accident, and like Tabs the pages put away are not loaded. Offer it for a short card read section by section, like a " +
+            "story, and never as a wall's only layout: a visitor who has always scrolled down can be lost when a card suddenly turns " +
+            "sideways. A card with fewer blocks than Show Navigation From, or with one section, always scrolls.";
 
         private const string CardOpenOneAtATimeHelp =
             "Accordion only. Ticked: opening a line folds the line that was open, so the card never holds more than one open block " +
@@ -225,60 +91,17 @@ namespace TileStories.Editor
         private const string CardBackButtonHelp =
             "What the phone's own Back button does while a card is open (Android; an iPhone has none, so nothing changes there). " +
             "Step The Card Down (the default): each press undoes the innermost thing -- an open full-screen view closes; else an " +
-            "open menu or list over the card closes (the card stays where it is); else an open line of an accordion or of an " +
+            "open list over the card closes (the card stays where it is); else an open line of an accordion or of an " +
             "Expandable block folds, the one opened last first; else the " +
             "card goes one height down, full to half to its title; at its title the card closes, as its X does. A visitor who " +
             "presses Back to leave never loses their place in one go. Leave It To The App: the card ignores Back and the app " +
             "decides what it does.";
 
-        private const string CardPresetHelp =
-            "A starting point for how a card is navigated. Pick one and it sets seven rows together -- Layout, Top Bar, Bottom Bar, " +
-            "Floating Button, Menu, Edge and Auto Nav Block -- and nothing else: every other row keeps what you set. The button shows " +
-            "the preset those seven rows hold now, or Custom once you change one of them yourself. One Ctrl+Z puts all seven back. " +
-            "Long read is what a wall that never touched these rows already has. The first four are the strongest starting points; each " +
-            "line says who it suits. A preset is only a shortcut: afterwards every row is yours to change, and the wall keeps the seven " +
-            "values, never the preset's name.";
-
-        // The Progress Map's warning: names the busiest card by its list title and the section count where its pieces stop showing a share
-        internal static string CardProgressMapWarning(string cardName, int sections) =>
-            "The Progress Map gives each section a piece as wide as its share of the card's blocks. The busiest card of this wall (" +
-            cardName + ") has " + sections + " sections, and past " + NavigationWarningRule.ProgressMapSectionsThatFit +
-            " the pieces stop showing their share: each stays one finger wide and the bar scrolls sideways. " +
-            "Pick another Top Bar, or keep this wall's cards to fewer families.";
-
-        // The bento's warning: the section count where its tiles stop filling the card
-        internal static string CardBentoWarning(string cardName, int sections) =>
-            "Bento shows the sections as tiles that fill the card while there are about " + NavigationWarningRule.BentoSectionsThatFill +
-            " or fewer (about " + NavigationWarningRule.BentoSectionsThatFillWithTheTitleFolded + " once the card's title has folded away). " +
-            "The busiest card of this wall (" + cardName + ") has " + sections + " sections: past that every tile keeps its smallest size and the " +
-            "visitor scrolls the tiles, so the sizes show only inside a row. Pick another Layout, or keep this wall's cards to fewer sections.";
-
-        // The Edge warning: the layout keeps the card's right edge for itself, so no Edge element is drawn (named by the layout's Editor label)
-        internal static string CardEdgeOwnedByLayoutWarning(string layout)
-        {
-            int at = System.Array.IndexOf(CardOptions.Layouts, layout);
-            string name = at >= 0 && at < CardOptions.LayoutLabels.Length ? CardOptions.LayoutLabels[at] : layout;
-            string why = layout == CardOptions.LayoutPages
-                ? "a sideways swipe starts there and the next page peeks in from it"
-                : "every line ends in the arrow that says it opens";
-            return "Edge is set, but Layout = " + name + " keeps the right edge of the card for itself: " + why + ". The card draws no Edge " +
-                   "element under this layout; the choice is kept for another layout.";
-        }
-
-        internal const string CardMoreThanTwoBarsWarning =
-            "Top Bar, Bottom Bar and Edge are all on: three bars leave little room to read at full height. " +
-            "Set one of them to None (the Edge also lies over the content).";
-
-        // The Bar Slots warning: the busiest card has more sections than the slots, and the row could still be raised
-        internal static string CardBarSlotsWarning(int slots, string cardName, int sections) =>
-            "Bar Slots is " + slots + ", but the busiest card of this wall (" + cardName + ") has " + sections + " sections: the last slot " +
-            "becomes More and the rest wait behind it. Raise Bar Slots (up to " + CardNavigationSettings.MaxSlotsMax + ") to show more sections at once.";
-
         private const string CardPreviewNavigationHelp =
-            "Developer-only. Opens the demo card on the point below, at full height, so you can pick a preset or change a row here and " +
-            "watch the card follow in Play Mode. It is the same switch as Show demo card in Detail Card > Card Container > Test: the two " +
-            "turn on and off together. Off by default; a release build ignores it. To turn it off, untick it here (or there), then Save " +
-            "All to JSON and Copy to StreamingAssets before a normal build.";
+            "Developer-only. Opens the demo card on the point below, at full height, so you can change a row here and watch the card " +
+            "follow in Play Mode. It is the same switch as Show demo card in Detail Card > Card Container > Test: the two turn on and " +
+            "off together. Off by default; a release build ignores it. To turn it off, untick it here (or there), then Save All to " +
+            "JSON and Copy to StreamingAssets before a normal build.";
 
         private const string CardPreviewPointHelp =
             "The point whose card opens (the same choice as Demo Point in Card Container > Test). Pick one with a long card: a card with " +
@@ -296,235 +119,39 @@ namespace TileStories.Editor
         private const string CardNavigationPlaymodeTestGuide =
             "SETUP\n" +
             "- Save All to JSON, then Copy to StreamingAssets (Play reads that copy).\n" +
-            "- Open the wall scene, press Play. Navigation edits are live: pick another Block Order or move a family here " +
-            "and the open card reorders in place, keeping its height and its scroll. Ctrl+Z here brings the old order back. " +
-            "Jump Opens Card To, Jump Motion and Back Button are live too: the next tap or Back press follows them; so are Show " +
-            "Navigation From, Show Navigation At, Layout, Open One At A Time, Top Bar, Bottom Bar, Menu, Floating Button, Edge, Auto Nav Block, Bar Slots " +
-            "and Hide While Scrolling: the open card's strip, bottom bar, menu button, floating button, edge dots, grid and bottom buttons " +
-            "appear, change or go at once.\n" +
-            "- The rows are in five groups under their own headings: Shape, When Navigation Shows, Elements, How They Look and What A " +
-            "Jump Does. A group whose rows do not apply to the choices above it (How They Look with no element that reads Labels, " +
-            "Show Counts or Bar Slots) shows no heading. Placed Model Control is not here: it is in Card Container.\n" +
-            "- Pick a point whose card has blocks of several families and enough of them to scroll; a very short card " +
-            "shows the same order in every option, so it proves nothing.\n\n" +
-            "PRESETS\n" +
-            "- The first row of Navigation is the Preset button: it reads the preset the seven rows hold now (Long read on a wall that never " +
-            "changed them), or Custom. Start here, then adjust the rows under it. Click " +
-            "it: a list opens with Long read, Rich point, One hand and Over the camera first, then a line, then the rest, each with who it " +
-            "suits; the one in use is marked.\n" +
-            "- Pick Rich point: Layout, Top Bar, Bottom Bar, Floating Button, Menu, Edge and Auto Nav Block change together and the open " +
-            "card follows at once. Every other row (Block Order, Show Navigation From, Bar Slots, Follow Scroll...) keeps what it had. " +
-            "Press Ctrl+Z once: all seven rows are back.\n" +
-            "- Pick each of the others in turn and read the open card: One hand puts a bar at the bottom and a menu button in the title " +
-            "row; Over the camera has one round button and no bar; Deep dive adds kind chips, edge dots and a contents list; Guided a " +
-            "progress map, an Up Next bar and a contents list; Story turns the card into pages; Quick glance folds every block into a " +
-            "line; Overview shows the sections as tiles.\n" +
-            "- Change one of the seven rows yourself: the button reads Custom. Change it back: the preset's name returns.\n\n" +
-            "LAYOUT\n" +
-            "- Set Layout = Accordion and open a long card at full: every block is one line (its icon, its heading or first words, its " +
-            "kind of content and minutes); the title, a block pinned under it and the bottom buttons stay as they were.\n" +
-            "- Tap a line: the block opens right under it and the card does not move. Tap it again: it folds. Open two lines, press " +
-            "Escape: the one opened last folds, then the other, then the card lowers to half.\n" +
-            "- Open a line, scroll down until its line is above the top, fold it with Escape: its line comes back to the top.\n" +
-            "- Tick Open One At A Time: open a line, then another: the first folds, and the line you tapped stays where it was.\n" +
-            "- With a Top Bar, tap a word: the card moves to that family's first line and opens it.\n" +
-            "- Set Layout = Tabs: the card shows one family at a time; tap another word of the Top Bar (or a slot of the Bottom Bar): " +
-            "only that family's blocks show, the word is underlined, and scrolling inside it never moves the underline. The sources at " +
-            "the end show with every family. A video playing in one family stops when you switch to another.\n" +
-            "- Set Top Bar and Bottom Bar to None with Tabs: a warning shows under Layout and the card uses Text Tabs.\n" +
-            "- Set Layout = Pages (the Top Bar row goes: Pages always uses the Family Pager): the strip under the title names one family " +
-            "between two arrows with its place (1 of 8), the card shows that family alone, and the edge of the next family's page shows " +
-            "at the right with its icon. Drag the content up and down: it scrolls and never turns. Drag it sideways past about a fifth " +
-            "of its width and let go: the page slides away and the next family's starts at its first block; a shorter drag slides back. " +
-            "A diagonal drag keeps doing what it started as. The first page has no left arrow, the last no right arrow and no edge at " +
-            "the right. Tap an arrow: the card moves one family. A video playing on a page stops when you turn the page. Swipe a " +
-            "filmstrip or turn a 3D model inside a page: the strip or the model moves, the page does not.\n" +
-            "- Set Layout = Bento (the Top Bar row goes: the tiles are the map) and open a long card at full: its families are tiles " +
-            "filling the card, the family with the most " +
-            "blocks a full-width tile at its place with a large count, the others two to a row, a family left alone spanning its row; " +
-            "each tile shows its icon, its name and its number of blocks. The sources stay under the tiles. On a card with only a few " +
-            "families each tile is as tall as what it shows and the rest of the card stays empty below them.\n" +
-            "- Tap a tile: that family opens over the card, its blocks one under the other with their headings, and the title bar ends " +
-            "with the family's name. Press Escape (or Back): the tiles again, the card where it was; press it again: the card lowers. A " +
-            "video playing there stops when it closes.\n" +
-            "- With a Menu set, open it and pick a family: the menu closes and the family opens -- never two layers over the card. " +
-            "No strip shows under the title, whatever Top Bar the wall had picked for another layout.\n" +
-            "- Open a card with fewer blocks than Show Navigation From, or with one family: it scrolls as with Scroll.\n" +
-            "- Set Layout = Scroll: every block is back, whole, in one scroll.\n\n" +
-            "BLOCK ORDER\n" +
-            "- Open that point's card and drag it up to full.\n" +
-            "- Set Block Order to As Authored: every block sits where Card Content lists it, top to bottom. Compare the card " +
-            "with the block list of Specific Marker > Card Content for that point; they must read in the same order.\n" +
-            "- Set Block Order to End Families Last: the order is the same, except that the blocks of every family with " +
-            "At The End ticked have moved to the bottom, keeping their order among themselves.\n" +
-            "- Set Block Order to Grouped By Family: scroll the whole card once. Each family's blocks must now sit together " +
-            "in one unbroken run, with no block of another family in between, and the runs must follow the Families table.\n" +
-            "- In all three the title block stays at the top of the card.\n\n" +
-            "FAMILIES\n" +
-            "- With Grouped By Family on, move a family up or down with its arrows: the card reorders at once and that " +
-            "family's whole run moves past its neighbour.\n" +
-            "- Tick At The End on a family that did not have it: with End Families Last (or Grouped By Family) its blocks " +
-            "move to the bottom of the card. Untick it again and they come back.\n" +
-            "- Press Ctrl+Z after each change: the card goes back to what it showed before.\n\n" +
-            "JUMPS\n" +
-            "- In Specific Marker > Card Content, give a point's Actions block a row with Action = Open Block and pick a block far down " +
-            "the card in Opens Block (its row must show no warning).\n" +
-            "- Open that point's card at half height and tap the button: with Jump Opens Card To = Full the card first rises to full, " +
-            "then the picked block's top comes to rest at the top of what scrolls.\n" +
-            "- Set Jump Opens Card To = Keep Its Stop and tap again from half height: the card stays at half and only its content moves.\n" +
-            "- Set Jump Motion = Instant: the content is there at once; Smooth: it glides. With Reduce Motion ticked it is always at once.\n" +
-            "- Pick, in Opens Block, the card's title block or a block waiting for Show After Reading: the row warns and the button is gone.\n" +
-            "- In Specific Marker > Card Content, open a Hotspot Image block and pick a block far down the card in a spot's Opens Block (its " +
-            "row shows no warning; left empty it shows none either). Open the card at full and tap that spot's pin (or its round close-up " +
-            "with the Loupes look): the card moves to the picked block and the spot's text does not open; the pin wears a small arrow. A " +
-            "spot with nothing picked still opens its text. Pick the card's title block in it: the row warns, the pin loses its arrow " +
-            "and opens its text again.\n\n" +
-            "TOP BAR\n" +
-            "- With Top Bar = Text Tabs, open a card with at least Show Navigation From blocks and raise it to full: a strip of words " +
-            "sits under the title, one per family the card has. Lower the card to its title: the strip is gone.\n" +
-            "- Open a card whose blocks all belong to one family: no strip at any height (one tab is not a choice).\n" +
-            "- The first word is underlined and bold. Scroll the card with the mouse wheel or a drag: the underline moves to the family " +
-            "you are reading.\n" +
-            "- Click a word: the card rises to full and that family's first block comes to rest at the top of what scrolls; its word " +
-            "is underlined.\n" +
-            "- Drag the strip sideways with the mouse: the words slide and the card does not move. Drag it up or down: the card " +
-            "moves like it does from its title.\n" +
-            "- Raise Show Navigation From above the card's block count: the strip goes. Set Top Bar = None: no strip on any card.\n" +
-            "- Untick Follow Scroll and scroll the card: the mark stays where it was; tap a word: it moves there. Tick it again: the " +
-            "mark follows the scroll.\n" +
-            "- Top Bar = Icon Tabs: every tab shows its family's icon in the family's colour above its word. Set Labels = Icon: the words " +
-            "go, the icons stay; Labels = Text: the icons go. Set Group By = Format: the tabs become Read, Look, Watch... with words only.\n" +
-            "- Top Bar = Icon Tabs With Chips: under the tabs, a chip per kind of block of the marked family; scroll into another family " +
-            "and the chips change; a family with one kind shows an empty row. Tap a chip: the card moves to that kind's first block.\n" +
-            "- Top Bar = Kind Chips: one chip per kind of the whole card, a coloured dot beside each word; the chip of the block you read " +
-            "is outlined and bold. Open a card with one family only: the chips still show.\n" +
-            "- Top Bar = Segmented: three or four equal segments fill the strip with no sideways scroll; the one you read is filled. In the " +
-            "Groups table rename a group: the segment's word changes at once. In the Families table pick another Group for a family: its " +
-            "blocks now light up that segment. Put every family in one group: the segments go (one segment is not a choice).\n" +
-            "- Top Bar = Progress Map: a thin bar split into pieces, a wide piece for a family with many blocks; the pieces up to the one " +
-            "you read are solid, the current one thicker. Tap a piece: the card moves there.\n" +
-            "- Top Bar = Family Pager: one family is named between two arrows, with its icon and its place (2 of 8); scroll the card: the " +
-            "name follows the family you read. Tap an arrow: the card moves to the family before or after; the first family has no left " +
-            "arrow, the last no right one. The Pages layout always uses it.\n" +
-            "- Tick Show Counts: each tab, chip or segment shows its number of blocks.\n\n" +
-            "BOTTOM BAR\n" +
-            "- Set Top Bar = None and Bottom Bar = Bottom Bar, open a long card with several families and raise it to full: a bar " +
-            "sits at the very bottom, under the card's pinned buttons, one slot per family with its icon and word.\n" +
-            "- With more families than Bar Slots the last slot reads More. Tap it: a list of the families that did not fit opens " +
-            "just above the bar; tap one and the card moves there, the list closes and the last slot now shows THAT family's icon " +
-            "and word, underlined, with a small up arrow. Tap it: the list opens again. Tap More twice: the list opens and closes.\n" +
-            "- Open the list and scroll the card, or press Escape: the list closes (Escape closes only the list; the card stays at its " +
-            "height). Open it and tap a word of the Top Bar: the card moves and the list closes.\n" +
-            "- Set Bar Slots to 3, 4 and 5: the bar holds two, three or four families and More, and More's list holds the rest. " +
-            "Open a card with fewer families than Bar Slots: one slot per family, no More.\n" +
-            "- Tap each slot: the card moves to that family's first block and the slot is underlined; scroll the card: the underline " +
-            "follows the family you read.\n" +
-            "- Scroll down: the pinned buttons and the bar slide away together; scroll up a little: both come back together.\n" +
-            "- Lower the card to half height on a card with a tall title: if the title, the buttons and the bar would leave less than " +
-            "a line of content, the buttons and the bar both give way. That is on purpose: one line of content is the least a height " +
-            "keeps. Set Show Navigation At = Full Only: at half height the bar goes and the buttons stay.\n" +
-            "- Lower the card to its title: no bar.\n" +
-            "- Bottom Bar = Dock: a rounded pill of icons sits at the bottom, centred. Only the family you are reading shows its word " +
-            "beside its icon, on an outlined plate. Scroll the card slowly: the word and the plate move from one icon to the next as " +
-            "you cross into each family. Tap an icon: the card moves there. Set Bar Slots to 3: the pill is narrower, never wider than " +
-            "the screen, and the last slot reads More. Labels has no effect on it.\n" +
-            "- Bottom Bar = Bar With Kinds: it looks like the Bottom Bar. Tap a family you are not in: the card moves there and no " +
-            "list opens. Tap the family you are in (underlined, with a small up arrow): a list of its kinds of block opens above the " +
-            "bar, each with how many blocks it has. Tap a kind: the card moves to its first block and the list closes. Tap the family " +
-            "twice more: the list opens, then closes. Scroll the card, or press Escape, while the list is open: it closes. A family " +
-            "with one kind has no arrow, and tapping it again just moves the card there again.\n" +
-            "- Bottom Bar = Up Next: a bar with a small Up next line, the next block's heading, its place on the card (for example 5 of " +
-            "13) and a Next button. Tap Next: the card moves to that block and the bar names the one after it, one number higher. " +
-            "Scroll with your finger instead: the bar follows what you read. Go to the last block: the bar says it is the end and " +
-            "has no Next button. On a card with one family the bar still shows.\n\n" +
-            "MENU\n" +
-            "- Set Menu = Drawer and open a card with at least Show Navigation From blocks: a round button with three bars sits in the " +
-            "title row, left of the close button (and of the language button when there is one). Set Menu = None: it goes.\n" +
-            "- Click it: the card darkens and a drawer opens on the left with a title and an X, and under them every " +
-            "family with its number of blocks, and under each family with several kinds of block, those kinds with theirs. The family " +
-            "and the kind you are reading are bold with a bar at their start.\n" +
-            "- Click a kind: the drawer closes and that kind's first block comes to rest at the top of what scrolls. Open it again and " +
-            "click the darkened card beside the drawer: it closes and the card has not moved. Open it and press Escape: it closes and " +
-            "the card stays at its height; Escape again lowers the card.\n" +
-            "- Set Menu = Big Tiles: the button opens a panel of big tiles, two to a row, one per family with its icon and count, under a " +
-            "switch By Purpose / By Format that starts on Group By. Click By Format: the tiles become Read, Look, Watch... Click a tile " +
-            "with several kinds: its kinds replace the tiles, with All Sections to go back; click a kind: the panel closes and the card " +
-            "moves there. A tile with one kind moves the card at once.\n" +
-            "- With Bottom Bar = Bottom Bar and more families than Bar Slots, tap More: the menu opens instead of the small list.\n\n" +
-            "FLOATING BUTTON\n" +
-            "- Set Floating Button = Dial and open a card with at least Show Navigation From blocks at its title height: a round button " +
-            "sits just above the card's top-right edge. Raise the card to half and to full: the button follows the card's edge, and at " +
-            "full it rests at the very top of the screen.\n" +
-            "- Click it: a column of buttons opens, one per family with its icon and word, upward over the camera view (downward over " +
-            "the card when the card is at full). Click a family: the column closes and the card moves there. Open it again and click " +
-            "the button (now an X), press Escape, or click the camera view beside it: the column closes and the card stays.\n" +
-            "- Set Floating Button = Radial: click the button, the families open on an arc around it, the last one More when there " +
-            "are more families than Bar Slots; click one: the card moves there. Click More: the arc shows the families that did not " +
-            "fit (with a Menu set, the menu opens instead).\n" +
-            "- With the Radial, press the button, slide towards a family and let go: the card moves to the family the slide pointed " +
-            "at, which is marked while you slide. Slide away from the arc, or let go on the button: nothing is picked.\n" +
-            "- Set Menu = Drawer and open the menu: it covers the floating button. Set Floating Button = None: the button goes.\n\n" +
-            "EDGE\n" +
-            "- Set Edge = Scrubber and open a card with at least Show Navigation From blocks and several families, then raise it to full: " +
-            "a column of small dots sits down the right edge of the content, one per family in the family's colour, the family you read " +
-            "a larger dot with an orange edge. At the card's title height there is no column; at half height there is one only when the " +
-            "content area is tall enough for every dot (about 48 points each).\n" +
-            "- Press on the dots and drag up or down: the dot under the finger is marked and a label beside it names its family. Let go: " +
-            "the card moves to that family's first block. Drag past the first or last dot by more than one dot's height and let go: nothing " +
-            "happens and the label goes.\n" +
-            "- Without any drag, tap each dot in turn: every family is reached with a single tap.\n" +
-            "- Start a drag on the content away from the dots: the card scrolls as usual and the dots follow what you read. Scroll a " +
-            "card with a full-width picture or a filmstrip at its right edge: the dots lie over that edge, and a drag that starts " +
-            "on them is the scrubber's, not the picture's.\n" +
-            "- Set Edge = None: the dots go.\n\n" +
-            "AUTO NAV BLOCK\n" +
-            "- Set Auto Nav Block = Icon Grid and open a card with at least Show Navigation From blocks: right under the title, before " +
-            "its first block, a grid of tiles, one per family of the card (with Group By = Format, one per format), each its icon, its " +
-            "word and how many blocks it holds. The tabs, bars and menus list no tile for it: it is no family of the card's own.\n" +
-            "- Tap a tile: the card rises to full and that family's first block comes to rest at the top of what scrolls.\n" +
-            "- Open a card with fewer blocks than Show Navigation From: no grid. Lower Show Navigation From to its block count: the grid " +
-            "appears; one more than its count: it goes.\n" +
-            "- In Specific Marker > Card Content add an Icon Grid block to a long point's card (+ Add block, navigation): the card shows " +
-            "that one where Card Content puts it, never a second one. Untick Icon Grid in Detail Card > Block Library: no grid on any card.\n" +
-            "- Set Auto Nav Block = None: the grid goes from every card that did not author its own.\n" +
-            "- Set Auto Nav Block = Contents and open the same long card: right under the title, a list of the card's families, each a " +
-            "line with its icon, its name and how many of its blocks were read (for example 0 of 18 read) -- folded. Tap a family: under " +
-            "it one row per block: an empty ring, the block's heading in bold, and its minutes on the right (the block's Reading Time in " +
-            "Specific Marker > Card Content; an audio or video block shows its clip's own length; a block with no time shows none). Tap " +
-            "the family again: its rows fold away.\n" +
-            "- Add a Contents block to a point's card yourself (+ Add block, navigation) and set its Rows = Every Block: every row shows " +
-            "at once under plain family names. Its Block Library row sets the default Rows for every Contents block a point authors; the " +
-            "one Auto Nav Block puts in always starts folded.\n" +
-            "- Raise the card to full and scroll slowly down past three blocks: as each block's top passes about a third of the way " +
-            "down the content, its row's ring fills with a tick, its heading turns regular and its family counts one more read. A row " +
-            "you never scrolled to stays empty and bold. Tap a row: the card moves to that block, and only that block is ticked, not " +
-            "the ones it flew past. A block shown as one folded line (Expandable, or the Accordion layout) is never ticked by " +
-            "scrolling past it: open it, and it ticks once its content passes that third.\n" +
-            "- Close the card and open it again: the ticks are still there. Detail Card > Card Container > Test > Reset Saved Card State, " +
-            "then close and reopen the card: every row is empty again; the notice counts the ticks it cleared.\n" +
-            "- Give a block a Reading Time of 3 in Card Content: its row reads 3 min at once. Set it back to 0: the time goes.\n" +
-            "- Open a card whose blocks all belong to one family: Contents still shows its rows (it lists blocks, not families).\n\n" +
-            "SHOW NAVIGATION AT AND HIDE WHILE SCROLLING\n" +
-            "- Open a long card with a tall title and buttons pinned to its bottom (an Actions block with the sticky_cta look) at half " +
-            "height. If the title, the strip and the buttons would leave less than a heading and two lines of content, the strip " +
-            "is left out and the buttons stay over at least one line of content: that is on purpose. Scroll the content a little: " +
-            "the title shrinks to one line and the strip comes back where there is room.\n" +
-            "- Raise the card to full: the strip and the buttons show. With Hide While Scrolling = When Scrolling Down, scroll down: " +
-            "the buttons slide away and the content takes their room; scroll up a little: they come back. At the very end of the " +
-            "card they are there too. The strip never moves.\n" +
-            "- Set Hide While Scrolling = Never and scroll down again: the buttons stay.\n" +
-            "- Set Show Navigation At = Full Only: at half height the strip never shows, even with the title shrunk; at full height " +
-            "it does. Set it back to Half And Full: the strip shows at half height again wherever there is room.\n" +
-            "- Lower the card to its title: neither the strip nor the buttons show.\n\n" +
-            "BACK BUTTON\n" +
-            "- In the Game view, Escape stands for the phone's Back button.\n" +
-            "- Open a card, drag it to full, open a picture in its full-screen view. Press Escape four times: the full view closes, " +
-            "the card goes to half, then to its title, then it closes and the marker is no longer selected.\n" +
-            "- With a Menu set, open the card at full and open the menu. Press Escape: the menu closes and the card stays at full; the " +
-            "next Escape lowers it to half. The same with a Bottom Bar's More list or a Bar With Kinds' list open.\n" +
-            "- Open a folded line (an Expandable block, or any line with Layout = Accordion) and press Escape: the line folds and the " +
-            "card stays; the next Escape lowers it.\n" +
-            "- Set Back Button = Leave It To The App and press Escape with a card open: nothing happens to the card.\n\n" +
+            "- Open the wall scene, press Play. Navigation edits are live: pick another Block Order or move a family here and the open " +
+            "card reorders in place, keeping its height and its scroll. Ctrl+Z here brings the old order back. Layout, Open One At A " +
+            "Time, Show Navigation From, Show Navigation At, Follow Scroll, Jump Opens Card To, Jump Motion and Back Button are live " +
+            "too: the open card, or its next tap or Back press, follows them at once.\n" +
+            "- The rows are in four groups under their own headings: Shape, When Navigation Shows, How They Look (only under Accordion) " +
+            "and What A Jump Does. Placed Model Control is not here: it is in Card Container.\n" +
+            "- Pick a point whose card has blocks of several families and enough of them to scroll; a very short card shows the same " +
+            "order in every option, so it proves nothing. Test > Preview Navigation opens that card for you at full height.\n\n" +
+            "SHAPE\n" +
+            "- Block Order: pick each option on a long card and read the card from top to bottom: As Authored keeps Card Content's " +
+            "order, End Families Last moves the ticked families (Sources) to the end, Grouped By Family makes each family one run in " +
+            "the Families table's order. Move a family with its arrows: the open card follows.\n" +
+            "- Layout = Accordion: every block is one line; tap a line, it opens right under it and the card does not move; tap it " +
+            "again, it folds. Open two lines and press Escape: the one opened last folds, then the other. Tick Open One At A Time: " +
+            "opening a line folds the other, and the line you tapped stays where it was.\n" +
+            "- Layout = Tabs: the card shows one section at a time; tap another group of the Navigation Bar: only its blocks show, and " +
+            "scrolling inside it never moves the mark. The sources at the end show with every section.\n" +
+            "- Layout = Pages: swipe sideways on the content: the next page turns in, and a drag straight down only scrolls the page.\n" +
+            "- Group By = Format with Tabs: the sections are Read, Look, Watch...; the Navigation Bar keeps its own groups.\n\n" +
+            "WHEN NAVIGATION SHOWS\n" +
+            "- Show Navigation From: raise it above the open card's block count -- the Navigation Bar goes and the card only scrolls; " +
+            "lower it again -- the bar is back.\n" +
+            "- Show Navigation At = Full Only with the Navigation Bar at the Top: at half height no bar, at full height the bar; Half And Full: the bar at both.\n" +
+            "- Hide While Scrolling = When Scrolling Down (the Navigation Bar off): on a card with buttons pinned to its bottom, read down: they slide away; " +
+            "a small move up brings them back. Never: they stay.\n\n" +
+            "WHAT A JUMP DOES\n" +
+            "- Follow Scroll on: scroll the card by hand, the bar's chosen group follows the blocks in view. Off: it moves only on a tap.\n" +
+            "- Jump Opens Card To = Full: at half height, tap a group of the bar -- the card rises to full first, then moves. Keep Its " +
+            "Stop: it stays at half and only the content moves.\n" +
+            "- Jump Motion = Smooth: the content glides to the block; Instant: it is there at once. With Reduce Motion on (Card " +
+            "Container) every jump is instant.\n" +
+            "- Back Button = Step The Card Down: open a block's full view and press Escape (the Editor's Back): it closes; again: the " +
+            "card goes from full to half, then to its title, then closes. Leave It To The App: Escape does nothing to the card.\n\n" +
             "EXPANDABLE BLOCKS AND THE FULL VIEW\n" +
             "- In Specific Marker > Card Content, set Display = Expandable on a few blocks of a long card (a text, a gallery, a video, a " +
             "3D model). Open the card: each of them is one line -- its icon, its heading (or its first words), its kind of content " +
@@ -535,20 +162,9 @@ namespace TileStories.Editor
             "- Open a line and tap its full-view button: the block fills the screen, the card's title and the block's words above it. " +
             "Play the video or turn the model there, press Escape: the card shows the same video at the same moment, and its own " +
             "player and model still answer. Switch the language or change a field while the full view is open: it stays, redrawn.\n\n" +
-            "WARNINGS\n" +
-            "- Top Bar, Bottom Bar and Edge all on (pick Deep dive, then set Bottom Bar to a bar): a warning shows under Edge. Set one " +
-            "of the three to None: it goes. Two bars never warn.\n" +
-            "- Top Bar = Progress Map, on a wall whose busiest card has more sections than the warning names: it shows under Top Bar and " +
-            "says which card and how many. Another Top Bar: it goes.\n" +
-            "- Layout = Bento, on a wall whose busiest card has more sections than the warning names: it shows under Layout. Another " +
-            "Layout: it goes.\n" +
-            "- A Bottom Bar (or the Radial) with Bar Slots below the sections of the busiest card: a warning shows under Bar Slots. Raise " +
-            "Bar Slots to its top, or to the sections of that card: it goes.\n" +
-            "- Layout = Tabs with Top Bar and Bottom Bar None: a warning shows under Layout. A warning is only for you: no visitor ever " +
-            "sees one, and none changes the card.\n\n" +
             "PREVIEW NAVIGATION\n" +
             "- In this section's Test, tick Preview Navigation and pick a point with a long card in Preview Point, then press Play: that " +
-            "card opens by itself at full height. Pick presets above and watch the card follow. A point whose card is too short for " +
+            "card opens by itself at full height. Change a row above and watch the card follow. A point whose card is too short for " +
             "navigation shows a note under Preview Point. Untick it when you are done.\n" +
             "- Test Runner: EditMode and PlayMode, zero failures.";
 
@@ -562,40 +178,13 @@ namespace TileStories.Editor
             "fast, and that the blocks that close the card still read as the end of it rather than as more content.\n" +
             "- Back Button (Android): open a card, raise it to full, and press the phone's own Back button (or make the Back gesture) " +
             "once per step: full to half, half to its title, then the card closes. With Leave It To The App, Back does what the app " +
-            "does without a card. With a Menu set, open it and press Back: the menu closes first and the card stays. An iPhone has no " +
-            "Back button: nothing to check there.\n" +
-            "- Menu: reach the menu button in the title row with the hand that holds the phone, open the menu and pick a line or a tile " +
-            "with a thumb; tap the darkened card beside it to close it. Check the card behind stays readable as a frame and the words of " +
-            "every line and tile read whole.\n" +
-            "- Top Bar: on a card with its strip, swipe the strip sideways with a thumb -- the words slide, the card stays; start a swipe " +
-            "on a word and move up -- the card rises and the word is not tapped; tap each word once -- every tap lands where it should.\n" +
-            "- Bottom Bar: hold the phone in one hand and reach every slot and More with the thumb; open More and pick a family from " +
-            "its list. Check that every word reads whole and that the bar does not sit under the phone's own gesture bar.\n" +
-            "- Floating Button: hold the phone in one hand at the card's title and half heights and reach the button with that thumb. " +
-            "With the Radial, press, slide towards each family on the arc and let go -- every family reachable with the same thumb, " +
-            "none under the thumb's own shadow -- then open it with a tap and tap each family. With the Dial, open it and reach the " +
-            "far end of its column.\n" +
-            "- Edge: hold the phone in one hand and reach every dot with the thumb of that hand by dragging along the column and, " +
-            "separately, by tapping; check the label beside the dot under the thumb reads whole and is not hidden by the thumb, and that " +
-            "a swipe on a filmstrip or a picture at the right edge of a block is not taken by the dots when it starts beside them.\n" +
+            "does without a card. An iPhone has no Back button: nothing to check there.\n" +
             "- Layout: with Accordion, open and fold lines with a thumb while scrolling, and check an open line never jumps the page; " +
             "with Tabs, switch sections with a thumb and check visitors can still tell which section they are in after scrolling; " +
             "with Pages, read a page down with a thumb and turn pages with the same thumb, and check a scroll never turns a page by " +
-            "accident and the next page's edge is noticed outdoors; with Bento, read every tile's name and count outdoors at the " +
-            "phone's width, tap the smallest tile with a thumb, and check the largest tile is what the eye goes to first.\n" +
+            "accident and the next page's edge is noticed outdoors.\n" +
             "- Expandable: on a card with expandable blocks, tap each line with a thumb (the whole line opens it) and the full-view " +
-            "button of an open one; read every line's words whole at the phone's width, and check its icon and its kind of content " +
-            "do not crowd the words.\n" +
-            "- Auto Nav Block: open a long card and read its grid of tiles at the phone's real width: every word whole, every tile tapped " +
-            "once with a thumb lands its family. With Contents: read each row's words at the phone's width, tap a row with a thumb, " +
-            "and check a ticked row is told apart from an unticked one outdoors in bright light (the filled ring and the lighter " +
-            "heading, not only the tick).\n" +
-            "- Hide While Scrolling: read a long card at full height with a thumb. The bottom buttons slide away as you read down and " +
-            "come back with a small move up; a tap on the content never makes them jump. Check that the half height of a long card " +
-            "shows something to read on this phone's screen.\n" +
-            "- Presets: pick One hand and Over the camera, then hold the phone in one hand and reach the bar, the menu button and the round " +
-            "button with that thumb; pick Quick glance and Story and use them while walking, as a visitor would. Untick Preview " +
-            "Navigation before a normal build.\n" +
+            "button of an open one; read every line's words whole at the phone's width.\n" +
             "- Nothing else here needs a device: the order and the jumps are the same on every screen.";
     }
 }

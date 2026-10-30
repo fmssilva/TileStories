@@ -93,20 +93,12 @@ namespace TileStories.Editor.Tests
             int sections = sheet.Nav.Model.Sections.Count;
             Assert.Greater(sections, 1, "precondition: The Lamp's map has several sections");
 
-            // - the bento door (CardLayoutView asks through SectionOpener): an index past either end opens nothing and answers false
-            Assert.IsFalse(sheet.Layout.SectionOpener(sections, null), "one past the last section");
-            Assert.IsFalse(sheet.Layout.SectionOpener(-1, null), "before the first");
-            Assert.IsFalse(sheet.Takeover.IsOpen, "no page drawn for either");
-            Assert.IsTrue(sheet.Layout.SectionOpener(0, null), "precondition: a real section does open");
-            Assert.IsTrue(sheet.FullView.IsOpen);
-
-            // - closed: neither a block nor a lightbox opens, and the section door answers false
+            // - closed: neither a block nor a lightbox opens
             sheet.Hide();
             sheet.FullViewOpener.OpenFullView(OpenBlock);
             Assert.IsFalse(sheet.Takeover.IsOpen, "a closed card opens no block");
             sheet.FullViewOpener.OpenTakeover("Gallery", 3, 0, (view, container, media, page) => { });
             Assert.IsFalse(sheet.Takeover.IsOpen, "nor a lightbox");
-            Assert.IsFalse(sheet.Layout.SectionOpener(0, null), "nor a section");
         }
     }
 }

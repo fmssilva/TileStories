@@ -23,9 +23,7 @@ namespace TileStories.Tests
         {
             Lamp + "/" + CardOptions.NavNone,
             Lamp + "/" + BuiltInNavElements.NextUp,
-            Lamp + "/" + BuiltInNavElements.BottomBar,
             Painting + "/" + BuiltInNavElements.NextUp,
-            Painting + "/" + BuiltInNavElements.BottomBar,
         };
 
         private PoiCardSheetView Sheet => Card.Sheet;
@@ -122,9 +120,7 @@ namespace TileStories.Tests
             string last = Model.Targets[Model.Targets.Count - 1];
             int lastRun = LastRunsSection();
             string bar = element == BuiltInNavElements.NextUp && Sheet.Slots.BottomView is NextUpNavView next
-                ? $" | next_up finished {next.Finished} '{next.Caption.text}' {next.Position.text}"
-                : element == BuiltInNavElements.BottomBar && Sheet.Slots.BottomView is BottomBarNavView b
-                    ? $" | bar marks {(b.CurrentIndex >= 0 ? Model.Sections[b.CurrentIndex].Key : "-")}" : "";
+                ? $" | next_up finished {next.Finished} '{next.Caption.text}' {next.Position.text}" : "";
             return $"content {Content:0.0} viewport {Viewport:0.0} (away {hiddenViewport:0.0}, area {hiddenViewport - Viewport:0.0}) range {Range:0.0} " +
                    $"offset {offset:0.0} short by {Range - offset:0.0} | area shown {Chrome.BottomShown} footer {Chrome.FooterShown} bar {Chrome.BottomNavShown} | " +
                    $"end in view {contentBottomBelowViewport <= OnePixel} ({contentBottomBelowViewport:0.0} below) | IsAtEnd {offset >= Range - NavScrollRule.EndTolerance} | " +

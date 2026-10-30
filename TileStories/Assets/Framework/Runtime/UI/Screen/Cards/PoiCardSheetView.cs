@@ -59,8 +59,6 @@ namespace TileStories
         public CardLayoutView Layout { get; }
         // The pages layout's sideways turn (_3.2 step 14): the next page's peek, the slide with the finger, the turn
         public CardPagerView Pager { get; }
-        // The bento layout's overview (_3.2 step 15b): the sections as tiles where the blocks were; a tile opens its section in the full view
-        public CardBentoView Bento { get; }
         // The full-screen view over the card (a gallery's lightbox), above the sheet in the same layer
         public TakeoverView Takeover { get; }
         // Any block of the card in that full view (_3.2 step 12): a second view of its kind, while the card's own stays bound
@@ -77,7 +75,7 @@ namespace TileStories
         public SheetDrag Drag { get; }
         // The "Show me where it is" button at the sheet's bottom right (_3.3 P3d, LocateFabRule): placed with the chrome (PlaceLocate)
         public LocateFabView Locate { get; }
-        // What opens in the full view (a block among its siblings, a lightbox, a bento section) and what reopens over a same-point rebind
+        // What opens in the full view (a block among its siblings, a lightbox) and what reopens over a same-point rebind
         public CardFullViewOpener FullViewOpener { get; }
 
         // Raised when the visitor closes the card (the X, or a drag / swipe below peek)
@@ -182,14 +180,13 @@ namespace TileStories
             BottomArea.AddToClassList("poi-card__bottom");
             Root.Insert(Root.IndexOf(Stack.Footer), BottomArea);
             BottomArea.Add(Stack.Footer);
-            // - the floating slot is a layer of its own (the sheet clips what it holds); its element host is the floating slot's
+            // - the floating slot is a layer of its own (the sheet clips what it holds)
             Floating = new FloatingSlot(this);
-            Slots = new NavSlots(Root, Stack.Scroll, BottomArea, Floating.Elements, navElements ?? NavElementRegistry.Shared);
+            Slots = new NavSlots(Root, Stack.Scroll, BottomArea, navElements ?? NavElementRegistry.Shared);
             // - an open section's Start begins its Reveal once it clears a Navigation Bar floating at the stack's foot
             Stack.FootInset = () => Slots.BottomKey == NavBarView.ElementKey ? Slots.Bar.FootClearance : 0f;
             Chrome = new CardChromeView(this);
             Pager = new CardPagerView(Root, Stack.Scroll, Layout, Nav);
-            Bento = new CardBentoView(Stack, Layout, Nav);
 
             // - the premium target's chrome (_3.3 S4 third round, v5): the X at the left, settings at the right, each a small glass DISC with a
             //   thin mark inside a whole touch target (the button); no words on either: the name (tooltip) comes from CardStrings
@@ -311,7 +308,6 @@ namespace TileStories
             // - the layout first: the controller's spy reads the section tabs shows
             Layout.Bind(model, _context);
             Pager.Bind(model, _context);
-            Bento.Bind(model, _context);
             Nav.Bind(model, _context);
             Slots.Bind(Nav.Model, Nav, _context);
             Floating.Refresh();
@@ -443,7 +439,6 @@ namespace TileStories
             Nav?.Unbind();
             Layout?.Unbind();
             Pager?.Unbind();
-            Bento?.Unbind();
             Slots?.Unbind();
             Floating?.Unbind();
             if (MenuButton != null) ShowMenuButton();
@@ -541,7 +536,7 @@ namespace TileStories
         public void OpenTakeover(string name, int pageCount, int startPage, TakeoverPageDrawer drawPage) =>
             FullViewOpener.OpenTakeover(name, pageCount, startPage, drawPage);
 
-        // A block asked for its full view (an open compact row's button, a bento tile): it opens among its siblings (CardFullViewOpener)
+        // A block asked for its full view (an open compact row's button): it opens among its siblings (CardFullViewOpener)
         public void OpenFullView(string blockKey) => FullViewOpener.OpenFullView(blockKey);
 
         // Rest at `stop` (Dismissed hides)

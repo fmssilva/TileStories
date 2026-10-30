@@ -101,11 +101,7 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(CardOptions.NavNone, s.navigation.bottom, "no bottom bar unless the wall picks one");
             // - _3.2 step 8: an old config has no Menu (never a default)
             Assert.AreEqual(CardOptions.NavNone, s.navigation.menu, "no menu button unless the wall picks one");
-            // - _3.2 step 9: an old config has no Floating Button, and a placed model gets its chip
-            Assert.AreEqual(CardOptions.NavNone, s.navigation.floating, "no floating button unless the wall picks one");
-            // - _3.2 step 10: an old config has no Edge element (it lies over the content, so it is opt-in)
-            Assert.AreEqual(CardOptions.NavNone, s.navigation.edge, "no edge element unless the wall picks one");
-            Assert.AreEqual(CardOptions.NavNone, s.navigation.auto_nav_block, "no nav block is added to any card unless the wall picks one");
+            // - _3.2 step 9: a placed model gets its chip
             Assert.AreEqual(CardOptions.PlacedModelChip, s.navigation.placed_model_control, "a placed model says so above the card");
             // - _3.2 step 3: the jump and spy options load on their section 3 defaults
             Assert.IsTrue(s.navigation.follow_scroll, "the marked section follows the scroll");
@@ -116,14 +112,9 @@ namespace TileStories.Editor.Tests
             // - _3.2 step 5b: the chrome options load on their section 3 defaults
             Assert.AreEqual(CardOptions.ShowNavHalfAndFull, s.navigation.show_at, "the strip may show at Half and Full");
             Assert.AreEqual(CardOptions.HideOnScrollDown, s.navigation.hide_on_scroll, "the bottom area hides while the reader moves down");
-            // - _3.2 step 6: the top elements' options load on their section 3 defaults; no Groups rows = the framework's four
+            // - _3.2 step 6: the top elements' options load on their section 3 defaults
             Assert.AreEqual(CardOptions.LabelsIconAndText, s.navigation.labels, "icon tabs show icon and words");
             Assert.IsFalse(s.navigation.show_counts, "no block counts");
-            CollectionAssert.IsEmpty(s.navigation.groups, "no Groups rows written");
-            CollectionAssert.AreEqual(NavGroupRule.DefaultKeys, NavGroupRule.Groups(s.navigation).Select(g => g.Key), "so the four defaults apply");
-            var family = JsonUtility.FromJson<CardFamilySetting>("{\"family\":\"about\",\"order\":10,\"at_end\":false}");
-            Assert.AreEqual("", family.group, "a Families row written before step 6 has no group: its family's default");
-            Assert.AreEqual(NavGroupRule.Discover, NavGroupRule.GroupOf(BuiltInFamilies.About, new CardNavigationSettings { families = { family } }));
             Assert.IsNotNull(loaded.pois[0].card);
             CollectionAssert.IsEmpty(loaded.pois[0].card.blocks, "no blocks = the header-only card");
         }
@@ -146,6 +137,60 @@ namespace TileStories.Editor.Tests
             Assert.IsNotEmpty(lamp.name, "the wall's own name is the identity the scene tests read back from the config");
             Assert.IsNotEmpty(military.name);
             Assert.AreEqual("military", military.category);
+        }
+
+        // _3.3 R1, no shims: a config written while the old navigation elements existed loads as it is -- every retired key ignored, every
+        // retired value read as the option's default -- and the card it makes is the Navigation Bar's. The old file is the SHIPPED wall with
+        // what such a file held: Text Tabs / Dock / Big Tiles in the three kept slots, the Floating / Edge / Auto Nav keys, a Groups table and
+        // a Families row's group, the Bento layout, and a Rails block authored on The Lamp
+        [Test]
+        public void AnOldConfigNamingRetiredElements_LoadsCleanly_OnTheNavigationBarDefault()
+        {
+            var shipped = JsonUtility.FromJson<WallConfigData>(File.ReadAllText("Assets/Apps/LivingRoom/config.json"));
+            var nav = shipped.card_settings.navigation;
+            nav.top = "text_tabs";
+            nav.bottom = "dock";
+            nav.menu = "grid_overlay";
+            nav.layout = "bento";
+            nav.bar = new CardNavBarSettings();
+            nav.families = new List<CardFamilySetting> { new() { family = "about", order = 10, at_end = false } };
+            int lampBlocks = shipped.pois.Single(p => p.id == "lamp").card.blocks.Count;
+            shipped.pois.Single(p => p.id == "lamp").card.blocks.Add(new BlockInstanceData { key = "block_900", kind = "nav_rails", variant = "rails" });
+            string json = JsonUtility.ToJson(shipped, true);
+            const string navigationOpens = "\"navigation\": {";
+            Assert.AreEqual(1, json.Split(new[] { navigationOpens }, StringSplitOptions.None).Length - 1, "precondition: one navigation object to write the old keys into");
+            json = json.Replace(navigationOpens, navigationOpens + "\"floating\": \"fab_dial\", \"edge\": \"edge_scrubber\", \"auto_nav_block\": \"nav_icon_grid\", "
+                + "\"groups\": [{\"key\": \"group_1\", \"label\": [{\"lang\": \"en\", \"value\": \"Discover\"}]}], ");
+            const string aboutRow = "\"family\": \"about\",";
+            Assert.AreEqual(1, json.Split(new[] { aboutRow }, StringSplitOptions.None).Length - 1, "precondition: one About row to give a group");
+            json = json.Replace(aboutRow, aboutRow + " \"group\": \"group_1\",");
+            StringAssert.Contains("\"edge_scrubber\"", json, "precondition: the old file names the retired elements");
+
+            WallConfigData old = null;
+            Assert.DoesNotThrow(() => old = JsonUtility.FromJson<WallConfigData>(json), "the old file loads");
+            var loaded = old.card_settings.navigation;
+            Assert.IsTrue(NavBarRule.Enabled(loaded), "the card's way round is the Navigation Bar");
+            Assert.IsTrue(NavBarRule.AtBottom(loaded.bar), "at its default place");
+            Assert.AreEqual(CardOptions.LayoutScroll, CardLayoutRule.Layout(loaded), "Bento reads as the default layout, Scroll");
+            Assert.AreEqual("about", loaded.families.Single().family, "the Families row keeps what still exists (its group is dropped)");
+
+            var lamp = old.pois.Single(p => p.id == "lamp");
+            var stack = BlockStackBuilder.Build(lamp, old.card_settings, BlockRegistry.Shared, old.pois);
+            var skipped = stack.Skipped.Single(s => s.Instance.key == "block_900");
+            Assert.AreEqual(BlockStackBuilder.SkipReason.UnknownKind, skipped.Reason, "a Rails block is a kind the card no longer has: left out, never drawn");
+            var model = CardNavModel.Build(stack.Entries, BlockRegistry.Shared, old.card_settings);
+            Assert.IsTrue(model.ShowsNavigation, "precondition: The Lamp shows navigation");
+            NavElementDefinition OfSlot(string slot, string key) =>
+                NavElementRegistry.Shared.TryGet(key, out var d) && d.Slot == slot ? d : null;
+            Assert.IsNull(NavSlotRule.TopElement(loaded, model, key => OfSlot(NavSlotKeys.Top, key)), "even with the bar off, Text Tabs draws nothing");
+            Assert.IsNull(NavSlotRule.BottomElement(loaded, model, key => OfSlot(NavSlotKeys.Bottom, key)), "nor the Dock");
+            Assert.IsNull(NavSlotRule.MenuElement(loaded, model, key => OfSlot(NavSlotKeys.Menu, key)), "nor Big Tiles");
+            Assert.AreEqual(lampBlocks, stack.Entries.Count + stack.Skipped.Count - 1, "every other block of The Lamp is read as before");
+
+            // - the next save writes none of it back: the retired keys simply go
+            string saved = JsonUtility.ToJson(old, true);
+            foreach (string key in new[] { "\"floating\":", "\"edge\":", "\"auto_nav_block\":", "\"groups\":", "\"group\":" })
+                StringAssert.DoesNotContain(key, saved, key + " is not written again");
         }
     }
 }

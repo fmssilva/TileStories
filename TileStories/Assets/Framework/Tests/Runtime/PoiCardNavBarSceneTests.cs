@@ -151,8 +151,6 @@ namespace TileStories.Tests
             Assert.AreEqual(NavBarView.ElementKey, Sheet.Slots.BottomKey, "the default bar is the bottom slot's element");
             Assert.IsNull(Sheet.Slots.TopKey, "...no top element (the old Top Bar defaults to none)");
             Assert.IsNull(Sheet.Slots.MenuKey);
-            Assert.IsNull(Sheet.Slots.FloatingKey);
-            Assert.IsNull(Sheet.Slots.EdgeKey);
             Assert.GreaterOrEqual(Bar.Items.Count, NavBarRule.MinEntries, "the card's groups");
             Assert.IsTrue(BottomShown, "Show Always: there at rest");
             Assert.IsTrue(Bar.OverHero, "at rest it lies on the hero's picture");

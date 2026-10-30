@@ -5,13 +5,11 @@ namespace TileStories
     //   - Sections First (the default): the section titles only, each opening its own rows (AccordionRule, the card's one accordion
     //     mechanism; sections open independently)
     //   - Every Block: every row under its title, as at step 11b
-    // A contents block the CARD inserted (Auto Nav Block, a synthesized entry) always opens with its sections folded -- the visitor did not
-    // ask for it, so it takes the least room; one a POI authored follows its own Rows, else the wall's Block Library default
+    // A contents block follows its own Rows, else the wall's Block Library default
     public static class NavContentsRule
     {
         public static bool SectionsFirst(BlockStackBuilder.Entry entry, CardSettings settings)
         {
-            if (entry.Synthesized) return true;
             var field = entry.Definition?.Field(BuiltInBlocks.NavContentsRowsField);
             if (field == null) return true;
             string rows = BlockLibraryRule.Choice(settings, entry.Definition, field, new BlockFieldReader(entry.Instance, null, null));

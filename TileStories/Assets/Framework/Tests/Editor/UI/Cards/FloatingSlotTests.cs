@@ -39,7 +39,6 @@ namespace TileStories.Editor.Tests
         {
             var wall = Shipped();
             var nav = wall.card_settings.navigation;
-            nav.floating = floating;
             nav.menu = menu;
             nav.top = CardOptions.NavNone;
             nav.block_order = CardOptions.BlockOrderByFamily;
@@ -116,10 +115,7 @@ namespace TileStories.Editor.Tests
             Assert.GreaterOrEqual(sheetAt, 0, "precondition: the sheet is in the card layer");
             Assert.Greater(floatingAt, sheetAt, "over the sheet");
             Assert.AreEqual(menuAt - 1, floatingAt, "right under the menu layer");
-            Assert.AreEqual(floatingAt - 1, sheet.Layer.IndexOf(sheet.Floating.Scrim), "its scrim right under it: it dims the card, never the slot");
-            Assert.IsFalse(sheet.Floating.IsDimmed, "and starts off");
             Assert.Greater(fullViewAt, menuAt, "and so under the full view");
-            Assert.AreSame(sheet.Floating.Elements, sheet.Slots.Floating, "the slots bind the Floating Button into the floating layer");
             Assert.IsTrue(sheet.Floating.Root.ClassListContains("ts-card"), "it carries the card's tokens (its gap is read there)");
             Assert.IsFalse(sheet.Floating.IsShown, "no card: no slot");
             Assert.AreEqual(PickingMode.Ignore, sheet.Floating.Root.pickingMode, "the row never takes a finger itself: a tap beside it reaches the camera");
@@ -181,133 +177,4 @@ namespace TileStories.Editor.Tests
         }
     }
 
-    // FloatingSlotTests's tests whose subject is an old navigation element: they wait for its rebuild on the Navigation Bar's pattern
-    [Ignore(TestSkips.OldNavigationElements)]
-    public class FloatingSlotOldNavigationTests : FloatingSlotFixture
-    {
-        // Section 5.4: the wall's Floating Button, in its own slot; None leaves the slot empty (and hidden while no model stands); a card below
-        // Show Navigation From gets none, like every element
-        [Test]
-        public void TheFloatingButton_IsTheWallsPick_InTheFloatingSlot_AndNoneOrAShortCardLeavesItEmpty()
-        {
-            CollectionAssert.AreEqual(new[] { BuiltInNavElements.FabDial, BuiltInNavElements.FabRadial },
-                NavElementRegistry.Shared.OfSlot(NavSlotKeys.Floating).Select(e => e.Key), "the floating slot's elements, from the registry");
-            Assert.IsTrue(NavElementRegistry.Shared.OfSlot(NavSlotKeys.Floating).Single(e => e.Key == BuiltInNavElements.FabRadial).ReadsBarSlots,
-                "the radial reads Bar Slots (its arc caps like a bar)");
-
-            var sheet = Sheet();
-            ShowCard(sheet, With(CardOptions.NavNone));
-            Assert.IsNull(sheet.Slots.FloatingView, "None: no element");
-            Assert.IsFalse(sheet.Floating.IsShown, "and nothing standing: the slot stays hidden");
-
-            ShowCard(sheet, With(BuiltInNavElements.FabDial));
-            Assert.IsInstanceOf<FabDialNavView>(sheet.Slots.FloatingView);
-            Assert.AreEqual(BuiltInNavElements.FabDial, sheet.Slots.FloatingKey);
-            Assert.AreSame(sheet.Floating.Elements, sheet.Slots.FloatingView.Root.parent, "drawn in the floating layer");
-            Assert.IsTrue(sheet.Floating.IsShown, "the slot shows over the open card");
-
-            ShowCard(sheet, With(BuiltInNavElements.FabRadial));
-            Assert.IsInstanceOf<FabRadialNavView>(sheet.Slots.FloatingView, "a live switch rebinds the slot");
-
-            ShowCard(sheet, With(BuiltInNavElements.FabDial), LampMilitary);
-            Assert.IsFalse(sheet.Nav.Model.ShowsNavigation, "precondition: Lamp - Military is under Show Navigation From");
-            Assert.IsNull(sheet.Slots.FloatingView, "a short card: no Floating Button");
-            Assert.IsFalse(sheet.Floating.IsShown);
-
-            sheet.Hide();
-            Assert.IsNull(sheet.Slots.FloatingView);
-            Assert.IsFalse(sheet.Floating.IsShown, "a closed card: no slot");
-        }
-
-        // fab_dial: a tap opens the column as the overlay owner's ONE anchored list, a labelled pill per section; Back closes it first and the card
-        // stays; a tap outside closes it first and only the next one closes the card; the button again closes it
-        [Test]
-        public void TheDial_OpensAsTheOverlaysOneList_APillPerSection_BackAndATapOutsideCloseItFirst()
-        {
-            var sheet = Sheet();
-            var wall = With(BuiltInNavElements.FabDial);
-            ShowCard(sheet, wall);
-            var dial = (FabDialNavView)sheet.Slots.FloatingView;
-            var model = sheet.Nav.Model;
-            Assert.AreEqual(8, model.Sections.Count, "precondition: The Lamp's 8 sections");
-            Assert.IsFalse(dial.IsOpen);
-            Assert.AreEqual(DisplayStyle.None, dial.List.style.display.value, "zero chrome until needed");
-
-            dial.Toggle();
-            Assert.IsTrue(dial.IsOpen);
-            Assert.AreEqual(FabDialNavView.ListKey, sheet.Overlay.OpenKey, "the one thing open over the card");
-            Assert.IsFalse(sheet.Overlay.IsModal, "anchored: no scrim");
-            Assert.IsTrue(dial.Fab.IsOpen, "the button shows the X");
-            Assert.IsTrue(sheet.Floating.IsDimmed, "the card and the camera view behind the column are dimmed");
-            var words = Words("en");
-            CollectionAssert.AreEqual(model.Sections.Select(s => words.Get(s.LabelKey)).ToArray(), dial.Items.Select(i => i.Label.text).ToArray(),
-                "a pill per section, in order, each its words");
-            Assert.IsTrue(dial.Items.All(i => i.Icon.style.display.value == DisplayStyle.Flex), "each with its family's icon");
-            Assert.IsTrue(dial.Items[0].Button.ClassListContains(NavTab.CurrentClass), "the section being read is marked");
-            Assert.AreEqual(1, dial.Items.Count(i => i.Button.ClassListContains(NavTab.CurrentClass)), "only it");
-
-            Assert.IsTrue(sheet.Back(), "Back is the card's");
-            Assert.IsFalse(dial.IsOpen, "Back closes the column first");
-            Assert.IsFalse(sheet.Floating.IsDimmed, "and the dim goes with it");
-            Assert.AreEqual(SheetStopRule.Stop.Full, sheet.Stop, "and the card stays where it was");
-
-            dial.Toggle();
-            int closes = 0;
-            sheet.CloseRequested += () => closes++;
-            sheet.TapOutside();
-            Assert.IsFalse(dial.IsOpen, "a tap on the camera view closes the column first");
-            Assert.AreEqual(0, closes, "not the card");
-            sheet.TapOutside();
-            Assert.AreEqual(1, closes, "with nothing open, the next tap outside closes the card");
-
-            dial.Toggle();
-            dial.Toggle();
-            Assert.IsFalse(dial.IsOpen, "the button again closes it");
-            Assert.IsFalse(sheet.Overlay.IsOpen, "and the owner knows");
-        }
-
-        // fab_radial: the arc holds Bar Slots items, the last More when the sections overflow; More turns the arc to the rest -- or, with a Menu,
-        // opens the Menu (which closes the arc: one thing at a time)
-        [Test]
-        public void TheRadial_HoldsBarSlotsItemsWithMoreLast_MoreTurnsTheArcToTheRest_OrOpensTheMenu()
-        {
-            var sheet = Sheet();
-            ShowCard(sheet, With(BuiltInNavElements.FabRadial));
-            var radial = (FabRadialNavView)sheet.Slots.FloatingView;
-            var model = sheet.Nav.Model;
-            Assert.AreEqual(4, model.BarSections.Count, "precondition: 5 Bar Slots over 8 sections: 4 and More");
-            Assert.AreEqual(4, model.MoreSections.Count);
-
-            radial.Tap();
-            Assert.IsTrue(radial.IsOpen, "a tap opens the arc");
-            Assert.AreEqual(FabRadialNavView.ArcKey, sheet.Overlay.OpenKey, "as the one thing open over the card");
-            Assert.AreEqual(5, radial.Items.Count, "Bar Slots items");
-            CollectionAssert.AreEqual(new[] { 0, 1, 2, 3, -1 }, radial.Items.Select(i => i.Section).ToArray(), "the first four sections, More last");
-            var words = Words("en");
-            Assert.AreEqual(words.Get(CardStrings.Keys.NavMore), radial.Items[4].Label.text, "More says so");
-            Assert.AreEqual(words.Get(model.Sections[0].LabelKey), radial.Items[0].Label.text, "every item its words");
-
-            radial.Pick(4);
-            Assert.IsTrue(radial.ShowsMore, "More turns the arc to the sections that did not fit");
-            Assert.IsTrue(radial.IsOpen, "the arc stays open");
-            CollectionAssert.AreEqual(new[] { 4, 5, 6, 7 }, radial.Items.Select(i => i.Section).ToArray(), "exactly the rest, in order");
-            radial.Tap();
-            Assert.IsFalse(radial.IsOpen, "the button (its X) closes the arc");
-            Assert.IsFalse(radial.ShowsMore, "and the next opening starts on the first level");
-
-            ShowCard(sheet, With(BuiltInNavElements.FabRadial, menu: BuiltInNavElements.DrawerTree));
-            radial = (FabRadialNavView)sheet.Slots.FloatingView;
-            radial.Tap();
-            radial.Pick(4);
-            Assert.IsTrue(sheet.Overlay.IsModal, "with a Menu, More opens it");
-            Assert.AreEqual(BuiltInNavElements.DrawerTree, sheet.Overlay.OpenKey);
-            Assert.IsFalse(radial.IsOpen, "and the arc closed: never two at once");
-            Assert.IsFalse(sheet.Floating.IsDimmed, "the menu dims with its own scrim, over the slot (which it covers)");
-
-            ShowCard(sheet, With(BuiltInNavElements.FabRadial, barSlots: 3));
-            radial = (FabRadialNavView)sheet.Slots.FloatingView;
-            radial.Tap();
-            Assert.AreEqual(3, radial.Items.Count, "Bar Slots = 3: two sections and More");
-        }
-    }
 }

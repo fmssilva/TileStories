@@ -35,22 +35,13 @@ namespace TileStories.Tests
         // What each element promises beyond the shared checks, by key: adding an element = a row in the definitions + its check here
         private static readonly Dictionary<string, System.Action<CardNavGalleryHarness, CardNavGalleryDefinitions.Entry>> ElementChecks = new()
         {
-            [BuiltInNavElements.TextTabs] = TextTabsKeepTheirPromise,
-            [BuiltInNavElements.IconTabs] = IconTabsKeepTheirPromise,
             [BuiltInNavElements.IconTabsChips] = IconTabsChipsKeepTheirPromise,
             [BuiltInNavElements.KindChips] = KindChipsKeepTheirPromise,
-            [BuiltInNavElements.Segmented] = SegmentedKeepsItsPromise,
             [BuiltInNavElements.ProgressMap] = ProgressMapKeepsItsPromise,
             [BuiltInNavElements.FamilyPager] = FamilyPagerKeepsItsPromise,
-            [BuiltInNavElements.BottomBar] = BottomBarKeepsItsPromise,
-            [BuiltInNavElements.Dock] = DockKeepsItsPromise,
             [BuiltInNavElements.BarSheet] = BarSheetKeepsItsPromise,
             [BuiltInNavElements.NextUp] = NextUpKeepsItsPromise,
             [BuiltInNavElements.DrawerTree] = DrawerTreeKeepsItsPromise,
-            [BuiltInNavElements.GridOverlay] = GridOverlayKeepsItsPromise,
-            [BuiltInNavElements.FabDial] = FloatingButtonKeepsItsPromise,
-            [BuiltInNavElements.FabRadial] = FloatingButtonKeepsItsPromise,
-            [BuiltInNavElements.EdgeScrubber] = EdgeScrubberKeepsItsPromise,
         };
 
         // The element an entry's slot holds now, its key and its slot element, and whether the card shows it (the chrome for a bar; the
@@ -60,8 +51,6 @@ namespace TileStories.Tests
             {
                 NavSlotKeys.Bottom => sheet.Slots.BottomView,
                 NavSlotKeys.Menu => sheet.Slots.MenuView,
-                NavSlotKeys.Floating => sheet.Slots.FloatingView,
-                NavSlotKeys.Edge => sheet.Slots.EdgeView,
                 _ => sheet.Slots.TopView,
             };
 
@@ -70,8 +59,6 @@ namespace TileStories.Tests
             {
                 NavSlotKeys.Bottom => sheet.Slots.BottomKey,
                 NavSlotKeys.Menu => sheet.Slots.MenuKey,
-                NavSlotKeys.Floating => sheet.Slots.FloatingKey,
-                NavSlotKeys.Edge => sheet.Slots.EdgeKey,
                 _ => sheet.Slots.TopKey,
             };
 
@@ -80,8 +67,6 @@ namespace TileStories.Tests
             {
                 NavSlotKeys.Bottom => sheet.Chrome.BottomNavShown,
                 NavSlotKeys.Menu => sheet.Overlay.IsModal && sheet.Overlay.OpenKey == entry.ElementKey,
-                NavSlotKeys.Floating => sheet.Floating.IsShown,
-                NavSlotKeys.Edge => sheet.Slots.EdgeView is EdgeScrubberNavView edge && edge.IsShown,
                 _ => sheet.Chrome.TopShown,
             };
 
@@ -92,8 +77,6 @@ namespace TileStories.Tests
             if (slot != NavSlotKeys.Top) yield return sheet.Slots.TopView;
             if (slot != NavSlotKeys.Bottom) yield return sheet.Slots.BottomView;
             if (slot != NavSlotKeys.Menu) yield return sheet.Slots.MenuView;
-            if (slot != NavSlotKeys.Floating) yield return sheet.Slots.FloatingView;
-            if (slot != NavSlotKeys.Edge) yield return sheet.Slots.EdgeView;
         }
 
         [UnitySetUp]
@@ -132,8 +115,8 @@ namespace TileStories.Tests
             CollectionAssert.AreEquivalent(new[] { "big", "small", "one_family", "pt_long", "two_families" }, CardNavGalleryDefinitions.Cases.Select(c => c.Key));
             Assert.AreEqual((CardNavGalleryDefinitions.ElementKeys.Count + CardNavGalleryDefinitions.BlockKinds.Count + CardNavGalleryDefinitions.Layouts.Count) * 5,
                 CardNavGalleryDefinitions.All.Count, "every element, nav block and layout over the five cases");
-            CollectionAssert.Contains(CardNavGalleryDefinitions.BlockKinds, BuiltInBlocks.NavIconGridKind, "the nav blocks are in the list too (step 11a)");
-            CollectionAssert.AreEquivalent(new[] { CardOptions.LayoutAccordion, CardOptions.LayoutTabs, CardOptions.LayoutPages, CardOptions.LayoutBento },
+            CollectionAssert.Contains(CardNavGalleryDefinitions.BlockKinds, BuiltInBlocks.NavContentsKind, "the nav blocks are in the list too (step 11a)");
+            CollectionAssert.AreEquivalent(new[] { CardOptions.LayoutAccordion, CardOptions.LayoutTabs, CardOptions.LayoutPages },
                 CardNavGalleryDefinitions.Layouts,
                 "and the layouts built (steps 13-14)");
             CollectionAssert.IsSubsetOf(CardNavGalleryDefinitions.ElementKeys, NavElementRegistry.Shared.All.Select(e => e.Key), "every listed element is registered");
@@ -214,90 +197,6 @@ namespace TileStories.Tests
             yield return CardGalleryChecks.Render(name);
         }
 
-        // The in-flow nav blocks (_3.2 section 5.6, step 11a) over every case: the wall's Auto Nav Block puts the block right after the
-        // header (the builder's step, not the harness), no slot holds anything, and the grid is the model's sections -- one tile per section in
-        // its order, each its section's words, its family's icon in the family's colour above them, its block count; every tile a full touch
-        // target, every word whole and at 4.5:1, the grid inside the card at 390 px; one section draws no tile (rule 2.5.7). A REAL tap (panel
-        // events) on every tile lands its section's first block with one nav_jump named nav_icon_grid; rendered Nav_nav_icon_grid_<case>
-        private static string[] BlockEntryNames => CardNavGalleryDefinitions.All
-            .Where(e => e.IsBlock && e.ElementKey == BuiltInBlocks.NavIconGridKind).Select(e => e.Name).ToArray();
-
-        [UnityTest]
-        public IEnumerator EveryNavBlockEntry_IsRightAfterTheHeader_OneTilePerSection_WholeAndTappable_ARealTapLandsIt_AndRenders(
-            [ValueSource(nameof(BlockEntryNames))] string name)
-        {
-            int index = CardNavGalleryDefinitions.All.ToList().FindIndex(e => e.Name == name);
-            var entry = CardNavGalleryDefinitions.All[index];
-            _harness.Show(index);
-            yield return CardTestInput.Settle();
-            var sheet = _harness.Gallery.Sheet;
-            var model = sheet.Nav.Model;
-            string autoKey = BlockStackBuilder.AutoNavBlockKey(entry.ElementKey);
-            Assert.IsTrue(model.ShowsNavigation, "precondition: the gallery's card has Show Navigation From targets");
-            Assert.IsNull(sheet.Slots.TopView, "no element in any slot: the block judged alone");
-            Assert.IsNull(sheet.Slots.BottomView);
-            CollectionAssert.DoesNotContain(model.Targets, autoKey, "the grid is no target of the card's own navigation");
-
-            var slot = sheet.Stack.SlotOfBlock(autoKey);
-            Assert.IsNotNull(slot, "Auto Nav Block put the grid in the stack");
-            var content = sheet.Stack.Scroll.contentContainer;
-            Assert.AreEqual(1, content.IndexOf(sheet.Stack.Sheets.SheetOf(slot).Root), "the first block of the scroll (its sheet): right after the header's hero (_3.3 P4.4a)");
-            var grid = slot.Q<VisualElement>("card-nav-icon-grid");
-            Assert.IsNotNull(grid);
-            var tiles = grid.Query<Button>(className: "nav-icon-grid__tile").ToList().Where(b => b.resolvedStyle.display == DisplayStyle.Flex && b.parent == grid).ToList();
-
-            if (!NavOntologyRule.OffersASectionChoice(model.Sections.Count))
-            {
-                Assert.AreEqual(DisplayStyle.None, grid.resolvedStyle.display, "one section: no grid (rule 2.5.7)");
-                yield return CardGalleryChecks.Render(name);
-                yield break;
-            }
-            Assert.AreEqual(model.Sections.Count, tiles.Count, "one tile per section");
-            var layer = sheet.Layer;
-            float onePixel = CardGalleryChecks.OnePixel(grid);
-            float touch = CardTestInput.TokenPx("--ts-touch-target");
-            var card = sheet.Root.worldBound;
-            Assert.GreaterOrEqual(grid.worldBound.xMin, card.xMin - onePixel, "the grid starts inside the card");
-            Assert.LessOrEqual(grid.worldBound.xMax, card.xMax + onePixel, "and ends inside it");
-            var strings = Strings(_harness, entry);
-            for (int i = 0; i < tiles.Count; i++)
-            {
-                var section = model.Sections[i];
-                var tile = tiles[i];
-                var label = tile.Q<Label>(className: "nav-tabs__label");
-                var count = tile.Q<Label>(className: "nav-item__count");
-                Assert.AreEqual(strings.Get(section.LabelKey), label.text, "tile " + i + ": its section's words in " + entry.Case.Language);
-                Assert.AreEqual(section.Count.ToString(), count.text, label.text + ": its block count");
-                Assert.IsTrue(CardTestInput.IsShown(tile, layer), label.text + ": shown at Full");
-                Assert.GreaterOrEqual(tile.layout.height, touch - onePixel, label.text + ": tall enough to tap");
-                Assert.GreaterOrEqual(tile.layout.width, touch - onePixel, label.text + ": wide enough to tap");
-                var icon = tile.Q<VisualElement>(className: "card-icon");
-                Assert.AreEqual(section.IconKey, CardIcons.KeyOf(icon), label.text + ": its family's icon");
-                Assert.LessOrEqual(icon.worldBound.yMax, label.worldBound.yMin + 0.5f, label.text + ": the icon above the words");
-                AssertFamilyPaint(icon.Q(className: "card-icon__frame").resolvedStyle.borderTopColor, section.ColorToken, tile, label.text + "'s icon");
-                foreach (var words in new[] { label, count })
-                {
-                    var size = words.MeasureTextSize(words.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined);
-                    Assert.GreaterOrEqual(words.layout.width + 0.5f, size.x, "'" + words.text + "': whole, never cut");
-                    float contrast = CardTestInput.Contrast(words.resolvedStyle.color, CardTestInput.EffectiveBackground(words));
-                    Assert.GreaterOrEqual(contrast, UIAccessibility.MinRatioNormalText, "'" + words.text + "' reads at 4.5:1 (" + contrast.ToString("F2") + ")");
-                }
-                Assert.LessOrEqual(tile.worldBound.xMax, grid.worldBound.xMax + onePixel, label.text + ": inside the grid");
-            }
-            yield return CardGalleryChecks.Render(name);
-
-            // - a real tap on every tile, the last first (the card is at its top, so every tap MOVES it): its section's first block lands
-            for (int i = tiles.Count - 1; i >= 0; i--)
-            {
-                sheet.Stack.Scroll.scrollOffset = Vector2.zero;
-                yield return CardTestInput.Settle();
-                var center = tiles[i].worldBound.center;
-                yield return CardTestInput.Tap(sheet.Root.panel, center);
-                yield return Landed(sheet.Nav);
-                AssertLanded(sheet, model.Sections[i].Targets[0], model.Sections[i].Key + "'s first block, from its tile");
-            }
-        }
-
         // The contents nav block (_3.2 section 5.6 D2, step 11b) over every case, WITHOUT and WITH ticks: Auto Nav Block puts it right after the
         // header; under one title per section (its words, its family's icon) one row per TARGET in the model's order -- rule 2.5.7 does not
         // apply, so one_family keeps its rows --; a row's heading is the block's own (else its kind's words), its minutes ReadingTimeRule's
@@ -346,7 +245,7 @@ namespace TileStories.Tests
             var sheet = _harness.Gallery.Sheet;
             var model = sheet.Nav.Model;
             string poi = entry.Name;
-            string autoKey = BlockStackBuilder.AutoNavBlockKey(entry.ElementKey);
+            string autoKey = CardNavGalleryDefinitions.NavBlockKey;
             var slot = sheet.Stack.SlotOfBlock(autoKey);
             Assert.IsNotNull(slot, "Auto Nav Block put the contents in the stack");
             Assert.AreEqual(1, sheet.Stack.Scroll.contentContainer.IndexOf(sheet.Stack.Sheets.SheetOf(slot).Root), "the first block of the scroll: right after the header's hero (_3.3 P4.4a)");
@@ -501,11 +400,8 @@ namespace TileStories.Tests
         //   - accordion: every target is a compact row with no view and no file -- a whole line to tap, its words before the chevron, at
         //     4.5:1 -- and a real tap on the first row opens it in place (its view bound under the line)
         //   - tabs and pages: drawn so only where the case has two sections or more (one_family scrolls); then only the first section's blocks
-        //     show, the others are set aside (no view, no file), and a real tap on the second tab (pages: the Family Pager's right chevron)
-        //     shows the second section, spy and mark on it; pages also peek the next page at the edge
-        //   - bento (step 15b): every section set aside (no view, no file), a tile per section placed exactly where BentoLayoutRule says for the
-        //     measured room, each a whole touch target with its words whole at 4.5:1, the lead the largest; a real tap on the second tile opens
-        //     that section in the full view (its blocks bound there, the spy on it), Back returns to the tiles
+        //     show, the others are set aside (no view, no file), and a real tap on the Family Pager's right chevron shows the second section,
+        //     spy and mark on it; pages also peek the next page at the edge
         // Rendered Nav_layout_<layout>_<case>.png (and _open / _second)
         private static string[] LayoutEntryNames => CardNavGalleryDefinitions.All.Where(e => e.Layout != null).Select(e => e.Name).ToArray();
 
@@ -559,11 +455,6 @@ namespace TileStories.Tests
                 yield return CardGalleryChecks.Render(name);
                 yield break;
             }
-            if (entry.Layout == CardOptions.LayoutBento)
-            {
-                yield return BentoKeepsItsPromise(sheet, model, name, entry.Case.Key, onePixel);
-                yield break;
-            }
             void AssertShown(int shown, string when)
             {
                 for (int i = 0; i < model.Sections.Count; i++)
@@ -597,119 +488,16 @@ namespace TileStories.Tests
                 yield return CardGalleryChecks.Render(name + "_second");
                 yield break;
             }
-            var tabs = sheet.Slots.TopView as TextTabsNavView;
-            Assert.IsNotNull(tabs, "precondition: Text Tabs at the top");
+            var tabsPager = sheet.Slots.TopView as FamilyPagerNavView;
+            Assert.IsNotNull(tabsPager, "precondition: tabs with no other element: the Family Pager at the top");
             yield return CardGalleryChecks.Render(name);
-            var second = tabs.Tabs.Single(t => t.Index == 1);
-            Assert.IsTrue(tabs.Viewport.worldBound.Contains(second.Button.worldBound.center), "precondition: the second tab is inside the strip");
-            yield return CardTestInput.Tap(sheet.Root.panel, second.Button.worldBound.center);
+            yield return CardTestInput.Tap(sheet.Root.panel, tabsPager.Next.worldBound.center);
             yield return Landed(sheet.Nav);
-            Assert.AreEqual(1, sheet.Layout.ShownSection, "a real tap on the second tab shows the second section");
+            Assert.AreEqual(1, sheet.Layout.ShownSection, "a real tap on the right chevron shows the second section");
             AssertShown(1, "after the tap");
             Assert.AreEqual(1, sheet.Nav.Current, "the spy names it");
-            Assert.AreEqual(1, tabs.CurrentIndex, "and its tab is marked");
+            Assert.AreEqual(1, tabsPager.CurrentIndex, "and the pager too");
             yield return CardGalleryChecks.Render(name + "_second");
-        }
-
-        // Bento's promise on one case (the layout is already Effective: the case has sections to switch between)
-        private static IEnumerator BentoKeepsItsPromise(PoiCardSheetView sheet, CardNavModel model, string name, string caseKey, float onePixel)
-        {
-            var stack = sheet.Stack;
-            var bento = sheet.Bento;
-            Assert.IsTrue(bento.IsOn, "the tiles are drawn");
-            Assert.IsNull(sheet.Slots.TopKey, "no Top Bar over the tiles (step 16: they are the map), though the entry's wall picks Text Tabs");
-            foreach (string key in model.Targets)
-            {
-                Assert.IsTrue(stack.IsParked(key), key + ": set aside");
-                Assert.IsNull(stack.ViewOfBlock(key), key + ": no view");
-                Assert.AreEqual(0, stack.HeldMediaOf(key), key + ": no file");
-            }
-            Assert.AreEqual(model.Sections.Count, bento.Tiles.Count, "a tile per section");
-            var placed = bento.Placed;
-            Assert.IsNotNull(placed, "the tiles were placed");
-            var host = bento.Host.worldBound;
-            float viewport = stack.Scroll.contentViewport.layout.height;
-            if (placed.Fills) Assert.AreEqual(viewport, host.height + placed.RoomLeft, onePixel, "the tiles and the room left under them are the room the visitor sees (" + viewport + ")");
-            else Assert.Greater(host.height, viewport, "the tiles at their minimum: taller than the room, the overview scrolls");
-            // - step 16: a tile never grows past what it holds -- measured here from its LAID-OUT parts (padding, title line, the names its
-            //   width shows, count), not from the view's own arithmetic. A row's tiles share one height, so the bound is the row's tallest content;
-            //   with room left under the tiles every row is exactly that tall
-            float namesMinWidth = CardTestInput.TokenPx("--ts-bento-names-min-width");
-            float minHeight = CardTestInput.TokenPx("--ts-bento-tile-min-height");
-            float ContentOf(CardBentoView.Tile tile)
-            {
-                var style = tile.Button.resolvedStyle;
-                float names = tile.Button.worldBound.width >= namesMinWidth - onePixel
-                    ? tile.Lines.Where(l => l.resolvedStyle.display == DisplayStyle.Flex).Sum(l => l.layout.height + l.resolvedStyle.marginTop) : 0f;
-                return style.paddingTop + style.paddingBottom + style.borderTopWidth + style.borderBottomWidth + tile.Words.parent.layout.height + names
-                    + tile.Count.layout.height;
-            }
-            foreach (var row in placed.Rows)
-            {
-                var tiles = row.Select(s => bento.Tiles[s]).ToList();
-                float bound = System.Math.Max(tiles.Max(ContentOf), minHeight);
-                foreach (var tile in tiles)
-                    Assert.LessOrEqual(tile.Button.worldBound.height, bound + onePixel, tile.Words.text + ": never taller than its row's content (" + bound + ")");
-                if (placed.RoomLeft > onePixel)
-                    Assert.AreEqual(bound, tiles[0].Button.worldBound.height, onePixel, tiles[0].Words.text + "'s row: exactly as tall as its content");
-            }
-            if (caseKey == "small")
-            {
-                // - the brief's case: 3 sections, 6 blocks -- the plates used to be stretched over the whole card
-                Assert.AreEqual(3, model.Sections.Count, "precondition: the small case's three sections");
-                Assert.Greater(placed.RoomLeft, CardTestInput.TokenPx("--ts-touch-target"), "room left under the tiles");
-                Assert.Greater(stack.Scroll.contentViewport.worldBound.yMax - host.yMax, CardTestInput.TokenPx("--ts-touch-target"),
-                    "and it is EMPTY space at the bottom of the card, under the last tile (" + host + " in " + stack.Scroll.contentViewport.worldBound + ")");
-                foreach (var tile in bento.Tiles)
-                    Assert.AreEqual(tile.Lines.Count(l => l.resolvedStyle.display == DisplayStyle.Flex && tile.Button.worldBound.width >= namesMinWidth),
-                        tile.ShownLines.Count(), tile.Words.text + ": every name it holds is shown (none cut by a short plate)");
-            }
-            float touch = CardTestInput.TokenPx("--ts-touch-target");
-            int lead = BentoLayoutRule.Lead(model.Sections.Select(s => s.Count).ToArray());
-            foreach (var tile in bento.Tiles)
-            {
-                var drawn = tile.Button.worldBound;
-                var rule = placed.Tiles[tile.Index];
-                Assert.AreEqual(rule.X, drawn.xMin - host.xMin, onePixel, tile.Words.text + ": drawn where the rule says (x)");
-                Assert.AreEqual(rule.Y, drawn.yMin - host.yMin, onePixel, tile.Words.text + ": (y)");
-                Assert.AreEqual(rule.Width, drawn.width, onePixel, tile.Words.text + ": (width)");
-                Assert.AreEqual(rule.Height, drawn.height, onePixel, tile.Words.text + ": (height)");
-                Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(drawn.width, drawn.height), tile.Words.text + ": a whole touch target");
-                Assert.GreaterOrEqual(System.Math.Min(drawn.width, drawn.height), touch - onePixel);
-                var words = tile.Words.MeasureTextSize(tile.Words.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined);
-                Assert.LessOrEqual(words.x, tile.Words.layout.width + 0.5f, "'" + tile.Words.text + "': the whole word fits");
-                Assert.LessOrEqual(tile.Words.worldBound.xMax, drawn.xMax + onePixel, "'" + tile.Words.text + "': inside its tile");
-                AssertReadable(tile.Words);
-                AssertReadable(tile.Count);
-                Assert.AreEqual(model.Sections[tile.Index].Count.ToString(), tile.Count.text, tile.Words.text + ": its count");
-                foreach (var line in tile.ShownLines)
-                {
-                    Assert.LessOrEqual(line.worldBound.yMax, tile.Count.worldBound.yMin + onePixel, "'" + line.text + "': a name above the count");
-                    Assert.LessOrEqual(line.worldBound.xMax, drawn.xMax + onePixel, "'" + line.text + "': inside its tile");
-                }
-                Assert.LessOrEqual(tile.Count.worldBound.yMax, drawn.yMax + onePixel, tile.Words.text + ": the count whole inside its tile");
-                if (tile.Index != lead)
-                    Assert.Greater(bento.Tiles[lead].Button.worldBound.width * bento.Tiles[lead].Button.worldBound.height, drawn.width * drawn.height - onePixel,
-                        "the lead is the largest tile (" + tile.Words.text + ")");
-            }
-            yield return CardGalleryChecks.Render(name);
-
-            var second = bento.Tiles[1];
-            stack.Scroll.ScrollTo(second.Button);
-            yield return CardTestInput.Settle();
-            Assert.IsTrue(stack.Scroll.contentViewport.worldBound.Contains(second.Button.worldBound.center), "precondition: the second tile is on screen");
-            yield return CardTestInput.Tap(sheet.Root.panel, second.Button.worldBound.center);
-            yield return CardTestInput.Settle();
-            Assert.IsTrue(sheet.FullView.IsOpen, "a real tap on the second tile opened its section in the full view");
-            Assert.AreEqual(model.Sections[1].Key, sheet.FullView.SectionKey);
-            CollectionAssert.AreEqual(model.Sections[1].Targets, sheet.FullView.SectionBlocks.ToList(), "its blocks, in order");
-            Assert.AreEqual(1, sheet.Nav.Current, "the spy names it");
-            yield return CardGalleryChecks.Render(name + "_open");
-            Assert.IsTrue(sheet.Back());
-            yield return CardTestInput.Settle();
-            Assert.IsFalse(sheet.FullView.IsOpen, "Back: the tiles again");
-            Assert.AreEqual(-1, sheet.Nav.Current, "no section on the overview");
-            Assert.AreEqual(0, sheet.Takeover.HeldMedia, "the page holds nothing");
         }
 
         private static void AssertReadable(Label words)
@@ -724,8 +512,8 @@ namespace TileStories.Tests
         public IEnumerator TheOneFamilyCase_RendersNoStrip_AndTheSameCardWithASecondFamilyDoes()
         {
             var all = CardNavGalleryDefinitions.All.ToList();
-            int one = all.FindIndex(e => e.ElementKey == BuiltInNavElements.TextTabs && e.Case.Key == "one_family");
-            int two = all.FindIndex(e => e.ElementKey == BuiltInNavElements.TextTabs && e.Case.Key == "two_families");
+            int one = all.FindIndex(e => e.ElementKey == BuiltInNavElements.ProgressMap && e.Case.Key == "one_family");
+            int two = all.FindIndex(e => e.ElementKey == BuiltInNavElements.ProgressMap && e.Case.Key == "two_families");
             var sheet = _harness.Gallery.Sheet;
 
             _harness.Show(one);
@@ -738,33 +526,10 @@ namespace TileStories.Tests
             _harness.Show(two);
             yield return CardTestInput.Settle();
             Assert.AreEqual(2, sheet.Nav.Model.Sections.Count, "precondition: the second family is a second section");
-            var tabs = sheet.Slots.TopView as TextTabsNavView;
-            Assert.IsNotNull(tabs, "two sections: the strip");
-            Assert.AreEqual(2, tabs.Tabs.Count, "with two tabs");
+            var map = sheet.Slots.TopView as ProgressMapNavView;
+            Assert.IsNotNull(map, "two sections: the strip");
+            Assert.AreEqual(2, map.Segments.Count, "with two pieces");
             Assert.IsTrue(sheet.Chrome.TopShown && sheet.Slots.Top.resolvedStyle.visibility == Visibility.Visible, "shown at Full");
-        }
-
-        // text_tabs: a tab per section in the model's order, each saying its section's word in the card's language, the first one marked
-        // (underline AND bold) and no other
-        private static void TextTabsKeepTheirPromise(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
-        {
-            var sheet = harness.Gallery.Sheet;
-            var tabs = (TextTabsNavView)sheet.Slots.TopView;
-            var model = sheet.Nav.Model;
-            Assert.AreEqual(model.Sections.Count, tabs.Tabs.Count, "one tab per section");
-            var strings = new CardStrings(harness.Gallery.StringTable.Entries(), CardStringSources.Shared.Entries(), null, entry.Case.Language, "en");
-            CollectionAssert.AreEqual(model.Sections.Select(s => strings.Get(s.LabelKey)).ToList(), tabs.Tabs.Select(t => t.Label.text).ToList(),
-                "each tab says its section's word, in " + entry.Case.Language);
-            Assert.AreEqual(0, tabs.CurrentIndex, "the first section is marked at the top of the card");
-            foreach (var tab in tabs.Tabs)
-            {
-                bool marked = tab.Index == 0;
-                Assert.AreEqual(marked, tab.Underline.resolvedStyle.display == DisplayStyle.Flex, tab.Label.text + ": underline");
-                Assert.AreEqual(marked ? FontStyle.Bold : FontStyle.Normal, tab.Label.resolvedStyle.unityFontStyleAndWeight, tab.Label.text + ": weight");
-            }
-            // - the strip scrolls when its words are wider than the card, and then only it does
-            bool scrolls = NavStripRule.MaxOffset(tabs.Row.layout.width, tabs.Viewport.contentRect.width) > 0f;
-            Assert.AreEqual(scrolls, entry.Case.Key == "big" || entry.Case.Key == "pt_long", "only the eight-section cards are wider than the card");
         }
 
         // The card's words as the gallery entry reads them
@@ -780,10 +545,6 @@ namespace TileStories.Tests
             float contrast = CardTestInput.Contrast(painted, CardTestInput.EffectiveBackground(on.parent));
             Assert.GreaterOrEqual(contrast, UIAccessibility.MinRatioLargeTextOrUIComponent, what + " reads at 3:1 (" + contrast.ToString("F2") + ")");
         }
-
-        // icon_tabs: the text tabs' promise, and each tab wears its family's icon in its family's colour above its word (Labels' default)
-        private static void IconTabsKeepTheirPromise(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry) =>
-            AssertIconTabs((IconTabsNavView)harness.Gallery.Sheet.Slots.TopView, harness, entry);
 
         private static void AssertIconTabs(TabsNavView tabs, CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
         {
@@ -849,29 +610,6 @@ namespace TileStories.Tests
             Assert.AreEqual(1, row.Chips.Count(c => c.Button.ClassListContains(NavChip.CurrentClass)), "exactly one chip marked");
         }
 
-        // segmented: one segment per group with a target, equal, inside the track with no scroll; the first group marked (filled + bold)
-        private static void SegmentedKeepsItsPromise(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
-        {
-            var view = (SegmentedNavView)harness.Gallery.Sheet.Slots.TopView;
-            var model = harness.Gallery.Sheet.Nav.Model;
-            var strings = Strings(harness, entry);
-            Assert.GreaterOrEqual(model.Groups.Count, 2, "precondition: drawn only with two groups");
-            CollectionAssert.AreEqual(model.Groups.Select(g => NavGroupRule.Words(g.Definition, strings)), view.Segments.Select(s => s.Label.text),
-                "each segment says its group's word, in " + entry.Case.Language);
-            float onePixel = CardGalleryChecks.OnePixel(view.Root);
-            var track = view.Track.worldBound;
-            float width = view.Segments[0].Button.layout.width;
-            foreach (var segment in view.Segments)
-            {
-                Assert.AreEqual(width, segment.Button.layout.width, onePixel, segment.Label.text + ": equal segments");
-                Assert.GreaterOrEqual(segment.Button.worldBound.xMin, track.xMin - onePixel, segment.Label.text + ": inside the track");
-                Assert.LessOrEqual(segment.Button.worldBound.xMax, track.xMax + onePixel, segment.Label.text + ": inside the track (no scroll)");
-                bool marked = segment.Index == 0;
-                Assert.AreEqual(marked, segment.Button.ClassListContains(SegmentedNavView.CurrentClass), segment.Label.text + ": marked");
-                Assert.AreEqual(marked ? FontStyle.Bold : FontStyle.Normal, segment.Label.resolvedStyle.unityFontStyleAndWeight, segment.Label.text + ": weight");
-            }
-        }
-
         // progress_map: a piece per section, as wide as ProgressMapRule says (and so never under the touch token), each with its family's
         // icon over its family-coloured piece of bar; the first section current (thicker, solid) and the rest faint
         private static void ProgressMapKeepsItsPromise(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
@@ -924,7 +662,7 @@ namespace TileStories.Tests
             Assert.LessOrEqual(view.Words.worldBound.xMax, view.Next.worldBound.xMin + 0.5f, "and end before the right one");
         }
 
-        // bottom_bar: at the very bottom of the card, Bar Slots - 1 sections and More when the card has more sections than the 5 slots
+        // The bar bar_sheet is built on: at the very bottom of the card, Bar Slots - 1 sections and More when the card has more sections than the 5 slots
         // (else one slot per section and no More), each slot an icon tab -- its family's icon in its colour above its word -- sharing the
         // bar's width equally; the first section marked (underline AND bold); More's list closed, holding exactly the overflow
         private static void BottomBarKeepsItsPromise(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
@@ -971,58 +709,6 @@ namespace TileStories.Tests
                 Assert.AreEqual(marked ? FontStyle.Bold : FontStyle.Normal, tab.Label.resolvedStyle.unityFontStyleAndWeight, tab.Label.text + ": weight");
             }
             Assert.IsFalse(bar.More.Button.ClassListContains(NavTab.CurrentClass), "More is not marked while the first section is read");
-        }
-
-        // dock: the bar's slots as an icon PILL. The section read (the first, at the top of the card) shows icon + word on an outlined plate,
-        // every other slot its icon alone; the pill is centred and inside the card; the bar's underline is gone (the plate and the widening
-        // say "here", never the colour alone); every slot still names itself (tooltip) and is a whole touch target
-        private static void DockKeepsItsPromise(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
-        {
-            var sheet = harness.Gallery.Sheet;
-            var dock = (DockNavView)sheet.Slots.BottomView;
-            var model = sheet.Nav.Model;
-            var strings = Strings(harness, entry);
-            float onePixel = CardGalleryChecks.OnePixel(dock.Root);
-            float touch = CardTestInput.TokenPx("--ts-touch-target");
-            var card = sheet.Root.worldBound;
-            Assert.IsTrue(dock.Root.ClassListContains(DockNavView.DockClass), "the dock's own look");
-            Assert.AreEqual(card.yMax, sheet.Slots.Bottom.worldBound.yMax, onePixel, "it closes the card: in the thumb zone");
-
-            int slots = NavOntologyRule.MaxSlots(ConfigNav(entry));
-            bool overflows = model.Sections.Count > slots;
-            Assert.AreEqual(overflows, dock.HasMore, "More exactly when the sections overflow the slots");
-            int inBar = overflows ? slots - 1 : model.Sections.Count;
-            CollectionAssert.AreEqual(model.Sections.Take(inBar).Select(s => strings.Get(s.LabelKey)), dock.Items.Select(t => t.Label.text),
-                "the first sections, each its word in " + entry.Case.Language);
-            var all = dock.Items.ToList();
-            if (overflows) all.Add(dock.More);
-
-            // - the pill: centred, inside the card, never wider than it
-            var pill = dock.Bar.worldBound;
-            Assert.LessOrEqual(pill.width, card.width + onePixel, "the pill is never wider than the card (" + pill.width.ToString("F1") + " of " + card.width.ToString("F1") + ")");
-            Assert.GreaterOrEqual(pill.xMin, card.xMin - onePixel, "inside the card on the left");
-            Assert.LessOrEqual(pill.xMax, card.xMax + onePixel, "and on the right");
-            Assert.AreEqual(card.center.x, pill.center.x, 2f * onePixel, "centred");
-
-            // - one marked item with its word beside its icon, on a plate with an outline; the rest icon only
-            for (int i = 0; i < all.Count; i++)
-            {
-                var slot = all[i];
-                bool marked = i == 0;
-                string name = slot.Label.text;
-                Assert.AreEqual(marked, CardTestInput.IsShown(slot.Label, sheet.Root), name + ": its word shows only while it is the section read");
-                Assert.IsTrue(CardTestInput.IsShown(slot.Icon, sheet.Root), name + ": its icon always shows");
-                Assert.GreaterOrEqual(slot.Button.layout.width, touch - onePixel, name + ": wide enough to tap");
-                Assert.GreaterOrEqual(slot.Button.layout.height, touch - onePixel, name + ": tall enough to tap");
-                Assert.AreEqual(name, slot.Button.tooltip, name + ": an icon alone still names its slot");
-                Assert.AreEqual(marked, slot.Button.ClassListContains(NavTab.CurrentClass), name + ": marked");
-                Assert.AreEqual(marked ? CardTestInput.TokenPx("--ts-choice-border") : 0f, slot.Button.resolvedStyle.borderTopWidth, 0.01f, name + ": an outline on the marked plate only");
-                if (slot.Underline != null) Assert.AreEqual(DisplayStyle.None, slot.Underline.resolvedStyle.display, name + ": no underline in a pill");
-                if (!marked) Assert.Less(slot.Button.layout.width, all[0].Button.layout.width, name + ": narrower than the marked one, which widened");
-            }
-            var first = all[0];
-            Assert.LessOrEqual(first.Icon.worldBound.xMax, first.Label.worldBound.xMin + 0.5f, "the marked item: its word BESIDE its icon");
-            Assert.AreEqual(FontStyle.Bold, first.Label.resolvedStyle.unityFontStyleAndWeight, "and bold");
         }
 
         // bar_sheet: the bar's own promise, then its own: the kinds list starts closed, and the arrow that says "a tap here opens it" is on the
@@ -1097,38 +783,6 @@ namespace TileStories.Tests
 
         // The wall's navigation settings of an entry (what Bar Slots the gallery's wall has)
         private static CardNavigationSettings ConfigNav(CardNavGalleryDefinitions.Entry entry) => CardNavGalleryDefinitions.Wall(entry).card_settings.navigation;
-
-        // The bottom bar's More list OPEN on the eight-section cards (English and Portuguese): above the bar, inside the card, one row per
-        // overflow section -- each a whole touch target, its word whole -- and the bar still under it; rendered Nav_bottom_bar_<case>_more
-        [UnityTest]
-        public IEnumerator TheBottomBarsMoreList_OpensAboveTheBar_WithAWholeRowPerOverflowSection_AndRenders([Values("big", "pt_long")] string caseKey)
-        {
-            var all = CardNavGalleryDefinitions.All.ToList();
-            int index = all.FindIndex(e => e.ElementKey == BuiltInNavElements.BottomBar && e.Case.Key == caseKey);
-            _harness.Show(index);
-            yield return CardTestInput.Settle();
-            var sheet = _harness.Gallery.Sheet;
-            var bar = (BottomBarNavView)sheet.Slots.BottomView;
-            Assert.IsTrue(bar.HasMore, "precondition: the eight sections overflow the bar");
-            bar.OpenMore();
-            yield return CardTestInput.Settle();
-            Assert.IsTrue(bar.MoreOpen);
-            float onePixel = CardGalleryChecks.OnePixel(bar.Root);
-            float touch = CardTestInput.TokenPx("--ts-touch-target");
-            Assert.LessOrEqual(bar.MoreList.worldBound.yMax, bar.Bar.worldBound.yMin + onePixel, "the list sits above the bar");
-            Assert.GreaterOrEqual(bar.MoreList.worldBound.yMin, sheet.Root.worldBound.yMin, "inside the card");
-            Assert.AreEqual(sheet.Root.worldBound.yMax, bar.Bar.worldBound.yMax, onePixel, "the bar stays at the card's bottom");
-            Assert.AreEqual(sheet.Nav.Model.MoreSections.Count, bar.MoreRows.Count, "one row per overflow section");
-            foreach (var row in bar.MoreRows)
-            {
-                Assert.GreaterOrEqual(row.Button.layout.height, touch - onePixel, row.Label.text + ": tall enough to tap");
-                Assert.GreaterOrEqual(row.Button.layout.width, touch - onePixel, row.Label.text + ": wide enough to tap");
-                var words = row.Label.MeasureTextSize(row.Label.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined);
-                Assert.GreaterOrEqual(row.Label.layout.width + 0.5f, words.x, "'" + row.Label.text + "': whole");
-                Assert.LessOrEqual(row.Icon.worldBound.xMax, row.Label.worldBound.xMin + 0.5f, row.Label.text + ": its icon beside its word");
-            }
-            yield return CardGalleryChecks.Render("Nav_bottom_bar_" + caseKey + "_more");
-        }
 
         private IEnumerator ShowEntry(string elementKey, string caseKey)
         {
@@ -1375,52 +1029,6 @@ namespace TileStories.Tests
             Assert.AreEqual(model.Targets[model.TargetCount - 1], nav.CurrentBlock, "a Next at the end moves nothing");
         }
 
-        // The dock's acceptance (_3.2 7b.1): with the Portuguese labels the pill never grows past the card (390 px), whichever section is marked
-        // -- the marked word is whole and shown, and exactly one word shows at a time. Each marked state is rendered once for the widest
-        [UnityTest]
-        public IEnumerator TheDock_NeverGrowsPastTheCard_WhicheverSlotIsMarked_WithThePortugueseLabels()
-        {
-            yield return ShowEntry(BuiltInNavElements.Dock, "pt_long");
-            var sheet = _harness.Gallery.Sheet;
-            var dock = (DockNavView)sheet.Slots.BottomView;
-            var model = sheet.Nav.Model;
-            float onePixel = CardGalleryChecks.OnePixel(dock.Root);
-            var card = sheet.Root.worldBound;
-            Assert.AreEqual(390f, sheet.Layer.panel.visualTree.layout.width, onePixel, "precondition: the run's 390 px frame");
-            var slots = dock.Items.Append(dock.More).ToList();
-            float widest = 0f;
-            string widestWord = "";
-            for (int i = 0; i < model.Sections.Count; i++)
-            {
-                sheet.Nav.JumpTo(i, "test");
-                yield return Landed(sheet.Nav);
-                var marked = slots.Where(s => s.Button.ClassListContains(NavTab.CurrentClass)).ToList();
-                Assert.AreEqual(1, marked.Count, "section " + i + ": exactly one slot marked");
-                var slot = marked[0];
-                // - the dock follows the SPY: after a jump lands, a short block (Listen's player) can already have the next family under the spy
-                //   line, so the marked slot is the one of the section the controller names now (the real-drag check is Phase B's)
-                int read = sheet.Nav.Current;
-                Assert.GreaterOrEqual(read, i, "section " + i + ": the spy names the section jumped to or the next one under its line");
-                Assert.AreEqual(read < dock.Items.Count ? read : dock.Items.Count, slots.IndexOf(slot), "section " + i + ": the slot of the section read, or More for the overflow");
-                var pill = dock.Bar.worldBound;
-                Assert.LessOrEqual(pill.width, card.width + onePixel, slot.Label.text + " marked: the pill fits the card (" + pill.width.ToString("F1") + " of " + card.width.ToString("F1") + ")");
-                Assert.GreaterOrEqual(pill.xMin, card.xMin - onePixel, slot.Label.text + " marked: inside the card (left)");
-                Assert.LessOrEqual(pill.xMax, card.xMax + onePixel, slot.Label.text + " marked: inside the card (right)");
-                Assert.AreEqual(1, slots.Count(s => CardTestInput.IsShown(s.Label, sheet.Root)), slot.Label.text + " marked: it alone says its word");
-                var words = slot.Label.MeasureTextSize(slot.Label.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined);
-                Assert.GreaterOrEqual(slot.Label.layout.width + 0.5f, words.x, "'" + slot.Label.text + "': whole, never cut");
-                foreach (var each in slots)
-                    Assert.GreaterOrEqual(each.Button.layout.width, CardTestInput.TokenPx("--ts-touch-target") - onePixel, each.Label.text + ": still a whole touch target wide");
-                if (pill.width > widest)
-                {
-                    widest = pill.width;
-                    widestWord = slot.Label.text;
-                }
-            }
-            Debug.Log("[Card] Dock at 390 px in Portuguese: widest pill " + widest.ToString("F1") + " px (marked '" + widestWord + "')");
-            yield return CardGalleryChecks.Render("Nav_dock_pt_long_widest");
-        }
-
         // A menu's scrim (step 8): over the WHOLE card layer, painted in exactly --ts-scrim (read from the stylesheet, never retyped)
         private static void AssertTheScrim(PoiCardSheetView sheet)
         {
@@ -1462,236 +1070,5 @@ namespace TileStories.Tests
             Assert.Less(drawer.Root.worldBound.width, sheet.Layer.worldBound.width, "a drawer: the card shows beside it");
         }
 
-        // fab_dial and fab_radial CLOSED (step 9, section 5.4): zero chrome until needed -- the round button alone, a touch target both ways,
-        // in the floating slot right above the sheet's top edge (at Full the slot rests in the sheet's top gap, never off the screen), its
-        // right edge where the card's content ends, its name the card's word for the sections; nothing else of it shows
-        // edge_scrubber (step 10): its host IS the stack's viewport, flush on its right edge; one dot per section in the model's order, each in a
-        // full touch-token target that tiles the centred column with no gap, the family's colour on a dark disc (>= 3:1 over a white frame
-        // by the disc, >= 3:1 over a black one by its light edge); the section read marked by a LARGER disc with an accent edge, and no word
-        // or bubble at rest; a finger beside the column or above / below it meets the content, never the element
-        private static void EdgeScrubberKeepsItsPromise(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
-        {
-            var sheet = harness.Gallery.Sheet;
-            var view = (EdgeScrubberNavView)sheet.Slots.EdgeView;
-            var model = sheet.Nav.Model;
-            var strings = Strings(harness, entry);
-            float onePixel = CardGalleryChecks.OnePixel(view.Root);
-            float touch = CardTestInput.TokenPx("--ts-touch-target");
-            var viewport = sheet.Stack.Scroll.contentViewport;
-
-            // - the host lies over the viewport itself, flush on its right edge, one touch target wide
-            Assert.AreSame(viewport, sheet.Slots.Edge.parent, "the host is a child of the stack's viewport");
-            Assert.AreEqual(viewport.worldBound.yMin, sheet.Slots.Edge.worldBound.yMin, onePixel, "from the viewport's top");
-            Assert.AreEqual(viewport.worldBound.yMax, sheet.Slots.Edge.worldBound.yMax, onePixel, "to its bottom");
-            Assert.AreEqual(viewport.worldBound.xMax, sheet.Slots.Edge.worldBound.xMax, onePixel, "flush on its right edge");
-            Assert.AreEqual(touch, sheet.Slots.Edge.worldBound.width, onePixel, "one touch target wide");
-
-            // - one dot per section, a full touch target each, tiling a column centred in the viewport
-            Assert.IsTrue(view.IsShown, "the viewport holds every target: " + model.Sections.Count + " x " + touch + " in " + viewport.layout.height);
-            Assert.AreEqual(model.Sections.Count, view.Items.Count, "one dot per section");
-            var expected = EdgeScrubberRule.Layout(model.Sections.Count, viewport.layout.height, touch);
-            Assert.AreEqual(expected.Top, view.Column.layout.y, onePixel, "the column is centred in the viewport");
-            Assert.AreEqual(expected.Height, view.Column.layout.height, onePixel, "and holds every target");
-            for (int i = 0; i < view.Items.Count; i++)
-            {
-                var item = view.Items[i];
-                var section = model.Sections[i];
-                Assert.AreEqual(touch, item.Button.layout.width, onePixel, item.Words + ": the tap target is as wide as the touch token");
-                Assert.AreEqual(touch, item.Button.layout.height, onePixel, item.Words + ": and as tall");
-                Assert.AreEqual(view.Column.worldBound.yMin + i * touch, item.Button.worldBound.yMin, onePixel, item.Words + ": the targets tile, no gap");
-                Assert.AreEqual(strings.Get(section.LabelKey), item.Words, item.Words + ": its section's word, in " + entry.Case.Language);
-                Assert.AreEqual(item.Words, item.Button.tooltip, item.Words + ": the dot is named for a long press");
-                AssertFamilyPaint(item.Fill.resolvedStyle.backgroundColor, section.ColorToken, item.Fill, item.Words + "'s dot");
-                // - the dot is drawn well inside its target (small to look at, whole to tap)
-                Assert.Less(item.Disc.layout.width, touch - onePixel, item.Words + ": the disc is smaller than its target");
-                var centre = item.Button.worldBound.center;
-                Assert.IsTrue(item.Button.worldBound.Contains(item.Disc.worldBound.center), item.Words + ": the disc sits in its target");
-                // - a finger on the dot meets the dot's own target, nothing over it
-                var picked = sheet.Layer.panel.Pick(centre);
-                Assert.IsTrue(picked == item.Button || (picked != null && item.Button.Contains(picked)), item.Words + ": the topmost thing at its centre is its own target");
-            }
-            Assert.AreEqual(view.Items[0].Button.worldBound.yMin, view.Column.worldBound.yMin, onePixel, "the first target starts the column");
-
-            // - contrast of a dot against a light and a dark block behind it (non-text, WCAG 1.4.11): the dark disc over white, its light edge over black
-            var disc = view.Items[1].Disc;
-            // - in either mode (_3.3 P4.4b) the fill and the edge are opposite tones: over each block ONE of them clears 3:1
-            Color fill = disc.resolvedStyle.backgroundColor, edgeRaw = disc.resolvedStyle.borderTopColor;
-            var edge = new Color(edgeRaw.r * edgeRaw.a, edgeRaw.g * edgeRaw.a, edgeRaw.b * edgeRaw.a, 1f);
-            foreach (var block in new[] { Color.white, Color.black })
-                Assert.GreaterOrEqual(Mathf.Max(UIAccessibility.ContrastRatio(fill, block), UIAccessibility.ContrastRatio(edge, block)),
-                    UIAccessibility.MinRatioLargeTextOrUIComponent, "the disc (fill or edge) reads over a " + (block == Color.white ? "white" : "black") + " block");
-
-            // - the section read is marked twice: a larger disc AND a larger colour disc with an accent edge; no other dot, no bubble at rest
-            var first = view.Items[0];
-            Assert.IsTrue(first.Button.ClassListContains(EdgeScrubberNavView.CurrentClass), "the first section is the one read at the top");
-            for (int i = 1; i < view.Items.Count; i++)
-                Assert.IsFalse(view.Items[i].Button.ClassListContains(EdgeScrubberNavView.CurrentClass), view.Items[i].Words + ": not the one read");
-            Assert.Greater(first.Disc.layout.width, view.Items[1].Disc.layout.width, "the current disc is larger");
-            Assert.Greater(first.Fill.layout.width, view.Items[1].Fill.layout.width, "and so is its colour");
-            Assert.AreNotEqual(view.Items[1].Disc.resolvedStyle.borderTopColor, first.Disc.resolvedStyle.borderTopColor, "with an edge of its own");
-            Assert.IsTrue(CardTokenColours.TryResolve(first.Button, "--ts-accent", out Color accent), "the accent resolves on the card");
-            Assert.AreEqual(accent, first.Disc.resolvedStyle.borderTopColor, "the accent edge");
-            Assert.IsFalse(view.Bubble.ClassListContains(EdgeScrubberNavView.BubbleShownClass), "no bubble at rest");
-            Assert.AreEqual(DisplayStyle.None, view.Bubble.resolvedStyle.display, "and it takes no room");
-            Assert.AreEqual(-1, view.Pointed, "no finger on a dot");
-
-            // - a finger beside the column or above / below it meets the content under it, never the element: the card still scrolls there
-            float x = view.Items[0].Button.worldBound.center.x;
-            Assert.IsFalse(view.Root.Contains(sheet.Layer.panel.Pick(new Vector2(viewport.worldBound.xMax - touch - 4f, view.Column.worldBound.center.y))),
-                "left of the column: the content");
-            if (view.Column.worldBound.yMin - viewport.worldBound.yMin > 8f)
-                Assert.IsFalse(view.Root.Contains(sheet.Layer.panel.Pick(new Vector2(x, view.Column.worldBound.yMin - 4f))), "above the column: the content");
-            if (viewport.worldBound.yMax - view.Column.worldBound.yMax > 8f)
-                Assert.IsFalse(view.Root.Contains(sheet.Layer.panel.Pick(new Vector2(x, view.Column.worldBound.yMax + 4f))), "below the column: the content");
-        }
-
-        private static void FloatingButtonKeepsItsPromise(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
-        {
-            var sheet = harness.Gallery.Sheet;
-            var view = sheet.Slots.FloatingView;
-            var fab = view is FabDialNavView dial ? dial.Fab : ((FabRadialNavView)view).Fab;
-            float onePixel = CardGalleryChecks.OnePixel(fab.Root);
-            float touch = CardTestInput.TokenPx("--ts-touch-target");
-            Assert.IsFalse(fab.IsOpen, "closed: the sections icon, not the X");
-            Assert.AreEqual(touch, fab.Button.layout.width, onePixel, "the button is one touch target wide");
-            Assert.AreEqual(touch, fab.Button.layout.height, onePixel, "and tall");
-            var slot = sheet.Floating.Root.worldBound;
-            Assert.AreEqual(sheet.Root.worldBound.yMin, slot.yMax, onePixel, "at Full the slot rests flush on the sheet's top edge");
-            Assert.GreaterOrEqual(slot.yMin, sheet.Layer.worldBound.yMin - onePixel, "inside the card layer, never off the screen");
-            Assert.AreEqual(sheet.Layer.worldBound.xMax - CardTestInput.TokenPx("--ts-space-4"), fab.Root.worldBound.xMax, onePixel,
-                "its right edge where the card's content ends");
-            Assert.AreEqual(Strings(harness, entry).Get(CardStrings.Keys.NavFab), fab.Button.tooltip, "its name: the card's word for the sections");
-            var shown = fab.Root.Query<Button>().ToList().Where(b => CardTestInput.IsShown(b, sheet.Layer)).ToList();
-            CollectionAssert.AreEqual(new[] { fab.Button }, shown, "closed: the button alone, zero chrome until needed");
-        }
-
-        // The floating button OPEN, opened by a real tap on it (step 9): every one of its items inside the card layer, a whole touch target,
-        // its words whole and in the case's language, never two overlapping; the dial lists every section with its icon beside its word, the
-        // radial holds Bar Slots items (More last when the sections overflow) on its arc; rendered Nav_<key>_<case>_open
-        [UnityTest]
-        public IEnumerator TheFloatingButton_ARealTapOpensIt_EveryItemWholeInsideTheLayerAndApart_AndRenders(
-            [Values(BuiltInNavElements.FabDial, BuiltInNavElements.FabRadial)] string key, [Values("big", "small", "pt_long", "two_families")] string caseKey)
-        {
-            yield return ShowEntry(key, caseKey);
-            var entry = CardNavGalleryDefinitions.All.First(e => e.ElementKey == key && e.Case.Key == caseKey);
-            var sheet = _harness.Gallery.Sheet;
-            var model = sheet.Nav.Model;
-            var strings = Strings(_harness, entry);
-            var view = sheet.Slots.FloatingView;
-            var fab = view is FabDialNavView d ? d.Fab : ((FabRadialNavView)view).Fab;
-            yield return CardTestInput.Tap(fab.Button.panel, fab.Button.worldBound.center);
-            yield return CardTestInput.Settle();
-            Assert.IsTrue(fab.IsOpen, "a real tap opened it (the button shows the X)");
-            Assert.AreEqual(key == BuiltInNavElements.FabDial ? FabDialNavView.ListKey : FabRadialNavView.ArcKey, sheet.Overlay.OpenKey,
-                "the one thing open over the card");
-
-            float onePixel = CardGalleryChecks.OnePixel(fab.Root);
-            float touch = CardTestInput.TokenPx("--ts-touch-target");
-            var layer = sheet.Layer.worldBound;
-            var items = new List<(Button Button, Label Label)>();
-            if (view is FabDialNavView dial)
-            {
-                Assert.AreEqual(FabFanRule.Direction.Down, dial.Direction, "at Full the button rests at the top: the column opens down over the card");
-                Assert.AreEqual(model.Sections.Count, dial.Items.Count, "a pill per section");
-                for (int i = 0; i < dial.Items.Count; i++)
-                {
-                    var item = dial.Items[i];
-                    Assert.AreEqual(strings.Get(model.Sections[i].LabelKey), item.Label.text, "its words, in " + entry.Case.Language);
-                    Assert.LessOrEqual(item.Icon.worldBound.xMax, item.Label.worldBound.xMin + 0.5f, item.Label.text + ": its icon beside its word");
-                    items.Add((item.Button, item.Label));
-                }
-                Assert.GreaterOrEqual(dial.List.worldBound.yMin, fab.Root.worldBound.yMax - onePixel, "under the button");
-            }
-            else
-            {
-                var radial = (FabRadialNavView)view;
-                // - a page holds what Bar Slots allows and the room fits (at Full, in the screen's corner, fewer), More last while sections are left
-                Assert.LessOrEqual(radial.Capacity, NavOntologyRule.MaxSlots(ConfigNav(entry)), "never more than Bar Slots");
-                int shown = NavOntologyRule.SectionsInBar(model.Sections.Count, radial.Capacity);
-                Assert.AreEqual(shown + (shown < model.Sections.Count ? 1 : 0), radial.Items.Count, "a page of the arc: rule 2.5.5 over its capacity");
-                Assert.IsTrue(radial.Layout.Fits, "the arc fits the layer (" + radial.Capacity + " items at radius " + radial.Layout.Radius + ")");
-                foreach (var item in radial.Items)
-                {
-                    string words = item.Section >= 0 ? strings.Get(model.Sections[item.Section].LabelKey) : strings.Get(CardStrings.Keys.NavMore);
-                    Assert.AreEqual(words, item.Label.text, "its words, in " + entry.Case.Language);
-                    Assert.LessOrEqual(item.Button.worldBound.center.x, fab.Root.worldBound.center.x + onePixel, item.Label.text + ": its centre left of the button's (the arc's half-plane)");
-                    items.Add((item.Button, item.Label));
-                }
-            }
-            for (int i = 0; i < items.Count; i++)
-            {
-                var (button, label) = items[i];
-                Assert.IsTrue(CardTestInput.IsShown(button, sheet.Layer), label.text + ": shown");
-                Assert.GreaterOrEqual(button.layout.height, touch - onePixel, label.text + ": tall enough to tap");
-                Assert.GreaterOrEqual(button.layout.width, touch - onePixel, label.text + ": wide enough to tap");
-                Assert.IsTrue(layer.Contains(button.worldBound.min) && layer.Contains(button.worldBound.max - Vector2.one * onePixel),
-                    label.text + ": whole inside the card layer " + button.worldBound + " in " + layer);
-                var size = label.MeasureTextSize(label.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined);
-                Assert.GreaterOrEqual(label.layout.width + 0.5f, size.x, "'" + label.text + "': whole, never cut");
-                var ground = CardTestInput.EffectiveBackground(label);
-                float contrast = CardTestInput.Contrast(label.resolvedStyle.color, ground);
-                // - the dial's pills are words on their own surface (_3.3 D1: text >= 7:1); the radial's words keep the 4.5:1 of a label
-                float least = key == BuiltInNavElements.FabDial ? 7f : UIAccessibility.MinRatioNormalText;
-                Assert.GreaterOrEqual(contrast, least, "'" + label.text + "' reads at " + least + ":1 (" + contrast.ToString("F2") + ": ink " +
-                    (Color32)label.resolvedStyle.color + " on " + (Color32)ground + ", its pill " + (Color32)button.resolvedStyle.backgroundColor + ")");
-                for (int j = i + 1; j < items.Count; j++)
-                {
-                    var a = items[i].Button.worldBound;
-                    var b = items[j].Button.worldBound;
-                    var shrunk = new Rect(a.x + onePixel, a.y + onePixel, a.width - 2 * onePixel, a.height - 2 * onePixel);
-                    Assert.IsFalse(shrunk.Overlaps(b), label.text + " and " + items[j].Label.text + ": never overlapping " + a + " / " + b);
-                }
-            }
-            yield return CardGalleryChecks.Render("Nav_" + key + "_" + caseKey + "_open");
-
-            // - the radial's next page: More turns the arc to the next sections (rendered too)
-            if (view is FabRadialNavView arc && arc.Items.Last().Section < 0)
-            {
-                var more = arc.Items.Last();
-                int next = arc.Items.Count - 1;
-                yield return CardTestInput.Tap(more.Button.panel, more.Button.worldBound.center);
-                yield return CardTestInput.Settle();
-                Assert.IsTrue(arc.ShowsMore, "a real tap on More shows the next page");
-                Assert.AreEqual(next, arc.PageStart, "starting with the first section the last page did not show");
-                int onPage = NavOntologyRule.SectionsInBar(model.Sections.Count - next, arc.Capacity);
-                CollectionAssert.AreEqual(model.Sections.Skip(next).Take(onPage).Select(sec => strings.Get(sec.LabelKey)),
-                    arc.Items.Where(i => i.Section >= 0).Select(i => i.Label.text), "exactly the next sections, in order");
-                Assert.IsTrue(arc.Layout.Fits, "the next page fits too");
-                yield return CardGalleryChecks.Render("Nav_" + key + "_" + caseKey + "_more");
-            }
-
-            yield return CardTestInput.Tap(fab.Button.panel, fab.Button.worldBound.center);
-            yield return CardTestInput.Settle();
-            Assert.IsFalse(fab.IsOpen, "a real tap on its X closes it");
-            Assert.IsFalse(sheet.Overlay.IsOpen);
-        }
-
-        // grid_overlay (step 8): big tiles over a scrim, inside the card, two to a row, one per section with its words and count, each at
-        // least two touch targets tall; the Purpose / Format switch on the wall's axis; the Format side lists the model's formats
-        private static void GridOverlayKeepsItsPromise(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
-        {
-            var sheet = harness.Gallery.Sheet;
-            var grid = (GridOverlayNavView)sheet.Slots.MenuView;
-            var model = sheet.Nav.Model;
-            var strings = Strings(harness, entry);
-            Assert.IsTrue(CardTestInput.IsShown(sheet.MenuButton, sheet.Root), "the header shows the menu button");
-            AssertTheScrim(sheet);
-            Assert.AreEqual(model.Sections.Count, grid.Tiles.Count, "a tile per section");
-            float tile = CardTestInput.TokenPx("--ts-grid-tile-height");
-            foreach (var t in grid.Tiles)
-            {
-                Assert.AreEqual(strings.Get(model.Sections[t.Index].LabelKey), t.Label.text, "its words, in " + entry.Case.Language);
-                Assert.GreaterOrEqual(t.Button.layout.height, tile - 0.5f, t.Label.text + ": a big thumb target");
-            }
-            if (grid.Tiles.Count >= 2)
-                Assert.AreEqual(grid.Tiles[0].Button.worldBound.yMin, grid.Tiles[1].Button.worldBound.yMin, 0.5f, "two tiles to a row");
-            Assert.IsTrue(grid.ByPurpose.ClassListContains(GridOverlayNavView.OptionCurrentClass), "it opens on the wall's axis, Purpose");
-            Assert.AreEqual(strings.Get(CardStrings.Keys.NavMenuByPurpose), grid.ByPurpose.text);
-            Assert.AreEqual(strings.Get(CardStrings.Keys.NavMenuByFormat), grid.ByFormat.text);
-            grid.ShowAxis(CardOptions.GroupByFormat);
-            CollectionAssert.AreEqual(model.By(CardOptions.GroupByFormat).Sections.Select(sec => strings.Get(sec.LabelKey)), grid.Tiles.Select(t => t.Label.text),
-                "the Format side: the model's formats");
-            grid.ShowAxis(CardOptions.GroupByFamily);
-        }
     }
 }

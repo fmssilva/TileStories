@@ -9,12 +9,12 @@ namespace TileStories.Editor
     {
         private const string CardNavBarHelp =
             "Navigation Bar: the visitor's main way round the card -- one bar of the card's groups. Set here where it sits, its shape and "
-            + "fill, how the chosen group shows, when it shows, and, in Bar Groups, each group it holds. While it is on, the card draws it "
-            + "INSTEAD of the Elements rows below (Top Bar, Bottom Bar, Menu, Floating Button, Edge): their values are kept for the day it is "
-            + "turned off. It shows on a card with navigation (Show Navigation From) and with blocks of two groups at least.";
+            + "fill, how the chosen group shows, when it shows, and, in Bar Groups, each group it holds. It shows on a card with navigation "
+            + "(Show Navigation From) and with blocks of two groups at least.";
 
         private const string CardNavBarEnabledHelp =
-            "On (the default): every card with navigation shows the Navigation Bar. Off: the card uses the Elements rows below.";
+            "On (the default): every card with navigation shows the Navigation Bar. Off: no Navigation Bar; under Layout = Tabs "
+            + "or Pages the card names the section being read between two arrows at its top, the way between its sections.";
 
         private const string CardNavBarPositionHelp =
             "Bottom (the default): floating over the foot of the screen, where a thumb reaches; the hero's words rise clear of it. Top: "
@@ -104,8 +104,5 @@ namespace TileStories.Editor
         private const string CardNavBarGroupFamiliesHelp =
             "The families whose blocks this group leads to. Pick several to merge them into one group. A family in two groups belongs to "
             + "the first; a family in none cannot be reached from the bar.";
-
-        private const string CardNavBarOnNotice =
-            "The Navigation Bar is on: the card draws it instead of these elements. Their values are kept for the day it is turned off.";
     }
 }

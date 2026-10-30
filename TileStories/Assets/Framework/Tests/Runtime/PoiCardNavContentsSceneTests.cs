@@ -30,7 +30,8 @@ namespace TileStories.Tests
     {
         private const string Lamp = "lamp";
         private const string LampMilitary = "lamp_military";
-        private static readonly string AutoKey = BlockStackBuilder.AutoNavBlockKey(BuiltInBlocks.NavContentsKind);
+        // The key of the contents block authored right after The Lamp's header for a test
+        private const string AutoKey = "block_900";
 
         private PoiCardSheetView Sheet => Card.Sheet;
         private NavController Nav => Sheet.Nav;
@@ -71,11 +72,13 @@ namespace TileStories.Tests
 
         private float TopOf(string block) => Sheet.Stack.TopInScroll(Sheet.Stack.SlotOfBlock(block));
 
-        // The wall's navigation for a test: Auto Nav Block `auto`, the card in `language`, pushed through the live seam
+        // The wall for a test: a contents block authored right after The Lamp's header when `auto` names nav_contents, the card in
+        // `language`, pushed through the live seam
         private IEnumerator UseAuto(string auto, string language = "en")
         {
             var copy = ConfigCopy();
-            copy.card_settings.navigation.auto_nav_block = auto;
+            if (auto == BuiltInBlocks.NavContentsKind)
+                copy.pois.Single(p => p.id == Lamp).card.blocks.Insert(1, new BlockInstanceData { key = AutoKey, kind = BuiltInBlocks.NavContentsKind });
             _shippedLanguages ??= new List<string>(ConfigCopy().card_settings.languages);
             copy.card_settings.languages = language == "en" ? new List<string>(_shippedLanguages) : new List<string> { language, "en" };
             Session.ApplyCardSettings(copy);
@@ -185,36 +188,6 @@ namespace TileStories.Tests
         // ---------------- the tests ----------------
 
         [UnityTest]
-        public IEnumerator AutoNavBlockContents_PutsTheListFirstOnTheLampsScroll_ARowPerTarget_NotOnLampMilitary_AndNoneTakesItAway_Live()
-        {
-            yield return UseAuto(CardOptions.NavNone);
-            yield return Open(Lamp, SheetStopRule.Stop.Full);
-            Assert.IsNull(Sheet.Stack.SlotOfBlock(AutoKey), "the shipped default (None): no contents");
-
-            yield return UseAuto(BuiltInBlocks.NavContentsKind);
-            var slot = Sheet.Stack.SlotOfBlock(AutoKey);
-            Assert.IsNotNull(slot, "Contents, live: The Lamp's open card gains the list");
-            int at = Scroll.contentContainer.IndexOf(Sheet.Stack.Sheets.SheetOf(slot).Root);
-            Assert.AreEqual(Scroll.contentContainer.IndexOf(Sheet.Stack.Sheets.SheetOf(Sheet.Stack.SlotOfBlock(Model.Targets[0])).Root), at + 1, "right before the card's first block");
-            Assert.AreEqual(56, Model.TargetCount, "precondition: The Lamp's 56 targets");
-            // - grouped by family: The Lamp's authored order mixes families (15 runs for 9 families), so a family's rows gather under its title,
-            //   each family in the order its first block comes, its rows in the card's order
-            CollectionAssert.AreEqual(Model.Sections.SelectMany(s => s.Targets).ToList(), View.Rows.Select(r => r.BlockKey).ToList(),
-                "a row per target, under its family, in the card's order");
-            CollectionAssert.AreEquivalent(Model.Targets, View.Rows.Select(r => r.BlockKey).ToList(), "every target once");
-            Assert.AreEqual(Model.Sections.Count, View.Sections.Count, "a title per family");
-            Assert.IsEmpty(Ticked, "nothing read yet: no tick");
-
-            yield return Open(LampMilitary, SheetStopRule.Stop.Full);
-            Assert.Less(Model.TargetCount, NavOntologyRule.MinBlocks(ConfigCopy().card_settings.navigation), "precondition: under Show Navigation From");
-            Assert.IsNull(Sheet.Stack.SlotOfBlock(AutoKey), "Lamp - Military gets no contents");
-
-            yield return Open(Lamp, SheetStopRule.Stop.Full);
-            yield return UseAuto(CardOptions.NavNone);
-            Assert.IsNull(Sheet.Stack.SlotOfBlock(AutoKey), "None, live: gone again");
-        }
-
-        [UnityTest]
         public IEnumerator TheRowsShow_TheReadingTimeTypedForABlock_TheClipLengthOfAudioAndVideo_AndNothingForABlockWithNeither()
         {
             yield return UseAuto(BuiltInBlocks.NavContentsKind);
@@ -260,7 +233,7 @@ namespace TileStories.Tests
         {
             // - three of The Lamp's texts as compact rows (Display Expandable), the contents list on: one push through the live seam
             var copy = ConfigCopy();
-            copy.card_settings.navigation.auto_nav_block = BuiltInBlocks.NavContentsKind;
+            copy.pois.Single(p => p.id == Lamp).card.blocks.Insert(1, new BlockInstanceData { key = AutoKey, kind = BuiltInBlocks.NavContentsKind });
             var rows = new[] { "block_2", "block_3", "block_4" };
             foreach (var block in copy.pois.Single(p => p.id == Lamp).card.blocks)
                 if (rows.Contains(block.key)) block.display = CardOptions.DisplayExpandable;
@@ -419,7 +392,6 @@ namespace TileStories.Tests
 
             // - an authored Contents block with Rows = Every Block: every row at once, plain titles
             var copy = ConfigCopy();
-            copy.card_settings.navigation.auto_nav_block = CardOptions.NavNone;
             var blocks = copy.pois.Single(p => p.id == Lamp).card.blocks;
             blocks.Insert(1, new BlockInstanceData
             {

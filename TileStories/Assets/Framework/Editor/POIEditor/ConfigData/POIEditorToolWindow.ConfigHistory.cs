@@ -52,23 +52,6 @@ namespace TileStories.Editor
                 key => ApplyPopupEdit(() => assignKey(key)), IsStillEditing(_config));
         }
 
-        // _3.2 step 17a: the navigation preset picker. A pick applies the whole preset inside ONE mutation scope -- one history step,
-        // so one Ctrl+Z puts all seven rows back together
-        private NamedOptionPickerPopup CreateNavigationPresetPickerPopup()
-        {
-            int InUse()
-            {
-                var matching = NavigationPresets.Matching(_config?.card_settings?.navigation);
-                for (int i = 0; i < NavigationPresets.All.Count; i++)
-                    if (ReferenceEquals(NavigationPresets.All[i], matching)) return i;
-                return -1;
-            }
-            return new NamedOptionPickerPopup(NavigationPresets.PickerKind, NavigationPresets.PickerTitle, NavigationPresets.PickerOptions(),
-                new[] { NavigationPresets.Recommended }, InUse,
-                index => ApplyPopupEdit(() => NavigationPresets.Apply(_config.card_settings.navigation ??= new CardNavigationSettings(), NavigationPresets.All[index])),
-                IsStillEditing(_config));
-        }
-
         // _3.2 step 17b: the Card Starter picker of one point. A pick goes through ApplyCardStarter: the question first on a point with
         // blocks, then the starter inside ONE mutation scope. The point is held by id and found again on every pick; the picker closes once
         // the config it was opened on is replaced (undo, reload) or the point is gone. After the sets and Start from scratch, under a second

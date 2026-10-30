@@ -50,11 +50,10 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(CardOptions.LayoutAccordion, CardLayoutRule.Layout(Nav(CardOptions.LayoutAccordion)));
             Assert.AreEqual(CardOptions.LayoutTabs, CardLayoutRule.Layout(Nav(CardOptions.LayoutTabs)));
             Assert.AreEqual(CardOptions.LayoutPages, CardLayoutRule.Layout(Nav(CardOptions.LayoutPages)));
-            Assert.AreEqual(CardOptions.LayoutBento, CardLayoutRule.Layout(Nav(CardOptions.LayoutBento)));
+            Assert.AreEqual(CardOptions.LayoutScroll, CardLayoutRule.Layout(Nav("bento")), "a retired layout reads as scroll");
             // - offered, never the default (Paul 2023, scrolljacking: changing the scroll direction disorients)
             Assert.AreNotEqual(CardOptions.LayoutPages, new CardNavigationSettings().layout);
-            CollectionAssert.AreEqual(new[] { "scroll", "accordion", "tabs", "pages", "bento" }, CardOptions.Layouts, "the Editor's order: Scroll first");
-            Assert.AreEqual("Bento", CardOptions.LayoutLabels[System.Array.IndexOf(CardOptions.Layouts, CardOptions.LayoutBento)]);
+            CollectionAssert.AreEqual(new[] { "scroll", "accordion", "tabs", "pages" }, CardOptions.Layouts, "the Editor's order: Scroll first");
             Assert.AreEqual("Pages", CardOptions.LayoutLabels[System.Array.IndexOf(CardOptions.Layouts, CardOptions.LayoutPages)]);
         }
 
@@ -84,7 +83,6 @@ namespace TileStories.Editor.Tests
             foreach (var (top, bottom) in new[] { (none, none), ("text_tabs", none), ("icon_tabs", "bottom_bar"), (none, "bottom_bar") })
                 Assert.AreEqual(BuiltInNavElements.FamilyPager, CardLayoutRule.TopElement(Nav(CardOptions.LayoutPages, top: top, bottom: bottom)),
                     "pages with Top Bar " + top + " / Bottom Bar " + bottom);
-            Assert.IsFalse(CardLayoutRule.TabsWithoutAnElement(Nav(CardOptions.LayoutPages, top: none, bottom: none)), "no Tabs warning for pages");
             // - through the slot rule the card draws: The Lamp in pages holds the Family Pager, a REGISTERED top element
             Assert.AreEqual(BuiltInNavElements.FamilyPager, NavSlotRule.TopElement(nav, Model(config, Lamp),
                 key => NavElementRegistry.Shared.TryGet(key, out var d) && d.Slot == NavSlotKeys.Top ? d : null));
@@ -170,22 +168,11 @@ namespace TileStories.Editor.Tests
         {
             foreach (string layout in new[] { CardOptions.LayoutTabs, CardOptions.LayoutPages })
             {
-                Assert.AreEqual("block_28", CardLayoutRule.SpyBlock(layout, null, "block_13", false, "block_28"), layout + ": the measure fell back to the card's first");
-                Assert.AreEqual("block_28", CardLayoutRule.SpyBlock(layout, null, null, false, "block_28"), layout + ": nothing measured");
-                Assert.AreEqual("block_37", CardLayoutRule.SpyBlock(layout, null, "block_37", true, "block_28"), layout + ": a block of the page shown is kept");
-                Assert.AreEqual("block_13", CardLayoutRule.SpyBlock(layout, null, "block_13", false, null), layout + ": with no page shown (none yet) what was measured");
+                Assert.AreEqual("block_28", CardLayoutRule.SpyBlock(layout, "block_13", false, "block_28"), layout + ": the measure fell back to the card's first");
+                Assert.AreEqual("block_28", CardLayoutRule.SpyBlock(layout, null, false, "block_28"), layout + ": nothing measured");
+                Assert.AreEqual("block_37", CardLayoutRule.SpyBlock(layout, "block_37", true, "block_28"), layout + ": a block of the page shown is kept");
+                Assert.AreEqual("block_13", CardLayoutRule.SpyBlock(layout, "block_13", false, null), layout + ": with no page shown (none yet) what was measured");
             }
-        }
-
-        // Audit F2-1 and F2-2: the edge scrubber's dots lay on the next page's peek (pages) and on every row's chevron (accordion)
-        [Test]
-        public void ThePagesAndTheAccordion_OwnTheCardsRightEdge_EveryOtherLayoutLeavesItToTheWall()
-        {
-            Assert.IsTrue(CardLayoutRule.LayoutOwnsTheEdge(Nav(CardOptions.LayoutPages)), "pages: the swipe starts there and the next page peeks there");
-            Assert.IsTrue(CardLayoutRule.LayoutOwnsTheEdge(Nav(CardOptions.LayoutAccordion)), "accordion: each row's chevron is there");
-            foreach (string other in new[] { CardOptions.LayoutScroll, CardOptions.LayoutTabs, CardOptions.LayoutBento, "", "no_such_layout" })
-                Assert.IsFalse(CardLayoutRule.LayoutOwnsTheEdge(Nav(other)), "'" + other + "': the wall's Edge");
-            Assert.IsFalse(CardLayoutRule.LayoutOwnsTheEdge(null), "no settings read as scroll");
         }
 
         [Test]
@@ -243,9 +230,6 @@ namespace TileStories.Editor.Tests
                 field_defaults = new List<BlockFieldDefault> { new() { key = field.Key, value = BuiltInBlocks.NavContentsEveryBlock } },
             });
             Assert.IsFalse(NavContentsRule.SectionsFirst(authored, config.card_settings), "the wall's Block Library default: Every Block");
-            var synthesized = new BlockStackBuilder.Entry(new BlockInstanceData { key = BlockStackBuilder.AutoNavBlockKey(kind.Key), kind = kind.Key }, kind,
-                BuiltInBlocks.NavContentsList, true);
-            Assert.IsTrue(NavContentsRule.SectionsFirst(synthesized, config.card_settings), "the card's own block opens folded, whatever the wall says");
 
             authored.Instance.fields.Add(new BlockFieldValue { key = field.Key, value = BuiltInBlocks.NavContentsSectionsFirst });
             Assert.IsTrue(NavContentsRule.SectionsFirst(authored, config.card_settings), "the block's own Rows wins over the wall's");
@@ -291,77 +275,6 @@ namespace TileStories.Editor.Tests
     [Ignore(TestSkips.OldNavigationElements)]
     public class CardLayoutRuleOldNavigationTests : CardLayoutRuleFixture
     {
-        // Bento (step 15b): like tabs it needs sections to switch between and sets them aside -- ALL of them, its tiles stand for them; a jump
-        // to a block of a section opens that section in the full view (never a scroll, never a section shown in the stack), a block of no
-        // section scrolls the overview; the spy names the section open in the full view and NONE on the overview; the Top Bar stays the wall's
-        [Test]
-        public void Bento_NeedsSectionsToSwitchBetween_SetsEverySectionAside_AndAJumpOpensItsSectionInTheFullView()
-        {
-            var config = Shipped();
-            config.card_settings.navigation.layout = CardOptions.LayoutBento;
-            var nav = config.card_settings.navigation;
-            var lamp = Model(config, Lamp);
-            Assert.AreEqual(CardOptions.LayoutBento, CardLayoutRule.Effective(nav, lamp), "The Lamp: 8 sections");
-            Assert.AreEqual(CardOptions.LayoutScroll, CardLayoutRule.Effective(nav, Model(config, LampMilitary)), "Military: under Show Navigation From");
-            Assert.AreEqual(CardOptions.LayoutScroll, CardLayoutRule.Effective(nav, Model(config, LampReligious)), "Religious: the header alone");
 
-            Assert.IsTrue(CardLayoutRule.ParksSections(CardOptions.LayoutBento), "its blocks are set aside");
-            Assert.IsTrue(CardLayoutRule.OpensSectionsInFullView(CardOptions.LayoutBento));
-            foreach (string other in new[] { CardOptions.LayoutScroll, CardOptions.LayoutAccordion, CardOptions.LayoutTabs, CardOptions.LayoutPages })
-            {
-                Assert.IsFalse(CardLayoutRule.OpensSectionsInFullView(other), other);
-                Assert.IsFalse(CardLayoutRule.JumpOpensSection(other, 2), other + ": a jump scrolls");
-            }
-            // - with no section shown (-1: what CardLayoutView.ParkedAtBind passes under bento), ShowsWith keeps exactly the blocks of no section (the sources) on the overview
-            for (int i = 0; i < lamp.Sections.Count; i++)
-                Assert.IsFalse(CardLayoutRule.ShowsWith(i, -1), "section " + i + " set aside");
-            Assert.IsTrue(CardLayoutRule.ShowsWith(-1, -1), "a block of no section stays");
-
-            Assert.IsTrue(CardLayoutRule.JumpOpensSection(CardOptions.LayoutBento, 0), "a block of a section: its section opens in the full view");
-            Assert.IsFalse(CardLayoutRule.JumpOpensSection(CardOptions.LayoutBento, -1), "the sources (no section): the overview scrolls to them");
-            Assert.IsFalse(CardLayoutRule.ShowsSectionBeforeJump(CardOptions.LayoutBento), "never a section shown in the stack");
-            Assert.IsFalse(CardLayoutRule.OpensRowBeforeJump(false));
-
-            Assert.AreEqual(-1, CardLayoutRule.SpySection(CardOptions.LayoutBento, -1, 5), "the overview: no section, whatever the scroll measured");
-            Assert.AreEqual(3, CardLayoutRule.SpySection(CardOptions.LayoutBento, 3, 5), "the section open in the full view");
-            Assert.IsNull(CardLayoutRule.SpyBlock(CardOptions.LayoutBento, null, "block_9", false, null), "the overview: no block");
-            Assert.AreEqual("block_20", CardLayoutRule.SpyBlock(CardOptions.LayoutBento, "block_20", "block_9", false, null), "the block the full view opened at");
-            Assert.AreEqual("block_9", CardLayoutRule.SpyBlock(CardOptions.LayoutScroll, "block_20", "block_9", false, null), "elsewhere what was measured");
-            Assert.AreEqual("block_9", CardLayoutRule.SpyBlock(CardOptions.LayoutAccordion, null, "block_9", false, "block_2"), "no section is set aside in an accordion");
-
-            // - step 16: the tiles ARE the map -- no Top Bar under bento, whatever the wall picked (its value stays for another layout), the
-            //   same rule that gives pages the Family Pager; every other layout leaves the wall's pick to the wall
-            Assert.AreEqual(BuiltInNavElements.TextTabs, nav.top, "precondition: the shipped wall's Top Bar is Text Tabs");
-            Assert.IsTrue(CardLayoutRule.LayoutPicksTheTopBar(nav), "bento picks the top slot itself");
-            foreach (string top in new[] { BuiltInNavElements.TextTabs, "icon_tabs", "progress_map", CardOptions.NavNone })
-                Assert.AreEqual(CardOptions.NavNone, CardLayoutRule.TopElement(Nav(CardOptions.LayoutBento, top: top)), top + ": nothing at the top under bento");
-            Assert.IsNull(NavSlotRule.TopElement(nav, lamp, key => NavElementRegistry.Shared.TryGet(key, out var e) && e.Slot == NavSlotKeys.Top ? e : null),
-                "the top slot of The Lamp holds no element");
-            Assert.IsTrue(CardLayoutRule.LayoutPicksTheTopBar(Nav(CardOptions.LayoutPages)), "pages: the same rule");
-            foreach (string other in new[] { CardOptions.LayoutScroll, CardOptions.LayoutAccordion, CardOptions.LayoutTabs })
-                Assert.IsFalse(CardLayoutRule.LayoutPicksTheTopBar(Nav(other)), other + ": the wall's Top Bar");
-            Assert.IsFalse(CardLayoutRule.TabsWithoutAnElement(Nav(CardOptions.LayoutBento, top: CardOptions.NavNone, bottom: CardOptions.NavNone)),
-                "no element needed: the tiles are the way between sections");
-        }
-
-        // Tabs with neither a Top Bar nor a Bottom Bar uses Text Tabs (and the Editor warns); any bar the wall set is kept
-        [Test]
-        public void TabsWithNoBar_UsesTextTabs_AnyBarTheWallSetIsKept_AndNoOtherLayoutChangesTheTopBar()
-        {
-            string none = CardOptions.NavNone;
-            Assert.AreEqual(BuiltInNavElements.TextTabs, CardLayoutRule.TopElement(Nav(CardOptions.LayoutTabs, top: none, bottom: none)));
-            Assert.IsTrue(CardLayoutRule.TabsWithoutAnElement(Nav(CardOptions.LayoutTabs, top: none, bottom: none)));
-            Assert.AreEqual(none, CardLayoutRule.TopElement(Nav(CardOptions.LayoutTabs, top: none, bottom: "bottom_bar")), "a bottom bar switches sections");
-            Assert.IsFalse(CardLayoutRule.TabsWithoutAnElement(Nav(CardOptions.LayoutTabs, top: none, bottom: "bottom_bar")));
-            Assert.AreEqual("icon_tabs", CardLayoutRule.TopElement(Nav(CardOptions.LayoutTabs, top: "icon_tabs", bottom: none)));
-            Assert.AreEqual(none, CardLayoutRule.TopElement(Nav(CardOptions.LayoutScroll, top: none, bottom: none)), "scroll: None stays None");
-            Assert.IsFalse(CardLayoutRule.TabsWithoutAnElement(Nav(CardOptions.LayoutAccordion, top: none, bottom: none)));
-            // - through the slot rule the card draws: The Lamp in tabs with both bars None holds Text Tabs at the top
-            var config = Shipped();
-            config.card_settings.navigation = Nav(CardOptions.LayoutTabs, top: none, bottom: none);
-            var model = Model(config, Lamp);
-            Assert.AreEqual(BuiltInNavElements.TextTabs, NavSlotRule.TopElement(config.card_settings.navigation, model,
-                key => NavElementRegistry.Shared.TryGet(key, out var d) && d.Slot == NavSlotKeys.Top ? d : null));
-        }
     }
 }

@@ -29,7 +29,7 @@ namespace TileStories
         }
     }
 
-    // The facets a visitor has switched on in a card's menu (drawer_tree, grid_overlay): ONE format, ONE time limit and any number of
+    // The facets a visitor has switched on in a card's menu (drawer_tree): ONE format, ONE time limit and any number of
     // "without" needs. Facets combine with AND (format AND time AND every without). Plain state, no view: a menu owns one and a pure rule
     // (NavFacetRule) judges blocks against it, so both menus filter the same way.
     public sealed class NavFacets
@@ -78,7 +78,7 @@ namespace TileStories
         }
     }
 
-    // The ONE rule that answers "does this block pass these facets" (_3.2 section 5.8, step 18), read by drawer_tree AND grid_overlay -- never
+    // The ONE rule that answers "does this block pass these facets" (_3.2 section 5.8, step 18), read by drawer_tree -- never
     // one filter per element. Pure: facts in, a yes or no out.
     //   - Format: the block's kind has that format
     //   - Time (<= 2 min, <= 5 min): the block has a time and it is within the limit. A block with NO time given does not match: nothing says

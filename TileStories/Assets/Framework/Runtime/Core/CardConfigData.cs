@@ -164,7 +164,7 @@ namespace TileStories
         public string group_by = CardOptions.GroupByFamily;
         // Show Navigation From: a card with fewer targets than this shows NO navigation element (a short card stays clean)
         public int min_blocks = 8;
-        // Bar Slots: how many sections a bar shows before its last slot becomes More (a navigation bar holds 3 to 5)
+        // Bar Slots: how many sections a bar shows before its last slot becomes More (a navigation bar holds 3 to 5; bar_sheet reads it)
         public int max_slots = 5;
         // Follow Scroll: the section a navigation element marks follows what the visitor scrolls through (off: only a jump moves it)
         public bool follow_scroll = true;
@@ -175,27 +175,17 @@ namespace TileStories
         // Back Button: "step_down" (the default: each system Back press undoes the innermost thing -- the full view, then an open menu or
         // list over the card, then one stop down, then closes the card, NavBackRule) | "none" (Back is left to the app) (CardOptions.BackButtons)
         public string back_button = CardOptions.BackButtonStepDown;
-        // Top Bar: the element in the strip under the header (a NavElementRegistry key of the top slot: text_tabs, ...) | "none"
-        // (CardOptions.NavNone, the default: the Navigation Bar is the card's way round). A key nothing registered draws no strip (the Editor
-        // shows it as missing)
+        // Top Bar: the element in the strip under the header while the Navigation Bar is off (a NavElementRegistry key of the top slot) |
+        // "none" (CardOptions.NavNone, the default: the Navigation Bar is the card's way round). A key nothing registered draws no strip. The
+        // POI Editor offers no element until the kept ones are rebuilt (_3.3 TODOs)
         public string top = CardOptions.NavNone;
         // Bottom Bar: the element under the stack, BELOW the sticky CTA footer, in the thumb zone (a NavElementRegistry key of the bottom
         // slot) | "none" (CardOptions.NavNone, the default). The footer and the bar are ONE bottom area for CardChromeRule
         public string bottom = CardOptions.NavNone;
-        // Menu: the element the header's menu button opens over the card, on a scrim (a NavElementRegistry key of the menu slot: drawer_tree,
-        // grid_overlay) | "none" (CardOptions.NavNone, the default: a menu hides the map behind a button, so it is never the only way in).
+        // Menu: the element the header's menu button opens over the card, on a scrim (a NavElementRegistry key of the menu slot:
+        // drawer_tree) | "none" (CardOptions.NavNone, the default: a menu hides the map behind a button, so it is never the only way in).
         // When set, a bar's More slot opens it instead of its small list
         public string menu = CardOptions.NavNone;
-        // Floating Button: the element in the card's floating slot, just above the sheet's top-right edge at every stop (a NavElementRegistry
-        // key of the floating slot: fab_dial, fab_radial) | "none" (CardOptions.NavNone, the default)
-        public string floating = CardOptions.NavNone;
-        // Edge: the element down the right edge of the stack's viewport (a NavElementRegistry key of the edge slot: edge_scrubber) | "none"
-        // (CardOptions.NavNone, the default). It sits over the content, so it is opt-in
-        public string edge = CardOptions.NavNone;
-        // Auto Nav Block: a nav block (a registered kind of the `navigation` family: nav_icon_grid) put right after the header of every card
-        // with at least Show Navigation From targets -- unless the point already shows a nav block of its own | "none" (CardOptions.NavNone,
-        // the default). Inserted by BlockStackBuilder.InsertAutoNavBlock, after the skip rules and the Block Order
-        public string auto_nav_block = CardOptions.NavNone;
         // Placed Model Control: "chip" (the default: while a model placed with place_in_ar stands, a chip above the sheet says so at every
         // stop, with a Remove on the card that placed it) | "none" (CardOptions.PlacedModelControls, PlacedModelChipRule)
         public string placed_model_control = CardOptions.PlacedModelChip;
@@ -210,24 +200,19 @@ namespace TileStories
         public string labels = CardOptions.LabelsIconAndText;
         // Show Counts: an item shows how many blocks it leads to
         public bool show_counts = false;
-        // The Groups table (the segmented element, _3.2 section 3): the wall's own groups, in order. Empty = the framework's four
-        // (NavGroupRule.Defaults: Discover, Watch, Explore, Visit); a family joins one through its Families row's Group
-        public List<CardNavGroup> groups = new();
         // Layout: how the card arranges its blocks (CardLayoutRule) -- "scroll" (the default: one scroll) | "accordion" (every navigation target
         // a compact row that opens in place) | "tabs" (one section shown at a time) | "pages" (one section per sideways page, the next one
-        // peeking; offered, never the default) | "bento" (the sections as tiles sized by their block counts; a tile opens its section in the full
-        // view) (CardOptions.Layouts)
+        // peeking; offered, never the default) (CardOptions.Layouts). A layout the card does not know reads as scroll
         public string layout = CardOptions.LayoutScroll;
         // Open One At A Time (accordion only): opening a row closes the others
         public bool accordion_one_open = false;
         // The Navigation Bar (_3.3 S4 third round, Detail Card > Navigation > Navigation Bar): ONE configurable bar of the card's groups --
         // where it sits, its shape and fill, how the chosen group shows, when it shows, and its groups table. While it is on (the default)
-        // the card draws it in place of the Top Bar / Bottom Bar / Menu / Floating Button / Edge elements (their values are kept)
+        // the card draws it in place of the Top Bar / Bottom Bar / Menu elements (their values are kept)
         public CardNavBarSettings bar = new();
 
         public const int MinBlocksMin = 2;
         public const int MinBlocksMax = 30;
-        // Bar Slots also caps fab_radial's arc (its last item becomes More, like a bar's)
         public const int MaxSlotsMin = 3;
         public const int MaxSlotsMax = 5;
     }
@@ -242,17 +227,6 @@ namespace TileStories
         public int order;
         // Whether this family's blocks close the card, overriding its registered AtEnd
         public bool at_end;
-        // The Groups row this family joins (its key); blank = the framework's default group for it (NavGroupRule.DefaultGroupOf)
-        public string group = "";
-    }
-
-    // One row of the Groups table: a generated key (what a Families row points at, never shown) and the visitor's words per language.
-    // A default row's words may stay empty: the framework's own word for its key is read then (CardStrings nav_group_<key>)
-    [Serializable]
-    public class CardNavGroup
-    {
-        public string key;
-        public List<LocalizedEntry> label = new();
     }
 
     // The Navigation Bar as a whole (_3.3 S4 third round, v5's Tweaks "Navigation Bar", in that order): what NavBarView draws and NavBarRule
@@ -262,7 +236,7 @@ namespace TileStories
     [Serializable]
     public class CardNavBarSettings
     {
-        // On by default: the bar is the visitor's main way round the card (the old Top / Bottom / Menu / Floating / Edge elements default
+        // On by default: the bar is the visitor's main way round the card (the old Top / Bottom / Menu elements default
         // to none, and are drawn only while it is off)
         public bool enabled = true;
         // Position: "bottom" (the default: floating over the screen's foot, in the thumb zone) | "top" (under the chrome row)
@@ -721,9 +695,8 @@ namespace TileStories
         public const string LayoutAccordion = "accordion";
         public const string LayoutTabs = "tabs";
         public const string LayoutPages = "pages";
-        public const string LayoutBento = "bento";
-        public static readonly string[] Layouts = { LayoutScroll, LayoutAccordion, LayoutTabs, LayoutPages, LayoutBento };
-        public static readonly string[] LayoutLabels = { "Scroll", "Accordion", "Tabs", "Pages", "Bento" };
+        public static readonly string[] Layouts = { LayoutScroll, LayoutAccordion, LayoutTabs, LayoutPages };
+        public static readonly string[] LayoutLabels = { "Scroll", "Accordion", "Tabs", "Pages" };
 
         // Group By's Editor words (GroupBys above)
         public static readonly string[] GroupByLabels = { "Family", "Format" };

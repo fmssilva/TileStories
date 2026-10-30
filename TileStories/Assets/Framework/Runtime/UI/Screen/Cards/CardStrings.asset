@@ -1050,13 +1050,6 @@ MonoBehaviour:
       value: Feedback
     - lang: pt
       value: Opinião
-  - key: kind_nav_icon_grid
-    where: The name of the icon grid block (a grid of the card's sections) as one kind of block.
-    text:
-    - lang: en
-      value: Sections grid
-    - lang: pt
-      value: Grelha de secções
   - key: kind_nav_contents
     where: The name of the contents block (a list of the card's blocks with their minutes and a tick once read) as one kind of block.
     text:
@@ -1064,20 +1057,6 @@ MonoBehaviour:
       value: Contents
     - lang: pt
       value: "\xCDndice"
-  - key: kind_nav_rails
-    where: The name of the rails block (a row of cards per section) as one kind of block.
-    text:
-    - lang: en
-      value: Browse
-    - lang: pt
-      value: Explorar
-  - key: kind_nav_bento
-    where: The name of the highlights block (a few big tiles the author picked) as one kind of block.
-    text:
-    - lang: en
-      value: Highlights
-    - lang: pt
-      value: Destaques
   - key: kind_sources
     where: The name of the sources block as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
     text:
@@ -1113,34 +1092,6 @@ MonoBehaviour:
       value: "{0} \xB7 {1}"
     - lang: pt
       value: "{0} \xB7 {1}"
-  - key: nav_group_discover
-    where: The name of the default navigation group that joins the About and Stories families. A segment of the Segmented navigation shows it.
-    text:
-    - lang: en
-      value: Discover
-    - lang: pt
-      value: Descobrir
-  - key: nav_group_watch
-    where: The name of the default navigation group that joins the Media and Listen families. A segment of the Segmented navigation shows it.
-    text:
-    - lang: en
-      value: Watch
-    - lang: pt
-      value: Ver
-  - key: nav_group_explore
-    where: The name of the default navigation group that joins the In AR and Play families. A segment of the Segmented navigation shows it.
-    text:
-    - lang: en
-      value: Explore
-    - lang: pt
-      value: Explorar
-  - key: nav_group_visit
-    where: The name of the default navigation group that joins the Visit and Community families. A segment of the Segmented navigation shows it.
-    text:
-    - lang: en
-      value: Visit
-    - lang: pt
-      value: Visitar
   - key: nav_more
     where: The last slot of the Bottom Bar when the card has more sections than Bar Slots; a tap on it
       lists the sections that did not fit.
@@ -1187,37 +1138,6 @@ MonoBehaviour:
       value: Contents
     - lang: pt
       value: "\xCDndice"
-  - key: nav_menu_by_purpose
-    where: One side of the switch on the menu of big tiles; it shows the card's sections by what the visitor
-      wants from them (About, Media, Stories...).
-    text:
-    - lang: en
-      value: By purpose
-    - lang: pt
-      value: Por objetivo
-  - key: nav_menu_by_format
-    where: The other side of the switch on the menu of big tiles; it shows the card's sections by how they are
-      taken in (Read, Look, Watch, Listen...).
-    text:
-    - lang: en
-      value: By format
-    - lang: pt
-      value: Por formato
-  - key: nav_menu_all
-    where: The way back from one section's kinds of block to all the sections, on the menu of big tiles.
-    text:
-    - lang: en
-      value: All sections
-    - lang: pt
-      value: "Todas as sec\xE7\xF5es"
-  - key: nav_fab
-    where: The name of the round floating button above the card's top-right edge that opens the card's sections
-      (as a list, or on an arc around it).
-    text:
-    - lang: en
-      value: Sections
-    - lang: pt
-      value: "Sec\xE7\xF5es"
   - key: placed_model_remove
     where: The button on the small chip above the card while a model placed in the room stands, on the card of the
       point that placed it; it takes the model away.
@@ -1308,13 +1228,6 @@ MonoBehaviour:
       value: Next section
     - lang: pt
       value: "Sec\xE7\xE3o seguinte"
-  - key: nav_rails_all
-    where: The last card of a row of the rails block when the section holds more blocks than the row shows ({0} = how many blocks the section holds); a tap moves the card to the section.
-    text:
-    - lang: en
-      value: All {0}
-    - lang: pt
-      value: Todos {0}
   - key: nav_facet_up_to
     where: A chip of the card's menus (the outline, the big tiles) that keeps only the blocks that take this long or less to read, watch or listen to ({0} = minutes).
     text:

@@ -37,13 +37,7 @@ namespace TileStories.Tests
         // - "folder/relative/File.cs | rule": the views S2 untangles, each with why it names the sheet today
         private static readonly Dictionary<string, string> AllowList = new()
         {
-            ["Blocks/Navigation/NavBentoBlockView.cs | " + SheetType] =
-                "holds the sheet's NavController (_nav) for the model and the jump: S2 reads both through BlockBindContext",
             ["Blocks/Navigation/NavContentsBlockView.cs | " + SheetType] =
-                "holds the sheet's NavController (_nav) for the model and the jump: S2 reads both through BlockBindContext",
-            ["Blocks/Navigation/NavIconGridBlockView.cs | " + SheetType] =
-                "holds the sheet's NavController (_nav) for the model and the jump: S2 reads both through BlockBindContext",
-            ["Blocks/Navigation/NavRailsBlockView.cs | " + SheetType] =
                 "holds the sheet's NavController (_nav) for the model and the jump: S2 reads both through BlockBindContext",
         };
 

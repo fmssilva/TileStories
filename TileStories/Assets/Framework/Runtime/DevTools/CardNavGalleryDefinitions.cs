@@ -50,31 +50,18 @@ namespace TileStories
             }
         }
 
-        // The elements the gallery shows: one row per element, every case drawn for each
+        // The elements the gallery shows (the ones kept for a later rebuild, _3.3 TODOs): one row per element, every case drawn for each
         public static readonly IReadOnlyList<string> ElementKeys = new[]
         {
-            BuiltInNavElements.TextTabs, BuiltInNavElements.IconTabs, BuiltInNavElements.IconTabsChips, BuiltInNavElements.KindChips,
-            BuiltInNavElements.Segmented, BuiltInNavElements.ProgressMap, BuiltInNavElements.FamilyPager, BuiltInNavElements.BottomBar,
-            BuiltInNavElements.Dock, BuiltInNavElements.BarSheet, BuiltInNavElements.NextUp,
-            BuiltInNavElements.DrawerTree, BuiltInNavElements.GridOverlay,
-            BuiltInNavElements.FabDial, BuiltInNavElements.FabRadial,
-            BuiltInNavElements.EdgeScrubber,
+            BuiltInNavElements.IconTabsChips, BuiltInNavElements.KindChips, BuiltInNavElements.ProgressMap, BuiltInNavElements.FamilyPager,
+            BuiltInNavElements.BarSheet, BuiltInNavElements.NextUp, BuiltInNavElements.DrawerTree,
         };
 
         // The nav block kinds the gallery shows (_3.2 section 5.6), every case drawn for each, the same way
-        public static readonly IReadOnlyList<string> BlockKinds = new[]
-        {
-            BuiltInBlocks.NavIconGridKind, BuiltInBlocks.NavContentsKind, BuiltInBlocks.NavRailsKind, BuiltInBlocks.NavBentoKind,
-        };
+        public static readonly IReadOnlyList<string> BlockKinds = new[] { BuiltInBlocks.NavContentsKind };
 
-        // The blocks (step 15a) the bento's tiles lead to: the first four blocks after the header, in every case. Their words come from the
-        // blocks themselves; the first tile also has a picture and the third opens the full view, so one card judges both outcomes
-        public static readonly IReadOnlyList<string> BentoTargets = new[] { "block_2", "block_3", "block_4", "block_5" };
-        public const string BentoKey = "block_900";
-
-        // The card layouts the gallery shows (_3.2 section 6.1), every case drawn for each, with Text Tabs at the top (pages: the Family Pager)
-        public static readonly IReadOnlyList<string> Layouts = new[]
-            { CardOptions.LayoutAccordion, CardOptions.LayoutTabs, CardOptions.LayoutPages, CardOptions.LayoutBento };
+        // The card layouts the gallery shows (_3.2 section 6.1), every case drawn for each, with the Family Pager at the top
+        public static readonly IReadOnlyList<string> Layouts = new[] { CardOptions.LayoutAccordion, CardOptions.LayoutTabs, CardOptions.LayoutPages };
 
         // The Reading Time a contents entry's card gives the FIRST copy of each gallery block that carries the field (_3.2 step 11b), so its
         // list shows typed minutes beside the rows with none and the audio clip's own length
@@ -119,7 +106,7 @@ namespace TileStories
         // Every element over every case, then every nav block over every case, then every layout over every case
         public static readonly IReadOnlyList<Entry> All = ElementKeys.SelectMany(key => Cases.Select(c => new Entry(key, c)))
             .Concat(BlockKinds.SelectMany(key => Cases.Select(c => new Entry(key, c, isBlock: true))))
-            .Concat(Layouts.SelectMany(layout => Cases.Select(c => new Entry(BuiltInNavElements.TextTabs, c, layout: layout)))).ToList();
+            .Concat(Layouts.SelectMany(layout => Cases.Select(c => new Entry(BuiltInNavElements.FamilyPager, c, layout: layout)))).ToList();
 
         // The slot an entry's element is registered for (top when the registry does not know it; InFlow for a nav block)
         public static string SlotOf(Entry entry) =>
@@ -130,7 +117,7 @@ namespace TileStories
 
         // The fabricated wall of an entry: the card gallery's own, with the entry's language offered and navigation from 2 targets. The
         // element is the wall's pick for ITS slot and every other slot holds nothing, so each render judges one element alone; a nav block
-        // is the wall's Auto Nav Block with every slot empty
+        // is authored into the card with every slot empty
         public static WallConfigData Wall(Entry entry)
         {
             var wall = CardGalleryDefinitions.Taxonomy();
@@ -138,13 +125,6 @@ namespace TileStories
             wall.card_settings.navigation.top = slot == NavSlotKeys.Top ? entry.ElementKey : CardOptions.NavNone;
             wall.card_settings.navigation.bottom = slot == NavSlotKeys.Bottom ? entry.ElementKey : CardOptions.NavNone;
             wall.card_settings.navigation.menu = slot == NavSlotKeys.Menu ? entry.ElementKey : CardOptions.NavNone;
-            wall.card_settings.navigation.floating = slot == NavSlotKeys.Floating ? entry.ElementKey : CardOptions.NavNone;
-            // - a Floating Button rests in the camera strip Full leaves (_3.3 S4a: Full Height = Leave A Camera Strip; To The Top leaves none)
-            if (slot == NavSlotKeys.Floating) wall.card_settings.container.full_height = CardOptions.FullHeightCameraStrip;
-            wall.card_settings.navigation.edge = slot == NavSlotKeys.Edge ? entry.ElementKey : CardOptions.NavNone;
-            // - a nav block comes in through Auto Nav Block (the builder's own step), every slot empty; one that needs authored content (the
-            //   bento) cannot: Poi() authors it into the card
-            wall.card_settings.navigation.auto_nav_block = entry.IsBlock && !NeedsAuthoring(entry) ? entry.ElementKey : CardOptions.NavNone;
             wall.card_settings.navigation.min_blocks = ShowNavigationFrom;
             if (entry.Layout != null) wall.card_settings.navigation.layout = entry.Layout;
             if (entry.Case.Language != "en") wall.card_settings.languages = new List<string> { "en", entry.Case.Language };
@@ -175,46 +155,12 @@ namespace TileStories
                     poi.card.blocks.Add(copy);
                 }
             }
-            // - a block the builder cannot insert by itself is authored: right after the header, where Auto Nav Block puts the others
-            if (NeedsAuthoring(entry)) poi.card.blocks.Insert(1, Bento());
+            // - a nav block is authored right after the header
+            if (entry.IsBlock) poi.card.blocks.Insert(1, new BlockInstanceData { key = NavBlockKey, kind = entry.ElementKey });
             return poi;
         }
 
-        // Whether this entry's block is authored into its card instead of inserted by Auto Nav Block (BlockKindDefinition.NeedsAuthoredContent)
-        public static bool NeedsAuthoring(Entry entry) =>
-            entry.IsBlock && BlockRegistry.Shared.TryGet(entry.ElementKey, out var kind) && kind.NeedsAuthoredContent;
-
-        // The bento block of the gallery: four tiles over BentoTargets -- the first with a picture and words of its own (English and
-        // Portuguese), the second with words only, the third opening its block in the full view, the fourth plain (the block's own words)
-        private static BlockInstanceData Bento()
-        {
-            BlockItemData Tile(string target, string en = null, string pt = null, string picture = null, string opens = null)
-            {
-                var item = new BlockItemData();
-                item.fields.Add(new BlockItemFieldValue { key = BuiltInBlocks.NavBentoTargetField, value = target });
-                if (en != null)
-                    item.fields.Add(new BlockItemFieldValue
-                    {
-                        key = BuiltInBlocks.NavBentoWordsField,
-                        text = new List<LocalizedEntry> { new() { lang = "en", value = en }, new() { lang = "pt", value = pt } },
-                    });
-                if (picture != null) item.fields.Add(new BlockItemFieldValue { key = BuiltInBlocks.NavBentoPictureField, asset = picture });
-                if (opens != null) item.fields.Add(new BlockItemFieldValue { key = BuiltInBlocks.NavBentoOpensField, value = opens });
-                return item;
-            }
-            var bento = new BlockInstanceData { key = BentoKey, kind = BuiltInBlocks.NavBentoKind, variant = BuiltInBlocks.NavBentoTiles, display = CardOptions.DisplayInline };
-            bento.fields.Add(new BlockFieldValue
-            {
-                key = BuiltInBlocks.NavBentoTilesField,
-                items = new List<BlockItemData>
-                {
-                    Tile(BentoTargets[0], "The castle", "O castelo", "wide.png"),
-                    Tile(BentoTargets[1], "Look closer", "Ver de perto"),
-                    Tile(BentoTargets[2], opens: BuiltInBlocks.NavBentoOpensFullView),
-                    Tile(BentoTargets[3]),
-                },
-            });
-            return bento;
-        }
+        // The key of an entry's authored nav block (no case's block takes it: theirs count up from block_2)
+        public const string NavBlockKey = "block_900";
     }
 }

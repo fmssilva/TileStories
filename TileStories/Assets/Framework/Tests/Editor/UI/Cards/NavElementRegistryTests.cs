@@ -40,11 +40,10 @@ namespace TileStories.Editor.Tests
         // - it lists BLOCKS, one dot each (not sections): rule 2.5.7 leaves it on a one-family card
         protected static NavElementDefinition AppDots(string slot = NavSlotKeys.Top) => new(AppKey, slot, "App Dots", "One dot per block.", NavChoice.Blocks);
 
-        // Section 5.1's top elements, in its order, then the pages layout's header (section 6.1, step 14) -- a Top Bar any layout may pick
+        // The top elements kept for a later rebuild (_3.3 TODOs), in their order, then the pages layout's header (section 6.1, step 14)
         protected static readonly string[] FrameworkTopElements =
         {
-            BuiltInNavElements.TextTabs, BuiltInNavElements.IconTabs, BuiltInNavElements.IconTabsChips, BuiltInNavElements.KindChips,
-            BuiltInNavElements.Segmented, BuiltInNavElements.ProgressMap, BuiltInNavElements.FamilyPager,
+            BuiltInNavElements.IconTabsChips, BuiltInNavElements.KindChips, BuiltInNavElements.ProgressMap, BuiltInNavElements.FamilyPager,
         };
 
         // A card of `textBlocks` rich texts under a header: every one an About target; `secondFamily` adds a Show On Wall button (In AR,
@@ -91,8 +90,8 @@ namespace TileStories.Editor.Tests
             // - the in-flow nav blocks (step 11) are kinds, not a slot of the sheet: no element is registered for one
             var unbuilt = Assert.Throws<ArgumentException>(() => registry.Register(AppDots("in_flow"), () => new AppDotsView()));
             StringAssert.Contains("'in_flow'", unbuilt.Message, "the refusal names the slot");
-            CollectionAssert.AreEqual(new[] { NavSlotKeys.Top, NavSlotKeys.Bottom, NavSlotKeys.Menu, NavSlotKeys.Floating, NavSlotKeys.Edge }, NavSlotKeys.Built,
-                "the slots the sheet draws today (step 7a: the bottom; step 8: the menu; step 9: the floating row; step 10: the edge host)");
+            CollectionAssert.AreEqual(new[] { NavSlotKeys.Top, NavSlotKeys.Bottom, NavSlotKeys.Menu }, NavSlotKeys.Built,
+                "the slots the sheet draws (step 7a: the bottom; step 8: the menu)");
             Assert.Throws<ArgumentException>(() => registry.Register(AppDots(null), () => new AppDotsView()));
             Assert.Throws<ArgumentNullException>(() => registry.Register(AppDots(), null));
             CollectionAssert.IsEmpty(registry.All, "nothing refused was kept");
@@ -143,233 +142,6 @@ namespace TileStories.Editor.Tests
     [Ignore(TestSkips.OldNavigationElements)]
     public class NavElementRegistryOldNavigationTests : NavElementRegistryFixture
     {
-        [Test]
-        public void TheFrameworksElements_AreRegisteredInShared_ForTheirSlot_WithEditorWordsInAscii()
-        {
-            Assert.IsTrue(NavElementRegistry.Shared.TryGet(BuiltInNavElements.TextTabs, out var tabs), "text_tabs is a framework element");
-            Assert.AreEqual(NavSlotKeys.Top, tabs.Slot);
-            Assert.AreEqual(NavChoice.Sections, tabs.Choice, "text tabs move between sections: rule 2.5.7 applies to them");
-            Assert.AreEqual(new CardNavigationSettings().top, BuiltInNavElements.TextTabs, "Top Bar's default is the registered text_tabs");
-            foreach (var element in NavElementRegistry.Shared.All)
-            {
-                Assert.IsFalse(string.IsNullOrWhiteSpace(element.Label), element.Key + " has an Editor label");
-                Assert.IsFalse(string.IsNullOrWhiteSpace(element.Help), element.Key + " has its (i) help");
-                EditorTextChecks.AssertAscii(element.Label + element.Help, element.Key);
-                Assert.IsInstanceOf<INavElementView>(NavElementRegistry.Shared.CreateView(element.Key), element.Key + " makes its view");
-            }
-            CollectionAssert.AreEqual(FrameworkTopElements, NavElementRegistry.Shared.OfSlot(NavSlotKeys.Top).Select(e => e.Key), "the six top elements of section 5.1, in its order, then the Family Pager");
-            CollectionAssert.AreEqual(new[] { BuiltInNavElements.BottomBar, BuiltInNavElements.Dock, BuiltInNavElements.BarSheet, BuiltInNavElements.NextUp },
-                NavElementRegistry.Shared.OfSlot(NavSlotKeys.Bottom).Select(e => e.Key), "the bottom slot's four elements of section 5.2 (7a's bar, then 7b's), in its order");
-            Assert.IsTrue(NavElementRegistry.Shared.TryGet(BuiltInNavElements.BottomBar, out var bar));
-            Assert.AreEqual(NavChoice.Sections, bar.Choice, "a bar moves between sections: rule 2.5.7 applies");
-            Assert.IsTrue(bar.ReadsBarSlots && bar.ReadsLabels, "it reads Bar Slots and Labels");
-            Assert.IsFalse(bar.ShowsCounts, "a count would crowd a fifth of the screen's width: no Show Counts");
-            // - step 7b: the dock is a bar of slots that ignores Labels (its marked item always shows icon and word); bar_sheet reads both
-            //   (its slots are the bar's); next_up follows BLOCKS, so rule 2.5.7 does not apply and no bar option does
-            Assert.IsTrue(NavElementRegistry.Shared.TryGet(BuiltInNavElements.Dock, out var dock));
-            Assert.AreEqual(NavChoice.Sections, dock.Choice);
-            Assert.IsTrue(dock.ReadsBarSlots && !dock.ReadsLabels && !dock.ShowsCounts, "the dock reads Bar Slots, not Labels");
-            Assert.IsTrue(NavElementRegistry.Shared.TryGet(BuiltInNavElements.BarSheet, out var sheet));
-            Assert.AreEqual(NavChoice.Sections, sheet.Choice);
-            Assert.IsTrue(sheet.ReadsBarSlots && sheet.ReadsLabels && !sheet.ShowsCounts, "bar_sheet reads Bar Slots and Labels like the bar");
-            Assert.IsTrue(NavElementRegistry.Shared.TryGet(BuiltInNavElements.NextUp, out var nextUp));
-            Assert.AreEqual(NavChoice.Blocks, nextUp.Choice, "next_up lists blocks: a one-family card gets it too");
-            Assert.IsFalse(nextUp.ReadsBarSlots || nextUp.ReadsLabels || nextUp.ShowsCounts, "and reads none of the bar's options");
-            Assert.IsFalse(NavElementRegistry.Shared.All.Where(e => e.Slot == NavSlotKeys.Top).Any(e => e.ReadsBarSlots), "no top element is a bar of slots");
-            Assert.AreEqual(CardOptions.NavNone, new CardNavigationSettings().bottom, "Bottom Bar's default is None");
-            Assert.IsNull(NavElementRegistry.Shared.CreateView("no_such_element"));
-        }
 
-        // An app adds its own top element with no Framework edit: the registry lists it for its slot (what the Editor's Top Bar popup reads)
-        // and a REAL sheet built over that registry shows it when the wall picks it -- bound to the card's own model and controller,
-        // pooled across cards, let go when the card closes or the wall picks None
-        [Test]
-        public void AnAppsOwnElement_IsListedForItsSlot_AndARealSheetShowsItBoundToTheCardsModelAndController()
-        {
-            var registry = new NavElementRegistry();
-            BuiltInNavElements.Register(registry);
-            var made = new List<AppDotsView>();
-            registry.Register(AppDots(), () => { var v = new AppDotsView(); made.Add(v); return v; });
-            CollectionAssert.AreEqual(FrameworkTopElements.Append(AppKey), registry.OfSlot(NavSlotKeys.Top).Select(e => e.Key),
-                "listed after the framework's, in registration order");
-
-            var sheet = new PoiCardSheetView(new VisualElement(), BlockRegistry.Shared, Array.Empty<StyleSheet>(), registry);
-            var wall = new WallConfigData { card_settings = new CardSettings() };
-            wall.card_settings.navigation.top = AppKey;
-            wall.card_settings.navigation.min_blocks = 2;
-            var poi = TextPoi("app_point", 3);
-
-            ShowCard(sheet, poi, wall);
-            Assert.AreEqual(AppKey, sheet.Slots.TopKey, "the wall's pick is shown");
-            Assert.AreEqual(1, made.Count);
-            var view = made[0];
-            Assert.AreSame(sheet.Nav, view.Nav, "bound to the card's own controller");
-            Assert.AreSame(sheet.Nav.Model, view.Model, "and to the model the controller drives");
-            Assert.AreEqual(1, view.Model.Sections.Count, "precondition: three About blocks make one section");
-            Assert.AreSame(sheet.Slots.Top, view.Root.parent, "its root sits in the top slot");
-            // - the strip FLOATS over the stack since _3.3 S4a's review: out of the flow, drawn after (over) the stack's ScrollView
-            Assert.Greater(sheet.Root.IndexOf(sheet.Slots.Top), sheet.Root.IndexOf(sheet.Stack.Scroll), "the slot is drawn over the stack's ScrollView");
-            Assert.Less(sheet.Root.IndexOf(sheet.Stack.HeaderSlot), sheet.Root.IndexOf(sheet.Slots.Top), "and after the header");
-
-            ShowCard(sheet, TextPoi("another_point", 4), wall);
-            Assert.AreEqual(1, made.Count, "another card rebinds the same view (pooled per key)");
-            Assert.AreEqual(2, view.Binds);
-
-            wall.card_settings.navigation.top = CardOptions.NavNone;
-            ShowCard(sheet, poi, wall);
-            Assert.IsNull(sheet.Slots.TopView, "None: the slot is empty");
-            Assert.IsNull(view.Nav, "and the app's view let go of the old card");
-            Assert.AreEqual(0, sheet.Slots.Top.childCount);
-
-            // - rule 2.5.7 is the ELEMENT's: on this one-section card Text Tabs (between sections) draws nothing, while the app's element,
-            //   which lists blocks, was drawn above -- the card still shows navigation (ShowsNavigation is unchanged)
-            wall.card_settings.navigation.top = BuiltInNavElements.TextTabs;
-            ShowCard(sheet, poi, wall);
-            Assert.IsTrue(sheet.Nav.Model.ShowsNavigation, "the one-section card still shows navigation");
-            Assert.IsNull(sheet.Slots.TopView, "but Text Tabs, which moves between sections, is not drawn for one");
-
-            wall.card_settings.navigation.top = AppKey;
-            ShowCard(sheet, poi, wall);
-            sheet.Hide();
-            Assert.IsNull(sheet.Slots.TopView, "closing the card empties the slot");
-            Assert.AreEqual(view.Binds, view.Unbinds, "every bind was unbound");
-        }
-
-        // A real sheet holds the strip in its slot and hides it at peek through the chrome (CardChromeRule: out of the flow, still laid
-        // out), shows it at Half and Full -- this sheet has no layout, so no floor applies; the floor is PoiCardChromeSceneTests' -- and a
-        // card below Show Navigation From holds no element at all
-        [Test]
-        public void TheTopSlot_IsHiddenAtPeekByTheChrome_AndEmptyForACardBelowShowNavigationFrom()
-        {
-            var sheet = new PoiCardSheetView(new VisualElement(), BlockRegistry.Shared, Array.Empty<StyleSheet>());
-            var wall = new WallConfigData { card_settings = new CardSettings() };
-            wall.card_settings.navigation.min_blocks = 3;
-            ShowCard(sheet, TextPoi("long", 3, secondFamily: true), wall);
-            Assert.AreEqual(BuiltInNavElements.TextTabs, sheet.Slots.TopKey, "the default Top Bar");
-            Assert.AreEqual(DisplayStyle.Flex, sheet.Slots.Top.style.display.value, "a held element is in the sheet");
-            foreach (var (stop, shown) in new[] { (SheetStopRule.Stop.Peek, false), (SheetStopRule.Stop.Half, true), (SheetStopRule.Stop.Full, true) })
-            {
-                sheet.SetStop(stop);
-                Assert.AreEqual(shown, sheet.Chrome.TopShown, stop.ToString());
-                Assert.AreEqual(!shown, sheet.Slots.Top.ClassListContains(CardChromeView.TopHiddenClass), stop + ": the hidden class");
-            }
-            ShowCard(sheet, TextPoi("short", 1, secondFamily: true), wall);
-            Assert.IsNull(sheet.Slots.TopView, "two targets under Show Navigation From 3: no element");
-            Assert.AreEqual(DisplayStyle.None, sheet.Slots.Top.style.display.value, "and no slot at all");
-            Assert.IsFalse(sheet.Chrome.TopShown);
-        }
-
-        [Test]
-        public void NavSlotRule_PicksTheWallsElement_OnlyWhenTheCardShowsNavigation_ItIsATopElement_AndRule7Allows()
-        {
-            var tabs = new NavElementDefinition(BuiltInNavElements.TextTabs, NavSlotKeys.Top, "Text Tabs", "x", NavChoice.Sections);
-            Func<string, NavElementDefinition> top = key => key == BuiltInNavElements.TextTabs ? tabs : key == AppKey ? AppDots() : null;
-            var wall = new WallConfigData { card_settings = new CardSettings() };
-            wall.card_settings.navigation.min_blocks = 3;
-            var twoSections = ModelOf(TextPoi("two", 3, secondFamily: true), wall);
-            var oneSection = ModelOf(TextPoi("one", 3), wall);
-            var shortCard = ModelOf(TextPoi("short", 1, secondFamily: true), wall);
-            Assert.AreEqual(2, twoSections.Sections.Count, "precondition");
-            Assert.AreEqual(1, oneSection.Sections.Count, "precondition");
-
-            var nav = new CardNavigationSettings();
-            Assert.AreEqual(BuiltInNavElements.TextTabs, NavSlotRule.TopElement(nav, twoSections, top), "the default");
-            Assert.AreEqual(BuiltInNavElements.TextTabs, NavSlotRule.TopElement(null, twoSections, top), "no settings read as the defaults");
-            Assert.IsNull(NavSlotRule.TopElement(nav, shortCard, top), "a card below Show Navigation From");
-            Assert.IsNull(NavSlotRule.TopElement(nav, null, top), "no model");
-            Assert.IsNull(NavSlotRule.TopElement(nav, oneSection, top), "rule 2.5.7: one section is no choice for an element between sections");
-            nav.top = AppKey;
-            Assert.AreEqual(AppKey, NavSlotRule.TopElement(nav, oneSection, top), "an element that lists blocks is drawn for one section");
-            foreach (string none in new[] { CardOptions.NavNone, "", "  ", null })
-            {
-                nav.top = none;
-                Assert.IsNull(NavSlotRule.TopElement(nav, twoSections, top), "'" + none + "' is no element");
-            }
-            nav.top = "unregistered";
-            Assert.IsNull(NavSlotRule.TopElement(nav, twoSections, top), "a key no top element has: nothing, never another element");
-        }
-
-        // The bottom slot's rule is the top one's on the wall's Bottom Bar: the pick when the card shows navigation and rule 2.5.7 allows,
-        // never a key registered for the OTHER slot, and the two slots answer independently
-        [Test]
-        public void NavSlotRule_BottomElement_IsTheWallsBottomBar_OnlyForTheBottomSlot_AndIndependentOfTheTop()
-        {
-            var registry = NavElementRegistry.Shared;
-            Func<string, NavElementDefinition> bottom = key => registry.TryGet(key, out var d) && d.Slot == NavSlotKeys.Bottom ? d : null;
-            Func<string, NavElementDefinition> top = key => registry.TryGet(key, out var d) && d.Slot == NavSlotKeys.Top ? d : null;
-            var wall = new WallConfigData { card_settings = new CardSettings() };
-            wall.card_settings.navigation.min_blocks = 3;
-            var twoSections = ModelOf(TextPoi("two", 3, secondFamily: true), wall);
-            var oneSection = ModelOf(TextPoi("one", 3), wall);
-            var shortCard = ModelOf(TextPoi("short", 1, secondFamily: true), wall);
-
-            var nav = new CardNavigationSettings();
-            Assert.IsNull(NavSlotRule.BottomElement(nav, twoSections, bottom), "the default None: no bar");
-            nav.bottom = BuiltInNavElements.BottomBar;
-            Assert.AreEqual(BuiltInNavElements.BottomBar, NavSlotRule.BottomElement(nav, twoSections, bottom), "the wall's pick");
-            Assert.AreEqual(BuiltInNavElements.TextTabs, NavSlotRule.TopElement(nav, twoSections, top), "and the Top Bar still answers for itself");
-            Assert.IsNull(NavSlotRule.BottomElement(nav, shortCard, bottom), "a card below Show Navigation From");
-            Assert.IsNull(NavSlotRule.BottomElement(nav, oneSection, bottom), "rule 2.5.7: one section is no choice for a bar");
-            nav.bottom = BuiltInNavElements.TextTabs;
-            Assert.IsNull(NavSlotRule.BottomElement(nav, twoSections, bottom), "a top element is never drawn in the bottom slot");
-            nav.top = BuiltInNavElements.BottomBar;
-            Assert.IsNull(NavSlotRule.TopElement(nav, twoSections, top), "nor the bar in the top slot");
-        }
-
-        // A real sheet: the bar is held in the bottom slot and shown with the bottom area -- at Half and Full, never at peek (this sheet
-        // has no layout, so no floor applies; PoiCardBottomBarSceneTests measures the floor) -- and Full Only hides the bar alone at Half
-        [Test]
-        public void TheBottomSlot_ShowsWithTheBottomArea_NeverAtPeek_AndFullOnlyKeepsItForFull()
-        {
-            var sheet = new PoiCardSheetView(new VisualElement(), BlockRegistry.Shared, Array.Empty<StyleSheet>());
-            var wall = new WallConfigData { card_settings = new CardSettings() };
-            wall.card_settings.navigation.min_blocks = 3;
-            wall.card_settings.navigation.bottom = BuiltInNavElements.BottomBar;
-            ShowCard(sheet, TextPoi("long", 3, secondFamily: true), wall);
-            Assert.AreEqual(BuiltInNavElements.BottomBar, sheet.Slots.BottomKey);
-            Assert.AreEqual(BuiltInNavElements.TextTabs, sheet.Slots.TopKey, "the two slots hold their own elements");
-            foreach (var (stop, shown) in new[] { (SheetStopRule.Stop.Peek, false), (SheetStopRule.Stop.Half, true), (SheetStopRule.Stop.Full, true) })
-            {
-                sheet.SetStop(stop);
-                Assert.AreEqual(shown, sheet.Chrome.BottomShown, stop + ": the area");
-                Assert.AreEqual(shown, sheet.Chrome.BottomNavShown, stop + ": the bar");
-                Assert.AreEqual(!shown, sheet.BottomArea.ClassListContains(CardChromeView.BottomHiddenClass), stop + ": the area's hidden class");
-                Assert.IsFalse(sheet.Slots.Bottom.ClassListContains(CardChromeView.BottomNavHiddenClass), stop + ": the bar is never hidden on its own here");
-            }
-            wall.card_settings.navigation.show_at = CardOptions.ShowNavFullOnly;
-            ShowCard(sheet, TextPoi("long", 3, secondFamily: true), wall);
-            sheet.SetStop(SheetStopRule.Stop.Half);
-            Assert.IsFalse(sheet.Chrome.BottomShown, "Full Only at Half: this card has no footer, so the area is the bar alone and hides");
-            sheet.SetStop(SheetStopRule.Stop.Full);
-            Assert.IsTrue(sheet.Chrome.BottomNavShown, "at Full it shows");
-        }
-
-        // Audit F2 (chunk C): the Edge slot answers the wall's pick in every layout but the two that own the card's right edge -- pages (the
-        // swipe and the next page's peek) and the accordion (every row's chevron): there it holds nothing, however the wall set it
-        [Test]
-        public void NavSlotRule_EdgeElement_IsTheWallsEdge_ExceptWhereTheLayoutOwnsTheRightEdge()
-        {
-            var registry = NavElementRegistry.Shared;
-            Func<string, NavElementDefinition> edge = key => registry.TryGet(key, out var d) && d.Slot == NavSlotKeys.Edge ? d : null;
-            var wall = new WallConfigData { card_settings = new CardSettings() };
-            wall.card_settings.navigation.min_blocks = 3;
-            var twoSections = ModelOf(TextPoi("two", 3, secondFamily: true), wall);
-            Assert.AreEqual(2, twoSections.Sections.Count, "precondition: sections for the scrubber to choose between");
-
-            var nav = new CardNavigationSettings { edge = BuiltInNavElements.EdgeScrubber };
-            foreach (string layout in new[] { CardOptions.LayoutScroll, CardOptions.LayoutTabs, CardOptions.LayoutBento })
-            {
-                nav.layout = layout;
-                Assert.AreEqual(BuiltInNavElements.EdgeScrubber, NavSlotRule.EdgeElement(nav, twoSections, edge), layout + ": the wall's scrubber");
-            }
-            foreach (string layout in new[] { CardOptions.LayoutPages, CardOptions.LayoutAccordion })
-            {
-                nav.layout = layout;
-                Assert.IsNull(NavSlotRule.EdgeElement(nav, twoSections, edge), layout + ": the layout owns the right edge, so no scrubber over it");
-            }
-            nav.layout = CardOptions.LayoutScroll;
-            nav.edge = CardOptions.NavNone;
-            Assert.IsNull(NavSlotRule.EdgeElement(nav, twoSections, edge), "and none stays none");
-        }
     }
 }

@@ -26,7 +26,7 @@ namespace TileStories.Tests
 
         protected ScrollView Scroll => Stack.Scroll;
 
-        protected TextTabsNavView Tabs => Sheet.Slots.TopView as TextTabsNavView;
+        protected FamilyPagerNavView Pager => Sheet.Slots.TopView as FamilyPagerNavView;
 
         protected float OnePixel => Sheet.Layer.panel.visualTree.layout.height / Screen.height;
 
@@ -121,27 +121,23 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.2f);
         }
 
-        // A real tap on the Text Tabs word of section `index` (dragged into the strip's view first, sideways like a thumb)
-        protected IEnumerator TapTab(int index)
+        // Real taps on the Family Pager's arrows (the tabs layout's own switch while the Navigation Bar is off) until section `index` shows
+        protected IEnumerator ShowSection(int index)
         {
-            Assert.IsNotNull(Tabs, "precondition: the top slot holds Text Tabs");
-            // - _3.3 S4a: the strip is chrome and waits for the hero (the screen at Full): a reader taps a tab once the picture is read away
+            Assert.IsNotNull(Pager, "precondition: the top slot holds the Family Pager");
+            // - _3.3 S4a: the strip is chrome and waits for the hero (the screen at Full): a reader taps it once the picture is read away
             if (Sheet.Slots.Top.ClassListContains(CardChromeView.TopHiddenClass)) yield return CardTestInput.PastTheHero(Sheet);
             Assert.IsFalse(Sheet.Slots.Top.ClassListContains(CardChromeView.TopHiddenClass), "precondition: the strip shows (offset "
                 + Scroll.scrollOffset.y + ", hero bottom " + Sheet.Stack.HeaderView?.HeroBottom() + ")");
-            var tab = Tabs.Tabs.Single(t => t.Index == index);
-            var visible = Tabs.Viewport.worldBound;
-            var rect = tab.Button.worldBound;
-            if (rect.xMin < visible.xMin - 0.5f || rect.xMax > visible.xMax + 0.5f)
+            for (int step = 0; step < Nav.Model.Sections.Count && Pager.CurrentIndex != index; step++)
             {
-                yield return CardTestInput.TouchDrag(Sheet.Root.panel, visible.center, new Vector2(visible.center.x - rect.center.x, 0f));
-                yield return null;
+                var arrow = Pager.CurrentIndex < index ? Pager.Next : Pager.Previous;
+                yield return CardTestInput.Tap(arrow.panel, arrow.worldBound.center);
+                for (int frame = 0; frame < 600 && Nav.IsJumping; frame++) yield return null;
+                Assert.IsFalse(Nav.IsJumping, "the jump came to rest");
+                yield return CardTestInput.Settle(0.3f);
             }
-            Assert.IsTrue(Tabs.Viewport.worldBound.Contains(tab.Button.worldBound.center), "precondition: tab " + index + " is inside the strip");
-            yield return CardTestInput.Tap(tab.Button.panel, tab.Button.worldBound.center);
-            for (int frame = 0; frame < 600 && Nav.IsJumping; frame++) yield return null;
-            Assert.IsFalse(Nav.IsJumping, "the jump came to rest");
-            yield return CardTestInput.Settle(0.3f);
+            Assert.AreEqual(index, Pager.CurrentIndex, "the pager reached section " + index);
         }
 
         // A real press and release of Escape on an Input System keyboard (where Android's Back arrives), under BackgroundSafeInput
@@ -179,8 +175,9 @@ namespace TileStories.Tests
     //     slot), with Open One At A Time a second tap closes the first (the owner gives its slot back) and the tapped row keeps its place; a
     //     real tap on a tab opens that section's first row and lands it; Escape folds the row opened last before the sheet moves
     //   - tabs: one section at a time, the others set aside (no view, no file); a real tap on a tab shows its section and the spy names it,
-    //     a real drag inside never moves it; a section put away lets its media go (the preview slot, the playing video); with neither bar
-    //     the card uses Text Tabs; a card with nothing to switch between scrolls
+    //     a real drag inside never moves it; a section put away lets its media go (the preview slot, the playing video); with the
+    //     Navigation Bar off and neither a Top nor a Bottom element the card uses the Family Pager; a card with nothing to switch between
+    //     scrolls
     //   - renders at 390 px in English and Portuguese: both layouts
     [Category("Core")]
     public class PoiCardLayoutSceneTests : PoiCardLayoutSceneFixture
@@ -229,6 +226,43 @@ namespace TileStories.Tests
             yield return PressEscape();
             Assert.AreEqual(SheetStopRule.Stop.Half, Sheet.Stop, "nothing open: the next Escape lowers the card");
         }
+
+        // ---------------- the tabs layout's own switch ----------------
+
+        [UnityTest]
+        public IEnumerator Tabs_WithTheBarOffAndNeitherBar_UsesTheFamilyPager_AndACardWithNothingToSwitchBetweenScrolls()
+        {
+            yield return UseNavigation(nav =>
+            {
+                nav.layout = CardOptions.LayoutTabs;
+                nav.top = CardOptions.NavNone;
+                nav.bottom = CardOptions.NavNone;
+                nav.bar.enabled = false;
+            });
+            yield return OpenFull(Lamp);
+            Assert.AreEqual(BuiltInNavElements.FamilyPager, Sheet.Slots.TopKey, "tabs with no bar: the top slot holds the Family Pager");
+            Assert.AreEqual(CardOptions.LayoutTabs, Sheet.Layout.Effective);
+            int stories = SectionIndex(BuiltInFamilies.Stories);
+            Assert.Greater(stories, 0, "precondition: Stories is not the first section, so the pager has to move");
+            yield return ShowSection(stories);
+            Assert.AreEqual(stories, Sheet.Layout.ShownSection, "and its arrows switch sections");
+            foreach (string key in Nav.Model.Sections[stories].Targets) Assert.IsFalse(Stack.IsParked(key), key + " of the shown section is drawn");
+            foreach (string key in Nav.Model.Sections[0].Targets) Assert.IsTrue(Stack.IsParked(key), key + " of the first section is set aside");
+
+            yield return OpenFull(LampMilitary);
+            Assert.IsFalse(Nav.Model.ShowsNavigation, "precondition: Lamp - Military is under Show Navigation From");
+            Assert.AreEqual(CardOptions.LayoutScroll, Sheet.Layout.Effective, "nothing to switch between: it scrolls");
+            foreach (string key in Nav.Model.Targets) Assert.IsFalse(Stack.IsParked(key), key + " is not set aside");
+
+            // - live: back to Scroll, every block of The Lamp is back, whole
+            yield return OpenFull(Lamp);
+            yield return UseNavigation(nav => nav.layout = CardOptions.LayoutScroll);
+            foreach (string key in Nav.Model.Targets)
+            {
+                Assert.IsFalse(Stack.IsParked(key), key + " back");
+                Assert.IsNotNull(Stack.ViewOfBlock(key), key + " drawn whole again");
+            }
+        }
     }
 
     // PoiCardLayoutSceneTests's tests whose subject is an old navigation element: they wait for its rebuild on the Navigation Bar's pattern
@@ -244,7 +278,7 @@ namespace TileStories.Tests
             Assert.GreaterOrEqual(stories, 0, "precondition: The Lamp has a Stories section");
             string first = Nav.Model.Sections[stories].Targets[0];
             Assert.IsFalse(Stack.IsExpanded(first), "precondition: its first row is folded");
-            yield return TapTab(stories);
+            yield return ShowSection(stories);
             Assert.IsTrue(Stack.IsExpanded(first), "the tab's jump opened the section's first row");
             Assert.IsNotNull(Stack.ViewOfBlock(first), "its view bound under the row");
             AssertLanded(first, "the opened row");
@@ -281,14 +315,14 @@ namespace TileStories.Tests
             }
             AssertShown(0, "opened");
             Assert.AreEqual(0, Nav.Current);
-            Assert.AreEqual(0, Tabs.CurrentIndex, "the first tab is marked");
+            Assert.AreEqual(0, Pager.CurrentIndex, "the first tab is marked");
 
             int media = SectionIndex(BuiltInFamilies.Media);
-            yield return TapTab(media);
+            yield return ShowSection(media);
             Assert.AreEqual(media, Sheet.Layout.ShownSection, "a real tap on the Media tab shows Media");
             AssertShown(media, "after the tap");
             Assert.AreEqual(media, Nav.Current, "the spy names it");
-            Assert.AreEqual(media, Tabs.CurrentIndex, "and its tab is marked");
+            Assert.AreEqual(media, Pager.CurrentIndex, "and its tab is marked");
             AssertLanded(sections[media].Targets[0], "Media's first block");
 
             // - a real drag inside the section: the content scrolls, the spy stays on it
@@ -299,7 +333,7 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.5f);
             Assert.Greater(Scroll.scrollOffset.y, offset + 10f, "precondition: the real drag scrolled the section");
             Assert.AreEqual(media, Nav.Current, "the spy still names Media: the scroll never leaves the section shown");
-            Assert.AreEqual(media, Tabs.CurrentIndex);
+            Assert.AreEqual(media, Pager.CurrentIndex);
         }
 
         [UnityTest]
@@ -309,7 +343,7 @@ namespace TileStories.Tests
             yield return OpenFull(Lamp);
             int media = SectionIndex(BuiltInFamilies.Media);
             int about = SectionIndex(BuiltInFamilies.About);
-            yield return TapTab(media);
+            yield return ShowSection(media);
             CollectionAssert.Contains(Card.PreviewService.HeldKeys, "block_59", "Media shows: the inline model holds its preview slot");
             var video = Stack.ViewOfBlock("block_56") as VideoBlockView;
             Assert.IsNotNull(video, "precondition: the inline video is bound while Media shows");
@@ -324,7 +358,7 @@ namespace TileStories.Tests
             Assert.IsNotNull(track, "precondition: the bound view has its track");
             Assert.IsTrue(_video.IsCurrent(track), "precondition: the owner serves that track");
 
-            yield return TapTab(about);
+            yield return ShowSection(about);
             Assert.AreEqual(about, Sheet.Layout.ShownSection, "About shows now");
             Assert.IsNull(Stack.ViewOfBlock("block_56"), "the video's block gave its view back");
             // - section 7.1 (decided at the 15b review): the ONE video owner keeps the paused clip until another video plays or the card closes
@@ -336,34 +370,8 @@ namespace TileStories.Tests
             foreach (string key in Nav.Model.Sections[media].Targets)
                 Assert.AreEqual(0, Stack.HeldMediaOf(key), key + ": no file held while Media is put away");
 
-            yield return TapTab(media);
+            yield return ShowSection(media);
             CollectionAssert.Contains(Card.PreviewService.HeldKeys, "block_59", "back on Media: the slot is taken again");
-        }
-
-        [UnityTest]
-        public IEnumerator Tabs_WithNeitherBar_UsesTextTabs_AndACardWithNothingToSwitchBetweenScrolls()
-        {
-            yield return UseNavigation(nav => { nav.layout = CardOptions.LayoutTabs; nav.top = CardOptions.NavNone; nav.bottom = CardOptions.NavNone; });
-            yield return OpenFull(Lamp);
-            Assert.AreEqual(BuiltInNavElements.TextTabs, Sheet.Slots.TopKey, "tabs with no bar: the top slot holds Text Tabs");
-            Assert.AreEqual(CardOptions.LayoutTabs, Sheet.Layout.Effective);
-            int stories = SectionIndex(BuiltInFamilies.Stories);
-            yield return TapTab(stories);
-            Assert.AreEqual(stories, Sheet.Layout.ShownSection, "and its tabs switch sections");
-
-            yield return OpenFull(LampMilitary);
-            Assert.IsFalse(Nav.Model.ShowsNavigation, "precondition: Lamp - Military is under Show Navigation From");
-            Assert.AreEqual(CardOptions.LayoutScroll, Sheet.Layout.Effective, "nothing to switch between: it scrolls");
-            foreach (string key in Nav.Model.Targets) Assert.IsFalse(Stack.IsParked(key), key + " is not set aside");
-
-            // - live: back to Scroll, every block of The Lamp is back, whole
-            yield return OpenFull(Lamp);
-            yield return UseNavigation(nav => nav.layout = CardOptions.LayoutScroll);
-            foreach (string key in Nav.Model.Targets)
-            {
-                Assert.IsFalse(Stack.IsParked(key), key + " back");
-                Assert.IsNotNull(Stack.ViewOfBlock(key), key + " drawn whole again");
-            }
         }
 
         // ---------------- what it looks like ----------------
@@ -399,7 +407,7 @@ namespace TileStories.Tests
                 Scroll.scrollOffset = Vector2.zero;
                 yield return CardTestInput.Settle(0.3f);
                 yield return Capture("Layout_Lamp_tabs_" + language);
-                yield return TapTab(SectionIndex(BuiltInFamilies.Media));
+                yield return ShowSection(SectionIndex(BuiltInFamilies.Media));
                 yield return Capture("Layout_Lamp_tabs_media_" + language);
                 if (language == "pt")
                 {

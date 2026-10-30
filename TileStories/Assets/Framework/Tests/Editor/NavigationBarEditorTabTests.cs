@@ -70,19 +70,19 @@ namespace TileStories.Editor.Tests
             ((HashSet<string>)typeof(POIEditorToolWindow).GetField("_openBarGroups", Instance).GetValue(_window.Editor)).Add(key);
 
         [UnityTest]
-        public IEnumerator TheComponent_IsFirst_OnByDefault_ItsRowsAreV5s_InOrder_AndOff_TheElementsComeBack_OneUndoStep()
+        public IEnumerator TheComponent_IsFirst_OnByDefault_ItsRowsAreV5s_InOrder_AndOff_NoOldElementRowComesBack_OneUndoStep()
         {
             OpenNavigation();
             yield return Draw();
             Assert.IsFalse(_window.Unsaved, "drawing writes nothing");
             Assert.IsTrue(Nav.bar.enabled, "on by default");
-            Assert.Less(Row("Navigation Bar"), Row("Preset"), "the Navigation Bar is the section's first component");
-            // - every row of v5's Tweaks "Navigation Bar", by its name, in its order, inside the component (above the Preset)
+            Assert.Less(Row("Navigation Bar"), Row("Layout"), "the Navigation Bar is the section's first component");
+            // - every row of v5's Tweaks "Navigation Bar", by its name, in its order, inside the component (above Shape's Layout)
             var rows = POIEditorToolWindow.NavigationBarRows;
             for (int i = 0; i < rows.Length; i++)
             {
                 CollectionAssert.Contains(RowTitles, rows[i], "the " + rows[i] + " row");
-                Assert.Less(Row(rows[i]), Row("Preset"), rows[i] + " sits in the component");
+                Assert.Less(Row(rows[i]), Row("Layout"), rows[i] + " sits in the component");
                 if (i > 0) Assert.Less(Row(rows[i - 1]), Row(rows[i]), rows[i - 1] + " comes before " + rows[i] + " (v5's order)");
             }
             Assert.Less(Row(rows[rows.Length - 1]), Row("Bar Groups"), "then the Bar Groups table");
@@ -90,14 +90,16 @@ namespace TileStories.Editor.Tests
             foreach (string gone in new[] { "Corner Radius", "Side Margin", "Height", "Fill Opacity", "Border", "Shadow", "Slide Indicator",
                 "Enlarge Chosen Icon", "Other Groups' Colour" })
                 CollectionAssert.DoesNotContain(RowTitles, gone, gone + ": not one of v5's options");
-            foreach (string gone in new[] { "Top Bar", "Bottom Bar", "Menu", "Floating Button", "Edge" })
-                CollectionAssert.DoesNotContain(RowTitles, gone, "on: " + gone + " is replaced by the bar");
-            CollectionAssert.Contains(_messages, Text("CardNavBarOnNotice"), "...and the notice says so");
+            var oldElements = new[] { "Top Bar", "Bottom Bar", "Menu", "Floating Button", "Edge", "Auto Nav Block", "Preset", "Show Counts", "Bar Slots" };
+            foreach (string gone in oldElements)
+                CollectionAssert.DoesNotContain(RowTitles, gone, "on: no " + gone + " row (retired or kept for a rebuild, _3.3 R1)");
 
             Pick(() => Nav.bar.enabled = false);
             yield return Draw();
             CollectionAssert.DoesNotContain(RowTitles, "Position", "off: no bar rows");
-            CollectionAssert.Contains(RowTitles, "Top Bar", "off: the Elements rows come back");
+            foreach (string gone in oldElements)
+                CollectionAssert.DoesNotContain(RowTitles, gone, "off: no " + gone + " row either -- the old elements are not offered");
+            CollectionAssert.Contains(RowTitles, "Layout", "off: the section's own rows still draw");
             yield return _window.PressUndo();
             Assert.IsTrue(Nav.bar.enabled, "one real Ctrl+Z turns it on again");
         }

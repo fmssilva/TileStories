@@ -54,7 +54,7 @@ namespace TileStories.Editor.Tests
         public void AKindWithNeither_ShowsNoTime()
         {
             Assert.AreEqual(0, ReadingTimeRule.Minutes(BuiltInBlocks.Header, WithMinutes(5f), 0f), "the title block carries no Reading Time");
-            Assert.AreEqual(0, ReadingTimeRule.Minutes(BuiltInBlocks.NavIconGrid, WithMinutes(5f), 0f), "a nav block neither");
+            Assert.AreEqual(0, ReadingTimeRule.Minutes(BuiltInBlocks.NavContents, WithMinutes(5f), 0f), "a nav block neither");
             Assert.AreEqual(0, ReadingTimeRule.Minutes(null, WithMinutes(5f), 0f));
             Assert.AreEqual(0, ReadingTimeRule.Minutes(BuiltInBlocks.RichText, null, 0f));
         }
@@ -78,7 +78,7 @@ namespace TileStories.Editor.Tests
             CollectionAssert.AreEquivalent(new[] { BuiltInBlocks.AudioGuideKind, BuiltInBlocks.VideoKind }, clips, "the kinds that read a clip");
             CollectionAssert.AreEquivalent(new[]
             {
-                BuiltInBlocks.HeaderKind, BuiltInBlocks.NavIconGridKind, BuiltInBlocks.NavContentsKind, BuiltInBlocks.NavRailsKind, BuiltInBlocks.NavBentoKind,
+                BuiltInBlocks.HeaderKind, BuiltInBlocks.NavContentsKind,
             }, none,
                 "the kinds that are never a row of a contents list");
         }

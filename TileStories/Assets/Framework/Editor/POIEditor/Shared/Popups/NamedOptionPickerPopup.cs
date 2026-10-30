@@ -3,9 +3,8 @@
 // A picker of named options, shown in the shared EditorPopup window: one row per option -- its name and, under it, who or what it
 // suits -- a thin line before each group of options after the first (the strongest first), and a mark on the option already in use. A WORKING popup
 // (the title bar's X and Esc close it, no button of its own); a pick closes it and hands the option's index to the caller, which applies
-// it inside ONE mutation scope (its factory in POIEditorToolWindow.ConfigHistory.cs), so a pick is one undo step. Two pickers use it,
-// each with its own kind and its own data: Detail Card > Navigation > Preset (_3.2 step 17a, NavigationPresets) and Specific Marker >
-// Card Content > Card Starter (_3.2 step 17b, CardStarters). It knows nothing of either: it only draws words and reports a row.
+// it inside ONE mutation scope (its factory in POIEditorToolWindow.ConfigHistory.cs), so a pick is one undo step. The Card Starter of
+// Specific Marker > Card Content uses it (_3.2 step 17b, CardStarters), with its own kind and data; the picker only draws words and reports a row.
 
 using System;
 using System.Collections.Generic;
