@@ -14,32 +14,24 @@ So start by reading them all.
 
 
 ## `And now: domain proj_guides\_3.3_POI_Card_Styles.md`
-C2 -- the 50 FULL PlayMode reds, then FULL green (the tracker's HANDOFF after C1; `40-testing.md` 4.2).
-GATE: as before (MCP; push: origin = the Architect's last commit, C1 committed; SDF fonts; compile clean before every run,
-editor_state confirms a run STARTED and Play Mode is off; Unity c). Restart Unity first if the developer has not (Editor.log 3.7 GB,
-4.2.6). No opening test run.
-WORKER MODEL: Opus + effort High.
-SUBAGENTS: per 00-process -- a Haiku pass to group the 50 failure messages from the FULL log, and one to list every remaining
-TapInView / bare-ScrollTo-then-tap caller in the PlayMode tests, fit well.
-TEST PLAN: each group by name after its fix; then ONE FULL in the background (PlayMode + EditMode) green. That closes the card review's FULL.
-PART 1 -- the bar-tap aims (7: Hotspot, OpenBlockAndBack, TapZoom, PlaceInAr, the video gallery's full screen): move EVERY remaining
-caller of the old tap-in-view path to TapInReach / IntoReach (the list from the subagent, not only the 7 reds), in the right order:
-into reach, read the state, then tap.
-PART 2 -- the header-title contrast (40 at 1.12:1): read what the test measures. If it reads the title against the wrong ground (the bar
-has been clear since P4.4b), measure as SEEN (the title's ink against the pixels really under it, as the ChromeMarks tests do). If the
-title really is unreadable somewhere, LOOK at it and fix the code.
-PART 3 -- the settings disc in dark mode (2.76:1 over white): a design fix, not a test fix. The settings mark wears the same treatment as
-the X (its glass disc and mark), so it reaches >= 4.5:1 (a meaningful icon) on every hero and on paper, light and dark. LOOK first
-(captures over the brightest hero), then the test.
-PART 4 -- ThemeType: the "UITK Halo" twin is intended (d3df243): the test accepts the halo assets for the halo copies only.
-PART 5 -- PullQuote both 17 px: the open sections' body size (--ts-size-body-open) flattened the quote's sizes. LOOK at both quotes in an
-open section; fix the code so each quote style keeps its own size (the minimal and serif quotes differ as designed); the test stays.
-PART 6 -- the five tokens with no reader by name (--ts-bar-pill, --ts-focus, --ts-glass-opacity, --ts-hero-fade, --ts-weight-body):
-grep var() in every USS and every C# lookup by name; delete the ones truly unused (both modes, the generator's source, the guard rows),
-keep and name the reader of any that is used.
-PART 7 -- FULL green in the background; docs (_3.3 build log with the FULL counts, _Test_Suite_1 if tests moved, 10-structure if files
-changed). Report with the Subagents line and one commit message. STOP with one AskUserQuestion.
-OUT OF SCOPE: the story block's redesign, new features.
+M1 -- maintenance, part 1: the Test Suite Review, AUDIT mode (skill `proj_guides/skills/Test_Suite_Review.md`; the first
+maintenance ever -- the card review's FULL is green at the Architect's last commit).
+GATE: as before (MCP; push: origin = the Architect's last commit; SDF fonts; compile clean). No opening test run, and NO test run at all
+unless step 1 needs per-fixture times that no log holds (then ONE FULL in the background, Unity c, with TestRunRecorder on).
+WORKER MODEL: Opus + effort Medium (an audit with judgement, no product code).
+SUBAGENTS: per 00-process -- good fits: a Haiku pass to pull the per-fixture times out of the last FULL logs; a Sonnet + medium pass to
+list the skipped tests and fixtures with their skip reasons; a Sonnet + medium pass to find tests that prove the same thing twice.
+TEST PLAN: none beyond the GATE's compile (this is an audit).
+FOCUS (add to the skill's steps):
+- The 163 skipped PlayMode tests: list them by reason. Those under TestSkips.OldNavigationElements guard elements kept for a later
+  rebuild -- propose for each: keep skipped (the rebuild is planned), or delete (the rebuild will write new tests on the bar's pattern).
+  No skip without an owner and a reason.
+- The option matrices that "Tests stay on scope" (`40-testing.md` 4.2) now forbids outside their component's own fixture.
+- CORE's ~18 min and FULL's ~76 min: the top 20 fixtures by time and the cheapest proof that keeps each guarantee.
+- The tap helpers: TapInReach / IntoReach are the rule; any leftover pattern that taps where the bar floats.
+RESULT: `proj_guides/_Test_Suite_1.md` gains (or a new `_Test_Suite_2.md` if _1 is the inventory) the time table, the findings and a
+fix list in block-sized chunks with the expected saving each -- AUDIT ONLY, no test changed. Report with the Subagents line. STOP with
+one AskUserQuestion. The Architect then picks the chunks with the developer.
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`
