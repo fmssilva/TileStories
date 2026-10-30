@@ -7,6 +7,7 @@ points to those rules instead of copying them.
 | Skill | Trigger (when + input) | Who | Result |
 |---|---|---|---|
 | `Domain_Planning.md` | Before building a new domain (or re-planning one): domain name, work plan, prior docs | Architect chat | The domain guide `_x.y_<Domain>.md`, verified twice |
+| `Feature_Prototyping.md` | Inside Domain Planning, once per feature group: the group's feature list, a stand-in wall | Architect chat | The group's spec section + an Editor Lab (Unity-skinned Editor mock + Scene / Play view) published and saved in `_x.y.N_Prototype/` |
 | `Domain_Review.md` | A domain's status table is all done, or it needs a health check: domain guide, FOCUS / SKIP | Worker, Opus-class | `_x.y.1_Audit.md` + fix list; then FIX chunks |
 | `Guidelines_Review.md` | Monthly, after a tool / Unity / package upgrade, or every ~10 blocks | Architect chat | A dated change list for the guides, applied after approval |
 | `Code_Health_Review.md` | The maintenance cadence (every ~10 blocks, before a domain close-out) | Worker, Opus-class | `_Code_Health_<n>.md` + fix chunks |

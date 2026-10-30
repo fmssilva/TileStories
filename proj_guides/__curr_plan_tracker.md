@@ -1,32 +1,19 @@
-# Plan tracker -- C2: the 50 FULL PlayMode reds, then FULL green
+# Plan tracker -- M1: the test ground audit (Test Suite Review 2)
 
-Brief: `proj_guides/__AI_worker.md` "C2" (the C1 tracker's HANDOFF; `40-testing.md` 4.2). Worker: Opus, effort High.
-TEST PLAN: each group by name after its fix; then ONE FULL in the background (PlayMode + EditMode) green -- closes the card review's FULL.
-OUT OF SCOPE: the story block's redesign, new features.
-
-## GATE
-- [x] MCP live (TileStories@d41388e4, telemetry_status ok, idle, Play Mode off); HEAD = origin/master = e1bcd1f (C1 committed as c57c71d), nothing to push
-- [x] Unity restarted (Editor.log 105 KB; the 3.86 GB one is Editor-prev.log); SDF fonts unchanged (last touched d3df243, no local diff); no InitTestScene leftovers
-- [x] compile clean (refresh force + compile: ExitCode 0, 0 error CS); no opening test run
-- [x] Unity c asked once (Pronto) before the first run
-
-## The 50 (C1's full_playmode.xml, grouped by the Haiku subagent; = the HANDOFF list)
-40 CardGalleryTests.EveryHeaderEntry (bar title 1.12 vs 4.5) | 1 PullQuote 17 = 17 | 1 CardSettingsGallery dark 2.76 | 1 CardVideoGallery FullScreen |
-3 PoiCardNavSceneTests (Hotspot x2, OpenBlockAndBack) | 1 PlaceInAr | 2 TapZoom story Back | 1 ThemeType (Halo assets)
+Brief: the M1 brief (`_3.3_POI_Card_Styles.md` M1, pasted in chat). Worker: Opus, effort Medium. AUDIT ONLY: no product or test code changes.
+Targets: (1) a component block tests in a few minutes on its own fixtures + EditMode; (2) one change to a block kind = ONE place of test
+data; (3) no test spends time on something old, retired or no longer true.
+Developer note (chat): the reference POI is the Ribeira Palace (`painting`); another POI only where needed.
+RESULT: `proj_guides/_Test_Suite_2.md`. STOP with one AskUserQuestion.
 
 ## Steps
-- [x] 1 PART 1 taps: every card-STACK caller of TapInView / bare ScrollTo+tap -> TapInReach / IntoReach (into reach, read, tap), 15 files;
-  TapInView kept only for takeover pages (PageScroll x3, nothing floats there), its comment says so
-- [x] 2 PART 2 header title: LOOKED (TestEvidence/Card/C2: light / black Peek + Half plate -- the chrome row on opaque paper, all reads);
-  the test measures as SEEN (ThemePixelSet.SeenOverBackdrops: render, inks cleared, RingContrast, black + white camera): the bar title only
-  while shown (opacity 0 otherwise), the plate's line in VisibleStack, the X off the hero at 7:1; no code fix needed
-- [x] 3 PART 3 chrome discs (X AND settings: one AddMark treatment): LOOKED -- dark over a WHITE camera the marks read 15.79:1 at Peek,
-  12.36:1 at Full (the sheet's top / the Top Band's painted fade lie under the disc, never the camera); over the hero the dark hero glass.
-  NO design change (a denser token moves no pixel that matters); the settings test measures as SEEN at D1's 7:1 -- REPORT this deviation
-- [x] 4 PART 4 ThemeType: a halo copy (card-hero__halo) may draw its face's "UITK Halo" twin; every other text the plain asset
-- [x] 5 PART 5 PullQuote: LOOKED (both 17 before); About.uss 4-class serif rule in open sections -> serif 22 / minimal 17, light + dark captures
-- [x] 6 PART 6 the five tokens: no var(), no C# lookup; --ts-focus only a ThemeContrastTests guard row -> all five deleted (shared, both modes,
-  8 accent knob sets), USS regenerated (14 lines), the guard row dropped; _3.3 token table to update in docs
-- [x] 7 the 16 fixtures (509): 5 red MINE (PageChrome Back x4: scroll read before TapInReach; a header render never still: hero pan) -> fixed, 44 / 44; EditMode FULL 2240: 2208 / 0 / 32 (4.6 min)
-- [x] 8 FULL PlayMode (Unity behind both ends) 1295: 1132 passed, 0 failed, 163 skipped (75.9 min)
-- [x] 9 docs (_3.3 build log + FULL counts, _Test_Suite_1 if tests moved, 40-testing / 10-structure if needed); report; commit msg; AskUserQuestion
+- [x] 0. GATE: UnityMCP live (telemetry_status), HEAD 5801c6d = origin/master, compile clean (0 error CS, ExitCode 0), marker SDF fonts static
+- [x] 1. Data: POI x kind inventory of the shipped config (26 POIs; Lamp 62 blocks, Painting 18), test file x POI id map (lamp 100 files,
+       painting 40), 64 test files hard-code block keys; last FULL PlayMode per-test times (TestResults.xml 08:00-09:16, copied to scratchpad)
+- [x] 2. EditMode per-fixture times: full EditMode in the background (behind / behind): 2240 / 2208 / 0 failed / 32 skipped, 5.2 min
+- [x] 3. Subagent S1 (Sonnet, medium): PART 2 -- held except two "duplicates" (About:200 vs Hero:221; ChromeScene footer names)
+- [x] 4. Subagent S2 (Sonnet, medium): PART 1 move map -- held; block_15 lacks show_after_viewed (re-read)
+- [x] 5. Gallery inventory: 170 block + 40 header cases, ids `kind_look_content`, ~1.8 s each (from the FULL XML)
+- [x] 6. PART 3 component map + CORE check (21.4 min PlayMode, NavBar class tag 9.0 min)
+- [x] 7. `_Test_Suite_2.md` written; `_3.3` status entry; `40-testing.md` RUN TIMES EditMode 5.2 min
+- [x] 8. Final report (60-finishing 6.4, Subagents line) + AskUserQuestion

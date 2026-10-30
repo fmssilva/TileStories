@@ -43,11 +43,36 @@ deciding case by case:
 * **Stop & Clarify:** If existing code is ambiguous, contradictory, or appears wrong, halt immediately. Ask or flag the issue instead of building on assumptions.
 
 ### Framework Completeness
-* **A complete, versatile framework, configured in the Editor.** Every feature a domain should have is built, and every
-  behaviour a wall developer may want different is a choice in the POI Editor: a row with an (i) help, a sensible default (per
-  wall, and per block / item where it makes sense), undo / redo / save, live sync in Scene and Play Mode, and a Test guide
-  (Scene / Play Mode / Device) that names Editor controls, never code, and is app-agnostic. A behaviour that is a trade-off
-  becomes options with a default, each option tested; one hard-coded rule only where one answer is right for every wall.
+* **All the good options, none of the noise.**
+  - This is a framework, so when several options are good, build them all and make the best one the default. Do not pick
+    one and drop the rest.
+  - Every candidate option passes one filter:
+    - **Option:** it depends on taste or on the wall (style, mood, a building's shape). It becomes a setting.
+    - **Fixed rule:** one answer is clearly right for every wall by UX, design or accessibility principles. It is
+      hard-coded, and the reason is written in the domain guide.
+    - **Dropped:** no wall developer would change it, or nobody would miss it.
+  - A good feature is never left out. An irrelevant knob is never added.
+* **Configured in the Editor.** Every option is a row in the POI Editor, with:
+  - an (i) help;
+  - a sensible default, per wall and per block or item where that makes sense;
+  - undo / redo / save;
+  - live sync in Scene and Play Mode;
+  - a Test guide (Scene / Play Mode / Device) that names Editor controls, never code, and is app-agnostic.
+
+  Each option is tested.
+* **Define, assign, place.**
+  - The wall's Global Scene defines named styles once.
+  - Hierarchy levels assign them.
+  - A POI or item places its own content (position, shapes, media) and may pick another named style.
+  - Values are not overridden one by one per item: a different look is a new named style.
+* **Unity's normal way of working.** A wall developer should never have to learn "the framework" before using it:
+  - Content is authored with the tools a Unity developer already knows: the Scene view and its handles, Prefab Mode,
+    Splines, the Animation window, Timeline, Particle System, the PSD Importer, ProBuilder.
+  - Content is ordinary Unity assets in the wall's folders.
+  - The framework adds only what needs the wall, the POI or its events: anchoring, config sync, Editor rows, templates.
+  - It never builds a private copy of a Unity tool.
+* **Defaults are judged in the real scene.** A default is chosen by looking at it in Unity, and on the phone for anything
+  visual in AR. Values tried in a prototype are experiments, not defaults.
 * **Real fixtures.** Tests run on the LivingRoom wall's POI sets (The Lamp's 12+ POIs, The Painting, The Camera); add a POI
   when an edge case needs one, never change an existing POI's identity fields (id, name, category, summary, keywords).
 

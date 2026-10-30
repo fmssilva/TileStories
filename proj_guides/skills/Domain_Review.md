@@ -38,9 +38,12 @@ Run proj_guides/skills/Domain_Review.md with:
    gallery entry | real-scene test | capture. Mark each cell ok / gap / n.a. Build it from the code (definitions, settings
    classes, tests), say how, and name every gap. This answers "can a developer choose AND test every option in the Editor?".
 3. **Missing features.** What a complete framework for this domain should offer that is not built: compare the domain guide
-   (incl. its deferred list), the design canvas, similar products, and what wall apps would need. For each: value (framework /
+   (incl. its deferred list), the design canvas and the domain's Editor Labs (`_x.y.N_Prototype/`), similar products, and what wall apps would need. For each: value (framework /
    app), cost, and recommend now / later / no. Also features that exist in code but have no Editor control.
-4. **Config ontology.** Are the settings grouped by one responsibility each, with clear names, in an order that matches how a
+4. **Config ontology.** Run every setting through the filter in `00-process.md` (Framework Completeness). Flag the knobs
+   that should be fixed rules (one clear winner) or dropped (nobody changes them), the good options that are missing, and
+   the authoring steps that force a developer to learn the framework instead of using Unity's normal tools. Are the
+   settings grouped by one responsibility each, with clear names, in an order that matches how a
    developer thinks? Propose regroupings / renames where it is muddled.
 5. **Editor quality.** The domain's Editor sections against `_5.1` section 0, captured at default width and 620 pt: rows and
    widths, the (i) column, tables, popups, warnings, fields shown that do not apply to the chosen option, the Test sub-foldout
