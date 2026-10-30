@@ -1,60 +1,32 @@
-# Plan tracker -- C1: the 16 CORE PlayMode reds, then CORE and FULL green
+# Plan tracker -- C2: the 50 FULL PlayMode reds, then FULL green
 
-Brief: `proj_guides/__AI_worker.md` "C1" (the R1 tracker's HANDOFF 2026-10-30; `40-testing.md` 4.2). Worker: Opus, effort High.
-TEST PLAN: the 16 by name after each fix group; CORE (PlayMode + EditMode) green; ONE FULL in the background. Closes the card review's
-deferred CORE (P1 to R1, 8 blocks). OUT OF SCOPE: the story block's redesign, any new feature. No baseline stash.
+Brief: `proj_guides/__AI_worker.md` "C2" (the C1 tracker's HANDOFF; `40-testing.md` 4.2). Worker: Opus, effort High.
+TEST PLAN: each group by name after its fix; then ONE FULL in the background (PlayMode + EditMode) green -- closes the card review's FULL.
+OUT OF SCOPE: the story block's redesign, new features.
 
 ## GATE
-- [x] MCP live (TileStories@d41388e4, telemetry_status ok, idle, Play Mode off); HEAD = origin/master = d82c572 (R1 committed as f5d1542), nothing to push
-- [x] SDF fonts unmodified (git: no change under the Theme / Markers font folders); no InitTestScene leftovers
-- [x] no opening test run
-- [x] compile clean (refresh force: ExitCode 0, console 0 errors)
+- [x] MCP live (TileStories@d41388e4, telemetry_status ok, idle, Play Mode off); HEAD = origin/master = e1bcd1f (C1 committed as c57c71d), nothing to push
+- [x] Unity restarted (Editor.log 105 KB; the 3.86 GB one is Editor-prev.log); SDF fonts unchanged (last touched d3df243, no local diff); no InitTestScene leftovers
+- [x] compile clean (refresh force + compile: ExitCode 0, 0 error CS); no opening test run
 - [x] Unity c asked once (Pronto) before the first run
 
-## Leads verified on disk (before any run)
-- Video x6 / Audio x2 / Story Open Row: taps through TapInView or a bare ScrollTo + Tap -- the viewport only; since S4a the Navigation Bar
-  and the Locate pin float over the stack's foot, where ScrollTo leaves a target. LocateFabView.Layer is PickingMode.Ignore (on paper)
-- Story margin 0: open sections never frame a slot (BlockStackView ~465); the composed clip bleeds (-24) but its rows get their margin
-  back only under .card-block-slot--framed (Components.uss ~577) -> the words likely touch the screen edge
-- Expandable / LiveUpdate: NavBarRule.StickyActionShown false under the bottom bar (Automatic) -> the sticky CTA block is skipped
-- ThemePipeline:78: HeaderSlot paints --ts-clear since P2; the Navigation Bar paints --ts-bar / --ts-hair in C# (NavBarView.Paint);
-  --ts-bar-glass only in Theme.default.asset (both modes) + the generated USS
+## The 50 (C1's full_playmode.xml, grouped by the Haiku subagent; = the HANDOFF list)
+40 CardGalleryTests.EveryHeaderEntry (bar title 1.12 vs 4.5) | 1 PullQuote 17 = 17 | 1 CardSettingsGallery dark 2.76 | 1 CardVideoGallery FullScreen |
+3 PoiCardNavSceneTests (Hotspot x2, OpenBlockAndBack) | 1 PlaceInAr | 2 TapZoom story Back | 1 ThemeType (Halo assets)
 
 ## Steps
-- [x] 1 diagnostic (16 / 16 red reproduced; every missed tap picked nav-bar-item-N: the floating Navigation Bar, never the Locate layer): CardTestInput.Tap logs what panel.Pick finds; run the 16 by name; read what lies under each missed tap; remove it
-- [x] 2 PART 1 taps (TapInReach / IntoReach in Video, Audio, Story): test fix (TapInReach) where the bar / pin covers the target; a code fix + one real-tap PlayMode test if a clear layer eats it
-- [x] 3 PART 1 Story (code: open rows take the gutter back + the cut fades into --ts-sheet-open; TestEvidence/Card/C1) margin: LOOK (Painting preview, light / dark) -> Components.uss open rule -> one title-margin assert -> LOOK again
-- [x] 4 PART 2: Expandable (precondition + counts 1 / 1), LiveUpdate (minus the footer blocks StickyActionShown leaves out)
-- [x] 5 PART 3: ThemePipeline (title bar --ts-clear, the Navigation Bar's --ts-bar / --ts-hair); delete --ts-bar-glass (asset, both modes) + regenerate USS
-- [x] 6 the 16 by name green
-- [x] 7 CORE PlayMode + EditMode green (PlayMode 230: 4 red my TapInReach change caused in the Story preview -> Preview() IntoReach, the fixture 10 / 10 + 1 skipped; EditMode 120 / 120)
-- [x] 8 FULL in the background (Unity c): PlayMode 1295, 1082 passed, 50 failed, 163 skipped (77.4 min); none in CORE; not fixed (the session budget: no new code sub-step after a compaction) -> HANDOFF
-- [x] 9 docs (FULL EditMode 2240: 2208 / 0 failed / 32 skipped, 7.0 min; RUN TIMES EditMode ~7 min): _3.3 build log (CORE / FULL counts), _Test_Suite_1 if tests moved, 10-structure if files changed; report; commit message; AskUserQuestion
-
-## Not deleted, reported: theme tokens with no runtime reader by name (scan): --ts-bar-pill, --ts-focus, --ts-glass-opacity, --ts-hero-fade, --ts-weight-body
-
-## The 16
-PoiCardAudioSceneTests: ARealTapOnTheHerosListenAtFull_..., InPortuguese_TheChipThePlayerAndTheMiniPlayerSpeakPortuguese
-PoiCardExpandableSceneTests: TheLamp_AllExpandable_HoldsNoMediaUntilARealTapOpensARow_...
-PoiCardLiveUpdateTests: BlockOrder_TheLampsCardRendersInAllThreeOrders_AndTheOptionIsLive
-PoiCardStorySceneTests: ThePaintingsStoryPreview_... x4, ThePreviewsTapNothing_OpensOnlyFromItsOpenRow_...
-PoiCardVideoSceneTests: AVideoTappedWhileAnotherPoints..., ClosingTheCard_StopsTheVideo..., InPortuguese_TheVideosSpeakPortuguese...,
-  TheAudioGuidePauses_WhenARealTapStartsTheVideo..., TheChaptersVideo_IsATeaser..., TheLamp_InlineVideo_FromTheWallsFolder...
-ThemePipelineTests: TheCardsRoots_DeclareOnlyTheirOwnTokens_AndPaintWithTheThemesByInheritance
-
-## HANDOFF (2026-10-30): the FULL PlayMode run's 50 reds (none in CORE; results XML copied to the session scratchpad, the fixture times in TestEvidence/Harness)
-- TEST, small, ours (the C1 pattern -- a tap under the floating Navigation Bar; use CardTestInput.TapInReach / IntoReach):
-  PoiCardNavSceneTests.Hotspot.cs:97 + :129 (TapInView on a pin / loupe), PoiCardNavSceneTests.OpenBlockAndBack.cs:132 (TapInView),
-  PoiCardTapZoomTests.cs:427-436 x2 (bare ScrollTo + Tap on the story's Open Row; read the offset AFTER IntoReach),
-  PoiCardPlaceInArSceneTests.cs:443-447 (bare ScrollTo + Tap on the button), CardVideoGalleryTests.cs:289-294 (the gallery harness's
-  TapInView on Full Screen: check whether the gallery card floats a bar)
-- CardGalleryTests.cs:161 x40 (every header entry): the bar's title contrast 1.12 vs 4.5. The bar is --ts-clear since P4.4b and
-  EffectiveBackground(title) finds no ground of the bar's own; decide what the title is measured over (the sheet's glass over the
-  darkest / lightest backdrop, as CardSettingsGalleryTests does with GroundOver) -- the test's aim, unless the render shows the title unread
-- CardSettingsGalleryTests.cs:124 ("dark"): the settings mark on its glass disc over a WHITE backdrop reads 2.76 (needs 7, D1); the bar
-  under it is clear now (P2 / P4.4b). A design trade-off: a denser disc glass in dark, or measure over the backdrops the card really shows
-- ThemeTypeTests.cs:58: the hero's halo labels (card-hero__halo, aaa2c1f) draw "<face> UITK Halo" assets (d3df243) and the title's halo
-  draws the display face on a body-classed copy; the test should accept a face's Halo variant and inherit the role of the label it
-  haloes -- the test's aim
-- CardGalleryTests.About.cs:374: PullQuote minimal (17) is no smaller than serif (17): --ts-el-quote-* vs the body size moved; check
-  which the look means (code if serif must stand larger)
+- [x] 1 PART 1 taps: every card-STACK caller of TapInView / bare ScrollTo+tap -> TapInReach / IntoReach (into reach, read, tap), 15 files;
+  TapInView kept only for takeover pages (PageScroll x3, nothing floats there), its comment says so
+- [x] 2 PART 2 header title: LOOKED (TestEvidence/Card/C2: light / black Peek + Half plate -- the chrome row on opaque paper, all reads);
+  the test measures as SEEN (ThemePixelSet.SeenOverBackdrops: render, inks cleared, RingContrast, black + white camera): the bar title only
+  while shown (opacity 0 otherwise), the plate's line in VisibleStack, the X off the hero at 7:1; no code fix needed
+- [x] 3 PART 3 chrome discs (X AND settings: one AddMark treatment): LOOKED -- dark over a WHITE camera the marks read 15.79:1 at Peek,
+  12.36:1 at Full (the sheet's top / the Top Band's painted fade lie under the disc, never the camera); over the hero the dark hero glass.
+  NO design change (a denser token moves no pixel that matters); the settings test measures as SEEN at D1's 7:1 -- REPORT this deviation
+- [x] 4 PART 4 ThemeType: a halo copy (card-hero__halo) may draw its face's "UITK Halo" twin; every other text the plain asset
+- [x] 5 PART 5 PullQuote: LOOKED (both 17 before); About.uss 4-class serif rule in open sections -> serif 22 / minimal 17, light + dark captures
+- [x] 6 PART 6 the five tokens: no var(), no C# lookup; --ts-focus only a ThemeContrastTests guard row -> all five deleted (shared, both modes,
+  8 accent knob sets), USS regenerated (14 lines), the guard row dropped; _3.3 token table to update in docs
+- [x] 7 the 16 fixtures (509): 5 red MINE (PageChrome Back x4: scroll read before TapInReach; a header render never still: hero pan) -> fixed, 44 / 44; EditMode FULL 2240: 2208 / 0 / 32 (4.6 min)
+- [x] 8 FULL PlayMode (Unity behind both ends) 1295: 1132 passed, 0 failed, 163 skipped (75.9 min)
+- [x] 9 docs (_3.3 build log + FULL counts, _Test_Suite_1 if tests moved, 40-testing / 10-structure if needed); report; commit msg; AskUserQuestion

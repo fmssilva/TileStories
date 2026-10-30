@@ -80,8 +80,7 @@ namespace TileStories.Tests
         // A REAL tap on the preview's centre opens the page in the full view: the second view, bound as the page
         private IEnumerator OpenPage(ComposedBlockView preview, System.Action<ComposedBlockView> got)
         {
-            var stack = _harness.Sheet.Stack;
-            yield return CardTestInput.TapInView(stack.Scroll, preview.Preview);
+            yield return CardTestInput.TapInReach(_harness.Sheet, preview.Preview);
             yield return CardTestInput.Settle(0.3f);
             var full = _harness.Sheet.FullView;
             Assert.IsTrue(full.IsOpen, "a real tap on the preview opened the full view");

@@ -31,7 +31,8 @@ MonoBehaviour:
       value:
         value: 17
         unit: 0
-      note: The body inside an OPEN section (Look Blocks = Open, v6's 17 pt prose on the open ground)
+      note: The body inside an OPEN section (Look Blocks = Open, v6's 17 pt prose
+        on the open ground)
     - name: --ts-size-title
       value:
         value: 24
@@ -127,10 +128,7 @@ MonoBehaviour:
         value: 32
         unit: 0
       note: 
-    numbers:
-    - name: --ts-glass-opacity
-      value: 0.88
-      note: Effects
+    numbers: []
     durations:
     - name: --ts-duration
       value: 0.22
@@ -139,10 +137,7 @@ MonoBehaviour:
     - name: --ts-ease
       value: 9
       note: 
-    fontStyles:
-    - name: --ts-weight-body
-      value: 0
-      note: 
+    fontStyles: []
   modes:
   - key: light
     tokens:
@@ -162,18 +157,16 @@ MonoBehaviour:
           in LINEAR colour, so an alpha blends in linear light: 0.5 left the card''s
           text behind at 181 of 247 (measured), still competing with the menu; 0.7
           recedes it to a frame (about 144)'
-      - name: --ts-hero-fade
-        value: {r: 0.95686275, g: 0.9411765, b: 0.9098039, a: 0.9}
-        note: 
       - name: --ts-scrim-hero
         value: {r: 0.039215688, g: 0.031372547, b: 0.023529412, a: 0.94}
         note: 'The dark of the hero: the colour of Words On Picture''s tone and scrim
-          (their strength is the picture''s own, worked out per hero), the ground of
-          a Clear Navigation Bar at Top over the hero, and the ink of the bar''s disc
-          there. The alpha is that ground''s: the project blends in LINEAR light, so
-          it is chosen against the WORST pixel any picture can have, pure white -- at
-          0.94 the ground stays at luminance 0.062 and the white words keep 7:1 over
-          any picture (ThemeContrastTests). The same in both modes: the hero is a picture'
+          (their strength is the picture''s own, worked out per hero), the ground
+          of a Clear Navigation Bar at Top over the hero, and the ink of the bar''s
+          disc there. The alpha is that ground''s: the project blends in LINEAR light,
+          so it is chosen against the WORST pixel any picture can have, pure white
+          -- at 0.94 the ground stays at luminance 0.062 and the white words keep
+          7:1 over any picture (ThemeContrastTests). The same in both modes: the
+          hero is a picture'
       - name: --ts-on-scrim
         value: {r: 1, g: 1, b: 1, a: 1}
         note: The hero's title, line and outline button over the scrim
@@ -182,52 +175,52 @@ MonoBehaviour:
         note: The hero's eyebrow over the scrim (a warm white)
       - name: --ts-hero-glow
         value: {r: 0.039215688, g: 0.03137255, b: 0.023529412, a: 0.72}
-        note: 'The ground of the hero''s focal action (its thin outline button): a dark
-          see-through fill over the picture'
+        note: 'The ground of the hero''s focal action (its thin outline button):
+          a dark see-through fill over the picture'
       - name: --ts-text-halo
         value: {r: 0, g: 0, b: 0, a: 0.85}
-        note: 'The dark halo hugging every letter of the hero (its text-shadow): the
-          picture right around a word is darkened, so the word reads over a bright sky'
+        note: 'The dark halo hugging every letter of the hero (its text-shadow):
+          the picture right around a word is darkened, so the word reads over a bright
+          sky'
       - name: --ts-bar
         value: {r: 1, g: 1, b: 1, a: 1}
         note: 'The card''s chrome ground: the grabber row, the bar, the top strip,
           the footer -- opaque, so their words never sit on the glass'
       - name: --ts-button-glass
         value: {r: 0.078431375, g: 0.06666667, b: 0.050980393, a: 0.07}
-        note: 'The round buttons'' ground on a see-through bar (X, settings, menu): a faint disc, no rim -- the solid mark carries the button'
-      - name: --ts-bar-pill
-        value: {r: 1, g: 1, b: 1, a: 0.9}
-        note: 'The pill behind the floating bar title (S4a review): nearly opaque, so the title reads over any block passing under it'
+        note: 'The round buttons'' ground on a see-through bar (X, settings, menu):
+          a faint disc, no rim -- the solid mark carries the button'
       - name: --ts-top-shade
         value: {r: 0, g: 0, b: 0, a: 0.5}
-        note: 'The fade from the sheet top while the floating bars sit on the hero picture (tints top_shade.png): their white marks read on any picture'
+        note: 'The fade from the sheet top while the floating bars sit on the hero
+          picture (tints top_shade.png): their white marks read on any picture'
       - name: --ts-chrome-glass
         value: {r: 0.98039216, g: 0.972549, b: 0.95686275, a: 0.72}
         note: 'The chrome discs after the hero (_3.3 S4 third round, v5): the X and
           settings on light glass (smoked in dark), the mark in the card''s ink'
       - name: --ts-chrome-band
         value: {r: 0.98039216, g: 0.972549, b: 0.95686275, a: 0.94}
-        note: 'The band behind the chrome row after the hero (_3.3 S4 third round, v5:
-          light glass, the title centred, a hairline at its foot): DENSE, so no block
-          text reads through it (no backdrop blur in UI Toolkit) and the marks and the
-          title keep 7:1 over anything scrolling under it (PoiCardChromeMarksSceneTests)'
+        note: 'The band behind the chrome row after the hero (_3.3 S4 third round,
+          v5: light glass, the title centred, a hairline at its foot): DENSE, so
+          no block text reads through it (no backdrop blur in UI Toolkit) and the
+          marks and the title keep 7:1 over anything scrolling under it (PoiCardChromeMarksSceneTests)'
       - name: --ts-top-fade
         value: {r: 0.95686275, g: 0.9411765, b: 0.9098039, a: 1}
-        note: 'The fade band behind the chrome row after the hero (_3.3 S4 third round, v6
-          Top Band = Fade): the sheet''s own colour, opaque (the ramp card_top_fade.png
+        note: 'The fade band behind the chrome row after the hero (_3.3 S4 third
+          round, v6 Top Band = Fade): the sheet''s own colour, opaque (the ramp card_top_fade.png
           carries the alpha: solid through the row, then fading to nothing, no edge)'
       - name: --ts-navbar-glass
         value: {r: 0.98039216, g: 0.972549, b: 0.95686275, a: 0.72}
-        note: 'A Glass Navigation Bar once the hero is read (_3.3 S4 third round): v5''s
-          light glass in light mode; in dark, smoked glass dense enough that its light
-          words keep 7:1 over a bright picture scrolling under it -- no backdrop blur in
-          UI Toolkit (PoiCardNavBarSceneTests, measured on the render)'
+        note: 'A Glass Navigation Bar once the hero is read (_3.3 S4 third round):
+          v5''s light glass in light mode; in dark, smoked glass dense enough that
+          its light words keep 7:1 over a bright picture scrolling under it -- no
+          backdrop blur in UI Toolkit (PoiCardNavBarSceneTests, measured on the render)'
       - name: --ts-chrome-glass-hero
         value: {r: 0.039215688, g: 0.03137255, b: 0.023529412, a: 0.92}
-        note: 'The chrome discs and a Glass Navigation Bar over the hero''s picture: DARK glass, the same in
-          both modes. No backdrop blur in UI Toolkit, and the project blends in
-          LINEAR light: a white mark keeps 7:1 over a white sky only on a ground of
-          luminance <= 0.10, measured on the render (PoiCardChromeMarksSceneTests)'
+        note: 'The chrome discs and a Glass Navigation Bar over the hero''s picture:
+          DARK glass, the same in both modes. No backdrop blur in UI Toolkit, and
+          the project blends in LINEAR light: a white mark keeps 7:1 over a white
+          sky only on a ground of luminance <= 0.10, measured on the render (PoiCardChromeMarksSceneTests)'
       - name: --ts-chrome-line-hero
         value: {r: 1, g: 1, b: 1, a: 0.32}
         note: 'The light rim of a chrome disc over the hero (v5): it draws the disc''s
@@ -259,17 +252,14 @@ MonoBehaviour:
         note: 
       - name: --ts-accent-shine
         value: {r: 0.13333334, g: 0.27450982, b: 0.6666667, a: 1}
-        note: 'The Open Row shine (R14.8): the brightest colour a light sweeping across the
-          words gives them; >= 7:1 on every surface like any text (D1)'
+        note: 'The Open Row shine (R14.8): the brightest colour a light sweeping
+          across the words gives them; >= 7:1 on every surface like any text (D1)'
       - name: --ts-accent-2
         value: {r: 0.7882353, g: 0.63529414, b: 0.15294118, a: 1}
         note: 
       - name: --ts-line
         value: {r: 0.43529412, g: 0.4, b: 0.3529412, a: 1}
         note: 'Lines: a border that means something (>= 4.5:1 on the surfaces)'
-      - name: --ts-focus
-        value: {r: 0.11764706, g: 0.22745098, b: 0.5411765, a: 1}
-        note: 
       - name: --ts-hair
         value: {r: 0.8509804, g: 0.8235294, b: 0.7764706, a: 1}
         note: 'A decorative hairline inside a block (separators): never the only
@@ -287,8 +277,8 @@ MonoBehaviour:
         note: The rim's inner band where the light falls (top, left)
       - name: --ts-metal-lo
         value: {r: 0.5411765, g: 0.50980395, b: 0.4627451, a: 1}
-        note: 'The rim''s band in shade (bottom, right): with the hi side a clear bevel
-          the moving light reads on (_3.3 S4a)'
+        note: 'The rim''s band in shade (bottom, right): with the hi side a clear
+          bevel the moving light reads on (_3.3 S4a)'
       - name: --ts-metal-groove
         value: {r: 0.6901961, g: 0.65882355, b: 0.60784316, a: 1}
         note: 'The thin groove just inside the rim''s band (_3.3 S4a): a second metal
@@ -380,10 +370,11 @@ MonoBehaviour:
         note: 
       - name: --ts-family-meta-text
         value: {r: 0.21960784, g: 0.2, b: 0.17254902, a: 1}
-        note: 'A family''s words on an open section (_3.3 P3): the eyebrow -- the family''s hue moved to 7:1 over every Start at
-          Intensity max (0.20), over a black and a white camera (ThemeContrastTests)'
+        note: 'A family''s words on an open section (_3.3 P3): the eyebrow -- the
+          family''s hue moved to 7:1 over every Start at Intensity max (0.20), over
+          a black and a white camera (ThemeContrastTests)'
       - name: --ts-family-about-text
-        value: {r: 0.3254902, g: 0.16078431, b: 0.00784314, a: 1}
+        value: {r: 0.3254902, g: 0.1607843, b: 0.00784314, a: 1}
         note: 
       - name: --ts-family-media-text
         value: {r: 0.07058824, g: 0.20392157, b: 0.38039216, a: 1}
@@ -392,81 +383,83 @@ MonoBehaviour:
         value: {r: 0.08627451, g: 0.23137255, b: 0.12941176, a: 1}
         note: 
       - name: --ts-family-stories-text
-        value: {r: 0.34509804, g: 0.12156863, b: 0.25490196, a: 1}
+        value: {r: 0.34509805, g: 0.12156863, b: 0.25490195, a: 1}
         note: 
       - name: --ts-family-ar-text
-        value: {r: 0.02352941, g: 0.22745098, b: 0.21568627, a: 1}
+        value: {r: 0.02352941, g: 0.22745098, b: 0.21568628, a: 1}
         note: 
       - name: --ts-family-play-text
         value: {r: 0.38431373, g: 0.10588235, b: 0.0627451, a: 1}
         note: 
       - name: --ts-family-visit-text
-        value: {r: 0.21960784, g: 0.17647059, b: 0.34901961, a: 1}
+        value: {r: 0.21960784, g: 0.1764706, b: 0.34901962, a: 1}
         note: 
       - name: --ts-family-community-text
-        value: {r: 0.29803922, g: 0.17647059, b: 0.0, a: 1}
+        value: {r: 0.29803923, g: 0.1764706, b: 0, a: 1}
         note: 
       - name: --ts-family-navigation-text
-        value: {r: 0.17647059, g: 0.21960784, b: 0.03137255, a: 1}
+        value: {r: 0.1764706, g: 0.21960784, b: 0.03137255, a: 1}
         note: 
       - name: --ts-sheet-open
-        value: {r: 0.97254902, g: 0.96470588, b: 0.94901961, a: 1}
-        note: 'The card''s ground under OPEN sections (_3.3 P3, Look Blocks = Open): the sheet''s own colour,
-          solid paper -- nothing of the camera, the wall or its markers shows through it'
+        value: {r: 0.972549, g: 0.9647059, b: 0.9490196, a: 1}
+        note: 'The card''s ground under OPEN sections (_3.3 P3, Look Blocks = Open):
+          the sheet''s own colour, solid paper -- nothing of the camera, the wall
+          or its markers shows through it'
       - name: --ts-locate-teal-hi
-        value: {r: 0.49803922, g: 0.89019608, b: 0.76862745, a: 1}
+        value: {r: 0.49803922, g: 0.8901961, b: 0.76862746, a: 1}
         note: 'The Locate Button''s pin (teal): the light top of its body'
       - name: --ts-locate-teal-lo
-        value: {r: 0.05490196, g: 0.60392157, b: 0.48627451, a: 1}
-        note: 'the deep foot of its body and the dot in its disc'
+        value: {r: 0.05490196, g: 0.6039216, b: 0.4862745, a: 1}
+        note: the deep foot of its body and the dot in its disc
       - name: --ts-locate-teal-rim
-        value: {r: 0.03137255, g: 0.42352941, b: 0.33725490, a: 1}
+        value: {r: 0.03137255, g: 0.42352942, b: 0.3372549, a: 1}
         note: 'its thin rim: >= 4.5:1 on the paper (a deep rim on the light paper)'
       - name: --ts-locate-green-hi
-        value: {r: 0.72156863, g: 0.93725490, b: 0.47843137, a: 1}
+        value: {r: 0.72156864, g: 0.9372549, b: 0.47843137, a: 1}
         note: 'The Locate Button''s pin (green): the light top of its body'
       - name: --ts-locate-green-lo
-        value: {r: 0.24705882, g: 0.61960784, b: 0.17254902, a: 1}
-        note: 'the deep foot of its body and the dot in its disc'
+        value: {r: 0.24705882, g: 0.61960787, b: 0.17254902, a: 1}
+        note: the deep foot of its body and the dot in its disc
       - name: --ts-locate-green-rim
         value: {r: 0.15686275, g: 0.43137255, b: 0.10980392, a: 1}
         note: 'its thin rim: >= 4.5:1 on the paper (a deep rim on the light paper)'
       - name: --ts-locate-cyan-hi
-        value: {r: 0.54509804, g: 0.89411765, b: 1.00000000, a: 1}
+        value: {r: 0.54509807, g: 0.89411765, b: 1, a: 1}
         note: 'The Locate Button''s pin (cyan): the light top of its body'
       - name: --ts-locate-cyan-lo
-        value: {r: 0.03921569, g: 0.51764706, b: 0.72156863, a: 1}
-        note: 'the deep foot of its body and the dot in its disc'
+        value: {r: 0.03921569, g: 0.5176471, b: 0.72156864, a: 1}
+        note: the deep foot of its body and the dot in its disc
       - name: --ts-locate-cyan-rim
-        value: {r: 0.02745098, g: 0.41568627, b: 0.58039216, a: 1}
+        value: {r: 0.02745098, g: 0.41568628, b: 0.5803922, a: 1}
         note: 'its thin rim: >= 4.5:1 on the paper (a deep rim on the light paper)'
       - name: --ts-locate-disc
-        value: {r: 1.00000000, g: 1.00000000, b: 1.00000000, a: 1}
-        note: 'The pin''s white inner disc (its centre)'
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: The pin's white inner disc (its centre)
       - name: --ts-locate-disc-edge
-        value: {r: 0.90588235, g: 0.92549020, b: 0.91372549, a: 1}
-        note: 'the inner disc''s soft edge'
+        value: {r: 0.90588236, g: 0.9254902, b: 0.9137255, a: 1}
+        note: the inner disc's soft edge
       - name: --ts-locate-shadow
-        value: {r: 0.00000000, g: 0.00000000, b: 0.00000000, a: 0.28}
-        note: 'The pin''s shadow on the bar (breathing with Float)'
+        value: {r: 0, g: 0, b: 0, a: 0.28}
+        note: The pin's shadow on the bar (breathing with Float)
       - name: --ts-locate-halo
-        value: {r: 0.00000000, g: 0.00000000, b: 0.00000000, a: 0.8}
-        note: 'The dark halo round the pin while it lies on a picture: its edge >= 3:1 on any picture (WCAG 1.4.11)'
+        value: {r: 0, g: 0, b: 0, a: 0.8}
+        note: 'The dark halo round the pin while it lies on a picture: its edge >=
+          3:1 on any picture (WCAG 1.4.11)'
       - name: --ts-locate-chip
-        value: {r: 1.00000000, g: 1.00000000, b: 1.00000000, a: 0.96}
-        note: 'The light chip under "Find it on the wall" (light in both modes)'
+        value: {r: 1, g: 1, b: 1, a: 0.96}
+        note: The light chip under "Find it on the wall" (light in both modes)
       - name: --ts-locate-chip-ink
         value: {r: 0.07058824, g: 0.23137255, b: 0.19607843, a: 1}
         note: 'the chip''s words: >= 7:1 on it'
       - name: --ts-locate-glass
-        value: {r: 1.00000000, g: 1.00000000, b: 1.00000000, a: 0.78}
+        value: {r: 1, g: 1, b: 1, a: 0.78}
         note: 'Glass + Ping: the light glass disc holding the pin'
       - name: --ts-locate-glass-line
-        value: {r: 1.00000000, g: 1.00000000, b: 1.00000000, a: 0.95}
-        note: 'the glass disc''s bright edge'
+        value: {r: 1, g: 1, b: 1, a: 0.95}
+        note: the glass disc's bright edge
       - name: --ts-section-neutral
-        value: {r: 0.41960784, g: 0.38823529, b: 0.34901961, a: 1}
-        note: 'A section''s tint under Sections > Colour = Neutral (v6)'
+        value: {r: 0.41960785, g: 0.3882353, b: 0.34901962, a: 1}
+        note: A section's tint under Sections > Colour = Neutral (v6)
       - name: --ts-family-meta-glass
         value: {r: 0.8757647, g: 0.85490197, b: 0.8174902, a: 0.55}
         note: 'A section''s glass sheet (R11, P4.4c1): the mode''s glass ground mixed
@@ -625,8 +618,8 @@ MonoBehaviour:
         value:
           value: 3
           unit: 0
-        note: 'The rim''s metal band, the band the moving light rides (_3.3 S4a: wider
-          in light so the light reads)'
+        note: 'The rim''s metal band, the band the moving light rides (_3.3 S4a:
+          wider in light so the light reads)'
       numbers:
       - name: --ts-rim-sweep-arc
         value: 62
@@ -653,18 +646,16 @@ MonoBehaviour:
           in LINEAR colour, so an alpha blends in linear light: 0.5 left the card''s
           text behind at 181 of 247 (measured), still competing with the menu; 0.7
           recedes it to a frame (about 144)'
-      - name: --ts-hero-fade
-        value: {r: 0.062745094, g: 0.05882353, b: 0.050980393, a: 0.9}
-        note: 
       - name: --ts-scrim-hero
         value: {r: 0.039215688, g: 0.031372547, b: 0.023529412, a: 0.94}
         note: 'The dark of the hero: the colour of Words On Picture''s tone and scrim
-          (their strength is the picture''s own, worked out per hero), the ground of
-          a Clear Navigation Bar at Top over the hero, and the ink of the bar''s disc
-          there. The alpha is that ground''s: the project blends in LINEAR light, so
-          it is chosen against the WORST pixel any picture can have, pure white -- at
-          0.94 the ground stays at luminance 0.062 and the white words keep 7:1 over
-          any picture (ThemeContrastTests). The same in both modes: the hero is a picture'
+          (their strength is the picture''s own, worked out per hero), the ground
+          of a Clear Navigation Bar at Top over the hero, and the ink of the bar''s
+          disc there. The alpha is that ground''s: the project blends in LINEAR light,
+          so it is chosen against the WORST pixel any picture can have, pure white
+          -- at 0.94 the ground stays at luminance 0.062 and the white words keep
+          7:1 over any picture (ThemeContrastTests). The same in both modes: the
+          hero is a picture'
       - name: --ts-on-scrim
         value: {r: 1, g: 1, b: 1, a: 1}
         note: The hero's title, line and outline button over the scrim
@@ -673,52 +664,52 @@ MonoBehaviour:
         note: The hero's eyebrow over the scrim (a warm white)
       - name: --ts-hero-glow
         value: {r: 0.039215688, g: 0.03137255, b: 0.023529412, a: 0.72}
-        note: 'The ground of the hero''s focal action (its thin outline button): a dark
-          see-through fill over the picture'
+        note: 'The ground of the hero''s focal action (its thin outline button):
+          a dark see-through fill over the picture'
       - name: --ts-text-halo
         value: {r: 0, g: 0, b: 0, a: 0.85}
-        note: 'The dark halo hugging every letter of the hero (its text-shadow): the
-          picture right around a word is darkened, so the word reads over a bright sky'
+        note: 'The dark halo hugging every letter of the hero (its text-shadow):
+          the picture right around a word is darkened, so the word reads over a bright
+          sky'
       - name: --ts-bar
         value: {r: 0.10980392, g: 0.101960786, b: 0.09019608, a: 1}
         note: 'The card''s chrome ground: the grabber row, the bar, the top strip,
           the footer -- opaque, so their words never sit on the glass'
       - name: --ts-button-glass
         value: {r: 1, g: 1, b: 1, a: 0.12}
-        note: 'The round buttons'' ground on a see-through bar (X, settings, menu): a faint disc, no rim -- the solid mark carries the button'
-      - name: --ts-bar-pill
-        value: {r: 0.10980392, g: 0.101960786, b: 0.09019608, a: 0.9}
-        note: 'The pill behind the floating bar title (S4a review): nearly opaque, so the title reads over any block passing under it'
+        note: 'The round buttons'' ground on a see-through bar (X, settings, menu):
+          a faint disc, no rim -- the solid mark carries the button'
       - name: --ts-top-shade
         value: {r: 0, g: 0, b: 0, a: 0.5}
-        note: 'The fade from the sheet top while the floating bars sit on the hero picture (tints top_shade.png): their white marks read on any picture'
+        note: 'The fade from the sheet top while the floating bars sit on the hero
+          picture (tints top_shade.png): their white marks read on any picture'
       - name: --ts-chrome-glass
         value: {r: 0.101960786, g: 0.105882354, b: 0.11764706, a: 0.72}
         note: 'The chrome discs after the hero (_3.3 S4 third round, v5): the X and
           settings on light glass (smoked in dark), the mark in the card''s ink'
       - name: --ts-chrome-band
         value: {r: 0.101960786, g: 0.105882354, b: 0.11764706, a: 0.99}
-        note: 'The band behind the chrome row after the hero (_3.3 S4 third round, v5:
-          light glass, the title centred, a hairline at its foot): DENSE, so no block
-          text reads through it (no backdrop blur in UI Toolkit) and the marks and the
-          title keep 7:1 over anything scrolling under it (PoiCardChromeMarksSceneTests)'
+        note: 'The band behind the chrome row after the hero (_3.3 S4 third round,
+          v5: light glass, the title centred, a hairline at its foot): DENSE, so
+          no block text reads through it (no backdrop blur in UI Toolkit) and the
+          marks and the title keep 7:1 over anything scrolling under it (PoiCardChromeMarksSceneTests)'
       - name: --ts-top-fade
         value: {r: 0.062745094, g: 0.05882353, b: 0.050980393, a: 1}
-        note: 'The fade band behind the chrome row after the hero (_3.3 S4 third round, v6
-          Top Band = Fade): the sheet''s own colour, opaque (the ramp card_top_fade.png
+        note: 'The fade band behind the chrome row after the hero (_3.3 S4 third
+          round, v6 Top Band = Fade): the sheet''s own colour, opaque (the ramp card_top_fade.png
           carries the alpha: solid through the row, then fading to nothing, no edge)'
       - name: --ts-navbar-glass
         value: {r: 0.101960786, g: 0.105882354, b: 0.11764706, a: 0.98}
-        note: 'A Glass Navigation Bar once the hero is read (_3.3 S4 third round): v5''s
-          light glass in light mode; in dark, smoked glass dense enough that its light
-          words keep 7:1 over a bright picture scrolling under it -- no backdrop blur in
-          UI Toolkit (PoiCardNavBarSceneTests, measured on the render)'
+        note: 'A Glass Navigation Bar once the hero is read (_3.3 S4 third round):
+          v5''s light glass in light mode; in dark, smoked glass dense enough that
+          its light words keep 7:1 over a bright picture scrolling under it -- no
+          backdrop blur in UI Toolkit (PoiCardNavBarSceneTests, measured on the render)'
       - name: --ts-chrome-glass-hero
         value: {r: 0.039215688, g: 0.03137255, b: 0.023529412, a: 0.92}
-        note: 'The chrome discs and a Glass Navigation Bar over the hero''s picture: DARK glass, the same in
-          both modes. No backdrop blur in UI Toolkit, and the project blends in
-          LINEAR light: a white mark keeps 7:1 over a white sky only on a ground of
-          luminance <= 0.10, measured on the render (PoiCardChromeMarksSceneTests)'
+        note: 'The chrome discs and a Glass Navigation Bar over the hero''s picture:
+          DARK glass, the same in both modes. No backdrop blur in UI Toolkit, and
+          the project blends in LINEAR light: a white mark keeps 7:1 over a white
+          sky only on a ground of luminance <= 0.10, measured on the render (PoiCardChromeMarksSceneTests)'
       - name: --ts-chrome-line-hero
         value: {r: 1, g: 1, b: 1, a: 0.32}
         note: 'The light rim of a chrome disc over the hero (v5): it draws the disc''s
@@ -750,17 +741,14 @@ MonoBehaviour:
         note: 
       - name: --ts-accent-shine
         value: {r: 1, g: 0.94509804, b: 0.78431374, a: 1}
-        note: 'The Open Row shine (R14.8): the brightest colour a light sweeping across the
-          words gives them; >= 7:1 on every surface like any text (D1)'
+        note: 'The Open Row shine (R14.8): the brightest colour a light sweeping
+          across the words gives them; >= 7:1 on every surface like any text (D1)'
       - name: --ts-accent-2
         value: {r: 0.7058824, g: 0.47058824, b: 0.15686275, a: 1}
         note: 
       - name: --ts-line
         value: {r: 0.6039216, g: 0.5686275, b: 0.5058824, a: 1}
         note: 'Lines: a border that means something (>= 4.5:1 on the surfaces)'
-      - name: --ts-focus
-        value: {r: 0.9490196, g: 0.70980394, b: 0.26666668, a: 1}
-        note: 
       - name: --ts-hair
         value: {r: 0.22745098, g: 0.21176471, b: 0.18431373, a: 1}
         note: 'A decorative hairline inside a block (separators): never the only
@@ -869,94 +857,97 @@ MonoBehaviour:
         value: {r: 0.078431375, g: 0.06666667, b: 0.050980393, a: 1}
         note: 
       - name: --ts-family-meta-text
-        value: {r: 0.85882353, g: 0.83921569, b: 0.8, a: 1}
-        note: 'A family''s words on an open section (_3.3 P3): the eyebrow -- the family''s hue moved to 7:1 over every Start at
-          Intensity max (0.20), over a black and a white camera (ThemeContrastTests)'
+        value: {r: 0.85882354, g: 0.8392157, b: 0.8, a: 1}
+        note: 'A family''s words on an open section (_3.3 P3): the eyebrow -- the
+          family''s hue moved to 7:1 over every Start at Intensity max (0.20), over
+          a black and a white camera (ThemeContrastTests)'
       - name: --ts-family-about-text
-        value: {r: 0.94509804, g: 0.81568627, b: 0.70196078, a: 1}
+        value: {r: 0.94509804, g: 0.8156863, b: 0.7019608, a: 1}
         note: 
       - name: --ts-family-media-text
-        value: {r: 0.77254902, g: 0.84705882, b: 0.95294118, a: 1}
+        value: {r: 0.77254903, g: 0.84705883, b: 0.9529412, a: 1}
         note: 
       - name: --ts-family-guides-text
-        value: {r: 0.7254902, g: 0.87843137, b: 0.75686275, a: 1}
+        value: {r: 0.7254902, g: 0.8784314, b: 0.75686276, a: 1}
         note: 
       - name: --ts-family-stories-text
-        value: {r: 0.93333333, g: 0.80392157, b: 0.8745098, a: 1}
+        value: {r: 0.93333334, g: 0.8039216, b: 0.8745098, a: 1}
         note: 
       - name: --ts-family-ar-text
-        value: {r: 0.69019608, g: 0.8745098, b: 0.85490196, a: 1}
+        value: {r: 0.6901961, g: 0.8745098, b: 0.85490197, a: 1}
         note: 
       - name: --ts-family-play-text
-        value: {r: 0.96862745, g: 0.80392157, b: 0.76862745, a: 1}
+        value: {r: 0.96862745, g: 0.8039216, b: 0.76862746, a: 1}
         note: 
       - name: --ts-family-visit-text
-        value: {r: 0.85490196, g: 0.82352941, b: 0.96078431, a: 1}
+        value: {r: 0.85490197, g: 0.8235294, b: 0.9607843, a: 1}
         note: 
       - name: --ts-family-community-text
-        value: {r: 0.93333333, g: 0.82352941, b: 0.65490196, a: 1}
+        value: {r: 0.93333334, g: 0.8235294, b: 0.654902, a: 1}
         note: 
       - name: --ts-family-navigation-text
-        value: {r: 0.80784314, g: 0.86666667, b: 0.58823529, a: 1}
+        value: {r: 0.80784315, g: 0.8666667, b: 0.5882353, a: 1}
         note: 
       - name: --ts-sheet-open
         value: {r: 0.05882353, g: 0.0627451, b: 0.07058824, a: 1}
-        note: 'The card''s ground under OPEN sections (_3.3 P3, Look Blocks = Open): the sheet''s own colour,
-          solid paper -- nothing of the camera, the wall or its markers shows through it'
+        note: 'The card''s ground under OPEN sections (_3.3 P3, Look Blocks = Open):
+          the sheet''s own colour, solid paper -- nothing of the camera, the wall
+          or its markers shows through it'
       - name: --ts-locate-teal-hi
-        value: {r: 0.49803922, g: 0.89019608, b: 0.76862745, a: 1}
+        value: {r: 0.49803922, g: 0.8901961, b: 0.76862746, a: 1}
         note: 'The Locate Button''s pin (teal): the light top of its body'
       - name: --ts-locate-teal-lo
-        value: {r: 0.05490196, g: 0.60392157, b: 0.48627451, a: 1}
-        note: 'the deep foot of its body and the dot in its disc'
+        value: {r: 0.05490196, g: 0.6039216, b: 0.4862745, a: 1}
+        note: the deep foot of its body and the dot in its disc
       - name: --ts-locate-teal-rim
-        value: {r: 0.49803922, g: 0.89019608, b: 0.76862745, a: 1}
+        value: {r: 0.49803922, g: 0.8901961, b: 0.76862746, a: 1}
         note: 'its thin rim: >= 4.5:1 on the paper (a light rim on the dark paper)'
       - name: --ts-locate-green-hi
-        value: {r: 0.72156863, g: 0.93725490, b: 0.47843137, a: 1}
+        value: {r: 0.72156864, g: 0.9372549, b: 0.47843137, a: 1}
         note: 'The Locate Button''s pin (green): the light top of its body'
       - name: --ts-locate-green-lo
-        value: {r: 0.24705882, g: 0.61960784, b: 0.17254902, a: 1}
-        note: 'the deep foot of its body and the dot in its disc'
+        value: {r: 0.24705882, g: 0.61960787, b: 0.17254902, a: 1}
+        note: the deep foot of its body and the dot in its disc
       - name: --ts-locate-green-rim
-        value: {r: 0.72156863, g: 0.93725490, b: 0.47843137, a: 1}
+        value: {r: 0.72156864, g: 0.9372549, b: 0.47843137, a: 1}
         note: 'its thin rim: >= 4.5:1 on the paper (a light rim on the dark paper)'
       - name: --ts-locate-cyan-hi
-        value: {r: 0.54509804, g: 0.89411765, b: 1.00000000, a: 1}
+        value: {r: 0.54509807, g: 0.89411765, b: 1, a: 1}
         note: 'The Locate Button''s pin (cyan): the light top of its body'
       - name: --ts-locate-cyan-lo
-        value: {r: 0.03921569, g: 0.51764706, b: 0.72156863, a: 1}
-        note: 'the deep foot of its body and the dot in its disc'
+        value: {r: 0.03921569, g: 0.5176471, b: 0.72156864, a: 1}
+        note: the deep foot of its body and the dot in its disc
       - name: --ts-locate-cyan-rim
-        value: {r: 0.54509804, g: 0.89411765, b: 1.00000000, a: 1}
+        value: {r: 0.54509807, g: 0.89411765, b: 1, a: 1}
         note: 'its thin rim: >= 4.5:1 on the paper (a light rim on the dark paper)'
       - name: --ts-locate-disc
-        value: {r: 1.00000000, g: 1.00000000, b: 1.00000000, a: 1}
-        note: 'The pin''s white inner disc (its centre)'
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: The pin's white inner disc (its centre)
       - name: --ts-locate-disc-edge
-        value: {r: 0.90588235, g: 0.92549020, b: 0.91372549, a: 1}
-        note: 'the inner disc''s soft edge'
+        value: {r: 0.90588236, g: 0.9254902, b: 0.9137255, a: 1}
+        note: the inner disc's soft edge
       - name: --ts-locate-shadow
-        value: {r: 0.00000000, g: 0.00000000, b: 0.00000000, a: 0.5}
-        note: 'The pin''s shadow on the bar (breathing with Float)'
+        value: {r: 0, g: 0, b: 0, a: 0.5}
+        note: The pin's shadow on the bar (breathing with Float)
       - name: --ts-locate-halo
-        value: {r: 0.00000000, g: 0.00000000, b: 0.00000000, a: 0.8}
-        note: 'The dark halo round the pin while it lies on a picture: its edge >= 3:1 on any picture (WCAG 1.4.11)'
+        value: {r: 0, g: 0, b: 0, a: 0.8}
+        note: 'The dark halo round the pin while it lies on a picture: its edge >=
+          3:1 on any picture (WCAG 1.4.11)'
       - name: --ts-locate-chip
-        value: {r: 1.00000000, g: 1.00000000, b: 1.00000000, a: 0.96}
-        note: 'The light chip under "Find it on the wall" (light in both modes)'
+        value: {r: 1, g: 1, b: 1, a: 0.96}
+        note: The light chip under "Find it on the wall" (light in both modes)
       - name: --ts-locate-chip-ink
         value: {r: 0.07058824, g: 0.23137255, b: 0.19607843, a: 1}
         note: 'the chip''s words: >= 7:1 on it'
       - name: --ts-locate-glass
-        value: {r: 1.00000000, g: 1.00000000, b: 1.00000000, a: 0.78}
+        value: {r: 1, g: 1, b: 1, a: 0.78}
         note: 'Glass + Ping: the light glass disc holding the pin'
       - name: --ts-locate-glass-line
-        value: {r: 1.00000000, g: 1.00000000, b: 1.00000000, a: 0.95}
-        note: 'the glass disc''s bright edge'
+        value: {r: 1, g: 1, b: 1, a: 0.95}
+        note: the glass disc's bright edge
       - name: --ts-section-neutral
-        value: {r: 0.81176471, g: 0.78431373, b: 0.7372549, a: 1}
-        note: 'A section''s tint under Sections > Colour = Neutral (v6)'
+        value: {r: 0.8117647, g: 0.78431374, b: 0.7372549, a: 1}
+        note: A section's tint under Sections > Colour = Neutral (v6)
       - name: --ts-family-meta-glass
         value: {r: 0.15733334, g: 0.14705883, b: 0.13003922, a: 0.7}
         note: 'A section''s glass sheet (R11, P4.4c1): the mode''s glass ground mixed
@@ -1147,9 +1138,6 @@ MonoBehaviour:
         - name: --ts-on-accent
           value: {r: 1, g: 1, b: 1, a: 1}
           note: 
-        - name: --ts-focus
-          value: {r: 0.11764706, g: 0.22745098, b: 0.5411765, a: 1}
-          note: 
         lengths: []
         numbers: []
         durations: []
@@ -1166,9 +1154,6 @@ MonoBehaviour:
           note: 
         - name: --ts-on-accent
           value: {r: 0.101960786, g: 0.07058824, b: 0.023529412, a: 1}
-          note: 
-        - name: --ts-focus
-          value: {r: 0.9490196, g: 0.70980394, b: 0.26666668, a: 1}
           note: 
         lengths: []
         numbers: []
@@ -1197,9 +1182,6 @@ MonoBehaviour:
         - name: --ts-on-accent
           value: {r: 1, g: 1, b: 1, a: 1}
           note: 
-        - name: --ts-focus
-          value: {r: 0.09019608, g: 0.27058825, b: 0.49803922, a: 1}
-          note: 
         lengths: []
         numbers: []
         durations: []
@@ -1216,9 +1198,6 @@ MonoBehaviour:
           note: 
         - name: --ts-on-accent
           value: {r: 0.043137256, g: 0.08627451, b: 0.14901961, a: 1}
-          note: 
-        - name: --ts-focus
-          value: {r: 0.5529412, g: 0.72156864, b: 0.91764706, a: 1}
           note: 
         lengths: []
         numbers: []
@@ -1247,9 +1226,6 @@ MonoBehaviour:
         - name: --ts-on-accent
           value: {r: 1, g: 1, b: 1, a: 1}
           note: 
-        - name: --ts-focus
-          value: {r: 0.5568628, g: 0.18431373, b: 0.078431375, a: 1}
-          note: 
         lengths: []
         numbers: []
         durations: []
@@ -1266,9 +1242,6 @@ MonoBehaviour:
           note: 
         - name: --ts-on-accent
           value: {r: 0.16470589, g: 0.05490196, b: 0.019607844, a: 1}
-          note: 
-        - name: --ts-focus
-          value: {r: 0.9411765, g: 0.6431373, b: 0.5294118, a: 1}
           note: 
         lengths: []
         numbers: []
@@ -1297,9 +1270,6 @@ MonoBehaviour:
         - name: --ts-on-accent
           value: {r: 1, g: 1, b: 1, a: 1}
           note: 
-        - name: --ts-focus
-          value: {r: 0.09019608, g: 0.30980393, b: 0.2, a: 1}
-          note: 
         lengths: []
         numbers: []
         durations: []
@@ -1316,9 +1286,6 @@ MonoBehaviour:
           note: 
         - name: --ts-on-accent
           value: {r: 0.043137256, g: 0.14117648, b: 0.07058824, a: 1}
-          note: 
-        - name: --ts-focus
-          value: {r: 0.56078434, g: 0.81960785, b: 0.61960787, a: 1}
           note: 
         lengths: []
         numbers: []

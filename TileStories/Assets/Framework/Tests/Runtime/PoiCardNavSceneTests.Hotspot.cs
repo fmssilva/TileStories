@@ -81,7 +81,7 @@ namespace TileStories.Tests
             yield return Capture("Hotspot_OpensBlock_numbered_Lamp_390");
 
             int jumps = NavJumps.Count;
-            yield return CardTestInput.TapInView(Scroll, view.Spots[jumper].Pin);
+            yield return CardTestInput.TapInReach(Sheet, view.Spots[jumper].Pin);
             yield return Landed();
             Assert.AreEqual(jumps + 1, NavJumps.Count, "a tap on the pin: one jump");
             var jump = NavJumps.Last();
@@ -94,7 +94,7 @@ namespace TileStories.Tests
             Assert.IsFalse(view.Detail.ClassListContains("card-hotspot__detail--open"), "the detail stays closed");
 
             // - a spot with nothing picked: its popup, no jump
-            yield return CardTestInput.TapInView(Scroll, view.Spots[plain].Pin);
+            yield return CardTestInput.TapInReach(Sheet, view.Spots[plain].Pin);
             Assert.AreEqual(plain, view.OpenIndex, "a pin without Opens Block opens its title and text");
             Assert.AreEqual(view.Spots[plain].Title, view.DetailTitle.text, "the spot's own title");
             Assert.AreEqual(jumps + 1, NavJumps.Count, "and no second jump");
@@ -119,14 +119,14 @@ namespace TileStories.Tests
             yield return Capture("Hotspot_OpensBlock_loupes_Lamp_390");
 
             int jumps = NavJumps.Count;
-            yield return CardTestInput.TapInView(Scroll, view.Spots[jumper].Loupe);
+            yield return CardTestInput.TapInReach(Sheet, view.Spots[jumper].Loupe);
             yield return Landed();
             Assert.AreEqual(jumps + 1, NavJumps.Count, "a tap on the close-up: one jump");
             Assert.AreEqual(target, NavJumps.Last().BlockKey, "to the block the wall names");
             Assert.AreEqual(BuiltInBlocks.HotspotImageKind, NavJumps.Last().Variant);
             Assert.AreEqual(-1, view.OpenIndex, "no text opened");
 
-            yield return CardTestInput.TapInView(Scroll, view.Spots[plain].Loupe);
+            yield return CardTestInput.TapInReach(Sheet, view.Spots[plain].Loupe);
             Assert.AreEqual(plain, view.OpenIndex, "a loupe without Opens Block opens its text");
             Assert.AreEqual(jumps + 1, NavJumps.Count, "and jumps nowhere");
         }
@@ -153,7 +153,7 @@ namespace TileStories.Tests
                 Assert.AreEqual("", view.Spots[spot].Jump, why + ": no jump target");
                 Assert.IsFalse(view.Spots[spot].Pin.ClassListContains(HotspotImageBlockView.PinJumpsClass), why + ": no arrow");
                 int jumps = NavJumps.Count;
-                yield return CardTestInput.TapInView(Scroll, view.Spots[spot].Pin);
+                yield return CardTestInput.TapInReach(Sheet, view.Spots[spot].Pin);
                 Assert.AreEqual(spot, view.OpenIndex, why + ": the spot opens its own text");
                 Assert.AreEqual(jumps, NavJumps.Count, why + ": and nothing jumps");
             }
@@ -163,7 +163,7 @@ namespace TileStories.Tests
             var again = HotspotOf(NumberedHotspots);
             Assert.AreEqual(good, again.Spots[spot].Jump, "a good pick jumps again, live");
             int before = NavJumps.Count;
-            yield return CardTestInput.TapInView(Scroll, again.Spots[spot].Pin);
+            yield return CardTestInput.TapInReach(Sheet, again.Spots[spot].Pin);
             yield return Landed();
             Assert.AreEqual(before + 1, NavJumps.Count, "one jump");
             Assert.AreEqual(good, NavJumps.Last().BlockKey);

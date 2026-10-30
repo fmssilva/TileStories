@@ -13,7 +13,6 @@
        light: 0.5 left the card's text behind at 181 of 247 (measured), still competing with the menu; 0.7 recedes it to a
        frame (about 144) */
     --ts-scrim: rgba(0, 0, 0, 0.7);
-    --ts-hero-fade: rgba(244, 240, 232, 0.9);
     /* The dark of the hero: the colour of Words On Picture's tone and scrim (their strength is the picture's own, worked out
        per hero), the ground of a Clear Navigation Bar at Top over the hero, and the ink of the bar's disc there. The alpha is
        that ground's: the project blends in LINEAR light, so it is chosen against the WORST pixel any picture can have, pure
@@ -35,8 +34,6 @@
     /* The round buttons' ground on a see-through bar (X, settings, menu): a faint disc, no rim -- the solid mark carries the
        button */
     --ts-button-glass: rgba(20, 17, 13, 0.07);
-    /* The pill behind the floating bar title (S4a review): nearly opaque, so the title reads over any block passing under it */
-    --ts-bar-pill: rgba(255, 255, 255, 0.9);
     /* The fade from the sheet top while the floating bars sit on the hero picture (tints top_shade.png): their white marks
        read on any picture */
     --ts-top-shade: rgba(0, 0, 0, 0.5);
@@ -77,7 +74,6 @@
     --ts-accent-2: rgb(201, 162, 39);
     /* Lines: a border that means something (>= 4.5:1 on the surfaces) */
     --ts-line: rgb(111, 102, 90);
-    --ts-focus: rgb(30, 58, 138);
     /* A decorative hairline inside a block (separators): never the only cue */
     --ts-hair: rgb(217, 210, 198);
     /* The block frame (R13.1, R12.5): the rim's outer line, measured against the sheet ground over the sunny-wall photo
@@ -270,12 +266,9 @@
     --ts-space-4: 16px;
     --ts-space-5: 24px;
     --ts-space-6: 32px;
-    /* Effects */
-    --ts-glass-opacity: 0.88;
     /* Motion */
     --ts-duration: 0.22s;
     --ts-ease: ease-out-cubic;
-    --ts-weight-body: normal;
 }
 
 .ts-app.ts-theme-default.ts-mode-dark {
@@ -289,7 +282,6 @@
        light: 0.5 left the card's text behind at 181 of 247 (measured), still competing with the menu; 0.7 recedes it to a
        frame (about 144) */
     --ts-scrim: rgba(0, 0, 0, 0.7);
-    --ts-hero-fade: rgba(16, 15, 13, 0.9);
     /* The dark of the hero: the colour of Words On Picture's tone and scrim (their strength is the picture's own, worked out
        per hero), the ground of a Clear Navigation Bar at Top over the hero, and the ink of the bar's disc there. The alpha is
        that ground's: the project blends in LINEAR light, so it is chosen against the WORST pixel any picture can have, pure
@@ -311,8 +303,6 @@
     /* The round buttons' ground on a see-through bar (X, settings, menu): a faint disc, no rim -- the solid mark carries the
        button */
     --ts-button-glass: rgba(255, 255, 255, 0.12);
-    /* The pill behind the floating bar title (S4a review): nearly opaque, so the title reads over any block passing under it */
-    --ts-bar-pill: rgba(28, 26, 23, 0.9);
     /* The fade from the sheet top while the floating bars sit on the hero picture (tints top_shade.png): their white marks
        read on any picture */
     --ts-top-shade: rgba(0, 0, 0, 0.5);
@@ -353,7 +343,6 @@
     --ts-accent-2: rgb(180, 120, 40);
     /* Lines: a border that means something (>= 4.5:1 on the surfaces) */
     --ts-line: rgb(154, 145, 129);
-    --ts-focus: rgb(242, 181, 68);
     /* A decorative hairline inside a block (separators): never the only cue */
     --ts-hair: rgb(58, 54, 47);
     /* The block frame (R13.1, R12.5): the rim's outer line, measured against the sheet ground over the sunny-wall photo
@@ -546,12 +535,9 @@
     --ts-space-4: 16px;
     --ts-space-5: 24px;
     --ts-space-6: 32px;
-    /* Effects */
-    --ts-glass-opacity: 0.88;
     /* Motion */
     --ts-duration: 0.22s;
     --ts-ease: ease-out-cubic;
-    --ts-weight-body: normal;
 }
 
 /* Type: body = atkinson_next_regular (bold: atkinson_next_bold, through its weight table), display = fraunces_semibold */

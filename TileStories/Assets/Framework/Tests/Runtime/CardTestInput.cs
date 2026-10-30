@@ -78,7 +78,9 @@ namespace TileStories.Tests
 
         // A real tap on `target` after scrolling `scroll` to it and asserting it is inside the visible part (40-testing 4.2.4b):
         // scrolled to as a whole, a block taller than the viewport lines up its far edge and can leave a button outside the
-        // view, where the tap would land on something else -- the precondition names that instead of a confusing later failure
+        // view, where the tap would land on something else -- the precondition names that instead of a confusing later failure.
+        // Only for a ScrollView nothing floats over (a takeover page): on the card's stack the Navigation Bar and the Locate Button
+        // float over the viewport's foot -- TapInReach there
         public static IEnumerator TapInView(ScrollView scroll, VisualElement target)
         {
             scroll.ScrollTo(target);

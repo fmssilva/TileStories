@@ -439,9 +439,9 @@ namespace TileStories.Tests
                 Assert.AreEqual(placeWords, view.ButtonLabel.text, language + ": the first state");
                 Assert.IsFalse(CardTestInput.IsShown(view.Note, view.Root), language + ": no line while nothing stands");
 
-                // - scrolled well down, as a visitor who read down to the button is: a real tap places
-                Sheet.Stack.Scroll.ScrollTo(view.Button);
-                yield return CardTestInput.Settle(0.2f);
+                // - scrolled well down, as a visitor who read down to the button is (where a finger reaches: the Navigation Bar floats over
+                //   the stack's foot): a real tap places
+                yield return CardTestInput.IntoReach(Sheet, view.Button);
                 float scrolledBefore = Sheet.Stack.Scroll.scrollOffset.y;
                 Assert.Greater(scrolledBefore, 1000f, language + ": precondition: the stack is scrolled far down (" + scrolledBefore + ")");
                 yield return CardTestInput.Tap(view.Button.panel, view.Button.worldBound.center);
@@ -458,8 +458,7 @@ namespace TileStories.Tests
                 // - the card rises: the placed button, in its quiet look, reads and removes
                 Sheet.SetStop(SheetStopRule.Stop.Full);
                 yield return CardTestInput.Settle();
-                Sheet.Stack.Scroll.ScrollTo(view.Button);
-                yield return CardTestInput.Settle(0.2f);
+                yield return CardTestInput.IntoReach(Sheet, view.Button);
                 Assert.IsTrue(CardTestInput.IsShown(view.Note, view.Root), language + ": the line is there again at Full");
                 yield return Capture("PlaceInAr_Lamp_PlacedFull_" + language);
                 yield return CardTestInput.Tap(view.Button.panel, view.Button.worldBound.center);

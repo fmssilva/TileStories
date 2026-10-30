@@ -55,10 +55,8 @@ namespace TileStories.Tests
         {
             var block = StoryBlock();
             var preview = (ComposedBlockView)Sheet.Stack.ViewOfBlock(block.key);
-            Scroll.ScrollTo(preview.Root);
-            yield return CardTestInput.Settle(0.3f);
             preview.Motion.Finish();
-            yield return CardTestInput.TapInView(Scroll, preview.Preview);
+            yield return CardTestInput.TapInReach(Sheet, preview.Preview);
             yield return CardTestInput.Settle(0.3f);
             Assert.IsTrue(Sheet.FullView.IsOpen && Sheet.FullView.BlockKey == block.key, "a real tap on the preview opened the story's page");
             var page = (ComposedBlockView)Sheet.FullView.View;
@@ -188,8 +186,8 @@ namespace TileStories.Tests
             ComposedBlockView preview = null, page = null;
             var block = StoryBlock();
             preview = (ComposedBlockView)Sheet.Stack.ViewOfBlock(block.key);
-            Scroll.ScrollTo(preview.Root);
-            yield return CardTestInput.Settle(0.3f);
+            // - where the finger will tap it (the tap leaves the scroll there), then read the scroll Back must give back
+            yield return CardTestInput.IntoReach(Sheet, preview.Preview);
             float offset = Scroll.scrollOffset.y;
             yield return OpenStoryPage((p, g) => { preview = p; page = g; });
 

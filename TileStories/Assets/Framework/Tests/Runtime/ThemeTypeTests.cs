@@ -23,6 +23,9 @@ namespace TileStories.Tests
 
         private static ThemeType Type => ThemeController.Load(ThemeController.DefaultThemeKey).Type;
         private static FontAsset Ui(string key) => Type.fontLibrary.GetUiFont(key);
+        // The theme's halo twins of its two faces (ThemeUssGenerator writes them on the themed root)
+        private static readonly CustomStyleProperty<FontAsset> BodyHalo = new("--ts-font-body-halo");
+        private static readonly CustomStyleProperty<FontAsset> DisplayHalo = new("--ts-font-display-halo");
 
         [UnityTest]
         public IEnumerator EveryTextOfEveryScreen_DrawsTheBodyFace_AndExactlyTheDisplayRolesTheDisplayFace()
@@ -37,24 +40,55 @@ namespace TileStories.Tests
             var wrong = new List<string>();
             var documents = Object.FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
             Assert.GreaterOrEqual(documents.Length, 3, "precondition: the wall scene's screens (card, search, zoom)");
+            // - a display role reaches its own text and the texts inside it (the font is inherited)
+            bool IsDisplay(VisualElement text)
+            {
+                for (var e = text; e != null; e = e.parent) if (displayClasses.Any(e.ClassListContains)) return true;
+                return false;
+            }
+            int haloCopies = 0;
             foreach (var document in documents)
             {
+                // - the theme's halo twins, read where the theme declares its faces (the themed root, .ts-app), as the hero reads them
+                var app = document.rootVisualElement.ClassListContains("ts-app") ? document.rootVisualElement : document.rootVisualElement.Q(className: "ts-app");
+                FontAsset bodyHalo = null, displayHalo = null;
+                app?.customStyle.TryGetValue(BodyHalo, out bodyHalo);
+                app?.customStyle.TryGetValue(DisplayHalo, out displayHalo);
                 foreach (var text in document.rootVisualElement.Query<TextElement>().ToList())
                 {
                     if (string.IsNullOrEmpty(text.text) || text.resolvedStyle.display == DisplayStyle.None) continue;
-                    // - a display role reaches its own text and the texts inside it (the font is inherited)
-                    bool isDisplay = false;
-                    for (var e = (VisualElement)text; e != null && !isDisplay; e = e.parent) isDisplay = displayClasses.Any(e.ClassListContains);
                     var drawn = text.resolvedStyle.unityFontDefinition.fontAsset;
-                    var expected = isDisplay ? display : body;
+                    bool isDisplay;
+                    FontAsset expected;
+                    if (text.ClassListContains(HeroWordsOnPicture.HaloClass))
+                    {
+                        // - a halo copy of the hero's words (HeroWordsOnPicture's back label) draws the halo TWIN of the face of the word it
+                        //   lies under -- the wide SDF its glow needs lives only there; its word: the nearest shown label with its text that is
+                        //   not a copy
+                        TextElement front = null;
+                        for (var e = text.parent; e != null && front == null; e = e.parent)
+                            front = e.Query<TextElement>().Where(t => t.text == text.text && !t.ClassListContains(HeroWordsOnPicture.HaloClass)
+                                && t.resolvedStyle.display != DisplayStyle.None).First();
+                        Assert.IsNotNull(front, "precondition: the halo copy '" + Short(text.text) + "' lies under a word of the hero");
+                        isDisplay = IsDisplay(front);
+                        expected = isDisplay ? displayHalo : bodyHalo;
+                        Assert.IsNotNull(expected, "precondition: the theme names its " + (isDisplay ? "display" : "body") + " halo twin");
+                        haloCopies++;
+                    }
+                    else
+                    {
+                        isDisplay = IsDisplay(text);
+                        expected = isDisplay ? display : body;
+                        if (isDisplay) displayed++;
+                    }
                     checkedTexts++;
-                    if (isDisplay) displayed++;
                     if (drawn != expected)
                         wrong.Add(document.name + " '" + Short(text.text) + "' (" + string.Join(" ", text.GetClasses()) + "): " + (drawn != null ? drawn.name : "no font asset") + ", not " + expected.name);
                 }
             }
             Assert.Greater(checkedTexts, 100, "precondition: the open Lamp card, search and zoom hold many texts");
             Assert.Greater(displayed, 3, "precondition: the card's title and block headings are display roles");
+            Assert.Greater(haloCopies, 0, "precondition: the open Lamp's hero draws its words' halo copies (Words On Picture's default look)");
             Assert.IsEmpty(wrong, wrong.Count + " text(s) drawn in another face: " + string.Join("; ", wrong.Take(10)));
         }
 

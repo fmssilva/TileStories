@@ -264,6 +264,41 @@ namespace TileStories.Tests
                 }
             return (UIAccessibility.ContrastRatio(ink, worst), worst, count);
         }
+
+        // Each ink as SEEN over the darkest and the lightest a camera can show (the scene camera's clear colour behind the card, put back
+        // after): per backdrop one render with the inks and one with them made clear, each read in its own area (RingContrast). What a
+        // background-colour walk cannot see is on the render: the sheet's glass picture, the Top Band's painted fade, the plate
+        internal static IEnumerator SeenOverBackdrops(string name, System.Collections.Generic.IReadOnlyList<(VisualElement Ink, VisualElement Area)> inks,
+            System.Action<Color, VisualElement, (float Ratio, Color Worst, int InkPixels)> each)
+        {
+            var camera = Camera.main;
+            Assert.IsNotNull(camera, "precondition: a camera draws the backdrop behind the card");
+            Color kept = camera.backgroundColor;
+            var colours = inks.Select(i => i.Ink.resolvedStyle.color).ToList();
+            try
+            {
+                foreach (var backdrop in new[] { Color.black, Color.white })
+                {
+                    camera.backgroundColor = backdrop;
+                    Texture2D drawn = null, under = null;
+                    try
+                    {
+                        yield return GrabStill(name, null, r => drawn = r);
+                        foreach (var (ink, _) in inks) { ink.style.color = Color.clear; ink.MarkDirtyRepaint(); }
+                        yield return GrabStill(name + "_under", null, r => under = r);
+                        for (int i = 0; i < inks.Count; i++)
+                            each(backdrop, inks[i].Ink, RingContrast(drawn, under, ScreenRectOf(inks[i].Area, drawn), colours[i]));
+                    }
+                    finally
+                    {
+                        foreach (var (ink, _) in inks) { ink.style.color = StyleKeyword.Null; ink.MarkDirtyRepaint(); }
+                        if (drawn != null) Object.Destroy(drawn);
+                        if (under != null) Object.Destroy(under);
+                    }
+                }
+            }
+            finally { camera.backgroundColor = kept; }
+        }
     }
 
     // The gallery part of the set: block looks over the token colours (hero header, text, status ramp, media, a quiz, the audio player), the

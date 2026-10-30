@@ -170,6 +170,11 @@
     font-size: var(--ts-size-quote);
 }
 
+/* in an open section too: the section's body size (PoiCard.uss, three classes) is the minimal quote's, never the serif one's */
+.card-section--open > .card-block-slot--open .card-quote--serif .card-quote__paragraph {
+    font-size: var(--ts-size-quote);
+}
+
 .card-quote__author {
     font-size: var(--ts-size-caption);
     -unity-font-style: bold;

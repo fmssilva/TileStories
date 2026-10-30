@@ -417,8 +417,7 @@ namespace TileStories.Tests
             CollectionAssert.Contains(Card.PreviewService.HeldKeys, "block_59", "Media shows: the inline model holds its preview slot");
             var video = Stack.ViewOfBlock("block_56") as VideoBlockView;
             Assert.IsNotNull(video, "precondition: the inline video is bound while its page shows");
-            Scroll.ScrollTo(Stack.SlotOfBlock("block_56"));
-            yield return CardTestInput.Settle(0.4f);
+            yield return CardTestInput.IntoReach(Sheet, video.Panel.PlayOverlay);
             yield return CardTestInput.Tap(video.Panel.PlayOverlay.panel, video.Panel.PlayOverlay.worldBound.center);
             yield return null;
             Assert.AreEqual(CardVideoState.Playing, _video.State, "a real tap played the video");

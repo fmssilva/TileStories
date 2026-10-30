@@ -253,7 +253,7 @@ namespace TileStories.Tests
                     entry.Kind + " '" + label.text + "' reads");
             yield return Render(render + "_compact");
 
-            yield return CardTestInput.TapInView(stack.Scroll, row.Toggle);
+            yield return CardTestInput.TapInReach(harness.Sheet, row.Toggle);
             yield return CardTestInput.Settle(0.2f);
             var view = stack.ViewOfBlock(key);
             Assert.IsNotNull(view, entry.Kind + ": a real tap opened it");
@@ -271,7 +271,7 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.2f);
             yield return Render(render + "_expanded");
 
-            yield return CardTestInput.TapInView(stack.Scroll, row.Toggle);
+            yield return CardTestInput.TapInReach(harness.Sheet, row.Toggle);
             Assert.IsNull(stack.ViewOfBlock(key), entry.Kind + ": a second real tap closed it");
             Assert.AreEqual(0, stack.HeldMediaOf(key), entry.Kind + ": every file given back");
         }

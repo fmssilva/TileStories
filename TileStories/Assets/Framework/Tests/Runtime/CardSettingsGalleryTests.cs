@@ -115,14 +115,18 @@ namespace TileStories.Tests
             Assert.AreEqual(CardTestInput.TokenPx("--ts-chrome-mark"), glyph.worldBound.width, onePixel + 0.01f, "a 16 pt mark");
             Assert.AreEqual(disc.worldBound.center.y, glyph.worldBound.center.y, onePixel, "centred in the disc");
             Assert.AreEqual(1.5f, glyph.worldBound.width * CardIcons.StrokeUnits(glyph.Kind), 0.01f, "v5's thin 1.5 stroke");
-            // - off the hero (this entry has no picture): the card's ink on the disc's glass over the bar's, over the darkest and the lightest
-            //   backdrop
+            // - off the hero (this entry has no picture): the card's ink on its disc AS SEEN on the render, over the darkest and the lightest
+            //   camera behind the card -- the disc's glass lies on the sheet's ground, drawn as a picture a colour walk does not see
             Assert.IsFalse(Sheet.Root.ClassListContains(BlockStackView.BarsOnHeroClass), "precondition: the bar is off the hero");
-            foreach (var backdrop in new[] { Color.black, Color.white })
+            CardTestInput.HoldSectionsStill(Sheet);
+            Sheet.Stack.Light.Clock = () => 0f;
+            Sheet.Stack.Light.Tick();
+            yield return ThemePixelSet.SeenOverBackdrops("settings_" + mode, new[] { ((VisualElement)glyph, disc) }, (backdrop, _, read) =>
             {
-                float contrast = CardTestInput.Contrast(glyph.resolvedStyle.color, CardTestInput.GroundOver(disc, CardTestInput.GroundOver(Sheet.Stack.HeaderSlot, backdrop, Sheet.Layer), Sheet.Layer));
-                Assert.GreaterOrEqual(contrast, 7f, mode + ": the mark reads at 7:1 on its glass over " + backdrop + " (" + contrast.ToString("F2") + ", D1)");
-            }
+                Assert.Greater(read.InkPixels, 0, "precondition: the mark draws pixels over " + backdrop);
+                Assert.GreaterOrEqual(read.Ratio, 7f, mode + ": the mark reads at 7:1 on its glass over " + backdrop + " as seen (" + read.Ratio.ToString("F2")
+                    + ":1, worst pixel " + (Color32)read.Worst + ", D1)");
+            });
 
             // - v5's places: the X at the left, settings at the right, level, each its inset from the card's side
             Rect close = Sheet.CloseButton.worldBound, settings = button.worldBound, card = Sheet.Root.worldBound;

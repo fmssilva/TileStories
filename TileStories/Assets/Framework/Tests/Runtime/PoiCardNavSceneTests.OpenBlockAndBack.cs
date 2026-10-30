@@ -130,7 +130,7 @@ namespace TileStories.Tests
 
             Sheet.SetStop(SheetStopRule.Stop.Half);
             yield return CardTestInput.Settle();
-            yield return CardTestInput.TapInView(Scroll, OpenBlockButton(actions, targets[0]).Button);
+            yield return CardTestInput.TapInReach(Sheet, OpenBlockButton(actions, targets[0]).Button);
             Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop, "Jump Opens Card To = Full: the tap raised the card");
             yield return Landed();
             Assert.AreEqual(0f, TopInViewport(targets[0]), OnePixel, targets[0] + "'s slot top meets the viewport's top (offset " + Scroll.scrollOffset.y + ")");
@@ -138,7 +138,7 @@ namespace TileStories.Tests
             Assert.AreEqual(targets[0], jump.BlockKey, "nav_jump: the block landed on");
             Assert.AreEqual(BuiltInBlocks.ActionsKind, jump.Variant, "nav_jump: the asking block's kind");
 
-            yield return CardTestInput.TapInView(Scroll, OpenBlockButton(actions, targets[1]).Button);
+            yield return CardTestInput.TapInReach(Sheet, OpenBlockButton(actions, targets[1]).Button);
             yield return Landed();
             Assert.AreEqual(Mathf.Min(Sheet.Stack.LandingTop(Slot(targets[1])), Range), Scroll.scrollOffset.y, OnePixel, targets[1] + ": landed, clamped to the range");
             Assert.AreEqual(targets[1], NavJumps.Last().BlockKey);

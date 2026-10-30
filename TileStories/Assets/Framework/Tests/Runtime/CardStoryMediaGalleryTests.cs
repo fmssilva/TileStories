@@ -103,7 +103,7 @@ namespace TileStories.Tests
         private IEnumerator TapPreview(ComposedBlockView preview)
         {
             preview.Motion.Finish();
-            yield return CardTestInput.TapInView(_harness.Sheet.Stack.Scroll, preview.Preview);
+            yield return CardTestInput.TapInReach(_harness.Sheet, preview.Preview);
             yield return CardTestInput.Settle(0.3f);
             var full = _harness.Sheet.FullView;
             Assert.IsTrue(full.IsOpen, "a real tap on the preview opened the full view");

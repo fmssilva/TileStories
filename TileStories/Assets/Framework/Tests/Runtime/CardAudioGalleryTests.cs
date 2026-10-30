@@ -493,9 +493,7 @@ namespace TileStories.Tests
                 wallSetup: wall => wall.card_settings.container.keep_audio_on_close = false);
             System.Collections.Generic.List<AudioGuideBlockView> views = null;
             yield return ShowCustom(entry, v => views = v);
-            _harness.Sheet.Stack.Scroll.ScrollTo(_harness.Sheet.Stack.SlotOf(views[0]));
-            yield return CardTestInput.Settle(0.15f);
-            yield return Tap(views[0].PlayButton);
+            yield return CardTestInput.TapInReach(_harness.Sheet, views[0].PlayButton);
             Assert.AreEqual(CardAudioState.Playing, Audio.State);
             yield return Tap(_harness.Sheet.CloseButton);
             Assert.AreEqual(CardAudioState.Idle, Audio.State, "the card closed: its audio stopped with it");

@@ -82,7 +82,7 @@ finding id; there is no Quarantine category.
 |---|---|---|---|
 | -- | PoiCardHeroSceneTests.EveryWordOfTheHero_... (16) | FIXED in Premium P1: v5's words shade (ramp + the --ts-scrim-hero floor); 8.29-19.65:1 on the render | -- |
 | -- | PoiCardPlaceInArSceneTests (TheLamp_ThePlacedArch..., KeepModelOnSwitch_...) | F1 FIXED in Premium P1: FloatingSlotRule puts the slot under the chrome row when it cannot rest above the sheet; guarded by WithAModelPlaced_AtEveryStop_AFingerOnTheXOrSettingsLandsOnThatMark (panel.Pick at Peek / Half / Full) | -- |
-| -- | CardSettingsGalleryTests (the settings mark) | F2 FIXED in Premium P1: the sliders mark in a glass disc, >= 7:1 over black and white in both modes (the dark glass floor raised 0.66 -> 0.72); over the hero 8.48-15.30:1 on the render (PoiCardChromeMarksSceneTests) | -- |
+| -- | CardSettingsGalleryTests (the settings mark) | F2 FIXED in Premium P1: the sliders mark in a glass disc, >= 7:1 as seen on the render over a black and a white camera in both modes; over the hero 8.48-15.30:1 on the render (PoiCardChromeMarksSceneTests) | -- |
 | -- | CardLightSceneTests.TheRimLight_RidesTheWholeMetalBand_... | F3 FIXED in Premium P1: the band was read back from a style pass that had not run (and the theme resolver held no lengths); CardLight now asks the theme (ThemeResolver.TryPixels) on every paint | -- |
 | x1 | PoiCardTapZoomTests.TheLampsTrueFalseStatement_... | F4: vertical and sideways halves never pass in one run since S4a | the next card block |
 | -- | CardNavGalleryTests (fab_dial cases) | F5 FIXED in Premium P1: the icon strip's marked-tab glass (two classes) out-ranked the dial pill's surface; the dial's words now asserted at 7:1 | -- |

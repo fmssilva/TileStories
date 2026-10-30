@@ -267,8 +267,7 @@ namespace TileStories.Tests
             var stack = Card.Sheet.Stack;
             var gallery = System.Linq.Enumerable.First(System.Linq.Enumerable.OfType<GalleryBlockView>(stack.BoundViews),
                 g => g.Shots.Count >= 2);
-            stack.Scroll.ScrollTo(gallery.Shots[0].Box);
-            yield return CardTestInput.Settle(0.2f);
+            yield return CardTestInput.IntoReach(Card.Sheet, gallery.Shots[0].Box);
             BeginTestTime();
             yield return Tap(ScreenPointOf(gallery.Shots[0].Box));
             yield return CardTestInput.Settle(0.2f);
@@ -424,12 +423,13 @@ namespace TileStories.Tests
             var story = sheet.Stack.ViewOfBlock(storyKey) as ComposedBlockView;
             Assert.IsNotNull(story, "precondition: The Painting's story is on its card");
             var scroll = sheet.Stack.Scroll;
-            scroll.ScrollTo(story.Root);
-            yield return CardTestInput.Settle(0.3f);
+            // - into reach first (the Navigation Bar floats over the stack's foot, where a bare ScrollTo leaves the row), then read the scroll
+            yield return CardTestInput.IntoReach(sheet, story.OpenRow);
             story.Motion.Finish();
+            yield return null;
             float offset = scroll.scrollOffset.y;
             Assert.Greater(offset, 0f, "precondition: the card is scrolled down to its story");
-            Assert.IsTrue(scroll.contentViewport.worldBound.Contains(story.OpenRow.worldBound.center), "precondition: the Open Row is in view");
+            Assert.IsTrue(CardTestInput.ReachableStack(sheet).Contains(story.OpenRow.worldBound.center), "precondition: the Open Row is where a finger reaches");
             float window = Session.ZoomSettings.double_tap_window_s;
             BeginTestTime();
 

@@ -156,14 +156,7 @@ namespace TileStories.Tests
                     Assert.LessOrEqual(subtitle.worldBound.yMax, card.yMax + 0.5f, "the whole subtitle is visible at full");
             }
 
-            // accessibility: contrast from the resolved (token) colours, the X's size
-            // - the bar's own ground (the sheet itself is clear since _3.3 P4.4b: the glass shows between blocks)
-            Color surface = CardTestInput.EffectiveBackground(title);
-            Assert.GreaterOrEqual(CardTestInput.Contrast(title.resolvedStyle.color, surface), UIAccessibility.MinRatioNormalText, "the bar's title on the card");
-            // - the plate's line sits on the card; a picture's words are measured over the scrim on the render (PoiCardHeroSceneTests)
-            var sub = header.HeroPart.Q<Label>("card-header-subtitle");
-            if (!header.HasPicture)
-                Assert.GreaterOrEqual(CardTestInput.Contrast(sub.resolvedStyle.color, surface), UIAccessibility.MinRatioNormalText, "subtitle (ink-2) on the card");
+            // accessibility: the X's size and name; the contrast below, as SEEN
             Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(sheet.CloseButton.worldBound.width, sheet.CloseButton.worldBound.height),
                 "the X is " + sheet.CloseButton.worldBound.size + ", below 44x44");
             Assert.AreEqual("Close", sheet.CloseButton.tooltip, "the X is named from the framework string table");
@@ -180,12 +173,42 @@ namespace TileStories.Tests
                 Assert.AreEqual(Color.white, sheet.CloseGlyph.resolvedStyle.color, "over the picture: the white mark");
                 Assert.AreEqual(1f, sheet.TopShade.resolvedStyle.opacity, 0.01f, "...under the top shade");
             }
-            else
+
+            // - the contrast as SEEN on the render, over the darkest and the lightest camera behind the card: since _3.3 P4.4b the bar is clear
+            //   and what the words and the X lie on is drawn as pictures (the sheet's glass, the Top Band's fade, the plate) -- a colour walk
+            //   up the parents finds none of them
+            // - the bar's title only while the bar shows it (Peek, or the hero's title scrolled away): hidden, it draws nothing to read
+            var seen = new System.Collections.Generic.List<(VisualElement Ink, VisualElement Area)>();
+            if (header.BarTitleShown) seen.Add((title, title));
+            else Assert.AreEqual(0f, title.resolvedStyle.opacity, 0.01f, "the bar's title is hidden while the hero's shows: nothing to read");
+            // - the plate's line where a visitor sees it bare (a picture's words are measured over the picture: PoiCardHeroSceneTests)
+            var sub = header.HeroPart.Q<Label>("card-header-subtitle");
+            if (!header.HasPicture && CardTestInput.IsShown(sub, sheet.Root) && CardTestInput.VisibleStack(sheet).Contains(sub.worldBound.center))
+                seen.Add((sub, sub));
+            // - off the hero the X on its glass at 7:1 (D1); over the picture its white mark on the dark hero glass is measured on the wall's
+            //   renders (PoiCardChromeMarksSceneTests)
+            if (!onHero) seen.Add((sheet.CloseGlyph, disc));
+            if (seen.Count > 0)
             {
-                // - the disc's glass over the bar's, over the darkest and the lightest backdrop: the mark keeps 7:1 on both (D1)
-                foreach (var backdrop in new[] { Color.black, Color.white })
-                    Assert.GreaterOrEqual(CardTestInput.Contrast(sheet.CloseGlyph.resolvedStyle.color, CardTestInput.GroundOver(disc, CardTestInput.GroundOver(sheet.Stack.HeaderSlot, backdrop, sheet.Layer), sheet.Layer)), 7f,
-                        "the X reads at 7:1 on its glass over " + backdrop);
+                // - a still frame: the open sections' drift, the Locate Button's float, the card's light and the hero's pan / zoom held where
+                //   they are (the hero's clock handed back after: its view is pooled for the next entry)
+                CardTestInput.HoldSectionsStill(sheet);
+                sheet.Stack.Light.Clock = () => 0f;
+                sheet.Stack.Light.Tick();
+                var heroClock = header.Clock;
+                float heroNow = heroClock();
+                header.Clock = () => heroNow;
+                try
+                {
+                    yield return ThemePixelSet.SeenOverBackdrops("Card_" + entry.Name, seen, (backdrop, ink, read) =>
+                    {
+                        string what = ink == title ? "the bar's title" : ink == sub ? "the plate's line" : "the X";
+                        float bar = ink == sheet.CloseGlyph ? 7f : UIAccessibility.MinRatioNormalText;
+                        Assert.Greater(read.InkPixels, 0, "precondition: " + what + " draws pixels over " + backdrop);
+                        Assert.GreaterOrEqual(read.Ratio, bar, what + " reads as seen over " + backdrop + ": " + read.Ratio.ToString("F2") + ":1 (worst pixel " + (Color32)read.Worst + ")");
+                    });
+                }
+                finally { header.Clock = heroClock; }
             }
 
             yield return Render("Card_" + entry.Name);
@@ -330,13 +353,11 @@ namespace TileStories.Tests
             public void Raise(CardEvent cardEvent) => Raised.Add(cardEvent);
         }
 
-        // Scroll `target` into view, then a real tap on its centre: what a visitor does when the block is taller than what shows
-        // (an answer's verdict pushes Previous / Next below the visible part of the card)
+        // Scroll `target` where a finger reaches, then a real tap on its centre: what a visitor does when the block is taller than what
+        // shows (an answer's verdict pushes Previous / Next below the visible part of the card; the Navigation Bar floats over its foot)
         private IEnumerator ScrollAndTap(VisualElement target)
         {
-            _harness.Sheet.Stack.Scroll.ScrollTo(target);
-            yield return CardTestInput.Settle(0.15f);
-            yield return CardTestInput.Tap(target.panel, target.worldBound.center);
+            yield return CardTestInput.TapInReach(_harness.Sheet, target);
             yield return null;
         }
 

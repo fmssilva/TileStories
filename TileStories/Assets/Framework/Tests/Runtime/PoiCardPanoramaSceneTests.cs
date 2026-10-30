@@ -86,8 +86,7 @@ namespace TileStories.Tests
             Assert.IsFalse(DeviceAttitude.Available, "precondition: no attitude sensor: the gyro look behaves as dragging");
             yield return OpenFull("lamp");
             var teaser = Panoramas[1];
-            Sheet.Stack.Scroll.ScrollTo(Sheet.Stack.SlotOf(teaser));
-            yield return CardTestInput.Settle(0.2f);
+            yield return CardTestInput.IntoReach(Sheet, teaser.TeaserOpenButton);
             var scroll = Sheet.Stack.Scroll;
             float scrollOffset = scroll.scrollOffset.y;
             Assert.Greater(scrollOffset, 0f, "precondition: the card is really scrolled to the teaser");

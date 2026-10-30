@@ -45,8 +45,7 @@ namespace TileStories.Tests
 
             yield return OpenFull("lamp");
             var inline = Sheet.Stack.BoundViews.OfType<VideoBlockView>().Single(v => v.Display == CardOptions.DisplayInline);
-            Sheet.Stack.Scroll.ScrollTo(Sheet.Stack.SlotOf(inline));
-            yield return CardTestInput.Settle(0.2f);
+            yield return CardTestInput.IntoReach(Sheet, inline.Panel.PlayOverlay);
             yield return CardTestInput.Tap(inline.Panel.PlayOverlay.panel, inline.Panel.PlayOverlay.worldBound.center);
             Assert.AreEqual(CardVideoState.Playing, Card.Video.State, "a real tap started it");
             Assert.AreEqual("lisbon_square_castle_55s", player.clip.name, "the real clip");

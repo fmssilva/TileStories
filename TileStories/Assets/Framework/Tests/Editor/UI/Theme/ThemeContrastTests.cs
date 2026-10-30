@@ -19,9 +19,9 @@ namespace TileStories.Tests
         public static readonly string[] TextRoles = { "--ts-ink", "--ts-ink-2", "--ts-ink-3", "--ts-accent-text", "--ts-accent", "--ts-accent-shine", "--ts-correct", "--ts-wrong" };
         // The body text roles APCA judges
         public static readonly string[] BodyRoles = { "--ts-ink", "--ts-ink-2" };
-        // Marks that carry meaning without words: a meaningful border, the focus ring, an accent outline, the status fallback rings
+        // Marks that carry meaning without words: a meaningful border, an accent outline, the status fallback rings
         public static readonly string[] MarkRoles =
-            { "--ts-line", "--ts-focus", "--ts-accent", "--ts-status-0", "--ts-status-1", "--ts-status-2", "--ts-status-3", "--ts-status-4" };
+            { "--ts-line", "--ts-accent", "--ts-status-0", "--ts-status-1", "--ts-status-2", "--ts-status-3", "--ts-status-4" };
         public static readonly string[] Families = { "meta", "about", "media", "guides", "stories", "ar", "play", "visit", "community", "navigation" };
 
         // One measured pair: what, its value, the bar it must clear

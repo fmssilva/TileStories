@@ -75,8 +75,9 @@ namespace TileStories.Tests
             yield return CardTestInput.Tap(target.panel, target.worldBound.center);
         }
 
-        // Scroll `target` into the card's visible part, check it is there, then tap it for real (CardTestInput.TapInView)
-        private IEnumerator TapInView(VisualElement target) => CardTestInput.TapInView(_harness.Sheet.Stack.Scroll, target);
+        // Bring `target` where a finger reaches on the card's stack (above the floating Navigation Bar and Locate Button), then tap it for
+        // real (CardTestInput.TapInReach)
+        private IEnumerator TapInReach(VisualElement target) => CardTestInput.TapInReach(_harness.Sheet, target);
 
         // The colour a render shows in the middle of `surface`
         private static IEnumerator ColourIn(VisualElement surface, System.Action<Color> got)
@@ -262,9 +263,7 @@ namespace TileStories.Tests
             Assert.Less(shortWords, 1.5f * line, "precondition: the measure tells one line from two (a short name at the same width is one line)");
             // - halfway between one line and two: a second line adds a line's advance (18.5 of a 19 px first line in Atkinson), not a whole box
             Assert.Greater(words, 1.5f * line, "a long name wraps onto a second line (" + words + " px of text, one line " + line + ")");
-            _harness.Sheet.Stack.Scroll.ScrollTo(panel.ChapterButtons[7]);
-            yield return CardTestInput.Settle(0.15f);
-            yield return Tap(panel.ChapterButtons[7]);
+            yield return TapInReach(panel.ChapterButtons[7]);
             Assert.AreEqual(90f, Video.Position, 0.01f, "the last button: 1:30");
             yield return CardGalleryChecks.Render("Card_video_chapters_longchapters");
         }
@@ -282,16 +281,16 @@ namespace TileStories.Tests
             var scroll = _harness.Sheet.Stack.Scroll;
             _harness.Sheet.SetStop(SheetStopRule.Stop.Half);
             yield return CardTestInput.Settle();
-            yield return TapInView(view.Panel.PlayOverlay);
+            yield return TapInReach(view.Panel.PlayOverlay);
             Assert.AreEqual(1, Output.LoadCount, "the real tap on play loaded the clip");
             _harness.AdvanceVideo(3f);
-            yield return TapInView(view.Panel.CaptionsButton);
-            scroll.ScrollTo(view.Panel.FullScreenButton);
-            yield return CardTestInput.Settle(0.15f);
+            yield return TapInReach(view.Panel.CaptionsButton);
+            // - into reach, read the scroll Back must give back, then the tap (a second scroll between them would move what is read)
+            yield return CardTestInput.IntoReach(_harness.Sheet, view.Panel.FullScreenButton);
             float offset = scroll.scrollOffset.y;
             Assert.Greater(offset, 0f, "precondition: the card is scrolled to the video");
 
-            yield return TapInView(view.Panel.FullScreenButton);
+            yield return Tap(view.Panel.FullScreenButton);
             yield return CardTestInput.Settle(0.15f);
             yield return CardGalleryChecks.Render("Card_video_fullscreen_opened");
             var takeover = _harness.Sheet.Takeover;
@@ -374,21 +373,15 @@ namespace TileStories.Tests
             yield return ShowCustom(entry);
             var video = _harness.Sheet.Stack.BoundViews.OfType<VideoBlockView>().Single();
             var audioView = _harness.Sheet.Stack.BoundViews.OfType<AudioGuideBlockView>().Single();
-            _harness.Sheet.Stack.Scroll.ScrollTo(_harness.Sheet.Stack.SlotOf(audioView));
-            yield return CardTestInput.Settle(0.15f);
-            yield return Tap(audioView.PlayButton);
+            yield return TapInReach(audioView.PlayButton);
             Assert.AreEqual(CardAudioState.Playing, _harness.AudioService.State, "precondition: the audio guide plays");
 
-            _harness.Sheet.Stack.Scroll.ScrollTo(_harness.Sheet.Stack.SlotOf(video));
-            yield return CardTestInput.Settle(0.15f);
-            yield return Tap(video.Panel.PlayOverlay);
+            yield return TapInReach(video.Panel.PlayOverlay);
             Assert.AreEqual(CardVideoState.Playing, Video.State);
             Assert.AreEqual(CardAudioState.Paused, _harness.AudioService.State, "the video started: the audio guide paused");
             Assert.AreEqual(CardIcons.Shape.Play, audioView.PlayGlyph.Kind, "its button offers play again");
 
-            _harness.Sheet.Stack.Scroll.ScrollTo(_harness.Sheet.Stack.SlotOf(audioView));
-            yield return CardTestInput.Settle(0.15f);
-            yield return Tap(audioView.PlayButton);
+            yield return TapInReach(audioView.PlayButton);
             Assert.AreEqual(CardAudioState.Playing, _harness.AudioService.State);
             Assert.AreEqual(CardVideoState.Paused, Video.State, "the audio started: the video paused");
         }
@@ -424,9 +417,7 @@ namespace TileStories.Tests
             yield return CardGalleryChecks.Render("Card_header_video_loop_playing");
 
             var film = _harness.Sheet.Stack.BoundViews.OfType<VideoBlockView>().Single();
-            _harness.Sheet.Stack.Scroll.ScrollTo(_harness.Sheet.Stack.SlotOf(film));
-            yield return CardTestInput.Settle(0.15f);
-            yield return Tap(film.Panel.PlayOverlay);
+            yield return TapInReach(film.Panel.PlayOverlay);
             Assert.IsFalse(Video.PlayingLoop, "the visitor's video took the ONE player");
             Assert.IsFalse(header.LoopShowsFrames, "the header shows its poster meanwhile");
             yield return Tap(film.Panel.PlayButton);
