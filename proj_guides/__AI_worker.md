@@ -25,7 +25,9 @@ TEST PLAN: full EditMode (with and without the split assembly, F11); CORE once (
 PART 1 -- F1, retire the old-navigation tests exactly as 2.1 lists (the 129 PlayMode + 31 EditMode skipped tests, the whole files,
 the `*OldNavigationTests` classes, the empty skeletons, `TestSkips.cs`, the NavigationElements cases, the Editor tab's old sweep). The
 kept nav elements' code stays; their rebuild will write new tests on the bar's pattern (the `_3.3` [rebuild] TODOs say so -- add that
-line to each). Structure map + `_Test_Suite_1.md` rows.
+line to each). Also F10 (developer, 2026-10-30): delete SectionSheetMeasureSceneTests (it measured the old section sheets'
+stops and landings; the NavBar / Sections fixtures test the landings today) and CardLightMeasureSceneTests (a one-off cost probe of the
+rim light; its cost.txt stays as evidence, a later device / profiler session measures performance). Structure map + `_Test_Suite_1.md` rows.
 PART 2 -- F2, re-aim CORE: the NavBar class tag onto 2-3 methods, SectionSheetScene's off, the Open sections' cheapest default test on;
 CORE guards the SHIPPED default. `_Test_Suite_1.md` section 3 rewritten as current truth.
 PART 3 -- F4, the per-component selection: PROVE `group_names` selects one kind's gallery cases (run it, show the count); tag
