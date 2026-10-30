@@ -9,8 +9,19 @@ using UnityEngine.UIElements;
 
 namespace TileStories.Tests
 {
-    // PoiCardPagesSceneTests's shared ground: its set-up and helpers, so its own tests and its old-navigation ones stand on one fixture
-    public abstract class PoiCardPagesSceneFixture : SearchSceneFixture
+    // Phase B of step 14 (_3.2 section 6.1, the pages layout) on the REAL LivingRoomScene with real touches and the card's REAL owners (the
+    // preview stage, the video owner over a stand-in picture device). The layout is pushed through the live seam, as the POI Editor's
+    // Layout row does. Asserted on the stack, the controller, the pager and the OWNERS, never on pixels:
+    //   - THE RULE: a vertical drag inside a page scrolls it and never turns it; a sideways drag turns it and never scrolls it; a diagonal is
+    //     judged once, as it leaves the slop, and stays what it was judged (a mostly-sideways one never scrolls however far it then goes up, a
+    //     mostly-vertical one never turns however far it then goes sideways)
+    //   - SwipePageRule on the real card: a short swipe slides back, the first and last pages go no further, one page per swipe; every
+    //     turn reports one nav_jump
+    //   - a page left lets its media go (the preview slot, the playing video), exactly as a tab put away
+    //   - a part that drags by itself keeps its drags: the gallery's strip scrolls, the 3D stage turns, the page stays
+    //   - the arriving page binds nothing mid-swipe, listing its blocks as compact rows until the turn
+    //   - a card with nothing to switch between scrolls
+    public class PoiCardPagesSceneTests : SearchSceneFixture
     {
         protected const string Lamp = "lamp";
 
@@ -25,8 +36,6 @@ namespace TileStories.Tests
         protected CardPagerView Pager => Sheet.Pager;
 
         protected ScrollView Scroll => Stack.Scroll;
-
-        protected FamilyPagerNavView FamilyPager => Sheet.Slots.TopView as FamilyPagerNavView;
 
         protected float OnePixel => Sheet.Layer.panel.visualTree.layout.height / Screen.height;
 
@@ -194,22 +203,7 @@ namespace TileStories.Tests
         {
             for (int i = 1; i <= frames; i++) yield return Vector2.Lerp(from, to, (float)i / frames);
         }
-    }
 
-    // Phase B of step 14 (_3.2 section 6.1, the pages layout and its Family Pager) on the REAL LivingRoomScene with real touches and the
-    // card's REAL owners (the preview stage, the video owner over a stand-in picture device). The layout is pushed through the live seam, as
-    // the POI Editor's Layout row does. Asserted on the stack, the controller, the pager and the OWNERS, never on pixels:
-    //   - THE RULE: a vertical drag inside a page scrolls it and never turns it; a sideways drag turns it and never scrolls it; a diagonal is
-    //     judged once, as it leaves the slop, and stays what it was judged (a mostly-sideways one never scrolls however far it then goes up, a
-    //     mostly-vertical one never turns however far it then goes sideways)
-    //   - SwipePageRule on the real card: a short swipe slides back, the first and last pages go no further, one page per swipe
-    //   - the Family Pager: names the page shown (words, icon, place), real taps on its chevrons turn one page, none at the ends
-    //   - a jump from a Bottom Bar slot lands its page; every turn reports one nav_jump (pages / family_pager)
-    //   - a page left lets its media go (the preview slot, the playing video), exactly as a tab put away
-    //   - a part that drags by itself keeps its drags: the gallery's strip scrolls, the 3D stage turns, the page stays
-    //   - a card with nothing to switch between scrolls; renders at 390 px in English and Portuguese
-    public class PoiCardPagesSceneTests : PoiCardPagesSceneFixture
-    {
         // ---------------- the rule that must not break ----------------
 
         [UnityTest]
@@ -560,157 +554,6 @@ namespace TileStories.Tests
             Assert.AreEqual(1, Page, "the page turned");
             Assert.IsEmpty(Pager.NextRows, "the teaser is cleared once the turn is done");
             AssertShowsOnly(1, "after the turn");
-        }
-    }
-
-    // PoiCardPagesSceneTests's tests whose subject is an old navigation element: they wait for its rebuild on the Navigation Bar's pattern
-    [Ignore(TestSkips.OldNavigationElements)]
-    public class PoiCardPagesSceneOldNavigationTests : PoiCardPagesSceneFixture
-    {
-        // ---------------- the Family Pager, the spy, other elements ----------------
-
-        [UnityTest]
-        public IEnumerator TheFamilyPager_NamesThePageShown_ItsChevronsTurnOnePage_AndTheNextPagePeeksAtTheEdge()
-        {
-            yield return UsePages();
-            yield return OpenFull(Lamp);
-            Assert.IsNotNull(FamilyPager, "precondition: the Family Pager is drawn");
-            float touch = CardTestInput.TokenPx("--ts-touch-target");
-            float peek = CardTestInput.TokenPx("--ts-page-peek");
-            // - the words the card reads, from the same tables (expected values come from their source, 40-testing 4.2.4b)
-            var strings = new CardStrings(Card.StringTable.Entries(), CardStringSources.Shared.Entries(), null, "en", "en");
-            for (int expected = 0; expected < 3; expected++)
-            {
-                var section = Nav.Model.Sections[expected];
-                Assert.AreEqual(expected, Page);
-                Assert.AreEqual(expected, Nav.Current, "the spy names the page shown");
-                Assert.AreEqual(expected, FamilyPager.CurrentIndex, "and the pager follows the spy");
-                // - _3.3 R16: the page's opener is its title, named in the visitor's words; the pager keeps only its place
-                var opener = Sheet.Stack.Sheets.All.First(s => s.Look.Shown).Opener;
-                Assert.AreEqual(strings.Get(section.LabelKey), opener.Name.text, "the page's opener names the section in the visitor's words");
-                Assert.AreEqual(DisplayStyle.None, FamilyPager.NameRow.resolvedStyle.display, "the pager says no name: the opener does");
-                StringAssert.StartsWith((expected + 1).ToString(), FamilyPager.Position.text, "its place: " + FamilyPager.Position.text);
-                StringAssert.EndsWith(Nav.Model.Sections.Count.ToString(), FamilyPager.Position.text);
-                // - the next page's cue: its words, a peek's width inside the viewport's right edge
-                var next = Nav.Model.Sections[expected + 1];
-                Assert.AreEqual(strings.Get(next.LabelKey), Pager.PeekWords.text, "the peek names the NEXT page");
-                var viewport = Scroll.contentViewport.worldBound;
-                Assert.AreEqual(peek, viewport.xMax - Pager.Peek.worldBound.xMin, OnePixel, "a peek's width of it shows at the edge");
-                foreach (var chevron in new[] { FamilyPager.Previous, FamilyPager.Next })
-                    Assert.IsTrue(chevron.worldBound.width >= touch - 0.5f && chevron.worldBound.height >= touch - 0.5f,
-                        chevron.name + " is a whole touch target: " + chevron.worldBound);
-
-                yield return CardTestInput.Tap(FamilyPager.Next.panel, FamilyPager.Next.worldBound.center);
-                yield return Rested();
-                Assert.AreEqual(BuiltInNavElements.FamilyPager, NavJumps.Last().Variant, "a chevron reports itself");
-            }
-            Assert.AreEqual(3, Page, "three real taps on the right chevron: three pages on");
-            AssertShowsOnly(3, "after the chevrons");
-            AssertLanded(Nav.Model.Sections[3].Targets[0], "the page's first block");
-
-            yield return CardTestInput.Tap(FamilyPager.Previous.panel, FamilyPager.Previous.worldBound.center);
-            yield return Rested();
-            Assert.AreEqual(2, Page, "the left chevron: one page back");
-
-            // - a real drag inside the page: it scrolls, the spy and the pager stay on it
-            var viewportNow = Scroll.contentViewport.worldBound;
-            if (Range > 20f)
-            {
-                yield return CardTestInput.TouchDrag(Sheet.Root.panel, new Vector2(viewportNow.center.x, viewportNow.yMin + viewportNow.height * 0.8f),
-                    new Vector2(0f, -viewportNow.height * 0.4f), frames: 16);
-                yield return CardTestInput.Settle(0.5f);
-            }
-            Assert.AreEqual(2, Nav.Current, "the spy never leaves the page shown");
-            Assert.AreEqual(2, FamilyPager.CurrentIndex);
-        }
-
-        [UnityTest]
-        public IEnumerator AJumpFromABottomBarSlot_TurnsToItsPage_AndLandsItsFirstBlock()
-        {
-            yield return UsePages(nav => nav.bottom = BuiltInNavElements.BarSheet);
-            yield return OpenFull(Lamp);
-            var bar = Sheet.Slots.BottomView as BottomBarNavView;
-            Assert.IsNotNull(bar, "precondition: the Bar With Kinds is drawn");
-            Assert.AreEqual(BuiltInNavElements.FamilyPager, Sheet.Slots.TopKey, "the pager stays at the top beside a bottom bar");
-            // - _3.3 S4a: the bottom bar is chrome and waits for the hero -- read just past it before tapping a slot
-            yield return CardTestInput.PastTheHero(Sheet);
-            Assert.IsTrue(Sheet.Chrome.BottomNavShown, "precondition: past the hero the bar shows");
-            for (int i = bar.Items.Count - 1; i >= 1; i--)
-            {
-                var slot = bar.Items[i].Button;
-                yield return CardTestInput.Tap(slot.panel, slot.worldBound.center);
-                yield return Rested();
-                Assert.AreEqual(i, Page, "a real tap on bar slot " + i + " turned to its page");
-                Assert.AreEqual(i, FamilyPager.CurrentIndex, "and the pager names it");
-                AssertShowsOnly(i, "after bar slot " + i);
-                AssertLanded(Nav.Model.Sections[i].Targets[0], "slot " + i + "'s first block");
-                Assert.AreEqual(BuiltInNavElements.BarSheet, NavJumps.Last().Variant);
-            }
-        }
-
-        // ---------------- what it looks like ----------------
-
-        [UnityTest]
-        public IEnumerator Renders_TheLampInPages_AtRest_MidSwipe_AndThePager_InEnglishAndPortuguese()
-        {
-            yield return UsePages();
-            foreach (string language in new[] { "en", "pt" })
-            {
-                yield return OpenFull(Lamp);
-                if (language == "pt")
-                {
-                    yield return CardTestInput.TapNextLanguage(Sheet);
-                    yield return CardTestInput.Settle(0.3f);
-                }
-                // - a rebind of the same point keeps its page (the language switch): start this language on the first one
-                Nav.JumpTo(0, "test", landsAtOnce: true);
-                yield return Rested();
-                Assert.AreEqual(0, Page, "precondition: the first page");
-                // - every page's counter whole between the chevrons, and its title (the opener's name) whole, in this language
-                for (int i = 0; i < Nav.Model.Sections.Count; i++)
-                {
-                    if (i > 0)
-                    {
-                        yield return CardTestInput.Tap(FamilyPager.Next.panel, FamilyPager.Next.worldBound.center);
-                        yield return Rested();
-                    }
-                    var middle = FamilyPager.Position.parent.worldBound;
-                    var position = FamilyPager.Position;
-                    Assert.GreaterOrEqual(position.worldBound.xMin, FamilyPager.Previous.worldBound.xMax - 0.5f, language + " page " + i + ": the counter starts after the left chevron");
-                    Assert.LessOrEqual(position.worldBound.xMax, FamilyPager.Next.worldBound.xMin + 0.5f, language + " page " + i + ": and ends before the right one");
-                    var size = position.MeasureTextSize(position.text, 0f, VisualElement.MeasureMode.Undefined, 0f, VisualElement.MeasureMode.Undefined);
-                    Assert.LessOrEqual(size.x, position.worldBound.width + 0.5f, language + " '" + position.text + "' is whole (" + size.x + " in " + position.worldBound.width + ")");
-                    Assert.IsTrue(middle.width > 0f);
-                    var title = Sheet.Stack.Sheets.All.First(s => s.Look.Shown).Opener.Name;
-                    var titleSize = title.MeasureTextSize(title.text, 0f, VisualElement.MeasureMode.Undefined, 0f, VisualElement.MeasureMode.Undefined);
-                    Assert.IsNotEmpty(title.text, language + " page " + i + ": titled by its opener");
-                    Assert.LessOrEqual(titleSize.x, title.worldBound.width + 0.5f, language + " '" + title.text + "': the page's title is whole");
-                    if (i == 0) yield return CardGalleryChecks.Render("Nav_Lamp_pages_rest_" + language + "_390");
-                }
-                // - back to the first page, then hold a swipe half way
-                Nav.JumpTo(0, "test", landsAtOnce: true);
-                yield return Rested();
-                var panel = Sheet.Root.panel;
-                var start = EdgePoint();
-                CardTestInput.TouchDown(panel, start);
-                yield return null;
-                foreach (var step in Line(Vector2.zero, new Vector2(-Pager.PageWidth * 0.45f, 0f), 8))
-                {
-                    CardTestInput.TouchMove(panel, start + step);
-                    yield return null;
-                }
-                Assert.Less(Pager.Offset, -Pager.PageWidth * 0.3f, "precondition: the page is half way");
-                yield return CardGalleryChecks.Render("Nav_Lamp_pages_midswipe_" + language + "_390");
-                CardTestInput.TouchUp(panel, start + new Vector2(-Pager.PageWidth * 0.45f, 0f));
-                yield return Rested();
-                Assert.AreEqual(1, Page);
-                yield return CardGalleryChecks.Render("Nav_Lamp_pages_second_" + language + "_390");
-                if (language == "pt")
-                {
-                    yield return CardTestInput.TapNextLanguage(Sheet);
-                    yield return CardTestInput.Settle(0.3f);
-                }
-            }
         }
     }
 }

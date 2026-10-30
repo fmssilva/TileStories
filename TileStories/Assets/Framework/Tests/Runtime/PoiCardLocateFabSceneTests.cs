@@ -590,6 +590,7 @@ namespace TileStories.Tests
 
         // It follows the bar: at Top it rests 12 over the sheet's foot (no bar under it), never on the bar; the hero's words (lower with no
         // bar under them) never give way to it -- no row narrowed -- and its chip shows only clear of their ink
+        [Category("CardSmoke")]
         [UnityTest]
         public IEnumerator WithTheBarAtTop_ItRests12OverTheFoot_ClearOfTheBarAndTheWords()
         {

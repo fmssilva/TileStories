@@ -82,6 +82,7 @@ namespace TileStories.Tests
             yield return CardTestInput.Tap(e.panel, e.worldBound.center);
         }
 
+        [Category("CardSmoke")]
         [UnityTest]
         public IEnumerator TheLamp_InlineVideo_FromTheWallsFolder_ARealTapPlaysIt_ThePosterUntilTheFirstFrame_ThenItsFramesAndCaptions()
         {

@@ -91,17 +91,25 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 (e.g. "59/59") as the acceptance criterion — counts change as tests are added; zero
 failures does not.
 
-**Which tests, when (three tiers).** RUN TIMES (replaced after a run when a number moved > ~10 %): full EditMode ~5.2 min (2240 tests); CORE ~17.5 min
-(PlayMode 227 tests 17.0 min + EditMode 118 tests 20 s); FULL PlayMode ~82 min (1339 tests); per-fixture times in `TestEvidence/Harness/fixture_times.csv` (`TestRunRecorder` writes it after every run).
+**Which tests, when (three tiers).** RUN TIMES (replaced after a run when a number moved > ~10 %): BLOCK's EditMode half ~2.0 min (2200 tests, without
+the Live assembly); full EditMode ~3.4 min (2211 tests); CardSmoke ~1.4 min (22 tests); CORE ~12.2 min (PlayMode 175 tests 12.0 min + EditMode 120 tests
+14 s); FULL PlayMode ~76 min (1155 tests); per-fixture times in `TestEvidence/Harness/fixture_times.csv` (`TestRunRecorder` writes it after every run).
 
-- **BLOCK -- every block, after each change:** compile, the full EditMode suite, then the PlayMode fixtures of the changed code
+- **BLOCK -- every block, after each change:** compile, the EditMode half, then the PlayMode fixtures of the changed code
   (the feature's own + every fixture that greps for the changed type, method or config key), named one by one in `test_names`;
   a few minutes. A block closes on this tier unless its TEST PLAN says CORE or FULL.
-  In a review phase (a domain's look reworked block after block) BLOCK's PlayMode half is ALL 17 card fixtures, every block: a
-  changed shared look breaks fixtures no grep names.
+  - **The EditMode half** is the suite without the Live assembly: `assembly_names: ["TileStories.Editor.Tests",
+    "TileStories.LivingRoom.Editor.Tests"]`. The fixtures that enter Play Mode (10-45 s each: the Editor -> running card push) live in
+    `Tests/Editor/Live` (`TileStories.Editor.Tests.Live`; `PlayModeEntryRuleTests` keeps them there and only them). A block that touches
+    an Editor row's live push or live-sync code runs the full EditMode suite instead.
+  - **In a review phase** (a domain's look reworked block after block) BLOCK's PlayMode half is the changed component's selection
+    (`proj_guides/_Test_Suite_2.md` 3.2, kept current there: its fixtures in one `test_names` run, its gallery cases in one
+    `group_names` run) + `category_names: ["CardSmoke"]` in a run of its own: one cheapest test per card component, the tripwire for a
+    changed shared look that breaks fixtures no grep names. A block that changes a component's fixtures keeps its row and its smoke
+    test current.
   Tests stay on scope: a block's own tests run every OTHER component at its default (e.g. the card's Navigation Bar at Bottom with
   its default look); another component's option matrix lives only in that component's own fixture, so it is never re-run for nothing.
-- **CORE -- `category_names: ["Core"]`, PlayMode then EditMode, ~18 min, background:** every 3rd-4th block, and at the end of a block on SHARED GROUND
+- **CORE -- `category_names: ["Core"]`, PlayMode then EditMode, ~12 min, background:** every 3rd-4th block, and at the end of a block on SHARED GROUND
   (the definition below).
 - **FULL -- everything, <= 90 min, background:** every ~12 blocks with the maintenance, before a domain close-out, a device
   session or a build.
@@ -112,10 +120,12 @@ failures does not.
   `FixedFrameForTheRun`), `WallSession`, `PanelSettings`, the card tokens, the sheet / stack / host's stops, layout or binding
   lifecycle, a registry or pure rule a whole domain reads (`BlockRegistry`, `BlockStackBuilder`, `CardNavModel`). Not shared ground: a
   view in a slot that exists, Editor-only code, a config field old configs load unchanged, a new kind in its own files, docs.
-- **The Core category** (`[Category("Core")]`) sits on the cheapest test that proves each domain's critical path, never on a slow
-  class; the list and the path each test guards: `proj_guides/_Test_Suite_<n>.md`. A block that adds a critical path tags its test.
+- **The Core category** (`[Category("Core")]`) sits on the cheapest test that proves each domain's critical path on the SHIPPED
+  default, never on a slow class or an option's matrix; the list and the path each test guards: `proj_guides/_Test_Suite_1.md`
+  section 3. A block that adds a critical path tags its test.
 - **`test_names` is a JSON array** of class names (`["TileStories.Tests.CardVideoGalleryTests", ...]`); a comma-separated string
-  runs 0 tests.
+  runs 0 tests. **`group_names`** is a JSON array of regexes over the FULL test name, parameters included: one kind's gallery cases are
+  `["CardGalleryTests\\..*\\(\"quick_facts"]`.
 - **The MCP job lists at most 25 failures:** after a red-heavy run, re-run the fixtures past the 25th by name.
 - **MEASUREMENTS** skip themselves (reported as skipped) unless their local switch file `TestEvidence/<domain>/MEASURING` exists --
   the gated look / cost instruments. `[Explicit]` does not keep a test out of the unfiltered MCP run, and MCP cannot exclude a category.

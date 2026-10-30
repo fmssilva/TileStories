@@ -5,8 +5,8 @@ using UnityEngine;
 namespace TileStories
 {
     // Phase A data list of the card's NAVIGATION ELEMENTS (_3.2 section 9, 40-testing.md 4.4): every element x every fixture case,
-    // fabricated -- no AR, no config.json. The ONE list both CardNavGalleryHarness (to look at, Assets/Dev/CardNavGallery) and
-    // CardNavGalleryTests (to assert) read, so the two cannot drift apart. To add an element: add its key to ElementKeys (one row);
+    // fabricated -- no AR, no config.json. CardNavGalleryHarness shows it (to look at, Assets/Dev/CardNavGallery); the kept elements'
+    // rebuild writes their tests on the Navigation Bar's pattern (_3.3 TODOs). To add an element: add its key to ElementKeys (one row);
     // to add a case: add one row to Cases. A case's card is made of real gallery blocks (CardGalleryDefinitions' self-contained
     // entries), copied as often as the case asks, each copy its own block, so the element runs over a real stack.
     // The in-flow nav BLOCKS (_3.2 section 5.6: nav_icon_grid) are rows of BlockKinds: their wall sets Auto Nav Block to the kind and

@@ -136,6 +136,7 @@ namespace TileStories.Tests
             Assert.AreEqual(CardTestInput.TokenPx("--ts-chrome-inset"), close.xMin - card.xMin, onePixel, "the X its inset from the left");
         }
 
+        [Category("CardSmoke")]
         [UnityTest]
         public IEnumerator RealTaps_OpenTheSettings_PickTheOtherLanguage_AndBack()
         {

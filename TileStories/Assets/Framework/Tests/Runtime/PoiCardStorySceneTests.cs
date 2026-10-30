@@ -260,6 +260,7 @@ namespace TileStories.Tests
         // _3.3 S3b on the real card: the story's Preview Tap and Block Entry, set through the live seam the POI Editor uses. Tap Nothing: a real
         // tap on the preview's picture opens nothing, a real tap on its Open Row still opens the page. Block Entry None: the rebound preview is
         // simply there -- no entry bound, at full opacity and rest position without being finished; the shipped default rises in
+        [Category("CardSmoke")]
         [UnityTest]
         public IEnumerator ThePreviewsTapNothing_OpensOnlyFromItsOpenRow_AndBlockEntryNone_IsSimplyThere_OnTheRealCard()
         {

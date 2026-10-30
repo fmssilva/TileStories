@@ -110,6 +110,7 @@ namespace TileStories.Tests
         // 10A.3.2, Phase B: Lamp - Religious's header is model_turntable on `default:azulejo_arch` (the Framework's own
         // default-key Fallback picture `default:azulejo_detail`): at peek only the title shows, at half and full the
         // hero shows the model, auto-spin turns it and a real drag rotates it.
+        [Category("CardSmoke")]
         [UnityTest]
         public IEnumerator LampReligious_HeaderShowsTheModel_AtHalfAndFull_OnlyTheTitleAtPeek_ARealDragRotatesIt()
         {

@@ -230,6 +230,7 @@ namespace TileStories.Tests
 
         // The cause of the old 1.5 px flake: a height measured while the sheet still animated. The gallery sheet has no
         // height transition at all, so every geometry assert above measures a sheet at rest -- whatever the frame rate.
+        [Category("CardSmoke")]
         [UnityTest]
         public IEnumerator TheGallerySheet_HasNoHeightAnimation_SoNoMeasurementRacesOne()
         {

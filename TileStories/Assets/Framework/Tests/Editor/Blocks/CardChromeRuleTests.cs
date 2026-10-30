@@ -158,8 +158,8 @@ namespace TileStories.Editor.Tests
 
         // ---------------- the resting end (_3.3 R10.8: Finished = the scroll has reached its end) ----------------
 
-        // The Lamp with Next Up at Full, measured by PoiCardRestingEndSceneTests (phase before): the content once the waiting block is
-        // revealed, the viewport with the bottom area away and back (the footer 81 + the bar 66 = 147)
+        // The Lamp with Next Up at Full, as measured on the real card (_3.3 R10.8): the content once the waiting block is revealed, the
+        // viewport with the bottom area away and back (the footer 81 + the bar 66 = 147)
         private const float EndContent = 19151f;
         private const float AwayViewport = 690f;
         private const float BackViewport = 543f;

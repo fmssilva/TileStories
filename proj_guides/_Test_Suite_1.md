@@ -86,27 +86,26 @@ finding id; there is no Quarantine category.
 | -- | CardLightSceneTests.TheRimLight_RidesTheWholeMetalBand_... | F3 FIXED in Premium P1: the band was read back from a style pass that had not run (and the theme resolver held no lengths); CardLight now asks the theme (ThemeResolver.TryPixels) on every paint | -- |
 | x1 | PoiCardTapZoomTests.TheLampsTrueFalseStatement_... | F4: vertical and sideways halves never pass in one run since S4a | the next card block |
 | -- | CardNavGalleryTests (fab_dial cases) | F5 FIXED in Premium P1: the icon strip's marked-tab glass (two classes) out-ranked the dial pill's surface; the dial's words now asserted at 7:1 | -- |
-| x29 | Typeface (12+4), SectionSheet (6), RestingEnd (5), CardLight (1), Story (1) measure tests | not a finding: a measurement, runs when its `MEASURING` file exists | the block that measures |
-| x13 | ThemePixelSet gallery (12) + scene (1), `[Explicit]` | not a finding: a pixel-set measurement, run by name before and after a change that must move no pixel | the block that changes the theme |
-| `TestSkips.OldNavigationElements` | Always at FIXTURE level: a fixture whose subject is a KEPT old element is skipped whole; a mixed one is split into `XFixture` (abstract: set-up + helpers), `X` (its card tests, on the default bar) and `XOldNavigationTests` (skipped). EditMode, whole: BottomElementsNavViewTests (bar_sheet, next_up), CardMenuOverlayTests, NavBottomElementRulesTests; split: NavElementRegistry, CardLayoutRule, NavTopElementRules. PlayMode, whole: PoiCardTopElements / BottomElements / Menu / Facet / RestingEnd / NavContents SceneTests, CardNavGalleryTests (+ Facets, FullView); split: PoiCardChromeScene, PoiCardHeroScene, PoiCardLayoutScene, PoiCardPagesScene, PoiCardPaintingScene, SectionSheetScene, SectionSheetMeasureScene. REMOVED with the retired elements (_3.3 R1): EditMode AutoNavBlock, BentoLayoutRule, BentoTileRule, EdgeScrubberRule, NavFitRule, NavRailRule, NavigationPresets, NavigationPresetEditorTab, LivePlayModeNavigationPreset, BentoLayoutSheet, BottomBarNavView Tests and the OldNavigation siblings of DetailCardEditorTab, FloatingSlot, NavFloatingRules, SheetDragScene; PlayMode PoiCardTextTabs / BottomBar / Edge / Floating / NavBlock / NavRails / NavBento / BentoLayout / NavOptions / NavCombinations / InterleavedSpy SceneTests and CardNavGalleryTests.RailsAndBento; the retired elements' cases inside the kept fixtures | not a finding: the Navigation Bar is on by default, so the kept elements draw only while it is off; the developer rebuilds them on the bar's pattern (`_3.3` TODOs, [rebuild]) | the block that rebuilds each kept element |
+| x13 | Typeface (8+4), Story (1) measure tests | not a finding: a measurement, runs when its `MEASURING` file exists (SectionSheet, RestingEnd and CardLight's were deleted: `_Test_Suite_2.md` F1 / F10) | the block that measures |
+| x9 | ThemePixelSet gallery (8) + scene (1), `[Explicit]` | not a finding: a pixel-set measurement, run by name before and after a change that must move no pixel | the block that changes the theme |
+| -- | the old navigation elements' tests (kept elements: Kind Chips, Icon Tabs With Chips, Progress Map, Family Pager, Bar With Kinds, Up Next, the Drawer and its facets, Contents) | RETIRED (`_Test_Suite_2.md` F1): the 129 PlayMode + 31 EditMode skipped tests deleted with their files, the split `*OldNavigationTests` classes (their fixtures folded back into one class) and `TestSkips.cs`; the elements' code stays, drawn only while the Navigation Bar is off. REMOVED earlier with the retired elements (_3.3 R1): EditMode AutoNavBlock, BentoLayoutRule, BentoTileRule, EdgeScrubberRule, NavFitRule, NavRailRule, NavigationPresets, NavigationPresetEditorTab, LivePlayModeNavigationPreset, BentoLayoutSheet, BottomBarNavView Tests; PlayMode PoiCardTextTabs / BottomBar / Edge / Floating / NavBlock / NavRails / NavBento / BentoLayout / NavOptions / NavCombinations / InterleavedSpy SceneTests | each element's rebuild writes its tests new on the bar's pattern (`_3.3` TODOs, [rebuild]) | the block that rebuilds each kept element |
 
 ## 3. The Core list (`[Category("Core")]`)
 
-**Tagged and timed (second session):** 48 `[Category("Core")]` attributes, 31 on classes and 17 on methods.
-First run, Unity behind both ways, all green:
-- PlayMode: 227 tests, 0 failed, 1 skipped (the story measurement, gated on a file), **17.0 min**.
-- EditMode: 118 tests, 0 failed, **20 s**.
-- CORE total **~17.5 min**, against the brief's 25-30 min target. The Architect accepted ~20 min: widen it only for a missing critical path.
-- Per-fixture times: `TestEvidence/Harness/core_first.csv`. Slowest: Floating 87 s, SectionSheet 71 s, LiveUpdate 63 s, BottomBar 61 s, Story 58 s.
+CORE guards the SHIPPED default's critical paths: one cheap test per path, never an option's matrix or a slow class. 46 attributes,
+26 on classes and 20 on methods. Last run (M2, 2026-10-30, Unity behind both ways), all green:
+- PlayMode: 175 tests, 0 failed, 1 skipped (the story measurement, gated on a file), **12.0 min**.
+- EditMode: 120 tests, 0 failed, **14 s**.
+- CORE total **~12.2 min**. Per-fixture times: `TestEvidence/Harness/core_after_m2.csv`. Slowest: LiveUpdate 70 s, Story 64 s, Model3D 56 s,
+  Audio 55 s, PageChrome 45 s.
 
-Run it with `run_tests` `category_names: ["Core"]`, PlayMode then EditMode. The class-level tags are on these 31 fast fixtures:
-PoiCardSheetDragSceneTests, PoiCardThemeSceneTests, PoiCardNavBarSceneTests, PoiCardAudioSceneTests, PoiCardStorySceneTests,
-MarkerConfigDrivesMarkerTests, ARZoomCameraFovTests, ARZoomRoutingTests, LivingRoomConfigIntegrationTests, ThemePipelineTests,
-PoiCardLanguageSceneTests, PoiCardChromeSceneTests, PoiCardTextTabsSceneTests, PoiCardLayoutSceneTests, SectionSheetSceneTests,
-PoiCardExpandableSceneTests, PoiCardVideoSceneTests, PoiCardModel3DSceneTests, PoiCardPanoramaSceneTests, PoiCardBottomBarSceneTests,
-PoiCardFullViewSiblingsSceneTests, PoiCardLiveUpdateTests, LodRealPipelineTests, OrientationWallSessionIntegrationTests,
-DisplacementSettingsRealMarkerTests, PoiCardFullHeightSceneTests, PoiCardFloatingSceneTests, PoiCardPaintingSceneTests, LodWallSceneTests,
-SearchDemoTests, MarkerViewRuntimeTests. The method-level tags are on the slow fixtures, by critical path:
+Run it with `run_tests` `category_names: ["Core"]`, PlayMode then EditMode. The class-level tags are on these 26 fast fixtures:
+PoiCardSheetDragSceneTests, PoiCardThemeSceneTests, PoiCardAudioSceneTests, PoiCardStorySceneTests, MarkerConfigDrivesMarkerTests,
+ARZoomCameraFovTests, ARZoomRoutingTests, LivingRoomConfigIntegrationTests, ThemePipelineTests, PoiCardLanguageSceneTests,
+PoiCardChromeSceneTests, PoiCardLayoutSceneTests, PoiCardExpandableSceneTests, PoiCardVideoSceneTests, PoiCardModel3DSceneTests,
+PoiCardPanoramaSceneTests, PoiCardFullViewSiblingsSceneTests, PoiCardLiveUpdateTests, LodRealPipelineTests,
+OrientationWallSessionIntegrationTests, DisplacementSettingsRealMarkerTests, PoiCardFullHeightSceneTests, PoiCardPaintingSceneTests,
+LodWallSceneTests, SearchDemoTests, MarkerViewRuntimeTests. The method-level tags are on the slow fixtures, by critical path:
 
 - open by a real marker tap, and close (X, swipe down, empty tap): PoiCardSceneTests {ARealMarkerTap_OpensTheCard_ForThatPoi,
   TheX_ClosesTheCard_..., PullingTheCardDownBelowPeek_ClosesIt, ATapOnEmptyCameraSpace_Closes_...}
@@ -114,7 +113,11 @@ SearchDemoTests, MarkerViewRuntimeTests. The method-level tags are on the slow f
 - the hero: PoiCardHeroSceneTests {AtFull_TheWholeHeroIsTheScreen_..., ARealTapOnTheHerosAction_...}
 - the block page, Back and Next / Previous: PoiCardPageChromeSceneTests {TheStoryPage_ARealTapOnBack_..., TheFoot_RealTapsOnNextAndPrevious_...}
 - navigation (a jump, the spy follows a real finger): PoiCardNavSceneTests {AJumpFromPeek_..., ARealFingerDrag_MovesTheSpy_...}
-  (+ PoiCardNavBarSceneTests, class)
+- the Navigation Bar (the default bar; a real tap jumps, real drags the bar follows): PoiCardNavBarSceneTests
+  {TheDefaultBar_FloatsAtTheBottom_..., ARealTap_JumpsToTheGroup_..._AndFollowsRealDrags} -- its option values and renders are its
+  component's BLOCK selection (`_Test_Suite_2.md` 3.2)
+- the Open sections (the default container): PoiCardSectionsSceneTests.TheDefault_IsOpen_OneSectionPerBarGroup_... -- the Cards look
+  (SectionSheetSceneTests) is an option, out of CORE
 - search (a typed query, a marker tap, select and filter): SearchSceneTests {ATypedQuery_..., ARealMarkerTap_Selects_...,
   SelectingAndFiltering_NeverUndoEachOther}
 - the Editor (EditMode): LiveSyncFieldMatrixTests.LiveEdit_ReachesTheRunningMarker (its rows, 116 cases),

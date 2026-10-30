@@ -16,8 +16,8 @@ namespace TileStories.Tests
     //     down), Fill x over the hero (a non-solid bar turns white on dark glass, Clear transparent there and solid after it)
     //   - the labels read at 7:1 on the real render on every fill, over the hero and after it, light and dark, Bottom and Top
     //   - an old config's "under_title" reads as Top on the running card; a merged group; the bar off
-    // Renders in TestEvidence/Premium/P2/.
-    [Category("Core")]
+    // Renders in TestEvidence/Premium/P2/. Core: the default bar, and a real tap that jumps and real drags the bar follows -- the option
+    // matrix and the renders are this component's own BLOCK selection, never CORE's.
     public class PoiCardNavBarSceneTests : SearchSceneFixture
     {
         private const string Domain = "Premium/P2";
@@ -144,6 +144,8 @@ namespace TileStories.Tests
         private static void AreSame(Color expected, Color actual, string what) =>
             Assert.Less(((Vector4)expected - (Vector4)actual).magnitude, 0.01f, what + ": expected " + (Color32)expected + ", drawn " + (Color32)actual);
 
+        [Category("CardSmoke")]
+        [Category("Core")]
         [UnityTest]
         public IEnumerator TheDefaultBar_FloatsAtTheBottom_SolidRaisedFilled_OverTheHero_TheHerosWordsClearOfIt()
         {
@@ -179,6 +181,7 @@ namespace TileStories.Tests
             yield return Save("default_bottom_light_OverTheHero");
         }
 
+        [Category("Core")]
         [UnityTest]
         public IEnumerator ARealTap_JumpsToTheGroup_TheBumpSlidesThereWithAnOvershoot_AndFollowsRealDrags()
         {

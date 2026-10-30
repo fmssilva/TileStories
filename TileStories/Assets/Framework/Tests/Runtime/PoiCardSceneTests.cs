@@ -530,6 +530,7 @@ namespace TileStories.Tests
             Assert.AreEqual(0, Card.Media.LoadedCount, "a closed card holds no media");
         }
 
+        [Category("CardSmoke")]
         [Category("Core")]
         [UnityTest]
         public IEnumerator ARealMarkerTap_OpensTheCard_ForThatPoi()

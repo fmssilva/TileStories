@@ -73,8 +73,11 @@ deciding case by case:
   - It never builds a private copy of a Unity tool.
 * **Defaults are judged in the real scene.** A default is chosen by looking at it in Unity, and on the phone for anything
   visual in AR. Values tried in a prototype are experiments, not defaults.
-* **Real fixtures.** Tests run on the LivingRoom wall's POI sets (The Lamp's 12+ POIs, The Painting, The Camera); add a POI
-  when an edge case needs one, never change an existing POI's identity fields (id, name, category, summary, keywords).
+* **Real fixtures, one home.** Each domain's guide names its reference fixtures, so one change edits one place and what the
+  developer tests by hand is what the tests check. The card: single-card tests run on ONE reference card (`_3.3` names it) and reach
+  its blocks by kind, never by a hard-coded block key; every look x content matrix lives only in the Phase A gallery. Markers and the
+  world (position, LOD, displacement, regions): the LivingRoom POI sets -- the Lamp's 12+ POIs, the Painting, the Camera. Add a POI or
+  a block only when a case needs one; never change an existing POI's identity fields (id, name, category, summary, keywords).
 
 ### Guidelines and the structure map are "version 0", never logs
 * **What this covers:** every file in `.clinerules/` (the structure map `10-structure.md` included), `proj_guides/__AI_*.md` and

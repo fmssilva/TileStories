@@ -302,7 +302,7 @@ namespace TileStories.Tests
     }
 
     // The gallery part of the set: block looks over the token colours (hero header, text, status ramp, media, a quiz, the audio player), the
-    // navigation's family colours (icon chips, the progress map), the menu overlay over its scrim, the floating slot, the full view, the mini-player
+    // full view, the mini-player
     [Explicit("a measurement: run by name before and after a change that must move no pixel")]
     public class ThemePixelSetGalleryTests
     {
@@ -313,11 +313,6 @@ namespace TileStories.Tests
         {
             "header_image_parallax_short_half", "rich_text_drop_cap_long", "status_ring_tokens", "gallery_carousel_short",
             "knowledge_check_multiple_choice_short", "audio_guide_player_short",
-        };
-
-        private static readonly string[] NavEntries =
-        {
-            "Nav_icon_tabs_chips_big", "Nav_progress_map_big", "Nav_drawer_tree_big", "Nav_fab_radial_big",
         };
 
         [UnitySetUp]
@@ -349,16 +344,6 @@ namespace TileStories.Tests
             _harness.Gallery.Show(index);
             yield return CardTestInput.Settle();
             yield return ThemePixelSet.Capture("block_" + name);
-        }
-
-        [UnityTest]
-        public IEnumerator NavigationElements([ValueSource(nameof(NavEntries))] string name)
-        {
-            int index = CardNavGalleryDefinitions.All.ToList().FindIndex(e => e.Name == name);
-            Assert.GreaterOrEqual(index, 0, "precondition: the navigation gallery defines " + name);
-            _harness.Show(index);
-            yield return CardTestInput.Settle();
-            yield return ThemePixelSet.Capture(name);
         }
 
         [UnityTest]

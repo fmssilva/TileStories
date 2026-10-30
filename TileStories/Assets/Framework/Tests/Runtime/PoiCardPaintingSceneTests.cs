@@ -9,8 +9,15 @@ using UnityEngine.UIElements;
 
 namespace TileStories.Tests
 {
-    // PoiCardPaintingSceneTests's shared ground: its set-up and helpers, so its own tests and its old-navigation ones stand on one fixture
-    public abstract class PoiCardPaintingSceneFixture : SearchSceneFixture
+    // Phase B of _3.2 step 17b on the REAL LivingRoomScene with real touches: the demo point. The Painting (the Ribeira Palace on the
+    // panel) was given its card with the Card Starter's Rich point set plus hand editing, and the wall writes its OWN navigation (a
+    // preset applied in Detail Card > Navigation) -- so this fixture, alone among the card fixtures, undoes SearchSceneFixture's pin to the
+    // framework default and measures what the wall ships (ShippedNavigation):
+    //   - every authored block of The Painting shows, in the order the card's own builder gives, its title in English and Portuguese
+    //   - Lamp - Residential draws its contents block and nothing of its card is left out
+    //   - renders at 390 px: The Painting in EN and PT at Half and Full, and Lamp - Residential's contents block
+    [Category("Core")]
+    public class PoiCardPaintingSceneTests : SearchSceneFixture
     {
         protected const string Painting = "painting";
 
@@ -18,34 +25,16 @@ namespace TileStories.Tests
 
         protected PoiCardSheetView Sheet => Card.Sheet;
 
-        protected NavController Nav => Sheet.Nav;
-
-        protected CardNavModel Model => Nav.Model;
-
         protected ScrollView Scroll => Sheet.Stack.Scroll;
 
         protected float OnePixel => Sheet.Layer.panel.visualTree.layout.height / Screen.height;
 
-        protected float Range => NavScrollRule.Range(Scroll.contentContainer.layout.height, Scroll.contentViewport.layout.height);
-
-        protected sealed class RecordingCardEvents : ICardEvents
-        {
-            public readonly List<CardEvent> Raised = new();
-            public void Raise(CardEvent cardEvent) => Raised.Add(cardEvent);
-        }
-
-        protected RecordingCardEvents _events;
-
         protected List<string> _shippedLanguages;
 
-        protected List<CardEvent> NavJumps => _events.Raised.Where(e => e.Kind == CardEventKinds.NavJump).ToList();
-
         [UnitySetUp]
-        public IEnumerator UseAnInMemoryCardStateRecordTheEventsAndTheWallsOwnNavigation()
+        public IEnumerator UseAnInMemoryCardStateAndTheWallsOwnNavigation()
         {
             Card.State = new CardLocalState(new MemoryCardStateStore(), Session.SearchConfig.wall_id);
-            _events = new RecordingCardEvents();
-            Card.Events = _events;
             Assert.IsNotNull(ShippedNavigation, "precondition: the wall writes its own navigation (Detail Card > Navigation, a preset applied)");
             yield return Push(null);
         }
@@ -85,54 +74,6 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.3f);
         }
 
-        // The tabs of the wall's top element (a tab bar, or the tab row of tabs-with-chips)
-        protected TabsNavView Tabs()
-        {
-            var view = Sheet.Slots.TopView;
-            if (view is IconTabsChipsNavView both) return both.Tabs;
-            Assert.IsInstanceOf<TabsNavView>(view, "precondition: the wall's top element is a row of tabs");
-            return (TabsNavView)view;
-        }
-
-        protected IEnumerator Landed()
-        {
-            for (int frame = 0; frame < 600 && Nav.IsJumping; frame++) yield return null;
-            Assert.IsFalse(Nav.IsJumping, "the jump came to rest");
-            yield return CardTestInput.Settle(0.3f);
-        }
-
-        // The section the reader is in, read from the SCREEN: the spy's own rule over each section's first slot as drawn
-        protected int SectionUnderTheSpyLine() =>
-            CardTestInput.SectionUnderTheSpyLine(Scroll, Model, Sheet.Stack.SlotOfBlock);
-
-        // A tab wholly inside its strip's visible part, after a real sideways drag of the strip when it is not
-        protected IEnumerator BringIntoView(TabsNavView tabs, Button tab)
-        {
-            var visible = tabs.Strip.Viewport.worldBound;
-            var rect = tab.worldBound;
-            if (rect.xMin < visible.xMin - 0.5f || rect.xMax > visible.xMax + 0.5f)
-            {
-                yield return CardTestInput.TouchDrag(Sheet.Root.panel, visible.center, new Vector2(visible.center.x - rect.center.x, 0f));
-                yield return null;
-            }
-            rect = tab.worldBound;
-            Assert.IsTrue(rect.xMin >= visible.xMin - 0.5f && rect.xMax <= visible.xMax + 0.5f, "precondition: the tab is inside its strip " + rect + " in " + visible);
-        }
-    }
-
-    // Phase B of _3.2 step 17b on the REAL LivingRoomScene with real touches: the demo point. The Painting (the Ribeira Palace on the
-    // panel) was given its card with the Card Starter's Rich point set plus hand editing, and the wall writes its OWN navigation (a
-    // preset applied in Detail Card > Navigation) -- so this fixture, alone among the card fixtures, undoes SearchSceneFixture's pin to the
-    // framework default and measures what the wall ships (ShippedNavigation):
-    //   - every authored block of The Painting shows, in the order the card's own builder gives, its title in English and Portuguese
-    //   - the wall's top element and menu are the ones on the card, and the strip shows at Full
-    //   - a REAL tap on every tab lands its section's first block at the viewport top (+-1 px), ONE nav_jump each, the tab marked
-    //   - the mark follows real drags of the stack
-    //   - Lamp - Residential draws its contents block and nothing of its card is left out
-    //   - renders at 390 px: The Painting in EN and PT at Half and Full, and Lamp - Residential's contents block
-    [Category("Core")]
-    public class PoiCardPaintingSceneTests : PoiCardPaintingSceneFixture
-    {
         // ---------------- The Painting's card ----------------
 
         [UnityTest]
@@ -188,144 +129,6 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.4f);
             Assert.Greater(view.Root.layout.height, 0f, "the contents list: drawn, not empty");
             yield return CardGalleryChecks.Render("Residential_" + nameof(NavContentsBlockView) + "_full_390");
-        }
-    }
-
-    // PoiCardPaintingSceneTests's tests whose subject is an old navigation element: they wait for its rebuild on the Navigation Bar's pattern
-    [Ignore(TestSkips.OldNavigationElements)]
-    public class PoiCardPaintingSceneOldNavigationTests : PoiCardPaintingSceneFixture
-    {
-        [UnityTest]
-        public IEnumerator TheWallsOwnNavigation_IsTheOneOnThePaintingsCard()
-        {
-            yield return Open(Painting, SheetStopRule.Stop.Full);
-            Assert.AreEqual(ShippedNavigation.top, Sheet.Slots.TopKey, "the wall's Top Bar");
-            Assert.AreEqual(ShippedNavigation.menu, Sheet.Slots.MenuKey ?? CardOptions.NavNone, "the wall's Menu");
-            Assert.AreNotEqual(new CardNavigationSettings().top + new CardNavigationSettings().menu, Sheet.Slots.TopKey + (Sheet.Slots.MenuKey ?? CardOptions.NavNone),
-                "the wall's own choice, not the framework default (the reason this fixture undoes the pin)");
-            Assert.GreaterOrEqual(Model.TargetCount, ShippedNavigation.min_blocks, "precondition: a card long enough for navigation");
-            // - _3.3 S4a: the strip is chrome and waits for the hero; read past it, the wall's strip shows
-            yield return CardTestInput.PastTheHero(Sheet);
-            Assert.IsTrue(Sheet.Chrome.TopShown, "the strip shows at Full once the hero is read");
-        }
-
-        [UnityTest]
-        public IEnumerator ARealTapOnEveryTab_LandsItsSection_AtTheViewportTop_OneJumpEach_AndTheTabIsMarked()
-        {
-            yield return Open(Painting, SheetStopRule.Stop.Full);
-            var tabs = Tabs();
-            Assert.AreEqual(Model.Sections.Count, tabs.Tabs.Count, "one tab per section");
-            Assert.Greater(Range, 100f, "precondition: the card really scrolls (range " + Range + ")");
-            // - _3.3 S4a: the strip is chrome and waits for the hero -- read just past it before a finger goes to it
-            if (!Sheet.Chrome.TopShown) yield return CardTestInput.PastTheHero(Sheet);
-            Assert.IsTrue(Sheet.Chrome.TopShown, "precondition: past the hero the strip shows");
-            // - last first: a tap that only worked from the top would pass a top-down walk on its first tab
-            foreach (var tab in tabs.Tabs.Reverse())
-            {
-                yield return BringIntoView(tabs, tab.Button);
-                int jumps = NavJumps.Count;
-                string block = Model.Sections[tab.Index].Targets[0];
-                yield return CardTestInput.TouchDrag(Sheet.Root.panel, tab.Button.worldBound.center, Vector2.zero, frames: 1);
-                yield return Landed();
-                var slot = Sheet.Stack.SlotOfBlock(block);
-                if (Sheet.Stack.LandingTop(slot) <= Range - OnePixel)
-                    Assert.AreEqual(Sheet.Stack.LandingInset, Sheet.Stack.LandingElement(slot).worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, tab.Label.text + ": its section's top meets the viewport's top");
-                else
-                    Assert.AreEqual(Range, Scroll.scrollOffset.y, OnePixel, tab.Label.text + ": a late section clamps at the end of the range");
-                Assert.AreEqual(jumps + 1, NavJumps.Count, tab.Label.text + ": one nav_jump");
-                Assert.AreEqual(block, NavJumps.Last().BlockKey, tab.Label.text + ": to its section's first block");
-                // - the mark is the section on SCREEN (section 4.4): a late section's jump clamps at the end, where the spy marks the last
-                Assert.AreEqual(SectionUnderTheSpyLine(), tabs.CurrentIndex, tab.Label.text + ": the tab of the section on screen is marked");
-                if (Sheet.Stack.LandingTop(slot) <= Range - OnePixel) Assert.AreEqual(tab.Index, tabs.CurrentIndex, tab.Label.text + ": a section that reaches the top is its own tab");
-            }
-        }
-
-        [UnityTest]
-        public IEnumerator ARealDragOfThePaintingsCard_MovesTheMark_ToTheSectionOnScreen()
-        {
-            yield return Open(Painting, SheetStopRule.Stop.Full);
-            var tabs = Tabs();
-            Assert.AreEqual(SectionUnderTheSpyLine(), tabs.CurrentIndex, "at the top");
-            var viewport = Scroll.contentViewport.worldBound;
-            var seen = new HashSet<int> { tabs.CurrentIndex };
-            // - until the end of the card, whatever its length (P1b's real content doubled it); the cap only stops a drag that never gets there
-            for (int drag = 0; drag < 40 && Scroll.scrollOffset.y < Range - NavScrollRule.EndTolerance; drag++)
-            {
-                float before = Scroll.scrollOffset.y;
-                yield return CardTestInput.TouchDrag(Scroll.panel, new Vector2(viewport.center.x, viewport.yMax - 40f), new Vector2(0f, -viewport.height * 0.5f));
-                yield return CardTestInput.Settle(0.6f);
-                Assert.Greater(Scroll.scrollOffset.y, before, "precondition: the real drag scrolled the stack");
-                Assert.AreEqual(SectionUnderTheSpyLine(), tabs.CurrentIndex, "after drag " + (drag + 1) + ": the tab of the section on screen");
-                Assert.AreEqual(1, tabs.Tabs.Count(t => t.Button.ClassListContains(NavTab.CurrentClass)), "one tab marked");
-                seen.Add(tabs.CurrentIndex);
-            }
-            Assert.GreaterOrEqual(seen.Count, 3, "the mark really moved with the reader, through several sections");
-            Assert.GreaterOrEqual(Scroll.scrollOffset.y, Range - NavScrollRule.EndTolerance, "precondition: the drags reached the end of the card");
-            Assert.AreEqual(Model.Sections.Count - 1, tabs.CurrentIndex, "at the end of the card: the last section's tab");
-        }
-
-        // The tabs-with-chips strip keeps ONE height whether the section read has chips or not (IconTabsChipsNavView's own promise). The
-        // Lamp could never test it -- each of its sections holds two kinds or more -- The Painting can: About and Media have chips, Stories
-        // one kind. Found at 17b: the emptied row collapsed, the viewport grew, the spy line crossed back over the boundary and the row
-        // filled again, inside one layout pass ("Layout update is struggling", reproduced on every drag across that boundary)
-        [UnityTest]
-        public IEnumerator TheTabsWithChipsStrip_KeepsOneHeight_OverASectionWithChipsAndOneWithout()
-        {
-            // - the test owns its strip: the wall's top element is the developer's choice (it was tabs with chips when this was written)
-            yield return Push(c => c.card_settings.navigation.top = BuiltInNavElements.IconTabsChips);
-            yield return Open(Painting, SheetStopRule.Stop.Full);
-            Assert.IsInstanceOf<IconTabsChipsNavView>(Sheet.Slots.TopView, "precondition: the strip is tabs with chips");
-            var both = (IconTabsChipsNavView)Sheet.Slots.TopView;
-            var tabs = both.Tabs;
-            // - _3.3 S4a: at Full the strip waits for the hero (a tap on a hidden strip's tab lands nowhere)
-            yield return CardTestInput.PastTheHero(Sheet);
-            Assert.IsTrue(Sheet.Chrome.TopShown, "precondition: the strip shows once the hero is read");
-            int withChips = Model.Sections.ToList().FindIndex(s => NavOntologyRule.OffersAKindChoice(s.Kinds.Count));
-            int without = Model.Sections.ToList().FindIndex(s => !NavOntologyRule.OffersAKindChoice(s.Kinds.Count));
-            Assert.GreaterOrEqual(withChips, 0, "precondition: a section with two kinds or more");
-            Assert.GreaterOrEqual(without, 0, "precondition: a section with one kind");
-
-            var strip = new Dictionary<int, float>();
-            var viewport = new Dictionary<int, float>();
-            foreach (int section in new[] { withChips, without, withChips })
-            {
-                var tab = tabs.Tabs.Single(t => t.Index == section);
-                yield return BringIntoView(tabs, tab.Button);
-                yield return CardTestInput.TouchDrag(Sheet.Root.panel, tab.Button.worldBound.center, Vector2.zero, frames: 1);
-                yield return Landed();
-                Assert.AreEqual(section == withChips, both.ChipsSection >= 0, "precondition: the chip row is " + (section == withChips ? "filled" : "empty"));
-                strip[section] = both.Root.layout.height;
-                viewport[section] = Scroll.contentViewport.layout.height;
-            }
-            Assert.AreEqual(strip[withChips], strip[without], OnePixel,
-                "the strip is as tall over a one-kind section as over one with chips (" + strip[withChips] + " / " + strip[without] + ")");
-            Assert.AreEqual(viewport[withChips], viewport[without], OnePixel, "so the reading space under it never jumps");
-        }
-
-        // Where the chrome hides the strip, nothing of it paints: the chip row hides WITH its strip. Found at 17b on The Painting's Half
-        // render: the row set its own visibility to Visible when it had chips, which beat the strip's inherited hidden, so the chips floated
-        // alone over the card's title. Measured at Peek, where the rule ALWAYS hides the strip (CardChromeRule.NavShownAt: never at peek) --
-        // the same class path as a hide for room (CardChromeView.TopShownClass). _3.3 P4.3: Half used to be that state on this card only
-        // because the header left no room; the new faces gave it the room
-        [UnityTest]
-        public IEnumerator WhereTheChromeHidesTheStrip_TheChipRowHidesWithIt_AndShowsWithItAtFull()
-        {
-            // - the test owns its strip: the wall's top element is the developer's choice (it was tabs with chips when this was written)
-            yield return Push(c => c.card_settings.navigation.top = BuiltInNavElements.IconTabsChips);
-            yield return Open(Painting, SheetStopRule.Stop.Peek);
-            Assert.IsInstanceOf<IconTabsChipsNavView>(Sheet.Slots.TopView, "precondition: the strip is tabs with chips");
-            var both = (IconTabsChipsNavView)Sheet.Slots.TopView;
-            Assert.IsFalse(Sheet.Chrome.TopShown, "precondition: at Peek the chrome hides the strip (never at peek)");
-            Assert.GreaterOrEqual(both.ChipsSection, 0, "precondition: the first section has chips bound");
-            Assert.AreEqual(Visibility.Hidden, both.Tabs.Root.resolvedStyle.visibility, "the tabs are hidden with the strip");
-            Assert.AreEqual(Visibility.Hidden, both.Chips.Root.resolvedStyle.visibility, "and so is the chip row: nothing floats over the title");
-
-            Sheet.SetStop(SheetStopRule.Stop.Full);
-            yield return CardTestInput.Settle(0.5f);
-            // - _3.3 S4a: at Full the strip waits for the hero
-            yield return CardTestInput.PastTheHero(Sheet);
-            Assert.IsTrue(Sheet.Chrome.TopShown, "precondition: the strip shows at Full once the hero is read");
-            Assert.AreEqual(Visibility.Visible, both.Chips.Root.resolvedStyle.visibility, "with the strip shown, the chips show");
         }
     }
 }

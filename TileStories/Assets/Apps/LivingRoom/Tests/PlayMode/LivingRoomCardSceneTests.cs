@@ -37,6 +37,7 @@ namespace TileStories.LivingRoom.Tests
         // The Lamp's block as the wall's config authored it (a copy of the running config, not the view's own reading)
         private BlockInstanceData AuthoredBlock() => ConfigCopy().pois.Single(p => p.id == "lamp").card.blocks.Single(b => b.kind == SizeComparisonBlock.Kind);
 
+        [Category("CardSmoke")]
         [UnityTest]
         public IEnumerator TheLamp_ShowsTheAppsSizeComparison_BeforeTheSources_DrawnToTheAuthoredScale_WithTheAuthoredWords()
         {

@@ -1,19 +1,35 @@
-# Plan tracker -- M1: the test ground audit (Test Suite Review 2)
+# Plan tracker -- M2: fast, honest test runs (Test Suite Review 2, chunks F1 + F2 + F4 + F11, + F10's two deletions)
 
-Brief: the M1 brief (`_3.3_POI_Card_Styles.md` M1, pasted in chat). Worker: Opus, effort Medium. AUDIT ONLY: no product or test code changes.
-Targets: (1) a component block tests in a few minutes on its own fixtures + EditMode; (2) one change to a block kind = ONE place of test
-data; (3) no test spends time on something old, retired or no longer true.
-Developer note (chat): the reference POI is the Ribeira Palace (`painting`); another POI only where needed.
-RESULT: `proj_guides/_Test_Suite_2.md`. STOP with one AskUserQuestion.
+Brief: `_3.3_POI_Card_Styles.md` M2 (pasted in chat; `proj_guides/__AI_worker.md`). Worker: Opus, effort Medium. Test infrastructure only,
+no product code. Source of truth: `proj_guides/_Test_Suite_2.md` (2.1, 3.2-3.4, 4). STOP with one AskUserQuestion.
+TEST PLAN: full EditMode (with and without the Live assembly); CORE once, in the background (Unity c).
+
+## Decisions (autonomous)
+- The split fixtures' abstract `*Fixture` bases fold back into their one kept class; helpers only the deleted tests used go.
+- DetailCardEditorTabTests 312-314 are NOT an old-element sweep: they are the reflection walk's edits for the live `top` / `bottom` /
+  `menu` config fields (every card_settings field undoes / redoes / survives Save) -> kept. No other old-element sweep in that file.
+- The Live assembly holds the 5 fixtures that `new EnterPlayMode` (Card, StoryEditor, NavigationBar, CardLocate, CardSections);
+  LivePlayModeConfigTests (19 pure tests, 1.8 s) and LodZoomLiveSyncTests (no Play Mode) stay. A rule test keeps Play Mode out of
+  the main Editor test assembly.
+- NavBarShapeRuleTests: measure first; the fix keeps every sample and assert (precision unchanged).
+- CORE Sections test: TheDefault_IsOpen (4.6 s, the cheapest default test); jump landings stay guarded by the NavBar's real-tap test
+  and PoiCardNavSceneTests.AJumpFromPeek.
+- CardSmoke: one cheapest test per row of `_Test_Suite_2.md` 3.2 (no generic "a block kind" smoke: a kind block runs its own selection).
 
 ## Steps
-- [x] 0. GATE: UnityMCP live (telemetry_status), HEAD 5801c6d = origin/master, compile clean (0 error CS, ExitCode 0), marker SDF fonts static
-- [x] 1. Data: POI x kind inventory of the shipped config (26 POIs; Lamp 62 blocks, Painting 18), test file x POI id map (lamp 100 files,
-       painting 40), 64 test files hard-code block keys; last FULL PlayMode per-test times (TestResults.xml 08:00-09:16, copied to scratchpad)
-- [x] 2. EditMode per-fixture times: full EditMode in the background (behind / behind): 2240 / 2208 / 0 failed / 32 skipped, 5.2 min
-- [x] 3. Subagent S1 (Sonnet, medium): PART 2 -- held except two "duplicates" (About:200 vs Hero:221; ChromeScene footer names)
-- [x] 4. Subagent S2 (Sonnet, medium): PART 1 move map -- held; block_15 lacks show_after_viewed (re-read)
-- [x] 5. Gallery inventory: 170 block + 40 header cases, ids `kind_look_content`, ~1.8 s each (from the FULL XML)
-- [x] 6. PART 3 component map + CORE check (21.4 min PlayMode, NavBar class tag 9.0 min)
-- [x] 7. `_Test_Suite_2.md` written; `_3.3` status entry; `40-testing.md` RUN TIMES EditMode 5.2 min
-- [x] 8. Final report (60-finishing 6.4, Subagents line) + AskUserQuestion
+- [x] 0. GATE: UnityMCP live (TileStories@d41388e4, telemetry on), HEAD bb32f6d = origin/master, SDF fonts unchanged, compile clean
+       (0 error CS, ExitCode 0), Play Mode off. Editor.log is 444 MB (flag in the report).
+- [x] 1. Audit: references (Haiku Explore), split classes, Live fixtures, per-method times from the last FULL (C2, scratchpad full_pm_c2.xml)
+- [x] 2. PART 1 (F1 + F10): delete the whole files; strip + fold the 9 split files; NavigationElements cases; LookMeasure constants;
+       comments that name deleted tests; `_3.3` [rebuild] lines; structure map; `_Test_Suite_1.md` rows -> compile -> full EditMode
+       RESULT: full EditMode 2209 / 2208 passed / 0 failed / 1 skipped, 298.6 s, behind / behind (was 2240 / 2208 / 0 / 32)
+- [x] 3. PART 2 (F2): Core tags (NavBar 2 methods, SectionSheet off, Sections' default on) -- reflection: 26 Core classes + 20 methods;
+       `_Test_Suite_1.md` section 3 rewritten after the CORE run (step 6)
+- [x] 4. PART 3 (F4): group_names `CardGalleryTests\..*\("quick_facts` = 6 / 6 passed, 9.7 s (exactly the expected cases); CardSmoke 21
+       methods = 22 / 22 passed, 82.1 s; PoiCardPagesSceneTests (folded) 8 / 8, 53.4 s -- all behind / behind;
+       `40-testing.md` 4.2 BLOCK rewritten; `_Test_Suite_2.md` 3.2 selections
+- [x] 5. PART 4 (F11): NavBarShapeRuleTests measured (Token() = 0.338 ms a read, ~98k reads in RaisedDepth; 41.2 s before) -> tokens read
+       once: 0.2 s; Live assembly (5 fixtures, 103.8 s) + PlayModeEntryRuleTests + 2 InternalsVisibleTo grants -> compile clean ->
+       EditMode without Live 2200 / 2199 / 0 / 1, 2.0 min (behind / behind) -> full EditMode 2211 / 2210 / 0 / 1, 3.4 min (ended in front)
+- [x] 6. PART 5: CORE PlayMode 175 / 174 / 0 / 1, 12.0 min + EditMode 120 / 120, 14 s (behind / behind); RUN TIMES; `_Test_Suite_1.md`
+       section 3; `_Test_Suite_2.md` 3.6 + status; structure map; LivingRoomScene active, Play Mode off; report + commit line

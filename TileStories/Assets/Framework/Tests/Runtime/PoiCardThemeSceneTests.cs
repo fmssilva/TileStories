@@ -93,6 +93,7 @@ namespace TileStories.Tests
             AssertEveryScreenIn(CardOptions.ModeDark);
         }
 
+        [Category("CardSmoke")]
         [UnityTest]
         public IEnumerator TheWallsDefaultMode_MovesTheAppLive_WhileTheVisitorPickedNone()
         {

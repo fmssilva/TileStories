@@ -1,0 +1,25 @@
+{
+    "name": "TileStories.Editor.Tests.Live",
+    "rootNamespace": "TileStories.Editor.Tests",
+    "references": [
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "TileStories.Editor",
+        "TileStories.Editor.Tests",
+        "TileStories.Tests.Runtime",
+        "TileStories",
+        "TileStories.LookKit",
+        "Unity.TextMeshPro",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

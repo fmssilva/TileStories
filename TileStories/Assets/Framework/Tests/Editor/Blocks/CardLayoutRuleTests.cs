@@ -7,8 +7,11 @@ using UnityEngine;
 
 namespace TileStories.Editor.Tests
 {
-    // CardLayoutRuleTests's shared ground: its set-up and helpers, so its own tests and its old-navigation ones stand on one fixture
-    public abstract class CardLayoutRuleFixture
+    // The card's layouts (_3.2 section 6.1, step 13) as pure rules, on the SHIPPED LivingRoom wall through the real BlockStackBuilder and
+    // registry: which layout a card is really drawn in (tabs needs sections to switch between), which blocks the accordion draws as rows,
+    // what a jump does first per layout, what the spy names, the Text Tabs fallback, Open One At A Time (AccordionRule, shared with the
+    // contents list), where the stack rests after a row closes, the contents block's Rows rule, and the spy at the end of a tabs card.
+    public class CardLayoutRuleTests
     {
         protected const string Lamp = "lamp";
 
@@ -32,14 +35,7 @@ namespace TileStories.Editor.Tests
             if (bottom != null) nav.bottom = bottom;
             return nav;
         }
-    }
 
-    // The card's layouts (_3.2 section 6.1, step 13) as pure rules, on the SHIPPED LivingRoom wall through the real BlockStackBuilder and
-    // registry: which layout a card is really drawn in (tabs needs sections to switch between), which blocks the accordion draws as rows,
-    // what a jump does first per layout, what the spy names, the Text Tabs fallback, Open One At A Time (AccordionRule, shared with the
-    // contents list), where the stack rests after a row closes, the contents block's Rows rule, and the spy at the end of a tabs card.
-    public class CardLayoutRuleTests : CardLayoutRuleFixture
-    {
         [Test]
         public void TheLayout_IsScrollByDefault_AndForAnythingUnknown()
         {
@@ -269,12 +265,5 @@ namespace TileStories.Editor.Tests
             Assert.IsTrue(CardLayoutRule.OpenerShowsWords(fallback));
             Assert.IsTrue(CardLayoutRule.PagerNamesTheSection(CardLayoutRule.Effective(new CardNavigationSettings { layout = CardOptions.LayoutPages }, null)));
         }
-    }
-
-    // CardLayoutRuleTests's tests whose subject is an old navigation element: they wait for its rebuild on the Navigation Bar's pattern
-    [Ignore(TestSkips.OldNavigationElements)]
-    public class CardLayoutRuleOldNavigationTests : CardLayoutRuleFixture
-    {
-
     }
 }

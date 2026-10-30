@@ -28,10 +28,6 @@ namespace TileStories.Tests
         public const string Hero = "Hero";
         // The palettes of P4.4b: phases before (today's dark), light and dark -- the same renders in each mode
         public const string Palette = "Palette";
-        // The section sheets of P4.4c1: the navigation's numbers (landings, spy, fits) before and after the sheets
-        public const string Sections = "Sections";
-        // The card's resting end: where real drags rest at the end, with the bottom chrome back, and what the navigation says there
-        public const string RestingEnd = "RestingEnd";
         private const int Gap = 8;
 
         // The domain the gallery and card renders measure into: Palette while its switch file exists, else Typeface
@@ -106,7 +102,7 @@ namespace TileStories.Tests
         }
     }
 
-    // The P4.1 gallery set (block looks + navigation elements), rendered for the type comparison
+    // The P4.1 gallery set (block looks, a block under glare, the full view), rendered for the type comparison
     public class TypefaceMeasureGalleryTests
     {
         private const string ScenePath = "Assets/Dev/CardNavGallery/CardNavGalleryScene.unity";
@@ -117,11 +113,6 @@ namespace TileStories.Tests
         {
             "header_image_parallax_short_half", "rich_text_drop_cap_long", "status_ring_tokens", "gallery_carousel_short",
             "knowledge_check_multiple_choice_short", "audio_guide_player_short",
-        };
-
-        private static readonly string[] NavEntries =
-        {
-            "Nav_icon_tabs_chips_big", "Nav_progress_map_big", "Nav_drawer_tree_big", "Nav_fab_radial_big",
         };
 
         [UnitySetUp]
@@ -154,16 +145,6 @@ namespace TileStories.Tests
             LookMeasure.FreezeHero(_harness.Gallery.Sheet);
             yield return CardTestInput.Settle();
             yield return LookMeasure.Render(LookMeasure.ActiveLook, _phase, "block_" + name);
-        }
-
-        [UnityTest]
-        public IEnumerator NavigationElements([ValueSource(nameof(NavEntries))] string name)
-        {
-            int index = CardNavGalleryDefinitions.All.ToList().FindIndex(e => e.Name == name);
-            Assert.GreaterOrEqual(index, 0, "precondition: the navigation gallery defines " + name);
-            _harness.Show(index);
-            yield return CardTestInput.Settle();
-            yield return LookMeasure.Render(LookMeasure.ActiveLook, _phase, name);
         }
 
         // The rich text block under the P0 glare layer: a white sheet at 35 % over the whole screen (sun on the glass, _3.3 R8 S2c)

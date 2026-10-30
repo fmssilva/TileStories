@@ -184,6 +184,7 @@ namespace TileStories.Tests
 
         // ---------------- the acceptance: count what is bound ----------------
 
+        [Category("CardSmoke")]
         [UnityTest]
         public IEnumerator TheLamp_AllExpandable_HoldsNoMediaUntilARealTapOpensARow_AndARealTapClosesIt_GivingTheOwnerItsSlotBack()
         {

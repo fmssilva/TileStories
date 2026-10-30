@@ -241,6 +241,7 @@ namespace TileStories.Tests
         // _Test_Suite_1.md F1 (a visitor bug): no floating chip ever lies over a chrome mark. With a model placed (the chip shows), at every
         // stop a finger on the centre of the X and of settings lands on THAT mark -- panel.Pick, the hit test a real tap uses -- and at Full
         // the chip rests under the chrome row
+        [Category("CardSmoke")]
         [UnityTest]
         public IEnumerator WithAModelPlaced_AtEveryStop_AFingerOnTheXOrSettingsLandsOnThatMark_NeverOnTheChip()
         {

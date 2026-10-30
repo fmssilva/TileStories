@@ -24,12 +24,21 @@ namespace TileStories.Editor.Tests
             return float.Parse(m.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
         }
 
-        private static float Room => Token("room");
-        private static float H => Token("height");
-        private static float Bump => NavBarShapeRule.BellHeight(Disc);
-        private static float Half => Token("bump-half");
-        private static float Disc => Token("disc-raised") * 0.5f;
-        private static float Corner => NavBarShapeRule.Radius(true, true, H, Token("raised-radius"));
+        // The bar's numbers, read once per run: they sit inside per-sample lambdas, and a token read (the file + a regex, ~0.34 ms) on
+        // every access cost this fixture ~40 s
+        private static float Room, H, Half, Disc, Bump, Corner;
+
+        // Read the bar's numbers from CardTokens.uss, in the order they depend on each other
+        [OneTimeSetUp]
+        public void ReadTheTokensOnce()
+        {
+            Room = Token("room");
+            H = Token("height");
+            Half = Token("bump-half");
+            Disc = Token("disc-raised") * 0.5f;
+            Bump = NavBarShapeRule.BellHeight(Disc);
+            Corner = NavBarShapeRule.Radius(true, true, H, Token("raised-radius"));
+        }
 
         // The six default groups on the bar's 10 pt padded row: their centres
         private static float GroupCentre(int i) => 10f + (W - 20f) / 6f * (i + 0.5f);

@@ -10,8 +10,12 @@ using UnityEngine.UIElements;
 
 namespace TileStories.Tests
 {
-    // PoiCardHeroSceneTests's shared ground: its set-up and helpers, so its own tests and its old-navigation ones stand on one fixture
-    public abstract class PoiCardHeroSceneFixture : SearchSceneFixture
+    // The header's hero on the REAL LivingRoomScene (_3.3 P4.4a, S4a; HeroRule / HeroMotionRule / HeroActionsRule): the hero is the
+    // screen at Full, its words and actions whole at Half (the PT Lamp's "Mostra-me onde fica" included) while the sticky bar waits; real
+    // taps on the hero's action and Listen do what the card's own blocks do; the drift, the zoom, the parallax and the words' rise run on
+    // the test's clock and stop under Reduce Motion (frame sequences saved for the eye); the glow lies only behind the words, a fade with no
+    // edge; and every word keeps 4.5:1 against the picture right about its letters on every hero picture of the wall, EN / PT, light / dark
+    public class PoiCardHeroSceneTests : SearchSceneFixture
     {
         protected PoiCardSheetView Sheet => Card.Sheet;
 
@@ -89,16 +93,7 @@ namespace TileStories.Tests
             ThemeController.SetMode(CardOptions.ModeLight);
             yield return null;
         }
-    }
 
-    // The header's bar and hero on the REAL LivingRoomScene (_3.3 P4.4a, S4a; HeroRule / HeroMotionRule / HeroActionsRule): the bar is one
-    // row whatever the language or the Menu (the stops never move); the hero is the screen -- Full's whole view, the strip waiting until the
-    // visitor scrolls -- its words and actions whole at Half (the PT Lamp's "Mostra-me onde fica" included) while the sticky bar waits; real
-    // taps on the hero's action and Listen do what the card's own blocks do; the drift, the zoom, the parallax and the words' rise run on
-    // the test's clock and stop under Reduce Motion (frame sequences saved for the eye); the glow lies only behind the words, a fade with no
-    // edge; and every word keeps 4.5:1 against the picture right about its letters on every hero picture of the wall, EN / PT, light / dark
-    public class PoiCardHeroSceneTests : PoiCardHeroSceneFixture
-    {
         // ---------------- the title's lines (P4.4b part 2) ----------------
 
         // The Editor's 3-line notice predicts the hero's lines with HeroTitleFitRule over the display face's glyph advances, on a 390 pt
@@ -987,6 +982,7 @@ namespace TileStories.Tests
         }
 
         // The hero's Listen is minimal: a small headphones mark and the time, no box -- still a whole touch target
+        [Category("CardSmoke")]
         [UnityTest]
         public IEnumerator Listen_IsASmallHeadphonesMarkAndItsTime_NoBox_StillAWholeTouchTarget()
         {
@@ -1084,69 +1080,6 @@ namespace TileStories.Tests
                 last = Header.Foot.resolvedStyle.opacity;
             }
             Assert.Less(last, 1f, "precondition: the scroll carried the words into their fade");
-        }
-    }
-
-    // PoiCardHeroSceneTests's tests whose subject is an old navigation element: they wait for its rebuild on the Navigation Bar's pattern
-    [Ignore(TestSkips.OldNavigationElements)]
-    public class PoiCardHeroSceneOldNavigationTests : PoiCardHeroSceneFixture
-    {
-        // ---------------- the bar ----------------
-
-        [UnityTest]
-        public IEnumerator TheBar_IsOneRow_SoNoLanguageOrMenuMovesAStop([Values("lamp", "painting")] string poi, [Values("en", "pt")] string language)
-        {
-            yield return Open(poi, language, SheetStopRule.Stop.Peek);
-            var stops = Sheet.Stops;
-            var title = Header.Root.Q<Label>("card-header-title");
-            float bar = Stack.HeaderSlot.worldBound.height;
-            Assert.AreEqual(Sheet.Root.worldBound.yMin + stops.Peek, Header.PeekPart.worldBound.yMax, OnePixel, "the peek stop is the bar's bottom");
-            Assert.AreEqual(Sheet.CloseButton.worldBound.yMax, Stack.HeaderSlot.worldBound.yMax, OnePixel, "the bar's row ends with the round buttons");
-            Assert.IsTrue(Header.BarTitleShown, "at Peek the bar shows the title");
-            Assert.AreEqual(WhiteSpace.NoWrap, title.resolvedStyle.whiteSpace, "one line");
-            Assert.Less(title.worldBound.height, title.resolvedStyle.fontSize * 2f, "...drawn as one line");
-            Assert.LessOrEqual(title.worldBound.xMax, Sheet.SettingsButton.worldBound.xMin + OnePixel, "it ends before settings");
-            Assert.GreaterOrEqual(title.worldBound.xMin, Sheet.CloseButton.worldBound.xMax - OnePixel, "...and starts after the X (v5: X left, settings right)");
-            Assert.AreEqual(Sheet.Root.worldBound.center.x, title.worldBound.center.x, OnePixel, "...centred on the card");
-
-            yield return Push(c => c.card_settings.navigation.menu = BuiltInNavElements.DrawerTree);
-            Assert.AreEqual(DisplayStyle.Flex, Sheet.MenuButton.resolvedStyle.display, "precondition: the Menu's button shows");
-            Assert.AreEqual(stops.Peek, Sheet.Stops.Peek, 0.01f, "a Menu never moves Peek (stop " + Sheet.Stop + ", peek part " + Stack.PeekPart.name
-                + " " + Stack.PeekPart.worldBound + ", root " + Sheet.Root.worldBound + ", layer " + Sheet.Layer.layout + ")");
-            Assert.AreEqual(stops.Half, Sheet.Stops.Half, 0.01f);
-            Assert.AreEqual(bar, Stack.HeaderSlot.worldBound.height, 0.01f, "the bar keeps its height");
-            Assert.LessOrEqual(title.worldBound.xMax, Sheet.MenuButton.worldBound.xMin + OnePixel, "the title ends before the Menu's button");
-            Assert.Less(title.worldBound.height, title.resolvedStyle.fontSize * 2f, "...still one line");
-        }
-
-        // ---------------- the hero is the screen (_3.3 S4a) ----------------
-
-        // At Full the hero fills the whole view under the bar and the strip waits: it comes as soon as the visitor scrolls (the chrome's hero
-        // layer, CardChromeRule: no chrome where it would cut the hero in view), and goes again at the top
-        [UnityTest]
-        public IEnumerator AtFull_TheHeroFillsTheView_AndTheStripComesOnceTheVisitorScrolls([Values("lamp", "painting")] string poi)
-        {
-            yield return Open(poi, "en", SheetStopRule.Stop.Full);
-            Assert.AreEqual(0f, Scroll.scrollOffset.y, 0.5f, "precondition: the stack at its top");
-            var view = Scroll.contentViewport.worldBound;
-            var hero = Header.HeroPart.worldBound;
-            Assert.IsFalse(Sheet.Chrome.TopShown, "at rest the strip waits: the hero is the screen");
-            Assert.AreEqual(Sheet.Root.worldBound.yMin, view.yMin, OnePixel, "the view starts at the sheet's top: the bars float over it (S4a review)");
-            Assert.AreEqual(view.yMin, hero.yMin, OnePixel, "the hero's top at the view's top");
-            Assert.AreEqual(view.height, hero.height, OnePixel, "the hero fills the view: " + hero + " in " + view);
-            Assert.AreEqual(Sheet.Root.worldBound.width, Header.Frame.worldBound.width, OnePixel, "full width");
-            Assert.GreaterOrEqual(Header.Picture.Root.worldBound.height, hero.height - OnePixel, "the picture covers the hero's height (cropped at its sides)");
-
-            // - a scroll: the strip comes; back at the top it waits again
-            float strip = Sheet.Slots.Top.layout.height;
-            Assert.Greater(strip, 0f, "precondition: the strip is laid out (hidden, still measured)");
-            // - it floats: it comes once the picture scrolled away by the bars and the strip (CardChromeRule, TopFloats)
-            Scroll.scrollOffset = new Vector2(0f, Stack.TopInset + strip + 8f);
-            for (int frame = 0; frame < 60 && !Sheet.Chrome.TopShown; frame++) yield return null;
-            Assert.IsTrue(Sheet.Chrome.TopShown, "scrolled by the bars' and the strip's height: the strip shows");
-            Scroll.scrollOffset = Vector2.zero;
-            for (int frame = 0; frame < 60 && Sheet.Chrome.TopShown; frame++) yield return null;
-            Assert.IsFalse(Sheet.Chrome.TopShown, "back at the top: the hero is the screen again");
         }
     }
 }

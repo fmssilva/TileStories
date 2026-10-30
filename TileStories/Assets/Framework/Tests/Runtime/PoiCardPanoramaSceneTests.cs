@@ -80,6 +80,7 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle();
         }
 
+        [Category("CardSmoke")]
         [UnityTest]
         public IEnumerator TheLamp_GyroTakeover_ARealTapOpensItFullScreen_ARealDragTurnsIt_BackKeepsTheCardsStopAndScroll()
         {

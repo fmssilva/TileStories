@@ -70,7 +70,7 @@ Present a clear, exact implementation plan for the requested adjustments/tasks. 
    - **WHERE:** Exact disk paths per 10-structure.md.
    - **WHY:** the rationale for this approach over the alternatives considered.
    - **TESTS:** per .clinerules/40-testing.md, see which layers of tests you should implement and what each one specifically needs to check for this task — don't plan a boilerplate list of tests. But make sure to include tests to confirm that the logic works, and all config params work as expecteed, etc. And implement real tests, not "mock code tests that don't really confirm anything". Focus on "language based tests (Edit/Play Mode) - vision and human will be done later.
-       - In terms of the tests themselves, so you know, we have 3 sets of already defined POI markers around the "Lamp, Painting and Camera" main POIs. Many with different positions, categories, effects, hierarchy, with reveal delays, etc... The Lamp set is the bigger one with some 12+ POIs. So confirm well the POIs configs when implementing some test, and if needed add new POIs to make sure we actually test all situations and edge cases. 
+       - In terms of the tests themselves: use the reference fixtures the domain guide names (.clinerules/00-process.md "Real fixtures, one home"): for the card, the one reference card for single-card tests and the Phase A gallery for look x content matrices; for markers and the world, the LivingRoom POI sets (the Lamp 12+ POIs, the Painting, the Camera). Add a POI or block only if a case needs one.
        - And in terms of tests to implement, lets use real code for real testing. No mock code!!
 
 ### 1.5. Architectural & Implementation Decision Analysis

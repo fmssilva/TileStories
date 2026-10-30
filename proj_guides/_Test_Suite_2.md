@@ -163,37 +163,39 @@ stops x options) cost 5-60 s each. So the slow tests are **rendered option matri
 
 ### 3.2 The component map -- component -> its fixtures (today's s) -> its BLOCK selection
 
-Times are the last FULL's (s). "BLOCK selection" = what a block on that component runs after full EditMode (3.4): its own fixtures,
-named in `test_names`, plus the card smoke (F4). The gallery's per-kind cases by `group_names` regex on the case id (`"gallery_"`,
-`"story_magazine_"`; unverified until F4).
+KEPT CURRENT (`40-testing.md` 4.2 points here). A block on a component runs, after the EditMode half (`40-testing.md` 4.2: the suite
+without the Live assembly), its row's **selection** -- the fixtures in ONE `test_names` run (full class names: `TileStories.Tests.<X>`,
+the app's `TileStories.LivingRoom.Tests.<X>`), its gallery cases in ONE `group_names` run (a regex over the FULL test name, parameters
+included; proven on quick_facts: `CardGalleryTests\..*\("quick_facts` ran exactly its 5 looks + its compact row, 6 / 6) -- then
+`category_names: ["CardSmoke"]` in a run of its own. Times are the last FULL's (s); a row whose component changes edits its fixtures here.
 
-| component | its fixtures (s) | BLOCK selection (est.) |
-|---|---|---|
-| Sheet: stops, drag, close, tap outside | PoiCardSceneTests' generic ~15 tests (~70), SheetDrag 17, FullHeight 20, TapZoom 41 | ~2.5 min |
-| Hero (the header block) | Hero 295, gallery headers 92, ChromeMarks' hero half ~50 | ~7 min (~5 after F5) |
-| Chrome: X, settings, top band, bottom area | Chrome 13, ChromeMarks 97, CardSettingsGallery 20, Theme 11 | ~2.5 min |
-| Navigation Bar + NavController | NavBar 543, Nav 106 | ~11 min (~6.5 after F5) |
-| Open sections (the default container) | Sections 388, BrightPage 100 | ~8 min (~5.5 after F5) |
-| Cards look (the other container) | SectionSheet 64, CardLight 59, ThemeFrame 30 | ~2.5 min |
-| Locate pin | Locate 310 | ~5 min (~3.5 after F5) |
-| **Story (the next block)** | Story 61, StoryGallery 93, StoryMediaGallery 65, PageChrome 133 | ~6 min |
-| Pages, full view, layouts | PageChrome 133, FullViewSiblings 30, Pages 55, Layout 16, ShowAfterReading 46 | ~4.5 min |
-| **A block kind** (rich_text, quick_facts, timeline, ...: the next blocks) | its gallery cases (~5-25 x 1.8 s) + its PoiCardSceneTests.<Family> tests on the golden card (~2-6 x 4.5 s) + its compact-row case | **~1-2 min** |
-| audio_guide | AudioScene 48, AudioGallery 31, RealAudio 4 + its gallery cases | ~1.5 min |
-| video | VideoScene 32, VideoGallery 22, RealVideo 8 + cases | ~1.3 min |
-| model_3d / panorama_360 | Model3D 59, ModelTurntableGallery 23, PreviewStage 7, PreviewWiring 12 / Panorama 20, PanoramaGallery 22 | ~1.7 / ~0.7 min |
-| place_in_ar | PlaceInAr 60 + cases | ~1.2 min |
-| timeline (horizontal) / related | CardTrackGallery 18 + cases | ~0.7 min |
-| size_comparison (app) | SizeComparisonGallery 46, LivingRoomCardScene 22 | ~1.2 min |
-| Expandable / Show After Reading | Expandable 44 / ShowAfterReading 46 | ~0.8 min each |
-| Theme, type, language | ThemePipeline 8, ThemeType 10, Language 39, Portuguese 8 | ~1 min |
-| Live config (Play Mode push) | LiveUpdate 78 (+ the EditMode LivePlayMode* fixtures) | ~1.3 min |
-| Editor tabs | EditMode only (3.4) | in EditMode |
+| component | its fixtures (s) | BLOCK selection | est. |
+|---|---|---|---|
+| Sheet: stops, drag, close, tap outside | PoiCardSceneTests' generic ~15 tests (~70), SheetDrag 17, FullHeight 20, TapZoom 41 | `test_names` PoiCardSceneTests, PoiCardSheetDragSceneTests, PoiCardFullHeightSceneTests, PoiCardTapZoomTests | ~5.5 min |
+| Hero (the header block) | Hero 295, gallery headers 92, ChromeMarks' hero half ~50 | `test_names` PoiCardHeroSceneTests, PoiCardChromeMarksSceneTests; `group_names` `CardGalleryTests\.EveryHeader` (40) | ~8 min (~5 after F5) |
+| Chrome: X, settings, top band, bottom area | Chrome 13, ChromeMarks 97, CardSettingsGallery 20, Theme 11 | `test_names` PoiCardChromeSceneTests, PoiCardChromeMarksSceneTests, CardSettingsGalleryTests, PoiCardThemeSceneTests | ~2.5 min |
+| Navigation Bar + NavController | NavBar 543, Nav 106 | `test_names` PoiCardNavBarSceneTests, PoiCardNavSceneTests | ~11 min (~6.5 after F5) |
+| Open sections (the default container) | Sections 388, BrightPage 100 | `test_names` PoiCardSectionsSceneTests, PoiCardBrightPageSceneTests | ~8 min (~5.5 after F5) |
+| Cards look (the other container) | SectionSheet 64, CardLight 59, ThemeFrame 30 | `test_names` SectionSheetSceneTests, CardLightSceneTests, ThemeFrameSceneTests | ~2.5 min |
+| Locate pin | Locate 310 | `test_names` PoiCardLocateFabSceneTests | ~5 min (~3.5 after F5) |
+| **Story (the next block)** | Story 61, StoryGallery 93, StoryMediaGallery 65, PageChrome 133 | `test_names` PoiCardStorySceneTests, CardStoryGalleryTests, CardStoryMediaGalleryTests, PoiCardPageChromeSceneTests | ~6 min |
+| Pages, full view, layouts | PageChrome 133, FullViewSiblings 30, Pages 55, Layout 16, ShowAfterReading 46 | `test_names` PoiCardPageChromeSceneTests, PoiCardFullViewSiblingsSceneTests, PoiCardPagesSceneTests, PoiCardLayoutSceneTests, PoiCardShowAfterReadingSceneTests | ~4.5 min |
+| **A block kind** (rich_text, quick_facts, timeline, ...: the next blocks) | its gallery cases (~5-25 x 1.8 s) + its PoiCardSceneTests.<Family> tests on the golden card (~2-6 x 4.5 s) + its compact-row case | `group_names` `CardGalleryTests\..*\("<kind>` (its looks + its compact row) + its Phase B tests by name in `test_names` | **~1-2 min** |
+| audio_guide | AudioScene 48, AudioGallery 31, RealAudio 4 + its gallery cases | `test_names` PoiCardAudioSceneTests, CardAudioGalleryTests, PoiCardRealAudioTests; `group_names` `CardGalleryTests\..*\("audio_guide` | ~1.5 min |
+| video | VideoScene 32, VideoGallery 22, RealVideo 8 + cases | `test_names` PoiCardVideoSceneTests, CardVideoGalleryTests, PoiCardRealVideoTests; `group_names` `CardGalleryTests\..*\("video` | ~1.3 min |
+| model_3d / panorama_360 | Model3D 59, ModelTurntableGallery 23, PreviewStage 7, PreviewWiring 12 / Panorama 20, PanoramaGallery 22 | `test_names` PoiCardModel3DSceneTests, ModelTurntableGalleryTests, CardPreviewStageTests, PoiCardPreviewWiringTests / PoiCardPanoramaSceneTests, PanoramaGalleryTests; + their `group_names` | ~1.7 / ~0.7 min |
+| place_in_ar | PlaceInAr 60 + cases | `test_names` PoiCardPlaceInArSceneTests; `group_names` `CardGalleryTests\..*\("place_in_ar` | ~1.2 min |
+| timeline (horizontal) / related | CardTrackGallery 18 + cases | `test_names` CardTrackGalleryTests; `group_names` `CardGalleryTests\..*\("(timeline|related)` | ~0.7 min |
+| size_comparison (app) | SizeComparisonGallery 46, LivingRoomCardScene 22 | `test_names` TileStories.LivingRoom.Tests.SizeComparisonGalleryTests, TileStories.LivingRoom.Tests.LivingRoomCardSceneTests | ~1.2 min |
+| Expandable / Show After Reading | Expandable 44 / ShowAfterReading 46 | `test_names` PoiCardExpandableSceneTests / PoiCardShowAfterReadingSceneTests | ~0.8 min each |
+| Theme, type, language | ThemePipeline 8, ThemeType 10, Language 39, Portuguese 8 | `test_names` ThemePipelineTests, ThemeTypeTests, PoiCardLanguageSceneTests, PoiCardPortugueseTests | ~1 min |
+| Live config (Play Mode push) | LiveUpdate 78 (+ the Live assembly's 5 fixtures, EditMode) | `test_names` PoiCardLiveUpdateTests; the EditMode half runs FULL (the Live assembly included) | ~1.3 min + ~2 min |
+| Editor tabs | EditMode only (3.4) | the EditMode half; full EditMode when a row's live push changes | in EditMode |
 
-Today a block in the review phase runs **the 16 card fixtures + 2 (319 tests, 38 min)**, because a changed shared look breaks fixtures no
-grep names. With the per-component selection that tripwire becomes the **card smoke** (F4): ONE cheapest test per card component above
-(~16 tests x ~4.5 s = ~1.2 min), so a kind block is full EditMode + its selection (~1-2 min) + the smoke, and CORE every 3rd-4th block
-still runs every critical path.
+The tripwire for a shared look no grep names is the **card smoke**: `[Category("CardSmoke")]` on ONE cheapest test method per row above
+(the cheapest METHOD, all its cases summed -- a method's tag tags every case): 21 methods, 22 tests (CardTrackGallery's has 2 cases), measured
+in section 3.6. So a block in the review phase is the EditMode half + its row's selection + the smoke, and CORE every 3rd-4th block still runs
+every critical path. A component whose fixtures change keeps its smoke test current (its cheapest method, renamed with it).
 Outside the card (unchanged, not in a card block's selection): markers, LOD, displacement, orientation, search (SearchSettingsField 123,
 SearchDemo 41, SearchScene 33, Effects 62 + 10, LODControllerEvaluate 22, Orientation 20, the galleries < 1 s each).
 
@@ -233,7 +235,26 @@ With F1 (31 fewer), the Live assembly and the NavBarShape sampling, a card block
 
 Never dropped: the regression of a real past bug, the contract guards (tokens, fields, render targets, contrast as seen).
 
+### 3.6 The times after F1 + F2 + F4 + F11 (M2, 2026-10-30, measured, Unity behind unless said)
+- **A block's EditMode half** (`assembly_names` without Live): **2200 tests, 2199 passed, 0 failed, 1 skipped, 2.0 min** (was the full
+  suite, 5.2 min). Full EditMode (CORE / FULL, Live included): 2211 / 2210 / 0 / 1, 3.4 min (that run ended with Unity in front).
+- F1: full EditMode right after the deletions 2209 / 2208 / 0 / 1 (was 2240 / 2208 / 0 / 32): the 31 old-navigation skips gone, every
+  passing test still there.
+- F11: the Live assembly's 5 fixtures 103.8 s (Story Editor 31.2, Card 27.6, Navigation Bar 21.8, Locate 13.4, Sections 9.8).
+  NavBarShapeRuleTests **41.2 s -> 0.2 s**, every sample and assert unchanged: the cause was not the sampling but `Room`, `H`, `Half`,
+  `Disc`, `Corner` as properties that re-read CardTokens.uss and ran a regex on every access (0.338 ms a read, measured), inside
+  per-sample lambdas -- ~98 000 reads in RaisedDepth alone. They are read once in `[OneTimeSetUp]`.
+- F4: `group_names` `CardGalleryTests\..*\("quick_facts` ran exactly its 6 cases (5 looks + the compact row), 6 / 6, 9.7 s.
+  `category_names: ["CardSmoke"]`: 22 / 22, **1.4 min** (82.1 s) -- the review phase's tripwire, was all 17 card fixtures (~38 min).
+- F2: **CORE 12.2 min** -- PlayMode 175 / 174 / 0 failed / 1 skipped (the story measurement), 12.0 min; EditMode 120 / 120, 14 s
+  (was ~21.4 min computed from the FULL, 229 PlayMode tests). The NavBar's 2 methods, Sections' default and no SectionSheet test
+  confirmed by name in the run. The list: `_Test_Suite_1.md` section 3.
+
 ## 4. FIX list -- block-sized chunks
+
+**Done (M2, 2026-10-30): F1, F2, F4, F11, and F10's two deletions** (SectionSheetMeasureSceneTests, CardLightMeasureSceneTests) -- section
+3.6. Not held from the audit: DetailCardEditorTabTests 312-314 are no old-element sweep but the reflection walk's edits of the live
+`top` / `bottom` / `menu` config fields (every card_settings field undoes / redoes / survives Save): kept. Next: F3 + F6 (M3, the golden card).
 
 Each chunk: its target(s), its effect (minutes saved / places-to-edit removed / tests deleted), its tier. Recommended order: F1, F2, F4
 (they make every later block cheap), F3 before the first moved kind, then F7 with each block; F5 / F6 any time; F8, F9 later.

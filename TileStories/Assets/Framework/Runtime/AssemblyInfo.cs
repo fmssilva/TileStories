@@ -1,7 +1,8 @@
 using System.Runtime.CompilerServices;
 
 // Assembly-level seam: exposes `internal` members of the Runtime (TileStories)
-// assembly to the two test assemblies so EditMode (TileStories.Editor.Tests) and
+// assembly to the test assemblies so EditMode (TileStories.Editor.Tests, and
+// TileStories.Editor.Tests.Live for the fixtures that enter Play Mode) and
 // PlayMode (TileStories.Tests.Runtime) suites can assert on ReconcileClusters and
 // other internal cluster/LOD seams without widening their public surface.
 //
@@ -13,4 +14,5 @@ using System.Runtime.CompilerServices;
 // Location mirrors Editor/AssemblyInfo.cs at the assembly root (10-structure rule:
 // self-documenting, cross-cutting config belongs at the assembly root, not a domain folder).
 [assembly: InternalsVisibleTo("TileStories.Editor.Tests")]
+[assembly: InternalsVisibleTo("TileStories.Editor.Tests.Live")]
 [assembly: InternalsVisibleTo("TileStories.Tests.Runtime")]

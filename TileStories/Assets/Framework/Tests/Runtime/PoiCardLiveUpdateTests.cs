@@ -359,6 +359,7 @@ namespace TileStories.Tests
             Assert.AreEqual("Heading for later", Sheet.Stack.HeadingOf(Sheet.Stack.BoundViews.OfType<QuickFactsBlockView>().First()).text, "the next open shows the edit");
         }
 
+        [Category("CardSmoke")]
         [UnityTest]
         public IEnumerator ACardPush_NeverTouchesAPointsNameCategorySummaryOrKeywords()
         {

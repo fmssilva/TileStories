@@ -122,6 +122,7 @@ namespace TileStories.Tests
 
         // ---------------- the three layouts ----------------
 
+        [Category("CardSmoke")]
         [UnityTest]
         public IEnumerator Scroll_HalfWayTheQuestionWaits_AndTheEndOfTheOneStackShowsIt()
         {

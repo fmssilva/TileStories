@@ -6,7 +6,8 @@ namespace TileStories
     // Phase A harness of the card's navigation elements (Assets/Dev/CardNavGallery, excluded from Build Settings): shows one
     // CardNavGalleryDefinitions entry at a time -- an element over a fixture card -- on the card gallery's real sheet, at Full.
     // It drives the CardGalleryHarness beside it (whose own block list is switched off in this scene); Left / Right step through
-    // the entries in Play Mode, Space shows the entry again. CardNavGalleryTests drive Show(index) directly.
+    // the entries in Play Mode, Space shows the entry again. The measuring instruments (ThemePixelSetGalleryTests,
+    // TypefaceMeasureGalleryTests) drive Show(index) directly.
     [RequireComponent(typeof(CardGalleryHarness))]
     public sealed class CardNavGalleryHarness : MonoBehaviour
     {

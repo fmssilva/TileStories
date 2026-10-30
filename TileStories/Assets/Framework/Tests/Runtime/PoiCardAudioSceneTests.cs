@@ -102,6 +102,7 @@ namespace TileStories.Tests
 
         // ---------------- what the wall's cards hold ----------------
 
+        [Category("CardSmoke")]
         [UnityTest]
         public IEnumerator TheLamp_HoldsAHeroChipAsItsHerosListen_AndAPlayerInItsStack_OnTheCastlesRealClip()
         {

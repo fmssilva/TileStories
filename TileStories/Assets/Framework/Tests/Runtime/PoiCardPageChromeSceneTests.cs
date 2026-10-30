@@ -157,6 +157,7 @@ namespace TileStories.Tests
             Sheet.Takeover.Close();
         }
 
+        [Category("CardSmoke")]
         [UnityTest]
         public IEnumerator TheTopBar_WithTheBreadcrumbOff_IsTheBackArrowAlone_AndWithNoSectionTheTrailHasTwoParts()
         {

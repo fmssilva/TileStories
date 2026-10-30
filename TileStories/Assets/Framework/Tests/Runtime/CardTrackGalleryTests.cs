@@ -211,6 +211,7 @@ namespace TileStories.Tests
             AssertStripEndsOnACard(track, cells, gap, "at rest");
         }
 
+        [Category("CardSmoke")]
         [UnityTest]
         public IEnumerator TheGallery_ShowsEachTrackBothWays_ThePeekEntryWithASlice_TheNoPeekEntryWholeCardsOnly(
             [Values("timeline_horizontal_long_nopeek", "related_carousel_nearest_nopeek")] string name)

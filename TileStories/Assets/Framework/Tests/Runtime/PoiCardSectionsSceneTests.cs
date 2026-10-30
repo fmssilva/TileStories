@@ -108,6 +108,8 @@ namespace TileStories.Tests
         private static void AreSame(Color expected, Color actual, string what) =>
             Assert.Less(((Vector4)expected - (Vector4)actual).magnitude, 0.01f, what + ": expected " + (Color32)expected + ", drawn " + (Color32)actual);
 
+        [Category("CardSmoke")]
+        [Category("Core")]
         [UnityTest]
         public IEnumerator TheDefault_IsOpen_OneSectionPerBarGroup_EachOpenedByItsTilesAndEyebrow_ItsBlocksOpen()
         {
