@@ -14,29 +14,30 @@ So start by reading them all.
 
 
 ## `And now: domain proj_guides\_3.3_POI_Card_Styles.md`
-R1 -- retire the old navigation elements (the developer accepted the inventory: `_3.3` fourth round > "The old navigation elements
--- inventory" + "P3c review, second pass" d) + one Reduce Motion fix.
-GATE: as before (MCP; push: origin = the Architect's last commit; SDF fonts; compile clean before every run, editor_state confirms a
-run STARTED and Play Mode is off; Unity c). No opening test run (`00-process.md` PLAN 2).
-WORKER MODEL: Opus + effort Medium (a wide but well-specified removal; no new design).
-SUBAGENTS: per 00-process -- a Haiku Explore is a good fit to list every reference of each retired element (code, USS, config keys,
-Editor rows, help text, presets, tests, docs) before deleting.
-TEST PLAN: BLOCK = full EditMode + the 16 card fixtures (the tracker's list). The registry is shared ground: the deferred CORE (end of the
-review) covers it.
-PART 1 -- RETIRE (delete code, USS, Editor rows / options / help, config keys and their readers, presets, tests, docs and the
-10-structure lines), per the inventory: Text Tabs, Tabs / Icon Tabs, Segmented (+ its Groups table: the bar's Bar Groups replace it),
-Bottom Bar, Dock, Edge Scrubber, Fab Dial, Fab Radial, Grid Overlay, the in-flow Icon Grid / Rails / Bento / Auto Nav blocks, the Bento
-layout. No shims (`00-process.md`): an old config naming a retired element loads cleanly (unknown value -> the Navigation Bar default),
-with ONE EditMode test for that. The shipped configs (both copies) are re-saved through the classes.
-PART 2 -- KEEP for a later rebuild (code stays, fixtures stay skipped under TestSkips.OldNavigationElements, NOT offered in the
-Editor until rebuilt): Kind Chips / Icon Tabs + Chips, Bar Sheet, Progress Map, Family Pager, Next Up, Drawer Tree + the menu overlay +
-facet chips, Contents, Navigation Presets. Write each as a line in `_3.3` "## TODOs" ([rebuild] tag, what it becomes, from the inventory).
-PART 3 -- Reduce Motion stops the header's 3D turntable (TODO [R1]): `HeaderBlockView` no longer forces Auto Spin on under Reduce Motion.
-Test: Reduce Motion on -> the turntable's angle is unchanged over 2 s; off -> it turns.
-PART 4 -- LOOK: the POI Editor's Detail Card / Navigation tabs in the dark skin (no retired option left, nothing empty or misaligned);
-the card at Half and Full (nothing changed for the visitor). Then BLOCK green, docs (_3.3 build log, _Test_Suite_1 -- the removed
-fixtures, 10-structure), report with the Subagents line and one commit message. STOP with one AskUserQuestion.
-OUT OF SCOPE: the story block, rebuilding any kept element.
+C1 -- the 16 CORE PlayMode reds, then the review's CORE and FULL green (the tracker's HANDOFF 2026-10-30; `40-testing.md` 4.2).
+GATE: as before (MCP; push: origin = the Architect's last commit, R1 is committed; SDF fonts; compile clean before every run,
+editor_state confirms a run STARTED and Play Mode is off; Unity c). No opening test run.
+WORKER MODEL: Opus + effort High (real-input reds across fixtures from several blocks).
+SUBAGENTS: per 00-process -- a Haiku pass to pull the failing asserts and their lines out of the long logs fits well.
+TEST PLAN: the 16 by name after each fix group; then CORE (PlayMode + EditMode) green; then ONE FULL in the background. These close
+the card review's deferred CORE (P1 to R1, 8 blocks).
+NO baseline stash: whose block caused a red does not change the fix. Fix each where it belongs; say per test what was wrong (code or
+the test's aim) and which block's change exposed it, when you can tell.
+PART 1 -- taps that do nothing (Video x6, Audio x2, Story x5): first check what is over the tap point -- the locate pin's floating layer
+(`LocateFabView.Layer`: it must be PickingMode.Ignore except the pin's own 44+ pt target), the Navigation Bar, the chrome band. A CODE
+fix if a transparent layer eats input meant for the card (with one PlayMode test: a real tap on a block under the layer's empty area
+reaches the block); a TEST fix if the target sits under the bar (aim at its visible part: TapInReach / IntoReach). Story's "rows keep the
+text's margin: 0" -- check whether open sections (P3) dropped the preview's side margin; fix the code if the visitor sees text touching
+the edge (LOOK at it first), else the test.
+PART 2 -- Expandable + LiveUpdate (one bound view short on The Lamp): the sticky CTA is off under a bottom bar since P3d (Sticky Action =
+Automatic). Decide per test: a test about the sticky CTA pins Sticky Action Shown (as P3d did for 9 tests); a count of the card's views
+is updated to today's default.
+PART 3 -- ThemePipelineTests (the bar paints --ts-bar-glass): the bar was restyled in P2 and no USS reads that token. Make the test
+check the tokens the Navigation Bar really paints with today; delete a theme token nothing uses (and its guard rows) -- no dead tokens.
+PART 4 -- CORE green, then ONE FULL in the background (Unity c). A red in FULL outside the card: fix it if it is small and clearly ours,
+else report it. Docs: _3.3 build log (CORE and FULL counts), _Test_Suite_1 if tests moved, 10-structure if files changed. Report with
+the Subagents line and one commit message. STOP with one AskUserQuestion.
+OUT OF SCOPE: the story block's redesign, any new feature.
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`
