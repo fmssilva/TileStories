@@ -14,30 +14,30 @@ So start by reading them all.
 
 
 ## `And now: domain proj_guides\_3.3_POI_Card_Styles.md`
-M2 -- fast, honest test runs: FIX chunks F1 + F2 + F4 + F11 of `proj_guides/_Test_Suite_2.md` (the developer chose the order:
-first the runs, then the golden card M3 = F3 + F6, then each block moves onto it = F7).
+M3 -- the reference card: FIX chunks F3 + F6 of `proj_guides/_Test_Suite_2.md` (`_3.3` fourth round > "The reference card").
 GATE: as before (MCP; push: origin = the Architect's last commit; SDF fonts; compile clean before every run, editor_state confirms a run
-STARTED and Play Mode is off; Unity c). No opening test run.
-WORKER MODEL: Opus + effort Medium (test infrastructure from an exact audit; no product code).
-SUBAGENTS: per 00-process -- a Haiku pass to list every reference of each file / class F1 deletes (structure map, _Test_Suite_1, other
-tests, DevTools) fits well.
-TEST PLAN: full EditMode (with and without the split assembly, F11); CORE once (F2, F4 change what it holds) in the background.
-PART 1 -- F1, retire the old-navigation tests exactly as 2.1 lists (the 129 PlayMode + 31 EditMode skipped tests, the whole files,
-the `*OldNavigationTests` classes, the empty skeletons, `TestSkips.cs`, the NavigationElements cases, the Editor tab's old sweep). The
-kept nav elements' code stays; their rebuild will write new tests on the bar's pattern (the `_3.3` [rebuild] TODOs say so -- add that
-line to each). Also F10 (developer, 2026-10-30): delete SectionSheetMeasureSceneTests (it measured the old section sheets'
-stops and landings; the NavBar / Sections fixtures test the landings today) and CardLightMeasureSceneTests (a one-off cost probe of the
-rim light; its cost.txt stays as evidence, a later device / profiler session measures performance). Structure map + `_Test_Suite_1.md` rows.
-PART 2 -- F2, re-aim CORE: the NavBar class tag onto 2-3 methods, SectionSheetScene's off, the Open sections' cheapest default test on;
-CORE guards the SHIPPED default. `_Test_Suite_1.md` section 3 rewritten as current truth.
-PART 3 -- F4, the per-component selection: PROVE `group_names` selects one kind's gallery cases (run it, show the count); tag
-`CardSmoke` (one cheapest test per card component); `40-testing.md` 4.2: the review-phase BLOCK becomes "full EditMode + the
-component's selection (`_Test_Suite_2.md` 3.2, kept current there) + CardSmoke"; RUN TIMES updated.
-PART 4 -- F11, the EditMode half: the six LivePlayMode* fixtures into their own test assembly (a block runs the rest by
-`assembly_names`; CORE / FULL run all); NavBarShapeRuleTests sampled where its asserts look (measure why it takes 40 s first).
-PART 5 -- the times after (EditMode per block, CORE), docs, report with the Subagents line and one commit message. STOP with one
-AskUserQuestion.
-OUT OF SCOPE: F3 (the golden card -- next block), F5, F6-F10, any product code.
+STARTED and Play Mode is off; Unity c for runs, b for captures). No opening test run.
+WORKER MODEL: Opus + effort Medium (config content + a test helper + moving tests; no new product feature).
+SUBAGENTS: per 00-process -- a Sonnet + medium pass to draft the new blocks' text from the Ribeira source (you check every fact against
+it); a Haiku pass to list every test that reads a Ribeira block key.
+TEST PLAN: the component selections that read the Ribeira (NavBar, Sections, Locate, BrightPage, Story, PageChrome, NavBarRule ...) +
+CardSmoke + EditMode without Live; then ONE FULL in the background (owed since M2 deleted helpers; it closes the maintenance's tests).
+PART 1 -- the content (LOOK first): the Ribeira Palace gains the ~20 blocks of 1.4, one per missing kind, at its default look, with
+REAL content from `proj_guides/detail_card/content/text/PACO_RIBEIRA_text.md` (and the existing Ribeira media; a missing picture or
+clip -> name it, use a clearly marked stand-in, add it to the TODOs); `show_after_viewed` on block_15. Both config copies, through the
+classes. LOOK at the whole card at Half and Full, light and dark (order, rhythm, nothing broken), then show the developer the block
+list with one line of content each and ask once: accepted?
+PART 2 -- `ReferenceCard` (test side): Golden = the Ribeira, BlockOf(kind[, look]) read from the shipped config, SecondCard, Edge.*;
+its EditMode test: every registered kind exactly once on the golden card. Then `.clinerules/00-process.md` "Real fixtures, one home"
+may name it (the helper now exists).
+PART 3 -- move the single-card tests that read Ribeira / Lamp block keys onto ReferenceCard (no hard-coded block_NN left for the
+golden card); F6: the sticky action owned by the bar's fixture, the Locate sweep's bar matrix deleted, NavBarRule tests out of
+LocateFabRuleTests, the under_title runtime copy, the footer / default duplicates, Chrome names.
+PART 4 -- one chunk from the M2 report: the Editor log grows ~140 MB per full EditMode run (`40-testing.md` 4.2.6): find the noisiest
+loggers in the test runs and silence them in tests (not in product warnings), measure the growth after.
+PART 5 -- runs as the TEST PLAN says; docs (_Test_Suite_2 3.2 current, _Test_Suite_1, 10-structure); report with the Subagents line and
+one commit message. STOP with one AskUserQuestion.
+OUT OF SCOPE: F5, F7 (each block moves when it is reviewed), F8 (trim the Lamp), F9, any redesign.
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`
