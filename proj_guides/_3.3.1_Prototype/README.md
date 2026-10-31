@@ -44,3 +44,10 @@ NOT covered -- every other kind still needs its design confirmed the same way in
 dark): video, model_3d, panorama_360, place_in_ar / show_on_wall, zoom_image, person, story_chapters, compare_points,
 dialogue, pull_quote, process_steps, swatches, actions, status, poll, collect, feedback, practical_info, today_map,
 wall_locator, related, the four nav blocks, and the future kinds (AI / voice guide).
+
+## Block Components Lab (2026-10-31)
+Live: https://claude.ai/artifact/Qx64R4kAtCPDyBpTnsuR3H -- record copy `Block Components Lab.html`.
+Shows: Detail Card > Block Components (Test, Motion, Effects, Elements with named styles, Patterns) next to the phone, and Specific
+Marker > the Ribeira Palace's story built from styles and patterns. Steps 1-3 walk define -> compose -> use. Judge: the section's
+place and order, styles instead of per-row looks, the motion set and who decides it, patterns' slots, the orange test tile.
+Values in it are experiments, not defaults (`00-process.md`).
