@@ -847,6 +847,8 @@ Today the hero has one Listen pill (an audio track). The target is a GUIDE that 
   more fun reported, no controlled evidence of better learning -- keep the mascot optional. Risks: auto-play takes pacing from the
   visitor (always a clear pause / take-over), motion cost on phones, AI answers outside the approved sources.
 - Plan it as its own domain with `skills/Domain_Planning.md` (the authored tour first, then the mascot, then Ask the guide).
+- **Study (2026-10-31):** `proj_guides/_3.4_The_Guide_Study.md` -- architecture in three tiers (authored tour, offline search, AI
+  through a tiny backend or on device), voices and word timings, design rules, risks, sources; prototyped in the Block Components Lab.
 
 ## Wall content folders: by POI, then by type (2026-10-29, from the `_4.1` Explore phase)
 Move each wall's runtime files from by-type (`CardMedia/images`, `audio`...) to `Resources/<Wall>/Wall/` + `Resources/<Wall>/POIs/<poi_id>/<type>/`,
