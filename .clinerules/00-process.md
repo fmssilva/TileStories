@@ -32,6 +32,7 @@ deciding case by case:
 - **Unity has one owner:** one Editor, one UnityMCP. Only one agent drives Unity at a time (compiles, runs, Play Mode, captures); a
   subagent does Unity work only while its caller waits on it. No worktrees for Unity work (no Editor attached).
 - The final report (`60-finishing.md` 6.4) lists every subagent used, with its model and effort.
+- How to do it (the brief's four lines, fan-out, checking, lessons): `proj_guides/skills/Subagents.md`.
 
 ---
 

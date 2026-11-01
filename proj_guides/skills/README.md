@@ -12,6 +12,7 @@ points to those rules instead of copying them.
 | `Guidelines_Review.md` | Monthly, after a tool / Unity / package upgrade, or every ~10 blocks | Architect chat | A dated change list for the guides, applied after approval |
 | `Code_Health_Review.md` | The maintenance cadence (every ~10 blocks, before a domain close-out) | Worker, Opus-class | `_Code_Health_<n>.md` + fix chunks |
 | `Test_Suite_Review.md` | The maintenance cadence, or a full PlayMode run past ~60 min | Worker, Opus-class | `_Test_Suite_<n>.md` + fix chunks, faster with every guarantee kept |
+| `Subagents.md` | A task passes the delegation test of `00-process.md`: the task, its paths, the answer's shape | any agent | The checked conclusion + the report's Subagents line |
 | `End_Of_Task_Guidelines_Review.md` | End of a long chat: the chat itself | any agent | Proposed process lessons, awaiting approval |
 
 Last maintenance (test suite, code health, guidelines): none yet -- the block count since it lives in each Architect answer.

@@ -860,3 +860,8 @@ analysis and the target tree: `_4.1.1_World_Design_Research.md` section 4.9. One
 - When the Detail Card domain (`_3.x`) is finished, design `_4.1.3` section 5 (Label and Tap) from the block library.
 - Card blocks (summary card, image, video, 3D model) become possible labels, and even markers.
 - Until then, `_4.1` continues with Wall Life (`_4.1.4_Wall_Life_Spec.md`).
+
+## Global Scene words become keyed texts (2026-11-01, from the Lab v7 texts review)
+The search overlay's words are hard-coded English (`SearchOverlayView`: "Search", "Filters", "Show filters", "Filters (n)"). Give them
+keys and EN / PT rows, shown behind the Texts button of Global Scene > Select, Filter & Search (the rule in `_3.3`, "Texts, demo
+content and terms live with their owner"). Same check for Results, Minimap, Onboarding and the other `UI/Screen` parts.
