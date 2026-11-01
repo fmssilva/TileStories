@@ -16,7 +16,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
   file by file; nothing in this project edits them by hand.
 - ASCII only, everywhere.
 - One concise line per file: what it is and does NOW. No dates, steps, blocks or "was / now": when a file changes, rewrite its
-  line in place (`00-process.md`, "version 0, never logs"; `60-finishing.md` 6.3).
+  line in place (`00-process.md`, "version 0, never a log"; `60-finishing.md` 6.3).
 
 ## 1. Organizing principles
 

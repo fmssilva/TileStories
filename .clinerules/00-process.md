@@ -81,12 +81,14 @@ deciding case by case:
   world (position, LOD, displacement, regions): the LivingRoom POI sets -- the Lamp's 12+ POIs, the Painting, the Camera. Add a POI or
   a block only when a case needs one; never change an existing POI's identity fields (id, name, category, summary, keywords).
 
-### Guidelines and the structure map are "version 0", never logs
-* **What this covers:** every file in `.clinerules/` (the structure map `10-structure.md` included), `proj_guides/__AI_*.md` and
-  `proj_guides/skills/`. They describe how to work and what exists NOW, as if written today for a newcomer.
+### Every guide is "version 0", never a log
+* **What this covers:** every guide -- `.clinerules/` (the structure map `10-structure.md` included), `proj_guides/__AI_*.md`,
+  `proj_guides/skills/`, the domain guides (`proj_guides/_x.y_*.md`) and their prototype READMEs. They describe how to work, what
+  exists and what is planned NOW, as if written today for a newcomer.
 * **When something changes, REWRITE the line in place** so it states the current truth. Never append what was done, when, by which
-  step or block: no dates, no "(added at step X)", no "was / used to / now", no "verified on". History lives in git, in the domain
-  guides' status rows and Build logs, and in the plan tracker -- never in a guideline or the structure map.
+  step or block: no dates, no "(added at step X)", no "was / used to / now", no "verified on", no "X built (date)" records, no review
+  rounds. Done A, then B, then C: the guide says C. History lives in git (commit messages) only. A domain guide's status table says
+  what is done now (done / partly / not yet), never when or by which block.
 * **A lesson learned enters a guideline only as a better rule**: the simplest wording that makes the mistake unlikely, placed where
   an agent reads it at the moment it matters. Add a short "why" only when the rule would look arbitrary without it.
 * **The structure map:** one concise line per file -- what it IS and does, so an agent can find what exists before creating

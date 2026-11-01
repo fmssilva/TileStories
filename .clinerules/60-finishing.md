@@ -40,21 +40,18 @@ or a log line saying success. Before saying something is done:
   progress-notes file, never batched to the end of a longer session.
 - Check off only what was actually re-verified this session, per §6.1 --
   not what a plan file already claimed before this session started.
-- If a bug is found and fixed, the fix's write-up goes in that same plan
-  file, in a numbered corrections section -- not a new document.
+- If a bug is found and fixed, rewrite the plan file's lines it touched
+  to the current truth; a lesson worth keeping enters as a rule or one
+  line beside it ("avoid X: Y"). The story of the fix goes in the commit
+  message, never in a guide (`00-process.md`, "version 0, never a log").
 - **Check other domains' plan files too, not just this one's.** If this
   session's fix changes a fact a *different* domain's plan file states
   about the code you just touched (not a forward-looking TODO note, an
   actual factual claim — "X currently does Y," "this bug lives in file
   Z and is not yet fixed") — that other file is now wrong and needs the
   same immediate correction, in the same session, not left for whoever
-  next happens to open it. This was found repeatedly in a direct audit
-  (`_2.7_Corrections_TODO.md`, six separate instances across two plan
-  files: a later domain's own status header still described an earlier
-  domain's bug as open after that bug was independently fixed during the
-  earlier domain's own later work; a resolver's documented method
-  signature never got updated after the real signature changed during
-  implementation). Before closing out any task, grep sibling plan files
+  next happens to open it (stale "bug still open" headers and old method
+  signatures are the usual misses). Before closing out any task, grep sibling plan files
   for the name of whatever you just changed (a method, a field, a
   behavior) and check whether any of them describe it — not just the one
   file you were told to update.
@@ -82,7 +79,7 @@ one-sentence description. If you deleted one, remove it. If you moved or
 renamed one, update its entry. If you created a whole new subfolder, add
 the folder with a one-line comment describing its purpose. If a file's job
 changed, REWRITE its one line to the current truth -- never append history
-(`00-process.md`, "version 0, never logs").
+(`00-process.md`, "version 0, never a log").
 
 **Do not** re-audit the entire tree every session. Only update the entries
 that the current task actually touched. The goal is continuous accuracy

@@ -28,8 +28,8 @@ claims to check, not proof.
 - Domain guides (`_x.y_*.md`) -- the spec, status table and TODOs of one domain; `__mixed_TODOs.md` -- the rest.
 
 **Guide hygiene (every review):** if a lesson, rule or instruction you are about to write already lives elsewhere, point to it
-instead of copying it; if two places disagree, fix the one that is wrong and say so. Guidelines and `10-structure.md` are
-"version 0, never logs" (`00-process.md`): check every block's edits to them and rewrite any history a Worker appended. Your own decisions on a specific block go
+instead of copying it; if two places disagree, fix the one that is wrong and say so. Every guide (domain guides too) is
+"version 0, never a log" (`00-process.md`): check every block's edits to them and rewrite any history a Worker appended. Your own decisions on a specific block go
 in the brief, not in a guide.
 
 ## 1. Ground (every session)

@@ -51,6 +51,5 @@ Shows: Detail Card > Block Components (Test, Motion, Effects, Elements with name
 Marker > the Ribeira Palace's story built from styles and patterns. Steps 1-3 walk define -> compose -> use. Judge: the section's
 place and order, styles instead of per-row looks, the motion set and who decides it, patterns' slots, the orange test tile.
 Values in it are experiments, not defaults (`00-process.md`).
-v7 (2026-11-01): every part carries its own Texts and Demo content (no Shared Content); a fourth tab, Languages & Terms (languages,
-glossary + synonyms as one Terms list, a Texts check); Global Scene at the top level. The record is in `_3.3` ("Texts, demo content and
-terms live with their owner").
+It also shows each text on its part, Demo content, the demo card, and the Languages & Terms tab (`_3.3`, "Texts, demo content,
+the demo card and terms").
