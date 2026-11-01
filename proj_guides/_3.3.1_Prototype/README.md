@@ -46,7 +46,7 @@ dialogue, pull_quote, process_steps, swatches, actions, status, poll, collect, f
 wall_locator, related, the four nav blocks, and the future kinds (AI / voice guide).
 
 ## Block Components Lab (2026-10-31)
-Live: https://claude.ai/artifact/Qx64R4kAtCPDyBpTnsuR3H -- record copy `Block Components Lab.html`.
+Live: https://claude.ai/artifact/KDs2Ko1dYdBWYwZVhjvuEp -- record copy `Block Components Lab.html`.
 Shows: Detail Card > Block Components (Test, Motion, Effects, Elements with named styles, Patterns) next to the phone, and Specific
 Marker > the Ribeira Palace's story built from styles and patterns. Steps 1-3 walk define -> compose -> use. Judge: the section's
 place and order, styles instead of per-row looks, the motion set and who decides it, patterns' slots, the orange test tile.
