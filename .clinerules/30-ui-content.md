@@ -4,7 +4,7 @@
 
 These are the project-wide UI invariants. The concrete, tested rules live with their UI: the POI Editor window ->
 `proj_guides/_5.1_Editor_Tab.md` section 0; the visitor UI (card, search, markers) -> its domain guide, and the card's look ->
-`_3.3_POI_Card_Styles.md` (tokens, presets, sunlight contrast). Add a rule here only when it holds for every screen.
+`_3.3_POI_Card_Styles.md` (the theme, contrast, and each card part's target and state). Add a rule here only when it holds for every screen.
 
 - **No hardcoded visual values in C# or UXML.** Colors, fonts, spacing, and corner radii
   are defined once as USS variables or a shared design-tokens ScriptableObject, and

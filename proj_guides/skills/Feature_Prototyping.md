@@ -51,7 +51,10 @@
       - Reference: `skills/feature_prototipe_planning_example.html` / `.png` (the `_4.1` Region Editor Lab).
    3. **Check once and publish.** Take one rendered look (a headless browser screenshot), fix what it shows, then publish it
       as an artifact. Save a record copy and a README entry in `_x.y.N_Prototype/`: the link, what it shows, what to judge.
-   4. **Feed back.** Fold the developer's answers into the spec, as decisions with a date.
+   4. **Feed back.** Fold each answer and each correction the developer makes in the Lab into the spec the same round, as a rule
+      in the section of the part it changes. The spec says the current target, not the round that changed it.
+      - For each part, the spec also says what the code has today and where (Built / Partly / Not yet + the class), so the
+        implementation starts from the gap.
 4. **Result:**
    - the group's spec section;
    - the live Lab link and its record copy;
