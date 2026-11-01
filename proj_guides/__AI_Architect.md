@@ -24,7 +24,7 @@ claims to check, not proof.
   30 UI; 40 tests; 60 finishing). You review against them; you do not restate them here.
 - `proj_guides/__AI_Architect.md` (this file) -- only the Architect's procedure: review, decide, commit, plan, brief.
 - `proj_guides/__AI_worker.md` -- only the Worker's session procedure (plan / act cycle, keep going, GATE, summaries).
-- `proj_guides/skills/` -- procedures used at specific moments (e.g. `Domain_Review.md`), indexed in `skills/README.md`.
+- `proj_guides/skills/` -- procedures used at specific moments (e.g. `Domain_Review.md`), indexed in `skills/_Skills_Index.md` (read at every session start).
 - Domain guides (`_x.y_*.md`) -- the spec, status table and TODOs of one domain; `__mixed_TODOs.md` -- the rest.
 
 **Guide hygiene (every review):** if a lesson, rule or instruction you are about to write already lives elsewhere, point to it
@@ -37,6 +37,7 @@ in the brief, not in a guide.
 - Read fully: `.clinerules/00-process.md`, `20-code-quality.md`, `30-ui-content.md`, `40-testing.md`, `60-finishing.md`, and the
   current domain guide (e.g. `proj_guides/_3.1_POI_Card_Blocks.md`: TODOs, status table, the sections the block touched »» IF YOU DON'T HAVE A DOMAIN GUIDE FILE, STOP AND ASK THE USER TO ADD IT).
 - Read `10-structure.md` and `_5.1_Editor_Tab.md` only where the block touched them.
+- Read `proj_guides/skills/_Skills_Index.md`; open a skill whenever the work in hand matches its trigger (a Lab: `Feature_Prototyping.md`).
 - In the FIRST session of a new domain, also read `proj_guides/__Architect_Handoff.md` (written at the last domain's close-out).
 
 ## 2. Verify on disk (evidence, not the summary)

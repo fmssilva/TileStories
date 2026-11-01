@@ -4,7 +4,9 @@ Two agents share these rules:
 - **Architect** (a review chat): verifies the last block on disk, decides, keeps the guides in sync, commits, and writes the next
   block's brief. Its own procedure: `proj_guides/__AI_Architect.md`. It does not write code.
 - **Worker** (a fresh Claude Code session per block): plans the block, then builds it. Its own procedure: `proj_guides/__AI_worker.md`,
-  the brief in its `## And now:` section (written there by the Architect). Moment-specific procedures: `proj_guides/skills/`.
+  the brief in its `## And now:` section (written there by the Architect).
+- **Skills** (both agents): at the start of every session read `proj_guides/skills/_Skills_Index.md` (each skill's name and
+  trigger, one screen). When a task matches a trigger, open that skill and follow it; the report names the skills followed.
 
 Both work in two modes, always in this order:
 - **PLAN MODE:** read, audit the code on disk, weigh options, write the plan. No file modifications except the plan tracker.

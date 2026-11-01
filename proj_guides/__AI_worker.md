@@ -46,6 +46,7 @@ Before you start executing and implementing things, perform a critical review of
 ### 1.1. Guidelines & Architecture Re-Grounding
 - Workspace rules: read ./.clinerules/ (specifically 00-process.md, 10-structure.md, 20-code-quality.md, 30-design-system.md, 40-testing.md, 50-terminal_and_tools.md, 60-finishing.md)
 - Structure map: read ./.clinerules/10-structure.md
+- Skills: read proj_guides/skills/_Skills_Index.md; open a skill when the block's work matches its trigger.
 »» read all the lines on all these files
 
 ### 1.2. Deep Codebase Audit & Gap Analysis

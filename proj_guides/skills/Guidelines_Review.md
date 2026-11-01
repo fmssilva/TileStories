@@ -3,7 +3,7 @@
 1. **Name:** "review the guidelines" -- keep the rules true, short and in one place.
 2. **Trigger:** about monthly, right after a Unity / package / tool upgrade (MCP, Claude Code, glTFast, Input System...), or
    every ~10 blocks. Input: the workspace (all of `.clinerules/`, `proj_guides/__AI_*.md`, `proj_guides/skills/`, `_5.1` section
-   0, `__mixed_TODOs.md`) and the date of the last review (`skills/README.md`). If the workspace is not readable, STOP and ask.
+   0, `__mixed_TODOs.md`) and the date of the last review (`skills/_Skills_Index.md`). If the workspace is not readable, STOP and ask.
 3. **Procedure:**
    1. **Inventory.** List every rule file with its size; flag files or sections that grew without adding new rules (history
       logs, repeated examples, narrative of past sessions).
@@ -20,5 +20,5 @@
       already in git, examples that repeat the rule).
 4. **Result:** a short dated change list -- for each item: file + section, ADD / MODIFY / REMOVE / MOVE, the exact new text (or
    the pointer that replaces it), the evidence (the re-test result or the duplicate locations), and the token saving. Nothing is
-   applied before the developer approves; after approval, apply it, write the date in `skills/README.md`, commit
+   applied before the developer approves; after approval, apply it, write the date in `skills/_Skills_Index.md`, commit
    ("Tidy the project guidelines"). If nothing needs to change, say so in one line.

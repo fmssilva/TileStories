@@ -1,4 +1,4 @@
-# Skills -- procedures used at specific moments
+# Skills index -- read at the start of every session
 
 A skill stores a job that repeats. The everyday rules live elsewhere (shared rules in `.clinerules/`, the Worker's session
 procedure in `__AI_worker.md`, the Architect's in `__AI_Architect.md`); a skill adds only the steps for one kind of moment and
