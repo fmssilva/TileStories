@@ -55,6 +55,11 @@
       in the section of the part it changes. The spec says the current target, not the round that changed it.
       - For each part, the spec also says what the code has today and where (Built / Partly / Not yet + the class), so the
         implementation starts from the gap.
+   5. **Audit against the code before the final round.** Walk every Editor row, config value and runtime UI element the code
+      has today in the group's area, and give each one a verdict against the Lab: same, add, merge (two versions of one option
+      become one list with every good choice), or drop (with a one-line reason). Options neither side has may be added, marked
+      PROPOSED for the developer to judge. Split the walk by area when it is large; each part reports a table, and the merged
+      decisions go into the Lab and the spec in one pass. The self-test then proves every new option reaches the screen.
 4. **Result:**
    - the group's spec section;
    - the live Lab link and its record copy;

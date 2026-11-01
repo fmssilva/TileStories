@@ -45,11 +45,11 @@ dark): video, model_3d, panorama_360, place_in_ar / show_on_wall, zoom_image, pe
 dialogue, pull_quote, process_steps, swatches, actions, status, poll, collect, feedback, practical_info, today_map,
 wall_locator, related, the four nav blocks, and the future kinds (AI / voice guide).
 
-## Block Components Lab (2026-10-31)
+## Block Components Lab (2026-11-01, v8)
 Live: https://claude.ai/artifact/KDs2Ko1dYdBWYwZVhjvuEp -- record copy `Block Components Lab.html`.
-Shows: Detail Card > Block Components (Test, Motion, Effects, Elements with named styles, Patterns) next to the phone, and Specific
-Marker > the Ribeira Palace's story built from styles and patterns. Steps 1-3 walk define -> compose -> use. Judge: the section's
-place and order, styles instead of per-row looks, the motion set and who decides it, patterns' slots, the orange test tile.
-Values in it are experiments, not defaults (`00-process.md`).
-It also shows each text on its part, Demo content, the demo card, and the Languages & Terms tab (`_3.3`, "Texts, demo content,
-the demo card and terms").
+Shows: the Detail Card, Specific Marker and Languages & Terms tabs as the target, next to the phone, with every option of Unity's
+card merged in (the Unity audit, `_3.3` sections 6-13): each part's own options, a preview and a page for every kept block kind on
+the demo card, the visitor's Settings panel, the Contents sheet, the Picture viewer and the Video player, each text on its part.
+Judge: the merged choices and their defaults; each PROPOSED row (keep or drop, `_3.3` section 17); the previews of the kinds drawn
+for the first time. `#selftest` checks that every option, text and demo field reaches the phone; `#dcshot=<kind>` opens the demo
+card at that kind. Values in it are experiments until judged in the real scene (`00-process.md`).
