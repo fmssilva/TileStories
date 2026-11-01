@@ -530,6 +530,7 @@ input.u.miss{border-color:#C0392B}
 .fate2{display:block;color:var(--u-dim);font-size:10.5px}
 .gpop button{appearance:none;border:0;background:none;color:var(--accent2);font:700 13.5px/1 var(--body);padding:8px 0 0;cursor:pointer}
 em.missing{font-style:normal;color:#FF8A7A}
+.pfocus{outline:3px solid #E07A1F!important;outline-offset:3px;border-radius:10px}
 </style>
 <div class="wrap">
 <header>
@@ -1817,8 +1818,8 @@ var REALSTR=[["close", "s5top", "The name of the round close button at the top r
 var LABSTR=[
  ["democard_title","s0card","The demo card's title, on its hero.","Demo card","Cartão demo","","Title"],
  ["democard_tag","s0card","The line over the demo card's title.","Every block once · not a marker","Todos os blocos uma vez · não é um marcador","","Line over the title"],
- ["test_demo_title","s0comp","The tile at the top of the demo card that opens the Block Components demo, and that page's title.","Block Components demo","Demo dos Block Components","","Tile title, and its page's title"],
- ["test_demo_line","s0comp","The second line of that tile.","Motion, interaction, effects, elements, patterns.","Movimento, interação, efeitos, elementos, padrões.","","Tile line"],
+ ["test_demo_title","s0card","The tile at the top of the demo card that opens the Block Components demo, and that page's title.","Block Components demo","Demo dos Block Components","","Components tile title (and its page's title)"],
+ ["test_demo_line","s0card","The second line of that tile.","Motion, interaction, effects, elements, patterns.","Movimento, interação, efeitos, elementos, padrões.","","Components tile line"],
  ["test_tile_tag","s0tile","The small tag over the tile's title.","TEST · NOT IN THE APP","TESTE · NÃO ESTÁ NA APP","","Tag"],
  ["test_tile_title","s0tile","The tile's title.","Demo card","Cartão demo","","Title"],
  ["test_tile_line","s0tile","The tile's second line.","Every block once, with its demo content.","Todos os blocos uma vez, com o conteúdo demo.","","Line"],
@@ -1915,6 +1916,7 @@ renderEl=function(kind,style,c,i,still){if(!c||!Object.keys(c).length)c=S.demoC[
 /* ----- the demo card: a card of its own with every block once, seeded once from the Ribeira Palace, then independent of every marker ----- */
 S.demoCard=JSON.parse(JSON.stringify(S.card));
 function demoCardScreen(){var keep=S.card,kt=S.test;S.card=S.demoCard;S.test={on:true,poi:"painting"};inDemoCard=true;var h;try{h=cardScreen()}finally{S.card=keep;S.test=kt;inDemoCard=false}
+  h=h.replace(/<i title="([^"]*)">&#10005;<\/i>/,'<i title="$1" data-go="card" role="button" style="cursor:pointer">&#10005;</i>');
   return h.replace(/<small>[^<]*<\/small><h2>Ribeira Palace<\/h2>/,"<small>"+TXH("democard_tag")+"</small><h2>"+TXH("democard_title")+"</h2>")}
 
 /* ----- Terms: the glossary and the search's synonym groups, one list; a term may have its own small page ----- */
@@ -1952,7 +1954,7 @@ contentAt=function(path){if(path.indexOf("demo:")===0){var k=path.slice(5);retur
 var modelSigV6=modelSig;modelSig=function(){var keep=S.view;S.view="term";var x=termScreen()+"#"+demoCardScreen()+"#"+(S.previewBar?ptool():"");S.view=keep;return modelSigV6()+x};
 
 /* ----- the Editor is organised by UI element: each element the phone shows has ONE component foldout (its options, its Aa words, its Demo content) ----- */
-var COMP={s0card:["Preview & Test","Demo card"],s0tile:["Preview & Test","Demo card tile"],s0comp:["Preview & Test","Components tile"],s0bar:["Preview & Test","Preview bar"],
+var COMP={s0card:["Preview & Test","Demo card"],s0tile:["Preview & Test","Demo card tile"],s0bar:["Preview & Test","Preview bar"],
  s1a:["Card","Sheet"],s1peek:["Card","Next card peek"],s1mini:["Card","Mini player"],s1b:["Card","Look"],s1c:["Card","Sound"],s1m:["Card","Media"],
  s2cfg:["Sections","All sections"],s2start:["Sections","Section start"],s2div:["Sections","Divider"],s2tint:["Sections","Section tint"],s2next:["Sections","Next Up"],
  s5top:["Card Controls","Top Bar"],s5settings:["Card Controls","Settings panel"],s5bar:["Card Controls","Navigation Bar"],s5contents:["Card Controls","Contents sheet"],
@@ -1994,8 +1996,8 @@ edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV6();
   var s6=d.querySelector('[data-fo="s6"]');if(s6)s6.remove();
   /* 0 · Preview & Test */
   var s0=innerOf(d,"s0");if(s0)s0.innerHTML=
-    comp("s0card","a card of its own with every block once: each block's demo",row("Demo card",'<button class="ubtn sm" type="button" data-democard="">Open it &#8250;</button>',"Filled once with the Ribeira Palace\'s content, independent since: a block removed from a real point stays here. The tests read it, never a real point."))+
-    comp("s0comp","first on the demo card, it opens the Block Components demo page",row("Opens",'<button class="ubtn sm" type="button" data-democard="" data-then="demo">The Block Components demo &#8250;</button>',"The page with every motion, interaction, effect, element and pattern."))+
+    comp("s0card","every block once with its demo content, and a tile to the Block Components page",row("Demo card",'<button class="ubtn sm" type="button" data-democard="">Open it &#8250;</button>',"Filled once with the Ribeira Palace\'s content, independent since: a block removed from a real point stays here. The tests read it, never a real point.")+
+      row("Components page",'<button class="ubtn sm" type="button" data-democard="" data-then="demo">Open it &#8250;</button>',"Opened by the first tile of the demo card: every motion, interaction, effect, element and pattern, on real parts."))+
     comp("s0tile","on a marker's card, it opens the demo card",row("Shown",pseg("test.on",["true","false"],["On","Off"]),"Scene and Play only.")+row("On marker",sel("test.poi",POIS,S.test.poi),"The marker whose card shows the tile.",true))+
     comp("s0bar","floating on the phone: theme, motion, language, focus, screen",row("Shown",pseg("previewBar",["true","false"],["Shown","Hidden"]),"Scene and Play only. Its Focus button makes the phone jump to the part being edited."));
   /* 1 · Card: Media holds the media folders */
@@ -2040,7 +2042,7 @@ edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV6();
      comp("s7tour","progress, previous, pause, next, sound, captions, Ask and stop","")+comp("s7resume","after the visitor takes over, the button that carries on","")+comp("s7mascot","a small tile that follows the block being told",ma)+comp("s7ask","questions by text or voice",as)}
   /* every owner gets its Aa and its Demo content at the top of its own foldout */
   var owners={};Object.keys(TXO).forEach(function(o){owners[o]=1});KINDS.forEach(function(K){owners["el:"+K.k]=1});LIB.forEach(function(r){owners["bd:"+r[1]]=1});S.patterns.forEach(function(p){owners["pt:"+p.id]=1});
-  Object.keys(owners).forEach(function(o){var f=innerOf(d,o);if(!f)return;f.insertAdjacentHTML("afterbegin",ownbar(o));f.insertAdjacentHTML("beforeend",ownPanels(o))});
+  Object.keys(owners).forEach(function(o){var f=innerOf(d,o);if(!f)return;f.insertAdjacentHTML("beforeend",ownbar(o)+ownPanels(o))});
   [["s4m","entrances, transitions, scroll and emphasis, picked by elements and blocks"],["s4i","flip, hold, compare, swipe, tilt, hotspots"],["s4f","edges, dividers, light and moving effects"]].forEach(function(x){var sm=d.querySelector('[data-fo="'+x[0]+'"] > summary');if(sm&&sm.innerHTML.indexOf('class="sub"')<0)sm.innerHTML=sm.innerHTML.replace(/^(Motion|Interaction|Effects)/,'$1 <span class="sub">· '+x[1]+'</span>')});
   var en=innerOf(d,"s3e");if(en){var n1=en.querySelector(":scope > .note");if(n1)n1.remove()}
   var g7=d.querySelector('[data-fo="s7"] > summary');if(g7)g7.innerHTML=g7.innerHTML.replace("7 · Guide","6 · Guide");
@@ -2076,7 +2078,7 @@ edGlobal=function(){var h='<div class="note">The top level only: the wall\'s mar
   var gc=function(id,sub){return fo(id,esc(COMP[id][1])+' <span class="sub">· '+sub+'</span>',null,ownbar(id)+' '+ownPanels(id),2)};
   GSECS.forEach(function(g,i){var srch=i===GSECS.length-1,body=srch?row("Synonym Groups",'<button class="ubtn sm" type="button" data-goloc="term:t3">Languages &amp; Terms › Terms &#8250;</button>',"One list with the card\'s glossary. Keyword Fields stay here: only the search reads them.")+gc("g:10s","where the visitor types a search")+gc("g:10f","opens the filters, with how many are on"):' ';
    h+=fo("g:"+i,esc(g[0])+' <span class="sub">· '+esc(g[1])+'</span>',srch?["ext","EXTENDED"]:["","EXISTING"],body,1)});
-  h+=fo("g:11",'Onboarding hints <span class="sub">· the first-use hints over the wall</span>',["new","NEW"],ownbar("g:11")+row("Wall hint",pseg("wallTip",["true","false"],["Shown","Hidden"]),"Over the wall until the visitor opens a card.")+ownPanels("g:11"),1);return h};
+  h+=fo("g:11",'Onboarding hints <span class="sub">· the first-use hints over the wall</span>',["new","NEW"],row("Wall hint",pseg("wallTip",["true","false"],["Shown","Hidden"]),"Over the wall until the visitor opens a card.")+ownbar("g:11")+ownPanels("g:11"),1);return h};
 
 /* ----- the fourth tab: Languages & Terms ----- */
 /* every localized value of the wall, interface and content, as references to the ONE place it is stored */
@@ -2210,12 +2212,35 @@ showSelfTest=function(res){showSelfTestV6(res);var box=document.getElementById("
   box.insertAdjacentHTML("beforeend",'<p>Texts on their parts: <b>'+tx[1]+'</b> of '+tx[0]+' fields change the phone; the rest belong to parts the Lab does not draw (<b>'+els+'</b> elsewhere) or show during the tour. Content in the Texts check: <b>'+lc[1]+'</b> of '+lc[0]+'. Demo content and term pages: <b>'+dm[1]+'</b> of '+dm[0]+'.</p>');
   var j=JSON.parse(box.dataset.json||"{}");j.elsewhere=els;j.texts={fields:tx[0],ok:tx[1]};j.content={fields:lc[0],ok:lc[1]};j.demo={fields:dm[0],ok:dm[1]};box.dataset.json=JSON.stringify(j)};
 
+var demoScreenV6=demoScreen;demoScreen=function(){return demoScreenV6().replace('data-go="card"','data-go="democard"')};
+
+/* ----- opening a component shows that element on the phone, marked for a moment ----- */
+var FOCUS={s0card:["democard",".hero"],s0tile:["card",".testtile","full"],s0bar:[null,"#ptool"],s1a:["card",".hero","half"],s1peek:["card",".peeknext","peek"],
+ s1b:["card",".hero","full"],s1c:["card",'[data-ref="b:b_audio"]',"full"],s1mini:["card",'[data-ref="b:b_audio"]',"full"],
+ s2cfg:["card",".gsec","full"],s2start:["card",'[data-ref="sec:stories"]',"full"],s2div:["card",".gsec","full"],s2tint:["card",".gsec","full"],
+ s5top:["card",".chrome","full"],s5settings:["card",".chrome i:last-child","full"],s5bar:["card","#navbar","full"],s5openrow:["card",'[data-ref="b:b_story"] .open',"full"],
+ s5expand:["card",'[data-ref="b:b_info"] .open',"full"],s5back:["story",".topbar button"],s5crumb:["story",".topbar span"],s5prevnext:["story",".pfoot"],
+ s5loc:["card",".locpin","half"],s5sticky:["card",".sticky","half"],s5term:["story",".gterm"],s5termpage:["term",".el-title"],
+ s7voice:["card",".gblock","full"],s7hero:["card",".gstart","full"],s7block:["card",".gblock","full"],s7cap:["card",".gblock","full"],s7coach:["card",".gblock","full"],
+ s7tour:["card",".gblock","full"],s7resume:["card",".gblock","full"],s7mascot:["card",".gblock","full"],s7ask:["card",".gblock","full"],
+ "g:10":["card",".walltip","closed"],"g:11":["card",".walltip","closed"],w2:["story",".gterm"]};
+function focusPhone(view,sel,stop){if(view){var same=S.view===view&&(!stop||S.stop===stop);if(stop)S.stop=stop;S.view=view;if(!same)renderPhone(false)}
+  setTimeout(function(){var el=ph.querySelector(sel)||document.querySelector(sel);if(!el)return;
+    if(scr.contains(el)){var y=el.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-90;scr.scrollTo({top:Math.max(0,y),behavior:S.reduce?"auto":"smooth"})}
+    document.body.dataset.lastfocus=sel+"|found|"+(scr.contains(el)?Math.round(el.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop):"overlay");el.classList.remove("pfocus");void el.offsetWidth;el.classList.add("pfocus");setTimeout(function(){el.classList.remove("pfocus")},1800)},80)}
+ed.addEventListener("toggle",function(e){var d=e.target;if(!d.dataset||!d.dataset.fo||!d.open||performance.now()-lastRender<150)return;var id=d.dataset.fo,f=FOCUS[id],k=id.split(":");
+  if(f){focusPhone(f[0],f[1],f[2]);return}
+  if(k[0]==="bd"){var b=S.card.filter(function(x){return x.kind===k[1]})[0];if(b){focusPhone("card",'[data-ref="b:'+b.id+'"]',"full");return}var c=S.demoCard.filter(function(x){return x.kind===k[1]})[0];if(c)focusPhone("democard",'[data-ref="b:'+c.id+'"]');return}
+  if(k[0]==="sec"){focusPhone("card",'[data-ref="sec:'+k[1]+'"]',"full");return}
+  if(k[0]==="eg"){var K=KINDS.filter(function(x){return x.c===k[1]})[0];if(K){var st=defStyle(K.k);if(st)show("demo","s:"+st.id)}}},true);
+
 if(location.hash==="#selftest"){var r0=selfTest();showSelfTest(r0)}
 S.view="card";S.tab="card";if(location.hash!=="#selftest")renderAll(false);
 if(location.hash==="#guide"){S.stop="full";renderAll(false);startTour();G.i=4;runStep()}
 if(location.hash==="#words"){S.tab="words";S.sel.term="t1";renderEditor();S.view="story";renderPhone(false)}
 if(location.hash==="#texts"){["s0","s2","s3","s4","s7"].forEach(function(id){S.op[id]=false});S.op["tp:s1b:Pages layout › chevrons"]=true;S.op["tp:s5page:Previous / Next buttons"]=true;S.op["tp:s5page:Back button"]=true;goOwner("s1b",true);goOwner("s5page",true);show("card")}
 if(location.hash.indexOf("#open=")===0){var ids=decodeURIComponent(location.hash.slice(6)).split(",");S.op={};["s0","s1","s2","s3","s4","s5","s7"].forEach(function(x){S.op[x]=false});var vw=null;ids.forEach(function(i){if(i.indexOf("tab:")===0)S.tab=i.slice(4);else if(i.indexOf("view:")===0)vw=i.slice(5);else S.op[i]=true});S.ui.level=0;renderEditor();if(vw){S.view=vw;renderPhone(false)}}
+if(location.hash.indexOf("#toggle=")===0){var tg=decodeURIComponent(location.hash.slice(8)).split(",");S.op={};tg.slice(0,-1).forEach(function(i){S.op[i]=true});S.ui.level=0;renderEditor();setTimeout(function(){var dd=ed.querySelector('[data-fo="'+tg[tg.length-1]+'"]');if(dd){dd.open=true;window.scrollTo(0,0)}},400)}
 if(location.hash==="#fr"){S.langs.list.push({code:"fr",name:"Français"});S.tab="words";S.ui.txf="content";S.sel.term="t1";renderEditor();S.termOpen="t1";S.view="term";renderPhone(false)}
 
 })();
