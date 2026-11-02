@@ -18,7 +18,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 2. How a round runs
 
 1. The developer looks at the Lab and writes corrections (with captures).
-2. The Architect changes the Lab in a new layer (`lab_src/v8m.js`, then `v8n`…), runs the self-test, takes captures of what changed
+2. The Architect changes the Lab in a new layer (`lab_src/v8n.js`, then `v8o`…), runs the self-test, takes captures of what changed
    and looks at them (D1 contrast, D5 one focal action, the flow), then publishes to the same link and copies the record copy.
 3. The same round, each decision goes into its part's section of `_3.3` as current state (no logs), with the Unity today line.
 4. Commit and push as `__AI_Architect.md` section 4 says (the whole workspace, `git add -A`).

@@ -1,0 +1,15 @@
+/* v8m: Lenses. The chips: --ink1 on --box, the chosen one in the accent; a block of the chosen topic gets a small badge */
+/* the label above, the chips the full width below */
+.lensbar{padding:14px 0 4px}
+.lensbar .lbl{display:block;padding:0 20px 8px;font:600 12px/1 var(--body);color:var(--ink2);text-transform:uppercase;letter-spacing:.06em}
+.lensbar .chips{padding:2px 20px!important}
+.lensbar .chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px}.lensbar .chips::-webkit-scrollbar{display:none}
+.lensbar button{flex:0 0 auto;appearance:none;border:1.5px solid var(--hair);background:var(--box);color:var(--ink1);font:600 14px/1 var(--body);padding:10px 14px;min-height:40px;border-radius:999px;cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+.lensbar button[aria-pressed=true]{background:var(--accent2);border-color:var(--accent2);color:var(--paper)}
+.lenshidden{display:none!important}
+.lensmark{position:relative}
+.lensbadge{position:absolute;z-index:2;top:8px;left:8px;background:var(--accent2);color:var(--paper);font:700 11px/1 var(--body);padding:5px 8px;border-radius:999px;letter-spacing:.02em;pointer-events:none}
+.tagm td{text-align:center}.tagm td:first-child{text-align:left}
+/* Unity's UI Toolkit blurs only an element itself, never what is behind it: so no backdrop blur; the captions and the first-card screen are solid */
+.gcap,.onb{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.onb{background:var(--paper)}

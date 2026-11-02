@@ -5,7 +5,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/block-components-lab.
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe' });
   const p = await b.newPage({ viewport: { width: 1400, height: 900 } });
   const errs = []; p.on('pageerror', e => errs.push(e.message));
-  await p.goto(url); await p.waitForTimeout(800);
+  await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 20000 }); await p.waitForTimeout(400);
   const R = src => p.evaluate(s => LAB.run(s), src);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   const click = async sel => { const bx = await p.locator(sel).first().boundingBox(); await p.mouse.click(bx.x + bx.width / 2, bx.y + bx.height / 2); await p.waitForTimeout(500); };
