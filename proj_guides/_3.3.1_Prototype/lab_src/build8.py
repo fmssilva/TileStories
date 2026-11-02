@@ -3,7 +3,7 @@ import io, json, os
 D = os.path.dirname(os.path.abspath(__file__))
 def rd(n): return io.open(os.path.join(D, n), encoding='utf-8').read()
 
-V8 = ['v8a.js', 'v8b.js', 'v8c.js', 'v8d.js', 'v8e.js', 'v8f.js', 'v8g.js']
+V8 = ['v8a.js', 'v8b.js', 'v8c.js', 'v8d.js', 'v8e.js', 'v8f.js', 'v8g.js', 'v8h.js']
 
 # words that moved to another part, or left with their part
 REOWN = {'peek_next_label': ('retired', 'the Next card peek left: a swipe up at Peek raises the card'),
@@ -39,6 +39,17 @@ NEWSTR = [
     ['how_bar', 's5hints', 'Step 3: the Navigation Bar.', 'The bar at the bottom jumps to each part of the card.', 'A barra em baixo salta para cada parte do cartão.', '', 'Step 3, bar'],
     ['how_locate', 's5hints', 'Step 4: the Locate Button.', 'The pin lowers the card and shows where this point is on the wall.', 'O pino baixa o cartão e mostra onde fica este ponto na parede.', '', 'Step 4, locate'],
     ['how_block', 's5hints', 'Step 5: a block and its page.', 'Tap a block to open its page; Back brings you here.', 'Toque num bloco para abrir a sua página; Voltar traz de volta aqui.', '', 'Step 5, block'],
+    ['state_loading', 's5states', 'Under a loader while the card or a page loads.', 'Loading…', 'A carregar…', '', 'Loading'],
+    ['state_slow', 's5states', 'Added under the loader after 4 s.', 'Still loading. The connection is slow.', 'Ainda a carregar. A ligação está lenta.', '', 'Slow line'],
+    ['state_lost_title', 's5states', 'The camera cannot see the wall (or lost it): the title.', "Can't see the wall", 'Não vejo a parede', '', 'Wall not found, title'],
+    ['state_lost_line', 's5states', 'Its line: what to do.', 'Point your phone at the tiles and hold still.', 'Aponte o telemóvel para os azulejos e fique quieto.', '', 'Wall not found, line'],
+    ['state_empty_title', 's5states', 'A list with nothing to show (no results for the filters).', 'Nothing here yet', 'Ainda nada aqui', '', 'Nothing here, title'],
+    ['state_empty_line', 's5states', 'Its line.', 'Try fewer filters.', 'Experimente menos filtros.', '', 'Nothing here, line'],
+    ['state_empty_action', 's5states', 'Its button.', 'Clear filters', 'Limpar filtros', '', 'Nothing here, button'],
+    ['state_offline_title', 's5states', 'No connection: the title.', "You're offline", 'Está sem ligação', '', 'Offline, title'],
+    ['state_offline_line', 's5states', 'Its line.', "What you've opened still works.", 'O que já abriu continua a funcionar.', '', 'Offline, line'],
+    ['state_retry', 's5states', 'The button that tries again (offline, a failed picture or page).', 'Try again', 'Tentar de novo', '', 'Try again'],
+    ['state_done', 's5states', 'After an action that saved something (an answer, a vote, a collected item).', 'Saved', 'Guardado', '', 'Done'],
     ['card_starter_custom', 'retired', '', 'Custom', 'Personalizado', '', ''],
 ]
 
@@ -73,7 +84,7 @@ a = "v7 = rd('v7.js').replace('__REALSTR__', rd('realstrings.json'))"
 assert a in src
 src = src.replace(a, "v7 = rd('v7.js').replace('__REALSTR__', fix_real(rd('realstrings.json')))\n"
                      "v7 = v7.replace('var LABSTR=[', 'var LABSTR=[' + ''.join(json.dumps(r, ensure_ascii=False) + ',' for r in NEWSTR if r[1] != 'retired'), 1)\n"
-                     "v7 = v7.replace('var COMP={', 'var COMP={s5viewer:[\"Card Controls\",\"Picture viewer\"],s5player:[\"Card Controls\",\"Video player\"],s5chip:[\"Card Controls\",\"Placed model chip\"],s5hints:[\"Card Controls\",\"Hints\"],', 1)\n"
+                     "v7 = v7.replace('var COMP={', 'var COMP={s5viewer:[\"Card Controls\",\"Picture viewer\"],s5player:[\"Card Controls\",\"Video player\"],s5chip:[\"Card Controls\",\"Placed model chip\"],s5hints:[\"Card Controls\",\"Hints\"],s5states:[\"Card Controls\",\"Loading & states\"],', 1)\n"
                      "v7 = v7.replace(PBAR_A, PBAR_B, 1)\nv7 = fix_demo_rows(v7)\n"
                      "v8 = '\\n'.join(rd(f) for f in V8 if os.path.exists(os.path.join(D, f)))")
 b = "+ v7 + '\\nif(location.hash===\"#selftest\")"
@@ -81,6 +92,6 @@ assert b in src, 'hook'
 src = src.replace(b, "+ v7 + '\\n' + v8 + '\\nif(location.hash===\"#selftest\")", 1)
 c = "rd('v7.css')"
 assert c in src
-src = src.replace(c, "rd('v7.css') + rd('v8.css') + rd('v8b.css') + rd('v8c.css') + rd('v8d.css') + rd('v8e.css') + rd('v8f.css') + rd('v8g.css')", 1)
+src = src.replace(c, "rd('v7.css') + rd('v8.css') + rd('v8b.css') + rd('v8c.css') + rd('v8d.css') + rd('v8e.css') + rd('v8f.css') + rd('v8g.css') + rd('v8h.css')", 1)
 src = src.replace("'Editor Lab · v7'", "'Editor Lab · v8'")
 exec(compile(src, 'build6+8', 'exec'), {'__file__': os.path.join(D, 'build6.py'), '__name__': '__main__', 'fix_real': fix_real, 'fix_demo_rows': fix_demo_rows, 'NEWSTR': NEWSTR, 'V8': V8, 'json': json, 'PBAR_A': PBAR_A, 'PBAR_B': PBAR_B})
