@@ -3,7 +3,7 @@ import io, json, os
 D = os.path.dirname(os.path.abspath(__file__))
 def rd(n): return io.open(os.path.join(D, n), encoding='utf-8').read()
 
-V8 = ['v8a.js', 'v8b.js', 'v8c.js', 'v8d.js', 'v8e.js', 'v8f.js', 'v8g.js', 'v8h.js', 'v8i.js', 'v8j.js', 'v8k.js', 'v8l.js', 'v8m.js']
+V8 = ['v8a.js', 'v8b.js', 'v8c.js', 'v8d.js', 'v8e.js', 'v8f.js', 'v8g.js', 'v8h.js', 'v8i.js', 'v8j.js', 'v8k.js', 'v8l.js', 'v8m.js', 'v8n.js']
 
 # words that moved to another part, or left with their part
 REOWN = {'peek_next_label': ('retired', 'the Next card peek left: a swipe up at Peek raises the card'),
@@ -51,6 +51,17 @@ NEWSTR = [
     ['state_retry', 's5states', 'The button that tries again (offline, a failed picture or page).', 'Try again', 'Tentar de novo', '', 'Try again'],
     ['state_done', 's5states', 'After an action that saved something (an answer, a vote, a collected item).', 'Saved', 'Guardado', '', 'Done'],
     ['guide_novoice', 's7cap', 'Over the captions when this device has no voice for the language (the words still light up).', 'No voice for this language on this device: captions only.', 'Sem voz para esta língua neste dispositivo: só legendas.', '', 'No voice'],
+    ['guide_intro', 's7mascot', "Azu's introduction, before the first step. {0} = the point's name.", "Hi! I'm Azu, and I'll be your guide. Ask me anything, at any time: just tap Ask. Now, let's meet {0}!", 'Olá! Sou o Azu e vou ser o seu guia. Pergunte-me o que quiser, a qualquer momento: basta tocar em Perguntar. Agora, vamos conhecer {0}!', '', 'Introduction'],
+    ['guide_moving_on', 's7resume', 'When the block being told left the screen: the guide tells the block now in view.', "OK, moving on. Let's look at this.", 'Muito bem, seguimos. Vejamos isto.', '', 'Moving on'],
+    ['guide_nudge_flip_1', 's7coach', 'Asking again (1st time) to flip a card.', 'Go on, tap the card to flip it.', 'Vá, toque no cartão para o virar.', '', 'Flip, again'],
+    ['guide_nudge_flip_2', 's7coach', 'Asking again (2nd time) to flip a card.', "Just one tap on the card, and you'll see what's on the other side.", 'Basta um toque no cartão e vê o que está do outro lado.', '', 'Flip, again (2)'],
+    ['guide_nudge_drag_1', 's7coach', 'Asking again (1st time) to drag across a picture.', 'Drag the line across the picture.', 'Arraste a linha sobre a imagem.', '', 'Drag, again'],
+    ['guide_nudge_drag_2', 's7coach', 'Asking again (2nd time) to drag.', 'Slide it all the way across, and see what changed.', 'Deslize até ao fim e veja o que mudou.', '', 'Drag, again (2)'],
+    ['guide_nudge_answer_1', 's7coach', 'Asking again (1st time) to answer a quiz.', 'Take a guess: tap one of the answers.', 'Arrisque: toque numa das respostas.', '', 'Answer, again'],
+    ['guide_nudge_answer_2', 's7coach', 'Asking again (2nd time) to answer.', 'No pressure, any answer will do.', 'Sem pressão, qualquer resposta serve.', '', 'Answer, again (2)'],
+    ['guide_try_moveon', 's7coach', 'After the last ask, when the visitor has not tried.', "No problem. Let's keep going.", 'Não faz mal. Vamos continuar.', '', 'Moving on'],
+    ['guide_after_flip', 's7coach', 'Once a card is flipped, before its back is read.', 'There it is.', 'Aí está.', '', 'After a flip'],
+    ['guide_after_answer', 's7coach', 'Once a quiz is answered, when the step has no words of its own.', 'Nicely done.', 'Muito bem.', '', 'After an answer'],
     ['lens_label', 's8lens', 'Before the chips (also their name for a screen reader).', 'See it as', 'Ver como', '', 'Label'],
     ['lens_all', 's8lens', 'The first chip: no lens.', 'Everything', 'Tudo', '', 'Everything'],
     ['aud_title', 's8onb', 'The first card: the question.', "Who's exploring today?", 'Quem está a explorar hoje?', '', 'Question'],
@@ -121,6 +132,6 @@ assert b in src, 'hook'
 src = src.replace(b, "+ v7 + '\\n' + v8 + '\\nif(location.hash===\"#selftest\")", 1)
 c = "rd('v7.css')"
 assert c in src
-src = src.replace(c, "rd('v7.css') + rd('v8.css') + rd('v8b.css') + rd('v8c.css') + rd('v8d.css') + rd('v8e.css') + rd('v8f.css') + rd('v8g.css') + rd('v8h.css') + rd('v8i.css') + rd('v8j.css') + rd('v8k.css') + rd('v8l.css') + rd('v8m.css')", 1)
+src = src.replace(c, "rd('v7.css') + rd('v8.css') + rd('v8b.css') + rd('v8c.css') + rd('v8d.css') + rd('v8e.css') + rd('v8f.css') + rd('v8g.css') + rd('v8h.css') + rd('v8i.css') + rd('v8j.css') + rd('v8k.css') + rd('v8l.css') + rd('v8m.css') + rd('v8n.css')", 1)
 src = src.replace("'Editor Lab · v7'", "'Editor Lab · v8'")
 exec(compile(src, 'build6+8', 'exec'), {'__file__': os.path.join(D, 'build6.py'), '__name__': '__main__', 'fix_real': fix_real, 'fix_demo_rows': fix_demo_rows, 'NEWSTR': NEWSTR, 'V8': V8, 'json': json, 'PBAR_A': PBAR_A, 'PBAR_B': PBAR_B})

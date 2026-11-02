@@ -8,7 +8,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/block-components-lab.
   await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 20000 }); await p.waitForTimeout(400);
   const R = src => p.evaluate(s => LAB.run(s), src);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
-  await R('S.hints.on=false;S.previewBar=false;S.lang="en";S.guideMute=true;renderAll(false)');
+  await R('S.hints.on=false;S.previewBar=false;S.lang="en";S.guideMute=true;S.guideCfg.intro="off";renderAll(false)');
   // helpers in the page: the spotlight's box, the picture's seen box, the view box's centre (as fractions of the picture)
   await R(`window.T8={rel:function(r){var p=ph.getBoundingClientRect();return[r.left-p.left,r.top-p.top,r.width,r.height].map(Math.round)},
     spot:function(){var s=ph.querySelector(".gspot.on"),d=G.fc&&G.fc.cue>=0?4:6;if(!s)return null;var r=T8.rel(s.getBoundingClientRect());return[r[0]+d,r[1]+d,r[2]-2*d,r[3]-2*d]},

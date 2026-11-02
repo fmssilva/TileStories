@@ -11,7 +11,9 @@ The Lab is one HTML page built from layers. Each layer adds to or wraps the one 
   spot named in a picture, Azu pointing; the Guide script's spots) -> `v8k.js` (a livelier Azu:
   2.5D, blinks, a mouth that follows the words, moods; play: poke, tickle, a fall, the water break, the cookie; Solemn) -> `v8l.js` (Audiences: Family /
   Explorer / Expert, the first-card screen, Settings, looks, per-field overrides with coverage and Draft with AI, length) -> `v8m.js`
-  (Lenses: "See it as" chips, tags per block, story row and guide step; no backdrop blur, as in Unity). CSS in the same order;
+  (Lenses: "See it as" chips, tags per block, story row and guide step; no backdrop blur, as in Unity) -> `v8n.js`
+  (the guide as a person: introduction, the invitation ladder, scroll keeps it going, the block placed above the panel, a voice
+  that survives a pause; the page is the phone and the Editor, the phone takes the window's height). CSS in the same order;
   `v3body.html` is the page.
 - **Words:** `realstrings.json` (the framework's real words, with their owner part); `build8.py` moves words to new owners and adds
   the Lab's new ones.
@@ -22,7 +24,9 @@ The Lab is one HTML page built from layers. Each layer adds to or wraps the one 
   (`#dcshot=<kind>`); `#pshot=<stop>|<scroll>` opens the card at a stop and a scroll. `node test8f.js` drives the page with real
   taps, drags and keys (Playwright with the installed Edge; `#probe` opens a handle on the page's state) and prints PASS / FAIL per
   check: the sheet's gestures, the pinned close and settings, the demo card's X, and that a change moves no frame. `node test8g.js`
-  does the same for the demo's flow, each hint (its moment, Off, Reduce Motion, one at a time) and How to use the card; `node test8m.js` checks the
+  does the same for the demo's flow, each hint (its moment, Off, Reduce Motion, one at a time) and How to use the card; `node test8n.js` checks the
+  page, the introduction, pause and resume of the voice, a failing voice, the gesture mid-sentence, the asks, a scroll and the
+  placing; `node test8m.js` checks the
   chips, what steps aside, the heading rule, the scroll that stays, the guide by lens and the tag table; `node test8l.js` checks
   the overrides and their fallback, the review rule, the looks, the guide's length, Settings, the first card and the coverage;
   `node test8k.js` checks
@@ -31,5 +35,5 @@ The Lab is one HTML page built from layers. Each layer adds to or wraps the one 
   voice that loads late, each light style, the glide, Reduce Motion and the words' contrast; `node test8h.js`
   shows every state in every look, light and dark, and measures its words' contrast.
 - **The audit** that shaped v8: `AUDIT_DECISIONS.md` and `audit/` (one report per area).
-- A change: add it to the newest layer (or a new `v8n.js`), list it in `build8.py`'s `V8`, rebuild, run the self-test, look at a
+- A change: add it to the newest layer (or a new `v8o.js`), list it in `build8.py`'s `V8`, rebuild, run the self-test, look at a
   capture, then fold the decision into `_3.3`.

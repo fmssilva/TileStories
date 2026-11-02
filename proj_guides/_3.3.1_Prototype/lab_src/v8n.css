@@ -1,0 +1,9 @@
+/* v8n: the page is the phone and the Editor: no title above, nothing below; the phone takes the height there is */
+.wrap > header{display:none}
+body{padding-block:8px}
+.wrap{gap:0}
+.stagebg{padding:8px 0}
+/* Azu's entrance: it walks in from the side with a little hop (Unity: a Rive animation) */
+.mascot.enter svg{animation:azenter 1.3s cubic-bezier(.3,1.25,.5,1)}
+@keyframes azenter{0%{transform:translateX(90px) rotate(18deg);opacity:0}35%{opacity:1}55%{transform:translateX(-6px) translateY(-14px) rotate(-6deg)}75%{transform:translateY(0) scale(1.06,.94)}100%{transform:none}}
+.reduce .mascot.enter svg{animation:none}
