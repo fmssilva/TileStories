@@ -16,17 +16,17 @@ initGrab=function(gb){gb.setAttribute("role","button");gb.tabIndex=0;
       var dy=(ev.clientY-y0)/k;S.stop=dy<-40?UP[S.stop]:dy>40?DOWN[S.stop]:S.stop;renderPhone(true)}
     gb.addEventListener("pointermove",mv);gb.addEventListener("pointerup",up)});
   gb.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();stepStop()}})};
-/* the first card a visit opens at Half rises 8 px and settles, once, so the visitor sees it moves (never with Reduce Motion) */
-function nudgeOnce(){if(S.nudged||S.reduce)return;S.nudged=true;var gb=document.getElementById("grab"),k=[{transform:"none"},{transform:"translateY(-8px)",offset:.4},{transform:"none"}],o={duration:700,delay:450,easing:"ease-in-out"};
+/* a hint (Card Controls > Hints): the card opened at Half rises 8 px and settles, so the visitor sees it moves (never with Reduce Motion) */
+function nudgeOnce(){var m=S.hints.on?S.hints.nudge:"off";if(m==="off"||S.reduce||(m==="visit"&&S.nudged))return;S.nudged=true;var gb=document.getElementById("grab"),k=[{transform:"none"},{transform:"translateY(-8px)",offset:.4},{transform:"none"}],o={duration:700,delay:450,easing:"ease-in-out"};
   scr.animate(k,o);if(gb)gb.animate(k,o)}
 /* the half card's picture and the peek row open the card one stop too */
 ph.addEventListener("click",function(e){if(S.view!=="card")return;var t=e.target;
   if(S.stop==="peek"&&t.closest(".peekrow")){e.stopPropagation();stepStop();return}
   if(S.stop==="half"&&t.closest(".hero")&&!t.closest("button,a,[data-go],[data-locate],[role=button]")){e.stopPropagation();stepStop()}},true);
 
-/* ----- the demo card closes back to where it was opened from; its settings open like the card's ----- */
+/* ----- the demo card closes back to where it was opened from (a card, the wall, Demo Components); its settings open like the card's ----- */
 ph.addEventListener("click",function(e){var t=e.target,ch=t.closest(".chrome i, .topband i");if(!ch)return;var x=ch.textContent.charCodeAt(0)===10005;
-  if(S.view==="democard"){e.stopPropagation();if(x){var b=S.lastCard||{view:"card",stop:"closed"};S.view=b.view;S.stop=b.stop;S.settingsOpen=false;renderPhone(false)}else{S.settingsOpen=!S.settingsOpen;renderPhone(true)}return}
+  if(S.view==="democard"){e.stopPropagation();if(x){var b=S.beforeDemo||{view:"card",stop:"closed"};S.view=b.view;S.stop=b.stop;S.settingsOpen=false;renderPhone(false)}else{S.settingsOpen=!S.settingsOpen;renderPhone(true)}return}
   if(S.view==="card"&&x&&ch.closest(".topband")){e.stopPropagation();S.stop="closed";renderPhone(false)}},true);
 
 /* ----- a change redraws in place: the hero keeps its height, what was on screen stays shown, the scroll stays ----- */
@@ -39,8 +39,8 @@ function shownInPlace(){var r=scr.getBoundingClientRect();scr.classList.add("sti
 var renderPhoneV8f=renderPhone;
 renderPhone=function(keep){var top=scr.scrollTop,view=S.view,was=S.lastStop;if(!keep||view!==S.lastView)S.heroH=0;S.lastView=view;
   renderPhoneV8f(keep);if(keep&&S.view===view){scr.scrollTop=top;shownInPlace()}
-  S.justOpened=S.view==="card"&&S.stop!=="closed"&&was==="closed";S.stopMoved=S.view==="card"&&was!==S.stop;if(S.justOpened&&S.stop==="half")nudgeOnce();S.lastStop=S.view==="card"?S.stop:"closed";
-  if(S.view==="card"||S.view==="story"||S.view==="gallery")S.lastCard={view:"card",stop:S.view==="card"?S.stop:"full"};
+  S.justOpened=S.view==="card"&&S.stop!=="closed"&&was==="closed";S.stopMoved=S.view==="card"&&was!==S.stop;if(S.stopMoved)S.movedAt=performance.now();if(S.justOpened&&S.stop==="half")nudgeOnce();S.lastStop=S.view==="card"?S.stop:"closed";
+  if(S.view!=="democard")S.beforeDemo={view:S.view,stop:S.stop};
   if(S.view==="democard"&&S.settingsOpen&&!ph.querySelector(".vset"))ph.insertAdjacentHTML("beforeend",settingsPanel());
   var gb=document.getElementById("grab");if(gb)gb.setAttribute("aria-label",TXT(S.stop==="full"?"sheet_collapse":"sheet_expand"))};
 /* light / dark only repaints: the editor's previews change colour in place, the editor is not rebuilt */
@@ -60,7 +60,7 @@ S.ctl.locate.label="visit";S.locShown=0;
 function locLabel(){return ph.querySelector(".locpin > span:first-child:not(.floatpin)")}
 function foldLabel(){S.locFolded=true;if(S.ctl.locate.label==="visit")S.locSeen=true;var lb=locLabel();if(lb)lb.classList.add("fold")}
 /* room = no overlap with the INK of the hero's words (their text and the guide button), not the box that holds them */
-locFit=function(){var lb=locLabel();if(!lb)return;lb.style.visibility="";var a=lb.getBoundingClientRect();if(!a.width)return;
+locFit=function(){var lb=locLabel();if(!lb)return;var wait=650-(performance.now()-(S.movedAt||0));if(wait>0){lb.style.visibility="hidden";clearTimeout(S.fitT);S.fitT=setTimeout(locFit,wait+20);return}lb.style.visibility="";var a=lb.getBoundingClientRect();if(!a.width)return;
   var hit=Array.prototype.some.call(scr.querySelectorAll(".hero .w small,.hero .w h2,.hero .w p,.hero .w button"),function(el){var c;if(el.tagName==="BUTTON")c=el.getBoundingClientRect();else{var rg=document.createRange();rg.selectNodeContents(el);c=rg.getBoundingClientRect()}
     return c.width&&!(a.right<c.left||a.left>c.right||a.bottom<c.top||a.top>c.bottom)});
   if(hit)lb.style.visibility="hidden"};
@@ -71,13 +71,9 @@ renderPhone=function(keep){renderPhoneV8f2(keep);pinLift(false);
   if(S.justOpened&&S.ctl.locate.label==="open"){S.locFolded=false;S.locShown=0}
   var lb=locLabel();if(!lb)return;lb.classList.add("loclab");
   if(S.locFolded||(S.ctl.locate.label==="visit"&&S.locSeen))lb.classList.add("fold");
-  if(S.stopMoved)lb.style.visibility="hidden";else locFit()};/* while the sheet moves the words are not in place yet: v8e's locFit at 420 ms decides */
+  locFit()};/* while the sheet and the hero settle (650 ms after a stop change) the words are not in place: it waits */
 scr.addEventListener("scroll",function(){if(S.view!=="card")return;pinLift(true);locFit()},{passive:true});
 ph.addEventListener("click",function(e){if(e.target.closest(".locpin"))foldLabel()},true);
-var edCardV8f=edCard;
-edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8f();
-  if(S.ctl.locate.style==="pin_label")addRows(d,"s5loc",row("Label shows",pseg("ctl.locate.label",["visit","open"],["Once a visit","Every card"]),"The label stays until it has been seen for 4 s (time counts only while it has room beside the pin, never over the hero's words), then folds into the pin. Once a visit: then for the rest of the visit. Every card: again on each card. A tap on the pin counts as read.",true),"Colour");
-  return d.innerHTML};
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("ctl\\.jump\\.","ctl\\.jump\\.|ctl\\.locate\\.label"));
 
 /* probes (#probe): the page's state for the headless checks */

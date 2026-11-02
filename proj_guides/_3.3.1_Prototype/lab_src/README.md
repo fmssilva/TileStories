@@ -5,7 +5,8 @@ The Lab is one HTML page built from layers. Each layer adds to or wraps the one 
 - **Layers:** `v3.js` (the catalogues and the state) -> `v4.js` (Detail Card's organisation) -> `v5.js` (the flow, the self-test) -> `v6.js`
   (the Guide) -> `v7.js` (texts on their parts, the demo card, Languages & Terms) -> `v8a-e.js` (the Unity audit merged: card, sections
   and controls; every block kind; elements and motion; Specific Marker and languages; the hero and the editor tools) -> `v8f.js`
-  (close and settings pinned, the tappable grabber, the demo card's X, a change redraws in place, the Locate Button rides with the bar and its label folds after 4 s seen). CSS in the same order;
+  (close and settings pinned, the tappable grabber, the demo card's X, a change redraws in place, the Locate Button rides with the bar and its label folds after 4 s seen) -> `v8g.js` (the demo
+  in one component: the tile opens Demo Components, its top button the demo card; the Hints; How to use the card). CSS in the same order;
   `v3body.html` is the page.
 - **Words:** `realstrings.json` (the framework's real words, with their owner part); `build8.py` moves words to new owners and adds
   the Lab's new ones.
@@ -15,7 +16,8 @@ The Lab is one HTML page built from layers. Each layer adds to or wraps the one 
   classed behaviour (it prints `bad=0` when all is well; about 3 minutes). `shots8b.ps1` captures the demo card at each kind
   (`#dcshot=<kind>`); `#pshot=<stop>|<scroll>` opens the card at a stop and a scroll. `node test8f.js` drives the page with real
   taps, drags and keys (Playwright with the installed Edge; `#probe` opens a handle on the page's state) and prints PASS / FAIL per
-  check: the sheet's gestures, the pinned close and settings, the demo card's X, and that a change moves no frame.
+  check: the sheet's gestures, the pinned close and settings, the demo card's X, and that a change moves no frame. `node test8g.js`
+  does the same for the demo's flow, each hint (its moment, Off, Reduce Motion, one at a time) and How to use the card.
 - **The audit** that shaped v8: `AUDIT_DECISIONS.md` and `audit/` (one report per area).
-- A change: add it to the newest layer (or a new `v8g.js`), list it in `build8.py`'s `V8`, rebuild, run the self-test, look at a
+- A change: add it to the newest layer (or a new `v8h.js`), list it in `build8.py`'s `V8`, rebuild, run the self-test, look at a
   capture, then fold the decision into `_3.3`.

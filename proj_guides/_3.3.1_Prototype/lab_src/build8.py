@@ -3,7 +3,7 @@ import io, json, os
 D = os.path.dirname(os.path.abspath(__file__))
 def rd(n): return io.open(os.path.join(D, n), encoding='utf-8').read()
 
-V8 = ['v8a.js', 'v8b.js', 'v8c.js', 'v8d.js', 'v8e.js', 'v8f.js']
+V8 = ['v8a.js', 'v8b.js', 'v8c.js', 'v8d.js', 'v8e.js', 'v8f.js', 'v8g.js']
 
 # words that moved to another part, or left with their part
 REOWN = {'peek_next_label': ('retired', 'the Next card peek left: a swipe up at Peek raises the card'),
@@ -32,8 +32,29 @@ NEWSTR = [
     ['transcript', 's5player', 'The button under a video or audio that shows the words of its captions.', 'Transcript', 'Transcrição', '', 'Transcript button'],
     ['sheet_expand', 's1a', 'The name of the grabber at the top of the card while a tap raises the card one stop (read by screen readers).', 'Expand card', 'Expandir cartão', '', 'Grabber, raise'],
     ['sheet_collapse', 's1a', 'The name of the grabber when the card is full and a tap lowers it to half (read by screen readers).', 'Collapse card', 'Recolher cartão', '', 'Grabber, lower'],
+    ['hint_navbar', 's5hints', 'The tip over the Navigation Bar the first time it shows (a hint).', 'Jump to any part', 'Salte para qualquer parte', '', 'Navigation Bar tip'],
+    ['settings_how', 's5settings', "The settings panel's last button: it starts the short tour of how the card works.", 'How to use the card', 'Como usar o cartão', '', 'How to use button'],
+    ['how_grab', 's5hints', 'How to use the card, step 1: the grabber.', 'Tap the bar at the top, or drag it, to open the card wider or smaller.', 'Toque na barra no topo, ou arraste-a, para abrir o cartão mais ou menos.', '', 'Step 1, grabber'],
+    ['how_settings', 's5hints', 'Step 2: the settings mark.', 'The sliders hold your language, light or dark, motion and text size.', 'Os ajustes têm o idioma, claro ou escuro, movimento e tamanho do texto.', '', 'Step 2, settings'],
+    ['how_bar', 's5hints', 'Step 3: the Navigation Bar.', 'The bar at the bottom jumps to each part of the card.', 'A barra em baixo salta para cada parte do cartão.', '', 'Step 3, bar'],
+    ['how_locate', 's5hints', 'Step 4: the Locate Button.', 'The pin lowers the card and shows where this point is on the wall.', 'O pino baixa o cartão e mostra onde fica este ponto na parede.', '', 'Step 4, locate'],
+    ['how_block', 's5hints', 'Step 5: a block and its page.', 'Tap a block to open its page; Back brings you here.', 'Toque num bloco para abrir a sua página; Voltar traz de volta aqui.', '', 'Step 5, block'],
     ['card_starter_custom', 'retired', '', 'Custom', 'Personalizado', '', ''],
 ]
+
+DEMO_ROWS = {
+    'test_tile_tag': ["test_tile_tag", "s0card", "The small tag over the tile's title and over the Demo Components page's demo card button.", "TEST · NOT IN THE APP", "TESTE · NÃO ESTÁ NA APP", "", "Tag"],
+    'test_tile_title': ["test_tile_title", "s0card", "The tile's title: first on every marker's card (Scene and Play only), it opens the Demo Components page.", "Demo Components", "Componentes demo", "", "Tile title"],
+    'test_tile_line': ["test_tile_line", "s0card", "The tile's second line.", "Motion, interaction, effects, elements, patterns.", "Movimento, interação, efeitos, elementos, padrões.", "", "Tile line"],
+    'test_demo_title': ["test_demo_title", "s0card", "On the Demo Components page: the button at its top that opens the full demo card.", "Demo card", "Cartão demo", "", "Demo card button"],
+    'test_demo_line': ["test_demo_line", "s0card", "That button's second line.", "Every block once, with its demo content.", "Todos os blocos uma vez, com o conteúdo demo.", "", "Demo card button line"],
+}
+def fix_demo_rows(v7):
+    import re
+    for k, row in DEMO_ROWS.items():
+        v7, n = re.subn(r'\["' + k + r'",[^\n]*?\],', lambda m: json.dumps(row, ensure_ascii=False) + ',', v7, count=1)
+        assert n == 1, k
+    return v7
 
 def fix_real(src):
     rows = json.loads(src)
@@ -52,14 +73,14 @@ a = "v7 = rd('v7.js').replace('__REALSTR__', rd('realstrings.json'))"
 assert a in src
 src = src.replace(a, "v7 = rd('v7.js').replace('__REALSTR__', fix_real(rd('realstrings.json')))\n"
                      "v7 = v7.replace('var LABSTR=[', 'var LABSTR=[' + ''.join(json.dumps(r, ensure_ascii=False) + ',' for r in NEWSTR if r[1] != 'retired'), 1)\n"
-                     "v7 = v7.replace('var COMP={', 'var COMP={s5viewer:[\"Card Controls\",\"Picture viewer\"],s5player:[\"Card Controls\",\"Video player\"],s5chip:[\"Card Controls\",\"Placed model chip\"],', 1)\n"
-                     "v7 = v7.replace(PBAR_A, PBAR_B, 1)\n"
+                     "v7 = v7.replace('var COMP={', 'var COMP={s5viewer:[\"Card Controls\",\"Picture viewer\"],s5player:[\"Card Controls\",\"Video player\"],s5chip:[\"Card Controls\",\"Placed model chip\"],s5hints:[\"Card Controls\",\"Hints\"],', 1)\n"
+                     "v7 = v7.replace(PBAR_A, PBAR_B, 1)\nv7 = fix_demo_rows(v7)\n"
                      "v8 = '\\n'.join(rd(f) for f in V8 if os.path.exists(os.path.join(D, f)))")
 b = "+ v7 + '\\nif(location.hash===\"#selftest\")"
 assert b in src, 'hook'
 src = src.replace(b, "+ v7 + '\\n' + v8 + '\\nif(location.hash===\"#selftest\")", 1)
 c = "rd('v7.css')"
 assert c in src
-src = src.replace(c, "rd('v7.css') + rd('v8.css') + rd('v8b.css') + rd('v8c.css') + rd('v8d.css') + rd('v8e.css') + rd('v8f.css')", 1)
+src = src.replace(c, "rd('v7.css') + rd('v8.css') + rd('v8b.css') + rd('v8c.css') + rd('v8d.css') + rd('v8e.css') + rd('v8f.css') + rd('v8g.css')", 1)
 src = src.replace("'Editor Lab · v7'", "'Editor Lab · v8'")
-exec(compile(src, 'build6+8', 'exec'), {'__file__': os.path.join(D, 'build6.py'), '__name__': '__main__', 'fix_real': fix_real, 'NEWSTR': NEWSTR, 'V8': V8, 'json': json, 'PBAR_A': PBAR_A, 'PBAR_B': PBAR_B})
+exec(compile(src, 'build6+8', 'exec'), {'__file__': os.path.join(D, 'build6.py'), '__name__': '__main__', 'fix_real': fix_real, 'fix_demo_rows': fix_demo_rows, 'NEWSTR': NEWSTR, 'V8': V8, 'json': json, 'PBAR_A': PBAR_A, 'PBAR_B': PBAR_B})
