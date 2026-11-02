@@ -1,0 +1,17 @@
+/* v8q: Azu, the tile of light. The canvas takes the drawing's place and its reactions (Unity: a render texture in an element) */
+.mascot.light .azgl{display:block;width:64px;height:64px;margin:-4px -4px 0;transform-origin:50% 90%;transition:transform .35s}
+.mascot.light.pointing .azgl{transform:rotate(-6deg)}
+.mascot.light.r-giggle .azgl{animation:azgig .8s ease-in-out}.mascot.light.r-spin .azgl{animation:azspin .8s cubic-bezier(.4,1.3,.5,1)}
+.mascot.light.r-jump .azgl{animation:azjump .7s cubic-bezier(.3,1.5,.5,1)}.mascot.light.r-laugh .azgl{animation:azlaugh .2s linear 6}
+.mascot.light.r-fall .azgl{animation:azfall 1.7s cubic-bezier(.3,.8,.4,1)}.mascot.light.r-eat .azgl{animation:azchew .25s ease-in-out 6}
+.mascot.light.r-drink .azgl{animation:azdrink 1.5s ease-in-out}.mascot.light.enter .azgl{animation:azenter 1.3s cubic-bezier(.3,1.25,.5,1)}
+/* peek: a box just above the block's top edge clips Azu; it rises from behind the block, then sinks back */
+.azpeek{position:absolute;width:70px;height:52px;overflow:hidden;z-index:4;pointer-events:none}
+.azpeek-in{position:absolute;left:3px;top:58px;width:64px;height:64px;transition:top .6s cubic-bezier(.3,1.4,.5,1)}
+.azpeek.up .azpeek-in{top:4px}
+.azpeek-in canvas,.azpeek-in svg{display:block;width:64px;height:64px}
+/* the walk: the same Azu, travelling over the camera view to a point on the wall */
+.azwalker{position:absolute;left:0;top:0;width:64px;height:64px;z-index:9;pointer-events:none;will-change:transform;transform-origin:32px 70px}
+.azwalker canvas,.azwalker svg{display:block;width:64px;height:64px}
+.azwalker.arrived canvas,.azwalker.arrived svg{animation:azjump .7s cubic-bezier(.3,1.5,.5,1)}
+.reduce .azpeek-in{transition:none}.reduce .mascot.light .azgl,.reduce .azwalker canvas{animation:none!important}
