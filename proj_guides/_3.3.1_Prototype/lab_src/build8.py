@@ -3,7 +3,7 @@ import io, json, os
 D = os.path.dirname(os.path.abspath(__file__))
 def rd(n): return io.open(os.path.join(D, n), encoding='utf-8').read()
 
-V8 = ['v8a.js', 'v8b.js', 'v8c.js', 'v8d.js', 'v8e.js', 'v8f.js', 'v8g.js', 'v8h.js', 'v8i.js', 'v8j.js', 'v8k.js', 'v8l.js', 'v8m.js', 'v8n.js', 'v8o.js', 'v8r.js']
+V8 = ['v8a.js', 'v8b.js', 'v8c.js', 'v8d.js', 'v8e.js', 'v8f.js', 'v8g.js', 'v8h.js', 'v8i.js', 'v8j.js', 'v8k.js', 'v8l.js', 'v8m.js', 'v8n.js', 'v8o.js', 'v8r.js', 'v8p.js']
 
 # words that moved to another part, or left with their part
 REOWN = {'peek_next_label': ('retired', 'the Next card peek left: a swipe up at Peek raises the card'),
@@ -51,6 +51,32 @@ NEWSTR = [
     ['state_retry', 's5states', 'The button that tries again (offline, a failed picture or page).', 'Try again', 'Tentar de novo', '', 'Try again'],
     ['state_done', 's5states', 'After an action that saved something (an answer, a vote, a collected item).', 'Saved', 'Guardado', '', 'Done'],
     ['guide_novoice', 's7cap', 'Over the captions when this device has no voice for the language (the words still light up).', 'No voice for this language on this device: captions only.', 'Sem voz para esta língua neste dispositivo: só legendas.', '', 'No voice'],
+    ['cam_ask', 's7cam', 'The pill, when no point is in view.', 'Ask Azu about what you see', 'Pergunte ao Azu sobre o que vê', '', 'Pill'],
+    ['cam_ask_about', 's7cam', 'The pill: {0} = the point nearest the middle.', 'Ask about {0}', 'Perguntar sobre {0}', '', 'Pill, a point'],
+    ['cam_hint', 's7cam', 'In the panel, before a question.', 'Point at the wall and ask, or pick a suggestion.', 'Aponte para a parede e pergunte, ou escolha uma sugestão.', '', 'Hint'],
+    ['cam_chip_what', 's7cam', 'A suggestion.', 'What am I looking at?', 'O que estou a ver?', '', 'What'],
+    ['cam_chip_story', 's7cam', 'A suggestion.', 'Tell me a story about this wall', 'Conta-me uma história desta parede', '', 'Story'],
+    ['cam_chip_route', 's7cam', 'A suggestion.', 'Make me a 20-min route', 'Faz-me um percurso de 20 min', '', 'Route'],
+    ['cam_chip_oldest', 's7cam', 'A suggestion.', "What's the oldest here?", 'O que é mais antigo aqui?', '', 'Oldest'],
+    ['cam_chip_kids', 's7cam', 'A suggestion.', "Kids' treasure hunt", 'Caça ao tesouro', '', 'Treasure hunt'],
+    ['cam_what_mid', 's7cam', 'An answer, without the model: {0} = the middle point.', 'In the middle: {0}.', 'Ao centro: {0}.', '', 'Middle'],
+    ['cam_what_at', 's7cam', 'An answer: {0} = a place, {1} = a point.', '{0}: {1}.', '{0}: {1}.', '', 'Place'],
+    ['cam_place_top_left', 's7cam', 'A place on the screen.', 'Top left', 'Em cima, à esquerda', '', 'Top left'],
+    ['cam_place_top_centre', 's7cam', 'A place on the screen.', 'At the top', 'Em cima', '', 'Top'],
+    ['cam_place_top_right', 's7cam', 'A place on the screen.', 'Top right', 'Em cima, à direita', '', 'Top right'],
+    ['cam_place_middle_left', 's7cam', 'A place on the screen.', 'On the left', 'À esquerda', '', 'Left'],
+    ['cam_place_middle', 's7cam', 'A place on the screen.', 'In the middle', 'Ao centro', '', 'Middle'],
+    ['cam_place_middle_right', 's7cam', 'A place on the screen.', 'On the right', 'À direita', '', 'Right'],
+    ['cam_place_bottom_left', 's7cam', 'A place on the screen.', 'Bottom left', 'Em baixo, à esquerda', '', 'Bottom left'],
+    ['cam_place_bottom_centre', 's7cam', 'A place on the screen.', 'At the bottom', 'Em baixo', '', 'Bottom'],
+    ['cam_place_bottom_right', 's7cam', 'A place on the screen.', 'Bottom right', 'Em baixo, à direita', '', 'Bottom right'],
+    ['cam_story_none', 's7cam', 'A point with no story yet: {0} = the point.', '{0}: its story is coming soon.', '{0}: a sua história chega em breve.', '', 'No story'],
+    ['cam_route', 's7cam', 'Before a route without the model.', 'A 20-minute route, left to right:', 'Um percurso de 20 minutos, da esquerda para a direita:', '', 'Route'],
+    ['cam_oldest', 's7cam', '{0} = the point, {1} = its year.', 'The oldest here: {0}, from about {1}.', 'O mais antigo aqui: {0}, de cerca de {1}.', '', 'Oldest'],
+    ['cam_hunt', 's7cam', 'The treasure hunt: {0} = the point to find.', 'Treasure hunt! Find {0} and tap it.', 'Caça ao tesouro! Encontre {0} e toque-lhe.', '', 'Hunt'],
+    ['cam_found', 's7cam', 'The right point tapped.', 'You found it! Well done.', 'Encontrou! Muito bem.', '', 'Found'],
+    ['cam_not_it', 's7cam', 'Another point tapped.', 'Not that one. Look again!', 'Esse não. Procure outra vez!', '', 'Not it'],
+    ['cam_none', 's7cam', 'No point in view.', "I can't see any point of the wall right now. Point the phone at the tiles.", 'Não vejo nenhum ponto da parede agora. Aponte o telemóvel para os azulejos.', '', 'None'],
     ['dock_label', 's7dock', 'The guide panel, for a screen reader.', 'The guide', 'O guia', '', 'Name'],
     ['dock_stop_of', 's7dock', 'The step: {0} of {1}.', 'Stop {0} of {1}', 'Paragem {0} de {1}', '', 'Stop'],
     ['dock_ask', 's7dock', 'The talk button, for a screen reader.', 'Ask Azu', 'Perguntar ao Azu', '', 'Talk button'],
@@ -140,7 +166,7 @@ a = "v7 = rd('v7.js').replace('__REALSTR__', rd('realstrings.json'))"
 assert a in src
 src = src.replace(a, "v7 = rd('v7.js').replace('__REALSTR__', fix_real(rd('realstrings.json')))\n"
                      "v7 = v7.replace('var LABSTR=[', 'var LABSTR=[' + ''.join(json.dumps(r, ensure_ascii=False) + ',' for r in NEWSTR if r[1] != 'retired'), 1)\n"
-                     "v7 = v7.replace('var COMP={', 'var COMP={s5viewer:[\"Card Controls\",\"Picture viewer\"],s5player:[\"Card Controls\",\"Video player\"],s5chip:[\"Card Controls\",\"Placed model chip\"],s5hints:[\"Card Controls\",\"Hints\"],s5states:[\"Card Controls\",\"Loading & states\"],s8onb:[\"Audiences\",\"Who’s exploring\"],s8set:[\"Audiences\",\"Audience in Settings\"],s8look:[\"Audiences\",\"Looks per audience\"],s8lens:[\"Audiences\",\"Lenses\"],s7dock:[\"Guide\",\"Guide panel\"],', 1)\n"
+                     "v7 = v7.replace('var COMP={', 'var COMP={s5viewer:[\"Card Controls\",\"Picture viewer\"],s5player:[\"Card Controls\",\"Video player\"],s5chip:[\"Card Controls\",\"Placed model chip\"],s5hints:[\"Card Controls\",\"Hints\"],s5states:[\"Card Controls\",\"Loading & states\"],s8onb:[\"Audiences\",\"Who’s exploring\"],s8set:[\"Audiences\",\"Audience in Settings\"],s8look:[\"Audiences\",\"Looks per audience\"],s8lens:[\"Audiences\",\"Lenses\"],s7dock:[\"Guide\",\"Guide panel\"],s7cam:[\"Guide\",\"Ask about the view\"],', 1)\n"
                      "v7 = v7.replace(PBAR_A, PBAR_B, 1)\nv7 = fix_demo_rows(v7)\n"
                      "v8 = '\\n'.join(rd(f) for f in V8 if os.path.exists(os.path.join(D, f)))")
 b = "+ v7 + '\\nif(location.hash===\"#selftest\")"
@@ -148,6 +174,6 @@ assert b in src, 'hook'
 src = src.replace(b, "+ v7 + '\\n' + v8 + '\\nif(location.hash===\"#selftest\")", 1)
 c = "rd('v7.css')"
 assert c in src
-src = src.replace(c, "rd('v7.css') + rd('v8.css') + rd('v8b.css') + rd('v8c.css') + rd('v8d.css') + rd('v8e.css') + rd('v8f.css') + rd('v8g.css') + rd('v8h.css') + rd('v8i.css') + rd('v8j.css') + rd('v8k.css') + rd('v8l.css') + rd('v8m.css') + rd('v8n.css') + rd('v8o.css') + rd('v8r.css')", 1)
+src = src.replace(c, "rd('v7.css') + rd('v8.css') + rd('v8b.css') + rd('v8c.css') + rd('v8d.css') + rd('v8e.css') + rd('v8f.css') + rd('v8g.css') + rd('v8h.css') + rd('v8i.css') + rd('v8j.css') + rd('v8k.css') + rd('v8l.css') + rd('v8m.css') + rd('v8n.css') + rd('v8o.css') + rd('v8r.css') + rd('v8p.css')", 1)
 src = src.replace("'Editor Lab · v7'", "'Editor Lab · v8'")
 exec(compile(src, 'build6+8', 'exec'), {'__file__': os.path.join(D, 'build6.py'), '__name__': '__main__', 'fix_real': fix_real, 'fix_demo_rows': fix_demo_rows, 'NEWSTR': NEWSTR, 'V8': V8, 'json': json, 'PBAR_A': PBAR_A, 'PBAR_B': PBAR_B})
