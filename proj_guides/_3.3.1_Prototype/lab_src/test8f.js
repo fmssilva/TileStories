@@ -12,6 +12,16 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/block-components-lab.
   const stop = () => R('S.stop'), view = () => R('S.view');
   const box = async sel => p.locator(sel).first().boundingBox();
 
+  // 0. the first card opened at Half nudges once; the next one does not; never with Reduce Motion
+  const nudge = async () => {
+    await R('S.view="card";S.stop="closed";S.cardCfg.openAt="half";renderPhone(false)'); await p.waitForTimeout(500);
+    await R('window.__n=0;var t0=performance.now();(function f(){var m=new DOMMatrix(getComputedStyle(scr).transform);window.__n=Math.min(window.__n,m.m42);if(performance.now()-t0<1500)requestAnimationFrame(f)})();ph.querySelector("[data-marker]").click()');
+    await p.waitForTimeout(1600); return p.evaluate(() => window.__n);
+  };
+  const n1 = await nudge(), n2 = await nudge();
+  await R('S.nudged=false;S.reduce=true'); const n3 = await nudge(); await R('S.reduce=false');
+  ok('first open at Half nudges 8 px once; the second and Reduce Motion do not', n1 <= -7 && n2 === 0 && n3 === 0, { first: n1, second: n2, reduced: n3 });
+
   // 1. close and settings stay at the sheet's top while the content scrolls
   for (const st of ['half', 'full']) {
     await open(st, 0);

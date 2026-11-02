@@ -16,6 +16,9 @@ initGrab=function(gb){gb.setAttribute("role","button");gb.tabIndex=0;
       var dy=(ev.clientY-y0)/k;S.stop=dy<-40?UP[S.stop]:dy>40?DOWN[S.stop]:S.stop;renderPhone(true)}
     gb.addEventListener("pointermove",mv);gb.addEventListener("pointerup",up)});
   gb.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();stepStop()}})};
+/* the first card a visit opens at Half rises 8 px and settles, once, so the visitor sees it moves (never with Reduce Motion) */
+function nudgeOnce(){if(S.nudged||S.reduce)return;S.nudged=true;var gb=document.getElementById("grab"),k=[{transform:"none"},{transform:"translateY(-8px)",offset:.4},{transform:"none"}],o={duration:700,delay:450,easing:"ease-in-out"};
+  scr.animate(k,o);if(gb)gb.animate(k,o)}
 /* the half card's picture and the peek row open the card one stop too */
 ph.addEventListener("click",function(e){if(S.view!=="card")return;var t=e.target;
   if(S.stop==="peek"&&t.closest(".peekrow")){e.stopPropagation();stepStop();return}
@@ -34,8 +37,9 @@ function shownInPlace(){var r=scr.getBoundingClientRect();scr.classList.add("sti
   scr.querySelectorAll(".mv:not(.in)").forEach(function(el){var b=el.getBoundingClientRect();if(b.bottom>r.top&&b.top<r.bottom)el.classList.add("in")});
   void scr.offsetHeight;scr.classList.remove("still")}
 var renderPhoneV8f=renderPhone;
-renderPhone=function(keep){var top=scr.scrollTop,view=S.view;if(!keep||view!==S.lastView)S.heroH=0;S.lastView=view;
+renderPhone=function(keep){var top=scr.scrollTop,view=S.view,was=S.lastStop;if(!keep||view!==S.lastView)S.heroH=0;S.lastView=view;
   renderPhoneV8f(keep);if(keep&&S.view===view){scr.scrollTop=top;shownInPlace()}
+  if(S.view==="card"&&S.stop==="half"&&was==="closed")nudgeOnce();S.lastStop=S.view==="card"?S.stop:"closed";
   if(S.view==="card"||S.view==="story"||S.view==="gallery")S.lastCard={view:"card",stop:S.view==="card"?S.stop:"full"};
   if(S.view==="democard"&&S.settingsOpen&&!ph.querySelector(".vset"))ph.insertAdjacentHTML("beforeend",settingsPanel());
   var gb=document.getElementById("grab");if(gb)gb.setAttribute("aria-label",TXT(S.stop==="full"?"sheet_collapse":"sheet_expand"))};
