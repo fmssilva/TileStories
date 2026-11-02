@@ -4,3 +4,8 @@
 .grab::after{left:30px;right:30px;top:9px}
 .grab:focus-visible{outline:2px solid #fff;outline-offset:-2px;border-radius:8px}
 .scr.still .mv{transition:none!important}
+/* the Locate Button rides up with the bar; its label folds into the pin */
+.locpin{transition:bottom .3s cubic-bezier(.2,.8,.2,1)}
+.locpin .loclab{display:inline-block;max-width:220px;white-space:nowrap;overflow:hidden;transition:max-width .35s ease,opacity .25s ease,padding .35s ease,margin .35s ease}
+.locpin .loclab.fold{max-width:0;opacity:0;padding-left:0!important;padding-right:0!important;margin-right:-8px}
+.reduce .locpin,.reduce .locpin .loclab{transition:none}

@@ -5,7 +5,7 @@ The Lab is one HTML page built from layers. Each layer adds to or wraps the one 
 - **Layers:** `v3.js` (the catalogues and the state) -> `v4.js` (Detail Card's organisation) -> `v5.js` (the flow, the self-test) -> `v6.js`
   (the Guide) -> `v7.js` (texts on their parts, the demo card, Languages & Terms) -> `v8a-e.js` (the Unity audit merged: card, sections
   and controls; every block kind; elements and motion; Specific Marker and languages; the hero and the editor tools) -> `v8f.js`
-  (close and settings pinned, the tappable grabber, the demo card's X, a change redraws in place). CSS in the same order;
+  (close and settings pinned, the tappable grabber, the demo card's X, a change redraws in place, the Locate Button rides with the bar and its label folds after 4 s seen). CSS in the same order;
   `v3body.html` is the page.
 - **Words:** `realstrings.json` (the framework's real words, with their owner part); `build8.py` moves words to new owners and adds
   the Lab's new ones.

@@ -22,6 +22,45 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/block-components-lab.
   await R('S.nudged=false;S.reduce=true'); const n3 = await nudge(); await R('S.reduce=false');
   ok('first open at Half nudges 8 px once; the second and Reduce Motion do not', n1 <= -7 && n2 === 0 && n3 === 0, { first: n1, second: n2, reduced: n3 });
 
+  // 0b. the grabber keeps no focus ring after a tap
+  await R('S.view="card";S.stop="half";renderPhone(false)'); await p.waitForTimeout(500);
+  let g0 = await box('#grab'); await p.mouse.click(g0.x + 48, g0.y + 16); await p.waitForTimeout(400);
+  ok('a tap leaves no focus ring on the grabber', await R('document.activeElement!==document.getElementById("grab")'));
+
+  // 0c. the Locate Button rests at the foot; the Navigation Bar lifts it
+  const pin = () => R('var lp=ph.querySelector(".locpin"),nb=document.getElementById("navbar"),pr=ph.getBoundingClientRect(),k=fit.getBoundingClientRect().height/SCREENS[S.screen][1];[Math.round((pr.bottom-lp.getBoundingClientRect().bottom)/k),getComputedStyle(nb).display!=="none",Math.round(lp.getBoundingClientRect().bottom-nb.getBoundingClientRect().top)]');
+  await R('S.view="card";S.stop="half";S.ctl.sticky="off";renderPhone(false);scr.scrollTop=0'); await p.waitForTimeout(500);
+  const pa = await pin();
+  ok('no bar shown: the pin sits at the foot (22 px)', !pa[1] && pa[0] >= 18 && pa[0] <= 26, pa);
+  await R('S.stop="full";renderPhone(true);scr.scrollTop=1000'); await p.waitForTimeout(700);
+  const pb = await pin();
+  ok('the bar comes: the pin rides above it (12 px gap)', pb[1] && pb[2] <= -10 && pb[2] >= -14, pb);
+  await R('scr.scrollTop=0'); await p.waitForTimeout(700);
+  const pc = await pin();
+  ok('the bar goes: the pin settles back to the foot', !pc[1] && pc[0] >= 18 && pc[0] <= 26, pc);
+
+  // 0d. the label: Once a visit = 4 s or a scroll, then folded for the visit; Every card = until a scroll, again on each card
+  const folded = () => R('var l=ph.querySelector(".locpin .loclab");l?l.classList.contains("fold"):"none"');
+  const openFromWall = async () => { await R('S.view="card";S.stop="closed";renderPhone(false)'); await p.waitForTimeout(300); await R('ph.querySelector("[data-marker]").click()'); await p.waitForTimeout(500); };
+  const seen = () => R('var l=ph.querySelector(".locpin .loclab");l&&l.style.visibility!=="hidden"&&!l.classList.contains("fold")');
+  const inkHit = () => R('var a=ph.querySelector(".locpin .loclab").getBoundingClientRect();Array.prototype.some.call(scr.querySelectorAll(".hero .w small,.hero .w h2,.hero .w p,.hero .w button"),function(el){var c;if(el.tagName==="BUTTON")c=el.getBoundingClientRect();else{var rg=document.createRange();rg.selectNodeContents(el);c=rg.getBoundingClientRect()}return c.width&&!(a.right<c.left||a.left>c.right||a.bottom<c.top||a.top>c.bottom)})');
+  await R('S.ctl.locate.label="visit";S.locSeen=false;S.locFolded=false;S.locShown=0');
+  await openFromWall(); await p.waitForTimeout(4500);
+  const v0 = [await seen(), await folded(), await R('S.locShown')];
+  ok('Once a visit: no room beside the hero words at Half -> hidden, not folded, no time counted', v0[0] === false && v0[1] === false && v0[2] === 0, v0);
+  await R('scr.scrollTop=260'); await p.waitForTimeout(400);
+  const v1 = [await seen(), await inkHit()];
+  ok('a scroll gives it room: it shows, over no word (a scroll never folds it)', v1[0] === true && v1[1] === false, v1);
+  await p.waitForTimeout(4300); const v2 = await folded(); await openFromWall(); const v3 = await folded();
+  ok('Once a visit: folded after 4 s seen, still folded on the next card', v2 === true && v3 === true, [v2, v3]);
+  await R('S.ctl.locate.label="open";S.locSeen=false;S.locFolded=false;S.locShown=0'); await openFromWall(); await R('scr.scrollTop=260'); await p.waitForTimeout(4600);
+  const e1 = await folded(); await openFromWall(); const e2 = await folded(); const e3 = await R('S.locShown');
+  ok('Every card: folded after 4 s seen, open again (time reset) on the next card', e1 === true && e2 === false && e3 === 0, [e1, e2, e3]);
+  await openFromWall(); await R('scr.scrollTop=260'); await p.waitForTimeout(300);
+  const pl = await box('.locpin > span:last-child'); await p.mouse.click(pl.x + pl.width / 2, pl.y + pl.height / 2); await p.waitForTimeout(300);
+  ok('a tap on the pin counts as read', await R('S.locFolded') === true);
+  await R('S.ctl.locate.label="visit";S.ctl.sticky="auto"');
+
   // 1. close and settings stay at the sheet's top while the content scrolls
   for (const st of ['half', 'full']) {
     await open(st, 0);
