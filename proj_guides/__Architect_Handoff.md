@@ -18,10 +18,10 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 2. How a round runs
 
 1. The developer looks at the Lab and writes corrections (with captures).
-2. The Architect changes the Lab in a new layer (`lab_src/v8f.js`, then `v8g`…), runs the self-test, takes captures of what changed
+2. The Architect changes the Lab in a new layer (`lab_src/v8g.js`, then `v8h`…), runs the self-test, takes captures of what changed
    and looks at them (D1 contrast, D5 one focal action, the flow), then publishes to the same link and copies the record copy.
 3. The same round, each decision goes into its part's section of `_3.3` as current state (no logs), with the Unity today line.
-4. Commit and push (`git add -A -- . ':!IPCE'`).
+4. Commit and push as `__AI_Architect.md` section 4 says (the whole workspace, `git add -A`).
 - A large, independent piece (an audit across areas, a new view family) goes to subagents in parallel, each with a narrow brief
   and a report table. Subagents return text; the Architect saves the reports. Small changes the Architect makes itself.
 

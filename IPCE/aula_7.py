@@ -308,17 +308,19 @@ def f(n: int) -> None:
             print(i)
 
 f(7)
+f(6)
 print()
 
 # Com while
 def f(n: int) -> None:
     i = 0
-    while i < n:
+    while i < n: # para ser igual ao for tem de ser "<" e não "<=". 
         if i % 2 == 0:
             print(i)
         i += 1
 
 f(7)
+f(6)
 
 # Estamos a imprimir os números pares de 0 a n-1.
 # O for faz isso sozinho, o while precisa de inicialização, condição e avanço.
@@ -426,7 +428,7 @@ def years_to_double(rate: float) -> int:
     money = 1000.0
     years = 0
     while money < 2000.0:
-        money *= 1 + rate
+        money *= (1 + rate)          # os parênteses só ajudam a ler: *= já faz a conta toda à direita primeiro
         years += 1
     return years
 
@@ -492,7 +494,9 @@ def interpret() -> None:
             break
         else:
             print("Comando desconhecido")
+interpret()                     # com A, C, Q: executa o A, "Comando desconhecido", sai
 
+#%%
 # Forma 2: a saída (Q) é testada na linha do while
 def interpret2() -> None:
     """ Interpret a sequence of commands until the user types "Q" (exit). """
@@ -506,7 +510,6 @@ def interpret2() -> None:
         elif cmd != "Q":        # o Q tem de ser testado outra vez aqui!
             print("Comando desconhecido")
 
-interpret()                     # com A, C, Q: executa o A, "Comando desconhecido", sai
 interpret2()                    # com B, x, Q: o mesmo
 
 # As duas funcionam. Mas na forma 2 há dois cuidados:
@@ -525,6 +528,10 @@ interpret2()                    # com B, x, Q: o mesmo
 
 # %%
 # 5. Ler inteiros até o utilizador escrever -1, e devolver a soma (ex 46 do guião)
+
+# Este problema é estranho porques estamos a somar números, mas depois usamos o -1 para terminar
+# ou seja na prática com este código podemos somar todos os numeros, exceto (-1)
+# mas é só para perceberem edge cases a ter em atenção quando a "END_MARK" é um valor que também podia ser usada na lógica do programa
 
 END_MARK = -1
 
@@ -596,7 +603,8 @@ def forgot_the_advance() -> int:
     i = 0
     total = 0
     while i < 5:
-        total += i              # falta o i += 1 !
+        total += 1              # falta o i += 1 !
+        print(total)            # 1, 2, 3, ... sem parar: vê-se que nunca acaba
     return total
 
 # print(forgot_the_advance())   # nunca acaba: parem com o quadrado vermelho ou Ctrl + C
@@ -613,7 +621,8 @@ def advance_wrong() -> int:
     i = 0
     total = 0
     while i < 5:
-        total += i
+        total += 1
+        print(total)            # também não pára
         i -= 1                  # anda para o lado errado: 0, -1, -2, ... nunca chega a 5
     return total
 
@@ -680,8 +689,16 @@ f) EXERCICIO 46 (GUIÃO) - Jogo Hi-Lo [14 min -> 11:20] --------------------
 
 import random
 
-# Degrau: um dado de 6 faces. Corram várias vezes.
-print(random.randint(1, 6))     # 1, 2, 3, 4, 5 ou 6 (os dois limites entram)
+# Degrau: um número ao calhas de 1 a 100. Corram várias vezes.
+print(random.randint(1, 100))   # um número entre 1 e 100 (os dois limites entram)
+
+
+
+
+
+
+# %%
+import random
 
 MAX_HILO = 1023
 
@@ -698,6 +715,7 @@ def play_hilo(lo: int, hi: int) -> None:
     """ The classic HI-LO game in the closed range lo to hi. """
     secret = random.randint(lo, hi)    # geração do número secreto!!! É assim que se faz!
     print("Já pensei num número...")
+    # print(secret)                    # truque para testar: ver o segredo (apagar no fim!)
     attempts = 0
     while True:
         guess = ask_guess()
@@ -724,6 +742,14 @@ main()
 #
 # random.randint(lo, hi) dá um inteiro ao calhas, com lo e hi incluídos.
 # (ao contrário do range, aqui o último entra)
+#
+# Onde pôr o attempts += 1? Logo a seguir a ler a tentativa.
+# Se ficar no FIM do corpo do while, o break do "=" salta-o:
+# a última tentativa não é contada, e acertar à 10ª dava "9 tentativas".
+#
+# Para perceber o que o programa está a fazer, ajuda pôr prints de teste
+# (print(secret), print("entrou aqui 1"), ...) e tirá-los no fim.
+# Chama-se depurar (teórica 6a: "colocar mensagens em zonas críticas do código").
 
 
 
@@ -915,12 +941,19 @@ def attempts_needed(secret: int, lo: int, hi: int) -> int:
 print(attempts_needed(383, 0, 1023))     # 3
 print(attempts_needed(0, 0, 1023))       # 10
 
-worst = 0
+
+
+
+
+
+# %%
+# Precisa da attempts_needed da célula de cima.
+worst_case = 0
 for secret in range(1024):               # experimentar os 1024 segredos todos
     a = attempts_needed(secret, 0, 1023)
-    if a > worst:
-        worst = a
-print(worst)                             # 11
+    if a > worst_case:
+        worst_case = a
+print(worst_case)                        # 11
 
 # Cada resposta corta o intervalo a meio:
 #   1024 -> 512 -> 256 -> ... -> 2 -> 1   (10 cortes)
@@ -963,6 +996,10 @@ a) Uma matriz é uma lista de listas [6 min -> 12:11] -----------------------
 m = [[1, 2, 3, 4, 5],
      [6, 7],
      [8, 9, 10]]
+
+# É o mesmo que escrever tudo numa linha:
+# m = [[1, 2, 3, 4, 5], [6, 7], [8, 9, 10]]
+# (partir em várias linhas é só para se ver a "tabela")
 
 # No 1º "nível" acedemos às linhas:
 print(m[0])                     # [1, 2, 3, 4, 5]  a linha 0 (é uma lista)
@@ -1041,20 +1078,32 @@ m = [[1, 2, 3, 4, 5],
 # Fazer print do valor 7 no terminal
 print(m[1][1])                  # 7
 
+# E estes?
+print(m[2][2])                  # 10
+print(m[1])                     # [6, 7]     (só um índice: a linha inteira)
+
 
 
 
 
 
 # %%
-# Trocar o 1 por 100 na matriz
+# Trocar o 1 por 100 na matriz. E depois trocar a linha 1 inteira.
 
-m = [[1, 2, 3, 4, 5],
-     [6, 7],
-     [8, 9, 10]]
+m = [[1, 2, 3, 6, 7],
+     [6, 7, 5, 5, 5],
+     [8, 9, 10, 8, 9]]
 
-m[0][0] = 100
-print(m)                        # [[100, 2, 3, 4, 5], [6, 7], [8, 9, 10]]
+m[0][0] = 100                   # dois índices: muda UMA célula
+m[1] = [10, 40]                 # um índice: troca a LINHA inteira por outra lista
+for r in m:
+    print(r)                    # [100, 2, 3, 6, 7]
+                                # [10, 40]
+                                # [8, 9, 10, 8, 9]
+
+# Repararam? Era uma matriz 3x5 a sério e, ao trocar uma linha,
+# deixou de ser: agora as linhas têm tamanhos diferentes.
+# (o guião avisa: "ao fazer crescer uma linha, a matriz deixa de ser matriz")
 
 
 
@@ -1074,13 +1123,14 @@ print(m)                        # [[100, 2, 3, 4, 5], [6, 7], [8, 9, 10]]
 
 # %%
 """
-b) Percorrer uma matriz: pelos valores ou pelos índices [5 min -> 12:16] ---
+b) Percorrer uma matriz: pelos valores ou pelos índices [7 min -> 12:18] ---
 
     As duas formas da aula 6 (revisão do for), agora em 2D.
+    Atenção à linha 1: tem 4 valores, as outras têm 3.
 """
 
 m = [[1, 2, 3],
-     [4, 5, 6],
+     [4, 5, 6, 9],
      [7, 8, 9]]
 
 # Pelos VALORES: cada linha, e dentro dela cada valor
@@ -1088,13 +1138,32 @@ total = 0
 for r in m:                     # r é uma linha (uma lista)
     for v in r:
         total += v
-print(total)                    # 45
+print(total)                    # 54
 
-# Pelos ÍNDICES: cada (i, j), como nos desenhos da aula 6
+# Pelos ÍNDICES, 1ª tentativa: as colunas da linha 0 para todas as linhas
+total = 0
 for i in range(len(m)):
-    for j in range(len(m[0])):
-        print(f"m[{i}][{j}] = {m[i][j]}")
-# m[0][0] = 1   m[0][1] = 2   ...   m[2][2] = 9
+    for j in range(len(m[0])):  # len(m[0]) = 3 em TODAS as linhas
+        total += m[i][j]
+print(total)                    # 45   ERRADO: o 9 da linha 1 ficou de fora (e sem aviso!)
+
+# Pelos ÍNDICES, como deve ser: cada linha com o seu tamanho
+total = 0
+for i in range(len(m)):
+    for j in range(len(m[i])):  # len(m[i]): o tamanho da linha i
+        total += m[i][j]
+print(total)                    # 54
+
+# Com len(m[0]) há dois desastres possíveis:
+#   a linha 0 é mais CURTA que outra -> valores esquecidos sem aviso (como aqui)
+#   a linha 0 é mais COMPRIDA        -> IndexError numa linha curta
+#
+# Regra: por defeito, for j in range(len(m[i])).
+# Funciona sempre, regular ou não.
+# len(m[0]) (ou ncols(m)) só quando sabemos que a matriz é regular (is_valid).
+#
+# E nomes: i e j para os índices (linha, coluna), como na matemática.
+# Evitar chamar "row" ou "col" a um índice: parece uma linha, mas é um número.
 
 
 
@@ -1103,19 +1172,28 @@ for i in range(len(m)):
 
 # %%
 """
-c) Exercícios [4 min -> 12:20] ----------------------------------------------
+c) Exercícios [6 min -> 12:24] ----------------------------------------------
 """
-# 1. Contar os pares da matriz (pelos valores chega)
+# 1. Contar os pares da matriz, das duas formas
 m = [[1, 2, 3],
      [4, 5, 6],
      [7, 8, 9]]
 
+# Pelos valores (chega, porque só lemos)
 count = 0
 for r in m:
     for v in r:
         if v % 2 == 0:
             count += 1
 print(count)                    # 4   (2, 4, 6, 8)
+
+# Pelos índices (com len(m[i]), a regra de cima)
+count = 0
+for i in range(len(m)):
+    for j in range(len(m[i])):
+        if m[i][j] % 2 == 0:
+            count += 1
+print(count)                    # 4
 
 # A regra é a mesma das listas:
 #   só preciso de LER os valores                -> for r in m / for v in r
@@ -1132,18 +1210,35 @@ print(count)                    # 4   (2, 4, 6, 8)
 
 # %%
 
-# 2. Escrever a soma de cada linha da matriz (pelos valores chega)
+# 2. A soma de cada linha da matriz
 m = [[1, 2, 3],
      [4, 5, 6],
      [7, 8, 9]]
 
+# a) Escrever as somas uma a uma (pelos valores)
 for r in m:
     total = 0                   # recomeça em cada linha
     for v in r:
         total += v
-    print(total)                # 6, 15, 24
+    print(total)                # 6, 15, 24 (uma por linha)
 
-# (no CONSOLIDAR 4, o mesmo mas a devolver a lista [6, 15, 24])
+# b) Guardar as somas numa lista e escrevê-la no fim (pelos índices)
+sums = []
+for i in range(len(m)):
+    total = 0                   # recomeça em cada linha
+    for j in range(len(m[i])):
+        total += m[i][j]
+    sums.append(total)          # uma soma por linha, depois do for de dentro
+print(sums)                     # [6, 15, 24]
+
+# O "total = 0" fica DENTRO do for de fora: cada linha começa do zero.
+# (é o mesmo cuidado do "j = 0" do ex 45)
+# Se ficasse antes dos dois for, as somas iam acumulando: 6, 21, 45.
+#
+# O append fica DEPOIS do for de dentro: só aí a soma da linha está completa.
+#
+# Guardar numa lista é mais útil do que escrever: a lista pode ser devolvida,
+# comparada, usada noutra conta. (CONSOLIDAR 4: o mesmo, numa função)
 
 
 
@@ -1152,7 +1247,7 @@ for r in m:
 
 # %%
 """
-d) EXERCICIO 48 (GUIÃO, Mooshak R) - maximum [5 min -> 12:25] ---------------
+d) EXERCICIO 48 (GUIÃO, Mooshak R) - maximum [5 min -> 12:29] ---------------
 
     O valor máximo de uma matriz de inteiros não vazia.
         maximum([[1, 2, 3, 4], [5, 6, 7, 8]]) == 8
@@ -1164,24 +1259,43 @@ type IMatrix = list[IList]       # matriz de inteiros
 def maximum(m: IMatrix) -> int:
     """ Maximum of matrix.
         Precondition: is_valid(m) and not is_empty(m) """
-    max = m[0][0]               # começar com um valor que existe mesmo
+    max_num = m[0][0]           # começar com um valor que existe mesmo
     for r in m:
         for v in r:
-            if v > max:
-                max = v
-    return max
+            if v > max_num:
+                max_num = v
+    return max_num
 
 print(maximum([[1, 2, 3, 4], [5, 6, 7, 8]]))       # 8
 print(maximum([[9, 1], [2, 3]]))                   # 9
+print(maximum([[-9, -1], [-2, -3]]))               # -1   (só negativos)
+
+# Porquê max_num e não max?
+# max já é uma função do Python (max([3, 7, 2]) dá 7).
+# Uma variável chamada max "tapa" essa função dentro do maximum.
+# Aqui não fazia mal, mas é um hábito a evitar.
+#
+# Porquê começar com m[0][0] e não com 0?
+# Com [[-9, -1], [-2, -3]] o 0 nunca seria ultrapassado e devolvia 0,
+# que nem está na matriz.
+
+
+
+
+
+
+# %%
+type IList = list[int]           # lista de inteiros
+type IMatrix = list[IList]       # matriz de inteiros
 
 # Encontrem o bug nesta versão:
 def maximum_bug(m: IMatrix) -> int:
     """ Maximum of matrix (with a bug!). """
-    max = m[0][0]
+    max_num = m[0][0]
     for r in m:
         for v in r:
-            if v > max:
-                max = v
+            if v > max_num:
+                max_num = v
     return v
 
 print(maximum_bug([[1, 2, 3, 4], [5, 6, 7, 8]]))   # 8   parece certo...
@@ -1192,10 +1306,6 @@ print(maximum_bug([[9, 1], [2, 3]]))               # 3   ... mas não está
 #
 # Lição (teórica 6a): um teste só, e ainda por cima um caso "arrumadinho",
 # não chega. Testar também com o máximo no início, no meio, negativos...
-#
-# Porquê começar com m[0][0] e não com 0?
-# Com maximum([[-5, -2]]) o 0 nunca seria ultrapassado e devolvia 0,
-# que nem está na matriz.
 
 
 
@@ -1204,7 +1314,7 @@ print(maximum_bug([[9, 1], [2, 3]]))               # 3   ... mas não está
 
 # %%
 """
-e) As ferramentas do guião (teórica 6a) [4 min -> 12:29] -------------------
+e) As ferramentas do guião (teórica 6a) [4 min -> 12:33] -------------------
 
     Corram esta célula e a seguinte ANTES dos exercícios seguintes: eles usam estas funções.
 
@@ -1225,12 +1335,16 @@ def create(nr: int, nc: int, value: any) -> GMatrix:
     """ Create and initialize a matrix with nr rows and nc columns.
         Precondition: nr >= 0 and nc >= 0
     """
-    m = [None]*nr         # cria espaço para as linhas
-    for i in range(nr):   # preenche as várias linhas
-        m[i] = [value]*nc
+    m = []                     # a lista das linhas
+    for _ in range(nr):        # cria e acrescenta as várias linhas
+        m.append([value]*nc)
     return m
 
 print(create(2, 5, 0))          # [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
+print(create(2, 5, 9))          # [[9, 9, 9, 9, 9], [9, 9, 9, 9, 9]]
+
+# (a versão do guião faz m = [None]*nr e depois m[i] = [value]*nc:
+#  o resultado é o mesmo; esta, com append, é a receita das listas da aula 5)
 
 
 
@@ -1312,10 +1426,38 @@ print(row(m, 1), col(m, 2))     # [4, 5, 6] [3, 6]
 
 
 
+# %%
+# A última ferramenta do guião: ler uma matriz de inteiros do terminal.
+# Escreve-se primeiro o número de linhas e colunas na mesma linha (ex: 2 3),
+# depois cada valor da matriz em linhas separadas.
+# (o split parte "2 3" em ["2", "3"]: teórica 5b)
+def input_int_matrix() -> IMatrix:
+    """ Interactive matrix reading. """
+    l = input("ROWS COLS: ").split()
+    nr, nc = int(l[0]), int(l[1])
+    m = []
+    for i in range(nr):
+        l = []
+        for j in range(nc):
+            x = int(input(f"m[{i}][{j}] = "))
+            l.append(x)
+        m.append(l)
+    return m
+
+
+print(input_int_matrix())   # com 2 3, depois 1, 2, 3, 4, 5, 6 dá [[1, 2, 3], [4, 5, 6]]
+
+# Repararam que é o padrão da soma das linhas (b) de cima)?
+# Uma lista l nova em cada linha i, e o m.append(l) depois do for de dentro.
+
+
+
+
+
 
 # %%
 """
-f) EXERCICIO 48 (GUIÃO) - multiply [5 min -> 12:34] ------------------------
+f) EXERCICIO 48 (GUIÃO) - multiply [4 min -> 12:37] ------------------------
 
     Multiplicar uma matriz por um número.
     O resultado é uma NOVA matriz.
@@ -1336,6 +1478,7 @@ def multiply(m: IMatrix, scalar: int) -> IMatrix:
 m1 = [[1, 2, 3, 4],
       [5, 6, 7, 8]]
 print(multiply(m1, 5))          # [[5, 10, 15, 20], [25, 30, 35, 40]]
+print(multiply(m1, 2))          # [[2, 4, 6, 8], [10, 12, 14, 16]]
 print(m1)                       # [[1, 2, 3, 4], [5, 6, 7, 8]]   a original não mudou
 
 # A receita das matrizes NOVAS (é a mesma da sum da teórica 6a):
@@ -1345,6 +1488,9 @@ print(m1)                       # [[1, 2, 3, 4], [5, 6, 7, 8]]   a original não
 #
 # Aqui são precisos os índices: para ESCREVER em m2[i][j],
 # tenho de saber em que posição estou.
+#
+# E aqui já se pode usar ncols(m) para todas as linhas:
+# a precondição (is_valid) garante que a matriz é regular.
 #
 # E a matriz original fica intacta, como o cabeçalho promete (-> IMatrix):
 # quem devolve uma matriz, não estraga a que recebeu.
@@ -1356,7 +1502,7 @@ print(m1)                       # [[1, 2, 3, 4], [5, 6, 7, 8]]   a original não
 
 # %%
 """
-g) EXERCICIO 48 (GUIÃO) - diagonals [5 min -> 12:39] -----------------------
+g) EXERCICIO 48 (GUIÃO) - diagonals [5 min -> 12:42] -----------------------
 
     Copiar as duas diagonais de uma matriz quadrada,
     para um par de listas.
@@ -1403,7 +1549,7 @@ print(diagonals(m3))            # ([1, 5, 9], [3, 5, 7])
 
 # %%
 """
-h) EXERCICIO 48 (GUIÃO) - transpose [6 min -> 12:45] -----------------------
+h) EXERCICIO 48 (GUIÃO) - transpose [6 min -> 12:48] -----------------------
 
     Trocar linhas por colunas. O resultado é uma NOVA matriz.
         transpose([[1, 2, 3, 4], [5, 6, 7, 8]]) == [[1, 5], [2, 6], [3, 7], [4, 8]]
@@ -1439,7 +1585,7 @@ print(transpose(m1))            # [[1, 5], [2, 6], [3, 7], [4, 8]]
 
 # %%
 """
-i) EXERCICIO 48 (GUIÃO) - product [8 min -> 12:53] -------------------------
+i) EXERCICIO 48 (GUIÃO) - product [7 min -> 12:55] -------------------------
 
     Produto de duas matrizes.
     Na posição (i, j) do resultado fica
@@ -1482,16 +1628,6 @@ def product(m1: IMatrix, m2: IMatrix) -> IMatrix:
             m3[i][j] = dot(row(m1, i), col(m2, j))
     return m3
 
-    # Outra forma (sem a dot): um 3º for, que faz a conta ali mesmo
-    # n = ncols(m1)
-    # m3 = create(nr, nc, 0)
-    # for i in range(nr):
-    #     for j in range(nc):
-    #         total = 0
-    #         for k in range(n):
-    #             total += m1[i][k] * m2[k][j]
-    #         m3[i][j] = total
-    # return m3
 
 m1 = [[1, 2, 3, 4],
       [5, 6, 7, 8]]
@@ -1516,8 +1652,39 @@ print(product(m1, m2))          # [[70, 80, 90], [158, 184, 210]]
 
 
 # %%
+# A mesma conta sem a função auxiliar dot: precisa de um 3º for, que faz
+# a conta de cada posição ali mesmo. Funciona, mas lê-se pior.
+# (precisa das ferramentas: create, nrows, ncols)
+
+m1 = [[1, 2, 3, 4],
+      [5, 6, 7, 8]]
+m2 = [[ 1,  2,  3],
+      [ 4,  5,  6],
+      [ 7,  8,  9],
+      [10, 11, 12]]
+
+nr, nc = nrows(m1), ncols(m2)
+n = ncols(m1)
+m3 = create(nr, nc, 0)
+for i in range(nr):
+    for j in range(nc):
+        total = 0
+        for k in range(n):
+            total += m1[i][k] * m2[k][j]
+        m3[i][j] = total
+print(m3)                       # [[70, 80, 90], [158, 184, 210]]
+
+# Três for encaixados: i (linha do resultado), j (coluna), k (a soma linha x coluna).
+# Com a dot, o 3º for fica escondido numa função com nome: mais fácil de ler e testar.
+
+
+
+
+
+
+# %%
 """
-j) EXERCICIO 48 (GUIÃO) - o main com os 5 testes [2 min -> 12:55] -----------
+j) EXERCICIO 48 (GUIÃO) - o main com os 5 testes [2 min -> 12:57] -----------
 
     Precisa das funções das células anteriores (corram-nas primeiro).
 """
@@ -1573,7 +1740,7 @@ main()
 
 # %%
 """
-k) Matrizes por dentro: porque é que o create é assim? [5 min -> 13:00] -----
+k) Matrizes por dentro: porque é que o create é assim? [3 min -> 13:00] -----
 
     Uma forma "mais curta" de criar uma matriz 3x3 de zeros.
     Antes de correr: o que escreve o último print?
@@ -1595,7 +1762,7 @@ print(m)                        # [[7, 0, 0], [0, 0, 0], [0, 0, 0]]   assim sim
 # É a mesma ideia das revisões 5 (valores e referências):
 #   b = a, com listas, não copia: a e b são a mesma lista.
 #
-# O create cria uma linha NOVA em cada volta: m[i] = [value]*nc.
+# O create cria uma linha NOVA em cada volta: m.append([value]*nc).
 # 3 voltas, 3 listas diferentes.
 #
 # (o [value]*nc dentro da linha não faz mal: os valores são números,

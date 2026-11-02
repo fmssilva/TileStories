@@ -1,0 +1,6 @@
+/* v8f: close and settings pinned to the sheet's top; a bigger grabber target; a redraw in place has no entrance */
+.scr > .chrome{position:sticky;top:12px;left:auto;right:auto;height:0;margin:0 12px;align-items:flex-start}
+.grab{width:96px;height:32px;margin-left:-48px}
+.grab::after{left:30px;right:30px;top:9px}
+.grab:focus-visible{outline:2px solid #fff;outline-offset:-2px;border-radius:8px}
+.scr.still .mv{transition:none!important}

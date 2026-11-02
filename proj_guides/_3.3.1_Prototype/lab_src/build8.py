@@ -3,13 +3,14 @@ import io, json, os
 D = os.path.dirname(os.path.abspath(__file__))
 def rd(n): return io.open(os.path.join(D, n), encoding='utf-8').read()
 
-V8 = ['v8a.js', 'v8b.js', 'v8c.js', 'v8d.js', 'v8e.js']
+V8 = ['v8a.js', 'v8b.js', 'v8c.js', 'v8d.js', 'v8e.js', 'v8f.js']
 
 # words that moved to another part, or left with their part
 REOWN = {'peek_next_label': ('retired', 'the Next card peek left: a swipe up at Peek raises the card'),
          'show_on_wall_nearby': ('retired', "Show On Wall's neighbours left: Related (Nearest) and the Wall Locator show them"),
          'gallery_count': ('s5viewer', ''), 'zoom_hint': ('s5viewer', ''),
          'video_full_screen': ('s5player', ''), 'video_chapters': ('s5player', ''), 'video_unavailable': ('s5player', ''),
+         'hero_listen': ('retired', 'the hero keeps one action, the guide button; the Audio Guide block plays the audio'),
          'placed_model_remove': ('s5chip', ''), 'placed_model_other': ('s5chip', ''), 'nav_more': ('s5bar', '')}
 NEWSTR = [
     ['mode_system', 's5settings', "Appearance and Motion: follow the phone's own setting.", 'Follow the phone', 'Seguir o telemóvel', '', 'Follow the phone'],
@@ -29,6 +30,8 @@ NEWSTR = [
     ['quiz_score', 'bd:Knowledge Check', 'At the end, with Score = At the end ({0} = right answers, {1} = questions).', '{0} of {1} right', '{0} de {1} certas', '', 'Score line'],
     ['model_in_room', 'bd:3D Model', "On the 3D Model's page: opens Place In AR with the same model.", 'See it in the room', 'Ver na sala', '', 'See it in the room'],
     ['transcript', 's5player', 'The button under a video or audio that shows the words of its captions.', 'Transcript', 'Transcrição', '', 'Transcript button'],
+    ['sheet_expand', 's1a', 'The name of the grabber at the top of the card while a tap raises the card one stop (read by screen readers).', 'Expand card', 'Expandir cartão', '', 'Grabber, raise'],
+    ['sheet_collapse', 's1a', 'The name of the grabber when the card is full and a tap lowers it to half (read by screen readers).', 'Collapse card', 'Recolher cartão', '', 'Grabber, lower'],
     ['card_starter_custom', 'retired', '', 'Custom', 'Personalizado', '', ''],
 ]
 
@@ -57,6 +60,6 @@ assert b in src, 'hook'
 src = src.replace(b, "+ v7 + '\\n' + v8 + '\\nif(location.hash===\"#selftest\")", 1)
 c = "rd('v7.css')"
 assert c in src
-src = src.replace(c, "rd('v7.css') + rd('v8.css') + rd('v8b.css') + rd('v8c.css') + rd('v8d.css') + rd('v8e.css')", 1)
+src = src.replace(c, "rd('v7.css') + rd('v8.css') + rd('v8b.css') + rd('v8c.css') + rd('v8d.css') + rd('v8e.css') + rd('v8f.css')", 1)
 src = src.replace("'Editor Lab · v7'", "'Editor Lab · v8'")
 exec(compile(src, 'build6+8', 'exec'), {'__file__': os.path.join(D, 'build6.py'), '__name__': '__main__', 'fix_real': fix_real, 'NEWSTR': NEWSTR, 'V8': V8, 'json': json, 'PBAR_A': PBAR_A, 'PBAR_B': PBAR_B})

@@ -1,0 +1,495 @@
+
+Introdução à Programação para a Ciência e Engenharia (2026/2027)
+Lista de exercícios
+Artur Miguel Dias
+Prática 08a (Semana de 02/nov-06/nov/2026)
+Sumário: Classes de dados. Exercício 49.
+
+S : 49 - Para trabalhar com datas de calendário, vamos introduzir a classe de dados Date, para representar datas individuais, e a classe de dados Dates, para representar sequências de datas.
+O exercício tem três etapas.
+
+a) Para representar datas individuais, defina a classe de dados Date, com as seguintes funções:
+def date_as_str(dt: Date) -> str:                     # converte data para string D/M/Y
+def date_input(prompt: str) -> Date:                  # lê data no formato D/M/Y
+def date_is_leap_year(year: int) -> bool:             # testa se ano é bisexto
+def date_month_length(month: int, year: int) -> int:  # número de dias dum mês
+def date_is_valid(dt: Date) -> bool:                  # valida data
+def date_is_less(dt1: Date, dt2: Date) -> bool:       # testa se self < other
+def date_is_equal(dt1: Date, dt2: Date) -> bool:      # testa se self == other
+def date_order_in_year(dt: Date) -> int:              # posição da data no ano (1..366)
+def date_next(dt: Date) -> Date:                      # dia seguinte
+def date_prev(dt: Date) -> Date:                      # dia anterior
+A função date_input, que lê uma data, deve detetar o caso especial duma linha vazia e, nesse caso, retornar None para indicar que não foi introduzida data.
+
+b) Para representar sequências de datas, defina a classe de dados Dates, com as seguintes funções:
+def dates_input(prompt1: str, prompt2: str) -> Dates:
+                                       # lê sequência terminada por linha vazia
+def dates_print(ds: Dates) -> None:    # escreve sequência 
+def dates_len(ds: Dates) -> None:      # número de datas 
+def dates_maximum(ds: Dates) -> Date:  # determina data máxima
+def dates_minimum(ds: Dates) -> Date:  # determina data mínima
+c) Para implementar a interface do Utilizador, defina a classe de dados UI com uma função ui_run que:
+Leia uma sequência de datas.
+Se a sequência for vazia, diz que não há datas.
+Caso contrário escreve: data máxima, data mínima, posição da data máxima no ano, dia seguinte da data máxima, dia anterior da data máxima.
+Analise e complete o programa, que segue o estilo introduzido nas aulas teóricas. Falta escrever sete funções. Olhe para os exemplos de execução.
+
+from dataclasses import dataclass
+
+############# type Date #############
+
+@dataclass
+class Date:
+    day: int
+    month: int
+    year: int
+
+def date_as_str(dt: Date) -> str:
+    """ Convert date to a string in the form D/M/Y. """
+    return f"{dt.day}/{dt.month}/{dt.year}"
+
+def date_input(prompt: str) -> Date:
+    """ Input a date using the standard representation.
+        Precondition: The input has the form D/M/Y """
+    END_MARK = ''
+    s = input(prompt)
+    if s == END_MARK:
+        return None
+    d, m, y = s.split("/")
+    return Date(int(d), int(m), int(y))
+
+def date_print(dt: Date) -> None:
+    """ Print a date in the standard representation. """
+    print(date_as_str(dt))
+
+def date_is_leap_year(year: int) -> bool:
+    """ Check if the year is a leap year. """
+    return (year % 4 == 0 and year % 100 != 0) or year % 400 == 0
+
+def date_month_length(month: int, year: int) -> int:
+    """ Number of days of a given month (in a given year).
+        Precondition: 1 <= month <= 12
+    """
+    durations = [None, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    if month == 2 and date_is_leap_year(year):
+        return durations[2] + 1
+    else:
+        return durations[month]
+
+def date_is_valid(dt: Date) -> bool:
+    """ Is the data valid? """
+    return (dt.year > 0          # estamos só interessados na "Era Comum"
+        and 1 <= dt.month <= 12
+        and 1 <= dt.day <= date_month_length(dt.month, dt.year))
+
+def date_is_less(dt1: Date, dt2: Date) -> bool:
+    """ Does one date come before the other?
+        Precondition: date_is_valid(dt1) and date_is_valid(dt2) """
+    pass # FAZER ...
+
+def date_is_equal(dt1: Date, dt2: Date) -> bool:
+    """ Are two dates equal?
+        Precondition: date_is_valid(dt1) and date_is_valid(dt2) """
+    return dt1 == dt2
+
+def date_order_in_year(dt: Date) -> int:
+    """ The day order number inside the year
+        Precondition: date_is_valid(dt) """
+    pass # FAZER ...
+
+def date_next(dt: Date) -> Date:
+    """ The following day.
+        Precondition: date_is_valid(dt) """
+    pass # FAZER ...
+
+def date_prev(dt: Date) -> Date:
+    """ The previous day.
+        Precondition: date_is_valid(dt) """
+    pass # FAZER ...
+
+
+############# type Dates #############
+
+@dataclass
+class Dates:
+    dates: list[Date]
+
+def dates_input(prompt1: str, prompt2: str) -> Dates:
+    """ Interactive date sequence reading. """
+    print(prompt1)
+    l = []
+    while True:
+        dt = date_input(prompt2)
+        if dt is None:
+            break
+        l.append(dt)
+    return Dates(l)
+
+def dates_print(ds: Dates) -> None:
+    """ Print a sequence of dates """
+    for d in ds.dates:
+        print(d)
+
+def dates_len(ds: Dates) -> int:
+    """ Number of dates in the sequence. """
+    pass # FAZER ...
+
+def dates_maximum(ds: Dates) -> Date:
+    """ The maximum.
+        Precondition: dates_len(ds) > 0 """
+    pass # FAZER ...
+
+def dates_minimum(ds: Dates) -> Date:
+    """ The minimum.
+        Precondition: dates_len(ds) > 0 """
+    pass # FAZER ...
+
+
+############# type UI #############
+
+# No validation here. We are assuming all the inputs are valid (to simplify).
+
+@dataclass
+class UI:    # User Interface.
+    dates: Dates
+
+def ui_run(ui: UI) -> None:
+    """ Run the user interface. """
+    ui.dates = dates_input(
+            	("Introduza uma data por linha,"
+            + " tudo terminado por uma linha vazia:"),
+        "D/M/Y: ")
+    if dates_len(ui.dates) == 0:
+        print("Não há datas!")
+    else:
+        max = dates_maximum(ui.dates)
+        min = dates_minimum(ui.dates)
+        print(f"Data máxima: {max}")
+        print(f"Data mínima: {min}")
+        print(f"Ord max: {date_order_in_year(max)}")
+        print(f"Next max: {date_next(max)}")
+        print(f"Prev max: {date_prev(max)}")
+
+
+############# main #############
+
+def main() -> None:
+    ui = UI(Dates([]))
+    ui_run(ui)
+
+main()
+Exemplo de execução
+Introduza uma data por linha, tudo terminado por uma linha vazia:
+D/M/Y: 
+Não há datas!
+Exemplo de execução
+Introduza uma data por linha, tudo terminado por uma linha vazia:
+D/M/Y: 30/10/2026
+D/M/Y: 1/1/2000
+D/M/Y: 31/12/2026
+D/M/Y: 
+Data máxima: 31/12/2026
+Data mínima: 1/1/2000
+Ord max: 365
+Next max: 1/1/2026
+Prev max: 30/12/2026
+
+
+
+
+
+
+
+
+
+Introdução à Programação para a Ciência e Engenharia (2026/2027)
+Lista de exercícios
+Artur Miguel Dias
+Prática 08b (Semana de 02/nov-06/nov/2026)
+Sumário: Classes de dados. Exercícios 50 e 51.
+
+T : 50 - Escreva um programa que faça contas com números racionais (frações). O programa deve suportar as quatro operações básicas +, -, *, /. Escreva o programa sem recorrer a nenhum tipo existente ou a uma biblioteca existente.
+O resultado de qualquer operação deve ser uma fração simplificada e normalizada. Isto consegue-se dividindo tanto o numerador como o denominador pelo maior divisor comum. Além disso, a normalização deve também garantir que apenas o numerador pode ser negativo.
+
+Se não se lembrar como se fazem contas com frações, peça ajuda ao professor.
+
+Escreva o programa usando duas classes de dados:
+
+Uma classe de dados Rational que implementa o tipo das frações.
+Uma classe de dados UI (user interface) que implementa a interação com o utilizador. Esta classe de dados preocupa-se apenas com a interação com o utilizador, e recorre à outra classe de dados para todos os aspetos lógicos dos números racionais.
+Analise e complete o programa, que segue o estilo introduzido nas aulas teóricas. Olhe para os exemplos de execução.
+
+from dataclasses import dataclass
+
+@dataclass
+class Rational:
+    num: int
+    den: int
+
+def gcd(m: int, n: int) -> int:
+    """ Greatest common divisor. Use the Euclidean algorithm. """
+    x = abs(m)
+    y = abs(n)
+    while x != y:
+        if x > y:
+            x -= y
+        else:
+            y -= x
+    return x
+
+def rational_as_str(r: Rational) -> str:
+    """ Convert to string. """
+    return f"{r.num}/{r.den}"
+
+def rational_is_valid(r: Rational) -> bool:
+    """ Is the rational valid? """
+    return r.den > 0
+  
+def rational_is_zero(r: Rational) -> bool:
+    """ Is this zero?
+        Precondition: rational_is_valid(r) """
+    return r.num == 0
+  
+def rational_normalize(r: Rational) -> Rational:
+    """ Put the rational in the normal form.
+        Precondition: den != 0 """
+    pass # FAZER
+
+def rational_create(num: int, den: int) -> Rational:
+    """ Simplify rational number.
+        Precondition: den != 0
+    """
+    return rational_normalize(Rational(num, den))
+
+def rational_add(r1: Rational, r2: Rational) -> Rational:
+    """ Add two rational numbers.
+        Precondition: rational_is_valid(r1) and rational_is_valid(r2) """
+    pass # FAZER
+
+def rational_sub(r1: Rational, r2: Rational) -> Rational:
+    """ Subtract two rational numbers.
+        Precondition: rational_is_valid(r1) and rational_is_valid(r2) """
+    pass # FAZER
+
+def rational_mul(r1: Rational, r2: Rational) -> Rational:
+    """ Multiply two rational numbers.
+        Precondition: rational_is_valid(r1) and rational_is_valid(r2) """
+    pass # FAZER
+
+def rational_div(r1: Rational, r2: Rational) -> Rational:
+    """ Divide two rational numbers.
+        Precondition: rational_is_valid(r1)
+                and rational_is_valid(r2) and not rational_is_zero(r2) """
+    pass # FAZER
+
+ 
+#########   User Interface   #########
+
+# No validation here. We are assuming all the inputs are valid (to simplify).
+
+@dataclass
+class UI:    # User Interface.
+    pass     # no attributes
+
+def ui_make_rational(s: str) -> Rational:
+    """ Create a rational number from the format: 'n/d'. """
+    n, d = s.split('/')
+    return Rational(int(n), int(d))
+
+def ui_process_input(s: str) -> list[Rational, str, Rational]:
+    """ Process the format: 'n/d op n/d'. """
+    r1, op, r2 = s.split()
+    x = ui_make_rational(r1)
+    y = ui_make_rational(r2)
+    return [x, op, y]
+
+def ui_eval_input(s: str) -> Rational:
+    """ Decode the input and perform the operation. """
+    x, op, y = ui_process_input(s)
+    if op == '+':
+        return rational_add(x, y)
+    elif op == '-':
+        return rational_sub(x, y)
+    elif op == '*':
+        return rational_mul(x, y)
+    elif op == '/':
+        return rational_div(x, y)
+    else:
+        return None
+
+def ui_run() -> None:
+    """ Run the user interface. """
+    s = input("A/B OP C/D: ")
+    print(rational_as_str(ui_eval_input(s)))
+
+
+############# main #############
+
+def main() -> None:
+    ui_run()
+
+main()
+Exemplo de execução
+A/B OP C/D: 3/5 + 2/1
+13/5
+Exemplo de execução
+A/B OP C/D: -30/-50 * 1/1
+3/5
+Exemplo de execução
+A/B OP C/D: 2/5 / 1/2
+4/5
+U : 51 - A "Pastelaria da Esquina" pretende informatizar as suas atividades e encomendou-lhe a realização de um programa de gestão de vendas.
+A pastelaria tem um stock corrente de bolos. O stock é constituído por várias unidades de cada variedade de bolo. Para cada variedade de bolo é preciso saber quantas unidades estão disponíveis para venda. Neste programa também queremos saber quais são os ingredientes usados para fazer cada variedade de bolo e qual a percentagem de cada ingrediente na receita.
+
+O programa funciona assim:
+
+Lê o stock inicial a partir do teclado;
+Pede ao utilizador o nome duma variedade de bolos e o número de unidades pretendidas;
+Efetua a venda, mostrando a quantidade efetivamente vendida (pode ser inferior à quantidade pedida por falta de stock);
+Escreve-se ainda o nome do ingrediente principal da variedade de bolo que foi vendida.
+Escreva o programa usando quatro classes de dados:
+
+Uma classe de dados Ingredient, que provavelmente não precisará de ter nenhum método para além do construtor. Os ingredientes são passivos.
+Uma classe de dados CakeVariety, com um método que descobre qual o ingrediente principal duma variedade bolos (se não houver ingredientes, retorna None), e outro método para concretizar as alterações internas relativas a uma venda (retorna o número de unidades realmente vendidas, que podem ser menos do que as pedidas).
+Uma classe de dados CakeShop que guarda o stock numa lista, com um método para descobrir uma variedade de bolo (se não existir, retorna None), e outro método para efetuar a venda duma variedade de bolo (se não existir, retorna None).
+Uma classe de dados UI (user interface) que implementa a interação com o utilizador. Cria-se apenas uma instância desta classe de dados. Essa instância precisa de guardar uma CakeShop. A classe de dados UI preocupa-se apenas com a interação com o utilizador, respeitando as responsabilidades das outras classes de dados.
+Ao contrário do exercício anterior, que fornece simples operações sobre frações, este programa tem estado interno porque precisa de gerir a situação corrente do stock da pastelaria, o qual pode variar ao longo do tempo. Uma pastelaria é um objeto mutável.
+
+Complete o programa:
+
+from dataclasses import dataclass
+
+#########   type Ingredient   #########
+
+@dataclass
+class Ingredient:
+    name: str
+    percent: float
+
+# Sem funções. Basta usar a função de construção.
+
+
+#########   type CakeVariety   #########
+
+@dataclass
+class CakeVariety:
+    name: str
+    amount: int
+    ingredients: list[Ingredient]
+    
+def cake_variety_main_ingredient(variety: CakeVariety) -> Ingredient:
+    """ The main ingredient of the recipe of a cake variety. """
+    # FAZER
+
+def cake_variety_sell(variety: CakeVariety, units: int) -> int:
+    """ Sell some units.
+        Precondition: units >= 0 """
+    # FAZER
+
+
+#**########   type CakeShop   #########
+
+@dataclass
+class CakeShop:
+    stock: list[CakeVariety]
+
+def cake_shop_size(shop: CakeShop) -> int:
+    """ Number of cake varieties in the shop. """
+    return len(shop.stock)
+
+def cake_shop_find_variety(shop: CakeShop, vname: str) -> CakeVariety:
+    """ Find a cake variety by name. """
+    # FAZER
+
+def cake_shop_sell(shop: CakeShop, vname: str, units: int) -> int:
+    """ Sell some units of a named cake variety.
+        Precondition: units >= 0 """
+    # FAZER
+
+
+#########   User Interface   #########
+
+# No validation here. We are assuming all the inputs are valid (to simplify).
+
+@dataclass
+class UI:
+    shop: CakeShop
+
+def ui_make_ingredient(line: str) -> Ingredient:
+    """ Create an ingredient from an input line. """
+    name, percentage = line.split()
+    return Ingredient(name, float(percentage))
+
+def ui_make_cake_variety(line: str) -> CakeVariety:
+    """ Create a cake variety ingredient from an input line plus ingredient lines. """
+    name, amount, n_ingredients = line.split()
+    n_ingredients = int(n_ingredients)
+    l = []
+    for _ in range(n_ingredients):
+        line = input()
+        i = ui_make_ingredient(line)
+        l.append(i)
+    return CakeVariety(name, int(amount), l)
+
+def ui_input_shop() -> CakeShop:
+    """ Load the shop with data read from the keyboard. """
+    END_MARK = "fim"
+    l = []
+    while True:
+        line = input()
+        if line == END_MARK:    # saída do ciclo pelo meio
+            break
+        cake = ui_make_cake_variety(line)
+        l.append(cake)
+    return CakeShop(l)
+
+def ui_process(ui: UI, name: str, units: int) -> None:
+    """ User interface for selling some units of a cake variety.
+        Precondition: units >= 0 """
+    sold = cake_shop_sell(ui.shop, name, units)
+    if sold == None:
+        print(f"Não existe {name}")
+    else:
+        print(f"Vendidas {sold} unidades de {name}")
+        cake = cake_shop_find_variety(ui.shop, name)
+        ingr = cake_variety_main_ingredient(cake)
+        if ingr == None:
+            print("Ingrediente principal: Sem ingredientes")
+        else:
+            print(f"Ingrediente principal: {ingr.name}")
+
+def ui_run(ui: UI) -> None:
+    """ Run the user interface. """
+    name = input("BOLO: ")            # pergunta o nome do bolo
+    units = int(input("UNIDADES: "))  # pergunta a quantidade
+    ui_process(ui, name, units)       # processa o pedido
+
+
+############# main #############
+
+def main() -> None:
+    ui = UI(ui_input_shop())
+    ui_run(ui)
+
+main()
+Exemplo de execução
+Puro-açúcar 230 4
+Leite-Condensado 0.1
+Açúcar 0.76
+Farinha 0.12
+Fermento 0.02
+Delícia-compacta 127 2
+Farinha 0.99
+Leite 0.01
+fim
+BOLO: Delícia-compacta
+UNIDADES: 1000
+Vendidas 127 unidades de Delícia-compacta
+Ingrediente principal: Farinha
+Exemplo de execução
+Puro-ar 230 0
+fim
+BOLO: Puro-ar
+UNIDADES: 100
+Vendidas 100 unidades de Puro-ar
+Ingrediente principal: Sem ingredientes
