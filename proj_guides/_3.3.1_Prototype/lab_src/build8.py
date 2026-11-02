@@ -3,7 +3,7 @@ import io, json, os
 D = os.path.dirname(os.path.abspath(__file__))
 def rd(n): return io.open(os.path.join(D, n), encoding='utf-8').read()
 
-V8 = ['v8a.js', 'v8b.js', 'v8c.js', 'v8d.js', 'v8e.js', 'v8f.js', 'v8g.js', 'v8h.js', 'v8i.js', 'v8j.js']
+V8 = ['v8a.js', 'v8b.js', 'v8c.js', 'v8d.js', 'v8e.js', 'v8f.js', 'v8g.js', 'v8h.js', 'v8i.js', 'v8j.js', 'v8k.js']
 
 # words that moved to another part, or left with their part
 REOWN = {'peek_next_label': ('retired', 'the Next card peek left: a swipe up at Peek raises the card'),
@@ -51,6 +51,17 @@ NEWSTR = [
     ['state_retry', 's5states', 'The button that tries again (offline, a failed picture or page).', 'Try again', 'Tentar de novo', '', 'Try again'],
     ['state_done', 's5states', 'After an action that saved something (an answer, a vote, a collected item).', 'Saved', 'Guardado', '', 'Done'],
     ['guide_novoice', 's7cap', 'Over the captions when this device has no voice for the language (the words still light up).', 'No voice for this language on this device: captions only.', 'Sem voz para esta língua neste dispositivo: só legendas.', '', 'No voice'],
+    ['mascot_name', 's7mascot', 'The mascot, for a screen reader.', 'Azu, the guide', 'Azu, o guia', '', 'Name'],
+    ['mascot_hey', 's7mascot', 'After a poke.', 'Hey!', 'Ei!', '', 'Poke'],
+    ['mascot_tickle', 's7mascot', 'After three quick taps.', 'Hehe, that tickles!', 'Hehe, faz cócegas!', '', 'Tickle'],
+    ['mascot_oops', 's7mascot', 'After a long press knocks Azu over.', "Oops! I'm fine.", 'Ups! Estou bem.', '', 'Knocked over'],
+    ['mascot_joke_1', 's7mascot', 'A joke, every third poke (Lively, not on a Solemn point).', "I've been on walls for centuries. Well, my great-grandmother has.", 'Estou em paredes há séculos. Bem, a minha bisavó está.', '', 'Joke 1'],
+    ['mascot_joke_2', 's7mascot', 'A joke.', 'Careful! I chip easily.', 'Cuidado! Lasco-me com facilidade.', '', 'Joke 2'],
+    ['mascot_joke_3', 's7mascot', 'A joke.', 'Blue is my favourite colour. Obviously.', 'O azul é a minha cor preferida. Claro.', '', 'Joke 3'],
+    ['mascot_water', 's7mascot', 'The water break: Azu asks for a tap on the glass.', 'A sip of water? Tap the glass.', 'Um gole de água? Toque no copo.', '', 'Water break'],
+    ['mascot_ahh', 's7mascot', 'After the sip.', 'Ahh! Where were we?', 'Ahh! Onde é que íamos?', '', 'After the sip'],
+    ['mascot_hungry', 's7mascot', 'Before the end: Azu asks for the cookie.', 'A little hungry... a cookie? Tap it.', 'Uma fominha... uma bolacha? Toque nela.', '', 'Cookie'],
+    ['mascot_thanks', 's7mascot', 'After the cookie.', 'Yum! Thank you!', 'Que bom! Obrigado!', '', 'After the cookie'],
     ['card_starter_custom', 'retired', '', 'Custom', 'Personalizado', '', ''],
 ]
 
@@ -93,6 +104,6 @@ assert b in src, 'hook'
 src = src.replace(b, "+ v7 + '\\n' + v8 + '\\nif(location.hash===\"#selftest\")", 1)
 c = "rd('v7.css')"
 assert c in src
-src = src.replace(c, "rd('v7.css') + rd('v8.css') + rd('v8b.css') + rd('v8c.css') + rd('v8d.css') + rd('v8e.css') + rd('v8f.css') + rd('v8g.css') + rd('v8h.css') + rd('v8i.css') + rd('v8j.css')", 1)
+src = src.replace(c, "rd('v7.css') + rd('v8.css') + rd('v8b.css') + rd('v8c.css') + rd('v8d.css') + rd('v8e.css') + rd('v8f.css') + rd('v8g.css') + rd('v8h.css') + rd('v8i.css') + rd('v8j.css') + rd('v8k.css')", 1)
 src = src.replace("'Editor Lab · v7'", "'Editor Lab · v8'")
 exec(compile(src, 'build6+8', 'exec'), {'__file__': os.path.join(D, 'build6.py'), '__name__': '__main__', 'fix_real': fix_real, 'fix_demo_rows': fix_demo_rows, 'NEWSTR': NEWSTR, 'V8': V8, 'json': json, 'PBAR_A': PBAR_A, 'PBAR_B': PBAR_B})

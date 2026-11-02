@@ -59,7 +59,8 @@ function fcTick(){G.fcRaf=0;var sp=ph.querySelector(".gspot");if(!G.on){if(sp)sp
 function pointAt(tg){var m=ph.querySelector(".mascot");if(!m)return;if(G.moment)tg=null;var a=m.querySelector(".marm");
   if(!tg){if(a)a.classList.remove("on");m.classList.remove("pointing");return}
   if(!a){a=document.createElement("i");a.className="marm";m.appendChild(a)}
-  var y=Math.max(70,Math.min(ph.offsetHeight-230,tg.y-27));if(Math.abs((parseFloat(m.style.top)||0)-y)>2)m.style.top=y+"px";
+  /* never under the captions: Azu stays above their box */
+  var cap=ph.querySelector(".gcap"),lo=cap?cap.offsetTop-72:ph.offsetHeight-230,y=Math.max(70,Math.min(lo,tg.y-27));if(Math.abs((parseFloat(m.style.top)||0)-y)>2)m.style.top=y+"px";
   var mx=m.offsetLeft+8,my=y+34,ang=Math.atan2(tg.y-my,tg.x-mx)*180/Math.PI;ang=Math.max(120,Math.min(240,ang<0?ang+360:ang));
   a.style.transform="rotate("+(ang-180).toFixed(1)+"deg)";a.classList.add("on");m.classList.add("pointing")}
 var stopTourV8j=stopTour;stopTour=function(){unzoomAll();var sp=ph.querySelector(".gspot");if(sp)sp.remove();ph.classList.remove("gspotting");stopTourV8j()};
