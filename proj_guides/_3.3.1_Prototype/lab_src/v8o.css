@@ -1,0 +1,55 @@
+/* v8o: the Guide Dock. Unity: a UI Toolkit sheet like the card's; the rings are elements with a radial-gradient sprite whose scale
+   and alpha follow the voice or the mic; the bubble is a 9-slice with a tail. Words always on solid colours (no backdrop blur). */
+.gdock{position:absolute;left:8px;right:8px;bottom:8px;z-index:14;background:#16181C;color:#F4F1EA;border-radius:24px;box-shadow:0 10px 30px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.06);padding:6px 12px 10px;transition:height .32s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
+.gd-grab{appearance:none;border:0;background:none;height:14px;display:flex;justify-content:center;align-items:center;cursor:pointer;padding:0;touch-action:none}
+.gd-grab i{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.28)}
+.gd-seg{display:flex;gap:3px;margin:2px 2px 8px}.gd-seg button{flex:1;height:4px;padding:0;border:0;border-radius:2px;background:rgba(255,255,255,.18);cursor:pointer}
+.gd-seg button.done{background:rgba(255,255,255,.62)}.gd-seg button.now{background:#FFD98A}
+.gd-main{display:flex;align-items:center;gap:8px;min-height:56px}
+.gd-line{flex:1;min-width:0;cursor:pointer}
+.gd-stop{display:block;font:600 11px/1.2 var(--body);color:rgba(244,241,234,.66);letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gd-cap .gcap{position:static;inset:auto;background:none;box-shadow:none;padding:0;margin-top:3px;max-height:44px;overflow:hidden;font:500 14px/1.4 var(--body);border-radius:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.gd-kb{appearance:none;border:0;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.08);color:#F4F1EA;display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
+.gd-kb svg,.gd-ctl svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* the talk button: a blue disc with a white mic and a soft glow; its rings tell the state */
+.gd-talk{position:relative;appearance:none;border:0;width:56px;height:56px;flex:0 0 auto;border-radius:50%;background:radial-gradient(circle at 35% 30%,#5B8CFF,#2F5FE0 60%,#1F45B5);color:#fff;display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 14px rgba(47,95,224,.4);touch-action:none;transition:transform .15s}
+.gd-talk:active{transform:scale(.94)}
+.gd-talk svg{position:relative;z-index:1;width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.gd-talk .ring{position:absolute;inset:-6px;border-radius:50%;background:radial-gradient(circle,rgba(91,140,255,.0) 55%,rgba(91,140,255,.45) 70%,rgba(91,140,255,0) 100%);opacity:0;pointer-events:none}
+.gd-talk.s-idle .ring:not(.r2){opacity:.55;animation:tkbreathe 3.2s ease-in-out infinite}
+.gd-talk.s-listening{background:radial-gradient(circle at 35% 30%,#4FE3C0,#14B08C 60%,#0B8A6C)}.gd-talk.s-listening .ring{background:radial-gradient(circle,rgba(79,227,192,0) 50%,rgba(79,227,192,.55) 68%,rgba(79,227,192,0) 100%);opacity:1;animation:tkpulse 1.1s ease-out infinite}.gd-talk.s-listening .r2{animation-delay:.55s}
+.gd-talk.s-thinking .ring{inset:-5px;background:conic-gradient(from 0deg,rgba(255,217,138,0),rgba(255,217,138,.9),rgba(255,217,138,0) 40%);-webkit-mask:radial-gradient(circle,transparent 62%,#000 64%);mask:radial-gradient(circle,transparent 62%,#000 64%);opacity:1;animation:tkspin 1s linear infinite}.gd-talk.s-thinking .r2{display:none}
+.gd-talk.s-speaking .ring{opacity:.8;animation:tkspeak .6s ease-in-out infinite alternate}.gd-talk.s-speaking .r2{animation-delay:.3s;inset:-7px;opacity:.35}
+.gd-talk.s-interrupted{animation:tkpop .3s ease}.gd-talk.s-notheard{animation:tkshake .4s ease}
+@keyframes tkbreathe{50%{transform:scale(1.08);opacity:.25}}@keyframes tkpulse{from{transform:scale(.9);opacity:.9}to{transform:scale(1.55);opacity:0}}
+@keyframes tkspin{to{transform:rotate(360deg)}}@keyframes tkspeak{from{transform:scale(.95)}to{transform:scale(1.18)}}@keyframes tkpop{50%{transform:scale(1.12)}}@keyframes tkshake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.gd-hint{text-align:right;font:600 11px/1.2 var(--body);color:rgba(244,241,234,.72);margin:4px 2px 0;min-height:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Peek: the controls and the suggested questions; Full: the conversation */
+.gd-peek,.gd-full{display:none}.gdock.h-peek .gd-peek,.gdock.h-full .gd-peek{display:block}.gdock.h-full .gd-full{display:flex}
+.gd-ctl{display:flex;justify-content:space-between;gap:6px;margin:10px 0 8px}
+.gd-ctl button{appearance:none;border:0;flex:1;height:40px;border-radius:14px;background:rgba(255,255,255,.08);color:#F4F1EA;display:grid;place-items:center;cursor:pointer;font:700 13px/1 var(--body)}
+.gd-ctl button[aria-pressed=false].cc{opacity:.5}
+.gd-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.gd-chips::-webkit-scrollbar{display:none}
+.gd-chips button{flex:0 0 auto;appearance:none;border:1px solid rgba(255,255,255,.16);background:transparent;color:#F4F1EA;font:600 13px/1 var(--body);padding:9px 12px;border-radius:999px;cursor:pointer}
+.gdock.h-full{top:72px}.gdock.h-full .gd-line{display:none}.gdock.h-full .gd-main{justify-content:flex-end}
+.gd-full{flex:1;min-height:0;flex-direction:column;gap:8px;margin-top:6px}
+.gd-thread{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:4px 2px}
+.gd-thread>div{max-width:84%;font:400 14.5px/1.45 var(--body);padding:9px 12px;border-radius:16px}
+.gm-azu{align-self:flex-start;background:rgba(255,255,255,.08);border-bottom-left-radius:5px}.gm-me{align-self:flex-end;background:#2F5FE0;color:#fff;border-bottom-right-radius:5px}
+.gm-note{align-self:center;max-width:94%!important;background:rgba(255,217,138,.14);color:#FFE3A6;font-size:13px!important;text-align:center}
+.gm-azu.typing{display:flex;gap:4px;padding:12px 14px}.gm-azu.typing i{width:6px;height:6px;border-radius:50%;background:rgba(244,241,234,.7);animation:tkdot 1s infinite}.gm-azu.typing i:nth-child(2){animation-delay:.15s}.gm-azu.typing i:nth-child(3){animation-delay:.3s}
+@keyframes tkdot{50%{opacity:.25;transform:translateY(-3px)}}
+.gd-form{display:flex;gap:6px}.gd-form .gin{flex:1;min-width:0;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#F4F1EA;border-radius:999px;padding:11px 14px;font:400 15px/1 var(--body)}
+.gd-form button{appearance:none;border:0;width:44px;border-radius:50%;background:#2F5FE0;color:#fff;font-size:16px;cursor:pointer}
+/* the bubble: Azu's own words, above the dock, a tail towards Azu; its words in --ink1 on --paper, the word said in the accent */
+.gbubble{position:absolute;left:14px;right:78px;z-index:15;background:var(--paper);color:var(--ink1);border-radius:18px;padding:11px 14px;box-shadow:0 8px 24px rgba(0,0,0,.28),0 0 0 1px var(--hair);animation:gbin .22s ease}
+.gbubble::after{content:"";position:absolute;right:-7px;bottom:14px;width:16px;height:16px;background:var(--paper);transform:rotate(45deg);border-radius:3px;box-shadow:3px -3px 0 0 transparent}
+.gbubble.tail-up::after{bottom:auto;top:12px}
+@keyframes gbin{from{opacity:0;transform:translateY(6px) scale(.98)}}
+.gbubble .gcap{position:static;inset:auto;background:none;box-shadow:none;padding:0;border-radius:0;max-height:none;color:var(--ink1);font:500 15px/1.45 var(--body)}
+.gbubble .gcap.gread .gw{-webkit-text-fill-color:transparent;background-image:linear-gradient(90deg,color-mix(in srgb,var(--accent2) calc(var(--a,0)*100%),var(--ink1)) calc(var(--f,0)*112% - 12%),var(--ink2) calc(var(--f,0)*112%))}
+.gbubble .gw.gb-off{display:none}
+.gbubble .gnovoice{color:var(--ink2)}
+.reduce .gbubble,.reduce .gd-talk,.reduce .gd-talk .ring{animation:none!important}
+/* Azu's state follows the talk: it leans in to listen, looks up to think */
+.mascot[data-state=listening] svg{transform:rotate(8deg) translateX(-3px)}.mascot[data-state=thinking] .az-eye{transform:translate(1px,-2px)}

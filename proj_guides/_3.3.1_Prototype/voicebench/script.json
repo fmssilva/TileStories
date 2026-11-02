@@ -1,0 +1,532 @@
+[
+ {
+  "key": "g0_family",
+  "lang": "en",
+  "text": "Hi! I'm Azu. Kings and queens lived right here, by the river, for a very long time. Want to see their palace?"
+ },
+ {
+  "key": "g1_family",
+  "lang": "en",
+  "text": "It was the royal home for about two hundred and fifty years, until it was lost on the first of November, 1755."
+ },
+ {
+  "key": "g2_family",
+  "lang": "en",
+  "text": "Here is something surprising. Tap the card to flip it."
+ },
+ {
+  "key": "g3_family",
+  "lang": "en",
+  "text": "Now the story. This drawing shows the square in 1662: the long palace along the back, its great corner tower on the left, and a fountain built for a night of fireworks."
+ },
+ {
+  "key": "g4_family",
+  "lang": "en",
+  "text": "King Manuel thought his castle on the hill was too small. So around 1500 he built a new palace right by the river, and filled it with the riches the ships brought back from India!"
+ },
+ {
+  "key": "g5_family",
+  "lang": "en",
+  "text": "Inside: a library of some seventy thousand books, the royal archive, a chapel, and next door a brand new opera house."
+ },
+ {
+  "key": "g6_family",
+  "lang": "en",
+  "text": "Drag across the picture: the palace before 1755, and the square that took its place."
+ },
+ {
+  "key": "g6_after_family",
+  "lang": "en",
+  "text": "That's it: the palace before 1755, and the open square that took its place."
+ },
+ {
+  "key": "g7_family",
+  "lang": "en",
+  "text": "On the morning of 1 November 1755, All Saints' Day, an earthquake, a fire and a tsunami destroyed the palace, its library and the opera house in a few hours."
+ },
+ {
+  "key": "g7x_family",
+  "lang": "en",
+  "text": "What was lost with it: the library of some seventy thousand books and the royal archive, burnt in the fire that followed the earthquake."
+ },
+ {
+  "key": "g8_family",
+  "lang": "en",
+  "text": "Back on the card, the gallery shows the square through three centuries."
+ },
+ {
+  "key": "g9_family",
+  "lang": "en",
+  "text": "Ready for a question? Which king moved the court to the river? Tap your answer."
+ },
+ {
+  "key": "g9_after_family",
+  "lang": "en",
+  "text": "It was Manuel the First, around 1500."
+ },
+ {
+  "key": "g10_family",
+  "lang": "en",
+  "text": "That was the Ribeira Palace. Ask me anything, or explore on your own."
+ },
+ {
+  "key": "g0_explorer",
+  "lang": "en",
+  "text": "Welcome to the Ribeira Palace. For two and a half centuries the kings of Portugal lived here, right on the river. Let me show you what was here."
+ },
+ {
+  "key": "g1_explorer",
+  "lang": "en",
+  "text": "It was the royal home for about two hundred and fifty years, until it was lost on the first of November, 1755."
+ },
+ {
+  "key": "g2_explorer",
+  "lang": "en",
+  "text": "Here is something surprising. Tap the card to flip it."
+ },
+ {
+  "key": "g3_explorer",
+  "lang": "en",
+  "text": "Now the story. This drawing shows the square in 1662: the long palace along the back, its great corner tower on the left, and a fountain built for a night of fireworks."
+ },
+ {
+  "key": "g4_explorer",
+  "lang": "en",
+  "text": "When King Manuel I found the old castle on the hill too cramped, he moved the court down to the docks around 1500 and filled the new palace with the wealth of the voyages to India."
+ },
+ {
+  "key": "g5_explorer",
+  "lang": "en",
+  "text": "Inside: a library of some seventy thousand books, the royal archive, a chapel, and next door a brand new opera house."
+ },
+ {
+  "key": "g6_explorer",
+  "lang": "en",
+  "text": "Drag across the picture: the palace before 1755, and the square that took its place."
+ },
+ {
+  "key": "g6_after_explorer",
+  "lang": "en",
+  "text": "That's it: the palace before 1755, and the open square that took its place."
+ },
+ {
+  "key": "g7_explorer",
+  "lang": "en",
+  "text": "On the morning of 1 November 1755, All Saints' Day, an earthquake, a fire and a tsunami destroyed the palace, its library and the opera house in a few hours."
+ },
+ {
+  "key": "g7x_explorer",
+  "lang": "en",
+  "text": "What was lost with it: the library of some seventy thousand books and the royal archive, burnt in the fire that followed the earthquake."
+ },
+ {
+  "key": "g8_explorer",
+  "lang": "en",
+  "text": "Back on the card, the gallery shows the square through three centuries."
+ },
+ {
+  "key": "g9_explorer",
+  "lang": "en",
+  "text": "Ready for a question? Which king moved the court to the river? Tap your answer."
+ },
+ {
+  "key": "g9_after_explorer",
+  "lang": "en",
+  "text": "It was Manuel the First, around 1500."
+ },
+ {
+  "key": "g10_explorer",
+  "lang": "en",
+  "text": "That was the Ribeira Palace. Ask me anything, or explore on your own."
+ },
+ {
+  "key": "g0_expert",
+  "lang": "en",
+  "text": "The Ribeira Palace: the royal residence for about two and a half centuries, until the earthquake of 1755. Let us go through what is known of it."
+ },
+ {
+  "key": "g1_expert",
+  "lang": "en",
+  "text": "It was the royal home for about two hundred and fifty years, until it was lost on the first of November, 1755."
+ },
+ {
+  "key": "g2_expert",
+  "lang": "en",
+  "text": "Here is something surprising. Tap the card to flip it."
+ },
+ {
+  "key": "g3_expert",
+  "lang": "en",
+  "text": "Now the story. This drawing shows the square in 1662: the long palace along the back, its great corner tower on the left, and a fountain built for a night of fireworks."
+ },
+ {
+  "key": "g4_expert",
+  "lang": "en",
+  "text": "Around 1500 Manuel I moved the court from the castle on the hill down to the river front, beside the docks, and paid for the new palace with the wealth of the India voyages: the crown now lived where its trade arrived."
+ },
+ {
+  "key": "g5_expert",
+  "lang": "en",
+  "text": "Inside: a library of some seventy thousand books, the royal archive, a chapel, and next door a brand new opera house."
+ },
+ {
+  "key": "g6_expert",
+  "lang": "en",
+  "text": "Drag across the picture: the palace before 1755, and the square that took its place."
+ },
+ {
+  "key": "g6_after_expert",
+  "lang": "en",
+  "text": "That's it: the palace before 1755, and the open square that took its place."
+ },
+ {
+  "key": "g7_expert",
+  "lang": "en",
+  "text": "On the morning of 1 November 1755, All Saints' Day, an earthquake, a fire and a tsunami destroyed the palace, its library and the opera house in a few hours."
+ },
+ {
+  "key": "g7x_expert",
+  "lang": "en",
+  "text": "What was lost with it: the library of some seventy thousand books and the royal archive, burnt in the fire that followed the earthquake."
+ },
+ {
+  "key": "g8_expert",
+  "lang": "en",
+  "text": "Back on the card, the gallery shows the square through three centuries."
+ },
+ {
+  "key": "g9_expert",
+  "lang": "en",
+  "text": "Ready for a question? Which king moved the court to the river? Tap your answer."
+ },
+ {
+  "key": "g9_after_expert",
+  "lang": "en",
+  "text": "It was Manuel the First, around 1500."
+ },
+ {
+  "key": "g10_expert",
+  "lang": "en",
+  "text": "That was the Ribeira Palace. Ask me anything, or explore on your own."
+ },
+ {
+  "key": "guide_intro",
+  "lang": "en",
+  "text": "Hi! I'm Azu, and I'll be your guide. Ask me anything, at any time: just tap Ask. Now, let's meet Ribeira Palace!"
+ },
+ {
+  "key": "guide_moving_on",
+  "lang": "en",
+  "text": "OK, moving on. Let's look at this."
+ },
+ {
+  "key": "guide_nudge_flip_1",
+  "lang": "en",
+  "text": "Go on, tap the card to flip it."
+ },
+ {
+  "key": "guide_nudge_flip_2",
+  "lang": "en",
+  "text": "Just one tap on the card, and you'll see what's on the other side."
+ },
+ {
+  "key": "guide_nudge_drag_1",
+  "lang": "en",
+  "text": "Drag the line across the picture."
+ },
+ {
+  "key": "guide_nudge_drag_2",
+  "lang": "en",
+  "text": "Slide it all the way across, and see what changed."
+ },
+ {
+  "key": "guide_nudge_answer_1",
+  "lang": "en",
+  "text": "Take a guess: tap one of the answers."
+ },
+ {
+  "key": "guide_nudge_answer_2",
+  "lang": "en",
+  "text": "No pressure, any answer will do."
+ },
+ {
+  "key": "guide_try_moveon",
+  "lang": "en",
+  "text": "No problem. Let's keep going."
+ },
+ {
+  "key": "guide_after_flip",
+  "lang": "en",
+  "text": "There it is."
+ },
+ {
+  "key": "guide_after_answer",
+  "lang": "en",
+  "text": "Nicely done."
+ },
+ {
+  "key": "g0_family",
+  "lang": "pt",
+  "text": "Olá! Sou o Azu. Reis e rainhas viveram aqui, junto ao rio, durante muito tempo. Queres ver o palácio deles?"
+ },
+ {
+  "key": "g1_family",
+  "lang": "pt",
+  "text": "Foi casa real durante cerca de duzentos e cinquenta anos, até se perder a um de novembro de 1755."
+ },
+ {
+  "key": "g2_family",
+  "lang": "pt",
+  "text": "Aqui está algo surpreendente. Toque no cartão para o virar."
+ },
+ {
+  "key": "g3_family",
+  "lang": "pt",
+  "text": "Agora a história. Este desenho mostra a praça em 1662: o longo palácio ao fundo, o grande torreão à esquerda e uma fonte erguida para uma noite de fogo de artifício."
+ },
+ {
+  "key": "g4_family",
+  "lang": "pt",
+  "text": "O rei D. Manuel achava o castelo no monte pequeno demais. Por isso, por volta de 1500, construiu um palácio novo mesmo junto ao rio, e encheu-o com as riquezas que os navios traziam da Índia!"
+ },
+ {
+  "key": "g5_family",
+  "lang": "pt",
+  "text": "Lá dentro: uma biblioteca com cerca de setenta mil livros, o arquivo real, uma capela e, ao lado, uma ópera acabada de construir."
+ },
+ {
+  "key": "g6_family",
+  "lang": "pt",
+  "text": "Arraste sobre a imagem: o palácio antes de 1755 e a praça que ficou no seu lugar."
+ },
+ {
+  "key": "g6_after_family",
+  "lang": "pt",
+  "text": "É isso: o palácio antes de 1755 e a praça aberta que ficou no seu lugar."
+ },
+ {
+  "key": "g7_family",
+  "lang": "pt",
+  "text": "Na manhã de 1 de novembro de 1755, Dia de Todos os Santos, um terramoto, um incêndio e um maremoto destruíram em poucas horas o palácio, a biblioteca e a ópera."
+ },
+ {
+  "key": "g7x_family",
+  "lang": "pt",
+  "text": "O que se perdeu com ele: a biblioteca de cerca de setenta mil livros e o arquivo real, queimados no incêndio que se seguiu ao terramoto."
+ },
+ {
+  "key": "g8_family",
+  "lang": "pt",
+  "text": "De volta ao cartão, a galeria mostra a praça ao longo de três séculos."
+ },
+ {
+  "key": "g9_family",
+  "lang": "pt",
+  "text": "Pronto para uma pergunta? Que rei mudou a corte para o rio? Toque na sua resposta."
+ },
+ {
+  "key": "g9_after_family",
+  "lang": "pt",
+  "text": "Foi D. Manuel I, por volta de 1500."
+ },
+ {
+  "key": "g10_family",
+  "lang": "pt",
+  "text": "Este foi o Paço da Ribeira. Pergunte-me o que quiser, ou explore sozinho."
+ },
+ {
+  "key": "g0_explorer",
+  "lang": "pt",
+  "text": "Bem-vindo ao Paço da Ribeira. Durante dois séculos e meio, os reis de Portugal viveram aqui, mesmo à beira do rio. Deixe-me mostrar-lhe o que aqui existia."
+ },
+ {
+  "key": "g1_explorer",
+  "lang": "pt",
+  "text": "Foi casa real durante cerca de duzentos e cinquenta anos, até se perder a um de novembro de 1755."
+ },
+ {
+  "key": "g2_explorer",
+  "lang": "pt",
+  "text": "Aqui está algo surpreendente. Toque no cartão para o virar."
+ },
+ {
+  "key": "g3_explorer",
+  "lang": "pt",
+  "text": "Agora a história. Este desenho mostra a praça em 1662: o longo palácio ao fundo, o grande torreão à esquerda e uma fonte erguida para uma noite de fogo de artifício."
+ },
+ {
+  "key": "g4_explorer",
+  "lang": "pt",
+  "text": "Quando D. Manuel I achou o velho castelo da colina demasiado apertado, mudou a corte para junto das docas por volta de 1500 e encheu o novo palácio com a riqueza das viagens à Índia."
+ },
+ {
+  "key": "g5_explorer",
+  "lang": "pt",
+  "text": "Lá dentro: uma biblioteca com cerca de setenta mil livros, o arquivo real, uma capela e, ao lado, uma ópera acabada de construir."
+ },
+ {
+  "key": "g6_explorer",
+  "lang": "pt",
+  "text": "Arraste sobre a imagem: o palácio antes de 1755 e a praça que ficou no seu lugar."
+ },
+ {
+  "key": "g6_after_explorer",
+  "lang": "pt",
+  "text": "É isso: o palácio antes de 1755 e a praça aberta que ficou no seu lugar."
+ },
+ {
+  "key": "g7_explorer",
+  "lang": "pt",
+  "text": "Na manhã de 1 de novembro de 1755, Dia de Todos os Santos, um terramoto, um incêndio e um maremoto destruíram em poucas horas o palácio, a biblioteca e a ópera."
+ },
+ {
+  "key": "g7x_explorer",
+  "lang": "pt",
+  "text": "O que se perdeu com ele: a biblioteca de cerca de setenta mil livros e o arquivo real, queimados no incêndio que se seguiu ao terramoto."
+ },
+ {
+  "key": "g8_explorer",
+  "lang": "pt",
+  "text": "De volta ao cartão, a galeria mostra a praça ao longo de três séculos."
+ },
+ {
+  "key": "g9_explorer",
+  "lang": "pt",
+  "text": "Pronto para uma pergunta? Que rei mudou a corte para o rio? Toque na sua resposta."
+ },
+ {
+  "key": "g9_after_explorer",
+  "lang": "pt",
+  "text": "Foi D. Manuel I, por volta de 1500."
+ },
+ {
+  "key": "g10_explorer",
+  "lang": "pt",
+  "text": "Este foi o Paço da Ribeira. Pergunte-me o que quiser, ou explore sozinho."
+ },
+ {
+  "key": "g0_expert",
+  "lang": "pt",
+  "text": "O Paço da Ribeira: residência real durante cerca de dois séculos e meio, até ao terramoto de 1755. Vejamos o que se sabe dele."
+ },
+ {
+  "key": "g1_expert",
+  "lang": "pt",
+  "text": "Foi casa real durante cerca de duzentos e cinquenta anos, até se perder a um de novembro de 1755."
+ },
+ {
+  "key": "g2_expert",
+  "lang": "pt",
+  "text": "Aqui está algo surpreendente. Toque no cartão para o virar."
+ },
+ {
+  "key": "g3_expert",
+  "lang": "pt",
+  "text": "Agora a história. Este desenho mostra a praça em 1662: o longo palácio ao fundo, o grande torreão à esquerda e uma fonte erguida para uma noite de fogo de artifício."
+ },
+ {
+  "key": "g4_expert",
+  "lang": "pt",
+  "text": "Por volta de 1500, D. Manuel I mudou a corte do castelo no monte para a frente ribeirinha, junto às docas, e pagou o novo paço com a riqueza das viagens à Índia: a coroa passava a viver onde o seu comércio chegava."
+ },
+ {
+  "key": "g5_expert",
+  "lang": "pt",
+  "text": "Lá dentro: uma biblioteca com cerca de setenta mil livros, o arquivo real, uma capela e, ao lado, uma ópera acabada de construir."
+ },
+ {
+  "key": "g6_expert",
+  "lang": "pt",
+  "text": "Arraste sobre a imagem: o palácio antes de 1755 e a praça que ficou no seu lugar."
+ },
+ {
+  "key": "g6_after_expert",
+  "lang": "pt",
+  "text": "É isso: o palácio antes de 1755 e a praça aberta que ficou no seu lugar."
+ },
+ {
+  "key": "g7_expert",
+  "lang": "pt",
+  "text": "Na manhã de 1 de novembro de 1755, Dia de Todos os Santos, um terramoto, um incêndio e um maremoto destruíram em poucas horas o palácio, a biblioteca e a ópera."
+ },
+ {
+  "key": "g7x_expert",
+  "lang": "pt",
+  "text": "O que se perdeu com ele: a biblioteca de cerca de setenta mil livros e o arquivo real, queimados no incêndio que se seguiu ao terramoto."
+ },
+ {
+  "key": "g8_expert",
+  "lang": "pt",
+  "text": "De volta ao cartão, a galeria mostra a praça ao longo de três séculos."
+ },
+ {
+  "key": "g9_expert",
+  "lang": "pt",
+  "text": "Pronto para uma pergunta? Que rei mudou a corte para o rio? Toque na sua resposta."
+ },
+ {
+  "key": "g9_after_expert",
+  "lang": "pt",
+  "text": "Foi D. Manuel I, por volta de 1500."
+ },
+ {
+  "key": "g10_expert",
+  "lang": "pt",
+  "text": "Este foi o Paço da Ribeira. Pergunte-me o que quiser, ou explore sozinho."
+ },
+ {
+  "key": "guide_intro",
+  "lang": "pt",
+  "text": "Olá! Sou o Azu e vou ser o seu guia. Pergunte-me o que quiser, a qualquer momento: basta tocar em Perguntar. Agora, vamos conhecer Ribeira Palace!"
+ },
+ {
+  "key": "guide_moving_on",
+  "lang": "pt",
+  "text": "Muito bem, seguimos. Vejamos isto."
+ },
+ {
+  "key": "guide_nudge_flip_1",
+  "lang": "pt",
+  "text": "Vá, toque no cartão para o virar."
+ },
+ {
+  "key": "guide_nudge_flip_2",
+  "lang": "pt",
+  "text": "Basta um toque no cartão e vê o que está do outro lado."
+ },
+ {
+  "key": "guide_nudge_drag_1",
+  "lang": "pt",
+  "text": "Arraste a linha sobre a imagem."
+ },
+ {
+  "key": "guide_nudge_drag_2",
+  "lang": "pt",
+  "text": "Deslize até ao fim e veja o que mudou."
+ },
+ {
+  "key": "guide_nudge_answer_1",
+  "lang": "pt",
+  "text": "Arrisque: toque numa das respostas."
+ },
+ {
+  "key": "guide_nudge_answer_2",
+  "lang": "pt",
+  "text": "Sem pressão, qualquer resposta serve."
+ },
+ {
+  "key": "guide_try_moveon",
+  "lang": "pt",
+  "text": "Não faz mal. Vamos continuar."
+ },
+ {
+  "key": "guide_after_flip",
+  "lang": "pt",
+  "text": "Aí está."
+ },
+ {
+  "key": "guide_after_answer",
+  "lang": "pt",
+  "text": "Muito bem."
+ }
+]

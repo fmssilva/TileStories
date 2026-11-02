@@ -31,3 +31,6 @@ Thumbs.db
 
 # Node / npm (if any scripts at root)
 node_modules/
+# voicebench: API keys and private A/B audio never leave this machine
+proj_guides/_3.3.1_Prototype/voicebench/.env
+proj_guides/_3.3.1_Prototype/voicebench/out-private/

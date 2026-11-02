@@ -3,7 +3,7 @@ import io, json, os
 D = os.path.dirname(os.path.abspath(__file__))
 def rd(n): return io.open(os.path.join(D, n), encoding='utf-8').read()
 
-V8 = ['v8a.js', 'v8b.js', 'v8c.js', 'v8d.js', 'v8e.js', 'v8f.js', 'v8g.js', 'v8h.js', 'v8i.js', 'v8j.js', 'v8k.js', 'v8l.js', 'v8m.js', 'v8n.js']
+V8 = ['v8a.js', 'v8b.js', 'v8c.js', 'v8d.js', 'v8e.js', 'v8f.js', 'v8g.js', 'v8h.js', 'v8i.js', 'v8j.js', 'v8k.js', 'v8l.js', 'v8m.js', 'v8n.js', 'v8o.js']
 
 # words that moved to another part, or left with their part
 REOWN = {'peek_next_label': ('retired', 'the Next card peek left: a swipe up at Peek raises the card'),
@@ -51,6 +51,22 @@ NEWSTR = [
     ['state_retry', 's5states', 'The button that tries again (offline, a failed picture or page).', 'Try again', 'Tentar de novo', '', 'Try again'],
     ['state_done', 's5states', 'After an action that saved something (an answer, a vote, a collected item).', 'Saved', 'Guardado', '', 'Done'],
     ['guide_novoice', 's7cap', 'Over the captions when this device has no voice for the language (the words still light up).', 'No voice for this language on this device: captions only.', 'Sem voz para esta língua neste dispositivo: só legendas.', '', 'No voice'],
+    ['dock_label', 's7dock', 'The guide panel, for a screen reader.', 'The guide', 'O guia', '', 'Name'],
+    ['dock_stop_of', 's7dock', 'The step: {0} of {1}.', 'Stop {0} of {1}', 'Paragem {0} de {1}', '', 'Stop'],
+    ['dock_ask', 's7dock', 'The talk button, for a screen reader.', 'Ask Azu', 'Perguntar ao Azu', '', 'Talk button'],
+    ['dock_tap_talk', 's7dock', 'Under the talk button, at rest.', 'Tap to talk · hold to talk', 'Toque para falar · mantenha para falar', '', 'At rest'],
+    ['dock_listening', 's7dock', 'Listening.', 'Listening…', 'A ouvir…', '', 'Listening'],
+    ['dock_thinking', 's7dock', 'Thinking.', 'Thinking…', 'A pensar…', '', 'Thinking'],
+    ['dock_tap_stop', 's7dock', 'While Azu speaks.', 'Tap to interrupt', 'Toque para interromper', '', 'Speaking'],
+    ['dock_go_ahead', 's7dock', 'Just interrupted.', 'Go ahead…', 'Diga…', '', 'Interrupted'],
+    ['dock_not_heard', 's7dock', 'Nothing heard.', "Didn't catch that. Hold the button, or type.", 'Não percebi. Mantenha o botão, ou escreva.', '', 'Not heard'],
+    ['dock_hold_hint', 's7dock', 'With Hold only, after a tap.', 'Hold the button while you speak.', 'Mantenha o botão enquanto fala.', '', 'Hold'],
+    ['dock_type', 's7dock', 'The keyboard button and the text field.', 'Type a question', 'Escreva uma pergunta', '', 'Type'],
+    ['dock_send', 's7dock', 'Send.', 'Send', 'Enviar', '', 'Send'],
+    ['dock_expand', 's7dock', 'The grabber, to raise the panel.', 'Show more', 'Mostrar mais', '', 'Expand'],
+    ['dock_collapse', 's7dock', 'The grabber, to lower the panel.', 'Show less', 'Mostrar menos', '', 'Collapse'],
+    ['dock_mic_framed', 's7dock', 'In the conversation when the microphone is blocked inside a page (a preview).', 'The microphone is not available in this preview. Type your question instead.', 'O microfone não está disponível nesta pré-visualização. Escreva a sua pergunta.', '', 'Mic blocked'],
+    ['dock_mic_none', 's7dock', 'When the device has no speech recognition.', 'Speaking is not available on this device. Type your question instead.', 'Falar não está disponível neste dispositivo. Escreva a sua pergunta.', '', 'No mic'],
     ['guide_intro', 's7mascot', "Azu's introduction, before the first step. {0} = the point's name.", "Hi! I'm Azu, and I'll be your guide. Ask me anything, at any time: just tap Ask. Now, let's meet {0}!", 'Olá! Sou o Azu e vou ser o seu guia. Pergunte-me o que quiser, a qualquer momento: basta tocar em Perguntar. Agora, vamos conhecer {0}!', '', 'Introduction'],
     ['guide_moving_on', 's7resume', 'When the block being told left the screen: the guide tells the block now in view.', "OK, moving on. Let's look at this.", 'Muito bem, seguimos. Vejamos isto.', '', 'Moving on'],
     ['guide_nudge_flip_1', 's7coach', 'Asking again (1st time) to flip a card.', 'Go on, tap the card to flip it.', 'Vá, toque no cartão para o virar.', '', 'Flip, again'],
@@ -124,7 +140,7 @@ a = "v7 = rd('v7.js').replace('__REALSTR__', rd('realstrings.json'))"
 assert a in src
 src = src.replace(a, "v7 = rd('v7.js').replace('__REALSTR__', fix_real(rd('realstrings.json')))\n"
                      "v7 = v7.replace('var LABSTR=[', 'var LABSTR=[' + ''.join(json.dumps(r, ensure_ascii=False) + ',' for r in NEWSTR if r[1] != 'retired'), 1)\n"
-                     "v7 = v7.replace('var COMP={', 'var COMP={s5viewer:[\"Card Controls\",\"Picture viewer\"],s5player:[\"Card Controls\",\"Video player\"],s5chip:[\"Card Controls\",\"Placed model chip\"],s5hints:[\"Card Controls\",\"Hints\"],s5states:[\"Card Controls\",\"Loading & states\"],s8onb:[\"Audiences\",\"Who’s exploring\"],s8set:[\"Audiences\",\"Audience in Settings\"],s8look:[\"Audiences\",\"Looks per audience\"],s8lens:[\"Audiences\",\"Lenses\"],', 1)\n"
+                     "v7 = v7.replace('var COMP={', 'var COMP={s5viewer:[\"Card Controls\",\"Picture viewer\"],s5player:[\"Card Controls\",\"Video player\"],s5chip:[\"Card Controls\",\"Placed model chip\"],s5hints:[\"Card Controls\",\"Hints\"],s5states:[\"Card Controls\",\"Loading & states\"],s8onb:[\"Audiences\",\"Who’s exploring\"],s8set:[\"Audiences\",\"Audience in Settings\"],s8look:[\"Audiences\",\"Looks per audience\"],s8lens:[\"Audiences\",\"Lenses\"],s7dock:[\"Guide\",\"Guide panel\"],', 1)\n"
                      "v7 = v7.replace(PBAR_A, PBAR_B, 1)\nv7 = fix_demo_rows(v7)\n"
                      "v8 = '\\n'.join(rd(f) for f in V8 if os.path.exists(os.path.join(D, f)))")
 b = "+ v7 + '\\nif(location.hash===\"#selftest\")"
@@ -132,6 +148,6 @@ assert b in src, 'hook'
 src = src.replace(b, "+ v7 + '\\n' + v8 + '\\nif(location.hash===\"#selftest\")", 1)
 c = "rd('v7.css')"
 assert c in src
-src = src.replace(c, "rd('v7.css') + rd('v8.css') + rd('v8b.css') + rd('v8c.css') + rd('v8d.css') + rd('v8e.css') + rd('v8f.css') + rd('v8g.css') + rd('v8h.css') + rd('v8i.css') + rd('v8j.css') + rd('v8k.css') + rd('v8l.css') + rd('v8m.css') + rd('v8n.css')", 1)
+src = src.replace(c, "rd('v7.css') + rd('v8.css') + rd('v8b.css') + rd('v8c.css') + rd('v8d.css') + rd('v8e.css') + rd('v8f.css') + rd('v8g.css') + rd('v8h.css') + rd('v8i.css') + rd('v8j.css') + rd('v8k.css') + rd('v8l.css') + rd('v8m.css') + rd('v8n.css') + rd('v8o.css')", 1)
 src = src.replace("'Editor Lab · v7'", "'Editor Lab · v8'")
 exec(compile(src, 'build6+8', 'exec'), {'__file__': os.path.join(D, 'build6.py'), '__name__': '__main__', 'fix_real': fix_real, 'fix_demo_rows': fix_demo_rows, 'NEWSTR': NEWSTR, 'V8': V8, 'json': json, 'PBAR_A': PBAR_A, 'PBAR_B': PBAR_B})
