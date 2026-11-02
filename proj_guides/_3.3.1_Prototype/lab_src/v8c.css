@@ -1,0 +1,28 @@
+/* v8c: element options */
+.t-inverse{background:var(--ink1);color:var(--paper)!important;padding:4px 10px;border-radius:6px;display:inline-block}
+.el-callout.inverse{background:var(--ink1);color:var(--paper)}.el-callout.inverse b{color:var(--paper)}
+.el-heading.a-centre{text-align:center}
+.el-quote.tq-accent.serif::before{color:var(--accent2)}.el-quote.tq-accent.minimal{border-left-color:var(--accent2)}
+.el-quote.tq-neutral.serif::before{color:var(--ink2)}.el-quote.tq-neutral.minimal{border-left-color:var(--ink2)}
+.el-quote.tq-inverse{background:var(--ink1);color:var(--paper);padding:14px 16px;border-radius:12px}.el-quote.tq-inverse.serif::before{color:var(--paper);top:-6px;left:10px}.el-quote.tq-inverse cite{color:var(--paper)}
+.postcard{transform:rotate(-1.6deg);border:6px solid #fff;box-shadow:0 8px 20px rgba(0,0,0,.18);border-radius:6px!important}
+.el-steps{list-style:none;margin:12px 0;padding:0}.el-steps li{display:flex;gap:12px;position:relative;padding-bottom:14px}
+.el-steps li i{flex:none;width:28px;height:28px;border-radius:50%;background:var(--fam);color:#fff;display:grid;place-items:center;font:700 13px/1 var(--body);font-style:normal;z-index:1}
+.el-steps li:not(:last-child)::before{content:"";position:absolute;left:13px;top:28px;bottom:0;width:2px;background:color-mix(in srgb,var(--fam) 40%,transparent)}
+.el-steps b{display:block;font:700 15px/1.3 var(--body)}.el-steps span{font-size:14px;color:var(--ink2)}
+.vbadge{position:absolute;right:8px;top:8px;width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;display:grid;place-items:center;font:700 13px/1 var(--body);font-style:normal;z-index:2}
+.el-pic .fr,.el-pair .fr,.el-vid{position:relative}
+.el-pair.arch .fr,.el-vid.arch,.cgrid.arch .fr,.cone.arch .fr,.cstack.arch .fr,.cfilm.arch .fr{border-radius:999px 999px 12px 12px!important}
+.aspeed{appearance:none;border:1px solid var(--hair);background:var(--paper);color:var(--ink1);border-radius:999px;padding:4px 8px;font:700 11px/1 var(--body);margin-right:6px}
+.acapline{width:100%;margin:6px 0 0;font:14px/1.4 var(--body);color:var(--ink1)}
+.turn.fit-yaw{background-size:80%!important}.turn.fit-sphere{background-size:70%!important}.turn.fit-rest{background-size:90%!important}.turn.fit-visible{background-size:100%!important}
+.sw.grid{display:grid;grid-template-columns:1fr 1fr}.sw code{display:block;font:500 10.5px/1.2 var(--mono);color:var(--ink2)}
+.el-car.inset{margin:16px 0;padding:0}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:14px 0}.cgrid .fr{aspect-ratio:1;border-radius:10px;overflow:hidden;position:relative}.cgrid img{width:100%;height:100%;object-fit:cover}.cgrid em{position:absolute;inset:0;background:rgba(0,0,0,.55);color:#fff;display:grid;place-items:center;font:700 20px/1 var(--body);font-style:normal}
+.cfilm{margin:14px 0}.cfilm .big{aspect-ratio:3/2;border-radius:12px;overflow:hidden}.cfilm .big img{width:100%;height:100%;object-fit:cover}.thumbsrow{display:flex;gap:4px;margin-top:6px}.thumbsrow span{flex:1;height:38px;border-radius:6px;background-size:cover;background-position:center;opacity:.6}.thumbsrow span.on{opacity:1;box-shadow:0 0 0 2px var(--ink1)}
+.cstack{margin:14px 0}.cstack .fr{aspect-ratio:3/2;border-radius:12px;overflow:hidden;margin-bottom:8px}.cstack img{width:100%;height:100%;object-fit:cover}
+.cone{position:relative;margin:14px 0}.cone .fr{aspect-ratio:3/2;border-radius:12px;overflow:hidden}.cone img{width:100%;height:100%;object-fit:cover}.carr{position:absolute;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.9);color:#111;display:grid;place-items:center;font-size:20px}.carr.l{left:8px}.carr.r{right:8px}
+.cmarks{display:flex;justify-content:center;gap:6px;margin-top:4px}.cmarks i{width:7px;height:7px;border-radius:50%;background:var(--hair)}.cmarks i.on{background:var(--ink1)}.cmarks.n{font:600 12px/1 var(--body);color:var(--ink2)}
+.el-pic.noimg .fr{aspect-ratio:4/5;width:60%;background:var(--famtint,var(--box));display:grid;place-items:center}.el-pic.noimg span{font:600 64px/1 var(--display);color:var(--fam)}
+.self-zoom{animation:selfzoom 28s ease-in-out infinite alternate}.self-pan{animation:selfpan 26s ease-in-out infinite alternate;object-position:0 50%}
+@keyframes selfzoom{from{transform:scale(1)}to{transform:scale(1.06)}}@keyframes selfpan{from{object-position:0 50%}to{object-position:100% 50%}}

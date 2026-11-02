@@ -1,0 +1,58 @@
+<div class="wrap">
+<header>
+  <div class="kicker">TileStories · Detail Card (_3.3) · Editor Lab · v3</div>
+  <h1>Block Components Lab</h1>
+  <p class="lede">From the smallest part to the whole card: <b>Motion</b>, <b>Interaction</b> and <b>Effects</b>, the <b>Elements</b> with named styles, <b>Patterns</b> made of elements, the <b>Block Library</b> built on them, then a marker's <b>card</b> (its blocks and their previews) and each block's <b>page</b> with its real content fields. Edit anything: the phone jumps to it, marks it EDITING and dims the rest. The floating bar on the phone switches light / dark, motion, language and screen.</p>
+  <nav class="steps" aria-label="The flow">
+    <button type="button" data-step="1" aria-pressed="true"><b>1</b><div>Define<br><span>Motion, interaction, effects, elements</span></div></button>
+    <button type="button" data-step="2" aria-pressed="false"><b>2</b><div>Compose<br><span>Patterns</span></div></button>
+    <button type="button" data-step="3" aria-pressed="false"><b>3</b><div>Blocks<br><span>The Block Library</span></div></button>
+    <button type="button" data-step="4" aria-pressed="false"><b>4</b><div>The card<br><span>Blocks and previews</span></div></button>
+    <button type="button" data-step="5" aria-pressed="false"><b>5</b><div>A page<br><span>The story's content</span></div></button>
+  </nav>
+</header>
+
+<div class="grid">
+  <section class="view" aria-label="Game view">
+    <div class="vbar"><span class="vtab">Game</span><button class="ubtn" type="button" id="replay" title="Replay the motion from the top">&#9654; Replay</button><span class="sp"></span><span style="opacity:.7">Preview controls float on the phone</span></div>
+    <div class="stagebg"><div class="fit" id="fit"><div class="ph cv" id="ph"><div class="camera" id="camera"></div><div class="hint" id="hint"><span>The card</span></div><div class="scr" id="scr"></div><div class="ptool" id="ptool"></div><div class="navbar" id="navbar"></div></div></div></div>
+  </section>
+
+  <section class="ed" aria-label="POI Editor (mock)">
+    <div class="edtitle">&#9881; <b>POI Editor</b> <span>· Lab mock of the Unity window</span></div>
+    <div class="edtool"><button class="ubtn" disabled>Load &amp; Populate Rig</button><button class="ubtn clear" disabled>Clear Rig</button><button class="ubtn save" disabled>Save All to JSON</button><button class="ubtn" disabled>Copy to StreamingAssets</button></div>
+    <div class="utabs" role="tablist">
+      <button class="utab g" role="tab" type="button" data-tab="global" aria-selected="false">Global Scene</button>
+      <button class="utab s" role="tab" type="button" data-tab="marker" aria-selected="false">Specific Marker</button>
+      <button class="utab c" role="tab" type="button" data-tab="card" aria-selected="true">Detail Card</button>
+    </div>
+    <div class="edbody" id="ed"></div>
+  </section>
+</div>
+
+<div class="notes">
+  <div class="card2">
+    <h2>In Unity</h2>
+    <table>
+      <tr><td>Elements, styles</td><td><span class="badge nat">NATIVE</span> the components exist; a style is a named set of their classes. <span class="badge bld">BUILD</span> the style tables, previews rendered off-screen into a texture.</td></tr>
+      <tr><td>Entrances, scroll, emphasis</td><td><span class="badge nat">NATIVE</span> translate / scale / rotate / opacity per frame; words and letters by per-glyph offsets (as the Open Row's Shine).</td></tr>
+      <tr><td>Cube, Flip, Tap to Flip</td><td><span class="badge bld">BUILD</span> UI Toolkit has no 3D: the page is drawn into a render texture sized from the panel at the device's scale (recreated on rotation and resize), shown on a perspective-warped strip mesh. Works on any screen; cost grows with resolution, so the texture is capped (e.g. 1.5x).</td></tr>
+      <tr><td>Imported animation</td><td><span class="badge bro">IMPORT</span> Rive: official Unity runtime, draws to a texture. Lottie: third-party runtimes only (unverified). Video with alpha: VideoPlayer (VP8 alpha / HEVC alpha, per platform: unverified). Unity Animation: an animated prefab on a camera into a texture: <span class="badge nat">NATIVE</span>.</td></tr>
+      <tr><td>Interaction</td><td>Flip, hold, drag to compare, swipe deck, hotspots, choice: <span class="badge nat">NATIVE</span> pointer manipulators. Scroll Scrub (pinned): <span class="badge bld">BUILD</span> a pinned slot in the stack. Tilt to Look: gyro (Input System attitude) <span class="badge nat">NATIVE</span>.</td></tr>
+      <tr><td>Screens</td><td>One card, three widths: phone portrait (the sheet), phone landscape (a side sheet over the camera), tablet (a centred reading column; patterns go two-up). Fixed rules per pattern, no per-screen settings.</td></tr>
+    </table>
+  </div>
+  <div class="card2">
+    <h2>What to judge</h2>
+    <ol>
+      <li>The layers in order: Motion, Interaction, Effects, Elements, Patterns, then Block Library. Easy to find things with the filters?</li>
+      <li>Imported animation as a motion type (Rive, Lottie, video with alpha, Unity Animation) with a trigger: on view, loop, tap, scrub with the scroll.</li>
+      <li>The interaction set: flip, hold, compare, swipe deck, scroll scrub, tilt, choice, hotspots. Missing one?</li>
+      <li>Edges and line dividers as effects, and the Divider element picking one. Enough shapes?</li>
+      <li>Specific Marker in two parts: the card (blocks, previews, what a tap does) and the pages (content fields). Right split?</li>
+      <li>The phone's floating bar (theme, motion, language, focus, screen) and the Editor's foldout options at the top.</li>
+    </ol>
+    <p style="color:var(--muted)">Values in this Lab are experiments, not defaults: defaults are chosen in Unity on the real card.</p>
+  </div>
+</div>
+</div>

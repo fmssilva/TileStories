@@ -1,0 +1,31 @@
+
+/* ---------- v7: texts and demo content per part, Languages & Terms ---------- */
+.utab.w{background:#6B4E9B}
+.ownbar{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 8px}
+.ownb{appearance:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--u-edge);background:#2F3A46;color:#E6EEF6;font:600 11.5px/1 system-ui,sans-serif;height:24px;padding:0 10px;border-radius:12px;cursor:pointer}
+.ownb b{font:700 11px/1 system-ui;color:#9CC3EA}
+.ownb em{font-style:normal;color:#FFB4A8;font-weight:600}
+.ownb[aria-pressed="true"]{background:#3C78B5;color:#fff}.ownb[aria-pressed="true"] b{color:#fff}
+.ownpanel{border:1px dashed #4A5A6A;border-radius:6px;padding:6px 8px;margin:0 0 10px;background:rgba(60,120,181,.07)}
+.tbl.txt td{white-space:normal;vertical-align:top}
+.tbl.txt td:first-child{font-size:11px;color:var(--u-dim);line-height:1.35}
+.tbl.txt .wh{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tbl.txt .fate{display:block;color:#E8C27A;margin-top:2px}
+.tbl.txt input{width:100%;box-sizing:border-box}
+input.u.miss{border-color:#C0392B}
+.tbl td.missing,.note b.missing{color:#FF8A7A}
+.chip2{display:inline-block;font:600 10px/1 system-ui;padding:3px 6px;border-radius:9px;background:#34424F;color:#CFE0F0;margin:0 3px 2px 0}
+.chip2.off{opacity:.5}
+.txscroll{max-height:340px;overflow:auto;border:1px solid #2B2B2B;border-radius:4px}
+.txscroll thead th{position:sticky;top:0;background:var(--u-panel,#383838);z-index:1}
+.gterm{text-decoration:underline dotted;text-decoration-thickness:1.5px;text-underline-offset:3px;cursor:help}
+.gpop{position:absolute;left:16px;right:16px;z-index:16;background:var(--paper);color:var(--ink1);border:1px solid var(--hair);border-radius:14px;padding:12px 14px;box-shadow:0 12px 28px rgba(0,0,0,.28);font:14px/1.45 var(--body)}
+.gpop b{display:block;font:600 16px/1.2 var(--display);margin-bottom:4px}
+.gpop p{margin:0}
+.tbl td.used{white-space:normal}
+.kicon.aa{background:#3C78B5;color:#fff}
+.kt{display:inline-block;font:700 9px/1 system-ui;padding:2px 4px;border-radius:3px;margin-right:3px}.kt.i{background:#3C78B5;color:#fff}.kt.c{background:#5C7A3A;color:#fff}
+.fate2{display:block;color:var(--u-dim);font-size:10.5px}
+.gpop button{appearance:none;border:0;background:none;color:var(--accent2);font:700 13.5px/1 var(--body);padding:8px 0 0;cursor:pointer}
+em.missing{font-style:normal;color:#FF8A7A}
+.pfocus{outline:3px solid #E07A1F!important;outline-offset:3px;border-radius:10px}

@@ -1,0 +1,9 @@
+/* v8d: the marker tab's tools */
+.decide{border:1px solid #6B5313;background:#2A2416;border-radius:8px;padding:10px 12px;margin:6px 0 10px}.decide b{display:block;color:#F2C14E;margin-bottom:4px}.decide span{display:block;color:var(--u-dim);font-size:12.5px}
+.tmplline{font-size:12.5px;color:var(--u-dim);margin:6px 0;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.shows{font-size:12.5px;margin:6px 0 8px}
+.pmark{display:inline-block;margin-left:4px;font:700 9.5px/1 var(--mono);background:#1F3A5A;color:#9CC4F2;padding:2px 4px;border-radius:3px}
+.grip{cursor:grab;color:var(--u-dim);margin-right:4px;letter-spacing:-3px}.chk{display:inline-flex;align-items:center;margin-left:2px}.chk input{width:15px;height:15px}
+.tocheck{font:600 10.5px/1 var(--mono);background:#4A3A12;color:#F2C14E;padding:2px 5px;border-radius:3px;margin-left:4px}.warnrow{color:#F2A35E}
+.cmin{margin-left:auto;font-size:12px;color:var(--ink2)}.cmin + .ctick{margin-left:8px}
+/* D5: one accent fill in view; the others are outlined */
+.nextup button,.collect button{background:transparent!important;color:var(--accent2)!important;border:1.5px solid var(--accent2)!important}.resume button{white-space:nowrap}
