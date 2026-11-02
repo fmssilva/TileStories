@@ -1,0 +1,16 @@
+/* v8j: Focus. The spotlight: a hole in a soft scrim with a warm ring (the rest of the card at --scrim); it glides from block to spot */
+/* placed every frame (it stays on its block during a scroll); a change of target glides in 0.55 s, in the script */
+.gspot{position:absolute;z-index:10;border-radius:14px;pointer-events:none;opacity:0;transition:opacity .35s}
+.gspot.on{opacity:1}
+img.gzimg{transform:none!important}
+.gspot.spotlight{box-shadow:0 0 0 2px rgba(255,217,138,.95),0 0 22px 4px rgba(255,217,138,.42),0 0 0 2400px rgba(10,10,12,var(--scrim,.4))}
+.gspot.ring{box-shadow:0 0 0 2px rgba(255,217,138,.95),0 0 22px 4px rgba(255,217,138,.42)}
+.gspotting .gfocus{box-shadow:none}
+/* Azu's arm: from its side towards what is told; the hand a small tile-blue mitten */
+.marm{position:absolute;left:-18px;top:30px;width:26px;height:5px;border-radius:3px;background:#1F4E9C;transform-origin:100% 50%;opacity:0;transition:opacity .25s,transform .4s cubic-bezier(.3,1.4,.5,1);pointer-events:none}
+.marm.on{opacity:1}.marm::before{content:"";position:absolute;left:-6px;top:-3.5px;width:11px;height:11px;border-radius:50%;background:#F4EEE3;border:2.5px solid #1F4E9C;box-sizing:border-box}
+.mascot.pointing svg{transform:rotate(-7deg)}.mascot.still .marm{transition:opacity .25s}
+/* Specific Marker > Guide script: a spot drawn on the step's picture */
+.cues .cue{margin:0 0 10px}.cuehd{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px;font-size:12px}.cuehd select{width:auto}
+.cuepic{position:relative;max-width:260px;cursor:crosshair;touch-action:none;user-select:none;border-radius:6px;overflow:hidden}.cuepic img{display:block;width:100%;height:auto;pointer-events:none}
+.cuepic i{position:absolute;border:2px solid #FFD98A;box-shadow:0 0 0 999px rgba(0,0,0,.35);border-radius:4px;pointer-events:none}
