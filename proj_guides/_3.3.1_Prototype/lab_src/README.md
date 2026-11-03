@@ -19,7 +19,8 @@ The Lab is one HTML page built from layers. Each layer adds to or wraps the one 
   the middle one, the model's tools to light points and draw routes, suggestions, a treasure hunt) -> `v8q.js`
   (Azu, the tile of light: a WebGL shader, glazed tile to holographic dot cube; the peek from behind a block; the walk to the
   wall) -> `v8s.js` (Azu as the guide's button, its remarks on what the camera sees, the Belém test wall to pan and zoom, a
-  tour raises the card to Full). CSS in the same order;
+  tour raises the card to Full) -> `v8t.js` (Ask Azu, the live agent: one model adapter, a manifest of 8 tools with policies,
+  link cards, the Editor's panel and test console). CSS in the same order;
   `v3body.html` is the page.
 - **Words:** `realstrings.json` (the framework's real words, with their owner part); `build8.py` moves words to new owners and adds
   the Lab's new ones.
@@ -30,7 +31,10 @@ The Lab is one HTML page built from layers. Each layer adds to or wraps the one 
   (`#dcshot=<kind>`); `#pshot=<stop>|<scroll>` opens the card at a stop and a scroll. `node test8f.js` drives the page with real
   taps, drags and keys (Playwright with the installed Edge; `#probe` opens a handle on the page's state) and prints PASS / FAIL per
   check: the sheet's gestures, the pinned close and settings, the demo card's X, and that a change moves no frame. `node test8g.js`
-  does the same for the demo's flow, each hint (its moment, Off, Reduce Motion, one at a time) and How to use the card; `node test8s.js` checks the test wall, the pan and zoom,
+  does the same for the demo's flow, each hint (its moment, Off, Reduce Motion, one at a time) and How to use the card; `node test8t.js`
+  checks the agent with a test double and with fetch faked for Gemini and the Claude API (no network): each policy, wrong ids,
+  citations, the fallbacks, the wall, the Editor and the console. `node test8t_live.js [dir]` asks the real model with this
+  computer's key (by hand only: it spends the quota); `node test8s.js` checks the test wall, the pan and zoom,
   Azu's remarks and their taps, the button's rules and the rise to Full; `node test8q.js` (WebGL by SwiftShader)
   checks the shader drawing, its forms by state, the mouth, the peek, the walk and its arrival, Tile, Reduce Motion;
   `node test8p.js` checks the pill, the
@@ -49,6 +53,9 @@ The Lab is one HTML page built from layers. Each layer adds to or wraps the one 
   spotlight, the zoom to each spot, Azu's arm, a scroll, Reduce Motion and drawing a spot; `node test8i.js` checks the
   voice that loads late, each light style, the glide, Reduce Motion and the words' contrast; `node test8h.js`
   shows every state in every look, light and dark, and measures its words' contrast.
+- **Keys:** the local Lab's live agent reads `keys.local.js`, which `python keys_local.py` writes from the workspace's
+  `.secrets/keys.env` (git ignores both); `python keys_local.py --check` asks each service whether its key works. The headless
+  checks (`#probe`) never load it; `#probe-live` does. See `../../__Services_And_Keys.md`.
 - **The audit** that shaped v8: `AUDIT_DECISIONS.md` and `audit/` (one report per area).
-- A change: add it to the newest layer (or a new `v8t.js`), list it in `build8.py`'s `V8`, rebuild, run the self-test, look at a
+- A change: add it to the newest layer (or a new `v8u.js`), list it in `build8.py`'s `V8`, rebuild, run the self-test, look at a
   capture, then fold the decision into `_3.3`.

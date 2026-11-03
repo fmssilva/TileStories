@@ -22,8 +22,8 @@ The studies behind the choices are [_3.4 The Guide](_3.4_The_Guide_Study.md) (vo
 | `voicebench/render.py` | Azure, ElevenLabs, Gemini | Reads `.secrets/keys.env` (the environment wins when a variable is set there). |
 | The local Lab (file://) | Gemini, Anthropic | `lab_src/keys_local.py` writes `keys.local.js` beside the Lab pages (git ignores it). The Lab's Services panel shows which keys it found, never the key itself. |
 | The published Lab (claude.ai) | none | The live agent answers through Claude, through the artifact's own `sample` capability. No key is ever published. |
-| The Unity Editor | Gemini, Anthropic, Azure, ElevenLabs | Import from `.secrets/keys.env` into EditorPrefs (this machine only), for Editor tests. |
-| The app on a phone | none | The phone asks our token service (a Cloudflare Worker), which holds the keys as secrets. A key in an APK can be read by anyone. |
+| The Unity Editor (to build, with the agent's Unity step) | Gemini, Anthropic, Azure, ElevenLabs | A menu item imports `.secrets/keys.env` into EditorPrefs (this machine only), for Editor tests; a build check fails a build whose assets hold a key. |
+| The app on a phone | none | The phone asks our token service (a Cloudflare Worker, to build), which holds the keys as secrets. A key in an APK can be read by anyone. |
 
 ## 2. The services
 
@@ -31,7 +31,7 @@ Status as of 2026-11-03.
 
 | Service | Used for | Key name(s) | Status | Cost and limits |
 |---|---|---|---|---|
-| **Google AI Studio** (Gemini) | the agent's model in the local Lab, embeddings for the library, TTS voices | `GEMINI_API_KEY` | **Working.** Text, embeddings and TTS answer. A browser page opened from a file may call it (CORS allows origin `null`). | Free tier for development only: Google may use the data, and EEA users need the paid tier. TTS free tier is 10 requests a day for each model, so the Gemini voice set has 7 of 106 lines. |
+| **Google AI Studio** (Gemini) | the agent's model in the local Lab, embeddings for the library, TTS voices | `GEMINI_API_KEY` | **Working.** Text, embeddings and TTS answer. The local Lab's Ask Azu runs on it (Flash-Lite: first words in about 2 s, about $0.0013 a question). A page opened from a file may call it (CORS allows origin `null`). | Free tier for development only: Google may use the data, and EEA users need the paid tier. TTS free tier is 10 requests a day for each model, so the Gemini voice set has 7 of 106 lines. |
 | **Anthropic** (Claude) | the recommended agent model (Haiku 5.5) for the app and the user study | `ANTHROPIC_API_KEY` | Not created | Pay as you go; prompt caching cuts the library's cost. |
 | **Azure Speech** (Azure for Students) | recorded voices with exact word times (pt-PT Raquel, Duarte, Fernanda; en-GB Sonia, Ryan) | `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION` | Not created: the directory is FCT NOVA, but there is no Speech resource yet | F0: 0.5 M neural characters a month, free. A full set is about 5,200 characters. |
 | **ElevenLabs** | recorded voices with word times (`with-timestamps`) | `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_PT`, `ELEVENLABS_VOICE_EN` | Account exists, no API key yet | Free: 10k characters a month, non-commercial. Starter: $6 a month, first month $1. |

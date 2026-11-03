@@ -17,7 +17,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 
 ## 1b. The guide's stretch: where it stands (2026-11-03)
 
-- **Lab published:** v18. The guide's layers and what each holds:
+- **Lab published:** v20. The guide's layers and what each holds:
   - `v8i`: voice from the first step; the read-along light.
   - `v8j`: focus, the spot zoom, Azu points.
   - `v8k`: a lively Azu and play.
@@ -28,6 +28,8 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
   - `v8r`: recorded voices and the blind Voice test.
   - `v8p`: Ask about the view.
   - `v8q`: Azu, the tile of light (WebGL).
+  - `v8s`: Azu as the guide's button, its comments, the Belém test wall, a tour opens the card.
+  - `v8t`: Ask Azu, the live agent (`_3.3` section 11, `_3.6` section 9).
 - **Tests:** each layer has its `test8*.js`, listed in `lab_src/README.md`. Run them all after the self-test; `test8r` needs
   two voice sets.
 - **Studies (current state):**
@@ -38,16 +40,24 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
   - `_3.7_Mascot_Pipeline_Study.md`: from a picture to the mascot; the body behind and the arm in front; AR walking; formats.
   - The spec is `_3.3` section 11 (the Guide's components) and section 11b (Audiences).
 - **Decided by the developer:** the read-along default is the Comet; the Explorer's Azu is Lively.
+- **Keys and accounts:** `__Services_And_Keys.md`.
+  - Every key is in `.secrets/keys.env` (git ignores it); `keys_local.py` gives the local Lab its keys, and `--check` tests them.
+  - The current Gemini key is used to build and test the system. The developer replaces every key once it all works (section 4
+    of that doc).
 - **Voices:**
-  - `_3.3.1_Prototype/voicebench/`: `export_script.js`, `render.py` (azure / eleven / edge), README.
-  - Keys go in `voicebench/.env`, which git ignores; never in the chat or a commit.
+  - `_3.3.1_Prototype/voicebench/`: `export_script.js`, `render.py` (azure / eleven / edge / gemini), README.
+  - Gemini TTS: the free tier allows 10 requests a day per model, so its set holds 7 of 106 lines.
+  - Best available is the set with the most lines: on this computer the full Edge sets; in the published Lab the Gemini set (the
+    only one there), whose missing lines use the device voice. The Editor names each set with its line count.
   - Edge sets are private (`out-private/`, ignored, never published: an undocumented service).
 - **The developer's accounts:**
   - Azure for Students: active, FCT NOVA directory, no Speech resource yet.
-  - Google AI Studio: a key was created, but shown in a chat on 2026-11-03, so it must be replaced.
+  - Google AI Studio: the key works (text, embeddings, TTS, and the live agent in the local Lab). It was shown in a chat on
+    2026-11-03, so it is replaced at the end.
   - ElevenLabs: an account; its MCP page is open.
-- **Built on 2026-11-03** (`v8s`, `test8s`): items 1-4 below.
-- **Asked on 2026-11-03, not yet built (5, 6):**
+- **Built on 2026-11-03:** items 1-4 below (`v8s`, `test8s`) and item 5 (`v8t`, `test8t`, `test8t_live`).
+- **Asked on 2026-11-03, not yet built: item 6** (the mascot's sources in the Editor, and the tile of light's styles).
+- **The asks of 2026-11-03:**
   1. **Play from a half card:** the card opens to Full; if the visitor lowers it to Half, the tour goes on there.
   2. **Azu always present as the guide's button (a FAB):** bottom left, above the nav bar, when the dock is closed and in the
      world view.
@@ -79,7 +89,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 2. How a round runs
 
 1. The developer looks at the Lab and writes corrections (with captures).
-2. The Architect changes the Lab in a new layer (`lab_src/v8t.js`, then `v8u`…), runs the self-test, takes captures of what changed
+2. The Architect changes the Lab in a new layer (`lab_src/v8u.js`, then `v8v`…), runs the self-test, takes captures of what changed
    and looks at them (D1 contrast, D5 one focal action, the flow), then publishes to the same link and copies the record copy.
 3. The same round, each decision goes into its part's section of `_3.3` as current state (no logs), with the Unity today line.
 4. Commit and push as `__AI_Architect.md` section 4 says (the whole workspace, `git add -A`).

@@ -50,7 +50,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/block-components-lab.
   ok('...a tap offers Start the guide and Ask me something', await R('ph.querySelectorAll(".azfabbub.menu [data-fabgo]").length===2'));
   await p.locator('#ph [data-fabgo="tour"]').click(); await p.waitForTimeout(300);
   ok('...Start the guide: the tour runs, Azu becomes the guide (no button)', await R('G.on&&!ph.querySelector(".azfab")'));
-  await R('stopTour();scr.scrollTop=900'); await p.waitForFunction(()=>!!document.querySelector("#ph .azfab"),null,{timeout:4000}).catch(()=>{});
+  await R('stopTour()'); await p.waitForTimeout(700); await R('scr.scrollTop=900'); await p.waitForFunction(()=>!!document.querySelector("#ph .azfab"),null,{timeout:4000}).catch(()=>{});
   ok('...the tour stopped (and the hero out of sight): Azu is the button again', await R('!!ph.querySelector(".azfab")'));
   await R('S.stop="half";renderPhone(false);scr.scrollTop=0'); await p.waitForTimeout(700); await p.locator('#ph .gstart').click(); await p.waitForTimeout(900);
   ok('Play from a card at Half: the card rises to Full (on the screen, not only in its state)', await R('G.on&&S.stop==="full"&&scr.getBoundingClientRect().top-ph.getBoundingClientRect().top<40'), await R('Math.round(scr.getBoundingClientRect().top-ph.getBoundingClientRect().top)'));

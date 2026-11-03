@@ -33,7 +33,7 @@ python render.py gemini --en Kore --pt Kore               # needs: pip install l
     direction ending in a colon is spoken, which made the line 11.5 s against 6.8 s.
   - **Free tier:** about 10 requests a minute, so a 7 s pause between lines, and a retry after 20 s on a 429.
   - **Daily cap:** 10 requests a day for each TTS model (measured on 2026-11-03), so a full set (both languages, every
-    audience) needs the paid tier, a few cents a set. Until then a set stays partial and is never the default voice.
+    audience) needs the paid tier, a few cents a set. Until then the set stays partial; the Editor shows each set's line count, and a line it lacks uses the device voice.
   - **Voices:** the prebuilt ones (Kore, Puck, Charon, Fenrir, Aoede…). The accent comes from the direction (European
     Portuguese, Lisbon).
 

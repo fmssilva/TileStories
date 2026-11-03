@@ -72,7 +72,7 @@ https://ipce-184ea7.gitlab.io/
 
 # %%
 """
-a) O problema: uma pessoa tem várias peças [7 min -> 10:25] ----------------
+a) O problema: uma "pessoa" tem vários atributos [7 min -> 10:25] ----------------
 
     Queremos guardar pessoas: nome, ano de nascimento, morada e email.
     Com o que já sabemos, há três maneiras.
@@ -90,6 +90,7 @@ joao_address = "Lisboa"
 joao_email = ""
 
 # Já são 8 variáveis para 2 pessoas.
+
 # E uma função que receba uma pessoa precisa de 4 parâmetros...
 def do_something_with_person(name, year, address, email):
     print(f"{name} nasceu em {year} e mora em {address}")
@@ -115,6 +116,7 @@ do_something_with_person(maria)     # Maria nasceu em 1990 e mora em Coimbra
 # E dá para ter uma lista de pessoas:
 people = [maria, joao]
 
+
 # Mas para ir buscar cada peça, temos de saber a sua posição no tuplo:
 print(maria[1])                 # 1990
 print(joao[2])                  # Lisboa
@@ -122,6 +124,18 @@ print(joao[2])                  # Lisboa
 # Funciona, mas daqui a um mês: o que é o maria[2]? E o [3]?
 # Temos de decorar que 0 = nome, 1 = ano, 2 = morada, 3 = email.
 # Um erro no número e o programa usa a peça errada sem dar erro nenhum.
+
+
+# Podemos usar constantes para "guardar o numero de cada atributo no tuplo)
+# Mas começa-se a aumentar a complexidade e duplicação... 
+IDX_NAME = 0
+IDX_YEAR = 1
+IDX_CITY = 2
+IDX_EMAIL = 3
+
+print(maria[IDX_NAME])
+print(joao[IDX_NAME])
+
 
 
 
@@ -146,9 +160,6 @@ print(maria["year"])            # 1990
 #   - não existe um "tipo pessoa": é só um dicionário qualquer
 
 
-
-
-
 # O ideal era escrever:
 #     maria.name
 #     maria.year
@@ -164,17 +175,15 @@ print(maria["year"])            # 1990
 # %%
 """
 b) A sintaxe, passo a passo [8 min -> 10:33] ------------------------------
-"""
 
-""" 1. import """
-from dataclasses import dataclass
-
-"""
-2. Definir o molde (template): as peças que compõem o nosso tipo de dados
+1. Definir o molde (template): as peças que compõem o nosso tipo de dados
         Passo 1: o import (uma vez, no início do ficheiro)
         Passo 2: @dataclass, por cima da class
         Passo 3: os atributos (as peças), um por linha, cada um com o seu tipo
 """
+
+from dataclasses import dataclass
+
 @dataclass
 class Person:
     name: str
@@ -183,10 +192,10 @@ class Person:
     email: str = ""             # valor por omissão: se não for dado, fica ""
 
 # Ainda não criámos pessoa nenhuma!
-# Só dissemos ao Python COMO é uma pessoa: o molde.
+# Só dissemos ao Python COMO é uma pessoa: o molde, o template.
 
 """
-3. Criar novos objetos seguindo esse molde:
+2. Criar novos objetos seguindo esse molde:
 """
 # Criar uma pessoa: chamar Person(...) como se fosse uma função.
 # Os valores vão pela ordem dos atributos.
@@ -197,6 +206,15 @@ joao = Person("João", 1970, "Lisboa")
 print(maria)                    # Person(name='Maria', year=1990, address='Coimbra', email='')
 print(joao)                     # Person(name='João', year=1970, address='Lisboa', email='')
 
+# É um tipo novo, tal como int ou str:
+print(type(maria))              # <class '__main__.Person'>
+
+# Ou seja: 
+# Class == o template onde definimos o nome da class e atributos que deve ter
+# Objeto == as instâncias de entidades reais que são criadas com base no template definido pela class 
+
+
+#%%
 # Ler uma peça: objeto.atributo
 print(maria.name)               # Maria
 print(maria.year)               # 1990
@@ -205,8 +223,7 @@ print(maria.year)               # 1990
 maria.address = "Faro"
 print(maria)                    # Person(name='Maria', year=1990, address='Faro', email='')
 
-# É um tipo novo, tal como int ou str:
-print(type(maria))              # <class '__main__.Person'>
+
 
 # Vocabulário:
 #   classe de dados (Person)  -> o molde: diz que peças há
@@ -219,6 +236,8 @@ print(type(maria))              # <class '__main__.Person'>
 
 
 
+
+# %%
 # Tal como o tuplo, passa-se a pessoa inteira a uma função, e faz-se listas de pessoas.
 # Mas agora cada peça tem nome:
 def do_something_with_person(person: Person) -> None:
@@ -238,16 +257,15 @@ for p in people:
 
 # %%
 """
-c) Exercícios: Point e Book [5 min -> 10:38] -------------------------------
-
+c) Exercícios: As classes Point e Book [5 min -> 10:38] -------------------------------
 
     1. Point
         Definam uma classe de dados Point, com atributos x, y, z (float).
         Criem 2 pontos (objetos dessa classe): (3, 4, 5) e (1, 2, 3).
 
-        Escrevam os 2 pontos.
+        Escrevam os 2 pontos completos com todos os atributos.
         Escrevam só a coordenada x de cada um.
-        Mudem o y de cada um (10 e 20) e voltem a escrever os pontos.
+        Mudem o y de cada um para 10 e 20 e voltem a escrever os pontos.
 """
 
 # import
@@ -336,11 +354,12 @@ d) Funções para a classe de dados [8 min -> 10:46] -------------------------
 
     Mas um tipo de dados costuma vir com operações próprias:
         o int tem +, -, *, //, %
-        a str tem len, o + que junta, os [ ] para ir buscar um carácter
-        a list tem len, append, sort...
+        a str tem len(), o + que junta, os [ ] para ir buscar um carácter
+        a list tem len(), append(), sort()...
 
-    Os nossos tipos também: escrevemos as funções que fazem sentido para eles.
-    Por exemplo, para o Point: a distância entre dois pontos, mover um ponto...
+    Os nossos tipos também podem, e normalmente devem, ter as suas póprias funções associadas. 
+    Então escrevemos as funções que fazem sentido para eles.
+    Por exemplo, para o Point: a distância entre dois pontos, duplicar um ponto, mover um ponto...
 
     Estas funções definem-se logo a seguir à classe.
     Nome das funções: tipo_operação  (person_as_str, point_distance...)
@@ -362,6 +381,9 @@ def point_distance(p1: Point, p2: Point) -> float:
     dy = p2.y - p1.y
     return (dx ** 2 + dy ** 2) ** 0.5
 
+def point_duplicate(p1: Point) -> Point:
+    """ A new point, with the same coordinates. """
+    return Point(p1.x, p1.y)
 
 def point_move_in_place(p: Point, dx: float, dy: float) -> None:
     """ Move the point itself by dx and dy. """
@@ -511,9 +533,9 @@ def date_as_str(dt: Date) -> str:
     """ Convert date to a string in the form D/M/Y. """
     return f"{dt.day}/{dt.month}/{dt.year}"
 
-def date_input(prompt: str) -> Date:
+def date_input(prompt: str) -> Date | None:
     """ Input a date using the standard representation.
-        Precondition: The input has the form D/M/Y """
+        Precondition: The input has the form "D/M/Y" or "" """
     END_MARK = ''
     s = input(prompt)
     if s == END_MARK:
@@ -557,8 +579,10 @@ print(date_is_valid(Date(31, 4, 2026)))         # False   abril tem 30 dias
 # Truques que vale a pena roubar:
 #   - durations começa com None: assim durations[1] é janeiro, sem fazer -1.
 #   - date_input devolve None para dizer "não há data" (linha vazia).
-#     (o guião escreve "if dt is None"; nós usamos "== None", como na teórica 5a:
-#      aqui faz o mesmo)
+#     O tipo "-> Date | None" diz isso mesmo: devolve uma Date OU None.
+#   - Para perguntar "é None?" usa-se "is None" (e "is not None"), não "== None".
+#     O == pode ser redefinido por quem escreve uma classe; o "is" não.
+#     (o Python não se queixa do == None, mas a convenção é o is)
 #   - date_is_valid está partida em várias linhas: os parênteses à volta deixam.
 
 
@@ -909,7 +933,7 @@ def dates_input(prompt1: str, prompt2: str) -> Dates:
     l = []
     while True:
         dt = date_input(prompt2)
-        if dt == None:          # linha vazia: acabou
+        if dt is None:          # linha vazia: acabou
             break
         l.append(dt)
     return Dates(l)
@@ -1093,6 +1117,7 @@ e) EXERCICIO 50 (GUIÃO, Mooshak T) - Frações: rational_normalize [8 min -> 12
            3/-5 -> -3/5      -30/-50 -> 3/5
 
     O guião dá o gcd (maior divisor comum) e algumas funções.
+    Cuidado: o gcd do guião só aceita números >= 0 (está na pré-condição).
     Corram esta célula antes das seguintes.
 """
 
@@ -1104,15 +1129,18 @@ class Rational:
     den: int
 
 def gcd(m: int, n: int) -> int:
-    """ Greatest common divisor. Use the Euclidean algorithm. """
-    x = abs(m)
-    y = abs(n)
-    while x != y:
-        if x > y:
-            x -= y
+    """ Greatest common divisor. Use the Euclidean algorithm.
+         Precondition: m >= 0 and n >= 0 """
+    if m == 0:
+        return n
+    elif n == 0:
+        return m
+    while m != n:
+        if m > n:
+            m -= n
         else:
-            y -= x
-    return x
+            n -= m
+    return n
 
 def rational_as_str(r: Rational) -> str:
     """ Convert to string. """
@@ -1129,10 +1157,8 @@ def rational_is_zero(r: Rational) -> bool:
 
 def rational_normalize(r: Rational) -> Rational:
     """ Put the rational in the normal form.
-        Precondition: den != 0 """
-    if r.num == 0:
-        return Rational(0, 1)   # o zero fica sempre 0/1 (e o gcd(0, ...) nunca acabava!)
-    g = gcd(r.num, r.den)
+        Precondition: r.den != 0 """
+    g = gcd(abs(r.num), abs(r.den))     # abs: o gcd só aceita números >= 0
     num = r.num // g
     den = r.den // g
     if den < 0:                 # o sinal passa para o numerador
@@ -1150,11 +1176,16 @@ print(rational_as_str(rational_create(6, 4)))       # 3/2
 print(rational_as_str(rational_create(3, -5)))      # -3/5
 print(rational_as_str(rational_create(-30, -50)))   # 3/5
 print(rational_as_str(rational_create(0, 7)))       # 0/1
-print(gcd(30, 50), gcd(-30, -50))                   # 10 10
+print(gcd(30, 50), gcd(0, 4))                       # 10 4
 
-# Porquê o if r.num == 0 primeiro?
-# gcd(0, 4): x = 0, y = 4. Como x < y, faz y -= x, ou seja y -= 0... para sempre.
-# É um while que nunca acaba (aula 7!). E 1/2 - 1/2 dá numerador 0: acontece mesmo.
+# Porquê o abs?
+# O gcd do guião só funciona com números >= 0 (é a pré-condição).
+# Com gcd(-30, -50): -30 > -50, então m -= n dá 20; depois 20 > -50 dá 70...
+# o m nunca chega ao n: um while que nunca acaba (aula 7!).
+# E -30/-50 é precisamente um dos exemplos do guião.
+#
+# E o zero? gcd(0, 7) dá 7, e 0 // 7 = 0, 7 // 7 = 1: fica 0/1, como deve.
+# (numa versão antiga do guião, o gcd(0, ...) também nunca acabava)
 #
 # O // aqui é seguro: o g divide os dois certinho, por isso não há arredondamentos.
 # E o normalize devolve uma fração NOVA: não mexe no r.
@@ -1228,14 +1259,14 @@ def ui_make_rational(s: str) -> Rational:
     n, d = s.split('/')
     return Rational(int(n), int(d))
 
-def ui_process_input(s: str) -> list[Rational, str, Rational]:
+def ui_process_input(s: str) -> tuple[Rational, str, Rational]:
     """ Process the format: 'n/d op n/d'. """
     r1, op, r2 = s.split()
     x = ui_make_rational(r1)
     y = ui_make_rational(r2)
-    return [x, op, y]
+    return (x, op, y)
 
-def ui_eval_input(s: str) -> Rational:
+def ui_eval_input(s: str) -> Rational | None:
     """ Decode the input and perform the operation. """
     x, op, y = ui_process_input(s)
     if op == '+':
@@ -1252,7 +1283,11 @@ def ui_eval_input(s: str) -> Rational:
 def ui_run() -> None:
     """ Run the user interface. """
     s = input("A/B OP C/D: ")
-    print(rational_as_str(ui_eval_input(s)))
+    result = ui_eval_input(s)
+    if result is None:
+        print("Operação inválida!")
+    else:
+        print(rational_as_str(result))
 
 
 ############# main #############
@@ -1268,9 +1303,15 @@ main()
 # Reparem: a UI não sabe somar frações. Só parte o texto e chama as rational_*.
 # Aqui a UI não guarda nada (pass): um programa de uma conta só não tem estado.
 #
-# Pormenor: "list[Rational, str, Rational]" não é bem um tipo de lista válido
-# (uma lista tem um só tipo lá dentro). O certo seria tuple[Rational, str, Rational].
-# O Python não se queixa porque não verifica os tipos (vamos ver isso nos erros).
+# Os tipos: tuple[Rational, str, Rational] é um tuplo com 3 coisas de tipos diferentes
+# (uma lista, list[...], tem um só tipo lá dentro).
+# E "-> Rational | None": devolve uma fração, ou None se a operação não existir
+# (A/B % C/D dá "Operação inválida!").
+# O Python não verifica os tipos (vamos ver isso nos erros): são para quem lê,
+# e para ferramentas como o Pylance do VSCode, que avisam quando não batem certo.
+#
+# (o guião faz print(rational_as_str(ui_eval_input(s))) e calcula tudo duas vezes;
+#  aqui guarda-se o resultado em result e usa-se esse)
 #
 # Para o Mooshak (T): a célula e) mais esta, num só ficheiro.
 
@@ -1320,7 +1361,7 @@ class CakeVariety:
     amount: int
     ingredients: list[Ingredient]
 
-def cake_variety_main_ingredient(variety: CakeVariety) -> Ingredient:
+def cake_variety_main_ingredient(variety: CakeVariety) -> Ingredient | None:
     """ The main ingredient of the recipe of a cake variety. """
     if len(variety.ingredients) == 0:
         return None
@@ -1396,18 +1437,18 @@ def cake_shop_size(shop: CakeShop) -> int:
     """ Number of cake varieties in the shop. """
     return len(shop.stock)
 
-def cake_shop_find_variety(shop: CakeShop, vname: str) -> CakeVariety:
+def cake_shop_find_variety(shop: CakeShop, vname: str) -> CakeVariety | None:
     """ Find a cake variety by name. """
     for variety in shop.stock:
         if variety.name == vname:
             return variety      # encontrou: sai logo da função
     return None                 # deu a volta toda e não encontrou
 
-def cake_shop_sell(shop: CakeShop, vname: str, units: int) -> int:
+def cake_shop_sell(shop: CakeShop, vname: str, units: int) -> int | None:
     """ Sell some units of a named cake variety.
         Precondition: units >= 0 """
     variety = cake_shop_find_variety(shop, vname)
-    if variety == None:
+    if variety is None:
         return None
     return cake_variety_sell(variety, units)
 
@@ -1469,13 +1510,13 @@ def ui_process(ui: UI, name: str, units: int) -> None:
     """ User interface for selling some units of a cake variety.
         Precondition: units >= 0 """
     sold = cake_shop_sell(ui.shop, name, units)
-    if sold == None:
+    if sold is None:
         print(f"Não existe {name}")
     else:
         print(f"Vendidas {sold} unidades de {name}")
         cake = cake_shop_find_variety(ui.shop, name)
         ingr = cake_variety_main_ingredient(cake)
-        if ingr == None:
+        if ingr is None:
             print("Ingrediente principal: Sem ingredientes")
         else:
             print(f"Ingrediente principal: {ingr.name}")
@@ -1752,7 +1793,8 @@ print(p2)                       # Point(x=10, y=4)
     - mudar o que se recebe:    o date_next_bug. Se a função é "dá-me um novo", criem um novo.
     - esquecer o caso vazio:    dates_maximum de uma lista vazia, ou main_ingredient
                                 sem ingredientes. Pensar sempre: e se não houver nenhum?
-    - o caso que nunca acaba:   gcd(0, ...) no normalize.
+    - o caso que nunca acaba:   o gcd com números negativos (daí o abs no normalize).
+    - comparar com None:        "is None", não "== None".
 """
 
 
@@ -1797,14 +1839,14 @@ def student_average(s: Student) -> float:
         total += g
     return total / len(s.grades)
 
-def course_find_student(c: Course, number: int) -> Student:
+def course_find_student(c: Course, number: int) -> Student | None:
     """ The student with that number, or None. """
     for s in c.students:
         if s.number == number:
             return s
     return None
 
-def course_best_student(c: Course) -> Student:
+def course_best_student(c: Course) -> Student | None:
     """ The student with the best average (None if no students). """
     if len(c.students) == 0:
         return None
@@ -2293,7 +2335,7 @@ def cake_shop_restock(shop: CakeShop, vname: str, units: int) -> None:
 class CakeShop:
     stock: list[CakeVariety]
 
-def cake_shop_find_variety(shop: CakeShop, vname: str) -> CakeVariety:
+def cake_shop_find_variety(shop: CakeShop, vname: str) -> CakeVariety | None:
     """ Find a cake variety by name. """
     for variety in shop.stock:
         if variety.name == vname:
@@ -2318,7 +2360,7 @@ def cake_shop_restock(shop: CakeShop, vname: str, units: int) -> None:
     """ Add units cakes to the variety (create it if it does not exist).
         Precondition: units >= 0 """
     variety = cake_shop_find_variety(shop, vname)
-    if variety == None:
+    if variety is None:
         shop.stock.append(CakeVariety(vname, units, []))
     else:
         variety.amount += units
@@ -2382,7 +2424,7 @@ class Book:
 class Library:
     books: list[Book]
 
-def library_find(lib: Library, title: str) -> Book:
+def library_find(lib: Library, title: str) -> Book | None:
     """ The book with that title, or None. """
     pass        # TODO
 
@@ -2392,7 +2434,7 @@ def library_lend(lib: Library, title: str) -> bool:
 
 def library_give_back(lib: Library, title: str) -> None:
     """ Give back a book.
-        Precondition: library_find(lib, title) != None """
+        Precondition: library_find(lib, title) is not None """
     pass        # TODO
 
 def library_available_by(lib: Library, author: str) -> list[str]:
@@ -2433,7 +2475,7 @@ class Book:
 class Library:
     books: list[Book]
 
-def library_find(lib: Library, title: str) -> Book:
+def library_find(lib: Library, title: str) -> Book | None:
     """ The book with that title, or None. """
     for b in lib.books:
         if b.title == title:
@@ -2443,14 +2485,14 @@ def library_find(lib: Library, title: str) -> Book:
 def library_lend(lib: Library, title: str) -> bool:
     """ Lend a book. True if it was possible. """
     b = library_find(lib, title)
-    if b == None or not b.available:
+    if b is None or not b.available:
         return False
     b.available = False
     return True
 
 def library_give_back(lib: Library, title: str) -> None:
     """ Give back a book.
-        Precondition: library_find(lib, title) != None """
+        Precondition: library_find(lib, title) is not None """
     b = library_find(lib, title)
     b.available = True
 
@@ -2473,10 +2515,10 @@ library_give_back(lib, "Os Maias")
 print(library_available_by(lib, "Eça de Queirós"))      # ['Os Maias', 'O Primo Basílio']
 
 # No library_lend, a ordem do "or" importa:
-#   b == None or not b.available
+#   b is None or not b.available
 # Se b for None, o or já é True e nem olha para b.available
 # (que dava erro: o None não tem atributos).
-# Trocado (not b.available or b == None) rebentava com um título que não existe.
+# Trocado (not b.available or b is None) rebentava com um título que não existe.
 
 
 

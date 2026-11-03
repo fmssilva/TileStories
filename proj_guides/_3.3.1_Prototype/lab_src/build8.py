@@ -3,7 +3,7 @@ import io, json, os
 D = os.path.dirname(os.path.abspath(__file__))
 def rd(n): return io.open(os.path.join(D, n), encoding='utf-8').read()
 
-V8 = ['v8a.js', 'v8b.js', 'v8c.js', 'v8d.js', 'v8e.js', 'v8f.js', 'v8g.js', 'v8h.js', 'v8i.js', 'v8j.js', 'v8k.js', 'v8l.js', 'v8m.js', 'v8n.js', 'v8o.js', 'v8r.js', 'v8p.js', 'v8q.js', 'v8s.js']
+V8 = ['v8a.js', 'v8b.js', 'v8c.js', 'v8d.js', 'v8e.js', 'v8f.js', 'v8g.js', 'v8h.js', 'v8i.js', 'v8j.js', 'v8k.js', 'v8l.js', 'v8m.js', 'v8n.js', 'v8o.js', 'v8r.js', 'v8p.js', 'v8q.js', 'v8s.js', 'v8t.js']
 
 # words that moved to another part, or left with their part
 REOWN = {'peek_next_label': ('retired', 'the Next card peek left: a swipe up at Peek raises the card'),
@@ -58,6 +58,17 @@ NEWSTR = [
     ['fab_comment_2', 's7mascot', 'A remark.', "That's {0} right there. Want the story? Tap me.", 'Ali está {0}. Quer a história? Toque-me.', '', 'Remark 2'],
     ['fab_comment_3', 's7mascot', 'A remark.', 'Look: {0}! Tap to know more.', 'Olhe: {0}! Toque para saber mais.', '', 'Remark 3'],
     ['fab_comment_card', 's7mascot', 'A remark on a point with a card.', "In the middle: {0}. Tap and I'll show you around.", 'Ao centro: {0}. Toque e eu mostro-lhe tudo.', '', 'Remark, a card'],
+    ['ag_thinking', 's7agent', 'While the model answers.', 'Thinking…', 'A pensar…', '', 'Thinking'],
+    ['ag_from', 's7agent', 'Under an answer: {0} = the texts it cites.', 'From: {0}', 'Fonte: {0}', '', 'Source line'],
+    ['ag_general', 's7agent', 'Under an answer with no citation, when general knowledge is allowed.', 'General knowledge', 'Conhecimento geral', '', 'Badge'],
+    ['ag_yes', 's7agent', 'On a button that asks first.', 'Yes', 'Sim', '', 'Yes'],
+    ['ag_chip_go', 's7agent', 'An offered action: {0} = a block, page or point.', 'Go to {0}', 'Ir para {0}', '', 'Go to'],
+    ['ag_chip_open', 's7agent', 'An offered action: {0} = a feature.', 'Open {0}', 'Abrir {0}', '', 'Open'],
+    ['ag_chip_light', 's7agent', 'An offered action: {0} = points.', 'Show {0}', 'Mostrar {0}', '', 'Show points'],
+    ['ag_chip_route', 's7agent', 'An offered action.', 'Show the route', 'Mostrar o percurso', '', 'Route'],
+    ['ag_chip_tour', 's7agent', 'An offered action that asks first.', 'Start the tour?', 'Começar a visita?', '', 'Start the tour'],
+    ['ag_note_offline', 's7agent', 'Before an offline answer when the model fails: {0} = why.', '(Offline: {0}) ', '(Offline: {0}) ', '', 'Offline note'],
+    ['ag_note_cap', 's7agent', "Before an offline answer when the session's questions are used up.", "(I've answered many questions; here is what the app has.) ", '(Já respondi a muitas perguntas; eis o que a aplicação tem.) ', '', 'Limit note'],
     ['cam_ask', 's7cam', 'The pill, when no point is in view.', 'Ask Azu about what you see', 'Pergunte ao Azu sobre o que vê', '', 'Pill'],
     ['cam_ask_about', 's7cam', 'The pill: {0} = the point nearest the middle.', 'Ask about {0}', 'Perguntar sobre {0}', '', 'Pill, a point'],
     ['cam_hint', 's7cam', 'In the panel, before a question.', 'Point at the wall and ask, or pick a suggestion.', 'Aponte para a parede e pergunte, ou escolha uma sugestão.', '', 'Hint'],
@@ -182,6 +193,6 @@ assert b in src, 'hook'
 src = src.replace(b, "+ v7 + '\\n' + v8 + '\\nif(location.hash===\"#selftest\")", 1)
 c = "rd('v7.css')"
 assert c in src
-src = src.replace(c, "rd('v7.css') + rd('v8.css') + rd('v8b.css') + rd('v8c.css') + rd('v8d.css') + rd('v8e.css') + rd('v8f.css') + rd('v8g.css') + rd('v8h.css') + rd('v8i.css') + rd('v8j.css') + rd('v8k.css') + rd('v8l.css') + rd('v8m.css') + rd('v8n.css') + rd('v8o.css') + rd('v8r.css') + rd('v8p.css') + rd('v8q.css') + rd('v8s.css')", 1)
+src = src.replace(c, "rd('v7.css') + rd('v8.css') + rd('v8b.css') + rd('v8c.css') + rd('v8d.css') + rd('v8e.css') + rd('v8f.css') + rd('v8g.css') + rd('v8h.css') + rd('v8i.css') + rd('v8j.css') + rd('v8k.css') + rd('v8l.css') + rd('v8m.css') + rd('v8n.css') + rd('v8o.css') + rd('v8r.css') + rd('v8p.css') + rd('v8q.css') + rd('v8s.css') + rd('v8t.css')", 1)
 src = src.replace("'Editor Lab · v7'", "'Editor Lab · v8'")
 exec(compile(src, 'build6+8', 'exec'), {'__file__': os.path.join(D, 'build6.py'), '__name__': '__main__', 'fix_real': fix_real, 'fix_demo_rows': fix_demo_rows, 'NEWSTR': NEWSTR, 'V8': V8, 'json': json, 'PBAR_A': PBAR_A, 'PBAR_B': PBAR_B})
