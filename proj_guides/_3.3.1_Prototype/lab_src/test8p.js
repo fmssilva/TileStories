@@ -8,7 +8,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/block-components-lab.
   await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 90000 }); await p.waitForTimeout(500);
   const R = src => p.evaluate(s => LAB.run(s), src);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
-  await R('S.hints.on=false;S.previewBar=false;S.lang="en";S.guideMute=true;sampleFn=null;S.camCfg.fab=false;S.view="card";S.stop="closed";S.camX=.4;renderAll(false)');
+  await R('S.hints.on=false;S.previewBar=false;S.lang="en";S.guideMute=true;sampleFn=null;S.camCfg.fab=false;S.camCfg.names="middle";S.view="card";S.stop="closed";S.camX=.4;renderAll(false)');
   // 1. the pill names the point nearest the middle
   const pill = await R('var b=ph.querySelector(".ca-pill");[!!b,b&&b.textContent,camView().central&&camView().central.name]');
   ok('On the wall: the Ask pill names the point nearest the middle', pill[0] && pill[1] === 'Ask about ' + pill[2], pill);

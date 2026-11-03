@@ -155,17 +155,15 @@ print(maria["year"])            # 1990
 # Mas:
 #   - as chaves são strings: muitas aspas, e uma gralha só se descobre a correr
 #     (maria["yaer"] dá KeyError)
-#   - nada obriga todas as pessoas a terem as mesmas chaves:
+#   - nada obriga todas as pessoas a terem as mesmas chaves/atributos:
 #     outra pessoa pode vir sem "address", ou com "adress"
 #   - não existe um "tipo pessoa": é só um dicionário qualquer
 
 
-# O ideal era escrever:
-#     maria.name
-#     maria.year
-#     maria.address
+# O ideal era consguir definir um tipo de dados que: 
+#       seja fácil de usar e intuitivo
+#       obrigue a ter todos os atributos definidos
 # É exatamente isto que uma classe de dados nos dá:
-# nomes como no dicionário, mas com as peças sempre iguais para todas as pessoas.
 
 
 
@@ -459,7 +457,15 @@ print(Point("Ponto C", "Só com altura", z=7))
 # Point(name='Ponto C', description='Só com altura', x=0.0, y=0.0, z=7)
 
 # Os atributos com valor por omissão têm de ficar no FIM da classe.
-# (vamos ver o erro na secção dos erros, no fim da aula)
+# Ou seja, a partir do momento que escrevemos um atributo com nome, 
+# todos os restantes para a direita tem de ter nome:
+print(Point("Ponto D", description="Um ponto qualquer", x=3, y=4, z=5))   # certo
+
+# Erro (temos atributo sem nome depois de um com nome): 
+# print(Point("Ponto E", description="Um ponto qualquer", 3, 4, 5))   # TypeError: Point() takes no positional arguments after keyword arguments
+# »» SyntaxError: positional argument follows keyword argument
+
+
 
 
 
@@ -468,7 +474,13 @@ print(Point("Ponto C", "Só com altura", z=7))
 
 # %%
 """
-f) Comparar objetos: o == funciona, o < não [4 min -> 10:53] ---------------
+f) Comparar objetos: ==, is e < [6 min -> 10:54] ---------------------------
+
+    Três perguntas diferentes:
+        d1 == d2   têm o mesmo VALOR? (as peças todas iguais)
+        d1 is d2   são o MESMO OBJETO? (a mesma "caixa" na memória)
+        d1 < d2    vem antes? (para os tipos que nós criamos,
+                   o Python não sabe como os queremos ordenar)
 
     Antes de correr: o que escrevem os prints?
 """
@@ -482,25 +494,89 @@ class Date:
     year: int
 
 d1 = Date(31, 12, 2026)
-d2 = Date(31, 12, 2026)
-d3 = Date(1, 1, 2000)
+d2 = Date(31, 12, 2026)         # outra data, com os mesmos valores
+d3 = d1                         # NÃO cria nada: fica a apontar para o mesmo objeto
 
-print(d1 == d2)                 # True    atributo a atributo, todos iguais
-print(d1 == d3)                 # False
+print(d1 == d2)                 # True    o @dataclass compara as peças todas
+print(d1 is d2)                 # False   mas são duas datas diferentes
+print(d1 is d3)                 # True    d1 e d3 são a mesma data
 
+# A prova: mudar o d2 não mexe no d1; mudar o d3 mexe!
 d2.day = 30
-print(d1, d2)                   # Date(day=31, month=12, year=2026) Date(day=30, month=12, year=2026)
-# São iguais em valor, mas são dois objetos diferentes:
-# mudar o d2 não mexe no d1.
+print(d1)                       # Date(day=31, month=12, year=2026)
+d3.day = 1
+print(d1)                       # Date(day=1, month=12, year=2026)
+
+
 
 # E o < ? Descomentem e corram:
-# print(d3 < d1)
+# print(Date(1, 1, 2000) < d1)
 # TypeError: '<' not supported between instances of 'Date' and 'Date'
 
-# O == o @dataclass escreve por nós: compara as peças todas.
-# O < não: o Python não sabe o que é "menor" para uma data.
+# O == o @dataclass escreve por nós. O < não:
+# o Python não sabe o que é "menor" para uma data.
 #   Comparava o dia primeiro? O ano? Nós é que sabemos: primeiro o ano.
 # Por isso o guião pede-nos uma função date_is_less.
+
+
+
+
+
+
+# %%
+"""
+    Onde é que o is aparece a sério: o None.
+
+    Uma função de PROCURA nem sempre encontra o que procura.
+    Nesse caso devolve None: "não há nada para devolver".
+    Quem chama tem de perguntar "é None?" ANTES de usar o resultado.
+
+    Vamos ver isto já no guião:
+        date_input   devolve None quando a linha vem vazia      (ex 49)
+        cake_shop_find_variety   None quando o bolo não existe  (ex 51)
+
+    Precisa da Date da célula de cima.
+"""
+
+def dates_first_in_year(dates: list[Date], year: int) -> Date | None:
+    """ The first date of that year; None if there is none. """
+    for d in dates:
+        if d.year == year:
+            return d                # encontrou: devolve a data
+    return None                     # deu a volta toda: não há
+
+agenda = [Date(30, 10, 2026), Date(1, 1, 2000), Date(31, 12, 2026)]
+
+for year in [2000, 1999]:
+    d = dates_first_in_year(agenda, year)
+    if d is None:
+        print(f"Não há datas de {year}.")
+    else:
+        print(f"Encontrei: {d.day}/{d.month}/{d.year}")
+# Encontrei: 1/1/2000
+# Não há datas de 1999.
+
+# O tipo "-> Date | None" avisa logo quem lê: pode vir uma Date, ou None.
+#
+# E se nos esquecermos de perguntar? Descomentem e corram:
+# print(dates_first_in_year(agenda, 1999).day)
+# AttributeError: 'NoneType' object has no attribute 'day'
+# O None não tem peças: é o erro mais comum com funções de procura.
+#
+# Escreve-se "x is None" (e "x is not None"), e não "x == None":
+# o == pode ser redefinido por quem escreve uma classe; o is não engana.
+
+
+
+# E o type(...)? Responde a outra pergunta: DE QUE TIPO é isto?
+print(type(agenda[0]), type(None))  # <class '__main__.Date'> <class 'NoneType'>
+#
+# Em IPCE não se usa o type para validar argumentos:
+# os tipos e as pré-condições dizem o que a função recebe, e quem chama cumpre.
+# Se alguém chamar dates_first_in_year("texto", 2000), o erro é de quem chamou.
+# O None é diferente: não é um engano, é uma resposta prevista ("não encontrei").
+# Por isso esse caso testa-se sempre, com is None.
+
 
 
 
@@ -849,6 +925,10 @@ print(c)                        # Circle(center=Point(x=2, y=0), radius=5)
 # o círculo não precisa de saber fazer contas com pontos, pede ao Point.
 
 
+
+
+
+#%%
 # Molde do Polygon (polígono)
 @dataclass
 class Polygon:
@@ -1681,7 +1761,10 @@ class Point:
 
 # %%
 """
-    Erro 5: uma gralha no nome do atributo. Este é o pior: NÃO dá erro.
+    Erro 5: uma gralha no nome do atributo. 
+    
+    Este é o pior: NÃO dá erro!!!
+    
     Antes de correr: onde mora a Maria?
 """
 
@@ -1695,12 +1778,15 @@ class Person:
     email: str = ""
 
 maria = Person("Maria", 1990, "Coimbra")
-maria.adress = "Faro"           # adress, com um d só!
+maria.ad_ress = "Faro"          # adress, com um d só!
+
 print(maria.address)            # Coimbra   a mudança não foi para a morada!
 print(maria)                    # Person(name='Maria', year=1990, address='Coimbra', email='')
 
+print(maria.ad_ress)             # AttributeError: 'Person' object has no attribute 'adress'
+
 # Ao alterar, o Python não confirma se o atributo existe:
-# criou um atributo NOVO "adress" e a morada ficou igual.
+# criou um atributo NOVO "ad_ress" e a morada ficou igual.
 # Se a morada não muda quando devia, procurem uma gralha.
 # (ao LER é diferente: print(maria.adres) já dava AttributeError)
 

@@ -17,7 +17,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 
 ## 1b. The guide's stretch: where it stands (2026-11-03)
 
-- **Lab published:** v20. The guide's layers and what each holds:
+- **Lab published:** v21. The guide's layers and what each holds:
   - `v8i`: voice from the first step; the read-along light.
   - `v8j`: focus, the spot zoom, Azu points.
   - `v8k`: a lively Azu and play.
@@ -30,6 +30,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
   - `v8q`: Azu, the tile of light (WebGL).
   - `v8s`: Azu as the guide's button, its comments, the Belém test wall, a tour opens the card.
   - `v8t`: Ask Azu, the live agent (`_3.3` section 11, `_3.6` section 9).
+  - `v8u`: the agent tested in the prototype (test scenes with checks, a trace under each answer, every point named).
 - **Tests:** each layer has its `test8*.js`, listed in `lab_src/README.md`. Run them all after the self-test; `test8r` needs
   two voice sets.
 - **Studies (current state):**
@@ -56,7 +57,11 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     2026-11-03, so it is replaced at the end.
   - ElevenLabs: an account; its MCP page is open.
 - **Built on 2026-11-03:** items 1-4 below (`v8s`, `test8s`) and item 5 (`v8t`, `test8t`, `test8t_live`).
-- **Asked on 2026-11-03, not yet built: item 6** (the mascot's sources in the Editor, and the tile of light's styles).
+- **Asked on 2026-11-03, not yet built:**
+  - item 6 (the mascot's sources in the Editor, and the tile of light's styles);
+  - the visitor's form of address (proposal in `_3.5` section 3.9, to decide).
+- **The developer's rule (2026-11-03):** every test runs in the prototype itself, so it can be redone by hand (the scenes in
+  Ask Azu's console); no separate test pages.
 - **The asks of 2026-11-03:**
   1. **Play from a half card:** the card opens to Full; if the visitor lowers it to Half, the tour goes on there.
   2. **Azu always present as the guide's button (a FAB):** bottom left, above the nav bar, when the dock is closed and in the
@@ -89,7 +94,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 2. How a round runs
 
 1. The developer looks at the Lab and writes corrections (with captures).
-2. The Architect changes the Lab in a new layer (`lab_src/v8u.js`, then `v8v`…), runs the self-test, takes captures of what changed
+2. The Architect changes the Lab in a new layer (`lab_src/v8v.js`, then `v8w`…), runs the self-test, takes captures of what changed
    and looks at them (D1 contrast, D5 one focal action, the flow), then publishes to the same link and copies the record copy.
 3. The same round, each decision goes into its part's section of `_3.3` as current state (no logs), with the Unity today line.
 4. Commit and push as `__AI_Architect.md` section 4 says (the whole workspace, `git add -A`).

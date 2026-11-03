@@ -1,0 +1,7 @@
+/* v8u: the development trace under an answer, every point named, the test scenes */
+.agtrace{margin-top:8px;padding-top:6px;border-top:1px dashed rgba(255,255,255,.18);font:500 10.5px/1.4 ui-monospace,Consolas,monospace;color:rgba(244,241,234,.6);word-break:break-word}
+.pinnames .cpin b{opacity:.92;transform:none}
+.pinnames .cpin:not(.central):not(.lit) b{background:rgba(16,18,22,.66);font-size:11px;padding:5px 8px}
+.agscenes{margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--u-edge)}
+.agscsel{max-width:270px}
+.agres td{vertical-align:top;white-space:normal}.agres td.ok{color:#7FD08A}.agres td.bad{color:#F0A49B}
