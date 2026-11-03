@@ -4,20 +4,16 @@ The guide's lines are rendered at authoring time into audio files, each with eve
 6 · Guide > Narration: Voice = Recorded files) plays them as the app will, and the Voice test compares voices blind. The Unity
 app reads the same files: one MP3 and a word-times list per line, found by what the line says.
 
-## The accounts (the developer creates them; the keys stay on this computer)
+## The accounts and keys
 
-1. **Azure for Students** (free, no card, the university e-mail): https://azure.microsoft.com/free/students
-   - Create a resource: **Speech** (tier **F0**, region e.g. West Europe).
-   - Open **Keys and Endpoint** and copy KEY 1 and the Location.
-   - F0 includes 0.5 M neural characters a month. The pt-PT voices are Raquel, Duarte and Fernanda, and the en-GB voices are
-     Sonia, Ryan, Libby and others. MAI-Voice (pt-PT-Rui) is paid from the $100 credit.
-2. **ElevenLabs** (Free: 10k characters a month, non-commercial; Starter $6, first month $1): https://elevenlabs.io
-   - Profile > API Keys.
-   - Pick a voice in the Voice Library (filter: Portuguese, Portugal accent) and copy its voice id.
-3. **Google AI Studio** (Gemini; free for development, paid tier needed before a study with EEA users):
-   https://aistudio.google.com > Get API key. Gemini TTS gives no word times: not rendered here yet.
-
-Copy `.env.example` to `.env` in this folder and fill in the keys. `.env` is ignored by git.
+- **Accounts:** the steps for each one (Azure Speech F0, ElevenLabs, Google AI Studio) are in
+  [`__Services_And_Keys.md`](../../__Services_And_Keys.md).
+- **Keys:** they are read from the workspace's one key file, `.secrets/keys.env`, which git ignores. Copy
+  `.secrets/keys.env.example` to start it.
+- **Voices:**
+  - Azure pt-PT: Raquel, Duarte and Fernanda. Azure en-GB: Sonia, Ryan, Libby and others.
+  - ElevenLabs: a voice id from the Voice Library (filter: Portuguese, Portugal accent).
+  - Gemini: its prebuilt voices.
 
 ## Rendering
 
@@ -27,7 +23,19 @@ pip install azure-cognitiveservices-speech                             # once, f
 python render.py azure  --en en-GB-SoniaNeural --pt pt-PT-RaquelNeural
 python render.py azure  --en en-GB-RyanNeural  --pt pt-PT-DuarteNeural
 python render.py eleven --en <voice id> --pt <voice id>
+python render.py gemini --en Kore --pt Kore               # needs: pip install lameenc (MP3)
 ```
+
+- **Gemini TTS** (`gemini-3.8-flash-tts`, the AI Studio key):
+  - **Word times:** it gives none, so they are estimated by characters over the part of the audio with sound, and the set is
+    marked `timings: estimated`.
+  - **Style direction:** in square brackets before the text. It is followed and not read aloud. Measured on 2026-11-03: a
+    direction ending in a colon is spoken, which made the line 11.5 s against 6.8 s.
+  - **Free tier:** about 10 requests a minute, so a 7 s pause between lines, and a retry after 20 s on a 429.
+  - **Daily cap:** 10 requests a day for each TTS model (measured on 2026-11-03), so a full set (both languages, every
+    audience) needs the paid tier, a few cents a set. Until then a set stays partial and is never the default voice.
+  - **Voices:** the prebuilt ones (Kore, Puck, Charon, Fenrir, Aoede…). The accent comes from the direction (European
+    Portuguese, Lisbon).
 
 - **Output:** `out/<set>/` (MP3 + `set.json`) and `out/voicesets.js`, which the Lab loads.
 - **Only what changed:** a line already rendered with the same text is skipped, so a re-run renders only the edited lines.

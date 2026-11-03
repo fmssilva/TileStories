@@ -3,7 +3,7 @@ import io, json, os
 D = os.path.dirname(os.path.abspath(__file__))
 def rd(n): return io.open(os.path.join(D, n), encoding='utf-8').read()
 
-V8 = ['v8a.js', 'v8b.js', 'v8c.js', 'v8d.js', 'v8e.js', 'v8f.js', 'v8g.js', 'v8h.js', 'v8i.js', 'v8j.js', 'v8k.js', 'v8l.js', 'v8m.js', 'v8n.js', 'v8o.js', 'v8r.js', 'v8p.js', 'v8q.js']
+V8 = ['v8a.js', 'v8b.js', 'v8c.js', 'v8d.js', 'v8e.js', 'v8f.js', 'v8g.js', 'v8h.js', 'v8i.js', 'v8j.js', 'v8k.js', 'v8l.js', 'v8m.js', 'v8n.js', 'v8o.js', 'v8r.js', 'v8p.js', 'v8q.js', 'v8s.js']
 
 # words that moved to another part, or left with their part
 REOWN = {'peek_next_label': ('retired', 'the Next card peek left: a swipe up at Peek raises the card'),
@@ -51,6 +51,13 @@ NEWSTR = [
     ['state_retry', 's5states', 'The button that tries again (offline, a failed picture or page).', 'Try again', 'Tentar de novo', '', 'Try again'],
     ['state_done', 's5states', 'After an action that saved something (an answer, a vote, a collected item).', 'Saved', 'Guardado', '', 'Done'],
     ['guide_novoice', 's7cap', 'Over the captions when this device has no voice for the language (the words still light up).', 'No voice for this language on this device: captions only.', 'Sem voz para esta língua neste dispositivo: só legendas.', '', 'No voice'],
+    ['fab_label', 's7mascot', "Azu as the guide's button, for a screen reader.", 'Azu, your guide', 'Azu, o seu guia', '', 'Button'],
+    ['fab_tour', 's7mascot', 'Its menu on the card.', 'Start the guide', 'Começar o guia', '', 'Start'],
+    ['fab_ask', 's7mascot', 'Its menu on the card.', 'Ask me something', 'Pergunte-me algo', '', 'Ask'],
+    ['fab_comment_1', 's7mascot', 'A remark on the wall: {0} = the point in the middle.', 'In the middle: {0}. Tap to hear more.', 'Ao centro: {0}. Toque para saber mais.', '', 'Remark 1'],
+    ['fab_comment_2', 's7mascot', 'A remark.', "That's {0} right there. Want the story? Tap me.", 'Ali está {0}. Quer a história? Toque-me.', '', 'Remark 2'],
+    ['fab_comment_3', 's7mascot', 'A remark.', 'Look: {0}! Tap to know more.', 'Olhe: {0}! Toque para saber mais.', '', 'Remark 3'],
+    ['fab_comment_card', 's7mascot', 'A remark on a point with a card.', "In the middle: {0}. Tap and I'll show you around.", 'Ao centro: {0}. Toque e eu mostro-lhe tudo.', '', 'Remark, a card'],
     ['cam_ask', 's7cam', 'The pill, when no point is in view.', 'Ask Azu about what you see', 'Pergunte ao Azu sobre o que vê', '', 'Pill'],
     ['cam_ask_about', 's7cam', 'The pill: {0} = the point nearest the middle.', 'Ask about {0}', 'Perguntar sobre {0}', '', 'Pill, a point'],
     ['cam_hint', 's7cam', 'In the panel, before a question.', 'Point at the wall and ask, or pick a suggestion.', 'Aponte para a parede e pergunte, ou escolha uma sugestão.', '', 'Hint'],
@@ -162,6 +169,7 @@ def fix_real(src):
 PBAR_A = '["pbar_label","s0bar","The bar\'s tag, before its buttons.","PREVIEW","PRÉ-VISUALIZAR"'
 PBAR_B = '["pbar_label","s0bar","The bar\'s tag, before its buttons: it says this is an Editor tool.","EDITOR","EDITOR"'
 src = rd('build6.py')
+src = src.replace("('__BEFORE__', 'paco_before_1755')]", "('__BEFORE__', 'paco_before_1755'), ('__BELEM__', 'belem_wall')]", 1)
 a = "v7 = rd('v7.js').replace('__REALSTR__', rd('realstrings.json'))"
 assert a in src
 src = src.replace(a, "v7 = rd('v7.js').replace('__REALSTR__', fix_real(rd('realstrings.json')))\n"
@@ -174,6 +182,6 @@ assert b in src, 'hook'
 src = src.replace(b, "+ v7 + '\\n' + v8 + '\\nif(location.hash===\"#selftest\")", 1)
 c = "rd('v7.css')"
 assert c in src
-src = src.replace(c, "rd('v7.css') + rd('v8.css') + rd('v8b.css') + rd('v8c.css') + rd('v8d.css') + rd('v8e.css') + rd('v8f.css') + rd('v8g.css') + rd('v8h.css') + rd('v8i.css') + rd('v8j.css') + rd('v8k.css') + rd('v8l.css') + rd('v8m.css') + rd('v8n.css') + rd('v8o.css') + rd('v8r.css') + rd('v8p.css') + rd('v8q.css')", 1)
+src = src.replace(c, "rd('v7.css') + rd('v8.css') + rd('v8b.css') + rd('v8c.css') + rd('v8d.css') + rd('v8e.css') + rd('v8f.css') + rd('v8g.css') + rd('v8h.css') + rd('v8i.css') + rd('v8j.css') + rd('v8k.css') + rd('v8l.css') + rd('v8m.css') + rd('v8n.css') + rd('v8o.css') + rd('v8r.css') + rd('v8p.css') + rd('v8q.css') + rd('v8s.css')", 1)
 src = src.replace("'Editor Lab · v7'", "'Editor Lab · v8'")
 exec(compile(src, 'build6+8', 'exec'), {'__file__': os.path.join(D, 'build6.py'), '__name__': '__main__', 'fix_real': fix_real, 'fix_demo_rows': fix_demo_rows, 'NEWSTR': NEWSTR, 'V8': V8, 'json': json, 'PBAR_A': PBAR_A, 'PBAR_B': PBAR_B})

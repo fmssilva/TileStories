@@ -1,0 +1,13 @@
+/* v8s: Azu as the guide's button (bottom left), its comments, the test wall */
+.testwall .wall .mk,.testwall .walltip{display:none}
+.azfab{position:absolute;left:12px;bottom:92px;z-index:12;width:58px;height:62px;appearance:none;border:0;background:none;padding:0;cursor:pointer;filter:drop-shadow(0 6px 12px rgba(0,0,0,.35))}
+.azfab.onwall{bottom:22px}
+.azfab svg,.azfab canvas{width:58px;height:62px;display:block}
+.azfab.hop svg,.azfab.hop canvas{animation:azjump .7s cubic-bezier(.3,1.5,.5,1)}
+/* its bubble: a remark or a little menu; words in --ink1 on --paper; an actionable one ends with a chevron */
+.azfabbub{position:absolute;left:76px;bottom:104px;z-index:12;max-width:230px;appearance:none;border:0;background:var(--paper);color:var(--ink1);font:600 13.5px/1.35 var(--body);padding:9px 12px;border-radius:14px 14px 14px 4px;box-shadow:0 8px 22px rgba(0,0,0,.3);text-align:left;cursor:pointer;animation:gbin .22s ease}
+.azfab.onwall ~ .azfabbub{bottom:36px}
+.azfabbub.act::after{content:" \203A";color:var(--accent2);font-weight:800}
+.azfabbub.menu{display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:16px;cursor:default}
+.azfabbub.menu button{appearance:none;border:0;background:var(--box);color:var(--ink1);font:700 14px/1 var(--body);padding:11px 14px;border-radius:12px;text-align:left;cursor:pointer;white-space:nowrap}
+.reduce .azfab svg,.reduce .azfab canvas,.reduce .azfabbub{animation:none!important}

@@ -8,7 +8,9 @@ window.VOICESETS=window.VOICESETS||[];
 /* a line is found by what it says: FNV-1a of "lang|text", the same key voicebench writes */
 function fnvKey(s){var b=new TextEncoder().encode(s),h=0x811c9dc5;for(var i=0;i<b.length;i++){h^=b[i];h=Math.imul(h,0x01000193)>>>0}return("0000000"+h.toString(16)).slice(-8)}
 function voiceSets(){return window.VOICESETS||[]}
-function currentSet(){var s=voiceSets(),id=S.guideCfg.voiceSet;return s.filter(function(x){return x.id===id})[0]||s.filter(function(x){return!x.private})[0]||s[0]||null}
+/* Best available: the set with the most lines rendered (a published one first when as full), so one voice tells the tour */
+function currentSet(){var s=voiceSets(),id=S.guideCfg.voiceSet,pick=s.filter(function(x){return x.id===id})[0];if(pick)return pick;
+  var n=function(x){return Object.keys(x.files||{}).length};return s.slice().sort(function(a,b){return n(b)-n(a)||(a.private?1:0)-(b.private?1:0)})[0]||null}
 function recFile(text,set){set=set||currentSet();if(!set||!text)return null;var f=set.files[fnvKey(S.lang+"|"+String(text).trim())];return f?{set:set,file:f,url:set.url+f.src}:null}
 /* ----- playing a recorded line: the audio's clock lights each word (its real start and end: the glide is exact) ----- */
 var sayV8r=say;
@@ -52,7 +54,7 @@ function stars(id,k,v){var h="";for(var i=1;i<=5;i++)h+='<button type="button" c
 /* Editor: Narration gets the recorded voice and its coverage; 6 · Guide gets Voice test */
 var edCardV8r=edCard;
 edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8r();var sets=voiceSets(),cur=currentSet(),lines=guideLines(S.lang),have=cur?lines.filter(function(l){return!!recFile(l.text,cur)}).length:0;
-  addRows(d,"s7voice",row("Recorded voice",sets.length?psel("guideCfg.voiceSet",[["","Best available"]].concat(sets.map(function(s){return[s.id,s.label+(s.private?" (this computer only)":"")]}))):'<span class="uses">None rendered yet</span>',
+  addRows(d,"s7voice",row("Recorded voice",sets.length?psel("guideCfg.voiceSet",[["","Best available"]].concat(sets.map(function(s){return[s.id,s.label+" · "+Object.keys(s.files||{}).length+" lines"+(s.timings==="estimated"?", word times estimated":"")+(s.private?" (this computer only)":"")]}))):'<span class="uses">None rendered yet</span>',
     "With Voice = Recorded files: the audio rendered at authoring time (voicebench: a provider's voice, rendered once, with each word's time), as the app plays it. "+(cur?have+" of "+lines.length+" lines rendered in "+S.lang.toUpperCase()+" for this point; a line not rendered (an edited text, an answer) speaks with the device voice.":"Render a set with voicebench/render.py (see voicebench/README).")));
   var vt=d.querySelector('[data-fo="s7voice"]');if(!vt)return d.innerHTML;
   var line=S.vt.line||"",opts=lines.filter(function(l){return vtSets(l.text).length>=2}),body;

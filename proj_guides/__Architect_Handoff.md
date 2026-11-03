@@ -15,10 +15,71 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
   look and flow of each part. When a part is final, it becomes Worker blocks.
 - **Unity:** CORE and FULL green at M3; no Worker block since. Sonnet subagents are rate-limited until 2026-11-05.
 
+## 1b. The guide's stretch: where it stands (2026-11-03)
+
+- **Lab published:** v18. The guide's layers and what each holds:
+  - `v8i`: voice from the first step; the read-along light.
+  - `v8j`: focus, the spot zoom, Azu points.
+  - `v8k`: a lively Azu and play.
+  - `v8l`: audiences.
+  - `v8m`: lenses.
+  - `v8n`: the guide as a person (intro, the invitation ladder, scroll, the voice survives a pause, the page is the phone).
+  - `v8o`: the Guide Dock.
+  - `v8r`: recorded voices and the blind Voice test.
+  - `v8p`: Ask about the view.
+  - `v8q`: Azu, the tile of light (WebGL).
+- **Tests:** each layer has its `test8*.js`, listed in `lab_src/README.md`. Run them all after the self-test; `test8r` needs
+  two voice sets.
+- **Studies (current state):**
+  - `_3.4_The_Guide_Study.md`: voice, read-along, focus, mascot, play, sound, the dock, interactions, scroll, intro, the
+    camera, the mascot in 3D / UI / AR, MCPs, student plans.
+  - `_3.5_Audiences_Study.md`.
+  - `_3.6_Guide_Agent_Study.md`: the live agent's architecture, tool manifest, knowledge, models and Editor panel.
+  - `_3.7_Mascot_Pipeline_Study.md`: from a picture to the mascot; the body behind and the arm in front; AR walking; formats.
+  - The spec is `_3.3` section 11 (the Guide's components) and section 11b (Audiences).
+- **Decided by the developer:** the read-along default is the Comet; the Explorer's Azu is Lively.
+- **Voices:**
+  - `_3.3.1_Prototype/voicebench/`: `export_script.js`, `render.py` (azure / eleven / edge), README.
+  - Keys go in `voicebench/.env`, which git ignores; never in the chat or a commit.
+  - Edge sets are private (`out-private/`, ignored, never published: an undocumented service).
+- **The developer's accounts:**
+  - Azure for Students: active, FCT NOVA directory, no Speech resource yet.
+  - Google AI Studio: a key was created, but shown in a chat on 2026-11-03, so it must be replaced.
+  - ElevenLabs: an account; its MCP page is open.
+- **Built on 2026-11-03** (`v8s`, `test8s`): items 1-4 below.
+- **Asked on 2026-11-03, not yet built (5, 6):**
+  1. **Play from a half card:** the card opens to Full; if the visitor lowers it to Half, the tour goes on there.
+  2. **Azu always present as the guide's button (a FAB):** bottom left, above the nav bar, when the dock is closed and in the
+     world view.
+  3. **In the world view, Azu replaces the "Ask about…" pill:**
+     - it watches where the camera points and makes small comments by itself in a small bubble ("In the middle is the Ribeira
+       Palace. Tap to hear more");
+     - some bubbles are actionable (a tap opens the card and starts the tour).
+  4. **The test wall:** a large tile-wall picture with about 10 demo points; a drag pans and a pinch or the wheel zooms, standing
+     in for moving the phone nearer or farther.
+  5. **The live agent's architecture, configured in the Editor:**
+     - scripted tours only, or also a live agent;
+     - the model and provider of the developer's choice;
+     - its inputs: text, voice, photo, the app's metadata and camera;
+     - its tools: navigate to a page or block, find a feature such as "is there a 3D model?", light points, routes, search the
+       library;
+     - its knowledge: a RAG library the developer builds (BM25 and vectors, then a re-rank);
+     - its outputs: text, voice, navigation, and clickable links in the chat (ranked options);
+     - fields for the services' keys, telling the developer what to do;
+     - Unity buildable.
+  6. **The mascot pipeline from the developer's own picture** (`proj_guides/mascote/`: a tile with a hat and a Belém tower, a
+     travelling cat):
+     - picture to a usable mascot: platforms, formats;
+     - the body behind a UI Toolkit block with the head out and an arm pointing into the block;
+     - walking on the wall in AR;
+     - the options in the Editor (models, styles, import).
+- **Answered in chat on 2026-11-03:** the concrete steps for the accounts (Azure Speech F0 resource keys, the ElevenLabs API key
+  and MCP, the Gemini key) and for Blender with blender-mcp.
+
 ## 2. How a round runs
 
 1. The developer looks at the Lab and writes corrections (with captures).
-2. The Architect changes the Lab in a new layer (`lab_src/v8s.js`, then `v8t`…), runs the self-test, takes captures of what changed
+2. The Architect changes the Lab in a new layer (`lab_src/v8t.js`, then `v8u`…), runs the self-test, takes captures of what changed
    and looks at them (D1 contrast, D5 one focal action, the flow), then publishes to the same link and copies the record copy.
 3. The same round, each decision goes into its part's section of `_3.3` as current state (no logs), with the Unity today line.
 4. Commit and push as `__AI_Architect.md` section 4 says (the whole workspace, `git add -A`).

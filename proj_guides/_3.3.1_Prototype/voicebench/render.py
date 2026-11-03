@@ -1,10 +1,11 @@
 """Renders the guide's lines (script.json, from export_script.js) with a voice provider into audio files plus each word's time,
-and writes the manifest the Lab reads (voicesets.js). Keys come from .env in this folder (never committed).
+and writes the manifest the Lab reads (voicesets.js). Keys come from the workspace's .secrets/keys.env (never committed).
 
   python render.py azure  --en en-GB-SoniaNeural --pt pt-PT-RaquelNeural
   python render.py azure  --en en-GB-RyanNeural  --pt pt-PT-DuarteNeural
   python render.py eleven --en <voice_id> --pt <voice_id> [--model eleven_multilingual_v2]
   python render.py edge   --en en-GB-SoniaNeural --pt pt-PT-RaquelNeural     (private A/B only: out-private/, never published)
+  python render.py gemini --en Kore --pt Kore [--model gemini-3.8-flash-tts]  (word times estimated: Gemini gives none)
   python render.py ... --only g0,g1 --lang pt --aud explorer                  (a subset)
 
 Word times: each word of the line (split on spaces, as the Lab splits it) gets [start, end] in seconds, from the provider's own
@@ -15,15 +16,18 @@ import argparse, base64, io, json, os, re, sys, time, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
+KEYS = os.path.normpath(os.path.join(HERE, '..', '..', '..', '.secrets', 'keys.env'))
+
 def env():
+    """The environment, then the workspace's one key file (.secrets/keys.env), then a local .env if one is left here."""
     e = dict(os.environ)
-    p = os.path.join(HERE, '.env')
-    if os.path.exists(p):
-        for line in io.open(p, encoding='utf-8'):
-            line = line.strip()
-            if line and not line.startswith('#') and '=' in line:
-                k, v = line.split('=', 1)
-                e.setdefault(k.strip(), v.strip())
+    for p in (KEYS, os.path.join(HERE, '.env')):
+        if os.path.exists(p):
+            for line in io.open(p, encoding='utf-8'):
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    k, v = line.split('=', 1)
+                    if v.strip(): e.setdefault(k.strip(), v.strip())
     return e
 
 def fnv(s):
@@ -89,6 +93,42 @@ def render_eleven(text, lang, voice, keys, model):
             spans.append((k, k + 1, a, b)); pos = k + 1
     return base64.b64decode(j['audio_base64']), words_from_spans(text, spans), 'mp3'
 
+# a direction in square brackets is followed, not read aloud (measured: "...: " is spoken, "[...] " is not)
+GEMINI_STYLE = {'pt': '[Português europeu de Lisboa, nunca do Brasil; tom caloroso e sem pressa de guia de museu] ',
+                'en': '[Warm, unhurried British English museum guide] '}
+
+def estimate_words(text, pcm, rate):
+    """No word times from the provider: spread the words over the voiced part of the audio, by their characters (a pause after
+    punctuation). Marked 'estimated' in the set."""
+    import array
+    a = array.array('h'); a.frombytes(pcm)
+    th = 600; n = len(a)
+    first = next((i for i in range(0, n, 120) if abs(a[i]) > th), 0)
+    last = next((i for i in range(n - 1, 0, -120) if abs(a[i]) > th), n - 1)
+    t0, t1 = first / rate, last / rate
+    toks = tokens(text)
+    weights = [(b - a2) + (3 if text[b - 1] in '.,;:!?' else 1) for a2, b in toks]
+    tot = float(sum(weights)) or 1.0
+    out, t = [], t0
+    for w in weights:
+        d = (t1 - t0) * w / tot
+        out.append([round(t, 3), round(t + d * .92, 3)]); t += d
+    return out
+
+def render_gemini(text, lang, voice, keys, model):
+    body = json.dumps({'contents': [{'parts': [{'text': GEMINI_STYLE.get(lang, '') + text}]}],
+                       'generationConfig': {'responseModalities': ['AUDIO'], 'speechConfig': {'voiceConfig': {'prebuiltVoiceConfig': {'voiceName': voice}}}}}).encode()
+    req = urllib.request.Request('https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent' % model, data=body,
+                                 headers={'x-goog-api-key': keys['GEMINI_API_KEY'], 'Content-Type': 'application/json'})
+    j = json.loads(urllib.request.urlopen(req, timeout=180).read())
+    part = j['candidates'][0]['content']['parts'][0]['inlineData']
+    pcm = base64.b64decode(part['data'])
+    rate = int(re.search(r'rate=(\d+)', part.get('mimeType', 'rate=24000')).group(1)) if 'rate=' in part.get('mimeType', '') else 24000
+    import lameenc
+    enc = lameenc.Encoder(); enc.set_bit_rate(48); enc.set_in_sample_rate(rate); enc.set_channels(1); enc.set_quality(2)
+    mp3 = enc.encode(pcm) + enc.flush()
+    return bytes(mp3), estimate_words(text, pcm, rate), 'mp3'
+
 def render_edge(text, lang, voice, keys):
     import asyncio, edge_tts
     async def go():
@@ -108,16 +148,19 @@ def render_edge(text, lang, voice, keys):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('provider', choices=['azure', 'eleven', 'edge'])
+    ap.add_argument('provider', choices=['azure', 'eleven', 'edge', 'gemini'])
     ap.add_argument('--en', required=True); ap.add_argument('--pt', required=True)
-    ap.add_argument('--model', default='eleven_multilingual_v2')
+    ap.add_argument('--model', default='')
+    ap.add_argument('--pause', type=float, default=0.0)
     ap.add_argument('--label', default='')
     ap.add_argument('--only', default=''); ap.add_argument('--lang', default=''); ap.add_argument('--aud', default='')
     a = ap.parse_args()
     keys = env()
-    need = {'azure': 'AZURE_SPEECH_KEY', 'eleven': 'ELEVENLABS_API_KEY'}.get(a.provider)
+    need = {'azure': 'AZURE_SPEECH_KEY', 'eleven': 'ELEVENLABS_API_KEY', 'gemini': 'GEMINI_API_KEY'}.get(a.provider)
+    model = a.model or {'eleven': 'eleven_multilingual_v2', 'gemini': 'gemini-3.8-flash-tts'}.get(a.provider, '')
+    pause = a.pause or (7.0 if a.provider == 'gemini' else 0.0)
     if need and not keys.get(need):
-        sys.exit('Missing %s in voicebench/.env (copy .env.example to .env and fill it in).' % need)
+        sys.exit('Missing %s in .secrets/keys.env (copy keys.env.example to keys.env and fill it in).' % need)
     lines = json.load(io.open(os.path.join(HERE, 'script.json'), encoding='utf-8'))
     only = set(x for x in a.only.split(',') if x)
     lines = [l for l in lines if (not only or l['key'].split('_')[0] in only or l['key'] in only) and (not a.lang or l['lang'] == a.lang)
@@ -127,7 +170,8 @@ def main():
     os.makedirs(base, exist_ok=True)
     man_path = os.path.join(base, 'set.json')
     man = json.load(io.open(man_path, encoding='utf-8')) if os.path.exists(man_path) else {'id': set_id, 'provider': a.provider, 'voices': {'en': a.en, 'pt': a.pt}, 'files': {}}
-    man['label'] = a.label or man.get('label') or '%s · %s / %s' % ({'azure': 'Azure Neural', 'eleven': 'ElevenLabs', 'edge': 'Edge (private)'}[a.provider], a.en, a.pt)
+    man['label'] = a.label or man.get('label') or '%s · %s / %s' % ({'azure': 'Azure Neural', 'eleven': 'ElevenLabs', 'edge': 'Edge (private)', 'gemini': 'Gemini TTS'}[a.provider], a.en, a.pt)
+    if a.provider == 'gemini': man['timings'] = 'estimated'
     chars, done = 0, set()
     for l in lines:
         voice = a.en if l['lang'] == 'en' else a.pt
@@ -140,17 +184,19 @@ def main():
         for tries in range(3):
             try:
                 if a.provider == 'azure': audio, words, ext = render_azure(l['text'], l['lang'], voice, keys)
-                elif a.provider == 'eleven': audio, words, ext = render_eleven(l['text'], l['lang'], voice, keys, a.model)
+                elif a.provider == 'eleven': audio, words, ext = render_eleven(l['text'], l['lang'], voice, keys, model)
+                elif a.provider == 'gemini': audio, words, ext = render_gemini(l['text'], l['lang'], voice, keys, model)
                 else: audio, words, ext = render_edge(l['text'], l['lang'], voice, keys)
                 break
             except Exception as e:
                 if tries == 2: raise
-                print('retry', fk, e); time.sleep(2 + tries * 3)
+                print('retry', fk, e); time.sleep(20 if '429' in str(e) else 2 + tries * 3)
         src = fk + '.' + ext
         open(os.path.join(base, src), 'wb').write(audio)
         man['files'][fk] = {'src': src, 'text': l['text'], 'lang': l['lang'], 'words': words}
         chars += len(l['text'])
         print('ok', fk, len(audio), 'bytes', len(words), 'words')
+        if pause: time.sleep(pause)
     io.open(man_path, 'w', encoding='utf-8').write(json.dumps(man, ensure_ascii=False))
     # the manifest the Lab reads: every set in out/ (published) or out-private/ (local only)
     for folder in ('out', 'out-private'):
