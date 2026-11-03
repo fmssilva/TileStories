@@ -38,6 +38,27 @@ Status as of 2026-11-03.
 | **Meshy / Tripo** (optional) | a 3D mascot from a picture | `MESHY_API_KEY`, `TRIPO_API_KEY` | Not created | Free credits, then paid. Only if the 2D/shader mascot is not enough. |
 | **Cloudflare Workers** (later) | the token service and the agent's loop for the app | none here: the keys go into the Worker's secrets | Not created | The free plan covers a study. |
 
+### What else the ElevenLabs key allows (every endpoint is enabled), to test later
+
+- **Speech to Text (Scribe):** the talk button's recogniser, where the phone's own one is poor (pt-PT).
+- **Forced Alignment:** exact word times for any audio and its text. It would give the Gemini set real times instead of
+  estimated ones.
+- **Sound Effects:** Azu's earcons (listening, thinking, a found point), from a text prompt.
+- **Music:** the soft bed under the narration.
+- **Voice Design:** a voice made from a description ("a warm Lisbon museum guide") as Azu's own voice.
+- **Voice Isolator:** cleans a recorded human narrator.
+- **Dubbing:** the English narration into Portuguese with the same voice.
+- **ElevenAgents:** a voice-native conversation mode (`_3.6` section 2).
+- The key has "Auto-disable if leaked" on; keep it on.
+
+### Claude: the subscription and the API
+
+- **The developer's Pro/Max plan already serves:** the published Lab's Ask Azu, which runs on the viewer's own plan through
+  the artifact's `sample` capability (no key, no cost per token), and Claude Code.
+- **The plan has no API key.** An app used by other people (the user study, the stores) needs an API key from the Console,
+  billed by tokens and separate from the plan. Haiku 5.5 is about $0.001 a question (`_3.6` section 6).
+- **On this computer,** the local Lab can use Gemini (free tier, development only) or the Claude API key, when one exists.
+
 ## 3. What the developer does, account by account
 
 What the Architect does after each one is in *italics*.

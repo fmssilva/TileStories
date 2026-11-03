@@ -2,6 +2,47 @@
 
 Read this first in a new Architect chat, then `__AI_Architect.md`. It says where the work is and how a round runs.
 
+## 0. Start here (next conversation, from 2026-11-03)
+
+- **State:**
+  - **The Lab:** v21 is published, with layers through `v8u`.
+  - **The tests:** the self-test and every `test8*.js` pass.
+  - **MCP:** blender-mcp is at user scope. Blender 5.2.3 is open with add-on 1.8, connected on port 9876. The ElevenLabs MCP
+    still needs `/mcp` > Authenticate.
+  - **Keys:** Gemini, Azure Speech (region `germanywestcentral`) and ElevenLabs all answer
+    (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).
+- **The tasks, in this order:**
+  1. **Bug: the card's two markers do not follow the pan.**
+     - **The cause:** "Ribeira Palace" and "Lisbon Cathedral" are placed at fixed screen percentages in `lab_src/v5.js`
+       line 24 (`left:52%;top:30%`, `left:22%;top:58%`), from before the camera could pan (v8p) and zoom (v8s). A drag moves
+       the picture under them.
+     - **The fix (`v8v`):**
+       - give each marker a u, v on its wall's picture and place it with `camGeom()` at every paint, as the pins are placed;
+       - on the Ribeira wall, show the wall's points too (Names on the points);
+       - make the Belém wall easy to reach from the phone itself (e.g. a Wall switch on the preview bar), since the developer
+         twice found only the two markers;
+       - add a test scene "Ribeira wall: a drag moves the markers with the picture".
+  2. **Item 6, the mascot** (`_3.7`), with blender-mcp:
+     - **The tile-Azu:** modelled in Blender by script. A box-like body with a hat suits code and gives clean, low-poly
+       topology to rig.
+     - **The cat, and "generate from a picture":** the add-on's own generators (the Blender panel: Hyper3D Rodin, Hunyuan 3D,
+       Tripo, Meshy). Their keys go in the add-on, not in an MCP. The free tiers are in `_3.7` section 9.
+     - **Then:** rig, the clips (idle, talk, listen, think, point, walk), and a GLB export. The GLB goes to the Lab (a
+       three.js GLTFLoader adapter) and to Unity (`mcp__UnityMCP__import_model_file`).
+     - **In the Editor:**
+       - Mascot source: Built-in tile of light / 2D / Rive / GLB / Sprite sheet / Generate from a picture;
+       - Import;
+       - the tile of light's styles.
+  3. **Voices:**
+     - **Azure:** render the Raquel/Duarte and Sonia/Ryan sets (F0, free) and publish them.
+     - **ElevenLabs:** the developer picks the voice ids first.
+     - **ElevenLabs Forced Alignment** can give exact word times to any audio (e.g. the Gemini set's estimated ones).
+  4. **The form of address** (tu / polite / você): a proposal in `_3.5` section 3.9, waiting for the developer's decision.
+- **Rules learned this round:**
+  - Keys go only in `.secrets/keys.env`, never into a script (`keys_local.py` is committed).
+  - MCP servers are added with `--scope user` (memory `mcp-add-needs-user-scope`).
+  - Every test runs in the prototype, through controls the developer can press (memory `tests-run-in-the-prototype-by-hand`).
+
 ## 1. Where the work is
 
 - **The target is the Block Components Lab** (https://claude.ai/artifact/KDs2Ko1dYdBWYwZVhjvuEp), the record copy
