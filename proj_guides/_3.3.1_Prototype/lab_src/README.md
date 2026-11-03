@@ -21,14 +21,17 @@ The Lab is one HTML page built from layers. Each layer adds to or wraps the one 
   wall) -> `v8s.js` (Azu as the guide's button, its remarks on what the camera sees, the Belém test wall to pan and zoom, a
   tour raises the card to Full) -> `v8t.js` (Ask Azu, the live agent: one model adapter, a manifest of 8 tools with policies,
   link cards, the Editor's panel and test console) -> `v8u.js` (the agent tested in the prototype: test scenes with checks,
-  a trace under each answer, every point named, the Belém wall's own library). CSS in the same order;
+  a trace under each answer, every point named, the Belém wall's own library) -> `v8v.js` (the card's markers ride on the wall's
+  picture, the Ribeira wall shows its points, the preview bar's Wall button, the markers' test scene) -> `v8w.js` (Azu as a 3D
+  model: the GLB from `../../mascote/3d/`, embedded by the build, drawn by three.js from jsdelivr; Mascot source, Play a clip,
+  Import, Generate from a picture). CSS in the same order;
   `v3body.html` is the page.
 - **Words:** `realstrings.json` (the framework's real words, with their owner part); `build8.py` moves words to new owners and adds
   the Lab's new ones.
 - **Build:** `python build8.py` writes `block-components-lab.html` here (not committed). Copy it to `../Block Components Lab.html` (the
   record copy) and publish it to https://claude.ai/artifact/KDs2Ko1dYdBWYwZVhjvuEp.
 - **Prove it:** `runtest8.ps1` opens the page headless with `#selftest`: every option, text and demo field must change the phone or be
-  classed behaviour (it prints `bad=0` when all is well; about 3 minutes). `shots8b.ps1` captures the demo card at each kind
+  classed behaviour (it prints `bad=0` when all is well; about 10 minutes, so run it alone: other headless tests beside it slow it past its limit). `shots8b.ps1` captures the demo card at each kind
   (`#dcshot=<kind>`); `#pshot=<stop>|<scroll>` opens the card at a stop and a scroll. `node test8f.js` drives the page with real
   taps, drags and keys (Playwright with the installed Edge; `#probe` opens a handle on the page's state) and prints PASS / FAIL per
   check: the sheet's gestures, the pinned close and settings, the demo card's X, and that a change moves no frame. `node test8g.js`
@@ -37,7 +40,11 @@ The Lab is one HTML page built from layers. Each layer adds to or wraps the one 
   citations, the fallbacks, the wall, the Editor and the console. `node test8t_live.js [dir]` asks the real model with this
   computer's key (by hand only: it spends the quota); `node test8u.js` checks the trace, the names on the points, the remark that
   follows the camera and the test scenes with their checks; `node test8u_live.js [dir]` presses Run all scenes with the real
-  model, then drags the wall and types a question, as the developer does by hand; `node test8s.js` checks the test wall, the pan and zoom,
+  model, then drags the wall and types a question, as the developer does by hand; `node test8v.js` checks the markers on the picture at rest, after a real drag and a zoom, the Ribeira wall's points, the
+  Wall button and the markers' scene in the console (with a mutation: markers left where they were turn it red); `node test8w.js`
+  (WebGL by SwiftShader, needs the network for three.js) checks the 3D Azu: the source, the model's clips and morphs, its frame,
+  each state's clip, the mouth, the blink, the peek, Reduce Motion, Import (the real GLB and a bare one) and the fallback with
+  no network; `node test8s.js` checks the test wall, the pan and zoom,
   Azu's remarks and their taps, the button's rules and the rise to Full; `node test8q.js` (WebGL by SwiftShader)
   checks the shader drawing, its forms by state, the mouth, the peek, the walk and its arrival, Tile, Reduce Motion;
   `node test8p.js` checks the pill, the

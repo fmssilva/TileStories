@@ -3,7 +3,7 @@ import io, json, os
 D = os.path.dirname(os.path.abspath(__file__))
 def rd(n): return io.open(os.path.join(D, n), encoding='utf-8').read()
 
-V8 = ['v8a.js', 'v8b.js', 'v8c.js', 'v8d.js', 'v8e.js', 'v8f.js', 'v8g.js', 'v8h.js', 'v8i.js', 'v8j.js', 'v8k.js', 'v8l.js', 'v8m.js', 'v8n.js', 'v8o.js', 'v8r.js', 'v8p.js', 'v8q.js', 'v8s.js', 'v8t.js', 'v8u.js']
+V8 = ['v8a.js', 'v8b.js', 'v8c.js', 'v8d.js', 'v8e.js', 'v8f.js', 'v8g.js', 'v8h.js', 'v8i.js', 'v8j.js', 'v8k.js', 'v8l.js', 'v8m.js', 'v8n.js', 'v8o.js', 'v8r.js', 'v8p.js', 'v8q.js', 'v8s.js', 'v8t.js', 'v8u.js', 'v8v.js', 'v8w.js']
 
 # words that moved to another part, or left with their part
 REOWN = {'peek_next_label': ('retired', 'the Next card peek left: a swipe up at Peek raises the card'),
@@ -139,6 +139,9 @@ NEWSTR = [
     ['len_standard', 's8set', 'Length: standard.', 'Standard', 'Normal', '', 'Standard'],
     ['len_deep', 's8set', 'Length: deep.', 'Deep', 'Aprofundada', '', 'Deep'],
     ['pbar_tip_aud', 's0bar', 'The preview bar: Preview as.', 'Preview as: Family, Explorer or Expert', 'Pré-visualizar como: Família, Explorador ou Especialista', '', 'Preview as, tip'],
+    ['pbar_wall_ribeira', 's0bar', "The Wall button while the phone stands at the card's own wall (the Ribeira painting); a tap goes to the test wall.", 'Ribeira wall', 'Parede da Ribeira', '', 'Wall button (Ribeira)'],
+    ['pbar_wall_belem', 's0bar', "The Wall button while the phone stands at the Belém test wall; a tap goes back to the card's wall.", 'Belém wall', 'Parede de Belém', '', 'Wall button (Belém)'],
+    ['pbar_tip_wall', 's0bar', "The Wall button's tooltip.", "Wall: the card's painting or the Belém test wall", 'Parede: a pintura do cartão ou a parede de teste de Belém', '', 'Wall button tooltip'],
     ['mascot_name', 's7mascot', 'The mascot, for a screen reader.', 'Azu, the guide', 'Azu, o guia', '', 'Name'],
     ['mascot_hey', 's7mascot', 'After a poke.', 'Hey!', 'Ei!', '', 'Poke'],
     ['mascot_tickle', 's7mascot', 'After three quick taps.', 'Hehe, that tickles!', 'Hehe, faz cócegas!', '', 'Tickle'],
@@ -181,6 +184,8 @@ PBAR_A = '["pbar_label","s0bar","The bar\'s tag, before its buttons.","PREVIEW",
 PBAR_B = '["pbar_label","s0bar","The bar\'s tag, before its buttons: it says this is an Editor tool.","EDITOR","EDITOR"'
 src = rd('build6.py')
 src = src.replace("('__BEFORE__', 'paco_before_1755')]", "('__BEFORE__', 'paco_before_1755'), ('__BELEM__', 'belem_wall')]", 1)
+# the 3D Azu (v8w): the GLB built in Blender, embedded as base64
+src = src.replace("css = rd('v2.css')", "js = js.replace('__AZUGLB__', 'data:model/gltf-binary;base64,' + base64.b64encode(open(os.path.join(D, '..', '..', 'mascote', '3d', 'azu_tile.glb'), 'rb').read()).decode())\ncss = rd('v2.css')", 1)
 a = "v7 = rd('v7.js').replace('__REALSTR__', rd('realstrings.json'))"
 assert a in src
 src = src.replace(a, "v7 = rd('v7.js').replace('__REALSTR__', fix_real(rd('realstrings.json')))\n"
@@ -193,6 +198,6 @@ assert b in src, 'hook'
 src = src.replace(b, "+ v7 + '\\n' + v8 + '\\nif(location.hash===\"#selftest\")", 1)
 c = "rd('v7.css')"
 assert c in src
-src = src.replace(c, "rd('v7.css') + rd('v8.css') + rd('v8b.css') + rd('v8c.css') + rd('v8d.css') + rd('v8e.css') + rd('v8f.css') + rd('v8g.css') + rd('v8h.css') + rd('v8i.css') + rd('v8j.css') + rd('v8k.css') + rd('v8l.css') + rd('v8m.css') + rd('v8n.css') + rd('v8o.css') + rd('v8r.css') + rd('v8p.css') + rd('v8q.css') + rd('v8s.css') + rd('v8t.css') + rd('v8u.css')", 1)
+src = src.replace(c, "rd('v7.css') + rd('v8.css') + rd('v8b.css') + rd('v8c.css') + rd('v8d.css') + rd('v8e.css') + rd('v8f.css') + rd('v8g.css') + rd('v8h.css') + rd('v8i.css') + rd('v8j.css') + rd('v8k.css') + rd('v8l.css') + rd('v8m.css') + rd('v8n.css') + rd('v8o.css') + rd('v8r.css') + rd('v8p.css') + rd('v8q.css') + rd('v8s.css') + rd('v8t.css') + rd('v8u.css') + rd('v8v.css') + rd('v8w.css')", 1)
 src = src.replace("'Editor Lab · v7'", "'Editor Lab · v8'")
 exec(compile(src, 'build6+8', 'exec'), {'__file__': os.path.join(D, 'build6.py'), '__name__': '__main__', 'fix_real': fix_real, 'fix_demo_rows': fix_demo_rows, 'NEWSTR': NEWSTR, 'V8': V8, 'json': json, 'PBAR_A': PBAR_A, 'PBAR_B': PBAR_B})

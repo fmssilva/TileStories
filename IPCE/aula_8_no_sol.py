@@ -526,18 +526,19 @@ print(d1)                       # Date(day=1, month=12, year=2026)
 
 # %%
 """
-    Onde é que o is aparece a sério: o None.
-
+    O "is" é muito usado para ver se um resultado de uma pesquisa realmnte existe
+    
     Uma função de PROCURA nem sempre encontra o que procura.
     Nesse caso devolve None: "não há nada para devolver".
-    Quem chama tem de perguntar "é None?" ANTES de usar o resultado.
-
-    Vamos ver isto já no guião:
-        date_input   devolve None quando a linha vem vazia      (ex 49)
-        cake_shop_find_variety   None quando o bolo não existe  (ex 51)
+    
+    Então os clientes que chamam essa função têm de ter cuidado
+    e verificar se realmente recebem um objeto ou se recebem None, 
+    antes de tentar usar esse resultado.    
 
     Precisa da Date da célula de cima.
 """
+
+agenda = [Date(30, 10, 2026), Date(1, 1, 2025), Date(31, 12, 2026)]
 
 def dates_first_in_year(dates: list[Date], year: int) -> Date | None:
     """ The first date of that year; None if there is none. """
@@ -546,16 +547,14 @@ def dates_first_in_year(dates: list[Date], year: int) -> Date | None:
             return d                # encontrou: devolve a data
     return None                     # deu a volta toda: não há
 
-agenda = [Date(30, 10, 2026), Date(1, 1, 2000), Date(31, 12, 2026)]
 
-for year in [2000, 1999]:
+for year in [2025, 2026, 1900]:
     d = dates_first_in_year(agenda, year)
     if d is None:
         print(f"Não há datas de {year}.")
     else:
         print(f"Encontrei: {d.day}/{d.month}/{d.year}")
-# Encontrei: 1/1/2000
-# Não há datas de 1999.
+
 
 # O tipo "-> Date | None" avisa logo quem lê: pode vir uma Date, ou None.
 #
@@ -566,18 +565,6 @@ for year in [2000, 1999]:
 #
 # Escreve-se "x is None" (e "x is not None"), e não "x == None":
 # o == pode ser redefinido por quem escreve uma classe; o is não engana.
-
-
-
-# E o type(...)? Responde a outra pergunta: DE QUE TIPO é isto?
-print(type(agenda[0]), type(None))  # <class '__main__.Date'> <class 'NoneType'>
-#
-# Em IPCE não se usa o type para validar argumentos:
-# os tipos e as pré-condições dizem o que a função recebe, e quem chama cumpre.
-# Se alguém chamar dates_first_in_year("texto", 2000), o erro é de quem chamou.
-# O None é diferente: não é um engano, é uma resposta prevista ("não encontrei").
-# Por isso esse caso testa-se sempre, com is None.
-
 
 
 
@@ -683,18 +670,16 @@ h) EXERCICIO 49 (GUIÃO) - date_is_less [6 min -> 11:02] --------------------
 def date_is_less(dt1: Date, dt2: Date) -> bool:
     """ Does one date come before the other?
         Precondition: date_is_valid(dt1) and date_is_valid(dt2) """
-    if dt1.year != dt2.year:
-        return dt1.year < dt2.year      # anos diferentes: o ano decide
-    elif dt1.month != dt2.month:
-        return dt1.month < dt2.month    # mesmo ano: o mês decide
-    else:
-        return dt1.day < dt2.day        # mesmo ano e mês: o dia decide
+    pass # TODO
+
 
 print(date_is_less(Date(30, 1, 2026), Date(1, 2, 2026)))     # True
 print(date_is_less(Date(1, 1, 2027), Date(31, 12, 2026)))    # False
 print(date_is_less(Date(5, 5, 2026), Date(5, 5, 2026)))      # False   igual não é menor
 
 
+
+#%%
 # Encontrem o bug nesta versão "mais curta":
 def date_is_less_bug(dt1: Date, dt2: Date) -> bool:
     """ Does one date come before the other? (with a bug!) """
@@ -735,10 +720,10 @@ i) EXERCICIO 49 (GUIÃO) - date_order_in_year [6 min -> 11:08] --------------
 def date_order_in_year(dt: Date) -> int:
     """ The day order number inside the year
         Precondition: date_is_valid(dt) """
-    total = 0
-    for m in range(1, dt.month):        # os meses antes deste (o próprio não entra)
-        total += date_month_length(m, dt.year)
-    return total + dt.day
+    pass # TODO
+
+
+
 
 print(date_order_in_year(Date(1, 1, 2026)))      # 1
 print(date_order_in_year(Date(1, 2, 2026)))      # 32
@@ -772,23 +757,15 @@ j) EXERCICIO 49 (GUIÃO) - date_next e date_prev [12 min -> 11:20] ----------
 def date_next(dt: Date) -> Date:
     """ The following day.
         Precondition: date_is_valid(dt) """
-    if dt.day < date_month_length(dt.month, dt.year):
-        return Date(dt.day + 1, dt.month, dt.year)      # caso normal
-    elif dt.month < 12:
-        return Date(1, dt.month + 1, dt.year)           # último dia do mês
-    else:
-        return Date(1, 1, dt.year + 1)                  # 31 de dezembro
+    pass # TODO
+
 
 def date_prev(dt: Date) -> Date:
     """ The previous day.
         Precondition: date_is_valid(dt) """
-    if dt.day > 1:
-        return Date(dt.day - 1, dt.month, dt.year)      # caso normal
-    elif dt.month > 1:
-        prev_month = dt.month - 1                       # dia 1: vai para o fim do mês anterior
-        return Date(date_month_length(prev_month, dt.year), prev_month, dt.year)
-    else:
-        return Date(31, 12, dt.year - 1)                # 1 de janeiro
+    pass # TODO
+
+
 
 print(date_as_str(date_next(Date(30, 10, 2026))))   # 31/10/2026
 print(date_as_str(date_next(Date(31, 10, 2026))))   # 1/11/2026
@@ -1025,27 +1002,26 @@ def dates_print(ds: Dates) -> None:
     for d in ds.dates:
         print(d)
 
+
+
 def dates_len(ds: Dates) -> int:
     """ Number of dates in the sequence. """
-    return len(ds.dates)
+    pass # TODO
+
 
 def dates_maximum(ds: Dates) -> Date:
     """ The maximum.
         Precondition: dates_len(ds) > 0 """
-    max = ds.dates[0]           # começar com uma data que existe mesmo
-    for d in ds.dates:
-        if date_is_less(max, d):    # o d é maior do que o max?
-            max = d
-    return max
+    pass # TODO
+
+
 
 def dates_minimum(ds: Dates) -> Date:
     """ The minimum.
         Precondition: dates_len(ds) > 0 """
-    min = ds.dates[0]
-    for d in ds.dates:
-        if date_is_less(d, min):    # o d é menor do que o min?
-            min = d
-    return min
+    pass # TODO
+
+
 
 ds = Dates([Date(30, 10, 2026), Date(1, 1, 2000), Date(31, 12, 2026)])
 print(dates_len(ds))                        # 3
@@ -1079,9 +1055,27 @@ c) EXERCICIO 49 (GUIÃO) - a UI e o main [5 min -> 12:00] -------------------
         - o que o programa tem de lembrar (aqui as datas, no 51 a loja)
           fica guardado num sítio só: o objeto ui
 
-    Inputs para experimentar:
-        30/10/2026, 1/1/2000, 31/12/2026, e uma linha vazia
-        (e depois corram outra vez só com uma linha vazia)
+    Definimos a classe de dados UI com uma função ui_run que:
+        - Leia uma sequência de datas.
+        - Se a sequência for vazia, diz que não há datas.
+        - Caso contrário escreve: data máxima, data mínima, posição da data máxima no ano, dia seguinte da data máxima, dia anterior da data máxima.
+
+    Exemplo de execução
+        Introduza uma data por linha, tudo terminado por uma linha vazia:
+        D/M/Y: 
+        Não há datas!
+
+    Exemplo de execução
+        Introduza uma data por linha, tudo terminado por uma linha vazia:
+        D/M/Y: 30/10/2026
+        D/M/Y: 1/1/2000
+        D/M/Y: 31/12/2026
+        D/M/Y: 
+        Data máxima: 31/12/2026
+        Data mínima: 1/1/2000
+        Ord max: 365
+        Next max: 1/1/2027
+        Prev max: 30/12/2026
 """
 
 ############# type UI #############
@@ -1192,6 +1186,19 @@ print(l)                        # [1, 2, 3]   a própria lista mudou
 """
 e) EXERCICIO 50 (GUIÃO, Mooshak T) - Frações: rational_normalize [8 min -> 12:12]
 
+    Escreva um programa que faça contas com números racionais (frações). 
+    O programa deve suportar as quatro operações básicas +, -, *, /. 
+    Escreva o programa sem recorrer a nenhum tipo existente ou a uma biblioteca existente.
+
+    O resultado de qualquer operação deve ser uma fração simplificada e normalizada. 
+    Isto consegue-se dividindo tanto o numerador como o denominador pelo maior divisor comum. 
+    Além disso, a normalização deve também garantir que apenas o numerador pode ser negativo.
+
+    Escreva o programa usando duas classes de dados:
+        Uma classe de dados Rational que implementa o tipo das frações.
+        Uma classe de dados UI (user interface) que implementa a interação com o utilizador. Esta classe de dados preocupa-se apenas com a interação com o utilizador, e recorre à outra classe de dados para todos os aspetos lógicos dos números racionais.
+
+
     Uma fração está na forma normal quando:
         1. está simplificada: numerador e denominador divididos pelo maior divisor comum
            6/4 -> 3/2
@@ -1237,16 +1244,14 @@ def rational_is_zero(r: Rational) -> bool:
         Precondition: rational_is_valid(r) """
     return r.num == 0
 
+
 def rational_normalize(r: Rational) -> Rational:
     """ Put the rational in the normal form.
         Precondition: r.den != 0 """
-    g = gcd(abs(r.num), abs(r.den))     # abs: o gcd só aceita números >= 0
-    num = r.num // g
-    den = r.den // g
-    if den < 0:                 # o sinal passa para o numerador
-        num = -num
-        den = -den
-    return Rational(num, den)
+    pass # TODO
+
+
+
 
 def rational_create(num: int, den: int) -> Rational:
     """ Simplify rational number.
@@ -1288,6 +1293,7 @@ f) EXERCICIO 50 (GUIÃO) - as 4 operações e a UI [8 min -> 12:20] -----------
         a/b - c/d = (a*d - c*b) / (b*d)
         a/b * c/d = (a*c) / (b*d)
         a/b / c/d = (a*d) / (b*c)        (multiplicar pelo inverso)
+        
     Depois é só criar com rational_create, que normaliza.
 
     Inputs para experimentar (um de cada vez):
@@ -1300,24 +1306,29 @@ f) EXERCICIO 50 (GUIÃO) - as 4 operações e a UI [8 min -> 12:20] -----------
 def rational_add(r1: Rational, r2: Rational) -> Rational:
     """ Add two rational numbers.
         Precondition: rational_is_valid(r1) and rational_is_valid(r2) """
-    return rational_create(r1.num * r2.den + r2.num * r1.den, r1.den * r2.den)
+    pass # TODO
+
+
 
 def rational_sub(r1: Rational, r2: Rational) -> Rational:
     """ Subtract two rational numbers.
         Precondition: rational_is_valid(r1) and rational_is_valid(r2) """
-    return rational_create(r1.num * r2.den - r2.num * r1.den, r1.den * r2.den)
+    pass # TODO
+
+
 
 def rational_mul(r1: Rational, r2: Rational) -> Rational:
     """ Multiply two rational numbers.
         Precondition: rational_is_valid(r1) and rational_is_valid(r2) """
-    return rational_create(r1.num * r2.num, r1.den * r2.den)
+    pass # TODO
+
+
 
 def rational_div(r1: Rational, r2: Rational) -> Rational:
     """ Divide two rational numbers.
         Precondition: rational_is_valid(r1)
                 and rational_is_valid(r2) and not rational_is_zero(r2) """
-    return rational_create(r1.num * r2.den, r1.den * r2.num)
-    # Se o r2 for negativo, o denominador fica negativo: o normalize trata disso.
+    pass # TODO
 
 
 a = Rational(1, 2)
@@ -1328,7 +1339,27 @@ print(rational_as_str(rational_div(a, Rational(-1, 4))))    # -2/1
 print(a, b)                     # Rational(num=1, den=2) Rational(num=1, den=3)   não mudaram
 
 
-#########   User Interface   #########
+
+
+# %%
+"""
+e) EXERCICIO 50 (GUIÃO, Mooshak T) - Frações: rational_normalize [8 min -> 12:12]
+
+    User Interface
+    Esceve uma classe de dados UI (user interface) que implementa a interação com o utilizador. Esta classe de dados preocupa-se apenas com a interação com o utilizador, e recorre à outra classe de dados para todos os aspetos lógicos dos números racionais.
+
+    Exemplo de execução
+        A/B OP C/D: 3/5 + 2/1
+        13/5
+
+    Exemplo de execução
+        A/B OP C/D: -30/-50 * 1/1
+        3/5
+
+    Exemplo de execução
+        A/B OP C/D: 2/5 / 1/2
+        4/5
+    """
 
 # No validation here. We are assuming all the inputs are valid (to simplify).
 
@@ -1336,10 +1367,12 @@ print(a, b)                     # Rational(num=1, den=2) Rational(num=1, den=3) 
 class UI:    # User Interface.
     pass     # no attributes
 
+
 def ui_make_rational(s: str) -> Rational:
     """ Create a rational number from the format: 'n/d'. """
     n, d = s.split('/')
     return Rational(int(n), int(d))
+
 
 def ui_process_input(s: str) -> tuple[Rational, str, Rational]:
     """ Process the format: 'n/d op n/d'. """
@@ -1347,6 +1380,7 @@ def ui_process_input(s: str) -> tuple[Rational, str, Rational]:
     x = ui_make_rational(r1)
     y = ui_make_rational(r2)
     return (x, op, y)
+
 
 def ui_eval_input(s: str) -> Rational | None:
     """ Decode the input and perform the operation. """
@@ -1361,6 +1395,7 @@ def ui_eval_input(s: str) -> Rational | None:
         return rational_div(x, y)
     else:
         return None
+
 
 def ui_run() -> None:
     """ Run the user interface. """
@@ -1406,15 +1441,42 @@ main()
 """
 g) EXERCICIO 51 (GUIÃO, Mooshak U) - Pastelaria: CakeVariety [9 min -> 12:29]
 
-    Uma pastelaria tem várias variedades de bolos.
-    Cada variedade tem: nome, quantas unidades há, e a lista dos ingredientes.
-    Cada ingrediente tem: nome e percentagem na receita.
+    A pastelaria tem um stock corrente de bolos. 
+    O stock é constituído por várias unidades de cada variedade de bolo. 
+    Para cada variedade de bolo é preciso saber quantas unidades estão disponíveis para venda. 
+    Neste programa também queremos saber quais são os ingredientes usados para fazer cada variedade de bolo 
+    e qual a percentagem de cada ingrediente na receita.
 
-    Quatro data classes, umas dentro das outras:
-        UI
-         └── CakeShop          stock: list[CakeVariety]
-              └── CakeVariety  name, amount, ingredients: list[Ingredient]
-                   └── Ingredient  name, percent
+    O programa funciona assim:
+        Lê o stock inicial a partir do teclado;
+        Pede ao utilizador o nome duma variedade de bolos e o número de unidades pretendidas;
+        Efetua a venda, mostrando a quantidade efetivamente vendida 
+            (pode ser inferior à quantidade pedida por falta de stock);
+        Escreve-se ainda o nome do ingrediente principal da variedade de bolo que foi vendida.
+
+
+    Escreva o programa usando quatro classes de dados:
+        Uma classe de dados Ingredient, que provavelmente não precisará de ter nenhum método para além do construtor. Os ingredientes são passivos.
+        Uma classe de dados CakeVariety, com um método que descobre qual o ingrediente principal duma variedade bolos (se não houver ingredientes, retorna None), e outro método para concretizar as alterações internas relativas a uma venda (retorna o número de unidades realmente vendidas, que podem ser menos do que as pedidas).
+        Uma classe de dados CakeShop que guarda o stock numa lista, com um método para descobrir uma variedade de bolo (se não existir, retorna None), e outro método para efetuar a venda duma variedade de bolo (se não existir, retorna None).
+        Uma classe de dados UI (user interface) que implementa a interação com o utilizador. Cria-se apenas uma instância desta classe de dados. Essa instância precisa de guardar uma CakeShop. A classe de dados UI preocupa-se apenas com a interação com o utilizador, respeitando as responsabilidades das outras classes de dados.
+
+        Quatro data classes, umas dentro das outras:
+            UI
+            └── CakeShop            stock: list[CakeVariety]
+                └── CakeVariety     name, amount, ingredients: list[Ingredient]
+                    └── Ingredient  name, percent
+    
+        ou seja: 
+            Uma pastelaria tem várias variedades de bolos.
+            Cada variedade tem: nome, quantas unidades há, e a lista dos ingredientes.
+            Cada ingrediente tem: nome e percentagem na receita.
+    
+    Ao contrário do exercício anterior, que fornece simples operações sobre frações, 
+    este programa tem estado interno porque precisa de gerir a situação corrente do stock da pastelaria, 
+    o qual pode variar ao longo do tempo. 
+    Uma pastelaria é um objeto mutável.
+
 
     Agora:
         cake_variety_main_ingredient -> o ingrediente com maior percentagem
@@ -1445,23 +1507,13 @@ class CakeVariety:
 
 def cake_variety_main_ingredient(variety: CakeVariety) -> Ingredient | None:
     """ The main ingredient of the recipe of a cake variety. """
-    if len(variety.ingredients) == 0:
-        return None
-    main = variety.ingredients[0]
-    for ingr in variety.ingredients:
-        if ingr.percent > main.percent:
-            main = ingr
-    return main
+    pass # TODO
+
 
 def cake_variety_sell(variety: CakeVariety, units: int) -> int:
     """ Sell some units.
         Precondition: units >= 0 """
-    if units > variety.amount:
-        sold = variety.amount   # não há que chegue: vende-se o que há
-    else:
-        sold = units
-    variety.amount -= sold      # ALTERA a variedade: o stock muda mesmo
-    return sold
+    pass #TODO
 
 delicia = CakeVariety("Delícia-compacta", 127,
                       [Ingredient("Farinha", 0.99), Ingredient("Leite", 0.01)])
@@ -1494,19 +1546,6 @@ h) EXERCICIO 51 (GUIÃO) - CakeShop e a UI [9 min -> 12:38] -----------------
 
         cake_shop_find_variety -> procura uma variedade pelo nome (None se não existir)
         cake_shop_sell         -> vende (None se a variedade não existir)
-
-    Input para experimentar (o 1º exemplo do guião, linha a linha):
-        Puro-açúcar 230 4
-        Leite-Condensado 0.1
-        Açúcar 0.76
-        Farinha 0.12
-        Fermento 0.02
-        Delícia-compacta 127 2
-        Farinha 0.99
-        Leite 0.01
-        fim
-        BOLO: Delícia-compacta
-        UNIDADES: 1000
 """
 
 #########   type CakeShop   #########
@@ -1521,19 +1560,14 @@ def cake_shop_size(shop: CakeShop) -> int:
 
 def cake_shop_find_variety(shop: CakeShop, vname: str) -> CakeVariety | None:
     """ Find a cake variety by name. """
-    for variety in shop.stock:
-        if variety.name == vname:
-            return variety      # encontrou: sai logo da função
-    return None                 # deu a volta toda e não encontrou
+    pass #TODO
+
+
 
 def cake_shop_sell(shop: CakeShop, vname: str, units: int) -> int | None:
     """ Sell some units of a named cake variety.
         Precondition: units >= 0 """
-    variety = cake_shop_find_variety(shop, vname)
-    if variety is None:
-        return None
-    return cake_variety_sell(variety, units)
-
+    pass #TODO
 
 # Experiência antes da UI: vender duas vezes na mesma loja.
 shop = CakeShop([CakeVariety("Delícia-compacta", 127, [Ingredient("Farinha", 0.99)])])
@@ -1552,7 +1586,32 @@ print(shop.stock[0].amount)                            # 0
 # desistia logo à primeira variedade que não fosse a certa.
 
 
-#########   User Interface   #########
+"""
+    #########   User Interface   #########
+
+    Exemplo de execução
+        Puro-açúcar 230 4
+        Leite-Condensado 0.1
+        Açúcar 0.76
+        Farinha 0.12
+        Fermento 0.02
+        Delícia-compacta 127 2
+        Farinha 0.99
+        Leite 0.01
+        fim
+        BOLO: Delícia-compacta
+        UNIDADES: 1000
+        Vendidas 127 unidades de Delícia-compacta
+        Ingrediente principal: Farinha
+
+    Exemplo de execução
+        Puro-ar 230 0
+        fim
+        BOLO: Puro-ar
+        UNIDADES: 100
+        Vendidas 100 unidades de Puro-ar
+        Ingrediente principal: Sem ingredientes
+"""
 
 # No validation here. We are assuming all the inputs are valid (to simplify).
 
@@ -1637,6 +1696,10 @@ main()
 
 
 
+
+
+
+
 # %%
 """
 i) E as classes "a sério" dos testes de anos anteriores? [4 min -> 12:42] ---
@@ -1698,6 +1761,8 @@ print(d1)                       # <__main__.DateClass object at 0x...>   (o núm
 #
 # E herança (class Circle(Shape), "um círculo É uma forma")? Existe,
 # também nas data classes, mas fica fora de IPCE.
+
+
 
 
 
@@ -1884,6 +1949,9 @@ print(p2)                       # Point(x=10, y=4)
     - o caso que nunca acaba:   o gcd com números negativos (daí o abs no normalize).
     - comparar com None:        "is None", não "== None".
 """
+
+
+
 
 
 

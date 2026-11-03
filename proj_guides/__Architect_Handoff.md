@@ -5,39 +5,31 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-03)
 
 - **State:**
-  - **The Lab:** v21 is published, with layers through `v8u`.
-  - **The tests:** the self-test and every `test8*.js` pass.
-  - **MCP:** blender-mcp is at user scope. Blender 5.2.3 is open with add-on 1.8, connected on port 9876. The ElevenLabs MCP
-    still needs `/mcp` > Authenticate.
+  - **The Lab:** v22 is published, with layers through `v8w` (see the commit of 2026-11-03 "Markers ride the wall's picture…").
+  - **Built on 2026-11-03 (second chat):**
+    - `v8v`: the card's markers are u, v places on the wall's picture (a drag or zoom moves them with it); the Ribeira wall
+      shows its points; the preview bar's Wall button; the console's scene "Ribeira wall: a drag moves the markers with the
+      picture" (no model; `test8v.js`, with a mutation proof).
+    - `v8w`: Mascot source = 3D model (GLB): Azu the tile, modelled by script in Blender (`proj_guides/mascote/3d/`, `_3.7`
+      section 10), drawn by three.js; clips by state, mouth morphs by viseme, blink; Play a clip; Import (names what a GLB
+      lacks); Generate from a picture (the generators' table). `test8w.js`.
+    - Voices: the Azure Raquel + Sonia and Duarte + Ryan sets, every line, published with the Lab. The partial Gemini set left
+      the manifest.
+  - **MCP:** blender-mcp is at user scope; Blender 5.2.3 with add-on 1.8 on port 9876. In this Blender, new shape keys start
+    at value 1 (set them to 0). The add-on's Rodin trial key is empty (`API_INSUFFICIENT_FUNDS`): no generator works until the
+    developer adds a key or brings a GLB made by hand on a generator's web. The ElevenLabs MCP still needs `/mcp` >
+    Authenticate.
   - **Keys:** Gemini, Azure Speech (region `germanywestcentral`) and ElevenLabs all answer
     (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).
 - **The tasks, in this order:**
-  1. **Bug: the card's two markers do not follow the pan.**
-     - **The cause:** "Ribeira Palace" and "Lisbon Cathedral" are placed at fixed screen percentages in `lab_src/v5.js`
-       line 24 (`left:52%;top:30%`, `left:22%;top:58%`), from before the camera could pan (v8p) and zoom (v8s). A drag moves
-       the picture under them.
-     - **The fix (`v8v`):**
-       - give each marker a u, v on its wall's picture and place it with `camGeom()` at every paint, as the pins are placed;
-       - on the Ribeira wall, show the wall's points too (Names on the points);
-       - make the Belém wall easy to reach from the phone itself (e.g. a Wall switch on the preview bar), since the developer
-         twice found only the two markers;
-       - add a test scene "Ribeira wall: a drag moves the markers with the picture".
-  2. **Item 6, the mascot** (`_3.7`), with blender-mcp:
-     - **The tile-Azu:** modelled in Blender by script. A box-like body with a hat suits code and gives clean, low-poly
-       topology to rig.
-     - **The cat, and "generate from a picture":** the add-on's own generators (the Blender panel: Hyper3D Rodin, Hunyuan 3D,
-       Tripo, Meshy). Their keys go in the add-on, not in an MCP. The free tiers are in `_3.7` section 9.
-     - **Then:** rig, the clips (idle, talk, listen, think, point, walk), and a GLB export. The GLB goes to the Lab (a
-       three.js GLTFLoader adapter) and to Unity (`mcp__UnityMCP__import_model_file`).
-     - **In the Editor:**
-       - Mascot source: Built-in tile of light / 2D / Rive / GLB / Sprite sheet / Generate from a picture;
-       - Import;
-       - the tile of light's styles.
-  3. **Voices:**
-     - **Azure:** render the Raquel/Duarte and Sonia/Ryan sets (F0, free) and publish them.
-     - **ElevenLabs:** the developer picks the voice ids first.
-     - **ElevenLabs Forced Alignment** can give exact word times to any audio (e.g. the Gemini set's estimated ones).
-  4. **The form of address** (tu / polite / você): a proposal in `_3.5` section 3.9, waiting for the developer's decision.
+  1. **The developer looks at v22:** the markers on a drag, the Wall button, the 3D Azu (6 · Guide > Azu > Mascot source).
+  2. **The cat:** from `proj_guides/mascote/3d/cat_clean.png`, by hand on Meshy's or Tripo's web (free), or by a key in the
+     add-on (`_3.7` section 9). Then import into Blender, rig (a quadruped: four legs, tail, head), the same clips and morphs,
+     export, and Import in the Lab.
+  3. **The rest of item 6:** the tile of light's styles in the Editor; Unity import of `azu_tile.glb` (glTFast, the two
+     layers of `_3.7` section 4) as a Worker block.
+  4. **Voices:** ElevenLabs once the developer picks the voice ids; Forced Alignment for word times of any audio.
+  5. **The form of address** (tu / polite / você): a proposal in `_3.5` section 3.9, waiting for the developer's decision.
 - **Rules learned this round:**
   - Keys go only in `.secrets/keys.env`, never into a script (`keys_local.py` is committed).
   - MCP servers are added with `--scope user` (memory `mcp-add-needs-user-scope`).
@@ -72,6 +64,8 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
   - `v8s`: Azu as the guide's button, its comments, the Belém test wall, a tour opens the card.
   - `v8t`: Ask Azu, the live agent (`_3.3` section 11, `_3.6` section 9).
   - `v8u`: the agent tested in the prototype (test scenes with checks, a trace under each answer, every point named).
+  - `v8v`: the markers on the picture, the Ribeira wall's points, the Wall button, the markers' scene.
+  - `v8w`: Azu as a 3D model (GLB), Import, Generate from a picture.
 - **Tests:** each layer has its `test8*.js`, listed in `lab_src/README.md`. Run them all after the self-test; `test8r` needs
   two voice sets.
 - **Studies (current state):**
@@ -88,9 +82,9 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     of that doc).
 - **Voices:**
   - `_3.3.1_Prototype/voicebench/`: `export_script.js`, `render.py` (azure / eleven / edge / gemini), README.
-  - Gemini TTS: the free tier allows 10 requests a day per model, so its set holds 7 of 106 lines.
-  - Best available is the set with the most lines: on this computer the full Edge sets; in the published Lab the Gemini set (the
-    only one there), whose missing lines use the device voice. The Editor names each set with its line count.
+  - Gemini TTS: the free tier allows 10 requests a day per model; its partial set is no longer published.
+  - Best available is the set with the most lines (a published one first when as full): in the published Lab the Azure sets;
+    on this computer the Edge set with one line more. The Editor names each set with its line count.
   - Edge sets are private (`out-private/`, ignored, never published: an undocumented service).
 - **The developer's accounts:**
   - Azure for Students: active, FCT NOVA directory, no Speech resource yet.
