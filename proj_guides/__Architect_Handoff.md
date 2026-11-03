@@ -5,8 +5,8 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-03)
 
 - **State:**
-  - **The Lab:** v22 is published, with layers through `v8w` (the commit "Make the wall's markers ride the picture, add Azu as a rigged 3D model, and publish the Azure
-    voices").
+  - **The Lab:** v23 is published, with layers through `v8x` (the commit "Add the developer's three Meshy mascots, rigged in
+    Blender, as 3D models to pick in the Editor").
   - **Built on 2026-11-03 (second chat):**
     - `v8v`: the card's markers are u, v places on the wall's picture (a drag or zoom moves them with it); the Ribeira wall
       shows its points; the preview bar's Wall button; the console's scene "Ribeira wall: a drag moves the markers with the
@@ -16,6 +16,10 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       lacks); Generate from a picture (the generators' table). `test8w.js`.
     - Voices: the Azure Raquel + Sonia and Duarte + Ryan sets, every line, published with the Lab. The partial Gemini set left
       the manifest.
+  - **Built on 2026-11-03 (third chat):** `v8x`: Mascot source = 3D model > **Model**, one card per model: Azu detailed
+    (default), Azu simple, the mouse, the explorer. The three new ones are the developer's Meshy models, rigged in Blender by
+    `proj_guides/mascote/3d/rig_meshy.py` (`_3.7` section 11); the explorer's colours are painted from its picture (Meshy
+    gave the shape only, twice). `test8x.js`, with a mutation proof.
   - **MCP:** blender-mcp is at user scope; Blender 5.2.3 with add-on 1.8 on port 9876. In this Blender, new shape keys start
     at value 1 (set them to 0). The add-on's Rodin trial key is empty (`API_INSUFFICIENT_FUNDS`): no generator works until the
     developer adds a key or brings a GLB made by hand on a generator's web. The ElevenLabs MCP still needs `/mcp` >
@@ -23,10 +27,12 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
   - **Keys:** Gemini, Azure Speech (region `germanywestcentral`) and ElevenLabs all answer
     (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).
 - **The tasks, in this order:**
-  1. **The developer looks at v22:** the markers on a drag, the Wall button, the 3D Azu (6 · Guide > Azu > Mascot source).
-  2. **The cat:** from `proj_guides/mascote/3d/cat_clean.png`, by hand on Meshy's or Tripo's web (free), or by a key in the
-     add-on (`_3.7` section 9). Then import into Blender, rig (a quadruped: four legs, tail, head), the same clips and morphs,
-     export, and Import in the Lab.
+  1. **The developer looks at the Lab:** the markers on a drag, the Wall button, and the four 3D models (6 · Guide > Azu >
+     Mascot source = 3D model > Model, then Play a clip).
+  2. **More mascots by the same route** (`rig_meshy.py`: add a SPEC entry with the landmarks from a front render): the poet
+     and the soldier (`proj_guides/mascote/poet.png`, `soldier.png`) once the developer makes them on Meshy; the explorer's
+     own texture if Meshy's download brings it; the cat (`cat_clean.png`) as a quadruped. The mouse's sleeve stretches a
+     little at the end of a wave (a sleeve split from the coat, by hand, would fix it).
   3. **The rest of item 6:** the tile of light's styles in the Editor; Unity import of `azu_tile.glb` (glTFast, the two
      layers of `_3.7` section 4) as a Worker block.
   4. **Voices:** ElevenLabs once the developer picks the voice ids; Forced Alignment for word times of any audio.
@@ -67,6 +73,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
   - `v8u`: the agent tested in the prototype (test scenes with checks, a trace under each answer, every point named).
   - `v8v`: the markers on the picture, the Ribeira wall's points, the Wall button, the markers' scene.
   - `v8w`: Azu as a 3D model (GLB), Import, Generate from a picture.
+  - `v8x`: the 3D model chosen in the Editor (Azu detailed, Azu simple, the mouse, the explorer).
 - **Tests:** each layer has its `test8*.js`, listed in `lab_src/README.md`. Run them all after the self-test; `test8r` needs
   two voice sets.
 - **Studies (current state):**
