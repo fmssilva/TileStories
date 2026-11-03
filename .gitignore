@@ -39,3 +39,6 @@ proj_guides/_3.3.1_Prototype/voicebench/out-private/
 !/.secrets/keys.env.example
 # The local Lab's keys, written from .secrets by keys_local.py (never published)
 keys.local.js
+
+# Blender backup copies
+*.blend1
