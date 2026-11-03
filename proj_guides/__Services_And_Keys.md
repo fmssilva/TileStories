@@ -33,8 +33,8 @@ Status as of 2026-11-03.
 |---|---|---|---|---|
 | **Google AI Studio** (Gemini) | the agent's model in the local Lab, embeddings for the library, TTS voices | `GEMINI_API_KEY` | **Working.** Text, embeddings and TTS answer. The local Lab's Ask Azu runs on it (Flash-Lite: first words in about 2 s, about $0.0013 a question). A page opened from a file may call it (CORS allows origin `null`). | Free tier for development only: Google may use the data, and EEA users need the paid tier. TTS free tier is 10 requests a day for each model, so the Gemini voice set has 7 of 106 lines. |
 | **Anthropic** (Claude) | the recommended agent model (Haiku 5.5) for the app and the user study | `ANTHROPIC_API_KEY` | Not created | Pay as you go; prompt caching cuts the library's cost. |
-| **Azure Speech** (Azure for Students) | recorded voices with exact word times (pt-PT Raquel, Duarte, Fernanda; en-GB Sonia, Ryan) | `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION` | Not created: the directory is FCT NOVA, but there is no Speech resource yet | F0: 0.5 M neural characters a month, free. A full set is about 5,200 characters. |
-| **ElevenLabs** | recorded voices with word times (`with-timestamps`) | `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_PT`, `ELEVENLABS_VOICE_EN` | Account exists, no API key yet | Free: 10k characters a month, non-commercial. Starter: $6 a month, first month $1. |
+| **Azure Speech** (Azure for Students) | recorded voices with exact word times (pt-PT Raquel, Duarte, Fernanda; en-GB Sonia, Ryan) | `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION` | **Working** (2026-11-03): a Speech resource, region `germanywestcentral` | F0: 0.5 M neural characters a month, free. A full set is about 5,200 characters. |
+| **ElevenLabs** | recorded voices with word times (`with-timestamps`) | `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_PT`, `ELEVENLABS_VOICE_EN` | **Working** (2026-11-03): the API key answers; the voice ids are not chosen yet | Free: 10k characters a month, non-commercial. Starter: $6 a month, first month $1. |
 | **Meshy / Tripo** (optional) | a 3D mascot from a picture | `MESHY_API_KEY`, `TRIPO_API_KEY` | Not created | Free credits, then paid. Only if the 2D/shader mascot is not enough. |
 | **Cloudflare Workers** (later) | the token service and the agent's loop for the app | none here: the keys go into the Worker's secrets | Not created | The free plan covers a study. |
 
@@ -77,7 +77,7 @@ word times.*
    3. On the voice, copy its id into `ELEVENLABS_VOICE_PT`.
    4. Do the same for an English voice, into `ELEVENLABS_VOICE_EN`.
 3. Optionally, connect the MCP so Claude Code can browse voices and make sound effects:
-   1. In a terminal, run `claude mcp add --transport http elevenlabs https://api.elevenlabs.io/v1/mcp`.
+   1. In a terminal, run `claude mcp add --scope user --transport http elevenlabs https://api.elevenlabs.io/v1/mcp`.
    2. In the VS Code Claude panel, type `/mcp` > elevenlabs > **Authenticate**.
    3. The MCP signs in with the account and needs no key. The renderer still uses the API key, because only the API returns word
       times.
@@ -101,8 +101,12 @@ word times.*
    2. In Blender, open **Edit > Preferences > Add-ons > Install from disk** and pick `addon.py`.
    3. Enable **Interface: Blender MCP**.
 4. Connect: in the 3D view press **N** > **BlenderMCP** tab > **Connect to Claude**.
-5. Register the server in a terminal: `claude mcp add blender -- uvx blender-mcp`.
-6. Restart the VS Code Claude panel. Blender must stay open while the Architect uses it.
+5. Register the server in a terminal: `claude mcp add --scope user blender -- uvx blender-mcp`.
+   - Always use `--scope user`. Without it, the server is saved for the folder as the terminal spells it
+     (`C:/Users/...`), while VS Code opens the same folder as `c:/Users/...`. To Claude Code those are two projects, and the
+     chat never sees the server (found on 2026-11-03).
+6. Start a new conversation in the VS Code Claude panel (servers load when a conversation starts). Blender must stay open,
+   with the add-on connected (port 9876), while the Architect uses it.
 
 *The Architect builds the tile mascot in Blender, rigs it and exports GLB/FBX for Unity (see _3.7).*
 
@@ -117,16 +121,18 @@ word times.*
 
 ## 4. Replacing the keys
 
-Do this once the whole system works. Every key is replaced in one file, and nothing else in the repo changes.
+Do this once the whole system works. Every key is replaced in one file, and nothing else in the repo changes. A key goes
+only into `.secrets/keys.env`, never into a script, even for a moment: `keys_local.py` is committed.
 
-1. **Gemini:**
-   1. In https://aistudio.google.com > **API keys**, delete the current key. It was shown in a chat.
+1. **Gemini, Azure and ElevenLabs:** all three keys were shown in a chat on 2026-11-03, so all three are replaced.
+2. **Gemini:**
+   1. In https://aistudio.google.com > **API keys**, delete the current key.
    2. **Create API key** in the same project.
    3. Paste it into `GEMINI_API_KEY`.
-2. **Every other key:** create a new one in its console, paste it into `.secrets/keys.env`, then delete the old one.
-3. Run `python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py` so the local Lab picks up the new keys.
-4. Check that each key answers by running `python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`. It prints `ok` or
+3. **Every other key:** create a new one in its console, paste it into `.secrets/keys.env`, then delete the old one.
+4. Run `python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py` so the local Lab picks up the new keys.
+5. Check that each key answers by running `python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`. It prints `ok` or
    the HTTP error for each service, never the key.
-5. If a key ever reaches a commit:
+6. If a key ever reaches a commit:
    1. Delete it in its console first, since the history keeps it.
    2. Then remove it from the repo.
