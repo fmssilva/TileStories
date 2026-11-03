@@ -5,7 +5,8 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-03)
 
 - **State:**
-  - **The Lab:** v22 is published, with layers through `v8w` (see the commit of 2026-11-03 "Markers ride the wall's picture…").
+  - **The Lab:** v22 is published, with layers through `v8w` (the commit "Make the wall's markers ride the picture, add Azu as a rigged 3D model, and publish the Azure
+    voices").
   - **Built on 2026-11-03 (second chat):**
     - `v8v`: the card's markers are u, v places on the wall's picture (a drag or zoom moves them with it); the Ribeira wall
       shows its points; the preview bar's Wall button; the console's scene "Ribeira wall: a drag moves the markers with the
