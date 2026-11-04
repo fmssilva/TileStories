@@ -25,7 +25,9 @@ The Lab is one HTML page built from layers. Each layer adds to or wraps the one 
   picture, the Ribeira wall shows its points, the preview bar's Wall button, the markers' test scene) -> `v8w.js` (Azu as a 3D
   model: the GLB from `../../mascote/3d/`, embedded by the build, drawn by three.js from jsdelivr; Mascot source, Play a clip,
   Import, Generate from a picture) -> `v8x.js` (the 3D model chosen in the Editor: Azu detailed, Azu simple, the mouse, the
-  explorer, the poet, the soldier; each GLB and its picture embedded by the build from `../../mascote/3d/` and `thumbs/`). CSS in the same order;
+  explorer, the poet, the soldier; each GLB and its picture embedded by the build from `../../mascote/3d/` and `thumbs/`) ->
+  `v8y.js` (the tile of light's styles: Glaze, Pattern, Light, Corners, and a preview drawn on its own canvas; the shader's
+  properties live in `v8q`'s `AZU_UNI`). CSS in the same order;
   `v3body.html` is the page.
 - **Words:** `realstrings.json` (the framework's real words, with their owner part); `build8.py` moves words to new owners and adds
   the Lab's new ones.
@@ -48,7 +50,9 @@ The Lab is one HTML page built from layers. Each layer adds to or wraps the one 
   no network; `node test8x.js` (the same) presses each card of Model: the model swaps in with its seven clips, four
   morphs and front arm, is drawn and fits its frame, waves on Play a clip, opens its mouth on A; a model seen before comes from
   the cache; Import still replaces the chosen one (with a mutation: a swap that does nothing turns eight checks red; `CAP=<dir>`
-  keeps a capture of each model in the guide); `node test8s.js` checks the test wall, the pan and zoom,
+  keeps a capture of each model in the guide); `node test8y.js` (the same) presses each style of the tile of light and counts
+  the colours in the preview and in the guide's own Azu: each glaze's ink, the four patterns, the lights' warmth, the corners,
+  Reduce Motion (with a mutation: a renderer that ignores the style turns seven checks red); `node test8s.js` checks the test wall, the pan and zoom,
   Azu's remarks and their taps, the button's rules and the rise to Full; `node test8q.js` (WebGL by SwiftShader)
   checks the shader drawing, its forms by state, the mouth, the peek, the walk and its arrival, Tile, Reduce Motion;
   `node test8p.js` checks the pill, the

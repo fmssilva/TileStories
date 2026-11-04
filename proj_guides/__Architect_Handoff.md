@@ -5,8 +5,8 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-03)
 
 - **State:**
-  - **The Lab:** v24 is published, with layers through `v8x` (the commit "Add the poet and the soldier (on Meshy's own rig
-    and walk) and the textured explorer as 3D models to pick").
+  - **The Lab:** v25 is published, with layers through `v8y` (the commit "Give the tile of light its styles in the Editor:
+    glaze, pattern, light, corners, and a preview").
   - **Built on 2026-11-03 (second chat):**
     - `v8v`: the card's markers are u, v places on the wall's picture (a drag or zoom moves them with it); the Ribeira wall
       shows its points; the preview bar's Wall button; the console's scene "Ribeira wall: a drag moves the markers with the
@@ -20,6 +20,11 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     detailed (default, the developer's choice), Azu simple, the mouse, the explorer, the poet, the soldier. The five Meshy
     models are rigged in Blender by `proj_guides/mascote/3d/rig_meshy.py` (`_3.7` section 11); the soldier on Meshy's own
     rig (FBX) with its walk. `test8x.js`, with a mutation proof.
+    `v8y`: the tile of light's styles under Mascot source = Tile of light: Glaze (Cobalt / Manganese / Polychrome),
+    Pattern (Rosette / Diamond point / Corner sprigs / Plain), Light (Pastel clouds / Glaze colours / Cobalt / Gold),
+    Corners (Crisp / Soft / Pillow), and a preview at rest and as light on its own canvas. The defaults are the old look; the
+    still Azu (Reduce Motion, the preview) moved to a moment where the face is clear of the highlight. `test8y.js`, with a
+    mutation proof.
   - **MCP:** blender-mcp is at user scope; Blender 5.2.3 with add-on 1.8 on port 9876. In this Blender, new shape keys start
     at value 1 (set them to 0). The add-on's Rodin trial key is empty (`API_INSUFFICIENT_FUNDS`): no generator works until the
     developer adds a key or brings a GLB made by hand on a generator's web. The ElevenLabs MCP still needs `/mcp` >
@@ -27,16 +32,16 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
   - **Keys:** Gemini, Azure Speech (region `germanywestcentral`) and ElevenLabs all answer
     (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).
 - **The tasks, in this order:**
-  1. **The developer looks at the Lab:** the markers on a drag, the Wall button, and the four 3D models (6 · Guide > Azu >
-     Mascot source = 3D model > Model, then Play a clip).
+  1. **The developer looks at the Lab:** the markers on a drag, the Wall button, the six 3D models (6 · Guide > Azu >
+     Mascot source = 3D model > Model, then Play a clip), and the tile of light's styles (Mascot source = Tile of light).
   2. **More mascots by the same route** (`rig_meshy.py`: a SPEC entry with the landmarks from a front render; `build_fbx`
      when Meshy's rig comes with it): the cat (`cat_clean.png`) as a quadruped. The Lab page is 14.2 MB of 16 MB: a
      seventh model needs supporting files or 512 px textures. The cat waits for the developer's Meshy model (textured GLB;
      the developer will make it later). The mouse's sleeve is sculpted into its coat, so it cannot lift its arm without
      tearing the coat (tried by script on 2026-11-04, `_3.7` section 11); **decided: the mouse keeps its gentle wave** (an
      A-pose regenerated on Meshy, then Meshy's rig, would be the fix if it is ever wanted).
-  3. **The rest of item 6:** the tile of light's styles in the Editor; Unity import of `azu_tile.glb` (glTFast, the two
-     layers of `_3.7` section 4) as a Worker block.
+  3. **The rest of item 6:** Unity import of the GLBs (glTFast, the two layers of `_3.7` section 4) and the tile of
+     light's Shader Graph with its style properties, as Worker blocks (the Unity MCP must be connected).
   4. **Voices:** ElevenLabs once the developer picks the voice ids; Forced Alignment for word times of any audio.
   5. **The form of address** (tu / polite / você): a proposal in `_3.5` section 3.9, waiting for the developer's decision.
 - **Rules learned this round:**
@@ -76,6 +81,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
   - `v8v`: the markers on the picture, the Ribeira wall's points, the Wall button, the markers' scene.
   - `v8w`: Azu as a 3D model (GLB), Import, Generate from a picture.
   - `v8x`: the 3D model chosen in the Editor (Azu detailed, Azu simple, the mouse, the explorer, the poet, the soldier).
+  - `v8y`: the tile of light's styles (Glaze, Pattern, Light, Corners, a preview).
 - **Tests:** each layer has its `test8*.js`, listed in `lab_src/README.md`. Run them all after the self-test; `test8r` needs
   two voice sets.
 - **Studies (current state):**

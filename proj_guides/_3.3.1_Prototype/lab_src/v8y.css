@@ -1,0 +1,5 @@
+/* v8y: the tile of light's preview in the Editor */
+.azprev{display:flex;gap:12px}
+.azprev figure{margin:0;text-align:center}
+.azprev img{display:block;width:96px;height:96px;border-radius:6px;background:#3A3F47}
+.azprev figcaption{margin-top:3px;font-size:11px;color:var(--u-dim)}

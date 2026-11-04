@@ -2,24 +2,31 @@
 /* Unity: the same shader as a Shader Graph Custom Function (HLSL) on a quad rendered by an "Azu camera" into a render texture,
    shown as an element inside the card (overflow: hidden makes the peek); the walk swaps it for a world-space Azu on the wall. */
 S.guideCfg.azuStyle="light";
-var AZU_FS="precision highp float;uniform vec2 uRes;uniform float uT,uMorph,uBlink,uMood,uTalk;\n"+
+/* the style: glaze colours, pattern, corner radius, the light's four colours (shader properties; v8y sets them from the Editor) */
+var AZU_UNI={uCream:[.96,.93,.87],uInk:[.12,.31,.61],uInk2:[.12,.31,.61],uMotif:0,uRound:.12,
+  uP0:[.48,.86,1],uP1:[.66,.52,1],uP2:[1,.55,.84],uP3:[1,.8,.66]};
+var AZU_FS="precision highp float;uniform vec2 uRes;uniform float uT,uMorph,uBlink,uMood,uTalk,uMotif,uRound;uniform vec3 uCream,uInk,uInk2,uP0,uP1,uP2,uP3;\n"+
 "float h3(vec3 p){return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);}\n"+
 "float nz(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(mix(h3(i),h3(i+vec3(1,0,0)),f.x),mix(h3(i+vec3(0,1,0)),h3(i+vec3(1,1,0)),f.x),f.y),mix(mix(h3(i+vec3(0,0,1)),h3(i+vec3(1,0,1)),f.x),mix(h3(i+vec3(0,1,1)),h3(i+vec3(1,1,1)),f.x),f.y),f.z);}\n"+
 "mat3 rY(float a){float c=cos(a),s=sin(a);return mat3(c,0.,-s,0.,1.,0.,s,0.,c);}mat3 rX(float a){float c=cos(a),s=sin(a);return mat3(1.,0.,0.,0.,c,s,0.,-s,c);}\n"+
 "float box(vec3 p,vec3 b,float r){vec3 q=abs(p)-b;return length(max(q,0.))+min(max(q.x,max(q.y,q.z)),0.)-r;}\n"+
-"mat3 R;vec3 B;float map(vec3 p){return box(R*p,B,.12);}\n"+
+"mat3 R;vec3 B;float map(vec3 p){return box(R*p,B,uRound);}\n"+
 "vec3 nrm(vec3 p){vec2 e=vec2(.002,0.);return normalize(vec3(map(p+e.xyy)-map(p-e.xyy),map(p+e.yxy)-map(p-e.yxy),map(p+e.yyx)-map(p-e.yyx)));}\n"+
-"float motif(vec2 u){u=abs(u);float c=step(length(u-vec2(1.))-.52,0.);float d=step(u.x+u.y,.34);float ring=step(abs(length(u)-.5),.035);return max(max(c,d),ring);}\n"+
-"vec3 pal(float t){vec3 a=vec3(.48,.86,1.),b=vec3(.66,.52,1.),c=vec3(1.,.55,.84),d=vec3(1.,.8,.66);float f=fract(t)*4.;return f<1.?mix(a,b,f):f<2.?mix(b,c,f-1.):f<3.?mix(c,d,f-2.):mix(d,a,f-3.);}\n"+
+"vec2 motif(vec2 u){u=abs(u);\n"+
+"  if(uMotif<.5){float c=step(length(u-vec2(1.))-.52,0.);float d=step(u.x+u.y,.34);float ring=step(abs(length(u)-.5),.035);return vec2(max(d,ring),c);}\n"+
+"  if(uMotif<1.5){float s=u.x+u.y;float l=step(abs(s-.66),.045)+step(abs(s-1.3),.045);float b=step(.93,max(u.x,u.y));return vec2(min(1.,l+b),step(abs(s-.98),.03)*(1.-b));}\n"+
+"  if(uMotif<2.5){float q=length(u-vec2(1.));float c=step(q,.44)-step(q,.33)+step(q,.2);float a=(u.x+u.y)*.7071,b=(u.x-u.y)*.7071;float lf=step(abs(b),.075*sin(clamp((a-.58)/.4,0.,1.)*3.1416))*step(.58,a)*step(a,.98);return vec2(min(1.,c),lf);}\n"+
+"  return vec2(0.);}\n"+
+"vec3 pal(float t){vec3 a=uP0,b=uP1,c=uP2,d=uP3;float f=fract(t)*4.;return f<1.?mix(a,b,f):f<2.?mix(b,c,f-1.):f<3.?mix(c,d,f-2.):mix(d,a,f-3.);}\n"+
 "void main(){vec2 uv=(gl_FragCoord.xy*2.-uRes)/uRes.y;float t=uT;\n"+
-" R=rX(.22*sin(t*.5)+.1)*rY(.45*sin(t*.37)+uMorph*t*.6);float th=mix(.16,.58,uMorph);B=vec3(.6,.6,th)*(1.+.02*sin(t*1.7));\n"+
+" R=rX(.22*sin(t*.5)+.1)*rY(.45*sin(t*.37)+uMorph*t*.6);float th=mix(.16,.58,uMorph);float kr=uRound-.12;B=vec3(.6-kr,.6-kr,max(.03,th-kr))*(1.+.02*sin(t*1.7));\n"+
 " vec3 ro=vec3(0.,0.,2.7),rd=normalize(vec3(uv*.62,-1.5));float d=0.,dist=0.;bool hit=false;\n"+
 " for(int i=0;i<56;i++){dist=map(ro+rd*d);if(dist<.001){hit=true;break;}d+=dist;if(d>5.)break;}\n"+
 " vec3 col=vec3(0.);float a=0.;\n"+
 " if(hit){vec3 p=ro+rd*d,n=nrm(p),lp=R*p,ln=R*n,l=normalize(vec3(-.5,.7,.9)),v=-rd;\n"+
 "  float front=step(.7,abs(ln.z));vec2 fu=lp.xy/.6;\n"+
-"  vec3 cream=vec3(.96,.93,.87),cob=mix(vec3(.12,.31,.61),vec3(.36,.2,.5),clamp(-uMood,0.,1.));\n"+
-"  vec3 solid=mix(cob*.75,mix(cream,cob,motif(fu)),front);\n"+
+"  vec3 cream=uCream,cob=mix(uInk,vec3(.36,.2,.5),clamp(-uMood,0.,1.));vec2 mo=motif(fu);\n"+
+"  vec3 solid=mix(cob*.75,mix(mix(cream,cob,mo.x),uInk2,mo.y),front);\n"+
 "  float ex=.27,ey=.14,er=.13*mix(1.,.12,uBlink);float eye=min(length((fu-vec2(-ex,ey))*vec2(1.,.13/er)),length((fu-vec2(ex,ey))*vec2(1.,.13/er)));\n"+
 "  float mouth=length((fu-vec2(0.,-.3))*vec2(1.,1./(.03+.09*uTalk)))-.16;\n"+
 "  if(front>.5&&lp.z>0.){solid=mix(solid,vec3(.1),step(eye,.13));solid=mix(solid,vec3(1.),step(length(fu-vec2(-ex+.045,ey+.05)),.04)+step(length(fu-vec2(ex+.045,ey+.05)),.04));solid=mix(solid,vec3(.45,.1,.15),step(mouth,0.)*step(.02,uTalk+.05*uMood));}\n"+
@@ -33,18 +40,26 @@ var AZU_FS="precision highp float;uniform vec2 uRes;uniform float uT,uMorph,uBli
 " gl_FragColor=vec4(col*a,a);}";
 var AZU_VS="attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
 /* one renderer, one canvas, moved wherever Azu is drawn */
-var AzuGL=(function(){var cv=null,gl=null,pr=null,U={},raf=0,st={morph:0,to:0,blink:0,mood:0,talk:0,t0:performance.now()},nextBlink=0;
-  function init(){if(gl!==null)return!!gl;cv=document.createElement("canvas");cv.className="azgl";cv.width=192;cv.height=192;try{gl=cv.getContext("webgl",{premultipliedAlpha:true,alpha:true,antialias:true,preserveDrawingBuffer:true})}catch(e){gl=null}
-    if(!gl){gl=false;return false}var sh=function(t,src){var s=gl.createShader(t);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));return s};
-    try{pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,AZU_VS));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,AZU_FS));gl.linkProgram(pr);gl.useProgram(pr)}catch(e){console.warn(e);gl=false;return false}
-    var b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);var lp=gl.getAttribLocation(pr,"p");gl.enableVertexAttribArray(lp);gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
-    ["uRes","uT","uMorph","uBlink","uMood","uTalk"].forEach(function(n){U[n]=gl.getUniformLocation(pr,n)});gl.clearColor(0,0,0,0);return true}
+var AzuGL=(function(){var cv=null,gl=null,U={},raf=0,st={morph:0,to:0,blink:0,mood:0,talk:0,t0:performance.now()},nextBlink=0,pv=null;
+  /* one canvas with the shader compiled on it: the guide's live Azu has one, the Editor's preview its own (so a preview never draws over the guide) */
+  function make(c){var g=null;try{g=c.getContext("webgl",{premultipliedAlpha:true,alpha:true,antialias:true,preserveDrawingBuffer:true})}catch(e){g=null}if(!g)return null;
+    var sh=function(t,src){var o=g.createShader(t);g.shaderSource(o,src);g.compileShader(o);if(!g.getShaderParameter(o,g.COMPILE_STATUS))throw new Error(g.getShaderInfoLog(o));return o};var pr,u={};
+    try{pr=g.createProgram();g.attachShader(pr,sh(g.VERTEX_SHADER,AZU_VS));g.attachShader(pr,sh(g.FRAGMENT_SHADER,AZU_FS));g.linkProgram(pr);g.useProgram(pr)}catch(e){console.warn(e);return null}
+    var b=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,b);g.bufferData(g.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),g.STATIC_DRAW);var lp=g.getAttribLocation(pr,"p");g.enableVertexAttribArray(lp);g.vertexAttribPointer(lp,2,g.FLOAT,false,0,0);
+    ["uRes","uT","uMorph","uBlink","uMood","uTalk"].concat(Object.keys(AZU_UNI)).forEach(function(n){u[n]=g.getUniformLocation(pr,n)});g.clearColor(0,0,0,0);return{gl:g,U:u,cv:c}}
+  /* one picture: the moment, the form, the blink, the mood, the mouth, and the style (AZU_UNI) */
+  function paint(r,t,morph,blink,mood,talk){var g=r.gl,u=r.U;g.viewport(0,0,r.cv.width,r.cv.height);g.clear(g.COLOR_BUFFER_BIT);g.uniform2f(u.uRes,r.cv.width,r.cv.height);g.uniform1f(u.uT,t);g.uniform1f(u.uMorph,morph);g.uniform1f(u.uBlink,blink);g.uniform1f(u.uMood,mood);g.uniform1f(u.uTalk,talk);
+    Object.keys(AZU_UNI).forEach(function(n){var v=AZU_UNI[n];if(v.length===3)g.uniform3fv(u[n],v);else g.uniform1f(u[n],v)});g.drawArrays(g.TRIANGLE_STRIP,0,4)}
+  function init(){if(gl!==null)return!!gl;cv=document.createElement("canvas");cv.className="azgl";cv.width=192;cv.height=192;var r=make(cv);if(!r){gl=false;return false}gl=r.gl;U=r;return true}
   function frame(now){raf=0;if(!cv||!cv.isConnected)return;var dt=Math.min(.05,(now-(st.last||now))/1000);st.last=now;var still=S.reduce;
     st.morph+=(st.to-st.morph)*Math.min(1,dt*(still?30:3.2));if(now>nextBlink){st.blinkT=now;nextBlink=now+2500+Math.random()*2500}st.blink=st.blinkT&&now-st.blinkT<140&&!still?1:0;
-    gl.viewport(0,0,cv.width,cv.height);gl.clear(gl.COLOR_BUFFER_BIT);gl.uniform2f(U.uRes,cv.width,cv.height);gl.uniform1f(U.uT,still?1.5:(now-st.t0)/1000);gl.uniform1f(U.uMorph,st.morph);gl.uniform1f(U.uBlink,st.blink);gl.uniform1f(U.uMood,st.mood);gl.uniform1f(U.uTalk,st.talk);
-    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);raf=requestAnimationFrame(frame)}
+    /* a still Azu (Reduce Motion) stands at a moment where the face is not under the highlight (t = 1.5 blows the front out) */
+    paint(U,still?4.5:(now-st.t0)/1000,st.morph,st.blink,st.mood,st.talk);raf=requestAnimationFrame(frame)}
   return{ok:function(){return init()},canvas:function(){return init()?cv:null},set:function(k,v){st[k]=v},get:function(k){return st[k]},
-    start:function(){if(init()&&!raf)raf=requestAnimationFrame(frame)},pixel:function(){if(!gl)return null;var px=new Uint8Array(4);gl.readPixels(96,96,1,1,gl.RGBA,gl.UNSIGNED_BYTE,px);return Array.from(px)}}})();
+    start:function(){if(init()&&!raf)raf=requestAnimationFrame(frame)},
+    /* one still frame (at rest or as light) on the preview's own canvas, as a picture: the Editor's preview */
+    still:function(morph,t){if(pv===null){var c=document.createElement("canvas");c.width=c.height=192;pv=make(c)||false}if(!pv)return null;paint(pv,t===undefined?4.5:t,morph,0,0,0);return pv.cv.toDataURL("image/png")},
+    pixel:function(){if(!gl)return null;var px=new Uint8Array(4);gl.readPixels(96,96,1,1,gl.RGBA,gl.UNSIGNED_BYTE,px);return Array.from(px)}}})();
 /* Azu's state picks its form: listening, thinking and travelling turn it into light; moods tint it */
 function azuForm(){if(S.guideCfg.azuStyle!=="light")return;var m=ph.querySelector(".mascot"),ts=m&&m.dataset.state,md=m&&m.dataset.mood;
   AzuGL.set("to",G.azWalk?1:ts==="listening"?.85:(ts==="thinking"||(G.azThinkTill||0)>performance.now())?.6:md==="surprised"?.25:0);AzuGL.set("mood",md==="serious"?-1:md==="big"?.6:0)}
