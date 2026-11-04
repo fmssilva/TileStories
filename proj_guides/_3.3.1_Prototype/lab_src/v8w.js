@@ -46,6 +46,8 @@ var Azu3D=(function(){var T=null,GL=null,cv=null,R=null,scene=null,cam=null,mode
     sync:function(){var m=az3dModel();if(!st.ready||st.swapping||st.model===m.id)return;st.swapping=true;
       get(m).then(function(g){use(g,m.name);st.model=m.id;st.swapping=false;if(ed.querySelector('[data-fo="s7mascot"]'))renderEditor()}).catch(function(e){st.swapping=false;st.model=m.id;st.err=String(e&&e.message||e);console.warn("Azu3D",e)})},
     canvas:function(){return st.ready?cv:null},start:function(){if(st.ready&&!raf)raf=requestAnimationFrame(frame)},
+    /* a continuous mouth (v9b: Azure's facial curves, or the loudness): the morphs ease to these each frame */
+    mouthTo:function(o,w,r){st.to={Open:o||0,Wide:w||0,Round:r||0}},
     viseme:function(shape){var m={A:{Open:1},E:{Wide:.8,Open:.3},O:{Round:1},big:{Open:.8,Wide:.3},chew:{Open:.4},surprised:{Round:.8,Open:.3}}[shape]||{};st.to={Open:m.Open||0,Wide:m.Wide||0,Round:m.Round||0}},
     force:function(clip,ms){st.force=clip;st.forceTill=performance.now()+(ms||3000)},
     /* how much of the frame the whole model takes: the largest |x| or |y| of its box's corners on the screen (1 = the edge) */

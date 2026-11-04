@@ -61,11 +61,11 @@ var sayV9a=say,lvDevice=function(t,w,e){sayV9a(t,w,e)};
 /* only the live agent's answers take the live voice; the tour's lines keep theirs (recorded or the device's) */
 say=function(text,onWord,onEnd){if(!lvOn()||!text||text!==G.answer){sayV9a(text,onWord,onEnd);return}
   var v=S.agentCfg.liveVoice,t0=performance.now(),my=G.lvSeq=(G.lvSeq||0)+1;
-  (v==="azure"?lvAzure(text):lvEleven(text)).then(function(r){if(G.lvSeq!==my)return;LV.last={voice:v,ms:Math.round(performance.now()-t0),shapes:r.vis.length,words:r.words.length,from:r.from};lvPlay(text,onWord,onEnd,r);lvStatus()})
+  (v==="azure"?lvAzure(text):lvEleven(text)).then(function(r){if(G.lvSeq!==my)return;LV.last={voice:v,ms:Math.round(performance.now()-t0),shapes:r.shapes||r.vis.length,words:r.words.length,from:r.from};lvPlay(text,onWord,onEnd,r);lvStatus()})
     .catch(function(e){if(G.lvSeq!==my)return;LV.last={voice:v,err:String(e&&e.message||e)};console.warn("live voice",e);lvStatus();sayV9a(text,onWord,onEnd)})};
 /* the wall's answers (Ask about the view) too: the audio, no captions */
 var camSayV9a=camSay;camSay=function(t){if(!lvOn()){camSayV9a(t);return}G.cam.busy=false;G.cam.answer=t;camLayer();var v=S.agentCfg.liveVoice,t0=performance.now();
-  (v==="azure"?lvAzure(t):lvEleven(t)).then(function(r){LV.last={voice:v,ms:Math.round(performance.now()-t0),shapes:r.vis.length,words:r.words.length,from:r.from};lvStatus();if(S.guideMute)return;
+  (v==="azure"?lvAzure(t):lvEleven(t)).then(function(r){LV.last={voice:v,ms:Math.round(performance.now()-t0),shapes:r.shapes||r.vis.length,words:r.words.length,from:r.from};lvStatus();if(S.guideMute)return;
     if(LV.camAudio)try{LV.camAudio.pause()}catch(x){}LV.camAudio=new Audio(URL.createObjectURL(new Blob([r.audio],{type:"audio/mpeg"})));LV.camAudio.play().catch(function(){})})
     .catch(function(e){LV.last={voice:v,err:String(e&&e.message||e)};lvStatus();camSayV9a(t)})};
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(agentCfg\\.(liveVoice|elevenModel)|"));

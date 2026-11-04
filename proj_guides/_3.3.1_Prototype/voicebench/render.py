@@ -59,6 +59,31 @@ def words_from_spans(text, spans):
     return out
 
 # ----- providers -----
+# the mouth's curves: Azure's 55 facial blend shapes (ARKit's order, 60 frames a second) as three channels Azu's mouths share,
+# open (the jaw less the lips' closing), round (pucker, funnel) and wide (smile, stretch), shut while the lips close;
+# kept at 30 frames a second, one character of MOUTH_ALPHA (64 levels) a channel, so a line of 10 s is 900 characters
+MOUTH_ALPHA = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_'
+def mouth_of(f):
+    jaw, close, pucker, funnel = f[17], f[18], f[20], f[19]
+    smile, stretch, low = (f[23] + f[24]) / 2, (f[29] + f[30]) / 2, (f[37] + f[38]) / 2
+    cl = lambda v: max(0.0, min(1.0, v))
+    gate = cl(1 - close * 1.3)
+    return cl((jaw - close * .9) * 2.2 + (low - .3) * .4), cl((max(pucker, funnel * 1.2) * 1.4 - .1) * gate), cl((smile + stretch - .15) * 2 * gate)
+def mouth_string(frames60):
+    out = []
+    for i in range(0, len(frames60), 2):
+        for v in mouth_of(frames60[i]): out.append(MOUTH_ALPHA[int(round(v * 63))])
+    return ''.join(out)
+def ssml_for(text, voice):
+    """SSML asking for the facial curves; returns it with a map from each SSML character to the text's (for word offsets)."""
+    head = ('<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="http://www.w3.org/2001/mstts" xml:lang="%s">'
+            '<voice name="%s"><mstts:viseme type="FacialExpression"/>') % (voice[:5], voice)
+    body, back = [], []
+    for i, c in enumerate(text):
+        e = {'&': '&amp;', '<': '&lt;', '>': '&gt;'}.get(c, c)
+        body.append(e); back.extend([i] * len(e))
+    return head + ''.join(body) + '</voice></speak>', len(head), back
+
 def render_azure(text, lang, voice, keys):
     import azure.cognitiveservices.speech as sdk
     cfg = sdk.SpeechConfig(subscription=keys['AZURE_SPEECH_KEY'], region=keys.get('AZURE_SPEECH_REGION', 'westeurope'))
@@ -66,16 +91,22 @@ def render_azure(text, lang, voice, keys):
     cfg.set_speech_synthesis_output_format(sdk.SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3)
     cfg.set_property(sdk.PropertyId.SpeechServiceResponse_RequestWordBoundary, 'true')
     syn = sdk.SpeechSynthesizer(speech_config=cfg, audio_config=None)
-    spans = []
+    ssml, at, back = ssml_for(text, voice)
+    spans, chunks = [], []
     def wb(evt):
         if str(evt.boundary_type).endswith('Word'):
             t0 = evt.audio_offset / 1e7
-            spans.append((evt.text_offset, evt.text_offset + evt.word_length, t0, t0 + evt.duration.total_seconds()))
+            o = evt.text_offset - at  # SSML offsets: back to the text's own
+            if 0 <= o < len(back):
+                a = back[o]; spans.append((a, a + evt.word_length, t0, t0 + evt.duration.total_seconds()))
     syn.synthesis_word_boundary.connect(wb)
-    r = syn.speak_text_async(text).get()
+    syn.viseme_received.connect(lambda e: e.animation and chunks.append(json.loads(e.animation)))
+    r = syn.speak_ssml_async(ssml).get()
     if r.reason != sdk.ResultReason.SynthesizingAudioCompleted:
         raise RuntimeError('azure: %s %s' % (r.reason, getattr(r, 'cancellation_details', '')))
-    return r.audio_data, words_from_spans(text, spans), 'mp3'
+    chunks.sort(key=lambda c: c['FrameIndex'])
+    frames = [f for c in chunks for f in c['BlendShapes']]
+    return r.audio_data, words_from_spans(text, spans), 'mp3', mouth_string(frames)
 
 def render_eleven(text, lang, voice, keys, model):
     body = json.dumps({'text': text, 'model_id': model, 'language_code': 'pt' if lang == 'pt' else 'en',
@@ -154,6 +185,7 @@ def main():
     ap.add_argument('--pause', type=float, default=0.0)
     ap.add_argument('--label', default='')
     ap.add_argument('--only', default=''); ap.add_argument('--lang', default=''); ap.add_argument('--aud', default='')
+    ap.add_argument('--mouth', action='store_true', help='Azure: render again the lines kept without the mouth\'s curves')
     a = ap.parse_args()
     keys = env()
     need = {'azure': 'AZURE_SPEECH_KEY', 'eleven': 'ELEVENLABS_API_KEY', 'gemini': 'GEMINI_API_KEY'}.get(a.provider)
@@ -179,11 +211,12 @@ def main():
         if fk in done: continue
         done.add(fk)
         old = man['files'].get(fk)
-        if old and old.get('text') == l['text'] and os.path.exists(os.path.join(base, old['src'])):
+        if old and old.get('text') == l['text'] and os.path.exists(os.path.join(base, old['src'])) and not (a.mouth and a.provider == 'azure' and not old.get('mouth')):
             continue
+        mouth = None
         for tries in range(3):
             try:
-                if a.provider == 'azure': audio, words, ext = render_azure(l['text'], l['lang'], voice, keys)
+                if a.provider == 'azure': audio, words, ext, mouth = render_azure(l['text'], l['lang'], voice, keys)
                 elif a.provider == 'eleven': audio, words, ext = render_eleven(l['text'], l['lang'], voice, keys, model)
                 elif a.provider == 'gemini': audio, words, ext = render_gemini(l['text'], l['lang'], voice, keys, model)
                 else: audio, words, ext = render_edge(l['text'], l['lang'], voice, keys)
@@ -194,6 +227,7 @@ def main():
         src = fk + '.' + ext
         open(os.path.join(base, src), 'wb').write(audio)
         man['files'][fk] = {'src': src, 'text': l['text'], 'lang': l['lang'], 'words': words}
+        if mouth: man['files'][fk]['mouth'] = mouth
         chars += len(l['text'])
         print('ok', fk, len(audio), 'bytes', len(words), 'words')
         if pause: time.sleep(pause)

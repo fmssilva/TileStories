@@ -28,7 +28,7 @@ var AZU_FS="precision highp float;uniform vec2 uRes;uniform float uT,uMorph,uBli
 "  vec3 cream=uCream,cob=mix(uInk,vec3(.36,.2,.5),clamp(-uMood,0.,1.));vec2 mo=motif(fu);\n"+
 "  vec3 solid=mix(cob*.75,mix(mix(cream,cob,mo.x),uInk2,mo.y),front);\n"+
 "  float ex=.27,ey=.14,er=.13*mix(1.,.12,uBlink);float eye=min(length((fu-vec2(-ex,ey))*vec2(1.,.13/er)),length((fu-vec2(ex,ey))*vec2(1.,.13/er)));\n"+
-"  float mouth=length((fu-vec2(0.,-.3))*vec2(1.,1./(.03+.09*uTalk)))-.16;\n"+
+"  float mouth=length((fu-vec2(0.,-.3))*vec2(1.-.2*uTalk,1./(.03+.15*uTalk)))-.16;\n"+
 "  if(front>.5&&lp.z>0.){solid=mix(solid,vec3(.1),step(eye,.13));solid=mix(solid,vec3(1.),step(length(fu-vec2(-ex+.045,ey+.05)),.04)+step(length(fu-vec2(ex+.045,ey+.05)),.04));solid=mix(solid,vec3(.45,.1,.15),step(mouth,0.)*step(.02,uTalk+.05*uMood));}\n"+
 "  float df=.55+.45*max(dot(n,l),0.),sp=pow(max(dot(reflect(-l,n),v),0.),42.),fr=pow(1.-max(dot(n,v),0.),3.);\n"+
 "  vec3 sc=solid*df+sp*.85+fr*.35*vec3(.9,.95,1.);\n"+

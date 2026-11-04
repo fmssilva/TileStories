@@ -28,7 +28,9 @@ The Lab is one HTML page built from layers. Each layer adds to or wraps the one 
   explorer, the poet, the soldier; each GLB and its picture embedded by the build from `../../mascote/3d/` and `thumbs/`) ->
   `v8y.js` (the tile of light's styles: Glaze, Pattern, Light, Corners, and a preview drawn on its own canvas; the shader's
   properties live in `v8q`'s `AZU_UNI`) -> `v8z.js` (the mascot's size; a character per audience in Looks per audience) ->
-  `v9a.js` (the voice of the live answers: the device's, Azure or ElevenLabs live, the mouth on the voice's own timing).
+  `v9a.js` (the voice of the live answers: the device's, Azure or ElevenLabs live, the mouth on the voice's own timing) ->
+  `v9b.js` (the real mouth: Azure's facial curves for the live answers and the recorded Azure lines, the loudness for other
+  voices; Azure the default voice of the answers).
   CSS in the same order;
   `v3body.html` is the page.
 - **Words:** `realstrings.json` (the framework's real words, with their owner part); `build8.py` moves words to new owners and adds
@@ -58,7 +60,10 @@ The Lab is one HTML page built from layers. Each layer adds to or wraps the one 
   and a Character per audience (a mutation: a character never applied); `node test9a.js` checks the live answers' voice
   with ElevenLabs faked (a real MP3, even letter times) and the Azure Speech SDK faked: the request, the audio as a live line,
   the words, the mouth on the voice's shapes, the tour's lines untouched, a refused key falling back to the device voice (a
-  mutation: a mouth that ignores the voice turns two checks red); `node test8s.js` checks the test wall, the pan and zoom,
+  mutation: a mouth that ignores the voice turns two checks red); `node test9b.js` checks the real mouth: a recorded Azure
+  line follows its curves on the audio's clock (tile of light and 2D tile), a live ElevenLabs answer opens by its loudness, a
+  recorded set without curves from a file falls back to the letters (a mutation: a player that ignores the curves turns three
+  checks red); `node test8s.js` checks the test wall, the pan and zoom,
   Azu's remarks and their taps, the button's rules and the rise to Full; `node test8q.js` (WebGL by SwiftShader)
   checks the shader drawing, its forms by state, the mouth, the peek, the walk and its arrival, Tile, Reduce Motion;
   `node test8p.js` checks the pill, the

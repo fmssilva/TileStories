@@ -3,7 +3,7 @@ import io, json, os
 D = os.path.dirname(os.path.abspath(__file__))
 def rd(n): return io.open(os.path.join(D, n), encoding='utf-8').read()
 
-V8 = ['v8a.js', 'v8b.js', 'v8c.js', 'v8d.js', 'v8e.js', 'v8f.js', 'v8g.js', 'v8h.js', 'v8i.js', 'v8j.js', 'v8k.js', 'v8l.js', 'v8m.js', 'v8n.js', 'v8o.js', 'v8r.js', 'v8p.js', 'v8q.js', 'v8s.js', 'v8t.js', 'v8u.js', 'v8v.js', 'v8w.js', 'v8x.js', 'v8y.js', 'v8z.js', 'v9a.js']
+V8 = ['v8a.js', 'v8b.js', 'v8c.js', 'v8d.js', 'v8e.js', 'v8f.js', 'v8g.js', 'v8h.js', 'v8i.js', 'v8j.js', 'v8k.js', 'v8l.js', 'v8m.js', 'v8n.js', 'v8o.js', 'v8r.js', 'v8p.js', 'v8q.js', 'v8s.js', 'v8t.js', 'v8u.js', 'v8v.js', 'v8w.js', 'v8x.js', 'v8y.js', 'v8z.js', 'v9a.js', 'v9b.js']
 
 # words that moved to another part, or left with their part
 REOWN = {'peek_next_label': ('retired', 'the Next card peek left: a swipe up at Peek raises the card'),

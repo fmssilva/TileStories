@@ -19,7 +19,7 @@ SPEC = {
                        "head": ((392, 185), (392, 50), "body"),
                        "arm.R": ((150, 470), (60, 580), "body"), "arm.L": ((630, 440), (735, 350), "body"),
                        "leg.R": ((300, 690), (290, 785), "root"), "leg.L": ((470, 690), (480, 785), "root")},
-                eyes=[(290, 380, 59, 68), (497, 376, 59, 68)], mouth=(395, 437, 30),
+                eyes=[(290, 380, 59, 68), (497, 376, 59, 68)], mouth=(395, 437, 40),
                 think=(0.35, -0.25, 0.9)),  # the slab is too wide for a hand at the chin: the hand goes up by its corner
     "mouse": dict(src="mouse_meshy.glb", weld=True, tris=24000, prefix="Mouse", face="head", weights="heat", arm_reach=(0.09, 0.14), gestures="fused",
                   scale=1 / 1.2625,

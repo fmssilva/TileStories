@@ -5,8 +5,8 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-03)
 
 - **State:**
-  - **The Lab:** v26 is published, with layers through `v9a` (the commit "Give the live answers a real voice with the mouth
-    on its timing, the mascot a size and a character per audience, and publish the ElevenLabs voices").
+  - **The Lab:** v27 is published, with layers through `v9b` (the commit "Move the mouth by Azure's facial curves: live
+    answers and the recorded Azure lines; loudness for other voices; Azure the answers' default voice").
   - **Built on 2026-11-03 (second chat):**
     - `v8v`: the card's markers are u, v places on the wall's picture (a drag or zoom moves them with it); the Ribeira wall
       shows its points; the preview bar's Wall button; the console's scene "Ribeira wall: a drag moves the markers with the
@@ -28,7 +28,11 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     `v8z`: the mascot's Size (Small / Medium / Large) and a Character per audience (Looks per audience). `test8z.js`.
     `v9a`: Ask Azu > Voice of the answers: Device / Azure (live, visemes) / ElevenLabs (live, letter times); the mouth on the
     voice's own timing; the device voice without a key or on an error. `test9a.js` (faked services) and a live run by hand.
-    Voices: the ElevenLabs set Luis (pt-PT) + Bella (en-US) rendered by a subagent and published with the Lab.
+    Voices: the ElevenLabs set Luis (pt-PT) + Bella (en-US, kept: the developer's choice) rendered by a subagent and
+    published with the Lab.
+    `v9b`: the real mouth: Azure's facial curves (60 frames a second) for the live answers and the recorded Azure lines (both
+    Azure sets rendered again with `--mouth`); the loudness for ElevenLabs; the 3D Azu's mouth and the tile of light's opening
+    made larger. Azure is the answers' default voice (the developer's choice). `test9b.js`, with a mutation proof.
   - **MCP:** blender-mcp is at user scope; Blender 5.2.3 with add-on 1.8 on port 9876. In this Blender, new shape keys start
     at value 1 (set them to 0). The add-on's Rodin trial key is empty (`API_INSUFFICIENT_FUNDS`): no generator works until the
     developer adds a key or brings a GLB made by hand on a generator's web. The ElevenLabs MCP still needs `/mcp` >

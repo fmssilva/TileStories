@@ -44,6 +44,9 @@ python render.py gemini --en Kore --pt Kore               # needs: pip install l
   manifest (its `set.json` was never kept, and its one listed line had no audio); its MP3s stay in `out/gemini-kore-kore/`.
 - **Install:** `python -m pip install azure-cognitiveservices-speech` (plain `pip` on this computer installs into a conda
   environment, not the Python that runs `render.py`).
+- **The mouth's curves (Azure):** each Azure line keeps `mouth`: Azure's facial blend shapes as open / round / wide, 30
+  frames a second, three characters a frame (`MOUTH_ALPHA`). `--mouth` renders again the Azure lines kept without them
+  (both Azure sets were, on 2026-11-04).
 - **Only what changed:** a line already rendered with the same text is skipped, so a re-run renders only the edited lines.
 - **Size:** the demo point is about 5,200 characters a voice (both languages, all audiences).
 - **edge** (`python render.py edge ...`): Microsoft Edge's online Read Aloud voices, the same voices as Azure.

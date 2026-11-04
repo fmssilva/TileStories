@@ -18,10 +18,13 @@ const TEXT = 'O palácio tinha uma ópera, inaugurada em março de 1755.';
   // a fake Azure Speech SDK: word boundaries every 0.3 s, visemes 1 (A), 8 (O), 21 (M) in turn, the same MP3
   const FAKE_SDK = `window.SpeechSDK={ResultReason:{SynthesizingAudioCompleted:10},SpeechSynthesisOutputFormat:{Audio24Khz48KBitRateMonoMp3:1},
     SpeechConfig:{fromSubscription:function(k,r){window.__az={key:k,region:r};return{}}},
-    SpeechSynthesizer:function(cfg){var me=this;this.close=function(){};this.speakTextAsync=function(text,ok){window.__az.voice=cfg.speechSynthesisVoiceName;var re=/\\S+/g,m,i=0;
-      while((m=re.exec(text))){me.wordBoundary&&me.wordBoundary(me,{audioOffset:i*3e6,duration:2.5e6,textOffset:m.index,wordLength:m[0].length});i++}
-      for(var v=0;v<30;v++)me.visemeReceived&&me.visemeReceived(me,{audioOffset:v*1e6,visemeId:[1,8,21][v%3]});
-      var b=atob("${MP3.toString('base64')}"),u=new Uint8Array(b.length);for(var j=0;j<b.length;j++)u[j]=b.charCodeAt(j);setTimeout(function(){ok({reason:10,audioData:u.buffer})},50)}}};`;
+    SpeechSynthesizer:function(cfg){var me=this;this.close=function(){};
+      var run=function(text,at,ok,curves){window.__az.voice=cfg.speechSynthesisVoiceName;window.__az.ssml=curves;var re=/\\S+/g,m,i=0;
+        while((m=re.exec(text))){me.wordBoundary&&me.wordBoundary(me,{audioOffset:i*3e6,duration:2.5e6,textOffset:at+m.index,wordLength:m[0].length});i++}
+        for(var v=0;v<30;v++){var e={audioOffset:v*1e6,visemeId:[1,8,21][v%3]};if(curves&&v<6){var fr=[];for(var n=0;n<30;n++){var b=new Array(55).fill(0);var ph=(v*30+n)%60;b[17]=ph<20?.6:ph<40?.3:.2;b[18]=ph>=40?.3:0;b[20]=ph>=20&&ph<40?.5:0;fr.push(b)}e.animation=JSON.stringify({FrameIndex:v*30,BlendShapes:fr})}me.visemeReceived&&me.visemeReceived(me,e)}
+        var b=atob("${MP3.toString('base64')}"),u=new Uint8Array(b.length);for(var j=0;j<b.length;j++)u[j]=b.charCodeAt(j);setTimeout(function(){ok({reason:10,audioData:u.buffer})},50)};
+      this.speakTextAsync=function(text,ok){run(text,0,ok,false)};
+      this.speakSsmlAsync=function(ssml,ok){var t=ssml.replace(/^.*FacialExpression"\\/>/,"").replace(/<\\/voice><\\/speak>$/,"");run(t,ssml.indexOf(t),ok,/FacialExpression/.test(ssml))}}};`;
   await p.route('**/microsoft-cognitiveservices-speech-sdk@*/**', r => r.fulfill({ status: 200, contentType: 'application/javascript', body: FAKE_SDK }));
   await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 90000 }); await p.waitForTimeout(500);
   const R = src => p.evaluate(s => LAB.run(s), src); const W = ms => p.waitForTimeout(ms);
@@ -29,7 +32,7 @@ const TEXT = 'O palácio tinha uma ópera, inaugurada em março de 1755.';
   await R('S.hints.on=false;S.previewBar=false;S.guideMute=false;S.introSeen=true;S.lang="pt";S.guideCfg.azuStyle="tile";S.view="card";S.stop="half";renderAll(false);renderEditor();ed.querySelector(\'[data-fo="s7agent"]\').open=true');
   // 1. the Editor: the row and its status, with no keys here
   const opts = await R('Array.from(ed.querySelectorAll(\'[data-set="@agentCfg.liveVoice"]\')).map(function(b){return b.textContent+(b.getAttribute("aria-pressed")==="true"?"*":"")})');
-  ok('Editor: Voice of the answers offers the device voice (chosen), Azure (live) and ElevenLabs (live)', opts.join('|') === 'Device voice*|Azure (live)|ElevenLabs (live)', opts);
+  ok('Editor: Voice of the answers offers the device voice, Azure (live, chosen: the developer\'s default) and ElevenLabs (live)', opts.join('|') === 'Device voice|Azure (live)*|ElevenLabs (live)', opts);
   await p.locator('[data-set="@agentCfg.liveVoice"][data-v="eleven"]').click(); await W(300);
   ok('...ElevenLabs with no key here: the Editor says the device voice reads the answers', /ElevenLabs none.*Without its key the answers use the device voice/.test(await R('ed.querySelector(".lvstat").textContent')));
   ok('...and its model row appears (Flash v2.5 chosen)', await R('(ed.querySelector(\'[data-set="@agentCfg.elevenModel"][aria-pressed="true"]\')||{}).textContent') === 'Flash v2.5 (fastest)');
@@ -47,8 +50,8 @@ const TEXT = 'O palácio tinha uma ópera, inaugurada em março de 1755.';
   // 3. Azure, live (a fake SDK): the voice, the visemes as the mouth
   await p.locator('[data-set="@agentCfg.liveVoice"][data-v="azure"]').click(); await W(300);
   const a1 = await speak();
-  ok('Azure: the SDK loads on demand, with the key, the region and Raquel for Portuguese', JSON.stringify(await R('window.__az')) === JSON.stringify({ key: 'az-key', region: 'westeurope', voice: 'pt-PT-RaquelNeural' }), await R('window.__az'));
-  ok('...the answer plays and ends; the mouth takes the visemes\' shapes (A, O, M)', a1.rec && a1.end === 1 && a1.shapes >= 3 && /Azure's visemes/.test(a1.last && a1.last.from || ''), a1);
+  ok('Azure: the SDK loads on demand, with the key, the region and Raquel for Portuguese, asking for the facial curves (SSML)', JSON.stringify(await R('window.__az')) === JSON.stringify({ key: 'az-key', region: 'westeurope', voice: 'pt-PT-RaquelNeural', ssml: true }), await R('window.__az'));
+  ok('...the answer plays and ends; the mouth follows the facial curves (180 frames, several shapes)', a1.rec && a1.end === 1 && a1.shapes >= 3 && /Azure's facial curves/.test(a1.last && a1.last.from || '') && a1.last.shapes === 180, a1);
   // 4. the tour's own lines keep their voice (only the agent's answers go live)
   ok('A tour line (not an answer) does not call a live voice', await R('(function(){var n=0,f=lvAzure;lvAzure=function(t){n++;return f(t)};G.answer="";say("Bem-vindo ao Paço da Ribeira.",function(){},function(){});lvAzure=f;stopSpeech();return n})()') === 0);
   // 5. a refused key: the device voice reads the answer, and the Editor says so
