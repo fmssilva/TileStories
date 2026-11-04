@@ -2,7 +2,7 @@
 
 Read this first in a new Architect chat, then `__AI_Architect.md`. It says where the work is and how a round runs.
 
-## 0. Start here (next conversation, from 2026-11-03)
+## 0. Start here (next conversation, from 2026-11-04)
 
 - **State:**
   - **The Lab:** v27 is published, with layers through `v9b` (the commit "Move the mouth by Azure's facial curves: live
@@ -40,8 +40,14 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
   - **Keys:** Gemini, Azure Speech (region `germanywestcentral`) and ElevenLabs all answer
     (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).
 - **The tasks, in this order:**
-  1. **The developer looks at the Lab:** the markers on a drag, the Wall button, the six 3D models (6 · Guide > Azu >
-     Mascot source = 3D model > Model, then Play a clip), and the tile of light's styles (Mascot source = Tile of light).
+  1. **The developer looks at the Lab** (v27) and says what to adjust:
+     - the six 3D models (6 · Guide > Azu > Mascot source = 3D model > Model, then Play a clip);
+     - the tile of light's styles (Mascot source = Tile of light), the Size, a Character per audience (7 · Audiences);
+     - the real mouth: the recorded tour with the voice "Azure Raquel" (published Lab), and a question in Ask Azu in the
+       local Lab opened from its file (the live Azure voice needs this computer's keys);
+     - the markers on a drag and the Wall button (from the second chat).
+     - The Editor was audited on 2026-11-04 for the mascots and the AI guide (animations, effects, actions): it covers them;
+       the three gaps found (the live answers' voice and mouth, the mascot's size, a character per audience) are built.
   2. **More mascots by the same route** (`rig_meshy.py`: a SPEC entry with the landmarks from a front render; `build_fbx`
      when Meshy's rig comes with it): the cat (`cat_clean.png`) as a quadruped. The Lab page is 14.2 MB of 16 MB: a
      seventh model needs supporting files or 512 px textures. The cat waits for the developer's Meshy model (textured GLB;
@@ -57,6 +63,12 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
   - Keys go only in `.secrets/keys.env`, never into a script (`keys_local.py` is committed).
   - MCP servers are added with `--scope user` (memory `mcp-add-needs-user-scope`).
   - Every test runs in the prototype, through controls the developer can press (memory `tests-run-in-the-prototype-by-hand`).
+  - blender-mcp: each `execute_blender_code` call starts with a fresh namespace (exec `rig_meshy.py` in every call), and
+    `read_homefile` / `open_mainfile` must be a call of their own (the next call has the context back).
+  - Script edits with apostrophes or backslashes: write a small Python patch with the Write tool (a bash heredoc mangles
+    them; memory `bash-heredoc-apostrophes-use-write-tool`).
+  - The live voice's keys reach the local Lab by `keys_local.py` (`keys.local.js`, ignored); the published Lab has none.
+  - `IPCE/aula_8_no_sol.py` is the developer's own file: never commit it with a round.
 
 ## 1. Where the work is
 
