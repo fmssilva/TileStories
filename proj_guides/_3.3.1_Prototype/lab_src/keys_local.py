@@ -10,7 +10,10 @@ import io, json, os, sys, urllib.error, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 KEYS = os.path.normpath(os.path.join(HERE, '..', '..', '..', '.secrets', 'keys.env'))
-LAB_KEYS = {'gemini': 'GEMINI_API_KEY', 'anthropic': 'ANTHROPIC_API_KEY'}
+LAB_KEYS = {'gemini': 'GEMINI_API_KEY', 'anthropic': 'ANTHROPIC_API_KEY',
+            # the live answers' voice (v9a): Azure Speech and ElevenLabs, with the voices picked for the recorded set
+            'azure': 'AZURE_SPEECH_KEY', 'azureRegion': 'AZURE_SPEECH_REGION',
+            'eleven': 'ELEVENLABS_API_KEY', 'elevenPT': 'ELEVENLABS_VOICE_PT', 'elevenEN': 'ELEVENLABS_VOICE_EN'}
 
 def keys():
     k = {}

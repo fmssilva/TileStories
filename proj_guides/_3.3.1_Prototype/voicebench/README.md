@@ -38,7 +38,9 @@ python render.py gemini --en Kore --pt Kore               # needs: pip install l
     Portuguese, Lisbon).
 
 - **Output:** `out/<set>/` (MP3 + `set.json`) and `out/voicesets.js`, which the Lab loads.
-- **Published sets (2026-11-03):** `azure-sonia-raquel` and `azure-ryan-duarte`, every line. The partial Gemini set left the
+- **Published sets:** `azure-sonia-raquel` and `azure-ryan-duarte` (2026-11-03), and the ElevenLabs set
+  `eleven-hpp4j3vqnfwauoo0d1us-ejartsrf33xovlh9hmuy` (2026-11-04: Luis, pt-PT, and Bella, en-US; Multilingual v2; 5,173
+  characters sent; the set's id is made from the voice ids), every line. The partial Gemini set left the
   manifest (its `set.json` was never kept, and its one listed line had no audio); its MP3s stay in `out/gemini-kore-kore/`.
 - **Install:** `python -m pip install azure-cognitiveservices-speech` (plain `pip` on this computer installs into a conda
   environment, not the Python that runs `render.py`).

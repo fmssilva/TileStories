@@ -5,8 +5,8 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-03)
 
 - **State:**
-  - **The Lab:** v25 is published, with layers through `v8y` (the commit "Give the tile of light its styles in the Editor:
-    glaze, pattern, light, corners, and a preview").
+  - **The Lab:** v26 is published, with layers through `v9a` (the commit "Give the live answers a real voice with the mouth
+    on its timing, the mascot a size and a character per audience, and publish the ElevenLabs voices").
   - **Built on 2026-11-03 (second chat):**
     - `v8v`: the card's markers are u, v places on the wall's picture (a drag or zoom moves them with it); the Ribeira wall
       shows its points; the preview bar's Wall button; the console's scene "Ribeira wall: a drag moves the markers with the
@@ -25,6 +25,10 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     Corners (Crisp / Soft / Pillow), and a preview at rest and as light on its own canvas. The defaults are the old look; the
     still Azu (Reduce Motion, the preview) moved to a moment where the face is clear of the highlight. `test8y.js`, with a
     mutation proof.
+    `v8z`: the mascot's Size (Small / Medium / Large) and a Character per audience (Looks per audience). `test8z.js`.
+    `v9a`: Ask Azu > Voice of the answers: Device / Azure (live, visemes) / ElevenLabs (live, letter times); the mouth on the
+    voice's own timing; the device voice without a key or on an error. `test9a.js` (faked services) and a live run by hand.
+    Voices: the ElevenLabs set Luis (pt-PT) + Bella (en-US) rendered by a subagent and published with the Lab.
   - **MCP:** blender-mcp is at user scope; Blender 5.2.3 with add-on 1.8 on port 9876. In this Blender, new shape keys start
     at value 1 (set them to 0). The add-on's Rodin trial key is empty (`API_INSUFFICIENT_FUNDS`): no generator works until the
     developer adds a key or brings a GLB made by hand on a generator's web. The ElevenLabs MCP still needs `/mcp` >
@@ -42,7 +46,8 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
      A-pose regenerated on Meshy, then Meshy's rig, would be the fix if it is ever wanted).
   3. **The rest of item 6:** Unity import of the GLBs (glTFast, the two layers of `_3.7` section 4) and the tile of
      light's Shader Graph with its style properties, as Worker blocks (the Unity MCP must be connected).
-  4. **Voices:** ElevenLabs once the developer picks the voice ids; Forced Alignment for word times of any audio.
+  4. **Voices:** the ElevenLabs set is published (Bella is American; a British EN voice is the developer's choice); the
+     app's Worker streams the live voice a sentence at a time (the Lab makes the whole answer first).
   5. **The form of address** (tu / polite / você): a proposal in `_3.5` section 3.9, waiting for the developer's decision.
 - **Rules learned this round:**
   - Keys go only in `.secrets/keys.env`, never into a script (`keys_local.py` is committed).

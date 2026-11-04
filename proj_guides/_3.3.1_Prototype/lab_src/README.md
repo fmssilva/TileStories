@@ -27,7 +27,9 @@ The Lab is one HTML page built from layers. Each layer adds to or wraps the one 
   Import, Generate from a picture) -> `v8x.js` (the 3D model chosen in the Editor: Azu detailed, Azu simple, the mouse, the
   explorer, the poet, the soldier; each GLB and its picture embedded by the build from `../../mascote/3d/` and `thumbs/`) ->
   `v8y.js` (the tile of light's styles: Glaze, Pattern, Light, Corners, and a preview drawn on its own canvas; the shader's
-  properties live in `v8q`'s `AZU_UNI`). CSS in the same order;
+  properties live in `v8q`'s `AZU_UNI`) -> `v8z.js` (the mascot's size; a character per audience in Looks per audience) ->
+  `v9a.js` (the voice of the live answers: the device's, Azure or ElevenLabs live, the mouth on the voice's own timing).
+  CSS in the same order;
   `v3body.html` is the page.
 - **Words:** `realstrings.json` (the framework's real words, with their owner part); `build8.py` moves words to new owners and adds
   the Lab's new ones.
@@ -52,7 +54,11 @@ The Lab is one HTML page built from layers. Each layer adds to or wraps the one 
   the cache; Import still replaces the chosen one (with a mutation: a swap that does nothing turns eight checks red; `CAP=<dir>`
   keeps a capture of each model in the guide); `node test8y.js` (the same) presses each style of the tile of light and counts
   the colours in the preview and in the guide's own Azu: each glaze's ink, the four patterns, the lights' warmth, the corners,
-  Reduce Motion (with a mutation: a renderer that ignores the style turns seven checks red); `node test8s.js` checks the test wall, the pan and zoom,
+  Reduce Motion (with a mutation: a renderer that ignores the style turns seven checks red); `node test8z.js` presses Size
+  and a Character per audience (a mutation: a character never applied); `node test9a.js` checks the live answers' voice
+  with ElevenLabs faked (a real MP3, even letter times) and the Azure Speech SDK faked: the request, the audio as a live line,
+  the words, the mouth on the voice's shapes, the tour's lines untouched, a refused key falling back to the device voice (a
+  mutation: a mouth that ignores the voice turns two checks red); `node test8s.js` checks the test wall, the pan and zoom,
   Azu's remarks and their taps, the button's rules and the rise to Full; `node test8q.js` (WebGL by SwiftShader)
   checks the shader drawing, its forms by state, the mouth, the peek, the walk and its arrival, Tile, Reduce Motion;
   `node test8p.js` checks the pill, the
@@ -71,7 +77,9 @@ The Lab is one HTML page built from layers. Each layer adds to or wraps the one 
   spotlight, the zoom to each spot, Azu's arm, a scroll, Reduce Motion and drawing a spot; `node test8i.js` checks the
   voice that loads late, each light style, the glide, Reduce Motion and the words' contrast; `node test8h.js`
   shows every state in every look, light and dark, and measures its words' contrast.
-- **Keys:** the local Lab's live agent reads `keys.local.js`, which `python keys_local.py` writes from the workspace's
+- **The live voice by hand:** with the keys on this computer, open the page from its file (not `#probe`), set Ask Azu >
+  Voice of the answers, and ask; it spends a few hundred characters an answer.
+- **Keys:** the local Lab's live agent and live voice read `keys.local.js`, which `python keys_local.py` writes from the workspace's
   `.secrets/keys.env` (git ignores both); `python keys_local.py --check` asks each service whether its key works. The headless
   checks (`#probe`) never load it; `#probe-live` does. See `../../__Services_And_Keys.md`.
 - **The audit** that shaped v8: `AUDIT_DECISIONS.md` and `audit/` (one report per area).

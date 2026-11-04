@@ -1,0 +1,9 @@
+/* v8z: the mascot's size (--azs on the phone: .8 / 1 / 1.35) */
+.mascot{width:calc(56px*var(--azs,1));height:calc(64px*var(--azs,1))}
+.mascot svg{width:calc(56px*var(--azs,1));height:calc(64px*var(--azs,1))}
+.mascot.light .azgl{width:calc(64px*var(--azs,1));height:calc(64px*var(--azs,1));margin:calc(-4px*var(--azs,1)) calc(-4px*var(--azs,1)) 0}
+.mascot.center{right:calc(50% - 28px*var(--azs,1))}
+.azbub{right:calc(16px + 56px*var(--azs,1))}
+.azfab{width:calc(58px*var(--azs,1));height:calc(62px*var(--azs,1))}
+.azfab svg,.azfab canvas{width:calc(58px*var(--azs,1));height:calc(62px*var(--azs,1))}
+.azfabbub{left:calc(18px + 58px*var(--azs,1))}

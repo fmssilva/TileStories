@@ -34,7 +34,7 @@ Status as of 2026-11-03.
 | **Google AI Studio** (Gemini) | the agent's model in the local Lab, embeddings for the library, TTS voices | `GEMINI_API_KEY` | **Working.** Text, embeddings and TTS answer. The local Lab's Ask Azu runs on it (Flash-Lite: first words in about 2 s, about $0.0013 a question). A page opened from a file may call it (CORS allows origin `null`). | Free tier for development only: Google may use the data, and EEA users need the paid tier. Text free tier: limits per Google Cloud project (not per key), shown in AI Studio > Rate limits; they reset at midnight Pacific time, and per-minute limits are low (Run all scenes asks two model steps per scene). On a 429 the Lab says `rate_limited`. TTS free tier is 10 requests a day for each model, so voices come from Azure. |
 | **Anthropic** (Claude) | the recommended agent model (Haiku 5.5) for the app and the user study | `ANTHROPIC_API_KEY` | Not created | Pay as you go; prompt caching cuts the library's cost. |
 | **Azure Speech** (Azure for Students) | recorded voices with exact word times (pt-PT Raquel, Duarte, Fernanda; en-GB Sonia, Ryan) | `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION` | **Working** (2026-11-03): a Speech resource, region `germanywestcentral`. The Raquel + Sonia and Duarte + Ryan sets are rendered (every line) and published with the Lab. | F0: 0.5 M neural characters a month, free. A full set is about 5,200 characters. |
-| **ElevenLabs** | recorded voices with word times (`with-timestamps`) | `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_PT`, `ELEVENLABS_VOICE_EN` | **Working** (2026-11-03): the API key answers; the voice ids are not chosen yet | Free: 10k characters a month, non-commercial. Starter: $6 a month, first month $1. |
+| **ElevenLabs** | recorded voices with word times (`with-timestamps`); the live answers' voice (`v9a`) | `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_PT`, `ELEVENLABS_VOICE_EN` | **Working** (2026-11-04): the Creator plan (131,000 characters a month, reset on the 3rd); the voices are Luis (pt-PT, professional) and Bella (en-US, premade); a full set is published | Free: 10k characters a month, non-commercial. Starter: $6 a month. Creator: the developer's plan. |
 | **3D generators** (Hyper3D Rodin, Hunyuan 3D, Tripo, Meshy) | the cat mascot from its picture, inside Blender (blender-mcp add-on) | the add-on's own fields (not `.secrets`); `MESHY_API_KEY`, `TRIPO_API_KEY` for scripts | None set. The add-on's shared Rodin trial key is empty (`API_INSUFFICIENT_FUNDS`, 2026-11-03). | Free by hand on Meshy's or Tripo's web (download the GLB). API keys: see `_3.7` section 9. The tile-Azu needs none (modelled by script). |
 | **Cloudflare Workers** (later) | the token service and the agent's loop for the app | none here: the keys go into the Worker's secrets | Not created | The free plan covers a study. |
 
@@ -103,7 +103,8 @@ word times.*
    3. The MCP signs in with the account and needs no key. The renderer still uses the API key, because only the API returns word
       times.
 
-*The Architect renders an ElevenLabs set. The free 10k characters cover one voice in both languages.*
+*Done (2026-11-04): the ElevenLabs set (Luis + Bella) is rendered and published. Bella is American English; for a British
+voice beside the Azure sets, put another voice id in `ELEVENLABS_VOICE_EN` and render again.*
 
 ### Anthropic (when the agent moves to the app)
 

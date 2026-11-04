@@ -223,7 +223,7 @@ print(maria.year)               # 1990
 
 # Alterar uma peça: a Maria vai morar para o Algarve
 maria.address = "Faro"
-print(maria)                    # Person(name='Maria', year=1990, address='Faro', email='')
+print(maria.address)                    # Person(name='Maria', year=1990, address='Faro', email='')
 
 
 
@@ -265,21 +265,30 @@ c) Exercícios: As classes Point e Book [5 min -> 10:38] -----------------------
         Definam uma classe de dados Point, com atributos x, y, z (float).
         Criem 2 pontos (objetos dessa classe): (3, 4, 5) e (1, 2, 3).
 
-        Escrevam os 2 pontos completos com todos os atributos.
-        Escrevam só a coordenada x de cada um.
+        Print os 2 pontos completos com todos os atributos.
+        Print só a coordenada x de cada um.
         Mudem o y de cada um para 10 e 20 e voltem a escrever os pontos.
 """
 
 #  import
 from dataclasses import dataclass
-
 # definir o molde
-# TODO
-
-
+@dataclass
+class Point:
+    x:float
+    y:float
+    z:float
 # criar novos objetos seguindo esse molde:
-# TODO
-
+p1 = Point(3,4,5)
+p2 = Point(1,2,3)
+print(p1)
+print(p2)
+print(p1.x)
+print(p2.x)
+p1.y = 40
+p2.y = 20
+print(p1)
+print(p2)
 
 
 
@@ -316,6 +325,14 @@ from dataclasses import dataclass
        Print o livro com maior numero de paginas
 """
 # TODO 
+@dataclass
+class Book:
+    title: str
+    author: str
+    pages: int
+
+b1 = Book("LOF", "Peter", 80_000)
+b2 = Book("HP", "JKR", 5_000)
 
 
 
