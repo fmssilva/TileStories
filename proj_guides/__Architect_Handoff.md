@@ -31,9 +31,10 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
      Mascot source = 3D model > Model, then Play a clip).
   2. **More mascots by the same route** (`rig_meshy.py`: a SPEC entry with the landmarks from a front render; `build_fbx`
      when Meshy's rig comes with it): the cat (`cat_clean.png`) as a quadruped. The Lab page is 14.2 MB of 16 MB: a
-     seventh model needs supporting files or 512 px textures. The cat waits for the developer's Meshy model (textured GLB).
-     The mouse's sleeve is sculpted into its coat, so it cannot lift its arm without tearing the coat (tried by script on
-     2026-11-04, `_3.7` section 11): the fix is the mouse regenerated on Meshy in an A-pose, then Meshy's rig (FBX).
+     seventh model needs supporting files or 512 px textures. The cat waits for the developer's Meshy model (textured GLB;
+     the developer will make it later). The mouse's sleeve is sculpted into its coat, so it cannot lift its arm without
+     tearing the coat (tried by script on 2026-11-04, `_3.7` section 11); **decided: the mouse keeps its gentle wave** (an
+     A-pose regenerated on Meshy, then Meshy's rig, would be the fix if it is ever wanted).
   3. **The rest of item 6:** the tile of light's styles in the Editor; Unity import of `azu_tile.glb` (glTFast, the two
      layers of `_3.7` section 4) as a Worker block.
   4. **Voices:** ElevenLabs once the developer picks the voice ids; Forced Alignment for word times of any audio.
