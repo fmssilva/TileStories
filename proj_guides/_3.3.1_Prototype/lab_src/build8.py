@@ -188,9 +188,9 @@ src = src.replace("('__BEFORE__', 'paco_before_1755')]", "('__BEFORE__', 'paco_b
 src = src.replace("css = rd('v2.css')", "js = js.replace('__AZUGLB__', 'data:model/gltf-binary;base64,' + base64.b64encode(open(os.path.join(D, '..', '..', 'mascote', '3d', 'azu_tile.glb'), 'rb').read()).decode())\ncss = rd('v2.css')", 1)
 # the 3D models (v8x): the developer's Meshy models rigged in Blender (rig_meshy.py), and each model's picture for the picker
 src = src.replace("css = rd('v2.css')", "M3 = os.path.join(D, '..', '..', 'mascote', '3d')\n"
-                  "for _k, _f in (('AZU', 'azu.glb'), ('MOUSE', 'mouse.glb'), ('EXPLORER', 'explorer.glb')):\n"
+                  "for _k, _f in (('AZU', 'azu.glb'), ('MOUSE', 'mouse.glb'), ('EXPLORER', 'explorer.glb'), ('POET', 'poet.glb'), ('SOLDIER', 'soldier.glb')):\n"
                   "    js = js.replace('__AZUGLB_' + _k + '__', 'data:model/gltf-binary;base64,' + base64.b64encode(open(os.path.join(M3, _f), 'rb').read()).decode())\n"
-                  "for _k in ('AZU', 'TILE', 'MOUSE', 'EXPLORER'):\n"
+                  "for _k in ('AZU', 'TILE', 'MOUSE', 'EXPLORER', 'POET', 'SOLDIER'):\n"
                   "    js = js.replace('__AZTHUMB_' + _k + '__', 'data:image/png;base64,' + base64.b64encode(open(os.path.join(M3, 'thumbs', _k.lower() + '.png'), 'rb').read()).decode())\n"
                   "css = rd('v2.css')", 1)
 a = "v7 = rd('v7.js').replace('__REALSTR__', rd('realstrings.json'))"

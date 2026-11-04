@@ -19,13 +19,13 @@ const CAP = process.env.CAP || require('os').tmpdir();  // a picture of each mod
   await p.waitForFunction(() => LAB.run('Azu3D.state().ready||Azu3D.state().failed'), null, { timeout: 60000 });
   await R('ed.querySelector(\'[data-fo="s7mascot"]\').open=true');
   const cards = await R('Array.from(ed.querySelectorAll(".az3dpick .sc")).map(function(c){var i=c.querySelector("img");return[c.textContent,c.getAttribute("aria-pressed"),i&&i.complete&&i.naturalWidth]})');
-  ok('3D model: the Model row shows four cards by name, each with its picture', cards.map(c => c[0]).join('|') === 'Azu, detailed|Azu, simple|The mouse|The explorer' && cards.every(c => c[2] >= 96), cards);
+  ok('3D model: the Model row shows six cards by name, each with its picture', cards.map(c => c[0]).join('|') === 'Azu, detailed|Azu, simple|The mouse|The explorer|The poet|The soldier' && cards.every(c => c[2] >= 96), cards);
   ok('...Azu, detailed is chosen by default', cards[0] && cards[0][1] === 'true');
   const st0 = await R('var s=Azu3D.state();[s.ready,s.src,s.model]');
   ok('...and it is the model loaded', st0[0] && st0[2] === 'azu' && /Azu, detailed \(azu\.glb\)/.test(st0[1]), st0);
   await R('startTour();pauseTour()'); await W(600);
   // 2. each card: the model swaps in, holds the whole contract, is drawn and fits its frame, plays a clip, moves its mouth
-  const models = [['azu', 'Azu, detailed'], ['tile', 'Azu, simple'], ['mouse', 'The mouse'], ['explorer', 'The explorer']];
+  const models = [['azu', 'Azu, detailed'], ['tile', 'Azu, simple'], ['mouse', 'The mouse'], ['explorer', 'The explorer'], ['poet', 'The poet'], ['soldier', 'The soldier']];
   for (const [id, name] of models) {
     await p.locator(`.az3dpick [data-v="${id}"]`).click();
     await p.waitForFunction(i => LAB.run('Azu3D.state().model===' + JSON.stringify(i) + '&&!Azu3D.state().swapping'), id, { timeout: 30000 }).catch(() => {});
@@ -48,7 +48,7 @@ const CAP = process.env.CAP || require('os').tmpdir();  // a picture of each mod
   const n0 = await R('Azu3D.state().parses'); await p.locator('.az3dpick [data-v="azu"]').click();
   await p.waitForFunction(() => LAB.run('Azu3D.state().model==="azu"&&!Azu3D.state().swapping'), null, { timeout: 10000 }).catch(() => {});
   const n1 = await R('Azu3D.state().parses');
-  ok('Back to Azu, detailed: drawn again from the cache (four models, four parses)', await R('Azu3D.state().model') === 'azu' && n0 === 4 && n1 === 4, [n0, n1]);
+  ok('Back to Azu, detailed: drawn again from the cache (six models, six parses)', await R('Azu3D.state().model') === 'azu' && n0 === 6 && n1 === 6, [n0, n1]);
   // 4. Import still replaces the chosen model; the next pick brings a built-in back
   await p.locator('[data-az3dimport]').setInputFiles(path.join(__dirname, '..', '..', 'mascote', '3d', 'mouse.glb')); await W(2500);
   const im = await R('[Azu3D.state().src,ed.querySelector(".az3dres")&&ed.querySelector(".az3dres").textContent]');

@@ -1,4 +1,4 @@
-/* ===================== v8x: the 3D mascot's model, chosen in the Editor: four built-in GLBs with the same contract (seven clips, four morphs, the front arm as its own mesh). Azu detailed, the mouse and the explorer are the developer's Meshy models, rigged in Blender by proj_guides/mascote/3d/rig_meshy.py; Azu simple is the tile modelled by script (v8w) ===================== */
+/* ===================== v8x: the 3D mascot's model, chosen in the Editor: six built-in GLBs with the same contract (seven clips, four morphs, the front arm as its own mesh). Azu detailed, the mouse, the explorer, the poet and the soldier are the developer's Meshy models, rigged in Blender by proj_guides/mascote/3d/rig_meshy.py (the soldier on Meshy's own rig); Azu simple is the tile modelled by script (v8w) ===================== */
 var AZ3D_MODELS=[
   {id:"azu",name:"Azu, detailed",file:"azu.glb",glb:"__AZUGLB_AZU__",thumb:"__AZTHUMB_AZU__",
    about:"Meshy model of the tile with the Belém tower (CC BY 4.0: credit Meshy), reduced to 24,000 triangles; the arms lift freely"},
@@ -7,7 +7,11 @@ var AZ3D_MODELS=[
   {id:"mouse",name:"The mouse",file:"mouse.glb",glb:"__AZUGLB_MOUSE__",thumb:"__AZTHUMB_MOUSE__",
    about:"Meshy model (CC BY 4.0) with a swinging tail; its arms are part of the coat, so it points and waves with the arm out, not up"},
   {id:"explorer",name:"The explorer",file:"explorer.glb",glb:"__AZUGLB_EXPLORER__",thumb:"__AZTHUMB_EXPLORER__",
-   about:"Meshy shape (CC BY 4.0), its colours painted from the picture (the back is filled in: navy hat and coat, cream curls); points with the spyglass"}];
+   about:"Meshy model (CC BY 4.0); points and waves with the spyglass, the arm out (its arms are part of the coat)"},
+  {id:"poet",name:"The poet",file:"poet.glb",glb:"__AZUGLB_POET__",thumb:"__AZTHUMB_POET__",
+   about:"Meshy model (CC BY 4.0) with a book and a quill; its arms are part of the robe, so its gestures are small"},
+  {id:"soldier",name:"The soldier",file:"soldier.glb",glb:"__AZUGLB_SOLDIER__",thumb:"__AZTHUMB_SOLDIER__",
+   about:"Meshy model (CC BY 4.0) on Meshy's own skeleton (elbows, knees, a spine) with its walk; the halberd stays upright, the shield arm waves and points"}];
 S.guideCfg.azuModel="azu";
 function az3dModelOf(id){for(var i=0;i<AZ3D_MODELS.length;i++)if(AZ3D_MODELS[i].id===id)return AZ3D_MODELS[i];return AZ3D_MODELS[0]}
 az3dModel=function(){var m=az3dModelOf(S.guideCfg.azuModel);return{id:m.id,name:m.name+" ("+m.file+")",glb:m.glb}};

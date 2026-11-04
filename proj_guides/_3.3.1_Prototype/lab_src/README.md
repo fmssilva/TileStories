@@ -25,7 +25,7 @@ The Lab is one HTML page built from layers. Each layer adds to or wraps the one 
   picture, the Ribeira wall shows its points, the preview bar's Wall button, the markers' test scene) -> `v8w.js` (Azu as a 3D
   model: the GLB from `../../mascote/3d/`, embedded by the build, drawn by three.js from jsdelivr; Mascot source, Play a clip,
   Import, Generate from a picture) -> `v8x.js` (the 3D model chosen in the Editor: Azu detailed, Azu simple, the mouse, the
-  explorer; each GLB and its picture embedded by the build from `../../mascote/3d/` and `thumbs/`). CSS in the same order;
+  explorer, the poet, the soldier; each GLB and its picture embedded by the build from `../../mascote/3d/` and `thumbs/`). CSS in the same order;
   `v3body.html` is the page.
 - **Words:** `realstrings.json` (the framework's real words, with their owner part); `build8.py` moves words to new owners and adds
   the Lab's new ones.

@@ -31,12 +31,30 @@ SPEC = {
                          "tail3": ((640, 680), (665, 555), "tail2")},
                   eyes=[(293, 258, 32, 36), (452, 258, 32, 36)], mouth=(372, 338, 26)),
     "explorer": dict(src="explorer_meshy.glb", weld=True, tris=22000, prefix="Explorer", face="head", weights="heat", arm_reach=(0.09, 0.14), gestures="fused",
-                     scale=1 / 1.2625, paint="explorer.png",
+                     scale=1 / 1.2625,  # paint="explorer.png" only for a Meshy shape without colour
                      bones={"root": ((400, 800), (400, 760), None), "body": ((400, 690), (400, 420), "root"),
                             "head": ((400, 420), (400, 30), "body"),
                             "arm.R": ((255, 480), (205, 610), "body"), "arm.L": ((545, 480), (590, 590), "body"),
                             "leg.R": ((335, 690), (335, 775), "root"), "leg.L": ((465, 690), (465, 775), "root")},
-                     eyes=[(320, 280, 31, 33), (478, 280, 31, 33)], mouth=(397, 345, 40)),
+                     eyes=[(322, 276, 31, 34), (470, 276, 31, 34)], mouth=(398, 330, 38), eyes_flat=True),
+    "poet": dict(src="poet_meshy.glb", weld=True, tris=24000, prefix="Poet", face="head", weights="heat", arm_reach=(0.09, 0.14), gestures="fused",
+                 scale=1 / 1.2625,
+                 bones={"root": ((380, 800), (380, 760), None), "body": ((380, 690), (380, 410), "root"),
+                        "head": ((380, 410), (380, 20), "body"),
+                        "arm.R": ((240, 445), (232, 530), "body"), "arm.L": ((525, 445), (508, 540), "body"),
+                        "leg.R": ((290, 690), (290, 775), "root"), "leg.L": ((455, 690), (455, 775), "root")},
+                 eyes=[(297, 272, 30, 34), (447, 270, 30, 34)], mouth=(370, 328, 38), lift=0.008, eyes_flat=True),  # bulging eyes
+    # the soldier: Meshy's own rig (a Mixamo-style skeleton with elbows, its weights) and its walk; the other clips are keyed
+    # on its bones through bonemap. The halberd arm is held in the walk, so the halberd stays upright.
+    "soldier": dict(fbx="soldier_rigged.fbx", tris=24000, prefix="Soldier", face="mixamorig:Head", gestures="free", height=1.5,
+                    walk_from="Walking",
+                    bonemap={"root": "mixamorig:Hips", "body": "mixamorig:Spine", "head": "mixamorig:Head",
+                             "arm.L": "mixamorig:LeftArm", "arm.R": "mixamorig:RightArm",
+                             "leg.L": "mixamorig:LeftUpLeg", "leg.R": "mixamorig:RightUpLeg"},
+                    hold=["mixamorig:RightShoulder", "mixamorig:RightArm", "mixamorig:RightForeArm", "mixamorig:RightHand", "Bone_028", "Bone_014"],
+                    front_groups=["mixamorig:LeftArm", "mixamorig:LeftForeArm", "mixamorig:LeftHand", "Bone_027", "Bone_019"],
+                    eyes=[(355, 348, 27, 31), (470, 348, 27, 31)], mouth=(410, 408, 34), lift=0.014, mouth_flat=True,
+                    think=(0.5, -0.6, -0.2)),  # thinking, the shield stays at the chest (at the chin it hides the face)
 }
 
 
@@ -283,11 +301,11 @@ def split_front_arm(name, o):
     """The front arm (the character's left, x+) becomes its own mesh on the same skeleton (drawn in front of the card).
     The cut runs where both sides carry the same weights, so the seam never opens."""
     s = SPEC[name]
-    gi = o.vertex_groups["arm.L"].index
+    gis = {o.vertex_groups[g].index for g in s.get("front_groups", ["arm.L"]) if g in o.vertex_groups}
     wl = np.zeros(len(o.data.vertices))
     for v in o.data.vertices:
         for ge in v.groups:
-            if ge.group == gi: wl[v.index] = ge.weight
+            if ge.group in gis: wl[v.index] += ge.weight
     sel = np.array([all(wl[i] >= 0.5 for i in p.vertices) for p in o.data.polygons])
     front = o.copy(); front.data = o.data.copy()
     for c in o.users_collection: c.objects.link(front)
@@ -316,7 +334,7 @@ def on_surface(sf, x, z, lift):
 
 def face(name, sf, arm):
     s = SPEC[name]; pre = s["prefix"]; col = arm.users_collection[0]
-    lift = 0.006
+    lift = s.get("lift", 0.006)  # a strongly curved face (the soldier's dome) needs the overlays a little higher
     # eyes: each lid is rows x columns; at rest every row sits on the eye's top arc (no area), Blink spreads them over the eye
     R, C = 12, 18  # the last band of rows is the lash line
     verts_b, verts_k, faces, fmat = [], [], [], []
@@ -334,6 +352,9 @@ def face(name, sf, arm):
                 zt = ez + erz * h; zb = ez - erz * h * 0.95
                 verts_b.append(on_surface(sf, x, zt, lift))
                 verts_k.append(on_surface(sf, x, zt + (zb - zt) * f, lift))
+        if s.get("eyes_flat"):  # eyes sculpted as domes with steep rims: each lid lies flat just in front of its eye
+            yf = min(v.y for v in verts_b[base:] + verts_k[base:])
+            for v in verts_b[base:] + verts_k[base:]: v.y = yf
         for r in range(R - 1):
             for c in range(C - 1):
                 a = base + r * C + c
@@ -344,14 +365,21 @@ def face(name, sf, arm):
     mx, mz, hw = s["mouth"][0], s["mouth"][1], s["mouth"][2] / 400
     mx, mz = P(mx, mz)
     K = 24
+    NR = 3  # rings from the centre out, each on the surface: a fan's long triangles would cut under a curved face
     def ring(ox, oz, rx, rz):
-        return [on_surface(sf, mx + ox + rx * math.cos(2 * math.pi * i / K), mz + oz + rz * math.sin(2 * math.pi * i / K), lift)
-                for i in range(K)] + [on_surface(sf, mx + ox, mz + oz, lift)]
+        return [on_surface(sf, mx + ox + rx * (r / NR) * math.cos(2 * math.pi * i / K), mz + oz + rz * (r / NR) * math.sin(2 * math.pi * i / K), lift)
+                for r in range(1, NR + 1) for i in range(K)] + [on_surface(sf, mx + ox, mz + oz, lift)]
     rest = ring(0, 0, 0.8 * hw, 0)
     keys = {"Open": ring(0, -0.15 * hw, 0.85 * hw, 0.7 * hw), "Wide": ring(0, -0.05 * hw, 1.05 * hw, 0.36 * hw),
             "Round": ring(0, -0.12 * hw, 0.48 * hw, 0.55 * hw)}  # each covers the painted smile
-    mf = [(K, i, (i + 1) % K) for i in range(K)]
-    mouth = mesh_with_keys(pre + "_Mouth", rest, mf, [0] * K, keys, [mat_rgb(pre + "_MouthIn", (0.07, 0.012, 0.018), 0.45)], col)
+    if s.get("mouth_flat"):  # a mouth sculpted as a hollow: the ovals lie flat just in front of its rim
+        yf = min(v.y for vs in [rest] + list(keys.values()) for v in vs)
+        for vs in [rest] + list(keys.values()):
+            for v in vs: v.y = yf
+    c0 = NR * K
+    mf = [(c0, i, (i + 1) % K) for i in range(K)] + [(r * K + i, r * K + (i + 1) % K, (r + 1) * K + (i + 1) % K, (r + 1) * K + i)
+                                                     for r in range(NR - 1) for i in range(K)]
+    mouth = mesh_with_keys(pre + "_Mouth", rest, mf, [0] * len(mf), keys, [mat_rgb(pre + "_MouthIn", (0.07, 0.012, 0.018), 0.45)], col)
     for ob in (eyes, mouth):
         ob.parent = arm
         vg = ob.vertex_groups.new(name=s["face"]); vg.add(list(range(len(ob.data.vertices))), 1.0, 'REPLACE')
@@ -398,11 +426,14 @@ X, Y, Z = (1, 0, 0), (0, 1, 0), (0, 0, 1)
 
 def clips(name, arm):
     s = SPEC[name]
+    bmap = s.get("bonemap", {})
+    nm = lambda k: bmap.get(k, k)  # a logical bone (root, body, head, arm.L...) to the rig's own name
+    ROOT = nm("root")
     bones = [b.name for b in arm.data.bones]
-    dl = rest_dir(arm, "arm.L"); dr = rest_dir(arm, "arm.R")
+    dl = rest_dir(arm, nm("arm.L")); dr = rest_dir(arm, nm("arm.R"))
     if dl.z > -0.2:  # an arm modelled raised (Azu waves in Meshy's pose): it hangs like the other arm
         dl = Vector((-dr.x, dr.y, dr.z))
-    DOWN_L = aim(arm, "arm.L", dl)
+    DOWN_L = aim(arm, nm("arm.L"), dl)
     fused = s.get("gestures") == "fused"
     G_TALK = (0.55, -0.6, -0.4) if fused else (0.6, -0.75, 0.05)
     G_THINK = (0.25, -0.6, -0.75) if fused else s.get("think", (-0.25, -0.75, 0.6))
@@ -423,7 +454,7 @@ def clips(name, arm):
 
     def pose_talk(t):
         sn = math.sin(2 * math.pi * t); s2 = math.sin(4 * math.pi * t)
-        g = aim(arm, "arm.L", G_TALK)
+        g = aim(arm, nm("arm.L"), G_TALK)
         p = {"body": rot(X, 2 * sn), "head": rot(X, 4 * s2) @ rot(Y, 2 * sn),
              "arm.L": blend(DOWN_L, g, 0.55 + 0.3 * sn), "arm.R": rot(X, -6 * sn)}
         for i, b in enumerate(tail): p[b] = rot(Z, 8 * math.sin(2 * math.pi * t - 0.6 * i))
@@ -438,13 +469,13 @@ def clips(name, arm):
     def pose_think(t):
         sn = math.sin(2 * math.pi * t)
         p = {"body": rot(Y, -2), "head": rot(Y, -8 + 2 * sn) @ rot(X, -5),
-             "arm.L": rot(Y, -3 * sn) @ aim(arm, "arm.L", G_THINK), "arm.R": I}
+             "arm.L": rot(Y, -3 * sn) @ aim(arm, nm("arm.L"), G_THINK), "arm.R": I}
         for i, b in enumerate(tail): p[b] = rot(Z, 14 * math.sin(2 * math.pi * t - 0.6 * i))
         return p, 0.0
 
     def pose_point(t):
         e = min(1.0, t / 0.4); e = e * e * (3 - 2 * e)
-        p = {"body": rot(Y, 4 * e), "head": rot(Y, 3 * e), "arm.L": blend(DOWN_L, aim(arm, "arm.L", G_POINT), e), "arm.R": I}
+        p = {"body": rot(Y, 4 * e), "head": rot(Y, 3 * e), "arm.L": blend(DOWN_L, aim(arm, nm("arm.L"), G_POINT), e), "arm.R": I}
         for b in tail: p[b] = rot(Z, 10 * e)
         return p, 0.0
 
@@ -458,7 +489,7 @@ def clips(name, arm):
     def pose_wave(t):
         sn = math.sin(2 * math.pi * t)
         p = {"body": rot(Y, 2 * sn), "head": rot(Y, 4 * sn),
-             "arm.L": rot(Y, SWING * sn) @ aim(arm, "arm.L", G_WAVE), "arm.R": I}
+             "arm.L": rot(Y, SWING * sn) @ aim(arm, nm("arm.L"), G_WAVE), "arm.R": I}
         for i, b in enumerate(tail): p[b] = rot(Z, 12 * math.sin(2 * math.pi * t - 0.6 * i))
         return p, 0.0
 
@@ -470,8 +501,8 @@ def clips(name, arm):
         pb.rotation_mode = 'QUATERNION'
     made = []
     for cn, fn, length in defs:
-        old = bpy.data.actions.get(s["prefix"] + "_" + cn)
-        if old: bpy.data.actions.remove(old)
+        if cn == "walk" and s.get("walk_from"):  # the rig's own walk, with the held bones still
+            made.append(walk_from(name, arm, I)); continue
         act = bpy.data.actions.new(cn)
         act.use_fake_user = True
         arm.animation_data.action = act
@@ -481,15 +512,107 @@ def clips(name, arm):
             pose, up = fn(t)
             if s["face"] == "body":  # the tile's face is on its body: the body takes the head's turns (the hat keeps its own)
                 pose["body"] = pose.get("head", I) @ pose.get("body", I)
+            pose = {nm(k): v for k, v in pose.items()}
             for pb in arm.pose.bones:
                 R = pose.get(pb.name, I)
-                pb.rotation_quaternion = qlocal(arm, pb.name, R) if pb.name != "root" else I
-                pb.location = (0, up, 0) if pb.name == "root" else (0, 0, 0)
+                pb.rotation_quaternion = qlocal(arm, pb.name, R) if pb.name != ROOT else I
+                pb.location = (0, up, 0) if pb.name == ROOT else (0, 0, 0)
                 pb.keyframe_insert("rotation_quaternion", frame=fr + 1)
                 pb.keyframe_insert("location", frame=fr + 1)
         made.append(act)
     arm.animation_data.action = bpy.data.actions["idle"] if "idle" in bpy.data.actions else made[0]
     return made
+
+
+def walk_from(name, arm, I):
+    """The rig's own walk (Meshy's library) as the clip walk: retimed to 24 fps, the held bones (the halberd arm) still, no
+    travel (the guide walks in place; the page moves it)."""
+    import re
+    from bpy_extras import anim_utils
+    s = SPEC[name]
+    src = next(a for a in bpy.data.actions if s["walk_from"] in a.name and a.name != "walk")
+    act = src.copy(); act.name = "walk"; act.use_fake_user = True
+    k = 24.0 / s.get("_fps", 24)
+    hold = set(s.get("hold", []))
+    root = s.get("bonemap", {}).get("root", "root")
+    last = 1
+    for slot in act.slots:
+        cb = anim_utils.action_get_channelbag_for_slot(act, slot)
+        if not cb: continue
+        for fc in list(cb.fcurves):
+            m = re.match(r'pose\.bones\["(.+)"\]\.(\w+)', fc.data_path)
+            if m and m.group(1) in hold:
+                cb.fcurves.remove(fc); continue
+            if m and m.group(1) == root and m.group(2) == "location":  # keep the bob, drop the travel: hold the mean
+                vals = [kp.co.y for kp in fc.keyframe_points]
+                if fc.array_index != 1 and vals:  # local Y is up along the hips; X and Z carry sway or travel
+                    mean = sum(vals) / len(vals)
+                    if max(vals) - min(vals) > 0.05:
+                        for kp in fc.keyframe_points:
+                            for a in ("co", "handle_left", "handle_right"): getattr(kp, a).y = mean
+            for kp in fc.keyframe_points:
+                for a in ("co", "handle_left", "handle_right"):
+                    v = getattr(kp, a); v.x = 1 + (v.x - 1) * k
+                last = max(last, kp.co.x)
+    arm.animation_data.action = act
+    if act.slots and hasattr(arm.animation_data, "action_slot"): arm.animation_data.action_slot = act.slots[0]
+    for b in hold:
+        pb = arm.pose.bones.get(b)
+        if not pb: continue
+        pb.rotation_mode = 'QUATERNION'; pb.rotation_quaternion = I; pb.location = (0, 0, 0)
+        for f in (1, round(last)):
+            pb.keyframe_insert("rotation_quaternion", frame=f); pb.keyframe_insert("location", frame=f)
+    bpy.data.actions.remove(src)
+    return act
+
+
+# ---------- 1b. a model that comes rigged (Meshy's rig, FBX): its skeleton, its weights, its walk ----------
+def prep_fbx(name):
+    s = SPEC[name]
+    col = bpy.data.collections.new(s["prefix"])
+    bpy.context.scene.collection.children.link(col)
+    before = set(bpy.data.objects)
+    bpy.ops.import_scene.fbx(filepath=os.path.join(HERE, "meshy", s["fbx"]))
+    new = [x for x in bpy.data.objects if x not in before]
+    for x in new:
+        for c in list(x.users_collection): c.objects.unlink(x)
+        col.objects.link(x)
+    arm = next(x for x in new if x.type == 'ARMATURE'); o = next(x for x in new if x.type == 'MESH')
+    s["_fps"] = bpy.context.scene.render.fps; bpy.context.scene.render.fps = 24
+    arm.animation_data.action = None
+    for pb in arm.pose.bones:
+        pb.location = (0, 0, 0); pb.rotation_quaternion = (1, 0, 0, 0); pb.rotation_euler = (0, 0, 0); pb.scale = (1, 1, 1)
+    # the importer's turn (FBX is Y-up) baked into the rest pose: armature space is then world space, as the clips assume
+    deselect(); arm.select_set(True); o.select_set(True); bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+    bpy.context.view_layer.update()
+    zmin = min((o.matrix_world @ v.co).z for v in o.data.vertices)
+    zmax = max((o.matrix_world @ v.co).z for v in o.data.vertices)
+    arm.location.z -= zmin
+    bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
+    s["scale"] = s.get("height", 1.5) / (zmax - zmin)
+    for a in list(bpy.data.actions):  # the rig's library: only the walk is kept (a fight and a run are not a guide's)
+        if s["walk_from"] not in a.name: bpy.data.actions.remove(a)
+    m = o.modifiers.new("dec", 'DECIMATE'); m.ratio = s["tris"] / len(o.data.polygons); m.use_collapse_triangulate = True
+    activate(o)
+    bpy.ops.object.modifier_move_to_index(modifier="dec", index=0)
+    bpy.ops.object.modifier_apply(modifier="dec")
+    bpy.ops.object.shade_smooth()
+    arm.name = s["prefix"] + "_Rig"; o.name = name + "_low"
+    return o, arm
+
+
+def build_fbx(name, do_export=True):
+    s = SPEC[name]
+    o, arm = prep_fbx(name)
+    sf = Surf(o)
+    front, nf = split_front_arm(name, o)
+    if s.get("eyes"):
+        face(name, sf, arm)
+    acts = clips(name, arm)
+    out = export(name, arm) if do_export else None
+    print(name, "front faces", nf, "clips", [a.name for a in acts], "->", out)
+    return arm
 
 
 # ---------- 6. export ----------
@@ -515,6 +638,9 @@ def export(name, arm):
     if not arm.get("scaled"):
         # the size is baked into the bones and the meshes (every node at scale 1): three.js frames a skinned mesh by its
         # geometry's box, which a scaled parent node would put off by the scale
+        if "scale" not in s:  # a rigged import is sized by its height (prep_fbx measures it; this measures again)
+            zs = [(o.matrix_world @ v.co).z for o in objs if o.type == 'MESH' and o.name.endswith("_Body") for v in o.data.vertices]
+            s["scale"] = s.get("height", 1.5) / (max(zs) - min(zs))
         arm.scale = (s["scale"],) * 3
         bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
         arm["scaled"] = True
