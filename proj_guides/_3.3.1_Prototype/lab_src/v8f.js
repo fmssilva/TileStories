@@ -8,7 +8,7 @@ on("topBand.after",function(){var tb=ph.querySelector(".topband"),c=scr.querySel
 /* ----- the sheet: a tap on the grabber moves it one stop (peek > half > full > half); a short drag goes one stop its way ----- */
 function stepStop(){S.stop=S.stop==="full"?"half":S.stop==="half"?"full":"half";feedback("tap");renderPhone(true)}
 var DOWN={full:"half",half:"peek",peek:"closed"},UP={peek:"half",half:"full",full:"full"};
-initGrab=function(gb){gb.setAttribute("role","button");gb.tabIndex=0;
+function initGrab(gb){gb.setAttribute("role","button");gb.tabIndex=0;
   gb.addEventListener("pointerdown",function(e){gb.setPointerCapture(e.pointerId);var y0=e.clientY,t0=parseFloat(scr.style.top)||0,k=fit.getBoundingClientRect().height/SCREENS[S.screen][1],moved=false;
     function mv(ev){if(!moved&&Math.abs(ev.clientY-y0)<6)return;if(!moved){moved=true;scr.style.transition="none"}var t=Math.max(0,t0+(ev.clientY-y0)/k);scr.style.top=t+"px";gb.style.top=(t+2)+"px"}
     function up(ev){gb.removeEventListener("pointermove",mv);gb.removeEventListener("pointerup",up);gb.blur();if(!moved){stepStop();return}
@@ -29,9 +29,9 @@ ph.addEventListener("click",function(e){var t=e.target,ch=t.closest(".chrome i, 
   if(S.view==="card"&&x&&ch.closest(".topband")){e.stopPropagation();S.stop="closed";renderPhone(false)}},true);
 
 /* ----- a change redraws in place: the hero keeps its height, what was on screen stays shown, the scroll stays ----- */
-fitHero=function(){var hero=scr.querySelector(".hero");if(!hero||(S.view!=="card"&&S.view!=="democard"))return;
+function fitHero(){var hero=scr.querySelector(".hero");if(!hero||(S.view!=="card"&&S.view!=="democard"))return;
   if(S.heroH){hero.style.transition="none";hero.style.height=S.heroH+"px";void hero.offsetHeight;hero.style.transition=""}
-  S.heroH=heroH();hero.style.height=S.heroH+"px"};
+  S.heroH=heroH();hero.style.height=S.heroH+"px"}
 function shownInPlace(){var r=scr.getBoundingClientRect();scr.classList.add("still");
   scr.querySelectorAll(".mv:not(.in)").forEach(function(el){var b=el.getBoundingClientRect();if(b.bottom>r.top&&b.top<r.bottom)el.classList.add("in")});
   void scr.offsetHeight;scr.classList.remove("still")}
@@ -58,10 +58,10 @@ S.ctl.locate.label="visit";S.locShown=0;
 function locLabel(){return ph.querySelector(".locpin > span:first-child:not(.floatpin)")}
 function foldLabel(){S.locFolded=true;if(S.ctl.locate.label==="visit")S.locSeen=true;var lb=locLabel();if(lb)lb.classList.add("fold")}
 /* room = no overlap with the INK of the hero's words (their text and the guide button), not the box that holds them */
-locFit=function(){var lb=locLabel();if(!lb)return;var wait=650-(performance.now()-(S.movedAt||0));if(wait>0){lb.style.visibility="hidden";clearTimeout(S.fitT);S.fitT=setTimeout(locFit,wait+20);return}lb.style.visibility="";var a=lb.getBoundingClientRect();if(!a.width)return;
+function locFit(){var lb=locLabel();if(!lb)return;var wait=650-(performance.now()-(S.movedAt||0));if(wait>0){lb.style.visibility="hidden";clearTimeout(S.fitT);S.fitT=setTimeout(locFit,wait+20);return}lb.style.visibility="";var a=lb.getBoundingClientRect();if(!a.width)return;
   var hit=Array.prototype.some.call(scr.querySelectorAll(".hero .w small,.hero .w h2,.hero .w p,.hero .w button"),function(el){var c;if(el.tagName==="BUTTON")c=el.getBoundingClientRect();else{var rg=document.createRange();rg.selectNodeContents(el);c=rg.getBoundingClientRect()}
     return c.width&&!(a.right<c.left||a.left>c.right||a.bottom<c.top||a.top>c.bottom)});
-  if(hit)lb.style.visibility="hidden"};
+  if(hit)lb.style.visibility="hidden"}
 setInterval(function(){var lb=locLabel();if(!lb||S.locFolded||S.view!=="card"||S.stop==="closed"||S.stop==="peek"||document.hidden)return;
   if(lb.style.visibility!=="hidden"&&!lb.classList.contains("fold")){S.locShown+=250;if(S.locShown>=4000)foldLabel()}},250);
 on("renderPhone.after",function(keep){pinLift(false);

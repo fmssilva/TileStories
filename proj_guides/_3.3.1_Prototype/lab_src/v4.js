@@ -5,7 +5,7 @@ var SICON={info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',
  star:'<path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8-4.3-4.1 5.9-.8z"/>',chat:'<path d="M4 5h16v10H9l-5 4z"/>',ar:'<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/>'};
 function sicon(k,sz){return '<svg viewBox="0 0 24 24" width="'+(sz||18)+'" height="'+(sz||18)+'" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(SICON[k]||SICON.info)+'</svg>'}
 var SCOLOURS=[["about","Terracotta"],["stories","Wine"],["media","Azulejo Blue"],["listen","River Green"],["play","Brick Red"],["visit","Indigo"],["accent2","Accent"]];
-S.cardCfg={enabled:true,openAt:"half",halfMax:0.62,peekNext:true,tapOutside:true,mode:"light",layout:"scroll",topBand:"fade",audioOverlap:"duck",keepAudio:true};
+S.cardCfg={enabled:true,openAt:"half",halfMax:0.40,peekNext:false,tapOutside:true,mode:"light",layout:"scroll",topBand:"fade",audioOverlap:"fade",keepAudio:true};
 S.secCfg={look:"open",start:"tiles",divider:"none",colour:"section",intensity:0.12,tint:120,order:"sections"};
 S.sections=[
  {id:"about",name:T("About","Sobre"),icon:"info",colour:"about",shown:true,start:"inherit",kinds:["Header","Quick Facts","Status","Inline","Actions"]},
@@ -14,7 +14,7 @@ S.sections=[
  {id:"listen",name:T("Listen","Ouvir"),icon:"headphones",colour:"listen",shown:true,start:"inherit",kinds:["Audio Guide"]},
  {id:"play",name:T("Play","Jogar"),icon:"play",colour:"play",shown:true,start:"inherit",kinds:["Knowledge Check","Poll","Collect","Feedback","Place In AR"]},
  {id:"visit",name:T("Visit","Visitar"),icon:"pin",colour:"visit",shown:true,start:"inherit",kinds:["Wall Locator","Today Map","Related","Practical Info","Sources","Contents"]}];
-S.ctl={bar:{on:true,pos:"bottom",indicator:"raised",depth:1,iconColour:"section",labels:"both",hide:false},jump:{motion:"smooth",opens:"half"},
+S.ctl={bar:{on:true,pos:"bottom",indicator:"raised",depth:1,iconColour:"section",labels:"both",hide:false},jump:{motion:"smooth",opens:"full"},
  top:{title:true,settings:true},crumb:"pages",prevnext:true,openrow:"nudge",locate:{on:true,style:"pin_label",colour:"teal",size:1,float:true},sticky:"auto"};
 S.blockDefs={};LIB.forEach(function(r){S.blockDefs[r[1]]={enter:"family",tap:"nothing",orow:"plain",page:false,chrome:"inherit"}});
 ["Story","Gallery","Timeline","Dialogue","Compare Points","Video"].forEach(function(k){S.blockDefs[k].tap="page";S.blockDefs[k].page=true});

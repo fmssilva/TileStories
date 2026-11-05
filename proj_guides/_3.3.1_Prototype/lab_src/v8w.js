@@ -2,8 +2,6 @@
 var AZUGLB="__AZUGLB__";
 /* what a mascot GLB must hold (the contract of _3.7 section 1): the clips, the morphs, the front arm as its own mesh */
 var AZ3D_CLIPS=["idle","talk","listen","think","point","walk","wave"],AZ3D_MORPHS=["Blink","Open","Wide","Round"];
-/* the model to draw: v8x offers several and the Editor picks one */
-function az3dModel(){return{id:"tile",name:"Azu, the tile (azu_tile.glb, built in Blender)",glb:AZUGLB}}
 var AZ3D_THREE="https://cdn.jsdelivr.net/npm/three@0.160.0/+esm",AZ3D_LOADER="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js/+esm";
 var Azu3D=(function(){var T=null,GL=null,cv=null,R=null,scene=null,cam=null,model=null,mixer=null,acts={},raf=0,last=0,
     st={ready:false,failed:false,err:"",loading:null,clip:"",force:null,forceTill:0,mouth:{Open:0,Wide:0,Round:0},to:{Open:0,Wide:0,Round:0},blinkT:0,nextBlink:0,frames:0,src:"built-in",info:null};
@@ -65,9 +63,9 @@ function az3dPlace(){if(!az3dOn()){var o=ph.querySelector(".az3d");if(o){var h=o
   if(c.parentNode!==host){host.querySelectorAll("svg,.azgl:not(.az3d)").forEach(function(x){x.style.display="none"});host.insertBefore(c,host.firstChild)}
   if(host.classList.contains("mascot"))host.classList.add("light");Azu3D.start()}
 setInterval(az3dPlace,150);
-var renderGuideV8w=renderGuide;renderGuide=function(text){renderGuideV8w(text);az3dPlace()};
-var azMouthV8w=azMouth;azMouth=function(m,shape){azMouthV8w(m,shape);Azu3D.viseme(shape)};
-var startTourV8w=startTour;startTour=function(){G.azWaveTill=performance.now()+2600;startTourV8w()};
+on("renderGuide.after",function(){az3dPlace()});
+on("azMouth.after",function(m,shape){Azu3D.viseme(shape)});
+on("startTour.before",function(){G.azWaveTill=performance.now()+2600});
 
 /* ----- Editor: 6 · Guide > Azu: Mascot source, the 3D model's clips, Import, Generate from a picture ----- */
 var AZ3D_GEN=[["Hyper3D Rodin","the add-on's shared trial key: no credit left on 2026-11-03","a Rodin key (Business plan) in the add-on"],

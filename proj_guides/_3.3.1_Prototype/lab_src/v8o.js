@@ -19,8 +19,7 @@ function ico(k){return'<svg viewBox="0 0 24 24" aria-hidden="true">'+ICO[k]+'</s
 var TALKW={idle:"dock_tap_talk",listening:"dock_listening",thinking:"dock_thinking",speaking:"dock_tap_stop",interrupted:"dock_go_ahead",notheard:"dock_not_heard"};
 function talkState(){if(G.talk==="listening"||G.talk==="notheard"||G.talk==="interrupted")return G.talk;if(G.busy)return"thinking";if(G.on&&!G.paused&&(G.utter||G.timer))return"speaking";return"idle"}
 /* the dock replaces the captions box and the control bar; the old ones stay as "Classic" */
-var renderGuideV8o=renderGuide;
-renderGuide=function(text){renderGuideV8o(text);["gdock","gbubble"].forEach(function(c){var o=ph.querySelector("."+c);if(o)o.remove()});if(!G.on||!dockOn())return;
+on("renderGuide.after",function(text){["gdock","gbubble"].forEach(function(c){var o=ph.querySelector("."+c);if(o)o.remove()});if(!G.on||!dockOn())return;
   var cap=ph.querySelector(".gcap"),bar=ph.querySelector(".gbar"),ask=ph.querySelector(".gask");if(bar)bar.remove();if(ask)ask.remove();
   var st=S.guideSteps[G.i],own=cap&&!blockWords(text!=null?text:stepText(st));if(G.askOpen&&S.dockH!=="full")S.dockH="full";
   var n=S.guideSteps.length,ts=talkState(),seg='<div class="gd-seg">'+S.guideSteps.map(function(s,j){return'<button type="button" data-gseg="'+j+'" class="'+(j<G.i?"done":j===G.i?"now":"")+'" aria-label="'+esc(fmt(TXT("dock_stop_of"),j+1,n))+'"></button>'}).join("")+'</div>';
@@ -39,22 +38,22 @@ renderGuide=function(text){renderGuideV8o(text);["gdock","gbubble"].forEach(func
   /* the words: Azu's own in its bubble (above the dock), or in the dock's line; a block's words are lit in the block, so the line shows the step */
   if(cap){if(own&&S.guideCfg.bubbles==="own"&&S.dockH!=="full"){var b=document.createElement("div");b.className="gbubble";b.setAttribute("role","status");cap.classList.add("gb-text");b.appendChild(cap);ph.appendChild(b);placeBubble()}
     else if(own||S.dockH==="full"){d.querySelector(".gd-cap").appendChild(cap)}else cap.remove()}
-  var th=d.querySelector(".gd-thread");if(th)th.scrollTop=th.scrollHeight;var m=ph.querySelector(".mascot");if(m)m.dataset.state=ts};
+  var th=d.querySelector(".gd-thread");if(th)th.scrollTop=th.scrollHeight;var m=ph.querySelector(".mascot");if(m)m.dataset.state=ts});
 /* the bubble sits just above the dock, its tail towards Azu */
 function placeBubble(){var b=ph.querySelector(".gbubble"),d=ph.querySelector(".gdock"),m=ph.querySelector(".mascot");if(!b||!d)return;var q=ph.getBoundingClientRect().height/ph.offsetHeight;
   b.style.bottom=(ph.offsetHeight-d.offsetTop+10)+"px";var up=m&&m.offsetTop+30<d.offsetTop-b.offsetHeight-10;b.classList.toggle("tail-up",!!up)}
 /* the free height for the block being told: above the dock and the bubble */
-freeHeight=function(){var box=scr.getBoundingClientRect(),lo=box.bottom;[".gcap",".gbar",".gdock",".gbubble"].forEach(function(s){var e=ph.querySelector(s);if(e){var r=e.getBoundingClientRect();if(r.height)lo=Math.min(lo,r.top)}});return{top:box.top,bottom:lo}};
+function freeHeight(){var box=scr.getBoundingClientRect(),lo=box.bottom;[".gcap",".gbar",".gdock",".gbubble"].forEach(function(s){var e=ph.querySelector(s);if(e){var r=e.getBoundingClientRect();if(r.height)lo=Math.min(lo,r.top)}});return{top:box.top,bottom:lo}}
 /* keep the talk state and the bubble's place in step with the voice */
 /* a bubble shows one sentence at a time (2 lines at most), the sentence being said */
 function bubbleSentence(){var b=ph.querySelector(".gbubble .gcap");if(!b)return;var ws=b.querySelectorAll(".gw"),k=Math.max(0,G.hl&&G.hl.k>=0?G.hl.k:0),sid=[],n=0;
   for(var i=0;i<ws.length;i++){sid.push(n);if(/[.!?…]["”»)]*$/.test(ws[i].textContent))n++}var cur=sid[Math.min(k,ws.length-1)];for(var j=0;j<ws.length;j++)ws[j].classList.toggle("gb-off",sid[j]!==cur)}
 setInterval(function(){if(!G.on||!dockOn())return;bubbleSentence();var t=ph.querySelector(".gd-talk"),ts=talkState();if(t&&!t.classList.contains("s-"+ts)){t.className="gd-talk s-"+ts;var h=ph.querySelector(".gd-hint");if(h)h.textContent=TXT(TALKW[ts]);var m=ph.querySelector(".mascot");if(m)m.dataset.state=ts}placeBubble()},150);
 /* the conversation: the tour's lines and the questions and answers */
-var runStepV8o=runStep;runStep=function(){runStepV8o();var st=S.guideSteps[G.i];if(st){var t=stepText(st);if(t&&(!G.thread.length||G.thread[G.thread.length-1].text!==t))G.thread.push({who:"azu",text:t});if(G.thread.length>60)G.thread.shift()}};
-var askV8o=ask;ask=function(q){if(!q||!q.trim())return;G.thread.push({who:"me",text:q.trim()});G.micNote="";G.talk="idle";askV8o(q)};
-var sayV8o=say;say=function(text,onWord,onEnd){if(G.askOpen&&G.answer&&text===G.answer){if(!G.thread.length||G.thread[G.thread.length-1].text!==text)G.thread.push({who:"azu",text:text});renderGuide(text)}sayV8o(text,onWord,onEnd)};
-var startTourV8o=startTour;startTour=function(){S.dockH=S.guideCfg.dockStart;G.thread=[];G.talk="idle";G.askOpen=false;G.answer="";G.micNote="";startTourV8o()};
+on("runStep.after",function(){var st=S.guideSteps[G.i];if(st){var t=stepText(st);if(t&&(!G.thread.length||G.thread[G.thread.length-1].text!==t))G.thread.push({who:"azu",text:t});if(G.thread.length>60)G.thread.shift()}});
+on("ask.before",function(q){G.thread.push({who:"me",text:q.trim()});G.micNote="";G.talk="idle"});
+on("sayDevice.before",function(text){if(G.askOpen&&G.answer&&text===G.answer){if(!G.thread.length||G.thread[G.thread.length-1].text!==text)G.thread.push({who:"azu",text:text});renderGuide(text)}});
+on("startTour.before",function(){S.dockH=S.guideCfg.dockStart;G.thread=[];G.talk="idle";G.askOpen=false;G.answer="";G.micNote=""});
 /* ----- the talk button: a tap listens until the visitor stops; a long press is hold-to-talk; speaking, a tap interrupts and listens ----- */
 function earcon(up){if(!S.guideCfg.earcons)return;try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();var o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;o.type="sine";o.frequency.setValueAtTime(up?620:880,t);o.frequency.exponentialRampToValueAtTime(up?880:560,t+.12);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.08,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+.16);o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+.18)}catch(e){}}
 function micBlockedNote(){return TXT(window.top!==window?"dock_mic_framed":"dock_mic_none")}
@@ -64,7 +63,7 @@ function listen(hold){var R=window.SpeechRecognition||window.webkitSpeechRecogni
   rec.onresult=function(ev){got="";for(var i=0;i<ev.results.length;i++)got+=ev.results[i][0].transcript;var h=ph.querySelector(".gd-hint");if(h)h.textContent=got||TXT("dock_listening")};
   rec.onerror=function(e){G.rec=null;heard(null,e.error)};rec.onend=function(){if(G.rec!==rec)return;G.rec=null;heard(got,null)};
   try{rec.start();G.talk="listening";earcon(true);haptic();renderGuide()}catch(e){heard(null,"start")}}
-function heard(q,err){if(q&&q.trim()){G.talk="idle";earcon(false);ask(q);return}
+function heard(q,err){if(firstAnswer("heard.answer",q,err)!==undefined)return;if(q&&q.trim()){G.talk="idle";earcon(false);ask(q);return}
   G.talk="notheard";if(err&&err!=="no-speech"&&err!=="aborted"){G.micNote=micBlockedNote();S.dockH="full";G.askOpen=true}renderGuide();try{if(navigator.vibrate)navigator.vibrate([10,60,10])}catch(e){}
   setTimeout(function(){if(G.talk==="notheard"){G.talk="idle";renderGuide();var i=ph.querySelector("#gq");if(i&&S.dockH==="full")i.focus({preventScroll:true})}},2200)}
 var talkDown=null;
@@ -107,10 +106,10 @@ ed.addEventListener("click",function(e){var t=e.target.closest("[data-gaskadd],[
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(panel|dockStart|bubbles|talk|earcons|chips|"));
 
 /* Azu's place: never under the dock or the bubble; with the bubble on the welcome (the hero), it sits beside the bubble, just above the dock */
-pointAt=function(tg){var m=ph.querySelector(".mascot");if(!m)return;if(G.moment)tg=null;var a=m.querySelector(".marm"),st=S.guideSteps[G.i],b=ph.querySelector(".gbubble");
+function pointAt(tg){var m=ph.querySelector(".mascot");if(!m)return;if(G.moment)tg=null;var a=m.querySelector(".marm"),st=S.guideSteps[G.i],b=ph.querySelector(".gbubble");
   if(dockOn()&&b&&st&&st.ref==="hero"){var y0=Math.max(70,b.offsetTop+b.offsetHeight-64);if(Math.abs((parseFloat(m.style.top)||0)-y0)>2)m.style.top=y0+"px";if(a)a.classList.remove("on");m.classList.remove("pointing");return}
   if(!tg){if(a)a.classList.remove("on");m.classList.remove("pointing");return}
   if(!a){a=document.createElement("i");a.className="marm";m.appendChild(a)}
   var fb=freeHeight(),pr=ph.getBoundingClientRect(),q=pr.height/ph.offsetHeight,lo=(fb.bottom-pr.top)/q-72,y=Math.max(70,Math.min(lo,tg.y-27));if(Math.abs((parseFloat(m.style.top)||0)-y)>2)m.style.top=y+"px";
   var mx=m.offsetLeft+8,my=y+34,ang=Math.atan2(tg.y-my,tg.x-mx)*180/Math.PI;ang=Math.max(120,Math.min(240,ang<0?ang+360:ang));
-  a.style.transform="rotate("+(ang-180).toFixed(1)+"deg)";a.classList.add("on");m.classList.add("pointing")};
+  a.style.transform="rotate("+(ang-180).toFixed(1)+"deg)";a.classList.add("on");m.classList.add("pointing")}

@@ -370,14 +370,8 @@ function storyScreen(){emitLatestFirst("storyScreen.before");var h=topbar(esc(L(
     else h+='<div class="item" data-ref="r:'+r.id+'">'+renderEl(r.kind,(r.style&&styleById(r.style))||defStyle(r.kind),r.c,0)+'</div>'});
   return pipe("storyScreen.html",h+'</div></div>');}
 function galleryScreen(){emitLatestFirst("galleryScreen.before");return pipe("galleryScreen.html",topbar(esc(L(secById("media").name))+" &#8250; <b>"+TXH("gallery_name")+"</b>")+'<div class="pg"><div class="blk">'+(S.galleryImgs||["g1","g2","g3","before"]).map(function(g,i){return renderEl("picture",defStyle("picture"),{img:g,cap:T("Picture "+(i+1),"Imagem "+(i+1))},i)}).join("")+'</div></div>')}
-function ptool(){var nx={phone:"land",land:"tablet",tablet:"phone"},nm={phone:"Phone",land:"Wide",tablet:"Tablet"};
-  return '<span class="lbl">PREVIEW</span><button type="button" data-pt="dark" aria-pressed="'+S.dark+'" title="Light / dark">'+(S.dark?"&#9790; Dark":"&#9728; Light")+'</button>'+
-   '<button type="button" data-pt="reduce" aria-pressed="'+S.reduce+'" title="Reduce Motion">'+(S.reduce?"Still":"Motion")+'</button>'+
-   '<button type="button" data-pt="lang" aria-pressed="false" title="Language">'+S.lang.toUpperCase()+'</button>'+
-   '<button type="button" data-pt="focusOn" aria-pressed="'+S.focusOn+'" title="Focus on what I edit">Focus</button>'+
-   '<button type="button" data-pt="screen" data-v="'+nx[S.screen]+'" aria-pressed="false" title="Screen">'+nm[S.screen]+'</button>'}
 /* the phone: the features before (latest first) and after (in module order), sharing the call's notes cx */
-function renderPhone(keep){var cx={};emitLatestFirst("renderPhone.before",keep,cx);var top=keep?scr.scrollTop:0,sz=SCREENS[S.screen];
+function renderPhone(keep){if(noDraw)return;var cx={};emitLatestFirst("renderPhone.before",keep,cx);var top=keep?scr.scrollTop:0,sz=SCREENS[S.screen];
   ph.style.width=sz[0]+"px";ph.style.height=sz[1]+"px";ph.classList.toggle("land",S.screen==="land");
   var k=Math.min(1,390/sz[0]);fit.style.transform="scale("+k+")";fit.style.height=(sz[1]*k)+"px";fit.style.width=(sz[0]*k)+"px";fit.style.transformOrigin="top left";
   document.getElementById("camera").style.backgroundImage=S.screen==="land"?"url("+IMG.hero+")":"none";
@@ -443,9 +437,9 @@ function turn(t,dir){var m=motionById(t.dataset.trv),sl=t.querySelectorAll(".sl"
   var o={duration:m.dur,easing:easeCss(m.ease),fill:"forwards"};A.animate(KA,o).onfinish=function(){A.style.opacity=0;A.getAnimations().forEach(function(x){x.cancel()});A.style.zIndex=""};B.animate(KB,o).onfinish=function(){B.getAnimations().forEach(function(x){x.cancel()});B.style.opacity=1}}
 function applyFocus(){var on=S.focusOn&&S.view==="demo"&&S.focusRef;scr.classList.toggle("focusing",!!on);
   scr.querySelectorAll(".item.focus").forEach(function(x){x.classList.remove("focus")});if(on){var el=scr.querySelector('[data-ref="'+S.focusRef+'"]');if(el)el.classList.add("focus")}}
-function flashRef(ref){var el=scr.querySelector('[data-ref="'+ref+'"]');if(!el)return;var y=el.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-70;
+function flashRef(ref){if(noDraw)return;var el=scr.querySelector('[data-ref="'+ref+'"]');if(!el)return;var y=el.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-70;
   scr.scrollTo({top:Math.max(0,y),behavior:S.reduce?"auto":"smooth"});if(S.view!=="demo"){el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash")}}
-function show(view,ref){if(ref&&view==="demo")S.focusRef=ref;if(S.view!==view){S.view=view;renderPhone(false)}else applyFocus();if(ref)setTimeout(function(){flashRef(ref)},40)}
+function show(view,ref){if(noDraw){S.view=view;return}if(ref&&view==="demo")S.focusRef=ref;if(S.view!==view){S.view=view;renderPhone(false)}else applyFocus();if(ref)setTimeout(function(){flashRef(ref)},40)}
 /* replay: jump back without a transition, then play forward */
 function replayIn(root){var els=root.querySelectorAll(".mv");els.forEach(function(el){el.style.transition="none";el.classList.remove("in")});void root.offsetWidth;
   requestAnimationFrame(function(){els.forEach(function(el){el.style.transition=""});requestAnimationFrame(function(){els.forEach(function(el){el.classList.add("in")})})})}
@@ -622,9 +616,11 @@ function bcJson(){var es={};for(var k in S.styles)es[k]=S.styles[k].map(function
 function markerJson(){return{blocks:S.card.map(function(b){var o={kind:b.kind,group:b.grp,entrance:b.enter,tap:b.tap};if(b.tap==="page")o.open_row=b.orow;if(b.pattern)o.pattern=b.pattern;return o}),
   story_page:S.story.map(function(r){return r.pattern?{pattern:r.pattern,slots:r.slots}:{element:r.kind,style:r.style||undefined,content:r.c}})}}
 var lastRender=0;
-function renderEditor(){emitLatestFirst("renderEditor.before");lastRender=performance.now();document.querySelectorAll(".utab").forEach(function(t){t.setAttribute("aria-selected",String(t.dataset.tab===S.tab))});
+/* noDraw: the self-test works the Editor's controls without drawing the Editor or the phone (show only sets the view) */
+var noDraw=false;
+function renderEditor(){if(noDraw)return;emitLatestFirst("renderEditor.before");lastRender=performance.now();document.querySelectorAll(".utab").forEach(function(t){t.setAttribute("aria-selected",String(t.dataset.tab===S.tab))});
   var h=firstAnswer("renderEditor.tab");ed.innerHTML=h!==undefined?h:S.tab==="card"?edCard():S.tab==="marker"?edMarker():edGlobal();emit("renderEditor.after")}
-function renderAll(keep){renderEditor();renderPhone(keep)}
+function renderAll(keep){if(noDraw)return;renderEditor();renderPhone(keep)}
 function refreshJson(){var pre=ed.querySelector(".json pre");if(pre)pre.textContent=JSON.stringify(S.tab==="card"?bcJson():markerJson(),null,2)}
 
 /* ---------- Editor events ---------- */
@@ -680,7 +676,7 @@ function setOpt(key,v){if(firstAnswer("setOpt.answer",key,v)!==undefined)return;
   if(key.indexOf("motion.")===0&&m){m[key.slice(7)]=v;renderAll(true);show("demo","m:"+m.id);playRef("m:"+m.id);return}
   if(key.indexOf("o.")===0&&st){st.o[key.slice(2)]=v;renderAll(true);show("demo","s:"+st.id);return}
   if(key.indexOf("fx.")===0&&f){f.o[key.slice(3)]=v;renderAll(true);show("demo","f:"+f.id);return}}
-function playRef(ref){setTimeout(function(){var b=scr.querySelector('[data-ref="'+ref+'"] [data-play]');if(b)b.click()},380)}
+function playRef(ref){if(noDraw)return;setTimeout(function(){var b=scr.querySelector('[data-ref="'+ref+'"] [data-play]');if(b)b.click()},380)}
 ed.addEventListener("change",function(e){var t=e.target,k=t.dataset.sel;if(t.dataset.num){numChange(t,true);return}if(!k)return;
   if(k==="test.poi"){S.test.poi=t.value;S.view="card";renderAll(false);return}
   if(k==="family"){S.family=t.value;renderAll(true);return}

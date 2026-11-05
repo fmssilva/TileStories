@@ -34,7 +34,7 @@ function regionRect(img,reg){var r=visRect(img);if(S.guideCfg.zoom==="zoom"&&VIE
   var L0=Math.max(r.left,r.left+ox+reg[0]*dw),T0=Math.max(r.top,r.top+oy+reg[1]*dh),R0=Math.min(r.right,r.left+ox+(reg[0]+reg[2])*dw),B0=Math.min(r.bottom,r.top+oy+(reg[1]+reg[3])*dh);
   return{left:L0,top:T0,width:R0-L0,height:B0-T0,right:R0,bottom:B0}}
 /* each frame while the tour runs: the cue now (the last one whose word was reached), the spotlight on it, Azu pointing */
-var runStepV8j=runStep;runStep=function(){unzoomAll();G.fc={cue:-2,i:G.i};runStepV8j();fcLoop()};
+on("runStep.before",function(){unzoomAll();G.fc={cue:-2,i:G.i}});on("runStep.after",function(){fcLoop()});
 function fcLoop(){if(!G.fcRaf)G.fcRaf=requestAnimationFrame(fcTick)}
 function fcTick(){G.fcRaf=0;var sp=ph.querySelector(".gspot");if(!G.on){if(sp)sp.remove();return}
   var st=S.guideSteps[G.i],el=stepEl(st),cfg=S.guideCfg,k=G.hl?G.hl.k:-1,cues=st&&st.cues||[],now=-1;
@@ -55,15 +55,7 @@ function fcTick(){G.fcRaf=0;var sp=ph.querySelector(".gspot");if(!G.on){if(sp)sp
   ph.classList.toggle("gspotting",cfg.cue!=="none");
   pointAt(r&&cfg.point&&!G.paused?{x:(r.left+r.width/2-p.left)/q,y:((Math.max(r.top,box.top)+Math.min(r.bottom,box.bottom))/2-p.top)/q}:null);
   G.fcRaf=requestAnimationFrame(fcTick)}
-/* Azu stands level with the spot and points at it with one arm */
-function pointAt(tg){var m=ph.querySelector(".mascot");if(!m)return;if(G.moment)tg=null;var a=m.querySelector(".marm");
-  if(!tg){if(a)a.classList.remove("on");m.classList.remove("pointing");return}
-  if(!a){a=document.createElement("i");a.className="marm";m.appendChild(a)}
-  /* never under the captions: Azu stays above their box */
-  var cap=ph.querySelector(".gcap"),lo=cap?cap.offsetTop-72:ph.offsetHeight-230,y=Math.max(70,Math.min(lo,tg.y-27));if(Math.abs((parseFloat(m.style.top)||0)-y)>2)m.style.top=y+"px";
-  var mx=m.offsetLeft+8,my=y+34,ang=Math.atan2(tg.y-my,tg.x-mx)*180/Math.PI;ang=Math.max(120,Math.min(240,ang<0?ang+360:ang));
-  a.style.transform="rotate("+(ang-180).toFixed(1)+"deg)";a.classList.add("on");m.classList.add("pointing")}
-var stopTourV8j=stopTour;stopTour=function(){unzoomAll();var sp=ph.querySelector(".gspot");if(sp)sp.remove();ph.classList.remove("gspotting");stopTourV8j()};
+on("stopTour.before",function(){unzoomAll();var sp=ph.querySelector(".gspot");if(sp)sp.remove();ph.classList.remove("gspotting")});
 
 /* Editor: 6 · Guide gets Focus, after Captions; Specific Marker > Guide script gets each step's spots, drawn on its picture */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var ca=d.querySelector('[data-fo="s7cap"]');if(!ca)return d.innerHTML;

@@ -8,19 +8,19 @@ function voicesFor(lang){var want=lang==="pt"?["pt-PT","pt"]:["en-GB","en"],out=
   want.forEach(function(w){VOICES.forEach(function(v){if((v.lang||"").replace("_","-").indexOf(w)===0&&out.indexOf(v)<0)out.push(v)})});
   var rank=function(v){return((v.lang||"").replace("_","-").indexOf(want[0])===0?0:2)+(/natural|neural|online|premium|enhanced/i.test(v.name)?0:1)};
   return out.map(function(v,i){return[v,i]}).sort(function(a,b){return rank(a[0])-rank(b[0])||a[1]-b[1]}).map(function(x){return x[0]})}
-voiceFor=function(lang){var vs=voicesFor(lang),pick=S.guideCfg["voice_"+lang];for(var i=0;i<vs.length;i++)if(vs[i].name===pick)return vs[i];return vs[0]||null};
-/* say waits up to 1.5 s for the voices, inside the tap's activation, before it falls back to captions only */
-var sayV8i=say;
-say=function(text,onWord,onEnd){if(G.voiceWait){clearInterval(G.voiceWait);G.voiceWait=null}
-  G.hl={k:-1,at:0,p:0,cpm:0,ended:false,last:0,seen:false,start:performance.now(),target:G.hl&&G.hl.target};G.noVoice=false;
-  var go=function(){sayV8i(text,onWord,function(){G.hl.ended=true;onEnd()});G.noVoice=!S.guideMute&&!G.utter&&!!G.timer;var n=ph.querySelector(".gnovoice");if(n)n.hidden=!G.noVoice;hlLoop()};
-  if(window.speechSynthesis&&!S.guideMute&&!loadVoices()){var t0=Date.now();G.voiceWait=setInterval(function(){if(loadVoices()||Date.now()-t0>1500){clearInterval(G.voiceWait);G.voiceWait=null;go()}},50);return}
-  go()};
-var stopSpeechV8i=stopSpeech;stopSpeech=function(){if(G.voiceWait){clearInterval(G.voiceWait);G.voiceWait=null}stopSpeechV8i()};
+function voiceFor(lang){var vs=voicesFor(lang),pick=S.guideCfg["voice_"+lang];for(var i=0;i<vs.length;i++)if(vs[i].name===pick)return vs[i];return vs[0]||null}
+/* the device voice waits up to 1.5 s for the voices, inside the tap's activation, before it falls back to captions only; its read-along starts with each line */
+on("sayDevice.before",function(){if(G.voiceWait){clearInterval(G.voiceWait);G.voiceWait=null}
+  G.hl={k:-1,at:0,p:0,cpm:0,ended:false,last:0,seen:false,start:performance.now(),target:G.hl&&G.hl.target};G.noVoice=false});
+on("sayDevice.wait",function(go){if(window.speechSynthesis&&!S.guideMute&&!loadVoices()){var t0=Date.now();G.voiceWait=setInterval(function(){if(loadVoices()||Date.now()-t0>1500){clearInterval(G.voiceWait);G.voiceWait=null;go()}},50);return true}});
+on("sayDevice.started",function(){G.noVoice=!S.guideMute&&!G.utter&&!!G.timer;var n=ph.querySelector(".gnovoice");if(n)n.hidden=!G.noVoice;hlLoop()});
+on("sayDevice.ended",function(){G.hl.ended=true});
+on("stopSpeech.before",function(){if(G.voiceWait){clearInterval(G.voiceWait);G.voiceWait=null}});
 /* the reading head: a word boundary (the voice) or a tick (no voice) sets the word; between them the head glides through it */
-markWord=function(k,target){var h=G.hl,now=performance.now();if(G.utter&&!h.est)h.seen=true;if(target!==h.target){hlClear(h.target);h.target=target||null}
-  if(k!==h.k){if(h.k>=0&&k>h.k&&!G.timer){var ch=0;for(var j=h.k;j<k;j++)ch+=G.words[j].w.length+1;var per=(now-h.at)/Math.max(1,ch);if(per>15&&per<400)h.cpm=h.cpm?h.cpm*.6+per*.4:per}h.k=k;h.at=now}hlLoop()};
-function wordMs(k){var base=60000/(170*S.guideCfg.speed);if(G.timer||!G.words[k])return base;return(G.words[k].w.length+1)*(G.hl.cpm||base/6)}
+/* markWord: before (latest first) and done (always, in module order) share the notes cx; after, in module order */
+function markWord(k,target){var cx={};emitLatestFirst("markWord.before",cx);try{var h=G.hl,now=performance.now();if(G.utter&&!h.est)h.seen=true;if(target!==h.target){hlClear(h.target);h.target=target||null}
+  if(k!==h.k){if(h.k>=0&&k>h.k&&!G.timer){var ch=0;for(var j=h.k;j<k;j++)ch+=G.words[j].w.length+1;var per=(now-h.at)/Math.max(1,ch);if(per>15&&per<400)h.cpm=h.cpm?h.cpm*.6+per*.4:per}h.k=k;h.at=now}hlLoop();emit("markWord.after",k,target)}finally{emit("markWord.done",cx)}}
+function wordMs(k){var ans=firstAnswer("wordMs.answer",k);if(ans!==undefined)return ans;var base=60000/(170*S.guideCfg.speed);if(G.timer||!G.words[k])return base;return(G.words[k].w.length+1)*(G.hl.cpm||base/6)}
 function hlLoop(){if(!G.hlRaf)G.hlRaf=requestAnimationFrame(hlTick)}
 function hlTick(now){G.hlRaf=0;var h=G.hl;if(!G.on||!h){return}var dt=h.last?Math.min(100,now-h.last):16;h.last=now;
   if(G.paused){h.at+=dt;h.start+=dt}
@@ -41,11 +41,11 @@ function hlPaint(box,p,glide){if(!box)return;var ws=box.querySelectorAll(".gw");
     w.style.setProperty("--f",fi.toFixed(3));w.style.setProperty("--h",hd.toFixed(3));w.style.setProperty("--t",t.toFixed(3));w.style.setProperty("--a",(j===k?1:t).toFixed(3));
     w.classList.toggle("un",j>k)}}
 function hlClear(box){if(!box)return;box.classList.remove("gread");box.querySelectorAll(".gw").forEach(function(w){w.removeAttribute("style");w.classList.remove("un")})}
-var clearGuideMarksV8i=clearGuideMarks;clearGuideMarks=function(){clearGuideMarksV8i();if(G.hl&&G.hl.target){hlClear(G.hl.target);G.hl.target=null}};
-var stopTourV8i=stopTour;stopTour=function(){if(G.hl&&G.hl.target){hlClear(G.hl.target);G.hl.target=null}stopTourV8i()};
+on("clearGuideMarks.after",function(){if(G.hl&&G.hl.target){hlClear(G.hl.target);G.hl.target=null}});
+on("stopTour.before",function(){if(G.hl&&G.hl.target){hlClear(G.hl.target);G.hl.target=null}});
 /* the captions say when this device has no voice for the language */
-var renderGuideV8i=renderGuide;renderGuide=function(text){renderGuideV8i(text);var cap=ph.querySelector(".gcap");if(!cap)return;
-  cap.insertAdjacentHTML("afterbegin",'<small class="gnovoice"'+(G.noVoice?"":" hidden")+'>'+TXH("guide_novoice")+'</small>');if(G.hl)hlPaint(cap,G.hl.p,S.guideCfg.glide&&!S.reduce)};
+on("renderGuide.after",function(text){var cap=ph.querySelector(".gcap");if(!cap)return;
+  cap.insertAdjacentHTML("afterbegin",'<small class="gnovoice"'+(G.noVoice?"":" hidden")+'>'+TXH("guide_novoice")+'</small>');if(G.hl)hlPaint(cap,G.hl.p,S.guideCfg.glide&&!S.reduce)});
 
 /* Editor: Captions gets the highlight's style, its trail, the glide, the voice in this browser and a Try */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;

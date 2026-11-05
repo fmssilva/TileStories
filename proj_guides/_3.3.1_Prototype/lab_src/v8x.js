@@ -14,7 +14,8 @@ var AZ3D_MODELS=[
    about:"Meshy model (CC BY 4.0) on Meshy's own skeleton (elbows, knees, a spine) with its walk; the halberd stays upright, the shield arm waves and points"}];
 S.guideCfg.azuModel="azu";
 function az3dModelOf(id){for(var i=0;i<AZ3D_MODELS.length;i++)if(AZ3D_MODELS[i].id===id)return AZ3D_MODELS[i];return AZ3D_MODELS[0]}
-az3dModel=function(){var m=az3dModelOf(S.guideCfg.azuModel);return{id:m.id,name:m.name+" ("+m.file+")",glb:m.glb}};
+/* the model to draw: the one the Editor picks */
+function az3dModel(){var m=az3dModelOf(S.guideCfg.azuModel);return{id:m.id,name:m.name+" ("+m.file+")",glb:m.glb}}
 /* the model changes nothing the phone's picture can show until the 3D model is drawn: a behaviour for the self-test */
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(guideCfg\\.azuModel|"));
 

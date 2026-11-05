@@ -31,7 +31,7 @@ ph.addEventListener("click",function(e){var c=e.target.closest("[data-lens]");if
   S.lens=c.dataset.lens;lensApply();if(anchor&&anchor.isConnected)scr.scrollTop+=anchor.getBoundingClientRect().top-y;
   var bar=scr.querySelector(".lensbar [aria-pressed=true]");if(bar)bar.focus({preventScroll:true})},true);
 /* the guide plays the core steps and the lens's own */
-var stepFitsV8m=stepFits;stepFits=function(st){return stepFitsV8m(st)&&fitsLens(st.topics)};
+on("stepFits.ok",function(ok,st){return ok&&fitsLens(st.topics)});
 
 /* Editor: 7 · Audiences > Lenses (the chips); Specific Marker > 5 · Lenses (the point's topics, and what belongs to each) */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var lk=d.querySelector('[data-fo="s8look"]');if(!lk)return d.innerHTML;

@@ -25,28 +25,36 @@ lives, so a change goes to one place. Update it in the same round as every chang
 
 ## Where the code is today
 
-The restructure is under way: the code is still in the old layers, in load order. The Editor's and the phone's shared
-functions (`edCard`, `edMarker`, `renderEditor`, `renderPhone`, the screens, `modelSig`, `renderEl`, `setOpt`…) have one
-definition each, in the layer that first defines them, and call named points (`renderPhone.before`, `edCard.html`,
-`cardScreen.html`…); each layer joins them with `on()` from its own file. The guide, the mascot, the world and the agent still
-wrap the layer before them.
+The restructure is under way: the code is still in the old layers, in load order, but nothing wraps or re-assigns a
+function any more (the check counts 0 of each). Every shared function has one definition, in the layer that first defines it
+(or, where a later layer replaced its whole body, in that layer), and calls named points (`renderPhone.before`,
+`edCard.html`, `runStep.after`, `say.source`…); each layer joins them with `on()` from its own file. The self-test silences
+the drawing with the flag `noDraw` (v3), not with stub functions.
+
+**The voice.** `say` (v6) asks its sources, the latest first: the live answers (`lvSay`, v9a: only `G.answer`, with
+`liveVoice` Azure or ElevenLabs and its key), then a recorded line (`recSay`, v8r: Voice = Recorded files and the line
+rendered); if none takes the line, the device voice (`sayDevice`, v6) speaks it. A source that fails hands the line to the
+ones older than it (`sayFrom`; v9a's `lvDevice`). Then `say.after` (v9b: the recorded line's mouth). The device voice has
+`sayDevice.before` (v8o the answer in the thread, v8n the resume point, v8i the read-along), `.wait` (v8i waits for the
+browser's voices), `.started`, `.ended`, `.after` (v8n: retry a failed voice). `camSay` (v8p) is built the same way
+(`camSay.source`: v9a's `lvCamSay`).
 
 | Layer | Holds |
 |---|---|
 | `v3.js` | Opens the shared scope. Catalogues (kinds, motions, effects, patterns, the library), the state `S`, the elements' drawing (`renderEl`), the phone (`renderPhone`, screens, the sheet), the Editor's widgets (`row`, `seg`, `fo`) and its events |
-| `ext.js` | The extension points: `on`, `emit`, `emitLatestFirst` (a "before" point), `pipe` (a value through each joiner), `firstAnswer` (the latest joiner with an answer wins) |
+| `ext.js` | The extension points: `on`, `emit`, `emitLatestFirst` (a "before" point), `pipe` (a value through each joiner), `firstAnswer` (the latest joiner with an answer wins), `answerBelow` (the same, from the joiners older than one) |
 | `v4.js` | Detail Card's organisation: sections, the Navigation Bar, the card's Editor (`edCard`, `edMarker`) |
 | `v5.js` | The flow (the wall, the marker, the stops) and the self-test |
-| `v6.js` | The Guide: the tour, the device voice (`say`), captions, Ask |
-| `v7.js` | Texts on their parts, the demo card, Languages & Terms, the Editor's focus map (`FOCUS`, `COMP`) |
-| `v8a`-`v8e` | The Unity audit merged: card and sections, every block kind, elements and motion, Specific Marker and languages, the hero and the Editor tools |
-| `v8f`-`v8h` | The sheet's details, the demo in one component, the Hints, Loading & states |
-| `v8i`-`v8o` | The guide: read-along, focus, a lively Azu, audiences, lenses, the guide as a person, the Guide Dock |
-| `v8r`, `v8p` | Recorded voices and the Voice test; Ask about the view |
-| `v8q`, `v8s` | Azu, the tile of light (WebGL); Azu as the guide's button, the test wall |
-| `v8t`, `v8u` | Ask Azu, the live agent; its test scenes |
-| `v8v`-`v8z` | The markers on the picture; the 3D Azu and its models; the tile of light's styles; size and character |
-| `v9a`, `v9b` | The live answers' voice; the real mouth |
+| `v6.js` | The Guide: the tour (`startTour`, `runStep`, `next`), the voice (`say`, `sayDevice`), captions (`renderGuide`), Ask (`ask`) |
+| `v7.js` | Texts on their parts, the demo card's screen, Languages & Terms, the preview bar (`ptool`), the Editor's focus map (`FOCUS`, `COMP`) |
+| `v8a`-`v8e` | The Unity audit merged: card and sections, every block kind (and the demo card, `S.demoCard`), elements and motion, Specific Marker and languages, the hero and the Editor tools |
+| `v8f`-`v8h` | The sheet's details (`initGrab`, `fitHero`, `locFit`), the demo in one component (`testTile`), the Hints, Loading & states |
+| `v8i`-`v8o` | The guide: read-along (`voiceFor`, `markWord`), focus, a lively Azu (`azMouth`), audiences, lenses, the guide as a person (`pauseTour`, `resumeTour`, `gesture`), the Guide Dock (`pointAt`, `freeHeight`, `heard`) |
+| `v8r`, `v8p` | Recorded voices (a source of `say`) and the Voice test; Ask about the view (`camLayer`, `camSay`, `camAsk`) |
+| `v8q`, `v8s` | Azu, the tile of light (WebGL); Azu as the guide's button (`fabLayer`), the test wall (`camGeom`, `camPaint`) |
+| `v8t`, `v8u` | Ask Azu, the live agent (`agentAsk`, `agPrompt`…); its test scenes (`agScene`, `agRunScene`) |
+| `v8v`-`v8z` | The markers on the picture; the 3D Azu and its models (`az3dModel`); the tile of light's styles; size and character |
+| `v9a`, `v9b` | The live answers' voice (a source of `say` and `camSay`; the default `liveVoice`); the real mouth (`lvAzure` with the facial curves) |
 | `boot.js` | Starts the page (the `#hash` routes) and closes the shared scope |
 
 Styles: `v2.css`, `v3extra.css`, then one `.css` per layer. The page: `head.html`, `page.html`. Words: `realstrings.json`
@@ -74,6 +82,7 @@ Rounds, each one proven by the self-test and `run_tests.js` with the same result
 1. The build only joins (done: the page it writes is byte-identical to the old build's).
 2. The extension points; the Editor and the phone join them (`edCard`, `edMarker`, `renderEditor`, `renderPhone`, the
    screens, `modelSig`, `renderEl`, `setOpt`) (done).
-3. The guide: the tour's steps, the voice (`say`, `stopSpeech`, `markWord`), `renderGuide`, Ask.
-4. The mascot, the world and the agent (`camLayer`, `azMouth`, `agPrompt`, `ptool`) and what is left.
+3. and 4. (one round) Everything left: the guide (the tour's steps, the voice `say` with its sources, `stopSpeech`,
+   `markWord`, `renderGuide`, Ask), the mascot, the world and the agent (`camLayer`, `azMouth`, `agPrompt`, `ptool`…), the
+   self-test's silenced drawing (a flag), and each default set once (done: the check counts 0 / 0 / 0 / 0).
 5. The code moves into `src/` by feature; the layers go; this file lists the modules; the check allows 0.

@@ -5,7 +5,7 @@ S.starter="rich";S.pendingStarter=null;S.story.forEach(function(r){if(r.checked=
 var STARTERS={simple:["Simple point",["Header","Quick Facts","Story","Gallery","Practical Info"]],rich:["Rich point",null],ar:["AR point",["Header","Quick Facts","Story","3D Model","Place In AR","Practical Info"]],scratch:["Start from scratch",[]]};
 var CARD0=JSON.stringify(S.card);
 /* a marker's own look and frame win over the block's */
-var koptV8b=kopt;kopt=function(kind,key){var b=S._cb;if(b&&b.kind===kind&&key==="look"&&b.k_look&&b.k_look!=="inherit")return b.k_look;return koptV8b(kind,key)};
+on("kopt.answer",function(kind,key){var b=S._cb;if(b&&b.kind===kind&&key==="look"&&b.k_look&&b.k_look!=="inherit")return b.k_look});
 on("blockPreviewHtml.before",function(b){S._cb=b});on("blockPreviewHtml.done",function(){S._cb=null});
 on("blockPreviewHtml.html",function(h,b){if(b.frame&&b.frame!=="inherit"&&S.secCfg.look==="cards")h=h.replace(/class="bprev( fr-[a-z]+)?/,'class="bprev fr-'+b.frame);
   if(b.minsMode==="hand")h=h.replace(/(<div class="open[^"]*"[^>]*>[^<]*?)\d+ min/,"$1"+b.mins+" min");
@@ -75,17 +75,16 @@ ed.addEventListener("click",function(e){var t=e.target;
 /* ----- Languages & Terms ----- */
 LANGPICK.push(["pt-BR","Português (Brasil)"],["nl","Nederlands"],["sv","Svenska"],["da","Dansk"],["nb","Norsk bokmål"],["fi","Suomi"],["pl","Polski"],["cs","Čeština"],["hu","Magyar"],["ro","Română"],["el","Ελληνικά"],["tr","Türkçe"],["ru","Русский"],["uk","Українська"],["ar","العربية"],["he","עברית"],["hi","हिन्दी"],["zh-Hans","中文（简体）"],["zh-Hant","中文（繁體）"],["ja","日本語"],["ko","한국어"],["ca","Català"],["gl","Galego"],["eu","Euskara"]);
 S.langs.opensIn="phone";
-var edWordsV7=edWords;
-edWords=function(){var d=document.createElement("div");d.innerHTML=edWordsV7();
+on("edWords.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   addRows(d,"w1",prow("Opens in",pseg("langs.opensIn",["phone","fallback"],["The phone's language when the wall has it","The fallback"]),"The card's language at the first open; the visitor's own pick wins after that."),"Fallback language");
   var lt=innerOf(d,"w1");if(lt)lt.querySelectorAll("tbody tr").forEach(function(r,i){var c=r.lastElementChild;if(c)c.insertAdjacentHTML("afterbegin",'<button class="del" type="button" data-lmove="'+i+'|-1" aria-label="Up">^</button><button class="del" type="button" data-lmove="'+i+'|1" aria-label="Down">v</button>')});
   var fb=d.querySelector("[data-txf]");if(fb&&!d.querySelector('[data-txf="app"]'))fb.parentNode.insertAdjacentHTML("beforeend",'<button class="chip" type="button" data-txf="app" aria-pressed="'+(S.ui.txf==="app")+'">App texts</button>');
-  return d.innerHTML};
-var txRowsV7=txRows;txRows=function(){if(S.ui.txf==="app")return '<tr><td colspan="9" class="uses">This wall\'s app adds no blocks of its own. An app\'s own block kinds bring their words here, each on its block.</td></tr>';return txRowsV7()};
+  return d.innerHTML});
+on("txRows.answer",function(){if(S.ui.txf==="app")return '<tr><td colspan="9" class="uses">This wall\'s app adds no blocks of its own. An app\'s own block kinds bring their words here, each on its block.</td></tr>'});
 var TXDEF=JSON.parse(TX0);
-var txPanelV7=txPanel;txPanel=function(o){var h=txPanelV7(o),d=document.createElement("div");d.innerHTML=h;
+on("txPanel.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   d.querySelectorAll("tbody tr").forEach(function(r){var inp=r.querySelector("[data-tx]");if(!inp)return;var k=inp.dataset.tx.split("|")[0];
-    if(JSON.stringify(S.tx[k])!==JSON.stringify(TXDEF[k])){var c=r.lastElementChild;if(c)c.insertAdjacentHTML("afterbegin",'<button class="del" type="button" data-txreset="'+k+'" title="Back to the framework\'s wording">&#8634;</button>')}});return d.innerHTML};
+    if(JSON.stringify(S.tx[k])!==JSON.stringify(TXDEF[k])){var c=r.lastElementChild;if(c)c.insertAdjacentHTML("afterbegin",'<button class="del" type="button" data-txreset="'+k+'" title="Back to the framework\'s wording">&#8634;</button>')}});return d.innerHTML});
 ed.addEventListener("click",function(e){var t=e.target;
   var lm=t.closest("[data-lmove]");if(lm){e.stopPropagation();var q=lm.dataset.lmove.split("|"),i=+q[0],j=i+(+q[1]),a=S.langs.list;if(j<0||j>=a.length)return;var x=a[i];a[i]=a[j];a[j]=x;renderAll(true);return}
   var tr=t.closest("[data-txreset]");if(tr){e.stopPropagation();var k=tr.dataset.txreset;S.tx[k]=JSON.parse(JSON.stringify(TXDEF[k]));renderAll(true);return}},true);
@@ -95,9 +94,9 @@ on("modelSig.before",function(cx){var x="";if(sigWant(/frame/)){var look=S.secCf
 
 /* reading time: the Contents sheet shows each block's minutes */
 var KMIN={"Story":4,"Gallery":2,"Video":1,"Audio Guide":3,"Timeline":2,"Dialogue":2,"Knowledge Check":2};function minsOf(b){return b.minsMode==="hand"?b.mins:(KMIN[b.kind]||1)}
-var contentsSheetV8b=contentsSheet;contentsSheet=function(){var h=contentsSheetV8b(),d=document.createElement("div");d.innerHTML=h;var subs=d.querySelectorAll(".crow.sub, .crow:not(.sec)"),list=S.card.filter(function(b){return(S.blockDefs[b.kind]||{}).offered!==false});
+on("contentsSheet.html",function(h){var d=document.createElement("div");d.innerHTML=h;var subs=d.querySelectorAll(".crow.sub, .crow:not(.sec)"),list=S.card.filter(function(b){return(S.blockDefs[b.kind]||{}).offered!==false});
   if(S.ctl.contents.rows==="sections"){var k=0;cardRuns().forEach(function(r){r.blocks.forEach(function(b){var el=d.querySelectorAll(".crow.sub")[k++];if(el)el.insertAdjacentHTML("beforeend",'<span class="cmin">'+esc(fmt(TXT("nav_contents_minutes"),minsOf(b)))+'</span>')})})}
-  else d.querySelectorAll(".crow").forEach(function(el,j){var b=S.card[j];if(b)el.insertAdjacentHTML("beforeend",'<span class="cmin">'+esc(fmt(TXT("nav_contents_minutes"),minsOf(b)))+'</span>')});return d.innerHTML};
+  else d.querySelectorAll(".crow").forEach(function(el,j){var b=S.card[j];if(b)el.insertAdjacentHTML("beforeend",'<span class="cmin">'+esc(fmt(TXT("nav_contents_minutes"),minsOf(b)))+'</span>')});return d.innerHTML});
 
 /* captures: #dcshot=<kind> opens the demo card at that block, still */
 if(location.hash.indexOf("#dcshot=")===0)setTimeout(function(){var dk=decodeURIComponent(location.hash.slice(8)),pv=dk.split("|");S.reduce=true;S.previewBar=false;if(pv[1])S.lang=pv[1];S.view="democard";S.stop="full";renderAll(false);setTimeout(function(){var b=S.demoCard.filter(function(x){return x.kind===pv[0]})[0],el=b&&scr.querySelector('[data-ref="b:'+b.id+'"]');if(el)scr.scrollTop=Math.max(0,el.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-70)},200)},50);

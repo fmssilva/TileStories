@@ -19,11 +19,11 @@ function buzz(k){if(!S.fb.haptics||k==="none")return;var p=HAPMS[k]||[10];if(S.f
 function feedback(id){var e=byId(S.fb.events,id);if(!e)return;buzz(e.hap);playSound(e.snd)}
 
 /* ----- the wall, the marker and the sheet ----- */
-function stopTop(st){var H=SCREENS[S.screen][1];if(S.screen==="land")return 0;if(st==="peek")return H-200;if(st==="half")return Math.round(H*(1-S.cardCfg.halfMax));if(st==="full")return 0;return H+10}
+function stopTop(st){var ans=firstAnswer("stopTop.answer",st);if(ans!==undefined)return ans;var H=SCREENS[S.screen][1];if(S.screen==="land")return 0;if(st==="peek")return H-200;if(st==="half")return Math.round(H*(1-S.cardCfg.halfMax));if(st==="full")return 0;return H+10}
 function wallLayer(){var w=document.getElementById("wall");if(!w){w=document.createElement("div");w.id="wall";w.className="wall";ph.insertBefore(w,ph.firstChild.nextSibling)}
   w.innerHTML='<button class="mk" type="button" data-marker="painting" style="left:52%;top:30%" aria-label="Ribeira Palace"><span>'+sicon("info",20)+'</span><b>Ribeira Palace</b></button><button class="mk dim" type="button" style="left:22%;top:58%" aria-label="Lisbon Cathedral"><span>'+sicon("star",18)+'</span><b>Lisbon Cathedral</b></button>'+
    (S.stop==="closed"&&S.wallTip!==false?'<div class="walltip">'+TXH("wall_tip")+'</div>':"");
-  return w}
+  emit("wallLayer.after",w);return w}
 on("renderPhone.after",function(keep){var inWall=S.view==="card";
   document.getElementById("camera").style.backgroundImage=inWall||S.screen==="land"?"url("+IMG.g1+")":"none";
   var w=wallLayer();w.style.display=inWall?"":"none";
@@ -36,11 +36,6 @@ on("renderPhone.after",function(keep){var inWall=S.view==="card";
   var pk=ph.querySelector(".peeknext");if(pk)pk.remove();
   if(inWall&&S.stop==="peek"&&S.cardCfg.peekNext){var p=document.createElement("div");p.className="peeknext";p.textContent=(TXT("peek_next_label"))+"Lisbon Cathedral ↑";ph.appendChild(p)}
   topBand();stickyAction()});
-function initGrab(gb){gb.addEventListener("pointerdown",function(e){gb.setPointerCapture(e.pointerId);var y0=e.clientY,t0=parseFloat(scr.style.top)||0,k=fit.getBoundingClientRect().height/SCREENS[S.screen][1];scr.style.transition="none";
-  function mv(ev){var t=Math.max(0,t0+(ev.clientY-y0)/k);scr.style.top=t+"px";gb.style.top=(t+2)+"px"}
-  function up(ev){gb.removeEventListener("pointermove",mv);gb.removeEventListener("pointerup",up);var t=parseFloat(scr.style.top),best="half",bd=1e9;["peek","half","full"].forEach(function(s){var d=Math.abs(stopTop(s)-t);if(d<bd){bd=d;best=s}});
-    if(t>stopTop("peek")+80)best="closed";S.stop=best;renderPhone(true)}
-  gb.addEventListener("pointermove",mv);gb.addEventListener("pointerup",up)})}
 function topBand(){var b=ph.querySelector(".topband");if(!b){b=document.createElement("div");b.className="topband";ph.appendChild(b)}
   var show=S.view==="card"&&S.stop==="full"&&scr.scrollTop>230;b.style.display=show?"":"none";b.className="topband tb-"+S.cardCfg.topBand;
   b.innerHTML='<i title="'+TXH("close")+'">&#10005;</i>'+(S.ctl.top.title?'<b>Ribeira Palace</b>':'<b></b>')+(S.ctl.top.settings?'<i title="'+TXH("visitor_settings")+'">&#9776;</i>':'<i style="visibility:hidden"></i>');emit("topBand.after")}
@@ -132,10 +127,9 @@ var BEHAVIOUR=/^@?(inter\.|m\.page|blockDefs\.[^.]+\.chrome|cardCfg\.(tapOutside
 /* the phone's signature for the self-test: each feature's piece is made before the older ones (latest first) and appended after them */
 function modelSig(){var cx={};emitLatestFirst("modelSig.before",cx);var keep=S.view,out="";["card","demo","story","gallery"].forEach(function(v){S.view=v;out+=(v==="card"?cardScreen()+navbar():v==="demo"?demoScreen():v==="story"?storyScreen():galleryScreen())+"#"});S.view=keep;
   return pipe("modelSig.sig",out+JSON.stringify({loc:S.ctl.locate,sticky:S.ctl.sticky,bar:[S.ctl.bar.on,S.ctl.bar.pos],openAt:stopTop(S.cardCfg.openAt),half:S.cardCfg.halfMax,band:S.cardCfg.topBand,top:S.ctl.top,dark:S.dark,lang:S.lang,peek:S.cardCfg.peekNext,on:S.cardCfg.enabled}),cx)}
-function selfTest(){var res=[],seen={},real={renderEditor:renderEditor,renderPhone:renderPhone,renderAll:renderAll,show:show,playRef:playRef,flashRef:flashRef};
+function selfTest(){var res=[],seen={};
   S.ui.level=9;S.op={};S.ui.single=false;
-  ["card","marker","words","global"].forEach(function(tab){S.tab=tab;real.renderEditor();var base=JSON.stringify(S);
-    renderEditor=function(){};renderPhone=function(){};renderAll=function(){};show=function(v){S.view=v};playRef=function(){};flashRef=function(){};
+  ["card","marker","words","global"].forEach(function(tab){S.tab=tab;renderEditor();var base=JSON.stringify(S);noDraw=true;
     var ctrls=[];ed.querySelectorAll("[data-set]").forEach(function(b){ctrls.push({el:b,kind:"set",key:b.dataset.set,v:b.dataset.v})});
     ed.querySelectorAll("select[data-sel]").forEach(function(x){Array.prototype.forEach.call(x.options,function(o){ctrls.push({el:x,kind:"sel",key:x.dataset.sel,v:o.value})})});
     ed.querySelectorAll('input[type=range][data-num]').forEach(function(r){ctrls.push({el:r,kind:"num",key:r.dataset.num,v:r.min});ctrls.push({el:r,kind:"num",key:r.dataset.num,v:r.max})});
@@ -145,14 +139,14 @@ function selfTest(){var res=[],seen={},real={renderEditor:renderEditor,renderPho
       catch(err){res.push({tab:tab,key:c.key,v:c.v,label:lab,result:"ERROR "+err.message});return}
       var stateChanged=JSON.stringify(S)!==state,after=modelSig();
       var offCard=/^@blockDefs\./.test(c.key)&&!S.card.some(function(b){return b.kind===c.key.split(".")[1]});res.push({tab:tab,key:c.key,v:c.v,label:lab,result:after!==before?"changes the phone":!stateChanged?"NOT WIRED (state unchanged)":BEHAVIOUR.test(c.key)?"behaviour (no picture)":offCard?"behaviour (block not on this card)":"NO EFFECT (state changes, phone does not)"})});
-    renderEditor=real.renderEditor;renderPhone=real.renderPhone;renderAll=real.renderAll;show=real.show;playRef=real.playRef;flashRef=real.flashRef});
-  return res}
+    noDraw=false});
+  return pipe("selfTest.res",res)}
 function cssq(s){return String(s).replace(/"/g,'\\"')}
-function labelOf(el){var r=el.closest(".row");return r?(r.querySelector("label")||{}).textContent||"":""}
+function labelOf(el){emit("labelOf.before",el);var r=el.closest(".row");return r?(r.querySelector("label")||{}).textContent||"":""}
 function showSelfTest(res){var works={};res.forEach(function(r){if(r.result==="changes the phone")works[r.tab+"|"+r.key]=1});res.forEach(function(r){if(/NO EFFECT/.test(r.result)&&works[r.tab+"|"+r.key])r.result="same look as now (other values of this row change the phone)"});var bad=res.filter(function(r){return /NO EFFECT|NOT WIRED|ERROR/.test(r.result)}),ok=res.filter(function(r){return r.result==="changes the phone"}).length,beh=res.filter(function(r){return/behaviour/.test(r.result)}).length;
   var box=document.getElementById("selftest");box.innerHTML='<h2>Self-test</h2><p><b>'+ok+'</b> option values change the phone · <b>'+beh+'</b> are behaviour (sound, taps, timing) · <b style="color:#C0392B">'+bad.length+'</b> do nothing or were not found.</p>'+
    (bad.length?'<table><tr><th>Tab</th><th>Row</th><th>Key</th><th>Value</th><th>Result</th></tr>'+bad.map(function(r){return'<tr><td>'+r.tab+'</td><td>'+esc(r.label)+'</td><td><code>'+esc(r.key)+'</code></td><td>'+esc(r.v)+'</td><td>'+r.result+'</td></tr>'}).join("")+'</table>':"<p>Every option shows on the phone.</p>");
-  box.dataset.json=JSON.stringify({ok:ok,behaviour:beh,bad:bad})}
+  box.dataset.json=JSON.stringify({ok:ok,behaviour:beh,bad:bad});emit("showSelfTest.after",res)}
 document.getElementById("runtest").addEventListener("click",function(){var b=this;b.disabled=true;b.textContent="Running…";setTimeout(function(){var snap=JSON.stringify(S);var r=selfTest();showSelfTest(r);b.disabled=false;b.textContent="Run the self-test again";
   var o=JSON.parse(snap);Object.keys(o).forEach(function(k){S[k]=o[k]});S.tab="card";S.view="card";renderAll(false)},30)});
 

@@ -29,9 +29,9 @@ on("L.answer",function(o,f){if(o&&typeof o==="object"&&aud()!=="explorer"){if(!O
 /* the guide's length: a step may be left out on Short, or told only on Deep */
 (function(){var by=function(id){return byId(S.guideSteps,id)};if(by("g5"))by("g5").len="notshort";if(by("g8"))by("g8").len="notshort";var j=S.guideSteps.findIndex(function(s){return s.id==="g7"});
   if(j>=0&&!by("g7x"))S.guideSteps.splice(j+1,0,{id:"g7x",view:"story",ref:"r:r9",act:"show",len:"deep",text:T("What was lost with it: the library of some seventy thousand books and the royal archive, burnt in the fire that followed the earthquake.","O que se perdeu com ele: a biblioteca de cerca de setenta mil livros e o arquivo real, queimados no incêndio que se seguiu ao terramoto.")})})();
-function stepFits(st){var l=lenNow();if(S.aud.hide[aud()][st.ref])return false;return st.len==="deep"?l==="deep":st.len==="notshort"?l!=="short":true}
-var startTourV8l=startTour;startTour=function(){if(!S.howSaved&&!S.fullSteps){S.fullSteps=S.guideSteps;S.guideSteps=S.fullSteps.filter(stepFits)}ovMap();startTourV8l()};
-var stopTourV8l=stopTour;stopTour=function(){stopTourV8l();if(S.fullSteps){S.guideSteps=S.fullSteps;S.fullSteps=null}};
+function stepFits(st){var l=lenNow(),ok=!S.aud.hide[aud()][st.ref]&&(st.len==="deep"?l==="deep":st.len==="notshort"?l!=="short":true);return pipe("stepFits.ok",ok,st)}
+on("startTour.before",function(){if(!S.howSaved&&!S.fullSteps){S.fullSteps=S.guideSteps;S.guideSteps=S.fullSteps.filter(stepFits)}ovMap()});
+on("stopTour.after",function(){if(S.fullSteps){S.guideSteps=S.fullSteps;S.fullSteps=null}});
 /* ----- the card for an audience: its looks (tokens), its hidden blocks, Azu's liveliness ----- */
 on("renderPhone.before",function(keep,cx){var a=cx.aud=aud();if(S.audApplied!==a){S.audApplied=a;S.guideCfg.life=S.aud.looks[a].life}ovMap()});on("renderPhone.after",function(keep,cx){var a=cx.aud;
   var lk=S.aud.looks[a];AUDS.forEach(function(x){ph.classList.toggle("aud-"+x,x===a&&x!=="explorer")});
@@ -53,7 +53,7 @@ on("settingsPanel.html",function(h){var opt=function(k,v,lab,cur){return'<button
 /* a new audience starts from its own length */
 document.addEventListener("click",function(e){var v=e.target.closest&&e.target.closest('[data-vis^="aud|"]');if(v)S.vis.len=""},true);
 /* the preview bar: Preview as (the Lab only) */
-var ptoolV8l=ptool;ptool=function(){var a=aud(),nx={explorer:"family",family:"expert",expert:"explorer"};return ptoolV8l()+'<button type="button" data-pt="aud" data-v="'+nx[a]+'" aria-pressed="'+(a!=="explorer")+'" title="'+TXH("pbar_tip_aud")+'">'+TXH("aud_"+a)+'</button>'};
+on("ptool.html",function(h){var a=aud(),nx={explorer:"family",family:"expert",expert:"explorer"};return h+'<button type="button" data-pt="aud" data-v="'+nx[a]+'" aria-pressed="'+(a!=="explorer")+'" title="'+TXH("pbar_tip_aud")+'">'+TXH("aud_"+a)+'</button>'});
 document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest('[data-pt="aud"]');if(!b)return;e.stopPropagation();e.preventDefault();S.vis.aud=b.dataset.v;S.vis.len="";renderAll(true)},true);
 
 /* ----- Editor: Detail Card > 7 · Audiences; Specific Marker > 4 · Audiences (coverage); the Guide script's length per step ----- */

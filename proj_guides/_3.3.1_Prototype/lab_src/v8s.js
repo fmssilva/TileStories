@@ -13,12 +13,12 @@ var WALLS={ribeira:{img:function(){return IMG.g1},w:720,h:414,pois:S.wallPois},
     {id:"tagus",name:T("The Tagus","O Tejo"),u:.66,v:.72}]}};
 function curWall(){return WALLS[S.camCfg.wall]||WALLS.ribeira}
 /* the camera: the wall's picture as the phone sees it, panned (camX, camY) and zoomed (camZoom: nearer the wall) */
-camGeom=function(){var wl=curWall(),W=ph.offsetWidth,H=ph.offsetHeight,k=Math.max(W/wl.w,H/wl.h)*S.camZoom,dw=wl.w*k,dh=wl.h*k;return{W:W,H:H,dw:dw,dh:dh,ox:(W-dw)*S.camX,oy:(H-dh)*S.camY}};
-function camPaint(){var c=document.getElementById("camera");if(!c||S.view!=="card")return;var g=camGeom();c.style.backgroundImage="url("+curWall().img()+")";c.style.backgroundSize=g.dw.toFixed(0)+"px "+g.dh.toFixed(0)+"px";c.style.backgroundPosition=g.ox.toFixed(0)+"px "+g.oy.toFixed(0)+"px"}
+function camGeom(){var wl=curWall(),W=ph.offsetWidth,H=ph.offsetHeight,k=Math.max(W/wl.w,H/wl.h)*S.camZoom,dw=wl.w*k,dh=wl.h*k;return{W:W,H:H,dw:dw,dh:dh,ox:(W-dw)*S.camX,oy:(H-dh)*S.camY}}
+function camPaint(){var c=document.getElementById("camera");if(c&&S.view==="card"){var g=camGeom();c.style.backgroundImage="url("+curWall().img()+")";c.style.backgroundSize=g.dw.toFixed(0)+"px "+g.dh.toFixed(0)+"px";c.style.backgroundPosition=g.ox.toFixed(0)+"px "+g.oy.toFixed(0)+"px"}emit("camPaint.after")}
 on("renderPhone.before",function(keep){S.wallPois=curWall().pois});on("renderPhone.after",function(keep){camPaint();ph.classList.toggle("testwall",S.camCfg.wall!=="ribeira");camLayer();fabLayer()});
 /* the test wall's points are its markers, always shown (the card's wall keeps its own marker) */
-var camLayerV8s=camLayer;camLayer=function(){camLayerV8s();var pins=ph.querySelector(".campins");if(pins&&S.camCfg.wall!=="ribeira"&&S.stop==="closed"&&S.view==="card")pins.hidden=false;
-  var a=ph.querySelector(".camask");if(a&&!G.cam.open&&S.camCfg.fab)a.remove();var bar=a&&a.querySelector(".ca-bar");if(bar&&S.camCfg.fab){var pill=bar.querySelector(".ca-pill span");if(pill)pill.textContent=TXT("cam_ask")}};
+on("camLayer.after",function(){var pins=ph.querySelector(".campins");if(pins&&S.camCfg.wall!=="ribeira"&&S.stop==="closed"&&S.view==="card")pins.hidden=false;
+  var a=ph.querySelector(".camask");if(a&&!G.cam.open&&S.camCfg.fab)a.remove();var bar=a&&a.querySelector(".ca-bar");if(bar&&S.camCfg.fab){var pill=bar.querySelector(".ca-pill span");if(pill)pill.textContent=TXT("cam_ask")}});
 /* drag (both ways) and zoom (the wheel, or two fingers) stand in for moving the phone */
 var camPan=null,pinch=null,ptrs={};
 ph.addEventListener("pointerdown",function(e){if(S.stop!=="closed"||S.view!=="card"||e.target.closest(".camask,.cpin,.mk,#ptool,button,.azfab,.azfabbub"))return;ptrs[e.pointerId]={x:e.clientX,y:e.clientY};
@@ -34,15 +34,15 @@ camDrag=null;
 /* ----- Azu as the guide's button: bottom left; on the card, above the bar; on the wall, in the corner ----- */
 /* on the card it shows once the hero's Start the guide is off the screen (the hero is the guide's way in until then) */
 function heroStartSeen(){var g=scr.querySelector(".hero .gstart");if(!g)return false;var r=g.getBoundingClientRect(),b=scr.getBoundingClientRect();return r.bottom>b.top&&r.top<b.bottom}
-function fabLayer(){var o=ph.querySelector(".azfab");if(o)o.remove();ph.querySelectorAll(".azfabbub").forEach(function(x){x.remove()});if(S.stop!=="closed")G.fab.bub=null;
+function fabLayer(){emitLatestFirst("fabLayer.before");var o=ph.querySelector(".azfab");if(o)o.remove();ph.querySelectorAll(".azfabbub").forEach(function(x){x.remove()});if(S.stop!=="closed")G.fab.bub=null;
   if(!S.camCfg.fab||S.view!=="card"||G.on||S.stop==="peek"||(G.cam.open&&S.stop==="closed")||(S.stop!=="closed"&&heroStartSeen()))return;
   var b=document.createElement("button");b.type="button";b.className="azfab"+(S.stop==="closed"?" onwall":"");b.setAttribute("aria-label",TXT("fab_label"));/* the button draws the 2D Azu: the shader's one canvas belongs to the guide, the peek and the walk */b.innerHTML=MASCOT;ph.appendChild(b);
   if(G.fab.menu&&S.stop!=="closed"){var m=document.createElement("div");m.className="azfabbub menu";m.innerHTML='<button type="button" data-fabgo="tour">▶ '+TXH("fab_tour")+'</button><button type="button" data-fabgo="ask">'+TXH("fab_ask")+'</button>';ph.appendChild(m)}
   if(G.fab.bub&&S.stop==="closed")showFabBub(G.fab.bub)}
 function showFabBub(bb){var o=ph.querySelector(".azfabbub");if(o)o.remove();var d=document.createElement("button");d.type="button";d.className="azfabbub"+(bb.act?" act":"");d.dataset.fabbub="1";d.textContent=bb.text;ph.appendChild(d)}
 /* a tour from a card at Half: the card rises to Full first (lowered again by the visitor, the tour goes on there) */
-var startTourV8s=startTour;startTour=function(){G.fab.menu=false;var f=ph.querySelector(".azfab");if(f)f.remove();if(S.view==="card"&&S.stop!=="full"){S.stop="full";renderPhone(true)}startTourV8s()};
-var stopTourV8s=stopTour;stopTour=function(){stopTourV8s();fabLayer()};
+on("startTour.before",function(){G.fab.menu=false;var f=ph.querySelector(".azfab");if(f)f.remove();if(S.view==="card"&&S.stop!=="full"){S.stop="full";renderPhone(true)}});
+on("stopTour.after",function(){fabLayer()});
 ph.addEventListener("click",function(e){var t=e.target.closest(".azfab,[data-fabgo],[data-fabbub]");if(!t)return;e.stopPropagation();
   if(t.classList.contains("azfab")){if(S.stop==="closed"){G.fab.bub=null;G.cam.open=true;renderPhone(true);return}G.fab.menu=!G.fab.menu;fabLayer();return}
   if(t.dataset.fabgo==="tour"){startTour();return}

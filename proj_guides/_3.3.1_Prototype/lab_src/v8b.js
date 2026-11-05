@@ -43,8 +43,8 @@ var PAGE_KINDS=["Story","Gallery","Timeline","Dialogue","Video","3D Model","360 
 Object.keys(S.blockDefs).forEach(function(k){var bd=S.blockDefs[k];bd.offered=true;bd.frame=k==="Sources"?"quiet":"normal";bd.o={};
   (KOPT[k]||[]).forEach(function(o){bd.o[o[0]]=typeof o[2]==="string"?(defStyle(o[2].slice(3))||{}).id:o[5]});
   bd.page=PAGE_KINDS.indexOf(k)>=0;if(bd.page&&bd.tap==="nothing")bd.tap="page";if(!bd.page&&bd.tap==="page")bd.tap="nothing"});
-S.blockDefs["Practical Info"].tap="expand";S.blockDefs.Sources.tap="expand";S.blockDefs["Compare Points"].tap="nothing";
-function kopt(kind,key){var bd=S.blockDefs[kind],v=bd&&bd.o?bd.o[key]:undefined;return typeof v==="boolean"?String(v):v}
+S.blockDefs.Sources.tap="expand";S.blockDefs["Compare Points"].tap="nothing";
+function kopt(kind,key){var ans=firstAnswer("kopt.answer",kind,key);if(ans!==undefined)return ans;var bd=S.blockDefs[kind],v=bd&&bd.o?bd.o[key]:undefined;return typeof v==="boolean"?String(v):v}
 function kstyle(kind,el){var id=kopt(kind,"look");return styleById(id)||defStyle(el)}
 
 /* ----- the Editor: Blocks ----- */

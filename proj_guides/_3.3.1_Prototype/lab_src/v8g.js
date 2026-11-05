@@ -1,7 +1,7 @@
 /* ===================== v8g: the demo in one component (the tile opens Demo Components, whose top button opens the full demo card); first-time hints; How to use the card ===================== */
 /* ----- the demo: a tile first on every marker's card opens Demo Components; its top button opens the demo card ----- */
-delete FOCUS.s0tile;FOCUS.s0card=["card",".testtile","full"];S.test.poi="painting";
-testTile=function(){return inDemoCard?"":'<button class="testtile" type="button" data-go="demo"><div><b>'+TXH("test_tile_tag")+'</b><strong>'+TXH("test_tile_title")+'</strong><span>'+TXH("test_tile_line")+'</span></div><em>&#8250;</em></button>'};
+delete FOCUS.s0tile;FOCUS.s0card=["card",".testtile","full"];
+function testTile(){return inDemoCard?"":'<button class="testtile" type="button" data-go="demo"><div><b>'+TXH("test_tile_tag")+'</b><strong>'+TXH("test_tile_title")+'</strong><span>'+TXH("test_tile_line")+'</span></div><em>&#8250;</em></button>'}
 on("demoScreen.html",function(h){return h.replace('<b>'+esc(L(UI.demo))+'</b>','<b>'+TXH("test_tile_title")+'</b>').replace('<div class="pg">','<div class="pg"><button class="testtile demoopen" type="button" data-go="democard"><div><b>'+TXH("test_tile_tag")+'</b><strong>'+TXH("test_demo_title")+'</strong><span>'+TXH("test_demo_line")+'</span></div><em>&#8250;</em></button>')});
 
 /* ----- hints: small first-time cues, each at the moment its feature is in reach, one at a time, each until seen ----- */
@@ -46,9 +46,9 @@ function hintTry(id){S.hintDone[id]=false;S.hintCard[id]=false;S.hintBusy=0;S.se
 var HOW=[["hero","#grab","how_grab"],["hero",".chrome i:last-child","how_settings"],["sec:stories","#navbar","how_bar"],["sec:stories",".locpin","how_locate"],["b:b_story",null,"how_block"]];
 function howTour(){if(G.on)stopTour();S.settingsOpen=false;S.howSaved=S.guideSteps;
   S.guideSteps=HOW.map(function(h,i){return{id:"how"+i,view:"card",ref:h[0],sel:h[1],act:"show",text:S.tx[h[2]]}});S.view="card";S.stop="full";renderPhone(false);startTour()}
-var stopTourV8g=stopTour;stopTour=function(){stopTourV8g();if(S.howSaved){S.guideSteps=S.howSaved;S.howSaved=null}};
-var runStepV8g=runStep;runStep=function(){runStepV8g();var st=S.guideSteps[G.i];if(G.on&&st&&st.sel){var el=ph.querySelector(st.sel);if(el){el.classList.add("gfocus");moveMascot(el)}}};
-var clearGuideMarksV8g=clearGuideMarks;clearGuideMarks=function(){clearGuideMarksV8g();ph.querySelectorAll(".gfocus").forEach(function(x){x.classList.remove("gfocus")})};
+on("stopTour.after",function(){if(S.howSaved){S.guideSteps=S.howSaved;S.howSaved=null}});
+on("runStep.after",function(){var st=S.guideSteps[G.i];if(G.on&&st&&st.sel){var el=ph.querySelector(st.sel);if(el){el.classList.add("gfocus");moveMascot(el)}}});
+on("clearGuideMarks.after",function(){ph.querySelectorAll(".gfocus").forEach(function(x){x.classList.remove("gfocus")})});
 on("settingsPanel.html",function(h){return S.hints.howto?h.replace(/<\/div>$/,'<button type="button" class="vhow" data-howto="1">'+TXH("settings_how")+' &#8250;</button></div>'):h});
 ph.addEventListener("click",function(e){if(e.target.closest("[data-howto]")){e.stopPropagation();howTour()}},true);
 

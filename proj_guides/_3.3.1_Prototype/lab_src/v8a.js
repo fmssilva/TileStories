@@ -1,10 +1,9 @@
 /* ===================== v8a: every good option of Unity's card, merged with the Lab's (audit 2026-11-01): Card, Sections, Card Controls, the visitor's settings ===================== */
 /* ----- state: the merged options and their defaults ----- */
-Object.assign(S.cardCfg,{openAt:"half",halfMax:0.40,peekNext:false,fullHeight:"top",backBtn:"step",accent:"heritage",round:"soft",strips:"edge",openOne:false,audioOverlap:"fade",earbuds:"pause",lockScreen:"pause",resume:true});
+Object.assign(S.cardCfg,{fullHeight:"top",backBtn:"step",accent:"heritage",round:"soft",strips:"edge",openOne:false,earbuds:"pause",lockScreen:"pause",resume:true});
 if(S.cardCfg.topBand==="clear")S.cardCfg.topBand="fade";
 Object.assign(S.secCfg,{glass:true,rim:true,motion:"reveal",divSec:"none",nextUp:true});
-Object.assign(S.ctl.bar,{shape:"floating",fill:"solid",chosenIcon:"filled",chosenColour:"section",minBlocks:8,showAt:"both",showFrom:"always",more:6});
-S.ctl.jump.opens="full";S.ctl.top.settings=true;
+Object.assign(S.ctl.bar,{shape:"floating",fill:"solid",chosenIcon:"filled",chosenColour:"section",minBlocks:8,showAt:"both",showFrom:"hero",more:6});
 Object.assign(S.ctl,{stickySlide:true,contents:{on:true,rows:"sections",ticks:true,chips:true},term:{opens:"popup",underline:"first"},pageChips:true,viewer:{counter:"chips"},player:{captions:true}});
 S.motionLevel="full";S.vis={lang:null,mode:"phone",motion:"phone",text:"default",feedback:true};S.settingsOpen=false;S.contentsOpen=false;
 S.sections.forEach(function(s){if(s.shown===false)s.shown=false;else s.shown=true});
@@ -120,8 +119,7 @@ ed.addEventListener("click",function(e){var t=e.target;
 var SECTIONS0=JSON.stringify(S.sections);
 
 /* ----- the phone: stops, accent, roundness, strips ----- */
-var stopTopV5=stopTop;
-stopTop=function(st){var H=SCREENS[S.screen][1];if(S.screen==="land")return 0;if(st==="peek")return H-64;if(st==="full")return S.cardCfg.fullHeight==="strip"?42:0;return stopTopV5(st)};
+on("stopTop.answer",function(st){var H=SCREENS[S.screen][1];if(S.screen==="land")return 0;if(st==="peek")return H-64;if(st==="full")return S.cardCfg.fullHeight==="strip"?42:0});
 function v8vars(){var st=document.getElementById("v8vars");if(!st){st=document.createElement("style");st.id="v8vars";document.head.appendChild(st)}var a=ACCENTS[S.cardCfg.accent]||ACCENTS.heritage;
   st.textContent=".cv{--accent2:"+a[0]+"}.cv.dark,#ph.dark,.dark .cv{--accent2:"+a[1]+"}"}
 /* sections on the card: the merged starts, the dividers between sections, Next Up, the order with Sources last */
@@ -166,7 +164,7 @@ function contentsSheet(){var c=S.ctl.contents,runs=cardRuns();if(!c.on)return ""
   var tick=function(read){return c.ticks?'<i class="ctick'+(read?" on":"")+'" aria-label="'+(read?TXH("nav_contents_read"):"")+'">'+(read?"&#10003;":"")+'</i>':""};
   var rows=c.rows==="sections"?runs.map(function(r,k){return'<div class="crow sec"><i style="color:'+colVar(r.sec.colour)+'">'+sicon(r.sec.icon,16)+'</i><b>'+esc(L(r.sec.name))+'</b><span>'+r.blocks.length+'</span>'+tick(k===0)+'</div>'+r.blocks.map(function(b,j){return'<div class="crow sub">'+esc(b.kind)+tick(k===0&&j===0)+'</div>'}).join("")}).join(""):
     S.card.map(function(b,j){var s=secById(grpOf(b));return'<div class="crow"><i style="color:'+colVar(s.colour)+'">'+sicon(s.icon,14)+'</i>'+esc(b.kind)+tick(j<2)+'</div>'}).join("");
-  return '<div class="csheet" role="dialog"><div class="vh"><b>'+TXH("nav_menu")+'</b><button type="button" data-csheet-close="1" aria-label="'+TXH("close")+'">&#10005;</button></div>'+chips+rows+'</div>'}
+  return pipe("contentsSheet.html",'<div class="csheet" role="dialog"><div class="vh"><b>'+TXH("nav_menu")+'</b><button type="button" data-csheet-close="1" aria-label="'+TXH("close")+'">&#10005;</button></div>'+chips+rows+'</div>')}
 on("renderPhone.before",function(keep){v8vars();ph.classList.toggle("rd-sharp",S.cardCfg.round==="sharp");ph.classList.toggle("rd-round",S.cardCfg.round==="round");ph.classList.toggle("strips-whole",S.cardCfg.strips==="whole");
   ph.classList.toggle("tx-large",S.vis.text==="large");ph.classList.toggle("tx-larger",S.vis.text==="larger");});
 on("renderPhone.after",function(keep){var inCard=S.view==="card",nb=document.getElementById("navbar"),c=S.ctl.bar;
@@ -190,17 +188,16 @@ ph.addEventListener("click",function(e){var t=e.target;
   var nx=t.closest("[data-nextsec]");if(nx){e.stopPropagation();var el=scr.querySelector('[data-ref="sec:'+nx.dataset.nextsec+'"]');S.activeSec=nx.dataset.nextsec;if(el)scr.scrollTo({top:el.offsetTop-60,behavior:S.reduce?"auto":"smooth"});feedback("jump");return}
   var acc=t.closest('.lt-acc[data-one="1"]');if(acc){var id=acc.dataset.accsec;Object.keys(S.openSecs).forEach(function(k){if(k!==id)S.openSecs[k]=false})}},true);
 /* the glossary: the first time only, and under the paragraph */
-var glossV7=gloss;
-gloss=function(text){var h=glossV7(text);if(S.ctl.term.underline!=="first")return h;S._gseen=S._gseen||{};
-  return h.replace(/<span class="gterm" tabindex="0" data-gterm="([^"]*)" data-gdef="[^"]*">([\s\S]*?)<\/span>/g,function(m,id,w){if(S._gseen[id])return w;S._gseen[id]=1;return m})};
+on("gloss.html",function(h){if(S.ctl.term.underline!=="first")return h;S._gseen=S._gseen||{};
+  return h.replace(/<span class="gterm" tabindex="0" data-gterm="([^"]*)" data-gdef="[^"]*">([\s\S]*?)<\/span>/g,function(m,id,w){if(S._gseen[id])return w;S._gseen[id]=1;return m})});
 on("storyScreen.before",function(){S._gseen={}});
 ph.addEventListener("click",function(e){var g=e.target.closest(".gterm");if(!g||S.ctl.term.opens!=="under")return;setTimeout(function(){var p=ph.querySelector(".gpop");if(!p)return;var par=g.closest("p,.el-par,.el-lede")||g.parentNode;p.classList.add("under");par.insertAdjacentElement("afterend",p)},0)});
 
 /* ----- the self-test: what draws outside the card's HTML, and what is behaviour ----- */
 /* the option the self-test is trying: extra views are drawn only for the options that can change them */
 S._stKey=null;function sigWant(re){return S._stKey==null||re.test(S._stKey)}
-var labelOfV7=labelOf;labelOf=function(el){S._stKey=el&&el.dataset?(el.dataset.set||el.dataset.sel||el.dataset.num||null):null;return labelOfV7(el)};
-var selfTestWordsV7=selfTestWords;selfTestWords=function(){S._stKey=null;return selfTestWordsV7()};
+on("labelOf.before",function(el){S._stKey=el&&el.dataset?(el.dataset.set||el.dataset.sel||el.dataset.num||null):null});
+on("selfTestWords.before",function(){S._stKey=null});
 on("modelSig.before",function(cx){var keep=S.view;S.view="card";var x=(sigWant(/langs|vis/)?settingsPanel():"")+(sigWant(/ctl\.contents|mins/)?contentsSheet():"");S.view=keep;cx.panels=x});
 on("modelSig.sig",function(s,cx){return s+cx.panels+JSON.stringify({full:stopTop("full"),peek:stopTop("peek"),acc:S.cardCfg.accent,round:S.cardCfg.round,strips:S.cardCfg.strips,ml:S.motionLevel,
     bar:[S.ctl.bar.shape,S.ctl.bar.fill,S.ctl.bar.minBlocks<=S.card.length,S.ctl.bar.showAt,S.ctl.bar.showFrom,S.ctl.bar.pos]})});

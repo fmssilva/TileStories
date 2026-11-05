@@ -16,7 +16,9 @@ MASCOT='<svg viewBox="0 0 64 74" aria-hidden="true"><defs><linearGradient id="az
 var MOUTH={rest:"M26 46Q32 51 38 46",A:"M25.5 45Q32 56 38.5 45Q32 48 25.5 45Z",E:"M24.5 46Q32 51.5 39.5 46Q32 47.5 24.5 46Z",O:"M29 47.5a3 3.6 0 1 0 6 0a3 3.6 0 1 0 -6 0Z",M:"M27 47.5L37 47.5",
   big:"M24 44.5Q32 55 40 44.5Z",serious:"M27.5 48.5Q32 47 36.5 48.5",surprised:"M29 47a3 4.2 0 1 0 6 0a3 4.2 0 1 0 -6 0Z",thinking:"M27 48Q31 46.5 37 47.5",chew:"M27 47Q32 49.5 37 47"};
 var MOODS={smile:"Smile",big:"Delighted",surprised:"Surprised",thinking:"Thinking",serious:"Serious"};
-function azMouth(m,shape){var p=m&&m.querySelector(".mouth");if(!p)return;var d=MOUTH[shape]||MOUTH.rest,open=/Z$/.test(d);p.setAttribute("d",d);p.setAttribute("fill",open?"#7A2333":"none");p.setAttribute("stroke-width",open?"2":"3")}
+/* azMouth: the drawn mouth (azMouth2d), then every other Azu that follows it (azMouth.after) */
+function azMouth(m,shape){azMouth2d(m,shape);emit("azMouth.after",m,shape)}
+function azMouth2d(m,shape){var p=m&&m.querySelector(".mouth");if(!p)return;var d=MOUTH[shape]||MOUTH.rest,open=/Z$/.test(d);p.setAttribute("d",d);p.setAttribute("fill",open?"#7A2333":"none");p.setAttribute("stroke-width",open?"2":"3")}
 function azMood(){var st=S.guideSteps[G.i];if(!S.guideCfg.moods)return"smile";if(S.m.solemn)return st&&st.mood==="big"?"smile":(st&&st.mood==="surprised"?"thinking":"serious");return(st&&st.mood)||"smile"}
 function restShape(md){return{big:"big",serious:"serious",surprised:"surprised",thinking:"thinking"}[md]||"rest"}
 /* the demo point's moods: the loss in 1755 is serious, the fun fact surprising, the quiz thoughtful, the end delighted */
@@ -26,13 +28,13 @@ function azApply(){var m=ph.querySelector(".mascot");if(!m)return;var md=azMood(
 function shapesOf(w){var out=[],m={a:"A",á:"A",à:"A",ã:"A",â:"A",e:"E",é:"E",ê:"E",i:"E",í:"E",o:"O",ó:"O",ô:"O",õ:"O",u:"O",ú:"O",m:"M",b:"M",p:"M"};
   String(w).toLowerCase().replace(/[^\p{L}]/gu,"").split("").forEach(function(c){var s=m[c];if(s&&out[out.length-1]!==s)out.push(s)});if(!out.length)out.push("E");
   if(out.length>3)out=[out[0],out[Math.floor(out.length/2)],out[out.length-1]];return out}
-var markWordV8k=markWord;markWord=function(k,target){markWordV8k(k,target);if(!S.guideCfg.lips||!G.words[k])return;var m=ph.querySelector(".mascot");if(!m)return;
+on("markWord.after",function(k){if(!S.guideCfg.lips||!G.words[k])return;var m=ph.querySelector(".mascot");if(!m)return;
   (G.lipT||[]).forEach(clearTimeout);var sh=shapesOf(G.words[k].w),dur=Math.max(120,wordMs(k)),per=dur/(sh.length+.6);
-  G.lipT=sh.map(function(s,i){return setTimeout(function(){azMouth(ph.querySelector(".mascot"),s)},i*per)}).concat([setTimeout(function(){G.lipT=null;azMouth(ph.querySelector(".mascot"),restShape(azMood()))},sh.length*per)])};
+  G.lipT=sh.map(function(s,i){return setTimeout(function(){azMouth(ph.querySelector(".mascot"),s)},i*per)}).concat([setTimeout(function(){G.lipT=null;azMouth(ph.querySelector(".mascot"),restShape(azMood()))},sh.length*per)])});
 /* blinks: every 2.5-5 s, never in sync with anything */
 function azBlink(){clearTimeout(G.blinkT);G.blinkT=setTimeout(function(){var m=ph.querySelector(".mascot");if(m&&!S.reduce){m.classList.add("blink");setTimeout(function(){m.classList.remove("blink")},140)}if(G.on)azBlink()},2500+Math.random()*2500)}
-var renderGuideV8k=renderGuide;renderGuide=function(text){renderGuideV8k(text);var m=ph.querySelector(".mascot");if(!m)return;m.setAttribute("role","button");m.setAttribute("aria-label",TXT("mascot_name"));m.tabIndex=-1;if(G.moment)m.classList.add("center");azApply()};
-var startTourV8k=startTour;startTour=function(){G.moment=null;G.talkFrom=performance.now();G.cardMoments=0;startTourV8k();azBlink()};
+on("renderGuide.after",function(){var m=ph.querySelector(".mascot");if(!m)return;m.setAttribute("role","button");m.setAttribute("aria-label",TXT("mascot_name"));m.tabIndex=-1;if(G.moment)m.classList.add("center");azApply()});
+on("startTour.before",function(){G.moment=null;G.talkFrom=performance.now();G.cardMoments=0});on("startTour.after",function(){azBlink()});
 
 /* ----- play: what the visitor starts is never limited; what Azu starts is rare (1 a card, 1 every 5 min) and never over a sentence ----- */
 function azBubble(txt,ms){var m=ph.querySelector(".mascot");if(!m)return;var o=ph.querySelector(".azbub");if(o)o.remove();var b=document.createElement("div");b.className="azbub";b.textContent=txt;b.setAttribute("role","status");
@@ -58,11 +60,10 @@ function azMomentEnd(done){var k=G.moment;if(!k)return;G.moment=null;clearTimeou
   var t=G.momentThen;G.momentThen=null;setTimeout(function(){if(t&&G.on)t()},done?900:0)}
 function momentAllowed(){var c=S.guideCfg;return c.mascot&&c.life==="lively"&&c.moments&&!S.m.solemn&&!(G.cardMoments>0)&&(!G.lastMoment||performance.now()-G.lastMoment>300000)}
 /* between two steps: after Water break s of narration, Azu stops for a sip (once a tour); at the tour's end, if nothing happened, a cookie */
-var nextV8k=next;next=function(){if(G.on&&!G.moment&&momentAllowed()&&!G.paused){var st=S.guideSteps[G.i+1];
-    if(st&&performance.now()-(G.talkFrom||0)>=S.guideCfg.waterAfter*1000){azMoment("water",nextV8k);return}
-    if(st&&st.act==="end"){azMoment("cookie",nextV8k);return}}
-  nextV8k()};
-var stopTourV8k=stopTour;stopTour=function(){if(G.moment){G.momentThen=null;azMomentEnd(false)}clearTimeout(G.blinkT);(G.lipT||[]).forEach(clearTimeout);G.lipT=null;var b=ph.querySelector(".azbub");if(b)b.remove();stopTourV8k()};
+on("next.answer",function(){if(G.on&&!G.moment&&momentAllowed()&&!G.paused){var st=S.guideSteps[G.i+1];
+    if(st&&performance.now()-(G.talkFrom||0)>=S.guideCfg.waterAfter*1000){azMoment("water",nextStep);return true}
+    if(st&&st.act==="end"){azMoment("cookie",nextStep);return true}}});
+on("stopTour.before",function(){if(G.moment){G.momentThen=null;azMomentEnd(false)}clearTimeout(G.blinkT);(G.lipT||[]).forEach(clearTimeout);G.lipT=null;var b=ph.querySelector(".azbub");if(b)b.remove()});
 /* the gestures on Azu: a tap pokes, three quick taps tickle, a long press (0.5 s) knocks Azu over; they never pause the tour */
 var azDown=null;
 ph.addEventListener("pointerdown",function(e){var m=e.target.closest(".mascot");if(!m||!G.on)return;e.stopPropagation();azDown={t:performance.now()}},true);

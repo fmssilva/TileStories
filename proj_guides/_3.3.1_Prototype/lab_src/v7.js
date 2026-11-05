@@ -99,7 +99,6 @@ on("renderEl.content",function(c,kind){if(!c||!Object.keys(c).length)c=S.demoC[k
 on("renderEl.html",function(h,a){return a.kind==="animation"&&S.view!=="demo"?h.replace(/<small>[\s\S]*?<\/small>/,""):h});
 
 /* ----- the demo card: a card of its own with every block once, seeded once from the Ribeira Palace, then independent of every marker ----- */
-S.demoCard=JSON.parse(JSON.stringify(S.card));
 function demoCardScreen(){var keep=S.card,kt=S.test;S.card=S.demoCard;S.test={on:true,poi:"painting"};inDemoCard=true;var h;try{h=cardScreen()}finally{S.card=keep;S.test=kt;inDemoCard=false}
   h=h.replace(/<i title="([^"]*)">&#10005;<\/i>/,'<i title="$1" data-go="card" role="button" style="cursor:pointer">&#10005;</i>');
   return h.replace(/<small>[^<]*<\/small><h2>Ribeira Palace<\/h2>/,"<small>"+TXH("democard_tag")+"</small><h2>"+TXH("democard_title")+"</h2>")}
@@ -116,17 +115,16 @@ function termWords(t){return t.words.split(",").map(function(w){return w.trim()}
 function termFor(word){var w=String(word).trim().toLowerCase();for(var i=0;i<S.terms.length;i++)if(termWords(S.terms[i]).some(function(x){return x.toLowerCase()===w}))return S.terms[i];return null}
 var TERM_RE=/\[\[([^\[\]]+?)\]\]/g;
 function markupTerm(inner){var bar=inner.indexOf("|");return{shown:(bar>=0?inner.slice(0,bar):inner).trim(),term:(bar>=0?inner.slice(bar+1):inner).trim()}}
-function gloss(text){return esc(text).replace(TERM_RE,function(m,inner){var x=markupTerm(inner);if(!x.shown||!x.term)return m;var t=termFor(x.term),def=t?L(t.def):"";
-  return def?'<span class="gterm" tabindex="0" data-gterm="'+t.id+'" data-gdef="'+esc(def)+'">'+x.shown+'</span>':x.shown})}
+function gloss(text){return pipe("gloss.html",esc(text).replace(TERM_RE,function(m,inner){var x=markupTerm(inner);if(!x.shown||!x.term)return m;var t=termFor(x.term),def=t?L(t.def):"";
+  return def?'<span class="gterm" tabindex="0" data-gterm="'+t.id+'" data-gdef="'+esc(def)+'">'+x.shown+'</span>':x.shown}))}
 function plainTerms(text){return String(text).replace(TERM_RE,function(m,inner){return markupTerm(inner).shown||m})}
 function termUses(t){var n=0,rows=[];S.story.forEach(function(r){var txts=[];if(r.c&&r.c.text)txts.push(r.c.text);(r.slots||[]).forEach(function(s){if(s&&s.text)txts.push(s.text)});
   txts.forEach(function(x){Object.keys(x).forEach(function(lg){var s=x[lg]||"",m;TERM_RE.lastIndex=0;while((m=TERM_RE.exec(s))){if(termFor(markupTerm(m[1]).term)===t){n++;if(rows.indexOf(r.id)<0)rows.push(r.id)}}})})});return{n:n,rows:rows}}
 function termScreen(){var t=byId(S.terms,S.termOpen)||S.terms[0];if(!t)return "";var ws=termWords(t);
   var h=topbar(TXH("term_crumb")+" &#8250; <b>"+esc(ws[0]||"")+"</b>")+'<div class="pg"><div class="blk"><div class="el-eyebrow">'+TXH("term_eyebrow")+'</div><h3 class="el-title">'+esc(ws[0]||"")+'</h3><p class="el-lede">'+esc(L(t.def))+'</p>';
   (t.page||[]).forEach(function(r,i){h+='<div class="item" data-ref="tp:'+i+'">'+renderEl(r.kind,defStyle(r.kind),r.c,i)+'</div>'});return h+'</div></div>'}
-var corpusV6=corpus;corpus=function(){return corpusV6().map(function(c){return Object.assign({},c,{text:plainTerms(c.text)})})};
-var searchAnswerV6=searchAnswer;
-searchAnswer=function(q){var extra=[];S.terms.forEach(function(t){var ws=termWords(t);if(ws.some(function(w){return q.toLowerCase().indexOf(w.toLowerCase())>=0}))extra=extra.concat(ws)});return searchAnswerV6(q+" "+extra.join(" "))};
+on("corpus.list",function(l){return l.map(function(c){return Object.assign({},c,{text:plainTerms(c.text)})})});
+on("searchAnswer.q",function(q){var extra=[];S.terms.forEach(function(t){var ws=termWords(t);if(ws.some(function(w){return q.toLowerCase().indexOf(w.toLowerCase())>=0}))extra=extra.concat(ws)});return q+" "+extra.join(" ")});
 ph.addEventListener("click",function(e){var old=ph.querySelector(".gpop"),o=e.target.closest("[data-termopen]");
   if(o){e.stopPropagation();if(old)old.remove();S.termOpen=o.dataset.termopen;S.view="term";renderPhone(false);return}
   var g=e.target.closest(".gterm");if(!g){if(old)old.remove();return}
@@ -158,8 +156,8 @@ function langHead(){return S.langs.list.map(function(l){return'<th>'+l.code.toUp
 function txInputs(k){var v=S.tx[k],long=Object.keys(v).some(function(c){return String(v[c]||"").length>34});return S.langs.list.map(function(l){var a='class="u'+(v[l.code]?'':' miss')+'" data-tx="'+k+'|'+l.code+'" placeholder="'+esc(L(v))+' ('+S.langs.fallback.toUpperCase()+')" aria-label="'+esc(TXP[k]+" · "+l.code.toUpperCase())+'"';
   return'<td>'+(long?'<textarea rows="2" '+a+'>'+esc(v[l.code]||"")+'</textarea>':'<input '+a+' value="'+esc(v[l.code]||"")+'">')+'</td>'}).join("")}
 /* Aa: the component's words, one row per word it shows, named by what it is on the phone; the (?) says where it shows */
-function txPanel(o){var ks=TXO[o]||[];return '<div class="ownpanel"><table class="tbl txt"><thead><tr><th style="width:30%">On the phone</th>'+langHead()+'<th style="width:22px"></th></tr></thead><tbody>'+ks.map(function(k){
-  return '<tr><td>'+(TXNEW[k]?'<span class="badge new">NEW</span> ':'')+esc(TXP[k]||"Its words")+(TXF[k]?'<span class="fate">'+esc(TXF[k])+'</span>':'')+'</td>'+txInputs(k)+'<td>'+help(TXW[k])+'</td></tr>'}).join("")+'</tbody></table></div>'}
+function txPanel(o){var ks=TXO[o]||[];return pipe("txPanel.html",'<div class="ownpanel"><table class="tbl txt"><thead><tr><th style="width:30%">On the phone</th>'+langHead()+'<th style="width:22px"></th></tr></thead><tbody>'+ks.map(function(k){
+  return '<tr><td>'+(TXNEW[k]?'<span class="badge new">NEW</span> ':'')+esc(TXP[k]||"Its words")+(TXF[k]?'<span class="fate">'+esc(TXF[k])+'</span>':'')+'</td>'+txInputs(k)+'<td>'+help(TXW[k])+'</td></tr>'}).join("")+'</tbody></table></div>')}
 function dmPanel(o){var p=o.split(":");
   if(p[0]==="el")return '<div class="ownpanel"><div class="sub2">Demo content</div>'+fieldsFor(p[1],S.demoC[p[1]]||{},"demo:"+p[1])+row("Reset",'<button class="ubtn sm" type="button" data-demoreset="'+p[1]+'">Back to the framework\'s demo</button>',"Demo content shows in the Editor\'s previews and on the demo card, never in the app. A marker\'s own content always wins.")+'</div>';
   if(p[0]==="bd"){var b=S.demoCard.filter(function(x){return x.kind===p[1]})[0];return '<div class="ownpanel">'+
@@ -241,15 +239,13 @@ function changedTexts(){var o={},z=JSON.parse(TX0);Object.keys(S.tx).forEach(fun
 
 /* ----- the phone's own words for the test tile, the preview bar and the demo card ----- */
 var inDemoCard=false;
-function testTile(){return inDemoCard?'<button class="testtile" type="button" data-go="demo"><div><b>'+TXH("test_tile_tag")+'</b><strong>'+TXH("test_demo_title")+'</strong><span>'+TXH("test_demo_line")+'</span></div><em>&#8250;</em></button>'
-  :'<button class="testtile" type="button" data-go="democard"><div><b>'+TXH("test_tile_tag")+'</b><strong>'+TXH("test_tile_title")+'</strong><span>'+TXH("test_tile_line")+'</span></div><em>&#8250;</em></button>'}
 S.previewBar=true;S.wallTip=true;
-ptool=function(){var nx={phone:"land",land:"tablet",tablet:"phone"},nm={phone:"pbar_phone",land:"pbar_wide",tablet:"pbar_tablet"};
-  return '<span class="lbl">'+TXH("pbar_label")+'</span><button type="button" data-pt="dark" aria-pressed="'+S.dark+'" title="'+TXH("pbar_tip_theme")+'">'+(S.dark?"&#9790; "+TXH("pbar_dark"):"&#9728; "+TXH("pbar_light"))+'</button>'+
+function ptool(){var nx={phone:"land",land:"tablet",tablet:"phone"},nm={phone:"pbar_phone",land:"pbar_wide",tablet:"pbar_tablet"};
+  return pipe("ptool.html",'<span class="lbl">'+TXH("pbar_label")+'</span><button type="button" data-pt="dark" aria-pressed="'+S.dark+'" title="'+TXH("pbar_tip_theme")+'">'+(S.dark?"&#9790; "+TXH("pbar_dark"):"&#9728; "+TXH("pbar_light"))+'</button>'+
    '<button type="button" data-pt="reduce" aria-pressed="'+S.reduce+'" title="'+TXH("pbar_tip_motion")+'">'+(S.reduce?TXH("pbar_still"):TXH("pbar_motion"))+'</button>'+
    '<button type="button" data-pt="lang" aria-pressed="false" title="'+TXH("pbar_tip_lang")+'">'+S.lang.toUpperCase()+'</button>'+
    '<button type="button" data-pt="focusOn" aria-pressed="'+S.focusOn+'" title="'+TXH("pbar_tip_focus")+'">'+TXH("pbar_focus")+'</button>'+
-   '<button type="button" data-pt="screen" data-v="'+nx[S.screen]+'" aria-pressed="false" title="'+TXH("pbar_tip_screen")+'">'+TXH(nm[S.screen])+'</button>'};
+   '<button type="button" data-pt="screen" data-v="'+nx[S.screen]+'" aria-pressed="false" title="'+TXH("pbar_tip_screen")+'">'+TXH(nm[S.screen])+'</button>')}
 on("renderPhone.after",function(keep){var pt=document.getElementById("ptool");if(pt)pt.style.display=S.previewBar?"":"none"});
 
 /* ----- Global Scene: the top level only ----- */
@@ -279,7 +275,7 @@ function tryWord(w){w=w.trim();if(!w)return "";var t=termFor(w);
   var ws=termWords(t),u=termUses(t),def=L(t.def);
   return "Search: a point holding any of "+ws.map(function(x){return "“"+x+"”"}).join(", ")+" is found by all of them. "+
    (def?(u.n?"Card: underlined in "+u.rows.length+" text"+(u.rows.length>1?"s":"")+" of the Ribeira Palace's story; a tap shows the definition"+(t.page.length?" and Read more opens its page. ":". "):"Card: no card text marks it yet (write [["+ws[0]+"]]). "):"No definition: search only. ")+"Guide: Ask (search) reads the same row."}
-function txRows(){var q=S.ui.txq.trim().toLowerCase(),out="",f=S.ui.txf;
+function txRows(){var ans=firstAnswer("txRows.answer");if(ans!==undefined)return ans;var q=S.ui.txq.trim().toLowerCase(),out="",f=S.ui.txf;
   if(f==="retired")return TXRET.map(function(k){return'<tr><td>'+esc(S.tx[k].en)+'</td><td colspan="'+S.langs.list.length+'" class="uses">'+esc(TXF[k])+'</td><td></td></tr>'}).join("");
   locRefs().forEach(function(r){var v=refObj(r.ref);if(!v)return;var m=missingOf(v),k=r.ref.slice(3);
     if(f==="missing"&&!m)return;if(f==="new"&&!(r.kind==="Interface"&&TXNEW[k]))return;if(f==="interface"&&r.kind!=="Interface")return;if(f==="content"&&r.kind!=="Content")return;
@@ -316,7 +312,7 @@ function edWords(){var h='<div class="note">Words every part of the wall reads: 
    '<div class="note">Outside the Editor: export / import the same rows for a translator (CSV or XLIFF), with a status per text (machine draft, reviewed).</div>';
   h+=fo("w3",'3 · Texts check <span class="sub">· every text of the wall in one list, for translators</span>',["new","NEW"],ck,1);
   h+=jsonBox("config.json · wall level (languages, terms)",wordsJson());
-  return h}
+  return pipe("edWords.html",h)}
 on("renderEditor.tab",function(){if(S.tab==="words")return edWords()});
 on("refreshJsonV4.answer",function(){if(S.tab==="words"){var pre=ed.querySelector(".json pre");if(pre)pre.textContent=JSON.stringify(wordsJson(),null,2);return true}});
 (function(){var tabs=document.querySelector(".utabs");if(tabs&&!tabs.querySelector('[data-tab="words"]')){var b=document.createElement("button");b.className="utab w";b.setAttribute("role","tab");b.type="button";b.dataset.tab="words";b.setAttribute("aria-selected","false");b.textContent="Languages & Terms";tabs.appendChild(b);
@@ -358,10 +354,9 @@ BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(langs\\.|wallTip|"));
 var TX_EXPECT={reading_minutes:1,guide_duration:1,pbar_tip_theme:1,pbar_tip_motion:1,pbar_tip_lang:1,pbar_tip_focus:1,pbar_tip_screen:1,term_crumb:1,test_tile_tag:1,test_tile_title:1,test_tile_line:1,test_demo_line:1,democard_title:1,democard_tag:1,pbar_label:1,pbar_light:1,pbar_motion:1,pbar_focus:1,pbar_phone:1,term_eyebrow:1,close:1,visitor_settings:1,page_back:1,gallery_name:1,page_previous:1,page_next:1,locate_label:1,open_block_button:1,open_row_story:1,fun_fact_label:1,
  before_label:1,after_label:1,model_3d_hint:1,panorama_360_drag_hint:1,audio_play:1,test_demo_title:1,open_row_expand:1,guide_start:1,guide_block_title:1,guide_block_line:1};
 var TX_DOM={peek_next_label:"shown at Peek",show_on_wall_button:"shown on the sticky button",wall_tip:"shown over the wall",audio_pause:"after a tap on Play",term_read_more:"shown in the glossary popup",pbar_dark:"the bar in dark mode",pbar_still:"the bar under Reduce Motion",pbar_wide:"the bar on a wide screen",pbar_tablet:"the bar on a tablet"};
-function selfTestWords(){var res=[],real={renderEditor:renderEditor,renderPhone:renderPhone,renderAll:renderAll,show:show,playRef:playRef,flashRef:flashRef};
+function selfTestWords(){emitLatestFirst("selfTestWords.before");var res=[];
   S.ui.level=9;S.op={};S.ui.single=false;S.ownAll=true;S.ui.txf="content";
-  ["card","words","global"].forEach(function(tab){S.tab=tab;real.renderEditor();var base=JSON.stringify(S);
-    renderEditor=function(){};renderPhone=function(){};renderAll=function(){};show=function(v){S.view=v};playRef=function(){};flashRef=function(){};
+  ["card","words","global"].forEach(function(tab){S.tab=tab;renderEditor();var base=JSON.stringify(S);noDraw=true;
     var acts=[];function lg(s){return langCodes().indexOf(s)>=0?s:null}
     ed.querySelectorAll("[data-tx]").forEach(function(x){var p=x.dataset.tx.split("|");acts.push({el:x,key:"tx:"+x.dataset.tx,tx:p[0],lang:p[1],v:"Zz"+p[0],kind:"input"})});
     ed.querySelectorAll("[data-loc]").forEach(function(x){var p=x.dataset.loc.split("|");acts.push({el:x,key:"loc:"+x.dataset.loc,lang:lg(p[1]),v:"Zz",kind:"input"})});
@@ -379,14 +374,13 @@ function selfTestWords(){var res=[],real={renderEditor:renderEditor,renderPhone:
       else if(/^(term:|loc:term:)/.test(a.key)&&!termUses(byId(S.terms,a.key.replace(/^loc:/,"").split(":")[1].split("|")[0])||{words:""}).n)r="elsewhere (no card text links this term)";
       else r="NO EFFECT (state changes, phone does not)";
       res.push({tab:tab,key:a.key,v:a.v||"",label:lab,result:r})});
-    renderEditor=real.renderEditor;renderPhone=real.renderPhone;renderAll=real.renderAll;show=real.show;playRef=real.playRef;flashRef=real.flashRef});
+    noDraw=false});
   S.ownAll=false;S.ui.txf="all";return res}
-var selfTestV6=selfTest;selfTest=function(){var a=selfTestV6(),b=selfTestWords();return a.concat(b)};
-var showSelfTestV6=showSelfTest;
-showSelfTest=function(res){showSelfTestV6(res);var box=document.getElementById("selftest"),els=res.filter(function(r){return/^elsewhere/.test(r.result)}).length,
+on("selfTest.res",function(a){return a.concat(selfTestWords())});
+on("showSelfTest.after",function(res){var box=document.getElementById("selftest"),els=res.filter(function(r){return/^elsewhere/.test(r.result)}).length,
   cnt=function(re){var x=res.filter(function(r){return re.test(r.key)});return[x.length,x.filter(function(r){return r.result==="changes the phone"}).length]},tx=cnt(/^tx:/),lc=cnt(/^loc:/),dm=cnt(/^demo:/);
   box.insertAdjacentHTML("beforeend",'<p>Texts on their parts: <b>'+tx[1]+'</b> of '+tx[0]+' fields change the phone; the rest belong to parts the Lab does not draw (<b>'+els+'</b> elsewhere) or show during the tour. Content in the Texts check: <b>'+lc[1]+'</b> of '+lc[0]+'. Demo content and term pages: <b>'+dm[1]+'</b> of '+dm[0]+'.</p>');
-  var j=JSON.parse(box.dataset.json||"{}");j.elsewhere=els;j.texts={fields:tx[0],ok:tx[1]};j.content={fields:lc[0],ok:lc[1]};j.demo={fields:dm[0],ok:dm[1]};box.dataset.json=JSON.stringify(j)};
+  var j=JSON.parse(box.dataset.json||"{}");j.elsewhere=els;j.texts={fields:tx[0],ok:tx[1]};j.content={fields:lc[0],ok:lc[1]};j.demo={fields:dm[0],ok:dm[1]};box.dataset.json=JSON.stringify(j)});
 
 
 /* ----- opening a component shows that element on the phone, marked for a moment ----- */

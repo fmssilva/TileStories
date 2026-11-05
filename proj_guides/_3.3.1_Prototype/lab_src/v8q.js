@@ -65,10 +65,10 @@ function azuForm(){if(S.guideCfg.azuStyle!=="light")return;var m=ph.querySelecto
   AzuGL.set("to",G.azWalk?1:ts==="listening"?.85:(ts==="thinking"||(G.azThinkTill||0)>performance.now())?.6:md==="surprised"?.25:0);AzuGL.set("mood",md==="serious"?-1:md==="big"?.6:0)}
 setInterval(azuForm,120);
 /* the mouth: the same shapes the 2D Azu uses, as an opening */
-var azMouthV8q=azMouth;azMouth=function(m,shape){azMouthV8q(m,shape);AzuGL.set("talk",{A:1,E:.55,O:.8,M:0,big:.7,chew:.4,surprised:.6}[shape]||0)};
+on("azMouth.after",function(m,shape){AzuGL.set("talk",{A:1,E:.55,O:.8,M:0,big:.7,chew:.4,surprised:.6}[shape]||0)});
 /* the guide's Azu: with Tile of light, the canvas replaces the drawing (the reactions move the canvas as they moved the drawing) */
-var renderGuideV8q=renderGuide;renderGuide=function(text){renderGuideV8q(text);if(S.guideCfg.azuStyle!=="light")return;var m=ph.querySelector(".mascot"),c=AzuGL.canvas();if(!m||!c)return;
-  var sv=m.querySelector("svg");if(sv)sv.style.display="none";if(c.parentNode!==m)m.insertBefore(c,m.firstChild);m.classList.add("light");AzuGL.start()};
+on("renderGuide.after",function(){if(S.guideCfg.azuStyle!=="light")return;var m=ph.querySelector(".mascot"),c=AzuGL.canvas();if(!m||!c)return;
+  var sv=m.querySelector("svg");if(sv)sv.style.display="none";if(c.parentNode!==m)m.insertBefore(c,m.firstChild);m.classList.add("light");AzuGL.start()});
 /* ----- peek: Azu rises from behind the block being told (a box that clips at the block's top edge) ----- */
 function azPeek(el){var o=ph.querySelector(".azpeek");if(o)o.remove();el=el||stepEl(S.guideSteps[G.i])||scr.querySelector('[data-ref^="b:"]');if(!el)return;var c=AzuGL.canvas();
   var box=document.createElement("div");box.className="azpeek";box.setAttribute("aria-hidden","true");var inner=document.createElement("div");inner.className="azpeek-in";
@@ -88,9 +88,9 @@ function azWalk(id,done){var poi=S.wallPois.filter(function(p){return p.id===id}
     w.style.transform="translate("+(x-32).toFixed(1)+"px,"+(y-70).toFixed(1)+"px) scale("+s.toFixed(3)+")";if(k<1){requestAnimationFrame(step);return}
     G.azWalk=false;AzuGL.set("to",0);w.classList.add("arrived");done&&done()};if(S.reduce)step(t0+dur);else requestAnimationFrame(step)}
 /* in Ask about the view, Azu walks to the first point the answer lights */
-var camLightV8q=camLight;camLight=function(ids){camLightV8q(ids);if(S.guideCfg.azuStyle==="light"&&S.guideCfg.azuWalk&&ids&&ids.length&&G.cam.open){var w=ph.querySelector(".azwalker");if(!w||w.dataset.at!==ids[0])azWalk(ids[0],function(){var x=ph.querySelector(".azwalker");if(x)x.dataset.at=ids[0]})}};
+on("camLight.after",function(ids){if(S.guideCfg.azuStyle==="light"&&S.guideCfg.azuWalk&&ids&&ids.length&&G.cam.open){var w=ph.querySelector(".azwalker");if(!w||w.dataset.at!==ids[0])azWalk(ids[0],function(){var x=ph.querySelector(".azwalker");if(x)x.dataset.at=ids[0]})}});
 S.guideCfg.azuWalk=true;
-var camLayerV8q=camLayer;camLayer=function(){camLayerV8q();if(!G.cam.open){var w=ph.querySelector(".azwalker");if(w)w.remove()}};
+on("camLayer.after",function(){if(!G.cam.open){var w=ph.querySelector(".azwalker");if(w)w.remove()}});
 
 /* Editor: 6 · Guide > Mascot gets Style, Walks to the wall, and a Try for the peek and the walk */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;

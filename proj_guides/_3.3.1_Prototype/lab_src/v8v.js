@@ -5,21 +5,20 @@ WALLS.ribeira.markers=[{id:"painting",u:.46,v:.52,name:T("Ribeira Palace","Paço
   {id:"cathedral",u:.70,v:.47,name:T("Lisbon Cathedral","Sé de Lisboa"),icon:"star"}];
 WALLS.belem.markers=[];
 function wallMarkers(){return curWall().markers||[]}
-var wallLayerV8v=wallLayer;
-wallLayer=function(){var w=wallLayerV8v();w.querySelectorAll(".mk").forEach(function(b){b.remove()});
+on("wallLayer.after",function(w){w.querySelectorAll(".mk").forEach(function(b){b.remove()});
   w.insertAdjacentHTML("afterbegin",wallMarkers().map(function(m){var n=esc(L(m.name));return'<button class="mk'+(m.card?"":" dim")+'" type="button"'+(m.card?' data-marker="'+m.id+'"':"")+' data-mk="'+m.id+'" aria-label="'+n+'"><span>'+sicon(m.icon,m.card?20:18)+'</span><b>'+n+'</b></button>'}).join(""));
-  placeMarkers();return w};
+  placeMarkers()});
 function placeMarkers(){var w=document.getElementById("wall");if(!w)return;var ms=wallMarkers();
   w.querySelectorAll("[data-mk]").forEach(function(b){var m=ms.filter(function(x){return x.id===b.dataset.mk})[0];if(!m)return;var s=poiScreen(m);b.style.left=s.x.toFixed(1)+"px";b.style.top=s.y.toFixed(1)+"px"})}
-var camPaintV8v=camPaint;camPaint=function(){camPaintV8v();placeMarkers()};
+on("camPaint.after",function(){placeMarkers()});
 /* the Ribeira wall shows its points too (named, as Names on the points says); the marker's own point gives way to the marker */
-var camLayerV8v=camLayer;camLayer=function(){camLayerV8v();var pins=ph.querySelector(".campins");if(!pins||S.camCfg.wall!=="ribeira")return;pins.hidden=false;
-  if(!G.cam.open)wallMarkers().forEach(function(m){var e=pins.querySelector('[data-cpin="'+m.id+'"]');if(e)e.remove()})};
+on("camLayer.after",function(){var pins=ph.querySelector(".campins");if(!pins||S.camCfg.wall!=="ribeira")return;pins.hidden=false;
+  if(!G.cam.open)wallMarkers().forEach(function(m){var e=pins.querySelector('[data-cpin="'+m.id+'"]');if(e)e.remove()})});
 
 /* ----- the Wall switch on the preview bar: the card's wall or the Belém test wall, one tap from anywhere ----- */
 function setWall(w){if(G.on)stopTour();S.camCfg.wall=w;S.view="card";S.stop="closed";G.cam.open=false;G.cam.lit=[];G.cam.route=[];G.cam.hunt=null;G.fab.bub=null;G.fab.said=null;
   S.camX=w==="belem"?.35:.4;S.camY=.5;S.camZoom=1;renderAll(true)}
-var ptoolV8v=ptool;ptool=function(){var w=S.camCfg.wall==="belem"?"belem":"ribeira";return ptoolV8v()+'<button type="button" data-pt="wall" aria-pressed="'+(w!=="ribeira")+'" title="'+TXH("pbar_tip_wall")+'">'+TXH("pbar_wall_"+w)+'</button>'};
+on("ptool.html",function(h){var w=S.camCfg.wall==="belem"?"belem":"ribeira";return h+'<button type="button" data-pt="wall" aria-pressed="'+(w!=="ribeira")+'" title="'+TXH("pbar_tip_wall")+'">'+TXH("pbar_wall_"+w)+'</button>'});
 document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest('[data-pt="wall"]');if(!b)return;e.stopPropagation();e.preventDefault();setWall(S.camCfg.wall==="belem"?"ribeira":"belem")},true);
 
 /* ----- the test scene: a finger drags the wall, the wheel zooms; each marker and pin must stay on its place in the picture ----- */
@@ -49,7 +48,7 @@ AGSCENES.push({id:"markers",label:"Ribeira wall · a drag moves the markers with
   q:T("nothing: it drags the wall 120 px left and 80 up as a finger does, then zooms in with the wheel","nada: arrasta a parede 120 px para a esquerda e 80 para cima, como um dedo, e depois aproxima com a roda"),
   expect:T("Each marker and each point stays on its place in the picture (within 1.5 px) and moves as far as the picture.","Cada marcador e cada ponto fica no seu lugar na imagem (a menos de 1,5 px) e anda tanto como a imagem."),
   setup:function(){setWall("ribeira");S.camX=.4;S.camY=.5;S.camZoom=1.3;renderPhone(false)}});
-var agSceneV8v=agScene;agScene=function(i){var sc=agSceneV8v(i);if(sc.act){AG.con.q="";agConPaint()}return sc};
-var agRunSceneV8v=agRunScene;agRunScene=function(i){var sc=AGSCENES[i];if(!sc.act)return agRunSceneV8v(i);agScene(i);
-  return new Promise(function(res){setTimeout(function(){var r=sc.act();AG.sceneRes[sc.id]={ok:r[0],note:r[1],answer:r[2],st:null,view:[]};agConPaint();res(AG.sceneRes[sc.id])},300)})};
-var agScenesHtmlV8v=agScenesHtml;agScenesHtml=function(){var h=agScenesHtmlV8v(),sc=AGSCENES[AG.scene];return sc.act?h.replace("Asks: “"+esc(L(sc.q))+"”","Does: "+esc(L(sc.q))):h};
+on("agScene.after",function(sc){if(sc.act){AG.con.q="";agConPaint()}});
+on("agRunScene.answer",function(i){var sc=AGSCENES[i];if(!sc.act)return;agScene(i);
+  return new Promise(function(res){setTimeout(function(){var r=sc.act();AG.sceneRes[sc.id]={ok:r[0],note:r[1],answer:r[2],st:null,view:[]};agConPaint();res(AG.sceneRes[sc.id])},300)})});
+on("agScenesHtml.html",function(h){var sc=AGSCENES[AG.scene];return sc.act?h.replace("Asks: “"+esc(L(sc.q))+"”","Does: "+esc(L(sc.q))):h});

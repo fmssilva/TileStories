@@ -56,7 +56,7 @@ const TEXT = 'O palácio tinha uma ópera, inaugurada em março de 1755.';
   ok('A tour line (not an answer) does not call a live voice', await R('(function(){var n=0,f=lvAzure;lvAzure=function(t){n++;return f(t)};G.answer="";say("Bem-vindo ao Paço da Ribeira.",function(){},function(){});lvAzure=f;stopSpeech();return n})()') === 0);
   // 5. a refused key: the device voice reads the answer, and the Editor says so
   await p.locator('[data-set="@agentCfg.liveVoice"][data-v="eleven"]').click(); await W(300); elStatus = 401;
-  await R('G.answer=' + JSON.stringify(TEXT) + ';window.__dev=0;var f=sayV9a;sayV9a=function(t,w,e){window.__dev++;stopSpeech()};say(G.answer,function(){},function(){})'); await W(1500);
+  await R('G.answer=' + JSON.stringify(TEXT) + ';window.__dev=0;var f=lvDevice;lvDevice=function(t,w,e){window.__dev++;stopSpeech()};say(G.answer,function(){},function(){})'); await W(1500);
   ok('ElevenLabs refuses the key: the device voice reads the answer instead', await R('window.__dev') === 1);
   ok('...and the Editor says it failed', /ElevenLabs failed \(ElevenLabs answered 401\); the device voice read it/.test(await R('lvStatusText()')), await R('lvStatusText()'));
   ok('no page errors', errs.length === 0, errs.slice(0, 3));

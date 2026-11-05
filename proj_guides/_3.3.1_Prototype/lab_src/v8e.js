@@ -1,8 +1,5 @@
 /* ===================== v8e: the hero fills what the card shows; editor tools look like editor tools and move; the page's top is clean ===================== */
-/* the bar comes after the hero by default: the visitor first meets the picture, then the sections */
-S.ctl.bar.showFrom="hero";
 function heroH(){var H=SCREENS[S.screen][1];if(S.screen==="land")return 300;return Math.max(220,H-stopTop(S.stop==="peek"||S.stop==="closed"?"half":S.stop))}
-function fitHero(){var hero=scr.querySelector(".hero");if(!hero||(S.view!=="card"&&S.view!=="democard"))return;hero.style.height=heroH()+"px"}
 function barAfterHero(){var nb=document.getElementById("navbar"),c=S.ctl.bar;if(!nb||S.view!=="card"||!c.on||c.showFrom!=="hero"||S.stop==="peek"||S.stop==="closed")return;
   var hero=scr.querySelector(".hero"),past=hero?scr.scrollTop>hero.offsetHeight-140:true;if(!past)nb.style.display="none";else if(S.card.length>=c.minBlocks&&S.sections.filter(shownOnBar).length>=2)nb.style.display=""}
 on("renderPhone.after",function(keep){fitHero();barAfterHero();editorTools()});
@@ -32,7 +29,5 @@ on("topBand.after",function(){var tb=ph.querySelector(".topband");if(tb)tb.query
 /* Peek: the title row starts at the sheet's own top */
 function peekFix(){var pr=ph.querySelector(".peekrow");if(pr)pr.style.top=stopTop("peek")+"px"}
 /* the locate label shows only where the hero's words leave it room (Unity: LabelFits) */
-function locFit(){var lb=ph.querySelector(".locpin > span:first-child:not(.floatpin)"),w=scr.querySelector(".hero .w");if(!lb)return;lb.style.visibility="";if(!w)return;
-  var a=lb.getBoundingClientRect(),c=w.getBoundingClientRect(),hit=!(a.right<c.left||a.left>c.right||a.bottom<c.top||a.top>c.bottom);if(hit)lb.style.visibility="hidden"}
 on("renderPhone.after",function(keep){peekFix();locFit()});scr.addEventListener("scroll",locFit,{passive:true});
 on("renderPhone.after",function(keep){var lp=ph.querySelector(".locpin");if(lp)lp.style.display=S.view==="card"&&S.stop==="peek"?"none":"";setTimeout(locFit,420)});
