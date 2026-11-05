@@ -52,7 +52,9 @@ setInterval(function(){if(!G.on||!dockOn())return;bubbleSentence();var t=ph.quer
 /* the conversation: the tour's lines and the questions and answers */
 on("runStep.after",function(){var st=S.guideSteps[G.i];if(st){var t=stepText(st);if(t&&(!G.thread.length||G.thread[G.thread.length-1].text!==t))G.thread.push({who:"azu",text:t});if(G.thread.length>60)G.thread.shift()}});
 on("ask.before",function(q){G.thread.push({who:"me",text:q.trim()});G.micNote="";G.talk="idle"});
-on("sayDevice.before",function(text){if(G.askOpen&&G.answer&&text===G.answer){if(!G.thread.length||G.thread[G.thread.length-1].text!==text)G.thread.push({who:"azu",text:text});renderGuide(text)}});
+/* the answer goes to the conversation once, when it is given (spoken by any voice, or not spoken); its words show as it is said */
+on("ask.after",function(t,turn){if(!t)return;G.thread.push(turn?{who:"azu",text:t,turn:turn}:{who:"azu",text:t});if(G.thread.length>60)G.thread.shift()});
+on("say.before",function(text){if(G.askOpen&&G.answer&&text===G.answer)renderGuide(text)});
 on("startTour.before",function(){S.dockH=S.guideCfg.dockStart;G.thread=[];G.talk="idle";G.askOpen=false;G.answer="";G.micNote=""});
 /* ----- the talk button: a tap listens until the visitor stops; a long press is hold-to-talk; speaking, a tap interrupts and listens ----- */
 function earcon(up){if(!S.guideCfg.earcons)return;try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();var o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;o.type="sine";o.frequency.setValueAtTime(up?620:880,t);o.frequency.exponentialRampToValueAtTime(up?880:560,t+.12);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.08,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+.16);o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+.18)}catch(e){}}

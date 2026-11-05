@@ -1,9 +1,16 @@
-/* The voice: say asks its sources, the latest first (say.source), then the device voice (sayDevice) speaks; the device voices per language; the recorded lines (recSay). */
-/* ----- speech: the device voice with word boundaries, or a timed fallback ----- */
-/* say asks its sources (say.source, the latest first), each one true when it speaks the line; the device voice speaks the rest.
-   sayFrom(src,…) asks only the sources older than src: a source that fails hands the line on */
-function say(text,onWord,onEnd){sayFrom(null,text,onWord,onEnd);emit("say.after",text)}
-function sayFrom(src,text,onWord,onEnd){if(answerBelow("say.source",src,text,onWord,onEnd)===undefined)sayDevice(text,onWord,onEnd)}
+/* The voice: one order of sources for every line (sayOrder): a recorded line (recSay), the live voice (say.live), then the device voice (sayDevice); the device voices per language; what speaks now and why (G.sayNow, Speaking now). */
+/* ----- the order of sources, written once, for every line (the tour's, Azu's own words, the answers) -----
+   Voice = Recorded, then live, then this device: the line's recorded file when the set has it; else the live voice (Ask Azu >
+   Voice of the answers, when its key is on this computer); else this device's voice. An answer (G.answer): the live voice first,
+   then a recorded line, then the device. Voice = Device voice: no recorded files (the answers still try the live voice first). */
+function sayOrder(text){var rec=S.guideCfg.voice==="recorded";return!!text&&text===G.answer?(rec?["live","recorded"]:["live"]):(rec?["recorded","live"]:[])}
+/* say asks each source in that order (the point say.<source>): it answers {speaks:who} when it takes the line, or {not:why,short:why}
+   when it cannot; the device voice speaks the rest. sayFrom(src,…,why) goes on after src: a source that fails hands its line on, with why */
+function say(text,onWord,onEnd){emitLatestFirst("say.before",text);G.sayLine={text:text,why:[]};sayFrom(null,text,onWord,onEnd);emit("say.after",text)}
+function sayFrom(src,text,onWord,onEnd,why){var line=G.sayLine&&G.sayLine.text===text?G.sayLine:(G.sayLine={text:text,why:[]});if(why)line.why.push(why);
+  var o=sayOrder(text),i=src?o.indexOf(src)+1:0;
+  for(;i<o.length;i++){var r=firstAnswer("say."+o[i],text,onWord,onEnd);if(r&&r.speaks){sayNow(o[i],r.speaks,line);return}if(r&&r.not)line.why.push(r)}
+  sayNow("device","",line);sayDevice(text,onWord,onEnd)}
 /* the device voice: before it (latest first), a wait for the voices (sayDevice.wait gets go), started once it speaks, ended when done, after it */
 function sayDevice(text,onWord,onEnd){emitLatestFirst("sayDevice.before",text,onWord,onEnd);var end=function(){emit("sayDevice.ended");onEnd()};
   var go=function(){stopSpeech();var words=[],re=/\S+/g,m;while((m=re.exec(text)))words.push({i:m.index,w:m[0]});G.words=words;
@@ -36,27 +43,45 @@ window.VOICESETS=window.VOICESETS||[];
 /* a line is found by what it says: FNV-1a of "lang|text", the same key voicebench writes */
 function fnvKey(s){var b=new TextEncoder().encode(s),h=0x811c9dc5;for(var i=0;i<b.length;i++){h^=b[i];h=Math.imul(h,0x01000193)>>>0}return("0000000"+h.toString(16)).slice(-8)}
 function voiceSets(){return window.VOICESETS||[]}
-/* Best available: the set with the most lines rendered (a published one first when as full), so one voice tells the tour */
+/* Best available: a published set first (this computer's private sets only when no published one exists), then the most lines, so one voice tells the tour */
 function currentSet(){var s=voiceSets(),id=S.guideCfg.voiceSet,pick=s.filter(function(x){return x.id===id})[0];if(pick)return pick;
-  var n=function(x){return Object.keys(x.files||{}).length};return s.slice().sort(function(a,b){return n(b)-n(a)||(a.private?1:0)-(b.private?1:0)})[0]||null}
+  var n=function(x){return Object.keys(x.files||{}).length};return s.slice().sort(function(a,b){return(a.private?1:0)-(b.private?1:0)||n(b)-n(a)})[0]||null}
 function recFile(text,set){set=set||currentSet();if(!set||!text)return null;var f=set.files[fnvKey(S.lang+"|"+String(text).trim())];return f?{set:set,file:f,url:set.url+f.src}:null}
-/* ----- playing a recorded line, a source of say: the audio's clock lights each word (its real start and end: the glide is exact) ----- */
-function recSay(text,onWord,onEnd){var r=S.guideCfg.voice==="recorded"?recFile(text):null;if(!r)return;
+/* a set's short name: its provider and voices ("Azure Neural · en-GB-SoniaNeural / pt-PT-RaquelNeural" is Azure Sonia + Raquel) */
+function setName(set){var p=String(set.label||set.id).split(" · "),who=(p[0]||"").replace(/ Neural$/,""),vs=(p[1]||"").split(" / ").map(function(v){return v.replace(/\s*\(.*?\)\s*/g,"").replace(/^[a-z]{2}-[A-Z]{2}-/,"").replace(/Neural$/,"").trim()}).filter(Boolean);
+  return vs.length?who+" "+vs.join(" + "):who}
+/* ----- playing a recorded line, the source say.recorded: the audio's clock lights each word (its real start and end: the glide is exact) ----- */
+function recSay(text,onWord,onEnd){var set=currentSet();if(!set)return{not:"no recorded voice set on this page",short:"no recorded set"};
+  var r=recFile(text,set);if(!r)return{not:"this line is not recorded in "+setName(set),short:"not recorded"};
   stopSpeech();var words=[],re=/\S+/g,m;while((m=re.exec(text)))words.push({i:m.index,w:m[0]});G.words=words;G.recWords=r.file.words;
   G.hl={k:-1,at:0,p:0,cpm:0,ended:false,last:0,seen:true,start:performance.now(),target:G.hl&&G.hl.target};G.noVoice=false;
   var a=new Audio(r.url);a.preload="auto";a.muted=!!S.guideMute;a.playbackRate=S.guideCfg.speed||1;G.recAudio=a;G.utter={recorded:true};G.lastWordAt=performance.now();musicDuck(true);
   var fin=function(){if(G.recAudio!==a)return;G.recAudio=null;G.utter=null;G.recWords=null;musicDuck(false);if(G.hl)G.hl.ended=true;onEnd()};
-  a.addEventListener("ended",fin);a.addEventListener("error",function(){if(G.recAudio!==a)return;G.recAudio=null;G.utter=null;G.recWords=null;sayFrom(recSay,text,onWord,onEnd)});
+  a.addEventListener("ended",fin);a.addEventListener("error",function(){if(G.recAudio!==a)return;G.recAudio=null;G.utter=null;G.recWords=null;sayFrom("recorded",text,onWord,onEnd,{not:"the recording did not play",short:"the recording did not play"})});
   var tick=function(){if(G.recAudio!==a)return;var t=a.currentTime,w=G.recWords,k=-1;for(var j=0;j<w.length;j++){if(w[j][0]<=t+.02)k=j;else break}
     if(k>=0&&k!==G.hl.k){onWord(k);G.lastWordAt=performance.now()}if(k>=0&&G.hl){G.hl.at=performance.now()-(t-w[k][0])*1000/(a.playbackRate||1)}if(!a.paused)G.lastWordAt=performance.now();requestAnimationFrame(tick)};
-  var p=a.play();if(p&&p.catch)p.catch(function(){if(G.recAudio===a){a.muted=true;a.play().catch(function(){})}});requestAnimationFrame(tick);return true}
-on("say.source",recSay);
+  var p=a.play();if(p&&p.catch)p.catch(function(){if(G.recAudio===a){a.muted=true;a.play().catch(function(){})}});requestAnimationFrame(tick);return{speaks:setName(set)}}
+on("say.recorded",recSay);
 /* the glide uses the word's real length */
 on("wordMs.answer",function(k){if(G.recWords&&G.recWords[k])return Math.max(60,(G.recWords[k][1]-G.recWords[k][0])*1000/((G.recAudio&&G.recAudio.playbackRate)||1))});
 on("stopSpeech.before",function(){if(G.recAudio){try{G.recAudio.pause()}catch(e){}G.recAudio=null;G.utter=null;G.recWords=null}});
-/* pause and resume: the audio just pauses and plays on (the app's AudioSource does the same) */
-on("pauseTour.answer",function(){if(!G.on)return true;if(G.recAudio){if(S.guideCfg.onScroll==="follow"&&G.userScrollAt&&performance.now()-G.userScrollAt<60&&!G.explicitPause)return true;G.paused=true;G.recAudio.pause();renderGuide();return true}});
-on("resumeTour.answer",function(){if(!G.on)return true;if(G.recAudio&&G.paused){G.paused=false;G.askOpen=false;G.recAudio.muted=!!S.guideMute;G.recAudio.play().catch(function(){});renderGuide();return true}});
-/* mute keeps the words going (the captions follow the audio's clock) */
-document.addEventListener("click",function(e){if(!G.recAudio||!e.target.closest||!e.target.closest('#ph [data-g="mute"]'))return;e.stopImmediatePropagation();e.stopPropagation();S.guideMute=!S.guideMute;G.recAudio.muted=S.guideMute;renderGuide()},true);
+/* pause, resume and mute act on whatever speaks: an audio (a recorded line, a live one) pauses and plays on, as the app's AudioSource
+   does; muted, its words go on with its clock */
+on("pauseNow.voice",function(){if(G.recAudio){G.recAudio.pause();return true}});
+on("resumeNow.voice",function(){if(G.recAudio){G.recAudio.muted=!!S.guideMute;G.recAudio.play().catch(function(){});return true}});
+on("mute.voice",function(){if(G.recAudio){G.recAudio.muted=!!S.guideMute;return true}});
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(voiceSet|"));
+
+/* ----- what speaks now, and why when one source stands in for another (no silent fallback) ----- */
+function sayNow(src,who,line){G.sayNow={src:src,by:who,why:line.why.slice(),text:line.text,answer:!!line.text&&line.text===G.answer};sayNowShow()}
+function sayNowText(){var n=G.sayNow;if(!n)return"Nothing at the moment.";var w=n.why,why=w.length>1?w.map(function(x){return x.short}).join("; "):w.length?w[0].not:"";
+  if(n.src==="recorded")return"Recorded · "+n.by+(why?" ("+why+")":"");
+  if(n.src==="live")return"Live · "+n.by+(why?" ("+why+")":n.answer?" (an answer: the live voice comes first)":"");
+  return"This device's voice"+(why?" ("+why+")":" (Voice is Device voice)")+(G.noVoice?" · it has no voice for "+S.lang.toUpperCase()+" here: captions only":"")}
+function sayNowShow(){var e=ed.querySelector(".saynow");if(e)e.textContent=sayNowText();emit("sayNow.after",G.sayNow)}
+on("sayDevice.started",function(){sayNowShow()});
+on("stopTour.after",function(){G.sayLine=null;G.sayNow=null;sayNowShow()});
+/* Editor: Narration > Speaking now, under Voice */
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
+  addRows(d,"s7voice",row("Speaking now",'<span class="uses saynow">'+esc(sayNowText())+'</span>',"The voice of the line being said, as it starts: Recorded (the set's file), Live (Ask Azu > Voice of the answers, with its key on this computer) or this device's voice, and why when one stands in for another. The tour's lines and Azu's own words try them in that order; an answer tries the live voice first."),"Speed");
+  return d.innerHTML});

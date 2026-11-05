@@ -8,7 +8,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 20000 }); await p.waitForTimeout(400);
   const R = src => p.evaluate(s => LAB.run(s), src);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
-  await R('S.hints.on=false;S.previewBar=false;S.lang="en";S.guideCfg.panel="classic";S.view="card";S.stop="full";renderAll(false);window.CAP=function(){var c=ph.querySelector(".gcap");if(!c)return"";c=c.cloneNode(true);c.querySelectorAll(".gnovoice,em").forEach(function(x){x.remove()});return c.textContent.trim()}');
+  await R('S.guideCfg.voice="device";S.hints.on=false;S.previewBar=false;S.lang="en";S.guideCfg.panel="classic";S.view="card";S.stop="full";renderAll(false);window.CAP=function(){var c=ph.querySelector(".gcap");if(!c)return"";c=c.cloneNode(true);c.querySelectorAll(".gnovoice,em").forEach(function(x){x.remove()});return c.textContent.trim()}');
   // 1. the page: nothing above the phone; the phone takes the height there is
   const pg = await R('var h=document.querySelector(".wrap > header"),r=ph.getBoundingClientRect();[h?getComputedStyle(h).display:"none",Math.round(r.top),Math.round(r.height),SCREENS.phone[1]]');
   ok('The page: no title above the phone; the phone takes the window\'s height (900 - 48, at most 820)', pg[0] === 'none' && pg[1] < 40 && pg[3] === 820 && pg[2] === 820, pg);

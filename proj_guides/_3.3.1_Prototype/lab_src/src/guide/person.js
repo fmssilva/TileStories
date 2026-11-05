@@ -19,16 +19,18 @@ on("sayDevice.after",function(){
 function speakFrom(k,retry){var a=G.sayArgs;if(!a)return;var full=G.words.slice(),w=full[k];if(!w){a.onEnd();return}
   if(retry){a.retries++;if(a.retries>1){S.guideMuteOnce=true}}
   var off=k,sub=a.text.slice(w.i);G.sayInner=true;var mute=S.guideMute;if(S.guideMuteOnce)S.guideMute=true;
-  say(sub,function(j){a.onWord(j+off)},a.onEnd);S.guideMute=mute;S.guideMuteOnce=false;G.sayInner=false;
+  sayDevice(sub,function(j){a.onWord(j+off)},a.onEnd);S.guideMute=mute;S.guideMuteOnce=false;G.sayInner=false;
   G.words=full;if(G.hl){G.hl.k=k;G.hl.p=k;G.hl.at=performance.now()}}
-/* pauseTour and resumeTour: a feature may answer for them (the latest first); pauseNow pauses whatever plays */
+/* pauseTour and resumeTour: a feature may answer for them (the latest first). pauseNow pauses whatever speaks: a source with its own
+   audio pauses it (pauseNow.voice, and resumeNow.voice plays it on); else the device voice stops and keeps its word */
 function pauseTour(){if(firstAnswer("pauseTour.answer")===undefined)pauseNow()}
-function pauseNow(){if(!G.on)return;G.paused=true;if(G.utter){G.pausedAt=G.hl&&G.hl.k>=0?G.hl.k:0;var u=G.utter;G.utter=null;try{speechSynthesis.cancel()}catch(e){}G.resumeVoice=true}renderGuide()}
+function pauseNow(){if(!G.on)return;G.paused=true;if(firstAnswer("pauseNow.voice")===undefined&&G.utter){G.pausedAt=G.hl&&G.hl.k>=0?G.hl.k:0;G.utter=null;try{speechSynthesis.cancel()}catch(e){}G.resumeVoice=true}renderGuide()}
 function resumeTour(){if(firstAnswer("resumeTour.answer")!==undefined||!G.on)return;G.paused=false;G.askOpen=false;
+  if(firstAnswer("resumeNow.voice")!==undefined){renderGuide();return}
   if(G.resumeVoice){G.resumeVoice=false;renderGuide();speakFrom(G.pausedAt||0,false);return}
   if(!G.utter&&!G.timer&&!G.waiting&&!G.tryWait)runStep();renderGuide()}
-/* a voice that goes quiet for 4 s while speaking, not paused: start again from its word */
-setInterval(function(){if(!G.on||G.paused||!G.utter||!G.lastWordAt||!(G.hl&&G.hl.seen))return;if(performance.now()-G.lastWordAt>4000&&window.speechSynthesis&&!speechSynthesis.paused){G.lastWordAt=performance.now();speakFrom(G.hl&&G.hl.k>=0?G.hl.k:0,true)}},1000);
+/* the device voice gone quiet for 4 s while speaking, not paused: start again from its word */
+setInterval(function(){if(!G.on||G.paused||!G.utter||G.recAudio||!G.lastWordAt||!(G.hl&&G.hl.seen))return;if(performance.now()-G.lastWordAt>4000&&window.speechSynthesis&&!speechSynthesis.paused){G.lastWordAt=performance.now();speakFrom(G.hl&&G.hl.k>=0?G.hl.k:0,true)}},1000);
 
 /* ----- the introduction: on the first tour (or every tour), Azu walks in and says who it is and how to ask ----- */
 on("runStep.before",function(){if(G.introPending&&G.i===0){G.introPending=false;S.guideSteps.splice(0,0,{id:"intro",view:"card",ref:"hero",act:"intro",text:T(fmt(S.tx.guide_intro.en,pointName()),fmt((S.tx.guide_intro.pt||S.tx.guide_intro.en),pointName()))});G.introNow=true}
@@ -43,7 +45,8 @@ function placeStep(st){if(G.keepScroll||!st||st.act==="intro")return;var el=step
     var want=r.height<=avail*.45?f.top+(avail-r.height)/3:f.top+16,dy=(r.top-want);if(st.ref==="hero")dy=-scr.scrollTop;
     if(Math.abs(dy)>4){G.autoScrollTill=performance.now()+900;scr.scrollTo({top:scr.scrollTop+dy/q,behavior:S.reduce?"auto":"smooth"})}},60)}
 
-/* ----- a scroll by the visitor: the guide keeps talking; if its block leaves the screen, it moves on to the block now in view ----- */
+/* ----- a scroll by the visitor: the guide keeps talking; if its block leaves the screen, it moves on to the block now in view
+   (with none in view it pauses the line where it is, whatever voice speaks it, and Resume plays on) ----- */
 ph.addEventListener("wheel",function(){G.userScrollAt=performance.now()},{capture:true,passive:true});
 ph.addEventListener("touchmove",function(){G.userScrollAt=performance.now()},{capture:true,passive:true});
 on("pauseTour.answer",function(){if(S.guideCfg.onScroll==="follow"&&G.userScrollAt&&performance.now()-G.userScrollAt<60&&!G.explicitPause)return true});
@@ -53,6 +56,7 @@ setInterval(function(){if(!G.on||G.paused||G.askOpen||G.moment||S.guideCfg.onScr
   if(!G.goneSince){G.goneSince=performance.now();return}if(performance.now()-G.goneSince<700)return;G.goneSince=0;
   /* the step whose block is now most in view */
   var best=-1,bv=0;S.guideSteps.forEach(function(s,j){if(j===G.i||s.act==="intro"||s.act==="end"||s.view!==S.view)return;var e=stepEl(s);if(!e)return;var q=e.getBoundingClientRect(),v=Math.max(0,Math.min(q.bottom,f.bottom)-Math.max(q.top,f.top));if(v>bv){bv=v;best=j}});
+  if(best<0&&!G.waiting&&!G.tryWait){pauseNow();return}
   stopSpeech();G.waiting=false;G.tryWait=false;clearTimeout(G.insistT);
   if(best<0){pauseNow();return}
   G.i=best;var t=TXT("guide_moving_on");renderGuide(t);say(t,function(k){markWord(k,null)},function(){if(G.on&&!G.paused){G.noPlace=true;runStepNoScroll()}})},300);

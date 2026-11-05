@@ -8,7 +8,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 20000 }); await p.waitForTimeout(400);
   const R = src => p.evaluate(s => LAB.run(s), src);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
-  await R('S.hints.on=false;S.previewBar=false;S.lang="en";S.guideCfg.panel="classic";renderAll(false)');
+  await R('S.guideCfg.voice="device";S.hints.on=false;S.previewBar=false;S.lang="en";S.guideCfg.panel="classic";renderAll(false)');
   // the voice: the browser has not loaded its voices yet (the first getVoices() is empty); the first step still speaks
   // the browser's voices arrive 700 ms after the tap (as on a fresh page, where the first getVoices() is empty)
   await R('window.__vAt=Infinity;var g0=speechSynthesis.getVoices.bind(speechSynthesis);speechSynthesis.getVoices=function(){return performance.now()<window.__vAt?[]:g0()};VOICES=[]');

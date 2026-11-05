@@ -29,7 +29,7 @@ const TEXT = 'O palácio tinha uma ópera, inaugurada em março de 1755.';
   await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 90000 }); await p.waitForTimeout(500);
   const R = src => p.evaluate(s => LAB.run(s), src); const W = ms => p.waitForTimeout(ms);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
-  await R('S.hints.on=false;S.previewBar=false;S.guideMute=false;S.introSeen=true;S.lang="pt";S.guideCfg.azuStyle="tile";S.view="card";S.stop="half";renderAll(false);renderEditor();ed.querySelector(\'[data-fo="s7agent"]\').open=true');
+  await R('S.guideCfg.voice="device";S.hints.on=false;S.previewBar=false;S.guideMute=false;S.introSeen=true;S.lang="pt";S.guideCfg.azuStyle="tile";S.view="card";S.stop="half";renderAll(false);renderEditor();ed.querySelector(\'[data-fo="s7agent"]\').open=true');
   // 1. the Editor: the row and its status, with no keys here
   const opts = await R('Array.from(ed.querySelectorAll(\'[data-set="@agentCfg.liveVoice"]\')).map(function(b){return b.textContent+(b.getAttribute("aria-pressed")==="true"?"*":"")})');
   ok('Editor: Voice of the answers offers the device voice, Azure (live, chosen: the developer\'s default) and ElevenLabs (live)', opts.join('|') === 'Device voice|Azure (live)*|ElevenLabs (live)', opts);

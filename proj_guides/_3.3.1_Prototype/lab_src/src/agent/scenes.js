@@ -4,7 +4,11 @@ S.agentCfg.trace=true;S.camCfg.names="all";AG.scene=0;AG.sceneRes={};AG.runAll=f
 function agTrace(turn){var st=turn.st;if(!st)return"";var c=(turn.calls||[]).map(function(k){var a=k.args||{},id=a.target_id||(a.poi_ids||[]).join(",")||a.kind||a.query||(a.items||[]).map(function(i){return i.target_id}).join(",");
     return(k.ok?"✓ ":"✗ ")+k.name+(id?"("+String(id).slice(0,40)+")":"")+(k.ok&&k.policy!=="auto"?" ["+k.policy+"]":"")}).join(" · ");
   return'<div class="agtrace">'+esc(agProvName(st.provider)+" · "+st.model+(st.err?" · "+st.err:"")+" · "+(st.first?st.first+" ms / ":"")+st.ms+" ms · "+st.tin+" in / "+st.tout+" out"+(st.est?" (est.)":"")+(st.cost?" · $"+st.cost.toFixed(4):""))+(c?'<br>'+esc(c):"")+'</div>'}
-on("agTurnHtml.html",function(h,turn){return h+(S.agentCfg.trace&&turn?agTrace(turn):"")});
+on("agTurnHtml.html",function(h,turn){if(!S.agentCfg.trace||!turn)return h;turn.vid=turn.vid||(AG.vids=(AG.vids||0)+1);
+  return h+agTrace(turn)+'<div class="agtrace agvoice" data-vid="'+turn.vid+'">'+esc(turn.voice?"Voice: "+turn.voice:"")+'</div>'});
+/* the voice that speaks the answer (Narration > Speaking now), under it, as it starts */
+on("sayNow.after",function(n){var t=G.agTurn;if(!n||!n.answer||!t||t.text!==n.text)return;t.voice=sayNowText();
+  ph.querySelectorAll('.agvoice[data-vid="'+t.vid+'"]').forEach(function(e){e.textContent="Voice: "+t.voice})});
 /* every answer keeps its trace, a failed one too (its offline answer says why) */
 on("agentAsk.before",function(q,where,ui){var d=ui.done,f=ui.fail;
   ui.done=function(t,turn){turn.st=AG.last;d(t,turn)};

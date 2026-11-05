@@ -1,5 +1,5 @@
 /* The Guide's tour: its settings and steps (S.guideCfg, S.guideSteps), startTour, runStep, next, the captions (renderGuide), the coach and the teaser. */
-S.guideCfg={heroButton:true,block:true,voice:"device",music:false,captions:true,highlight:true,coach:true,mascot:true,ask:"ai",speed:1};
+S.guideCfg={heroButton:true,block:true,voice:"recorded",music:false,captions:true,highlight:true,coach:true,mascot:true,ask:"ai",speed:1};
 S.guideSteps=[
  {id:"g0",view:"card",ref:"hero",act:"teaser",text:T("Welcome to the Ribeira Palace. For two and a half centuries the kings of Portugal lived here, right on the river. Let me show you what was here.","Bem-vindo ao Paço da Ribeira. Durante dois séculos e meio, os reis de Portugal viveram aqui, mesmo à beira do rio. Deixe-me mostrar-lhe o que aqui existia.")},
  {id:"g1",view:"card",ref:"b:b_facts",act:"show",text:T("It was the royal home for about two hundred and fifty years, until it was lost on the first of November, 1755.","Foi casa real durante cerca de duzentos e cinquenta anos, até se perder a um de novembro de 1755.")},
@@ -70,7 +70,7 @@ ph.addEventListener("click",function(e){var t=e.target,g=t.closest("[data-g]");
   if(t.closest("[data-flip]"))gesture("flip");if(t.closest(".kq button"))gesture("answer");
   if(!g)return;e.stopPropagation();var k=g.dataset.g;
   if(k==="start"){if(S.view!=="card"){S.view="card"}startTour()}else if(k==="pause")pauseTour();else if(k==="play"){G.askOpen=false;resumeTour()}else if(k==="next"){stopSpeech();G.paused=false;next()}else if(k==="prev"){stopSpeech();G.paused=false;prev()}
-  else if(k==="stop")stopTour();else if(k==="mute"){S.guideMute=!S.guideMute;if(S.guideMute)stopSpeech();renderGuide()}else if(k==="cc"){S.guideCfg.captions=!S.guideCfg.captions;renderGuide()}
+  else if(k==="stop")stopTour();else if(k==="mute"){S.guideMute=!S.guideMute;if(firstAnswer("mute.voice")===undefined&&S.guideMute)stopSpeech();renderGuide()}else if(k==="cc"){S.guideCfg.captions=!S.guideCfg.captions;renderGuide()}
   else if(k==="ask"){pauseTour();G.askOpen=true;renderGuide();var i=ph.querySelector("#gq");if(i)i.focus()}else if(k==="askclose"){G.askOpen=false;renderGuide()}
   else if(k==="stopask"&&G.ctl)G.ctl.abort();
   else if(k==="mic"){var R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R){G.answer=TXT("guide_no_mic");renderGuide();return}
@@ -83,7 +83,7 @@ on("renderPhone.after",function(keep){if(G.on)renderGuide()});
 on("edCard.html",function(h){var c=S.guideCfg;
   var gb=row("Start from the hero",pseg("guideCfg.heroButton",["true","false"],["Shown","Hidden"]),"A Start the guide button on the hero (replaces the Listen pill).")+
    row("Guide block",pseg("guideCfg.block",["true","false"],["Shown","Hidden"]),"A Guide block first in the first section.")+
-   row("Voice",pseg("guideCfg.voice",["recorded","device"],["Recorded files","Device voice"]),"Recorded: audio rendered when authoring (or a human voice), with word timings. Device voice: the phone reads the script (free, offline, plainer).")+
+   row("Voice",pseg("guideCfg.voice",["recorded","device"],["Recorded, then live, then this device","Device voice"]),"Recorded, then live, then this device: each line plays its audio rendered when authoring (or a human voice), with word timings; a line the recorded set lacks is spoken by the live voice (Ask Azu > Voice of the answers, when its key is on this computer), else by this device's voice. Speaking now says which, and why. Device voice: the phone reads the script (free, offline, plainer).")+
    row("Speed",pslider("guideCfg.speed",0.7,1.4,0.05),"")+row("Music bed",pseg("guideCfg.music",["true","false"],["On","Off"]),"Soft music that ducks under the voice.")+
    row("Captions",pseg("guideCfg.captions",["true","false"],["On","Off"]),"On by default (accessibility, noisy places).")+row("Highlight what is read",pseg("guideCfg.highlight",["true","false"],["On","Off"]),"The words light up in the text as they are spoken.")+
    row("Invite to try",pseg("guideCfg.coach",["true","false"],["On","Off"]),"At an interactive block the guide waits for the gesture (9 s at most), with one hint.")+

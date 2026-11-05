@@ -10,7 +10,7 @@ const GLB = path.join(__dirname, '..', '..', '..', 'mascote', '3d', 'azu_tile.gl
   await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 90000 }); await p.waitForTimeout(500);
   const R = src => p.evaluate(s => LAB.run(s), src); const W = ms => p.waitForTimeout(ms);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
-  await R('S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;sampleFn=null;S.view="card";S.stop="half";renderAll(false)');
+  await R('S.guideCfg.voice="device";S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;sampleFn=null;S.view="card";S.stop="half";renderAll(false)');
   // 1. the Editor: Mascot source with 3D model (GLB); choosing it loads the model
   await R('renderEditor();ed.querySelector(\'[data-fo="s7mascot"]\').open=true');
   const src = await R('Array.from(ed.querySelectorAll(\'[data-set="@guideCfg.azuStyle"]\')).map(function(b){return b.textContent})');

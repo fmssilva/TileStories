@@ -52,7 +52,7 @@ on("lvPlay.after",function(text,r){var a=G.recAudio;if(!a)return;
   if(r.mouth)mtStart(a,r.mouth,"curves");else if(r.vis&&r.vis.length)ldStart(a,ldShapeFromVis(r.vis))});
 /* the recorded lines: their curves when the set has them (Azure), else the loudness with the words' letters */
 on("say.after",function(text){var a=G.recAudio;if(!a||!G.utter||G.utter.live||MT.audio===a||LD.audio===a)return;
-  var r=S.guideCfg.voice==="recorded"?recFile(text):null;if(!r)return;if(r.file&&r.file.mouth)mtStart(a,mouthDecode(r.file.mouth),"curves");else ldStart(a,ldShapeFromWords())});
+  var r=G.sayNow&&G.sayNow.src==="recorded"&&G.sayNow.text===text?recFile(text):null;if(!r)return;if(r.file&&r.file.mouth)mtStart(a,mouthDecode(r.file.mouth),"curves");else ldStart(a,ldShapeFromWords())});
 on("stopSpeech.before",function(){if(MT.audio)mtStop();if(LD.audio)ldStop()});
 /* the moment's mouth, for the Editor and the checks */
 function mouthNow(){return{kind:MT.kind||(G.visTrack?"shapes":"letters"),talk:AzuGL.get("talk"),m3d:Azu3D.morphNow("Open")}}

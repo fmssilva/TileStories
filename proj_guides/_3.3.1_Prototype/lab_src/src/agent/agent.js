@@ -112,10 +112,10 @@ function agentAsk(q,where,ui){emitLatestFirst("agentAsk.before",q,where,ui);var 
 function agNote(code){return fmt(TXT(code==="cap"?"ag_note_cap":"ag_note_offline"),code)}
 /* the card: the dock's conversation gets the answer with its cards and buttons */
 on("ask.answer",function(q){if(!q||!q.trim()||!agLive())return;
-  G.thread.push({who:"me",text:q.trim()});G.micNote="";G.talk="idle";pauseTour();G.askOpen=true;G.busy=true;G.answer=TXT("ag_thinking");G.agTurn=null;renderGuide();G.ctl=new AbortController();
+  emitLatestFirst("ask.before",q);pauseTour();G.askOpen=true;G.busy=true;G.answer=TXT("ag_thinking");G.agTurn=null;renderGuide();G.ctl=new AbortController();
   agentAsk(q,"card",{signal:G.ctl.signal,start:function(){},text:function(t){G.answer=t;var e=ph.querySelector(".gans");if(e)e.textContent=t},
-    done:function(t,turn){G.busy=false;if(!t&&!turn.links.length&&!turn.chips.length){renderGuide();return}G.answer=t;G.agTurn=turn;G.thread.push({who:"azu",text:t,turn:turn});renderGuide();if(t&&S.agentCfg.voiceOut)say(t,function(){},function(){})},
-    fail:function(code,turn){G.busy=false;var t=agNote(code)+searchAnswer(q);G.answer=t;G.agTurn=null;G.thread.push({who:"azu",text:t});renderGuide();if(S.agentCfg.voiceOut)say(t,function(){},function(){})}});return true});
+    done:function(t,turn){G.busy=false;if(!t&&!turn.links.length&&!turn.chips.length){renderGuide();return}G.answer=t;G.agTurn=turn;emit("ask.after",t,turn);renderGuide();if(t&&S.agentCfg.voiceOut)say(t,function(){},function(){})},
+    fail:function(code,turn){G.busy=false;var t=agNote(code)+searchAnswer(q);G.answer=t;G.agTurn=null;emit("ask.after",t);renderGuide();if(S.agentCfg.voiceOut)say(t,function(){},function(){})}});return true});
 /* the wall: Ask about the view, with the same manifest (scripted only answers from the view, without a model) */
 on("camAsk.answer",function(q,kind){if(kind||!sampleFn)return;if(S.guideCfg.ask!=="ai"&&sampleFn===AG.fn){G.cam.open=true;camLayer();camSay(camOffline("what"));return true}if(!agLive())return;
   G.cam.open=true;G.cam.busy=true;G.cam.route=[];G.cam.lit=[];G.cam.hunt=null;G.cam.turn=null;camLayer();

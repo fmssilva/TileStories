@@ -5,3 +5,5 @@
 .agscenes{margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--u-edge)}
 .agscsel{max-width:270px}
 .agres td{vertical-align:top;white-space:normal}.agres td.ok{color:#7FD08A}.agres td.bad{color:#F0A49B}
+.agtrace.agvoice:empty{display:none}
+.agtrace.agvoice{margin-top:2px;padding-top:0;border-top:0}

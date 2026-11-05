@@ -67,7 +67,12 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
     voice (`agent/live-voice`): `tests/test9a.js` checks it with ElevenLabs faked (a real MP3, even letter times) and the Azure
     Speech SDK faked: the request, the audio as a live line, the words, the mouth on the voice's shapes, the tour's lines
     untouched, a refused key falling back to the device voice (a mutation: a mouth that ignores the voice turns two checks
-    red).
+    red). The order of sources (`guide/voice`, `agent/live-voice`): `tests/test9c.js` (ElevenLabs and Azure
+    faked, no network) checks the default (Recorded, then live, then this device), a recorded line from its file, a line the set
+    lacks by the live voice with a key and by the device voice without, a refused key, Voice = Device voice, Speaking now's words
+    for each, pause / resume / mute / stop on a recorded, a live (also while it is being made) and a device line, the
+    scroll-follow pause, and each answer once in the conversation (`MUTATE=1 node tests/test9c.js` breaks the order: 17 checks
+    turn red).
 - **The live voice by hand:** with the keys on this computer, open the page from its file (not `#probe`), set Ask Azu >
   Voice of the answers, and ask; it spends a few hundred characters an answer.
 - **Keys:** the local Lab's live agent and live voice read `keys.local.js`, which `python keys_local.py` writes from the workspace's
