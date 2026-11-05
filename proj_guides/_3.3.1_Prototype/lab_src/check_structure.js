@@ -4,12 +4,15 @@
 //   replaces  - a function assigned again by a later module
 //   redeclared - a function declared in more than one module
 //   defaults  - an S.* value set at the top level of more than one module
-// structure_baseline.json holds the allowed counts: a count may only go down (the restructure drives them all to 0).
+// and one rule: no module or style is named after a version (v3.js, v8b.css...), so the layers cannot come back.
+// structure_baseline.json holds the allowed counts: a count may only go down (all four are 0).
 const fs = require('fs'), path = require('path');
 const acorn = require(process.env.ACORN || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/acorn');
 const D = __dirname, BASE = path.join(D, 'structure_baseline.json');
 const py = fs.readFileSync(path.join(D, 'build.py'), 'utf8');
-const MODULES = JSON.parse(py.match(/MODULES = (\[[\s\S]*?\])/)[1].replace(/'/g, '"'));
+const pyList = name => JSON.parse(py.match(new RegExp(name + ' = (\\[[\\s\\S]*?\\])'))[1].replace(/'/g, '"'));
+const MODULES = pyList('MODULES'), STYLES = pyList('STYLES');
+const versioned = MODULES.concat(STYLES).filter(f => /^v\d/.test(path.basename(f)));
 const fn = {}, st = {}, errors = [];
 const F = n => (fn[n] = fn[n] || { def: [], wrap: [], replace: [] });
 const mpath = n => n.type === 'Identifier' ? n.name : n.type === 'MemberExpression' && !n.computed ? ((o => o && o + '.' + n.property.name)(mpath(n.object))) : null;
@@ -45,10 +48,11 @@ const now = {
 if (process.argv.includes('--write-baseline')) { fs.writeFileSync(BASE, JSON.stringify(now, null, 1) + '\n'); console.log('baseline written', JSON.stringify(now)); process.exit(0) }
 const base = fs.existsSync(BASE) ? JSON.parse(fs.readFileSync(BASE, 'utf8')) : { wraps: 0, replaces: 0, redeclared: 0, defaults: 0 };
 let bad = 0;
+console.log((versioned.length ? 'FAIL ' : 'ok   ') + 'named after a version: ' + (versioned.join(' ') || 'none')); if (versioned.length) bad++;
 for (const k in now) { const up = now[k] > base[k]; if (up) bad++; console.log((up ? 'FAIL ' : 'ok   ') + k.padEnd(11) + now[k] + ' (allowed ' + base[k] + ')') }
 if (process.argv.includes('--list')) {
   list(f => f.def.length + f.wrap.length + f.replace.length > 1).forEach(n => console.log('  ' + n + ': def[' + fn[n].def + '] wrap[' + fn[n].wrap + '] replace[' + fn[n].replace + ']'));
   Object.keys(st).filter(p => st[p].size > 1).forEach(p => console.log('  ' + p + ' set in ' + [...st[p]].join(' ')));
 }
-if (bad) console.log('The structure got worse: a wrapper, a re-assignment, a second declaration or a default set twice was added. See PROTOTYPE_STRUCTURE.md, "Rules".');
+if (bad) console.log('The structure got worse: a wrapper, a re-assignment, a second declaration or a default set twice was added, or a file is named after a version. See PROTOTYPE_STRUCTURE.md, "Rules".');
 process.exit(bad ? 1 : 0);

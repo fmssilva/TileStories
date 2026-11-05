@@ -1,0 +1,8 @@
+/* The gallery page and its pictures in the Editor. */
+function galleryScreen(){emitLatestFirst("galleryScreen.before");return pipe("galleryScreen.html",topbar(esc(L(secById("media").name))+" &#8250; <b>"+TXH("gallery_name")+"</b>")+'<div class="pg"><div class="blk">'+(S.galleryImgs||["g1","g2","g3","before"]).map(function(g,i){return renderEl("picture",defStyle("picture"),{img:g,cap:T("Picture "+(i+1),"Imagem "+(i+1))},i)}).join("")+'</div></div>')}
+on("edMarker.html",function(h){if(S.sel.page!=="gallery")return h;var d=document.createElement("div");d.innerHTML=h;var pg=d.querySelector('[data-fo="mpages"] > .inner');
+  if(pg){var imgs=S.galleryImgs||["g1","g2","g3","before"];pg.innerHTML=row("Page of",sel("m.page",[["story","Story · "+L(DEMO.title)],["gallery","Gallery"]],"gallery"),"Each block with a page has its content here.")+
+    fo("pg:gallery","Gallery · its pictures",["ext","EXTENDED"],row("Pictures",'<div class="assets">'+ASSETS.map(function(a){return'<button type="button" data-gal="'+a+'" aria-pressed="'+(imgs.indexOf(a)>=0)+'" style="background-image:url('+IMG[a]+')" aria-label="'+a+'"></button>'}).join("")+'</div>',"Tap to add or remove; the order is the tap order."),2)}
+  return d.innerHTML});
+ed.addEventListener("change",function(e){var t=e.target;if(t.dataset.sel==="m.page"){e.stopImmediatePropagation();S.sel.page=t.value;renderEditor();show(t.value==="gallery"?"gallery":"story")}},true);
+ed.addEventListener("click",function(e){var g=e.target.closest("[data-gal]");if(!g)return;e.stopPropagation();var a=S.galleryImgs||["g1","g2","g3","before"],i=a.indexOf(g.dataset.gal);if(i>=0)a.splice(i,1);else a.push(g.dataset.gal);S.galleryImgs=a;renderEditor();S.view="gallery";renderPhone(false)},true);

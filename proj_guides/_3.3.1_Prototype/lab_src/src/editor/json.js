@@ -1,0 +1,9 @@
+/* The JSON views of the Editor (bcJson, markerJson, refreshJson, refreshJsonV4). */
+function jsonBox(t,obj){return'<div class="json"><div class="jh"><span>'+esc(t)+'</span><span>live</span></div><pre>'+esc(JSON.stringify(obj,null,2))+'</pre></div>'}
+function bcJson(){var es={};for(var k in S.styles)es[k]=S.styles[k].map(function(s){var o={key:s.id,name:s.name};for(var x in s.o)o[x]=s.o[x];o.entrance=s.enter;if(s.scroll)o.scroll=s.scroll;if(s.turn)o.transition=s.turn;if(s.def)o["default"]=true;return o});
+  return{motion_family:S.family,replay:S.replay,motions:S.motions.map(function(m){var o={key:m.id};for(var x in m)if(x!=="id")o[x]=m[x];return o}),interactions:S.inter.map(function(x){return{key:x.id,options:x.o}}),
+   effects:S.effects.map(function(f){return{key:f.id,group:f.grp,options:f.o}}),element_styles:es,patterns:S.patterns.map(function(p){return{key:p.id,name:p.name,rows:p.rows.map(function(r){return{element:r.kind,style:r.style}})}})}}
+function markerJson(){return{blocks:S.card.map(function(b){var o={kind:b.kind,group:b.grp,entrance:b.enter,tap:b.tap};if(b.tap==="page")o.open_row=b.orow;if(b.pattern)o.pattern=b.pattern;return o}),
+  story_page:S.story.map(function(r){return r.pattern?{pattern:r.pattern,slots:r.slots}:{element:r.kind,style:r.style||undefined,content:r.c}})}}
+function refreshJson(){var pre=ed.querySelector(".json pre");if(pre)pre.textContent=JSON.stringify(S.tab==="card"?bcJson():markerJson(),null,2)}
+function refreshJsonV4(){if(firstAnswer("refreshJsonV4.answer")!==undefined)return;var pre=ed.querySelector(".json pre");if(!pre)return;if(S.tab==="card")pre.textContent=JSON.stringify({card:S.cardCfg,sections_config:S.secCfg,sections:S.sections.map(function(s){return{key:s.id,name:s.name,icon:s.icon,colour:s.colour,shown:s.shown,start:s.start,blocks:s.kinds}}),controls:S.ctl,block_defaults:S.blockDefs},null,2)}

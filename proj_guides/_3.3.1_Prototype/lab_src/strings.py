@@ -108,6 +108,6 @@ for r in rows:
         missing.append(k)
     out.append([k, o, re.sub(r'\s+', ' ', str(r.get('where') or '')).strip(), t.get('en', ''), t.get('pt', ''), fate, part])
 print(len(out), 'texts;', sum(1 for x in out if x[1] == 'retired'), 'retired;', 'no owner:', missing)
-io.open(os.path.join(D, 'realstrings.json'), 'w', encoding='utf-8').write(json.dumps(out, ensure_ascii=False))
+io.open(os.path.join(D, 'src', 'core', 'realstrings.json'), 'w', encoding='utf-8').write(json.dumps(out, ensure_ascii=False))
 if missing:
     sys.exit(1)
