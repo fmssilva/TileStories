@@ -79,17 +79,15 @@ function afterTry(st){if(!G.on||S.guideSteps[G.i]!==st)return;clearTimeout(G.ins
   t=st.after&&L(st.after)?L(st.after):TXT(st.wait==="answer"?"guide_after_answer":"guide_after_flip");renderGuide(t);say(t,function(k){markWord(k,null)},done)}
 
 /* Editor: Invite to try gets Insists and Waits; the tour gets What a scroll does; the mascot gets the Introduction; the Guide script gets each step's After words */
-var edCardV8n=edCard;
-edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8n();
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   addRows(d,"s7coach",row("Insists",pseg("guideCfg.insist",["0","1","2"],["Never","Once","Twice"]),"When the visitor has not tried yet, the guide asks again, each time with new words, then says it is fine and moves on. It never blocks the tour. Done at any moment, even while the guide is still asking, it carries on at once and says what was revealed (a flipped card's back, read in place).")+
     row("Waits",pslider("guideCfg.insistAfter",3,12,1),"Seconds before each new ask.",true));
   addRows(d,"s7resume",row("When the visitor scrolls",pseg("guideCfg.onScroll",["follow","pause"],["Keeps going","Pauses"]),"Keeps going: the guide talks on while its block is on the screen; when the block leaves it, the guide says “Moving on” and tells the block now in view (or pauses when none is). Pauses: any scroll pauses and offers Resume."));
   addRows(d,"s7mascot",row("Introduction",pseg("guideCfg.intro",["first","every","off"],["First tour","Every tour","Off"]),"Azu walks in and says who it is and how to ask, before the first step."));
-  return d.innerHTML};
-var edMarkerV8n=edMarker;
-edMarker=function(){var d=document.createElement("div");d.innerHTML=edMarkerV8n();var st=S.sel.gstep&&byId(S.fullSteps||S.guideSteps,S.sel.gstep);if(!st||st.act!=="try")return d.innerHTML;
+  return d.innerHTML});
+on("edMarker.html",function(h){var d=document.createElement("div");d.innerHTML=h;var st=S.sel.gstep&&byId(S.fullSteps||S.guideSteps,S.sel.gstep);if(!st||st.act!=="try")return d.innerHTML;
   var slot=d.querySelector('[data-pick="gstep"][data-id="'+cssq(st.id)+'"] + tr.slot td:last-child');if(!slot)return d.innerHTML;var a=st.after||{en:"",pt:""};
   slot.insertAdjacentHTML("beforeend",row("After the gesture · EN",'<textarea class="u" rows="2" data-gafter="'+st.id+'|en" placeholder="'+(st.wait==="flip"?"(reads the card’s back)":"")+'">'+esc(a.en||"")+'</textarea>',"What the guide says once the visitor has done it: what was revealed.")+
-    row("After the gesture · PT",'<textarea class="u" rows="2" data-gafter="'+st.id+'|pt">'+esc(a.pt||"")+'</textarea>',""));return d.innerHTML};
+    row("After the gesture · PT",'<textarea class="u" rows="2" data-gafter="'+st.id+'|pt">'+esc(a.pt||"")+'</textarea>',""));return d.innerHTML});
 ed.addEventListener("input",function(e){var t=e.target;if(!t.dataset||!t.dataset.gafter)return;e.stopImmediatePropagation();var q=t.dataset.gafter.split("|"),st=byId(S.fullSteps||S.guideSteps,q[0]);st.after=st.after||{en:"",pt:""};st.after[q[1]]=t.value},true);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(intro|insist|insistAfter|onScroll|"));

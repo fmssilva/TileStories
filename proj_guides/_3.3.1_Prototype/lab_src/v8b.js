@@ -56,8 +56,7 @@ function koptRows(k){var q="blockDefs."+k+".",bd=S.blockDefs[k],h="";
     else r=(o[6]?prow:row)(o[1],pseg(p,o[2],o[3]),o[4]);h+=r});
   if(k!=="Header")h+=row("Frame",pseg(q+"frame",["normal","featured","quiet"],["Normal","Featured","Quiet"]),"Cards style only. Featured: a deeper shadow and a larger title, for the one or two blocks to push. Quiet: a hairline edge, for credits. Every choice keeps the 3:1 edge (D2).");
   return h}
-var edCardV8a=edCard;
-edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8a();
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   Object.keys(S.blockDefs).forEach(function(k){var f=innerOf(d,"bd:"+k);if(!f)return;var bd=S.blockDefs[k],q="blockDefs."+k+".";
     var first=f.querySelector(":scope > .sub2");if(first)first.insertAdjacentHTML("beforebegin",'<div class="sub2">Its own options</div>'+koptRows(k));
     if(k==="Header"){var tr=rowEl(d,"bd:"+k,"Tap");if(tr)tr.remove()}
@@ -65,7 +64,7 @@ edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8a();
     if(bd.tap==="orow"){var orw=rowEl(d,"bd:"+k,"Tap");if(orw&&!rowEl(d,"bd:"+k,"Open Row"))orw.insertAdjacentHTML("afterend",row("Open Row",pseg(q+"orow",["inherit","plain","nudge","shine"],["As in Card Controls ("+S.ctl.openrow+")","Plain","Nudge","Shine"]),"The words inviting the tap, and their motion."))}
     var sw=rowEl(d,"bd:"+k,"Starts with");if(sw)sw.remove()});
   var nt=innerOf(d,"s3b");if(nt){var n0=nt.querySelector(":scope > .note");if(n0)n0.innerHTML="A block = a part with behaviour, data or an owner. Each one opens to its own options (its look and settings, Unity's Block Library), then its Preview on the card and its Full Page. A marker places it, picks its look \"As the block\" or its own, and may override the rest. Kinds that became patterns or merged: "+esc(GONE)}
-  return d.innerHTML};
+  return d.innerHTML});
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(blockDefs\\.Place In AR\\.o\\.|blockDefs\\.Knowledge Check\\.o\\.appears|"));
 
 /* ----- the demo card: every kept kind once, in its section's order ----- */
@@ -128,20 +127,19 @@ var KPREV={
    return '<div class="bt">'+TXH("sources_heading")+'</div><ul class="srcs">'+r.map(function(x){return'<li>'+esc(x[0])+(conf?' <em class="'+x[1]+'">'+TXH(x[1]==="v"?"sources_verified":"sources_draft")+'</em>':"")+'</li>'}).join("")+'</ul><div class="fmt">'+esc(L(T("6 sources","6 fontes")))+'</div>'},
  "Contents":function(){var runs=cardRuns(),ev=kopt("Contents","rows")==="every",tk=kopt("Contents","ticks")==="true";
    return '<div class="bt">'+TXH("nav_menu")+'</div><div class="cblock">'+(ev?S.card.slice(0,6).map(function(b,j){return'<div>'+esc(b.kind)+(tk&&j<2?' <em>&#10003;</em>':"")+'</div>'}).join(""):runs.map(function(r,k){return'<div><b>'+esc(L(r.sec.name))+'</b> <span>'+esc(fmt(TXT("nav_contents_section_read"),tk&&k===0?1:0,r.blocks.length))+'</span></div>'}).join(""))+'</div>'}};
-var blockPreviewV7=blockPreviewV3;
-blockPreviewV3=function(b,i){var bd=S.blockDefs[b.kind]||{},f=KPREV[b.kind];
-  if(b.kind==="Practical Info"||b.kind==="Inline"||!f){var h0=blockPreviewV7(b,i);return frameOf(b,h0)}
+on("blockPreviewHtml.answer",function(b,i){var bd=S.blockDefs[b.kind]||{},f=KPREV[b.kind];
+  if(b.kind==="Practical Info"||b.kind==="Inline"||!f)return;
   var m=b.enter==="family"?motionById(S.family):motionById(b.enter),page=bd.page&&(b.tap==="page"||b.tap==="orow"),h=f(b);
   var or=page?'<div class="open'+(b.orow==="nudge"?" nudge":"")+(b.orow==="shine"?" shine":"")+'"'+(b.tap==="orow"?' data-go="kpage" data-kind="'+esc(b.kind)+'"':"")+'>'+(b.kind==="Story"?esc(L(UI.read)):esc(L(UI.open))+(b.orow==="nudge"?"":" &#8250;"))+'</div>':b.tap==="expand"?'<div class="open">'+TXH("open_row_expand")+' &#8964;</div>':"";
   var go=b.tap==="page"?' data-go="'+(b.kind==="Story"?"story":b.kind==="Gallery"?"gallery":"kpage")+'" data-kind="'+esc(b.kind)+'"':b.tap==="expand"?" data-expand":"";
   var inner='<div class="bprev'+(b.tap==="page"?" tap":"")+(b.tap==="expand"?" expand":"")+'"'+go+'>'+h+or+'</div>';
-  return frameOf(b,'<div class="item" data-ref="b:'+b.id+'">'+wrapMv(inner,m,0)+'</div>')};
+  return '<div class="item" data-ref="b:'+b.id+'">'+wrapMv(inner,m,0)+'</div>'});
+on("blockPreviewHtml.frame",function(h,b){return frameOf(b,h)});
 function frameOf(b,h){var fr=(S.blockDefs[b.kind]||{}).frame;return fr&&fr!=="normal"&&S.secCfg.look==="cards"?h.replace('class="bprev','class="bprev fr-'+fr):h}
 /* a block whose kind is not offered leaves every card */
-var cardRunsV8a=cardRuns;cardRuns=function(){return cardRunsV8a().map(function(r){return{sec:r.sec,blocks:r.blocks.filter(function(b){return(S.blockDefs[b.kind]||{}).offered!==false})}})};
+on("cardRuns.runs",function(runs){return runs.map(function(r){return{sec:r.sec,blocks:r.blocks.filter(function(b){return(S.blockDefs[b.kind]||{}).offered!==false})}})});
 /* the hero: its look, words on the picture, motion, the Listen pill */
-var cardScreenV8a=cardScreen;
-cardScreen=function(){var h=cardScreenV8a(),d=document.createElement("div");d.innerHTML=h;var hero=d.querySelector(".hero");
+on("cardScreen.html",function(h){var d=document.createElement("div");d.innerHTML=h;var hero=d.querySelector(".hero");
   if(hero){var lk=kopt("Header","look"),w=hero.querySelector(".w");hero.classList.add("hl-"+lk,"hw-"+kopt("Header","words"),"hm-"+(S.reduce?"none":kopt("Header","motion")));
     if(lk==="text")hero.style.backgroundImage="none";
     if(lk==="split")hero.insertAdjacentHTML("afterbegin",'<div class="hsplit"><span style="background-image:url('+IMG.before+')"><em>'+TXH("header_then")+'</em></span><span style="background-image:url('+IMG.g2+')"><em>'+TXH("header_now")+'</em></span></div>');
@@ -150,7 +148,7 @@ cardScreen=function(){var h=cardScreenV8a(),d=document.createElement("div");d.in
     if(lk==="model")hero.insertAdjacentHTML("afterbegin",'<span class="hloop">3D</span>');
     if(w){var gs=w.querySelector(".gstart"),listen=kopt("Header","listen")==="true"&&lk!=="compact";if(gs||listen){var row1=document.createElement("div");row1.className="hact";if(gs)row1.appendChild(gs);
       if(listen)row1.insertAdjacentHTML("beforeend",'<button type="button" class="hlisten">'+sicon("headphones",15)+esc(fmt(TXT("hero_listen"),"3:11"))+'</button>');w.appendChild(row1)}}}
-  return d.innerHTML};
+  return d.innerHTML});
 
 /* ----- pages: every kind with a page; page chips; the picture viewer; the video player ----- */
 S.pageKind="Timeline";S.viewerAt=0;
@@ -167,28 +165,26 @@ function kpageBody(k){var o=function(key){return kopt(k,key)};
   if(k==="Today Map")return KPREV["Today Map"]()+'<button type="button" class="arfocal">'+TXH("today_map_directions")+'</button>';
   return ""}
 function kpageScreen(){var k=S.pageKind;S._pk=k;var h=topbar(esc(L(secById(secOfKind(k)).name))+" &#8250; <b>"+esc(k)+"</b>")+pageChips(k)+'<div class="pg"><div class="blk">'+kpageBody(k)+'</div></div>'+pageFoot(["card",L(secById(secOfKind(k)).name)],["card",L(UI.visit)]);S._pk=null;return h}
-var storyScreenV8a=storyScreen;storyScreen=function(){var h=storyScreenV8a(),ch=kopt("Story","layout")==="chapters";
-  h=h.replace('<div class="pg">',pageChips("Story")+(ch?'<div class="chapbar"><span class="on"></span><span></span><span></span><small>'+esc(fmt(TXT("story_chapter_of"),1,3))+'</small></div>':"")+'<div class="pg">');return h};
-var galleryScreenV8a=galleryScreen;galleryScreen=function(){return galleryScreenV8a().replace('<div class="pg">',pageChips("Gallery")+'<div class="pg">')};
+on("storyScreen.html",function(h){var ch=kopt("Story","layout")==="chapters";
+  h=h.replace('<div class="pg">',pageChips("Story")+(ch?'<div class="chapbar"><span class="on"></span><span></span><span></span><small>'+esc(fmt(TXT("story_chapter_of"),1,3))+'</small></div>':"")+'<div class="pg">');return h});
+on("galleryScreen.html",function(h){return h.replace('<div class="pg">',pageChips("Gallery")+'<div class="pg">')});
 function viewerScreen(){var imgs=S.galleryImgs||["g1","g2","g3","before"],i=S.viewerAt%imgs.length,c=S.ctl.viewer.counter;
   return '<div class="viewer"><div class="vtop"><button type="button" data-go="gallery" aria-label="'+TXH("page_back")+'">&#8249;</button>'+(c==="chips"?'<div class="vchips">'+imgs.map(function(x,j){return'<button type="button" data-vat="'+j+'" aria-pressed="'+(j===i)+'">'+(j+1)+'</button>'}).join("")+'</div>':c==="count"?'<span>'+esc(fmt(TXT("viewer_position"),i+1,imgs.length))+'</span>':"<span></span>")+'</div>'+
    '<img alt="" src="'+IMG[imgs[i]]+'"><div class="vcapt">'+esc(L(DEMO.piccap))+' <small>Dirk Stoop</small><em>'+TXH("zoom_hint")+'</em></div></div>'}
-var renderPhoneV8a=renderPhone;
-renderPhone=function(keep){if(S.view==="kpage"||S.view==="viewer"){var v=S.view;S.view="card";renderPhoneV8a(keep);S.view=v;scr.innerHTML=v==="kpage"?kpageScreen():viewerScreen();scr.style.top="0px";
+on("renderPhone.before",function(keep,cx){if(S.view==="kpage"||S.view==="viewer"){cx.page=S.view;S.view="card"}});
+on("renderPhone.after",function(keep,cx){if(cx.page){var v=cx.page;S.view=v;scr.innerHTML=v==="kpage"?kpageScreen():viewerScreen();scr.style.top="0px";
     var nb=document.getElementById("navbar");if(nb)nb.style.display="none";["locpin","sticky","vset","csheet","peekrow","topband"].forEach(function(k){var o=ph.querySelector("."+k);if(o)o.style.display="none"});
-    var w=document.getElementById("wall");if(w)w.style.display="none";var gb=document.getElementById("grab");if(gb)gb.style.display="none";return}
-  renderPhoneV8a(keep)};
+    var w=document.getElementById("wall");if(w)w.style.display="none";var gb=document.getElementById("grab");if(gb)gb.style.display="none"}});
 document.addEventListener("click",function(e){var t=e.target;if(!ph.contains(t))return;var g=t.closest('[data-go="kpage"]');if(g){e.stopPropagation();S.pageKind=g.dataset.kind;S.view="kpage";renderPhone(false);return}
   var gp=t.closest('[data-go="story"][data-kind],[data-go="gallery"][data-kind]');if(gp&&S.view!=="card"){e.stopPropagation();S.view=gp.dataset.go;renderPhone(false);return}
   var vi=t.closest(".blk .el-pic img, .blk .fr img");if(vi&&S.view==="gallery"){e.stopPropagation();var all=Array.prototype.slice.call(scr.querySelectorAll(".blk img"));S.viewerAt=Math.max(0,all.indexOf(vi));S.view="viewer";renderPhone(false);return}
   var va=t.closest("[data-vat]");if(va){e.stopPropagation();S.viewerAt=+va.dataset.vat;renderPhone(false);return}
   var vp=t.closest(".viewer img");if(vp){e.stopPropagation();vp.classList.toggle("z2");return}},true);
-var modelSigV8a=modelSig;
-modelSig=function(){var keep=S.view,pk=S.pageKind,look=S.secCfg.look,x="";
+on("modelSig.before",function(cx){var keep=S.view,pk=S.pageKind,look=S.secCfg.look,x="";
   if(sigWant(/blockDefs|ctl\.(player|pageChips)|^o\.|^style\.|card\.\d+\./)){S.view="kpage";PAGE_KINDS.forEach(function(k){if(k!=="Story"&&k!=="Gallery"){S.pageKind=k;x+=kpageScreen()}})}
   if(sigWant(/ctl\.viewer/)){S.view="viewer";x+=viewerScreen()}
   if(sigWant(/secCfg\.(glass|rim)|frame/)){S.secCfg.look="cards";S.view="card";x+="#cards#"+demoCardScreen();S.secCfg.look=look}
   if(sigWant(/secCfg\.divSec/)){var st=S.secCfg.start;S.view="card";S.secCfg.start="fade";x+="#fade#"+cardScreen();S.secCfg.start=st}
-  if(sigWant(/ctl\.term/)){x+="#gloss#"+gloss("[[Torreão]] [[Torreão]]");S._gseen={}}S.view=keep;S.pageKind=pk;return modelSigV8a()+x};
+  if(sigWant(/ctl\.term/)){x+="#gloss#"+gloss("[[Torreão]] [[Torreão]]");S._gseen={}}S.view=keep;S.pageKind=pk;cx.pages=x});on("modelSig.sig",function(s,cx){return s+cx.pages});
 var FOCUS8={s5viewer:["viewer",".viewer .vtop"],s5player:["kpage",".vplayer"],s5chip:["card",".hero"]};Object.keys(FOCUS8).forEach(function(k){FOCUS[k]=FOCUS8[k]});
 ed.addEventListener("toggle",function(e){var d=e.target;if(!d.dataset||d.dataset.fo!=="s5player"||!d.open)return;S.pageKind="Video"},true);

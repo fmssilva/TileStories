@@ -77,10 +77,9 @@ function lvStatusText(){var k=lvKeys(),l=LV.last,names={device:"the device voice
   if(l)s+=l.err?" Last answer: "+names[l.voice]+" failed ("+l.err+"); the device voice read it.":" Last answer: "+names[l.voice]+", "+l.ms+" ms to the audio, "+l.shapes+" mouth shapes from "+l.from+".";
   return s}
 function lvStatus(){var e=ed.querySelector(".lvstat");if(e)e.textContent=lvStatusText()}
-var edCardV9a=edCard;
-edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV9a();
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   var lab=Array.from(d.querySelectorAll('[data-fo="s7agent"] .row > label')).filter(function(l){return l.firstChild&&l.firstChild.textContent==="Spoken answer"})[0];
   if(lab)lab.parentNode.insertAdjacentHTML("afterend",row("Voice of the answers",pseg("agentCfg.liveVoice",["device","azure","eleven"],["Device voice","Azure (live)","ElevenLabs (live)"])+'<div class="uses lvstat">'+esc(lvStatusText())+'</div>',
       "Device voice: the phone's own, free; the mouth follows each word's letters over the word's time. Azure (live): the narration's voice (Sonia in English, Raquel in Portuguese) made for each answer; the mouth follows Azure's visemes. ElevenLabs (live): the voices picked for the recorded set, with each letter's time; the mouth follows the letters at their times. The live voices need a key (on this computer from .secrets/keys.env, by keys_local.py; in the app, on the server, which streams the audio and its timings a sentence at a time). Without a key, or on an error, the device voice reads the answer.",true)+
     (S.agentCfg.liveVoice==="eleven"?row("ElevenLabs model",pseg("agentCfg.elevenModel",["eleven_flash_v2_5","eleven_multilingual_v2"],["Flash v2.5 (fastest)","Multilingual v2 (richest)"]),"Flash: about 75 ms to the first audio and half the credits; Multilingual v2: the richest voice, slower. Both speak European Portuguese with a pt-PT voice.",true):""));
-  return d.innerHTML};
+  return d.innerHTML});

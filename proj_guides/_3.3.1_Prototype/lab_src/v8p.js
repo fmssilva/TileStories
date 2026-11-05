@@ -13,7 +13,7 @@ function camView(){var g=camGeom(),rows=["top","middle","bottom"],cols=["left","
   var foot=g.H-(G.cam.open?330:140);S.wallPois.forEach(function(p){var s=poiScreen(p);if(s.x<8||s.x>g.W-8||s.y<60||s.y>foot)return;var c=Math.min(2,Math.floor(s.x/g.W*3)),r=Math.min(2,Math.floor(s.y/g.H*3));
     out.push({id:p.id,name:L(p.name),x:s.x,y:s.y,where:r===1&&c===1?"middle":rows[r]+" "+cols[c],d:Math.hypot(s.x-g.W/2,s.y-g.H*.45),year:p.year||null,card:!!p.card})});
   out.sort(function(a,b){return a.d-b.d});return{pois:out,central:out[0]||null}}
-var renderPhoneV8p=renderPhone;renderPhone=function(keep){renderPhoneV8p(keep);var c=document.getElementById("camera");if(c)c.style.backgroundPosition=(S.camX*100).toFixed(1)+"% 50%";camLayer()};
+on("renderPhone.after",function(keep){var c=document.getElementById("camera");if(c)c.style.backgroundPosition=(S.camX*100).toFixed(1)+"% 50%";camLayer()});
 /* the pins and the Ask pill, on the wall when no card is open */
 function camLayer(){var o=ph.querySelector(".campins");if(o)o.remove();var b=ph.querySelector(".camask");if(b)b.remove();
   ph.classList.toggle("camopen",!!G.cam.open&&S.stop==="closed");if(!S.camCfg.on||S.view!=="card"||S.stop!=="closed"||G.on)return;var v=camView(),d=document.createElement("div");d.className="campins";if(!G.cam.open)d.hidden=true;
@@ -59,14 +59,13 @@ ph.addEventListener("pointermove",function(e){if(!camDrag)return;var g=camGeom()
 ph.addEventListener("pointerup",function(){camDrag=null},true);
 
 /* Editor: 6 · Guide > Ask about the view */
-var edCardV8p=edCard;
-edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8p();var at=d.querySelector('[data-fo="s7ask"]');if(!at)return d.innerHTML;
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var at=d.querySelector('[data-fo="s7ask"]');if(!at)return d.innerHTML;
   at.insertAdjacentHTML("afterend",comp("s7cam","on the wall, with no card open: questions about the points in view",
     row("Ask about the view",pseg("camCfg.on",["true","false"],["Shown","Hidden"]),"A pill at the foot of the camera view: “Ask about Ribeira Palace”, the point nearest the middle (it has a ring and its name). No photo is sent: the model gets the points in view, each one’s place on the screen (top right, middle…), the middle one, the audience and the lens. Its tools light the points it names (the rest dimmed) and draw a numbered route. A tap on a point with a card opens it. In the Lab, a drag on the wall stands in for moving the phone.")+
     row("Suggestions",pseg("camCfg.chips",["true","false"],["Shown","Hidden"]),"What am I looking at? · Tell me a story about this wall · Make me a 20-min route · What’s the oldest here? · Kids’ treasure hunt (find the point Azu names, then tap it).")+
     row("Try",'<button class="del" type="button" data-camtry="1">Try</button>',"Closes the card and opens Ask about the view.")+
     '<table class="tbl"><thead><tr><th>The wall’s points</th><th>u</th><th>v</th><th>Year</th></tr></thead><tbody>'+S.wallPois.map(function(p){return'<tr><td>'+esc(L(p.name))+'</td><td>'+p.u+'</td><td>'+p.v+'</td><td>'+(p.year||"")+'</td></tr>'}).join("")+'</tbody></table>'));
-  var f=innerOf(d,"s7cam");if(f)f.insertAdjacentHTML("beforeend",ownbar("s7cam")+ownPanels("s7cam"));return d.innerHTML};
+  var f=innerOf(d,"s7cam");if(f)f.insertAdjacentHTML("beforeend",ownbar("s7cam")+ownPanels("s7cam"));return d.innerHTML});
 ed.addEventListener("click",function(e){var t=e.target.closest("[data-camtry]");if(!t)return;e.stopPropagation();if(G.on)stopTour();S.view="card";S.stop="closed";G.cam.open=true;renderPhone(false)},true);
-var modelSigV8p=modelSig;modelSig=function(){return modelSigV8p()+"#cam:"+S.camCfg.on+S.camCfg.chips};
+on("modelSig.sig",function(h){return h+"#cam:"+S.camCfg.on+S.camCfg.chips});
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("ctl\\.jump\\.","ctl\\.jump\\.|camCfg\\."));

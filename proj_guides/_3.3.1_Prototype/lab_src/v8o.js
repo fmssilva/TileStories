@@ -87,8 +87,7 @@ ph.addEventListener("pointerup",function(e){if(grabY==null)return;var dy=e.clien
 ph.addEventListener("submit",function(e){var f=e.target.closest(".gd-form");if(!f)return;e.preventDefault();e.stopPropagation();var i=f.querySelector("#gq");if(i&&i.value.trim()){var q=i.value;i.value="";ask(q)}},true);
 
 /* Editor: 6 · Guide > Guide panel (after Captions); Specific Marker > Guide script > Suggested questions */
-var edCardV8o=edCard;
-edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8o();var ca=d.querySelector('[data-fo="s7cap"]');if(!ca)return d.innerHTML;
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var ca=d.querySelector('[data-fo="s7cap"]');if(!ca)return d.innerHTML;
   ca.insertAdjacentHTML("beforebegin",comp("s7dock","one panel for the tour's words, its controls and the conversation",
     row("Panel",pseg("guideCfg.panel",["dock","classic"],["Dock","Classic"]),"Dock: one panel at the bottom with three heights: Mini (the step, the words, the talk button), Peek (the controls and suggested questions), Full (the conversation and a text field). A tap on its line pauses or plays; the grabber or a swipe changes its height. Classic: the captions box over the control bar.")+
     row("Starts at",pseg("guideCfg.dockStart",["mini","peek"],["Mini","Peek"]),"Its height when the tour starts.",true)+
@@ -97,11 +96,10 @@ edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8o();va
     row("Sounds",pseg("guideCfg.earcons",["true","false"],["On","Off"]),"A short rising tone when it starts listening and a falling one when it stops (under 300 ms). With a light haptic.")+
     row("Suggested questions",pseg("guideCfg.chips",["true","false"],["Shown","Hidden"]),"Chips in the Peek height (the point's own, in the Guide script). A tap asks it.")+
     row("Try",'<button class="del" type="button" data-docktry="1">Try</button>',"Starts the tour with the dock.")));
-  var f=innerOf(d,"s7dock");if(f)f.insertAdjacentHTML("beforeend",ownbar("s7dock")+ownPanels("s7dock"));return d.innerHTML};
-var edMarkerV8o=edMarker;
-edMarker=function(){var d=document.createElement("div");d.innerHTML=edMarkerV8o();var f=innerOf(d,"m3");if(!f)return d.innerHTML;
+  var f=innerOf(d,"s7dock");if(f)f.insertAdjacentHTML("beforeend",ownbar("s7dock")+ownPanels("s7dock"));return d.innerHTML});
+on("edMarker.html",function(h){var d=document.createElement("div");d.innerHTML=h;var f=innerOf(d,"m3");if(!f)return d.innerHTML;
   f.insertAdjacentHTML("beforeend",row("Suggested questions",'<div class="gasks">'+S.guideAsks.map(function(q,i){return'<div class="btnrow"><input class="u" data-gask="'+i+'|en" value="'+esc(q.en||"")+'"><input class="u" data-gask="'+i+'|pt" value="'+esc(q.pt||"")+'"><button class="del" type="button" data-gaskdel="'+i+'">Remove</button></div>'}).join("")+
-    '<button class="ubtn sm" type="button" data-gaskadd="1">+ Add a question</button></div>',"Chips in the guide panel (EN / PT): questions a visitor might ask here. A tap asks Azu."));return d.innerHTML};
+    '<button class="ubtn sm" type="button" data-gaskadd="1">+ Add a question</button></div>',"Chips in the guide panel (EN / PT): questions a visitor might ask here. A tap asks Azu."));return d.innerHTML});
 ed.addEventListener("input",function(e){var t=e.target;if(!t.dataset||!t.dataset.gask)return;e.stopImmediatePropagation();var q=t.dataset.gask.split("|");S.guideAsks[+q[0]][q[1]]=t.value},true);
 ed.addEventListener("click",function(e){var t=e.target.closest("[data-gaskadd],[data-gaskdel],[data-docktry]");if(!t)return;e.stopPropagation();
   if(t.dataset.docktry){if(G.on)stopTour();S.guideCfg.panel="dock";startTour();return}

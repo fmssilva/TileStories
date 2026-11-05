@@ -52,8 +52,7 @@ function vtLoad(){var sum={},add=function(rs){Object.keys(rs||{}).forEach(functi
 function stars(id,k,v){var h="";for(var i=1;i<=5;i++)h+='<button type="button" class="vstar'+(i<=v?" on":"")+'" data-vtr="'+id+'|'+k+'|'+i+'" aria-label="'+i+'">★</button>';return'<span class="vstars">'+h+'</span>'}
 
 /* Editor: Narration gets the recorded voice and its coverage; 6 · Guide gets Voice test */
-var edCardV8r=edCard;
-edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8r();var sets=voiceSets(),cur=currentSet(),lines=guideLines(S.lang),have=cur?lines.filter(function(l){return!!recFile(l.text,cur)}).length:0;
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var sets=voiceSets(),cur=currentSet(),lines=guideLines(S.lang),have=cur?lines.filter(function(l){return!!recFile(l.text,cur)}).length:0;
   addRows(d,"s7voice",row("Recorded voice",sets.length?psel("guideCfg.voiceSet",[["","Best available"]].concat(sets.map(function(s){return[s.id,s.label+" · "+Object.keys(s.files||{}).length+" lines"+(s.timings==="estimated"?", word times estimated":"")+(s.private?" (this computer only)":"")]}))):'<span class="uses">None rendered yet</span>',
     "With Voice = Recorded files: the audio rendered at authoring time (voicebench: a provider's voice, rendered once, with each word's time), as the app plays it. "+(cur?have+" of "+lines.length+" lines rendered in "+S.lang.toUpperCase()+" for this point; a line not rendered (an edited text, an answer) speaks with the device voice.":"Render a set with voicebench/render.py (see voicebench/README).")));
   var vt=d.querySelector('[data-fo="s7voice"]');if(!vt)return d.innerHTML;
@@ -67,7 +66,7 @@ edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8r();va
     if(S.vt.results){var r=S.vt.results;body+='<table class="tbl"><thead><tr><th>Results (everyone)</th><th>Natural</th><th>Accent</th><th>Best</th><th>Scores</th></tr></thead><tbody>'+Object.keys(r).map(function(id){var s=voiceSets().filter(function(z){return z.id===id})[0],x=r[id];
         return'<tr><td>'+esc(s?s.label:id)+'</td><td>'+(x.n?(x.nat/x.n).toFixed(2):"-")+'</td><td>'+(x.na?(x.acc/x.na).toFixed(2):"-")+'</td><td>'+x.best+'</td><td>'+x.n+'</td></tr>'}).join("")+'</tbody></table>'}}
   vt.insertAdjacentHTML("afterend",comp("s7vtest","a blind test: the same line in each voice, unnamed, scored, then the names and everyone's means",body+'<div class="note">Share the Lab with native listeners (as Contributors) and they score here too; each listener’s scores are their own, everyone sees the means. Level the voices (−16 LUFS) when rendering.</div>'));
-  return d.innerHTML};
+  return d.innerHTML});
 ed.addEventListener("change",function(e){var t=e.target;if(!t.dataset)return;if(t.dataset.vtline){e.stopImmediatePropagation();S.vt.line=t.value;S.vt.order=[];S.vt.saved=false;renderEditor();return}
   if(t.dataset.vtbest){e.stopImmediatePropagation();S.vt.best=t.dataset.vtbest}},true);
 ed.addEventListener("click",function(e){var t=e.target.closest("[data-vtstart],[data-vtplay],[data-vtr],[data-vtsave]");if(!t)return;e.stopPropagation();

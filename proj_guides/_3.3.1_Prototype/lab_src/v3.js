@@ -199,7 +199,9 @@ var FIELDS={title:[["text","ltext","Text"]],eyebrow:[["text","ltext","Text"]],he
  hotspot:[["img","img","Picture"]],model_3d:[["img","img","Model (stand-in picture)"]],panorama:[["img","img","Panorama"]],scrolly:[],map:[],timeline:[],swatches:[],divider:[],spacer:[]};
 
 /* ---------- helpers ---------- */
-function L(o,f){if(o==null)return f==null?"":L(f);if(typeof o==="string")return o;return o[S.lang]||o.en||""}
+function L(o,f){var ans=firstAnswer("L.answer",o,f);return ans!==undefined?ans:Lbase(o,f)}
+/* the words in the visitor's language (then the fallback language), before any audience's own words */
+function Lbase(o,f){if(o==null)return f==null?"":L(f);if(typeof o==="string")return o;return o[S.lang]||(S.langs&&o[S.langs.fallback])||o.en||o.pt||""}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function styleById(id){for(var k in S.styles){var a=S.styles[k];for(var i=0;i<a.length;i++)if(a[i].id===id)return a[i]}return null}
 function kindOfStyle(id){for(var k in S.styles){if(S.styles[k].some(function(s){return s.id===id}))return k}return null}
@@ -207,7 +209,7 @@ function defStyle(kind){var a=S.styles[kind]||[];for(var i=0;i<a.length;i++)if(a
 function byId(a,id){for(var i=0;i<a.length;i++)if(a[i].id===id)return a[i];return null}
 function motionById(id){return byId(S.motions,id)} function effectById(id){return byId(S.effects,id)} function patternById(id){return byId(S.patterns,id)} function interById(id){return byId(S.inter,id)}
 function styleUses(id){var n=0;S.patterns.forEach(function(p){p.rows.forEach(function(r){if(r.style===id)n++})});S.story.forEach(function(r){if(!r.pattern&&(r.style===id||(!r.style&&defStyle(r.kind).id===id)))n++});return n}
-function motionUses(id){var n=0;for(var k in S.styles)S.styles[k].forEach(function(s){if(s.enter===id||s.scroll===id||s.turn===id)n++});S.card.forEach(function(b){if(b.enter===id)n++});if(S.family===id)n++;return n}
+function motionUses(id){var n=0;for(var k in S.styles)S.styles[k].forEach(function(s){if(s.enter===id||s.scroll===id||s.turn===id)n++});S.card.forEach(function(b){if(b.enter===id)n++});if(S.family===id)n++;return pipe("motionUses.count",n,id)}
 function effectUses(id){var n=0;S.styles.divider.forEach(function(s){if(s.o.uses===id)n++});return n}
 function patternUses(id){return S.story.filter(function(r){return r.pattern===id}).length+S.card.filter(function(b){return b.pattern===id}).length}
 function entranceOf(style){var m=style.enter==="family"?S.family:style.enter;return m==="none"?null:motionById(m)}
@@ -222,7 +224,7 @@ function colourVar(c){return c==="accent"?"var(--accent2)":c==="neutral"?"var(--
 function mtile(c){return TILE}
 
 /* ---------- effects: edges and line dividers ---------- */
-function edgeSvg(f){var o=f.o,h=o.h||30,col=colourVar(o.colour),W=390,p="";
+function edgeSvg(f){var ans=firstAnswer("edgeSvg.answer",f);if(ans!==undefined)return ans;var o=f.o,h=o.h||30,col=colourVar(o.colour),W=390,p="";
   if(f.id==="e_wave")p='<path d="M0 '+h+'V'+h*.55+'C48 '+h*.2+' 98 '+h*.15+' 150 '+h*.45+'S262 '+h*.9+' 318 '+h*.6+'S372 '+h*.25+' 390 '+h*.35+'V'+h+'Z" fill="currentColor" opacity=".18"/>';
   if(f.id==="e_multiwave"){[[.18,.3],[.12,.5],[.25,.7]].forEach(function(a,i){var y=h*a[1];p+='<path d="M0 '+h+'V'+y+'C80 '+(y-h*.25)+' 140 '+(y+h*.2)+' 210 '+y+'S330 '+(y-h*.3)+' 390 '+(y+h*.05)+'V'+h+'Z" fill="currentColor" opacity="'+a[0]+'"/>'})}
   if(f.id==="e_torn"){var d="M0 "+h,x=0,seed=7;while(x<=W){seed=(seed*9301+49297)%233280;var y=h*.25+(seed/233280)*h*.5;d+=" L"+x+" "+y.toFixed(1);x+=6+(seed%7)}d+=" L390 "+h+"Z";p='<path d="'+d+'" fill="currentColor" opacity=".22"/>'}
@@ -243,7 +245,7 @@ function lineSvg(f){var col=colourVar(f.o.colour),m="";
   if(f.id==="l_scroll")m='<svg width="70" height="18" viewBox="0 0 70 18"><path d="M35 3L39 9L35 15L31 9Z" fill="currentColor"/><path d="M27 9C23 3 15 3 15 9C15 13 21 13 21 9 M43 9C47 3 55 3 55 9C55 13 49 13 49 9" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>';
   if(f.id==="l_dots")m='<svg width="70" height="16" viewBox="0 0 70 16"><circle cx="20" cy="8" r="2" fill="currentColor"/><circle cx="27" cy="8" r="2.6" fill="currentColor"/><path d="M35 1L37 6L42 6L38 9L40 14L35 11L30 14L32 9L28 6L33 6Z" fill="currentColor"/><circle cx="43" cy="8" r="2.6" fill="currentColor"/><circle cx="50" cy="8" r="2" fill="currentColor"/></svg>';
   return '<div class="lined" style="color:'+col+'">'+m+'</div>';}
-function effectArt(f){if(f.grp==="edge")return '<div class="edgebox">'+edgeSvg(f)+'</div>';if(f.grp==="line")return '<div style="padding:4px 20px">'+lineSvg(f)+'</div>';
+function effectArt(f){var ans=firstAnswer("effectArt.answer",f);if(ans!==undefined)return ans;if(f.grp==="edge")return '<div class="edgebox">'+edgeSvg(f)+'</div>';if(f.grp==="line")return '<div style="padding:4px 20px">'+lineSvg(f)+'</div>';
   if(f.id==="x_fade")return '<div class="fadeband" style="background-image:url('+IMG.g1+');--fh:'+f.o.h+'px"></div>';
   if(f.id==="x_tone")return '<div class="toneband" style="background-image:url('+IMG.hero+')"><div class="tn" style="background:radial-gradient('+(130*f.o.spread)+'% '+(75*f.o.spread)+'% at 12% 100%,rgba(0,0,0,.55),rgba(0,0,0,.25) 45%,rgba(0,0,0,0) 80%)"></div><div class="w">Ribeira Palace</div></div>';
   if(f.id==="x_reveal"){var n=15,t="";for(var i=0;i<n;i++)t+='<span class="t" style="transition-delay:'+(i*45)+'ms;width:24px;height:24px;display:block">'+TILE.replace("<svg",'<svg width="24" height="24"')+'</span>';
@@ -253,8 +255,9 @@ function effectArt(f){if(f.grp==="edge")return '<div class="edgebox">'+edgeSvg(f
 
 /* ---------- render one element ---------- */
 function C(c,k,f){return L(c&&c[k],f)}
-function renderEl(kind,style,c,i,still){
-  c=c||{};var o=style.o||{},h="";
+/* an element: an own answer, or the plain one (its content first) through renderEl.html; every result through renderEl.final */
+function renderEl(kind,style,c,i,still){var a={kind:kind,style:style,c:c,i:i,still:still},ans=firstAnswer("renderEl.answer",a);if(ans!==undefined)return pipe("renderEl.final",ans,a);
+  c=pipe("renderEl.content",c,kind);c=c||{};var o=style.o||{},h="";
   var tone=o.tone?" t-"+o.tone:"",size=o.size&&o.size!=="m"?" s-"+o.size:"",al=o.align==="centre"?" a-centre":"";
   var scroll=!still&&style.scroll&&style.scroll!=="none"?' data-scroll="'+style.scroll+'"':"";
   switch(kind){
@@ -292,16 +295,16 @@ function renderEl(kind,style,c,i,still){
    case"swatches":h='<div class="sw">'+[["#1F4E9C","Cobalt"],["#C99A3B","Ochre"],["#B4572E","Terracotta"],["#EFE9DC","Lime white"],["#4E7A6B","River green"]].map(function(s){return'<div><i style="background:'+s[0]+';'+(o.swsize==="s"?"height:28px":"")+'"></i><small>'+s[1]+'</small></div>'}).join("")+'</div>';break;
    case"divider":var f=effectById(o.uses||"l_hair");h=f?(f.grp==="edge"?'<div style="margin:16px -20px">'+edgeSvg(f)+'</div>':lineSvg(f)):'<div class="el-div missing"></div>';break;
    case"spacer":h='<div class="el-sp" style="--h:'+({s:16,m:24,l:40}[o.space||"m"])+'px"></div>';break;}
-  return still?h:wrapMv(h,entranceOf(style),i);}
+  return pipe("renderEl.final",pipe("renderEl.html",still?h:wrapMv(h,entranceOf(style),i),a),a);}
 function noBtn(h){return h.replace(/<button/g,"<span").replace(/<\/button>/g,"</span>")}
 function thumb(kind,style,cls){return noBtn('<div class="thumb'+(cls?" "+cls:"")+' cv'+(S.dark?" dark":"")+'"><div class="tin">'+renderEl(kind,style,{},0,true)+'</div></div>')}
 function patThumb(p,cls){return noBtn('<div class="thumb tall'+(cls?" "+cls:"")+' cv'+(S.dark?" dark":"")+'"><div class="tin">'+p.rows.map(function(r){return renderEl(r.kind,styleById(r.style)||defStyle(r.kind),{},0,true)}).join("")+'</div></div>')}
 
 /* ---------- motion, interaction demos ---------- */
 function pathBadge(id){var p=PATH[id]||"bld";return '<span class="mpath">'+({nat:"NATIVE",bld:"BUILD",imp:"IMPORT"}[p])+'</span>'}
-function motionSummary(m){if(m.type==="entrance")return "Entrance · "+(m.from==="scale"?"scales up":m.from==="none"?"fades":m.from==="wipe"?"wipes in":"from "+m.from)+(m.rot?" · tilts "+m.rot+"°":"")+" · "+m.dur+" ms"+(m.pieces!=="whole"?" · "+m.pieces+" one by one":"");
+function motionSummary(m){var ans=firstAnswer("motionSummary.answer",m);if(ans!==undefined)return ans;if(m.type==="entrance")return "Entrance · "+(m.from==="scale"?"scales up":m.from==="none"?"fades":m.from==="wipe"?"wipes in":"from "+m.from)+(m.rot?" · tilts "+m.rot+"°":"")+" · "+m.dur+" ms"+(m.pieces!=="whole"?" · "+m.pieces+" one by one":"");
   if(m.type==="transition")return "Transition · "+({slide:"Swipe",cube:"Cube",deck:"Card Deck",flip:"Flip",fade:"Cross-fade",zoom:"Zoom"})[m.style]+" · "+m.dur+" ms";if(m.type==="scroll")return "With the scroll · "+m.factor;if(m.type==="imported")return ({lottie:"Lottie",rive:"Rive",video:"Video + alpha",unity:"Unity Animation"})[m.source]+" · "+m.file+" · "+({enter:"on view",loop:"loops",tap:"on tap",scrub:"with the scroll"})[m.trigger];return "Emphasis loop · "+m.dur+" ms";}
-function motionDemo(m){
+function motionDemo(m){var ans=firstAnswer("motionDemo.answer",m);if(ans!==undefined)return ans;
   var head='<div class="mhead"><div><b>'+esc(m.name)+'</b>'+pathBadge(m.id)+'<small>'+esc(motionSummary(m))+'</small></div><button type="button" data-play="'+m.id+'">&#9654; Play</button></div>',body="";
   if(m.type==="entrance"){
     if(m.pieces==="words")body=wrapMv('<h3 class="el-title">'+esc(L(DEMO.title))+'</h3>',m,0);
@@ -328,7 +331,9 @@ function interDemo(x){var b="",o=x.o;
 function effectDemo(f){return '<div class="item" data-ref="f:'+f.id+'"><div class="fx"><div class="cap">'+esc(f.name)+' <small>· '+({edge:"edge",line:"line divider",light:"light",moving:"moving"})[f.grp]+'</small></div>'+effectArt(f)+'</div></div>'}
 
 /* ---------- block previews on the card ---------- */
-function blockPreviewV3(b,i){var m=b.enter==="family"?motionById(S.family):motionById(b.enter),h="",tap=b.tap==="page"?" tap":"";
+/* a block on the card, from its effective settings: an own answer or the plain one, its frame, then the last touches */
+function blockPreviewHtml(b,i){emitLatestFirst("blockPreviewHtml.before",b,i);var out;
+  try{out=firstAnswer("blockPreviewHtml.answer",b,i);if(out===undefined){var m=b.enter==="family"?motionById(S.family):motionById(b.enter),h="",tap=b.tap==="page"?" tap":"";
   var or=b.tap==="page"?'<div class="open'+(b.orow==="nudge"?" nudge":"")+(b.orow==="shine"?" shine":"")+'">'+(b.kind==="Story"?esc(L(UI.read)):esc(L(UI.open))+(b.orow==="nudge"?"":" &#8250;"))+'</div>':"";
   if(b.kind==="Quick Facts")h='<div class="qf"><div><small>'+esc(L(UI.home))+'</small><b>'+esc(L(UI.homev))+'</b></div><div><small>'+esc(L(UI.lost))+'</small><b>'+esc(L(UI.lostv))+'</b></div></div>';
   if(b.kind==="Inline"){var p=patternById(b.pattern);h=p?p.rows.map(function(r,j){return renderEl(r.kind,styleById(r.style)||defStyle(r.kind),{},j,true).replace('class="el-callout','class="el-callout')}).join(""):"";
@@ -340,18 +345,13 @@ function blockPreviewV3(b,i){var m=b.enter==="family"?motionById(S.family):motio
   if(b.kind==="Knowledge Check")h='<div class="kq" data-kq><b>'+esc(L(T("Which king moved the court to the river?","Que rei mudou a corte para o rio?")))+'</b><button type="button" data-ok="1">Manuel I</button><button type="button">Philip I</button><button type="button">José I</button></div>';
   if(b.kind==="Practical Info")h='<dl class="info"><dt>'+(S.lang==="pt"?"Onde":"Where")+'</dt><dd>Praça do Comércio</dd></dl><div class="more"><dl class="info" style="margin-top:6px"><dt>'+(S.lang==="pt"?"Hoje":"Today")+'</dt><dd>'+(S.lang==="pt"?"Praça aberta, sempre":"An open square, always")+'</dd><dt>Metro</dt><dd>Terreiro do Paço</dd></dl></div>'+'<div class="open">'+(TXH("open_row_expand"))+' &#8964;</div>';
   var inner='<div class="bprev'+tap+(b.tap==="expand"?" expand":"")+'" '+(b.tap==="page"?'data-go="'+(b.kind==="Story"?"story":"gallery")+'"':b.tap==="expand"?"data-expand":"")+'>'+h+or+'</div>';
-  return '<div class="item" data-ref="b:'+b.id+'">'+wrapMv(inner,m,0)+'</div>';}
+  out='<div class="item" data-ref="b:'+b.id+'">'+wrapMv(inner,m,0)+'</div>'}out=pipe("blockPreviewHtml.frame",out,b)}finally{emit("blockPreviewHtml.done",b,i)}
+  return pipe("blockPreviewHtml.html",out,b)}
 
 /* ---------- phone ---------- */
 var scr=document.getElementById("scr"),ph=document.getElementById("ph"),hint=document.getElementById("hint"),fit=document.getElementById("fit");
 var SCREENS={phone:[360,740],land:[740,360],tablet:[640,860]};
-function cardScreen(){var t=S.test.on&&S.test.poi==="painting",h='<div class="chrome"><i title="'+TXH("close")+'">&#10005;</i><i title="'+TXH("visitor_settings")+'">&#9776;</i></div><div class="hero" style="background-image:url('+IMG.hero+')"><div class="w"><small>'+esc(L(UI.where))+'</small><h2>Ribeira Palace</h2><p>'+esc(L(UI.line))+'</p></div></div>';
-  GROUPS.forEach(function(g){var bl=S.card.filter(function(b){return b.grp===g});if(!bl.length&&!(g==="about"&&t))return;
-    h+='<div class="gsec"><div class="ey" style="color:var(--'+g+')">'+esc(L(UI[g]))+'</div>';
-    if(g==="about"&&t)h+=testTile();
-    bl.forEach(function(b,i){h+=blockPreview(b,i)});h+='</div>'});
-  return h+'<div style="height:40px"></div>';}
-function topbar(crumb){return '<div class="topbar"><button type="button" data-go="card" aria-label="'+TXH("page_back")+'">&#8249;</button><span>Ribeira Palace &#8250; '+crumb+'</span></div>';}
+function topbar(crumb){var ans=firstAnswer("topbar.answer",crumb);if(ans!==undefined)return ans;return '<div class="topbar"><button type="button" data-go="card" aria-label="'+TXH("page_back")+'">&#8249;</button><span>Ribeira Palace &#8250; '+crumb+'</span></div>';}
 function layerHead(t,s){return '<div class="layerhead">'+t+'<small>'+s+'</small></div>'}
 function demoScreen(){var h=topbar("<b>"+esc(L(UI.demo))+"</b>")+'<div class="pg">';
   h+=layerHead("Motion","Each motion on real parts. Motion Family: <b>"+esc((motionById(S.family)||{}).name)+"</b> · Replay: <b>"+(S.replay==="every"?"Every Pass":"Once")+"</b>.");
@@ -362,22 +362,22 @@ function demoScreen(){var h=topbar("<b>"+esc(L(UI.demo))+"</b>")+'<div class="pg
   KINDS.forEach(function(K){(S.styles[K.k]||[]).forEach(function(st){h+='<div class="item" data-ref="s:'+st.id+'"><span class="tag">'+esc(K.n)+' · <b>'+esc(st.name)+(st.def?" ★":"")+'</b></span><div class="blk">'+renderEl(K.k,st,{},0)+'</div></div>'})});
   h+=layerHead("Patterns","Groups of elements with their styles; a marker fills the content.");
   S.patterns.forEach(function(p){h+='<div class="item" data-ref="p:'+p.id+'"><span class="tag">Pattern · <b>'+esc(p.name)+'</b></span><div class="blk">'+p.rows.map(function(r,i){return renderEl(r.kind,styleById(r.style)||defStyle(r.kind),{},i)}).join("")+'</div></div>'});
-  return h+'</div>';}
-function storyScreen(){var h=topbar(esc(L(secById("stories").name))+" &#8250; <b>"+esc(L(DEMO.title))+"</b>")+'<div class="pg"><div class="blk">';
+  return pipe("demoScreen.html",h+'</div>');}
+function storyScreen(){emitLatestFirst("storyScreen.before");var h=topbar(esc(L(secById("stories").name))+" &#8250; <b>"+esc(L(DEMO.title))+"</b>")+'<div class="pg"><div class="blk">';
   S.story.forEach(function(r){if(r.pattern){var p=patternById(r.pattern);if(!p){h+='<div class="item" data-ref="r:'+r.id+'"><p class="el-par missing">(missing pattern)</p></div>';return}
       var parts=p.rows.map(function(pr,i){return renderEl(pr.kind,styleById(pr.style)||defStyle(pr.kind),r.slots[i]||{},i)});
       h+='<div class="item" data-ref="r:'+r.id+'">'+(r.pattern==="pt1"?'<div class="wide2"><div>'+parts[0]+'</div><div>'+parts.slice(1).join("")+'</div></div>':parts.join(""))+'</div>';}
     else h+='<div class="item" data-ref="r:'+r.id+'">'+renderEl(r.kind,(r.style&&styleById(r.style))||defStyle(r.kind),r.c,0)+'</div>'});
-  return h+'</div></div>';}
-function galleryScreen(){return topbar(esc(L(secById("media").name))+" &#8250; <b>"+TXH("gallery_name")+"</b>")+'<div class="pg"><div class="blk">'+(S.galleryImgs||["g1","g2","g3","before"]).map(function(g,i){return renderEl("picture",defStyle("picture"),{img:g,cap:T("Picture "+(i+1),"Imagem "+(i+1))},i)}).join("")+'</div></div>'}
-function navbar(){return GROUPS.map(function(g){return'<span style="color:var(--'+g+')"><i></i>'+esc(L(UI[g]))+'</span>'}).join("")}
+  return pipe("storyScreen.html",h+'</div></div>');}
+function galleryScreen(){emitLatestFirst("galleryScreen.before");return pipe("galleryScreen.html",topbar(esc(L(secById("media").name))+" &#8250; <b>"+TXH("gallery_name")+"</b>")+'<div class="pg"><div class="blk">'+(S.galleryImgs||["g1","g2","g3","before"]).map(function(g,i){return renderEl("picture",defStyle("picture"),{img:g,cap:T("Picture "+(i+1),"Imagem "+(i+1))},i)}).join("")+'</div></div>')}
 function ptool(){var nx={phone:"land",land:"tablet",tablet:"phone"},nm={phone:"Phone",land:"Wide",tablet:"Tablet"};
   return '<span class="lbl">PREVIEW</span><button type="button" data-pt="dark" aria-pressed="'+S.dark+'" title="Light / dark">'+(S.dark?"&#9790; Dark":"&#9728; Light")+'</button>'+
    '<button type="button" data-pt="reduce" aria-pressed="'+S.reduce+'" title="Reduce Motion">'+(S.reduce?"Still":"Motion")+'</button>'+
    '<button type="button" data-pt="lang" aria-pressed="false" title="Language">'+S.lang.toUpperCase()+'</button>'+
    '<button type="button" data-pt="focusOn" aria-pressed="'+S.focusOn+'" title="Focus on what I edit">Focus</button>'+
    '<button type="button" data-pt="screen" data-v="'+nx[S.screen]+'" aria-pressed="false" title="Screen">'+nm[S.screen]+'</button>'}
-function renderPhone(keep){var top=keep?scr.scrollTop:0,sz=SCREENS[S.screen];
+/* the phone: the features before (latest first) and after (in module order), sharing the call's notes cx */
+function renderPhone(keep){var cx={};emitLatestFirst("renderPhone.before",keep,cx);var top=keep?scr.scrollTop:0,sz=SCREENS[S.screen];
   ph.style.width=sz[0]+"px";ph.style.height=sz[1]+"px";ph.classList.toggle("land",S.screen==="land");
   var k=Math.min(1,390/sz[0]);fit.style.transform="scale("+k+")";fit.style.height=(sz[1]*k)+"px";fit.style.width=(sz[0]*k)+"px";fit.style.transformOrigin="top left";
   document.getElementById("camera").style.backgroundImage=S.screen==="land"?"url("+IMG.hero+")":"none";
@@ -386,7 +386,8 @@ function renderPhone(keep){var top=keep?scr.scrollTop:0,sz=SCREENS[S.screen];
   document.getElementById("ptool").innerHTML=ptool();
   var nb=document.getElementById("navbar");nb.innerHTML=navbar();nb.style.display=S.view==="card"?"":"none";
   hint.style.display=S.view==="card"?"":"none";hint.firstChild.textContent="The card · Ribeira Palace";
-  splitPieces();scr.scrollTop=top;observe();initTransitions();initBoxes();onScroll(scr);applyFocus();}
+  splitPieces();scr.scrollTop=top;observe();initTransitions();initBoxes();onScroll(scr);applyFocus();
+  emit("renderPhone.after",keep,cx)}
 function splitPieces(){scr.querySelectorAll(".mvp").forEach(function(w){var m=motionById(w.dataset.pieces);var n=0;
   w.querySelectorAll("h3,h4,p,q,div.el-eyebrow").forEach(function(el){if(el.children.length)return;
     var parts=m.pieces==="letters"?el.textContent.split(""):el.textContent.split(/(\s+)/);
@@ -483,7 +484,7 @@ function motionOpts(type,withFamily){var a=[];if(withFamily)a.push(["family","Fa
 function matchQ(name){var q=S.ui.q.trim().toLowerCase();return !q||name.toLowerCase().indexOf(q)>=0}
 function matches(name,cat){var q=S.ui.q.trim().toLowerCase();return (S.ui.cat==="All"||cat===S.ui.cat)&&(!q||name.toLowerCase().indexOf(q)>=0)}
 function advice(m){if(m.type==="entrance"&&m.dur>600)return "Long for an entrance: the visitor waits "+m.dur+" ms to read. Fine for one hero moment.";if(m.type==="transition"&&m.dur>900)return "A slow turn: good for a story mode, tiring for a quick swipe.";if(m.type==="entrance"&&m.dist>80)return "A long travel: a dramatic entrance.";return ""}
-function motionBody(m){var b=row("Name",'<input class="u" data-text="motion" value="'+esc(m.name)+'">',"The name styles and blocks pick it by.");
+function motionBody(m){var ans=firstAnswer("motionBody.answer",m);if(ans!==undefined)return ans;var b=row("Name",'<input class="u" data-text="motion" value="'+esc(m.name)+'">',"The name styles and blocks pick it by.");
   if(m.type==="entrance"){b+=row("Comes in",seg("motion.from",["below","left","right","scale","wipe","none"],["Below","Left","Right","Scale","Wipe","In place"],m.from),"Where it enters from.",true)+
    row("Distance (pt)",slider("motion.dist",0,200,1,m.dist),"How far it travels.",true)+row("Tilt (°)",slider("motion.rot",-20,20,1,m.rot||0),"A rotation that settles to straight.",true)+
    row("Duration (ms)",slider("motion.dur",100,2000,10,m.dur,advice(m)),"Advice, not a cap: 250-500 ms reads best.",true)+row("Easing",seg("motion.ease",["out","overshoot","spring","inout"],["Ease Out","Overshoot","Spring","In-Out"],m.ease),"Overshoot and Spring give the little jump.",true)+
@@ -565,7 +566,7 @@ function edCardV3(){var h='';
   lb+='</div>';var cur=LIB.filter(function(r){return r[1]===S.sel.block})[0];if(cur)lb+='<div class="tip"><b>'+esc(cur[1])+'</b> · '+esc(cur[3])+' Its own options (Block Library defaults) and its preview / page settings live here; a marker places it and fills its content.</div>';
   h+=fo("library","Block Library",["ext","EXTENDED"],lb,1);
   h+=jsonBox("config.json · card_settings.block_components",bcJson());return h;}
-function libThumb(name){var k={"Header":["picture","st17"],"Inline":["callout","st28"],"Story":["picture","st16"],"Quick Facts":["swatches","st42"],"Timeline":["timeline","st41"],"Gallery":["carousel","st20"],"Before and After":["before_after","st35"],"Hotspot Image":["hotspot","st36"],"Video":["video","st21"],"3D Model":["model_3d","st37"],"360 Panorama":["panorama","st38"],"Audio Guide":["audio","st32"],"Wall Locator":["map","st40"],"Today Map":["map","st40"],"Compare Points":["picture_pair","st19"],"Related":["picture_pair","st19"],"Sources":["list","st14"],"Contents":["list","st15"],"Practical Info":["list","st14"]}[name]||["callout","st11"];
+function libThumb(name){var ans=firstAnswer("libThumb.answer",name);if(ans!==undefined)return ans;var k={"Header":["picture","st17"],"Inline":["callout","st28"],"Story":["picture","st16"],"Quick Facts":["swatches","st42"],"Timeline":["timeline","st41"],"Gallery":["carousel","st20"],"Before and After":["before_after","st35"],"Hotspot Image":["hotspot","st36"],"Video":["video","st21"],"3D Model":["model_3d","st37"],"360 Panorama":["panorama","st38"],"Audio Guide":["audio","st32"],"Wall Locator":["map","st40"],"Today Map":["map","st40"],"Compare Points":["picture_pair","st19"],"Related":["picture_pair","st19"],"Sources":["list","st14"],"Contents":["list","st15"],"Practical Info":["list","st14"]}[name]||["callout","st11"];
   return thumb(k[0],styleById(k[1]))}
 
 function edMarkerV3(){var h=row("Marker",sel("m.poi",[["painting","7. Ribeira Palace"]],"painting"),"The marker whose card you edit.");
@@ -608,8 +609,12 @@ function fieldsFor(kind,c,path){var f=FIELDS[kind]||[],h='<div class="fields">';
    else if(type==="img")h+=row(lab,'<div class="assets">'+ASSETS.map(function(a){return'<button type="button" data-asset="'+path+'|'+key+'|'+a+'" aria-pressed="'+(v===a)+'" style="background-image:url('+IMG[a]+')" aria-label="'+a+'"></button>'}).join("")+'</div>',"A picture from the wall's media folder.");
    else if(type==="imgs"){v=v||[];h+=row(lab,'<div class="assets">'+ASSETS.map(function(a){return'<button type="button" data-assets="'+path+'|'+key+'|'+a+'" aria-pressed="'+(v.indexOf(a)>=0)+'" style="background-image:url('+IMG[a]+')" aria-label="'+a+'"></button>'}).join("")+'</div>',"Tap to add or remove; the order is the tap order.")}});
   return h+'</div>';}
-function contentAt(path){var p=path.split("."),r=byId(S.story,p[0]);if(!r)return null;if(p[1]==="c")return r.c=r.c||{};var j=+p[1].slice(1);return r.slots[j]=r.slots[j]||{}}
-function edGlobal(){return locked("Scene Configuration")+locked("Markers · Badge · Outline · Effects")+locked("Hierarchy Levels")+'<div class="note">Global Scene is unchanged. Its Effects section has the same Test pattern (a demo grid on a base marker) that Block Components follows.</div>'}
+function contentAt(path){var ans=firstAnswer("contentAt.answer",path);if(ans!==undefined)return ans;var p=path.split("."),r=byId(S.story,p[0]);if(!r)return null;if(p[1]==="c")return r.c=r.c||{};var j=+p[1].slice(1);return r.slots[j]=r.slots[j]||{}}
+function edGlobal(){var h='<div class="note">The top level only: the wall\'s markers and how a visitor finds them.</div>';
+  var gc=function(id,sub){return fo(id,esc(COMP[id][1])+' <span class="sub">· '+sub+'</span>',null,ownbar(id)+' '+ownPanels(id),2)};
+  GSECS.forEach(function(g,i){var srch=i===GSECS.length-1,body=srch?row("Synonym Groups",'<button class="ubtn sm" type="button" data-goloc="term:t3">Languages &amp; Terms › Terms &#8250;</button>',"One list with the card\'s glossary. Keyword Fields stay here: only the search reads them.")+gc("g:10s","where the visitor types a search")+gc("g:10f","opens the filters, with how many are on"):' ';
+   h+=fo("g:"+i,esc(g[0])+' <span class="sub">· '+esc(g[1])+'</span>',srch?["ext","EXTENDED"]:["","EXISTING"],body,1)});
+  h+=fo("g:11",'Onboarding hints <span class="sub">· the first-use hints over the wall</span>',["new","NEW"],row("Wall hint",pseg("wallTip",["true","false"],["Shown","Hidden"]),"Over the wall until the visitor opens a card.")+ownbar("g:11")+ownPanels("g:11"),1);return h}
 function jsonBox(t,obj){return'<div class="json"><div class="jh"><span>'+esc(t)+'</span><span>live</span></div><pre>'+esc(JSON.stringify(obj,null,2))+'</pre></div>'}
 function bcJson(){var es={};for(var k in S.styles)es[k]=S.styles[k].map(function(s){var o={key:s.id,name:s.name};for(var x in s.o)o[x]=s.o[x];o.entrance=s.enter;if(s.scroll)o.scroll=s.scroll;if(s.turn)o.transition=s.turn;if(s.def)o["default"]=true;return o});
   return{motion_family:S.family,replay:S.replay,motions:S.motions.map(function(m){var o={key:m.id};for(var x in m)if(x!=="id")o[x]=m[x];return o}),interactions:S.inter.map(function(x){return{key:x.id,options:x.o}}),
@@ -617,7 +622,8 @@ function bcJson(){var es={};for(var k in S.styles)es[k]=S.styles[k].map(function
 function markerJson(){return{blocks:S.card.map(function(b){var o={kind:b.kind,group:b.grp,entrance:b.enter,tap:b.tap};if(b.tap==="page")o.open_row=b.orow;if(b.pattern)o.pattern=b.pattern;return o}),
   story_page:S.story.map(function(r){return r.pattern?{pattern:r.pattern,slots:r.slots}:{element:r.kind,style:r.style||undefined,content:r.c}})}}
 var lastRender=0;
-function renderEditor(){lastRender=performance.now();document.querySelectorAll(".utab").forEach(function(t){t.setAttribute("aria-selected",String(t.dataset.tab===S.tab))});ed.innerHTML=S.tab==="card"?edCard():S.tab==="marker"?edMarker():edGlobal()}
+function renderEditor(){emitLatestFirst("renderEditor.before");lastRender=performance.now();document.querySelectorAll(".utab").forEach(function(t){t.setAttribute("aria-selected",String(t.dataset.tab===S.tab))});
+  var h=firstAnswer("renderEditor.tab");ed.innerHTML=h!==undefined?h:S.tab==="card"?edCard():S.tab==="marker"?edMarker():edGlobal();emit("renderEditor.after")}
 function renderAll(keep){renderEditor();renderPhone(keep)}
 function refreshJson(){var pre=ed.querySelector(".json pre");if(pre)pre.textContent=JSON.stringify(S.tab==="card"?bcJson():markerJson(),null,2)}
 
@@ -663,7 +669,7 @@ ed.addEventListener("click",function(e){var t=e.target;
   var ca=t.closest("[data-cadd]");if(ca){var nb={id:nid("b"),kind:ca.dataset.cadd,grp:"about",enter:"family",tap:"nothing",orow:"plain"};if(nb.kind==="Inline")nb.pattern="pt3";S.card.push(nb);S.sel.cblock=nb.id;renderAll(true);show("card","b:"+nb.id);return}
   var pk=t.closest("[data-pick]");if(pk&&!t.closest("select,input,textarea,button")){if(pk.dataset.pick==="row"){S.sel.row=pk.dataset.id;S.sel.picker=null;renderEditor();show("story","r:"+S.sel.row)}else{S.sel.cblock=pk.dataset.id;renderEditor();show("card","b:"+S.sel.cblock)}}});
 function swap(a,i,j){var x=a[i];a[i]=a[j];a[j]=x}
-function setOpt(key,v){
+function setOpt(key,v){if(firstAnswer("setOpt.answer",key,v)!==undefined)return;
   if(key==="test.on"){S.test.on=v==="true";renderEditor();S.view="card";renderPhone(false);return}
   if(key==="focusOn"){S.focusOn=v==="true";renderAll(true);return}
   if(key==="replay"){S.replay=v;renderAll(true);return}

@@ -25,11 +25,16 @@ lives, so a change goes to one place. Update it in the same round as every chang
 
 ## Where the code is today
 
-The restructure is under way: the code is still in the old layers, in load order. Each one wraps the one before it.
+The restructure is under way: the code is still in the old layers, in load order. The Editor's and the phone's shared
+functions (`edCard`, `edMarker`, `renderEditor`, `renderPhone`, the screens, `modelSig`, `renderEl`, `setOpt`…) have one
+definition each, in the layer that first defines them, and call named points (`renderPhone.before`, `edCard.html`,
+`cardScreen.html`…); each layer joins them with `on()` from its own file. The guide, the mascot, the world and the agent still
+wrap the layer before them.
 
 | Layer | Holds |
 |---|---|
 | `v3.js` | Opens the shared scope. Catalogues (kinds, motions, effects, patterns, the library), the state `S`, the elements' drawing (`renderEl`), the phone (`renderPhone`, screens, the sheet), the Editor's widgets (`row`, `seg`, `fo`) and its events |
+| `ext.js` | The extension points: `on`, `emit`, `emitLatestFirst` (a "before" point), `pipe` (a value through each joiner), `firstAnswer` (the latest joiner with an answer wins) |
 | `v4.js` | Detail Card's organisation: sections, the Navigation Bar, the card's Editor (`edCard`, `edMarker`) |
 | `v5.js` | The flow (the wall, the marker, the stops) and the self-test |
 | `v6.js` | The Guide: the tour, the device voice (`say`), captions, Ask |
@@ -68,7 +73,7 @@ Rounds, each one proven by the self-test and `run_tests.js` with the same result
 
 1. The build only joins (done: the page it writes is byte-identical to the old build's).
 2. The extension points; the Editor and the phone join them (`edCard`, `edMarker`, `renderEditor`, `renderPhone`, the
-   screens, `modelSig`, `renderEl`, `setOpt`).
+   screens, `modelSig`, `renderEl`, `setOpt`) (done).
 3. The guide: the tour's steps, the voice (`say`, `stopSpeech`, `markWord`), `renderGuide`, Ask.
 4. The mascot, the world and the agent (`camLayer`, `azMouth`, `agPrompt`, `ptool`) and what is left.
 5. The code moves into `src/` by feature; the layers go; this file lists the modules; the check allows 0.

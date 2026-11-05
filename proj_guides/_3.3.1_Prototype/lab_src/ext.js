@@ -1,0 +1,7 @@
+/* Extension points: a shared function calls its point by name; a feature joins it with on(). Joining order = module order. */
+function extPoint(n){var r=extPoint.r||(extPoint.r={});return r[n]||(r[n]=[])}
+function on(n,fn){extPoint(n).push(fn)}
+function emit(n,a,b,c){var l=extPoint(n);for(var i=0;i<l.length;i++)l[i](a,b,c)}
+function emitLatestFirst(n,a,b,c){var l=extPoint(n);for(var i=l.length-1;i>=0;i--)l[i](a,b,c)}
+function pipe(n,v,a,b){var l=extPoint(n);for(var i=0;i<l.length;i++)v=l[i](v,a,b);return v}
+function firstAnswer(n,a,b,c){var l=extPoint(n);for(var i=l.length-1;i>=0;i--){var r=l[i](a,b,c);if(r!==undefined)return r}}

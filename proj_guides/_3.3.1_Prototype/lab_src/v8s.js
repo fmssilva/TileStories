@@ -15,7 +15,7 @@ function curWall(){return WALLS[S.camCfg.wall]||WALLS.ribeira}
 /* the camera: the wall's picture as the phone sees it, panned (camX, camY) and zoomed (camZoom: nearer the wall) */
 camGeom=function(){var wl=curWall(),W=ph.offsetWidth,H=ph.offsetHeight,k=Math.max(W/wl.w,H/wl.h)*S.camZoom,dw=wl.w*k,dh=wl.h*k;return{W:W,H:H,dw:dw,dh:dh,ox:(W-dw)*S.camX,oy:(H-dh)*S.camY}};
 function camPaint(){var c=document.getElementById("camera");if(!c||S.view!=="card")return;var g=camGeom();c.style.backgroundImage="url("+curWall().img()+")";c.style.backgroundSize=g.dw.toFixed(0)+"px "+g.dh.toFixed(0)+"px";c.style.backgroundPosition=g.ox.toFixed(0)+"px "+g.oy.toFixed(0)+"px"}
-var renderPhoneV8s=renderPhone;renderPhone=function(keep){S.wallPois=curWall().pois;renderPhoneV8s(keep);camPaint();ph.classList.toggle("testwall",S.camCfg.wall!=="ribeira");camLayer();fabLayer()};
+on("renderPhone.before",function(keep){S.wallPois=curWall().pois});on("renderPhone.after",function(keep){camPaint();ph.classList.toggle("testwall",S.camCfg.wall!=="ribeira");camLayer();fabLayer()});
 /* the test wall's points are its markers, always shown (the card's wall keeps its own marker) */
 var camLayerV8s=camLayer;camLayer=function(){camLayerV8s();var pins=ph.querySelector(".campins");if(pins&&S.camCfg.wall!=="ribeira"&&S.stop==="closed"&&S.view==="card")pins.hidden=false;
   var a=ph.querySelector(".camask");if(a&&!G.cam.open&&S.camCfg.fab)a.remove();var bar=a&&a.querySelector(".ca-bar");if(bar&&S.camCfg.fab){var pill=bar.querySelector(".ca-pill span");if(pill)pill.textContent=TXT("cam_ask")}};
@@ -58,14 +58,13 @@ setInterval(function(){if(!S.camCfg.comments||!S.camCfg.fab||S.view!=="card"||S.
   clearTimeout(G.fab.t);G.fab.t=setTimeout(function(){G.fab.bub=null;fabLayer()},6000)},400);
 
 /* Editor: 6 · Guide > Ask about the view gets the wall, Azu's button and its comments */
-var edCardV8s=edCard;
-edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8s();
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   addRows(d,"s7cam",row("Azu as the guide's button",pseg("camCfg.fab",["true","false"],["On","Off"]),"Azu stays on the screen as the guide's button, bottom left: above the bar on the card (a tap offers Start the guide or Ask), in the corner on the wall (a tap opens Ask about the view). It replaces the Ask pill. During a tour it is the guide itself.")+
     row("Azu comments",pseg("camCfg.comments",["true","false"],["On","Off"]),"On the wall, Azu watches where the camera points. When a point settles in the middle (1.2 s), a short remark in a small bubble (“In the middle: Belém Tower. Tap to hear more.”). A tap on the bubble opens the point’s card and starts its tour, or tells its story. Never while the phone moves, at most 12 a visit.")+
     row("Between comments",pslider("camCfg.every",4,30,1),"Seconds, at least.",true)+
     row("Wall (the Lab)",pseg("camCfg.wall",["ribeira","belem"],["Ribeira painting","Belém panorama (11 points)"]),"Ribeira: the card’s own wall. Belém: a test wall from the Grande Panorama de Lisboa (Museu Nacional do Azulejo; photo CC0, Gerda Arendt) with 11 points. Drag pans, the wheel or two fingers zoom: the Lab’s stand-in for moving the phone nearer or farther."),"Try");
-  return d.innerHTML};
-var modelSigV8s=modelSig;modelSig=function(){return modelSigV8s()+"#fab:"+S.camCfg.fab+S.camCfg.comments+S.camCfg.wall};
+  return d.innerHTML});
+on("modelSig.sig",function(h){return h+"#fab:"+S.camCfg.fab+S.camCfg.comments+S.camCfg.wall});
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("ctl\\.jump\\.","ctl\\.jump\\.|camCfg\\.every"));
 
 /* the card's scroll decides whether the hero's Start is still in sight */

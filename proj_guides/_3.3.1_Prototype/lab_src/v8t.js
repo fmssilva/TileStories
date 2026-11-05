@@ -192,8 +192,7 @@ function agConHtml(){var c=AG.con,st=c.st;
     (st?'<div class="agmet">'+esc(agProvName(st.provider)+" · "+st.model)+' · first words '+(st.first||"-")+' ms · '+st.ms+' ms · '+st.tin+' in / '+st.tout+' out'+(st.est?" (estimated)":"")+(st.cost?" · $"+st.cost.toFixed(5):"")+(st.err?' · <span class="bad">'+esc(st.err)+'</span>':"")+'</div>':"")+
     '<div class="agconb"><button class="ubtn sm" type="button" data-agsave="1"'+(c.q&&!c.busy?"":" disabled")+'>Save as eval case</button><button class="ubtn sm" type="button" data-agcopy="1"'+(AG.evals.length?"":" disabled")+'>Copy eval cases (JSON)</button><span class="uses">'+AG.evals.length+' saved</span></div></div>'}
 function agConPaint(){var e=ed.querySelector(".agcon");if(!e)return;var t=document.createElement("div");t.innerHTML=agConHtml();e.replaceWith(t.firstChild)}
-var edCardV8t=edCard;
-edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8t();var at=d.querySelector('[data-fo="s7cam"]');if(!at)return d.innerHTML;var A=S.agentCfg,pol=function(n){return AGTOOLS[n].ro?[["auto","Auto"],["off","Off"]]:[["auto","Auto"],["suggest","Suggest"],["confirm","Confirm"],["off","Off"]]};
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var at=d.querySelector('[data-fo="s7cam"]');if(!at)return d.innerHTML;var A=S.agentCfg,pol=function(n){return AGTOOLS[n].ro?[["auto","Auto"],["off","Off"]]:[["auto","Auto"],["suggest","Suggest"],["confirm","Confirm"],["off","Off"]]};
   var sub=function(t){return'<div class="agh">'+esc(t)+'</div>'};
   at.insertAdjacentHTML("afterend",comp("s7agent","answers questions on the card and on the wall: a model, its tools, its knowledge",
     sub("1 · Guide mode")+row("Guide mode",pseg("guideCfg.ask",["off","search","ai"],["Scripted only","Scripted + offline search","Scripted + live agent"]),"Scripted only: the authored tour, no questions. Offline search: a question jumps to the block that answers it (no network). Live agent: a model answers, from this point's library, and acts in the app with the tools below. The tour itself is always the authored one, in the recorded voice: the model never narrates it.")+
@@ -220,9 +219,9 @@ edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8t();va
     sub("8 · Limits")+row("Model steps",pslider("agentCfg.steps",1,5,1),"Model calls in one answer, at most (each tool result goes back once).",true)+row("Timeout",pslider("agentCfg.timeout",4,30,1),"Seconds. Then the offline answer, with a note.",true)+
     row("Questions a session",pslider("agentCfg.cap",5,200,5),"Then offline answers. In the app, the token service also caps each install and day.",true)+
     sub("9 · Test console")+agConHtml()));
-  var f=innerOf(d,"s7agent");if(f)f.insertAdjacentHTML("beforeend",ownbar("s7agent")+ownPanels("s7agent"));return d.innerHTML};
+  var f=innerOf(d,"s7agent");if(f)f.insertAdjacentHTML("beforeend",ownbar("s7agent")+ownPanels("s7agent"));return d.innerHTML});
 /* any change to the agent's settings re-picks the model (a test's own stand-in survives other changes) */
-var renderEditorV8t=renderEditor;renderEditor=function(){var sig=JSON.stringify(S.agentCfg)+"|"+!!AG.claude+!!agKey("gemini")+!!agKey("anthropic")+!!AG.mock;if(sig!==AG.sig){AG.sig=sig;applyProvider()}renderEditorV8t()};
+on("renderEditor.before",function(){var sig=JSON.stringify(S.agentCfg)+"|"+!!AG.claude+!!agKey("gemini")+!!agKey("anthropic")+!!AG.mock;if(sig!==AG.sig){AG.sig=sig;applyProvider()}});
 ed.addEventListener("keydown",function(e){if(e.target.closest&&e.target.closest(".agcon,.agkey"))e.stopPropagation()},true);
 ed.addEventListener("change",function(e){var t=e.target;if(!t.dataset||!t.dataset.agkey)return;e.stopPropagation();var v=t.value.trim();if(v)AG.keys[t.dataset.agkey]=v;try{localStorage.setItem("lab.agentKeys",JSON.stringify(AG.keys))}catch(x){}t.value="";renderEditor()},true);
 ed.addEventListener("click",function(e){var t=e.target.closest("[data-agrun],[data-agsave],[data-agcopy],[data-agctx],[data-agtest],[data-agforget]");if(!t)return;e.stopPropagation();
@@ -236,5 +235,5 @@ ed.addEventListener("click",function(e){var t=e.target.closest("[data-agrun],[da
   if(t.dataset.agtest){applyProvider();if(!AG.fn){AG.testR="nothing live here";renderEditor();return}AG.testR="asking…";var r=ed.querySelector(".agtestr");if(r)r.textContent=AG.testR;
     AG.fn("Reply with the single word: ok",{}).then(function(x){AG.testR=(AG.last?agProvName(AG.last.provider)+" · "+AG.last.model+": ":"")+String(x.text).trim().slice(0,40)+" ("+(AG.last?AG.last.ms:0)+" ms)";renderEditor()},
       function(x){AG.testR="error: "+(x&&(x.code||x.message)||"?");renderEditor()})}},true);
-var modelSigV8t=modelSig;modelSig=function(){return modelSigV8t()+"#ag:"+(G.agTurn?G.agTurn.links.length:0)};
+on("modelSig.sig",function(h){return h+"#ag:"+(G.agTurn?G.agTurn.links.length:0)});
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("ctl\\.jump\\.","ctl\\.jump\\.|agentCfg\\."));

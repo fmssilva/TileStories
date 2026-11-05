@@ -5,7 +5,7 @@ D = os.path.dirname(os.path.abspath(__file__))
 M3 = os.path.join(D, '..', '..', 'mascote', '3d')
 
 # the order is the load order: a module may use what an earlier one defines
-MODULES = ['v3.js', 'v4.js', 'v5.js', 'v6.js', 'v7.js',
+MODULES = ['v3.js', 'ext.js', 'v4.js', 'v5.js', 'v6.js', 'v7.js',
            'v8a.js', 'v8b.js', 'v8c.js', 'v8d.js', 'v8e.js', 'v8f.js', 'v8g.js', 'v8h.js', 'v8i.js', 'v8j.js', 'v8k.js', 'v8l.js',
            'v8m.js', 'v8n.js', 'v8o.js', 'v8r.js', 'v8p.js', 'v8q.js', 'v8s.js', 'v8t.js', 'v8u.js', 'v8v.js', 'v8w.js', 'v8x.js',
            'v8y.js', 'v8z.js', 'v9a.js', 'v9b.js',

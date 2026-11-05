@@ -71,8 +71,7 @@ ph.addEventListener("pointerup",function(e){var m=e.target.closest(".mascot");if
 ph.addEventListener("click",function(e){var p=e.target.closest("[data-azprop]");if(p){e.stopPropagation();azMomentDo();return}if(e.target.closest(".mascot"))e.stopPropagation()},true);
 
 /* Editor: 6 · Guide > Mascot gets its liveliness, mouth, moods, moments and a Try per play; Specific Marker > Guide script gets Solemn and each step's mood */
-var edCardV8k=edCard;
-edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8k();
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   addRows(d,"s7mascot",row("Liveliness",pseg("guideCfg.life",["lively","calm"],["Lively","Calm"]),"Lively: Azu hops, reacts to every poke (6 reactions, never one of the last 3), sometimes tells a joke, and may stop once for a sip of water or a cookie. Calm: blinks, talks and points; a poke gets a wink; nothing unprompted.")+
     row("Mouth",pseg("guideCfg.lips",["true","false"],["Follows the words","Still"]),"The mouth changes shape with each word being said (from its letters here; from the voice's visemes in the app).")+
     row("Moods",pseg("guideCfg.moods",["true","false"],["On","Off"]),"Each step's mood (in the Guide script): smile, delighted, surprised, thinking, serious. On a Solemn point the face stays serious or thoughtful.")+
@@ -80,13 +79,12 @@ edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8k();
     row("Water break after",pslider("guideCfg.waterAfter",20,180,10),"Seconds of narration before Azu stops for a sip.",true)+
     row("Try",'<div class="btnrow"><button class="del" type="button" data-aztry="poke">Poke</button><button class="del" type="button" data-aztry="tickle">Tickle</button><button class="del" type="button" data-aztry="fall">Knock over</button><button class="del" type="button" data-aztry="water">Water break</button><button class="del" type="button" data-aztry="cookie">Cookie</button></div>',
       "On the phone: a tap pokes, three quick taps tickle, a long press knocks Azu over. They never pause the tour."));
-  return d.innerHTML};
-var edMarkerV8k=edMarker;
-edMarker=function(){var d=document.createElement("div");d.innerHTML=edMarkerV8k();var f=innerOf(d,"m3");if(!f)return d.innerHTML;
+  return d.innerHTML});
+on("edMarker.html",function(h){var d=document.createElement("div");d.innerHTML=h;var f=innerOf(d,"m3");if(!f)return d.innerHTML;
   f.insertAdjacentHTML("afterbegin",row("Solemn point",pseg("m.solemn",["false","true"],["No","Yes"]),"A memorial, a church, a tragedy: Azu keeps a serious face, tells no jokes and stops for nothing."));
   var st=S.sel.gstep&&byId(S.guideSteps,S.sel.gstep),slot=st&&d.querySelector('[data-pick="gstep"][data-id="'+cssq(st.id)+'"] + tr.slot td:last-child');
   if(slot)slot.insertAdjacentHTML("afterbegin",row("Azu's mood",'<select class="u" data-azmood="'+st.id+'">'+Object.keys(MOODS).map(function(k){return'<option value="'+k+'"'+((st.mood||"smile")===k?" selected":"")+'>'+MOODS[k]+'</option>'}).join("")+'</select>',"Azu's face during this step."));
-  return d.innerHTML};
+  return d.innerHTML});
 ed.addEventListener("change",function(e){var t=e.target;if(!t.dataset||!t.dataset.azmood)return;e.stopImmediatePropagation();byId(S.guideSteps,t.dataset.azmood).mood=t.value;azApply()},true);
 ed.addEventListener("click",function(e){var t=e.target.closest("[data-aztry]");if(!t)return;e.stopPropagation();var k=t.dataset.aztry;if(!G.on){startTour()}
   setTimeout(function(){if(k==="poke")azPoke();else if(k==="tickle")azTickle();else if(k==="fall")azFall();else{pauseTour();azMoment(k,function(){resumeTour()})}},G.on?50:900)},true);

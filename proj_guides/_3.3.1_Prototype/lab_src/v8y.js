@@ -18,8 +18,8 @@ azuApply();
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(guideCfg\\.(azuGlaze|azuMotif|azuLight|azuShape)|"));
 
 /* Editor: 6 · Guide > Azu > Mascot source = Tile of light: Glaze, Pattern, Light, Corners, Preview */
-var edCardV8y=edCard,azuPrev={key:null};
-edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8y();azuApply();
+var azuPrev={key:null};
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;azuApply();
   if(S.guideCfg.azuStyle==="light"){var r=rowEl(d,"s7mascot","Mascot source");
     /* drawn again only when the style changes (an Editor render is not a reason to draw) */
     var key=[S.guideCfg.azuGlaze,S.guideCfg.azuMotif,S.guideCfg.azuLight,S.guideCfg.azuShape].join("|");
@@ -30,4 +30,4 @@ edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8y();az
       row("Light",pseg("guideCfg.azuLight",["pastel","glaze","cobalt","gold"],["Pastel clouds","Glaze colours","Cobalt","Gold"]),"The colours of the clouds inside the tile when it turns to light, to listen, think and travel: pastel clouds (cyan, violet, magenta, peach); the glaze's own colours, lifted to light; cobalt blues; gold.",true)+
       row("Corners",pseg("guideCfg.azuShape",["crisp","soft","pillow"],["Crisp","Soft","Pillow"]),"How round the tile's edges are; the tile keeps its size.",true)+
       row("Preview",rest?'<div class="azprev"><figure><img src="'+rest+'" alt="Azu at rest" width="96" height="96"><figcaption>At rest</figcaption></figure><figure><img src="'+lit+'" alt="Azu as light" width="96" height="96"><figcaption>As light</figcaption></figure></div>':'<span class="uses">This browser cannot draw WebGL: no preview (the guide shows the Tile (2.5D)).</span>',"Unity: the same values are the properties of the tile's Shader Graph material; each choice is a style asset.",true))}
-  return d.innerHTML};
+  return d.innerHTML});

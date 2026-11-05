@@ -3,8 +3,7 @@
 KOPT.Header=KOPT.Header.filter(function(o){return o[0]!=="listen"});delete S.blockDefs.Header.o.listen;
 
 /* ----- close and settings: pinned to the sheet's top (sticky in the sheet, v8f.css); the top band carries them once it shows ----- */
-var topBandV8f=topBand;
-topBand=function(){topBandV8f();var tb=ph.querySelector(".topband"),c=scr.querySelector(".chrome");if(c)c.style.visibility=tb&&tb.style.display!=="none"?"hidden":""};
+on("topBand.after",function(){var tb=ph.querySelector(".topband"),c=scr.querySelector(".chrome");if(c)c.style.visibility=tb&&tb.style.display!=="none"?"hidden":""});
 
 /* ----- the sheet: a tap on the grabber moves it one stop (peek > half > full > half); a short drag goes one stop its way ----- */
 function stepStop(){S.stop=S.stop==="full"?"half":S.stop==="half"?"full":"half";feedback("tap");renderPhone(true)}
@@ -36,13 +35,12 @@ fitHero=function(){var hero=scr.querySelector(".hero");if(!hero||(S.view!=="card
 function shownInPlace(){var r=scr.getBoundingClientRect();scr.classList.add("still");
   scr.querySelectorAll(".mv:not(.in)").forEach(function(el){var b=el.getBoundingClientRect();if(b.bottom>r.top&&b.top<r.bottom)el.classList.add("in")});
   void scr.offsetHeight;scr.classList.remove("still")}
-var renderPhoneV8f=renderPhone;
-renderPhone=function(keep){var top=scr.scrollTop,view=S.view,was=S.lastStop;if(!keep||view!==S.lastView)S.heroH=0;S.lastView=view;
-  renderPhoneV8f(keep);if(keep&&S.view===view){scr.scrollTop=top;shownInPlace()}
+on("renderPhone.before",function(keep,cx){cx.top=scr.scrollTop;cx.view=S.view;cx.was=S.lastStop;if(!keep||cx.view!==S.lastView)S.heroH=0;S.lastView=cx.view});
+on("renderPhone.after",function(keep,cx){var top=cx.top,view=cx.view,was=cx.was;if(keep&&S.view===view){scr.scrollTop=top;shownInPlace()}
   S.justOpened=S.view==="card"&&S.stop!=="closed"&&was==="closed";S.stopMoved=S.view==="card"&&was!==S.stop;if(S.stopMoved)S.movedAt=performance.now();if(S.justOpened&&S.stop==="half")nudgeOnce();S.lastStop=S.view==="card"?S.stop:"closed";
   if(S.view!=="democard")S.beforeDemo={view:S.view,stop:S.stop};
   if(S.view==="democard"&&S.settingsOpen&&!ph.querySelector(".vset"))ph.insertAdjacentHTML("beforeend",settingsPanel());
-  var gb=document.getElementById("grab");if(gb)gb.setAttribute("aria-label",TXT(S.stop==="full"?"sheet_collapse":"sheet_expand"))};
+  var gb=document.getElementById("grab");if(gb)gb.setAttribute("aria-label",TXT(S.stop==="full"?"sheet_collapse":"sheet_expand"))});
 /* light / dark only repaints: the editor's previews change colour in place, the editor is not rebuilt */
 function darkInPlace(){ed.querySelectorAll(".cv").forEach(function(c){c.classList.toggle("dark",S.dark)});renderPhone(true)}
 document.addEventListener("click",function(e){var t=e.target;if(!t.closest)return;
@@ -66,12 +64,11 @@ locFit=function(){var lb=locLabel();if(!lb)return;var wait=650-(performance.now(
   if(hit)lb.style.visibility="hidden"};
 setInterval(function(){var lb=locLabel();if(!lb||S.locFolded||S.view!=="card"||S.stop==="closed"||S.stop==="peek"||document.hidden)return;
   if(lb.style.visibility!=="hidden"&&!lb.classList.contains("fold")){S.locShown+=250;if(S.locShown>=4000)foldLabel()}},250);
-var renderPhoneV8f2=renderPhone;
-renderPhone=function(keep){renderPhoneV8f2(keep);pinLift(false);
+on("renderPhone.after",function(keep){pinLift(false);
   if(S.justOpened&&S.ctl.locate.label==="open"){S.locFolded=false;S.locShown=0}
   var lb=locLabel();if(!lb)return;lb.classList.add("loclab");
   if(S.locFolded||(S.ctl.locate.label==="visit"&&S.locSeen))lb.classList.add("fold");
-  locFit()};/* while the sheet and the hero settle (650 ms after a stop change) the words are not in place: it waits */
+  locFit()});/* while the sheet and the hero settle (650 ms after a stop change) the words are not in place: it waits */
 scr.addEventListener("scroll",function(){if(S.view!=="card")return;pinLift(true);locFit()},{passive:true});
 ph.addEventListener("click",function(e){if(e.target.closest(".locpin"))foldLabel()},true);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("ctl\\.jump\\.","ctl\\.jump\\.|ctl\\.locate\\.label"));

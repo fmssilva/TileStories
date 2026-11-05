@@ -93,12 +93,11 @@ S.guideCfg.azuWalk=true;
 var camLayerV8q=camLayer;camLayer=function(){camLayerV8q();if(!G.cam.open){var w=ph.querySelector(".azwalker");if(w)w.remove()}};
 
 /* Editor: 6 · Guide > Mascot gets Style, Walks to the wall, and a Try for the peek and the walk */
-var edCardV8q=edCard;
-edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8q();
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   addRows(d,"s7mascot",row("Style",pseg("guideCfg.azuStyle",["light","tile"],["Tile of light","Tile (2.5D)"]),"Tile of light: a glazed tile drawn by a shader. It turns into a holographic dot cube with colour clouds inside to listen, think and travel, then forms again; its moods tint it, its mouth opens with the words. Tile: the 2.5D drawing. Unity: the same shader as a Shader Graph Custom Function, rendered by an Azu camera into a render texture shown inside the card.")+
     row("Walks to the wall",pseg("guideCfg.azuWalk",["true","false"],["On","Off"]),"In Ask about the view, Azu leaves the panel as light, travels to the first point the answer lights, and becomes a tile there (smaller: farther away). Unity: its screen box is handed to a world-space Azu on the wall’s plane, the size matched by depth.")+
     row("Try",'<div class="btnrow"><button class="del" type="button" data-azqtry="peek">Peek from behind a block</button><button class="del" type="button" data-azqtry="walk">Walk to the Torreão</button><button class="del" type="button" data-azqtry="think">Think</button></div>',"Peek: Azu rises from behind the block’s top edge (a box that clips it).",true));
-  return d.innerHTML};
+  return d.innerHTML});
 ed.addEventListener("click",function(e){var t=e.target.closest("[data-azqtry]");if(!t)return;e.stopPropagation();var k=t.dataset.azqtry;
   if(k==="peek"){if(!G.on){S.view="card";if(S.stop==="closed"||S.stop==="peek")S.stop="half";renderPhone(false)}azPeek()}
   else if(k==="walk"){if(G.on)stopTour();S.view="card";G.cam.open=true;S.stop="closed";renderPhone(false);azWalk("torreao")}

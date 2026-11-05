@@ -19,9 +19,8 @@ az3dModel=function(){var m=az3dModelOf(S.guideCfg.azuModel);return{id:m.id,name:
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(guideCfg\\.azuModel|"));
 
 /* Editor: 6 · Guide > Azu > Mascot source = 3D model: the Model picker, one card per model with its picture */
-var edCardV8x=edCard;
-edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8x();
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   if(az3dOn()){var r=rowEl(d,"s7mascot","Mascot source");
     if(r)r.insertAdjacentHTML("afterend",row("Model",'<div class="thumbs az3dpick">'+AZ3D_MODELS.map(function(m){return'<button class="sc" type="button" data-set="@guideCfg.azuModel" data-v="'+m.id+'" aria-pressed="'+(S.guideCfg.azuModel===m.id)+'" title="'+esc(m.about)+'"><img src="'+m.thumb+'" alt="" width="96" height="96"><span class="nm"><span>'+esc(m.name)+'</span></span></button>'}).join("")+'</div>',
       "Which 3D model is Azu. Each has the same skeleton contract: the clips idle, talk, listen, think, point, walk and wave; the morphs Blink, Open, Wide and Round; the front arm as its own mesh. "+AZ3D_MODELS.map(function(m){return m.name+": "+m.about+"."}).join(" ")+" Import… below tries a GLB of your own.",true))}
-  return d.innerHTML};
+  return d.innerHTML});

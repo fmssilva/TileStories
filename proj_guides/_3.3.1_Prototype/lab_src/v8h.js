@@ -36,13 +36,12 @@ ph.addEventListener("click",function(e){if(e.target.closest(".stv")){e.stopPropa
 /* Try: the phone where the state belongs (the wall for the camera's states, the card for the rest) */
 function stateTry(kind){stateHide();S.settingsOpen=false;S.view="card";S.stop=kind==="lost"||kind==="loading"&&S.states.loading==="scan"?"closed":kind==="done"?"full":"half";renderPhone(false);
   if(kind==="done")scr.scrollTop=scr.querySelector(".hero").offsetHeight+200;setTimeout(function(){stateShow(kind)},kind==="done"?500:400)}
-var edCardV8h=edCard;
-edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8h();var hn=d.querySelector('[data-fo="s5hints"]');if(!hn)return d.innerHTML;
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var hn=d.querySelector('[data-fo="s5hints"]');if(!hn)return d.innerHTML;
   var body='<table class="tbl"><thead><tr><th style="width:22%">State</th><th>Look</th><th style="width:44px"></th><th style="width:30px"></th></tr></thead><tbody>'+
     STATES.map(function(s){return'<tr><td>'+esc(s[1])+'</td><td>'+pseg("states."+s[0],s[2],s[3])+'</td><td><button class="del" type="button" data-sttry="'+s[0]+'">Try</button></td><td>'+help(s[4])+'</td></tr>'}).join("")+'</tbody></table>'+
     row("Loader shows after",pseg("states.after",["0.2","0.3","0.5"],["0.2 s","0.3 s","0.5 s"]),"A loader never flashes: nothing shows for a load quicker than this, and once shown it stays at least 0.5 s.");
   hn.insertAdjacentHTML("afterend",comp("s5states","loading, the wall not found, nothing here, offline, done",body));var f=innerOf(d,"s5states");if(f)f.insertAdjacentHTML("beforeend",ownbar("s5states")+ownPanels("s5states"));
-  return d.innerHTML};
+  return d.innerHTML});
 ed.addEventListener("click",function(e){var t=e.target.closest("[data-sttry]");if(t){e.stopPropagation();stateTry(t.dataset.sttry)}},true);
 FOCUS.s5states=["card",".hero","half"];
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("ctl\\.jump\\.","ctl\\.jump\\.|states\\."));

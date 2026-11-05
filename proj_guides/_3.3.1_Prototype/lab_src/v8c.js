@@ -40,12 +40,11 @@ function carouselStill(st,c){var o=st.o,ci=c.imgs||["g1","g2","g3","before"],arc
   else if(o.layout==="one")h='<div class="cone'+arch+'"><div class="fr"><img alt="" src="'+IMG[ci[0]]+'"></div><span class="carr l">&#8249;</span><span class="carr r">&#8250;</span></div>';
   else h='<div class="el-car'+(o.width==="inset"?" inset":"")+'">'+ci.map(function(x){return'<div class="fr'+arch+'"><img alt="" src="'+IMG[x]+'"></div>'}).join("")+'</div>';
   return h+marks}
-var renderElV7=renderEl;
-renderEl=function(kind,style,c,i,still){var o=(style&&style.o)||{};c=c||{};
+on("renderEl.answer",function(a){var kind=a.kind,style=a.style,c=a.c,i=a.i,still=a.still,o=(style&&style.o)||{};c=c||{};
   if(kind==="carousel"&&(still||o.layout!=="one")){if(!Object.keys(c).length)c=S.demoC.carousel||{};var hc=carouselStill(style,c)+(c.cap?'<div class="el-pic" style="margin-top:6px"><figcaption>'+esc(L(c.cap))+'</figcaption></div>':"");return still?hc:wrapMv(hc,entranceOf(style),i)}
   if(kind==="list"&&o.marker==="steps"){if(!Object.keys(c).length)c=S.demoC.list||{};var it=(c.items&&(c.items[S.lang]||c.items.en))||DEMO.list[S.lang];var hl=stepsList(it);return still?hl:wrapMv(hl,entranceOf(style),i)}
-  if(kind==="picture"&&c.img==="__none"){var hn=o.noimg==="initial"?'<figure class="el-pic arch noimg"><div class="fr"><span>'+esc(L(DEMO.heading).charAt(0))+'</span></div></figure>':"";return hn}
-  var h=renderElV7(kind,style,c,i,still);
+  if(kind==="picture"&&c.img==="__none"){var hn=o.noimg==="initial"?'<figure class="el-pic arch noimg"><div class="fr"><span>'+esc(L(DEMO.heading).charAt(0))+'</span></div></figure>':"";return hn}});
+on("renderEl.html",function(h,a){var kind=a.kind,o=(a.style&&a.style.o)||{};
   if(kind==="heading"&&o.align==="centre")h=h.replace('class="el-heading','class="el-heading a-centre');
   if(kind==="pull_quote")h=h.replace('class="el-quote ','class="el-quote tq-'+(o.tone||"family")+' ');
   if(kind==="callout"&&o.cshape==="postcard")h=h.replace(/class="(el-callout|flip)/,'class="$1 postcard');
@@ -58,7 +57,7 @@ renderEl=function(kind,style,c,i,still){var o=(style&&style.o)||{};c=c||{};
   if(kind==="panorama"&&o.gyro==="on")h=h.replace(TXH("panorama_360_drag_hint"),TXH("panorama_360_gyro_hint"));
   if(kind==="swatches"){if(o.swlayout==="grid")h=h.replace('class="sw"','class="sw grid"');if(o.code==="on")h=h.replace(/<i style="background:(#[0-9A-Fa-f]{6});([^"]*)"><\/i><small>([^<]*)<\/small>/g,'<i style="background:$1;$2"></i><small>$3<code>$1</code></small>')}
   if(kind==="spacer")h=h.replace(/--h:\d+px/,"--h:"+({s:16,m:32,l:48}[o.space||"m"])+"px");
-  return h};
+  return h});
 /* the Lab's map look leaves: the map is an authored picture */
 (S.styles.map||[]).forEach(function(st){delete st.o.mlook});
 /* ----- motion: a new type, By itself (Unity's time-driven Slow Zoom and Pan) ----- */
@@ -66,20 +65,19 @@ TYPES.self="By itself";PATH.self_zoom="nat";PATH.self_pan="nat";
 S.motions.splice(S.motions.findIndex(function(m){return m.type==="emphasis"}),0,{id:"self_zoom",name:"Slow Zoom",type:"self",style:"zoom",dur:28000},{id:"self_pan",name:"Pan",type:"self",style:"pan",dur:26000});
 var mz=motionById("zoom");if(mz)mz.name="Zoom with the scroll";
 (S.styles.picture||[]).forEach(function(st){if(st.self==null)st.self="none"});(S.styles.video||[]).forEach(function(st){if(st.self==null)st.self="none"});
-var motionSummaryV7=motionSummary;motionSummary=function(m){if(m.type==="self")return "By itself · "+({zoom:"1 to 1.06 and back",pan:"across its room and back"})[m.style]+" · "+Math.round(m.dur/1000)+" s";return motionSummaryV7(m)};
-var motionDemoV7=motionDemo;motionDemo=function(m){if(m.type!=="self")return motionDemoV7(m);
-  return '<div class="item" data-ref="m:'+m.id+'"><div class="mdemo"><div class="mhead"><div><b>'+esc(m.name)+'</b>'+pathBadge(m.id)+'<small>'+esc(motionSummary(m))+'</small></div></div><figure class="el-pic"><div class="fr"><img alt="" src="'+IMG.hero+'" class="'+(S.reduce?"":"self-"+m.style)+'" style="animation-duration:'+(m.dur/1000)+'s"></div></figure></div></div>'};
-var motionBodyV7=motionBody;motionBody=function(m){if(m.type!=="self")return motionBodyV7(m);return row("Name",'<input class="u" data-text="motion" value="'+esc(m.name)+'">',"")+row("Loop (s)",slider("motion.dur",8000,60000,1000,m.dur),"One way, then back. Slower than 26 s per drift, at most 12 pt/s; stopped under Reduce Motion.")};
-var motionUsesV7=motionUses;motionUses=function(id){var n=motionUsesV7(id);Object.keys(S.styles).forEach(function(k){S.styles[k].forEach(function(st){if(st.self===id)n++})});return n};
+on("motionSummary.answer",function(m){if(m.type==="self")return "By itself · "+({zoom:"1 to 1.06 and back",pan:"across its room and back"})[m.style]+" · "+Math.round(m.dur/1000)+" s"});
+on("motionDemo.answer",function(m){if(m.type!=="self")return;
+  return '<div class="item" data-ref="m:'+m.id+'"><div class="mdemo"><div class="mhead"><div><b>'+esc(m.name)+'</b>'+pathBadge(m.id)+'<small>'+esc(motionSummary(m))+'</small></div></div><figure class="el-pic"><div class="fr"><img alt="" src="'+IMG.hero+'" class="'+(S.reduce?"":"self-"+m.style)+'" style="animation-duration:'+(m.dur/1000)+'s"></div></figure></div></div>'});
+on("motionBody.answer",function(m){if(m.type!=="self")return;return row("Name",'<input class="u" data-text="motion" value="'+esc(m.name)+'">',"")+row("Loop (s)",slider("motion.dur",8000,60000,1000,m.dur),"One way, then back. Slower than 26 s per drift, at most 12 pt/s; stopped under Reduce Motion.")});
+on("motionUses.count",function(n,id){Object.keys(S.styles).forEach(function(k){S.styles[k].forEach(function(st){if(st.self===id)n++})});return n});
 ed.addEventListener("change",function(e){var t=e.target;if(t.dataset.sel!=="style.self")return;e.stopImmediatePropagation();var st=styleById(S.sel.style);if(!st)return;st.self=t.value;renderAll(true);show("demo","s:"+st.id)},true);
-var renderElV8c=renderEl;renderEl=function(kind,style,c,i,still){var h=renderElV8c(kind,style,c,i,still);if(!still&&style&&style.self&&style.self!=="none"&&!S.reduce){var m=motionById(style.self);if(m)h=h.replace(/<img alt="" src="([^"]*)"/,'<img alt="" src="$1" class="self-'+m.style+'" style="animation-duration:'+(m.dur/1000)+'s"')}return h};
+on("renderEl.final",function(h,a){var style=a.style,still=a.still;if(!still&&style&&style.self&&style.self!=="none"&&!S.reduce){var m=motionById(style.self);if(m)h=h.replace(/<img alt="" src="([^"]*)"/,'<img alt="" src="$1" class="self-'+m.style+'" style="animation-duration:'+(m.dur/1000)+'s"')}return h});
 /* ----- effects: light and the own strip ----- */
 S.effects.push({id:"e_own",grp:"edge",name:"Own strip picture",o:{h:24,colour:"family"}},{id:"x_glass",grp:"light",name:"Living glass",o:{}},{id:"x_rim",grp:"light",name:"Rim light",o:{}});
-var edgeSvgV7=edgeSvg;edgeSvg=function(f){if(f.id!=="e_own")return edgeSvgV7(f);var h=f.o.h||24,p="";for(var x=0;x<390;x+=h)p+='<rect x="'+x+'" y="0" width="'+(h-2)+'" height="'+h+'" rx="3" fill="currentColor" opacity="'+((x/h)%2?.3:.75)+'"/>';return '<svg class="edge" viewBox="0 0 390 '+h+'" preserveAspectRatio="none" style="height:'+h+'px;color:'+colourVar(f.o.colour)+'">'+p+'</svg>'};
-var effectArtV7=effectArt;effectArt=function(f){if(f.id==="x_glass")return '<div class="gsec glasslit" style="--fam:var(--media);height:90px;border-radius:14px;margin:8px 14px"></div>';if(f.id==="x_rim")return '<div style="padding:10px 14px"><div class="bprev rimlit" style="--fam:var(--stories);height:70px;margin:0"></div></div>';return effectArtV7(f)};
+on("edgeSvg.answer",function(f){if(f.id!=="e_own")return;var h=f.o.h||24,p="";for(var x=0;x<390;x+=h)p+='<rect x="'+x+'" y="0" width="'+(h-2)+'" height="'+h+'" rx="3" fill="currentColor" opacity="'+((x/h)%2?.3:.75)+'"/>';return '<svg class="edge" viewBox="0 0 390 '+h+'" preserveAspectRatio="none" style="height:'+h+'px;color:'+colourVar(f.o.colour)+'">'+p+'</svg>'});
+on("effectArt.answer",function(f){if(f.id==="x_glass")return '<div class="gsec glasslit" style="--fam:var(--media);height:90px;border-radius:14px;margin:8px 14px"></div>';if(f.id==="x_rim")return '<div style="padding:10px 14px"><div class="bprev rimlit" style="--fam:var(--stories);height:70px;margin:0"></div></div>'});
 /* ----- the Editor: notes and rows ----- */
-var edCardV8b=edCard;
-edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8b();
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   var en=innerOf(d,"s3e");if(en)en.insertAdjacentHTML("afterbegin",'<div class="note">An app may register its own element kinds; they appear here with their styles.</div>');
   d.querySelectorAll('[data-fo^="el:"] .inner').forEach(function(f){f.querySelectorAll(":scope > .row").forEach(function(r){var lb=r.querySelector("label");if(lb&&lb.textContent==="Proportion")lb.insertAdjacentHTML("beforeend",' <span class="prop">PROPOSED</span>')})});
   var st=styleById(S.sel.style);if(st&&(kindOfStyle(st.id)==="picture"||kindOfStyle(st.id)==="video")){var f=innerOf(d,"el:"+kindOfStyle(st.id)),ws=f&&Array.prototype.filter.call(f.querySelectorAll(":scope > .row"),function(r){var l=r.querySelector("label");return l&&l.textContent==="With the scroll"})[0];
@@ -87,6 +85,6 @@ edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8b();
   addRows(d,"s4m",'<div class="note fixed">Fixed rules: the stagger stops growing after 5 rows; only the picture nearest the middle moves by itself; Reduce Motion makes every part whole and still.</div>');
   var bt=d.querySelector('button[disabled][title^="Lab: an SVG"]');if(bt)bt.textContent="+ Import an edge (SVG or a tileable PNG strip)";
   if(S.ctl.openrow==="shine"&&S.secCfg.look==="cards"&&S.secCfg.rim)addRows(d,"s5openrow",'<div class="note warn">Rim light is on (Sections › All sections): the card already has its one glow (D5). Shine adds a second.</div>');
-  return d.innerHTML};
+  return d.innerHTML});
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(o\\.speed|o\\.pptap|"));
-var modelSigV8c=modelSig;modelSig=function(){var x="";if(sigWant(/^o\.noimg/))(S.styles.picture||[]).forEach(function(st){x+=renderEl("picture",st,{img:"__none"},0,true)});return modelSigV8c()+x};
+on("modelSig.before",function(cx){var x="";if(sigWant(/^o\.noimg/))(S.styles.picture||[]).forEach(function(st){x+=renderEl("picture",st,{img:"__none"},0,true)});cx.noimg=x});on("modelSig.sig",function(s,cx){return s+cx.noimg});

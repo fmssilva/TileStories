@@ -12,7 +12,7 @@ function fitsLens(tags){return!S.lens||!tags||!tags.length||tags.indexOf(S.lens)
 /* the chip row: under the hero on the card, and at the top of the story page */
 function lensBar(){return'<div class="lensbar" role="toolbar" aria-label="'+TXH("lens_label")+'"><span class="lbl">'+TXH("lens_label")+'</span><div class="chips">'+
   [["",TXT("lens_all")]].concat(S.lenses.map(function(l){return[l.id,L(l.name)]})).map(function(c){return'<button type="button" data-lens="'+c[0]+'" aria-pressed="'+(S.lens===c[0])+'">'+esc(c[1])+'</button>'}).join("")+'</div></div>'}
-var renderPhoneV8m=renderPhone;renderPhone=function(keep){renderPhoneV8m(keep);lensApply()};
+on("renderPhone.after",function(keep){lensApply()});
 function lensApply(){scr.querySelectorAll(".lensbar").forEach(function(b){b.remove()});scr.querySelectorAll(".lenshidden,.lensmark").forEach(function(e){e.classList.remove("lenshidden","lensmark")});scr.querySelectorAll(".lensbadge").forEach(function(e){e.remove()});
   if(!lensOn()){S.lens="";return}
   if(S.view==="card"){var h=scr.querySelector(".hero");if(h)h.insertAdjacentHTML("afterend",lensBar())}
@@ -34,24 +34,22 @@ ph.addEventListener("click",function(e){var c=e.target.closest("[data-lens]");if
 var stepFitsV8m=stepFits;stepFits=function(st){return stepFitsV8m(st)&&fitsLens(st.topics)};
 
 /* Editor: 7 · Audiences > Lenses (the chips); Specific Marker > 5 · Lenses (the point's topics, and what belongs to each) */
-var edCardV8m=edCard;
-edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8m();var lk=d.querySelector('[data-fo="s8look"]');if(!lk)return d.innerHTML;
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var lk=d.querySelector('[data-fo="s8look"]');if(!lk)return d.innerHTML;
   lk.insertAdjacentHTML("afterend",comp("s8lens","“See it as” chips: a topic of the point, chosen during the visit",
     row("Lenses",pseg("lensCfg.on",["true","false"],["On","Off"]),"Chips under the hero (Everything, then the point's topics). A chip keeps the core blocks and the chosen topic's; the other topics' blocks step aside. Nothing moves: the order stays, the first block in view stays where it was, and the topic's blocks get its badge. Never asked at the first card.")+
     row("On the story page too",pseg("lensCfg.story",["true","false"],["Yes","No"]),"The same chips at the top of the story; a heading goes with its rows.")+
     row("Shown from",pseg("lensCfg.min",["2","3","4"],["2 tagged","3 tagged","4 tagged"]),"The chips show only when the point has at least this many blocks tagged with a topic.")));
-  var f=innerOf(d,"s8lens");if(f)f.insertAdjacentHTML("beforeend",ownbar("s8lens")+ownPanels("s8lens"));return d.innerHTML};
+  var f=innerOf(d,"s8lens");if(f)f.insertAdjacentHTML("beforeend",ownbar("s8lens")+ownPanels("s8lens"));return d.innerHTML});
 function tagItems(){var out=[];(S.card||[]).forEach(function(b){out.push({ref:"b:"+b.id,label:"Card · "+(b.kind||"")+" · "+b.id.replace(/^b_/,"")})});
   S.story.forEach(function(r){if(r.kind!=="heading")out.push({ref:"r:"+r.id,label:"Story · "+(r.pattern?((patternById(r.pattern)||{}).name||r.pattern):(KIND[r.kind]?KIND[r.kind].n:r.kind))+" · "+r.id})});return out}
-var edMarkerV8m=edMarker;
-edMarker=function(){var h=edMarkerV8m(),t='<div class="note">The point\'s topics, shown as “See it as” chips. Tag a block, a story row or a guide step with the topics it belongs to; untagged ones are core and always shown.</div>'+
+on("edMarker.html",function(h){var t='<div class="note">The point\'s topics, shown as “See it as” chips. Tag a block, a story row or a guide step with the topics it belongs to; untagged ones are core and always shown.</div>'+
   '<table class="tbl"><thead><tr><th>Topic</th><th>EN</th><th>PT</th><th style="width:40px"></th></tr></thead><tbody>'+S.lenses.map(function(l,i){return'<tr><td class="uses">'+esc(l.id)+'</td><td><input class="u" data-lensn="'+i+'|en" value="'+esc(l.name.en||"")+'"></td><td><input class="u" data-lensn="'+i+'|pt" value="'+esc(l.name.pt||"")+'"></td><td><button class="del" type="button" data-lensdel="'+i+'">Remove</button></td></tr>'}).join("")+
   '</tbody></table><div class="btnrow"><button class="ubtn sm" type="button" data-lensadd="1">+ Add a topic</button></div>'+
   '<table class="tbl tagm"><thead><tr><th>Belongs to</th>'+S.lenses.map(function(l){return'<th>'+esc(L(l.name))+'</th>'}).join("")+'</tr></thead><tbody>'+
   tagItems().concat((S.fullSteps||S.guideSteps).map(function(st,j){return{ref:"g:"+st.id,label:"Guide · step "+(j+1)}})).map(function(it){var tg=it.ref.indexOf("g:")===0?(byId(S.fullSteps||S.guideSteps,it.ref.slice(2)).topics||[]):(S.tags[it.ref]||[]);
     return'<tr><td>'+esc(it.label)+'</td>'+S.lenses.map(function(l){return'<td><input type="checkbox" data-tag="'+it.ref+'|'+l.id+'"'+(tg.indexOf(l.id)>=0?" checked":"")+' aria-label="'+esc(it.label+" · "+L(l.name))+'"></td>'}).join("")+'</tr>'}).join("")+'</tbody></table>'+
   '<div class="note">'+taggedCount()+' tagged on the card and the story'+(taggedCount()<S.lensCfg.min?": the chips need "+S.lensCfg.min+".":".")+'</div>';
-  var sec=fo("m5","5 · Lenses",["new","NEW"],t,1);var i=h.lastIndexOf('<div class="json">');return i<0?h+sec:h.slice(0,i)+sec+h.slice(i)};
+  var sec=fo("m5","5 · Lenses",["new","NEW"],t,1);var i=h.lastIndexOf('<div class="json">');return i<0?h+sec:h.slice(0,i)+sec+h.slice(i)});
 ed.addEventListener("change",function(e){var t=e.target;if(!t.dataset||!t.dataset.tag)return;e.stopImmediatePropagation();var q=t.dataset.tag.split("|"),list;
   if(q[0].indexOf("g:")===0){var st=byId(S.fullSteps||S.guideSteps,q[0].slice(2));list=st.topics=st.topics||[]}else list=S.tags[q[0]]=S.tags[q[0]]||[];
   var i=list.indexOf(q[1]);if(t.checked&&i<0)list.push(q[1]);if(!t.checked&&i>=0)list.splice(i,1);renderAll(true)},true);
@@ -62,4 +60,4 @@ ed.addEventListener("click",function(e){var t=e.target.closest("[data-lensadd],[
   renderAll(true)},true);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("ctl\\.jump\\.","ctl\\.jump\\.|lensCfg\\.story|lensCfg\\.min"));
 /* the self-test's view of the phone includes the chips and what a lens hides */
-var modelSigV8m=modelSig;modelSig=function(){return modelSigV8m()+"#lens:"+(lensOn()?(S.lensCfg.story?"s":"")+S.lens+"|"+S.lenses.map(function(l){return l.id+":"+L(l.name)}).join(",")+"|"+JSON.stringify(S.tags):"off")};
+on("modelSig.sig",function(h){return h+"#lens:"+(lensOn()?(S.lensCfg.story?"s":"")+S.lens+"|"+S.lenses.map(function(l){return l.id+":"+L(l.name)}).join(",")+"|"+JSON.stringify(S.tags):"off")});

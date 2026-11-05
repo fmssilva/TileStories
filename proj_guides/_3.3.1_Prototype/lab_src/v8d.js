@@ -6,23 +6,20 @@ var STARTERS={simple:["Simple point",["Header","Quick Facts","Story","Gallery","
 var CARD0=JSON.stringify(S.card);
 /* a marker's own look and frame win over the block's */
 var koptV8b=kopt;kopt=function(kind,key){var b=S._cb;if(b&&b.kind===kind&&key==="look"&&b.k_look&&b.k_look!=="inherit")return b.k_look;return koptV8b(kind,key)};
-var blockPreviewV8b=blockPreviewV3;
-blockPreviewV3=function(b,i){S._cb=b;var h;try{h=blockPreviewV8b(b,i)}finally{S._cb=null}
-  if(b.frame&&b.frame!=="inherit"&&S.secCfg.look==="cards")h=h.replace(/class="bprev( fr-[a-z]+)?/,'class="bprev fr-'+b.frame);
+on("blockPreviewHtml.before",function(b){S._cb=b});on("blockPreviewHtml.done",function(){S._cb=null});
+on("blockPreviewHtml.html",function(h,b){if(b.frame&&b.frame!=="inherit"&&S.secCfg.look==="cards")h=h.replace(/class="bprev( fr-[a-z]+)?/,'class="bprev fr-'+b.frame);
   if(b.minsMode==="hand")h=h.replace(/(<div class="open[^"]*"[^>]*>[^<]*?)\d+ min/,"$1"+b.mins+" min");
   var ow=b.orw&&L(b.orw);if(ow)h=h.replace(/(<div class="open[^"]*"[^>]*>)[^<]*/,"$1"+esc(ow)+" ");
-  return h};
+  return h});
 /* the hero's content (the Header page) */
-var cardScreenV8c=cardScreen;
-cardScreen=function(){var h=cardScreenV8c();if(typeof inDemoCard!=="undefined"&&inDemoCard)return h;return h.replace(/<h2>Ribeira Palace<\/h2>/,"<h2>"+esc(L(S.hero.title))+"</h2>").replace(/(<div class="hero[^"]*" style="background-image:url\()[^)]*\)/,"$1"+IMG[S.hero.pic]+");background-position:"+S.hero.fx+"% "+S.hero.fy+"%")};
+on("cardScreen.html",function(h){if(typeof inDemoCard!=="undefined"&&inDemoCard)return h;return h.replace(/<h2>Ribeira Palace<\/h2>/,"<h2>"+esc(L(S.hero.title))+"</h2>").replace(/(<div class="hero[^"]*" style="background-image:url\()[^)]*\)/,"$1"+IMG[S.hero.pic]+");background-position:"+S.hero.fx+"% "+S.hero.fy+"%")});
 function storyMarks(){var out=[],seen=[];function walk(o,d){if(o==null||d>8)return;if(typeof o==="string"){var i=0,j;while((i=o.indexOf("[[",i))>=0){j=o.indexOf("]]",i+2);if(j<0)break;var m=o.slice(i+2,j),k=m.indexOf("|");out.push(k>=0?m.slice(k+1):m);i=j+2}return}if(typeof o!=="object"||seen.indexOf(o)>=0)return;seen.push(o);Object.keys(o).forEach(function(x){walk(o[x],d+1)})}walk(S.story,0);return out}
 function cardWarnings(){var w=[],terms=S.terms.map(function(t){return t.words.toLowerCase()}).join(",");
   S.card.forEach(function(b){var bd=S.blockDefs[b.kind]||{},sec=secById(grpOf(b));if(bd.offered===false)w.push(b.kind+" is not shown: its kind is Off for this wall (Detail Card › Blocks).");else if(sec&&sec.shown===false)w.push(b.kind+" is not shown: its section "+L(sec.name)+" is Hidden.");else if(S.poiSec[grpOf(b)]==="hide")w.push(b.kind+" is not shown: its section is hidden on this card.")});
   storyMarks().forEach(function(word){if(terms.indexOf(word.toLowerCase())<0)w.push("The story marks [["+word+"]], which Languages & Terms › Terms does not have.")});
   if(!S.hero.pic)w.push("The Header needs its picture for the Image parallax look.");
   return w}
-var edMarkerV7=edMarker;
-edMarker=function(){var d=document.createElement("div");d.innerHTML=edMarkerV7();var mc=innerOf(d,"mcard");
+on("edMarker.html",function(h){var d=document.createElement("div");d.innerHTML=h;var mc=innerOf(d,"mcard");
   if(mc){var edited=JSON.stringify(S.card)!==CARD0,cur=edited?"custom":S.starter,opts=Object.keys(STARTERS).map(function(k){return[k,STARTERS[k][0]]});if(edited)opts.unshift(["custom","Custom"]);
     var top=row("Card starter",sel("m.starter",opts,cur),"Fills this card with a set of blocks to start from. It reads Custom once you edit the blocks.");
     if(S.pendingStarter){var n=S.card.length,ps=STARTERS[S.pendingStarter];top+='<div class="decide"><b>Replace the '+n+' block'+(n===1?"":"s")+' on Ribeira Palace with '+esc(ps[0])+'?</b><span>'+(ps[1]?ps[1].length+" blocks: "+esc(ps[1].join(", ")):"the Rich point's blocks")+'. Your content in the blocks you keep stays; Ctrl+Z undoes it.</span><div class="btnrow"><button class="ubtn sm" type="button" data-starter-go="1">Replace the blocks</button><button class="del" type="button" data-starter-no="1">Keep my blocks</button></div></div>'}
@@ -58,7 +55,7 @@ edMarker=function(){var d=document.createElement("div");d.innerHTML=edMarkerV7()
     row("Focus across",pslider("hero.fx",0,100,1),"The point of the picture that stays in view when the frame crops it (and the Spotlight's centre).")+row("Focus down",pslider("hero.fy",0,100,1),"")+
     row("Loop clip",'<input class="u" value="(none)" readonly>',"Video loop: a short silent clip from the media folder.")+row("Model",'<input class="u" value="(none)" readonly>',"Model turntable: a model from the media folder."),2)}
   else{var ps=d.querySelector('select[data-sel="m.page"]');if(ps&&!ps.querySelector('option[value="header"]'))ps.insertAdjacentHTML("beforeend",'<option value="header">Header · the hero</option>')}
-  return d.innerHTML};
+  return d.innerHTML});
 var STARTS_NAME={magazine:"Story -- magazine",short:"Story -- short",empty:"Empty"};
 S.previewRows=[{link:"r1"},{link:"r7"},{kind:"paragraph"},{link:"r99"}];
 document.addEventListener("change",function(e){var t=e.target;if(!ed.contains(t))return;
@@ -94,7 +91,7 @@ ed.addEventListener("click",function(e){var t=e.target;
   var tr=t.closest("[data-txreset]");if(tr){e.stopPropagation();var k=tr.dataset.txreset;S.tx[k]=JSON.parse(JSON.stringify(TXDEF[k]));renderAll(true);return}},true);
 var FOCUS9={w1:["card",".chrome i:last-child","full"]};Object.keys(FOCUS9).forEach(function(k){if(!FOCUS[k])FOCUS[k]=FOCUS9[k]});
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(m\.starter|"));
-var modelSigV8d=modelSig;modelSig=function(){var x="";if(sigWant(/frame/)){var look=S.secCfg.look,keep=S.view;S.secCfg.look="cards";S.view="card";x="#cardsR#"+cardScreen();S.secCfg.look=look;S.view=keep}return modelSigV8d()+x};
+on("modelSig.before",function(cx){var x="";if(sigWant(/frame/)){var look=S.secCfg.look,keep=S.view;S.secCfg.look="cards";S.view="card";x="#cardsR#"+cardScreen();S.secCfg.look=look;S.view=keep}cx.frame=x});on("modelSig.sig",function(s,cx){return s+cx.frame});
 
 /* reading time: the Contents sheet shows each block's minutes */
 var KMIN={"Story":4,"Gallery":2,"Video":1,"Audio Guide":3,"Timeline":2,"Dialogue":2,"Knowledge Check":2};function minsOf(b){return b.minsMode==="hand"?b.mins:(KMIN[b.kind]||1)}
@@ -105,5 +102,5 @@ var contentsSheetV8b=contentsSheet;contentsSheet=function(){var h=contentsSheetV
 /* captures: #dcshot=<kind> opens the demo card at that block, still */
 if(location.hash.indexOf("#dcshot=")===0)setTimeout(function(){var dk=decodeURIComponent(location.hash.slice(8)),pv=dk.split("|");S.reduce=true;S.previewBar=false;if(pv[1])S.lang=pv[1];S.view="democard";S.stop="full";renderAll(false);setTimeout(function(){var b=S.demoCard.filter(function(x){return x.kind===pv[0]})[0],el=b&&scr.querySelector('[data-ref="b:'+b.id+'"]');if(el)scr.scrollTop=Math.max(0,el.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-70)},200)},50);
 /* block thumbnails: the kind's own preview, where it has one */
-var libThumbV7=libThumb;libThumb=function(name){var f=KPREV[name];if(!f||name==="Quick Facts")return libThumbV7(name);var h;try{h=f({kind:name,id:"thumb"})}catch(e){return libThumbV7(name)}return noBtn('<div class="thumb cv'+(S.dark?" dark":"")+'"><div class="tin"><div class="bprev">'+h+'</div></div></div>')};
+on("libThumb.answer",function(name){var f=KPREV[name];if(!f||name==="Quick Facts")return;var h;try{h=f({kind:name,id:"thumb"})}catch(e){return}return noBtn('<div class="thumb cv'+(S.dark?" dark":"")+'"><div class="tin"><div class="bprev">'+h+'</div></div></div>')});
 delete S.cardCfg.peekNext;

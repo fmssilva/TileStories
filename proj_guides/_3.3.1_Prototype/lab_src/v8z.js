@@ -9,15 +9,14 @@ function azCharOpts(){return[["","Same as the guide"],["light","Tile of light"],
 /* as the audiences' liveliness (v8l), the character is written into the guide's settings when the audience (or its choice) changes */
 function azCharApply(){var a=aud(),c=S.aud.looks[a].char||"",key=a+"|"+c;if(S.audCharApplied===key)return;S.audCharApplied=key;if(!c)return;
   if(c.indexOf("glb:")===0){S.guideCfg.azuStyle="glb";S.guideCfg.azuModel=c.slice(4)}else S.guideCfg.azuStyle=c}
-var renderPhoneV8z=renderPhone;renderPhone=function(keep){azCharApply();ph.style.setProperty("--azs",azSize());renderPhoneV8z(keep)};
+on("renderPhone.before",function(keep){azCharApply();ph.style.setProperty("--azs",azSize())});
 /* both act on the guide's Azu, which the card screens the self-test compares do not draw: behaviour */
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(guideCfg\\.azuSize|aud\\.looks\\.[a-z]+\\.char|"));
 
 /* ----- Editor: 6 · Guide > Mascot gets Size; 7 · Audiences > Looks per audience gets Character ----- */
-var edCardV8z=edCard;
-edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8z();
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   var r=rowEl(d,"s7mascot","Liveliness");
   if(r)r.insertAdjacentHTML("beforebegin",row("Size",pseg("guideCfg.azuSize",["s","m","l"],["Small","Medium","Large"]),"How big Azu is on the card and as the guide's button: Small (80 %), Medium, Large (135 %). Its peek from behind a block and its walk to the wall keep their own sizes. Unity: the Azu element's scale."));
   var tb=d.querySelector('[data-fo="s8look"] table tbody');
   if(tb)tb.insertAdjacentHTML("afterbegin",'<tr><td>Character</td>'+AUDS.map(function(a){return'<td>'+psel("aud.looks."+a+".char",azCharOpts())+'</td>'}).join("")+'</tr>');
-  return d.innerHTML};
+  return d.innerHTML});

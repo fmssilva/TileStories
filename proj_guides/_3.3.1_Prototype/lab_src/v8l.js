@@ -17,8 +17,7 @@ function ovEntry(id,a){return S.ov[id]&&S.ov[id][a]||null}
 function ovState(id,a){var e=ovEntry(id,a);if(a==="explorer"||!e)return"inherited";if(e.source==="ai"&&!e.reviewed)return"draft";var f=ovFields().filter(function(x){return x.id===id})[0];return f&&e.basedOn!==hashOf(f.get)?"stale":"over"}
 function setOv(id,a,text,source,reviewed){var f=ovFields().filter(function(x){return x.id===id})[0];S.ov[id]=S.ov[id]||{};S.ov[id][a]={text:text,source:source||"human",reviewed:reviewed!==false,basedOn:f?hashOf(f.get):""}}
 /* the content in the visitor's language: the audience's own words for this field when it has them (reviewed), else the default's */
-var Lbase=L;
-L=function(o,f){if(o&&typeof o==="object"&&aud()!=="explorer"){if(!OVMAP)ovMap();var id=OVMAP.get(o);if(id){var e=ovEntry(id,aud());if(e&&!(e.source==="ai"&&!e.reviewed)&&e.text[S.lang])return e.text[S.lang]}}return Lbase(o,f)};
+on("L.answer",function(o,f){if(o&&typeof o==="object"&&aud()!=="explorer"){if(!OVMAP)ovMap();var id=OVMAP.get(o);if(id){var e=ovEntry(id,aud());if(e&&!(e.source==="ai"&&!e.reviewed)&&e.text[S.lang])return e.text[S.lang]}}});
 /* the demo point: Family and Expert words for the story's first paragraph and the guide's welcome; an AI draft to review; a stale one */
 (function(){ovMap();
   setOv("r:r2","family",T("King Manuel thought his castle on the hill was too small. So around 1500 he built a new palace right by the river, and filled it with the riches the ships brought back from India!","O rei D. Manuel achava o castelo no monte pequeno demais. Por isso, por volta de 1500, construiu um palácio novo mesmo junto ao rio, e encheu-o com as riquezas que os navios traziam da Índia!"));
@@ -34,11 +33,11 @@ function stepFits(st){var l=lenNow();if(S.aud.hide[aud()][st.ref])return false;r
 var startTourV8l=startTour;startTour=function(){if(!S.howSaved&&!S.fullSteps){S.fullSteps=S.guideSteps;S.guideSteps=S.fullSteps.filter(stepFits)}ovMap();startTourV8l()};
 var stopTourV8l=stopTour;stopTour=function(){stopTourV8l();if(S.fullSteps){S.guideSteps=S.fullSteps;S.fullSteps=null}};
 /* ----- the card for an audience: its looks (tokens), its hidden blocks, Azu's liveliness ----- */
-var renderPhoneV8l=renderPhone;renderPhone=function(keep){var a=aud();if(S.audApplied!==a){S.audApplied=a;S.guideCfg.life=S.aud.looks[a].life}ovMap();renderPhoneV8l(keep);
+on("renderPhone.before",function(keep,cx){var a=cx.aud=aud();if(S.audApplied!==a){S.audApplied=a;S.guideCfg.life=S.aud.looks[a].life}ovMap()});on("renderPhone.after",function(keep,cx){var a=cx.aud;
   var lk=S.aud.looks[a];AUDS.forEach(function(x){ph.classList.toggle("aud-"+x,x===a&&x!=="explorer")});
   ph.dataset.type=lk.type;ph.dataset.orn=lk.orn;ph.dataset.corners=lk.corners;
   var hide=S.aud.hide[a]||{};scr.querySelectorAll("[data-ref]").forEach(function(el){var h=!!hide[el.dataset.ref];el.classList.toggle("audhidden",h)});
-  var ask=S.aud.ask&&!S.aud.seen&&S.view==="card"&&S.stop!=="closed"&&S.stop!=="peek",ob=ph.querySelector(".onb");if(!ask&&ob)ob.remove();else if(ask&&!ob)onbShow()};
+  var ask=S.aud.ask&&!S.aud.seen&&S.view==="card"&&S.stop!=="closed"&&S.stop!=="peek",ob=ph.querySelector(".onb");if(!ask&&ob)ob.remove();else if(ask&&!ob)onbShow()});
 /* ----- the first card: "Who's exploring today?" One screen, three choices, Skip = Explorer ----- */
 var AUDICON={family:'<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="14" cy="11" r="5"/><circle cx="28" cy="15" r="4"/><path d="M5 34c0-7 4-12 9-12s9 5 9 12M21 34c0-6 3-10 7-10s7 4 7 10"/></svg>',
   explorer:'<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="14"/><path d="M25 15l-3 8-7 2 3-8z"/></svg>',
@@ -48,9 +47,9 @@ function onbShow(){var o=ph.querySelector(".onb");if(o)o.remove();var d=document
     '<button type="button" class="onb-skip" data-onb="skip">'+TXH("aud_skip")+'</button><small class="onb-note">'+TXH("aud_note")+'</small></div>';d.tabIndex=-1;ph.appendChild(d);d.focus({preventScroll:true})}
 ph.addEventListener("click",function(e){var b=e.target.closest("[data-onb]");if(!b)return;e.stopPropagation();var a=b.dataset.onb;S.vis.aud=a==="skip"?"explorer":a;S.vis.len="";S.aud.seen=true;var o=ph.querySelector(".onb");if(o)o.remove();renderAll(true)},true);
 /* ----- the visitor's Settings: who's exploring, and the length ----- */
-var settingsPanelV8l=settingsPanel;settingsPanel=function(){var h=settingsPanelV8l(),opt=function(k,v,lab,cur){return'<button type="button" data-vis="'+k+'|'+v+'" aria-pressed="'+(cur===v)+'">'+esc(lab)+'</button>'};
+on("settingsPanel.html",function(h){var opt=function(k,v,lab,cur){return'<button type="button" data-vis="'+k+'|'+v+'" aria-pressed="'+(cur===v)+'">'+esc(lab)+'</button>'};
   var add='<small>'+TXH("settings_aud")+'</small><div class="vo">'+AUDS.map(function(a){return opt("aud",a,TXT("aud_"+a),aud())}).join("")+'</div><small>'+TXH("settings_len")+'</small><div class="vo">'+LENS.map(function(l){return opt("len",l,TXT("len_"+l),lenNow())}).join("")+'</div>';
-  var i=h.indexOf("<small>");return i<0?h:h.slice(0,i)+add+h.slice(i)};
+  var i=h.indexOf("<small>");return i<0?h:h.slice(0,i)+add+h.slice(i)});
 /* a new audience starts from its own length */
 document.addEventListener("click",function(e){var v=e.target.closest&&e.target.closest('[data-vis^="aud|"]');if(v)S.vis.len=""},true);
 /* the preview bar: Preview as (the Lab only) */
@@ -59,8 +58,7 @@ document.addEventListener("click",function(e){var b=e.target.closest&&e.target.c
 
 /* ----- Editor: Detail Card > 7 · Audiences; Specific Marker > 4 · Audiences (coverage); the Guide script's length per step ----- */
 var AUDN={family:"Family",explorer:"Explorer",expert:"Expert"};
-var edCardV8l=edCard;
-edCard=function(){var h=edCardV8l(),lk=S.aud.looks;
+on("edCard.html",function(h){var lk=S.aud.looks;
   var looks='<table class="tbl"><thead><tr><th style="width:24%"></th>'+AUDS.map(function(a){return'<th>'+AUDN[a]+(a==="explorer"?" (default)":"")+'</th>'}).join("")+'</tr></thead><tbody>'+
     [["life","Azu",["lively","calm"],["Lively","Calm"]],["len","Length",LENS,["Short","Standard","Deep"]],["type","Type",["base","up"],["Base","A step up"]],["orn","Ornaments",["stickers","base","off"],["Stickers","Base","Off"]],["corners","Corners",["round","base","tight"],["Round","Base","Tight"]]].map(function(r){
       return'<tr><td>'+r[1]+'</td>'+AUDS.map(function(a){return'<td>'+pseg("aud.looks."+a+"."+r[0],r[2],r[3])+'</td>'}).join("")+'</tr>'}).join("")+'</tbody></table>';
@@ -73,11 +71,10 @@ edCard=function(){var h=edCardV8l(),lk=S.aud.looks;
   var sec=fo("s8",'7 · Audiences <span class="sub">· Family, Explorer, Expert</span>',["new","NEW"],body,1);
   var d=document.createElement("div");d.innerHTML=h;var g=d.querySelector('[data-fo="s7"]');if(g)g.insertAdjacentHTML("afterend",sec);else{var i=d.innerHTML.lastIndexOf('<div class="json">');d.innerHTML=d.innerHTML.slice(0,i)+sec+d.innerHTML.slice(i)}
   ["s8onb","s8set"].forEach(function(o){var f=innerOf(d,o);if(f)f.insertAdjacentHTML("beforeend",ownbar(o)+ownPanels(o))});
-  return d.innerHTML};
+  return d.innerHTML});
 var OVLAB={inherited:"Inherited",over:"Own words",stale:"Check: the default changed",draft:"AI draft · to review",hidden:"Hidden"};
 function blockRefs(){var out=[];(S.card||[]).forEach(function(b){out.push({ref:"b:"+b.id,label:(b.kind||"Block")+" · "+b.id.replace(/^b_/,"")})});return out}
-var edMarkerV8l=edMarker;
-edMarker=function(){var d=document.createElement("div");d.innerHTML=edMarkerV8l();
+on("edMarker.html",function(h0){var d=document.createElement("div");d.innerHTML=h0;
   var fs=ovFields(),tot={family:0,expert:0},sel=S.sel.ov||"";
   var t='<div class="note">What each audience reads on this point. Explorer is the default; Family and Expert inherit it field by field until a field gets its own words. A tap on a cell opens it.</div><table class="tbl cov"><thead><tr><th>Field</th>'+AUDS.map(function(a){return'<th>'+AUDN[a]+'</th>'}).join("")+'</tr></thead><tbody>';
   fs.forEach(function(f){t+='<tr><td>'+esc(f.label)+'</td>'+AUDS.map(function(a){var st=a==="explorer"?"default":ovState(f.id,a);if(st!=="inherited"&&st!=="default")tot[a]++;
@@ -89,7 +86,7 @@ edMarker=function(){var d=document.createElement("div");d.innerHTML=edMarkerV8l(
   var sec=fo("m4","4 · Audiences",["new","NEW"],t,1);var i=d.innerHTML.lastIndexOf('<div class="json">');var html=i<0?d.innerHTML+sec:d.innerHTML.slice(0,i)+sec+d.innerHTML.slice(i);
   d.innerHTML=html;var st=S.sel.gstep&&byId(S.fullSteps||S.guideSteps,S.sel.gstep),slot=st&&d.querySelector('[data-pick="gstep"][data-id="'+cssq(st.id)+'"] + tr.slot td:last-child');
   if(slot)slot.insertAdjacentHTML("afterbegin",row("Length",'<select class="u" data-glen="'+st.id+'">'+[["","Every length"],["notshort","Not on Short"],["deep","Deep only"]].map(function(o){return'<option value="'+o[0]+'"'+((st.len||"")===o[0]?" selected":"")+'>'+o[1]+'</option>'}).join("")+'</select>',"Which lengths tell this step."));
-  return d.innerHTML};
+  return d.innerHTML});
 /* one override open: the default beside it, its words per language, Back to the default, Draft with AI (flags new names, dates and numbers), Reviewed */
 function newTokens(draft,base){var have=(" "+[base.en,base.pt].join(" ")+" ").toLowerCase(),out=[];
   /* a number anywhere, or a capitalised word that does not start its sentence, which the default does not have */

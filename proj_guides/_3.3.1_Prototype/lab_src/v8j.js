@@ -66,20 +66,18 @@ function pointAt(tg){var m=ph.querySelector(".mascot");if(!m)return;if(G.moment)
 var stopTourV8j=stopTour;stopTour=function(){unzoomAll();var sp=ph.querySelector(".gspot");if(sp)sp.remove();ph.classList.remove("gspotting");stopTourV8j()};
 
 /* Editor: 6 · Guide gets Focus, after Captions; Specific Marker > Guide script gets each step's spots, drawn on its picture */
-var edCardV8j=edCard;
-edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8j();var ca=d.querySelector('[data-fo="s7cap"]');if(!ca)return d.innerHTML;
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var ca=d.querySelector('[data-fo="s7cap"]');if(!ca)return d.innerHTML;
   ca.insertAdjacentHTML("afterend",comp("s7focus","the spotlight on what is told, the zoom to a spot in a picture, Azu pointing",
     row("Focus",pseg("guideCfg.cue",["spotlight","ring","none"],["Spotlight","Soft ring","None"]),"Spotlight: the rest of the card dims and a soft light rings what the guide is telling. Soft ring: only the ring. One at a time; it follows the scroll and hides while the visitor takes over.")+
     row("Dim the rest",pslider("guideCfg.scrim",0.2,0.6,0.05),"Spotlight only: how dark the rest of the card goes (0.4 = 40 %).",true)+
     row("Into pictures",pseg("guideCfg.zoom",["zoom","spot"],["Slow zoom","Light the spot"]),"When the guide names a spot in a picture (the step's spots, in the Guide script). Slow zoom: the picture glides in to the spot (1.5 s). Light the spot: the picture stays and the spotlight closes on the spot. Reduce Motion: a crossfade instead of the glide.")+
     row("Azu points",pseg("guideCfg.point",["true","false"],["On","Off"]),"Azu stands level with what is being told and points at it with one arm (with the mascot on).")+
     row("Try",'<button class="del" type="button" data-fctry="g3">Try</button>',"Starts the tour at the step that names three spots in the 1662 drawing.")));
-  return d.innerHTML};
+  return d.innerHTML});
 function stepPic(st){var el=stepEl(st),i=stepImg(el);if(i)return i.currentSrc||i.src;var r=st.ref&&st.ref.indexOf("r:")===0?byId(S.story,st.ref.slice(2)):null,k=null;
   (function walk(o){if(k||!o||typeof o!=="object")return;if(typeof o.img==="string"){k=o.img;return}for(var x in o)walk(o[x])})(r);return k&&IMG[k]?IMG[k]:null}
 function stepWords(st){var t=stepText(st),out=[],seen={};(t.match(/\S+/g)||[]).forEach(function(w){var c=cueWord(w);if(c.length>2&&!seen[c]){seen[c]=1;out.push(c)}});return out}
-var edMarkerV8j=edMarker;
-edMarker=function(){var d=document.createElement("div");d.innerHTML=edMarkerV8j();var st=S.sel.gstep&&byId(S.guideSteps,S.sel.gstep);if(!st)return d.innerHTML;
+on("edMarker.html",function(html){var d=document.createElement("div");d.innerHTML=html;var st=S.sel.gstep&&byId(S.guideSteps,S.sel.gstep);if(!st)return d.innerHTML;
   var slot=d.querySelector('[data-pick="gstep"][data-id="'+cssq(st.id)+'"] + tr.slot td:last-child');if(!slot)return d.innerHTML;
   var pic=stepPic(st),words=stepWords(st),cues=st.cues||[];
   var h=cues.map(function(c,i){var r=c.region||[.3,.3,.4,.4],cur=cueWord(L(c.at));
@@ -87,7 +85,7 @@ edMarker=function(){var d=document.createElement("div");d.innerHTML=edMarkerV8j(
       (pic?'<div class="cuepic" data-cuepic="'+st.id+'|'+i+'"><img src="'+pic+'" alt="" draggable="false"><i style="left:'+r[0]*100+'%;top:'+r[1]*100+'%;width:'+r[2]*100+'%;height:'+r[3]*100+'%"></i></div>':'<div class="note">This step\'s block has no picture: the spotlight shows the whole block.</div>')+'</div>'}).join("");
   slot.insertAdjacentHTML("beforeend",row("Spots it names",'<div class="cues">'+(h||'<span class="uses">None: the spotlight shows the whole block.</span>')+'<div class="btnrow"><button class="ubtn sm" type="button" data-cueadd="'+st.id+'">+ Add a spot</button>'+(cues.length?'<button class="ubtn sm" type="button" data-fctry="'+st.id+'">Try this step</button>':"")+'</div></div>',
     "A word of what the guide says, and the spot in the picture it means: when the voice reaches the word, the picture zooms to the spot and Azu points at it. Drag on the picture to draw the spot."));
-  return d.innerHTML};
+  return d.innerHTML});
 ed.addEventListener("click",function(e){var t=e.target.closest("[data-fctry],[data-cueadd],[data-cuedel]");if(!t)return;e.stopPropagation();
   if(t.dataset.fctry){var j=S.guideSteps.findIndex(function(s){return s.id===t.dataset.fctry});if(G.on)stopTour();startTour();if(j>0){G.i=j;runStep()}return}
   if(t.dataset.cueadd){var st=byId(S.guideSteps,t.dataset.cueadd);(st.cues=st.cues||[]).push({at:T("",""),region:[.3,.3,.4,.4]});renderEditor();return}

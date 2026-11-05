@@ -74,8 +74,7 @@ var AZ3D_GEN=[["Hyper3D Rodin","the add-on's shared trial key: no credit left on
   ["Hunyuan 3D (Tencent)","about 20 a day on the web; 200 credits once on the API","a Tencent Cloud SecretId and SecretKey in the add-on; its licence may exclude the EU (check before use)"],
   ["Tripo","about 300 credits a month on the web (CC BY, not for commercial use)","a Tripo API key in the add-on"],
   ["Meshy","100 credits a month on the web (outputs CC BY 4.0)","the API starts at Pro (about $20 a month)"]];
-var edCardV8w=edCard;
-edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8w();
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   var r=rowEl(d,"s7mascot","Style");if(r)r.outerHTML=row("Mascot source",pseg("guideCfg.azuStyle",["light","tile","glb"],["Tile of light","Tile (2.5D)","3D model (GLB)"]),"Tile of light: a glazed tile drawn by a shader (it turns to light to listen, think and travel). Tile (2.5D): the drawing. 3D model: a GLB with a skeleton, clips and morphs (built in Blender from the developer's picture), drawn by three.js here and by glTFast in Unity. Rive files and sprite sheets are other sources of the same contract (Unity import; the Lab does not draw them).");
   if(az3dOn()){var s=Azu3D.state(),i=s.info;
     addRows(d,"s7mascot",
@@ -83,7 +82,7 @@ edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8w();
       row("Play a clip",'<div class="btnrow">'+AZ3D_CLIPS.map(function(c){return'<button class="del" type="button" data-az3d="'+c+'">'+c+'</button>'}).join("")+'</div>',"Plays the clip on the guide's Azu for three seconds (the guide opens if it is closed).",true)+
       row("Import…",'<label class="ubtn sm az3dimp">Choose a GLB…<input type="file" accept=".glb,model/gltf-binary" data-az3dimport="1" hidden></label>'+(s.lastImport?'<div class="uses az3dres">'+az3dReport(s.lastImport)+'</div>':""),"Checks a GLB against what Azu needs: the clips (idle, talk, listen, think, point, walk, wave), the morphs (Blink, Open, Wide, Round), the front arm as its own mesh (drawn in front of the card), and its size. A file with clips replaces the chosen model in this Lab until another model is picked.",true)+
       row("Generate from a picture",'<table class="tbl az3dgen"><thead><tr><th>Generator</th><th>Free</th><th>To use it from Blender</th></tr></thead><tbody>'+AZ3D_GEN.map(function(g){return'<tr><td>'+esc(g[0])+'</td><td>'+esc(g[1])+'</td><td>'+esc(g[2])+'</td></tr>'}).join("")+'</tbody></table>',"A generator makes one textured model from the picture, in Blender (the blender-mcp add-on's AI Model Generation). There it gets its skeleton, clips and morphs, and is exported as a GLB to import here. The tile is modelled by script instead: a generator's tile is a lumpy slab with the face baked in.",true),"Walks to the wall")}
-  return d.innerHTML};
+  return d.innerHTML});
 function az3dReport(r){if(r.err)return esc(r.name+": not a GLB the loader can read ("+r.err+").");var i=r.info,p=[];
   p.push(i.missClips.length?"missing clips: "+i.missClips.join(", "):"all seven clips");p.push(i.missMorphs.length?"missing morphs: "+i.missMorphs.join(", "):"all four morphs");
   p.push(i.front?"the front arm is its own mesh":"no front-arm mesh (name one Azu_ArmFront) so the arm cannot be drawn in front of the card");p.push("size "+i.size.map(function(v){return v.toFixed(2)}).join(" × ")+" (1 = one tile; Unity scales it to 0.15 m on the wall)");
@@ -91,4 +90,4 @@ function az3dReport(r){if(r.err)return esc(r.name+": not a GLB the loader can re
 ed.addEventListener("click",function(e){var t=e.target.closest("[data-az3d]");if(!t)return;e.stopPropagation();if(!G.on){S.view="card";if(S.stop==="closed")S.stop="half";renderPhone(false);startTour();pauseTour()}Azu3D.force(t.dataset.az3d,3000)},true);
 ed.addEventListener("change",function(e){var t=e.target;if(!t.dataset||!t.dataset.az3dimport||!t.files||!t.files[0])return;e.stopPropagation();Azu3D.importFile(t.files[0]).then(function(){renderEditor()})},true);
 /* choosing the source loads the model (once) */
-var renderEditorV8w=renderEditor;renderEditor=function(){renderEditorV8w();if(az3dOn())Azu3D.load()};
+on("renderEditor.after",function(){if(az3dOn())Azu3D.load()});

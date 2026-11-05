@@ -79,7 +79,6 @@ function TXH(k){return esc(TXT(k))}
 S.langs={list:[{code:"en",name:"English"},{code:"pt",name:"Português (Portugal)"}],fallback:"en"};
 var LANGPICK=[["fr","Français"],["es","Español"],["de","Deutsch"],["it","Italiano"]];
 function langCodes(){return S.langs.list.map(function(l){return l.code})}
-L=function(o,f){if(o==null)return f==null?"":L(f);if(typeof o==="string")return o;return o[S.lang]||o[S.langs.fallback]||o.en||o.pt||""};
 function fmt(t){var a=arguments;return String(t).replace(/\{(\d)\}/g,function(m,i){return a[+i+1]!=null?a[+i+1]:m})}
 Object.defineProperty(UI,"read",{get:function(){var o={};langCodes().forEach(function(c){var w=S.tx.open_row_story[c];o[c]=w?fmt(S.tx.open_row_meta[c]||S.tx.open_row_meta.en,w,fmt(S.tx.reading_minutes[c]||S.tx.reading_minutes.en,4)):""});return o}});
 Object.defineProperty(UI,"open",{get:function(){return S.tx.open_block_button}});
@@ -96,8 +95,8 @@ S.demoC={title:{text:DEMO.title},eyebrow:{text:DEMO.eyebrow},heading:{text:DEMO.
  timeline:{items:{en:["c. 1500 · The court moves to the river","1580s · The Torreão rises","1755 · Earthquake, fire and tsunami"],pt:["c. 1500 · A corte muda-se para o rio","1580s · Ergue-se o Torreão","1755 · Terramoto, incêndio e maremoto"]}},
  scrolly:{items:{en:["1662: the palace along the river.","Before 1755: the Torreão and the opera.","Today: the square that took its place."],pt:["1662: o palácio ao longo do rio.","Antes de 1755: o Torreão e a ópera.","Hoje: a praça que ficou no seu lugar."]}}};
 var DEMOC0=JSON.parse(JSON.stringify(S.demoC));
-var renderElV6=renderEl;
-renderEl=function(kind,style,c,i,still){if(!c||!Object.keys(c).length)c=S.demoC[kind]||{};var h=renderElV6(kind,style,c,i,still);return kind==="animation"&&S.view!=="demo"?h.replace(/<small>[\s\S]*?<\/small>/,""):h};
+on("renderEl.content",function(c,kind){if(!c||!Object.keys(c).length)c=S.demoC[kind]||{};return c});
+on("renderEl.html",function(h,a){return a.kind==="animation"&&S.view!=="demo"?h.replace(/<small>[\s\S]*?<\/small>/,""):h});
 
 /* ----- the demo card: a card of its own with every block once, seeded once from the Ribeira Palace, then independent of every marker ----- */
 S.demoCard=JSON.parse(JSON.stringify(S.card));
@@ -134,10 +133,9 @@ ph.addEventListener("click",function(e){var old=ph.querySelector(".gpop"),o=e.ta
   e.stopPropagation();if(old)old.remove();var t=byId(S.terms,g.dataset.gterm),p=document.createElement("div");p.className="gpop";
   p.innerHTML='<b>'+esc(g.textContent)+'</b><p>'+esc(g.dataset.gdef)+'</p>'+(t&&t.page&&t.page.length?'<button type="button" data-termopen="'+t.id+'">'+TXH("term_read_more")+' &#8250;</button>':'');
   var r=g.getBoundingClientRect(),pr=ph.getBoundingClientRect(),sc=pr.width/ph.offsetWidth||1;p.style.top=Math.round((r.bottom-pr.top)/sc+6)+"px";ph.appendChild(p)},true);
-var contentAtV6=contentAt;
-contentAt=function(path){if(path.indexOf("demo:")===0){var k=path.slice(5);return S.demoC[k]=S.demoC[k]||{}}
-  if(path.indexOf("termpage:")===0){var q=path.split(":"),t=byId(S.terms,q[1]),r=t&&t.page[+q[2]];return r?(r.c=r.c||{}):null}return contentAtV6(path)};
-var modelSigV6=modelSig;modelSig=function(){var keep=S.view;S.view="term";var x=termScreen()+"#"+demoCardScreen()+"#"+(S.previewBar?ptool():"");S.view=keep;return modelSigV6()+x};
+on("contentAt.answer",function(path){if(path.indexOf("demo:")===0){var k=path.slice(5);return S.demoC[k]=S.demoC[k]||{}}
+  if(path.indexOf("termpage:")===0){var q=path.split(":"),t=byId(S.terms,q[1]),r=t&&t.page[+q[2]];return r?(r.c=r.c||{}):null}});
+on("modelSig.before",function(cx){var keep=S.view;S.view="term";var x=termScreen()+"#"+demoCardScreen()+"#"+(S.previewBar?ptool():"");S.view=keep;cx.term=x});on("modelSig.sig",function(s,cx){return s+cx.term});
 
 /* ----- the Editor is organised by UI element: each element the phone shows has ONE component foldout (its options, its Aa words, its Demo content) ----- */
 var COMP={s5viewer:["Card Controls","Picture viewer"],s5player:["Card Controls","Video player"],s5chip:["Card Controls","Placed model chip"],s5hints:["Card Controls","Hints"],s5states:["Card Controls","Loading & states"],s8onb:["Audiences","Who’s exploring"],s8set:["Audiences","Audience in Settings"],s8look:["Audiences","Looks per audience"],s8lens:["Audiences","Lenses"],s7dock:["Guide","Guide panel"],s7cam:["Guide","Ask about the view"],s0card:["Preview & Test","Demo card"],s0tile:["Preview & Test","Demo card tile"],s0bar:["Preview & Test","Preview bar"],
@@ -177,8 +175,7 @@ function takeRow(inner,label,relabel){if(!inner)return "";var rows=inner.querySe
 function innerOf(d,id){return d.querySelector('[data-fo="'+cssq(id)+'"] > .inner')}
 function comp(id,sub,body,badge){return fo(id,esc(COMP[id][1])+' <span class="sub">· '+sub+'</span>',badge||null,body||' ',2)}
 var PLANNED=["ext","PLANNED"];
-var edCardV6=edCard;
-edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV6();
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   var s6=d.querySelector('[data-fo="s6"]');if(s6)s6.remove();
   /* 0 · Preview & Test */
   var s0=innerOf(d,"s0");if(s0)s0.innerHTML=
@@ -234,7 +231,7 @@ edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV6();
   var g7=d.querySelector('[data-fo="s7"] > summary');if(g7)g7.innerHTML=g7.innerHTML.replace("7 · Guide","6 · Guide");
   d.querySelectorAll(".badge").forEach(function(b){if(/^WAS |^ONE PLACE/.test(b.textContent))b.textContent="EXTENDED"});
   d.querySelectorAll(".row").forEach(function(rw){var lb=rw.querySelector("label");if(!lb||rw.querySelector(".help"))return;var t=ROWHELP[lb.textContent];if(!t)return;var sp=rw.lastElementChild;if(sp&&sp.tagName==="SPAN")sp.outerHTML=help(t)});
-  return d.innerHTML.replace(/ 1 block kinds</g," 1 block<").replace(/ block kinds</g," blocks<")};
+  return d.innerHTML.replace(/ 1 block kinds</g," 1 block<").replace(/ block kinds</g," blocks<")});
 var ROWHELP={"Tap outside closes":"A tap outside the card closes it.","Shown":"Shows or hides this part.","Position":"Where the bar sits on the screen.",
  "Hide while scrolling":"The bar slides away while the visitor reads down, and comes back on a scroll up.","Float":"The pin bobs gently; still under Reduce Motion.",
  "A jump opens the card to":"The stop the card rises to when a bar item is tapped at Peek.","Size":"1 = the size of the chosen section's disc on the bar.",
@@ -253,18 +250,13 @@ ptool=function(){var nx={phone:"land",land:"tablet",tablet:"phone"},nm={phone:"p
    '<button type="button" data-pt="lang" aria-pressed="false" title="'+TXH("pbar_tip_lang")+'">'+S.lang.toUpperCase()+'</button>'+
    '<button type="button" data-pt="focusOn" aria-pressed="'+S.focusOn+'" title="'+TXH("pbar_tip_focus")+'">'+TXH("pbar_focus")+'</button>'+
    '<button type="button" data-pt="screen" data-v="'+nx[S.screen]+'" aria-pressed="false" title="'+TXH("pbar_tip_screen")+'">'+TXH(nm[S.screen])+'</button>'};
-var renderPhoneV6b=renderPhone;renderPhone=function(keep){renderPhoneV6b(keep);var pt=document.getElementById("ptool");if(pt)pt.style.display=S.previewBar?"":"none"};
+on("renderPhone.after",function(keep){var pt=document.getElementById("ptool");if(pt)pt.style.display=S.previewBar?"":"none"});
 
 /* ----- Global Scene: the top level only ----- */
 var GSECS=[["Labels, Text & Fonts","the marker labels' words, sizes and fonts"],["Marker","shape, icon and the category table"],["Orientation","how markers, labels and badges face the camera"],
  ["Badge","the second sign on a marker, and its table"],["Outline","the ring around a marker, and its levels"],["Effects","glow, pulse and the other marker effects, with their Test grid"],
  ["Hierarchy Levels","what shows at each level of the wall"],["LOD","how much detail shows with the distance"],["Zoom","how far the visitor zooms, and its steps"],
  ["Displacement","how labels make room for each other"],["Select, Filter & Search","selection, search, filters, results, minimap, voice, keyword fields"]];
-edGlobal=function(){var h='<div class="note">The top level only: the wall\'s markers and how a visitor finds them.</div>';
-  var gc=function(id,sub){return fo(id,esc(COMP[id][1])+' <span class="sub">· '+sub+'</span>',null,ownbar(id)+' '+ownPanels(id),2)};
-  GSECS.forEach(function(g,i){var srch=i===GSECS.length-1,body=srch?row("Synonym Groups",'<button class="ubtn sm" type="button" data-goloc="term:t3">Languages &amp; Terms › Terms &#8250;</button>',"One list with the card\'s glossary. Keyword Fields stay here: only the search reads them.")+gc("g:10s","where the visitor types a search")+gc("g:10f","opens the filters, with how many are on"):' ';
-   h+=fo("g:"+i,esc(g[0])+' <span class="sub">· '+esc(g[1])+'</span>',srch?["ext","EXTENDED"]:["","EXISTING"],body,1)});
-  h+=fo("g:11",'Onboarding hints <span class="sub">· the first-use hints over the wall</span>',["new","NEW"],row("Wall hint",pseg("wallTip",["true","false"],["Shown","Hidden"]),"Over the wall until the visitor opens a card.")+ownbar("g:11")+ownPanels("g:11"),1);return h};
 
 /* ----- the fourth tab: Languages & Terms ----- */
 /* every localized value of the wall, interface and content, as references to the ONE place it is stored */
@@ -325,10 +317,8 @@ function edWords(){var h='<div class="note">Words every part of the wall reads: 
   h+=fo("w3",'3 · Texts check <span class="sub">· every text of the wall in one list, for translators</span>',["new","NEW"],ck,1);
   h+=jsonBox("config.json · wall level (languages, terms)",wordsJson());
   return h}
-var renderEditorV6=renderEditor;
-renderEditor=function(){if(S.tab!=="words")return renderEditorV6();lastRender=performance.now();document.querySelectorAll(".utab").forEach(function(t){t.setAttribute("aria-selected",String(t.dataset.tab===S.tab))});ed.innerHTML=edWords()};
-var refreshJsonV6=refreshJsonV4;
-refreshJsonV4=function(){if(S.tab==="words"){var pre=ed.querySelector(".json pre");if(pre)pre.textContent=JSON.stringify(wordsJson(),null,2);return}refreshJsonV6()};
+on("renderEditor.tab",function(){if(S.tab==="words")return edWords()});
+on("refreshJsonV4.answer",function(){if(S.tab==="words"){var pre=ed.querySelector(".json pre");if(pre)pre.textContent=JSON.stringify(wordsJson(),null,2);return true}});
 (function(){var tabs=document.querySelector(".utabs");if(tabs&&!tabs.querySelector('[data-tab="words"]')){var b=document.createElement("button");b.className="utab w";b.setAttribute("role","tab");b.type="button";b.dataset.tab="words";b.setAttribute("aria-selected","false");b.textContent="Languages & Terms";tabs.appendChild(b);
   b.addEventListener("click",function(){S.tab="words";renderEditor();show("story","r:r4")})}})();
 
@@ -398,7 +388,6 @@ showSelfTest=function(res){showSelfTestV6(res);var box=document.getElementById("
   box.insertAdjacentHTML("beforeend",'<p>Texts on their parts: <b>'+tx[1]+'</b> of '+tx[0]+' fields change the phone; the rest belong to parts the Lab does not draw (<b>'+els+'</b> elsewhere) or show during the tour. Content in the Texts check: <b>'+lc[1]+'</b> of '+lc[0]+'. Demo content and term pages: <b>'+dm[1]+'</b> of '+dm[0]+'.</p>');
   var j=JSON.parse(box.dataset.json||"{}");j.elsewhere=els;j.texts={fields:tx[0],ok:tx[1]};j.content={fields:lc[0],ok:lc[1]};j.demo={fields:dm[0],ok:dm[1]};box.dataset.json=JSON.stringify(j)};
 
-var demoScreenV6=demoScreen;demoScreen=function(){return demoScreenV6().replace('data-go="card"','data-go="democard"')};
 
 /* ----- opening a component shows that element on the phone, marked for a moment ----- */
 var FOCUS={s0card:["democard",".hero"],s0tile:["card",".testtile","full"],s0bar:[null,"#ptool"],s1a:["card",".hero","half"],s1peek:["card",".peeknext","peek"],

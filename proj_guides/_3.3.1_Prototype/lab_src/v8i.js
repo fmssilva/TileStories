@@ -48,8 +48,7 @@ var renderGuideV8i=renderGuide;renderGuide=function(text){renderGuideV8i(text);v
   cap.insertAdjacentHTML("afterbegin",'<small class="gnovoice"'+(G.noVoice?"":" hidden")+'>'+TXH("guide_novoice")+'</small>');if(G.hl)hlPaint(cap,G.hl.p,S.guideCfg.glide&&!S.reduce)};
 
 /* Editor: Captions gets the highlight's style, its trail, the glide, the voice in this browser and a Try */
-var edCardV8i=edCard;
-edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8i();
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   var vs=voicesFor(S.lang),key="guideCfg.voice_"+S.lang;
   addRows(d,"s7cap",row("Highlight style",pseg("guideCfg.hl",["comet","sentence","fill","word"],["Comet","Sentence + word","Fill","One word"]),"How the words being read light up, in the captions and in the block's own text. Comet: the word being said is bright and the words behind it fade away. Sentence + word: a soft band over the sentence being said, the word in it brighter (a small study found a sentence band easiest to follow for readers with dyslexia). Fill: the words already said stay lit. One word: only the word being said.")+
     row("Trail",pslider("guideCfg.trail",2,14,1),"Comet only: how many words the fading trail covers behind the word being said.",true)+
@@ -57,6 +56,6 @@ edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8i();
     row("Try",'<button class="del" type="button" data-hltry="1">Try</button>',"Starts the tour with these settings."));
   addRows(d,"s7voice",row("Voice in this browser",psel(key,[["","Best available"]].concat(vs.map(function(v){return[v.name,v.name+(v.localService?"":" · online")]}))),
     "The prototype speaks with this browser's voices (in Edge, the Natural voices are online and sound best). The app speaks with recorded files or the phone's voice. "+(vs.length?vs.length+" voice(s) for this language here.":"No voice for this language in this browser: captions only.")));
-  return d.innerHTML};
+  return d.innerHTML});
 ed.addEventListener("click",function(e){var t=e.target.closest("[data-hltry]");if(t){e.stopPropagation();if(G.on)stopTour();startTour()}},true);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(hl|trail|glide|voice_en|voice_pt|"));

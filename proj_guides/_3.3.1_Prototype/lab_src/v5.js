@@ -24,8 +24,7 @@ function wallLayer(){var w=document.getElementById("wall");if(!w){w=document.cre
   w.innerHTML='<button class="mk" type="button" data-marker="painting" style="left:52%;top:30%" aria-label="Ribeira Palace"><span>'+sicon("info",20)+'</span><b>Ribeira Palace</b></button><button class="mk dim" type="button" style="left:22%;top:58%" aria-label="Lisbon Cathedral"><span>'+sicon("star",18)+'</span><b>Lisbon Cathedral</b></button>'+
    (S.stop==="closed"&&S.wallTip!==false?'<div class="walltip">'+TXH("wall_tip")+'</div>':"");
   return w}
-var renderPhoneV4=renderPhone;
-renderPhone=function(keep){renderPhoneV4(keep);var inWall=S.view==="card";
+on("renderPhone.after",function(keep){var inWall=S.view==="card";
   document.getElementById("camera").style.backgroundImage=inWall||S.screen==="land"?"url("+IMG.g1+")":"none";
   var w=wallLayer();w.style.display=inWall?"":"none";
   var top=inWall?stopTop(S.stop):0;scr.style.top=top+"px";scr.style.borderRadius=inWall&&S.stop!=="full"?"22px 22px 0 0":"";scr.style.transition="top .35s cubic-bezier(.2,.8,.2,1)";
@@ -36,7 +35,7 @@ renderPhone=function(keep){renderPhoneV4(keep);var inWall=S.view==="card";
   var lp=ph.querySelector(".locpin");if(lp&&inWall&&S.stop==="closed")lp.remove();
   var pk=ph.querySelector(".peeknext");if(pk)pk.remove();
   if(inWall&&S.stop==="peek"&&S.cardCfg.peekNext){var p=document.createElement("div");p.className="peeknext";p.textContent=(TXT("peek_next_label"))+"Lisbon Cathedral ↑";ph.appendChild(p)}
-  topBand();stickyAction()};
+  topBand();stickyAction()});
 function initGrab(gb){gb.addEventListener("pointerdown",function(e){gb.setPointerCapture(e.pointerId);var y0=e.clientY,t0=parseFloat(scr.style.top)||0,k=fit.getBoundingClientRect().height/SCREENS[S.screen][1];scr.style.transition="none";
   function mv(ev){var t=Math.max(0,t0+(ev.clientY-y0)/k);scr.style.top=t+"px";gb.style.top=(t+2)+"px"}
   function up(ev){gb.removeEventListener("pointermove",mv);gb.removeEventListener("pointerup",up);var t=parseFloat(scr.style.top),best="half",bd=1e9;["peek","half","full"].forEach(function(s){var d=Math.abs(stopTop(s)-t);if(d<bd){bd=d;best=s}});
@@ -44,15 +43,14 @@ function initGrab(gb){gb.addEventListener("pointerdown",function(e){gb.setPointe
   gb.addEventListener("pointermove",mv);gb.addEventListener("pointerup",up)})}
 function topBand(){var b=ph.querySelector(".topband");if(!b){b=document.createElement("div");b.className="topband";ph.appendChild(b)}
   var show=S.view==="card"&&S.stop==="full"&&scr.scrollTop>230;b.style.display=show?"":"none";b.className="topband tb-"+S.cardCfg.topBand;
-  b.innerHTML='<i title="'+TXH("close")+'">&#10005;</i>'+(S.ctl.top.title?'<b>Ribeira Palace</b>':'<b></b>')+(S.ctl.top.settings?'<i title="'+TXH("visitor_settings")+'">&#9776;</i>':'<i style="visibility:hidden"></i>')}
+  b.innerHTML='<i title="'+TXH("close")+'">&#10005;</i>'+(S.ctl.top.title?'<b>Ribeira Palace</b>':'<b></b>')+(S.ctl.top.settings?'<i title="'+TXH("visitor_settings")+'">&#9776;</i>':'<i style="visibility:hidden"></i>');emit("topBand.after")}
 function stickyAction(){var s=ph.querySelector(".sticky");if(s)s.remove();var on=S.ctl.sticky==="shown"||(S.ctl.sticky==="auto"&&!(S.ctl.bar.on&&S.ctl.bar.pos==="bottom"));
   if(S.view==="card"&&on&&(S.stop==="half"||S.stop==="full")){s=document.createElement("div");s.className="sticky";s.innerHTML='<button type="button" data-locate="1">'+(TXH("show_on_wall_button"))+'</button>';ph.appendChild(s)}}
 scr.addEventListener("scroll",function(){if(S.view==="card")topBand()},{passive:true});
 
 /* ----- card layouts: one scroll, tabs, pages, accordion ----- */
-var cardScreenV4=cardScreen;
-cardScreen=function(){var lay=S.cardCfg.layout;if(lay==="scroll")return cardScreenV4();
-  var h=cardScreenV4(),d=document.createElement("div");d.innerHTML=h;var secs=d.querySelectorAll(".gsec");if(!secs.length)return h;
+on("cardScreen.html",function(h){var lay=S.cardCfg.layout;if(lay==="scroll")return h;
+  var d=document.createElement("div");d.innerHTML=h;var secs=d.querySelectorAll(".gsec");if(!secs.length)return h;
   var ids=Array.prototype.map.call(secs,function(x){return x.dataset.ref.slice(4)});if(ids.indexOf(S.activeSec)<0)S.activeSec=ids[0];
   if(lay==="tabs"||lay==="pages"){var strip=lay==="tabs"?'<div class="lt-tabs">'+ids.map(function(id){var s=secById(id);return'<button type="button" data-tabsec="'+id+'" aria-pressed="'+(S.activeSec===id)+'" style="color:'+colVar(s.colour)+'">'+esc(L(s.name))+'</button>'}).join("")+'</div>':"";
     secs.forEach(function(x){if(x.dataset.ref!=="sec:"+S.activeSec)x.remove()});
@@ -61,16 +59,14 @@ cardScreen=function(){var lay=S.cardCfg.layout;if(lay==="scroll")return cardScre
   if(lay==="accordion")secs.forEach(function(x){var id=x.dataset.ref.slice(4),open=!!S.openSecs[id],ey=x.querySelector(".ey");
     var head=document.createElement("button");head.type="button";head.className="lt-acc";head.dataset.accsec=id;head.setAttribute("aria-expanded",String(open));head.innerHTML=ey?ey.outerHTML+'<em>'+(open?"&#8722;":"+")+'</em>':id;if(ey)ey.remove();
     x.insertBefore(head,x.firstChild);if(!open)Array.prototype.slice.call(x.children,1).forEach(function(c){c.style.display="none"})});
-  return d.innerHTML};
+  return d.innerHTML});
 
 /* ----- page chrome on pages: breadcrumb, previous / next ----- */
-var topbarV3=topbar;
 function chromeOf(k){var bd=S.blockDefs[k]||{};return bd.chrome==="override"?{crumb:bd.crumb,prevnext:bd.prevnext}:{crumb:S.ctl.crumb,prevnext:S.ctl.prevnext}}
-topbar=function(crumb){if((S._pk?chromeOf(S._pk).crumb:S.ctl.crumb)==="off")return '<div class="topbar"><button type="button" data-go="card" aria-label="'+TXH("page_back")+'">&#8249;</button><span></span></div>';return topbarV3(crumb)};
-var storyScreenV3=storyScreen,galleryScreenV3=galleryScreen;
+on("topbar.answer",function(crumb){if((S._pk?chromeOf(S._pk).crumb:S.ctl.crumb)==="off")return '<div class="topbar"><button type="button" data-go="card" aria-label="'+TXH("page_back")+'">&#8249;</button><span></span></div>'});
 function pageFoot(prev,next){if(!(S._pk?chromeOf(S._pk).prevnext:S.ctl.prevnext))return "";return '<div class="pfoot"><button type="button" data-go="'+prev[0]+'"><small>'+(TXH("page_previous"))+'</small>'+esc(prev[1])+'</button><button type="button" data-go="'+next[0]+'"><small>'+(TXH("page_next"))+'</small>'+esc(next[1])+'</button></div>'}
-storyScreen=function(){S._pk="Story";var h=storyScreenV3()+pageFoot(["card",L(secById("about").name)],["gallery",TXT("gallery_name")]);S._pk=null;return h};
-galleryScreen=function(){S._pk="Gallery";var h=galleryScreenV3()+pageFoot(["story",L(DEMO.title)],["card",L(secById("visit").name)]);S._pk=null;return h};
+on("storyScreen.before",function(){S._pk="Story"});on("storyScreen.html",function(h){h=h+pageFoot(["card",L(secById("about").name)],["gallery",TXT("gallery_name")]);S._pk=null;return h});
+on("galleryScreen.before",function(){S._pk="Gallery"});on("galleryScreen.html",function(h){h=h+pageFoot(["story",L(DEMO.title)],["card",L(secById("visit").name)]);S._pk=null;return h});
 
 /* ----- phone events ----- */
 ph.addEventListener("click",function(e){var t=e.target;
@@ -87,8 +83,7 @@ ph.addEventListener("click",function(e){var t=e.target;
   if(t.closest(".bprev"))feedback("tap")},true);
 
 /* ----- Detail Card tab: blocks as accordions, feedback, dividers pool, Card Controls ----- */
-var edCardV4=edCard;
-edCard=function(){var h=edCardV4(),d=document.createElement("div");d.innerHTML=h;
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   /* 3 > Blocks: one foldout per block, grouped by section, options inside */
   var bl=d.querySelector('[data-fo="s3b"] > .inner');if(bl){var html='<div class="note">A block = a part with behaviour, data or an owner. Each one opens to its defaults: its section, its Preview on the card and its Full Page. A marker places it and may override.</div>';
     S.sections.forEach(function(sec){var inner="";sec.kinds.forEach(function(k){if(!matchQ(k))return;var bd=S.blockDefs[k],q="blockDefs."+k+".";
@@ -109,7 +104,7 @@ edCard=function(){var h=edCardV4(),d=document.createElement("div");d.innerHTML=h
   var dv=d.querySelector('[data-fo="el:divider"] > .inner');if(dv)dv.insertAdjacentHTML("afterbegin",'<div class="tip"><b>One pool of dividers.</b> Every divider artwork (edges and line dividers) lives in Motion &amp; Effects &gt; Effects. A Divider style here only picks one of them; a section\'s start picks one too. Add or import a new divider there and it is usable everywhere.</div>');
   /* 5: Card Controls */
   var s5=d.querySelector('[data-fo="s5"] > summary');if(s5)s5.innerHTML=s5.innerHTML.replace("Navigation &amp; Controls","Card Controls").replace("what the visitor uses to move around","the parts around the content: bar, top bar, page chrome, locate button, sticky action");
-  return d.innerHTML};
+  return d.innerHTML});
 ed.addEventListener("click",function(e){var tr=e.target.closest("[data-try]");if(tr){e.stopPropagation();feedback(tr.dataset.try)}},true);
 
 
@@ -125,18 +120,18 @@ function curOf(key){var p=key.split("."),st=styleById(S.sel.style);
   if(key==="style.uses")return st&&st.o.uses;if(p[0]==="style")return st&&st[p[1]];if(p[0]==="prow")return(patternById(p[1])||{rows:[]}).rows[+p[2]]&&patternById(p[1]).rows[+p[2]].style;
   return{family:S.family,replay:S.replay,focusOn:S.focusOn,previewLang:S.lang,"test.poi":S.test.poi,"m.poi":"painting"}[key]}
 
-var edMarkerV4=edMarker;
-edMarker=function(){var h=edMarkerV4();if(S.sel.page!=="gallery")return h;var d=document.createElement("div");d.innerHTML=h;var pg=d.querySelector('[data-fo="mpages"] > .inner');
+on("edMarker.html",function(h){if(S.sel.page!=="gallery")return h;var d=document.createElement("div");d.innerHTML=h;var pg=d.querySelector('[data-fo="mpages"] > .inner');
   if(pg){var imgs=S.galleryImgs||["g1","g2","g3","before"];pg.innerHTML=row("Page of",sel("m.page",[["story","Story · "+L(DEMO.title)],["gallery","Gallery"]],"gallery"),"Each block with a page has its content here.")+
     fo("pg:gallery","Gallery · its pictures",["ext","EXTENDED"],row("Pictures",'<div class="assets">'+ASSETS.map(function(a){return'<button type="button" data-gal="'+a+'" aria-pressed="'+(imgs.indexOf(a)>=0)+'" style="background-image:url('+IMG[a]+')" aria-label="'+a+'"></button>'}).join("")+'</div>',"Tap to add or remove; the order is the tap order."),2)}
-  return d.innerHTML};
+  return d.innerHTML});
 ed.addEventListener("change",function(e){var t=e.target;if(t.dataset.sel==="m.page"){e.stopImmediatePropagation();S.sel.page=t.value;renderEditor();show(t.value==="gallery"?"gallery":"story")}},true);
 ed.addEventListener("click",function(e){var g=e.target.closest("[data-gal]");if(!g)return;e.stopPropagation();var a=S.galleryImgs||["g1","g2","g3","before"],i=a.indexOf(g.dataset.gal);if(i>=0)a.splice(i,1);else a.push(g.dataset.gal);S.galleryImgs=a;renderEditor();S.view="gallery";renderPhone(false)},true);
 
 /* ----- self-test: every Editor control must change what the phone shows ----- */
 var BEHAVIOUR=/^@?(inter\.|m\.page|blockDefs\.[^.]+\.chrome|cardCfg\.(tapOutside|keepAudio|audioOverlap|peekNext|enabled)|fb\.|ctl\.jump\.|ctl\.bar\.hide|ui\.|test\.poi|focusOn|previewLang)/;
-function modelSig(){var keep=S.view,out="";["card","demo","story","gallery"].forEach(function(v){S.view=v;out+=(v==="card"?cardScreen()+navbar():v==="demo"?demoScreen():v==="story"?storyScreen():galleryScreen())+"#"});S.view=keep;
-  return out+JSON.stringify({loc:S.ctl.locate,sticky:S.ctl.sticky,bar:[S.ctl.bar.on,S.ctl.bar.pos],openAt:stopTop(S.cardCfg.openAt),half:S.cardCfg.halfMax,band:S.cardCfg.topBand,top:S.ctl.top,dark:S.dark,lang:S.lang,peek:S.cardCfg.peekNext,on:S.cardCfg.enabled})}
+/* the phone's signature for the self-test: each feature's piece is made before the older ones (latest first) and appended after them */
+function modelSig(){var cx={};emitLatestFirst("modelSig.before",cx);var keep=S.view,out="";["card","demo","story","gallery"].forEach(function(v){S.view=v;out+=(v==="card"?cardScreen()+navbar():v==="demo"?demoScreen():v==="story"?storyScreen():galleryScreen())+"#"});S.view=keep;
+  return pipe("modelSig.sig",out+JSON.stringify({loc:S.ctl.locate,sticky:S.ctl.sticky,bar:[S.ctl.bar.on,S.ctl.bar.pos],openAt:stopTop(S.cardCfg.openAt),half:S.cardCfg.halfMax,band:S.cardCfg.topBand,top:S.ctl.top,dark:S.dark,lang:S.lang,peek:S.cardCfg.peekNext,on:S.cardCfg.enabled}),cx)}
 function selfTest(){var res=[],seen={},real={renderEditor:renderEditor,renderPhone:renderPhone,renderAll:renderAll,show:show,playRef:playRef,flashRef:flashRef};
   S.ui.level=9;S.op={};S.ui.single=false;
   ["card","marker","words","global"].forEach(function(tab){S.tab=tab;real.renderEditor();var base=JSON.stringify(S);

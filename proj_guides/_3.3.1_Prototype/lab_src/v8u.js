@@ -63,12 +63,11 @@ ed.addEventListener("click",function(e){var t=e.target.closest("[data-agsetup],[
   AGSCENES.reduce(function(pr,s,i){return pr.then(function(){return agRunScene(i)})},Promise.resolve()).then(function(){AG.runAll=false;agConPaint()})},true);
 
 /* ----- Editor rows ----- */
-var edCardV8u=edCard;
-edCard=function(){var d=document.createElement("div");d.innerHTML=edCardV8u();
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   addRows(d,"s7agent",row("Trace under each answer",pseg("agentCfg.trace",["true","false"],["On (development)","Off"]),"Under each answer, in small grey type: the model, the time to the first words and in all, the tokens, the cost, and each tool call (✓ valid, ✗ refused, with its policy when not Auto). It is never spoken and never part of the answer's text, so the link cards and buttons stay as they are. Off in the app."),"Spoken answer");
   addRows(d,"s7cam",row("Names on the points",pseg("camCfg.names",["all","middle"],["All in view (testing)","The middle one"]),"All: every point in view shows its name, to check that the guide names what is on the screen. The middle one: as in the app, the others are dots until lit."),"Wall (the Lab)");
-  return d.innerHTML};
-var modelSigV8u=modelSig;modelSig=function(){return modelSigV8u()+"#pin:"+S.camCfg.names};
+  return d.innerHTML});
+on("modelSig.sig",function(h){return h+"#pin:"+S.camCfg.names});
 /* ----- on a wall that is not the card's own (the Belém test wall), the library is that wall's: its points, not the Ribeira card's texts ----- */
 var WALLINFO={belem:T("The Grande Panorama de Lisboa, the Belém stretch: a tiled view of Lisbon's riverside from about 1700, before the 1755 earthquake (Museu Nacional do Azulejo).","O Grande Panorama de Lisboa, o troço de Belém: uma vista em azulejo da margem de Lisboa, de cerca de 1700, antes do terramoto de 1755 (Museu Nacional do Azulejo).")};
 function agTestWall(where){return where==="wall"&&S.camCfg.wall!=="ribeira"}

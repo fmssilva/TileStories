@@ -110,11 +110,10 @@ function ask(q){if(!q.trim())return;pauseTour();G.askOpen=true;G.busy=true;G.ans
   .then(function(r){done(r.text)}).catch(function(e){G.busy=false;if(e&&e.code==="cancelled"){G.answer=e.text||"";renderGuide();return}var t=searchAnswer(q);done(TXT("guide_ai_error").replace("{0}",(e&&e.code||"error"))+t)})}
 
 /* ----- hooks into the card: hero button, Guide block, gestures, take-over ----- */
-var cardScreenV5=cardScreen;
-cardScreen=function(){var h=cardScreenV5(),d=document.createElement("div");d.innerHTML=h;
+on("cardScreen.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   if(S.guideCfg.heroButton){var w=d.querySelector(".hero .w");if(w)w.insertAdjacentHTML("beforeend",'<button type="button" class="gstart" data-g="start">&#9654; '+TXH("guide_start")+' · '+esc(fmt(TXT("guide_duration"),3))+'</button>')}
   if(S.guideCfg.block){var ab=d.querySelector('[data-ref="sec:about"] .ey');if(ab)ab.insertAdjacentHTML("afterend",'<div class="item" data-ref="b:b_guide"><button type="button" class="gblock" data-g="start"><span class="gm">'+(S.guideCfg.mascot?MASCOT:sicon("play",48))+'</span><span><b>'+(TXH("guide_block_title"))+'</b><small>'+(TXH("guide_block_line"))+'</small></span></button></div>')}
-  return d.innerHTML};
+  return d.innerHTML});
 ph.addEventListener("click",function(e){var t=e.target,g=t.closest("[data-g]");
   if(t.closest("[data-flip]"))gesture("flip");if(t.closest(".kq button"))gesture("answer");
   if(!g)return;e.stopPropagation();var k=g.dataset.g;
@@ -127,11 +126,10 @@ ph.addEventListener("click",function(e){var t=e.target,g=t.closest("[data-g]");
 ph.addEventListener("submit",function(e){if(!e.target.classList.contains("gform"))return;e.preventDefault();var i=ph.querySelector("#gq");if(i)ask(i.value)},true);
 ph.addEventListener("pointerdown",function(e){if(e.target.closest("[data-ba]"))gesture("drag")},true);
 ["wheel","touchmove"].forEach(function(ev){scr.addEventListener(ev,function(){if(G.on&&!G.paused&&!G.waiting)pauseTour()},{passive:true})});
-var renderPhoneV5=renderPhone;renderPhone=function(keep){renderPhoneV5(keep);if(G.on)renderGuide()};
+on("renderPhone.after",function(keep){if(G.on)renderGuide()});
 
 /* ----- the Editor: Detail Card > 7 · Guide, Specific Marker > 3 · Guide script ----- */
-var edCardV5=edCard;
-edCard=function(){var h=edCardV5(),c=S.guideCfg;
+on("edCard.html",function(h){var c=S.guideCfg;
   var gb=row("Start from the hero",pseg("guideCfg.heroButton",["true","false"],["Shown","Hidden"]),"A Start the guide button on the hero (replaces the Listen pill).")+
    row("Guide block",pseg("guideCfg.block",["true","false"],["Shown","Hidden"]),"A Guide block first in the first section.")+
    row("Voice",pseg("guideCfg.voice",["recorded","device"],["Recorded files","Device voice"]),"Recorded: audio rendered when authoring (or a human voice), with word timings. Device voice: the phone reads the script (free, offline, plainer).")+
@@ -142,12 +140,11 @@ edCard=function(){var h=edCardV5(),c=S.guideCfg;
    row("Ask the guide",pseg("guideCfg.ask",["off","search","ai"],["Off","Search (offline)","AI (cloud)"]),"Search: offline keyword search that jumps to a block. AI: answers only from this card's content and scrolls to the block that helps.")+
    '<div class="note fixed">Fixed rules: one visible pause that stops voice, scroll and mascot (WCAG 2.2.2); any drag by the visitor pauses the tour and offers Resume; captions available; Reduce Motion = no auto-scroll animation, a still mascot.</div>';
   var sec=fo("s7",'7 · Guide <span class="sub">· the narrated tour and Ask the guide</span>',["new","NEW"],gb,1);
-  var i=h.lastIndexOf('<div class="json">');return h.slice(0,i)+sec+h.slice(i)};
-var edMarkerV5=edMarker;
-edMarker=function(){var h=edMarkerV5(),t='<div class="note">The tour of this point: one row per step, in order. Each step shows a block, says its words (EN / PT), and may wait for the visitor to try it.</div><table class="tbl"><thead><tr><th style="width:22px">#</th><th style="width:28%">Shows</th><th style="width:70px">Does</th><th>Says</th></tr></thead><tbody>';
+  var i=h.lastIndexOf('<div class="json">');return h.slice(0,i)+sec+h.slice(i)});
+on("edMarker.html",function(h){var t='<div class="note">The tour of this point: one row per step, in order. Each step shows a block, says its words (EN / PT), and may wait for the visitor to try it.</div><table class="tbl"><thead><tr><th style="width:22px">#</th><th style="width:28%">Shows</th><th style="width:70px">Does</th><th>Says</th></tr></thead><tbody>';
   S.guideSteps.forEach(function(st,j){var c=corpus().filter(function(x){return x.ref===st.ref})[0];t+='<tr class="pick'+(S.sel.gstep===st.id?" sel":"")+'" data-pick="gstep" data-id="'+st.id+'"><td class="uses">'+(j+1)+'</td><td>'+esc(st.ref==="hero"?"The hero (teaser)":c?c.title:st.ref)+'</td><td class="uses">'+st.act+(st.wait?" · "+st.wait:"")+'</td><td class="uses">'+esc(stepText(st))+'</td></tr>';
     if(S.sel.gstep===st.id)t+='<tr class="slot"><td></td><td colspan="3">'+(st.text?langCodes().map(function(lg){return row("Says · "+lg.toUpperCase(),'<textarea class="u" rows="2" data-gtext="'+st.id+'|'+lg+'">'+esc(st.text[lg]||"")+'</textarea>',"")}).join(""):'<div class="note">Reads the block\'s own text.</div>')+'</td></tr>'});
-  t+='</tbody></table>';var sec=fo("m3","3 · Guide script",["new","NEW"],t,1);var i=h.lastIndexOf('<div class="json">');return h.slice(0,i)+sec+h.slice(i)};
+  t+='</tbody></table>';var sec=fo("m3","3 · Guide script",["new","NEW"],t,1);var i=h.lastIndexOf('<div class="json">');return h.slice(0,i)+sec+h.slice(i)});
 ed.addEventListener("click",function(e){var p=e.target.closest('[data-pick="gstep"]');if(!p||e.target.closest("textarea"))return;e.stopPropagation();S.sel.gstep=p.dataset.id;renderEditor()},true);
 ed.addEventListener("input",function(e){var t=e.target;if(!t.dataset.gtext)return;e.stopImmediatePropagation();var q=t.dataset.gtext.split("|"),st=byId(S.guideSteps,q[0]);st.text[q[1]]=t.value},true);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(guideCfg\\.(voice|speed|music|captions|highlight|coach|ask)|"));
