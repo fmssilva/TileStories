@@ -117,3 +117,5 @@ ed.addEventListener("input",function(e){var t=e.target;if(!t.dataset||!t.dataset
 ed.addEventListener("change",function(e){var t=e.target;if(!t.dataset)return;if(t.dataset.ovrev){e.stopImmediatePropagation();var q=t.dataset.ovrev.split("|");ovEntry(q[0],q[1]).reviewed=t.checked;renderAll(true);return}
   if(t.dataset.glen){e.stopImmediatePropagation();var st=byId(S.fullSteps||S.guideSteps,t.dataset.glen);if(t.value)st.len=t.value;else delete st.len}},true);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("ctl\\.jump\\.","ctl\\.jump\\.|aud\\.ask|aud\\.looks\\.|aud\\.hide\\."));
+/* each row's demo: the card as that audience sees it; the first-card question */
+rowDemos({"vis.aud":{stop:"full",ring:".hero"},"aud.ask":{stop:"full",act:function(){onbShow()},ring:".onb"}});

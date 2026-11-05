@@ -9,10 +9,11 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const R = src => p.evaluate(s => LAB.run(s), src);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   await R('S.hints.on=false;S.previewBar=false;S.lang="en";S.guideMute=true;sampleFn=null;S.camCfg.fab=false;S.camCfg.names="middle";S.view="card";S.stop="closed";S.camX=.4;renderAll(false)');
-  // 1. the pill names the point nearest the middle
-  const pill = await R('var b=ph.querySelector(".ca-pill");[!!b,b&&b.textContent,camView().central&&camView().central.name]');
-  ok('On the wall: the Ask pill names the point nearest the middle', pill[0] && pill[1] === 'Ask about ' + pill[2], pill);
-  await p.locator('#ph .ca-pill').click(); await p.waitForTimeout(200);
+  // 1. the way in names the point nearest the middle (round 7: the guide's button replaces the pill; its menu item names the point)
+  await p.locator('#ph .gbtn').click(); await p.waitForTimeout(200);
+  const pill = await R('var b=ph.querySelector("[data-gbgo=view]");[!!b,b&&b.textContent,camView().central&&camView().central.name]');
+  ok('On the wall: the guide button\'s Ask about … names the point nearest the middle', pill[0] && pill[1] === 'Ask about ' + pill[2], pill);
+  await p.locator('#ph [data-gbgo="view"]').click(); await p.waitForTimeout(200);
   const open = await R('[ph.classList.contains("camopen"),ph.querySelectorAll(".cpin").length,!!ph.querySelector(".cpin.central b"),getComputedStyle(ph.querySelector(".cpin.central b")).opacity,ph.querySelectorAll("[data-cchip]").length]');
   ok('A tap opens the panel: the points in view as pins, the middle one ringed with its name, five suggestions', open[0] && open[1] >= 2 && open[2] && open[3] === '1' && open[4] === 5, open);
   // 2. what the model is given: the points in view and where each sits (no photo)

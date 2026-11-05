@@ -1,7 +1,7 @@
 /* Azu, the tile of light: the WebGL shader, its forms by state, the peek from behind a block, the walk to the wall. */
 /* Unity: the same shader as a Shader Graph Custom Function (HLSL) on a quad rendered by an "Azu camera" into a render texture,
    shown as an element inside the card (overflow: hidden makes the peek); the walk swaps it for a world-space Azu on the wall. */
-S.guideCfg.azuStyle="light";
+S.guideCfg.azuStyle="glb";
 /* the style: glaze colours, pattern, corner radius, the light's four colours (shader properties; mascot/tile-styles.js sets them from the Editor) */
 var AZU_UNI={uCream:[.96,.93,.87],uInk:[.12,.31,.61],uInk2:[.12,.31,.61],uMotif:0,uRound:.12,
   uP0:[.48,.86,1],uP1:[.66,.52,1],uP2:[1,.55,.84],uP3:[1,.8,.66]};
@@ -103,3 +103,5 @@ ed.addEventListener("click",function(e){var t=e.target.closest("[data-azqtry]");
   else if(k==="walk"){if(G.on)stopTour();S.view="card";G.cam.open=true;S.stop="closed";renderPhone(false);azWalk("torreao")}
   else{if(!G.on)startTour();G.azThinkTill=performance.now()+3200}},true);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(azuStyle|azuWalk|"));
+/* the row's demo: a question on the wall, Azu walking to the point it lights */
+rowDemos({"guideCfg.azuWalk":{wall:"open",act:function(){camAsk("","what")},ringAfter:900,ring:".azwalker|.camask"}});

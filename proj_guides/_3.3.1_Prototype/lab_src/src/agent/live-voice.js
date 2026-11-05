@@ -1,10 +1,9 @@
-/* The live voice: Azure or ElevenLabs live, for the answers and the lines the recorded set lacks; the source say.live and a source of camSay; the mouth on the voice's own timing. */
+/* The live voice: Azure or ElevenLabs live, for the answers and the lines the recorded set lacks; the source say.live (the tour's lines, the answers on the card and on the wall); the mouth on the voice's own timing. */
 S.agentCfg.liveVoice="azure";S.agentCfg.elevenModel="eleven_flash_v2_5";   /* without Azure's key, the device voice reads the answers */
 var AZ_SDK="https://cdn.jsdelivr.net/npm/microsoft-cognitiveservices-speech-sdk@1.43.0/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js";
 var LV={last:null,sdk:null};
 /* the keys: only this computer's (keys.local.js, from .secrets/keys.env); the published Lab has none and speaks with the device voice */
 function lvKeys(){var k=window.LABKEYS||{};return{azure:!!(k.azure&&k.azureRegion),eleven:!!(k.eleven&&(k.elevenPT||k.elevenEN))}}
-function lvOn(){var v=S.agentCfg.liveVoice;return v!=="device"&&!!lvKeys()[v]}
 /* a letter's shape (ElevenLabs gives letters, not visemes) */
 var LV_CH={a:"A",á:"A",à:"A",ã:"A",â:"A",e:"E",é:"E",ê:"E",i:"E",í:"E",y:"E",o:"O",ó:"O",ô:"O",õ:"O",u:"O",ú:"O",w:"O",m:"M",b:"M",p:"M",f:"chew",v:"chew"};
 function lvWords(text){var out=[],re=/\S+/g,m;while((m=re.exec(text)))out.push({i:m.index,w:m[0]});return out}
@@ -40,7 +39,7 @@ function lvPlay(text,onWord,onEnd,r){var held=LV.held;stopSpeech();G.words=lvWor
   a.addEventListener("ended",fin);a.addEventListener("error",function(){if(G.recAudio!==a)return;G.recAudio=null;G.utter=null;G.recWords=null;G.visTrack=null;LV.last={voice:S.agentCfg.liveVoice,err:"the audio did not play"};rest();lvDevice(text,onWord,onEnd)});
   var tick=function(){if(G.recAudio!==a)return;var t=a.currentTime,w=G.recWords,k=-1;for(var j=0;j<w.length;j++){if(w[j][0]<=t+.02)k=j;else break}
     if(k>=0&&k!==G.hl.k){onWord(k);G.lastWordAt=performance.now()}if(k>=0&&G.hl)G.hl.at=performance.now()-(t-w[k][0])*1000/(a.playbackRate||1);if(!a.paused)G.lastWordAt=performance.now();
-    var v=G.visTrack||[],n=vi;while(n+1<v.length&&v[n+1].t<=t)n++;if(n!==vi){vi=n;var m=ph.querySelector(".mascot");if(m&&S.guideCfg.lips&&n>=0)azMouth(m,v[n].s)}
+    if(mouthHeld(a)){if(vi!==-2){vi=-2;rest()}}else{var v=G.visTrack||[],n=Math.max(-1,vi);while(n+1<v.length&&v[n+1].t<=t)n++;if(n!==vi){vi=n;var m=ph.querySelector(".mascot");if(m&&n>=0)azMouth(m,v[n].s)}}
     requestAnimationFrame(tick)};
   if(!held){var p=a.play();if(p&&p.catch)p.catch(function(){if(G.recAudio===a){a.muted=true;a.play().catch(function(){})}})}requestAnimationFrame(tick);emit("lvPlay.after",text,r)}
 /* while the voice's own shapes move the mouth, the letters-per-word mouth stands down (the word light goes on) */
@@ -61,12 +60,6 @@ on("say.live",lvSay);
 on("pauseNow.voice",function(){if(LV.wait){LV.held=true;return true}});
 on("resumeNow.voice",function(){if(LV.wait){LV.held=false;return true}});
 on("mute.voice",function(){if(LV.wait)return true});
-/* the wall's answers (Ask about the view) too: the audio, no captions */
-function lvCamSay(t){if(!lvOn())return;G.cam.busy=false;G.cam.answer=t;camLayer();var v=S.agentCfg.liveVoice,t0=performance.now();
-  (v==="azure"?lvAzure(t):lvEleven(t)).then(function(r){LV.last={voice:v,ms:Math.round(performance.now()-t0),shapes:r.shapes||r.vis.length,words:r.words.length,from:r.from};lvStatus();if(S.guideMute)return;
-    if(LV.camAudio)try{LV.camAudio.pause()}catch(x){}LV.camAudio=new Audio(URL.createObjectURL(new Blob([r.audio],{type:"audio/mpeg"})));LV.camAudio.play().catch(function(){})})
-    .catch(function(e){LV.last={voice:v,err:String(e&&e.message||e)};lvStatus();camSayFrom(lvCamSay,t)});return true}
-on("camSay.source",lvCamSay);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(agentCfg\\.(liveVoice|elevenModel)|"));
 
 /* ----- Editor: 6 · Guide > Ask Azu > Outputs: the voice of the answers ----- */
@@ -82,3 +75,5 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
       "Device voice: the phone's own, free; the mouth follows each word's letters over the word's time. Azure (live): the narration's voice (Sonia in English, Raquel in Portuguese) made for each answer; the mouth follows Azure's visemes. ElevenLabs (live): the voices picked for the recorded set, with each letter's time; the mouth follows the letters at their times. The live voices need a key (on this computer from .secrets/keys.env, by keys_local.py; in the app, on the server, which streams the audio and its timings a sentence at a time). Without a key, or on an error, the device voice reads the answer. The live voice also speaks the tour's lines the recorded set lacks (Narration > Voice = Recorded, then live, then this device); Narration > Speaking now says which voice speaks and why.",true)+
     (S.agentCfg.liveVoice==="eleven"?row("ElevenLabs model",pseg("agentCfg.elevenModel",["eleven_flash_v2_5","eleven_multilingual_v2"],["Flash v2.5 (fastest)","Multilingual v2 (richest)"]),"Flash: about 75 ms to the first audio and half the credits; Multilingual v2: the richest voice, slower. Both speak European Portuguese with a pt-PT voice.",true):""));
   return d.innerHTML});
+/* each row's demo: a question answered aloud in the conversation (Speaking now says by which voice) */
+rowDemos({"agentCfg.liveVoice":{tour:true,dock:"full",act:function(){ask(L(S.guideAsks[1]))},ringAfter:1400,ring:".gd-thread"},"agentCfg.elevenModel":{tour:true,dock:"full",act:function(){ask(L(S.guideAsks[1]))},ringAfter:1400,ring:".gd-thread"}});

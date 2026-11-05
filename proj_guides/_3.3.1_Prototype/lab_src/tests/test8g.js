@@ -64,7 +64,8 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // 3. How to use the card: from the settings panel only; the Guide's tour on the card's own controls
   await R('S.view="card";S.stop="half";S.settingsOpen=true;renderPhone(false)'); await p.waitForTimeout(400);
   ok('the settings panel ends with How to use the card', await R('var b=ph.querySelector(".vset .vhow");b?b.textContent.indexOf("How to use the card")===0:false'));
-  await click('.vset .vhow'); await p.waitForTimeout(400);
+  // round 7: Settings has the guide's group (voice, speed, captions), so the panel scrolls to its last button
+  await R('ph.querySelector(".vset .vhow").scrollIntoView({block:"nearest"})'); await click('.vset .vhow'); await p.waitForTimeout(400);
   const t1 = await R('[G.on,S.guideSteps[G.i].id,!!ph.querySelector("#grab.gfocus"),S.stop,!ph.querySelector(".vset")]');
   ok('it starts the tour at the grabber (marked), full, settings closed', t1[0] && t1[1] === 'how0' && t1[2] && t1[3] === 'full' && t1[4], t1);
   await R('next()'); await p.waitForTimeout(400);

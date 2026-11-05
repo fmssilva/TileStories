@@ -1,0 +1,7 @@
+/* The Stop's toast and its question: the dock's dark, the action in the dock's gold, 44 px targets. Unity: a VisualElement above the
+   dock (or the Navigation Bar), shown for 5 s by schedule.Execute; no blur. */
+.gtoast,.gstopask{position:absolute;left:12px;right:12px;z-index:17;display:flex;align-items:center;gap:10px;justify-content:space-between;background:#16181C;color:#F4F1EA;border:1px solid rgba(244,241,234,.16);border-radius:16px;padding:6px 6px 6px 16px;font:600 15px/1.3 var(--body);box-shadow:0 10px 28px rgba(0,0,0,.4);animation:gbin .22s ease}
+.gtoast button,.gstopask button{appearance:none;border:0;min-height:44px;padding:0 18px;border-radius:12px;background:#FFD98A;color:#1A1814;font:700 15px/1 var(--body);cursor:pointer}
+.gstopask{flex-wrap:wrap;padding:12px 10px 10px 16px}.gstopask b{font-weight:700}.gstopask div{display:flex;gap:8px;margin-left:auto}
+.gstopask button[data-gstop=no]{background:rgba(244,241,234,.14);color:#F4F1EA}
+.reduce .gtoast,.reduce .gstopask{animation:none}

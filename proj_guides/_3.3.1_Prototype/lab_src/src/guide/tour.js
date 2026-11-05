@@ -21,7 +21,8 @@ function musicOn(on){try{if(on&&!G.music){actx=actx||new (window.AudioContext||w
 function musicDuck(d){if(G.music)G.music.gain.setTargetAtTime(d?0.015:0.05,actx.currentTime,0.3)}
 
 /* ----- the tour ----- */
-function startTour(){emitLatestFirst("startTour.before");G.on=true;G.i=0;G.paused=false;S.stop="full";if(S.guideCfg.music)musicOn(true);feedback("open");runStep();emit("startTour.after")}
+/* startTour(from): from the start, or from a step kept by a stop (from = {id: the step}; the features before it know which) */
+function startTour(from){emitLatestFirst("startTour.before",from);G.on=true;G.i=0;G.paused=false;S.stop="full";if(from){var j=S.guideSteps.findIndex(function(s){return s.id===from.id});G.i=Math.max(0,j)}if(S.guideCfg.music)musicOn(true);feedback("open");runStep();emit("startTour.after",from)}
 function stopTour(){emitLatestFirst("stopTour.before");G.on=false;G.waiting=false;stopSpeech();musicOn(false);clearGuideMarks();renderGuide();emit("stopTour.after")}
 function runStep(){emitLatestFirst("runStep.before");var st=G.on&&S.guideSteps[G.i];if(G.on&&!st)stopTour();else if(st){G.waiting=false;
   if(S.view!==st.view){S.view=st.view;renderPhone(false)}
@@ -56,7 +57,8 @@ function renderGuide(text){["gbar","gcap","mascot","gask","gresume"].forEach(fun
    '<button type="button" data-g="mute" aria-pressed="'+!!S.guideMute+'" aria-label="'+TXH("guide_ctrl_mute")+'">'+(S.guideMute?"&#128263;":"&#128266;")+'</button><button type="button" data-g="cc" aria-pressed="'+S.guideCfg.captions+'">'+TXH("guide_ctrl_captions")+'</button>'+
    (S.guideCfg.ask!=="off"?'<button type="button" data-g="ask" class="askb">'+(TXH("guide_ask_button"))+'</button>':"")+'<button type="button" data-g="stop" aria-label="'+TXH("guide_ctrl_stop")+'">&#10005;</button></div>';ph.appendChild(bar);
   if(S.guideCfg.mascot){var m=document.createElement("div");m.className="mascot"+(S.reduce?" still":"")+(G.utter||G.timer?" talk":"");m.innerHTML=MASCOT;m.style.top="120px";ph.appendChild(m);var el=st.ref==="hero"?scr.querySelector(".hero"):scr.querySelector('[data-ref="'+st.ref+'"]');moveMascot(el)}
-  if(G.paused&&!G.askOpen){var rs=document.createElement("button");rs.type="button";rs.className="gresume";rs.dataset.g="play";rs.textContent=TXT("guide_resume");ph.appendChild(rs)}
+  /* paused: a Resume pill (with the dock, its own Play at Mini and the guide button's at Compact offer it) */
+  if(G.paused&&!G.askOpen&&!dockOn()){var rs=document.createElement("button");rs.type="button";rs.className="gresume";rs.dataset.g="play";rs.textContent=TXT("guide_resume");ph.appendChild(rs)}
   if(G.askOpen){var a=document.createElement("div");a.className="gask";var ai=S.guideCfg.ask==="ai";
     a.innerHTML='<div class="gaskh"><b>'+(TXH("guide_ask_title"))+'</b><span>'+(ai?TXH("guide_ask_mode_ai"):TXH("guide_ask_mode_search"))+'</span><button type="button" data-g="askclose" aria-label="'+TXH("guide_ask_close")+'">&#10005;</button></div>'+
      '<div class="gans" aria-live="polite">'+(G.answer?esc(G.answer):'<span class="hintq">'+(TXH("guide_ask_example"))+'</span>')+'</div>'+
@@ -64,13 +66,13 @@ function renderGuide(text){["gbar","gcap","mascot","gask","gresume"].forEach(fun
 /* ----- hooks into the card: hero button, Guide block, gestures, take-over ----- */
 on("cardScreen.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   if(S.guideCfg.heroButton){var w=d.querySelector(".hero .w");if(w)w.insertAdjacentHTML("beforeend",'<button type="button" class="gstart" data-g="start">&#9654; '+TXH("guide_start")+' · '+esc(fmt(TXT("guide_duration"),3))+'</button>')}
-  if(S.guideCfg.block){var ab=d.querySelector('[data-ref="sec:about"] .ey');if(ab)ab.insertAdjacentHTML("afterend",'<div class="item" data-ref="b:b_guide"><button type="button" class="gblock" data-g="start"><span class="gm">'+(S.guideCfg.mascot?MASCOT:sicon("play",48))+'</span><span><b>'+(TXH("guide_block_title"))+'</b><small>'+(TXH("guide_block_line"))+'</small></span></button></div>')}
+  if(S.guideCfg.block){var ab=d.querySelector('[data-ref="sec:about"] .ey');if(ab)ab.insertAdjacentHTML("afterend",'<div class="item" data-ref="b:b_guide"><button type="button" class="gblock" data-g="start"><span class="gm">'+(S.guideCfg.mascot?mascotStill():sicon("play",48))+'</span><span><b>'+(TXH("guide_block_title"))+'</b><small>'+(TXH("guide_block_line"))+'</small></span></button></div>')}
   return d.innerHTML});
 ph.addEventListener("click",function(e){var t=e.target,g=t.closest("[data-g]");
   if(t.closest("[data-flip]"))gesture("flip");if(t.closest(".kq button"))gesture("answer");
   if(!g)return;e.stopPropagation();var k=g.dataset.g;
-  if(k==="start"){if(S.view!=="card"){S.view="card"}startTour()}else if(k==="pause")pauseTour();else if(k==="play"){G.askOpen=false;resumeTour()}else if(k==="next"){stopSpeech();G.paused=false;next()}else if(k==="prev"){stopSpeech();G.paused=false;prev()}
-  else if(k==="stop")stopTour();else if(k==="mute"){S.guideMute=!S.guideMute;if(firstAnswer("mute.voice")===undefined&&S.guideMute)stopSpeech();renderGuide()}else if(k==="cc"){S.guideCfg.captions=!S.guideCfg.captions;renderGuide()}
+  if(k==="start"){if(S.view!=="card"){S.view="card"}startTour()}else if(k==="pause")pauseTour();else if(k==="play"){G.askOpen=false;resumeTour()}else if(k==="next"){stopSpeech();G.paused=false;next()}else if(k==="prev"){if(firstAnswer("prevTap.answer")===undefined){stopSpeech();G.paused=false;prev()}}
+  else if(k==="stop"){if(firstAnswer("stopTap.answer")===undefined)stopTour()}else if(k==="mute"){S.guideMute=!S.guideMute;if(firstAnswer("mute.voice")===undefined&&S.guideMute)stopSpeech();renderGuide()}else if(k==="cc"){S.guideCfg.captions=!S.guideCfg.captions;renderGuide()}
   else if(k==="ask"){pauseTour();G.askOpen=true;renderGuide();var i=ph.querySelector("#gq");if(i)i.focus()}else if(k==="askclose"){G.askOpen=false;renderGuide()}
   else if(k==="stopask"&&G.ctl)G.ctl.abort();
   else if(k==="mic"){var R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R){G.answer=TXT("guide_no_mic");renderGuide();return}
@@ -99,3 +101,8 @@ on("edMarker.html",function(h){var t='<div class="note">The tour of this point: 
 ed.addEventListener("click",function(e){var p=e.target.closest('[data-pick="gstep"]');if(!p||e.target.closest("textarea"))return;e.stopPropagation();S.sel.gstep=p.dataset.id;renderEditor()},true);
 ed.addEventListener("input",function(e){var t=e.target;if(!t.dataset.gtext)return;e.stopImmediatePropagation();var q=t.dataset.gtext.split("|"),st=byId(S.guideSteps,q[0]);st.text[q[1]]=t.value},true);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(guideCfg\\.(voice|speed|music|captions|highlight|coach|ask)|"));
+/* each row's demo (editor/demo.js): the tour at a step, the part the row changes ringed */
+rowDemos({"guideCfg.voice":{tour:"g1",ring:".gbubble|.gdock|.gcap"},"guideCfg.speed":{tour:"g1",ring:".gbubble|.gdock|.gcap"},"guideCfg.music":{tour:"g1",ring:".gdock|.gbar"},
+  "guideCfg.heroButton":{stop:"full",ring:".hero .gstart|.hero"},"guideCfg.block":{stop:"full",scroll:'[data-ref="b:b_guide"]',ring:".gblock|[data-ref=\"sec:about\"]"},
+  "guideCfg.captions":{tour:"g1",ring:".gbubble|.gdock|.gbar"},"guideCfg.highlight":{tour:"g4",ring:".gfocus"},"guideCfg.coach":{tour:"g2",ring:".gcoach|.gfocus"},
+  "guideCfg.mascot":{tour:"g1",ring:".mascot|.gfocus"},"guideCfg.ask":{tour:true,dock:"full",act:function(){ask(L(S.guideAsks[0]))},ringAfter:1400,ring:".gd-thread|.gask"}});

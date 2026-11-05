@@ -72,6 +72,18 @@ on("resumeNow.voice",function(){if(G.recAudio){G.recAudio.muted=!!S.guideMute;G.
 on("mute.voice",function(){if(G.recAudio){G.recAudio.muted=!!S.guideMute;return true}});
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(voiceSet|"));
 
+/* ----- a line said again from a word, whatever speaks it: an audio (a recorded or live line) seeks to the word's time, as the app's
+   AudioSource seeks its clip; the device voice speaks again from the word (speakFrom); a live line still being made, or a device
+   voice still waiting for the browser's voices, seeks when it starts. sentenceStart: the first word of the sentence word k is in ----- */
+function sentenceStart(k){var w=G.words||[],s=0;for(var j=0;j<Math.min(k,w.length);j++)if(/[.!?…]["”»)]*$/.test(w[j].w))s=j+1;return Math.max(0,Math.min(s,w.length-1))}
+function seekWord(k){if(G.recAudio&&G.recWords){var w=G.recWords[k];G.recAudio.currentTime=w?w[0]:0;if(G.hl)G.hl.k=k-1;return true}
+  if(typeof LV!=="undefined"&&LV.wait){G.seekOnPlay=k;return true}
+  if(G.voiceWait){G.seekOnStart=k;return true}
+  if(G.sayArgs&&(G.utter||G.timer||G.resumeVoice)){speakFrom(k,false);return true}return false}
+on("lvPlay.after",function(){if(G.seekOnPlay==null||!G.recAudio||!G.recWords)return;var w=G.recWords[G.seekOnPlay];G.seekOnPlay=null;G.recAudio.currentTime=w?w[0]:0});
+on("sayDevice.started",function(){if(G.seekOnStart==null)return;var k=G.seekOnStart;G.seekOnStart=null;setTimeout(function(){speakFrom(k,false)},0)});
+on("say.before",function(){G.seekOnPlay=null;G.seekOnStart=null});
+
 /* ----- what speaks now, and why when one source stands in for another (no silent fallback) ----- */
 function sayNow(src,who,line){G.sayNow={src:src,by:who,why:line.why.slice(),text:line.text,answer:!!line.text&&line.text===G.answer};sayNowShow()}
 function sayNowText(){var n=G.sayNow;if(!n)return"Nothing at the moment.";var w=n.why,why=w.length>1?w.map(function(x){return x.short}).join("; "):w.length?w[0].not:"";

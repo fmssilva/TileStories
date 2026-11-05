@@ -31,3 +31,5 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;a
       row("Corners",pseg("guideCfg.azuShape",["crisp","soft","pillow"],["Crisp","Soft","Pillow"]),"How round the tile's edges are; the tile keeps its size.",true)+
       row("Preview",rest?'<div class="azprev"><figure><img src="'+rest+'" alt="Azu at rest" width="96" height="96"><figcaption>At rest</figcaption></figure><figure><img src="'+lit+'" alt="Azu as light" width="96" height="96"><figcaption>As light</figcaption></figure></div>':'<span class="uses">This browser cannot draw WebGL: no preview (the guide shows the Tile (2.5D)).</span>',"Unity: the same values are the properties of the tile's Shader Graph material; each choice is a style asset.",true))}
   return d.innerHTML});
+/* each row's demo: the guide's Azu in that style */
+rowDemos({"guideCfg.azuGlaze":{tour:"g1",ring:".mascot"},"guideCfg.azuMotif":{tour:"g1",ring:".mascot"},"guideCfg.azuLight":{tour:"g1",ring:".mascot"},"guideCfg.azuShape":{tour:"g1",ring:".mascot"}});

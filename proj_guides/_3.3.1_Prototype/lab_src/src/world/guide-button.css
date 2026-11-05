@@ -1,13 +1,43 @@
-/* v8s: Azu as the guide's button (bottom left), its comments, the test wall */
+/* The guide's button (✦) and Azu beside it, the ✦'s menu, Azu's remarks on the test wall. Unity: a UI Toolkit Button and a
+   VisualElement in the card's root, absolutely placed; the ring is drawn by generateVisualContent (Painter2D Arc + Stroke), the label
+   folds by a USS transition on width and opacity. Every word on a solid colour (no backdrop blur); the drop shadows are depth only. */
 .testwall .wall .mk,.testwall .walltip{display:none}
-.azfab{position:absolute;left:12px;bottom:92px;z-index:12;width:58px;height:62px;appearance:none;border:0;background:none;padding:0;cursor:pointer;filter:drop-shadow(0 6px 12px rgba(0,0,0,.35))}
-.azfab.onwall{bottom:22px}
-.azfab svg,.azfab canvas{width:58px;height:62px;display:block}
+.gbtn-wrap{position:absolute;left:12px;bottom:92px;z-index:12;display:flex;align-items:flex-end;gap:8px;pointer-events:none}
+.gbtn-wrap>*{pointer-events:auto}
+.gbtn-wrap.side-right{left:auto;right:12px;flex-direction:row-reverse}
+.gbtn-wrap.onwall{bottom:22px}
+.gbtn-wrap.intour{z-index:15;align-items:center}
+/* the ✦: the dock's dark, a light rim (it stands out on a dark card or a busy wall), the ✦ in the dock's gold */
+.gbtn{position:relative;appearance:none;display:flex;align-items:center;height:48px;min-width:48px;padding:0 12px;border-radius:24px;border:2px solid #F4F1EA;background:#16181C;color:#F4F1EA;font:700 15px/1 var(--body);cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.32);box-sizing:border-box}
+.gb-ic{display:grid;place-items:center;width:20px;height:20px;flex:none}.gb-ic svg{width:22px;height:22px;fill:#FFD98A}
+.gbtn.ic-face .gb-ic svg{width:24px;height:24px}
+.gb-lab{display:inline-block;max-width:90px;margin-left:8px;white-space:nowrap;overflow:hidden;transition:max-width .35s ease,opacity .25s ease,margin .35s ease}
+.gb-lab.fold{max-width:0;opacity:0;margin-left:0}
+.gbtn.ic-word .gb-lab{margin-left:0;max-width:none}
+/* during a tour: a disc with the progress ring inside its rim */
+.gbtn.tour{width:56px;height:56px;min-width:56px;padding:0;justify-content:center;border-radius:50%}
+.gbtn.tour .gb-lab{display:none}.gbtn.tour .gb-ic svg{width:24px;height:24px}
+.gbtn.ic-word.tour{width:auto;padding:0 16px;border-radius:28px;overflow:hidden}.gbtn.ic-word.tour .gb-lab{display:inline-block}
+.gb-ring{position:absolute;left:-2px;top:-2px;width:56px;height:56px;transform:rotate(-90deg);pointer-events:none}
+.gb-ring circle{fill:none;stroke-width:3.5}.gb-ring .tr{stroke:rgba(244,241,234,.24)}.gb-ring .pg{stroke:#FFD98A;stroke-linecap:round;transition:stroke-dasharray .3s linear}
+.gb-bar{position:absolute;left:0;bottom:0;height:4px;background:#FFD98A;transition:width .3s linear}
+.gb-pause{appearance:none;width:48px;height:48px;border-radius:50%;border:2px solid #F4F1EA;background:#16181C;color:#F4F1EA;display:grid;place-items:center;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.32);box-sizing:border-box}
+.gb-pause svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+/* Azu beside it: it plays when tapped; its arm points at the ✦ for the hint */
+.azfab{position:relative;appearance:none;border:0;background:none;padding:0;cursor:pointer;filter:drop-shadow(0 6px 12px rgba(0,0,0,.35))}
+.azfab svg,.azfab canvas{display:block;overflow:visible}
+.azfab .marm{left:-14px;top:24px}
+.azfab.point-gb .marm{opacity:1;transform:rotate(6deg)}
+.side-right .azfab .marm{left:auto;right:-14px;transform-origin:0 50%}.side-right .azfab.point-gb .marm{transform:rotate(-6deg)}
 .azfab.hop svg,.azfab.hop canvas{animation:azjump .7s cubic-bezier(.3,1.5,.5,1)}
-/* its bubble: a remark or a little menu; words in --ink1 on --paper; an actionable one ends with a chevron */
-.azfabbub{position:absolute;left:76px;bottom:104px;z-index:12;max-width:230px;appearance:none;border:0;background:var(--paper);color:var(--ink1);font:600 13.5px/1.35 var(--body);padding:9px 12px;border-radius:14px 14px 14px 4px;box-shadow:0 8px 22px rgba(0,0,0,.3);text-align:left;cursor:pointer;animation:gbin .22s ease}
-.azfab.onwall ~ .azfabbub{bottom:36px}
+/* its remark (placed above the ✦ and Azu): words in --ink1 on --paper; an actionable one ends with a chevron */
+.azfabbub{position:absolute;z-index:13;max-width:250px;appearance:none;border:0;background:var(--paper);color:var(--ink1);font:600 13.5px/1.35 var(--body);padding:11px 13px;min-height:44px;border-radius:14px 14px 14px 4px;box-shadow:0 8px 22px rgba(0,0,0,.3);text-align:left;cursor:pointer;animation:gbin .22s ease}
 .azfabbub.act::after{content:" \203A";color:var(--accent2);font-weight:800}
-.azfabbub.menu{display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:16px;cursor:default}
-.azfabbub.menu button{appearance:none;border:0;background:var(--box);color:var(--ink1);font:700 14px/1 var(--body);padding:11px 14px;border-radius:12px;text-align:left;cursor:pointer;white-space:nowrap}
-.reduce .azfab svg,.reduce .azfab canvas,.reduce .azfabbub{animation:none!important}
+.azbub.byfab{border-radius:14px 14px 14px 4px;max-width:230px}
+/* the ✦'s menu: the dock's dark, 44 px items, their icons in gold */
+.gbmenu{position:absolute;z-index:16;display:flex;flex-direction:column;gap:2px;min-width:224px;max-width:300px;padding:6px;border-radius:18px;background:#16181C;border:1px solid rgba(244,241,234,.16);box-shadow:0 12px 30px rgba(0,0,0,.4);animation:gbin .18s ease}
+.gbmenu button{appearance:none;border:0;display:flex;align-items:center;gap:12px;min-height:44px;padding:9px 12px;border-radius:12px;background:transparent;color:#F4F1EA;font:600 15px/1.2 var(--body);text-align:left;cursor:pointer}
+.gbmenu button:hover,.gbmenu button:focus-visible{background:rgba(244,241,234,.1)}
+.gbmenu svg{width:20px;height:20px;flex:none;fill:none;stroke:#FFD98A;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.gbmenu small{display:block;font:500 12.5px/1.25 var(--body);color:rgba(244,241,234,.74);margin-top:2px}
+.reduce .gbtn-wrap *,.reduce .azfabbub,.reduce .gbmenu{animation:none!important;transition:none!important}

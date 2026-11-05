@@ -1,4 +1,4 @@
-/* The Locate Button: it rides with the bar, its label folds after it is seen (pinLift, locFit). */
+/* The Locate Button: it rides with the bar, its label folds after it is seen (pinLift, locFit); the rule of a label seen 4 s (seenLabel). */
 /* ----- the Locate Button rests at the foot of the screen; the Navigation Bar (or the Sticky Action) lifts it when it comes ----- */
 function pinLift(anim){var lp=ph.querySelector(".locpin");if(!lp)return;var k=fit.getBoundingClientRect().height/SCREENS[S.screen][1],pr=ph.getBoundingClientRect(),b=22;
   [document.getElementById("navbar"),ph.querySelector(".sticky")].forEach(function(el){if(!el||getComputedStyle(el).display==="none"||el.classList.contains("away"))return;
@@ -14,8 +14,14 @@ function locFit(){var lb=locLabel();if(!lb)return;var wait=650-(performance.now(
   var hit=Array.prototype.some.call(scr.querySelectorAll(".hero .w small,.hero .w h2,.hero .w p,.hero .w button"),function(el){var c;if(el.tagName==="BUTTON")c=el.getBoundingClientRect();else{var rg=document.createRange();rg.selectNodeContents(el);c=rg.getBoundingClientRect()}
     return c.width&&!(a.right<c.left||a.left>c.right||a.bottom<c.top||a.top>c.bottom)});
   if(hit)lb.style.visibility="hidden"}
-setInterval(function(){var lb=locLabel();if(!lb||S.locFolded||S.view!=="card"||S.stop==="closed"||S.stop==="peek"||document.hidden)return;
-  if(lb.style.visibility!=="hidden"&&!lb.classList.contains("fold")){S.locShown+=250;if(S.locShown>=4000)foldLabel()}},250);
+/* the rule, for every label that folds into its button once seen (the Locate Button's, the guide button's): seenLabel({label: its
+   element, live: may its time count now, done: folded already, add(ms): adds seen time and gives the total, fold}). Unity: one
+   scheduler (schedule.Execute) adds the visible time, then the USS class "fold" transitions the label's width and opacity */
+var SEEN_MS=4000,SEEN=[];
+function seenLabel(o){SEEN.push(o)}
+setInterval(function(){if(document.hidden)return;SEEN.forEach(function(o){var lb=o.label();if(!lb||o.done()||!o.live())return;
+  if(lb.style.visibility!=="hidden"&&!lb.classList.contains("fold")&&o.add(250)>=SEEN_MS)o.fold()})},250);
+seenLabel({label:locLabel,live:function(){return S.view==="card"&&S.stop!=="closed"&&S.stop!=="peek"},done:function(){return S.locFolded},add:function(ms){return S.locShown+=ms},fold:foldLabel});
 on("renderPhone.after",function(keep){pinLift(false);
   if(S.justOpened&&S.ctl.locate.label==="open"){S.locFolded=false;S.locShown=0}
   var lb=locLabel();if(!lb)return;lb.classList.add("loclab");

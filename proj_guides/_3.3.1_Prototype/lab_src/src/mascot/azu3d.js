@@ -1,5 +1,5 @@
 /* Azu as a 3D model: the GLB drawn by three.js; the source, a clip, Import, Generate from a picture. */
-var AZUGLB="__AZUGLB__";
+
 /* what a mascot GLB must hold (the contract of _3.7 section 1): the clips, the morphs, the front arm as its own mesh */
 var AZ3D_CLIPS=["idle","talk","listen","think","point","walk","wave"],AZ3D_MORPHS=["Blink","Open","Wide","Round"];
 var AZ3D_THREE="https://cdn.jsdelivr.net/npm/three@0.160.0/+esm",AZ3D_LOADER="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js/+esm";
@@ -89,3 +89,5 @@ ed.addEventListener("click",function(e){var t=e.target.closest("[data-az3d]");if
 ed.addEventListener("change",function(e){var t=e.target;if(!t.dataset||!t.dataset.az3dimport||!t.files||!t.files[0])return;e.stopPropagation();Azu3D.importFile(t.files[0]).then(function(){renderEditor()})},true);
 /* choosing the source loads the model (once) */
 on("renderEditor.after",function(){if(az3dOn())Azu3D.load()});
+/* the row's demo: the guide's Azu drawn by that source */
+rowDemos({"guideCfg.azuStyle":{tour:"g1",ring:".mascot"}});

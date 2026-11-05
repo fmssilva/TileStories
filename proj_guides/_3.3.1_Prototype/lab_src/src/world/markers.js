@@ -1,4 +1,4 @@
-/* The card's markers on the wall's picture, the Wall button, the markers' test scene. */
+/* The card's markers on the wall's picture, the Wall button, the markers' test scene; the scenes that act instead of asking (act: [ok, note, what it did], or a promise of it). */
 /* each marker is a place on its wall's picture (u, v: 0-1 across and down), placed with camGeom() at every paint, as the pins are.
    The palace's marker stands for its point ("painting"), so that point draws no pin while the marker shows. */
 WALLS.ribeira.markers=[{id:"painting",u:.46,v:.52,name:T("Ribeira Palace","Paço da Ribeira"),icon:"info",card:true},
@@ -50,5 +50,5 @@ AGSCENES.push({id:"markers",label:"Ribeira wall · a drag moves the markers with
   setup:function(){setWall("ribeira");S.camX=.4;S.camY=.5;S.camZoom=1.3;renderPhone(false)}});
 on("agScene.after",function(sc){if(sc.act){AG.con.q="";agConPaint()}});
 on("agRunScene.answer",function(i){var sc=AGSCENES[i];if(!sc.act)return;agScene(i);
-  return new Promise(function(res){setTimeout(function(){var r=sc.act();AG.sceneRes[sc.id]={ok:r[0],note:r[1],answer:r[2],st:null,view:[]};agConPaint();res(AG.sceneRes[sc.id])},300)})});
+  return new Promise(function(res){setTimeout(function(){Promise.resolve(sc.act()).then(function(r){AG.sceneRes[sc.id]={ok:r[0],note:r[1],answer:r[2],st:null,view:[]};agConPaint();res(AG.sceneRes[sc.id])})},300)})});
 on("agScenesHtml.html",function(h){var sc=AGSCENES[AG.scene];return sc.act?h.replace("Asks: “"+esc(L(sc.q))+"”","Does: "+esc(L(sc.q))):h});

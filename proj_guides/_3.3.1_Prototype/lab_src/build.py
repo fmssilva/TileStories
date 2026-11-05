@@ -19,18 +19,18 @@ MODULES = ['src/core/open.js', 'src/core/assets.js', 'src/core/catalogues.js', '
            'src/phone/redraw.js', 'src/card/chrome-pinned.js', 'src/card/locate.js', 'src/card/hints.js', 'src/card/states.js',
            'src/guide/ask.js', 'src/guide/readalong.js', 'src/guide/focus.js', 'src/mascot/azu2d.js',
            'src/audiences/audiences.js', 'src/audiences/lenses.js', 'src/guide/person.js', 'src/guide/dock.js',
-           'src/guide/voice.js', 'src/guide/voice-test.js', 'src/world/camera-ask.js', 'src/mascot/azu-gl.js',
+           'src/guide/voice.js', 'src/guide/controls.js', 'src/guide/voice-test.js', 'src/world/camera-ask.js', 'src/mascot/azu-gl.js',
            'src/world/wall.js', 'src/world/guide-button.js', 'src/agent/agent.js', 'src/agent/tools.js', 'src/agent/console.js',
            'src/agent/scenes.js', 'src/mascot/azu3d.js', 'src/mascot/models.js', 'src/mascot/tile-styles.js',
-           'src/mascot/size.js', 'src/world/markers.js', 'src/agent/live-voice.js', 'src/mascot/mouth.js', 'src/core/boot.js']
+           'src/mascot/size.js', 'src/world/markers.js', 'src/guide/guide-scenes.js', 'src/agent/live-voice.js', 'src/mascot/mouth.js', 'src/core/boot.js']
 # the cascade depends on this order: a new style goes at the end, or beside the rule it overrides
 STYLES = ['src/core/base.css', 'src/card/card-base.css', 'src/phone/sheet.css', 'src/guide/tour.css', 'src/editor/texts.css',
           'src/card/controls.css', 'src/card/blocks.css', 'src/card/elements.css', 'src/editor/marker-tab.css', 'src/card/hero.css',
           'src/phone/grabber.css', 'src/card/hints.css', 'src/card/states.css', 'src/guide/readalong.css', 'src/guide/focus.css',
           'src/mascot/azu2d.css', 'src/audiences/audiences.css', 'src/audiences/lenses.css', 'src/guide/person.css',
-          'src/guide/dock.css', 'src/guide/voice-test.css', 'src/world/camera-ask.css', 'src/mascot/azu-gl.css',
+          'src/guide/dock.css', 'src/guide/controls.css', 'src/guide/voice-test.css', 'src/world/camera-ask.css', 'src/mascot/azu-gl.css',
           'src/world/guide-button.css', 'src/agent/agent.css', 'src/agent/scenes.css', 'src/world/markers.css',
-          'src/mascot/azu3d.css', 'src/mascot/models.css', 'src/mascot/tile-styles.css', 'src/mascot/size.css']
+          'src/mascot/azu3d.css', 'src/mascot/models.css', 'src/mascot/tile-styles.css', 'src/mascot/size.css', 'src/editor/demo.css']
 
 
 def rd(*p):
@@ -46,11 +46,10 @@ ASSETS = [('__REALSTR__', None, os.path.join(D, 'src', 'core', 'realstrings.json
 ASSETS += [('__' + k + '__', 'image/jpeg', os.path.join(D, 'assets', f + '.jpg')) for k, f in
            (('HERO', 'paco_hero'), ('G1', 'paco_gallery_1'), ('G2', 'paco_gallery_2'), ('G3', 'paco_gallery_3'),
             ('BEFORE', 'paco_before_1755'), ('BELEM', 'belem_wall'))]
-ASSETS += [('__AZUGLB__', 'model/gltf-binary', os.path.join(M3, 'azu_tile.glb'))]
 ASSETS += [('__AZUGLB_' + k + '__', 'model/gltf-binary', os.path.join(M3, f)) for k, f in
            (('AZU', 'azu.glb'), ('MOUSE', 'mouse.glb'), ('EXPLORER', 'explorer.glb'), ('POET', 'poet.glb'), ('SOLDIER', 'soldier.glb'))]
 ASSETS += [('__AZTHUMB_' + k + '__', 'image/png', os.path.join(M3, 'thumbs', k.lower() + '.png')) for k in
-           ('AZU', 'TILE', 'MOUSE', 'EXPLORER', 'POET', 'SOLDIER')]
+           ('AZU', 'MOUSE', 'EXPLORER', 'POET', 'SOLDIER')]
 
 
 def build():

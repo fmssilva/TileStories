@@ -1,4 +1,4 @@
-/* v8o: the Guide Dock. Unity: a UI Toolkit sheet like the card's; the rings are elements with a radial-gradient sprite whose scale
+/* The Guide Dock. Unity: a UI Toolkit sheet like the card's; the rings are elements with a radial-gradient sprite whose scale
    and alpha follow the voice or the mic; the bubble is a 9-slice with a tail. Words always on solid colours (no backdrop blur). */
 .gdock{position:absolute;left:8px;right:8px;bottom:8px;z-index:14;background:#16181C;color:#F4F1EA;border-radius:24px;box-shadow:0 10px 30px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.06);padding:6px 12px 10px;transition:height .32s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
 .gd-grab{appearance:none;border:0;background:none;height:14px;display:flex;justify-content:center;align-items:center;cursor:pointer;padding:0;touch-action:none}
@@ -10,7 +10,12 @@
 .gd-stop{display:block;font:600 11px/1.2 var(--body);color:rgba(244,241,234,.66);letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gd-cap .gcap{position:static;inset:auto;background:none;box-shadow:none;padding:0;margin-top:3px;max-height:44px;overflow:hidden;font:500 14px/1.4 var(--body);border-radius:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .gd-kb{appearance:none;border:0;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.08);color:#F4F1EA;display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
-.gd-kb svg,.gd-ctl svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* Mini: Pause and Stop beside the talk button (44 px targets); the chevron at the top right hides the dock (Compact) */
+.gd-mini{display:flex;gap:6px;flex:0 0 auto}
+.gd-mc{appearance:none;border:0;width:44px;height:44px;border-radius:50%;background:rgba(244,241,234,.12);color:#F4F1EA;display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
+.gd-hide{position:absolute;top:0;right:8px;appearance:none;border:0;background:none;width:44px;height:30px;display:grid;place-items:center;color:rgba(244,241,234,.78);cursor:pointer;padding:0}
+.gd-hide svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.gd-kb svg,.gd-mc svg,.gd-ctl svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 /* the talk button: a blue disc with a white mic and a soft glow; its rings tell the state */
 .gd-talk{position:relative;appearance:none;border:0;width:56px;height:56px;flex:0 0 auto;border-radius:50%;background:radial-gradient(circle at 35% 30%,#5B8CFF,#2F5FE0 60%,#1F45B5);color:#fff;display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 14px rgba(47,95,224,.4);touch-action:none;transition:transform .15s}
 .gd-talk:active{transform:scale(.94)}
@@ -27,9 +32,9 @@
 /* Peek: the controls and the suggested questions; Full: the conversation */
 .gd-peek,.gd-full{display:none}.gdock.h-peek .gd-peek,.gdock.h-full .gd-peek{display:block}.gdock.h-full .gd-full{display:flex}
 .gd-ctl{display:flex;justify-content:space-between;gap:6px;margin:10px 0 8px}
-.gd-ctl button{appearance:none;border:0;flex:1;height:40px;border-radius:14px;background:rgba(255,255,255,.08);color:#F4F1EA;display:grid;place-items:center;cursor:pointer;font:700 13px/1 var(--body)}
+.gd-ctl button{appearance:none;border:0;flex:1;height:44px;border-radius:14px;background:rgba(255,255,255,.08);color:#F4F1EA;display:grid;place-items:center;cursor:pointer;font:700 13px/1 var(--body)}
 .gd-ctl button[aria-pressed=false].cc{opacity:.5}
-.gd-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.gd-chips::-webkit-scrollbar{display:none}
+.gd-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;align-items:center}.gd-chips .gd-kb{width:44px;height:44px}.gd-chips::-webkit-scrollbar{display:none}
 .gd-chips button{flex:0 0 auto;appearance:none;border:1px solid rgba(255,255,255,.16);background:transparent;color:#F4F1EA;font:600 13px/1 var(--body);padding:9px 12px;border-radius:999px;cursor:pointer}
 .gdock.h-full{top:72px}.gdock.h-full .gd-line{display:none}.gdock.h-full .gd-main{justify-content:flex-end}
 .gd-full{flex:1;min-height:0;flex-direction:column;gap:8px;margin-top:6px}

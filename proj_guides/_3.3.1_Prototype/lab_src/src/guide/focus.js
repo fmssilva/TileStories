@@ -53,7 +53,7 @@ function fcTick(){G.fcRaf=0;var sp=ph.querySelector(".gspot");if(!G.on){if(sp)sp
     if(e<1){e=1-Math.pow(1-e,3);g=g.map(function(v,i){return f[i]+(v-f[i])*e})}G.fc.last=g;
     sp.style.left=g[0]+"px";sp.style.top=g[1]+"px";sp.style.width=g[2]+"px";sp.style.height=g[3]+"px"}
   ph.classList.toggle("gspotting",cfg.cue!=="none");
-  pointAt(r&&cfg.point&&!G.paused?{x:(r.left+r.width/2-p.left)/q,y:((Math.max(r.top,box.top)+Math.min(r.bottom,box.bottom))/2-p.top)/q}:null);
+  pointAt(r&&cfg.point&&!G.paused?{x:(r.left+r.width/2-p.left)/q,y:((Math.max(r.top,box.top)+Math.min(r.bottom,box.bottom))/2-p.top)/q,el:el}:null);
   G.fcRaf=requestAnimationFrame(fcTick)}
 on("stopTour.before",function(){unzoomAll();var sp=ph.querySelector(".gspot");if(sp)sp.remove();ph.classList.remove("gspotting")});
 
@@ -93,3 +93,5 @@ ed.addEventListener("pointermove",function(e){if(!cueDraw)return;var g=cueAt(e),
 ed.addEventListener("pointerup",function(e){if(!cueDraw)return;var g=cueAt(e),q=cueDraw.b.dataset.cuepic.split("|");byId(S.guideSteps,q[0]).cues[+q[1]].region=g.map(function(v){return Math.round(v*1000)/1000});cueDraw=null;
   if(G.on&&G.fc){G.fc.cue=-2}},true);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(cue|scrim|zoom|point|"));
+/* each row's demo: the light on the block being told; the zoom on the step that names three spots */
+rowDemos({"guideCfg.cue":{tour:"g1",ring:".gspot|.gfocus"},"guideCfg.scrim":{tour:"g1",ring:".gspot|.gfocus"},"guideCfg.zoom":{tour:"g3",ringAfter:1500,ring:".gspot|.gfocus"},"guideCfg.point":{tour:"g1",ring:".mascot"}});

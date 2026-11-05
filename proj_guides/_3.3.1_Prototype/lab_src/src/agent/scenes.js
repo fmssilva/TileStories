@@ -6,8 +6,8 @@ function agTrace(turn){var st=turn.st;if(!st)return"";var c=(turn.calls||[]).map
   return'<div class="agtrace">'+esc(agProvName(st.provider)+" · "+st.model+(st.err?" · "+st.err:"")+" · "+(st.first?st.first+" ms / ":"")+st.ms+" ms · "+st.tin+" in / "+st.tout+" out"+(st.est?" (est.)":"")+(st.cost?" · $"+st.cost.toFixed(4):""))+(c?'<br>'+esc(c):"")+'</div>'}
 on("agTurnHtml.html",function(h,turn){if(!S.agentCfg.trace||!turn)return h;turn.vid=turn.vid||(AG.vids=(AG.vids||0)+1);
   return h+agTrace(turn)+'<div class="agtrace agvoice" data-vid="'+turn.vid+'">'+esc(turn.voice?"Voice: "+turn.voice:"")+'</div>'});
-/* the voice that speaks the answer (Narration > Speaking now), under it, as it starts */
-on("sayNow.after",function(n){var t=G.agTurn;if(!n||!n.answer||!t||t.text!==n.text)return;t.voice=sayNowText();
+/* the voice that speaks the answer, on the card or on the wall (Narration > Speaking now), under it, as it starts */
+on("sayNow.after",function(n){var t=[G.agTurn,G.cam.turn].filter(function(x){return x&&n&&x.text===n.text})[0];if(!n||!n.answer||!t)return;t.voice=sayNowText();
   ph.querySelectorAll('.agvoice[data-vid="'+t.vid+'"]').forEach(function(e){e.textContent="Voice: "+t.voice})});
 /* every answer keeps its trace, a failed one too (its offline answer says why) */
 on("agentAsk.before",function(q,where,ui){var d=ui.done,f=ui.fail;
@@ -83,3 +83,5 @@ WALLS.belem.pois.forEach(function(p){if(p.id==="tagus")p.name=T("Open water on t
 /* spoken text has no markdown: the rule asks for plain text, and emphasis a model still writes is taken out */
 on("agPrompt.text",function(s){return s.replace("RULES:\n","RULES:\n- Plain spoken text: no markdown, no lists, no asterisks.\n")});
 on("agClean.text",function(t){return String(t||"").replace(/\*{1,2}([^*\n]+)\*{1,2}/g,"$1").replace(/(^|\s)_([^_\n]+)_(?=\s|[.,;!?]|$)/g,"$1$2")});
+/* each row's demo: the points named on the wall; a question answered on the card, its trace under it */
+rowDemos({"camCfg.names":{wall:"open",ring:".campins"},"agentCfg.trace":{tour:true,dock:"full",act:function(){ask(L(S.guideAsks[0]))},ringAfter:1400,ring:".agtrace|.gd-thread"}});

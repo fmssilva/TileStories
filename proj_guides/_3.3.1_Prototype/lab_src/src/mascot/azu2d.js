@@ -1,10 +1,10 @@
 /* Azu in 2D: depth, feet, moods, the mouth by the letters, blinks; play (poke, tickle, a fall, a cookie, a water break). */
 function moveMascot(el){var m=ph.querySelector(".mascot");if(!m)return;var p=ph.getBoundingClientRect(),k=p.width/ph.offsetWidth,y=120;
-  if(el){var r=el.getBoundingClientRect();y=Math.max(70,Math.min(ph.offsetHeight-210,(r.top-p.top)/k+10))}m.style.top=y+"px";m.classList.remove("hop");void m.offsetWidth;m.classList.add("hop")}
+  if(el){var r=el.getBoundingClientRect();y=besideWords(m,Math.max(70,Math.min(ph.offsetHeight-210,(r.top-p.top)/k+10)),70,ph.offsetHeight-210,el)}m.style.top=y+"px";m.classList.remove("hop");void m.offsetWidth;m.classList.add("hop")}
 
 /* ----- the guide's floating controls, captions, mascot and Ask ----- */
 var MASCOT='<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="6" y="8" width="52" height="50" rx="10" fill="#F4EEE3" stroke="#1F4E9C" stroke-width="3"/><path d="M6 18H18A10 10 0 0 1 6 28ZM58 18V28A10 10 0 0 1 46 18Z" fill="#1F4E9C" opacity=".55"/><path d="M32 14C36 19 36 22 32 25C28 22 28 19 32 14Z" fill="#1F4E9C"/><circle cx="23" cy="36" r="4.5" fill="#1A1814"/><circle cx="41" cy="36" r="4.5" fill="#1A1814"/><circle cx="24.5" cy="34.5" r="1.4" fill="#fff"/><circle cx="42.5" cy="34.5" r="1.4" fill="#fff"/><path class="mouth" d="M26 46Q32 51 38 46" stroke="#1A1814" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="16" cy="44" r="3" fill="#E79AB7" opacity=".6"/><circle cx="48" cy="44" r="3" fill="#E79AB7" opacity=".6"/></svg>';
-S.guideCfg.life="lively";S.guideCfg.lips=true;S.guideCfg.moods=true;S.guideCfg.moments=true;S.guideCfg.waterAfter=60;S.m=S.m||{};S.m.solemn=false;
+S.guideCfg.life="lively";S.guideCfg.azuTap="play";S.guideCfg.lips=true;S.guideCfg.moods=true;S.guideCfg.moments=true;S.guideCfg.waterAfter=60;S.m=S.m||{};S.m.solemn=false;
 /* Azu in 2.5D: a tile with its thickness behind it, light from the top left, feet and a soft shadow; the face's parts are named so they can move */
 MASCOT='<svg viewBox="0 0 64 74" aria-hidden="true"><defs><linearGradient id="azg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".55" stop-color="#F4EEE3"/><stop offset="1" stop-color="#E2D6C1"/></linearGradient></defs>'+
   '<ellipse class="az-shadow" cx="32" cy="70.5" rx="17" ry="2.6" fill="rgba(0,0,0,.2)"/>'+
@@ -33,7 +33,7 @@ function azApply(){var m=ph.querySelector(".mascot");if(!m)return;var md=azMood(
 function shapesOf(w){var out=[],m={a:"A",á:"A",à:"A",ã:"A",â:"A",e:"E",é:"E",ê:"E",i:"E",í:"E",o:"O",ó:"O",ô:"O",õ:"O",u:"O",ú:"O",m:"M",b:"M",p:"M"};
   String(w).toLowerCase().replace(/[^\p{L}]/gu,"").split("").forEach(function(c){var s=m[c];if(s&&out[out.length-1]!==s)out.push(s)});if(!out.length)out.push("E");
   if(out.length>3)out=[out[0],out[Math.floor(out.length/2)],out[out.length-1]];return out}
-on("markWord.after",function(k){if(!S.guideCfg.lips||!G.words[k])return;var m=ph.querySelector(".mascot");if(!m)return;
+on("markWord.after",function(k){if(!S.guideCfg.lips||S.reduce||!G.words[k])return;var m=ph.querySelector(".mascot");if(!m)return;
   (G.lipT||[]).forEach(clearTimeout);var sh=shapesOf(G.words[k].w),dur=Math.max(120,wordMs(k)),per=dur/(sh.length+.6);
   G.lipT=sh.map(function(s,i){return setTimeout(function(){azMouth(ph.querySelector(".mascot"),s)},i*per)}).concat([setTimeout(function(){G.lipT=null;azMouth(ph.querySelector(".mascot"),restShape(azMood()))},sh.length*per)])});
 /* blinks: every 2.5-5 s, never in sync with anything */
@@ -42,9 +42,12 @@ on("renderGuide.after",function(){var m=ph.querySelector(".mascot");if(!m)return
 on("startTour.before",function(){G.moment=null;G.talkFrom=performance.now();G.cardMoments=0});on("startTour.after",function(){azBlink()});
 
 /* ----- play: what the visitor starts is never limited; what Azu starts is rare (1 a card, 1 every 5 min) and never over a sentence ----- */
-function azBubble(txt,ms){var m=ph.querySelector(".mascot");if(!m)return;var o=ph.querySelector(".azbub");if(o)o.remove();var b=document.createElement("div");b.className="azbub";b.textContent=txt;b.setAttribute("role","status");
-  var mid=m.classList.contains("center");b.classList.toggle("mid",mid);b.style.top=(mid?ph.offsetHeight*.42-48:m.offsetTop-40)+"px";ph.appendChild(b);clearTimeout(G.bubT);G.bubT=setTimeout(function(){b.remove()},ms||1800)}
-function azReact(cls,ms,mood){var m=ph.querySelector(".mascot");if(!m)return;m.classList.remove("r-giggle","r-spin","r-jump","r-wink","r-blush","r-fall","r-laugh","r-eat","r-drink");void m.offsetWidth;
+/* the Azu on the screen: the guide's (during a tour) or the one beside the guide's button (world/guide-button.js); both play the same */
+function azuEl(){return ph.querySelector(".mascot")||ph.querySelector(".azfab")}
+function azBubble(txt,ms){var m=azuEl();if(!m)return;var o=ph.querySelector(".azbub");if(o)o.remove();var b=document.createElement("div");b.className="azbub";b.textContent=txt;b.setAttribute("role","status");
+  var mid=m.classList.contains("center");b.classList.toggle("mid",mid);ph.appendChild(b);
+  if(m.classList.contains("azfab")){b.classList.add("byfab");placeNear(b)}else b.style.top=(mid?ph.offsetHeight*.42-48:m.offsetTop-40)+"px";clearTimeout(G.bubT);G.bubT=setTimeout(function(){b.remove()},ms||1800)}
+function azReact(cls,ms,mood){var m=azuEl();if(!m)return;m.classList.remove("r-giggle","r-spin","r-jump","r-wink","r-blush","r-fall","r-laugh","r-eat","r-drink");void m.offsetWidth;
   if(!S.reduce||cls==="r-wink"||cls==="r-blush")m.classList.add(cls);if(mood)azMouth(m,mood);clearTimeout(G.reactT);G.reactT=setTimeout(function(){m.classList.remove(cls);azApply()},ms||800)}
 function haptic(){try{if(navigator.vibrate)navigator.vibrate(12)}catch(e){}}
 var POKES=["r-giggle","r-spin","r-jump","r-wink","r-blush","hey"];
@@ -69,16 +72,19 @@ on("next.answer",function(){if(G.on&&!G.moment&&momentAllowed()&&!G.paused){var 
     if(st&&performance.now()-(G.talkFrom||0)>=S.guideCfg.waterAfter*1000){azMoment("water",nextStep);return true}
     if(st&&st.act==="end"){azMoment("cookie",nextStep);return true}}});
 on("stopTour.before",function(){if(G.moment){G.momentThen=null;azMomentEnd(false)}clearTimeout(G.blinkT);(G.lipT||[]).forEach(clearTimeout);G.lipT=null;var b=ph.querySelector(".azbub");if(b)b.remove()});
-/* the gestures on Azu: a tap pokes, three quick taps tickle, a long press (0.5 s) knocks Azu over; they never pause the tour */
+/* the gestures on Azu (the guide's, or the one beside the guide's button): a tap does what Tap on Azu says (it plays: a poke), three
+   quick taps tickle, a long press (0.5 s) knocks Azu over; they never pause the tour. A tap on Azu never opens the ✦'s menu unless asked */
 var azDown=null;
-ph.addEventListener("pointerdown",function(e){var m=e.target.closest(".mascot");if(!m||!G.on)return;e.stopPropagation();azDown={t:performance.now()}},true);
-ph.addEventListener("pointerup",function(e){var m=e.target.closest(".mascot");if(!m||!azDown){azDown=null;return}e.stopPropagation();var held=performance.now()-azDown.t,now=performance.now();azDown=null;
-  if(held>=500){azFall();return}G.taps=(G.taps||[]).filter(function(t){return now-t<1200}).concat([now]);if(G.taps.length>=3){G.taps=[];azTickle();return}azPoke()},true);
-ph.addEventListener("click",function(e){var p=e.target.closest("[data-azprop]");if(p){e.stopPropagation();azMomentDo();return}if(e.target.closest(".mascot"))e.stopPropagation()},true);
+function azTarget(e){var m=e.target.closest(".mascot,.azfab");return m&&(G.on||m.classList.contains("azfab"))?m:null}
+ph.addEventListener("pointerdown",function(e){if(!azTarget(e))return;e.stopPropagation();azDown={t:performance.now()}},true);
+ph.addEventListener("pointerup",function(e){if(!azTarget(e)||!azDown){azDown=null;return}e.stopPropagation();var held=performance.now()-azDown.t,now=performance.now();azDown=null;
+  if(held>=500){azFall();return}G.taps=(G.taps||[]).filter(function(t){return now-t<1200}).concat([now]);if(G.taps.length>=3){G.taps=[];azTickle();return}azuTapDo(azuTapAct())},true);
+ph.addEventListener("click",function(e){var p=e.target.closest("[data-azprop]");if(p){e.stopPropagation();azMomentDo();return}if(e.target.closest(".mascot,.azfab"))e.stopPropagation()},true);
 
 /* Editor: 6 · Guide > Mascot gets its liveliness, mouth, moods, moments and a Try per play; Specific Marker > Guide script gets Solemn and each step's mood */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
-  addRows(d,"s7mascot",row("Liveliness",pseg("guideCfg.life",["lively","calm"],["Lively","Calm"]),"Lively: Azu hops, reacts to every poke (6 reactions, never one of the last 3), sometimes tells a joke, and may stop once for a sip of water or a cookie. Calm: blinks, talks and points; a poke gets a wink; nothing unprompted.")+
+  addRows(d,"s7mascot",row("Tap on Azu",pseg("guideCfg.azuTap",["play","menu","point"],["Play","Opens the menu","Points to the ✦ button"]),"Play: a tap on Azu (the guide's, or the one beside the guide's button) pokes it; it never opens the menu, so one gesture means one thing. Opens the menu: as before, a tap on Azu opens the ✦'s menu (during a tour it shows or hides the dock). Points to the ✦ button: Azu points at the ✦ and says “Need anything? Tap ✦”. Three quick taps and a long press always play. With Guide button = Azu only, Azu is the button and a tap opens the menu.")+
+    row("Liveliness",pseg("guideCfg.life",["lively","calm"],["Lively","Calm"]),"Lively: Azu hops, reacts to every poke (6 reactions, never one of the last 3), sometimes tells a joke, and may stop once for a sip of water or a cookie. Calm: blinks, talks and points; a poke gets a wink; nothing unprompted.")+
     row("Mouth",pseg("guideCfg.lips",["true","false"],["Follows the words","Still"]),"The mouth changes shape with each word being said (from its letters here; from the voice's visemes in the app).")+
     row("Moods",pseg("guideCfg.moods",["true","false"],["On","Off"]),"Each step's mood (in the Guide script): smile, delighted, surprised, thinking, serious. On a Solemn point the face stays serious or thoughtful.")+
     row("Moments",pseg("guideCfg.moments",["true","false"],["On","Off"]),"Lively only, at most one a tour and one every 5 minutes, between two steps, never over a sentence: a sip of water after the time below, or a cookie before the end. One tap answers; 8 s without one, the tour carries on.")+
@@ -95,3 +101,8 @@ ed.addEventListener("change",function(e){var t=e.target;if(!t.dataset||!t.datase
 ed.addEventListener("click",function(e){var t=e.target.closest("[data-aztry]");if(!t)return;e.stopPropagation();var k=t.dataset.aztry;if(!G.on){startTour()}
   setTimeout(function(){if(k==="poke")azPoke();else if(k==="tickle")azTickle();else if(k==="fall")azFall();else{pauseTour();azMoment(k,function(){resumeTour()})}},G.on?50:900)},true);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(life|lips|moods|moments|waterAfter|").replace("^@?(","^@?(m\\.solemn|"));
+/* each row's demo: Azu tapped once (beside the ✦); a poke in the tour; the mouth and the mood on step 2; a water break */
+rowDemos({"guideCfg.azuTap":{past:true,act:function(){var a=ph.querySelector(".azfab");if(a)gsTouch(a)},ring:".gbmenu|.azfab"},"guideCfg.life":{tour:"g1",act:function(){azPoke()},ring:".mascot"},
+  "guideCfg.lips":{tour:"g1",ring:".mascot"},"guideCfg.moods":{tour:"g1",ring:".mascot"},
+  "guideCfg.moments":{tour:"g1",act:function(){if(momentAllowed()){pauseTour();azMoment("water",function(){resumeTour()})}},ring:".azmoment|.mascot"},
+  "guideCfg.waterAfter":{tour:"g1",act:function(){if(momentAllowed()){pauseTour();azMoment("water",function(){resumeTour()})}},ring:".azmoment|.mascot"}});

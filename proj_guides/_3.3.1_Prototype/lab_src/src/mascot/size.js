@@ -20,3 +20,5 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   var tb=d.querySelector('[data-fo="s8look"] table tbody');
   if(tb)tb.insertAdjacentHTML("afterbegin",'<tr><td>Character</td>'+AUDS.map(function(a){return'<td>'+psel("aud.looks."+a+".char",azCharOpts())+'</td>'}).join("")+'</tr>');
   return d.innerHTML});
+/* the row's demo: the guide's Azu at that size */
+rowDemos({"guideCfg.azuSize":{tour:"g1",ring:".mascot"}});

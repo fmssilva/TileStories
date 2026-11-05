@@ -1,0 +1,5 @@
+/* A row with a demo: its label is pressable (it shows the row's demo on the phone). Unity: the POI Editor's row gets a small preview
+   icon button (DrawIconButton) beside its label. */
+.row > label.rd{cursor:pointer}
+.row > label.rd::after{content:" \25B8";color:#E07A1F}
+.row > label.rd:hover{color:#fff}

@@ -25,10 +25,9 @@ function camLayer(){var o=ph.querySelector(".campins");if(o)o.remove();var b=ph.
   ph.appendChild(a)}emit("camLayer.after")}
 /* ----- the answers: the model gets the points in view (names, grid places, the middle one), the card, the audience; its tools light points and make routes ----- */
 function camContext(){var v=camView();return{in_view:v.pois.map(function(p){return{id:p.id,name:p.name,place:p.where,year:p.year,has_card:p.card}}),middle:v.central&&v.central.id,audience:aud(),lens:S.lens||null,language:S.lang==="pt"?"pt-PT":"en"}}
-/* camSay asks its sources (camSay.source, the latest first), each one true when it speaks the answer; the device voice speaks the rest */
-function camSay(t){camSayFrom(null,t)}
-function camSayFrom(src,t){if(answerBelow("camSay.source",src,t)===undefined)camSayDevice(t)}
-function camSayDevice(t){G.cam.busy=false;G.cam.answer=t;camLayer();try{if(window.speechSynthesis&&!S.guideMute){var u=new SpeechSynthesisUtterance(t),vv=voiceFor(S.lang);if(vv){u.voice=vv;u.lang=vv.lang}speechSynthesis.cancel();speechSynthesis.speak(u)}}catch(e){}}
+/* the wall's answers take the one order of every line (guide/voice.js's sayOrder: an answer, so the live voice first, then a recorded
+   line, then the device) and Narration > Speaking now says which voice and why; the panel shows the words, so no captions */
+function camSay(t){G.cam.busy=false;G.cam.answer=t;camLayer();G.answer=t;say(t,function(){},function(){})}
 function camLight(ids){G.cam.lit=ids.filter(function(id){return S.wallPois.some(function(p){return p.id===id})});camLayer();emit("camLight.after",ids)}
 /* without the model (offline, or a preview): answers built from the same view */
 function camOffline(kind){var v=camView(),P=v.pois;if(!P.length)return TXT("cam_none");var c=v.central;
@@ -49,7 +48,7 @@ function camAsk(q,kind){if(firstAnswer("camAsk.answer",q,kind)!==undefined)retur
 /* the talk button's words go here while the camera ask is open */
 on("heard.answer",function(q,err){if(G.cam.open&&q&&q.trim()){G.talk="idle";camAsk(q);return true}});
 ph.addEventListener("click",function(e){var t=e.target.closest("[data-camask],[data-camclose],[data-cchip],[data-cpin]");if(!t)return;e.stopPropagation();
-  if(t.dataset.camclose){G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};camLayer();try{speechSynthesis.cancel()}catch(x){}return}
+  if(t.dataset.camclose){G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};camLayer();stopSpeech();return}
   if(t.dataset.camask){if(!G.cam.open){G.cam.open=true;camLayer();return}listen(false);return}
   if(t.dataset.cchip){var k=t.dataset.cchip;camAsk(TXT("cam_chip_"+k),sampleFn&&k!=="kids"?null:k);if(sampleFn&&k!=="kids")G.cam.lastChip=k;return}
   var id=t.dataset.cpin;if(G.cam.hunt){if(id===G.cam.hunt){G.cam.hunt=null;haptic();camLight([id]);camSay(TXT("cam_found"))}else{G.cam.answer=TXT("cam_not_it");camLayer()}return}
@@ -71,3 +70,5 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;v
 ed.addEventListener("click",function(e){var t=e.target.closest("[data-camtry]");if(!t)return;e.stopPropagation();if(G.on)stopTour();S.view="card";S.stop="closed";G.cam.open=true;renderPhone(false)},true);
 on("modelSig.sig",function(h){return h+"#cam:"+S.camCfg.on+S.camCfg.chips});
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("ctl\\.jump\\.","ctl\\.jump\\.|camCfg\\."));
+/* each row's demo: the wall, the ✦'s menu with Ask about the view; the panel open with its suggestions */
+rowDemos({"camCfg.on":{wall:true,act:function(){gbMenu(true)},ring:'[data-gbgo="view"]|.gbtn'},"camCfg.chips":{wall:"open",ring:".ca-chips|.camask"}});

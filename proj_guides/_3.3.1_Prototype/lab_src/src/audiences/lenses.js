@@ -61,3 +61,5 @@ ed.addEventListener("click",function(e){var t=e.target.closest("[data-lensadd],[
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("ctl\\.jump\\.","ctl\\.jump\\.|lensCfg\\.story|lensCfg\\.min"));
 /* the self-test's view of the phone includes the chips and what a lens hides */
 on("modelSig.sig",function(h){return h+"#lens:"+(lensOn()?(S.lensCfg.story?"s":"")+S.lens+"|"+S.lenses.map(function(l){return l.id+":"+L(l.name)}).join(",")+"|"+JSON.stringify(S.tags):"off")});
+/* each row's demo: the See it as chips under the hero; on the story page */
+rowDemos({"lensCfg.on":{stop:"full",ring:".lensbar|.hero"},"lensCfg.min":{stop:"full",ring:".lensbar|.hero"},"lensCfg.story":{view:"story",ring:".lensbar|.topbar"}});

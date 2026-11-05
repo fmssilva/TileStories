@@ -1,31 +1,31 @@
 /* v8k: Azu. Tappable; 2.5D (its thickness, light from the top left, feet, a shadow); moods move the brows and eyes; reactions are short */
 .mascot{pointer-events:auto;cursor:pointer;width:56px;height:64px;transition:top .6s cubic-bezier(.3,1.4,.5,1),right .7s cubic-bezier(.4,0,.2,1)}
 .mascot svg{width:56px;height:64px;overflow:visible;transform-origin:50% 92%;transition:transform .35s}
-.mascot .az-brow{stroke:#1A1814;stroke-width:2.4;fill:none;stroke-linecap:round;opacity:0;transform-box:fill-box;transform-origin:50% 50%;transition:opacity .2s,transform .2s}
-.mascot .az-eye,.mascot .az-cheek{transform-box:fill-box;transform-origin:50% 50%;transition:transform .09s}
-.mascot.blink .az-eye{transform:scaleY(.12)}
-.mascot[data-mood=surprised] .az-brow{opacity:1;transform:translateY(-3px)}.mascot[data-mood=surprised] .az-eye{transform:scale(1.15)}
-.mascot[data-mood=thinking] .az-brow.l{opacity:1;transform:translateY(-2.5px) rotate(-8deg)}.mascot[data-mood=thinking] .az-eye{transform:translate(1.5px,-1px)}
-.mascot[data-mood=serious] .az-brow{opacity:1}.mascot[data-mood=serious] .az-brow.l{transform:translateY(-1px) rotate(-12deg)}.mascot[data-mood=serious] .az-brow.r{transform:translateY(-1px) rotate(12deg)}.mascot[data-mood=serious] .az-cheek{opacity:.25}
-.mascot[data-mood=big] .az-cheek{transform:scale(1.25)}
+:is(.mascot,.azfab) .az-brow{stroke:#1A1814;stroke-width:2.4;fill:none;stroke-linecap:round;opacity:0;transform-box:fill-box;transform-origin:50% 50%;transition:opacity .2s,transform .2s}
+:is(.mascot,.azfab) .az-eye,:is(.mascot,.azfab) .az-cheek{transform-box:fill-box;transform-origin:50% 50%;transition:transform .09s}
+:is(.mascot,.azfab).blink .az-eye{transform:scaleY(.12)}
+:is(.mascot,.azfab)[data-mood=surprised] .az-brow{opacity:1;transform:translateY(-3px)}:is(.mascot,.azfab)[data-mood=surprised] .az-eye{transform:scale(1.15)}
+:is(.mascot,.azfab)[data-mood=thinking] .az-brow.l{opacity:1;transform:translateY(-2.5px) rotate(-8deg)}:is(.mascot,.azfab)[data-mood=thinking] .az-eye{transform:translate(1.5px,-1px)}
+:is(.mascot,.azfab)[data-mood=serious] .az-brow{opacity:1}:is(.mascot,.azfab)[data-mood=serious] .az-brow.l{transform:translateY(-1px) rotate(-12deg)}:is(.mascot,.azfab)[data-mood=serious] .az-brow.r{transform:translateY(-1px) rotate(12deg)}:is(.mascot,.azfab)[data-mood=serious] .az-cheek{opacity:.25}
+:is(.mascot,.azfab)[data-mood=big] .az-cheek{transform:scale(1.25)}
 /* the 3D feel when pointing: Azu turns towards the spot */
 .mascot.pointing svg{transform:perspective(240px) rotateY(-18deg) rotate(-5deg)}
 /* reactions (Reduce Motion: only the wink and the blush, which do not move) */
-.mascot.r-giggle svg{animation:azgig .8s ease-in-out}
+:is(.mascot,.azfab).r-giggle svg{animation:azgig .8s ease-in-out}
 @keyframes azgig{0%,100%{transform:rotate(0)}20%{transform:rotate(-9deg)}40%{transform:rotate(8deg)}60%{transform:rotate(-5deg)}80%{transform:rotate(3deg)}}
-.mascot.r-spin svg{animation:azspin .8s cubic-bezier(.4,1.3,.5,1)}
+:is(.mascot,.azfab).r-spin svg{animation:azspin .8s cubic-bezier(.4,1.3,.5,1)}
 @keyframes azspin{from{transform:perspective(240px) rotateY(0)}to{transform:perspective(240px) rotateY(360deg)}}
-.mascot.r-jump svg{animation:azjump .7s cubic-bezier(.3,1.5,.5,1)}
+:is(.mascot,.azfab).r-jump svg{animation:azjump .7s cubic-bezier(.3,1.5,.5,1)}
 @keyframes azjump{0%{transform:none}20%{transform:scale(1.08,.9)}50%{transform:translateY(-22px) scale(.95,1.06)}80%{transform:scale(1.06,.94)}100%{transform:none}}
-.mascot.r-wink .az-eye:last-child{transform:scaleY(.12)}
-.mascot.r-blush .az-cheek{transform:scale(1.6);opacity:1}
-.mascot.r-laugh svg{animation:azlaugh .2s linear 6}
+:is(.mascot,.azfab).r-wink .az-eye:last-child{transform:scaleY(.12)}
+:is(.mascot,.azfab).r-blush .az-cheek{transform:scale(1.6);opacity:1}
+:is(.mascot,.azfab).r-laugh svg{animation:azlaugh .2s linear 6}
 @keyframes azlaugh{50%{transform:translateY(-3px) rotate(4deg)}}
-.mascot.r-fall svg{animation:azfall 1.7s cubic-bezier(.3,.8,.4,1)}
+:is(.mascot,.azfab).r-fall svg{animation:azfall 1.7s cubic-bezier(.3,.8,.4,1)}
 @keyframes azfall{0%{transform:none}22%{transform:translate(-8px,6px) rotate(-96deg)}62%{transform:translate(-8px,6px) rotate(-96deg)}82%{transform:rotate(9deg)}100%{transform:none}}
-.mascot.r-eat svg{animation:azchew .25s ease-in-out 6}
+:is(.mascot,.azfab).r-eat svg{animation:azchew .25s ease-in-out 6}
 @keyframes azchew{50%{transform:scale(1.05,.95)}}
-.mascot.r-drink svg{animation:azdrink 1.5s ease-in-out}
+:is(.mascot,.azfab).r-drink svg{animation:azdrink 1.5s ease-in-out}
 @keyframes azdrink{30%,70%{transform:rotate(-15deg)}}
 /* a moment: Azu walks to the middle; the prop pulses three times, then waits */
 .mascot.center{right:calc(50% - 28px);top:42%!important}
@@ -38,4 +38,4 @@
 /* Azu's speech bubble: words in --ink1 on --paper */
 .azbub{position:absolute;right:72px;z-index:13;max-width:210px;background:var(--paper);color:var(--ink1);font:600 13px/1.35 var(--body);padding:8px 11px;border-radius:14px 14px 4px 14px;box-shadow:0 8px 20px rgba(0,0,0,.28);animation:drop .25s ease;pointer-events:none}
 .azbub.mid{right:auto;left:50%;transform:translateX(-50%);border-radius:14px;text-align:center}
-.reduce .mascot svg,.reduce .azprop,.reduce .azbub,.mascot.still svg{animation:none!important}
+.reduce :is(.mascot,.azfab) svg,.reduce .azprop,.reduce .azbub,.mascot.still svg{animation:none!important}

@@ -48,3 +48,6 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   return d.innerHTML});
 ed.addEventListener("click",function(e){var t=e.target.closest("[data-hltry]");if(t){e.stopPropagation();if(G.on)stopTour();startTour()}},true);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(hl|trail|glide|voice_en|voice_pt|"));
+/* each row's demo: a block read in place, its words lit */
+rowDemos({"guideCfg.hl":{tour:"g4",ring:".gfocus"},"guideCfg.trail":{tour:"g4",ring:".gfocus"},"guideCfg.glide":{tour:"g4",ring:".gfocus"},
+  "guideCfg.voice_en":{tour:"g1",ring:".gbubble|.gdock"},"guideCfg.voice_pt":{tour:"g1",ring:".gbubble|.gdock"}});

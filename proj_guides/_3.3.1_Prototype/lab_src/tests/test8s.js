@@ -31,8 +31,9 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await p.locator('#ph .azfabbub').click(); await p.waitForTimeout(700);
   ok('...a tap on its remark opens Ask about the view, the point lit', await R('G.cam.open&&!!ph.querySelector(".camask.open")&&ph.querySelectorAll(".cpin.lit").length>=1&&ph.querySelector(".ca-ans").textContent.length>5'));
   await R('G.cam.open=false;G.cam.lit=[];renderPhone(true)'); await p.waitForTimeout(200);
-  await p.locator('#ph .azfab').click(); await p.waitForTimeout(200);
-  ok('A tap on Azu on the wall opens Ask about the view (no Ask pill any more)', await R('G.cam.open&&!!ph.querySelector(".camask.open")&&!ph.querySelector(".azfab")'));
+  // round 7: the ✦ beside Azu is the visitor's way in; its menu has Ask about the view (a tap on Azu plays)
+  await p.locator('#ph .gbtn').click(); await p.waitForTimeout(200); await p.locator('#ph [data-gbgo="view"]').click(); await p.waitForTimeout(200);
+  ok('On the wall, the ✦\'s Ask about the view opens it (no Ask pill any more)', await R('G.cam.open&&!!ph.querySelector(".camask.open")&&!ph.querySelector(".azfab")'));
   await R('G.cam.open=false;renderPhone(true)');
   // 4. the card's wall: a remark on a point with a card opens it and starts its tour, at Full
   await R('S.camCfg.wall="ribeira";S.camX=.4;S.camY=.5;S.camZoom=1;G.fab.said=null;G.fab.last=0;renderAll(false)');
@@ -46,17 +47,17 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('At Half, with the hero\'s Start the guide in sight: no Azu button', await R('!ph.querySelector(".azfab")'));
   await R('S.stop="full";renderPhone(true);scr.scrollTop=900'); await p.waitForTimeout(900);
   ok('...scrolled past the hero: Azu appears above the bar', await R('!!ph.querySelector(".azfab")&&!ph.querySelector(".azfab.onwall")'));
-  await p.locator('#ph .azfab').click(); await p.waitForTimeout(150);
-  ok('...a tap offers Start the guide and Ask me something', await R('ph.querySelectorAll(".azfabbub.menu [data-fabgo]").length===2'));
-  await p.locator('#ph [data-fabgo="tour"]').click(); await p.waitForTimeout(300);
-  ok('...Start the guide: the tour runs, Azu becomes the guide (no button)', await R('G.on&&!ph.querySelector(".azfab")'));
+  await p.locator('#ph .gbtn').click(); await p.waitForTimeout(150);
+  ok('...a tap on the ✦ beside it offers Start the tour, Ask and Guide settings', await R('ph.querySelectorAll(".gbmenu [data-gbgo]").length===3'));
+  await p.locator('#ph [data-gbgo="tour"]').click(); await p.waitForTimeout(300);
+  ok('...Start the tour: the tour runs, Azu becomes the guide (no Azu beside the ✦)', await R('G.on&&!ph.querySelector(".azfab")'));
   await R('stopTour()'); await p.waitForTimeout(700); await R('scr.scrollTop=900'); await p.waitForFunction(()=>!!document.querySelector("#ph .azfab"),null,{timeout:4000}).catch(()=>{});
   ok('...the tour stopped (and the hero out of sight): Azu is the button again', await R('!!ph.querySelector(".azfab")'));
   await R('S.stop="half";renderPhone(false);scr.scrollTop=0'); await p.waitForTimeout(700); await p.locator('#ph .gstart').click(); await p.waitForTimeout(900);
   ok('Play from a card at Half: the card rises to Full (on the screen, not only in its state)', await R('G.on&&S.stop==="full"&&scr.getBoundingClientRect().top-ph.getBoundingClientRect().top<40'), await R('Math.round(scr.getBoundingClientRect().top-ph.getBoundingClientRect().top)'));
   await R('stopTour()');
   // 6. the Editor
-  ok('Editor: Ask about the view has Azu as the guide\'s button, its comments, their pace and the wall', await R('var f=ed.querySelector(\'[data-fo="s7cam"]\');!!f&&["Azu as the guide","Azu comments","Between comments","Wall (the Lab)"].every(function(t){return f.textContent.indexOf(t)>=0})'));
+  ok('Editor: Ask about the view has Azu\'s comments, their pace and the wall; the button is in Guide button', await R('var f=ed.querySelector(\'[data-fo="s7cam"]\');!!f&&["Azu comments","Between comments","Wall (the Lab)"].every(function(t){return f.textContent.indexOf(t)>=0})&&!!rowEl(ed,"s7gbtn","Guide button")'));
   ok('no page errors', errs.length === 0, errs.slice(0, 3));
   console.log(fails ? `${fails} FAILED` : 'ALL PASS');
   await b.close();

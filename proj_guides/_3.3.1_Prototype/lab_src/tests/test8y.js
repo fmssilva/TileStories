@@ -14,7 +14,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('window.azCount=function(src){return new Promise(function(res){var im=new Image();im.onload=function(){var c=document.createElement("canvas");c.width=im.width;c.height=im.height;var x=c.getContext("2d");x.drawImage(im,0,0);var d=x.getImageData(0,0,c.width,c.height).data,n={cover:0,blue:0,purple:0,ochre:0,r:0,b:0};for(var i=0;i<d.length;i+=4){if(d[i+3]<200)continue;var r=d[i],g=d[i+1],bl=d[i+2];n.cover++;n.r+=r;n.b+=bl;if(bl>r+60)n.blue++;if(r-g>18&&g<.8*r&&g<.85*bl)n.purple++;if(r>170&&bl<r-90)n.ochre++}n.r=Math.round(n.r/Math.max(1,n.cover));n.b=Math.round(n.b/Math.max(1,n.cover));res(n)};im.src=src})}');
   const prev = async (i) => R('azCount(ed.querySelectorAll(".azprev img")[' + i + '].src)');
   const press = async (key, v) => { await p.locator(`[data-set="@guideCfg.${key}"][data-v="${v}"]`).click(); await W(250); await R('ed.querySelector(\'[data-fo="s7mascot"]\').open=true'); };
-  await R('S.guideCfg.voice="device";S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;sampleFn=null;S.view="card";S.stop="half";renderAll(false)');
+  await R('S.guideCfg.azuStyle="light";S.guideCfg.voice="device";S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;sampleFn=null;S.view="card";S.stop="half";renderAll(false)');
   await R('renderEditor();ed.querySelector(\'[data-fo="s7mascot"]\').open=true');
   // 1. the rows, by name, with the defaults pressed; the defaults are the shader's look before the styles
   const rows = await R('["Glaze","Pattern","Light","Corners","Preview"].map(function(l){return !!rowEl(ed,"s7mascot",l)})');

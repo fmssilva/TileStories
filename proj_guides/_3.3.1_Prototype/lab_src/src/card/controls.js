@@ -144,7 +144,7 @@ on("renderPhone.after",function(keep){var inCard=S.view==="card",nb=document.get
   if(inCard&&S.settingsOpen){ph.insertAdjacentHTML("beforeend",settingsPanel())}
   if(inCard&&S.contentsOpen&&S.ctl.contents.on){ph.insertAdjacentHTML("beforeend",contentsSheet())}
   var tb=ph.querySelector(".topband");if(tb)tb.querySelectorAll("i").forEach(function(i){if(i.textContent==="☰")i.innerHTML=SLIDERS})});
-scr.addEventListener("scroll",function(){if(S.view!=="card")return;var nb=document.getElementById("navbar"),c=S.ctl.bar;if(nb&&c.on&&c.showFrom==="hero"&&S.stop!=="peek")nb.style.display=scr.scrollTop<200?"none":"";
+scr.addEventListener("scroll",function(){if(S.view!=="card")return;var nb=document.getElementById("navbar"),c=S.ctl.bar;if(nb&&c.on&&c.showFrom==="hero"&&S.stop!=="peek"&&S.stop!=="closed")nb.style.display=scr.scrollTop<200?"none":"";
   var st=ph.querySelector(".sticky");if(st&&S.ctl.stickySlide){var y=scr.scrollTop,dir=y>(S._lastY||0);st.classList.toggle("away",dir&&y>40&&y<scr.scrollHeight-scr.clientHeight-20);S._lastY=y}},{passive:true});
 ph.addEventListener("click",function(e){var t=e.target;
   var ch=t.closest(".chrome i, .topband i");if(ch&&S.view==="card"&&ch.querySelector("svg")&&ch.innerHTML.indexOf("M4 7h9")>=0){e.stopPropagation();S.settingsOpen=!S.settingsOpen;renderPhone(true);return}

@@ -10,7 +10,7 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
 - **Build:** `python build.py` writes `block-components-lab.html` here (not committed). Copy it to `../Block Components Lab.html` (the
   record copy) and publish it to https://claude.ai/artifact/KDs2Ko1dYdBWYwZVhjvuEp.
 - **Prove it:** `powershell -ExecutionPolicy Bypass -File tests/runtest8.ps1` opens the page headless with `#selftest`: every option,
-  text and demo field must change the phone or be classed behaviour (it prints `bad=0` when all is well; about 10 minutes, so run
+  text and demo field must change the phone or be classed behaviour (it prints `bad=0` when all is well; about 40 minutes, so run
   it alone: other headless tests beside it slow it past its limit). `tests/shots8b.ps1` captures the demo card at each kind
   (`#dcshot=<kind>`); `#pshot=<stop>|<scroll>` opens the card at a stop and a scroll. `node run_tests.js` runs every test in
   `tests/` (not the `*_live` ones) and lists the failed checks; `node run_tests.js --only=test8i,test9b` runs some. Each test
@@ -72,7 +72,14 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
     lacks by the live voice with a key and by the device voice without, a refused key, Voice = Device voice, Speaking now's words
     for each, pause / resume / mute / stop on a recorded, a live (also while it is being made) and a device line, the
     scroll-follow pause, and each answer once in the conversation (`MUTATE=1 node tests/test9c.js` breaks the order: 17 checks
-    turn red).
+    turn red). The guide's controls (`guide/dock`, `guide/controls`, `world/guide-button`, `editor/demo`, `guide/guide-scenes`):
+    `tests/test9d.js` presses each control as a finger does: Pause and Stop at Mini, Compact by a swipe and back by the ✦, the hide
+    chevron, Stop's toast and its Resume (the step and the sentence), Ask first, Previous replaying the sentence, the ✦ and every
+    item of its menu (on the card and on the wall), a tap on Azu (it plays; the menu or the hint only when asked), the hint at most
+    once a visit, the label folding after 4 s; each new Editor row's values on the phone; every row of 6 · Guide and 7 · Audiences
+    showing its demo, and the self-test failing a row without one; the contrast, light and dark; the seven scenes in Ask Azu's
+    console; and the fixes (Azu 0 px over words, the mouth of a paused recorded line, the wall's answers in the one order).
+    `MUTATE=1 node tests/test9d.js` makes the toast's Resume start the tour again from the start: the named checks turn red.
 - **The live voice by hand:** with the keys on this computer, open the page from its file (not `#probe`), set Ask Azu >
   Voice of the answers, and ask; it spends a few hundred characters an answer.
 - **Keys:** the local Lab's live agent and live voice read `keys.local.js`, which `python keys_local.py` writes from the workspace's

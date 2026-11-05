@@ -8,12 +8,15 @@ function mouthOfBlend(b){var cl=function(v){return Math.max(0,Math.min(1,v))},cl
 /* every source's mouth from the three channels */
 function azMouthCurve(o,r,w){AzuGL.set("talk",Math.min(1,o*1.1));Azu3D.mouthTo(o,w,r);var m=ph.querySelector(".mascot");if(!m)return;
   var s=o<.1&&r<.2?"M":r>.4&&o>.06?"O":w>.4&&o<.5?"E":o>.62?"big":o>.28?"A":"chew";if(s!==G.m2d){G.m2d=s;azMouth2d(m,s)}}
+/* a paused line, Mouth = Still, or Reduce Motion (a still Azu): the mouth rests in its mood's shape, whatever the audio's clock says */
+function mouthHeld(a){return a.paused||S.reduce||!S.guideCfg.lips}
+function mouthRest(){AzuGL.set("talk",0);Azu3D.mouthTo(0,0,0);var m=ph.querySelector(".mascot");if(m&&G.m2d!=="rest"){G.m2d="rest";azMouth2d(m,restShape(azMood()))}}
 
 /* ----- the player: the curves follow the audio's own clock; the letters' mouth stands down meanwhile ----- */
 var MT={track:null,audio:null,mark:[],raf:0,kind:""};
 function mtStart(audio,track,kind){MT.track=track;MT.audio=audio;MT.kind=kind;G.visTrack=MT.mark;if(!MT.raf)MT.raf=requestAnimationFrame(mtTick)}
 function mtTick(){MT.raf=0;var a=MT.audio;if(!a||G.recAudio!==a){mtStop();return}var tr=MT.track,i=Math.min(tr.f.length-1,Math.floor(a.currentTime*tr.fps)),v=i>=0?tr.f[i]:[0,0,0];
-  if(S.guideCfg.lips)azMouthCurve(v[0],v[1],v[2]);MT.raf=requestAnimationFrame(mtTick)}
+  if(mouthHeld(a))mouthRest();else azMouthCurve(v[0],v[1],v[2]);MT.raf=requestAnimationFrame(mtTick)}
 function mtStop(){if(MT.raf)cancelAnimationFrame(MT.raf);MT.raf=0;if(G.visTrack===MT.mark)G.visTrack=null;MT.track=null;MT.audio=null;MT.kind="";Azu3D.mouthTo(0,0,0);AzuGL.set("talk",0);
   var m=ph.querySelector(".mascot");if(m){G.m2d=null;azMouth2d(m,restShape(azMood()))}}
 
@@ -27,7 +30,7 @@ function ldTick(){LD.raf=0;var a=LD.audio;if(!a||G.recAudio!==a){ldStop();return
   /* an audio the page may not read (a file opened from disk) gives only zeros: then the letters move the mouth again */
   if(rms===0&&!a.paused&&a.currentTime>.4){if(++LD.zero>20){var p=LD.prev;ldStop(true);G.visTrack=p;return}}else if(rms>0)LD.zero=0;
   LD.lvl+=(Math.min(1,Math.max(0,(rms-.012)*7))-LD.lvl)*.45;var sh=LD.shape?LD.shape(a.currentTime):"A",o=LD.lvl*(sh==="M"?.15:1);
-  if(S.guideCfg.lips)azMouthCurve(o,sh==="O"?.75*Math.min(1,LD.lvl*2):0,sh==="E"?.6*Math.min(1,LD.lvl*2):0);LD.raf=requestAnimationFrame(ldTick)}
+  if(mouthHeld(a))mouthRest();else azMouthCurve(o,sh==="O"?.75*Math.min(1,LD.lvl*2):0,sh==="E"?.6*Math.min(1,LD.lvl*2):0);LD.raf=requestAnimationFrame(ldTick)}
 function ldStop(keep){if(LD.raf)cancelAnimationFrame(LD.raf);LD.raf=0;LD.audio=null;if(!keep&&G.visTrack===MT.mark)G.visTrack=null;if(MT.kind==="loudness")MT.kind="";Azu3D.mouthTo(0,0,0);AzuGL.set("talk",0)}
 /* the shape of the moment: a live answer's letters at their times, or the current word's letters */
 function ldShapeFromVis(vis){return function(t){var s="A";for(var i=0;i<vis.length&&vis[i].t<=t;i++)s=vis[i].s;return s}}

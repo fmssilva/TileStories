@@ -38,7 +38,7 @@ on("runStep.before",function(){if(G.introPending&&G.i===0){G.introPending=false;
 on("runStep.after",function(){
   var st=S.guideSteps[G.i];if(st&&st.act==="intro"){var m=ph.querySelector(".mascot");if(m&&!S.reduce){m.classList.add("enter");setTimeout(function(){m.classList.remove("enter")},1400)}}
   if(st&&st.act==="try")G.tryKind=st.wait;placeStep(st)});
-on("startTour.before",function(){G.introPending=!S.howSaved&&(S.guideCfg.intro==="every"||(S.guideCfg.intro==="first"&&!S.introSeen));if(G.introPending)S.introSeen=true});
+on("startTour.before",function(from){G.introPending=!from&&!S.howSaved&&(S.guideCfg.intro==="every"||(S.guideCfg.intro==="first"&&!S.introSeen));if(G.introPending)S.introSeen=true});
 
 /* ----- the block being told, placed where the guide panel never covers it: a short block at a third of the free height, a tall one near the top ----- */
 function placeStep(st){if(G.keepScroll||!st||st.act==="intro")return;var el=stepEl(st);if(!el)return;setTimeout(function(){if(!el.isConnected||!G.on)return;var f=freeHeight(),r=el.getBoundingClientRect(),avail=f.bottom-f.top,q=ph.getBoundingClientRect().height/ph.offsetHeight;
@@ -96,3 +96,7 @@ on("edMarker.html",function(h){var d=document.createElement("div");d.innerHTML=h
     row("After the gesture · PT",'<textarea class="u" rows="2" data-gafter="'+st.id+'|pt">'+esc(a.pt||"")+'</textarea>',""));return d.innerHTML});
 ed.addEventListener("input",function(e){var t=e.target;if(!t.dataset||!t.dataset.gafter)return;e.stopImmediatePropagation();var q=t.dataset.gafter.split("|"),st=byId(S.fullSteps||S.guideSteps,q[0]);st.after=st.after||{en:"",pt:""};st.after[q[1]]=t.value},true);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(intro|insist|insistAfter|onScroll|"));
+/* each row's demo: the invitation at the flip card; a scroll by the visitor; Azu's introduction */
+rowDemos({"guideCfg.insist":{tour:"g2",ring:".gcoach|.gfocus"},"guideCfg.insistAfter":{tour:"g2",ring:".gcoach|.gfocus"},
+  "guideCfg.onScroll":{tour:"g1",act:function(){G.userScrollAt=performance.now();scr.dispatchEvent(new WheelEvent("wheel",{deltaY:300,bubbles:true}));scr.scrollTop+=360},ringAfter:1200,ring:".gdock|.gresume"},
+  "guideCfg.intro":{tour:true,intro:true,ring:".mascot"}});

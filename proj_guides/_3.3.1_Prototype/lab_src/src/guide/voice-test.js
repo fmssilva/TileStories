@@ -39,3 +39,5 @@ ed.addEventListener("change",function(e){var t=e.target;if(!t.dataset)return;if(
 ed.addEventListener("click",function(e){var t=e.target.closest("[data-vtstart],[data-vtplay],[data-vtr],[data-vtsave]");if(!t)return;e.stopPropagation();
   if(t.dataset.vtstart){vtStart();return}if(t.dataset.vtplay!=null){vtPlay(+t.dataset.vtplay);return}if(t.dataset.vtsave){vtSave();return}
   var q=t.dataset.vtr.split("|"),x=S.vt.ratings[q[0]]=S.vt.ratings[q[0]]||{};x[q[1]]=+q[2];renderEditor()},true);
+/* the row's demo: a line in the chosen recorded set (Speaking now names it) */
+rowDemos({"guideCfg.voiceSet":{tour:"g1",ring:".gbubble|.gdock"}});
