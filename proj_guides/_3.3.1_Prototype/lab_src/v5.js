@@ -22,7 +22,7 @@ function feedback(id){var e=byId(S.fb.events,id);if(!e)return;buzz(e.hap);playSo
 function stopTop(st){var H=SCREENS[S.screen][1];if(S.screen==="land")return 0;if(st==="peek")return H-200;if(st==="half")return Math.round(H*(1-S.cardCfg.halfMax));if(st==="full")return 0;return H+10}
 function wallLayer(){var w=document.getElementById("wall");if(!w){w=document.createElement("div");w.id="wall";w.className="wall";ph.insertBefore(w,ph.firstChild.nextSibling)}
   w.innerHTML='<button class="mk" type="button" data-marker="painting" style="left:52%;top:30%" aria-label="Ribeira Palace"><span>'+sicon("info",20)+'</span><b>Ribeira Palace</b></button><button class="mk dim" type="button" style="left:22%;top:58%" aria-label="Lisbon Cathedral"><span>'+sicon("star",18)+'</span><b>Lisbon Cathedral</b></button>'+
-   (S.stop==="closed"?'<div class="walltip">Tap a marker to open its card</div>':"");
+   (S.stop==="closed"&&S.wallTip!==false?'<div class="walltip">'+TXH("wall_tip")+'</div>':"");
   return w}
 var renderPhoneV4=renderPhone;
 renderPhone=function(keep){renderPhoneV4(keep);var inWall=S.view==="card";
@@ -35,7 +35,7 @@ renderPhone=function(keep){renderPhoneV4(keep);var inWall=S.view==="card";
   var nb=document.getElementById("navbar");if(inWall&&(S.stop==="closed"||S.stop==="peek"))nb.style.display="none";
   var lp=ph.querySelector(".locpin");if(lp&&inWall&&S.stop==="closed")lp.remove();
   var pk=ph.querySelector(".peeknext");if(pk)pk.remove();
-  if(inWall&&S.stop==="peek"&&S.cardCfg.peekNext){var p=document.createElement("div");p.className="peeknext";p.textContent=(S.lang==="pt"?"Seguinte: ":"Next: ")+"Lisbon Cathedral ↑";ph.appendChild(p)}
+  if(inWall&&S.stop==="peek"&&S.cardCfg.peekNext){var p=document.createElement("div");p.className="peeknext";p.textContent=(TXT("peek_next_label"))+"Lisbon Cathedral ↑";ph.appendChild(p)}
   topBand();stickyAction()};
 function initGrab(gb){gb.addEventListener("pointerdown",function(e){gb.setPointerCapture(e.pointerId);var y0=e.clientY,t0=parseFloat(scr.style.top)||0,k=fit.getBoundingClientRect().height/SCREENS[S.screen][1];scr.style.transition="none";
   function mv(ev){var t=Math.max(0,t0+(ev.clientY-y0)/k);scr.style.top=t+"px";gb.style.top=(t+2)+"px"}
@@ -44,9 +44,9 @@ function initGrab(gb){gb.addEventListener("pointerdown",function(e){gb.setPointe
   gb.addEventListener("pointermove",mv);gb.addEventListener("pointerup",up)})}
 function topBand(){var b=ph.querySelector(".topband");if(!b){b=document.createElement("div");b.className="topband";ph.appendChild(b)}
   var show=S.view==="card"&&S.stop==="full"&&scr.scrollTop>230;b.style.display=show?"":"none";b.className="topband tb-"+S.cardCfg.topBand;
-  b.innerHTML='<i>&#10005;</i>'+(S.ctl.top.title?'<b>Ribeira Palace</b>':'<b></b>')+(S.ctl.top.settings?'<i>&#9776;</i>':'<i style="visibility:hidden"></i>')}
+  b.innerHTML='<i title="'+TXH("close")+'">&#10005;</i>'+(S.ctl.top.title?'<b>Ribeira Palace</b>':'<b></b>')+(S.ctl.top.settings?'<i title="'+TXH("visitor_settings")+'">&#9776;</i>':'<i style="visibility:hidden"></i>')}
 function stickyAction(){var s=ph.querySelector(".sticky");if(s)s.remove();var on=S.ctl.sticky==="shown"||(S.ctl.sticky==="auto"&&!(S.ctl.bar.on&&S.ctl.bar.pos==="bottom"));
-  if(S.view==="card"&&on&&(S.stop==="half"||S.stop==="full")){s=document.createElement("div");s.className="sticky";s.innerHTML='<button type="button" data-locate="1">'+(S.lang==="pt"?"Mostrar onde fica":"Show me where it is")+'</button>';ph.appendChild(s)}}
+  if(S.view==="card"&&on&&(S.stop==="half"||S.stop==="full")){s=document.createElement("div");s.className="sticky";s.innerHTML='<button type="button" data-locate="1">'+(TXH("show_on_wall_button"))+'</button>';ph.appendChild(s)}}
 scr.addEventListener("scroll",function(){if(S.view==="card")topBand()},{passive:true});
 
 /* ----- card layouts: one scroll, tabs, pages, accordion ----- */
@@ -57,7 +57,7 @@ cardScreen=function(){var lay=S.cardCfg.layout;if(lay==="scroll")return cardScre
   if(lay==="tabs"||lay==="pages"){var strip=lay==="tabs"?'<div class="lt-tabs">'+ids.map(function(id){var s=secById(id);return'<button type="button" data-tabsec="'+id+'" aria-pressed="'+(S.activeSec===id)+'" style="color:'+colVar(s.colour)+'">'+esc(L(s.name))+'</button>'}).join("")+'</div>':"";
     secs.forEach(function(x){if(x.dataset.ref!=="sec:"+S.activeSec)x.remove()});
     var keep=d.querySelector(".gsec");if(keep){keep.insertAdjacentHTML("beforebegin",strip);
-      if(lay==="pages"){var i=ids.indexOf(S.activeSec);keep.insertAdjacentHTML("afterend",'<div class="lt-pages"><button type="button" data-pagesec="'+ids[(i-1+ids.length)%ids.length]+'">&#8249;</button><span>'+ids.map(function(id){return'<i class="'+(id===S.activeSec?"on":"")+'"></i>'}).join("")+'</span><button type="button" data-pagesec="'+ids[(i+1)%ids.length]+'">&#8250;</button></div>')}}}
+      if(lay==="pages"){var i=ids.indexOf(S.activeSec);keep.insertAdjacentHTML("afterend",'<div class="lt-pages"><button type="button" data-pagesec="'+ids[(i-1+ids.length)%ids.length]+'" aria-label="'+TXH("nav_pager_previous")+'">&#8249;</button><span>'+ids.map(function(id){return'<i class="'+(id===S.activeSec?"on":"")+'"></i>'}).join("")+'</span><button type="button" data-pagesec="'+ids[(i+1)%ids.length]+'" aria-label="'+TXH("nav_pager_next")+'">&#8250;</button></div>')}}}
   if(lay==="accordion")secs.forEach(function(x){var id=x.dataset.ref.slice(4),open=!!S.openSecs[id],ey=x.querySelector(".ey");
     var head=document.createElement("button");head.type="button";head.className="lt-acc";head.dataset.accsec=id;head.setAttribute("aria-expanded",String(open));head.innerHTML=ey?ey.outerHTML+'<em>'+(open?"&#8722;":"+")+'</em>':id;if(ey)ey.remove();
     x.insertBefore(head,x.firstChild);if(!open)Array.prototype.slice.call(x.children,1).forEach(function(c){c.style.display="none"})});
@@ -66,11 +66,11 @@ cardScreen=function(){var lay=S.cardCfg.layout;if(lay==="scroll")return cardScre
 /* ----- page chrome on pages: breadcrumb, previous / next ----- */
 var topbarV3=topbar;
 function chromeOf(k){var bd=S.blockDefs[k]||{};return bd.chrome==="override"?{crumb:bd.crumb,prevnext:bd.prevnext}:{crumb:S.ctl.crumb,prevnext:S.ctl.prevnext}}
-topbar=function(crumb){if((S._pk?chromeOf(S._pk).crumb:S.ctl.crumb)==="off")return '<div class="topbar"><button type="button" data-go="card" aria-label="Back">&#8249;</button><span></span></div>';return topbarV3(crumb)};
+topbar=function(crumb){if((S._pk?chromeOf(S._pk).crumb:S.ctl.crumb)==="off")return '<div class="topbar"><button type="button" data-go="card" aria-label="'+TXH("page_back")+'">&#8249;</button><span></span></div>';return topbarV3(crumb)};
 var storyScreenV3=storyScreen,galleryScreenV3=galleryScreen;
-function pageFoot(prev,next){if(!(S._pk?chromeOf(S._pk).prevnext:S.ctl.prevnext))return "";return '<div class="pfoot"><button type="button" data-go="'+prev[0]+'"><small>'+(S.lang==="pt"?"Anterior":"Previous")+'</small>'+esc(prev[1])+'</button><button type="button" data-go="'+next[0]+'"><small>'+(S.lang==="pt"?"Seguinte":"Next")+'</small>'+esc(next[1])+'</button></div>'}
-storyScreen=function(){S._pk="Story";var h=storyScreenV3()+pageFoot(["card",L(UI.about)],["gallery","Gallery"]);S._pk=null;return h};
-galleryScreen=function(){S._pk="Gallery";var h=galleryScreenV3()+pageFoot(["story",L(DEMO.title)],["card",L(UI.visit)]);S._pk=null;return h};
+function pageFoot(prev,next){if(!(S._pk?chromeOf(S._pk).prevnext:S.ctl.prevnext))return "";return '<div class="pfoot"><button type="button" data-go="'+prev[0]+'"><small>'+(TXH("page_previous"))+'</small>'+esc(prev[1])+'</button><button type="button" data-go="'+next[0]+'"><small>'+(TXH("page_next"))+'</small>'+esc(next[1])+'</button></div>'}
+storyScreen=function(){S._pk="Story";var h=storyScreenV3()+pageFoot(["card",L(secById("about").name)],["gallery",TXT("gallery_name")]);S._pk=null;return h};
+galleryScreen=function(){S._pk="Gallery";var h=galleryScreenV3()+pageFoot(["story",L(DEMO.title)],["card",L(secById("visit").name)]);S._pk=null;return h};
 
 /* ----- phone events ----- */
 ph.addEventListener("click",function(e){var t=e.target;
@@ -139,7 +139,7 @@ function modelSig(){var keep=S.view,out="";["card","demo","story","gallery"].for
   return out+JSON.stringify({loc:S.ctl.locate,sticky:S.ctl.sticky,bar:[S.ctl.bar.on,S.ctl.bar.pos],openAt:stopTop(S.cardCfg.openAt),half:S.cardCfg.halfMax,band:S.cardCfg.topBand,top:S.ctl.top,dark:S.dark,lang:S.lang,peek:S.cardCfg.peekNext,on:S.cardCfg.enabled})}
 function selfTest(){var res=[],seen={},real={renderEditor:renderEditor,renderPhone:renderPhone,renderAll:renderAll,show:show,playRef:playRef,flashRef:flashRef};
   S.ui.level=9;S.op={};S.ui.single=false;
-  ["card","marker"].forEach(function(tab){S.tab=tab;real.renderEditor();var base=JSON.stringify(S);
+  ["card","marker","words","global"].forEach(function(tab){S.tab=tab;real.renderEditor();var base=JSON.stringify(S);
     renderEditor=function(){};renderPhone=function(){};renderAll=function(){};show=function(v){S.view=v};playRef=function(){};flashRef=function(){};
     var ctrls=[];ed.querySelectorAll("[data-set]").forEach(function(b){ctrls.push({el:b,kind:"set",key:b.dataset.set,v:b.dataset.v})});
     ed.querySelectorAll("select[data-sel]").forEach(function(x){Array.prototype.forEach.call(x.options,function(o){ctrls.push({el:x,kind:"sel",key:x.dataset.sel,v:o.value})})});

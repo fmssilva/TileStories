@@ -61,7 +61,7 @@ var PATH={rise:"nat",slide:"nat",pop:"nat",fade:"nat",tilt:"nat",wipe:"nat",word
  parallax:"nat",zoom:"nat",scalein:"nat",shine:"nat",pulse:"nat",float:"nat",im_tile:"imp",im_ship:"imp",im_dust:"imp",im_door:"nat"};
 var uid=200;function nid(p){return p+(++uid)}
 var S={tab:"card",step:1,dark:false,reduce:false,lang:"en",screen:"phone",focusOn:true,view:"demo",focusRef:null,family:"rise",replay:"every",
- test:{on:true,poi:"painting"},ui:{single:false,level:2,q:"",cat:"All"},op:{},
+ test:{on:true,poi:"painting"},ui:{single:false,level:1,q:"",cat:"All"},op:{s3:false,s4:false,s5:false,s6:false,s2:true},
  motions:[
   {id:"rise",name:"Rise",type:"entrance",from:"below",dist:18,dur:420,ease:"out",stagger:70,pieces:"whole",rot:0},
   {id:"slide",name:"Slide In",type:"entrance",from:"left",dist:40,dur:450,ease:"out",stagger:70,pieces:"whole",rot:0},
@@ -262,9 +262,9 @@ function renderEl(kind,style,c,i,still){
    case"eyebrow":h='<div class="el-eyebrow'+tone+al+'">'+esc(C(c,"text",DEMO.eyebrow))+'</div>';break;
    case"heading":h='<h4 class="el-heading'+tone+size+(o.rule==="on"?" rule":"")+'">'+esc(C(c,"text",DEMO.heading))+'</h4>';break;
    case"lede":h='<p class="el-lede'+size+al+'">'+esc(C(c,"text",DEMO.lede))+'</p>';break;
-   case"paragraph":h='<p class="el-par'+(o.dropcap==="on"?" dropcap":"")+'">'+esc(C(c,"text",DEMO.paragraph))+'</p>';break;
+   case"paragraph":h='<p class="el-par'+(o.dropcap==="on"?" dropcap":"")+'">'+gloss(C(c,"text",DEMO.paragraph))+'</p>';break;
    case"callout":var ti=C(c,"title",DEMO.ctitle),tx=C(c,"text",DEMO.ctext);
-     if(o.calltap==="flip"&&!still)h='<div class="flip" data-flip><div class="in2"><div class="fc"><b>'+esc(S.lang==="pt"?"Sabia que?":"Did you know?")+'</b><p>'+esc(tx)+'</p></div><div class="bc"><b>'+esc(ti)+'</b><p>'+esc(C(c,"back",DEMO.back))+'</p></div></div></div>';
+     if(o.calltap==="flip"&&!still)h='<div class="flip" data-flip><div class="in2"><div class="fc"><b>'+esc(TXT("fun_fact_label"))+'</b><p>'+esc(tx)+'</p></div><div class="bc"><b>'+esc(ti)+'</b><p>'+esc(C(c,"back",DEMO.back))+'</p></div></div></div>';
      else h='<div class="el-callout '+(o.tone||"neutral")+size+'"><b class="'+tone+'">'+esc(ti)+'</b><p>'+esc(tx)+'</p></div>';break;
    case"pull_quote":h='<blockquote class="el-quote '+(o.variant||"serif")+'"><q>'+esc(C(c,"text",DEMO.quote))+'</q><cite>'+esc(c.cite||DEMO.cite)+'</cite></blockquote>';break;
    case"list":var tag=o.marker==="numbers"?"ol":"ul",items=(c.items&&c.items[S.lang])||DEMO.list[S.lang];h='<'+tag+' class="el-list">'+items.map(function(x){return"<li>"+esc(x)+"</li>"}).join("")+'</'+tag+'>';break;
@@ -275,26 +275,27 @@ function renderEl(kind,style,c,i,still){
    case"picture_pair":var pi=c.imgs||["before","g2"];h='<figure class="el-pair'+(o.width==="bleed"?" bleed":"")+'">'+pi.slice(0,2).map(function(x){return'<div class="fr"><img alt="" src="'+IMG[x]+'"></div>'}).join("")+'</figure><div class="el-pic" style="margin-top:8px"><figcaption>'+esc(C(c,"cap",DEMO.paircap))+'</figcaption></div>';break;
    case"carousel":var ci=c.imgs||["g1","g2","g3"];
      if(o.layout!=="one"||still)h='<div class="el-car">'+ci.map(function(x){return'<div class="fr"><img alt="" src="'+IMG[x]+'"></div>'}).join("")+'</div>';
-     else{var tm=motionById(style.turn||"t_slide");h='<div class="trv'+(tm&&tm.style==="deck"?" deck":"")+'" data-trv="'+(tm?tm.id:"t_slide")+'" data-imgs="'+ci.join(",")+'"></div><div class="ctrl"><button type="button" data-turn="-1">&#8249;</button><button type="button" data-turn="1">&#8250;</button></div>'}
+     else{var tm=motionById(style.turn||"t_slide");h='<div class="trv'+(tm&&tm.style==="deck"?" deck":"")+'" data-trv="'+(tm?tm.id:"t_slide")+'" data-imgs="'+ci.join(",")+'"></div><div class="ctrl"><button type="button" data-turn="-1" aria-label="'+TXH("carousel_prev")+'">&#8249;</button><button type="button" data-turn="1" aria-label="'+TXH("carousel_next")+'">&#8250;</button></div>'}
      if(c.cap)h+='<div class="el-pic" style="margin-top:6px"><figcaption>'+esc(C(c,"cap"))+'</figcaption></div>';break;
    case"video":h='<div class="el-vid'+(o.width==="bleed"?" bleed":"")+'"><img alt="" src="'+IMG[c.img||"hero"]+'"'+scroll+'><i>&#9654;</i><span>'+esc(C(c,"cap",DEMO.vidcap))+'</span></div>';break;
-   case"audio":h='<div class="audio" data-audio><button type="button" aria-label="Play">&#9654;</button><div class="bar"><i></i></div><small>'+esc(C(c,"cap",T("Guided tour · 3:11","Visita guiada · 3:11")))+'</small></div>';break;
-   case"animation":h='<div class="anim'+(o.trigger==="loop"&&!still?" loop":"")+(still?" play":"")+'" data-anim="'+(o.trigger||"enter")+'">'+ANIMSVG+'<small>'+esc(({lottie:"Lottie",rive:"Rive",video:"Video + alpha",unity:"Unity Animation"})[o.source||"lottie"])+' · '+esc(({enter:"plays on view",loop:"loops",tap:"tap to play",scrub:"scrubs with the scroll"})[o.trigger||"enter"])+'</small></div>';break;
-   case"before_after":h='<div class="ba" data-ba style="--x:'+(o.start||50)+'%"><img alt="" src="'+IMG[c.after||"g2"]+'"><img class="top" alt="" src="'+IMG[c.before||"before"]+'"><span class="lb l">'+(S.lang==="pt"?"Antes de 1755":"Before 1755")+'</span><span class="lb r">'+(S.lang==="pt"?"Hoje":"Today")+'</span><div class="knob"></div></div>';break;
+   case"audio":h='<div class="audio" data-audio><button type="button" aria-label="'+TXH("audio_play")+'">&#9654;</button><div class="bar"><i></i></div><small>'+esc(C(c,"cap",T("Guided tour · 3:11","Visita guiada · 3:11")))+'</small></div>';break;
+   case"animation":h='<div class="anim'+(o.trigger==="loop"&&!still?" loop":"")+(still?" play":"")+'" data-anim="'+(o.trigger||"enter")+'">'+ANIMSVG+'<small>'+(c.file?esc(c.file)+' · ':'')+esc(({lottie:"Lottie",rive:"Rive",video:"Video + alpha",unity:"Unity Animation"})[o.source||"lottie"])+' · '+esc(({enter:"plays on view",loop:"loops",tap:"tap to play",scrub:"scrubs with the scroll"})[o.trigger||"enter"])+'</small></div>';break;
+   case"before_after":h='<div class="ba" data-ba style="--x:'+(o.start||50)+'%"><img alt="" src="'+IMG[c.after||"g2"]+'"><img class="top" alt="" src="'+IMG[c.before||"before"]+'"><span class="lb l">'+esc(L(c.blabel)||TXT("before_label"))+'</span><span class="lb r">'+esc(L(c.alabel)||TXT("after_label"))+'</span><div class="knob"></div></div>';break;
    case"hotspot":h='<div class="hs"><img alt="" src="'+IMG[c.img||"g3"]+'"><button class="pin" type="button" data-hspot="0" style="left:38%;top:42%;'+(o.pulse==="still"?"animation:none":"")+'">1</button><button class="pin" type="button" data-hspot="1" style="left:72%;top:58%;'+(o.pulse==="still"?"animation:none":"")+'">2</button><div class="pop"></div></div>';break;
-   case"model_3d":h='<div class="turn" data-turnt style="background-image:url('+IMG[c.img||"g1"]+')"><span class="hint2">'+(S.lang==="pt"?"Arraste para rodar":"Drag to turn")+' · stand-in</span></div>';break;
-   case"panorama":h='<div class="pano" data-pano style="background-image:url('+IMG[c.img||"hero"]+')"><span class="hint2">'+(S.lang==="pt"?"Arraste ou rode o telemóvel":"Drag or turn the phone")+'</span></div>';break;
+   case"model_3d":h='<div class="turn" data-turnt style="background-image:url('+IMG[c.img||"g1"]+')"><span class="hint2">'+(TXH("model_3d_hint"))+'</span></div>';break;
+   case"panorama":h='<div class="pano" data-pano style="background-image:url('+IMG[c.img||"hero"]+')"><span class="hint2">'+(TXH("panorama_360_drag_hint"))+'</span></div>';break;
    case"scrolly":h=still?'<figure class="el-pic"><div class="fr"><img alt="" src="'+IMG.g3+'"></div></figure>':'<div class="scrub" data-scrub><div class="stick"><img alt="" src="'+IMG.g3+'"><img alt="" src="'+IMG.before+'" style="opacity:0"><img alt="" src="'+IMG.g2+'" style="opacity:0"></div>'+
-     [T("1662: the palace along the river.","1662: o palácio ao longo do rio."),T("Before 1755: the Torreão and the opera.","Antes de 1755: o Torreão e a ópera."),T("Today: the square that took its place.","Hoje: a praça que ficou no seu lugar.")].map(function(s){return'<div class="step">'+esc(L(s))+'</div>'}).join("")+'<div style="height:60px"></div></div>';break;
+     [T("1662: the palace along the river.","1662: o palácio ao longo do rio."),T("Before 1755: the Torreão and the opera.","Antes de 1755: o Torreão e a ópera."),T("Today: the square that took its place.","Hoje: a praça que ficou no seu lugar.")].map(function(s,j){var it=c.items&&(c.items[S.lang]||c.items.en);return'<div class="step">'+esc(it&&it[j]!=null?it[j]:L(s))+'</div>'}).join("")+'<div style="height:60px"></div></div>';break;
    case"map":h='<div class="map"><svg viewBox="0 0 320 200"><path d="M0 150C60 130 120 165 180 150S290 120 320 135V200H0Z" fill="#9FC1D6" opacity=".7"/><text x="230" y="185" font-size="11" fill="#2E5870" font-family="sans-serif">Tagus</text><rect x="120" y="92" width="70" height="42" fill="none" stroke="var(--fam)" stroke-width="2"/><path d="M60 40L120 92M190 92L260 50M155 92V20" stroke="var(--ink2)" stroke-width="1.5" opacity=".5"/><g transform="translate(145 70)">'+PIN.replace("<svg",'<svg width="22" height="30"')+'</g></svg></div>';break;
-   case"timeline":var ev=[["c. 1500",T("The court moves to the river","A corte muda-se para o rio")],["1580s",T("The Torreão rises","Ergue-se o Torreão")],["1755",T("Earthquake, fire and tsunami","Terramoto, incêndio e maremoto")]];
+   case"timeline":var ev=[["c. 1500",T("The court moves to the river","A corte muda-se para o rio")],["1580s",T("The Torreão rises","Ergue-se o Torreão")],["1755",T("Earthquake, fire and tsunami","Terramoto, incêndio e maremoto")]];if(c.items&&(c.items[S.lang]||c.items.en))ev=(c.items[S.lang]||c.items.en).map(function(s){var p=s.split(" · ");return[p[0],p.slice(1).join(" · ")]});
      h='<div class="tl">'+ev.map(function(e){return'<div><b>'+e[0]+'</b><span>'+esc(L(e[1]))+'</span></div>'}).join("")+'</div>';break;
    case"swatches":h='<div class="sw">'+[["#1F4E9C","Cobalt"],["#C99A3B","Ochre"],["#B4572E","Terracotta"],["#EFE9DC","Lime white"],["#4E7A6B","River green"]].map(function(s){return'<div><i style="background:'+s[0]+';'+(o.swsize==="s"?"height:28px":"")+'"></i><small>'+s[1]+'</small></div>'}).join("")+'</div>';break;
    case"divider":var f=effectById(o.uses||"l_hair");h=f?(f.grp==="edge"?'<div style="margin:16px -20px">'+edgeSvg(f)+'</div>':lineSvg(f)):'<div class="el-div missing"></div>';break;
    case"spacer":h='<div class="el-sp" style="--h:'+({s:16,m:24,l:40}[o.space||"m"])+'px"></div>';break;}
   return still?h:wrapMv(h,entranceOf(style),i);}
-function thumb(kind,style,cls){return '<div class="thumb'+(cls?" "+cls:"")+' cv'+(S.dark?" dark":"")+'"><div class="tin">'+renderEl(kind,style,{},0,true)+'</div></div>'}
-function patThumb(p,cls){return '<div class="thumb tall'+(cls?" "+cls:"")+' cv'+(S.dark?" dark":"")+'"><div class="tin">'+p.rows.map(function(r){return renderEl(r.kind,styleById(r.style)||defStyle(r.kind),{},0,true)}).join("")+'</div></div>'}
+function noBtn(h){return h.replace(/<button/g,"<span").replace(/<\/button>/g,"</span>")}
+function thumb(kind,style,cls){return noBtn('<div class="thumb'+(cls?" "+cls:"")+' cv'+(S.dark?" dark":"")+'"><div class="tin">'+renderEl(kind,style,{},0,true)+'</div></div>')}
+function patThumb(p,cls){return noBtn('<div class="thumb tall'+(cls?" "+cls:"")+' cv'+(S.dark?" dark":"")+'"><div class="tin">'+p.rows.map(function(r){return renderEl(r.kind,styleById(r.style)||defStyle(r.kind),{},0,true)}).join("")+'</div></div>')}
 
 /* ---------- motion, interaction demos ---------- */
 function pathBadge(id){var p=PATH[id]||"bld";return '<span class="mpath">'+({nat:"NATIVE",bld:"BUILD",imp:"IMPORT"}[p])+'</span>'}
@@ -312,7 +313,7 @@ function motionDemo(m){
     if(m.source==="video")body='<div class="anim" style="background:#1A1712;height:140px;position:relative;overflow:hidden" data-dust>'+Array(18).join("x").split("x").map(function(_,i){return'<i style="position:absolute;left:'+((i*53)%100)+'%;top:'+((i*37)%100)+'%;width:4px;height:4px;border-radius:50%;background:#F2C14E;box-shadow:0 0 8px #F2C14E;animation:pulse '+(1.2+(i%5)*.3)+'s ease-in-out infinite;opacity:.8"></i>'}).join("")+'<small style="position:absolute;bottom:8px;color:#EADBB0">Video with alpha over the card</small></div>';
     else if(m.source==="unity")body='<div class="anim" data-door style="perspective:600px;height:150px;display:flex;gap:2px;justify-content:center;align-items:center;background:#2A2016"><div class="door l" style="width:60px;height:110px;background:#7A4A22;transform-origin:left;transition:transform 1.2s cubic-bezier(.2,.8,.2,1);border:2px solid #C99A3B"></div><div class="door r" style="width:60px;height:110px;background:#7A4A22;transform-origin:right;transition:transform 1.2s cubic-bezier(.2,.8,.2,1);border:2px solid #C99A3B"></div></div>';
     else body='<div class="anim'+(m.trigger==="loop"?" loop":"")+'" data-anim="'+m.trigger+'">'+ANIMSVG+'<small>'+esc(motionSummary(m))+'</small></div>';}
-  else body='<div class="emrow">'+(m.style==="shine"?'<span class="shine" data-em>'+esc(L(UI.read))+' &#8250;</span>':m.style==="pulse"?'<span class="pulse" data-em>'+(S.lang==="pt"?"Encontre na parede":"Find it on the wall")+'</span>':'<span class="floatpin" data-em>'+PIN+'</span>')+'</div>';
+  else body='<div class="emrow">'+(m.style==="shine"?'<span class="shine" data-em>'+esc(L(UI.read))+' &#8250;</span>':m.style==="pulse"?'<span class="pulse" data-em>'+(TXH("locate_label"))+'</span>':'<span class="floatpin" data-em>'+PIN+'</span>')+'</div>';
   return '<div class="item" data-ref="m:'+m.id+'"><div class="mdemo">'+head+body+'</div></div>';}
 function interDemo(x){var b="",o=x.o;
   if(x.id==="flip")b=renderEl("callout",{o:{tone:"family",calltap:"flip"}},{},0,false);
@@ -327,7 +328,7 @@ function interDemo(x){var b="",o=x.o;
 function effectDemo(f){return '<div class="item" data-ref="f:'+f.id+'"><div class="fx"><div class="cap">'+esc(f.name)+' <small>· '+({edge:"edge",line:"line divider",light:"light",moving:"moving"})[f.grp]+'</small></div>'+effectArt(f)+'</div></div>'}
 
 /* ---------- block previews on the card ---------- */
-function blockPreview(b,i){var m=b.enter==="family"?motionById(S.family):motionById(b.enter),h="",tap=b.tap==="page"?" tap":"";
+function blockPreviewV3(b,i){var m=b.enter==="family"?motionById(S.family):motionById(b.enter),h="",tap=b.tap==="page"?" tap":"";
   var or=b.tap==="page"?'<div class="open'+(b.orow==="nudge"?" nudge":"")+(b.orow==="shine"?" shine":"")+'">'+(b.kind==="Story"?esc(L(UI.read)):esc(L(UI.open))+(b.orow==="nudge"?"":" &#8250;"))+'</div>':"";
   if(b.kind==="Quick Facts")h='<div class="qf"><div><small>'+esc(L(UI.home))+'</small><b>'+esc(L(UI.homev))+'</b></div><div><small>'+esc(L(UI.lost))+'</small><b>'+esc(L(UI.lostv))+'</b></div></div>';
   if(b.kind==="Inline"){var p=patternById(b.pattern);h=p?p.rows.map(function(r,j){return renderEl(r.kind,styleById(r.style)||defStyle(r.kind),{},j,true).replace('class="el-callout','class="el-callout')}).join(""):"";
@@ -337,20 +338,20 @@ function blockPreview(b,i){var m=b.enter==="family"?motionById(S.family):motionB
   if(b.kind==="Gallery")h=renderEl("carousel",defStyle("carousel"),{},0,true);
   if(b.kind==="Audio Guide")h=renderEl("audio",defStyle("audio"),{},0,true);
   if(b.kind==="Knowledge Check")h='<div class="kq" data-kq><b>'+esc(L(T("Which king moved the court to the river?","Que rei mudou a corte para o rio?")))+'</b><button type="button" data-ok="1">Manuel I</button><button type="button">Philip I</button><button type="button">José I</button></div>';
-  if(b.kind==="Practical Info")h='<dl class="info"><dt>'+(S.lang==="pt"?"Onde":"Where")+'</dt><dd>Praça do Comércio</dd></dl><div class="more"><dl class="info" style="margin-top:6px"><dt>'+(S.lang==="pt"?"Hoje":"Today")+'</dt><dd>'+(S.lang==="pt"?"Praça aberta, sempre":"An open square, always")+'</dd><dt>Metro</dt><dd>Terreiro do Paço</dd></dl></div>'+'<div class="open">'+(S.lang==="pt"?"Ver mais":"See more")+' &#8964;</div>';
+  if(b.kind==="Practical Info")h='<dl class="info"><dt>'+(S.lang==="pt"?"Onde":"Where")+'</dt><dd>Praça do Comércio</dd></dl><div class="more"><dl class="info" style="margin-top:6px"><dt>'+(S.lang==="pt"?"Hoje":"Today")+'</dt><dd>'+(S.lang==="pt"?"Praça aberta, sempre":"An open square, always")+'</dd><dt>Metro</dt><dd>Terreiro do Paço</dd></dl></div>'+'<div class="open">'+(TXH("open_row_expand"))+' &#8964;</div>';
   var inner='<div class="bprev'+tap+(b.tap==="expand"?" expand":"")+'" '+(b.tap==="page"?'data-go="'+(b.kind==="Story"?"story":"gallery")+'"':b.tap==="expand"?"data-expand":"")+'>'+h+or+'</div>';
   return '<div class="item" data-ref="b:'+b.id+'">'+wrapMv(inner,m,0)+'</div>';}
 
 /* ---------- phone ---------- */
 var scr=document.getElementById("scr"),ph=document.getElementById("ph"),hint=document.getElementById("hint"),fit=document.getElementById("fit");
 var SCREENS={phone:[360,740],land:[740,360],tablet:[640,860]};
-function cardScreen(){var t=S.test.on&&S.test.poi==="painting",h='<div class="chrome"><i>&#10005;</i><i>&#9776;</i></div><div class="hero" style="background-image:url('+IMG.hero+')"><div class="w"><small>'+esc(L(UI.where))+'</small><h2>Ribeira Palace</h2><p>'+esc(L(UI.line))+'</p></div></div>';
+function cardScreen(){var t=S.test.on&&S.test.poi==="painting",h='<div class="chrome"><i title="'+TXH("close")+'">&#10005;</i><i title="'+TXH("visitor_settings")+'">&#9776;</i></div><div class="hero" style="background-image:url('+IMG.hero+')"><div class="w"><small>'+esc(L(UI.where))+'</small><h2>Ribeira Palace</h2><p>'+esc(L(UI.line))+'</p></div></div>';
   GROUPS.forEach(function(g){var bl=S.card.filter(function(b){return b.grp===g});if(!bl.length&&!(g==="about"&&t))return;
     h+='<div class="gsec"><div class="ey" style="color:var(--'+g+')">'+esc(L(UI[g]))+'</div>';
-    if(g==="about"&&t)h+='<button class="testtile" type="button" data-go="demo"><div><b>TEST · NOT IN THE APP</b><strong>'+esc(L(UI.demo))+'</strong><span>Motion, interaction, effects, elements, patterns.</span></div><em>&#8250;</em></button>';
+    if(g==="about"&&t)h+=testTile();
     bl.forEach(function(b,i){h+=blockPreview(b,i)});h+='</div>'});
   return h+'<div style="height:40px"></div>';}
-function topbar(crumb){return '<div class="topbar"><button type="button" data-go="card" aria-label="Back">&#8249;</button><span>Ribeira Palace &#8250; '+crumb+'</span></div>';}
+function topbar(crumb){return '<div class="topbar"><button type="button" data-go="card" aria-label="'+TXH("page_back")+'">&#8249;</button><span>Ribeira Palace &#8250; '+crumb+'</span></div>';}
 function layerHead(t,s){return '<div class="layerhead">'+t+'<small>'+s+'</small></div>'}
 function demoScreen(){var h=topbar("<b>"+esc(L(UI.demo))+"</b>")+'<div class="pg">';
   h+=layerHead("Motion","Each motion on real parts. Motion Family: <b>"+esc((motionById(S.family)||{}).name)+"</b> · Replay: <b>"+(S.replay==="every"?"Every Pass":"Once")+"</b>.");
@@ -362,13 +363,13 @@ function demoScreen(){var h=topbar("<b>"+esc(L(UI.demo))+"</b>")+'<div class="pg
   h+=layerHead("Patterns","Groups of elements with their styles; a marker fills the content.");
   S.patterns.forEach(function(p){h+='<div class="item" data-ref="p:'+p.id+'"><span class="tag">Pattern · <b>'+esc(p.name)+'</b></span><div class="blk">'+p.rows.map(function(r,i){return renderEl(r.kind,styleById(r.style)||defStyle(r.kind),{},i)}).join("")+'</div></div>'});
   return h+'</div>';}
-function storyScreen(){var h=topbar(esc(L(UI.stories))+" &#8250; <b>"+esc(L(DEMO.title))+"</b>")+'<div class="pg"><div class="blk">';
+function storyScreen(){var h=topbar(esc(L(secById("stories").name))+" &#8250; <b>"+esc(L(DEMO.title))+"</b>")+'<div class="pg"><div class="blk">';
   S.story.forEach(function(r){if(r.pattern){var p=patternById(r.pattern);if(!p){h+='<div class="item" data-ref="r:'+r.id+'"><p class="el-par missing">(missing pattern)</p></div>';return}
       var parts=p.rows.map(function(pr,i){return renderEl(pr.kind,styleById(pr.style)||defStyle(pr.kind),r.slots[i]||{},i)});
       h+='<div class="item" data-ref="r:'+r.id+'">'+(r.pattern==="pt1"?'<div class="wide2"><div>'+parts[0]+'</div><div>'+parts.slice(1).join("")+'</div></div>':parts.join(""))+'</div>';}
     else h+='<div class="item" data-ref="r:'+r.id+'">'+renderEl(r.kind,(r.style&&styleById(r.style))||defStyle(r.kind),r.c,0)+'</div>'});
   return h+'</div></div>';}
-function galleryScreen(){return topbar(esc(L(UI.media))+" &#8250; <b>Gallery</b>")+'<div class="pg"><div class="blk">'+(S.galleryImgs||["g1","g2","g3","before"]).map(function(g,i){return renderEl("picture",defStyle("picture"),{img:g,cap:T("Picture "+(i+1),"Imagem "+(i+1))},i)}).join("")+'</div></div>'}
+function galleryScreen(){return topbar(esc(L(secById("media").name))+" &#8250; <b>"+TXH("gallery_name")+"</b>")+'<div class="pg"><div class="blk">'+(S.galleryImgs||["g1","g2","g3","before"]).map(function(g,i){return renderEl("picture",defStyle("picture"),{img:g,cap:T("Picture "+(i+1),"Imagem "+(i+1))},i)}).join("")+'</div></div>'}
 function navbar(){return GROUPS.map(function(g){return'<span style="color:var(--'+g+')"><i></i>'+esc(L(UI[g]))+'</span>'}).join("")}
 function ptool(){var nx={phone:"land",land:"tablet",tablet:"phone"},nm={phone:"Phone",land:"Wide",tablet:"Tablet"};
   return '<span class="lbl">PREVIEW</span><button type="button" data-pt="dark" aria-pressed="'+S.dark+'" title="Light / dark">'+(S.dark?"&#9790; Dark":"&#9728; Light")+'</button>'+
@@ -381,7 +382,7 @@ function renderPhone(keep){var top=keep?scr.scrollTop:0,sz=SCREENS[S.screen];
   var k=Math.min(1,390/sz[0]);fit.style.transform="scale("+k+")";fit.style.height=(sz[1]*k)+"px";fit.style.width=(sz[0]*k)+"px";fit.style.transformOrigin="top left";
   document.getElementById("camera").style.backgroundImage=S.screen==="land"?"url("+IMG.hero+")":"none";
   ph.classList.toggle("dark",S.dark);ph.classList.toggle("reduce",S.reduce);
-  scr.innerHTML=S.view==="card"?cardScreen():S.view==="demo"?demoScreen():S.view==="story"?storyScreen():galleryScreen();
+  scr.innerHTML=S.view==="card"?cardScreen():S.view==="demo"?demoScreen():S.view==="story"?storyScreen():S.view==="term"?termScreen():S.view==="democard"?demoCardScreen():galleryScreen();
   document.getElementById("ptool").innerHTML=ptool();
   var nb=document.getElementById("navbar");nb.innerHTML=navbar();nb.style.display=S.view==="card"?"":"none";
   hint.style.display=S.view==="card"?"":"none";hint.firstChild.textContent="The card · Ribeira Palace";
@@ -453,7 +454,7 @@ ph.addEventListener("click",function(e){var t=e.target;
   var ex=t.closest("[data-expand]");if(ex){ex.classList.toggle("opened");return}
   var kq=t.closest(".kq button");if(kq){kq.classList.add(kq.dataset.ok?"ok":"no");return}
   var fl=t.closest("[data-flip]");if(fl){fl.classList.toggle("on");return}
-  var au=t.closest("[data-audio] button");if(au){var a=au.parentNode;a.classList.toggle("playing");au.innerHTML=a.classList.contains("playing")?"&#10073;&#10073;":"&#9654;";return}
+  var au=t.closest("[data-audio] button");if(au){var a=au.parentNode;a.classList.toggle("playing");au.innerHTML=a.classList.contains("playing")?"&#10073;&#10073;":"&#9654;";au.setAttribute("aria-label",a.classList.contains("playing")?TXT("audio_pause"):TXT("audio_play"));return}
   var an=t.closest('[data-anim="tap"]');if(an){an.classList.remove("play");void an.offsetWidth;an.classList.add("play");return}
   var dr=t.closest("[data-door]");if(dr){var op=dr.dataset.open!=="1";dr.dataset.open=op?"1":"0";dr.querySelector(".l").style.transform=op?"rotateY(-75deg)":"";dr.querySelector(".r").style.transform=op?"rotateY(75deg)":"";return}
   var hsp=t.closest("[data-hspot]");if(hsp){var pop=hsp.parentNode.querySelector(".pop");var notes=[T("The Torreão: the corner tower of the 1580s.","O Torreão: a torre de canto da década de 1580."),T("The river front where the court landed.","A frente ribeirinha onde a corte desembarcava.")];pop.textContent=L(notes[+hsp.dataset.hspot]);pop.classList.add("on");return}
@@ -479,6 +480,7 @@ function isOpen(id,depth){if(S.op.hasOwnProperty(id))return S.op[id];return dept
 function fo(id,title,badge,body,depth,cur){return '<details class="fo'+(cur?" cur":"")+'" data-fo="'+id+'" data-depth="'+depth+'"'+(isOpen(id,depth)?" open":"")+'><summary>'+title+'<span class="sp"></span>'+(badge?'<span class="badge '+badge[0]+'">'+badge[1]+'</span>':"")+'</summary>'+(body?'<div class="inner">'+body+'</div>':"")+'</details>'}
 function locked(t){return '<details class="fo locked"><summary>'+esc(t)+'<span class="sp"></span><span class="badge">EXISTING</span></summary></details>'}
 function motionOpts(type,withFamily){var a=[];if(withFamily)a.push(["family","Family's ("+((motionById(S.family)||{}).name||"(missing)")+")"]);S.motions.forEach(function(m){if(m.type===type)a.push([m.id,m.name])});a.push(["none","None"]);return a}
+function matchQ(name){var q=S.ui.q.trim().toLowerCase();return !q||name.toLowerCase().indexOf(q)>=0}
 function matches(name,cat){var q=S.ui.q.trim().toLowerCase();return (S.ui.cat==="All"||cat===S.ui.cat)&&(!q||name.toLowerCase().indexOf(q)>=0)}
 function advice(m){if(m.type==="entrance"&&m.dur>600)return "Long for an entrance: the visitor waits "+m.dur+" ms to read. Fine for one hero moment.";if(m.type==="transition"&&m.dur>900)return "A slow turn: good for a story mode, tiring for a quick swipe.";if(m.type==="entrance"&&m.dist>80)return "A long travel: a dramatic entrance.";return ""}
 function motionBody(m){var b=row("Name",'<input class="u" data-text="motion" value="'+esc(m.name)+'">',"The name styles and blocks pick it by.");
@@ -491,7 +493,7 @@ function motionBody(m){var b=row("Name",'<input class="u" data-text="motion" val
   else if(m.type==="imported")b+=row("Source",seg("motion.source",["lottie","rive","video","unity"],["Lottie","Rive","Video + alpha","Unity Animation"],m.source),"Made in another tool (or a Unity prefab), imported as an asset.",true)+row("File",'<input class="u" data-text="motionfile" value="'+esc(m.file)+'">',"The asset in the wall's folder.",true)+row("Plays",seg("motion.trigger",["enter","loop","tap","scrub"],["On view","Loop","On tap","With scroll"],m.trigger),"With scroll scrubs it with the visitor's scroll.",true);
   else b+=row("Period (ms)",slider("motion.dur",600,6000,50,m.dur),"One loop; loops stop under Reduce Motion.",true);
   return b;}
-function edCard(){var h='';
+function edCardV3(){var h='';
   /* Editor view: how foldouts behave + find */
   h+='<div class="fo" style="padding:6px 8px"><div class="row" style="grid-template-columns:150px minmax(0,1fr) 22px"><label>Foldouts</label><div>'+seg("ui.single",["false","true"],["Many open","One at a time"],String(S.ui.single))+'</div>'+help("Editor preference (not saved to the wall): one open at a time closes the others at the same level.")+'</div>'+
    row("Open to level",seg("ui.level",["0","1","2","3"],["Closed","1","2","3"],String(S.ui.level)),"How deep the foldouts open by default.")+
@@ -508,7 +510,7 @@ function edCard(){var h='';
   var mb=row("Motion Family",sel("family",motionOpts("entrance",false),S.family),"The card's default entrance.")+
    row("Replay",seg("replay",["every","once"],["Every Pass","Once"],S.replay),"Every Pass: scrolling down plays an entrance, scrolling back up undoes it, down again replays. Once: it stays. One choice for the whole card (Reveal follows it).")+
    '<div class="note fixed">One hard rule: Reduce Motion shows everything whole at once and stops loops. Everything else is yours; warnings are advice.</div>';
-  Object.keys(TYPES).forEach(function(t){var inner="";S.motions.filter(function(m){return m.type===t&&matches(m.name,"Motion")}).forEach(function(m){var u=motionUses(m.id);
+  Object.keys(TYPES).forEach(function(t){var inner="";S.motions.filter(function(m){return m.type===t&&matchQ(m.name)}).forEach(function(m){var u=motionUses(m.id);
      inner+=fo("mo:"+m.id,esc(m.name)+' <span class="sub">· '+esc(motionSummary(m))+' · used '+u+'</span>',[PATH[m.id]==="imp"?"bro":PATH[m.id]==="bld"?"bld":"nat",({nat:"NATIVE",bld:"BUILD",imp:"IMPORT"})[PATH[m.id]||"bld"]],motionBody(m)+'<div class="btnrow"><button class="del" type="button" data-del="motion" data-id="'+m.id+'" '+(u?"disabled title=\"In use\"":"")+'>Delete</button></div>',9,S.sel.layer==="motion"&&S.sel.motion===m.id)});
     inner+='<div class="btnrow"><button class="ubtn sm" type="button" data-add="motion" data-type="'+t+'">+ New '+TYPES[t].toLowerCase()+' preset</button></div>';
     mb+=fo("mt:"+t,TYPES[t]+' <span class="sub">· '+S.motions.filter(function(m){return m.type===t}).length+'</span>',null,inner,3)});
@@ -516,7 +518,7 @@ function edCard(){var h='';
   b+=fo("motion","Motion",["new","NEW"],mb,2);
   /* Interaction */
   var ib='<div class="note">Things the visitor does to a part. Elements and patterns pick them (a Callout\'s Tap to Flip, a Picture\'s Hold to Reveal).</div>';
-  S.inter.forEach(function(x){if(!matches(x.name,"Interactive"))return;var o=x.o,bb='<div class="note">'+esc(x.h)+'</div>';
+  S.inter.forEach(function(x){if(!matchQ(x.name))return;var o=x.o,bb='<div class="note">'+esc(x.h)+'</div>';
     if(x.id==="flip")bb+=row("Turn (ms)",slider("inter.dur",200,1500,10,o.dur),"",true);if(x.id==="hold")bb+=row("Hold (ms)",slider("inter.hold",300,3000,50,o.hold),"How long the press must last.",true);
     if(x.id==="compare")bb+=row("Start at (%)",slider("inter.start",0,100,1,o.start),"",true);if(x.id==="deck")bb+=row("Throw at (pt)",slider("inter.throwd",40,240,5,o.throwd),"How far a drag must go to throw a card.",true);
     if(x.id==="tiltlook")bb+=row("Strength (pt)",slider("inter.strength",0,40,1,o.strength),"",true);
@@ -524,7 +526,7 @@ function edCard(){var h='';
   b+=fo("interaction","Interaction",["new","NEW"],ib,2);
   /* Effects */
   var eb='<div class="note">The Look Kit. Edges shape the start of a section or a divider; line dividers sit between parts. A Divider element picks one of these.</div>';
-  [["edge","Edges"],["line","Line dividers"],["light","Light"],["moving","Moving"]].forEach(function(gp){var inner="";S.effects.filter(function(f){return f.grp===gp[0]&&matches(f.name,"Structure")}).forEach(function(f){var o=f.o,fb='<div class="thumb cv'+(S.dark?" dark":"")+'" style="height:auto;padding:4px 0">'+(f.grp==="edge"?edgeSvg(f):f.grp==="line"?lineSvg(f):"")+'</div>';
+  [["edge","Edges"],["line","Line dividers"],["light","Light"],["moving","Moving"]].forEach(function(gp){var inner="";S.effects.filter(function(f){return f.grp===gp[0]&&matchQ(f.name)}).forEach(function(f){var o=f.o,fb='<div class="thumb cv'+(S.dark?" dark":"")+'" style="height:auto;padding:4px 0">'+(f.grp==="edge"?edgeSvg(f):f.grp==="line"?lineSvg(f):"")+'</div>';
      if(o.h!=null&&f.grp==="edge")fb+=row("Height (pt)",slider("fx.h",12,80,1,o.h),"",true);
      if(o.colour)fb+=row("Colour",seg("fx.colour",["family","accent","neutral"],["Family colour","Accent","Neutral"],o.colour),"",true);
      if(f.id==="x_fade")fb+=row("Height (pt)",slider("fx.h",20,160,1,o.h),"",true);if(f.id==="x_tone")fb+=row("Spread",slider("fx.spread",0.4,1.5,0.05,o.spread),"Its strength stays automatic.",true);if(f.id==="x_drift")fb+=row("Speed (pt/s)",slider("fx.speed",2,40,1,o.speed),"",true);
@@ -559,14 +561,14 @@ function edCard(){var h='';
   h+=fo("bc","Block Components",["new","NEW"],b,1);
   /* Block Library */
   var lb='<div class="note">A block earns its place with behaviour, data or an owner; arrangements of words and pictures are patterns, placed by the Inline block. '+esc(GONE)+'</div><div class="bgrid">';
-  LIB.forEach(function(r){if(!matches(r[1],"Block"))if(S.ui.cat!=="All"||S.ui.q)return;lb+='<button class="sc bcard" type="button" data-block="'+esc(r[1])+'" aria-pressed="'+(S.sel.block===r[1])+'">'+libThumb(r[1])+'<span class="nm">'+esc(r[1])+(r[2]==="new"?' <span class="badge new">NEW</span>':'')+'</span><span class="from">'+esc(r[0])+' · built from '+esc(r[4])+'</span></button>'});
+  LIB.forEach(function(r){if(!matchQ(r[1]))return;lb+='<button class="sc bcard" type="button" data-block="'+esc(r[1])+'" aria-pressed="'+(S.sel.block===r[1])+'">'+libThumb(r[1])+'<span class="nm">'+esc(r[1])+(r[2]==="new"?' <span class="badge new">NEW</span>':'')+'</span><span class="from">'+esc(r[0])+' · built from '+esc(r[4])+'</span></button>'});
   lb+='</div>';var cur=LIB.filter(function(r){return r[1]===S.sel.block})[0];if(cur)lb+='<div class="tip"><b>'+esc(cur[1])+'</b> · '+esc(cur[3])+' Its own options (Block Library defaults) and its preview / page settings live here; a marker places it and fills its content.</div>';
   h+=fo("library","Block Library",["ext","EXTENDED"],lb,1);
   h+=jsonBox("config.json · card_settings.block_components",bcJson());return h;}
 function libThumb(name){var k={"Header":["picture","st17"],"Inline":["callout","st28"],"Story":["picture","st16"],"Quick Facts":["swatches","st42"],"Timeline":["timeline","st41"],"Gallery":["carousel","st20"],"Before and After":["before_after","st35"],"Hotspot Image":["hotspot","st36"],"Video":["video","st21"],"3D Model":["model_3d","st37"],"360 Panorama":["panorama","st38"],"Audio Guide":["audio","st32"],"Wall Locator":["map","st40"],"Today Map":["map","st40"],"Compare Points":["picture_pair","st19"],"Related":["picture_pair","st19"],"Sources":["list","st14"],"Contents":["list","st15"],"Practical Info":["list","st14"]}[name]||["callout","st11"];
   return thumb(k[0],styleById(k[1]))}
 
-function edMarker(){var h=row("Marker",sel("m.poi",[["painting","7. Ribeira Palace"]],"painting"),"The marker whose card you edit.");
+function edMarkerV3(){var h=row("Marker",sel("m.poi",[["painting","7. Ribeira Palace"]],"painting"),"The marker whose card you edit.");
   h+=locked("Position & Visual")+locked("Labels");
   /* 1. the card */
   var cb='<div class="note">The card as the visitor meets it: blocks in order, in their bar groups, each with its preview and what a tap does. The Header is set above (existing).</div><table class="tbl"><thead><tr><th style="width:22px">#</th><th style="width:80px">Preview</th><th>Block</th><th style="width:70px">Group</th><th style="width:74px"></th></tr></thead><tbody>';
@@ -597,11 +599,11 @@ function edMarker(){var h=row("Marker",sel("m.poi",[["painting","7. Ribeira Pala
   h+=fo("mpages","2 · Pages · each block's content",["new","NEW"],pages,1);
   h+=jsonBox("config.json · the marker's detail card (blocks + the story page)",markerJson());return h;}
 function mv2(kind,i){return'<button class="del" type="button" data-'+kind+'="'+i+'" data-dir="-1">^</button> <button class="del" type="button" data-'+kind+'="'+i+'" data-dir="1">v</button> <button class="del" type="button" data-'+kind+'="'+i+'" data-dir="0">&#128465;</button>'}
-function cardThumb(b){var h=blockPreview(b,0).replace(/class="mv pre[^"]*"/g,'class=""').replace(/data-go="[^"]*"/g,"");return '<div class="thumb sm cv'+(S.dark?" dark":"")+'" style="width:72px;height:44px"><div class="tin" style="transform:scale(.21)">'+h+'</div></div>'}
+function cardThumb(b){var h=noBtn(blockPreview(b,0)).replace(/class="mv pre[^"]*"/g,'class=""').replace(/data-go="[^"]*"/g,"");return '<div class="thumb sm cv'+(S.dark?" dark":"")+'" style="width:72px;height:44px"><div class="tin" style="transform:scale(.21)">'+h+'</div></div>'}
 function fieldsFor(kind,c,path){var f=FIELDS[kind]||[],h='<div class="fields">';if(!f.length)return '<span class="uses">No content: the element draws from its style (and the wall\'s data).</span>';
   f.forEach(function(x){var key=x[0],type=x[1],lab=x[2],v=c[key];
-   if(type==="ltext"){v=v||{en:"",pt:""};["en","pt"].forEach(function(lg){h+=row(lab+" · "+lg.toUpperCase(),'<textarea class="u" rows="2" data-field="'+path+'|'+key+'|'+lg+'">'+esc(v[lg]||"")+'</textarea>',lg==="en"?"One per language; empty in PT falls back to EN.":"")})}
-   else if(type==="litems"){v=v||{en:[],pt:[]};["en","pt"].forEach(function(lg){h+=row(lab+" · "+lg.toUpperCase(),'<textarea class="u" rows="3" data-field="'+path+'|'+key+'|'+lg+'|lines">'+esc((v[lg]||[]).join("\n"))+'</textarea>',"")})}
+   if(type==="ltext"){v=v||{en:"",pt:""};langCodes().forEach(function(lg){h+=row(lab+" · "+lg.toUpperCase(),'<textarea class="u" rows="2" data-field="'+path+'|'+key+'|'+lg+'">'+esc(v[lg]||"")+'</textarea>',lg==="en"?"One per language; empty in PT falls back to EN.":"")})}
+   else if(type==="litems"){v=v||{en:[],pt:[]};langCodes().forEach(function(lg){h+=row(lab+" · "+lg.toUpperCase(),'<textarea class="u" rows="3" data-field="'+path+'|'+key+'|'+lg+'|lines">'+esc((v[lg]||[]).join("\n"))+'</textarea>',"")})}
    else if(type==="text")h+=row(lab,'<input class="u" data-field="'+path+'|'+key+'" value="'+esc(v||"")+'">',"");
    else if(type==="img")h+=row(lab,'<div class="assets">'+ASSETS.map(function(a){return'<button type="button" data-asset="'+path+'|'+key+'|'+a+'" aria-pressed="'+(v===a)+'" style="background-image:url('+IMG[a]+')" aria-label="'+a+'"></button>'}).join("")+'</div>',"A picture from the wall's media folder.");
    else if(type==="imgs"){v=v||[];h+=row(lab,'<div class="assets">'+ASSETS.map(function(a){return'<button type="button" data-assets="'+path+'|'+key+'|'+a+'" aria-pressed="'+(v.indexOf(a)>=0)+'" style="background-image:url('+IMG[a]+')" aria-label="'+a+'"></button>'}).join("")+'</div>',"Tap to add or remove; the order is the tap order.")}});
@@ -694,7 +696,7 @@ ed.addEventListener("input",function(e){var t=e.target;
   if(t.dataset.field){var q=t.dataset.field.split("|"),c=contentAt(q[0]);if(!c)return;if(q[2]){c[q[1]]=c[q[1]]||{};c[q[1]][q[2]]=q[3]==="lines"?t.value.split("\n"):t.value}else c[q[1]]=t.value;renderPhone(true);refreshJson()}});
 document.querySelectorAll(".utab").forEach(function(t){t.addEventListener("click",function(){S.tab=t.dataset.tab;renderEditor();if(S.tab==="marker")show("card");else if(S.tab==="card")show("demo")})});
 document.querySelectorAll("[data-step]").forEach(function(b){b.addEventListener("click",function(){var n=+b.dataset.step;S.step=n;document.querySelectorAll("[data-step]").forEach(function(x){x.setAttribute("aria-pressed",String(x===b))});
-  S.op={};S.op.bc=n<=3;S.op.motion=n===1;S.op.elements=n===1;S.op.patterns=n===2;S.op.library=n===3;S.op.test=false;S.op.interaction=false;S.op.effects=false;S.op.mcard=n===4;S.op.mpages=n===5;S.op["pg:story"]=n===5;
+  S.op={};S.op.bc=n<=3;S.op.motion=n===1;S.op.elements=n===1;S.op.patterns=n===2;S.op.library=n===3;S.op.test=false;S.op.interaction=false;S.op.effects=false;S.op.mcard=n===4;S.op.mpages=n===5;S.op["pg:story"]=n===5;if(n===1){S.op["mt:entrance"]=true;S.op["mo:"+S.sel.motion]=true}
   if(n===1){S.tab="card";S.sel.layer="motion";renderEditor();show("demo","m:"+S.sel.motion)}
   if(n===2){S.tab="card";S.sel.layer="pattern";S.op["pt:"+S.sel.pattern]=true;renderEditor();show("demo","p:"+S.sel.pattern)}
   if(n===3){S.tab="card";renderEditor();show("demo")}
@@ -702,5 +704,3 @@ document.querySelectorAll("[data-step]").forEach(function(b){b.addEventListener(
   if(n===5){S.tab="marker";renderEditor();S.view="story";renderPhone(false)}
   if(window.innerWidth<1000)document.querySelector(".ed").scrollIntoView({behavior:"smooth"})})});
 document.getElementById("replay").addEventListener("click",function(){scr.scrollTop=0;renderPhone(false);if(S.focusRef&&S.view==="demo")setTimeout(function(){flashRef(S.focusRef)},60)});
-S.focusRef="m:rise";renderAll(false);setTimeout(function(){flashRef("m:rise")},300);
-})();

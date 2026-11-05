@@ -187,4 +187,4 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
    option reaches the phone; only a capture says it looks right.
 3. **Measure before you change, and say the number** (the sheet's stops, contrast ratios).
 4. **A differently shaped fixture finds what the big one cannot.**
-5. **Audit against the code before a prototype counts as final** (`skills/Feature_Prototyping.md` step 5).
+5. **Audit against the code before a prototype counts as final** (`skills/Feature_Prototyping.md` step 6).

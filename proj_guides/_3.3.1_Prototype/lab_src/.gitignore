@@ -4,3 +4,4 @@ caps*/
 dom.txt
 err.txt
 selftest.json
+tests_result*.json

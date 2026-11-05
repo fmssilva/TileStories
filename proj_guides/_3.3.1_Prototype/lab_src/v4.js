@@ -43,11 +43,11 @@ function sectionStart(sec){var st=sec.start==="inherit"?S.secCfg.start:sec.start
 function cardRuns(){var vis=function(id){var s=secById(id);return s&&s.shown&&S.poiSec[id]!=="hide"};
   if(S.secCfg.order==="placed"){var runs=[];S.card.forEach(function(b){var g=grpOf(b);if(!vis(g))return;if(runs.length&&runs[runs.length-1].sec.id===g)runs[runs.length-1].blocks.push(b);else runs.push({sec:secById(g),blocks:[b]})});return runs}
   return S.sections.filter(function(s){return vis(s.id)}).map(function(s){return{sec:s,blocks:S.card.filter(function(b){return grpOf(b)===s.id})}})}
-function cardScreen(){var t=S.test.on&&S.test.poi==="painting",h='<div class="chrome"><i>&#10005;</i><i>&#9776;</i></div><div class="hero" style="background-image:url('+IMG.hero+')"><div class="w"><small>'+esc(L(UI.where))+'</small><h2>Ribeira Palace</h2><p>'+esc(L(UI.line))+'</p></div></div>';
+function cardScreen(){var t=S.test.on&&S.test.poi==="painting",h='<div class="chrome"><i title="'+TXH("close")+'">&#10005;</i><i title="'+TXH("visitor_settings")+'">&#9776;</i></div><div class="hero" style="background-image:url('+IMG.hero+')"><div class="w"><small>'+esc(L(UI.where))+'</small><h2>Ribeira Palace</h2><p>'+esc(L(UI.line))+'</p></div></div>';
   cardRuns().forEach(function(run,si){var sec=run.sec,bl=run.blocks;if(!bl.length&&!(si===0&&t))return;
     var col=colVar(sec.colour),tint=S.secCfg.look==="open"&&S.secCfg.colour!=="neutral"?"linear-gradient(to bottom, color-mix(in srgb,"+(S.secCfg.colour==="accent"?"var(--accent2)":col)+" "+Math.round(S.secCfg.intensity*100)+"%, transparent) 0, transparent "+S.secCfg.tint+"px)":"none";
     h+='<div class="gsec item" data-ref="sec:'+sec.id+'" style="--fam:'+col+';--famtint:color-mix(in srgb,'+col+' 8%,transparent);background:'+tint+(S.secCfg.look==="cards"?";margin:12px;border-radius:18px;background:var(--box)":"")+'">'+sectionStart(sec)+'<div class="ey" style="color:'+(S.secCfg.colour==="neutral"?"var(--ink2)":S.secCfg.colour==="accent"?"var(--accent2)":col)+'">'+esc(L(sec.name))+'</div>';
-    if(si===0&&t)h+='<button class="testtile" type="button" data-go="demo"><div><b>TEST · NOT IN THE APP</b><strong>'+esc(L(UI.demo))+'</strong><span>Motion, interaction, effects, elements, patterns.</span></div><em>&#8250;</em></button>';
+    if(si===0&&t)h+=testTile();
     bl.forEach(function(b,i){if(i>0&&S.secCfg.divider!=="none"){var dv=effectById(S.secCfg.divider);if(dv)h+=lineSvg(dv)}h+=blockPreview(b,i)});h+='</div>'});
   return h+'<div style="height:60px"></div>';}
 function navbar(){var c=S.ctl.bar,first=true;return S.sections.filter(function(s){return s.shown&&S.poiSec[s.id]!=="hide"}).map(function(s){var col=c.iconColour==="section"?colVar(s.colour):c.iconColour==="accent"?"var(--accent2)":"var(--ink2)";
@@ -60,7 +60,7 @@ renderPhone=function(keep){renderPhoneV3(keep);var nb=document.getElementById("n
   if(S.view==="card"&&S.ctl.locate.on){var L2=S.ctl.locate,sz=Math.round(40*L2.size),pin=document.createElement("div");pin.className="locpin";
     pin.style.cssText="position:absolute;right:18px;bottom:"+(c.on&&c.pos==="bottom"?92:22)+"px;z-index:7;display:flex;align-items:center;gap:8px";
     var hue={teal:["#7fe3c4","#0e9a7c"],green:["#b8ef7a","#3f9e2c"],cyan:["#8be4ff","#0a84b8"],accent:["#8FB0EC","#1F4E9C"]}[L2.colour]||["#7fe3c4","#0e9a7c"];
-    pin.innerHTML=(L2.style==="pin_label"?'<span style="background:rgba(255,255,255,.95);color:#123b32;font:700 12px/1 var(--body);padding:8px 11px;border-radius:999px;box-shadow:0 3px 10px rgba(0,0,0,.18)">'+(S.lang==="pt"?"Encontre na parede":"Find it on the wall")+'</span>':"")+
+    pin.innerHTML=(L2.style==="pin_label"?'<span style="background:rgba(255,255,255,.95);color:#123b32;font:700 12px/1 var(--body);padding:8px 11px;border-radius:999px;box-shadow:0 3px 10px rgba(0,0,0,.18)">'+(TXH("locate_label"))+'</span>':"")+
       '<span class="'+(L2.float&&!S.reduce?"floatpin":"")+'" style="'+(L2.style==="glass"?"display:grid;place-items:center;width:"+(sz+14)+"px;height:"+(sz+14)+"px;border-radius:50%;background:rgba(255,255,255,.85);box-shadow:0 6px 16px rgba(0,0,0,.18)":"")+'">'+PIN.replace('<svg','<svg width="'+sz+'" height="'+Math.round(sz*1.33)+'"').replace(/#7fe3c4/g,hue[0]).replace(/#0e9a7c/g,hue[1])+'</span>';
     ph.appendChild(pin)}};
 renderAll=function(keep){renderEditor();renderPhone(keep)};
@@ -74,7 +74,7 @@ function edCard(){var h="";
   h+=fo("s0",sectionTitle("0","Preview &amp; Test","Editor tools, never in the app"),["test","TEST"],
     row("Show the demo card",pseg("test.on",["true","false"],["On","Off"]),"Adds the Block Components demo block at the top of the chosen marker's first section, in Scene and Play only.")+
     row("On marker",sel("test.poi",POIS,S.test.poi),"The reference card: the Ribeira Palace.",true)+row("Focus on what I edit",seg("focusOn",["true","false"],["On","Off"],String(S.focusOn)),"The demo jumps to the part you edit and dims the rest.",true)+
-    row("Preview language",seg("previewLang",["en","pt"],["EN","PT"],S.lang),"The language the Editor previews show (the phone's bar too).")+
+    row("Preview language",seg("previewLang",langCodes(),langCodes().map(function(c){return c.toUpperCase()}),S.lang),"The language the Editor previews show (the phone's bar too).")+
     '<div class="note">On the phone: the floating Preview bar (theme, motion, language, focus, screen).</div>',1);
   /* 1. Card */
   var c1=fo("s1a","Sheet",null,row("Enable Detail Card",pseg("cardCfg.enabled",["true","false"],["On","Off"]),"Off: tapping a marker shows only its label.")+
@@ -94,7 +94,7 @@ function edCard(){var h="";
    row("Block order",pseg("secCfg.order",["sections","placed"],["By section","As placed"]),"By section: blocks gather in their section's order. As placed: the marker's own order.");
   var sx=fo("s2cfg","Sections config <span class=\"sub\">· for every section</span>",null,cfg,2);
   S.sections.forEach(function(sec,i){var col=colVar(sec.colour);
-    var body=row("Name · EN",'<input class="u" data-path="sections.'+i+'.name.en" value="'+esc(sec.name.en)+'">',"The word on the Navigation Bar and the section's eyebrow.")+row("Name · PT",'<input class="u" data-path="sections.'+i+'.name.pt" value="'+esc(sec.name.pt)+'">',"")+
+    var body=langCodes().map(function(lg,j){return row("Name · "+lg.toUpperCase(),'<input class="u" data-path="sections.'+i+'.name.'+lg+'" value="'+esc(sec.name[lg]||"")+'">',j?"":"The word on the Navigation Bar and the section's eyebrow.")}).join("")+
      row("Icon",'<div class="assets">'+Object.keys(SICON).map(function(k){return'<button type="button" data-secicon="'+sec.id+'|'+k+'" aria-pressed="'+(sec.icon===k)+'" style="background:#2E2E2E;color:#EEE;display:grid;place-items:center;width:34px;height:30px">'+sicon(k,16)+'</button>'}).join("")+'</div>',"Its icon on the bar.")+
      row("Colour",'<div class="assets">'+SCOLOURS.map(function(c){return'<button type="button" class="cv" data-seccol="'+sec.id+'|'+c[0]+'" aria-pressed="'+(sec.colour===c[0])+'" title="'+c[1]+'" style="background:var(--'+c[0]+');width:30px;height:26px"></button>'}).join("")+'</div>',"A theme colour: the bar icon, the eyebrow, the tint, the family colour of its elements.")+
      row("Start",'<div class="seg">'+["inherit","tiles","wave","arches","plain"].map(function(v){return'<button type="button" data-set="@sections.'+i+'.start" data-v="'+v+'" aria-pressed="'+(sec.start===v)+'">'+(v==="inherit"?"As configured":v[0].toUpperCase()+v.slice(1))+'</button>'}).join("")+'</div>',"Override the Sections config for this section only.")+
@@ -165,6 +165,7 @@ function edMarker(){var h=row("Marker",sel("m.poi",[["painting","7. Ribeira Pala
 
 /* ----- v4 events ----- */
 ed.addEventListener("click",function(e){var t=e.target;
+  if(t.closest("[data-seckind],[data-secicon],[data-seccol],[data-secmove],[data-secdel],[data-secadd],[data-blockdef],[data-poisec]"))e.stopPropagation();
   var sk=t.closest("[data-seckind]");if(sk){var q=sk.dataset.seckind.split("|"),sec=secById(q[0]);if(sec.kinds.indexOf(q[1])>=0)return;S.sections.forEach(function(s){s.kinds=s.kinds.filter(function(k){return k!==q[1]})});sec.kinds.push(q[1]);S.sel.layer="section";S.sel.section=sec.id;renderAll(true);show("card","sec:"+sec.id);return}
   var si=t.closest("[data-secicon]");if(si){var q2=si.dataset.secicon.split("|");secById(q2[0]).icon=q2[1];renderAll(true);show("card");return}
   var sc=t.closest("[data-seccol]");if(sc){var q3=sc.dataset.seccol.split("|");secById(q3[0]).colour=q3[1];renderAll(true);show("card","sec:"+q3[0]);return}
@@ -178,7 +179,7 @@ setOpt=function(key,v){if(key==="previewLang"){S.lang=v;renderAll(true);return}
   if(key[0]==="@"){var path=key.slice(1);setPath(path,pval(v));if(path==="cardCfg.mode")S.dark=v==="dark";
     if(path.indexOf("sections.")===0){var sid=S.sections[+path.split(".")[1]].id;S.sel.layer="section";S.sel.section=sid;renderAll(true);show("card","sec:"+sid);return}
     if(path.indexOf("blockDefs.")===0){renderAll(true);var b=S.card.filter(function(x){return x.kind===S.sel.blockDef})[0];show("card",b?"b:"+b.id:null);return}
-    renderAll(true);if(path.indexOf("test.")!==0)show("card");return}
+    renderAll(true);show("card");return}
   if(key.indexOf("cb.")===0){var cb=byId(S.card,S.sel.cblock);cb[key.slice(3)]=v;renderAll(true);show("card","b:"+cb.id);return}
   setOptV3(key,v)};
 ed.addEventListener("change",function(e){var t=e.target,k=t.dataset.sel;if(!k)return;

@@ -55,7 +55,24 @@
       in the section of the part it changes. The spec says the current target, not the round that changed it.
       - For each part, the spec also says what the code has today and where (Built / Partly / Not yet + the class), so the
         implementation starts from the gap.
-   5. **Audit against the code before the final round.** Walk every Editor row, config value and runtime UI element the code
+   5. **Keep a Lab that lives over many rounds in order.** Several prototypes run side by side, so each one is self-contained:
+      - **Its own folder:** `_x.y.N_Prototype/`, with its sources in a `<name>_src/` folder there once it has more than one file.
+      - **Its own map:** `PROTOTYPE_STRUCTURE.md` beside the sources. It starts with "the code of this prototype, not the Unity
+        project" (the project's structure is `10-structure.md`). It lists each module, the features it owns, the Editor
+        sections it fills and the tests that prove it. Create it with the prototype; update it in the same round as every change.
+      - **One home per feature:** a feature's state and defaults, its drawing, its Editor rows, each row's demo and its test live
+        in one module. A change edits that module; a new module is only for a new feature. Never add a "newest layer" that
+        wraps the old one.
+      - **Extension points, not wrappers:** the shared parts (the Editor, the phone, the tour, the voice) call named
+        registries that each module joins. Never `var fOld=f; f=function(){...fOld()...}`, never a second declaration of
+        a function.
+      - **No silent fallback:** when one source stands in for another (a recorded line missing, so the device voice speaks),
+        the Editor shows it at that moment.
+      - **Each Editor row names its demo:** the view, the part it changes, the state, and an action (play a sample, open the
+        state). A change shows that demo; the self-test fails a row without one.
+      - **The build only joins the modules and embeds the assets.** It never rewrites code. It refuses a wrapper, a second
+        declaration or a default set twice.
+   6. **Audit against the code before the final round.** Walk every Editor row, config value and runtime UI element the code
       has today in the group's area, and give each one a verdict against the Lab: same, add, merge (two versions of one option
       become one list with every good choice), or drop (with a one-line reason). Options neither side has may be added, marked
       PROPOSED for the developer to judge. Split the walk by area when it is large; each part reports a table, and the merged

@@ -122,3 +122,4 @@
 .assets button{appearance:none;width:52px;height:38px;border-radius:3px;border:2px solid transparent;padding:0;background:#222 center/cover;cursor:pointer}
 .assets button[aria-pressed="true"]{border-color:#E07A1F}
 .reduce .flip .in2,.reduce .deck .cd,.reduce .hs .pin{transition:none;animation:none}
+.navbar span em{flex:none}.navbar span{gap:4px}
