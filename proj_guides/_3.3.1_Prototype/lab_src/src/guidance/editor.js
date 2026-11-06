@@ -29,7 +29,7 @@ function gdItemRow(it){var p="guidance.items."+it.id+".",k=gdKindOf(it),g=gdGrou
     row("Done when",pseg(p+"doneWhen",GD_DONE.map(function(x){return x[0]}),GD_DONE.map(function(x){return x[1]})),"The visitor's action that retires it for good (this visit and the next, until Reset the visitor): Apple TipKit's rule, a tip gone once its feature is used.")+
     '<div class="note gdfix">'+esc("About: "+(it.about==="marker"?"the nearest marker (it must be on the screen)":"nothing (the wall)")+" · Mascot goes: "+(it.goes==="beside"?"beside it, and points":"stays beside the ✦")+
       " · Focus: "+(it.focus==="ring"?"Ring":"None")+" · When: "+(it.when==="visit"?"the visit started":"at a pause")+(+it.stillFor>0?", the phone still "+it.stillFor+" s":"")+(pv&&+it.afterPrev>0?", at least "+it.afterPrev+" s after the "+pv.label:"")+
-      " · Spoken: "+(k&&k.spoken==="bubble"?"no, a bubble only (App)":"as the kind")+". These fields are edited in a later round.")+'</div>'+
+      " · Spoken: "+(k&&k.spoken==="bubble"?"no, a bubble only (App)":"as the kind")+". Fixed for this item.")+'</div>'+
     '<div class="note gdrb">'+esc(gdReadBack(it))+'</div>';
   return fo("gd:i:"+it.id,sum,null,body,4)}
 function gdVisitorLine(){var v=S.gdVisitor;return"Visit "+v.visits+(v.visits>1?" (a returning visitor)":" (a first visit)")+" · "+gdItems().map(function(it){var vm=gdVisitOf(v,it.id),em=gdEverOf(v,it.id);

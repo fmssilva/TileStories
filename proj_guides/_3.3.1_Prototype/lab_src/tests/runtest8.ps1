@@ -1,10 +1,10 @@
-param([string]$hash = "selftest")
+param([string]$hash = "selftest", [int]$minutes = 90)
 $edge = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
 $d = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $url = "file:///$($d -replace '\\','/')/block-components-lab.html#$hash"
 Remove-Item "$d\dom.txt", "$d\err.txt" -ErrorAction SilentlyContinue
 $p = Start-Process -FilePath $edge -ArgumentList @('--headless=new', '--disable-gpu', '--window-size=1400,1500', '--virtual-time-budget=15000', '--enable-logging=stderr', '--v=0', "--user-data-dir=$d\edgeprof11", '--dump-dom', $url) -PassThru -WindowStyle Hidden -RedirectStandardOutput "$d\dom.txt" -RedirectStandardError "$d\err.txt"
-if (-not $p.WaitForExit(3600000)) {
+if (-not $p.WaitForExit($minutes * 60000)) {
   Get-CimInstance Win32_Process -Filter "Name='msedge.exe'" | Where-Object { $_.CommandLine -like '*edgeprof11*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
   "TIMEOUT"; exit
 }

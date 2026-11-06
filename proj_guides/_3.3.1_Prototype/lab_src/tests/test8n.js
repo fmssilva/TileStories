@@ -82,7 +82,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
     await R('stopTour()');
   }
   // 8. the Editor
-  ok('Editor: Insists, Waits, When the visitor scrolls, Introduction', await R('["Insists","Waits","When the visitor scrolls","Introduction"].every(function(t){return ed.textContent.indexOf(t)>=0})'));
+  ok('Editor: Insists, Waits, When the visitor scrolls, Introduction', await R('S.tab="guide";renderEditor();["Insists","Waits","When the visitor scrolls","Introduction"].every(function(t){return ed.textContent.indexOf(t)>=0})'));
   await R('S.tab="marker";S.sel.gstep="g6";renderEditor()');
   ok('Guide script: a try step\'s After the gesture words', await R('!!ed.querySelector(\'textarea[data-gafter="g6|en"]\')&&ed.querySelector(\'textarea[data-gafter="g6|en"]\').value.indexOf("square")>0'));
   ok('no page errors', errs.length === 0, errs.slice(0, 3));

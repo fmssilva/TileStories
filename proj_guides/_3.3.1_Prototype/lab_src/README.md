@@ -10,8 +10,8 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
 - **Build:** `python build.py` writes `block-components-lab.html` here (not committed). Copy it to `../Block Components Lab.html` (the
   record copy) and publish it to https://claude.ai/artifact/KDs2Ko1dYdBWYwZVhjvuEp.
 - **Prove it:** `powershell -ExecutionPolicy Bypass -File tests/runtest8.ps1` opens the page headless with `#selftest`: every option,
-  text and demo field must change the phone or be classed behaviour (it prints `bad=0` when all is well; about 40 minutes, so run
-  it alone: other headless tests beside it slow it past its limit). `tests/shots8b.ps1` captures the demo card at each kind
+  text and demo field must change the phone or be classed behaviour (it prints `bad=0` when all is well; 30-60 minutes, so run
+  it alone: other headless tests beside it slow it past its limit; `-minutes 120` raises the limit, 90 by default). `tests/shots8b.ps1` captures the demo card at each kind
   (`#dcshot=<kind>`); `#pshot=<stop>|<scroll>` opens the card at a stop and a scroll. `node run_tests.js` runs every test in
   `tests/` (not the `*_live` ones) and lists the failed checks; `node run_tests.js --only=test8i,test9b` runs some. Each test
   drives the page with real taps, drags and keys (Playwright with the installed Edge; `#probe` opens a handle on the page's
