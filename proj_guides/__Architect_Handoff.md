@@ -6,8 +6,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 
 - **State:**
   - **The Lab:** `master` holds guidance round 1, verified on 2026-11-06 (the Guide tab, the opening message, Tap a marker,
-    the wall's pill removed). The published link still shows v29: this session's account could not open the artifact, so
-    v30 waits for the developer (share it with edit access, or a new artifact: section 1). Its code is in modules by feature
+    the wall's pill removed), published as v30 at a new link on 2026-11-06 (section 1; the old link stays at v29). Its code is in modules by feature
     (`lab_src/src/<area>/<module>.js`), with no wrappers: `lab_src/PROTOTYPE_STRUCTURE.md` says where each feature lives and
     where a change goes. The build only joins files (`build.py`) and refuses wrappers, re-assignments of functions, second
     declarations, defaults set twice and version-named modules (`check_structure.js`, `structure_baseline.json` at 0).
@@ -64,14 +63,14 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 
 ## 1. Where the work is
 
-- **The target is the Block Components Lab** (https://claude.ai/artifact/KDs2Ko1dYdBWYwZVhjvuEp), the record copy
+- **The target is the Block Components Lab** (https://claude.ai/artifact/QmhHSzTrbJAR3doq1YEoZR), the record copy
   `_3.3.1_Prototype/Block Components Lab.html`, and its sources `_3.3.1_Prototype/lab_src/` (modules by feature, the build,
   the tests; `PROTOTYPE_STRUCTURE.md` says where a change goes, `README.md` how to prove and publish it).
-- **Publishing from another account:** the artifact is private to the developer's account. To keep the same link, the
-  owner shares it with edit access (the page's Share menu); that account's session then reads the live version and publishes
-  to it. Otherwise a new artifact: publish `_3.3.1_Prototype/Block Components Lab.html` with `files` mapping every
-  `voicebench/out/...` file (184, from `_3.3.1_Prototype/voicebench/out/`, the same paths) and the `db` capability (rules:
-  `voicerate` read view / write owner, `voicerate/{self}` read view / write interact), then give the developer the new link.
+- **Publishing:** the page goes from the record copy on disk, with `root` `_3.3.1_Prototype` (a redeploy to the same link
+  keeps the voice files and the capabilities). From an account that cannot open the link (a read says "not found"): the owner
+  shares it with edit access (the page's Share menu), or the session publishes a new artifact: the record copy, `files` listing
+  every `voicebench/out/...` file at its own path (186), and the capabilities `db` (rules: `voicerate` read view / write owner,
+  `voicerate/{self}` read view / write interact), `user` and `sample` (Ask Azu); then every guide's link is replaced.
 - **The spec is `_3.3_POI_Card_Styles.md`**: each part of the card and its Editor as the Lab shows it, with what Unity has today
   (Built / Partly / Not yet + the class). Section 17 lists the open items and the PROPOSED options.
 - **The Lab holds every good option of Unity's card** (the audit of 2026-11-01: `lab_src/AUDIT_DECISIONS.md`, `lab_src/audit/`).

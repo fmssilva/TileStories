@@ -1970,7 +1970,7 @@ on("setOpt.answer",function(key,v){if(key==="ui.rowDemo"){S.ui.rowDemo=v==="true
 on("renderEditor.after",function(){ed.querySelectorAll(".row > label").forEach(function(lb){var k=rowKey(lb.parentNode);if(k&&rowDemoOf(k)){lb.classList.add("rd");lb.title="Show it on the phone"}})});
 /* the self-test: every row of the Guide tab and of Detail Card > 6 · Audiences has its demo (a row without one fails) */
 function rowsWithoutDemo(ids){var out=[];ids.forEach(function(id){ed.querySelectorAll('[data-fo="'+id+'"] .row').forEach(function(r){var k=rowKey(r);if(k&&!rowDemoOf(k)&&!out.some(function(x){return x.key===k}))out.push({key:k,label:(r.querySelector("label")||{}).textContent||""})})});return out}
-on("selfTest.res",function(res){var keep=S.tab;[["guide",guideSecIds()],["card",["s8"]]].forEach(function(t){S.tab=t[0];renderEditor();rowsWithoutDemo(t[1]).forEach(function(r){res.push({tab:t[0],key:"@"+r.key,v:"(its demo)",label:r.label,result:"NO DEMO (a row of the Guide tab or of 6 · Audiences shows nothing on the phone when changed or opened)"})})});S.tab=keep;return res});
+on("selfTest.res",function(res){var keep=S.tab;[["guide",guideSecIds()],["card",["s8"]]].filter(function(t){return stWalks(t[0])}).forEach(function(t){S.tab=t[0];renderEditor();rowsWithoutDemo(t[1]).forEach(function(r){res.push({tab:t[0],key:"@"+r.key,v:"(its demo)",label:r.label,result:"NO DEMO (a row of the Guide tab or of 6 · Audiences shows nothing on the phone when changed or opened)"})})});S.tab=keep;return res});
 
 /* The Global Scene tab: the wall's markers and how a visitor finds them (edGlobal, GSECS). */
 function edGlobal(){var h='<div class="note">The top level only: the wall\'s markers and how a visitor finds them.</div>';
@@ -2010,7 +2010,7 @@ function selfTestWords(){emitLatestFirst("selfTestWords.before");var res=[];
       res.push({tab:tab,key:a.key,v:a.v||"",label:lab,result:r})});
     noDraw=false});
   S.ownAll=false;S.ui.txf="all";return res}
-on("selfTest.res",function(a){return a.concat(selfTestWords())});
+on("selfTest.res",function(a){return stWalks("words")?a.concat(selfTestWords()):a});
 on("showSelfTest.after",function(res){var box=document.getElementById("selftest"),els=res.filter(function(r){return/^elsewhere/.test(r.result)}).length,
   cnt=function(re){var x=res.filter(function(r){return re.test(r.key)});return[x.length,x.filter(function(r){return r.result==="changes the phone"}).length]},tx=cnt(/^tx:/),lc=cnt(/^loc:/),dm=cnt(/^demo:/);
   box.insertAdjacentHTML("beforeend",'<p>Texts on their parts: <b>'+tx[1]+'</b> of '+tx[0]+' fields change the phone; the rest belong to parts the Lab does not draw (<b>'+els+'</b> elsewhere) or show during the tour. Content in the Texts check: <b>'+lc[1]+'</b> of '+lc[0]+'. Demo content and term pages: <b>'+dm[1]+'</b> of '+dm[0]+'.</p>');
@@ -2305,9 +2305,15 @@ var BEHAVIOUR=/^@?(inter\.|m\.page|blockDefs\.[^.]+\.chrome|cardCfg\.(tapOutside
 /* the phone's signature for the self-test: each feature's piece is made before the older ones (latest first) and appended after them */
 function modelSig(){var cx={};emitLatestFirst("modelSig.before",cx);var keep=S.view,out="";["card","demo","story","gallery"].forEach(function(v){S.view=v;out+=(v==="card"?cardScreen()+navbar():v==="demo"?demoScreen():v==="story"?storyScreen():galleryScreen())+"#"});S.view=keep;
   return pipe("modelSig.sig",out+JSON.stringify({loc:S.ctl.locate,sticky:S.ctl.sticky,bar:[S.ctl.bar.on,S.ctl.bar.pos],openAt:stopTop(S.cardCfg.openAt),half:S.cardCfg.halfMax,band:S.cardCfg.topBand,top:S.ctl.top,dark:S.dark,lang:S.lang,peek:S.cardCfg.peekNext,on:S.cardCfg.enabled}),cx)}
-function selfTest(){var res=[],seen={};
+/* the page opened as the self-test (#selftest, #selftest=<tab>,<tab>), and the tabs it walks (null: all) */
+function isSelfTest(){return location.hash==="#selftest"||location.hash.indexOf("#selftest=")===0}
+function selfTestTabs(){var m=location.hash.match(/^#selftest=(.+)$/);return m?decodeURIComponent(m[1]).split(","):null}
+var ST_TABS=["card","guide","marker","words","global"],stWalk=null;
+/* a tab the self-test walks this run (every tab when none was named) */
+function stWalks(tab){return!stWalk||stWalk.indexOf(tab)>=0}
+function selfTest(tabs){var res=[],seen={};stWalk=tabs||null;
   S.ui.level=9;S.op={};S.ui.single=false;
-  ["card","guide","marker","words","global"].forEach(function(tab){S.tab=tab;renderEditor();var base=JSON.stringify(S);noDraw=true;
+  ST_TABS.filter(stWalks).forEach(function(tab){S.tab=tab;renderEditor();var base=JSON.stringify(S);noDraw=true;
     var ctrls=[];ed.querySelectorAll("[data-set]").forEach(function(b){ctrls.push({el:b,kind:"set",key:b.dataset.set,v:b.dataset.v})});
     ed.querySelectorAll("select[data-sel]").forEach(function(x){Array.prototype.forEach.call(x.options,function(o){ctrls.push({el:x,kind:"sel",key:x.dataset.sel,v:o.value})})});
     ed.querySelectorAll('input[type=range][data-num]').forEach(function(r){ctrls.push({el:r,kind:"num",key:r.dataset.num,v:r.min});ctrls.push({el:r,kind:"num",key:r.dataset.num,v:r.max})});
@@ -5382,7 +5388,7 @@ var Azu3D=(function(){var T=null,GL=null,cv=null,R=null,scene=null,cam=null,mode
     if(now>st.nextBlink){st.blinkT=now;st.nextBlink=now+2500+Math.random()*2500}morph("Blink",!still&&now-st.blinkT<140?1:0);
     R.render(scene,cam);st.frames++;raf=requestAnimationFrame(frame)}
   return{
-    load:function(){if(st.loading)return st.loading;if(location.hash==="#selftest"){st.failed=true;st.err="not loaded in the self-test";return st.loading=Promise.resolve()}var m=az3dModel();st.loading=lib().then(function(){view();return get(m)})
+    load:function(){if(st.loading)return st.loading;if(isSelfTest()){st.failed=true;st.err="not loaded in the self-test";return st.loading=Promise.resolve()}var m=az3dModel();st.loading=lib().then(function(){view();return get(m)})
       .then(function(g){use(g,m.name);st.model=m.id;st.ready=true;az3dPlace();if(ed.querySelector('[data-fo="s7mascot"]'))renderEditor()}).catch(function(e){st.failed=true;st.err=String(e&&e.message||e);console.warn("Azu3D",e);if(ed.querySelector('[data-fo="s7mascot"]'))renderEditor()});return st.loading},
     /* Import: a GLB from the developer's computer, checked against the contract; it replaces the built-in one when it has clips */
     importFile:function(file){return lib().then(function(){if(!cv)view();return file.arrayBuffer()}).then(parse).then(function(g){var info=check(g);if(g.animations.length){use(g,file.name);st.model=az3dModel().id;st.ready=true;az3dPlace()}st.lastImport={name:file.name,info:info};return info})
@@ -6186,8 +6192,9 @@ var GDSCENES=[
 GDSCENES.forEach(function(s){s.where="wall";AGSCENES.push(s)});
 
 /* Starts the page (the #hash routes) and closes the shared scope. */
-if(location.hash==="#selftest"){var r0=selfTest();showSelfTest(r0)}
-S.view="card";S.tab="card";if(location.hash!=="#selftest")renderAll(false);
+/* #selftest walks every tab; #selftest=guide,words only those (the texts come with "words") */
+if(isSelfTest()){var r0=selfTest(selfTestTabs());showSelfTest(r0)}
+S.view="card";S.tab="card";if(!isSelfTest())renderAll(false);
 if(location.hash==="#guide"){S.stop="full";renderAll(false);startTour();G.i=4;runStep()}
 if(location.hash==="#words"){S.tab="words";S.sel.term="t1";renderEditor();S.view="story";renderPhone(false)}
 if(location.hash==="#texts"){["s0","s2","s3","s4","s7"].forEach(function(id){S.op[id]=false});S.op["tp:s1b:Pages layout › chevrons"]=true;S.op["tp:s5page:Previous / Next buttons"]=true;S.op["tp:s5page:Back button"]=true;goOwner("s1b",true);goOwner("s5page",true);show("card")}
