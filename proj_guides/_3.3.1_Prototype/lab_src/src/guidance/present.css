@@ -6,7 +6,7 @@
   box-shadow:0 8px 22px rgba(0,0,0,.3),0 0 0 1px var(--hair)}
 .gdbub button{appearance:none;display:block;width:100%;min-height:44px;border:0;background:none;color:inherit;font:600 14px/1.38 var(--body);text-align:left;padding:11px 14px;cursor:pointer;border-radius:16px}
 .gdbub.gd-in{animation:gdin .22s cubic-bezier(.2,.8,.2,1)}
-.gdbub.gd-out{opacity:0;transform:scale(.97);transition:opacity .16s ease,transform .16s ease}
+.gdbub.gd-out{opacity:0;transform:scale(.97);transition:opacity .16s ease,transform .16s ease,translate .16s ease}
 @keyframes gdin{from{opacity:0;transform:scale(.94)}}
 .gdtail{position:absolute;width:14px;height:14px;background:var(--paper);rotate:45deg;border-radius:2px;pointer-events:none}
 .gdbub[data-tail="down"] .gdtail{bottom:-6px;box-shadow:3px 3px 4px -2px rgba(0,0,0,.18)}
@@ -20,6 +20,21 @@
 .gdring.gd-pulse{animation:gdring .9s cubic-bezier(.3,.9,.4,1)}
 @keyframes gdring{0%{opacity:0;transform:scale(.7)}55%{opacity:1;transform:scale(1.12)}100%{transform:scale(1)}}
 .gdring.gd-out,.gdpoint.gd-out{opacity:0;transition:opacity .16s ease}
+/* the ring round the ✦ (Ask about the view's way in): the same white ring and dark edges, the button's own pill shape, under its layer */
+.gdring.gd-rect{margin:0;border-radius:999px;z-index:11}
+.gdring.gd-rect.gd-pulse{animation:gdringr .9s cubic-bezier(.3,.9,.4,1)}
+@keyframes gdringr{0%{opacity:0;transform:scale(.9)}55%{opacity:1;transform:scale(1.05)}100%{transform:scale(1)}}
+/* a spoken tip: the word being said is lit (a highlighter behind it, the words still 7:1 on it) */
+.gdbub .gdw{border-radius:4px;transition:background-color .12s ease}
+.gdbub .gdw.on{background:#F2DFA6;box-shadow:0 0 0 2px #F2DFA6}
+.dark .gdbub .gdw.on{background:#4A3D18;box-shadow:0 0 0 2px #4A3D18}
+/* a long press: Fewer like this? with its two answers, each a 44 px target */
+.gdfewer{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;padding:8px 8px 8px 14px}
+.gdfewer .gdfq{font:600 14px/1.3 var(--body);color:var(--ink1)}
+.gdfewer .gdfb{display:flex;gap:6px;margin-left:auto}
+.gdbub .gdfewer button{display:inline-block;width:auto;min-width:64px;min-height:44px;padding:0 14px;border-radius:999px;text-align:center;font:700 14px/1 var(--body);border:1px solid var(--hair);background:var(--box);color:var(--ink1)}
+.gdbub .gdfewer button[data-gdfewer="yes"]{background:var(--ink1);color:var(--paper);border-color:var(--ink1)}
+
 /* Azu pointing: the still picture leans towards the marker and a small pointer sits at the ring (the 3D model plays its point clip) */
 .gdpoint{position:absolute;z-index:12;width:16px;height:16px;margin:-8px 0 0 -8px;pointer-events:none}
 .gdpoint svg{display:block;width:16px;height:16px;fill:#FFD98A;stroke:#16181C;stroke-width:1.6;stroke-linejoin:round;overflow:visible}
@@ -30,7 +45,7 @@
 .azfab.gd-point[data-gdlean="right"] .azstill{rotate:7deg}
 .azfab.gd-point:not(.gd-left) .marm{left:auto;right:-14px;transform-origin:0 50%}
 .azfab.gd-point:not(.gd-left) .marm::before{left:auto;right:-6px}
-.reduce .gdbub,.reduce .gdring,.reduce .gdpoint,.reduce .azfab.gd-point .azstill{animation:none!important;transition:none!important}
+.reduce .gdbub,.reduce .gdring,.reduce .gdpoint,.reduce .gdbub .gdw,.reduce .azfab.gd-point .azstill{animation:none!important;transition:none!important}
 /* the Editor's demo chip (never in the app): the ×10 clock of a demo */
 .gdchip{position:absolute;z-index:20;left:50%;top:14px;translate:-50% 0;background:#16181C;color:#F4F1EA;font:700 12.5px/1 var(--body);padding:8px 12px;border-radius:999px;
   border:1px solid rgba(244,241,234,.3);box-shadow:0 6px 16px rgba(0,0,0,.35);white-space:nowrap;pointer-events:none}

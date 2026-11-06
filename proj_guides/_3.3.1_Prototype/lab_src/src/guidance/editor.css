@@ -13,3 +13,12 @@
 .note.gdrb{color:#E2E2E2;border-left:2px solid #7A5A12;padding-left:8px}
 .note.gdwhy{color:#CFE3FF}
 .note.gdfix{font-size:11px}
+/* 0 · Preview & Test: Why not now?'s item, the visitor's memory table, the Log of the last 30 decisions (newest first) */
+.gdwhysel{max-width:220px}
+.tbl.gdmem td,.tbl.gdmem th{font-size:11px;padding:3px 5px}
+.gdlog{max-height:260px;overflow:auto;border:1px solid var(--u-line,#3a3a3a);border-radius:4px;padding:4px 6px;background:#1E1E1E;font-size:11px;line-height:1.35}
+.gdl{display:grid;grid-template-columns:38px 58px 1fr;gap:6px;padding:2px 0;border-bottom:1px solid #2A2A2A}
+.gdl span:first-child{color:#9AA0A6;font-variant-numeric:tabular-nums}
+.gdl b{font-weight:600}
+.gdl-shown b{color:#9FE3A8}.gdl-skipped b{color:#C9C9C9}.gdl-ended b{color:#E2C36B}.gdl-learned b{color:#CFE3FF}
+.note.gdmix{color:#D8D8D8}

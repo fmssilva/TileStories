@@ -1,4 +1,4 @@
-/* The Guide's tour: its settings and steps (S.guideCfg, S.guideSteps), startTour, runStep, next, the captions (renderGuide), the coach and the teaser. */
+/* The Guide's tour: its settings and steps (S.guideCfg, S.guideSteps), startTour, runStep (a step's line heard: tourStep.ended), next, the captions (renderGuide), the coach and the teaser; its length (tourMinutes). */
 S.guideCfg={heroButton:true,block:true,voice:"recorded",music:false,captions:true,highlight:true,coach:true,mascot:true,ask:"ai",speed:1};
 S.guideSteps=[
  {id:"g0",view:"card",ref:"hero",act:"teaser",text:T("Welcome to the Ribeira Palace. For two and a half centuries the kings of Portugal lived here, right on the river. Let me show you what was here.","Bem-vindo ao Paço da Ribeira. Durante dois séculos e meio, os reis de Portugal viveram aqui, mesmo à beira do rio. Deixe-me mostrar-lhe o que aqui existia.")},
@@ -13,6 +13,8 @@ S.guideSteps=[
  {id:"g9",view:"card",ref:"b:b_quiz",act:"try",wait:"answer",text:T("Ready for a question? Which king moved the court to the river? Tap your answer.","Pronto para uma pergunta? Que rei mudou a corte para o rio? Toque na sua resposta.")},
  {id:"g10",view:"card",ref:"hero",act:"end",text:T("That was the Ribeira Palace. Ask me anything, or explore on your own.","Este foi o Paço da Ribeira. Pergunte-me o que quiser, ou explore sozinho.")}];
 var G={on:false,i:0,paused:false,waiting:false,timer:null,utter:null,words:[],music:null,askOpen:false,answer:"",busy:false,ctl:null};
+/* the tour's length in minutes, as the hero's button and the guidance's invitation (A tour of {point}) say it */
+function tourMinutes(){return 3}
 function stepText(st){if(st.text)return L(st.text);var r=byId(S.story,st.ref.slice(2));return r&&r.c?L(r.c.text):""}
 /* a soft music bed that ducks under the voice */
 function musicOn(on){try{if(on&&!G.music){actx=actx||new (window.AudioContext||window.webkitAudioContext)();var g=actx.createGain();g.gain.value=0.05;g.connect(actx.destination);
@@ -32,7 +34,7 @@ function runStep(){emitLatestFirst("runStep.before");var st=G.on&&S.guideSteps[G
   var text=stepText(st),target=st.act==="read"&&S.guideCfg.highlight&&el?el.querySelector(".el-par,.el-lede"):null;if(target)wrapWords(target);
   renderGuide(text);moveMascot(el);
   if(st.act==="try"&&S.guideCfg.coach&&el)coach(el,st.wait);
-  say(text,function(k){markWord(k,target)},function(){if(!G.on||G.paused)return;
+  say(text,function(k){markWord(k,target)},function(){if(!G.on||G.paused)return;emit("tourStep.ended",st);
     if(st.act==="try"&&S.guideCfg.coach){G.waiting=true;renderGuide(text);G.timer=setTimeout(function(){if(G.waiting){G.waiting=false;next()}},9000);return}
     if(st.act==="end"){G.askOpen=S.guideCfg.ask!=="off";renderGuide(text);return}
     setTimeout(function(){if(G.on&&!G.paused)next()},700)})}emit("runStep.after")}
@@ -65,7 +67,7 @@ function renderGuide(text){["gbar","gcap","mascot","gask","gresume"].forEach(fun
      '<form class="gform"><input id="gq" class="gin" type="text" autocomplete="off" placeholder="'+(TXH("guide_ask_placeholder"))+'"><button type="button" data-g="mic" aria-label="'+TXH("guide_ask_mic")+'">&#127908;</button><button type="submit" '+(G.busy?"disabled":"")+'>'+(G.busy?"…":(TXH("guide_ask_send")))+'</button>'+(G.busy?'<button type="button" data-g="stopask">'+TXH("guide_ask_stop")+'</button>':"")+'</form>';ph.appendChild(a)}}emit("renderGuide.after",text)}
 /* ----- hooks into the card: hero button, Guide block, gestures, take-over ----- */
 on("cardScreen.html",function(h){var d=document.createElement("div");d.innerHTML=h;
-  if(S.guideCfg.heroButton){var w=d.querySelector(".hero .w");if(w)w.insertAdjacentHTML("beforeend",'<button type="button" class="gstart" data-g="start">&#9654; '+TXH("guide_start")+' · '+esc(fmt(TXT("guide_duration"),3))+'</button>')}
+  if(S.guideCfg.heroButton){var w=d.querySelector(".hero .w");if(w)w.insertAdjacentHTML("beforeend",'<button type="button" class="gstart" data-g="start">&#9654; '+TXH("guide_start")+' · '+esc(fmt(TXT("guide_duration"),tourMinutes()))+'</button>')}
   if(S.guideCfg.block){var ab=d.querySelector('[data-ref="sec:about"] .ey');if(ab)ab.insertAdjacentHTML("afterend",'<div class="item" data-ref="b:b_guide"><button type="button" class="gblock" data-g="start"><span class="gm">'+(S.guideCfg.mascot?mascotStill():sicon("play",48))+'</span><span><b>'+(TXH("guide_block_title"))+'</b><small>'+(TXH("guide_block_line"))+'</small></span></button></div>')}
   return d.innerHTML});
 ph.addEventListener("click",function(e){var t=e.target,g=t.closest("[data-g]");

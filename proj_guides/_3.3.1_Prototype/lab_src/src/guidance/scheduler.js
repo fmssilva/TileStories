@@ -1,41 +1,102 @@
 /* Guidance, the scheduler (_3.8 section 3.3): one pure function, gdPick(items, visitor, context, now) → {item, why} | {none, why}.
-   It reads only its arguments (no page, no clock of its own), so a test gives it a fake clock and fake memory. Round 1: the gates (one
-   at a time, Azu's remarks and any bubble counted; never over a sentence; quiet while a panel is open or during the tour; quiet while
-   the phone moves and 0.7 s after), the breathing room between any two (Essential skips it), and each item's own rules (On, Done when,
-   Shows, Again after, its screen, its target on screen, the phone still, an In order group's sequence and its gap). Ties: Essential
-   first, then importance, then the Editor's order. Unity: GuidanceScheduler, plain C# (Pick(state, now)), EditMode tests on the same
-   cases. */
-var GD_MOVE_MS=700;
-function gdVisitOf(visitor,id){return visitor.visit.items[id]||{shown:0,last:null,end:null,dismissed:0}}
+   It reads only its arguments (no page, no clock of its own), so a test gives it a fake clock and fake memory; gdWhyNot answers for one
+   item in the same words. In order:
+   1. The gates (fixed, no option breaks them; a pulled item passes the limits, never the gates): Guidance On; one at a time (Azu's
+      remarks and any bubble counted); never over a sentence; quiet while a system state shows (Loading & states); a panel open
+      (Settings, Ask about the view, the ✦ menu, Contents) or the dock at Full; the phone moving (and 0.7 s after); a touch in the last
+      0.8 s; the card's first 1.5 s; quiet in a tour except an item allowed Between steps, at a pause between two steps; never over its
+      own target or the block being told (the service measures it: context.covers).
+   2. The limits (an Essential item skips them): the breathing room between any two (×2 after three ignored in a row, up to ×4); at most
+      n a minute and a visit; each kind's cap a visit and its gap; each item's Shows and Again after (×3 after a dismissed App item);
+      a group resting (5 min after a dismissed Content item; for the visit after Fewer like this?).
+   3. The stage of the visit: s = max(active minutes / 15, the share of the milestones done); a returning visitor starts at 5 min.
+   4. The score of each eligible item: importance × along the visit(s) × kind weight(s) × group weight × freshness × fit; the highest
+      shows (Essential first); ties: the Editor's order. Deterministic, so Why not now? can always answer.
+   Unity: GuidanceScheduler, plain C# (Pick(state, now), WhyNot(state, now, id)), EditMode tests on the same cases. */
+var GD_MOVE_MS=700,GD_TOUCH_MS=800,GD_CARD_MS=1500,GD_REST_MS=300000,GD_BACK_MIN=5,GD_STAGE_MIN=15,GD_FOREVER=1e15;
+var GD_STATES={loading:"Loading",lost:"wall not found",empty:"nothing here",offline:"offline",done:"done"};
+function gdVisitOf(visitor,id){return visitor.visit.items[id]||{shown:0,last:null,end:null,dismissed:0,acted:0,how:""}}
 function gdEverOf(visitor,id){return visitor.ever.items[id]||{shown:0,done:false,by:""}}
 function gdLeft(ms){return Math.max(1,Math.ceil(ms/1000))+" s left"}
-/* the gates: fixed, no option breaks them (a pulled item passes the limits, never the gates) */
+function gdN(x,d){return(+x).toFixed(d==null?2:d)}
+/* the stage of the visit: s from 0 (just arrived) to 1 (15 active minutes, or every milestone done) */
+function gdStage(visitor,now){var v=visitor.visit||{},ret=visitor.visits>1,act=Math.max(0,now-(v.at||0)-(v.away||0))/60000,mins=act+(ret?GD_BACK_MIN:0),used=visitor.used||{};
+  var done=GD_FEATURES.filter(function(f){return used[f[0]]!=null}).length,share=done/GD_FEATURES.length;
+  return{s:Math.min(1,Math.max(mins/GD_STAGE_MIN,share)),mins:mins,active:act,returning:ret,done:done,share:share}}
+/* the gates for every item: fixed, no option breaks them */
 function gdGate(ctx,now){if(!ctx.on)return"Guidance is Off";if(ctx.demo)return"an Editor demo is showing";
   if(ctx.showing)return"one at a time: the "+ctx.showing+" is showing";if(ctx.remark)return"one at a time: "+ctx.remark+" is showing";
-  if(ctx.speaking)return"never over a sentence: the guide is speaking";if(ctx.panel)return"quiet while "+ctx.panel+" is open";
-  if(ctx.movedAt!=null&&now-ctx.movedAt<GD_MOVE_MS)return"quiet while the phone moves (and 0.7 s after)";return null}
+  if(ctx.speaking)return"never over a sentence: the guide is speaking";
+  if(ctx.state)return"quiet while a system state shows ("+ctx.state+")";
+  if(ctx.panel)return"quiet while "+ctx.panel+" is open";if(ctx.dockFull)return"quiet while the dock is at Full";
+  if(ctx.movedAt!=null&&now-ctx.movedAt<GD_MOVE_MS)return"quiet while the phone moves (and 0.7 s after)";
+  if(ctx.touchAt!=null&&now-ctx.touchAt<GD_TOUCH_MS)return"quiet while the visitor acts: a touch "+gdN((now-ctx.touchAt)/1000,1)+" s ago (it waits 0.8 s)";
+  if(ctx.cardAt!=null&&now-ctx.cardAt<GD_CARD_MS)return"quiet in the card's first 1.5 s";return null}
+/* the tour's gate, per item: quiet in a tour, except an item allowed Between steps, at a pause between two steps */
+function gdTourGate(it,ctx){if(!ctx.tour)return null;if(it.duringTour!=="between")return"quiet in a tour (During a tour: Never)";
+  if(!ctx.tour.between)return"quiet in a tour: it waits for a pause between two steps";return null}
 /* the item before this one in its In order group (the On ones only): items come in the Editor's order, each with its group and the group's mode */
 function gdPrevOf(it,items){if(it.groupMode!=="order")return null;var i=items.indexOf(it);
   for(var j=i-1;j>=0;j--){var p=items[j];if(p.group===it.group&&p.on)return p}return null}
-/* one item: {ok, why} or {no: why} */
-function gdCheck(it,items,visitor,ctx,now){var vm=gdVisitOf(visitor,it.id),em=gdEverOf(visitor,it.id),why=[];
+/* where its target is on the screen (the context's own: the nearest marker, the ✦, the point in the middle) */
+function gdTargetCtx(it,ctx){return it.about==="marker"?ctx.marker:it.about==="gbtn"?ctx.gbtn:it.about==="middle"?ctx.central:null}
+/* the score: importance × along the visit × kind weight × group weight × freshness × fit, each factor kept for the words */
+function gdScore(it,items,visitor,ctx,now,st){var kw=GD_MIX[it.kind]||[100,100,100],f={imp:+it.importance||0,s:st.s};
+  if(it.along==="steady"){f.kind=kw[1]/100;f.along=1}else{f.kind=gdCurve(kw,st.s)/100;f.along=gdCurve(GD_CURVE[it.along]||GD_CURVE.kind,st.s)}
+  f.group=it.groupWeight==null?1:+it.groupWeight;
+  var vm=gdVisitOf(visitor,it.id),em=gdEverOf(visitor,it.id),last=em.last!=null?em.last:vm.last,tau=(+ctx.tau||120)*1000;f.fresh=last==null?1:1-Math.exp(-Math.max(0,now-last)/tau);
+  f.fit=1;f.fitWhy=[];var T=gdTargetCtx(it,ctx);if(T&&T.middle){f.fit*=1.5;f.fitWhy.push("in the middle")}
+  if(it.teaches&&items.some(function(o){return o.id!==it.id&&o.kind==="app"&&o.on&&(o.teaches===it.teaches||o.doneWhen===it.teaches)&&!gdEverOf(visitor,o.id).done})){f.fit*=1.3;f.fitWhy.push("it teaches an open app tip")}
+  f.score=f.imp*f.along*f.kind*f.group*f.fresh*f.fit;return f}
+function gdScoreWords(f,it){var w=["importance "+f.imp,(it.kindName||it.kind)+" "+Math.round(f.kind*100)+" %"];
+  if(f.along!==1)w.push((it.along==="late"?"late ":"early ")+gdN(f.along,f.along<0.1?3:2));if(f.group!==1)w.push("group "+gdN(f.group,1));
+  if(f.fresh<0.995)w.push("fresh "+gdN(f.fresh));if(f.fit!==1)w.push("fit "+gdN(f.fit,2).replace(/0$/,"")+" ("+f.fitWhy.join(", ")+")");
+  return"score "+gdN(f.score,f.score<0.1?3:2)+" ("+w.join(" × ")+"; stage s "+gdN(f.s)+")"}
+function gdZeroWhy(it,f){if(f.along===0)return"along the visit "+(it.along==="late"?"Late: nothing before a third of the visit (stage s "+gdN(f.s)+"; it grows after s 0.30)":"Early: nothing left at this stage (s "+gdN(f.s)+")");
+  if(f.group===0)return"its group's weight is 0";return"score 0"}
+/* one item: {ok, why, score} or {no: why} */
+function gdCheck(it,items,visitor,ctx,now){var vm=gdVisitOf(visitor,it.id),em=gdEverOf(visitor,it.id),v=visitor.visit,why=[];
   if(!it.on)return{no:"Off"};
+  if(it.kindOn===false)return{no:(it.kindName||it.kind)+" is Off"};
   if(it.doneWhen&&em.done)return{no:"done for good ("+GD_EVENTS[em.by||it.doneWhen]+")"};
   if(it.shows==="once"&&em.shown>=1)return{no:"shown once ever"};
   if(it.shows==="visit"&&vm.shown>=1)return{no:"shown once this visit"};
   if((it.shows==="upto"||it.shows==="until")&&vm.shown>=+it.max)return{no:"shown "+vm.shown+" of "+it.max+" this visit"};
+  var rest=v.rest&&v.rest[it.group];if(rest!=null&&now<rest)return{no:v.fewer&&v.fewer[it.group]?"Fewer like this: "+(it.groupName||it.group)+" rests for the visit":(it.groupName||it.group)+" rests 5 min after a dismissal: "+gdLeft(rest-now)};
+  var tg=gdTourGate(it,ctx);if(tg)return{no:tg};
   if(it.screen==="wall"&&!ctx.onWall)return{no:"not on the wall ("+(ctx.where||"a card is open")+")"};
   if(it.about==="marker"){if(!ctx.marker)return{no:"no marker in view"};why.push(ctx.marker.name+" in view")}
+  if(it.about==="gbtn"){if(!ctx.gbtn)return{no:"the ✦ is not on the screen"};why.push("the ✦ on the screen")}
+  if(it.about==="middle"){var c=ctx.central;if(!c)return{no:"no point in the middle"};if(!c.tour)return{no:c.name+" in the middle has no tour"};why.push(c.name+" in the middle")}
+  if(ctx.covers&&ctx.covers[it.id])return{no:"never over its own target: "+ctx.covers[it.id]};
+  if(+it.notBefore>0){var at=now-(v.at||0)-(v.away||0);if(at<+it.notBefore*1000)return{no:"not before "+it.notBefore+" s of the visit: "+gdLeft(+it.notBefore*1000-at)}}
   var p=gdPrevOf(it,items);if(p){var pm=gdVisitOf(visitor,p.id);if(!pm.shown)return{no:"after the "+p.label+" (not shown yet this visit)"};
     var since=now-pm.last;if(since<+it.afterPrev*1000)return{no:it.afterPrev+" s after the "+p.label+": "+gdLeft(+it.afterPrev*1000-since)};if(+it.afterPrev>0)why.push(Math.floor(since/1000)+" s after the "+p.label)}
   if(+it.stillFor>0){var st=now-ctx.stillSince;if(!(st>=+it.stillFor*1000))return{no:"the phone still "+(isFinite(st)?(st/1000).toFixed(1):"0")+" s (it waits for "+it.stillFor+" s)"};why.push("the phone still "+(isFinite(st)?(st/1000).toFixed(1)+" s":"")) }
-  if(!it.essential&&visitor.visit.lastEnd!=null&&now-visitor.visit.lastEnd<ctx.breathing*1000)return{no:"breathing room "+ctx.breathing+" s: "+gdLeft(ctx.breathing*1000-(now-visitor.visit.lastEnd))};
-  if(+it.again>0&&vm.end!=null&&it.shows!=="once"&&it.shows!=="visit"&&now-vm.end<+it.again*1000)return{no:"again after "+it.again+" s: "+gdLeft(+it.again*1000-(now-vm.end))};
+  if(!it.essential){var mul=v.breathMul||1,br=ctx.breathing*mul,L=ctx.limits||{},starts=v.starts||[];
+    if(v.lastEnd!=null&&now-v.lastEnd<br*1000)return{no:"breathing room "+br+" s"+(mul>1?" (×"+mul+": "+(v.ignoredRun||0)+" ignored in a row)":"")+": "+gdLeft(br*1000-(now-v.lastEnd))};
+    if(+L.perMinute>0){var inMin=starts.filter(function(t){return now-t<60000});if(inMin.length>=+L.perMinute)return{no:"at most "+L.perMinute+" a minute: "+gdLeft(60000-(now-inMin[inMin.length-L.perMinute]))}}
+    var all=items.reduce(function(a,o){return a+gdVisitOf(visitor,o.id).shown},0);if(+L.perVisit>0&&all>=+L.perVisit)return{no:"at most "+L.perVisit+" a visit: shown "+all+" this visit"};
+    if(it.kindCap>0){var kn=items.filter(function(o){return o.kind===it.kind}).reduce(function(a,o){return a+gdVisitOf(visitor,o.id).shown},0);if(kn>=it.kindCap)return{no:"at most "+it.kindCap+" "+(it.kindName||it.kind)+" items a visit: shown "+kn}}
+    if(it.kindGap>0){var ke=null;items.forEach(function(o){if(o.kind!==it.kind)return;var e=gdVisitOf(visitor,o.id).end;if(e!=null&&(ke==null||e>ke))ke=e});
+      if(ke!=null&&now-ke<it.kindGap*1000)return{no:(it.kindName||it.kind)+"'s gap "+it.kindGap+" s: "+gdLeft(it.kindGap*1000-(now-ke))}}}
+  var tri=vm.how==="dismissed"&&it.kind==="app"&&!(ctx.learn&&ctx.learn.dismiss===false),ag=+it.again*(tri?3:1);
+  if(ag>0&&vm.end!=null&&it.shows!=="once"&&it.shows!=="visit"&&now-vm.end<ag*1000)return{no:"again after "+ag+" s"+(tri?" (×3: it was dismissed)":"")+": "+gdLeft(ag*1000-(now-vm.end))};
   if(it.when==="visit")why.unshift("the visit started ("+(ctx.returning?"a returning visitor":"a first visit")+")");
   if(it.shows==="upto"||it.shows==="until")why.push("shown "+vm.shown+" of "+it.max+" this visit");
   if(it.essential)why.push("Essential: it skips the breathing room");
-  return{ok:true,why:why.join(", ")}}
+  var f=gdScore(it,items,visitor,ctx,now,gdStage(visitor,now));if(!(f.score>0))return{no:gdZeroWhy(it,f)};
+  why.push(gdScoreWords(f,it));return{ok:true,why:why.join(", "),score:f.score,f:f}}
+/* every item checked, in the Editor's order; the eligible ones in the order they would show: Essential first, then the score, then the Editor's order */
+function gdAll(items,visitor,ctx,now){return items.map(function(it,i){return{it:it,i:i,r:gdCheck(it,items,visitor,ctx,now)}})}
+function gdOrder(a,b){var d=b.r.score-a.r.score;return(b.it.essential?1:0)-(a.it.essential?1:0)||(Math.abs(d)<1e-9?0:d)||a.i-b.i}
 function gdPick(items,visitor,ctx,now){var g=gdGate(ctx,now);if(g)return{none:true,why:g};
-  var list=items.map(function(it,i){return{it:it,i:i}}).sort(function(a,b){return(b.it.essential?1:0)-(a.it.essential?1:0)||(+b.it.importance)-(+a.it.importance)||a.i-b.i});
-  var skips=[];for(var k=0;k<list.length;k++){var it=list[k].it,r=gdCheck(it,items,visitor,ctx,now);if(r.ok)return{item:it,why:it.label+": "+r.why};skips.push(it.label+": "+r.no)}
-  return{none:true,why:skips.length?skips.join(" · "):"no guidance items"}}
+  var all=gdAll(items,visitor,ctx,now),ok=all.filter(function(x){return x.r.ok}).sort(gdOrder);
+  if(ok.length){var b=ok[0];return{item:b.it,why:b.it.label+": "+b.r.why,score:b.r.score}}
+  return{none:true,why:all.length?all.map(function(x){return x.it.label+": "+x.r.no}).join(" · "):"no guidance items"}}
+/* Why not now? for one item, in the scheduler's own words: a gate, its own reason, or the item that goes first */
+function gdWhyNot(items,visitor,ctx,now,id){var it=items.filter(function(x){return x.id===id})[0];if(!it)return"no such item";
+  var g=gdGate(ctx,now);if(g)return it.label+": "+g;
+  var all=gdAll(items,visitor,ctx,now),me=all.filter(function(x){return x.it===it})[0];if(!me.r.ok)return it.label+": "+me.r.no;
+  var ok=all.filter(function(x){return x.r.ok}).sort(gdOrder),b=ok[0];if(b.it===it)return it.label+": it shows next: "+me.r.why;
+  return it.label+": it could show, but the "+b.it.label+" goes first ("+(b.it.essential&&!it.essential?"Essential":"score "+gdN(b.r.score)+" against "+gdN(me.r.score))+")"}

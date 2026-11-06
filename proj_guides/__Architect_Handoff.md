@@ -5,18 +5,23 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-07)
 
 - **State:**
-  - **The Lab:** `master` holds guidance round 1, verified on 2026-11-06 (the Guide tab, the opening message, Tap a marker,
-    the wall's pill removed), published as v30 at a new link on 2026-11-06 (section 1; the old link stays at v29). Its code is in modules by feature
+  - **The Lab:** `master` holds guidance rounds 1 and 2, verified on 2026-11-06, published as v31 at the new link (section 1;
+    the old link stays at v29). Its code is in modules by feature
     (`lab_src/src/<area>/<module>.js`), with no wrappers: `lab_src/PROTOTYPE_STRUCTURE.md` says where each feature lives and
     where a change goes. The build only joins files (`build.py`) and refuses wrappers, re-assignments of functions, second
     declarations, defaults set twice and version-named modules (`check_structure.js`, `structure_baseline.json` at 0).
   - **Proof of the Lab:** the self-test (`tests/runtest8.ps1`: three walks side by side, about 3 min) gives
-    `ok=1180 behaviour=634 bad=0`; `node run_tests.js` runs the 26 test files one at a time (643 checks, about 28 min; `tests_baseline.json`).
-  - **Test levels (decided 2026-11-06):** blocks of work; level 1 every block (the block's own tests: `run_tests.js --changed`,
-    the self-test of its tab), level 2 every 3rd-4th block, on shared ground and before a publish or a merge, level 3 every
-    10-12 blocks and before a Unity hand-off. The rules: `lab_src/README.md` "Levels". Count the blocks since the last level 2
-    and 3 in every answer (both counts start at 0 on 2026-11-06, when level 2 ran; the first level 3, with every test's
-    mutation, is owed by the 12th block).
+    `ok=1180 behaviour=720 bad=0` (round 2); `node run_tests.js` runs the 27 test files one at a time (about 30 min;
+    `tests_baseline.json`).
+  - **Test levels (decided 2026-11-06, cut the same day: the developer refused 1h30 of tests a round):** while building, only
+    the build and captures, iterated until the app and the Editor look right (`skills/Feature_Prototyping.md` step 3.3); then
+    level 1 once per round (its test files, its mutation, the self-test of its tab: about 10 min); level 2 (every tab, every
+    file: about 31 min) every 3rd-4th round and when a round touches shared ground; level 3 every 10-12 rounds and before a
+    Unity hand-off. The rules: `lab_src/README.md` "Levels". Count the rounds since the last level 2 and 3 in every answer:
+    1 and 1 after guidance round 2 (level 2 last ran on round 1; level 3 never yet).
+  - **Next block for the tests:** make them faster. Measure how much of a file's minute is starting Edge and loading the
+    13 MB page; then pure logic checks in Node (the scheduler) and one Edge with one page for all files. `test9d` failed two
+    timing checks once in three runs (Azu not yet settled beside the block): watch it.
   - **Decided and built on 2026-11-05/06:**
     - The voice: one order for every line (`sayOrder`, `src/guide/voice.js`): the recorded line, else the live voice (when its
       key is on this computer), else the device's; "Speaking now" in the Editor says which and why. Best available prefers a
@@ -30,9 +35,13 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     sources in `_3.8_guidance_plans/`). Decisions: a top-level **Guide** tab (today's 6 · Guide + Guidance + the first pages);
     App and Fun tips as a bubble only, Content spoken once the guide has been heard; a deterministic mix; the card Hints edited
     in Guidance with a view in Card Controls.
-  - **Guidance round 1 is done** (merged into `master`; the brief `_3.8_guidance_plans/brief_round1.md`). Its captures were
-    judged by the Architect; the developer's look questions are open (the PT opening line, what "Mascot Off" means, Azu's size
-    beside the marker). **Next: guidance round 2** (`_3.8` section 8), as a brief to an Opus subagent.
+  - **Guidance rounds 1 and 2 are done** (merged into `master`; the briefs `_3.8_guidance_plans/brief_round1.md` and
+    `brief_round2.md`; round 2: the memory and the visit, every gate and limit, the stage and the score, the learning, Ask
+    about the view and A tour of {point}, Why not now? / The visitor / Log, five console scenes; `tests/test9f.js`). Their
+    captures were judged by the Architect; the developer reviews later, step by step (the open look questions: round 1's PT
+    opening line, what "Mascot Off" means, Azu's size beside the marker; round 2's in the closing answer of 2026-11-06).
+    **Next: the faster-tests block, then guidance round 3** (`_3.8` section 8), as a brief to an Opus subagent. Prototype only
+    (no Unity) until the developer says so.
   - **MCP:** blender-mcp at user scope (Blender 5.2.3, add-on 1.8, port 9876). The Unity MCP was not connected this stretch.
   - **Keys:** Gemini, Azure Speech and ElevenLabs answer (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).
 - **The tasks, in this order:**

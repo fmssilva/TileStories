@@ -49,8 +49,18 @@
         - **The Editor window** (IMGUI): rows, tables, popups and small previews, laid out as `_5.1` section 0 describes.
         - **Everywhere:** the project renders in linear colour space, so alpha blends look different from the browser.
       - Reference: `skills/feature_prototipe_planning_example.html` / `.png` (the `_4.1` Region Editor Lab).
-   3. **Check once and publish.** Take one rendered look (a headless browser screenshot), fix what it shows, then publish it
-      as an artifact. Save a record copy and a README entry in `_x.y.N_Prototype/`: the link, what it shows, what to judge.
+   3. **Look until it is right, then publish.** Build each feature in this order (the Lab's version of `__AI_worker.md`
+      2.3 steps 3-5, "Look and polish FIRST"):
+      1. **Build:** the page joins with no error (in a Lab with a build, its check at 0).
+      2. **Run it and capture:** the app (the phone at 390 px, light and dark, every state the feature has) and its Editor
+         tab (the new rows, a popup open). Open each capture and judge it as a designer: modern, premium, minimalist, a
+         "wow"; one focal point; nothing covering its target or other words; text 4.5:1 or more; 44 px targets.
+      3. **Iterate steps 1-2** until the app and the Editor both look right. Only the build runs during this loop.
+      4. **Then the automated tests,** once the look is accepted: the behaviour on the real page (taps, gestures, the clock),
+         the edge cases, the measured rules (contrast, overlap, sizes), and pure checks without a browser for the logic. They
+         run once when the feature is done, not after every change.
+      Then publish it as an artifact. Save a record copy and a README entry in `_x.y.N_Prototype/`: the link, what it shows,
+      what to judge.
    4. **Feed back.** Fold each answer and each correction the developer makes in the Lab into the spec the same round, as a rule
       in the section of the part it changes. The spec says the current target, not the round that changed it.
       - For each part, the spec also says what the code has today and where (Built / Partly / Not yet + the class), so the
