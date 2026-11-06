@@ -19,17 +19,23 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
   their timings), and a file that crashed at its start runs once more. Each test drives the page with real taps, drags and keys (Playwright with the installed Edge;
   `#probe` opens a handle on the page's state) and prints PASS / FAIL per check. Never run the self-test and `run_tests.js`
   together: each slows the other past its limits.
-- **Levels: what a block of work runs.** A block is one change the developer can look at (a feature, a fix, a family of rows).
-  - **Level 1, every block (a few minutes):** `python build.py`; `node run_tests.js --changed` (the test files this
-    map names for every changed module, and every changed test); `tests/runtest8.ps1 -tabs <the tab the block touched>`.
-    When `--changed` prints SHARED GROUND (a module this map names no test for: `core/`, `editor/shell.js`, `editor/card-tab.js`…,
-    or the build and test tools) or NOT IN THE MAP, the block closes on level 2.
-  - **Level 2, every 3rd-4th block, a block on shared ground, and before a publish or a merge into `master`:**
+- **Levels: what a block of work runs** (decided 2026-11-06; a prototype's tests never cost more than building it). A block
+  is one change the developer can look at (a feature, a fix, a family of rows).
+  - **While building, look first** (`../../skills/Feature_Prototyping.md` step 3.3): after each change only `python build.py`
+    (the check 0/0/0/0), then run it and capture the phone at 390 px, light and dark, and the Editor tab, open each capture
+    and fix until the app and the Editor look premium and clean. No test file runs in this loop.
+  - **Level 1, once the block's look is accepted (about 10 minutes):** `node run_tests.js --only=<the block's files>` (the
+    files this map names for the modules it changed; `--changed` lists them, and also runs every changed test), its
+    mutation (`MUTATE=1`), `tests/runtest8.ps1 -tabs <the tab it touched>`. The pure logic checks run in Node, with no
+    browser, where that is simple.
+  - **Level 2, every 3rd-4th round, and when a round touched shared ground** (`--changed` prints SHARED GROUND or NOT IN THE
+    MAP: `core/`, `editor/shell.js`, `editor/card-tab.js`…, the build and test tools; new words only in `core/words.js`
+    are covered by `-tabs words`) **before its publish:**
     `tests/runtest8.ps1` (every tab, about 3 min), then `node run_tests.js` (every file, about 28 min).
-  - **Level 3, every 10-12 blocks and before a hand-off to Unity:** level 2, then every mutation the tests
-    name (`MUTATE=1 node tests/<file>.js`: the named checks turn red), and the results replace `tests_baseline.json`.
+  - **Level 3, every 10-12 rounds and before a hand-off to Unity:** level 2, then every mutation the tests name, and the
+    results replace `tests_baseline.json`.
   - A wider level confirms, never discovers: green on 1 before 2, on 2 before 3. A round's report names the level it closed on
-    and the blocks since the last level 2 and 3.
+    and the rounds since the last level 2 and 3.
 - **The tests, by feature:**
   - *The sheet and the card's chrome* (`phone/sheet`, `phone/grabber`, `phone/redraw`, `card/chrome-pinned`, `card/locate`):
     `tests/test8f.js` checks the sheet's gestures, the pinned close and settings, the demo card's X, and that a change moves no
@@ -104,6 +110,7 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
     sections and every former 6 · Guide row (the same 90 rows and 15 foldouts); each Guidance row's demo (the ×10 chip); Show next now and
     the visitor; the five scenes in Ask Azu's console. `MUTATE=1 node tests/test9e.js` makes the scheduler ignore Done when: the checks
     named [Done when] turn red.
+  - *Guidance, round 2* (the same modules, `guide/tour`'s `tourStep.ended`, the `view.opened` of `world/guide-button` and `world/camera-ask`): `tests/test9f.js` checks each new gate, limit and learning rule alone on `gdPick` with a fake clock (a touch in the last 0.8 s, the card's first 1.5 s, the dock at Full, a system state, quiet in a tour but Between steps, never over its own target; at most a minute and a visit, a kind's cap and gap; three ignored ×2, a dismissed App tip ×3, a dismissed Content item's group resting, Fewer like this); the stage and the score (the kinds' weights at s = 0 / 0.3 / 1, Along the visit, freshness, fit, ties, deterministic, the mix); the learning and the memory on the page (Remember across visits Off, Leave for 31 min, Reset the visitor, each item's memory, the features used); the two new items (Ask about the view beside the ✦ and A tour of {point}: 2 lines, 7:1, 0 px over words, light, dark, Portuguese; spoken once the guide has been heard, its word lit; their taps); the bubble's tap, swipe and long press by the mouse; the 15-minute script (App first, then Content; at most 2 a minute; none over a sentence); Why not now? word for word the scheduler's; every new Editor row's demo with its ×10 chip, the read-backs and the Log; the five new scenes in Ask Azu's console. `MUTATE=1 node tests/test9f.js` makes the score ignore the stage of the visit (the kinds' weights and Along the visit at ×1): the checks named [the stage] turn red.
 - **The live voice by hand:** with the keys on this computer, open the page from its file (not `#probe`), set Ask Azu >
   Voice of the answers, and ask; it spends a few hundred characters an answer.
 - **Keys:** the local Lab's live agent and live voice read `keys.local.js`, which `python keys_local.py` writes from the workspace's

@@ -46,7 +46,7 @@ function gbMenu(open){G.fab.menu=open==null?!G.fab.menu:open;fabLayer()}
 function gbGo(k){G.fab.menu=false;
   if(k==="tour"){if(G.resumeAt)resumeTourAt();else startTour();return}
   if(k==="ask"){startTour();pauseTour();G.askOpen=true;S.dockH="full";renderGuide();var i=ph.querySelector("#gq");if(i)i.focus({preventScroll:true});return}
-  if(k==="view"){G.fab.bub=null;G.cam.open=true;renderPhone(true);var q=ph.querySelector("#caq");if(q)q.focus({preventScroll:true});return}
+  if(k==="view"){G.fab.bub=null;G.cam.open=true;renderPhone(true);emit("view.opened","the ✦ menu");var q=ph.querySelector("#caq");if(q)q.focus({preventScroll:true});return}
   if(k==="settings"){S.settingsOpen=true;renderPhone(true);var v=ph.querySelector(".vset"),g=v&&v.querySelector(".vguide");if(g){v.scrollTop=Math.max(0,g.offsetTop-12);g.classList.remove("pfocus");void g.offsetWidth;g.classList.add("pfocus");setTimeout(function(){g.classList.remove("pfocus")},1800)}}}
 /* a tour from a card at Half: the card rises to Full first (lowered again by the visitor, the tour goes on there) */
 on("startTour.before",function(){G.fab.menu=false;ph.querySelectorAll(".gbtn-wrap,.gbmenu,.azfabbub").forEach(function(x){x.remove()});if(S.view==="card"&&S.stop!=="full"){S.stop="full";renderPhone(true)}});
@@ -64,7 +64,7 @@ ph.addEventListener("click",function(e){var t=e.target.closest("[data-gbtn],[dat
   if(t.dataset.gbtn){if(G.on){S.dockH=S.dockH==="compact"?"mini":"compact";G.askOpen=false;renderGuide()}else gbMenu();return}
   if(t.dataset.gbgo){gbGo(t.dataset.gbgo);return}
   var bb=G.fab.bub;G.fab.bub=null;if(!bb){fabLayer();return}var p=S.wallPois.filter(function(x){return x.id===bb.id})[0];
-  if(p&&p.card){S.stop="half";renderPhone(false);emit("card.opened","remark");startTour();return}G.cam.open=true;renderPhone(true);camAsk("",p&&p.year?"oldest":"what");camLight([bb.id])},true);
+  if(p&&p.card){S.stop="half";renderPhone(false);emit("card.opened","remark");startTour();return}G.cam.open=true;renderPhone(true);emit("view.opened","Azu's remark");camAsk("",p&&p.year?"oldest":"what");camLight([bb.id])},true);
 /* what a tap on Azu does (mascot/azu2d.js asks): with the ✦ beside it, Mascot > Tap on Azu; as the button itself (Azu only), the ✦'s part */
 function azuTapAct(){var c=S.guideCfg;if(c.gbtn==="azu")return G.on?(S.dockH==="compact"?"dock":"play"):"menu";if(c.azuTap==="menu")return G.on?"dock":"menu";return c.azuTap}
 function azuTapDo(act){if(act==="menu"){gbMenu();return}if(act==="dock"){S.dockH=S.dockH==="compact"?"mini":"compact";renderGuide();return}if(act==="point"){if(!gbHint(true))azPoke();return}azPoke()}

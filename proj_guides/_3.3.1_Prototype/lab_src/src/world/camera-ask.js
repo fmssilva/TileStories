@@ -49,7 +49,7 @@ function camAsk(q,kind){if(firstAnswer("camAsk.answer",q,kind)!==undefined)retur
 on("heard.answer",function(q,err){if(G.cam.open&&q&&q.trim()){G.talk="idle";camAsk(q);return true}});
 ph.addEventListener("click",function(e){var t=e.target.closest("[data-camask],[data-camclose],[data-cchip],[data-cpin]");if(!t)return;e.stopPropagation();
   if(t.dataset.camclose){G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};camLayer();stopSpeech();return}
-  if(t.dataset.camask){if(!G.cam.open){G.cam.open=true;camLayer();return}listen(false);return}
+  if(t.dataset.camask){if(!G.cam.open){G.cam.open=true;camLayer();emit("view.opened","the pill");return}listen(false);return}
   if(t.dataset.cchip){var k=t.dataset.cchip;camAsk(TXT("cam_chip_"+k),sampleFn&&k!=="kids"?null:k);if(sampleFn&&k!=="kids")G.cam.lastChip=k;return}
   var id=t.dataset.cpin;if(G.cam.hunt){if(id===G.cam.hunt){G.cam.hunt=null;haptic();camLight([id]);camSay(TXT("cam_found"))}else{G.cam.answer=TXT("cam_not_it");camLayer()}return}
   var p=S.wallPois.filter(function(x){return x.id===id})[0];if(p&&p.card){G.cam.open=false;S.stop="half";renderPhone(false);emit("card.opened","pin")}},true);
