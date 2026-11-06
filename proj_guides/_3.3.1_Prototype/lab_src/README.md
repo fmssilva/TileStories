@@ -76,10 +76,20 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
     `tests/test9d.js` presses each control as a finger does: Pause and Stop at Mini, Compact by a swipe and back by the ✦, the hide
     chevron, Stop's toast and its Resume (the step and the sentence), Ask first, Previous replaying the sentence, the ✦ and every
     item of its menu (on the card and on the wall), a tap on Azu (it plays; the menu or the hint only when asked), the hint at most
-    once a visit, the label folding after 4 s; each new Editor row's values on the phone; every row of 6 · Guide and 7 · Audiences
+    once a visit, the label folding after 4 s; each new Editor row's values on the phone; every row of the Guide tab and 6 · Audiences
     showing its demo, and the self-test failing a row without one; the contrast, light and dark; the seven scenes in Ask Azu's
     console; and the fixes (Azu 0 px over words, the mouth of a paused recorded line, the wall's answers in the one order).
     `MUTATE=1 node tests/test9d.js` makes the toast's Resume start the tour again from the start: the named checks turn red.
+  - *The Guide tab and the guidance, round 1* (`editor/guide-tab`, `guidance/catalog`, `guidance/scheduler`, `guidance/service`,
+    `guidance/present`, `guidance/editor`, `guidance/scenes`): `tests/test9e.js` checks the scheduler's `gdPick` alone on a fake clock (each
+    gate and rule by itself, deterministic), then on the page with the visit's clock moved by hand: the opening once a visit (its look: 2
+    lines, 7:1, 0 px over words, not under the ✦, light, dark and in Portuguese); Tap a marker 20 s after the opening and only once the
+    phone has been still 1.2 s, never during a real drag on the wall, beside the nearest marker (Azu pointing, the ring 3:1 on the wall's
+    picture), again after 25 s, at most 3 a visit, never after a card opens (this visit and the next, until Reset the visitor), never at
+    the same time as Azu's remark; Mascot Off's plain bubble; Reduce Motion; the wall's pill gone and Global Scene's link; the Guide tab's
+    sections and every former 6 · Guide row (the same 90 rows and 15 foldouts); each Guidance row's demo (the ×10 chip); Show next now and
+    the visitor; the five scenes in Ask Azu's console. `MUTATE=1 node tests/test9e.js` makes the scheduler ignore Done when: the checks
+    named [Done when] turn red.
 - **The live voice by hand:** with the keys on this computer, open the page from its file (not `#probe`), set Ask Azu >
   Voice of the answers, and ask; it spends a few hundred characters an answer.
 - **Keys:** the local Lab's live agent and live voice read `keys.local.js`, which `python keys_local.py` writes from the workspace's

@@ -42,9 +42,9 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('S.camX=.98;camPaint();camLayer()'); await W(700);
   ok('...one about a point in view stays, and goes when a pan takes the point off the screen', bb && await R('!ph.querySelector(".azfabbub")'), bb);
   // 4. the scenes: each sets the prototype as a visitor would be, and the console says what it asks and expects
-  await R('renderEditor();ed.querySelector(\'[data-fo="s7agent"]\').open=true');
+  await R('S.tab="guide";renderEditor();ed.querySelector(\'[data-fo="s7agent"]\').open=true');
   const s0 = await R('[AGSCENES.length,ed.querySelectorAll(".agscsel option").length]');
-  ok('Scenes: 8 in the console, and the guide\'s 7 (round 7: its controls\' scenes)', s0[0] === 15 && s0[1] === 15, s0);
+  ok('Scenes: 8 in the console, the guide\'s 7 (round 7: its controls\' scenes) and the guidance\'s 5 (round g1)', s0[0] === 20 && s0[1] === 20, s0);
   await R('var s=ed.querySelector(".agscsel");s.value="3";s.dispatchEvent(new Event("change",{bubbles:true}))');
   await p.locator('[data-agsetup]').click(); await W(400);
   const s1 = await R('[S.camCfg.wall,S.stop,G.cam.open,camView().pois.map(function(p){return p.id}).join(),/In view now: .*Jerónimos/.test(ed.querySelector(".agscenes").textContent),ed.querySelector("#agq").value]');
@@ -63,7 +63,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // 5. Run all: every scene in turn, each with its check
   await R('AG.mock={text:"Ok."};AG.sceneRes={}');
   await p.locator('[data-agscall]').click(); await p.waitForFunction(() => !LAB.run('AG.runAll'), null, { timeout: 150000 }).catch(() => {});
-  ok('Run all scenes: fifteen results in the table (the markers scene and the guide\'s need no model)', await R('Object.keys(AG.sceneRes).length===15&&ed.querySelectorAll(".agres tbody tr").length===15'), await R('Object.keys(AG.sceneRes)'));
+  ok('Run all scenes: twenty results in the table (the markers scene, the guide\'s and the guidance\'s need no model)', await R('Object.keys(AG.sceneRes).length===20&&ed.querySelectorAll(".agres tbody tr").length===20'), await R('Object.keys(AG.sceneRes)'));
   ok('...the photo scene leaves Photo of the view as it was (Off)', await R('S.agentCfg.photo===false'));
   // 6. the Editor rows
   ok('Editor: Trace under each answer (Outputs) and Names on the points (Ask about the view)', await R('/Trace under each answer/.test(ed.querySelector(\'[data-fo="s7agent"]\').textContent)&&/Names on the points/.test(ed.querySelector(\'[data-fo="s7cam"]\').textContent)'));

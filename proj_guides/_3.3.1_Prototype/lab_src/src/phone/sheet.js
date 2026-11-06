@@ -16,7 +16,7 @@ on("renderPhone.after",function(keep){var inWall=S.view==="card";
   topBand();stickyAction()});
 /* ----- phone events ----- */
 ph.addEventListener("click",function(e){var t=e.target;
-  var mk=t.closest("[data-marker]");if(mk){S.stop=S.cardCfg.openAt;S.view="card";feedback("open");renderPhone(false);return}
+  var mk=t.closest("[data-marker]");if(mk){S.stop=S.cardCfg.openAt;S.view="card";feedback("open");renderPhone(false);emit("card.opened","marker");return}
   if(S.view==="card"&&t===ph.querySelector("#camera")||t.closest("#wall")&&!t.closest(".mk")){if(S.cardCfg.tapOutside&&S.stop!=="closed"){S.stop="closed";renderPhone(false)}return}
   var ch=t.closest(".chrome i");if(ch&&S.view==="card"&&ch.textContent.charCodeAt(0)===10005){S.stop="closed";renderPhone(false);return}
   var lt=t.closest("[data-tabsec],[data-pagesec]");if(lt){S.activeSec=lt.dataset.tabsec||lt.dataset.pagesec;feedback("jump");renderPhone(true);return}

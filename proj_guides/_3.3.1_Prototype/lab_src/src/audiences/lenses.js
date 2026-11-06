@@ -33,7 +33,7 @@ ph.addEventListener("click",function(e){var c=e.target.closest("[data-lens]");if
 /* the guide plays the core steps and the lens's own */
 on("stepFits.ok",function(ok,st){return ok&&fitsLens(st.topics)});
 
-/* Editor: 7 · Audiences > Lenses (the chips); Specific Marker > 5 · Lenses (the point's topics, and what belongs to each) */
+/* Editor: 6 · Audiences > Lenses (the chips); Specific Marker > 5 · Lenses (the point's topics, and what belongs to each) */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var lk=d.querySelector('[data-fo="s8look"]');if(!lk)return d.innerHTML;
   lk.insertAdjacentHTML("afterend",comp("s8lens","“See it as” chips: a topic of the point, chosen during the visit",
     row("Lenses",pseg("lensCfg.on",["true","false"],["On","Off"]),"Chips under the hero (Everything, then the point's topics). A chip keeps the core blocks and the chosen topic's; the other topics' blocks step aside. Nothing moves: the order stays, the first block in view stays where it was, and the topic's blocks get its badge. Never asked at the first card.")+

@@ -24,7 +24,7 @@ const shots = process.argv[2] || '';
   const w = await R('[AG.con.err||"",G.cam.answer,G.cam.lit,AG.con.calls.map(function(k){return k.name+(k.ok?"":"!")}),AG.last&&[AG.last.model,AG.last.first,AG.last.ms,AG.last.tin,AG.last.tout]]');
   ok('Wall: an answer about the points in view, acting on the wall', !w[0] && w[1] && w[3].length > 0, w);
   if (shots) { await p.locator('#ph').screenshot({ path: shots + '/live_wall.png' });
-    await R('var f=ed.querySelector(\'[data-fo="s7agent"]\');f.open=true;f.scrollIntoView()'); await p.waitForTimeout(300);
+    await R('S.tab="guide";renderEditor();var f=ed.querySelector(\'[data-fo="s7agent"]\');f.open=true;f.scrollIntoView()'); await p.waitForTimeout(300);
     await p.locator('[data-fo="s7agent"]').screenshot({ path: shots + '/live_editor.png' }); }
   // the photo of the view goes with the question
   await R('S.agentCfg.photo=true;G.cam.turn=null;window.__img=0;var of=window.fetch;window.fetch=function(u,o){try{if(/inlineData/.test(o.body))window.__img++}catch(e){}return of(u,o)};camAsk("Descreva o que vê nesta parte do painel, numa frase.")');

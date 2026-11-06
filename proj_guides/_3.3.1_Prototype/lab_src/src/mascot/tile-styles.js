@@ -17,7 +17,7 @@ azuApply();
 /* they change the shader's picture, not the page's: behaviour for the self-test */
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(guideCfg\\.(azuGlaze|azuMotif|azuLight|azuShape)|"));
 
-/* Editor: 6 · Guide > Azu > Mascot source = Tile of light: Glaze, Pattern, Light, Corners, Preview */
+/* Editor: Guide tab > Azu > Mascot source = Tile of light: Glaze, Pattern, Light, Corners, Preview */
 var azuPrev={key:null};
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;azuApply();
   if(S.guideCfg.azuStyle==="light"){var r=rowEl(d,"s7mascot","Mascot source");

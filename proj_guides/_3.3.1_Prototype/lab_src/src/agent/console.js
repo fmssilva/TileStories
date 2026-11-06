@@ -1,5 +1,5 @@
 /* The agent's test console and its status (agConHtml, agStatus). */
-/* ----- Editor: 6 · Guide > Ask Azu (the live agent) ----- */
+/* ----- Editor: Guide tab > Ask Azu (the live agent) ----- */
 function agTok(){return Math.round(corpus().reduce(function(n,c){return n+c.title.length+c.text.length+30},0)/4)}
 function agCostQ(){var p=agProvider(),pr=AGPRICE[agModel(p)];if(p==="claude")return"on the viewer's Claude plan";if(!pr)return"-";var tin=(agTok()+700)*2,tout=S.agentCfg.maxOut;return"≈ $"+((tin*pr[0]+tout*pr[1])/1e6).toFixed(4)+" a question"}
 function agStatus(){var p=agProvider(),w=window.LABKEYS||{};

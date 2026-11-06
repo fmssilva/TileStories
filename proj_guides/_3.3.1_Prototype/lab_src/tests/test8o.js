@@ -71,7 +71,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('Panel: Classic: the captions box and the bar, no dock', await R('!ph.querySelector(".gdock")&&!!ph.querySelector(".gbar")'));
   await R('stopTour();S.guideCfg.panel="dock"');
   // 8. the Editor
-  ok('Editor: Guide panel (then Guide button, round 7) before Captions, its rows and its words', await R('var f=ed.querySelector(\'[data-fo="s7dock"]\');!!f&&f.nextElementSibling.nextElementSibling===ed.querySelector(\'[data-fo="s7cap"]\')&&["Panel","Starts at","Azu\'s own words","Talk button","Sounds","Suggested questions"].every(function(t){return f.textContent.indexOf(t)>=0})&&(TXO.s7dock||[]).length===17'));
+  ok('Editor: Guide panel (then Guide button, round 7) before Captions, its rows and its words', await R('S.tab="guide";renderEditor();var f=ed.querySelector(\'[data-fo="s7dock"]\');!!f&&f.nextElementSibling.nextElementSibling===ed.querySelector(\'[data-fo="s7cap"]\')&&["Panel","Starts at","Azu\'s own words","Talk button","Sounds","Suggested questions"].every(function(t){return f.textContent.indexOf(t)>=0})&&(TXO.s7dock||[]).length===17'));
   await R('S.tab="marker";renderEditor()');
   await p.locator('input[data-gask="0|en"]').fill('When was it built?'); await R('startTour();S.dockH="peek";renderGuide()'); await p.waitForTimeout(200);
   ok('Specific Marker: a suggested question, typed, on its chip', await R('ph.querySelector(\'[data-chip="0"]\').textContent') === 'When was it built?');

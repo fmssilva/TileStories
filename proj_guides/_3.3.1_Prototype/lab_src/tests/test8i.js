@@ -72,7 +72,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await run('comet', '', 1500); await R('stopTour()');
   ok('after the tour, the block text is plain again', await R('!document.querySelector(".gread")&&![].some.call(document.querySelectorAll("#ph .gw"),function(w){return w.getAttribute("style")})'));
   // the Editor: Captions has the style, Trail, Glide and a Try; Narration has the voice in this browser
-  ok('Editor: Highlight style (4), Trail, Glide, Try, Voice in this browser', await R('var c=ed.querySelector(\'[data-fo="s7cap"]\'),v=ed.querySelector(\'[data-fo="s7voice"]\');!!c&&c.querySelectorAll(\'[data-k="@guideCfg.hl"] button, .seg [data-v]\').length>=0&&/Highlight style/.test(c.textContent)&&/Comet/.test(c.textContent)&&/Sentence \\+ word/.test(c.textContent)&&/Trail/.test(c.textContent)&&/Glide/.test(c.textContent)&&!!c.querySelector("[data-hltry]")&&!!v&&!!v.querySelector(\'select[data-sel="@guideCfg.voice_en"]\')'));
+  ok('Editor: Highlight style (4), Trail, Glide, Try, Voice in this browser', await R('S.tab="guide";renderEditor();var c=ed.querySelector(\'[data-fo="s7cap"]\'),v=ed.querySelector(\'[data-fo="s7voice"]\');!!c&&c.querySelectorAll(\'[data-k="@guideCfg.hl"] button, .seg [data-v]\').length>=0&&/Highlight style/.test(c.textContent)&&/Comet/.test(c.textContent)&&/Sentence \\+ word/.test(c.textContent)&&/Trail/.test(c.textContent)&&/Glide/.test(c.textContent)&&!!c.querySelector("[data-hltry]")&&!!v&&!!v.querySelector(\'select[data-sel="@guideCfg.voice_en"]\')'));
   ok('no page errors', errs.length === 0, errs.slice(0, 3));
   console.log(fails ? `${fails} FAILED` : 'ALL PASS');
   await b.close();

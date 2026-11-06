@@ -49,7 +49,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const rm = await R('var w=ph.querySelector(".azwalker");[w?w.className:null,S.stop,G.cam.open,S.guideCfg.azuStyle,G.on]'); ok('Reduce Motion: the walk is a cut (it is already there)', rm[0] && rm[0].indexOf('arrived') >= 0, rm);
   await R('S.reduce=false;G.cam.open=false;camLayer()');
   // 8. the Editor
-  ok('Editor: Mascot has Style, Walks to the wall and three Try', await R('var f=ed.querySelector(\'[data-fo="s7mascot"]\');!!f&&/Tile of light/.test(f.textContent)&&/Walks to the wall/.test(f.textContent)&&f.querySelectorAll("[data-azqtry]").length===3'));
+  ok('Editor: Mascot has Style, Walks to the wall and three Try', await R('S.tab="guide";renderEditor();var f=ed.querySelector(\'[data-fo="s7mascot"]\');!!f&&/Tile of light/.test(f.textContent)&&/Walks to the wall/.test(f.textContent)&&f.querySelectorAll("[data-azqtry]").length===3'));
   ok('no page errors', errs.length === 0, errs.slice(0, 3));
   console.log(fails ? `${fails} FAILED` : 'ALL PASS');
   await b.close();

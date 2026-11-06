@@ -43,6 +43,6 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;a
 on("setOpt.answer",function(key,v){if(key==="ui.rowDemo"){S.ui.rowDemo=v==="true";renderEditor();return true}});
 /* a row with a demo has a pressable label */
 on("renderEditor.after",function(){ed.querySelectorAll(".row > label").forEach(function(lb){var k=rowKey(lb.parentNode);if(k&&rowDemoOf(k)){lb.classList.add("rd");lb.title="Show it on the phone"}})});
-/* the self-test: every row of 6 · Guide and 7 · Audiences has its demo (a row without one fails) */
+/* the self-test: every row of the Guide tab and of Detail Card > 6 · Audiences has its demo (a row without one fails) */
 function rowsWithoutDemo(ids){var out=[];ids.forEach(function(id){ed.querySelectorAll('[data-fo="'+id+'"] .row').forEach(function(r){var k=rowKey(r);if(k&&!rowDemoOf(k)&&!out.some(function(x){return x.key===k}))out.push({key:k,label:(r.querySelector("label")||{}).textContent||""})})});return out}
-on("selfTest.res",function(res){var keep=S.tab;S.tab="card";renderEditor();rowsWithoutDemo(["s7","s8"]).forEach(function(r){res.push({tab:"card",key:"@"+r.key,v:"(its demo)",label:r.label,result:"NO DEMO (a row of 6 · Guide or 7 · Audiences shows nothing on the phone when changed or opened)"})});S.tab=keep;return res});
+on("selfTest.res",function(res){var keep=S.tab;[["guide",guideSecIds()],["card",["s8"]]].forEach(function(t){S.tab=t[0];renderEditor();rowsWithoutDemo(t[1]).forEach(function(r){res.push({tab:t[0],key:"@"+r.key,v:"(its demo)",label:r.label,result:"NO DEMO (a row of the Guide tab or of 6 · Audiences shows nothing on the phone when changed or opened)"})})});S.tab=keep;return res});

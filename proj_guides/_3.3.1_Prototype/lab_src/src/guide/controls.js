@@ -32,7 +32,7 @@ on("prevTap.answer",function(){if(!G.on)return;var now=performance.now(),k=G.hl&
 /* the stop's look reaches the phone's signature (the toast or the question) */
 on("modelSig.sig",function(h){return sigWant(/guideCfg\.stopUndo/)?h+"#stop:"+stopUiHtml(S.guideCfg.stopUndo):h});
 
-/* Editor: 6 · Guide > Guide panel gets Stop */
+/* Editor: Guide tab > Guide panel gets Stop */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   addRows(d,"s7dock",row("Stop",pseg("guideCfg.stopUndo",["toast","ask"],["Undo toast","Ask first"]),"Undo toast: Stop ends the tour at once, with no question, and a toast says “Tour stopped · Resume” for 5 s; Resume goes back to the step and the sentence it stopped at. The point is kept after the toast is gone: the guide's button offers Resume the tour. Ask first: the tour pauses and asks “Stop the tour?” (Stop / Keep listening). Previous, mid-sentence, says the sentence again; a second tap within 2 s goes to the step before."),"Azu's own words");
   return d.innerHTML});

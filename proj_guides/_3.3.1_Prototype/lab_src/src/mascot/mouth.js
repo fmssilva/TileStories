@@ -60,7 +60,7 @@ on("stopSpeech.before",function(){if(MT.audio)mtStop();if(LD.audio)ldStop()});
 /* the moment's mouth, for the Editor and the checks */
 function mouthNow(){return{kind:MT.kind||(G.visTrack?"shapes":"letters"),talk:AzuGL.get("talk"),m3d:Azu3D.morphNow("Open")}}
 
-/* ----- Editor: 6 · Guide > Mascot: how the mouth moves now ----- */
+/* ----- Editor: Guide tab > Mascot: how the mouth moves now ----- */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var r=rowEl(d,"s7mascot","Mouth");
   if(r)r.insertAdjacentHTML("afterend",row("How it moves",'<span class="uses">Azure\'s facial curves: 60 frames a second, the jaw, the lips\' closing, their rounding and widening (the live answers in Azure, the recorded Azure lines). Other recorded voices and ElevenLabs: the sound\'s loudness opens it, the letters shape it. The device voice: the letters at the word times.</span>',"The same three values (open, round, wide) move every source: the 3D models' morphs Open, Round and Wide, the tile of light's opening, the 2D tile's nearest drawn mouth. Unity: the Worker streams Azure's blend shapes with the audio; SetViseme takes the three values; uLipSync gives the same from any audio.",true));
   return d.innerHTML});

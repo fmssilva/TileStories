@@ -41,7 +41,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await p.locator('#ptool [data-pt="wall"]').click(); await W(300);
   ok('...and a tap back to the card\'s wall with its markers', await R('S.camCfg.wall==="ribeira"&&ph.querySelectorAll("#wall .mk").length===2'));
   // 6. the test scene, pressed in Ask Azu's console as the developer does
-  await R('S.previewBar=false;renderEditor();ed.querySelector(\'[data-fo="s7agent"]\').open=true');
+  await R('S.previewBar=false;S.tab="guide";renderEditor();ed.querySelector(\'[data-fo="s7agent"]\').open=true');
   const idx = await R('AGSCENES.findIndex(function(s){return s.id==="markers"})'); // round 7: the guide's scenes follow it in the console
   await R(`var s=ed.querySelector(".agscsel");s.value="${idx}";s.dispatchEvent(new Event("change",{bubbles:true}))`); await W(200);
   const lbl = await R('ed.querySelector(".agscenes").textContent');

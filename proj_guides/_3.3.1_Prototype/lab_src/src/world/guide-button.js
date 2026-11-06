@@ -24,11 +24,9 @@ function fabLayer(){emitLatestFirst("fabLayer.before");ph.querySelectorAll(".gbt
   if(S.view!=="card"||G.on||S.stop==="peek"||(G.cam.open&&S.stop==="closed")||(S.stop!=="closed"&&heroStartSeen())){G.fab.menu=false;return}
   ph.insertAdjacentHTML("beforeend",gbWrapHtml(false));
   if(G.fab.menu){ph.insertAdjacentHTML("beforeend",gbMenuHtml());placeNear(ph.querySelector(".gbmenu"))}
-  if(G.fab.bub&&S.stop==="closed"&&gbAzu())showFabBub(G.fab.bub);gbClear()}
-/* the ✦ and Azu keep clear of what shares the foot of the screen: on the wall the hint (Tap a marker…) rises above them, and gives
-   way to Azu's remark while it shows (one invitation at a time); on the card,
-   on the Locate Button's side, they rise above its pin */
-function gbClear(){var w=ph.querySelector(".gbtn-wrap:not(.intour)"),tip=ph.querySelector(".walltip");if(tip){tip.style.bottom=w&&S.stop==="closed"?(ph.offsetHeight-w.offsetTop+10)+"px":"";tip.style.visibility=ph.querySelector(".azfabbub")?"hidden":""}
+  if(G.fab.bub&&S.stop==="closed"&&gbAzu())showFabBub(G.fab.bub);gbClear();emit("fabLayer.after")}
+/* the ✦ and Azu keep clear of what shares the foot of the screen: on the card, on the Locate Button's side, they rise above its pin */
+function gbClear(){var w=ph.querySelector(".gbtn-wrap:not(.intour)");
   var lp=ph.querySelector(".locpin");if(!w||!lp||S.stop==="closed"||getComputedStyle(lp).display==="none")return;var a=w.getBoundingClientRect(),b=lp.getBoundingClientRect(),q=ph.getBoundingClientRect().height/ph.offsetHeight;
   if(a.right>b.left&&a.left<b.right&&a.bottom>b.top&&a.top<b.bottom)w.style.bottom=Math.round((ph.getBoundingClientRect().bottom-b.top)/q+8)+"px"}
 /* the label says "Guide" for 4 s of being seen, then folds into the ✦: the Locate Button's rule (card/locate.js's seenLabel) */
@@ -66,12 +64,13 @@ ph.addEventListener("click",function(e){var t=e.target.closest("[data-gbtn],[dat
   if(t.dataset.gbtn){if(G.on){S.dockH=S.dockH==="compact"?"mini":"compact";G.askOpen=false;renderGuide()}else gbMenu();return}
   if(t.dataset.gbgo){gbGo(t.dataset.gbgo);return}
   var bb=G.fab.bub;G.fab.bub=null;if(!bb){fabLayer();return}var p=S.wallPois.filter(function(x){return x.id===bb.id})[0];
-  if(p&&p.card){S.stop="half";renderPhone(false);startTour();return}G.cam.open=true;renderPhone(true);camAsk("",p&&p.year?"oldest":"what");camLight([bb.id])},true);
+  if(p&&p.card){S.stop="half";renderPhone(false);emit("card.opened","remark");startTour();return}G.cam.open=true;renderPhone(true);camAsk("",p&&p.year?"oldest":"what");camLight([bb.id])},true);
 /* what a tap on Azu does (mascot/azu2d.js asks): with the ✦ beside it, Mascot > Tap on Azu; as the button itself (Azu only), the ✦'s part */
 function azuTapAct(){var c=S.guideCfg;if(c.gbtn==="azu")return G.on?(S.dockH==="compact"?"dock":"play"):"menu";if(c.azuTap==="menu")return G.on?"dock":"menu";return c.azuTap}
 function azuTapDo(act){if(act==="menu"){gbMenu();return}if(act==="dock"){S.dockH=S.dockH==="compact"?"mini":"compact";renderGuide();return}if(act==="point"){if(!gbHint(true))azPoke();return}azPoke()}
 /* ----- Azu's comments: watching where the camera points; when a point settles in the middle, a short, tappable remark ----- */
-setInterval(function(){if(!S.camCfg.comments||!gbAzu()||S.view!=="card"||S.stop!=="closed"||G.on||G.cam.open)return;var v=camView(),c=v.central,now=performance.now();
+/* one at a time: while another of the guide's bubbles shows (guidance/present.js answers fabRemark.quiet), the remark waits */
+setInterval(function(){if(!S.camCfg.comments||!gbAzu()||S.view!=="card"||S.stop!=="closed"||G.on||G.cam.open||firstAnswer("fabRemark.quiet"))return;var v=camView(),c=v.central,now=performance.now();
   if(!c){G.fab.cen=null;return}if(G.fab.panAt&&now-G.fab.panAt<700)return;if(c.id!==G.fab.cen){G.fab.cen=c.id;G.fab.since=now;return}
   if(now-G.fab.since<1200||now-G.fab.last<S.camCfg.every*1000||G.fab.count>=12||G.fab.said===c.id)return;
   var p=S.wallPois.filter(function(x){return x.id===c.id})[0],k=["fab_comment_1","fab_comment_2","fab_comment_3"][G.fab.count%3];
@@ -85,7 +84,7 @@ setInterval(function(){if(G.on||S.view!=="card"||S.stop==="closed"||S.stop==="pe
    by itself at most once a visit, after a few pokes or when the visitor seems idle (25 s), Lively only, never over a sentence; under
    Reduce Motion nothing moves (the words only). Unity: the Rive state machine's point input aimed at the button's world box ----- */
 function gbHint(byVisitor){var b=ph.querySelector(".gbtn"),az=azuEl();if(!b||!az||!gbAzu()||!gbOn())return false;
-  if(!byVisitor){if(G.gb.hinted||S.guideCfg.life!=="lively"||S.m.solemn||G.utter||G.timer||G.recAudio||G.moment)return false;G.gb.hinted=true}
+  if(!byVisitor){if(G.gb.hinted||S.guideCfg.life!=="lively"||S.m.solemn||G.utter||G.timer||G.recAudio||G.moment||firstAnswer("fabRemark.quiet"))return false;G.gb.hinted=true}
   if(!S.reduce){if(az.classList.contains("azfab")){az.classList.add("point-gb");clearTimeout(G.gb.pt);G.gb.pt=setTimeout(function(){az.classList.remove("point-gb")},2800)}
     else G.pointTo={till:performance.now()+2800,at:function(){var e=ph.querySelector(".gbtn");if(!e)return null;var pr=ph.getBoundingClientRect(),q=pr.height/ph.offsetHeight,r=e.getBoundingClientRect();return{x:(r.left+r.width/2-pr.left)/q,y:(r.top+r.height/2-pr.top)/q}}}}
   azBubble(fmt(TXT("gb_hint"),S.guideCfg.gbIcon==="star"?"✦":TXT("gb_label")),3200);G.gb.hintAt=performance.now();return true}
@@ -100,7 +99,7 @@ ph.addEventListener("click",function(e){var t=e.target.closest("[data-gset]");if
 /* the ✦ and Azu as the card shows them reach the phone's signature */
 on("modelSig.sig",function(h){if(!sigWant(/guideCfg\.(gb|azuTap)/))return h;var m=G.fab.menu;G.fab.menu=false;var x="#gb:"+gbWrapHtml(false);G.fab.menu=m;return h+x});
 
-/* Editor: 6 · Guide > Guide button, after Guide panel */
+/* Editor: Guide tab > Guide button, after Guide panel */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var dk=d.querySelector('[data-fo="s7dock"]');if(!dk)return d.innerHTML;
   dk.insertAdjacentHTML("afterend",comp("s7gbtn","the visitor's own way in, always in one place, and Azu beside it",
     row("Guide button",pseg("guideCfg.gbtn",["both","azu","star"],["✦ and Azu beside it","Azu only","✦ only"]),"✦ and Azu beside it: two roles. The ✦ is the visitor's: a tap opens its menu (Start or Resume the tour, Ask by typing or talking, Ask about the view on the wall, the guide's settings); during a tour it shows the progress as a ring and a tap shows or hides the dock. Azu beside it takes the initiative (its remarks on the view, the hint) and a tap on Azu plays (Mascot > Tap on Azu). Azu only: Azu is the button, as before: a tap opens the menu, three taps and a long press still play; during a tour Azu is the guide, and a tap at Compact brings the dock back. ✦ only: no Azu outside the tour, so no remarks on the wall. On the card it shows once the hero's Start the guide is out of sight; on the wall, in the corner.")+

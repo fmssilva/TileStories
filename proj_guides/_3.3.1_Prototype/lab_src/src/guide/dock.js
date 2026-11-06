@@ -97,7 +97,7 @@ ph.addEventListener("pointerup",function(e){if(grabY==null)return;var dy=e.clien
   S.dockH=o[Math.max(lo,Math.min(3,i+(dy<0?1:-1)))];G.askOpen=S.dockH==="full";e.stopPropagation();renderGuide()},true);
 ph.addEventListener("submit",function(e){var f=e.target.closest(".gd-form");if(!f)return;e.preventDefault();e.stopPropagation();var i=f.querySelector("#gq");if(i&&i.value.trim()){var q=i.value;i.value="";ask(q)}},true);
 
-/* Editor: 6 · Guide > Guide panel (after Captions); Specific Marker > Guide script > Suggested questions */
+/* Editor: Guide tab > Guide panel (after Captions); Specific Marker > Guide script > Suggested questions */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var ca=d.querySelector('[data-fo="s7cap"]');if(!ca)return d.innerHTML;
   ca.insertAdjacentHTML("beforebegin",comp("s7dock","one panel for the tour's words, its controls and the conversation",
     row("Panel",pseg("guideCfg.panel",["dock","classic"],["Dock","Classic"]),"Dock: one panel at the bottom with its heights: Mini (the step, the words, Pause, Stop and the talk button), Peek (+ previous, next, sound, captions, the keyboard and the suggested questions), Full (the conversation and a text field), and Compact (hidden: the voice goes on, the guide's button shows the progress and a pause). The grabber or a swipe changes its height; the chevron hides it. Classic: the captions box over the control bar.")+

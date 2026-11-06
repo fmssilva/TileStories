@@ -67,7 +67,7 @@ on("renderGuide.after",function(){az3dPlace()});
 on("azMouth.after",function(m,shape){Azu3D.viseme(shape)});
 on("startTour.before",function(){G.azWaveTill=performance.now()+2600});
 
-/* ----- Editor: 6 · Guide > Azu: Mascot source, the 3D model's clips, Import, Generate from a picture ----- */
+/* ----- Editor: Guide tab > Azu: Mascot source, the 3D model's clips, Import, Generate from a picture ----- */
 var AZ3D_GEN=[["Hyper3D Rodin","the add-on's shared trial key: no credit left on 2026-11-03","a Rodin key (Business plan) in the add-on"],
   ["Hunyuan 3D (Tencent)","about 20 a day on the web; 200 credits once on the API","a Tencent Cloud SecretId and SecretKey in the add-on; its licence may exclude the EU (check before use)"],
   ["Tripo","about 300 credits a month on the web (CC BY, not for commercial use)","a Tripo API key in the add-on"],

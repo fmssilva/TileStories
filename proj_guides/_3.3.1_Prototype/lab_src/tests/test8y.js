@@ -15,7 +15,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const prev = async (i) => R('azCount(ed.querySelectorAll(".azprev img")[' + i + '].src)');
   const press = async (key, v) => { await p.locator(`[data-set="@guideCfg.${key}"][data-v="${v}"]`).click(); await W(250); await R('ed.querySelector(\'[data-fo="s7mascot"]\').open=true'); };
   await R('S.guideCfg.azuStyle="light";S.guideCfg.voice="device";S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;sampleFn=null;S.view="card";S.stop="half";renderAll(false)');
-  await R('renderEditor();ed.querySelector(\'[data-fo="s7mascot"]\').open=true');
+  await R('S.tab="guide";renderEditor();ed.querySelector(\'[data-fo="s7mascot"]\').open=true');
   // 1. the rows, by name, with the defaults pressed; the defaults are the shader's look before the styles
   const rows = await R('["Glaze","Pattern","Light","Corners","Preview"].map(function(l){return !!rowEl(ed,"s7mascot",l)})');
   const pressed = await R('["azuGlaze","azuMotif","azuLight","azuShape"].map(function(k){var b=ed.querySelector(\'[data-set="@guideCfg.\'+k+\'"][aria-pressed="true"]\');return b&&b.textContent})');

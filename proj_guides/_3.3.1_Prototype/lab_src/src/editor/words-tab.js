@@ -63,4 +63,4 @@ on("refreshJsonV4.answer",function(){if(S.tab==="words"){var pre=ed.querySelecto
 (function(){var tabs=document.querySelector(".utabs");if(tabs&&!tabs.querySelector('[data-tab="words"]')){var b=document.createElement("button");b.className="utab w";b.setAttribute("role","tab");b.type="button";b.dataset.tab="words";b.setAttribute("aria-selected","false");b.textContent="Languages & Terms";tabs.appendChild(b);
   b.addEventListener("click",function(){S.tab="words";renderEditor();show("story","r:r4")})}})();
 /* ----- self-test: every text, demo field, term and term page must reach the phone (or say why not) ----- */
-BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(langs\\.|wallTip|"));
+BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(langs\\.|"));

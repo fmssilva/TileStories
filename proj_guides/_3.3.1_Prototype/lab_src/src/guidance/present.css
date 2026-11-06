@@ -1,0 +1,36 @@
+/* Guidance, the look: the tip's bubble (the dock's paper, --ink1 on --paper: 7:1 and more, light and dark), its tail, the ring on the
+   marker, Azu's pointer, the Editor's ×10 chip. Unity: the bubble a 9-slice VisualElement (USS transitions on scale and opacity), the
+   tail a child rotated 45° (USS rotate), the ring a VisualElement with border-radius and two borders, the pulse a USS transition on
+   scale; Azu's move a translate tween; the drop shadows are depth only (a 9-slice shadow sprite). */
+.gdbub{position:absolute;z-index:14;width:max-content;max-width:calc(100% - 24px);box-sizing:border-box;background:var(--paper);color:var(--ink1);border-radius:16px;
+  box-shadow:0 8px 22px rgba(0,0,0,.3),0 0 0 1px var(--hair)}
+.gdbub button{appearance:none;display:block;width:100%;min-height:44px;border:0;background:none;color:inherit;font:600 14px/1.38 var(--body);text-align:left;padding:11px 14px;cursor:pointer;border-radius:16px}
+.gdbub.gd-in{animation:gdin .22s cubic-bezier(.2,.8,.2,1)}
+.gdbub.gd-out{opacity:0;transform:scale(.97);transition:opacity .16s ease,transform .16s ease}
+@keyframes gdin{from{opacity:0;transform:scale(.94)}}
+.gdtail{position:absolute;width:14px;height:14px;background:var(--paper);rotate:45deg;border-radius:2px;pointer-events:none}
+.gdbub[data-tail="down"] .gdtail{bottom:-6px;box-shadow:3px 3px 4px -2px rgba(0,0,0,.18)}
+.gdbub[data-tail="up"] .gdtail{top:-6px}
+.gdbub[data-tail="left"] .gdtail{left:-6px}
+.gdbub[data-tail="right"] .gdtail{right:-6px}
+.gdbub[data-tail="none"] .gdtail{display:none}
+/* the ring on the marker: a white ring between two dark edges, so it holds 3:1 on a light or a dark part of the wall; it lies under the markers (their names drawn over it) */
+.gdring{position:absolute;width:72px;height:72px;margin:-36px 0 0 -36px;border-radius:50%;box-sizing:border-box;border:3px solid #FFFFFF;
+  box-shadow:0 0 0 2px rgba(22,24,28,.88),inset 0 0 0 2px rgba(22,24,28,.88);pointer-events:none}
+.gdring.gd-pulse{animation:gdring .9s cubic-bezier(.3,.9,.4,1)}
+@keyframes gdring{0%{opacity:0;transform:scale(.7)}55%{opacity:1;transform:scale(1.12)}100%{transform:scale(1)}}
+.gdring.gd-out,.gdpoint.gd-out{opacity:0;transition:opacity .16s ease}
+/* Azu pointing: the still picture leans towards the marker and a small pointer sits at the ring (the 3D model plays its point clip) */
+.gdpoint{position:absolute;z-index:12;width:16px;height:16px;margin:-8px 0 0 -8px;pointer-events:none}
+.gdpoint svg{display:block;width:16px;height:16px;fill:#FFD98A;stroke:#16181C;stroke-width:1.6;stroke-linejoin:round;overflow:visible}
+.gdpoint.gd-in{animation:gdpt .35s ease .3s backwards}
+@keyframes gdpt{from{opacity:0;scale:.4}}
+.azfab.gd-point .azstill{transition:rotate .3s ease}
+.azfab.gd-point[data-gdlean="left"] .azstill{rotate:-7deg}
+.azfab.gd-point[data-gdlean="right"] .azstill{rotate:7deg}
+.azfab.gd-point:not(.gd-left) .marm{left:auto;right:-14px;transform-origin:0 50%}
+.azfab.gd-point:not(.gd-left) .marm::before{left:auto;right:-6px}
+.reduce .gdbub,.reduce .gdring,.reduce .gdpoint,.reduce .azfab.gd-point .azstill{animation:none!important;transition:none!important}
+/* the Editor's demo chip (never in the app): the ×10 clock of a demo */
+.gdchip{position:absolute;z-index:20;left:50%;top:14px;translate:-50% 0;background:#16181C;color:#F4F1EA;font:700 12.5px/1 var(--body);padding:8px 12px;border-radius:999px;
+  border:1px solid rgba(244,241,234,.3);box-shadow:0 6px 16px rgba(0,0,0,.35);white-space:nowrap;pointer-events:none}

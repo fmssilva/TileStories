@@ -62,7 +62,7 @@ on("resumeNow.voice",function(){if(LV.wait){LV.held=false;return true}});
 on("mute.voice",function(){if(LV.wait)return true});
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(agentCfg\\.(liveVoice|elevenModel)|"));
 
-/* ----- Editor: 6 · Guide > Ask Azu > Outputs: the voice of the answers ----- */
+/* ----- Editor: Guide tab > Ask Azu > Outputs: the voice of the answers ----- */
 function lvStatusText(){var k=lvKeys(),l=LV.last,names=LVN;
   var s="Keys on this computer: Azure "+(k.azure?"✓":"none")+", ElevenLabs "+(k.eleven?"✓":"none")+".";
   if(S.agentCfg.liveVoice!=="device"&&!k[S.agentCfg.liveVoice])s+=" Without its key the answers use the device voice, and so do the tour's lines the recorded set lacks.";
