@@ -70,6 +70,11 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 - **The target is the Block Components Lab** (https://claude.ai/artifact/KDs2Ko1dYdBWYwZVhjvuEp), the record copy
   `_3.3.1_Prototype/Block Components Lab.html`, and its sources `_3.3.1_Prototype/lab_src/` (modules by feature, the build,
   the tests; `PROTOTYPE_STRUCTURE.md` says where a change goes, `README.md` how to prove and publish it).
+- **Publishing from another account:** the artifact is private to the developer's account. To keep the same link, the
+  owner shares it with edit access (the page's Share menu); that account's session then reads the live version and publishes
+  to it. Otherwise a new artifact: publish `_3.3.1_Prototype/Block Components Lab.html` with `files` mapping every
+  `voicebench/out/...` file (184, from `_3.3.1_Prototype/voicebench/out/`, the same paths) and the `db` capability (rules:
+  `voicerate` read view / write owner, `voicerate/{self}` read view / write interact), then give the developer the new link.
 - **The spec is `_3.3_POI_Card_Styles.md`**: each part of the card and its Editor as the Lab shows it, with what Unity has today
   (Built / Partly / Not yet + the class). Section 17 lists the open items and the PROPOSED options.
 - **The Lab holds every good option of Unity's card** (the audit of 2026-11-01: `lab_src/AUDIT_DECISIONS.md`, `lab_src/audit/`).
