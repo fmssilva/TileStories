@@ -26,9 +26,17 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     sources in `_3.8_guidance_plans/`). Decisions: a top-level **Guide** tab (today's 6 · Guide + Guidance + the first pages);
     App and Fun tips as a bubble only, Content spoken once the guide has been heard; a deterministic mix; the card Hints edited
     in Guidance with a view in Card Controls.
-  - **Running when this was written:** guidance round 1 (study section 8): the Guide tab, `src/guidance/` (catalog, scheduler,
-    present), the Opening message and Tap a marker said by the mascot, the wall hint pill removed, `tests/test9e.js`. A Worker
-    subagent builds it; the Architect verifies (build, self-test, run_tests, captures), commits, publishes.
+  - **Guidance round 1 is half-way, on the branch `guidance-r1-wip`** (pushed; `master` holds the last verified state, Lab
+    v29). Its brief: `_3.8_guidance_plans/brief_round1.md`. On the branch: the Guide tab (`src/editor/guide-tab.js`), the
+    modules `src/guidance/` (catalog, scheduler, service, present, editor, scenes), the wall pill's removal, `tests/test9e.js`
+    and the other tests adjusted. The Opus subagent that built it was stopped while it ran its proofs, so **none of it is
+    verified**, and its report (captures, questions) was never written.
+    **First thing in the next chat:** `git checkout guidance-r1-wip`; read the brief; `python build.py`; run
+    `node run_tests.js --only=test9e` and the guide group, then the self-test (`tests/runtest8.ps1`, about 40 min, alone) and
+    the full `node run_tests.js`; fix what is red (or hand the rest of the brief to a new subagent); take and open the captures
+    the brief names; update `tests_baseline.json`, `PROTOTYPE_STRUCTURE.md`, `README.md` and the spec (`_3.3` section 11 and
+    14: the Guide tab, the wall hint now said by the mascot); then merge into `master`, commit, push, publish (Lab v30) and ask
+    the developer the look questions.
   - **MCP:** blender-mcp at user scope (Blender 5.2.3, add-on 1.8, port 9876). The Unity MCP was not connected this stretch.
   - **Keys:** Gemini, Azure Speech and ElevenLabs answer (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).
 - **The tasks, in this order:**
