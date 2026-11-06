@@ -57,7 +57,7 @@ function fcTick(){G.fcRaf=0;var sp=ph.querySelector(".gspot");if(!G.on){if(sp)sp
   G.fcRaf=requestAnimationFrame(fcTick)}
 on("stopTour.before",function(){unzoomAll();var sp=ph.querySelector(".gspot");if(sp)sp.remove();ph.classList.remove("gspotting")});
 
-/* Editor: 6 · Guide gets Focus, after Captions; Specific Marker > Guide script gets each step's spots, drawn on its picture */
+/* Editor: Guide tab gets Focus, after Captions; Specific Marker > Guide script gets each step's spots, drawn on its picture */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var ca=d.querySelector('[data-fo="s7cap"]');if(!ca)return d.innerHTML;
   ca.insertAdjacentHTML("afterend",comp("s7focus","the spotlight on what is told, the zoom to a spot in a picture, Azu pointing",
     row("Focus",pseg("guideCfg.cue",["spotlight","ring","none"],["Spotlight","Soft ring","None"]),"Spotlight: the rest of the card dims and a soft light rings what the guide is telling. Soft ring: only the ring. One at a time; it follows the scroll and hides while the visitor takes over.")+

@@ -2,17 +2,26 @@
 
 Read this first in a new Architect chat, then `__AI_Architect.md`. It says where the work is and how a round runs.
 
-## 0. Start here (next conversation, from 2026-11-06)
+## 0. Start here (next conversation, from 2026-11-07)
 
 - **State:**
-  - **The Lab:** v29 is published (the commit "Add the guide button with its menu, Pause and Stop at Mini, a hidden dock, and
-    the explorer as the default mascot"). Its code is in modules by feature (`lab_src/src/<area>/<module>.js`), with no
-    wrappers: `lab_src/PROTOTYPE_STRUCTURE.md` says where each feature lives and where a change goes. The build only joins
-    files (`build.py`) and refuses wrappers, re-assignments, second declarations, defaults set twice and version-named
-    modules (`check_structure.js`, `structure_baseline.json` at 0).
-  - **Proof of the Lab:** the self-test (`tests/runtest8.ps1`, about 40 min, alone) gives `ok=1180 behaviour=602 bad=0`;
-    `node run_tests.js` runs the 25 test files (584 checks; `tests_baseline.json`). A start crash "page.waitForFunction:
-    Timeout 20000ms" under load is known flakiness: rerun that file alone.
+  - **The Lab:** `master` holds guidance round 1, verified on 2026-11-06 (the Guide tab, the opening message, Tap a marker,
+    the wall's pill removed). The published link still shows v29: this session's account could not open the artifact, so
+    v30 waits for the developer (share it with edit access, or a new artifact: section 1). Its code is in modules by feature
+    (`lab_src/src/<area>/<module>.js`), with no wrappers: `lab_src/PROTOTYPE_STRUCTURE.md` says where each feature lives and
+    where a change goes. The build only joins files (`build.py`) and refuses wrappers, re-assignments of functions, second
+    declarations, defaults set twice and version-named modules (`check_structure.js`, `structure_baseline.json` at 0).
+  - **Proof of the Lab:** the self-test (`tests/runtest8.ps1`, alone) gives `ok=1180 behaviour=634 bad=0` in 31 min (a run the
+    same day passed the 60-minute limit with nothing else running: `-minutes` now sets the limit, 90 by default);
+    `node run_tests.js` runs the 26 test files (643 checks; `tests_baseline.json`, about 28 min). A start crash
+    "page.waitForFunction: Timeout" under load is known flakiness: rerun that file alone.
+  - **Test levels for the Lab: PROPOSED, waiting for the developer** (today every round pays the whole self-test and every
+    test file, about 60-90 min). The draft: L1 every change (the build, the test files the structure map names for the
+    changed modules, the self-test of the touched tab); L2 a round's close (L1 + a smoke file, one cheapest check per area);
+    L3 full (merge into `master`, every 4th round, shared ground: `core/`, `editor/shell.js`, `editor/demo.js`,
+    `editor/selftest*`, `phone/sheet.js`, `guide/tour.js`, `guide/voice.js`, `build.py`, `src/page/`), with the files run in
+    parallel. Once decided it goes in `lab_src/README.md` "Prove it", with the tools it needs (`run_tests.js --changed`,
+    `--jobs`, `#selftest=<tab>`).
   - **Decided and built on 2026-11-05/06:**
     - The voice: one order for every line (`sayOrder`, `src/guide/voice.js`): the recorded line, else the live voice (when its
       key is on this computer), else the device's; "Speaking now" in the Editor says which and why. Best available prefers a
@@ -21,22 +30,14 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       Pause and Stop at Mini, Compact (the dock hidden, the ✦ ring), Stop with an Undo toast, Previous replays the sentence.
     - The mascot: Mascot source = 3D model, Model = The explorer by default; "Azu, simple" removed; where Azu is not drawn live
       (beside the ✦, the guide block) a 3D source shows the model's picture.
-    - Every Editor row of 6 · Guide and 7 · Audiences has its demo (`rowDemos`, `src/editor/demo.js`).
+    - Every Editor row of the Guide tab and of Detail Card > 6 · Audiences has its demo (`rowDemos`, `src/editor/demo.js`).
   - **The guidance system:** `_3.8_Guidance_Study.md` (decided 2026-11-06; the two independent plans with the research and
     sources in `_3.8_guidance_plans/`). Decisions: a top-level **Guide** tab (today's 6 · Guide + Guidance + the first pages);
     App and Fun tips as a bubble only, Content spoken once the guide has been heard; a deterministic mix; the card Hints edited
     in Guidance with a view in Card Controls.
-  - **Guidance round 1 is half-way, on the branch `guidance-r1-wip`** (pushed; `master` holds the last verified state, Lab
-    v29). Its brief: `_3.8_guidance_plans/brief_round1.md`. On the branch: the Guide tab (`src/editor/guide-tab.js`), the
-    modules `src/guidance/` (catalog, scheduler, service, present, editor, scenes), the wall pill's removal, `tests/test9e.js`
-    and the other tests adjusted. The Opus subagent that built it was stopped while it ran its proofs, so **none of it is
-    verified**, and its report (captures, questions) was never written.
-    **First thing in the next chat:** `git checkout guidance-r1-wip`; read the brief; `python build.py`; run
-    `node run_tests.js --only=test9e` and the guide group, then the self-test (`tests/runtest8.ps1`, about 40 min, alone) and
-    the full `node run_tests.js`; fix what is red (or hand the rest of the brief to a new subagent); take and open the captures
-    the brief names; update `tests_baseline.json`, `PROTOTYPE_STRUCTURE.md`, `README.md` and the spec (`_3.3` section 11 and
-    14: the Guide tab, the wall hint now said by the mascot); then merge into `master`, commit, push, publish (Lab v30) and ask
-    the developer the look questions.
+  - **Guidance round 1 is done** (merged into `master`; the brief `_3.8_guidance_plans/brief_round1.md`). Its captures were
+    judged by the Architect; the developer's look questions are open (the PT opening line, what "Mascot Off" means, Azu's size
+    beside the marker). **Next: guidance round 2** (`_3.8` section 8), as a brief to an Opus subagent.
   - **MCP:** blender-mcp at user scope (Blender 5.2.3, add-on 1.8, port 9876). The Unity MCP was not connected this stretch.
   - **Keys:** Gemini, Azure Speech and ElevenLabs answer (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).
 - **The tasks, in this order:**

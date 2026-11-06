@@ -82,7 +82,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   }
   await R('S.dark=false;renderAll(false);stopTour()');
   // 13. the Editor
-  ok('Editor: Mascot has Liveliness, Mouth, Moods, Moments, Water break after and five Try', await R('var f=ed.querySelector(\'[data-fo="s7mascot"]\');!!f&&["Liveliness","Mouth","Moods","Moments","Water break after"].every(function(t){return f.textContent.indexOf(t)>=0})&&f.querySelectorAll("[data-aztry]").length===5'));
+  ok('Editor: Mascot has Liveliness, Mouth, Moods, Moments, Water break after and five Try', await R('S.tab="guide";renderEditor();var f=ed.querySelector(\'[data-fo="s7mascot"]\');!!f&&["Liveliness","Mouth","Moods","Moments","Water break after"].every(function(t){return f.textContent.indexOf(t)>=0})&&f.querySelectorAll("[data-aztry]").length===5'));
   ok('Azu\'s words are on the Mascot (Languages & Terms)', await R('(TXO.s7mascot||[]).length') >= 11, await R('(TXO.s7mascot||[]).length'));
   await R('S.tab="marker";S.sel.gstep="g2";renderEditor()'); await p.waitForTimeout(300);
   ok('Guide script: Solemn point, and Azu\'s mood on the step', await R('/Solemn point/.test(ed.querySelector(\'[data-fo="m3"]\').textContent)&&!!ed.querySelector("[data-azmood=g2]")'));

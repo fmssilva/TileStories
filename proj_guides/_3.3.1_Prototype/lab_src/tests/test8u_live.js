@@ -1,5 +1,5 @@
 // v8u live check, by hand only (it spends the key's quota): node test8u_live.js [shots dir]. Needs keys.local.js (python keys_local.py).
-// It does what the developer does in the prototype: Editor > 6 · Guide > Ask Azu > 9 · Test console > Run all scenes; then a drag on the wall and a typed question.
+// It does what the developer does in the prototype: Editor > Guide > 3 · Ask > Ask Azu > 9 · Test console > Run all scenes; then a drag on the wall and a typed question.
 const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe-live';
 const shots = process.argv[2] || '';
@@ -10,7 +10,7 @@ const shots = process.argv[2] || '';
   await p.goto(url); await p.waitForFunction(() => window.LAB && window.LABKEYS, null, { timeout: 90000 }); await p.waitForTimeout(800);
   const R = src => p.evaluate(s => LAB.run(s), src);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
-  await R('S.hints.on=false;S.introSeen=true;S.guideMute=true;S.agentCfg.voiceOut=false;S.lang="pt";renderAll(false);renderEditor();var f=ed.querySelector(\'[data-fo="s7agent"]\');f.open=true;f.querySelector(".agcon").scrollIntoView()');
+  await R('S.hints.on=false;S.introSeen=true;S.guideMute=true;S.agentCfg.voiceOut=false;S.lang="pt";renderAll(false);S.tab="guide";renderEditor();var f=ed.querySelector(\'[data-fo="s7agent"]\');f.open=true;f.querySelector(".agcon").scrollIntoView()');
   ok('Gemini answers here (keys.local.js)', await R('agProvider()==="gemini"'));
   await p.locator('[data-agscall]').click();
   await p.waitForFunction(() => !LAB.run('AG.runAll'), null, { timeout: 240000 }).catch(() => {});

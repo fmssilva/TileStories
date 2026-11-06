@@ -52,14 +52,14 @@ ph.addEventListener("click",function(e){var t=e.target.closest("[data-camask],[d
   if(t.dataset.camask){if(!G.cam.open){G.cam.open=true;camLayer();return}listen(false);return}
   if(t.dataset.cchip){var k=t.dataset.cchip;camAsk(TXT("cam_chip_"+k),sampleFn&&k!=="kids"?null:k);if(sampleFn&&k!=="kids")G.cam.lastChip=k;return}
   var id=t.dataset.cpin;if(G.cam.hunt){if(id===G.cam.hunt){G.cam.hunt=null;haptic();camLight([id]);camSay(TXT("cam_found"))}else{G.cam.answer=TXT("cam_not_it");camLayer()}return}
-  var p=S.wallPois.filter(function(x){return x.id===id})[0];if(p&&p.card){G.cam.open=false;S.stop="half";renderPhone(false)}},true);
+  var p=S.wallPois.filter(function(x){return x.id===id})[0];if(p&&p.card){G.cam.open=false;S.stop="half";renderPhone(false);emit("card.opened","pin")}},true);
 ph.addEventListener("submit",function(e){var f=e.target.closest(".ca-form");if(!f)return;e.preventDefault();e.stopPropagation();var i=f.querySelector("#caq");if(i&&i.value.trim()){var q=i.value;i.value="";camAsk(q)}},true);
 /* a drag on the wall pans the camera (the Lab's stand-in for moving the phone) */
 var camDrag=null;ph.addEventListener("pointerdown",function(e){if(S.stop!=="closed"||S.view!=="card"||e.target.closest(".camask,.cpin,.mk,#ptool,button"))return;camDrag={x:e.clientX,cx:S.camX}},true);
 ph.addEventListener("pointermove",function(e){if(!camDrag)return;var g=camGeom(),q=ph.getBoundingClientRect().width/ph.offsetWidth,dx=(e.clientX-camDrag.x)/q,span=g.dw-g.W;if(span<=0)return;S.camX=Math.max(0,Math.min(1,camDrag.cx-dx/span));var c=document.getElementById("camera");if(c)c.style.backgroundPosition=(S.camX*100).toFixed(1)+"% 50%";camLayer()},true);
 ph.addEventListener("pointerup",function(){camDrag=null},true);
 
-/* Editor: 6 · Guide > Ask about the view */
+/* Editor: Guide tab > Ask about the view */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var at=d.querySelector('[data-fo="s7ask"]');if(!at)return d.innerHTML;
   at.insertAdjacentHTML("afterend",comp("s7cam","on the wall, with no card open: questions about the points in view",
     row("Ask about the view",pseg("camCfg.on",["true","false"],["Shown","Hidden"]),"A pill at the foot of the camera view: “Ask about Ribeira Palace”, the point nearest the middle (it has a ring and its name). No photo is sent: the model gets the points in view, each one’s place on the screen (top right, middle…), the middle one, the audience and the lens. Its tools light the points it names (the rest dimmed) and draw a numbered route. A tap on a point with a card opens it. In the Lab, a drag on the wall stands in for moving the phone.")+

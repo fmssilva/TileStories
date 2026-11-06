@@ -33,10 +33,10 @@ const NEW = 'Uma frase nova, ainda sem áudio, que nenhum conjunto gravou.';
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   if (process.env.MUTATE) { await R('sayOrder=function(text){return!!text&&text===G.answer?["live"]:[]}'); console.log('MUTATION: the device voice before the recorded one (tour lines skip the recorded and live voices)'); }
   // 1. the default: Recorded, then live, then this device; Speaking now in Narration, idle
-  const def = await R('[S.guideCfg.voice,(ed.querySelector(\'[data-set="@guideCfg.voice"][aria-pressed="true"]\')||{}).textContent,(ed.querySelector(".saynow")||{}).textContent]');
+  const def = await R('S.tab="guide";renderEditor();[S.guideCfg.voice,(ed.querySelector(\'[data-set="@guideCfg.voice"][aria-pressed="true"]\')||{}).textContent,(ed.querySelector(".saynow")||{}).textContent]');
   ok('The default voice is the recorded one: Voice = Recorded, then live, then this device', def[0] === 'recorded' && def[1] === 'Recorded, then live, then this device', def);
   ok('...Narration has Speaking now (nothing at the moment)', def[2] === 'Nothing at the moment.', def[2]);
-  await R('S.hints.on=false;S.previewBar=false;S.guideMute=false;S.introSeen=true;S.lang="pt";S.guideCfg.voiceSet="azure-sonia-raquel";S.guideCfg.panel="classic";S.view="card";S.stop="full";renderAll(false);renderEditor();' +
+  await R('S.hints.on=false;S.previewBar=false;S.guideMute=false;S.introSeen=true;S.lang="pt";S.guideCfg.voiceSet="azure-sonia-raquel";S.guideCfg.panel="classic";S.view="card";S.stop="full";renderAll(false);S.tab="guide";renderEditor();' +
     'window.SPK=0;var sp0=speechSynthesis.speak.bind(speechSynthesis);speechSynthesis.speak=function(u){SPK++;sp0(u)};window.NOW=function(){return(ed.querySelector(".saynow")||{}).textContent}');
   const atStep = id => R(`stopSpeech();G.paused=false;G.i=S.guideSteps.findIndex(function(s){return s.id==="${id}"});runStep()`);
   // 2. a recorded line plays its file

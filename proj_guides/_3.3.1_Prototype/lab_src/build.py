@@ -10,7 +10,8 @@ MODULES = ['src/core/open.js', 'src/core/assets.js', 'src/core/catalogues.js', '
            'src/editor/json.js', 'src/editor/card-tab.js', 'src/editor/demo.js', 'src/editor/global-tab.js',
            'src/editor/selftest-texts.js', 'src/phone/shell.js', 'src/card/motion.js', 'src/card/interactions.js',
            'src/card/sections.js', 'src/phone/sheet.js', 'src/phone/feedback.js', 'src/editor/selftest.js',
-           'src/editor/words-tab.js', 'src/editor/focus.js', 'src/card/chrome.js', 'src/card/gallery.js',
+           'src/editor/words-tab.js', 'src/editor/focus.js', 'src/editor/guide-tab.js',
+           'src/card/chrome.js', 'src/card/gallery.js',
            'src/card/contents.js', 'src/card/effects.js', 'src/guide/tour.js', 'src/editor/texts.js',
            'src/phone/preview-bar.js', 'src/phone/settings.js', 'src/card/terms.js', 'src/card/controls.js',
            'src/phone/preview-tools.js', 'src/phone/grabber.js', 'src/card/blocks.js', 'src/card/demo-card.js',
@@ -22,7 +23,9 @@ MODULES = ['src/core/open.js', 'src/core/assets.js', 'src/core/catalogues.js', '
            'src/guide/voice.js', 'src/guide/controls.js', 'src/guide/voice-test.js', 'src/world/camera-ask.js', 'src/mascot/azu-gl.js',
            'src/world/wall.js', 'src/world/guide-button.js', 'src/agent/agent.js', 'src/agent/tools.js', 'src/agent/console.js',
            'src/agent/scenes.js', 'src/mascot/azu3d.js', 'src/mascot/models.js', 'src/mascot/tile-styles.js',
-           'src/mascot/size.js', 'src/world/markers.js', 'src/guide/guide-scenes.js', 'src/agent/live-voice.js', 'src/mascot/mouth.js', 'src/core/boot.js']
+           'src/mascot/size.js', 'src/world/markers.js', 'src/guide/guide-scenes.js', 'src/agent/live-voice.js', 'src/mascot/mouth.js',
+           'src/guidance/catalog.js', 'src/guidance/scheduler.js', 'src/guidance/service.js', 'src/guidance/present.js',
+           'src/guidance/editor.js', 'src/guidance/scenes.js', 'src/core/boot.js']
 # the cascade depends on this order: a new style goes at the end, or beside the rule it overrides
 STYLES = ['src/core/base.css', 'src/card/card-base.css', 'src/phone/sheet.css', 'src/guide/tour.css', 'src/editor/texts.css',
           'src/card/controls.css', 'src/card/blocks.css', 'src/card/elements.css', 'src/editor/marker-tab.css', 'src/card/hero.css',
@@ -30,7 +33,8 @@ STYLES = ['src/core/base.css', 'src/card/card-base.css', 'src/phone/sheet.css', 
           'src/mascot/azu2d.css', 'src/audiences/audiences.css', 'src/audiences/lenses.css', 'src/guide/person.css',
           'src/guide/dock.css', 'src/guide/controls.css', 'src/guide/voice-test.css', 'src/world/camera-ask.css', 'src/mascot/azu-gl.css',
           'src/world/guide-button.css', 'src/agent/agent.css', 'src/agent/scenes.css', 'src/world/markers.css',
-          'src/mascot/azu3d.css', 'src/mascot/models.css', 'src/mascot/tile-styles.css', 'src/mascot/size.css', 'src/editor/demo.css']
+          'src/mascot/azu3d.css', 'src/mascot/models.css', 'src/mascot/tile-styles.css', 'src/mascot/size.css', 'src/editor/demo.css',
+          'src/guidance/present.css', 'src/guidance/editor.css']
 
 
 def rd(*p):

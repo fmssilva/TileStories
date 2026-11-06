@@ -81,7 +81,7 @@ ph.addEventListener("pointerup",function(e){if(!azTarget(e)||!azDown){azDown=nul
   if(held>=500){azFall();return}G.taps=(G.taps||[]).filter(function(t){return now-t<1200}).concat([now]);if(G.taps.length>=3){G.taps=[];azTickle();return}azuTapDo(azuTapAct())},true);
 ph.addEventListener("click",function(e){var p=e.target.closest("[data-azprop]");if(p){e.stopPropagation();azMomentDo();return}if(e.target.closest(".mascot,.azfab"))e.stopPropagation()},true);
 
-/* Editor: 6 · Guide > Mascot gets its liveliness, mouth, moods, moments and a Try per play; Specific Marker > Guide script gets Solemn and each step's mood */
+/* Editor: Guide tab > Mascot gets its liveliness, mouth, moods, moments and a Try per play; Specific Marker > Guide script gets Solemn and each step's mood */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   addRows(d,"s7mascot",row("Tap on Azu",pseg("guideCfg.azuTap",["play","menu","point"],["Play","Opens the menu","Points to the ✦ button"]),"Play: a tap on Azu (the guide's, or the one beside the guide's button) pokes it; it never opens the menu, so one gesture means one thing. Opens the menu: as before, a tap on Azu opens the ✦'s menu (during a tour it shows or hides the dock). Points to the ✦ button: Azu points at the ✦ and says “Need anything? Tap ✦”. Three quick taps and a long press always play. With Guide button = Azu only, Azu is the button and a tap opens the menu.")+
     row("Liveliness",pseg("guideCfg.life",["lively","calm"],["Lively","Calm"]),"Lively: Azu hops, reacts to every poke (6 reactions, never one of the last 3), sometimes tells a joke, and may stop once for a sip of water or a cookie. Calm: blinks, talks and points; a poke gets a wink; nothing unprompted.")+

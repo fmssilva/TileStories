@@ -1,5 +1,5 @@
 /* v8p: Ask about the view. Pins on the wall's points (Unity: the wall's markers, placed by WorldToScreenPoint); the middle one has a ring and its name */
-.camopen .wall .mk,.camopen .walltip{display:none}
+.camopen .wall .mk{display:none}
 .campins{position:absolute;inset:0;z-index:6;pointer-events:none}
 .cpin{position:absolute;transform:translate(-50%,-50%);appearance:none;border:0;background:none;padding:0;display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:auto;cursor:pointer;transition:opacity .3s}
 .cpin i{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#fff;color:#1F45B5;font:800 12px/1 var(--body);font-style:normal;box-shadow:0 0 0 3px rgba(255,255,255,.45),0 4px 12px rgba(0,0,0,.4)}

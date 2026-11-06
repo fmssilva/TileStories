@@ -57,7 +57,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await go(); await reach(0); await R('stopTour()'); await p.waitForTimeout(100);
   ok('Stop: no light, the picture back (no zoom, its scroll effect back)', await R('!ph.querySelector(".gspot")&&!scr.querySelector("img.gzimg")&&!scr.querySelector("img[data-gz]")'));
   // 9. the Editor: Focus after Captions; the Guide script's spots, drawn with the mouse
-  ok('Editor: Focus after Captions, its four rows and a Try', await R('var c=ed.querySelector(\'[data-fo="s7cap"]\'),f=ed.querySelector(\'[data-fo="s7focus"]\');!!f&&c.nextElementSibling===f&&/Spotlight/.test(f.textContent)&&/Dim the rest/.test(f.textContent)&&/Slow zoom/.test(f.textContent)&&/Azu points/.test(f.textContent)&&!!f.querySelector("[data-fctry]")'));
+  ok('Editor: Focus after Captions, its four rows and a Try', await R('S.tab="guide";renderEditor();var c=ed.querySelector(\'[data-fo="s7cap"]\'),f=ed.querySelector(\'[data-fo="s7focus"]\');!!f&&c.nextElementSibling===f&&/Spotlight/.test(f.textContent)&&/Dim the rest/.test(f.textContent)&&/Slow zoom/.test(f.textContent)&&/Azu points/.test(f.textContent)&&!!f.querySelector("[data-fctry]")'));
   await R('S.tab="marker";S.sel.gstep="g3";renderEditor()'); await p.waitForTimeout(300);
   ok('Guide script: the step names three spots, each on its picture', await R('ed.querySelectorAll("[data-cuepic]").length===3&&ed.querySelectorAll("[data-cuepic] img").length===3'));
   const pic = p.locator('[data-cuepic="g3|0"]'); await pic.scrollIntoViewIfNeeded(); const bx = await pic.boundingBox();

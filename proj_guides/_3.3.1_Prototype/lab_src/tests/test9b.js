@@ -22,7 +22,7 @@ const TEXT = 'O palácio tinha uma ópera, inaugurada em março de 1755.';
     while (Date.now() - t0 < ms) { const s = await R('var m=ph.querySelector(".mascot .mouth"),a=G.recAudio,tr=MT.track,e=null;if(a&&tr){var i=Math.min(tr.f.length-1,Math.floor(a.currentTime*tr.fps));e=Math.min(1,tr.f[i][0]*1.1)}[mouthNow().kind,AzuGL.get("talk"),m&&m.getAttribute("d"),e,window.__end]');
       kinds.add(s[0]); talks.add(Math.round(s[1] * 100)); if (s[2]) d2.add(s[2]); if (s[3] !== null) { n++; if (Math.abs(s[3] - s[1]) < .2) near++; } if (s[4]) { ended = true; break; } await W(40); }
     return { kinds: [...kinds], talks: talks.size, shapes2d: d2.size, near, n, ended }; };
-  await R('renderEditor();ed.querySelector(\'[data-fo="s7mascot"]\').open=true');
+  await R('S.tab="guide";renderEditor();ed.querySelector(\'[data-fo="s7mascot"]\').open=true');
   ok('Editor: Mascot says how the mouth moves', /Azure's facial curves: 60 frames a second/.test(await R('(rowEl(ed,"s7mascot","How it moves")||{}).textContent||""')));
   // 1. a recorded Azure line: its curves, on the audio's clock, on the tile of light
   await setup('light', 'azure-sonia-raquel');

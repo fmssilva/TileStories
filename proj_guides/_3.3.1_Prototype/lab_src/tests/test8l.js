@@ -70,8 +70,8 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await p.locator('#ptool [data-pt="aud"]').click(); await p.waitForTimeout(300);
   ok('Preview bar: one tap previews as the next audience', await R('S.vis.aud') === 'family');
   await R('S.vis.aud="explorer";renderAll(false)');
-  // 8. the Editor: 7 · Audiences; Specific Marker > 4 · Audiences with its coverage, an override's editor, Draft with AI and its flags
-  ok('Editor: 7 · Audiences after the Guide, with Preview as, Who\'s exploring (its words), Audience in Settings, Looks per audience', await R('var s=ed.querySelector(\'[data-fo="s8"]\');!!s&&ed.querySelector(\'[data-fo="s7"]\').nextElementSibling===s&&!!s.querySelector(\'[data-fo="s8onb"]\')&&!!s.querySelector(\'[data-fo="s8look"]\')&&/Preview as/.test(s.textContent)&&(TXO.s8onb||[]).length===9&&(TXO.s8set||[]).length===5'));
+  // 8. the Editor: 6 · Audiences; Specific Marker > 4 · Audiences with its coverage, an override's editor, Draft with AI and its flags
+  ok('Editor: 6 · Audiences after Card Controls (the Guide has its own tab), with Preview as, Who\'s exploring (its words), Audience in Settings, Looks per audience', await R('S.tab="card";renderEditor();var s=ed.querySelector(\'[data-fo="s8"]\');!!s&&!ed.querySelector(\'[data-fo="s7"]\')&&ed.querySelector(\'[data-fo="s5"]\').nextElementSibling===s&&!!s.querySelector(\'[data-fo="s8onb"]\')&&!!s.querySelector(\'[data-fo="s8look"]\')&&/Preview as/.test(s.textContent)&&(TXO.s8onb||[]).length===9&&(TXO.s8set||[]).length===5'));
   await R('S.tab="marker";renderEditor()');
   const cov = await R('var m=ed.querySelector(\'[data-fo="m4"]\');m?[m.querySelectorAll(".covc.over").length,m.querySelectorAll(".covc.draft").length,m.querySelectorAll(".covc.stale").length,m.querySelectorAll(".covc.hidden").length]:null');
   ok('Coverage: own words, an AI draft to review, a stale one, a hidden block', cov && cov[0] >= 4 && cov[1] === 1 && cov[2] === 1 && cov[3] === 1, cov);

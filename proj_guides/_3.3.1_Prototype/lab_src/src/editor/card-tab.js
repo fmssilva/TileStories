@@ -1,5 +1,8 @@
 /* The Detail Card tab (edCard, its point edCard.html), the @path options and the steps bar. */
-function edCard(){var h="";
+/* the Detail Card's document (edCardDoc): every section its modules make or fill through edCard.html, the guide's too; the tab shows it
+   through edCard.tab, where a section shown by another tab is taken out (editor/guide-tab.js takes the Guide's to the Guide tab) */
+function edCard(){return pipe("edCard.tab",edCardDoc())}
+function edCardDoc(){var h="";
   h+='<div class="fo" style="padding:6px 8px"><div class="row"><label>Foldouts</label><div>'+seg("ui.single",["false","true"],["Many open","One at a time"],String(S.ui.single))+'</div>'+help("Editor preference, not saved to the wall.")+'</div>'+row("Open to level",seg("ui.level",["0","1","2","3"],["Closed","1","2","3"],String(S.ui.level)),"How deep the foldouts open.")+
    '<div class="filters"><input class="u" data-q="1" placeholder="Find a setting or part..." value="'+esc(S.ui.q)+'">'+["All"].concat(CATS).map(function(c){return'<button class="chip" type="button" data-cat="'+c+'" aria-pressed="'+(S.ui.cat===c)+'">'+c+'</button>'}).join("")+'</div></div>';
   /* 0. Preview & Test */

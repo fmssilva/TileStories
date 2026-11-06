@@ -1,7 +1,7 @@
 /* The guide's button (✦) and Azu beside it, the ✦'s menu, Azu's remarks on the test wall. Unity: a UI Toolkit Button and a
    VisualElement in the card's root, absolutely placed; the ring is drawn by generateVisualContent (Painter2D Arc + Stroke), the label
    folds by a USS transition on width and opacity. Every word on a solid colour (no backdrop blur); the drop shadows are depth only. */
-.testwall .wall .mk,.testwall .walltip{display:none}
+.testwall .wall .mk{display:none}
 .gbtn-wrap{position:absolute;left:12px;bottom:92px;z-index:12;display:flex;align-items:flex-end;gap:8px;pointer-events:none}
 .gbtn-wrap>*{pointer-events:auto}
 .gbtn-wrap.side-right{left:auto;right:12px;flex-direction:row-reverse}

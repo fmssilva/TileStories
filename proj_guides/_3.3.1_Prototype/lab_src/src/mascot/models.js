@@ -17,7 +17,7 @@ function az3dModel(){var m=az3dModelOf(S.guideCfg.azuModel);return{id:m.id,name:
 /* the model changes nothing the phone's picture can show until the 3D model is drawn: a behaviour for the self-test */
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(guideCfg\\.azuModel|"));
 
-/* Editor: 6 · Guide > Azu > Mascot source = 3D model: the Model picker, one card per model with its picture */
+/* Editor: Guide tab > Azu > Mascot source = 3D model: the Model picker, one card per model with its picture */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   if(az3dOn()){var r=rowEl(d,"s7mascot","Mascot source");
     if(r)r.insertAdjacentHTML("afterend",row("Model",'<div class="thumbs az3dpick">'+AZ3D_MODELS.map(function(m){return'<button class="sc" type="button" data-set="@guideCfg.azuModel" data-v="'+m.id+'" aria-pressed="'+(S.guideCfg.azuModel===m.id)+'" title="'+esc(m.about)+'"><img src="'+m.thumb+'" alt="" width="96" height="96"><span class="nm"><span>'+esc(m.name)+'</span></span></button>'}).join("")+'</div>',

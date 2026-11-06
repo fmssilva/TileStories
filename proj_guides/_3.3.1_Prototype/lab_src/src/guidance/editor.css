@@ -1,0 +1,15 @@
+/* The Guide tab and its Guidance rows (the Editor, IMGUI in Unity): the tab's colour; an item's row in its foldout's summary: On, its name,
+   its importance dots, how often, ▸ Show now; the read-back and the scheduler's lines. */
+.utab.gd{background:#7A5A12}
+.gdi{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;flex:1 1 auto;min-width:0}
+.fo[data-fo^="gd:i:"] > summary > .sp{display:none}
+.gdi .gdon{width:78px;flex:none}.gdi .gdon .seg{flex-wrap:nowrap}
+.gdi b{font-weight:600}
+.gddots{display:inline-flex;gap:2px}
+.gddots button{appearance:none;width:12px;height:12px;padding:0;border-radius:50%;border:1px solid #9AA0A6;background:transparent;cursor:pointer}
+.gddots button.on{background:#E2C36B;border-color:#E2C36B}
+.gdhow{font-weight:400;color:var(--u-dim);font-size:11.5px}
+.gdshow{margin-left:auto}
+.note.gdrb{color:#E2E2E2;border-left:2px solid #7A5A12;padding-left:8px}
+.note.gdwhy{color:#CFE3FF}
+.note.gdfix{font-size:11px}

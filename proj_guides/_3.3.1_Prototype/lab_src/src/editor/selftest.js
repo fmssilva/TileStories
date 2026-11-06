@@ -17,7 +17,7 @@ function modelSig(){var cx={};emitLatestFirst("modelSig.before",cx);var keep=S.v
   return pipe("modelSig.sig",out+JSON.stringify({loc:S.ctl.locate,sticky:S.ctl.sticky,bar:[S.ctl.bar.on,S.ctl.bar.pos],openAt:stopTop(S.cardCfg.openAt),half:S.cardCfg.halfMax,band:S.cardCfg.topBand,top:S.ctl.top,dark:S.dark,lang:S.lang,peek:S.cardCfg.peekNext,on:S.cardCfg.enabled}),cx)}
 function selfTest(){var res=[],seen={};
   S.ui.level=9;S.op={};S.ui.single=false;
-  ["card","marker","words","global"].forEach(function(tab){S.tab=tab;renderEditor();var base=JSON.stringify(S);noDraw=true;
+  ["card","guide","marker","words","global"].forEach(function(tab){S.tab=tab;renderEditor();var base=JSON.stringify(S);noDraw=true;
     var ctrls=[];ed.querySelectorAll("[data-set]").forEach(function(b){ctrls.push({el:b,kind:"set",key:b.dataset.set,v:b.dataset.v})});
     ed.querySelectorAll("select[data-sel]").forEach(function(x){Array.prototype.forEach.call(x.options,function(o){ctrls.push({el:x,kind:"sel",key:x.dataset.sel,v:o.value})})});
     ed.querySelectorAll('input[type=range][data-num]').forEach(function(r){ctrls.push({el:r,kind:"num",key:r.dataset.num,v:r.min});ctrls.push({el:r,kind:"num",key:r.dataset.num,v:r.max})});

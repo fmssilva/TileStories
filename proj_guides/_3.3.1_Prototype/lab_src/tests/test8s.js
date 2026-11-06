@@ -57,7 +57,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('Play from a card at Half: the card rises to Full (on the screen, not only in its state)', await R('G.on&&S.stop==="full"&&scr.getBoundingClientRect().top-ph.getBoundingClientRect().top<40'), await R('Math.round(scr.getBoundingClientRect().top-ph.getBoundingClientRect().top)'));
   await R('stopTour()');
   // 6. the Editor
-  ok('Editor: Ask about the view has Azu\'s comments, their pace and the wall; the button is in Guide button', await R('var f=ed.querySelector(\'[data-fo="s7cam"]\');!!f&&["Azu comments","Between comments","Wall (the Lab)"].every(function(t){return f.textContent.indexOf(t)>=0})&&!!rowEl(ed,"s7gbtn","Guide button")'));
+  ok('Editor: Ask about the view has Azu\'s comments, their pace and the wall; the button is in Guide button', await R('S.tab="guide";renderEditor();var f=ed.querySelector(\'[data-fo="s7cam"]\');!!f&&["Azu comments","Between comments","Wall (the Lab)"].every(function(t){return f.textContent.indexOf(t)>=0})&&!!rowEl(ed,"s7gbtn","Guide button")'));
   ok('no page errors', errs.length === 0, errs.slice(0, 3));
   console.log(fails ? `${fails} FAILED` : 'ALL PASS');
   await b.close();

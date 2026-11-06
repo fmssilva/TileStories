@@ -12,7 +12,7 @@ const GLB = path.join(__dirname, '..', '..', '..', 'mascote', '3d', 'azu_tile.gl
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   await R('S.guideCfg.voice="device";S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;sampleFn=null;S.view="card";S.stop="half";renderAll(false)');
   // 1. the Editor: Mascot source with 3D model (GLB); choosing it loads the model
-  await R('renderEditor();ed.querySelector(\'[data-fo="s7mascot"]\').open=true');
+  await R('S.tab="guide";renderEditor();ed.querySelector(\'[data-fo="s7mascot"]\').open=true');
   const src = await R('Array.from(ed.querySelectorAll(\'[data-set="@guideCfg.azuStyle"]\')).map(function(b){return b.textContent})');
   ok('Editor: Mascot source offers Tile of light, Tile (2.5D) and 3D model (GLB)', src.join('|') === 'Tile of light|Tile (2.5D)|3D model (GLB)', src);
   await p.locator('[data-set="@guideCfg.azuStyle"][data-v="glb"]').click();
@@ -74,7 +74,7 @@ const GLB = path.join(__dirname, '..', '..', '..', 'mascote', '3d', 'azu_tile.gl
   await p.close();
   await p2.goto(url, { waitUntil: 'domcontentloaded', timeout: 120000 }); await p2.waitForFunction(() => window.LAB, null, { timeout: 90000 });
   const R2 = s => p2.evaluate(x => LAB.run(x), s);
-  await R2('S.hints.on=false;S.guideMute=true;S.introSeen=true;S.view="card";S.stop="half";S.guideCfg.azuStyle="glb";renderAll(false);ed.querySelector(\'[data-fo="s7mascot"]\')&&(ed.querySelector(\'[data-fo="s7mascot"]\').open=true);startTour()');
+  await R2('S.hints.on=false;S.guideMute=true;S.introSeen=true;S.view="card";S.stop="half";S.guideCfg.azuStyle="glb";renderAll(false);S.tab="guide";renderEditor();ed.querySelector(\'[data-fo="s7mascot"]\')&&(ed.querySelector(\'[data-fo="s7mascot"]\').open=true);startTour()');
   await p2.waitForFunction(() => LAB.run('Azu3D.state().failed'), null, { timeout: 30000 }).catch(() => {});
   const off = await R2('[Azu3D.state().failed,!!ph.querySelector(".mascot"),!ph.querySelector(".az3d"),/Could not load three\\.js/.test(ed.textContent)]');
   ok('No network: the Editor says the model could not load, the guide keeps its Azu', off.every(Boolean), off);

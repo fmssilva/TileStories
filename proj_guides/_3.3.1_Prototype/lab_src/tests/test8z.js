@@ -10,7 +10,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const R = src => p.evaluate(s => LAB.run(s), src); const W = ms => p.waitForTimeout(ms);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   // round 7: a change to an Editor row shows its demo on the phone; this test changes rows mid-scene, so it keeps the phone as it set it
-  await R('S.ui.rowDemo=false;S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;sampleFn=null;S.view="card";S.stop="half";renderAll(false);renderEditor();ed.querySelector(\'[data-fo="s7mascot"]\').open=true;startTour();pauseTour()'); await W(800);
+  await R('S.ui.rowDemo=false;S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;sampleFn=null;S.view="card";S.stop="half";renderAll(false);S.tab="guide";renderEditor();ed.querySelector(\'[data-fo="s7mascot"]\').open=true;startTour();pauseTour()'); await W(800);
   // 1. Size: the row, Medium by default; each choice resizes the guide's Azu (the drawing and the shader's canvas)
   const opts = await R('Array.from(ed.querySelectorAll(\'[data-set="@guideCfg.azuSize"]\')).map(function(b){return b.textContent+(b.getAttribute("aria-pressed")==="true"?"*":"")})');
   ok('Mascot: Size offers Small, Medium (chosen) and Large', opts.join('|') === 'Small|Medium*|Large', opts);
@@ -19,7 +19,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('...Small 80 %, Medium 56 px wide, Large 135 % (the drawing and the canvas alike)', dims.m[0] === 56 && Math.abs(dims.s[0] - 56 * .8) <= 1 && Math.abs(dims.l[0] - 56 * 1.35) <= 1 && Math.abs(dims.l[2] - 64 * 1.35) <= 1, dims);
   await p.locator('[data-set="@guideCfg.azuSize"][data-v="m"]').click(); await W(300);
   // 2. Character per audience: a row in Looks per audience, "Same as the guide" for each by default
-  await R('ed.querySelector(\'[data-fo="s8look"]\')&&(ed.querySelector(\'[data-fo="s8look"]\').open=true)');
+  await R('S.tab="card";renderEditor();ed.querySelector(\'[data-fo="s8look"]\')&&(ed.querySelector(\'[data-fo="s8look"]\').open=true)');
   const sels = await R('Array.from(ed.querySelectorAll(\'[data-sel^="@aud.looks."][data-sel$=".char"]\')).map(function(s){return s.dataset.sel+"="+s.options[s.selectedIndex].text+"/"+s.options.length})');
   ok('Looks per audience: a Character for Family, Explorer and Expert, each "Same as the guide", with every source and model', sels.length === 3 && sels.every(s => /=Same as the guide\/8$/.test(s)), sels);
   // Family = the mouse; previewing as Family turns the guide's Azu into the 3D mouse; Explorer keeps the guide's own

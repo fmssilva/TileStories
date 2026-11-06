@@ -12,7 +12,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;S.agentCfg.voiceOut=false;S.camCfg.comments=false;S.view="card";S.stop="full";renderAll(false)');
   await W(300);
   // 1. what answers here: nothing live in the headless Lab (no Claude, no key), so offline
-  ok('Nothing live here: no model, the Editor says offline answers', await R('agProvider()===null&&!AG.fn&&/nothing live here/.test(ed.textContent)'));
+  ok('Nothing live here: no model, the Editor says offline answers', await R('S.tab="guide";renderEditor();agProvider()===null&&!AG.fn&&/nothing live here/.test(ed.textContent)'));
   // 2. the test double becomes the page's model through the same adapter
   await R('AG.mock={text:"ok"};S.agentCfg.provider="mock";applyProvider();renderEditor()');
   ok('A model this page can reach becomes the page\'s model, behind the adapter', await R('sampleFn===AG.fn&&agLive()&&/Test double/.test(ed.textContent)'));
