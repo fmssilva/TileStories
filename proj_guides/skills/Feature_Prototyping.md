@@ -68,8 +68,13 @@
         a function.
       - **No silent fallback:** when one source stands in for another (a recorded line missing, so the device voice speaks),
         the Editor shows it at that moment.
+      - **Every feature is in the Editor:** each thing the visitor can see or do (a button, a gesture, a notice, a behaviour)
+        has its place in the Editor, in the section of the part it belongs to: at least an On / Off row, and options where a
+        choice is useful. A feature with no row is not finished. The developer must be able to read the Editor and know every
+        feature the app has.
       - **Each Editor row names its demo:** the view, the part it changes, the state, and an action (play a sample, open the
-        state). A change shows that demo; the self-test fails a row without one.
+        state). A change, or a press on the row's name, shows that demo at once, so its effect is seen. The self-test fails a
+        row without one, and the tests press each row and check that its part is shown and changed.
       - **The build only joins the modules and embeds the assets.** It never rewrites code. It refuses a wrapper, a second
         declaration or a default set twice.
    6. **Audit against the code before the final round.** Walk every Editor row, config value and runtime UI element the code
