@@ -15,9 +15,15 @@ var BEHAVIOUR=/^@?(inter\.|m\.page|blockDefs\.[^.]+\.chrome|cardCfg\.(tapOutside
 /* the phone's signature for the self-test: each feature's piece is made before the older ones (latest first) and appended after them */
 function modelSig(){var cx={};emitLatestFirst("modelSig.before",cx);var keep=S.view,out="";["card","demo","story","gallery"].forEach(function(v){S.view=v;out+=(v==="card"?cardScreen()+navbar():v==="demo"?demoScreen():v==="story"?storyScreen():galleryScreen())+"#"});S.view=keep;
   return pipe("modelSig.sig",out+JSON.stringify({loc:S.ctl.locate,sticky:S.ctl.sticky,bar:[S.ctl.bar.on,S.ctl.bar.pos],openAt:stopTop(S.cardCfg.openAt),half:S.cardCfg.halfMax,band:S.cardCfg.topBand,top:S.ctl.top,dark:S.dark,lang:S.lang,peek:S.cardCfg.peekNext,on:S.cardCfg.enabled}),cx)}
-function selfTest(){var res=[],seen={};
+/* the page opened as the self-test (#selftest, #selftest=<tab>,<tab>), and the tabs it walks (null: all) */
+function isSelfTest(){return location.hash==="#selftest"||location.hash.indexOf("#selftest=")===0}
+function selfTestTabs(){var m=location.hash.match(/^#selftest=(.+)$/);return m?decodeURIComponent(m[1]).split(","):null}
+var ST_TABS=["card","guide","marker","words","global"],stWalk=null;
+/* a tab the self-test walks this run (every tab when none was named) */
+function stWalks(tab){return!stWalk||stWalk.indexOf(tab)>=0}
+function selfTest(tabs){var res=[],seen={};stWalk=tabs||null;
   S.ui.level=9;S.op={};S.ui.single=false;
-  ["card","guide","marker","words","global"].forEach(function(tab){S.tab=tab;renderEditor();var base=JSON.stringify(S);noDraw=true;
+  ST_TABS.filter(stWalks).forEach(function(tab){S.tab=tab;renderEditor();var base=JSON.stringify(S);noDraw=true;
     var ctrls=[];ed.querySelectorAll("[data-set]").forEach(function(b){ctrls.push({el:b,kind:"set",key:b.dataset.set,v:b.dataset.v})});
     ed.querySelectorAll("select[data-sel]").forEach(function(x){Array.prototype.forEach.call(x.options,function(o){ctrls.push({el:x,kind:"sel",key:x.dataset.sel,v:o.value})})});
     ed.querySelectorAll('input[type=range][data-num]').forEach(function(r){ctrls.push({el:r,kind:"num",key:r.dataset.num,v:r.min});ctrls.push({el:r,kind:"num",key:r.dataset.num,v:r.max})});

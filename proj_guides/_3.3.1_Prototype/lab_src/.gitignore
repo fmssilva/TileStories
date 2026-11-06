@@ -1,7 +1,7 @@
 block-components-lab.html
 edgeprof*/
 caps*/
-dom.txt
-err.txt
-selftest.json
+dom*.txt
+err*.txt
+selftest*.json
 tests_result*.json

@@ -24,7 +24,7 @@ function selfTestWords(){emitLatestFirst("selfTestWords.before");var res=[];
       res.push({tab:tab,key:a.key,v:a.v||"",label:lab,result:r})});
     noDraw=false});
   S.ownAll=false;S.ui.txf="all";return res}
-on("selfTest.res",function(a){return a.concat(selfTestWords())});
+on("selfTest.res",function(a){return stWalks("words")?a.concat(selfTestWords()):a});
 on("showSelfTest.after",function(res){var box=document.getElementById("selftest"),els=res.filter(function(r){return/^elsewhere/.test(r.result)}).length,
   cnt=function(re){var x=res.filter(function(r){return re.test(r.key)});return[x.length,x.filter(function(r){return r.result==="changes the phone"}).length]},tx=cnt(/^tx:/),lc=cnt(/^loc:/),dm=cnt(/^demo:/);
   box.insertAdjacentHTML("beforeend",'<p>Texts on their parts: <b>'+tx[1]+'</b> of '+tx[0]+' fields change the phone; the rest belong to parts the Lab does not draw (<b>'+els+'</b> elsewhere) or show during the tour. Content in the Texts check: <b>'+lc[1]+'</b> of '+lc[0]+'. Demo content and term pages: <b>'+dm[1]+'</b> of '+dm[0]+'.</p>');

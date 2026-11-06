@@ -35,7 +35,7 @@ var Azu3D=(function(){var T=null,GL=null,cv=null,R=null,scene=null,cam=null,mode
     if(now>st.nextBlink){st.blinkT=now;st.nextBlink=now+2500+Math.random()*2500}morph("Blink",!still&&now-st.blinkT<140?1:0);
     R.render(scene,cam);st.frames++;raf=requestAnimationFrame(frame)}
   return{
-    load:function(){if(st.loading)return st.loading;if(location.hash==="#selftest"){st.failed=true;st.err="not loaded in the self-test";return st.loading=Promise.resolve()}var m=az3dModel();st.loading=lib().then(function(){view();return get(m)})
+    load:function(){if(st.loading)return st.loading;if(isSelfTest()){st.failed=true;st.err="not loaded in the self-test";return st.loading=Promise.resolve()}var m=az3dModel();st.loading=lib().then(function(){view();return get(m)})
       .then(function(g){use(g,m.name);st.model=m.id;st.ready=true;az3dPlace();if(ed.querySelector('[data-fo="s7mascot"]'))renderEditor()}).catch(function(e){st.failed=true;st.err=String(e&&e.message||e);console.warn("Azu3D",e);if(ed.querySelector('[data-fo="s7mascot"]'))renderEditor()});return st.loading},
     /* Import: a GLB from the developer's computer, checked against the contract; it replaces the built-in one when it has clips */
     importFile:function(file){return lib().then(function(){if(!cv)view();return file.arrayBuffer()}).then(parse).then(function(g){var info=check(g);if(g.animations.length){use(g,file.name);st.model=az3dModel().id;st.ready=true;az3dPlace()}st.lastImport={name:file.name,info:info};return info})

@@ -10,12 +10,26 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
 - **Build:** `python build.py` writes `block-components-lab.html` here (not committed). Copy it to `../Block Components Lab.html` (the
   record copy) and publish it to https://claude.ai/artifact/KDs2Ko1dYdBWYwZVhjvuEp.
 - **Prove it:** `powershell -ExecutionPolicy Bypass -File tests/runtest8.ps1` opens the page headless with `#selftest`: every option,
-  text and demo field must change the phone or be classed behaviour (it prints `bad=0` when all is well; 30-60 minutes, so run
-  it alone: other headless tests beside it slow it past its limit; `-minutes 120` raises the limit, 90 by default). `tests/shots8b.ps1` captures the demo card at each kind
-  (`#dcshot=<kind>`); `#pshot=<stop>|<scroll>` opens the card at a stop and a scroll. `node run_tests.js` runs every test in
-  `tests/` (not the `*_live` ones) and lists the failed checks; `node run_tests.js --only=test8i,test9b` runs some. Each test
-  drives the page with real taps, drags and keys (Playwright with the installed Edge; `#probe` opens a handle on the page's
-  state) and prints PASS / FAIL per check.
+  text and demo field must change the phone or be classed behaviour, and every row of the Guide tab and 6 · Audiences has its
+  demo (it prints `bad=0` when all is well). It walks the tabs as three walks side by side and sums them (about 3 minutes);
+  `-tabs guide` walks one tab (`#selftest=guide`; add `words` for the texts); `-single` is the old one walk, many times slower.
+  `tests/shots8b.ps1` captures the demo card at each kind (`#dcshot=<kind>`); `#pshot=<stop>|<scroll>` opens the card at a
+  stop and a scroll. `node run_tests.js` runs every test in `tests/` (not the `*_live` ones) and lists the failed checks:
+  `--only=test8i,test9b` runs some, `--changed` the block's own (below); one file at a time (two at once slow each other past
+  their timings), and a file that crashed at its start runs once more. Each test drives the page with real taps, drags and keys (Playwright with the installed Edge;
+  `#probe` opens a handle on the page's state) and prints PASS / FAIL per check. Never run the self-test and `run_tests.js`
+  together: each slows the other past its limits.
+- **Levels: what a block of work runs.** A block is one change the developer can look at (a feature, a fix, a family of rows).
+  - **Level 1, every block (a few minutes):** `python build.py`; `node run_tests.js --changed` (the test files this
+    map names for every changed module, and every changed test); `tests/runtest8.ps1 -tabs <the tab the block touched>`.
+    When `--changed` prints SHARED GROUND (a module this map names no test for: `core/`, `editor/shell.js`, `editor/card-tab.js`…,
+    or the build and test tools) or NOT IN THE MAP, the block closes on level 2.
+  - **Level 2, every 3rd-4th block, a block on shared ground, and before a publish or a merge into `master`:**
+    `tests/runtest8.ps1` (every tab, about 3 min), then `node run_tests.js` (every file, about 28 min).
+  - **Level 3, every 10-12 blocks and before a hand-off to Unity:** level 2, then every mutation the tests
+    name (`MUTATE=1 node tests/<file>.js`: the named checks turn red), and the results replace `tests_baseline.json`.
+  - A wider level confirms, never discovers: green on 1 before 2, on 2 before 3. A round's report names the level it closed on
+    and the blocks since the last level 2 and 3.
 - **The tests, by feature:**
   - *The sheet and the card's chrome* (`phone/sheet`, `phone/grabber`, `phone/redraw`, `card/chrome-pinned`, `card/locate`):
     `tests/test8f.js` checks the sheet's gestures, the pinned close and settings, the demo card's X, and that a change moves no

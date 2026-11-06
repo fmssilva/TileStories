@@ -1,6 +1,7 @@
 /* Starts the page (the #hash routes) and closes the shared scope. */
-if(location.hash==="#selftest"){var r0=selfTest();showSelfTest(r0)}
-S.view="card";S.tab="card";if(location.hash!=="#selftest")renderAll(false);
+/* #selftest walks every tab; #selftest=guide,words only those (the texts come with "words") */
+if(isSelfTest()){var r0=selfTest(selfTestTabs());showSelfTest(r0)}
+S.view="card";S.tab="card";if(!isSelfTest())renderAll(false);
 if(location.hash==="#guide"){S.stop="full";renderAll(false);startTour();G.i=4;runStep()}
 if(location.hash==="#words"){S.tab="words";S.sel.term="t1";renderEditor();S.view="story";renderPhone(false)}
 if(location.hash==="#texts"){["s0","s2","s3","s4","s7"].forEach(function(id){S.op[id]=false});S.op["tp:s1b:Pages layout › chevrons"]=true;S.op["tp:s5page:Previous / Next buttons"]=true;S.op["tp:s5page:Back button"]=true;goOwner("s1b",true);goOwner("s5page",true);show("card")}

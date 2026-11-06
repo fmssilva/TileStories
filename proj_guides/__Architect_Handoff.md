@@ -11,17 +11,13 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     (`lab_src/src/<area>/<module>.js`), with no wrappers: `lab_src/PROTOTYPE_STRUCTURE.md` says where each feature lives and
     where a change goes. The build only joins files (`build.py`) and refuses wrappers, re-assignments of functions, second
     declarations, defaults set twice and version-named modules (`check_structure.js`, `structure_baseline.json` at 0).
-  - **Proof of the Lab:** the self-test (`tests/runtest8.ps1`, alone) gives `ok=1180 behaviour=634 bad=0` in 31 min (a run the
-    same day passed the 60-minute limit with nothing else running: `-minutes` now sets the limit, 90 by default);
-    `node run_tests.js` runs the 26 test files (643 checks; `tests_baseline.json`, about 28 min). A start crash
-    "page.waitForFunction: Timeout" under load is known flakiness: rerun that file alone.
-  - **Test levels for the Lab: PROPOSED, waiting for the developer** (today every round pays the whole self-test and every
-    test file, about 60-90 min). The draft: L1 every change (the build, the test files the structure map names for the
-    changed modules, the self-test of the touched tab); L2 a round's close (L1 + a smoke file, one cheapest check per area);
-    L3 full (merge into `master`, every 4th round, shared ground: `core/`, `editor/shell.js`, `editor/demo.js`,
-    `editor/selftest*`, `phone/sheet.js`, `guide/tour.js`, `guide/voice.js`, `build.py`, `src/page/`), with the files run in
-    parallel. Once decided it goes in `lab_src/README.md` "Prove it", with the tools it needs (`run_tests.js --changed`,
-    `--jobs`, `#selftest=<tab>`).
+  - **Proof of the Lab:** the self-test (`tests/runtest8.ps1`: three walks side by side, about 3 min) gives
+    `ok=1180 behaviour=634 bad=0`; `node run_tests.js` runs the 26 test files one at a time (643 checks, about 28 min; `tests_baseline.json`).
+  - **Test levels (decided 2026-11-06):** blocks of work; level 1 every block (the block's own tests: `run_tests.js --changed`,
+    the self-test of its tab), level 2 every 3rd-4th block, on shared ground and before a publish or a merge, level 3 every
+    10-12 blocks and before a Unity hand-off. The rules: `lab_src/README.md` "Levels". Count the blocks since the last level 2
+    and 3 in every answer (both counts start at 0 on 2026-11-06, when level 2 ran; the first level 3, with every test's
+    mutation, is owed by the 12th block).
   - **Decided and built on 2026-11-05/06:**
     - The voice: one order for every line (`sayOrder`, `src/guide/voice.js`): the recorded line, else the live voice (when its
       key is on this computer), else the device's; "Speaking now" in the Editor says which and why. Best available prefers a
@@ -98,7 +94,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 2. How a round runs
 
 1. The developer looks at the Lab and writes corrections (with captures).
-2. The Architect changes the Lab in the feature's own module (`lab_src/PROTOTYPE_STRUCTURE.md` says which), runs the self-test and `run_tests.js`, takes captures of what changed
+2. The Architect changes the Lab in the feature's own module (`lab_src/PROTOTYPE_STRUCTURE.md` says which), runs the level the block owes (`lab_src/README.md` "Levels"), takes captures of what changed
    and looks at them (D1 contrast, D5 one focal action, the flow), then publishes to the same link and copies the record copy.
 3. The same round, each decision goes into its part's section of `_3.3` as current state (no logs), with the Unity today line.
 4. Commit and push as `__AI_Architect.md` section 4 says (the whole workspace, `git add -A`).
