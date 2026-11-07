@@ -9,7 +9,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const R = src => p.evaluate(s => LAB.run(s), src);
   const W = ms => p.waitForTimeout(ms);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
-  await R('S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;S.agentCfg.voiceOut=false;S.camCfg.comments=false;AG.mock={text:"ok"};S.agentCfg.provider="mock";applyProvider();S.view="card";S.stop="full";renderAll(false)');
+  await R('S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;S.agentCfg.voiceOut=false;gdGroupById("inview").on=false;AG.mock={text:"ok"};S.agentCfg.provider="mock";applyProvider();S.view="card";S.stop="full";renderAll(false)');
   await W(300);
   // 1. the trace under an answer: the model, the times, the tokens, the calls; the text and the link cards untouched
   await R('agCardAsk();AG.mock={calls:[{name:"navigate_to",args:{target_id:"b:b_fun"}},{name:"show_links",args:{items:[{target_id:"b:b_ba"}]}},{name:"navigate_to",args:{target_id:"b:zz"}}],text:"An opera [src:b:b_fun]."};ask("Opera?")');
@@ -35,16 +35,16 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('...The middle one: the others are dots', await R('[].filter.call(ph.querySelectorAll(".cpin:not(.central):not(.lit) b"),function(b){return +getComputedStyle(b).opacity>.5}).length===0'));
   await R('S.camCfg.names="all";camLayer()');
   // 3. a remark about a point that has left the screen goes
-  await R('G.fab.bub={id:"painting",text:"In the middle: Ribeira Palace.",act:true};fabLayer()'); await W(200);
-  ok('Azu\'s remark about a point not on this wall is dropped', await R('!ph.querySelector(".azfabbub")&&!G.fab.bub'));
-  await R('G.cam.open=false;camLayer();var c=camView().central;G.fab.bub={id:c.id,text:"x",act:true};fabLayer()');
-  const bb = await R('!!ph.querySelector(".azfabbub")');
+  // (guidance round 3: Azu's remarks are the guidance's What's in view, one item a point of the wall in view)
+  ok('Azu\'s remark about a point not on this wall is dropped', await R('gdItems().filter(function(x){return x.base==="inview"}).every(function(x){return S.wallPois.some(function(p){return p.id===x.point})})&&!gdItems().some(function(x){return x.id==="inview:painting"})&&gdItems().some(function(x){return x.id==="inview:houses"})'));
+  await R('G.cam.open=false;camLayer();G.gd.manual=false;gdStop("t");var c=camView().central,it=gdItems().filter(function(x){return x.id==="inview:"+c.id})[0];gdStart(it,"test")'); await W(300);
+  const bb = await R('!!ph.querySelector(".gdbub:not(.gd-out)")&&G.gd.cur&&G.gd.cur.item.base==="inview"');
   await R('S.camX=.98;camPaint();camLayer()'); await W(700);
-  ok('...one about a point in view stays, and goes when a pan takes the point off the screen', bb && await R('!ph.querySelector(".azfabbub")'), bb);
+  ok('...one about a point in view stays, and goes when a pan takes the point off the screen', bb && await R('!G.gd.cur&&!ph.querySelector(".gdbub:not(.gd-out)")'), bb);
   // 4. the scenes: each sets the prototype as a visitor would be, and the console says what it asks and expects
   await R('S.tab="guide";renderEditor();ed.querySelector(\'[data-fo="s7agent"]\').open=true');
   const s0 = await R('[AGSCENES.length,ed.querySelectorAll(".agscsel option").length]');
-  ok('Scenes: 8 in the console, the guide\'s 7 (round 7: its controls\' scenes) and the guidance\'s 10 (rounds g1 and g2: 5 each)', s0[0] === 25 && s0[1] === 25, s0);
+  ok('Scenes: 8 in the console, the guide\'s 7 (round 7: its controls\' scenes) and the guidance\'s 12 (rounds g1 and g2: 5 each; g3: 2)', s0[0] === 27 && s0[1] === 27, s0);
   await R('var s=ed.querySelector(".agscsel");s.value="3";s.dispatchEvent(new Event("change",{bubbles:true}))');
   await p.locator('[data-agsetup]').click(); await W(400);
   const s1 = await R('[S.camCfg.wall,S.stop,G.cam.open,camView().pois.map(function(p){return p.id}).join(),/In view now: .*Jerónimos/.test(ed.querySelector(".agscenes").textContent),ed.querySelector("#agq").value]');

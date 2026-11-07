@@ -1,7 +1,9 @@
 /* Guidance, the look (_3.8 section 4): a tip is one bubble (the dock's paper, 7:1 words, at most 2 lines, a tail to the mascot). Its
-   target: the nearest marker (Tap a marker), the point in the middle (A tour of {point}): the mascot goes beside it (a 0.45 s arc hop)
-   and points, Tap a marker's ring circles the marker (one soft pulse, then still); the ✦ (Ask about the view): Azu stays beside it and
-   points at it, a ring round the ✦. Placed by a small solver: the side with room, never over its target, the words on the wall, the ✦,
+   target: the nearest marker (Tap a marker), the point in the middle (A tour of {point}, and Azu's remark on a point, {point} in the
+   middle, whose bubble ends with a › to say a tap does more): the mascot goes beside it (a 0.45 s arc hop) and points, Tap a marker's
+   ring circles the marker (one soft pulse, then still); the ✦ (Ask about the view, The ✦): Azu stays beside it and lifts its arm to it
+   (point-gb; the guide's Azu in a tour, the 3D model, G.pointTo), a ring round the ✦ for Ask about the view; under Reduce Motion the
+   arm stays down (the words only). Placed by a small solver: the side with room, never over its target, the words on the wall, the ✦,
    the bar or the block being told; the service asks it first (gdCovers) so a tip that would cover its target never starts. A spoken tip
    (Content, once the guide has been heard this visit) lights the word being said. Reduce Motion: no hop (Azu is there), a still ring.
    Mascot Off (Guide button = ✦ only, or Mascot > Character = Off): a plain bubble at the target, no character. The bubble's controls
@@ -25,21 +27,26 @@ function gdMascot(){return S.guideCfg.mascot!==false&&gbAzu()?ph.querySelector("
 /* what a tip must keep clear of: the words on the wall (marker and point names, Azu's remark), the markers, the ✦, the bar, the preview
    bar, and during a tour the block being told */
 function gdObstacles(){var out=[];
-  ph.querySelectorAll("#wall .mk b,.campins .cpin b,.azfabbub,.azbub").forEach(function(e){if(gdSeen(e))out.push({b:gdPR(e),w:6,text:1})});
+  ph.querySelectorAll("#wall .mk b,.campins .cpin b,.azbub").forEach(function(e){if(gdSeen(e))out.push({b:gdPR(e),w:6,text:1})});
   ph.querySelectorAll("#wall .mk span,.campins .cpin i").forEach(function(e){if(gdSeen(e))out.push({b:gdPR(e),w:4})});
   ["#navbar","#ptool",".gbtn",".gb-pause"].forEach(function(s){var e=ph.querySelector(s);if(gdSeen(e))out.push({b:gdPR(e),w:4})});
   var gf=scr.querySelector(".gfocus");if(G.on&&gdSeen(gf))out.push({b:gdPR(gf),w:8,told:1});return out}
 /* an item's target on the screen: its point, the box the bubble and Azu keep clear of, and whether Azu goes beside it */
-function gdTarget(it){var P=it.about==="marker"?gdMarker():it.about==="middle"?gdCentral():null;
+/* the ✦'s wrap: outside a tour, or (a pull in a tour) the one above the dock */
+function gdGbWrap(){return ph.querySelector(".gbtn-wrap:not(.intour)")||(G.on?ph.querySelector(".gbtn-wrap.intour"):null)}
+/* a point of the wall on the screen (its item's own point, else the one in the middle) */
+function gdPointNow(it){var c=gdCentral();if(c&&(!it.point||c.id===it.point))return c;if(typeof camView!=="function")return c;var p=camView().pois.filter(function(x){return x.id===it.point})[0];
+  return p?{id:p.id,name:p.name,x:p.x,y:p.y,middle:p.where==="middle"}:c}
+function gdTarget(it){var P=it.about==="marker"?gdMarker():it.about==="middle"?gdCentral():it.about==="point"?gdPointNow(it):null;
   if(P)return{x:P.x,y:P.y,name:P.name,box:gdBox(P.x-GD_RING,P.y-GD_RING,2*GD_RING,2*GD_RING),beside:true};
-  if(it.about==="gbtn"){var g=ph.querySelector(".gbtn-wrap:not(.intour) .gbtn");if(!gdSeen(g))return null;var B=gdPR(g);return{x:(B.l+B.r)/2,y:(B.t+B.b)/2,name:"the ✦",rect:B,box:{l:B.l-6,t:B.t-6,r:B.r+6,b:B.b+6},beside:false}}
+  if(it.about==="gbtn"){var w=gdGbWrap(),g=w&&w.querySelector(".gbtn");if(!gdSeen(g))return null;var B=gdPR(g);return{x:(B.l+B.r)/2,y:(B.t+B.b)/2,name:"the ✦",rect:B,box:{l:B.l-6,t:B.t-6,r:B.r+6,b:B.b+6},beside:false}}
   return null}
 /* the bubble's words: plain, or one span a word when it is spoken (the word being said is lit) */
 function gdWords(t){return String(t).split(/(\s+)/).map(function(w){return/^\s*$/.test(w)?w:'<span class="gdw">'+esc(w)+'</span>'}).join("")}
 function gdBubHtml(c){return'<button type="button" data-gdbub="1">'+(c.spoken?gdWords(c.text):esc(c.text))+'</button><i class="gdtail"></i>'}
 /* the tip on the phone: its elements made once, then placed (again at each paint of the wall: the marker moves with the picture) */
 function gdPresent(c){gdClearEls();var it=c.item,az=gdMascot();
-  var b=document.createElement("div");b.className="gdbub"+(az?"":" plain")+(S.reduce?"":" gd-in");b.setAttribute("role","status");b.setAttribute("aria-live","polite");
+  var b=document.createElement("div");b.className="gdbub"+(az?"":" plain")+(S.reduce?"":" gd-in")+(it.form==="remark"?" gd-more":"");b.setAttribute("role","status");b.setAttribute("aria-live","polite");
   b.innerHTML=gdBubHtml(c);ph.appendChild(b);
   if(it.focus==="ring")gdRing(it,!S.reduce);
   if(it.points&&az&&it.goes==="beside"){var p=document.createElement("i");p.className="gdpoint";p.setAttribute("aria-hidden","true");p.innerHTML='<svg viewBox="0 0 16 16"><path d="M2.5 2.5 14 8 2.5 13.5Z"/></svg>';ph.appendChild(p)}
@@ -66,7 +73,7 @@ function gdSolve(c,bw,bh){var it=c.item,W=ph.offsetWidth,H=ph.offsetHeight,az=gd
   else if(M&&M.beside){var ring2=M.box;
     [["down",gdBox(clampL(M.x-bw/2),M.y-GD_RING-10-bh,bw,bh)],["left",gdBox(M.x+GD_RING+10,M.y-bh/2,bw,bh)],["right",gdBox(M.x-GD_RING-10-bw,M.y-bh/2,bw,bh)],["up",gdBox(clampL(M.x-bw/2),M.y+GD_RING+34,bw,bh)]].forEach(function(q,qi){
       var s=cost(q[1],[ring2])+qi*20;if(!best||s<best.s)best={s:s,B:q[1],tail:q[0],at:M}})}
-  else{var wrap=ph.querySelector(".gbtn-wrap:not(.intour)"),wt=wrap?gdPR(wrap).t:H-80,right=S.guideCfg.gbSide==="right",ex=M?[M.box]:[];
+  else{var wrap=gdGbWrap(),wt=wrap?gdPR(wrap).t:H-80,right=S.guideCfg.gbSide==="right",ex=M?[M.box]:[];
     for(var up=0;up<=160;up+=8){var l=right?W-GD_GUT-bw:GD_GUT,B=gdBox(l,wt-12-bh-up,bw,bh),s=cost(B,ex)+up*4;if(!best||s<best.s)best={s:s,B:B,tail:"down"}}
     best.A=home;if(!home&&M)best.at=M}
   best.M=M;best.home=home;
@@ -87,12 +94,14 @@ function gdPlace(c,first){var b=ph.querySelector(".gdbub:not(.gd-out)");if(!b||!
     var pt=ph.querySelector(".gdpoint");if(pt){var ax=(best.A.l+best.A.r)/2,ay=(best.A.t+best.A.b)/2,ang=Math.atan2(M.y-ay,M.x-ax),px=M.x-Math.cos(ang)*(GD_RING-5),py=M.y-Math.sin(ang)*(GD_RING-5);
       /* in the gap between the marker and Azu; below the marker its name sits there, so Azu's arm points alone */
       pt.style.display=best.side==="below"?"none":"";pt.style.left=Math.round(px)+"px";pt.style.top=Math.round(py)+"px";pt.style.rotate=(ang*180/Math.PI).toFixed(1)+"deg";if(first&&!S.reduce){pt.classList.remove("gd-in");void pt.offsetWidth;pt.classList.add("gd-in")}}}
-  else if(az&&it.points&&it.about==="gbtn"){az.classList.add("point-gb");G.gd.ptGb=true}}
+  else if(it.points&&it.about==="gbtn"&&!S.reduce){if(az){az.classList.add("point-gb");G.gd.ptGb=true}
+    /* no Azu beside the ✦ (a pull in a tour): the guide's own Azu turns to it (the 3D model reads G.pointTo) */
+    else if(!G.gd.ptTo&&typeof azuEl==="function"&&azuEl()){G.gd.ptTo=true;G.pointTo={till:performance.now()+Math.max(1500,c.until-c.at),at:function(){var w=gdGbWrap(),g=w&&w.querySelector(".gbtn");if(!g)return null;var B=gdPR(g);return{x:(B.l+B.r)/2,y:(B.t+B.b)/2}}}}}}
 /* Azu away from the ✦ (kept across a redraw of the button: fabLayer.after) */
 function gdApplyAz(az,hop){var a=G.gd.az;if(!az||!a)return;az.classList.add("gd-away","gd-point");az.classList.toggle("gd-left",a.left);az.dataset.gdlean=a.left?"left":"right";
   var to=a.dx+"px "+a.dy+"px";if(hop&&az.animate){var from=az.style.translate||"0px 0px",f=from.split(" ").map(parseFloat);az.animate([{translate:from},{translate:((f[0]+a.dx)/2)+"px "+(Math.min(f[1]||0,a.dy)-40)+"px"},{translate:to}],{duration:450,easing:"cubic-bezier(.3,.7,.4,1)"})}
   az.style.translate=to;var arm=az.querySelector(".marm");if(arm){arm.classList.add("on");arm.style.transform=a.left?"rotate(-8deg)":"rotate(8deg)"}}
-function gdAzHome(){var az=ph.querySelector(".azfab"),pg=G.gd.ptGb;G.gd.az=null;G.gd.ptGb=false;if(!az)return;if(pg)az.classList.remove("point-gb");var from=az.style.translate;
+function gdAzHome(){var az=ph.querySelector(".azfab"),pg=G.gd.ptGb;G.gd.az=null;G.gd.ptGb=false;if(G.gd.ptTo){G.gd.ptTo=false;G.pointTo=null}if(!az)return;if(pg)az.classList.remove("point-gb");var from=az.style.translate;
   if(from&&!S.reduce&&az.animate){var f=from.split(" ").map(parseFloat);az.animate([{translate:from},{translate:(f[0]/2)+"px "+(Math.min(0,f[1]||0)-30)+"px"},{translate:"0px 0px"}],{duration:420,easing:"cubic-bezier(.3,.7,.4,1)"})}
   az.style.translate="";az.classList.remove("gd-away","gd-point","gd-left");delete az.dataset.gdlean;var arm=az.querySelector(".marm");if(arm){arm.classList.remove("on");arm.style.transform=""}}
 function gdUnpresent(){gdAzHome();ph.querySelectorAll(".gdbub,.gdring,.gdpoint").forEach(function(x){x.classList.add("gd-out");x.removeAttribute("aria-live");setTimeout(function(){x.remove()},S.reduce?0:170)})}
@@ -106,12 +115,17 @@ on("camPaint.after",function(){if(G.gd.cur)gdPlace(G.gd.cur,false)});
 /* and 4 times a second: what it keeps clear of may move (the ✦'s label folds, a remark comes), never during Azu's hop */
 setInterval(function(){var c=G.gd.cur,az=ph.querySelector(".azfab");if(!c||noDraw||az&&az.getAnimations&&az.getAnimations().length)return;gdPlace(c,false)},250);
 /* the words may change in the Editor while the tip shows */
-on("renderPhone.after",function(){var c=G.gd.cur;if(!c)return;var t=gdLine(c.item,c.ret,c.slots),b=ph.querySelector(".gdbub:not(.gd-out) button[data-gdbub]");if(b&&t!==c.text){c.text=t;if(c.spoken)b.innerHTML=gdWords(t);else b.textContent=t}gdPlace(c,false)});
-/* one at a time: Azu's remark and the hint wait while a tip shows */
-on("fabRemark.quiet",function(){if(G.gd.cur)return true});
+on("renderPhone.after",function(){var c=G.gd.cur;if(!c)return;
+  /* (and the language: the point's name in the visitor's language, its line kept) */
+  if(c.slots&&c.slots.id){var pp=(S.wallPois||[]).filter(function(x){return x.id===c.slots.id})[0];if(pp)c.slots.point=L(pp.name)}var t=gdLine(c.item,c.ret,c.slots),b=ph.querySelector(".gdbub:not(.gd-out) button[data-gdbub]");if(b&&t!==c.text){c.text=t;if(c.spoken)b.innerHTML=gdWords(t);else b.textContent=t}gdPlace(c,false)});
 /* ----- the bubble's controls: a tap does its action; a swipe away dismisses; a long press asks Fewer like this? ----- */
-function gdTap(){var c=G.gd.cur;if(!c)return;var it=c.item;if(c.pull){gdStop("tapped (a demo)");return}
-  if(it.tap==="view"){gdStop("tapped: Ask about the view opens","acted");G.fab.bub=null;G.fab.menu=false;G.cam.open=true;renderPhone(true);emit("view.opened","the tip");return}
+function gdTap(){var c=G.gd.cur;if(!c)return;var it=c.item;if(c.pull&&G.gd.demo){gdStop("tapped (a demo)");return}
+  if(it.tap==="view"){gdStop("tapped: Ask about the view opens","acted");G.fab.menu=false;G.cam.open=true;renderPhone(true);emit("view.opened","the tip");return}
+  /* Azu's remark: a point with a card opens it and starts its tour; any other opens Ask about the view about it, the point lit */
+  if(it.tap==="remark"){var pid=c.slots.id,p=(S.wallPois||[]).filter(function(x){return x.id===pid})[0];gdStop("tapped: "+(p&&p.card?"the tour of "+(c.slots.point||"the point")+" starts":"Ask about the view opens about "+(c.slots.point||"the point")),"acted");
+    if(p&&p.card){S.stop="half";renderPhone(false);emit("card.opened","Azu's remark");startTour();return}
+    G.fab.menu=false;G.cam.open=true;renderPhone(true);emit("view.opened","Azu's remark");camAsk("",p&&p.year?"oldest":"what");camLight([pid]);return}
+  if(it.tap==="menu"){gdStop("tapped: the ✦ menu opens","acted");gbMenu(true);return}
   if(it.tap==="tour"){gdStop("tapped: the tour of "+(c.slots.point||"the point")+" starts","acted");S.stop="half";renderPhone(false);emit("card.opened","the tour invitation");startTour();return}
   gdStop("tapped","acted")}
 function gdSwipe(dx){var c=G.gd.cur;if(!c)return;var b=ph.querySelector(".gdbub:not(.gd-out)");if(b){b.style.opacity="";if(!S.reduce)b.style.translate=(dx>0?1:-1)*Math.round(ph.offsetWidth*.7)+"px 0px"}

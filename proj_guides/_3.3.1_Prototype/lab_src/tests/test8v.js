@@ -9,7 +9,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const R = src => p.evaluate(s => LAB.run(s), src); const W = ms => p.waitForTimeout(ms);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   const gaps = () => R('var g=wallGaps();[g.pic.x,g.pic.y,g.items.map(function(i){return[i.id,Math.round(i.x),Math.round(i.y),+i.gap.toFixed(2)]})]');
-  await R('S.hints.on=false;S.guideMute=true;S.introSeen=true;sampleFn=null;S.camCfg.comments=false;S.camCfg.wall="ribeira";S.view="card";S.stop="closed";S.camX=.4;S.camY=.5;S.camZoom=1.3;renderAll(false)');
+  await R('S.hints.on=false;S.guideMute=true;S.introSeen=true;sampleFn=null;gdGroupById("inview").on=false;S.camCfg.wall="ribeira";S.view="card";S.stop="closed";S.camX=.4;S.camY=.5;S.camZoom=1.3;renderAll(false)');
   await W(400);
   // 1. at rest: each marker on its point in the picture; the wall's points shown, the palace's own point is its marker
   const g0 = await gaps(); const mk0 = g0[2].filter(i => i[0].indexOf('pin:') < 0), pins0 = g0[2].filter(i => i[0].indexOf('pin:') === 0);

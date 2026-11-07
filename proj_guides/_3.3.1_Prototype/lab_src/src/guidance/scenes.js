@@ -1,17 +1,21 @@
-/* Guidance tested in the prototype: ten scenes in Ask Azu's test console (round 1's five, round 2's five: the 15-minute script, Ignore three,
-   Fewer like this, Leave and come back, During a tour) (Set up, Set up and ask, Run all scenes), each putting the
+/* Guidance tested in the prototype: twelve scenes in Ask Azu's test console (round 1's five, round 2's five: the 15-minute script, Ignore three,
+   Fewer like this, Leave and come back, During a tour; round 3's two: a remark yields, The ✦ after four pokes) (Set up, Set up and ask,
+   Run all scenes), each putting the
    phone where a visitor would be, acting as a finger does (a tap on the marker, a drag on the wall) and checking the phone. The visit's
-   clock runs ×10 or ×20 in a scene, is stepped by hand to ignore a tip for 5 minutes, and runs ×1 for the drag; Azu's remarks wait; the clock and the remarks come back after it. */
+   clock runs ×10 or ×20 in a scene, is stepped by hand to ignore a tip for 5 minutes, and runs ×1 for the drag; Azu's remarks (What's in view) and The ✦ rest unless the scene is about them; the clock, the remarks and
+   The ✦ come back after it. */
 /* how much of the tip (its bubble, and Azu beside the marker) covers the words on the wall, in px² (0: nothing) */
 function gdOverWords(){var b=ph.querySelector(".gdbub:not(.gd-out)"),az=G.gd.az&&ph.querySelector(".azfab"),mine=[b,az].filter(Boolean).map(gdPR),a=0;
   gdObstacles().filter(function(o){return o.text}).forEach(function(o){mine.forEach(function(m){a+=gdOver(m,o.b)})});return Math.round(a)}
 function gdScWait(f,ms){var t0=performance.now();return new Promise(function(res){(function w(){var v=false;try{v=f()}catch(e){}if(v||performance.now()-t0>ms){res(!!v);return}setTimeout(w,50)})()})}
 /* a scene's start: the Ribeira wall, a first visit (or one whose opening was said 30 s ago), the clock at its rate, the remarks resting */
-function gdScSetup(rate,opened){if(G.on)stopTour();setWall("ribeira");gdStop("a scene");G.gd.demo=false;gdChip(null);G.gd.sc={rate:G.gd.rate,comments:S.camCfg.comments,gbtn:S.guideCfg.gbtn};
-  S.camCfg.comments=false;G.fab.bub=null;G.gd.manual=false;G.gd.rate=rate;gdResetVisitor();
+function gdScSetup(rate,opened,keep){if(G.on)stopTour();setWall("ribeira");gdStop("a scene");G.gd.demo=false;gdChip(null);var iv=gdGroupById("inview");
+  G.gd.sc={rate:G.gd.rate,inview:iv.on,hint:S.guidance.items.gbhint.on,gbtn:S.guideCfg.gbtn,azuTap:S.guideCfg.azuTap,life:S.guideCfg.life};
+  /* Azu's remarks and The ✦ rest, unless the scene is about them (keep) */
+  if(!keep){iv.on=false;S.guidance.items.gbhint.on=false}G.gd.manual=false;G.gd.rate=rate;gdResetVisitor();
   if(opened){var now=gdNow(),vm=gdVM("opening"),em=gdEM("opening");vm.shown=1;vm.last=now-30000;vm.end=now-21000;em.shown=1;S.gdVisitor.visit.lastEnd=now-21000}
   G.gd.movedAt=gdNow();renderPhone(false)}
-function gdScDone(r){var k=G.gd.sc;if(k){G.gd.rate=k.rate;G.gd.manual=false;S.camCfg.comments=k.comments;if(S.guideCfg.gbtn!==k.gbtn){S.guideCfg.gbtn=k.gbtn;fabLayer()}G.gd.sc=null}return r}
+function gdScDone(r){var k=G.gd.sc;if(k){G.gd.rate=k.rate;G.gd.manual=false;gdGroupById("inview").on=k.inview;S.guidance.items.gbhint.on=k.hint;S.guideCfg.azuTap=k.azuTap;S.guideCfg.life=k.life;if(S.guideCfg.gbtn!==k.gbtn){S.guideCfg.gbtn=k.gbtn;fabLayer()}G.gd.sc=null}return r}
 function gdIs(id){return!!(G.gd.cur&&G.gd.cur.item.id===id&&!G.gd.cur.pull)}
 function gdAzuBy(){var az=ph.querySelector(".azfab"),M=gdMarker();if(!az||!M)return null;var A=gdPR(az);return Math.round(Math.hypot((A.l+A.r)/2-M.x,(A.t+A.b)/2-M.y))}
 var GDSCENES=[
@@ -116,3 +120,30 @@ var GDSCENES2=[
         var ans="During the tour: "+r.shown+" ticks with a tip; at a line: “"+r.line+"”; between steps: “"+r.never+"” and “"+r.between+"”.";
         return gdScDone(r.shown===0&&/never over a sentence/.test(r.line)&&/quiet in a tour \(During a tour: Never\)/.test(r.never)&&r.between&&!/quiet in a tour/.test(r.between)?[true,"quiet in a tour; only a Between steps item gets past it, between steps",ans]:[false,"something showed in the tour, or the tour's gate held the wrong items",ans])})}}];
 GDSCENES2.forEach(function(s){s.where=s.id==="gd2_tour"?"card":"wall";AGSCENES.push(s)});
+/* ----- round 3: two more scenes (ids gd3_*): a remark yields; The ✦ after four pokes ----- */
+var GDSCENES3=[
+  {id:"gd3_yield",label:"Guidance · a remark yields: the tip first, the remark after its breathing room",setup:function(){gdScSetup(1,true,true);S.guidance.items.gbhint.on=false},
+    q:T("nothing: the opening was said 30 s ago; it drags the wall a little and lets go with Ribeira Palace in the middle, then lets the visit run (the clock stepped ×30)","nada: a abertura foi dita há 30 s; arrasta um pouco a parede e larga com o Paço da Ribeira ao centro, e deixa a visita correr (o relógio a passos, ×30)"),
+    expect:T("As the point settles, Tap a marker and Azu's remark are both due: the tip shows (it scores more) and the remark waits; it comes only after the breathing room (15 s) from the tip's end, and the next tip waits 15 s after the remark too.","Quando o ponto assenta, o Toque num marcador e o comentário do Azu estão ambos prontos: a dica aparece (pontua mais) e o comentário espera; só vem depois do intervalo (15 s) a contar do fim da dica, e a dica seguinte também espera 15 s depois do comentário."),
+    act:function(){var n=0,r={};return new Promise(function(res){var iv=setInterval(function(){fingerDrag(n%2?-8:8,0);n++;if(n>=6){clearInterval(iv);res()}},120)}).then(function(){var snap=null;
+      return gdScRun(150000,function(){var c=G.gd.cur,items=gdItems(),rem=items.filter(function(x){return x.id==="inview:painting"})[0];
+        if(c&&!c.pull){if(r.tip==null&&c.item.id==="tapmarker"){r.tip=c.at;r.tipScore=G.gd.last&&G.gd.last.score;var ck=snap&&rem?gdCheck(rem,items,snap,Object.assign(gdContext(),{showing:null}),c.at):null;r.due=!!(ck&&ck.ok);r.remScore=ck&&ck.score;
+            r.during=gdWhyNot(items,S.gdVisitor,gdContext(),gdNow(),"inview:painting")}
+          if(r.tip!=null&&r.rem==null&&c.item.base==="inview"){r.rem=c.at;r.remId=c.item.id;r.line=c.text;r.tipEnd=gdVisitOf(S.gdVisitor,"tapmarker").end}
+          if(r.rem!=null&&r.next==null&&c.item.id==="tapmarker"&&c.at>r.rem){r.next=c.at;r.remEnd=gdVisitOf(S.gdVisitor,r.remId).end;return true}}
+        if(r.tipEnd==null&&r.tip!=null&&!c&&r.after==null)r.after=gdWhyNot(items,S.gdVisitor,gdContext(),gdNow(),"inview:painting");
+        snap=JSON.parse(JSON.stringify(S.gdVisitor))})}).then(function(){var br=+S.guidance.breathing,g1=r.rem!=null&&r.tipEnd!=null?Math.round((r.rem-r.tipEnd)/1000):null,g2=r.next!=null&&r.remEnd!=null?Math.round((r.next-r.remEnd)/1000):null;
+        var ans="As Ribeira Palace settled: "+(r.due?"both due, Tap a marker (score "+gdN(r.tipScore)+") against the remark (score "+gdN(r.remScore)+")":"the remark not due with the tip")+"; while the tip showed, the remark: “"+(r.during||"")+"”; after it: “"+(r.after||"")+"”; the remark "+(g1!=null?g1+" s after the tip ended":"never")+(r.line?" (“"+r.line+"”)":"")+"; the next tip "+(g2!=null?g2+" s after the remark ended":"not in the run")+".";
+        return gdScDone(r.due&&r.tip!=null&&/one at a time: the Tap a marker is showing/.test(r.during||"")&&/breathing room|at most \d a minute/.test(r.after||"")&&g1>=br&&g2>=br?[true,"the remark yields to the tip and keeps the breathing room, both ways",ans]:[false,"the remark did not yield, or came within the breathing room",ans])})}},
+  {id:"gd3_pokes",label:"Guidance · The ✦ after four pokes: once a visit, done with the menu",setup:function(){gdScSetup(1,true,true);gdGroupById("inview").on=false;S.guideCfg.azuTap="play";S.guideCfg.life="lively";var e=gdEM("tapmarker");e.done=true;e.by="card"},
+    q:T("nothing: a visitor who has seen a card pokes Azu four times on the wall, then four more, then taps the ✦","nada: um visitante que já viu um cartão toca no Azu quatro vezes na parede, depois mais quatro, e depois toca no ✦"),
+    expect:T("After the fourth poke (and Azu's joke) Azu lifts its arm to the ✦ and says “Need anything? Tap ✦.” beside it, not over it; four more pokes: not again this visit; the ✦'s menu opened: done for good.","Depois do quarto toque (e da piada do Azu) o Azu levanta o braço para o ✦ e diz “Precisa de alguma coisa? Toque em ✦.” ao lado dele, sem o tapar; mais quatro toques: não volta nesta visita; o menu do ✦ aberto: fica feito."),
+    act:function(){var r={},poke=function(n){var p=Promise.resolve();for(var i=0;i<n;i++)p=p.then(function(){gsTouch(ph.querySelector(".azfab"));return gdScWait(function(){return false},650)});return p};
+      return poke(4).then(function(){r.pokes=S.gdVisitor.visit.pokes;return gdScWait(function(){return gdIs("gbhint")},8000)}).then(function(a){var b=ph.querySelector(".gdbub:not(.gd-out)"),g=ph.querySelector(".gbtn");
+        r.shown=a;r.text=a?G.gd.cur.text:"";r.arm=!!ph.querySelector(".azfab.point-gb");r.over=b&&g?Math.round(gdOver(gdPR(b),gdPR(g))):-1;r.words=gdOverWords();r.why=a?G.gd.cur.why:"";
+        return gdScWait(function(){return!G.gd.cur},9000)}).then(function(){return poke(4)}).then(function(){return gdScWait(function(){return gdIs("gbhint")},1500)}).then(function(again){r.again=again;
+        r.whyAgain=gdWhyNot(gdItems(),S.gdVisitor,Object.assign(gdContext(),{showing:null,touchAt:null,remark:null}),gdNow(),"gbhint");gsTouch(ph.querySelector(".gbtn"));r.menu=!!ph.querySelector(".gbmenu");r.done=gdEverOf(S.gdVisitor,"gbhint").done;
+        r.whyDone=gdWhyNot(gdItems(),S.gdVisitor,Object.assign(gdContext(),{showing:null,panel:null,remark:null,touchAt:null}),gdNow(),"gbhint");G.fab.menu=false;fabLayer();
+        var ans=r.pokes+" pokes: The ✦ "+(r.shown?"“"+r.text+"”, Azu's arm "+(r.arm?"to the ✦":"down")+", "+r.over+" px² over the ✦, "+r.words+" px² over words ("+r.why+")":"not shown")+"; 4 more: "+(r.again?"again":"not again")+" (“"+r.whyAgain+"”); the ✦ tapped: the menu "+(r.menu?"open":"closed")+", “"+r.whyDone+"”.";
+        return gdScDone(r.pokes===4&&r.shown&&r.text===gdLine(S.guidance.items.gbhint)&&r.arm&&r.over===0&&r.words===0&&/4 pokes on Azu/.test(r.why)&&!r.again&&/shown once this visit/.test(r.whyAgain)&&r.menu&&r.done&&/done for good \(the visitor opened the ✦ menu\)/.test(r.whyDone)?[true,"four pokes bring The ✦ once a visit, beside the ✦, pointing; the menu retires it",ans]:[false,"The ✦ did not come after four pokes, came twice, or the menu did not retire it",ans])})}}];
+GDSCENES3.forEach(function(s){s.where="wall";AGSCENES.push(s)});

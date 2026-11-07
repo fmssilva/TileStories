@@ -9,7 +9,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const R = src => p.evaluate(s => LAB.run(s), src);
   const W = ms => p.waitForTimeout(ms);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
-  await R('S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;S.agentCfg.voiceOut=false;S.camCfg.comments=false;S.view="card";S.stop="full";renderAll(false)');
+  await R('S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;S.agentCfg.voiceOut=false;gdGroupById("inview").on=false;S.view="card";S.stop="full";renderAll(false)');
   await W(300);
   // 1. what answers here: nothing live in the headless Lab (no Claude, no key), so offline
   ok('Nothing live here: no model, the Editor says offline answers', await R('S.tab="guide";renderEditor();agProvider()===null&&!AG.fn&&/nothing live here/.test(ed.textContent)'));

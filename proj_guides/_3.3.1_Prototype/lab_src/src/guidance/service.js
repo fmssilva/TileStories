@@ -9,15 +9,17 @@
    A tip ends acted (a tap, or the feature it teaches used), dismissed (swiped away, or Fewer like this?), ignored (its time ran out)
    or by the moment (the wall left, its target gone): the learning (gdLearn) reads how. The events (_3.8 section 3.2), each from the
    module that knows it: visit started (gdVisitStart), the phone moving (phone.moved), a touch (the phone's pointer), card opened
-   (card.opened), a tour step heard (tourStep.ended), a question asked (ask.after), Ask about the view opened (view.opened). Unity:
-   GuidanceService (a MonoBehaviour ticking at 4 Hz, fed by the event buses: the AR camera's motion, the touches, the card's open, the
-   tour's steps), the memory as JSON in persistentDataPath, the visit clock Time.unscaledTime since the visit started, the time away
-   from OnApplicationPause. */
+   (card.opened), a tour step heard (tourStep.ended), a question asked (ask.after), Ask about the view opened (view.opened), the ✦
+   menu opened (menu.opened), Azu poked (mascot.poked: counted this visit), idle (no touch, wheel or key and the phone still since,
+   the visit's start at the earliest). A pull (gdPull: Tap on Azu = Points to the ✦) shows its item at once, past every gate but one at a
+   time (the tip showing gives way). Unity: GuidanceService (a MonoBehaviour ticking at 4 Hz, fed by the event buses: the AR camera's
+   motion, the touches, the card's open, the tour's steps, the mascot's poke, the ✦ menu), the memory as JSON in persistentDataPath, the
+   visit clock Time.unscaledTime since the visit started, the time away from OnApplicationPause. */
 var GD_VISIT_GAP=30*60000;
-function gdVisitMem(n,now){return{n:n,at:now,lastEnd:null,items:{},starts:[],away:0,ignoredRun:0,breathMul:1,rest:{},fewer:{},heard:false}}
+function gdVisitMem(n,now){return{n:n,at:now,lastEnd:null,items:{},starts:[],away:0,ignoredRun:0,breathMul:1,rest:{},fewer:{},heard:false,pokes:0}}
 function gdNewMemory(now){return{visits:1,visit:gdVisitMem(1,now),ever:{items:{}},used:{},met:false}}
 S.gdVisitor=gdNewMemory(0);
-G.gd={t:0,rate:1,manual:false,cur:null,movedAt:null,touchAt:null,cardAt:null,wallAt:null,onWall:false,demo:false,last:null,next:null,log:[],between:false,skipKey:""};
+G.gd={t:0,rate:1,manual:false,cur:null,movedAt:null,touchAt:null,actAt:null,cardAt:null,wallAt:null,onWall:false,demo:false,last:null,next:null,log:[],between:false,skipKey:""};
 function gdNow(){return G.gd.t}
 /* the log: every decision (shown, skipped, ended) and event, with the visit's time; the Editor shows the last 30 */
 function gdLog(what,why){var v=S.gdVisitor.visit,t=Math.round(gdNow());G.gd.log.push({t:t,vt:t-Math.round(v.at||0),v:v.n,what:what,why:why||""});if(G.gd.log.length>400)G.gd.log.shift();emit("gdLog.after")}
@@ -34,15 +36,16 @@ function gdResetVisitor(){gdVisitStart(false)}
 /* the visitor leaves the app for ms (the visit's clock moves on): 30 min or more away ends the visit, and coming back starts the next */
 function gdLeave(ms){if(G.gd.cur)gdStop("the visitor left the app");var mins=Math.round(ms/60000);G.gd.t+=ms;
   if(ms>=GD_VISIT_GAP){gdLog("away","away "+mins+" min: the visit ended (a visit ends after 30 min away)");gdVisitStart(true,"after "+mins+" min away")}
-  else{S.gdVisitor.visit.away=(S.gdVisitor.visit.away||0)+ms;gdLog("away","away "+mins+" min: the same visit goes on")}}
+  else{S.gdVisitor.visit.away=(S.gdVisitor.visit.away||0)+ms;G.gd.actAt=G.gd.t;gdLog("away","away "+mins+" min: the same visit goes on")}}
 /* the nearest marker with a card on the screen (its circle's centre, in the phone's pixels), clear of the screen's edges and foot */
 function gdMarker(){if(S.view!=="card"||typeof wallMarkers!=="function")return null;var W=ph.offsetWidth,H=ph.offsetHeight,best=null;
   wallMarkers().forEach(function(m){if(!m.card)return;var s=poiScreen(m);if(s.x<40||s.x>W-40||s.y<90||s.y>H-170)return;var d=Math.hypot(s.x-W/2,s.y-H*.45);
     if(!best||d<best.d)best={id:m.id,name:L(m.name),x:s.x,y:s.y,d:d,middle:gdInMiddle(s.x,s.y)}});return best}
 /* the middle of the screen: the centre cell of a 3 × 3 grid (Ask about the view's own grid) */
 function gdInMiddle(x,y){var W=ph.offsetWidth,H=ph.offsetHeight;return x>=W/3&&x<=2*W/3&&y>=H/3&&y<=2*H/3}
-/* the ✦ on the wall (the way into Ask about the view), and the point in the middle with its tour (a point with a card has one) */
-function gdGbtn(){if(S.view!=="card"||S.stop!=="closed")return null;var g=ph.querySelector(".gbtn-wrap:not(.intour) .gbtn");if(!g||!g.getClientRects().length)return null;var B=gdPR(g);return{name:"the ✦",x:(B.l+B.r)/2,y:(B.t+B.b)/2,middle:false}}
+/* the ✦ wherever it shows outside a tour (on the wall the way into Ask about the view; on the card past the hero), and the point in the
+   middle with its tour (a point with a card has one) */
+function gdGbtn(){if(S.view!=="card"||G.on)return null;var g=ph.querySelector(".gbtn-wrap:not(.intour) .gbtn");if(!g||!g.getClientRects().length)return null;var B=gdPR(g);return{name:"the ✦",x:(B.l+B.r)/2,y:(B.t+B.b)/2,middle:false}}
 function gdCentral(){if(S.view!=="card"||S.stop!=="closed"||typeof camView!=="function")return null;var c=camView().central,W=ph.offsetWidth,H=ph.offsetHeight;
   if(!c||c.x<40||c.x>W-40||c.y<90||c.y>H-170)return null;return{id:c.id,name:c.name,x:c.x,y:c.y,middle:c.where==="middle",tour:!!c.card,min:c.card?tourMinutes():null}}
 /* the moment, as the scheduler reads it */
@@ -51,7 +54,9 @@ function gdContext(){var t=-Infinity,mv=G.gd.movedAt,wa=G.gd.wallAt,g=S.guidance
   var speaking=!!(G.utter||G.timer||G.recAudio);
   return{on:!!g.on,breathing:+g.breathing,limits:{perMinute:+g.perMinute,perVisit:+g.perVisit},tau:+g.freshTau,learn:{ignore:g.learnIgnore!==false,dismiss:g.learnDismiss!==false},
     demo:!!G.gd.demo,showing:G.gd.cur?G.gd.cur.item.label:null,
-    remark:G.fab&&G.fab.bub||ph.querySelector(".azfabbub")?"Azu's remark":ph.querySelector(".azbub")?"Azu's bubble":null,
+    remark:ph.querySelector(".azbub")?"Azu's bubble":null,
+    pokes:S.gdVisitor.visit.pokes||0,idleSince:Math.max(G.gd.actAt==null?t:G.gd.actAt,mv==null?t:mv,S.gdVisitor.visit.at||0),
+    lively:S.guideCfg.life==="lively",solemn:!!(S.m&&S.m.solemn),
     speaking:speaking,state:sk?GD_STATES[sk]||sk:null,
     panel:S.settingsOpen?"Settings":G.cam&&G.cam.open?"Ask about the view":G.fab&&G.fab.menu?"the ✦ menu":S.contentsOpen?"Contents":null,
     dockFull:!!(G.on&&typeof dockOn==="function"&&dockOn()&&S.dockH==="full"),tour:G.on?{between:!!G.gd.between&&!speaking,step:G.i}:null,
@@ -61,7 +66,9 @@ function gdContext(){var t=-Infinity,mv=G.gd.movedAt,wa=G.gd.wallAt,g=S.guidance
 /* how long a tip stays: by its words, 4 to 9 s (the visit's clock); with the clock fast (a scene, a demo) it stays at least 0.6 to 1.5 s of real time, to be seen */
 function gdOnScreen(it,text){var n=String(text||"").split(/\s+/).filter(Boolean).length;return Math.max(4000,Math.min(9000,3000+n*350))}
 /* the slots of its line: the point it is about and the minutes of that point's tour */
-function gdSlots(it){if(it.about!=="middle")return{};var c=gdCentral();if(c&&c.tour)return{id:c.id,point:c.name,min:c.min};
+function gdSlots(it){if(it.about==="point"){var n=gdItems().filter(function(o){return o.group===it.group}).reduce(function(a,o){return a+gdVisitOf(S.gdVisitor,o.id).shown},0);
+    return{id:it.point,point:it.pointName||"",card:!!it.card,n:n}}
+  if(it.about!=="middle")return{};var c=gdCentral();if(c&&c.tour)return{id:c.id,point:c.name,min:c.min};
   var p=(S.wallPois||[]).filter(function(x){return x.card})[0];return{id:p&&p.id,point:p?L(p.name):"",min:tourMinutes()}}
 /* spoken (_3.8 decision 2): App as a bubble only; Content spoken once the visitor has heard the guide this visit, else a bubble */
 function gdSpoken(it,o){if(o&&o.spoken!=null)return!!o.spoken;return it.spoken==="kind"&&it.kindSpoken==="heard"&&!!S.gdVisitor.visit.heard}
@@ -89,7 +96,12 @@ function gdLearn(c,how,now){var it=c.item,v=S.gdVisitor.visit,vm=gdVM(it.id),em=
     v.rest[it.group]=now+GD_REST_MS;gdLog("learned",it.label+" dismissed: "+gn+" rests 5 min")}}
 /* the events */
 on("phone.moved",function(){G.gd.movedAt=gdNow()});
-["pointerdown","pointerup"].forEach(function(t){ph.addEventListener(t,function(){G.gd.touchAt=gdNow()},{capture:true,passive:true})});
+["pointerdown","pointerup"].forEach(function(t){ph.addEventListener(t,function(){G.gd.touchAt=G.gd.actAt=gdNow()},{capture:true,passive:true})});
+/* idle: no touch, no wheel, no key (and the phone still: movedAt) */
+["wheel","keydown"].forEach(function(t){ph.addEventListener(t,function(){G.gd.actAt=gdNow()},{capture:true,passive:true})});
+/* Azu poked (mascot/azu2d.js), counted this visit; the ✦ menu opened (world/guide-button.js): The ✦ is done */
+on("mascot.poked",function(){var v=S.gdVisitor.visit;v.pokes=(v.pokes||0)+1;gdLog("event",GD_EVENTS.poked+" ("+v.pokes+" this visit)")});
+on("menu.opened",function(how){gdUsed("menu",how)});
 /* a feature used (a milestone of the stage): the items it retires are done for good; a tip that teaches it, showing now, was acted on */
 function gdUsed(f,how){var now=gdNow(),c=G.gd.cur;S.gdVisitor.used[f]=now;
   gdItems().forEach(function(it){if(it.doneWhen===f){var em=gdEM(it.id);if(!em.done){em.done=true;em.by=f}}});
@@ -104,7 +116,7 @@ on("startTour.before",function(){if(G.gd.cur&&!G.gd.cur.pull)gdStop("the tour st
 function gdTick(){if(noDraw)return;var now=gdNow(),w=gdOnWall();if(w&&!G.gd.onWall)G.gd.wallAt=now;G.gd.onWall=w;
   var c=G.gd.cur;if(c){var it=c.item;if(it.screen==="wall"&&!w){gdStop("the wall left the screen");return}
     if(!c.pull){if(it.about==="marker"&&!gdMarker()){gdStop("its marker left the screen");return}
-      if(it.about==="middle"){var cc=gdCentral();if(!cc||cc.id!==c.slots.id){gdStop("its point left the middle");return}}
+      if(it.about==="middle"||it.about==="point"){var cc=gdCentral();if(!cc||cc.id!==c.slots.id){gdStop("its point left the middle");return}}
       if(it.about==="gbtn"&&!gdGbtn()){gdStop("the ✦ left the screen");return}}
     if(c.ask){if(now>=c.askUntil)gdStop("Fewer like this? not answered","ignored");return}
     if(now>=c.until&&performance.now()>=c.realMin)gdStop("its time is up","ignored");return}
@@ -114,6 +126,10 @@ function gdTick(){if(noDraw)return;var now=gdNow(),w=gdOnWall();if(w&&!G.gd.onWa
   G.gd.last=r;G.gd.ctx=ctx;if(r.item){gdStart(r.item,r.why);return}
   /* a skip is logged when its reason changes (the numbers aside) */
   var key=r.why.replace(/\d+(\.\d+)?/g,"#");if(key!==G.gd.skipKey){G.gd.skipKey=key;gdLog("skipped",r.why)}}
+/* a pull (_3.8 section 3.3: past every gate but one at a time): the item at once, the tip showing gives way; it writes no memory.
+   Tap on Azu = Points to the ✦ pulls The ✦ (false when there is no ✦ or no Azu beside it to point) */
+function gdPull(id,why){var it=gdInstances(id)[0];if(!it)return false;if(it.about==="gbtn"&&!(ph.querySelector(".gbtn")&&typeof azuEl==="function"&&azuEl()&&gbAzu()&&gbOn()))return false;
+  if(G.gd.cur)gdStop("the visitor asked for "+it.label);var ab=ph.querySelector(".azbub");if(ab)ab.remove();gdStart(it,why||"asked by the visitor",{pull:true});return true}
 function gdAdvance(ms){for(var k=0;k<ms;k+=250){G.gd.t+=Math.min(250,ms-k);gdTick()}}
 setInterval(function(){if(G.gd.manual||noDraw)return;G.gd.t+=250*G.gd.rate;gdTick()},250);
 gdLog("visit","a first visit");
