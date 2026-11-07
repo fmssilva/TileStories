@@ -212,8 +212,9 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   const keysG = await rowKeys('.row'); await R('S.tab="card";renderEditor()'); const keysA = await rowKeys('[data-fo="s8"] .row'), keys = keysG.concat(keysA);
   const nod = await R('S.tab="guide";renderEditor();var a=rowsWithoutDemo(guideSecIds());S.tab="card";renderEditor();a.concat(rowsWithoutDemo(["s8"])).map(function(r){return r.key})');
   ok(`Every row of the Guide tab and 6 · Audiences declares its demo (${keys.length} rows)`, keys.length >= 70 && nod.length === 0, nod);
-  const shown = [], missing = [];
-  for (const k of keys) {
+  // pressed here: every row but 4 · Guidance's, which test9e presses one by one (every row of that section) and test9f again for its new ones
+  const shown = [], missing = [], pressKeys = keys.filter(k => !/^guidance\./.test(k));
+  for (const k of pressKeys) {
     await R(`S.tab="${keysG.indexOf(k) >= 0 ? 'guide' : 'card'}";if(ed.dataset.tabNow!==S.tab){ed.dataset.tabNow=S.tab;renderEditor()}`);
     await R('document.body.dataset.rowdemo=""');
     const lb = await R(`var c=ed.querySelector('[data-set="@${k}"],[data-sel="@${k}"],[data-num="@${k}"]'),l=c.closest(".row").querySelector("label.rd");l.scrollIntoView({block:"center"});var r=l.getBoundingClientRect();[r.left+12,r.top+r.height/2]`);
@@ -221,7 +222,7 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
     let v = ''; const t0 = Date.now(); while (Date.now() - t0 < 6000) { v = await R('document.body.dataset.rowdemo||""'); if (v) break; await W(80); }
     (/\|found\|/.test(v) ? shown : missing).push(k + ' ' + v.split('|').slice(1).join(' '));
   }
-  ok('...a press on each row\'s label shows its demo on the phone, its part ringed', missing.length === 0 && shown.length === keys.length, missing);
+  ok('...a press on each row\'s label shows its demo on the phone, its part ringed', missing.length === 0 && shown.length === pressKeys.length && pressKeys.length >= 70, [missing, pressKeys.length]);
   await R('S.tab="guide";S.op={gt1:true,s7dock:true};renderEditor()'); await R('document.body.dataset.rowdemo=""'); await p.locator('[data-set="@guideCfg.dockStart"][data-v="compact"]').click();
   await until('document.body.dataset.rowdemo', 5000);
   ok('...a change to a row shows its demo too: Starts at = Compact, the tour starts hidden, the ✦ ringed', /^guideCfg\.dockStart\|found\|\.gbtn-wrap\.intour/.test(await R('document.body.dataset.rowdemo')) && await R('G.on&&S.dockH==="compact"'), await R('document.body.dataset.rowdemo'));

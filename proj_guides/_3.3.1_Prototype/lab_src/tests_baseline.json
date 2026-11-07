@@ -105,11 +105,11 @@
   "s": 31
  },
  "test8u.js": {
-  "pass": 22,
+  "pass": 23,
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 120
+  "s": 47
  },
  "test8v.js": {
   "pass": 16,
@@ -172,20 +172,20 @@
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 427
+  "s": 438
  },
  "test9e.js": {
   "pass": 59,
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 198
+  "s": 158
  },
  "test9f.js": {
   "pass": 61,
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 240
+  "s": 161
  }
 }

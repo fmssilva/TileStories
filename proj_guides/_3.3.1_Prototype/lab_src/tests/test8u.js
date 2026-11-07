@@ -60,11 +60,17 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('Take me to a point off the screen: the camera turns until it is the middle point', await R('AG.sceneRes.take&&AG.sceneRes.take.ok'), await R('AG.sceneRes.take'));
   await R('AG.mock={calls:[{name:"make_route",args:{poi_ids:["poi:bomsucesso","poi:houses"]}}],text:"A short route."};agRunScene(5)'); await W(1500);
   ok('A route over points in view passes; it is offered as a button (Route is Suggest)', await R('AG.sceneRes.route&&AG.sceneRes.route.ok&&!!ph.querySelector(".camask .agchip")'), await R('[AG.sceneRes.route,camView().pois.map(function(p){return p.id})]'));
-  // 5. Run all: every scene in turn, each with its check
+  // 5. Run all: the scenes in turn, each with its check; the console's 8, then Stop (the guide's and the guidance's scenes are
+  //    pressed one by one in test9d, test9e and test9f, so they are not run a second time here)
   await R('AG.mock={text:"Ok."};AG.sceneRes={}');
-  await p.locator('[data-agscall]').click(); await p.waitForFunction(() => !LAB.run('AG.runAll'), null, { timeout: 240000 }).catch(() => {});
-  ok('Run all scenes: twenty-five results in the table (the markers scene, the guide\'s and the guidance\'s need no model)', await R('Object.keys(AG.sceneRes).length===25&&ed.querySelectorAll(".agres tbody tr").length===25'), await R('Object.keys(AG.sceneRes)'));
-  ok('...the photo scene leaves Photo of the view as it was (Off)', await R('S.agentCfg.photo===false'));
+  await p.locator('[data-agscall]').click();
+  const ran8 = await p.waitForFunction(() => Object.keys(LAB.run('AG.sceneRes')).length >= 8, null, { timeout: 120000 }).then(() => true).catch(() => false);
+  const runLabel = await R('ed.querySelector("[data-agscall]").textContent');
+  await p.locator('[data-agscall]').click(); await p.waitForFunction(() => !LAB.run('AG.runAll'), null, { timeout: 120000 }).catch(() => {});
+  const ra = await R('var k=Object.keys(AG.sceneRes),ids=AGSCENES.map(function(s){return s.id});[k.length,k.slice(0,8).join()===ids.slice(0,8).join(),ed.querySelectorAll(".agres tbody tr").length,ed.querySelector("[data-agscall]").textContent]');
+  ok('Run all scenes: the console\'s eight in order, each with its result in the table; while it runs the button is Stop', ran8 && runLabel === 'Stop' && ra[1] && ra[2] === ra[0], [ran8, runLabel, ra]);
+  ok('...Stop ends it: the scene running ends, no next one starts, the button reads Run all scenes again', ra[0] >= 8 && ra[0] <= 9 && ra[3] === 'Run all scenes', ra);
+  ok('...the photo scene leaves Photo of the view as it was (Off)', await R('S.agentCfg.photo===false&&!!AG.sceneRes.photo'));
   // 6. the Editor rows
   ok('Editor: Trace under each answer (Outputs) and Names on the points (Ask about the view)', await R('/Trace under each answer/.test(ed.querySelector(\'[data-fo="s7agent"]\').textContent)&&/Names on the points/.test(ed.querySelector(\'[data-fo="s7cam"]\').textContent)'));
   ok('no page errors', errs.length === 0, errs.slice(0, 3));

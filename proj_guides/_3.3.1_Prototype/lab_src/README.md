@@ -31,7 +31,7 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
   - **Level 2, every 3rd-4th round, and when a round touched shared ground** (`--changed` prints SHARED GROUND or NOT IN THE
     MAP: `core/`, `editor/shell.js`, `editor/card-tab.js`…, the build and test tools; new words only in `core/words.js`
     are covered by `-tabs words`) **before its publish:**
-    `tests/runtest8.ps1` (every tab, about 3 min), then `node run_tests.js` (every file, about 28 min).
+    `tests/runtest8.ps1` (every tab, about 3 min), then `node run_tests.js` (every file, about 30 min).
   - **Level 3, every 10-12 rounds and before a hand-off to Unity:** level 2, then every mutation the tests name, and the
     results replace `tests_baseline.json`.
   - A wider level confirms, never discovers: green on 1 before 2, on 2 before 3. A round's report names the level it closed on
