@@ -25,7 +25,7 @@
 .gdring.gd-rect.gd-pulse{animation:gdringr .9s cubic-bezier(.3,.9,.4,1)}
 @keyframes gdringr{0%{opacity:0;transform:scale(.9)}55%{opacity:1;transform:scale(1.05)}100%{transform:scale(1)}}
 /* a spoken tip: the word being said is lit (a highlighter behind it, the words still 7:1 on it) */
-.gdbub .gdw{border-radius:4px;transition:background-color .12s ease}
+.gdbub .gdw{border-radius:4px}
 .gdbub .gdw.on{background:#F2DFA6;box-shadow:0 0 0 2px #F2DFA6}
 .dark .gdbub .gdw.on{background:#4A3D18;box-shadow:0 0 0 2px #4A3D18}
 /* a long press: Fewer like this? with its two answers, each a 44 px target */
