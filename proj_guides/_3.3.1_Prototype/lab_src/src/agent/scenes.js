@@ -1,5 +1,5 @@
 /* The agent tested in the prototype: the trace under each answer, every point named, the test scenes with their checks. */
-S.agentCfg.trace=true;S.camCfg.names="all";AG.scene=0;AG.sceneRes={};AG.runAll=false;
+S.agentCfg.trace=true;S.camCfg.names="all";AG.scene=0;AG.sceneRes={};AG.runAll=false;AG.stopAll=false;
 /* ----- the trace: what answered, how fast, the tokens, the cost and each tool call, under the answer (never spoken, never in the text) ----- */
 function agTrace(turn){var st=turn.st;if(!st)return"";var c=(turn.calls||[]).map(function(k){var a=k.args||{},id=a.target_id||(a.poi_ids||[]).join(",")||a.kind||a.query||(a.items||[]).map(function(i){return i.target_id}).join(",");
     return(k.ok?"✓ ":"✗ ")+k.name+(id?"("+String(id).slice(0,40)+")":"")+(k.ok&&k.policy!=="auto"?" ["+k.policy+"]":"")}).join(" · ");
@@ -52,7 +52,7 @@ function agRunScene(i){var ans=firstAnswer("agRunScene.answer",i);if(ans!==undef
     setTimeout(function(){var r=turn?sc.check(turn,ctx):[false,"no answer"];if(sc.id==="photo")S.agentCfg.photo=false;AG.sceneRes[sc.id]={ok:r[0],note:r[1],answer:turn?turn.text:"",st:turn&&turn.st,view:(ctx.in_view||[]).map(function(v){return v.name})};agConPaint();res(AG.sceneRes[sc.id])},300)}},200)})}
 function agScenesHtml(){var sc=AGSCENES[AG.scene],ctx=agContext(agWhere());
   return pipe("agScenesHtml.html",'<div class="agscenes"><div class="agconb"><select class="u agscsel" data-agscene="1">'+AGSCENES.map(function(s,i){return'<option value="'+i+'"'+(i===AG.scene?" selected":"")+'>'+esc(s.label)+'</option>'}).join("")+'</select>'+
-    '<button class="ubtn sm" type="button" data-agsetup="1">Set up</button><button class="ubtn sm" type="button" data-agscrun="1">Set up and ask</button><button class="ubtn sm" type="button" data-agscall="1">'+(AG.runAll?"Running…":"Run all scenes")+'</button></div>'+
+    '<button class="ubtn sm" type="button" data-agsetup="1">Set up</button><button class="ubtn sm" type="button" data-agscrun="1">Set up and ask</button><button class="ubtn sm" type="button" data-agscall="1">'+(AG.runAll?(AG.stopAll?"Stopping…":"Stop"):"Run all scenes")+'</button></div>'+
     '<div class="uses">Asks: “'+esc(L(sc.q))+'” · Expected: '+esc(L(sc.expect))+'</div>'+
     (agWhere()==="wall"?'<div class="uses">In view now: '+esc((ctx.in_view||[]).map(function(v){return v.name+(v.id===ctx.middle?" (middle)":"")}).join(", ")||"none")+'</div>':"")+
     (Object.keys(AG.sceneRes).length?'<table class="tbl agres"><thead><tr><th>Scene</th><th>Answer</th><th>Check</th></tr></thead><tbody>'+AGSCENES.filter(function(s){return AG.sceneRes[s.id]}).map(function(s){var r=AG.sceneRes[s.id];
@@ -62,8 +62,9 @@ ed.addEventListener("change",function(e){var t=e.target;if(!t.dataset||!t.datase
 ed.addEventListener("click",function(e){var t=e.target.closest("[data-agsetup],[data-agscrun],[data-agscall]");if(!t)return;e.stopPropagation();
   if(t.dataset.agsetup){agScene(AG.scene);return}
   if(t.dataset.agscrun){agRunScene(AG.scene);return}
-  if(AG.runAll)return;AG.runAll=true;AG.sceneRes={};agConPaint();
-  AGSCENES.reduce(function(pr,s,i){return pr.then(function(){return agRunScene(i)})},Promise.resolve()).then(function(){AG.runAll=false;agConPaint()})},true);
+  /* Run all scenes, in order; while it runs the button is Stop (the scene running ends, no next one starts) */
+  if(AG.runAll){AG.stopAll=true;agConPaint();return}AG.runAll=true;AG.stopAll=false;AG.sceneRes={};agConPaint();
+  AGSCENES.reduce(function(pr,s,i){return pr.then(function(){return AG.stopAll?null:agRunScene(i)})},Promise.resolve()).then(function(){AG.runAll=false;AG.stopAll=false;agConPaint()})},true);
 
 /* ----- Editor rows ----- */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;

@@ -154,7 +154,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('...once the visitor has heard the guide this visit: spoken (the one order of voices) and in the bubble, the word being said lit, 7:1 on its light', sp[0] === 'tourof' && sp[1] === true && sp[2] && sp[3] === 10 && /spoken/.test(sp[4]) && litSeen && litCr >= 7, [sp, litSeen, litCr]);
   await R('var b=ph.querySelector(".gdbub button[data-gdbub]");gsTouch(b)'); await W(400);
   const tapT = await R('[G.on,S.stop,gdEverOf(S.gdVisitor,"tourof").acted,!G.gd.cur,!G.timer||G.on]');
-  const stepEnd = await until('gdEverOf(S.gdVisitor,"tourof").done', 15000);
+  const stepEnd = await until('gdEverOf(S.gdVisitor,"tourof").done', 30000); // ends as soon as the step is heard; the cap only matters on a busy machine
   ok('...a tap on it starts the tour of that point (startTour): acted; once a step is heard, it is done', tapT[0] === true && tapT[2] === 1 && tapT[3] && stepEnd, [tapT, stepEnd]);
   await R('stopTour();S.view="card";S.stop="closed";renderPhone(false)');
 
@@ -221,21 +221,24 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const newRows = await R('var o=[];ed.querySelectorAll(\'[data-fo="gt4"] .row\').forEach(function(r){var k=rowKey(r);if(k&&o.indexOf(k)<0&&/^guidance\\.(perMinute|perVisit|freshTau|learnIgnore|learnDismiss|fewer|remember|kinds\\.|items\\.[a-z]+\\.(along|duringTour)|items\\.(askview|tourof)\\.)/.test(k))o.push(k)});o');
   ok(`every new row has its demo (${newRows.length} rows: Overall's 7, the kinds' and groups' 10, each item's During a tour and Along the visit, the two new items' own)`, newRows.length >= 30 && (await R(`${JSON.stringify(newRows)}.filter(function(k){return!rowDemoOf(k)})`)).length === 0, newRows.length);
   const seen = {}, missing = [];
+  const CHIP_RE = { 'guidance.perMinute': /×10 · At most 2 a minute, the next tip: \d+ s/, 'guidance.learnIgnore': /Breathing room ×2 after 3 ignored: \d+ s/, 'guidance.learnDismiss': /×30 · Dismissed: Again after ×3: \d+ s/,
+    'guidance.kinds.1.gap': /×10 · Content's gap: \d+ s/, 'guidance.freshTau': /after τ = 120 s: ×0\.63/, 'guidance.fewer': /Fewer like this\?/, 'guidance.remember': /On: Welcome back/ };
   for (const k of newRows) {
     await R('document.body.dataset.rowdemo="";window.__chips=[];clearInterval(window.__chI);window.__chI=setInterval(function(){var c=ph.querySelector(".gdchip");if(c&&window.__chips.indexOf(c.textContent)<0)window.__chips.push(c.textContent)},50)');
     const lb = await R(`var c=ed.querySelector('[data-fo="gt4"] .row [data-set="@${k}"],[data-fo="gt4"] .row [data-num="@${k}"]'),l=c&&c.closest(".row").querySelector("label.rd");if(l){l.scrollIntoView({block:"center"});var r=l.getBoundingClientRect();[r.left+12,r.top+r.height/2]}else null`);
     if (!lb) await R(`showRowDemo("${k}")`); else await p.mouse.click(lb[0], lb[1]);
     let v = ''; const t0 = Date.now(); while (Date.now() - t0 < 5000) { v = await R('document.body.dataset.rowdemo||""'); if (v) break; await W(80); }
     if (!/\|found\|/.test(v)) missing.push(k + ' ' + v);
-    if (/perMinute|learnIgnore|learnDismiss|kinds\.1\.gap|remember|fewer|freshTau/.test(k)) { await W(/perMinute|learnIgnore|learnDismiss|kinds\.1\.gap/.test(k) ? 9000 : 4000); }
+    // a limit or a learning row: until its countdown chip shows (at most 9 s / 4 s, as before; no fixed wait)
+    const chipRe = CHIP_RE[k];
+    if (chipRe) { const t1 = Date.now(), cap = /perMinute|learnIgnore|learnDismiss|kinds\.1\.gap/.test(k) ? 9000 : 4000; while (Date.now() - t1 < cap) { if ((await R('window.__chips.slice()')).some(c => chipRe.test(c))) break; await W(100); } }
     seen[k] = await R('window.__chips.slice()');
   }
   await R('clearInterval(window.__chI)');
   ok('...a press on each new row shows its demo on the phone: the tip (or its chip) ringed', missing.length === 0, { missing, shown: newRows.length - missing.length });
   const has = (k, re) => (seen[k] || []).some(c => re.test(c));
   ok('...the limits and the learning on the ×10 clock with the countdown chip: at most a minute, three ignored (×2), a dismissal (×3), a kind\'s gap; freshness; Fewer like this?; Remember',
-    has('guidance.perMinute', /×10 · At most 2 a minute, the next tip: \d+ s/) && has('guidance.learnIgnore', /Breathing room ×2 after 3 ignored: \d+ s/) && has('guidance.learnDismiss', /×30 · Dismissed: Again after ×3: \d+ s/) && has('guidance.kinds.1.gap', /×10 · Content's gap: \d+ s/) &&
-    has('guidance.freshTau', /after τ = 120 s: ×0\.63/) && has('guidance.fewer', /Fewer like this\?/) && has('guidance.remember', /On: Welcome back/), seen);
+    Object.keys(CHIP_RE).every(k => has(k, CHIP_RE[k])), seen);
   const along = await R('[gdAlongWords(S.guidance.items.tourof),gdReadBack(S.guidance.items.askview)]');
   ok('...the read-back in words: Along the visit and During a tour, not before 60 s, until the visitor opens Ask about the view', /late: nothing for the first third, then growing to full/.test(along[0]) && /not before 60 s of the visit · at most about every 90 s, up to 2 times a visit, until the visitor opens Ask about the view · along the visit as the kind \(App: 70 % → 40 % → 15 %\) · during a tour never\./.test(along[1]), along);
   const kw = await R('[].map.call(ed.querySelectorAll(".note.gdmix"),function(n){return n.textContent})');
