@@ -12,7 +12,7 @@
       visit after Fewer like this?). Its own When and Only if: after n pokes on Azu or n s idle; Lively only; never on a Solemn point;
       a point of the wall settled in the middle; two items about the ✦ never both in the visit's first minute (the Editor's order).
    3. The stage of the visit: s = max(active minutes / 15, the share of the milestones done); a returning visitor starts at 5 min.
-   4. The score of each eligible item: importance × along the visit(s) × kind weight(s) × group weight × freshness × fit; the highest
+   4. The score of each eligible item: importance × along the visit(s) × kind weight(s) (the Mix, data) × group weight × freshness × fit; the highest
       shows (Essential first); ties: the Editor's order. Deterministic, so Why not now? can always answer.
    Unity: GuidanceScheduler, plain C# (Pick(state, now), WhyNot(state, now, id)), EditMode tests on the same cases. */
 var GD_MOVE_MS=700,GD_TOUCH_MS=800,GD_CARD_MS=1500,GD_REST_MS=300000,GD_BACK_MIN=5,GD_STAGE_MIN=15,GD_FOREVER=1e15,GD_FIRST_MS=60000;
@@ -52,7 +52,8 @@ function gdVisitT(v,now){return now-(v.at||0)-(v.away||0)}
 function gdShownOf(items,visitor,f){return items.filter(f).reduce(function(a,o){return a+gdVisitOf(visitor,o.id).shown},0)}
 function gdLastEndOf(items,visitor,f){var e=null;items.forEach(function(o){if(!f(o))return;var x=gdVisitOf(visitor,o.id).end;if(x!=null&&(e==null||x>e))e=x});return e}
 /* the score: importance × along the visit × kind weight × group weight × freshness × fit, each factor kept for the words */
-function gdScore(it,items,visitor,ctx,now,st){var kw=GD_MIX[it.kind]||[100,100,100],f={imp:+it.importance||0,s:st.s};
+/* the kind's weight: its row of the Mix along the visit (S.guidance.mix, handed in with the item as kindMix: the scheduler reads only its arguments) */
+function gdScore(it,items,visitor,ctx,now,st){var kw=it.kindMix||[100,100,100],f={imp:+it.importance||0,s:st.s};
   if(it.along==="steady"){f.kind=kw[1]/100;f.along=1}else{f.kind=gdCurve(kw,st.s)/100;f.along=gdCurve(GD_CURVE[it.along]||GD_CURVE.kind,st.s)}
   f.group=it.groupWeight==null?1:+it.groupWeight;
   var vm=gdVisitOf(visitor,it.id),em=gdEverOf(visitor,it.id),last=em.last!=null?em.last:vm.last,tau=(+ctx.tau||120)*1000;f.fresh=last==null?1:1-Math.exp(-Math.max(0,now-last)/tau);

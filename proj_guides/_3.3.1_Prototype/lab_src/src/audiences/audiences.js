@@ -1,7 +1,10 @@
-/* Audiences: Family, Explorer, Expert; the first-card screen, the looks per audience, the overrides per field and Draft with AI, the guide's length. */
+/* Audiences: Family, Explorer, Expert; the first-card screen, the looks per audience, the overrides per field and Draft with AI, the guide's length.
+   Round 5 of the guidance: each audience's Guidance preset (Looks per audience › Guidance preset: Family → Family, Explorer → First visit,
+   Expert → Expert); the audience set (Who's exploring, the visitor's Settings, Preview as) is the point audience.set, which the guidance
+   joins to write that preset (guidance/service.js). Unity: AudienceLook.guidancePreset, a GuidancePreset reference */
 var AUDS=["family","explorer","expert"],LENS=["short","standard","deep"];
 S.vis.aud="explorer";S.vis.len="";
-S.aud={ask:true,seen:true,looks:{family:{life:"lively",len:"short",type:"up",orn:"stickers",corners:"round"},explorer:{life:"lively",len:"standard",type:"base",orn:"base",corners:"base"},expert:{life:"calm",len:"deep",type:"base",orn:"off",corners:"tight"}},hide:{family:{},explorer:{},expert:{"b:b_quiz":1}}};
+S.aud={ask:true,seen:true,looks:{family:{life:"lively",len:"short",type:"up",orn:"stickers",corners:"round",gdPreset:"family"},explorer:{life:"lively",len:"standard",type:"base",orn:"base",corners:"base",gdPreset:"first"},expert:{life:"calm",len:"deep",type:"base",orn:"off",corners:"tight",gdPreset:"expert"}},hide:{family:{},explorer:{},expert:{"b:b_quiz":1}}};
 COMP.s8onb=["Audiences","Who's exploring"];COMP.s8set=["Audiences","Audience in Settings"];COMP.s8look=["Audiences","Looks per audience"];
 FOCUS.s8onb=["card",".hero","half"];FOCUS.s8set=["card",".hero","half"];FOCUS.s8look=["story",'[data-ref="r:r2"]',"full"];
 function aud(){return AUDS.indexOf(S.vis.aud)>=0?S.vis.aud:"explorer"}
@@ -33,7 +36,9 @@ function stepFits(st){var l=lenNow(),ok=!S.aud.hide[aud()][st.ref]&&(st.len==="d
 on("startTour.before",function(){if(!S.howSaved&&!S.fullSteps){S.fullSteps=S.guideSteps;S.guideSteps=S.fullSteps.filter(stepFits)}ovMap()});
 on("stopTour.after",function(){if(S.fullSteps){S.guideSteps=S.fullSteps;S.fullSteps=null}});
 /* ----- the card for an audience: its looks (tokens), its hidden blocks, Azu's liveliness ----- */
-on("renderPhone.before",function(keep,cx){var a=cx.aud=aud();if(S.audApplied!==a){S.audApplied=a;S.guideCfg.life=S.aud.looks[a].life}ovMap()});on("renderPhone.after",function(keep,cx){var a=cx.aud;
+on("renderPhone.before",function(keep,cx){var a=cx.aud=aud();if(S.audApplied!==a){S.audApplied=a;S.guideCfg.life=S.aud.looks[a].life}
+  /* the audience set, or its Guidance preset changed: the guidance writes that preset (audience.set) */
+  var gp=a+"|"+(S.aud.looks[a].gdPreset||"");if(S.audGd!==gp){S.audGd=gp;emit("audience.set",a,S.aud.looks[a].gdPreset)}ovMap()});on("renderPhone.after",function(keep,cx){var a=cx.aud;
   var lk=S.aud.looks[a];AUDS.forEach(function(x){ph.classList.toggle("aud-"+x,x===a&&x!=="explorer")});
   ph.dataset.type=lk.type;ph.dataset.orn=lk.orn;ph.dataset.corners=lk.corners;
   var hide=S.aud.hide[a]||{};scr.querySelectorAll("[data-ref]").forEach(function(el){var h=!!hide[el.dataset.ref];el.classList.toggle("audhidden",h)});
@@ -61,7 +66,10 @@ var AUDN={family:"Family",explorer:"Explorer",expert:"Expert"};
 on("edCard.html",function(h){var lk=S.aud.looks;
   var looks='<table class="tbl"><thead><tr><th style="width:24%"></th>'+AUDS.map(function(a){return'<th>'+AUDN[a]+(a==="explorer"?" (default)":"")+'</th>'}).join("")+'</tr></thead><tbody>'+
     [["life","Azu",["lively","calm"],["Lively","Calm"]],["len","Length",LENS,["Short","Standard","Deep"]],["type","Type",["base","up"],["Base","A step up"]],["orn","Ornaments",["stickers","base","off"],["Stickers","Base","Off"]],["corners","Corners",["round","base","tight"],["Round","Base","Tight"]]].map(function(r){
-      return'<tr><td>'+r[1]+'</td>'+AUDS.map(function(a){return'<td>'+pseg("aud.looks."+a+"."+r[0],r[2],r[3])+'</td>'}).join("")+'</tr>'}).join("")+'</tbody></table>';
+      return'<tr><td>'+r[1]+'</td>'+AUDS.map(function(a){return'<td>'+pseg("aud.looks."+a+"."+r[0],r[2],r[3])+'</td>'}).join("")+'</tr>'}).join("")+
+    /* the guidance preset this audience sets (Guide › 4 · Guidance › Overall › Preset) */
+    '<tr class="audgd"><td>Guidance preset</td>'+AUDS.map(function(a){return'<td>'+psel("aud.looks."+a+".gdPreset",GD_PRESET_IDS)+'</td>'}).join("")+'</tr></tbody></table>'+
+    '<div class="note">Guidance preset: the audience chosen in Who\'s exploring (or in Settings) sets it, so the guide speaks up as that audience needs (Guide › 4 · Guidance › Overall › Preset, where each preset\'s values are). Now: '+esc(AUDN[aud()]+" → "+gdPresetName(S.aud.looks[aud()].gdPreset)+(gdPresetNow()==="custom"?" (changed by hand since: Custom)":""))+'.</div>';
   var body='<div class="note">Who is exploring: one preset changes the words (where the point has them), the guide\'s length, Azu and a few looks. One design for all; a preset is a content preference, never an age, kept on the phone only.</div>'+
     row("Preview as",pseg("vis.aud",AUDS,["Family","Explorer","Expert"]),"The phone shows the card as this audience sees it (also on the preview bar).")+
     comp("s8onb","the first card asks once: Family, Explorer or Expert; Skip = Explorer",row("Ask on the first card",pseg("aud.ask",["true","false"],["On","Off"]),"The first time a card opens, one screen: three choices and Skip. Never again after an answer or a Skip.")+
@@ -119,3 +127,5 @@ ed.addEventListener("change",function(e){var t=e.target;if(!t.dataset)return;if(
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("ctl\\.jump\\.","ctl\\.jump\\.|aud\\.ask|aud\\.looks\\.|aud\\.hide\\."));
 /* each row's demo: the card as that audience sees it; the first-card question */
 rowDemos({"vis.aud":{stop:"full",ring:".hero"},"aud.ask":{stop:"full",act:function(){onbShow()},ring:".onb"}});
+/* an audience's Guidance preset: that preset simulated (Guide › 0 · Preview & Test › Simulate a visit), two visit-minutes ×10 on the wall */
+rowDemos(AUDS.reduce(function(m,a){m["aud.looks."+a+".gdPreset"]={wall:true,act:function(){gdDemoAudPreset(a)},ringAfter:600,ring:".gdchip|.gdbub"};return m},{}));
