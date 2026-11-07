@@ -19,9 +19,19 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     file: about 31 min) every 3rd-4th round and when a round touches shared ground; level 3 every 10-12 rounds and before a
     Unity hand-off. The rules: `lab_src/README.md` "Levels". Count the rounds since the last level 2 and 3 in every answer:
     1 and 1 after guidance round 2 (level 2 last ran on round 1; level 3 never yet).
-  - **Next block for the tests:** make them faster. Measure how much of a file's minute is starting Edge and loading the
-    13 MB page; then pure logic checks in Node (the scheduler) and one Edge with one page for all files. `test9d` failed two
-    timing checks once in three runs (Azu not yet settled beside the block): watch it.
+  - **Where the tests' time goes (measured 2026-11-07):**
+    - Starting Edge and loading the 13 MB page costs only about 8 s a file (Edge 0.3-0.8 s, the page 7 s), so one shared Edge
+      would save almost nothing.
+    - The time is the tests' own work: test9d presses 72 rows' demos (114 s) and clicks about 25 values (68 s); scenes run in
+      real time.
+    - Done:
+      - Run all scenes has a Stop; test8u runs the console's 8 and stops (258 s to 47 s).
+      - test9f waits for each chip instead of fixed 4-9 s.
+      - test9d no longer presses 4 · Guidance's rows (test9e presses every one).
+      - Caps that end as soon as the thing happens were widened, so a busy machine does not fail them.
+    - **A busy machine fails timing checks:** VS Code once held the CPU at 60-99 % and every file ran 30-50 % slower with false
+      reds. Check the load first (`(Get-CimInstance Win32_Processor).LoadPercentage`); a window reload fixed it.
+    - Still open: pure logic in Node (the scheduler reads the page's catalog, so not simple yet).
   - **Decided and built on 2026-11-05/06:**
     - The voice: one order for every line (`sayOrder`, `src/guide/voice.js`): the recorded line, else the live voice (when its
       key is on this computer), else the device's; "Speaking now" in the Editor says which and why. Best available prefers a
