@@ -5,7 +5,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-07)
 
 - **State:**
-  - **The Lab:** `master` holds guidance rounds 1-3, verified on 2026-11-06/07, published as v32 at the new link (section 1;
+  - **The Lab:** `master` holds guidance rounds 1-4, verified on 2026-11-06/07, published as v33 at the new link (section 1;
     the old link stays at v29). Its code is in modules by feature
     (`lab_src/src/<area>/<module>.js`), with no wrappers: `lab_src/PROTOTYPE_STRUCTURE.md` says where each feature lives and
     where a change goes. The build only joins files (`build.py`) and refuses wrappers, re-assignments of functions, second
@@ -50,18 +50,20 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     sources in `_3.8_guidance_plans/`). Decisions: a top-level **Guide** tab (today's 6 · Guide + Guidance + the first pages);
     App and Fun tips as a bubble only, Content spoken once the guide has been heard; a deterministic mix; the card Hints edited
     in Guidance with a view in Card Controls.
-  - **Guidance rounds 1-3 are done** (merged into `master`; the briefs `_3.8_guidance_plans/brief_round1.md` to
-    `brief_round3.md`).
+  - **Guidance rounds 1-4 are done** (merged into `master`; the briefs `_3.8_guidance_plans/brief_round1.md` to
+    `brief_round4.md`).
     - Round 2: the memory and the visit, every gate and limit, the stage and the score, the learning, Ask about the view
       and A tour of {point}, Why not now? / The visitor / Log, five console scenes; `tests/test9f.js`.
     - Round 3: Azu's wall remarks became Content › What's in view (one item a point) and the ✦ hint App › The wall ›
       The ✦; their old timers removed; two scenes; `tests/test9g.js`.
+    - Round 4: the card Hints became App › The card (cues, a Cue room of 5 s) and How to use the card a pulled
+      walkthrough, also from the ✦ menu's How does this work?; Card Controls > Hints a view; `tests/test9h.js`.
     - Their captures were judged by the Architect; the developer reviews later, step by step. The open look questions:
       round 1's PT opening line, what "Mascot Off" means, Azu's size beside the marker; rounds 2 and 3's in the closing
       answers of 2026-11-06/07 (among them: a group's own shorter gap, the remarks counting in Content's cap, The ✦ on the
       card, a ring for The ✦ with the 3D model, "The" mid-sentence in the remark lines).
-    - **Next: guidance round 4** (`_3.8` section 8: the card Hints and How to use the card join; the ✦ "How does this
-      work?"), as a brief to an Opus subagent, in the shape of `brief_round3.md`. Prototype only (no Unity) until the
+    - **Next: guidance round 5** (`_3.8` section 8: the simulator, presets, Talkativeness, the Mix table, the audiences'
+      preset), as a brief to an Opus subagent, in the shape of `brief_round4.md` with the short level 1. Prototype only (no Unity) until the
       developer says so.
   - **MCP:** blender-mcp at user scope (Blender 5.2.3, add-on 1.8, port 9876). The Unity MCP was not connected this stretch.
   - **Keys:** Gemini, Azure Speech and ElevenLabs answer (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).
