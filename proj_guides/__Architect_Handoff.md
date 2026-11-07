@@ -13,13 +13,17 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
   - **Proof of the Lab:** the self-test (`tests/runtest8.ps1`: three walks side by side, about 3 min) gives
     `ok=1179 behaviour=785 bad=0` (round 3, 2.1 min); `node run_tests.js` runs the 28 test files one at a time (about 30
     min; `tests_baseline.json`). test9d takes about 490 s of its 600 s limit: watch it.
-  - **Test levels (decided 2026-11-06, cut the same day: the developer refused 1h30 of tests a round):** while building, only
-    the build and captures, iterated until the app and the Editor look right (`skills/Feature_Prototyping.md` step 3.3); then
-    level 1 once per round (its test files, its mutation, the self-test of its tab: about 10 min); level 2 (every tab, every
-    file: about 31 min) every 3rd-4th round and when a round touches shared ground; level 3 every 10-12 rounds and before a
-    Unity hand-off. The rules: `lab_src/README.md` "Levels". Count the rounds since the last level 2 and 3 in every answer:
-    0 and 3 after guidance round 3 (level 2 ran on round 3, 2026-11-07: every tab bad=0, every file green; level 3 never
-    yet).
+  - **Test levels** (decided 2026-11-06; cut twice since: the developer refused 1h30 of tests a round, then a 30-min level 1
+    on 2026-11-07). The rules are in `lab_src/README.md` "Levels". Every brief repeats them.
+    - **While building:** only the build and captures, iterated until the app and the Editor look right
+      (`skills/Feature_Prototyping.md` step 3.3).
+    - **Level 1, once a round (5-7 min):** the round's new test file, plus the file of what it replaced, its mutation, and the
+      self-test of its tab. No `--changed` run: it pulled 8-10 files.
+    - **Level 2, every 3rd-4th round (about 35 min):** every tab and every file. It runs sooner when a round changed existing
+      shared code.
+    - **Level 3, every 10-12 rounds and before a Unity hand-off:** level 2, every mutation and a new baseline.
+    - Count the rounds since the last level 2 and 3 in every answer. After guidance round 4 that is 1 and 4: level 2 ran on
+      round 3 on 2026-11-07, and level 3 has not run yet.
   - **Where the tests' time goes (measured 2026-11-07):**
     - Starting Edge and loading the 13 MB page costs only about 8 s a file (Edge 0.3-0.8 s, the page 7 s), so one shared Edge
       would save almost nothing.

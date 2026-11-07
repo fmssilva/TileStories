@@ -9,9 +9,10 @@ function initGrab(gb){gb.setAttribute("role","button");gb.tabIndex=0;
       var dy=(ev.clientY-y0)/k;S.stop=dy<-40?UP[S.stop]:dy>40?DOWN[S.stop]:S.stop;renderPhone(true)}
     gb.addEventListener("pointermove",mv);gb.addEventListener("pointerup",up)});
   gb.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();stepStop()}})};
-/* a hint (Card Controls > Hints): the card opened at Half rises 8 px and settles, so the visitor sees it moves (never with Reduce Motion) */
-function nudgeOnce(){var m=S.hints.on?S.hints.nudge:"off";if(m==="off"||S.reduce||(m==="visit"&&S.nudged))return;S.nudged=true;var gb=document.getElementById("grab"),k=[{transform:"none"},{transform:"translateY(-8px)",offset:.4},{transform:"none"}],o={duration:700,delay:450,easing:"ease-in-out"};
-  scr.animate(k,o);if(gb)gb.animate(k,o)}
+/* the Grabber nudge's look (a cue: Guide › Guidance › App › The card, which decides when): the card opened at Half rises 8 px and
+   settles, so the visitor sees it moves; it plays 1.15 s. Unity: a translate tween on the sheet and the grabber (USS translate, 0.45 s delay) */
+function cueNudge(){var gb=document.getElementById("grab"),k=[{transform:"none"},{transform:"translateY(-8px)",offset:.4},{transform:"none"}],o={duration:700,delay:450,easing:"ease-in-out"};
+  scr.animate(k,o);if(gb)gb.animate(k,o);return 1150}
 /* the half card's picture and the peek row open the card one stop too */
 ph.addEventListener("click",function(e){if(S.view!=="card")return;var t=e.target;
   if(S.stop==="peek"&&t.closest(".peekrow")){e.stopPropagation();stepStop();return}

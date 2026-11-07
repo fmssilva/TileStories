@@ -4,7 +4,7 @@ function shownInPlace(){var r=scr.getBoundingClientRect();scr.classList.add("sti
   void scr.offsetHeight;scr.classList.remove("still")}
 on("renderPhone.before",function(keep,cx){cx.top=scr.scrollTop;cx.view=S.view;cx.was=S.lastStop;if(!keep||cx.view!==S.lastView)S.heroH=0;S.lastView=cx.view});
 on("renderPhone.after",function(keep,cx){var top=cx.top,view=cx.view,was=cx.was;if(keep&&S.view===view){scr.scrollTop=top;shownInPlace()}
-  S.justOpened=S.view==="card"&&S.stop!=="closed"&&was==="closed";S.stopMoved=S.view==="card"&&was!==S.stop;if(S.stopMoved)S.movedAt=performance.now();if(S.justOpened&&S.stop==="half")nudgeOnce();S.lastStop=S.view==="card"?S.stop:"closed";
+  S.justOpened=S.view==="card"&&S.stop!=="closed"&&was==="closed";S.stopMoved=S.view==="card"&&was!==S.stop;if(S.stopMoved)S.movedAt=performance.now();S.lastStop=S.view==="card"?S.stop:"closed";
   if(S.view!=="democard")S.beforeDemo={view:S.view,stop:S.stop};
   if(S.view==="democard"&&S.settingsOpen&&!ph.querySelector(".vset"))ph.insertAdjacentHTML("beforeend",settingsPanel());
   var gb=document.getElementById("grab");if(gb)gb.setAttribute("aria-label",TXT(S.stop==="full"?"sheet_collapse":"sheet_expand"))});

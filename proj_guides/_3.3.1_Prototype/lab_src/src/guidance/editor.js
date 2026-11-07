@@ -19,6 +19,11 @@ FOCUS["gd:overall"]=["card","#wall","closed"];FOCUS["gd:app"]=["card","[data-mar
 FOCUS["gd:g:start"]=["card","[data-marker]","closed"];FOCUS["gd:g:wall"]=["card",".gbtn-wrap","closed"];FOCUS["gd:g:tours"]=["card","[data-marker]","closed"];FOCUS["gd:g:inview"]=["card","#wall","closed"];
 FOCUS["gd:i:opening"]=["card",".gbtn-wrap","closed"];FOCUS["gd:i:tapmarker"]=["card","[data-marker]","closed"];FOCUS["gd:i:askview"]=["card",".gbtn-wrap","closed"];FOCUS["gd:i:tourof"]=["card","[data-marker]","closed"];
 FOCUS["gd:i:gbhint"]=["card",".gbtn-wrap","closed"];FOCUS["gd:i:inview"]=["card","#wall","closed"];
+/* round 4: App › The card (cues), each opened on the card at its element; App › How to use the card (its steps' words, the ✦ menu's) */
+var GD_CUE_SEL={nudge:"#grab",label:".locpin",navbar:"#navbar",ba:"[data-ba]",strip:".el-car,.hstrip",term:".gterm"};
+COMP["gd:g:card"]=["Guide","Guidance › The card (cues)"];FOCUS["gd:g:card"]=["card","#grab","half"];COMP["gd:g:howto"]=["Guide","Guidance › How to use the card"];FOCUS["gd:g:howto"]=["card",".chrome","half"];
+Object.keys(GD_CUE_SEL).forEach(function(id){COMP["gd:i:"+id]=["Guide","Guidance › The card › "+S.guidance.items[id].label];FOCUS["gd:i:"+id]=["card",GD_CUE_SEL[id].split(",")[0],id==="nudge"||id==="label"?"half":"full"]});
+gdGroupById("howto").items.forEach(function(id){var it=S.guidance.items[id];COMP["gd:i:"+id]=["Guide","Guidance › How to use the card › "+it.label];FOCUS["gd:i:"+id]=["card",it.sel||".hero","full"]});
 /* a guidance word's place in the tab (Languages & Terms' links; Global Scene's link) */
 function gdKindOfGroup(gid){var k=null;S.guidance.kinds.forEach(function(x){x.groups.forEach(function(g){if(g.id===gid)k=x.id})});return k}
 on("guidePath.answer",function(o){if(o==="gd:overall"||/^gd:(app|content)$/.test(o))return["gt4",o];if(o.indexOf("gd:g:")===0)return["gt4","gd:"+(gdKindOfGroup(o.slice(5))||"app"),o];
@@ -28,6 +33,8 @@ TX_DOM.wall_tip="shown in the guide's tip beside the nearest marker";TX_DOM.gd_o
 TX_DOM.gd_askview="shown in the guide's tip beside the ✦";TX_DOM.gd_tourof="shown in the tour invitation on the wall";
 TX_DOM.fab_comment_1="shown in Azu's remark on the point in the middle, in turn";TX_DOM.fab_comment_2=TX_DOM.fab_comment_1;TX_DOM.fab_comment_3=TX_DOM.fab_comment_1;
 TX_DOM.fab_comment_card="shown in Azu's remark on a point with a card";TX_DOM.gb_hint="shown in the guide's tip beside the ✦ (after pokes on Azu, or idle)";
+TX_DOM.hint_navbar="shown over the Navigation Bar in its cue";TX_DOM.gd_how="shown in the ✦ menu";TX_DOM.gd_how_wall="shown in How does this work? on the wall";TX_DOM.gd_how_open="shown in How does this work? on the wall";
+["how_grab","how_settings","how_bar","how_locate","how_block"].forEach(function(k){TX_DOM[k]="said in How to use the card's walkthrough"});
 TX_DOM.gd_fewer="shown after a long press on a tip";TX_DOM.gd_fewer_yes="shown after a long press on a tip";TX_DOM.gd_fewer_no="shown after a long press on a tip";
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(guidance\\.|"));
 /* the visit's time as the Log and the visitor read it: m:ss */
@@ -42,7 +49,29 @@ var GD_TAP_WORDS={close:"it closes (acted)",view:"Ask about the view opens (acte
 function gdPointsWords(it){var ins=gdInstances(it.id),wn=S.camCfg.wall==="belem"?"the Belém panorama":"the Ribeira painting";
   return"One item a point of the wall in the Lab ("+wn+", "+ins.length+" points): "+ins.map(function(x){return x.pointName+(x.card&&it.cardLine!==false?" (a card: its own line)":"")}).join(", ")+
     ". Each once a visit, with its own memory; the others say the 3 remarks in turn, so never the same twice in a row."}
-function gdItemRow(it){var p="guidance.items."+it.id+".",k=gdKindOf(it),g=gdGroupOf(it),i=g?g.items.indexOf(it.id):0,pv=i>0&&g.mode==="order"?S.guidance.items[g.items[i-1]]:null;
+/* a cue's row (App › The card): On, its name, importance, how often, ▸ Show now; opened: Label, its words (where it has any), Shows (Once a
+   visit / Every card), Done when (a step of How to use the card), the fixed ones in words (its element, its look, Reduce Motion, the cue
+   room) and its read-back */
+function gdCueRow(it){var p="guidance.items."+it.id+".",r=+S.guidance.cueRoom||0;
+  var sum='<span class="gdi"><span class="gdon">'+pseg(p+"on",["true","false"],["On","Off"])+'</span><b>'+esc(it.label)+'</b><span class="badge">CUE</span>'+gdDots(it)+
+    '<span class="gdhow">'+esc(gdHowOften(it))+'</span><button type="button" class="ubtn sm gdshow" data-gdshow="'+it.id+'" title="Show it on the card now">&#9656; Show now</button></span>';
+  var words=it.id==="label"?'<div class="note">Says: the Locate Button\'s own label, “'+esc(TXT("locate_label"))+'” (Languages &amp; Terms, owned by Card Controls › Locate Button).</div>':
+    it.says?'<div class="sub2">Says · its words over the bar (Languages &amp; Terms, owned here)</div>'+txPanel("gd:i:"+it.id):'<div class="note">No words: motion on the element only.</div>';
+  var body=row("Label",'<input class="u" data-path="'+p+'label" value="'+esc(it.label)+'">',"Editor only: the cue's name in these lists, in Card Controls > Hints, the Log and the scenes.")+words+
+    row("Shows",pseg(p+"shows",GD_CUE_SHOWS.map(function(x){return x[0]}),GD_CUE_SHOWS.map(function(x){return x[1]})),"Once a visit: once it has shown, not again this visit. Every card: once on each card the visitor opens. Off (the row's On): never. A cue is not a tip: the tips' limits (at most a minute, a visit, App's cap) do not count it.")+
+    row("Done when",pseg(p+"doneWhen",GD_DONE_CUE.map(function(x){return x[0]}),GD_DONE_CUE.map(function(x){return x[1]})),"Retired for good once the visitor has seen that step of How to use the card (its line heard): the walkthrough taught it, so the cue is not needed.")+
+    '<div class="note gdfix">'+esc("Its element: "+GD_CUE_WHEN[it.about]+" · Its look: "+it.look+" · Under Reduce Motion: "+(it.reduce==="skip"?"skipped (it is a movement)":"shown, with no travel")+
+      " · One at a time: never two cues at once, never with a tip; the cue room ("+r+" s, 1 · Overall) between a tip and a cue, either way; none between two cues · Never in a tour, with a panel open, while the visitor scrolls or touches (0.8 s), or in the card's first 1.5 s"+(it.when==="open"?" (it answers the opening itself, so the touch that opened the card and the first 1.5 s do not hold it)":"")+". Fixed for this cue.")+'</div>'+
+    '<div class="note gdrb">'+esc(gdReadBack(it))+'</div>';
+  return fo("gd:i:"+it.id,sum,null,body,4)}
+/* a step of How to use the card: On, its name, ▸ Show now (the walkthrough from this step); opened: Label, its words, what it marks and
+   what seeing it retires, its read-back */
+function gdStepRow(it){var p="guidance.items."+it.id+".";
+  var sum='<span class="gdi"><span class="gdon">'+pseg(p+"on",["true","false"],["On","Off"])+'</span><b>'+esc(it.label)+'</b><span class="gdhow">'+esc(gdHowOften(it))+'</span><button type="button" class="ubtn sm gdshow" data-gdshow="'+it.id+'" title="Walk the card from this step">&#9656; Show now</button></span>';
+  var body=row("Label",'<input class="u" data-path="'+p+'label" value="'+esc(it.label)+'">',"Editor only: the step's name in these lists and the read-back.")+
+    '<div class="sub2">Says · its line in the walkthrough (Languages &amp; Terms, owned here)</div>'+txPanel("gd:i:"+it.id)+'<div class="note gdrb">'+esc(gdReadBack(it))+'</div>';
+  return fo("gd:i:"+it.id,sum,null,body,4)}
+function gdItemRow(it){if(it.form==="cue")return gdCueRow(it);if(it.form==="walk")return gdStepRow(it);var p="guidance.items."+it.id+".",k=gdKindOf(it),g=gdGroupOf(it),i=g?g.items.indexOf(it.id):0,pv=i>0&&g.mode==="order"?S.guidance.items[g.items[i-1]]:null;
   var sum='<span class="gdi"><span class="gdon">'+pseg(p+"on",["true","false"],["On","Off"])+'</span><b>'+esc(it.label)+'</b>'+(it.essential?'<span class="badge new">ESSENTIAL</span>':"")+gdDots(it)+
     '<span class="gdhow">'+esc(gdHowOften(it))+'</span><button type="button" class="ubtn sm gdshow" data-gdshow="'+it.id+'" title="Show it on the phone now">&#9656; Show now</button></span>';
   var body=row("Label",'<input class="u" data-path="'+p+'label" value="'+esc(it.label)+'">',"Editor only: the item's name in these lists, in the read-back, the Log and the scenes. The visitor never sees it.")+
@@ -98,6 +127,7 @@ on("edGuide.html",function(h){var d=document.createElement("div");d.innerHTML=h;
     row("Log",'<div class="gdlog" id="gdlog" role="log" aria-label="The last 30 decisions">'+gdLogHtml()+'</div>',"The last 30 decisions, the newest first: each with the visit's time, shown (and why: its rules and its score), skipped (why nothing shows: a gate, or each item's reason; written when the reason changes), ended (and how: acted, dismissed, ignored, or the moment), and what the learning changed."));
   var g=S.guidance,ov=row("Guidance",pseg("guidance.on",["true","false"],["On","Off"]),"On: the guide takes the initiative at a pause, one tip at a time, never over a sentence, never while the phone moves. Off: no tips; what the visitor asks for (the ✦ menu, Ask) still answers.")+
     row("Breathing room (s)",pslider("guidance.breathing",5,60,1),"Seconds between any two tips, from the end of one to the start of the next (an Essential item skips it). Doubled after three ignored in a row (below).")+
+    row("Cue room (s)",pslider("guidance.cueRoom",0,30,1),"Seconds between a tip and a card cue (a hint on the card: the grabber's nudge, the bar's ring…), either way: from the end of a tip to a cue, and from the end of a cue to a tip. Shorter than the breathing room: a cue is a small movement on the element, no bubble, no mascot. Two cues follow each other with no room, one at a time. 0: none (still never at once).")+
     row("At most a minute",pslider("guidance.perMinute",1,6,1),"Tips that may start in any 60 s (an Essential item skips it). Talkative scripts meet it; most visits never do.")+
     row("At most a visit",pslider("guidance.perVisit",5,60,1),"Tips in one visit, all kinds together (an Essential item skips it). A kind has its own cap below.")+
     row("Freshness (s)",pslider("guidance.freshTau",30,600,10),"Seconds (τ) to recover. An item just shown scores ×0, then recovers: 1 − e^(−t/τ) (after τ: ×0.63, after 2τ: ×0.86). So a tip that was just seen yields to another when both are due.")+
@@ -111,12 +141,20 @@ on("edGuide.html",function(h){var d=document.createElement("div");d.innerHTML=h;
       row("Gap (s)",pslider(kp+"gap",0,180,5),"Seconds from the end of one "+k.name+" item to the start of the next (0: only the breathing room). An Essential item skips it.")+
       '<div class="note gdmix">'+esc(gdKindWords(k))+'</div>';
     k.groups.forEach(function(g,gi){var items=g.items.map(function(id){return S.guidance.items[id]}).filter(Boolean),gp=kp+"groups."+gi+".",per=items.some(function(x){return x.perPoint});
-      inner+=fo("gd:g:"+g.id,esc(g.name)+' <span class="sub">· '+(g.mode==="order"?"In order: the visit's first words, then the first gesture":per?"one item a point of the wall: Azu's remarks":"each on its own")+'</span>',null,
-        '<div class="note">'+(g.mode==="order"?"In order: an item waits until the one before it has shown this visit.":"Each item on its own.")+' A row: On, its name, importance (●), how often, ▸ Show now; open it for its fields.</div>'+
+      /* a pulled group (How to use the card): no weight, cap or gap (never scheduled, never capped); where it opens, its words, its steps */
+      if(g.pulled){inner+=fo("gd:g:"+g.id,esc(g.name)+' <span class="sub">· a walkthrough, in order, pulled only</span>',null,
+        '<div class="note">Pulled only: never scheduled, never capped, never by itself. It opens from the visitor\'s Settings and from the ✦ menu (How does this work?). On a card it walks the card, step by step, through the guide\'s tour; on the wall one bubble says how the wall works and offers to open a card. A step seen (its line heard) retires its cue in The card (cues).</div>'+
+        row("On",pseg(gp+"on",["true","false"],["On","Off"]),"Off: the walkthrough is gone, and with it its entries in Settings and the ✦ menu.")+
+        row("In Settings",pseg(gp+"inSettings",["true","false"],["Shown","Hidden"]),"A button at the foot of the visitor's Settings, “"+TXT("settings_how")+"” (its word in Card Controls › Settings panel). It closes the panel and walks the card.")+
+        row("In the ✦ menu",pseg(gp+"inMenu",["true","false"],["Shown","Hidden"]),"An item of the ✦ menu, “"+TXT("gd_how")+"”, on the card and on the wall: on the card it walks the card; on the wall one bubble says how the wall works, with a chip that opens a card.")+
+        '<div class="sub2">Its words · the ✦ menu\'s item and the wall\'s bubble (Languages &amp; Terms, owned here)</div>'+txPanel("gd:g:"+g.id)+
+        '<div class="note">Its steps, in this order (a row: On, the step, ▸ Show now walks the card from it; open it for its words):</div>'+items.map(gdItemRow).join(""),3);return}
+      inner+=fo("gd:g:"+g.id,esc(g.name)+' <span class="sub">· '+(g.mode==="order"?"In order: the visit's first words, then the first gesture":per?"one item a point of the wall: Azu's remarks":g.id==="card"?"the card's hints, one cue each: motion on the element, no mascot":"each on its own")+'</span>',null,
+        '<div class="note">'+(g.mode==="order"?"In order: an item waits until the one before it has shown this visit.":g.id==="card"?"Each cue on its own, at the moment its feature is in reach, taking turns with the tips (one at a time, the cue room between them). Card Controls › Hints shows them as a view.":"Each item on its own.")+' A row: On, its name, importance (●), how often, ▸ Show now; open it for its fields.</div>'+
         row("On",pseg(gp+"on",["true","false"],["On","Off"]),"Off: none of "+g.name+"'s items show (each keeps its own On)."+(per?" Ask › Ask about the view › Azu comments is this same switch.":""))+
         row("Weight",pslider(gp+"weight",0,2,0.1),"×: this group's items' scores against the others' (1: as they are; 0: they never win).")+
-        row("At most a visit",pslider(gp+"cap",0,40,1),"The "+g.name+" items in one visit, all together (0: no cap of its own; "+k.name+"'s "+k.cap+" still holds). An Essential item skips it.")+
-        row("Gap (s)",pslider(gp+"gap",0,120,1),"Seconds from the end of one "+g.name+" item to the start of the next. 0: as the kind ("+k.name+"'s "+k.gap+" s); more: the group's own, in place of the kind's. The breathing room between any two tips ("+S.guidance.breathing+" s) still holds.")+
+        row("At most a visit",pslider(gp+"cap",0,40,1),"The "+g.name+" items in one visit, all together (0: no cap of its own; "+(g.id==="card"?"a cue is not a tip, so "+k.name+"'s cap does not count it":k.name+"'s "+k.cap+" still holds")+"). An Essential item skips it.")+
+        row("Gap (s)",pslider(gp+"gap",0,120,1),"Seconds from the end of one "+g.name+" item to the start of the next. 0: "+(g.id==="card"?"none: two cues follow each other with no room":"as the kind ("+k.name+"'s "+k.gap+" s)")+"; more: the group's own, in place of the kind's. The breathing room between any two tips ("+S.guidance.breathing+" s) still holds.")+
         items.map(gdItemRow).join(""),3)});
     gs+=fo("gd:"+k.id,esc(k.name)+' <span class="sub">· '+gdKindSub(k)+'</span>',null,inner,2)});
   d.insertAdjacentHTML("beforeend",fo("gt4",sectionTitle("4","Guidance","when the guide speaks up: a tip at a pause, one at a time"),["new","NEW"],
@@ -148,7 +186,7 @@ function gdItemNow(id){var all=gdItems(),x=all.filter(function(o){return o.id===
 function gdDemoBegin(){G.gd.demo=true;G.gd.demoOwner=G.demoSeq;clearTimeout(G.gd.demoT);clearInterval(G.gd.demoI);gdStop("an Editor demo");gdChip(null);return G.demoSeq}
 function gdDemoLive(my){if(G.demoSeq===my)return true;if(G.gd.demoOwner===my){G.gd.demo=false;gdChip(null);clearInterval(G.gd.demoI)}return false}
 function gdDemoEnd(my,ms){G.gd.demoT=setTimeout(function(){if(!gdDemoLive(my))return;gdChip(null);gdStop("the demo ended");G.gd.demo=false},ms)}
-function gdDemoShow(it,ms,o){var need=it.about==="marker"&&!gdMarker()||it.about==="middle"&&!(gdCentral()||{}).tour||it.about==="gbtn"&&!gdGbtn()||it.about==="point"&&!gdCentral();
+function gdDemoShow(it,ms,o){if(it.form==="cue"){cuePlace(it.id);return gdStart(it,"the Editor's demo",Object.assign({pull:true,ms:ms||4000},o||{}))}var need=it.about==="marker"&&!gdMarker()||it.about==="middle"&&!(gdCentral()||{}).tour||it.about==="gbtn"&&!gdGbtn()||it.about==="point"&&!gdCentral();
   if(need&&typeof setWall==="function"){setWall("ribeira");S.stop="closed";renderPhone(false)}
   /* a per-point item: the one of the point in the middle now */
   if(it.base){var m=gdItemNow(it.base);if(m)it=m}
@@ -158,7 +196,7 @@ var GD_FIELD_CHIP={essential:function(it){return it.essential?"Essential: it ski
   importance:function(it){return"Importance "+it.importance+" of 5: when two are due, the higher scores more"}};
 function gdDemoItem(id,field){var my=gdDemoBegin(),it=gdItemNow(id);if(!it)return;
   if(!it.on){gdChip("Off: the "+it.label+" never shows");gdDemoEnd(my,3500);return}
-  var c=gdDemoShow(it);if(GD_FIELD_CHIP[field])gdChip(GD_FIELD_CHIP[field](it));gdDemoEnd(my,Math.max(3500,c.until-c.at+300))}
+  var c=gdDemoShow(it);if(GD_FIELD_CHIP[field])gdChip(GD_FIELD_CHIP[field](it));gdDemoEnd(my,Math.max(3500,c?c.until-c.at+300:0))}
 /* Shows and Again after: the item, the ×10 countdown to its next time, the item again, then how often in words */
 function gdDemoTwice(id){var my=gdDemoBegin(),it=gdItemNow(id);if(!it)return;
   if(!it.on){gdChip("Off: the "+it.label+" never shows");gdDemoEnd(my,3500);return}
@@ -203,6 +241,7 @@ var GD_DEMO_ROWS={
       {show:it.id,chip:on?"An App tip waits ×3; a Content item rests its group 5 min":"Off: a dismissal changes nothing"}]},
   fewer:function(){var it=gdOnItems()[0];if(!it)return[];if(!S.guidance.fewer)return[{show:it.id,ms:4000,chip:"Off: a long press does nothing",wait:3000}];
     return[{show:it.id,ms:9000,chip:"A long press on the tip…",wait:900},{fn:function(){gdAskFewer()},chip:"Fewer like this? Fewer: its group rests for the visit",wait:3600}]},
+  cueRoom:function(){var r=+S.guidance.cueRoom;return[{show:"gbhint",ms:2400,chip:"×10 · a tip (the ✦)",wait:2600},{stop:true,count:r,label:"The cue room after a tip"},{show:"navbar",chip:r>0?"×10 · then a cue: the bar's ring and its words":"Cue room 0: the cue right after the tip (never at once)",wait:3600}]},
   remember:function(){var on=S.guidance.remember!==false,op=gdItemNow("opening");
     return[{chip:"×10 · Leave for 31 min: the visit ends",wait:1500},{show:op&&op.on?"opening":null,o:{ret:on},chip:on?"On: Welcome back (a returning visitor, the stage from 5 min)":"Off: a first visit again (nothing remembered)",wait:3400}]}};
 function gdDemoKind(ki,f){var k=S.guidance.kinds[ki];if(!k)return;var its=gdOnItems(k.id);
@@ -223,8 +262,8 @@ function gdDemoGroupField(ki,gi,f){var k=S.guidance.kinds[ki],g=k&&k.groups[gi];
   if(!its.length){gdDemo([{chip:g.name+": no item is On",wait:3000}]);return}var a=gdItemNow(its[0].base||its[0].id);
   if(f==="on"){gdDemo([{show:a.id,chip:g.name+" On: its items take part in the score",wait:3200}]);return}
   if(f==="cap"){var n=its.reduce(function(s,o){return s+gdVisitOf(S.gdVisitor,o.id).shown},0);
-    gdDemo([{show:a.id,chip:+g.cap>0?g.name+": at most "+g.cap+" a visit ("+n+" so far)":g.name+": no cap of its own ("+k.name+"'s "+k.cap+" a visit holds)",wait:3200}]);return}
-  if(!(+g.gap>0)){gdDemo([{show:a.id,chip:g.name+": no gap of its own, as the kind ("+k.name+"'s "+k.gap+" s)",wait:3200}]);return}
+    gdDemo([{show:a.id,chip:+g.cap>0?g.name+": at most "+g.cap+" a visit ("+n+" so far)":g.name+": no cap of its own ("+(g.id==="card"?"a cue is not a tip: "+k.name+"'s cap does not count it":k.name+"'s "+k.cap+" a visit holds")+")",wait:3200}]);return}
+  if(!(+g.gap>0)){gdDemo([{show:a.id,chip:g.id==="card"?g.name+": no gap: two cues follow each other, one at a time":g.name+": no gap of its own, as the kind ("+k.name+"'s "+k.gap+" s)",wait:3200}]);return}
   var b=its.filter(function(x){return x.id!==a.id})[0]||a;
   gdDemo([{show:a.id,chip:"×10 · a "+g.name+" item",wait:2200},{stop:true,count:+g.gap,label:g.name+"'s gap"},{show:b.id,chip:"×10 · then the next "+g.name+" item"}])}
 /* Lines per point: the remark of the point in the middle, with the line it says */
@@ -246,9 +285,15 @@ var GD_DEMOS={"guidance.on":{wall:true,act:function(){gdDemoOverall("on")},ringA
   "guidance.breathing":{wall:true,act:function(){gdDemoOverall("breathing")},ringAfter:600,ring:".gdbub|.gdchip"}};
 Object.keys(GD_DEMO_ROWS).forEach(function(f){GD_DEMOS["guidance."+f]={wall:true,act:function(){gdDemo(GD_DEMO_ROWS[f]())},ringAfter:600,ring:".gdbub|.gdchip"}});
 S.guidance.kinds.forEach(function(k,ki){var kp="guidance.kinds."+ki+".";["on","cap","gap"].forEach(function(f){GD_DEMOS[kp+f]={wall:true,act:function(){gdDemoKind(ki,f)},ringAfter:600,ring:".gdbub|.gdchip"}});
-  k.groups.forEach(function(g,gi){GD_DEMOS[kp+"groups."+gi+".weight"]={wall:true,act:function(){gdDemoGroup(ki,gi)},ringAfter:600,ring:".gdbub|.gdchip"};
+  k.groups.forEach(function(g,gi){var gp=kp+"groups."+gi+".";if(g.pulled){GD_DEMOS[gp+"on"]={act:function(){gdDemoHow("on")},ringAfter:1100,ring:".gfocus|.gdchip"};
+      GD_DEMOS[gp+"inSettings"]={stop:"half",act:function(){gdDemoHow("settings")},ringAfter:500,ring:".vhow|.vset"};GD_DEMOS[gp+"inMenu"]={wall:true,act:function(){gdDemoHow("menu")},ringAfter:500,ring:'[data-gbgo="how"]|.gbmenu'};return}
+    GD_DEMOS[kp+"groups."+gi+".weight"]={wall:true,act:function(){gdDemoGroup(ki,gi)},ringAfter:600,ring:".gdbub|.gdchip"};
     ["on","cap","gap"].forEach(function(f){GD_DEMOS[kp+"groups."+gi+"."+f]={wall:true,act:function(){gdDemoGroupField(ki,gi,f)},ringAfter:600,ring:".gdbub|.gdchip"}})})});
 Object.keys(S.guidance.items).forEach(function(id){var p="guidance.items."+id+".",d=S.guidance.items[id];
+  /* a cue: on the card at its element (never the wall); a step of How to use the card: the walkthrough from that step */
+  if(d.form==="cue"){var rg=".gdchip|"+GD_CUE_SEL[id].split(",").join("|");["on","importance","doneWhen"].forEach(function(f){GD_DEMOS[p+f]={stop:id==="nudge"||id==="label"?"half":"full",act:function(){gdDemoCue(id,f)},ringAfter:700,ring:rg}});
+    GD_DEMOS[p+"shows"]={stop:"full",act:function(){gdDemoCueShows(id)},ringAfter:700,ring:rg};return}
+  if(d.form==="walk"){GD_DEMOS[p+"on"]={act:function(){gdDemoWalk(id)},ringAfter:1100,ring:".gfocus|.gdchip"};return}
   if(d.perPoint)GD_DEMOS[p+"cardLine"]={wall:true,act:function(){gdDemoLines(id)},ringAfter:600,ring:".gdbub|.gdchip"};
   if(d.pokes!=null)GD_DEMOS[p+"pokes"]={wall:true,act:function(){gdDemoPokes(id)},ringAfter:600,ring:".gdchip|.gdbub"};
   if(d.idleFor!=null)GD_DEMOS[p+"idleFor"]={wall:true,act:function(){gdDemoIdle(id)},ringAfter:600,ring:".gdchip|.gdbub"};
@@ -256,4 +301,20 @@ Object.keys(S.guidance.items).forEach(function(id){var p="guidance.items."+id+".
   ["shows","max","again"].forEach(function(f){GD_DEMOS[p+f]={wall:true,act:function(){gdDemoTwice(id)},ringAfter:600,ring:".gdbub|.gdchip"}});
   GD_DEMOS[p+"along"]={wall:true,act:function(){gdDemoAlong(id)},ringAfter:600,ring:".gdbub|.gdchip"};
   GD_DEMOS[p+"duringTour"]={tour:"g1",act:function(){gdDemoTour(id)},ringAfter:600,ring:".gdchip"}});
+/* round 4: a cue shown now on the card (a pull: no memory), its chip for the row; Shows twice for Every card (the next card); the
+   walkthrough from a step; How to use the card's group: the walkthrough, its Settings entry, its ✦ menu item */
+function gdDemoCue(id,f){var my=gdDemoBegin(),it=gdItemNow(id),d=S.guidance.items[id];if(!it)return;
+  if(!d.on){cuePlace(id);gdChip("Off: the "+it.label+" never shows");gdDemoEnd(my,3500);return}
+  var c=gdDemoShow(it,4000),chip=f==="doneWhen"?(d.doneWhen?"Done when "+GD_EVENTS[d.doneWhen]+": then never again":"Never done for good: once a visit or a card"):f==="importance"?"Importance "+d.importance+" of 5: a cue and a tip both due, the higher goes first":null;
+  if(d.reduce==="skip"&&S.reduce)chip="Reduce Motion: a moving cue is skipped";else if(!gdGroupById("card").on)chip="The card (cues) is Off: shown here as a demo only";if(chip)gdChip(chip);
+  gdDemoEnd(my,Math.max(3500,c&&isFinite(c.until)?c.until-c.at+400:4000))}
+function gdDemoCueShows(id){var d=S.guidance.items[id];if(d.shows!=="card"){gdDemo([{show:id,ms:3000,chip:"Once a visit: once it has shown, not again this visit",wait:3200}]);return}
+  gdDemo([{show:id,ms:2400,chip:"Every card: on this card…",wait:2600},{stop:true,show:id,ms:2400,chip:"×10 · …and again on the next card",wait:2800}])}
+function gdDemoWalk(id){var my=gdDemoBegin(),d=S.guidance.items[id];if(!d.on){gdChip("Off: the walkthrough skips "+d.label);gdDemoEnd(my,3000);return}
+  if(gdGroupById("howto").on===false){gdChip("How to use the card is Off");gdDemoEnd(my,3000);return}gdWalkCard(id);gdChip("How to use the card · from "+d.label);gdDemoEnd(my,3400)}
+function gdDemoHow(f){var my=gdDemoBegin(),g=gdGroupById("howto");
+  if(g.on===false){gdChip("How to use the card Off: no walkthrough, no entry in Settings or the ✦ menu");gdDemoEnd(my,3500);return}
+  if(f==="on"){gdWalkCard();gdChip("How to use the card: the walkthrough, pulled");gdDemoEnd(my,3400);return}
+  if(f==="settings"){S.settingsOpen=true;renderPhone(false);var v=ph.querySelector(".vset");if(v)v.scrollTop=v.scrollHeight;gdChip(g.inSettings?"In Settings: its button at the panel's foot":"In Settings: Hidden");gdDemoEnd(my,3500);return}
+  gbMenu(true);gdChip(g.inMenu?"In the ✦ menu: How does this work?":"In the ✦ menu: Hidden");gdDemoEnd(my,3500)}
 rowDemos(GD_DEMOS);

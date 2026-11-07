@@ -27,12 +27,16 @@ function gdStage(visitor,now){var v=visitor.visit||{},ret=visitor.visits>1,act=M
   return{s:Math.min(1,Math.max(mins/GD_STAGE_MIN,share)),mins:mins,active:act,returning:ret,done:done,share:share}}
 /* the gates for every item: fixed, no option breaks them */
 function gdGate(ctx,now){if(!ctx.on)return"Guidance is Off";if(ctx.demo)return"an Editor demo is showing";
-  if(ctx.showing)return"one at a time: the "+ctx.showing+" is showing";if(ctx.remark)return"one at a time: "+ctx.remark+" is showing";
+  if(ctx.showing)return"one at a time: "+(/^the /i.test(ctx.showing)?"":"the ")+ctx.showing+" is showing";if(ctx.remark)return"one at a time: "+ctx.remark+" is showing";
   if(ctx.speaking)return"never over a sentence: the guide is speaking";
   if(ctx.state)return"quiet while a system state shows ("+ctx.state+")";
   if(ctx.panel)return"quiet while "+ctx.panel+" is open";if(ctx.dockFull)return"quiet while the dock is at Full";
   if(ctx.movedAt!=null&&now-ctx.movedAt<GD_MOVE_MS)return"quiet while the phone moves (and 0.7 s after)";
+  /* the moment a card opens (context.moment = "open") is the visitor's own act answered: the touch that opened it and the card's first
+     1.5 s do not hold back a cue that answers the opening (gdCheck lets no other item through at that moment) */
+  if(ctx.moment==="open")return null;
   if(ctx.touchAt!=null&&now-ctx.touchAt<GD_TOUCH_MS)return"quiet while the visitor acts: a touch "+gdN((now-ctx.touchAt)/1000,1)+" s ago (it waits 0.8 s)";
+  if(ctx.scrollAt!=null&&now-ctx.scrollAt<GD_TOUCH_MS)return"quiet while the visitor scrolls (and 0.8 s after)";
   if(ctx.cardAt!=null&&now-ctx.cardAt<GD_CARD_MS)return"quiet in the card's first 1.5 s";return null}
 /* the tour's gate, per item: quiet in a tour, except an item allowed Between steps, at a pause between two steps */
 function gdTourGate(it,ctx){if(!ctx.tour)return null;if(it.duringTour!=="between")return"quiet in a tour (During a tour: Never)";
@@ -66,15 +70,21 @@ function gdCheck(it,items,visitor,ctx,now){var vm=gdVisitOf(visitor,it.id),em=gd
   if(!it.on)return{no:"Off"};
   if(it.kindOn===false)return{no:(it.kindName||it.kind)+" is Off"};
   if(it.groupOn===false)return{no:(it.groupName||it.group)+" is Off"};
+  if(it.groupPulled)return{no:"pulled only: it opens from Settings or the ✦ menu, never on its own"};
+  if(ctx.moment==="open"&&it.when!=="open")return{no:"the card is opening: only a cue that answers the opening shows now"};
   if(it.doneWhen&&em.done)return{no:"done for good ("+GD_EVENTS[em.by||it.doneWhen]+")"};
   if(it.shows==="once"&&em.shown>=1)return{no:"shown once ever"};
   if(it.shows==="visit"&&vm.shown>=1)return{no:"shown once this visit"};
+  if(it.shows==="card"&&vm.shown>=1&&vm.card===(v.cards||0))return{no:"shown on this card (again on the next)"};
   if((it.shows==="upto"||it.shows==="until")&&vm.shown>=+it.max)return{no:"shown "+vm.shown+" of "+it.max+" this visit"};
   var rest=v.rest&&v.rest[it.group];if(rest!=null&&now<rest)return{no:v.fewer&&v.fewer[it.group]?"Fewer like this: "+(it.groupName||it.group)+" rests for the visit":(it.groupName||it.group)+" rests 5 min after a dismissal: "+gdLeft(rest-now)};
   var tg=gdTourGate(it,ctx);if(tg)return{no:tg};
   if(it.lively&&!ctx.lively)return{no:"Lively only: Azu is Calm (Mascot > Liveliness)"};
   if(it.notSolemn&&ctx.solemn)return{no:"never on a Solemn point"};
   if(it.screen==="wall"&&!ctx.onWall)return{no:"not on the wall ("+(ctx.where||"a card is open")+")"};
+  /* a cue: on a card, its element on the screen (the context's cues: card/hints.js finds them), a moving cue never under Reduce Motion */
+  if(it.form==="cue"){if(!ctx.onCard)return{no:"not on a card ("+(ctx.where||"the wall")+")"};if(it.reduce==="skip"&&ctx.reduce)return{no:"skipped under Reduce Motion (a moving cue)"};
+    var ce=ctx.cues&&ctx.cues[it.about];if(!ce)return{no:GD_CUE_NO[it.about]||"its part is not on the screen"};why.push(ce)}
   if(it.about==="marker"){if(!ctx.marker)return{no:"no marker in view"};why.push(ctx.marker.name+" in view")}
   if(it.about==="gbtn"){if(!ctx.gbtn)return{no:"the ✦ is not on the screen"};why.push("the ✦ on the screen")}
   if(it.about==="middle"){var c=ctx.central;if(!c)return{no:"no point in the middle"};if(!c.tour)return{no:c.name+" in the middle has no tour"};why.push(c.name+" in the middle")}
@@ -92,16 +102,24 @@ function gdCheck(it,items,visitor,ctx,now){var vm=gdVisitOf(visitor,it.id),em=gd
   /* two items about the ✦ never both in the visit's first minute */
   if(it.about==="gbtn"&&gdVisitT(v,now)<GD_FIRST_MS){var o2=items.filter(function(o){return o.id!==it.id&&o.about==="gbtn"&&gdVisitOf(visitor,o.id).shown>0})[0];
     if(o2)return{no:"one about the ✦ in the visit's first minute: the "+o2.label+" showed"}}
-  if(!it.essential){var mul=v.breathMul||1,br=ctx.breathing*mul,L=ctx.limits||{},starts=v.starts||[];
+  /* the cue room (Overall): between a tip and a cue, either way (a cue is small motion: a shorter room than the breathing room between
+     two tips); two cues follow each other with no room (one at a time). A tip that a card's opening ended (visitor.visit.openEnd: the visitor did
+     what it asked) is answered, so the room does not count from it */
+  var room=+ctx.cueRoom||0,tip=function(o){return o.form!=="cue"};
+  if(it.form==="cue"){var te=v.lastEnd;if(room>0&&te!=null&&now-te<room*1000&&te!==v.openEnd)return{no:"the cue room "+room+" s after a tip: "+gdLeft(room*1000-(now-te))}}
+  else if(!it.essential){var mul=v.breathMul||1,br=ctx.breathing*mul,L=ctx.limits||{},starts=v.starts||[];
     if(v.lastEnd!=null&&now-v.lastEnd<br*1000)return{no:"breathing room "+br+" s"+(mul>1?" (×"+mul+": "+(v.ignoredRun||0)+" ignored in a row)":"")+": "+gdLeft(br*1000-(now-v.lastEnd))};
+    if(room>0&&v.cueEnd!=null&&now-v.cueEnd<room*1000)return{no:"the cue room "+room+" s after a cue: "+gdLeft(room*1000-(now-v.cueEnd))};
     if(+L.perMinute>0){var inMin=starts.filter(function(t){return now-t<60000});if(inMin.length>=+L.perMinute)return{no:"at most "+L.perMinute+" a minute: "+gdLeft(60000-(now-inMin[inMin.length-L.perMinute]))}}
-    var all=items.reduce(function(a,o){return a+gdVisitOf(visitor,o.id).shown},0);if(+L.perVisit>0&&all>=+L.perVisit)return{no:"at most "+L.perVisit+" a visit: shown "+all+" this visit"};
-    if(it.kindCap>0){var kn=items.filter(function(o){return o.kind===it.kind}).reduce(function(a,o){return a+gdVisitOf(visitor,o.id).shown},0);if(kn>=it.kindCap)return{no:"at most "+it.kindCap+" "+(it.kindName||it.kind)+" items a visit: shown "+kn}}
+    /* the tips' limits count the tips (a cue is not a tip: it has its own Shows and the cue room) */
+    var all=items.filter(tip).reduce(function(a,o){return a+gdVisitOf(visitor,o.id).shown},0);if(+L.perVisit>0&&all>=+L.perVisit)return{no:"at most "+L.perVisit+" a visit: shown "+all+" this visit"};
+    if(it.kindCap>0){var kn=items.filter(function(o){return o.kind===it.kind&&tip(o)}).reduce(function(a,o){return a+gdVisitOf(visitor,o.id).shown},0);if(kn>=it.kindCap)return{no:"at most "+it.kindCap+" "+(it.kindName||it.kind)+" items a visit: shown "+kn}}}
+  if(!it.essential){
     if(it.groupCap>0){var gc=gdShownOf(items,visitor,function(o){return o.group===it.group});if(gc>=it.groupCap)return{no:"at most "+it.groupCap+" "+(it.groupName||it.group)+" a visit: shown "+gc}}
-    /* a group's own gap stands in for its kind's */
+    /* a group's own gap stands in for its kind's (the kind's gap is the tips') */
     if(it.groupGap>0){var ge=gdLastEndOf(items,visitor,function(o){return o.group===it.group});
       if(ge!=null&&now-ge<it.groupGap*1000)return{no:(it.groupName||it.group)+"'s gap "+it.groupGap+" s: "+gdLeft(it.groupGap*1000-(now-ge))}}
-    else if(it.kindGap>0){var ke=gdLastEndOf(items,visitor,function(o){return o.kind===it.kind});
+    else if(it.kindGap>0&&tip(it)){var ke=gdLastEndOf(items,visitor,function(o){return o.kind===it.kind&&tip(o)});
       if(ke!=null&&now-ke<it.kindGap*1000)return{no:(it.kindName||it.kind)+"'s gap "+it.kindGap+" s: "+gdLeft(it.kindGap*1000-(now-ke))}}}
   var tri=vm.how==="dismissed"&&it.kind==="app"&&!(ctx.learn&&ctx.learn.dismiss===false),ag=+it.again*(tri?3:1);
   if(ag>0&&vm.end!=null&&it.shows!=="once"&&it.shows!=="visit"&&now-vm.end<ag*1000)return{no:"again after "+ag+" s"+(tri?" (×3: it was dismissed)":"")+": "+gdLeft(ag*1000-(now-vm.end))};
