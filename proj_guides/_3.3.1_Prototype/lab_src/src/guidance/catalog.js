@@ -10,10 +10,14 @@
    this?) by Overall (gd:overall). The events the items wait for or retire on are named in GD_EVENTS (the same names in Unity). Unity:
    GuidanceCatalog, a ScriptableObject (kinds, groups, items; a per-point item expanded from the wall's POI list at load; the words as
    CardStrings keys), read by GuidanceScheduler. */
-S.guidance={on:true,breathing:15,perMinute:2,perVisit:30,freshTau:120,learnIgnore:true,learnDismiss:true,fewer:true,remember:true,
+S.guidance={on:true,breathing:15,cueRoom:5,perMinute:2,perVisit:30,freshTau:120,learnIgnore:true,learnDismiss:true,fewer:true,remember:true,
   kinds:[{id:"app",name:"App",spoken:"bubble",on:true,cap:20,gap:0,groups:[
       {id:"start",name:"The start",mode:"order",on:true,weight:1,cap:0,gap:0,items:["opening","tapmarker"]},
-      {id:"wall",name:"The wall",mode:"all",on:true,weight:1,cap:0,gap:0,items:["askview","gbhint"]}]},
+      {id:"wall",name:"The wall",mode:"all",on:true,weight:1,cap:0,gap:0,items:["askview","gbhint"]},
+      /* the card's Hints (round 4): one Cue a hint, motion on its element, no mascot; their moments and looks as before (card/hints.js) */
+      {id:"card",name:"The card (cues)",mode:"all",on:true,weight:1,cap:0,gap:0,items:["nudge","label","navbar","ba","strip","term"]},
+      /* How to use the card: a Walkthrough, In order, pulled only (Settings, the ✦ menu's How does this work?): never scheduled, never capped */
+      {id:"howto",name:"How to use the card",mode:"order",pulled:true,on:true,inSettings:true,inMenu:true,items:["wk_grab","wk_settings","wk_bar","wk_locate","wk_block"]}]},
     {id:"content",name:"Content",spoken:"heard",on:true,cap:12,gap:60,groups:[
       {id:"inview",name:"What's in view",mode:"all",on:true,weight:1,cap:12,gap:7,items:["inview"]},
       {id:"tours",name:"Tours",mode:"all",on:true,weight:1,cap:0,gap:0,items:["tourof"]}]}],
@@ -59,18 +63,58 @@ S.guidance={on:true,breathing:15,perMinute:2,perVisit:30,freshTau:120,learnIgnor
       says:"gd_tourof",saysBack:"",spoken:"kind",
       about:"middle",mustSee:true,form:"invitation",goes:"beside",points:true,focus:"none",tap:"tour",
       when:"pause",screen:"wall",stillFor:1.2,afterPrev:0,notBefore:0,
-      importance:3,essential:false,shows:"visit",max:1,again:0,doneWhen:"tour",teaches:"tour",onScreen:"auto",duringTour:"never",along:"late"}}};
+      importance:3,essential:false,shows:"visit",max:1,again:0,doneWhen:"tour",teaches:"tour",onScreen:"auto",duringTour:"never",along:"late"},
+    /* ----- App › The card (cues): today's six card Hints, form Cue (motion on the element, no mascot, a bubble only where the hint had
+       words: the Navigation Bar's tip, the Locate label). about: the element (card/hints.js finds it: cueTargets); when: open = the card
+       opening (the nudge at Half; the label), else at a pause with the element in view; shows: once a visit or every card (once on each);
+       reduce: skip (a moving cue) or still; Done when: the matching step of How to use the card seen. Their looks: card/hints.js ----- */
+    nudge:{id:"nudge",label:"Grabber nudge",on:true,kind:"app",group:"card",form:"cue",says:"",about:"grab",when:"open",screen:"card",reduce:"skip",
+      importance:4,essential:false,shows:"visit",max:1,again:0,doneWhen:"wk_grab",teaches:"",duringTour:"never",along:"kind",
+      look:"The card opened at Half rises 8 px and settles (0.45 s in, for 0.7 s): the visitor sees it moves."},
+    label:{id:"label",label:"Locate label",on:true,kind:"app",group:"card",form:"cue",says:"locate_label",about:"locate",when:"open",screen:"card",reduce:"still",untilSeen:true,
+      importance:3,essential:false,shows:"visit",max:1,again:0,doneWhen:"wk_locate",teaches:"",duringTour:"never",along:"kind",
+      look:"“Find it on the wall” beside the pin until it has been seen for 4 s (the time counts only while it has room beside the pin), then it folds into the pin; a tap on the pin counts as read."},
+    navbar:{id:"navbar",label:"Navigation Bar",on:true,kind:"app",group:"card",form:"cue",says:"hint_navbar",about:"navbar",when:"pause",screen:"card",reduce:"still",
+      importance:3,essential:false,shows:"visit",max:1,again:0,doneWhen:"wk_bar",teaches:"",duringTour:"never",along:"kind",
+      look:"The bar rings once and “Jump to any part” sits over it for 3 s (under Reduce Motion it fades in and out, no ring travel)."},
+    ba:{id:"ba",label:"Before / After",on:true,kind:"app",group:"card",form:"cue",says:"",about:"ba",when:"pause",screen:"card",reduce:"skip",
+      importance:3,essential:false,shows:"visit",max:1,again:0,doneWhen:"",teaches:"",duringTour:"never",along:"kind",
+      look:"The first before / after in view sweeps 12 % each way and returns (1.4 s); a touch stops it."},
+    strip:{id:"strip",label:"Swipe strips",on:true,kind:"app",group:"card",form:"cue",says:"",about:"strip",when:"pause",screen:"card",reduce:"skip",
+      importance:3,essential:false,shows:"visit",max:1,again:0,doneWhen:"",teaches:"",duringTour:"never",along:"kind",
+      look:"The first strip with more to the side slides 40 px and back (1.1 s)."},
+    term:{id:"term",label:"Underlined words",on:true,kind:"app",group:"card",form:"cue",says:"",about:"term",when:"pause",screen:"card",reduce:"still",
+      importance:2,essential:false,shows:"visit",max:1,again:0,doneWhen:"",teaches:"",duringTour:"never",along:"kind",
+      look:"The first underlined word in view glows once (2 s): a tap explains it."},
+    /* ----- App › How to use the card: the walkthrough's steps, in order, run through the tour's steps (ref: the part the step scrolls
+       to; sel: the control it marks); each step's line heard is its memory ("seen"), and a seen step retires the cue whose Done when
+       names it ----- */
+    wk_grab:{id:"wk_grab",label:"The grabber",on:true,kind:"app",group:"howto",form:"walk",says:"how_grab",ref:"hero",sel:"#grab"},
+    wk_settings:{id:"wk_settings",label:"The settings mark",on:true,kind:"app",group:"howto",form:"walk",says:"how_settings",ref:"hero",sel:".chrome i:last-child"},
+    wk_bar:{id:"wk_bar",label:"The Navigation Bar",on:true,kind:"app",group:"howto",form:"walk",says:"how_bar",ref:"sec:stories",sel:"#navbar"},
+    wk_locate:{id:"wk_locate",label:"The Locate Button",on:true,kind:"app",group:"howto",form:"walk",says:"how_locate",ref:"sec:stories",sel:".locpin"},
+    wk_block:{id:"wk_block",label:"A block and its page",on:true,kind:"app",group:"howto",form:"walk",says:"how_block",ref:"b:b_story",sel:null}}};
 /* the events (study 3.2): their names in the Lab and in Unity, and the words the Editor reads them back with */
 /* the events as a condition in the read-back ("until the visitor opens a card") */
 var GD_UNTIL={card:"the visitor opens a card",view:"the visitor opens Ask about the view",tour:"the visitor hears a step of a tour",ask:"the visitor asks a question",menu:"the visitor opens the ✦ menu"};
 var GD_EVENTS={visit:"the visit started",marker:"a marker in view",moving:"the phone moving",still:"the phone still",card:"the visitor opened a card",
   view:"the visitor opened Ask about the view",tour:"a step of the tour was heard",ask:"the visitor asked a question",intro:"the guide's introduction was heard",
-  menu:"the visitor opened the ✦ menu",poked:"the visitor poked Azu",idle:"the visitor idle"};
+  menu:"the visitor opened the ✦ menu",poked:"the visitor poked Azu",idle:"the visitor idle",opened:"the card opened"};
+/* How to use the card's steps as events: a step seen (its line heard) retires the cue whose Done when names it */
+["wk_grab","wk_settings","wk_bar","wk_locate","wk_block"].forEach(function(id){var n=S.guidance.items[id].label;GD_EVENTS[id]="the visitor saw How to use the card's step “"+n+"”";GD_UNTIL[id]="the visitor has seen it in How to use the card"});
 /* the features used (study 3.2's events the Lab has): the milestones of the stage of the visit */
 var GD_FEATURES=[["card","card opened"],["tour","a tour step heard"],["ask","a question asked"],["view","Ask about the view opened"]];
 /* the values an item's fields take, in the Editor's words */
 var GD_SHOWS=[["once","Once ever"],["visit","Once a visit"],["upto","Up to n a visit"],["until","Until done, at most n a visit"],["every","Every time (Again after only)"]];
 var GD_DONE=[["","Never (it does not retire)"],["card","When the visitor opens a card"],["view","When the visitor opens Ask about the view"],["tour","When a step of a tour is heard"],["menu","When the visitor opens the ✦ menu"]];
+/* a cue's own values: how often (Once a visit / Every card: once on each card opened) and Done when (a step of How to use the card seen) */
+var GD_CUE_SHOWS=[["visit","Once a visit"],["card","Every card"]];
+var GD_DONE_CUE=[["","Never"],["wk_grab","Its step: The grabber"],["wk_bar","Its step: The Navigation Bar"],["wk_locate","Its step: The Locate Button"]];
+/* where a cue's element must be, in words (the read-back and Why not now?) */
+var GD_CUE_WHEN={grab:"when the card opens at Half (the opening's own answer to the tap)",locate:"when the card opens, the Locate Button on the screen (else at the next pause)",
+  navbar:"at a pause, when the Navigation Bar shows",ba:"at a pause, when a Before / After is in view",strip:"at a pause, when a strip with more to the side is in view",term:"at a pause, when an underlined word is in view"};
+var GD_CUE_NO={grab:"the grabber nudges only as the card opens at Half",locate:"no Locate Button on the screen",navbar:"the Navigation Bar is not showing",
+  ba:"no Before / After in view",strip:"no strip with more to the side in view",term:"no underlined word in view"};
 var GD_TOUR=[["never","Never"],["between","Between steps"]];
 var GD_ALONG=[["kind","As the kind"],["steady","Steady"],["early","Early"],["late","Late"]];
 /* the stage of the visit, s from 0 to 1: the kinds' weights at s = 0 / 0.3 / 1 (a fixed table: the mix), and the items' curves along the
@@ -81,8 +125,9 @@ var GD_CURVE={kind:[1,1,1],early:[1,1,0],late:[0,0,1]};
 function gdCurve(p,s){s=Math.max(0,Math.min(1,+s||0));return s<=0.3?p[0]+(p[1]-p[0])*s/0.3:p[1]+(p[2]-p[1])*(s-0.3)/0.7}
 /* the items in the Editor's order (kind, group, item), each a copy with its group's and kind's values (the scheduler reads only its
    arguments): the scheduler's input, its tie-break and an In order group's sequence */
-function gdItems(defs){var out=[];S.guidance.kinds.forEach(function(k){k.groups.forEach(function(g){g.items.forEach(function(id){var it=S.guidance.items[id];if(!it)return;
-  var o=Object.assign({},it,{groupMode:g.mode,groupName:g.name,groupOn:g.on!==false,groupWeight:g.weight==null?1:+g.weight,groupCap:+g.cap||0,groupGap:+g.gap||0,kindName:k.name,kindOn:k.on!==false,kindCap:+k.cap||0,kindGap:+k.gap||0,kindSpoken:k.spoken});
+function gdItems(defs){var out=[];S.guidance.kinds.forEach(function(k){k.groups.forEach(function(g){if(g.pulled&&!defs)return;g.items.forEach(function(id){var it=S.guidance.items[id];if(!it)return;
+  /* a pulled group (How to use the card) is never the scheduler's: only the Editor's list (defs) holds its steps */
+  var o=Object.assign({},it,{groupMode:g.mode,groupName:g.name,groupOn:g.on!==false,groupPulled:!!g.pulled,groupWeight:g.weight==null?1:+g.weight,groupCap:+g.cap||0,groupGap:+g.gap||0,kindName:k.name,kindOn:k.on!==false,kindCap:+k.cap||0,kindGap:+k.gap||0,kindSpoken:k.spoken});
   /* a per-point item: one for each point of the wall in view, its id and label naming the point, each with its own memory */
   if(it.perPoint&&!defs)(S.wallPois||[]).forEach(function(p){var n=L(p.name);out.push(Object.assign({},o,{id:it.id+":"+p.id,base:it.id,point:p.id,pointName:n,card:!!p.card,label:it.label.replace(/\{point\}/g,n)}))});
   else out.push(o)})})});return out}
@@ -105,8 +150,8 @@ function gdLine(it,returning,slots){slots=slots||{};var k=returning&&it.saysBack
   return TXT(k).replace(/\{point\}/g,slots.point||"").replace(/\{min\}/g,slots.min!=null?slots.min:"").replace(/\{button\}/g,S.guideCfg.gbIcon==="star"?"✦":TXT("gb_label"))}
 /* the read-back of an item, in words (study 3.2): "Tap a marker · App › The start · when a marker is in view and the phone is still ·
    at most about every 25 s, up to 3 times a visit, until the visitor opens a card." */
-function gdHowOften(it){var n=+it.max,ag=+it.again;
-  var s=it.shows==="once"?"once ever":it.shows==="visit"?"once a visit":it.shows==="upto"?"up to "+n+(n===1?" time":" times")+" a visit":it.shows==="until"?"up to "+n+(n===1?" time":" times")+" a visit":"every time";
+function gdHowOften(it){var n=+it.max,ag=+it.again;if(it.form==="walk")return"pulled only: never on its own";
+  var s=it.shows==="once"?"once ever":it.shows==="visit"?"once a visit":it.shows==="card"?"once on each card":it.shows==="upto"?"up to "+n+(n===1?" time":" times")+" a visit":it.shows==="until"?"up to "+n+(n===1?" time":" times")+" a visit":"every time";
   if(ag>0&&it.shows!=="once"&&it.shows!=="visit")s="at most about every "+ag+" s, "+s;
   if(it.perPoint)s+=" for each point";if(it.doneWhen)s+=", until "+GD_UNTIL[it.doneWhen];return s}
 var GD_ABOUT={nothing:"",marker:"when a marker is in view",gbtn:"when the ✦ is on the screen",middle:"when a point with a tour is in the middle",point:"when its point settles in the middle"};
@@ -116,7 +161,20 @@ function gdWhenWords(it){var w=[],o=[];if(+it.pokes>0)o.push("after "+it.pokes+"
 function gdAlongWords(it){var k=GD_MIX[it.kind]||[0,0,0],kn=(gdKindOf(it)||{}).name||"?";
   if(it.along==="steady")return"steady: "+kn+"'s "+k[1]+" % all visit";if(it.along==="early")return"early: full for the first third, then fading to nothing";
   if(it.along==="late")return"late: nothing for the first third, then growing to full";return"as the kind ("+kn+": "+k[0]+" % → "+k[1]+" % → "+k[2]+" %)"}
-function gdReadBack(it){var g=gdGroupOf(it),k=gdKindOf(it),w=[];
+/* How to use the card on the wall (the ✦ menu's How does this work? there): one bubble in the group's words, beside the nearest marker
+   (Azu pointing, its ring), and a chip that offers to open a card; a pull, so it writes no memory */
+function gdHowWall(){var g=gdGroupById("howto");return{id:"howto:wall",label:"How does this work? (on the wall)",on:true,kind:"app",group:"howto",groupName:g.name,groupMode:"order",groupOn:g.on!==false,groupPulled:true,
+  kindName:"App",kindOn:true,kindSpoken:"bubble",says:"gd_how_wall",cta:"gd_how_open",saysBack:"",spoken:"kind",about:"marker",mustSee:false,form:"invitation",goes:"beside",points:true,focus:"ring",tap:"close",
+  screen:"wall",duringTour:"never",along:"kind",importance:3,essential:false,shows:"every",max:1,again:0,doneWhen:"",teaches:""}}
+/* a cue's read-back: what it is, its moment, how often, Reduce Motion, the room from a tip, Done when */
+function gdCueReadBack(it){var g=gdGroupOf(it),r=+S.guidance.cueRoom||0;
+  return it.label+" · App › "+(g?g.name:"?")+" · a cue (motion on its element, no mascot"+(it.says?", its own words over it":", no words")+") · "+GD_CUE_WHEN[it.about]+" · "+gdHowOften(it)+
+    " · under Reduce Motion "+(it.reduce==="skip"?"skipped (a moving cue)":"shown, with no travel")+" · one at a time with every tip and cue; "+(r>0?"never within "+r+" s of a tip, either way (the cue room)":"no room from a tip (the cue room is 0)")+" · during a tour never."}
+/* a step of How to use the card: its place, pulled only, what its line marks and what seeing it retires */
+function gdStepReadBack(it){var g=gdGroupOf(it),on=g?g.items.filter(function(id){return S.guidance.items[id].on}):[],i=on.indexOf(it.id),ret=gdDefs().filter(function(x){return x.form==="cue"&&x.doneWhen===it.id}).map(function(x){return x.label});
+  return it.label+" · App › How to use the card · "+(it.on?"step "+(i+1)+" of "+on.length:"Off: skipped")+" · pulled only (Settings, the ✦ menu's How does this work?): never scheduled, never capped · "+(it.sel?"it marks "+it.label.replace(/^The /,"the "):"it opens a block's page")+
+    " · seen (its line heard): "+(ret.length?"the "+ret.join(", the ")+" is done for good":"nothing to retire")+"."}
+function gdReadBack(it){if(it.form==="cue")return gdCueReadBack(it);if(it.form==="walk")return gdStepReadBack(it);var g=gdGroupOf(it),k=gdKindOf(it),w=[];
   if(it.when==="visit")w.push("once the visit has started");else if(it.when!=="settle")w.push("at a pause");
   if(GD_ABOUT[it.about])w.push(GD_ABOUT[it.about]);if(+it.stillFor>0)w.push("the phone still "+it.stillFor+" s");
   if(+it.notBefore>0)w.push("not before "+it.notBefore+" s of the visit");w=w.concat(gdWhenWords(it));

@@ -45,12 +45,12 @@ var GSCENES=[
         return s>0&&i1===i&&k1>=s-1&&k1<k&&G.i===i-1?[true,"Previous says the sentence again; a second tap goes back a step",ans]:[false,"Previous did not replay the sentence, or the second tap did not go back",ans]})})})}},
   {id:"g_menu",label:"Guide · the ✦ and its menu",setup:function(){gsPast()},
     q:T("nothing: scrolls past the hero, taps the ✦, then each item","nada: passa o topo, toca no ✦ e depois em cada opção"),
-    expect:T("The ✦ (and Azu beside it) above the bar; its menu: Start the tour, Ask, Guide settings; each item does what it says.","O ✦ (e o Azu ao lado) acima da barra; o seu menu: Começar a visita, Perguntar, Definições do guia; cada opção faz o que diz."),
+    expect:T("The ✦ (and Azu beside it) above the bar; its menu: Start the tour, Ask, How does this work?, Guide settings; each item does what it says.","O ✦ (e o Azu ao lado) acima da barra; o seu menu: Começar a visita, Perguntar, Como funciona?, Definições do guia; cada opção faz o que diz."),
     act:function(){return gsGbtn().then(function(there){if(!there)return[false,"no ✦ past the hero","the hero's Start in sight: "+heroStartSeen()+"; the card at "+S.stop+"; scrolled "+Math.round(scr.scrollTop)+" px"];gsTap(".gbtn");var items=[].map.call(ph.querySelectorAll(".gbmenu [data-gbgo]"),function(b){return b.dataset.gbgo}),res=[];
       gsTap('[data-gbgo="settings"]');res.push(!!ph.querySelector(".vset .vguide"));S.settingsOpen=false;renderPhone(true);scr.scrollTop=900;fabLayer();
       gsTap(".gbtn");gsTap('[data-gbgo="ask"]');res.push(G.on&&S.dockH==="full"&&!!ph.querySelector(".gd-form"));stopTour();scr.scrollTop=900;fabLayer();
       gsTap(".gbtn");gsTap('[data-gbgo="tour"]');res.push(G.on&&!G.paused);var ans="Menu: "+items.join(", ")+"; settings "+(res[0]?"open at the guide's group":"not open")+"; ask "+(res[1]?"opens the conversation":"no")+"; tour "+(res[2]?"starts":"no")+".";
-      return items.join()==="tour,ask,settings"&&res.every(Boolean)?[true,"the ✦'s menu has its three items and each acts",ans]:[false,"an item is missing or does not act",ans]})}},
+      return items.join()==="tour,ask,how,settings"&&res.every(Boolean)?[true,"the ✦'s menu has its four items and each acts",ans]:[false,"an item is missing or does not act",ans]})}},
   {id:"g_azu",label:"Guide · a tap on Azu plays (never the menu)",setup:function(){S.guideCfg.azuTap="play";gsPast()},
     q:T("nothing: taps Azu beside the ✦ once","nada: toca uma vez no Azu ao lado do ✦"),
     expect:T("Azu reacts (a poke); the ✦'s menu stays closed.","O Azu reage (um toque); o menu do ✦ fica fechado."),

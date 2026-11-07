@@ -43,10 +43,11 @@ function gdTarget(it){var P=it.about==="marker"?gdMarker():it.about==="middle"?g
   return null}
 /* the bubble's words: plain, or one span a word when it is spoken (the word being said is lit) */
 function gdWords(t){return String(t).split(/(\s+)/).map(function(w){return/^\s*$/.test(w)?w:'<span class="gdw">'+esc(w)+'</span>'}).join("")}
-function gdBubHtml(c){return'<button type="button" data-gdbub="1">'+(c.spoken?gdWords(c.text):esc(c.text))+'</button><i class="gdtail"></i>'}
+function gdBubHtml(c){var cta=c.item&&c.item.cta?'<button type="button" class="gdcta" data-gdcta="1">'+TXH(c.item.cta)+'<span aria-hidden="true">&#8250;</span></button>':"";
+  return'<button type="button" data-gdbub="1">'+(c.spoken?gdWords(c.text):esc(c.text))+'</button>'+cta+'<i class="gdtail"></i>'}
 /* the tip on the phone: its elements made once, then placed (again at each paint of the wall: the marker moves with the picture) */
 function gdPresent(c){gdClearEls();var it=c.item,az=gdMascot();
-  var b=document.createElement("div");b.className="gdbub"+(az?"":" plain")+(S.reduce?"":" gd-in")+(it.form==="remark"?" gd-more":"");b.setAttribute("role","status");b.setAttribute("aria-live","polite");
+  var b=document.createElement("div");b.className="gdbub"+(az?"":" plain")+(S.reduce?"":" gd-in")+(it.form==="remark"?" gd-more":"")+(it.cta?" gd-cta":"");b.setAttribute("role","status");b.setAttribute("aria-live","polite");
   b.innerHTML=gdBubHtml(c);ph.appendChild(b);
   if(it.focus==="ring")gdRing(it,!S.reduce);
   if(it.points&&az&&it.goes==="beside"){var p=document.createElement("i");p.className="gdpoint";p.setAttribute("aria-hidden","true");p.innerHTML='<svg viewBox="0 0 16 16"><path d="M2.5 2.5 14 8 2.5 13.5Z"/></svg>';ph.appendChild(p)}
@@ -107,7 +108,7 @@ function gdAzHome(){var az=ph.querySelector(".azfab"),pg=G.gd.ptGb;G.gd.az=null;
 function gdUnpresent(){gdAzHome();ph.querySelectorAll(".gdbub,.gdring,.gdpoint").forEach(function(x){x.classList.add("gd-out");x.removeAttribute("aria-live");setTimeout(function(){x.remove()},S.reduce?0:170)})}
 /* would the item's bubble, at its best place, cover its target or the block being told? (measured with its words, never shown) */
 function gdCovers(it){if(!gdTarget(it))return null;var m=document.createElement("div");m.className="gdbub";m.style.visibility="hidden";
-  m.innerHTML=gdBubHtml({text:gdLine(it,S.gdVisitor.visits>1,gdSlots(it))});ph.appendChild(m);var best=gdSolve({item:it},m.offsetWidth,m.offsetHeight);m.remove();return best.cover||null}
+  m.innerHTML=gdBubHtml({item:it,text:gdLine(it,S.gdVisitor.visits>1,gdSlots(it))});ph.appendChild(m);var best=gdSolve({item:it},m.offsetWidth,m.offsetHeight);m.remove();return best.cover||null}
 /* a spoken tip: its line through the one order of voices (guide/voice.js's say), the word being said lit */
 function gdVoice(c){say(c.text,function(k){ph.querySelectorAll(".gdbub:not(.gd-out) .gdw").forEach(function(w,i){w.classList.toggle("on",i===k)})},function(){ph.querySelectorAll(".gdbub .gdw.on").forEach(function(w){w.classList.remove("on")})})}
 on("fabLayer.after",function(){if(G.gd.az)gdApplyAz(ph.querySelector(".azfab"),false);if(G.gd.ptGb&&G.gd.cur){var az=ph.querySelector(".azfab");if(az)az.classList.add("point-gb")}});
@@ -117,7 +118,8 @@ setInterval(function(){var c=G.gd.cur,az=ph.querySelector(".azfab");if(!c||noDra
 /* the words may change in the Editor while the tip shows */
 on("renderPhone.after",function(){var c=G.gd.cur;if(!c)return;
   /* (and the language: the point's name in the visitor's language, its line kept) */
-  if(c.slots&&c.slots.id){var pp=(S.wallPois||[]).filter(function(x){return x.id===c.slots.id})[0];if(pp)c.slots.point=L(pp.name)}var t=gdLine(c.item,c.ret,c.slots),b=ph.querySelector(".gdbub:not(.gd-out) button[data-gdbub]");if(b&&t!==c.text){c.text=t;if(c.spoken)b.innerHTML=gdWords(t);else b.textContent=t}gdPlace(c,false)});
+  if(c.slots&&c.slots.id){var pp=(S.wallPois||[]).filter(function(x){return x.id===c.slots.id})[0];if(pp)c.slots.point=L(pp.name)}var t=gdLine(c.item,c.ret,c.slots),b=ph.querySelector(".gdbub:not(.gd-out) button[data-gdbub]");if(b&&t!==c.text){c.text=t;if(c.spoken)b.innerHTML=gdWords(t);else b.textContent=t}
+  var ct=c.item.cta&&ph.querySelector(".gdbub:not(.gd-out) [data-gdcta]");if(ct)ct.innerHTML=TXH(c.item.cta)+'<span aria-hidden="true">&#8250;</span>';gdPlace(c,false)});
 /* ----- the bubble's controls: a tap does its action; a swipe away dismisses; a long press asks Fewer like this? ----- */
 function gdTap(){var c=G.gd.cur;if(!c)return;var it=c.item;if(c.pull&&G.gd.demo){gdStop("tapped (a demo)");return}
   if(it.tap==="view"){gdStop("tapped: Ask about the view opens","acted");G.fab.menu=false;G.cam.open=true;renderPhone(true);emit("view.opened","the tip");return}
@@ -144,7 +146,24 @@ ph.addEventListener("pointermove",function(e){var p=G.gd.press;if(!p||e.pointerI
 ["pointerup","pointercancel"].forEach(function(t){ph.addEventListener(t,function(e){var p=G.gd.press;if(!p||e.pointerId!==p.id)return;G.gd.press=null;clearTimeout(G.gd.holdT);
   if(p.held||p.moved)G.gd.noClickUntil=performance.now()+400;if(!p.moved)return;
   if(t==="pointerup"&&Math.abs(p.dx)>=GD_SWIPE){gdSwipe(p.dx);return}var b=ph.querySelector(".gdbub:not(.gd-out)");if(b){b.style.translate="";b.style.opacity=""}},true)});
+/* an invitation's chip (How does this work? on the wall: Open a card): the card of the marker Azu points at opens, at its stop */
+function gdCta(){var c=G.gd.cur;if(!c)return;gdStop("tapped: "+TXT(c.item.cta),"acted");S.view="card";S.stop=S.cardCfg.openAt;feedback("open");renderPhone(false);emit("card.opened","How does this work?")}
 ph.addEventListener("click",function(e){var f=e.target.closest("[data-gdfewer]");if(f){e.stopPropagation();if(f.dataset.gdfewer==="yes")gdFewer();else gdKeep();return}
+  var ct=e.target.closest("[data-gdcta]");if(ct){e.stopPropagation();if(performance.now()<(G.gd.noClickUntil||0))return;gdCta();return}
   var t=e.target.closest("[data-gdbub]");if(!t)return;e.stopPropagation();if(performance.now()<(G.gd.noClickUntil||0))return;gdTap()},true);
 /* the Editor's demos: a chip on the phone with the ×10 clock (Editor only, never in the app; Unity: a Play-mode preview label) */
 function gdChip(text){var c=ph.querySelector(".gdchip");if(!text){if(c)c.remove();return}if(!c){c=document.createElement("div");c.className="gdchip";c.setAttribute("aria-hidden","true");ph.appendChild(c)}c.textContent=text}
+
+/* ----- How to use the card, the walkthrough's look: its On steps, in order, run through the tour's steps (each scrolls to its part and
+   marks its control; its line is the step's words); the card's own guide steps come back when it ends. It opens from Settings (its
+   entry at the panel's foot, In Settings) and from the ✦ menu's How does this work? (In the ✦ menu): guidance/service.js's gdWalk.
+   Unity: the same GuideTour runner with the walkthrough's steps (GuidanceCatalog), each step's control marked by the guide's focus ----- */
+function gdWalkCard(fromId){if(G.on)stopTour();S.settingsOpen=false;G.fab.menu=false;var g=gdGroupById("howto"),steps=g.items.map(function(id){return S.guidance.items[id]}).filter(function(x){return x&&x.on});
+  if(!steps.length)return false;if(!S.howSaved)S.howSaved=S.guideSteps;
+  S.guideSteps=steps.map(function(it,i){return{id:"how"+i,gd:it.id,view:"card",ref:it.ref,sel:it.sel,act:"show",text:S.tx[it.says]}});S.view="card";S.stop="full";renderPhone(false);
+  var j=fromId?steps.map(function(x){return x.id}).indexOf(fromId):-1;startTour();if(j>0){stopSpeech();G.i=j;runStep()}return true}
+on("stopTour.after",function(){if(S.howSaved){S.guideSteps=S.howSaved;S.howSaved=null}});
+on("runStep.after",function(){var st=S.guideSteps[G.i];if(G.on&&st&&st.sel){var el=ph.querySelector(st.sel);if(el){el.classList.add("gfocus");moveMascot(el)}}});
+on("clearGuideMarks.after",function(){ph.querySelectorAll(".gfocus").forEach(function(x){x.classList.remove("gfocus")})});
+on("settingsPanel.html",function(h){var g=gdGroupById("howto");return g&&g.on!==false&&g.inSettings?h.replace(/<\/div>$/,'<button type="button" class="vhow" data-howto="1">'+TXH("settings_how")+' &#8250;</button></div>'):h});
+ph.addEventListener("click",function(e){if(e.target.closest("[data-howto]")){e.stopPropagation();gdWalk("Settings")}},true);

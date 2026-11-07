@@ -16,7 +16,7 @@
    motion, the touches, the card's open, the tour's steps, the mascot's poke, the ✦ menu), the memory as JSON in persistentDataPath, the
    visit clock Time.unscaledTime since the visit started, the time away from OnApplicationPause. */
 var GD_VISIT_GAP=30*60000;
-function gdVisitMem(n,now){return{n:n,at:now,lastEnd:null,items:{},starts:[],away:0,ignoredRun:0,breathMul:1,rest:{},fewer:{},heard:false,pokes:0}}
+function gdVisitMem(n,now){return{n:n,at:now,lastEnd:null,cueEnd:null,cards:0,items:{},starts:[],away:0,ignoredRun:0,breathMul:1,rest:{},fewer:{},heard:false,pokes:0}}
 function gdNewMemory(now){return{visits:1,visit:gdVisitMem(1,now),ever:{items:{}},used:{},met:false}}
 S.gdVisitor=gdNewMemory(0);
 G.gd={t:0,rate:1,manual:false,cur:null,movedAt:null,touchAt:null,actAt:null,cardAt:null,wallAt:null,onWall:false,demo:false,last:null,next:null,log:[],between:false,skipKey:""};
@@ -50,9 +50,12 @@ function gdCentral(){if(S.view!=="card"||S.stop!=="closed"||typeof camView!=="fu
   if(!c||c.x<40||c.x>W-40||c.y<90||c.y>H-170)return null;return{id:c.id,name:c.name,x:c.x,y:c.y,middle:c.where==="middle",tour:!!c.card,min:c.card?tourMinutes():null}}
 /* the moment, as the scheduler reads it */
 function gdOnWall(){return S.view==="card"&&S.stop==="closed"&&!G.on}
+/* on a card: the sheet at Half or Full, or one of its pages (never the wall, Peek or the Demo Components page): where the cues live */
+function gdOnCard(){return S.view==="card"?S.stop==="half"||S.stop==="full":S.view!=="demo"}
 function gdContext(){var t=-Infinity,mv=G.gd.movedAt,wa=G.gd.wallAt,g=S.guidance,st=ph.querySelector(".stv"),sk=st&&(st.className.match(/\bst-(\w+)/)||[])[1];
   var speaking=!!(G.utter||G.timer||G.recAudio);
-  return{on:!!g.on,breathing:+g.breathing,limits:{perMinute:+g.perMinute,perVisit:+g.perVisit},tau:+g.freshTau,learn:{ignore:g.learnIgnore!==false,dismiss:g.learnDismiss!==false},
+  var onCard=gdOnCard(),mo=G.gd.moment||null;
+  return{on:!!g.on,breathing:+g.breathing,cueRoom:+g.cueRoom||0,reduce:!!S.reduce,scrollAt:G.gd.scrollAt,onCard:onCard,cues:onCard?cueTargets(mo==="open"):{},moment:mo,limits:{perMinute:+g.perMinute,perVisit:+g.perVisit},tau:+g.freshTau,learn:{ignore:g.learnIgnore!==false,dismiss:g.learnDismiss!==false},
     demo:!!G.gd.demo,showing:G.gd.cur?G.gd.cur.item.label:null,
     remark:ph.querySelector(".azbub")?"Azu's bubble":null,
     pokes:S.gdVisitor.visit.pokes||0,idleSince:Math.max(G.gd.actAt==null?t:G.gd.actAt,mv==null?t:mv,S.gdVisitor.visit.at||0),
@@ -73,12 +76,22 @@ function gdSlots(it){if(it.about==="point"){var n=gdItems().filter(function(o){r
 /* spoken (_3.8 decision 2): App as a bubble only; Content spoken once the visitor has heard the guide this visit, else a bubble */
 function gdSpoken(it,o){if(o&&o.spoken!=null)return!!o.spoken;return it.spoken==="kind"&&it.kindSpoken==="heard"&&!!S.gdVisitor.visit.heard}
 /* a tip starts (the scheduler's choice, or pulled: an Editor demo, which never writes the memory) and ends */
-function gdStart(it,why,o){o=o||{};if(G.gd.cur)gdStop("another tip");var now=gdNow(),ret=o.ret!=null?!!o.ret:S.gdVisitor.visits>1&&!o.first,slots=gdSlots(it),text=gdLine(it,ret,slots),spoken=gdSpoken(it,o);
+function gdStart(it,why,o){o=o||{};if(G.gd.cur)gdStop("another tip");if(it.form==="cue")return gdCueStart(it,why,o);var now=gdNow(),ret=o.ret!=null?!!o.ret:S.gdVisitor.visits>1&&!o.first,slots=gdSlots(it),text=gdLine(it,ret,slots),spoken=gdSpoken(it,o);
   G.gd.cur={item:it,at:now,until:now+(o.ms||gdOnScreen(it,text)),realMin:G.gd.manual?0:performance.now()+(G.gd.rate>1?Math.max(600,15000/G.gd.rate):0),pull:!!o.pull,why:why||"",text:text,slots:slots,ret:ret,spoken:spoken};
   if(!o.pull){var vm=gdVM(it.id),em=gdEM(it.id);vm.shown++;vm.last=now;vm.end=null;vm.line=text;em.shown++;em.last=now;em.line=text;S.gdVisitor.visit.starts.push(now)}
   G.gd.skipKey="";gdLog("shown",(o.pull?"(pulled) ":"")+(why||it.label)+(spoken?" · spoken":""));gdPresent(G.gd.cur);if(spoken)gdVoice(G.gd.cur);return G.gd.cur}
 /* how: "acted", "dismissed", "fewer", "ignored", or "" (the moment ended it); round 1's true is a dismissal */
+/* a cue starts: its look on its element (card/hints.js's cueStart gives how long it plays; the Locate label: until seen); its memory
+   (this visit, ever, the card it showed on) at its start, the label's once it has been seen; no bubble, no mascot, not a tip's start */
+function gdCueStart(it,why,o){var now=gdNow(),c={item:it,at:now,until:now,realMin:0,pull:!!o.pull,why:why||"",text:it.says?TXT(it.says):"",slots:{},cue:true},d=cueStart(c);
+  if(d==null){gdLog("skipped",it.label+": its part is not on the screen");return null}
+  G.gd.cur=c;if(!o.pull){var vm=gdVM(it.id),em=gdEM(it.id);vm.last=now;vm.end=null;em.last=now;vm.card=S.gdVisitor.visit.cards||0;if(!it.untilSeen){vm.shown++;em.shown++}}
+  G.gd.skipKey="";gdLog("shown",(o.pull?"(pulled) ":"")+(why||it.label)+" · a cue");if(!isFinite(d)&&o.ms)d=o.ms;
+  c.until=now+d;c.realMin=G.gd.manual||!isFinite(d)?0:performance.now()+d;return c}
 function gdStop(why,how){var c=G.gd.cur;if(!c)return;if(how===true)how="dismissed";how=how||"";G.gd.cur=null;var now=gdNow();
+  /* a cue ends: seen (it played, or the label was seen 4 s) or by the moment; it writes the cue's end (the cue room), never a tip's */
+  if(c.cue){if(!c.pull){var cv=gdVM(c.item.id);cv.end=now;cv.how=how;S.gdVisitor.visit.cueEnd=now;if(c.item.untilSeen&&how==="seen"){cv.shown++;gdEM(c.item.id).shown++}}
+    gdLog("ended",c.item.label+": "+(why||"it played")+(how?" ("+how+")":""));cueStop(c,how);return}
   if(c.spoken&&G.sayLine&&G.sayLine.text===c.text)stopSpeech();
   if(!c.pull){var vm=gdVM(c.item.id);vm.end=now;vm.how=how;S.gdVisitor.visit.lastEnd=now;gdLearn(c,how,now)}
   gdLog("ended",c.item.label+": "+(why||"its time is up")+(how?" ("+how+")":""));gdUnpresent(why)}
@@ -106,20 +119,44 @@ on("menu.opened",function(how){gdUsed("menu",how)});
 function gdUsed(f,how){var now=gdNow(),c=G.gd.cur;S.gdVisitor.used[f]=now;
   gdItems().forEach(function(it){if(it.doneWhen===f){var em=gdEM(it.id);if(!em.done){em.done=true;em.by=f}}});
   gdLog("event",GD_EVENTS[f]+(how?" ("+how+")":""));if(c&&!c.pull&&c.item.teaches===f)gdStop(GD_EVENTS[f],"acted")}
-on("card.opened",function(how){G.gd.cardAt=gdNow();gdUsed("card",how);if(G.gd.cur)gdStop("the visitor opened a card")});
+/* a card opened: a tip it ends (the visitor did what it asked, or opened a card over it) is answered: the cue room does not count from it */
+on("card.opened",function(how){var v=S.gdVisitor.visit,e0=v.lastEnd;G.gd.cardAt=gdNow();gdUsed("card",how);if(G.gd.cur&&!G.gd.cur.cue)gdStop("the visitor opened a card");if(v.lastEnd!==e0)v.openEnd=v.lastEnd});
 on("view.opened",function(how){gdUsed("view",how)});
 on("ask.after",function(){S.gdVisitor.visit.heard=true;gdUsed("ask")});
-/* the tour: a step heard (the guide heard this visit; the introduction: met the guide); between two steps until the next one starts */
-on("tourStep.ended",function(st){S.gdVisitor.visit.heard=true;if(st&&st.act==="intro"&&!S.gdVisitor.met){S.gdVisitor.met=true;gdLog("event",GD_EVENTS.intro)}G.gd.between=true;gdUsed("tour",st&&st.id)});
+/* the tour: a step heard (the guide heard this visit; the introduction: met the guide); between two steps until the next one starts.
+   A step of How to use the card (st.gd: its item) is not the tour's: its line heard is that step seen, which retires its cue */
+on("tourStep.ended",function(st){S.gdVisitor.visit.heard=true;if(st&&st.act==="intro"&&!S.gdVisitor.met){S.gdVisitor.met=true;gdLog("event",GD_EVENTS.intro)}G.gd.between=true;
+  if(st&&st.gd){gdStepSeen(st.gd);return}gdUsed("tour",st&&st.id)});
+function gdStepSeen(id){var now=gdNow(),vm=gdVM(id),em=gdEM(id);vm.shown++;vm.last=now;em.shown++;em.last=now;gdUsed(id,"How to use the card")}
+/* the card scrolled: the visitor acts (quiet 0.8 s after, as after a touch) */
+scr.addEventListener("scroll",function(){G.gd.scrollAt=gdNow()},{passive:true});
+/* a card opens (the sheet up from the wall, by any way): a new card for Every card, and the moment of the opening: once the opening's own
+   events have run (card.opened ends a tip), the scheduler is asked at once with context.moment = "open" (only the cues that answer the
+   opening, past the touch that opened it and the card's first 1.5 s) */
+on("renderPhone.after",function(){if(!S.justOpened||noDraw)return;S.gdVisitor.visit.cards=(S.gdVisitor.visit.cards||0)+1;clearTimeout(G.gd.openT);G.gd.openT=setTimeout(gdOpening,0)});
+function gdOpening(){if(noDraw||G.gd.demo||!gdOnCard())return;var c=G.gd.cur;if(c&&c.cue&&!c.pull)gdStop("a new card");if(G.gd.cur)return;
+  G.gd.moment="open";var r;try{var ctx=gdContext();r=gdPick(gdItems(),S.gdVisitor,ctx,gdNow())}finally{G.gd.moment=null}
+  G.gd.last=r;if(r.item)gdStart(r.item,r.why);else gdLog("skipped","the card opened: "+r.why)}
+/* a cue on the screen now (the Locate Button asks for its label), and the label seen 4 s or the pin tapped (card/locate.js) */
+function gdCueOn(id){var c=G.gd.cur;return!!(c&&c.cue&&c.item.id===id)}
+function gdCueSeen(id){if(gdCueOn(id))gdStop("seen (4 s, or the pin tapped)","seen")}
+/* How to use the card, pulled (Settings, the ✦ menu's How does this work?): past every gate and never capped, the tip showing gives way.
+   On a card it walks the card (guidance/present.js's gdWalkCard, through the tour's steps); on the wall, one bubble says how the wall
+   works and offers to open a card (gdHowWall). Its group Off: nothing (the entries are hidden too) */
+function gdWalk(from){var g=gdGroupById("howto");if(!g||g.on===false)return false;if(G.gd.cur)gdStop("the visitor asked for How to use the card");
+  if(S.view==="card"&&S.stop==="closed"&&!G.on){gdStart(gdHowWall(),"asked by the visitor ("+from+")",{pull:true,ms:9000});return true}
+  gdLog("shown","(pulled) How to use the card ("+from+"): "+g.items.filter(function(id){return S.guidance.items[id].on}).length+" steps on the card");gdWalkCard();return true}
 on("startTour.before",function(){if(G.gd.cur&&!G.gd.cur.pull)gdStop("the tour started")});on("runStep.before",function(){G.gd.between=false});on("stopTour.after",function(){G.gd.between=false});
 /* the loop: the wall seen since when, the tip on screen ends, or the scheduler is asked (a choice that would cover its target is asked again without it) */
 function gdTick(){if(noDraw)return;var now=gdNow(),w=gdOnWall();if(w&&!G.gd.onWall)G.gd.wallAt=now;G.gd.onWall=w;
   var c=G.gd.cur;if(c){var it=c.item;if(it.screen==="wall"&&!w){gdStop("the wall left the screen");return}
+    /* a cue ends with its card; the Locate label also when its pin goes (Peek) */
+    if(c.cue&&(!gdOnCard()||it.about==="locate"&&!(c.pull||cueTargets(false).locate))){gdStop("its card left the screen");return}
     if(!c.pull){if(it.about==="marker"&&!gdMarker()){gdStop("its marker left the screen");return}
       if(it.about==="middle"||it.about==="point"){var cc=gdCentral();if(!cc||cc.id!==c.slots.id){gdStop("its point left the middle");return}}
       if(it.about==="gbtn"&&!gdGbtn()){gdStop("the ✦ left the screen");return}}
     if(c.ask){if(now>=c.askUntil)gdStop("Fewer like this? not answered","ignored");return}
-    if(now>=c.until&&performance.now()>=c.realMin)gdStop("its time is up","ignored");return}
+    if(now>=c.until&&performance.now()>=c.realMin)gdStop(c.cue?"it played":"its time is up",c.cue?"seen":"ignored");return}
   if(G.gd.demo&&G.gd.demoOwner!==G.demoSeq){G.gd.demo=false;gdChip(null)}if(G.gd.demo)return;
   var ctx=gdContext(),items=gdItems(),r=gdPick(items,S.gdVisitor,ctx,now);
   for(var k=0;k<4&&r.item;k++){var cov=gdCovers(r.item);if(!cov)break;ctx.covers[r.item.id]=cov;r=gdPick(items,S.gdVisitor,ctx,now)}

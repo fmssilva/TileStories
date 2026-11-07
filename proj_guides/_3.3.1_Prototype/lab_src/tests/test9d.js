@@ -131,7 +131,7 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   await tap('.gbtn'); await W(250);
   const items = await R('[].map.call(ph.querySelectorAll(".gbmenu [data-gbgo]"),function(b){return b.dataset.gbgo})');
   const ih = await R('[].map.call(ph.querySelectorAll(".gbmenu [data-gbgo]"),function(b){return Math.round(b.getBoundingClientRect().height)})');
-  ok('A tap on the ✦: its menu on the card: Start the tour, Ask (type or talk), Guide settings (44 px items)', items.join() === 'tour,ask,settings' && ih.every(h => h >= 44), [items, ih]);
+  ok('A tap on the ✦: its menu on the card: Start the tour, Ask (type or talk), How does this work?, Guide settings (44 px items)', items.join() === 'tour,ask,how,settings' && ih.every(h => h >= 44), [items, ih]);
   await R('scr.dispatchEvent(new MouseEvent("click",{bubbles:true}))'); await W(200); ok('...a tap elsewhere closes it', await R('!ph.querySelector(".gbmenu")&&!G.fab.menu'));
   await past(); await tap('.gbtn'); await W(200); await tap('[data-gbgo="tour"]'); await W(400);
   ok('...Start the tour: the tour runs; the ✦ stays (with its ring), Azu becomes the guide', await R('G.on&&!!ph.querySelector(".gbtn.tour")&&!ph.querySelector(".azfab")&&!!ph.querySelector(".mascot")'));
@@ -149,7 +149,7 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   const wl = await R('var w=ph.querySelector(".gbtn-wrap");[!!w&&w.classList.contains("onwall"),Math.round(ph.getBoundingClientRect().bottom-w.getBoundingClientRect().bottom)]');
   await tap('.gbtn'); await W(250);
   const wi = await R('[[].map.call(ph.querySelectorAll(".gbmenu [data-gbgo]"),function(b){return b.dataset.gbgo}).join(),(ph.querySelector(\'[data-gbgo="view"]\')||{}).textContent,camView().central&&camView().central.name]');
-  ok('On the wall: the ✦ in the corner; its menu adds Ask about the view, named after the point in the middle', wl[0] && wl[1] <= 30 && wi[0] === 'tour,ask,view,settings' && wi[1] === 'Ask about ' + wi[2], [wl, wi]);
+  ok('On the wall: the ✦ in the corner; its menu adds Ask about the view, named after the point in the middle', wl[0] && wl[1] <= 30 && wi[0] === 'tour,ask,view,how,settings' && wi[1] === 'Ask about ' + wi[2], [wl, wi]);
   await tap('[data-gbgo="view"]'); await W(300);
   ok('...Ask about the view: its panel opens on the wall', await R('G.cam.open&&!!ph.querySelector(".camask.open")'));
   await R('G.cam.open=false;renderPhone(true)'); await tap('.gbtn'); await W(200); await tap('[data-gbgo="tour"]'); await W(500);

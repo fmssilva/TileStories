@@ -1,21 +1,23 @@
-/* Guidance tested in the prototype: twelve scenes in Ask Azu's test console (round 1's five, round 2's five: the 15-minute script, Ignore three,
-   Fewer like this, Leave and come back, During a tour; round 3's two: a remark yields, The ✦ after four pokes) (Set up, Set up and ask,
+/* Guidance tested in the prototype: fourteen scenes in Ask Azu's test console (round 1's five, round 2's five: the 15-minute script, Ignore three,
+   Fewer like this, Leave and come back, During a tour; round 3's two: a remark yields, The ✦ after four pokes; round 4's two: a hint and a
+   tip never at once, How does this work? on the card and on the wall) (Set up, Set up and ask,
    Run all scenes), each putting the
    phone where a visitor would be, acting as a finger does (a tap on the marker, a drag on the wall) and checking the phone. The visit's
-   clock runs ×10 or ×20 in a scene, is stepped by hand to ignore a tip for 5 minutes, and runs ×1 for the drag; Azu's remarks (What's in view) and The ✦ rest unless the scene is about them; the clock, the remarks and
-   The ✦ come back after it. */
+   clock runs ×10 or ×20 in a scene, is stepped by hand to ignore a tip for 5 minutes, and runs ×1 for the drag; Azu's remarks (What's in view), The ✦
+   and the card's cues rest unless the scene is about them; the clock, the remarks, The ✦ and the cues come back after it. */
 /* how much of the tip (its bubble, and Azu beside the marker) covers the words on the wall, in px² (0: nothing) */
 function gdOverWords(){var b=ph.querySelector(".gdbub:not(.gd-out)"),az=G.gd.az&&ph.querySelector(".azfab"),mine=[b,az].filter(Boolean).map(gdPR),a=0;
   gdObstacles().filter(function(o){return o.text}).forEach(function(o){mine.forEach(function(m){a+=gdOver(m,o.b)})});return Math.round(a)}
 function gdScWait(f,ms){var t0=performance.now();return new Promise(function(res){(function w(){var v=false;try{v=f()}catch(e){}if(v||performance.now()-t0>ms){res(!!v);return}setTimeout(w,50)})()})}
 /* a scene's start: the Ribeira wall, a first visit (or one whose opening was said 30 s ago), the clock at its rate, the remarks resting */
 function gdScSetup(rate,opened,keep){if(G.on)stopTour();setWall("ribeira");gdStop("a scene");G.gd.demo=false;gdChip(null);var iv=gdGroupById("inview");
-  G.gd.sc={rate:G.gd.rate,inview:iv.on,hint:S.guidance.items.gbhint.on,gbtn:S.guideCfg.gbtn,azuTap:S.guideCfg.azuTap,life:S.guideCfg.life};
-  /* Azu's remarks and The ✦ rest, unless the scene is about them (keep) */
-  if(!keep){iv.on=false;S.guidance.items.gbhint.on=false}G.gd.manual=false;G.gd.rate=rate;gdResetVisitor();
+  var cg=gdGroupById("card"),cues={};cg.items.forEach(function(id){cues[id]=S.guidance.items[id].on});
+  G.gd.sc={rate:G.gd.rate,inview:iv.on,hint:S.guidance.items.gbhint.on,gbtn:S.guideCfg.gbtn,azuTap:S.guideCfg.azuTap,life:S.guideCfg.life,cueOn:cg.on,cues:cues};
+  /* Azu's remarks, The ✦ and the card's cues rest, unless the scene is about them (keep) */
+  if(!keep){iv.on=false;S.guidance.items.gbhint.on=false;cg.on=false}G.gd.manual=false;G.gd.rate=rate;gdResetVisitor();
   if(opened){var now=gdNow(),vm=gdVM("opening"),em=gdEM("opening");vm.shown=1;vm.last=now-30000;vm.end=now-21000;em.shown=1;S.gdVisitor.visit.lastEnd=now-21000}
   G.gd.movedAt=gdNow();renderPhone(false)}
-function gdScDone(r){var k=G.gd.sc;if(k){G.gd.rate=k.rate;G.gd.manual=false;gdGroupById("inview").on=k.inview;S.guidance.items.gbhint.on=k.hint;S.guideCfg.azuTap=k.azuTap;S.guideCfg.life=k.life;if(S.guideCfg.gbtn!==k.gbtn){S.guideCfg.gbtn=k.gbtn;fabLayer()}G.gd.sc=null}return r}
+function gdScDone(r){var k=G.gd.sc;if(k){G.gd.rate=k.rate;G.gd.manual=false;gdGroupById("inview").on=k.inview;S.guidance.items.gbhint.on=k.hint;S.guideCfg.azuTap=k.azuTap;S.guideCfg.life=k.life;var cg=gdGroupById("card");cg.on=k.cueOn;Object.keys(k.cues).forEach(function(id){S.guidance.items[id].on=k.cues[id]});if(S.guideCfg.gbtn!==k.gbtn){S.guideCfg.gbtn=k.gbtn;fabLayer()}G.gd.sc=null}return r}
 function gdIs(id){return!!(G.gd.cur&&G.gd.cur.item.id===id&&!G.gd.cur.pull)}
 function gdAzuBy(){var az=ph.querySelector(".azfab"),M=gdMarker();if(!az||!M)return null;var A=gdPR(az);return Math.round(Math.hypot((A.l+A.r)/2-M.x,(A.t+A.b)/2-M.y))}
 var GDSCENES=[
@@ -147,3 +149,39 @@ var GDSCENES3=[
         var ans=r.pokes+" pokes: The ✦ "+(r.shown?"“"+r.text+"”, Azu's arm "+(r.arm?"to the ✦":"down")+", "+r.over+" px² over the ✦, "+r.words+" px² over words ("+r.why+")":"not shown")+"; 4 more: "+(r.again?"again":"not again")+" (“"+r.whyAgain+"”); the ✦ tapped: the menu "+(r.menu?"open":"closed")+", “"+r.whyDone+"”.";
         return gdScDone(r.pokes===4&&r.shown&&r.text===gdLine(S.guidance.items.gbhint)&&r.arm&&r.over===0&&r.words===0&&/4 pokes on Azu/.test(r.why)&&!r.again&&/shown once this visit/.test(r.whyAgain)&&r.menu&&r.done&&/done for good \(the visitor opened the ✦ menu\)/.test(r.whyDone)?[true,"four pokes bring The ✦ once a visit, beside the ✦, pointing; the menu retires it",ans]:[false,"The ✦ did not come after four pokes, came twice, or the menu did not retire it",ans])})}}];
 GDSCENES3.forEach(function(s){s.where="wall";AGSCENES.push(s)});
+/* ----- round 4: two more scenes (ids gd4_*): a hint and a tip never at once; How does this work? on the card and on the wall ----- */
+/* the cues rest in the scenes not about them (as the remarks do); a scene about them keeps only its own */
+function gdScCues(keep){var g=gdGroupById("card");g.items.forEach(function(id){S.guidance.items[id].on=keep.indexOf(id)>=0});g.on=true}
+/* the card at Full scrolled past the hero (the ✦ shows) with the Before / After still below the screen; then brought into view */
+function gdScBaTop(){var el=scr.querySelector("[data-ba]");return el?el.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop:null}
+/* (placed again when the act starts: Ask Azu's console redraws the Editor after the set-up, and the card with it) */
+function gdScOnCard(){if(S.view!=="card"||S.stop!=="full"){S.view="card";S.stop="full";renderPhone(false)}var top=gdScBaTop(),h=scr.querySelector(".hero").offsetHeight;scr.scrollTop=Math.max(h+40,Math.min(h+120,(top||2000)-scr.clientHeight-40));fabLayer()}
+var GDSCENES4=[
+  {id:"gd4_once",label:"Guidance · a hint and a tip never at once: the cue waits its room",setup:function(){gdScSetup(1,true,true);gdGroupById("inview").on=false;S.guideCfg.life="lively";S.guideCfg.azuTap="play";gdScCues(["ba"]);
+      var e=gdEM("tapmarker");e.done=true;e.by="card";gdScOnCard()},
+    q:T("nothing: on a card scrolled past the hero, a visitor who has poked Azu four times gets The ✦; while it shows, a Before / After scrolls into view (the clock stepped ×30)","nada: num cartão já depois do topo, um visitante que tocou quatro vezes no Azu recebe O ✦; enquanto aparece, um Antes / Depois entra no ecrã (o relógio a passos, ×30)"),
+    expect:T("The ✦'s tip shows beside the ✦; the Before / After's sweep waits while it shows (one at a time), then waits the cue room (5 s) after the tip ends, and only then sweeps; never both at once.","A dica d'O ✦ aparece junto ao ✦; o varrimento do Antes / Depois espera enquanto ela está no ecrã (um de cada vez), depois espera o intervalo das pistas (5 s) a contar do fim da dica, e só então varre; nunca os dois ao mesmo tempo."),
+    act:function(){var r={both:0},ba=null,x0=null;gdScOnCard();S.gdVisitor.visit.pokes=4;return gdScRun(60000,function(){var c=G.gd.cur,now=gdNow(),items=gdItems();
+        if(c&&!c.pull&&c.item.id==="gbhint"&&r.tip==null){r.tip=c.at;var top=gdScBaTop();if(top!=null)scr.scrollTop=top-140;ba=scr.querySelector("[data-ba]");x0=ba&&ba.style.getPropertyValue("--x")}
+        if(r.tip!=null&&c&&c.item.id==="gbhint"&&!r.during&&now-r.tip>=2000)r.during=gdWhyNot(items,S.gdVisitor,gdContext(),now,"ba");
+        if(r.tip!=null&&r.tipEnd==null&&!(c&&c.item.id==="gbhint")){r.tipEnd=gdVisitOf(S.gdVisitor,"gbhint").end;r.after=gdWhyNot(items,S.gdVisitor,gdContext(),now,"ba")}
+        /* never at once: the sweep never moves while a bubble is on the screen */
+        if(ba&&ph.querySelector(".gdbub:not(.gd-out)")&&ba.style.getPropertyValue("--x")!==x0)r.both++;
+        if(c&&!c.pull&&c.item.id==="ba"&&r.cue==null){r.cue=c.at;return true}}).then(function(){var room=+S.guidance.cueRoom,gap=r.cue!=null&&r.tipEnd!=null?Math.round((r.cue-r.tipEnd)/100)/10:null;
+        var ans="The ✦ "+(r.tip!=null?"shown":"not shown")+"; while it showed, the Before / After: “"+(r.during||"")+"”; after it: “"+(r.after||"")+"”; the sweep "+(gap!=null?gap+" s after the tip ended":"never")+"; "+r.both+" moments with both.";
+        return gdScDone(r.tip!=null&&/one at a time: The ✦ is showing/.test(r.during||"")&&/the cue room \d+ s after a tip/.test(r.after||"")&&gap>=room&&r.both===0?[true,"the cue waits while the tip shows, then its room ("+gap+" s); never both at once",ans]:[false,"the cue came with the tip, or within its room",ans])})}},
+  {id:"gd4_how",label:"Guidance · How does this work?: from the ✦ menu, on the card and on the wall",setup:function(){gdScSetup(1,true);G.gd.sc.how={on:S.guidance.on,mute:S.guideMute,intro:S.introSeen};S.guidance.on=false;S.guideMute=true;S.introSeen=true;
+      S.view="card";S.stop="full";renderPhone(false);scr.scrollTop=scr.querySelector(".hero").offsetHeight+60;fabLayer()},
+    q:T("nothing: Guidance set Off for the scene; on a card it taps the ✦, then How does this work?; then on the wall the same, and the bubble's Open a card","nada: a Orientação desligada para a cena; num cartão toca no ✦ e depois em Como funciona?; depois na parede o mesmo, e no Abrir um cartão da bolha"),
+    expect:T("A pull, so no gate stops it (Guidance Off): on the card the walkthrough starts at the grabber (marked), and once its line is heard the Grabber nudge is done for good; on the wall one bubble says how the wall works, beside the nearest marker, 0 px over words, with Open a card, which opens the card.","Um pedido, por isso nenhuma regra o trava (Orientação desligada): no cartão a explicação começa pela pega (marcada) e, ouvida a sua frase, o Toque na pega fica feito; na parede uma bolha diz como a parede funciona, junto ao marcador mais próximo, 0 px sobre palavras, com Abrir um cartão, que abre o cartão."),
+    act:function(){var r={},k=G.gd.sc.how;if(S.view!=="card"||S.stop!=="full"){S.view="card";S.stop="full";renderPhone(false)}scr.scrollTop=scr.querySelector(".hero").offsetHeight+60;fabLayer();gsTouch(ph.querySelector(".gbtn"));r.item=!!ph.querySelector('[data-gbgo="how"]');var it=ph.querySelector('[data-gbgo="how"]');if(it)gsTouch(it);
+      r.walk=G.on&&S.guideSteps[G.i]&&S.guideSteps[G.i].id==="how0";r.mark=!!ph.querySelector("#grab.gfocus");
+      return gdScWait(function(){return gdEverOf(S.gdVisitor,"nudge").done},12000).then(function(d){r.done=d&&gdEverOf(S.gdVisitor,"nudge").by==="wk_grab";stopTour();S.stop="closed";renderPhone(false);
+        return gdScWait(function(){return!!ph.querySelector(".gbtn")},2000)}).then(function(){gsTouch(ph.querySelector(".gbtn"));var w=ph.querySelector('[data-gbgo="how"]');if(w)gsTouch(w);
+        return gdScWait(function(){return gdIs("howto:wall")||!!(G.gd.cur&&G.gd.cur.item.id==="howto:wall")},2000)}).then(function(a){return gdScWait(function(){return false},500).then(function(){var b=ph.querySelector(".gdbub:not(.gd-out)"),g=ph.querySelector(".gbtn");
+        r.wall=a;r.text=a?G.gd.cur.text:"";r.cta=!!(b&&b.querySelector("[data-gdcta]"));r.words=gdOverWords();r.overStar=b&&g?Math.round(gdOver(gdPR(b),gdPR(g))):-1;r.ring=!!ph.querySelector(".gdring");
+        var c=b&&b.querySelector("[data-gdcta]");if(c)gsTouch(c);r.open=S.stop!=="closed";
+        S.guidance.on=k.on;S.guideMute=k.mute;S.introSeen=k.intro;
+        var ans="The ✦ menu "+(r.item?"has How does this work?":"lacks it")+"; on the card: "+(r.walk?"the walkthrough at its first step, the grabber "+(r.mark?"marked":"not marked"):"no walkthrough")+", "+(r.done?"the Grabber nudge done once its line was heard":"the nudge not retired")+"; on the wall: "+(r.wall?"“"+r.text+"”, "+(r.cta?"with Open a card":"no chip")+", the ring "+(r.ring?"on its marker":"off")+", "+r.words+" px² over words, "+r.overStar+" px² over the ✦":"no bubble")+"; Open a card "+(r.open?"opened the card":"did nothing")+".";
+        return gdScDone(r.item&&r.walk&&r.mark&&r.done&&r.wall&&r.text===TXT("gd_how_wall")&&r.cta&&r.words===0&&r.overStar===0&&r.open?[true,"pulled past every gate: the card walked (its step retires the nudge), the wall in one bubble that opens a card",ans]:[false,"How does this work? did not open, walk, retire or offer as it should",ans])})})}}];
+GDSCENES4.forEach(function(s){s.where="card";AGSCENES.push(s)});
