@@ -5,6 +5,10 @@
 .gdbub{position:absolute;z-index:14;width:max-content;max-width:calc(100% - 24px);box-sizing:border-box;background:var(--paper);color:var(--ink1);border-radius:16px;
   box-shadow:0 8px 22px rgba(0,0,0,.3),0 0 0 1px var(--hair)}
 .gdbub button{appearance:none;display:block;width:100%;min-height:44px;border:0;background:none;color:inherit;font:600 14px/1.38 var(--body);text-align:left;padding:11px 14px;cursor:pointer;border-radius:16px}
+/* Azu's remark: a › after its words says a tap does more (Unity: a second Label, the glyph in --accent2); narrower, so its two lines
+   share the words (no word left alone on the second; Unity: the same max-width in USS) */
+.gdbub.gd-more{max-width:min(296px,calc(100% - 24px))}
+.gdbub.gd-more button::after{content:"\00a0\203A";color:var(--accent2);font-weight:800}
 .gdbub.gd-in{animation:gdin .22s cubic-bezier(.2,.8,.2,1)}
 .gdbub.gd-out{opacity:0;transform:scale(.97);transition:opacity .16s ease,transform .16s ease,translate .16s ease}
 @keyframes gdin{from{opacity:0;transform:scale(.94)}}

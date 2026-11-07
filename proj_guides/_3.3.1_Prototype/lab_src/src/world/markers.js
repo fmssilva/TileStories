@@ -16,7 +16,7 @@ on("camLayer.after",function(){var pins=ph.querySelector(".campins");if(!pins||S
   if(!G.cam.open)wallMarkers().forEach(function(m){var e=pins.querySelector('[data-cpin="'+m.id+'"]');if(e)e.remove()})});
 
 /* ----- the Wall switch on the preview bar: the card's wall or the Belém test wall, one tap from anywhere ----- */
-function setWall(w){if(G.on)stopTour();S.camCfg.wall=w;S.view="card";S.stop="closed";G.cam.open=false;G.cam.lit=[];G.cam.route=[];G.cam.hunt=null;G.fab.bub=null;G.fab.said=null;
+function setWall(w){if(G.on)stopTour();S.camCfg.wall=w;S.view="card";S.stop="closed";G.cam.open=false;G.cam.lit=[];G.cam.route=[];G.cam.hunt=null;
   S.camX=w==="belem"?.35:.4;S.camY=.5;S.camZoom=1;renderAll(true)}
 on("ptool.html",function(h){var w=S.camCfg.wall==="belem"?"belem":"ribeira";return h+'<button type="button" data-pt="wall" aria-pressed="'+(w!=="ribeira")+'" title="'+TXH("pbar_tip_wall")+'">'+TXH("pbar_wall_"+w)+'</button>'});
 document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest('[data-pt="wall"]');if(!b)return;e.stopPropagation();e.preventDefault();setWall(S.camCfg.wall==="belem"?"ribeira":"belem")},true);

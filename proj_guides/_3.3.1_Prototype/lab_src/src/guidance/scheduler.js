@@ -7,13 +7,15 @@
       0.8 s; the card's first 1.5 s; quiet in a tour except an item allowed Between steps, at a pause between two steps; never over its
       own target or the block being told (the service measures it: context.covers).
    2. The limits (an Essential item skips them): the breathing room between any two (×2 after three ignored in a row, up to ×4); at most
-      n a minute and a visit; each kind's cap a visit and its gap; each item's Shows and Again after (×3 after a dismissed App item);
-      a group resting (5 min after a dismissed Content item; for the visit after Fewer like this?).
+      n a minute and a visit; each kind's cap a visit and its gap; each group's own cap and gap (a group's gap stands in for its kind's);
+      each item's Shows and Again after (×3 after a dismissed App item); a group resting (5 min after a dismissed Content item; for the
+      visit after Fewer like this?). Its own When and Only if: after n pokes on Azu or n s idle; Lively only; never on a Solemn point;
+      a point of the wall settled in the middle; two items about the ✦ never both in the visit's first minute (the Editor's order).
    3. The stage of the visit: s = max(active minutes / 15, the share of the milestones done); a returning visitor starts at 5 min.
    4. The score of each eligible item: importance × along the visit(s) × kind weight(s) × group weight × freshness × fit; the highest
       shows (Essential first); ties: the Editor's order. Deterministic, so Why not now? can always answer.
    Unity: GuidanceScheduler, plain C# (Pick(state, now), WhyNot(state, now, id)), EditMode tests on the same cases. */
-var GD_MOVE_MS=700,GD_TOUCH_MS=800,GD_CARD_MS=1500,GD_REST_MS=300000,GD_BACK_MIN=5,GD_STAGE_MIN=15,GD_FOREVER=1e15;
+var GD_MOVE_MS=700,GD_TOUCH_MS=800,GD_CARD_MS=1500,GD_REST_MS=300000,GD_BACK_MIN=5,GD_STAGE_MIN=15,GD_FOREVER=1e15,GD_FIRST_MS=60000;
 var GD_STATES={loading:"Loading",lost:"wall not found",empty:"nothing here",offline:"offline",done:"done"};
 function gdVisitOf(visitor,id){return visitor.visit.items[id]||{shown:0,last:null,end:null,dismissed:0,acted:0,how:""}}
 function gdEverOf(visitor,id){return visitor.ever.items[id]||{shown:0,done:false,by:""}}
@@ -39,7 +41,12 @@ function gdTourGate(it,ctx){if(!ctx.tour)return null;if(it.duringTour!=="between
 function gdPrevOf(it,items){if(it.groupMode!=="order")return null;var i=items.indexOf(it);
   for(var j=i-1;j>=0;j--){var p=items[j];if(p.group===it.group&&p.on)return p}return null}
 /* where its target is on the screen (the context's own: the nearest marker, the ✦, the point in the middle) */
-function gdTargetCtx(it,ctx){return it.about==="marker"?ctx.marker:it.about==="gbtn"?ctx.gbtn:it.about==="middle"?ctx.central:null}
+function gdTargetCtx(it,ctx){return it.about==="marker"?ctx.marker:it.about==="gbtn"?ctx.gbtn:it.about==="middle"?ctx.central:it.about==="point"&&ctx.central&&ctx.central.id===it.point?ctx.central:null}
+/* the visit's time (its time away not counted) */
+function gdVisitT(v,now){return now-(v.at||0)-(v.away||0)}
+/* the items of its group, or of its kind, shown this visit and the latest end among them */
+function gdShownOf(items,visitor,f){return items.filter(f).reduce(function(a,o){return a+gdVisitOf(visitor,o.id).shown},0)}
+function gdLastEndOf(items,visitor,f){var e=null;items.forEach(function(o){if(!f(o))return;var x=gdVisitOf(visitor,o.id).end;if(x!=null&&(e==null||x>e))e=x});return e}
 /* the score: importance × along the visit × kind weight × group weight × freshness × fit, each factor kept for the words */
 function gdScore(it,items,visitor,ctx,now,st){var kw=GD_MIX[it.kind]||[100,100,100],f={imp:+it.importance||0,s:st.s};
   if(it.along==="steady"){f.kind=kw[1]/100;f.along=1}else{f.kind=gdCurve(kw,st.s)/100;f.along=gdCurve(GD_CURVE[it.along]||GD_CURVE.kind,st.s)}
@@ -58,27 +65,43 @@ function gdZeroWhy(it,f){if(f.along===0)return"along the visit "+(it.along==="la
 function gdCheck(it,items,visitor,ctx,now){var vm=gdVisitOf(visitor,it.id),em=gdEverOf(visitor,it.id),v=visitor.visit,why=[];
   if(!it.on)return{no:"Off"};
   if(it.kindOn===false)return{no:(it.kindName||it.kind)+" is Off"};
+  if(it.groupOn===false)return{no:(it.groupName||it.group)+" is Off"};
   if(it.doneWhen&&em.done)return{no:"done for good ("+GD_EVENTS[em.by||it.doneWhen]+")"};
   if(it.shows==="once"&&em.shown>=1)return{no:"shown once ever"};
   if(it.shows==="visit"&&vm.shown>=1)return{no:"shown once this visit"};
   if((it.shows==="upto"||it.shows==="until")&&vm.shown>=+it.max)return{no:"shown "+vm.shown+" of "+it.max+" this visit"};
   var rest=v.rest&&v.rest[it.group];if(rest!=null&&now<rest)return{no:v.fewer&&v.fewer[it.group]?"Fewer like this: "+(it.groupName||it.group)+" rests for the visit":(it.groupName||it.group)+" rests 5 min after a dismissal: "+gdLeft(rest-now)};
   var tg=gdTourGate(it,ctx);if(tg)return{no:tg};
+  if(it.lively&&!ctx.lively)return{no:"Lively only: Azu is Calm (Mascot > Liveliness)"};
+  if(it.notSolemn&&ctx.solemn)return{no:"never on a Solemn point"};
   if(it.screen==="wall"&&!ctx.onWall)return{no:"not on the wall ("+(ctx.where||"a card is open")+")"};
   if(it.about==="marker"){if(!ctx.marker)return{no:"no marker in view"};why.push(ctx.marker.name+" in view")}
   if(it.about==="gbtn"){if(!ctx.gbtn)return{no:"the ✦ is not on the screen"};why.push("the ✦ on the screen")}
   if(it.about==="middle"){var c=ctx.central;if(!c)return{no:"no point in the middle"};if(!c.tour)return{no:c.name+" in the middle has no tour"};why.push(c.name+" in the middle")}
+  if(it.about==="point"){var cp=ctx.central;if(!cp)return{no:"no point in the middle"};if(cp.id!==it.point)return{no:"not in the middle ("+cp.name+" is nearest)"};
+    if(!cp.middle)return{no:cp.name+" is the nearest, not in the middle yet"};why.push(cp.name+" in the middle")}
   if(ctx.covers&&ctx.covers[it.id])return{no:"never over its own target: "+ctx.covers[it.id]};
   if(+it.notBefore>0){var at=now-(v.at||0)-(v.away||0);if(at<+it.notBefore*1000)return{no:"not before "+it.notBefore+" s of the visit: "+gdLeft(+it.notBefore*1000-at)}}
   var p=gdPrevOf(it,items);if(p){var pm=gdVisitOf(visitor,p.id);if(!pm.shown)return{no:"after the "+p.label+" (not shown yet this visit)"};
     var since=now-pm.last;if(since<+it.afterPrev*1000)return{no:it.afterPrev+" s after the "+p.label+": "+gdLeft(+it.afterPrev*1000-since)};if(+it.afterPrev>0)why.push(Math.floor(since/1000)+" s after the "+p.label)}
   if(+it.stillFor>0){var st=now-ctx.stillSince;if(!(st>=+it.stillFor*1000))return{no:"the phone still "+(isFinite(st)?(st/1000).toFixed(1):"0")+" s (it waits for "+it.stillFor+" s)"};why.push("the phone still "+(isFinite(st)?(st/1000).toFixed(1)+" s":"")) }
+  /* its own When: after n pokes on Azu (this visit) or n s idle (no touch, the phone still), whichever comes first */
+  if(+it.pokes>0||+it.idleFor>0){var pk=+it.pokes>0&&(+ctx.pokes||0)>=+it.pokes,iS=ctx.idleSince,idl=+it.idleFor>0&&iS!=null&&now-iS>=+it.idleFor*1000;
+    if(!pk&&!idl){var ow=[];if(+it.pokes>0)ow.push(it.pokes+" pokes on Azu ("+(+ctx.pokes||0)+" so far)");if(+it.idleFor>0)ow.push(it.idleFor+" s idle ("+(iS==null?"not idle":gdLeft(+it.idleFor*1000-(now-iS)))+")");return{no:"after "+ow.join(" or ")}}
+    why.push(pk?(+ctx.pokes)+" pokes on Azu":"idle "+Math.floor((now-iS)/1000)+" s")}
+  /* two items about the ✦ never both in the visit's first minute */
+  if(it.about==="gbtn"&&gdVisitT(v,now)<GD_FIRST_MS){var o2=items.filter(function(o){return o.id!==it.id&&o.about==="gbtn"&&gdVisitOf(visitor,o.id).shown>0})[0];
+    if(o2)return{no:"one about the ✦ in the visit's first minute: the "+o2.label+" showed"}}
   if(!it.essential){var mul=v.breathMul||1,br=ctx.breathing*mul,L=ctx.limits||{},starts=v.starts||[];
     if(v.lastEnd!=null&&now-v.lastEnd<br*1000)return{no:"breathing room "+br+" s"+(mul>1?" (×"+mul+": "+(v.ignoredRun||0)+" ignored in a row)":"")+": "+gdLeft(br*1000-(now-v.lastEnd))};
     if(+L.perMinute>0){var inMin=starts.filter(function(t){return now-t<60000});if(inMin.length>=+L.perMinute)return{no:"at most "+L.perMinute+" a minute: "+gdLeft(60000-(now-inMin[inMin.length-L.perMinute]))}}
     var all=items.reduce(function(a,o){return a+gdVisitOf(visitor,o.id).shown},0);if(+L.perVisit>0&&all>=+L.perVisit)return{no:"at most "+L.perVisit+" a visit: shown "+all+" this visit"};
     if(it.kindCap>0){var kn=items.filter(function(o){return o.kind===it.kind}).reduce(function(a,o){return a+gdVisitOf(visitor,o.id).shown},0);if(kn>=it.kindCap)return{no:"at most "+it.kindCap+" "+(it.kindName||it.kind)+" items a visit: shown "+kn}}
-    if(it.kindGap>0){var ke=null;items.forEach(function(o){if(o.kind!==it.kind)return;var e=gdVisitOf(visitor,o.id).end;if(e!=null&&(ke==null||e>ke))ke=e});
+    if(it.groupCap>0){var gc=gdShownOf(items,visitor,function(o){return o.group===it.group});if(gc>=it.groupCap)return{no:"at most "+it.groupCap+" "+(it.groupName||it.group)+" a visit: shown "+gc}}
+    /* a group's own gap stands in for its kind's */
+    if(it.groupGap>0){var ge=gdLastEndOf(items,visitor,function(o){return o.group===it.group});
+      if(ge!=null&&now-ge<it.groupGap*1000)return{no:(it.groupName||it.group)+"'s gap "+it.groupGap+" s: "+gdLeft(it.groupGap*1000-(now-ge))}}
+    else if(it.kindGap>0){var ke=gdLastEndOf(items,visitor,function(o){return o.kind===it.kind});
       if(ke!=null&&now-ke<it.kindGap*1000)return{no:(it.kindName||it.kind)+"'s gap "+it.kindGap+" s: "+gdLeft(it.kindGap*1000-(now-ke))}}}
   var tri=vm.how==="dismissed"&&it.kind==="app"&&!(ctx.learn&&ctx.learn.dismiss===false),ag=+it.again*(tri?3:1);
   if(ag>0&&vm.end!=null&&it.shows!=="once"&&it.shows!=="visit"&&now-vm.end<ag*1000)return{no:"again after "+ag+" s"+(tri?" (×3: it was dismissed)":"")+": "+gdLeft(ag*1000-(now-vm.end))};
@@ -88,7 +111,11 @@ function gdCheck(it,items,visitor,ctx,now){var vm=gdVisitOf(visitor,it.id),em=gd
   var f=gdScore(it,items,visitor,ctx,now,gdStage(visitor,now));if(!(f.score>0))return{no:gdZeroWhy(it,f)};
   why.push(gdScoreWords(f,it));return{ok:true,why:why.join(", "),score:f.score,f:f}}
 /* every item checked, in the Editor's order; the eligible ones in the order they would show: Essential first, then the score, then the Editor's order */
-function gdAll(items,visitor,ctx,now){return items.map(function(it,i){return{it:it,i:i,r:gdCheck(it,items,visitor,ctx,now)}})}
+function gdAll(items,visitor,ctx,now){var all=items.map(function(it,i){return{it:it,i:i,r:gdCheck(it,items,visitor,ctx,now)}});
+  /* two items about the ✦ both due in the visit's first minute: the first in the Editor's order, the other never in that minute */
+  if(gdVisitT(visitor.visit||{},now)<GD_FIRST_MS){var first=null;all.forEach(function(x){if(x.it.about!=="gbtn"||!x.r.ok)return;if(!first){first=x;return}
+    x.r={no:"one about the ✦ in the visit's first minute: the "+first.it.label+" goes first (the Editor's order)"}})}
+  return all}
 function gdOrder(a,b){var d=b.r.score-a.r.score;return(b.it.essential?1:0)-(a.it.essential?1:0)||(Math.abs(d)<1e-9?0:d)||a.i-b.i}
 function gdPick(items,visitor,ctx,now){var g=gdGate(ctx,now);if(g)return{none:true,why:g};
   var all=gdAll(items,visitor,ctx,now),ok=all.filter(function(x){return x.r.ok}).sort(gdOrder);

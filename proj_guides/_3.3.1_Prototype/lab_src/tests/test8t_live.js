@@ -9,7 +9,7 @@ const shots = process.argv[2] || '';
   await p.goto(url); await p.waitForFunction(() => window.LAB && window.LABKEYS, null, { timeout: 90000 }); await p.waitForTimeout(800);
   const R = src => p.evaluate(s => LAB.run(s), src);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
-  await R('S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;S.agentCfg.voiceOut=false;S.camCfg.comments=false;S.lang="pt";S.view="card";S.stop="full";renderAll(false);applyProvider();renderEditor()');
+  await R('S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;S.agentCfg.voiceOut=false;gdGroupById("inview").on=false;S.lang="pt";S.view="card";S.stop="full";renderAll(false);applyProvider();renderEditor()');
   ok('The key from keys.local.js: Gemini answers here', await R('agProvider()==="gemini"&&sampleFn===AG.fn'), await R('agProvider()'));
   // the card
   await R('startTour();pauseTour();G.askOpen=true;S.dockH="full";renderGuide();ask("O palácio tinha uma ópera? Mostra-me onde se fala disso.")');

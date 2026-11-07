@@ -162,7 +162,7 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   await R('S.guideCfg.azuTap="menu";G.taps=[]'); await W(1300); await tap('.azfab'); await W(200);
   ok('...Tap on Azu = Opens the menu: the ✦\'s menu opens', await R('!!ph.querySelector(".gbmenu")'));
   await past(); await R('S.guideCfg.azuTap="point";G.taps=[]'); await tap('.azfab'); await W(300);
-  ok('...Tap on Azu = Points to the ✦ button: Azu points at the ✦ and says "Need anything? Tap ✦."', await R('ph.querySelector(".azfab").classList.contains("point-gb")&&ph.querySelector(".azbub").textContent==="Need anything? Tap ✦."'));
+  ok('...Tap on Azu = Points to the ✦ button: Azu points at the ✦ and says "Need anything? Tap ✦."', await R('ph.querySelector(".azfab").classList.contains("point-gb")&&(ph.querySelector(".gdbub:not(.gd-out) button[data-gdbub]")||{}).textContent==="Need anything? Tap ✦."'));
   await R('S.guideCfg.azuTap="play"'); await tourAt('g1', 'mini'); const pk1 = await R('G.pokes||0'); await tap('.mascot'); await W(150);
   ok('...during the tour, a tap on the guide\'s Azu plays too and leaves the dock as it is', await R('G.pokes||0') === pk1 + 1 && await R('S.dockH==="mini"&&!G.paused'));
   await past(); await R('S.guideCfg.gbtn="azu";fabLayer()'); await W(150); await tap('.azfab'); await W(200);
@@ -171,15 +171,17 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   ok('Guide button = ✦ only: the ✦, no Azu beside it', await R('!!ph.querySelector(".gbtn")&&!ph.querySelector(".azfab")'));
   // the hint: after a few pokes, at most once a visit; Reduce Motion: words only; Calm: never by itself
   const pokeN = async n => { for (let i = 0; i < n; i++) { await tap('.azfab'); await W(650); } };
-  await past(); await R('G.gb.hinted=false;G.pokes=0;G.gb.hintAt=0'); await pokeN(4); await W(1300);
-  const h1 = await R('[!!(ph.querySelector(".azbub")&&ph.querySelector(".azbub").textContent==="Need anything? Tap ✦."),ph.querySelector(".azfab").classList.contains("point-gb"),G.gb.hintAt>0]');
-  await R('G.gb.hintAt=0'); await pokeN(4); await W(1300);
-  ok('The hint: after a few pokes Azu points at the ✦ and says it; not again in the visit', h1.every(Boolean) && await R('G.gb.hintAt===0'), h1);
-  await past(); await R('G.gb.hinted=false;G.pokes=0;S.reduce=true;renderPhone(true);scr.scrollTop=900;fabLayer()'); await W(200); await pokeN(4); await W(1300);
-  ok('...under Reduce Motion: the words only, nothing moves (no arm)', await R('G.gb.hinted&&!ph.querySelector(".azfab.point-gb")&&!G.pointTo'));
-  await past(); await R('G.gb.hinted=false;G.pokes=0;S.guideCfg.life="calm"'); await pokeN(4); await W(1300);
-  ok('...Calm: never by itself', await R('!G.gb.hinted'));
-  await R('S.guideCfg.life="lively";G.gb.hinted=true');
+  // (guidance round 3: the hint is Guide › Guidance › The wall › The ✦: its bubble, once a visit in the visitor's memory; it waits for Azu's own joke)
+  const hintN = 'gdVisitOf(S.gdVisitor,"gbhint").shown';
+  await past(); await R('gdStop("t");gdResetVisitor();S.guidance.items.gbhint.on=true;G.pokes=0'); await pokeN(4); await until(hintN + '===1', 8000); await W(300);
+  const h1 = await R('[(ph.querySelector(".gdbub:not(.gd-out) button[data-gdbub]")||{}).textContent==="Need anything? Tap ✦.",ph.querySelector(".azfab").classList.contains("point-gb"),' + hintN + '===1]');
+  await pokeN(4); await W(1300);
+  ok('The hint: after a few pokes Azu points at the ✦ and says it; not again in the visit', h1.every(Boolean) && await R(hintN + '===1'), h1);
+  await past(); await R('gdStop("t");gdResetVisitor();G.pokes=0;S.reduce=true;renderPhone(true);scr.scrollTop=900;fabLayer()'); await W(200); await pokeN(4); await until(hintN + '===1', 8000); await W(300);
+  ok('...under Reduce Motion: the words only, nothing moves (no arm)', await R(hintN + '===1&&!!ph.querySelector(".gdbub")&&!ph.querySelector(".azfab.point-gb")&&!G.pointTo'));
+  await past(); await R('gdStop("t");gdResetVisitor();G.pokes=0;S.guideCfg.life="calm"'); await pokeN(4); await W(1300);
+  ok('...Calm: never by itself', await R(hintN + '===0'));
+  await R('S.guideCfg.life="lively";gdStop("t");gdVM("gbhint").shown=1');
 
   // ---------- the label folds after 4 s of being seen (the Locate Button's rule and code) ----------
   await past(); await R('G.gb.folded=false;G.gb.shown=0;fabLayer()'); await W(300);
@@ -197,14 +199,14 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   for (const [v, chk] of [['compact', '!ph.querySelector(".gdock")&&!!ph.querySelector(".gbtn.tour .gb-ring")'], ['peek', '!!ph.querySelector(".gdock.h-peek")'], ['mini', '!!ph.querySelector(".gdock.h-mini")']]) { await pick('dockStart', v); await startAt(); want.push(['Starts at ' + v, await R(chk)]); await R('stopTour()'); }
   for (const [v, chk] of [['pause', '!!ph.querySelector(\'.gd-mini [data-g="pause"]\')&&!ph.querySelector(\'.gd-mini [data-g="stop"]\')'], ['line', '!ph.querySelector(".gd-mini")&&!!ph.querySelector(".gd-main .gd-kb")'], ['pausestop', 'ph.querySelectorAll(".gd-mini button").length===2']]) { await pick('miniCtl', v); await startAt(); want.push(['Controls at Mini ' + v, await R(chk)]); await R('stopTour()'); }
   for (const [v, chk] of [['face', '!!ph.querySelector(".gbtn.ic-face .gb-ic svg rect")'], ['word', '!ph.querySelector(".gbtn .gb-ic")&&ph.querySelector(".gbtn").textContent==="Guide"'], ['star', '!!ph.querySelector(".gbtn.ic-star .gb-ic svg")']]) { await pick('gbIcon', v); await R('S.view="card";S.stop="full";renderPhone(false);scr.scrollTop=900;fabLayer()'); want.push(['Icon ' + v, await R(chk)]); }
-  for (const [v, chk] of [['right', 'ph.querySelector(".gbtn-wrap").getBoundingClientRect().left-ph.getBoundingClientRect().left>180&&ph.querySelector(".azfab").getBoundingClientRect().right<=ph.querySelector(".gbtn").getBoundingClientRect().left'], ['left', 'ph.querySelector(".gbtn-wrap").getBoundingClientRect().left-ph.getBoundingClientRect().left<20']]) { await pick('gbSide', v); await R('S.view="card";S.stop="full";renderPhone(false);scr.scrollTop=900;fabLayer()'); await W(100); want.push(['Side ' + v, await R(chk)]); }
+  for (const [v, chk] of [['right', 'ph.querySelector(".gbtn-wrap").getBoundingClientRect().left-ph.getBoundingClientRect().left>180&&ph.querySelector(".azfab").getBoundingClientRect().right<=ph.querySelector(".gbtn").getBoundingClientRect().left'], ['left', 'ph.querySelector(".gbtn-wrap").getBoundingClientRect().left-ph.getBoundingClientRect().left<20']]) { await pick('gbSide', v); await R('S.view="card";S.stop="full";renderPhone(false);scr.scrollTop=900;fabLayer()'); const drawn = await until('!!ph.querySelector(".gbtn-wrap")&&!!ph.querySelector(".azfab")&&!!ph.querySelector(".gbtn")', 3000); want.push(['Side ' + v, drawn && await R(chk)]); }
   for (const [v, chk] of [['azu', '!ph.querySelector(".gbtn")&&!!ph.querySelector(".azfab")'], ['star', '!!ph.querySelector(".gbtn")&&!ph.querySelector(".azfab")'], ['both', '!!ph.querySelector(".gbtn")&&!!ph.querySelector(".azfab")']]) { await pick('gbtn', v); await R('S.view="card";S.stop="full";renderPhone(false);scr.scrollTop=900;fabLayer()'); want.push(['Guide button ' + v, await R(chk)]); }
   await pick('stopUndo', 'ask'); want.push(['Stop ask', await R('S.guideCfg.stopUndo==="ask"')]); await pick('stopUndo', 'toast');
   await pick('swipeCompact', 'false'); want.push(['Swipe off', await R('S.guideCfg.swipeCompact===false')]); await pick('swipeCompact', 'true');
   await pick('gbFold', 'false'); want.push(['Label folds off', await R('S.guideCfg.gbFold===false')]); await pick('gbFold', 'true');
   for (const v of ['point', 'menu', 'play']) { await pick('azuTap', v); want.push(['Tap on Azu ' + v, await R(`S.guideCfg.azuTap==="${v}"`)]); }
   ok('Each new row, clicked in the Editor, reaches the phone (Starts at, Controls at Mini, Icon, Side, Guide button) or the guide (Stop, Swipe, Label folds, Tap on Azu)', want.every(w => w[1]), want.filter(w => !w[1]));
-  ok('...the Editor: Guide panel has Controls at Mini, Swipe down to Compact, Stop; Guide button follows it; Mascot has Tap on Azu; the old row is gone', await R('var d=ed.querySelector(\'[data-fo="s7dock"]\'),g=ed.querySelector(\'[data-fo="s7gbtn"]\');["Starts at","Controls at Mini","Swipe down to Compact","Stop"].every(function(t){return!!rowEl(ed,"s7dock",t)})&&d.nextElementSibling===g&&["Guide button","Icon","Side","Label folds after 4 s"].every(function(t){return!!rowEl(ed,"s7gbtn",t)})&&!!rowEl(ed,"s7mascot","Tap on Azu")&&!/Azu as the guide/.test(ed.textContent)&&(TXO.s7gbtn||[]).length===10'));
+  ok('...the Editor: Guide panel has Controls at Mini, Swipe down to Compact, Stop; Guide button follows it; Mascot has Tap on Azu; the old row is gone', await R('var d=ed.querySelector(\'[data-fo="s7dock"]\'),g=ed.querySelector(\'[data-fo="s7gbtn"]\');["Starts at","Controls at Mini","Swipe down to Compact","Stop"].every(function(t){return!!rowEl(ed,"s7dock",t)})&&d.nextElementSibling===g&&["Guide button","Icon","Side","Label folds after 4 s"].every(function(t){return!!rowEl(ed,"s7gbtn",t)})&&!!rowEl(ed,"s7mascot","Tap on Azu")&&!/Azu as the guide/.test(ed.textContent)&&(TXO.s7gbtn||[]).length===9&&TXOWN.gb_hint==="gd:i:gbhint"'));
 
   // ---------- each row's demo (the Guide tab, 6 · Audiences) ----------
   await R(base + 'S.tab="guide";S.ui.level=9;S.op={};S.view="card";S.stop="full";renderAll(false)');

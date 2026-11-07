@@ -54,7 +54,7 @@ var POKES=["r-giggle","r-spin","r-jump","r-wink","r-blush","hey"];
 function azPoke(){haptic();var calm=S.guideCfg.life!=="lively",pool=calm?["r-wink","r-blush"]:POKES.filter(function(x){return(G.lastPokes||[]).indexOf(x)<0}),r=pool[Math.floor(Math.random()*pool.length)];
   G.lastPokes=((G.lastPokes||[]).concat([r])).slice(calm?-1:-3);G.pokes=(G.pokes||0)+1;
   if(r==="hey"){azReact("r-jump",700,"surprised");azBubble(TXT("mascot_hey"))}else azReact(r,800,r==="r-wink"||r==="r-blush"?"big":"A");
-  if(!calm&&!S.m.solemn&&G.pokes%3===0)setTimeout(function(){azBubble(TXT("mascot_joke_"+(1+Math.floor(G.pokes/3)%3)),3200)},700);return r}
+  if(!calm&&!S.m.solemn&&G.pokes%3===0)setTimeout(function(){azBubble(TXT("mascot_joke_"+(1+Math.floor(G.pokes/3)%3)),3200)},700);emit("mascot.poked",r);return r}
 function azTickle(){haptic();azReact("r-laugh",1300,"big");azBubble(TXT("mascot_tickle"))}
 function azFall(){haptic();azReact("r-fall",1700,"surprised");azBubble(TXT("mascot_oops"),1400)}
 /* a moment: Azu walks to the middle with a prop and asks for one tap; it never blocks (8 s, then the tour carries on) */

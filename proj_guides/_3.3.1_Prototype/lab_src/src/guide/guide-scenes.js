@@ -56,11 +56,12 @@ var GSCENES=[
     expect:T("Azu reacts (a poke); the ✦'s menu stays closed.","O Azu reage (um toque); o menu do ✦ fica fechado."),
     act:function(){return gsGbtn().then(function(){var a=ph.querySelector(".azfab");if(!a)return[false,"no Azu beside the ✦",""];var n=G.pokes||0;gsTouch(a);
       return gsWait(120).then(function(){var r=(ph.querySelector(".azfab").className.match(/r-\w+/)||[""])[0],ans="Pokes "+n+" → "+(G.pokes||0)+(r?", "+r:"")+"; the menu "+(G.fab.menu?"opened":"closed")+".";return(G.pokes||0)===n+1&&!G.fab.menu&&!ph.querySelector(".gbmenu")?[true,"Azu plays and the menu stays closed",ans]:[false,"the tap did not play, or opened the menu",ans]})})}},
-  {id:"g_hint",label:"Guide · Azu points at the ✦, once a visit",setup:function(){S.guideCfg.azuTap="play";S.guideCfg.life="lively";G.gb.hinted=false;G.pokes=0;gsPast()},
+  {id:"g_hint",label:"Guide · Azu points at the ✦, once a visit",setup:function(){S.guideCfg.azuTap="play";S.guideCfg.life="lively";G.pokes=0;gsPast();gdResetVisitor()},
     q:T("nothing: pokes Azu four times, then four more","nada: toca no Azu quatro vezes e depois mais quatro"),
     expect:T("After a few pokes Azu points at the ✦ and says “Need anything? Tap ✦.”; it does not say it again in this visit.","Após alguns toques o Azu aponta para o ✦ e diz “Precisa de alguma coisa? Toque em ✦.”; não volta a dizê-lo nesta visita."),
-    act:function(){var hint=fmt(TXT("gb_hint"),"✦"),seen=0,poke=function(n){var p=Promise.resolve();for(var i=0;i<n;i++)p=p.then(function(){gsTouch(ph.querySelector(".azfab"));return gsWait(650)});return p};
-      var look=function(){var b=ph.querySelector(".azbub");return b&&b.textContent===hint};
-      return gsGbtn().then(function(){return poke(4)}).then(function(){return gsWait(1300)}).then(function(){seen=look()?1:0;var pt=!!ph.querySelector(".azfab.point-gb");G.gb.hintAt=0;return poke(4).then(function(){return gsWait(1300)}).then(function(){var again=G.gb.hintAt>0;
+    act:function(){var hint=gdLine(S.guidance.items.gbhint),seen=0,poke=function(n){var p=Promise.resolve();for(var i=0;i<n;i++)p=p.then(function(){gsTouch(ph.querySelector(".azfab"));return gsWait(650)});return p};
+      /* the guidance says it (Guide › Guidance › The wall › The ✦): its bubble, once Azu's own (a joke after a poke) has gone; at most 8 s */
+      var look=function(){var b=ph.querySelector(".gdbub:not(.gd-out) button[data-gdbub]");return!!b&&b.textContent===hint},wait=function(ms){var t0=performance.now();return new Promise(function(res){(function w(){if(look()||performance.now()-t0>ms){res();return}setTimeout(w,60)})()})},shown=function(){return gdVisitOf(S.gdVisitor,"gbhint").shown};
+      return gsGbtn().then(function(){return poke(4)}).then(function(){return wait(8000)}).then(function(){seen=look()?1:0;var pt=!!ph.querySelector(".azfab.point-gb"),n1=shown();return poke(4).then(function(){return gsWait(1300)}).then(function(){var again=shown()>n1;
         var ans="After 4 pokes: "+(seen?"the hint":"no hint")+(pt?", Azu's arm towards the ✦":"")+"; after 4 more: "+(again?"said again":"not again")+".";return seen&&pt&&!again?[true,"the hint comes once, pointing at the ✦",ans]:[false,"the hint is missing, does not point, or came twice",ans]})})}}];
 GSCENES.forEach(function(s){s.where="card";AGSCENES.push(s)});

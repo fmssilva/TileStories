@@ -8,7 +8,9 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 90000 }); await p.waitForTimeout(500);
   const R = src => p.evaluate(s => LAB.run(s), src);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
-  await R('S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;sampleFn=null;S.guideCfg.azuStyle="tile";S.camCfg.wall="belem";S.camCfg.every=4;S.view="card";S.stop="closed";S.camX=.35;S.camY=.45;S.camZoom=1.3;renderAll(false)');
+  await R('S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;sampleFn=null;S.guideCfg.azuStyle="tile";S.camCfg.wall="belem";S.view="card";S.stop="closed";S.camX=.35;S.camY=.45;S.camZoom=1.3;renderAll(false)');
+  // (guidance round 3: the remarks are Guide › Guidance › What's in view; the opening said 30 s ago, the other tips resting, so the remark is the one due)
+  await R('gdGroupById("inview").on=true;["tapmarker","askview","gbhint","tourof"].forEach(function(id){S.guidance.items[id].on=false});G.gd.manual=false;gdStop("t");gdResetVisitor();var o=gdVM("opening"),oe=gdEM("opening");o.shown=1;o.last=gdNow()-30000;o.end=gdNow()-21000;oe.shown=1;S.gdVisitor.visit.lastEnd=gdNow()-21000');
   await p.waitForTimeout(400);
   // 1. the test wall: its points are the markers, on the picture
   const w1 = await R('[S.wallPois.length,ph.querySelectorAll(".cpin").length,!ph.querySelector(".campins").hidden,getComputedStyle(document.getElementById("camera")).backgroundImage.length>1000]');
@@ -25,10 +27,10 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('The wheel zooms in (nearer the wall): fewer points in view', z[0] > 1.3, z);
   await R('S.camZoom=1.3;S.camX=.35;S.camY=.45;camPaint();camLayer()');
   // 3. Azu in the corner comments on the point that settles in the middle; the bubble is tappable
-  await p.waitForFunction(() => LAB.run('!!ph.querySelector(".azfabbub")'), null, { timeout: 15000 }).catch(() => {});
-  const cm = await R('var b=ph.querySelector(".azfabbub");[!!ph.querySelector(".azfab.onwall"),b&&b.textContent,camView().central.name]');
+  await p.waitForFunction(() => LAB.run('!!(G.gd.cur&&G.gd.cur.item.base==="inview"&&ph.querySelector(".gdbub button[data-gdbub]"))'), null, { timeout: 15000 }).catch(() => {});
+  const cm = await R('var b=ph.querySelector(".gdbub button[data-gdbub]");[!!ph.querySelector(".azfab.onwall"),b&&b.textContent,camView().central.name]');
   ok('On the wall: Azu in the corner says what is in the middle, by itself', cm[0] && cm[1] && cm[1].indexOf(cm[2]) >= 0, cm);
-  await p.locator('#ph .azfabbub').click(); await p.waitForTimeout(700);
+  await p.locator('#ph .gdbub button[data-gdbub]').click(); await p.waitForTimeout(700);
   ok('...a tap on its remark opens Ask about the view, the point lit', await R('G.cam.open&&!!ph.querySelector(".camask.open")&&ph.querySelectorAll(".cpin.lit").length>=1&&ph.querySelector(".ca-ans").textContent.length>5'));
   await R('G.cam.open=false;G.cam.lit=[];renderPhone(true)'); await p.waitForTimeout(200);
   // round 7: the ✦ beside Azu is the visitor's way in; its menu has Ask about the view (a tap on Azu plays)
@@ -36,12 +38,12 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('On the wall, the ✦\'s Ask about the view opens it (no Ask pill any more)', await R('G.cam.open&&!!ph.querySelector(".camask.open")&&!ph.querySelector(".azfab")'));
   await R('G.cam.open=false;renderPhone(true)');
   // 4. the card's wall: a remark on a point with a card opens it and starts its tour, at Full
-  await R('S.camCfg.wall="ribeira";S.camX=.4;S.camY=.5;S.camZoom=1;G.fab.said=null;G.fab.last=0;renderAll(false)');
-  await p.waitForFunction(() => LAB.run('!!ph.querySelector(".azfabbub")'), null, { timeout: 15000 }).catch(() => {});
-  ok('On the card\'s wall, the remark on Ribeira Palace offers its tour', await R('ph.querySelector(".azfabbub").textContent.indexOf(TXT("fab_comment_card").slice(0,10))===0||/show you around/.test(ph.querySelector(".azfabbub").textContent)'));
-  await p.locator('#ph .azfabbub').click(); await p.waitForTimeout(600);
+  await R('S.camCfg.wall="ribeira";S.camX=.4;S.camY=.5;S.camZoom=1;S.gdVisitor.visit.lastEnd=null;S.gdVisitor.visit.starts=[];renderAll(false)');
+  await p.waitForFunction(() => LAB.run('!!(G.gd.cur&&G.gd.cur.item.id==="inview:painting"&&ph.querySelector(".gdbub button[data-gdbub]"))'), null, { timeout: 15000 }).catch(() => {});
+  ok('On the card\'s wall, the remark on Ribeira Palace offers its tour', await R('var b=ph.querySelector(".gdbub button[data-gdbub]");!!b&&(b.textContent.indexOf(TXT("fab_comment_card").slice(0,10))===0||/show you around/.test(b.textContent))'));
+  await p.locator('#ph .gdbub button[data-gdbub]').click(); await p.waitForTimeout(600);
   ok('...a tap: the card opens and the tour starts, at Full', await R('G.on&&S.stop==="full"'));
-  await R('stopTour()');
+  await R('stopTour();["tapmarker","askview","gbhint","tourof"].forEach(function(id){S.guidance.items[id].on=true})');
   // 5. a tour from a card at Half raises it to Full; on the card Azu's button waits until the hero's Start is out of sight
   await R('S.stop="half";renderPhone(false)'); await p.waitForTimeout(900);
   ok('At Half, with the hero\'s Start the guide in sight: no Azu button', await R('!ph.querySelector(".azfab")'));
@@ -57,7 +59,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('Play from a card at Half: the card rises to Full (on the screen, not only in its state)', await R('G.on&&S.stop==="full"&&scr.getBoundingClientRect().top-ph.getBoundingClientRect().top<40'), await R('Math.round(scr.getBoundingClientRect().top-ph.getBoundingClientRect().top)'));
   await R('stopTour()');
   // 6. the Editor
-  ok('Editor: Ask about the view has Azu\'s comments, their pace and the wall; the button is in Guide button', await R('S.tab="guide";renderEditor();var f=ed.querySelector(\'[data-fo="s7cam"]\');!!f&&["Azu comments","Between comments","Wall (the Lab)"].every(function(t){return f.textContent.indexOf(t)>=0})&&!!rowEl(ed,"s7gbtn","Guide button")'));
+  ok('Editor: Ask about the view has Azu\'s comments (a link to Guidance › What\'s in view, where their pace is) and the wall; the button is in Guide button', await R('S.tab="guide";renderEditor();var f=ed.querySelector(\'[data-fo="s7cam"]\');!!f&&["Azu comments","Wall (the Lab)"].every(function(t){return f.textContent.indexOf(t)>=0})&&!!f.querySelector(\'[data-goto="gd:g:inview"]\')&&f.textContent.indexOf("Between comments")<0&&!!rowEl(ed,"s7gbtn","Guide button")'));
   ok('no page errors', errs.length === 0, errs.slice(0, 3));
   console.log(fails ? `${fails} FAILED` : 'ALL PASS');
   await b.close();

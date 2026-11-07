@@ -29,10 +29,6 @@
 .azfab .marm{left:-14px;top:24px}
 .azfab.point-gb .marm{opacity:1;transform:rotate(6deg)}
 .side-right .azfab .marm{left:auto;right:-14px;transform-origin:0 50%}.side-right .azfab.point-gb .marm{transform:rotate(-6deg)}
-.azfab.hop svg,.azfab.hop canvas{animation:azjump .7s cubic-bezier(.3,1.5,.5,1)}
-/* its remark (placed above the ✦ and Azu): words in --ink1 on --paper; an actionable one ends with a chevron */
-.azfabbub{position:absolute;z-index:13;max-width:250px;appearance:none;border:0;background:var(--paper);color:var(--ink1);font:600 13.5px/1.35 var(--body);padding:11px 13px;min-height:44px;border-radius:14px 14px 14px 4px;box-shadow:0 8px 22px rgba(0,0,0,.3);text-align:left;cursor:pointer;animation:gbin .22s ease}
-.azfabbub.act::after{content:" \203A";color:var(--accent2);font-weight:800}
 .azbub.byfab{border-radius:14px 14px 14px 4px;max-width:230px}
 /* the ✦'s menu: the dock's dark, 44 px items, their icons in gold */
 .gbmenu{position:absolute;z-index:16;display:flex;flex-direction:column;gap:2px;min-width:224px;max-width:300px;padding:6px;border-radius:18px;background:#16181C;border:1px solid rgba(244,241,234,.16);box-shadow:0 12px 30px rgba(0,0,0,.4);animation:gbin .18s ease}
@@ -40,4 +36,4 @@
 .gbmenu button:hover,.gbmenu button:focus-visible{background:rgba(244,241,234,.1)}
 .gbmenu svg{width:20px;height:20px;flex:none;fill:none;stroke:#FFD98A;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .gbmenu small{display:block;font:500 12.5px/1.25 var(--body);color:rgba(244,241,234,.74);margin-top:2px}
-.reduce .gbtn-wrap *,.reduce .azfabbub,.reduce .gbmenu{animation:none!important;transition:none!important}
+.reduce .gbtn-wrap *,.reduce .gbmenu{animation:none!important;transition:none!important}

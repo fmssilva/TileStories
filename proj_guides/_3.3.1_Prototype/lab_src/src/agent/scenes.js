@@ -17,9 +17,6 @@ on("agentAsk.before",function(q,where,ui){var d=ui.done,f=ui.fail;
 
 /* ----- the wall: every point in view named (testing: does the guide name what is on the screen?), or only the middle one ----- */
 on("camLayer.after",function(){ph.classList.toggle("pinnames",S.camCfg.names==="all")});
-/* a remark about a point that has left the screen (another wall, a pan) goes */
-on("fabLayer.before",function(){if(G.fab.bub&&S.stop==="closed"&&!camView().pois.some(function(p){return p.id===G.fab.bub.id}))G.fab.bub=null});
-setInterval(function(){if(G.fab.bub&&S.stop==="closed"&&ph.querySelector(".azfabbub")&&!camView().pois.some(function(p){return p.id===G.fab.bub.id}))fabLayer()},400);
 
 /* ----- the test scenes: each puts the prototype where a visitor would be (as by hand: close the card, pick the wall, drag, tap Azu), asks, and checks the answer ----- */
 function agCardAsk(){S.view="card";S.stop="full";S.camCfg.wall="ribeira";G.cam.open=false;renderPhone(false);startTour();pauseTour();G.askOpen=true;S.dockH="full";renderGuide()}
