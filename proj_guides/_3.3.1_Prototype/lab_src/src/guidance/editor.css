@@ -22,3 +22,48 @@
 .gdl b{font-weight:600}
 .gdl-shown b{color:#9FE3A8}.gdl-skipped b{color:#C9C9C9}.gdl-ended b{color:#E2C36B}.gdl-learned b{color:#CFE3FF}
 .note.gdmix{color:#D8D8D8}
+/* round 5: the values in force, the Preset (Custom and its changes), the help's tables, the Mix along the visit (its table and curve), the
+   simulator's timeline. Unity: IMGUI rows and tables in the POI Editor; the curve and the timeline drawn with Painter2D (generateVisualContent)
+   in the Editor window, the dots as hit rects */
+.gdforce{font-size:11px;color:#B9C4CF;margin-top:3px}
+.note.gdpreset{color:#E2E2E2}.note.gdpreset.custom{color:#F0D58A;border-left:2px solid #E2C36B;padding-left:8px}
+.note.gdtalk{color:#D8D8D8}
+.tbl.gdhelp td,.tbl.gdhelp th{font-size:11px;padding:3px 5px;vertical-align:top;white-space:normal;overflow:visible;line-height:1.35}
+.tbl.gdhelp td:first-child,.tbl.gdhelp th:first-child{width:24%;color:var(--u-dim)}
+.tbl.gdhelp th.on{color:#F0D58A}
+.tbl.gdmixt td,.tbl.gdmixt th{font-size:11.5px;padding:4px 6px;vertical-align:middle}
+.tbl.gdmixt td:first-child,.tbl.gdmixt th:first-child{width:34%}
+.tbl.gdmixt td{white-space:normal;overflow:visible}
+.tbl.gdmixt small{display:block;color:#AEB4BA;font-size:10.5px;line-height:1.35;margin-top:2px}
+.gdmixc{display:inline-flex;align-items:center;gap:4px;color:#C9C9C9}
+.gdmixc input{width:56px}
+.gdsw{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.gdcurve{display:block;width:100%;max-width:540px;height:auto;margin:10px 0 4px}
+.gdcurve .gdgrid{stroke:#4A4A4A;stroke-width:1}.gdcurve .gdgrid.dash{stroke-dasharray:3 3}
+.gdax{fill:#AEB4BA;font-size:10px}
+.gdend{font-size:10.5px;font-weight:600}
+.gdtlw{margin:8px 0 4px;overflow:hidden;border-radius:6px;background:#242424;border:1px solid #1B1B1B}
+.gdtl{display:block;touch-action:none;cursor:col-resize;user-select:none}
+.gdtl .gdlane{fill:#262626}.gdtl .gdlane.alt{fill:#2B2B2B}
+.gdtl .gdlab{fill:#C9C9C9;font-size:11px;font-weight:600}
+.gdtl .gdtick{stroke:#383838;stroke-width:1}.gdtl .gdtick.maj{stroke:#4C4C4C}
+.gdtl .gdnone{fill:#9EA4AA;font-size:10.5px;font-style:italic}
+.gdq,.gdq-pan{fill:#59606A}.gdq-tour{fill:#6C7E95}.gdq-card{fill:#6F6553}.gdq-panel{fill:#665C78}
+.gddot{cursor:pointer;outline:none}.gddot .gdhit{fill:transparent}
+.gddot .gdd{stroke:#1E1E1E;stroke-width:1.5}
+.gddot.cue .gdd{fill:#262626;stroke:#E2C36B;stroke-width:2}
+.gddot.many.cue .gdd{fill:#E2C36B;stroke:#1E1E1E;stroke-width:1.5}
+.gddot:hover .gdd,.gddot:focus .gdd{stroke:#FFFFFF}
+.gdn{fill:#1A1A1A;font-size:10px;font-weight:700;pointer-events:none}
+.gdring2{fill:none;stroke:rgba(255,255,255,.7);stroke-width:1.2}.gdring2.sel{stroke:#FFFFFF;stroke-width:2.5}
+.gdsimpick{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin:2px 0 4px;font-size:11px;color:#AEB4BA}.gdsimpick:empty{display:none}.gdsimpick .ubtn.on{outline:1px solid #E2C36B}
+.gdghost{fill:none;stroke:#7E848A;stroke-width:1;stroke-dasharray:2 2}
+.gdmove{stroke:#8A8F95;stroke-width:1;stroke-dasharray:2 2}
+.gdhead{stroke:#F2F2F2;stroke-width:1.5}.gdheadk{fill:#F2F2F2}
+.gdleg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:11px;color:#AEB4BA;margin:2px 0 6px}
+.gdleg .gdsw.cue{background:transparent;border:2px solid #E2C36B;width:7px;height:7px}
+.gdleg .gdsw.n{width:14px;height:14px;background:#E2C36B;color:#1A1A1A;font:700 9px/14px sans-serif;text-align:center;font-style:normal}
+.gdleg .gdsw.q{border-radius:3px;width:14px;margin-left:8px;margin-right:4px}.gdleg .gdsw.gdq-pan{background:#59606A}.gdleg .gdsw.gdq-tour{background:#6C7E95}.gdleg .gdsw.gdq-card{background:#6F6553}.gdleg .gdsw.gdq-panel{background:#665C78}
+.gdleg .gdsw.mv{background:transparent;border:1.5px solid rgba(255,255,255,.8);width:10px;height:10px}.gdleg .gdsw.gh{background:transparent;border:1px dashed #9AA0A6;width:8px;height:8px}
+.note.gdsimlearn{color:#BFC5CB;font-size:11px}
+.note.gdsimnow{color:#CFE3FF}.note.gdsimsum{color:#E2E2E2;font-weight:600}.note.gdsimmoved{color:#F0D58A}

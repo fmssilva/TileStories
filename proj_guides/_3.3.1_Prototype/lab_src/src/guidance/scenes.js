@@ -1,4 +1,5 @@
-/* Guidance tested in the prototype: fourteen scenes in Ask Azu's test console (round 1's five, round 2's five: the 15-minute script, Ignore three,
+/* Guidance tested in the prototype: seventeen scenes in Ask Azu's test console (round 5's three, at the end: the Quiet preset, the Family audience,
+   a first visit simulated; round 1's five, round 2's five: the 15-minute script, Ignore three,
    Fewer like this, Leave and come back, During a tour; round 3's two: a remark yields, The ✦ after four pokes; round 4's two: a hint and a
    tip never at once, How does this work? on the card and on the wall) (Set up, Set up and ask,
    Run all scenes), each putting the
@@ -185,3 +186,31 @@ var GDSCENES4=[
         var ans="The ✦ menu "+(r.item?"has How does this work?":"lacks it")+"; on the card: "+(r.walk?"the walkthrough at its first step, the grabber "+(r.mark?"marked":"not marked"):"no walkthrough")+", "+(r.done?"the Grabber nudge done once its line was heard":"the nudge not retired")+"; on the wall: "+(r.wall?"“"+r.text+"”, "+(r.cta?"with Open a card":"no chip")+", the ring "+(r.ring?"on its marker":"off")+", "+r.words+" px² over words, "+r.overStar+" px² over the ✦":"no bubble")+"; Open a card "+(r.open?"opened the card":"did nothing")+".";
         return gdScDone(r.item&&r.walk&&r.mark&&r.done&&r.wall&&r.text===TXT("gd_how_wall")&&r.cta&&r.words===0&&r.overStar===0&&r.open?[true,"pulled past every gate: the card walked (its step retires the nudge), the wall in one bubble that opens a card",ans]:[false,"How does this work? did not open, walk, retire or offer as it should",ans])})})}}];
 GDSCENES4.forEach(function(s){s.where="card";AGSCENES.push(s)});
+/* ----- round 5: three more scenes (ids gd5_*): the Quiet preset, the Family audience in Who's exploring, a first visit simulated. Each keeps
+   the settings it found (S.guidance, the audience, the first-card question) and gives them back after ----- */
+function gd5Keep(){G.gd.sc5={g:JSON.parse(JSON.stringify(S.guidance)),aud:S.vis.aud,len:S.vis.len,ask:S.aud.ask,seen:S.aud.seen,sim:S.ui.gdSim};if(G.on)stopTour();setWall("ribeira");gdStop("a scene");G.gd.demo=false;gdChip(null)}
+function gd5Done(r){var k=G.gd.sc5;if(k){S.vis.aud=k.aud;S.vis.len=k.len;S.aud.ask=k.ask;S.aud.seen=k.seen;renderPhone(false);S.guidance=k.g;S.ui.gdSim=k.sim;G.gd.sc5=null;var o=ph.querySelector(".onb");if(o)o.remove();renderAll(true)}return r}
+/* the Editor's Preset chosen: the change its select makes (setOpt), without the row's own demo (the scene shows its tip itself) */
+function gd5Preset(id){setOpt("@guidance.preset",id)}
+var GDSCENES5=[
+  {id:"gd5_quiet",label:"Guidance · the Quiet preset: fewer tips in 15 min than Balanced, a longer room",setup:function(){gd5Keep();gdPresetWrite("first")},
+    q:T("nothing: it chooses the Quiet preset in Overall › Preset, then simulates a first visit (Simulate a visit, Instant) and shows its first tip on the phone","nada: escolhe a predefinição Calma em Geral › Predefinição, simula uma primeira visita (Simular uma visita, Instantâneo) e mostra a primeira dica no telemóvel"),
+    expect:T("Quiet: the breathing room 15 s × 2 = 30 s; the first visit gets fewer tips in 15 min than with First visit (Balanced), at most 1 a minute.","Calma: o intervalo 15 s × 2 = 30 s; a primeira visita recebe menos dicas em 15 min do que com Primeira visita (Equilibrada), no máximo 1 por minuto."),
+    act:function(){var bal=gdSimulate("first",{g:JSON.parse(JSON.stringify(S.guidance)),life:S.guideCfg.life}),b=gdSimSum(bal,15),roomB=gdRoomNow();gd5Preset("quiet");
+      var now=gdPresetNow(),roomQ=gdRoomNow(),q=gdSimulate("first"),s=gdSimSum(q,15),d=q.dots.filter(function(x){return!x.cue})[1];if(d)gdSimShow(d);
+      return gdScWait(function(){return!!ph.querySelector(".gdbub:not(.gd-out)")},2500).then(function(shown){var ans="Preset now "+gdPresetName(now)+"; the room "+roomB+" s → "+roomQ+" s ("+gdForceWords(S.guidance.breathing," s",true).replace("In force: ","")+"); First visit: "+b.words+"; Quiet: "+s.words+"; the phone "+(shown?"shows its tip at "+gdClock(d.t):"shows nothing")+".";
+        return gd5Done(now==="quiet"&&roomQ>roomB&&s.tips<b.tips&&s.perMin<=1&&shown?[true,"Quiet: "+s.tips+" tips in 15 min against "+b.tips+", the room "+roomQ+" s",ans]:[false,"Quiet did not make it quieter",ans])})}},
+  {id:"gd5_family",label:"Guidance · the Family audience: Who's exploring sets the Family preset",setup:function(){gd5Keep();gdPresetWrite("first");S.vis.aud="explorer";S.vis.len="";S.aud.ask=true;S.aud.seen=false;S.view="card";S.stop="closed";renderPhone(false)},
+    q:T("nothing: it opens the card, and on the first card's Who's exploring it taps Family","nada: abre o cartão e, no Quem está a explorar do primeiro cartão, toca em Família"),
+    expect:T("Family chosen: the Family preset is in force (12 s between two tips, Content's gap 45 s, the Mix 60 / 35 / 15 and 25 / 40 / 45), and the Editor's Preset reads Family.","Família escolhida: a predefinição Família fica em vigor (12 s entre duas dicas, o intervalo do Conteúdo 45 s, a Mistura 60 / 35 / 15 e 25 / 40 / 45), e a Predefinição do Editor diz Família."),
+    act:function(){S.stop="half";renderPhone(false);return gdScWait(function(){return!!ph.querySelector('.onb [data-onb="family"]')},2500).then(function(ok){var b=ph.querySelector('.onb [data-onb="family"]');if(b)gsTouch(b);
+      return gdScWait(function(){return gdPresetNow()==="family"},2500).then(function(){var g=S.guidance,p=GD_PRESETS.family,now=gdPresetNow();
+        var ans="Who's exploring "+(ok?"asked":"did not show")+"; the audience "+(AUDN[aud()]||aud())+"; the preset "+gdPresetName(now)+": the room "+g.breathing+" s, Content's gap "+g.kinds[1].gap+" s, the Mix App "+g.mix.app.join(" / ")+", Content "+g.mix.content.join(" / ")+".";
+        return gd5Done(ok&&aud()==="family"&&now==="family"&&g.breathing===p.breathing&&JSON.stringify(g.mix)===JSON.stringify(p.mix)?[true,"Family in Who's exploring set the Family preset",ans]:[false,"the audience did not set its preset",ans])})})}},
+  {id:"gd5_sim",label:"Guidance · simulate a first visit: App first, then Content, about 10 in 15 min",setup:function(){gd5Keep();gdPresetWrite("first");S.ui.gdSim="first"},
+    q:T("nothing: it runs Simulate a visit with the First visit script (the real scheduler on a fake clock, 20 min at once) and shows its first remark on the phone","nada: corre Simular uma visita com o guião Primeira visita (o verdadeiro escalonador num relógio falso, 20 min de uma vez) e mostra o primeiro comentário no telemóvel"),
+    expect:T("App first (the opening, Tap a marker, Ask about the view), then Content; about 10 tips in 15 min (8 to 12), at most 2 a minute, none over a sentence.","Primeiro a App (a abertura, o Toque num marcador, Pergunte sobre a vista), depois o Conteúdo; cerca de 10 dicas em 15 min (8 a 12), no máximo 2 por minuto, nunca sobre uma frase."),
+    act:function(){var r=gdSimNow("first"),s=gdSimSum(r,15),tips=r.dots.filter(function(d){return!d.cue&&d.t<900000}),c=tips.filter(function(d){return d.kind==="content"})[0];if(c)gdSimShow(c);
+      return gdScWait(function(){return!!ph.querySelector(".gdbub:not(.gd-out)")},2500).then(function(shown){var ans=s.words+": "+tips.map(function(d){return gdClock(d.t)+" "+d.label}).join(", ")+"; the phone "+(shown?"shows "+(c?c.label:"?")+" at "+(c?gdClock(c.t):"?"):"shows nothing")+".";
+        return gd5Done(s.first==="app"&&s.appBefore>=2&&s.content>0&&s.tips>=8&&s.tips<=12&&s.perMin<=2&&s.over===0&&shown?[true,"App first, then Content: "+s.tips+" tips in 15 min, at most "+s.perMin+" a minute",ans]:[false,"the simulated first visit was not as the study says",ans])})}}];
+GDSCENES5.forEach(function(s){s.where="wall";AGSCENES.push(s)});

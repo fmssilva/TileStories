@@ -46,7 +46,7 @@
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 65
+  "s": 67
  },
  "test8m.js": {
   "pass": 19,
@@ -186,7 +186,7 @@
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 197
+  "s": 202
  },
  "test9g.js": {
   "pass": 46,
@@ -201,5 +201,12 @@
   "failed": [],
   "crashed": "",
   "s": 116
+ },
+ "test9i.js": {
+  "pass": 40,
+  "fail": 0,
+  "failed": [],
+  "crashed": "",
+  "s": 100
  }
 }

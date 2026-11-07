@@ -4,13 +4,18 @@
    marker) and The wall (Ask about the view, The ✦); Content (spoken once the visitor has heard the guide this visit, else a bubble) with
    What's in view (one item a wall point: Azu's remarks, the 400 ms timer they had is gone) and Tours (A tour of {point}). Each kind has
    its On, its cap a visit and its gap; each group its On, its weight, its own cap a visit and its own gap (0: none of its own; a group's
-   gap stands in for its kind's for its items); the kinds' weights along the visit are a fixed table (GD_MIX). A per-point item
+   gap stands in for its kind's for its items); the kinds' weights along the visit are data (round 5: S.guidance.mix, Overall › Mix along the visit, read by gdScore through
+   each item's kindMix). Round 5 also adds Talkativeness (one knob over the room, the limits and the kinds' caps: GD_TALK) and the presets
+   (GD_PRESETS: each writes the Overall and kind values, never the items; Custom lists its changes). A per-point item
    (perPoint) is one item for each point of the wall in view (gdItems: "Ribeira Palace in the middle"), each with its own memory, edited
    once. An item's words are in Languages & Terms (S.tx), owned by the item's foldout (gd:i:<id>); the bubble's own words (Fewer like
    this?) by Overall (gd:overall). The events the items wait for or retire on are named in GD_EVENTS (the same names in Unity). Unity:
    GuidanceCatalog, a ScriptableObject (kinds, groups, items; a per-point item expanded from the wall's POI list at load; the words as
    CardStrings keys), read by GuidanceScheduler. */
 S.guidance={on:true,breathing:15,cueRoom:5,perMinute:2,perVisit:30,freshTau:120,learnIgnore:true,learnDismiss:true,fewer:true,remember:true,
+  /* round 5: Talkativeness (Quiet / Balanced / Chatty), the preset last chosen (First visit: these values), the Mix along the visit (each kind's
+     weight at s = 0 / 0.3 / 1; Fun's row is ready for round 7: Fun has no items yet) */
+  talk:"balanced",preset:"first",mix:{app:[70,40,15],content:[25,50,60],fun:[5,10,25]},
   kinds:[{id:"app",name:"App",spoken:"bubble",on:true,cap:20,gap:0,groups:[
       {id:"start",name:"The start",mode:"order",on:true,weight:1,cap:0,gap:0,items:["opening","tapmarker"]},
       {id:"wall",name:"The wall",mode:"all",on:true,weight:1,cap:0,gap:0,items:["askview","gbhint"]},
@@ -117,17 +122,74 @@ var GD_CUE_NO={grab:"the grabber nudges only as the card opens at Half",locate:"
   ba:"no Before / After in view",strip:"no strip with more to the side in view",term:"no underlined word in view"};
 var GD_TOUR=[["never","Never"],["between","Between steps"]];
 var GD_ALONG=[["kind","As the kind"],["steady","Steady"],["early","Early"],["late","Late"]];
-/* the stage of the visit, s from 0 to 1: the kinds' weights at s = 0 / 0.3 / 1 (a fixed table: the mix), and the items' curves along the
-   visit at the same three points (As the kind: the kind's weight alone; Early: it fades after a third; Late: it grows from a third);
-   Steady holds the kind's weight at its middle (s = 0.3) all visit. Straight lines between the points. */
-var GD_MIX={app:[70,40,15],content:[25,50,60]};
+/* the stage of the visit, s from 0 to 1: the kinds' weights at s = 0 / 0.3 / 1 (the Mix along the visit: data, S.guidance.mix, Overall ›
+   Mix along the visit), and the items' curves along the visit at the same three points (As the kind: the kind's weight alone; Early: it
+   fades after a third; Late: it grows from a third); Steady holds the kind's weight at its middle (s = 0.3) all visit. Straight lines
+   between the points. A kind with no row weighs nothing. */
+function gdMix(kind,g){var m=(g||S.guidance).mix,r=m&&m[kind];return r?r.map(Number):[0,0,0]}
+var GD_MIX_KINDS=[["app","App"],["content","Content"],["fun","Fun"]],GD_MIX_AT=["on arrival","a third in","at the end"];
+/* ----- Talkativeness (round 5, _3.8 section 3.3 point 6): one knob over the numbers. Balanced is the rows' own values; Quiet doubles the
+   breathing room and halves the limits; Chatty shortens the room to 0.6 and gives the limits half again. The limits: At most a minute, At
+   most a visit and each kind's At most a visit. The value in force is the row's × the factor (the room to the second; a limit to a whole
+   tip, at least 1; a cap of 0 stays none). Judged with the simulator (Preview & Test › Simulate a visit): with the limits ×0.5 a first
+   visit kept its 12 tips in 15 min (its items' own rules bind first: a remark once a visit for each point), only slower; at ×0.4 the
+   caps bite (Content 12 → 5: 10 tips, at most 1 a minute). Chatty cannot add what there is not to say: the same tips, sooner (3 a minute).
+   Unity: GuidanceCatalog.talkativeness, applied by GuidanceScheduler's state builder ----- */
+var GD_TALK={quiet:{name:"Quiet",room:2,limits:0.4},balanced:{name:"Balanced",room:1,limits:1},chatty:{name:"Chatty",room:0.6,limits:1.5}},GD_TALK_IDS=["quiet","balanced","chatty"];
+function gdTalk(g){return GD_TALK[(g||S.guidance).talk]||GD_TALK.balanced}
+function gdRoomNow(){return Math.round(+S.guidance.breathing*gdTalk().room)}
+function gdLimitNow(v){v=+v||0;return v>0?Math.max(1,Math.round(v*gdTalk().limits)):0}
+/* the value in force in words, under its row: "In force: 15 s × 2 = 30 s (Quiet)" */
+function gdForceWords(v,unit,room){var t=gdTalk(),f=room?t.room:t.limits,n=room?Math.round(+v*f):gdLimitNow(v);return"In force: "+(f===1?v+unit:v+unit+" × "+f+" = "+n+unit)+" ("+t.name+")"}
+/* ----- the presets (round 5, _3.8 section 7): each writes the Overall and kind values (Talkativeness, the breathing room, the limits, each
+   kind's cap and gap, the Mix, Remember across visits), never the items. One table, read back by the Editor's help. First visit is the
+   catalog's own values above (today's); the others, and why:
+   - Returning: the app is known (its tips are mostly done), so App weighs less and Content more, a little more room, App capped at 8;
+   - Family: a group that moves on fast and likes play: a shorter room (12 s), Content's gap 45 s, more Fun (ready for round 7);
+   - Expert: Quiet (the room ×2, the limits ×0.4), App at 40 / 20 / 10 (an expert learns fast), Content at 55 / 70 / 70, its gap 45 s;
+   - Quiet and Chatty: First visit with Talkativeness Quiet or Chatty.
+   Remember across visits is On in every preset (Off is for a kiosk or a demo: set by hand, which makes it Custom). The audiences choose
+   one (Detail Card › 6 · Audiences › Looks per audience › Guidance preset). Unity: GuidancePreset assets (ScriptableObjects) ----- */
+var GD_PRESET_IDS=[["first","First visit"],["returning","Returning"],["family","Family"],["expert","Expert"],["quiet","Quiet"],["chatty","Chatty"]];
+/* the values a preset writes, read from a settings object (S.guidance, or a copy) */
+function gdPresetOf(g){g=g||S.guidance;var k={},m={};g.kinds.forEach(function(x){k[x.id]={cap:+x.cap,gap:+x.gap}});Object.keys(g.mix||{}).forEach(function(x){m[x]=g.mix[x].map(Number)});
+  return{talk:g.talk||"balanced",breathing:+g.breathing,perMinute:+g.perMinute,perVisit:+g.perVisit,remember:g.remember!==false,mix:m,kinds:k}}
+function gdPresetLike(p,o){var q=JSON.parse(JSON.stringify(p));Object.keys(o).forEach(function(x){q[x]=o[x]});return q}
+var GD_PRESETS=(function(){var first=gdPresetOf();return{first:first,
+  returning:{talk:"balanced",breathing:20,perMinute:2,perVisit:24,remember:true,mix:{app:[35,20,10],content:[55,65,65],fun:[10,15,25]},kinds:{app:{cap:8,gap:0},content:{cap:14,gap:45}}},
+  family:{talk:"balanced",breathing:12,perMinute:2,perVisit:30,remember:true,mix:{app:[60,35,15],content:[25,40,45],fun:[15,25,40]},kinds:{app:{cap:20,gap:0},content:{cap:12,gap:45}}},
+  expert:{talk:"quiet",breathing:15,perMinute:2,perVisit:24,remember:true,mix:{app:[40,20,10],content:[55,70,70],fun:[5,10,20]},kinds:{app:{cap:8,gap:0},content:{cap:16,gap:45}}},
+  quiet:gdPresetLike(first,{talk:"quiet"}),chatty:gdPresetLike(first,{talk:"chatty"})}})();
+/* each preset's why, in words (the Editor's help reads it back) */
+var GD_PRESET_WHY={first:"today's values: App first, then Content as the visit grows; a tip at most every 15 s, 2 a minute.",
+  returning:"the app is known (its tips are mostly done): App weighs less and Content more, 20 s between two tips, App capped at 8.",
+  family:"a group that moves on fast and likes play: 12 s between two tips, Content's gap 45 s, more Fun (ready for round 7).",
+  expert:"Quiet (the room ×2, the limits ×0.4), App at 40 / 20 / 10 (an expert learns fast) and Content at 55 / 70 / 70.",
+  quiet:"First visit's values with Talkativeness Quiet: twice the room, the limits ×0.4.",chatty:"First visit's values with Talkativeness Chatty: the room ×0.6, the limits ×1.5.",custom:"values changed by hand."};
+function gdPresetName(id){var p=GD_PRESET_IDS.filter(function(x){return x[0]===id})[0];return p?p[1]:id==="custom"?"Custom":id}
+/* what differs between two sets of a preset's values, in words ("Breathing room 20 s, was 15 s"): b the values now, a the preset's */
+function gdPresetWords(a,b){var w=[],kn={app:"App",content:"Content"};
+  if(a.talk!==b.talk)w.push("Talkativeness "+(GD_TALK[b.talk]||{}).name+", was "+(GD_TALK[a.talk]||{}).name);
+  if(a.breathing!==b.breathing)w.push("Breathing room "+b.breathing+" s, was "+a.breathing+" s");
+  if(a.perMinute!==b.perMinute)w.push("At most a minute "+b.perMinute+", was "+a.perMinute);
+  if(a.perVisit!==b.perVisit)w.push("At most a visit "+b.perVisit+", was "+a.perVisit);
+  Object.keys(b.kinds).forEach(function(k){var x=a.kinds[k]||{},y=b.kinds[k];if(x.cap!==y.cap)w.push((kn[k]||k)+": At most a visit "+y.cap+", was "+x.cap);if(x.gap!==y.gap)w.push((kn[k]||k)+": Gap "+y.gap+" s, was "+x.gap+" s")});
+  GD_MIX_KINDS.forEach(function(k){var x=a.mix[k[0]]||[0,0,0],y=b.mix[k[0]]||[0,0,0];[0,1,2].forEach(function(i){if(x[i]!==y[i])w.push("Mix: "+k[1]+" "+GD_MIX_AT[i]+" "+y[i]+" %, was "+x[i]+" %")})});
+  if(a.remember!==b.remember)w.push("Remember across visits "+(b.remember?"On":"Off")+", was "+(a.remember?"On":"Off"));return w}
+/* the preset in force: the one last chosen while every value is still its own (or another whose values they all are: First visit with
+   Talkativeness Quiet is Quiet), else Custom; and Custom's changes in words, from the one last chosen */
+function gdPresetDiff(id){var p=GD_PRESETS[id||S.guidance.preset];return p?gdPresetWords(p,gdPresetOf()):["no preset chosen"]}
+function gdPresetNow(){var id=S.guidance.preset;if(GD_PRESETS[id]&&!gdPresetDiff(id).length)return id;var m=GD_PRESET_IDS.filter(function(x){return!gdPresetDiff(x[0]).length})[0];return m?m[0]:"custom"}
+/* a preset chosen (Overall › Preset, or an audience in Who's exploring): it writes its values, never the items */
+function gdPresetWrite(id){var p=GD_PRESETS[id],g=S.guidance;if(!p)return false;g.talk=p.talk;g.breathing=p.breathing;g.perMinute=p.perMinute;g.perVisit=p.perVisit;g.remember=p.remember;
+  g.mix=JSON.parse(JSON.stringify(p.mix));g.kinds.forEach(function(k){var v=p.kinds[k.id];if(v){k.cap=v.cap;k.gap=v.gap}});g.preset=id;return true}
 var GD_CURVE={kind:[1,1,1],early:[1,1,0],late:[0,0,1]};
 function gdCurve(p,s){s=Math.max(0,Math.min(1,+s||0));return s<=0.3?p[0]+(p[1]-p[0])*s/0.3:p[1]+(p[2]-p[1])*(s-0.3)/0.7}
 /* the items in the Editor's order (kind, group, item), each a copy with its group's and kind's values (the scheduler reads only its
    arguments): the scheduler's input, its tie-break and an In order group's sequence */
 function gdItems(defs){var out=[];S.guidance.kinds.forEach(function(k){k.groups.forEach(function(g){if(g.pulled&&!defs)return;g.items.forEach(function(id){var it=S.guidance.items[id];if(!it)return;
   /* a pulled group (How to use the card) is never the scheduler's: only the Editor's list (defs) holds its steps */
-  var o=Object.assign({},it,{groupMode:g.mode,groupName:g.name,groupOn:g.on!==false,groupPulled:!!g.pulled,groupWeight:g.weight==null?1:+g.weight,groupCap:+g.cap||0,groupGap:+g.gap||0,kindName:k.name,kindOn:k.on!==false,kindCap:+k.cap||0,kindGap:+k.gap||0,kindSpoken:k.spoken});
+  var o=Object.assign({},it,{groupMode:g.mode,groupName:g.name,groupOn:g.on!==false,groupPulled:!!g.pulled,groupWeight:g.weight==null?1:+g.weight,groupCap:+g.cap||0,groupGap:+g.gap||0,kindName:k.name,kindOn:k.on!==false,kindCap:gdLimitNow(k.cap),kindGap:+k.gap||0,kindSpoken:k.spoken,kindMix:gdMix(k.id)});
   /* a per-point item: one for each point of the wall in view, its id and label naming the point, each with its own memory */
   if(it.perPoint&&!defs)(S.wallPois||[]).forEach(function(p){var n=L(p.name);out.push(Object.assign({},o,{id:it.id+":"+p.id,base:it.id,point:p.id,pointName:n,card:!!p.card,label:it.label.replace(/\{point\}/g,n)}))});
   else out.push(o)})})});return out}
@@ -158,7 +220,7 @@ var GD_ABOUT={nothing:"",marker:"when a marker is in view",gbtn:"when the ✦ is
 /* its own When, in words: after n pokes on Azu, or n s idle; Lively only, never on a Solemn point */
 function gdWhenWords(it){var w=[],o=[];if(+it.pokes>0)o.push("after "+it.pokes+" pokes on Azu");if(+it.idleFor>0)o.push("after "+it.idleFor+" s idle (no touch, the phone still)");if(o.length)w.push(o.join(" or "));
   if(it.lively)w.push("Lively only");if(it.notSolemn)w.push("never on a Solemn point");return w}
-function gdAlongWords(it){var k=GD_MIX[it.kind]||[0,0,0],kn=(gdKindOf(it)||{}).name||"?";
+function gdAlongWords(it){var k=gdMix(it.kind),kn=(gdKindOf(it)||{}).name||"?";
   if(it.along==="steady")return"steady: "+kn+"'s "+k[1]+" % all visit";if(it.along==="early")return"early: full for the first third, then fading to nothing";
   if(it.along==="late")return"late: nothing for the first third, then growing to full";return"as the kind ("+kn+": "+k[0]+" % → "+k[1]+" % → "+k[2]+" %)"}
 /* How to use the card on the wall (the ✦ menu's How does this work? there): one bubble in the group's words, beside the nearest marker
