@@ -36,7 +36,7 @@ S.guidance={on:true,breathing:15,cueRoom:5,perMinute:2,perVisit:30,freshTau:120,
     /* Tap a marker: the mascot goes beside the nearest marker, points and rings it: "Tap here."; until a card is opened, at most 3 a visit */
     tapmarker:{id:"tapmarker",label:"Tap a marker",on:true,kind:"app",group:"start",
       says:"wall_tip",saysBack:"",spoken:"kind",
-      about:"marker",mustSee:true,form:"tip",goes:"beside",points:true,focus:"ring",tap:"close",
+      about:"marker",mustSee:true,form:"tip",goes:"beside",points:true,focus:"ring",gesture:true,tap:"close",
       when:"pause",screen:"wall",stillFor:1.2,afterPrev:20,notBefore:0,
       importance:4,essential:false,shows:"until",max:3,again:25,doneWhen:"card",teaches:"card",onScreen:"auto",duringTour:"never",along:"kind"},
     /* Ask about the view: about the ✦ (its menu holds Ask about the view; the wall has no pill of its own): Azu at the ✦ points at it, a ring
@@ -207,9 +207,13 @@ function gdGroupById(id){var g=null;S.guidance.kinds.forEach(function(k){k.group
    the next in turn (slots.n: how many of its group have shown this visit, so never the same twice in a row) or, for a point with a card,
    its own (saysCard, when Lines per point says so); the slots filled ({point}: the point it is about; {min}: the minutes of that
    point's tour; {button}: the ✦, or the word when the guide's button shows Azu's face or the word) */
-function gdLine(it,returning,slots){slots=slots||{};var k=returning&&it.saysBack?it.saysBack:it.says;
+function gdLine(it,returning,slots){slots=slots||{};var a=slots.aud!==undefined?slots.aud:typeof aud==="function"?aud():"",ak=it.saysAud&&it.saysAud[a];
+  /* round 6: the returning visitor's line, else the audience's own line (when it has words), else Says (its variants in turn) */
+  var k=returning&&it.saysBack&&gdHasWords(it.saysBack)?it.saysBack:ak&&gdHasWords(ak)?ak:it.says;
   if(Array.isArray(k))k=slots.card&&it.saysCard&&it.cardLine!==false?it.saysCard:k[(+slots.n||0)%k.length];
-  return TXT(k).replace(/\{point\}/g,slots.point||"").replace(/\{min\}/g,slots.min!=null?slots.min:"").replace(/\{button\}/g,S.guideCfg.gbIcon==="star"?"✦":TXT("gb_label"))}
+  return TXT(k).replace(/\{point\}/g,slots.point||"").replace(/\{year\}/g,slots.year!=null?slots.year:"").replace(/\{min\}/g,slots.min!=null?slots.min:"").replace(/\{button\}/g,S.guideCfg.gbIcon==="star"?"✦":TXT("gb_label"))}
+/* a word key with words in the visitor's language (an empty line falls back to Says) */
+function gdHasWords(k){var o=S.tx[k];return!!(o&&String(L(o)||"").trim())}
 /* the read-back of an item, in words (study 3.2): "Tap a marker · App › The start · when a marker is in view and the phone is still ·
    at most about every 25 s, up to 3 times a visit, until the visitor opens a card." */
 function gdHowOften(it){var n=+it.max,ag=+it.again;if(it.form==="walk")return"pulled only: never on its own";
@@ -236,11 +240,89 @@ function gdCueReadBack(it){var g=gdGroupOf(it),r=+S.guidance.cueRoom||0;
 function gdStepReadBack(it){var g=gdGroupOf(it),on=g?g.items.filter(function(id){return S.guidance.items[id].on}):[],i=on.indexOf(it.id),ret=gdDefs().filter(function(x){return x.form==="cue"&&x.doneWhen===it.id}).map(function(x){return x.label});
   return it.label+" · App › How to use the card · "+(it.on?"step "+(i+1)+" of "+on.length:"Off: skipped")+" · pulled only (Settings, the ✦ menu's How does this work?): never scheduled, never capped · "+(it.sel?"it marks "+it.label.replace(/^The /,"the "):"it opens a block's page")+
     " · seen (its line heard): "+(ret.length?"the "+ret.join(", the ")+" is done for good":"nothing to retire")+"."}
-function gdReadBack(it){if(it.form==="cue")return gdCueReadBack(it);if(it.form==="walk")return gdStepReadBack(it);var g=gdGroupOf(it),k=gdKindOf(it),w=[];
-  if(it.when==="visit")w.push("once the visit has started");else if(it.when!=="settle")w.push("at a pause");
-  if(GD_ABOUT[it.about])w.push(GD_ABOUT[it.about]);if(+it.stillFor>0)w.push("the phone still "+it.stillFor+" s");
-  if(+it.notBefore>0)w.push("not before "+it.notBefore+" s of the visit");w=w.concat(gdWhenWords(it));
+function gdReadBack(it){if(it.form==="cue")return gdCueReadBack(it)+gdGestureWords(it);if(it.form==="walk")return gdStepReadBack(it);var g=gdGroupOf(it),k=gdKindOf(it),w=[];
+  if(it.when==="visit")w.push("once the visit has started");else if(it.when==="event")w.push("within "+GD_EVENT_MS/1000+" s after "+(GD_EVENTS[it.event]||it.event));
+  else if(it.when==="idle"&&!(+it.idleFor>0))w.push("after "+gdIdleOf(it)+" s idle");else if(it.when==="settle"&&it.about!=="point")w.push("when its target settles in the middle");else if(it.when!=="settle")w.push("at a pause");
+  if(GD_ABOUT[it.about])w.push(GD_ABOUT[it.about]+(it.mustSee===false?" (or without it)":""));if(+it.stillFor>0)w.push("the phone still "+it.stillFor+" s");
+  if(+it.notBefore>0)w.push("not before "+it.notBefore+" s of the visit");w=w.concat(gdWhenWords(it)).concat(gdOnlyWords(it));
   if(g&&g.mode==="order"&&+it.afterPrev>0){var i=g.items.indexOf(it.id),pv=i>0?S.guidance.items[g.items[i-1]]:null;if(pv)w.push("at least "+it.afterPrev+" s after the "+pv.label)}
   var gl=g&&(+g.cap>0||+g.gap>0)?" · "+g.name+" together: "+[+g.cap>0?"at most "+g.cap+" a visit":"",+g.gap>0?"at least "+g.gap+" s apart":""].filter(Boolean).join(", "):"";
   return it.label+" · "+(k?k.name:"?")+" › "+(g?g.name:"?")+(it.essential?" · Essential":"")+" · "+w.join(", ")+" · "+gdHowOften(it)+gl+" · along the visit "+gdAlongWords(it)+
-    " · during a tour "+(it.duringTour==="between"?"only between steps":"never")+"."}
+    " · during a tour "+(it.duringTour==="between"?"only between steps":"never")+"."+gdLookWords(it)}
+/* ----- round 6 (_3.8 section 3.2, the item in full; section 4, its look). Every tip (not a cue, not a walkthrough step) carries the
+   study's field groups: Identity (Label, On, its group and with it its kind), Words (Says: 1-4 variants in turn, never the same twice in
+   a row; the slots {point} {year} {button} and {min}; an optional line per audience; a returning visitor's line; Spoken), About (its
+   target, Must be on screen), Show (Form; Mascot goes: Beside it / Stays / Walks to it; Points at it; Focus: None / Glint / Ring /
+   Spotlight and its dim; Shows the gesture; Button), When (When, its event or idle, the phone still, Only if: screen, audience, first /
+   returning, has / has not used, Solemn, Lively; the earliest and latest second of the visit), How much (Importance, Essential, Along the
+   visit, Shows, At most, Again after, Done when, Teaches, After a dismissal, Expires, On screen for, During a tour). Their defaults are set
+   here once (gdFill), for the catalog's items and for each new one (+ Add guidance's templates, Duplicate). A cue keeps its round-4
+   fields (its element fixes its look); Before / After and Swipe strips gain Shows the gesture; a walkthrough step gains its Focus.
+   Unity: the same fields on GuidanceItem (GuidanceCatalog); the templates a ScriptableObject list ----- */
+var GD_EVENT_MS=20000;
+var GD_FOCUS=[["none","None"],["glint","Glint"],["ring","Ring"],["spotlight","Spotlight"]];
+var GD_STEP_FOCUS=[["tour","As the tour's Focus"],["spotlight","Spotlight"],["ring","Ring"],["none","None"]];
+var GD_GOES=[["beside","Beside it"],["stays","Stays"],["walk","Walks to it"]];
+var GD_BUTTONS=[["none","None"],["show","Show me"],["tour","Start the tour"],["card","Open the card"],["view","Ask about the view"]];
+var GD_BTN_WORD={show:"gd_btn_show",tour:"gd_btn_tour",card:"gd_btn_card",view:"gd_btn_view"};
+var GD_FORMS=[["tip","Tip"],["invitation","Invitation"],["remark","Remark"]];
+var GD_WHEN=[["pause","At a pause"],["visit","At the visit's start"],["settle","When its target settles"],["idle","After idle"],["event","On an event"]];
+var GD_WHEN_EVENTS=[["card","a card opened"],["view","Ask about the view opened"],["tour","a tour step heard"],["ask","a question asked"],["menu","the ✦ menu opened"],["poked","Azu poked"]];
+var GD_SPOKEN=[["kind","As the kind"],["bubble","A bubble only"],["heard","Spoken once the guide is heard"]];
+var GD_AFTER_DISMISS=[["wait","Wait ×3"],["visit","Not again this visit"],["never","Never again"]];
+var GD_EXPIRES=[["target","When its target leaves the screen"],["never","Never (its time only)"]];
+var GD_ONSCREEN=[["auto","Auto (by its words)"],["secs","For n s"],["tap","Until tapped"]];
+var GD_TEACH=[["","Nothing"],["card","Opening a card"],["view","Ask about the view"],["tour","A tour"],["ask","Asking a question"],["menu","The ✦ menu"]];
+var GD_USED=[["","Any"],["card","a card opened"],["tour","a tour step heard"],["ask","a question asked"],["view","Ask about the view opened"],["menu","the ✦ menu opened"]];
+var GD_ABOUT_OPTS=[["nothing","Nothing"],["marker","The nearest marker"],["middle","The point in the middle (with a tour)"],["gbtn","The ✦"]];
+var GD_AUD=[["","Any"],["family","Family"],["explorer","Explorer"],["expert","Expert"]];
+var GD_VISIT_IS=[["","Any"],["first","A first visit"],["returning","A returning visit"]];
+var GD_SCREEN=[["wall","The wall"],["card","A card"],["any","Any"]];
+function gdNameOf(t,v){return((t.filter(function(x){return x[0]===v})[0])||[0,v])[1]}
+/* the gesture a target asks for (the ghost finger): a tap on a marker, a point or the ✦; a drag across a Before / After; a swipe on a strip */
+var GD_GESTURE={marker:"tap",middle:"tap",point:"tap",gbtn:"tap",ba:"drag",strip:"swipe"};
+var GD_GESTURE_WORDS={tap:"a tap",drag:"a drag across",swipe:"a swipe"};
+var GD_TIP_DEF={dim:0.4,gesture:false,button:"none",event:"card",pokes:0,idleFor:0,aud:"",visitIs:"",hasUsed:"",notUsed:"",lively:false,notSolemn:false,notAfter:0,
+  afterDismiss:"wait",expires:"target",onScreen:"auto",onScreenS:6,mustSee:true,spoken:"kind",points:false,focus:"none",goes:"stays",tap:"close",form:"tip",when:"pause",screen:"wall",stillFor:0,afterPrev:0,notBefore:0,
+  importance:3,essential:false,shows:"visit",max:1,again:0,doneWhen:"",teaches:"",duringTour:"never",along:"kind",about:"nothing",saysBack:""};
+function gdIsTip(it){return!!it&&it.form!=="cue"&&it.form!=="walk"}
+function gdFill(it){if(it.form==="cue"){if(GD_GESTURE[it.about]&&it.gesture==null)it.gesture=true;return it}if(it.form==="walk"){if(it.focus==null)it.focus="tour";return it}
+  Object.keys(GD_TIP_DEF).forEach(function(k){if(it[k]===undefined)it[k]=GD_TIP_DEF[k]});if(!it.saysAud)it.saysAud={};return it}
+Object.keys(S.guidance.items).forEach(function(id){gdFill(S.guidance.items[id])});
+/* Spotlight is kept for Essential items and walkthrough steps (or it loses its force), and needs a target to cut out */
+function gdSpotOk(it){return!!it&&(it.form==="walk"||!!it.essential&&it.about!=="nothing")}
+function gdSpotWhy(it){return!it||it.form==="walk"?"":!it.essential?"Spotlight is kept for Essential items and walkthrough steps: this item is not Essential":it.about==="nothing"?"Spotlight needs a target to cut out: this item is about Nothing":""}
+/* the Focus in force: a Spotlight that is not allowed shows as a Ring (the Editor says so, beside the field and in the read-back) */
+function gdFocusNow(it){return it.focus==="spotlight"&&!gdSpotOk(it)?"ring":it.focus||"none"}
+function gdIdleOf(it){return it.when==="idle"?(+it.idleFor||20):+it.idleFor||0}
+function gdGestureOf(it){return it&&it.gesture?GD_GESTURE[it.about]||null:null}
+function gdGestureWords(it){var g=gdGestureOf(it);return g?" The ghost finger shows "+GD_GESTURE_WORDS[g]+".":""}
+/* Only if, in words (only what differs from Any) */
+function gdOnlyWords(it){var w=[];if(it.screen==="card")w.push("only on a card");if(it.aud)w.push("only for "+gdNameOf(GD_AUD,it.aud));if(it.visitIs)w.push("only on "+gdNameOf(GD_VISIT_IS,it.visitIs).toLowerCase());
+  if(it.hasUsed)w.push("only once "+gdNameOf(GD_USED,it.hasUsed));if(it.notUsed)w.push("only until "+gdNameOf(GD_USED,it.notUsed));if(+it.notAfter>0)w.push("not after "+it.notAfter+" s of the visit");return w}
+/* the look, in words, after the read-back */
+function gdLookWords(it){var f=gdFocusNow(it),g=gdGestureOf(it),b=it.button&&it.button!=="none"?gdNameOf(GD_BUTTONS,it.button):"";
+  return" Look: "+gdNameOf(GD_FORMS,it.form).toLowerCase()+", "+(it.goes==="walk"?"Azu walks to it":it.goes==="beside"?"Azu hops beside it":"Azu stays")+(it.points?" and points":"")+", focus "+gdNameOf(GD_FOCUS,f)+
+    (f!==it.focus?" (a Spotlight shows as a Ring: "+gdSpotWhy(it).replace(/^Spotlight /,"")+")":"")+(g?", the ghost finger shows "+GD_GESTURE_WORDS[g]:"")+(b?", its button “"+b+"”":"")+"."}
+/* every line an item can say (its variants, a point with a card's own, the returning visitor's, each audience's) */
+function gdLineKeys(it){var k=[].concat(it.says||[]);if(it.saysCard)k.push(it.saysCard);if(it.saysBack)k.push(it.saysBack);Object.keys(it.saysAud||{}).forEach(function(a){if(it.saysAud[a])k.push(it.saysAud[a])});return k.filter(function(x){return x&&S.tx[x]})}
+var GD_LANG_NAME={en:"English",pt:"Portuguese"};
+/* why an item can never show (the named warnings of the Editor), in words; none: it can */
+function gdNever(it){var r=[],k=gdKindOf(it),g=gdGroupOf(it),ab=gdNameOf(GD_ABOUT_OPTS,it.about).toLowerCase();if(!gdIsTip(it))return r;
+  if(k&&k.on===false)r.push("its kind, "+k.name+", is Off");if(g&&g.on===false)r.push("its group, "+g.name+", is Off");if(g&&!g.pulled&&+g.weight===0)r.push("its group's weight is 0, so it never wins");
+  if(it.hasUsed&&it.hasUsed===it.notUsed)r.push("Only if contradicts itself: has used and has not used "+gdNameOf(GD_USED,it.hasUsed));
+  if(it.screen==="card"&&/^(marker|middle|point)$/.test(it.about)&&it.mustSee!==false)r.push("Only if contradicts itself: only on a card, but its target is on the wall");
+  if(+it.notAfter>0&&+it.notAfter<=+it.notBefore)r.push("Only if contradicts itself: its latest ("+it.notAfter+" s) is not after its earliest ("+it.notBefore+" s)");
+  if(it.when==="settle"&&!/^(marker|middle|point)$/.test(it.about))r.push("When its target settles, but it is about "+ab+": nothing settles");
+  if(it.doneWhen&&it.doneWhen===it.hasUsed)r.push("Done when is already true: Only if waits until "+gdNameOf(GD_USED,it.hasUsed)+", which retires it");
+  if(it.doneWhen&&it.when==="event"&&it.doneWhen===it.event)r.push("Done when is already true: it waits for "+(GD_EVENTS[it.event]||it.event)+", which retires it");
+  var says=[].concat(it.says||[]).filter(function(x){return S.tx[x]});langCodes().forEach(function(l){if(!says.some(function(x){return String(S.tx[x][l]||"").trim()}))r.push("it has no words in "+(GD_LANG_NAME[l]||l))});return r}
+/* + Add guidance's templates (_3.8 section 7): each a new item in the group it is added to, with its words. Fun arrives in round 7, so a
+   Moment goes into the group it is added to until then */
+var GD_TEMPLATES=[
+  {id:"control",name:"Tip about a control",f:{label:"New tip about the ✦",about:"gbtn",points:true,focus:"ring",gesture:true,tap:"menu",importance:3,shows:"upto",max:2,again:60,notBefore:30},en:"Anything else? Tap {button}.",pt:"Mais alguma coisa? Toque em {button}."},
+  {id:"remark",name:"Remark about the point in view",f:{label:"{point}: a new remark",perPoint:true,form:"remark",about:"point",goes:"beside",points:true,when:"settle",stillFor:1.2,tap:"remark",importance:2,shows:"visit"},en:"{point}: see how the blue catches the light.",pt:"{point}: veja como o azul apanha a luz."},
+  {id:"tour",name:"Offer a tour",f:{label:"New tour offer for {point}",form:"invitation",about:"middle",goes:"beside",points:true,tap:"tour",button:"tour",stillFor:1.2,importance:3,shows:"visit",doneWhen:"tour",teaches:"tour",along:"late"},en:"{point} has a story. Shall I tell it?",pt:"{point} tem uma história. Conto-lha?"},
+  {id:"moment",name:"Moment",f:{label:"New moment",about:"nothing",duringTour:"between",lively:true,notSolemn:true,importance:2,shows:"visit",along:"late",notBefore:300},en:"Arms tired? Lower the phone, I'll wait.",pt:"Braços cansados? Baixe o telemóvel, eu espero."},
+  {id:"step",name:"Step of a sequence",f:{label:"New step",about:"marker",goes:"beside",points:true,focus:"ring",gesture:true,stillFor:1.2,afterPrev:20,importance:3,shows:"until",max:2,again:30,doneWhen:"card",teaches:"card"},en:"Now tap the glowing marker.",pt:"Agora toque no marcador aceso."},
+  {id:"blank",name:"Blank",f:{label:"New item"},en:"",pt:""}];

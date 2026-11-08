@@ -5,14 +5,16 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-07)
 
 - **State:**
-  - **The Lab:** `master` holds guidance rounds 1-5, verified on 2026-11-06/07, published as v34 at the new link (section 1;
+  - **The Lab:** `master` holds guidance rounds 1-6, verified on 2026-11-06/08, published as v35 at the new link (section 1;
     the old link stays at v29). Its code is in modules by feature
     (`lab_src/src/<area>/<module>.js`), with no wrappers: `lab_src/PROTOTYPE_STRUCTURE.md` says where each feature lives and
     where a change goes. The build only joins files (`build.py`) and refuses wrappers, re-assignments of functions, second
     declarations, defaults set twice and version-named modules (`check_structure.js`, `structure_baseline.json` at 0).
   - **Proof of the Lab:** the self-test (`tests/runtest8.ps1`: three walks side by side, about 3 min) gives
-    `ok=1179 behaviour=785 bad=0` (round 3, 2.1 min); `node run_tests.js` runs the 28 test files one at a time (about 30
-    min; `tests_baseline.json`). test9d takes about 490 s of its 600 s limit: watch it.
+    `ok=1189 behaviour=1283 bad=0` (round 6, 2.3 min); `node run_tests.js` runs every test file one at a time (883 checks,
+    about 42 min after round 6; `tests_baseline.json`). test9d takes about 430 s and test9j about 300 s of their 600 s
+    limit: watch them. Level 2 after round 6 caught 4 files broken by its shared changes (a reused class, the dock's Tips box
+    shifting the answers' traces, a tip rule catching cues): shared code changed means level 2 that round.
   - **Test levels** (decided 2026-11-06; cut twice since: the developer refused 1h30 of tests a round, then a 30-min level 1
     on 2026-11-07). The rules are in `lab_src/README.md` "Levels". Every brief repeats them.
     - **While building:** only the build and captures, iterated until the app and the Editor look right
@@ -22,8 +24,8 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     - **Level 2, every 3rd-4th round (about 35 min):** every tab and every file. It runs sooner when a round changed existing
       shared code.
     - **Level 3, every 10-12 rounds and before a Unity hand-off:** level 2, every mutation and a new baseline.
-    - Count the rounds since the last level 2 and 3 in every answer. After guidance round 5 that is 2 and 5: level 2 ran on
-      round 3 on 2026-11-07, and level 3 has not run yet.
+    - Count the rounds since the last level 2 and 3 in every answer. After guidance round 6 that is 0 and 6: level 2 ran on
+      round 6 on 2026-11-08, and level 3 has not run yet (owed by about round 10).
   - **Where the tests' time goes (measured 2026-11-07):**
     - Starting Edge and loading the 13 MB page costs only about 8 s a file (Edge 0.3-0.8 s, the page 7 s), so one shared Edge
       would save almost nothing.
@@ -50,8 +52,8 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     sources in `_3.8_guidance_plans/`). Decisions: a top-level **Guide** tab (today's 6 · Guide + Guidance + the first pages);
     App and Fun tips as a bubble only, Content spoken once the guide has been heard; a deterministic mix; the card Hints edited
     in Guidance with a view in Card Controls.
-  - **Guidance rounds 1-5 are done** (merged into `master`; the briefs `_3.8_guidance_plans/brief_round1.md` to
-    `brief_round5.md`).
+  - **Guidance rounds 1-6 are done** (merged into `master`; the briefs `_3.8_guidance_plans/brief_round1.md` to
+    `brief_round6.md`).
     - Round 2: the memory and the visit, every gate and limit, the stage and the score, the learning, Ask about the view
       and A tour of {point}, Why not now? / The visitor / Log, five console scenes; `tests/test9f.js`.
     - Round 3: Azu's wall remarks became Content › What's in view (one item a point) and the ✦ hint App › The wall ›
@@ -60,13 +62,18 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       walkthrough, also from the ✦ menu's How does this work?; Card Controls > Hints a view; `tests/test9h.js`.
     - Round 5: the editable Mix table, Talkativeness, the presets (and the audiences' Guidance preset), Simulate a visit
       with five scripted visitors, the ×10 demos of the Overall and kind rows; `tests/test9i.js`.
+    - Round 6: the look (Focus None / Glint / Ring / Spotlight, the 0.45 s hop and Walks to it, the ghost finger, the Button
+      chip, Reduce Motion), accessibility (Tips, Tips stay until I tap them, Show the tips again, the screen-reader stand-in,
+      the dock's Tips), the full item form (six groups, variants, Only if chips, named warnings, + Add guidance with
+      templates, Duplicate, Delete with Undo, drag), four scenes; `tests/test9j.js`. Shared code changed: `editor/shell.js`
+      (a foldout opened by a draw is quiet), `guide/focus.js` (one shared `spotPaint`), `guide/dock.js` (`dockThread.html`).
+      A Guide tab draw takes about 1.1 s, mostly the Detail Card document: the main cost of test9j's clicks.
     - Their captures were judged by the Architect; the developer reviews later, step by step. The open look questions:
       round 1's PT opening line, what "Mascot Off" means, Azu's size beside the marker; rounds 2 and 3's in the closing
       answers of 2026-11-06/07 (among them: a group's own shorter gap, the remarks counting in Content's cap, The ✦ on the
       card, a ring for The ✦ with the 3D model, "The" mid-sentence in the remark lines).
-    - **Next: guidance round 6** (`_3.8` section 8: the look: glint, spotlight, the mascot's hop, the ghost finger, Reduce
-      Motion, screen reader, "stay until tapped"; the full item form, templates, drag, warnings), as a brief to an Opus
-      subagent in the shape of `brief_round5.md`. Level 2 is owed by round 6 or 7. Prototype only (no Unity) until the
+    - **Next: guidance round 7** (`_3.8` section 8: Fun: Moments, jokes per point, the treasure-hunt invite, seasonal, Solemn
+      points), as a brief to an Opus subagent in the shape of `brief_round6.md`. Prototype only (no Unity) until the
       developer says so.
   - **MCP:** blender-mcp at user scope (Blender 5.2.3, add-on 1.8, port 9876). The Unity MCP was not connected this stretch.
   - **Keys:** Gemini, Azure Speech and ElevenLabs answer (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).

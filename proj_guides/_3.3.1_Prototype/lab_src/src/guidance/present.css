@@ -59,3 +59,30 @@
 /* the Editor's demo chip (never in the app): the ×10 clock of a demo */
 .gdchip{position:absolute;z-index:20;left:50%;top:14px;translate:-50% 0;background:#16181C;color:#F4F1EA;font:700 12.5px/1 var(--body);padding:8px 12px;border-radius:999px;
   border:1px solid rgba(244,241,234,.3);box-shadow:0 6px 16px rgba(0,0,0,.35);white-space:nowrap;pointer-events:none}
+/* round 6: the Glint (a light band sweeping once across the target, clipped to it; Reduce Motion: a still warm highlight). Unity: a
+   VisualElement with overflow hidden and the target's radius, a sweep texture child tweened on translate */
+.gdglint{position:absolute;z-index:11;border-radius:50%;overflow:hidden;pointer-events:none}
+.gdglint.gd-rect{z-index:13;border-radius:999px}
+.gdglint i{position:absolute;top:-30%;bottom:-30%;left:-70%;width:60%;rotate:18deg;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.9),rgba(255,255,255,0))}
+.gdglint.still{box-shadow:0 0 0 3px #FFD98A,0 0 16px 5px rgba(255,217,138,.6)}
+.gdglint.still i{display:none}
+/* the ghost finger: a translucent sprite with a dark edge (3:1 on the wall and the card); the tap's ripple a ring */
+.gdfinger{position:absolute;z-index:15;width:40px;height:52px;transform-origin:14px 4px;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+.gdfinger svg{display:block;width:40px;height:52px;fill:rgba(255,255,255,.78);stroke:rgba(22,24,28,.85);stroke-width:1.6;stroke-linejoin:round}
+.gdfinger.still{opacity:.9}
+.gdripple{position:absolute;z-index:11;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;border:3px solid rgba(255,255,255,.95);box-shadow:0 0 0 2px rgba(22,24,28,.55);pointer-events:none;opacity:0}
+/* a tip that stays until tapped: its close button (44 px), the words keep their room */
+.gdbub.gd-stay button[data-gdbub]{padding-right:46px}
+.gdbub button.gdx{position:absolute;top:0;right:0;width:44px;min-height:44px;height:44px;padding:0;display:flex;align-items:center;justify-content:center;font:700 15px/1 var(--body);color:var(--ink2,var(--ink1));border-radius:0 16px 0 12px}
+/* the toast after Show the tips again (the Stop toast's look), above the Settings panel */
+.gtoast.gdtoast{z-index:30;top:56px;bottom:auto}
+/* Settings › The guide › Tips */
+.vset .vtips{margin-top:4px}
+.vset .vagain{display:block;width:100%;margin-top:14px;appearance:none;border:1px solid var(--hair,rgba(0,0,0,.15));background:transparent;color:inherit;font:700 14px/1 var(--body);padding:12px;border-radius:12px;text-align:left;cursor:pointer}
+.vset .vnote{margin:6px 2px 0;font:500 13px/1.35 var(--body);color:var(--ink2,inherit)}
+/* the dock's conversation: the tips shown this visit, under Tips */
+.gm-tips{flex:none;align-self:stretch;padding:10px 12px;border-radius:14px;background:rgba(255,217,138,.08);border:1px solid rgba(255,217,138,.32);color:#F4F1EA}
+.gm-tips small{display:block;font:800 11px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:#FFD98A;margin-bottom:6px}
+.gm-tip{font:500 14px/1.35 var(--body);padding:4px 0;color:#F4F1EA}
+.gm-tip+.gm-tip{border-top:1px solid rgba(244,241,234,.12)}
+.reduce .gdglint i,.reduce .gdfinger,.reduce .gdripple{animation:none!important}

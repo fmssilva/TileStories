@@ -768,6 +768,9 @@ header .lede,header nav.steps{display:none}header h1{font-size:26px;margin:2px 0
 .gspot.on{opacity:1}
 img.gzimg{transform:none!important}
 .gspot.spotlight{box-shadow:0 0 0 2px rgba(255,217,138,.95),0 0 22px 4px rgba(255,217,138,.42),0 0 0 2400px rgba(10,10,12,var(--scrim,.4))}
+.gspot.round{border-radius:50%}
+/* Guidance's Spotlight on an Essential tip: the same cut-out, under the bubble and Azu */
+.gspot.gdspot{z-index:10;transition:opacity .3s}
 .gspot.ring{box-shadow:0 0 0 2px rgba(255,217,138,.95),0 0 22px 4px rgba(255,217,138,.42)}
 .gspotting .gfocus{box-shadow:none}
 /* Azu's arm: from its side towards what is told; the hand a small tile-blue mitten */
@@ -1143,6 +1146,33 @@ body{padding-block:8px}
 /* the Editor's demo chip (never in the app): the ×10 clock of a demo */
 .gdchip{position:absolute;z-index:20;left:50%;top:14px;translate:-50% 0;background:#16181C;color:#F4F1EA;font:700 12.5px/1 var(--body);padding:8px 12px;border-radius:999px;
   border:1px solid rgba(244,241,234,.3);box-shadow:0 6px 16px rgba(0,0,0,.35);white-space:nowrap;pointer-events:none}
+/* round 6: the Glint (a light band sweeping once across the target, clipped to it; Reduce Motion: a still warm highlight). Unity: a
+   VisualElement with overflow hidden and the target's radius, a sweep texture child tweened on translate */
+.gdglint{position:absolute;z-index:11;border-radius:50%;overflow:hidden;pointer-events:none}
+.gdglint.gd-rect{z-index:13;border-radius:999px}
+.gdglint i{position:absolute;top:-30%;bottom:-30%;left:-70%;width:60%;rotate:18deg;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.9),rgba(255,255,255,0))}
+.gdglint.still{box-shadow:0 0 0 3px #FFD98A,0 0 16px 5px rgba(255,217,138,.6)}
+.gdglint.still i{display:none}
+/* the ghost finger: a translucent sprite with a dark edge (3:1 on the wall and the card); the tap's ripple a ring */
+.gdfinger{position:absolute;z-index:15;width:40px;height:52px;transform-origin:14px 4px;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+.gdfinger svg{display:block;width:40px;height:52px;fill:rgba(255,255,255,.78);stroke:rgba(22,24,28,.85);stroke-width:1.6;stroke-linejoin:round}
+.gdfinger.still{opacity:.9}
+.gdripple{position:absolute;z-index:11;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;border:3px solid rgba(255,255,255,.95);box-shadow:0 0 0 2px rgba(22,24,28,.55);pointer-events:none;opacity:0}
+/* a tip that stays until tapped: its close button (44 px), the words keep their room */
+.gdbub.gd-stay button[data-gdbub]{padding-right:46px}
+.gdbub button.gdx{position:absolute;top:0;right:0;width:44px;min-height:44px;height:44px;padding:0;display:flex;align-items:center;justify-content:center;font:700 15px/1 var(--body);color:var(--ink2,var(--ink1));border-radius:0 16px 0 12px}
+/* the toast after Show the tips again (the Stop toast's look), above the Settings panel */
+.gtoast.gdtoast{z-index:30;top:56px;bottom:auto}
+/* Settings › The guide › Tips */
+.vset .vtips{margin-top:4px}
+.vset .vagain{display:block;width:100%;margin-top:14px;appearance:none;border:1px solid var(--hair,rgba(0,0,0,.15));background:transparent;color:inherit;font:700 14px/1 var(--body);padding:12px;border-radius:12px;text-align:left;cursor:pointer}
+.vset .vnote{margin:6px 2px 0;font:500 13px/1.35 var(--body);color:var(--ink2,inherit)}
+/* the dock's conversation: the tips shown this visit, under Tips */
+.gm-tips{flex:none;align-self:stretch;padding:10px 12px;border-radius:14px;background:rgba(255,217,138,.08);border:1px solid rgba(255,217,138,.32);color:#F4F1EA}
+.gm-tips small{display:block;font:800 11px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:#FFD98A;margin-bottom:6px}
+.gm-tip{font:500 14px/1.35 var(--body);padding:4px 0;color:#F4F1EA}
+.gm-tip+.gm-tip{border-top:1px solid rgba(244,241,234,.12)}
+.reduce .gdglint i,.reduce .gdfinger,.reduce .gdripple{animation:none!important}
 /* The Guide tab and its Guidance rows (the Editor, IMGUI in Unity): the tab's colour; an item's row in its foldout's summary: On, its name,
    its importance dots, how often, ▸ Show now; the read-back and the scheduler's lines. */
 .utab.gd{background:#7A5A12}
@@ -1212,6 +1242,44 @@ body{padding-block:8px}
 .gdleg .gdsw.mv{background:transparent;border:1.5px solid rgba(255,255,255,.8);width:10px;height:10px}.gdleg .gdsw.gh{background:transparent;border:1px dashed #9AA0A6;width:8px;height:8px}
 .note.gdsimlearn{color:#BFC5CB;font-size:11px}
 .note.gdsimnow{color:#CFE3FF}.note.gdsimsum{color:#E2E2E2;font-weight:600}.note.gdsimmoved{color:#F0D58A}
+/* round 6: the full item form. Its field groups (Identity, Words, About, Show, When, How much) as sub-headings; the drag handle ≡ (a 44 px
+   column in the summary is too wide for the Editor: 24 × 28, the IMGUI ReorderableList's handle); the variants; the Only if chips; the named
+   warnings; + Add guidance's templates; the Editor's toast. Unity: IMGUI (EditorGUILayout foldouts, a ReorderableList, a HelpBox per warning) */
+.gddrag{appearance:none;flex:none;width:22px;height:28px;padding:0;margin-left:-4px;border:0;border-radius:4px;background:transparent;color:#9AA0A6;font:700 13px/1 var(--mono);letter-spacing:-3px;cursor:grab;touch-action:none}
+.gddrag:hover{background:#3A3A3A;color:#E2E2E2}
+.fo.gddragging{position:relative;z-index:5;opacity:.92;box-shadow:0 6px 18px rgba(0,0,0,.5);outline:1px solid #E2C36B;border-radius:4px;background:#2B2B2B}
+.fo.gddragging .gddrag{cursor:grabbing}
+.inner{position:relative}
+.gddropline{position:absolute;left:4px;right:4px;height:3px;border-radius:2px;background:#E2C36B;pointer-events:none;z-index:6}
+.sub2.gdfg{margin-top:14px;padding-top:8px;border-top:1px solid #3A3A3A;color:#F0D58A;letter-spacing:.02em}
+.sub2.gdfg:first-child{margin-top:4px;border-top:0}
+.gdvars{display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+.gdvar{display:flex;align-items:center;gap:6px;width:100%}
+.gdvar .gdvn{flex:none;min-width:18px;font:600 11px/1 var(--mono);color:#9AA0A6}
+.gdvar .gdvt{flex:1 1 auto;min-width:0;font-size:12px;color:#E2E2E2}
+.gdvar .gdvt.empty{color:#F0B37A;font-style:italic}
+.gdchips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+.gdchipc{display:inline-flex;align-items:center;gap:2px;padding:3px 4px 3px 10px;border-radius:999px;background:#33302A;border:1px solid #6B5A2A;color:#F0E6CC;font-size:11.5px}
+.gdchipc:only-child,.gdchipc:not(:has(button)){padding-right:10px}
+.gdchipc button{appearance:none;width:22px;height:22px;border:0;border-radius:50%;background:transparent;color:#E2C36B;font-size:11px;cursor:pointer}
+.gdchipc button:hover{background:#4A4232}
+.seg button.gdno{opacity:.42;cursor:not-allowed;text-decoration:line-through}
+.badge.gdwb{background:#7A4A12;color:#FFE2B8}
+.gdwarns{margin:0 0 10px;padding:8px 10px;border-radius:6px;border:1px solid #3A4A3A;background:#1F2A20;color:#BFE3C4;font-size:12px;line-height:1.4}
+.gdwarns.on{border-color:#7A5A12;background:#2E2614;color:#F5E3BE}
+.gdwarns b{display:block;margin-bottom:4px;color:#FFD98A}
+.gdwl{display:flex;align-items:center;gap:8px;padding:3px 0;border-top:1px solid rgba(255,217,138,.15)}
+.gdwl span{flex:1 1 auto}
+.note.gdwarn{border-left:2px solid #E2A14B;padding-left:8px}
+.gdadd{margin:8px 0 2px}
+.gdtpl{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px;padding:8px;border:1px dashed #6B5A2A;border-radius:6px}
+.gdtpl > span{width:100%;font-size:11.5px;color:#C9C9C9}
+.gdacts{margin-top:8px}
+.gdacts [data-gddel]{color:#F2A7A0}
+.gdedtoast{position:fixed;bottom:18px;z-index:1000;display:flex;align-items:center;gap:10px;justify-content:space-between;box-sizing:border-box;padding:8px 8px 8px 14px;border-radius:8px;background:#16181C;color:#F4F1EA;border:1px solid #E2C36B;box-shadow:0 10px 26px rgba(0,0,0,.5);font-size:12.5px}
+.gdedtoast .ubtn{background:#FFD98A;color:#1A1814;border-color:#FFD98A;font-weight:700}
+/* a demo chip on the phone stays on one line inside it */
+.gdchip{max-width:calc(100% - 24px);overflow:hidden;text-overflow:ellipsis}
 </style>
 <div class="wrap">
 <header>
@@ -1555,6 +1623,21 @@ var LABSTR=[["gd_how","gd:g:howto","The ✦ menu's item that starts How to use t
  ["gb_view_about", "s7gbtn", "Its menu on the wall ({0} = the point in the middle).", "Ask about {0}", "Perguntar sobre {0}", "", "Menu: the view (a point)"],
  ["gb_settings", "s7gbtn", "Its menu: opens Settings at the guide's settings.", "Guide settings", "Definições do guia", "", "Menu: settings"],
  ["gb_hint", "gd:i:gbhint", "Azu's tip beside the ✦, pointing at it; {button} is the ✦, or the word when the button shows Azu's face or the word (Guide › Guidance › The wall › The ✦).", "Need anything? Tap {button}.", "Precisa de alguma coisa? Toque em {button}.", "", "Says"],
+ ["settings_tips", "gd:overall", "Settings › The guide: the visitor's own Tips (Guide › Guidance, round 6).", "Tips", "Dicas", "", "Settings: Tips"],
+ ["settings_tips_all", "gd:overall", "Tips: every tip shows.", "All", "Todas", "", "Settings: Tips All"],
+ ["settings_tips_ess", "gd:overall", "Tips: only the Essential items (the opening).", "Essentials only", "Só as essenciais", "", "Settings: Tips Essentials only"],
+ ["settings_tips_off", "gd:overall", "Tips: none (what the visitor asks for still answers).", "Off", "Desligadas", "", "Settings: Tips Off"],
+ ["settings_tips_off_note", "gd:overall", "Under Tips, when Off.", "You can always tap ✦ for help.", "Pode sempre tocar em ✦ para ajuda.", "", "Settings: Tips Off's note"],
+ ["settings_tips_stay", "gd:overall", "Settings › The guide: a tip waits until the visitor taps it (WCAG 2.2.1).", "Tips stay until I tap them", "As dicas ficam até eu tocar", "", "Settings: Tips stay"],
+ ["settings_tips_again", "gd:overall", "Settings › The guide: the tips seen and done show again (an Undo toast follows).", "Show the tips again", "Mostrar as dicas outra vez", "", "Settings: Show the tips again"],
+ ["gd_tips_again_done", "gd:overall", "The toast after Show the tips again.", "The tips will show again.", "As dicas vão voltar a aparecer.", "", "Toast: tips again"],
+ ["gd_undo", "gd:overall", "The toast's Undo.", "Undo", "Anular", "", "Toast: Undo"],
+ ["gd_dismiss", "gd:overall", "The close button on a tip that stays until tapped.", "Dismiss", "Fechar", "", "Tip: close"],
+ ["dock_tips", "gd:overall", "The dock's conversation: the heading over the tips shown this visit.", "Tips", "Dicas", "", "Dock: Tips"],
+ ["gd_btn_show", "gd:overall", "A tip's Button: shows the gesture on its target.", "Show me", "Mostre-me", "", "Button: Show me"],
+ ["gd_btn_tour", "gd:overall", "A tip's Button: starts the tour.", "Start the tour", "Começar a visita", "", "Button: Start the tour"],
+ ["gd_btn_card", "gd:overall", "A tip's Button: opens the card.", "Open the card", "Abrir o cartão", "", "Button: Open the card"],
+ ["gd_btn_view", "gd:overall", "A tip's Button: opens Ask about the view.", "Ask about the view", "Perguntar sobre a vista", "", "Button: Ask about the view"],
  ["settings_guide", "s5settings", "The title of the guide's group (its voice, speed and captions).", "The guide", "O guia", "", "Guide group title"],
  ["settings_voice_rec", "s5settings", "The guide's voice: the recorded one.", "Recorded voice", "Voz gravada", "", "Voice: recorded"],
  ["settings_voice_dev", "s5settings", "The guide's voice: this phone's own.", "This phone's voice", "Voz do telemóvel", "", "Voice: the phone's"],
@@ -1779,10 +1862,15 @@ var lastRender=0;
 /* noDraw: the self-test works the Editor's controls without drawing the Editor or the phone (show only sets the view) */
 var noDraw=false;
 function renderEditor(){if(noDraw)return;emitLatestFirst("renderEditor.before");lastRender=performance.now();document.querySelectorAll(".utab").forEach(function(t){t.setAttribute("aria-selected",String(t.dataset.tab===S.tab))});
-  var h=firstAnswer("renderEditor.tab");ed.innerHTML=h!==undefined?h:S.tab==="card"?edCard():S.tab==="marker"?edMarker():edGlobal();emit("renderEditor.after")}
+  var h=firstAnswer("renderEditor.tab");ed.innerHTML=h!==undefined?h:S.tab==="card"?edCard():S.tab==="marker"?edMarker():edGlobal();
+  /* the foldouts this draw opens fire their own toggle event later (after the rest of the task, the phone's draw too): each is marked, so
+     it is always quiet (edQuiet), however long the task ran */
+  lastRender=performance.now();ed.querySelectorAll("details[open]").forEach(function(d){d._rt=1});emit("renderEditor.after")}
+/* a toggle that is the draw's own (a foldout drawn open), not the developer's */
+function edQuiet(d){return!!d._rt||performance.now()-lastRender<150}
 function renderAll(keep){if(noDraw)return;renderEditor();renderPhone(keep)}
 /* ---------- Editor events ---------- */
-ed.addEventListener("toggle",function(e){var d=e.target;if(!d.dataset||!d.dataset.fo)return;var id=d.dataset.fo,quiet=performance.now()-lastRender<150;S.op[id]=d.open;
+ed.addEventListener("toggle",function(e){var d=e.target;if(!d.dataset||!d.dataset.fo)return;var id=d.dataset.fo,quiet=edQuiet(d);if(d._rt)setTimeout(function(){d._rt=0},0);S.op[id]=d.open;
   if(!d.open||quiet)return;
   if(S.ui.single){var par=d.parentElement;Array.prototype.forEach.call(par.children,function(s){if(s!==d&&s.tagName==="DETAILS"&&s.open){s.open=false;S.op[s.dataset.fo]=false}})}
   var k=id.split(":");
@@ -2504,7 +2592,7 @@ function focusPhone(view,sel,stop){if(view){var same=S.view===view&&(!stop||S.st
   setTimeout(function(){var el=ph.querySelector(sel)||document.querySelector(sel);if(!el)return;
     if(scr.contains(el)){var y=el.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-90;scr.scrollTo({top:Math.max(0,y),behavior:S.reduce?"auto":"smooth"})}
     document.body.dataset.lastfocus=sel+"|found|"+(scr.contains(el)?Math.round(el.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop):"overlay");el.classList.remove("pfocus");void el.offsetWidth;el.classList.add("pfocus");setTimeout(function(){el.classList.remove("pfocus")},1800)},80)}
-ed.addEventListener("toggle",function(e){var d=e.target;if(!d.dataset||!d.dataset.fo||!d.open||performance.now()-lastRender<150)return;var id=d.dataset.fo,f=FOCUS[id],k=id.split(":");
+ed.addEventListener("toggle",function(e){var d=e.target;if(!d.dataset||!d.dataset.fo||!d.open||edQuiet(d))return;var id=d.dataset.fo,f=FOCUS[id],k=id.split(":");
   if(f){focusPhone(f[0],f[1],f[2]);return}
   if(k[0]==="bd"){var b=S.card.filter(function(x){return x.kind===k[1]})[0];if(b){focusPhone("card",'[data-ref="b:'+b.id+'"]',"full");return}var c=S.demoCard.filter(function(x){return x.kind===k[1]})[0];if(c)focusPhone("democard",'[data-ref="b:'+c.id+'"]');return}
   if(k[0]==="sec"){focusPhone("card",'[data-ref="sec:'+k[1]+'"]',"full");return}
@@ -3956,8 +4044,14 @@ function regionRect(img,reg){var r=visRect(img);if(S.guideCfg.zoom==="zoom"&&VIE
 /* each frame while the tour runs: the cue now (the last one whose word was reached), the spotlight on it, Azu pointing */
 on("runStep.before",function(){unzoomAll();G.fc={cue:-2,i:G.i}});on("runStep.after",function(){fcLoop()});
 function fcLoop(){if(!G.fcRaf)G.fcRaf=requestAnimationFrame(fcTick)}
-function fcTick(){G.fcRaf=0;var sp=ph.querySelector(".gspot");if(!G.on){if(sp)sp.remove();return}
-  var st=S.guideSteps[G.i],el=stepEl(st),cfg=S.guideCfg,k=G.hl?G.hl.k:-1,cues=st&&st.cues||[],now=-1;
+/* the spotlight's cut-out, one for the guide (the tour's Focus, and Guidance's Spotlight on an Essential tip): a hole the size of the box
+   g = [left, top, width, height] in the phone's px, in a scrim at scrim (0.2-0.6), with the warm ring; mode "spotlight" or "ring"; round
+   for a marker. Unity: Painter2D in generateVisualContent, FillRule.OddEven: the screen's rect and the hole's rounded rect in one path,
+   filled once (the ring a Stroke on the hole) */
+function spotPaint(sp,g,mode,scrim,round){sp.classList.add("on");sp.classList.toggle("spotlight",mode==="spotlight");sp.classList.toggle("ring",mode==="ring");sp.classList.toggle("round",!!round);
+  sp.style.setProperty("--scrim",scrim);sp.style.left=g[0]+"px";sp.style.top=g[1]+"px";sp.style.width=g[2]+"px";sp.style.height=g[3]+"px"}
+function fcTick(){G.fcRaf=0;var sp=ph.querySelector(".gspot:not(.gdspot)");if(!G.on){if(sp)sp.remove();return}
+  var st=S.guideSteps[G.i],el=stepEl(st),cfg=Object.assign({},S.guideCfg,st&&st.cue?{cue:st.cue}:{}),k=G.hl?G.hl.k:-1,cues=st&&st.cues||[],now=-1;
   for(var c=0;c<cues.length;c++){var ix=cueIndex(cues[c]);if(ix>=0&&k>=ix)now=c}
   if(!G.fc||G.fc.i!==G.i)G.fc={cue:-2,i:G.i};
   var img=stepImg(el);if(now!==G.fc.cue){G.fc.cue=now;if(img)zoomImg(img,now>=0?cues[now].region:null)}
@@ -3968,10 +4062,9 @@ function fcTick(){G.fcRaf=0;var sp=ph.querySelector(".gspot");if(!G.on){if(sp)sp
   if(cfg.cue==="none"||!r||G.paused||G.askOpen||G.moment){if(sp)sp.classList.remove("on")}
   else{if(!sp){sp=document.createElement("div");sp.className="gspot";sp.setAttribute("aria-hidden","true");ph.appendChild(sp)}
     var t=Math.max(r.top,box.top+4),b=Math.min(r.bottom,box.bottom-4),pad=now>=0?4:6;
-    sp.className="gspot on "+cfg.cue;sp.style.setProperty("--scrim",cfg.scrim);
     var g=[(r.left-p.left)/q-pad,(t-p.top)/q-pad,r.width/q+2*pad,Math.max(0,b-t)/q+2*pad],f=G.fc.from,e=S.reduce||!f?1:Math.min(1,(tn-G.fc.at)/550);
     if(e<1){e=1-Math.pow(1-e,3);g=g.map(function(v,i){return f[i]+(v-f[i])*e})}G.fc.last=g;
-    sp.style.left=g[0]+"px";sp.style.top=g[1]+"px";sp.style.width=g[2]+"px";sp.style.height=g[3]+"px"}
+    spotPaint(sp,g,cfg.cue,cfg.scrim)}
   ph.classList.toggle("gspotting",cfg.cue!=="none");
   pointAt(r&&cfg.point&&!G.paused?{x:(r.left+r.width/2-p.left)/q,y:((Math.max(r.top,box.top)+Math.min(r.bottom,box.bottom))/2-p.top)/q,el:el}:null);
   G.fcRaf=requestAnimationFrame(fcTick)}
@@ -4462,7 +4555,7 @@ function dockHtml(h){var n=S.guideSteps.length,st=S.guideSteps[G.i],ts=talkState
     '<div class="gd-peek"><div class="gd-ctl"><button type="button" data-g="prev" aria-label="'+TXH("guide_ctrl_prev")+'">'+ico("prev")+'</button><button type="button" data-g="'+(G.paused?"play":"pause")+'" aria-label="'+(G.paused?TXH("guide_ctrl_play"):TXH("guide_ctrl_pause"))+'">'+ico(G.paused?"play":"pause")+'</button><button type="button" data-g="next" aria-label="'+TXH("guide_ctrl_next")+'">'+ico("next")+'</button>'+
       '<button type="button" data-g="mute" aria-pressed="'+!!S.guideMute+'" aria-label="'+TXH("guide_ctrl_mute")+'">'+ico(S.guideMute?"mute":"sound")+'</button><button type="button" data-g="cc" aria-pressed="'+S.guideCfg.captions+'" class="cc">CC</button><button type="button" data-g="stop" aria-label="'+TXH("guide_ctrl_stop")+'">'+ico("stop")+'</button></div>'+
       '<div class="gd-chips">'+(mc!=="line"?kb:"")+(S.guideCfg.chips?S.guideAsks.map(function(q,i){return'<button type="button" data-chip="'+i+'">'+esc(L(q))+'</button>'}).join(""):"")+'</div></div>'+
-    '<div class="gd-full"><div class="gd-thread" aria-live="polite">'+G.thread.map(function(m){return'<div class="gm-'+m.who+'">'+esc(m.text)+'</div>'}).join("")+(G.busy?'<div class="gm-azu typing"><i></i><i></i><i></i></div>':"")+(G.micNote?'<div class="gm-note">'+esc(G.micNote)+'</div>':"")+'</div>'+
+    '<div class="gd-full"><div class="gd-thread" aria-live="polite">'+pipe("dockThread.html",G.thread.map(function(m){return'<div class="gm-'+m.who+'">'+esc(m.text)+'</div>'}).join(""))+(G.busy?'<div class="gm-azu typing"><i></i><i></i><i></i></div>':"")+(G.micNote?'<div class="gm-note">'+esc(G.micNote)+'</div>':"")+'</div>'+
       '<form class="gd-form"><input id="gq" class="gin" type="text" autocomplete="off" placeholder="'+TXH("dock_type")+'"><button type="submit" aria-label="'+TXH("dock_send")+'">&#10148;</button></form></div>'}
 /* the dock replaces the captions box and the control bar; the old ones stay as "Classic". Compact: no dock (the voice goes on; the
    guide's button shows the progress and a pause); Azu's own words in its bubble, a block's words lit in the block */
@@ -5222,7 +5315,7 @@ function agTurnHtml(turn,live){if(!turn)return"";var h="";
   if(live&&turn.chips.length)h+='<div class="agchips">'+turn.chips.map(function(c,i){return c.done?"":'<button type="button" class="agchip'+(c.confirm?" confirm":"")+'" data-agchip="'+i+'">'+esc(c.label)+(c.confirm?' <span>'+TXH("ag_yes")+'</span>':"")+'</button>'}).join("")+'</div>';
   return pipe("agTurnHtml.html",h,turn)}
 on("renderGuide.after",function(){
-  var els=ph.querySelectorAll(".gd-thread > div");G.thread.forEach(function(m,i){if(m.turn&&els[i])els[i].insertAdjacentHTML("beforeend",agTurnHtml(m.turn,m.turn===G.agTurn))});var th=ph.querySelector(".gd-thread");if(th&&G.agTurn)th.scrollTop=th.scrollHeight;
+  var els=ph.querySelectorAll(".gd-thread > div:not(.gm-tips)");G.thread.forEach(function(m,i){if(m.turn&&els[i])els[i].insertAdjacentHTML("beforeend",agTurnHtml(m.turn,m.turn===G.agTurn))});var th=ph.querySelector(".gd-thread");if(th&&G.agTurn)th.scrollTop=th.scrollHeight;
   var a=ph.querySelector(".gans");if(a&&G.agTurn&&!G.busy)a.insertAdjacentHTML("beforeend",agTurnHtml(G.agTurn,true))});
 on("camLayer.after",function(){var a=ph.querySelector(".ca-ans");if(a&&G.cam.turn&&!G.cam.busy)a.insertAdjacentHTML("beforeend",agTurnHtml(G.cam.turn,true))});
 ph.addEventListener("click",function(e){var t=e.target.closest("[data-aglink],[data-agchip]");if(!t)return;e.stopPropagation();e.preventDefault();
@@ -5916,7 +6009,7 @@ S.guidance={on:true,breathing:15,cueRoom:5,perMinute:2,perVisit:30,freshTau:120,
     /* Tap a marker: the mascot goes beside the nearest marker, points and rings it: "Tap here."; until a card is opened, at most 3 a visit */
     tapmarker:{id:"tapmarker",label:"Tap a marker",on:true,kind:"app",group:"start",
       says:"wall_tip",saysBack:"",spoken:"kind",
-      about:"marker",mustSee:true,form:"tip",goes:"beside",points:true,focus:"ring",tap:"close",
+      about:"marker",mustSee:true,form:"tip",goes:"beside",points:true,focus:"ring",gesture:true,tap:"close",
       when:"pause",screen:"wall",stillFor:1.2,afterPrev:20,notBefore:0,
       importance:4,essential:false,shows:"until",max:3,again:25,doneWhen:"card",teaches:"card",onScreen:"auto",duringTour:"never",along:"kind"},
     /* Ask about the view: about the ✦ (its menu holds Ask about the view; the wall has no pill of its own): Azu at the ✦ points at it, a ring
@@ -6087,9 +6180,13 @@ function gdGroupById(id){var g=null;S.guidance.kinds.forEach(function(k){k.group
    the next in turn (slots.n: how many of its group have shown this visit, so never the same twice in a row) or, for a point with a card,
    its own (saysCard, when Lines per point says so); the slots filled ({point}: the point it is about; {min}: the minutes of that
    point's tour; {button}: the ✦, or the word when the guide's button shows Azu's face or the word) */
-function gdLine(it,returning,slots){slots=slots||{};var k=returning&&it.saysBack?it.saysBack:it.says;
+function gdLine(it,returning,slots){slots=slots||{};var a=slots.aud!==undefined?slots.aud:typeof aud==="function"?aud():"",ak=it.saysAud&&it.saysAud[a];
+  /* round 6: the returning visitor's line, else the audience's own line (when it has words), else Says (its variants in turn) */
+  var k=returning&&it.saysBack&&gdHasWords(it.saysBack)?it.saysBack:ak&&gdHasWords(ak)?ak:it.says;
   if(Array.isArray(k))k=slots.card&&it.saysCard&&it.cardLine!==false?it.saysCard:k[(+slots.n||0)%k.length];
-  return TXT(k).replace(/\{point\}/g,slots.point||"").replace(/\{min\}/g,slots.min!=null?slots.min:"").replace(/\{button\}/g,S.guideCfg.gbIcon==="star"?"✦":TXT("gb_label"))}
+  return TXT(k).replace(/\{point\}/g,slots.point||"").replace(/\{year\}/g,slots.year!=null?slots.year:"").replace(/\{min\}/g,slots.min!=null?slots.min:"").replace(/\{button\}/g,S.guideCfg.gbIcon==="star"?"✦":TXT("gb_label"))}
+/* a word key with words in the visitor's language (an empty line falls back to Says) */
+function gdHasWords(k){var o=S.tx[k];return!!(o&&String(L(o)||"").trim())}
 /* the read-back of an item, in words (study 3.2): "Tap a marker · App › The start · when a marker is in view and the phone is still ·
    at most about every 25 s, up to 3 times a visit, until the visitor opens a card." */
 function gdHowOften(it){var n=+it.max,ag=+it.again;if(it.form==="walk")return"pulled only: never on its own";
@@ -6116,14 +6213,92 @@ function gdCueReadBack(it){var g=gdGroupOf(it),r=+S.guidance.cueRoom||0;
 function gdStepReadBack(it){var g=gdGroupOf(it),on=g?g.items.filter(function(id){return S.guidance.items[id].on}):[],i=on.indexOf(it.id),ret=gdDefs().filter(function(x){return x.form==="cue"&&x.doneWhen===it.id}).map(function(x){return x.label});
   return it.label+" · App › How to use the card · "+(it.on?"step "+(i+1)+" of "+on.length:"Off: skipped")+" · pulled only (Settings, the ✦ menu's How does this work?): never scheduled, never capped · "+(it.sel?"it marks "+it.label.replace(/^The /,"the "):"it opens a block's page")+
     " · seen (its line heard): "+(ret.length?"the "+ret.join(", the ")+" is done for good":"nothing to retire")+"."}
-function gdReadBack(it){if(it.form==="cue")return gdCueReadBack(it);if(it.form==="walk")return gdStepReadBack(it);var g=gdGroupOf(it),k=gdKindOf(it),w=[];
-  if(it.when==="visit")w.push("once the visit has started");else if(it.when!=="settle")w.push("at a pause");
-  if(GD_ABOUT[it.about])w.push(GD_ABOUT[it.about]);if(+it.stillFor>0)w.push("the phone still "+it.stillFor+" s");
-  if(+it.notBefore>0)w.push("not before "+it.notBefore+" s of the visit");w=w.concat(gdWhenWords(it));
+function gdReadBack(it){if(it.form==="cue")return gdCueReadBack(it)+gdGestureWords(it);if(it.form==="walk")return gdStepReadBack(it);var g=gdGroupOf(it),k=gdKindOf(it),w=[];
+  if(it.when==="visit")w.push("once the visit has started");else if(it.when==="event")w.push("within "+GD_EVENT_MS/1000+" s after "+(GD_EVENTS[it.event]||it.event));
+  else if(it.when==="idle"&&!(+it.idleFor>0))w.push("after "+gdIdleOf(it)+" s idle");else if(it.when==="settle"&&it.about!=="point")w.push("when its target settles in the middle");else if(it.when!=="settle")w.push("at a pause");
+  if(GD_ABOUT[it.about])w.push(GD_ABOUT[it.about]+(it.mustSee===false?" (or without it)":""));if(+it.stillFor>0)w.push("the phone still "+it.stillFor+" s");
+  if(+it.notBefore>0)w.push("not before "+it.notBefore+" s of the visit");w=w.concat(gdWhenWords(it)).concat(gdOnlyWords(it));
   if(g&&g.mode==="order"&&+it.afterPrev>0){var i=g.items.indexOf(it.id),pv=i>0?S.guidance.items[g.items[i-1]]:null;if(pv)w.push("at least "+it.afterPrev+" s after the "+pv.label)}
   var gl=g&&(+g.cap>0||+g.gap>0)?" · "+g.name+" together: "+[+g.cap>0?"at most "+g.cap+" a visit":"",+g.gap>0?"at least "+g.gap+" s apart":""].filter(Boolean).join(", "):"";
   return it.label+" · "+(k?k.name:"?")+" › "+(g?g.name:"?")+(it.essential?" · Essential":"")+" · "+w.join(", ")+" · "+gdHowOften(it)+gl+" · along the visit "+gdAlongWords(it)+
-    " · during a tour "+(it.duringTour==="between"?"only between steps":"never")+"."}
+    " · during a tour "+(it.duringTour==="between"?"only between steps":"never")+"."+gdLookWords(it)}
+/* ----- round 6 (_3.8 section 3.2, the item in full; section 4, its look). Every tip (not a cue, not a walkthrough step) carries the
+   study's field groups: Identity (Label, On, its group and with it its kind), Words (Says: 1-4 variants in turn, never the same twice in
+   a row; the slots {point} {year} {button} and {min}; an optional line per audience; a returning visitor's line; Spoken), About (its
+   target, Must be on screen), Show (Form; Mascot goes: Beside it / Stays / Walks to it; Points at it; Focus: None / Glint / Ring /
+   Spotlight and its dim; Shows the gesture; Button), When (When, its event or idle, the phone still, Only if: screen, audience, first /
+   returning, has / has not used, Solemn, Lively; the earliest and latest second of the visit), How much (Importance, Essential, Along the
+   visit, Shows, At most, Again after, Done when, Teaches, After a dismissal, Expires, On screen for, During a tour). Their defaults are set
+   here once (gdFill), for the catalog's items and for each new one (+ Add guidance's templates, Duplicate). A cue keeps its round-4
+   fields (its element fixes its look); Before / After and Swipe strips gain Shows the gesture; a walkthrough step gains its Focus.
+   Unity: the same fields on GuidanceItem (GuidanceCatalog); the templates a ScriptableObject list ----- */
+var GD_EVENT_MS=20000;
+var GD_FOCUS=[["none","None"],["glint","Glint"],["ring","Ring"],["spotlight","Spotlight"]];
+var GD_STEP_FOCUS=[["tour","As the tour's Focus"],["spotlight","Spotlight"],["ring","Ring"],["none","None"]];
+var GD_GOES=[["beside","Beside it"],["stays","Stays"],["walk","Walks to it"]];
+var GD_BUTTONS=[["none","None"],["show","Show me"],["tour","Start the tour"],["card","Open the card"],["view","Ask about the view"]];
+var GD_BTN_WORD={show:"gd_btn_show",tour:"gd_btn_tour",card:"gd_btn_card",view:"gd_btn_view"};
+var GD_FORMS=[["tip","Tip"],["invitation","Invitation"],["remark","Remark"]];
+var GD_WHEN=[["pause","At a pause"],["visit","At the visit's start"],["settle","When its target settles"],["idle","After idle"],["event","On an event"]];
+var GD_WHEN_EVENTS=[["card","a card opened"],["view","Ask about the view opened"],["tour","a tour step heard"],["ask","a question asked"],["menu","the ✦ menu opened"],["poked","Azu poked"]];
+var GD_SPOKEN=[["kind","As the kind"],["bubble","A bubble only"],["heard","Spoken once the guide is heard"]];
+var GD_AFTER_DISMISS=[["wait","Wait ×3"],["visit","Not again this visit"],["never","Never again"]];
+var GD_EXPIRES=[["target","When its target leaves the screen"],["never","Never (its time only)"]];
+var GD_ONSCREEN=[["auto","Auto (by its words)"],["secs","For n s"],["tap","Until tapped"]];
+var GD_TEACH=[["","Nothing"],["card","Opening a card"],["view","Ask about the view"],["tour","A tour"],["ask","Asking a question"],["menu","The ✦ menu"]];
+var GD_USED=[["","Any"],["card","a card opened"],["tour","a tour step heard"],["ask","a question asked"],["view","Ask about the view opened"],["menu","the ✦ menu opened"]];
+var GD_ABOUT_OPTS=[["nothing","Nothing"],["marker","The nearest marker"],["middle","The point in the middle (with a tour)"],["gbtn","The ✦"]];
+var GD_AUD=[["","Any"],["family","Family"],["explorer","Explorer"],["expert","Expert"]];
+var GD_VISIT_IS=[["","Any"],["first","A first visit"],["returning","A returning visit"]];
+var GD_SCREEN=[["wall","The wall"],["card","A card"],["any","Any"]];
+function gdNameOf(t,v){return((t.filter(function(x){return x[0]===v})[0])||[0,v])[1]}
+/* the gesture a target asks for (the ghost finger): a tap on a marker, a point or the ✦; a drag across a Before / After; a swipe on a strip */
+var GD_GESTURE={marker:"tap",middle:"tap",point:"tap",gbtn:"tap",ba:"drag",strip:"swipe"};
+var GD_GESTURE_WORDS={tap:"a tap",drag:"a drag across",swipe:"a swipe"};
+var GD_TIP_DEF={dim:0.4,gesture:false,button:"none",event:"card",pokes:0,idleFor:0,aud:"",visitIs:"",hasUsed:"",notUsed:"",lively:false,notSolemn:false,notAfter:0,
+  afterDismiss:"wait",expires:"target",onScreen:"auto",onScreenS:6,mustSee:true,spoken:"kind",points:false,focus:"none",goes:"stays",tap:"close",form:"tip",when:"pause",screen:"wall",stillFor:0,afterPrev:0,notBefore:0,
+  importance:3,essential:false,shows:"visit",max:1,again:0,doneWhen:"",teaches:"",duringTour:"never",along:"kind",about:"nothing",saysBack:""};
+function gdIsTip(it){return!!it&&it.form!=="cue"&&it.form!=="walk"}
+function gdFill(it){if(it.form==="cue"){if(GD_GESTURE[it.about]&&it.gesture==null)it.gesture=true;return it}if(it.form==="walk"){if(it.focus==null)it.focus="tour";return it}
+  Object.keys(GD_TIP_DEF).forEach(function(k){if(it[k]===undefined)it[k]=GD_TIP_DEF[k]});if(!it.saysAud)it.saysAud={};return it}
+Object.keys(S.guidance.items).forEach(function(id){gdFill(S.guidance.items[id])});
+/* Spotlight is kept for Essential items and walkthrough steps (or it loses its force), and needs a target to cut out */
+function gdSpotOk(it){return!!it&&(it.form==="walk"||!!it.essential&&it.about!=="nothing")}
+function gdSpotWhy(it){return!it||it.form==="walk"?"":!it.essential?"Spotlight is kept for Essential items and walkthrough steps: this item is not Essential":it.about==="nothing"?"Spotlight needs a target to cut out: this item is about Nothing":""}
+/* the Focus in force: a Spotlight that is not allowed shows as a Ring (the Editor says so, beside the field and in the read-back) */
+function gdFocusNow(it){return it.focus==="spotlight"&&!gdSpotOk(it)?"ring":it.focus||"none"}
+function gdIdleOf(it){return it.when==="idle"?(+it.idleFor||20):+it.idleFor||0}
+function gdGestureOf(it){return it&&it.gesture?GD_GESTURE[it.about]||null:null}
+function gdGestureWords(it){var g=gdGestureOf(it);return g?" The ghost finger shows "+GD_GESTURE_WORDS[g]+".":""}
+/* Only if, in words (only what differs from Any) */
+function gdOnlyWords(it){var w=[];if(it.screen==="card")w.push("only on a card");if(it.aud)w.push("only for "+gdNameOf(GD_AUD,it.aud));if(it.visitIs)w.push("only on "+gdNameOf(GD_VISIT_IS,it.visitIs).toLowerCase());
+  if(it.hasUsed)w.push("only once "+gdNameOf(GD_USED,it.hasUsed));if(it.notUsed)w.push("only until "+gdNameOf(GD_USED,it.notUsed));if(+it.notAfter>0)w.push("not after "+it.notAfter+" s of the visit");return w}
+/* the look, in words, after the read-back */
+function gdLookWords(it){var f=gdFocusNow(it),g=gdGestureOf(it),b=it.button&&it.button!=="none"?gdNameOf(GD_BUTTONS,it.button):"";
+  return" Look: "+gdNameOf(GD_FORMS,it.form).toLowerCase()+", "+(it.goes==="walk"?"Azu walks to it":it.goes==="beside"?"Azu hops beside it":"Azu stays")+(it.points?" and points":"")+", focus "+gdNameOf(GD_FOCUS,f)+
+    (f!==it.focus?" (a Spotlight shows as a Ring: "+gdSpotWhy(it).replace(/^Spotlight /,"")+")":"")+(g?", the ghost finger shows "+GD_GESTURE_WORDS[g]:"")+(b?", its button “"+b+"”":"")+"."}
+/* every line an item can say (its variants, a point with a card's own, the returning visitor's, each audience's) */
+function gdLineKeys(it){var k=[].concat(it.says||[]);if(it.saysCard)k.push(it.saysCard);if(it.saysBack)k.push(it.saysBack);Object.keys(it.saysAud||{}).forEach(function(a){if(it.saysAud[a])k.push(it.saysAud[a])});return k.filter(function(x){return x&&S.tx[x]})}
+var GD_LANG_NAME={en:"English",pt:"Portuguese"};
+/* why an item can never show (the named warnings of the Editor), in words; none: it can */
+function gdNever(it){var r=[],k=gdKindOf(it),g=gdGroupOf(it),ab=gdNameOf(GD_ABOUT_OPTS,it.about).toLowerCase();if(!gdIsTip(it))return r;
+  if(k&&k.on===false)r.push("its kind, "+k.name+", is Off");if(g&&g.on===false)r.push("its group, "+g.name+", is Off");if(g&&!g.pulled&&+g.weight===0)r.push("its group's weight is 0, so it never wins");
+  if(it.hasUsed&&it.hasUsed===it.notUsed)r.push("Only if contradicts itself: has used and has not used "+gdNameOf(GD_USED,it.hasUsed));
+  if(it.screen==="card"&&/^(marker|middle|point)$/.test(it.about)&&it.mustSee!==false)r.push("Only if contradicts itself: only on a card, but its target is on the wall");
+  if(+it.notAfter>0&&+it.notAfter<=+it.notBefore)r.push("Only if contradicts itself: its latest ("+it.notAfter+" s) is not after its earliest ("+it.notBefore+" s)");
+  if(it.when==="settle"&&!/^(marker|middle|point)$/.test(it.about))r.push("When its target settles, but it is about "+ab+": nothing settles");
+  if(it.doneWhen&&it.doneWhen===it.hasUsed)r.push("Done when is already true: Only if waits until "+gdNameOf(GD_USED,it.hasUsed)+", which retires it");
+  if(it.doneWhen&&it.when==="event"&&it.doneWhen===it.event)r.push("Done when is already true: it waits for "+(GD_EVENTS[it.event]||it.event)+", which retires it");
+  var says=[].concat(it.says||[]).filter(function(x){return S.tx[x]});langCodes().forEach(function(l){if(!says.some(function(x){return String(S.tx[x][l]||"").trim()}))r.push("it has no words in "+(GD_LANG_NAME[l]||l))});return r}
+/* + Add guidance's templates (_3.8 section 7): each a new item in the group it is added to, with its words. Fun arrives in round 7, so a
+   Moment goes into the group it is added to until then */
+var GD_TEMPLATES=[
+  {id:"control",name:"Tip about a control",f:{label:"New tip about the ✦",about:"gbtn",points:true,focus:"ring",gesture:true,tap:"menu",importance:3,shows:"upto",max:2,again:60,notBefore:30},en:"Anything else? Tap {button}.",pt:"Mais alguma coisa? Toque em {button}."},
+  {id:"remark",name:"Remark about the point in view",f:{label:"{point}: a new remark",perPoint:true,form:"remark",about:"point",goes:"beside",points:true,when:"settle",stillFor:1.2,tap:"remark",importance:2,shows:"visit"},en:"{point}: see how the blue catches the light.",pt:"{point}: veja como o azul apanha a luz."},
+  {id:"tour",name:"Offer a tour",f:{label:"New tour offer for {point}",form:"invitation",about:"middle",goes:"beside",points:true,tap:"tour",button:"tour",stillFor:1.2,importance:3,shows:"visit",doneWhen:"tour",teaches:"tour",along:"late"},en:"{point} has a story. Shall I tell it?",pt:"{point} tem uma história. Conto-lha?"},
+  {id:"moment",name:"Moment",f:{label:"New moment",about:"nothing",duringTour:"between",lively:true,notSolemn:true,importance:2,shows:"visit",along:"late",notBefore:300},en:"Arms tired? Lower the phone, I'll wait.",pt:"Braços cansados? Baixe o telemóvel, eu espero."},
+  {id:"step",name:"Step of a sequence",f:{label:"New step",about:"marker",goes:"beside",points:true,focus:"ring",gesture:true,stillFor:1.2,afterPrev:20,importance:3,shows:"until",max:2,again:30,doneWhen:"card",teaches:"card"},en:"Now tap the glowing marker.",pt:"Agora toque no marcador aceso."},
+  {id:"blank",name:"Blank",f:{label:"New item"},en:"",pt:""}];
 
 /* Guidance, the scheduler (_3.8 section 3.3): one pure function, gdPick(items, visitor, context, now) → {item, why} | {none, why}.
    It reads only its arguments (no page, no clock of its own), so a test gives it a fake clock and fake memory; gdWhyNot answers for one
@@ -6154,6 +6329,8 @@ function gdStage(visitor,now){var v=visitor.visit||{},ret=visitor.visits>1,act=M
   return{s:Math.min(1,Math.max(mins/GD_STAGE_MIN,share)),mins:mins,active:act,returning:ret,done:done,share:share}}
 /* the gates for every item: fixed, no option breaks them */
 function gdGate(ctx,now){if(!ctx.on)return"Guidance is Off";if(ctx.demo)return"an Editor demo is showing";
+  /* round 6: the visitor's own Tips (Settings › The guide › Tips): Off silences every push item (the ✦ and Ask still answer) */
+  if(ctx.tips==="off")return"the visitor turned Tips Off (Settings › The guide › Tips)";
   if(ctx.showing)return"one at a time: "+(/^the /i.test(ctx.showing)?"":"the ")+ctx.showing+" is showing";if(ctx.remark)return"one at a time: "+ctx.remark+" is showing";
   if(ctx.speaking)return"never over a sentence: the guide is speaking";
   if(ctx.state)return"quiet while a system state shows ("+ctx.state+")";
@@ -6199,23 +6376,37 @@ function gdCheck(it,items,visitor,ctx,now){var vm=gdVisitOf(visitor,it.id),em=gd
   if(it.kindOn===false)return{no:(it.kindName||it.kind)+" is Off"};
   if(it.groupOn===false)return{no:(it.groupName||it.group)+" is Off"};
   if(it.groupPulled)return{no:"pulled only: it opens from Settings or the ✦ menu, never on its own"};
+  if(ctx.tips==="essentials"&&!it.essential)return{no:"the visitor chose Essentials only (Settings › The guide › Tips)"};
   if(ctx.moment==="open"&&it.when!=="open")return{no:"the card is opening: only a cue that answers the opening shows now"};
   if(it.doneWhen&&em.done)return{no:"done for good ("+GD_EVENTS[em.by||it.doneWhen]+")"};
   if(it.shows==="once"&&em.shown>=1)return{no:"shown once ever"};
   if(it.shows==="visit"&&vm.shown>=1)return{no:"shown once this visit"};
   if(it.shows==="card"&&vm.shown>=1&&vm.card===(v.cards||0))return{no:"shown on this card (again on the next)"};
   if((it.shows==="upto"||it.shows==="until")&&vm.shown>=+it.max)return{no:"shown "+vm.shown+" of "+it.max+" this visit"};
+  /* round 6: After a dismissal (Wait ×3 is the learning below; Not again this visit; Never again) */
+  if(it.afterDismiss==="never"&&(em.dismissed||0)>0)return{no:"dismissed before: never again (After a dismissal: Never again)"};
+  if(it.afterDismiss==="visit"&&(vm.dismissed||0)>0)return{no:"dismissed this visit: not again this visit (After a dismissal)"};
   var rest=v.rest&&v.rest[it.group];if(rest!=null&&now<rest)return{no:v.fewer&&v.fewer[it.group]?"Fewer like this: "+(it.groupName||it.group)+" rests for the visit":(it.groupName||it.group)+" rests 5 min after a dismissal: "+gdLeft(rest-now)};
   var tg=gdTourGate(it,ctx);if(tg)return{no:tg};
   if(it.lively&&!ctx.lively)return{no:"Lively only: Azu is Calm (Mascot > Liveliness)"};
   if(it.notSolemn&&ctx.solemn)return{no:"never on a Solemn point"};
   if(it.screen==="wall"&&!ctx.onWall)return{no:"not on the wall ("+(ctx.where||"a card is open")+")"};
+  if(it.screen==="card"&&!ctx.onCard&&it.form!=="cue")return{no:"only on a card ("+(ctx.where||"the wall")+")"};
+  /* round 6: Only if (the audience, a first or returning visit, a feature used or not yet), and the latest second of the visit */
+  if(it.aud&&ctx.aud!==it.aud)return{no:"only for "+gdNameOf(GD_AUD,it.aud)+" (the audience is "+gdNameOf(GD_AUD,ctx.aud||"explorer")+")"};
+  if(it.visitIs==="first"&&ctx.returning)return{no:"only on a first visit"};if(it.visitIs==="returning"&&!ctx.returning)return{no:"only on a returning visit"};
+  var used=visitor.used||{};if(it.hasUsed&&used[it.hasUsed]==null)return{no:"only once "+gdNameOf(GD_USED,it.hasUsed)};if(it.notUsed&&used[it.notUsed]!=null)return{no:"only until "+gdNameOf(GD_USED,it.notUsed)+" (it was)"};
+  if(+it.notAfter>0&&gdVisitT(v,now)>+it.notAfter*1000)return{no:"not after "+it.notAfter+" s of the visit"};
+  if(it.when==="event"){var et=v.ev&&v.ev[it.event];if(et==null||now-et>GD_EVENT_MS)return{no:"on an event: it waits for "+(GD_EVENTS[it.event]||it.event)+" (then "+GD_EVENT_MS/1000+" s)"};why.push(GD_EVENTS[it.event]+" "+Math.floor((now-et)/1000)+" s ago")}
   /* a cue: on a card, its element on the screen (the context's cues: card/hints.js finds them), a moving cue never under Reduce Motion */
   if(it.form==="cue"){if(!ctx.onCard)return{no:"not on a card ("+(ctx.where||"the wall")+")"};if(it.reduce==="skip"&&ctx.reduce)return{no:"skipped under Reduce Motion (a moving cue)"};
     var ce=ctx.cues&&ctx.cues[it.about];if(!ce)return{no:GD_CUE_NO[it.about]||"its part is not on the screen"};why.push(ce)}
-  if(it.about==="marker"){if(!ctx.marker)return{no:"no marker in view"};why.push(ctx.marker.name+" in view")}
-  if(it.about==="gbtn"){if(!ctx.gbtn)return{no:"the ✦ is not on the screen"};why.push("the ✦ on the screen")}
-  if(it.about==="middle"){var c=ctx.central;if(!c)return{no:"no point in the middle"};if(!c.tour)return{no:c.name+" in the middle has no tour"};why.push(c.name+" in the middle")}
+  var must=it.mustSee!==false;
+  if(it.about==="marker"){if(!ctx.marker){if(must)return{no:"no marker in view"}}else why.push(ctx.marker.name+" in view")}
+  if(it.about==="gbtn"){if(!ctx.gbtn){if(must)return{no:"the ✦ is not on the screen"}}else why.push("the ✦ on the screen")}
+  if(it.about==="middle"){var c=ctx.central;if(!c||!c.tour){if(must)return{no:!c?"no point in the middle":c.name+" in the middle has no tour"}}else why.push(c.name+" in the middle")}
+  /* round 6: When its target settles (a marker or the point in the middle): the target in the middle */
+  if(it.when==="settle"&&it.about!=="point"){var Tg=gdTargetCtx(it,ctx);if(!Tg||!Tg.middle)return{no:"its target has not settled in the middle"}}
   if(it.about==="point"){var cp=ctx.central;if(!cp)return{no:"no point in the middle"};if(cp.id!==it.point)return{no:"not in the middle ("+cp.name+" is nearest)"};
     if(!cp.middle)return{no:cp.name+" is the nearest, not in the middle yet"};why.push(cp.name+" in the middle")}
   if(ctx.covers&&ctx.covers[it.id])return{no:"never over its own target: "+ctx.covers[it.id]};
@@ -6224,8 +6415,9 @@ function gdCheck(it,items,visitor,ctx,now){var vm=gdVisitOf(visitor,it.id),em=gd
     var since=now-pm.last;if(since<+it.afterPrev*1000)return{no:it.afterPrev+" s after the "+p.label+": "+gdLeft(+it.afterPrev*1000-since)};if(+it.afterPrev>0)why.push(Math.floor(since/1000)+" s after the "+p.label)}
   if(+it.stillFor>0){var st=now-ctx.stillSince;if(!(st>=+it.stillFor*1000))return{no:"the phone still "+(isFinite(st)?(st/1000).toFixed(1):"0")+" s (it waits for "+it.stillFor+" s)"};why.push("the phone still "+(isFinite(st)?(st/1000).toFixed(1)+" s":"")) }
   /* its own When: after n pokes on Azu (this visit) or n s idle (no touch, the phone still), whichever comes first */
-  if(+it.pokes>0||+it.idleFor>0){var pk=+it.pokes>0&&(+ctx.pokes||0)>=+it.pokes,iS=ctx.idleSince,idl=+it.idleFor>0&&iS!=null&&now-iS>=+it.idleFor*1000;
-    if(!pk&&!idl){var ow=[];if(+it.pokes>0)ow.push(it.pokes+" pokes on Azu ("+(+ctx.pokes||0)+" so far)");if(+it.idleFor>0)ow.push(it.idleFor+" s idle ("+(iS==null?"not idle":gdLeft(+it.idleFor*1000-(now-iS)))+")");return{no:"after "+ow.join(" or ")}}
+  var iN=gdIdleOf(it);
+  if(+it.pokes>0||iN>0){var pk=+it.pokes>0&&(+ctx.pokes||0)>=+it.pokes,iS=ctx.idleSince,idl=iN>0&&iS!=null&&now-iS>=iN*1000;
+    if(!pk&&!idl){var ow=[];if(+it.pokes>0)ow.push(it.pokes+" pokes on Azu ("+(+ctx.pokes||0)+" so far)");if(iN>0)ow.push(iN+" s idle ("+(iS==null?"not idle":gdLeft(iN*1000-(now-iS)))+")");return{no:"after "+ow.join(" or ")}}
     why.push(pk?(+ctx.pokes)+" pokes on Azu":"idle "+Math.floor((now-iS)/1000)+" s")}
   /* two items about the ✦ never both in the visit's first minute */
   if(it.about==="gbtn"&&gdVisitT(v,now)<GD_FIRST_MS){var o2=items.filter(function(o){return o.id!==it.id&&o.about==="gbtn"&&gdVisitOf(visitor,o.id).shown>0})[0];
@@ -6292,8 +6484,9 @@ function gdWhyNot(items,visitor,ctx,now,id){var it=items.filter(function(x){retu
    motion, the touches, the card's open, the tour's steps, the mascot's poke, the ✦ menu), the memory as JSON in persistentDataPath, the
    visit clock Time.unscaledTime since the visit started, the time away from OnApplicationPause. */
 var GD_VISIT_GAP=30*60000;
-function gdVisitMem(n,now){return{n:n,at:now,lastEnd:null,cueEnd:null,cards:0,items:{},starts:[],away:0,ignoredRun:0,breathMul:1,rest:{},fewer:{},heard:false,pokes:0}}
-function gdNewMemory(now){return{visits:1,visit:gdVisitMem(1,now),ever:{items:{}},used:{},met:false}}
+function gdVisitMem(n,now){return{n:n,at:now,lastEnd:null,cueEnd:null,cards:0,items:{},starts:[],away:0,ignoredRun:0,breathMul:1,rest:{},fewer:{},heard:false,pokes:0,ev:{},tips:[]}}
+/* round 6: the visitor's own Tips (All / Essentials only / Off) and Tips stay until I tap them (WCAG 2.2.1), kept with the memory */
+function gdNewMemory(now){return{visits:1,visit:gdVisitMem(1,now),ever:{items:{}},used:{},met:false,prefs:{tips:"all",stay:false}}}
 S.gdVisitor=gdNewMemory(0);
 G.gd={t:0,rate:1,manual:false,cur:null,movedAt:null,touchAt:null,actAt:null,cardAt:null,wallAt:null,onWall:false,demo:false,last:null,next:null,log:[],between:false,skipKey:""};
 function gdNow(){return G.gd.t}
@@ -6342,7 +6535,7 @@ function gdOnCard(){return S.view==="card"?S.stop==="half"||S.stop==="full":S.vi
 /* the context's numbers (the page's moment and the simulator's both start from them): the breathing room and the limits in force
    (Talkativeness: the row's value × its factor), the cue room, freshness, the learning, Lively, Solemn, Reduce Motion */
 function gdCtxBase(){var g=S.guidance;return{on:!!g.on,breathing:gdRoomNow(),cueRoom:+g.cueRoom||0,reduce:!!S.reduce,limits:{perMinute:gdLimitNow(g.perMinute),perVisit:gdLimitNow(g.perVisit)},tau:+g.freshTau,
-  learn:{ignore:g.learnIgnore!==false,dismiss:g.learnDismiss!==false},lively:S.guideCfg.life==="lively",solemn:!!(S.m&&S.m.solemn)}}
+  learn:{ignore:g.learnIgnore!==false,dismiss:g.learnDismiss!==false},lively:S.guideCfg.life==="lively",solemn:!!(S.m&&S.m.solemn),aud:typeof aud==="function"?aud():""}}
 function gdContext(){var t=-Infinity,mv=G.gd.movedAt,wa=G.gd.wallAt,st=ph.querySelector(".stv"),sk=st&&(st.className.match(/\bst-(\w+)/)||[])[1];
   var speaking=!!(G.utter||G.timer||G.recAudio);
   var onCard=gdOnCard(),mo=G.gd.moment||null;
@@ -6355,33 +6548,41 @@ function gdContext(){var t=-Infinity,mv=G.gd.movedAt,wa=G.gd.wallAt,st=ph.queryS
     dockFull:!!(G.on&&typeof dockOn==="function"&&dockOn()&&S.dockH==="full"),tour:G.on?{between:!!G.gd.between&&!speaking,step:G.i}:null,
     movedAt:mv,touchAt:G.gd.touchAt,cardAt:S.view==="card"&&S.stop!=="closed"?G.gd.cardAt:null,
     onWall:gdOnWall(),where:S.view!=="card"?"the phone shows "+S.view:G.on?"the tour":S.stop!=="closed"?"a card is open":"",
-    marker:gdMarker(),gbtn:gdGbtn(),central:gdCentral(),covers:{},stillSince:Math.max(mv==null?t:mv,wa==null?t:wa),returning:S.gdVisitor.visits>1})}
+    marker:gdMarker(),gbtn:gdGbtn(),central:gdCentral(),covers:{},stillSince:Math.max(mv==null?t:mv,wa==null?t:wa),returning:S.gdVisitor.visits>1,tips:gdPrefs().tips})}
+/* the visitor's Tips settings (an older memory has none: the defaults) */
+function gdPrefs(V){V=V||S.gdVisitor;return V.prefs||(V.prefs={tips:"all",stay:false})}
 /* how long a tip stays: by its words, 4 to 9 s (the visit's clock); with the clock fast (a scene, a demo) it stays at least 0.6 to 1.5 s of real time, to be seen */
-function gdOnScreen(it,text){var n=String(text||"").split(/\s+/).filter(Boolean).length;return Math.max(4000,Math.min(9000,3000+n*350))}
+function gdOnScreen(it,text){if(it.onScreen==="secs"&&+it.onScreenS>0)return +it.onScreenS*1000;var n=String(text||"").split(/\s+/).filter(Boolean).length;return Math.max(4000,Math.min(9000,3000+n*350))}
 /* the slots of its line: the point it is about and the minutes of that point's tour */
+/* round 6: {year} the point's year; a line with variants says the next in turn (n: how many times it has shown, so never the same twice in a row) */
+function gdYearOf(id){var p=(S.wallPois||[]).filter(function(x){return x.id===id})[0];return p&&p.year||""}
 function gdSlots(it,V,c,items){V=V||S.gdVisitor;if(it.about==="point"){var n=(items||gdItems()).filter(function(o){return o.group===it.group}).reduce(function(a,o){return a+gdVisitOf(V,o.id).shown},0);
-    return{id:it.point,point:it.pointName||"",card:!!it.card,n:n}}
-  if(it.about!=="middle")return{};if(c===undefined)c=gdCentral();if(c&&c.tour)return{id:c.id,point:c.name,min:c.min};
-  var p=(S.wallPois||[]).filter(function(x){return x.card})[0];return{id:p&&p.id,point:p?L(p.name):"",min:tourMinutes()}}
+    return{id:it.point,point:it.pointName||"",card:!!it.card,n:n,year:gdYearOf(it.point)}}
+  var nn=gdEverOf(V,it.id).shown||0;
+  if(it.about==="marker"){var mk=c===undefined&&S.view==="card"?gdMarker():null;return mk?{id:mk.id,point:mk.name,year:gdYearOf(mk.id),n:nn}:{n:nn}}
+  if(it.about!=="middle")return{n:nn};if(c===undefined)c=gdCentral();if(c&&c.tour)return{id:c.id,point:c.name,min:c.min,year:gdYearOf(c.id),n:nn};
+  var p=(S.wallPois||[]).filter(function(x){return x.card})[0];return{id:p&&p.id,point:p?L(p.name):"",min:tourMinutes(),year:p?gdYearOf(p.id):"",n:nn}}
 /* spoken (_3.8 decision 2): App as a bubble only; Content spoken once the visitor has heard the guide this visit, else a bubble */
-function gdSpoken(it,o){if(o&&o.spoken!=null)return!!o.spoken;return it.spoken==="kind"&&it.kindSpoken==="heard"&&!!S.gdVisitor.visit.heard}
+/* round 6: Spoken per item (As the kind / A bubble only / Spoken once the guide is heard); never while a screen reader is on (Preview & Test >
+   The visitor > Screen reader on, the Lab's stand-in for VoiceOver / TalkBack): the bubble is announced politely instead */
+function gdSpoken(it,o){if(S.ui.gdSR)return false;if(o&&o.spoken!=null)return!!o.spoken;var h=!!S.gdVisitor.visit.heard;return it.spoken==="heard"?h:it.spoken==="kind"&&it.kindSpoken==="heard"&&h}
 /* a tip starts (the scheduler's choice, or pulled: an Editor demo, which never writes the memory) and ends */
 function gdStart(it,why,o){o=o||{};if(G.gd.cur)gdStop("another tip");if(it.form==="cue")return gdCueStart(it,why,o);var now=gdNow(),ret=o.ret!=null?!!o.ret:S.gdVisitor.visits>1&&!o.first,slots=gdSlots(it),text=o.text!=null?o.text:gdLine(it,ret,slots),spoken=gdSpoken(it,o);
   G.gd.cur={item:it,at:now,until:now+(o.ms||gdOnScreen(it,text)),realMin:G.gd.manual?0:performance.now()+(G.gd.rate>1?Math.max(600,15000/G.gd.rate):0),pull:!!o.pull,why:why||"",text:text,slots:slots,ret:ret,spoken:spoken};
-  if(!o.pull)gdMemStart(S.gdVisitor,it,now,text);
+  if(!o.pull){gdMemStart(S.gdVisitor,it,now,text);gdSaid(it,text,now)}
   G.gd.skipKey="";gdLog("shown",(o.pull?"(pulled) ":"")+(why||it.label)+(spoken?" · spoken":""));gdPresent(G.gd.cur);if(spoken)gdVoice(G.gd.cur);return G.gd.cur}
 /* how: "acted", "dismissed", "fewer", "ignored", or "" (the moment ended it); round 1's true is a dismissal */
 /* a cue starts: its look on its element (card/hints.js's cueStart gives how long it plays; the Locate label: until seen); its memory
    (this visit, ever, the card it showed on) at its start, the label's once it has been seen; no bubble, no mascot, not a tip's start */
 function gdCueStart(it,why,o){var now=gdNow(),c={item:it,at:now,until:now,realMin:0,pull:!!o.pull,why:why||"",text:it.says?TXT(it.says):"",slots:{},cue:true},d=cueStart(c);
   if(d==null){gdLog("skipped",it.label+": its part is not on the screen");return null}
-  G.gd.cur=c;if(!o.pull)gdMemStart(S.gdVisitor,it,now,"");
+  G.gd.cur=c;if(!o.pull){gdMemStart(S.gdVisitor,it,now,"");if(it.says)gdSaid(it,c.text,now)}if(gdGestureOf(it))gdFinger(it,null,cueEl(it.about));
   G.gd.skipKey="";gdLog("shown",(o.pull?"(pulled) ":"")+(why||it.label)+" · a cue");if(!isFinite(d)&&o.ms)d=o.ms;
   c.until=now+d;c.realMin=G.gd.manual||!isFinite(d)?0:performance.now()+d;return c}
 function gdStop(why,how){var c=G.gd.cur;if(!c)return;if(how===true)how="dismissed";how=how||"";G.gd.cur=null;var now=gdNow();
   /* a cue ends: seen (it played, or the label was seen 4 s) or by the moment; it writes the cue's end (the cue room), never a tip's */
   if(c.cue){if(!c.pull)gdMemEnd(S.gdVisitor,c,how,now);
-    gdLog("ended",c.item.label+": "+(why||"it played")+(how?" ("+how+")":""));cueStop(c,how);return}
+    gdLog("ended",c.item.label+": "+(why||"it played")+(how?" ("+how+")":""));cueStop(c,how);gdFingerStop();return}
   if(c.spoken&&G.sayLine&&G.sayLine.text===c.text)stopSpeech();
   if(!c.pull)gdMemEnd(S.gdVisitor,c,how,now);
   gdLog("ended",c.item.label+": "+(why||"its time is up")+(how?" ("+how+")":""));gdUnpresent(why)}
@@ -6395,6 +6596,7 @@ function gdLearn(c,how,now,V,log){V=V||S.gdVisitor;log=log||gdLog;var it=c.item,
   if(how==="dismissed"||how==="fewer"){vm.dismissed++;em.dismissed++;
     if(how==="fewer"){v.rest[it.group]=GD_FOREVER;v.fewer[it.group]=true;log("learned","Fewer like this: "+gn+" rests for the visit");return}
     if(S.guidance.learnDismiss===false)return;
+    if(it.afterDismiss==="visit"||it.afterDismiss==="never"){log("learned",it.label+" dismissed: "+(it.afterDismiss==="never"?"never again":"not again this visit"));return}
     if(it.kind==="app"){if(+it.again>0)log("learned",it.label+" dismissed: it waits ×3 its Again after ("+3*it.again+" s)");return}
     v.rest[it.group]=now+GD_REST_MS;log("learned",it.label+" dismissed: "+gn+" rests 5 min")}}
 /* the events */
@@ -6403,12 +6605,12 @@ on("phone.moved",function(){G.gd.movedAt=gdNow()});
 /* idle: no touch, no wheel, no key (and the phone still: movedAt) */
 ["wheel","keydown"].forEach(function(t){ph.addEventListener(t,function(){G.gd.actAt=gdNow()},{capture:true,passive:true})});
 /* Azu poked (mascot/azu2d.js), counted this visit; the ✦ menu opened (world/guide-button.js): The ✦ is done */
-on("mascot.poked",function(){var v=S.gdVisitor.visit;v.pokes=(v.pokes||0)+1;gdLog("event",GD_EVENTS.poked+" ("+v.pokes+" this visit)")});
+on("mascot.poked",function(){var v=S.gdVisitor.visit;v.pokes=(v.pokes||0)+1;(v.ev=v.ev||{}).poked=gdNow();gdLog("event",GD_EVENTS.poked+" ("+v.pokes+" this visit)")});
 on("menu.opened",function(how){gdUsed("menu",how)});
 /* an audience set (Who's exploring, the visitor's Settings, Preview as: audiences/audiences.js) writes its Guidance preset (round 5) */
 on("audience.set",function(a,p){if(!p||!GD_PRESETS[p])return;gdPresetWrite(p);gdLog("event","the audience set: "+(AUDN[a]||a)+" (the "+gdPresetName(p)+" preset)")});
 /* a feature used (a milestone of the stage): the items it retires are done for good; a tip that teaches it, showing now, was acted on */
-function gdUsed(f,how){var now=gdNow(),c=G.gd.cur;gdMemUsed(S.gdVisitor,f,now,gdItems());
+function gdUsed(f,how){var now=gdNow(),c=G.gd.cur,vv=S.gdVisitor.visit;(vv.ev=vv.ev||{})[f]=now;gdMemUsed(S.gdVisitor,f,now,gdItems());
   gdLog("event",GD_EVENTS[f]+(how?" ("+how+")":""));if(c&&!c.pull&&c.item.teaches===f)gdStop(GD_EVENTS[f],"acted")}
 /* a card opened: a tip it ends (the visitor did what it asked, or opened a card over it) is answered: the cue room does not count from it */
 on("card.opened",function(how){var v=S.gdVisitor.visit,e0=v.lastEnd;G.gd.cardAt=gdNow();gdUsed("card",how);if(G.gd.cur&&!G.gd.cur.cue)gdStop("the visitor opened a card");if(v.lastEnd!==e0)v.openEnd=v.lastEnd});
@@ -6440,7 +6642,7 @@ function gdWalk(from){var g=gdGroupById("howto");if(!g||g.on===false)return fals
 on("startTour.before",function(){if(G.gd.cur&&!G.gd.cur.pull)gdStop("the tour started")});on("runStep.before",function(){G.gd.between=false});on("stopTour.after",function(){G.gd.between=false});
 /* the loop: the wall seen since when, the tip on screen ends, or the scheduler is asked (a choice that would cover its target is asked again without it) */
 function gdTick(){if(noDraw)return;var now=gdNow(),w=gdOnWall();if(w&&!G.gd.onWall)G.gd.wallAt=now;G.gd.onWall=w;
-  var c=G.gd.cur;if(c){var e=gdEnds(c,now,{onWall:w,get onCard(){return gdOnCard()},get locate(){return!!cueTargets(false).locate},get marker(){return gdMarker()},get central(){return gdCentral()},get gbtn(){return gdGbtn()},realOk:performance.now()>=c.realMin});
+  var c=G.gd.cur;if(c){var e=gdEnds(c,now,{onWall:w,get onCard(){return gdOnCard()},get locate(){return!!cueTargets(false).locate},get marker(){return gdMarker()},get central(){return gdCentral()},get gbtn(){return gdGbtn()},realOk:performance.now()>=c.realMin,stay:!!gdPrefs().stay});
     if(e&&e!=="wait")gdStop(e[0],e[1]);return}
   if(G.gd.demo&&G.gd.demoOwner!==G.demoSeq){G.gd.demo=false;gdChip(null)}if(G.gd.demo)return;
   var ctx=gdContext(),items=gdItems(),r=gdPick(items,S.gdVisitor,ctx,now);
@@ -6451,12 +6653,14 @@ function gdTick(){if(noDraw)return;var now=gdNow(),w=gdOnWall();if(w&&!G.gd.onWa
 /* why the tip on the screen ends now: [why, how], "wait" (Fewer like this? asked), or null (it stays). Its screen left (a wall tip off the
    wall; a cue off its card, the Locate label also when its pin goes), its target gone (its marker, its point out of the middle, the ✦),
    or its time up (a cue: seen; a tip: ignored). W is the moment (the page's, or the simulator's) */
-function gdEnds(c,now,W){var it=c.item;if(it.screen==="wall"&&!W.onWall)return["the wall left the screen",""];
+function gdEnds(c,now,W){var it=c.item;if(it.screen==="wall"&&!W.onWall)return["the wall left the screen",""];var keep=it.expires==="never";
   if(c.cue&&(!W.onCard||it.about==="locate"&&!(c.pull||W.locate)))return["its card left the screen",""];
-  if(!c.pull){if(it.about==="marker"&&!W.marker)return["its marker left the screen",""];
+  if(!c.pull&&!keep){if(it.about==="marker"&&!W.marker)return["its marker left the screen",""];
     if(it.about==="middle"||it.about==="point"){var cc=W.central;if(!cc||cc.id!==c.slots.id)return["its point left the middle",""]}
     if(it.about==="gbtn"&&!W.gbtn)return["the ✦ left the screen",""]}
   if(c.ask)return now>=c.askUntil?["Fewer like this? not answered","ignored"]:"wait";
+  /* round 6: a tip stays until tapped (On screen for: Until tapped, or the visitor's Tips stay until I tap them): its time never runs out */
+  if(!c.cue&&!c.pull&&(it.onScreen==="tap"||W.stay))return null;
   if(now>=c.until&&W.realOk!==false)return[c.cue?"it played":"its time is up",c.cue?"seen":"ignored"];return null}
 /* a pull (_3.8 section 3.3: past every gate but one at a time): the item at once, the tip showing gives way; it writes no memory.
    Tap on Azu = Points to the ✦ pulls The ✦ (false when there is no ✦ or no Azu beside it to point) */
@@ -6572,6 +6776,13 @@ function gdSimSum(res,mins){var lim=(mins||15)*60000,tips=res.dots.filter(functi
   var fc=tips.map(function(d){return d.kind}).indexOf("content"),k=[["App",by("app")],["Content",by("content")],["Fun",by("fun")]].filter(function(x){return x[1]>0});
   return{tips:tips.length,app:by("app"),content:by("content"),fun:by("fun"),cues:cues.length,perMin:perMin,over:over,first:tips[0]?tips[0].kind:null,appBefore:fc<0?tips.length:fc,
     words:tips.length+" tips in "+(mins||15)+" min"+(k.length?": "+k.map(function(x){return x[0]+" "+x[1]}).join(", "):"")+(cues.length?" (and "+cues.length+" card cue"+(cues.length>1?"s":"")+")":"")+"; at most "+perMin+" a minute; "+(over?over+" over a sentence":"none over a sentence")}}
+/* ----- round 6: every tip that showed also lands in the dock's conversation under Tips (a bubble is never the only channel); Settings >
+   The guide > Show the tips again resets the memory (what showed, what is done, the features used; the visitor's Tips settings stay), with
+   an Undo toast and no popup. Unity: GuidanceService.Said (the dock's thread reads it), GuidanceMemory.ResetShown with a kept copy for Undo ----- */
+function gdSaid(it,text,now){var v=S.gdVisitor.visit,l=v.tips||(v.tips=[]);if(!text)return;l.push({t:now,id:it.id,label:it.label,text:text});if(l.length>30)l.shift()}
+function gdTipsAgain(){var V=S.gdVisitor,keep=JSON.stringify(V);if(G.gd.cur)gdStop("Show the tips again");V.ever.items={};V.visit.items={};V.used={};V.visit.rest={};V.visit.fewer={};V.visit.starts=[];V.visit.ignoredRun=0;V.visit.breathMul=1;V.visit.lastEnd=null;V.visit.cueEnd=null;
+  G.gd.tipsUndo=keep;gdLog("event","Show the tips again: the memory reset (the visitor's Tips settings kept)");return keep}
+function gdTipsUndo(){if(!G.gd.tipsUndo)return false;S.gdVisitor=JSON.parse(G.gd.tipsUndo);G.gd.tipsUndo=null;gdLog("event","Show the tips again undone: the memory back");return true}
 
 /* Guidance, the look (_3.8 section 4): a tip is one bubble (the dock's paper, 7:1 words, at most 2 lines, a tail to the mascot). Its
    target: the nearest marker (Tap a marker), the point in the middle (A tour of {point}, and Azu's remark on a point, {point} in the
@@ -6608,6 +6819,8 @@ function gdObstacles(){var out=[];
   var gf=scr.querySelector(".gfocus");if(G.on&&gdSeen(gf))out.push({b:gdPR(gf),w:8,told:1});return out}
 /* an item's target on the screen: its point, the box the bubble and Azu keep clear of, and whether Azu goes beside it */
 /* the ✦'s wrap: outside a tour, or (a pull in a tour) the one above the dock */
+/* round 6: Mascot goes Beside it or Walks to it: Azu leaves the ✦ for its place beside the target */
+function gdGoes(it){return it.goes==="beside"||it.goes==="walk"}
 function gdGbWrap(){return ph.querySelector(".gbtn-wrap:not(.intour)")||(G.on?ph.querySelector(".gbtn-wrap.intour"):null)}
 /* a point of the wall on the screen (its item's own point, else the one in the middle) */
 function gdPointNow(it){var c=gdCentral();if(c&&(!it.point||c.id===it.point))return c;if(typeof camView!=="function")return c;var p=camView().pois.filter(function(x){return x.id===it.point})[0];
@@ -6618,20 +6831,25 @@ function gdTarget(it){var P=it.about==="marker"?gdMarker():it.about==="middle"?g
   return null}
 /* the bubble's words: plain, or one span a word when it is spoken (the word being said is lit) */
 function gdWords(t){return String(t).split(/(\s+)/).map(function(w){return/^\s*$/.test(w)?w:'<span class="gdw">'+esc(w)+'</span>'}).join("")}
-function gdBubHtml(c){var cta=c.item&&c.item.cta?'<button type="button" class="gdcta" data-gdcta="1">'+TXH(c.item.cta)+'<span aria-hidden="true">&#8250;</span></button>':"";
-  return'<button type="button" data-gdbub="1">'+(c.spoken?gdWords(c.text):esc(c.text))+'</button>'+cta+'<i class="gdtail"></i>'}
+/* the bubble's chip: How does this work?'s Open a card (cta), or the item's Button (round 6: Show me / Start the tour / Open the card / Ask
+   about the view); with Tips stay until I tap them (or On screen for: Until tapped) a dismiss button, so the visitor can close it without acting */
+function gdBtnOf(it){return!it?null:it.cta?{word:it.cta,act:"card"}:it.button&&it.button!=="none"&&GD_BTN_WORD[it.button]?{word:GD_BTN_WORD[it.button],act:it.button}:null}
+function gdStays(c){return!!c&&!c.pull&&!c.cue&&(c.item.onScreen==="tap"||!!gdPrefs().stay)}
+function gdBubHtml(c){var bt=gdBtnOf(c.item),cta=bt?'<button type="button" class="gdcta" data-gdcta="'+bt.act+'">'+TXH(bt.word)+'<span aria-hidden="true">&#8250;</span></button>':"";
+  var x=gdStays(c)?'<button type="button" class="gdx" data-gdx="1" aria-label="'+TXH("gd_dismiss")+'"><span aria-hidden="true">&#10005;</span></button>':"";
+  return'<button type="button" data-gdbub="1">'+(c.spoken?gdWords(c.text):esc(c.text))+'</button>'+cta+x+'<i class="gdtail"></i>'}
 /* the tip on the phone: its elements made once, then placed (again at each paint of the wall: the marker moves with the picture) */
 function gdPresent(c){gdClearEls();var it=c.item,az=gdMascot();
-  var b=document.createElement("div");b.className="gdbub"+(az?"":" plain")+(S.reduce?"":" gd-in")+(it.form==="remark"?" gd-more":"")+(it.cta?" gd-cta":"");b.setAttribute("role","status");b.setAttribute("aria-live","polite");
+  var b=document.createElement("div");b.className="gdbub"+(az?"":" plain")+(S.reduce?"":" gd-in")+(it.form==="remark"?" gd-more":"")+(gdBtnOf(it)?" gd-cta":"")+(gdStays(c)?" gd-stay":"");b.setAttribute("role","status");b.setAttribute("aria-live","polite");
   b.innerHTML=gdBubHtml(c);ph.appendChild(b);
-  if(it.focus==="ring")gdRing(it,!S.reduce);
-  if(it.points&&az&&it.goes==="beside"){var p=document.createElement("i");p.className="gdpoint";p.setAttribute("aria-hidden","true");p.innerHTML='<svg viewBox="0 0 16 16"><path d="M2.5 2.5 14 8 2.5 13.5Z"/></svg>';ph.appendChild(p)}
+  if(gdFocusNow(it)==="ring")gdRing(it,!S.reduce);
+  if(it.points&&az&&gdGoes(it)){var p=document.createElement("i");p.className="gdpoint";p.setAttribute("aria-hidden","true");p.innerHTML='<svg viewBox="0 0 16 16"><path d="M2.5 2.5 14 8 2.5 13.5Z"/></svg>';ph.appendChild(p)}
   gdPlace(c,true)}
 /* the rings: on a marker it sits in the wall's layer under the markers, so the marker and its name are drawn over it (never covered; a
    redrawn wall gets it back); round the ✦ it sits just under the button's own layer */
 function gdRing(it,pulse){if(it&&it.about==="gbtn"){var q=ph.querySelector(".gdring.gd-rect");if(!q){q=document.createElement("div");q.className="gdring gd-rect"+(pulse?" gd-pulse":"");q.setAttribute("aria-hidden","true");var w0=ph.querySelector(".gbtn-wrap");ph.insertBefore(q,w0||null)}return q}
   var w=document.getElementById("wall");if(!w)return null;var r=w.querySelector(".gdring");if(!r){r=document.createElement("div");r.className="gdring"+(pulse?" gd-pulse":"");r.setAttribute("aria-hidden","true");w.insertBefore(r,w.firstChild)}return r}
-function gdClearEls(){ph.querySelectorAll(".gdbub,.gdring,.gdpoint").forEach(function(x){x.remove()})}
+function gdClearEls(){ph.querySelectorAll(".gdbub,.gdring,.gdpoint,.gdglint,.gspot.gdspot,.gdfinger,.gdripple").forEach(function(x){x.remove()})}
 /* the solver: Azu's place beside the target (right, left, above, below) and the bubble's (above Azu, below, beside), the one covering least;
    for the ✦ (or no target) the bubble above the ✦ and Azu; cover says when even the best place is over its target or the block being told */
 function gdSolve(c,bw,bh){var it=c.item,W=ph.offsetWidth,H=ph.offsetHeight,az=gdMascot(),obs=gdObstacles();
@@ -6640,7 +6858,7 @@ function gdSolve(c,bw,bh){var it=c.item,W=ph.offsetWidth,H=ph.offsetHeight,az=gd
   var clampL=function(l){return Math.max(GD_GUT,Math.min(W-GD_GUT-bw,l))};
   var M=gdTarget(it),home=null,best=null;
   if(az){var cur=az.style.translate;az.style.translate="";home=gdPR(az);az.style.translate=cur}
-  if(M&&M.beside&&it.goes==="beside"&&az){var aw=home.r-home.l,ah=home.b-home.t,ring=M.box;
+  if(M&&M.beside&&gdGoes(it)&&az){var aw=home.r-home.l,ah=home.b-home.t,ring=M.box;
     [["right",M.x+GD_RING+6,M.y-ah/2],["left",M.x-GD_RING-6-aw,M.y-ah/2],["above",M.x-aw/2,M.y-GD_RING-6-ah],["below",M.x-aw/2,M.y+GD_RING+30]].forEach(function(a,ai){
       var A1=gdBox(a[1],a[2],aw,ah),cx=(A1.l+A1.r)/2;
       [["down",gdBox(clampL(cx-bw/2),A1.t-10-bh,bw,bh)],["up",gdBox(clampL(cx-bw/2),A1.b+10,bw,bh)],
@@ -6661,31 +6879,45 @@ function gdPlace(c,first){var b=ph.querySelector(".gdbub:not(.gd-out)");if(!b||!
   /* the tail: towards Azu, or (Mascot Off) towards the target; none for a plain tip with no target */
   var to=A?{x:(A.l+A.r)/2,y:(A.t+A.b)/2}:best.at||null,tl=b.querySelector(".gdtail"),bh=b.offsetHeight;
   if(!to){b.dataset.tail="none"}else if(tl){if(best.tail==="down"||best.tail==="up")tl.style.left=Math.round(Math.max(14,Math.min(bw-28,to.x-best.B.l-7)))+"px";else tl.style.top=Math.round(Math.max(10,Math.min(bh-24,to.y-best.B.t-7)))+"px"}
-  var rg=it.focus==="ring"&&M?gdRing(it,false):null;
+  var fc=gdFocusNow(it),rg=fc==="ring"&&M?gdRing(it,false):null;
   if(rg&&M&&M.rect){rg.style.left=Math.round(M.rect.l-5)+"px";rg.style.top=Math.round(M.rect.t-5)+"px";rg.style.width=Math.round(M.rect.r-M.rect.l+10)+"px";rg.style.height=Math.round(M.rect.b-M.rect.t+10)+"px"}
   else if(rg&&M){rg.style.left=Math.round(M.x)+"px";rg.style.top=Math.round(M.y)+"px"}
   /* Azu: hops to its place beside the target (Reduce Motion: it is there), points at it; at the ✦ it stays and lifts its arm to it */
-  if(az&&best.A&&it.goes==="beside"&&M&&M.beside){var dx=Math.round(best.A.l-best.home.l),dy=Math.round(best.A.t-best.home.t),left=M.x<(best.A.l+best.A.r)/2;
-    G.gd.az={dx:dx,dy:dy,left:left};gdApplyAz(az,first&&!S.reduce);
+  G.gd.hopMs=0;
+  if(az&&best.A&&gdGoes(it)&&M&&M.beside){var dx=Math.round(best.A.l-best.home.l),dy=Math.round(best.A.t-best.home.t),left=M.x<(best.A.l+best.A.r)/2;
+    G.gd.az={dx:dx,dy:dy,left:left,walk:it.goes==="walk"};gdApplyAz(az,first&&!S.reduce);
     var pt=ph.querySelector(".gdpoint");if(pt){var ax=(best.A.l+best.A.r)/2,ay=(best.A.t+best.A.b)/2,ang=Math.atan2(M.y-ay,M.x-ax),px=M.x-Math.cos(ang)*(GD_RING-5),py=M.y-Math.sin(ang)*(GD_RING-5);
       /* in the gap between the marker and Azu; below the marker its name sits there, so Azu's arm points alone */
       pt.style.display=best.side==="below"?"none":"";pt.style.left=Math.round(px)+"px";pt.style.top=Math.round(py)+"px";pt.style.rotate=(ang*180/Math.PI).toFixed(1)+"deg";if(first&&!S.reduce){pt.classList.remove("gd-in");void pt.offsetWidth;pt.classList.add("gd-in")}}}
   else if(it.points&&it.about==="gbtn"&&!S.reduce){if(az){az.classList.add("point-gb");G.gd.ptGb=true}
     /* no Azu beside the ✦ (a pull in a tour): the guide's own Azu turns to it (the 3D model reads G.pointTo) */
-    else if(!G.gd.ptTo&&typeof azuEl==="function"&&azuEl()){G.gd.ptTo=true;G.pointTo={till:performance.now()+Math.max(1500,c.until-c.at),at:function(){var w=gdGbWrap(),g=w&&w.querySelector(".gbtn");if(!g)return null;var B=gdPR(g);return{x:(B.l+B.r)/2,y:(B.t+B.b)/2}}}}}}
+    else if(!G.gd.ptTo&&typeof azuEl==="function"&&azuEl()){G.gd.ptTo=true;G.pointTo={till:performance.now()+Math.max(1500,c.until-c.at),at:function(){var w=gdGbWrap(),g=w&&w.querySelector(".gbtn");if(!g)return null;var B=gdPR(g);return{x:(B.l+B.r)/2,y:(B.t+B.b)/2}}}}}
+  /* round 6: the Glint and the Spotlight on the target; the ghost finger once, after Azu's hop */
+  if(fc==="glint"&&M)gdGlint(it,M,first);var sp=ph.querySelector(".gspot.gdspot");if(fc==="spotlight"&&M)gdSpotTip(it,M);else if(sp)sp.remove();
+  if(first&&M&&gdGestureOf(it))gdFinger(it,M,null)}
 /* Azu away from the ✦ (kept across a redraw of the button: fabLayer.after) */
+/* round 6: the hop is a short arc (0.45 s, a parabola sampled along an eased time); Walks to it (on the wall) is a slower walk along the
+   bottom, a small step bob, then up to its place. Unity: a translate tween on an arc (DOTween DOJump on the mascot's VisualElement) / along
+   a two-leg path (DOPath) with the Animator's walk clip; Reduce Motion: no tween, the mascot is there */
+function gdArcFrames(x0,y0,x1,y1){var h=Math.min(70,40+Math.hypot(x1-x0,y1-y0)*.08),out=[];for(var i=0;i<=8;i++){var t=i/8,e=1-Math.pow(1-t,2.2);out.push({translate:(x0+(x1-x0)*e).toFixed(1)+"px "+(y0+(y1-y0)*e-h*4*e*(1-e)).toFixed(1)+"px",offset:t})}return out}
+function gdWalkMs(x0,y0,x1,y1){return Math.round(Math.max(1100,Math.min(2400,700+(Math.abs(x1-x0)+Math.abs(y1-y0))*3.2)))}
+function gdWalkFrames(x0,y0,x1,y1){var a=Math.abs(x1-x0),b=Math.abs(y1-y0),L=a+b||1,out=[{translate:x0+"px "+y0+"px",offset:0}],n=Math.max(2,Math.round(a/26));
+  for(var i=1;i<=n;i++){var t=i/n,x=x0+(x1-x0)*t;out.push({translate:x.toFixed(1)+"px "+(y0-(i%2?4:0))+"px",offset:+(a*t/L).toFixed(4)})}
+  out[out.length-1].translate=x1+"px "+y0+"px";out.push({translate:x1+"px "+y1+"px",offset:1});return out}
 function gdApplyAz(az,hop){var a=G.gd.az;if(!az||!a)return;az.classList.add("gd-away","gd-point");az.classList.toggle("gd-left",a.left);az.dataset.gdlean=a.left?"left":"right";
-  var to=a.dx+"px "+a.dy+"px";if(hop&&az.animate){var from=az.style.translate||"0px 0px",f=from.split(" ").map(parseFloat);az.animate([{translate:from},{translate:((f[0]+a.dx)/2)+"px "+(Math.min(f[1]||0,a.dy)-40)+"px"},{translate:to}],{duration:450,easing:"cubic-bezier(.3,.7,.4,1)"})}
+  var to=a.dx+"px "+a.dy+"px";if(hop&&az.animate){var f=(az.style.translate||"0px 0px").split(" ").map(parseFloat),x0=f[0]||0,y0=f[1]||0,ms=a.walk?gdWalkMs(x0,y0,a.dx,a.dy):450;G.gd.hopMs=ms;
+    az.animate(a.walk?gdWalkFrames(x0,y0,a.dx,a.dy):gdArcFrames(x0,y0,a.dx,a.dy),{duration:ms,easing:a.walk?"ease-in-out":"linear"})}
   az.style.translate=to;var arm=az.querySelector(".marm");if(arm){arm.classList.add("on");arm.style.transform=a.left?"rotate(-8deg)":"rotate(8deg)"}}
 function gdAzHome(){var az=ph.querySelector(".azfab"),pg=G.gd.ptGb;G.gd.az=null;G.gd.ptGb=false;if(G.gd.ptTo){G.gd.ptTo=false;G.pointTo=null}if(!az)return;if(pg)az.classList.remove("point-gb");var from=az.style.translate;
   if(from&&!S.reduce&&az.animate){var f=from.split(" ").map(parseFloat);az.animate([{translate:from},{translate:(f[0]/2)+"px "+(Math.min(0,f[1]||0)-30)+"px"},{translate:"0px 0px"}],{duration:420,easing:"cubic-bezier(.3,.7,.4,1)"})}
   az.style.translate="";az.classList.remove("gd-away","gd-point","gd-left");delete az.dataset.gdlean;var arm=az.querySelector(".marm");if(arm){arm.classList.remove("on");arm.style.transform=""}}
-function gdUnpresent(){gdAzHome();ph.querySelectorAll(".gdbub,.gdring,.gdpoint").forEach(function(x){x.classList.add("gd-out");x.removeAttribute("aria-live");setTimeout(function(){x.remove()},S.reduce?0:170)})}
+function gdUnpresent(){gdAzHome();ph.querySelectorAll(".gdbub,.gdring,.gdpoint,.gdglint,.gspot.gdspot,.gdfinger,.gdripple").forEach(function(x){x.classList.add("gd-out");x.removeAttribute("aria-live");setTimeout(function(){x.remove()},S.reduce?0:170)})}
 /* would the item's bubble, at its best place, cover its target or the block being told? (measured with its words, never shown) */
 function gdCovers(it){if(!gdTarget(it))return null;var m=document.createElement("div");m.className="gdbub";m.style.visibility="hidden";
   m.innerHTML=gdBubHtml({item:it,text:gdLine(it,S.gdVisitor.visits>1,gdSlots(it))});ph.appendChild(m);var best=gdSolve({item:it},m.offsetWidth,m.offsetHeight);m.remove();return best.cover||null}
 /* a spoken tip: its line through the one order of voices (guide/voice.js's say), the word being said lit */
-function gdVoice(c){say(c.text,function(k){ph.querySelectorAll(".gdbub:not(.gd-out) .gdw").forEach(function(w,i){w.classList.toggle("on",i===k)})},function(){ph.querySelectorAll(".gdbub .gdw.on").forEach(function(w){w.classList.remove("on")})})}
+/* (the line voiced last, G.gd.voiced: what the screen-reader scene reads) */
+function gdVoice(c){G.gd.voiced={text:c.text,at:c.at};say(c.text,function(k){ph.querySelectorAll(".gdbub:not(.gd-out) .gdw").forEach(function(w,i){w.classList.toggle("on",i===k)})},function(){ph.querySelectorAll(".gdbub .gdw.on").forEach(function(w){w.classList.remove("on")})})}
 on("fabLayer.after",function(){if(G.gd.az)gdApplyAz(ph.querySelector(".azfab"),false);if(G.gd.ptGb&&G.gd.cur){var az=ph.querySelector(".azfab");if(az)az.classList.add("point-gb")}});
 on("camPaint.after",function(){if(G.gd.cur)gdPlace(G.gd.cur,false)});
 /* and 4 times a second: what it keeps clear of may move (the ✦'s label folds, a remark comes), never during Azu's hop */
@@ -6694,7 +6926,7 @@ setInterval(function(){var c=G.gd.cur,az=ph.querySelector(".azfab");if(!c||noDra
 on("renderPhone.after",function(){var c=G.gd.cur;if(!c)return;
   /* (and the language: the point's name in the visitor's language, its line kept) */
   if(c.slots&&c.slots.id){var pp=(S.wallPois||[]).filter(function(x){return x.id===c.slots.id})[0];if(pp)c.slots.point=L(pp.name)}var t=gdLine(c.item,c.ret,c.slots),b=ph.querySelector(".gdbub:not(.gd-out) button[data-gdbub]");if(b&&t!==c.text){c.text=t;if(c.spoken)b.innerHTML=gdWords(t);else b.textContent=t}
-  var ct=c.item.cta&&ph.querySelector(".gdbub:not(.gd-out) [data-gdcta]");if(ct)ct.innerHTML=TXH(c.item.cta)+'<span aria-hidden="true">&#8250;</span>';gdPlace(c,false)});
+  var bo=gdBtnOf(c.item),ct=bo&&ph.querySelector(".gdbub:not(.gd-out) [data-gdcta]");if(ct)ct.innerHTML=TXH(bo.word)+'<span aria-hidden="true">&#8250;</span>';gdPlace(c,false)});
 /* ----- the bubble's controls: a tap does its action; a swipe away dismisses; a long press asks Fewer like this? ----- */
 function gdTap(){var c=G.gd.cur;if(!c)return;var it=c.item;if(c.pull&&G.gd.demo){gdStop("tapped (a demo)");return}
   if(it.tap==="view"){gdStop("tapped: Ask about the view opens","acted");G.fab.menu=false;G.cam.open=true;renderPhone(true);emit("view.opened","the tip");return}
@@ -6722,9 +6954,15 @@ ph.addEventListener("pointermove",function(e){var p=G.gd.press;if(!p||e.pointerI
   if(p.held||p.moved)G.gd.noClickUntil=performance.now()+400;if(!p.moved)return;
   if(t==="pointerup"&&Math.abs(p.dx)>=GD_SWIPE){gdSwipe(p.dx);return}var b=ph.querySelector(".gdbub:not(.gd-out)");if(b){b.style.translate="";b.style.opacity=""}},true)});
 /* an invitation's chip (How does this work? on the wall: Open a card): the card of the marker Azu points at opens, at its stop */
-function gdCta(){var c=G.gd.cur;if(!c)return;gdStop("tapped: "+TXT(c.item.cta),"acted");S.view="card";S.stop=S.cardCfg.openAt;feedback("open");renderPhone(false);emit("card.opened","How does this work?")}
+function gdCta(act){var c=G.gd.cur;if(!c)return;var it=c.item,bt=gdBtnOf(it),w=bt?TXT(bt.word):"",M=gdTarget(it);act=act||bt&&bt.act||"card";
+  if(act==="tour"){gdStop("tapped its button: "+w,"acted");S.stop="half";renderPhone(false);emit("card.opened","the tip's button");startTour();return}
+  if(act==="view"){gdStop("tapped its button: "+w,"acted");G.fab.menu=false;G.cam.open=true;renderPhone(true);emit("view.opened","the tip's button");return}
+  /* Show me: the gesture on its target (the ghost finger, the ring), or How does this work? when it has no target */
+  if(act==="show"){gdStop("tapped its button: "+w,"acted");if(M)setTimeout(function(){gdShowMe(it,M)},S.reduce?0:180);else gdWalk("Show me");return}
+  gdStop("tapped: "+w,"acted");S.view="card";S.stop=S.cardCfg.openAt;feedback("open");renderPhone(false);emit("card.opened",it.cta?"How does this work?":"the tip's button")}
 ph.addEventListener("click",function(e){var f=e.target.closest("[data-gdfewer]");if(f){e.stopPropagation();if(f.dataset.gdfewer==="yes")gdFewer();else gdKeep();return}
-  var ct=e.target.closest("[data-gdcta]");if(ct){e.stopPropagation();if(performance.now()<(G.gd.noClickUntil||0))return;gdCta();return}
+  var ct=e.target.closest("[data-gdcta]");if(ct){e.stopPropagation();if(performance.now()<(G.gd.noClickUntil||0))return;gdCta(ct.dataset.gdcta);return}
+  if(e.target.closest("[data-gdx]")){e.stopPropagation();gdStop("dismissed (its close button)","dismissed");return}
   var t=e.target.closest("[data-gdbub]");if(!t)return;e.stopPropagation();if(performance.now()<(G.gd.noClickUntil||0))return;gdTap()},true);
 /* the Editor's demos: a chip on the phone with the ×10 clock (Editor only, never in the app; Unity: a Play-mode preview label) */
 function gdChip(text){var c=ph.querySelector(".gdchip");if(!text){if(c)c.remove();return}if(!c){c=document.createElement("div");c.className="gdchip";c.setAttribute("aria-hidden","true");ph.appendChild(c)}c.textContent=text}
@@ -6735,13 +6973,91 @@ function gdChip(text){var c=ph.querySelector(".gdchip");if(!text){if(c)c.remove(
    Unity: the same GuideTour runner with the walkthrough's steps (GuidanceCatalog), each step's control marked by the guide's focus ----- */
 function gdWalkCard(fromId){if(G.on)stopTour();S.settingsOpen=false;G.fab.menu=false;var g=gdGroupById("howto"),steps=g.items.map(function(id){return S.guidance.items[id]}).filter(function(x){return x&&x.on});
   if(!steps.length)return false;if(!S.howSaved)S.howSaved=S.guideSteps;
-  S.guideSteps=steps.map(function(it,i){return{id:"how"+i,gd:it.id,view:"card",ref:it.ref,sel:it.sel,act:"show",text:S.tx[it.says]}});S.view="card";S.stop="full";renderPhone(false);
+  S.guideSteps=steps.map(function(it,i){return{id:"how"+i,gd:it.id,view:"card",ref:it.ref,sel:it.sel,act:"show",text:S.tx[it.says],cue:it.focus&&it.focus!=="tour"?it.focus:undefined}});S.view="card";S.stop="full";renderPhone(false);
   var j=fromId?steps.map(function(x){return x.id}).indexOf(fromId):-1;startTour();if(j>0){stopSpeech();G.i=j;runStep()}return true}
 on("stopTour.after",function(){if(S.howSaved){S.guideSteps=S.howSaved;S.howSaved=null}});
 on("runStep.after",function(){var st=S.guideSteps[G.i];if(G.on&&st&&st.sel){var el=ph.querySelector(st.sel);if(el){el.classList.add("gfocus");moveMascot(el)}}});
 on("clearGuideMarks.after",function(){ph.querySelectorAll(".gfocus").forEach(function(x){x.classList.remove("gfocus")})});
 on("settingsPanel.html",function(h){var g=gdGroupById("howto");return g&&g.on!==false&&g.inSettings?h.replace(/<\/div>$/,'<button type="button" class="vhow" data-howto="1">'+TXH("settings_how")+' &#8250;</button></div>'):h});
 ph.addEventListener("click",function(e){if(e.target.closest("[data-howto]")){e.stopPropagation();gdWalk("Settings")}},true);
+
+/* ----- round 6, the look (_3.8 section 4). Focus per item: None / Glint / Ring / Spotlight.
+   - Glint: the element shines once, a light band sweeping across it (0.9 s); under Reduce Motion a still highlight. Unity: a sweep texture
+     (a ramp PNG) on a VisualElement clipped to the target (overflow hidden, its radius), its translate tweened once; the Lab draws the band
+     with a gradient as that texture's stand-in.
+   - Spotlight (Essentials and walkthrough steps only): the rest dims at the item's Dim (0.2-0.6), the target cut out, its name inside the
+     hole: the guide's own cut-out (guide/focus.js's spotPaint), never a copy. Unity: Painter2D FillRule.OddEven.
+   - Ring: today's (one soft pulse, then still).
+   The ghost finger (Shows the gesture): a translucent finger beside the target does its gesture once (a tap on a marker, a point or the ✦;
+   a drag across a Before / After; a swipe on a strip), after Azu's hop; under Reduce Motion it is shown still at its end. Unity: a sprite
+   (an Image in a VisualElement) with a translate tween (and a scale for the press), the tap's ripple a ring VisualElement scaled and faded.
+   The Button chip in the bubble (Show me / Start the tour / Open the card / Ask about the view): a second Button, as How does this work?'s
+   chip. Accessibility: the bubble is role=status, aria-live polite (announced, never spoken over a screen reader); Tips stay until I tap
+   them keeps it until the visitor taps or closes it (WCAG 2.2.1); every tip also lands in the dock's conversation under Tips. ----- */
+function gdGlint(it,M,first){var g=ph.querySelector(".gdglint"),still=!!S.reduce;
+  if(!g){g=document.createElement("div");g.className="gdglint"+(still?" still":"")+(M.rect?" gd-rect":"");g.setAttribute("aria-hidden","true");g.innerHTML="<i></i>";ph.appendChild(g);
+    if(!still&&g.animate){var i=g.querySelector("i"),dl=Math.max(250,(G.gd.hopMs||0)-100);i.animate([{translate:"0 0"},{translate:"300% 0"}],{duration:1100,delay:dl,easing:"cubic-bezier(.45,0,.3,1)",fill:"both"});
+      g.animate([{boxShadow:"0 0 0 0 rgba(255,217,138,0)"},{boxShadow:"0 0 0 3px rgba(255,236,190,.95),0 0 22px 8px rgba(255,217,138,.55)",offset:.45},{boxShadow:"0 0 0 0 rgba(255,217,138,0)"}],{duration:1300,delay:dl,easing:"ease-in-out",fill:"both"})}}
+  var B=M.rect?{l:M.rect.l-4,t:M.rect.t-4,r:M.rect.r+4,b:M.rect.b+4}:{l:M.x-26,t:M.y-26,r:M.x+26,b:M.y+26};
+  g.style.left=Math.round(B.l)+"px";g.style.top=Math.round(B.t)+"px";g.style.width=Math.round(B.r-B.l)+"px";g.style.height=Math.round(B.b-B.t)+"px"}
+/* the spotlight's hole: the target (a marker or a point: its circle; the ✦: its pill) and its name beside it, so the words stay readable in it */
+function gdSpotBox(M){var B=M.rect?{l:M.rect.l-6,t:M.rect.t-6,r:M.rect.r+6,b:M.rect.b+6}:{l:M.x-30,t:M.y-30,r:M.x+30,b:M.y+30},grow=false;
+  if(!M.rect)gdObstacles().forEach(function(o){if(!o.text)return;var cx=(o.b.l+o.b.r)/2,cy=(o.b.t+o.b.b)/2;if(Math.hypot(cx-M.x,cy-M.y)<64){grow=true;B={l:Math.min(B.l,o.b.l-8),t:Math.min(B.t,o.b.t-6),r:Math.max(B.r,o.b.r+8),b:Math.max(B.b,o.b.b+6)}}});
+  B.round=!M.rect&&!grow;return B}
+function gdSpotTip(it,M){var sp=ph.querySelector(".gspot.gdspot");if(!sp){sp=document.createElement("div");sp.className="gspot gdspot";sp.setAttribute("aria-hidden","true");ph.appendChild(sp)}
+  var B=gdSpotBox(M);spotPaint(sp,[Math.round(B.l),Math.round(B.t),Math.round(B.r-B.l),Math.round(B.b-B.t)],"spotlight",Math.max(.2,Math.min(.6,+it.dim||.4)),B.round)}
+/* the ghost finger: its tip at (14, 4) of a 40 x 52 sprite */
+var GD_FINGER='<svg viewBox="0 0 40 52" aria-hidden="true"><path d="M14 4c2.8 0 4.6 2 4.6 4.8v14.6l1.6-.2c1.4-2.2 4.8-2 5.8.6 1.6-1.6 4.8-.9 5.4 1.6 1.8-1 4.6.2 4.6 3V38c0 7.6-5.8 12.6-13 12.6-5.4 0-8.6-2.6-11.4-7.2L5 33.6c-1.4-2.4.6-5 3.2-4.2l2 1.6V8.8C10.2 6 11.6 4 14 4z"/></svg>',GD_TIP_X=14,GD_TIP_Y=4;
+function gdFingerStop(){ph.querySelectorAll(".gdfinger,.gdripple").forEach(function(x){x.remove()})}
+/* where the finger rests beside a point target: its tip at the ring's edge, pointing in, from the side that covers no words, no part of the
+   target, the bubble or Azu (12 directions tried; the sprite turned about its tip). Returns the tip, the direction out and the angle */
+function gdFingerBox(tx,ty,deg){var r=deg*Math.PI/180,c=Math.cos(r),s=Math.sin(r),xs=[],ys=[];[[-14,-4],[26,-4],[26,48],[-14,48]].forEach(function(q){xs.push(tx+q[0]*c-q[1]*s);ys.push(ty+q[0]*s+q[1]*c)});
+  return{l:Math.min.apply(null,xs),t:Math.min.apply(null,ys),r:Math.max.apply(null,xs),b:Math.max.apply(null,ys)}}
+function gdFingerRest(M){var bub=ph.querySelector(".gdbub:not(.gd-out)"),az=G.gd.az&&ph.querySelector(".azfab"),W=ph.offsetWidth,H=ph.offsetHeight,avoid=gdObstacles().map(function(o){return{b:o.b,w:o.text?50:4}});
+  if(bub)avoid.push({b:gdPR(bub),w:30});if(az){var A=gdPR(az),a=G.gd.az,cur=az.style.translate.split(" ").map(parseFloat);avoid.push({b:{l:A.l-(cur[0]||0)+a.dx,t:A.t-(cur[1]||0)+a.dy,r:A.r-(cur[0]||0)+a.dx,b:A.b-(cur[1]||0)+a.dy},w:30})}
+  var core=M.rect?{l:M.rect.l,t:M.rect.t,r:M.rect.r,b:M.rect.b}:{l:M.x-22,t:M.y-22,r:M.x+22,b:M.y+22};avoid.push({b:core,w:40});
+  var best=null;for(var k=0;k<12;k++){var an=(k*30+120)*Math.PI/180,ux=Math.cos(an),uy=Math.sin(an),R=M.rect?Math.max(M.rect.r-M.rect.l,M.rect.b-M.rect.t)/2+4:GD_RING-4,tx=M.x+ux*R,ty=M.y+uy*R,deg=Math.atan2(-uy,-ux)*180/Math.PI+90,box=gdFingerBox(tx,ty,deg);
+    var c=avoid.reduce(function(s2,o){return s2+gdOver(box,o.b)*o.w},0)+Math.max(0,8-box.l)*99+Math.max(0,box.r-(W-8))*99+Math.max(0,50-box.t)*99+Math.max(0,box.b-(H-8))*99+Math.abs(deg)*.5;
+    if(!best||c<best.c)best={c:c,x:tx,y:ty,d:[ux,uy],deg:deg}}return best}
+/* the gesture once (M: a point target; el: a cue's element, a Before / After or a strip); hopMs: after Azu's hop */
+function gdFinger(it,M,el,force){var g=force||gdGestureOf(it);if(!g)return null;gdFingerStop();var f=document.createElement("div");f.className="gdfinger";f.innerHTML=GD_FINGER;f.dataset.gesture=g;ph.appendChild(f);
+  var still=!!S.reduce,delay=still?0:(G.gd.hopMs||0)+150,place=function(x,y){f.style.left=Math.round(x-GD_TIP_X)+"px";f.style.top=Math.round(y-GD_TIP_Y)+"px"},at=function(x,y){return{translate:Math.round(x-GD_TIP_X)+"px "+Math.round(y-GD_TIP_Y)+"px"}};
+  f.style.left="0px";f.style.top="0px";
+  if(g==="tap"){var r=gdFingerRest(M),dx=r.d[0]*16,dy=r.d[1]*16;f.style.translate=at(r.x,r.y).translate;f.style.rotate=r.deg.toFixed(1)+"deg";f.dataset.endx=Math.round(r.x);f.dataset.endy=Math.round(r.y);
+    if(still){f.classList.add("still");return f}
+    f.animate([Object.assign({opacity:0,scale:"1"},at(r.x+dx,r.y+dy)),Object.assign({opacity:.95,scale:"1",offset:.35},at(r.x+dx*.3,r.y+dy*.3)),Object.assign({opacity:.95,scale:".9",offset:.5},at(r.x,r.y)),Object.assign({opacity:.95,scale:"1",offset:.7},at(r.x+dx*.4,r.y+dy*.4)),Object.assign({opacity:0,scale:"1"},at(r.x+dx*.6,r.y+dy*.6))],{duration:1400,delay:delay,fill:"both",easing:"ease-out"});
+    var rp=document.createElement("i");rp.className="gdripple";rp.setAttribute("aria-hidden","true");rp.style.left=Math.round(M.x)+"px";rp.style.top=Math.round(M.y)+"px";ph.appendChild(rp);
+    rp.animate([{opacity:0,scale:".6"},{opacity:.8,scale:".8",offset:.01},{opacity:0,scale:"1.35"}],{duration:650,delay:delay+700,fill:"both",easing:"ease-out"});return f}
+  var B=el?gdPR(el):M?M.box:null;if(!B)return null;var w=B.r-B.l,h=B.b-B.t,y=B.t+h*(g==="drag"?.74:.58),xs=g==="drag"?[.5,.8,.2,.5]:[.84,.3];
+  var end=xs[xs.length-1];f.style.translate=at(B.l+w*end,y).translate;f.dataset.endx=Math.round(B.l+w*end);f.dataset.endy=Math.round(y);
+  if(still){f.classList.add("still");return f}
+  var fr=[Object.assign({opacity:0},at(B.l+w*xs[0],y+10))];xs.forEach(function(x,i){fr.push(Object.assign({opacity:.95,offset:+(.12+.76*i/(xs.length-1)).toFixed(3)},at(B.l+w*x,y)))});fr.push(Object.assign({opacity:0},at(B.l+w*end,y+8)));
+  f.animate(fr,{duration:g==="drag"?1700:1000,delay:el?0:delay,fill:"both",easing:"ease-in-out"});return f}
+/* Show me (the Button chip): the gesture on the target, and its ring, as a demonstration (no memory) */
+function gdShowMe(it,M){gdFinger(it,M,null,GD_GESTURE[it.about]||"tap");if(!M.rect){var r=gdRing({about:it.about},!S.reduce);if(r){r.style.left=Math.round(M.x)+"px";r.style.top=Math.round(M.y)+"px"}}
+  setTimeout(function(){if(!G.gd.cur){gdFingerStop();ph.querySelectorAll(".gdring").forEach(function(x){x.remove()})}},S.reduce?2600:2000)}
+/* a line's height in the bubble (the Editor's warnings): its lines at the bubble's width on this phone, in a hidden bubble */
+G.gd.lineCache={};
+function gdLineCount(text,form,btn){var key=ph.offsetWidth+"|"+form+"|"+(btn?1:0)+"|"+text;if(G.gd.lineCache[key]!=null)return G.gd.lineCache[key];
+  var m=document.createElement("div");m.className="gdbub"+(form==="remark"?" gd-more":"")+(btn?" gd-cta":"");m.style.visibility="hidden";m.innerHTML='<button type="button" data-gdbub="1">'+esc(text)+'</button>';ph.appendChild(m);
+  var bt=m.querySelector("button"),cs=getComputedStyle(bt),n=Math.round((bt.offsetHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom))/parseFloat(cs.lineHeight));m.remove();return G.gd.lineCache[key]=n}
+/* ----- Settings › The guide: Tips (All / Essentials only / Off: "You can always tap ✦ for help"), Tips stay until I tap them (Off by
+   default), Show the tips again (the memory reset, an Undo toast, no popup). Unity: the Settings panel's toggles (PlayerPrefs-free: the
+   guidance memory JSON), the toast a VisualElement with a scheduled hide ----- */
+on("settingsPanel.html",function(h){var d=document.createElement("div");d.innerHTML=h;var g=d.querySelector(".vguide");if(!g)return h;var P=gdPrefs(),
+    o=function(k,v,lab,cur){return'<button type="button" data-gdpref="'+k+'|'+v+'" aria-pressed="'+(String(cur)===v)+'">'+esc(lab)+'</button>'};
+  g.insertAdjacentHTML("beforeend",'<div class="vtips"><small>'+TXH("settings_tips")+'</small><div class="vo">'+o("tips","all",TXT("settings_tips_all"),P.tips)+o("tips","essentials",TXT("settings_tips_ess"),P.tips)+o("tips","off",TXT("settings_tips_off"),P.tips)+'</div>'+
+    (P.tips==="off"?'<p class="vnote">'+TXH("settings_tips_off_note")+'</p>':"")+'<small>'+TXH("settings_tips_stay")+'</small><div class="vo">'+o("stay","true",TXT("settings_on"),String(!!P.stay))+o("stay","false",TXT("settings_off"),String(!!P.stay))+'</div>'+
+    '<button type="button" class="vagain" data-gdagain="1">'+TXH("settings_tips_again")+'</button></div>');return d.innerHTML});
+function gdToast(text,undo){ph.querySelectorAll(".gdtoast").forEach(function(x){x.remove()});clearTimeout(G.gd.toastT);var d=document.createElement("div");d.className="gtoast gdtoast";d.setAttribute("role","status");
+  d.innerHTML='<span>'+esc(text)+'</span>'+(undo?'<button type="button" data-gdundo="1">'+TXH("gd_undo")+'</button>':"");ph.appendChild(d);G.gd.toastT=setTimeout(function(){d.remove()},6000);return d}
+ph.addEventListener("click",function(e){var t=e.target.closest("[data-gdpref],[data-gdagain],[data-gdundo]");if(!t)return;e.stopPropagation();
+  if(t.dataset.gdpref){var q=t.dataset.gdpref.split("|"),P=gdPrefs();P[q[0]]=q[0]==="stay"?q[1]==="true":q[1];gdLog("event","the visitor set "+(q[0]==="stay"?"Tips stay until I tap them "+(P.stay?"On":"Off"):"Tips: "+q[1]));if(q[0]==="tips"&&q[1]!=="all"&&G.gd.cur&&!G.gd.cur.pull&&!(q[1]==="essentials"&&G.gd.cur.item.essential))gdStop("the visitor changed Tips");renderPhone(true);return}
+  if(t.dataset.gdagain){gdTipsAgain();renderPhone(true);gdToast(TXT("gd_tips_again_done"),true);return}
+  if(t.dataset.gdundo){gdTipsUndo();t.closest(".gdtoast").remove();renderPhone(true)}},true);
+/* ----- the dock's conversation: the tips shown this visit, under Tips (guide/dock.js's dockThread.html) ----- */
+on("dockThread.html",function(h){var l=(S.gdVisitor.visit.tips||[]).slice(-8);if(!l.length)return h;
+  return'<div class="gm-tips" role="group" aria-label="'+TXH("dock_tips")+'"><small>'+TXH("dock_tips")+'</small>'+l.map(function(x){return'<div class="gm-tip" data-gdtip="'+esc(x.id)+'">'+esc(x.text)+'</div>'}).join("")+'</div>'+h});
 
 /* Guidance in the Editor: Guide tab > 4 · Guidance. 1 · Overall: Guidance On / Off, Breathing room, At most a minute, At most a visit,
    Freshness, the learning (Ignored three in a row, After a dismissal, Fewer like this?), Remember across visits, the long
@@ -6802,12 +7118,13 @@ function gdPointsWords(it){var ins=gdInstances(it.id),wn=S.camCfg.wall==="belem"
    visit / Every card), Done when (a step of How to use the card), the fixed ones in words (its element, its look, Reduce Motion, the cue
    room) and its read-back */
 function gdCueRow(it){var p="guidance.items."+it.id+".",r=+S.guidance.cueRoom||0;
-  var sum='<span class="gdi"><span class="gdon">'+pseg(p+"on",["true","false"],["On","Off"])+'</span><b>'+esc(it.label)+'</b><span class="badge">CUE</span>'+gdDots(it)+
+  var sum='<span class="gdi">'+gdDragH(it)+'<span class="gdon">'+pseg(p+"on",["true","false"],["On","Off"])+'</span><b>'+esc(it.label)+'</b><span class="badge">CUE</span>'+gdDots(it)+
     '<span class="gdhow">'+esc(gdHowOften(it))+'</span><button type="button" class="ubtn sm gdshow" data-gdshow="'+it.id+'" title="Show it on the card now">&#9656; Show now</button></span>';
   var words=it.id==="label"?'<div class="note">Says: the Locate Button\'s own label, “'+esc(TXT("locate_label"))+'” (Languages &amp; Terms, owned by Card Controls › Locate Button).</div>':
     it.says?'<div class="sub2">Says · its words over the bar (Languages &amp; Terms, owned here)</div>'+txPanel("gd:i:"+it.id):'<div class="note">No words: motion on the element only.</div>';
   var body=row("Label",'<input class="u" data-path="'+p+'label" value="'+esc(it.label)+'">',"Editor only: the cue's name in these lists, in Card Controls > Hints, the Log and the scenes.")+words+
     row("Shows",pseg(p+"shows",GD_CUE_SHOWS.map(function(x){return x[0]}),GD_CUE_SHOWS.map(function(x){return x[1]})),"Once a visit: once it has shown, not again this visit. Every card: once on each card the visitor opens. Off (the row's On): never. A cue is not a tip: the tips' limits (at most a minute, a visit, App's cap) do not count it.")+
+    (GD_GESTURE[it.about]?row("Shows the gesture",pseg(p+"gesture",["true","false"],["On","Off"]),"A translucent finger does "+GD_GESTURE_WORDS[GD_GESTURE[it.about]]+" once with the cue, beside its element. (This cue is skipped under Reduce Motion, a movement.)"):"")+
     row("Done when",pseg(p+"doneWhen",GD_DONE_CUE.map(function(x){return x[0]}),GD_DONE_CUE.map(function(x){return x[1]})),"Retired for good once the visitor has seen that step of How to use the card (its line heard): the walkthrough taught it, so the cue is not needed.")+
     '<div class="note gdfix">'+esc("Its element: "+GD_CUE_WHEN[it.about]+" · Its look: "+it.look+" · Under Reduce Motion: "+(it.reduce==="skip"?"skipped (it is a movement)":"shown, with no travel")+
       " · One at a time: never two cues at once, never with a tip; the cue room ("+r+" s, 1 · Overall) between a tip and a cue, either way; none between two cues · Never in a tour, with a panel open, while the visitor scrolls or touches (0.8 s), or in the card's first 1.5 s"+(it.when==="open"?" (it answers the opening itself, so the touch that opened the card and the first 1.5 s do not hold it)":"")+". Fixed for this cue.")+'</div>'+
@@ -6816,32 +7133,73 @@ function gdCueRow(it){var p="guidance.items."+it.id+".",r=+S.guidance.cueRoom||0
 /* a step of How to use the card: On, its name, ▸ Show now (the walkthrough from this step); opened: Label, its words, what it marks and
    what seeing it retires, its read-back */
 function gdStepRow(it){var p="guidance.items."+it.id+".";
-  var sum='<span class="gdi"><span class="gdon">'+pseg(p+"on",["true","false"],["On","Off"])+'</span><b>'+esc(it.label)+'</b><span class="gdhow">'+esc(gdHowOften(it))+'</span><button type="button" class="ubtn sm gdshow" data-gdshow="'+it.id+'" title="Walk the card from this step">&#9656; Show now</button></span>';
+  var sum='<span class="gdi">'+gdDragH(it)+'<span class="gdon">'+pseg(p+"on",["true","false"],["On","Off"])+'</span><b>'+esc(it.label)+'</b><span class="gdhow">'+esc(gdHowOften(it))+'</span><button type="button" class="ubtn sm gdshow" data-gdshow="'+it.id+'" title="Walk the card from this step">&#9656; Show now</button></span>';
   var body=row("Label",'<input class="u" data-path="'+p+'label" value="'+esc(it.label)+'">',"Editor only: the step's name in these lists and the read-back.")+
+    row("Focus",pseg(p+"focus",GD_STEP_FOCUS.map(function(x){return x[0]}),GD_STEP_FOCUS.map(function(x){return x[1]})),"How the step marks its control: as the tour's own Focus (Guide › 1 · The tour › Focus: "+gdNameOf([["spotlight","Spotlight"],["ring","Soft ring"],["none","None"]],S.guideCfg.cue)+"), Spotlight (the rest dims, the control cut out), Ring, or None. A walkthrough step may use the Spotlight.")+
     '<div class="sub2">Says · its line in the walkthrough (Languages &amp; Terms, owned here)</div>'+txPanel("gd:i:"+it.id)+'<div class="note gdrb">'+esc(gdReadBack(it))+'</div>';
   return fo("gd:i:"+it.id,sum,null,body,4)}
-function gdItemRow(it){if(it.form==="cue")return gdCueRow(it);if(it.form==="walk")return gdStepRow(it);var p="guidance.items."+it.id+".",k=gdKindOf(it),g=gdGroupOf(it),i=g?g.items.indexOf(it.id):0,pv=i>0&&g.mode==="order"?S.guidance.items[g.items[i-1]]:null;
-  var sum='<span class="gdi"><span class="gdon">'+pseg(p+"on",["true","false"],["On","Off"])+'</span><b>'+esc(it.label)+'</b>'+(it.essential?'<span class="badge new">ESSENTIAL</span>':"")+gdDots(it)+
+function gdItemRow(it){if(it.form==="cue")return gdCueRow(it);if(it.form==="walk")return gdStepRow(it);var p="guidance.items."+it.id+".",k=gdKindOf(it),g=gdGroupOf(it),i=g?g.items.indexOf(it.id):0,pv=i>0&&g.mode==="order"?S.guidance.items[g.items[i-1]]:null,wn=gdWarnsOf(it.id);
+  var sum='<span class="gdi">'+gdDragH(it)+'<span class="gdon">'+pseg(p+"on",["true","false"],["On","Off"])+'</span><b>'+esc(it.label)+'</b>'+(it.essential?'<span class="badge new">ESSENTIAL</span>':"")+
+    (wn.length?'<span class="badge gdwb" title="'+esc(wn.map(function(w){return w.text}).join(" · "))+'">&#9888; '+wn.length+'</span>':"")+gdDots(it)+
     '<span class="gdhow">'+esc(gdHowOften(it))+'</span><button type="button" class="ubtn sm gdshow" data-gdshow="'+it.id+'" title="Show it on the phone now">&#9656; Show now</button></span>';
-  var body=row("Label",'<input class="u" data-path="'+p+'label" value="'+esc(it.label)+'">',"Editor only: the item's name in these lists, in the read-back, the Log and the scenes. The visitor never sees it.")+
-    '<div class="sub2">'+(Array.isArray(it.says)?"Says · its lines per language: "+it.says.length+" in turn"+(it.saysCard?", and a point with a card's own":"")+" (Languages &amp; Terms, owned here)":"Says · one line per language (Languages &amp; Terms, owned here)")+'</div>'+txPanel("gd:i:"+it.id)+
-    (it.perPoint?row("Lines per point",pseg(p+"cardLine",["true","false"],["A point with a card: its own line","The 3 in turn for every point"]),"Which line each point says. The 3 remarks come in turn (never the same twice in a row). A point with a card can say its own line instead (“Tap and I'll show you around”), since a tap there starts its tour.")+'<div class="note gdpts">'+esc(gdPointsWords(it))+'</div>':"")+
-    (it.pokes!=null?row("After pokes on Azu",pslider(p+"pokes",0,10,1),"Pokes on Azu in this visit that bring it (0: not by pokes). The tip waits for the finger to lift (0.8 s) and for Azu's own bubble (a joke after a poke) to end."):"")+
-    (it.idleFor!=null?row("After idle (s)",pslider(p+"idleFor",0,90,5),"Seconds with no touch and the phone still that bring it (0: not by idle), counted from the visit's start at the earliest. Whichever comes first, the pokes or the idle."):"")+
-    row("Essential",pseg(p+"essential",["true","false"],["Yes","No"]),"Yes: it skips the breathing room and the limits (never the gates: one at a time, never over a sentence, never while the phone moves or a panel is open), and goes before any other. For the visit's first words.")+
+  var H=function(t,s){return'<div class="sub2 gdfg">'+t+(s?' <span class="sub">· '+s+'</span>':"")+'</div>'},sp=gdSpotOk(it),gs=GD_GESTURE[it.about];
+  var body=H("Identity","its name, On and where it lives")+
+    row("Label",'<input class="u" data-path="'+p+'label" value="'+esc(it.label)+'">',"Editor only: the item's name in these lists, in the read-back, the Log and the scenes. The visitor never sees it.")+
+    row("Group",psel(p+"group",gdGroupOpts()),"The group it belongs to, and with it its kind (App, Content): its group's On, weight, cap and gap hold for it. In an In order group it waits for the one before it. Moving it puts it at the end of the new group (drag ≡ to reorder there).")+
+    H("Words","what it says, in each language (Languages &amp; Terms, owned here)")+txPanel("gd:i:"+it.id)+
+    row("Says",gdSaysHtml(it),"1 to 4 variants that come in turn, never the same twice in a row (a per-point item turns through them across its points). The slots: {point} the point it is about, {year} that point's year, {button} the ✦ (or its word), {min} a tour's minutes. Each variant's words are in the table above; ▸ shows the item saying it.")+
+    (it.perPoint?row("Lines per point",pseg(p+"cardLine",["true","false"],["A point with a card: its own line","The 3 in turn for every point"]),"Which line each point says. The remarks come in turn (never the same twice in a row). A point with a card can say its own line instead (“Tap and I'll show you around”), since a tap there starts its tour.")+'<div class="note gdpts">'+esc(gdPointsWords(it))+'</div>':"")+
+    row("Per audience",gdAudHtml(it),"Optional: its own line for Family, Explorer or Expert (an empty line falls back to Says). ▸ shows it as that audience.")+
+    row("Returning visitor",gdBackHtml(it),"Optional: the line a returning visitor gets (Welcome back…); an empty line falls back to Says.")+
+    row("Spoken",pseg(p+"spoken",GD_SPOKEN.map(function(x){return x[0]}),GD_SPOKEN.map(function(x){return x[1]})),"As the kind: "+(k&&k.spoken==="bubble"?k.name+" is a bubble only":(k?k.name:"")+" is spoken once the visitor has heard the guide this visit")+". A bubble only: never spoken. Spoken once the guide is heard: the voice says it, its word lit. Never spoken while a screen reader is on (it is announced).")+
+    H("About","its target on the screen")+
+    (it.perPoint?'<div class="note">About: '+esc(GD_ABOUT_WORDS.point)+'</div>':row("About",psel(p+"about",GD_ABOUT_OPTS),"Its target: Nothing (the bubble at the ✦), the nearest marker, the point in the middle (one with a tour) or the ✦. Azu goes beside it, points, and its focus is on it; the bubble is never over it."))+
+    row("Must be on screen",pseg(p+"mustSee",["true","false"],["Yes","No"]),"Yes: it waits until its target is on the screen, and ends when the target leaves (see Expires). No: it may show without it, at the ✦.")+
+    H("Show","how it looks on the phone")+
+    row("Form",pseg(p+"form",GD_FORMS.map(function(x){return x[0]}),GD_FORMS.map(function(x){return x[1]})),"Tip: a bubble. Invitation: a bubble with its Button chip. Remark: about the point in view, narrower, ending with › (a tap does more). A Cue is the card's own (The card (cues)); a Walkthrough step is How to use the card's; a Page is the first pages' (round 8).")+
+    row("Mascot goes",pseg(p+"goes",GD_GOES.map(function(x){return x[0]}),GD_GOES.map(function(x){return x[1]})),"Beside it: Azu hops to it, a short arc (0.45 s). Stays: Azu stays at the ✦. Walks to it (on the wall): a slower walk along the bottom, then up to its place. Reduce Motion: no hop, no walk, Azu appears there.")+
+    row("Points at it",pseg(p+"points",["true","false"],["Yes","No"]),"Azu points at its target (its arm; the 3D model's point clip).")+
+    row("Focus",gdFocusSeg(it),"None. Glint: the target shines once, a light sweep (Reduce Motion: a still highlight). Ring: one soft pulse, then still. Spotlight: the rest dims, the target cut out; kept for Essential items and walkthrough steps, or it loses its force.")+
+    (it.focus==="spotlight"&&sp?row("Dim the rest",pslider(p+"dim",0.2,0.6,0.05),"Spotlight: how dark the rest goes (0.4 = 40 %); the target and its name stay clear in the cut-out.",true):"")+
+    (gs?row("Shows the gesture",pseg(p+"gesture",["true","false"],["On","Off"]),"A translucent finger beside the target does "+GD_GESTURE_WORDS[gs]+" once, after Azu's hop. Reduce Motion: it is shown still, at its end."):'<div class="note">Shows the gesture: none for '+esc(gdNameOf(GD_ABOUT_OPTS,it.about))+' (no target to touch).</div>')+
+    row("Button",pseg(p+"button",GD_BUTTONS.map(function(x){return x[0]}),GD_BUTTONS.map(function(x){return x[1]})),"A chip in the bubble that does its action: Show me (the gesture on its target), Start the tour, Open the card, Ask about the view. A tap on the words still does its own action ("+(GD_TAP_WORDS[it.tap]||"it closes")+").")+
+    '<div class="note">Mood, clip and sound: off by default; haptic: none (haptics only answer the visitor\'s own touch).</div>'+
+    H("When","the moment, and only if")+
+    row("When",pseg(p+"when",GD_WHEN.map(function(x){return x[0]}).concat(it.when==="pokes"?["pokes"]:[]),GD_WHEN.map(function(x){return x[1]}).concat(it.when==="pokes"?["After pokes or idle"]:[])),"At a pause (the gates: never while the visitor acts). At the visit's start. When its target settles in the middle (1.2 s still). After idle (no touch, the phone still). On an event (within "+GD_EVENT_MS/1000+" s after it).")+
+    (it.when==="event"?row("The event",psel(p+"event",GD_WHEN_EVENTS),"The visitor's action it follows.",true):"")+
+    (it.when==="pokes"||+it.pokes>0?row("After pokes on Azu",pslider(p+"pokes",0,10,1),"Pokes on Azu in this visit that bring it (0: not by pokes). The tip waits for the finger to lift (0.8 s) and for Azu's own bubble (a joke after a poke) to end.",true):"")+
+    (it.when==="idle"||it.when==="pokes"||+it.idleFor>0?row("After idle (s)",pslider(p+"idleFor",0,90,5),"Seconds with no touch and the phone still that bring it (0: "+(it.when==="idle"?"20 s":"not by idle")+"), counted from the visit's start at the earliest.",true):"")+
+    row("The phone still (s)",pslider(p+"stillFor",0,5,0.1),"Seconds the phone must be still first (never while panning, nor 0.7 s after).")+
+    (g&&g.mode==="order"?row("After the previous (s)",pslider(p+"afterPrev",0,120,5),"In order: seconds after the "+(pv?pv.label:"item before it")+" showed.",true):"")+
+    '<div class="sub2">Only if <span class="sub">· every chip must hold</span></div><div class="gdchips">'+gdOnlyChips(it)+'</div>'+
+    row("Screen",pseg(p+"screen",GD_SCREEN.map(function(x){return x[0]}),GD_SCREEN.map(function(x){return x[1]})),"Where it may show: the wall, a card, or either.",true)+
+    row("Audience",pseg(p+"aud",GD_AUD.map(function(x){return x[0]}),GD_AUD.map(function(x){return x[1]})),"Only for this audience (Who's exploring).",true)+
+    row("Visit",pseg(p+"visitIs",GD_VISIT_IS.map(function(x){return x[0]}),GD_VISIT_IS.map(function(x){return x[1]})),"Only on a first visit, or only on a returning one.",true)+
+    row("Has used",psel(p+"hasUsed",GD_USED),"Only once the visitor has done this (a milestone of the visit).",true)+
+    row("Has not used",psel(p+"notUsed",GD_USED),"Only until the visitor has done this.",true)+
+    row("Not on Solemn points",pseg(p+"notSolemn",["true","false"],["Yes","No"]),"Never on a point marked Solemn (a memorial).",true)+
+    row("Lively only",pseg(p+"lively",["true","false"],["Yes","No"]),"Only when Mascot › Liveliness is Lively.",true)+
+    row("Earliest (s)",pslider(p+"notBefore",0,1200,30)+'<div class="gdforce">'+esc(+it.notBefore>0?"Not before "+gdClock(+it.notBefore*1000)+" into the visit":"From the visit's start")+'</div>',"The earliest moment of the visit, in seconds (1:00 = a minute in).",true)+
+    row("Latest (s)",pslider(p+"notAfter",0,1200,30)+'<div class="gdforce">'+esc(+it.notAfter>0?"Not after "+gdClock(+it.notAfter*1000)+" into the visit":"No latest")+'</div>',"The latest moment of the visit (0: none).",true)+
+    H("How much","its weight, how often, and its end")+
+    row("Importance",gdDots(it),"1 to 5: when two are due, the higher scores more.")+
+    row("Essential",pseg(p+"essential",["true","false"],["Yes","No"]),"Yes: it skips the breathing room and the limits (never the gates: one at a time, never over a sentence, never while the phone moves or a panel is open), and goes before any other. For the visit's first words. Spotlight is kept for Essentials.")+
+    row("Along the visit",pseg(p+"along",GD_ALONG.map(function(x){return x[0]}),GD_ALONG.map(function(x){return x[1]})),"How its weight follows the stage of the visit (s: 0 on arrival, 1 after 15 active minutes or every milestone done). As the kind; Steady; Early; Late. A weight in the score, never a quota.")+
     row("Shows",pseg(p+"shows",GD_SHOWS.map(function(x){return x[0]}),GD_SHOWS.map(function(x){return x[1]})),"How often it may show: once ever; once a visit; up to n a visit; until done (its Done when), at most n a visit; or every time (only Again after and the breathing room limit it).")+
     (it.shows==="upto"||it.shows==="until"?row("At most",pslider(p+"max",1,10,1),"Times a visit.",true):"")+
-    (it.shows==="once"||it.shows==="visit"?"":row("Again after (s)",pslider(p+"again",0,120,5),"Seconds after it ends before it may show again (its cooldown; 0: only the breathing room). The read-back says it as the visitor lives it: “at most about every 25 s”. A dismissed App tip waits ×3 (1 · Overall > After a dismissal). Not for Once ever or Once a visit.",true))+
-    row("Done when",pseg(p+"doneWhen",GD_DONE.map(function(x){return x[0]}),GD_DONE.map(function(x){return x[1]})),"The visitor's action that retires it for good (this visit and the next, until Reset the visitor): Apple TipKit's rule, a tip gone once its feature is used. A tip showing when its feature is used counts as acted.")+
+    (it.shows==="once"||it.shows==="visit"?"":row("Again after (s)",pslider(p+"again",0,120,5),"Seconds after it ends before it may show again (its cooldown; 0: only the breathing room). The read-back says it as the visitor lives it: “at most about every 25 s”.",true))+
+    row("Done when",pseg(p+"doneWhen",GD_DONE.map(function(x){return x[0]}),GD_DONE.map(function(x){return x[1]})),"The visitor's action that retires it for good (this visit and the next, until Reset the visitor): a tip gone once its feature is used. A tip showing when its feature is used counts as acted.")+
+    row("Teaches",psel(p+"teaches",GD_TEACH),"The feature it teaches: one tap on it closes both, and it scores ×1.3 while an App tip about that feature is still open.")+
+    row("After a dismissal",pseg(p+"afterDismiss",GD_AFTER_DISMISS.map(function(x){return x[0]}),GD_AFTER_DISMISS.map(function(x){return x[1]})),"Swiped away (or closed): Wait ×3 (an App tip waits ×3 its Again after; a Content item rests its group 5 min); Not again this visit; Never again.")+
+    row("Expires",pseg(p+"expires",GD_EXPIRES.map(function(x){return x[0]}),GD_EXPIRES.map(function(x){return x[1]})),"When its target leaves the screen it ends (the default); Never: only its time ends it.")+
+    row("On screen for",pseg(p+"onScreen",GD_ONSCREEN.map(function(x){return x[0]}),GD_ONSCREEN.map(function(x){return x[1]})),"Auto: by its words, 4 to 9 s. For n s. Until tapped: it stays until the visitor taps or closes it (the visitor's Settings › Tips stay until I tap them does the same for every tip).")+
+    (it.onScreen==="secs"?row("Seconds",pslider(p+"onScreenS",2,20,1),"How long it stays.",true):"")+
     row("During a tour",pseg(p+"duringTour",GD_TOUR.map(function(x){return x[0]}),GD_TOUR.map(function(x){return x[1]})),"Never: quiet for the whole tour. Between steps: it may show at a pause between two steps of a tour (never over a step's words, never over the block being told).")+
-    row("Along the visit",pseg(p+"along",GD_ALONG.map(function(x){return x[0]}),GD_ALONG.map(function(x){return x[1]})),"How its weight follows the stage of the visit (s: 0 on arrival, 1 after 15 active minutes or every milestone done). As the kind: the kind's weight alone. Steady: the kind's middle weight all visit. Early: full for the first third, then fading to nothing. Late: nothing for the first third, then growing to full. A weight in the score, never a quota.")+
-    '<div class="note gdfix">'+esc("About: "+(GD_ABOUT_WORDS[it.about]||it.about)+" · Mascot goes: "+(it.goes==="beside"?"beside it, and points":it.points?"stays beside the ✦ and points at it":"stays beside the ✦")+
-      " · Focus: "+(it.focus==="ring"?"Ring":"None")+" · When: "+(it.when==="visit"?"the visit started":it.when==="settle"?"its point settles in the middle":"at a pause")+(+it.stillFor>0?", the phone still "+it.stillFor+" s (never while panning, nor 0.7 s after)":"")+(+it.notBefore>0?", not before "+it.notBefore+" s of the visit":"")+(pv&&+it.afterPrev>0?", at least "+it.afterPrev+" s after the "+pv.label:"")+
-      (it.lively||it.notSolemn?", "+gdWhenWords(Object.assign({},it,{pokes:0,idleFor:0})).join(", "):"")+
-      " · A tap: "+(GD_TAP_WORDS[it.tap]||"it closes")+" · Spoken: "+(k&&k.spoken==="bubble"?"no, a bubble only (App)":"once the visitor has heard the guide this visit, else a bubble ("+(k?k.name:"")+")")+
-      (it.id==="gbhint"?" · Mascot > Tap on Azu = Points to the ✦ button shows it at once, as asked: a pull, past every rule but one at a time":"")+
+    '<div class="note gdfix">'+esc("A tap: "+(GD_TAP_WORDS[it.tap]||"it closes")+(it.id==="gbhint"?" · Mascot > Tap on Azu = Points to the ✦ button shows it at once, as asked: a pull, past every rule but one at a time":"")+
       (it.about==="gbtn"?" · Two items about the ✦ never both in the visit's first minute (the first in this list goes first)":"")+". Fixed for this item.")+'</div>'+
-    '<div class="note gdrb">'+esc(gdReadBack(it))+'</div>';
+    wn.map(function(w){return'<div class="note warn gdwarn" data-gdwarn="'+w.kind+'">&#9888; '+esc(w.text)+'</div>'}).join("")+
+    '<div class="note gdrb">'+esc(gdReadBack(it))+'</div>'+
+    '<div class="btnrow gdacts"><button class="ubtn sm" type="button" data-gddup="'+it.id+'">Duplicate</button><button class="ubtn sm" type="button" data-gddel="'+it.id+'">Delete</button></div>';
   return fo("gd:i:"+it.id,sum,null,body,4)}
 /* a kind's weight along the visit, read back in words (its row of 1 · Overall › Mix along the visit) */
 function gdKindWords(k){var w=gdMix(k.id);return"Its weight along the visit: "+w[0]+" % on arrival, "+w[1]+" % a third of the way in, "+w[2]+" % at the end (s = 0 / 0.3 / 1, straight lines between): a weight in each item's score, never a quota; an item's Along the visit shapes it further. "+
@@ -6936,7 +7294,8 @@ function gdItemNow(id){var all=gdItems(),x=all.filter(function(o){return o.id===
 /* a demo begins: the guidance waits (gate "an Editor demo is showing") while it runs; a newer demo of any row ends it */
 function gdDemoBegin(){G.gd.demo=true;G.gd.demoOwner=G.demoSeq;clearTimeout(G.gd.demoT);clearInterval(G.gd.demoI);gdStop("an Editor demo");gdChip(null);return G.demoSeq}
 function gdDemoLive(my){if(G.demoSeq===my)return true;if(G.gd.demoOwner===my){G.gd.demo=false;gdChip(null);clearInterval(G.gd.demoI)}return false}
-function gdDemoEnd(my,ms){G.gd.demoT=setTimeout(function(){if(!gdDemoLive(my))return;gdChip(null);gdStop("the demo ended");G.gd.demo=false},ms)}
+/* a demo ends its own pulled tip only (never a tip the visitor or a scene got meanwhile) */
+function gdDemoEnd(my,ms){G.gd.demoT=setTimeout(function(){if(!gdDemoLive(my))return;gdChip(null);if(G.gd.cur&&G.gd.cur.pull)gdStop("the demo ended");G.gd.demo=false},ms)}
 function gdDemoShow(it,ms,o){if(it.form==="cue"){cuePlace(it.id);return gdStart(it,"the Editor's demo",Object.assign({pull:true,ms:ms||4000},o||{}))}var need=it.about==="marker"&&!gdMarker()||it.about==="middle"&&!(gdCentral()||{}).tour||it.about==="gbtn"&&!gdGbtn()||it.about==="point"&&!gdCentral();
   if(need&&typeof setWall==="function"){setWall("ribeira");S.stop="closed";renderPhone(false)}
   /* a per-point item: the one of the point in the middle now */
@@ -7216,7 +7575,7 @@ ed.addEventListener("pointerdown",function(e){var sv=e.target.closest&&e.target.
   document.addEventListener("pointermove",mv);document.addEventListener("pointerup",up)},true);
 ed.addEventListener("keydown",function(e){var dt=e.target.closest&&e.target.closest("[data-gdsimdot]");if(dt&&(e.key==="Enter"||e.key===" ")){e.preventDefault();dt.dispatchEvent(new MouseEvent("click",{bubbles:true}))}},true);
 /* the simulator runs when its foldout opens */
-ed.addEventListener("toggle",function(e){var d=e.target;if(d.dataset&&d.dataset.fo==="gd:sim"&&d.open&&!d.querySelector("#gdsimtl")&&performance.now()-lastRender>150)setTimeout(renderEditor,0)},true);
+ed.addEventListener("toggle",function(e){var d=e.target;if(d.dataset&&d.dataset.fo==="gd:sim"&&d.open&&!d.querySelector("#gdsimtl")&&!edQuiet(d))setTimeout(renderEditor,0)},true);
 on("renderEditor.after",function(){gdSimTrack()});
 /* ----- round 5's rows' demos: the change re-runs the simulator; the phone plays the two visit-minutes where something moved, ×10 (each dot's
    item at its moment, the chip saying what moved); the old ×10 chip demos stay for the rows that had them ----- */
@@ -7233,6 +7592,153 @@ var GD_DEMOS5={"guidance.preset":{wall:true,act:function(){gdDemoSim({label:"Pre
   "guidance.talk":{wall:true,act:function(){gdDemoSim({label:gdTalk().name+": room "+gdRoomNow()+" s, "+gdLimitNow(S.guidance.perMinute)+"/min"})},ringAfter:600,ring:".gdchip|.gdbub"}};
 GD_MIX_KINDS.forEach(function(k){[0,1,2].forEach(function(i){GD_DEMOS5["guidance.mix."+k[0]+"."+i]={wall:true,act:function(){gdDemoSim({label:"Mix "+k[1]+" s "+["0","0.3","1"][i]+": "+gdMix(k[0])[i]+" %"})},ringAfter:600,ring:".gdchip|.gdbub"}})});
 rowDemos(GD_DEMOS5);
+/* ----- round 6: the full item form (_3.8 section 3.2's groups: Identity, Words, About, Show, When, How much; gdItemRow above), its named
+   warnings, + Add guidance with its templates, Duplicate, Delete with an Undo toast (no popup), drag ≡ to reorder inside a group (the
+   tie-break and an In order group's sequence; the order across kinds is the Mix table, never a drag), and every field row's demo (the item
+   on the phone with the new value). Preview & Test › The visitor gains Tips, Tips stay until tapped and Screen reader on (the Lab's
+   stand-in). Unity: the POI Editor's GuidanceItem inspector (IMGUI foldouts per group, a ReorderableList for the drag, the templates a
+   GenericMenu-free inline list, Undo.RecordObject for Delete's Undo shown in the window's own toast) ----- */
+S.ui.gdSR=false;S.ui.gdAddIn=null;
+BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(gdVisitor\\.|"));
+TX_DOM.gd_btn_show="shown on a tip's Button chip";TX_DOM.gd_btn_tour=TX_DOM.gd_btn_show;TX_DOM.gd_btn_card=TX_DOM.gd_btn_show;TX_DOM.gd_btn_view=TX_DOM.gd_btn_show;
+["settings_tips","settings_tips_all","settings_tips_ess","settings_tips_off","settings_tips_off_note","settings_tips_stay","settings_tips_again"].forEach(function(k){TX_DOM[k]="shown in the visitor's Settings › The guide"});
+TX_DOM.gd_tips_again_done="shown in the toast after Show the tips again";TX_DOM.gd_undo=TX_DOM.gd_tips_again_done;TX_DOM.gd_dismiss="on a tip that stays until tapped";TX_DOM.dock_tips="shown in the dock's conversation";
+function gdDragH(it){return'<button type="button" class="gddrag" data-gddrag="'+it.id+'" aria-label="Drag to reorder the '+esc(it.label)+'" title="Drag to reorder inside its group (the tie-break and the order)">&#8942;&#8942;</button>'}
+/* the groups an item may move to (not a pulled group, not the card's cues: those hold their own forms) */
+function gdGroupOpts(){var o=[];S.guidance.kinds.forEach(function(k){k.groups.forEach(function(g){if(!g.pulled&&g.id!=="card")o.push([g.id,k.name+" › "+g.name])})});return o}
+function gdSaysHtml(it){var ks=[].concat(it.says||[]),a='<div class="gdvars">'+ks.map(function(k,i){var t=TXT(k);return'<div class="gdvar"><span class="gdvn">'+(i+1)+'</span><span class="gdvt'+(String(t).trim()?"":" empty")+'">'+esc(String(t).trim()?t:"(no words yet)")+'</span><button class="ubtn sm" type="button" data-gdsay="'+it.id+'|'+k+'" title="Show the item saying this line">&#9656;</button>'+
+    (ks.length>1?'<button class="del" type="button" data-gdvardel="'+it.id+'|'+i+'">Remove</button>':"")+'</div>'}).join("");
+  return a+(ks.length<4?'<button class="ubtn sm" type="button" data-gdvaradd="'+it.id+'">+ Add a variant</button>':'<span class="uses">4 variants: the most</span>')+'</div>'}
+function gdAudHtml(it){var A=GD_AUD.slice(1),has=function(a){return!!(it.saysAud&&it.saysAud[a[0]])};
+  return'<div class="gdvars">'+A.filter(has).map(function(a){var k=it.saysAud[a[0]];return'<div class="gdvar"><span class="gdvn">'+esc(a[1])+'</span><span class="gdvt">'+esc(TXT(k)||"(no words yet: Says)")+'</span><button class="ubtn sm" type="button" data-gdsay="'+it.id+'|'+k+'|'+a[0]+'">&#9656;</button><button class="del" type="button" data-gdauddel="'+it.id+'|'+a[0]+'">Remove</button></div>'}).join("")+
+    '<div class="btnrow" style="margin:0">'+A.filter(function(a){return!has(a)}).map(function(a){return'<button class="ubtn sm" type="button" data-gdaudadd="'+it.id+'|'+a[0]+'">+ '+esc(a[1])+'</button>'}).join("")+'</div></div>'}
+function gdBackHtml(it){var k=it.saysBack;return'<div class="gdvars">'+(k&&S.tx[k]?'<div class="gdvar"><span class="gdvt">'+esc(TXT(k)||"(no words yet: Says)")+'</span><button class="ubtn sm" type="button" data-gdsay="'+it.id+'|'+k+'|back">&#9656;</button>'+(TXOWN[k]==="gd:i:"+it.id&&/^gdw_/.test(k)?'<button class="del" type="button" data-gdbackdel="'+it.id+'">Remove</button>':"")+'</div>':
+  '<button class="ubtn sm" type="button" data-gdbackadd="'+it.id+'">+ A returning visitor\'s line</button>')+'</div>'}
+/* Focus: Spotlight offered only where it is allowed (else a disabled choice that says why) */
+function gdFocusSeg(it){var key="@guidance.items."+it.id+".focus",ok=gdSpotOk(it);
+  return'<div class="seg">'+GD_FOCUS.map(function(f){if(f[0]==="spotlight"&&!ok)return'<button type="button" class="gdno" disabled aria-disabled="true" title="'+esc(gdSpotWhy(it))+'">Spotlight</button>';
+    return'<button type="button" data-set="'+key+'" data-v="'+f[0]+'" aria-pressed="'+(it.focus===f[0])+'">'+f[1]+'</button>'}).join("")+'</div>'+(!ok?'<div class="gdforce gdspotwhy">'+esc(gdSpotWhy(it)+(it.focus==="spotlight"?": shown as a Ring.":"."))+'</div>':"")}
+/* Only if, as chips: every condition in force, each with its × (the screen has none: it is always one) */
+function gdOnlyChips(it){var c=[],x=function(f,t){return'<span class="gdchipc">'+esc(t)+(f?'<button type="button" data-gdoff="'+it.id+'|'+f+'" aria-label="Remove: '+esc(t)+'">&#10005;</button>':"")+'</span>'};
+  c.push(x(null,it.screen==="any"?"on the wall or a card":it.screen==="card"?"on a card":"on the wall"));if(+it.stillFor>0)c.push(x("stillFor","the phone still "+it.stillFor+" s"));
+  if(it.aud)c.push(x("aud","the audience is "+gdNameOf(GD_AUD,it.aud)));if(it.visitIs)c.push(x("visitIs",gdNameOf(GD_VISIT_IS,it.visitIs).toLowerCase()));
+  if(it.hasUsed)c.push(x("hasUsed","has used: "+gdNameOf(GD_USED,it.hasUsed)));if(it.notUsed)c.push(x("notUsed","has not used: "+gdNameOf(GD_USED,it.notUsed)));
+  if(it.notSolemn)c.push(x("notSolemn","not on Solemn points"));if(it.lively)c.push(x("lively","Lively only"));
+  if(+it.notBefore>0)c.push(x("notBefore","from "+gdClock(+it.notBefore*1000)));if(+it.notAfter>0)c.push(x("notAfter","until "+gdClock(+it.notAfter*1000)));return c.join("")}
+/* ----- the named warnings: an item that can never show; a line too long for 2 lines in either language; a line said by two items ----- */
+G.gd.warns=[];
+function gdSample(t){var n=(S.wallPois||[]).map(function(p){return L(p.name)}).filter(function(x){return/Ribeira|Paço/.test(x)})[0]||"Ribeira Palace";return String(t).replace(/\{point\}/g,n).replace(/\{year\}/g,"1755").replace(/\{min\}/g,"4").replace(/\{button\}/g,S.guideCfg.gbIcon==="star"?"✦":TXT("gb_label"))}
+function gdWarnings(){var out=[],seen={},langs=langCodes(),keepL=S.lang;
+  gdDefs().filter(gdIsTip).forEach(function(it){gdNever(it).forEach(function(r){out.push({id:it.id,kind:"never",text:"The “"+it.label+"” can never show: "+r+"."})});
+    gdLineKeys(it).forEach(function(k){langs.forEach(function(l){var t=String(S.tx[k][l]||"").trim();if(!t)return;var n=gdLineCount(gdSample(t),it.form,!!gdBtnOf(it));
+      if(n>2)out.push({id:it.id,kind:"long",text:"The “"+it.label+"” has a line too long for 2 lines in "+(GD_LANG_NAME[l]||l)+" ("+n+" lines): “"+t+"”. Shorten it."});
+      var key=l+"|"+t.toLowerCase();(seen[key]=seen[key]||[]).push(it)})})});
+  var dup={};Object.keys(seen).forEach(function(key){var its=seen[key].filter(function(x,i,a){return a.indexOf(x)===i});if(its.length<2)return;var l=key.split("|")[0],t=String(S.tx[gdLineKeys(its[0]).filter(function(k){return String(S.tx[k][l]||"").trim().toLowerCase()===key.slice(l.length+1)})[0]][l]);
+    its.forEach(function(it){var o=its.filter(function(x){return x!==it}).map(function(x){return"the “"+x.label+"”"}).join(", "),dk=it.id+"|"+o;if(!dup[dk]){dup[dk]={id:it.id,kind:"dup",o:o,label:it.label,lines:[]};out.push(dup[dk])}dup[dk].lines.push("“"+t+"” ("+(GD_LANG_NAME[l]||l)+")")})});
+  Object.keys(dup).forEach(function(k){var w=dup[k];w.text="The “"+w.label+"” says the same line as "+w.o+": "+w.lines.join(", ")+"."});
+  S.lang=keepL;return out}
+function gdWarnsOf(id){return G.gd.warns.filter(function(w){return w.id===id})}
+function gdWarnsHtml(){var w=G.gd.warns;return'<div class="gdwarns'+(w.length?" on":"")+'" id="gdwarns" role="status">'+(w.length?'<b>&#9888; '+w.length+(w.length>1?" warnings":" warning")+'</b>'+w.map(function(x){return'<div class="gdwl" data-gdwarn="'+x.kind+'"><span>'+esc(x.text)+'</span><button class="ubtn sm" type="button" data-gdgoitem="'+x.id+'">Open it</button></div>'}).join(""):
+  "No warnings: every tip can show, every line fits in 2 lines in each language, and no line is said by two items.")+'</div>'}
+/* ----- new words, new items: + Add guidance (a template), Duplicate; Delete (an Undo toast) ----- */
+function gdFreeId(pre,map){var n=1;while(map[pre+n])n++;return pre+n}
+function gdNewWord(owner,label,en,pt){var k=gdFreeId("gdw_",S.tx);S.tx[k]={en:en||"",pt:pt||""};(TXO[owner]=TXO[owner]||[]).push(k);TXW[k]="A guidance item's line (Guide › Guidance).";TXF[k]="";TXP[k]=label;TXOWN[k]=owner;TX_DOM[k]="shown in the guide's tip";return k}
+function gdRegister(it){var g=gdGroupById(it.group);COMP["gd:i:"+it.id]=["Guide","Guidance › "+(g?g.name:"?")+" › "+it.label];FOCUS["gd:i:"+it.id]=["card",it.about==="gbtn"?".gbtn-wrap":it.about==="nothing"?"#wall":"[data-marker]","closed"]}
+function gdNewItem(tid,gid){var T=GD_TEMPLATES.filter(function(x){return x.id===tid})[0],g=gdGroupById(gid);if(!T||!g)return null;var id=gdFreeId("gdn",S.guidance.items),it=JSON.parse(JSON.stringify(T.f));
+  it.id=id;it.on=true;it.kind=gdKindOfGroup(gid);it.group=gid;gdFill(it);it.says=gdNewWord("gd:i:"+id,"Says",T.en,T.pt);S.guidance.items[id]=it;g.items.push(id);gdRegister(it);gdLog("event","the Editor added the “"+it.label+"” ("+T.name+") to "+g.name);return it}
+function gdDupItem(id){var src=S.guidance.items[id],g=src&&gdGroupOf(src);if(!g)return null;var nid=gdFreeId("gdn",S.guidance.items),it=JSON.parse(JSON.stringify(src)),own="gd:i:"+nid,cp=function(k){return k&&S.tx[k]?gdNewWord(own,TXP[k]||"Says",S.tx[k].en,S.tx[k].pt):k};
+  it.id=nid;it.label=src.label+" (copy)";it.says=Array.isArray(src.says)?src.says.map(cp):cp(src.says);if(src.saysCard)it.saysCard=cp(src.saysCard);it.saysBack=src.saysBack?cp(src.saysBack):"";it.saysAud={};Object.keys(src.saysAud||{}).forEach(function(a){it.saysAud[a]=cp(src.saysAud[a])});
+  S.guidance.items[nid]=it;g.items.splice(g.items.indexOf(id)+1,0,nid);gdRegister(it);gdLog("event","the Editor duplicated the “"+src.label+"”");return it}
+function gdDelItem(id){var it=S.guidance.items[id],g=it&&gdGroupOf(it);if(!g)return false;var i=g.items.indexOf(id);if(G.gd.cur&&(G.gd.cur.item.base||G.gd.cur.item.id)===id)gdStop("its item was deleted");
+  g.items.splice(i,1);it.deleted=true;G.gd.undoDel={id:id,gid:g.id,i:i};gdLog("event","the Editor deleted the “"+it.label+"” from "+g.name);return true}
+function gdUndoDel(){var u=G.gd.undoDel,g=u&&gdGroupById(u.gid),it=u&&S.guidance.items[u.id];if(!g||!it)return false;delete it.deleted;g.items.splice(Math.min(u.i,g.items.length),0,u.id);G.gd.undoDel=null;gdLog("event","the Editor's delete undone: the “"+it.label+"” is back");return true}
+function gdMoveItem(id,gid){var it=S.guidance.items[id],a=it&&gdGroupOf(it),b=gdGroupById(gid);if(!a||!b||a===b)return false;a.items.splice(a.items.indexOf(id),1);b.items.push(id);it.group=gid;it.kind=gdKindOfGroup(gid);gdRegister(it);return true}
+/* the Editor's toast (no popup): what was done, and Undo where it can be undone. Unity: a label at the foot of the POI Editor's window */
+function gdEdToast(text,undo){var o=document.getElementById("gdedtoast");if(o)o.remove();clearTimeout(G.gd.edToastT);var r=ed.getBoundingClientRect(),d=document.createElement("div");d.id="gdedtoast";d.className="gdedtoast";d.setAttribute("role","status");
+  d.style.left=Math.round(r.left+16)+"px";d.style.width=Math.round(Math.max(260,r.width-32))+"px";d.innerHTML='<span>'+esc(text)+'</span>'+(undo?'<button type="button" class="ubtn sm" data-gdedundo="'+undo+'">Undo</button>':"");document.body.appendChild(d);
+  G.gd.edToastT=setTimeout(function(){d.remove()},8000);return d}
+function gdOpenItem(id){var it=S.guidance.items[id];if(!it)return;S.tab="guide";S.op.gt4=true;S.op["gd:"+it.kind]=true;S.op["gd:g:"+it.group]=true;S.op["gd:i:"+id]=true;renderEditor();var f=ed.querySelector('[data-fo="gd:i:'+id+'"]');if(f)f.scrollIntoView({block:"center"})}
+ed.addEventListener("click",function(e){var t=e.target,q;
+  var dg=t.closest("[data-gddrag]");if(dg){e.preventDefault();e.stopPropagation();return}
+  var ad=t.closest("[data-gdadd]");if(ad){e.stopPropagation();S.ui.gdAddIn=ad.dataset.gdadd&&S.ui.gdAddIn!==ad.dataset.gdadd?ad.dataset.gdadd:null;renderEditor();return}
+  var tp=t.closest("[data-gdtpl]");if(tp){e.stopPropagation();q=tp.dataset.gdtpl.split("|");var nw=gdNewItem(q[1],q[0]);S.ui.gdAddIn=null;if(!nw)return;gdOpenItem(nw.id);renderPhone(true);
+    gdEdToast("Added the “"+nw.label+"” to "+gdGroupById(q[0]).name+". Its words are in Says.");showRowDemo("guidance.items."+nw.id+".on");return}
+  var du=t.closest("[data-gddup]");if(du){e.stopPropagation();var c=gdDupItem(du.dataset.gddup);if(!c)return;gdOpenItem(c.id);gdEdToast("Duplicated: the “"+c.label+"”, just below it.");showRowDemo("guidance.items."+c.id+".on");return}
+  var dl=t.closest("[data-gddel]");if(dl){e.stopPropagation();var it=S.guidance.items[dl.dataset.gddel];if(!gdDelItem(dl.dataset.gddel))return;renderAll(true);gdEdToast("Deleted the “"+it.label+"” from "+gdGroupById(G.gd.undoDel.gid).name+".","del");return}
+  var va=t.closest("[data-gdvaradd]");if(va){e.stopPropagation();var a=S.guidance.items[va.dataset.gdvaradd],ks=[].concat(a.says);if(ks.length>=4)return;ks.push(gdNewWord("gd:i:"+a.id,"Says (variant "+(ks.length+1)+")","",""));a.says=ks;renderEditor();return}
+  var vd=t.closest("[data-gdvardel]");if(vd){e.stopPropagation();q=vd.dataset.gdvardel.split("|");var b=S.guidance.items[q[0]],k2=[].concat(b.says);k2.splice(+q[1],1);b.says=k2.length===1?k2[0]:k2;renderAll(true);return}
+  var aa=t.closest("[data-gdaudadd]");if(aa){e.stopPropagation();q=aa.dataset.gdaudadd.split("|");var c2=S.guidance.items[q[0]];c2.saysAud=c2.saysAud||{};c2.saysAud[q[1]]=gdNewWord("gd:i:"+c2.id,"Says ("+gdNameOf(GD_AUD,q[1])+")","","");renderEditor();return}
+  var adl=t.closest("[data-gdauddel]");if(adl){e.stopPropagation();q=adl.dataset.gdauddel.split("|");delete S.guidance.items[q[0]].saysAud[q[1]];renderAll(true);return}
+  var ba=t.closest("[data-gdbackadd]");if(ba){e.stopPropagation();var c3=S.guidance.items[ba.dataset.gdbackadd];c3.saysBack=gdNewWord("gd:i:"+c3.id,"Says (returning visitor)","","");renderEditor();return}
+  var bd=t.closest("[data-gdbackdel]");if(bd){e.stopPropagation();S.guidance.items[bd.dataset.gdbackdel].saysBack="";renderAll(true);return}
+  var sy=t.closest("[data-gdsay]");if(sy){e.stopPropagation();q=sy.dataset.gdsay.split("|");gdDemoSay(q[0],q[1],q[2]);return}
+  var of=t.closest("[data-gdoff]");if(of){e.stopPropagation();q=of.dataset.gdoff.split("|");S.guidance.items[q[0]][q[1]]=GD_TIP_DEF[q[1]];renderAll(true);showRowDemo("guidance.items."+q[0]+"."+q[1]);return}
+  var gi=t.closest("[data-gdgoitem]");if(gi){e.stopPropagation();gdOpenItem(gi.dataset.gdgoitem);return}},true);
+/* a guidance word typed: the warnings box follows (a line too long, the same line twice, no words) */
+document.addEventListener("input",function(e){var t=e.target;if(!t.dataset||!t.dataset.tx||!ed.contains(t))return;var k=t.dataset.tx.split("|")[0];if(!/^gd:/.test(TXOWN[k]||""))return;
+  clearTimeout(G.gd.warnT);G.gd.warnT=setTimeout(function(){G.gd.warns=gdWarnings();var w=ed.querySelector("#gdwarns");if(w)w.outerHTML=gdWarnsHtml()},250)},true);
+/* the toast's Undo (the toast sits over the page, outside the Editor's panel) */
+document.addEventListener("click",function(e){var un=e.target.closest&&e.target.closest("[data-gdedundo]");if(!un)return;e.stopPropagation();var u=G.gd.undoDel;
+  if(gdUndoDel()){gdOpenItem(u.id);renderPhone(true);var x=document.getElementById("gdedtoast");if(x)x.remove();gdEdToast("Undone: the “"+S.guidance.items[u.id].label+"” is back in its place.")}},true);
+/* a group chosen for an item moves it (its kind follows) */
+on("setOpt.answer",function(key,v){var m=/^@guidance\.items\.([^.]+)\.group$/.exec(key);if(m){gdMoveItem(m[1],v);renderAll(true);return true}
+  if(key==="ui.gdSR"){S.ui.gdSR=v==="true";renderEditor();gdDemoSR();return true}});
+/* ----- drag ≡ to reorder inside a group: the row follows the pointer, a line shows where it lands; the group's order is the tie-break
+   (and an In order group's sequence) ----- */
+ed.addEventListener("pointerdown",function(e){var h=e.target.closest&&e.target.closest("[data-gddrag]");if(!h)return;e.preventDefault();e.stopPropagation();var row=h.closest("details[data-fo]"),box=row.parentElement,
+    rows=[].filter.call(box.children,function(x){return x.matches&&x.matches('details[data-fo^="gd:i:"]')}),ln=document.createElement("div");ln.className="gddropline";box.appendChild(ln);
+  G.gd.drag={id:h.dataset.gddrag,row:row,rows:rows,box:box,y0:e.clientY,from:rows.indexOf(row),to:rows.indexOf(row),line:ln};row.classList.add("gddragging");try{h.setPointerCapture(e.pointerId)}catch(x){}},true);
+ed.addEventListener("pointermove",function(e){var d=G.gd.drag;if(!d)return;var dy=e.clientY-d.y0;d.row.style.translate="0 "+Math.round(dy)+"px";var to=0,br=d.box.getBoundingClientRect();
+  d.rows.forEach(function(r,i){if(r===d.row)return;var b=r.getBoundingClientRect();if(e.clientY>b.top+b.height/2)to=i+(i<d.from?1:0)});if(e.clientY<d.rows[0].getBoundingClientRect().top)to=0;d.to=Math.max(0,Math.min(d.rows.length-1,to));
+  var others=d.rows.filter(function(r){return r!==d.row}),ref=others[d.to],y=ref?ref.getBoundingClientRect().top:others.length?others[others.length-1].getBoundingClientRect().bottom:br.top;d.line.style.top=Math.round(y-br.top+d.box.scrollTop-2)+"px"},true);
+ed.addEventListener("pointerup",function(e){var d=G.gd.drag;if(!d)return;G.gd.drag=null;d.row.classList.remove("gddragging");d.row.style.translate="";d.line.remove();if(d.to===d.from)return;
+  var it=S.guidance.items[d.id],g=gdGroupOf(it),ids=d.rows.map(function(r){return r.dataset.fo.slice(5)}),mv=ids.splice(d.from,1)[0];ids.splice(d.to,0,mv);
+  var rest=g.items.filter(function(x){return ids.indexOf(x)<0});g.items=ids.concat(rest);renderAll(true);gdLog("event","the Editor moved the “"+it.label+"” to "+(d.to+1)+" of "+ids.length+" in "+g.name);
+  gdEdToast("Moved: the “"+it.label+"” is "+(d.to+1)+" of "+ids.length+" in "+g.name+" ("+(g.mode==="order"?"its place in the sequence":"it wins a tie against the ones below it")+").")},true);
+/* ----- the Editor's new parts: the warnings at the top of 4 · Guidance, + Add guidance in each group, the visitor's Tips and the
+   screen reader in 0 · Preview & Test ----- */
+/* the warnings are known before the rows are drawn (each item's badge and its own warnings) */
+on("renderEditor.before",function(){if(S.tab==="guide")G.gd.warns=gdWarnings()});
+on("edGuide.html",function(h){var d=document.createElement("div");d.innerHTML=h;
+  var g4=d.querySelector('[data-fo="gt4"] > .inner');if(g4)g4.insertAdjacentHTML("afterbegin",gdWarnsHtml());
+  S.guidance.kinds.forEach(function(k){k.groups.forEach(function(g){if(g.pulled||g.id==="card")return;var f=d.querySelector('[data-fo="gd:g:'+g.id+'"] > .inner');if(!f)return;
+    f.insertAdjacentHTML("beforeend",'<div class="gdadd"><button class="ubtn sm" type="button" data-gdadd="'+g.id+'" aria-expanded="'+(S.ui.gdAddIn===g.id)+'">+ Add guidance</button>'+
+      (S.ui.gdAddIn===g.id?'<div class="gdtpl" role="group" aria-label="Templates"><span>A new item in '+esc(g.name)+' from:</span>'+GD_TEMPLATES.map(function(t){return'<button class="ubtn sm" type="button" data-gdtpl="'+g.id+'|'+t.id+'">'+esc(t.name)+'</button>'}).join("")+'<button class="ubtn sm" type="button" data-gdadd="">Cancel</button></div>':"")+'</div>')})});
+  var m=d.querySelector("#gdmem");if(m)m.insertAdjacentHTML("afterend",
+    row("Tips",pseg("gdVisitor.prefs.tips",["all","essentials","off"],["All","Essentials only","Off"]),"The visitor's own Settings › The guide › Tips (kept in its memory): All; Essentials only (the opening); Off (the ✦ and Ask still answer: “You can always tap ✦ for help”).")+
+    row("Tips stay until tapped",pseg("gdVisitor.prefs.stay",["false","true"],["Off","On"]),"The visitor's Settings › The guide › Tips stay until I tap them (WCAG 2.2.1): a tip's time never runs out; it waits for a tap, a swipe or its close button. Default Off.")+
+    row("Screen reader on",seg("ui.gdSR",["false","true"],["Off","On"],String(!!S.ui.gdSR)),"A stand-in for VoiceOver / TalkBack on the phone: no tip is spoken (the bubble is announced politely, aria-live), and each still lands in the dock's conversation under Tips."));
+  return d.innerHTML});
+/* ----- each new row's demo: the item on the phone with the new value, and a chip that says it; a new item's own rows use the round-1 demos ----- */
+var GD_FORM_DEMO={group:1,spoken:1,about:1,mustSee:1,form:1,goes:1,points:1,focus:1,dim:1,gesture:1,button:1,when:1,event:1,stillFor:1,afterPrev:1,screen:1,aud:1,visitIs:1,hasUsed:1,notUsed:1,notSolemn:1,lively:1,notBefore:1,notAfter:1,teaches:1,afterDismiss:1,expires:1,onScreen:1,onScreenS:1};
+function gdFieldChip(it,f){var v=it[f],nm=function(t){return gdNameOf(t,v)},ctx=Object.assign(gdContext(),{demo:false,showing:null,remark:null,speaking:false,panel:null,touchAt:null,movedAt:null,cardAt:null,scrollAt:null,stillSince:-Infinity}),r=gdCheck(it,gdItems(),S.gdVisitor,ctx,gdNow()),now=r.ok?"now: it could show":"now: "+r.no;
+  var w={group:"In "+((gdGroupOf(it)||{}).name||"?")+" ("+(gdKindOf(it)||{}).name+")",spoken:"Spoken: "+nm(GD_SPOKEN)+(G.gd.cur&&G.gd.cur.spoken?" (speaking now)":" (a bubble now)"),about:"About: "+nm(GD_ABOUT_OPTS),mustSee:"Must be on screen: "+(v?"Yes":"No"),
+    form:"Form: "+nm(GD_FORMS),goes:"Mascot goes: "+nm(GD_GOES),points:"Points at it: "+(v?"Yes":"No"),focus:"Focus: "+nm(GD_FOCUS)+(gdFocusNow(it)!==v?" (shown as a Ring: for Essentials)":""),dim:"Spotlight: the rest at "+Math.round(+v*100)+" %",
+    gesture:"The ghost finger: "+(gdGestureOf(it)?GD_GESTURE_WORDS[gdGestureOf(it)]:"Off"),button:"Button: "+nm(GD_BUTTONS),teaches:"Teaches: "+nm(GD_TEACH),afterDismiss:"After a dismissal: "+nm(GD_AFTER_DISMISS),expires:"Expires: "+nm(GD_EXPIRES),onScreen:"On screen for: "+nm(GD_ONSCREEN),onScreenS:"On screen for "+v+" s"}[f];
+  return(w||(gdReadBack(it).split(" · ")[2]||f))+(GD_FORM_DEMO[f]&&/^(when|event|stillFor|afterPrev|screen|aud|visitIs|hasUsed|notUsed|notSolemn|lively|notBefore|notAfter)$/.test(f)?" · "+now:"")}
+function gdDemoField(id,f){var my=gdDemoBegin(),it=gdItemNow(id);if(!it){gdChip("Not in a group: it never shows");gdDemoEnd(my,3000);return}if(!it.on){gdChip("Off: the "+it.label+" never shows");gdDemoEnd(my,3500);return}
+  var c=gdDemoShow(it,6500);gdChip(gdFieldChip(it,f));gdDemoEnd(my,Math.max(4200,c?c.until-c.at+400:0))}
+/* a line of Says (a variant, an audience's, the returning visitor's) on the phone */
+function gdDemoSay(id,k,who){var my=gdDemoBegin(),it=gdItemNow(id);if(!it)return;var slots=gdSlots(it),t=gdLine(Object.assign({},it,{says:k,saysAud:{},saysBack:""}),false,slots);
+  if(!String(t).trim()){gdChip("No words yet: write them in the table above");gdDemoEnd(my,3000);return}
+  var c=gdDemoShow(it,6500,{text:t});gdChip(who==="back"?"A returning visitor's line":who?gdNameOf(GD_AUD,who)+"'s line":"Says: this variant");gdDemoEnd(my,Math.max(4200,c?c.until-c.at+400:0))}
+/* the visitor's Tips and the screen reader: on the phone, the visitor's own Settings, or a tip announced and in the dock */
+function gdDemoPrefs(f){var my=gdDemoBegin(),P=gdPrefs();S.settingsOpen=true;renderPhone(false);var v=ph.querySelector(".vset"),g=v&&v.querySelector(".vtips");if(v&&g)v.scrollTop=Math.max(0,g.offsetTop-40);
+  gdChip(f==="stay"?"Tips stay until I tap them: "+(P.stay?"On":"Off"):"Tips: "+(P.tips==="all"?"All":P.tips==="essentials"?"Essentials only":"Off (the ✦ still answers)"));gdDemoEnd(my,3600)}
+function gdDemoSR(){var my=gdDemoBegin(),it=gdItemNow("inview")||gdItemNow("opening");if(!it)return;var keep=S.gdVisitor.visit.heard;S.gdVisitor.visit.heard=true;var c=gdDemoShow(it,6000);S.gdVisitor.visit.heard=keep;
+  gdChip(S.ui.gdSR?"Screen reader on: announced politely, never spoken":"Screen reader off: "+(c&&c.spoken?"spoken, its word lit":"a bubble"));gdDemoEnd(my,4200)}
+rowDemos({"gdVisitor.prefs.tips":{stop:"half",act:function(){gdDemoPrefs("tips")},ringAfter:500,ring:".vtips|.gdchip"},"gdVisitor.prefs.stay":{stop:"half",act:function(){gdDemoPrefs("stay")},ringAfter:500,ring:".vtips|.gdchip"},
+  "ui.gdSR":{wall:true,act:gdDemoSR,ringAfter:600,ring:".gdbub|.gdchip"}});
+on("rowDemo.spec",function(key){var m=/^guidance\.items\.([^.]+)\.(\w+)$/.exec(key);if(!m||GD_DEMOS[key]||GD_DEMOS5[key])return;var id=m[1],f=m[2],d=S.guidance.items[id];if(!d)return;
+  if(d.form==="cue"){if(f==="gesture")return{stop:"full",act:function(){gdDemoCue(id,"on");gdChip(d.gesture?"Shows the gesture: the ghost finger, "+GD_GESTURE_WORDS[GD_GESTURE[d.about]]:"Shows the gesture Off: the cue alone")},ringAfter:900,ring:".gdfinger|.gdchip"};return}
+  if(d.form==="walk"){if(f==="focus")return{act:function(){gdDemoWalk(id);gdChip("Focus: "+gdNameOf(GD_STEP_FOCUS,d.focus))},ringAfter:1100,ring:".gspot.on|.gfocus|.gdchip"};return}
+  /* the item shows at once on the wall (no sheet to settle, the bubble drawn in the same frame): no wait before or after */
+  if(GD_FORM_DEMO[f])return{wall:true,wait:0,act:function(){gdDemoField(id,f)},ringAfter:60,ring:".gdbub|.gdchip"};
+  if(/^(on|importance|essential|doneWhen)$/.test(f))return{wall:true,act:function(){gdDemoItem(id,f)},ringAfter:600,ring:".gdbub|.gdchip"};
+  if(/^(shows|max|again)$/.test(f))return{wall:true,act:function(){gdDemoTwice(id)},ringAfter:600,ring:".gdbub|.gdchip"};
+  if(f==="along")return{wall:true,act:function(){gdDemoAlong(id)},ringAfter:600,ring:".gdbub|.gdchip"};if(f==="duringTour")return{tour:"g1",act:function(){gdDemoTour(id)},ringAfter:600,ring:".gdchip"};
+  if(f==="cardLine")return{wall:true,act:function(){gdDemoLines(id)},ringAfter:600,ring:".gdbub|.gdchip"};if(f==="pokes")return{wall:true,act:function(){gdDemoPokes(id)},ringAfter:600,ring:".gdchip|.gdbub"};
+  if(f==="idleFor")return{wall:true,act:function(){gdDemoIdle(id)},ringAfter:600,ring:".gdchip|.gdbub"}});
 
 /* Guidance tested in the prototype: seventeen scenes in Ask Azu's test console (round 5's three, at the end: the Quiet preset, the Family audience,
    a first visit simulated; round 1's five, round 2's five: the 15-minute script, Ignore three,
@@ -7247,7 +7753,8 @@ function gdOverWords(){var b=ph.querySelector(".gdbub:not(.gd-out)"),az=G.gd.az&
   gdObstacles().filter(function(o){return o.text}).forEach(function(o){mine.forEach(function(m){a+=gdOver(m,o.b)})});return Math.round(a)}
 function gdScWait(f,ms){var t0=performance.now();return new Promise(function(res){(function w(){var v=false;try{v=f()}catch(e){}if(v||performance.now()-t0>ms){res(!!v);return}setTimeout(w,50)})()})}
 /* a scene's start: the Ribeira wall, a first visit (or one whose opening was said 30 s ago), the clock at its rate, the remarks resting */
-function gdScSetup(rate,opened,keep){if(G.on)stopTour();setWall("ribeira");gdStop("a scene");G.gd.demo=false;gdChip(null);var iv=gdGroupById("inview");
+/* a scene starts clean: an Editor demo still pending is cancelled (a newer demo sequence), so its end never stops the scene's tip */
+function gdScSetup(rate,opened,keep){G.demoSeq=(G.demoSeq||0)+1;clearTimeout(G.gd.demoT);clearInterval(G.gd.demoI);if(G.on)stopTour();setWall("ribeira");gdStop("a scene");G.gd.demo=false;gdChip(null);var iv=gdGroupById("inview");
   var cg=gdGroupById("card"),cues={};cg.items.forEach(function(id){cues[id]=S.guidance.items[id].on});
   G.gd.sc={rate:G.gd.rate,inview:iv.on,hint:S.guidance.items.gbhint.on,gbtn:S.guideCfg.gbtn,azuTap:S.guideCfg.azuTap,life:S.guideCfg.life,cueOn:cg.on,cues:cues};
   /* Azu's remarks, The ✦ and the card's cues rest, unless the scene is about them (keep) */
@@ -7450,6 +7957,46 @@ var GDSCENES5=[
       return gdScWait(function(){return!!ph.querySelector(".gdbub:not(.gd-out)")},2500).then(function(shown){var ans=s.words+": "+tips.map(function(d){return gdClock(d.t)+" "+d.label}).join(", ")+"; the phone "+(shown?"shows "+(c?c.label:"?")+" at "+(c?gdClock(c.t):"?"):"shows nothing")+".";
         return gd5Done(s.first==="app"&&s.appBefore>=2&&s.content>0&&s.tips>=8&&s.tips<=12&&s.perMin<=2&&s.over===0&&shown?[true,"App first, then Content: "+s.tips+" tips in 15 min, at most "+s.perMin+" a minute",ans]:[false,"the simulated first visit was not as the study says",ans])})}}];
 GDSCENES5.forEach(function(s){s.where="wall";AGSCENES.push(s)});
+/* ----- round 6: four more scenes (ids gd6_*): the Spotlight on an Essential, the ghost finger on Before / After, Tips stay until tapped,
+   and a screen reader on (nothing spoken, the tip in the dock). Each keeps what it changes (the guidance, the visitor's Tips settings, the
+   screen reader, Reduce Motion) and gives it back after ----- */
+function gd6Keep(){G.gd.sc6={g:JSON.parse(JSON.stringify(S.guidance)),sr:S.ui.gdSR,reduce:S.reduce};if(G.on)stopTour();G.cam.open=false;S.settingsOpen=false;G.fab.menu=false;S.view="card";S.stop="closed";renderPhone(false)}
+function gd6Done(r){var k=G.gd.sc6;if(k){gdStop("the scene ended");S.guidance=k.g;S.ui.gdSR=k.sr;S.reduce=k.reduce;gdPrefs().stay=false;if(G.on)stopTour();G.gd.sc6=null}return gdScDone(r)}
+/* why nothing showed, in the scheduler's words (a failed scene says it) */
+function gd6Why(){var l=G.gd.last;return l?String(l.why).slice(0,220):"nothing asked yet"}
+/* how much of an element covers the words on the phone (any visible text, not its own), in px² */
+function gdOverText(el){if(!el)return 0;var B=gdPR(el),a=0;ph.querySelectorAll("b,span,small,p,label,button,h1,h2,h3,h4,div,i,em,strong,a").forEach(function(x){if(x===el||el.contains(x)||x.contains(el)||x.children.length||!String(x.textContent).trim()||!gdSeen(x))return;
+  var cs=getComputedStyle(x);if(cs.opacity==="0"||cs.visibility==="hidden")return;a+=gdOver(B,gdPR(x))});return Math.round(a)}
+var GDSCENES6=[
+  {id:"gd6_spot",label:"Guidance · the Spotlight on an Essential: the rest dims, the marker cut out",setup:function(){gd6Keep()},arrange:function(){gdScSetup(10,true);var it=S.guidance.items.tapmarker;it.essential=true;it.focus="spotlight";it.dim=0.4;it.gesture=false},
+    q:T("nothing: Tap a marker is made Essential with Focus Spotlight; the opening was said 30 s ago; it waits on the wall (×10)","nada: o Toque num marcador fica Essencial com Foco Holofote; a abertura foi dita há 30 s; espera na parede (×10)"),
+    expect:T("Tap a marker with the Spotlight: the rest of the wall dims to 0.4, the marker and its name cut out and readable; the bubble and Azu beside it, nothing over its words.","O Toque num marcador com o Holofote: o resto da parede escurece a 0,4, o marcador e o nome recortados e legíveis; o balão e o Azu ao lado, nada sobre as palavras."),
+    act:function(){this.arrange();return gdScWait(function(){return gdIs("tapmarker")},9000).then(function(ok){return gdScWait(function(){return false},700).then(function(){
+      var sp=ph.querySelector(".gspot.gdspot.on"),M=gdMarker(),S0=sp?gdPR(sp):null,dim=sp?+sp.style.getPropertyValue("--scrim"):null,mk=ph.querySelector('[data-marker="painting"] b'),N=mk?gdPR(mk):null,b=ph.querySelector(".gdbub:not(.gd-out)");
+      var inHole=S0&&M&&M.x>S0.l&&M.x<S0.r&&M.y>S0.t&&M.y<S0.b&&N&&N.l>=S0.l-1&&N.r<=S0.r+1&&N.t>=S0.t-1&&N.b<=S0.b+1,overT=b&&M?gdOver(gdPR(b),gdBox(M.x-GD_RING,M.y-GD_RING,2*GD_RING,2*GD_RING)):null,ow=gdOverWords();
+      var ans="Tap a marker "+(ok?"shown":"not shown ("+gd6Why()+")")+"; the spotlight "+(sp?"on, the rest at "+dim:"missing")+"; the marker and its name "+(inHole?"inside the cut-out":"not inside it")+"; the bubble over the marker: "+overT+" px²; over words: "+ow+" px².";
+      return gd6Done(ok&&sp&&dim>=0.2&&dim<=0.6&&inHole&&overT===0&&ow===0?[true,"the Spotlight dims the rest, the marker and its name clear in the cut-out",ans]:[false,"the Spotlight did not cut out the marker as it should",ans])})})}},
+  {id:"gd6_finger",label:"Guidance · the ghost finger on Before / After: a drag across, beside the words",setup:function(){gd6Keep()},arrange:function(){gdScSetup(10,false,true);gdGroupById("card").on=true;gdGroupById("card").items.forEach(function(id){S.guidance.items[id].on=id==="ba"});S.guidance.items.ba.gesture=true;cuePlace("ba")},
+    q:T("nothing: the card is open at a Before / After; only its cue is On; it waits (×10)","nada: o cartão está aberto num Antes / Depois; só a sua dica está ligada; espera (×10)"),
+    expect:T("The Before / After cue sweeps, and a translucent finger drags across it once, 0 px over its words.","A dica do Antes / Depois oscila, e um dedo translúcido arrasta-o uma vez, 0 px sobre as palavras."),
+    act:function(){var mid=null;this.arrange();return gdScWait(function(){return gdIs("ba")},9000).then(function(ok){return gdScWait(function(){var f=ph.querySelector(".gdfinger");if(f&&f.getAnimations().some(function(a){return a.playState==="running"&&a.currentTime>500})){mid={g:f.dataset.gesture,over:gdOverText(f),ba:gdOver(gdPR(f),gdPR(cueEl("ba")))>0};return true}return false},3000).then(function(){
+      var ans="the Before / After cue "+(ok?"shown":"not shown ("+gd6Why()+")")+"; the ghost finger "+(mid?"mid-gesture ("+mid.g+"), over the picture: "+(mid.ba?"yes":"no")+", over words: "+mid.over+" px²":"not seen")+".";
+      return gd6Done(ok&&mid&&mid.g==="drag"&&mid.ba&&mid.over===0?[true,"the ghost finger drags across the Before / After, beside its words",ans]:[false,"no ghost finger on the Before / After",ans])})})}},
+  {id:"gd6_stay",label:"Guidance · Tips stay until tapped: the tip waits for the visitor's tap",setup:function(){gd6Keep()},arrange:function(){gdScSetup(10,true);S.guidance.items.tapmarker.gesture=false;gdPrefs().stay=true},
+    q:T("nothing: Settings › The guide › Tips stay until I tap them is On; Tap a marker shows, the visit goes on 20 s (×10), then it taps the tip's close button","nada: Definições › O guia › As dicas ficam até eu tocar está ligado; aparece o Toque num marcador, a visita continua 20 s (×10), depois toca no botão de fechar"),
+    expect:T("The tip is still there 20 s later (its time never runs out), with a 44 px close button; a tap closes it.","A dica continua lá 20 s depois (o tempo nunca acaba), com um botão de fechar de 44 px; um toque fecha-a."),
+    act:function(){var t0=null;this.arrange();return gdScWait(function(){return gdIs("tapmarker")},9000).then(function(ok){t0=gdNow();return gdScWait(function(){return gdNow()-t0>=20000},4000).then(function(){
+      var still=gdIs("tapmarker"),x=ph.querySelector(".gdbub:not(.gd-out) [data-gdx]"),xs=x?[x.offsetWidth,x.offsetHeight]:null;if(x)gsTouch(x);
+      return gdScWait(function(){return!G.gd.cur},1500).then(function(gone){var how=gdVisitOf(S.gdVisitor,"tapmarker").how;var ans="Tap a marker "+(ok?"shown":"not shown")+"; after "+Math.round((gdNow()-t0)/1000)+" s "+(still?"still there":"gone")+"; its close button "+(xs?xs.join(" × ")+" px":"missing")+"; tapped: "+(gone?"closed ("+how+")":"still there")+".";
+        return gd6Done(ok&&still&&xs&&xs[0]>=44&&xs[1]>=44&&gone&&how==="dismissed"?[true,"the tip stayed until the visitor closed it",ans]:[false,"the tip did not stay, or did not close",ans])})})})}},
+  {id:"gd6_sr",label:"Guidance · screen reader on: nothing spoken, the tip in the dock",setup:function(){gd6Keep()},arrange:function(){gdScSetup(10,true,true);gdGroupById("inview").on=true;S.guidance.items.gbhint.on=false;gdGroupById("card").on=false;S.guidance.items.tapmarker.on=false;S.ui.gdSR=true;S.gdVisitor.visit.heard=true;G.gd.voiced=null},
+    q:T("nothing: a screen reader is on (Preview & Test › The visitor); the visitor has heard the guide, so Azu's remark would be spoken; then it opens the dock (✦ › Ask)","nada: um leitor de ecrã está ligado (Pré-visualizar e testar › O visitante); o visitante já ouviu o guia, por isso o comentário do Azu seria falado; depois abre a doca (✦ › Perguntar)"),
+    expect:T("Azu's remark shows as a bubble announced politely (aria-live), never spoken; in the dock's conversation it is under Tips.","O comentário do Azu aparece num balão anunciado com cortesia (aria-live), nunca falado; na conversa da doca está em Dicas."),
+    act:function(){var c=null;this.arrange();return gdScWait(function(){return!!(G.gd.cur&&G.gd.cur.item.base==="inview"&&!G.gd.cur.pull)},10000).then(function(ok){c=G.gd.cur;var b=ph.querySelector(".gdbub:not(.gd-out)"),live=b&&b.getAttribute("aria-live"),spoken=!!(c&&c.spoken),said=!!(c&&G.gd.voiced&&G.gd.voiced.at===c.at),text=c&&c.text;
+      gdStop("the scene opens the dock");G.cam.open=false;gbGo("ask");return gdScWait(function(){return!!ph.querySelector(".gdock .gm-tips")},2500).then(function(){var tp=ph.querySelector(".gdock .gm-tips"),inDock=!!(tp&&text&&tp.textContent.indexOf(text)>=0);
+        var ans="Azu's remark "+(ok?"“"+text+"”":"not shown ("+gd6Why()+")")+"; announced: aria-live "+live+"; spoken: "+(spoken||said?"yes":"no")+"; the dock's Tips "+(inDock?"hold it":"do not hold it")+".";
+        return gd6Done(ok&&live==="polite"&&!spoken&&!said&&inDock?[true,"announced, not spoken, and in the dock under Tips",ans]:[false,"spoken over the screen reader, or missing from the dock",ans])})})}}];
+GDSCENES6.forEach(function(s){s.where=s.id==="gd6_finger"?"card":"wall";AGSCENES.push(s)});
 
 /* Starts the page (the #hash routes) and closes the shared scope. */
 /* #selftest walks every tab; #selftest=guide,words only those (the texts come with "words") */
