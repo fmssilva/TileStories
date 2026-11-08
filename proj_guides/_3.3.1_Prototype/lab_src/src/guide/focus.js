@@ -36,8 +36,14 @@ function regionRect(img,reg){var r=visRect(img);if(S.guideCfg.zoom==="zoom"&&VIE
 /* each frame while the tour runs: the cue now (the last one whose word was reached), the spotlight on it, Azu pointing */
 on("runStep.before",function(){unzoomAll();G.fc={cue:-2,i:G.i}});on("runStep.after",function(){fcLoop()});
 function fcLoop(){if(!G.fcRaf)G.fcRaf=requestAnimationFrame(fcTick)}
-function fcTick(){G.fcRaf=0;var sp=ph.querySelector(".gspot");if(!G.on){if(sp)sp.remove();return}
-  var st=S.guideSteps[G.i],el=stepEl(st),cfg=S.guideCfg,k=G.hl?G.hl.k:-1,cues=st&&st.cues||[],now=-1;
+/* the spotlight's cut-out, one for the guide (the tour's Focus, and Guidance's Spotlight on an Essential tip): a hole the size of the box
+   g = [left, top, width, height] in the phone's px, in a scrim at scrim (0.2-0.6), with the warm ring; mode "spotlight" or "ring"; round
+   for a marker. Unity: Painter2D in generateVisualContent, FillRule.OddEven: the screen's rect and the hole's rounded rect in one path,
+   filled once (the ring a Stroke on the hole) */
+function spotPaint(sp,g,mode,scrim,round){sp.classList.add("on");sp.classList.toggle("spotlight",mode==="spotlight");sp.classList.toggle("ring",mode==="ring");sp.classList.toggle("round",!!round);
+  sp.style.setProperty("--scrim",scrim);sp.style.left=g[0]+"px";sp.style.top=g[1]+"px";sp.style.width=g[2]+"px";sp.style.height=g[3]+"px"}
+function fcTick(){G.fcRaf=0;var sp=ph.querySelector(".gspot:not(.gdspot)");if(!G.on){if(sp)sp.remove();return}
+  var st=S.guideSteps[G.i],el=stepEl(st),cfg=Object.assign({},S.guideCfg,st&&st.cue?{cue:st.cue}:{}),k=G.hl?G.hl.k:-1,cues=st&&st.cues||[],now=-1;
   for(var c=0;c<cues.length;c++){var ix=cueIndex(cues[c]);if(ix>=0&&k>=ix)now=c}
   if(!G.fc||G.fc.i!==G.i)G.fc={cue:-2,i:G.i};
   var img=stepImg(el);if(now!==G.fc.cue){G.fc.cue=now;if(img)zoomImg(img,now>=0?cues[now].region:null)}
@@ -48,10 +54,9 @@ function fcTick(){G.fcRaf=0;var sp=ph.querySelector(".gspot");if(!G.on){if(sp)sp
   if(cfg.cue==="none"||!r||G.paused||G.askOpen||G.moment){if(sp)sp.classList.remove("on")}
   else{if(!sp){sp=document.createElement("div");sp.className="gspot";sp.setAttribute("aria-hidden","true");ph.appendChild(sp)}
     var t=Math.max(r.top,box.top+4),b=Math.min(r.bottom,box.bottom-4),pad=now>=0?4:6;
-    sp.className="gspot on "+cfg.cue;sp.style.setProperty("--scrim",cfg.scrim);
     var g=[(r.left-p.left)/q-pad,(t-p.top)/q-pad,r.width/q+2*pad,Math.max(0,b-t)/q+2*pad],f=G.fc.from,e=S.reduce||!f?1:Math.min(1,(tn-G.fc.at)/550);
     if(e<1){e=1-Math.pow(1-e,3);g=g.map(function(v,i){return f[i]+(v-f[i])*e})}G.fc.last=g;
-    sp.style.left=g[0]+"px";sp.style.top=g[1]+"px";sp.style.width=g[2]+"px";sp.style.height=g[3]+"px"}
+    spotPaint(sp,g,cfg.cue,cfg.scrim)}
   ph.classList.toggle("gspotting",cfg.cue!=="none");
   pointAt(r&&cfg.point&&!G.paused?{x:(r.left+r.width/2-p.left)/q,y:((Math.max(r.top,box.top)+Math.min(r.bottom,box.bottom))/2-p.top)/q,el:el}:null);
   G.fcRaf=requestAnimationFrame(fcTick)}

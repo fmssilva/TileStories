@@ -130,7 +130,7 @@ function agTurnHtml(turn,live){if(!turn)return"";var h="";
   if(live&&turn.chips.length)h+='<div class="agchips">'+turn.chips.map(function(c,i){return c.done?"":'<button type="button" class="agchip'+(c.confirm?" confirm":"")+'" data-agchip="'+i+'">'+esc(c.label)+(c.confirm?' <span>'+TXH("ag_yes")+'</span>':"")+'</button>'}).join("")+'</div>';
   return pipe("agTurnHtml.html",h,turn)}
 on("renderGuide.after",function(){
-  var els=ph.querySelectorAll(".gd-thread > div");G.thread.forEach(function(m,i){if(m.turn&&els[i])els[i].insertAdjacentHTML("beforeend",agTurnHtml(m.turn,m.turn===G.agTurn))});var th=ph.querySelector(".gd-thread");if(th&&G.agTurn)th.scrollTop=th.scrollHeight;
+  var els=ph.querySelectorAll(".gd-thread > div:not(.gm-tips)");G.thread.forEach(function(m,i){if(m.turn&&els[i])els[i].insertAdjacentHTML("beforeend",agTurnHtml(m.turn,m.turn===G.agTurn))});var th=ph.querySelector(".gd-thread");if(th&&G.agTurn)th.scrollTop=th.scrollHeight;
   var a=ph.querySelector(".gans");if(a&&G.agTurn&&!G.busy)a.insertAdjacentHTML("beforeend",agTurnHtml(G.agTurn,true))});
 on("camLayer.after",function(){var a=ph.querySelector(".ca-ans");if(a&&G.cam.turn&&!G.cam.busy)a.insertAdjacentHTML("beforeend",agTurnHtml(G.cam.turn,true))});
 ph.addEventListener("click",function(e){var t=e.target.closest("[data-aglink],[data-agchip]");if(!t)return;e.stopPropagation();e.preventDefault();

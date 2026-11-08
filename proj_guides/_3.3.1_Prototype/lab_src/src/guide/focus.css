@@ -4,6 +4,9 @@
 .gspot.on{opacity:1}
 img.gzimg{transform:none!important}
 .gspot.spotlight{box-shadow:0 0 0 2px rgba(255,217,138,.95),0 0 22px 4px rgba(255,217,138,.42),0 0 0 2400px rgba(10,10,12,var(--scrim,.4))}
+.gspot.round{border-radius:50%}
+/* Guidance's Spotlight on an Essential tip: the same cut-out, under the bubble and Azu */
+.gspot.gdspot{z-index:10;transition:opacity .3s}
 .gspot.ring{box-shadow:0 0 0 2px rgba(255,217,138,.95),0 0 22px 4px rgba(255,217,138,.42)}
 .gspotting .gfocus{box-shadow:none}
 /* Azu's arm: from its side towards what is told; the hand a small tile-blue mitten */

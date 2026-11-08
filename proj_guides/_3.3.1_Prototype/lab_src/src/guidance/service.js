@@ -16,8 +16,9 @@
    motion, the touches, the card's open, the tour's steps, the mascot's poke, the ✦ menu), the memory as JSON in persistentDataPath, the
    visit clock Time.unscaledTime since the visit started, the time away from OnApplicationPause. */
 var GD_VISIT_GAP=30*60000;
-function gdVisitMem(n,now){return{n:n,at:now,lastEnd:null,cueEnd:null,cards:0,items:{},starts:[],away:0,ignoredRun:0,breathMul:1,rest:{},fewer:{},heard:false,pokes:0}}
-function gdNewMemory(now){return{visits:1,visit:gdVisitMem(1,now),ever:{items:{}},used:{},met:false}}
+function gdVisitMem(n,now){return{n:n,at:now,lastEnd:null,cueEnd:null,cards:0,items:{},starts:[],away:0,ignoredRun:0,breathMul:1,rest:{},fewer:{},heard:false,pokes:0,ev:{},tips:[]}}
+/* round 6: the visitor's own Tips (All / Essentials only / Off) and Tips stay until I tap them (WCAG 2.2.1), kept with the memory */
+function gdNewMemory(now){return{visits:1,visit:gdVisitMem(1,now),ever:{items:{}},used:{},met:false,prefs:{tips:"all",stay:false}}}
 S.gdVisitor=gdNewMemory(0);
 G.gd={t:0,rate:1,manual:false,cur:null,movedAt:null,touchAt:null,actAt:null,cardAt:null,wallAt:null,onWall:false,demo:false,last:null,next:null,log:[],between:false,skipKey:""};
 function gdNow(){return G.gd.t}
@@ -66,7 +67,7 @@ function gdOnCard(){return S.view==="card"?S.stop==="half"||S.stop==="full":S.vi
 /* the context's numbers (the page's moment and the simulator's both start from them): the breathing room and the limits in force
    (Talkativeness: the row's value × its factor), the cue room, freshness, the learning, Lively, Solemn, Reduce Motion */
 function gdCtxBase(){var g=S.guidance;return{on:!!g.on,breathing:gdRoomNow(),cueRoom:+g.cueRoom||0,reduce:!!S.reduce,limits:{perMinute:gdLimitNow(g.perMinute),perVisit:gdLimitNow(g.perVisit)},tau:+g.freshTau,
-  learn:{ignore:g.learnIgnore!==false,dismiss:g.learnDismiss!==false},lively:S.guideCfg.life==="lively",solemn:!!(S.m&&S.m.solemn)}}
+  learn:{ignore:g.learnIgnore!==false,dismiss:g.learnDismiss!==false},lively:S.guideCfg.life==="lively",solemn:!!(S.m&&S.m.solemn),aud:typeof aud==="function"?aud():""}}
 function gdContext(){var t=-Infinity,mv=G.gd.movedAt,wa=G.gd.wallAt,st=ph.querySelector(".stv"),sk=st&&(st.className.match(/\bst-(\w+)/)||[])[1];
   var speaking=!!(G.utter||G.timer||G.recAudio);
   var onCard=gdOnCard(),mo=G.gd.moment||null;
@@ -79,33 +80,41 @@ function gdContext(){var t=-Infinity,mv=G.gd.movedAt,wa=G.gd.wallAt,st=ph.queryS
     dockFull:!!(G.on&&typeof dockOn==="function"&&dockOn()&&S.dockH==="full"),tour:G.on?{between:!!G.gd.between&&!speaking,step:G.i}:null,
     movedAt:mv,touchAt:G.gd.touchAt,cardAt:S.view==="card"&&S.stop!=="closed"?G.gd.cardAt:null,
     onWall:gdOnWall(),where:S.view!=="card"?"the phone shows "+S.view:G.on?"the tour":S.stop!=="closed"?"a card is open":"",
-    marker:gdMarker(),gbtn:gdGbtn(),central:gdCentral(),covers:{},stillSince:Math.max(mv==null?t:mv,wa==null?t:wa),returning:S.gdVisitor.visits>1})}
+    marker:gdMarker(),gbtn:gdGbtn(),central:gdCentral(),covers:{},stillSince:Math.max(mv==null?t:mv,wa==null?t:wa),returning:S.gdVisitor.visits>1,tips:gdPrefs().tips})}
+/* the visitor's Tips settings (an older memory has none: the defaults) */
+function gdPrefs(V){V=V||S.gdVisitor;return V.prefs||(V.prefs={tips:"all",stay:false})}
 /* how long a tip stays: by its words, 4 to 9 s (the visit's clock); with the clock fast (a scene, a demo) it stays at least 0.6 to 1.5 s of real time, to be seen */
-function gdOnScreen(it,text){var n=String(text||"").split(/\s+/).filter(Boolean).length;return Math.max(4000,Math.min(9000,3000+n*350))}
+function gdOnScreen(it,text){if(it.onScreen==="secs"&&+it.onScreenS>0)return +it.onScreenS*1000;var n=String(text||"").split(/\s+/).filter(Boolean).length;return Math.max(4000,Math.min(9000,3000+n*350))}
 /* the slots of its line: the point it is about and the minutes of that point's tour */
+/* round 6: {year} the point's year; a line with variants says the next in turn (n: how many times it has shown, so never the same twice in a row) */
+function gdYearOf(id){var p=(S.wallPois||[]).filter(function(x){return x.id===id})[0];return p&&p.year||""}
 function gdSlots(it,V,c,items){V=V||S.gdVisitor;if(it.about==="point"){var n=(items||gdItems()).filter(function(o){return o.group===it.group}).reduce(function(a,o){return a+gdVisitOf(V,o.id).shown},0);
-    return{id:it.point,point:it.pointName||"",card:!!it.card,n:n}}
-  if(it.about!=="middle")return{};if(c===undefined)c=gdCentral();if(c&&c.tour)return{id:c.id,point:c.name,min:c.min};
-  var p=(S.wallPois||[]).filter(function(x){return x.card})[0];return{id:p&&p.id,point:p?L(p.name):"",min:tourMinutes()}}
+    return{id:it.point,point:it.pointName||"",card:!!it.card,n:n,year:gdYearOf(it.point)}}
+  var nn=gdEverOf(V,it.id).shown||0;
+  if(it.about==="marker"){var mk=c===undefined&&S.view==="card"?gdMarker():null;return mk?{id:mk.id,point:mk.name,year:gdYearOf(mk.id),n:nn}:{n:nn}}
+  if(it.about!=="middle")return{n:nn};if(c===undefined)c=gdCentral();if(c&&c.tour)return{id:c.id,point:c.name,min:c.min,year:gdYearOf(c.id),n:nn};
+  var p=(S.wallPois||[]).filter(function(x){return x.card})[0];return{id:p&&p.id,point:p?L(p.name):"",min:tourMinutes(),year:p?gdYearOf(p.id):"",n:nn}}
 /* spoken (_3.8 decision 2): App as a bubble only; Content spoken once the visitor has heard the guide this visit, else a bubble */
-function gdSpoken(it,o){if(o&&o.spoken!=null)return!!o.spoken;return it.spoken==="kind"&&it.kindSpoken==="heard"&&!!S.gdVisitor.visit.heard}
+/* round 6: Spoken per item (As the kind / A bubble only / Spoken once the guide is heard); never while a screen reader is on (Preview & Test >
+   The visitor > Screen reader on, the Lab's stand-in for VoiceOver / TalkBack): the bubble is announced politely instead */
+function gdSpoken(it,o){if(S.ui.gdSR)return false;if(o&&o.spoken!=null)return!!o.spoken;var h=!!S.gdVisitor.visit.heard;return it.spoken==="heard"?h:it.spoken==="kind"&&it.kindSpoken==="heard"&&h}
 /* a tip starts (the scheduler's choice, or pulled: an Editor demo, which never writes the memory) and ends */
 function gdStart(it,why,o){o=o||{};if(G.gd.cur)gdStop("another tip");if(it.form==="cue")return gdCueStart(it,why,o);var now=gdNow(),ret=o.ret!=null?!!o.ret:S.gdVisitor.visits>1&&!o.first,slots=gdSlots(it),text=o.text!=null?o.text:gdLine(it,ret,slots),spoken=gdSpoken(it,o);
   G.gd.cur={item:it,at:now,until:now+(o.ms||gdOnScreen(it,text)),realMin:G.gd.manual?0:performance.now()+(G.gd.rate>1?Math.max(600,15000/G.gd.rate):0),pull:!!o.pull,why:why||"",text:text,slots:slots,ret:ret,spoken:spoken};
-  if(!o.pull)gdMemStart(S.gdVisitor,it,now,text);
+  if(!o.pull){gdMemStart(S.gdVisitor,it,now,text);gdSaid(it,text,now)}
   G.gd.skipKey="";gdLog("shown",(o.pull?"(pulled) ":"")+(why||it.label)+(spoken?" · spoken":""));gdPresent(G.gd.cur);if(spoken)gdVoice(G.gd.cur);return G.gd.cur}
 /* how: "acted", "dismissed", "fewer", "ignored", or "" (the moment ended it); round 1's true is a dismissal */
 /* a cue starts: its look on its element (card/hints.js's cueStart gives how long it plays; the Locate label: until seen); its memory
    (this visit, ever, the card it showed on) at its start, the label's once it has been seen; no bubble, no mascot, not a tip's start */
 function gdCueStart(it,why,o){var now=gdNow(),c={item:it,at:now,until:now,realMin:0,pull:!!o.pull,why:why||"",text:it.says?TXT(it.says):"",slots:{},cue:true},d=cueStart(c);
   if(d==null){gdLog("skipped",it.label+": its part is not on the screen");return null}
-  G.gd.cur=c;if(!o.pull)gdMemStart(S.gdVisitor,it,now,"");
+  G.gd.cur=c;if(!o.pull){gdMemStart(S.gdVisitor,it,now,"");if(it.says)gdSaid(it,c.text,now)}if(gdGestureOf(it))gdFinger(it,null,cueEl(it.about));
   G.gd.skipKey="";gdLog("shown",(o.pull?"(pulled) ":"")+(why||it.label)+" · a cue");if(!isFinite(d)&&o.ms)d=o.ms;
   c.until=now+d;c.realMin=G.gd.manual||!isFinite(d)?0:performance.now()+d;return c}
 function gdStop(why,how){var c=G.gd.cur;if(!c)return;if(how===true)how="dismissed";how=how||"";G.gd.cur=null;var now=gdNow();
   /* a cue ends: seen (it played, or the label was seen 4 s) or by the moment; it writes the cue's end (the cue room), never a tip's */
   if(c.cue){if(!c.pull)gdMemEnd(S.gdVisitor,c,how,now);
-    gdLog("ended",c.item.label+": "+(why||"it played")+(how?" ("+how+")":""));cueStop(c,how);return}
+    gdLog("ended",c.item.label+": "+(why||"it played")+(how?" ("+how+")":""));cueStop(c,how);gdFingerStop();return}
   if(c.spoken&&G.sayLine&&G.sayLine.text===c.text)stopSpeech();
   if(!c.pull)gdMemEnd(S.gdVisitor,c,how,now);
   gdLog("ended",c.item.label+": "+(why||"its time is up")+(how?" ("+how+")":""));gdUnpresent(why)}
@@ -119,6 +128,7 @@ function gdLearn(c,how,now,V,log){V=V||S.gdVisitor;log=log||gdLog;var it=c.item,
   if(how==="dismissed"||how==="fewer"){vm.dismissed++;em.dismissed++;
     if(how==="fewer"){v.rest[it.group]=GD_FOREVER;v.fewer[it.group]=true;log("learned","Fewer like this: "+gn+" rests for the visit");return}
     if(S.guidance.learnDismiss===false)return;
+    if(it.afterDismiss==="visit"||it.afterDismiss==="never"){log("learned",it.label+" dismissed: "+(it.afterDismiss==="never"?"never again":"not again this visit"));return}
     if(it.kind==="app"){if(+it.again>0)log("learned",it.label+" dismissed: it waits ×3 its Again after ("+3*it.again+" s)");return}
     v.rest[it.group]=now+GD_REST_MS;log("learned",it.label+" dismissed: "+gn+" rests 5 min")}}
 /* the events */
@@ -127,12 +137,12 @@ on("phone.moved",function(){G.gd.movedAt=gdNow()});
 /* idle: no touch, no wheel, no key (and the phone still: movedAt) */
 ["wheel","keydown"].forEach(function(t){ph.addEventListener(t,function(){G.gd.actAt=gdNow()},{capture:true,passive:true})});
 /* Azu poked (mascot/azu2d.js), counted this visit; the ✦ menu opened (world/guide-button.js): The ✦ is done */
-on("mascot.poked",function(){var v=S.gdVisitor.visit;v.pokes=(v.pokes||0)+1;gdLog("event",GD_EVENTS.poked+" ("+v.pokes+" this visit)")});
+on("mascot.poked",function(){var v=S.gdVisitor.visit;v.pokes=(v.pokes||0)+1;(v.ev=v.ev||{}).poked=gdNow();gdLog("event",GD_EVENTS.poked+" ("+v.pokes+" this visit)")});
 on("menu.opened",function(how){gdUsed("menu",how)});
 /* an audience set (Who's exploring, the visitor's Settings, Preview as: audiences/audiences.js) writes its Guidance preset (round 5) */
 on("audience.set",function(a,p){if(!p||!GD_PRESETS[p])return;gdPresetWrite(p);gdLog("event","the audience set: "+(AUDN[a]||a)+" (the "+gdPresetName(p)+" preset)")});
 /* a feature used (a milestone of the stage): the items it retires are done for good; a tip that teaches it, showing now, was acted on */
-function gdUsed(f,how){var now=gdNow(),c=G.gd.cur;gdMemUsed(S.gdVisitor,f,now,gdItems());
+function gdUsed(f,how){var now=gdNow(),c=G.gd.cur,vv=S.gdVisitor.visit;(vv.ev=vv.ev||{})[f]=now;gdMemUsed(S.gdVisitor,f,now,gdItems());
   gdLog("event",GD_EVENTS[f]+(how?" ("+how+")":""));if(c&&!c.pull&&c.item.teaches===f)gdStop(GD_EVENTS[f],"acted")}
 /* a card opened: a tip it ends (the visitor did what it asked, or opened a card over it) is answered: the cue room does not count from it */
 on("card.opened",function(how){var v=S.gdVisitor.visit,e0=v.lastEnd;G.gd.cardAt=gdNow();gdUsed("card",how);if(G.gd.cur&&!G.gd.cur.cue)gdStop("the visitor opened a card");if(v.lastEnd!==e0)v.openEnd=v.lastEnd});
@@ -164,7 +174,7 @@ function gdWalk(from){var g=gdGroupById("howto");if(!g||g.on===false)return fals
 on("startTour.before",function(){if(G.gd.cur&&!G.gd.cur.pull)gdStop("the tour started")});on("runStep.before",function(){G.gd.between=false});on("stopTour.after",function(){G.gd.between=false});
 /* the loop: the wall seen since when, the tip on screen ends, or the scheduler is asked (a choice that would cover its target is asked again without it) */
 function gdTick(){if(noDraw)return;var now=gdNow(),w=gdOnWall();if(w&&!G.gd.onWall)G.gd.wallAt=now;G.gd.onWall=w;
-  var c=G.gd.cur;if(c){var e=gdEnds(c,now,{onWall:w,get onCard(){return gdOnCard()},get locate(){return!!cueTargets(false).locate},get marker(){return gdMarker()},get central(){return gdCentral()},get gbtn(){return gdGbtn()},realOk:performance.now()>=c.realMin});
+  var c=G.gd.cur;if(c){var e=gdEnds(c,now,{onWall:w,get onCard(){return gdOnCard()},get locate(){return!!cueTargets(false).locate},get marker(){return gdMarker()},get central(){return gdCentral()},get gbtn(){return gdGbtn()},realOk:performance.now()>=c.realMin,stay:!!gdPrefs().stay});
     if(e&&e!=="wait")gdStop(e[0],e[1]);return}
   if(G.gd.demo&&G.gd.demoOwner!==G.demoSeq){G.gd.demo=false;gdChip(null)}if(G.gd.demo)return;
   var ctx=gdContext(),items=gdItems(),r=gdPick(items,S.gdVisitor,ctx,now);
@@ -175,12 +185,14 @@ function gdTick(){if(noDraw)return;var now=gdNow(),w=gdOnWall();if(w&&!G.gd.onWa
 /* why the tip on the screen ends now: [why, how], "wait" (Fewer like this? asked), or null (it stays). Its screen left (a wall tip off the
    wall; a cue off its card, the Locate label also when its pin goes), its target gone (its marker, its point out of the middle, the ✦),
    or its time up (a cue: seen; a tip: ignored). W is the moment (the page's, or the simulator's) */
-function gdEnds(c,now,W){var it=c.item;if(it.screen==="wall"&&!W.onWall)return["the wall left the screen",""];
+function gdEnds(c,now,W){var it=c.item;if(it.screen==="wall"&&!W.onWall)return["the wall left the screen",""];var keep=it.expires==="never";
   if(c.cue&&(!W.onCard||it.about==="locate"&&!(c.pull||W.locate)))return["its card left the screen",""];
-  if(!c.pull){if(it.about==="marker"&&!W.marker)return["its marker left the screen",""];
+  if(!c.pull&&!keep){if(it.about==="marker"&&!W.marker)return["its marker left the screen",""];
     if(it.about==="middle"||it.about==="point"){var cc=W.central;if(!cc||cc.id!==c.slots.id)return["its point left the middle",""]}
     if(it.about==="gbtn"&&!W.gbtn)return["the ✦ left the screen",""]}
   if(c.ask)return now>=c.askUntil?["Fewer like this? not answered","ignored"]:"wait";
+  /* round 6: a tip stays until tapped (On screen for: Until tapped, or the visitor's Tips stay until I tap them): its time never runs out */
+  if(!c.cue&&!c.pull&&(it.onScreen==="tap"||W.stay))return null;
   if(now>=c.until&&W.realOk!==false)return[c.cue?"it played":"its time is up",c.cue?"seen":"ignored"];return null}
 /* a pull (_3.8 section 3.3: past every gate but one at a time): the item at once, the tip showing gives way; it writes no memory.
    Tap on Azu = Points to the ✦ pulls The ✦ (false when there is no ✦ or no Azu beside it to point) */
@@ -296,3 +308,10 @@ function gdSimSum(res,mins){var lim=(mins||15)*60000,tips=res.dots.filter(functi
   var fc=tips.map(function(d){return d.kind}).indexOf("content"),k=[["App",by("app")],["Content",by("content")],["Fun",by("fun")]].filter(function(x){return x[1]>0});
   return{tips:tips.length,app:by("app"),content:by("content"),fun:by("fun"),cues:cues.length,perMin:perMin,over:over,first:tips[0]?tips[0].kind:null,appBefore:fc<0?tips.length:fc,
     words:tips.length+" tips in "+(mins||15)+" min"+(k.length?": "+k.map(function(x){return x[0]+" "+x[1]}).join(", "):"")+(cues.length?" (and "+cues.length+" card cue"+(cues.length>1?"s":"")+")":"")+"; at most "+perMin+" a minute; "+(over?over+" over a sentence":"none over a sentence")}}
+/* ----- round 6: every tip that showed also lands in the dock's conversation under Tips (a bubble is never the only channel); Settings >
+   The guide > Show the tips again resets the memory (what showed, what is done, the features used; the visitor's Tips settings stay), with
+   an Undo toast and no popup. Unity: GuidanceService.Said (the dock's thread reads it), GuidanceMemory.ResetShown with a kept copy for Undo ----- */
+function gdSaid(it,text,now){var v=S.gdVisitor.visit,l=v.tips||(v.tips=[]);if(!text)return;l.push({t:now,id:it.id,label:it.label,text:text});if(l.length>30)l.shift()}
+function gdTipsAgain(){var V=S.gdVisitor,keep=JSON.stringify(V);if(G.gd.cur)gdStop("Show the tips again");V.ever.items={};V.visit.items={};V.used={};V.visit.rest={};V.visit.fewer={};V.visit.starts=[];V.visit.ignoredRun=0;V.visit.breathMul=1;V.visit.lastEnd=null;V.visit.cueEnd=null;
+  G.gd.tipsUndo=keep;gdLog("event","Show the tips again: the memory reset (the visitor's Tips settings kept)");return keep}
+function gdTipsUndo(){if(!G.gd.tipsUndo)return false;S.gdVisitor=JSON.parse(G.gd.tipsUndo);G.gd.tipsUndo=null;gdLog("event","Show the tips again undone: the memory back");return true}

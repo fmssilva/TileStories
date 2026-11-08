@@ -27,6 +27,8 @@ function gdStage(visitor,now){var v=visitor.visit||{},ret=visitor.visits>1,act=M
   return{s:Math.min(1,Math.max(mins/GD_STAGE_MIN,share)),mins:mins,active:act,returning:ret,done:done,share:share}}
 /* the gates for every item: fixed, no option breaks them */
 function gdGate(ctx,now){if(!ctx.on)return"Guidance is Off";if(ctx.demo)return"an Editor demo is showing";
+  /* round 6: the visitor's own Tips (Settings › The guide › Tips): Off silences every push item (the ✦ and Ask still answer) */
+  if(ctx.tips==="off")return"the visitor turned Tips Off (Settings › The guide › Tips)";
   if(ctx.showing)return"one at a time: "+(/^the /i.test(ctx.showing)?"":"the ")+ctx.showing+" is showing";if(ctx.remark)return"one at a time: "+ctx.remark+" is showing";
   if(ctx.speaking)return"never over a sentence: the guide is speaking";
   if(ctx.state)return"quiet while a system state shows ("+ctx.state+")";
@@ -72,23 +74,37 @@ function gdCheck(it,items,visitor,ctx,now){var vm=gdVisitOf(visitor,it.id),em=gd
   if(it.kindOn===false)return{no:(it.kindName||it.kind)+" is Off"};
   if(it.groupOn===false)return{no:(it.groupName||it.group)+" is Off"};
   if(it.groupPulled)return{no:"pulled only: it opens from Settings or the ✦ menu, never on its own"};
+  if(ctx.tips==="essentials"&&!it.essential)return{no:"the visitor chose Essentials only (Settings › The guide › Tips)"};
   if(ctx.moment==="open"&&it.when!=="open")return{no:"the card is opening: only a cue that answers the opening shows now"};
   if(it.doneWhen&&em.done)return{no:"done for good ("+GD_EVENTS[em.by||it.doneWhen]+")"};
   if(it.shows==="once"&&em.shown>=1)return{no:"shown once ever"};
   if(it.shows==="visit"&&vm.shown>=1)return{no:"shown once this visit"};
   if(it.shows==="card"&&vm.shown>=1&&vm.card===(v.cards||0))return{no:"shown on this card (again on the next)"};
   if((it.shows==="upto"||it.shows==="until")&&vm.shown>=+it.max)return{no:"shown "+vm.shown+" of "+it.max+" this visit"};
+  /* round 6: After a dismissal (Wait ×3 is the learning below; Not again this visit; Never again) */
+  if(it.afterDismiss==="never"&&(em.dismissed||0)>0)return{no:"dismissed before: never again (After a dismissal: Never again)"};
+  if(it.afterDismiss==="visit"&&(vm.dismissed||0)>0)return{no:"dismissed this visit: not again this visit (After a dismissal)"};
   var rest=v.rest&&v.rest[it.group];if(rest!=null&&now<rest)return{no:v.fewer&&v.fewer[it.group]?"Fewer like this: "+(it.groupName||it.group)+" rests for the visit":(it.groupName||it.group)+" rests 5 min after a dismissal: "+gdLeft(rest-now)};
   var tg=gdTourGate(it,ctx);if(tg)return{no:tg};
   if(it.lively&&!ctx.lively)return{no:"Lively only: Azu is Calm (Mascot > Liveliness)"};
   if(it.notSolemn&&ctx.solemn)return{no:"never on a Solemn point"};
   if(it.screen==="wall"&&!ctx.onWall)return{no:"not on the wall ("+(ctx.where||"a card is open")+")"};
+  if(it.screen==="card"&&!ctx.onCard&&it.form!=="cue")return{no:"only on a card ("+(ctx.where||"the wall")+")"};
+  /* round 6: Only if (the audience, a first or returning visit, a feature used or not yet), and the latest second of the visit */
+  if(it.aud&&ctx.aud!==it.aud)return{no:"only for "+gdNameOf(GD_AUD,it.aud)+" (the audience is "+gdNameOf(GD_AUD,ctx.aud||"explorer")+")"};
+  if(it.visitIs==="first"&&ctx.returning)return{no:"only on a first visit"};if(it.visitIs==="returning"&&!ctx.returning)return{no:"only on a returning visit"};
+  var used=visitor.used||{};if(it.hasUsed&&used[it.hasUsed]==null)return{no:"only once "+gdNameOf(GD_USED,it.hasUsed)};if(it.notUsed&&used[it.notUsed]!=null)return{no:"only until "+gdNameOf(GD_USED,it.notUsed)+" (it was)"};
+  if(+it.notAfter>0&&gdVisitT(v,now)>+it.notAfter*1000)return{no:"not after "+it.notAfter+" s of the visit"};
+  if(it.when==="event"){var et=v.ev&&v.ev[it.event];if(et==null||now-et>GD_EVENT_MS)return{no:"on an event: it waits for "+(GD_EVENTS[it.event]||it.event)+" (then "+GD_EVENT_MS/1000+" s)"};why.push(GD_EVENTS[it.event]+" "+Math.floor((now-et)/1000)+" s ago")}
   /* a cue: on a card, its element on the screen (the context's cues: card/hints.js finds them), a moving cue never under Reduce Motion */
   if(it.form==="cue"){if(!ctx.onCard)return{no:"not on a card ("+(ctx.where||"the wall")+")"};if(it.reduce==="skip"&&ctx.reduce)return{no:"skipped under Reduce Motion (a moving cue)"};
     var ce=ctx.cues&&ctx.cues[it.about];if(!ce)return{no:GD_CUE_NO[it.about]||"its part is not on the screen"};why.push(ce)}
-  if(it.about==="marker"){if(!ctx.marker)return{no:"no marker in view"};why.push(ctx.marker.name+" in view")}
-  if(it.about==="gbtn"){if(!ctx.gbtn)return{no:"the ✦ is not on the screen"};why.push("the ✦ on the screen")}
-  if(it.about==="middle"){var c=ctx.central;if(!c)return{no:"no point in the middle"};if(!c.tour)return{no:c.name+" in the middle has no tour"};why.push(c.name+" in the middle")}
+  var must=it.mustSee!==false;
+  if(it.about==="marker"){if(!ctx.marker){if(must)return{no:"no marker in view"}}else why.push(ctx.marker.name+" in view")}
+  if(it.about==="gbtn"){if(!ctx.gbtn){if(must)return{no:"the ✦ is not on the screen"}}else why.push("the ✦ on the screen")}
+  if(it.about==="middle"){var c=ctx.central;if(!c||!c.tour){if(must)return{no:!c?"no point in the middle":c.name+" in the middle has no tour"}}else why.push(c.name+" in the middle")}
+  /* round 6: When its target settles (a marker or the point in the middle): the target in the middle */
+  if(it.when==="settle"&&it.about!=="point"){var Tg=gdTargetCtx(it,ctx);if(!Tg||!Tg.middle)return{no:"its target has not settled in the middle"}}
   if(it.about==="point"){var cp=ctx.central;if(!cp)return{no:"no point in the middle"};if(cp.id!==it.point)return{no:"not in the middle ("+cp.name+" is nearest)"};
     if(!cp.middle)return{no:cp.name+" is the nearest, not in the middle yet"};why.push(cp.name+" in the middle")}
   if(ctx.covers&&ctx.covers[it.id])return{no:"never over its own target: "+ctx.covers[it.id]};
@@ -97,8 +113,9 @@ function gdCheck(it,items,visitor,ctx,now){var vm=gdVisitOf(visitor,it.id),em=gd
     var since=now-pm.last;if(since<+it.afterPrev*1000)return{no:it.afterPrev+" s after the "+p.label+": "+gdLeft(+it.afterPrev*1000-since)};if(+it.afterPrev>0)why.push(Math.floor(since/1000)+" s after the "+p.label)}
   if(+it.stillFor>0){var st=now-ctx.stillSince;if(!(st>=+it.stillFor*1000))return{no:"the phone still "+(isFinite(st)?(st/1000).toFixed(1):"0")+" s (it waits for "+it.stillFor+" s)"};why.push("the phone still "+(isFinite(st)?(st/1000).toFixed(1)+" s":"")) }
   /* its own When: after n pokes on Azu (this visit) or n s idle (no touch, the phone still), whichever comes first */
-  if(+it.pokes>0||+it.idleFor>0){var pk=+it.pokes>0&&(+ctx.pokes||0)>=+it.pokes,iS=ctx.idleSince,idl=+it.idleFor>0&&iS!=null&&now-iS>=+it.idleFor*1000;
-    if(!pk&&!idl){var ow=[];if(+it.pokes>0)ow.push(it.pokes+" pokes on Azu ("+(+ctx.pokes||0)+" so far)");if(+it.idleFor>0)ow.push(it.idleFor+" s idle ("+(iS==null?"not idle":gdLeft(+it.idleFor*1000-(now-iS)))+")");return{no:"after "+ow.join(" or ")}}
+  var iN=gdIdleOf(it);
+  if(+it.pokes>0||iN>0){var pk=+it.pokes>0&&(+ctx.pokes||0)>=+it.pokes,iS=ctx.idleSince,idl=iN>0&&iS!=null&&now-iS>=iN*1000;
+    if(!pk&&!idl){var ow=[];if(+it.pokes>0)ow.push(it.pokes+" pokes on Azu ("+(+ctx.pokes||0)+" so far)");if(iN>0)ow.push(iN+" s idle ("+(iS==null?"not idle":gdLeft(iN*1000-(now-iS)))+")");return{no:"after "+ow.join(" or ")}}
     why.push(pk?(+ctx.pokes)+" pokes on Azu":"idle "+Math.floor((now-iS)/1000)+" s")}
   /* two items about the ✦ never both in the visit's first minute */
   if(it.about==="gbtn"&&gdVisitT(v,now)<GD_FIRST_MS){var o2=items.filter(function(o){return o.id!==it.id&&o.about==="gbtn"&&gdVisitOf(visitor,o.id).shown>0})[0];

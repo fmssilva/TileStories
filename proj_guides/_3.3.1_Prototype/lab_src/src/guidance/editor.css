@@ -67,3 +67,41 @@
 .gdleg .gdsw.mv{background:transparent;border:1.5px solid rgba(255,255,255,.8);width:10px;height:10px}.gdleg .gdsw.gh{background:transparent;border:1px dashed #9AA0A6;width:8px;height:8px}
 .note.gdsimlearn{color:#BFC5CB;font-size:11px}
 .note.gdsimnow{color:#CFE3FF}.note.gdsimsum{color:#E2E2E2;font-weight:600}.note.gdsimmoved{color:#F0D58A}
+/* round 6: the full item form. Its field groups (Identity, Words, About, Show, When, How much) as sub-headings; the drag handle ≡ (a 44 px
+   column in the summary is too wide for the Editor: 24 × 28, the IMGUI ReorderableList's handle); the variants; the Only if chips; the named
+   warnings; + Add guidance's templates; the Editor's toast. Unity: IMGUI (EditorGUILayout foldouts, a ReorderableList, a HelpBox per warning) */
+.gddrag{appearance:none;flex:none;width:22px;height:28px;padding:0;margin-left:-4px;border:0;border-radius:4px;background:transparent;color:#9AA0A6;font:700 13px/1 var(--mono);letter-spacing:-3px;cursor:grab;touch-action:none}
+.gddrag:hover{background:#3A3A3A;color:#E2E2E2}
+.fo.gddragging{position:relative;z-index:5;opacity:.92;box-shadow:0 6px 18px rgba(0,0,0,.5);outline:1px solid #E2C36B;border-radius:4px;background:#2B2B2B}
+.fo.gddragging .gddrag{cursor:grabbing}
+.inner{position:relative}
+.gddropline{position:absolute;left:4px;right:4px;height:3px;border-radius:2px;background:#E2C36B;pointer-events:none;z-index:6}
+.sub2.gdfg{margin-top:14px;padding-top:8px;border-top:1px solid #3A3A3A;color:#F0D58A;letter-spacing:.02em}
+.sub2.gdfg:first-child{margin-top:4px;border-top:0}
+.gdvars{display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+.gdvar{display:flex;align-items:center;gap:6px;width:100%}
+.gdvar .gdvn{flex:none;min-width:18px;font:600 11px/1 var(--mono);color:#9AA0A6}
+.gdvar .gdvt{flex:1 1 auto;min-width:0;font-size:12px;color:#E2E2E2}
+.gdvar .gdvt.empty{color:#F0B37A;font-style:italic}
+.gdchips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+.gdchipc{display:inline-flex;align-items:center;gap:2px;padding:3px 4px 3px 10px;border-radius:999px;background:#33302A;border:1px solid #6B5A2A;color:#F0E6CC;font-size:11.5px}
+.gdchipc:only-child,.gdchipc:not(:has(button)){padding-right:10px}
+.gdchipc button{appearance:none;width:22px;height:22px;border:0;border-radius:50%;background:transparent;color:#E2C36B;font-size:11px;cursor:pointer}
+.gdchipc button:hover{background:#4A4232}
+.seg button.gdno{opacity:.42;cursor:not-allowed;text-decoration:line-through}
+.badge.gdwb{background:#7A4A12;color:#FFE2B8}
+.gdwarns{margin:0 0 10px;padding:8px 10px;border-radius:6px;border:1px solid #3A4A3A;background:#1F2A20;color:#BFE3C4;font-size:12px;line-height:1.4}
+.gdwarns.on{border-color:#7A5A12;background:#2E2614;color:#F5E3BE}
+.gdwarns b{display:block;margin-bottom:4px;color:#FFD98A}
+.gdwl{display:flex;align-items:center;gap:8px;padding:3px 0;border-top:1px solid rgba(255,217,138,.15)}
+.gdwl span{flex:1 1 auto}
+.note.gdwarn{border-left:2px solid #E2A14B;padding-left:8px}
+.gdadd{margin:8px 0 2px}
+.gdtpl{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px;padding:8px;border:1px dashed #6B5A2A;border-radius:6px}
+.gdtpl > span{width:100%;font-size:11.5px;color:#C9C9C9}
+.gdacts{margin-top:8px}
+.gdacts [data-gddel]{color:#F2A7A0}
+.gdedtoast{position:fixed;bottom:18px;z-index:1000;display:flex;align-items:center;gap:10px;justify-content:space-between;box-sizing:border-box;padding:8px 8px 8px 14px;border-radius:8px;background:#16181C;color:#F4F1EA;border:1px solid #E2C36B;box-shadow:0 10px 26px rgba(0,0,0,.5);font-size:12.5px}
+.gdedtoast .ubtn{background:#FFD98A;color:#1A1814;border-color:#FFD98A;font-weight:700}
+/* a demo chip on the phone stays on one line inside it */
+.gdchip{max-width:calc(100% - 24px);overflow:hidden;text-overflow:ellipsis}

@@ -15,10 +15,15 @@ var lastRender=0;
 /* noDraw: the self-test works the Editor's controls without drawing the Editor or the phone (show only sets the view) */
 var noDraw=false;
 function renderEditor(){if(noDraw)return;emitLatestFirst("renderEditor.before");lastRender=performance.now();document.querySelectorAll(".utab").forEach(function(t){t.setAttribute("aria-selected",String(t.dataset.tab===S.tab))});
-  var h=firstAnswer("renderEditor.tab");ed.innerHTML=h!==undefined?h:S.tab==="card"?edCard():S.tab==="marker"?edMarker():edGlobal();emit("renderEditor.after")}
+  var h=firstAnswer("renderEditor.tab");ed.innerHTML=h!==undefined?h:S.tab==="card"?edCard():S.tab==="marker"?edMarker():edGlobal();
+  /* the foldouts this draw opens fire their own toggle event later (after the rest of the task, the phone's draw too): each is marked, so
+     it is always quiet (edQuiet), however long the task ran */
+  lastRender=performance.now();ed.querySelectorAll("details[open]").forEach(function(d){d._rt=1});emit("renderEditor.after")}
+/* a toggle that is the draw's own (a foldout drawn open), not the developer's */
+function edQuiet(d){return!!d._rt||performance.now()-lastRender<150}
 function renderAll(keep){if(noDraw)return;renderEditor();renderPhone(keep)}
 /* ---------- Editor events ---------- */
-ed.addEventListener("toggle",function(e){var d=e.target;if(!d.dataset||!d.dataset.fo)return;var id=d.dataset.fo,quiet=performance.now()-lastRender<150;S.op[id]=d.open;
+ed.addEventListener("toggle",function(e){var d=e.target;if(!d.dataset||!d.dataset.fo)return;var id=d.dataset.fo,quiet=edQuiet(d);if(d._rt)setTimeout(function(){d._rt=0},0);S.op[id]=d.open;
   if(!d.open||quiet)return;
   if(S.ui.single){var par=d.parentElement;Array.prototype.forEach.call(par.children,function(s){if(s!==d&&s.tagName==="DETAILS"&&s.open){s.open=false;S.op[s.dataset.fo]=false}})}
   var k=id.split(":");
