@@ -14,7 +14,14 @@
    the visit's start at the earliest). A pull (gdPull: Tap on Azu = Points to the ✦) shows its item at once, past every gate but one at a
    time (the tip showing gives way). Unity: GuidanceService (a MonoBehaviour ticking at 4 Hz, fed by the event buses: the AR camera's
    motion, the touches, the card's open, the tour's steps, the mascot's poke, the ✦ menu), the memory as JSON in persistentDataPath, the
-   visit clock Time.unscaledTime since the visit started, the time away from OnApplicationPause. */
+   visit clock Time.unscaledTime since the visit started, the time away from OnApplicationPause.
+   Round 7 (Fun): the tour moving on to its next step asks the scheduler at that moment (next.answer, context.moment = "between"): a
+   Moment it picks shows (Azu's prop, mascot/azu2d.js) and holds the next step until it ends (a tap on the prop: acted; 8 s: ignored;
+   moment.ended); the context gives the tour's narration so far and whether its last step is next, today (Preview & Test › Today is) and a
+   Solemn day, and whether the phone is on a Solemn point (Specific Marker › Solemn point: on its card, or its point in the middle);
+   a treasure found (hunt.found, world/camera-ask.js) retires the hunt's invitation. The memory keeps the variants seen (A joke: the
+   least seen shows) and the pokes at an item's last start (a joke every third poke). The simulator gains the Moments between a tour's
+   steps, a scripted visitor's audience and Solemn points, and a sixth visitor, Family on a Solemn wall. */
 var GD_VISIT_GAP=30*60000;
 function gdVisitMem(n,now){return{n:n,at:now,lastEnd:null,cueEnd:null,cards:0,items:{},starts:[],away:0,ignoredRun:0,breathMul:1,rest:{},fewer:{},heard:false,pokes:0,ev:{},tips:[]}}
 /* round 6: the visitor's own Tips (All / Essentials only / Off) and Tips stay until I tap them (WCAG 2.2.1), kept with the memory */
@@ -28,12 +35,16 @@ function gdVM(id,V){var v=(V||S.gdVisitor).visit.items;return v[id]||(v[id]={sho
 function gdEM(id,V){var v=(V||S.gdVisitor).ever.items;return v[id]||(v[id]={shown:0,done:false,by:"",last:null,line:"",dismissed:0,acted:0})}
 /* a start and an end in a visitor's memory (the service's, or the simulator's own: one bookkeeping for both). A cue: its last and the
    card it showed on (the Locate label counts once it has been seen); a tip: shown, last, the line used, and its start (at most n a minute) */
-function gdMemStart(V,it,now,text){var vm=gdVM(it.id,V),em=gdEM(it.id,V);vm.last=now;vm.end=null;em.last=now;
-  if(it.form==="cue"){vm.card=V.visit.cards||0;if(!it.untilSeen){vm.shown++;em.shown++}return}
-  vm.shown++;vm.line=text;em.shown++;em.line=text;V.visit.starts.push(now)}
+function gdMemStart(V,it,now,text,key,answer){var vm=gdVM(it.id,V),em=gdEM(it.id,V);vm.last=now;vm.end=null;em.last=now;vm.card=V.visit.cards||0;
+  if(it.form==="cue"){if(!it.untilSeen){vm.shown++;em.shown++}return}
+  /* round 7: the pokes at its start (pokes are counted since it last showed) and the variant said (the least seen shows next) */
+  vm.pk=V.visit.pokes||0;if(key){var sn=em.seen||(em.seen={});sn[key]=(sn[key]||0)+1}
+  vm.shown++;vm.line=text;em.shown++;em.line=text;if(!answer)V.visit.starts.push(now)}
 /* a cue's end writes the cue room's clock (never a tip's end or learning); a tip's end, how it ended and the learning */
 function gdMemEnd(V,c,how,now,log){var vm=gdVM(c.item.id,V);vm.end=now;vm.how=how;
   if(c.cue){V.visit.cueEnd=now;if(c.item.untilSeen&&how==="seen"){vm.shown++;gdEM(c.item.id,V).shown++}return}
+  /* round 7: a joke that answered pokes neither starts the breathing room nor counts as ignored */
+  if(c.answer){if(how==="acted"||how==="dismissed"||how==="fewer")gdLearn(c,how,now,V,log);return}
   V.visit.lastEnd=now;gdLearn(c,how,now,V,log)}
 /* a feature used: the items it retires are done for good (the items given, in the Editor's order) */
 function gdMemUsed(V,f,now,items){V.used[f]=now;items.forEach(function(it){if(it.doneWhen===f){var em=gdEM(it.id,V);if(!em.done){em.done=true;em.by=f}}})}
@@ -66,8 +77,12 @@ function gdOnWall(){return S.view==="card"&&S.stop==="closed"&&!G.on}
 function gdOnCard(){return S.view==="card"?S.stop==="half"||S.stop==="full":S.view!=="demo"}
 /* the context's numbers (the page's moment and the simulator's both start from them): the breathing room and the limits in force
    (Talkativeness: the row's value × its factor), the cue room, freshness, the learning, Lively, Solemn, Reduce Motion */
-function gdCtxBase(){var g=S.guidance;return{on:!!g.on,breathing:gdRoomNow(),cueRoom:+g.cueRoom||0,reduce:!!S.reduce,limits:{perMinute:gdLimitNow(g.perMinute),perVisit:gdLimitNow(g.perVisit)},tau:+g.freshTau,
-  learn:{ignore:g.learnIgnore!==false,dismiss:g.learnDismiss!==false},lively:S.guideCfg.life==="lively",solemn:!!(S.m&&S.m.solemn),aud:typeof aud==="function"?aud():""}}
+function gdCtxBase(){var g=S.guidance,md=gdTodayMD();return{on:!!g.on,breathing:gdRoomNow(),cueRoom:+g.cueRoom||0,reduce:!!S.reduce,limits:{perMinute:gdLimitNow(g.perMinute),perVisit:gdLimitNow(g.perVisit)},tau:+g.freshTau,
+  learn:{ignore:g.learnIgnore!==false,dismiss:g.learnDismiss!==false},lively:S.guideCfg.life==="lively",solemn:!!(S.m&&S.m.solemn),aud:typeof aud==="function"?aud():"",
+  today:md,solemnDay:gdSolemnDay(md)?gdDayWords(md):null}}
+/* round 7: on a Solemn point now: Specific Marker › Solemn point marks the marker's point (Ribeira Palace): on its card, in a tour, or on
+   the wall with that point in the middle (or no point in the middle); another point in the middle of the wall is not it */
+function gdSolemnNow(){if(!(S.m&&S.m.solemn))return false;if(S.view==="card"&&S.stop==="closed"&&!G.on){var c=gdCentral();return!c||c.id===(S.m.poi||"painting")}return true}
 function gdContext(){var t=-Infinity,mv=G.gd.movedAt,wa=G.gd.wallAt,st=ph.querySelector(".stv"),sk=st&&(st.className.match(/\bst-(\w+)/)||[])[1];
   var speaking=!!(G.utter||G.timer||G.recAudio);
   var onCard=gdOnCard(),mo=G.gd.moment||null;
@@ -77,7 +92,9 @@ function gdContext(){var t=-Infinity,mv=G.gd.movedAt,wa=G.gd.wallAt,st=ph.queryS
     pokes:S.gdVisitor.visit.pokes||0,idleSince:Math.max(G.gd.actAt==null?t:G.gd.actAt,mv==null?t:mv,S.gdVisitor.visit.at||0),
     speaking:speaking,state:sk?GD_STATES[sk]||sk:null,
     panel:S.settingsOpen?"Settings":G.cam&&G.cam.open?"Ask about the view":G.fab&&G.fab.menu?"the ✦ menu":S.contentsOpen?"Contents":null,
-    dockFull:!!(G.on&&typeof dockOn==="function"&&dockOn()&&S.dockH==="full"),tour:G.on?{between:!!G.gd.between&&!speaking,step:G.i}:null,
+    dockFull:!!(G.on&&typeof dockOn==="function"&&dockOn()&&S.dockH==="full"),solemn:gdSolemnNow(),
+    /* the tour: between two steps (as it moves on, nothing is said), its narration so far (since it started or the last Moment) and its last step next */
+    tour:G.on?{between:mo==="between"||!!G.gd.between&&!speaking,step:G.i,talked:Math.max(0,(performance.now()-(G.talkFrom||performance.now()))/1000),toEnd:!!(S.guideSteps[G.i+1]&&S.guideSteps[G.i+1].act==="end")}:null,
     movedAt:mv,touchAt:G.gd.touchAt,cardAt:S.view==="card"&&S.stop!=="closed"?G.gd.cardAt:null,
     onWall:gdOnWall(),where:S.view!=="card"?"the phone shows "+S.view:G.on?"the tour":S.stop!=="closed"?"a card is open":"",
     marker:gdMarker(),gbtn:gdGbtn(),central:gdCentral(),covers:{},stillSince:Math.max(mv==null?t:mv,wa==null?t:wa),returning:S.gdVisitor.visits>1,tips:gdPrefs().tips})}
@@ -88,7 +105,15 @@ function gdOnScreen(it,text){if(it.onScreen==="secs"&&+it.onScreenS>0)return +it
 /* the slots of its line: the point it is about and the minutes of that point's tour */
 /* round 6: {year} the point's year; a line with variants says the next in turn (n: how many times it has shown, so never the same twice in a row) */
 function gdYearOf(id){var p=(S.wallPois||[]).filter(function(x){return x.id===id})[0];return p&&p.year||""}
-function gdSlots(it,V,c,items){V=V||S.gdVisitor;if(it.about==="point"){var n=(items||gdItems()).filter(function(o){return o.group===it.group}).reduce(function(a,o){return a+gdVisitOf(V,o.id).shown},0);
+/* round 7: every line's slots also carry today (a seasonal line), the variants this visitor has seen (A joke: the least seen) and {thing}
+   (the point the treasure hunt asks for: Ask about the view's own pick, camHuntPick) */
+function gdSlots(it,V,c,items){V=V||S.gdVisitor;var o=gdSlotsOf(it,V,c,items);o.today=gdTodayMD();if(it.pick==="least")o.seen=gdEverOf(V,it.id).seen||{};if(it.tap==="hunt"||it.button==="hunt")o.thing=gdHuntThing();return o}
+/* the points in view as Ask about the view sees them once it is open (its panel hides the foot of the wall) */
+function gdViewOpen(){var k=G.cam.open;G.cam.open=true;try{return camView().pois}finally{G.cam.open=k}}
+/* the hunt asks for a point in view (Ask about the view's own list), so the invitation names the same one; with no camera (the simulator) the wall's points */
+function gdHuntThing(){var P=S.view==="card"&&typeof camView==="function"?gdViewOpen():(S.wallPois||[]).map(function(p){return{id:p.id,name:L(p.name)}}),h=typeof camHuntPick==="function"&&P.length?camHuntPick(P):null;return h?h.name:""}
+function gdSlotsOf(it,V,c,items){if(it.ptJokes)return{id:it.point,point:it.pointName||"",n:gdEverOf(V,it.id).shown||0,jokes:it.jokes,year:gdYearOf(it.point)};
+  if(it.about==="point"){var n=(items||gdItems()).filter(function(o){return o.group===it.group}).reduce(function(a,o){return a+gdVisitOf(V,o.id).shown},0);
     return{id:it.point,point:it.pointName||"",card:!!it.card,n:n,year:gdYearOf(it.point)}}
   var nn=gdEverOf(V,it.id).shown||0;
   if(it.about==="marker"){var mk=c===undefined&&S.view==="card"?gdMarker():null;return mk?{id:mk.id,point:mk.name,year:gdYearOf(mk.id),n:nn}:{n:nn}}
@@ -99,9 +124,9 @@ function gdSlots(it,V,c,items){V=V||S.gdVisitor;if(it.about==="point"){var n=(it
    The visitor > Screen reader on, the Lab's stand-in for VoiceOver / TalkBack): the bubble is announced politely instead */
 function gdSpoken(it,o){if(S.ui.gdSR)return false;if(o&&o.spoken!=null)return!!o.spoken;var h=!!S.gdVisitor.visit.heard;return it.spoken==="heard"?h:it.spoken==="kind"&&it.kindSpoken==="heard"&&h}
 /* a tip starts (the scheduler's choice, or pulled: an Editor demo, which never writes the memory) and ends */
-function gdStart(it,why,o){o=o||{};if(G.gd.cur)gdStop("another tip");if(it.form==="cue")return gdCueStart(it,why,o);var now=gdNow(),ret=o.ret!=null?!!o.ret:S.gdVisitor.visits>1&&!o.first,slots=gdSlots(it),text=o.text!=null?o.text:gdLine(it,ret,slots),spoken=gdSpoken(it,o);
-  G.gd.cur={item:it,at:now,until:now+(o.ms||gdOnScreen(it,text)),realMin:G.gd.manual?0:performance.now()+(G.gd.rate>1?Math.max(600,15000/G.gd.rate):0),pull:!!o.pull,why:why||"",text:text,slots:slots,ret:ret,spoken:spoken};
-  if(!o.pull){gdMemStart(S.gdVisitor,it,now,text);gdSaid(it,text,now)}
+function gdStart(it,why,o){o=o||{};if(G.gd.cur)gdStop("another tip");if(it.form==="cue")return gdCueStart(it,why,o);var now=gdNow(),ret=o.ret!=null?!!o.ret:S.gdVisitor.visits>1&&!o.first,slots=gdSlots(it),key=o.text!=null?null:gdLineKey(it,ret,slots),text=o.text!=null?o.text:gdLine(it,ret,slots),spoken=gdSpoken(it,o);
+  G.gd.cur={item:it,answer:!!o.answer,at:now,until:now+(o.ms||gdOnScreen(it,text)),realMin:G.gd.manual?0:performance.now()+(G.gd.rate>1?Math.max(600,15000/G.gd.rate):0),pull:!!o.pull,why:why||"",text:text,slots:slots,ret:ret,spoken:spoken};
+  if(!o.pull){gdMemStart(S.gdVisitor,it,now,text,key,!!o.answer);gdSaid(it,text,now)}
   G.gd.skipKey="";gdLog("shown",(o.pull?"(pulled) ":"")+(why||it.label)+(spoken?" · spoken":""));gdPresent(G.gd.cur);if(spoken)gdVoice(G.gd.cur);return G.gd.cur}
 /* how: "acted", "dismissed", "fewer", "ignored", or "" (the moment ended it); round 1's true is a dismissal */
 /* a cue starts: its look on its element (card/hints.js's cueStart gives how long it plays; the Locate label: until seen); its memory
@@ -171,21 +196,37 @@ function gdCueSeen(id){if(gdCueOn(id))gdStop("seen (4 s, or the pin tapped)","se
 function gdWalk(from){var g=gdGroupById("howto");if(!g||g.on===false)return false;if(G.gd.cur)gdStop("the visitor asked for How to use the card");
   if(S.view==="card"&&S.stop==="closed"&&!G.on){gdStart(gdHowWall(),"asked by the visitor ("+from+")",{pull:true,ms:9000});return true}
   gdLog("shown","(pulled) How to use the card ("+from+"): "+g.items.filter(function(id){return S.guidance.items[id].on}).length+" steps on the card");gdWalkCard();return true}
-on("startTour.before",function(){if(G.gd.cur&&!G.gd.cur.pull)gdStop("the tour started")});on("runStep.before",function(){G.gd.between=false});on("stopTour.after",function(){G.gd.between=false});
+on("startTour.before",function(){G.gd.hold=false;if(G.gd.cur&&!G.gd.cur.pull)gdStop("the tour started")});on("runStep.before",function(){G.gd.between=false});on("stopTour.after",function(){G.gd.between=false});
+/* ----- round 7: the tour moves on to its next step (guide/tour.js's next asks next.answer): the scheduler is asked at that moment
+   (context.moment = "between": only a Moment); a Moment it picks shows and holds the next step until it ends (G.gd.hold: present.js's
+   gdResume goes on); a Moment showing holds it too. The tour stopping ends a Moment (never "ignored": the moment ended it) ----- */
+on("next.answer",function(){if(!G.on||G.paused||noDraw||G.gd.demo)return;var c=G.gd.cur;if(c&&c.item.form==="moment"){G.gd.hold=true;return true}if(c)return;
+  /* (the tour moving on ends the line it was saying: a Next pressed mid-line is not a sentence still being said) */
+  G.gd.moment="between";var r;try{var ctx=gdContext();ctx.speaking=false;r=gdPick(gdItems(),S.gdVisitor,ctx,gdNow())}finally{G.gd.moment=null}
+  G.gd.last=r;if(r.item&&r.item.form==="moment"){G.gd.hold=true;gdStart(r.item,r.why);return true}
+  var key="between|"+r.why.replace(/\d+(\.\d+)?/g,"#");if(key!==G.gd.skipKey){G.gd.skipKey=key;gdLog("skipped","between two steps: "+r.why)}});
+on("stopTour.before",function(){G.gd.hold=false;var c=G.gd.cur;if(c&&c.item.form==="moment")gdStop("the tour stopped")});
+/* a Moment ends (mascot/azu2d.js): a tap on its prop is acted, 8 s with no tap ignored */
+on("moment.ended",function(k,done){var c=G.gd.cur;if(c&&c.item.form==="moment")gdStop(done?"tapped: Azu "+(k==="cookie"?"eats the cookie":"drinks")+", and the tour goes on":"8 s with no tap: the tour goes on",done?"acted":"ignored")});
+/* a treasure found in Ask about the view's hunt (world/camera-ask.js): the hunt's invitation is done */
+on("hunt.found",function(id){gdUsed("hunt","found")});
 /* the loop: the wall seen since when, the tip on screen ends, or the scheduler is asked (a choice that would cover its target is asked again without it) */
 function gdTick(){if(noDraw)return;var now=gdNow(),w=gdOnWall();if(w&&!G.gd.onWall)G.gd.wallAt=now;G.gd.onWall=w;
-  var c=G.gd.cur;if(c){var e=gdEnds(c,now,{onWall:w,get onCard(){return gdOnCard()},get locate(){return!!cueTargets(false).locate},get marker(){return gdMarker()},get central(){return gdCentral()},get gbtn(){return gdGbtn()},realOk:performance.now()>=c.realMin,stay:!!gdPrefs().stay});
+  var c=G.gd.cur;if(c){var e=gdEnds(c,now,{moment:!!G.moment,onWall:w,get onCard(){return gdOnCard()},get locate(){return!!cueTargets(false).locate},get marker(){return gdMarker()},get central(){return gdCentral()},get gbtn(){return gdGbtn()},realOk:performance.now()>=c.realMin,stay:!!gdPrefs().stay});
     if(e&&e!=="wait")gdStop(e[0],e[1]);return}
   if(G.gd.demo&&G.gd.demoOwner!==G.demoSeq){G.gd.demo=false;gdChip(null)}if(G.gd.demo)return;
   var ctx=gdContext(),items=gdItems(),r=gdPick(items,S.gdVisitor,ctx,now);
   for(var k=0;k<4&&r.item;k++){var cov=gdCovers(r.item);if(!cov)break;ctx.covers[r.item.id]=cov;r=gdPick(items,S.gdVisitor,ctx,now)}
-  G.gd.last=r;G.gd.ctx=ctx;if(r.item){gdStart(r.item,r.why);return}
+  G.gd.last=r;G.gd.ctx=ctx;if(r.item){gdStart(r.item,r.why,{answer:r.answer});return}
   /* a skip is logged when its reason changes (the numbers aside) */
   var key=r.why.replace(/\d+(\.\d+)?/g,"#");if(key!==G.gd.skipKey){G.gd.skipKey=key;gdLog("skipped",r.why)}}
 /* why the tip on the screen ends now: [why, how], "wait" (Fewer like this? asked), or null (it stays). Its screen left (a wall tip off the
    wall; a cue off its card, the Locate label also when its pin goes), its target gone (its marker, its point out of the middle, the ✦),
    or its time up (a cue: seen; a tip: ignored). W is the moment (the page's, or the simulator's) */
-function gdEnds(c,now,W){var it=c.item;if(it.screen==="wall"&&!W.onWall)return["the wall left the screen",""];var keep=it.expires==="never";
+function gdEnds(c,now,W){var it=c.item;
+  /* round 7: a Moment on the page ends with Azu's prop (moment.ended: a tap, or 8 s); in the simulator by its time */
+  if(it.form==="moment"&&W.moment!==undefined)return W.moment?null:["the moment ended",""];
+  if(it.screen==="wall"&&!W.onWall)return["the wall left the screen",""];var keep=it.expires==="never";
   if(c.cue&&(!W.onCard||it.about==="locate"&&!(c.pull||W.locate)))return["its card left the screen",""];
   if(!c.pull&&!keep){if(it.about==="marker"&&!W.marker)return["its marker left the screen",""];
     if(it.about==="middle"||it.about==="point"){var cc=W.central;if(!cc||cc.id!==c.slots.id)return["its point left the middle",""]}
@@ -233,16 +274,21 @@ var GD_SIM_SCRIPTS=[
     ev:[[0,"at","painting"]],react:{}},
   {id:"tour",name:"Tour lover",says:"a tour lover: it taps the marker when Tap a marker shows and starts the tour, takes every tour it is offered, taps each remark and starts the tour again at 13:00",
     ev:[[0,"at","painting"],[290,"pan","torreao"],[400,"pan","painting"],[560,"pan","square"],[700,"pan","painting"],[780,"tour",0],[1000,"pan","river"],[1100,"pan","painting"]],
-    react:{tapmarker:[1,2,"tour"],tourof:[0,2,"tap"],inview:[0,2,"tap",15]}},
+    react:{tapmarker:[1,2,"tour"],tourof:[0,2,"tap"],inview:[0,2,"tap",15],water:[0,2,"tap"],cookie:[0,2,"tap"]}},
   {id:"expert",name:"Expert",says:"an expert: a returning visitor who has used everything (the card, a tour, Ask, Ask about the view, the ✦ menu, How to use the card); it pans across every point, opens the card at 8:00 for 60 s and ignores the tips",
     returning:true,used:["card","tour","ask","view","menu","wk_grab","wk_settings","wk_bar","wk_locate","wk_block"],
-    ev:[[0,"at","square"],[60,"pan","torreao"],[140,"pan","river"],[230,"pan","castle"],[330,"pan","arcade"],[420,"pan","painting"],[480,"card",60],[700,"pan","square"],[900,"pan","torreao"],[1080,"pan","painting"]],react:{}}];
+    ev:[[0,"at","square"],[60,"pan","torreao"],[140,"pan","river"],[230,"pan","castle"],[330,"pan","arcade"],[420,"pan","painting"],[480,"card",60],[700,"pan","square"],[900,"pan","torreao"],[1080,"pan","painting"]],react:{}},
+  /* round 7: a family on a wall with a Solemn point (Terreiro do Paço, marked Solemn for this visit): it in the middle 5 minutes, then a
+     Lively point (the Torreão, with a joke of its own); no Fun while the Solemn point is in the middle */
+  {id:"solemn",name:"Family on a Solemn wall",says:"a family (Who's exploring: Family) on the Ribeira wall, where Terreiro do Paço is marked Solemn for this visit: it holds the phone on it for 5 minutes, then pans to the Torreão (a point with a joke of its own), opens the card at 6:40 for 40 s, and looks round the wall; it ignores the tips",
+    aud:"family",solemn:["square"],ev:[[0,"at","square"],[300,"pan","torreao"],[400,"card",40],[470,"pan","river"],[600,"pan","castle"],[760,"pan","painting"],[900,"pan","torreao"],[1050,"pan","arcade"]],react:{}}];
 function gdSimScript(id){return GD_SIM_SCRIPTS.filter(function(x){return x.id===id})[0]||GD_SIM_SCRIPTS[0]}
 /* a visit simulated with these settings (set: {g, life}, a copy of S.guidance and Mascot > Liveliness; none: the Editor's now) */
 function gdSimulate(id,set){var sc=gdSimScript(id),keepG=S.guidance,keepL=S.guideCfg.life;if(set){S.guidance=set.g;S.guideCfg.life=set.life}
   try{return gdSimRun(sc)}finally{S.guidance=keepG;S.guideCfg.life=keepL}}
 function gdSimRun(sc){var items=gdItems(),base=gdCtxBase(),V=gdNewMemory(0),pois=S.wallPois||[],cardP=pois.filter(function(p){return p.card})[0],cur=null,due=[],occ={},occB={},skipKey="";
   var res={id:sc.id,name:sc.name,dots:[],quiet:[],skips:[],speech:[],learned:[],ms:GD_SIM_MS},lg=function(what,why){res.learned.push({t:now,why:why})},now=0;
+  var solemnAt=function(){var id=w.where==="wall"?w.point:cardP&&cardP.id;return(sc.solemn||[]).indexOf(id)>=0};
   var w={where:"wall",point:null,moveTill:-1e9,movedAt:null,touchAt:null,actAt:null,scrollAt:null,cardAt:null,openAt:null,stage:-1,cardTill:-1,wallAt:0,panel:null,panelTill:-1,tour:null};
   if(sc.returning){V.visits=2;V.visit.n=2;V.met=true;(sc.used||[]).forEach(function(f){gdMemUsed(V,f,-60000,items)})}
   var poi=function(id){return pois.filter(function(p){return p.id===id})[0]};
@@ -251,14 +297,14 @@ function gdSimRun(sc){var items=gdItems(),base=gdCtxBase(),V=gdNewMemory(0),pois
   var central=function(){var p=w.where==="wall"&&!moving()&&w.point?poi(w.point):null;return p?{id:p.id,name:L(p.name),x:195,y:380,middle:true,tour:!!p.card,min:p.card?tourMinutes():null}:null};
   var gbtn=function(){return w.where==="wall"||w.where==="card"&&w.stage>=2?{name:"the ✦",x:350,y:760,middle:false}:null};
   var cues=function(moment){var o={},st=w.where==="card"&&w.stage>=0?GD_SIM_CARD[w.stage]:null;if(st){st[2].forEach(function(k){o[k]=CUE_WHY[k]});if(moment==="open"&&st[1]==="half")o.grab=CUE_WHY.grab}return o};
-  var ctxAt=function(moment){var t=-Infinity,mv=w.movedAt,tr=w.where==="tour"?{between:!!w.tour.between,step:w.tour.i}:null,oc=onCard();
+  var ctxAt=function(moment){var t=-Infinity,mv=w.movedAt,tr=w.where==="tour"?{between:!!w.tour.between,step:w.tour.i,talked:(now-w.tour.talkFrom)/1000,toEnd:w.tour.i+1===w.tour.n-1}:null,oc=onCard();
     return Object.assign({},base,{scrollAt:w.scrollAt,onCard:oc,cues:oc?cues(moment):{},moment:moment||null,demo:false,showing:cur?cur.item.label:null,remark:null,pokes:V.visit.pokes||0,
       idleSince:Math.max(w.actAt==null?t:w.actAt,mv==null?t:mv,V.visit.at||0),speaking:!!(w.tour&&now<w.tour.lineTill),state:null,panel:w.panel,dockFull:false,tour:tr,movedAt:mv,touchAt:w.touchAt,
       cardAt:oc?w.cardAt:null,onWall:w.where==="wall",where:w.where==="wall"?"":w.where==="tour"?"the tour":"a card is open",marker:marker(),gbtn:tr?null:gbtn(),central:central(),covers:{},
-      stillSince:Math.max(mv==null?t:mv,w.wallAt==null?t:w.wallAt),returning:V.visits>1})};
+      stillSince:Math.max(mv==null?t:mv,w.wallAt==null?t:w.wallAt),returning:V.visits>1,solemn:solemnAt(),aud:sc.aud||base.aud})};
   var touch=function(){w.touchAt=w.actAt=now};
-  var start=function(it,why){var cue=it.form==="cue",slots=gdSlots(it,V,central(),items),text=cue?(it.says?TXT(it.says):""):gdLine(it,V.visits>1,slots),dur=cue?GD_SIM_CUE[it.about]||2000:gdOnScreen(it,text);
-    cur={item:it,at:now,until:now+dur,cue:cue,pull:false,slots:slots,text:text,why:why};gdMemStart(V,it,now,text);var b=it.base||it.id;occ[it.id]=(occ[it.id]||0)+1;occB[b]=(occB[b]||0)+1;
+  var start=function(it,why){var cue=it.form==="cue",slots=gdSlots(it,V,central(),items),text=cue?(it.says?TXT(it.says):""):gdLine(it,V.visits>1,slots),dur=cue?GD_SIM_CUE[it.about]||2000:it.form==="moment"?8000:gdOnScreen(it,text);
+    cur={item:it,at:now,until:now+dur,cue:cue,pull:false,slots:slots,text:text,why:why};gdMemStart(V,it,now,text,cue?null:gdLineKey(it,V.visits>1,slots));var b=it.base||it.id;occ[it.id]=(occ[it.id]||0)+1;occB[b]=(occB[b]||0)+1;
     var d={t:now,end:null,id:it.id,base:b,at:it.point||w.point,label:it.label.replace(/\{point\}/g,slots.point||"the point"),kind:it.kind,cue:cue,text:text,why:why,n:occ[it.id],how:""};res.dots.push(d);cur.dot=d;skipKey="";
     var rc=sc.react&&sc.react[b];if(rc&&(rc[0]===0||rc[0]===occB[b]))due.push({t:now+rc[1]*1000,act:rc[2],dur:rc[3],dot:d})};
   var stop=function(why,how){var c=cur;if(!c)return;cur=null;gdMemEnd(V,c,how,now,lg);c.dot.end=now;c.dot.how=how;c.dot.endWhy=why};
@@ -271,7 +317,7 @@ function gdSimRun(sc){var items=gdItems(),base=gdCtxBase(),V=gdNewMemory(0),pois
     if(quiet)return;if(cur&&cur.cue)stop("a new card","");if(!cur){var r=gdPick(items,V,ctxAt("open"),now);if(r.item)start(r.item,r.why)}};
   var closeCard=function(){w.where="wall";w.stage=-1;w.openAt=null;w.cardTill=-1;w.wallAt=now;touch()};
   var startTour=function(k){if(cur)stop("the tour started","");if(!onCard())openCard(0,true);var n=Math.max(1,(S.guideSteps||[]).length),step=tourMinutes()*60000/n;
-    w.where="tour";w.openAt=null;w.tour={i:0,n:n,line:step-2000,lineTill:now+step-2000,pauseTill:null,between:false,stopAfter:k||0};res.speech.push([now,now+step-2000])};
+    w.where="tour";w.openAt=null;w.tour={i:0,n:n,line:step-2000,lineTill:now+step-2000,pauseTill:null,between:false,stopAfter:k||0,talkFrom:now,asked:false};res.speech.push([now,now+step-2000])};
   var endTour=function(){w.tour=null;w.where="card";w.stage=0;w.cardTill=now+4000};
   var tap=function(){var c=cur,it=c.item;touch();
     if(it.tap==="view"){stop("tapped: Ask about the view opens","acted");panel("Ask about the view",20,"view");return}
@@ -292,7 +338,10 @@ function gdSimRun(sc){var items=gdItems(),base=gdCtxBase(),V=gdNewMemory(0),pois
     if(w.panel&&now>=w.panelTill){w.panel=null;touch()}
     if(w.where==="card"&&w.openAt!=null){var el=(now-w.openAt)/1000,s0=w.stage;while(w.stage+1<GD_SIM_CARD.length&&GD_SIM_CARD[w.stage+1][0]<=el)w.stage++;if(w.stage!==s0){if(w.stage===1)touch();else w.scrollAt=now}}
     var T=w.tour;if(T){if(T.pauseTill==null&&now>=T.lineTill){V.visit.heard=true;T.between=true;T.pauseTill=now+2000;used("tour")}
-      else if(T.pauseTill!=null&&now>=T.pauseTill){T.i++;if(T.i>=T.n||T.stopAfter&&T.i>=T.stopAfter)endTour();else{T.between=false;T.pauseTill=null;T.lineTill=now+T.line;res.speech.push([now,T.lineTill])}}}
+      else if(T.pauseTill!=null&&now>=T.pauseTill&&!(cur&&cur.item.form==="moment")){
+        /* the tour moves on: the scheduler asked at that moment (only a Moment); one it picks holds the next step until it ends */
+        if(!T.asked){T.asked=true;if(!cur&&T.i+1<T.n&&!(T.stopAfter&&T.i+1>=T.stopAfter)){var rm=gdPick(items,V,ctxAt("between"),now);if(rm.item){start(rm.item,rm.why);T.talkFrom=now}}}
+        if(!(cur&&cur.item.form==="moment")){T.asked=false;T.i++;if(T.i>=T.n||T.stopAfter&&T.i>=T.stopAfter)endTour();else{T.between=false;T.pauseTill=null;T.lineTill=now+T.line;res.speech.push([now,T.lineTill])}}}}
     if(w.where==="card"&&now>=w.cardTill)closeCard();
     if(moving())w.movedAt=now;
     if(cur){var en=gdEnds(cur,now,{onWall:w.where==="wall",onCard:onCard(),locate:!!cues().locate,marker:marker(),central:central(),gbtn:w.where==="tour"?null:gbtn(),realOk:true});if(en&&en!=="wait")stop(en[0],en[1]);continue}

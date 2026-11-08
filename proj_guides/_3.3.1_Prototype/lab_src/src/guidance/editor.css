@@ -105,3 +105,19 @@
 .gdedtoast .ubtn{background:#FFD98A;color:#1A1814;border-color:#FFD98A;font-weight:700}
 /* a demo chip on the phone stays on one line inside it */
 .gdchip{max-width:calc(100% - 24px);overflow:hidden;text-overflow:ellipsis}
+/* round 7: Seasonal's lines by date (a card each: its words and ▸, then From / To and the Solemn day choice), the Fun kind's Solemn note,
+   Specific Marker › Guide script › Jokes */
+.gdseasons{gap:6px}
+.gdvar.gdseason{display:grid;grid-template-columns:1fr;gap:6px;padding:7px 9px;border:1px solid #4A4A4A;border-radius:6px;background:#2E2E2E}
+.gdvar.gdseason.on{border-color:#4C8BD6;box-shadow:inset 3px 0 0 #4C8BD6}
+.gdseason .gdsline{display:flex;align-items:center;gap:8px;min-width:0}
+.gdseason .gdsline .gdvt{flex:1 1 auto}
+.gdseason .gdsdate{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.gdseason .gdsdate label{display:flex;align-items:center;gap:5px;font-size:11px;color:#B9C4CF}
+.gdseason input.gdmd{width:62px;flex:none;font:12px/1 var(--mono);text-align:center;padding:3px 4px}
+.gdseason .gdsw2{font-size:11px;color:#9AA0A6;min-width:96px}
+.gdseason .gdsdate .seg{flex:1 1 230px}
+.gdsolemn{border-left:3px solid #8E7CC3;padding-left:8px}
+.badge.gdsolb{font-family:inherit;letter-spacing:0;text-transform:none}
+.gdjk{margin:8px 0 4px;padding-top:6px;border-top:1px solid #3A3A3A}
+.gdjk .gdjkt td:first-child{font-size:11px;color:#B9C4CF}

@@ -35,8 +35,10 @@ function camOffline(kind){var v=camView(),P=v.pois;if(!P.length)return TXT("cam_
   if(kind==="story"){camLight([c.id]);var r=c.card?byId(S.story,"r2"):null;return r?L(r.c.text):fmt(TXT("cam_story_none"),c.name)}
   if(kind==="route"){var rt=P.slice().sort(function(a,b){return a.x-b.x}).map(function(p){return p.id});G.cam.route=rt;camLight(rt);return TXT("cam_route")+" "+rt.map(function(id,i){return(i+1)+". "+P.filter(function(p){return p.id===id})[0].name}).join(" · ")}
   if(kind==="oldest"){var o=P.filter(function(p){return p.year}).sort(function(a,b){return a.year-b.year})[0];if(!o)return TXT("cam_none");camLight([o.id]);return fmt(TXT("cam_oldest"),o.name,o.year)}
-  if(kind==="kids"){var h=P.filter(function(p){return p.id==="river"})[0]||P[P.length-1];G.cam.hunt=h.id;G.cam.lit=[];return fmt(TXT("cam_hunt"),h.name)}
+  if(kind==="kids"){var h=camHuntPick(P);G.cam.hunt=h.id;G.cam.lit=[];return fmt(TXT("cam_hunt"),h.name)}
   return""}
+/* the point the treasure hunt asks for (the Tagus, else the last in view): also named by the guidance's hunt invitation ({thing}) */
+function camHuntPick(P){return P.filter(function(p){return p.id==="river"})[0]||P[P.length-1]||null}
 function camAsk(q,kind){if(firstAnswer("camAsk.answer",q,kind)!==undefined)return;G.cam.open=true;G.cam.busy=true;G.cam.route=[];G.cam.lit=[];G.cam.hunt=null;camLayer();
   if(!sampleFn||kind){setTimeout(function(){camSay(camOffline(kind||"what"))},350);return}
   var ctx=camContext(),prompt="You are Azu, the guide of a heritage app, talking to a visitor who points the phone at a tiled wall in Lisbon. You do not see the picture: you get the points of the wall now in view, where each sits on the screen, and the one in the middle. Answer only from these and from what you know for sure about them; never invent dates or facts. Answer in "+(ctx.language==="pt-PT"?"European Portuguese":"English")+", in at most 3 short spoken sentences, for a "+ctx.audience+" visitor. Use the tools: highlight_points for the points you name; make_route for a route (an ordered list of ids, each once).\n\nVIEW: "+JSON.stringify(ctx)+"\n\nVISITOR: "+q;
@@ -51,7 +53,7 @@ ph.addEventListener("click",function(e){var t=e.target.closest("[data-camask],[d
   if(t.dataset.camclose){G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};camLayer();stopSpeech();return}
   if(t.dataset.camask){if(!G.cam.open){G.cam.open=true;camLayer();emit("view.opened","the pill");return}listen(false);return}
   if(t.dataset.cchip){var k=t.dataset.cchip;camAsk(TXT("cam_chip_"+k),sampleFn&&k!=="kids"?null:k);if(sampleFn&&k!=="kids")G.cam.lastChip=k;return}
-  var id=t.dataset.cpin;if(G.cam.hunt){if(id===G.cam.hunt){G.cam.hunt=null;haptic();camLight([id]);camSay(TXT("cam_found"))}else{G.cam.answer=TXT("cam_not_it");camLayer()}return}
+  var id=t.dataset.cpin;if(G.cam.hunt){if(id===G.cam.hunt){G.cam.hunt=null;haptic();camLight([id]);camSay(TXT("cam_found"));emit("hunt.found",id)}else{G.cam.answer=TXT("cam_not_it");camLayer()}return}
   var p=S.wallPois.filter(function(x){return x.id===id})[0];if(p&&p.card){G.cam.open=false;S.stop="half";renderPhone(false);emit("card.opened","pin")}},true);
 ph.addEventListener("submit",function(e){var f=e.target.closest(".ca-form");if(!f)return;e.preventDefault();e.stopPropagation();var i=f.querySelector("#caq");if(i&&i.value.trim()){var q=i.value;i.value="";camAsk(q)}},true);
 /* a drag on the wall pans the camera (the Lab's stand-in for moving the phone) */
