@@ -5,8 +5,10 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-07)
 
 - **State:**
-  - **The Lab:** `master` holds guidance rounds 1-6, verified on 2026-11-06/08, published as v35 at the new link (section 1;
-    the old link stays at v29). Its code is in modules by feature
+  - **The Lab:** `master` holds guidance rounds 1-6, verified on 2026-11-06/08, published at
+    https://claude.ai/artifact/Jrejv7X9YLrUZAx2TdCBsN with the 186 voice files and the capabilities (section 1). The
+    developer changed account on 2026-11-08: the old links stay in the old account (QmhHSz… at v34, KDs2… at v29). Its
+    code is in modules by feature
     (`lab_src/src/<area>/<module>.js`), with no wrappers: `lab_src/PROTOTYPE_STRUCTURE.md` says where each feature lives and
     where a change goes. The build only joins files (`build.py`) and refuses wrappers, re-assignments of functions, second
     declarations, defaults set twice and version-named modules (`check_structure.js`, `structure_baseline.json` at 0).
@@ -105,7 +107,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 
 ## 1. Where the work is
 
-- **The target is the Block Components Lab** (https://claude.ai/artifact/QmhHSzTrbJAR3doq1YEoZR), the record copy
+- **The target is the Block Components Lab** (https://claude.ai/artifact/Jrejv7X9YLrUZAx2TdCBsN), the record copy
   `_3.3.1_Prototype/Block Components Lab.html`, and its sources `_3.3.1_Prototype/lab_src/` (modules by feature, the build,
   the tests; `PROTOTYPE_STRUCTURE.md` says where a change goes, `README.md` how to prove and publish it).
 - **Publishing:** the page goes from the record copy on disk, with `root` `_3.3.1_Prototype` (a redeploy to the same link

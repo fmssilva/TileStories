@@ -46,7 +46,7 @@ dialogue, pull_quote, process_steps, swatches, actions, status, poll, collect, f
 wall_locator, related, the four nav blocks, and the future kinds (AI / voice guide).
 
 ## Block Components Lab (2026-11-01, v8)
-Live: https://claude.ai/artifact/QmhHSzTrbJAR3doq1YEoZR -- record copy `Block Components Lab.html`.
+Live: https://claude.ai/artifact/Jrejv7X9YLrUZAx2TdCBsN -- record copy `Block Components Lab.html`.
 Shows: the Detail Card, Specific Marker and Languages & Terms tabs as the target, next to the phone, with every option of Unity's
 card merged in (the Unity audit, `_3.3` sections 6-13): each part's own options, a preview and a page for every kept block kind on
 the demo card, the visitor's Settings panel, the Contents sheet, the Picture viewer and the Video player, each text on its part.

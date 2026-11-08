@@ -8,7 +8,7 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
 - **Words:** `src/core/realstrings.json` (the framework's real words, with their owner part; `python strings.py` re-imports them
   from Unity's `CardStrings.asset`); the Lab's own words are in `src/core/words.js`'s `LABSTR`.
 - **Build:** `python build.py` writes `block-components-lab.html` here (not committed). Copy it to `../Block Components Lab.html` (the
-  record copy) and publish it to https://claude.ai/artifact/QmhHSzTrbJAR3doq1YEoZR.
+  record copy) and publish it to https://claude.ai/artifact/Jrejv7X9YLrUZAx2TdCBsN.
 - **Prove it:** `powershell -ExecutionPolicy Bypass -File tests/runtest8.ps1` opens the page headless with `#selftest`: every option,
   text and demo field must change the phone or be classed behaviour, and every row of the Guide tab and 6 · Audiences has its
   demo (it prints `bad=0` when all is well). It walks the tabs as three walks side by side and sums them (about 3 minutes);
