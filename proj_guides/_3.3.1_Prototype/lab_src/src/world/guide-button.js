@@ -22,14 +22,29 @@ function gbWrapHtml(tour){var wall=S.stop==="closed"&&!tour,az=gbAzu()&&!tour?'<
     pz=tour&&S.dockH==="compact"?'<button type="button" class="gb-pause" data-g="'+(G.paused?"play":"pause")+'" aria-label="'+(G.paused?TXH("guide_ctrl_play"):TXH("guide_ctrl_pause"))+'">'+ico(G.paused?"play":"pause")+'</button>':"";
   return'<div class="gbtn-wrap side-'+S.guideCfg.gbSide+(wall?" onwall":"")+(tour?" intour":"")+'">'+(gbOn()?gbHtml(tour):"")+pz+az+'</div>'}
 function fabLayer(){emitLatestFirst("fabLayer.before");ph.querySelectorAll(".gbtn-wrap:not(.intour),.gbmenu").forEach(function(x){x.remove()});
-  if(S.view!=="card"||G.on||S.stop==="peek"||(G.cam.open&&S.stop==="closed")||(S.stop!=="closed"&&heroStartSeen())){G.fab.menu=false;return}
+  if(S.view!=="card"||G.on||G.gb.tour||S.stop==="peek"||(G.cam.open&&S.stop==="closed")||(S.stop!=="closed"&&heroStartSeen())){G.fab.menu=false;gbBand();return}
   ph.insertAdjacentHTML("beforeend",gbWrapHtml(false));
   if(G.fab.menu){ph.insertAdjacentHTML("beforeend",gbMenuHtml());placeNear(ph.querySelector(".gbmenu"))}
-  gbClear();emit("fabLayer.after")}
+  gbClear();gbBand();emit("fabLayer.after")}
 /* the ✦ and Azu keep clear of what shares the foot of the screen: on the card, on the Locate Button's side, they rise above its pin */
 function gbClear(){var w=ph.querySelector(".gbtn-wrap:not(.intour)");
   var lp=ph.querySelector(".locpin");if(!w||!lp||S.stop==="closed"||getComputedStyle(lp).display==="none")return;var a=w.getBoundingClientRect(),b=lp.getBoundingClientRect(),q=ph.getBoundingClientRect().height/ph.offsetHeight;
   if(a.right>b.left&&a.left<b.right&&a.bottom>b.top&&a.top<b.bottom)w.style.bottom=Math.round((ph.getBoundingClientRect().bottom-b.top)/q+8)+"px"}
+/* (guidance round 7, the look fix) on the card the ✦ and Azu never cover words: a band of the card's paper sits behind them, from just
+   above them down to the foot (under the Navigation Bar, the ✦ and the Locate Button), so the card's words scroll away under it as under
+   the bar; the card's foot gains the band's height, so its last words still rise above it. Unity: a VisualElement band with the card's
+   background colour and a ramp texture along its top edge (no USS gradient), placed before the bar in the hierarchy (draw order); the
+   ScrollView's bottom padding grows by its height */
+/* in a tour the same rule for the tour's ✦ and its caption above the dock: a band of the dock's own colour behind that row (from just above
+   the ✦ and the caption down under the dock), so the card's words (the hero's eyebrow at the first step) never sit under them */
+function gbTourBand(){var w=ph.querySelector(".gbtn-wrap.intour"),d=ph.querySelector(".gdock"),old=ph.querySelector(".gbband.tour");
+  if(!G.on||!w||!d||!w.getClientRects().length){if(old)old.remove();return}var top=w.offsetTop,bb=ph.querySelector(".gbubble");if(bb&&bb.getClientRects().length)top=Math.min(top,bb.offsetTop);
+  var b=old||document.createElement("div"),t=Math.round(top-24);b.className="gbband tour";b.setAttribute("aria-hidden","true");b.style.top=t+"px";b.style.setProperty("--gbband",getComputedStyle(d).backgroundColor);if(!old)ph.insertBefore(b,d)}
+function gbBand(){var w=ph.querySelector(".gbtn-wrap:not(.intour)"),old=ph.querySelector(".gbband:not(.tour)");
+  if(!w||S.view!=="card"||S.stop==="closed"||G.on||G.gb.tour){if(old)old.remove();scr.style.paddingBottom="";return}
+  var pr=ph.getBoundingClientRect(),q=pr.height/ph.offsetHeight,top=Infinity;[].forEach.call(w.children,function(x){var r=x.getBoundingClientRect();if(r.height)top=Math.min(top,(r.top-pr.top)/q)});if(!isFinite(top))return;
+  var b=old||document.createElement("div"),t=Math.round(top-24),h=ph.offsetHeight-t;b.className="gbband";b.setAttribute("aria-hidden","true");b.style.top=t+"px";if(!old)ph.insertBefore(b,ph.querySelector("#navbar")||w);
+  var pb=Math.max(110,h+12)+"px";if(scr.style.paddingBottom!==pb)scr.style.paddingBottom=pb}
 /* the label says "Guide" for 4 s of being seen, then folds into the ✦: the Locate Button's rule (card/locate.js's seenLabel) */
 seenLabel({label:function(){return ph.querySelector(".gbtn:not(.tour) .gb-lab")},live:function(){return S.guideCfg.gbFold&&S.guideCfg.gbIcon!=="word"&&S.view==="card"&&S.stop!=="peek"},
   done:function(){return G.gb.folded},add:function(ms){return G.gb.shown+=ms},fold:function(){G.gb.folded=true;var l=ph.querySelector(".gbtn:not(.tour) .gb-lab");if(l)l.classList.add("fold")}});
@@ -51,13 +66,15 @@ function gbGo(k){G.fab.menu=false;
   if(k==="view"){G.cam.open=true;renderPhone(true);emit("view.opened","the ✦ menu");var q=ph.querySelector("#caq");if(q)q.focus({preventScroll:true});return}
   if(k==="settings"){S.settingsOpen=true;renderPhone(true);var v=ph.querySelector(".vset"),g=v&&v.querySelector(".vguide");if(g){v.scrollTop=Math.max(0,g.offsetTop-12);g.classList.remove("pfocus");void g.offsetWidth;g.classList.add("pfocus");setTimeout(function(){g.classList.remove("pfocus")},1800)}}}
 /* a tour from a card at Half: the card rises to Full first (lowered again by the visitor, the tour goes on there) */
-on("startTour.before",function(){G.fab.menu=false;ph.querySelectorAll(".gbtn-wrap,.gbmenu").forEach(function(x){x.remove()});if(S.view==="card"&&S.stop!=="full"){S.stop="full";renderPhone(true)}});
-on("stopTour.after",function(){ph.querySelectorAll(".gbtn-wrap.intour").forEach(function(x){x.remove()});fabLayer()});
+/* a tour starting: the card's ✦, its Azu and their band go (the tour has its own ✦ above the dock); the redraw that puts the card at Full
+   runs before G.on is set, so it is marked as the tour's (G.gb.tour): fabLayer draws no second ✦ and Azu behind the tour's (guidance round 7's look fix) */
+on("startTour.before",function(){G.fab.menu=false;ph.querySelectorAll(".gbtn-wrap,.gbmenu,.gbband").forEach(function(x){x.remove()});scr.style.paddingBottom="";if(S.view==="card"&&S.stop!=="full"){S.stop="full";G.gb.tour=true;try{renderPhone(true)}finally{G.gb.tour=false}}});
+on("stopTour.after",function(){ph.querySelectorAll(".gbtn-wrap.intour,.gbband.tour").forEach(function(x){x.remove()});fabLayer()});
 /* ----- during a tour: the ✦ above the dock (Mini, Peek) or where the dock was (Compact), with the progress ring and, at Compact, a pause; a tap shows or hides the dock ----- */
 on("renderGuide.after",function(){var o=ph.querySelector(".gbtn-wrap.intour");if(o)o.remove();if(!G.on||!gbOn()||!dockOn()||S.dockH==="full")return;
-  ph.insertAdjacentHTML("beforeend",gbWrapHtml(true));var w=ph.querySelector(".gbtn-wrap.intour"),d=ph.querySelector(".gdock");w.style.bottom=(d?ph.offsetHeight-d.offsetTop+8:22)+"px";placeBubble()});
+  ph.insertAdjacentHTML("beforeend",gbWrapHtml(true));var w=ph.querySelector(".gbtn-wrap.intour"),d=ph.querySelector(".gdock");w.style.bottom=(d?ph.offsetHeight-d.offsetTop+8:22)+"px";placeBubble();gbTourBand()});
 setInterval(function(){if(!G.on)return;var c=ph.querySelector(".gbtn.tour .pg"),b=ph.querySelector(".gbtn.tour .gb-bar"),p=gbProgress();if(c)c.style.strokeDasharray=(GBC*p).toFixed(1)+" "+GBC.toFixed(1);if(b)b.style.width=(p*100).toFixed(1)+"%";
-  var w=ph.querySelector(".gbtn-wrap.intour"),d=ph.querySelector(".gdock");if(w)w.style.bottom=(d?ph.offsetHeight-d.offsetTop+8:22)+"px"},200);
+  var w=ph.querySelector(".gbtn-wrap.intour"),d=ph.querySelector(".gdock");if(w)w.style.bottom=(d?ph.offsetHeight-d.offsetTop+8:22)+"px";gbTourBand()},200);
 /* the bubble above the dock moves beside the ✦ (Mini, Peek), or above it (Compact) */
 setInterval(function(){var b=ph.querySelector(".gbubble"),w=ph.querySelector(".gbtn-wrap.intour");if(!b)return;b.style.left=w&&ph.querySelector(".gdock")&&S.guideCfg.gbSide==="left"?(w.offsetLeft+w.offsetWidth+8)+"px":"";b.style.right=w&&ph.querySelector(".gdock")&&S.guideCfg.gbSide==="right"?(ph.offsetWidth-w.offsetLeft+8)+"px":""},150);
 /* ----- the taps: the ✦ (its menu, or during a tour the dock), a menu item; a tap elsewhere closes the menu ----- */
@@ -72,7 +89,7 @@ function azuTapDo(act){if(act==="menu"){gbMenu();return}if(act==="dock"){S.dockH
 /* the card's scroll decides whether the hero's Start is still in sight */
 var fabT=0;scr.addEventListener("scroll",function(){if(G.on||S.stop==="closed")return;clearTimeout(fabT);fabT=setTimeout(function(){var had=!!ph.querySelector(".gbtn-wrap"),want=!heroStartSeen();if(had!==want)fabLayer()},120)},{passive:true});
 /* and every 400 ms (a card still rising, a stop changed by a drag): the button follows what is on the screen */
-setInterval(function(){if(G.on||S.view!=="card"||S.stop==="closed"||S.stop==="peek")return;var had=!!ph.querySelector(".gbtn-wrap"),want=!heroStartSeen();if(had!==want)fabLayer();else if(had)gbClear()},400);
+setInterval(function(){if(G.on||S.view!=="card"||S.stop==="closed"||S.stop==="peek")return;var had=!!ph.querySelector(".gbtn-wrap"),want=!heroStartSeen();if(had!==want)fabLayer();else if(had){gbClear();gbBand()}},400);
 /* ----- the guide's settings, where the visitor's Settings live: the voice, its speed and the captions (Who's exploring is there already) ----- */
 on("settingsPanel.html",function(h){var c=S.guideCfg,o=function(k,v,lab){return'<button type="button" data-gset="'+k+'|'+v+'" aria-pressed="'+(String(c[k])===v)+'">'+esc(lab)+'</button>'};
   var g='<div class="vguide"><small>'+TXH("settings_guide")+'</small><div class="vo">'+o("voice","recorded",TXT("settings_voice_rec"))+o("voice","device",TXT("settings_voice_dev"))+'</div>'+

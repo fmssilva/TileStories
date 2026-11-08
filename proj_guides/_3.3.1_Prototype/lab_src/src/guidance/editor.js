@@ -28,9 +28,12 @@ var GD_CUE_SEL={nudge:"#grab",label:".locpin",navbar:"#navbar",ba:"[data-ba]",st
 COMP["gd:g:card"]=["Guide","Guidance › The card (cues)"];FOCUS["gd:g:card"]=["card","#grab","half"];COMP["gd:g:howto"]=["Guide","Guidance › How to use the card"];FOCUS["gd:g:howto"]=["card",".chrome","half"];
 Object.keys(GD_CUE_SEL).forEach(function(id){COMP["gd:i:"+id]=["Guide","Guidance › The card › "+S.guidance.items[id].label];FOCUS["gd:i:"+id]=["card",GD_CUE_SEL[id].split(",")[0],id==="nudge"||id==="label"?"half":"full"]});
 gdGroupById("howto").items.forEach(function(id){var it=S.guidance.items[id];COMP["gd:i:"+id]=["Guide","Guidance › How to use the card › "+it.label];FOCUS["gd:i:"+id]=["card",it.sel||".hero","full"]});
+/* round 7: 4 · Fun, its groups and items (a Moment opens on the card in a tour; Play on the wall) */
+FOCUS["gd:fun"]=["card","#wall","closed"];COMP["gd:g:moments"]=["Guide","Guidance › Fun › Moments"];FOCUS["gd:g:moments"]=["card",".gbtn-wrap","full"];COMP["gd:g:play"]=["Guide","Guidance › Fun › Play"];FOCUS["gd:g:play"]=["card","#wall","closed"];
+["water","cookie","joke","ptjoke","hunt","season"].forEach(function(id){var it=S.guidance.items[id],m=it.group==="moments";COMP["gd:i:"+id]=["Guide","Guidance › Fun › "+(m?"Moments":"Play")+" › "+it.label];FOCUS["gd:i:"+id]=["card",m?".gbtn-wrap":"#wall",m?"full":"closed"]});
 /* a guidance word's place in the tab (Languages & Terms' links; Global Scene's link) */
 function gdKindOfGroup(gid){var k=null;S.guidance.kinds.forEach(function(x){x.groups.forEach(function(g){if(g.id===gid)k=x.id})});return k}
-on("guidePath.answer",function(o){if(o==="gd:overall"||/^gd:(app|content)$/.test(o))return["gt4",o];if(o.indexOf("gd:g:")===0)return["gt4","gd:"+(gdKindOfGroup(o.slice(5))||"app"),o];
+on("guidePath.answer",function(o){if(o==="gd:overall"||/^gd:(app|content|fun)$/.test(o))return["gt4",o];if(o.indexOf("gd:g:")===0)return["gt4","gd:"+(gdKindOfGroup(o.slice(5))||"app"),o];
   var m=o.match(/^gd:i:(.+)$/),it=m&&S.guidance.items[m[1]];if(it)return["gt4","gd:"+it.kind,"gd:g:"+it.group,o]});
 /* the self-test: a tip's words show on the wall, at its moment (behaviour); every guidance option is timing (behaviour) */
 TX_DOM.wall_tip="shown in the guide's tip beside the nearest marker";TX_DOM.gd_opening="shown in the guide's opening tip on the wall";TX_DOM.gd_opening_back="shown in the opening tip to a returning visitor";
@@ -39,6 +42,10 @@ TX_DOM.fab_comment_1="shown in Azu's remark on the point in the middle, in turn"
 TX_DOM.fab_comment_card="shown in Azu's remark on a point with a card";TX_DOM.gb_hint="shown in the guide's tip beside the ✦ (after pokes on Azu, or idle)";
 TX_DOM.hint_navbar="shown over the Navigation Bar in its cue";TX_DOM.gd_how="shown in the ✦ menu";TX_DOM.gd_how_wall="shown in How does this work? on the wall";TX_DOM.gd_how_open="shown in How does this work? on the wall";
 ["how_grab","how_settings","how_bar","how_locate","how_block"].forEach(function(k){TX_DOM[k]="said in How to use the card's walkthrough"});
+TX_DOM.mascot_joke_1="shown in A joke's bubble (Fun › Play), the least seen of its variants";TX_DOM.mascot_joke_2=TX_DOM.mascot_joke_1;TX_DOM.mascot_joke_3=TX_DOM.mascot_joke_1;
+TX_DOM.mascot_water="shown in the water break's bubble, between two tour steps";TX_DOM.mascot_hungry="shown in the cookie's bubble, before the tour's last step";
+TX_DOM.gd_hunt="shown in the treasure hunt invitation (Family, after a card)";TX_DOM.gd_season_antonio="shown as the seasonal line in its window of dates";TX_DOM.gd_season_xmas=TX_DOM.gd_season_antonio;TX_DOM.gd_season_1755=TX_DOM.gd_season_antonio;
+["ptj_painting_1","ptj_torreao_1","ptj_river_1"].forEach(function(k){TX_DOM[k]="shown in its point's joke when the point settles in the middle"});
 TX_DOM.gd_fewer="shown after a long press on a tip";TX_DOM.gd_fewer_yes="shown after a long press on a tip";TX_DOM.gd_fewer_no="shown after a long press on a tip";
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(guidance\\.|"));
 /* the visit's time as the Log and the visitor read it: m:ss */
@@ -48,7 +55,7 @@ function gdDots(it){var p="@guidance.items."+it.id+".importance";return'<span cl
   return'<button type="button" data-set="'+p+'" data-v="'+n+'" aria-pressed="'+(+it.importance===n)+'"'+(n<=+it.importance?' class="on"':'')+' title="Importance '+n+' of 5" aria-label="Importance '+n+' of 5"></button>'}).join("")+'</span>'}
 var GD_ABOUT_WORDS={nothing:"nothing (the wall)",marker:"the nearest marker (it must be on the screen)",gbtn:"the ✦ (it must be on the screen: on the wall, the way into Ask about the view; on the card, once the hero's Start is out of sight)",middle:"the point in the middle, one with a tour",
   point:"its point of the wall, when it is the one in the middle (one item a point of the wall, each with its own memory)"};
-var GD_TAP_WORDS={close:"it closes (acted)",view:"Ask about the view opens (acted)",tour:"the tour of that point starts (acted)",remark:"a point with a card starts its tour; any other opens Ask about the view about it, the point lit (acted)",menu:"the ✦'s menu opens (acted; then it is done)"};
+var GD_TAP_WORDS={prop:"its prop: Azu drinks or eats it (acted), and the tour goes on",hunt:"Ask about the view opens and its treasure hunt starts (acted)",close:"it closes (acted)",view:"Ask about the view opens (acted)",tour:"the tour of that point starts (acted)",remark:"a point with a card starts its tour; any other opens Ask about the view about it, the point lit (acted)",menu:"the ✦'s menu opens (acted; then it is done)"};
 /* a per-point item's points on the wall now, and the line each says (Lines per point) */
 function gdPointsWords(it){var ins=gdInstances(it.id),wn=S.camCfg.wall==="belem"?"the Belém panorama":"the Ribeira painting";
   return"One item a point of the wall in the Lab ("+wn+", "+ins.length+" points): "+ins.map(function(x){return x.pointName+(x.card&&it.cardLine!==false?" (a card: its own line)":"")}).join(", ")+
@@ -85,17 +92,20 @@ function gdItemRow(it){if(it.form==="cue")return gdCueRow(it);if(it.form==="walk
   var body=H("Identity","its name, On and where it lives")+
     row("Label",'<input class="u" data-path="'+p+'label" value="'+esc(it.label)+'">',"Editor only: the item's name in these lists, in the read-back, the Log and the scenes. The visitor never sees it.")+
     row("Group",psel(p+"group",gdGroupOpts()),"The group it belongs to, and with it its kind (App, Content): its group's On, weight, cap and gap hold for it. In an In order group it waits for the one before it. Moving it puts it at the end of the new group (drag ≡ to reorder there).")+
-    H("Words","what it says, in each language (Languages &amp; Terms, owned here)")+txPanel("gd:i:"+it.id)+
-    row("Says",gdSaysHtml(it),"1 to 4 variants that come in turn, never the same twice in a row (a per-point item turns through them across its points). The slots: {point} the point it is about, {year} that point's year, {button} the ✦ (or its word), {min} a tour's minutes. Each variant's words are in the table above; ▸ shows the item saying it.")+
+    H("Words",it.ptJokes?"each point's own jokes (Specific Marker › Guide script)":"what it says, in each language (Languages &amp; Terms, owned here)")+(it.ptJokes?"":txPanel("gd:i:"+it.id))+
+    (it.seasons?row("Says by date",gdSeasonHtml(it),"One of these: each line has its window of dates, From and To (MM-DD, both included; a window may run over the new year, 12-01 to 01-06). The line whose window holds today shows (Preview & Test › Today is tries each date); none: Seasonal is quiet. A Solemn day's line (1 November, the 1755 earthquake) is a remembrance, never a joke: that day no joke shows. Each line's words are in the table above; ▸ shows it."):
+     it.ptJokes?row("Says",gdPtJokesHtml(it),"Each point's own Jokes, 0 to 3 a point in every language, written in Specific Marker › Guide script › Jokes; in turn when a point has several. A point with no joke says none: never a generic one in its place."):
+     row("Says",gdSaysHtml(it),(it.pick==="least"?"One of these: the variant this visitor has seen least shows (ties: the first). ":"1 to 4 variants that come in turn, never the same twice in a row (a per-point item turns through them across its points). ")+"The slots: {point} the point it is about, {year} that point's year, {button} the ✦ (or its word), {min} a tour's minutes"+(it.tap==="hunt"||it.button==="hunt"?", {thing} the point the treasure hunt asks for":"")+". Each variant's words are in the table above; ▸ shows the item saying it."))+
     (it.perPoint?row("Lines per point",pseg(p+"cardLine",["true","false"],["A point with a card: its own line","The 3 in turn for every point"]),"Which line each point says. The remarks come in turn (never the same twice in a row). A point with a card can say its own line instead (“Tap and I'll show you around”), since a tap there starts its tour.")+'<div class="note gdpts">'+esc(gdPointsWords(it))+'</div>':"")+
-    row("Per audience",gdAudHtml(it),"Optional: its own line for Family, Explorer or Expert (an empty line falls back to Says). ▸ shows it as that audience.")+
-    row("Returning visitor",gdBackHtml(it),"Optional: the line a returning visitor gets (Welcome back…); an empty line falls back to Says.")+
+    (it.seasons||it.ptJokes?"":row("Per audience",gdAudHtml(it),"Optional: its own line for Family, Explorer or Expert (an empty line falls back to Says). ▸ shows it as that audience.")+
+    row("Returning visitor",gdBackHtml(it),"Optional: the line a returning visitor gets (Welcome back…); an empty line falls back to Says."))+
     row("Spoken",pseg(p+"spoken",GD_SPOKEN.map(function(x){return x[0]}),GD_SPOKEN.map(function(x){return x[1]})),"As the kind: "+(k&&k.spoken==="bubble"?k.name+" is a bubble only":(k?k.name:"")+" is spoken once the visitor has heard the guide this visit")+". A bubble only: never spoken. Spoken once the guide is heard: the voice says it, its word lit. Never spoken while a screen reader is on (it is announced).")+
     H("About","its target on the screen")+
     (it.perPoint?'<div class="note">About: '+esc(GD_ABOUT_WORDS.point)+'</div>':row("About",psel(p+"about",GD_ABOUT_OPTS),"Its target: Nothing (the bubble at the ✦), the nearest marker, the point in the middle (one with a tour) or the ✦. Azu goes beside it, points, and its focus is on it; the bubble is never over it."))+
     row("Must be on screen",pseg(p+"mustSee",["true","false"],["Yes","No"]),"Yes: it waits until its target is on the screen, and ends when the target leaves (see Expires). No: it may show without it, at the ✦.")+
     H("Show","how it looks on the phone")+
-    row("Form",pseg(p+"form",GD_FORMS.map(function(x){return x[0]}),GD_FORMS.map(function(x){return x[1]})),"Tip: a bubble. Invitation: a bubble with its Button chip. Remark: about the point in view, narrower, ending with › (a tap does more). A Cue is the card's own (The card (cues)); a Walkthrough step is How to use the card's; a Page is the first pages' (round 8).")+
+    row("Form",pseg(p+"form",GD_FORMS.map(function(x){return x[0]}),GD_FORMS.map(function(x){return x[1]})),"Tip: a bubble. Invitation: a bubble with its Button chip. Remark: about the point in view, narrower, ending with › (a tap does more). Moment: Azu walks to the middle with its prop and asks for one tap, between two steps of a tour (it holds the next step until a tap or 8 s). A Cue is the card's own (The card (cues)); a Walkthrough step is How to use the card's; a Page is the first pages' (round 8).")+
+    (it.form==="moment"?row("Prop",pseg(p+"prop",GD_PROPS.map(function(x){return x[0]}),GD_PROPS.map(function(x){return x[1]})),"Azu's prop: a glass of water (Azu drinks, “Ahh”) or a cookie (Azu eats it, “Thank you!”). The look is Azu's own (Rive states in the app).",true):"")+
     row("Mascot goes",pseg(p+"goes",GD_GOES.map(function(x){return x[0]}),GD_GOES.map(function(x){return x[1]})),"Beside it: Azu hops to it, a short arc (0.45 s). Stays: Azu stays at the ✦. Walks to it (on the wall): a slower walk along the bottom, then up to its place. Reduce Motion: no hop, no walk, Azu appears there.")+
     row("Points at it",pseg(p+"points",["true","false"],["Yes","No"]),"Azu points at its target (its arm; the 3D model's point clip).")+
     row("Focus",gdFocusSeg(it),"None. Glint: the target shines once, a light sweep (Reduce Motion: a still highlight). Ring: one soft pulse, then still. Spotlight: the rest dims, the target cut out; kept for Essential items and walkthrough steps, or it loses its force.")+
@@ -106,7 +116,10 @@ function gdItemRow(it){if(it.form==="cue")return gdCueRow(it);if(it.form==="walk
     H("When","the moment, and only if")+
     row("When",pseg(p+"when",GD_WHEN.map(function(x){return x[0]}).concat(it.when==="pokes"?["pokes"]:[]),GD_WHEN.map(function(x){return x[1]}).concat(it.when==="pokes"?["After pokes or idle"]:[])),"At a pause (the gates: never while the visitor acts). At the visit's start. When its target settles in the middle (1.2 s still). After idle (no touch, the phone still). On an event (within "+GD_EVENT_MS/1000+" s after it).")+
     (it.when==="event"?row("The event",psel(p+"event",GD_WHEN_EVENTS),"The visitor's action it follows.",true):"")+
+    (it.when==="between"?row("After narration (s)",pslider(p+"talkFor",0,300,10),"Seconds of the tour's narration first, since the tour started or the last Moment (0: at any step). It was Guide › Mascot › Water break after.",true)+
+      row("Before the last step",pseg(p+"beforeEnd",["true","false"],["Yes","No"]),"Yes: only as the tour moves on to its last step (the cookie, before the end).",true):"")+
     (it.when==="pokes"||+it.pokes>0?row("After pokes on Azu",pslider(p+"pokes",0,10,1),"Pokes on Azu in this visit that bring it (0: not by pokes). The tip waits for the finger to lift (0.8 s) and for Azu's own bubble (a joke after a poke) to end.",true):"")+
+    (it.when==="pokes"||+it.latePause>0?row("Or a pause late (from)",pslider(p+"latePause",0,1200,60)+'<div class="gdforce">'+esc(+it.latePause>0?"Also, rarely, at a pause from "+gdClock(+it.latePause*1000)+" into the visit (once a visit, and only if it has not shown)":"Not at a pause: only after pokes")+'</div>',"Besides the pokes: at a pause late in the visit, from this moment (0: never), once a visit; then Along the visit weighs it. After pokes it answers the visitor, so Along the visit does not hold it back.",true):"")+
     (it.when==="idle"||it.when==="pokes"||+it.idleFor>0?row("After idle (s)",pslider(p+"idleFor",0,90,5),"Seconds with no touch and the phone still that bring it (0: "+(it.when==="idle"?"20 s":"not by idle")+"), counted from the visit's start at the earliest.",true):"")+
     row("The phone still (s)",pslider(p+"stillFor",0,5,0.1),"Seconds the phone must be still first (never while panning, nor 0.7 s after).")+
     (g&&g.mode==="order"?row("After the previous (s)",pslider(p+"afterPrev",0,120,5),"In order: seconds after the "+(pv?pv.label:"item before it")+" showed.",true):"")+
@@ -116,7 +129,7 @@ function gdItemRow(it){if(it.form==="cue")return gdCueRow(it);if(it.form==="walk
     row("Visit",pseg(p+"visitIs",GD_VISIT_IS.map(function(x){return x[0]}),GD_VISIT_IS.map(function(x){return x[1]})),"Only on a first visit, or only on a returning one.",true)+
     row("Has used",psel(p+"hasUsed",GD_USED),"Only once the visitor has done this (a milestone of the visit).",true)+
     row("Has not used",psel(p+"notUsed",GD_USED),"Only until the visitor has done this.",true)+
-    row("Not on Solemn points",pseg(p+"notSolemn",["true","false"],["Yes","No"]),"Never on a point marked Solemn (a memorial).",true)+
+    (gdKindSolemnOff(it)?'<div class="note gdfixs">Not on Solemn points: always. Fixed for '+esc((gdKindOf(it)||{}).name||"Fun")+' (not an option): Why not now? says “a Solemn point: no fun here”.</div>':row("Not on Solemn points",pseg(p+"notSolemn",["true","false"],["Yes","No"]),"Never on a point marked Solemn (a memorial).",true))+
     row("Lively only",pseg(p+"lively",["true","false"],["Yes","No"]),"Only when Mascot › Liveliness is Lively.",true)+
     row("Earliest (s)",pslider(p+"notBefore",0,1200,30)+'<div class="gdforce">'+esc(+it.notBefore>0?"Not before "+gdClock(+it.notBefore*1000)+" into the visit":"From the visit's start")+'</div>',"The earliest moment of the visit, in seconds (1:00 = a minute in).",true)+
     row("Latest (s)",pslider(p+"notAfter",0,1200,30)+'<div class="gdforce">'+esc(+it.notAfter>0?"Not after "+gdClock(+it.notAfter*1000)+" into the visit":"No latest")+'</div>',"The latest moment of the visit (0: none).",true)+
@@ -143,7 +156,7 @@ function gdItemRow(it){if(it.form==="cue")return gdCueRow(it);if(it.form==="walk
 /* a kind's weight along the visit, read back in words (its row of 1 · Overall › Mix along the visit) */
 function gdKindWords(k){var w=gdMix(k.id);return"Its weight along the visit: "+w[0]+" % on arrival, "+w[1]+" % a third of the way in, "+w[2]+" % at the end (s = 0 / 0.3 / 1, straight lines between): a weight in each item's score, never a quota; an item's Along the visit shapes it further. "+
   (k.spoken==="bubble"?"Spoken: never, a bubble only.":"Spoken: once the visitor has heard the guide this visit (a tour step, an answer), else a bubble.")}
-function gdKindSub(k){return k.id==="app"?"how to use the app: a bubble, never spoken":"what is here and what next: spoken once the guide has been heard"}
+function gdKindSub(k){return k.id==="app"?"how to use the app: a bubble, never spoken":k.id==="fun"?"play: a bubble only, never spoken":"what is here and what next: spoken once the guide has been heard"}
 /* ----- 0 · Preview & Test: the read-outs ----- */
 /* an item's memory as the Editor reads it: a per-point item's, summed over its points on this wall (the latest line used) */
 function gdMemOf(def){var v=S.gdVisitor,r={shown:0,ever:0,last:null,line:"",acted:0,dismissed:0,done:false,by:""};
@@ -168,6 +181,8 @@ on("edGuide.html",function(h){var d=document.createElement("div");d.innerHTML=h;
     row("Why not now?",'<div class="btnrow" style="margin:0"><select class="u gdwhysel" data-gdwhysel="1" aria-label="The item">'+gdItems().map(function(it){return'<option value="'+it.id+'"'+(G.gd.whyId===it.id?" selected":"")+'>'+esc(it.label)+'</option>'}).join("")+'</select><button class="ubtn sm" type="button" data-gdwhynot="1">Why not now?</button></div>',
       "Pick an item: why it does not show at this moment, in the scheduler's own words (a gate, its own rule, a limit, the learning, its score), or which item goes first. The phone stays as it is.")+
     '<div class="note gdwhy" id="gdwhynot">'+esc(G.gd.whyText||"Pick an item and press Why not now?")+'</div>'+
+    row("Today is",'<input type="date" class="u gdtoday" data-sel="@ui.gdToday" value="'+esc(S.ui.gdToday||"")+'" aria-label="Today is">',"The date the phone takes as today: each seasonal line shows only in its window of dates (Fun › Play › Seasonal), and a Solemn day (1 November) rests every joke. The real date by default; pick one to try each season.")+
+    '<div class="note gdwhy" id="gdtoday">'+esc(gdTodayWords())+'</div>'+
     row("The visitor",'<div class="btnrow" style="margin:0"><button class="ubtn sm" type="button" data-gdvisit="new">New visit</button><button class="ubtn sm" type="button" data-gdvisit="leave">Leave for 31 min</button><button class="ubtn sm" type="button" data-gdvisit="reset">Reset the visitor</button></div>',"The visitor's memory, kept on the phone only. New visit: the same visitor comes back now (the opening says Welcome back; what is done stays done). Leave for 31 min: the visit's clock moves 31 minutes with the app away: a visit ends after 30 min away, so the visitor comes back to a new visit (the stage counts from 5 min). Reset the visitor: a first visit again, nothing remembered. With Remember across visits Off, every new visit is a first visit.")+
     '<div class="note" id="gdvisitor">'+esc(gdVisitorLine())+'</div><div class="note" id="gdvisitor2">'+esc(gdVisitorMore())+'</div><div id="gdmem">'+gdMemTable()+'</div>'+
     row("Log",'<div class="gdlog" id="gdlog" role="log" aria-label="The last 30 decisions">'+gdLogHtml()+'</div>',"The last 30 decisions, the newest first: each with the visit's time, shown (and why: its rules and its score), skipped (why nothing shows: a gate, or each item's reason; written when the reason changes), ended (and how: acted, dismissed, ignored, or the moment), and what the learning changed."));
@@ -186,8 +201,9 @@ on("edGuide.html",function(h){var d=document.createElement("div");d.innerHTML=h;
     '<div class="sub2">The long press · its words (Languages &amp; Terms, owned here)</div>'+txPanel("gd:overall");
   var gs="";S.guidance.kinds.forEach(function(k,ki){var kp="guidance.kinds."+ki+".",inner=row("On",pseg(kp+"on",["true","false"],["On","Off"]),"Off: none of the "+k.name+" items show (each keeps its own On).")+
       row("At most a visit",pslider(kp+"cap",1,40,1)+gdForceNote(k.cap,"",false),"The "+k.name+" items in one visit, all together (an Essential item skips it). Talkativeness scales it (the value in force below).")+
-      row("Gap (s)",pslider(kp+"gap",0,180,5),"Seconds from the end of one "+k.name+" item to the start of the next (0: only the breathing room). An Essential item skips it.")+
-      '<div class="note gdmix">'+esc(gdKindWords(k))+'</div>';
+      row("Gap (s)",pslider(kp+"gap",0,k.id==="fun"?600:180,k.id==="fun"?10:5),"Seconds from the end of one "+k.name+" item to the start of the next (0: only the breathing room). An Essential item skips it.")+
+      '<div class="note gdmix">'+esc(gdKindWords(k))+'</div>'+
+      (k.solemnOff?'<div class="note gdsolemn"><b>Solemn points: off.</b> '+esc("Fun never shows on a Solemn point (Specific Marker › Solemn point): no Moment, no joke, no hunt invitation, no seasonal line. Fixed for the kind, not an option; Why not now? says “a Solemn point: no fun here”. Calm (Mascot › Liveliness) allows only its items without Lively only.")+'</div>':"");
     k.groups.forEach(function(g,gi){var items=g.items.map(function(id){return S.guidance.items[id]}).filter(Boolean),gp=kp+"groups."+gi+".",per=items.some(function(x){return x.perPoint});
       /* a pulled group (How to use the card): no weight, cap or gap (never scheduled, never capped); where it opens, its words, its steps */
       if(g.pulled){inner+=fo("gd:g:"+g.id,esc(g.name)+' <span class="sub">· a walkthrough, in order, pulled only</span>',null,
@@ -197,14 +213,14 @@ on("edGuide.html",function(h){var d=document.createElement("div");d.innerHTML=h;
         row("In the ✦ menu",pseg(gp+"inMenu",["true","false"],["Shown","Hidden"]),"An item of the ✦ menu, “"+TXT("gd_how")+"”, on the card and on the wall: on the card it walks the card; on the wall one bubble says how the wall works, with a chip that opens a card.")+
         '<div class="sub2">Its words · the ✦ menu\'s item and the wall\'s bubble (Languages &amp; Terms, owned here)</div>'+txPanel("gd:g:"+g.id)+
         '<div class="note">Its steps, in this order (a row: On, the step, ▸ Show now walks the card from it; open it for its words):</div>'+items.map(gdItemRow).join(""),3);return}
-      inner+=fo("gd:g:"+g.id,esc(g.name)+' <span class="sub">· '+(g.mode==="order"?"In order: the visit's first words, then the first gesture":per?"one item a point of the wall: Azu's remarks":g.id==="card"?"the card's hints, one cue each: motion on the element, no mascot":"each on its own")+'</span>',null,
+      inner+=fo("gd:g:"+g.id,esc(g.name)+' <span class="sub">· '+(g.mode==="order"?"In order: the visit's first words, then the first gesture":g.id==="inview"?"one item a point of the wall: Azu's remarks":g.id==="moments"?"the water break and the cookie, between tour steps, 5 min apart":g.id==="play"?"a joke, each point's joke, the treasure hunt, a seasonal line":g.id==="card"?"the card's hints, one cue each: motion on the element, no mascot":"each on its own")+'</span>',null,
         '<div class="note">'+(g.mode==="order"?"In order: an item waits until the one before it has shown this visit.":g.id==="card"?"Each cue on its own, at the moment its feature is in reach, taking turns with the tips (one at a time, the cue room between them). Card Controls › Hints shows them as a view.":"Each item on its own.")+' A row: On, its name, importance (●), how often, ▸ Show now; open it for its fields.</div>'+
-        row("On",pseg(gp+"on",["true","false"],["On","Off"]),"Off: none of "+g.name+"'s items show (each keeps its own On)."+(per?" Ask › Ask about the view › Azu comments is this same switch.":""))+
+        row("On",pseg(gp+"on",["true","false"],["On","Off"]),"Off: none of "+g.name+"'s items show (each keeps its own On)."+(g.id==="inview"?" Ask › Ask about the view › Azu comments is this same switch.":g.id==="moments"?" Guide › 2 · Mascot › Moments is this same switch.":""))+
         row("Weight",pslider(gp+"weight",0,2,0.1),"×: this group's items' scores against the others' (1: as they are; 0: they never win).")+
         row("At most a visit",pslider(gp+"cap",0,40,1),"The "+g.name+" items in one visit, all together (0: no cap of its own; "+(g.id==="card"?"a cue is not a tip, so "+k.name+"'s cap does not count it":k.name+"'s "+k.cap+" still holds")+"). An Essential item skips it.")+
-        row("Gap (s)",pslider(gp+"gap",0,120,1),"Seconds from the end of one "+g.name+" item to the start of the next. 0: "+(g.id==="card"?"none: two cues follow each other with no room":"as the kind ("+k.name+"'s "+k.gap+" s)")+"; more: the group's own, in place of the kind's. The breathing room between any two tips ("+S.guidance.breathing+" s) still holds.")+
+        row("Gap (s)",pslider(gp+"gap",0,k.id==="fun"?600:120,k.id==="fun"?10:1),"Seconds from the end of one "+g.name+" item to the start of the next. 0: "+(g.id==="card"?"none: two cues follow each other with no room":"as the kind ("+k.name+"'s "+k.gap+" s)")+"; more: the group's own, in place of the kind's. The breathing room between any two tips ("+S.guidance.breathing+" s) still holds.")+
         items.map(gdItemRow).join(""),3)});
-    gs+=fo("gd:"+k.id,esc(k.name)+' <span class="sub">· '+gdKindSub(k)+'</span>',null,inner,2)});
+    gs+=fo("gd:"+k.id,esc(k.name)+' <span class="sub">· '+gdKindSub(k)+'</span>'+(k.solemnOff?' <span class="badge gdsolb">Solemn points: off</span>':""),null,inner,2)});
   d.insertAdjacentHTML("beforeend",fo("gt4",sectionTitle("4","Guidance","when the guide speaks up: a tip at a pause, one at a time"),["new","NEW"],
     fo("gd:overall",'Overall <span class="sub">· on, the breathing room, the limits, the learning and the memory</span>',null,ov,2)+gs,1));
   return d.innerHTML});
@@ -235,7 +251,13 @@ function gdDemoBegin(){G.gd.demo=true;G.gd.demoOwner=G.demoSeq;clearTimeout(G.gd
 function gdDemoLive(my){if(G.demoSeq===my)return true;if(G.gd.demoOwner===my){G.gd.demo=false;gdChip(null);clearInterval(G.gd.demoI)}return false}
 /* a demo ends its own pulled tip only (never a tip the visitor or a scene got meanwhile) */
 function gdDemoEnd(my,ms){G.gd.demoT=setTimeout(function(){if(!gdDemoLive(my))return;gdChip(null);if(G.gd.cur&&G.gd.cur.pull)gdStop("the demo ended");G.gd.demo=false},ms)}
-function gdDemoShow(it,ms,o){if(it.form==="cue"){cuePlace(it.id);return gdStart(it,"the Editor's demo",Object.assign({pull:true,ms:ms||4000},o||{}))}var need=it.about==="marker"&&!gdMarker()||it.about==="middle"&&!(gdCentral()||{}).tour||it.about==="gbtn"&&!gdGbtn()||it.about==="point"&&!gdCentral();
+function gdDemoShow(it,ms,o){if(it.form==="cue"){cuePlace(it.id);return gdStart(it,"the Editor's demo",Object.assign({pull:true,ms:ms||4000},o||{}))}
+  /* round 7: a Moment in a tour (paused while it shows, on again after); a point's joke on a point that has one, turned to the middle; a
+     seasonal line outside its window: its first line (the chip says so) */
+  if(it.form==="moment"){if(!G.on){S.introSeen=true;startTour()}if(!G.paused)pauseTour();var cm=gdStart(it,"the Editor's demo",Object.assign({pull:true,ms:ms||8000},o||{}));gdChip("A Moment: "+it.label+", between two tour steps (one tap, or 8 s)");return cm}
+  if(it.ptJokes){var c0=gdCentral(),ins=gdInstances(it.base||it.id).filter(function(x){return x.jokes&&x.jokes.length}),pk=ins.filter(function(x){return o&&o.point?x.point===o.point:!!(c0&&x.point===c0.id)})[0]||ins[0];
+    if(!pk)return null;if(typeof setWall==="function"&&S.camCfg.wall!=="ribeira")setWall("ribeira");gdSimAim(pk.point);return gdStart(pk,"the Editor's demo",Object.assign({pull:true,ms:ms},o||{}))}
+  if(it.seasons&&!(o&&o.text)&&!gdSeasonOf(it,gdTodayMD())){var f0=(it.seasons||[]).filter(function(x){return gdHasWords(x.says)})[0];if(f0)o=Object.assign({},o||{},{text:TXT(f0.says)})}var need=it.about==="marker"&&!gdMarker()||it.about==="middle"&&!(gdCentral()||{}).tour||it.about==="gbtn"&&!gdGbtn()||it.about==="point"&&!gdCentral();
   if(need&&typeof setWall==="function"){setWall("ribeira");S.stop="closed";renderPhone(false)}
   /* a per-point item: the one of the point in the middle now */
   if(it.base){var m=gdItemNow(it.base);if(m)it=m}
@@ -333,22 +355,22 @@ function gdDemoTour(id){var it=gdItemNow(id);if(!it)return;var my=gdDemoBegin();
 var GD_DEMOS={"guidance.on":{wall:true,act:function(){gdDemoOverall("on")},ringAfter:600,ring:".gdbub|.gdchip"},
   "guidance.breathing":{wall:true,act:function(){gdDemoOverall("breathing")},ringAfter:600,ring:".gdbub|.gdchip"}};
 Object.keys(GD_DEMO_ROWS).forEach(function(f){GD_DEMOS["guidance."+f]={wall:true,act:function(){gdDemo(GD_DEMO_ROWS[f]())},ringAfter:600,ring:".gdbub|.gdchip"}});
-S.guidance.kinds.forEach(function(k,ki){var kp="guidance.kinds."+ki+".";["on","cap","gap"].forEach(function(f){GD_DEMOS[kp+f]={wall:true,act:function(){gdDemoKind(ki,f)},ringAfter:600,ring:".gdbub|.gdchip"}});
+S.guidance.kinds.forEach(function(k,ki){var kp="guidance.kinds."+ki+".";["on","cap","gap"].forEach(function(f){GD_DEMOS[kp+f]={wall:true,wait:0,act:function(){gdDemoKind(ki,f)},ringAfter:60,ring:".gdbub|.gdchip"}});
   k.groups.forEach(function(g,gi){var gp=kp+"groups."+gi+".";if(g.pulled){GD_DEMOS[gp+"on"]={act:function(){gdDemoHow("on")},ringAfter:1100,ring:".gfocus|.gdchip"};
       GD_DEMOS[gp+"inSettings"]={stop:"half",act:function(){gdDemoHow("settings")},ringAfter:500,ring:".vhow|.vset"};GD_DEMOS[gp+"inMenu"]={wall:true,act:function(){gdDemoHow("menu")},ringAfter:500,ring:'[data-gbgo="how"]|.gbmenu'};return}
-    GD_DEMOS[kp+"groups."+gi+".weight"]={wall:true,act:function(){gdDemoGroup(ki,gi)},ringAfter:600,ring:".gdbub|.gdchip"};
-    ["on","cap","gap"].forEach(function(f){GD_DEMOS[kp+"groups."+gi+"."+f]={wall:true,act:function(){gdDemoGroupField(ki,gi,f)},ringAfter:600,ring:".gdbub|.gdchip"}})})});
+    GD_DEMOS[kp+"groups."+gi+".weight"]={wall:true,wait:0,act:function(){gdDemoGroup(ki,gi)},ringAfter:60,ring:".gdbub|.gdchip"};
+    ["on","cap","gap"].forEach(function(f){GD_DEMOS[kp+"groups."+gi+"."+f]={wall:true,wait:0,act:function(){gdDemoGroupField(ki,gi,f)},ringAfter:60,ring:".gdbub|.gdchip"}})})});
 Object.keys(S.guidance.items).forEach(function(id){var p="guidance.items."+id+".",d=S.guidance.items[id];
   /* a cue: on the card at its element (never the wall); a step of How to use the card: the walkthrough from that step */
   if(d.form==="cue"){var rg=".gdchip|"+GD_CUE_SEL[id].split(",").join("|");["on","importance","doneWhen"].forEach(function(f){GD_DEMOS[p+f]={stop:id==="nudge"||id==="label"?"half":"full",act:function(){gdDemoCue(id,f)},ringAfter:700,ring:rg}});
     GD_DEMOS[p+"shows"]={stop:"full",act:function(){gdDemoCueShows(id)},ringAfter:700,ring:rg};return}
   if(d.form==="walk"){GD_DEMOS[p+"on"]={act:function(){gdDemoWalk(id)},ringAfter:1100,ring:".gfocus|.gdchip"};return}
-  if(d.perPoint)GD_DEMOS[p+"cardLine"]={wall:true,act:function(){gdDemoLines(id)},ringAfter:600,ring:".gdbub|.gdchip"};
-  if(d.pokes!=null)GD_DEMOS[p+"pokes"]={wall:true,act:function(){gdDemoPokes(id)},ringAfter:600,ring:".gdchip|.gdbub"};
-  if(d.idleFor!=null)GD_DEMOS[p+"idleFor"]={wall:true,act:function(){gdDemoIdle(id)},ringAfter:600,ring:".gdchip|.gdbub"};
-  ["on","importance","essential","doneWhen"].forEach(function(f){GD_DEMOS[p+f]={wall:true,act:function(){gdDemoItem(id,f)},ringAfter:600,ring:".gdbub|.gdchip"}});
-  ["shows","max","again"].forEach(function(f){GD_DEMOS[p+f]={wall:true,act:function(){gdDemoTwice(id)},ringAfter:600,ring:".gdbub|.gdchip"}});
-  GD_DEMOS[p+"along"]={wall:true,act:function(){gdDemoAlong(id)},ringAfter:600,ring:".gdbub|.gdchip"};
+  if(d.perPoint)GD_DEMOS[p+"cardLine"]={wall:true,wait:0,act:function(){gdDemoLines(id)},ringAfter:60,ring:".gdbub|.gdchip"};
+  if(d.pokes!=null)GD_DEMOS[p+"pokes"]={wall:true,wait:0,act:function(){gdDemoPokes(id)},ringAfter:60,ring:".gdchip|.gdbub"};
+  if(d.idleFor!=null)GD_DEMOS[p+"idleFor"]={wall:true,wait:0,act:function(){gdDemoIdle(id)},ringAfter:60,ring:".gdchip|.gdbub"};
+  ["on","importance","essential","doneWhen"].forEach(function(f){GD_DEMOS[p+f]={wall:true,wait:0,act:function(){gdDemoItem(id,f)},ringAfter:60,ring:".gdbub|.gdchip"}});
+  ["shows","max","again"].forEach(function(f){GD_DEMOS[p+f]={wall:true,wait:0,act:function(){gdDemoTwice(id)},ringAfter:60,ring:".gdbub|.gdchip"}});
+  GD_DEMOS[p+"along"]={wall:true,wait:0,act:function(){gdDemoAlong(id)},ringAfter:60,ring:".gdbub|.gdchip"};
   GD_DEMOS[p+"duringTour"]={tour:"g1",act:function(){gdDemoTour(id)},ringAfter:600,ring:".gdchip"}});
 /* round 4: a cue shown now on the card (a pull: no memory), its chip for the row; Shows twice for Every card (the next card); the
    walkthrough from a step; How to use the card's group: the walkthrough, its Settings entry, its ✦ menu item */
@@ -366,6 +388,8 @@ function gdDemoHow(f){var my=gdDemoBegin(),g=gdGroupById("howto");
   if(f==="on"){gdWalkCard();gdChip("How to use the card: the walkthrough, pulled");gdDemoEnd(my,3400);return}
   if(f==="settings"){S.settingsOpen=true;renderPhone(false);var v=ph.querySelector(".vset");if(v)v.scrollTop=v.scrollHeight;gdChip(g.inSettings?"In Settings: its button at the panel's foot":"In Settings: Hidden");gdDemoEnd(my,3500);return}
   gbMenu(true);gdChip(g.inMenu?"In the ✦ menu: How does this work?":"In the ✦ menu: Hidden");gdDemoEnd(my,3500)}
+/* (round 7) an item's, a group's and a kind's demo show their tip in the same frame: no wait before or after (the Fun rows doubled the
+   Guide tab's rows; a second a row was 3 minutes of the tests) */
 rowDemos(GD_DEMOS);
 /* ----- round 5: Overall's Preset, Talkativeness and the Mix along the visit; 0 · Preview & Test › Simulate a visit ----- */
 COMP["gd:mix"]=["Guide","Guidance › Overall › Mix along the visit"];FOCUS["gd:mix"]=["card","#wall","closed"];COMP["gd:help"]=["Guide","Guidance › Overall › Help"];FOCUS["gd:help"]=["card","#wall","closed"];
@@ -384,12 +408,12 @@ function gdPresetRow(){var now=gdPresetNow(),base=S.guidance.preset,diff=gdPrese
 /* Help: the presets' table and Talkativeness's factors, read from their tables (GD_PRESETS, GD_TALK) */
 function gdHelpHtml(){var P=GD_PRESET_IDS,now=gdPresetNow(),g=S.guidance,cell=function(x){return'<td>'+esc(x)+'</td>'},mx=function(m){return(m||[0,0,0]).join(" / ")};
   var rows=[["Talkativeness",function(p){return GD_TALK[p.talk].name}],["Breathing room",function(p){return p.breathing+" s"}],["At most a minute",function(p){return p.perMinute}],["At most a visit",function(p){return p.perVisit}],
-    ["App: at most a visit, gap",function(p){return p.kinds.app.cap+", "+p.kinds.app.gap+" s"}],["Content: at most a visit, gap",function(p){return p.kinds.content.cap+", "+p.kinds.content.gap+" s"}],
+    ["App: at most a visit, gap",function(p){return p.kinds.app.cap+", "+p.kinds.app.gap+" s"}],["Content: at most a visit, gap",function(p){return p.kinds.content.cap+", "+p.kinds.content.gap+" s"}],["Fun: at most a visit, gap",function(p){return p.kinds.fun?p.kinds.fun.cap+", "+p.kinds.fun.gap+" s":"–"}],
     ["Mix: App",function(p){return mx(p.mix.app)}],["Mix: Content",function(p){return mx(p.mix.content)}],["Mix: Fun",function(p){return mx(p.mix.fun)}],["Remember across visits",function(p){return p.remember?"On":"Off"}]];
   var pt='<table class="tbl gdhelp"><thead><tr><th></th>'+P.map(function(p){return'<th'+(p[0]===now?' class="on"':'')+'>'+esc(p[1])+'</th>'}).join("")+'</tr></thead><tbody>'+
     rows.map(function(r){return'<tr><td>'+esc(r[0])+'</td>'+P.map(function(p){return cell(r[1](GD_PRESETS[p[0]]))}).join("")+'</tr>'}).join("")+'</tbody></table>'+
     '<div class="note">'+P.map(function(p){return"<b>"+esc(p[1])+"</b>: "+esc(GD_PRESET_WHY[p[0]])}).join("<br>")+'</div>';
-  var force=function(id){var t=GD_TALK[id],l=function(v){v=+v||0;return v>0?Math.max(1,Math.round(v*t.limits)):0};return Math.round(+g.breathing*t.room)+" s · "+l(g.perMinute)+" a minute · "+l(g.perVisit)+" a visit · App "+l(g.kinds[0].cap)+", Content "+l(g.kinds[1].cap)};
+  var force=function(id){var t=GD_TALK[id],l=function(v){v=+v||0;return v>0?Math.max(1,Math.round(v*t.limits)):0};return Math.round(+g.breathing*t.room)+" s · "+l(g.perMinute)+" a minute · "+l(g.perVisit)+" a visit · App "+l(g.kinds[0].cap)+", Content "+l(g.kinds[1].cap)+(g.kinds[2]?", Fun "+l(g.kinds[2].cap):"")};
   var tt='<table class="tbl gdhelp"><thead><tr><th></th>'+GD_TALK_IDS.map(function(id){return'<th'+(id===g.talk?' class="on"':'')+'>'+GD_TALK[id].name+'</th>'}).join("")+'</tr></thead><tbody>'+
     '<tr><td>The breathing room</td>'+GD_TALK_IDS.map(function(id){return cell("×"+GD_TALK[id].room)}).join("")+'</tr>'+
     '<tr><td>The limits: At most a minute, At most a visit, each kind\'s At most a visit</td>'+GD_TALK_IDS.map(function(id){return cell("×"+GD_TALK[id].limits)}).join("")+'</tr>'+
@@ -415,11 +439,11 @@ function gdMixHtml(){var cols=["On arrival (s 0)","A third in (s 0.3)","At the e
       return'<td><span class="gdmixc"><input class="u" type="number" data-num="'+p+'" min="0" max="100" step="5" value="'+m[i]+'" aria-label="'+k[1]+' '+cols[i]+'"> %</span></td>'}).join("")+'</tr>'}).join("")+'</tbody></table>';
   return fo("gd:mix",'Mix along the visit <span class="sub">· each kind\'s weight at s = 0 / 0.3 / 1, and its curve</span>',null,
     '<div class="note">The kinds\' weights along the visit (s: 0 on arrival, 1 after 15 active minutes or every milestone done): a weight in each item\'s score, never a quota. App tips also retire by themselves once learned. The order across kinds is this table, never a drag.</div>'+tb+gdMixCurve()+
-    '<div class="note">Each row\'s weight is read back on its kind (App, Content). A change re-runs Simulate a visit (0 · Preview & Test) and its demo shows what moved.</div>',3)}
+    '<div class="note">Each row\'s weight is read back on its kind (App, Content, Fun). A change re-runs Simulate a visit (0 · Preview & Test) and its demo shows what moved.</div>',3)}
 /* ----- the simulator in the Editor ----- */
 var GD_SIM_QUIET={tour:"a tour",pan:"panning",card:"a card open",panel:"a panel open"};
 /* the settings now, and the ones before the last change (what moved is between them) */
-function gdSimSig(){return JSON.stringify([S.guidance,S.guideCfg.life,S.camCfg.wall,S.lang])}
+function gdSimSig(){return JSON.stringify([S.guidance,S.guideCfg.life,S.camCfg.wall,S.lang,gdTodayMD(),S.ptJokes,S.vis.aud])}
 function gdSimTrack(){var k=G.gd.sim,sig=gdSimSig();if(k.set&&k.set.sig===sig)return;k.prev=k.set;k.set={sig:sig,g:JSON.parse(JSON.stringify(S.guidance)),life:S.guideCfg.life}}
 function gdSimRes(sid,set){var k=G.gd.sim,key=sid+"|"+set.sig;if(!k.cache[key]){if(Object.keys(k.cache).length>24)k.cache={};k.cache[key]=gdSimulate(sid,set)}return k.cache[key]}
 function gdSimNow(sid){gdSimTrack();return gdSimRes(sid||S.ui.gdSim,G.gd.sim.set)}
@@ -449,7 +473,7 @@ function gdSimSvg(res,prev,W){var k=G.gd.sim,L=70,R=12,T=22,LH=28,H=T+GD_LANES.l
   for(var m=0;m<=20;m++){var x=X(m*60000).toFixed(1);h+='<line x1="'+x+'" x2="'+x+'" y1="'+(T-(m%5?3:6))+'" y2="'+(H-4)+'" class="gdtick'+(m%5?'':' maj')+'"/>';if(m%5===0)h+='<text x="'+x+'" y="'+(T-9)+'" text-anchor="'+(m===0?"start":m===20?"end":"middle")+'" class="gdax">'+(m?m+" min":"0")+'</text>'}
   GD_LANES.forEach(function(ln,i){var y=T+i*LH;h+='<rect x="0" y="'+y+'" width="'+W+'" height="'+LH+'" class="gdlane'+(i%2?' alt':'')+'"/><text x="8" y="'+(y+LH/2+4)+'" class="gdlab">'+ln[1]+'</text>'});
   var yOf=function(lane){return T+GD_LANES.map(function(x){return x[0]}).indexOf(lane)*LH+LH/2};
-  if(!res.dots.some(function(d){return d.kind==="fun"}))h+='<text x="'+(L+6)+'" y="'+(yOf("fun")+4)+'" class="gdnone">no Fun items yet (round 7 adds them)</text>';
+  if(!S.guidance.kinds.some(function(k){return k.id==="fun"}))h+='<text x="'+(L+6)+'" y="'+(yOf("fun")+4)+'" class="gdnone">no Fun kind</text>';
   res.quiet.forEach(function(q){if(q.from>up)return;var a=X(q.from),b=X(Math.min(q.to,up));h+='<rect x="'+a.toFixed(1)+'" y="'+(yOf("quiet")-6)+'" width="'+Math.max(1.5,b-a).toFixed(1)+'" height="12" rx="3" class="gdq gdq-'+q.cls+'"><title>'+gdClock(q.from)+"–"+gdClock(q.to)+" · quiet: "+GD_SIM_QUIET[q.cls]+'</title></rect>'});
   if(df)df.gone.forEach(function(d){if(d.t>up)return;h+='<circle cx="'+X(d.t).toFixed(1)+'" cy="'+yOf(d.kind)+'" r="5" class="gdghost"><title>gone: '+esc(d.label)+" (was "+gdClock(d.t)+')</title></circle>'});
   var px=X(k.t).toFixed(1);h+='<line x1="'+px+'" x2="'+px+'" y1="'+(T-6)+'" y2="'+(H-2)+'" class="gdhead"/><circle cx="'+px+'" cy="'+(T-6)+'" r="3.5" class="gdheadk"/>';
@@ -475,7 +499,7 @@ function gdSimHtml(){var sid=S.ui.gdSim,sc=gdSimScript(sid);gdSimTrack();
   if(!isOpen("gd:sim",2))return fo("gd:sim",'Simulate a visit <span class="sub">· a scripted visitor, 0-20 min, the real scheduler</span>',["new","NEW"],body+'<div class="note">Open it to run the simulation.</div>',2);
   var res=gdSimNow(sid),prev=gdSimPrev(sid),mv=gdSimMovedWords(prev,res);
   body+='<div class="gdtlw" id="gdsimtl">'+gdSimSvg(res,prev,gdSimW())+'</div>'+
-    '<div class="gdleg"><span><i class="gdsw" style="background:'+GD_KIND_INK.app+'"></i>App</span><span><i class="gdsw cue"></i>a cue on the card</span><span><i class="gdsw" style="background:'+GD_KIND_INK.content+'"></i>Content</span><span><i class="gdsw n">3</i>merged: too close to tell apart (a tap lists them)</span><span class="gdlq">Quiet:<i class="gdsw q gdq-tour"></i>a tour<i class="gdsw q gdq-pan"></i>panning<i class="gdsw q gdq-card"></i>a card open<i class="gdsw q gdq-panel"></i>a panel open</span>'+(mv&&!/nothing moved/.test(mv)?'<span><i class="gdsw mv"></i>moved since the last change</span><span><i class="gdsw gh"></i>where it was</span>':'')+'</div>'+
+    '<div class="gdleg"><span><i class="gdsw" style="background:'+GD_KIND_INK.app+'"></i>App</span><span><i class="gdsw cue"></i>a cue on the card</span><span><i class="gdsw" style="background:'+GD_KIND_INK.content+'"></i>Content</span><span><i class="gdsw" style="background:'+GD_KIND_INK.fun+'"></i>Fun</span><span><i class="gdsw n">3</i>merged: too close to tell apart (a tap lists them)</span><span class="gdlq">Quiet:<i class="gdsw q gdq-tour"></i>a tour<i class="gdsw q gdq-pan"></i>panning<i class="gdsw q gdq-card"></i>a card open<i class="gdsw q gdq-panel"></i>a panel open</span>'+(mv&&!/nothing moved/.test(mv)?'<span><i class="gdsw mv"></i>moved since the last change</span><span><i class="gdsw gh"></i>where it was</span>':'')+'</div>'+
     '<div class="note gdsimnow" id="gdsimnow">'+esc(gdSimNowWords(res,G.gd.sim.t))+'</div><div class="btnrow gdsimpick" id="gdsimpick">'+gdSimPickHtml(res)+'</div><div class="note gdsimsum" id="gdsimsum">'+esc(gdSimSumWords(res))+'</div><div class="note gdsimlearn">'+esc(gdSimLearnWords(res))+'</div>'+(mv?'<div class="note gdsimmoved" id="gdsimmoved">'+esc(mv)+'</div>':'');
   return fo("gd:sim",'Simulate a visit <span class="sub">· a scripted visitor, 0-20 min, the real scheduler</span>',["new","NEW"],body,2)}
 /* the timeline drawn again in place (the playhead, a playback) */
@@ -486,7 +510,8 @@ function gdSimPickHtml(res){var p=G.gd.sim.pick||[];return p.length>1?'<span>'+p
 /* a dot shown on the phone at its moment: the wall (or, for a cue, the card at its element), its line as it was said; a demo (pulled: no memory) */
 function gdSimShow(d,inDemo){var it=gdItems().filter(function(x){return x.id===d.id})[0];if(!it)return null;var my=inDemo?null:gdDemoBegin(),sc=gdSimScript(S.ui.gdSim);
   if(it.form==="cue")cuePlace(it.id);else{if(!(S.view==="card"&&S.stop==="closed"&&!G.on&&!S.settingsOpen&&!G.cam.open))gdOnWallNow();else gdStop("the simulator");gdSimAim(it.about==="marker"?((S.wallPois||[]).filter(function(x){return x.card})[0]||{}).id:d.at)}
-  var c=gdStart(it,"the simulator ("+sc.name+", "+gdClock(d.t)+")",{pull:true,ms:it.form==="cue"?4000:6500,text:it.form==="cue"?undefined:d.text,ret:!!sc.returning});
+  /* a Moment: in the tour, as the visitor had it (round 7) */
+  var c=it.form==="moment"?gdDemoShow(it,6500,{text:d.text}):gdStart(it,"the simulator ("+sc.name+", "+gdClock(d.t)+")",{pull:true,ms:it.form==="cue"?4000:6500,text:it.form==="cue"?undefined:d.text,ret:!!sc.returning});
   gdChip("Simulated · "+sc.name+" · "+gdClock(d.t)+" · "+gdSimShort(d));G.gd.sim.shown=d;if(!inDemo)gdDemoEnd(my,7000);return c}
 /* the phone turned to the point the visitor was pointing at then (a tip about the marker: to the marker, which the script keeps in view): in the middle of the screen (the wall zoomed in when the point sits
    too low or too high to reach the middle; Ask about the view's agCenter pans) */
@@ -538,6 +563,9 @@ rowDemos(GD_DEMOS5);
    stand-in). Unity: the POI Editor's GuidanceItem inspector (IMGUI foldouts per group, a ReorderableList for the drag, the templates a
    GenericMenu-free inline list, Undo.RecordObject for Delete's Undo shown in the window's own toast) ----- */
 S.ui.gdSR=false;S.ui.gdAddIn=null;
+/* round 7: Preview & Test › Today is (the real date until one is picked) and the point whose Jokes Specific Marker › Guide script shows */
+S.ui.gdToday=gdTodayISO();S.ui.gdJkPoint="painting";
+BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(ui\\.gdToday|ui\\.gdJkPoint|"));
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(gdVisitor\\.|"));
 TX_DOM.gd_btn_show="shown on a tip's Button chip";TX_DOM.gd_btn_tour=TX_DOM.gd_btn_show;TX_DOM.gd_btn_card=TX_DOM.gd_btn_show;TX_DOM.gd_btn_view=TX_DOM.gd_btn_show;
 ["settings_tips","settings_tips_all","settings_tips_ess","settings_tips_off","settings_tips_off_note","settings_tips_stay","settings_tips_again"].forEach(function(k){TX_DOM[k]="shown in the visitor's Settings › The guide"});
@@ -562,7 +590,8 @@ function gdOnlyChips(it){var c=[],x=function(f,t){return'<span class="gdchipc">'
   c.push(x(null,it.screen==="any"?"on the wall or a card":it.screen==="card"?"on a card":"on the wall"));if(+it.stillFor>0)c.push(x("stillFor","the phone still "+it.stillFor+" s"));
   if(it.aud)c.push(x("aud","the audience is "+gdNameOf(GD_AUD,it.aud)));if(it.visitIs)c.push(x("visitIs",gdNameOf(GD_VISIT_IS,it.visitIs).toLowerCase()));
   if(it.hasUsed)c.push(x("hasUsed","has used: "+gdNameOf(GD_USED,it.hasUsed)));if(it.notUsed)c.push(x("notUsed","has not used: "+gdNameOf(GD_USED,it.notUsed)));
-  if(it.notSolemn)c.push(x("notSolemn","not on Solemn points"));if(it.lively)c.push(x("lively","Lively only"));
+  if(gdKindSolemnOff(it))c.push(x(null,"not on Solemn points (fixed for "+((gdKindOf(it)||{}).name||"Fun")+")"));else if(it.notSolemn)c.push(x("notSolemn","not on Solemn points"));if(it.lively)c.push(x("lively","Lively only"));
+  if(it.when==="between")c.push(x(null,"in a tour, between two steps"));if(it.seasons)c.push(x(null,"in its window of dates"));if(it.ptJokes)c.push(x(null,"a point with a joke of its own"));if(it.joke)c.push(x(null,"not on a Solemn day"));
   if(+it.notBefore>0)c.push(x("notBefore","from "+gdClock(+it.notBefore*1000)));if(+it.notAfter>0)c.push(x("notAfter","until "+gdClock(+it.notAfter*1000)));return c.join("")}
 /* ----- the named warnings: an item that can never show; a line too long for 2 lines in either language; a line said by two items ----- */
 G.gd.warns=[];
@@ -649,12 +678,12 @@ on("edGuide.html",function(h){var d=document.createElement("div");d.innerHTML=h;
     row("Screen reader on",seg("ui.gdSR",["false","true"],["Off","On"],String(!!S.ui.gdSR)),"A stand-in for VoiceOver / TalkBack on the phone: no tip is spoken (the bubble is announced politely, aria-live), and each still lands in the dock's conversation under Tips."));
   return d.innerHTML});
 /* ----- each new row's demo: the item on the phone with the new value, and a chip that says it; a new item's own rows use the round-1 demos ----- */
-var GD_FORM_DEMO={group:1,spoken:1,about:1,mustSee:1,form:1,goes:1,points:1,focus:1,dim:1,gesture:1,button:1,when:1,event:1,stillFor:1,afterPrev:1,screen:1,aud:1,visitIs:1,hasUsed:1,notUsed:1,notSolemn:1,lively:1,notBefore:1,notAfter:1,teaches:1,afterDismiss:1,expires:1,onScreen:1,onScreenS:1};
+var GD_FORM_DEMO={prop:1,talkFor:1,beforeEnd:1,latePause:1,group:1,spoken:1,about:1,mustSee:1,form:1,goes:1,points:1,focus:1,dim:1,gesture:1,button:1,when:1,event:1,stillFor:1,afterPrev:1,screen:1,aud:1,visitIs:1,hasUsed:1,notUsed:1,notSolemn:1,lively:1,notBefore:1,notAfter:1,teaches:1,afterDismiss:1,expires:1,onScreen:1,onScreenS:1};
 function gdFieldChip(it,f){var v=it[f],nm=function(t){return gdNameOf(t,v)},ctx=Object.assign(gdContext(),{demo:false,showing:null,remark:null,speaking:false,panel:null,touchAt:null,movedAt:null,cardAt:null,scrollAt:null,stillSince:-Infinity}),r=gdCheck(it,gdItems(),S.gdVisitor,ctx,gdNow()),now=r.ok?"now: it could show":"now: "+r.no;
   var w={group:"In "+((gdGroupOf(it)||{}).name||"?")+" ("+(gdKindOf(it)||{}).name+")",spoken:"Spoken: "+nm(GD_SPOKEN)+(G.gd.cur&&G.gd.cur.spoken?" (speaking now)":" (a bubble now)"),about:"About: "+nm(GD_ABOUT_OPTS),mustSee:"Must be on screen: "+(v?"Yes":"No"),
     form:"Form: "+nm(GD_FORMS),goes:"Mascot goes: "+nm(GD_GOES),points:"Points at it: "+(v?"Yes":"No"),focus:"Focus: "+nm(GD_FOCUS)+(gdFocusNow(it)!==v?" (shown as a Ring: for Essentials)":""),dim:"Spotlight: the rest at "+Math.round(+v*100)+" %",
-    gesture:"The ghost finger: "+(gdGestureOf(it)?GD_GESTURE_WORDS[gdGestureOf(it)]:"Off"),button:"Button: "+nm(GD_BUTTONS),teaches:"Teaches: "+nm(GD_TEACH),afterDismiss:"After a dismissal: "+nm(GD_AFTER_DISMISS),expires:"Expires: "+nm(GD_EXPIRES),onScreen:"On screen for: "+nm(GD_ONSCREEN),onScreenS:"On screen for "+v+" s"}[f];
-  return(w||(gdReadBack(it).split(" · ")[2]||f))+(GD_FORM_DEMO[f]&&/^(when|event|stillFor|afterPrev|screen|aud|visitIs|hasUsed|notUsed|notSolemn|lively|notBefore|notAfter)$/.test(f)?" · "+now:"")}
+    gesture:"The ghost finger: "+(gdGestureOf(it)?GD_GESTURE_WORDS[gdGestureOf(it)]:"Off"),button:"Button: "+nm(GD_BUTTONS),teaches:"Teaches: "+nm(GD_TEACH),afterDismiss:"After a dismissal: "+nm(GD_AFTER_DISMISS),expires:"Expires: "+nm(GD_EXPIRES),onScreen:"On screen for: "+nm(GD_ONSCREEN),onScreenS:"On screen for "+v+" s",prop:"Prop: "+nm(GD_PROPS),talkFor:+v>0?"After "+v+" s of the tour's narration":"At any step of a tour",beforeEnd:v?"Only before the tour's last step":"At any step, not only the last",latePause:+v>0?"Or rarely at a pause from "+gdClock(+v*1000):"Only after pokes"}[f];
+  return(w||(gdReadBack(it).split(" · ")[2]||f))+(GD_FORM_DEMO[f]&&/^(when|event|stillFor|afterPrev|screen|aud|visitIs|hasUsed|notUsed|notSolemn|lively|notBefore|notAfter|talkFor|beforeEnd|latePause)$/.test(f)?" · "+now:"")}
 function gdDemoField(id,f){var my=gdDemoBegin(),it=gdItemNow(id);if(!it){gdChip("Not in a group: it never shows");gdDemoEnd(my,3000);return}if(!it.on){gdChip("Off: the "+it.label+" never shows");gdDemoEnd(my,3500);return}
   var c=gdDemoShow(it,6500);gdChip(gdFieldChip(it,f));gdDemoEnd(my,Math.max(4200,c?c.until-c.at+400:0))}
 /* a line of Says (a variant, an audience's, the returning visitor's) on the phone */
@@ -673,8 +702,56 @@ on("rowDemo.spec",function(key){var m=/^guidance\.items\.([^.]+)\.(\w+)$/.exec(k
   if(d.form==="walk"){if(f==="focus")return{act:function(){gdDemoWalk(id);gdChip("Focus: "+gdNameOf(GD_STEP_FOCUS,d.focus))},ringAfter:1100,ring:".gspot.on|.gfocus|.gdchip"};return}
   /* the item shows at once on the wall (no sheet to settle, the bubble drawn in the same frame): no wait before or after */
   if(GD_FORM_DEMO[f])return{wall:true,wait:0,act:function(){gdDemoField(id,f)},ringAfter:60,ring:".gdbub|.gdchip"};
-  if(/^(on|importance|essential|doneWhen)$/.test(f))return{wall:true,act:function(){gdDemoItem(id,f)},ringAfter:600,ring:".gdbub|.gdchip"};
-  if(/^(shows|max|again)$/.test(f))return{wall:true,act:function(){gdDemoTwice(id)},ringAfter:600,ring:".gdbub|.gdchip"};
-  if(f==="along")return{wall:true,act:function(){gdDemoAlong(id)},ringAfter:600,ring:".gdbub|.gdchip"};if(f==="duringTour")return{tour:"g1",act:function(){gdDemoTour(id)},ringAfter:600,ring:".gdchip"};
-  if(f==="cardLine")return{wall:true,act:function(){gdDemoLines(id)},ringAfter:600,ring:".gdbub|.gdchip"};if(f==="pokes")return{wall:true,act:function(){gdDemoPokes(id)},ringAfter:600,ring:".gdchip|.gdbub"};
-  if(f==="idleFor")return{wall:true,act:function(){gdDemoIdle(id)},ringAfter:600,ring:".gdchip|.gdbub"}});
+  if(/^(on|importance|essential|doneWhen)$/.test(f))return{wall:true,wait:0,act:function(){gdDemoItem(id,f)},ringAfter:60,ring:".gdbub|.gdchip"};
+  if(/^(shows|max|again)$/.test(f))return{wall:true,wait:0,act:function(){gdDemoTwice(id)},ringAfter:60,ring:".gdbub|.gdchip"};
+  if(f==="along")return{wall:true,wait:0,act:function(){gdDemoAlong(id)},ringAfter:60,ring:".gdbub|.gdchip"};if(f==="duringTour")return{tour:"g1",act:function(){gdDemoTour(id)},ringAfter:60,ring:".gdchip"};
+  if(f==="cardLine")return{wall:true,wait:0,act:function(){gdDemoLines(id)},ringAfter:60,ring:".gdbub|.gdchip"};if(f==="pokes")return{wall:true,wait:0,act:function(){gdDemoPokes(id)},ringAfter:60,ring:".gdchip|.gdbub"};
+  if(f==="idleFor")return{wall:true,wait:0,act:function(){gdDemoIdle(id)},ringAfter:60,ring:".gdchip|.gdbub"}});
+
+/* ----- round 7, Fun in the Editor: Says by date (Seasonal), each point's jokes (read here, written in Specific Marker › Guide script ›
+   Jokes), Preview & Test › Today is; their demos (a line on the phone with its date, a point's joke turned to the middle of the wall).
+   Unity: the POI Editor's GuidanceItem inspector (a list of {line, from, to, solemn}), the POI's own Guide script (its Jokes as CardStrings
+   keys), a date field in the Preview panel ----- */
+function gdTodayWords(){var md=gdTodayMD(),it=S.guidance.items.season,sv=it&&!it.deleted?gdSeasonOf(it,md):null,sd=gdSolemnDay(md);
+  return"Today is "+gdDayWords(md)+(S.ui.gdToday&&S.ui.gdToday!==gdTodayISO()?" (picked; the real date is "+gdDayWords(gdTodayISO().slice(5))+")":" (the real date)")+": "+
+    (sv?"Seasonal says “"+TXT(sv.says)+"”"+(sd?"; a Solemn day: no jokes today":""):"no seasonal line's window holds it, so Seasonal is quiet")+"."}
+function gdSeasonTodayWords(it){var md=gdTodayMD(),sv=gdSeasonOf(it,md);return"Today ("+gdDayWords(md)+", Preview & Test › Today is): "+(sv?"“"+TXT(sv.says)+"”"+(sv.solemn?", a Solemn day: no jokes today":""):"no line's window holds it: Seasonal is quiet")+"."}
+function gdSeasonHtml(it){var md=gdTodayMD(),p="guidance.items."+it.id+".seasons.";
+  return'<div class="gdvars gdseasons">'+(it.seasons||[]).map(function(x,i){var on=gdInWindow(md,x.from,x.to),w=gdHasWords(x.says);
+    return'<div class="gdvar gdseason'+(on?" on":"")+'"><div class="gdsline"><span class="gdvt'+(w?"":" empty")+'">'+esc(w?TXT(x.says):"(no words yet)")+'</span>'+(on?'<span class="badge new">TODAY</span>':"")+
+      '<button class="ubtn sm" type="button" data-gdseason="'+it.id+'|'+i+'" title="Show this line on the phone">&#9656;</button></div>'+
+      '<div class="gdsdate"><label>From <input class="u gdmd" data-sel="@'+p+i+'.from" value="'+esc(x.from)+'" maxlength="5" placeholder="MM-DD" aria-label="From (month-day)"></label><label>To <input class="u gdmd" data-sel="@'+p+i+'.to" value="'+esc(x.to)+'" maxlength="5" placeholder="MM-DD" aria-label="To (month-day)"></label>'+
+      '<span class="gdsw2">'+esc(gdDayWords(x.from)+(x.to!==x.from?" – "+gdDayWords(x.to):""))+'</span>'+pseg(p+i+".solemn",["false","true"],["A light line","Solemn day: no jokes"])+'</div></div>'}).join("")+'</div>'+
+    '<div class="gdforce">'+esc(gdSeasonTodayWords(it))+'</div>'}
+function gdPtJokesHtml(it){var P=S.wallPois||[],w=P.filter(function(p){return gdPtJokes(p.id).length});
+  return'<div class="gdvars">'+(w.length?w.map(function(p){var ks=gdPtJokes(p.id);return'<div class="gdvar"><span class="gdvn">'+esc(L(p.name))+'</span><span class="gdvt">'+ks.map(function(k){return esc(TXT(k))}).join(" · ")+'</span><button class="ubtn sm" type="button" data-gdjkshow="'+p.id+'|'+ks[0]+'" title="Show it on the wall">&#9656;</button></div>'}).join(""):'<div class="note">No point has a joke yet.</div>')+
+    '<div class="note">'+esc((P.length-w.length)+" of the wall's "+P.length+" points have no joke: none shows there.")+'</div>'+
+    '<button class="ubtn sm" type="button" data-gdjkgo="1">Edit in Specific Marker › Guide script › Jokes &#8250;</button></div>'}
+/* Specific Marker › 3 · Guide script › Jokes: the point (the wall's points; in the app each has its own Specific Marker), its 0-3 lines in each language */
+function gdJokesBlock(){var P=S.wallPois||[],p=P.filter(function(x){return x.id===S.ui.gdJkPoint})[0]||P[0];if(!p)return"";var pid=p.id,ks=S.ptJokes[pid]||[],n=function(x){return(S.ptJokes[x.id]||[]).length};
+  return'<div class="gdjk"><div class="sub2">Jokes <span class="sub">· 0-3 a point, each in every language: said when the point settles in the middle, once a visit (Guide › Guidance › Fun › Play › {point}\'s joke)</span></div>'+
+    row("Point",sel("@ui.gdJkPoint",P.map(function(x){return[x.id,L(x.name)+" ("+n(x)+(n(x)===1?" joke)":" jokes)")]}),pid),"Whose jokes these are: in the app each point has its own Specific Marker and Guide script; the Lab's one marker page lists the wall's points here. A change shows that point's joke on the wall.")+
+    (ks.length?'<table class="tbl txt gdjkt"><thead><tr><th style="width:24%">Joke</th>'+langHead()+'<th style="width:96px"></th></tr></thead><tbody>'+ks.map(function(k,i){return'<tr><td>'+(i+1)+' · '+esc(L(p.name))+'</td>'+txInputs(k)+'<td><button class="ubtn sm" type="button" data-gdjkshow="'+pid+'|'+k+'" title="Show it on the wall">&#9656;</button> <button class="del" type="button" data-gdjkdel="'+pid+'|'+i+'">Remove</button></td></tr>'}).join("")+'</tbody></table>':'<div class="note">No joke for '+esc(L(p.name))+': none shows there (never a generic one in its place).</div>')+
+    '<div class="btnrow">'+(ks.length<3?'<button class="ubtn sm" type="button" data-gdjkadd="'+pid+'">+ Add a joke</button>':'<span class="uses">3 jokes: the most</span>')+'</div>'+
+    '<div class="note">Short and kind, about what is painted there: one line, two at most. A Solemn point never jokes (Fun is off there).</div></div>'}
+on("edMarker.html",function(h){var d=document.createElement("div");d.innerHTML=h;var f=innerOf(d,"m3");if(!f)return h;var sr=f.querySelector('[data-set="@m.solemn"]'),at=sr&&sr.closest(".row"),b=gdJokesBlock();
+  if(at)at.insertAdjacentHTML("afterend",b);else f.insertAdjacentHTML("afterbegin",b);return d.innerHTML});
+/* a point's joke on the wall now (a demo: no memory), the point turned to the middle */
+function gdJkShow(pid,k){var my=gdDemoBegin();gdOnWallNow();var ins=gdItems().filter(function(x){return x.id==="ptjoke:"+pid})[0],t=k?TXT(k):ins?gdLine(ins,false,gdSlots(ins)):"",p=(S.wallPois||[]).filter(function(x){return x.id===pid})[0],nm=p?L(p.name):pid;
+  if(!ins||!String(t).trim()){gdChip(nm+": no joke, so none shows (never a generic one)");gdDemoEnd(my,3200);return null}
+  var c=gdDemoShow(ins,6500,{text:t,point:pid});gdChip(nm+"'s joke: when it settles in the middle, once a visit");gdDemoEnd(my,Math.max(4200,c?c.until-c.at+400:0));return c}
+function gdDemoSeason(id,i){var my=gdDemoBegin(),it=gdItemNow(id),x=it&&it.seasons&&it.seasons[i];if(!x)return;
+  if(!gdHasWords(x.says)){gdChip("No words yet: write them in the table above");gdDemoEnd(my,3000);return}var on=gdInWindow(gdTodayMD(),x.from,x.to);
+  var c=gdDemoShow(it,6500,{text:TXT(x.says)});gdChip(gdDayWords(x.from)+(x.to!==x.from?" – "+gdDayWords(x.to):"")+(x.solemn?" · a Solemn day: no jokes":"")+(on?" · today":" · not today ("+gdDayWords(gdTodayMD())+")"));gdDemoEnd(my,Math.max(4200,c?c.until-c.at+400:0))}
+function gdDemoToday(){var my=gdDemoBegin(),md=gdTodayMD(),it=gdItemNow("season"),sv=it?gdSeasonOf(it,md):null,sd=gdSolemnDay(md);
+  if(sv&&it.on){var c=gdDemoShow(it,6500);gdChip("Today is "+gdDayWords(md)+(sd?": a Solemn day, no jokes":": its seasonal line"));gdDemoEnd(my,Math.max(4200,c?c.until-c.at+400:0));return}
+  gdChip("Today is "+gdDayWords(md)+": no seasonal line");gdDemoEnd(my,3200)}
+rowDemos({"ui.gdToday":{wall:true,act:gdDemoToday,ringAfter:300,ring:".gdbub|.gdchip"},"ui.gdJkPoint":{wall:true,act:function(){gdJkShow(S.ui.gdJkPoint)},ringAfter:300,ring:".gdbub|.gdchip"}});
+on("rowDemo.spec",function(key){var m=/^guidance\.items\.([^.]+)\.seasons\.(\d+)\.(from|to|solemn)$/.exec(key);if(!m)return;var id=m[1],i=+m[2];return{wall:true,wait:0,act:function(){gdDemoSeason(id,i)},ringAfter:60,ring:".gdbub|.gdchip"}});
+ed.addEventListener("click",function(e){var t=e.target,q;
+  var sn=t.closest("[data-gdseason]");if(sn){e.stopPropagation();q=sn.dataset.gdseason.split("|");gdDemoSeason(q[0],+q[1]);return}
+  var js=t.closest("[data-gdjkshow]");if(js){e.stopPropagation();q=js.dataset.gdjkshow.split("|");gdJkShow(q[0],q[1]);return}
+  var ja=t.closest("[data-gdjkadd]");if(ja){e.stopPropagation();var pid=ja.dataset.gdjkadd,l=S.ptJokes[pid]||(S.ptJokes[pid]=[]),p=(S.wallPois||[]).filter(function(x){return x.id===pid})[0];if(l.length>=3)return;
+    l.push(gdNewWord("gd:i:ptjoke","Joke · "+(p?L(p.name):pid),"",""));renderEditor();return}
+  var jd=t.closest("[data-gdjkdel]");if(jd){e.stopPropagation();q=jd.dataset.gdjkdel.split("|");(S.ptJokes[q[0]]||[]).splice(+q[1],1);renderAll(true);return}
+  var jg=t.closest("[data-gdjkgo]");if(jg){e.stopPropagation();S.tab="marker";S.op.m3=true;renderEditor();var b=ed.querySelector(".gdjk");if(b)b.scrollIntoView({block:"center"});return}},true);

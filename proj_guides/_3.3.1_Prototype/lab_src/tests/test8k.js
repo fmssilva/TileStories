@@ -11,7 +11,8 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('S.hints.on=false;S.previewBar=false;S.lang="en";S.guideMute=true;S.view="card";S.stop="full";renderAll(false)');
   // record every reaction class Azu gets
   await R('window.RX=[];new MutationObserver(function(ms){ms.forEach(function(m){var c=m.target.className&&m.target.className.baseVal===undefined?m.target.className:"";(c.match(/r-\\w+|blink/g)||[]).forEach(function(x){if(RX[RX.length-1]!==x)RX.push(x)})})}).observe(ph,{subtree:true,attributes:true,attributeFilter:["class"]})');
-  const start = async (extra) => { await R(`if(G.on)stopTour();${extra || ''};startTour();G.i=0;runStep()`); await p.waitForTimeout(700); };
+  const start = async (extra) => { await R(`if(G.on)stopTour();gdResetVisitor();${extra || ''};startTour();G.i=0;runStep()`); await p.waitForTimeout(700); };
+  const until = async (src, ms) => { const t0 = Date.now(); while (Date.now() - t0 < ms) { if (await R(src)) return true; await p.waitForTimeout(60); } return false; };
   const tap = async () => { const m = await p.locator('#ph .mascot').boundingBox(); await p.mouse.click(m.x + m.width / 2, m.y + m.height / 2); };
   // 1. a tap pokes; the tour carries on
   await start(); await R('RX=[]'); await tap(); await p.waitForTimeout(150);
@@ -19,10 +20,14 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // 2. Lively: never one of the last three again
   const seq = []; for (let i = 0; i < 9; i++) { seq.push(await R('azPoke()')); await p.waitForTimeout(30); }
   ok('Lively pokes: never one of the last 3 reactions', seq.every((r, i) => seq.slice(Math.max(0, i - 3), i).indexOf(r) < 0), seq);
-  ok('...and a joke every third poke (its words from Languages & Terms)', await R('var b=ph.querySelector(".azbub");!!b&&[TXT("mascot_joke_1"),TXT("mascot_joke_2"),TXT("mascot_joke_3")].indexOf(b.textContent)>=0') || (await p.waitForTimeout(800), await R('var b=ph.querySelector(".azbub");!!b&&[TXT("mascot_joke_1"),TXT("mascot_joke_2"),TXT("mascot_joke_3")].indexOf(b.textContent)>=0')));
+  await R('stopTour();S.stop="closed";renderPhone(false);gdResetVisitor();window.__k0=S.guidance.kinds.map(function(k){return k.on});S.guidance.kinds.forEach(function(k){k.on=k.id==="fun"});G.gd.touchAt=null;G.pokes=0;azPoke();azPoke();azPoke()');
+  ok('...and a joke after three pokes (Guide › Guidance › Fun › Play › A joke, on the wall; its words from Languages & Terms)', await until('var b=G.gd.cur;!!b&&b.item.id==="joke"&&[TXT("mascot_joke_1"),TXT("mascot_joke_2"),TXT("mascot_joke_3")].indexOf(b.text)>=0&&!!ph.querySelector(".gdbub:not(.gd-out)")', 4000), await R('G.gd.last&&G.gd.last.why'));
+  await R('gdStop("test");S.guidance.kinds.forEach(function(k,i){k.on=window.__k0[i]});');
   // 3. Calm: a wink or a blush, no jokes
   await start('S.guideCfg.life="calm";G.pokes=0'); const cs = []; for (let i = 0; i < 6; i++) cs.push(await R('azPoke()')); await p.waitForTimeout(900);
-  ok('Calm: a poke gets a wink or a blush, and no joke', cs.every(r => r === 'r-wink' || r === 'r-blush') && await R('!ph.querySelector(".azbub")||[TXT("mascot_joke_1"),TXT("mascot_joke_2"),TXT("mascot_joke_3")].indexOf(ph.querySelector(".azbub").textContent)<0'), cs);
+  await R('stopTour();S.stop="closed";renderPhone(false);gdResetVisitor();window.__k0=S.guidance.kinds.map(function(k){return k.on});S.guidance.kinds.forEach(function(k){k.on=k.id==="fun"});G.gd.touchAt=null;azPoke();azPoke();azPoke()'); await p.waitForTimeout(1600);
+  ok('Calm: a poke gets a wink or a blush, and no joke', cs.every(r => r === 'r-wink' || r === 'r-blush') && await R('(!ph.querySelector(".azbub")||[TXT("mascot_joke_1"),TXT("mascot_joke_2"),TXT("mascot_joke_3")].indexOf(ph.querySelector(".azbub").textContent)<0)&&!(G.gd.cur&&G.gd.cur.item.id==="joke")'), cs);
+  await R('S.guidance.kinds.forEach(function(k,i){k.on=window.__k0[i]});');
   await R('S.guideCfg.life="lively"');
   // 4. three quick taps tickle; a long press knocks Azu over
   await start(); await R('RX=[]'); for (let i = 0; i < 3; i++) { await tap(); await p.waitForTimeout(120); }
@@ -35,8 +40,9 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('Step 2 (lost in 1755): a serious face, its brows shown', await R('var m=ph.querySelector(".mascot");m.dataset.mood==="serious"&&getComputedStyle(m.querySelector(".az-brow")).opacity==="1"'));
   await R('S.m.solemn=true;G.i=2;runStep()'); await p.waitForTimeout(500);
   ok('Solemn point: "surprised" becomes thoughtful', await R('ph.querySelector(".mascot").dataset.mood') === 'thinking');
-  await R('G.pokes=2;azPoke()'); await p.waitForTimeout(900);
-  ok('Solemn point: no joke on the third poke', await R('!ph.querySelector(".azbub")||[TXT("mascot_joke_1"),TXT("mascot_joke_2"),TXT("mascot_joke_3")].indexOf(ph.querySelector(".azbub").textContent)<0'));
+  await R('stopTour();S.stop="half";renderPhone(false);gdResetVisitor();window.__k0=S.guidance.kinds.map(function(k){return k.on});S.guidance.kinds.forEach(function(k){k.on=k.id==="fun"});G.gd.touchAt=null;azPoke();azPoke();azPoke()'); await p.waitForTimeout(1600);
+  ok('Solemn point: no joke on the third poke (Why not now?: a Solemn point, no fun here)', await R('(!ph.querySelector(".azbub")||[TXT("mascot_joke_1"),TXT("mascot_joke_2"),TXT("mascot_joke_3")].indexOf(ph.querySelector(".azbub").textContent)<0)&&!(G.gd.cur&&G.gd.cur.item.id==="joke")&&/a Solemn point: no fun here/.test(gdWhyNot(gdItems(),S.gdVisitor,Object.assign(gdContext(),{touchAt:null,remark:null,showing:null}),gdNow(),"joke"))'));
+  await R('S.guidance.kinds.forEach(function(k,i){k.on=window.__k0[i]});');
   await R('S.m.solemn=false');
   // 6. the mouth follows the words (and stays still when asked)
   await start('S.guideCfg.speed=0.8'); await p.waitForTimeout(400);
@@ -48,7 +54,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('S.guideCfg.lips=true;RX=[]'); await p.waitForTimeout(5300);
   ok('Azu blinks (every 2.5-5 s)', await R('RX.indexOf("blink")>=0'));
   // 7. the water break: between two steps, after the time set; one tap; then the tour goes on; once a tour
-  await start('S.guideCfg.waterAfter=1;G.cardMoments=0;G.lastMoment=0'); await R('G.talkFrom=performance.now()-5000');
+  await start('S.guidance.items.water.talkFor=1'); await R('G.talkFrom=performance.now()-5000');
   await p.waitForFunction(() => LAB.run('G.moment'), null, { timeout: 15000 });
   const mo = await R('[G.moment,G.i,!!ph.querySelector(".azmoment [data-azprop=water]"),ph.querySelector(".mascot").classList.contains("center"),!!ph.querySelector(".gspot.on")]');
   ok('Water break: between steps, Azu in the middle with the glass, the light stepped back', mo[0] === 'water' && mo[1] === 0 && mo[2] && mo[3] && !mo[4], mo);
@@ -57,19 +63,20 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('G.talkFrom=performance.now()-5000;next()'); await p.waitForTimeout(300);
   ok('...and only once a tour', await R('!G.moment'));
   // 8. no tap: it carries on by itself after 8 s
-  await start('G.cardMoments=0;G.lastMoment=0'); await R('azMoment("water",function(){window.MDONE=1})'); await p.waitForTimeout(8400);
+  await start(''); await R('azMoment("water",function(){window.MDONE=1})'); await p.waitForTimeout(8400);
   ok('No tap: after 8 s the tour carries on by itself', await R('!G.moment&&window.MDONE===1'));
   // 9. the cookie, before the end
-  await start('G.cardMoments=0;G.lastMoment=0;S.guideCfg.waterAfter=600'); await R('G.i=S.guideSteps.length-2;next()'); await p.waitForTimeout(400);
+  await start('S.guidance.items.water.talkFor=600'); await R('G.i=S.guideSteps.length-2;next()'); await p.waitForTimeout(400);
   ok('Before the end: a cookie', await R('G.moment==="cookie"&&!!ph.querySelector("[data-azprop=cookie]")'));
   await R('RX=[]'); await p.locator('#ph [data-azprop]').click(); await p.waitForTimeout(1800);
   ok('...a tap: Azu eats it and thanks', await R('RX.indexOf("r-eat")>=0&&ph.querySelector(".azbub").textContent===TXT("mascot_thanks")'));
   // 10. Calm or Solemn: nothing unprompted
   for (const [n, x] of [['Calm', 'S.guideCfg.life="calm"'], ['Solemn', 'S.m.solemn=true']]) {
-    await start(`${x};G.cardMoments=0;G.lastMoment=0;S.guideCfg.waterAfter=1`); await R('G.talkFrom=performance.now()-5000;G.i=S.guideSteps.length-2;next()'); await p.waitForTimeout(300);
+    await start(`${x};S.guidance.items.water.talkFor=1`); await R('G.talkFrom=performance.now()-5000;G.i=S.guideSteps.length-2;next()'); await p.waitForTimeout(300);
     ok(`${n}: no water break, no cookie`, await R('!G.moment'));
     await R('S.guideCfg.life="lively";S.m.solemn=false');
   }
+  await R('S.guidance.items.water.talkFor=60');
   // 11. Reduce Motion: a poke moves nothing
   await start('S.reduce=true'); await R('G.lastPokes=["r-wink","r-blush","hey"];azPoke()'); await p.waitForTimeout(100);
   ok('Reduce Motion: a poke moves nothing', await R('ph.querySelector(".mascot svg").getAnimations().filter(function(a){return a.playState==="running"}).length===0'));
@@ -83,7 +90,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('S.dark=false;renderAll(false);stopTour()');
   // 13. the Editor
   ok('Editor: Mascot has Liveliness, Mouth, Moods, Moments, Water break after and five Try', await R('S.tab="guide";renderEditor();var f=ed.querySelector(\'[data-fo="s7mascot"]\');!!f&&["Liveliness","Mouth","Moods","Moments","Water break after"].every(function(t){return f.textContent.indexOf(t)>=0})&&f.querySelectorAll("[data-aztry]").length===5'));
-  ok('Azu\'s words are on the Mascot (Languages & Terms)', await R('(TXO.s7mascot||[]).length') >= 11, await R('(TXO.s7mascot||[]).length'));
+  ok('Azu\'s words are on the Mascot (Languages & Terms; the jokes and the Moments\' asks are their guidance items\' now)', await R('(TXO.s7mascot||[]).length') >= 8 && await R('TXOWN.mascot_joke_1==="gd:i:joke"&&TXOWN.mascot_water==="gd:i:water"'), await R('(TXO.s7mascot||[]).length'));
   await R('S.tab="marker";S.sel.gstep="g2";renderEditor()'); await p.waitForTimeout(300);
   ok('Guide script: Solemn point, and Azu\'s mood on the step', await R('/Solemn point/.test(ed.querySelector(\'[data-fo="m3"]\').textContent)&&!!ed.querySelector("[data-azmood=g2]")'));
   await p.locator('select[data-azmood="g2"]').selectOption('thinking');

@@ -15,7 +15,11 @@
    VisualElements with a border radius and two borders (USS), the pulse a USS transition on scale; the marker's screen point from
    RuntimePanelUtils.CameraTransformWorldToPanel; the word lit by TextElement.PostProcessTextVertices (the read-along's tint); the
    swipe and the long press a PointerManipulator (PointerDown / Move / Up, a 0.6 s schedule.Execute for the hold), the swipe's exit a
-   translate tween. */
+   translate tween.
+   Round 7: a Moment (Fun › Moments) is Azu's own look, unchanged: Azu walks to the middle with its prop and asks for one tap
+   (mascot/azu2d.js's azMoment, its words the item's Says); no bubble of the guidance. Unity: the prop and Azu's reactions are the Rive
+   file's states (drink, eat), the bubble as every tip's. A tap on the treasure hunt's invitation (or its chip, Start the hunt) opens Ask
+   about the view and starts its hunt (camAsk's own, no copy). */
 var GD_RING=36,GD_GUT=12,GD_SWIPE=40,GD_HOLD=600;
 G.gd.az=null;
 function gdPR(el){var pr=ph.getBoundingClientRect(),q=pr.height/ph.offsetHeight,r=el.getBoundingClientRect();return{l:(r.left-pr.left)/q,t:(r.top-pr.top)/q,r:(r.right-pr.left)/q,b:(r.bottom-pr.top)/q}}
@@ -54,6 +58,8 @@ function gdBubHtml(c){var bt=gdBtnOf(c.item),cta=bt?'<button type="button" class
   return'<button type="button" data-gdbub="1">'+(c.spoken?gdWords(c.text):esc(c.text))+'</button>'+cta+x+'<i class="gdtail"></i>'}
 /* the tip on the phone: its elements made once, then placed (again at each paint of the wall: the marker moves with the picture) */
 function gdPresent(c){gdClearEls();var it=c.item,az=gdMascot();
+  /* a Moment: Azu's prop and bubble (as before); when it ends, the tour's next step it held goes on */
+  if(it.form==="moment"){var pull=c.pull;G.gd.mom=true;azMoment(it.prop==="cookie"?"cookie":"water",function(){gdResume(pull)},c.text);return}
   var b=document.createElement("div");b.className="gdbub"+(az?"":" plain")+(S.reduce?"":" gd-in")+(it.form==="remark"?" gd-more":"")+(gdBtnOf(it)?" gd-cta":"")+(gdStays(c)?" gd-stay":"");b.setAttribute("role","status");b.setAttribute("aria-live","polite");
   b.innerHTML=gdBubHtml(c);ph.appendChild(b);
   if(gdFocusNow(it)==="ring")gdRing(it,!S.reduce);
@@ -68,7 +74,8 @@ function gdClearEls(){ph.querySelectorAll(".gdbub,.gdring,.gdpoint,.gdglint,.gsp
    for the ✦ (or no target) the bubble above the ✦ and Azu; cover says when even the best place is over its target or the block being told */
 function gdSolve(c,bw,bh){var it=c.item,W=ph.offsetWidth,H=ph.offsetHeight,az=gdMascot(),obs=gdObstacles();
   var bounds=function(x){return Math.max(0,GD_GUT-x.l)*(x.b-x.t)+Math.max(0,x.r-(W-GD_GUT))*(x.b-x.t)+Math.max(0,44-x.t)*(x.r-x.l)+Math.max(0,x.b-(H-GD_GUT))*(x.r-x.l)};
-  var cost=function(x,extra){var s=bounds(x)*20;obs.forEach(function(o){s+=gdOver(x,o.b)*o.w});(extra||[]).forEach(function(e){s+=gdOver(x,e)*8});return s};
+  /* round 7: any overlap with words costs a fixed 500 on top of its area (a sliver of a name was cheaper than the next side: 0 px over words) */
+  var cost=function(x,extra){var s=bounds(x)*20;obs.forEach(function(o){var a=gdOver(x,o.b);s+=a*o.w+(a>0&&o.text?500:0)});(extra||[]).forEach(function(e){s+=gdOver(x,e)*8});return s};
   var clampL=function(l){return Math.max(GD_GUT,Math.min(W-GD_GUT-bw,l))};
   var M=gdTarget(it),home=null,best=null;
   if(az){var cur=az.style.translate;az.style.translate="";home=gdPR(az);az.style.translate=cur}
@@ -125,7 +132,9 @@ function gdApplyAz(az,hop){var a=G.gd.az;if(!az||!a)return;az.classList.add("gd-
 function gdAzHome(){var az=ph.querySelector(".azfab"),pg=G.gd.ptGb;G.gd.az=null;G.gd.ptGb=false;if(G.gd.ptTo){G.gd.ptTo=false;G.pointTo=null}if(!az)return;if(pg)az.classList.remove("point-gb");var from=az.style.translate;
   if(from&&!S.reduce&&az.animate){var f=from.split(" ").map(parseFloat);az.animate([{translate:from},{translate:(f[0]/2)+"px "+(Math.min(0,f[1]||0)-30)+"px"},{translate:"0px 0px"}],{duration:420,easing:"cubic-bezier(.3,.7,.4,1)"})}
   az.style.translate="";az.classList.remove("gd-away","gd-point","gd-left");delete az.dataset.gdlean;var arm=az.querySelector(".marm");if(arm){arm.classList.remove("on");arm.style.transform=""}}
-function gdUnpresent(){gdAzHome();ph.querySelectorAll(".gdbub,.gdring,.gdpoint,.gdglint,.gspot.gdspot,.gdfinger,.gdripple").forEach(function(x){x.classList.add("gd-out");x.removeAttribute("aria-live");setTimeout(function(){x.remove()},S.reduce?0:170)})}
+/* the tour's next step, held by a Moment, goes on (a demo's Moment resumes the tour it paused) */
+function gdResume(pull){if(G.gd.hold){G.gd.hold=false;if(G.on&&!G.paused)nextStep()}else if(pull&&G.on&&G.paused)resumeTour()}
+function gdUnpresent(){if(G.gd.mom){G.gd.mom=false;if(G.moment)azMomentEnd(false)}gdAzHome();ph.querySelectorAll(".gdbub,.gdring,.gdpoint,.gdglint,.gspot.gdspot,.gdfinger,.gdripple").forEach(function(x){x.classList.add("gd-out");x.removeAttribute("aria-live");setTimeout(function(){x.remove()},S.reduce?0:170)})}
 /* would the item's bubble, at its best place, cover its target or the block being told? (measured with its words, never shown) */
 function gdCovers(it){if(!gdTarget(it))return null;var m=document.createElement("div");m.className="gdbub";m.style.visibility="hidden";
   m.innerHTML=gdBubHtml({item:it,text:gdLine(it,S.gdVisitor.visits>1,gdSlots(it))});ph.appendChild(m);var best=gdSolve({item:it},m.offsetWidth,m.offsetHeight);m.remove();return best.cover||null}
@@ -149,6 +158,7 @@ function gdTap(){var c=G.gd.cur;if(!c)return;var it=c.item;if(c.pull&&G.gd.demo)
     if(p&&p.card){S.stop="half";renderPhone(false);emit("card.opened","Azu's remark");startTour();return}
     G.fab.menu=false;G.cam.open=true;renderPhone(true);emit("view.opened","Azu's remark");camAsk("",p&&p.year?"oldest":"what");camLight([pid]);return}
   if(it.tap==="menu"){gdStop("tapped: the ✦ menu opens","acted");gbMenu(true);return}
+  if(it.tap==="hunt"){gdStop("tapped: the treasure hunt starts","acted");gdHuntGo("the hunt invitation");return}
   if(it.tap==="tour"){gdStop("tapped: the tour of "+(c.slots.point||"the point")+" starts","acted");S.stop="half";renderPhone(false);emit("card.opened","the tour invitation");startTour();return}
   gdStop("tapped","acted")}
 function gdSwipe(dx){var c=G.gd.cur;if(!c)return;var b=ph.querySelector(".gdbub:not(.gd-out)");if(b){b.style.opacity="";if(!S.reduce)b.style.translate=(dx>0?1:-1)*Math.round(ph.offsetWidth*.7)+"px 0px"}
@@ -171,6 +181,7 @@ ph.addEventListener("pointermove",function(e){var p=G.gd.press;if(!p||e.pointerI
 function gdCta(act){var c=G.gd.cur;if(!c)return;var it=c.item,bt=gdBtnOf(it),w=bt?TXT(bt.word):"",M=gdTarget(it);act=act||bt&&bt.act||"card";
   if(act==="tour"){gdStop("tapped its button: "+w,"acted");S.stop="half";renderPhone(false);emit("card.opened","the tip's button");startTour();return}
   if(act==="view"){gdStop("tapped its button: "+w,"acted");G.fab.menu=false;G.cam.open=true;renderPhone(true);emit("view.opened","the tip's button");return}
+  if(act==="hunt"){gdStop("tapped its button: "+w,"acted");gdHuntGo("the tip's button");return}
   /* Show me: the gesture on its target (the ghost finger, the ring), or How does this work? when it has no target */
   if(act==="show"){gdStop("tapped its button: "+w,"acted");if(M)setTimeout(function(){gdShowMe(it,M)},S.reduce?0:180);else gdWalk("Show me");return}
   gdStop("tapped: "+w,"acted");S.view="card";S.stop=S.cardCfg.openAt;feedback("open");renderPhone(false);emit("card.opened",it.cta?"How does this work?":"the tip's button")}
@@ -178,6 +189,8 @@ ph.addEventListener("click",function(e){var f=e.target.closest("[data-gdfewer]")
   var ct=e.target.closest("[data-gdcta]");if(ct){e.stopPropagation();if(performance.now()<(G.gd.noClickUntil||0))return;gdCta(ct.dataset.gdcta);return}
   if(e.target.closest("[data-gdx]")){e.stopPropagation();gdStop("dismissed (its close button)","dismissed");return}
   var t=e.target.closest("[data-gdbub]");if(!t)return;e.stopPropagation();if(performance.now()<(G.gd.noClickUntil||0))return;gdTap()},true);
+/* round 7: the treasure hunt from its invitation: Ask about the view opens and its own hunt starts (the Kids' treasure hunt chip's call) */
+function gdHuntGo(how){G.fab.menu=false;G.cam.open=true;renderPhone(true);emit("view.opened",how);camAsk(TXT("cam_chip_kids"),"kids")}
 /* the Editor's demos: a chip on the phone with the ×10 clock (Editor only, never in the app; Unity: a Play-mode preview label) */
 function gdChip(text){var c=ph.querySelector(".gdchip");if(!text){if(c)c.remove();return}if(!c){c=document.createElement("div");c.className="gdchip";c.setAttribute("aria-hidden","true");ph.appendChild(c)}c.textContent=text}
 

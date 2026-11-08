@@ -37,3 +37,8 @@
 .gbmenu svg{width:20px;height:20px;flex:none;fill:none;stroke:#FFD98A;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .gbmenu small{display:block;font:500 12.5px/1.25 var(--body);color:rgba(244,241,234,.74);margin-top:2px}
 .reduce .gbtn-wrap *,.reduce .gbmenu{animation:none!important;transition:none!important}
+
+/* (guidance round 7) the band of the card's paper behind the ✦ and Azu on the card: the words scroll away under it, never under the ✦ (Unity: a
+   VisualElement with the card's colour and a ramp texture on its top edge; the Lab's gradient stands in for that texture) */
+.gbband{position:absolute;left:0;right:0;bottom:0;z-index:5;pointer-events:none;background:linear-gradient(to bottom,rgba(0,0,0,0),var(--paper) 20px)}
+.gbband.tour{background:linear-gradient(to bottom,rgba(0,0,0,0),var(--gbband,var(--paper)) 20px)}
