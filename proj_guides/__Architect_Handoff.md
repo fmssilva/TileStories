@@ -5,9 +5,9 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-07)
 
 - **State:**
-  - **The Lab:** `master` holds guidance rounds 1-8, verified on 2026-11-06/09, published at
-    https://claude.ai/artifact/4LpLd4ZTgBEnjrXnhUMCVh with the 186 voice files and the capabilities (section 1). The
-    developer changes account often (three times on 2026-11-08/09); the old links stay in their accounts (Jq6X2K… at round 7, Jrejv7… at
+  - **The Lab:** `master` holds guidance rounds 1-9, verified on 2026-11-06/09, published at
+    https://claude.ai/artifact/J9J4hWDvF161Bog9dsm83K with the 186 voice files and the capabilities (section 1). The
+    developer changes account often (three times on 2026-11-08/09); the old links stay in their accounts (4LpLd4… at round 8, Jq6X2K… at round 7, Jrejv7… at
     round 6, QmhHSz… at round 5, KDs2… at v29). A new account cannot update an old link: publish a new one (section 1, Publishing). Its
     code is in modules by feature
     (`lab_src/src/<area>/<module>.js`), with no wrappers: `lab_src/PROTOTYPE_STRUCTURE.md` says where each feature lives and
@@ -34,8 +34,8 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     - **Level 2, every 3rd-4th round (about 35 min):** every tab and every file. It runs sooner when a round changed existing
       shared code.
     - **Level 3, every 10-12 rounds and before a Unity hand-off:** level 2, every mutation and a new baseline.
-    - Count the rounds since the last level 2 and 3 in every answer. After guidance round 8 that is 0 and 8: level 2 ran on
-      round 8 on 2026-11-09, and level 3 has not run yet (owed by about round 10).
+    - Count the rounds since the last level 2 and 3 in every answer. After guidance round 9 that is 1 and 9: level 2 ran on
+      round 8 on 2026-11-09 (round 9's broad level 1 covered its touched modules), and level 3 is owed with round 10.
   - **Where the tests' time goes (measured 2026-11-07):**
     - Starting Edge and loading the 13 MB page costs only about 8 s a file (Edge 0.3-0.8 s, the page 7 s), so one shared Edge
       would save almost nothing.
@@ -62,8 +62,8 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     sources in `_3.8_guidance_plans/`). Decisions: a top-level **Guide** tab (today's 6 · Guide + Guidance + the first pages);
     App and Fun tips as a bubble only, Content spoken once the guide has been heard; a deterministic mix; the card Hints edited
     in Guidance with a view in Card Controls.
-  - **Guidance rounds 1-8 are done** (merged into `master`; the briefs `_3.8_guidance_plans/brief_round1.md` to
-    `brief_round8.md`).
+  - **Guidance rounds 1-9 are done** (merged into `master`; the briefs `_3.8_guidance_plans/brief_round1.md` to
+    `brief_round9.md`).
     - Round 2: the memory and the visit, every gate and limit, the stage and the score, the learning, Ask about the view
       and A tour of {point}, Why not now? / The visitor / Log, five console scenes; `tests/test9f.js`.
     - Round 3: Azu's wall remarks became Content › What's in view (one item a point) and the ✦ hint App › The wall ›
@@ -88,14 +88,21 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       back; Audiences › Where to ask (`S.aud.where` replaced `S.aud.ask`); Start the app in the preview bar and Preview &
       Test; How to use the card moved to Sequences; four scenes; `tests/test9l.js`. Shared code changed:
       `audiences/audiences.js`, `core/words.js`.
+    - Round 9: pull: Things to try (the ✦ menu and Settings; a sheet of 8 features from the App items that Teach, ticked
+      from Done when, each with Show me), App › The guide › Pause the guide (a pulled-only Try item), the card controls'
+      use events, Ask Azu's "how do I…" (offline match in EN and PT, the live tool `show_how`) with a Show me card,
+      Fewer like this's toast; four scenes; `tests/test9m.js`. Shared code changed: `world/guide-button.js` (the ✦ menu has
+      5 items on the card, 6 on the wall), `agent/agent.js`, `agent/tools.js` (9 tools), `guide/guide-scenes.js`,
+      `core/words.js`. Its level 1 ran 13 files (every guidance file and each touched module's), so the full level 2 was
+      left to round 10's level 3.
     - Their captures were judged by the Architect; the developer reviews later, step by step. The open look questions:
       round 1's PT opening line, what "Mascot Off" means, Azu's size beside the marker; rounds 2 and 3's in the closing
       answers of 2026-11-06/07 (among them: a group's own shorter gap, the remarks counting in Content's cap, The ✦ on the
       card, a ring for The ✦ with the 3D model, "The" mid-sentence in the remark lines).
-    - **Next: guidance round 9** (`_3.8` section 8 and 3.4: pull: the ✦ menu's Things to try (the App items as a checklist,
-      Show me), Settings › Tips with Fewer like this, Ask Azu's "how do I…" answered from the same items with Show me;
-      proves Tips Off still lets Things to try show), as a brief to an Opus subagent in the shape of `brief_round8.md`,
-      with level 1 running test9e up to its own file. Prototype only (no Unity) until the developer says so.
+    - **Next: guidance round 10** (`_3.8` section 8: every remaining Editor row, about 148 outside Guide and Audiences,
+      gets its demo; the self-test fails any row without one), then **level 3** (level 2, every mutation, a new
+      baseline). Before it: split test9d (570 s of its 600 s on round 9) and look at the self-test's growth (9.9 min at
+      round 8). Prototype only (no Unity) until the developer says so.
   - **MCP:** blender-mcp at user scope (Blender 5.2.3, add-on 1.8, port 9876). The Unity MCP was not connected this stretch.
   - **Keys:** Gemini, Azure Speech and ElevenLabs answer (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).
 - **The tasks, in this order:**
@@ -126,7 +133,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 
 ## 1. Where the work is
 
-- **The target is the Block Components Lab** (https://claude.ai/artifact/4LpLd4ZTgBEnjrXnhUMCVh), the record copy
+- **The target is the Block Components Lab** (https://claude.ai/artifact/J9J4hWDvF161Bog9dsm83K), the record copy
   `_3.3.1_Prototype/Block Components Lab.html`, and its sources `_3.3.1_Prototype/lab_src/` (modules by feature, the build,
   the tests; `PROTOTYPE_STRUCTURE.md` says where a change goes, `README.md` how to prove and publish it).
 - **Publishing:** the page goes from the record copy on disk, with `root` `_3.3.1_Prototype` (a redeploy to the same link

@@ -1,4 +1,5 @@
-/* Guidance tested in the prototype: the scenes in Ask Azu's test console (round 8's four at the end: a first run, Skip every page, the camera
+/* Guidance tested in the prototype: the scenes in Ask Azu's test console (round 9's four at the very end: Things to try's Show me on Before / After,
+   Tips Off with Things to try still there, How do I pause the guide?, Fewer like this then Things to try) (round 8's four before them: a first run, Skip every page, the camera
    refused then allowed, a later launch) (round 5's three, at the end: the Quiet preset, the Family audience,
    a first visit simulated; round 1's five, round 2's five: the 15-minute script, Ignore three,
    Fewer like this, Leave and come back, During a tour; round 3's two: a remark yields, The ✦ after four pokes; round 4's two: a hint and a
@@ -13,7 +14,7 @@ function gdOverWords(){var b=ph.querySelector(".gdbub:not(.gd-out)"),az=G.gd.az&
 function gdScWait(f,ms){var t0=performance.now();return new Promise(function(res){(function w(){var v=false;try{v=f()}catch(e){}if(v||performance.now()-t0>ms){res(!!v);return}setTimeout(w,50)})()})}
 /* a scene's start: the Ribeira wall, a first visit (or one whose opening was said 30 s ago), the clock at its rate, the remarks resting */
 /* a scene starts clean: an Editor demo still pending is cancelled (a newer demo sequence), so its end never stops the scene's tip */
-function gdScSetup(rate,opened,keep){G.demoSeq=(G.demoSeq||0)+1;clearTimeout(G.gd.demoT);clearInterval(G.gd.demoI);if(G.on)stopTour();setWall("ribeira");gdStop("a scene");G.gd.demo=false;gdChip(null);var iv=gdGroupById("inview");
+function gdScSetup(rate,opened,keep){G.demoSeq=(G.demoSeq||0)+1;clearTimeout(G.gd.demoT);clearInterval(G.gd.demoI);if(G.on)stopTour();G.gd.tryOpen=false;G.gd.tryOwner=null;G.gd.tryShow=null;setWall("ribeira");gdStop("a scene");G.gd.demo=false;gdChip(null);var iv=gdGroupById("inview");
   var cg=gdGroupById("card"),cues={};cg.items.forEach(function(id){cues[id]=S.guidance.items[id].on});
   var fk=gdKindById("fun");G.gd.sc={rate:G.gd.rate,inview:iv.on,hint:S.guidance.items.gbhint.on,gbtn:S.guideCfg.gbtn,azuTap:S.guideCfg.azuTap,life:S.guideCfg.life,cueOn:cg.on,cues:cues,fun:fk?fk.on:null};
   /* round 7: Fun rests too, unless the scene is about it (keep = "fun") */
@@ -354,3 +355,47 @@ var GDSCENES8=[
           var ans="a later launch: "+(later[0]?"no pages":"pages shown")+", the Opening message “"+later[1]+"” (visit "+later[2]+"); Remember across visits Off, a later launch: "+(again?"Hello again (a first run)":"no pages")+".";
           return gd8Done(later[0]&&later[1]===TXT("gd_opening_back")&&later[2]===2&&again?[true,"a later launch says Welcome back with no pages; with Remember Off the pages come again",ans]:[false,"the later launch did not go as it should",ans])})}}];
 GDSCENES8.forEach(function(s){s.where="wall";AGSCENES.push(s)});
+/* ----- round 9: four scenes (ids gd9_*), the visitor's pull: Things to try's Show me on Before / After, Tips Off with Things to try still
+   there, "How do I pause the guide?" answered offline with its Show me card, and Fewer like this on an App tip then Things to try. Each
+   taps as a finger does (gsTouch) and checks the phone: where the visitor was taken, the finger's gesture and where it ends ----- */
+/* the sheet's rows now, and a tap on one of its controls */
+function gd9Rows(){return[].map.call(ph.querySelectorAll(".gdtry .gdtry-row"),function(r){return r.dataset.gdtryrow})}
+function gd9Open(){var g=ph.querySelector(".gbtn");if(!g)return false;gsTouch(g);var t=ph.querySelector('.gbmenu [data-gbgo="try"]');if(!t){G.fab.menu=false;fabLayer();return false}gsTouch(t);return!!ph.querySelector(".gdtry")}
+function gd9Show(id){return gsTouch(ph.querySelector('.gdtry [data-gdtryshow="'+id+'"]'))}
+/* the finger's end inside the target's box (a little room: the tip rests at its edge) */
+function gd9OnTarget(){var s=G.gd.tryShow;if(!s||!s.played||!s.end||!s.box)return false;var b=s.box,m=24;return s.end[0]>=b.l-m&&s.end[0]<=b.r+m&&s.end[1]>=b.t-m&&s.end[1]<=b.b+m}
+function gd9Played(id){return gdScWait(function(){var s=G.gd.tryShow;return!!(s&&s.id===id&&s.played)},3500)}
+function gd9Keep(){G.gd.sc9={prefs:JSON.stringify(gdPrefs()),ask:S.guideCfg.ask,menu:S.guidance.tryMenu};S.guidance.tryMenu=true}
+function gd9Done(r){var k=G.gd.sc9;if(k){var P=JSON.parse(k.prefs),V=gdPrefs();V.tips=P.tips;V.stay=P.stay;S.guideCfg.ask=k.ask;S.guidance.tryMenu=k.menu;G.gd.sc9=null}G.gd.tryOpen=false;G.fab.menu=false;if(G.on)stopTour();renderPhone(false);return gdScDone(r)}
+var GDSCENES9=[
+  {id:"gd9_tryba",label:"Guidance · Things to try: Show me on Before / After",setup:function(){gdScSetup(10,true);gd9Keep()},
+    q:T("nothing: on the wall it taps ✦, Things to try, then Show me on Drag Before / After","nada: na parede toca em ✦, Coisas a experimentar, depois Mostre-me em Arrastar o antes e depois"),
+    expect:T("The sheet lists the App items that teach, “1 of 8 tried” (the ✦ menu itself, just opened, is ticked); Show me takes the visitor to the card at the Before / After and the ghost finger drags across it.","A folha lista os itens da app que ensinam, “1 de 8 experimentadas” (o próprio menu ✦, acabado de abrir, fica marcado); Mostre-me leva o visitante ao cartão no antes e depois e o dedo-fantasma arrasta-o."),
+    act:function(){var open=gd9Open(),rows=gd9Rows(),n=(ph.querySelector(".gdtry-n")||{}).textContent||"";gd9Show("ba");
+      return gd9Played("ba").then(function(ok){var s=G.gd.tryShow||{},on=gd9OnTarget(),ba=!!cueEl("ba");
+        var ans="the sheet "+(open?"opened":"did not open")+": "+rows.length+" rows ("+n+"); Show me: "+(ok?"the "+s.gesture+" on "+s.where+" ("+s.view+" at "+s.stop+"), the finger "+(on?"on":"off")+" the Before / After":"nothing played")+"; the sheet "+(ph.querySelector(".gdtry")?"still open":"closed")+".";
+        return gd9Done(open&&rows.indexOf("ba")>=0&&ok&&s.gesture==="drag"&&s.stop==="full"&&ba&&on&&!ph.querySelector(".gdtry")?[true,"Show me took the visitor to the Before / After and dragged across it",ans]:[false,"Show me did not play on the Before / After",ans])})}},
+  {id:"gd9_tipsoff",label:"Guidance · Tips Off, Things to try still there",setup:function(){gdScSetup(10,false);gd9Keep();gdPrefs().tips="off"},
+    q:T("nothing: Settings › Tips = Off; it waits 30 s of the visit (×10), then taps ✦, Things to try and Show me on Open a card","nada: Definições › Dicas = Desligadas; espera 30 s da visita (×10), depois toca em ✦, Coisas a experimentar e Mostre-me em Abrir um cartão"),
+    expect:T("No tip by itself (not even the opening); the ✦ menu still has Things to try, its rows and Show me play: the finger taps the nearest marker.","Nenhuma dica sozinha (nem a abertura); o menu ✦ ainda tem Coisas a experimentar, as linhas e o Mostre-me funcionam: o dedo toca no marcador mais próximo."),
+    act:function(){var t0=gdNow();return gdScWait(function(){return gdNow()-t0>=30000||!!G.gd.cur},6000).then(function(){var none=!G.gd.cur,why=gd6Why();var open=gd9Open(),rows=gd9Rows();gd9Show("tapmarker");
+      return gd9Played("tapmarker").then(function(ok){var s=G.gd.tryShow||{},on=gd9OnTarget();
+        var ans="30 s with Tips Off: "+(none?"no tip ("+why.slice(0,90)+")":"a tip showed ("+(G.gd.cur&&G.gd.cur.item.label)+")")+"; Things to try "+(open?"opened, "+rows.length+" rows":"missing")+"; Show me "+(ok?"the "+s.gesture+" on "+s.where+", the finger "+(on?"on":"off")+" the marker":"did not play")+".";
+        return gd9Done(none&&/Tips Off/.test(why)&&open&&rows.length>0&&ok&&s.gesture==="tap"&&on?[true,"Tips Off silenced the pushed tips; the pull still answered",ans]:[false,"Tips Off hid the pull, or a tip still came",ans])})})}},
+  {id:"gd9_howpause",label:"Guidance · How do I pause the guide? (Show me)",setup:function(){gdScSetup(10,true);gd9Keep();S.guideCfg.ask="search";S.view="card";S.stop="full";renderPhone(false);scr.scrollTop=900;fabLayer()},
+    q:T("How do I pause the guide?","Como pauso o guia?"),
+    expect:T("Offline (no key): Azu answers from the app's own tip (“During the tour, tap ⏸ beside the talk button.”) with a Show me card; its tap starts the tour at Mini and the finger taps ⏸; the item is seen, not done.","Offline (sem chave): o Azu responde com a dica da própria app (“Durante a visita, toque em ⏸ ao lado do botão de falar.”) e um cartão Mostre-me; o toque começa a visita no Mini e o dedo toca em ⏸; o item fica visto, não feito."),
+    act:function(){var g=ph.querySelector(".gbtn");if(g)gsTouch(g);var a=ph.querySelector('.gbmenu [data-gbgo="ask"]');if(a)gsTouch(a);var i=ph.querySelector("#gq"),fm=ph.querySelector(".gd-form");if(i&&fm){i.value=L(GDSCENES9[2].q);fm.dispatchEvent(new Event("submit",{bubbles:true,cancelable:true}))}
+      return gdScWait(function(){return!!ph.querySelector(".gdhowc")},2500).then(function(card){var t=G.answer,want=gdTryHowLine(S.guidance.items.pause),vm=gdVM("pause"),told=vm.told||0;if(card)gsTouch(ph.querySelector(".gdhowc"));
+        return gd9Played("pause").then(function(ok){var s=G.gd.tryShow||{},on=gd9OnTarget(),done=gdTryDone(S.guidance.items.pause);
+          var ans="the answer: “"+t+"”; "+(card?"a Show me card":"no Show me card")+"; the item seen "+told+", done: "+(done?"yes (wrong)":"no")+"; Show me "+(ok?"the "+s.gesture+" on "+s.where+" (the tour "+(G.on?"on":"off")+", the dock "+S.dockH+"), the finger "+(on?"on":"off")+" ⏸":"did not play")+".";
+          return gd9Done(t===want&&card&&told>=1&&!done&&ok&&s.tour&&on?[true,"answered from the app's own tip, its Show me tapped ⏸ in the tour",ans]:[false,"the how do I… answer or its Show me did not come as it should",ans])})})}},
+  {id:"gd9_fewer",label:"Guidance · Fewer like this on an App tip, then Things to try",setup:function(){gdScSetup(10,true);gd9Keep()},
+    q:T("nothing: Tap a marker shows; a long press, Fewer; then ✦, Things to try, Show me on Open a card","nada: aparece o Toque num marcador; um toque longo, Menos; depois ✦, Coisas a experimentar, Mostre-me em Abrir um cartão"),
+    expect:T("The toast says fewer like this, and “You can always find these in Things to try.”; The start rests for the visit, yet Things to try's Open a card row still plays its Show me on the marker.","O aviso diz menos destas e “Pode sempre encontrá-las em Coisas a experimentar.”; O início descansa nesta visita, mas a linha Abrir um cartão ainda mostra o Mostre-me no marcador."),
+    act:function(){return gdScWait(function(){return gdIs("tapmarker")},9000).then(function(tm){if(tm){gdAskFewer();var y=ph.querySelector('[data-gdfewer="yes"]');if(y)gsTouch(y)}
+      var toast=ph.querySelector(".gdtoast"),line=toast&&toast.querySelector(".gdtoast-try"),rest=!!(S.gdVisitor.visit.fewer||{}).start;var open=gd9Open(),rows=gd9Rows();gd9Show("tapmarker");
+      return gd9Played("tapmarker").then(function(ok){var s=G.gd.tryShow||{},on=gd9OnTarget();
+        var ans="Tap a marker "+(tm?"shown":"not shown")+"; the toast: "+(toast?"“"+toast.textContent+"”":"none")+"; The start "+(rest?"rests for the visit":"does not rest")+"; Things to try "+(open?rows.length+" rows":"missing")+"; Show me "+(ok?"the "+s.gesture+", the finger "+(on?"on":"off")+" the marker":"did not play")+".";
+        return gd9Done(tm&&line&&line.textContent===TXT("gd_fewer_try")&&rest&&open&&rows.indexOf("tapmarker")>=0&&ok&&on?[true,"Fewer rested The start; its toast pointed to Things to try, whose Show me still plays",ans]:[false,"the toast's line or Things to try after Fewer did not come as it should",ans])})})}}];
+GDSCENES9[0].where="wall";GDSCENES9[1].where="wall";GDSCENES9[2].where="card";GDSCENES9[3].where="wall";GDSCENES9.forEach(function(s){AGSCENES.push(s)});

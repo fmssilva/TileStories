@@ -98,7 +98,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('renderEditor()');
   const e1 = await R('var f=ed.querySelector(\'[data-fo="s7agent"]\');[!!f&&ed.querySelector(\'[data-fo="s7cam"]\').nextElementSibling===f,f&&["1 · Guide mode","2 · Model","3 · Inputs","4 · Tools","5 · Knowledge","6 · Outputs","7 · Services and keys","8 · Limits","9 · Test console"].filter(function(t){return f.textContent.indexOf(t)<0}),f&&f.querySelectorAll(".agtools tbody tr").length,(TXO.s7agent||[]).length,ed.innerHTML.indexOf("TESTKEY")<0&&ed.innerHTML.indexOf("TESTANT")<0,/from keys\\.local\\.js/.test(ed.textContent)]');
   ok('Editor: Ask Azu follows Ask about the view, with its nine parts', e1[0] && e1[1] && e1[1].length === 0, e1);
-  ok('...the eight tools, each with its policy; its eleven words', e1[2] === 8 && e1[3] === 11, e1);
+  ok('...the nine tools (guidance round 9: show_how), each with its policy; its eleven words', e1[2] === 9 && e1[3] === 11, e1);
   ok('...the keys: where they came from, never the key itself', e1[4] && e1[5], e1);
   await R('var s=ed.querySelector(\'select[data-sel="@agentCfg.pol.navigate_to"]\');s.value="confirm";s.dispatchEvent(new Event("change",{bubbles:true}))');
   ok('...a policy set in the Editor is the agent\'s', await R('S.agentCfg.pol.navigate_to==="confirm"'));

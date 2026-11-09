@@ -50,7 +50,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('S.stop="full";renderPhone(true);scr.scrollTop=900'); await p.waitForTimeout(900);
   ok('...scrolled past the hero: Azu appears above the bar', await R('!!ph.querySelector(".azfab")&&!ph.querySelector(".azfab.onwall")'));
   await p.locator('#ph .gbtn').click(); await p.waitForTimeout(150);
-  ok('...a tap on the ✦ beside it offers Start the tour, Ask, How does this work? and Guide settings', await R('ph.querySelectorAll(".gbmenu [data-gbgo]").length===4'));
+  ok('...a tap on the ✦ beside it offers Start the tour, Ask, How does this work?, Things to try (guidance round 9) and Guide settings', await R('ph.querySelectorAll(".gbmenu [data-gbgo]").length===5'));
   await p.locator('#ph [data-gbgo="tour"]').click(); await p.waitForTimeout(300);
   ok('...Start the tour: the tour runs, Azu becomes the guide (no Azu beside the ✦)', await R('G.on&&!ph.querySelector(".azfab")'));
   await R('stopTour()'); await p.waitForTimeout(700); await R('scr.scrollTop=900'); await p.waitForFunction(()=>!!document.querySelector("#ph .azfab"),null,{timeout:4000}).catch(()=>{});

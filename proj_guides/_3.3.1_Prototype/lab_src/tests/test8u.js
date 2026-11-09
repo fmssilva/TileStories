@@ -44,7 +44,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // 4. the scenes: each sets the prototype as a visitor would be, and the console says what it asks and expects
   await R('S.tab="guide";renderEditor();ed.querySelector(\'[data-fo="s7agent"]\').open=true');
   const s0 = await R('[AGSCENES.length,ed.querySelectorAll(".agscsel option").length]');
-  ok('Scenes: 8 in the console, the guide\'s 7 (round 7: its controls\' scenes) and the guidance\'s 26 (rounds g1 and g2: 5 each; g3: 2; g4: 2; g5: 3; g6: 4; g7: 5; g8: 4)', s0[0] === 45 && s0[1] === 45, s0);
+  ok('Scenes: 8 in the console, the guide\'s 7 (round 7: its controls\' scenes) and the guidance\'s 30 (rounds g1 and g2: 5 each; g3: 2; g4: 2; g5: 3; g6: 4; g7: 5; g8: 4; g9: 4)', s0[0] === 49 && s0[1] === 49, s0);
   await R('var s=ed.querySelector(".agscsel");s.value="3";s.dispatchEvent(new Event("change",{bubbles:true}))');
   await p.locator('[data-agsetup]').click(); await W(400);
   const s1 = await R('[S.camCfg.wall,S.stop,G.cam.open,camView().pois.map(function(p){return p.id}).join(),/In view now: .*Jerónimos/.test(ed.querySelector(".agscenes").textContent),ed.querySelector("#agq").value]');
