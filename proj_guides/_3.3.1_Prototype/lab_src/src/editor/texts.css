@@ -29,3 +29,5 @@ input.u.miss{border-color:#C0392B}
 .gpop button{appearance:none;border:0;background:none;color:var(--accent2);font:700 13.5px/1 var(--body);padding:8px 0 0;cursor:pointer}
 em.missing{font-style:normal;color:#FF8A7A}
 .pfocus{outline:3px solid #E07A1F!important;outline-offset:3px;border-radius:10px}
+/* the Open Row on a preview: the ring just outside its words (never over them) */
+.bprev .open.pfocus{outline-offset:-3px;padding:2px 9px;margin-left:-9px;margin-right:-9px;margin-bottom:-4px}

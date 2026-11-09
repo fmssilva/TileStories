@@ -61,7 +61,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('AG.mock={calls:[{name:"make_route",args:{poi_ids:["poi:bomsucesso","poi:houses"]}}],text:"A short route."};agRunScene(5)'); await W(1500);
   ok('A route over points in view passes; it is offered as a button (Route is Suggest)', await R('AG.sceneRes.route&&AG.sceneRes.route.ok&&!!ph.querySelector(".camask .agchip")'), await R('[AG.sceneRes.route,camView().pois.map(function(p){return p.id})]'));
   // 5. Run all: the scenes in turn, each with its check; the console's 8, then Stop (the guide's and the guidance's scenes are
-  //    pressed one by one in test9d, test9e and test9f, so they are not run a second time here)
+  //    pressed one by one in test9da, test9e and test9f, so they are not run a second time here)
   await R('AG.mock={text:"Ok."};AG.sceneRes={}');
   await p.locator('[data-agscall]').click();
   const ran8 = await p.waitForFunction(() => Object.keys(LAB.run('AG.sceneRes')).length >= 8, null, { timeout: 120000 }).then(() => true).catch(() => false);

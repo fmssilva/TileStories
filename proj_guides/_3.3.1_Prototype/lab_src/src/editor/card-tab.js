@@ -116,3 +116,24 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   /* 5: Card Controls */
   var s5=d.querySelector('[data-fo="s5"] > summary');if(s5)s5.innerHTML=s5.innerHTML.replace("Navigation &amp; Controls","Card Controls").replace("what the visitor uses to move around","the parts around the content: bar, top bar, page chrome, locate button, sticky action");
   return d.innerHTML});
+/* ----- the demos of the rows this tab makes: Card, Sections, Feedback and Card Controls (the rows card/controls.js remakes have their
+   demos there; a block's rows: card/blocks.js's builder) ----- */
+function barRing(){var nb=document.getElementById("navbar");return nb&&nb.style.display!=="none"?"#navbar":".gsec"}
+var CARDTAB_DEMOS={
+  "cardCfg.layout":{stop:"full",wait:0,scroll:".lt-tabs|.lt-acc|.gsec",ring:".lt-tabs|.lt-acc|.gsec"},
+  "secCfg.look":{stop:"full",wait:0,scroll:".gsec",ring:".gsec"},
+  "secCfg.tint":{stop:"full",wait:0,scroll:'[data-ref="sec:stories"]',ring:'[data-ref="sec:stories"]'},
+  "ctl.top.title":{stop:"full",past:true,wait:0,ring:".topband b|.topband"},
+  "ctl.bar.on":{stop:"full",past:true,wait:0,ring:barRing},"ctl.bar.pos":{stop:"full",past:true,wait:0,ring:barRing},
+  "ctl.bar.depth":{stop:"full",past:true,wait:0,ring:barRing},"ctl.bar.iconColour":{stop:"full",past:true,wait:0,ring:barRing},
+  "ctl.jump.motion":{stop:"full",past:true,wait:0,act:function(){var b=ph.querySelector('#navbar [data-navsec="media"]');if(b)b.click()},ringAfter:700,ring:'[data-ref="sec:media"]'},
+  "ctl.openrow":{block:"Story",wait:0,scroll:function(){return blockAt("Story").sel.split("|")[0]+" .open"},ring:function(){return blockAt("Story").sel.split("|")[0]+" .open"}},
+  "ctl.crumb":{view:"story",wait:0,ring:".topbar span|.topbar"},
+  "ctl.prevnext":{view:"story",wait:0,scroll:".pfoot|.pg",ring:".pfoot|.pg"},
+  "ctl.locate.on":{stop:"half",wait:0,ring:".locpin|.hero"},"ctl.locate.colour":{stop:"half",wait:0,ring:".locpin|.hero"},
+  "ctl.locate.size":{stop:"half",wait:0,ring:".locpin|.hero"},"ctl.locate.float":{stop:"half",wait:0,ring:".locpin|.hero"},
+  "ctl.sticky":{stop:"half",wait:0,ring:".sticky|#navbar"}};
+/* Feedback: a tap on a block buzzes (the ring where the phone would vibrate) and, with Sounds On, plays its sound */
+["fb.haptics","fb.hStrength","fb.sound","fb.volume"].forEach(function(k){CARDTAB_DEMOS[k]={block:"Knowledge Check",wait:0,act:function(){feedback(k==="fb.sound"||k==="fb.volume"?"right":"tap")},ringAfter:60,ring:function(){return".hapring|"+blockAt("Knowledge Check").sel}}});
+rowDemos(CARDTAB_DEMOS);
+rowDemos(function(key){var m=/^blockDefs\.([^.]+)\.(enter|orow|chrome|crumb|prevnext)$/.exec(key);if(m&&S.blockDefs[m[1]])return blockRowDemo(m[1],m[2])});

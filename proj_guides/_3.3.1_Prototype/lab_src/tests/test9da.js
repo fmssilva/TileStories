@@ -1,9 +1,11 @@
-// v9d checks (Playwright + the installed Edge): node test9d.js -> PASS/FAIL per check
-// The guide's controls: Pause and Stop at Mini, Compact and back, Stop's toast and Resume (the step and the sentence), Ask first,
-// Previous replays the sentence, the ✦ and its menu (every item), Azu's tap plays and never opens the menu, the hint at most once,
-// the label that folds, each Editor row's values on the phone, each row's demo (the Guide tab, 6 · Audiences), the contrast, the scenes in
-// Ask Azu's console; and the fixes: Azu beside the block (0 px over words), the mouth of a paused recorded line, the wall's answers in
-// the one order. MUTATE=1 node test9d.js runs it with the toast's Resume starting the tour again from the start (the named checks turn red).
+// test9da (Playwright + the installed Edge): node test9da.js -> PASS/FAIL per check. The first half of round 9's test9d (split in guidance
+// round 10, by its own sections; every check kept as it was): the guide's controls on the phone. Pause and Stop at Mini, Compact and
+// back, Stop's toast and Resume (the step and the sentence), Ask first, Previous replays the sentence; the ✦ and its menu (every item,
+// on the card and on the wall), Azu's tap plays and never opens the menu, the hint at most once, the label that folds; the contrast,
+// light and dark;
+// the seven scenes in Ask Azu's console; and the fixes: Azu beside the block (0 px over words), the mouth of a paused recorded line,
+// the wall's answers in the one order. MUTATE=1 node test9da.js runs it with the toast's Resume starting the tour again from the
+// start (the named checks turn red). The other half: test9db.
 const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
 const fs = require('fs'), path = require('path');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
@@ -31,12 +33,13 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   const tourAt = async (id, h) => { await R(base + `if(G.on)stopTour();S.view="card";S.stop="full";renderAll(false);startTour();var j=S.guideSteps.findIndex(function(s){return s.id==="${id}"});if(j>0){stopSpeech();G.i=j;runStep()}S.dockH="${h || 'mini'}";renderGuide()`); await W(500); };
   const past = async () => { await R(base + 'if(G.on)stopTour();G.fab.menu=false;S.view="card";S.stop="full";renderAll(false);scr.scrollTop=900;fabLayer()'); await W(400); };
 
+  const T0 = Date.now(), tsec = s => console.log('TIME ' + s + ' ' + Math.round((Date.now() - T0) / 1000) + ' s');
   // ---------- the fixes ----------
   // a. Azu points from beside the block, never over words (Quick facts, the story's inside, the 1662 drawing), light and dark
   const inkOver = 'var m=ph.querySelector(".mascot").getBoundingClientRect(),a=0,w=document.createTreeWalker(scr,NodeFilter.SHOW_TEXT),n,rg=document.createRange();while((n=w.nextNode())){if(!/\\S/.test(n.nodeValue))continue;var cs=getComputedStyle(n.parentElement);if(cs.visibility==="hidden"||cs.display==="none"||cs.opacity==="0")continue;rg.selectNodeContents(n);[].forEach.call(rg.getClientRects(),function(r){var x=Math.min(r.right,m.right)-Math.max(r.left,m.left),y=Math.min(r.bottom,m.bottom)-Math.max(r.top,m.top);if(x>1&&y>1)a+=x*y})}Math.round(a)';
   for (const dark of [false, true]) for (const id of ['g1', 'g5', 'g7']) {
     await tourAt(id); await R(`S.dark=${dark};renderAll(true)`);
-    let last = null, same = 0; const t0 = Date.now(); while (Date.now() - t0 < 5000 && same < 3) { const y = await R('ph.querySelector(".mascot").offsetTop'); same = y === last ? same + 1 : 0; last = y; await W(150); }
+    let last = null, same = 0; const t0 = Date.now(); while (Date.now() - t0 < 10000 && same < 3) { const y = await R('JSON.stringify([Math.round(ph.querySelector(".mascot").getBoundingClientRect().top),Math.round(scr.scrollTop)])'); same = y === last ? same + 1 : 0; last = y; await W(150); }
     const o = await R(inkOver);
     ok(`a. ${dark ? 'dark' : 'light'}, step ${id}: Azu points from beside the block, 0 px over any words`, o === 0 && await R('ph.querySelector(".mascot").classList.contains("pointing")'), o);
   }
@@ -80,7 +83,7 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   await tap('.gb-pause'); await W(200);
   await tap('.gbtn.tour'); await W(250); ok('...a tap on the ✦ brings the dock back at Mini', await R('S.dockH==="mini"&&!!ph.querySelector(".gdock.h-mini")&&!G.paused'));
   await tap('.gd-hide'); await W(250); ok('The hide chevron hides the dock too (Compact)', await R('S.dockH==="compact"&&!ph.querySelector(".gdock")'));
-  await tap('.gbtn.tour'); await W(200); await R('S.guideCfg.swipeCompact=false'); await drag('.gd-grab', 90); await W(250);
+  await tap('.gbtn.tour'); await until('!!ph.querySelector(".gd-grab")', 5000); await R('S.guideCfg.swipeCompact=false'); await drag('.gd-grab', 90); await W(250);
   ok('Swipe down to Compact Off: a swipe down at Mini stays at Mini', await R('S.dockH') === 'mini');
   // Azu's own words at Compact: in its bubble above the ✦, or nowhere with captions off
   await tourAt('g0', 'compact'); await W(400);
@@ -121,6 +124,7 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   ok('...after 2 s, a tap replays again (it does not go back a step)', await R('G.i') === pv2[0] && await R('G.hl.k') <= pv2[1], pv2);
   await R('stopTour()');
 
+  tsec('fixes, Mini, Compact, Stop, Previous');
   // ---------- the ✦ and its menu ----------
   await past();
   const gb = await R('var w=ph.querySelector(".gbtn-wrap"),b=ph.querySelector(".gbtn"),a=ph.querySelector(".azfab"),n=document.getElementById("navbar");[!!b,!!a,b&&a&&b.getBoundingClientRect().right<=a.getBoundingClientRect().left,Math.round(n.getBoundingClientRect().top-w.getBoundingClientRect().bottom),ph.querySelector(".gbtn .gb-lab").textContent]');
@@ -191,51 +195,7 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   ok('...Label folds after 4 s = Off: the word stays', await R('!ph.querySelector(".gb-lab").classList.contains("fold")'));
   await R('S.guideCfg.gbFold=true;G.gb.folded=true');
 
-  // ---------- each Editor row's values on the phone (real clicks on the Editor) ----------
-  await R(base + 'S.tab="guide";S.op={gt1:true,s7dock:true,s7gbtn:true,s7mascot:true};S.view="card";S.stop="full";renderAll(false)');
-  const pick = async (key, v) => { const s = `[data-set="@guideCfg.${key}"][data-v="${v}"]`; await p.locator(s).scrollIntoViewIfNeeded(); await p.locator(s).click(); await W(150); await R('clearTimeout(G.demoT);G.demoSeq++;if(G.on)stopTour();hideStopUi()'); };
-  const startAt = async () => { await R('S.view="card";S.stop="full";renderPhone(false);startTour();G.i=S.guideSteps.findIndex(function(s){return s.id==="g1"});stopSpeech();runStep()'); await W(400); };
-  const want = [];
-  for (const [v, chk] of [['compact', '!ph.querySelector(".gdock")&&!!ph.querySelector(".gbtn.tour .gb-ring")'], ['peek', '!!ph.querySelector(".gdock.h-peek")'], ['mini', '!!ph.querySelector(".gdock.h-mini")']]) { await pick('dockStart', v); await startAt(); want.push(['Starts at ' + v, await R(chk)]); await R('stopTour()'); }
-  for (const [v, chk] of [['pause', '!!ph.querySelector(\'.gd-mini [data-g="pause"]\')&&!ph.querySelector(\'.gd-mini [data-g="stop"]\')'], ['line', '!ph.querySelector(".gd-mini")&&!!ph.querySelector(".gd-main .gd-kb")'], ['pausestop', 'ph.querySelectorAll(".gd-mini button").length===2']]) { await pick('miniCtl', v); await startAt(); want.push(['Controls at Mini ' + v, await R(chk)]); await R('stopTour()'); }
-  for (const [v, chk] of [['face', '!!ph.querySelector(".gbtn.ic-face .gb-ic svg rect")'], ['word', '!ph.querySelector(".gbtn .gb-ic")&&ph.querySelector(".gbtn").textContent==="Guide"'], ['star', '!!ph.querySelector(".gbtn.ic-star .gb-ic svg")']]) { await pick('gbIcon', v); await R('S.view="card";S.stop="full";renderPhone(false);scr.scrollTop=900;fabLayer()'); want.push(['Icon ' + v, await R(chk)]); }
-  for (const [v, chk] of [['right', 'ph.querySelector(".gbtn-wrap").getBoundingClientRect().left-ph.getBoundingClientRect().left>180&&ph.querySelector(".azfab").getBoundingClientRect().right<=ph.querySelector(".gbtn").getBoundingClientRect().left'], ['left', 'ph.querySelector(".gbtn-wrap").getBoundingClientRect().left-ph.getBoundingClientRect().left<20']]) { await pick('gbSide', v); await R('S.view="card";S.stop="full";renderPhone(false);scr.scrollTop=900;fabLayer()'); const drawn = await until('!!ph.querySelector(".gbtn-wrap")&&!!ph.querySelector(".azfab")&&!!ph.querySelector(".gbtn")', 3000); want.push(['Side ' + v, drawn && await R(chk)]); }
-  for (const [v, chk] of [['azu', '!ph.querySelector(".gbtn")&&!!ph.querySelector(".azfab")'], ['star', '!!ph.querySelector(".gbtn")&&!ph.querySelector(".azfab")'], ['both', '!!ph.querySelector(".gbtn")&&!!ph.querySelector(".azfab")']]) { await pick('gbtn', v); await R('S.view="card";S.stop="full";renderPhone(false);scr.scrollTop=900;fabLayer()'); want.push(['Guide button ' + v, await R(chk)]); }
-  await pick('stopUndo', 'ask'); want.push(['Stop ask', await R('S.guideCfg.stopUndo==="ask"')]); await pick('stopUndo', 'toast');
-  await pick('swipeCompact', 'false'); want.push(['Swipe off', await R('S.guideCfg.swipeCompact===false')]); await pick('swipeCompact', 'true');
-  await pick('gbFold', 'false'); want.push(['Label folds off', await R('S.guideCfg.gbFold===false')]); await pick('gbFold', 'true');
-  for (const v of ['point', 'menu', 'play']) { await pick('azuTap', v); want.push(['Tap on Azu ' + v, await R(`S.guideCfg.azuTap==="${v}"`)]); }
-  ok('Each new row, clicked in the Editor, reaches the phone (Starts at, Controls at Mini, Icon, Side, Guide button) or the guide (Stop, Swipe, Label folds, Tap on Azu)', want.every(w => w[1]), want.filter(w => !w[1]));
-  ok('...the Editor: Guide panel has Controls at Mini, Swipe down to Compact, Stop; Guide button follows it; Mascot has Tap on Azu; the old row is gone', await R('var d=ed.querySelector(\'[data-fo="s7dock"]\'),g=ed.querySelector(\'[data-fo="s7gbtn"]\');["Starts at","Controls at Mini","Swipe down to Compact","Stop"].every(function(t){return!!rowEl(ed,"s7dock",t)})&&d.nextElementSibling===g&&["Guide button","Icon","Side","Label folds after 4 s"].every(function(t){return!!rowEl(ed,"s7gbtn",t)})&&!!rowEl(ed,"s7mascot","Tap on Azu")&&!/Azu as the guide/.test(ed.textContent)&&(TXO.s7gbtn||[]).length===9&&TXOWN.gb_hint==="gd:i:gbhint"'));
-
-  // ---------- each row's demo (the Guide tab, 6 · Audiences) ----------
-  await R(base + 'S.tab="guide";S.ui.level=9;S.op={};S.view="card";S.stop="full";renderAll(false)');
-  const rowKeys = sel => R('var o=[];ed.querySelectorAll(\'' + sel + '\').forEach(function(r){var k=rowKey(r);if(k&&o.indexOf(k)<0)o.push(k)});o');
-  const keysG = await rowKeys('.row'); await R('S.tab="card";renderEditor()'); const keysA = await rowKeys('[data-fo="s8"] .row'), keys = keysG.concat(keysA);
-  const nod = await R('S.tab="guide";renderEditor();var a=rowsWithoutDemo(guideSecIds());S.tab="card";renderEditor();a.concat(rowsWithoutDemo(["s8"])).map(function(r){return r.key})');
-  ok(`Every row of the Guide tab and 6 · Audiences declares its demo (${keys.length} rows)`, keys.length >= 70 && nod.length === 0, nod);
-  // pressed here: every row but 4 · Guidance's, which test9e presses one by one (every row of that section) and test9f again for its new ones
-  const shown = [], missing = [], pressKeys = keys.filter(k => !/^guidance\./.test(k));
-  for (const k of pressKeys) {
-    await R(`S.tab="${keysG.indexOf(k) >= 0 ? 'guide' : 'card'}";if(ed.dataset.tabNow!==S.tab){ed.dataset.tabNow=S.tab;renderEditor()}`);
-    await R('document.body.dataset.rowdemo=""');
-    const lb = await R(`var c=ed.querySelector('[data-set="@${k}"],[data-sel="@${k}"],[data-num="@${k}"]'),l=c.closest(".row").querySelector("label.rd");l.scrollIntoView({block:"center"});var r=l.getBoundingClientRect();[r.left+12,r.top+r.height/2]`);
-    await p.mouse.click(lb[0], lb[1]);
-    let v = ''; const t0 = Date.now(); while (Date.now() - t0 < 6000) { v = await R('document.body.dataset.rowdemo||""'); if (v) break; await W(80); }
-    (/\|found\|/.test(v) ? shown : missing).push(k + ' ' + v.split('|').slice(1).join(' '));
-  }
-  ok('...a press on each row\'s label shows its demo on the phone, its part ringed', missing.length === 0 && shown.length === pressKeys.length && pressKeys.length >= 70, [missing, pressKeys.length]);
-  await R('S.tab="guide";S.op={gt1:true,s7dock:true};renderEditor()'); await R('document.body.dataset.rowdemo=""'); await p.locator('[data-set="@guideCfg.dockStart"][data-v="compact"]').click();
-  await until('document.body.dataset.rowdemo', 5000);
-  ok('...a change to a row shows its demo too: Starts at = Compact, the tour starts hidden, the ✦ ringed', /^guideCfg\.dockStart\|found\|\.gbtn-wrap\.intour/.test(await R('document.body.dataset.rowdemo')) && await R('G.on&&S.dockH==="compact"'), await R('document.body.dataset.rowdemo'));
-  await R('stopTour();S.guideCfg.dockStart="mini";renderEditor()');
-  ok('...the controls\' demos: Controls at Mini rings the Mini controls; Stop shows the toast; Guide button the ✦ and Azu past the hero', shown.some(s => /^guideCfg\.miniCtl found \.gd-mini/.test(s)) && shown.some(s => /^guideCfg\.stopUndo found \.gtoast/.test(s)) && shown.some(s => /^guideCfg\.gbtn found \.gbtn-wrap/.test(s)) && shown.some(s => /^guideCfg\.azuTap found/.test(s)), shown.filter(s => /miniCtl|stopUndo|gbtn |azuTap/.test(s)));
-  // the self-test fails a row of the Guide tab or 6 · Audiences that has no demo (a row added without one)
-  await R('on("edCard.html",function(h){if(!window.__fake)return h;var d=document.createElement("div");d.innerHTML=h;addRows(d,"s7dock",row("A row with no demo",pseg("guideCfg.noDemoRow",["a","b"],["A","B"]),""));return d.innerHTML});window.__fake=1;S.guideCfg.noDemoRow="a"');
-  const st = await R('var j=extPoint("selfTest.res").filter(function(f){return String(f).indexOf("rowsWithoutDemo")>=0})[0],r=j([]);showSelfTest(r);[r.map(function(x){return x.key+" "+x.result.slice(0,7)}),JSON.parse(document.getElementById("selftest").dataset.json).bad.length]');
-  await R('window.__fake=0;delete S.guideCfg.noDemoRow;renderEditor();document.getElementById("selftest").innerHTML=""');
-  ok('The self-test fails a row of the Guide tab with no demo (NO DEMO, counted as bad)', st[0].length === 1 && /^@guideCfg\.noDemoRow NO DEMO/.test(st[0][0]) && st[1] === 1, st);
-
+  tsec('the ✦, Azu, the hint, the label');
   // ---------- contrast: words 4.5:1, controls 3:1, light and dark ----------
   const CR = 'var px=function(c){var m=c.match(/[\\d.]+/g).map(Number),k=c.indexOf("color(")===0?255:1;return{r:m[0]*k,g:m[1]*k,b:m[2]*k,a:m.length>3?m[3]:1}},lum=function(c){return[c.r,c.g,c.b].map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce(function(a,v,i){return a+v*[.2126,.7152,.0722][i]},0)},over=function(f,b){return{r:f.r*f.a+b.r*(1-f.a),g:f.g*f.a+b.g*(1-f.a),b:f.b*f.a+b.b*(1-f.a),a:1}},cr=function(a,b){var x=lum(a),y=lum(b);return Math.round((Math.max(x,y)+.05)/(Math.min(x,y)+.05)*100)/100},cs=function(s){return getComputedStyle(ph.querySelector(s))},bgOf=function(s){var e=ph.querySelector(s);while(e){var c=px(getComputedStyle(e).backgroundColor);if(c.a>.5)return c;e=e.parentElement}return{r:255,g:255,b:255,a:1}};';
   for (const dark of [false, true]) {
@@ -254,6 +214,7 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   }
   await R('S.dark=false;G.fab.menu=false;renderAll(false)');
 
+  tsec('contrast');
   // ---------- the scenes in Ask Azu's console, pressed as the developer does ----------
   await R(base + 'S.ui.level=1;S.tab="guide";S.op={gt3:true,s7agent:true};renderEditor();var f=ed.querySelector(\'[data-fo="s7agent"]\');if(f)f.open=true');
   const scenes = await R('AGSCENES.map(function(s,i){return[i,s.id,s.label]}).filter(function(x){return/^g_/.test(x[1])})');
@@ -266,6 +227,7 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
     ok(`Scene "${label}": Set up and ask runs it, ✓`, /Does: nothing:/.test(does) && r && r.ok === true, r && [r.note, r.answer]);
     await R('if(G.on)stopTour();hideStopUi();S.settingsOpen=false;G.cam.open=false');
   }
+  tsec('scenes');
   ok('no page errors', errs.length === 0, errs.slice(0, 3));
   console.log(fails ? `${fails} FAILED` : 'ALL PASS');
   await b.close();

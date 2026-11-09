@@ -75,13 +75,16 @@ function setOpt(key,v){if(firstAnswer("setOpt.answer",key,v)!==undefined)return;
   if(key.indexOf("motion.")===0&&m){m[key.slice(7)]=v;renderAll(true);show("demo","m:"+m.id);playRef("m:"+m.id);return}
   if(key.indexOf("o.")===0&&st){st.o[key.slice(2)]=v;renderAll(true);show("demo","s:"+st.id);return}
   if(key.indexOf("fx.")===0&&f){f.o[key.slice(3)]=v;renderAll(true);show("demo","f:"+f.id);return}}
-function playRef(ref){if(noDraw)return;setTimeout(function(){var b=scr.querySelector('[data-ref="'+ref+'"] [data-play]');if(b)b.click()},380)}
+/* a part's Play pressed (playRef), or its entrance played again (replayRef), once the redraw has settled; a second ask for the same part
+   within that wait is the same play (a row's change and its demo ask both) */
+var replayT={};function replayRef(ref){if(noDraw)return;clearTimeout(replayT[ref]);replayT[ref]=setTimeout(function(){var it=scr.querySelector('[data-ref="'+ref+'"]');if(it)replayIn(it)},420)}
+var playRefT={};function playRef(ref){if(noDraw)return;clearTimeout(playRefT[ref]);playRefT[ref]=setTimeout(function(){var b=scr.querySelector('[data-ref="'+ref+'"] [data-play]');if(b)b.click()},380)}
 ed.addEventListener("change",function(e){var t=e.target,k=t.dataset.sel;if(t.dataset.num){numChange(t,true);return}if(!k)return;
   if(k==="test.poi"){S.test.poi=t.value;S.view="card";renderAll(false);return}
   if(k==="family"){S.family=t.value;renderAll(true);return}
   if(k.indexOf("cb.")===0){var b=byId(S.card,S.sel.cblock);b[k.slice(3)]=t.value;renderAll(true);show("card","b:"+b.id);return}
   var st=styleById(S.sel.style);
-  if(k==="style.enter"&&st){st.enter=t.value;renderAll(true);show("demo","s:"+st.id);setTimeout(function(){var it=scr.querySelector('[data-ref="s:'+st.id+'"]');if(it)replayIn(it)},420);return}
+  if(k==="style.enter"&&st){st.enter=t.value;renderAll(true);show("demo","s:"+st.id);replayRef("s:"+st.id);return}
   if(k==="style.scroll"&&st){st.scroll=t.value;renderAll(true);show("demo","s:"+st.id);return}
   if(k==="style.turn"&&st){st.turn=t.value;renderAll(true);show("demo","s:"+st.id);return}
   if(k==="style.uses"&&st){st.o.uses=t.value;renderAll(true);show("demo","s:"+st.id);return}

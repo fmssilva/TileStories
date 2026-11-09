@@ -177,3 +177,20 @@ ed.addEventListener("toggle",function(e){var d=e.target;if(!d.dataset||d.dataset
 on("libThumb.answer",function(name){var f=KPREV[name];if(!f||name==="Quick Facts")return;var h;try{h=f({kind:name,id:"thumb"})}catch(e){return}return noBtn('<div class="thumb cv'+(S.dark?" dark":"")+'"><div class="tin"><div class="bprev">'+h+'</div></div></div>')});
 /* ----- the hero keeps one action: the guide button (the Listen pill left; the Audio Guide block plays the audio) ----- */
 KOPT.Header=KOPT.Header.filter(function(o){return o[0]!=="listen"});delete S.blockDefs.Header.o.listen;
+/* ----- each block row's demo (Blocks & Components › Blocks › a block): that block in view, the marker's card when it holds it, else
+   the demo card, ringed (Offered Off: its section, where it was); an option of its full page opens the page; Entrance plays it once;
+   Tap and Open Row ring its Open Row; Page chrome, Breadcrumb and Previous / Next open its page at that part. One builder for every
+   kind (blockRowDemo); the rows made in editor/card-tab.js (Entrance, Open Row, Page chrome) use it too. Unity: the row's preview
+   action opens the reference card at that block (CardTestInput.IntoReach) ----- */
+var KOPT_PAGE={Story:["layout"],Video:["captions"],"Knowledge Check":["score","retry"],"3D Model":["room"]};
+function blockAt(kind){if(kind==="Header")return{view:"card",sel:".hero"};var b=S.card.filter(function(x){return x.kind===kind})[0],v="card";
+  if(!b){b=S.demoCard.filter(function(x){return x.kind===kind})[0];v="democard"}return{view:v,sel:(b?'[data-ref="b:'+b.id+'"]|':"")+'[data-ref="sec:'+secOfKind(kind)+'"]'}}
+function blockRowDemo(kind,field){var o=field.indexOf("o.")===0?field.slice(2):null,first=function(){return blockAt(kind).sel.split("|")[0]};
+  if(o&&(KOPT_PAGE[kind]||[]).indexOf(o)>=0)return{page:kind,wait:0,ring:{layout:".chapbar|.pg .blk",captions:".vcap|.vplayer",room:".arfocal|.pg .blk",score:".kscore|.pg .blk",retry:".ubtn2|.pg .blk"}[o]};
+  if(field==="chrome"||field==="crumb")return{page:kind,wait:0,ring:field==="crumb"?".topbar span|.topbar":".topbar"};
+  if(field==="prevnext")return{page:kind,wait:0,scroll:".pfoot|.pg",ring:".pfoot|.pg"};
+  var sp={block:kind,wait:0};
+  if(field==="enter"){sp.act=function(){var e=phFind(blockAt(kind).sel);if(e)replayIn(e)};sp.ringAfter=60}
+  if(field==="tap"||field==="orow")sp.ring=sp.scroll=function(){return first()+" .open|"+blockAt(kind).sel};
+  return sp}
+rowDemos(function(key){var m=/^blockDefs\.([^.]+)\.(offered|frame|tap|o\.\w+)$/.exec(key);if(m&&S.blockDefs[m[1]])return blockRowDemo(m[1],m[2])});

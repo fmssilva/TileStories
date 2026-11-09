@@ -29,3 +29,5 @@ document.addEventListener("click",function(e){var t=e.target;if(!ph.contains(t))
   var vi=t.closest(".blk .el-pic img, .blk .fr img");if(vi&&S.view==="gallery"){e.stopPropagation();var all=Array.prototype.slice.call(scr.querySelectorAll(".blk img"));S.viewerAt=Math.max(0,all.indexOf(vi));S.view="viewer";renderPhone(false);return}
   var va=t.closest("[data-vat]");if(va){e.stopPropagation();S.viewerAt=+va.dataset.vat;renderPhone(false);return}
   var vp=t.closest(".viewer img");if(vp){e.stopPropagation();vp.classList.toggle("z2");return}},true);
+/* a block kind's full page on the phone (a row's demo, the spec's page): the story, the gallery, or its own page */
+function pageOpen(kind){if(kind==="Story")S.view="story";else if(kind==="Gallery")S.view="gallery";else{S.pageKind=kind;S.view="kpage"}}

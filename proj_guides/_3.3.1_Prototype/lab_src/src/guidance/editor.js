@@ -919,3 +919,7 @@ function gdDemoTryShow(id){var my=gdDemoBegin(),it=gdTryItem(id);if(!it)return;g
 rowDemos({"guidance.tryMenu":{wall:true,wait:0,act:gdDemoTryMenu,ringAfter:300,ring:'[data-gbgo="try"]|.gbmenu|.gdchip'}});
 on("rowDemo.spec",function(key){var m=/^guidance\.items\.([^.]+)\.inTry$/.exec(key);if(!m||!S.guidance.items[m[1]])return;var id=m[1];
   return{wall:true,wait:0,act:function(){gdDemoTryRow(id)},ringAfter:300,ring:'[data-gdtryrow="'+id+'"]|.gdtry|.gdchip'}});
+/* ----- round 10: 0 · Preview & Test's simulator rows show on the phone too: The visitor plays its first two visit-minutes (×10);
+   Speed plays the timeline at that speed, each dot's item on the phone (Instant: the two minutes ×10) ----- */
+rowDemos({"ui.gdSim":{wall:true,wait:0,act:function(){var s=gdSimScript(S.ui.gdSim||"first");gdDemoSim({label:"The visitor: "+(s?s.name:S.ui.gdSim)})},ringAfter:600,ring:".gdchip|.gdbub"},
+  "ui.gdSpeed":{wall:true,wait:0,act:function(){if(S.ui.gdSpeed==="instant"||!ed.querySelector("#gdsimtl"))gdDemoSim({label:S.ui.gdSpeed==="instant"?"Instant: the whole visit at once":"×"+S.ui.gdSpeed});else{G.gd.sim.t=0;gdSimPlay()}},ringAfter:600,ring:".gdchip|.gdbub"}});
