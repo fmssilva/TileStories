@@ -30,7 +30,10 @@ const TEXT = 'O palácio tinha uma ópera, inaugurada em março de 1755.';
   const r1 = await watch('window.__end=0;G.answer="";say(guideLines("pt")[4].text,function(k){G.hl.k=k},function(){window.__end=1})', 20000);
   ok('A recorded Azure line: the mouth follows its curves (the tile of light opens to many heights)', r1.kinds.indexOf('curves') >= 0 && r1.talks >= 10 && r1.ended, r1);
   ok('...on the audio\'s own clock (the opening matches the curve at the audio\'s time, most frames)', r1.n > 10 && r1.near / r1.n > .8, [r1.near, r1.n]);
-  ok('...and at the end it rests (the curves stop, the opening closes)', await R('[mouthNow().kind,AzuGL.get("talk")]').then(v => v[0] !== 'curves' && v[1] === 0));
+  // the line's end callback fires before the last frame settles: wait for the rest (at most 1.5 s), never a fixed wait
+  const rests = async () => { const t0 = Date.now(); let v; do { v = await R('[mouthNow().kind,AzuGL.get("talk")]'); if (v[0] !== 'curves' && v[1] === 0) return [true, v]; await W(50); } while (Date.now() - t0 < 1500); return [false, v]; };
+  const rs1 = await rests();
+  ok('...and at the end it rests (the curves stop, the opening closes)', rs1[0], rs1[1]);
   // 2. the same line on the 2D tile: its drawn mouths follow (several shapes)
   await setup('tile', 'azure-sonia-raquel');
   const r2 = await watch('window.__end=0;G.answer="";say(guideLines("pt")[4].text,function(k){G.hl.k=k},function(){window.__end=1})', 20000);

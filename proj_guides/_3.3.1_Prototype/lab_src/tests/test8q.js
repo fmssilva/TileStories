@@ -19,8 +19,8 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('At rest a tile; listening, it becomes the holographic cube (see-through)', rest < 0.1 && lis[0] > 0.7 && lis[1][3] < 230, [rest, lis]);
   await R('G.talk="idle"'); await p.waitForTimeout(1500);
   ok('...and forms again', await R('AzuGL.get("morph")') < 0.15);
-  await R('azMouth(ph.querySelector(".mascot"),"A")');
-  ok('The mouth opens with the words (the same shapes as the 2D Azu)', await R('AzuGL.get("talk")') === 1);
+  // set and read in one call: the tour's own lip timer runs between two calls and would close the mouth again
+  ok('The mouth opens with the words (the same shapes as the 2D Azu)', await R('azMouth(ph.querySelector(".mascot"),"A");AzuGL.get("talk")') === 1);
   // 3. peek: from behind the block's top edge
   await R('stopTour();S.view="card";S.stop="full";renderPhone(false);var el=scr.querySelector(\'[data-ref="b:b_facts"]\');scr.scrollTop+=el.getBoundingClientRect().top-scr.getBoundingClientRect().top-200;azPeek(el)'); await p.waitForTimeout(900);
   const pk = await R('var x=ph.querySelector(".azpeek"),e=scr.querySelector(\'[data-ref="b:b_facts"]\');x?[Math.round(x.getBoundingClientRect().bottom-e.getBoundingClientRect().top),x.classList.contains("up"),getComputedStyle(x).overflow,!!x.querySelector("canvas")]:null');

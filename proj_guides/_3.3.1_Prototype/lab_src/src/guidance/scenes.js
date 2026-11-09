@@ -1,4 +1,5 @@
-/* Guidance tested in the prototype: seventeen scenes in Ask Azu's test console (round 5's three, at the end: the Quiet preset, the Family audience,
+/* Guidance tested in the prototype: the scenes in Ask Azu's test console (round 8's four at the end: a first run, Skip every page, the camera
+   refused then allowed, a later launch) (round 5's three, at the end: the Quiet preset, the Family audience,
    a first visit simulated; round 1's five, round 2's five: the 15-minute script, Ignore three,
    Fewer like this, Leave and come back, During a tour; round 3's two: a remark yields, The ✦ after four pokes; round 4's two: a hint and a
    tip never at once, How does this work? on the card and on the wall) (Set up, Set up and ask,
@@ -191,8 +192,8 @@ var GDSCENES4=[
 GDSCENES4.forEach(function(s){s.where="card";AGSCENES.push(s)});
 /* ----- round 5: three more scenes (ids gd5_*): the Quiet preset, the Family audience in Who's exploring, a first visit simulated. Each keeps
    the settings it found (S.guidance, the audience, the first-card question) and gives them back after ----- */
-function gd5Keep(){G.gd.sc5={g:JSON.parse(JSON.stringify(S.guidance)),aud:S.vis.aud,len:S.vis.len,ask:S.aud.ask,seen:S.aud.seen,sim:S.ui.gdSim};if(G.on)stopTour();setWall("ribeira");gdStop("a scene");G.gd.demo=false;gdChip(null)}
-function gd5Done(r){var k=G.gd.sc5;if(k){S.vis.aud=k.aud;S.vis.len=k.len;S.aud.ask=k.ask;S.aud.seen=k.seen;renderPhone(false);S.guidance=k.g;S.ui.gdSim=k.sim;G.gd.sc5=null;var o=ph.querySelector(".onb");if(o)o.remove();renderAll(true)}return r}
+function gd5Keep(){G.gd.sc5={g:JSON.parse(JSON.stringify(S.guidance)),aud:S.vis.aud,len:S.vis.len,where:S.aud.where,seen:S.aud.seen,sim:S.ui.gdSim};if(G.on)stopTour();setWall("ribeira");gdStop("a scene");G.gd.demo=false;gdChip(null)}
+function gd5Done(r){var k=G.gd.sc5;if(k){S.vis.aud=k.aud;S.vis.len=k.len;S.aud.where=k.where;S.aud.seen=k.seen;renderPhone(false);S.guidance=k.g;S.ui.gdSim=k.sim;G.gd.sc5=null;var o=ph.querySelector(".onb");if(o)o.remove();renderAll(true)}return r}
 /* the Editor's Preset chosen: the change its select makes (setOpt), without the row's own demo (the scene shows its tip itself) */
 function gd5Preset(id){setOpt("@guidance.preset",id)}
 var GDSCENES5=[
@@ -203,7 +204,7 @@ var GDSCENES5=[
       var now=gdPresetNow(),roomQ=gdRoomNow(),q=gdSimulate("first"),s=gdSimSum(q,15),d=q.dots.filter(function(x){return!x.cue})[1];if(d)gdSimShow(d);
       return gdScWait(function(){return!!ph.querySelector(".gdbub:not(.gd-out)")},2500).then(function(shown){var ans="Preset now "+gdPresetName(now)+"; the room "+roomB+" s → "+roomQ+" s ("+gdForceWords(S.guidance.breathing," s",true).replace("In force: ","")+"); First visit: "+b.words+"; Quiet: "+s.words+"; the phone "+(shown?"shows its tip at "+gdClock(d.t):"shows nothing")+".";
         return gd5Done(now==="quiet"&&roomQ>roomB&&s.tips<b.tips&&s.perMin<=1&&shown?[true,"Quiet: "+s.tips+" tips in 15 min against "+b.tips+", the room "+roomQ+" s",ans]:[false,"Quiet did not make it quieter",ans])})}},
-  {id:"gd5_family",label:"Guidance · the Family audience: Who's exploring sets the Family preset",setup:function(){gd5Keep();gdPresetWrite("first");S.vis.aud="explorer";S.vis.len="";S.aud.ask=true;S.aud.seen=false;S.view="card";S.stop="closed";renderPhone(false)},
+  {id:"gd5_family",label:"Guidance · the Family audience: Who's exploring sets the Family preset",setup:function(){gd5Keep();gdPresetWrite("first");S.vis.aud="explorer";S.vis.len="";S.aud.where="card";S.aud.seen=false;S.view="card";S.stop="closed";renderPhone(false)},
     q:T("nothing: it opens the card, and on the first card's Who's exploring it taps Family","nada: abre o cartão e, no Quem está a explorar do primeiro cartão, toca em Família"),
     expect:T("Family chosen: the Family preset is in force (12 s between two tips, Content's gap 45 s, the Mix 60 / 35 / 15 and 25 / 40 / 45), and the Editor's Preset reads Family.","Família escolhida: a predefinição Família fica em vigor (12 s entre duas dicas, o intervalo do Conteúdo 45 s, a Mistura 60 / 35 / 15 e 25 / 40 / 45), e a Predefinição do Editor diz Família."),
     act:function(){S.stop="half";renderPhone(false);return gdScWait(function(){return!!ph.querySelector('.onb [data-onb="family"]')},2500).then(function(ok){var b=ph.querySelector('.onb [data-onb="family"]');if(b)gsTouch(b);
@@ -303,3 +304,53 @@ var GDSCENES7=[
       var ans="Today is "+gdDayWords(gdTodayMD())+"; the seasonal line "+(ok?"“"+(c&&c.text)+"”"+(c&&c.spoken?", spoken":", a bubble only"):"not shown ("+gd6Why()+")")+".";
       return gd7Done(ok&&c.text===want&&!c.spoken?[true,"in December the Christmas line shows, a bubble only",ans]:[false,"no Christmas line in December",ans])})}}];
 GDSCENES7.forEach(function(s){s.where="wall";AGSCENES.push(s)});
+/* ----- round 8: four scenes about the first pages (ids gd8_*): a first run (Hello, Who's exploring, the camera, the wall), Skip every page,
+   the camera refused then allowed, a later launch (Welcome back, no pages). Each starts the app as the preview bar's Start the app does,
+   taps the pages as a finger does (gsTouch) and checks the phone; it keeps what it changes (the guidance, Where to ask, the audience, the
+   language, the camera's permission, Remember across visits) and gives it back after ----- */
+function gd8Keep(where){G.gd.sc8={g:JSON.parse(JSON.stringify(S.guidance)),where:S.aud.where,seen:S.aud.seen,aud:S.vis.aud,len:S.vis.len,lang:S.lang,cam:G.gd.camPerm};
+  gdScSetup(10,false);S.aud.where=where||"card";S.lang="en"}
+function gd8Done(r){var k=G.gd.sc8;if(k){if(G.gd.pages)gdPagesEnd("the scene ended",false);gdStop("the scene ended");S.aud.where=k.where;S.aud.seen=k.seen;S.vis.aud=k.aud;S.vis.len=k.len;S.lang=k.lang;G.gd.camPerm=k.cam;
+    renderPhone(false);S.guidance=k.g;G.gd.sc8=null;renderPhone(false)}return gdScDone(r)}
+/* the page showing (its kind, or the camera's state), and a tap on one of its controls */
+function gd8Page(){var L=ph.querySelector(".gdpages:not(.gd-out)");return L?L.dataset.page+(L.dataset.cam?":"+L.dataset.cam:""):""}
+function gd8Tap(sel){var e=ph.querySelector(".gdpages:not(.gd-out) "+sel);return e?gsTouch(e):false}
+function gd8Wait(page,ms){return gdScWait(function(){return gd8Page()===page},ms||2500)}
+var GDSCENES8=[
+  {id:"gd8_first",label:"Guidance · first run: Hello, Who's exploring, the camera, the wall",setup:function(){gd8Keep("start")},
+    q:T("nothing: Start the app with Where to ask = At the app's start; it taps Let's go, Family, Allow the camera, Allow","nada: Iniciar a app com Onde perguntar = No início da app; toca em Vamos lá, Família, Permitir a câmara, Permitir"),
+    expect:T("Hello (Azu forms from a tile and waves), Who's exploring (Family sets the Family preset), the camera and the phone's request, then the wall: the Opening message's short line.","Olá (o Azu forma-se de um azulejo e acena), Quem explora (Família põe o perfil Família), a câmara e o pedido do telemóvel, depois a parede: a linha curta da mensagem de abertura."),
+    act:function(){var seen=[],rec=function(){var p=gd8Page();if(p&&seen[seen.length-1]!==p)seen.push(p)};gdLaunch("first");
+      return gd8Wait("hello").then(function(){rec();gd8Tap('[data-gdpg="next"]');return gd8Wait("aud")}).then(function(){rec();var f=ph.querySelector('.gdpages .onb [data-onb="family"]');if(f)gsTouch(f);return gd8Wait("camera")})
+        .then(function(){rec();gd8Tap('[data-gdpg="camera"]');return gd8Wait("camera:prompt")}).then(function(){rec();gd8Tap('[data-gdpg="sys:allow"]');return gdScWait(function(){return gdIs("opening")},4000)})
+        .then(function(op){var line=op?G.gd.cur.text:"",short=TXT("gd_pg_wall"),pre=gdPresetNow();
+          var ans="the pages: "+seen.join(" → ")+"; the audience "+S.vis.aud+" (the "+gdPresetName(pre)+" preset); the camera "+G.gd.camPerm+"; then "+(op?"the Opening message: “"+line+"”":"no Opening message ("+gd6Why()+")")+".";
+          return gd8Done(seen.join(",")==="hello,aud,camera,camera:prompt"&&S.vis.aud==="family"&&pre==="family"&&G.gd.camPerm==="allowed"&&line===short?[true,"the run in order, Family's preset set, the camera allowed, the wall's short line",ans]:[false,"the first run did not go as it should",ans])})}},
+  {id:"gd8_skip",label:"Guidance · Skip every page: one Skip, the camera's own request, the wall",setup:function(){gd8Keep("start")},
+    q:T("nothing: Start the app with Where to ask = At the app's start; it taps Skip on Hello, then Allow","nada: Iniciar a app com Onde perguntar = No início da app; toca em Saltar no Olá, depois em Permitir"),
+    expect:T("Skip skips the rest of the intro: no Who's exploring (Explorer), straight to the phone's camera request (never the wall without it), then the wall with the Opening message; the first card asks nothing.","Saltar salta o resto da introdução: sem Quem explora (Explorador), logo o pedido da câmara do telemóvel (nunca a parede sem ela), depois a parede com a mensagem de abertura; o primeiro cartão não pergunta nada."),
+    act:function(){var seen=[];gdLaunch("first");
+      return gd8Wait("hello").then(function(){seen.push(gd8Page());gd8Tap('[data-gdpg="skip"]');return gd8Wait("camera:prompt")}).then(function(ok){seen.push(gd8Page());gd8Tap('[data-gdpg="sys:allow"]');return gdScWait(function(){return gdIs("opening")},4000)})
+        .then(function(op){var pg=S.gdVisitor.pages||{};S.view="card";S.stop="half";renderPhone(false);var asks=!!ph.querySelector(".onb");S.stop="closed";renderPhone(false);
+          var ans="the pages: "+seen.join(" → ")+"; skipped: "+(pg.skipped?"yes":"no")+"; the audience "+S.vis.aud+" (answered: "+(S.aud.seen?"yes":"no")+"); "+(op?"the Opening message: “"+G.gd.cur.text+"”":"no Opening message")+"; the first card asks: "+(asks?"yes":"no")+".";
+          return gd8Done(seen.join(",")==="hello,camera:prompt"&&pg.skipped&&S.vis.aud==="explorer"&&S.aud.seen&&op&&!asks?[true,"one Skip skipped the intro; the camera was still asked; the wall came after it",ans]:[false,"Skip did not skip the intro as it should",ans])})}},
+  {id:"gd8_camera",label:"Guidance · the camera refused, then allowed: never the wall without it",setup:function(){gd8Keep("card")},
+    q:T("nothing: Start the app; Let's go, Allow the camera, Don't Allow; it waits 10 s (×10); Try again, Allow","nada: Iniciar a app; Vamos lá, Permitir a câmara, Não permitir; espera 10 s (×10); Tentar de novo, Permitir"),
+    expect:T("Refused: “The camera is off”, how to allow it, Open Settings and Try again, no Skip; the wall never comes; Try again asks again; allowed, the wall and the Opening message.","Recusada: “A câmara está desligada”, como a ligar, Abrir Definições e Tentar de novo, sem Saltar; a parede nunca chega; Tentar de novo pede outra vez; permitida, a parede e a mensagem de abertura."),
+    act:function(){var off=null,wallBefore=null;gdLaunch("first");
+      return gd8Wait("hello").then(function(){gd8Tap('[data-gdpg="next"]');return gd8Wait("camera")}).then(function(){gd8Tap('[data-gdpg="camera"]');return gd8Wait("camera:prompt")})
+        .then(function(){gd8Tap('[data-gdpg="sys:deny"]');return gd8Wait("camera:refused")}).then(function(r){var L=ph.querySelector(".gdpages");off=[r,!!(L&&L.querySelector('[data-gdpg="settings"]')),!!(L&&L.querySelector('[data-gdpg="retry"]')),!(L&&L.querySelector('[data-gdpg="skip"]')),(L&&L.querySelector(".gdpg-t")||{}).textContent||""];
+          return gdScWait(function(){return false},1000)}).then(function(){wallBefore=!!G.gd.cur||!G.gd.pages;gd8Tap('[data-gdpg="retry"]');return gd8Wait("camera:prompt")})
+        .then(function(again){gd8Tap('[data-gdpg="sys:allow"]');return gdScWait(function(){return gdIs("opening")},4000).then(function(op){
+          var ans="refused: “"+off[4]+"”, Open Settings "+(off[1]?"on":"missing")+", Try again "+(off[2]?"on":"missing")+", Skip "+(off[3]?"gone":"shown")+"; 10 s later the wall: "+(wallBefore?"yes (wrong)":"no")+"; Try again: "+(again?"the request again":"no request")+"; allowed: "+(op?"the wall and the Opening message":"no wall")+".";
+          return gd8Done(off[0]&&off[1]&&off[2]&&off[3]&&!wallBefore&&again&&op&&G.gd.camPerm==="allowed"?[true,"refused, the app stayed on the camera's page; allowed, the wall came",ans]:[false,"the camera's refusal did not hold the wall back, or allowing it did not go on",ans])})})}},
+  {id:"gd8_later",label:"Guidance · a later launch: Welcome back, no pages (Remember Off: the pages again)",setup:function(){gd8Keep("card")},
+    q:T("nothing: a first run (Skip, Allow), then Later launch; then Remember across visits Off and Later launch again","nada: uma primeira vez (Saltar, Permitir), depois Abrir de novo; depois Lembrar entre visitas desligado e Abrir de novo outra vez"),
+    expect:T("The later launch: no pages, the Opening message's “Welcome back! Tap a marker to begin.”; with Remember across visits Off every launch is a first: Hello again.","A abertura seguinte: sem páginas, a mensagem de abertura “Bem-vindo de volta! Toque num marcador para começar.”; com Lembrar entre visitas desligado cada abertura é a primeira: o Olá outra vez."),
+    act:function(){var later=null;gdLaunch("first");
+      return gd8Wait("hello").then(function(){gd8Tap('[data-gdpg="skip"]');return gd8Wait("camera:prompt")}).then(function(){gd8Tap('[data-gdpg="sys:allow"]');return gdScWait(function(){return gdIs("opening")},4000)})
+        .then(function(){gdStop("the next launch");gdLaunch("later");return gdScWait(function(){return gdIs("opening")},4000)}).then(function(op){later=[!G.gd.pages&&!gd8Page(),op?G.gd.cur.text:"",S.gdVisitor.visits];
+          gdStop("the next launch");S.guidance.remember=false;gdLaunch("later");return gd8Wait("hello")}).then(function(again){
+          var ans="a later launch: "+(later[0]?"no pages":"pages shown")+", the Opening message “"+later[1]+"” (visit "+later[2]+"); Remember across visits Off, a later launch: "+(again?"Hello again (a first run)":"no pages")+".";
+          return gd8Done(later[0]&&later[1]===TXT("gd_opening_back")&&later[2]===2&&again?[true,"a later launch says Welcome back with no pages; with Remember Off the pages come again",ans]:[false,"the later launch did not go as it should",ans])})}}];
+GDSCENES8.forEach(function(s){s.where="wall";AGSCENES.push(s)});

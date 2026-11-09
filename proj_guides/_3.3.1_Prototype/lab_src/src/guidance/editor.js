@@ -33,8 +33,10 @@ FOCUS["gd:fun"]=["card","#wall","closed"];COMP["gd:g:moments"]=["Guide","Guidanc
 ["water","cookie","joke","ptjoke","hunt","season"].forEach(function(id){var it=S.guidance.items[id],m=it.group==="moments";COMP["gd:i:"+id]=["Guide","Guidance › Fun › "+(m?"Moments":"Play")+" › "+it.label];FOCUS["gd:i:"+id]=["card",m?".gbtn-wrap":"#wall",m?"full":"closed"]});
 /* a guidance word's place in the tab (Languages & Terms' links; Global Scene's link) */
 function gdKindOfGroup(gid){var k=null;S.guidance.kinds.forEach(function(x){x.groups.forEach(function(g){if(g.id===gid)k=x.id})});return k}
-on("guidePath.answer",function(o){if(o==="gd:overall"||/^gd:(app|content|fun)$/.test(o))return["gt4",o];if(o.indexOf("gd:g:")===0)return["gt4","gd:"+(gdKindOfGroup(o.slice(5))||"app"),o];
-  var m=o.match(/^gd:i:(.+)$/),it=m&&S.guidance.items[m[1]];if(it)return["gt4","gd:"+it.kind,"gd:g:"+it.group,o]});
+on("guidePath.answer",function(o){if(o==="gd:overall"||/^gd:(app|content|fun|seq)$/.test(o))return["gt4",o];if(o.indexOf("gd:g:")===0)return["gt4",gdGroupFo(o.slice(5)),o];
+  var m=o.match(/^gd:i:(.+)$/),it=m&&S.guidance.items[m[1]];if(it)return["gt4",gdGroupFo(it.group),"gd:g:"+it.group,o]});
+/* round 8: the foldout a group sits in: its kind's, or Sequences for an In order sequence (How to use the card, First pages) */
+function gdGroupFo(gid){var g=gdGroupById(gid);return g&&g.seq?"gd:seq":"gd:"+(gdKindOfGroup(gid)||"app")}
 /* the self-test: a tip's words show on the wall, at its moment (behaviour); every guidance option is timing (behaviour) */
 TX_DOM.wall_tip="shown in the guide's tip beside the nearest marker";TX_DOM.gd_opening="shown in the guide's opening tip on the wall";TX_DOM.gd_opening_back="shown in the opening tip to a returning visitor";
 TX_DOM.gd_askview="shown in the guide's tip beside the ✦";TX_DOM.gd_tourof="shown in the tour invitation on the wall";
@@ -84,7 +86,7 @@ function gdStepRow(it){var p="guidance.items."+it.id+".";
     row("Focus",pseg(p+"focus",GD_STEP_FOCUS.map(function(x){return x[0]}),GD_STEP_FOCUS.map(function(x){return x[1]})),"How the step marks its control: as the tour's own Focus (Guide › 1 · The tour › Focus: "+gdNameOf([["spotlight","Spotlight"],["ring","Soft ring"],["none","None"]],S.guideCfg.cue)+"), Spotlight (the rest dims, the control cut out), Ring, or None. A walkthrough step may use the Spotlight.")+
     '<div class="sub2">Says · its line in the walkthrough (Languages &amp; Terms, owned here)</div>'+txPanel("gd:i:"+it.id)+'<div class="note gdrb">'+esc(gdReadBack(it))+'</div>';
   return fo("gd:i:"+it.id,sum,null,body,4)}
-function gdItemRow(it){if(it.form==="cue")return gdCueRow(it);if(it.form==="walk")return gdStepRow(it);var p="guidance.items."+it.id+".",k=gdKindOf(it),g=gdGroupOf(it),i=g?g.items.indexOf(it.id):0,pv=i>0&&g.mode==="order"?S.guidance.items[g.items[i-1]]:null,wn=gdWarnsOf(it.id);
+function gdItemRow(it){if(it.form==="cue")return gdCueRow(it);if(it.form==="walk")return gdStepRow(it);if(it.form==="page")return gdPageRow(it);var p="guidance.items."+it.id+".",k=gdKindOf(it),g=gdGroupOf(it),i=g?g.items.indexOf(it.id):0,pv=i>0&&g.mode==="order"?S.guidance.items[g.items[i-1]]:null,wn=gdWarnsOf(it.id);
   var sum='<span class="gdi">'+gdDragH(it)+'<span class="gdon">'+pseg(p+"on",["true","false"],["On","Off"])+'</span><b>'+esc(it.label)+'</b>'+(it.essential?'<span class="badge new">ESSENTIAL</span>':"")+
     (wn.length?'<span class="badge gdwb" title="'+esc(wn.map(function(w){return w.text}).join(" · "))+'">&#9888; '+wn.length+'</span>':"")+gdDots(it)+
     '<span class="gdhow">'+esc(gdHowOften(it))+'</span><button type="button" class="ubtn sm gdshow" data-gdshow="'+it.id+'" title="Show it on the phone now">&#9656; Show now</button></span>';
@@ -168,7 +170,7 @@ function gdVisitorMore(){var v=S.gdVisitor,vi=v.visit,now=gdNow(),st=gdStage(v,n
     rest=Object.keys(vi.rest||{}).filter(function(g){return vi.rest[g]>now}).map(function(g){var gg=gdGroupById(g);return(gg?gg.name:g)+(vi.fewer&&vi.fewer[g]?" (Fewer like this: the visit)":" ("+gdClock(vi.rest[g]-now)+")")});
   return(v.visits>1?"A returning visitor":"A first visit")+" · visits "+v.visits+" · active "+gdN(st.active,1)+" min"+(st.returning?" (the stage counts from 5 min)":"")+" · the stage s "+gdN(st.s)+
     " · met the guide: "+(v.met?"yes":"no")+" · heard the guide this visit: "+(vi.heard?"yes":"no")+" · pokes on Azu: "+(vi.pokes||0)+" · features used: "+(used.join(", ")||"none")+
-    " · breathing room ×"+(vi.breathMul||1)+" ("+(vi.ignoredRun||0)+" ignored in a row) · resting: "+(rest.join(", ")||"none")+" · Remember across visits: "+(S.guidance.remember!==false?"On":"Off")}
+    " · breathing room ×"+(vi.breathMul||1)+" ("+(vi.ignoredRun||0)+" ignored in a row) · resting: "+(rest.join(", ")||"none")+" · Remember across visits: "+(S.guidance.remember!==false?"On":"Off")+" · "+gdPagesSeenWords()}
 function gdMemTable(){var v=S.gdVisitor;return'<table class="tbl gdmem"><thead><tr><th>Item</th><th>Visit</th><th>Ever</th><th>Last shown</th><th>The line used</th><th>Acted</th><th>Dismissed</th><th>Done</th></tr></thead><tbody>'+
   gdDefs().map(function(it){var m=gdMemOf(it);return'<tr><td>'+esc(it.label)+(it.perPoint?" <small>(its points summed)</small>":"")+'</td><td>'+m.shown+'</td><td>'+m.ever+'</td><td>'+(m.last!=null?gdClock(m.last-v.visit.at):"")+'</td><td>'+esc(m.line)+'</td><td>'+m.acted+'</td><td>'+m.dismissed+'</td><td>'+(m.done?esc(GD_EVENTS[m.by]||m.by):"")+'</td></tr>'}).join("")+'</tbody></table>'}
 /* the Log: the last 30 decisions (shown, skipped, ended, and what the learning changed), the newest first, each with the visit's time */
@@ -204,15 +206,10 @@ on("edGuide.html",function(h){var d=document.createElement("div");d.innerHTML=h;
       row("Gap (s)",pslider(kp+"gap",0,k.id==="fun"?600:180,k.id==="fun"?10:5),"Seconds from the end of one "+k.name+" item to the start of the next (0: only the breathing room). An Essential item skips it.")+
       '<div class="note gdmix">'+esc(gdKindWords(k))+'</div>'+
       (k.solemnOff?'<div class="note gdsolemn"><b>Solemn points: off.</b> '+esc("Fun never shows on a Solemn point (Specific Marker › Solemn point): no Moment, no joke, no hunt invitation, no seasonal line. Fixed for the kind, not an option; Why not now? says “a Solemn point: no fun here”. Calm (Mascot › Liveliness) allows only its items without Lively only.")+'</div>':"");
+    if(k.groups.some(function(g){return g.seq}))inner+='<div class="note gdseqnote">Its sequences (In order: '+esc(k.groups.filter(function(g){return g.seq}).map(function(g){return g.name}).join(", "))+') are in Sequences, below.</div>';
     k.groups.forEach(function(g,gi){var items=g.items.map(function(id){return S.guidance.items[id]}).filter(Boolean),gp=kp+"groups."+gi+".",per=items.some(function(x){return x.perPoint});
-      /* a pulled group (How to use the card): no weight, cap or gap (never scheduled, never capped); where it opens, its words, its steps */
-      if(g.pulled){inner+=fo("gd:g:"+g.id,esc(g.name)+' <span class="sub">· a walkthrough, in order, pulled only</span>',null,
-        '<div class="note">Pulled only: never scheduled, never capped, never by itself. It opens from the visitor\'s Settings and from the ✦ menu (How does this work?). On a card it walks the card, step by step, through the guide\'s tour; on the wall one bubble says how the wall works and offers to open a card. A step seen (its line heard) retires its cue in The card (cues).</div>'+
-        row("On",pseg(gp+"on",["true","false"],["On","Off"]),"Off: the walkthrough is gone, and with it its entries in Settings and the ✦ menu.")+
-        row("In Settings",pseg(gp+"inSettings",["true","false"],["Shown","Hidden"]),"A button at the foot of the visitor's Settings, “"+TXT("settings_how")+"” (its word in Card Controls › Settings panel). It closes the panel and walks the card.")+
-        row("In the ✦ menu",pseg(gp+"inMenu",["true","false"],["Shown","Hidden"]),"An item of the ✦ menu, “"+TXT("gd_how")+"”, on the card and on the wall: on the card it walks the card; on the wall one bubble says how the wall works, with a chip that opens a card.")+
-        '<div class="sub2">Its words · the ✦ menu\'s item and the wall\'s bubble (Languages &amp; Terms, owned here)</div>'+txPanel("gd:g:"+g.id)+
-        '<div class="note">Its steps, in this order (a row: On, the step, ▸ Show now walks the card from it; open it for its words):</div>'+items.map(gdItemRow).join(""),3);return}
+      /* round 8: a sequence (How to use the card, the first pages) is drawn in Sequences (gdSeqFo) */
+      if(g.seq)return;
       inner+=fo("gd:g:"+g.id,esc(g.name)+' <span class="sub">· '+(g.mode==="order"?"In order: the visit's first words, then the first gesture":g.id==="inview"?"one item a point of the wall: Azu's remarks":g.id==="moments"?"the water break and the cookie, between tour steps, 5 min apart":g.id==="play"?"a joke, each point's joke, the treasure hunt, a seasonal line":g.id==="card"?"the card's hints, one cue each: motion on the element, no mascot":"each on its own")+'</span>',null,
         '<div class="note">'+(g.mode==="order"?"In order: an item waits until the one before it has shown this visit.":g.id==="card"?"Each cue on its own, at the moment its feature is in reach, taking turns with the tips (one at a time, the cue room between them). Card Controls › Hints shows them as a view.":"Each item on its own.")+' A row: On, its name, importance (●), how often, ▸ Show now; open it for its fields.</div>'+
         row("On",pseg(gp+"on",["true","false"],["On","Off"]),"Off: none of "+g.name+"'s items show (each keeps its own On)."+(g.id==="inview"?" Ask › Ask about the view › Azu comments is this same switch.":g.id==="moments"?" Guide › 2 · Mascot › Moments is this same switch.":""))+
@@ -220,7 +217,7 @@ on("edGuide.html",function(h){var d=document.createElement("div");d.innerHTML=h;
         row("At most a visit",pslider(gp+"cap",0,40,1),"The "+g.name+" items in one visit, all together (0: no cap of its own; "+(g.id==="card"?"a cue is not a tip, so "+k.name+"'s cap does not count it":k.name+"'s "+k.cap+" still holds")+"). An Essential item skips it.")+
         row("Gap (s)",pslider(gp+"gap",0,k.id==="fun"?600:120,k.id==="fun"?10:1),"Seconds from the end of one "+g.name+" item to the start of the next. 0: "+(g.id==="card"?"none: two cues follow each other with no room":"as the kind ("+k.name+"'s "+k.gap+" s)")+"; more: the group's own, in place of the kind's. The breathing room between any two tips ("+S.guidance.breathing+" s) still holds.")+
         items.map(gdItemRow).join(""),3)});
-    gs+=fo("gd:"+k.id,esc(k.name)+' <span class="sub">· '+gdKindSub(k)+'</span>'+(k.solemnOff?' <span class="badge gdsolb">Solemn points: off</span>':""),null,inner,2)});
+    gs+=fo("gd:"+k.id,esc(k.name)+' <span class="sub">· '+gdKindSub(k)+'</span>'+(k.solemnOff?' <span class="badge gdsolb">Solemn points: off</span>':""),null,inner,2)});gs+=gdSeqFo();
   d.insertAdjacentHTML("beforeend",fo("gt4",sectionTitle("4","Guidance","when the guide speaks up: a tip at a pause, one at a time"),["new","NEW"],
     fo("gd:overall",'Overall <span class="sub">· on, the breathing room, the limits, the learning and the memory</span>',null,ov,2)+gs,1));
   return d.innerHTML});
@@ -356,11 +353,11 @@ var GD_DEMOS={"guidance.on":{wall:true,act:function(){gdDemoOverall("on")},ringA
   "guidance.breathing":{wall:true,act:function(){gdDemoOverall("breathing")},ringAfter:600,ring:".gdbub|.gdchip"}};
 Object.keys(GD_DEMO_ROWS).forEach(function(f){GD_DEMOS["guidance."+f]={wall:true,act:function(){gdDemo(GD_DEMO_ROWS[f]())},ringAfter:600,ring:".gdbub|.gdchip"}});
 S.guidance.kinds.forEach(function(k,ki){var kp="guidance.kinds."+ki+".";["on","cap","gap"].forEach(function(f){GD_DEMOS[kp+f]={wall:true,wait:0,act:function(){gdDemoKind(ki,f)},ringAfter:60,ring:".gdbub|.gdchip"}});
-  k.groups.forEach(function(g,gi){var gp=kp+"groups."+gi+".";if(g.pulled){GD_DEMOS[gp+"on"]={act:function(){gdDemoHow("on")},ringAfter:1100,ring:".gfocus|.gdchip"};
+  k.groups.forEach(function(g,gi){var gp=kp+"groups."+gi+".";if(g.launch){GD_DEMOS[gp+"on"]={wall:true,wait:0,act:function(){gdDemoPagesOn()},ringAfter:400,ring:".gdpages|.gdchip"};return}if(g.pulled){GD_DEMOS[gp+"on"]={act:function(){gdDemoHow("on")},ringAfter:1100,ring:".gfocus|.gdchip"};
       GD_DEMOS[gp+"inSettings"]={stop:"half",act:function(){gdDemoHow("settings")},ringAfter:500,ring:".vhow|.vset"};GD_DEMOS[gp+"inMenu"]={wall:true,act:function(){gdDemoHow("menu")},ringAfter:500,ring:'[data-gbgo="how"]|.gbmenu'};return}
     GD_DEMOS[kp+"groups."+gi+".weight"]={wall:true,wait:0,act:function(){gdDemoGroup(ki,gi)},ringAfter:60,ring:".gdbub|.gdchip"};
     ["on","cap","gap"].forEach(function(f){GD_DEMOS[kp+"groups."+gi+"."+f]={wall:true,wait:0,act:function(){gdDemoGroupField(ki,gi,f)},ringAfter:60,ring:".gdbub|.gdchip"}})})});
-Object.keys(S.guidance.items).forEach(function(id){var p="guidance.items."+id+".",d=S.guidance.items[id];
+Object.keys(S.guidance.items).forEach(function(id){var p="guidance.items."+id+".",d=S.guidance.items[id];if(d.form==="page")return;
   /* a cue: on the card at its element (never the wall); a step of How to use the card: the walkthrough from that step */
   if(d.form==="cue"){var rg=".gdchip|"+GD_CUE_SEL[id].split(",").join("|");["on","importance","doneWhen"].forEach(function(f){GD_DEMOS[p+f]={stop:id==="nudge"||id==="label"?"half":"full",act:function(){gdDemoCue(id,f)},ringAfter:700,ring:rg}});
     GD_DEMOS[p+"shows"]={stop:"full",act:function(){gdDemoCueShows(id)},ringAfter:700,ring:rg};return}
@@ -572,7 +569,7 @@ TX_DOM.gd_btn_show="shown on a tip's Button chip";TX_DOM.gd_btn_tour=TX_DOM.gd_b
 TX_DOM.gd_tips_again_done="shown in the toast after Show the tips again";TX_DOM.gd_undo=TX_DOM.gd_tips_again_done;TX_DOM.gd_dismiss="on a tip that stays until tapped";TX_DOM.dock_tips="shown in the dock's conversation";
 function gdDragH(it){return'<button type="button" class="gddrag" data-gddrag="'+it.id+'" aria-label="Drag to reorder the '+esc(it.label)+'" title="Drag to reorder inside its group (the tie-break and the order)">&#8942;&#8942;</button>'}
 /* the groups an item may move to (not a pulled group, not the card's cues: those hold their own forms) */
-function gdGroupOpts(){var o=[];S.guidance.kinds.forEach(function(k){k.groups.forEach(function(g){if(!g.pulled&&g.id!=="card")o.push([g.id,k.name+" › "+g.name])})});return o}
+function gdGroupOpts(){var o=[];S.guidance.kinds.forEach(function(k){k.groups.forEach(function(g){if(!g.pulled&&!g.launch&&g.id!=="card")o.push([g.id,k.name+" › "+g.name])})});return o}
 function gdSaysHtml(it){var ks=[].concat(it.says||[]),a='<div class="gdvars">'+ks.map(function(k,i){var t=TXT(k);return'<div class="gdvar"><span class="gdvn">'+(i+1)+'</span><span class="gdvt'+(String(t).trim()?"":" empty")+'">'+esc(String(t).trim()?t:"(no words yet)")+'</span><button class="ubtn sm" type="button" data-gdsay="'+it.id+'|'+k+'" title="Show the item saying this line">&#9656;</button>'+
     (ks.length>1?'<button class="del" type="button" data-gdvardel="'+it.id+'|'+i+'">Remove</button>':"")+'</div>'}).join("");
   return a+(ks.length<4?'<button class="ubtn sm" type="button" data-gdvaradd="'+it.id+'">+ Add a variant</button>':'<span class="uses">4 variants: the most</span>')+'</div>'}
@@ -613,9 +610,12 @@ function gdFreeId(pre,map){var n=1;while(map[pre+n])n++;return pre+n}
 function gdNewWord(owner,label,en,pt){var k=gdFreeId("gdw_",S.tx);S.tx[k]={en:en||"",pt:pt||""};(TXO[owner]=TXO[owner]||[]).push(k);TXW[k]="A guidance item's line (Guide › Guidance).";TXF[k]="";TXP[k]=label;TXOWN[k]=owner;TX_DOM[k]="shown in the guide's tip";return k}
 function gdRegister(it){var g=gdGroupById(it.group);COMP["gd:i:"+it.id]=["Guide","Guidance › "+(g?g.name:"?")+" › "+it.label];FOCUS["gd:i:"+it.id]=["card",it.about==="gbtn"?".gbtn-wrap":it.about==="nothing"?"#wall":"[data-marker]","closed"]}
 function gdNewItem(tid,gid){var T=GD_TEMPLATES.filter(function(x){return x.id===tid})[0],g=gdGroupById(gid);if(!T||!g)return null;var id=gdFreeId("gdn",S.guidance.items),it=JSON.parse(JSON.stringify(T.f));
-  it.id=id;it.on=true;it.kind=gdKindOfGroup(gid);it.group=gid;gdFill(it);it.says=gdNewWord("gd:i:"+id,"Says",T.en,T.pt);S.guidance.items[id]=it;g.items.push(id);gdRegister(it);gdLog("event","the Editor added the “"+it.label+"” ("+T.name+") to "+g.name);return it}
+  it.id=id;it.on=true;it.kind=gdKindOfGroup(gid);it.group=gid;gdFill(it);it.says=gdNewWord("gd:i:"+id,"Says",T.en,T.pt);S.guidance.items[id]=it;
+  /* round 8: a page gets its title and one button (Next), and goes before Straight to the wall (the run ends there) */
+  if(T.page){it.title=gdNewWord("gd:i:"+id,"Title",T.title.en,T.title.pt);it.buttons=[{word:gdNewWord("gd:i:"+id,"Button 1",T.btn.en,T.btn.pt),act:"next"}];
+    var wi=g.items.map(function(x){return(S.guidance.items[x]||{}).page}).indexOf("wall");if(wi>=0)g.items.splice(wi,0,id);else g.items.push(id)}else g.items.push(id);gdRegister(it);gdLog("event","the Editor added the “"+it.label+"” ("+T.name+") to "+g.name);return it}
 function gdDupItem(id){var src=S.guidance.items[id],g=src&&gdGroupOf(src);if(!g)return null;var nid=gdFreeId("gdn",S.guidance.items),it=JSON.parse(JSON.stringify(src)),own="gd:i:"+nid,cp=function(k){return k&&S.tx[k]?gdNewWord(own,TXP[k]||"Says",S.tx[k].en,S.tx[k].pt):k};
-  it.id=nid;it.label=src.label+" (copy)";it.says=Array.isArray(src.says)?src.says.map(cp):cp(src.says);if(src.saysCard)it.saysCard=cp(src.saysCard);it.saysBack=src.saysBack?cp(src.saysBack):"";it.saysAud={};Object.keys(src.saysAud||{}).forEach(function(a){it.saysAud[a]=cp(src.saysAud[a])});
+  it.id=nid;it.label=src.label+" (copy)";it.says=Array.isArray(src.says)?src.says.map(cp):cp(src.says);if(src.form==="page"){it.title=cp(src.title);it.buttons=(src.buttons||[]).map(function(b){return{word:cp(b.word),act:b.act}})}if(src.saysCard)it.saysCard=cp(src.saysCard);it.saysBack=src.saysBack?cp(src.saysBack):"";it.saysAud={};Object.keys(src.saysAud||{}).forEach(function(a){it.saysAud[a]=cp(src.saysAud[a])});
   S.guidance.items[nid]=it;g.items.splice(g.items.indexOf(id)+1,0,nid);gdRegister(it);gdLog("event","the Editor duplicated the “"+src.label+"”");return it}
 function gdDelItem(id){var it=S.guidance.items[id],g=it&&gdGroupOf(it);if(!g)return false;var i=g.items.indexOf(id);if(G.gd.cur&&(G.gd.cur.item.base||G.gd.cur.item.id)===id)gdStop("its item was deleted");
   g.items.splice(i,1);it.deleted=true;G.gd.undoDel={id:id,gid:g.id,i:i};gdLog("event","the Editor deleted the “"+it.label+"” from "+g.name);return true}
@@ -625,7 +625,7 @@ function gdMoveItem(id,gid){var it=S.guidance.items[id],a=it&&gdGroupOf(it),b=gd
 function gdEdToast(text,undo){var o=document.getElementById("gdedtoast");if(o)o.remove();clearTimeout(G.gd.edToastT);var r=ed.getBoundingClientRect(),d=document.createElement("div");d.id="gdedtoast";d.className="gdedtoast";d.setAttribute("role","status");
   d.style.left=Math.round(r.left+16)+"px";d.style.width=Math.round(Math.max(260,r.width-32))+"px";d.innerHTML='<span>'+esc(text)+'</span>'+(undo?'<button type="button" class="ubtn sm" data-gdedundo="'+undo+'">Undo</button>':"");document.body.appendChild(d);
   G.gd.edToastT=setTimeout(function(){d.remove()},8000);return d}
-function gdOpenItem(id){var it=S.guidance.items[id];if(!it)return;S.tab="guide";S.op.gt4=true;S.op["gd:"+it.kind]=true;S.op["gd:g:"+it.group]=true;S.op["gd:i:"+id]=true;renderEditor();var f=ed.querySelector('[data-fo="gd:i:'+id+'"]');if(f)f.scrollIntoView({block:"center"})}
+function gdOpenItem(id){var it=S.guidance.items[id];if(!it)return;S.tab="guide";S.op.gt4=true;S.op[gdGroupFo(it.group)]=true;S.op["gd:g:"+it.group]=true;S.op["gd:i:"+id]=true;renderEditor();var f=ed.querySelector('[data-fo="gd:i:'+id+'"]');if(f)f.scrollIntoView({block:"center"})}
 ed.addEventListener("click",function(e){var t=e.target,q;
   var dg=t.closest("[data-gddrag]");if(dg){e.preventDefault();e.stopPropagation();return}
   var ad=t.closest("[data-gdadd]");if(ad){e.stopPropagation();S.ui.gdAddIn=ad.dataset.gdadd&&S.ui.gdAddIn!==ad.dataset.gdadd?ad.dataset.gdadd:null;renderEditor();return}
@@ -658,9 +658,11 @@ ed.addEventListener("pointerdown",function(e){var h=e.target.closest&&e.target.c
   G.gd.drag={id:h.dataset.gddrag,row:row,rows:rows,box:box,y0:e.clientY,from:rows.indexOf(row),to:rows.indexOf(row),line:ln};row.classList.add("gddragging");try{h.setPointerCapture(e.pointerId)}catch(x){}},true);
 ed.addEventListener("pointermove",function(e){var d=G.gd.drag;if(!d)return;var dy=e.clientY-d.y0;d.row.style.translate="0 "+Math.round(dy)+"px";var to=0,br=d.box.getBoundingClientRect();
   d.rows.forEach(function(r,i){if(r===d.row)return;var b=r.getBoundingClientRect();if(e.clientY>b.top+b.height/2)to=i+(i<d.from?1:0)});if(e.clientY<d.rows[0].getBoundingClientRect().top)to=0;d.to=Math.max(0,Math.min(d.rows.length-1,to));
-  var others=d.rows.filter(function(r){return r!==d.row}),ref=others[d.to],y=ref?ref.getBoundingClientRect().top:others.length?others[others.length-1].getBoundingClientRect().bottom:br.top;d.line.style.top=Math.round(y-br.top+d.box.scrollTop-2)+"px"},true);
+  var others=d.rows.filter(function(r){return r!==d.row}),ref=others[d.to],y=ref?ref.getBoundingClientRect().top:others.length?others[others.length-1].getBoundingClientRect().bottom:br.top;d.line.style.top=Math.round(y-br.top+d.box.scrollTop-2)+"px";
+  var why=gdDragWhy(d);d.line.classList.toggle("no",!!why);d.line.dataset.why=why||""},true);
 ed.addEventListener("pointerup",function(e){var d=G.gd.drag;if(!d)return;G.gd.drag=null;d.row.classList.remove("gddragging");d.row.style.translate="";d.line.remove();if(d.to===d.from)return;
   var it=S.guidance.items[d.id],g=gdGroupOf(it),ids=d.rows.map(function(r){return r.dataset.fo.slice(5)}),mv=ids.splice(d.from,1)[0];ids.splice(d.to,0,mv);
+  var why=g.launch?gdPagesRule(ids):"";if(g.launch){G.gd.pgRule=why;if(why){renderEditor();gdEdToast(why+". The drag was undone.");gdLog("event","the Editor's drag undone: "+why);return}}
   var rest=g.items.filter(function(x){return ids.indexOf(x)<0});g.items=ids.concat(rest);renderAll(true);gdLog("event","the Editor moved the “"+it.label+"” to "+(d.to+1)+" of "+ids.length+" in "+g.name);
   gdEdToast("Moved: the “"+it.label+"” is "+(d.to+1)+" of "+ids.length+" in "+g.name+" ("+(g.mode==="order"?"its place in the sequence":"it wins a tie against the ones below it")+").")},true);
 /* ----- the Editor's new parts: the warnings at the top of 4 · Guidance, + Add guidance in each group, the visitor's Tips and the
@@ -671,7 +673,7 @@ on("edGuide.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   var g4=d.querySelector('[data-fo="gt4"] > .inner');if(g4)g4.insertAdjacentHTML("afterbegin",gdWarnsHtml());
   S.guidance.kinds.forEach(function(k){k.groups.forEach(function(g){if(g.pulled||g.id==="card")return;var f=d.querySelector('[data-fo="gd:g:'+g.id+'"] > .inner');if(!f)return;
     f.insertAdjacentHTML("beforeend",'<div class="gdadd"><button class="ubtn sm" type="button" data-gdadd="'+g.id+'" aria-expanded="'+(S.ui.gdAddIn===g.id)+'">+ Add guidance</button>'+
-      (S.ui.gdAddIn===g.id?'<div class="gdtpl" role="group" aria-label="Templates"><span>A new item in '+esc(g.name)+' from:</span>'+GD_TEMPLATES.map(function(t){return'<button class="ubtn sm" type="button" data-gdtpl="'+g.id+'|'+t.id+'">'+esc(t.name)+'</button>'}).join("")+'<button class="ubtn sm" type="button" data-gdadd="">Cancel</button></div>':"")+'</div>')})});
+      (S.ui.gdAddIn===g.id?'<div class="gdtpl" role="group" aria-label="Templates"><span>A new '+(g.launch?"page":"item")+' in '+esc(g.name)+' from:</span>'+GD_TEMPLATES.filter(function(t){return!!t.page===!!g.launch}).map(function(t){return'<button class="ubtn sm" type="button" data-gdtpl="'+g.id+'|'+t.id+'">'+esc(t.name)+'</button>'}).join("")+'<button class="ubtn sm" type="button" data-gdadd="">Cancel</button></div>':"")+'</div>')})});
   var m=d.querySelector("#gdmem");if(m)m.insertAdjacentHTML("afterend",
     row("Tips",pseg("gdVisitor.prefs.tips",["all","essentials","off"],["All","Essentials only","Off"]),"The visitor's own Settings › The guide › Tips (kept in its memory): All; Essentials only (the opening); Off (the ✦ and Ask still answer: “You can always tap ✦ for help”).")+
     row("Tips stay until tapped",pseg("gdVisitor.prefs.stay",["false","true"],["Off","On"]),"The visitor's Settings › The guide › Tips stay until I tap them (WCAG 2.2.1): a tip's time never runs out; it waits for a tap, a swipe or its close button. Default Off.")+
@@ -755,3 +757,106 @@ ed.addEventListener("click",function(e){var t=e.target,q;
     l.push(gdNewWord("gd:i:ptjoke","Joke · "+(p?L(p.name):pid),"",""));renderEditor();return}
   var jd=t.closest("[data-gdjkdel]");if(jd){e.stopPropagation();q=jd.dataset.gdjkdel.split("|");(S.ptJokes[q[0]]||[]).splice(+q[1],1);renderAll(true);return}
   var jg=t.closest("[data-gdjkgo]");if(jg){e.stopPropagation();S.tab="marker";S.op.m3=true;renderEditor();var b=ed.querySelector(".gdjk");if(b)b.scrollIntoView({block:"center"});return}},true);
+/* ----- round 8, the Editor (_3.8 section 7's 5 · Sequences; section 6): Sequences holds the In order sequences, How to use the card (moved
+   here from App, its rows as they were) and First pages: its On, the run now and its time (under 30 s), its words (Skip, the progress),
+   each page a row (On, the page, how long, ▸ Show now) that opens its form (Identity, Words, Show: the Page form, Azu, the language chip,
+   a custom page's buttons; When, fixed; the read-back), + Add guidance with the Page template, Duplicate and Delete for a page of its own,
+   drag ≡ to reorder (Hello first, Straight to the wall last: the drop line says why while a drag would break that, and the drop is
+   undone with the reason in the field). 0 · Preview & Test › Start the app (a first run / a later launch) and the visitor's first pages;
+   the preview bar's Start the app and Later launch. Each row's demo: a page row shows that page on the phone with its value; the group's
+   On the run's first page; Start the app plays the run. Unity: the POI Editor's Guide tab, Sequences drawn from GuidanceCatalog (a
+   ReorderableList whose ends are pinned), Start the app a Play-mode launch with the GuidanceMemory file cleared (a first run) or kept ----- */
+COMP["gd:seq"]=["Guide","Guidance › Sequences"];FOCUS["gd:seq"]=["card","#wall","closed"];COMP["gd:g:pages"]=["Guide","Guidance › Sequences › First pages"];FOCUS["gd:g:pages"]=["card","#wall","closed"];
+gdGroupById("pages").items.forEach(function(id){COMP["gd:i:"+id]=["Guide","Guidance › Sequences › First pages › "+S.guidance.items[id].label];FOCUS["gd:i:"+id]=["card","#wall","closed"]});
+["gd_pg_hello_t","gd_pg_hello","gd_pg_go","gd_pg_how","gd_pg_lang","gd_pg_cam_t","gd_pg_cam","gd_pg_cam_allow","gd_pg_cam_usage","gd_pg_off_t","gd_pg_off","gd_pg_settings","gd_pg_retry","gd_pg_skip","gd_pg_dots"].forEach(function(k){TX_DOM[k]="shown on the first pages (Start the app)"});
+TX_DOM.gd_pg_wall="shown in the Opening message right after the first pages";
+G.gd.pgRule="";S.ui.gdLaunch="first";
+/* How to use the card's foldout (round 4's rows, unchanged; drawn in Sequences since round 8) */
+function gdHowtoFo(g){var gp=gdGroupPath(g.id),items=g.items.map(function(id){return S.guidance.items[id]}).filter(Boolean);
+  return fo("gd:g:"+g.id,esc(g.name)+' <span class="sub">· a walkthrough, in order, pulled only</span>',null,
+    '<div class="note">Pulled only: never scheduled, never capped, never by itself. It opens from the visitor\'s Settings and from the ✦ menu (How does this work?). On a card it walks the card, step by step, through the guide\'s tour; on the wall one bubble says how the wall works and offers to open a card. A step seen (its line heard) retires its cue in The card (cues).</div>'+
+    row("On",pseg(gp+"on",["true","false"],["On","Off"]),"Off: the walkthrough is gone, and with it its entries in Settings and the ✦ menu.")+
+    row("In Settings",pseg(gp+"inSettings",["true","false"],["Shown","Hidden"]),"A button at the foot of the visitor's Settings, “"+TXT("settings_how")+"” (its word in Card Controls › Settings panel). It closes the panel and walks the card.")+
+    row("In the ✦ menu",pseg(gp+"inMenu",["true","false"],["Shown","Hidden"]),"An item of the ✦ menu, “"+TXT("gd_how")+"”, on the card and on the wall: on the card it walks the card; on the wall one bubble says how the wall works, with a chip that opens a card.")+
+    '<div class="sub2">Its words · the ✦ menu\'s item and the wall\'s bubble (Languages &amp; Terms, owned here)</div>'+txPanel("gd:g:"+g.id)+
+    '<div class="note">Its steps, in this order (a row: On, the step, ▸ Show now walks the card from it; open it for its words):</div>'+items.map(gdItemRow).join(""),3)}
+/* 5 · Sequences: each In order sequence of the catalog, in its order */
+function gdSeqFo(){var inner='<div class="note">The In order sequences: How to use the card (a walkthrough, pulled from Settings and the ✦ menu) and the first pages (the app\'s first run). Each step or page is an item; drag ≡ to reorder: the order is the sequence.</div>';
+  S.guidance.kinds.forEach(function(k){k.groups.forEach(function(g){if(g.seq)inner+=g.launch?gdPagesFo(g):gdHowtoFo(g)})});
+  return fo("gd:seq",'Sequences <span class="sub">· in order: How to use the card, the first pages</span>',null,inner,2)}
+/* a first run as it would go now (the camera not yet allowed: a new install) and its time */
+function gdPagesRunWords(){var g=gdGroupById("pages"),pl=gdPagesPlan(),sec=gdPagesSecs(pl),w=gdPageOf("wall");
+  if(!g||g.on===false)return"First pages Off: a first run opens on the wall (the camera's own request first, while it is not allowed). Who's exploring: "+gdNameOf(AUD_WHERE,S.aud.where)+".";
+  return"A first run now: "+pl.map(function(x){return x.label}).concat(["the wall"+(w&&w.on?" (its short line)":"")]).join(" → ")+" · about "+sec+" s"+(sec>GD_PAGE_RUN_MAX?": over "+GD_PAGE_RUN_MAX+" s, shorten a page or turn one Off":", under "+GD_PAGE_RUN_MAX+" s")+
+    ". Who's exploring: "+(S.aud.where==="start"?"asked here":S.aud.where==="card"?"asked on the first card, not here":"never asked (Explorer)")+" (Detail Card › 6 · Audiences › Where to ask)."}
+function gdPagesFo(g){var gp=gdGroupPath(g.id),its=g.items.map(function(id){return S.guidance.items[id]}).filter(function(x){return x&&!x.deleted});
+  var body='<div class="note">'+esc("In order, at the app's start, on a first run only; the scheduler is quiet while it runs. Every page can be skipped: Skip skips the rest of the intro (the camera's own request still comes: the app never goes on to the wall without the camera). Later launches: no pages, the Opening message's Welcome back (Overall › Remember across visits Off: every launch is a first). No carousel of benefits, no account, no tutorial of the card before a card exists.")+'</div>'+
+    row("On",pseg(gp+"on",["true","false"],["On","Off"]),"Off: no pages; a first run opens on the wall (the camera's own request still comes first while it is not allowed).")+
+    '<div class="note gdpgrun'+(gdPagesSecs(gdPagesPlan())>GD_PAGE_RUN_MAX?" warn":"")+'" id="gdpgrun">'+esc(gdPagesRunWords())+'</div>'+
+    (G.gd.pgRule?'<div class="note warn gdpgrule" role="status">&#9888; '+esc(G.gd.pgRule)+'. The drag was undone.</div>':"")+
+    '<div class="sub2">Its words · every page\'s Skip and the progress (Languages &amp; Terms, owned here)</div>'+txPanel("gd:g:"+g.id)+
+    '<div class="note">Its pages, in this order (a row: On, the page, ▸ Show now; open it for its form). Drag ≡ to reorder: Hello stays first, Straight to the wall last.</div>'+its.map(gdItemRow).join("");
+  return fo("gd:g:"+g.id,esc(g.name)+' <span class="sub">· the app\'s first run: Hello, Who\'s exploring, the camera, then the wall</span>',null,body,3)}
+/* a custom page's buttons (up to 2): what each does; its words are in the table above */
+function gdPageBtnsHtml(it){var p="guidance.items."+it.id+".",bs=it.buttons||[];
+  return bs.map(function(b,i){return row("Button "+(i+1),pseg(p+"buttons."+i+".act",GD_PAGE_ACTS.map(function(x){return x[0]}),["Next page","Show me how it works"])+(i>0?'<button class="del" type="button" data-gdpgbtndel="'+it.id+'|'+i+'">Remove</button>':""),
+    "What a tap does: the next page, or the next page and How to use the card's bubble on the wall after the pages. Its words are in the table above. The first button is filled, the second outlined; Skip is always there.")}).join("")+
+    (bs.length<2?'<button class="ubtn sm" type="button" data-gdpgbtnadd="'+it.id+'">+ A second button</button>':'<span class="uses">2 buttons: the most (and Skip)</span>')}
+/* a page's row: On, its name, its place and time, ▸ Show now; opened: the Page form */
+function gdPageRow(it){var p="guidance.items."+it.id+".",scr=gdPagesPlan(),i=scr.indexOf(it),wall=it.page==="wall";
+  var sum='<span class="gdi">'+gdDragH(it)+'<span class="gdon">'+pseg(p+"on",["true","false"],["On","Off"])+'</span><b>'+esc(it.label)+'</b><span class="badge gdpgb">'+(wall?"THE WALL":"PAGE")+'</span>'+
+    '<span class="gdhow">'+esc(wall?(it.on?"its short line opens the wall":"Off: the Opening message's own line"):!it.on?"Off: skipped":it.page==="aud"&&S.aud.where!=="start"?"not asked here (Where to ask)":"page "+(i+1)+" of "+scr.length+" · about "+gdPageSecs(it)+" s")+'</span>'+
+    '<button type="button" class="ubtn sm gdshow" data-gdshow="'+it.id+'" title="Show it on the phone now">&#9656; Show now</button></span>';
+  var H=function(t,s){return'<div class="sub2 gdfg">'+t+(s?' <span class="sub">· '+s+'</span>':"")+'</div>'};
+  var body=H("Identity","its name, On and its place")+
+    row("Label",'<input class="u" data-path="'+p+'label" value="'+esc(it.label)+'">',"Editor only: the page's name in these lists, the read-back, the Log and the scenes. The visitor never sees it.")+
+    '<div class="note gdfix">'+esc("Its place: "+(it.page==="hello"?"first (Hello stays first: the visitor's first screen is the guide's hello)":wall?"last (Straight to the wall stays last: the run ends on the wall)":"between Hello and Straight to the wall: drag ≡ to move it")+".")+'</div>'+
+    H("Words",it.page==="aud"?"the first card's own screen":"its title, line and buttons, in each language (Languages &amp; Terms, owned here)")+
+    (it.page==="aud"?'<div class="note">Its words are Who\'s exploring\'s own (Detail Card › 6 · Audiences › Who\'s exploring): the same screen, one home, no copy.</div>':txPanel("gd:i:"+it.id))+
+    H("Show","how it looks on the phone")+
+    '<div class="note gdfix">'+esc((wall?"Form: the wall itself (no screen). ":"Form: Page (a title, a line, up to 2 buttons and Skip; fixed for the first pages). ")+gdPageLook(it)+".")+'</div>'+
+    (it.page==="hello"||it.page==="custom"?row("Azu",pseg(p+"azu",GD_PAGE_AZU.map(function(x){return x[0]}),GD_PAGE_AZU.map(function(x){return x[1]})),"How Azu comes on the page: it forms from a tile and waves (the Rive file's states in the app: form, then wave), it simply appears, or it is not shown. Reduce Motion: it appears (no tile, no wave). Mascot Off (Guide › Mascot): no Azu.")+
+      row("Language chip",pseg(p+"langChip",["true","false"],["Shown","Hidden"]),"EN / PT at the top of the page: a tap switches the app's language at once (the same as the visitor's Settings › Language)."):"")+
+    (it.page==="custom"?gdPageBtnsHtml(it):"")+
+    (it.page==="hello"?'<div class="note gdfix">'+esc("Its buttons: “"+TXT("gd_pg_go")+"” (the next page) and “"+TXT("gd_pg_how")+"” (the next page, and after the pages How to use the card's bubble on the wall, which says the visit's first words). Fixed for Hello.")+'</div>':"")+
+    (it.page==="camera"?'<div class="note gdfix">'+esc("After “"+TXT("gd_pg_cam_allow")+"” the phone's own request comes (a stand-in in the Lab: Allow / Don't Allow), with this page's request line. Refused: the page says how to allow it, with Open Settings (the phone's Settings for the app) and Try again (it asks again); no Skip there: the app never goes on to the wall without the camera. Skip on the page itself goes straight to the request. Unity: Application.RequestUserAuthorization(UserAuthorization.WebCam) on iOS, Permission.RequestUserPermission(Permission.Camera) on Android.")+'</div>':"")+
+    H("When","fixed for a page")+
+    '<div class="note gdfix">'+esc("At the app's start, on a first run only: "+gdPageWhen(it)+". Later launches: no pages, the Opening message's Welcome back. Overall › Remember across visits Off: every launch is a first.")+'</div>'+
+    (it.page==="aud"?row("Where to ask",'<button class="ubtn sm" type="button" data-gdwhere="1">'+esc(gdNameOf(AUD_WHERE,S.aud.where))+' · open it in 6 · Audiences &#8250;</button>',"Who's exploring is asked here only when Detail Card › 6 · Audiences › Where to ask is At the app's start; On the first card, the card's own screen asks there; Never: neither asks."):"")+
+    '<div class="note gdrb">'+esc(gdReadBack(it))+'</div>'+
+    (it.page==="custom"?'<div class="btnrow gdacts"><button class="ubtn sm" type="button" data-gddup="'+it.id+'">Duplicate</button><button class="ubtn sm" type="button" data-gddel="'+it.id+'">Delete</button></div>':"");
+  return fo("gd:i:"+it.id,sum,null,body,4)}
+/* the visitor's first pages, in words (Preview & Test › The visitor) */
+function gdPagesSeenWords(){var P=G.gd.pages,n=gdPageNow(),pg=S.gdVisitor.pages;
+  if(P&&n)return"The first pages: "+(P.preview?"a page shown by the Editor":"running now")+", "+(n.it?n.it.label:"?")+" ("+(P.i+1)+" of "+P.run.length+(P.cam?", the camera "+P.cam:"")+")";
+  return pg?"The first pages: seen at visit "+pg.visit+(pg.earlier?" (an earlier launch, before the Lab opened)":"")+(pg.skipped?", skipped":"")+(pg.how?", with Show me how it works":"")+"; the camera "+G.gd.camPerm:"The first pages: not seen yet (Start the app shows them); the camera "+G.gd.camPerm}
+/* while a drag would break the order's ends, the drop line says why */
+function gdDragWhy(d){var it=S.guidance.items[d.id],g=it&&gdGroupOf(it);if(!g||!g.launch)return"";var ids=d.rows.map(function(r){return r.dataset.fo.slice(5)}),mv=ids.splice(d.from,1)[0];ids.splice(d.to,0,mv);return gdPagesRule(ids)}
+/* ----- the demos: a page on the phone with its value; the group's On: the run's first page; Start the app: the run ----- */
+function gdDemoPagesOn(){var my=gdDemoBegin(),g=gdGroupById("pages");
+  if(g.on===false){gdOnWallNow();gdChip("First pages Off: a first run opens on the wall (the camera's request first)");gdDemoEnd(my,3200);return}
+  var f=gdPagesPlan()[0];if(f)gdPagesPreview(f.id);gdChip("First pages On: a first run starts here");gdDemoEnd(my,2800)}
+function gdDemoPage(id,f){var my=gdDemoBegin(),it=S.guidance.items[id];if(!it)return;
+  if(it.page==="wall"){gdOnWallNow();var op=gdItemNow("opening");if(op)gdStart(op,"the Editor's demo",{pull:true,text:it.on&&gdHasWords(it.says)?TXT(it.says):gdLine(op,false,{}),ms:6000});
+    gdChip(it.on?"Straight to the wall: the Opening message's short line, then Tap a marker":"Straight to the wall Off: the Opening message says its own line");gdDemoEnd(my,4200);return}
+  if(!it.on){gdOnWallNow();gdChip("Off: the first run skips "+it.label);gdDemoEnd(my,3000);return}
+  gdPagesPreview(id);var b=/^buttons\.(\d)/.exec(f||""),bt=b&&(it.buttons||[])[+b[1]];
+  var ch=f==="azu"?"Azu: "+gdNameOf(GD_PAGE_AZU,it.azu)+(S.reduce&&it.azu==="form"?" (Reduce Motion: it appears)":!gdAzuOn()?" (Mascot Off: no Azu)":""):f==="langChip"?"The language chip: "+(it.langChip?"shown":"hidden"):bt?"Button "+(+b[1]+1)+": "+gdNameOf(GD_PAGE_ACTS,bt.act).split(" (")[0]:
+    it.page==="aud"&&S.aud.where!=="start"?"Who's exploring: not asked here now (Where to ask: "+gdNameOf(AUD_WHERE,S.aud.where)+")":it.label+" · "+(G.gd.pages?"page "+(G.gd.pages.i+1)+" of "+G.gd.pages.run.length:"");
+  gdChip(ch);gdDemoEnd(my,3000)}
+on("rowDemo.spec",function(key){var m=/^guidance\.items\.([^.]+)\.(on|azu|langChip|buttons\.\d+\.act)$/.exec(key);if(!m)return;var d=S.guidance.items[m[1]];if(!d||d.form!=="page")return;
+  var id=m[1],f=m[2];return{wall:true,wait:0,act:function(){gdDemoPage(id,f)},ringAfter:400,ring:d.page==="wall"?".gdbub|.gdchip":".gdpages|.gdchip"}});
+rowDemos({"ui.gdLaunch":{wall:true,wait:0,act:function(){var k=S.ui.gdLaunch||"first";gdLaunch(k);if(!G.gd.pages){gdChip(k==="later"?"A later launch: no pages; the Opening message says Welcome back":"No page to show: the wall");setTimeout(function(){if(!G.gd.pages)gdChip(null)},3500)}},ringAfter:450,ring:".gdpages|.gdbub|.gdchip"}});
+/* ----- 0 · Preview & Test › Start the app, and the visitor's first pages ----- */
+on("edGuide.html",function(h){var d=document.createElement("div");d.innerHTML=h;var v=d.querySelector('[data-fo="gt0"] [data-gdvisit]'),r=v&&v.closest(".row");if(!r)return h;
+  r.insertAdjacentHTML("beforebegin",row("Start the app",pseg("ui.gdLaunch",["first","later"],["▸ A first run","▸ A later launch"]),"Plays the app's start on the phone, as the preview bar's Start the app and Later launch do. A first run: the visitor reset to a first visit (as Reset the visitor), the audience not yet asked, the camera not yet allowed: the first pages from Hello, then the wall. A later launch: the same visitor opens the app again: no pages, the Opening message's Welcome back (with Remember across visits Off every launch is a first: the pages again). A press plays it again.")+
+    '<div class="note gdwhy" id="gdpgseen">'+esc(gdPagesSeenWords())+'</div>');return d.innerHTML});
+on("gdLog.after",function(){var n=ed.querySelector("#gdpgseen");if(n)n.textContent=gdPagesSeenWords()});
+/* ----- the preview bar: Start the app (a first run) and Later launch ----- */
+on("ptool.html",function(h){return h+'<button type="button" class="gdlaunch" data-gdlaunch="first" title="'+TXH("pbar_tip_start")+'">&#9656; '+TXH("pbar_start")+'</button><button type="button" class="gdlaunch" data-gdlaunch="later" title="'+TXH("pbar_tip_later")+'">'+TXH("pbar_later")+'</button>'});
+document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-gdlaunch]");if(!b)return;e.stopPropagation();e.preventDefault();G.demoSeq=(G.demoSeq||0)+1;gdLaunch(b.dataset.gdlaunch)},true);
+/* ----- the page form's own buttons: a custom page's second button, Where to ask's link ----- */
+ed.addEventListener("click",function(e){var t=e.target,q;
+  var ba=t.closest("[data-gdpgbtnadd]");if(ba){e.stopPropagation();var it=S.guidance.items[ba.dataset.gdpgbtnadd];if(!it||(it.buttons||[]).length>=2)return;it.buttons=(it.buttons||[]).concat([{word:gdNewWord("gd:i:"+it.id,"Button "+((it.buttons||[]).length+1),"Show me how it works","Mostre-me como funciona"),act:"how"}]);renderAll(true);showRowDemo("guidance.items."+it.id+".buttons."+(it.buttons.length-1)+".act");return}
+  var bd=t.closest("[data-gdpgbtndel]");if(bd){e.stopPropagation();q=bd.dataset.gdpgbtndel.split("|");var c=S.guidance.items[q[0]];if(c&&c.buttons)c.buttons.splice(+q[1],1);renderAll(true);return}
+  var wh=t.closest("[data-gdwhere]");if(wh){e.stopPropagation();S.tab="card";S.op.s8=true;S.op.s8onb=true;renderEditor();var f=ed.querySelector('[data-fo="s8onb"]');if(f)f.scrollIntoView({block:"center"});return}},true);

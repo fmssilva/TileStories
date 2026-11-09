@@ -86,3 +86,73 @@
 .gm-tip{font:500 14px/1.35 var(--body);padding:4px 0;color:#F4F1EA}
 .gm-tip+.gm-tip{border-top:1px solid rgba(244,241,234,.12)}
 .reduce .gdglint i,.reduce .gdfinger,.reduce .gdripple{animation:none!important}
+/* round 8: the first pages. One opaque screen of the app's paper over the wall (no blur); the progress bars and Hello's language chip at
+   the top; one focal point in the middle (Azu, the camera's mark); the buttons and Skip at the foot, in the thumb's reach. Colours are
+   the card's tokens, set light and dark (no runtime mixing): Unity USS variables in the two theme style sheets. The phone's request and
+   its Settings are stand-ins drawn as the system's (Unity: the platform's own UI, never drawn by the app) */
+.gdpages{position:absolute;inset:0;z-index:19;display:flex;flex-direction:column;background:var(--paper);color:var(--ink1);--pgtint:#E5ECF6;--pgedge:rgba(26,24,20,.34);--pgdot:rgba(26,24,20,.16)}
+.cv.dark .gdpages{--pgtint:#1C2433;--pgedge:rgba(241,238,232,.4);--pgdot:rgba(241,238,232,.2)}
+.gdpages:focus,.gdpg-alert:focus,.gdpg-set:focus{outline:none}
+.gdpages.gd-out{opacity:0;transition:opacity .2s ease;pointer-events:none}
+.gdpg-top{position:relative;z-index:32;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;margin:50px 20px 0}
+.gdpg-dots{display:flex;gap:6px;align-items:center}
+.gdpg-dots i{display:block;width:16px;height:4px;border-radius:2px;background:var(--pgdot)}
+.gdpg-dots i.done{background:var(--ink2)}
+.gdpg-dots i.on{width:28px;background:var(--accent2)}
+.gdpg-lang{display:flex;border:1.5px solid var(--pgedge);border-radius:999px;padding:2px}
+.gdpg-lang button{appearance:none;border:0;background:none;color:var(--ink1);font:700 14px/1 var(--body);letter-spacing:.04em;min-width:52px;min-height:44px;border-radius:999px;cursor:pointer}
+.gdpg-lang button[aria-pressed="true"]{background:var(--ink1);color:var(--paper)}
+.gdpg-body{flex:1;min-height:0;display:flex;flex-direction:column;padding:0 24px 30px}
+.gdpg-mid{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding-bottom:12px}
+.gdpg-t{font:600 40px/1.06 var(--display);letter-spacing:-.01em;margin:0 0 12px;color:var(--ink1);text-wrap:balance}
+.gdpg-l{font:400 19px/1.42 var(--body);color:var(--ink2);margin:0;max-width:310px;text-wrap:balance}
+.gdpages[data-page="camera"] .gdpg-t{font-size:32px}
+.gdpg-foot{display:flex;flex-direction:column;gap:10px}
+.gdpg-b{appearance:none;width:100%;min-height:54px;border-radius:16px;font:700 17px/1.2 var(--body);padding:12px 18px;cursor:pointer;border:1.5px solid transparent}
+.gdpg-pri{background:var(--accent2);color:var(--paper)}
+.gdpg-sec{background:transparent;color:var(--ink1);border-color:var(--pgedge)}
+.gdpg-b:active{transform:scale(.985)}
+.gdpg-skip{appearance:none;align-self:center;border:0;background:none;color:var(--ink1);font:600 15px/1 var(--body);min-height:44px;min-width:88px;padding:0 16px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+/* Hello's Azu: the tile it forms from, and Azu (still: no tile) */
+.gdpg-art{position:relative;width:150px;height:150px;margin-bottom:22px}
+.gdpg-tile{position:absolute;inset:18px;color:var(--accent2);border-radius:20px;overflow:hidden;background:var(--paper);box-shadow:0 0 0 1.5px var(--pgedge)}
+.gdpg-tile svg{display:block;width:100%;height:100%}
+.gdpg-art.gd-formed .gdpg-tile,.gdpg-art[data-azu="still"] .gdpg-tile,.gdpg-art[data-azu="appear"] .gdpg-tile{opacity:0}
+.gdpg-azu{position:absolute;inset:0;display:grid;place-items:center;transform-origin:50% 90%}
+.gdpg-azu img,.gdpg-azu svg{display:block;width:142px;height:142px;object-fit:contain}
+/* the camera's mark: the camera in a soft tile of the accent; refused: crossed, in the second ink */
+.gdpg-cam{width:116px;height:116px;border-radius:30px;background:var(--pgtint);display:grid;place-items:center;margin-bottom:28px}
+.gdpg-cam svg{width:58px;height:58px;fill:none;stroke:var(--accent2);stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round}
+.gdpg-cam.off{background:var(--box)}.gdpg-cam.off svg{stroke:var(--ink2)}
+/* the Who's exploring page: the audiences' own screen in the layer, under the progress */
+.gdpg-stage{position:absolute;inset:0}
+.gdpg-stage .onb{animation:none}
+.gdpages:not(.gd-still) .gdpg-stage .onb-in{animation:gdpgin .32s cubic-bezier(.2,.8,.2,1)}
+@keyframes gdpgin{from{opacity:0;translate:0 18px}}
+/* the phone's own request (a stand-in): the dim, the system's alert, Allow / Don't Allow; and its Settings (a stand-in) */
+.gdpg-sys{position:absolute;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.gdpg-scrim{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.gdpg-alert{position:relative;width:270px;border-radius:14px;overflow:hidden;background:#F2F2F2;color:#000;text-align:center;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.gdpg-alert b{display:block;font-size:17px;line-height:1.3;font-weight:600;padding:19px 16px 3px}
+.gdpg-alert p{font-size:13px;line-height:1.38;margin:0;padding:0 16px 19px}
+.gdpg-abtn{display:flex;border-top:1px solid rgba(60,60,67,.29)}
+.gdpg-abtn button{flex:1;min-height:44px;appearance:none;border:0;background:none;color:#0A58C2;font:400 17px/1.2 system-ui,-apple-system,"Segoe UI",sans-serif;cursor:pointer}
+.gdpg-abtn button+button{border-left:1px solid rgba(60,60,67,.29);font-weight:600}
+.cv.dark .gdpg-alert{background:#2C2C2E;color:#fff}.cv.dark .gdpg-abtn{border-color:rgba(84,84,88,.65)}.cv.dark .gdpg-abtn button{color:#5AA9FF}.cv.dark .gdpg-abtn button+button{border-color:rgba(84,84,88,.65)}
+.gdpg-standin{position:relative;background:#16181C;color:#F4F1EA;font:700 12px/1.2 var(--body);padding:8px 12px;border-radius:999px;max-width:300px;text-align:center}
+.gdpg-set{position:absolute;inset:0;z-index:40;display:flex;flex-direction:column;background:#F2F2F7;color:#000;padding:50px 16px 0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.cv.dark .gdpg-set{background:#000;color:#fff}
+.gdpg-setback{appearance:none;align-self:flex-start;border:0;background:none;color:#0A58C2;font:400 17px/1 system-ui,-apple-system,"Segoe UI",sans-serif;min-height:44px;padding:0 8px 0 0;cursor:pointer}
+.cv.dark .gdpg-setback{color:#5AA9FF}
+.gdpg-setback span{font-size:28px;line-height:0;vertical-align:-3px;margin-right:2px}
+.gdpg-set h3{font-size:32px;line-height:1.1;font-weight:700;margin:6px 0 22px}
+.gdpg-set small{font-size:13px;text-transform:uppercase;letter-spacing:.02em;color:#56565C;margin:0 0 6px 16px}
+.cv.dark .gdpg-set small{color:#A1A1A8}
+.gdpg-setrow{display:flex;align-items:center;justify-content:space-between;min-height:52px;padding:0 6px 0 16px;border-radius:12px;background:#fff;font-size:17px}
+.cv.dark .gdpg-setrow{background:#1C1C1E}
+.gdpg-sw{appearance:none;border:0;background:none;width:64px;height:44px;display:grid;place-items:center;cursor:pointer;padding:0}
+.gdpg-sw i{position:relative;display:block;width:51px;height:31px;border-radius:999px;background:#787880;transition:background .2s}
+.gdpg-sw i::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;transition:translate .2s}
+.gdpg-sw[aria-checked="true"] i{background:#248A3D}.gdpg-sw[aria-checked="true"] i::after{translate:20px 0}
+.gdpg-set .gdpg-standin{align-self:center;margin-top:auto;margin-bottom:28px}
+.reduce .gdpg-sw i,.reduce .gdpg-sw i::after{transition:none}

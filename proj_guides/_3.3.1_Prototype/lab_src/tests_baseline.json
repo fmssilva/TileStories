@@ -4,7 +4,7 @@
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 68
+  "s": 73
  },
  "test8g.js": {
   "pass": 24,
@@ -46,7 +46,7 @@
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 67
+  "s": 61
  },
  "test8m.js": {
   "pass": 19,
@@ -179,7 +179,7 @@
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 265
+  "s": 324
  },
  "test9f.js": {
   "pass": 61,
@@ -207,7 +207,7 @@
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 104
+  "s": 121
  },
  "test9j.js": {
   "pass": 52,
@@ -222,5 +222,12 @@
   "failed": [],
   "crashed": "",
   "s": 138
+ },
+ "test9l.js": {
+  "pass": 48,
+  "fail": 0,
+  "failed": [],
+  "crashed": "",
+  "s": 98
  }
 }

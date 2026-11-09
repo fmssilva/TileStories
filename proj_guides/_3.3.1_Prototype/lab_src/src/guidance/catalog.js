@@ -28,7 +28,10 @@ S.guidance={on:true,breathing:15,cueRoom:5,perMinute:2,perVisit:30,freshTau:120,
       /* the card's Hints (round 4): one Cue a hint, motion on its element, no mascot; their moments and looks as before (card/hints.js) */
       {id:"card",name:"The card (cues)",mode:"all",on:true,weight:1,cap:0,gap:0,items:["nudge","label","navbar","ba","strip","term"]},
       /* How to use the card: a Walkthrough, In order, pulled only (Settings, the ✦ menu's How does this work?): never scheduled, never capped */
-      {id:"howto",name:"How to use the card",mode:"order",pulled:true,on:true,inSettings:true,inMenu:true,items:["wk_grab","wk_settings","wk_bar","wk_locate","wk_block"]}]},
+      {id:"howto",name:"How to use the card",mode:"order",pulled:true,seq:true,on:true,inSettings:true,inMenu:true,items:["wk_grab","wk_settings","wk_bar","wk_locate","wk_block"]},
+      /* round 8: the first pages (_3.8 section 6): In order, form Page, at the app's start (launch: never the scheduler's; it is quiet while they
+         run); shown in the Editor's Sequences beside How to use the card (seq) */
+      {id:"pages",name:"First pages",mode:"order",launch:true,seq:true,on:true,items:["pg_hello","pg_aud","pg_camera","pg_wall"]}]},
     {id:"content",name:"Content",spoken:"heard",on:true,cap:12,gap:60,groups:[
       {id:"inview",name:"What's in view",mode:"all",on:true,weight:1,cap:12,gap:7,items:["inview"]},
       {id:"tours",name:"Tours",mode:"all",on:true,weight:1,cap:0,gap:0,items:["tourof"]}]},
@@ -111,6 +114,18 @@ S.guidance={on:true,breathing:15,cueRoom:5,perMinute:2,perVisit:30,freshTau:120,
     wk_bar:{id:"wk_bar",label:"The Navigation Bar",on:true,kind:"app",group:"howto",form:"walk",says:"how_bar",ref:"sec:stories",sel:"#navbar"},
     wk_locate:{id:"wk_locate",label:"The Locate Button",on:true,kind:"app",group:"howto",form:"walk",says:"how_locate",ref:"sec:stories",sel:".locpin"},
     wk_block:{id:"wk_block",label:"A block and its page",on:true,kind:"app",group:"howto",form:"walk",says:"how_block",ref:"b:b_story",sel:null},
+    /* ----- round 8, App › First pages (_3.8 section 6): the app's first run, in order, form Page (a title, a line, up to 2 buttons, and Skip),
+       under 30 s. Hello (Azu forms from a tile and waves; the language as a chip; Let's go, Show me how it works); Who's exploring (the
+       audiences' own screen, reused: only when Detail Card › 6 · Audiences › Where to ask = At the app's start); The camera (asked when
+       needed: its line, Allow the camera, then the phone's own request; refused: how to allow it, Open Settings, Try again: never the wall
+       without the camera); Straight to the wall (no screen: the Opening message says its short line, then Tap a marker as the start's).
+       Skip on any page skips the rest of the intro (the camera's own request still comes). Later launches: no pages, Welcome back ----- */
+    pg_hello:{id:"pg_hello",label:"Hello",on:true,kind:"app",group:"pages",form:"page",page:"hello",title:"gd_pg_hello_t",says:"gd_pg_hello",
+      buttons:[{word:"gd_pg_go",act:"next"},{word:"gd_pg_how",act:"how"}],langChip:true,azu:"form"},
+    pg_aud:{id:"pg_aud",label:"Who's exploring",on:true,kind:"app",group:"pages",form:"page",page:"aud",title:"",says:"",buttons:[]},
+    pg_camera:{id:"pg_camera",label:"The camera",on:true,kind:"app",group:"pages",form:"page",page:"camera",title:"gd_pg_cam_t",says:"gd_pg_cam",
+      buttons:[{word:"gd_pg_cam_allow",act:"camera"}],usage:"gd_pg_cam_usage",offTitle:"gd_pg_off_t",offSays:"gd_pg_off",offSettings:"gd_pg_settings",offRetry:"gd_pg_retry"},
+    pg_wall:{id:"pg_wall",label:"Straight to the wall",on:true,kind:"app",group:"pages",form:"page",page:"wall",title:"",says:"gd_pg_wall",buttons:[]},
     /* ----- round 7, Fun › Moments: form Moment (Azu walks to the middle with its prop and asks for one tap: the look of mascot/azu2d.js, as
        before), between two steps of a tour as it moves on (it holds the next step until a tap or 8 s), Lively only; once a card, the group
        5 min apart. The water break after n s of the tour's narration (it was Guide › Mascot › Water break after); the cookie before the
@@ -249,7 +264,7 @@ var GD_CURVE={kind:[1,1,1],early:[1,1,0],late:[0,0,1]};
 function gdCurve(p,s){s=Math.max(0,Math.min(1,+s||0));return s<=0.3?p[0]+(p[1]-p[0])*s/0.3:p[1]+(p[2]-p[1])*(s-0.3)/0.7}
 /* the items in the Editor's order (kind, group, item), each a copy with its group's and kind's values (the scheduler reads only its
    arguments): the scheduler's input, its tie-break and an In order group's sequence */
-function gdItems(defs){var out=[];S.guidance.kinds.forEach(function(k){k.groups.forEach(function(g){if(g.pulled&&!defs)return;g.items.forEach(function(id){var it=S.guidance.items[id];if(!it)return;
+function gdItems(defs){var out=[];S.guidance.kinds.forEach(function(k){k.groups.forEach(function(g){if((g.pulled||g.launch)&&!defs)return;g.items.forEach(function(id){var it=S.guidance.items[id];if(!it)return;
   /* a pulled group (How to use the card) is never the scheduler's: only the Editor's list (defs) holds its steps */
   var o=Object.assign({},it,{groupMode:g.mode,groupName:g.name,groupOn:g.on!==false,groupPulled:!!g.pulled,groupWeight:g.weight==null?1:+g.weight,groupCap:+g.cap||0,groupGap:+g.gap||0,kindName:k.name,kindOn:k.on!==false,kindCap:gdLimitNow(k.cap),kindGap:+k.gap||0,kindSpoken:k.spoken,kindMix:gdMix(k.id),kindSolemnOff:k.solemnOff===true});
   /* a per-point item: one for each point of the wall in view, its id and label naming the point, each with its own memory */
@@ -274,6 +289,8 @@ function gdGroupById(id){var g=null;S.guidance.kinds.forEach(function(k){k.group
 function gdLineKey(it,returning,slots){slots=slots||{};var a=slots.aud!==undefined?slots.aud:typeof aud==="function"?aud():"",ak=it.saysAud&&it.saysAud[a];
   if(it.seasons){var sv=gdSeasonOf(it,slots.today||gdTodayMD());return sv?sv.says:""}
   if(it.ptJokes){var js=slots.jokes||it.jokes||gdPtJokes(it.point);return js.length?js[(+slots.n||0)%js.length]:""}
+  /* round 8: right after the first pages the visit's first words are Straight to the wall's short line (slots.pagesLine: the page's Says) */
+  if(slots.pagesLine&&!returning&&gdHasWords(slots.pagesLine))return slots.pagesLine;
   /* round 6: the returning visitor's line, else the audience's own line (when it has words), else Says (its variants in turn) */
   var k=returning&&it.saysBack&&gdHasWords(it.saysBack)?it.saysBack:ak&&gdHasWords(ak)?ak:it.says;
   if(Array.isArray(k)){if(slots.card&&it.saysCard&&it.cardLine!==false)k=it.saysCard;else if(it.pick==="least"&&k.length){var sn=slots.seen||{},best=null;k.forEach(function(x){var c=+(sn[x]||0);if(!best||c<best.c)best={k:x,c:c}});k=best.k}else k=k[(+slots.n||0)%k.length]}
@@ -284,7 +301,7 @@ function gdLine(it,returning,slots){slots=slots||{};var k=gdLineKey(it,returning
 function gdHasWords(k){var o=S.tx[k];return!!(o&&String(L(o)||"").trim())}
 /* the read-back of an item, in words (study 3.2): "Tap a marker · App › The start · when a marker is in view and the phone is still ·
    at most about every 25 s, up to 3 times a visit, until the visitor opens a card." */
-function gdHowOften(it){var n=+it.max,ag=+it.again;if(it.form==="walk")return"pulled only: never on its own";
+function gdHowOften(it){var n=+it.max,ag=+it.again;if(it.form==="walk")return"pulled only: never on its own";if(it.form==="page")return"at the app's start, a first run only";
   var s=it.shows==="once"?"once ever":it.shows==="visit"?"once a visit":it.shows==="card"?"once on each card":it.shows==="upto"?"up to "+n+(n===1?" time":" times")+" a visit":it.shows==="until"?"up to "+n+(n===1?" time":" times")+" a visit":"every time";
   if(ag>0&&it.shows!=="once"&&it.shows!=="visit")s="at most about every "+ag+" s, "+s;
   /* round 7: a joke every n pokes (and rarely once at a pause late) */
@@ -316,7 +333,7 @@ function gdCueReadBack(it){var g=gdGroupOf(it),r=+S.guidance.cueRoom||0;
 function gdStepReadBack(it){var g=gdGroupOf(it),on=g?g.items.filter(function(id){return S.guidance.items[id].on}):[],i=on.indexOf(it.id),ret=gdDefs().filter(function(x){return x.form==="cue"&&x.doneWhen===it.id}).map(function(x){return x.label});
   return it.label+" · App › How to use the card · "+(it.on?"step "+(i+1)+" of "+on.length:"Off: skipped")+" · pulled only (Settings, the ✦ menu's How does this work?): never scheduled, never capped · "+(it.sel?"it marks "+it.label.replace(/^The /,"the "):"it opens a block's page")+
     " · seen (its line heard): "+(ret.length?"the "+ret.join(", the ")+" is done for good":"nothing to retire")+"."}
-function gdReadBack(it){if(it.form==="cue")return gdCueReadBack(it)+gdGestureWords(it);if(it.form==="walk")return gdStepReadBack(it);var g=gdGroupOf(it),k=gdKindOf(it),w=[];
+function gdReadBack(it){if(it.form==="cue")return gdCueReadBack(it)+gdGestureWords(it);if(it.form==="walk")return gdStepReadBack(it);if(it.form==="page")return gdPageReadBack(it);var g=gdGroupOf(it),k=gdKindOf(it),w=[];
   if(it.when==="visit")w.push("once the visit has started");else if(it.when==="between")w.push(gdBetweenWords(it));else if(it.when==="event")w.push("within "+GD_EVENT_MS/1000+" s after "+(GD_EVENTS[it.event]||it.event));
   else if(it.when==="idle"&&!(+it.idleFor>0))w.push("after "+gdIdleOf(it)+" s idle");else if(it.when==="settle"&&it.about!=="point")w.push("when its target settles in the middle");else if(it.when!=="settle")w.push("at a pause");
   if(GD_ABOUT[it.about])w.push(GD_ABOUT[it.about]+(it.mustSee===false?" (or without it)":""));if(+it.stillFor>0)w.push("the phone still "+it.stillFor+" s");
@@ -363,8 +380,13 @@ var GD_GESTURE_WORDS={tap:"a tap",drag:"a drag across",swipe:"a swipe"};
 var GD_TIP_DEF={dim:0.4,gesture:false,button:"none",event:"card",pokes:0,idleFor:0,aud:"",visitIs:"",hasUsed:"",notUsed:"",lively:false,notSolemn:false,notAfter:0,prop:"water",talkFor:0,beforeEnd:false,latePause:0,pick:"turn",
   afterDismiss:"wait",expires:"target",onScreen:"auto",onScreenS:6,mustSee:true,spoken:"kind",points:false,focus:"none",goes:"stays",tap:"close",form:"tip",when:"pause",screen:"wall",stillFor:0,afterPrev:0,notBefore:0,
   importance:3,essential:false,shows:"visit",max:1,again:0,doneWhen:"",teaches:"",duringTour:"never",along:"kind",about:"nothing",saysBack:""};
-function gdIsTip(it){return!!it&&it.form!=="cue"&&it.form!=="walk"}
+/* round 8: a page's own fields (the Page form): its kind (hello, aud, camera, wall, or a custom page), its title and line, up to 2 buttons
+   ({word, act}: next / how), the language chip, Azu (forms from a tile and waves / appears / none) */
+var GD_PAGE_DEF={page:"custom",title:"",says:"",buttons:[],langChip:false,azu:"none"};
+function gdIsTip(it){return!!it&&it.form!=="cue"&&it.form!=="walk"&&it.form!=="page"}
 function gdFill(it){if(it.form==="cue"){if(GD_GESTURE[it.about]&&it.gesture==null)it.gesture=true;return it}if(it.form==="walk"){if(it.focus==null)it.focus="tour";return it}
+  /* round 8: a page keeps its own fields (GD_PAGE_DEF), never a tip's */
+  if(it.form==="page"){Object.keys(GD_PAGE_DEF).forEach(function(k){if(it[k]===undefined)it[k]=JSON.parse(JSON.stringify(GD_PAGE_DEF[k]))});return it}
   Object.keys(GD_TIP_DEF).forEach(function(k){if(it[k]===undefined)it[k]=GD_TIP_DEF[k]});if(!it.saysAud)it.saysAud={};return it}
 Object.keys(S.guidance.items).forEach(function(id){gdFill(S.guidance.items[id])});
 /* Spotlight is kept for Essential items and walkthrough steps (or it loses its force), and needs a target to cut out */
@@ -407,4 +429,40 @@ var GD_TEMPLATES=[
   {id:"tour",name:"Offer a tour",f:{label:"New tour offer for {point}",form:"invitation",about:"middle",goes:"beside",points:true,tap:"tour",button:"tour",stillFor:1.2,importance:3,shows:"visit",doneWhen:"tour",teaches:"tour",along:"late"},en:"{point} has a story. Shall I tell it?",pt:"{point} tem uma história. Conto-lha?"},
   {id:"moment",name:"Moment",f:{label:"New moment",form:"moment",prop:"water",tap:"prop",about:"nothing",mustSee:false,when:"between",talkFor:90,screen:"any",duringTour:"between",lively:true,notSolemn:true,importance:2,shows:"card",along:"steady"},en:"Arms tired? Lower the phone, I'll wait.",pt:"Braços cansados? Baixe o telemóvel, eu espero."},
   {id:"step",name:"Step of a sequence",f:{label:"New step",about:"marker",goes:"beside",points:true,focus:"ring",gesture:true,stillFor:1.2,afterPrev:20,importance:3,shows:"until",max:2,again:30,doneWhen:"card",teaches:"card"},en:"Now tap the glowing marker.",pt:"Agora toque no marcador aceso."},
-  {id:"blank",name:"Blank",f:{label:"New item"},en:"",pt:""}];
+  {id:"blank",name:"Blank",f:{label:"New item"},en:"",pt:""},
+  /* round 8: a page of the first pages (offered only there): a title, a line, one button (Next; a second one can be added) */
+  {id:"page",name:"Page",page:true,f:{label:"New page",form:"page",page:"custom",azu:"none"},en:"A short line under the title.",pt:"Uma linha curta sob o título.",
+    title:{en:"A new page",pt:"Uma página nova"},btn:{en:"Next",pt:"Seguinte"}}];
+/* ----- round 8, the first pages (_3.8 section 6) as data: the kinds of page, a button's actions, Azu on a page, the order's fixed ends, the
+   reading time of a page and of the run (under 30 s), a page's read-back. Unity: the same group in GuidanceCatalog (its pages
+   GuidanceItems of the Page form), read by an OnboardingController that draws each page as a UI Toolkit screen ----- */
+var GD_PAGE_KINDS={hello:"Hello",aud:"Who's exploring",camera:"The camera",wall:"Straight to the wall",custom:"A page"};
+var GD_PAGE_ACTS=[["next","Next page"],["how","Next, and How to use the card on the wall after the pages"]];
+var GD_PAGE_AZU=[["form","Forms from a tile and waves"],["appear","Appears"],["none","None"]];
+var GD_PAGE_RUN_MAX=30;
+/* the pages in the group's order (a deleted one out) */
+function gdPageDefs(){var g=gdGroupById("pages");return g?g.items.map(function(id){return S.guidance.items[id]}).filter(function(x){return x&&!x.deleted}):[]}
+function gdPageOf(kind){return gdPageDefs().filter(function(x){return x.page===kind})[0]||null}
+/* the order's two fixed ends: Hello first, Straight to the wall last ("" when the order keeps them) */
+function gdPagesRule(ids){var k=ids.map(function(id){return(S.guidance.items[id]||{}).page}),h=k.indexOf("hello"),w=k.indexOf("wall");
+  if(h>0)return"Hello stays first: the visitor's first screen is the guide's hello, before any question";
+  if(w>=0&&w!==k.length-1)return"Straight to the wall stays last: the run ends on the wall, with the Opening message";return""}
+/* a page's words (in the visitor's language) and its time: its words read at 4 a second, and 1.5 s to act; Who's exploring 5 s (three
+   choices); the camera's own request 3 s more; the wall none (it is the wall itself) */
+function gdPageWordsOf(it){return[it.title,it.says].concat((it.buttons||[]).map(function(b){return b.word})).filter(function(k){return k&&S.tx[k]}).map(function(k){return TXT(k)}).join(" ")}
+function gdPageSecs(it){if(it.page==="wall")return 0;if(it.page==="aud")return 5;var n=gdPageWordsOf(it).split(/\s+/).filter(Boolean).length;return Math.round((n/4+1.5+(it.page==="camera"?3:0))*10)/10}
+/* the screens of a first run now (its On pages, Who's exploring only when asked here; the camera, as on a new install), the wall aside */
+function gdPagesPlan(){var g=gdGroupById("pages");if(!g||g.on===false)return[];return gdPageDefs().filter(function(it){return it.on&&it.page!=="wall"&&(it.page!=="aud"||S.aud.where==="start")})}
+function gdPagesSecs(list){return Math.round((list||gdPageDefs().filter(function(x){return x.on})).reduce(function(a,x){return a+gdPageSecs(x)},0))}
+/* when a page is in the run, in words */
+function gdPageWhen(it){return it.page==="hello"?"first":it.page==="aud"?"only when Detail Card › 6 · Audiences › Where to ask is At the app's start (now: "+gdNameOf(AUD_WHERE,S.aud.where)+")":
+  it.page==="camera"?"only while the camera is not yet allowed (the phone's own permission)":it.page==="wall"?"last: the run ends on the wall":"in its place in the order"}
+function gdPageLook(it){if(it.page==="aud")return"The first card's own screen, reused (Family, Explorer, Expert; its Skip = Explorer): it sets the audience, and with it the guidance preset";
+  if(it.page==="wall")return"No screen: the Opening message says this short line on the wall, then Tap a marker comes as The start's";
+  var an={next:"the next page",how:"the next page, and How to use the card after the pages",camera:"the phone's own request"},b=(it.buttons||[]).filter(function(x){return x.word}).map(function(x){return"“"+TXT(x.word)+"” ("+(an[x.act]||x.act)+")"}),w=[];
+  if(it.azu&&it.azu!=="none")w.push("Azu "+(it.azu==="form"?"forms from a tile and waves (Reduce Motion: it appears; Mascot Off: no Azu)":"appears (Mascot Off: no Azu)"));if(it.langChip)w.push("the language as a chip (EN / PT: the app's language)");
+  w.push("its title and line");w.push(b.length?b.join(" and "):"no button");var t=w.join(", ");
+  return t.charAt(0).toUpperCase()+t.slice(1)+(it.page==="camera"?"; then the phone's own request (Allow / Don't Allow); refused: how to allow it, Open Settings and Try again, never the wall without the camera":"")}
+function gdPageReadBack(it){var all=gdPagesPlan(),i=all.indexOf(it);
+  return it.label+" · App › First pages · "+(!it.on?"Off: skipped":it.page==="wall"?"the run's end":i<0?"not in a first run now":"page "+(i+1)+" of "+all.length+" of a first run now")+" · "+gdPageWhen(it)+" · at the app's start, on a first run only (later launches: no pages, Welcome back; Remember across visits Off: every launch is a first) · "+
+    gdPageLook(it)+(it.page==="wall"?"":" · Skip skips the rest of the intro (the camera's own request still comes)")+(it.page==="wall"?"":" · about "+gdPageSecs(it)+" s")+"."}

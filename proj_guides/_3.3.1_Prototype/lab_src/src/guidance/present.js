@@ -285,3 +285,71 @@ ph.addEventListener("click",function(e){var t=e.target.closest("[data-gdpref],[d
 /* ----- the dock's conversation: the tips shown this visit, under Tips (guide/dock.js's dockThread.html) ----- */
 on("dockThread.html",function(h){var l=(S.gdVisitor.visit.tips||[]).slice(-8);if(!l.length)return h;
   return'<div class="gm-tips" role="group" aria-label="'+TXH("dock_tips")+'"><small>'+TXH("dock_tips")+'</small>'+l.map(function(x){return'<div class="gm-tip" data-gdtip="'+esc(x.id)+'">'+esc(x.text)+'</div>'}).join("")+'</div>'+h});
+/* ----- round 8 (_3.8 section 6), the first pages' look: one screen at a time over the wall, the app's paper (opaque, no blur), one focal
+   point: Hello's Azu (it forms from a tile and waves: the tile turns in, dissolves, Azu rises from it and waves; Reduce Motion: Azu is
+   there, no tile, no wave; Mascot Off: no Azu), the camera's mark, the refused camera's mark. At the top the pages' progress (a short bar
+   a page) and, on Hello, the language as a chip (EN / PT: the app's language). At the foot, in the thumb's reach: the page's buttons
+   (the first filled, the second outlined, 54 px) and Skip (the rest of the intro, 44 px). Who's exploring is the audiences' own screen in
+   the layer (onbShow, no copy). The camera's request is the phone's own (a stand-in: a dim and the system's alert, Allow / Don't allow);
+   refused: Open Settings shows the phone's Settings (a stand-in: the Camera switch, Back to the app) and Try again asks again; the
+   refused screen has no Skip (the app never goes on to the wall without the camera). A page comes in with a short rise and fade (0.32 s).
+   Unity: each page a UI Toolkit screen (UXML) in the onboarding's UIDocument above the AR view (sort order), the progress and the chip
+   VisualElements, the buttons Buttons (USS: 54 px, the accent, a 1.5 px border); the entrance a USS transition on translate and opacity;
+   Azu's forming and wave the Rive file's states ("form", "wave"; the 3D model: its Animator's wave clip), Reduce Motion its still state;
+   the request the platform's own dialog (no Unity UI); Open Settings a native call (iOS UIApplication.openSettingsURLString, Android the
+   app's settings intent) ----- */
+var GD_CAM_SVG='<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M17.5 10.5h13l3 5h6a3 3 0 0 1 3 3v17.5a3 3 0 0 1-3 3h-31a3 3 0 0 1-3-3V18.5a3 3 0 0 1 3-3h6z"/><circle cx="24" cy="27" r="7.5"/></svg>';
+var GD_CAMOFF_SVG='<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M17.5 10.5h13l3 5h6a3 3 0 0 1 3 3v17.5a3 3 0 0 1-3 3h-31a3 3 0 0 1-3-3V18.5a3 3 0 0 1 3-3h6z"/><circle cx="24" cy="27" r="7.5"/><path class="cut" d="M7 7l34 34"/></svg>';
+/* the phone's own words (its request, its Settings): not the app's, so not in Languages & Terms; the Lab's stand-in says them */
+var GD_SYS={title:T("Allow the camera?","Permitir a câmara?"),allow:T("Allow","Permitir"),deny:T("Don't Allow","Não permitir"),standin:T("The phone's own request · a stand-in in the Lab","O pedido do próprio telemóvel · uma simulação no Lab"),
+  back:T("Back to the app","Voltar à app"),settings:T("Settings","Definições"),access:T("Allow access to","Permitir acesso a"),camera:T("Camera","Câmara"),setin:T("The phone's Settings · a stand-in in the Lab","As Definições do telemóvel · uma simulação no Lab")};
+function gdAzuOn(){return S.guideCfg.mascot!==false&&gbAzu()}
+function gdPagesLayer(){ph.querySelectorAll(".gdpages.gd-out").forEach(function(x){x.remove()});var L=ph.querySelector(".gdpages");
+  if(!L){L=document.createElement("div");L.className="gdpages";L.setAttribute("role","dialog");L.setAttribute("aria-modal","true");ph.appendChild(L)}return L}
+function gdPagesUnpaint(){var L=ph.querySelector(".gdpages:not(.gd-out)");if(!L)return;L.classList.add("gd-out");L.removeAttribute("aria-modal");setTimeout(function(){L.remove()},S.reduce?0:220)}
+/* Azu on a page: the tile it forms from, and Azu (the guide's own still: the 2D tile or the 3D model's picture) */
+function gdPgAzu(it){if(!gdAzuOn()||it.azu==="none")return"";return'<div class="gdpg-art" data-azu="'+(S.reduce?"still":it.azu)+'"><span class="gdpg-tile">'+TILE+'</span><span class="gdpg-azu">'+mascotStill()+'</span></div>'}
+function gdPgSys(it){return'<div class="gdpg-sys"><div class="gdpg-scrim"></div><div class="gdpg-alert" role="alertdialog" aria-label="'+esc(L(GD_SYS.title))+'"><b>'+esc(L(GD_SYS.title))+'</b><p>'+TXH(it.usage||"gd_pg_cam_usage")+'</p>'+
+  '<div class="gdpg-abtn"><button type="button" data-gdpg="sys:deny">'+esc(L(GD_SYS.deny))+'</button><button type="button" data-gdpg="sys:allow">'+esc(L(GD_SYS.allow))+'</button></div></div><span class="gdpg-standin">'+esc(L(GD_SYS.standin))+'</span></div>'}
+function gdPgSet(){var on=G.gd.camPerm==="allowed";return'<div class="gdpg-set" role="dialog" aria-label="'+esc(L(GD_SYS.settings))+'"><button type="button" class="gdpg-setback" data-gdpg="back"><span aria-hidden="true">&#8249;</span> '+esc(L(GD_SYS.back))+'</button>'+
+  '<h3>'+esc(L(GD_SYS.settings))+'</h3><small>'+esc(L(GD_SYS.access))+'</small><div class="gdpg-setrow"><span>'+esc(L(GD_SYS.camera))+'</span><button type="button" class="gdpg-sw" role="switch" aria-checked="'+on+'" aria-label="'+esc(L(GD_SYS.camera))+'" data-gdpg="switch"><i></i></button></div>'+
+  '<span class="gdpg-standin">'+esc(L(GD_SYS.setin))+'</span></div>'}
+/* the page now, drawn (anim: it comes in, and Hello's Azu forms; a redraw for the language or the words keeps it still) */
+function gdPagePaint(anim){var P=G.gd.pages,n=gdPageNow();if(!P||!n||noDraw)return;var it=n.it||S.guidance.items.pg_camera,kind=n.direct?"camera":it.page,Lr=gdPagesLayer();
+  Lr.dataset.page=kind;Lr.dataset.cam=P.cam||"";Lr.classList.toggle("gd-still",!!S.reduce);Lr.setAttribute("aria-label",it.label);
+  var dots='<div class="gdpg-dots" role="img" aria-label="'+esc(fmt(TXT("gd_pg_dots"),P.i+1,P.run.length))+'">'+(P.run.length>1?P.run.map(function(x,i){return'<i'+(i===P.i?' class="on"':i<P.i?' class="done"':"")+'></i>'}).join(""):"")+'</div>';
+  var lang=it.langChip&&kind!=="aud"?'<div class="gdpg-lang" role="group" aria-label="'+TXH("gd_pg_lang")+'">'+langCodes().map(function(l){return'<button type="button" data-gdpg="lang:'+l+'" aria-pressed="'+(S.lang===l)+'">'+l.toUpperCase()+'</button>'}).join("")+'</div>':"";
+  var top='<div class="gdpg-top">'+dots+lang+'</div>';
+  /* Who's exploring: the audiences' own screen, in the layer */
+  if(kind==="aud"){var ha=top+"|aud|"+S.lang+"|"+S.vis.aud;if(!anim&&Lr._html===ha&&Lr.querySelector(".onb"))return;Lr._html=ha;Lr.innerHTML=top+'<div class="gdpg-stage"></div>';onbShow(Lr.querySelector(".gdpg-stage"));return}
+  var off=kind==="camera"&&(P.cam==="refused"||P.cam==="settings"),t=off?it.offTitle:n.direct?"":it.title,s=off?it.offSays:n.direct?"":it.says;
+  var art=kind==="camera"?'<div class="gdpg-cam'+(off?" off":"")+'">'+(off?GD_CAMOFF_SVG:GD_CAM_SVG)+'</div>':gdPgAzu(it);
+  var bs=off?[{word:it.offSettings,act:"settings"},{word:it.offRetry,act:"retry"}]:n.direct?[]:(it.buttons||[]).filter(function(b){return b&&b.word&&gdHasWords(b.word)}).slice(0,2);
+  var foot='<div class="gdpg-foot">'+bs.map(function(b,i){return'<button type="button" class="gdpg-b '+(i?"gdpg-sec":"gdpg-pri")+'" data-gdpg="'+b.act+'">'+TXH(b.word)+'</button>'}).join("")+
+    (off||n.direct?"":'<button type="button" class="gdpg-skip" data-gdpg="skip">'+TXH("gd_pg_skip")+'</button>')+'</div>';
+  var mid='<div class="gdpg-mid">'+art+(t&&gdHasWords(t)?'<h2 class="gdpg-t">'+TXH(t)+'</h2>':"")+(s&&gdHasWords(s)?'<p class="gdpg-l">'+TXH(s)+'</p>':"")+'</div>';
+  var sys=kind==="camera"&&P.cam==="prompt"?gdPgSys(it):kind==="camera"&&P.cam==="settings"?gdPgSet():"";
+  /* a redraw that changes nothing keeps the page as it is (an entrance or Azu's forming goes on) */
+  var html=top+'<div class="gdpg-body">'+mid+foot+'</div>'+sys;if(!anim&&Lr._html===html)return;Lr._html=html;Lr.innerHTML=html;
+  var body=Lr.querySelector(".gdpg-body"),al=Lr.querySelector(".gdpg-alert,.gdpg-set");
+  if(anim&&!S.reduce&&body.animate){body.animate([{opacity:0,translate:"0 18px"},{opacity:1,translate:"0 0"}],{duration:320,easing:"cubic-bezier(.2,.8,.2,1)"})}
+  if(al&&!S.reduce&&al.animate)al.animate([{opacity:0,scale:".94"},{opacity:1,scale:"1"}],{duration:200,easing:"ease-out"});
+  /* the screen reader starts at the page (the dialog, its label), or at the phone's request when it shows */
+  gdPgForm(Lr,anim&&!P.cam);var f=Lr.querySelector(".gdpg-alert,.gdpg-set")||Lr;if(f.tabIndex<0||!f.hasAttribute("tabindex"))f.setAttribute("tabindex","-1");f.focus({preventScroll:true})}
+/* Hello: the tile turns in and dissolves, Azu rises from it, then waves (Reduce Motion, Appears, or a redraw: Azu is simply there) */
+function gdPgForm(Lr,anim){var art=Lr.querySelector(".gdpg-art");if(!art)return;var t=art.querySelector(".gdpg-tile"),a=art.querySelector(".gdpg-azu");
+  if(!anim||S.reduce||art.dataset.azu!=="form"||!a.animate){art.classList.add("gd-formed");return}
+  t.animate([{opacity:0,scale:".45",rotate:"-90deg"},{opacity:1,scale:"1",rotate:"0deg",offset:.42},{opacity:1,scale:"1",rotate:"0deg",offset:.58},{opacity:0,scale:"1.18",rotate:"0deg"}],{duration:1150,easing:"cubic-bezier(.2,.8,.2,1)",fill:"forwards"});
+  a.animate([{opacity:0,scale:".5",translate:"0 14px"},{opacity:0,scale:".5",translate:"0 14px",offset:.5},{opacity:1,scale:"1.06",translate:"0 -2px",offset:.82},{opacity:1,scale:"1",translate:"0 0"}],{duration:1150,easing:"ease-out",fill:"backwards"});
+  a.animate([{rotate:"0deg"},{rotate:"-11deg",offset:.18},{rotate:"9deg",offset:.42},{rotate:"-7deg",offset:.66},{rotate:"4deg",offset:.84},{rotate:"0deg"}],{duration:1100,delay:1200,easing:"ease-in-out"});
+  setTimeout(function(){art.classList.add("gd-formed")},1200)}
+/* the pages' controls: real taps (the language chip, the buttons, Skip, the camera's request, Settings' switch and Back) */
+ph.addEventListener("click",function(e){var b=e.target.closest("[data-gdpg]");if(!b||!G.gd.pages)return;e.stopPropagation();var a=b.dataset.gdpg;
+  if(a.indexOf("lang:")===0){var l=a.slice(5);if(S.lang!==l){S.lang=l;gdLog("event","the language: "+l.toUpperCase()+" (the app's, on Hello's chip)");renderAll(true)}return}
+  if(a==="next")gdPagesNext();else if(a==="how")gdPagesNext(true);else if(a==="skip")gdPagesSkip();else if(a==="camera")gdCamAsk();
+  else if(a==="sys:allow")gdCamAnswer(true);else if(a==="sys:deny")gdCamAnswer(false);else if(a==="settings")gdCamSettings();else if(a==="retry")gdCamRetry();
+  else if(a==="switch")gdCamSwitch();else if(a==="back")gdCamBack()},true);
+/* the wall under the pages never takes a touch, a drag or the wheel meant for a page */
+["pointerdown","pointermove","wheel"].forEach(function(t){window.addEventListener(t,function(e){if(G.gd.pages&&e.target&&e.target.closest&&e.target.closest(".gdpages"))e.stopPropagation()},{capture:true,passive:true})});
+/* a redraw (the language, dark, the words in the Editor) draws the page again, still */
+on("renderPhone.after",function(){if(G.gd.pages&&!noDraw)gdPagePaint(false)});

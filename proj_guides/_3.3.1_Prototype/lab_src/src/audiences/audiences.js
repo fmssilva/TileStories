@@ -1,13 +1,19 @@
 /* Audiences: Family, Explorer, Expert; the first-card screen, the looks per audience, the overrides per field and Draft with AI, the guide's length.
    Round 5 of the guidance: each audience's Guidance preset (Looks per audience › Guidance preset: Family → Family, Explorer → First visit,
    Expert → Expert); the audience set (Who's exploring, the visitor's Settings, Preview as) is the point audience.set, which the guidance
-   joins to write that preset (guidance/service.js). Unity: AudienceLook.guidancePreset, a GuidancePreset reference */
+   joins to write that preset (guidance/service.js). Unity: AudienceLook.guidancePreset, a GuidancePreset reference.
+   Round 8 of the guidance: Who's exploring's Where to ask (At the app's start / On the first card / Never: Explorer). At the app's start the
+   first pages ask it (guidance's First pages › Who's exploring shows this same screen: onbShow(host), no copy) and the first card does not;
+   On the first card, today's screen; Never, neither asks. An answer here (a choice or Skip) is the point audience.asked. Unity:
+   AudienceSettings.whereToAsk (an enum), read by the OnboardingController and the first card */
 var AUDS=["family","explorer","expert"],LENS=["short","standard","deep"];
 S.vis.aud="explorer";S.vis.len="";
-S.aud={ask:true,seen:true,looks:{family:{life:"lively",len:"short",type:"up",orn:"stickers",corners:"round",gdPreset:"family"},explorer:{life:"lively",len:"standard",type:"base",orn:"base",corners:"base",gdPreset:"first"},expert:{life:"calm",len:"deep",type:"base",orn:"off",corners:"tight",gdPreset:"expert"}},hide:{family:{},explorer:{},expert:{"b:b_quiz":1}}};
+S.aud={where:"card",seen:true,looks:{family:{life:"lively",len:"short",type:"up",orn:"stickers",corners:"round",gdPreset:"family"},explorer:{life:"lively",len:"standard",type:"base",orn:"base",corners:"base",gdPreset:"first"},expert:{life:"calm",len:"deep",type:"base",orn:"off",corners:"tight",gdPreset:"expert"}},hide:{family:{},explorer:{},expert:{"b:b_quiz":1}}};
 COMP.s8onb=["Audiences","Who's exploring"];COMP.s8set=["Audiences","Audience in Settings"];COMP.s8look=["Audiences","Looks per audience"];
 FOCUS.s8onb=["card",".hero","half"];FOCUS.s8set=["card",".hero","half"];FOCUS.s8look=["story",'[data-ref="r:r2"]',"full"];
 function aud(){return AUDS.indexOf(S.vis.aud)>=0?S.vis.aud:"explorer"}
+/* where Who's exploring is asked (round 8): the first pages, the first card, or never (every visitor an Explorer) */
+var AUD_WHERE=[["start","At the app's start"],["card","On the first card"],["never","Never (Explorer)"]];
 function lenNow(){return LENS.indexOf(S.vis.len)>=0?S.vis.len:S.aud.looks[aud()].len}
 /* ----- overrides: stored apart from the texts (the texts keep only their languages), one entry per field and audience ----- */
 S.ov={};
@@ -42,15 +48,16 @@ on("renderPhone.before",function(keep,cx){var a=cx.aud=aud();if(S.audApplied!==a
   var lk=S.aud.looks[a];AUDS.forEach(function(x){ph.classList.toggle("aud-"+x,x===a&&x!=="explorer")});
   ph.dataset.type=lk.type;ph.dataset.orn=lk.orn;ph.dataset.corners=lk.corners;
   var hide=S.aud.hide[a]||{};scr.querySelectorAll("[data-ref]").forEach(function(el){var h=!!hide[el.dataset.ref];el.classList.toggle("audhidden",h)});
-  var ask=S.aud.ask&&!S.aud.seen&&S.view==="card"&&S.stop!=="closed"&&S.stop!=="peek",ob=ph.querySelector(".onb");if(!ask&&ob)ob.remove();else if(ask&&!ob)onbShow()});
+  var ask=S.aud.where==="card"&&!S.aud.seen&&S.view==="card"&&S.stop!=="closed"&&S.stop!=="peek",ob=ph.querySelector(".onb:not(.onb-start)");if(!ask&&ob)ob.remove();else if(ask&&!ob)onbShow()});
 /* ----- the first card: "Who's exploring today?" One screen, three choices, Skip = Explorer ----- */
 var AUDICON={family:'<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="14" cy="11" r="5"/><circle cx="28" cy="15" r="4"/><path d="M5 34c0-7 4-12 9-12s9 5 9 12M21 34c0-6 3-10 7-10s7 4 7 10"/></svg>',
   explorer:'<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="14"/><path d="M25 15l-3 8-7 2 3-8z"/></svg>',
   expert:'<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="17" cy="17" r="10"/><path d="M24.5 24.5L34 34M12 17h10M17 12v10"/></svg>'};
-function onbShow(){var o=ph.querySelector(".onb");if(o)o.remove();var d=document.createElement("div");d.className="onb";d.setAttribute("role","dialog");d.setAttribute("aria-modal","true");d.setAttribute("aria-label",TXT("aud_title"));
+/* host: the first pages' layer (Where to ask = At the app's start): the same screen, drawn there (onb-start) */
+function onbShow(host){ph.querySelectorAll(".onb").forEach(function(o){o.remove()});var d=document.createElement("div");d.className="onb"+(host?" onb-start":"");d.setAttribute("role","dialog");d.setAttribute("aria-modal","true");d.setAttribute("aria-label",TXT("aud_title"));
   d.innerHTML='<div class="onb-in"><b class="onb-t">'+TXH("aud_title")+'</b>'+AUDS.map(function(a){return'<button type="button" class="onb-c onb-'+a+'" data-onb="'+a+'" aria-pressed="'+(aud()===a)+'"><span class="onb-ic">'+AUDICON[a]+'</span><span class="onb-tx"><strong>'+TXH("aud_"+a)+'</strong><small>'+TXH("aud_"+a+"_line")+'</small></span></button>'}).join("")+
-    '<button type="button" class="onb-skip" data-onb="skip">'+TXH("aud_skip")+'</button><small class="onb-note">'+TXH("aud_note")+'</small></div>';d.tabIndex=-1;ph.appendChild(d);d.focus({preventScroll:true})}
-ph.addEventListener("click",function(e){var b=e.target.closest("[data-onb]");if(!b)return;e.stopPropagation();var a=b.dataset.onb;S.vis.aud=a==="skip"?"explorer":a;S.vis.len="";S.aud.seen=true;var o=ph.querySelector(".onb");if(o)o.remove();renderAll(true)},true);
+    '<button type="button" class="onb-skip" data-onb="skip">'+TXH("aud_skip")+'</button><small class="onb-note">'+TXH("aud_note")+'</small></div>';d.tabIndex=-1;(host||ph).appendChild(d);d.focus({preventScroll:true})}
+ph.addEventListener("click",function(e){var b=e.target.closest("[data-onb]");if(!b)return;e.stopPropagation();var a=b.dataset.onb;S.vis.aud=a==="skip"?"explorer":a;S.vis.len="";S.aud.seen=true;var o=ph.querySelector(".onb");if(o)o.remove();emit("audience.asked",S.vis.aud,a==="skip");renderAll(true)},true);
 /* ----- the visitor's Settings: who's exploring, and the length ----- */
 on("settingsPanel.html",function(h){var opt=function(k,v,lab,cur){return'<button type="button" data-vis="'+k+'|'+v+'" aria-pressed="'+(cur===v)+'">'+esc(lab)+'</button>'};
   var add='<small>'+TXH("settings_aud")+'</small><div class="vo">'+AUDS.map(function(a){return opt("aud",a,TXT("aud_"+a),aud())}).join("")+'</div><small>'+TXH("settings_len")+'</small><div class="vo">'+LENS.map(function(l){return opt("len",l,TXT("len_"+l),lenNow())}).join("")+'</div>';
@@ -72,7 +79,7 @@ on("edCard.html",function(h){var lk=S.aud.looks;
     '<div class="note">Guidance preset: the audience chosen in Who\'s exploring (or in Settings) sets it, so the guide speaks up as that audience needs (Guide › 4 · Guidance › Overall › Preset, where each preset\'s values are). Now: '+esc(AUDN[aud()]+" → "+gdPresetName(S.aud.looks[aud()].gdPreset)+(gdPresetNow()==="custom"?" (changed by hand since: Custom)":""))+'.</div>';
   var body='<div class="note">Who is exploring: one preset changes the words (where the point has them), the guide\'s length, Azu and a few looks. One design for all; a preset is a content preference, never an age, kept on the phone only.</div>'+
     row("Preview as",pseg("vis.aud",AUDS,["Family","Explorer","Expert"]),"The phone shows the card as this audience sees it (also on the preview bar).")+
-    comp("s8onb","the first card asks once: Family, Explorer or Expert; Skip = Explorer",row("Ask on the first card",pseg("aud.ask",["true","false"],["On","Off"]),"The first time a card opens, one screen: three choices and Skip. Never again after an answer or a Skip.")+
+    comp("s8onb","asked once: Family, Explorer or Expert; Skip = Explorer",row("Where to ask",pseg("aud.where",AUD_WHERE.map(function(x){return x[0]}),AUD_WHERE.map(function(x){return x[1]})),"Where the one screen (three choices and Skip) is asked, once: At the app's start (the first pages ask it, after Hello: Guide › 4 · Guidance › Sequences › First pages; the first card then does not), On the first card (the first time a card opens), or Never (every visitor is an Explorer). Never again after an answer or a Skip; Settings can change it.")+
       row("Try",'<button class="del" type="button" data-onbtry="1">Show it now</button>',""))+
     comp("s8set","in the visitor's Settings: who's exploring, and Short / Standard / Deep","")+
     comp("s8look","per audience: Azu, the length, the type, the ornaments, the corners",looks+'<div class="note">Contrast and tap sizes pass in every set (the same tokens, a few values changed).</div>');
@@ -114,7 +121,7 @@ function ovDraft(id,a){var f=ovFields().filter(function(x){return x.id===id})[0]
   sampleFn(prompt,{modelTier:"quick"}).then(function(r){var j=null;try{j=JSON.parse(String(r.text).replace(/^[^{]*/,"").replace(/[^}]*$/,""))}catch(x){}
     S.ovBusy=null;if(j&&(j.en||j.pt))setOv(id,a,{en:j.en||"",pt:j.pt||""},"ai",false);else S.ovNote="The draft could not be read; try again.";renderEditor()}).catch(function(){S.ovBusy=null;S.ovNote="The AI could not answer; try again.";renderEditor()})}
 ed.addEventListener("click",function(e){var t=e.target.closest("[data-ovc],[data-ovh],[data-ovback],[data-ovai],[data-ovok],[data-onbtry]");if(!t)return;e.stopPropagation();var q;
-  if(t.dataset.onbtry){S.aud.seen=false;S.view="card";if(S.stop==="closed"||S.stop==="peek")S.stop="half";renderPhone(false);return}
+  if(t.dataset.onbtry){audWhereShow();return}
   if(t.dataset.ovc){q=t.dataset.ovc;S.sel.ov=S.sel.ov===q?"":q;renderEditor();return}
   if(t.dataset.ovh){q=t.dataset.ovh.split("|");var h=S.aud.hide[q[1]];if(h[q[0]])delete h[q[0]];else h[q[0]]=1;renderAll(true);return}
   if(t.dataset.ovback){q=t.dataset.ovback.split("|");delete S.ov[q[0]][q[1]];renderAll(true);return}
@@ -124,8 +131,14 @@ ed.addEventListener("input",function(e){var t=e.target;if(!t.dataset||!t.dataset
   if(!en){setOv(q[0],q[1],{en:"",pt:""},"human",true);en=ovEntry(q[0],q[1])}en.text[q[2]]=t.value;if(!en.text.en&&!en.text.pt)delete S.ov[q[0]][q[1]];clearTimeout(S.ovT);S.ovT=setTimeout(function(){renderPhone(true)},250)},true);
 ed.addEventListener("change",function(e){var t=e.target;if(!t.dataset)return;if(t.dataset.ovrev){e.stopImmediatePropagation();var q=t.dataset.ovrev.split("|");ovEntry(q[0],q[1]).reviewed=t.checked;renderAll(true);return}
   if(t.dataset.glen){e.stopImmediatePropagation();var st=byId(S.fullSteps||S.guideSteps,t.dataset.glen);if(t.value)st.len=t.value;else delete st.len}},true);
-BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("ctl\\.jump\\.","ctl\\.jump\\.|aud\\.ask|aud\\.looks\\.|aud\\.hide\\."));
+BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("ctl\\.jump\\.","ctl\\.jump\\.|aud\\.where|aud\\.looks\\.|aud\\.hide\\."));
 /* each row's demo: the card as that audience sees it; the first-card question */
-rowDemos({"vis.aud":{stop:"full",ring:".hero"},"aud.ask":{stop:"full",act:function(){onbShow()},ring:".onb"}});
+/* Where to ask (and its Try): where the question appears now. At the app's start: the first pages from Who's exploring (Guide › Guidance ›
+   First pages); On the first card: the card's screen; Never: no question, a chip says so */
+function audWhereShow(){var w=S.aud.where;S.aud.seen=false;
+  if(w==="start"){gdPagesPreview("pg_aud");return}
+  if(w==="never"){S.aud.seen=true;S.view="card";S.stop="half";renderPhone(false);gdChip("Where to ask · Never: no question, every visitor is an Explorer");setTimeout(function(){gdChip(null)},3200);return}
+  S.view="card";if(S.stop==="closed"||S.stop==="peek")S.stop="half";renderPhone(false)}
+rowDemos({"vis.aud":{stop:"full",ring:".hero"},"aud.where":{stop:"half",act:function(){audWhereShow()},ring:".onb|.gdchip"}});
 /* an audience's Guidance preset: that preset simulated (Guide › 0 · Preview & Test › Simulate a visit), two visit-minutes ×10 on the wall */
 rowDemos(AUDS.reduce(function(m,a){m["aud.looks."+a+".gdPreset"]={wall:true,act:function(){gdDemoAudPreset(a)},ringAfter:600,ring:".gdchip|.gdbub"};return m},{}));

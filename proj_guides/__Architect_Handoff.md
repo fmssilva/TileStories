@@ -5,33 +5,37 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-07)
 
 - **State:**
-  - **The Lab:** `master` holds guidance rounds 1-7, verified on 2026-11-06/08, published at
-    https://claude.ai/artifact/Jq6X2KNyqx7KX353EMZVDS with the 186 voice files and the capabilities (section 1). The
-    developer changed account twice on 2026-11-08; the old links stay in their accounts (Jrejv7… at round 6, QmhHSz… at
-    round 5, KDs2… at v29). A new account cannot update an old link: publish a new one (section 1, Publishing). Its
+  - **The Lab:** `master` holds guidance rounds 1-8, verified on 2026-11-06/09, published at
+    https://claude.ai/artifact/4LpLd4ZTgBEnjrXnhUMCVh with the 186 voice files and the capabilities (section 1). The
+    developer changes account often (three times on 2026-11-08/09); the old links stay in their accounts (Jq6X2K… at round 7, Jrejv7… at
+    round 6, QmhHSz… at round 5, KDs2… at v29). A new account cannot update an old link: publish a new one (section 1, Publishing). Its
     code is in modules by feature
     (`lab_src/src/<area>/<module>.js`), with no wrappers: `lab_src/PROTOTYPE_STRUCTURE.md` says where each feature lives and
     where a change goes. The build only joins files (`build.py`) and refuses wrappers, re-assignments of functions, second
     declarations, defaults set twice and version-named modules (`check_structure.js`, `structure_baseline.json` at 0).
-  - **Proof of the Lab:** the self-test (`tests/runtest8.ps1`: three walks side by side, about 3 min) gives
-    `ok=1189 behaviour=1890 bad=0` (round 7, 6.2 min; the Guide walk alone is about 1300 controls); `node run_tests.js`
-    runs every test file one at a time (32 files, about 56 min after round 7; `tests_baseline.json`). test9d takes
-    430-555 s of its 600 s limit (as slow on round 6's page: the machine's load decides) and test9j 300-460 s: watch them,
-    and split test9d before it reaches the kill. test8q's mouth check races the tour's lip timer (passes alone). Never walk
-    `guide,words` together in the self-test (65 min); one big tab per walk. Level 2 after rounds 6 and 7 each caught real
-    breaks from shared changes (round 6: a reused class, the dock's Tips box shifting the answers' traces, a tip rule
-    catching cues; round 7: the card's ✦ and Azu drawn during a tour): shared code changed means level 2 that round.
+  - **Proof of the Lab:** the self-test (`tests/runtest8.ps1`: three walks side by side) gives
+    `ok=1197 behaviour=1932 bad=0` (round 8, 9.9 min, growing: 2.3 min at round 6, 6.2 at round 7; the Guide walk alone is
+    about 1300 controls); `node run_tests.js` runs every test file one at a time (33 files, about 56 min after round 8;
+    `tests_baseline.json`). test9d takes 430-555 s of its 600 s limit (the machine's load decides) and test9j 300-460 s:
+    watch them, and split test9d before it reaches the kill. Never walk `guide,words` together in the self-test (65 min);
+    one big tab per walk. test8q's mouth and test9b's rest were timing races (set and read in two calls; read with no wait):
+    fixed on 2026-11-09 (one call; an `until` of 1.5 s), 3 of 3 green each.
+  - **Level 2 caught real breaks after rounds 6, 7 and 8** (round 6: a reused class, the dock's Tips box shifting the
+    answers' traces, a tip rule catching cues; round 7: the card's ✦ and Azu drawn during a tour; round 8: checks of
+    round 6's templates and defaults). Two rules came of it: shared code changed means level 2 that round; and every round
+    touches `src/guidance/`, so a round's level 1 runs test9e up to its own file, not only the new one.
   - **Test levels** (decided 2026-11-06; cut twice since: the developer refused 1h30 of tests a round, then a 30-min level 1
     on 2026-11-07). The rules are in `lab_src/README.md` "Levels". Every brief repeats them.
     - **While building:** only the build and captures, iterated until the app and the Editor look right
       (`skills/Feature_Prototyping.md` step 3.3).
-    - **Level 1, once a round (5-7 min):** the round's new test file, plus the file of what it replaced, its mutation, and the
-      self-test of its tab. No `--changed` run: it pulled 8-10 files.
+    - **Level 1, once a round (about 25 min for guidance rounds):** the round's new test file, the file of what it replaced,
+      the guidance files test9e up to the round's own, the files of any shared module it touched, its mutation, and the
+      self-test of its tab (one big tab per walk). No `--changed` run: it pulled 8-10 files.
     - **Level 2, every 3rd-4th round (about 35 min):** every tab and every file. It runs sooner when a round changed existing
       shared code.
     - **Level 3, every 10-12 rounds and before a Unity hand-off:** level 2, every mutation and a new baseline.
-    - Count the rounds since the last level 2 and 3 in every answer. After guidance round 7 that is 0 and 7: level 2 ran on
-      round 7 on 2026-11-08, and level 3 has not run yet (owed by about round 10).
+    - Count the rounds since the last level 2 and 3 in every answer. After guidance round 8 that is 0 and 8: level 2 ran on
+      round 8 on 2026-11-09, and level 3 has not run yet (owed by about round 10).
   - **Where the tests' time goes (measured 2026-11-07):**
     - Starting Edge and loading the 13 MB page costs only about 8 s a file (Edge 0.3-0.8 s, the page 7 s), so one shared Edge
       would save almost nothing.
@@ -58,8 +62,8 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     sources in `_3.8_guidance_plans/`). Decisions: a top-level **Guide** tab (today's 6 · Guide + Guidance + the first pages);
     App and Fun tips as a bubble only, Content spoken once the guide has been heard; a deterministic mix; the card Hints edited
     in Guidance with a view in Card Controls.
-  - **Guidance rounds 1-7 are done** (merged into `master`; the briefs `_3.8_guidance_plans/brief_round1.md` to
-    `brief_round7.md`).
+  - **Guidance rounds 1-8 are done** (merged into `master`; the briefs `_3.8_guidance_plans/brief_round1.md` to
+    `brief_round8.md`).
     - Round 2: the memory and the visit, every gate and limit, the stage and the score, the learning, Ask about the view
       and A tour of {point}, Why not now? / The visitor / Log, five console scenes; `tests/test9f.js`.
     - Round 3: Azu's wall remarks became Content › What's in view (one item a point) and the ✦ hint App › The wall ›
@@ -79,13 +83,19 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       Preview & Test › Today is; a sixth scripted visitor; the ✦ on a paper band on the card and in a tour (no words under
       it); five scenes; `tests/test9k.js`. Shared code changed: `mascot/azu2d.js`, `world/camera-ask.js`,
       `world/guide-button.js` and `.css`, `core/words.js`.
+    - Round 8: Sequences › First pages (Hello with Azu forming from a tile and the language chip, Who's exploring when
+      asked at the app's start, the camera with its refused path, straight to the wall), Skip, later launches' Welcome
+      back; Audiences › Where to ask (`S.aud.where` replaced `S.aud.ask`); Start the app in the preview bar and Preview &
+      Test; How to use the card moved to Sequences; four scenes; `tests/test9l.js`. Shared code changed:
+      `audiences/audiences.js`, `core/words.js`.
     - Their captures were judged by the Architect; the developer reviews later, step by step. The open look questions:
       round 1's PT opening line, what "Mascot Off" means, Azu's size beside the marker; rounds 2 and 3's in the closing
       answers of 2026-11-06/07 (among them: a group's own shorter gap, the remarks counting in Content's cap, The ✦ on the
       card, a ring for The ✦ with the 3D model, "The" mid-sentence in the remark lines).
-    - **Next: guidance round 8** (`_3.8` section 8 and section 6: the first pages (Page form), Start the app, Who's
-      exploring's Where to ask; proves the run in order, each Skip, the camera refused), as a brief to an Opus subagent in
-      the shape of `brief_round7.md` (with its "Lessons" section). Prototype only (no Unity) until the developer says so.
+    - **Next: guidance round 9** (`_3.8` section 8 and 3.4: pull: the ✦ menu's Things to try (the App items as a checklist,
+      Show me), Settings › Tips with Fewer like this, Ask Azu's "how do I…" answered from the same items with Show me;
+      proves Tips Off still lets Things to try show), as a brief to an Opus subagent in the shape of `brief_round8.md`,
+      with level 1 running test9e up to its own file. Prototype only (no Unity) until the developer says so.
   - **MCP:** blender-mcp at user scope (Blender 5.2.3, add-on 1.8, port 9876). The Unity MCP was not connected this stretch.
   - **Keys:** Gemini, Azure Speech and ElevenLabs answer (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).
 - **The tasks, in this order:**
@@ -116,7 +126,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 
 ## 1. Where the work is
 
-- **The target is the Block Components Lab** (https://claude.ai/artifact/Jq6X2KNyqx7KX353EMZVDS), the record copy
+- **The target is the Block Components Lab** (https://claude.ai/artifact/4LpLd4ZTgBEnjrXnhUMCVh), the record copy
   `_3.3.1_Prototype/Block Components Lab.html`, and its sources `_3.3.1_Prototype/lab_src/` (modules by feature, the build,
   the tests; `PROTOTYPE_STRUCTURE.md` says where a change goes, `README.md` how to prove and publish it).
 - **Publishing:** the page goes from the record copy on disk, with `root` `_3.3.1_Prototype` (a redeploy to the same link
