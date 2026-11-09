@@ -122,7 +122,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const mi = await R('[].map.call(ph.querySelectorAll(".gbmenu [data-gbgo]"),function(b){return b.dataset.gbgo}).join()');
   await p.locator('#ph [data-gbgo="how"]').click(); await W(400);
   const s2 = await R('[G.on,S.guideSteps[G.i].id,!!ph.querySelector("#grab.gfocus"),!ph.querySelector(".gbmenu")]');
-  ok('From the ✦ on the card (real clicks): its menu has How does this work?, which walks the card (Guidance Off: no gate stops a pull)', mi === 'tour,ask,how,settings' && s2.every(Boolean), [mi, s2]);
+  ok('From the ✦ on the card (real clicks): its menu has How does this work?, which walks the card (Guidance Off: no gate stops a pull)', mi === 'tour,ask,how,try,settings' && s2.every(Boolean), [mi, s2]);
   await R('stopTour()');
 
   // ---------- 4. How does this work? on the wall: one bubble, beside the nearest marker, a chip that opens a card ----------
@@ -131,11 +131,12 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
     await p.locator('#ph .gbtn').click(); await W(250);
     const wi = await R('[].map.call(ph.querySelectorAll(".gbmenu [data-gbgo]"),function(b){return b.dataset.gbgo}).join()');
     await p.locator('#ph [data-gbgo="how"]').click(); await until('!!(G.gd.cur&&G.gd.cur.item.id==="howto:wall")', 2000); await W(450);
-    const l = await R(look); const az = await R('[!ph.querySelector(".gbmenu"),!!ph.querySelector(".gdring"),G.gd.cur&&G.gd.cur.pull,G.gd.az!=null]');
+    /* (round 9) Azu's hop ended before its place is measured: the check read Azu mid-hop under load */
+    await until('var a=ph.querySelector(".azfab");!a||!a.getAnimations||!a.getAnimations().length', 2500); const l = await R(look); const az = await R('[!ph.querySelector(".gbmenu"),!!ph.querySelector(".gdring"),G.gd.cur&&G.gd.cur.pull,G.gd.az!=null]');
     ok(`On the wall (${dark ? 'dark' : 'light'}): the ✦ menu has it; one bubble (the menu closed), beside the nearest marker, Azu pointing, its ring; 2 lines, 7:1, 0 px over words or the ✦; the chip Open a card, 44 px, 7:1`,
-      wi === 'tour,ask,view,how,settings' && az.every(Boolean) && l[0] <= 2 && l[1] >= 7 && l[2] === 0 && l[3] === 0 && l[4] === await R('TXT("gd_how_wall")') && l[5] >= 44 && l[6] >= 7 && /^Open a card/.test(l[7]), [wi, az, l]);
+      wi === 'tour,ask,view,how,try,settings' && az.every(Boolean) && l[0] <= 2 && l[1] >= 7 && l[2] === 0 && l[3] === 0 && l[4] === await R('TXT("gd_how_wall")') && l[5] >= 44 && l[6] >= 7 && /^Open a card/.test(l[7]), [wi, az, l]);
   }
-  await R('S.dark=false;S.lang="pt";renderAll(true)'); await W(250); const lpt = await R(look);
+  await R('S.dark=false;S.lang="pt";renderAll(true)'); await W(250); await until('var a=ph.querySelector(".azfab");!a||!a.getAnimations||!a.getAnimations().length', 2500); const lpt = await R(look);
   ok('...in Portuguese: its words from Languages & Terms, 2 lines at most', lpt[4] === await R('S.tx.gd_how_wall.pt') && /^Abrir um cartão/.test(lpt[7]) && lpt[0] <= 2 && lpt[2] === 0, lpt);
   await R('S.lang="en";renderAll(true)'); await W(150);
   await p.locator('#ph .gdbub [data-gdcta]').click(); await W(400);
@@ -145,7 +146,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('var g=gdGroupById("howto");g.inMenu=true;g.inSettings=false;S.view="card";S.stop="half";S.settingsOpen=true;renderPhone(false)'); const h2 = await R('!ph.querySelector(".vhow")');
   await R('var g=gdGroupById("howto");g.inSettings=true;g.on=false;S.settingsOpen=true;renderPhone(false)'); const h3 = await R('[!ph.querySelector(".vhow"),gbItems().indexOf("how")<0,gdWalk("test")===false]');
   await R('gdGroupById("howto").on=true;S.settingsOpen=false;renderPhone(false)');
-  ok('Its entries follow the group: In the ✦ menu Hidden: no item; In Settings Hidden: no button; the group Off: neither, and nothing opens', h1 === 'tour,ask,view,settings' && h2 && h3.every(Boolean), [h1, h2, h3]);
+  ok('Its entries follow the group: In the ✦ menu Hidden: no item; In Settings Hidden: no button; the group Off: neither, and nothing opens', h1 === 'tour,ask,view,try,settings' && h2 && h3.every(Boolean), [h1, h2, h3]);
 
   // ---------- 5. Card Controls > Hints: a view of the same data ----------
   await fresh(); await R('S.tab="card";S.ui.level=1;S.op={s5:true,s5hints:true};renderEditor()'); await W(200);
@@ -170,8 +171,8 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // ---------- 6. every new row's demo; the words and their owners; the old timers gone ----------
   await fresh(); await R('S.tab="guide";S.ui.level=9;S.op={};renderEditor()'); await W(200);
   const rows = await R('var o=[];ed.querySelectorAll(\'[data-fo="gd:g:card"] .row,[data-fo="gd:g:howto"] .row,[data-fo="gd:overall"] .row,[data-fo="gd:g:card"] summary [data-set],[data-fo="gd:g:howto"] summary [data-set]\').forEach(function(r){var k=r.matches(".row")?rowKey(r):r.dataset.set.slice(1);if(k&&o.indexOf(k)<0&&(/^guidance\\.(cueRoom|items\\.(nudge|label|navbar|ba|strip|term|wk_[a-z]+)\\.)/.test(k)||k.indexOf(gdGroupPath("card"))===0||k.indexOf(gdGroupPath("howto"))===0))o.push(k)});o');
-  ok(`every new row has its demo (${rows.length} rows: Overall's Cue room; The card's 4 group rows and its 6 cues' On, importance, Shows and Done when, round 6's Shows the gesture on Before / After and Swipe strips; How to use the card's On, In Settings, In the ✦ menu and its 5 steps' On and, round 6, Focus)`,
-    rows.length === 1 + 4 + 24 + 2 + 3 + 5 + 5 && (await R(`${JSON.stringify(rows)}.filter(function(k){return!rowDemoOf(k)})`)).length === 0, rows.length);
+  ok(`every new row has its demo (${rows.length} rows: Overall's Cue room; The card's 4 group rows and its 6 cues' On, importance, Shows and Done when, round 6's Shows the gesture on Before / After and Swipe strips; How to use the card's On, In Settings, In the ✦ menu and its 5 steps' On and, round 6, Focus; round 9: In Things to try on the 4 cues that teach)`,
+    rows.length === 1 + 4 + 24 + 2 + 3 + 5 + 5 + 4 && (await R(`${JSON.stringify(rows)}.filter(function(k){return!rowDemoOf(k)})`)).length === 0, rows.length);
   const CHIP_RE = { 'guidance.cueRoom': /×10 · The cue room after a tip: \d+ s/, 'guidance.items.nudge.doneWhen': /Done when the visitor saw How to use the card's step “The grabber”/, 'guidance.items.navbar.importance': /Importance 3 of 5/,
     'guidance.items.label.shows': /Once a visit: once it has shown/, [await R('gdGroupPath("howto")') + 'inMenu']: /In the ✦ menu: How does this work\?/, 'guidance.items.wk_bar.on': /How to use the card · from The Navigation Bar/ };
   const RING_RE = { 'guidance.items.nudge.on': /\|(#grab|\.gdchip)$/, 'guidance.items.wk_grab.on': /\|\.gfocus$/, [await R('gdGroupPath("howto")') + 'inSettings']: /\|\.vhow$/, [await R('gdGroupPath("howto")') + 'inMenu']: /\|\[data-gbgo="how"\]$/ };

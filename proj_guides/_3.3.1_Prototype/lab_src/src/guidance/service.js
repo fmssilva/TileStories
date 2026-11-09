@@ -87,11 +87,11 @@ function gdContext(){var t=-Infinity,mv=G.gd.movedAt,wa=G.gd.wallAt,st=ph.queryS
   var speaking=!!(G.utter||G.timer||G.recAudio);
   var onCard=gdOnCard(),mo=G.gd.moment||null;
   return Object.assign(gdCtxBase(),{scrollAt:G.gd.scrollAt,onCard:onCard,cues:onCard?cueTargets(mo==="open"):{},moment:mo,
-    demo:!!G.gd.demo,showing:G.gd.cur?G.gd.cur.item.label:null,
+    demo:!!G.gd.demo,showing:G.gd.cur?G.gd.cur.item.label:gdTryPlaying()?"Show me ("+gdTryWord(gdTryItem(G.gd.tryShow.id)||{teaches:""})+")":null,
     remark:ph.querySelector(".azbub")?"Azu's bubble":null,
     pokes:S.gdVisitor.visit.pokes||0,idleSince:Math.max(G.gd.actAt==null?t:G.gd.actAt,mv==null?t:mv,S.gdVisitor.visit.at||0),
     speaking:speaking,state:sk?GD_STATES[sk]||sk:null,
-    panel:S.settingsOpen?"Settings":G.cam&&G.cam.open?"Ask about the view":G.fab&&G.fab.menu?"the ✦ menu":S.contentsOpen?"Contents":null,
+    panel:S.settingsOpen?"Settings":G.cam&&G.cam.open?"Ask about the view":G.fab&&G.fab.menu?"the ✦ menu":S.contentsOpen?"Contents":G.gd.tryOpen?"Things to try":null,
     dockFull:!!(G.on&&typeof dockOn==="function"&&dockOn()&&S.dockH==="full"),solemn:gdSolemnNow(),
     /* the tour: between two steps (as it moves on, nothing is said), its narration so far (since it started or the last Moment) and its last step next */
     tour:G.on?{between:mo==="between"||!!G.gd.between&&!speaking,step:G.i,talked:Math.max(0,(performance.now()-(G.talkFrom||performance.now()))/1000),toEnd:!!(S.guideSteps[G.i+1]&&S.guideSteps[G.i+1].act==="end")}:null,
@@ -446,3 +446,42 @@ function gdPagesHow(){if(!gdWalk("Show me how it works (the first pages)"))retur
 on("audience.asked",function(a,skip){var n=gdPageNow();if(!n||!n.it||n.it.page!=="aud")return;if(!G.gd.pages.preview)gdLog("event","Who's exploring at the app's start: "+(skip?"Skip (Explorer)":AUDN[a]||a));gdPagesNext()});
 /* a newer Editor demo takes the phone: the pages close */
 setInterval(function(){var P=G.gd.pages;if(P&&P.seq!==G.demoSeq)gdPagesEnd("a newer demo took the phone",false)},250);
+/* ----- round 9 (_3.8 section 3.4), the visitor's pull: Things to try and Ask Azu's "how do I…?". Things to try opens from the ✦ menu
+   (Overall › Things to try: Shown) and from Settings › The guide; while it is open it is a panel (the scheduler is quiet). Its Show me
+   (and Ask Azu's Show me card) is a pull: past the limits, never past the gates that still hold for a pull (a system state showing, the
+   first pages running); one at a time (the tip showing gives way, and while the gesture plays the scheduler is quiet: context.showing);
+   it writes no memory. A "how do I…" answer marks its item as seen (shown this visit and ever, never done: done is the feature used).
+   The features the card's cues and The guide teach come from the visitor's own touch, here (the page's own events, so no other module
+   changes): a Before / After dragged, a strip swiped, the Navigation Bar or the Locate Button tapped, the guide paused. Unity: the same
+   GuidanceService, fed by the card's controls' events (BeforeAfter.Dragged, Strip.Swiped, NavBar.Jumped, Locate.Tapped, GuideTour.Paused) ----- */
+G.gd.tryOpen=false;G.gd.tryShow=null;G.gd.tryOwner=null;
+function gdTryPlaying(){var s=G.gd.tryShow;return!!(s&&performance.now()<s.realUntil)}
+/* the gates a pull still meets (round 2's rule: the limits pass, the gates hold): a system state showing, the first pages running */
+function gdPullGate(){var st=ph.querySelector(".stv"),sk=st&&(st.className.match(/\bst-(\w+)/)||[])[1];if(sk)return"quiet while a system state shows ("+(GD_STATES[sk]||sk)+")";
+  if(G.gd.pages)return"quiet while the first pages run";return null}
+/* Things to try opens (the ✦ menu, Settings › The guide, an Editor demo) and closes */
+function gdTryOpen(from,demo){G.fab.menu=false;S.settingsOpen=false;S.contentsOpen=false;if(G.gd.cur)gdStop("the visitor opened Things to try");G.gd.tryOpen=true;G.gd.tryOwner=demo?G.demoSeq:null;
+  var c=gdTryCount();if(!demo)gdLog("event","Things to try opened ("+from+"): "+c.done+" of "+c.n+" tried");renderPhone(true);return true}
+function gdTryClose(){if(!G.gd.tryOpen)return;G.gd.tryOpen=false;G.gd.tryOwner=null;renderPhone(true)}
+/* a card opened under it (a marker tapped above the sheet): the sheet closes */
+on("card.opened",function(){G.gd.tryOpen=false;G.gd.tryOwner=null});
+/* an answer to "how do I…" seen: its item shown this visit and ever (as a step of How to use the card is seen), never done */
+function gdTold(id,how){var now=gdNow(),vm=gdVM(id),em=gdEM(id);vm.shown++;vm.last=now;em.shown++;em.last=now;vm.told=(vm.told||0)+1;em.told=(em.told||0)+1;
+  var it=S.guidance.items[id];gdLog("event","Ask Azu answered how to "+(it?gdTryWord(it).toLowerCase():id)+" ("+how+"): the "+(it?it.label:id)+" seen, not done")}
+/* the offline answer (no key: the scripted answers): the feature's words and a Show me card, in the dock's conversation or on the wall */
+function gdHowTurn(q,it,t){return{q:q,links:[],chips:[],calls:[],cites:[],source:"",text:t,ctx:null,shows:[it.id],how:true}}
+function gdHowAsk(q,it){it=it||gdHowFind(q);if(!it)return false;emitLatestFirst("ask.before",q);pauseTour();G.askOpen=true;G.busy=false;var t=gdTryHowLine(it),turn=gdHowTurn(q,it,t);
+  G.answer=t;G.agTurn=turn;gdTold(it.id,"Ask Azu, offline");emit("ask.after",t,turn);renderGuide();say(t,function(){},function(){});return true}
+/* joined latest first, so before the live agent: with the live agent on, the agent answers (its tool show_how); without, the match */
+on("ask.answer",function(q){if(G.agTurn&&G.agTurn.how)G.agTurn=null;if(!q||!String(q).trim()||agLive())return;var it=gdHowFind(q);if(!it)return;return gdHowAsk(q,it)});
+on("camAsk.answer",function(q,kind){if(G.cam.turn&&G.cam.turn.how)G.cam.turn=null;if(kind||!q||!String(q).trim()||agLive())return;var it=gdHowFind(q);if(!it)return;
+  var t=gdTryHowLine(it);G.cam.open=true;G.cam.route=[];G.cam.lit=[];G.cam.hunt=null;G.cam.turn=gdHowTurn(q,it,t);gdTold(it.id,"Ask about the view, offline");camSay(t);return true});
+/* the features used, from the visitor's own touch (registered on the document, so a module that stops a tap from going on never hides it) */
+document.addEventListener("pointerdown",function(e){var b=ph.contains(e.target)&&e.target.closest("[data-ba]");G.gd.baDrag=b?{x:e.clientX,id:e.pointerId,used:false}:null},{capture:true,passive:true});
+document.addEventListener("pointermove",function(e){var d=G.gd.baDrag;if(!d||d.used||e.pointerId!==d.id)return;if(Math.abs(e.clientX-d.x)>12){d.used=true;gdUsed("ba","dragged")}},{capture:true,passive:true});
+document.addEventListener("pointerup",function(){G.gd.baDrag=null},{capture:true,passive:true});
+scr.addEventListener("scroll",function(e){var t=e.target;if(t===scr||!t.matches||!t.matches(".el-car,.hstrip")||t._gdSwiped||t.scrollLeft<24)return;t._gdSwiped=true;gdUsed("strip","swiped")},{capture:true,passive:true});
+document.addEventListener("click",function(e){var t=e.target;if(!t.closest||!ph.contains(t)||G.gd.demo)return;
+  if(t.closest("#navbar [data-navsec],#navbar [data-navmore]")){gdUsed("navbar","tapped");return}
+  if(t.closest(".locpin")){gdUsed("locate","tapped");return}
+  if(t.closest('[data-g="pause"]'))gdUsed("pause","tapped")},true);

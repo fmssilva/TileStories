@@ -19,6 +19,8 @@
    only, once a visit, after a card, a tap starts Ask about the view's hunt; Seasonal: one of its lines, the one whose window of dates
    holds today, a Solemn day's line (1 November, 1755) is a remembrance and rests every joke that day). */
 S.guidance={on:true,breathing:15,cueRoom:5,perMinute:2,perVisit:30,freshTau:120,learnIgnore:true,learnDismiss:true,fewer:true,remember:true,
+  /* round 9: Things to try in the ✦ menu (Overall › The visitor's controls; Settings › The guide always links it) */
+  tryMenu:true,
   /* round 5: Talkativeness (Quiet / Balanced / Chatty), the preset last chosen (First visit: these values), the Mix along the visit (each kind's
      weight at s = 0 / 0.3 / 1; Fun's row weighs Fun's items since round 7) */
   talk:"balanced",preset:"first",mix:{app:[70,40,15],content:[25,50,60],fun:[5,10,25]},
@@ -31,7 +33,11 @@ S.guidance={on:true,breathing:15,cueRoom:5,perMinute:2,perVisit:30,freshTau:120,
       {id:"howto",name:"How to use the card",mode:"order",pulled:true,seq:true,on:true,inSettings:true,inMenu:true,items:["wk_grab","wk_settings","wk_bar","wk_locate","wk_block"]},
       /* round 8: the first pages (_3.8 section 6): In order, form Page, at the app's start (launch: never the scheduler's; it is quiet while they
          run); shown in the Editor's Sequences beside How to use the card (seq) */
-      {id:"pages",name:"First pages",mode:"order",launch:true,seq:true,on:true,items:["pg_hello","pg_aud","pg_camera","pg_wall"]}]},
+      {id:"pages",name:"First pages",mode:"order",launch:true,seq:true,on:true,items:["pg_hello","pg_aud","pg_camera","pg_wall"]},
+      /* round 9: The guide (_3.8 section 3.1: Pause any time…), pulled only for now: its item is a row of Things to try and an answer of Ask
+         Azu's how do I…, never on its own (its push, between two steps of a tour, waits for the developer's call). Last in the list: code that finds a
+         group by its place (guidance.kinds.0.groups.N) keeps its N */
+      {id:"guide",name:"The guide",mode:"all",pulled:true,on:true,items:["pause"]}]},
     {id:"content",name:"Content",spoken:"heard",on:true,cap:12,gap:60,groups:[
       {id:"inview",name:"What's in view",mode:"all",on:true,weight:1,cap:12,gap:7,items:["inview"]},
       {id:"tours",name:"Tours",mode:"all",on:true,weight:1,cap:0,gap:0,items:["tourof"]}]},
@@ -92,16 +98,16 @@ S.guidance={on:true,breathing:15,cueRoom:5,perMinute:2,perVisit:30,freshTau:120,
       importance:4,essential:false,shows:"visit",max:1,again:0,doneWhen:"wk_grab",teaches:"",duringTour:"never",along:"kind",
       look:"The card opened at Half rises 8 px and settles (0.45 s in, for 0.7 s): the visitor sees it moves."},
     label:{id:"label",label:"Locate label",on:true,kind:"app",group:"card",form:"cue",says:"locate_label",about:"locate",when:"open",screen:"card",reduce:"still",untilSeen:true,
-      importance:3,essential:false,shows:"visit",max:1,again:0,doneWhen:"wk_locate",teaches:"",duringTour:"never",along:"kind",
+      importance:3,essential:false,shows:"visit",max:1,again:0,doneWhen:"wk_locate",teaches:"locate",duringTour:"never",along:"kind",
       look:"“Find it on the wall” beside the pin until it has been seen for 4 s (the time counts only while it has room beside the pin), then it folds into the pin; a tap on the pin counts as read."},
     navbar:{id:"navbar",label:"Navigation Bar",on:true,kind:"app",group:"card",form:"cue",says:"hint_navbar",about:"navbar",when:"pause",screen:"card",reduce:"still",
-      importance:3,essential:false,shows:"visit",max:1,again:0,doneWhen:"wk_bar",teaches:"",duringTour:"never",along:"kind",
+      importance:3,essential:false,shows:"visit",max:1,again:0,doneWhen:"wk_bar",teaches:"navbar",duringTour:"never",along:"kind",
       look:"The bar rings once and “Jump to any part” sits over it for 3 s (under Reduce Motion it fades in and out, no ring travel)."},
     ba:{id:"ba",label:"Before / After",on:true,kind:"app",group:"card",form:"cue",says:"",about:"ba",when:"pause",screen:"card",reduce:"skip",
-      importance:3,essential:false,shows:"visit",max:1,again:0,doneWhen:"",teaches:"",duringTour:"never",along:"kind",
+      importance:3,essential:false,shows:"visit",max:1,again:0,doneWhen:"",teaches:"ba",duringTour:"never",along:"kind",
       look:"The first before / after in view sweeps 12 % each way and returns (1.4 s); a touch stops it."},
     strip:{id:"strip",label:"Swipe strips",on:true,kind:"app",group:"card",form:"cue",says:"",about:"strip",when:"pause",screen:"card",reduce:"skip",
-      importance:3,essential:false,shows:"visit",max:1,again:0,doneWhen:"",teaches:"",duringTour:"never",along:"kind",
+      importance:3,essential:false,shows:"visit",max:1,again:0,doneWhen:"",teaches:"strip",duringTour:"never",along:"kind",
       look:"The first strip with more to the side slides 40 px and back (1.1 s)."},
     term:{id:"term",label:"Underlined words",on:true,kind:"app",group:"card",form:"cue",says:"",about:"term",when:"pause",screen:"card",reduce:"still",
       importance:2,essential:false,shows:"visit",max:1,again:0,doneWhen:"",teaches:"",duringTour:"never",along:"kind",
@@ -126,6 +132,9 @@ S.guidance={on:true,breathing:15,cueRoom:5,perMinute:2,perVisit:30,freshTau:120,
     pg_camera:{id:"pg_camera",label:"The camera",on:true,kind:"app",group:"pages",form:"page",page:"camera",title:"gd_pg_cam_t",says:"gd_pg_cam",
       buttons:[{word:"gd_pg_cam_allow",act:"camera"}],usage:"gd_pg_cam_usage",offTitle:"gd_pg_off_t",offSays:"gd_pg_off",offSettings:"gd_pg_settings",offRetry:"gd_pg_retry"},
     pg_wall:{id:"pg_wall",label:"Straight to the wall",on:true,kind:"app",group:"pages",form:"page",page:"wall",title:"",says:"gd_pg_wall",buttons:[]},
+    /* ----- round 9, App › The guide: Pause the guide, form Try (pulled only: a row of Things to try, an answer of Ask Azu; no bubble). About
+       the guide's Pause (the dock's ⏸ in a tour, or the ✦'s at Compact); Show me taps it; done when the visitor pauses the guide ----- */
+    pause:{id:"pause",label:"Pause the guide",on:true,kind:"app",group:"guide",form:"try",about:"pause",teaches:"pause",doneWhen:"pause"},
     /* ----- round 7, Fun › Moments: form Moment (Azu walks to the middle with its prop and asks for one tap: the look of mascot/azu2d.js, as
        before), between two steps of a tour as it moves on (it holds the next step until a tap or 8 s), Lively only; once a card, the group
        5 min apart. The water break after n s of the tour's narration (it was Guide › Mascot › Water break after); the cookie before the
@@ -178,10 +187,13 @@ function gdDayWords(md){var p=String(md||"").split("-");return(+p[1]||"?")+" "+(
 function gdSolemnDay(md){var sv=null;Object.keys(S.guidance.items).forEach(function(id){var it=S.guidance.items[id];if(it.seasons&&it.on&&!it.deleted)(it.seasons||[]).forEach(function(x){if(x.solemn&&gdInWindow(md,x.from,x.to))sv=x})});return sv}
 /* the events (study 3.2): their names in the Lab and in Unity, and the words the Editor reads them back with */
 /* the events as a condition in the read-back ("until the visitor opens a card") */
-var GD_UNTIL={card:"the visitor opens a card",view:"the visitor opens Ask about the view",tour:"the visitor hears a step of a tour",ask:"the visitor asks a question",menu:"the visitor opens the ✦ menu",hunt:"the visitor finds a treasure"};
+var GD_UNTIL={card:"the visitor opens a card",view:"the visitor opens Ask about the view",tour:"the visitor hears a step of a tour",ask:"the visitor asks a question",menu:"the visitor opens the ✦ menu",hunt:"the visitor finds a treasure",
+  /* round 9: the features the card's cues and The guide teach (Things to try's ticks) */
+  navbar:"the visitor uses the Navigation Bar",locate:"the visitor taps the Locate Button",ba:"the visitor drags a Before / After",strip:"the visitor swipes a strip",pause:"the visitor pauses the guide"};
 var GD_EVENTS={visit:"the visit started",marker:"a marker in view",moving:"the phone moving",still:"the phone still",card:"the visitor opened a card",
   view:"the visitor opened Ask about the view",tour:"a step of the tour was heard",ask:"the visitor asked a question",intro:"the guide's introduction was heard",
-  menu:"the visitor opened the ✦ menu",poked:"the visitor poked Azu",idle:"the visitor idle",opened:"the card opened",hunt:"the visitor found the treasure"};
+  menu:"the visitor opened the ✦ menu",poked:"the visitor poked Azu",idle:"the visitor idle",opened:"the card opened",hunt:"the visitor found the treasure",
+  navbar:"the visitor used the Navigation Bar",locate:"the visitor tapped the Locate Button",ba:"the visitor dragged a Before / After",strip:"the visitor swiped a strip",pause:"the visitor paused the guide"};
 /* How to use the card's steps as events: a step seen (its line heard) retires the cue whose Done when names it */
 ["wk_grab","wk_settings","wk_bar","wk_locate","wk_block"].forEach(function(id){var n=S.guidance.items[id].label;GD_EVENTS[id]="the visitor saw How to use the card's step “"+n+"”";GD_UNTIL[id]="the visitor has seen it in How to use the card"});
 /* the features used (study 3.2's events the Lab has): the milestones of the stage of the visit */
@@ -301,13 +313,13 @@ function gdLine(it,returning,slots){slots=slots||{};var k=gdLineKey(it,returning
 function gdHasWords(k){var o=S.tx[k];return!!(o&&String(L(o)||"").trim())}
 /* the read-back of an item, in words (study 3.2): "Tap a marker · App › The start · when a marker is in view and the phone is still ·
    at most about every 25 s, up to 3 times a visit, until the visitor opens a card." */
-function gdHowOften(it){var n=+it.max,ag=+it.again;if(it.form==="walk")return"pulled only: never on its own";if(it.form==="page")return"at the app's start, a first run only";
+function gdHowOften(it){var n=+it.max,ag=+it.again;if(it.form==="walk")return"pulled only: never on its own";if(it.form==="page")return"at the app's start, a first run only";if(it.form==="try")return"pulled only: Things to try and Ask Azu's how do I…";
   var s=it.shows==="once"?"once ever":it.shows==="visit"?"once a visit":it.shows==="card"?"once on each card":it.shows==="upto"?"up to "+n+(n===1?" time":" times")+" a visit":it.shows==="until"?"up to "+n+(n===1?" time":" times")+" a visit":"every time";
   if(ag>0&&it.shows!=="once"&&it.shows!=="visit")s="at most about every "+ag+" s, "+s;
   /* round 7: a joke every n pokes (and rarely once at a pause late) */
   if(it.shows==="every"&&+it.pokes>0)s="every "+it.pokes+" pokes on Azu"+(+it.latePause>0?", or once at a pause late":"");
   if(it.perPoint)s+=" for each point";if(it.doneWhen)s+=", until "+GD_UNTIL[it.doneWhen];return s}
-var GD_ABOUT={nothing:"",marker:"when a marker is in view",gbtn:"when the ✦ is on the screen",middle:"when a point with a tour is in the middle",point:"when its point settles in the middle"};
+var GD_ABOUT={nothing:"",marker:"when a marker is in view",gbtn:"when the ✦ is on the screen",middle:"when a point with a tour is in the middle",point:"when its point settles in the middle",pause:"when the guide's Pause is on the screen (in a tour)"};
 /* round 7: its moment between two tour steps, in words (the water break's narration, the cookie's last step) */
 function gdBetweenWords(it){var w=["between two steps of a tour, as it moves on (it holds the next step until a tap or 8 s)"];if(+it.talkFor>0)w.push("after "+it.talkFor+" s of the tour's narration");if(it.beforeEnd)w.push("before the tour's last step");return w.join(", ")}
 /* its own When, in words: after n pokes on Azu, or n s idle; Lively only, never on a Solemn point */
@@ -333,7 +345,7 @@ function gdCueReadBack(it){var g=gdGroupOf(it),r=+S.guidance.cueRoom||0;
 function gdStepReadBack(it){var g=gdGroupOf(it),on=g?g.items.filter(function(id){return S.guidance.items[id].on}):[],i=on.indexOf(it.id),ret=gdDefs().filter(function(x){return x.form==="cue"&&x.doneWhen===it.id}).map(function(x){return x.label});
   return it.label+" · App › How to use the card · "+(it.on?"step "+(i+1)+" of "+on.length:"Off: skipped")+" · pulled only (Settings, the ✦ menu's How does this work?): never scheduled, never capped · "+(it.sel?"it marks "+it.label.replace(/^The /,"the "):"it opens a block's page")+
     " · seen (its line heard): "+(ret.length?"the "+ret.join(", the ")+" is done for good":"nothing to retire")+"."}
-function gdReadBack(it){if(it.form==="cue")return gdCueReadBack(it)+gdGestureWords(it);if(it.form==="walk")return gdStepReadBack(it);if(it.form==="page")return gdPageReadBack(it);var g=gdGroupOf(it),k=gdKindOf(it),w=[];
+function gdReadBack(it){if(it.form==="cue")return gdCueReadBack(it)+gdGestureWords(it);if(it.form==="walk")return gdStepReadBack(it);if(it.form==="page")return gdPageReadBack(it);if(it.form==="try")return gdTryReadBack(it);var g=gdGroupOf(it),k=gdKindOf(it),w=[];
   if(it.when==="visit")w.push("once the visit has started");else if(it.when==="between")w.push(gdBetweenWords(it));else if(it.when==="event")w.push("within "+GD_EVENT_MS/1000+" s after "+(GD_EVENTS[it.event]||it.event));
   else if(it.when==="idle"&&!(+it.idleFor>0))w.push("after "+gdIdleOf(it)+" s idle");else if(it.when==="settle"&&it.about!=="point")w.push("when its target settles in the middle");else if(it.when!=="settle")w.push("at a pause");
   if(GD_ABOUT[it.about])w.push(GD_ABOUT[it.about]+(it.mustSee===false?" (or without it)":""));if(+it.stillFor>0)w.push("the phone still "+it.stillFor+" s");
@@ -367,7 +379,9 @@ var GD_SPOKEN=[["kind","As the kind"],["bubble","A bubble only"],["heard","Spoke
 var GD_AFTER_DISMISS=[["wait","Wait ×3"],["visit","Not again this visit"],["never","Never again"]];
 var GD_EXPIRES=[["target","When its target leaves the screen"],["never","Never (its time only)"]];
 var GD_ONSCREEN=[["auto","Auto (by its words)"],["secs","For n s"],["tap","Until tapped"]];
-var GD_TEACH=[["","Nothing"],["card","Opening a card"],["view","Ask about the view"],["tour","A tour"],["ask","Asking a question"],["menu","The ✦ menu"],["hunt","The treasure hunt"]];
+var GD_TEACH=[["","Nothing"],["card","Opening a card"],["view","Ask about the view"],["tour","A tour"],["ask","Asking a question"],["menu","The ✦ menu"],["hunt","The treasure hunt"],
+  /* round 9: the card's cues' and The guide's features */
+  ["navbar","The Navigation Bar"],["locate","The Locate Button"],["ba","Dragging a Before / After"],["strip","Swiping a strip"],["pause","Pausing the guide"]];
 var GD_USED=[["","Any"],["card","a card opened"],["tour","a tour step heard"],["ask","a question asked"],["view","Ask about the view opened"],["menu","the ✦ menu opened"]];
 var GD_ABOUT_OPTS=[["nothing","Nothing"],["marker","The nearest marker"],["middle","The point in the middle (with a tour)"],["gbtn","The ✦"]];
 var GD_AUD=[["","Any"],["family","Family"],["explorer","Explorer"],["expert","Expert"]];
@@ -375,7 +389,7 @@ var GD_VISIT_IS=[["","Any"],["first","A first visit"],["returning","A returning 
 var GD_SCREEN=[["wall","The wall"],["card","A card"],["any","Any"]];
 function gdNameOf(t,v){return((t.filter(function(x){return x[0]===v})[0])||[0,v])[1]}
 /* the gesture a target asks for (the ghost finger): a tap on a marker, a point or the ✦; a drag across a Before / After; a swipe on a strip */
-var GD_GESTURE={marker:"tap",middle:"tap",point:"tap",gbtn:"tap",ba:"drag",strip:"swipe"};
+var GD_GESTURE={marker:"tap",middle:"tap",point:"tap",gbtn:"tap",ba:"drag",strip:"swipe",pause:"tap"};
 var GD_GESTURE_WORDS={tap:"a tap",drag:"a drag across",swipe:"a swipe"};
 var GD_TIP_DEF={dim:0.4,gesture:false,button:"none",event:"card",pokes:0,idleFor:0,aud:"",visitIs:"",hasUsed:"",notUsed:"",lively:false,notSolemn:false,notAfter:0,prop:"water",talkFor:0,beforeEnd:false,latePause:0,pick:"turn",
   afterDismiss:"wait",expires:"target",onScreen:"auto",onScreenS:6,mustSee:true,spoken:"kind",points:false,focus:"none",goes:"stays",tap:"close",form:"tip",when:"pause",screen:"wall",stillFor:0,afterPrev:0,notBefore:0,
@@ -383,8 +397,10 @@ var GD_TIP_DEF={dim:0.4,gesture:false,button:"none",event:"card",pokes:0,idleFor
 /* round 8: a page's own fields (the Page form): its kind (hello, aud, camera, wall, or a custom page), its title and line, up to 2 buttons
    ({word, act}: next / how), the language chip, Azu (forms from a tile and waves / appears / none) */
 var GD_PAGE_DEF={page:"custom",title:"",says:"",buttons:[],langChip:false,azu:"none"};
-function gdIsTip(it){return!!it&&it.form!=="cue"&&it.form!=="walk"&&it.form!=="page"}
-function gdFill(it){if(it.form==="cue"){if(GD_GESTURE[it.about]&&it.gesture==null)it.gesture=true;return it}if(it.form==="walk"){if(it.focus==null)it.focus="tour";return it}
+function gdIsTip(it){return!!it&&it.form!=="cue"&&it.form!=="walk"&&it.form!=="page"&&it.form!=="try"}
+function gdFill(it){/* round 9: In Things to try (an App item): Yes when it Teaches a feature; a Try item (pulled only) keeps its own few fields */
+  if(it.inTry===undefined&&it.kind==="app"&&it.form!=="walk"&&it.form!=="page")it.inTry=!!it.teaches;if(it.form==="try")return it;
+  if(it.form==="cue"){if(GD_GESTURE[it.about]&&it.gesture==null)it.gesture=true;return it}if(it.form==="walk"){if(it.focus==null)it.focus="tour";return it}
   /* round 8: a page keeps its own fields (GD_PAGE_DEF), never a tip's */
   if(it.form==="page"){Object.keys(GD_PAGE_DEF).forEach(function(k){if(it[k]===undefined)it[k]=JSON.parse(JSON.stringify(GD_PAGE_DEF[k]))});return it}
   Object.keys(GD_TIP_DEF).forEach(function(k){if(it[k]===undefined)it[k]=GD_TIP_DEF[k]});if(!it.saysAud)it.saysAud={};return it}
@@ -466,3 +482,45 @@ function gdPageLook(it){if(it.page==="aud")return"The first card's own screen, r
 function gdPageReadBack(it){var all=gdPagesPlan(),i=all.indexOf(it);
   return it.label+" · App › First pages · "+(!it.on?"Off: skipped":it.page==="wall"?"the run's end":i<0?"not in a first run now":"page "+(i+1)+" of "+all.length+" of a first run now")+" · "+gdPageWhen(it)+" · at the app's start, on a first run only (later launches: no pages, Welcome back; Remember across visits Off: every launch is a first) · "+
     gdPageLook(it)+(it.page==="wall"?"":" · Skip skips the rest of the intro (the camera's own request still comes)")+(it.page==="wall"?"":" · about "+gdPageSecs(it)+" s")+"."}
+/* ----- round 9 (_3.8 section 3.4), pull: Things to try and Ask Azu's "how do I…?" as data. Things to try is the App items that teach a
+   feature (each item's Teaches), one row a feature, in the Editor's order: each item's In Things to try (Yes when it Teaches; the developer
+   may take a row out), its words the feature's (gd_try_<feature>: the row, "Open a card"; gd_tryhow_<feature>: the answer to "how do I…",
+   both owned by the item that teaches it). A row is ticked once the visitor has done it: the same memory as Done when (its item done for
+   good) or the feature it teaches used (the visitor's features used). It is the visitor's own pull: never scheduled, never capped, and the
+   item's On, its group's and its kind's (the push) and the visitor's Tips (Off: no pushed tip) never hide it. Ask Azu's "how do I…" (no
+   key: a simple match on the question's words, in both languages, against each feature's keywords and its row's words; the live agent:
+   its tool show_how) answers from the same items: the feature's answer, and a Show me card that plays its gesture. Unity: the same
+   GuidanceItem fields (Teaches, InThingsToTry) and two CardStrings keys a feature; the match a small keyword table in GuidanceCatalog ----- */
+/* the keywords of each feature, in English and Portuguese (accents dropped; a phrase, or a word with a mark in it, is matched as it is; a word by its first 5 letters) */
+var GD_TRY_KEYS={card:["card","cards","cartao","cartoes","marker","markers","marcador","marcadores"],view:["the view","a vista","view","vista"],menu:["menu","✦","star","estrela"],
+  locate:["locate","localizar","find it","encontrar","encontro","the pin","o pino","alfinete"],navbar:["navigation","navegacao","the bar","a barra","jump","saltar","salto"],
+  ba:["before and after","before / after","before/after","antes e depois","antes / depois","antes/depois","slider","compare","comparar"],
+  strip:["swipe","strip","strips","deslizar","deslizo","faixa","faixas","tira","tiras"],pause:["pause","pausar","pauso","pausa","stop the guide","parar o guia"]};
+var GD_HOW_STOP={about:1,what:1,with:1,this:1,that:1,from:1,into:1,then:1,your:1,have:1,does:1,sobre:1,como:1,para:1,numa:1,este:1,esta:1,isto:1,onde:1,quando:1,there:1,where:1,which:1};
+/* an item that can be a row: an App item (a tip, a cue, or a Try item) that teaches a feature */
+function gdTryCan(it){return!!it&&it.kind==="app"&&!!it.teaches&&!it.deleted&&(gdIsTip(it)||it.form==="cue"||it.form==="try")}
+function gdTryIn(it){return it.inTry!=null?it.inTry!==false:!!it.teaches}
+/* the rows of Things to try now: one a feature (the first item In Things to try that teaches it), in the Editor's order */
+function gdTryDefs(){var seen={},out=[];gdDefs().forEach(function(it){if(!gdTryCan(it)||!gdTryIn(it)||seen[it.teaches])return;seen[it.teaches]=1;out.push(it)});return out}
+/* every feature an App item teaches (Ask Azu answers them, In Things to try or not), one item a feature */
+function gdTeachers(){var seen={},out=[];gdDefs().forEach(function(it){if(!gdTryCan(it)||seen[it.teaches])return;seen[it.teaches]=1;out.push(it)});return out}
+function gdTryItem(id){return gdDefs().filter(function(x){return x.id===id&&gdTryCan(x)})[0]||null}
+/* done: the item done for good (its Done when) or the feature it teaches used; the count "3 of 8" */
+function gdTryDone(it,V){V=V||S.gdVisitor;return!!(gdEverOf(V,it.id).done||it.teaches&&V.used&&V.used[it.teaches]!=null)}
+function gdTryCount(V,rows){V=V||S.gdVisitor;rows=rows||gdTryDefs();return{done:rows.filter(function(it){return gdTryDone(it,V)}).length,n:rows.length}}
+/* its words: the feature's row ("Open a card") and the answer to how do I… ({button}: the ✦, or its word) */
+function gdTryWord(it){var k="gd_try_"+it.teaches;return S.tx[k]?TXT(k):gdNameOf(GD_TEACH,it.teaches)}
+function gdTryHowLine(it){var k="gd_tryhow_"+it.teaches;return(S.tx[k]?TXT(k):gdTryWord(it)).replace(/\{button\}/g,S.guideCfg.gbIcon==="star"?"✦":TXT("gb_label"))}
+/* "how do I…?": a question about the app (how / where do I / can I; como / onde / posso), then the feature whose keywords (2 each) and row's
+   words in both languages (1 each, 4 letters or more) the question has most; 2 or more to answer; ties: the Editor's order. A question about
+   the history ("How old is the palace?", "Como era o palácio antes do terramoto?") matches none */
+function gdHowNorm(t){return" "+String(t||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9✦/ ]+/g," ").replace(/\s+/g," ").trim()+" "}
+function gdHowAsks(n){return/ (how|can i|where do i|where can i|como|posso|onde posso|onde e que) /.test(n)}
+function gdHowWordHit(w,k){return w===k||k.length>=5&&w.length>=5&&w.slice(0,5)===k.slice(0,5)}
+function gdHowScore(n,it){var ws=n.trim().split(" "),s=0,f=it.teaches;(GD_TRY_KEYS[f]||[]).forEach(function(k){if(!/^[a-z]{4,}$/.test(k)?n.indexOf(" "+k+" ")>=0:ws.some(function(w){return gdHowWordHit(w,k)}))s+=2});
+  var k2="gd_try_"+f,o=S.tx[k2]||{},row=[];Object.keys(o).forEach(function(l){gdHowNorm(o[l]).trim().split(" ").forEach(function(x){if(x.length>=4&&!GD_HOW_STOP[x]&&row.indexOf(x)<0)row.push(x)})});
+  row.forEach(function(x){if(ws.some(function(w){return gdHowWordHit(w,x)}))s+=1});return s}
+function gdHowFind(q){var n=gdHowNorm(q);if(!gdHowAsks(n))return null;var best=null,bs=1;gdTeachers().forEach(function(it){var sc=gdHowScore(n,it);if(sc>bs){bs=sc;best=it}});return best}
+/* a Try item's read-back (pulled only) */
+function gdTryReadBack(it){var g=gdGroupOf(it);return it.label+" · App › "+(g?g.name:"?")+" · pulled only: a row of Things to try ("+(gdTryIn(it)?"In":"Out")+") and Ask Azu's answer to how do I… · never on its own (no bubble, never scheduled, never capped) · "+
+  (GD_ABOUT[it.about]?"about "+GD_ABOUT[it.about].replace(/^when /,"")+" · ":"")+"Show me: "+(GD_GESTURE_WORDS[GD_GESTURE[it.about]]||"a tap")+" on it, the visitor taken there first · done when "+(GD_UNTIL[it.doneWhen]||GD_EVENTS[it.doneWhen]||"never")+"."}

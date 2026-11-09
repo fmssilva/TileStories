@@ -46,7 +46,10 @@ function gdPointNow(it){var c=gdCentral();if(c&&(!it.point||c.id===it.point))ret
 function gdTarget(it){var P=it.about==="marker"?gdMarker():it.about==="middle"?gdCentral():it.about==="point"?gdPointNow(it):null;
   if(P)return{x:P.x,y:P.y,name:P.name,box:gdBox(P.x-GD_RING,P.y-GD_RING,2*GD_RING,2*GD_RING),beside:true};
   if(it.about==="gbtn"){var w=gdGbWrap(),g=w&&w.querySelector(".gbtn");if(!gdSeen(g))return null;var B=gdPR(g);return{x:(B.l+B.r)/2,y:(B.t+B.b)/2,name:"the ✦",rect:B,box:{l:B.l-6,t:B.t-6,r:B.r+6,b:B.b+6},beside:false}}
+  /* round 9: the guide's Pause in a tour (the dock's ⏸ at Mini or Peek, the ✦'s at Compact) */
+  if(it.about==="pause"){var pz=gdPauseEl();if(!pz)return null;var Bp=gdPR(pz);return{x:(Bp.l+Bp.r)/2,y:(Bp.t+Bp.b)/2,name:"the guide's Pause",rect:Bp,box:{l:Bp.l-6,t:Bp.t-6,r:Bp.r+6,b:Bp.b+6},beside:false}}
   return null}
+function gdPauseEl(){var l=['.gdock .gd-mini [data-g="pause"]','.gdock .gd-ctl [data-g="pause"]','.gb-pause[data-g="pause"]'];for(var i=0;i<l.length;i++){var e=ph.querySelector(l[i]);if(gdSeen(e)&&e.getBoundingClientRect().height>0)return e}return null}
 /* the bubble's words: plain, or one span a word when it is spoken (the word being said is lit) */
 function gdWords(t){return String(t).split(/(\s+)/).map(function(w){return/^\s*$/.test(w)?w:'<span class="gdw">'+esc(w)+'</span>'}).join("")}
 /* the bubble's chip: How does this work?'s Open a card (cta), or the item's Button (round 6: Show me / Start the tour / Open the card / Ask
@@ -167,7 +170,9 @@ function gdAskFewer(){var c=G.gd.cur,b=ph.querySelector(".gdbub:not(.gd-out)");i
   c.ask=true;c.askUntil=gdNow()+8000;c.askReal=performance.now()+8000;b.classList.add("asking");b.style.translate="";b.style.opacity="";
   b.innerHTML='<div class="gdfewer" role="group" aria-label="'+TXH("gd_fewer")+'"><span class="gdfq">'+TXH("gd_fewer")+'</span><span class="gdfb"><button type="button" data-gdfewer="yes">'+TXH("gd_fewer_yes")+'</button><button type="button" data-gdfewer="no">'+TXH("gd_fewer_no")+'</button></span></div><i class="gdtail"></i>';
   gdPlace(c,false);if(!c.pull)gdLog("event","a long press on the "+c.item.label+": Fewer like this?");return true}
-function gdFewer(){var c=G.gd.cur;if(!c)return;var g=gdGroupOf(c.item);if(c.pull){gdStop("Fewer like this (a demo)");return}gdStop("Fewer like this: "+(g?g.name:"its group")+" rests for the visit","fewer")}
+function gdFewer(){var c=G.gd.cur;if(!c)return;var g=gdGroupOf(c.item);if(c.pull){gdStop("Fewer like this (a demo)");return}gdStop("Fewer like this: "+(g?g.name:"its group")+" rests for the visit","fewer");gdFewerToast(c.item)}
+/* round 9: the toast after Fewer like this; an App group's adds the way back to them (Things to try), never a Content or Fun group's */
+function gdFewerToast(it){var app=it.kind==="app"&&gdTryDefs().length>0;return gdToast(TXT("gd_fewer_done"),false,app?TXT("gd_fewer_try"):"")}
 function gdKeep(){var c=G.gd.cur,b=ph.querySelector(".gdbub:not(.gd-out)");if(!c||!b)return;c.ask=false;b.classList.remove("asking");b.innerHTML=gdBubHtml(c);c.until=Math.max(c.until,gdNow()+3000);gdPlace(c,false)}
 ph.addEventListener("pointerdown",function(e){var b=e.target.closest(".gdbub:not(.gd-out)");if(!b||!G.gd.cur||e.target.closest("[data-gdfewer]"))return;
   var p={x:e.clientX,y:e.clientY,id:e.pointerId,moved:false,held:false,dx:0};G.gd.press=p;clearTimeout(G.gd.holdT);try{e.target.setPointerCapture(e.pointerId)}catch(x){}
@@ -241,7 +246,7 @@ function gdFingerStop(){ph.querySelectorAll(".gdfinger,.gdripple").forEach(funct
 function gdFingerBox(tx,ty,deg){var r=deg*Math.PI/180,c=Math.cos(r),s=Math.sin(r),xs=[],ys=[];[[-14,-4],[26,-4],[26,48],[-14,48]].forEach(function(q){xs.push(tx+q[0]*c-q[1]*s);ys.push(ty+q[0]*s+q[1]*c)});
   return{l:Math.min.apply(null,xs),t:Math.min.apply(null,ys),r:Math.max.apply(null,xs),b:Math.max.apply(null,ys)}}
 function gdFingerRest(M){var bub=ph.querySelector(".gdbub:not(.gd-out)"),az=G.gd.az&&ph.querySelector(".azfab"),W=ph.offsetWidth,H=ph.offsetHeight,avoid=gdObstacles().map(function(o){return{b:o.b,w:o.text?50:4}});
-  if(bub)avoid.push({b:gdPR(bub),w:30});if(az){var A=gdPR(az),a=G.gd.az,cur=az.style.translate.split(" ").map(parseFloat);avoid.push({b:{l:A.l-(cur[0]||0)+a.dx,t:A.t-(cur[1]||0)+a.dy,r:A.r-(cur[0]||0)+a.dx,b:A.b-(cur[1]||0)+a.dy},w:30})}
+  if(bub)avoid.push({b:gdPR(bub),w:30});/* round 9: words a target brings of its own (the dock's line beside the guide's Pause) */if(M.avoid)M.avoid.forEach(function(b){avoid.push({b:b,w:50})});if(az){var A=gdPR(az),a=G.gd.az,cur=az.style.translate.split(" ").map(parseFloat);avoid.push({b:{l:A.l-(cur[0]||0)+a.dx,t:A.t-(cur[1]||0)+a.dy,r:A.r-(cur[0]||0)+a.dx,b:A.b-(cur[1]||0)+a.dy},w:30})}
   var core=M.rect?{l:M.rect.l,t:M.rect.t,r:M.rect.r,b:M.rect.b}:{l:M.x-22,t:M.y-22,r:M.x+22,b:M.y+22};avoid.push({b:core,w:40});
   var best=null;for(var k=0;k<12;k++){var an=(k*30+120)*Math.PI/180,ux=Math.cos(an),uy=Math.sin(an),R=M.rect?Math.max(M.rect.r-M.rect.l,M.rect.b-M.rect.t)/2+4:GD_RING-4,tx=M.x+ux*R,ty=M.y+uy*R,deg=Math.atan2(-uy,-ux)*180/Math.PI+90,box=gdFingerBox(tx,ty,deg);
     var c=avoid.reduce(function(s2,o){return s2+gdOver(box,o.b)*o.w},0)+Math.max(0,8-box.l)*99+Math.max(0,box.r-(W-8))*99+Math.max(0,50-box.t)*99+Math.max(0,box.b-(H-8))*99+Math.abs(deg)*.5;
@@ -276,8 +281,8 @@ on("settingsPanel.html",function(h){var d=document.createElement("div");d.innerH
   g.insertAdjacentHTML("beforeend",'<div class="vtips"><small>'+TXH("settings_tips")+'</small><div class="vo">'+o("tips","all",TXT("settings_tips_all"),P.tips)+o("tips","essentials",TXT("settings_tips_ess"),P.tips)+o("tips","off",TXT("settings_tips_off"),P.tips)+'</div>'+
     (P.tips==="off"?'<p class="vnote">'+TXH("settings_tips_off_note")+'</p>':"")+'<small>'+TXH("settings_tips_stay")+'</small><div class="vo">'+o("stay","true",TXT("settings_on"),String(!!P.stay))+o("stay","false",TXT("settings_off"),String(!!P.stay))+'</div>'+
     '<button type="button" class="vagain" data-gdagain="1">'+TXH("settings_tips_again")+'</button></div>');return d.innerHTML});
-function gdToast(text,undo){ph.querySelectorAll(".gdtoast").forEach(function(x){x.remove()});clearTimeout(G.gd.toastT);var d=document.createElement("div");d.className="gtoast gdtoast";d.setAttribute("role","status");
-  d.innerHTML='<span>'+esc(text)+'</span>'+(undo?'<button type="button" data-gdundo="1">'+TXH("gd_undo")+'</button>':"");ph.appendChild(d);G.gd.toastT=setTimeout(function(){d.remove()},6000);return d}
+function gdToast(text,undo,more){ph.querySelectorAll(".gdtoast").forEach(function(x){x.remove()});clearTimeout(G.gd.toastT);var d=document.createElement("div");d.className="gtoast gdtoast"+(more?" gdtoast-2":"");d.setAttribute("role","status");
+  d.innerHTML='<span>'+esc(text)+(more?'<small class="gdtoast-try">'+esc(more)+'</small>':"")+'</span>'+(undo?'<button type="button" data-gdundo="1">'+TXH("gd_undo")+'</button>':"");ph.appendChild(d);G.gd.toastT=setTimeout(function(){d.remove()},6000);return d}
 ph.addEventListener("click",function(e){var t=e.target.closest("[data-gdpref],[data-gdagain],[data-gdundo]");if(!t)return;e.stopPropagation();
   if(t.dataset.gdpref){var q=t.dataset.gdpref.split("|"),P=gdPrefs();P[q[0]]=q[0]==="stay"?q[1]==="true":q[1];gdLog("event","the visitor set "+(q[0]==="stay"?"Tips stay until I tap them "+(P.stay?"On":"Off"):"Tips: "+q[1]));if(q[0]==="tips"&&q[1]!=="all"&&G.gd.cur&&!G.gd.cur.pull&&!(q[1]==="essentials"&&G.gd.cur.item.essential))gdStop("the visitor changed Tips");renderPhone(true);return}
   if(t.dataset.gdagain){gdTipsAgain();renderPhone(true);gdToast(TXT("gd_tips_again_done"),true);return}
@@ -353,3 +358,56 @@ ph.addEventListener("click",function(e){var b=e.target.closest("[data-gdpg]");if
 ["pointerdown","pointermove","wheel"].forEach(function(t){window.addEventListener(t,function(e){if(G.gd.pages&&e.target&&e.target.closest&&e.target.closest(".gdpages"))e.stopPropagation()},{capture:true,passive:true})});
 /* a redraw (the language, dark, the words in the Editor) draws the page again, still */
 on("renderPhone.after",function(){if(G.gd.pages&&!noDraw)gdPagePaint(false)});
+/* ----- round 9 (_3.8 section 3.4), the pull's look. Things to try: a short sheet in the card's own look (the paper, the hairlines and the
+   radius of Settings and the Contents sheet, no new style), one focal point (the count), then one row a feature in the Editor's order: a
+   tick when done, the feature in a few words, and Show me (44 px). The line at the top: "3 of 8 tried" and a thin bar; once every row is
+   done, one line says so (the rows stay, ticked; the ✦ menu still opens it). Show me (the sheet's, and Ask Azu's Show me card under a
+   "how do I…" answer) plays the item's gesture on its target (round 6's Show me: its ghost finger and ring, gdFinger and gdRing; its own end, so an older Show me never cuts it short), taking the visitor there first:
+   the wall for a marker, the card at its element for a cue (cuePlace), a tour at Mini for the guide's Pause; it writes no memory.
+   Unity: the sheet a UI Toolkit panel like the card's sheets (a VisualElement with the card's USS: background, border, radius; a ListView
+   of rows, each a Label, a tick and a Button; the bar a VisualElement whose width is the share done); Show me the ghost finger's sprite
+   and its tween (as round 6); the Show me card a link card of Ask Azu's answer (a Button styled as its other cards) ----- */
+function gdTryHtml(){var V=S.gdVisitor,rows=gdTryDefs(),c=gdTryCount(V,rows),all=c.n>0&&c.done===c.n;
+  return'<div class="gdtry" role="dialog" aria-label="'+TXH("gd_try")+'"><div class="gdtry-h"><b>'+TXH("gd_try")+'</b><button type="button" class="gdtry-x" data-gdtryx="1" aria-label="'+TXH("close")+'">&#10005;</button></div>'+
+    '<p class="gdtry-n'+(all?" all":"")+'" role="status">'+(all?TXH("gd_try_all"):esc(fmt(TXT("gd_try_count"),c.done,c.n)))+'</p>'+
+    '<div class="gdtry-bar" aria-hidden="true"><i style="width:'+(c.n?Math.round(c.done/c.n*1000)/10:0)+'%"></i></div>'+
+    '<ul class="gdtry-list">'+rows.map(function(it){var d=gdTryDone(it,V);return'<li class="gdtry-row'+(d?" done":"")+'" data-gdtryrow="'+it.id+'"><span class="gdtry-tick" role="img" aria-label="'+(d?TXH("gd_try_done"):TXH("gd_try_todo"))+'">'+(d?"&#10003;":"")+'</span>'+
+      '<span class="gdtry-w">'+esc(gdTryWord(it))+'</span><button type="button" class="gdtry-show" data-gdtryshow="'+it.id+'">'+TXH("gd_btn_show")+'<span aria-hidden="true">&#8250;</span></button></li>'}).join("")+'</ul></div>'}
+/* drawn with the phone (a redraw keeps it); a newer Editor demo closes the one an older demo opened */
+on("renderPhone.after",function(){var o=ph.querySelector(".gdtry");if(o)o.remove();if(G.gd.tryOpen&&G.gd.tryOwner!=null&&G.gd.tryOwner!==G.demoSeq){G.gd.tryOpen=false;G.gd.tryOwner=null}
+  if(!G.gd.tryOpen||S.view!=="card"||noDraw)return;ph.insertAdjacentHTML("beforeend",gdTryHtml())});
+/* Settings › The guide: Things to try › (the same sheet), after Show the tips again */
+on("settingsPanel.html",function(h){var d=document.createElement("div");d.innerHTML=h;var g=d.querySelector(".vtips");if(!g||!gdTryDefs().length)return h;
+  g.insertAdjacentHTML("beforeend",'<button type="button" class="vtry" data-gdtry="settings"><span>'+TXH("gd_try")+'</span><span aria-hidden="true">&#8250;</span></button>');return d.innerHTML});
+/* Show me: the visitor taken to the target (a marker: the wall; a cue: the card at its element; the guide's Pause: a tour at Mini; the ✦:
+   where it shows, else the wall), then the gesture once; while it plays the scheduler is quiet (context.showing) */
+function gdTryShow(id,from){var it=gdTryItem(id);if(!it)return false;var why=gdPullGate();if(why){gdLog("skipped","Show me ("+it.label+"): "+why);return false}
+  G.gd.tryOpen=false;G.gd.tryOwner=null;S.settingsOpen=false;S.contentsOpen=false;G.fab.menu=false;if(G.gd.cur)gdStop("the visitor asked: Show me");gdFingerStop();
+  var n=G.gd.tryN=(G.gd.tryN||0)+1,w=gdTryPlace(it);G.gd.tryShow={id:it.id,from:from,n:n,where:w.where,played:false,realUntil:performance.now()+w.ms+3400};
+  gdLog("shown","(pulled) Show me: "+gdTryWord(it)+" ("+from+"), on "+w.where);clearTimeout(G.gd.tryT);G.gd.tryT=setTimeout(function(){gdTryPlay(it,n)},w.ms);return true}
+function gdTryPlace(it){
+  if(it.form==="cue"){cuePlace(it.id);return{where:"the card, at its element",ms:820}}
+  if(it.about==="pause"){S.view="card";if(!G.on){S.stop="full";renderPhone(false);S.introSeen=true;startTour()}G.askOpen=false;S.dockH="mini";if(G.paused)resumeTour();renderGuide();return{where:"a tour, at its Pause",ms:900}}
+  var wall=/^(marker|middle|point)$/.test(it.about);
+  if(!wall&&gdTarget(it)){if(S.view==="card")renderPhone(true);return{where:"the screen as it is",ms:160}}
+  if(G.on)stopTour();G.cam.open=false;S.view="card";S.stop="closed";renderPhone(false);
+  /* no marker in view: the camera turns to the point with a card (the phone moves in the app; the Lab pans the picture) */
+  if(wall&&!gdMarker()){var pc=(S.wallPois||[]).filter(function(p){return p.card})[0];if(pc&&typeof agCenter==="function")agCenter(pc.id)}return{where:"the wall",ms:520}}
+function gdTryPlay(it,n){var s=G.gd.tryShow;if(!s||s.n!==n)return;G.gd.hopMs=0;var f=null,M=null,el=null;
+  if(it.form==="cue"){el=cueEl(it.about);if(!el){gdLog("skipped","Show me ("+it.label+"): "+(GD_CUE_NO[it.about]||"its part is not on the screen"));return}
+    var g=GD_GESTURE[it.about];if(g==="drag"||g==="swipe")f=gdFinger(it,null,el,g);
+    else{var te=it.about==="navbar"&&el.querySelector("[data-navsec]")||el,B=gdPR(te);M={x:(B.l+B.r)/2,y:(B.t+B.b)/2,rect:B,box:B};f=gdFinger(it,M,null,"tap")}}
+  else{M=gdTarget(it);if(!M){gdLog("skipped","Show me ("+it.label+"): its target is not on the screen");return}if(it.about==="pause")M.avoid=gdDockWords();f=gdFinger(it,M,null,GD_GESTURE[it.about]||"tap");if(!M.rect){var rg=gdRing({about:it.about},!S.reduce);if(rg){rg.style.left=Math.round(M.x)+"px";rg.style.top=Math.round(M.y)+"px"}}}
+  s.played=true;s.gesture=f?f.dataset.gesture:"";s.view=S.view;s.stop=S.stop;s.tour=!!G.on;s.box=M?(M.rect||M.box||{l:M.x-GD_RING,t:M.y-GD_RING,r:M.x+GD_RING,b:M.y+GD_RING}):gdPR(el);s.end=f?[+f.dataset.endx,+f.dataset.endy]:null;
+  clearTimeout(G.gd.tryEndT);G.gd.tryEndT=setTimeout(function(){if(G.gd.tryN!==n||G.gd.cur)return;gdFingerStop();ph.querySelectorAll(".gdring").forEach(function(x){x.remove()})},S.reduce?2600:2500)}
+/* the words beside the guide's Pause (the dock's line and hint, Azu's bubble above it): the finger keeps off them */
+function gdDockWords(){var o=[],pr=ph.getBoundingClientRect(),q=pr.height/ph.offsetHeight;ph.querySelectorAll(".gdock .gd-stop,.gdock .gd-cap,.gdock .gd-hint,.gbubble").forEach(function(e){if(!gdSeen(e))return;
+  /* the words' own extent (a Range over them), not their box: the line's box runs on under the buttons */
+  var rg=document.createRange();rg.selectNodeContents(e);var r=rg.getBoundingClientRect();if(r.width>0&&r.height>0)o.push({l:(r.left-pr.left)/q,t:(r.top-pr.top)/q,r:(r.right-pr.left)/q,b:(r.bottom-pr.top)/q})});return o}
+/* Ask Azu's Show me card, under a "how do I…" answer (the live agent's show_how, or the offline match): the agent's other cards' look */
+on("agTurnHtml.html",function(h,turn){if(!turn||!turn.shows||!turn.shows.length)return h;
+  return h+'<div class="gdhows">'+turn.shows.map(function(id){var it=gdTryItem(id);if(!it)return"";return'<button type="button" class="gdhowc" data-gdhow="'+esc(id)+'"><span class="gdhowc-ic" aria-hidden="true">'+GD_FINGER+'</span><b>'+TXH("gd_btn_show")+'</b><small>'+esc(gdTryWord(it))+'</small><i aria-hidden="true">&#8250;</i></button>'}).join("")+'</div>'});
+/* the taps: the ✕, a row's Show me, Settings' link, Ask's Show me card */
+ph.addEventListener("click",function(e){var t=e.target.closest("[data-gdtry],[data-gdtryx],[data-gdtryshow],[data-gdhow]");if(!t)return;e.stopPropagation();e.preventDefault();
+  if(t.dataset.gdtryx){gdTryClose();return}if(t.dataset.gdtry){gdTryOpen(t.dataset.gdtry==="settings"?"Settings › The guide":t.dataset.gdtry);return}
+  if(t.dataset.gdtryshow){gdTryShow(t.dataset.gdtryshow,"Things to try");return}if(t.dataset.gdhow){gdTryShow(t.dataset.gdhow,"Ask Azu")}},true);

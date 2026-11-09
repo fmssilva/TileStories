@@ -74,6 +74,7 @@ function gdCueRow(it){var p="guidance.items."+it.id+".",r=+S.guidance.cueRoom||0
     row("Shows",pseg(p+"shows",GD_CUE_SHOWS.map(function(x){return x[0]}),GD_CUE_SHOWS.map(function(x){return x[1]})),"Once a visit: once it has shown, not again this visit. Every card: once on each card the visitor opens. Off (the row's On): never. A cue is not a tip: the tips' limits (at most a minute, a visit, App's cap) do not count it.")+
     (GD_GESTURE[it.about]?row("Shows the gesture",pseg(p+"gesture",["true","false"],["On","Off"]),"A translucent finger does "+GD_GESTURE_WORDS[GD_GESTURE[it.about]]+" once with the cue, beside its element. (This cue is skipped under Reduce Motion, a movement.)"):"")+
     row("Done when",pseg(p+"doneWhen",GD_DONE_CUE.map(function(x){return x[0]}),GD_DONE_CUE.map(function(x){return x[1]})),"Retired for good once the visitor has seen that step of How to use the card (its line heard): the walkthrough taught it, so the cue is not needed.")+
+    gdTryRows(it,!(it.says&&it.id!=="label"))+
     '<div class="note gdfix">'+esc("Its element: "+GD_CUE_WHEN[it.about]+" · Its look: "+it.look+" · Under Reduce Motion: "+(it.reduce==="skip"?"skipped (it is a movement)":"shown, with no travel")+
       " · One at a time: never two cues at once, never with a tip; the cue room ("+r+" s, 1 · Overall) between a tip and a cue, either way; none between two cues · Never in a tour, with a panel open, while the visitor scrolls or touches (0.8 s), or in the card's first 1.5 s"+(it.when==="open"?" (it answers the opening itself, so the touch that opened the card and the first 1.5 s do not hold it)":"")+". Fixed for this cue.")+'</div>'+
     '<div class="note gdrb">'+esc(gdReadBack(it))+'</div>';
@@ -86,7 +87,7 @@ function gdStepRow(it){var p="guidance.items."+it.id+".";
     row("Focus",pseg(p+"focus",GD_STEP_FOCUS.map(function(x){return x[0]}),GD_STEP_FOCUS.map(function(x){return x[1]})),"How the step marks its control: as the tour's own Focus (Guide › 1 · The tour › Focus: "+gdNameOf([["spotlight","Spotlight"],["ring","Soft ring"],["none","None"]],S.guideCfg.cue)+"), Spotlight (the rest dims, the control cut out), Ring, or None. A walkthrough step may use the Spotlight.")+
     '<div class="sub2">Says · its line in the walkthrough (Languages &amp; Terms, owned here)</div>'+txPanel("gd:i:"+it.id)+'<div class="note gdrb">'+esc(gdReadBack(it))+'</div>';
   return fo("gd:i:"+it.id,sum,null,body,4)}
-function gdItemRow(it){if(it.form==="cue")return gdCueRow(it);if(it.form==="walk")return gdStepRow(it);if(it.form==="page")return gdPageRow(it);var p="guidance.items."+it.id+".",k=gdKindOf(it),g=gdGroupOf(it),i=g?g.items.indexOf(it.id):0,pv=i>0&&g.mode==="order"?S.guidance.items[g.items[i-1]]:null,wn=gdWarnsOf(it.id);
+function gdItemRow(it){if(it.form==="try")return gdTryRow(it);if(it.form==="cue")return gdCueRow(it);if(it.form==="walk")return gdStepRow(it);if(it.form==="page")return gdPageRow(it);var p="guidance.items."+it.id+".",k=gdKindOf(it),g=gdGroupOf(it),i=g?g.items.indexOf(it.id):0,pv=i>0&&g.mode==="order"?S.guidance.items[g.items[i-1]]:null,wn=gdWarnsOf(it.id);
   var sum='<span class="gdi">'+gdDragH(it)+'<span class="gdon">'+pseg(p+"on",["true","false"],["On","Off"])+'</span><b>'+esc(it.label)+'</b>'+(it.essential?'<span class="badge new">ESSENTIAL</span>':"")+
     (wn.length?'<span class="badge gdwb" title="'+esc(wn.map(function(w){return w.text}).join(" · "))+'">&#9888; '+wn.length+'</span>':"")+gdDots(it)+
     '<span class="gdhow">'+esc(gdHowOften(it))+'</span><button type="button" class="ubtn sm gdshow" data-gdshow="'+it.id+'" title="Show it on the phone now">&#9656; Show now</button></span>';
@@ -143,7 +144,7 @@ function gdItemRow(it){if(it.form==="cue")return gdCueRow(it);if(it.form==="walk
     (it.shows==="upto"||it.shows==="until"?row("At most",pslider(p+"max",1,10,1),"Times a visit.",true):"")+
     (it.shows==="once"||it.shows==="visit"?"":row("Again after (s)",pslider(p+"again",0,120,5),"Seconds after it ends before it may show again (its cooldown; 0: only the breathing room). The read-back says it as the visitor lives it: “at most about every 25 s”.",true))+
     row("Done when",pseg(p+"doneWhen",GD_DONE.map(function(x){return x[0]}),GD_DONE.map(function(x){return x[1]})),"The visitor's action that retires it for good (this visit and the next, until Reset the visitor): a tip gone once its feature is used. A tip showing when its feature is used counts as acted.")+
-    row("Teaches",psel(p+"teaches",GD_TEACH),"The feature it teaches: one tap on it closes both, and it scores ×1.3 while an App tip about that feature is still open.")+
+    row("Teaches",psel(p+"teaches",GD_TEACH),"The feature it teaches: one tap on it closes both, and it scores ×1.3 while an App tip about that feature is still open.")+gdTryRows(it,false)+
     row("After a dismissal",pseg(p+"afterDismiss",GD_AFTER_DISMISS.map(function(x){return x[0]}),GD_AFTER_DISMISS.map(function(x){return x[1]})),"Swiped away (or closed): Wait ×3 (an App tip waits ×3 its Again after; a Content item rests its group 5 min); Not again this visit; Never again.")+
     row("Expires",pseg(p+"expires",GD_EXPIRES.map(function(x){return x[0]}),GD_EXPIRES.map(function(x){return x[1]})),"When its target leaves the screen it ends (the default); Never: only its time ends it.")+
     row("On screen for",pseg(p+"onScreen",GD_ONSCREEN.map(function(x){return x[0]}),GD_ONSCREEN.map(function(x){return x[1]})),"Auto: by its words, 4 to 9 s. For n s. Until tapped: it stays until the visitor taps or closes it (the visitor's Settings › Tips stay until I tap them does the same for every tip).")+
@@ -210,6 +211,7 @@ on("edGuide.html",function(h){var d=document.createElement("div");d.innerHTML=h;
     k.groups.forEach(function(g,gi){var items=g.items.map(function(id){return S.guidance.items[id]}).filter(Boolean),gp=kp+"groups."+gi+".",per=items.some(function(x){return x.perPoint});
       /* round 8: a sequence (How to use the card, the first pages) is drawn in Sequences (gdSeqFo) */
       if(g.seq)return;
+      if(g.pulled){inner+=gdPullFo(g);return}
       inner+=fo("gd:g:"+g.id,esc(g.name)+' <span class="sub">· '+(g.mode==="order"?"In order: the visit's first words, then the first gesture":g.id==="inview"?"one item a point of the wall: Azu's remarks":g.id==="moments"?"the water break and the cookie, between tour steps, 5 min apart":g.id==="play"?"a joke, each point's joke, the treasure hunt, a seasonal line":g.id==="card"?"the card's hints, one cue each: motion on the element, no mascot":"each on its own")+'</span>',null,
         '<div class="note">'+(g.mode==="order"?"In order: an item waits until the one before it has shown this visit.":g.id==="card"?"Each cue on its own, at the moment its feature is in reach, taking turns with the tips (one at a time, the cue room between them). Card Controls › Hints shows them as a view.":"Each item on its own.")+' A row: On, its name, importance (●), how often, ▸ Show now; open it for its fields.</div>'+
         row("On",pseg(gp+"on",["true","false"],["On","Off"]),"Off: none of "+g.name+"'s items show (each keeps its own On)."+(g.id==="inview"?" Ask › Ask about the view › Azu comments is this same switch.":g.id==="moments"?" Guide › 2 · Mascot › Moments is this same switch.":""))+
@@ -227,7 +229,7 @@ function gdReadouts(){var v=ed.querySelector("#gdvisitor");if(v)v.textContent=gd
 on("gdLog.after",function(){if(!G.gd.roT)G.gd.roT=setTimeout(function(){G.gd.roT=0;gdReadouts()},60)});
 setInterval(function(){var n=ed.querySelector("#gdnow");if(n)n.textContent=gdNowLine();var v2=ed.querySelector("#gdvisitor2");if(v2)v2.textContent=gdVisitorMore()},1000);
 /* ----- the Editor's actions: Show next now, Why not now?, the visitor, ▸ Show now; a changed label redraws the rows ----- */
-function gdOnWallNow(){if(G.on)stopTour();if(typeof hideStopUi==="function")hideStopUi();S.settingsOpen=false;S.contentsOpen=false;G.fab.menu=false;G.cam.open=false;S.view="card";S.stop="closed";renderPhone(false)}
+function gdOnWallNow(){if(G.on)stopTour();if(typeof hideStopUi==="function")hideStopUi();S.settingsOpen=false;S.contentsOpen=false;G.fab.menu=false;G.cam.open=false;G.gd.tryOpen=false;S.view="card";S.stop="closed";renderPhone(false)}
 function gdShowNext(){gdOnWallNow();gdStop("Show next now");var ctx=gdContext();ctx.onWall=true;ctx.where="";ctx.stillSince=-Infinity;ctx.movedAt=null;ctx.touchAt=null;ctx.cardAt=null;ctx.panel=null;ctx.dockFull=false;ctx.tour=null;ctx.state=null;ctx.remark=null;ctx.showing=null;ctx.speaking=false;ctx.demo=false;
   var r=gdPick(gdItems(),S.gdVisitor,ctx,gdNow());G.gd.next=r;if(r.item)gdStart(r.item,r.why);var w=ed.querySelector("#gdwhy");if(w)w.textContent=r.item?"Next: "+r.why:"Next: nothing. "+r.why;return r}
 /* Why not now?: the scheduler's words for one item at this moment (the phone as it is; its bubble measured, so a covered target says so) */
@@ -353,11 +355,12 @@ var GD_DEMOS={"guidance.on":{wall:true,act:function(){gdDemoOverall("on")},ringA
   "guidance.breathing":{wall:true,act:function(){gdDemoOverall("breathing")},ringAfter:600,ring:".gdbub|.gdchip"}};
 Object.keys(GD_DEMO_ROWS).forEach(function(f){GD_DEMOS["guidance."+f]={wall:true,act:function(){gdDemo(GD_DEMO_ROWS[f]())},ringAfter:600,ring:".gdbub|.gdchip"}});
 S.guidance.kinds.forEach(function(k,ki){var kp="guidance.kinds."+ki+".";["on","cap","gap"].forEach(function(f){GD_DEMOS[kp+f]={wall:true,wait:0,act:function(){gdDemoKind(ki,f)},ringAfter:60,ring:".gdbub|.gdchip"}});
-  k.groups.forEach(function(g,gi){var gp=kp+"groups."+gi+".";if(g.launch){GD_DEMOS[gp+"on"]={wall:true,wait:0,act:function(){gdDemoPagesOn()},ringAfter:400,ring:".gdpages|.gdchip"};return}if(g.pulled){GD_DEMOS[gp+"on"]={act:function(){gdDemoHow("on")},ringAfter:1100,ring:".gfocus|.gdchip"};
+  k.groups.forEach(function(g,gi){var gp=kp+"groups."+gi+".";if(g.launch){GD_DEMOS[gp+"on"]={wall:true,wait:0,act:function(){gdDemoPagesOn()},ringAfter:400,ring:".gdpages|.gdchip"};return}if(g.pulled&&g.id==="howto"){GD_DEMOS[gp+"on"]={act:function(){gdDemoHow("on")},ringAfter:1100,ring:".gfocus|.gdchip"};
       GD_DEMOS[gp+"inSettings"]={stop:"half",act:function(){gdDemoHow("settings")},ringAfter:500,ring:".vhow|.vset"};GD_DEMOS[gp+"inMenu"]={wall:true,act:function(){gdDemoHow("menu")},ringAfter:500,ring:'[data-gbgo="how"]|.gbmenu'};return}
     GD_DEMOS[kp+"groups."+gi+".weight"]={wall:true,wait:0,act:function(){gdDemoGroup(ki,gi)},ringAfter:60,ring:".gdbub|.gdchip"};
     ["on","cap","gap"].forEach(function(f){GD_DEMOS[kp+"groups."+gi+"."+f]={wall:true,wait:0,act:function(){gdDemoGroupField(ki,gi,f)},ringAfter:60,ring:".gdbub|.gdchip"}})})});
 Object.keys(S.guidance.items).forEach(function(id){var p="guidance.items."+id+".",d=S.guidance.items[id];if(d.form==="page")return;
+  if(d.form==="try"){GD_DEMOS[p+"on"]={wait:0,act:function(){gdDemoTryShow(id)},ringAfter:1500,ring:".gdfinger|.gdchip"};return}
   /* a cue: on the card at its element (never the wall); a step of How to use the card: the walkthrough from that step */
   if(d.form==="cue"){var rg=".gdchip|"+GD_CUE_SEL[id].split(",").join("|");["on","importance","doneWhen"].forEach(function(f){GD_DEMOS[p+f]={stop:id==="nudge"||id==="label"?"half":"full",act:function(){gdDemoCue(id,f)},ringAfter:700,ring:rg}});
     GD_DEMOS[p+"shows"]={stop:"full",act:function(){gdDemoCueShows(id)},ringAfter:700,ring:rg};return}
@@ -860,3 +863,59 @@ ed.addEventListener("click",function(e){var t=e.target,q;
   var ba=t.closest("[data-gdpgbtnadd]");if(ba){e.stopPropagation();var it=S.guidance.items[ba.dataset.gdpgbtnadd];if(!it||(it.buttons||[]).length>=2)return;it.buttons=(it.buttons||[]).concat([{word:gdNewWord("gd:i:"+it.id,"Button "+((it.buttons||[]).length+1),"Show me how it works","Mostre-me como funciona"),act:"how"}]);renderAll(true);showRowDemo("guidance.items."+it.id+".buttons."+(it.buttons.length-1)+".act");return}
   var bd=t.closest("[data-gdpgbtndel]");if(bd){e.stopPropagation();q=bd.dataset.gdpgbtndel.split("|");var c=S.guidance.items[q[0]];if(c&&c.buttons)c.buttons.splice(+q[1],1);renderAll(true);return}
   var wh=t.closest("[data-gdwhere]");if(wh){e.stopPropagation();S.tab="card";S.op.s8=true;S.op.s8onb=true;renderEditor();var f=ed.querySelector('[data-fo="s8onb"]');if(f)f.scrollIntoView({block:"center"});return}},true);
+/* ----- round 9 (_3.8 section 3.4), the pull in the Editor. Overall › The visitor's controls › Things to try (In the ✦ menu: Shown /
+   Hidden): it lives in Overall, not in App's kind row, because the study puts the visitor's controls there (section 7's tree) and because
+   it is pull: App's kind row holds the push (its On, cap, gap and weight), and Things to try lists rows from every App group (The start,
+   The wall, the card's cues, The guide). Each App item that teaches a feature: In Things to try (Yes / No; Yes when it Teaches), its row's
+   and its answer's words, and what ticks it. App › The guide (pulled only): Pause the guide. 0 · Preview & Test › The visitor: "Things to
+   try: 3 of 8 tried". Each row's demo: the sheet on the phone with the new value (the ✦ menu with or without it; the sheet with the row in
+   or out; Show me playing). Unity: the POI Editor's Guidance section (a Toggle per item, a PopupField for In the ✦ menu) ----- */
+COMP["gd:g:guide"]=["Guide","Guidance › The guide"];FOCUS["gd:g:guide"]=["card",".gbtn-wrap","full"];COMP["gd:i:pause"]=["Guide","Guidance › The guide › Pause the guide"];FOCUS["gd:i:pause"]=["card",".gbtn-wrap","full"];
+TX_DOM.gd_try="shown in the ✦ menu, as Things to try's title and in Settings › The guide";TX_DOM.gd_try_count="shown at the top of Things to try";TX_DOM.gd_try_all="shown at the top of Things to try once every row is done";
+TX_DOM.gd_try_done="read by a screen reader on a done row of Things to try";TX_DOM.gd_try_todo="read by a screen reader on a row of Things to try not yet done";
+TX_DOM.gd_fewer_done="shown in the toast after Fewer like this";TX_DOM.gd_fewer_try="shown in the toast after Fewer like this on an App tip";
+Object.keys(GD_TRY_KEYS).forEach(function(f){TX_DOM["gd_try_"+f]="shown as a row of Things to try";TX_DOM["gd_tryhow_"+f]="shown in Ask Azu's answer to how do I…"});
+/* an item's Things to try, in its row: In Things to try, its words (where the row has no words panel of its own), what ticks it */
+function gdTryRows(it,words){if(it.kind!=="app")return"";var p="guidance.items."+it.id+".",H='<div class="sub2 gdfg">Things to try <span class="sub">· the visitor\'s checklist (the ✦ menu, Settings › The guide)</span></div>';
+  if(!it.teaches)return it.form==="cue"?"":'<div class="note gdtrynone">Things to try: no row (it teaches nothing; choose what it Teaches above).</div>';
+  var first=gdTeachers().filter(function(x){return x.teaches===it.teaches})[0],other=first&&first.id!==it.id?first:null;
+  return H+row("In Things to try",pseg(p+"inTry",["true","false"],["Yes","No"]),"Yes (the default when it Teaches): a row of Things to try, “"+gdTryWord(it)+"”, ticked once the visitor has done it, with Show me (the gesture on its target, the visitor taken there first). No: no row. The visitor's own pull: the item's On (its push), its group's and kind's, and the visitor's Tips never hide it. One row a feature: the first item In Things to try that teaches it.")+
+    (words?'<div class="sub2">Its row and its answer · Languages &amp; Terms, owned here</div>'+txPanel("gd:i:"+it.id):"")+
+    '<div class="note gdtryrb">'+esc("Its row: “"+gdTryWord(it)+"” · Ask Azu's answer to how do I…: “"+gdTryHowLine(it)+"” · ticked when "+(GD_UNTIL[it.teaches]||it.teaches)+(it.doneWhen&&it.doneWhen!==it.teaches?" (or once it is done: "+(GD_UNTIL[it.doneWhen]||it.doneWhen)+")":"")+
+      (other?" · another item teaches it first: the row is the "+other.label+"'s":"")+" · now "+(gdTryAt(it.id)>=0?"row "+(gdTryAt(it.id)+1)+" of "+gdTryDefs().length:"not a row")+".")+'</div>'}
+/* an item's place among Things to try's rows (-1: not a row) */
+function gdTryAt(id){return gdTryDefs().map(function(x){return x.id}).indexOf(id)}
+/* a Try item's row (App › The guide, pulled only): its name, ▸ Show me; opened: Label, its words, what it is about, In Things to try, the read-back */
+function gdTryRow(it){var p="guidance.items."+it.id+".";
+  var sum='<span class="gdi">'+gdDragH(it)+'<b>'+esc(it.label)+'</b><span class="badge">PULL</span><span class="gdhow">'+esc(gdHowOften(it))+'</span><button type="button" class="ubtn sm gdshow" data-gdshow="'+it.id+'" title="Show me on the phone now">&#9656; Show me</button></span>';
+  var body=row("Label",'<input class="u" data-path="'+p+'label" value="'+esc(it.label)+'">',"Editor only: its name in these lists, the read-back and the Log.")+
+    '<div class="sub2">Words · its row in Things to try and Ask Azu\'s answer (Languages &amp; Terms, owned here)</div>'+txPanel("gd:i:"+it.id)+
+    '<div class="note gdfix">'+esc("About: "+(GD_ABOUT[it.about]||it.about).replace(/^when /,"")+" · Show me: "+(GD_GESTURE_WORDS[GD_GESTURE[it.about]]||"a tap")+" on it (a tour starts at Mini when none runs) · Teaches: "+gdNameOf(GD_TEACH,it.teaches)+" · Done when "+(GD_UNTIL[it.doneWhen]||"never")+". Fixed for this item; pulled only, so no bubble, no When and no limits.")+'</div>'+
+    gdTryRows(it,false)+'<div class="note gdrb">'+esc(gdReadBack(it))+'</div>';
+  return fo("gd:i:"+it.id,sum,null,body,4)}
+/* a pulled group that is not a sequence (App › The guide): its note and its items */
+function gdPullFo(g){var items=g.items.map(function(id){return S.guidance.items[id]}).filter(function(x){return x&&!x.deleted});
+  return fo("gd:g:"+g.id,esc(g.name)+' <span class="sub">· pulled only: Things to try and Ask Azu\'s how do I…</span>',null,
+    '<div class="note">Pulled only (round 9): each item is a row of Things to try and an answer of Ask Azu\'s how do I…, never on its own (no bubble, never scheduled, never capped). Its push (a tip between two steps of a tour) is not built: it waits for the developer\'s call.</div>'+items.map(gdItemRow).join(""),3)}
+/* Overall › The visitor's controls › Things to try, and what it holds now */
+function gdTryNowWords(){var r=gdTryDefs();return"In the ✦ menu: "+(S.guidance.tryMenu!==false?"Shown":"Hidden")+" · Settings › The guide › Things to try ›: always · its "+r.length+" rows, in the Editor's order: "+r.map(function(it){return gdTryWord(it)+" ("+it.label+")"}).join(", ")+"."}
+function gdTrySeenWords(){var c=gdTryCount(),r=gdTryDefs().filter(function(it){return gdTryDone(it)});return"Things to try: "+c.done+" of "+c.n+" tried"+(r.length?" ("+r.map(gdTryWord).join(", ")+")":"")+(G.gd.tryOpen?" · the sheet is open":"")}
+on("edGuide.html",function(h){var d=document.createElement("div");d.innerHTML=h;var ov=d.querySelector('[data-fo="gd:overall"] > .inner');if(!ov)return h;
+  var lp=[].filter.call(ov.querySelectorAll(":scope > .sub2"),function(x){return/The long press/.test(x.textContent)})[0];
+  var w='<div class="sub2 gdvc">The visitor\'s controls <span class="sub">· what the visitor asks for: never scheduled, never capped</span></div>'+
+    row("Things to try",pseg("guidance.tryMenu",["true","false"],["Shown","Hidden"]),"In the ✦ menu. Shown: the ✦ menu has Things to try, a short sheet of the App items that teach a feature (each item's In Things to try), in this order, each ticked once the visitor has done it (its Done when, or the feature used), each with Show me. Hidden: not in the menu; Settings › The guide › Things to try › still opens it (pull help stays findable). The visitor's own pull: never scheduled, never capped; the visitor's Tips Off silences the pushed tips, never this.")+
+    '<div class="note gdtrynow" id="gdtrynow">'+esc(gdTryNowWords())+'</div>';
+  if(lp)lp.insertAdjacentHTML("beforebegin",w);else ov.insertAdjacentHTML("beforeend",w);
+  var pg=d.querySelector("#gdpgseen");if(pg)pg.insertAdjacentHTML("afterend",'<div class="note gdwhy" id="gdtryseen">'+esc(gdTrySeenWords())+'</div>');return d.innerHTML});
+on("gdLog.after",function(){var n=ed.querySelector("#gdtryseen");if(n)n.textContent=gdTrySeenWords()});
+/* the demos: the ✦ menu with or without it, then the sheet; the sheet with a row in or out; Show me on the phone */
+function gdDemoTryClose(my,ms){setTimeout(function(){if(G.gd.tryOwner===my)gdTryClose()},ms)}
+function gdDemoTryMenu(){var my=gdDemoBegin();G.fab.menu=true;fabLayer();var on=S.guidance.tryMenu!==false&&gdTryDefs().length>0;
+  if(!on){gdChip(S.guidance.tryMenu===false?"Hidden from the ✦ menu: Settings › The guide › Things to try › still opens it":"No row to try: no App item teaches a feature");gdDemoEnd(my,3600);return}
+  gdChip("In the ✦ menu: Things to try");G.gd.demoT=setTimeout(function(){if(!gdDemoLive(my))return;gdTryOpen("the Editor's demo",true);var c=gdTryCount();gdChip("Things to try: "+c.done+" of "+c.n+" tried");gdDemoEnd(my,3400);gdDemoTryClose(my,3600)},1200)}
+function gdDemoTryRow(id){var my=gdDemoBegin(),d=S.guidance.items[id];if(!d)return;gdTryOpen("the Editor's demo",true);var rows=gdTryDefs(),i=gdTryAt(id),first=gdTeachers().filter(function(x){return x.teaches===d.teaches})[0];
+  gdChip(i>=0?"In Things to try: row "+(i+1)+" of "+rows.length+", “"+gdTryWord(d)+"”":"Out of Things to try: no row for the "+d.label+(gdTryIn(d)&&first&&first.id!==d.id?" (the "+first.label+" teaches it first)":""));gdDemoEnd(my,3600);gdDemoTryClose(my,3800)}
+function gdDemoTryShow(id){var my=gdDemoBegin(),it=gdTryItem(id);if(!it)return;gdTryShow(id,"the Editor's demo");gdChip("Show me: "+gdTryWord(it)+(G.gd.tryShow?" ("+G.gd.tryShow.where+")":""));gdDemoEnd(my,4400)}
+rowDemos({"guidance.tryMenu":{wall:true,wait:0,act:gdDemoTryMenu,ringAfter:300,ring:'[data-gbgo="try"]|.gbmenu|.gdchip'}});
+on("rowDemo.spec",function(key){var m=/^guidance\.items\.([^.]+)\.inTry$/.exec(key);if(!m||!S.guidance.items[m[1]])return;var id=m[1];
+  return{wall:true,wait:0,act:function(){gdDemoTryRow(id)},ringAfter:300,ring:'[data-gdtryrow="'+id+'"]|.gdtry|.gdchip'}});
