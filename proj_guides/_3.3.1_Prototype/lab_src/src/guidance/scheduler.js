@@ -33,6 +33,8 @@ function gdStage(visitor,now){var v=visitor.visit||{},ret=visitor.visits>1,act=M
   return{s:Math.min(1,Math.max(mins/GD_STAGE_MIN,share)),mins:mins,active:act,returning:ret,done:done,share:share}}
 /* the gates for every item: fixed, no option breaks them */
 function gdGate(ctx,now){if(!ctx.on)return"Guidance is Off";if(ctx.demo)return"an Editor demo is showing";
+  /* round 8: the app's start: quiet while the first pages run (they are an In order group of their own, never the scheduler's) */
+  if(ctx.pages)return"quiet while "+ctx.pages+" "+(/^the first/.test(ctx.pages)?"run (the app's start)":"shows");
   /* round 6: the visitor's own Tips (Settings › The guide › Tips): Off silences every push item (the ✦ and Ask still answer) */
   if(ctx.tips==="off")return"the visitor turned Tips Off (Settings › The guide › Tips)";
   if(ctx.showing)return"one at a time: "+(/^the /i.test(ctx.showing)?"":"the ")+ctx.showing+" is showing";if(ctx.remark)return"one at a time: "+ctx.remark+" is showing";

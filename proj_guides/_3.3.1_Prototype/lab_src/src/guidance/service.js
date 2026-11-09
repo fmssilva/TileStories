@@ -50,7 +50,7 @@ function gdMemEnd(V,c,how,now,log){var vm=gdVM(c.item.id,V);vm.end=now;vm.how=ho
 function gdMemUsed(V,f,now,items){V.used[f]=now;items.forEach(function(it){if(it.doneWhen===f){var em=gdEM(it.id,V);if(!em.done){em.done=true;em.by=f}}})}
 /* a visit starts: a new visitor (Reset the visitor) or the same one back (New visit; a return after 30 min away); the clock goes on.
    With Remember across visits Off, the one back is a first visit again */
-function gdVisitStart(returning,why){if(G.gd.cur)gdStop("a new visit");var now=gdNow(),keep=returning&&S.guidance.remember!==false;
+function gdVisitStart(returning,why){if(G.gd.pages)gdPagesEnd("a new visit",false);if(G.gd.cur)gdStop("a new visit");var now=gdNow(),keep=returning&&S.guidance.remember!==false;
   if(keep){S.gdVisitor.visits++;S.gdVisitor.visit=gdVisitMem(S.gdVisitor.visits,now)}else S.gdVisitor=gdNewMemory(now);
   G.gd.wallAt=G.gd.onWall?now:null;G.gd.skipKey="";
   gdLog("visit",keep?"the visitor came back (visit "+S.gdVisitor.visits+")"+(why?", "+why:""):returning?"a first visit again (Remember across visits is Off)"+(why?", "+why:""):"a first visit")}
@@ -97,7 +97,9 @@ function gdContext(){var t=-Infinity,mv=G.gd.movedAt,wa=G.gd.wallAt,st=ph.queryS
     tour:G.on?{between:mo==="between"||!!G.gd.between&&!speaking,step:G.i,talked:Math.max(0,(performance.now()-(G.talkFrom||performance.now()))/1000),toEnd:!!(S.guideSteps[G.i+1]&&S.guideSteps[G.i+1].act==="end")}:null,
     movedAt:mv,touchAt:G.gd.touchAt,cardAt:S.view==="card"&&S.stop!=="closed"?G.gd.cardAt:null,
     onWall:gdOnWall(),where:S.view!=="card"?"the phone shows "+S.view:G.on?"the tour":S.stop!=="closed"?"a card is open":"",
-    marker:gdMarker(),gbtn:gdGbtn(),central:gdCentral(),covers:{},stillSince:Math.max(mv==null?t:mv,wa==null?t:wa),returning:S.gdVisitor.visits>1,tips:gdPrefs().tips})}
+    marker:gdMarker(),gbtn:gdGbtn(),central:gdCentral(),covers:{},stillSince:Math.max(mv==null?t:mv,wa==null?t:wa),returning:S.gdVisitor.visits>1,tips:gdPrefs().tips,
+    /* round 8: the first pages showing (the app's start): the scheduler is quiet */
+    pages:G.gd.pages?(G.gd.pages.preview?"a page shown by the Editor":"the first pages"):null})}
 /* the visitor's Tips settings (an older memory has none: the defaults) */
 function gdPrefs(V){V=V||S.gdVisitor;return V.prefs||(V.prefs={tips:"all",stay:false})}
 /* how long a tip stays: by its words, 4 to 9 s (the visit's clock); with the clock fast (a scene, a demo) it stays at least 0.6 to 1.5 s of real time, to be seen */
@@ -107,7 +109,9 @@ function gdOnScreen(it,text){if(it.onScreen==="secs"&&+it.onScreenS>0)return +it
 function gdYearOf(id){var p=(S.wallPois||[]).filter(function(x){return x.id===id})[0];return p&&p.year||""}
 /* round 7: every line's slots also carry today (a seasonal line), the variants this visitor has seen (A joke: the least seen) and {thing}
    (the point the treasure hunt asks for: Ask about the view's own pick, camHuntPick) */
-function gdSlots(it,V,c,items){V=V||S.gdVisitor;var o=gdSlotsOf(it,V,c,items);o.today=gdTodayMD();if(it.pick==="least")o.seen=gdEverOf(V,it.id).seen||{};if(it.tap==="hunt"||it.button==="hunt")o.thing=gdHuntThing();return o}
+function gdSlots(it,V,c,items){V=V||S.gdVisitor;var o=gdSlotsOf(it,V,c,items);o.today=gdTodayMD();
+  /* round 8: the visit's first words right after the first pages: Straight to the wall's short line (when that page is On) */
+  if(it.when==="visit"&&V.visit&&V.visit.pages){var pw=gdPageOf("wall");if(pw&&pw.on&&gdHasWords(pw.says))o.pagesLine=pw.says}if(it.pick==="least")o.seen=gdEverOf(V,it.id).seen||{};if(it.tap==="hunt"||it.button==="hunt")o.thing=gdHuntThing();return o}
 /* the points in view as Ask about the view sees them once it is open (its panel hides the foot of the wall) */
 function gdViewOpen(){var k=G.cam.open;G.cam.open=true;try{return camView().pois}finally{G.cam.open=k}}
 /* the hunt asks for a point in view (Ask about the view's own list), so the invitation names the same one; with no camera (the simulator) the wall's points */
@@ -364,3 +368,81 @@ function gdSaid(it,text,now){var v=S.gdVisitor.visit,l=v.tips||(v.tips=[]);if(!t
 function gdTipsAgain(){var V=S.gdVisitor,keep=JSON.stringify(V);if(G.gd.cur)gdStop("Show the tips again");V.ever.items={};V.visit.items={};V.used={};V.visit.rest={};V.visit.fewer={};V.visit.starts=[];V.visit.ignoredRun=0;V.visit.breathMul=1;V.visit.lastEnd=null;V.visit.cueEnd=null;
   G.gd.tipsUndo=keep;gdLog("event","Show the tips again: the memory reset (the visitor's Tips settings kept)");return keep}
 function gdTipsUndo(){if(!G.gd.tipsUndo)return false;S.gdVisitor=JSON.parse(G.gd.tipsUndo);G.gd.tipsUndo=null;gdLog("event","Show the tips again undone: the memory back");return true}
+/* ----- round 8 (_3.8 section 6): the first pages, at the app's start. A launch (gdLaunch: the preview bar's and Preview & Test's Start the
+   app) is the app opening: a first run (the visitor reset to a first visit, as Reset the visitor; the audience not yet asked; the camera
+   not yet allowed, as a new install) or a later launch (the same visitor back: a new visit, with Remember across visits Off a first one).
+   On a first run the pages run from Hello (gdPagesRun: First pages' On pages in order; Who's exploring only when Where to ask = At the
+   app's start and not yet answered; the camera only while it is not allowed, and its own request even when its page is Off), the
+   scheduler quiet (a gate); the wall ends the run: the Opening message says Straight to the wall's short line, then Tap a marker as The
+   start's. Skip skips the rest of the intro (Who's exploring unanswered is Explorer; the camera's own request still comes). The camera:
+   Allow the camera, then the phone's request (G.gd.camPerm: ask / allowed / denied, the phone's permission); refused, how to allow it with
+   Open Settings (the phone's Settings, a stand-in) and Try again: the run never goes on to the wall without the camera. Show me how it
+   works: How to use the card's bubble on the wall after the pages (it says the visit's first words). Later launches: no pages, the Opening
+   message's Welcome back. The memory: S.gdVisitor.pages (seen at which visit, skipped, Show me how) and the visit's pages (the short
+   line). A newer Editor demo closes the pages. Unity: an OnboardingController (UI Toolkit screens from GuidanceCatalog's First pages),
+   started by the app's first scene when GuidanceMemory has no pages; the camera through Application.RequestUserAuthorization(
+   UserAuthorization.WebCam) on iOS (Application.HasUserAuthorization after; refused: Settings by UIApplication.openSettingsURLString, a
+   small native call) and Permission.RequestUserPermission(Permission.Camera) with PermissionCallbacks (Denied, DeniedAndDontAskAgain:
+   the app settings intent) on Android; AR Foundation's ARCameraManager starts only once allowed ----- */
+G.gd.pages=null;G.gd.camPerm="allowed";
+function gdPagesRun(){var g=gdGroupById("pages"),on=!g||g.on!==false,need=G.gd.camPerm!=="allowed",out=[];
+  if(on)gdPageDefs().forEach(function(it){if(!it.on||it.page==="wall")return;if(it.page==="aud"&&!(S.aud.where==="start"&&!S.aud.seen))return;if(it.page==="camera"&&!need)return;out.push(it.id)});
+  if(need&&out.indexOf("pg_camera")<0)out.push("pg_camera:direct");return out}
+function gdPageName(id){var it=S.guidance.items[String(id).split(":")[0]];return it?it.label+(/:direct$/.test(id)?" (the phone's request only: its page is Off)":""):id}
+/* the page showing now: its id in the run, its item, and whether it is the camera's request alone */
+function gdPageNow(){var P=G.gd.pages;if(!P)return null;var id=P.run[P.i]||"";return{id:id,it:S.guidance.items[id.split(":")[0]]||null,direct:/:direct$/.test(id)}}
+function gdLaunch(kind){if(noDraw)return false;var later=kind==="later";
+  if(G.gd.pages)gdPagesEnd("the app started again",false);if(G.gd.cur)gdStop("the app started");gdChip(null);G.gd.demo=false;
+  if(G.on)stopTour();if(typeof hideStopUi==="function")hideStopUi();S.settingsOpen=false;S.contentsOpen=false;G.fab.menu=false;G.cam.open=false;ph.querySelectorAll(".azbub,.gdtoast,.onb").forEach(function(x){x.remove()});
+  /* a later launch of a visitor the Lab opened mid-visit: its first pages were seen at that earlier launch */
+  if(later&&!S.gdVisitor.pages){S.gdVisitor.pages={at:gdNow(),visit:S.gdVisitor.visits,how:false,skipped:false,earlier:true}}
+  gdVisitStart(later,later?"a later launch":"Start the app: a first run");
+  var first=!S.gdVisitor.pages;if(!later)G.gd.camPerm="ask";
+  /* a first run: the audience not yet asked (Who's exploring asks again where it is asked) */
+  if(first){S.aud.seen=false;S.vis.aud="explorer";S.vis.len=""}
+  S.view="card";S.stop="closed";renderPhone(false);
+  if(!first){gdLog("event","a later launch: no pages (seen at visit "+S.gdVisitor.pages.visit+"); the Opening message says Welcome back");return true}
+  gdPagesStart(gdPagesRun());return true}
+function gdPagesStart(run,o){o=o||{};if(!run.length){gdPagesDone({how:false,skipped:false},"no page to show");return null}
+  G.gd.pages={run:run,i:o.i||0,how:false,skipped:false,cam:o.cam||null,seq:G.demoSeq,at:gdNow(),preview:!!o.preview};
+  if(/:direct$/.test(run[G.gd.pages.i]))G.gd.pages.cam="prompt";
+  if(!o.preview)gdLog("event","the first pages: "+run.map(gdPageName).join(" → ")+" → the wall (the scheduler is quiet while they run)");gdPagePaint(true);return G.gd.pages}
+/* an Editor's demo: one page shown, the run going on from it as the visitor would (no memory) */
+function gdPagesPreview(id,o){if(noDraw)return null;o=o||{};if(G.gd.pages)gdPagesEnd("another page shown",false);if(G.gd.cur)gdStop("a page shown");
+  if(G.on)stopTour();S.settingsOpen=false;G.fab.menu=false;G.cam.open=false;S.view="card";S.stop="closed";renderPhone(false);
+  var run=gdPageDefs().filter(function(x){return x.page!=="wall"&&(x.on||x.id===id)}).map(function(x){return x.id}),i=run.indexOf(id);if(i<0){run=[id];i=0}
+  return gdPagesStart(run,{i:i,cam:o.cam,preview:true})}
+function gdPagesNext(how){var P=G.gd.pages;if(!P)return;if(how)P.how=true;var n=gdPageNow();
+  if(n&&n.it&&!P.preview)gdLog("event","the first pages: "+n.it.label+" done"+(how?" (Show me how it works)":""));P.i++;P.cam=null;
+  if(P.i>=P.run.length){gdPagesEnd("the run ended on the wall",true);return}if(/:direct$/.test(P.run[P.i]))P.cam="prompt";gdPagePaint(true)}
+/* Skip: the rest of the intro (an unanswered Who's exploring is Explorer); the camera's own request still comes when it is not allowed */
+function gdPagesSkip(){var P=G.gd.pages;if(!P)return;var n=gdPageNow();P.skipped=true;
+  if(S.aud.where==="start"&&!S.aud.seen&&P.run.slice(P.i).some(function(id){return/^pg_aud/.test(id)})){S.aud.seen=true;if(!P.preview)gdLog("event","Who's exploring: skipped with the intro (Explorer)")}
+  if(!P.preview)gdLog("event","Skip on "+(n&&n.it?n.it.label:"a page")+": the rest of the intro skipped");
+  if(G.gd.camPerm!=="allowed"){var cid=n&&/^pg_camera/.test(n.id)?n.id:"pg_camera:direct";P.run=P.run.slice(0,P.i).concat([cid]);P.i=P.run.length-1;P.cam="prompt";gdPagePaint(true);return}
+  gdPagesEnd("Skip: the intro skipped",true)}
+/* the camera: its page's button asks; the phone's own request answers; refused, Open Settings (the switch) and Try again */
+function gdCamAsk(){var P=G.gd.pages;if(!P)return;P.cam="prompt";if(!P.preview)gdLog("event","the camera: the phone's own request");gdPagePaint(false)}
+function gdCamAnswer(ok){var P=G.gd.pages;if(!P)return;G.gd.camPerm=ok?"allowed":"denied";
+  if(!P.preview)gdLog("event",ok?"the camera allowed":"the camera refused: how to allow it, Open Settings and Try again (never the wall without it)");
+  if(ok){gdPagesNext();return}P.cam="refused";gdPagePaint(true)}
+function gdCamSettings(){var P=G.gd.pages;if(!P)return;P.cam="settings";gdPagePaint(true)}
+function gdCamSwitch(){var P=G.gd.pages;if(!P)return;G.gd.camPerm=G.gd.camPerm==="allowed"?"denied":"allowed";gdPagePaint(false)}
+function gdCamBack(){var P=G.gd.pages;if(!P)return;if(G.gd.camPerm==="allowed"){if(!P.preview)gdLog("event","the camera allowed in Settings: back to the app");gdPagesNext();return}P.cam="refused";gdPagePaint(true)}
+/* Try again: the phone's request once more (Android asks again; iOS answers at once with what Settings says: the stand-in asks again) */
+function gdCamRetry(){var P=G.gd.pages;if(!P)return;P.cam="prompt";gdPagePaint(false)}
+/* the run ends: on the wall (done), or closed by a new launch, a new visit or a newer Editor demo (nothing remembered) */
+function gdPagesEnd(why,done){var P=G.gd.pages;if(!P)return;G.gd.pages=null;gdPagesUnpaint();
+  if(!done||P.preview){if(!P.preview)gdLog("event","the first pages closed: "+why);return}gdPagesDone(P,why)}
+function gdPagesDone(P,why){var V=S.gdVisitor,now=gdNow();V.pages={at:now,visit:V.visits,how:!!P.how,skipped:!!P.skipped};V.visit.pages=true;
+  /* asked at the app's start and its page Off, or never reached: no question on the first card either */
+  if(S.aud.where==="start"&&!S.aud.seen)S.aud.seen=true;
+  gdLog("event","the first pages ended ("+why+"): the wall, "+(P.how?"How to use the card's bubble":"the Opening message's short line"));
+  if(P.how)gdPagesHow()}
+/* Show me how it works: How to use the card's bubble on the wall says the visit's first words (the Opening message counts it as said) */
+function gdPagesHow(){if(!gdWalk("Show me how it works (the first pages)"))return false;var op=gdItems().filter(function(x){return x.id==="opening"})[0],c=G.gd.cur;
+  if(op&&c){gdMemStart(S.gdVisitor,op,gdNow(),c.text,null);gdLog("event","the Opening message: said by How to use the card's bubble (Show me how it works)")}return true}
+/* Who's exploring answered on its page (audiences/audiences.js's audience.asked): the next page */
+on("audience.asked",function(a,skip){var n=gdPageNow();if(!n||!n.it||n.it.page!=="aud")return;if(!G.gd.pages.preview)gdLog("event","Who's exploring at the app's start: "+(skip?"Skip (Explorer)":AUDN[a]||a));gdPagesNext()});
+/* a newer Editor demo takes the phone: the pages close */
+setInterval(function(){var P=G.gd.pages;if(P&&P.seq!==G.demoSeq)gdPagesEnd("a newer demo took the phone",false)},250);

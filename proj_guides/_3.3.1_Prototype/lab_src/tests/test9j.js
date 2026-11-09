@@ -265,16 +265,18 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   lap('before 12');
   // ---------- 12. + Add guidance: each template (real clicks) ----------
   const tpl = [];
-  for (const t of await R('GD_TEMPLATES.map(function(x){return[x.id,x.name]})')) {
+  /* round 8: the Page template belongs to First pages only (test9l), never to The wall */
+  for (const t of await R('GD_TEMPLATES.filter(function(x){return!x.page}).map(function(x){return[x.id,x.name]})')) {
     await R(base + 'S.ui.gdAddIn=null;S.ui.rowDemo=true;G.gd.manual=false;'); await editor({ gt4: true, 'gd:app': true, 'gd:g:wall': true });
     const ad = p.locator('[data-gdadd="wall"]'); await ad.scrollIntoViewIfNeeded(); await ad.click(); await W(150);
-    const tb = p.locator(`[data-gdtpl="wall|${t[0]}"]`); const label = await tb.textContent(); await tb.click(); await W(200);
+    const tb = p.locator(`[data-gdtpl="wall|${t[0]}"]`); const label = await tb.textContent({ timeout: 2500 }).catch(() => null); if (label == null) { tpl.push([t[1], null, []]); continue; } await tb.click(); await W(200);
     const nid = await R('var g=gdGroupById("wall");g.items[g.items.length-1]');
     await until(`!!G.gd.cur&&(G.gd.cur.item.base||G.gd.cur.item.id)==="${nid}"||/no words/.test(((ph.querySelector(".gdchip")||{}).textContent||""))||document.body.dataset.rowdemo.indexOf("${nid}")>=0`, 2500);
     const r = await R(`var it=S.guidance.items["${nid}"],T=GD_TEMPLATES.filter(function(x){return x.id==="${t[0]}"})[0];[it.group,it.kind,Object.keys(T.f).every(function(k){return JSON.stringify(it[k])===JSON.stringify(T.f[k])}),TXOWN[[].concat(it.says)[0]],S.tx[[].concat(it.says)[0]].en===T.en,!!ed.querySelector('[data-fo="gd:i:${nid}"]')&&ed.querySelector('[data-fo="gd:i:${nid}"]').open,(document.getElementById("gdedtoast")||{}).textContent||""]`);
     tpl.push([t[1], label, r]);
   }
-  ok('+ Add guidance offers the six templates; each adds its item to the group (its kind), with the template\'s fields and words (owned by it), opens its form and says so', tpl.length === 6 && tpl.every(x => x[1] === x[0] && x[2][0] === 'wall' && x[2][1] === 'app' && x[2][2] && /^gd:i:gdn\d+$/.test(x[2][3]) && x[2][4] && x[2][5] && /^Added the/.test(x[2][6])), tpl);
+  const offered = await R(`S.ui.gdAddIn="wall";renderEditor();var o=[].map.call(ed.querySelectorAll('[data-gdtpl^="wall|"]'),function(b){return b.dataset.gdtpl.slice(5)}).join(",");S.ui.gdAddIn=null;renderEditor();o`);
+  ok('+ Add guidance offers the six templates (never the Page of First pages); each adds its item to the group (its kind), with the template\'s fields and words (owned by it), opens its form and says so', tpl.length === 6 && tpl.every(x => x[1] === x[0] && x[2][0] === 'wall' && x[2][1] === 'app' && x[2][2] && /^gd:i:gdn\d+$/.test(x[2][3]) && x[2][4] && x[2][5] && /^Added the/.test(x[2][6])) && offered === 'control,remark,tour,moment,step,blank', [offered, tpl]);
   await R('G.gd.manual=true;S.ui.rowDemo=false');
 
   lap('before 13');
