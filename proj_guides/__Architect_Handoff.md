@@ -5,7 +5,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-07)
 
 - **State:**
-  - **The Lab:** `master` holds guidance rounds 1-9, verified on 2026-11-06/09, published at
+  - **The Lab:** `master` holds guidance rounds 1-10, verified on 2026-11-06/09, published at
     https://claude.ai/artifact/J9J4hWDvF161Bog9dsm83K with the 186 voice files and the capabilities (section 1). The
     developer changes account often (three times on 2026-11-08/09); the old links stay in their accounts (4LpLd4… at round 8, Jq6X2K… at round 7, Jrejv7… at
     round 6, QmhHSz… at round 5, KDs2… at v29). A new account cannot update an old link: publish a new one (section 1, Publishing). Its
@@ -13,13 +13,18 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     (`lab_src/src/<area>/<module>.js`), with no wrappers: `lab_src/PROTOTYPE_STRUCTURE.md` says where each feature lives and
     where a change goes. The build only joins files (`build.py`) and refuses wrappers, re-assignments of functions, second
     declarations, defaults set twice and version-named modules (`check_structure.js`, `structure_baseline.json` at 0).
-  - **Proof of the Lab:** the self-test (`tests/runtest8.ps1`: three walks side by side) gives
-    `ok=1197 behaviour=1932 bad=0` (round 8, 9.9 min, growing: 2.3 min at round 6, 6.2 at round 7; the Guide walk alone is
-    about 1300 controls); `node run_tests.js` runs every test file one at a time (33 files, about 56 min after round 8;
-    `tests_baseline.json`). test9d takes 430-555 s of its 600 s limit (the machine's load decides) and test9j 300-460 s:
-    watch them, and split test9d before it reaches the kill. Never walk `guide,words` together in the self-test (65 min);
-    one big tab per walk. test8q's mouth and test9b's rest were timing races (set and read in two calls; read with no wait):
+  - **Proof of the Lab:** the self-test, one big tab per walk (`tests/runtest8.ps1 -tabs card`, `-tabs guide`, `-tabs
+    marker,global`, `-tabs words`, each its own call), gives `ok=1199 behaviour=2046 bad=0` in about 5 min (level 3 after
+    round 10, 2026-11-09); it also fails any Editor row without its demo, in every tab. `node run_tests.js` runs every test
+    file one at a time (37 files, 1056 checks, about 72 min; `tests_baseline.json`, rewritten by that level 3). test9d was
+    split into test9da / test9db (round 10) and test9j into test9ja / test9jb (level 3: it reached its 600 s kill on a busy
+    machine, on master too). The slowest files now: test9e 494 s, test9da 322 s, test9db 344-502 s. Never walk
+    `guide,words` together in the self-test (65 min). test8q's mouth and test9b's rest were timing races (set and read in two calls; read with no wait):
     fixed on 2026-11-09 (one call; an `until` of 1.5 s), 3 of 3 green each.
+  - **Level 3 after round 10 (2026-11-09)** found no break from round 10: its reds were timing races and one file too long
+    for a busy machine (the developer's Chrome at 160 % CPU and 1.8 GB of memory free). Fixed: test9i's Talkativeness demo
+    waits up to 20 s for its chip (8 s), test9da waits for Azu and the scroll to settle (10 s) and for the dock before its
+    drag, test9j split; test9db and test9k were green alone. Every mutation (12 files: test9c, 9da, 9e, 9f, 9g, 9h, 9i, 9ja, 9k, 9l, 9m, 9n) turns its named checks red (test9l's after a rerun: its first start did not load in 90 s).
   - **Level 2 caught real breaks after rounds 6, 7 and 8** (round 6: a reused class, the dock's Tips box shifting the
     answers' traces, a tip rule catching cues; round 7: the card's ✦ and Azu drawn during a tour; round 8: checks of
     round 6's templates and defaults). Two rules came of it: shared code changed means level 2 that round; and every round
@@ -34,8 +39,8 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     - **Level 2, every 3rd-4th round (about 35 min):** every tab and every file. It runs sooner when a round changed existing
       shared code.
     - **Level 3, every 10-12 rounds and before a Unity hand-off:** level 2, every mutation and a new baseline.
-    - Count the rounds since the last level 2 and 3 in every answer. After guidance round 9 that is 1 and 9: level 2 ran on
-      round 8 on 2026-11-09 (round 9's broad level 1 covered its touched modules), and level 3 is owed with round 10.
+    - Count the rounds since the last level 2 and 3 in every answer. After guidance round 10 that is 0 and 0: level 3 (with
+      level 2) ran on 2026-11-09.
   - **Where the tests' time goes (measured 2026-11-07):**
     - Starting Edge and loading the 13 MB page costs only about 8 s a file (Edge 0.3-0.8 s, the page 7 s), so one shared Edge
       would save almost nothing.
@@ -62,8 +67,8 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     sources in `_3.8_guidance_plans/`). Decisions: a top-level **Guide** tab (today's 6 · Guide + Guidance + the first pages);
     App and Fun tips as a bubble only, Content spoken once the guide has been heard; a deterministic mix; the card Hints edited
     in Guidance with a view in Card Controls.
-  - **Guidance rounds 1-9 are done** (merged into `master`; the briefs `_3.8_guidance_plans/brief_round1.md` to
-    `brief_round9.md`).
+  - **Guidance rounds 1-10 are done** (merged into `master`; the briefs `_3.8_guidance_plans/brief_round1.md` to
+    `brief_round10.md`).
     - Round 2: the memory and the visit, every gate and limit, the stage and the score, the learning, Ask about the view
       and A tour of {point}, Why not now? / The visitor / Log, five console scenes; `tests/test9f.js`.
     - Round 3: Azu's wall remarks became Content › What's in view (one item a point) and the ✦ hint App › The wall ›
@@ -95,23 +100,28 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       5 items on the card, 6 on the wall), `agent/agent.js`, `agent/tools.js` (9 tools), `guide/guide-scenes.js`,
       `core/words.js`. Its level 1 ran 13 files (every guidance file and each touched module's), so the full level 2 was
       left to round 10's level 3.
+    - Round 10: every Editor row of every tab has its demo (298 were missing; `rowDemos` in each row's module, a family by
+      `rowDemos(function(key){…})`, the spec's new fields `block` and `page`); the self-test's `NO DEMO` covers every tab;
+      12 exemptions with reasons (`ROW_DEMO_EXEMPT`, `editor/demo.js`); one ring at a time; a change's demo starts in the
+      same task; test9d split; `tests/test9n.js`. Shared code changed: `editor/demo.js`, `editor/shell.js` (`playRef` /
+      `replayRef`, one play per part), `editor/texts.css`, and each tab's modules (`card/*`, `editor/*-tab.js`,
+      `editor/components.js`, `mascot/azu2d.js`). The Detail Card tab's draw grew about 9 % (the ▸ on 290 more labels).
     - Their captures were judged by the Architect; the developer reviews later, step by step. The open look questions:
       round 1's PT opening line, what "Mascot Off" means, Azu's size beside the marker; rounds 2 and 3's in the closing
       answers of 2026-11-06/07 (among them: a group's own shorter gap, the remarks counting in Content's cap, The ✦ on the
       card, a ring for The ✦ with the 3D model, "The" mid-sentence in the remark lines).
-    - **Next: guidance round 10** (`_3.8` section 8: every remaining Editor row, about 148 outside Guide and Audiences,
-      gets its demo; the self-test fails any row without one), then **level 3** (level 2, every mutation, a new
-      baseline). Before it: split test9d (570 s of its 600 s on round 9) and look at the self-test's growth (9.9 min at
-      round 8). Prototype only (no Unity) until the developer says so.
+    - **Next: the developer's step-by-step review** of the collected look questions (rounds 1-10; round 10's: build the
+      seven missing phone effects so their rows get real demos, Global Scene's rows, stand-ins for block options with
+      nothing to see, the Sticky Action's demo with the bar at the bottom, and whether every Detail Card change should
+      move the phone). Prototype only (no Unity) until the developer says so.
   - **MCP:** blender-mcp at user scope (Blender 5.2.3, add-on 1.8, port 9876). The Unity MCP was not connected this stretch.
   - **Keys:** Gemini, Azure Speech and ElevenLabs answer (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).
 - **The tasks, in this order:**
-  1. **Guidance rounds 1-10** (`_3.8` section 8), each verified and published, with captures and specific questions for the
-     developer. Round 10 gives every remaining Editor row (about 148) its demo (the developer's rule, `skills/Feature_Prototyping.md`
-     step 5).
+  1. **Guidance rounds 1-10 are done** (`_3.8` section 8), each verified and published. Next: the developer's look review,
+     step by step, then what it decides.
   2. **The developer's look at v29+:** the open questions of the guide's controls (the ✦ above the dock at Mini, the ring at
      Compact, the step's name under Resume, one invitation at a time on the wall, the explorer's size).
-  3. **Lab upkeep** (`_3.3` section 17, "The Lab"): the self-test's time (38 min, was 10); split the large shared handlers by
+  3. **Lab upkeep** (`_3.3` section 17, "The Lab"): the self-test's time (about 5 min as one big tab per walk); split the large shared handlers by
      feature when each is next touched.
   4. **Mascots:** the cat waits for the developer's Meshy model; the mouse keeps its gentle wave.
   5. **Unity:** the GLBs' import (glTFast), the tile of light's Shader Graph, and later the guidance (`_3.8` Unity path), as

@@ -128,3 +128,5 @@ ed.addEventListener("input",function(e){var t=e.target;
   if(t.dataset.termtry){e.stopImmediatePropagation();var tw=document.getElementById("termtry");if(tw)tw.textContent=tryWord(t.value);return}
   if(t.dataset.txq){e.stopImmediatePropagation();S.ui.txq=t.value;var tb=document.getElementById("txrows");if(tb)tb.innerHTML=txRows();return}},true);
 ed.addEventListener("change",function(e){var t=e.target;if(t.dataset.tx||t.dataset.term){var y=window.scrollY;renderEditor();window.scrollTo(0,y)}},true);
+/* the Preview bar's Shown: the bar on the phone (Hidden: the card's top, where it was) */
+rowDemos({"previewBar":{stop:"half",wait:0,ring:function(){return S.previewBar?"#ptool":".chrome"}}});

@@ -64,3 +64,5 @@ on("edCard.html",function(html){var d=document.createElement("div");d.innerHTML=
   return d.innerHTML});
 FOCUS.s5hints=["card","#grab","half"];
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("ctl\\.jump\\.","ctl\\.jump\\.|test\\.on"));
+/* Tile on every card's demo: the card, its first section, the tile ringed (Off: the section without it) */
+rowDemos({"test.on":{stop:"full",wait:0,scroll:".testtile|.gsec",ring:".testtile|.gsec"}});

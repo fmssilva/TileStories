@@ -130,3 +130,13 @@ function fieldsFor(kind,c,path){var f=FIELDS[kind]||[],h='<div class="fields">';
    else if(type==="img")h+=row(lab,'<div class="assets">'+ASSETS.map(function(a){return'<button type="button" data-asset="'+path+'|'+key+'|'+a+'" aria-pressed="'+(v===a)+'" style="background-image:url('+IMG[a]+')" aria-label="'+a+'"></button>'}).join("")+'</div>',"A picture from the wall's media folder.");
    else if(type==="imgs"){v=v||[];h+=row(lab,'<div class="assets">'+ASSETS.map(function(a){return'<button type="button" data-assets="'+path+'|'+key+'|'+a+'" aria-pressed="'+(v.indexOf(a)>=0)+'" style="background-image:url('+IMG[a]+')" aria-label="'+a+'"></button>'}).join("")+'</div>',"Tap to add or remove; the order is the tap order.")}});
   return h+'</div>';}
+/* ----- each row's demo (Blocks & Components, Motion & Effects): the item it edits on the demo screen (the foldout it sits in: the
+   motion, the effect, the interaction, the element's style), brought into view and ringed; a motion plays once; an element's Entrance
+   plays it in; Motion Family and Replay play the family's entrance ----- */
+function compRef(kind){var s=S.sel;return kind==="motion"?"m:"+s.motion:kind==="fx"?"f:"+s.effect:kind==="inter"?"i:"+s.inter:kind==="family"?"m:"+S.family:"s:"+s.style}
+function compDemo(kind){var sel=function(){return'[data-ref="'+compRef(kind)+'"]'};
+  return{view:"demo",wait:0,scroll:sel,ring:sel,act:function(){S.focusRef=compRef(kind);applyFocus();var r=compRef(kind);
+    if(kind==="motion"||kind==="family")playRef(r);else if(kind==="enter")replayRef(r)},ringAfter:60}}
+rowDemos(function(key){var k=key.split(".")[0];
+  if(k==="motion"||k==="fx"||k==="inter")return compDemo(k);if(k==="o")return compDemo("style");
+  if(k==="style")return compDemo(key==="style.enter"?"enter":"style");if(key==="family"||key==="replay")return compDemo("family")});

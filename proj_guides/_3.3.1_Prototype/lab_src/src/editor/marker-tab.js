@@ -109,3 +109,13 @@ ed.addEventListener("click",function(e){var t=e.target;
   var pv=t.closest("[data-prv]");if(pv){e.stopPropagation();var q=pv.dataset.prv.split("|");if(q[0]==="del")S.previewRows.splice(+q[1],1);else if(q[0]==="unlink")S.previewRows[+q[1]]={kind:"pull_quote"};else if(q[0]==="link")S.previewRows.push({link:"r9"});else S.previewRows.push({kind:"paragraph"});renderAll(true);show("card");return}
   var hp=t.closest("[data-heropic]");if(hp){e.stopPropagation();var q2=hp.dataset.heropic.split("|");S.hero[q2[0]]=q2[1];renderAll(true);S.view="card";S.stop="full";renderPhone(false);return}},true);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(m\.starter|"));
+/* ----- the demos of the Specific Marker's rows: its card; a placed block's rows (its options on this card) that block in view, ringed
+   (Entrance plays it once); Page of: that page; the Header page's focus point: the hero ----- */
+function mBlockSel(){var b=byId(S.card,S.sel.cblock);return b?'[data-ref="b:'+b.id+'"]':".gsec"}
+rowDemos({"m.poi":{stop:"half",wait:0,ring:".hero"},"m.starter":{stop:"full",wait:0,scroll:".gsec",ring:".gsec"},
+  "m.page":{view:function(){return S.sel.page==="gallery"?"gallery":S.sel.page==="header"?"card":"story"},wait:0,ring:function(){return S.sel.page==="header"?".hero":".topbar"}},
+  "hero.fx":{stop:"full",wait:0,ring:".hero"},"hero.fy":{stop:"full",wait:0,ring:".hero"}});
+rowDemos(function(key){if(!/^cb\./.test(key))return;if(key==="cb.orow")return{view:"card",wait:0,scroll:function(){return mBlockSel()+" .open|"+mBlockSel()},ring:function(){return mBlockSel()+" .open|"+mBlockSel()}};
+  return{view:"card",wait:0,scroll:mBlockSel,act:key==="cb.enter"?function(){var e=scr.querySelector(mBlockSel());if(e)replayIn(e)}:null,ringAfter:60,ring:mBlockSel}});
+rowDemos(function(key){var m=/^card\.(\d+)\.(\w+)$/.exec(key),b=m&&S.card[+m[1]];if(!b)return;var s='[data-ref="b:'+b.id+'"]';
+  var r=m[2]==="tap"?s+" .open|"+s:s+"|.gsec";return{view:"card",wait:0,scroll:r,ring:r}});

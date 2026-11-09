@@ -165,3 +165,42 @@ on("modelSig.sig",function(s,cx){return s+cx.panels+JSON.stringify({full:stopTop
     bar:[S.ctl.bar.shape,S.ctl.bar.fill,S.ctl.bar.minBlocks<=S.card.length,S.ctl.bar.showAt,S.ctl.bar.showFrom,S.ctl.bar.pos]})});
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(cardCfg\\.(backBtn|openOne|earbuds|lockScreen|resume|audioOverlap)|ctl\\.(stickySlide|term\\.opens)|"));
 delete S.cardCfg.peekNext;
+/* ----- the demos of the rows made (or remade) here: the card at the stop and the part each row changes, ringed ----- */
+function secSel(id){return'[data-ref="sec:'+id+'"]'}
+var CTL_DEMOS={
+  "cardCfg.openAt":{stop:function(){return S.cardCfg.openAt},wait:0,ring:"#grab|.hero"},
+  "cardCfg.halfMax":{stop:"half",wait:0,ring:"#grab|.hero"},
+  "cardCfg.fullHeight":{stop:"full",wait:0,ring:".chrome|.hero"},
+  "cardCfg.tapOutside":{stop:"half",wait:0,act:function(){var c=ph.querySelector("#camera");if(c)c.dispatchEvent(new MouseEvent("click",{bubbles:true}))},ringAfter:300,ring:function(){return S.stop==="closed"?"#wall":".hero"}},
+  "cardCfg.mode":{stop:"full",wait:0,scroll:".gsec",ring:".gsec"},
+  "cardCfg.accent":{block:"Story",wait:0,scroll:function(){return blockAt("Story").sel.split("|")[0]+" .open"},ring:function(){return blockAt("Story").sel.split("|")[0]+" .open"}},
+  "cardCfg.round":{block:"Story",wait:0},
+  "cardCfg.openOne":{block:"Practical Info",wait:0,act:function(){var e=phFind(blockAt("Practical Info").sel),x=e&&e.querySelector("[data-expand]");if(x)x.click()}},
+  "cardCfg.topBand":{stop:"full",past:true,wait:0,ring:".topband"},
+  "cardCfg.strips":{block:"Gallery",wait:0},
+  "secCfg.glass":{stop:"full",wait:0,scroll:".gsec",ring:".gsec"},"secCfg.rim":{stop:"full",wait:0,scroll:".gsec",ring:".rimlit|.gsec"},
+  "secCfg.order":{stop:"full",wait:0,scroll:".gsec",ring:".gsec"},
+  "secCfg.start":{stop:"full",wait:0,scroll:secSel("stories"),ring:secSel("stories")+" .sstart|"+secSel("stories")},
+  "secCfg.motion":{stop:"full",wait:0,scroll:secSel("stories"),ring:secSel("stories")+" .sstart|"+secSel("stories")},
+  "secCfg.divSec":{stop:"full",wait:0,scroll:".secdiv|"+secSel("stories"),ring:".secdiv|"+secSel("stories")},
+  "secCfg.divider":{stop:"full",wait:0,scroll:secSel("about"),ring:secSel("about")+" .el-div|"+secSel("about")},
+  "secCfg.colour":{stop:"full",wait:0,scroll:secSel("stories"),ring:secSel("stories")},"secCfg.intensity":{stop:"full",wait:0,scroll:secSel("stories"),ring:secSel("stories")},
+  "secCfg.nextUp":{stop:"full",wait:0,scroll:".nextup|"+secSel("about"),ring:".nextup|"+secSel("about")},
+  "motionLevel":{stop:"full",wait:0,scroll:secSel("stories"),ring:secSel("stories")+" .sstart|"+secSel("stories")},
+  "ctl.bar.minBlocks":{stop:"full",past:true,wait:0,ring:barRing},"ctl.bar.showAt":{stop:"half",past:true,wait:0,ring:barRing},
+  "ctl.bar.showFrom":{stop:"full",wait:0,ring:function(){return barRing()==="#navbar"?"#navbar":".hero"}},
+  "ctl.bar.more":{stop:"full",past:true,wait:0,ring:"#navbar [data-navmore]|#navbar"},
+  "ctl.jump.opens":{stop:"half",past:true,wait:0,act:function(){var b=ph.querySelector('#navbar [data-navsec="media"]');if(b)b.click()},ringAfter:700,ring:secSel("media")},
+  "ctl.pageChips":{view:"story",wait:0,ring:".pchips|.topbar"},
+  "ctl.stickySlide":{stop:"half",wait:0,act:function(){scr.scrollTop=420},ringAfter:300,ring:".sticky|#navbar"},
+  "ctl.term.opens":{view:"story",wait:0,scroll:".gterm",act:function(){var g=scr.querySelector(".gterm");if(g)g.click()},ringAfter:200,ring:".gpop|.gterm"},
+  "ctl.term.underline":{view:"story",wait:0,scroll:".gterm",ring:".gterm"},
+  "ctl.locate.style":{stop:"half",wait:0,ring:".locpin|.hero"},
+  "ctl.viewer.counter":{view:"viewer",wait:0,ring:".vchips|.vtop span|.vtop"},
+  "ctl.player.captions":{page:"Video",wait:0,ring:".vcap|.vplayer"}};
+["indicator","labels","shape","fill","chosenIcon","chosenColour"].forEach(function(k){CTL_DEMOS["ctl.bar."+k]={stop:"full",past:true,wait:0,ring:barRing}});
+["on","rows","ticks","chips"].forEach(function(k){CTL_DEMOS["ctl.contents."+k]={stop:"full",past:true,wait:0,act:function(){S.contentsOpen=true;renderPhone(true)},ringAfter:60,ring:{on:".csheet|#navbar",rows:".csheet",ticks:".csheet .ctick|.csheet",chips:".csheet .cchips|.csheet"}[k]}});
+rowDemos(CTL_DEMOS);
+/* each section's own Start and Shown: that section on the card (Hidden: the bar it left) */
+rowDemos(function(key){var m=/^sections\.(\d+)\.(start|shown)$/.exec(key),sec=m&&S.sections[+m[1]];if(!sec)return;var s=secSel(sec.id);
+  return{stop:"full",wait:0,scroll:s+"|.gsec",ring:m[2]==="start"?s+" .sstart|"+s:function(){return ph.querySelector(s)?s:barRing()}}});

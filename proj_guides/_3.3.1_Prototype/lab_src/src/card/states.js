@@ -45,3 +45,5 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;v
 ed.addEventListener("click",function(e){var t=e.target.closest("[data-sttry]");if(t){e.stopPropagation();stateTry(t.dataset.sttry)}},true);
 FOCUS.s5states=["card",".hero","half"];
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("ctl\\.jump\\.","ctl\\.jump\\.|states\\."));
+/* Loader shows after's demo: the card loading, nothing for that long, then the loader (ringed) */
+rowDemos({"states.after":{stop:"half",wait:0,act:function(){stateHide();var my=G.demoSeq;setTimeout(function(){if(G.demoSeq===my)stateShow("loading")},Math.round(parseFloat(S.states.after)*1000))},ringAfter:620,ring:".stv"}});

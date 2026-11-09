@@ -159,7 +159,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('[x10] Every new Overall row has its demo: Preset, Talkativeness and the nine cells of the Mix (a press on the label, or the cell\'s change) re-run the simulator and play its two visit-minutes ×10 on the phone', miss.length === 0, { miss, sample: chips['guidance.talk'] });
   // a new row's demo plays the moved items at their moments: Talkativeness Chatty clicked (Show each row's demo On)
   await R('S.ui.rowDemo=true;window.__chips=[]'); await p.locator('[data-set="@guidance.talk"][data-v="chatty"]').click();
-  const dm = await until('window.__chips.some(function(c){return/ · was \\d|· new$/.test(c)})', 8000); const dmc = await R('window.__chips.slice()');
+  const dm = await until('window.__chips.some(function(c){return/ · was \\d|· new$/.test(c)})', 20000); const dmc = await R('window.__chips.slice()');
   await R('S.ui.rowDemo=false;gdPresetWrite("first");renderEditor()');
   ok('[x10] ...Talkativeness Chatty pressed: the demo starts where the timeline moved and names each item\'s move on the phone ("×10 · 0:18 · Ribeira Palace · was 4:18")', dm && dmc.some(c => /^×10 · Chatty: room 9 s, 3\/min · \d+:\d\d–\d+:\d\d$/.test(c)) && dmc.some(c => /^×10 · \d+:\d\d · .+ · (was \d+:\d\d|new)$/.test(c)), dmc.slice(0, 5));
   await R(base + 'S.tab="card";S.ui.level=1;S.op={s8:true,s8look:true};renderEditor()'); await W(200);

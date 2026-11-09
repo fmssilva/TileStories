@@ -106,3 +106,5 @@ BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(life|l
 /* each row's demo: Azu tapped once (beside the ✦); a poke in the tour; the mouth and the mood on step 2; a water break */
 rowDemos({"guideCfg.azuTap":{past:true,act:function(){var a=ph.querySelector(".azfab");if(a)gsTouch(a)},ring:".gbmenu|.azfab"},"guideCfg.life":{tour:"g1",act:function(){azPoke()},ring:".mascot"},
   "guideCfg.lips":{tour:"g1",ring:".mascot"},"guideCfg.moods":{tour:"g1",ring:".mascot"}});
+/* Solemn point's demo (Specific Marker › Guide script): the tour on this point, Azu's face (serious when Yes) ringed */
+rowDemos({"m.solemn":{tour:"g1",ring:".mascot"}});

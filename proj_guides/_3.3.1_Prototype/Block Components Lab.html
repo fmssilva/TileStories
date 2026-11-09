@@ -531,6 +531,8 @@ input.u.miss{border-color:#C0392B}
 .gpop button{appearance:none;border:0;background:none;color:var(--accent2);font:700 13.5px/1 var(--body);padding:8px 0 0;cursor:pointer}
 em.missing{font-style:normal;color:#FF8A7A}
 .pfocus{outline:3px solid #E07A1F!important;outline-offset:3px;border-radius:10px}
+/* the Open Row on a preview: the ring just outside its words (never over them) */
+.bprev .open.pfocus{outline-offset:-3px;padding:2px 9px;margin-left:-9px;margin-right:-9px;margin-bottom:-4px}
 /* ===== v8: the merged options ===== */
 .prop{font:600 9px/1 var(--mono);letter-spacing:.05em;padding:2px 4px;border-radius:3px;background:#4A3A12;color:#F2C14E;margin-left:4px;vertical-align:1px}
 .chrome i{pointer-events:auto;cursor:pointer}
@@ -2024,6 +2026,16 @@ function fieldsFor(kind,c,path){var f=FIELDS[kind]||[],h='<div class="fields">';
    else if(type==="img")h+=row(lab,'<div class="assets">'+ASSETS.map(function(a){return'<button type="button" data-asset="'+path+'|'+key+'|'+a+'" aria-pressed="'+(v===a)+'" style="background-image:url('+IMG[a]+')" aria-label="'+a+'"></button>'}).join("")+'</div>',"A picture from the wall's media folder.");
    else if(type==="imgs"){v=v||[];h+=row(lab,'<div class="assets">'+ASSETS.map(function(a){return'<button type="button" data-assets="'+path+'|'+key+'|'+a+'" aria-pressed="'+(v.indexOf(a)>=0)+'" style="background-image:url('+IMG[a]+')" aria-label="'+a+'"></button>'}).join("")+'</div>',"Tap to add or remove; the order is the tap order.")}});
   return h+'</div>';}
+/* ----- each row's demo (Blocks & Components, Motion & Effects): the item it edits on the demo screen (the foldout it sits in: the
+   motion, the effect, the interaction, the element's style), brought into view and ringed; a motion plays once; an element's Entrance
+   plays it in; Motion Family and Replay play the family's entrance ----- */
+function compRef(kind){var s=S.sel;return kind==="motion"?"m:"+s.motion:kind==="fx"?"f:"+s.effect:kind==="inter"?"i:"+s.inter:kind==="family"?"m:"+S.family:"s:"+s.style}
+function compDemo(kind){var sel=function(){return'[data-ref="'+compRef(kind)+'"]'};
+  return{view:"demo",wait:0,scroll:sel,ring:sel,act:function(){S.focusRef=compRef(kind);applyFocus();var r=compRef(kind);
+    if(kind==="motion"||kind==="family")playRef(r);else if(kind==="enter")replayRef(r)},ringAfter:60}}
+rowDemos(function(key){var k=key.split(".")[0];
+  if(k==="motion"||k==="fx"||k==="inter")return compDemo(k);if(k==="o")return compDemo("style");
+  if(k==="style")return compDemo(key==="style.enter"?"enter":"style");if(key==="family"||key==="replay")return compDemo("family")});
 
 /* The Editor's shell: rows, segments, selects, sliders, foldouts (fo), renderEditor and renderAll, setOpt, and the Editor's own events; the path controls (pseg, psel, pslider) and the row helpers (rowEl, setRow, addRows, dropRow). */
 /* ---------- Editor ---------- */
@@ -2102,13 +2114,16 @@ function setOpt(key,v){if(firstAnswer("setOpt.answer",key,v)!==undefined)return;
   if(key.indexOf("motion.")===0&&m){m[key.slice(7)]=v;renderAll(true);show("demo","m:"+m.id);playRef("m:"+m.id);return}
   if(key.indexOf("o.")===0&&st){st.o[key.slice(2)]=v;renderAll(true);show("demo","s:"+st.id);return}
   if(key.indexOf("fx.")===0&&f){f.o[key.slice(3)]=v;renderAll(true);show("demo","f:"+f.id);return}}
-function playRef(ref){if(noDraw)return;setTimeout(function(){var b=scr.querySelector('[data-ref="'+ref+'"] [data-play]');if(b)b.click()},380)}
+/* a part's Play pressed (playRef), or its entrance played again (replayRef), once the redraw has settled; a second ask for the same part
+   within that wait is the same play (a row's change and its demo ask both) */
+var replayT={};function replayRef(ref){if(noDraw)return;clearTimeout(replayT[ref]);replayT[ref]=setTimeout(function(){var it=scr.querySelector('[data-ref="'+ref+'"]');if(it)replayIn(it)},420)}
+var playRefT={};function playRef(ref){if(noDraw)return;clearTimeout(playRefT[ref]);playRefT[ref]=setTimeout(function(){var b=scr.querySelector('[data-ref="'+ref+'"] [data-play]');if(b)b.click()},380)}
 ed.addEventListener("change",function(e){var t=e.target,k=t.dataset.sel;if(t.dataset.num){numChange(t,true);return}if(!k)return;
   if(k==="test.poi"){S.test.poi=t.value;S.view="card";renderAll(false);return}
   if(k==="family"){S.family=t.value;renderAll(true);return}
   if(k.indexOf("cb.")===0){var b=byId(S.card,S.sel.cblock);b[k.slice(3)]=t.value;renderAll(true);show("card","b:"+b.id);return}
   var st=styleById(S.sel.style);
-  if(k==="style.enter"&&st){st.enter=t.value;renderAll(true);show("demo","s:"+st.id);setTimeout(function(){var it=scr.querySelector('[data-ref="s:'+st.id+'"]');if(it)replayIn(it)},420);return}
+  if(k==="style.enter"&&st){st.enter=t.value;renderAll(true);show("demo","s:"+st.id);replayRef("s:"+st.id);return}
   if(k==="style.scroll"&&st){st.scroll=t.value;renderAll(true);show("demo","s:"+st.id);return}
   if(k==="style.turn"&&st){st.turn=t.value;renderAll(true);show("demo","s:"+st.id);return}
   if(k==="style.uses"&&st){st.o.uses=t.value;renderAll(true);show("demo","s:"+st.id);return}
@@ -2270,8 +2285,29 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   /* 5: Card Controls */
   var s5=d.querySelector('[data-fo="s5"] > summary');if(s5)s5.innerHTML=s5.innerHTML.replace("Navigation &amp; Controls","Card Controls").replace("what the visitor uses to move around","the parts around the content: bar, top bar, page chrome, locate button, sticky action");
   return d.innerHTML});
+/* ----- the demos of the rows this tab makes: Card, Sections, Feedback and Card Controls (the rows card/controls.js remakes have their
+   demos there; a block's rows: card/blocks.js's builder) ----- */
+function barRing(){var nb=document.getElementById("navbar");return nb&&nb.style.display!=="none"?"#navbar":".gsec"}
+var CARDTAB_DEMOS={
+  "cardCfg.layout":{stop:"full",wait:0,scroll:".lt-tabs|.lt-acc|.gsec",ring:".lt-tabs|.lt-acc|.gsec"},
+  "secCfg.look":{stop:"full",wait:0,scroll:".gsec",ring:".gsec"},
+  "secCfg.tint":{stop:"full",wait:0,scroll:'[data-ref="sec:stories"]',ring:'[data-ref="sec:stories"]'},
+  "ctl.top.title":{stop:"full",past:true,wait:0,ring:".topband b|.topband"},
+  "ctl.bar.on":{stop:"full",past:true,wait:0,ring:barRing},"ctl.bar.pos":{stop:"full",past:true,wait:0,ring:barRing},
+  "ctl.bar.depth":{stop:"full",past:true,wait:0,ring:barRing},"ctl.bar.iconColour":{stop:"full",past:true,wait:0,ring:barRing},
+  "ctl.jump.motion":{stop:"full",past:true,wait:0,act:function(){var b=ph.querySelector('#navbar [data-navsec="media"]');if(b)b.click()},ringAfter:700,ring:'[data-ref="sec:media"]'},
+  "ctl.openrow":{block:"Story",wait:0,scroll:function(){return blockAt("Story").sel.split("|")[0]+" .open"},ring:function(){return blockAt("Story").sel.split("|")[0]+" .open"}},
+  "ctl.crumb":{view:"story",wait:0,ring:".topbar span|.topbar"},
+  "ctl.prevnext":{view:"story",wait:0,scroll:".pfoot|.pg",ring:".pfoot|.pg"},
+  "ctl.locate.on":{stop:"half",wait:0,ring:".locpin|.hero"},"ctl.locate.colour":{stop:"half",wait:0,ring:".locpin|.hero"},
+  "ctl.locate.size":{stop:"half",wait:0,ring:".locpin|.hero"},"ctl.locate.float":{stop:"half",wait:0,ring:".locpin|.hero"},
+  "ctl.sticky":{stop:"half",wait:0,ring:".sticky|#navbar"}};
+/* Feedback: a tap on a block buzzes (the ring where the phone would vibrate) and, with Sounds On, plays its sound */
+["fb.haptics","fb.hStrength","fb.sound","fb.volume"].forEach(function(k){CARDTAB_DEMOS[k]={block:"Knowledge Check",wait:0,act:function(){feedback(k==="fb.sound"||k==="fb.volume"?"right":"tap")},ringAfter:60,ring:function(){return".hapring|"+blockAt("Knowledge Check").sel}}});
+rowDemos(CARDTAB_DEMOS);
+rowDemos(function(key){var m=/^blockDefs\.([^.]+)\.(enter|orow|chrome|crumb|prevnext)$/.exec(key);if(m&&S.blockDefs[m[1]])return blockRowDemo(m[1],m[2])});
 
-/* Each element's demo content (S.demoC) and where a demo field lives; each Editor row's demo (rowDemos, showRowDemo). */
+/* Each element's demo content (S.demoC) and where a demo field lives; each Editor row's demo (rowDemos, showRowDemo) and the self-test's NO DEMO over every tab. */
 S.demoC={title:{text:DEMO.title},eyebrow:{text:DEMO.eyebrow},heading:{text:DEMO.heading},lede:{text:DEMO.lede},paragraph:{text:DEMO.paragraph},
  callout:{title:DEMO.ctitle,text:DEMO.ctext,back:DEMO.back},pull_quote:{text:DEMO.quote,cite:DEMO.cite},list:{items:DEMO.list},
  picture:{img:"g3",cap:DEMO.piccap},picture_pair:{imgs:["before","g2"],cap:DEMO.paircap},carousel:{imgs:["g1","g2","g3"]},video:{img:"hero",cap:DEMO.vidcap},
@@ -2287,38 +2323,79 @@ on("contentAt.answer",function(path){if(path.indexOf("demo:")===0){var k=path.sl
 ed.addEventListener("focusin",function(e){var f=e.target.dataset&&e.target.dataset.field;if(f&&(f.indexOf("demo:")===0||f.indexOf("termpage:")===0))pathShow(f)});
 
 /* ----- each row's demo: a row declares its demo, one runner shows it -----
-   A module declares the demos of its own rows, by the row's key: rowDemos({"guideCfg.x": spec}) (it joins the point rowDemo.spec).
-   A change to the row, or a press on its label (▸), runs showRowDemo(key): the phone goes to the spec's view, sets its state, does its
-   action and rings the part the row changes. A spec: view ("card", "story"…) and stop (the sheet's stop, "full" when not given);
-   past (the card scrolled past the hero); wall (true: the wall; "open": Ask about the view open); tour (a step's id, or true: the
-   start) and dock (the dock's height then); intro (the tour starts with Azu's introduction); scroll (a selector brought into view);
-   act (a function: a tap, a line, a gesture) and wait (ms before it); ring (the part: selectors joined by "|", the first found is
-   ringed, or a function giving them) and ringAfter (ms after the act). Unity: the POI Editor's row gets its
-   preview action, which sets the Play-mode guide the same way (PlayMode Live Config) */
-function rowDemos(map){on("rowDemo.spec",function(key){return map[key]})}
+   A module declares the demos of its own rows, by the row's key: rowDemos({"guideCfg.x": spec}) (it joins the point rowDemo.spec), or
+   rowDemos(function(key){…}) for a family of rows (every block's options, every section's, every motion's): it returns the spec of a key
+   it owns, else nothing. A row's key is its option's path (@…), or, for a row with none, its first control's key (motion.dur, fx.h…:
+   the part it edits is the foldout it sits in, as setCtx reads it). A change to the row, or a press on its label (▸), runs
+   showRowDemo(key): the phone goes to the spec's view, sets its state, does its action and rings the part the row changes. A spec:
+   view ("card", "story", "democard", "demo"…) and stop (the sheet's stop, "full" when not given); block (a block kind: the card that
+   holds it, the marker's or else the demo card, at Full, the block brought into view and ringed when no ring is given); page (a block
+   kind: its full page open, the story, the gallery or its own page); past (the card scrolled past the hero: true or a scrollTop);
+   wall (true: the wall; "open": Ask about the view open); tour (a step's id, or true: the start) and dock (the dock's height then);
+   intro (the tour starts with Azu's introduction); scroll (a selector brought into view); act (a function: a tap, a line, a gesture)
+   and wait (ms before it: 0 starts it in the same frame as the change); ring (the part: selectors joined by "|", the first found is
+   ringed) and ringAfter (ms after the act). view, stop, block, page, past, scroll and ring may be functions, read when the demo runs.
+   Unity: the POI Editor's row gets its preview action, which sets the Play-mode guide the same way (PlayMode Live Config) */
+function rowDemos(m){on("rowDemo.spec",typeof m==="function"?m:function(key){return m[key]})}
 function rowDemoOf(key){return firstAnswer("rowDemo.spec",String(key||"").replace(/^@/,""))}
-function rowKey(r){var c=r.querySelector('[data-set^="@"],[data-sel^="@"],[data-num^="@"]');return c?(c.dataset.set||c.dataset.sel||c.dataset.num).slice(1):null}
-function showRowDemo(key){var sp=rowDemoOf(key);if(!sp||noDraw)return false;var my=G.demoSeq=(G.demoSeq||0)+1;clearTimeout(G.demoT);
+function rowKey(r){var c=r.querySelector('[data-set^="@"],[data-sel^="@"],[data-num^="@"]')||r.querySelector("[data-set],[data-sel],[data-num]");return c?(c.dataset.set||c.dataset.sel||c.dataset.num).replace(/^@/,""):null}
+function rdv(x){return typeof x==="function"?x():x}
+function showRowDemo(key){var sp=rowDemoOf(key);if(!sp||noDraw)return false;var my=G.demoSeq=(G.demoSeq||0)+1;clearTimeout(G.demoT);G.demoStart=performance.now();
   if(G.on)stopTour();if(typeof hideStopUi==="function")hideStopUi();S.settingsOpen=false;S.contentsOpen=false;G.fab.menu=false;G.cam.open=false;var o=ph.querySelector(".onb");if(o)o.remove();
-  if(sp.wall){S.view="card";S.stop="closed";G.cam.open=sp.wall==="open";renderPhone(false)}else{S.view=sp.view||"card";S.stop=sp.stop||"full";renderPhone(false);if(sp.past)scr.scrollTop=typeof sp.past==="number"?sp.past:900}
+  var bk=rdv(sp.block),pk=rdv(sp.page),bv=bk?blockAt(bk):null,ring=sp.ring!=null?sp.ring:bv?bv.sel:null,scroll=sp.scroll!=null?sp.scroll:bv?bv.sel:null,past=rdv(sp.past);
+  if(sp.wall){S.view="card";S.stop="closed";G.cam.open=sp.wall==="open";renderPhone(false)}
+  else{if(pk)pageOpen(pk);else S.view=bv?bv.view:rdv(sp.view)||"card";S.stop=rdv(sp.stop)||"full";renderPhone(false);if(past)scr.scrollTop=typeof past==="number"?past:900}
   if(sp.tour){S.introSeen=!sp.intro;startTour();var j=typeof sp.tour==="string"?S.guideSteps.findIndex(function(s){return s.id===sp.tour}):-1;if(j>0){stopSpeech();G.i=j;runStep()}if(sp.dock){S.dockH=sp.dock;renderGuide()}}
-  G.demoT=setTimeout(function(){if(G.demoSeq!==my)return;if(sp.scroll){var e=scr.querySelector(sp.scroll);if(e)scr.scrollTop=Math.max(0,e.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-scr.clientHeight/3)}
-    if(sp.act)sp.act();G.demoT=setTimeout(function(){if(G.demoSeq===my)ringPart(key,typeof sp.ring==="function"?sp.ring():sp.ring)},sp.ringAfter!=null?sp.ringAfter:sp.act?300:60)},sp.wait!=null?sp.wait:sp.tour?900:400);return true}
-/* the part, ringed for 2.4 s; body[data-rowdemo] says what was shown (the checks read it) */
-function ringPart(key,ring){var sels=String(ring||"").split("|"),el=null,sel="";for(var i=0;i<sels.length&&!el;i++){sel=sels[i];el=sel&&ph.querySelector(sel)}
-  document.body.dataset.rowdemo=key+"|"+(el?"found":"missing")+"|"+sel;if(!el)return;el.classList.remove("pfocus");void el.offsetWidth;el.classList.add("pfocus");clearTimeout(el._rdT);el._rdT=setTimeout(function(){el.classList.remove("pfocus")},2400)}
-/* the triggers: a changed value (after the change is made) or a press on the row's label */
-document.addEventListener("click",function(e){if(noDraw||!ed.contains(e.target))return;var b=e.target.closest('[data-set^="@"]');if(b){var k=b.dataset.set.slice(1);if(S.ui.rowDemo!==false&&rowDemoOf(k))setTimeout(function(){showRowDemo(k)},0);return}
-  var lb=e.target.closest(".row > label.rd");if(lb){var r=rowKey(lb.parentNode);if(r)showRowDemo(r)}},true);
-document.addEventListener("change",function(e){if(noDraw||S.ui.rowDemo===false||!ed.contains(e.target))return;var t=e.target,k=t.dataset&&(t.dataset.sel||t.dataset.num);if(!k||k[0]!=="@")return;k=k.slice(1);if(rowDemoOf(k))setTimeout(function(){showRowDemo(k)},0)},true);
+  var go=function(){if(G.demoSeq!==my)return;var sc=rdv(scroll);if(sc){var e=phFind(sc),put=function(){if(G.demoSeq===my&&e&&scr.contains(e))scr.scrollTop=Math.max(0,e.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-(ph.clientHeight-(parseFloat(scr.style.top)||0))/3)};
+      put();setTimeout(put,380)}
+    if(sp.act)sp.act();G.demoT=setTimeout(function(){if(G.demoSeq===my)ringPart(key,rdv(ring))},sp.ringAfter!=null?sp.ringAfter:sp.act?300:60)};
+  var w=sp.wait!=null?sp.wait:sp.tour?900:400;if(w)G.demoT=setTimeout(go,w);else go();return true}
+/* the part, ringed for 2.4 s, the one ring on the phone (an older demo's goes); body[data-rowdemo] says what was shown (the checks read it).
+   The scroll puts the part a third of the way down the sheet's height at its stop (not the height it has mid-slide), and once more
+   when the hero has settled at the new stop (0.35 s) */
+/* the first of the selectors joined by "|" found on the phone (an id also in the page: the preview bar) */
+function phFind(sels,out){sels=String(sels||"").split("|");for(var i=0;i<sels.length;i++){var s=sels[i],el=s&&(ph.querySelector(s)||(s.charAt(0)==="#"?document.querySelector(s):null));if(el){if(out)out.sel=s;return el}}return null}
+function ringPart(key,ring){var o={},el=phFind(ring,o),sel=el?o.sel:String(ring||"").split("|").pop();G.demoRingAt=performance.now();
+  document.body.dataset.rowdemo=key+"|"+(el?"found":"missing")+"|"+sel;document.querySelectorAll(".pfocus").forEach(function(x){if(x!==el)x.classList.remove("pfocus")});if(!el)return;el.classList.remove("pfocus");void el.offsetWidth;el.classList.add("pfocus");clearTimeout(el._rdT);el._rdT=setTimeout(function(){el.classList.remove("pfocus")},2400)}
+/* the triggers: a changed value (after the change is made) or a press on the row's label; the change's demo starts as soon as the
+   change is made, in its own task (G.demoAsk: when it was asked, G.demoStart: when it started; the checks read them) */
+function rowDemoSoon(k){G.demoAsk=performance.now();G.demoPend=k;clearTimeout(G.demoPendT);G.demoPendT=setTimeout(rowDemoNow,0)}
+function rowDemoNow(){var k=G.demoPend;G.demoPend=null;clearTimeout(G.demoPendT);if(k)showRowDemo(k)}
+/* the change made (the Editor's own handlers ran): the demo starts in the same task; a handler that stops the event leaves it to the
+   next task (the timeout above) */
+["click","change"].forEach(function(t){document.addEventListener(t,function(){if(G.demoPend)rowDemoNow()},false)});
+document.addEventListener("click",function(e){if(noDraw||!ed.contains(e.target))return;var b=e.target.closest("[data-set]");if(b){var k=b.dataset.set.replace(/^@/,"");if(S.ui.rowDemo!==false&&rowDemoOf(k))rowDemoSoon(k);return}
+  var lb=e.target.closest(".row > label.rd");if(lb){var r=rowKey(lb.parentNode);if(r){setCtx(lb.parentNode);showRowDemo(r)}}},true);
+document.addEventListener("change",function(e){if(noDraw||S.ui.rowDemo===false||!ed.contains(e.target))return;var t=e.target,k=t.dataset&&(t.dataset.sel||t.dataset.num);if(!k)return;k=k.replace(/^@/,"");if(rowDemoOf(k))rowDemoSoon(k)},true);
 /* 0 · Preview & Test > Show each row's demo: Off keeps the phone as it is when a value changes (the label's ▸ still shows it) */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;addRows(d,"s0",row("Show each row's demo",seg("ui.rowDemo",["true","false"],["On","Off"],String(S.ui.rowDemo!==false)),"On: a change to a row shows that row's own demo on the phone (its view, its state, an action, the part ringed). Off: the phone stays as it is; a press on a row's label (▸) still shows its demo.",true),"Preview language");return d.innerHTML});
 on("setOpt.answer",function(key,v){if(key==="ui.rowDemo"){S.ui.rowDemo=v==="true";renderEditor();return true}});
 /* a row with a demo has a pressable label */
 on("renderEditor.after",function(){ed.querySelectorAll(".row > label").forEach(function(lb){var k=rowKey(lb.parentNode);if(k&&rowDemoOf(k)){lb.classList.add("rd");lb.title="Show it on the phone"}})});
-/* the self-test: every row of the Guide tab and of Detail Card > 6 · Audiences has its demo (a row without one fails) */
-function rowsWithoutDemo(ids){var out=[];ids.forEach(function(id){ed.querySelectorAll('[data-fo="'+id+'"] .row').forEach(function(r){var k=rowKey(r);if(k&&!rowDemoOf(k)&&!out.some(function(x){return x.key===k}))out.push({key:k,label:(r.querySelector("label")||{}).textContent||""})})});return out}
-on("selfTest.res",function(res){var keep=S.tab;[["guide",guideSecIds()],["card",["s8"]]].filter(function(t){return stWalks(t[0])}).forEach(function(t){S.tab=t[0];renderEditor();rowsWithoutDemo(t[1]).forEach(function(r){res.push({tab:t[0],key:"@"+r.key,v:"(its demo)",label:r.label,result:"NO DEMO (a row of the Guide tab or of 6 · Audiences shows nothing on the phone when changed or opened)"})})});S.tab=keep;return res});
+/* ----- the self-test: every row of every tab has its demo (a row without one fails: NO DEMO), but the exemptions below ----- */
+/* the rows that change nothing the Lab's phone can show, each with its reason (keep them rare: a row with an effect gets a demo) */
+var ROW_DEMO_EXEMPT={
+  "ui.single":"An Editor preference (many foldouts open or one at a time); not saved to the wall, nothing on the phone.",
+  "ui.level":"An Editor preference (how deep the foldouts open); not saved to the wall, nothing on the phone.",
+  "cardCfg.enabled":"Enable Detail Card Off (a marker's tap shows only its label): the Lab's markers always open the card, so Off shows nothing yet.",
+  "cardCfg.backBtn":"The phone's own Back button (Android): the Lab's phone has none to press.",
+  "cardCfg.earbuds":"Earbuds disconnecting is a system event the Lab cannot make; nothing to show on the phone.",
+  "cardCfg.lockScreen":"The screen locking is a system event the Lab cannot make; nothing to show on the phone.",
+  "cardCfg.audioOverlap":"Two sounds at once: the Lab's audio and video blocks make no sound, so what the other sound does cannot be shown.",
+  "cardCfg.resume":"Reopening an audio or a story where the visitor left: the Lab keeps no playback position to show.",
+  "cardCfg.keepAudio":"The mini player on the wall after the card closes: the Lab's audio block plays nothing, so there is no player to keep.",
+  "ctl.bar.hide":"Hide while scrolling: the Lab's Navigation Bar does not slide away yet (a behaviour still to build).",
+  "langs.opensIn":"The language at a first open on a visitor's phone: the Lab's phone always shows the Editor's preview language.",
+  "langs.fallback":"Every word of the Lab's card has both languages, so no word ever falls back: nothing changes on the phone."};
+function rowExempt(k){return ROW_DEMO_EXEMPT.hasOwnProperty(String(k||"").replace(/^@/,""))}
+/* the rows without a demo in the tab drawn now: in the foldouts named (ids), or in the whole tab */
+function rowsWithoutDemo(ids){var out=[],seen={},rows=ids?[].concat.apply([],ids.map(function(id){return[].slice.call(ed.querySelectorAll('[data-fo="'+id+'"] .row'))})):[].slice.call(ed.querySelectorAll(".row"));
+  rows.forEach(function(r){var k=rowKey(r);if(k&&!seen[k]&&!rowDemoOf(k)&&!rowExempt(k)){seen[k]=1;var d=r.closest("details[data-fo]"),p=[];while(d){var s=d.querySelector(":scope > summary");p.unshift(s?s.textContent.replace(/\s+/g," ").trim():d.dataset.fo);d=d.parentElement&&d.parentElement.closest("details[data-fo]")}
+    out.push({key:k,label:(r.querySelector("label")||{}).textContent||"",path:p.join(" › ")})}});return out}
+/* each tab the self-test walks, every foldout open */
+function rowsWithoutDemoAll(){var keep=[S.tab,S.ui.level,JSON.stringify(S.op)],out=[];S.ui.level=9;S.op={};ST_TABS.filter(stWalks).forEach(function(tab){S.tab=tab;renderEditor();rowsWithoutDemo().forEach(function(r){r.tab=tab;out.push(r)})});
+  S.tab=keep[0];S.ui.level=keep[1];S.op=JSON.parse(keep[2]);return out}
+on("selfTest.res",function(res){rowsWithoutDemoAll().forEach(function(r){res.push({tab:r.tab,key:"@"+r.key,v:"(its demo)",label:r.label,result:"NO DEMO (this row shows nothing on the phone when changed or opened: "+r.path+")"})});return res});
 
 /* The Global Scene tab: the wall's markers and how a visitor finds them (edGlobal, GSECS). */
 function edGlobal(){var h='<div class="note">The top level only: the wall\'s markers and how a visitor finds them.</div>';
@@ -3139,6 +3216,8 @@ ed.addEventListener("input",function(e){var t=e.target;
   if(t.dataset.termtry){e.stopImmediatePropagation();var tw=document.getElementById("termtry");if(tw)tw.textContent=tryWord(t.value);return}
   if(t.dataset.txq){e.stopImmediatePropagation();S.ui.txq=t.value;var tb=document.getElementById("txrows");if(tb)tb.innerHTML=txRows();return}},true);
 ed.addEventListener("change",function(e){var t=e.target;if(t.dataset.tx||t.dataset.term){var y=window.scrollY;renderEditor();window.scrollTo(0,y)}},true);
+/* the Preview bar's Shown: the bar on the phone (Hidden: the card's top, where it was) */
+rowDemos({"previewBar":{stop:"half",wait:0,ring:function(){return S.previewBar?"#ptool":".chrome"}}});
 
 /* The preview bar under the phone (ptool): phone, wide, tablet, language, dark, reduce motion. */
 S.previewBar=true;
@@ -3363,6 +3442,45 @@ on("modelSig.sig",function(s,cx){return s+cx.panels+JSON.stringify({full:stopTop
     bar:[S.ctl.bar.shape,S.ctl.bar.fill,S.ctl.bar.minBlocks<=S.card.length,S.ctl.bar.showAt,S.ctl.bar.showFrom,S.ctl.bar.pos]})});
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(cardCfg\\.(backBtn|openOne|earbuds|lockScreen|resume|audioOverlap)|ctl\\.(stickySlide|term\\.opens)|"));
 delete S.cardCfg.peekNext;
+/* ----- the demos of the rows made (or remade) here: the card at the stop and the part each row changes, ringed ----- */
+function secSel(id){return'[data-ref="sec:'+id+'"]'}
+var CTL_DEMOS={
+  "cardCfg.openAt":{stop:function(){return S.cardCfg.openAt},wait:0,ring:"#grab|.hero"},
+  "cardCfg.halfMax":{stop:"half",wait:0,ring:"#grab|.hero"},
+  "cardCfg.fullHeight":{stop:"full",wait:0,ring:".chrome|.hero"},
+  "cardCfg.tapOutside":{stop:"half",wait:0,act:function(){var c=ph.querySelector("#camera");if(c)c.dispatchEvent(new MouseEvent("click",{bubbles:true}))},ringAfter:300,ring:function(){return S.stop==="closed"?"#wall":".hero"}},
+  "cardCfg.mode":{stop:"full",wait:0,scroll:".gsec",ring:".gsec"},
+  "cardCfg.accent":{block:"Story",wait:0,scroll:function(){return blockAt("Story").sel.split("|")[0]+" .open"},ring:function(){return blockAt("Story").sel.split("|")[0]+" .open"}},
+  "cardCfg.round":{block:"Story",wait:0},
+  "cardCfg.openOne":{block:"Practical Info",wait:0,act:function(){var e=phFind(blockAt("Practical Info").sel),x=e&&e.querySelector("[data-expand]");if(x)x.click()}},
+  "cardCfg.topBand":{stop:"full",past:true,wait:0,ring:".topband"},
+  "cardCfg.strips":{block:"Gallery",wait:0},
+  "secCfg.glass":{stop:"full",wait:0,scroll:".gsec",ring:".gsec"},"secCfg.rim":{stop:"full",wait:0,scroll:".gsec",ring:".rimlit|.gsec"},
+  "secCfg.order":{stop:"full",wait:0,scroll:".gsec",ring:".gsec"},
+  "secCfg.start":{stop:"full",wait:0,scroll:secSel("stories"),ring:secSel("stories")+" .sstart|"+secSel("stories")},
+  "secCfg.motion":{stop:"full",wait:0,scroll:secSel("stories"),ring:secSel("stories")+" .sstart|"+secSel("stories")},
+  "secCfg.divSec":{stop:"full",wait:0,scroll:".secdiv|"+secSel("stories"),ring:".secdiv|"+secSel("stories")},
+  "secCfg.divider":{stop:"full",wait:0,scroll:secSel("about"),ring:secSel("about")+" .el-div|"+secSel("about")},
+  "secCfg.colour":{stop:"full",wait:0,scroll:secSel("stories"),ring:secSel("stories")},"secCfg.intensity":{stop:"full",wait:0,scroll:secSel("stories"),ring:secSel("stories")},
+  "secCfg.nextUp":{stop:"full",wait:0,scroll:".nextup|"+secSel("about"),ring:".nextup|"+secSel("about")},
+  "motionLevel":{stop:"full",wait:0,scroll:secSel("stories"),ring:secSel("stories")+" .sstart|"+secSel("stories")},
+  "ctl.bar.minBlocks":{stop:"full",past:true,wait:0,ring:barRing},"ctl.bar.showAt":{stop:"half",past:true,wait:0,ring:barRing},
+  "ctl.bar.showFrom":{stop:"full",wait:0,ring:function(){return barRing()==="#navbar"?"#navbar":".hero"}},
+  "ctl.bar.more":{stop:"full",past:true,wait:0,ring:"#navbar [data-navmore]|#navbar"},
+  "ctl.jump.opens":{stop:"half",past:true,wait:0,act:function(){var b=ph.querySelector('#navbar [data-navsec="media"]');if(b)b.click()},ringAfter:700,ring:secSel("media")},
+  "ctl.pageChips":{view:"story",wait:0,ring:".pchips|.topbar"},
+  "ctl.stickySlide":{stop:"half",wait:0,act:function(){scr.scrollTop=420},ringAfter:300,ring:".sticky|#navbar"},
+  "ctl.term.opens":{view:"story",wait:0,scroll:".gterm",act:function(){var g=scr.querySelector(".gterm");if(g)g.click()},ringAfter:200,ring:".gpop|.gterm"},
+  "ctl.term.underline":{view:"story",wait:0,scroll:".gterm",ring:".gterm"},
+  "ctl.locate.style":{stop:"half",wait:0,ring:".locpin|.hero"},
+  "ctl.viewer.counter":{view:"viewer",wait:0,ring:".vchips|.vtop span|.vtop"},
+  "ctl.player.captions":{page:"Video",wait:0,ring:".vcap|.vplayer"}};
+["indicator","labels","shape","fill","chosenIcon","chosenColour"].forEach(function(k){CTL_DEMOS["ctl.bar."+k]={stop:"full",past:true,wait:0,ring:barRing}});
+["on","rows","ticks","chips"].forEach(function(k){CTL_DEMOS["ctl.contents."+k]={stop:"full",past:true,wait:0,act:function(){S.contentsOpen=true;renderPhone(true)},ringAfter:60,ring:{on:".csheet|#navbar",rows:".csheet",ticks:".csheet .ctick|.csheet",chips:".csheet .cchips|.csheet"}[k]}});
+rowDemos(CTL_DEMOS);
+/* each section's own Start and Shown: that section on the card (Hidden: the bar it left) */
+rowDemos(function(key){var m=/^sections\.(\d+)\.(start|shown)$/.exec(key),sec=m&&S.sections[+m[1]];if(!sec)return;var s=secSel(sec.id);
+  return{stop:"full",wait:0,scroll:s+"|.gsec",ring:m[2]==="start"?s+" .sstart|"+s:function(){return ph.querySelector(s)?s:barRing()}}});
 
 /* The preview bar's grip (drag it anywhere) and its replay. */
 /* the grabber's drag ends in renderPhone: the hero follows the new stop */
@@ -3579,6 +3697,23 @@ ed.addEventListener("toggle",function(e){var d=e.target;if(!d.dataset||d.dataset
 on("libThumb.answer",function(name){var f=KPREV[name];if(!f||name==="Quick Facts")return;var h;try{h=f({kind:name,id:"thumb"})}catch(e){return}return noBtn('<div class="thumb cv'+(S.dark?" dark":"")+'"><div class="tin"><div class="bprev">'+h+'</div></div></div>')});
 /* ----- the hero keeps one action: the guide button (the Listen pill left; the Audio Guide block plays the audio) ----- */
 KOPT.Header=KOPT.Header.filter(function(o){return o[0]!=="listen"});delete S.blockDefs.Header.o.listen;
+/* ----- each block row's demo (Blocks & Components › Blocks › a block): that block in view, the marker's card when it holds it, else
+   the demo card, ringed (Offered Off: its section, where it was); an option of its full page opens the page; Entrance plays it once;
+   Tap and Open Row ring its Open Row; Page chrome, Breadcrumb and Previous / Next open its page at that part. One builder for every
+   kind (blockRowDemo); the rows made in editor/card-tab.js (Entrance, Open Row, Page chrome) use it too. Unity: the row's preview
+   action opens the reference card at that block (CardTestInput.IntoReach) ----- */
+var KOPT_PAGE={Story:["layout"],Video:["captions"],"Knowledge Check":["score","retry"],"3D Model":["room"]};
+function blockAt(kind){if(kind==="Header")return{view:"card",sel:".hero"};var b=S.card.filter(function(x){return x.kind===kind})[0],v="card";
+  if(!b){b=S.demoCard.filter(function(x){return x.kind===kind})[0];v="democard"}return{view:v,sel:(b?'[data-ref="b:'+b.id+'"]|':"")+'[data-ref="sec:'+secOfKind(kind)+'"]'}}
+function blockRowDemo(kind,field){var o=field.indexOf("o.")===0?field.slice(2):null,first=function(){return blockAt(kind).sel.split("|")[0]};
+  if(o&&(KOPT_PAGE[kind]||[]).indexOf(o)>=0)return{page:kind,wait:0,ring:{layout:".chapbar|.pg .blk",captions:".vcap|.vplayer",room:".arfocal|.pg .blk",score:".kscore|.pg .blk",retry:".ubtn2|.pg .blk"}[o]};
+  if(field==="chrome"||field==="crumb")return{page:kind,wait:0,ring:field==="crumb"?".topbar span|.topbar":".topbar"};
+  if(field==="prevnext")return{page:kind,wait:0,scroll:".pfoot|.pg",ring:".pfoot|.pg"};
+  var sp={block:kind,wait:0};
+  if(field==="enter"){sp.act=function(){var e=phFind(blockAt(kind).sel);if(e)replayIn(e)};sp.ringAfter=60}
+  if(field==="tap"||field==="orow")sp.ring=sp.scroll=function(){return first()+" .open|"+blockAt(kind).sel};
+  return sp}
+rowDemos(function(key){var m=/^blockDefs\.([^.]+)\.(offered|frame|tap|o\.\w+)$/.exec(key);if(m&&S.blockDefs[m[1]])return blockRowDemo(m[1],m[2])});
 
 /* The demo card: one block of every kind (S.demoCard), its screen and the demo tile. */
 /* ----- the demo card: a card of its own with every block once, seeded once from the Ribeira Palace, then independent of every marker ----- */
@@ -3630,6 +3765,8 @@ document.addEventListener("click",function(e){var t=e.target;if(!ph.contains(t))
   var vi=t.closest(".blk .el-pic img, .blk .fr img");if(vi&&S.view==="gallery"){e.stopPropagation();var all=Array.prototype.slice.call(scr.querySelectorAll(".blk img"));S.viewerAt=Math.max(0,all.indexOf(vi));S.view="viewer";renderPhone(false);return}
   var va=t.closest("[data-vat]");if(va){e.stopPropagation();S.viewerAt=+va.dataset.vat;renderPhone(false);return}
   var vp=t.closest(".viewer img");if(vp){e.stopPropagation();vp.classList.toggle("z2");return}},true);
+/* a block kind's full page on the phone (a row's demo, the spec's page): the story, the gallery, or its own page */
+function pageOpen(kind){if(kind==="Story")S.view="story";else if(kind==="Gallery")S.view="gallery";else{S.pageKind=kind;S.view="kpage"}}
 
 /* The elements: renderEl, their options merged with Unity's, the steps list and the carousel. */
 function colourVar(c){return c==="accent"?"var(--accent2)":c==="neutral"?"var(--ink2)":"var(--fam)"}
@@ -3878,6 +4015,16 @@ ed.addEventListener("click",function(e){var t=e.target;
   var pv=t.closest("[data-prv]");if(pv){e.stopPropagation();var q=pv.dataset.prv.split("|");if(q[0]==="del")S.previewRows.splice(+q[1],1);else if(q[0]==="unlink")S.previewRows[+q[1]]={kind:"pull_quote"};else if(q[0]==="link")S.previewRows.push({link:"r9"});else S.previewRows.push({kind:"paragraph"});renderAll(true);show("card");return}
   var hp=t.closest("[data-heropic]");if(hp){e.stopPropagation();var q2=hp.dataset.heropic.split("|");S.hero[q2[0]]=q2[1];renderAll(true);S.view="card";S.stop="full";renderPhone(false);return}},true);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(m\.starter|"));
+/* ----- the demos of the Specific Marker's rows: its card; a placed block's rows (its options on this card) that block in view, ringed
+   (Entrance plays it once); Page of: that page; the Header page's focus point: the hero ----- */
+function mBlockSel(){var b=byId(S.card,S.sel.cblock);return b?'[data-ref="b:'+b.id+'"]':".gsec"}
+rowDemos({"m.poi":{stop:"half",wait:0,ring:".hero"},"m.starter":{stop:"full",wait:0,scroll:".gsec",ring:".gsec"},
+  "m.page":{view:function(){return S.sel.page==="gallery"?"gallery":S.sel.page==="header"?"card":"story"},wait:0,ring:function(){return S.sel.page==="header"?".hero":".topbar"}},
+  "hero.fx":{stop:"full",wait:0,ring:".hero"},"hero.fy":{stop:"full",wait:0,ring:".hero"}});
+rowDemos(function(key){if(!/^cb\./.test(key))return;if(key==="cb.orow")return{view:"card",wait:0,scroll:function(){return mBlockSel()+" .open|"+mBlockSel()},ring:function(){return mBlockSel()+" .open|"+mBlockSel()}};
+  return{view:"card",wait:0,scroll:mBlockSel,act:key==="cb.enter"?function(){var e=scr.querySelector(mBlockSel());if(e)replayIn(e)}:null,ringAfter:60,ring:mBlockSel}});
+rowDemos(function(key){var m=/^card\.(\d+)\.(\w+)$/.exec(key),b=m&&S.card[+m[1]];if(!b)return;var s='[data-ref="b:'+b.id+'"]';
+  var r=m[2]==="tap"?s+" .open|"+s:s+"|.gsec";return{view:"card",wait:0,scroll:r,ring:r}});
 
 /* Languages: the list, the opening language, the texts per language in the Editor (S.langs). */
 /* ----- the wall's languages (Languages & Terms > Languages): every localized field shows one field per language; an empty one shows the fallback's ----- */
@@ -4053,6 +4200,8 @@ on("edCard.html",function(html){var d=document.createElement("div");d.innerHTML=
   return d.innerHTML});
 FOCUS.s5hints=["card","#grab","half"];
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("ctl\\.jump\\.","ctl\\.jump\\.|test\\.on"));
+/* Tile on every card's demo: the card, its first section, the tile ringed (Off: the section without it) */
+rowDemos({"test.on":{stop:"full",wait:0,scroll:".testtile|.gsec",ring:".testtile|.gsec"}});
 
 /* Loading & states: every state in every look (S.states, stateShow). */
 S.states={loading:"skeleton",lost:"frame",empty:"mascot",offline:"banner",done:"button",after:"0.3"};
@@ -4101,6 +4250,8 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;v
 ed.addEventListener("click",function(e){var t=e.target.closest("[data-sttry]");if(t){e.stopPropagation();stateTry(t.dataset.sttry)}},true);
 FOCUS.s5states=["card",".hero","half"];
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("ctl\\.jump\\.","ctl\\.jump\\.|states\\."));
+/* Loader shows after's demo: the card loading, nothing for that long, then the loader (ringed) */
+rowDemos({"states.after":{stop:"half",wait:0,act:function(){stateHide();var my=G.demoSeq;setTimeout(function(){if(G.demoSeq===my)stateShow("loading")},Math.round(parseFloat(S.states.after)*1000))},ringAfter:620,ring:".stv"}});
 
 /* Ask the guide: the corpus, the search and the answer (ask). */
 /* ----- the content the guide (and Ask) can point to ----- */
@@ -4397,6 +4548,8 @@ BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(life|l
 /* each row's demo: Azu tapped once (beside the ✦); a poke in the tour; the mouth and the mood on step 2; a water break */
 rowDemos({"guideCfg.azuTap":{past:true,act:function(){var a=ph.querySelector(".azfab");if(a)gsTouch(a)},ring:".gbmenu|.azfab"},"guideCfg.life":{tour:"g1",act:function(){azPoke()},ring:".mascot"},
   "guideCfg.lips":{tour:"g1",ring:".mascot"},"guideCfg.moods":{tour:"g1",ring:".mascot"}});
+/* Solemn point's demo (Specific Marker › Guide script): the tour on this point, Azu's face (serious when Yes) ringed */
+rowDemos({"m.solemn":{tour:"g1",ring:".mascot"}});
 
 /* Audiences: Family, Explorer, Expert; the first-card screen, the looks per audience, the overrides per field and Draft with AI, the guide's length.
    Round 5 of the guidance: each audience's Guidance preset (Looks per audience › Guidance preset: Family → Family, Explorer → First visit,
@@ -8745,6 +8898,10 @@ function gdDemoTryShow(id){var my=gdDemoBegin(),it=gdTryItem(id);if(!it)return;g
 rowDemos({"guidance.tryMenu":{wall:true,wait:0,act:gdDemoTryMenu,ringAfter:300,ring:'[data-gbgo="try"]|.gbmenu|.gdchip'}});
 on("rowDemo.spec",function(key){var m=/^guidance\.items\.([^.]+)\.inTry$/.exec(key);if(!m||!S.guidance.items[m[1]])return;var id=m[1];
   return{wall:true,wait:0,act:function(){gdDemoTryRow(id)},ringAfter:300,ring:'[data-gdtryrow="'+id+'"]|.gdtry|.gdchip'}});
+/* ----- round 10: 0 · Preview & Test's simulator rows show on the phone too: The visitor plays its first two visit-minutes (×10);
+   Speed plays the timeline at that speed, each dot's item on the phone (Instant: the two minutes ×10) ----- */
+rowDemos({"ui.gdSim":{wall:true,wait:0,act:function(){var s=gdSimScript(S.ui.gdSim||"first");gdDemoSim({label:"The visitor: "+(s?s.name:S.ui.gdSim)})},ringAfter:600,ring:".gdchip|.gdbub"},
+  "ui.gdSpeed":{wall:true,wait:0,act:function(){if(S.ui.gdSpeed==="instant"||!ed.querySelector("#gdsimtl"))gdDemoSim({label:S.ui.gdSpeed==="instant"?"Instant: the whole visit at once":"×"+S.ui.gdSpeed});else{G.gd.sim.t=0;gdSimPlay()}},ringAfter:600,ring:".gdchip|.gdbub"}});
 
 /* Guidance tested in the prototype: the scenes in Ask Azu's test console (round 9's four at the very end: Things to try's Show me on Before / After,
    Tips Off with Things to try still there, How do I pause the guide?, Fewer like this then Things to try) (round 8's four before them: a first run, Skip every page, the camera
