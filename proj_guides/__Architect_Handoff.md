@@ -139,10 +139,14 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       Stop's count now taken as the click lands, since the Guide tab's redraw, about 1.3 s, can hold Playwright's click
       while two more scenes finish) and test8w (it set Azu's state on the element; since round 11 the dock's timer copies
       the app's own state at every height, so it now sets `G.talk` / `G.busy`).
-    - Open look question from round 12: at the finale the tour's quiz shows over the card's own quiz block (the tour's
-      step 10, "Test yourself"), so two quizzes are on screen; the developer decides (see the closing answers).
-    - **Next: round 13**, Don't say it! and Find it on the wall (In a step), on round 12's base (research 4.4, 4.7, 5.4),
-      after the developer's answers on round 12's beats.
+    - The developer's answers on round 12 (2026-11-10), for round 13's first part: when the quiz is promised, **Azu's quiz
+      replaces the tour's "Test yourself" step** (the block stays on the card to play freely; at the finale two quizzes
+      were on screen); **the promise and its quiz count as one beat** (so a short tour gets the quiz and one more beat);
+      the promise's **4 s buttons stay up while step 1 starts** (the tour no longer waits about 9 s); **the Cookie stays**
+      as the breather's variant (it plays in tours without the quiz). The words ("Not quite.", "Got it: no more games
+      today, just the story.", "Toque na resposta, ou diga-a", "Primeiro uma pergunta") were not changed.
+    - **Next: round 13**: first the three changes above, then Don't say it! and Find it on the wall (In a step), on round
+      12's base (research 4.4, 4.7, 5.4).
     - **Then: the developer's step-by-step review** of the collected look questions (rounds 1-10; round 10's: build the
       seven missing phone effects so their rows get real demos, Global Scene's rows, stand-ins for block options with
       nothing to see, the Sticky Action's demo with the bar at the bottom, and whether every Detail Card change should
