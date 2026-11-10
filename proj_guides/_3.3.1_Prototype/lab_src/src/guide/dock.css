@@ -278,3 +278,18 @@
    the Mini. The Teleprompter's fade ends at 24 px, before its header. Unity: the Open state's background-color without alpha */
 .cv .gdock.lk-paper.h-peek,.cv .gdock.lk-paper.h-full{background-color:var(--surfsolid)}
 .cv .gdock.lk-prompter.h-peek,.cv .gdock.lk-prompter.h-full{--fade:var(--surfsolid);background:linear-gradient(180deg,var(--fade0) 0px,var(--fade) 24px,var(--fade) 100%)}
+
+/* guidance round 12: the quiz's star at the end of the progress line (Fun › On the tour), in every Look and height: Open's bar keeps 26 px
+   for it at its end; Mini puts it at the end of its line (Paper glass, Player sheet), on Azu's ring (Ink glass) or on the capsule
+   (Teleprompter). Pending (the promise said, not yet answered): faded. Unity: a VectorImage at the end of the progress element */
+.gd-qstar{display:grid;place-items:center;width:22px;height:22px;color:var(--acc);flex:none;pointer-events:none}
+.gd-qstar svg{width:20px;height:20px;fill:currentColor}
+.gd-qstar.pend{opacity:.5}
+.gd-seek.qs{margin-right:28px}
+.gd-qstar.sk{position:absolute;right:-28px;top:50%;margin-top:-11px}
+.gd-qstar.m-paper{position:absolute;right:18px;bottom:-11px;background:var(--surfsolid);border-radius:50%}
+.gd-qstar.m-player{position:absolute;right:8px;top:-11px;background:var(--surfsolid);border-radius:50%}
+.gd-qstar.m-ring{position:absolute;right:-6px;top:-6px;width:20px;height:20px;background:#16151A;border-radius:50%}.gd-qstar.m-ring svg{width:15px;height:15px}
+.gd-capsule{position:relative}
+.gd-qstar.m-cap{position:absolute;right:10px;top:-11px;background:var(--cap);color:var(--capink);border-radius:50%}
+.lk-player .gd-qstar.sk,.lk-player .gd-qstar.m-player{color:#9E3B1A}.cv.dark .lk-player .gd-qstar.sk,.cv.dark .lk-player .gd-qstar.m-player{color:#F0A27E}

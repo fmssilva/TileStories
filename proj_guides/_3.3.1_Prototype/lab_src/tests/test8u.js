@@ -44,7 +44,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // 4. the scenes: each sets the prototype as a visitor would be, and the console says what it asks and expects
   await R('S.tab="guide";renderEditor();ed.querySelector(\'[data-fo="s7agent"]\').open=true');
   const s0 = await R('[AGSCENES.length,ed.querySelectorAll(".agscsel option").length]');
-  ok('Scenes: 8 in the console, the guide\'s 7 (round 7: its controls\' scenes) and the guidance\'s 30 (rounds g1 and g2: 5 each; g3: 2; g4: 2; g5: 3; g6: 4; g7: 5; g8: 4; g9: 4)', s0[0] === 49 && s0[1] === 49, s0);
+  ok('Scenes: 8 in the console, the guide\'s 7 (round 7: its controls\' scenes) and the guidance\'s 38 (rounds g1 and g2: 5 each; g3: 2; g4: 2; g5: 3; g6: 4; g7: 5; g8: 4; g9: 4; g12: 8)', s0[0] === 57 && s0[1] === 57, s0);
   await R('var s=ed.querySelector(".agscsel");s.value="3";s.dispatchEvent(new Event("change",{bubbles:true}))');
   await p.locator('[data-agsetup]').click(); await W(400);
   const s1 = await R('[S.camCfg.wall,S.stop,G.cam.open,camView().pois.map(function(p){return p.id}).join(),/In view now: .*Jerónimos/.test(ed.querySelector(".agscenes").textContent),ed.querySelector("#agq").value]');
@@ -66,10 +66,15 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await p.locator('[data-agscall]').click();
   const ran8 = await p.waitForFunction(() => Object.keys(LAB.run('AG.sceneRes')).length >= 8, null, { timeout: 120000 }).then(() => true).catch(() => false);
   const runLabel = await R('ed.querySelector("[data-agscall]").textContent');
+  // (round 12 review) the count is taken as Stop lands: Playwright waits for a still button, and the Guide tab's redraws (about 1 s
+  //  each, twice in a scene) can hold the click while one or two more scenes finish; the rule is the same: after Stop, only the
+  //  scene running may finish
+  await R('ed.addEventListener("click",function(e){if(e.target.closest("[data-agscall]"))window.__t8uAt=Object.keys(AG.sceneRes).length},{capture:true,once:true})');
   await p.locator('[data-agscall]').click(); await p.waitForFunction(() => !LAB.run('AG.runAll'), null, { timeout: 120000 }).catch(() => {});
+  const at = await R('window.__t8uAt');
   const ra = await R('var k=Object.keys(AG.sceneRes),ids=AGSCENES.map(function(s){return s.id});[k.length,k.slice(0,8).join()===ids.slice(0,8).join(),ed.querySelectorAll(".agres tbody tr").length,ed.querySelector("[data-agscall]").textContent]');
   ok('Run all scenes: the console\'s eight in order, each with its result in the table; while it runs the button is Stop', ran8 && runLabel === 'Stop' && ra[1] && ra[2] === ra[0], [ran8, runLabel, ra]);
-  ok('...Stop ends it: the scene running ends, no next one starts, the button reads Run all scenes again', ra[0] >= 8 && ra[0] <= 9 && ra[3] === 'Run all scenes', ra);
+  ok('...Stop ends it: the scene running ends, no next one starts, the button reads Run all scenes again', ra[0] >= 8 && at >= 8 && ra[0] <= at + 1 && ra[3] === 'Run all scenes', [at, ra]);
   ok('...the photo scene leaves Photo of the view as it was (Off)', await R('S.agentCfg.photo===false&&!!AG.sceneRes.photo'));
   // 6. the Editor rows
   ok('Editor: Trace under each answer (Outputs) and Names on the points (Ask about the view)', await R('/Trace under each answer/.test(ed.querySelector(\'[data-fo="s7agent"]\').textContent)&&/Names on the points/.test(ed.querySelector(\'[data-fo="s7cam"]\').textContent)'));

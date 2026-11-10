@@ -138,6 +138,17 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
     a credited track only, Music credits); the green ▸ (22 px, 3:1) and every new row's demo by a real click on it. `MUTATE=1 node
     tests/test9o.js` lets Fun through during a tour: the checks named [fun hold] turn red. The tracks: `../music/tracks.js` (the
     Architect's approved ones, with their licences; a credited one carries its credit line).
+  - *Fun › On the tour, guidance round 12* (`guidance/catalog`, `guidance/scheduler`, `guidance/service`, `guidance/present`, `guidance/editor`,
+    `guidance/scenes`, `mascot/azu2d`'s props, `guide/dock`'s star, `world/guide-button`'s Your N questions): `tests/test9p.js` checks the tour's
+    plan alone on `gdTourPlan` (deterministic; its rhythm and caps by length; never two seams in a row nor in the first 20 s; pairs whole; its
+    words) and its gates (Solemn, Calm, a screen reader, Games on the tour, two Not nows, never over a sentence, Fun's hold never holding a
+    beat); the quiz's question picking (steps heard, one a third), the speech match, the guess's bands, the prop by date; on the page the
+    promise and its star in every Look at Mini and Open, Deal / waiting / No quiz by real taps, the quiz (a right and a wrong answer by tap, one
+    by the recogniser's text, Not sure, Show me, the score lines, the best kept, Skip, too few saved), a skipped step dropping its beat, the
+    breather (the glass beside Azu 0 px over words, 8 s Go on, A question first and Back to our story), Guess the year (a real drag, Tell me,
+    the two pins), the two-Not-now rule, Settings' Games on the tour, the Editor's rows and the plan line, every new row's demo (a real click on
+    a sample), Draft with AI with `sampleFn` stubbed and Reviewed, and the eight scenes. `MUTATE=1 node tests/test9p.js` lets the plan ignore
+    the tour's cap and rhythm: the checks named [cap] turn red.
   - *Every Editor row's demo, guidance round 10* (`editor/demo`, the rows' modules: `editor/card-tab`, `card/controls`, `card/blocks`,
     `card/pages`, `card/states`, `card/hints`, `editor/texts`, `editor/components`, `editor/marker-tab`, `mascot/azu2d`, `guidance/editor`):
     `tests/test9n.js` checks that the self-test's NO DEMO check walks every tab and finds no row without a demo but its named exemptions

@@ -25,9 +25,9 @@
 var GD_VISIT_GAP=30*60000;
 function gdVisitMem(n,now){return{n:n,at:now,lastEnd:null,cueEnd:null,cards:0,items:{},starts:[],away:0,ignoredRun:0,breathMul:1,rest:{},fewer:{},heard:false,pokes:0,ev:{},tips:[]}}
 /* round 6: the visitor's own Tips (All / Essentials only / Off) and Tips stay until I tap them (WCAG 2.2.1), kept with the memory */
-function gdNewMemory(now){return{visits:1,visit:gdVisitMem(1,now),ever:{items:{}},used:{},met:false,prefs:{tips:"all",stay:false}}}
+function gdNewMemory(now){return{visits:1,visit:gdVisitMem(1,now),ever:{items:{}},used:{},met:false,prefs:{tips:"all",stay:false,games:"on"}}}
 S.gdVisitor=gdNewMemory(0);
-G.gd={t:0,rate:1,manual:false,cur:null,movedAt:null,touchAt:null,actAt:null,cardAt:null,wallAt:null,onWall:false,demo:false,last:null,next:null,log:[],between:false,skipKey:""};
+G.gd={t:0,rate:1,manual:false,cur:null,movedAt:null,touchAt:null,actAt:null,cardAt:null,wallAt:null,onWall:false,demo:false,last:null,next:null,log:[],between:false,skipKey:"",plan:null,heard:{}};
 function gdNow(){return G.gd.t}
 /* the log: every decision (shown, skipped, ended) and event, with the visit's time; the Editor shows the last 30 */
 function gdLog(what,why){var v=S.gdVisitor.visit,t=Math.round(gdNow());G.gd.log.push({t:t,vt:t-Math.round(v.at||0),v:v.n,what:what,why:why||""});if(G.gd.log.length>400)G.gd.log.shift();emit("gdLog.after")}
@@ -39,12 +39,14 @@ function gdMemStart(V,it,now,text,key,answer){var vm=gdVM(it.id,V),em=gdEM(it.id
   if(it.form==="cue"){if(!it.untilSeen){vm.shown++;em.shown++}return}
   /* round 7: the pokes at its start (pokes are counted since it last showed) and the variant said (the least seen shows next) */
   vm.pk=V.visit.pokes||0;if(key){var sn=em.seen||(em.seen={});sn[key]=(sn[key]||0)+1}
-  vm.shown++;vm.line=text;em.shown++;em.line=text;if(!answer)V.visit.starts.push(now)}
+  vm.shown++;vm.line=text;em.shown++;em.line=text;if(!answer&&!it.onTour)V.visit.starts.push(now)}
 /* a cue's end writes the cue room's clock (never a tip's end or learning); a tip's end, how it ended and the learning */
 function gdMemEnd(V,c,how,now,log){var vm=gdVM(c.item.id,V);vm.end=now;vm.how=how;
   if(c.cue){V.visit.cueEnd=now;if(c.item.untilSeen&&how==="seen"){vm.shown++;gdEM(c.item.id,V).shown++}return}
   /* round 7: a joke that answered pokes neither starts the breathing room nor counts as ignored */
   if(c.answer){if(how==="acted"||how==="dismissed"||how==="fewer")gdLearn(c,how,now,V,log);return}
+  /* round 12: a beat of the tour ends inside the tour's rhythm: no breathing room, no learning of the visit's tips */
+  if(c.item.onTour){if(how==="acted"){vm.acted++;gdEM(c.item.id,V).acted++}return}
   V.visit.lastEnd=now;gdLearn(c,how,now,V,log)}
 /* a feature used: the items it retires are done for good (the items given, in the Editor's order) */
 function gdMemUsed(V,f,now,items){V.used[f]=now;items.forEach(function(it){if(it.doneWhen===f){var em=gdEM(it.id,V);if(!em.done){em.done=true;em.by=f}}})}
@@ -94,14 +96,15 @@ function gdContext(){var t=-Infinity,mv=G.gd.movedAt,wa=G.gd.wallAt,st=ph.queryS
     panel:S.settingsOpen?"Settings":G.cam&&G.cam.open?"Ask about the view":G.fab&&G.fab.menu?"the ✦ menu":S.contentsOpen?"Contents":G.gd.tryOpen?"Things to try":null,
     dockFull:!!(G.on&&typeof dockOn==="function"&&dockOn()&&S.dockH==="full"),solemn:gdSolemnNow(),
     /* the tour: between two steps (as it moves on, nothing is said), its narration so far (since it started or the last Moment) and its last step next */
-    tour:G.on?{paused:!!G.paused,between:mo==="between"||!!G.gd.between&&!speaking,step:G.i,talked:Math.max(0,(performance.now()-(G.talkFrom||performance.now()))/1000),toEnd:!!(S.guideSteps[G.i+1]&&S.guideSteps[G.i+1].act==="end")}:null,
+    plan:G.gd.plan,games:gdPrefs().games||"on",notNow:+S.gdVisitor.visit.notNow||0,sr:!!(S.ui&&S.ui.gdSR),
+    tour:G.on?{paused:!!G.paused,between:mo==="between"||!!G.gd.between&&!speaking,step:G.i,stepId:S.guideSteps[G.i]&&S.guideSteps[G.i].id,talked:Math.max(0,(performance.now()-(G.talkFrom||performance.now()))/1000),toEnd:!!(S.guideSteps[G.i+1]&&S.guideSteps[G.i+1].act==="end")}:null,
     movedAt:mv,touchAt:G.gd.touchAt,cardAt:S.view==="card"&&S.stop!=="closed"?G.gd.cardAt:null,
     onWall:gdOnWall(),where:S.view!=="card"?"the phone shows "+S.view:G.on?"the tour":S.stop!=="closed"?"a card is open":"",
     marker:gdMarker(),gbtn:gdGbtn(),central:gdCentral(),covers:{},stillSince:Math.max(mv==null?t:mv,wa==null?t:wa),returning:S.gdVisitor.visits>1,tips:gdPrefs().tips,
     /* round 8: the first pages showing (the app's start): the scheduler is quiet */
     pages:G.gd.pages?(G.gd.pages.preview?"a page shown by the Editor":"the first pages"):null})}
 /* the visitor's Tips settings (an older memory has none: the defaults) */
-function gdPrefs(V){V=V||S.gdVisitor;return V.prefs||(V.prefs={tips:"all",stay:false})}
+function gdPrefs(V){V=V||S.gdVisitor;var p=V.prefs||(V.prefs={tips:"all",stay:false});if(p.games==null)p.games="on";return p}
 /* how long a tip stays: by its words, 4 to 9 s (the visit's clock); with the clock fast (a scene, a demo) it stays at least 0.6 to 1.5 s of real time, to be seen */
 function gdOnScreen(it,text){if(it.onScreen==="secs"&&+it.onScreenS>0)return +it.onScreenS*1000;var n=String(text||"").split(/\s+/).filter(Boolean).length;return Math.max(4000,Math.min(9000,3000+n*350))}
 /* the slots of its line: the point it is about and the minutes of that point's tour */
@@ -129,7 +132,7 @@ function gdSlotsOf(it,V,c,items){if(it.ptJokes)return{id:it.point,point:it.point
 function gdSpoken(it,o){if(S.ui.gdSR)return false;if(o&&o.spoken!=null)return!!o.spoken;var h=!!S.gdVisitor.visit.heard;return it.spoken==="heard"?h:it.spoken==="kind"&&it.kindSpoken==="heard"&&h}
 /* a tip starts (the scheduler's choice, or pulled: an Editor demo, which never writes the memory) and ends */
 function gdStart(it,why,o){o=o||{};if(G.gd.cur)gdStop("another tip");if(it.form==="cue")return gdCueStart(it,why,o);var now=gdNow(),ret=o.ret!=null?!!o.ret:S.gdVisitor.visits>1&&!o.first,slots=gdSlots(it),key=o.text!=null?null:gdLineKey(it,ret,slots),text=o.text!=null?o.text:gdLine(it,ret,slots),spoken=gdSpoken(it,o);
-  G.gd.cur={item:it,answer:!!o.answer,at:now,until:now+(o.ms||gdOnScreen(it,text)),realMin:G.gd.manual?0:performance.now()+(G.gd.rate>1?Math.max(600,15000/G.gd.rate):0),pull:!!o.pull,why:why||"",text:text,slots:slots,ret:ret,spoken:spoken};
+  G.gd.cur={item:it,answer:!!o.answer,beat:o.beat||null,react:!!o.react,owed:o.owed||null,at:now,until:now+(o.ms||gdOnScreen(it,text)),realMin:G.gd.manual?0:performance.now()+(G.gd.rate>1?Math.max(600,15000/G.gd.rate):0),pull:!!o.pull,why:why||"",text:text,slots:slots,ret:ret,spoken:spoken};
   if(!o.pull){gdMemStart(S.gdVisitor,it,now,text,key,!!o.answer);gdSaid(it,text,now)}
   G.gd.skipKey="";gdLog("shown",(o.pull?"(pulled) ":"")+(why||it.label)+(spoken?" · spoken":""));gdPresent(G.gd.cur);if(spoken)gdVoice(G.gd.cur);return G.gd.cur}
 /* how: "acted", "dismissed", "fewer", "ignored", or "" (the moment ended it); round 1's true is a dismissal */
@@ -179,7 +182,7 @@ on("view.opened",function(how){gdUsed("view",how)});
 on("ask.after",function(){S.gdVisitor.visit.heard=true;gdUsed("ask")});
 /* the tour: a step heard (the guide heard this visit; the introduction: met the guide); between two steps until the next one starts.
    A step of How to use the card (st.gd: its item) is not the tour's: its line heard is that step seen, which retires its cue */
-on("tourStep.ended",function(st){S.gdVisitor.visit.heard=true;if(st&&st.act==="intro"&&!S.gdVisitor.met){S.gdVisitor.met=true;gdLog("event",GD_EVENTS.intro)}G.gd.between=true;
+on("tourStep.ended",function(st){S.gdVisitor.visit.heard=true;if(st&&st.id)G.gd.heard[st.id]=1;if(st&&st.act==="intro"&&!S.gdVisitor.met){S.gdVisitor.met=true;gdLog("event",GD_EVENTS.intro)}G.gd.between=true;
   if(st&&st.gd){gdStepSeen(st.gd);return}gdUsed("tour",st&&st.id)});
 function gdStepSeen(id){var now=gdNow(),vm=gdVM(id),em=gdEM(id);vm.shown++;vm.last=now;em.shown++;em.last=now;gdUsed(id,"How to use the card")}
 /* the card scrolled: the visitor acts (quiet 0.8 s after, as after a touch) */
@@ -204,12 +207,14 @@ on("startTour.before",function(){G.gd.hold=false;if(G.gd.cur&&!G.gd.cur.pull)gdS
 /* ----- round 7: the tour moves on to its next step (guide/tour.js's next asks next.answer): the scheduler is asked at that moment
    (context.moment = "between": only a Moment); a Moment it picks shows and holds the next step until it ends (G.gd.hold: present.js's
    gdResume goes on); a Moment showing holds it too. The tour stopping ends a Moment (never "ignored": the moment ended it) ----- */
-on("next.answer",function(){if(!G.on||G.paused||noDraw||G.gd.demo)return;var c=G.gd.cur;if(c&&c.item.form==="moment"){G.gd.hold=true;return true}if(c)return;
+on("next.answer",function(){if(!G.on||G.paused||noDraw||G.gd.demo)return;var c=G.gd.cur;if(c&&(c.item.form==="moment"||c.item.onTour)){G.gd.hold=true;return true}if(c)return;
+  /* round 12: a seam of the tour's plan (Fun › On the tour): its beat, or the guess's answer after the step that held it */
+  if(gdSeam())return true;
   /* (the tour moving on ends the line it was saying: a Next pressed mid-line is not a sentence still being said) */
   G.gd.moment="between";var r;try{var ctx=gdContext();ctx.speaking=false;r=gdPick(gdItems(),S.gdVisitor,ctx,gdNow())}finally{G.gd.moment=null}
   G.gd.last=r;if(r.item&&r.item.form==="moment"){G.gd.hold=true;gdStart(r.item,r.why);return true}
   var key="between|"+r.why.replace(/\d+(\.\d+)?/g,"#");if(key!==G.gd.skipKey){G.gd.skipKey=key;gdLog("skipped","between two steps: "+r.why)}});
-on("stopTour.before",function(){G.gd.hold=false;var c=G.gd.cur;if(c&&c.item.form==="moment")gdStop("the tour stopped")});
+on("stopTour.before",function(){G.gd.hold=false;var c=G.gd.cur;if(c&&(c.item.form==="moment"||c.item.onTour&&!c.pull))gdStop("the tour stopped")});
 /* a Moment ends (mascot/azu2d.js): a tap on its prop is acted, 8 s with no tap ignored */
 on("moment.ended",function(k,done){var c=G.gd.cur;if(c&&c.item.form==="moment")gdStop(done?"tapped: Azu "+(k==="cookie"?"eats the cookie":"drinks")+", and the tour goes on":"8 s with no tap: the tour goes on",done?"acted":"ignored")});
 /* a treasure found in Ask about the view's hunt (world/camera-ask.js): the hunt's invitation is done */
@@ -227,7 +232,7 @@ function gdTick(){if(noDraw)return;var now=gdNow(),w=gdOnWall();if(w&&!G.gd.onWa
 /* why the tip on the screen ends now: [why, how], "wait" (Fewer like this? asked), or null (it stays). Its screen left (a wall tip off the
    wall; a cue off its card, the Locate label also when its pin goes), its target gone (its marker, its point out of the middle, the ✦),
    or its time up (a cue: seen; a tip: ignored). W is the moment (the page's, or the simulator's) */
-function gdEnds(c,now,W){var it=c.item;
+function gdEnds(c,now,W){var it=c.item;if(it.onTour&&W.moment!==undefined)return null;
   /* round 7: a Moment on the page ends with Azu's prop (moment.ended: a tap, or 8 s); in the simulator by its time */
   if(it.form==="moment"&&W.moment!==undefined)return W.moment?null:["the moment ended",""];
   if(it.screen==="wall"&&!W.onWall)return["the wall left the screen",""];var keep=it.expires==="never";
@@ -485,3 +490,59 @@ document.addEventListener("click",function(e){var t=e.target;if(!t.closest||!ph.
   if(t.closest("#navbar [data-navsec],#navbar [data-navmore]")){gdUsed("navbar","tapped");return}
   if(t.closest(".locpin")){gdUsed("locate","tapped");return}
   if(t.closest('[data-g="pause"]'))gdUsed("pause","tapped")},true);
+
+/* ----- round 12, Fun › On the tour: the tour's plan (research_tour_entertainment.md 3.1). As a tour starts (not a walkthrough of How to
+   use the card), the scheduler is asked once for the plan (gdTourPlan, pure) with the tour's steps as they will play (the length, the lens,
+   the introduction; each step's seconds of narration at the visitor's speed and whether it holds a reviewed question or guess in this
+   language). The plan is fixed and readable (Guide › Guidance › Fun › On the tour: "This tour's plan"; the Log); only what the visitor does
+   changes it: a Not now, No quiz, a skip (a seam reached by Next on a step not heard drops its beat), a stop (the plan is kept: Resume
+   keeps the promise; stopped for good, the quiz is offered from the ✦ menu, or said away in one line). At each seam the service asks the
+   scheduler for its beat (gdCheck: the live gates) and holds the next step until it ends. Unity: GuideTour asks
+   GuidanceService.PlanTour at Start; the seams are its StepEnded events ----- */
+/* a step's seconds of narration (guide/dock.js's stepSecs: its recorded words' times, else its words at the visitor's speed) */
+function gdTourIn(steps){var l=S.lang||"en",g=gdGroupById("ontour")||{};
+  return{steps:steps.map(function(st){return{id:st.id,act:st.act,secs:stepSecs(st),title:stepTitle(st),q:gdQOk(S.tourQ[st.id],l),guess:gdGuessOk(S.tourGuess[st.id],l)}}),
+    len:typeof lenNow==="function"?lenNow():"standard",aud:typeof aud==="function"?aud():"explorer",lang:l,every:+g.every||75,perTour:+g.perTour||3,perShort:+g.perShort||2,perDeep:+g.perDeep||5,auds:g.auds||null}}
+function gdPlanCtx(){return{solemn:gdSolemnNow()||!!(S.m&&S.m.solemn&&(G.on||S.view==="card")),lively:S.guideCfg.life==="lively",sr:!!S.ui.gdSR,games:gdPrefs().games||"on",notNow:+S.gdVisitor.visit.notNow||0}}
+/* the steps a tour would play now (not started): the length and the lens (audiences/stepFits), the introduction when it is due */
+function gdStepsNow(){if(G.on&&!S.howSaved)return S.guideSteps;var st=(S.fullSteps||S.guideSteps).filter(function(x){return typeof stepFits!=="function"||stepFits(x)});
+  if(S.guideCfg.intro==="every"||(S.guideCfg.intro==="first"&&!S.introSeen))st=[{id:"intro",view:"card",ref:"hero",act:"intro",text:T(fmt(S.tx.guide_intro.en,pointName()),fmt((S.tx.guide_intro.pt||S.tx.guide_intro.en),pointName()))}].concat(st);return st}
+/* the plan a tour would get now (the Editor's line and Why not now? when no tour plays) */
+function gdPlanNow(){return gdTourPlan(gdItems(),S.gdVisitor,gdPlanCtx(),gdTourIn(gdStepsNow()))}
+function gdPlanMake(){var P=gdTourPlan(gdItems(),S.gdVisitor,gdPlanCtx(),gdTourIn(S.guideSteps));P.point=S.m&&S.m.poi||"painting";P.quiz=null;P.at0=gdNow();G.gd.plan=P;G.gd.heard={};G.gd.guess=null;G.gd.owed=null;
+  gdLog("event","the tour's plan: "+gdPlanWords(P));return P}
+on("startTour.after",function(from){if(S.howSaved)return;var P=G.gd.plan;
+  /* Resume (from a kept step): the same plan, its promise kept; a new tour: a new plan */
+  if(from&&P&&P.stopped&&P.point===(S.m&&S.m.poi||"painting")){P.stopped=false;G.gd.owed=null;gdLog("event","the tour resumed: its plan kept");return}gdPlanMake()});
+on("stopTour.after",function(){var P=G.gd.plan;if(!P||S.howSaved)return;P.stopped=true;var f=gdPlanBeat("quizfinale");
+  /* stopped before its finale, a quiz promised and accepted: offered from the ✦ menu for the rest of the visit, or said away in one line */
+  if(f&&f.state==="planned"&&P.quiz==="on"){var q=gdQuizQs(P,true);if(q.length>=2){G.gd.owed={n:q.length,qs:q};gdLog("event","the tour stopped before its quiz: Your "+q.length+" questions in the ✦ menu")}
+    else{G.gd.owed=null;f.state="dropped";f.why="the tour stopped: too few questions from the steps heard";setTimeout(function(){if(!G.on&&typeof azBubble==="function")azBubble(TXT("tour_quiz_saved"),3200)},400);gdLog("event","the tour stopped before its quiz: said away (“"+TXT("tour_quiz_saved")+"”)")}}});
+/* a beat of the plan by its item */
+function gdPlanBeat(id,P){P=P||G.gd.plan;return P?P.beats.filter(function(b){return b.id===id})[0]||null:null}
+/* a beat dropped (a skip, a gate at its seam, the visitor's Not now): with its reason; a promise dropped takes its payoff with it */
+function gdBeatDrop(b,why){if(!b||b.state!=="planned")return;b.state="dropped";b.why=why;gdLog("skipped","“"+b.label+"”: dropped from the tour's plan ("+why+")");
+  if(b.pairs&&b.place==="opening"){var f=gdPlanBeat(b.pairs);if(f&&f.state==="planned")gdBeatDrop(f,"its promise was not made")}}
+/* a seam (the tour moving on, guide/tour.js's next): the guess's answer after the step that held it; else the beat planned after this step */
+function gdSeam(){var P=G.gd.plan,st=S.guideSteps[G.i];if(!P||!st||S.howSaved)return false;
+  var gs=G.gd.guess;if(gs&&gs.step===st.id&&!gs.shown){gs.shown=true;G.gd.hold=true;gdGuessAnswer(gs);return true}
+  var b=P.beats.filter(function(x){return x.state==="planned"&&x.after===st.id})[0];if(!b)return false;
+  var it=gdItems().filter(function(x){return x.id===b.id})[0];if(!it){gdBeatDrop(b,"its item is gone");return false}
+  /* a seam reached by a skip (Next on a step not heard): its beat drops; the finale still keeps the promise */
+  if(!G.gd.heard[st.id]&&b.place!=="finale"){gdBeatDrop(b,"the visitor skipped step "+(G.i+1));return false}
+  G.gd.moment="between";var r;try{var ctx=gdContext();ctx.speaking=false;r=S.guidance.on?gdCheck(it,gdItems(),S.gdVisitor,ctx,gdNow()):{no:"Guidance is Off"}}finally{G.gd.moment=null}
+  if(!r.ok){gdBeatDrop(b,r.no);return false}
+  b.state="played";G.gd.hold=true;gdStart(it,r.why,{beat:b});return true}
+/* Next pressed: the step being said counts as heard when 80 % of it was played (any speed) */
+document.addEventListener("click",function(e){var t=e.target.closest&&e.target.closest('#ph [data-g="next"]');if(!t||!G.on)return;var st=S.guideSteps[G.i];if(st&&typeof dkShare==="function"&&dkShare()>=.8)G.gd.heard[st.id]=1},true);
+/* a game's Not now (its 4 s chip; No quiz, thanks): two this visit end the games for the visit, said once, kindly */
+function gdNotNow(it){var v=S.gdVisitor.visit;v.notNow=(+v.notNow||0)+1;gdLog("event","Not now on the "+it.label+" ("+v.notNow+" this visit)");
+  if(v.notNow>=2){var P=G.gd.plan;if(P)P.beats.forEach(function(b){if(b.game&&b.state==="planned")gdBeatDrop(b,"two Not nows this visit: no more games")});if(!v.nomore){v.nomore=true;return TXT("tour_nomore")}}return""}
+/* the quiz's questions at the finale (research 5.3): from the steps heard, one from each third, never two from a step */
+function gdQuizQs(P,heardOnly){var l=S.lang||"en",steps=S.guideSteps,at=0,out=[],k0=P?P.k0:0;steps.forEach(function(st,j){var s=stepSecs(st);if(j>k0&&!/^(intro|teaser|end)$/.test(st.act))out.push({id:st.id,from:0,at:at+s/2,q:gdQOk(S.tourQ[st.id],l),heard:!!G.gd.heard[st.id]});at+=s});
+  var lo=out.length?out[0].at:0;out.forEach(function(x){x.from=lo});var it=S.guidance.items.quizfinale;return gdQuizPick(out,+(it&&it.qn)||3,at)}
+/* the best score per point, on the phone only (the visitor's memory; never sent) */
+function gdQuizBest(point){var b=S.gdVisitor.quizBest||(S.gdVisitor.quizBest={});return b[point||"painting"]||null}
+function gdQuizKeep(point,right,n){var b=S.gdVisitor.quizBest||(S.gdVisitor.quizBest={}),k=point||"painting",o=b[k];if(!o||right/n>o.right/o.n||right/n===o.right/o.n&&n>o.n)b[k]={right:right,n:n};return b[k]}
+/* the ✦ menu's Your 3 questions (world/guide-button.js): while the tour is stopped for good before its quiz */
+function gdQuizOwed(){var o=G.gd.owed;return!G.on&&o&&G.gd.plan&&G.gd.plan.stopped?o.n:0}

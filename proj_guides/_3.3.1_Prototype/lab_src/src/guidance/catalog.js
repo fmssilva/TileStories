@@ -45,7 +45,10 @@ S.guidance={on:true,breathing:15,cueRoom:5,perMinute:2,perVisit:30,freshTau:120,
        visit heard 4 Fun lines in 15 min and 16 tips in all, too many). Never on a Solemn point: fixed for the kind (solemnOff), the
        scheduler's own gate, never an option. Moments: today's caps (once a card each, the group 5 min apart); Play: each on its own */
     {id:"fun",name:"Fun",spoken:"bubble",on:true,cap:4,gap:300,solemnOff:true,groups:[
-      {id:"moments",name:"Moments",mode:"all",on:true,weight:1,cap:0,gap:300,items:["water","cookie"]},
+      /* round 12: Fun › On the tour (it took Moments' place: the water break and the cookie moved in). Its own rhythm (the tour's, never
+         Fun's visit cap): one beat per 75 s of narration (every, 60-120), at most 3 a tour (perTour; Short 2, Deep 5), the opening and the
+         finale included; who gets it (auds: Family, Explorer, Expert). Liveliness is Mascot › Liveliness (Calm: only the items Calm too) */
+      {id:"ontour",name:"On the tour",mode:"all",on:true,weight:1,cap:0,gap:0,tour:true,life:"azu",every:75,perTour:3,perShort:2,perDeep:5,auds:{family:true,explorer:true,expert:true},items:["quizpromise","quizfinale","guessyear","water","cookie"]},
       {id:"play",name:"Play",mode:"all",on:true,weight:1,cap:0,gap:0,items:["joke","ptjoke","hunt","season"]}]}],
   items:{
     /* Opening message: the visit's first words, beside Azu at the ✦; Essential (skips the breathing room and the limits); once a visit */
@@ -135,16 +138,28 @@ S.guidance={on:true,breathing:15,cueRoom:5,perMinute:2,perVisit:30,freshTau:120,
     /* ----- round 9, App › The guide: Pause the guide, form Try (pulled only: a row of Things to try, an answer of Ask Azu; no bubble). About
        the guide's Pause (the dock's ⏸ in a tour, or the ✦'s at Compact); Show me taps it; done when the visitor pauses the guide ----- */
     pause:{id:"pause",label:"Pause the guide",on:true,kind:"app",group:"guide",form:"try",about:"pause",teaches:"pause",doneWhen:"pause"},
-    /* ----- round 7, Fun › Moments: form Moment (Azu walks to the middle with its prop and asks for one tap: the look of mascot/azu2d.js, as
-       before), between two steps of a tour as it moves on (it holds the next step until a tap or 8 s), Lively only; once a card, the group
-       5 min apart. The water break after n s of the tour's narration (it was Guide › Mascot › Water break after); the cookie before the
-       tour's last step ----- */
-    water:{id:"water",label:"Water break",on:true,kind:"fun",group:"moments",form:"moment",prop:"water",says:"mascot_water",spoken:"kind",
-      about:"nothing",mustSee:false,goes:"stays",points:false,focus:"none",tap:"prop",when:"between",talkFor:60,screen:"any",lively:true,
-      importance:3,essential:false,shows:"card",max:1,again:0,doneWhen:"",teaches:"",onScreen:"auto",duringTour:"between",along:"steady"},
-    cookie:{id:"cookie",label:"Cookie",on:true,kind:"fun",group:"moments",form:"moment",prop:"cookie",says:"mascot_hungry",spoken:"kind",
-      about:"nothing",mustSee:false,goes:"stays",points:false,focus:"none",tap:"prop",when:"between",beforeEnd:true,screen:"any",lively:true,
-      importance:3,essential:false,shows:"card",max:1,again:0,doneWhen:"",teaches:"",onScreen:"auto",duringTour:"between",along:"steady"},
+    /* ----- round 12, Fun › On the tour (research_tour_entertainment.md 4.1, 4.3, 4.5, 5.1, 5.3): form Beat, made for the tour; each in
+       its tour's plan (gdTourPlan) at a seam: the Opening (after the introduction), Between steps, or the Finale (before the last step).
+       The quiz promise and the quiz are one pair (a promise kept: the quiz is promised only when the plan holds both and the point has
+       its reviewed questions). The breather was round 7's Water break (the same id): Azu says its line, drinks (the glass beside Azu, by
+       date a fan in June-September or a scarf in December-February, never the same prop twice in a visit), then Go on / A question first
+       (8 s: Go on). The cookie, a breather variant before the last step (only in a tour without the breather). Guess the year: before
+       the step that holds a year (Specific Marker › Guide script: its guess), a slider, Tell me, the answer after that step ----- */
+    quizpromise:{id:"quizpromise",label:"The quiz promise",on:true,kind:"fun",group:"ontour",form:"beat",beat:"promise",says:"tour_promise",saysAud:{expert:"tour_promise_expert"},spoken:"kind",
+      place:"opening",answers:"chips",waits:4,needs:"quiz",pairs:"quizfinale",scores:false,calm:true,game:true,minSteps:4,qMin:3,expert:"optin",
+      importance:4,shows:"every",tourLen:"every"},
+    quizfinale:{id:"quizfinale",label:"The quiz",on:true,kind:"fun",group:"ontour",form:"beat",beat:"finale",says:"tour_quiz_start",spoken:"kind",
+      place:"finale",answers:"tapsay",waits:0,needs:"quiz",pairs:"quizpromise",scores:true,calm:true,game:true,qn:3,showMe:true,
+      importance:4,shows:"every",tourLen:"every"},
+    guessyear:{id:"guessyear",label:"Guess the year",on:true,kind:"fun",group:"ontour",form:"beat",beat:"guess",says:"tour_guess",spoken:"kind",
+      place:"between",answers:"slider",waits:8,needs:"year",scores:false,calm:true,game:true,
+      importance:3,shows:"every",tourLen:"every"},
+    water:{id:"water",label:"The breather",on:true,kind:"fun",group:"ontour",form:"beat",beat:"breather",prop:"water",props:"date",says:"tour_breather",spoken:"kind",
+      place:"between",answers:"chips",waits:8,talkFor:60,minNarr:90,needs:"",scores:false,calm:false,game:false,
+      importance:3,shows:"visit",tourLen:"every"},
+    cookie:{id:"cookie",label:"Cookie",on:true,kind:"fun",group:"ontour",form:"beat",beat:"breather",prop:"cookie",props:"fixed",says:"tour_cookie",spoken:"kind",
+      place:"between",beforeEnd:true,variantOf:"water",answers:"chips",waits:8,needs:"",scores:false,calm:false,game:false,
+      importance:2,shows:"visit",tourLen:"every"},
     /* ----- Fun › Play. A joke (it was Azu's joke every third poke): its variants Azu's jokes, the least seen shows; after 3 pokes on Azu
        since it last showed (as before), or rarely at a pause late in the visit (from 10:00, once a visit: latePause); Lively only; a
        bubble at the ✦; never in a tour. After pokes it answers the visitor (as Azu's bubble did): the breathing room and Fun's gap neither hold
@@ -278,7 +293,7 @@ function gdCurve(p,s){s=Math.max(0,Math.min(1,+s||0));return s<=0.3?p[0]+(p[1]-p
    arguments): the scheduler's input, its tie-break and an In order group's sequence */
 function gdItems(defs){var out=[];S.guidance.kinds.forEach(function(k){k.groups.forEach(function(g){if((g.pulled||g.launch)&&!defs)return;g.items.forEach(function(id){var it=S.guidance.items[id];if(!it)return;
   /* a pulled group (How to use the card) is never the scheduler's: only the Editor's list (defs) holds its steps */
-  var o=Object.assign({},it,{groupMode:g.mode,groupName:g.name,groupOn:g.on!==false,groupPulled:!!g.pulled,groupWeight:g.weight==null?1:+g.weight,groupCap:+g.cap||0,groupGap:+g.gap||0,kindName:k.name,kindOn:k.on!==false,kindCap:gdLimitNow(k.cap),kindGap:+k.gap||0,kindSpoken:k.spoken,kindMix:gdMix(k.id),kindSolemnOff:k.solemnOff===true});
+  var o=Object.assign({},it,{groupMode:g.mode,groupName:g.name,groupOn:g.on!==false,groupPulled:!!g.pulled,groupWeight:g.weight==null?1:+g.weight,groupCap:+g.cap||0,groupGap:+g.gap||0,kindName:k.name,kindOn:k.on!==false,kindCap:gdLimitNow(k.cap),kindGap:+k.gap||0,kindSpoken:k.spoken,kindMix:gdMix(k.id),kindSolemnOff:k.solemnOff===true,onTour:!!g.tour,groupLife:g.life||""});
   /* a per-point item: one for each point of the wall in view, its id and label naming the point, each with its own memory */
   if(it.perPoint&&!defs)(S.wallPois||[]).forEach(function(p){var n=L(p.name),x={id:it.id+":"+p.id,base:it.id,point:p.id,pointName:n,card:!!p.card,label:it.label.replace(/\{point\}/g,n)};if(it.ptJokes)x.jokes=gdPtJokes(p.id);out.push(Object.assign({},o,x))});
   else out.push(o)})})});return out}
@@ -313,7 +328,7 @@ function gdLine(it,returning,slots){slots=slots||{};var k=gdLineKey(it,returning
 function gdHasWords(k){var o=S.tx[k];return!!(o&&String(L(o)||"").trim())}
 /* the read-back of an item, in words (study 3.2): "Tap a marker · App › The start · when a marker is in view and the phone is still ·
    at most about every 25 s, up to 3 times a visit, until the visitor opens a card." */
-function gdHowOften(it){var n=+it.max,ag=+it.again;if(it.form==="walk")return"pulled only: never on its own";if(it.form==="page")return"at the app's start, a first run only";if(it.form==="try")return"pulled only: Things to try and Ask Azu's how do I…";
+function gdHowOften(it){var n=+it.max,ag=+it.again;if(it.form==="beat")return gdBeatHowOften(it);if(it.form==="walk")return"pulled only: never on its own";if(it.form==="page")return"at the app's start, a first run only";if(it.form==="try")return"pulled only: Things to try and Ask Azu's how do I…";
   var s=it.shows==="once"?"once ever":it.shows==="visit"?"once a visit":it.shows==="card"?"once on each card":it.shows==="upto"?"up to "+n+(n===1?" time":" times")+" a visit":it.shows==="until"?"up to "+n+(n===1?" time":" times")+" a visit":"every time";
   if(ag>0&&it.shows!=="once"&&it.shows!=="visit")s="at most about every "+ag+" s, "+s;
   /* round 7: a joke every n pokes (and rarely once at a pause late) */
@@ -345,7 +360,7 @@ function gdCueReadBack(it){var g=gdGroupOf(it),r=+S.guidance.cueRoom||0;
 function gdStepReadBack(it){var g=gdGroupOf(it),on=g?g.items.filter(function(id){return S.guidance.items[id].on}):[],i=on.indexOf(it.id),ret=gdDefs().filter(function(x){return x.form==="cue"&&x.doneWhen===it.id}).map(function(x){return x.label});
   return it.label+" · App › How to use the card · "+(it.on?"step "+(i+1)+" of "+on.length:"Off: skipped")+" · pulled only (Settings, the ✦ menu's How does this work?): never scheduled, never capped · "+(it.sel?"it marks "+it.label.replace(/^The /,"the "):"it opens a block's page")+
     " · seen (its line heard): "+(ret.length?"the "+ret.join(", the ")+" is done for good":"nothing to retire")+"."}
-function gdReadBack(it){if(it.form==="cue")return gdCueReadBack(it)+gdGestureWords(it);if(it.form==="walk")return gdStepReadBack(it);if(it.form==="page")return gdPageReadBack(it);if(it.form==="try")return gdTryReadBack(it);var g=gdGroupOf(it),k=gdKindOf(it),w=[];
+function gdReadBack(it){if(it.form==="beat")return gdBeatReadBack(it);if(it.form==="cue")return gdCueReadBack(it)+gdGestureWords(it);if(it.form==="walk")return gdStepReadBack(it);if(it.form==="page")return gdPageReadBack(it);if(it.form==="try")return gdTryReadBack(it);var g=gdGroupOf(it),k=gdKindOf(it),w=[];
   if(it.when==="visit")w.push("once the visit has started");else if(it.when==="between")w.push(gdBetweenWords(it));else if(it.when==="event")w.push("within "+GD_EVENT_MS/1000+" s after "+(GD_EVENTS[it.event]||it.event));
   else if(it.when==="idle"&&!(+it.idleFor>0))w.push("after "+gdIdleOf(it)+" s idle");else if(it.when==="settle"&&it.about!=="point")w.push("when its target settles in the middle");else if(it.when!=="settle")w.push("at a pause");
   if(GD_ABOUT[it.about])w.push(GD_ABOUT[it.about]+(it.mustSee===false?" (or without it)":""));if(+it.stillFor>0)w.push("the phone still "+it.stillFor+" s");
@@ -398,11 +413,18 @@ var GD_TIP_DEF={dim:0.4,gesture:false,button:"none",event:"card",pokes:0,idleFor
    ({word, act}: next / how), the language chip, Azu (forms from a tile and waves / appears / none) */
 var GD_PAGE_DEF={page:"custom",title:"",says:"",buttons:[],langChip:false,azu:"none"};
 function gdIsTip(it){return!!it&&it.form!=="cue"&&it.form!=="walk"&&it.form!=="page"&&it.form!=="try"}
+/* round 12: a beat's own defaults (Fun › On the tour; the fields below, with the round's data at the end of this file) */
+var GD_BEAT_DEF={beat:"breather",place:"between",answers:"chips",waits:8,needs:"",pairs:"",scores:false,calm:false,auds:{family:true,explorer:true,expert:true},tourLen:"every",
+  game:false,srPath:true,talkFor:0,beforeEnd:false,minNarr:0,minSteps:0,qMin:3,qn:3,showMe:true,expert:"optin",props:"fixed",variantOf:"",
+  when:"tour",duringTour:"between",screen:"any",about:"nothing",mustSee:false,goes:"stays",tap:"close",lively:false};
 function gdFill(it){/* round 9: In Things to try (an App item): Yes when it Teaches a feature; a Try item (pulled only) keeps its own few fields */
   if(it.inTry===undefined&&it.kind==="app"&&it.form!=="walk"&&it.form!=="page")it.inTry=!!it.teaches;if(it.form==="try")return it;
   if(it.form==="cue"){if(GD_GESTURE[it.about]&&it.gesture==null)it.gesture=true;return it}if(it.form==="walk"){if(it.focus==null)it.focus="tour";return it}
   /* round 8: a page keeps its own fields (GD_PAGE_DEF), never a tip's */
   if(it.form==="page"){Object.keys(GD_PAGE_DEF).forEach(function(k){if(it[k]===undefined)it[k]=JSON.parse(JSON.stringify(GD_PAGE_DEF[k]))});return it}
+  /* round 12: a beat of the tour gets its own fields first (GD_BEAT_DEF: place, answers, waits, needs, pairs, scores, calm too,
+     audiences, tour length), then the tip's */
+  if(it.form==="beat")Object.keys(GD_BEAT_DEF).forEach(function(k){if(it[k]===undefined)it[k]=JSON.parse(JSON.stringify(GD_BEAT_DEF[k]))});
   Object.keys(GD_TIP_DEF).forEach(function(k){if(it[k]===undefined)it[k]=GD_TIP_DEF[k]});if(!it.saysAud)it.saysAud={};return it}
 Object.keys(S.guidance.items).forEach(function(id){gdFill(S.guidance.items[id])});
 /* Spotlight is kept for Essential items and walkthrough steps (or it loses its force), and needs a target to cut out */
@@ -433,6 +455,7 @@ function gdNever(it){var r=[],k=gdKindOf(it),g=gdGroupOf(it),ab=gdNameOf(GD_ABOU
   if(it.doneWhen&&it.doneWhen===it.hasUsed)r.push("Done when is already true: Only if waits until "+gdNameOf(GD_USED,it.hasUsed)+", which retires it");
   if(it.doneWhen&&it.when==="event"&&it.doneWhen===it.event)r.push("Done when is already true: it waits for "+(GD_EVENTS[it.event]||it.event)+", which retires it");
   /* round 7: a point's joke has its words in Specific Marker › Guide script (a point with none says none: never a warning); a Moment only in a tour */
+  if(it.form==="beat")return r.concat(gdBeatNever(it));
   if(it.form==="moment"&&it.duringTour!=="between")r.push("it is a Moment, but During a tour is Never: a Moment shows only between two steps of a tour");
   if(it.when==="between"&&it.duringTour!=="between")r.push("When Between tour steps, but During a tour is Never");
   /* round 11: Fun is held while a tour plays, so a Fun item that comes only between tour steps cannot show (until its When changes) */
@@ -445,7 +468,8 @@ var GD_TEMPLATES=[
   {id:"control",name:"Tip about a control",f:{label:"New tip about the ✦",about:"gbtn",points:true,focus:"ring",gesture:true,tap:"menu",importance:3,shows:"upto",max:2,again:60,notBefore:30},en:"Anything else? Tap {button}.",pt:"Mais alguma coisa? Toque em {button}."},
   {id:"remark",name:"Remark about the point in view",f:{label:"{point}: a new remark",perPoint:true,form:"remark",about:"point",goes:"beside",points:true,when:"settle",stillFor:1.2,tap:"remark",importance:2,shows:"visit"},en:"{point}: see how the blue catches the light.",pt:"{point}: veja como o azul apanha a luz."},
   {id:"tour",name:"Offer a tour",f:{label:"New tour offer for {point}",form:"invitation",about:"middle",goes:"beside",points:true,tap:"tour",button:"tour",stillFor:1.2,importance:3,shows:"visit",doneWhen:"tour",teaches:"tour",along:"late"},en:"{point} has a story. Shall I tell it?",pt:"{point} tem uma história. Conto-lha?"},
-  {id:"moment",name:"Moment",f:{label:"New moment",form:"moment",prop:"water",tap:"prop",about:"nothing",mustSee:false,when:"between",talkFor:90,screen:"any",duringTour:"between",lively:true,notSolemn:true,importance:2,shows:"card",along:"steady"},en:"Arms tired? Lower the phone, I'll wait.",pt:"Braços cansados? Baixe o telemóvel, eu espero."},
+  /* round 12: a Breather (Fun › On the tour): a beat of the tour, Azu's prop and the chips Go on / A question first */
+  {id:"moment",name:"Breather",f:{label:"New breather",form:"beat",beat:"breather",prop:"water",props:"date",place:"between",answers:"chips",waits:8,talkFor:90,calm:false,game:false,importance:2,shows:"visit"},en:"Arms tired? Lower the phone a moment, I'll wait.",pt:"Braços cansados? Baixe o telemóvel um momento, eu espero."},
   {id:"step",name:"Step of a sequence",f:{label:"New step",about:"marker",goes:"beside",points:true,focus:"ring",gesture:true,stillFor:1.2,afterPrev:20,importance:3,shows:"until",max:2,again:30,doneWhen:"card",teaches:"card"},en:"Now tap the glowing marker.",pt:"Agora toque no marcador aceso."},
   {id:"blank",name:"Blank",f:{label:"New item"},en:"",pt:""},
   /* round 8: a page of the first pages (offered only there): a title, a line, one button (Next; a second one can be added) */
@@ -526,3 +550,76 @@ function gdHowFind(q){var n=gdHowNorm(q);if(!gdHowAsks(n))return null;var best=n
 /* a Try item's read-back (pulled only) */
 function gdTryReadBack(it){var g=gdGroupOf(it);return it.label+" · App › "+(g?g.name:"?")+" · pulled only: a row of Things to try ("+(gdTryIn(it)?"In":"Out")+") and Ask Azu's answer to how do I… · never on its own (no bubble, never scheduled, never capped) · "+
   (GD_ABOUT[it.about]?"about "+GD_ABOUT[it.about].replace(/^when /,"")+" · ":"")+"Show me: "+(GD_GESTURE_WORDS[GD_GESTURE[it.about]]||"a tap")+" on it, the visitor taken there first · done when "+(GD_UNTIL[it.doneWhen]||GD_EVENTS[it.doneWhen]||"never")+"."}
+
+/* ----- round 12, Fun › On the tour, as data (research_tour_entertainment.md 3.2-3.5). A beat's fields (GD_BEAT_DEF, set once by gdFill):
+   Place in the tour (Opening: after the introduction / Between steps / Finale: before the last step; In a step comes in round 13), The
+   visitor answers by (Nothing / Chips / Slider / Tap / Tap or say), Waits (3-12 s: then it carries on by itself; the quiz has no timer),
+   Needs (what the point must hold: quiz questions, a year; a named warning when it lacks them), Pairs with (a promise and its payoff are
+   one), Scores, Calm too (allowed when Mascot › Liveliness is Calm), Audiences (Family / Explorer / Expert), Tour length (Every length
+   / Not on Short / Deep only), a game (its 4 s Not now chip; two Not nows end games for the visit), a button path (a screen reader may
+   get it). The quiz's questions and the guesses are per step, in Specific Marker › Guide script (S.tourQ, S.tourGuess: words EN / PT,
+   Draft with AI, a Reviewed tick per language); unreviewed ones never play. Unity: GuidanceItem's beat fields (GuidanceCatalog); the
+   questions a QuizQuestion list on each GuideStep (CardStrings keys), the Reviewed flags beside them ----- */
+var GD_PLACES=[["opening","Opening"],["between","Between steps"],["finale","Finale"]];
+var GD_PLACE_WORDS={opening:"after the introduction, before the first step",between:"between two steps",finale:"before the tour's last step"};
+var GD_ANSWERS=[["nothing","Nothing"],["chips","Chips"],["slider","Slider"],["tap","Tap"],["tapsay","Tap or say"]];
+/* the answers a beat may offer (the quiz: tap always, voice an extra; a guess: its slider) */
+var GD_ANSWERS_OF={promise:["chips","nothing"],finale:["tap","tapsay"],guess:["slider"],breather:["chips","nothing"]};
+var GD_NEEDS={"":"nothing of the point's",quiz:"its reviewed quiz questions (Specific Marker › Guide script)",year:"a step with a reviewed guess (Specific Marker › Guide script)"};
+var GD_TOURLEN=[["every","Every length"],["notshort","Not on Short"],["deep","Deep only"]];
+var GD_AUDS=[["family","Family"],["explorer","Explorer"],["expert","Expert"]];
+var GD_EXPERT=[["optin","An opt-in question"],["same","As the others"]];
+var GD_BEAT_KIND={promise:"the quiz's promise",finale:"the quiz",guess:"a guess",breather:"a breather"};
+
+/* the breather's prop by date (Preview & Test › Today is): a fan in June-September, a scarf in December-February, else the glass; never
+   the same prop twice in a visit (the next in turn). The cookie keeps its own */
+var GD_PROP_DATES=[{prop:"fan",from:"06-01",to:"09-30"},{prop:"scarf",from:"12-01",to:"02-28"}];
+var GD_PROP_NAMES={water:"a glass of water",fan:"a fan",scarf:"a scarf",cookie:"a cookie"};
+function gdPropByDate(md){var p=GD_PROP_DATES.filter(function(x){return gdInWindow(md,x.from,x.to)})[0];return p?p.prop:"water"}
+function gdPropOf(it,md,used){if(it.props!=="date")return it.prop||"water";var want=gdPropByDate(md);used=used||[];if(used.indexOf(want)<0)return want;
+  var alt=["water","fan","scarf"].filter(function(x){return used.indexOf(x)<0});return alt[0]||want}
+/* the quiz's questions and the guesses, per step of the demo point (the Guide script's; written from the tour's own text). Each language
+   reviewed on its own; the AI's draft (src "ai") of the step "Drag across the picture" is not reviewed yet, so it never plays */
+S.tourQ={
+  g1:{q:T("How long was the palace the royal home?","Durante quanto tempo foi o palácio casa real?"),a:[T("About 250 years","Cerca de 250 anos"),T("About 50 years","Cerca de 50 anos"),T("About 500 years","Cerca de 500 anos")],ok:0,
+    why:T("Kings lived here about 250 years, until 1755.","Os reis viveram aqui cerca de 250 anos, até 1755."),src:"human",rev:{en:true,pt:true}},
+  g4:{q:T("What filled the new palace?","O que encheu o novo palácio?"),a:[T("The wealth of the India voyages","A riqueza das viagens à Índia"),T("Gold from Brazil","Ouro do Brasil"),T("Spanish silver","Prata espanhola")],ok:0,
+    why:T("Manuel I filled it with the riches of the India voyages.","D. Manuel I encheu-o com a riqueza das viagens à Índia."),src:"human",rev:{en:true,pt:true}},
+  g5:{q:T("How many books did the palace library hold?","Quantos livros tinha a biblioteca do palácio?"),a:[T("About 7,000","Cerca de 7 000"),T("About 70,000","Cerca de 70 000"),T("About 700,000","Cerca de 700 000")],ok:1,
+    why:T("Some seventy thousand books, beside the royal archive.","Cerca de setenta mil livros, ao lado do arquivo real."),src:"human",rev:{en:true,pt:true}},
+  g6:{q:T("What took the palace's place?","O que ficou no lugar do palácio?"),a:[T("A square","Uma praça"),T("A cathedral","Uma catedral"),T("A harbour","Um porto")],ok:0,
+    why:T("The square, the Terreiro do Paço, took its place.","A praça, o Terreiro do Paço, ficou no seu lugar."),src:"ai",rev:{en:false,pt:false}},
+  g7:{q:T("What destroyed the palace in 1755?","O que destruiu o palácio em 1755?"),a:[T("A war","Uma guerra"),T("An earthquake, a fire and a tsunami","Um terramoto, um incêndio e um maremoto"),T("A great flood","Uma grande cheia")],ok:1,
+    why:T("All three struck on the morning of 1 November.","Os três chegaram na manhã de 1 de novembro."),src:"human",rev:{en:true,pt:true}},
+  g8:{q:T("What does the gallery show?","O que mostra a galeria?"),a:[T("The king's portraits","Retratos do rei"),T("The square through three centuries","A praça ao longo de três séculos")],ok:1,
+    why:T("Three centuries of the square, in pictures.","Três séculos da praça, em imagens."),src:"human",rev:{en:true,pt:true}}};
+S.tourGuess={g4:{q:T("When do you think the king moved the court down to the river?","Quando acha que o rei mudou a corte para junto do rio?"),n:1500,from:1400,to:1700,unit:"year",src:"human",rev:{en:true,pt:true}}};
+/* a step's question / guess that plays in a language: its words there, at least two answers, the right one among them, and reviewed */
+function gdQOk(q,l){if(!q||!q.rev||!q.rev[l])return false;var t=function(o){return!!(o&&String(o[l]||"").trim())};return t(q.q)&&(q.a||[]).filter(t).length>=2&&(q.a||[]).length<=3&&t((q.a||[])[+q.ok])}
+function gdGuessOk(g,l){return!!(g&&g.rev&&g.rev[l]&&g.q&&String(g.q[l]||"").trim()&&isFinite(+g.n)&&+g.from<+g.n&&+g.n<+g.to)}
+/* the why line: 12 words or fewer (the study's rule; the Editor warns) */
+function gdWhyWords(t){return String(t||"").split(/\s+/).filter(Boolean).length}
+/* the point's reviewed questions in a language: their steps (the quiz needs qMin from at least two steps) */
+function gdQSteps(l,steps){return(steps||S.fullSteps||S.guideSteps).filter(function(st){return gdQOk(S.tourQ[st.id],l)}).map(function(st){return st.id})}
+/* a beat's warnings (gdNever): what it needs and the point lacks, named; a pair whose other half is Off or gone */
+function gdBeatNever(it){var r=[],langs=langCodes();
+  if(it.needs==="quiz"){langs.forEach(function(l){var q=gdQSteps(l),n=q.length;if(n<+it.qMin||n<2)r.push("the quiz needs "+it.qMin+" reviewed questions from 2 steps in "+(GD_LANG_NAME[l]||l)+"; this point has "+n)})}
+  if(it.needs==="year")langs.forEach(function(l){if(!(S.fullSteps||S.guideSteps).some(function(st){return gdGuessOk(S.tourGuess[st.id],l)}))r.push("a guess needs a step with a reviewed guess in "+(GD_LANG_NAME[l]||l)+"; this point has none")});
+  if(it.pairs){var o=S.guidance.items[it.pairs];if(!o||o.deleted)r.push("its pair, "+it.pairs+", is gone: a promise and its payoff are one");else if(!o.on)r.push("its pair, the “"+o.label+"”, is Off: a promise and its payoff are one")}
+  var a=it.auds||{};if(!GD_AUDS.some(function(x){return a[x[0]]}))r.push("no audience gets it (Audiences)");
+  var g=gdGroupOf(it);if(g&&g.auds&&!GD_AUDS.some(function(x){return g.auds[x[0]]&&a[x[0]]}))r.push("no audience of On the tour gets it");
+  return r}
+/* how often, in words: from its tour's plan */
+function gdBeatHowOften(it){return(it.shows==="visit"?"once a visit, ":"once a tour, ")+"in its tour's plan ("+gdNameOf(GD_PLACES,it.place)+")"}
+/* the read-back of a beat: what, where, its rhythm, who, what it needs, its pair */
+function gdBeatReadBack(it){var g=gdGroupOf(it),a=it.auds||{},w=[];
+  w.push(GD_BEAT_KIND[it.beat]||"a beat");w.push(GD_PLACE_WORDS[it.place]||"at a seam");
+  if(+it.talkFor>0)w.push("after "+it.talkFor+" s of narration");if(it.beforeEnd)w.push("before the last step");if(+it.minNarr>0)w.push("only in a tour of "+it.minNarr+" s of narration or more");
+  if(it.variantOf){var vo=S.guidance.items[it.variantOf];if(vo)w.push("a variant of “"+vo.label+"” (never both in a tour)")}
+  if(+it.minSteps>0)w.push("only in a tour of "+it.minSteps+" steps or more");
+  w.push("answers by "+gdNameOf(GD_ANSWERS,it.answers).toLowerCase());w.push(+it.waits>0?"waits "+it.waits+" s, then carries on":"no timer");
+  if(it.needs)w.push("needs "+GD_NEEDS[it.needs]);if(it.pairs){var p=S.guidance.items[it.pairs];if(p)w.push("one pair with “"+p.label+"”")}
+  if(it.scores)w.push("scores");if(it.game)w.push("a game (its 4 s Not now chip)");w.push(it.calm?"Calm too":"Lively only");
+  w.push("for "+GD_AUDS.filter(function(x){return a[x[0]]}).map(function(x){return x[1]+(x[0]==="expert"&&it.beat==="promise"&&it.expert==="optin"?" (an opt-in)":"")}).join(", ")||"nobody");
+  if(it.tourLen!=="every")w.push(gdNameOf(GD_TOURLEN,it.tourLen).toLowerCase());
+  return it.label+" · Fun › "+(g?g.name:"?")+" · "+w.join(", ")+" · "+gdBeatHowOften(it)+" · never over a sentence, never on a Solemn point, never two seams in a row; the tour's rhythm, never Fun's visit cap."}

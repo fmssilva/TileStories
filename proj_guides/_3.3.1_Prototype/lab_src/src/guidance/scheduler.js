@@ -20,7 +20,12 @@
    pokes on Azu counted since the item last showed, or rarely a pause late in the visit (latePause, once a visit; then Along the visit
    counts, after pokes it is the visitor's own answer: ×1); a seasonal line only in its window of dates (context.today); a point's joke only
    for a point with a joke of its own.
-   Unity: GuidanceScheduler, plain C# (Pick(state, now), WhyNot(state, now, id)), EditMode tests on the same cases. */
+   Round 12, Fun › On the tour: its items are made for the tour, so Fun's hold in a tour does not hold them; they play only at a seam of
+   the tour's plan (gdTourPlan: asked once as a tour starts, fixed, readable), never over a sentence, and Fun's visit cap, the breathing
+   room and the visit's limits neither hold nor count them (the tour's own rhythm does). At their seam the live gates still hold: a
+   Solemn point, the visitor's Games on the tour Off and two Not nows (a game), Calm (only the items Calm too), a screen reader (only an
+   item with a button path).
+   Unity: GuidanceScheduler, plain C# (Pick(state, now), WhyNot(state, now, id), PlanTour(state, tour)), EditMode tests on the same cases. */
 var GD_MOVE_MS=700,GD_TOUCH_MS=800,GD_CARD_MS=1500,GD_REST_MS=300000,GD_BACK_MIN=5,GD_STAGE_MIN=15,GD_FOREVER=1e15,GD_FIRST_MS=60000;
 var GD_STATES={loading:"Loading",lost:"wall not found",empty:"nothing here",offline:"offline",done:"done"};
 function gdVisitOf(visitor,id){return visitor.visit.items[id]||{shown:0,last:null,end:null,dismissed:0,acted:0,how:""}}
@@ -85,9 +90,12 @@ function gdCheck(it,items,visitor,ctx,now){var vm=gdVisitOf(visitor,it.id),em=gd
   /* round 7: Fun never on a Solemn point (fixed for the kind) and no joke on a Solemn day */
   if(it.kindSolemnOff&&ctx.solemn)return{no:"a Solemn point: no fun here"};
   if(it.joke&&ctx.solemnDay)return{no:"a Solemn day ("+ctx.solemnDay+"): no jokes today"};
-  /* round 11: Fun never during a tour: every Fun item is held while a tour plays (not paused); fixed, no option */
+  /* round 12: a beat of the tour (Fun › On the tour) answers from the tour's plan, at its own seam */
+  if(it.onTour)return gdBeatCheck(it,ctx);
+  /* round 11: Fun never during a tour: every Fun item is held while a tour plays (not paused); fixed, no option (the beats of On the
+     tour, made for it, are the exception: above) */
   if(it.kind==="fun"&&ctx.tour&&!ctx.tour.paused)return{no:"held while a tour plays: Fun never shows during a tour"};
-  if(ctx.moment==="between"&&it.form!=="moment")return{no:"the tour moves on to its next step: only a Moment holds it"};
+  if(ctx.moment==="between"&&it.form!=="moment")return{no:"the tour moves on to its next step: only a beat of its plan (Fun › On the tour) plays there"};
   if(it.form==="moment"&&ctx.moment!=="between")return{no:"a Moment comes only as the tour moves on to its next step"};
   if(ctx.tips==="essentials"&&!it.essential)return{no:"the visitor chose Essentials only (Settings › The guide › Tips)"};
   if(ctx.moment==="open"&&it.when!=="open")return{no:"the card is opening: only a cue that answers the opening shows now"};
@@ -148,7 +156,7 @@ function gdCheck(it,items,visitor,ctx,now){var vm=gdVisitOf(visitor,it.id),em=gd
   /* the cue room (Overall): between a tip and a cue, either way (a cue is small motion: a shorter room than the breathing room between
      two tips); two cues follow each other with no room (one at a time). A tip that a card's opening ended (visitor.visit.openEnd: the visitor did
      what it asked) is answered, so the room does not count from it */
-  var room=+ctx.cueRoom||0,tip=function(o){return o.form!=="cue"};
+  var room=+ctx.cueRoom||0,tip=function(o){return o.form!=="cue"&&!o.onTour};
   /* round 7: a Fun item after pokes answers the visitor (as Azu's own bubble did): the breathing room, the cue room, at most a minute and the
      kind's and group's gaps neither hold it nor start from it (one at a time, the gates and the caps still hold) */
   var answer=viaPokes&&it.kind==="fun";
@@ -191,7 +199,100 @@ function gdPick(items,visitor,ctx,now){var g=gdGate(ctx,now);if(g)return{none:tr
   return{none:true,why:all.length?all.map(function(x){return x.it.label+": "+x.r.no}).join(" · "):"no guidance items"}}
 /* Why not now? for one item, in the scheduler's own words: a gate, its own reason, or the item that goes first */
 function gdWhyNot(items,visitor,ctx,now,id){var it=items.filter(function(x){return x.id===id})[0];if(!it)return"no such item";
+  if(it.onTour){var rb=gdCheck(it,items,visitor,ctx,now);return it.label+": "+(rb.ok?"it plays at this seam: "+rb.why:rb.no)}
   var g=gdGate(ctx,now);if(g)return it.label+": "+g;
   var all=gdAll(items,visitor,ctx,now),me=all.filter(function(x){return x.it===it})[0];if(!me.r.ok)return it.label+": "+me.r.no;
   var ok=all.filter(function(x){return x.r.ok}).sort(gdOrder),b=ok[0];if(b.it===it)return it.label+": it shows next: "+me.r.why;
   return it.label+": it could show, but the "+b.it.label+" goes first ("+(b.it.essential&&!it.essential?"Essential":"score "+gdN(b.r.score)+" against "+gdN(me.r.score))+")"}
+
+/* ----- round 12, Fun › On the tour: the tour's plan (research_tour_entertainment.md 3.1, 3.5). Pure: the items (gdItems' On the tour
+   ones, in the Editor's order), the visitor's memory, the context (Solemn, Liveliness, a screen reader, the visitor's Games on the tour, the
+   Not nows this visit) and the tour (its steps, each with its seconds of narration, whether a reviewed question or guess is on it in this
+   language; its length; the audience; the group's rhythm). A seam is the gap after a step (seam s: after step s+1, as the dock counts).
+   The opening is the seam after the introduction (the leading intro / teaser steps); the finale the seam before the last step (the
+   "end" step), else after it. The rhythm: room for one beat per `every` s of narration (rounded up), at most the length's cap (Short /
+   Standard / Deep), the opening and the finale included; never two seams in a row; never in the tour's first 20 s but the opening. A pair
+   (the quiz promise and the quiz) is planned whole or not at all. In the Editor's order, each item's seam by its Place: the opening, the
+   finale, or between (a guess: before the step that holds it; after n s of narration: the first free seam after it, never the last
+   seam; before the last step: the finale's seam). A variant (the cookie) never in a tour with its base (the breather). Every item not
+   planned keeps its reason (Why not now?). Unity: TourPlan GuidanceScheduler.PlanTour(state, tour) ----- */
+var GD_TOUR_FIRST=20;
+function gdMmss(s){s=Math.max(0,Math.round(+s||0));return Math.floor(s/60)+":"+("0"+s%60).slice(-2)}
+function gdSeamWords(P,s){var st=P.titles&&P.titles[s+1];return"the seam after step "+(s+1)+(st?" (before “"+st+"”)":"")+", at "+gdMmss(P.at[s])+" of narration"}
+function gdTourPlan(items,visitor,ctx,T){var steps=T.steps||[],n=steps.length,at=[],c=0;steps.forEach(function(st){c+=+st.secs||0;at.push(c)});
+  var k0=0;for(var j=0;j<n;j++){if(steps[j].act==="intro"||steps[j].act==="teaser")k0=j;else break}
+  var kf=n>1&&steps[n-1].act==="end"?n-2:n-1,content=steps.filter(function(st){return!/^(intro|teaser|end)$/.test(st.act)}).length;
+  var cap=T.len==="short"?+T.perShort:T.len==="deep"?+T.perDeep:+T.perTour,every=Math.max(1,+T.every||75),budget=Math.max(0,Math.min(cap,Math.ceil(c/every)));
+  var P={n:n,narr:c,at:at,k0:k0,kf:kf,cap:cap,every:every,budget:budget,len:T.len||"standard",aud:T.aud||"explorer",lang:T.lang||"en",content:content,titles:steps.map(function(x){return x.title||""}),ids:steps.map(function(x){return x.id}),beats:[],why:{}};
+  var on=items.filter(function(it){return it.onTour}),vis=visitor&&visitor.visit&&visitor.visit.items||{},A=P.aud,AN={family:"Family",explorer:"Explorer",expert:"Expert"}[A]||A;
+  var qs=steps.filter(function(st){return st.q}),qd={};qs.forEach(function(st){qd[st.id]=1});
+  var gate=function(it){if(!it.on)return"Off";if(it.kindOn===false)return(it.kindName||"Fun")+" is Off";if(it.groupOn===false)return(it.groupName||"On the tour")+" is Off";
+    if(ctx.solemn)return"a Solemn point: no beats on it";
+    if(T.auds&&!T.auds[A])return(it.groupName||"On the tour")+" is not for "+AN+" (its Audiences)";if(!(it.auds||{})[A])return"not for "+AN+" (its Audiences)";
+    if(!it.calm&&(!ctx.lively||it.groupLife==="calm"))return(it.groupLife==="calm"?"On the tour's Liveliness is Calm":"Calm (Mascot › Liveliness)")+": only the items Calm too";
+    if(ctx.sr&&it.srPath===false)return"a screen reader is on, and it has no button path";
+    if(it.game&&ctx.games==="off")return"the visitor turned Games on the tour Off (Settings › The guide)";
+    if(it.game&&(+ctx.notNow||0)>=2)return"two Not nows this visit: no more games";
+    if(it.tourLen==="notshort"&&P.len==="short")return"Not on Short (this tour is Short)";if(it.tourLen==="deep"&&P.len!=="deep")return"Deep only (this tour is "+(P.len==="short"?"Short":"Standard")+")";
+    if(it.shows==="visit"&&(vis[it.id]||{}).shown>0)return"once a visit: it played this visit";
+    if(+it.minNarr>0&&c<+it.minNarr)return"a tour of "+gdMmss(c)+" of narration: it needs "+it.minNarr+" s or more";
+    if(+it.minSteps>0&&content<+it.minSteps)return"a tour of "+content+" steps: it needs "+it.minSteps+" or more";
+    if(it.needs==="quiz"&&(qs.length<+it.qMin||Object.keys(qd).length<2))return"too few reviewed questions in "+({en:"English",pt:"Portuguese"}[P.lang]||P.lang)+": "+qs.length+" on this tour's steps (it needs "+it.qMin+", from 2 steps): no promise";
+    if(it.needs==="year"&&!steps.some(function(st){return st.guess}))return"no step of this tour holds a reviewed guess";return null};
+  var free=function(s){for(var i=0;i<P.beats.length;i++){var b=P.beats[i];if(Math.abs(b.seam-s)<2)return b}return null};
+  var room=function(k){return P.beats.length+k<=P.budget};
+  var full=function(){return"the tour already has "+P.beats.length+" beats (room for "+P.budget+": one per "+every+" s of its "+gdMmss(c)+" of narration, at most "+cap+" on "+({short:"Short",deep:"Deep"}[P.len]||"Standard")+")"};
+  var seamOf=function(it){if(it.place==="opening")return k0;if(it.place==="finale")return kf;
+    if(it.beat==="guess"){for(var j=k0+2;j<=kf;j++)if(steps[j].guess)return j-1;return-1}
+    if(it.beforeEnd)return kf;
+    var from=+it.talkFor||0;for(var s=k0+1;s<kf;s++){if(at[s]>=Math.max(from,GD_TOUR_FIRST)&&!free(s))return s}return-1};
+  var why=function(it,s){if(s<0)return it.beat==="guess"?"the step that holds the year comes too soon after the introduction":+it.talkFor>0?"no free seam after "+it.talkFor+" s of narration but the last":"no free seam";
+    if(s>=n-1&&it.place!=="finale"&&!it.beforeEnd)return"no seam there";var o=free(s);if(o)return"never two seams in a row: “"+o.label+"” is at "+gdSeamWords(P,o.seam);
+    if(at[s]<GD_TOUR_FIRST&&it.place!=="opening")return"not in the tour's first "+GD_TOUR_FIRST+" s";return null};
+  var add=function(it,s){P.beats.push({id:it.id,label:it.label,beat:it.beat,place:it.place,seam:s,after:P.ids[s],at:at[s],state:"planned",game:!!it.game,pairs:it.pairs||""});P.why[it.id]="planned for "+gdSeamWords(P,s)};
+  on.forEach(function(it){if(P.why[it.id])return;var g=gate(it);if(g){P.why[it.id]=g;return}
+    if(it.variantOf&&P.beats.some(function(b){return b.id===it.variantOf})){P.why[it.id]="a variant of “"+(on.filter(function(o){return o.id===it.variantOf})[0]||{label:it.variantOf}).label+"”: it is in this tour";return}
+    var pr=it.pairs?on.filter(function(o){return o.id===it.pairs})[0]:null;
+    if(it.pairs){if(!pr){P.why[it.id]="its pair is not in On the tour";return}var gp=gate(pr);if(gp){P.why[it.id]="its pair, “"+pr.label+"”: "+gp;P.why[pr.id]=gp;return}
+      var s1=seamOf(it),s2=seamOf(pr);if(!(s1>=0&&s2>=0&&Math.abs(s1-s2)>=2)){P.why[it.id]=P.why[pr.id]="the tour is too short for the pair (its two seams in a row)";return}
+      if(!room(2)){P.why[it.id]=P.why[pr.id]=full();return}var w1=why(it,s1)||why(pr,s2);if(w1){P.why[it.id]=P.why[pr.id]=w1;return}
+      var a=s1<s2?[it,s1,pr,s2]:[pr,s2,it,s1];add(a[0],a[1]);add(a[2],a[3]);return}
+    var s=seamOf(it),w=why(it,s);if(w){P.why[it.id]=w;return}if(!room(1)){P.why[it.id]=full();return}add(it,s)});
+  P.beats.sort(function(a,b){return a.seam-b.seam});return P}
+/* the plan in words (the Editor's "This tour's plan", the Log) */
+function gdPlanWords(P){if(!P)return"no tour has started yet";var b=P.beats.map(function(x){return x.label+" at "+gdSeamWords(P,x.seam)+(x.state&&x.state!=="planned"?" ("+x.state+(x.why?": "+x.why:"")+")":"")});
+  return gdMmss(P.narr)+" of narration, "+P.content+" steps ("+({short:"Short",deep:"Deep"}[P.len]||"Standard")+"): room for "+P.budget+" beat"+(P.budget===1?"":"s")+" (one per "+P.every+" s, at most "+P.cap+"). "+(b.length?b.join(" · "):"No beats")+"."}
+/* a beat at its seam: planned there, and the live gates (never over a sentence; a game: Games on the tour, two Not nows; Calm; a screen reader) */
+function gdBeatCheck(it,ctx){var T=ctx.tour,P=ctx.plan;
+  if(!T)return{no:"only in a tour, at its seams (its tour's plan)"+(ctx.planNow?": "+(ctx.planNow.why[it.id]||"")+" (a tour now)":"")};
+  if(!P)return{no:"no plan for this tour yet: a tour asks for it as it starts"};
+  var b=P.beats.filter(function(x){return x.id===it.id})[0];if(!b)return{no:"not in this tour's plan: "+(P.why[it.id]||"")};
+  if(b.state==="played")return{no:"it played at "+gdSeamWords(P,b.seam)+" (once a tour)"};
+  if(b.state==="dropped")return{no:"dropped from this tour's plan: "+(b.why||"")};
+  if(ctx.moment!=="between"||(T.stepId!=null?T.stepId!==b.after:T.step!==b.seam))return{no:"planned for "+gdSeamWords(P,b.seam)+" (the tour is at step "+((T.step|0)+1)+")"};
+  if(ctx.speaking)return{no:"never over a sentence: the guide is speaking"};
+  if(it.game&&ctx.games==="off")return{no:"the visitor turned Games on the tour Off (Settings › The guide)"};
+  if(it.game&&(+ctx.notNow||0)>=2)return{no:"two Not nows this visit: no more games"};
+  if(!it.calm&&(!ctx.lively||it.groupLife==="calm"))return{no:(it.groupLife==="calm"?"On the tour's Liveliness is Calm":"Calm (Mascot › Liveliness)")+": only the items Calm too"};
+  if(ctx.sr&&it.srPath===false)return{no:"a screen reader is on, and it has no button path"};
+  return{ok:true,why:"planned for "+gdSeamWords(P,b.seam),score:1,f:{score:1}}}
+/* the quiz's questions, chosen at the finale (research 5.3): only from steps heard (80 % played), one from each third of the tour's
+   narration when it can, never two from a step, in the tour's order; n at most. steps: [{id, at (its middle, s), q: a reviewed
+   question, heard}]; the thirds from the first content step to the finale */
+function gdQuizPick(steps,n,narr){var ok=steps.filter(function(st){return st.q&&st.heard}),out=[],used={};var lo=steps.length?steps[0].from||0:0,hi=narr||1,third=function(st){return Math.min(2,Math.max(0,Math.floor(3*((st.at||0)-lo)/Math.max(1,hi-lo))))};
+  [0,1,2].forEach(function(t){if(out.length>=n)return;var x=ok.filter(function(st){return!used[st.id]&&third(st)===t})[0];if(x){used[x.id]=1;out.push(x)}});
+  ok.forEach(function(st){if(out.length<n&&!used[st.id]){used[st.id]=1;out.push(st)}});
+  return out.sort(function(a,b){return a.at-b.at}).map(function(st){return st.id})}
+/* the speech path: the recogniser's text matched to a choice, in the language ("the second", "1755", "the palace"); -1: none (tap still) */
+/* the ordinals said (strong: "the second") before the bare numbers and letters (weak: "two", "b"), so "the second one" is the second */
+var GD_ORD={en:[[["first","1st"],["second","2nd"],["third","3rd"]],[["one","a"],["two","b"],["three","c"]]],pt:[[["primeira","primeiro"],["segunda","segundo"],["terceira","terceiro"]],[["um","uma","a"],["dois","duas","b"],["tres"]]]};
+function gdQuizNorm(t){return String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/(\d)[ ,.](?=\d{3}\b)/g,"$1").replace(/[^a-z0-9 ]+/g," ").replace(/\s+/g," ").trim()}
+function gdQuizMatch(said,choices,lang){var t=" "+gdQuizNorm(said)+" ",ws=t.trim().split(" "),ord=GD_ORD[lang]||GD_ORD.en,hit=-1;
+  /* a number said that one choice holds */
+  var nums=t.match(/\d+/g)||[];choices.forEach(function(c,i){var cn=gdQuizNorm(c).match(/\d+/g)||[];if(nums.some(function(x){return cn.indexOf(x)>=0}))hit=hit===-1?i:-2});if(hit>=0)return hit;
+  /* the choice's own words (4 letters or more): the one with most of them said, if only one */
+  var best=-1,bn=0,tie=false;choices.forEach(function(c,i){var cw=gdQuizNorm(c).split(" ").filter(function(w){return w.length>=4}),k=cw.filter(function(w){return ws.indexOf(w)>=0}).length;if(k>bn){bn=k;best=i;tie=false}else if(k&&k===bn)tie=true});if(bn>0&&!tie)return best;
+  /* an ordinal ("the second", "a segunda"), only when the words did not name one */
+  for(var pass=0;pass<2;pass++)for(var i=0;i<Math.min(choices.length,3);i++){if(ord[pass][i].some(function(w){return ws.indexOf(w)>=0}))return i}return-1}
+/* guess the year: the band of a guess (3, never mocking): within 5 % of the range, within 20 %, or further (older / later) */
+function gdGuessBand(g,v){var r=Math.max(1,+g.to-+g.from),d=Math.abs(+v-+g.n);return d<=r*.05?1:d<=r*.2?2:3}
