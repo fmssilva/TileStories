@@ -85,6 +85,8 @@ function gdCheck(it,items,visitor,ctx,now){var vm=gdVisitOf(visitor,it.id),em=gd
   /* round 7: Fun never on a Solemn point (fixed for the kind) and no joke on a Solemn day */
   if(it.kindSolemnOff&&ctx.solemn)return{no:"a Solemn point: no fun here"};
   if(it.joke&&ctx.solemnDay)return{no:"a Solemn day ("+ctx.solemnDay+"): no jokes today"};
+  /* round 11: Fun never during a tour: every Fun item is held while a tour plays (not paused); fixed, no option */
+  if(it.kind==="fun"&&ctx.tour&&!ctx.tour.paused)return{no:"held while a tour plays: Fun never shows during a tour"};
   if(ctx.moment==="between"&&it.form!=="moment")return{no:"the tour moves on to its next step: only a Moment holds it"};
   if(it.form==="moment"&&ctx.moment!=="between")return{no:"a Moment comes only as the tour moves on to its next step"};
   if(ctx.tips==="essentials"&&!it.essential)return{no:"the visitor chose Essentials only (Settings › The guide › Tips)"};

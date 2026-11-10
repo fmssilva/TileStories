@@ -67,7 +67,7 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   // ---------- Mini: Pause and Stop ----------
   await tourAt('g1', 'mini');
   const ms = [await size('.gd-mini [data-g="pause"]'), await size('.gd-mini [data-g="stop"]')];
-  ok('Mini: Pause and Stop beside the talk button, 44 px or more; the keyboard moved to Peek', ms.every(s => s[0] >= 44 && s[1] >= 44) && await R('!ph.querySelector(".gd-main .gd-kb")&&!!ph.querySelector(".gd-chips .gd-kb")'), ms);
+  ok('Mini: Pause and Stop in the Mini, 44 px or more; no keyboard at Mini (round 11: typing is Open\'s ask field)', ms.every(s => s[0] >= 44 && s[1] >= 44) && await R('!ph.querySelector(".gd-main .gd-kb")'), ms);
   await tap('.gd-mini [data-g="pause"]'); await W(200); const k0 = await R('G.hl.k'); await W(800);
   ok('...a tap on Pause pauses the voice (its word holds)', await R('G.paused') && await R('G.hl.k') === k0, [k0]);
   await tap('.gd-mini [data-g="play"]'); await W(900);
@@ -138,9 +138,9 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   ok('A tap on the ✦: its menu on the card: Start the tour, Ask (type or talk), How does this work?, Things to try (guidance round 9), Guide settings (44 px items)', items.join() === 'tour,ask,how,try,settings' && ih.every(h => h >= 44), [items, ih]);
   await R('scr.dispatchEvent(new MouseEvent("click",{bubbles:true}))'); await W(200); ok('...a tap elsewhere closes it', await R('!ph.querySelector(".gbmenu")&&!G.fab.menu'));
   await past(); await tap('.gbtn'); await W(200); await tap('[data-gbgo="tour"]'); await W(400);
-  ok('...Start the tour: the tour runs; the ✦ stays (with its ring), Azu becomes the guide', await R('G.on&&!!ph.querySelector(".gbtn.tour")&&!ph.querySelector(".azfab")&&!!ph.querySelector(".mascot")'));
-  await tap('.gbtn.tour'); await W(200); ok('...during the tour a tap on the ✦ hides the dock', await R('S.dockH==="compact"'));
-  await tap('.gbtn.tour'); await W(200); ok('...and shows it again', await R('S.dockH==="mini"'));
+  ok('...Start the tour: the tour runs; the ✦ grew into the panel (hidden while it shows, round 11), Azu becomes the guide', await R('G.on&&!ph.querySelector(".gbtn-wrap")&&!!ph.querySelector(".gdock")&&!ph.querySelector(".azfab")&&!!ph.querySelector(".mascot")'));
+  await W(400); await tap('.gd-hide'); await W(450); ok('...during the tour the hide chevron hides the dock, back into the ✦', await R('S.dockH==="compact"&&!!ph.querySelector(".gbtn.tour")'));
+  await tap('.gbtn.tour'); await W(450); ok('...and a tap on the ✦ shows it again', await R('S.dockH==="mini"'));
   await past(); await tap('.gbtn'); await W(200); await tap('[data-gbgo="ask"]'); await W(300);
   ok('...Ask (type or talk): the conversation opens, its text field ready', await R('G.on&&S.dockH==="full"&&document.activeElement&&document.activeElement.id==="gq"'));
   await past(); await tap('.gbtn'); await W(200); await tap('[data-gbgo="settings"]'); await W(300);
@@ -204,7 +204,8 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
     const a = await R(CR + 'var disc=px(cs(".gbtn").backgroundColor),card=bgOf("#scr .item")||px(getComputedStyle(scr).backgroundColor),rim=px(cs(".gbtn").borderTopColor),pg=bgOf("#scr");[cr(px(cs(".gb-ic svg").fill),disc),cr(px(cs(".gbtn").color),disc),Math.max(cr(disc,pg),cr(rim,pg)),cr(px(cs(".gbmenu button").color),px(cs(".gbmenu").backgroundColor)),cr(px(getComputedStyle(ph.querySelector(".gbmenu small")||ph.querySelector(".gbmenu button")).color),px(cs(".gbmenu").backgroundColor))]');
     await tourAt('g5', 'mini'); await R(`S.dark=${dark};renderAll(true)`); await W(300);
     const dk = { r: 22, g: 24, b: 28, a: 1 };
-    const t = await R(CR + 'var dk={r:22,g:24,b:28,a:1},ic=over(px(cs(".gd-mc").backgroundColor),dk);[cr(px(cs(".gd-mc").color),ic),cr(over(px(cs(".gd-hide").color),dk),dk),cr(px(cs(".gb-ring .pg").stroke),px(cs(".gbtn.tour").backgroundColor))]');
+    const t = await R(CR + 'var dk={r:22,g:24,b:28,a:1},ic=over(px(cs(".gd-mc").backgroundColor),dk);[cr(px(cs(".gd-mc").color),ic),cr(over(px(cs(".gd-hide").color),dk),dk)]');
+    t.push(await R(CR + 'S.dockH="compact";renderGuide();var r=cr(px(cs(".gb-ring .pg").stroke),px(cs(".gbtn.tour").backgroundColor));S.dockH="mini";renderGuide();r')); // round 11: the ✦ and its ring show at Compact
     await R('ph.querySelector(\'.gd-mini [data-g="stop"]\').click()'); await W(200);
     const tt = await R(CR + 'var t=ph.querySelector(".gtoast");[cr(px(cs(".gtoast").color),px(cs(".gtoast").backgroundColor)),cr(px(cs(".gtoast button").color),px(cs(".gtoast button").backgroundColor))]');
     await R('hideStopUi()');

@@ -38,7 +38,7 @@ on("markWord.after",function(k){if(!S.guideCfg.lips||S.reduce||!G.words[k])retur
   G.lipT=sh.map(function(s,i){return setTimeout(function(){azMouth(ph.querySelector(".mascot"),s)},i*per)}).concat([setTimeout(function(){G.lipT=null;azMouth(ph.querySelector(".mascot"),restShape(azMood()))},sh.length*per)])});
 /* blinks: every 2.5-5 s, never in sync with anything */
 function azBlink(){clearTimeout(G.blinkT);G.blinkT=setTimeout(function(){var m=ph.querySelector(".mascot");if(m&&!S.reduce){m.classList.add("blink");setTimeout(function(){m.classList.remove("blink")},140)}if(G.on)azBlink()},2500+Math.random()*2500)}
-on("renderGuide.after",function(){var m=ph.querySelector(".mascot");if(!m)return;m.setAttribute("role","button");m.setAttribute("aria-label",TXT("mascot_name"));m.tabIndex=-1;if(G.moment)m.classList.add("center");azApply()});
+on("renderGuide.after",function(){var m=ph.querySelector(".mascot");if(!m)return;m.setAttribute("role","button");m.setAttribute("aria-label",TXT("mascot_name"));m.tabIndex=-1;azApply()});
 on("startTour.before",function(){G.moment=null;G.talkFrom=performance.now()});on("startTour.after",function(){azBlink()});
 
 /* ----- play: what the visitor starts is never limited; what Azu starts by itself is the guidance's (Guide › Guidance › Fun, round 7): the
@@ -59,15 +59,31 @@ function azPoke(){haptic();var calm=S.guideCfg.life!=="lively",pool=calm?["r-win
   emit("mascot.poked",r);return r}
 function azTickle(){haptic();azReact("r-laugh",1300,"big");azBubble(TXT("mascot_tickle"))}
 function azFall(){haptic();azReact("r-fall",1700,"surprised");azBubble(TXT("mascot_oops"),1400)}
-/* a moment: Azu walks to the middle with a prop and asks for one tap; it never blocks (8 s, then the tour carries on). Its words: the
-   guidance item's Says (words), else the prop's own. When it starts is the guidance's (Fun › Moments); its end is moment.ended */
-function azMoment(kind,then,words){var m=ph.querySelector(".mascot");G.moment=kind;G.talkFrom=performance.now();words=words||TXT(kind==="water"?"mascot_water":"mascot_hungry");
-  var o=document.createElement("div");o.className="azmoment "+kind;o.innerHTML='<button type="button" class="azprop" data-azprop="'+kind+'" aria-label="'+esc(words)+'">'+(kind==="water"?'<svg viewBox="0 0 24 32" aria-hidden="true"><path d="M4 3H20L18 29H6Z" fill="rgba(170,215,255,.35)" stroke="#5B8FD6" stroke-width="2" stroke-linejoin="round"/><path class="az-water" d="M5.6 12H18.4L17.3 28H6.7Z" fill="#7FB8F0"/></svg>':'<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="#D9A55B" stroke="#9A6A2A" stroke-width="2"/><circle cx="11" cy="12" r="2" fill="#5B3716"/><circle cx="20" cy="10" r="1.8" fill="#5B3716"/><circle cx="19" cy="20" r="2.2" fill="#5B3716"/><circle cx="11" cy="21" r="1.6" fill="#5B3716"/></svg>')+'</button>';
-  ph.appendChild(o);if(m){m.classList.add("center");azMouth(m,"surprised")}azBubble(words,8000);
-  G.momentThen=then;clearTimeout(G.momentT);G.momentT=setTimeout(function(){azMomentEnd(false)},8000)}
+/* a moment: Azu shows a prop and asks for one tap; it never blocks (8 s, then the tour carries on). Its words: the guidance item's
+   Says (words), else the prop's own. When it starts is the guidance's (Fun › Moments); its end is moment.ended.
+   Round 11: Azu stays where it is (beside the words, never over them) and the prop is placed beside Azu with 0 px over any words (the
+   card's, the panel's, a bubble's) and inside the phone; with no room it waits (tried again every 300 ms; 8 s with none: the moment
+   ends unseen). Unity: the prop's rect tested against the glyph boxes (TextElement) and the panel's rect, the same candidates */
+var PROP=54;
+function propObstacles(){var out=typeof wordBoxes==="function"?wordBoxes(null).slice():[];ph.querySelectorAll(".gdock,.gbubble,.azbub,.gbtn-wrap,.gtoast,.gcoach").forEach(function(e){if(!e.getClientRects().length)return;var r=phRect(e);out.push({l:r.l,t:r.t,r:r.l+r.w,b:r.t+r.h})});return out}
+function propFree(x,y,obs){if(x<8||y<64||x+PROP>ph.offsetWidth-8||y+PROP>ph.offsetHeight-8)return false;return!obs.some(function(b){return b.r>x&&b.l<x+PROP&&b.b>y&&b.t<y+PROP})}
+/* the nearest free place beside Azu: left or right of it, above or below, then a step further up or down */
+function propSpot(){var m=azuEl();if(!m||!m.getClientRects().length)return null;var a=phRect(m),obs=propObstacles(),g=8,c=[];
+  [0,-(PROP+g),PROP+g,-2*(PROP+g),2*(PROP+g)].forEach(function(dy){var y=a.t+(a.h-PROP)/2+dy;c.push([a.l-PROP-g,y],[a.l+a.w+g,y])});
+  c.push([a.l+(a.w-PROP)/2,a.t-PROP-g],[a.l+(a.w-PROP)/2,a.t+a.h+g]);
+  for(var i=0;i<c.length;i++)if(propFree(c[i][0],c[i][1],obs))return{x:Math.round(c[i][0]),y:Math.round(c[i][1])};return null}
+function azMoment(kind,then,words){G.moment=kind;G.talkFrom=performance.now();words=words||TXT(kind==="water"?"mascot_water":"mascot_hungry");G.momentThen=then;G.propWaited=0;
+  clearTimeout(G.momentT);clearInterval(G.propT);var t0=performance.now();
+  var show=function(sp){var m=ph.querySelector(".mascot"),o=document.createElement("div");o.className="azmoment "+kind;o.style.left=sp.x+"px";o.style.top=sp.y+"px";
+    o.innerHTML='<button type="button" class="azprop" data-azprop="'+kind+'" aria-label="'+esc(words)+'">'+(kind==="water"?'<svg viewBox="0 0 24 32" aria-hidden="true"><path d="M4 3H20L18 29H6Z" fill="rgba(170,215,255,.35)" stroke="#5B8FD6" stroke-width="2" stroke-linejoin="round"/><path class="az-water" d="M5.6 12H18.4L17.3 28H6.7Z" fill="#7FB8F0"/></svg>':'<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="#D9A55B" stroke="#9A6A2A" stroke-width="2"/><circle cx="11" cy="12" r="2" fill="#5B3716"/><circle cx="20" cy="10" r="1.8" fill="#5B3716"/><circle cx="19" cy="20" r="2.2" fill="#5B3716"/><circle cx="11" cy="21" r="1.6" fill="#5B3716"/></svg>')+'</button>';
+    ph.appendChild(o);G.propAt=sp;if(m)azMouth(m,"surprised");G.momentT=setTimeout(function(){azMomentEnd(false)},8000)};
+  /* the words first (they ask for the tap), then the prop placed clear of every word, the bubble's included */
+  var tryPlace=function(){if(G.moment!==kind){clearInterval(G.propT);return true}var sp=propSpot();if(sp){clearInterval(G.propT);show(sp);return true}
+    G.propWaited=performance.now()-t0;if(G.propWaited>8000){clearInterval(G.propT);azMomentEnd(false);return true}return false};
+  azBubble(words,8000);if(!tryPlace())G.propT=setInterval(tryPlace,300)}
 function azMomentDo(){var k=G.moment;if(!k)return;clearTimeout(G.momentT);haptic();var p=ph.querySelector(".azmoment");if(p)p.classList.add("using");azReact(k==="water"?"r-drink":"r-eat",1500,k==="water"?"O":"chew");
   setTimeout(function(){azBubble(TXT(k==="water"?"mascot_ahh":"mascot_thanks"),1500);azMomentEnd(true)},1500)}
-function azMomentEnd(done){var k=G.moment;if(!k)return;G.moment=null;clearTimeout(G.momentT);var p=ph.querySelector(".azmoment");if(p)p.remove();var m=ph.querySelector(".mascot");if(m)m.classList.remove("center");
+function azMomentEnd(done){var k=G.moment;if(!k)return;G.moment=null;clearTimeout(G.momentT);clearInterval(G.propT);var p=ph.querySelector(".azmoment");if(p)p.remove();var m=ph.querySelector(".mascot");if(m)m.classList.remove("center");
   var t=G.momentThen;G.momentThen=null;emit("moment.ended",k,!!done);setTimeout(function(){if(t&&G.on)t()},done?900:0)}
 on("stopTour.before",function(){if(G.moment){G.momentThen=null;azMomentEnd(false)}clearTimeout(G.blinkT);(G.lipT||[]).forEach(clearTimeout);G.lipT=null;var b=ph.querySelector(".azbub");if(b)b.remove()});
 /* the gestures on Azu (the guide's, or the one beside the guide's button): a tap does what Tap on Azu says (it plays: a poke), three
@@ -82,7 +98,7 @@ ph.addEventListener("click",function(e){var p=e.target.closest("[data-azprop]");
 /* Moments and Water break after: link rows to the guidance that shows them now (Guide › 4 · Guidance › Fun › Moments, round 7): the
    Moments' On / Off is that group's On; the water break's seconds of narration are its item's own row (Water break after) */
 function mascotMomentLinks(){var gp=gdGroupPath("moments"),gg=gdGroupById("moments"),w=S.guidance.items.water,go=function(o,t){return'<button class="ubtn sm gdedited" type="button" data-goto="'+o+'">'+esc(t)+' &#8250;</button>'};if(!gp||!gg)return"";
-  return row("Moments",'<div class="btnrow" style="margin:0">'+pseg(gp+"on",["true","false"],["On","Off"])+go("gd:g:moments","Edited in Guide › Guidance › Fun › Moments")+'</div>',"Between two steps of a tour, as it moves on, Azu walks to the middle with a glass of water (after the narration below) or a cookie (before the last step) and asks for one tap; 8 s without one, the tour carries on. Lively only, never on a Solemn point, once a card each, 5 min apart: the guidance's scheduler decides (its gates, Fun's weight in the Mix). Its On / Off is the group's own; its rules are there.")+
+  return row("Moments",'<div class="btnrow" style="margin:0">'+pseg(gp+"on",["true","false"],["On","Off"])+go("gd:g:moments","Edited in Guide › Guidance › Fun › Moments")+'</div>',"Between two steps of a tour, as it moves on, Azu walks to the middle with a glass of water (after the narration below) or a cookie (before the last step) and asks for one tap; 8 s without one, the tour carries on. Lively only, never on a Solemn point, once a card each, 5 min apart: the guidance's scheduler decides (its gates, Fun's weight in the Mix). Its On / Off is the group's own; its rules are there. Since round 11 every Fun item is held while a tour plays, so the Moments wait (Why not now? says so) and the prop is placed beside Azu with 0 px over any words.")+
     (w&&!w.deleted?row("Water break after",'<div class="btnrow" style="margin:0"><span class="uses">'+(+w.talkFor||0)+' s of narration</span>'+go("gd:i:water","Edited in Guide › Guidance › Fun › Moments › Water break")+'</div>',"The seconds of the tour's narration before Azu stops for a sip: the Water break item's own row now.",true):"")}
 /* Editor: Guide tab > Mascot gets its liveliness, mouth, moods, moments and a Try per play; Specific Marker > Guide script gets Solemn and each step's mood */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;

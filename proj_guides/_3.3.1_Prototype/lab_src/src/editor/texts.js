@@ -81,7 +81,7 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
      comp("s5termpage","a term's own page, opened by Read more","")}
   /* 7 · Guide: one component per element of the tour */
   var s7=innerOf(d,"s7");if(s7){var g=function(l,r){return takeRow(s7,l,r)},rules=s7.querySelector(":scope > .note.fixed");rules=rules?row("Fixed rules",'<span class="uses">pause, take-over, captions, Reduce Motion</span>',rules.textContent.replace(/^Fixed rules:\s*/,"")):"";
-    var vo=g("Voice")+g("Speed")+g("Music bed"),he=g("Start from the hero","Shown"),bl=g("Guide block","Shown"),ca=g("Captions","Shown")+g("Highlight what is read"),co2=g("Invite to try","Shown"),ma=g("Mascot","Character"),as=g("Ask the guide","Answers from");
+    var vo=g("Voice")+g("Speed")+g("Music bed")+g("Music volume")+g("Under the voice")+g("Track")+g("Credit")+g("Playing now")+g("Visitor can choose the music"),he=g("Start from the hero","Shown"),bl=g("Guide block","Shown"),ca=g("Captions","Shown")+g("Highlight what is read"),co2=g("Invite to try","Shown"),ma=g("Mascot","Character"),as=g("Ask the guide","Answers from");
     s7.innerHTML=rules+comp("s7voice","the voice, its speed and the music under it",vo)+comp("s7hero","the button on the hero that starts the tour",he)+comp("s7block","the tile that starts the tour, first in About",bl)+
      comp("s7cap","the words being read, at the bottom",ca)+comp("s7coach","at a block to try, the guide waits for the gesture",co2)+
      comp("s7tour","progress, previous, pause, next, sound, captions, Ask and stop","")+comp("s7resume","after the visitor takes over, the button that carries on","")+comp("s7mascot","a small tile that follows the block being told",ma)+comp("s7ask","questions by text or voice",as)}

@@ -201,7 +201,8 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   for (const k of await R(`[].map.call(ed.querySelectorAll('[data-fo="gd:i:${bid}"] [data-tx]'),function(x){return x.dataset.tx})`)) { const l = p.locator(`[data-fo="gd:i:${bid}"] [data-tx="${k}"]`); await l.scrollIntoViewIfNeeded(); await l.fill(k.endsWith('|pt') ? 'Olá.' : 'Hello there.'); await l.press('Tab'); await W(250); }
   await W(400); const n2 = await R('[].map.call(ed.querySelectorAll("#gdwarns .gdwl"),function(x){return x.textContent})');
   wres.push(['no words (Blank)', n1.some(x => /“New item” can never show: it has no words in English/.test(x)), !n2.some(x => /no words/.test(x))]);
-  ok('No warning with the catalog as it is', w0.length === 0, w0);
+  // round 11: Fun is held while a tour plays, so the two Moments (they come only between tour steps) are named as unable to show; nothing else
+  ok('No warning with the catalog as it is, but the two Moments of round 11 (Fun held in a tour: they cannot show)', w0.length === 2 && w0.every(x => /Fun is held while a tour plays/.test(x)) && /Water break/.test(w0.join()) && /Cookie/.test(w0.join()), w0);
   ok('Each named warning appears, naming the item, and goes once fixed: kind Off, Only if contradicts itself, Done when already true, a line too long (Portuguese), a line said twice, no words', wres.every(x => x[1] && x[2]), wres);
   const badge = await R(`S.guidance.kinds[0].on=false;renderEditor();var s=ed.querySelector('[data-fo="gd:i:tapmarker"] > summary .gdwb'),n=ed.querySelector('[data-fo="gd:i:tapmarker"] .gdwarn');S.guidance.kinds[0].on=true;[!!s,n?n.textContent:""]`);
   ok('...and on the item itself: a ⚠ badge on its row, the warning in its form', badge[0] && /its kind, App, is Off/.test(badge[1]), badge);

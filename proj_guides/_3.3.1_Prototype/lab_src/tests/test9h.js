@@ -17,7 +17,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
   const p = await b.newPage({ viewport: { width: 1400, height: 900 } });
   const errs = []; p.on('pageerror', e => errs.push(e.message));
-  await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 90000 }); await p.waitForTimeout(500);
+  await p.goto(url, { timeout: 90000 }); await p.waitForFunction(() => window.LAB, null, { timeout: 90000 }); await p.waitForTimeout(500);
   const R = src => p.evaluate(s => LAB.run(s), src); const W = ms => p.waitForTimeout(Math.min(ms, 500));
   const until = async (src, ms) => { const t0 = Date.now(); while (Date.now() - t0 < ms) { if (await R(src)) return true; await W(60); } return false; };
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
@@ -27,7 +27,9 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
     'S.guidance.on=true;S.guidance.breathing=15;S.guidance.cueRoom=5;S.hints.on=true;gdGroupById("card").items.forEach(function(id){var it=S.guidance.items[id];it.on=true;it.shows="visit"});var hw=gdGroupById("howto");hw.on=true;hw.inSettings=true;hw.inMenu=true;' +
     '["opening","tapmarker","askview","gbhint","tourof"].forEach(function(id){S.guidance.items[id].on=true});gdGroupById("inview").on=false;G.gd.demo=false;gdChip(null);';
   const opened = 'var o=gdVM("opening"),oe=gdEM("opening");o.shown=1;o.last=gdNow()-30000;o.end=gdNow()-21000;oe.shown=1;S.gdVisitor.visit.lastEnd=gdNow()-21000;var e=gdEM("tapmarker");e.done=true;e.by="card";';
-  const fresh = async (extra, manual) => { await R(base + 'if(G.on)stopTour();G.cam.open=false;S.settingsOpen=false;G.fab.menu=false;setWall("ribeira");S.view="card";S.stop="closed";renderPhone(false);' + `G.gd.manual=${!!manual};G.gd.rate=1;` + 'gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;G.gd.actAt=null;G.gd.scrollAt=null;' + opened + (extra || '')); await W(150); };
+  const fresh = async (extra, manual) => { await R(base + 'if(G.on)stopTour();G.cam.open=false;S.settingsOpen=false;G.fab.menu=false;setWall("ribeira");S.view="card";S.stop="closed";renderPhone(false);' + `G.gd.manual=${!!manual};G.gd.rate=1;` + 'gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;G.gd.actAt=null;G.gd.scrollAt=null;' + opened + (extra || '')); await W(150);
+    /* (round 11 review) the sheet may still be growing to its stop (184 px of 820 measured): wait until its height holds */
+    await until('var h=Math.round(scr.getBoundingClientRect().height),o=window.__t9sh;window.__t9sh=h;o===h', 3000); };
   const CR = 'var px=function(c){var m=c.match(/[\\d.]+/g).map(Number);return{r:m[0],g:m[1],b:m[2]}},lum=function(c){return[c.r,c.g,c.b].map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce(function(a,v,i){return a+v*[.2126,.7152,.0722][i]},0)},cr=function(a,b){var x=lum(a),y=lum(b);return Math.round((Math.max(x,y)+.05)/(Math.min(x,y)+.05)*100)/100};';
   const look = CR + 'var q=ph.getBoundingClientRect().height/ph.offsetHeight,b=ph.querySelector(".gdbub:not(.gd-out)"),bt=b.querySelector("button[data-gdbub]"),cs=getComputedStyle(bt),lh=parseFloat(cs.lineHeight),lines=Math.round((bt.offsetHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom))/lh),B=gdPR(b),g=ph.querySelector(".gbtn"),ct=b.querySelector("[data-gdcta]");' +
     '[lines,cr(px(cs.color),px(getComputedStyle(b).backgroundColor)),gdOverWords(),g?gdOver(B,gdPR(g)):0,bt.textContent,ct?Math.round(ct.getBoundingClientRect().height/q):0,ct?cr(px(getComputedStyle(ct).color),px(getComputedStyle(ct).backgroundColor)):0,ct?ct.textContent:""]';

@@ -31,7 +31,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R(base);
   const pk = (mod, now, id) => R(`S.guidance=JSON.parse(window.__g0);var V={visits:1,visit:{n:1,at:0,lastEnd:null,cards:0,items:{opening:{shown:1,last:0,end:9000,dismissed:0}},starts:[0],ev:{},pokes:0,rest:{},fewer:{}},ever:{items:{opening:{shown:1,done:false,by:""}}},used:{}},
     C={on:true,breathing:15,limits:{perMinute:2,perVisit:30},tau:120,demo:false,showing:null,remark:null,speaking:false,panel:null,movedAt:null,touchAt:null,onWall:true,where:"",marker:null,gbtn:{name:"the ✦",x:40,y:700},central:null,stillSince:-Infinity,returning:false,aud:"explorer",tips:"all",lively:true,solemn:false,today:"03-10",solemnDay:null,pokes:0,idleSince:null,covers:{}},
-    vm=function(id,o){V.visit.items[id]=Object.assign({shown:0,last:null,end:null,dismissed:0,acted:0,how:""},o)},TOUR=function(t,e){C.tour={between:true,step:2,talked:t,toEnd:!!e};C.onWall=false;C.where="the tour";C.moment="between"};
+    vm=function(id,o){V.visit.items[id]=Object.assign({shown:0,last:null,end:null,dismissed:0,acted:0,how:""},o)},TOUR=function(t,e,play){C.tour={between:true,step:2,talked:t,toEnd:!!e,paused:!play};C.onWall=false;C.where="the tour";C.moment="between"};
     ${mod || ''};var items=gdItems(),only=${id ? `"${id}"` : 'null'};${id ? `gdWhyNot(items,V,C,${now},"${id}")` : `var r=gdPick(items,V,C,${now});[r.item?r.item.id:null,r.why,!!r.answer]`}`);
   const P = {};
   // the Moments
@@ -40,7 +40,10 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   P.card = await pk('TOUR(70);vm("water",{shown:1,last:500000,end:508000,card:0})', 600000, 'water'); P.card2 = await pk('TOUR(70);vm("water",{shown:1,last:200000,end:208000,card:0});V.visit.cards=1', 600000);
   P.apart = await pk('TOUR(70,true);vm("water",{shown:1,last:400000,end:408000,card:0});V.visit.lastEnd=408000', 500000, 'cookie'); P.cookie = await pk('TOUR(10,true)', 600000);
   P.onlyM = await pk('TOUR(70);V.visit.pokes=3', 600000, 'joke');
-  ok('Moments through the scheduler: as the tour moves on (context.moment "between"), after 60 s of narration, the Water break shows (its kind Fun, a Moment)', P.water[0] === 'water' && /between two steps, 70 s of narration/.test(P.water[1]), P.water);
+  // round 11: a playing tour holds every Fun item (the Moments' own rules above are read with the tour not playing)
+  P.holdW = await pk('TOUR(70,false,true)', 600000, 'water'); P.holdC = await pk('TOUR(10,true,true)', 600000, 'cookie'); P.holdJ = await pk('TOUR(70,false,true);C.moment=null;C.pokes=3', 600000, 'joke'); P.holdPick = await pk('TOUR(70,false,true)', 600000);
+  ok('[fun hold] Round 11: while a tour plays every Fun item is held (the water break, the cookie, a joke): Why not now? says "held while a tour plays", and nothing is picked as it moves on', [P.holdW, P.holdC, P.holdJ].every(x => /held while a tour plays/.test(x)) && P.holdPick[0] === null, [P.holdW, P.holdC, P.holdJ, P.holdPick]);
+  ok('Moments through the scheduler (their own rules, the tour not playing): as the tour moves on (context.moment "between"), after 60 s of narration, the Water break is the pick (its kind Fun, a Moment)', P.water[0] === 'water' && /between two steps, 70 s of narration/.test(P.water[1]), P.water);
   ok('...between steps only: never at a tick of the clock, never outside a tour, not before its 60 s of narration (and it says so)', /a Moment comes only as the tour moves on/.test(P.tick) && /only between two steps of a tour/.test(P.noTour) && /after 60 s of the tour's narration \(30 s so far\)/.test(P.talk), [P.tick, P.noTour, P.talk]);
   ok('...Lively only (Calm: none); [solemn] never on a Solemn point', /Lively only/.test(P.calmW) && /a Solemn point: no fun here/.test(P.solW), [P.calmW, P.solW]);
   ok('...once a card (again on the next card); 5 min apart (the Moments\' gap 300 s, the cookie after a water break); the cookie before the last step', /shown on this card/.test(P.card) && P.card2[0] === 'water' && /Moments's gap 300 s/.test(P.apart) && P.cookie[0] === 'cookie' && /the tour's last step next/.test(P.cookie[1]), [P.card, P.card2[0], P.apart, P.cookie]);
@@ -50,7 +53,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const NOAC = 'S.guidance.kinds[0].on=false;S.guidance.kinds[1].on=false;';
   P.jLate = await pk(NOAC, 660000); P.jEarly = await pk('', 300000, 'joke'); P.jDay = await pk('C.pokes=3;C.solemnDay="1 Nov"', 30000, 'joke'); P.jTour = await pk('C.pokes=3;C.tour={between:true,step:1,talked:5};C.onWall=false', 30000, 'joke');
   ok('A joke after 3 pokes on Azu (not after 2), and again 3 pokes after it last showed; an answer to the pokes, so the breathing room does not hold it', P.j3[0] === 'joke' && P.j3[2] === true && /3 pokes on Azu/.test(P.j3[1]) && /after 3 pokes on Azu \(2 so far\)/.test(P.j2) && /\(2 so far since it last showed\)/.test(P.jSince) && P.j6[0] === 'joke' && P.j6[2] === true, [P.j3, P.j2, P.jSince, P.j6[0]]);
-  ok('...and rarely at a pause late in the visit (from 10:00, once a visit), never in a tour, never on a Solemn day', P.jLate[0] === 'joke' && /a pause late in the visit/.test(P.jLate[1]) && P.jLate[2] === false && /from 10:00/.test(P.jEarly) && /a Solemn day \(1 Nov\): no jokes today/.test(P.jDay) && /quiet in a tour/.test(P.jTour), [P.jLate[0], P.jEarly, P.jDay, P.jTour]);
+  ok('...and rarely at a pause late in the visit (from 10:00, once a visit), never in a tour, never on a Solemn day', P.jLate[0] === 'joke' && /a pause late in the visit/.test(P.jLate[1]) && P.jLate[2] === false && /from 10:00/.test(P.jEarly) && /a Solemn day \(1 Nov\): no jokes today/.test(P.jDay) && /quiet in a tour|held while a tour plays/.test(P.jTour), [P.jLate[0], P.jEarly, P.jDay, P.jTour]);  // round 11: the Fun hold comes first
   const rot = await R('var it=gdItems().filter(function(x){return x.id==="joke"})[0];[gdLine(it,false,{seen:{}}),gdLine(it,false,{seen:{mascot_joke_2:1}}),gdLine(it,false,{seen:{mascot_joke_2:1,mascot_joke_3:1}}),gdLine(it,false,{seen:{mascot_joke_2:2,mascot_joke_3:1,mascot_joke_1:1}}),TXT("mascot_joke_2"),TXT("mascot_joke_3"),TXT("mascot_joke_1")]');
   ok('...its variants rotate: the least seen shows (ties: the first, today\'s first joke)', rot[0] === rot[4] && rot[1] === rot[5] && rot[2] === rot[6] && rot[3] === rot[5], rot.slice(0, 4));
   // a point's joke
@@ -87,15 +90,11 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('S.guidance.kinds.forEach(function(k){k.on=false});G.talkFrom=performance.now()-90000;startTour()');
   const noSched = await until('G.i>=1', 25000) && await R('!G.moment&&!ph.querySelector(".azmoment")');
   ok('...no Moment without the scheduler: with Fun Off the tour moves on, no water break', noSched, await R('[G.i,G.moment]'));
-  await R('stopTour();gdResetVisitor();' + FUN + 'G.talkFrom=performance.now();startTour()');
-  const wa = await until('G.moment==="water"&&!!ph.querySelector(".azmoment [data-azprop]")', 30000);
-  const wa1 = await R('[G.i,!!G.gd.hold,G.gd.cur&&G.gd.cur.item.id,ph.querySelector(".mascot").classList.contains("center"),(ph.querySelector(".azbub")||{}).textContent]');
-  ok('A water break in a real tour: between two steps, through the scheduler (Azu in the middle with the glass, its words, the next step held)', wa && wa1[1] && wa1[2] === 'water' && wa1[3] && wa1[4] === await R('TXT("mascot_water")'), wa1);
-  await p.locator('#ph [data-azprop]').click();
-  const wa2 = await until(`G.i===${wa1[0] + 1}&&!G.moment`, 5000);
-  ok('...one real click on the glass: Azu drinks, the tour goes on to the next step; its memory: acted', wa2 && await R('gdVisitOf(S.gdVisitor,"water").how==="acted"&&gdVisitOf(S.gdVisitor,"water").shown===1'), await R('[G.i,gdVisitOf(S.gdVisitor,"water")]'));
-  await R('G.talkFrom=performance.now()-90000'); await until(`G.i>=${wa1[0] + 2}`, 25000);
-  ok('...once a card: the tour moves on again, no second water break', await R('!G.moment&&gdVisitOf(S.gdVisitor,"water").shown===1'), await R('[G.i,G.moment]'));
+  // round 11: in a real tour the water break is held (Fun never during a tour); it was a Moment between two steps
+  await R('stopTour();gdResetVisitor();' + FUN + 'G.talkFrom=performance.now()-90000;startTour()');
+  let sawW = false; { const t0 = Date.now(); while (Date.now() - t0 < 25000) { if (await R('!!G.moment||!!ph.querySelector(".azmoment")')) { sawW = true; break; } if (await R('G.i>=2')) break; await W(150); } }
+  const wa1 = await R('[G.i,gdVisitOf(S.gdVisitor,"water").shown,(function(id){var a=gdAll(gdItems(),S.gdVisitor,gdContext(),gdNow()).filter(function(x){return x.it.id===id})[0];return a?String(a.r.no||""):""})("water")]');
+  ok('[fun hold] A real tour: it moves on, step after step, and no water break shows between them (Fun held while it plays; Why not now? says so)', !sawW && wa1[0] >= 1 && wa1[1] === 0 && /held while a tour plays/.test(wa1[2]), [sawW, wa1]);
   await R('stopTour();gdResetVisitor();' + FUN + 'S.guideCfg.life="calm";G.talkFrom=performance.now()-90000;startTour()'); await until('G.i>=1', 25000);
   const calmT = await R('!G.moment&&!ph.querySelector(".azmoment")');
   await R('stopTour();gdResetVisitor();' + FUN + 'S.guideCfg.life="lively";S.m.solemn=true;G.talkFrom=performance.now()-90000;startTour()'); await until('G.i>=1', 25000);
@@ -177,7 +176,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const sol = sim.solemn.fun;
   ok('Simulate a visit: a sixth visitor, Family on a Solemn wall', sim.names.length === 6 && sim.names[5] === 'Family on a Solemn wall', sim.names);
   ok('[solemn] ...no Fun dot while the Solemn point is in the middle (its first 5 minutes, Today is 20 Dec: the Christmas line due from 1:00); Fun after, once a Lively point is there (deterministic)', sol.length >= 1 && sol.every(d => d[0] >= 300000) && sim.solemn.same, sol);
-  ok('...Tour lover gets Moments between steps (two water breaks, tapped)', sim.tour.fun.filter(d => d[1] === 'water' && d[2] === 'acted').length === 2 && sim.tour.same, sim.tour.fun);
+  ok('[fun hold] ...Tour lover gets no Moment in its tours (round 11: Fun is held while a tour plays; it had two water breaks)', sim.tour.fun.filter(d => d[1] === 'water' || d[1] === 'cookie').length === 0 && sim.tour.same, sim.tour.fun);
   await R(base + 'gdPresetWrite("first");'); await editor('guide', { gt0: true, 'gd:sim': true }); await R('setOpt("ui.gdSim","tour")'); await W(300);
   await p.locator('[data-set="ui.gdSim"][data-v="solemn"]').click(); await W(400);
   const lane = await R('var s=ed.querySelector("[data-gdsimsvg]"),labs=[].map.call(s.querySelectorAll(".gdlab"),function(x){return[x.textContent,+x.getAttribute("y")]}),fy=labs.filter(function(l){return l[0]==="Fun"})[0][1]-4;[S.ui.gdSim,[].filter.call(s.querySelectorAll(".gddot .gdd"),function(c){return Math.abs(+c.getAttribute("cy")-fy)<2}).length,!!s.querySelector(".gdnone"),(ed.querySelector("#gdsimsum")||{}).textContent,(ed.querySelector(".gdleg")||{}).textContent]');

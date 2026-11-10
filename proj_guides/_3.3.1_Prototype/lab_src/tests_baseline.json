@@ -35,11 +35,11 @@
   "s": 68
  },
  "test8k.js": {
-  "pass": 28,
+  "pass": 29,
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 90
+  "s": 74
  },
  "test8l.js": {
   "pass": 31,
@@ -67,7 +67,7 @@
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 35
+  "s": 32
  },
  "test8p.js": {
   "pass": 15,
@@ -95,7 +95,7 @@
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 40
+  "s": 36
  },
  "test8t.js": {
   "pass": 36,
@@ -109,7 +109,7 @@
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 79
+  "s": 77
  },
  "test8v.js": {
   "pass": 16,
@@ -172,56 +172,56 @@
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 322
+  "s": 314
  },
  "test9db.js": {
   "pass": 8,
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 344
+  "s": 301
  },
  "test9e.js": {
   "pass": 59,
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 494
+  "s": 395
  },
  "test9f.js": {
   "pass": 61,
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 267
+  "s": 240
  },
  "test9g.js": {
   "pass": 46,
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 147
+  "s": 119
  },
  "test9h.js": {
   "pass": 40,
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 190
+  "s": 148
  },
  "test9i.js": {
   "pass": 40,
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 133
+  "s": 145
  },
  "test9ja.js": {
   "pass": 50,
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 247
+  "s": 303
  },
  "test9jb.js": {
   "pass": 3,
@@ -231,19 +231,18 @@
   "s": 79
  },
  "test9k.js": {
-  "pass": 54,
+  "pass": 53,
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 277,
-  "retried": true
+  "s": 174
  },
  "test9l.js": {
   "pass": 48,
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 119
+  "s": 112
  },
  "test9m.js": {
   "pass": 32,
@@ -257,6 +256,13 @@
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 62
+  "s": 55
+ },
+ "test9o.js": {
+  "pass": 60,
+  "fail": 0,
+  "failed": [],
+  "crashed": "",
+  "s": 198
  }
 }

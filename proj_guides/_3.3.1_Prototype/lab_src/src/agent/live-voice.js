@@ -32,7 +32,7 @@ function lvSdk(){if(window.SpeechSDK)return Promise.resolve(window.SpeechSDK);if
    paused while its audio was being made, it waits for Resume ----- */
 function lvPlay(text,onWord,onEnd,r){var held=LV.held;stopSpeech();G.words=lvWords(text);G.recWords=r.words;G.visTrack=r.vis;
   G.hl={k:-1,at:0,p:0,cpm:0,ended:false,last:0,seen:true,start:performance.now(),target:G.hl&&G.hl.target};G.noVoice=false;
-  var url=URL.createObjectURL(new Blob([r.audio],{type:"audio/mpeg"})),a=new Audio(url),vi=-1;a.muted=!!S.guideMute;a.playbackRate=S.guideCfg.speed||1;
+  var url=URL.createObjectURL(new Blob([r.audio],{type:"audio/mpeg"})),a=new Audio(url),vi=-1;a.muted=!!S.guideMute;a.playbackRate=guideSpeed();G.rate=a.playbackRate;
   G.recAudio=a;G.utter={recorded:true,live:true};G.lastWordAt=performance.now();musicDuck(true);
   var rest=function(){var m=ph.querySelector(".mascot");if(m)azMouth(m,restShape(azMood()))};
   var fin=function(){if(G.recAudio!==a)return;G.recAudio=null;G.utter=null;G.recWords=null;G.visTrack=null;musicDuck(false);if(G.hl)G.hl.ended=true;URL.revokeObjectURL(url);rest();onEnd()};

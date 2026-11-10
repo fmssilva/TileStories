@@ -32,7 +32,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('A tap on the dock\'s line pauses', await R('G.paused'));
   await p.locator('#ph .gd-line').click(); await p.waitForTimeout(200);
   ok('...and plays again', await R('!G.paused'));
-  await p.locator('#ph .gd-seg [data-gseg="2"]').click(); await p.waitForTimeout(300);
+  await R('S.dockH="peek";renderGuide()'); await p.locator('#ph .gd-seg [data-gseg="2"]').click(); await p.waitForTimeout(300); // round 11: the bar is Open's
   ok('A tap on a segment goes to that step', await R('G.i') === 2);
   // 4. a suggested question, a typed question
   await R('S.dockH="peek";renderGuide()'); await p.locator('#ph [data-chip="0"]').click(); await p.waitForTimeout(800);
@@ -42,20 +42,20 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('stopTour()');
   // 5. the talk button: a tap listens (a stand-in recogniser), its words are asked; while Azu speaks, a tap interrupts it
   await R(`window.FakeRec=function(){};FakeRec.prototype.start=function(){var s=this;window.RECS=(window.RECS||0)+1;setTimeout(function(){s.onresult&&s.onresult({results:[[{transcript:"What was inside?"}]]});if(!s.continuous)s.onend&&s.onend()},300)};FakeRec.prototype.stop=function(){this.onend&&this.onend()};window.SpeechRecognition=FakeRec`);
-  await R('startTour();G.i=1;runStep()'); await p.waitForTimeout(600);
+  await R('startTour();G.i=1;runStep();S.dockH="peek";renderGuide()'); await p.waitForTimeout(600); // round 11: the talk button is Open's
   ok('While Azu speaks: the button says it can interrupt', await R('ph.querySelector(".gd-talk").classList.contains("s-speaking")&&ph.querySelector(".gd-hint").textContent===TXT("dock_tap_stop")'));
   await p.locator('#ph .gd-talk').click(); await p.waitForTimeout(120);
   const ls = await R('[G.paused,G.talk,ph.querySelector(".gd-talk").className]');
   ok('...a tap interrupts it and listens', ls[0] && /listening|interrupted/.test(ls[1]) && /s-listening|s-interrupted/.test(ls[2]), ls);
   await p.waitForTimeout(700);
   ok('...the words heard are asked', await R('[].some.call(ph.querySelectorAll(".gm-me"),function(e){return e.textContent==="What was inside?"})'));
-  await R('stopTour();startTour()'); await p.waitForTimeout(300); await R('pauseTour()');
+  await R('stopTour();startTour()'); await p.waitForTimeout(300); await R('pauseTour();S.dockH="peek";renderGuide()');
   const tb = await p.locator('#ph .gd-talk').boundingBox(); await p.mouse.move(tb.x + 28, tb.y + 28); await p.mouse.down(); await p.waitForTimeout(900);
   const hold = await R('[G.talk,!!G.rec&&G.rec.continuous]'); await p.mouse.up(); await p.waitForTimeout(300);
   ok('Hold: listens while held (continuous), sends on release', hold[0] === 'listening' && hold[1] && await R('ph.querySelectorAll(".gm-me").length>=1'), hold);
   // no recogniser allowed: it says why, and opens the text field
   await R(`window.SpeechRecognition=function(){};SpeechRecognition.prototype.start=function(){var s=this;setTimeout(function(){s.onerror&&s.onerror({error:"not-allowed"})},50)};SpeechRecognition.prototype.stop=function(){}`);
-  await R('stopTour();startTour()'); await p.waitForTimeout(300); await R('pauseTour()'); await p.locator('#ph .gd-talk').click(); await p.waitForTimeout(400);
+  await R('stopTour();startTour()'); await p.waitForTimeout(300); await R('pauseTour();S.dockH="peek";renderGuide()'); await p.locator('#ph .gd-talk').click(); await p.waitForTimeout(400);
   ok('The microphone not allowed: the conversation says why, and offers typing', await R('S.dockH==="full"&&!!ph.querySelector(".gm-note")&&ph.querySelector(".gm-note").textContent.length>20&&!!ph.querySelector("#gq")'));
   await R('stopTour()');
   // 6. the words' contrast: the bubble (light and dark) and the dock
@@ -71,7 +71,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('Panel: Classic: the captions box and the bar, no dock', await R('!ph.querySelector(".gdock")&&!!ph.querySelector(".gbar")'));
   await R('stopTour();S.guideCfg.panel="dock"');
   // 8. the Editor
-  ok('Editor: Guide panel (then Guide button, round 7) before Captions, its rows and its words', await R('S.tab="guide";renderEditor();var f=ed.querySelector(\'[data-fo="s7dock"]\');!!f&&f.nextElementSibling.nextElementSibling===ed.querySelector(\'[data-fo="s7cap"]\')&&["Panel","Starts at","Azu\'s own words","Talk button","Sounds","Suggested questions"].every(function(t){return f.textContent.indexOf(t)>=0})&&(TXO.s7dock||[]).length===17'));
+  ok('Editor: Guide panel (then Guide button, round 7) before Captions, its rows and its words', await R('S.tab="guide";renderEditor();var f=ed.querySelector(\'[data-fo="s7dock"]\');!!f&&f.nextElementSibling.nextElementSibling===ed.querySelector(\'[data-fo="s7cap"]\')&&["Panel","Starts at","Azu\'s own words","Talk button","Sounds","Suggested questions"].every(function(t){return f.textContent.indexOf(t)>=0})&&(TXO.s7dock||[]).length===28'));  // round 11: 11 new words of the panel (dock_speed, dock_readall…)
   await R('S.tab="marker";renderEditor()');
   await p.locator('input[data-gask="0|en"]').fill('When was it built?'); await R('startTour();S.dockH="peek";renderGuide()'); await p.waitForTimeout(200);
   ok('Specific Marker: a suggested question, typed, on its chip', await R('ph.querySelector(\'[data-chip="0"]\').textContent') === 'When was it built?');

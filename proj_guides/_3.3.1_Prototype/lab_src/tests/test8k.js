@@ -53,21 +53,25 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('Mouth Still: one shape', ds2.size === 1, ds2.size);
   await R('S.guideCfg.lips=true;RX=[]'); await p.waitForTimeout(5300);
   ok('Azu blinks (every 2.5-5 s)', await R('RX.indexOf("blink")>=0'));
-  // 7. the water break: between two steps, after the time set; one tap; then the tour goes on; once a tour
-  await start('S.guidance.items.water.talkFor=1'); await R('G.talkFrom=performance.now()-5000');
-  await p.waitForFunction(() => LAB.run('G.moment'), null, { timeout: 15000 });
-  const mo = await R('[G.moment,G.i,!!ph.querySelector(".azmoment [data-azprop=water]"),ph.querySelector(".mascot").classList.contains("center"),!!ph.querySelector(".gspot.on")]');
-  ok('Water break: between steps, Azu in the middle with the glass, the light stepped back', mo[0] === 'water' && mo[1] === 0 && mo[2] && mo[3] && !mo[4], mo);
+  // 7. the water break (round 11): held while the tour plays (Fun never during a tour); shown as the Editor's Try does, the glass
+  // beside Azu, one tap, then the tour goes on
+  await start('S.guidance.items.water.talkFor=1'); await R('G.talkFrom=performance.now()-5000;next()'); await p.waitForTimeout(600);
+  ok('Water break: never between the steps of a playing tour (round 11: Fun is held; Why not now? says so)', await R('!G.moment&&!ph.querySelector(".azmoment")&&/held while a tour plays/.test((function(id){var a=gdAll(gdItems(),S.gdVisitor,gdContext(),gdNow()).filter(function(x){return x.it.id===id})[0];return a?String(a.r.no||""):""})("water"))'));
+  await R('stopSpeech();G.i=S.guideSteps.findIndex(function(s){return s.id==="g8"});runStep()'); await p.waitForTimeout(1200); // a step with pictures beside Azu: room for the glass
+  await R('pauseTour();azMoment("water",function(){resumeTour()})'); await p.waitForFunction(() => LAB.run('!!document.querySelector("#ph .azmoment")'), null, { timeout: 5000 });
+  const mo = await R('[G.moment,!!ph.querySelector(".azmoment [data-azprop=water]"),ph.querySelector(".mascot").classList.contains("center")]');
+  ok('...its look (the Try): the glass beside Azu, Azu where it was (beside the words)', mo[0] === 'water' && mo[1] && !mo[2], mo);
   await R('RX=[]'); await p.locator('#ph [data-azprop]').click(); await p.waitForTimeout(3000);
-  ok('...one tap on the glass: Azu drinks, says "Ahh", and the tour carries on to the next step', await R('RX.indexOf("r-drink")>=0&&G.i===1&&!G.moment&&!ph.querySelector(".azmoment")'), await R('[G.i,G.moment,RX]'));
-  await R('G.talkFrom=performance.now()-5000;next()'); await p.waitForTimeout(300);
-  ok('...and only once a tour', await R('!G.moment'));
+  ok('...one tap on the glass: Azu drinks, says "Ahh", and the tour carries on', await R('RX.indexOf("r-drink")>=0&&!G.paused&&!G.moment&&!ph.querySelector(".azmoment")'), await R('[G.i,G.moment,RX]'));
   // 8. no tap: it carries on by itself after 8 s
   await start(''); await R('azMoment("water",function(){window.MDONE=1})'); await p.waitForTimeout(8400);
   ok('No tap: after 8 s the tour carries on by itself', await R('!G.moment&&window.MDONE===1'));
-  // 9. the cookie, before the end
+  // 9. the cookie, before the end (round 11: held in a playing tour; its look as the Try shows it)
   await start('S.guidance.items.water.talkFor=600'); await R('G.i=S.guideSteps.length-2;next()'); await p.waitForTimeout(400);
-  ok('Before the end: a cookie', await R('G.moment==="cookie"&&!!ph.querySelector("[data-azprop=cookie]")'));
+  ok('Before the end: no cookie while the tour plays (Fun held)', await R('!G.moment&&/held while a tour plays/.test((function(id){var a=gdAll(gdItems(),S.gdVisitor,gdContext(),gdNow()).filter(function(x){return x.it.id===id})[0];return a?String(a.r.no||""):""})("cookie"))'));
+  await R('stopSpeech();G.i=S.guideSteps.findIndex(function(s){return s.id==="g8"});runStep()'); await p.waitForTimeout(1200);
+  await R('pauseTour();azMoment("cookie",function(){resumeTour()})'); await p.waitForFunction(() => LAB.run('!!document.querySelector("#ph [data-azprop=cookie]")'), null, { timeout: 5000 });
+  ok('...its look (the Try): a cookie', await R('G.moment==="cookie"&&!!ph.querySelector("[data-azprop=cookie]")'));
   await R('RX=[]'); await p.locator('#ph [data-azprop]').click(); await p.waitForTimeout(1800);
   ok('...a tap: Azu eats it and thanks', await R('RX.indexOf("r-eat")>=0&&ph.querySelector(".azbub").textContent===TXT("mascot_thanks")'));
   // 10. Calm or Solemn: nothing unprompted

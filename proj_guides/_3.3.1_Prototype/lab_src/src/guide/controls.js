@@ -38,3 +38,28 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   return d.innerHTML});
 /* the row's demo: Stop pressed mid-sentence at Mini: the toast, or the question */
 rowDemos({"guideCfg.stopUndo":{tour:"g5",dock:"mini",act:function(){var b=ph.querySelector('.gd-mini [data-g="stop"]')||ph.querySelector('.gd-ctl [data-g="stop"]');if(b)b.click()},ring:".gtoast|.gstopask"}});
+
+/* ----- round 11: the speed chip, the visitor's own: 0.5× · 0.75× · 1× · 1.25× · 1.5× · 1.75× · 2× in turn (its first value Narration ›
+   Speed); the voice follows at once: an audio's playbackRate, the device voice spoken again from its word at the new rate. Unity:
+   AudioSource.pitch with a pitch-shifter (the time stretch), or the TextToSpeech rate from the word ----- */
+var SPEEDS=[0.5,0.75,1,1.25,1.5,1.75,2];
+function speedNext(v){for(var i=0;i<SPEEDS.length;i++)if(SPEEDS[i]>v+1e-6)return SPEEDS[i];return SPEEDS[0]}
+function setGuideSpeed(v){S.vis.speed=v;G.rate=v;if(G.recAudio)G.recAudio.playbackRate=v;else if(G.on&&!G.paused&&(G.utter||G.timer)&&G.sayArgs)speakFrom(G.hl&&G.hl.k>=0?G.hl.k:0,false);
+  ph.querySelectorAll(".gd-speed").forEach(function(b){b.textContent=spd(v)+"×";b.setAttribute("aria-label",fmt(TXT("dock_speed"),spd(v)))});dkTick()}
+ph.addEventListener("click",function(e){var b=e.target.closest('[data-g="speed"]');if(!b)return;e.stopPropagation();setGuideSpeed(speedNext(guideSpeed()))},true);
+/* ----- round 11: the progress bar seeks. A drag (its hit area 44 px high) or a tap: the stop under the finger, and within it the sentence
+   at that place (its share of the stop's words); the knob and the time follow the finger, the voice goes there on release. Keys: ← → the
+   stop before / after. Unity: a PointerDown / Move / Up manipulator on the bar's element (CapturePointer), the same rule ----- */
+function seekAt(sk,x){var best=null;sk.querySelectorAll("[data-gseg]").forEach(function(s){var r=s.getBoundingClientRect();if(!best||x>=r.left)best={j:+s.dataset.gseg,r:r}});if(!best)return{j:G.i,f:0};
+  return{j:best.j,f:Math.max(0,Math.min(.999,(x-best.r.left)/Math.max(1,best.r.width)))}}
+function seekShow(d){var sk=d.sk.isConnected?d.sk:ph.querySelector(".gd-seek");if(!sk)return;d.sk=sk;dkKnob(sk,d.j,d.f);var T=dkTimes(),c=T.stops[d.j],el=c?c.at+d.f*(c.len-.7):0;
+  ph.querySelectorAll(".gdock .gd-time").forEach(function(t){var k=t.dataset.t;t.textContent=k==="both"?mmss(el)+" / "+mmss(T.tot):k==="el"?mmss(el):k==="rem"?"-"+mmss(T.tot-el):mmss(T.tot)})}
+/* to stop j, at the first word of the sentence at share f of its words */
+function seekTo(j,f){var st=S.guideSteps[j];if(!st||!G.on)return;var ws=stepText(st).match(/\S+/g)||[],k=Math.min(ws.length-1,Math.floor(f*ws.length)),s=0;for(var i=0;i<k;i++)if(/[.!?…]["”»)]*$/.test(ws[i]))s=i+1;
+  G.seekedTo={j:j,k:s};hideStopUi();stopSpeech();G.paused=false;G.waiting=false;G.tryWait=false;G.askOpen=false;G.startWord=s;if(S.dockH==="full")S.dockH="peek";G.i=j;runStep()}
+ph.addEventListener("pointerdown",function(e){var sk=e.target.closest(".gdock .gd-seek");if(!sk)return;e.preventDefault();e.stopPropagation();try{sk.setPointerCapture(e.pointerId)}catch(x){}
+  G.seekDrag=Object.assign({id:e.pointerId,sk:sk},seekAt(sk,e.clientX));sk.classList.add("dragging");seekShow(G.seekDrag)},true);
+ph.addEventListener("pointermove",function(e){var d=G.seekDrag;if(!d||e.pointerId!==d.id)return;e.stopPropagation();if(!d.sk.isConnected)d.sk=ph.querySelector(".gd-seek")||d.sk;Object.assign(d,seekAt(d.sk,e.clientX));seekShow(d)},true);
+["pointerup","pointercancel"].forEach(function(t){ph.addEventListener(t,function(e){var d=G.seekDrag;if(!d||e.pointerId!==d.id)return;G.seekDrag=null;e.stopPropagation();d.sk.classList.remove("dragging");if(t==="pointerup")seekTo(d.j,d.f)},true)});
+ph.addEventListener("keydown",function(e){var sk=e.target.closest&&e.target.closest(".gd-seek");if(!sk||!G.on)return;var j=e.key==="ArrowRight"?G.i+1:e.key==="ArrowLeft"?G.i-1:e.key==="Home"?0:e.key==="End"?S.guideSteps.length-1:null;
+  if(j==null||j<0||j>=S.guideSteps.length)return;e.preventDefault();seekTo(j,0);setTimeout(function(){var n=ph.querySelector(".gd-seek");if(n)n.focus({preventScroll:true})},0)},true);

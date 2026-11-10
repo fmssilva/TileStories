@@ -15,12 +15,23 @@ function sayFrom(src,text,onWord,onEnd,why){var line=G.sayLine&&G.sayLine.text==
 function sayDevice(text,onWord,onEnd){emitLatestFirst("sayDevice.before",text,onWord,onEnd);var end=function(){emit("sayDevice.ended");onEnd()};
   var go=function(){stopSpeech();var words=[],re=/\S+/g,m;while((m=re.exec(text)))words.push({i:m.index,w:m[0]});G.words=words;
     var v=voiceFor(S.lang);musicDuck(true);
-    if(v&&!S.guideMute){var u=new SpeechSynthesisUtterance(text);u.voice=v;u.lang=v.lang;u.rate=S.guideCfg.speed;
+    if(v&&!S.guideMute){var u=new SpeechSynthesisUtterance(text);u.voice=v;u.lang=v.lang;u.rate=guideSpeed();G.rate=u.rate;
       u.onboundary=function(e){if(e.name&&e.name!=="word")return;var k=0;for(var j=0;j<words.length;j++)if(words[j].i<=e.charIndex)k=j;onWord(k)};
       u.onend=function(){musicDuck(false);if(G.utter===u)end()};G.utter=u;speechSynthesis.speak(u)}
-    else{var k=0,per=60000/(170*S.guideCfg.speed);onWord(0);G.timer=setInterval(function(){if(G.paused)return;k++;if(k>=words.length){clearInterval(G.timer);G.timer=null;musicDuck(false);end();return}onWord(k)},per)}
+    else{var k=0,per=60000/(170*guideSpeed());G.rate=guideSpeed();onWord(0);G.timer=setInterval(function(){if(G.paused)return;k++;if(k>=words.length){clearInterval(G.timer);G.timer=null;musicDuck(false);end();return}onWord(k)},per)}
     emit("sayDevice.started",text)};
   if(firstAnswer("sayDevice.wait",go)===undefined)go();emit("sayDevice.after",text)}
+/* the voice's speed: the visitor's (the panel's speed chip, Settings › The guide), else Narration › Speed (round 11: 0.5-2) */
+function guideSpeed(){var v=S.vis&&S.vis.speed!=null?+S.vis.speed:+S.guideCfg.speed;return v>0?v:1}
+/* the voice's level now, 0-1, for the panel's bars (round 11): still when nothing speaks or the line is paused; a recorded or live line by
+   its own level (an AnalyserNode where the page may read its audio: mascot/mouth.js's loudness; else its mouth curve; else its word
+   times); the device voice (or the words by time) by its word events. Unity: AudioSource.GetOutputData's RMS for an audio, the
+   TextToSpeech word callbacks (Android onRangeStart, iOS willSpeakRangeOfSpeechString) for the device voice */
+function voiceLevel(){if(!G.on||G.paused||G.moment)return 0;var a=G.recAudio,now=performance.now();
+  if(a){if(a.paused)return 0;if(typeof LD!=="undefined"&&LD.audio===a&&LD.lvl>0)return Math.min(1,LD.lvl*1.4);
+    if(typeof MT!=="undefined"&&MT.audio===a&&MT.track){var tr=MT.track,i=Math.min(tr.f.length-1,Math.floor(a.currentTime*tr.fps));if(i>=0)return Math.min(1,tr.f[i][0]*1.6+.08)}}
+  else if(!G.utter&&!G.timer)return 0;
+  var h=G.hl;if(!h||h.k<0||h.ended)return 0;var w=G.words[h.k],dt=now-h.at,len=w?w.w.length:4;return Math.max(0,Math.min(1,(.55+len*.05)*Math.exp(-dt/(260+len*30))))}
 function stopSpeech(){emitLatestFirst("stopSpeech.before");if(window.speechSynthesis)speechSynthesis.cancel();G.utter=null;if(G.timer){clearInterval(G.timer);G.timer=null}}
 S.guideCfg.voice_en="";S.guideCfg.voice_pt="";
 /* the browser loads its voices lazily: the first getVoices() is empty, so the tour's first step had no voice (captions only) */
@@ -55,7 +66,7 @@ function recSay(text,onWord,onEnd){var set=currentSet();if(!set)return{not:"no r
   var r=recFile(text,set);if(!r)return{not:"this line is not recorded in "+setName(set),short:"not recorded"};
   stopSpeech();var words=[],re=/\S+/g,m;while((m=re.exec(text)))words.push({i:m.index,w:m[0]});G.words=words;G.recWords=r.file.words;
   G.hl={k:-1,at:0,p:0,cpm:0,ended:false,last:0,seen:true,start:performance.now(),target:G.hl&&G.hl.target};G.noVoice=false;
-  var a=new Audio(r.url);a.preload="auto";a.muted=!!S.guideMute;a.playbackRate=S.guideCfg.speed||1;G.recAudio=a;G.utter={recorded:true};G.lastWordAt=performance.now();musicDuck(true);
+  var a=new Audio(r.url);a.preload="auto";a.muted=!!S.guideMute;a.playbackRate=guideSpeed();G.rate=a.playbackRate;G.recAudio=a;G.utter={recorded:true};G.lastWordAt=performance.now();musicDuck(true);
   var fin=function(){if(G.recAudio!==a)return;G.recAudio=null;G.utter=null;G.recWords=null;musicDuck(false);if(G.hl)G.hl.ended=true;onEnd()};
   a.addEventListener("ended",fin);a.addEventListener("error",function(){if(G.recAudio!==a)return;G.recAudio=null;G.utter=null;G.recWords=null;sayFrom("recorded",text,onWord,onEnd,{not:"the recording did not play",short:"the recording did not play"})});
   var tick=function(){if(G.recAudio!==a)return;var t=a.currentTime,w=G.recWords,k=-1;for(var j=0;j<w.length;j++){if(w[j][0]<=t+.02)k=j;else break}

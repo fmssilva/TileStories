@@ -1,52 +1,260 @@
-/* The Guide Dock. Unity: a UI Toolkit sheet like the card's; the rings are elements with a radial-gradient sprite whose scale
-   and alpha follow the voice or the mic; the bubble is a 9-slice with a tail. Words always on solid colours (no backdrop blur). */
-.gdock{position:absolute;left:8px;right:8px;bottom:8px;z-index:14;background:#16181C;color:#F4F1EA;border-radius:24px;box-shadow:0 10px 30px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.06);padding:6px 12px 10px;transition:height .32s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
-.gd-grab{appearance:none;border:0;background:none;height:14px;display:flex;justify-content:center;align-items:center;cursor:pointer;padding:0;touch-action:none}
-.gd-grab i{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.28)}
-.gd-seg{display:flex;gap:3px;margin:2px 2px 8px}.gd-seg button{flex:1;height:4px;padding:0;border:0;border-radius:2px;background:rgba(255,255,255,.18);cursor:pointer}
-.gd-seg button.done{background:rgba(255,255,255,.62)}.gd-seg button.now{background:#FFD98A}
-.gd-main{display:flex;align-items:center;gap:8px;min-height:56px}
+/* The Guide Dock in its four Looks (round 11; drawn as the Architect's static layouts: gp/project Main = Paper glass, InkGlass,
+   Player, Prompter). Unity: one UXML template per Look, swapped with its USS, the same element names; no backdrop blur (the glass
+   is a translucent fill with a light edge), a gradient is a ramp texture (Ink glass's fill, Teleprompter's fade); the shadows a
+   9-slice in light mode. Every word at 4.5:1 or more over the worst backdrop (scratchpad g11/contrast11.js); 44 px targets. */
+.gdock{position:absolute;z-index:14;box-sizing:border-box;display:flex;flex-direction:column;font-family:var(--body);color:var(--ink);
+  --ink:#F4F1EA;--ink2:#C9C2B6;--faded:#A39C90;--acc:#F2B544;--onacc:#16151A;--acctx:#F2B544;--hl:#F2B544;--hltx:#16151A;--trk:rgba(255,255,255,.22);--chip:#2A2830;--line:rgba(255,255,255,.22);--field:rgba(255,255,255,.08);--fieldedge:rgba(255,255,255,.12);--grab:rgba(255,255,255,.28);--tpun:#A39C90}
+.gdock :where(button){appearance:none;border:0;background:none;padding:0;margin:0;cursor:pointer;font:inherit;color:inherit;display:grid;place-items:center;flex:none;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+.gdock .fi{width:24px;height:24px;fill:currentColor}
+.gdock .si{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.gdock .vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.gdock p{margin:0}
+/* the parts every Look shares */
+.gd-mrow{display:flex;align-items:center;gap:10px;min-width:0}
+.gd-av{width:48px;height:48px;border-radius:50%;background:#EFE7DA;display:grid;place-items:center;overflow:hidden;flex:none}
+.gd-av svg,.gd-av img{width:42px;height:42px;display:block;object-fit:contain}
+.gd-bars{display:inline-flex;align-items:center;gap:3px;height:20px;color:var(--acc);flex:none}
+.gd-bars i{display:block;width:3px;height:100%;border-radius:2px;background:currentColor;transform:scaleY(.18);will-change:transform}
 .gd-line{flex:1;min-width:0;cursor:pointer}
-.gd-stop{display:block;font:600 11px/1.2 var(--body);color:rgba(244,241,234,.66);letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.gd-cap .gcap{position:static;inset:auto;background:none;box-shadow:none;padding:0;margin-top:3px;max-height:44px;overflow:hidden;font:500 14px/1.4 var(--body);border-radius:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.gd-kb{appearance:none;border:0;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.08);color:#F4F1EA;display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
-/* Mini: Pause and Stop beside the talk button (44 px targets); the chevron at the top right hides the dock (Compact) */
-.gd-mini{display:flex;gap:6px;flex:0 0 auto}
-.gd-mc{appearance:none;border:0;width:44px;height:44px;border-radius:50%;background:rgba(244,241,234,.12);color:#F4F1EA;display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
-.gd-hide{position:absolute;top:0;right:8px;appearance:none;border:0;background:none;width:44px;height:30px;display:grid;place-items:center;color:rgba(244,241,234,.78);cursor:pointer;padding:0}
-.gd-hide svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.gd-kb svg,.gd-mc svg,.gd-ctl svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-/* the talk button: a blue disc with a white mic and a soft glow; its rings tell the state */
-.gd-talk{position:relative;appearance:none;border:0;width:56px;height:56px;flex:0 0 auto;border-radius:50%;background:radial-gradient(circle at 35% 30%,#5B8CFF,#2F5FE0 60%,#1F45B5);color:#fff;display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 14px rgba(47,95,224,.4);touch-action:none;transition:transform .15s}
+.gd-mini{display:flex;gap:6px;flex:none;align-items:center}
+.gd-mc{width:44px;height:44px;border-radius:50%}
+.gd-mpp{width:48px;height:48px;background:var(--acc);color:var(--onacc)}
+.gd-mpp .fi{width:20px;height:20px}.gd-mstop .fi{width:18px;height:18px}
+.gd-openb{width:44px;height:44px;border-radius:50%}
+.gd-mprog{position:absolute;left:30px;right:30px;bottom:0;height:3px;border-radius:2px;background:var(--trk);overflow:hidden}
+.gd-mprog b{display:block;height:100%;width:0;background:var(--acc);transition:width .25s linear}
+/* the hide chevron: a small tab on the Mini's top edge (44 px to tap), in the Look's own surface */
+.gd-hide{position:absolute!important;top:-36px;right:22px;width:44px;height:44px}
+.gd-hide::before{content:"";position:absolute;left:8px;right:8px;top:18px;bottom:0;border-radius:14px 14px 4px 4px;background:var(--tab,var(--surfsolid));box-shadow:0 -2px 8px rgba(0,0,0,.12)}
+.gd-hide .si{position:relative;width:18px;height:18px;margin-top:18px}
+/* Open's grabber (the handle) and its chevron back to Mini */
+.gd-handle{position:absolute!important;left:50%;top:-10px;width:96px;height:44px;margin-left:-48px}
+.gd-handle i{width:40px;height:4px;border-radius:2px;background:var(--grab)}
+.gd-small{position:absolute!important;top:6px;right:8px;width:44px;height:44px;border-radius:50%;color:var(--ink2)}
+.gd-head .gd-small{position:static!important}
+/* the words like a teleprompter */
+.gd-tp{display:flex;flex-direction:column;gap:6px;min-width:0}
+.gd-tp .tp-prev,.gd-tp .tp-next{font:400 15px/21px var(--body);color:var(--faded);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.gd-tp .tp-now{font:500 21px/29px var(--display);color:var(--ink);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.gd-tp .tp-now .tw{color:var(--tpun)}.gd-tp .tp-now .tw.said,.gd-tp .tp-now .tw.on{color:var(--ink)}
+.gd-tp .tw.on,.gm-now .tw.on{background:var(--hl);color:var(--hltx)!important;border-radius:6px;padding:0 4px;margin:0 -2px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.gd-tp .tp-empty{visibility:hidden}
+.gd-tp.tp-up{animation:tpup .42s cubic-bezier(.2,.8,.2,1)}
+@keyframes tpup{from{transform:translateY(24px);opacity:.35}to{transform:none;opacity:1}}
+.gd-tp.tp-mini .tp-now{font:400 15px/20px var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.gd-tp.tp-mini .tw{color:var(--ink)!important}.gd-tp.tp-mini .tw.on{padding:0 3px}
+.gd-tpoff .tp-now{visibility:hidden}
+/* where we are: the time and the step, the progress bar (a 44 px hit area round a thin track), the knob */
+.gd-where{display:flex;flex-direction:column;gap:6px}
+.gd-lab{display:flex;justify-content:space-between;gap:12px;font:400 13px/18px var(--body);color:var(--ink2)}
+.gd-stop{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.gd-time{font-variant-numeric:tabular-nums;white-space:nowrap}
+.gd-seek{position:relative;height:44px;margin:-11px 0;display:flex;align-items:center;cursor:pointer;touch-action:none;outline:none}
+.gd-seek:focus-visible .sk-knob{box-shadow:0 0 0 3px var(--ink)}
+.sk-track{display:flex;align-items:center;gap:3px;width:100%}
+.sk-track i{display:block;position:relative;height:4px;border-radius:2px;background:var(--trk);overflow:hidden}
+.sk-track b{display:block;height:100%;width:0;background:var(--acc)}
+.sk-knob{position:absolute;top:50%;left:0;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:#fff;box-shadow:0 0 0 4px var(--acc),0 2px 6px rgba(26,24,20,.3);transition:left .25s linear;pointer-events:none}
+.gd-seek.dragging .sk-knob{transition:none;transform:scale(1.2)}
+/* the controls */
+.gd-ctl{display:flex;align-items:center;justify-content:space-between}
+.gd-pn{width:52px;height:52px;border-radius:50%;color:var(--ink)}.gd-pn .fi{width:26px;height:26px}
+.gd-play{width:68px;height:68px;border-radius:50%;background:var(--acc);color:var(--onacc)}.gd-play .fi{width:26px;height:26px}
+.gd-stopb{width:52px;height:52px;border-radius:50%;color:var(--ink)}.gd-stopb .fi{width:20px;height:20px}
+.gd-speed{min-width:58px;height:44px;border-radius:22px!important;border:1px solid var(--line)!important;font:700 15px/1 var(--body)!important;color:var(--ink);padding:0 12px!important;font-variant-numeric:tabular-nums}
+/* asking: the questions ready to tap, typed, by voice */
+.gd-chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:1px 0}.gd-chips::-webkit-scrollbar{display:none}
+.gd-chips [data-chip]{height:44px;border-radius:22px;padding:0 16px;font:600 14px/1 var(--body);background:var(--chip);color:var(--ink);white-space:nowrap}
+.gd-kb{width:44px;height:44px;border-radius:50%;border:1px solid var(--line)!important;color:var(--ink)}
+.gd-kb svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.gd-askrow{display:flex;gap:10px;align-items:center}
+.gd-form{flex:1;min-width:0;display:flex;align-items:center;gap:6px;height:52px;border-radius:26px;background:var(--field);border:1px solid var(--fieldedge);padding:0 6px 0 18px;box-sizing:border-box}
+.gd-form .gin{flex:1;min-width:0;border:0;background:transparent;outline:none;font:400 15px/1 var(--body);color:var(--ink);padding:0}
+.gd-form .gin::placeholder{color:var(--ink2);opacity:1}
+.gd-send{width:44px;height:44px;border-radius:50%;background:var(--acc)!important;color:var(--onacc)}
+.gd-form:has(.gin:placeholder-shown) .gd-send{display:none}
+.gd-hint{font:600 12px/16px var(--body);color:var(--ink2);text-align:right;height:0;margin-top:-6px;overflow:hidden}
+.gd-hint.on{height:16px}
+/* the talk button: its rings tell the state (the Look gives its disc) */
+.gdock .gd-talk{position:relative;width:52px;height:52px;border-radius:50%;background:#1A1814;color:#fff;touch-action:none;transition:transform .15s}
 .gd-talk:active{transform:scale(.94)}
-.gd-talk svg{position:relative;z-index:1;width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.gd-talk .ring{position:absolute;inset:-6px;border-radius:50%;background:radial-gradient(circle,rgba(91,140,255,.0) 55%,rgba(91,140,255,.45) 70%,rgba(91,140,255,0) 100%);opacity:0;pointer-events:none}
-.gd-talk.s-idle .ring:not(.r2){opacity:.55;animation:tkbreathe 3.2s ease-in-out infinite}
-.gd-talk.s-listening{background:radial-gradient(circle at 35% 30%,#4FE3C0,#14B08C 60%,#0B8A6C)}.gd-talk.s-listening .ring{background:radial-gradient(circle,rgba(79,227,192,0) 50%,rgba(79,227,192,.55) 68%,rgba(79,227,192,0) 100%);opacity:1;animation:tkpulse 1.1s ease-out infinite}.gd-talk.s-listening .r2{animation-delay:.55s}
+.gd-talk svg{position:relative;z-index:1;width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.gd-talk .ring{position:absolute;inset:-6px;border-radius:50%;background:radial-gradient(circle,rgba(242,181,68,0) 55%,rgba(242,181,68,.42) 70%,rgba(242,181,68,0) 100%);opacity:0;pointer-events:none}
+.gd-talk.s-idle .ring:not(.r2){opacity:.45;animation:tkbreathe 3.2s ease-in-out infinite}
+.gdock .gd-talk.s-listening{background:#0B8A6C;color:#fff}.gd-talk.s-listening .ring{background:radial-gradient(circle,rgba(79,227,192,0) 50%,rgba(79,227,192,.55) 68%,rgba(79,227,192,0) 100%);opacity:1;animation:tkpulse 1.1s ease-out infinite}.gd-talk.s-listening .r2{animation-delay:.55s}
 .gd-talk.s-thinking .ring{inset:-5px;background:conic-gradient(from 0deg,rgba(255,217,138,0),rgba(255,217,138,.9),rgba(255,217,138,0) 40%);-webkit-mask:radial-gradient(circle,transparent 62%,#000 64%);mask:radial-gradient(circle,transparent 62%,#000 64%);opacity:1;animation:tkspin 1s linear infinite}.gd-talk.s-thinking .r2{display:none}
-.gd-talk.s-speaking .ring{opacity:.8;animation:tkspeak .6s ease-in-out infinite alternate}.gd-talk.s-speaking .r2{animation-delay:.3s;inset:-7px;opacity:.35}
+.gd-talk.s-speaking .ring{opacity:.7;animation:tkspeak .6s ease-in-out infinite alternate}.gd-talk.s-speaking .r2{animation-delay:.3s;inset:-8px;opacity:.3}
 .gd-talk.s-interrupted{animation:tkpop .3s ease}.gd-talk.s-notheard{animation:tkshake .4s ease}
-@keyframes tkbreathe{50%{transform:scale(1.08);opacity:.25}}@keyframes tkpulse{from{transform:scale(.9);opacity:.9}to{transform:scale(1.55);opacity:0}}
-@keyframes tkspin{to{transform:rotate(360deg)}}@keyframes tkspeak{from{transform:scale(.95)}to{transform:scale(1.18)}}@keyframes tkpop{50%{transform:scale(1.12)}}@keyframes tkshake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
-.gd-hint{text-align:right;font:600 11px/1.2 var(--body);color:rgba(244,241,234,.72);margin:4px 2px 0;min-height:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* Peek: the controls and the suggested questions; Full: the conversation */
-.gd-peek,.gd-full{display:none}.gdock.h-peek .gd-peek,.gdock.h-full .gd-peek{display:block}.gdock.h-full .gd-full{display:flex}
-.gd-ctl{display:flex;justify-content:space-between;gap:6px;margin:10px 0 8px}
-.gd-ctl button{appearance:none;border:0;flex:1;height:44px;border-radius:14px;background:rgba(255,255,255,.08);color:#F4F1EA;display:grid;place-items:center;cursor:pointer;font:700 13px/1 var(--body)}
-.gd-ctl button[aria-pressed=false].cc{opacity:.5}
-.gd-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;align-items:center}.gd-chips .gd-kb{width:44px;height:44px}.gd-chips::-webkit-scrollbar{display:none}
-.gd-chips button{flex:0 0 auto;appearance:none;border:1px solid rgba(255,255,255,.16);background:transparent;color:#F4F1EA;font:600 13px/1 var(--body);padding:9px 12px;border-radius:999px;cursor:pointer}
-.gdock.h-full{top:72px}.gdock.h-full .gd-line{display:none}.gdock.h-full .gd-main{justify-content:flex-end}
-.gd-full{flex:1;min-height:0;flex-direction:column;gap:8px;margin-top:6px}
-.gd-thread{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:4px 2px}
-.gd-thread>div{max-width:84%;font:400 14.5px/1.45 var(--body);padding:9px 12px;border-radius:16px}
-.gm-azu{align-self:flex-start;background:rgba(255,255,255,.08);border-bottom-left-radius:5px}.gm-me{align-self:flex-end;background:#2F5FE0;color:#fff;border-bottom-right-radius:5px}
-.gm-note{align-self:center;max-width:94%!important;background:rgba(255,217,138,.14);color:#FFE3A6;font-size:13px!important;text-align:center}
-.gm-azu.typing{display:flex;gap:4px;padding:12px 14px}.gm-azu.typing i{width:6px;height:6px;border-radius:50%;background:rgba(244,241,234,.7);animation:tkdot 1s infinite}.gm-azu.typing i:nth-child(2){animation-delay:.15s}.gm-azu.typing i:nth-child(3){animation-delay:.3s}
+@keyframes tkbreathe{50%{transform:scale(1.08);opacity:.2}}@keyframes tkpulse{from{transform:scale(.9);opacity:.9}to{transform:scale(1.55);opacity:0}}
+@keyframes tkspin{to{transform:rotate(360deg)}}@keyframes tkspeak{from{transform:scale(.95)}to{transform:scale(1.16)}}@keyframes tkpop{50%{transform:scale(1.12)}}@keyframes tkshake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+/* the whole text (Full): the tour's lines so far and the conversation, the line said now marked */
+.gdock.h-full{top:72px}
+.gdock.h-full>*{flex:none}
+.gdock.h-full>.gd-wrow,.gdock.h-full>.gd-card,.gdock.h-full>.gd-thread{flex:1 1 0;min-height:0;align-items:stretch}
+.gdock.h-full .gd-cardw{min-height:0}.gdock.h-full .gd-cardw .gd-thread{flex:1}
+.gdock.h-full .gd-wrow>.gd-av{display:none}
+.gdock.h-full .gd-wrow .gd-thread{flex:1}
+.gdock.h-full .gd-side{align-self:flex-start}
+.gd-thread{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:2px;scrollbar-width:thin}
+.gd-thread>div{max-width:88%;font:400 15px/1.45 var(--body);padding:9px 12px;border-radius:16px}
+.gdock .gm-azu{align-self:flex-start;background:var(--chip);color:var(--ink);border-bottom-left-radius:5px}
+.gdock .gm-me{align-self:flex-end;background:var(--acc);color:var(--onacc);border-bottom-right-radius:5px}
+.gdock .gm-now{font:500 18px/1.45 var(--display)!important;background:transparent;padding:4px 2px;max-width:100%}
+.gdock .gm-now .tw{color:var(--tpun)}.gdock .gm-now .tw.said{color:var(--ink)}
+.gdock .gm-note{align-self:center;max-width:94%!important;background:rgba(242,181,68,.16);color:var(--ink);font-size:13px!important;text-align:center}
+.gm-azu.typing{display:flex;gap:4px;padding:12px 14px}.gm-azu.typing i{width:6px;height:6px;border-radius:50%;background:var(--ink2);animation:tkdot 1s infinite}.gm-azu.typing i:nth-child(2){animation-delay:.15s}.gm-azu.typing i:nth-child(3){animation-delay:.3s}
 @keyframes tkdot{50%{opacity:.25;transform:translateY(-3px)}}
-.gd-form{display:flex;gap:6px}.gd-form .gin{flex:1;min-width:0;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#F4F1EA;border-radius:999px;padding:11px 14px;font:400 15px/1 var(--body)}
-.gd-form button{appearance:none;border:0;width:44px;border-radius:50%;background:#2F5FE0;color:#fff;font-size:16px;cursor:pointer}
-/* the bubble: Azu's own words, above the dock, a tail towards Azu; its words in --ink1 on --paper, the word said in the accent */
+.gd-side{display:flex;flex-direction:column;gap:6px;flex:none}
+.gd-aa{width:44px;height:44px;border-radius:22px;font:700 15px/1 var(--body)!important;color:var(--ink)}
+.gd-aa[aria-pressed=false]{text-decoration:line-through;text-decoration-thickness:2px}
+.gd-all{height:44px;border-radius:22px;padding:0 10px!important;font:700 14px/1 var(--body)!important;color:var(--acctx)}
+.gd-all.ic{width:44px;padding:0!important;color:var(--ink)}
+
+/* ===== A · Paper glass: the card's paper as glass ===== */
+.gdock.lk-paper{--surf:rgba(251,250,247,.90);--surfsolid:#FBFAF7;--edge:rgba(255,255,255,.85);--ink:#1A1814;--ink2:#4F4A42;--faded:#5F5950;--acc:#A63F1C;--onacc:#FFFFFF;--acctx:#9E3B1A;--hl:#F6DCC9;--hltx:#1A1814;--trk:rgba(26,24,20,.14);--chip:#EFEBE3;--line:rgba(26,24,20,.18);--field:rgba(26,24,20,.06);--fieldedge:transparent;--grab:rgba(26,24,20,.2);--tpun:#1A1814;
+  background:var(--surf);border:1px solid var(--edge);box-shadow:0 14px 34px rgba(26,24,20,.22),inset 0 1px 0 rgba(255,255,255,.9)}
+.cv.dark .gdock.lk-paper{--surf:rgba(31,29,26,.90);--surfsolid:#1F1D1A;--edge:rgba(255,255,255,.12);--ink:#F4F1EA;--ink2:#C9C2B6;--faded:#A39C90;--acctx:#F0A27E;--hl:#7A3A1E;--hltx:#FFFFFF;--trk:rgba(255,255,255,.16);--chip:#34302B;--line:rgba(255,255,255,.2);--field:rgba(255,255,255,.08);--grab:rgba(255,255,255,.28);--tpun:#F4F1EA;box-shadow:0 14px 34px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08)}
+.gdock.lk-paper.h-mini{left:12px;right:12px;bottom:16px;height:72px;border-radius:36px;padding:0 10px 0 12px;justify-content:center}
+.lk-paper .gd-line{display:flex;flex-direction:column;gap:2px}
+.lk-paper .gd-line .gd-stop{display:flex;align-items:center;gap:8px;font:600 12px/16px var(--body);color:var(--ink2)}
+.lk-paper .gd-line .gd-bars{height:14px;gap:2px}
+.lk-paper .gd-mt{font:400 15px/20px var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lk-paper .gd-mstop{color:var(--ink)}
+.gdock.lk-paper:not(.h-mini){--surf:rgba(251,250,247,.97);left:12px;right:12px;bottom:16px;border-radius:30px;padding:24px 16px 16px;gap:12px}
+.cv.dark .gdock.lk-paper:not(.h-mini){--surf:rgba(31,29,26,.97)}
+.lk-paper .gd-head{display:flex;align-items:center;gap:10px;height:44px}
+.lk-paper .gd-head .gd-av{width:44px;height:44px}
+.lk-paper .gd-who{display:flex;flex-direction:column;min-width:0;white-space:nowrap}.lk-paper .gd-who b{display:flex;align-items:center;gap:8px;font:700 15px/18px var(--body)}.lk-paper .gd-who small{font:400 13px/16px var(--body);color:var(--ink2);overflow:hidden;text-overflow:ellipsis}
+.lk-paper .gd-head .gd-bars{height:16px;gap:2px}
+.gd-sp{flex:1}
+.lk-paper .gd-head .gd-all,.lk-paper .gd-head .gd-aa{color:var(--ink)}
+.lk-paper .gd-play{box-shadow:0 8px 18px rgba(166,63,28,.35)}
+.lk-paper .gd-askf{flex:1;min-width:0;display:flex;align-items:center;gap:10px;height:48px;border-radius:24px;background:var(--field);padding:0 6px 0 16px;box-sizing:border-box}
+.lk-paper .gd-askf>svg{width:20px;height:20px;flex:none;fill:none;stroke:var(--ink2);stroke-width:2;stroke-linecap:round}
+.lk-paper .gd-askf .gd-form{background:none;border:0;padding:0;height:44px}
+.lk-paper .gd-talk{width:48px;height:48px;background:#1A1814;color:#fff}
+.cv.dark .lk-paper .gd-talk{background:#F4F1EA;color:#1A1814}
+
+/* ===== B · Ink glass: dark ink glass, saffron accents (the Architect's pick) ===== */
+.gdock.lk-ink{--surfsolid:#1C1A21;background-color:rgba(28,26,33,.92);background-image:linear-gradient(180deg,rgba(44,40,52,.92),rgba(22,21,26,.92) 55%);border:1px solid rgba(255,255,255,.14);box-shadow:0 16px 36px rgba(10,9,12,.38)}
+.cv.dark .gdock.lk-ink{border-color:rgba(255,255,255,.22);box-shadow:0 16px 36px rgba(0,0,0,.6)}
+.gdock.lk-ink.h-mini{left:50%;bottom:18px;transform:translateX(-50%);height:64px;border-radius:32px;padding:0 8px;justify-content:center;width:max-content}
+.lk-ink .gd-mrow{gap:6px}
+.gd-ring{position:relative;width:52px;height:52px;flex:none}
+.gd-ring svg{position:absolute;inset:0;width:52px;height:52px;transform:rotate(-90deg)}
+.gd-ring circle{fill:none;stroke-width:3}.gd-ring .tr{stroke:rgba(255,255,255,.16)}.gd-ring .pg{stroke:#F2B544;stroke-linecap:round;stroke-dasharray:0 200;transition:stroke-dasharray .25s linear}
+.gd-ring .gd-av{position:absolute;left:7px;top:7px;width:38px;height:38px}.gd-ring .gd-av svg,.gd-ring .gd-av img{width:34px;height:34px}
+.lk-ink .gd-mrow .gd-line{flex:none;display:flex;align-items:center;min-width:44px;height:44px;justify-content:center;padding:0 4px}
+.lk-ink .gd-mrow .gd-bars{height:20px}
+.lk-ink .gd-mini .gd-mpp{margin-left:4px}
+.gdock.lk-ink:not(.h-mini){left:10px;right:10px;bottom:14px;border-radius:32px;padding:34px 18px 18px;gap:14px}
+.lk-ink .gd-wrow{display:flex;align-items:flex-start;gap:12px;margin-top:4px}
+.lk-ink .gd-wrow .gd-av{width:40px;height:40px}.lk-ink .gd-wrow .gd-av svg,.lk-ink .gd-wrow .gd-av img{width:36px;height:36px}
+.lk-ink .gd-wrow .gd-tp{flex:1}
+.lk-ink .gd-tp .tp-prev{font-size:14px;line-height:20px;-webkit-line-clamp:1}
+.lk-ink .gd-tp .tp-now{font-size:22px;line-height:30px;-webkit-line-clamp:3}
+.lk-ink .gd-side button{border:1px solid rgba(255,255,255,.18)}
+.lk-ink .sk-track{gap:0}.lk-ink .sk-track i{height:2px;overflow:visible;border-radius:0}.lk-ink .sk-track b{height:4px;margin-top:-1px;border-radius:2px}
+.lk-ink .sk-track i::after{content:"";position:absolute;left:0;top:-1px;width:4px;height:4px;border-radius:2px;background:rgba(255,255,255,.55)}
+.lk-ink .sk-track i.done::after,.lk-ink .sk-track i.now::after{background:#F2B544}
+.lk-ink .sk-knob{background:#F4F1EA;box-shadow:0 0 0 5px rgba(242,181,68,.35)}
+.lk-ink .gd-lab{color:var(--ink2)}
+.lk-ink .gd-pn{background:rgba(255,255,255,.08)}
+.lk-ink .gd-play{box-shadow:0 0 0 8px rgba(242,181,68,.16)}
+.lk-ink .gd-talk{width:60px;height:60px;background:#16151A;color:#F2B544;border:2px solid #F2B544!important;box-shadow:0 0 0 6px #16151A,0 0 0 8px rgba(242,181,68,.22)}
+.lk-ink .gd-hide{--tab:#1C1A21;color:#F4F1EA}
+
+/* ===== C · Player sheet: a music player's mini bar and its sheet ===== */
+.gdock.lk-player{--surfsolid:#FFFFFF;--ink:#1A1814;--ink2:#4F4A42;--faded:#6B655C;--acc:#1A1814;--onacc:#FFFFFF;--acctx:#9E3B1A;--hl:#F6DCC9;--hltx:#1A1814;--trk:rgba(26,24,20,.12);--chip:#FFFFFF;--line:rgba(26,24,20,.14);--field:transparent;--fieldedge:transparent;--grab:rgba(26,24,20,.2);--tpun:#1A1814;--card:#F6F2EA;--sq:#F2EEE6;--bar:#1A1814;
+  background:#FFFFFF;box-shadow:0 -10px 30px rgba(26,24,20,.10)}
+.cv.dark .gdock.lk-player{--surfsolid:#1C1B19;--ink:#F4F1EA;--ink2:#C9C2B6;--faded:#A39C90;--acc:#F4F1EA;--onacc:#1A1814;--acctx:#F0A27E;--hl:#7A3A1E;--hltx:#FFFFFF;--trk:rgba(255,255,255,.16);--chip:#1C1B19;--line:rgba(255,255,255,.18);--grab:rgba(255,255,255,.28);--tpun:#F4F1EA;--card:#2A2724;--sq:#2A2724;--bar:#2A2724;background:#1C1B19;box-shadow:0 -10px 30px rgba(0,0,0,.5)}
+.gdock.lk-player.h-mini{left:0;right:0;bottom:0;height:96px;padding:14px 14px 22px;border-top:1px solid var(--line);justify-content:center}
+.gd-mprog.top{left:0;right:0;top:0;bottom:auto;border-radius:0}
+.lk-player .gd-avb{width:52px;height:52px;border-radius:14px;overflow:hidden}
+.lk-player .gd-avb .gd-av{width:52px;height:52px;border-radius:14px}
+.lk-player .gd-line{display:flex;flex-direction:column;gap:2px}
+.lk-player .gd-mt{font:700 15px/20px var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lk-player .gd-line .gd-stop{font:400 13px/17px var(--body);color:var(--ink2)}
+.lk-player .gd-mnext{width:44px;height:44px;border-radius:50%;color:var(--ink)}
+.lk-player .gd-mstop{color:var(--ink)}
+.gdock.lk-player:not(.h-mini){left:0;right:0;bottom:0;border-radius:28px 28px 0 0;padding:34px 18px 24px;gap:14px;box-shadow:0 -12px 36px rgba(26,24,20,.16)}
+.lk-player .gd-card{background:var(--card);border-radius:18px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start}
+.lk-player .gd-cardw{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.gd-eye{font:700 12px/16px var(--body);letter-spacing:.1em;color:var(--acctx)}
+.lk-player .gd-tp .tp-now{font-size:19px;line-height:27px}
+.lk-player .gd-tp .tp-now::before{content:"“"}.lk-player .gd-tp .tp-now::after{content:"”"}
+.lk-player .gd-side{gap:2px}
+.lk-player .sk-track{gap:0}.lk-player .sk-track i{border-radius:0}.lk-player .sk-track i+i{box-shadow:inset 2px 0 0 var(--surfsolid)}
+.lk-player .sk-track i:first-child{border-radius:2px 0 0 2px}.lk-player .sk-track i:last-child{border-radius:0 2px 2px 0}
+.lk-player .sk-knob{width:20px;height:20px;margin:-10px 0 0 -10px;background:var(--acc);box-shadow:0 2px 6px rgba(26,24,20,.3)}
+.lk-player .gd-lab3{display:flex;justify-content:space-between;gap:10px;font:400 13px/18px var(--body);color:var(--ink2)}
+.lk-player .gd-lab3 .gd-stop{text-align:center;flex:1}
+.lk-player .gd-speed,.lk-player .gd-stopb{border-radius:14px!important;border:0!important;background:var(--sq)}
+.lk-player .gd-stopb{width:60px;height:44px}.lk-player .gd-stopb .fi{width:18px;height:18px}
+.lk-player .gd-play{width:72px;height:72px}.lk-player .gd-play .fi{width:28px;height:28px}
+.lk-player .gd-chips [data-chip]{border:1px solid var(--line)}
+.lk-player .gd-askbar{display:flex;align-items:center;gap:8px;height:60px;border-radius:30px;background:var(--bar);padding:0 8px 0 20px;box-sizing:border-box}
+.lk-player .gd-askbar .gd-form{display:contents}
+.lk-player .gd-askbar .gin{color:#FFFFFF;order:1}.lk-player .gd-askbar .gin::placeholder{color:#C9C2B6}
+.lk-player .gd-askbar .gd-talk{order:2;width:auto;height:44px;border-radius:22px;background:#34302A;color:#fff;padding:0 14px!important;display:flex;gap:6px;font:700 14px/1 var(--body)}
+.lk-player .gd-askbar .gd-talk svg{width:18px;height:18px}
+.lk-player .gd-askbar .gd-send{order:3;width:44px;height:44px;background:#FFFFFF!important;color:#1A1814}
+.lk-player .gd-hide{--tab:var(--surfsolid)}
+
+/* ===== D · Teleprompter: no box, the words over the paper's fade ===== */
+.gdock.lk-prompter{--fade:rgba(251,250,247,.97);--fade0:rgba(251,250,247,0);--surfsolid:#FBFAF7;--ink:#1A1814;--ink2:#4F4A42;--faded:#6B655C;--acc:#A63F1C;--onacc:#FFFFFF;--acctx:#9E3B1A;--hl:#F6DCC9;--hltx:#1A1814;--trk:rgba(26,24,20,.16);--chip:#FBFAF7;--line:rgba(26,24,20,.16);--field:rgba(26,24,20,.06);--fieldedge:transparent;--grab:rgba(26,24,20,.2);--tpun:#1A1814;--cap:#1A1814;--capink:#FFFFFF;
+  left:0;right:0;bottom:0;background:linear-gradient(180deg,var(--fade0) 0px,var(--fade) 56px,var(--fade) 100%)}
+.cv.dark .gdock.lk-prompter{--fade:rgba(20,19,18,.97);--fade0:rgba(20,19,18,0);--surfsolid:#141312;--ink:#F1EEE8;--ink2:#C9C3B8;--faded:#A39C90;--acctx:#F0A27E;--hl:#7A3A1E;--hltx:#FFFFFF;--trk:rgba(255,255,255,.18);--chip:#1F1D1A;--line:rgba(255,255,255,.18);--field:rgba(255,255,255,.08);--grab:rgba(255,255,255,.28);--tpun:#F1EEE8;--cap:#2E2B27}
+.gdock.lk-prompter.h-mini{padding:56px 24px 22px;align-items:center;gap:12px}
+.lk-prompter .gd-pline{align-self:stretch}
+.lk-prompter .gd-tp.tp-mini .tp-now{font:500 18px/26px var(--display);white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.gd-capsule{background:var(--cap);color:var(--capink);border-radius:32px}
+.lk-prompter .gd-mrow.gd-capsule{height:60px;border-radius:30px;padding:0 8px 0 14px;gap:4px;width:max-content;align-self:center}
+.lk-prompter .gd-mrow .gd-line{flex:none;display:flex;align-items:center;height:44px;padding:0 4px}
+.lk-prompter .gd-mrow .gd-bars{color:#F6DCC9}
+.lk-prompter .gd-mpp{width:44px;height:44px;background:#FFFFFF;color:#1A1814;margin-left:8px}
+.lk-prompter .gd-mstop,.lk-prompter .gd-openb{color:#FFFFFF}
+.lk-prompter .gd-hide{top:auto;bottom:30px;right:12px;right:16px;--tab:transparent;color:var(--ink2)}.lk-prompter .gd-hide::before{box-shadow:none;border:1px solid var(--line);border-radius:14px}
+.gdock.lk-prompter:not(.h-mini){padding:64px 20px 22px;gap:14px}
+.gdock.lk-prompter.h-full{top:60px}
+.lk-prompter .gd-handle{top:20px}
+.lk-prompter .gd-head{display:flex;align-items:center;gap:10px}
+.lk-prompter .gd-head .gd-av{width:36px;height:36px}.lk-prompter .gd-head .gd-av svg,.lk-prompter .gd-head .gd-av img{width:32px;height:32px}
+.lk-prompter .gd-head .gd-eye{font-size:13px;letter-spacing:.06em;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.lk-prompter .gd-head .gd-aa{border:1px solid var(--line)!important}
+.lk-prompter .gd-tp{gap:4px}
+.lk-prompter .gd-tp .tp-prev,.lk-prompter .gd-tp .tp-next{font:400 18px/26px var(--display)}
+.lk-prompter .gd-tp .tp-now{font:600 24px/32px var(--display)}
+.lk-prompter .gd-hrow{flex-direction:row;align-items:center;gap:10px;font:400 13px/18px var(--body);color:var(--ink2)}
+.lk-prompter .gd-hrow .gd-seek{flex:1;margin:-11px 0}
+.lk-prompter .sk-track{gap:0}.lk-prompter .sk-track i{height:2px;border-radius:0}.lk-prompter .sk-track i+i{box-shadow:inset 2px 0 0 var(--surfsolid)}
+.lk-prompter .sk-knob{width:16px;height:16px;margin:-8px 0 0 -8px;background:var(--acc);box-shadow:0 0 0 4px var(--surfsolid)}
+.lk-prompter .gd-lab1{margin-top:-10px;font-size:12px}
+.lk-prompter .gd-chips [data-chip]{border:1px solid var(--line)}
+.lk-prompter .gd-botrow{display:flex;align-items:center;gap:10px}
+.lk-prompter .gd-ctl.gd-capsule{flex:1;height:64px;padding:0 8px}
+.lk-prompter .gd-capsule .gd-pn,.lk-prompter .gd-capsule .gd-stopb{width:44px;height:44px;color:#FFFFFF}
+.lk-prompter .gd-capsule .gd-pn .fi{width:22px;height:22px}
+.lk-prompter .gd-capsule .gd-play{width:50px;height:50px;background:#FFFFFF;color:#1A1814}.lk-prompter .gd-capsule .gd-play .fi{width:20px;height:20px}
+.lk-prompter .gd-capsule .gd-speed{border:0!important;color:#FFFFFF;min-width:48px;padding:0 8px!important}
+.lk-prompter .gd-talk{width:64px;height:64px;background:#A63F1C;color:#FFFFFF;box-shadow:0 8px 18px rgba(166,63,28,.35)}
+.lk-prompter .gd-talk svg{width:26px;height:26px}
+
+/* the ✦ grows into the panel and back (guide/dock.js's dkMorph): one surface whose box glides from the ✦'s circle to the panel's in
+   320 ms; the ✦ fades out in its first 120 ms; the panel's parts fade in from Azu down. Unity: USS transitions on the panel's width,
+   height, left, top and border-radius (the named ease-out: no cubic-bezier in 6.3), its children's opacity with a delay */
+.gd-morph{position:absolute;z-index:16;pointer-events:none;box-sizing:border-box;display:grid;place-items:center;overflow:hidden;box-shadow:0 14px 34px rgba(0,0,0,.28)}
+.gd-morph.go{transition:left .32s cubic-bezier(.2,.8,.2,1),top .32s cubic-bezier(.2,.8,.2,1),width .32s cubic-bezier(.2,.8,.2,1),height .32s cubic-bezier(.2,.8,.2,1),border-radius .32s cubic-bezier(.2,.8,.2,1),background-color .32s ease}
+.gd-mstar{display:grid;place-items:center}.gd-mstar svg{width:24px;height:24px;fill:#FFD98A}
+.gd-morph.grow .gd-mstar{animation:mstarout .12s ease-out forwards}
+.gd-morph.shrink .gd-mstar{opacity:0}.gd-morph.shrink.into .gd-mstar{animation:mstarin .18s ease-out .14s forwards}
+@keyframes mstarout{to{opacity:0;transform:scale(.7)}}@keyframes mstarin{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:none}}
+.gdock.gd-in{background:transparent!important;border-color:transparent!important;box-shadow:none!important}
+.gdock>*{transition:opacity .2s ease-out}
+.gdock.gd-in0>*{opacity:0;transition:none}
+.gdock>:nth-child(2){transition-delay:.03s}.gdock>:nth-child(3){transition-delay:.06s}.gdock>:nth-child(4){transition-delay:.09s}.gdock>:nth-child(5){transition-delay:.12s}.gdock>:nth-child(n+6){transition-delay:.15s}
+.gbtn-wrap.gd-arriving{opacity:0}
+/* the bubble: Azu's own words, above the Mini, a tail towards Azu; its words in --ink1 on --paper, the word said in the accent */
 .gbubble{position:absolute;left:14px;right:78px;z-index:15;background:var(--paper);color:var(--ink1);border-radius:18px;padding:11px 14px;box-shadow:0 8px 24px rgba(0,0,0,.28),0 0 0 1px var(--hair);animation:gbin .22s ease}
 .gbubble::after{content:"";position:absolute;right:-7px;bottom:14px;width:16px;height:16px;background:var(--paper);transform:rotate(45deg);border-radius:3px;box-shadow:3px -3px 0 0 transparent}
 .gbubble.tail-up::after{bottom:auto;top:12px}
@@ -55,6 +263,18 @@
 .gbubble .gcap.gread .gw{-webkit-text-fill-color:transparent;background-image:linear-gradient(90deg,color-mix(in srgb,var(--accent2) calc(var(--a,0)*100%),var(--ink1)) calc(var(--f,0)*112% - 12%),var(--ink2) calc(var(--f,0)*112%))}
 .gbubble .gw.gb-off{display:none}
 .gbubble .gnovoice{color:var(--ink2)}.gbubble .gcap em{color:var(--accent2)}
-.reduce .gbubble,.reduce .gd-talk,.reduce .gd-talk .ring{animation:none!important}
+.reduce .gbubble,.reduce .gd-talk,.reduce .gd-talk .ring,.reduce .gd-tp.tp-up{animation:none!important}.reduce .sk-knob,.reduce .gd-mprog b,.reduce .gd-ring .pg{transition:none}
+.reduce .gdock>*{transition:none}
 /* Azu's state follows the talk: it leans in to listen, looks up to think */
 .mascot[data-state=listening] svg{transform:rotate(8deg) translateX(-3px)}.mascot[data-state=thinking] .az-eye{transform:translate(1px,-2px)}
+/* the words' area keeps one height in Open (Peek), whatever the line said now: the controls under it never move under a finger
+   (Paper: a line, three, a line; Ink: a line and three; Player: three; Teleprompter: two, two, one) */
+.gdock.h-peek .gd-tp{overflow:hidden;flex:none}
+.lk-paper.h-peek .gd-tp{height:141px}.lk-paper .gd-tp .tp-prev,.lk-paper .gd-tp .tp-next{-webkit-line-clamp:1}.lk-paper .gd-tp .tp-now{-webkit-line-clamp:3}
+.lk-ink.h-peek .gd-tp{height:116px;flex:1 1 0;min-width:0}
+.lk-player.h-peek .gd-tp{height:81px}.lk-player .gd-tp .tp-now{-webkit-line-clamp:3}
+.lk-prompter.h-peek .gd-tp{height:154px}.lk-prompter .gd-tp .tp-prev,.lk-prompter .gd-tp .tp-next{-webkit-line-clamp:1}.lk-prompter .gd-tp .tp-now{-webkit-line-clamp:2}
+/* Open sits over the card's words, so its fill is solid (a .97 fill let the card's lines read through it); the glass stays on
+   the Mini. The Teleprompter's fade ends at 24 px, before its header. Unity: the Open state's background-color without alpha */
+.cv .gdock.lk-paper.h-peek,.cv .gdock.lk-paper.h-full{background-color:var(--surfsolid)}
+.cv .gdock.lk-prompter.h-peek,.cv .gdock.lk-prompter.h-full{--fade:var(--surfsolid);background:linear-gradient(180deg,var(--fade0) 0px,var(--fade) 24px,var(--fade) 100%)}
