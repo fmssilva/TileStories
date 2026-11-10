@@ -122,8 +122,12 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       talk button's timer, and the Mini has no talk button; test8q caught it), and two test races: test9o's music level (a fixed wait on the audio clock) and test9h's
       sheet still growing to Full (184 px of 820) when a check began (red on round 11 about one run in two, green on
       master; now 4 of 4). Level 2: the self-test's four walks bad=0, 38 files green after those fixes.
-    - **Next:** the developer chooses the panel's look and options (round 11's questions), then round 12, Fun › On the
-      tour (`_3.8_guidance_plans/research_tour_entertainment.md`, decisions in `_3.8` §9).
+    - The developer's answers (2026-11-10): **Ink glass** is the default look (the other three stay as options); the Mini
+      shows **Pause only** (Stop is in Open); the water glass and the cookie move to round 12; the "blue line" beside Azu was
+      the old 2D Azu's pointing arm (`.marm`), still drawn beside the 3D model in a tour: now only the drawn tiles have it
+      (`pointAt`, as the ✦ already did; test8j checks both).
+    - **Next: round 12**, Fun › On the tour (`_3.8_guidance_plans/brief_round12.md`: the group and the tour plan, the
+      breather, the promised quiz, guess the year); round 13: Don't say it! and Find it on the wall.
     - **Then: the developer's step-by-step review** of the collected look questions (rounds 1-10; round 10's: build the
       seven missing phone effects so their rows get real demos, Global Scene's rows, stand-ins for block options with
       nothing to see, the Sticky Action's demo with the bar at the bottom, and whether every Detail Card change should

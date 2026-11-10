@@ -26,8 +26,13 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   s = await R('[T8.vbc(),T8.spot(),T8.rel(visRect(T8.img())),T8.img().classList.contains("gzimg")]');
   ok('"palace": the picture zooms to the palace (the view centred on it)', s[0] && Math.abs(s[0][0] - 0.6) < 0.12 && Math.abs(s[0][1] - 0.52) < 0.12 && s[3], s[0]);
   ok('...and the spotlight rings the picture', s[1] && s[1].every((v, i) => Math.abs(v - s[2][i]) <= 3), s.slice(1, 3));
+  // (round 11 review) the 3D model (the default) points with its own animation: no drawn arm beside it; the drawn tile keeps its arm
+  const model = await R('var m=ph.querySelector(".mascot");[mascotIsModel(),!m.querySelector(".marm"),m.classList.contains("pointing")]');
+  ok('The 3D model points with no drawn arm beside it (the old arm stood beside the model)', model.every(Boolean), model);
+  await R('S.guideCfg.azuStyle="tile"'); for (let t = 0; t < 40 && !(await R('!!ph.querySelector(".mascot .marm.on")')); t++) await p.waitForTimeout(100);
   const arm = await R('var m=ph.querySelector(".mascot"),a=m.querySelector(".marm.on"),sp=T8.spot();if(!a)null;else{var ar=a.getBoundingClientRect(),mr=m.getBoundingClientRect(),pr=ph.getBoundingClientRect(),tx=pr.left+sp[0]+sp[2]/2,ty=pr.top+sp[1]+sp[3]/2,hx=ar.left,hy=ar.top+ar.height/2,mx=mr.left+mr.width/2,my=mr.top+mr.height/2;[Math.hypot(tx-hx,ty-hy),Math.hypot(tx-mx,ty-my)].map(Math.round)}');
-  ok('Azu points: its hand is nearer the spot than Azu is', arm && arm[0] < arm[1], arm);
+  ok('Azu points (the drawn tile): its hand is nearer the spot than Azu is', arm && arm[0] < arm[1], arm);
+  await R('S.guideCfg.azuStyle="glb"');
   await reach(1);
   s = await R('[T8.vbc(),T8.vb(),S.guideSteps[3].cues[1].region]');
   ok('"tower": the view moves left, to the whole corner tower', s[0][0] < 0.5 && s[1][0] <= s[2][0] + 0.01 && s[1][0] + s[1][2] >= s[2][0] + s[2][2] - 0.01 && s[1][1] <= s[2][1] + 0.01 && s[1][1] + s[1][3] >= s[2][1] + s[2][3] - 0.01, s);

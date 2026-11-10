@@ -1,7 +1,7 @@
 /* The Guide Dock (the guide panel): Compact (hidden), Mini, Peek, Full, drawn in one of four Looks (round 11: Paper glass, Ink glass,
    Player sheet, Teleprompter); Pause and Stop at Mini, the hide control; the words like a teleprompter, the progress bar, the voice moving,
    the speed chip; the bubble, the talk button and its states, the conversation, the suggested questions; the ✦ growing into it. */
-S.guideCfg.panel="dock";S.guideCfg.dockStart="mini";S.guideCfg.miniCtl="pausestop";S.guideCfg.swipeCompact=true;S.guideCfg.bubbles="own";S.guideCfg.talk="both";S.guideCfg.earcons=true;S.guideCfg.chips=true;
+S.guideCfg.panel="dock";S.guideCfg.dockStart="mini";S.guideCfg.miniCtl="pause";S.guideCfg.swipeCompact=true;S.guideCfg.bubbles="own";S.guideCfg.talk="both";S.guideCfg.earcons=true;S.guideCfg.chips=true;
 /* round 11: the panel's Look and its parts */
 S.guideCfg.look="ink";S.guideCfg.pWords="prompter";S.guideCfg.pBars=true;S.guideCfg.pSpeed=true;
 S.dockH="mini";G.talk="idle";G.thread=[];
@@ -278,10 +278,12 @@ BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(panel|
 function pointAt(tg){var m=ph.querySelector(".mascot");if(!m)return;if(G.moment)tg=null;var a=m.querySelector(".marm"),st=S.guideSteps[G.i],b=ph.querySelector(".gbubble");
   if(dockOn()&&b&&st&&st.ref==="hero"){var y0=Math.max(70,b.offsetTop+b.offsetHeight-64),gw=ph.querySelector(".gbtn-wrap.intour.side-right");if(gw)y0=Math.max(70,Math.min(y0,gw.offsetTop-70));if(Math.abs((parseFloat(m.style.top)||0)-y0)>2)m.style.top=y0+"px";if(a)a.classList.remove("on");m.classList.remove("pointing");return}
   if(!tg){if(a)a.classList.remove("on");m.classList.remove("pointing");return}
-  if(!a){a=document.createElement("i");a.className="marm";m.appendChild(a)}
+  /* the arm is the drawn tile's (2.5D, light); a 3D model points with its own animation (the developer, 2026-11-10: the old arm
+     stood beside the model), as the ✦'s Azu already does */
+  if(a&&mascotIsModel()){a.remove();a=null}if(!a&&!mascotIsModel()){a=document.createElement("i");a.className="marm";m.appendChild(a)}
   var fb=freeHeight(),pr=ph.getBoundingClientRect(),q=pr.height/ph.offsetHeight,lo=(fb.bottom-pr.top)/q-72,y=Math.max(70,Math.min(lo,tg.y-27));y=besideWords(m,y,70,lo,tg.el);if(Math.abs((parseFloat(m.style.top)||0)-y)>2)m.style.top=y+"px";
   var mx=m.offsetLeft+8,my=y+34,ang=Math.atan2(tg.y-my,tg.x-mx)*180/Math.PI;ang=Math.max(120,Math.min(240,ang<0?ang+360:ang));
-  a.style.transform="rotate("+(ang-180).toFixed(1)+"deg)";a.classList.add("on");m.classList.add("pointing")}
+  if(a){a.style.transform="rotate("+(ang-180).toFixed(1)+"deg)";a.classList.add("on")}m.classList.add("pointing")}
 /* Azu points from beside the block, never over words: the ink of the words on the screen (each line of text, as a Range draws it:
    the block's and its neighbours') is measured, and Azu takes the nearest height where its tile covers none of them (above or below a
    line, or beside the block). Unity: the glyph boxes from TextElement.PostProcessTextVertices, the same search on the Azu element's top */
