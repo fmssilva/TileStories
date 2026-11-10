@@ -56,7 +56,8 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // 7. the water break (round 11): held while the tour plays (Fun never during a tour); shown as the Editor's Try does, the glass
   // beside Azu, one tap, then the tour goes on
   await start('S.guidance.items.water.talkFor=1'); await R('G.talkFrom=performance.now()-5000;next()'); await p.waitForTimeout(600);
-  ok('Water break: never between the steps of a playing tour (round 11: Fun is held; Why not now? says so)', await R('!G.moment&&!ph.querySelector(".azmoment")&&/held while a tour plays/.test((function(id){var a=gdAll(gdItems(),S.gdVisitor,gdContext(),gdNow()).filter(function(x){return x.it.id===id})[0];return a?String(a.r.no||""):""})("water"))'));
+  // round 12: the water break is the breather, a beat of Fun › On the tour: it plays only at its seam of the tour's plan (Why not now? answers from the plan)
+  ok('Water break: never between the steps of a playing tour but at its planned seam (round 12: the breather; Why not now? answers from the plan)', await R('!G.moment&&!ph.querySelector(".azmoment")&&/plan/.test((function(id){var a=gdAll(gdItems(),S.gdVisitor,gdContext(),gdNow()).filter(function(x){return x.it.id===id})[0];return a?String(a.r.no||""):""})("water"))'));
   await R('stopSpeech();G.i=S.guideSteps.findIndex(function(s){return s.id==="g8"});runStep()'); await p.waitForTimeout(1200); // a step with pictures beside Azu: room for the glass
   await R('pauseTour();azMoment("water",function(){resumeTour()})'); await p.waitForFunction(() => LAB.run('!!document.querySelector("#ph .azmoment")'), null, { timeout: 5000 });
   const mo = await R('[G.moment,!!ph.querySelector(".azmoment [data-azprop=water]"),ph.querySelector(".mascot").classList.contains("center")]');
@@ -68,7 +69,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('No tap: after 8 s the tour carries on by itself', await R('!G.moment&&window.MDONE===1'));
   // 9. the cookie, before the end (round 11: held in a playing tour; its look as the Try shows it)
   await start('S.guidance.items.water.talkFor=600'); await R('G.i=S.guideSteps.length-2;next()'); await p.waitForTimeout(400);
-  ok('Before the end: no cookie while the tour plays (Fun held)', await R('!G.moment&&/held while a tour plays/.test((function(id){var a=gdAll(gdItems(),S.gdVisitor,gdContext(),gdNow()).filter(function(x){return x.it.id===id})[0];return a?String(a.r.no||""):""})("cookie"))'));
+  ok('Before the end: no cookie but at its planned seam (round 12: a beat of the tour; Why not now? answers from the plan)', await R('!G.moment&&/plan/.test((function(id){var a=gdAll(gdItems(),S.gdVisitor,gdContext(),gdNow()).filter(function(x){return x.it.id===id})[0];return a?String(a.r.no||""):""})("cookie"))'));
   await R('stopSpeech();G.i=S.guideSteps.findIndex(function(s){return s.id==="g8"});runStep()'); await p.waitForTimeout(1200);
   await R('pauseTour();azMoment("cookie",function(){resumeTour()})'); await p.waitForFunction(() => LAB.run('!!document.querySelector("#ph [data-azprop=cookie]")'), null, { timeout: 5000 });
   ok('...its look (the Try): a cookie', await R('G.moment==="cookie"&&!!ph.querySelector("[data-azprop=cookie]")'));
@@ -94,7 +95,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('S.dark=false;renderAll(false);stopTour()');
   // 13. the Editor
   ok('Editor: Mascot has Liveliness, Mouth, Moods, Moments, Water break after and five Try', await R('S.tab="guide";renderEditor();var f=ed.querySelector(\'[data-fo="s7mascot"]\');!!f&&["Liveliness","Mouth","Moods","Moments","Water break after"].every(function(t){return f.textContent.indexOf(t)>=0})&&f.querySelectorAll("[data-aztry]").length===5'));
-  ok('Azu\'s words are on the Mascot (Languages & Terms; the jokes and the Moments\' asks are their guidance items\' now)', await R('(TXO.s7mascot||[]).length') >= 8 && await R('TXOWN.mascot_joke_1==="gd:i:joke"&&TXOWN.mascot_water==="gd:i:water"'), await R('(TXO.s7mascot||[]).length'));
+  ok('Azu\'s words are on the Mascot (Languages & Terms; the jokes are A joke\'s; round 12: the old water and cookie asks are the Try\'s words again)', await R('(TXO.s7mascot||[]).length') >= 8 && await R('TXOWN.mascot_joke_1==="gd:i:joke"&&TXOWN.mascot_water==="s7mascot"'), await R('(TXO.s7mascot||[]).length'));
   await R('S.tab="marker";S.sel.gstep="g2";renderEditor()'); await p.waitForTimeout(300);
   ok('Guide script: Solemn point, and Azu\'s mood on the step', await R('/Solemn point/.test(ed.querySelector(\'[data-fo="m3"]\').textContent)&&!!ed.querySelector("[data-azmood=g2]")'));
   await p.locator('select[data-azmood="g2"]').selectOption('thinking');

@@ -139,10 +139,11 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
 
   // ---------- 9. Fun never during a tour, never over words ----------
   const fun = await R(base + 'S.guidance.on=true;S.guidance.items.water.talkFor=1;var items=gdItems(),V=S.gdVisitor,c=gdContext(),out={};c.moment="between";c.tour={between:true,step:2,talked:99,toEnd:false,paused:false};c.onWall=false;c.solemn=false;' +
-    'out.water=gdWhyNot(items,V,c,gdNow()+600000,"water");out.joke=gdWhyNot(items,V,Object.assign({},c,{moment:null}),gdNow()+600000,"joke");c.tour.paused=true;out.paused=gdWhyNot(items,V,c,gdNow()+600000,"water");out.never=gdNever(S.guidance.items.water).join("; ");out');
-  ok('[fun hold] Every Fun item is held while a tour plays (the water break, a joke): Why not now? says "held while a tour plays"; paused, not that reason', /held while a tour plays/.test(fun.water) && /held while a tour plays/.test(fun.joke) && !/held while a tour plays/.test(fun.paused), fun);
-  ok('...the Editor warns that a Moment between tour steps cannot show now (named)', /Fun is held while a tour plays/.test(fun.never), fun.never);
-  await R(base + 'S.guidance.on=true;S.guidance.items.water.talkFor=1;S.guideCfg.look="ink";if(G.on)stopTour();S.view="card";S.stop="full";renderAll(false);G.gd.manual=false;startTour()');
+    'out.water=gdWhyNot(items,V,Object.assign({},c,{moment:null}),gdNow()+600000,"hunt");out.joke=gdWhyNot(items,V,Object.assign({},c,{moment:null}),gdNow()+600000,"joke");c.tour.paused=true;out.paused=gdWhyNot(items,V,Object.assign({},c,{moment:null}),gdNow()+600000,"hunt");out.never=gdNever(S.guidance.items.water).join("; ");out');
+  // round 12: the water break became a beat of Fun › On the tour (made for the tour: never held), so the hold is checked on the treasure hunt
+  ok('[fun hold] Every Fun item is held while a tour plays (the treasure hunt, a joke): Why not now? says "held while a tour plays"; paused, not that reason', /held while a tour plays/.test(fun.water) && /held while a tour plays/.test(fun.joke) && !/held while a tour plays/.test(fun.paused), fun);
+  ok('...the breather (round 12, a beat of the tour) is never held, so no "cannot show" warning', !/Fun is held while a tour plays/.test(fun.never), fun.never);
+  await R(base + 'S.guidance.on=true;gdGroupById("ontour").on=false;S.guidance.items.water.talkFor=1;S.guideCfg.look="ink";if(G.on)stopTour();S.view="card";S.stop="full";renderAll(false);G.gd.manual=false;startTour()');
   let sawMoment = false; const t9 = Date.now(); while (Date.now() - t9 < 14000) { if (await R('!!G.moment||!!ph.querySelector(".azmoment")')) { sawMoment = true; break; } if (await R('G.i>=2')) break; await W(150); }
   ok('[fun hold] On the page: the tour moves on (its steps end) and no water break shows', !sawMoment && await R('G.i>=1'), [await R('G.i'), sawMoment]);
   await R('stopTour();S.guidance.on=false');
@@ -155,7 +156,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const wait1 = await R('[G.moment,!!ph.querySelector(".azmoment")]');
   await R('document.getElementById("t9block").remove()'); const shownP = await until('!!ph.querySelector(".azmoment")', 1500);
   ok('...with no room it waits (no prop, the moment held), and shows once there is room', wait1[0] === 'water' && !wait1[1] && shownP, [wait1, shownP]);
-  await R('azMomentEnd(false);stopTour()');
+  await R('azMomentEnd(false);stopTour();gdGroupById("ontour").on=true');
   tsec('fun');
 
   // ---------- 10. the music bed ----------

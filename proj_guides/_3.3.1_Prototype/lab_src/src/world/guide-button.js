@@ -4,7 +4,7 @@ G.fab={menu:false};G.gb={shown:0,folded:false};
 COMP.s7gbtn=["Guide","Guide button"];
 var GBSTAR='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 3.2c.65 4.9 3.55 7.8 8.4 8.4-4.85.65-7.75 3.55-8.4 8.4-.65-4.85-3.55-7.75-8.4-8.4 4.85-.6 7.75-3.5 8.4-8.4Z"/><path d="M19 2.2c.25 1.45.95 2.15 2.4 2.4-1.45.25-2.15.95-2.4 2.4-.25-1.45-.95-2.15-2.4-2.4 1.45-.25 2.15-.95 2.4-2.4Z"/></svg>',
   GBFACE='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.2" y="3.2" width="17.6" height="17.6" rx="4.6" fill="#F4EEE3" stroke="#1F4E9C" stroke-width="1.8"/><circle cx="9.2" cy="11" r="1.7" fill="#1A1814"/><circle cx="14.8" cy="11" r="1.7" fill="#1A1814"/><path d="M9.3 15q2.7 2.1 5.4 0" stroke="#1A1814" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>',
-  GBICO={tour:'<path d="M8 5l11 7-11 7z"/>',ask:'<path d="M5 6h14v9H9l-4 3.5z"/>',view:'<path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.6"/>',settings:'<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
+  GBICO={quiz:'<path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/>',tour:'<path d="M8 5l11 7-11 7z"/>',ask:'<path d="M5 6h14v9H9l-4 3.5z"/>',view:'<path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.6"/>',settings:'<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
   how:'<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.4 2.3c-.7.3-1 .8-1 1.5v.4"/><path d="M12 16.6v.4"/>',
   /* round 9: Things to try, a checklist */
   try:'<path d="M4 7.5l1.8 1.8L9.2 6"/><path d="M12.5 8h7.5"/><path d="M4 15.5l1.8 1.8 3.4-3.3"/><path d="M12.5 16h7.5"/>'};
@@ -58,9 +58,11 @@ function placeNear(d){var w=ph.querySelector(".gbtn-wrap");if(!w)return;var pr=p
    try (round 9: Guide › Guidance › Overall › Things to try, In the ✦ menu: the checklist of the App items that teach; it opens whatever the
    visitor's Tips are, and while it has a row), the guide's settings ----- */
 function gbItems(){var wall=S.stop==="closed",out=[],hw=gdGroupById("howto");if(!wall||S.camCfg.wall==="ribeira")out.push("tour");out.push("ask");if(wall&&S.camCfg.on)out.push("view");if(hw&&hw.on!==false&&hw.inMenu)out.push("how");
-  if(S.guidance.tryMenu!==false&&gdTryDefs().length)out.push("try");out.push("settings");return out}
+  if(S.guidance.tryMenu!==false&&gdTryDefs().length)out.push("try");
+  /* guidance round 12: the tour stopped for good before its promised quiz: Your 3 questions (from the steps heard), for the rest of the visit */
+  if(typeof gdQuizOwed==="function"&&gdQuizOwed())out.splice(1,0,"quiz");out.push("settings");return out}
 function gbMenuHtml(){var c=camView().central;return'<div class="gbmenu" role="menu" aria-label="'+TXH("gb_name")+'">'+gbItems().map(function(k){
-    var t=k==="tour"?(G.resumeAt?TXH("gb_resume")+(G.resumeAt.title?'<small>'+esc(G.resumeAt.title)+'</small>':""):TXH("gb_start")):k==="view"?esc(c?fmt(TXT("gb_view_about"),c.name):TXT("gb_view")):k==="how"?TXH("gd_how"):k==="try"?TXH("gd_try"):TXH("gb_"+k);
+    var t=k==="tour"?(G.resumeAt?TXH("gb_resume")+(G.resumeAt.title?'<small>'+esc(G.resumeAt.title)+'</small>':""):TXH("gb_start")):k==="view"?esc(c?fmt(TXT("gb_view_about"),c.name):TXT("gb_view")):k==="how"?TXH("gd_how"):k==="try"?TXH("gd_try"):k==="quiz"?esc(fmt(TXT("tour_menu_quiz"),gdQuizOwed())):TXH("gb_"+k);
     return'<button type="button" role="menuitem" data-gbgo="'+k+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+GBICO[k]+'</svg><span>'+t+'</span></button>'}).join("")+'</div>'}
 function gbMenu(open){var was=G.fab.menu;G.fab.menu=open==null?!G.fab.menu:open;fabLayer();if(G.fab.menu&&!was)emit("menu.opened","the ✦")}
 function gbGo(k){G.fab.menu=false;
@@ -68,6 +70,7 @@ function gbGo(k){G.fab.menu=false;
   if(k==="ask"){startTour();pauseTour();G.askOpen=true;S.dockH="full";renderGuide();var i=ph.querySelector("#gq");if(i)i.focus({preventScroll:true});return}
   if(k==="how"){fabLayer();gdWalk("the ✦ menu");return}
   if(k==="try"){fabLayer();gdTryOpen("the ✦ menu");return}
+  if(k==="quiz"){fabLayer();gdQuizPull();return}
   if(k==="view"){G.cam.open=true;renderPhone(true);emit("view.opened","the ✦ menu");var q=ph.querySelector("#caq");if(q)q.focus({preventScroll:true});return}
   if(k==="settings"){S.settingsOpen=true;renderPhone(true);var v=ph.querySelector(".vset"),g=v&&v.querySelector(".vguide");if(g){v.scrollTop=Math.max(0,g.offsetTop-12);g.classList.remove("pfocus");void g.offsetWidth;g.classList.add("pfocus");setTimeout(function(){g.classList.remove("pfocus")},1800)}}}
 /* a tour from a card at Half: the card rises to Full first (lowered again by the visitor, the tour goes on there) */

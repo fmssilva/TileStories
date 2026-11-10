@@ -40,7 +40,9 @@ var FI={prev:'<path d="M18 5.5v13a1 1 0 0 1-1.55.83L7 13v5H5V6h2v5l9.45-6.33A1 1
 function fi(k){return'<svg viewBox="0 0 24 24" aria-hidden="true" class="fi">'+FI[k]+'</svg>'}
 function si(k){return'<svg viewBox="0 0 24 24" aria-hidden="true" class="si">'+FI[k]+'</svg>'}
 /* ----- the time: each stop's length from its words' timing (a recorded line's own word times, else the words at the voice's speed) ----- */
-function stopSecs(j){var st=S.guideSteps[j];if(!st)return 0;var t=stepText(st),sp=guideSpeed(),r=typeof recFile==="function"?recFile(t):null,w=r&&r.file&&r.file.words;
+function stopSecs(j){return stepSecs(S.guideSteps[j])}
+/* a step's seconds (its recorded words' times, else its words at the visitor's speed): the bar's and the tour plan's (guidance round 12) */
+function stepSecs(st){if(!st)return 0;var t=stepText(st),sp=guideSpeed(),r=typeof recFile==="function"?recFile(t):null,w=r&&r.file&&r.file.words;
   if(w&&w.length)return w[w.length-1][1]/sp+.7;return Math.max(1,(t.match(/\S+/g)||[]).length)*60/(170*sp)+.7}
 function dkTimes(){var a=[],tot=0;for(var j=0;j<S.guideSteps.length;j++){var s=stopSecs(j);a.push({at:tot,len:s});tot+=s}return{stops:a,tot:tot}}
 /* the share of the line said: the stop's own line (a recorded line by its clock, else its words) */
@@ -49,10 +51,13 @@ function dkShare(){var st=S.guideSteps[G.i];if(!st||!G.sayLine||G.sayLine.text!=
 function dkElapsed(T){var c=T.stops[G.i];return c?c.at+dkShare()*(c.len-.7):0}
 function mmss(s){s=Math.max(0,Math.round(s));return Math.floor(s/60)+":"+("0"+s%60).slice(-2)}
 /* ----- the progress bar: one segment a stop (its length the stop's), the knob where the voice is; a drag seeks (guide/controls.js) ----- */
-function dkSeek(kind){var T=dkTimes(),el=dkElapsed(T),n=S.guideSteps.length,sh=dkShare();
-  return'<div class="gd-seg gd-seek sk-'+kind+'" role="slider" tabindex="0" aria-label="'+TXH("dock_seek")+'" aria-valuemin="0" aria-valuemax="'+Math.round(T.tot)+'" aria-valuenow="'+Math.round(el)+'" aria-valuetext="'+esc(mmss(el)+" / "+mmss(T.tot)+" · "+fmt(TXT("dock_stop_of"),G.i+1,n))+'">'+
+/* guidance round 12: the quiz's star at the end of the progress line, in every Look (Fun › On the tour's promise: gdQuizStar) */
+var QSTAR='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.9 6 6.5.8-4.8 4.5 1.2 6.5L12 17.3l-5.8 3.1 1.2-6.5L2.6 9.4l6.5-.8z"/></svg>';
+function dkQStar(c){var q=typeof gdQuizStar==="function"?gdQuizStar():"";return q?'<span class="gd-qstar'+(q==="pending"?" pend":"")+(c?" "+c:"")+'" role="img" aria-label="'+TXH("tour_star")+'" title="'+TXH("tour_star")+'">'+QSTAR+'</span>':""}
+function dkSeek(kind){var T=dkTimes(),el=dkElapsed(T),n=S.guideSteps.length,sh=dkShare(),qs=dkQStar("sk");
+  return'<div class="gd-seg gd-seek sk-'+kind+(qs?" qs":"")+'" role="slider" tabindex="0" aria-label="'+TXH("dock_seek")+'" aria-valuemin="0" aria-valuemax="'+Math.round(T.tot)+'" aria-valuenow="'+Math.round(el)+'" aria-valuetext="'+esc(mmss(el)+" / "+mmss(T.tot)+" · "+fmt(TXT("dock_stop_of"),G.i+1,n))+'">'+
     '<span class="sk-track">'+T.stops.map(function(s,j){return'<i data-gseg="'+j+'" class="'+(j<G.i?"done":j===G.i?"now":"")+'" style="flex:'+s.len.toFixed(2)+' 1 0"><b style="width:'+(j<G.i?100:j===G.i?sh*100:0).toFixed(1)+'%"></b></i>'}).join("")+'</span>'+
-    '<span class="sk-knob" aria-hidden="true"></span></div>'}
+    '<span class="sk-knob" aria-hidden="true"></span>'+qs+'</div>'}
 function dkTimeHtml(kind){var T=dkTimes(),el=dkElapsed(T);if(kind==="both")return'<span class="gd-time" data-t="both">'+mmss(el)+" / "+mmss(T.tot)+'</span>';
   return'<span class="gd-time" data-t="'+kind+'">'+(kind==="el"?mmss(el):kind==="rem"?"-"+mmss(T.tot-el):mmss(T.tot))+'</span>'}
 /* ----- the words like a teleprompter: the line said now, its spoken word marked, the line before faded above it and the next below;
@@ -109,11 +114,11 @@ function dkThread(){var now=-1;G.thread.forEach(function(m,i){if(m.who==="azu"&&
 function dkWords(h,v){if(h==="full")return dkThread();if(dkWordsOff())return"";return dkWordsOn()?tpHtml(G.tpText||"",v):'<div class="gd-tp gd-tpoff" data-v="'+v+'"><p class="tp-now">&nbsp;</p></div>'}
 /* ----- the four Looks, drawn as the Architect's layouts (scratchpad gp/project: Main = Paper glass, InkGlass, Player, Prompter) ----- */
 function dockMini(L){var n=S.guideSteps.length,st=S.guideSteps[G.i],lab=fmt(TXT("dock_stop_of"),G.i+1,n),ctl=dkMiniCtl(),line=dkWordsOn()?tpHtml(G.tpText||"","mini"):"";
-  if(L==="paper")return'<div class="gd-mrow gd-main">'+dkAv()+'<div class="gd-line" data-dock="playpause"><small class="gd-stop">Azu · '+esc(lab)+dkBars(7)+'</small>'+(line||'<span class="gd-mt">'+esc(stepTitle(st))+'</span>')+'</div>'+ctl+dkOpenB()+'</div><span class="gd-mprog" aria-hidden="true"><b></b></span>'+dkHide();
-  if(L==="player")return'<span class="gd-mprog top" aria-hidden="true"><b></b></span><div class="gd-mrow gd-main">'+dkOpenB("gd-avb")+'<div class="gd-line" data-dock="playpause"><b class="gd-mt">'+esc(stepTitle(st))+'</b><small class="gd-stop">Azu · '+esc(lab)+' · '+dkTimeHtml("el")+'</small></div>'+ctl+dkStep("next","gd-mnext")+'</div>'+dkHide();
-  if(L==="prompter")return(line?'<div class="gd-pline">'+line+'</div>':"")+'<div class="gd-mrow gd-main gd-capsule"><span class="gd-line" data-dock="playpause"><small class="gd-stop vh">'+esc(lab+" · "+stepTitle(st))+'</small>'+dkBars(7)+'</span>'+ctl+dkOpenB()+'</div>'+dkHide();
+  if(L==="paper")return'<div class="gd-mrow gd-main">'+dkAv()+'<div class="gd-line" data-dock="playpause"><small class="gd-stop">Azu · '+esc(lab)+dkBars(7)+'</small>'+(line||'<span class="gd-mt">'+esc(stepTitle(st))+'</span>')+'</div>'+ctl+dkOpenB()+'</div><span class="gd-mprog" aria-hidden="true"><b></b></span>'+dkQStar("m-paper")+dkHide();
+  if(L==="player")return'<span class="gd-mprog top" aria-hidden="true"><b></b></span>'+dkQStar("m-player")+'<div class="gd-mrow gd-main">'+dkOpenB("gd-avb")+'<div class="gd-line" data-dock="playpause"><b class="gd-mt">'+esc(stepTitle(st))+'</b><small class="gd-stop">Azu · '+esc(lab)+' · '+dkTimeHtml("el")+'</small></div>'+ctl+dkStep("next","gd-mnext")+'</div>'+dkHide();
+  if(L==="prompter")return(line?'<div class="gd-pline">'+line+'</div>':"")+'<div class="gd-mrow gd-main gd-capsule"><span class="gd-line" data-dock="playpause"><small class="gd-stop vh">'+esc(lab+" · "+stepTitle(st))+'</small>'+dkBars(7)+'</span>'+ctl+dkOpenB()+dkQStar("m-cap")+'</div>'+dkHide();
   /* Ink glass: Azu inside its progress ring, the voice's bars, Pause, open */
-  return'<div class="gd-mrow gd-main"><span class="gd-ring" aria-hidden="true"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="23" class="tr"/><circle cx="26" cy="26" r="23" class="pg"/></svg>'+dkAv()+'</span><span class="gd-line" data-dock="playpause"><small class="gd-stop vh">'+esc(lab+" · "+stepTitle(st))+'</small>'+dkBars(7)+'</span>'+ctl+dkOpenB()+'</div>'+dkHide()}
+  return'<div class="gd-mrow gd-main"><span class="gd-ring" aria-hidden="true"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="23" class="tr"/><circle cx="26" cy="26" r="23" class="pg"/></svg>'+dkAv()+dkQStar("m-ring")+'</span><span class="gd-line" data-dock="playpause"><small class="gd-stop vh">'+esc(lab+" · "+stepTitle(st))+'</small>'+dkBars(7)+'</span>'+ctl+dkOpenB()+'</div>'+dkHide()}
 function dockOpen(L,h,ts){var n=S.guideSteps.length,st=S.guideSteps[G.i],lab=fmt(TXT("dock_stop_of"),G.i+1,n),nm=stepTitle(st),stop='<span class="gd-stop">'+esc(lab)+(nm?" · "+esc(nm):"")+'</span>',typing=h==="peek"&&G.typing;
   if(L==="paper")return dkHandle(h)+'<div class="gd-head">'+dkAv()+'<div class="gd-who"><b>Azu'+dkBars(9)+'</b><small class="gd-status">'+dkStatus(ts)+'</small></div><span class="gd-sp"></span>'+dkAa()+dkAll(h,"lines")+dkSmall()+'</div>'+
     dkWords(h,"paper")+'<div class="gd-where"><div class="gd-lab">'+stop+dkTimeHtml("both")+'</div>'+dkSeek("segs")+'</div>'+dkCtl()+

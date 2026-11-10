@@ -172,7 +172,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await fresh('S.view="card";S.stop="half";renderPhone(false);S.settingsOpen=true;renderPhone(false)');
   const st = await R('var v=ph.querySelector(".vset"),t=v&&v.querySelector(".vtips .vtry"),a=v&&v.querySelector(".vtips .vagain");[!!t,t&&t.textContent.indexOf("Things to try")===0,!!(a&&t&&a.compareDocumentPosition(t)&4),Math.round(t.getBoundingClientRect().height*ph.offsetHeight/ph.getBoundingClientRect().height),v.querySelectorAll("[data-gdpref]").length]');
   await p.locator('#ph .vset [data-gdpref="tips|off"]').click(); await W(150); const st2 = await R('[gdPrefs().tips,!!ph.querySelector(".vset .vnote")]'); await R('gdPrefs().tips="all";renderPhone(true)');
-  ok('Settings › The guide: Things to try › after Show the tips again (44 px); Tips and its other rows as before (Off by a real click, its note)', st[0] && st[1] && st[2] && st[3] >= 44 && st[4] === 5 && st2[0] === 'off' && st2[1], [st, st2]);
+  ok('Settings › The guide: Things to try › after Show the tips again (44 px); Tips, its other rows and Games on the tour (round 12) (Off by a real click, its note)', st[0] && st[1] && st[2] && st[3] >= 44 && st[4] === 7 && st2[0] === 'off' && st2[1], [st, st2]);
   await fresh('G.gd.manual=true;S.gdVisitor.visit.lastEnd=null;var it=gdItems().filter(function(x){return x.id==="tapmarker"})[0];gdStart(it,"test")');
   await R('gdAskFewer()'); await p.locator('#ph [data-gdfewer="yes"]').click(); await W(150);
   const fa = await R('var t=ph.querySelector(".gdtoast");[!!t,t&&t.querySelector("span").firstChild.textContent,t&&(t.querySelector(".gdtoast-try")||{}).textContent,!G.gd.cur,!!S.gdVisitor.visit.fewer.start,gdVM("tapmarker").how]');

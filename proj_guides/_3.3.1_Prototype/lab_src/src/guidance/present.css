@@ -188,3 +188,97 @@
 .gdhowc b{font:700 13.5px/1.25 var(--body)}
 .gdhowc small{grid-column:2;font:500 12px/1.3 var(--body);color:rgba(244,241,234,.8)}
 .gdhowc i{grid-row:1/span 2;grid-column:3;font-style:normal;font-size:20px;opacity:.7}
+
+/* ----- round 12, Fun › On the tour: the beat card (`.gdbeat`), set on the dock in the Look's own colours: an opaque surface (it sits over
+   the card; a beat plays at a seam, when no words are told), its line spoken with the word lit, chips 44 px or more, every word 4.5:1 or
+   more (scratchpad g12 captures). Unity: a UXML template in the dock's sheet, its Look's USS; the 4 s / 8 s bar a scale transition; no
+   backdrop blur (Ink glass's fill a ramp texture, as the dock's) ----- */
+.gdbeat{position:absolute;left:12px;right:12px;z-index:15;box-sizing:border-box;border-radius:28px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:12px;font-family:var(--body);
+  background:var(--bt-bg);color:var(--bt-ink);box-shadow:0 16px 36px rgba(10,9,12,.3);
+  --bt-bg:#FBFAF7;--bt-ink:#1A1814;--bt-ink2:#4F4A42;--bt-acc:#A63F1C;--bt-onacc:#FFFFFF;--bt-acctx:#9E3B1A;--bt-hl:#F6DCC9;--bt-hltx:#1A1814;--bt-chip:#EFEBE3;--bt-line:rgba(26,24,20,.18);--bt-ok:#1E6B3E;--bt-okbg:rgba(30,107,62,.12);--bt-no:#9E2B1D;--bt-nobg:rgba(158,43,29,.1)}
+.gdbeat.bt-in{animation:bt-rise .26s cubic-bezier(.2,.8,.3,1)}
+@keyframes bt-rise{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+.gdbeat.bt-away{opacity:0;pointer-events:none;transform:translateY(24px);transition:opacity .2s ease,transform .2s ease}
+/* Ink glass (the default): the dock's dark glass, gold */
+.gdbeat.bt-ink{--bt-bg:#1C1A21;--bt-ink:#F4F1EA;--bt-ink2:#C9C2B6;--bt-acc:#F2B544;--bt-onacc:#16151A;--bt-acctx:#F2B544;--bt-hl:#F2B544;--bt-hltx:#16151A;--bt-chip:rgba(255,255,255,.08);--bt-line:rgba(255,255,255,.2);--bt-ok:#86DCA5;--bt-okbg:rgba(134,220,165,.14);--bt-no:#FFA494;--bt-nobg:rgba(255,164,148,.12);
+  background-image:linear-gradient(180deg,#2C2834,#18171C 70%);border:1px solid rgba(255,255,255,.14);border-radius:30px;left:10px;right:10px}
+.cv.dark .gdbeat.bt-ink{border-color:rgba(255,255,255,.22);box-shadow:0 16px 36px rgba(0,0,0,.6)}
+/* Paper glass: the card's paper */
+.gdbeat.bt-paper{border-radius:30px;box-shadow:0 14px 34px rgba(26,24,20,.18),inset 0 1px 0 rgba(255,255,255,.9)}
+.cv.dark .gdbeat.bt-paper{--bt-bg:#1F1D1A;--bt-ink:#F4F1EA;--bt-ink2:#C9C2B6;--bt-acctx:#F0A27E;--bt-hl:#7A3A1E;--bt-hltx:#FFFFFF;--bt-chip:#34302B;--bt-line:rgba(255,255,255,.2);--bt-ok:#86DCA5;--bt-okbg:rgba(134,220,165,.14);--bt-no:#FFA494;--bt-nobg:rgba(255,164,148,.12);box-shadow:0 14px 34px rgba(0,0,0,.5)}
+/* Player sheet: white, a card's corners */
+.gdbeat.bt-player{--bt-bg:#FFFFFF;--bt-acc:#1A1814;--bt-chip:#F2EEE6;--bt-line:rgba(26,24,20,.14);border-radius:24px;border:1px solid rgba(26,24,20,.1)}
+.cv.dark .gdbeat.bt-player{--bt-bg:#1C1B19;--bt-ink:#F4F1EA;--bt-ink2:#C9C2B6;--bt-acc:#F4F1EA;--bt-onacc:#1A1814;--bt-acctx:#F0A27E;--bt-hl:#7A3A1E;--bt-hltx:#FFFFFF;--bt-chip:#2A2724;--bt-line:rgba(255,255,255,.18);--bt-ok:#86DCA5;--bt-okbg:rgba(134,220,165,.14);--bt-no:#FFA494;--bt-nobg:rgba(255,164,148,.12);border-color:rgba(255,255,255,.12);box-shadow:0 12px 32px rgba(0,0,0,.5)}
+/* Teleprompter: the paper, a dark capsule's chips */
+.gdbeat.bt-prompter{border-radius:22px}
+.gdbeat.bt-prompter .bt-chip.pri{--bt-acc:#1A1814}
+.cv.dark .gdbeat.bt-prompter{--bt-bg:#141312;--bt-ink:#F1EEE8;--bt-ink2:#C9C3B8;--bt-acctx:#F0A27E;--bt-hl:#7A3A1E;--bt-hltx:#FFFFFF;--bt-chip:#1F1D1A;--bt-line:rgba(255,255,255,.18);--bt-ok:#86DCA5;--bt-okbg:rgba(134,220,165,.14);--bt-no:#FFA494;--bt-nobg:rgba(255,164,148,.12);box-shadow:0 12px 32px rgba(0,0,0,.55)}
+.cv.dark .gdbeat.bt-prompter .bt-chip.pri{--bt-acc:#F1EEE8;--bt-onacc:#141312}
+.gdbeat :where(button){appearance:none;border:0;background:none;padding:0;margin:0;font:inherit;color:inherit;cursor:pointer;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+.gdbeat p{margin:0}
+.bt-eye{font:700 12px/16px var(--body);letter-spacing:.1em;color:var(--bt-acctx)}
+.bt-line{font:600 19px/27px var(--body);color:var(--bt-ink)}
+.bt-line:empty{display:none}
+.btw{border-radius:4px}
+.btw.on{background:var(--bt-hl);color:var(--bt-hltx);box-shadow:0 0 0 2px var(--bt-hl)}
+.bt-body:empty,.bt-foot:empty{display:none}
+.bt-body{display:flex;flex-direction:column;gap:12px}
+.bt-chips{display:flex;flex-wrap:wrap;gap:8px}
+.bt-chip{position:relative;overflow:hidden;min-height:48px;padding:0 20px!important;border-radius:24px;font:700 15px/1 var(--body)!important;background:var(--bt-chip)!important;color:var(--bt-ink)!important;border:1px solid var(--bt-line)!important;display:inline-flex;align-items:center;justify-content:center}
+.bt-chip.pri{background:var(--bt-acc)!important;color:var(--bt-onacc)!important;border-color:transparent!important}
+.bt-chip.bt-gone{opacity:0;transition:opacity .3s ease}
+.bt-bar{position:absolute;left:0;right:0;bottom:0;height:4px;background:currentColor;opacity:.45;transform-origin:left center;animation:bt-drain 4s linear forwards}
+@keyframes bt-drain{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+.reduce .bt-bar{animation-name:bt-drain}
+/* the quiz */
+.bt-choices{display:flex;flex-direction:column;gap:8px}
+.bt-choice{display:flex!important;align-items:center;gap:12px;width:100%;min-height:52px;padding:10px 14px!important;border-radius:16px;background:var(--bt-chip)!important;border:1.5px solid var(--bt-line)!important;text-align:left;font:600 16px/1.3 var(--body)!important;color:var(--bt-ink)!important}
+.bt-choice:disabled{cursor:default}
+.bt-mark{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--bt-line);box-sizing:border-box;display:grid;place-items:center}
+.bt-choice.ok{border-color:var(--bt-ok)!important;background:var(--bt-okbg)!important}
+.bt-choice.ok .bt-mark{border-color:var(--bt-ok);background:var(--bt-ok)}
+.bt-choice.ok .bt-mark::after{content:"";width:10px;height:5px;border:solid var(--bt-bg);border-width:0 0 2.5px 2.5px;transform:translateY(-1px) rotate(-45deg)}
+.bt-choice.no{border-color:var(--bt-no)!important;background:var(--bt-nobg)!important}
+.bt-choice.no .bt-mark{border-color:var(--bt-no);background:var(--bt-no)}
+.bt-choice.no .bt-mark::after{content:"✕";font:900 12px/1 var(--body);color:var(--bt-bg)}
+.bt-choice:disabled:not(.ok):not(.no){opacity:.62}
+.bt-row{display:flex;align-items:center;gap:10px}
+.bt-hint{flex:1;min-width:0;font:400 13px/18px var(--body);color:var(--bt-ink2)}
+.bt-mic{width:48px;height:48px;border-radius:50%;background:var(--bt-chip)!important;border:1px solid var(--bt-line)!important;display:grid!important;place-items:center;flex:none}
+.bt-mic svg{width:22px;height:22px;fill:none;stroke:var(--bt-ink);stroke-width:2;stroke-linecap:round}
+.bt-verdict{font:600 16px/23px var(--body);color:var(--bt-ink)}
+.bt-verdict.ok{color:var(--bt-ok)}
+.bt-foot{display:flex;justify-content:center;margin-top:-4px}
+.bt-chip.bt-skip{background:none!important;border:0!important;min-height:44px;font:600 14px/1 var(--body)!important;color:var(--bt-ink2)!important;text-decoration:underline;text-underline-offset:3px}
+.bt-score{display:flex;align-items:baseline;gap:14px}
+.bt-score b{font:700 56px/1 var(--display,var(--body));color:var(--bt-ink)}
+.bt-score b small{font-size:26px;color:var(--bt-ink2);margin-left:2px}
+.bt-best{font:600 14px/20px var(--body);color:var(--bt-ink2)}
+/* guess the year */
+.bt-q{font:600 17px/24px var(--body);color:var(--bt-ink)}
+.bt-slider{display:flex;flex-direction:column;align-items:stretch;gap:2px}
+.bt-val{align-self:center;font:700 40px/1 var(--display,var(--body));color:var(--bt-ink);font-variant-numeric:tabular-nums}
+.bt-range{-webkit-appearance:none;appearance:none;width:100%;height:44px;margin:0;background:none;cursor:pointer;touch-action:none}
+.bt-range::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:var(--bt-line)}
+.bt-range::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;margin-top:-12px;border-radius:50%;background:var(--bt-acc);border:3px solid var(--bt-bg);box-shadow:0 0 0 2px var(--bt-acc),0 4px 10px rgba(0,0,0,.25)}
+.bt-range::-moz-range-track{height:6px;border-radius:3px;background:var(--bt-line)}
+.bt-range::-moz-range-thumb{width:30px;height:30px;border-radius:50%;background:var(--bt-acc);border:3px solid var(--bt-bg)}
+.bt-ends{display:flex;justify-content:space-between;font:600 13px/16px var(--body);color:var(--bt-ink2)}
+.bt-track{position:relative;height:84px;margin:0 14px}
+.bt-rail{position:absolute;left:0;right:0;top:40px;height:6px;border-radius:3px;background:var(--bt-line)}
+.bt-pin{position:absolute;top:33px;width:20px;height:20px;margin-left:-10px;border-radius:50%;box-sizing:border-box;border:3px solid var(--bt-bg)}
+.bt-pin.you{background:var(--bt-acc);box-shadow:0 0 0 2px var(--bt-acc)}
+.bt-pin.ans{background:var(--bt-ok);box-shadow:0 0 0 2px var(--bt-ok);animation:bt-pin .4s cubic-bezier(.2,.8,.3,1.4)}
+@keyframes bt-pin{from{transform:scale(0)}to{transform:none}}
+.bt-pin span{position:absolute;left:50%;translate:-50% 0;white-space:nowrap;font:700 12px/16px var(--body);color:var(--bt-ink);background:var(--bt-chip);border:1px solid var(--bt-line);padding:3px 8px;border-radius:10px}
+.bt-pin.you span{bottom:22px}.bt-pin.ans span{top:22px}
+.bt-track+.bt-ends{margin:0 4px}
+/* Show me: the block ringed, the card below the fold, the way back */
+.gdshowme{outline:3px solid #F2B544;outline-offset:4px;border-radius:12px;transition:outline-color .3s ease}
+.gdshowback{position:absolute;z-index:16;left:50%;bottom:24px;translate:-50% 0;box-shadow:0 10px 24px rgba(0,0,0,.3);--bt-acc:#1A1814;--bt-onacc:#FFFFFF;appearance:none;border:0;cursor:pointer}
+.cv.dark .gdshowback{--bt-acc:#F4F1EA;--bt-onacc:#1A1814}
+/* while a beat shows: the dock's hide tab rests (the card sits on the dock), Azu stands on the card's edge */
+.gd-beating .gdock .gd-hide,.gd-beating .gbubble{visibility:hidden}
+.mascot.gd-onbeat{z-index:16;top:var(--gd-bt-top)!important;transition:top .3s cubic-bezier(.2,.8,.3,1)}
+/* Settings › The guide › Games on the tour */
+.vgames{margin-top:6px}

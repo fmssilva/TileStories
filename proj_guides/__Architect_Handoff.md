@@ -39,8 +39,9 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     - **Level 2, every 3rd-4th round (about 35 min):** every tab and every file. It runs sooner when a round changed existing
       shared code.
     - **Level 3, every 10-12 rounds and before a Unity hand-off:** level 2, every mutation and a new baseline.
-    - Count the rounds since the last level 2 and 3 in every answer. After guidance round 11 that is 0 and 1: level 2 ran on
-      2026-11-10 (round 11 changed the dock, shared by 15 files); level 3 last ran on 2026-11-09.
+    - Count the rounds since the last level 2 and 3 in every answer. After guidance round 12 that is 0 and 2: level 2 ran on
+      2026-11-10 after round 11 and again after round 12 (the self-test's four walks bad=0; 39 files, 1175 checks, about 71
+      min); level 3 last ran on 2026-11-09.
   - **Where the tests' time goes (measured 2026-11-07):**
     - Starting Edge and loading the 13 MB page costs only about 8 s a file (Edge 0.3-0.8 s, the page 7 s), so one shared Edge
       would save almost nothing.
@@ -126,8 +127,22 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       shows **Pause only** (Stop is in Open); the water glass and the cookie move to round 12; the "blue line" beside Azu was
       the old 2D Azu's pointing arm (`.marm`), still drawn beside the 3D model in a tour: now only the drawn tiles have it
       (`pointAt`, as the ✦ already did; test8j checks both).
-    - **Next: round 12**, Fun › On the tour (`_3.8_guidance_plans/brief_round12.md`: the group and the tour plan, the
-      breather, the promised quiz, guess the year); round 13: Don't say it! and Find it on the wall.
+    - Round 12 (2026-11-10, `_3.8_guidance_plans/brief_round12.md`): Fun › On the tour, its own rhythm (one beat per 75 s,
+      at most 3 a tour, Short 2, Deep 5), the tour plan (`gdTourPlan`, pure, asked once at a tour's start; readable in the
+      Editor; Why not now? answers from it), pairs, the 4 s Not now (two end the games), the breather (today's Water break
+      with Go on / A question first; the Cookie its variant; props by date), the promised quiz (the star in every Look;
+      per-step questions with Draft with AI and Reviewed; tap or speech), Guess the year (slider, two pins, 3 bands); the
+      visitor's Settings › The guide › Games on the tour; 8 scenes `gd12_*`; `tests/test9p.js` (60 checks, mutation 5 red).
+      The demo tour (1:24 of narration) has room for 2 beats, so it plays the quiz pair only. The Architect's review:
+      "Close!" on every wrong quiz answer became "Not quite." (500 years is not close to 250); level 2 found three checks
+      written for the old state: test9m (Settings › The guide has 7 choices with Games on the tour), test8u (57 scenes;
+      Stop's count now taken as the click lands, since the Guide tab's redraw, about 1.3 s, can hold Playwright's click
+      while two more scenes finish) and test8w (it set Azu's state on the element; since round 11 the dock's timer copies
+      the app's own state at every height, so it now sets `G.talk` / `G.busy`).
+    - Open look question from round 12: at the finale the tour's quiz shows over the card's own quiz block (the tour's
+      step 10, "Test yourself"), so two quizzes are on screen; the developer decides (see the closing answers).
+    - **Next: round 13**, Don't say it! and Find it on the wall (In a step), on round 12's base (research 4.4, 4.7, 5.4),
+      after the developer's answers on round 12's beats.
     - **Then: the developer's step-by-step review** of the collected look questions (rounds 1-10; round 10's: build the
       seven missing phone effects so their rows get real demos, Global Scene's rows, stand-ins for block options with
       nothing to see, the Sticky Action's demo with the bar at the bottom, and whether every Detail Card change should

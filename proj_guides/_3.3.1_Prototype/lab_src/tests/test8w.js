@@ -31,8 +31,10 @@ const GLB = path.join(__dirname, '..', '..', '..', 'mascote', '3d', 'azu_tile.gl
   const clipOf = async (setup) => { await R(setup); await W(450); return R('Azu3D.state().clip'); };
   await R('G.azWaveTill=0');
   const sp = await clipOf('G.paused=false;G.talk="idle";G.busy=false;G.timer=G.timer||1;var m=ph.querySelector(".mascot");m.dataset.state="speaking";m.classList.remove("pointing")');
-  const li = await clipOf('ph.querySelector(".mascot").dataset.state="listening"');
-  const th = await clipOf('ph.querySelector(".mascot").dataset.state="thinking"');
+  // (round 12 review) the states come from the app's own (talkState: the dock's timer copies it onto Azu at every height), not set on Azu
+  const li = await clipOf('G.talk="listening";ph.querySelector(".mascot").dataset.state="listening"');
+  const th = await clipOf('G.talk="idle";G.busy=true;ph.querySelector(".mascot").dataset.state="thinking"');
+  await R('G.busy=false');
   // pointing: the guide's own pointAt (as a step with a spot calls it); the clip changes on the next frame
   const pt = await R('ph.querySelector(".mascot").dataset.state="speaking";G.moment=null;G.i=S.guideSteps.findIndex(function(x){return x.ref!=="hero"});pointAt({x:150,y:330});new Promise(function(r){requestAnimationFrame(function(){requestAnimationFrame(function(){r(Azu3D.state().clip)})})})');
   ok('Each state its clip: speaking -> talk, listening -> listen, thinking -> think, pointing -> point', sp === 'talk' && li === 'listen' && th === 'think' && pt === 'point', [sp, li, th, pt]);
