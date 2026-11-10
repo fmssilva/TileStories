@@ -5,7 +5,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-07)
 
 - **State:**
-  - **The Lab:** `master` holds guidance rounds 1-10, verified on 2026-11-06/09, published at
+  - **The Lab:** `master` holds guidance rounds 1-11, verified on 2026-11-06/10, published at
     https://claude.ai/artifact/RKn3RrkY4pP4mCzrTNfa2s with the 186 voice files and the capabilities (section 1). The
     developer changes account often (four times on 2026-11-08/09); the old links stay in their accounts (J9J4h… at round 9, 4LpLd4… at round 8, Jq6X2K… at round 7, Jrejv7… at
     round 6, QmhHSz… at round 5, KDs2… at v29). A new account cannot update an old link: publish a new one (section 1, Publishing). Its
@@ -39,8 +39,8 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     - **Level 2, every 3rd-4th round (about 35 min):** every tab and every file. It runs sooner when a round changed existing
       shared code.
     - **Level 3, every 10-12 rounds and before a Unity hand-off:** level 2, every mutation and a new baseline.
-    - Count the rounds since the last level 2 and 3 in every answer. After guidance round 10 that is 0 and 0: level 3 (with
-      level 2) ran on 2026-11-09.
+    - Count the rounds since the last level 2 and 3 in every answer. After guidance round 11 that is 0 and 1: level 2 ran on
+      2026-11-10 (round 11 changed the dock, shared by 15 files); level 3 last ran on 2026-11-09.
   - **Where the tests' time goes (measured 2026-11-07):**
     - Starting Edge and loading the 13 MB page costs only about 8 s a file (Edge 0.3-0.8 s, the page 7 s), so one shared Edge
       would save almost nothing.
@@ -110,7 +110,21 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       round 1's PT opening line, what "Mascot Off" means, Azu's size beside the marker; rounds 2 and 3's in the closing
       answers of 2026-11-06/07 (among them: a group's own shorter gap, the remarks counting in Content's cap, The ✦ on the
       card, a ring for The ✦ with the 3D model, "The" mid-sentence in the remark lines).
-    - **Next: the developer's step-by-step review** of the collected look questions (rounds 1-10; round 10's: build the
+    - Round 11 (2026-11-10, the developer's feedback on the guide's panel): the panel's **Look**, four built side by side
+      so the developer chooses (Paper glass, **Ink glass**, Player sheet, Teleprompter), each with Mini and Open: speed
+      0.5-2×, previous / next part, pause, stop, a draggable progress bar, the voice moving, the words as a teleprompter,
+      Aa and Read all, asking by voice or typed with suggestions; the ✦ grows into the panel and hides while it shows; Fun
+      held during a tour (the water glass showed over a caption); the Editor's ▸ a green play button; the music bed's
+      volume, ducking, tracks (`music/tracks.js`: four CC0 tracks and Cabezón by Joan Benson, CC BY-SA 2.0, credited) and
+      the visitor's Music choice. `tests/test9o.js`. The Architect's review fixed Ink's words running off the panel (a
+      `flex:none` winning over Ink's `flex:1`) and the card's text reading through Paper's and the Teleprompter's Open (a
+      .97 fill; Open is solid now), Azu no longer showing listening or thinking at Mini (its state was copied only by the
+      talk button's timer, and the Mini has no talk button; test8q caught it), and two test races: test9o's music level (a fixed wait on the audio clock) and test9h's
+      sheet still growing to Full (184 px of 820) when a check began (red on round 11 about one run in two, green on
+      master; now 4 of 4). Level 2: the self-test's four walks bad=0, 38 files green after those fixes.
+    - **Next:** the developer chooses the panel's look and options (round 11's questions), then round 12, Fun › On the
+      tour (`_3.8_guidance_plans/research_tour_entertainment.md`, decisions in `_3.8` §9).
+    - **Then: the developer's step-by-step review** of the collected look questions (rounds 1-10; round 10's: build the
       seven missing phone effects so their rows get real demos, Global Scene's rows, stand-ins for block options with
       nothing to see, the Sticky Action's demo with the bar at the bottom, and whether every Detail Card change should
       move the phone). Prototype only (no Unity) until the developer says so.

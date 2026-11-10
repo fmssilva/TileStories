@@ -94,7 +94,7 @@ function gdContext(){var t=-Infinity,mv=G.gd.movedAt,wa=G.gd.wallAt,st=ph.queryS
     panel:S.settingsOpen?"Settings":G.cam&&G.cam.open?"Ask about the view":G.fab&&G.fab.menu?"the ✦ menu":S.contentsOpen?"Contents":G.gd.tryOpen?"Things to try":null,
     dockFull:!!(G.on&&typeof dockOn==="function"&&dockOn()&&S.dockH==="full"),solemn:gdSolemnNow(),
     /* the tour: between two steps (as it moves on, nothing is said), its narration so far (since it started or the last Moment) and its last step next */
-    tour:G.on?{between:mo==="between"||!!G.gd.between&&!speaking,step:G.i,talked:Math.max(0,(performance.now()-(G.talkFrom||performance.now()))/1000),toEnd:!!(S.guideSteps[G.i+1]&&S.guideSteps[G.i+1].act==="end")}:null,
+    tour:G.on?{paused:!!G.paused,between:mo==="between"||!!G.gd.between&&!speaking,step:G.i,talked:Math.max(0,(performance.now()-(G.talkFrom||performance.now()))/1000),toEnd:!!(S.guideSteps[G.i+1]&&S.guideSteps[G.i+1].act==="end")}:null,
     movedAt:mv,touchAt:G.gd.touchAt,cardAt:S.view==="card"&&S.stop!=="closed"?G.gd.cardAt:null,
     onWall:gdOnWall(),where:S.view!=="card"?"the phone shows "+S.view:G.on?"the tour":S.stop!=="closed"?"a card is open":"",
     marker:gdMarker(),gbtn:gdGbtn(),central:gdCentral(),covers:{},stillSince:Math.max(mv==null?t:mv,wa==null?t:wa),returning:S.gdVisitor.visits>1,tips:gdPrefs().tips,

@@ -877,55 +877,263 @@ body{padding-block:8px}
 .mascot.enter svg{animation:azenter 1.3s cubic-bezier(.3,1.25,.5,1)}
 @keyframes azenter{0%{transform:translateX(90px) rotate(18deg);opacity:0}35%{opacity:1}55%{transform:translateX(-6px) translateY(-14px) rotate(-6deg)}75%{transform:translateY(0) scale(1.06,.94)}100%{transform:none}}
 .reduce .mascot.enter svg{animation:none}
-/* The Guide Dock. Unity: a UI Toolkit sheet like the card's; the rings are elements with a radial-gradient sprite whose scale
-   and alpha follow the voice or the mic; the bubble is a 9-slice with a tail. Words always on solid colours (no backdrop blur). */
-.gdock{position:absolute;left:8px;right:8px;bottom:8px;z-index:14;background:#16181C;color:#F4F1EA;border-radius:24px;box-shadow:0 10px 30px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.06);padding:6px 12px 10px;transition:height .32s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
-.gd-grab{appearance:none;border:0;background:none;height:14px;display:flex;justify-content:center;align-items:center;cursor:pointer;padding:0;touch-action:none}
-.gd-grab i{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.28)}
-.gd-seg{display:flex;gap:3px;margin:2px 2px 8px}.gd-seg button{flex:1;height:4px;padding:0;border:0;border-radius:2px;background:rgba(255,255,255,.18);cursor:pointer}
-.gd-seg button.done{background:rgba(255,255,255,.62)}.gd-seg button.now{background:#FFD98A}
-.gd-main{display:flex;align-items:center;gap:8px;min-height:56px}
+/* The Guide Dock in its four Looks (round 11; drawn as the Architect's static layouts: gp/project Main = Paper glass, InkGlass,
+   Player, Prompter). Unity: one UXML template per Look, swapped with its USS, the same element names; no backdrop blur (the glass
+   is a translucent fill with a light edge), a gradient is a ramp texture (Ink glass's fill, Teleprompter's fade); the shadows a
+   9-slice in light mode. Every word at 4.5:1 or more over the worst backdrop (scratchpad g11/contrast11.js); 44 px targets. */
+.gdock{position:absolute;z-index:14;box-sizing:border-box;display:flex;flex-direction:column;font-family:var(--body);color:var(--ink);
+  --ink:#F4F1EA;--ink2:#C9C2B6;--faded:#A39C90;--acc:#F2B544;--onacc:#16151A;--acctx:#F2B544;--hl:#F2B544;--hltx:#16151A;--trk:rgba(255,255,255,.22);--chip:#2A2830;--line:rgba(255,255,255,.22);--field:rgba(255,255,255,.08);--fieldedge:rgba(255,255,255,.12);--grab:rgba(255,255,255,.28);--tpun:#A39C90}
+.gdock :where(button){appearance:none;border:0;background:none;padding:0;margin:0;cursor:pointer;font:inherit;color:inherit;display:grid;place-items:center;flex:none;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+.gdock .fi{width:24px;height:24px;fill:currentColor}
+.gdock .si{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.gdock .vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.gdock p{margin:0}
+/* the parts every Look shares */
+.gd-mrow{display:flex;align-items:center;gap:10px;min-width:0}
+.gd-av{width:48px;height:48px;border-radius:50%;background:#EFE7DA;display:grid;place-items:center;overflow:hidden;flex:none}
+.gd-av svg,.gd-av img{width:42px;height:42px;display:block;object-fit:contain}
+.gd-bars{display:inline-flex;align-items:center;gap:3px;height:20px;color:var(--acc);flex:none}
+.gd-bars i{display:block;width:3px;height:100%;border-radius:2px;background:currentColor;transform:scaleY(.18);will-change:transform}
 .gd-line{flex:1;min-width:0;cursor:pointer}
-.gd-stop{display:block;font:600 11px/1.2 var(--body);color:rgba(244,241,234,.66);letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.gd-cap .gcap{position:static;inset:auto;background:none;box-shadow:none;padding:0;margin-top:3px;max-height:44px;overflow:hidden;font:500 14px/1.4 var(--body);border-radius:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.gd-kb{appearance:none;border:0;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.08);color:#F4F1EA;display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
-/* Mini: Pause and Stop beside the talk button (44 px targets); the chevron at the top right hides the dock (Compact) */
-.gd-mini{display:flex;gap:6px;flex:0 0 auto}
-.gd-mc{appearance:none;border:0;width:44px;height:44px;border-radius:50%;background:rgba(244,241,234,.12);color:#F4F1EA;display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
-.gd-hide{position:absolute;top:0;right:8px;appearance:none;border:0;background:none;width:44px;height:30px;display:grid;place-items:center;color:rgba(244,241,234,.78);cursor:pointer;padding:0}
-.gd-hide svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.gd-kb svg,.gd-mc svg,.gd-ctl svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-/* the talk button: a blue disc with a white mic and a soft glow; its rings tell the state */
-.gd-talk{position:relative;appearance:none;border:0;width:56px;height:56px;flex:0 0 auto;border-radius:50%;background:radial-gradient(circle at 35% 30%,#5B8CFF,#2F5FE0 60%,#1F45B5);color:#fff;display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 14px rgba(47,95,224,.4);touch-action:none;transition:transform .15s}
+.gd-mini{display:flex;gap:6px;flex:none;align-items:center}
+.gd-mc{width:44px;height:44px;border-radius:50%}
+.gd-mpp{width:48px;height:48px;background:var(--acc);color:var(--onacc)}
+.gd-mpp .fi{width:20px;height:20px}.gd-mstop .fi{width:18px;height:18px}
+.gd-openb{width:44px;height:44px;border-radius:50%}
+.gd-mprog{position:absolute;left:30px;right:30px;bottom:0;height:3px;border-radius:2px;background:var(--trk);overflow:hidden}
+.gd-mprog b{display:block;height:100%;width:0;background:var(--acc);transition:width .25s linear}
+/* the hide chevron: a small tab on the Mini's top edge (44 px to tap), in the Look's own surface */
+.gd-hide{position:absolute!important;top:-36px;right:22px;width:44px;height:44px}
+.gd-hide::before{content:"";position:absolute;left:8px;right:8px;top:18px;bottom:0;border-radius:14px 14px 4px 4px;background:var(--tab,var(--surfsolid));box-shadow:0 -2px 8px rgba(0,0,0,.12)}
+.gd-hide .si{position:relative;width:18px;height:18px;margin-top:18px}
+/* Open's grabber (the handle) and its chevron back to Mini */
+.gd-handle{position:absolute!important;left:50%;top:-10px;width:96px;height:44px;margin-left:-48px}
+.gd-handle i{width:40px;height:4px;border-radius:2px;background:var(--grab)}
+.gd-small{position:absolute!important;top:6px;right:8px;width:44px;height:44px;border-radius:50%;color:var(--ink2)}
+.gd-head .gd-small{position:static!important}
+/* the words like a teleprompter */
+.gd-tp{display:flex;flex-direction:column;gap:6px;min-width:0}
+.gd-tp .tp-prev,.gd-tp .tp-next{font:400 15px/21px var(--body);color:var(--faded);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.gd-tp .tp-now{font:500 21px/29px var(--display);color:var(--ink);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.gd-tp .tp-now .tw{color:var(--tpun)}.gd-tp .tp-now .tw.said,.gd-tp .tp-now .tw.on{color:var(--ink)}
+.gd-tp .tw.on,.gm-now .tw.on{background:var(--hl);color:var(--hltx)!important;border-radius:6px;padding:0 4px;margin:0 -2px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.gd-tp .tp-empty{visibility:hidden}
+.gd-tp.tp-up{animation:tpup .42s cubic-bezier(.2,.8,.2,1)}
+@keyframes tpup{from{transform:translateY(24px);opacity:.35}to{transform:none;opacity:1}}
+.gd-tp.tp-mini .tp-now{font:400 15px/20px var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.gd-tp.tp-mini .tw{color:var(--ink)!important}.gd-tp.tp-mini .tw.on{padding:0 3px}
+.gd-tpoff .tp-now{visibility:hidden}
+/* where we are: the time and the step, the progress bar (a 44 px hit area round a thin track), the knob */
+.gd-where{display:flex;flex-direction:column;gap:6px}
+.gd-lab{display:flex;justify-content:space-between;gap:12px;font:400 13px/18px var(--body);color:var(--ink2)}
+.gd-stop{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.gd-time{font-variant-numeric:tabular-nums;white-space:nowrap}
+.gd-seek{position:relative;height:44px;margin:-11px 0;display:flex;align-items:center;cursor:pointer;touch-action:none;outline:none}
+.gd-seek:focus-visible .sk-knob{box-shadow:0 0 0 3px var(--ink)}
+.sk-track{display:flex;align-items:center;gap:3px;width:100%}
+.sk-track i{display:block;position:relative;height:4px;border-radius:2px;background:var(--trk);overflow:hidden}
+.sk-track b{display:block;height:100%;width:0;background:var(--acc)}
+.sk-knob{position:absolute;top:50%;left:0;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:#fff;box-shadow:0 0 0 4px var(--acc),0 2px 6px rgba(26,24,20,.3);transition:left .25s linear;pointer-events:none}
+.gd-seek.dragging .sk-knob{transition:none;transform:scale(1.2)}
+/* the controls */
+.gd-ctl{display:flex;align-items:center;justify-content:space-between}
+.gd-pn{width:52px;height:52px;border-radius:50%;color:var(--ink)}.gd-pn .fi{width:26px;height:26px}
+.gd-play{width:68px;height:68px;border-radius:50%;background:var(--acc);color:var(--onacc)}.gd-play .fi{width:26px;height:26px}
+.gd-stopb{width:52px;height:52px;border-radius:50%;color:var(--ink)}.gd-stopb .fi{width:20px;height:20px}
+.gd-speed{min-width:58px;height:44px;border-radius:22px!important;border:1px solid var(--line)!important;font:700 15px/1 var(--body)!important;color:var(--ink);padding:0 12px!important;font-variant-numeric:tabular-nums}
+/* asking: the questions ready to tap, typed, by voice */
+.gd-chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:1px 0}.gd-chips::-webkit-scrollbar{display:none}
+.gd-chips [data-chip]{height:44px;border-radius:22px;padding:0 16px;font:600 14px/1 var(--body);background:var(--chip);color:var(--ink);white-space:nowrap}
+.gd-kb{width:44px;height:44px;border-radius:50%;border:1px solid var(--line)!important;color:var(--ink)}
+.gd-kb svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.gd-askrow{display:flex;gap:10px;align-items:center}
+.gd-form{flex:1;min-width:0;display:flex;align-items:center;gap:6px;height:52px;border-radius:26px;background:var(--field);border:1px solid var(--fieldedge);padding:0 6px 0 18px;box-sizing:border-box}
+.gd-form .gin{flex:1;min-width:0;border:0;background:transparent;outline:none;font:400 15px/1 var(--body);color:var(--ink);padding:0}
+.gd-form .gin::placeholder{color:var(--ink2);opacity:1}
+.gd-send{width:44px;height:44px;border-radius:50%;background:var(--acc)!important;color:var(--onacc)}
+.gd-form:has(.gin:placeholder-shown) .gd-send{display:none}
+.gd-hint{font:600 12px/16px var(--body);color:var(--ink2);text-align:right;height:0;margin-top:-6px;overflow:hidden}
+.gd-hint.on{height:16px}
+/* the talk button: its rings tell the state (the Look gives its disc) */
+.gdock .gd-talk{position:relative;width:52px;height:52px;border-radius:50%;background:#1A1814;color:#fff;touch-action:none;transition:transform .15s}
 .gd-talk:active{transform:scale(.94)}
-.gd-talk svg{position:relative;z-index:1;width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.gd-talk .ring{position:absolute;inset:-6px;border-radius:50%;background:radial-gradient(circle,rgba(91,140,255,.0) 55%,rgba(91,140,255,.45) 70%,rgba(91,140,255,0) 100%);opacity:0;pointer-events:none}
-.gd-talk.s-idle .ring:not(.r2){opacity:.55;animation:tkbreathe 3.2s ease-in-out infinite}
-.gd-talk.s-listening{background:radial-gradient(circle at 35% 30%,#4FE3C0,#14B08C 60%,#0B8A6C)}.gd-talk.s-listening .ring{background:radial-gradient(circle,rgba(79,227,192,0) 50%,rgba(79,227,192,.55) 68%,rgba(79,227,192,0) 100%);opacity:1;animation:tkpulse 1.1s ease-out infinite}.gd-talk.s-listening .r2{animation-delay:.55s}
+.gd-talk svg{position:relative;z-index:1;width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.gd-talk .ring{position:absolute;inset:-6px;border-radius:50%;background:radial-gradient(circle,rgba(242,181,68,0) 55%,rgba(242,181,68,.42) 70%,rgba(242,181,68,0) 100%);opacity:0;pointer-events:none}
+.gd-talk.s-idle .ring:not(.r2){opacity:.45;animation:tkbreathe 3.2s ease-in-out infinite}
+.gdock .gd-talk.s-listening{background:#0B8A6C;color:#fff}.gd-talk.s-listening .ring{background:radial-gradient(circle,rgba(79,227,192,0) 50%,rgba(79,227,192,.55) 68%,rgba(79,227,192,0) 100%);opacity:1;animation:tkpulse 1.1s ease-out infinite}.gd-talk.s-listening .r2{animation-delay:.55s}
 .gd-talk.s-thinking .ring{inset:-5px;background:conic-gradient(from 0deg,rgba(255,217,138,0),rgba(255,217,138,.9),rgba(255,217,138,0) 40%);-webkit-mask:radial-gradient(circle,transparent 62%,#000 64%);mask:radial-gradient(circle,transparent 62%,#000 64%);opacity:1;animation:tkspin 1s linear infinite}.gd-talk.s-thinking .r2{display:none}
-.gd-talk.s-speaking .ring{opacity:.8;animation:tkspeak .6s ease-in-out infinite alternate}.gd-talk.s-speaking .r2{animation-delay:.3s;inset:-7px;opacity:.35}
+.gd-talk.s-speaking .ring{opacity:.7;animation:tkspeak .6s ease-in-out infinite alternate}.gd-talk.s-speaking .r2{animation-delay:.3s;inset:-8px;opacity:.3}
 .gd-talk.s-interrupted{animation:tkpop .3s ease}.gd-talk.s-notheard{animation:tkshake .4s ease}
-@keyframes tkbreathe{50%{transform:scale(1.08);opacity:.25}}@keyframes tkpulse{from{transform:scale(.9);opacity:.9}to{transform:scale(1.55);opacity:0}}
-@keyframes tkspin{to{transform:rotate(360deg)}}@keyframes tkspeak{from{transform:scale(.95)}to{transform:scale(1.18)}}@keyframes tkpop{50%{transform:scale(1.12)}}@keyframes tkshake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
-.gd-hint{text-align:right;font:600 11px/1.2 var(--body);color:rgba(244,241,234,.72);margin:4px 2px 0;min-height:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* Peek: the controls and the suggested questions; Full: the conversation */
-.gd-peek,.gd-full{display:none}.gdock.h-peek .gd-peek,.gdock.h-full .gd-peek{display:block}.gdock.h-full .gd-full{display:flex}
-.gd-ctl{display:flex;justify-content:space-between;gap:6px;margin:10px 0 8px}
-.gd-ctl button{appearance:none;border:0;flex:1;height:44px;border-radius:14px;background:rgba(255,255,255,.08);color:#F4F1EA;display:grid;place-items:center;cursor:pointer;font:700 13px/1 var(--body)}
-.gd-ctl button[aria-pressed=false].cc{opacity:.5}
-.gd-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;align-items:center}.gd-chips .gd-kb{width:44px;height:44px}.gd-chips::-webkit-scrollbar{display:none}
-.gd-chips button{flex:0 0 auto;appearance:none;border:1px solid rgba(255,255,255,.16);background:transparent;color:#F4F1EA;font:600 13px/1 var(--body);padding:9px 12px;border-radius:999px;cursor:pointer}
-.gdock.h-full{top:72px}.gdock.h-full .gd-line{display:none}.gdock.h-full .gd-main{justify-content:flex-end}
-.gd-full{flex:1;min-height:0;flex-direction:column;gap:8px;margin-top:6px}
-.gd-thread{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:4px 2px}
-.gd-thread>div{max-width:84%;font:400 14.5px/1.45 var(--body);padding:9px 12px;border-radius:16px}
-.gm-azu{align-self:flex-start;background:rgba(255,255,255,.08);border-bottom-left-radius:5px}.gm-me{align-self:flex-end;background:#2F5FE0;color:#fff;border-bottom-right-radius:5px}
-.gm-note{align-self:center;max-width:94%!important;background:rgba(255,217,138,.14);color:#FFE3A6;font-size:13px!important;text-align:center}
-.gm-azu.typing{display:flex;gap:4px;padding:12px 14px}.gm-azu.typing i{width:6px;height:6px;border-radius:50%;background:rgba(244,241,234,.7);animation:tkdot 1s infinite}.gm-azu.typing i:nth-child(2){animation-delay:.15s}.gm-azu.typing i:nth-child(3){animation-delay:.3s}
+@keyframes tkbreathe{50%{transform:scale(1.08);opacity:.2}}@keyframes tkpulse{from{transform:scale(.9);opacity:.9}to{transform:scale(1.55);opacity:0}}
+@keyframes tkspin{to{transform:rotate(360deg)}}@keyframes tkspeak{from{transform:scale(.95)}to{transform:scale(1.16)}}@keyframes tkpop{50%{transform:scale(1.12)}}@keyframes tkshake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+/* the whole text (Full): the tour's lines so far and the conversation, the line said now marked */
+.gdock.h-full{top:72px}
+.gdock.h-full>*{flex:none}
+.gdock.h-full>.gd-wrow,.gdock.h-full>.gd-card,.gdock.h-full>.gd-thread{flex:1 1 0;min-height:0;align-items:stretch}
+.gdock.h-full .gd-cardw{min-height:0}.gdock.h-full .gd-cardw .gd-thread{flex:1}
+.gdock.h-full .gd-wrow>.gd-av{display:none}
+.gdock.h-full .gd-wrow .gd-thread{flex:1}
+.gdock.h-full .gd-side{align-self:flex-start}
+.gd-thread{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:2px;scrollbar-width:thin}
+.gd-thread>div{max-width:88%;font:400 15px/1.45 var(--body);padding:9px 12px;border-radius:16px}
+.gdock .gm-azu{align-self:flex-start;background:var(--chip);color:var(--ink);border-bottom-left-radius:5px}
+.gdock .gm-me{align-self:flex-end;background:var(--acc);color:var(--onacc);border-bottom-right-radius:5px}
+.gdock .gm-now{font:500 18px/1.45 var(--display)!important;background:transparent;padding:4px 2px;max-width:100%}
+.gdock .gm-now .tw{color:var(--tpun)}.gdock .gm-now .tw.said{color:var(--ink)}
+.gdock .gm-note{align-self:center;max-width:94%!important;background:rgba(242,181,68,.16);color:var(--ink);font-size:13px!important;text-align:center}
+.gm-azu.typing{display:flex;gap:4px;padding:12px 14px}.gm-azu.typing i{width:6px;height:6px;border-radius:50%;background:var(--ink2);animation:tkdot 1s infinite}.gm-azu.typing i:nth-child(2){animation-delay:.15s}.gm-azu.typing i:nth-child(3){animation-delay:.3s}
 @keyframes tkdot{50%{opacity:.25;transform:translateY(-3px)}}
-.gd-form{display:flex;gap:6px}.gd-form .gin{flex:1;min-width:0;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#F4F1EA;border-radius:999px;padding:11px 14px;font:400 15px/1 var(--body)}
-.gd-form button{appearance:none;border:0;width:44px;border-radius:50%;background:#2F5FE0;color:#fff;font-size:16px;cursor:pointer}
-/* the bubble: Azu's own words, above the dock, a tail towards Azu; its words in --ink1 on --paper, the word said in the accent */
+.gd-side{display:flex;flex-direction:column;gap:6px;flex:none}
+.gd-aa{width:44px;height:44px;border-radius:22px;font:700 15px/1 var(--body)!important;color:var(--ink)}
+.gd-aa[aria-pressed=false]{text-decoration:line-through;text-decoration-thickness:2px}
+.gd-all{height:44px;border-radius:22px;padding:0 10px!important;font:700 14px/1 var(--body)!important;color:var(--acctx)}
+.gd-all.ic{width:44px;padding:0!important;color:var(--ink)}
+
+/* ===== A · Paper glass: the card's paper as glass ===== */
+.gdock.lk-paper{--surf:rgba(251,250,247,.90);--surfsolid:#FBFAF7;--edge:rgba(255,255,255,.85);--ink:#1A1814;--ink2:#4F4A42;--faded:#5F5950;--acc:#A63F1C;--onacc:#FFFFFF;--acctx:#9E3B1A;--hl:#F6DCC9;--hltx:#1A1814;--trk:rgba(26,24,20,.14);--chip:#EFEBE3;--line:rgba(26,24,20,.18);--field:rgba(26,24,20,.06);--fieldedge:transparent;--grab:rgba(26,24,20,.2);--tpun:#1A1814;
+  background:var(--surf);border:1px solid var(--edge);box-shadow:0 14px 34px rgba(26,24,20,.22),inset 0 1px 0 rgba(255,255,255,.9)}
+.cv.dark .gdock.lk-paper{--surf:rgba(31,29,26,.90);--surfsolid:#1F1D1A;--edge:rgba(255,255,255,.12);--ink:#F4F1EA;--ink2:#C9C2B6;--faded:#A39C90;--acctx:#F0A27E;--hl:#7A3A1E;--hltx:#FFFFFF;--trk:rgba(255,255,255,.16);--chip:#34302B;--line:rgba(255,255,255,.2);--field:rgba(255,255,255,.08);--grab:rgba(255,255,255,.28);--tpun:#F4F1EA;box-shadow:0 14px 34px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08)}
+.gdock.lk-paper.h-mini{left:12px;right:12px;bottom:16px;height:72px;border-radius:36px;padding:0 10px 0 12px;justify-content:center}
+.lk-paper .gd-line{display:flex;flex-direction:column;gap:2px}
+.lk-paper .gd-line .gd-stop{display:flex;align-items:center;gap:8px;font:600 12px/16px var(--body);color:var(--ink2)}
+.lk-paper .gd-line .gd-bars{height:14px;gap:2px}
+.lk-paper .gd-mt{font:400 15px/20px var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lk-paper .gd-mstop{color:var(--ink)}
+.gdock.lk-paper:not(.h-mini){--surf:rgba(251,250,247,.97);left:12px;right:12px;bottom:16px;border-radius:30px;padding:24px 16px 16px;gap:12px}
+.cv.dark .gdock.lk-paper:not(.h-mini){--surf:rgba(31,29,26,.97)}
+.lk-paper .gd-head{display:flex;align-items:center;gap:10px;height:44px}
+.lk-paper .gd-head .gd-av{width:44px;height:44px}
+.lk-paper .gd-who{display:flex;flex-direction:column;min-width:0;white-space:nowrap}.lk-paper .gd-who b{display:flex;align-items:center;gap:8px;font:700 15px/18px var(--body)}.lk-paper .gd-who small{font:400 13px/16px var(--body);color:var(--ink2);overflow:hidden;text-overflow:ellipsis}
+.lk-paper .gd-head .gd-bars{height:16px;gap:2px}
+.gd-sp{flex:1}
+.lk-paper .gd-head .gd-all,.lk-paper .gd-head .gd-aa{color:var(--ink)}
+.lk-paper .gd-play{box-shadow:0 8px 18px rgba(166,63,28,.35)}
+.lk-paper .gd-askf{flex:1;min-width:0;display:flex;align-items:center;gap:10px;height:48px;border-radius:24px;background:var(--field);padding:0 6px 0 16px;box-sizing:border-box}
+.lk-paper .gd-askf>svg{width:20px;height:20px;flex:none;fill:none;stroke:var(--ink2);stroke-width:2;stroke-linecap:round}
+.lk-paper .gd-askf .gd-form{background:none;border:0;padding:0;height:44px}
+.lk-paper .gd-talk{width:48px;height:48px;background:#1A1814;color:#fff}
+.cv.dark .lk-paper .gd-talk{background:#F4F1EA;color:#1A1814}
+
+/* ===== B · Ink glass: dark ink glass, saffron accents (the Architect's pick) ===== */
+.gdock.lk-ink{--surfsolid:#1C1A21;background-color:rgba(28,26,33,.92);background-image:linear-gradient(180deg,rgba(44,40,52,.92),rgba(22,21,26,.92) 55%);border:1px solid rgba(255,255,255,.14);box-shadow:0 16px 36px rgba(10,9,12,.38)}
+.cv.dark .gdock.lk-ink{border-color:rgba(255,255,255,.22);box-shadow:0 16px 36px rgba(0,0,0,.6)}
+.gdock.lk-ink.h-mini{left:50%;bottom:18px;transform:translateX(-50%);height:64px;border-radius:32px;padding:0 8px;justify-content:center;width:max-content}
+.lk-ink .gd-mrow{gap:6px}
+.gd-ring{position:relative;width:52px;height:52px;flex:none}
+.gd-ring svg{position:absolute;inset:0;width:52px;height:52px;transform:rotate(-90deg)}
+.gd-ring circle{fill:none;stroke-width:3}.gd-ring .tr{stroke:rgba(255,255,255,.16)}.gd-ring .pg{stroke:#F2B544;stroke-linecap:round;stroke-dasharray:0 200;transition:stroke-dasharray .25s linear}
+.gd-ring .gd-av{position:absolute;left:7px;top:7px;width:38px;height:38px}.gd-ring .gd-av svg,.gd-ring .gd-av img{width:34px;height:34px}
+.lk-ink .gd-mrow .gd-line{flex:none;display:flex;align-items:center;min-width:44px;height:44px;justify-content:center;padding:0 4px}
+.lk-ink .gd-mrow .gd-bars{height:20px}
+.lk-ink .gd-mini .gd-mpp{margin-left:4px}
+.gdock.lk-ink:not(.h-mini){left:10px;right:10px;bottom:14px;border-radius:32px;padding:34px 18px 18px;gap:14px}
+.lk-ink .gd-wrow{display:flex;align-items:flex-start;gap:12px;margin-top:4px}
+.lk-ink .gd-wrow .gd-av{width:40px;height:40px}.lk-ink .gd-wrow .gd-av svg,.lk-ink .gd-wrow .gd-av img{width:36px;height:36px}
+.lk-ink .gd-wrow .gd-tp{flex:1}
+.lk-ink .gd-tp .tp-prev{font-size:14px;line-height:20px;-webkit-line-clamp:1}
+.lk-ink .gd-tp .tp-now{font-size:22px;line-height:30px;-webkit-line-clamp:3}
+.lk-ink .gd-side button{border:1px solid rgba(255,255,255,.18)}
+.lk-ink .sk-track{gap:0}.lk-ink .sk-track i{height:2px;overflow:visible;border-radius:0}.lk-ink .sk-track b{height:4px;margin-top:-1px;border-radius:2px}
+.lk-ink .sk-track i::after{content:"";position:absolute;left:0;top:-1px;width:4px;height:4px;border-radius:2px;background:rgba(255,255,255,.55)}
+.lk-ink .sk-track i.done::after,.lk-ink .sk-track i.now::after{background:#F2B544}
+.lk-ink .sk-knob{background:#F4F1EA;box-shadow:0 0 0 5px rgba(242,181,68,.35)}
+.lk-ink .gd-lab{color:var(--ink2)}
+.lk-ink .gd-pn{background:rgba(255,255,255,.08)}
+.lk-ink .gd-play{box-shadow:0 0 0 8px rgba(242,181,68,.16)}
+.lk-ink .gd-talk{width:60px;height:60px;background:#16151A;color:#F2B544;border:2px solid #F2B544!important;box-shadow:0 0 0 6px #16151A,0 0 0 8px rgba(242,181,68,.22)}
+.lk-ink .gd-hide{--tab:#1C1A21;color:#F4F1EA}
+
+/* ===== C · Player sheet: a music player's mini bar and its sheet ===== */
+.gdock.lk-player{--surfsolid:#FFFFFF;--ink:#1A1814;--ink2:#4F4A42;--faded:#6B655C;--acc:#1A1814;--onacc:#FFFFFF;--acctx:#9E3B1A;--hl:#F6DCC9;--hltx:#1A1814;--trk:rgba(26,24,20,.12);--chip:#FFFFFF;--line:rgba(26,24,20,.14);--field:transparent;--fieldedge:transparent;--grab:rgba(26,24,20,.2);--tpun:#1A1814;--card:#F6F2EA;--sq:#F2EEE6;--bar:#1A1814;
+  background:#FFFFFF;box-shadow:0 -10px 30px rgba(26,24,20,.10)}
+.cv.dark .gdock.lk-player{--surfsolid:#1C1B19;--ink:#F4F1EA;--ink2:#C9C2B6;--faded:#A39C90;--acc:#F4F1EA;--onacc:#1A1814;--acctx:#F0A27E;--hl:#7A3A1E;--hltx:#FFFFFF;--trk:rgba(255,255,255,.16);--chip:#1C1B19;--line:rgba(255,255,255,.18);--grab:rgba(255,255,255,.28);--tpun:#F4F1EA;--card:#2A2724;--sq:#2A2724;--bar:#2A2724;background:#1C1B19;box-shadow:0 -10px 30px rgba(0,0,0,.5)}
+.gdock.lk-player.h-mini{left:0;right:0;bottom:0;height:96px;padding:14px 14px 22px;border-top:1px solid var(--line);justify-content:center}
+.gd-mprog.top{left:0;right:0;top:0;bottom:auto;border-radius:0}
+.lk-player .gd-avb{width:52px;height:52px;border-radius:14px;overflow:hidden}
+.lk-player .gd-avb .gd-av{width:52px;height:52px;border-radius:14px}
+.lk-player .gd-line{display:flex;flex-direction:column;gap:2px}
+.lk-player .gd-mt{font:700 15px/20px var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lk-player .gd-line .gd-stop{font:400 13px/17px var(--body);color:var(--ink2)}
+.lk-player .gd-mnext{width:44px;height:44px;border-radius:50%;color:var(--ink)}
+.lk-player .gd-mstop{color:var(--ink)}
+.gdock.lk-player:not(.h-mini){left:0;right:0;bottom:0;border-radius:28px 28px 0 0;padding:34px 18px 24px;gap:14px;box-shadow:0 -12px 36px rgba(26,24,20,.16)}
+.lk-player .gd-card{background:var(--card);border-radius:18px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start}
+.lk-player .gd-cardw{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.gd-eye{font:700 12px/16px var(--body);letter-spacing:.1em;color:var(--acctx)}
+.lk-player .gd-tp .tp-now{font-size:19px;line-height:27px}
+.lk-player .gd-tp .tp-now::before{content:"“"}.lk-player .gd-tp .tp-now::after{content:"”"}
+.lk-player .gd-side{gap:2px}
+.lk-player .sk-track{gap:0}.lk-player .sk-track i{border-radius:0}.lk-player .sk-track i+i{box-shadow:inset 2px 0 0 var(--surfsolid)}
+.lk-player .sk-track i:first-child{border-radius:2px 0 0 2px}.lk-player .sk-track i:last-child{border-radius:0 2px 2px 0}
+.lk-player .sk-knob{width:20px;height:20px;margin:-10px 0 0 -10px;background:var(--acc);box-shadow:0 2px 6px rgba(26,24,20,.3)}
+.lk-player .gd-lab3{display:flex;justify-content:space-between;gap:10px;font:400 13px/18px var(--body);color:var(--ink2)}
+.lk-player .gd-lab3 .gd-stop{text-align:center;flex:1}
+.lk-player .gd-speed,.lk-player .gd-stopb{border-radius:14px!important;border:0!important;background:var(--sq)}
+.lk-player .gd-stopb{width:60px;height:44px}.lk-player .gd-stopb .fi{width:18px;height:18px}
+.lk-player .gd-play{width:72px;height:72px}.lk-player .gd-play .fi{width:28px;height:28px}
+.lk-player .gd-chips [data-chip]{border:1px solid var(--line)}
+.lk-player .gd-askbar{display:flex;align-items:center;gap:8px;height:60px;border-radius:30px;background:var(--bar);padding:0 8px 0 20px;box-sizing:border-box}
+.lk-player .gd-askbar .gd-form{display:contents}
+.lk-player .gd-askbar .gin{color:#FFFFFF;order:1}.lk-player .gd-askbar .gin::placeholder{color:#C9C2B6}
+.lk-player .gd-askbar .gd-talk{order:2;width:auto;height:44px;border-radius:22px;background:#34302A;color:#fff;padding:0 14px!important;display:flex;gap:6px;font:700 14px/1 var(--body)}
+.lk-player .gd-askbar .gd-talk svg{width:18px;height:18px}
+.lk-player .gd-askbar .gd-send{order:3;width:44px;height:44px;background:#FFFFFF!important;color:#1A1814}
+.lk-player .gd-hide{--tab:var(--surfsolid)}
+
+/* ===== D · Teleprompter: no box, the words over the paper's fade ===== */
+.gdock.lk-prompter{--fade:rgba(251,250,247,.97);--fade0:rgba(251,250,247,0);--surfsolid:#FBFAF7;--ink:#1A1814;--ink2:#4F4A42;--faded:#6B655C;--acc:#A63F1C;--onacc:#FFFFFF;--acctx:#9E3B1A;--hl:#F6DCC9;--hltx:#1A1814;--trk:rgba(26,24,20,.16);--chip:#FBFAF7;--line:rgba(26,24,20,.16);--field:rgba(26,24,20,.06);--fieldedge:transparent;--grab:rgba(26,24,20,.2);--tpun:#1A1814;--cap:#1A1814;--capink:#FFFFFF;
+  left:0;right:0;bottom:0;background:linear-gradient(180deg,var(--fade0) 0px,var(--fade) 56px,var(--fade) 100%)}
+.cv.dark .gdock.lk-prompter{--fade:rgba(20,19,18,.97);--fade0:rgba(20,19,18,0);--surfsolid:#141312;--ink:#F1EEE8;--ink2:#C9C3B8;--faded:#A39C90;--acctx:#F0A27E;--hl:#7A3A1E;--hltx:#FFFFFF;--trk:rgba(255,255,255,.18);--chip:#1F1D1A;--line:rgba(255,255,255,.18);--field:rgba(255,255,255,.08);--grab:rgba(255,255,255,.28);--tpun:#F1EEE8;--cap:#2E2B27}
+.gdock.lk-prompter.h-mini{padding:56px 24px 22px;align-items:center;gap:12px}
+.lk-prompter .gd-pline{align-self:stretch}
+.lk-prompter .gd-tp.tp-mini .tp-now{font:500 18px/26px var(--display);white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.gd-capsule{background:var(--cap);color:var(--capink);border-radius:32px}
+.lk-prompter .gd-mrow.gd-capsule{height:60px;border-radius:30px;padding:0 8px 0 14px;gap:4px;width:max-content;align-self:center}
+.lk-prompter .gd-mrow .gd-line{flex:none;display:flex;align-items:center;height:44px;padding:0 4px}
+.lk-prompter .gd-mrow .gd-bars{color:#F6DCC9}
+.lk-prompter .gd-mpp{width:44px;height:44px;background:#FFFFFF;color:#1A1814;margin-left:8px}
+.lk-prompter .gd-mstop,.lk-prompter .gd-openb{color:#FFFFFF}
+.lk-prompter .gd-hide{top:auto;bottom:30px;right:12px;right:16px;--tab:transparent;color:var(--ink2)}.lk-prompter .gd-hide::before{box-shadow:none;border:1px solid var(--line);border-radius:14px}
+.gdock.lk-prompter:not(.h-mini){padding:64px 20px 22px;gap:14px}
+.gdock.lk-prompter.h-full{top:60px}
+.lk-prompter .gd-handle{top:20px}
+.lk-prompter .gd-head{display:flex;align-items:center;gap:10px}
+.lk-prompter .gd-head .gd-av{width:36px;height:36px}.lk-prompter .gd-head .gd-av svg,.lk-prompter .gd-head .gd-av img{width:32px;height:32px}
+.lk-prompter .gd-head .gd-eye{font-size:13px;letter-spacing:.06em;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.lk-prompter .gd-head .gd-aa{border:1px solid var(--line)!important}
+.lk-prompter .gd-tp{gap:4px}
+.lk-prompter .gd-tp .tp-prev,.lk-prompter .gd-tp .tp-next{font:400 18px/26px var(--display)}
+.lk-prompter .gd-tp .tp-now{font:600 24px/32px var(--display)}
+.lk-prompter .gd-hrow{flex-direction:row;align-items:center;gap:10px;font:400 13px/18px var(--body);color:var(--ink2)}
+.lk-prompter .gd-hrow .gd-seek{flex:1;margin:-11px 0}
+.lk-prompter .sk-track{gap:0}.lk-prompter .sk-track i{height:2px;border-radius:0}.lk-prompter .sk-track i+i{box-shadow:inset 2px 0 0 var(--surfsolid)}
+.lk-prompter .sk-knob{width:16px;height:16px;margin:-8px 0 0 -8px;background:var(--acc);box-shadow:0 0 0 4px var(--surfsolid)}
+.lk-prompter .gd-lab1{margin-top:-10px;font-size:12px}
+.lk-prompter .gd-chips [data-chip]{border:1px solid var(--line)}
+.lk-prompter .gd-botrow{display:flex;align-items:center;gap:10px}
+.lk-prompter .gd-ctl.gd-capsule{flex:1;height:64px;padding:0 8px}
+.lk-prompter .gd-capsule .gd-pn,.lk-prompter .gd-capsule .gd-stopb{width:44px;height:44px;color:#FFFFFF}
+.lk-prompter .gd-capsule .gd-pn .fi{width:22px;height:22px}
+.lk-prompter .gd-capsule .gd-play{width:50px;height:50px;background:#FFFFFF;color:#1A1814}.lk-prompter .gd-capsule .gd-play .fi{width:20px;height:20px}
+.lk-prompter .gd-capsule .gd-speed{border:0!important;color:#FFFFFF;min-width:48px;padding:0 8px!important}
+.lk-prompter .gd-talk{width:64px;height:64px;background:#A63F1C;color:#FFFFFF;box-shadow:0 8px 18px rgba(166,63,28,.35)}
+.lk-prompter .gd-talk svg{width:26px;height:26px}
+
+/* the ✦ grows into the panel and back (guide/dock.js's dkMorph): one surface whose box glides from the ✦'s circle to the panel's in
+   320 ms; the ✦ fades out in its first 120 ms; the panel's parts fade in from Azu down. Unity: USS transitions on the panel's width,
+   height, left, top and border-radius (the named ease-out: no cubic-bezier in 6.3), its children's opacity with a delay */
+.gd-morph{position:absolute;z-index:16;pointer-events:none;box-sizing:border-box;display:grid;place-items:center;overflow:hidden;box-shadow:0 14px 34px rgba(0,0,0,.28)}
+.gd-morph.go{transition:left .32s cubic-bezier(.2,.8,.2,1),top .32s cubic-bezier(.2,.8,.2,1),width .32s cubic-bezier(.2,.8,.2,1),height .32s cubic-bezier(.2,.8,.2,1),border-radius .32s cubic-bezier(.2,.8,.2,1),background-color .32s ease}
+.gd-mstar{display:grid;place-items:center}.gd-mstar svg{width:24px;height:24px;fill:#FFD98A}
+.gd-morph.grow .gd-mstar{animation:mstarout .12s ease-out forwards}
+.gd-morph.shrink .gd-mstar{opacity:0}.gd-morph.shrink.into .gd-mstar{animation:mstarin .18s ease-out .14s forwards}
+@keyframes mstarout{to{opacity:0;transform:scale(.7)}}@keyframes mstarin{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:none}}
+.gdock.gd-in{background:transparent!important;border-color:transparent!important;box-shadow:none!important}
+.gdock>*{transition:opacity .2s ease-out}
+.gdock.gd-in0>*{opacity:0;transition:none}
+.gdock>:nth-child(2){transition-delay:.03s}.gdock>:nth-child(3){transition-delay:.06s}.gdock>:nth-child(4){transition-delay:.09s}.gdock>:nth-child(5){transition-delay:.12s}.gdock>:nth-child(n+6){transition-delay:.15s}
+.gbtn-wrap.gd-arriving{opacity:0}
+/* the bubble: Azu's own words, above the Mini, a tail towards Azu; its words in --ink1 on --paper, the word said in the accent */
 .gbubble{position:absolute;left:14px;right:78px;z-index:15;background:var(--paper);color:var(--ink1);border-radius:18px;padding:11px 14px;box-shadow:0 8px 24px rgba(0,0,0,.28),0 0 0 1px var(--hair);animation:gbin .22s ease}
 .gbubble::after{content:"";position:absolute;right:-7px;bottom:14px;width:16px;height:16px;background:var(--paper);transform:rotate(45deg);border-radius:3px;box-shadow:3px -3px 0 0 transparent}
 .gbubble.tail-up::after{bottom:auto;top:12px}
@@ -934,9 +1142,21 @@ body{padding-block:8px}
 .gbubble .gcap.gread .gw{-webkit-text-fill-color:transparent;background-image:linear-gradient(90deg,color-mix(in srgb,var(--accent2) calc(var(--a,0)*100%),var(--ink1)) calc(var(--f,0)*112% - 12%),var(--ink2) calc(var(--f,0)*112%))}
 .gbubble .gw.gb-off{display:none}
 .gbubble .gnovoice{color:var(--ink2)}.gbubble .gcap em{color:var(--accent2)}
-.reduce .gbubble,.reduce .gd-talk,.reduce .gd-talk .ring{animation:none!important}
+.reduce .gbubble,.reduce .gd-talk,.reduce .gd-talk .ring,.reduce .gd-tp.tp-up{animation:none!important}.reduce .sk-knob,.reduce .gd-mprog b,.reduce .gd-ring .pg{transition:none}
+.reduce .gdock>*{transition:none}
 /* Azu's state follows the talk: it leans in to listen, looks up to think */
 .mascot[data-state=listening] svg{transform:rotate(8deg) translateX(-3px)}.mascot[data-state=thinking] .az-eye{transform:translate(1px,-2px)}
+/* the words' area keeps one height in Open (Peek), whatever the line said now: the controls under it never move under a finger
+   (Paper: a line, three, a line; Ink: a line and three; Player: three; Teleprompter: two, two, one) */
+.gdock.h-peek .gd-tp{overflow:hidden;flex:none}
+.lk-paper.h-peek .gd-tp{height:141px}.lk-paper .gd-tp .tp-prev,.lk-paper .gd-tp .tp-next{-webkit-line-clamp:1}.lk-paper .gd-tp .tp-now{-webkit-line-clamp:3}
+.lk-ink.h-peek .gd-tp{height:116px;flex:1 1 0;min-width:0}
+.lk-player.h-peek .gd-tp{height:81px}.lk-player .gd-tp .tp-now{-webkit-line-clamp:3}
+.lk-prompter.h-peek .gd-tp{height:154px}.lk-prompter .gd-tp .tp-prev,.lk-prompter .gd-tp .tp-next{-webkit-line-clamp:1}.lk-prompter .gd-tp .tp-now{-webkit-line-clamp:2}
+/* Open sits over the card's words, so its fill is solid (a .97 fill let the card's lines read through it); the glass stays on
+   the Mini. The Teleprompter's fade ends at 24 px, before its header. Unity: the Open state's background-color without alpha */
+.cv .gdock.lk-paper.h-peek,.cv .gdock.lk-paper.h-full{background-color:var(--surfsolid)}
+.cv .gdock.lk-prompter.h-peek,.cv .gdock.lk-prompter.h-full{--fade:var(--surfsolid);background:linear-gradient(180deg,var(--fade0) 0px,var(--fade) 24px,var(--fade) 100%)}
 /* The Stop's toast and its question: the dock's dark, the action in the dock's gold, 44 px targets. Unity: a VisualElement above the
    dock (or the Navigation Bar), shown for 5 s by schedule.Execute; no blur. */
 .gtoast,.gstopask{position:absolute;left:12px;right:12px;z-index:17;display:flex;align-items:center;gap:10px;justify-content:space-between;background:#16181C;color:#F4F1EA;border:1px solid rgba(244,241,234,.16);border-radius:16px;padding:6px 6px 6px 16px;font:600 15px/1.3 var(--body);box-shadow:0 10px 28px rgba(0,0,0,.4);animation:gbin .22s ease}
@@ -1029,6 +1249,12 @@ body{padding-block:8px}
    VisualElement with the card's colour and a ramp texture on its top edge; the Lab's gradient stands in for that texture) */
 .gbband{position:absolute;left:0;right:0;bottom:0;z-index:5;pointer-events:none;background:linear-gradient(to bottom,rgba(0,0,0,0),var(--paper) 20px)}
 .gbband.tour{background:linear-gradient(to bottom,rgba(0,0,0,0),var(--gbband,var(--paper)) 20px)}
+/* round 11: the visitor's music in Settings › The guide: its feelings, its volume, a credit line where a licence asks for one */
+.vmusic{margin-top:10px}.vmusic>small,.vcredits>small{display:block;font:700 12px/1.3 var(--body);color:var(--ink2);margin:0 0 6px}
+.vmusic .vcredit{display:block;text-transform:none;letter-spacing:0;font:400 12px/1.4 var(--body);color:var(--ink2);margin-top:6px}
+.vmusic .vvol{display:flex;align-items:center;gap:10px;margin-top:8px;font:600 13px/1.2 var(--body);color:var(--ink1);min-height:44px}
+.vmusic .vvol input{flex:1;accent-color:#A63F1C;height:44px}
+.vcredits{margin-top:10px}.vcredits p{margin:0 0 4px;font:400 12px/1.4 var(--body);color:var(--ink2)}
 /* v8t: Ask Azu, the live agent: link cards, offered actions, the source line; the Editor's panel and console */
 .agsrc{font:600 11.5px/1.3 var(--body);opacity:.72;margin:6px 0 2px;letter-spacing:.01em}
 .agsrc.gen{display:table;opacity:1;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:3px 9px}
@@ -1087,11 +1313,16 @@ body{padding-block:8px}
 .azbub{right:calc(16px + 56px*var(--azs,1))}
 .azfab{width:calc(50px*var(--azs,1));height:calc(56px*var(--azs,1))}
 .azfab svg,.azfab canvas{width:calc(50px*var(--azs,1));height:calc(56px*var(--azs,1))}
-/* A row with a demo: its label is pressable (it shows the row's demo on the phone). Unity: the POI Editor's row gets a small preview
-   icon button (DrawIconButton) beside its label. */
-.row > label.rd{cursor:pointer}
-.row > label.rd::after{content:" \25B8";color:#E07A1F}
+/* A row with a demo: its label is pressable (it shows the row's demo on the phone), with a green round play button after it (round 11:
+   22 px, the disc #2FB36B at 4.3:1 on the Editor's #383838 and 5.5:1 on #282828, its dark triangle 5.7:1 on the disc). Unity: the POI
+   Editor's row gets a small preview icon button (DrawIconButton) with a green play icon beside its label. */
+.row > label.rd{cursor:pointer;position:relative;justify-self:start;max-width:100%;box-sizing:border-box;padding-right:30px;min-height:22px;line-height:22px}
+.row > label.rd::after{content:"";position:absolute;right:2px;top:50%;width:22px;height:22px;margin-top:-11px;border-radius:50%;
+  background:#2FB36B url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Cpath d='M8.5 6.2v9.6a.8.8 0 0 0 1.2.7l7.4-4.8a.8.8 0 0 0 0-1.4L9.7 5.5a.8.8 0 0 0-1.2.7z' fill='%230F2A1A'/%3E%3C/svg%3E") center/22px 22px no-repeat;
+  box-shadow:0 1px 2px rgba(0,0,0,.35)}
 .row > label.rd:hover{color:#fff}
+.row > label.rd:hover::after{background-color:#3CC97C}
+.row > label.rd:active::after{transform:scale(.92)}
 /* Guidance, the look: the tip's bubble (the dock's paper, --ink1 on --paper: 7:1 and more, light and dark), its tail, the ring on the
    marker, Azu's pointer, the Editor's ×10 chip. Unity: the bubble a 9-slice VisualElement (USS transitions on scale and opacity), the
    tail a child rotated 45° (USS rotate), the ring a VisualElement with border-radius and two borders, the pulse a USS transition on
@@ -1739,6 +1970,21 @@ var LABSTR=[["gd_how","gd:g:howto","The ✦ menu's item that starts How to use t
  ["carousel_next","el:carousel","The carousel's next-picture button (screen readers).","Next picture","Imagem seguinte","","Next button name"],
  ["guide_listening","s7ask","While the microphone listens.","Listening…","A ouvir…","","Microphone: listening"],
  ["dock_hide", "s7dock", "The chevron at the dock's top right: it hides the dock (Compact); the voice goes on.", "Hide the guide (it keeps talking)", "Esconder o guia (continua a falar)", "", "Hide button"],
+ ["dock_speed", "s7dock", "The speed chip, for a screen reader: {0} is the speed.", "Speed, {0} times", "Velocidade, {0} vezes", "", "Speed chip"],
+ ["dock_readall", "s7dock", "The button that shows the whole text (Full).", "Read all", "Ler tudo", "", "Read all"],
+ ["dock_readless", "s7dock", "The same button at Full: back to the line said now.", "Fewer words", "Menos texto", "", "Read less"],
+ ["dock_words", "s7dock", "Aa: shows or hides the words in the panel.", "Show or hide the words", "Mostrar ou esconder o texto", "", "Aa button"],
+ ["dock_open", "s7dock", "The Mini's chevron (or Azu): opens the panel.", "Open the guide panel", "Abrir o painel do guia", "", "Open button"],
+ ["dock_small", "s7dock", "The panel's chevron: back to Mini.", "Make the panel small", "Encolher o painel", "", "Small button"],
+ ["dock_telling", "s7dock", "Under Azu's name while it speaks (Paper glass).", "Telling the story", "A contar a história", "", "Status: telling"],
+ ["dock_paused", "s7dock", "Under Azu's name while the tour is paused.", "Paused", "Em pausa", "", "Status: paused"],
+ ["dock_seek", "s7dock", "The progress bar, for a screen reader (a drag seeks).", "Where the tour is", "Onde vai a visita", "", "Progress bar"],
+ ["dock_ask_ph", "s7dock", "The ask field's placeholder.", "Ask Azu anything", "Pergunte ao Azu", "", "Ask field"],
+ ["dock_voice", "s7dock", "The talk button's word (Player sheet).", "Voice", "Voz", "", "Voice button"],
+ ["settings_music", "s5settings", "The guide's music: the title of its choices (Settings › The guide).", "Music", "Música", "", "Music title"],
+ ["settings_music_off", "s5settings", "The guide's music: none.", "Off", "Desligada", "", "Music: off"],
+ ["settings_music_credits", "s5settings", "The guide's music: the credits the tracks' licences ask for.", "Music credits", "Créditos da música", "", "Music credits"],
+ ["settings_music_vol", "s5settings", "The guide's music: its volume.", "Music volume", "Volume da música", "", "Music volume"],
  ["guide_stopped", "s7tour", "The toast after Stop, for 5 s.", "Tour stopped", "Visita interrompida", "", "Stop toast"],
  ["guide_stop_resume", "s7tour", "The toast's button: back to the step and the sentence it stopped at.", "Resume", "Retomar", "", "Stop toast button"],
  ["guide_stop_ask", "s7tour", "With Stop = Ask first: the question before stopping.", "Stop the tour?", "Parar a visita?", "", "Stop question"],
@@ -2993,15 +3239,58 @@ var G={on:false,i:0,paused:false,waiting:false,timer:null,utter:null,words:[],mu
 /* the tour's length in minutes, as the hero's button and the guidance's invitation (A tour of {point}) say it */
 function tourMinutes(){return 3}
 function stepText(st){if(st.text)return L(st.text);var r=byId(S.story,st.ref.slice(2));return r&&r.c?L(r.c.text):""}
-/* a soft music bed that ducks under the voice */
-function musicOn(on){try{if(on&&!G.music){actx=actx||new (window.AudioContext||window.webkitAudioContext)();var g=actx.createGain();g.gain.value=0.05;g.connect(actx.destination);
-    [196,246.9,293.7].forEach(function(f,i){var o=actx.createOscillator();o.type="sine";o.frequency.value=f;var l=actx.createOscillator(),lg=actx.createGain();l.frequency.value=.07+i*.03;lg.gain.value=1.2;l.connect(lg);lg.connect(o.frequency);o.connect(g);o.start();l.start()});G.music=g}
-  if(!on&&G.music){G.music.disconnect();G.music=null}}catch(e){}}
-function musicDuck(d){if(G.music)G.music.gain.setTargetAtTime(d?0.015:0.05,actx.currentTime,0.3)}
+/* ----- the music bed (round 11): a track that loops under the voice and ducks while Azu speaks. Music volume 0-100 % (15), Under the
+   voice: how low it ducks, a share of its volume (30 %); Track: the manifest's approved tracks (../music/tracks.js: id, name, file,
+   licence, author, source; the first the default), the Soft drone (built in: three sine tones), or Add your own… (a file, this session).
+   The visitor's Settings › The guide › Music picks a feeling and a volume of their own (Visitor can choose the music). The Lab: a
+   looping <audio> (a file from this computer: its volume is the gain, the page may not route it through Web Audio) or the drone's
+   GainNode. Unity: an AudioSource with loop, an AudioMixer group and two snapshots (normal / ducked) blended while the voice speaks;
+   Add your own is an AudioClip field in the POI Editor ----- */
+S.guideCfg.musicVol=15;S.guideCfg.musicDuck=30;S.guideCfg.musicTrack="exploration";S.guideCfg.musicVis=true;
+var MUSIC_FULL=1/3;
+window.MUSICTRACKS=window.MUSICTRACKS||[];
+(function(){["music/tracks.js","../music/tracks.js"].forEach(function(s){var e=document.createElement("script");e.src=s;e.onload=function(){try{renderEditor()}catch(x){}};e.onerror=function(){};document.head.appendChild(e)})})();
+function musicTracks(){var seen={};return(window.MUSICTRACKS||[]).filter(function(t){if(!t||!t.id||seen[t.id])return false;seen[t.id]=1;return true})}
+/* a track whose licence asks for it (CC BY-SA) carries its credit line {en, pt}: shown under its choice and in Settings' Music credits */
+function musicCredit(id){var t=musicTrackById(id);return t&&t.credit?L(t.credit):""}
+function musicCredits(){return musicTracks().filter(function(t){return t.credit}).map(function(t){return L(t.credit)})}
+function musicTrackById(id){return musicTracks().filter(function(t){return t.id===id})[0]||null}
+/* the track that plays now: the visitor's choice, else the Editor's (Music bed On: its Track; Off: none) */
+function musicPick(){var v=S.vis&&S.vis.music;if(v!=null&&(S.guideCfg.musicVis!==false))return v;return S.guideCfg.music?S.guideCfg.musicTrack:"off"}
+function musicVol(){var v=S.vis&&S.vis.musicVol!=null&&S.guideCfg.musicVis!==false?S.vis.musicVol:S.guideCfg.musicVol;return Math.max(0,Math.min(100,+v||0))/100}
+/* what a pick plays, and why when it stands in for another (no silent fallback) */
+function musicSource(id){if(id==="drone")return{kind:"drone",name:"Soft drone (built in)"};
+  if(id==="own")return G.musicOwn?{kind:"file",url:G.musicOwn.url,name:G.musicOwn.name}:{kind:"drone",name:"Soft drone (built in)",why:"no file chosen yet for Add your own…"};
+  var t=musicTrackById(id);return t?{kind:"file",url:t.url||t.file,name:L(t.name),t:t}:{kind:"drone",name:"Soft drone (built in)",why:"“"+id+"” is not in music/tracks.js on this page"}}
+/* the level: the volume, ducked under the voice */
+function musicTarget(){var g=G.music;if(!g)return 0;var v=musicVol()*(g.kind==="drone"?MUSIC_FULL:1);return g.ducked?v*(Math.max(0,Math.min(100,+S.guideCfg.musicDuck))/100):v}
+function musicLevel(){var g=G.music;if(!g)return 0;return g.kind==="drone"?g.gain.gain.value:g.audio.volume}
+function musicSet(fast){var g=G.music;if(!g)return;var v=musicTarget();if(g.kind==="drone"){g.gain.gain.setTargetAtTime(v,actx.currentTime,fast?0.02:0.3);return}
+  clearInterval(g.tw);if(fast){g.audio.volume=Math.min(1,v);return}var a=g.audio;g.tw=setInterval(function(){var d=v-a.volume;if(Math.abs(d)<.004){a.volume=Math.min(1,v);clearInterval(g.tw);return}a.volume=Math.max(0,Math.min(1,a.volume+d*.25))},40)}
+function musicOn(on,id){try{var want=on?(id||musicPick()):"off";if(G.music&&(!on||G.music.id!==want)){var g=G.music;G.music=null;clearInterval(g.tw);if(g.kind==="drone"){g.oscs.forEach(function(o){try{o.stop()}catch(e){}});g.gain.disconnect()}else{g.audio.pause();g.audio.src=""}}
+  if(!on||want==="off"){G.musicNow=null;musicNowShow();return}if(G.music)return;var src=musicSource(want);
+  if(src.kind==="drone"){actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();var gn=actx.createGain();gn.gain.value=0.0001;gn.connect(actx.destination);var oscs=[];
+    [196,246.9,293.7].forEach(function(f,i){var o=actx.createOscillator();o.type="sine";o.frequency.value=f;var l=actx.createOscillator(),lg=actx.createGain();l.frequency.value=.07+i*.03;lg.gain.value=1.2;l.connect(lg);lg.connect(o.frequency);o.connect(gn);o.start();l.start();oscs.push(o,l)});
+    G.music={id:want,kind:"drone",gain:gn,oscs:oscs,ducked:false}}
+  else{var a=new Audio(src.url);a.loop=true;a.preload="auto";a.volume=0;G.music={id:want,kind:"file",audio:a,ducked:false};var p=a.play();if(p&&p.catch)p.catch(function(){})}
+  G.musicNow=src;musicNowShow();musicSet(false)}catch(e){}}
+function musicDuck(d){if(!G.music||G.music.ducked===!!d)return;G.music.ducked=!!d;musicSet(false)}
+/* a change in the Editor or Settings: the track swapped, the level set */
+function musicApply(){var want=musicPick();if(G.musicDemo&&want==="off")want=S.guideCfg.musicTrack;if((!G.on&&!G.musicDemo)||want==="off"){musicOn(false);return}
+  if(G.music&&G.music.id!==want){var d=G.music.ducked;musicOn(false);musicOn(true,want);if(G.music){G.music.ducked=d;musicSet(true)}}else if(!G.music)musicOn(true,want);else musicSet(false)}
+/* a music row's demo: the music plays a few seconds at that setting, ducking under a line of Azu's (the tour's), then stops */
+function musicDemo(){clearTimeout(G.musicDemoT);G.musicDemo=true;musicApply();G.musicDemoT=setTimeout(function(){G.musicDemo=false;if(!(G.on&&musicPick()!=="off"))musicOn(false)},7000)}
+/* Playing now: the Editor says what plays, and why when it stands in */
+function musicNowText(){var n=G.musicNow;if(!n)return"Nothing at the moment.";return n.name+(n.t?" · "+n.t.licence+", "+n.t.author:"")+(n.why?" (the Soft drone plays: "+n.why+")":"")}
+function musicNowShow(){var e=ed.querySelector(".musicnow");if(e)e.textContent=musicNowText()}
+/* Add your own…: a file from this computer, for this session */
+function musicPickFile(){var i=document.createElement("input");i.type="file";i.accept="audio/*";i.onchange=function(){var f=i.files&&i.files[0];if(!f)return;if(G.musicOwn)URL.revokeObjectURL(G.musicOwn.url);G.musicOwn={name:f.name,url:URL.createObjectURL(f)};S.guideCfg.musicTrack="own";
+    if(G.music&&G.music.id==="own")musicOn(false);musicApply();renderEditor()};i.click()}
+ed.addEventListener("change",function(e){var t=e.target;if(t.dataset&&t.dataset.sel==="@guideCfg.musicTrack"&&t.value==="own"&&!noDraw&&!S._stKey)setTimeout(musicPickFile,0)},false);
 
 /* ----- the tour ----- */
 /* startTour(from): from the start, or from a step kept by a stop (from = {id: the step}; the features before it know which) */
-function startTour(from){emitLatestFirst("startTour.before",from);G.on=true;G.i=0;G.paused=false;S.stop="full";if(from){var j=S.guideSteps.findIndex(function(s){return s.id===from.id});G.i=Math.max(0,j)}if(S.guideCfg.music)musicOn(true);feedback("open");runStep();emit("startTour.after",from)}
+function startTour(from){emitLatestFirst("startTour.before",from);G.on=true;G.i=0;G.paused=false;S.stop="full";if(from){var j=S.guideSteps.findIndex(function(s){return s.id===from.id});G.i=Math.max(0,j)}if(musicPick()!=="off")musicOn(true);feedback("open");runStep();emit("startTour.after",from)}
 function stopTour(){emitLatestFirst("stopTour.before");G.on=false;G.waiting=false;stopSpeech();musicOn(false);clearGuideMarks();renderGuide();emit("stopTour.after")}
 function runStep(){emitLatestFirst("runStep.before");var st=G.on&&S.guideSteps[G.i];if(G.on&&!st)stopTour();else if(st){G.waiting=false;
   if(S.view!==st.view){S.view=st.view;renderPhone(false)}
@@ -3065,7 +3354,14 @@ on("edCard.html",function(h){var c=S.guideCfg;
   var gb=row("Start from the hero",pseg("guideCfg.heroButton",["true","false"],["Shown","Hidden"]),"A Start the guide button on the hero (replaces the Listen pill).")+
    row("Guide block",pseg("guideCfg.block",["true","false"],["Shown","Hidden"]),"A Guide block first in the first section.")+
    row("Voice",pseg("guideCfg.voice",["recorded","device"],["Recorded, then live, then this device","Device voice"]),"Recorded, then live, then this device: each line plays its audio rendered when authoring (or a human voice), with word timings; a line the recorded set lacks is spoken by the live voice (Ask Azu > Voice of the answers, when its key is on this computer), else by this device's voice. Speaking now says which, and why. Device voice: the phone reads the script (free, offline, plainer).")+
-   row("Speed",pslider("guideCfg.speed",0.7,1.4,0.05),"")+row("Music bed",pseg("guideCfg.music",["true","false"],["On","Off"]),"Soft music that ducks under the voice.")+
+   row("Speed",pslider("guideCfg.speed",0.5,2,0.05),"The voice's speed, 0.5-2: the first value of the visitor's speed chip (the guide panel) and of Settings › The guide.")+row("Music bed",pseg("guideCfg.music",["true","false"],["On","Off"]),"Soft music that loops under the voice and ducks while Azu speaks. Off: none, unless the visitor picks one in Settings › The guide › Music.")+
+   row("Music volume",pslider("guideCfg.musicVol",0,100,5),"0-100 % (15): the music's level against the voice (the visitor's own in Settings when they set it).",true)+
+   row("Under the voice",pslider("guideCfg.musicDuck",0,100,5),"How low the music goes while Azu speaks, as a share of its volume (30 %); it comes back up between the lines. Unity: an AudioMixer snapshot.",true)+
+   row("Track",psel("guideCfg.musicTrack",musicTracks().map(function(t){return[t.id,L(t.name)+" · "+t.licence+", "+t.author]}).concat([["drone","Soft drone (built in)"],["own",G.musicOwn?"Your file · "+G.musicOwn.name:"Add your own…"]])),
+     (musicTracks().length?musicTracks().length+" approved tracks from music/tracks.js (each with its licence and source; the Architect adds them), then the Soft drone, then Add your own… (a file from this computer, for this session; Unity: an AudioClip in the POI Editor). The first track is the default.":"music/tracks.js is not on this page: only the Soft drone and Add your own… (the Exploration default plays the Soft drone, and Playing now says so)."),true)+
+   (musicCredit(S.guideCfg.musicTrack)?row("Credit",'<span class="uses mcredit">'+esc(musicCredit(S.guideCfg.musicTrack))+'</span>',"This track's licence asks for this credit: the visitor sees it under the choice and in Settings › The guide › Music credits.",true):"")+
+   row("Playing now",'<span class="uses musicnow">'+esc(musicNowText())+'</span>',"The music playing now and its licence, and why when the Soft drone stands in for a track this page does not have (no silent fallback).",true)+
+   row("Visitor can choose the music",pseg("guideCfg.musicVis",["true","false"],["Shown","Hidden"]),"Shown: Settings › The guide › Music offers Off and each track's feeling (Exploration, Storyteller, Calm, Cinematic) and a volume; the Track above is the default. Hidden: the Editor's choice only.",true)+
    row("Captions",pseg("guideCfg.captions",["true","false"],["On","Off"]),"On by default (accessibility, noisy places).")+row("Highlight what is read",pseg("guideCfg.highlight",["true","false"],["On","Off"]),"The words light up in the text as they are spoken.")+
    row("Invite to try",pseg("guideCfg.coach",["true","false"],["On","Off"]),"At an interactive block the guide waits for the gesture (9 s at most), with one hint.")+
    row("Mascot",pseg("guideCfg.mascot",["true","false"],["Azu","Off"]),"A small tile character that follows the block being told. Still under Reduce Motion.")+
@@ -3081,7 +3377,8 @@ ed.addEventListener("click",function(e){var p=e.target.closest('[data-pick="gste
 ed.addEventListener("input",function(e){var t=e.target;if(!t.dataset.gtext)return;e.stopImmediatePropagation();var q=t.dataset.gtext.split("|"),st=byId(S.guideSteps,q[0]);st.text[q[1]]=t.value},true);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(guideCfg\\.(voice|speed|music|captions|highlight|coach|ask)|"));
 /* each row's demo (editor/demo.js): the tour at a step, the part the row changes ringed */
-rowDemos({"guideCfg.voice":{tour:"g1",ring:".gbubble|.gdock|.gcap"},"guideCfg.speed":{tour:"g1",ring:".gbubble|.gdock|.gcap"},"guideCfg.music":{tour:"g1",ring:".gdock|.gbar"},
+rowDemos({"guideCfg.voice":{tour:"g1",ring:".gbubble|.gdock|.gcap"},"guideCfg.speed":{tour:"g1",act:function(){S.vis.speed=null;dkTick()},ring:".gd-speed|.gbubble|.gdock|.gcap"},"guideCfg.music":{tour:"g1",act:function(){musicDemo()},ring:".gdock|.gbar"},"guideCfg.musicVol":{tour:"g1",act:function(){musicDemo()},ring:".gdock|.gbar"},"guideCfg.musicDuck":{tour:"g1",act:function(){musicDemo()},ring:".gdock|.gbar"},
+  "guideCfg.musicTrack":{tour:"g1",act:function(){musicDemo()},ring:".gdock|.gbar"},"guideCfg.musicVis":{act:function(){S.settingsOpen=true;renderPhone(true);var v=ph.querySelector(".vset"),g=v&&v.querySelector(".vmusic");if(v&&g)v.scrollTop=Math.max(0,g.offsetTop-60)},ring:".vmusic|.vguide"},
   "guideCfg.heroButton":{stop:"full",ring:".hero .gstart|.hero"},"guideCfg.block":{stop:"full",scroll:'[data-ref="b:b_guide"]',ring:".gblock|[data-ref=\"sec:about\"]"},
   "guideCfg.captions":{tour:"g1",ring:".gbubble|.gdock|.gbar"},"guideCfg.highlight":{tour:"g4",ring:".gfocus"},"guideCfg.coach":{tour:"g2",ring:".gcoach|.gfocus"},
   "guideCfg.mascot":{tour:"g1",ring:".mascot|.gfocus"},"guideCfg.ask":{tour:true,dock:"full",act:function(){ask(L(S.guideAsks[0]))},ringAfter:1400,ring:".gd-thread|.gask"}});
@@ -3169,7 +3466,7 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
      comp("s5termpage","a term's own page, opened by Read more","")}
   /* 7 · Guide: one component per element of the tour */
   var s7=innerOf(d,"s7");if(s7){var g=function(l,r){return takeRow(s7,l,r)},rules=s7.querySelector(":scope > .note.fixed");rules=rules?row("Fixed rules",'<span class="uses">pause, take-over, captions, Reduce Motion</span>',rules.textContent.replace(/^Fixed rules:\s*/,"")):"";
-    var vo=g("Voice")+g("Speed")+g("Music bed"),he=g("Start from the hero","Shown"),bl=g("Guide block","Shown"),ca=g("Captions","Shown")+g("Highlight what is read"),co2=g("Invite to try","Shown"),ma=g("Mascot","Character"),as=g("Ask the guide","Answers from");
+    var vo=g("Voice")+g("Speed")+g("Music bed")+g("Music volume")+g("Under the voice")+g("Track")+g("Credit")+g("Playing now")+g("Visitor can choose the music"),he=g("Start from the hero","Shown"),bl=g("Guide block","Shown"),ca=g("Captions","Shown")+g("Highlight what is read"),co2=g("Invite to try","Shown"),ma=g("Mascot","Character"),as=g("Ask the guide","Answers from");
     s7.innerHTML=rules+comp("s7voice","the voice, its speed and the music under it",vo)+comp("s7hero","the button on the hero that starts the tour",he)+comp("s7block","the tile that starts the tour, first in About",bl)+
      comp("s7cap","the words being read, at the bottom",ca)+comp("s7coach","at a block to try, the guide waits for the gesture",co2)+
      comp("s7tour","progress, previous, pause, next, sound, captions, Ask and stop","")+comp("s7resume","after the visitor takes over, the button that carries on","")+comp("s7mascot","a small tile that follows the block being told",ma)+comp("s7ask","questions by text or voice",as)}
@@ -4294,12 +4591,12 @@ on("sayDevice.ended",function(){G.hl.ended=true});
 /* markWord: before (latest first) and done (always, in module order) share the notes cx; after, in module order */
 function markWord(k,target){var cx={};emitLatestFirst("markWord.before",cx);try{var h=G.hl,now=performance.now();if(G.utter&&!h.est)h.seen=true;if(target!==h.target){hlClear(h.target);h.target=target||null}
   if(k!==h.k){if(h.k>=0&&k>h.k&&!G.timer){var ch=0;for(var j=h.k;j<k;j++)ch+=G.words[j].w.length+1;var per=(now-h.at)/Math.max(1,ch);if(per>15&&per<400)h.cpm=h.cpm?h.cpm*.6+per*.4:per}h.k=k;h.at=now}hlLoop();emit("markWord.after",k,target)}finally{emit("markWord.done",cx)}}
-function wordMs(k){var ans=firstAnswer("wordMs.answer",k);if(ans!==undefined)return ans;var base=60000/(170*S.guideCfg.speed);if(G.timer||!G.words[k])return base;return(G.words[k].w.length+1)*(G.hl.cpm||base/6)}
+function wordMs(k){var ans=firstAnswer("wordMs.answer",k);if(ans!==undefined)return ans;var base=60000/(170*guideSpeed());if(G.timer||!G.words[k])return base;return(G.words[k].w.length+1)*(G.hl.cpm||base/6)}
 function hlLoop(){if(!G.hlRaf)G.hlRaf=requestAnimationFrame(hlTick)}
 function hlTick(now){G.hlRaf=0;var h=G.hl;if(!G.on||!h){return}var dt=h.last?Math.min(100,now-h.last):16;h.last=now;
   if(G.paused){h.at+=dt;h.start+=dt}
   /* some voices send no word events (Chrome's network voices, Android): after 1.2 s without one, the head follows the time, by characters */
-  if(G.utter&&!h.seen&&!h.ended&&now-h.start>1200){h.est=true;var el=now-h.start,per=60000/(170*S.guideCfg.speed)/6,c=0,k=0;for(;k<G.words.length-1;k++){c+=G.words[k].w.length+1;if(c*per>el)break}if(k!==h.k)markWord(k,h.target)}
+  if(G.utter&&!h.seen&&!h.ended&&now-h.start>1200){h.est=true;var el=now-h.start,per=60000/(170*guideSpeed())/6,c=0,k=0;for(;k<G.words.length-1;k++){c+=G.words[k].w.length+1;if(c*per>el)break}if(k!==h.k)markWord(k,h.target)}
   var n=G.words.length,tgt=h.ended?n:h.k<0?0:h.k+Math.min(.97,(now-h.at)/wordMs(h.k)),glide=S.guideCfg.glide&&!S.reduce;
   h.p=glide?h.p+(tgt-h.p)*Math.min(1,dt/90):(h.ended?n:Math.max(0,h.k)+1-1e-6);
   if(!glide&&h.k<0)h.p=0;
@@ -4480,7 +4777,7 @@ on("markWord.after",function(k){if(!S.guideCfg.lips||S.reduce||!G.words[k])retur
   G.lipT=sh.map(function(s,i){return setTimeout(function(){azMouth(ph.querySelector(".mascot"),s)},i*per)}).concat([setTimeout(function(){G.lipT=null;azMouth(ph.querySelector(".mascot"),restShape(azMood()))},sh.length*per)])});
 /* blinks: every 2.5-5 s, never in sync with anything */
 function azBlink(){clearTimeout(G.blinkT);G.blinkT=setTimeout(function(){var m=ph.querySelector(".mascot");if(m&&!S.reduce){m.classList.add("blink");setTimeout(function(){m.classList.remove("blink")},140)}if(G.on)azBlink()},2500+Math.random()*2500)}
-on("renderGuide.after",function(){var m=ph.querySelector(".mascot");if(!m)return;m.setAttribute("role","button");m.setAttribute("aria-label",TXT("mascot_name"));m.tabIndex=-1;if(G.moment)m.classList.add("center");azApply()});
+on("renderGuide.after",function(){var m=ph.querySelector(".mascot");if(!m)return;m.setAttribute("role","button");m.setAttribute("aria-label",TXT("mascot_name"));m.tabIndex=-1;azApply()});
 on("startTour.before",function(){G.moment=null;G.talkFrom=performance.now()});on("startTour.after",function(){azBlink()});
 
 /* ----- play: what the visitor starts is never limited; what Azu starts by itself is the guidance's (Guide › Guidance › Fun, round 7): the
@@ -4501,15 +4798,31 @@ function azPoke(){haptic();var calm=S.guideCfg.life!=="lively",pool=calm?["r-win
   emit("mascot.poked",r);return r}
 function azTickle(){haptic();azReact("r-laugh",1300,"big");azBubble(TXT("mascot_tickle"))}
 function azFall(){haptic();azReact("r-fall",1700,"surprised");azBubble(TXT("mascot_oops"),1400)}
-/* a moment: Azu walks to the middle with a prop and asks for one tap; it never blocks (8 s, then the tour carries on). Its words: the
-   guidance item's Says (words), else the prop's own. When it starts is the guidance's (Fun › Moments); its end is moment.ended */
-function azMoment(kind,then,words){var m=ph.querySelector(".mascot");G.moment=kind;G.talkFrom=performance.now();words=words||TXT(kind==="water"?"mascot_water":"mascot_hungry");
-  var o=document.createElement("div");o.className="azmoment "+kind;o.innerHTML='<button type="button" class="azprop" data-azprop="'+kind+'" aria-label="'+esc(words)+'">'+(kind==="water"?'<svg viewBox="0 0 24 32" aria-hidden="true"><path d="M4 3H20L18 29H6Z" fill="rgba(170,215,255,.35)" stroke="#5B8FD6" stroke-width="2" stroke-linejoin="round"/><path class="az-water" d="M5.6 12H18.4L17.3 28H6.7Z" fill="#7FB8F0"/></svg>':'<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="#D9A55B" stroke="#9A6A2A" stroke-width="2"/><circle cx="11" cy="12" r="2" fill="#5B3716"/><circle cx="20" cy="10" r="1.8" fill="#5B3716"/><circle cx="19" cy="20" r="2.2" fill="#5B3716"/><circle cx="11" cy="21" r="1.6" fill="#5B3716"/></svg>')+'</button>';
-  ph.appendChild(o);if(m){m.classList.add("center");azMouth(m,"surprised")}azBubble(words,8000);
-  G.momentThen=then;clearTimeout(G.momentT);G.momentT=setTimeout(function(){azMomentEnd(false)},8000)}
+/* a moment: Azu shows a prop and asks for one tap; it never blocks (8 s, then the tour carries on). Its words: the guidance item's
+   Says (words), else the prop's own. When it starts is the guidance's (Fun › Moments); its end is moment.ended.
+   Round 11: Azu stays where it is (beside the words, never over them) and the prop is placed beside Azu with 0 px over any words (the
+   card's, the panel's, a bubble's) and inside the phone; with no room it waits (tried again every 300 ms; 8 s with none: the moment
+   ends unseen). Unity: the prop's rect tested against the glyph boxes (TextElement) and the panel's rect, the same candidates */
+var PROP=54;
+function propObstacles(){var out=typeof wordBoxes==="function"?wordBoxes(null).slice():[];ph.querySelectorAll(".gdock,.gbubble,.azbub,.gbtn-wrap,.gtoast,.gcoach").forEach(function(e){if(!e.getClientRects().length)return;var r=phRect(e);out.push({l:r.l,t:r.t,r:r.l+r.w,b:r.t+r.h})});return out}
+function propFree(x,y,obs){if(x<8||y<64||x+PROP>ph.offsetWidth-8||y+PROP>ph.offsetHeight-8)return false;return!obs.some(function(b){return b.r>x&&b.l<x+PROP&&b.b>y&&b.t<y+PROP})}
+/* the nearest free place beside Azu: left or right of it, above or below, then a step further up or down */
+function propSpot(){var m=azuEl();if(!m||!m.getClientRects().length)return null;var a=phRect(m),obs=propObstacles(),g=8,c=[];
+  [0,-(PROP+g),PROP+g,-2*(PROP+g),2*(PROP+g)].forEach(function(dy){var y=a.t+(a.h-PROP)/2+dy;c.push([a.l-PROP-g,y],[a.l+a.w+g,y])});
+  c.push([a.l+(a.w-PROP)/2,a.t-PROP-g],[a.l+(a.w-PROP)/2,a.t+a.h+g]);
+  for(var i=0;i<c.length;i++)if(propFree(c[i][0],c[i][1],obs))return{x:Math.round(c[i][0]),y:Math.round(c[i][1])};return null}
+function azMoment(kind,then,words){G.moment=kind;G.talkFrom=performance.now();words=words||TXT(kind==="water"?"mascot_water":"mascot_hungry");G.momentThen=then;G.propWaited=0;
+  clearTimeout(G.momentT);clearInterval(G.propT);var t0=performance.now();
+  var show=function(sp){var m=ph.querySelector(".mascot"),o=document.createElement("div");o.className="azmoment "+kind;o.style.left=sp.x+"px";o.style.top=sp.y+"px";
+    o.innerHTML='<button type="button" class="azprop" data-azprop="'+kind+'" aria-label="'+esc(words)+'">'+(kind==="water"?'<svg viewBox="0 0 24 32" aria-hidden="true"><path d="M4 3H20L18 29H6Z" fill="rgba(170,215,255,.35)" stroke="#5B8FD6" stroke-width="2" stroke-linejoin="round"/><path class="az-water" d="M5.6 12H18.4L17.3 28H6.7Z" fill="#7FB8F0"/></svg>':'<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="#D9A55B" stroke="#9A6A2A" stroke-width="2"/><circle cx="11" cy="12" r="2" fill="#5B3716"/><circle cx="20" cy="10" r="1.8" fill="#5B3716"/><circle cx="19" cy="20" r="2.2" fill="#5B3716"/><circle cx="11" cy="21" r="1.6" fill="#5B3716"/></svg>')+'</button>';
+    ph.appendChild(o);G.propAt=sp;if(m)azMouth(m,"surprised");G.momentT=setTimeout(function(){azMomentEnd(false)},8000)};
+  /* the words first (they ask for the tap), then the prop placed clear of every word, the bubble's included */
+  var tryPlace=function(){if(G.moment!==kind){clearInterval(G.propT);return true}var sp=propSpot();if(sp){clearInterval(G.propT);show(sp);return true}
+    G.propWaited=performance.now()-t0;if(G.propWaited>8000){clearInterval(G.propT);azMomentEnd(false);return true}return false};
+  azBubble(words,8000);if(!tryPlace())G.propT=setInterval(tryPlace,300)}
 function azMomentDo(){var k=G.moment;if(!k)return;clearTimeout(G.momentT);haptic();var p=ph.querySelector(".azmoment");if(p)p.classList.add("using");azReact(k==="water"?"r-drink":"r-eat",1500,k==="water"?"O":"chew");
   setTimeout(function(){azBubble(TXT(k==="water"?"mascot_ahh":"mascot_thanks"),1500);azMomentEnd(true)},1500)}
-function azMomentEnd(done){var k=G.moment;if(!k)return;G.moment=null;clearTimeout(G.momentT);var p=ph.querySelector(".azmoment");if(p)p.remove();var m=ph.querySelector(".mascot");if(m)m.classList.remove("center");
+function azMomentEnd(done){var k=G.moment;if(!k)return;G.moment=null;clearTimeout(G.momentT);clearInterval(G.propT);var p=ph.querySelector(".azmoment");if(p)p.remove();var m=ph.querySelector(".mascot");if(m)m.classList.remove("center");
   var t=G.momentThen;G.momentThen=null;emit("moment.ended",k,!!done);setTimeout(function(){if(t&&G.on)t()},done?900:0)}
 on("stopTour.before",function(){if(G.moment){G.momentThen=null;azMomentEnd(false)}clearTimeout(G.blinkT);(G.lipT||[]).forEach(clearTimeout);G.lipT=null;var b=ph.querySelector(".azbub");if(b)b.remove()});
 /* the gestures on Azu (the guide's, or the one beside the guide's button): a tap does what Tap on Azu says (it plays: a poke), three
@@ -4524,7 +4837,7 @@ ph.addEventListener("click",function(e){var p=e.target.closest("[data-azprop]");
 /* Moments and Water break after: link rows to the guidance that shows them now (Guide › 4 · Guidance › Fun › Moments, round 7): the
    Moments' On / Off is that group's On; the water break's seconds of narration are its item's own row (Water break after) */
 function mascotMomentLinks(){var gp=gdGroupPath("moments"),gg=gdGroupById("moments"),w=S.guidance.items.water,go=function(o,t){return'<button class="ubtn sm gdedited" type="button" data-goto="'+o+'">'+esc(t)+' &#8250;</button>'};if(!gp||!gg)return"";
-  return row("Moments",'<div class="btnrow" style="margin:0">'+pseg(gp+"on",["true","false"],["On","Off"])+go("gd:g:moments","Edited in Guide › Guidance › Fun › Moments")+'</div>',"Between two steps of a tour, as it moves on, Azu walks to the middle with a glass of water (after the narration below) or a cookie (before the last step) and asks for one tap; 8 s without one, the tour carries on. Lively only, never on a Solemn point, once a card each, 5 min apart: the guidance's scheduler decides (its gates, Fun's weight in the Mix). Its On / Off is the group's own; its rules are there.")+
+  return row("Moments",'<div class="btnrow" style="margin:0">'+pseg(gp+"on",["true","false"],["On","Off"])+go("gd:g:moments","Edited in Guide › Guidance › Fun › Moments")+'</div>',"Between two steps of a tour, as it moves on, Azu walks to the middle with a glass of water (after the narration below) or a cookie (before the last step) and asks for one tap; 8 s without one, the tour carries on. Lively only, never on a Solemn point, once a card each, 5 min apart: the guidance's scheduler decides (its gates, Fun's weight in the Mix). Its On / Off is the group's own; its rules are there. Since round 11 every Fun item is held while a tour plays, so the Moments wait (Why not now? says so) and the prop is placed beside Azu with 0 px over any words.")+
     (w&&!w.deleted?row("Water break after",'<div class="btnrow" style="margin:0"><span class="uses">'+(+w.talkFor||0)+' s of narration</span>'+go("gd:i:water","Edited in Guide › Guidance › Fun › Moments › Water break")+'</div>',"The seconds of the tour's narration before Azu stops for a sip: the Water break item's own row now.",true):"")}
 /* Editor: Guide tab > Mascot gets its liveliness, mouth, moods, moments and a Try per play; Specific Marker > Guide script gets Solemn and each step's mood */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
@@ -4865,8 +5178,12 @@ rowDemos({"guideCfg.insist":{tour:"g2",ring:".gcoach|.gfocus"},"guideCfg.insistA
   "guideCfg.onScroll":{tour:"g1",act:function(){G.userScrollAt=performance.now();scr.dispatchEvent(new WheelEvent("wheel",{deltaY:300,bubbles:true}));scr.scrollTop+=360},ringAfter:1200,ring:".gdock|.gresume"},
   "guideCfg.intro":{tour:true,intro:true,ring:".mascot"}});
 
-/* The Guide Dock: Compact, Mini, Peek, Full; Pause and Stop at Mini, the hide control; the bubble, the talk button and its states, the conversation, the suggested questions. */
+/* The Guide Dock (the guide panel): Compact (hidden), Mini, Peek, Full, drawn in one of four Looks (round 11: Paper glass, Ink glass,
+   Player sheet, Teleprompter); Pause and Stop at Mini, the hide control; the words like a teleprompter, the progress bar, the voice moving,
+   the speed chip; the bubble, the talk button and its states, the conversation, the suggested questions; the ✦ growing into it. */
 S.guideCfg.panel="dock";S.guideCfg.dockStart="mini";S.guideCfg.miniCtl="pausestop";S.guideCfg.swipeCompact=true;S.guideCfg.bubbles="own";S.guideCfg.talk="both";S.guideCfg.earcons=true;S.guideCfg.chips=true;
+/* round 11: the panel's Look and its parts */
+S.guideCfg.look="ink";S.guideCfg.pWords="prompter";S.guideCfg.pBars=true;S.guideCfg.pSpeed=true;
 S.dockH="mini";G.talk="idle";G.thread=[];
 COMP.s7dock=["Guide","Guide panel"];FOCUS.s7dock=["card",".gblock","full"];
 /* the demo point's suggested questions (the point's content; Specific Marker > Guide script) */
@@ -4885,38 +5202,173 @@ var MIC='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6"
 function ico(k){return'<svg viewBox="0 0 24 24" aria-hidden="true">'+ICO[k]+'</svg>'}
 var TALKW={idle:"dock_tap_talk",listening:"dock_listening",thinking:"dock_thinking",speaking:"dock_tap_stop",interrupted:"dock_go_ahead",notheard:"dock_not_heard"};
 function talkState(){if(G.talk==="listening"||G.talk==="notheard"||G.talk==="interrupted")return G.talk;if(G.busy)return"thinking";if(G.on&&!G.paused&&(G.utter||G.timer))return"speaking";return"idle"}
-/* the dock replaces the captions box and the control bar; the old ones stay as "Classic" */
-/* the dock's markup at a height: Mini (the step, its words, Pause and Stop, the talk button), Peek (+ the controls, the keyboard and the
-   suggested questions), Full (+ the conversation). Controls at Mini = Tap on the line keeps today's Mini (the keyboard beside the talk button) */
 var HIDE='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
-function dockHtml(h){var n=S.guideSteps.length,st=S.guideSteps[G.i],ts=talkState(),mc=S.guideCfg.miniCtl,kb='<button type="button" class="gd-kb" data-dock="type" aria-label="'+TXH("dock_type")+'">'+KBD+'</button>',
-    seg='<div class="gd-seg">'+S.guideSteps.map(function(s,j){return'<button type="button" data-gseg="'+j+'" class="'+(j<G.i?"done":j===G.i?"now":"")+'" aria-label="'+esc(fmt(TXT("dock_stop_of"),j+1,n))+'"></button>'}).join("")+'</div>',
-    pz='<button type="button" class="gd-mc" data-g="'+(G.paused?"play":"pause")+'" aria-label="'+(G.paused?TXH("guide_ctrl_play"):TXH("guide_ctrl_pause"))+'">'+ico(G.paused?"play":"pause")+'</button>',
-    sp='<button type="button" class="gd-mc" data-g="stop" aria-label="'+TXH("guide_ctrl_stop")+'">'+ico("halt")+'</button>';
-  return'<button type="button" class="gd-grab" data-dock="cycle" aria-label="'+TXH(h==="full"?"dock_collapse":"dock_expand")+'"><i></i></button>'+(h!=="full"?'<button type="button" class="gd-hide" data-dock="hide" aria-label="'+TXH("dock_hide")+'">'+HIDE+'</button>':"")+seg+
-    '<div class="gd-main"><div class="gd-line" data-dock="playpause"><small class="gd-stop">'+esc(fmt(TXT("dock_stop_of"),G.i+1,n))+(stepTitle(st)?' · '+esc(stepTitle(st)):"")+'</small><div class="gd-cap"></div></div>'+
-    (mc==="line"?kb:'<div class="gd-mini">'+pz+(mc==="pausestop"?sp:"")+'</div>')+
-    '<button type="button" class="gd-talk s-'+ts+'" data-talk="1" aria-label="'+TXH("dock_ask")+'"><i class="ring"></i><i class="ring r2"></i>'+MIC+'</button></div>'+
-    '<div class="gd-hint" aria-live="polite">'+TXH(TALKW[ts])+'</div>'+
-    '<div class="gd-peek"><div class="gd-ctl"><button type="button" data-g="prev" aria-label="'+TXH("guide_ctrl_prev")+'">'+ico("prev")+'</button><button type="button" data-g="'+(G.paused?"play":"pause")+'" aria-label="'+(G.paused?TXH("guide_ctrl_play"):TXH("guide_ctrl_pause"))+'">'+ico(G.paused?"play":"pause")+'</button><button type="button" data-g="next" aria-label="'+TXH("guide_ctrl_next")+'">'+ico("next")+'</button>'+
-      '<button type="button" data-g="mute" aria-pressed="'+!!S.guideMute+'" aria-label="'+TXH("guide_ctrl_mute")+'">'+ico(S.guideMute?"mute":"sound")+'</button><button type="button" data-g="cc" aria-pressed="'+S.guideCfg.captions+'" class="cc">CC</button><button type="button" data-g="stop" aria-label="'+TXH("guide_ctrl_stop")+'">'+ico("stop")+'</button></div>'+
-      '<div class="gd-chips">'+(mc!=="line"?kb:"")+(S.guideCfg.chips?S.guideAsks.map(function(q,i){return'<button type="button" data-chip="'+i+'">'+esc(L(q))+'</button>'}).join(""):"")+'</div></div>'+
-    '<div class="gd-full"><div class="gd-thread" aria-live="polite">'+pipe("dockThread.html",G.thread.map(function(m){return'<div class="gm-'+m.who+'">'+esc(m.text)+'</div>'}).join(""))+(G.busy?'<div class="gm-azu typing"><i></i><i></i><i></i></div>':"")+(G.micNote?'<div class="gm-note">'+esc(G.micNote)+'</div>':"")+'</div>'+
-      '<form class="gd-form"><input id="gq" class="gin" type="text" autocomplete="off" placeholder="'+TXH("dock_type")+'"><button type="submit" aria-label="'+TXH("dock_send")+'">&#10148;</button></form></div>'}
+
+/* ----- round 11: the Looks. Each has two states on the dock's heights: Mini (its pill, capsule, mini player or one line) at Mini, and
+   Open (its panel) at Peek and Full. Peek = Open (asking by typing focuses its field: the keyboard, ✦ › Ask); Full = Open with the whole
+   text shown (Read all: the tour's lines so far and the conversation, the line said now marked); Compact = hidden, as before.
+   Unity: one UXML template per Look (a VisualTreeAsset), the same controller and the same element names (gd-play, gd-seek…), so a Look
+   is a swap of template and USS; the glass is a translucent fill with a light edge (no backdrop blur in 6.3), a gradient a ramp texture */
+var DLOOKS=[["paper","Paper glass"],["ink","Ink glass"],["player","Player sheet"],["prompter","Teleprompter"]];
+function dkLook(){var l=S.guideCfg.look;return DLOOKS.some(function(x){return x[0]===l})?l:"ink"}
+/* the icons of the drawn Looks: filled transport glyphs, stroked chevrons */
+var FI={prev:'<path d="M18 5.5v13a1 1 0 0 1-1.55.83L7 13v5H5V6h2v5l9.45-6.33A1 1 0 0 1 18 5.5z"/>',next:'<path d="M6 5.5v13a1 1 0 0 0 1.55.83L17 13v5h2V6h-2v5L7.55 4.67A1 1 0 0 0 6 5.5z"/>',
+  pause:'<rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/>',play:'<path d="M8 5.6v12.8a1 1 0 0 0 1.53.85l10.2-6.4a1 1 0 0 0 0-1.7L9.53 4.75A1 1 0 0 0 8 5.6z"/>',
+  stop:'<rect x="5" y="5" width="14" height="14" rx="3"/>',up:'<polyline points="6 15 12 9 18 15"/>',down:'<polyline points="6 9 12 15 18 9"/>',
+  all:'<polyline points="7 10 12 5 17 10"/><polyline points="7 14 12 19 17 14"/>',lines:'<line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/>',
+  send:'<line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>',wave:'<path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4"/>'};
+function fi(k){return'<svg viewBox="0 0 24 24" aria-hidden="true" class="fi">'+FI[k]+'</svg>'}
+function si(k){return'<svg viewBox="0 0 24 24" aria-hidden="true" class="si">'+FI[k]+'</svg>'}
+/* ----- the time: each stop's length from its words' timing (a recorded line's own word times, else the words at the voice's speed) ----- */
+function stopSecs(j){var st=S.guideSteps[j];if(!st)return 0;var t=stepText(st),sp=guideSpeed(),r=typeof recFile==="function"?recFile(t):null,w=r&&r.file&&r.file.words;
+  if(w&&w.length)return w[w.length-1][1]/sp+.7;return Math.max(1,(t.match(/\S+/g)||[]).length)*60/(170*sp)+.7}
+function dkTimes(){var a=[],tot=0;for(var j=0;j<S.guideSteps.length;j++){var s=stopSecs(j);a.push({at:tot,len:s});tot+=s}return{stops:a,tot:tot}}
+/* the share of the line said: the stop's own line (a recorded line by its clock, else its words) */
+function dkShare(){var st=S.guideSteps[G.i];if(!st||!G.sayLine||G.sayLine.text!==stepText(st))return 0;if(G.recAudio&&G.recAudio.duration>0)return Math.min(1,G.recAudio.currentTime/G.recAudio.duration);
+  var w=(G.words||[]).length,k=G.hl&&G.hl.k>=0?G.hl.k+1:0;return w?Math.min(1,k/w):0}
+function dkElapsed(T){var c=T.stops[G.i];return c?c.at+dkShare()*(c.len-.7):0}
+function mmss(s){s=Math.max(0,Math.round(s));return Math.floor(s/60)+":"+("0"+s%60).slice(-2)}
+/* ----- the progress bar: one segment a stop (its length the stop's), the knob where the voice is; a drag seeks (guide/controls.js) ----- */
+function dkSeek(kind){var T=dkTimes(),el=dkElapsed(T),n=S.guideSteps.length,sh=dkShare();
+  return'<div class="gd-seg gd-seek sk-'+kind+'" role="slider" tabindex="0" aria-label="'+TXH("dock_seek")+'" aria-valuemin="0" aria-valuemax="'+Math.round(T.tot)+'" aria-valuenow="'+Math.round(el)+'" aria-valuetext="'+esc(mmss(el)+" / "+mmss(T.tot)+" · "+fmt(TXT("dock_stop_of"),G.i+1,n))+'">'+
+    '<span class="sk-track">'+T.stops.map(function(s,j){return'<i data-gseg="'+j+'" class="'+(j<G.i?"done":j===G.i?"now":"")+'" style="flex:'+s.len.toFixed(2)+' 1 0"><b style="width:'+(j<G.i?100:j===G.i?sh*100:0).toFixed(1)+'%"></b></i>'}).join("")+'</span>'+
+    '<span class="sk-knob" aria-hidden="true"></span></div>'}
+function dkTimeHtml(kind){var T=dkTimes(),el=dkElapsed(T);if(kind==="both")return'<span class="gd-time" data-t="both">'+mmss(el)+" / "+mmss(T.tot)+'</span>';
+  return'<span class="gd-time" data-t="'+kind+'">'+(kind==="el"?mmss(el):kind==="rem"?"-"+mmss(T.tot-el):mmss(T.tot))+'</span>'}
+/* ----- the words like a teleprompter: the line said now, its spoken word marked, the line before faded above it and the next below;
+   they move up as the voice goes on. A line is a sentence, or a phrase of a long one (at a comma after 5 words, at most 12 words).
+   Unity: three Labels in a VisualElement; on a new line their translate is animated up (experimental.animation), the word marked by
+   rich text (<mark>) from the voice's word times ----- */
+function tpLines(text){var ws=String(text||"").match(/\S+/g)||[],out=[],a=0;for(var i=0;i<ws.length;i++){var w=ws[i],n=i-a+1;
+    if(/[.!?…]["”»)]*$/.test(w)||(/[,:;—]["”»)]*$/.test(w)&&n>=5)||n>=12||i===ws.length-1){out.push({a:a,b:i});a=i+1}}return{ws:ws,ls:out}}
+function tpLineOf(ls,k){for(var i=0;i<ls.length;i++)if(k<=ls[i].b)return i;return Math.max(0,ls.length-1)}
+/* the word being said in this text (its index), when this text is the line being said */
+function dkWordK(text){return G.sayLine&&G.sayLine.text===text&&G.hl&&G.hl.k>=0?G.hl.k:-1}
+function tpWords(P,a,b,k){var h="";for(var j=a;j<=b;j++)h+=(j>a?" ":"")+'<span class="tw'+(j<k?" said":j===k?" on":"")+'" data-k="'+j+'">'+esc(P.ws[j])+'</span>';return h}
+function tpHtml(text,variant){var P=tpLines(text),k=dkWordK(text),i=tpLineOf(P.ls,Math.max(0,k));
+  if(variant==="mini"){var l=P.ls[i];if(!l)return'<div class="gd-tp tp-mini" data-line="0" data-v="mini"><p class="tp-now">&nbsp;</p></div>';var a0=k>l.a+2?k-2:l.a;return'<div class="gd-tp tp-mini" data-line="'+i+'" data-v="mini"><p class="tp-now">'+(a0>l.a?"…":"")+tpWords(P,a0,l.b,k)+'</p></div>'}
+  var sp={ink:[1,0],paper:[1,1],player:[0,0],prompter:[2,1]}[variant]||[1,1],out="",line=function(x,c){var l=P.ls[x];return'<p class="'+c+(l?"":" tp-empty")+'">'+(l?tpWords(P,l.a,l.b,c==="tp-now"?k:-1):"&nbsp;")+'</p>'};
+  for(var b=sp[0];b>=1;b--)out+=line(i-b,"tp-prev");out+=line(i,"tp-now");for(var a=1;a<=sp[1];a++)out+=line(i+a,"tp-next");
+  return'<div class="gd-tp tp-'+variant+'" data-line="'+i+'" data-v="'+variant+'">'+out+'</div>'}
+function dkWordsOn(){return S.guideCfg.pWords!=="off"&&!!S.guideCfg.captions}
+/* the words move on with the voice: a new line slides up; within a line the word said is marked */
+function dkWord(k){if(!dkWordsOn()||G.tpText==null||!G.sayLine||G.sayLine.text!==G.tpText)return;var P=tpLines(G.tpText);
+  ph.querySelectorAll(".gdock .gd-tp").forEach(function(tp){var i=tpLineOf(P.ls,Math.max(0,k));if(tp.dataset.v==="mini"){var x0=document.createElement("div");x0.innerHTML=tpHtml(G.tpText,"mini");tp.replaceWith(x0.firstChild);return}if(String(i)!==tp.dataset.line){var v=tp.dataset.v,x=document.createElement("div");x.innerHTML=tpHtml(G.tpText,v);var n=x.firstChild;if(!S.reduce&&+i>+tp.dataset.line)n.classList.add("tp-up");tp.replaceWith(n);return}
+    tp.querySelectorAll(".tp-now .tw").forEach(function(w){var j=+w.dataset.k;w.classList.toggle("said",j<k);w.classList.toggle("on",j===k)})});
+  ph.querySelectorAll(".gdock .gm-now .tw").forEach(function(w){var j=+w.dataset.k;w.classList.toggle("said",j<k);w.classList.toggle("on",j===k)})}
+on("markWord.after",function(k){if(G.on&&dockOn())dkWord(k)});
+/* ----- the parts every Look shares ----- */
+function dkAv(c){return'<span class="gd-av'+(c?" "+c:"")+'" aria-hidden="true">'+mascotStill()+'</span>'}
+function dkBars(n){if(!S.guideCfg.pBars)return"";var h="";for(var i=0;i<n;i++)h+="<i></i>";return'<span class="gd-bars" aria-hidden="true">'+h+'</span>'}
+function dkPP(c){var p=G.paused;return'<button type="button" class="'+c+'" data-g="'+(p?"play":"pause")+'" aria-label="'+(p?TXH("guide_ctrl_play"):TXH("guide_ctrl_pause"))+'">'+fi(p?"play":"pause")+'</button>'}
+function dkStopB(c){return'<button type="button" class="'+c+'" data-g="stop" aria-label="'+TXH("guide_ctrl_stop")+'">'+fi("stop")+'</button>'}
+function dkStep(k,c){return'<button type="button" class="'+c+'" data-g="'+k+'" aria-label="'+TXH("guide_ctrl_"+k)+'">'+fi(k)+'</button>'}
+function spd(v){return String(+(+v).toFixed(2))}
+function dkSpeed(){if(S.guideCfg.pSpeed===false)return"";var v=guideSpeed();return'<button type="button" class="gd-speed" data-g="speed" aria-label="'+esc(fmt(TXT("dock_speed"),spd(v)))+'">'+spd(v)+'×</button>'}
+function dkCtl(c){return'<div class="gd-ctl'+(c?" "+c:"")+'">'+dkSpeed()+dkStep("prev","gd-pn")+dkPP("gd-play")+dkStep("next","gd-pn")+dkStopB("gd-stopb")+'</div>'}
+function dkKb(){return'<button type="button" class="gd-kb" data-dock="type" aria-label="'+TXH("dock_type")+'">'+KBD+'</button>'}
+/* Controls at Mini: Pause + Stop, Pause only, or Tap on the line (no buttons; the keyboard to ask by typing) */
+function dkMiniCtl(){var mc=S.guideCfg.miniCtl;if(mc==="line")return dkKb();return'<div class="gd-mini">'+dkPP("gd-mc gd-mpp")+(mc==="pausestop"?dkStopB("gd-mc gd-mstop"):"")+'</div>'}
+function dkOpenB(c){return'<button type="button" class="gd-grab '+(c||"gd-openb")+'" data-dock="cycle" aria-label="'+TXH("dock_open")+'">'+(c?dkAv():si("up"))+'</button>'}
+function dkHide(){return'<button type="button" class="gd-hide" data-dock="hide" aria-label="'+TXH("dock_hide")+'">'+si("down")+'</button>'}
+function dkHandle(h){return'<button type="button" class="gd-grab gd-handle" data-dock="cycle" aria-label="'+TXH(h==="full"?"dock_collapse":"dock_expand")+'"><i></i></button>'}
+function dkSmall(){return'<button type="button" class="gd-small" data-dock="mini" aria-label="'+TXH("dock_small")+'">'+si("down")+'</button>'}
+function dkAa(){return dkWordsOff()?"":'<button type="button" class="gd-aa" data-g="cc" aria-pressed="'+!!S.guideCfg.captions+'" aria-label="'+TXH("dock_words")+'">Aa</button>'}
+function dkWordsOff(){return S.guideCfg.pWords==="off"}
+function dkAll(h,icon){var f=h==="full";return'<button type="button" class="gd-all'+(icon?" ic":"")+'" data-dock="readall" aria-pressed="'+f+'" aria-label="'+TXH(f?"dock_readless":"dock_readall")+'">'+(icon?si(icon):TXH(f?"dock_readless":"dock_readall"))+'</button>'}
+function dkChips(kb){var c=S.guideCfg.chips?S.guideAsks.map(function(q,i){return'<button type="button" data-chip="'+i+'">'+esc(L(q))+'</button>'}).join(""):"";return c||kb?'<div class="gd-chips">'+(kb?dkKb():"")+c+'</div>':""}
+function dkForm(){return'<form class="gd-form"><input id="gq" class="gin" type="text" autocomplete="off" placeholder="'+TXH("dock_ask_ph")+'" aria-label="'+TXH("dock_type")+'"><button type="submit" class="gd-send" aria-label="'+TXH("dock_send")+'">'+si("send")+'</button></form>'}
+function dkTalk(ts,label){return'<button type="button" class="gd-talk s-'+ts+'" data-talk="1" aria-label="'+TXH("dock_ask")+'"><i class="ring"></i><i class="ring r2"></i>'+(label?si("wave")+'<span>'+TXH("dock_voice")+'</span>':MIC)+'</button>'}
+function dkHint(ts){return'<div class="gd-hint'+(/listening|thinking|interrupted|notheard/.test(ts)?" on":"")+'" aria-live="polite">'+TXH(TALKW[ts])+'</div>'}
+function dkStatus(ts){return G.paused?TXH("dock_paused"):ts!=="idle"&&ts!=="speaking"?TXH(TALKW[ts]):TXH("dock_telling")}
+/* the whole text (Full): the tour's lines so far and the questions and answers, the line said now marked */
+function dkThread(){var now=-1;G.thread.forEach(function(m,i){if(m.who==="azu"&&m.text===G.tpText)now=i});
+  return'<div class="gd-thread" aria-live="polite">'+pipe("dockThread.html",G.thread.map(function(m,i){if(i!==now)return'<div class="gm-'+m.who+'">'+esc(m.text)+'</div>';var P=tpLines(m.text);return'<div class="gm-'+m.who+' gm-now">'+tpWords(P,0,P.ws.length-1,dkWordK(m.text))+'</div>'}).join(""))+
+    (G.busy?'<div class="gm-azu typing"><i></i><i></i><i></i></div>':"")+(G.micNote?'<div class="gm-note">'+esc(G.micNote)+'</div>':"")+'</div>'}
+/* the words area of Open: the teleprompter (Peek), the whole text (Full); Words Off: none (the words still light up in the block) */
+function dkWords(h,v){if(h==="full")return dkThread();if(dkWordsOff())return"";return dkWordsOn()?tpHtml(G.tpText||"",v):'<div class="gd-tp gd-tpoff" data-v="'+v+'"><p class="tp-now">&nbsp;</p></div>'}
+/* ----- the four Looks, drawn as the Architect's layouts (scratchpad gp/project: Main = Paper glass, InkGlass, Player, Prompter) ----- */
+function dockMini(L){var n=S.guideSteps.length,st=S.guideSteps[G.i],lab=fmt(TXT("dock_stop_of"),G.i+1,n),ctl=dkMiniCtl(),line=dkWordsOn()?tpHtml(G.tpText||"","mini"):"";
+  if(L==="paper")return'<div class="gd-mrow gd-main">'+dkAv()+'<div class="gd-line" data-dock="playpause"><small class="gd-stop">Azu · '+esc(lab)+dkBars(7)+'</small>'+(line||'<span class="gd-mt">'+esc(stepTitle(st))+'</span>')+'</div>'+ctl+dkOpenB()+'</div><span class="gd-mprog" aria-hidden="true"><b></b></span>'+dkHide();
+  if(L==="player")return'<span class="gd-mprog top" aria-hidden="true"><b></b></span><div class="gd-mrow gd-main">'+dkOpenB("gd-avb")+'<div class="gd-line" data-dock="playpause"><b class="gd-mt">'+esc(stepTitle(st))+'</b><small class="gd-stop">Azu · '+esc(lab)+' · '+dkTimeHtml("el")+'</small></div>'+ctl+dkStep("next","gd-mnext")+'</div>'+dkHide();
+  if(L==="prompter")return(line?'<div class="gd-pline">'+line+'</div>':"")+'<div class="gd-mrow gd-main gd-capsule"><span class="gd-line" data-dock="playpause"><small class="gd-stop vh">'+esc(lab+" · "+stepTitle(st))+'</small>'+dkBars(7)+'</span>'+ctl+dkOpenB()+'</div>'+dkHide();
+  /* Ink glass: Azu inside its progress ring, the voice's bars, Pause, open */
+  return'<div class="gd-mrow gd-main"><span class="gd-ring" aria-hidden="true"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="23" class="tr"/><circle cx="26" cy="26" r="23" class="pg"/></svg>'+dkAv()+'</span><span class="gd-line" data-dock="playpause"><small class="gd-stop vh">'+esc(lab+" · "+stepTitle(st))+'</small>'+dkBars(7)+'</span>'+ctl+dkOpenB()+'</div>'+dkHide()}
+function dockOpen(L,h,ts){var n=S.guideSteps.length,st=S.guideSteps[G.i],lab=fmt(TXT("dock_stop_of"),G.i+1,n),nm=stepTitle(st),stop='<span class="gd-stop">'+esc(lab)+(nm?" · "+esc(nm):"")+'</span>',typing=h==="peek"&&G.typing;
+  if(L==="paper")return dkHandle(h)+'<div class="gd-head">'+dkAv()+'<div class="gd-who"><b>Azu'+dkBars(9)+'</b><small class="gd-status">'+dkStatus(ts)+'</small></div><span class="gd-sp"></span>'+dkAa()+dkAll(h,"lines")+dkSmall()+'</div>'+
+    dkWords(h,"paper")+'<div class="gd-where"><div class="gd-lab">'+stop+dkTimeHtml("both")+'</div>'+dkSeek("segs")+'</div>'+dkCtl()+
+    '<div class="gd-askrow"><span class="gd-askf">'+KBD+dkForm()+'</span>'+dkTalk(ts)+'</div>'+dkChips(false)+dkHint(ts);
+  if(L==="player")return dkHandle(h)+dkSmall()+'<div class="gd-card"><div class="gd-cardw"><small class="gd-eye">AZU · '+esc(lab.toUpperCase())+'</small>'+dkWords(h,"player")+'</div><div class="gd-side">'+dkAll(h)+dkAa()+'</div></div>'+
+    '<div class="gd-where">'+dkSeek("line")+'<div class="gd-lab3">'+dkTimeHtml("el")+stop+dkTimeHtml("rem")+'</div></div>'+dkCtl()+dkChips(false)+
+    '<div class="gd-askbar">'+dkForm()+dkTalk(ts,true)+'</div>'+dkHint(ts);
+  if(L==="prompter")return dkHandle(h)+'<div class="gd-head">'+dkAv()+'<small class="gd-eye">AZU · '+esc(lab.toUpperCase())+'</small><span class="gd-sp"></span>'+dkAll(h)+dkAa()+dkSmall()+'</div>'+dkWords(h,"prompter")+
+    '<div class="gd-where gd-hrow">'+dkTimeHtml("el")+dkSeek("hair")+dkTimeHtml("tot")+'</div><div class="gd-lab gd-lab1">'+stop+'</div>'+(typing||h==="full"?'<div class="gd-askrow">'+dkForm()+'</div>'+dkChips(false):dkChips(true))+
+    '<div class="gd-botrow">'+dkCtl("gd-capsule")+dkTalk(ts)+'</div>'+dkHint(ts);
+  /* Ink glass */
+  return dkHandle(h)+dkSmall()+'<div class="gd-wrow">'+dkAv()+dkWords(h,"ink")+'<div class="gd-side">'+dkAll(h,"all")+dkAa()+'</div></div>'+
+    '<div class="gd-where">'+dkSeek("dots")+'<div class="gd-lab">'+stop+dkTimeHtml("both")+'</div></div>'+dkCtl()+dkChips(false)+'<div class="gd-askrow">'+dkForm()+dkTalk(ts)+'</div>'+dkHint(ts)}
+function dockHtml(h){var L=dkLook(),ts=talkState();return h==="mini"?dockMini(L):dockOpen(L,h,ts)}
+/* ----- the progress, the time and the ring follow the voice (4 times a second); a drag on the bar holds them (guide/controls.js) ----- */
+function dkTick(){var d=ph.querySelector(".gdock");if(!d||!G.on)return;var T=dkTimes(),el=dkElapsed(T),sh=dkShare(),f=T.tot?el/T.tot:0;
+  if(!G.seekDrag){var sk=d.querySelector(".gd-seek");if(sk){sk.querySelectorAll("[data-gseg]").forEach(function(s){var j=+s.dataset.gseg;s.className=j<G.i?"done":j===G.i?"now":"";var b=s.firstChild;if(b)b.style.width=(j<G.i?100:j===G.i?sh*100:0).toFixed(1)+"%"});
+      sk.setAttribute("aria-valuenow",Math.round(el));sk.setAttribute("aria-valuetext",mmss(el)+" / "+mmss(T.tot)+" · "+fmt(TXT("dock_stop_of"),G.i+1,S.guideSteps.length));dkKnob(sk,G.i,sh)}
+    d.querySelectorAll(".gd-time").forEach(function(t){var k=t.dataset.t;t.textContent=k==="both"?mmss(el)+" / "+mmss(T.tot):k==="el"?mmss(el):k==="rem"?"-"+mmss(T.tot-el):mmss(T.tot)})}
+  d.querySelectorAll(".gd-mprog b").forEach(function(b){b.style.width=(f*100).toFixed(1)+"%"});var pg=d.querySelector(".gd-ring .pg");if(pg)pg.style.strokeDasharray=(2*Math.PI*23*f).toFixed(1)+" 200"}
+/* the knob on a stop's segment, at the share given */
+function dkKnob(sk,j,sh){var s=sk.querySelector('[data-gseg="'+j+'"]'),k=sk.querySelector(".sk-knob");if(!s||!k)return;var a=sk.getBoundingClientRect(),r=s.getBoundingClientRect(),q=a.width/(sk.offsetWidth||1);if(!a.width)return;k.style.left=((r.left-a.left+sh*r.width)/q).toFixed(1)+"px"}
+setInterval(dkTick,250);
+/* ----- the voice moving: the bars (and Ink glass's ring of light) move only while the voice speaks, from its level (guide/voice.js's
+   voiceLevel); still when paused. Unity: the bars are VisualElements whose style.scale follows the level each frame ----- */
+var BARS={raf:0,cur:[],t0:0};
+function barsLoop(){BARS.raf=0;var bs=ph.querySelectorAll(".gdock .gd-bars i");if(!bs.length||!G.on)return;var lv=voiceLevel(),t=performance.now()/1000;G.barsLvl=lv;
+  for(var i=0;i<bs.length;i++){var shape=.45+.55*Math.abs(Math.sin(t*(5.3+i*1.7)+i*1.9)*Math.cos(t*(2.1+i*.6)+i)),want=.18+.82*Math.min(1,lv*shape*1.3),c=BARS.cur[i]==null?.18:BARS.cur[i];c+=(want-c)*(lv>0?.5:.35);if(lv<=0&&c<.19)c=.18;BARS.cur[i]=c;bs[i].style.transform="scaleY("+c.toFixed(3)+")"}
+  BARS.raf=requestAnimationFrame(barsLoop)}
+function barsStart(){if(!BARS.raf)BARS.raf=requestAnimationFrame(barsLoop)}
+
 /* the dock replaces the captions box and the control bar; the old ones stay as "Classic". Compact: no dock (the voice goes on; the
-   guide's button shows the progress and a pause); Azu's own words in its bubble, a block's words lit in the block */
-on("renderGuide.after",function(text){["gdock","gbubble"].forEach(function(c){var o=ph.querySelector("."+c);if(o)o.remove()});if(!G.on||!dockOn())return;
+   guide's button shows the progress and a pause); Azu's own words in its bubble (Compact, and at Mini in the Looks without a line of
+   words: Ink glass, Player sheet), a block's words lit in the block; at Open the words are the panel's teleprompter */
+on("renderGuide.after",function(text){var old=ph.querySelector(".gdock"),oldR=old&&old.getClientRects().length?phRect(old):null,oldH=old&&old.dataset.h,oldL=old&&old.dataset.look;
+  ["gdock","gbubble"].forEach(function(c){var o=ph.querySelector("."+c);if(o)o.remove()});if(!G.on||!dockOn()){if(oldR)dkMorph(oldR,null,oldL);return}
   var cap=ph.querySelector(".gcap"),bar=ph.querySelector(".gbar"),ask=ph.querySelector(".gask");if(bar)bar.remove();if(ask)ask.remove();
-  var st=S.guideSteps[G.i],own=cap&&!blockWords(text!=null?text:stepText(st));if(G.askOpen&&S.dockH!=="full")S.dockH="full";var ts=talkState(),compact=S.dockH==="compact",d=null;
-  if(!compact){d=document.createElement("div");d.className="gdock h-"+S.dockH;d.setAttribute("role","region");d.setAttribute("aria-label",TXT("dock_label"));d.innerHTML=dockHtml(S.dockH);ph.appendChild(d)}
-  /* the words: Azu's own in its bubble (above the dock), or in the dock's line; a block's words are lit in the block, so the line shows the step */
-  if(cap){if(own&&(compact||S.guideCfg.bubbles==="own"&&S.dockH!=="full")){var b=document.createElement("div");b.className="gbubble";b.setAttribute("role","status");cap.classList.add("gb-text");b.appendChild(cap);ph.appendChild(b);placeBubble()}
-    else if(d&&(own||S.dockH==="full")){d.querySelector(".gd-cap").appendChild(cap)}else cap.remove()}
-  var th=d&&d.querySelector(".gd-thread");if(th)th.scrollTop=th.scrollHeight;var m=ph.querySelector(".mascot");if(m)m.dataset.state=ts});
-/* the dock's markup reaches the phone's signature: its height at the start, its controls at Mini, its chips */
-on("modelSig.sig",function(h){if(!sigWant(/guideCfg\.(dockStart|miniCtl|chips|panel)/))return h;var keep=S.dockH;S.dockH=S.guideCfg.dockStart;var x="#dock:"+S.guideCfg.panel+"|"+S.dockH+"|"+(S.dockH==="compact"?"":dockHtml(S.dockH));S.dockH=keep;return h+x});
+  var st=S.guideSteps[G.i],t=text!=null?text:stepText(st),own=cap&&!blockWords(t);G.tpText=t;if(G.askOpen&&S.dockH!=="full")S.dockH="full";if(S.dockH!=="peek")G.typing=false;
+  var ts=talkState(),compact=S.dockH==="compact",L=dkLook(),line=L==="paper"||L==="prompter",d=null;
+  if(!compact){d=document.createElement("div");d.className="gdock h-"+S.dockH+" lk-"+L;d.dataset.h=S.dockH;d.dataset.look=L;d.setAttribute("role","region");d.setAttribute("aria-label",TXT("dock_label"));d.innerHTML=dockHtml(S.dockH);ph.appendChild(d)}
+  /* the words: Azu's own in its bubble (Compact; Mini of a Look with no line), else in the panel; a block's words are lit in the block */
+  if(cap){if(own&&(compact||S.guideCfg.bubbles==="own"&&(S.dockH==="mini"&&(!line||!dkWordsOn())||S.dockH==="peek"&&dkWordsOff()))){var b=document.createElement("div");b.className="gbubble";b.setAttribute("role","status");cap.classList.add("gb-text");b.appendChild(cap);ph.appendChild(b);placeBubble()}
+    else cap.remove()}
+  var th=d&&d.querySelector(".gd-thread");if(th){var nw=th.querySelector(".gm-now");th.scrollTop=nw&&!G.askOpen?Math.max(0,nw.offsetTop-th.offsetTop-24):th.scrollHeight}var m=ph.querySelector(".mascot");if(m)m.dataset.state=ts;
+  if(d){dkTick();barsStart();if(!oldR)dkMorph(G.morphFrom||dkStarAt(),d,L);else if(oldH!==S.dockH&&oldL===L)dkMorph(oldR,d,L);else if(G.morph&&performance.now()<G.morph.end)dkHold(d)}else if(oldR)dkMorph(oldR,null,oldL);G.morphFrom=null;
+  if(d&&G.typing){var gi=d.querySelector("#gq");if(gi)gi.focus({preventScroll:true})}});
+/* ----- the ✦ grows into the panel (Morph.dc.html): a tap on the ✦, or a tour starting, widens the ✦'s circle into the pill, then the
+   panel (320 ms); the ✦ fades out and stays hidden while the panel shows (world/guide-button.js); closing shrinks the panel back into the
+   ✦. A change of height glides the same way. Reduce Motion: a crossfade. Unity: the panel's width, height, border-radius and position
+   animated (USS transitions, or experimental.animation with the named ease-out curve: no cubic-bezier in 6.3), its children's opacity
+   from Azu down, the ✦'s opacity ----- */
+function phRect(el){var pr=ph.getBoundingClientRect(),q=pr.height/(ph.offsetHeight||1),r=el.getBoundingClientRect();return{l:(r.left-pr.left)/q,t:(r.top-pr.top)/q,w:r.width/q,h:r.height/q}}
+/* where the ✦ is (or would be): the tour's ✦ at Compact, the card's, else its corner */
+function dkStarAt(){var b=ph.querySelector(".gbtn-wrap .gbtn");if(b&&b.getClientRects().length)return phRect(b);return{l:S.guideCfg.gbSide==="right"?ph.offsetWidth-68:12,t:ph.offsetHeight-78,w:56,h:56}}
+var MORPH_MS=320;
+function dkHold(d){d.classList.add("gd-in");if(G.morph.end-performance.now()>200){d.classList.add("gd-in0");setTimeout(function(){d.classList.remove("gd-in0")},Math.max(0,G.morph.end-performance.now()-200))}setTimeout(function(){d.classList.remove("gd-in","gd-in0")},Math.max(0,G.morph.end-performance.now())+30)}
+/* a morph's end: the panel on the screen now shows its own surface (a redraw during the morph made a new one) */
+function dkMorphEnd(my){if(G.morph===my)G.morph=null;var c=ph.querySelector(".gdock");if(c)c.classList.remove("gd-in","gd-in0")}
+function dkMorph(from,d,L){var old=ph.querySelector(".gd-morph");if(old)old.remove();var to=d?phRect(d):null;
+  if(S.reduce){if(d&&d.animate)d.animate([{opacity:0},{opacity:1}],{duration:200,easing:"ease-out"});if(!d)dkStarIn(200);return}
+  var s=document.createElement("div");s.className="gd-morph lk-"+L+(d?" grow":" shrink");s.setAttribute("aria-hidden","true");s.innerHTML='<span class="gd-mstar">'+GBSTAR+'</span>';
+  var cs=d&&getComputedStyle(d),surf=d?(L==="prompter"?getComputedStyle(ph).getPropertyValue("--paper"):cs.backgroundColor):null,rad=d?(L==="prompter"?"28px":cs.borderRadius):null,star=function(r){return{left:r.l+"px",top:r.t+"px",width:r.w+"px",height:r.h+"px",borderRadius:Math.min(r.w,r.h)/2+"px"}};
+  var go=function(a,b,ab,bb,ar,br){Object.assign(s.style,a,{background:ab,borderRadius:ar||a.borderRadius});ph.appendChild(s);s.style.transitionDuration=MORPH_MS+"ms";void s.offsetWidth;s.classList.add("go");Object.assign(s.style,b,{background:bb,borderRadius:br||b.borderRadius})};
+  var end=performance.now()+MORPH_MS,my=G.morph={end:end};
+  if(d){d.classList.add("gd-in","gd-in0");setTimeout(function(){d.classList.remove("gd-in0")},from.w>80?60:120);var A=star(from),B={left:to.l+"px",top:to.t+"px",width:to.w+"px",height:to.h+"px"};if(from.w>80){A.borderRadius=rad}
+    go(A,B,from.w>80?surf:"#16181C",surf,null,rad);setTimeout(function(){dkMorphEnd(my);s.remove()},MORPH_MS+20);return}
+  /* closing: into the ✦ (once it is drawn: the tour's at Compact, the card's after the tour) */
+  Object.assign(s.style,{left:from.l+"px",top:from.t+"px",width:from.w+"px",height:from.h+"px",borderRadius:"28px",background:"rgba(22,24,28,.9)"});ph.appendChild(s);
+  requestAnimationFrame(function(){var tgt=dkStarAt();go({left:from.l+"px",top:from.t+"px",width:from.w+"px",height:from.h+"px",borderRadius:"28px"},star(tgt),"rgba(22,24,28,.9)","#16181C");s.classList.add("into");
+    var w=ph.querySelector(".gbtn-wrap");if(w)w.classList.add("gd-arriving");setTimeout(function(){s.remove();var w2=ph.querySelector(".gbtn-wrap.gd-arriving");if(w2)w2.classList.remove("gd-arriving");dkMorphEnd(my)},MORPH_MS+20)})}
+function dkStarIn(ms){var w=ph.querySelector(".gbtn-wrap");if(w&&w.animate)w.animate([{opacity:0},{opacity:1}],{duration:ms,easing:"ease-out"})}
+/* the dock's markup reaches the phone's signature: its Look, its height at the start and its Open, its controls at Mini, its parts */
+on("modelSig.sig",function(h){if(!sigWant(/guideCfg\.(dockStart|miniCtl|chips|panel|look|pWords|pBars|pSpeed)/))return h;var keep=S.dockH;S.dockH=S.guideCfg.dockStart;var x="#dock:"+S.guideCfg.panel+"|"+S.dockH+"|"+(S.dockH==="compact"?"":dockHtml(S.dockH))+"|"+dockHtml("peek");S.dockH=keep;return h+x});
 /* the bubble sits just above the dock, its tail towards Azu */
-function placeBubble(){var b=ph.querySelector(".gbubble"),d=ph.querySelector(".gdock")||ph.querySelector(".gbtn-wrap.intour"),m=ph.querySelector(".mascot");if(!b)return;var top=d?d.offsetTop:ph.offsetHeight-16;
+function placeBubble(){var b=ph.querySelector(".gbubble"),d=ph.querySelector(".gdock")||ph.querySelector(".gbtn-wrap.intour"),m=ph.querySelector(".mascot");if(!b)return;var hd=d&&d.querySelector(".gd-hide"),top=d?Math.min(phRect(d.querySelector(".gd-mrow")||d).t,hd?phRect(hd).t:1e9):ph.offsetHeight-16;
   b.style.bottom=(ph.offsetHeight-top+10)+"px";var up=m&&m.offsetTop+30<top-b.offsetHeight-10;b.classList.toggle("tail-up",!!up)}
 /* the free height for the block being told: above the dock and the bubble */
 function freeHeight(){var box=scr.getBoundingClientRect(),lo=box.bottom;[".gcap",".gbar",".gdock",".gbubble",".gbtn-wrap.intour"].forEach(function(s){var e=ph.querySelector(s);if(e){var r=e.getBoundingClientRect();if(r.height)lo=Math.min(lo,r.top)}});return{top:box.top,bottom:lo}}
@@ -4924,7 +5376,8 @@ function freeHeight(){var box=scr.getBoundingClientRect(),lo=box.bottom;[".gcap"
 /* a bubble shows one sentence at a time (2 lines at most), the sentence being said */
 function bubbleSentence(){var b=ph.querySelector(".gbubble .gcap");if(!b)return;var ws=b.querySelectorAll(".gw"),k=Math.max(0,G.hl&&G.hl.k>=0?G.hl.k:0),sid=[],n=0;
   for(var i=0;i<ws.length;i++){sid.push(n);if(/[.!?…]["”»)]*$/.test(ws[i].textContent))n++}var cur=sid[Math.min(k,ws.length-1)];for(var j=0;j<ws.length;j++)ws[j].classList.toggle("gb-off",sid[j]!==cur)}
-setInterval(function(){if(!G.on||!dockOn())return;bubbleSentence();var t=ph.querySelector(".gd-talk"),ts=talkState();if(t&&!t.classList.contains("s-"+ts)){t.className="gd-talk s-"+ts;var h=ph.querySelector(".gd-hint");if(h)h.textContent=TXT(TALKW[ts]);var m=ph.querySelector(".mascot");if(m)m.dataset.state=ts}placeBubble()},150);
+setInterval(function(){if(!G.on||!dockOn())return;bubbleSentence();var t=ph.querySelector(".gd-talk"),ts=talkState(),m=ph.querySelector(".mascot");if(m&&m.dataset.state!==ts)m.dataset.state=ts;/* Azu's state follows at every height (round 11: the Mini has no talk button) */if(t&&!t.classList.contains("s-"+ts)){t.className="gd-talk s-"+ts;var h=ph.querySelector(".gd-hint");if(h){h.textContent=TXT(TALKW[ts]);h.classList.toggle("on",/listening|thinking|interrupted|notheard/.test(ts))}}
+  var stt=ph.querySelector(".gd-status");if(stt){var w=dkStatus(ts);if(stt.innerHTML!==w)stt.innerHTML=w}if(ph.querySelector(".gd-bars"))barsStart();placeBubble()},150);
 /* the conversation: the tour's lines and the questions and answers */
 on("runStep.after",function(){var st=S.guideSteps[G.i];if(st){var t=stepText(st);if(t&&(!G.thread.length||G.thread[G.thread.length-1].text!==t))G.thread.push({who:"azu",text:t});if(G.thread.length>60)G.thread.shift()}});
 on("ask.before",function(q){G.thread.push({who:"me",text:q.trim()});G.micNote="";G.talk="idle"});
@@ -4951,30 +5404,45 @@ ph.addEventListener("pointerup",function(e){if(!talkDown)return;var td=talkDown;
   if(td.hold){if(G.rec)try{G.rec.stop()}catch(x){}return}
   if(S.guideCfg.talk==="hold"){G.talk="notheard";G.micNote="";renderGuide();var h=ph.querySelector(".gd-hint");if(h)h.textContent=TXT("dock_hold_hint");setTimeout(function(){G.talk="idle";renderGuide()},1600);return}
   if(G.rec){try{G.rec.stop()}catch(x){}return}listen(false)},true);
-/* the dock's own taps: its height, play / pause on the line, typing, a step's segment, a suggested question */
-ph.addEventListener("click",function(e){var t=e.target.closest("[data-dock],[data-gseg],[data-chip]");if(!t||!ph.querySelector(".gdock"))return;e.stopPropagation();
+/* the dock's own taps: its height, play / pause on the line, typing, Read all, a suggested question (a step's segment is the progress
+   bar's: guide/controls.js seeks) */
+ph.addEventListener("click",function(e){var t=e.target.closest("[data-dock],[data-chip]");if(!t||!ph.querySelector(".gdock"))return;e.stopPropagation();
   if(t.dataset.chip!=null){ask(L(S.guideAsks[+t.dataset.chip]));return}
-  if(t.dataset.gseg!=null){stopSpeech();G.paused=false;G.askOpen=false;S.dockH=S.dockH==="full"?"peek":S.dockH;G.i=+t.dataset.gseg;runStep();return}
   var k=t.dataset.dock;if(k==="hide"){S.dockH="compact";G.askOpen=false;renderGuide();return}if(k==="cycle"){S.dockH={mini:"peek",peek:"full",full:"mini"}[S.dockH];G.askOpen=S.dockH==="full";renderGuide();return}
+  if(k==="mini"){S.dockH="mini";G.askOpen=false;renderGuide();return}
+  if(k==="readall"){S.dockH=S.dockH==="full"?"peek":"full";G.askOpen=false;renderGuide();return}
   if(k==="playpause"){if(S.dockH==="full")return;if(G.paused)resumeTour();else{G.explicitPause=true;pauseTour();G.explicitPause=false}return}
-  if(k==="type"){S.dockH="full";G.askOpen=true;renderGuide();var i=ph.querySelector("#gq");if(i)i.focus({preventScroll:true})}},true);
-/* a swipe on the grabber: up raises the dock one height, down lowers it; down at Mini hides it (Compact) when Swipe down to Compact is on */
-var grabY=null;ph.addEventListener("pointerdown",function(e){if(e.target.closest(".gd-grab"))grabY=e.clientY},true);
-ph.addEventListener("pointerup",function(e){if(grabY==null)return;var dy=e.clientY-grabY;grabY=null;if(Math.abs(dy)<24)return;var o=["compact","mini","peek","full"],i=o.indexOf(S.dockH),lo=S.guideCfg.swipeCompact?0:1;
-  S.dockH=o[Math.max(lo,Math.min(3,i+(dy<0?1:-1)))];G.askOpen=S.dockH==="full";e.stopPropagation();renderGuide()},true);
+  /* the keyboard: Open (Peek) with the typed question focused */
+  if(k==="type"){S.dockH="peek";G.typing=true;G.askOpen=false;renderGuide();var i=ph.querySelector("#gq");if(i)i.focus({preventScroll:true})}},true);
+/* a swipe on the grabber (the handle, the open chevron) or on the Mini: up raises the dock one height, down lowers it; down at Mini
+   hides it (Compact) when Swipe down to Compact is on */
+/* the swipe ends wherever the finger lifts (the Mini sits at the foot: a swipe down leaves the phone), so its end is heard on the document */
+var grabY=null;ph.addEventListener("pointerdown",function(e){if(e.target.closest(".gd-grab,.gdock.h-mini .gd-mrow"))grabY=e.clientY},true);
+document.addEventListener("pointerup",function(e){if(grabY==null)return;var dy=e.clientY-grabY;grabY=null;if(Math.abs(dy)<24)return;var o=["compact","mini","peek","full"],i=o.indexOf(S.dockH),lo=S.guideCfg.swipeCompact?0:1;
+  S.dockH=o[Math.max(lo,Math.min(3,i+(dy<0?1:-1)))];G.askOpen=S.dockH==="full";G.swiped=performance.now();e.stopPropagation();renderGuide()},true);
+/* a swipe is not a tap: the click that follows it does nothing */
+ph.addEventListener("click",function(e){if(G.swiped&&performance.now()-G.swiped<400&&e.target.closest(".gdock")){G.swiped=0;e.stopPropagation();e.preventDefault()}},true);
 ph.addEventListener("submit",function(e){var f=e.target.closest(".gd-form");if(!f)return;e.preventDefault();e.stopPropagation();var i=f.querySelector("#gq");if(i&&i.value.trim()){var q=i.value;i.value="";ask(q)}},true);
 
 /* Editor: Guide tab > Guide panel (after Captions); Specific Marker > Guide script > Suggested questions */
+var LOOKW={paper:"Paper glass: the card's paper as a glass pill (Mini: Azu, the step, a line of words, Pause) and a glass panel (Open: Azu and its voice's bars, the words, the stops as segments, the controls with a terracotta Play, the ask field and the questions).",
+  ink:"Ink glass (the Architect's pick): a dark capsule (Mini: Azu inside its progress ring, the voice's bars, a saffron Pause) and a dark glass panel (Open: Azu beside the words, the line said now large with its word in saffron, a line with a dot for each stop, the controls around a large saffron Play, the questions, the ask field and the microphone in its ring).",
+  player:"Player sheet: a music player's mini bar docked at the foot (Mini: Azu, the step's name, the time, Pause, Next) and a white sheet (Open: the words in a caption card with Read all, a scrubber, the time and what is left, a large black Play, the questions, a dark ask bar with Voice).",
+  prompter:"Teleprompter: no box; one line of words over the paper's fade and a small capsule (Mini); Open: the words scroll up large over the fade, a hairline with its knob, the questions and the keyboard, and a capsule of controls beside a terracotta microphone."};
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var ca=d.querySelector('[data-fo="s7cap"]');if(!ca)return d.innerHTML;
   ca.insertAdjacentHTML("beforebegin",comp("s7dock","one panel for the tour's words, its controls and the conversation",
-    row("Panel",pseg("guideCfg.panel",["dock","classic"],["Dock","Classic"]),"Dock: one panel at the bottom with its heights: Mini (the step, the words, Pause, Stop and the talk button), Peek (+ previous, next, sound, captions, the keyboard and the suggested questions), Full (the conversation and a text field), and Compact (hidden: the voice goes on, the guide's button shows the progress and a pause). The grabber or a swipe changes its height; the chevron hides it. Classic: the captions box over the control bar.")+
-    row("Starts at",pseg("guideCfg.dockStart",["mini","peek","compact"],["Mini","Peek","Compact"]),"Its height when the tour starts. Compact: the tour starts hidden; a tap on the guide's button brings the dock at Mini.",true)+
-    row("Controls at Mini",pseg("guideCfg.miniCtl",["pausestop","pause","line"],["Pause + Stop","Pause only","Tap on the line"]),"Pause + Stop: two buttons (44 px) beside the talk button, always in sight; the keyboard moves to Peek. Pause only: the same without Stop (Stop is at Peek). Tap on the line: no buttons; a tap on the dock's line pauses or plays, and the keyboard stays beside the talk button.",true)+
-    row("Swipe down to Compact",pseg("guideCfg.swipeCompact",["true","false"],["On","Off"]),"On: a swipe down on the grabber at Mini hides the dock (Compact); the voice goes on. Off: Mini is the lowest a swipe goes; the chevron and the guide's button still hide it.",true)+
-    row("Azu's own words",pseg("guideCfg.bubbles",["own","panel"],["In a bubble","In the panel"]),"In a bubble: what Azu says in its own words (the welcome, an ask, an answer) appears in a bubble above the panel, its tail towards Azu; a block's words light up in the block itself, with no bubble. Every line also goes to the conversation (Full).")+
-    row("Talk button",pseg("guideCfg.talk",["both","tap","hold"],["Tap or hold","Tap","Hold"]),"Tap: listens until the visitor stops speaking; a second tap sends. Hold: listens while held, sends on release. While Azu speaks, the button interrupts it and listens. The keyboard is always beside it. Never always-listening.")+
+    row("Panel",pseg("guideCfg.panel",["dock","classic"],["Dock","Classic"]),"Dock: one panel at the bottom in its Look, with its heights: Mini (the Look's pill, capsule, mini player or one line: the step, the voice, Pause and Stop), Peek (Open: the panel with the words, the progress, the controls, the questions and the ask field), Full (Open with the whole text: Read all) and Compact (hidden: the voice goes on, the guide's button shows the progress and a pause). The ✦ grows into it and it shrinks back into the ✦. The grabber or a swipe changes its height; the chevron hides it. Classic: the captions box over the control bar.")+
+    row("Look",pseg("guideCfg.look",DLOOKS.map(function(x){return x[0]}),DLOOKS.map(function(x){return x[1]})),LOOKW[dkLook()]+" Each in light and dark, the same controls, the same heights. Unity: one UXML template per Look with the same element names, swapped with its USS; no backdrop blur (a translucent fill with a light edge), a gradient as a ramp texture.",true)+
+    row("Words",pseg("guideCfg.pWords",["prompter","off"],["Teleprompter","Off"]),"Teleprompter: the line said now, its spoken word marked, the line before faded above it and the next below; they move up as the voice goes on (never fixed bubbles). The visitor's Aa shows or hides them, Read all shows the whole text. Off: no words in the panel (a block's words still light up in the block; Azu's own words go to its bubble).",true)+
+    row("Voice moving",pseg("guideCfg.pBars",["true","false"],["On","Off"]),"On: bars (Ink glass's Mini: with Azu's ring) move only while the voice speaks: a recorded or live voice by its level (the Lab: an AnalyserNode where the page may read the audio, else the line's own mouth curve or its word times; Unity: AudioSource.GetOutputData), the device voice by its word events. Still when paused.",true)+
+    row("Speed button",pseg("guideCfg.pSpeed",["true","false"],["Shown","Hidden"]),"A chip in the controls: 0.5× · 0.75× · 1× · 1.25× · 1.5× · 1.75× · 2×, the visitor's own (the voice follows at once); its first value is Narration › Speed.",true)+
+    row("Starts at",pseg("guideCfg.dockStart",["mini","peek","compact"],["Mini","Peek","Compact"]),"Its height when the tour starts (the ✦ grows into it). Compact: the tour starts hidden; a tap on the guide's button brings the dock at Mini.",true)+
+    row("Controls at Mini",pseg("guideCfg.miniCtl",["pausestop","pause","line"],["Pause + Stop","Pause only","Tap on the line"]),"Pause + Stop: two buttons (44 px) in the Mini, in the Look's style. Pause only: the same without Stop (Stop is in Open). Tap on the line: no buttons; a tap on the Mini's line (or the voice's bars) pauses or plays, and a keyboard button asks by typing.",true)+
+    row("Swipe down to Compact",pseg("guideCfg.swipeCompact",["true","false"],["On","Off"]),"On: a swipe down on the Mini hides the dock (Compact); the voice goes on. Off: Mini is the lowest a swipe goes; the chevron and the guide's button still hide it.",true)+
+    row("Azu's own words",pseg("guideCfg.bubbles",["own","panel"],["In a bubble","In the panel"]),"In a bubble: what Azu says in its own words (the welcome, an ask, an answer) appears in a bubble above the Mini, its tail towards Azu, in the Looks whose Mini has no line of words (Ink glass, Player sheet) and at Compact; Paper glass and Teleprompter show them in their Mini's line. In Open the words are the panel's. A block's words light up in the block itself. Every line also goes to the whole text (Full).")+
+    row("Talk button",pseg("guideCfg.talk",["both","tap","hold"],["Tap or hold","Tap","Hold"]),"The microphone in Open, beside the ask field. Tap: listens until the visitor stops speaking; a second tap sends. Hold: listens while held, sends on release. While Azu speaks, the button interrupts it and listens. Its states show on it and in words under it (listening, thinking, go ahead, not heard). Never always-listening.")+
     row("Sounds",pseg("guideCfg.earcons",["true","false"],["On","Off"]),"A short rising tone when it starts listening and a falling one when it stops (under 300 ms). With a light haptic.")+
-    row("Suggested questions",pseg("guideCfg.chips",["true","false"],["Shown","Hidden"]),"Chips in the Peek height (the point's own, in the Guide script). A tap asks it.")+
+    row("Suggested questions",pseg("guideCfg.chips",["true","false"],["Shown","Hidden"]),"Chips in Open (the point's own, in the Guide script), ready to tap: a tap asks it.")+
     row("Try",'<button class="del" type="button" data-docktry="1">Try</button>',"Starts the tour with the dock.")));
   var f=innerOf(d,"s7dock");if(f)f.insertAdjacentHTML("beforeend",ownbar("s7dock")+ownPanels("s7dock"));return d.innerHTML});
 on("edMarker.html",function(h){var d=document.createElement("div");d.innerHTML=h;var f=innerOf(d,"m3");if(!f)return d.innerHTML;
@@ -5009,9 +5477,10 @@ function besideWords(m,y,top,lo,el){if(!el)return y;var boxes=wordBoxes(el);if(!
   boxes.forEach(function(b){[b.t-h-3,b.b+3].forEach(function(c){if(c<top||c>lo||azuOver(m,c,boxes).length)return;if(best===null||Math.abs(c-y)<Math.abs(best-y))best=c})});
   return best===null?y:best}
 /* each row's demo: the tour at that height, the part ringed; a swipe; the talk button; the chips at Peek */
-rowDemos({"guideCfg.panel":{tour:"g1",ring:".gdock|.gbar"},"guideCfg.dockStart":{tour:"g1",ring:".gdock|.gbtn-wrap.intour"},"guideCfg.miniCtl":{tour:"g1",dock:"mini",ring:".gd-mini|.gd-line"},
+rowDemos({"guideCfg.look":{tour:"g1",dock:"peek",ring:".gdock"},"guideCfg.pWords":{tour:"g1",dock:"peek",ring:".gd-tp|.gd-wrow|.gdock"},"guideCfg.pBars":{tour:"g1",dock:"mini",ring:".gd-bars|.gdock"},
+  "guideCfg.pSpeed":{tour:"g1",dock:"peek",ring:".gd-speed|.gd-ctl"},"guideCfg.panel":{tour:"g1",ring:".gdock|.gbar"},"guideCfg.dockStart":{tour:"g1",ring:".gdock|.gbtn-wrap.intour"},"guideCfg.miniCtl":{tour:"g1",dock:"mini",ring:".gd-mini|.gd-line"},
   "guideCfg.swipeCompact":{tour:"g1",dock:"mini",act:function(){var g=ph.querySelector(".gd-grab");if(g)gsTouch(g,90)},ring:function(){return S.dockH==="compact"?".gbtn-wrap.intour":".gd-grab"}},
-  "guideCfg.bubbles":{tour:true,ring:".gbubble|.gd-cap"},"guideCfg.talk":{tour:"g1",ring:".gd-talk"},"guideCfg.earcons":{tour:"g1",act:function(){earcon(true)},ring:".gd-talk"},"guideCfg.chips":{tour:"g1",dock:"peek",ring:".gd-chips"}});
+  "guideCfg.bubbles":{tour:true,ring:".gbubble|.gd-tp"},"guideCfg.talk":{tour:"g1",dock:"peek",ring:".gd-talk"},"guideCfg.earcons":{tour:"g1",dock:"peek",act:function(){earcon(true)},ring:".gd-talk"},"guideCfg.chips":{tour:"g1",dock:"peek",ring:".gd-chips"}});
 
 /* The voice: one order of sources for every line (sayOrder): a recorded line (recSay), the live voice (say.live), then the device voice (sayDevice); the device voices per language; what speaks now and why (G.sayNow, Speaking now). */
 /* ----- the order of sources, written once, for every line (the tour's, Azu's own words, the answers) -----
@@ -5030,12 +5499,23 @@ function sayFrom(src,text,onWord,onEnd,why){var line=G.sayLine&&G.sayLine.text==
 function sayDevice(text,onWord,onEnd){emitLatestFirst("sayDevice.before",text,onWord,onEnd);var end=function(){emit("sayDevice.ended");onEnd()};
   var go=function(){stopSpeech();var words=[],re=/\S+/g,m;while((m=re.exec(text)))words.push({i:m.index,w:m[0]});G.words=words;
     var v=voiceFor(S.lang);musicDuck(true);
-    if(v&&!S.guideMute){var u=new SpeechSynthesisUtterance(text);u.voice=v;u.lang=v.lang;u.rate=S.guideCfg.speed;
+    if(v&&!S.guideMute){var u=new SpeechSynthesisUtterance(text);u.voice=v;u.lang=v.lang;u.rate=guideSpeed();G.rate=u.rate;
       u.onboundary=function(e){if(e.name&&e.name!=="word")return;var k=0;for(var j=0;j<words.length;j++)if(words[j].i<=e.charIndex)k=j;onWord(k)};
       u.onend=function(){musicDuck(false);if(G.utter===u)end()};G.utter=u;speechSynthesis.speak(u)}
-    else{var k=0,per=60000/(170*S.guideCfg.speed);onWord(0);G.timer=setInterval(function(){if(G.paused)return;k++;if(k>=words.length){clearInterval(G.timer);G.timer=null;musicDuck(false);end();return}onWord(k)},per)}
+    else{var k=0,per=60000/(170*guideSpeed());G.rate=guideSpeed();onWord(0);G.timer=setInterval(function(){if(G.paused)return;k++;if(k>=words.length){clearInterval(G.timer);G.timer=null;musicDuck(false);end();return}onWord(k)},per)}
     emit("sayDevice.started",text)};
   if(firstAnswer("sayDevice.wait",go)===undefined)go();emit("sayDevice.after",text)}
+/* the voice's speed: the visitor's (the panel's speed chip, Settings › The guide), else Narration › Speed (round 11: 0.5-2) */
+function guideSpeed(){var v=S.vis&&S.vis.speed!=null?+S.vis.speed:+S.guideCfg.speed;return v>0?v:1}
+/* the voice's level now, 0-1, for the panel's bars (round 11): still when nothing speaks or the line is paused; a recorded or live line by
+   its own level (an AnalyserNode where the page may read its audio: mascot/mouth.js's loudness; else its mouth curve; else its word
+   times); the device voice (or the words by time) by its word events. Unity: AudioSource.GetOutputData's RMS for an audio, the
+   TextToSpeech word callbacks (Android onRangeStart, iOS willSpeakRangeOfSpeechString) for the device voice */
+function voiceLevel(){if(!G.on||G.paused||G.moment)return 0;var a=G.recAudio,now=performance.now();
+  if(a){if(a.paused)return 0;if(typeof LD!=="undefined"&&LD.audio===a&&LD.lvl>0)return Math.min(1,LD.lvl*1.4);
+    if(typeof MT!=="undefined"&&MT.audio===a&&MT.track){var tr=MT.track,i=Math.min(tr.f.length-1,Math.floor(a.currentTime*tr.fps));if(i>=0)return Math.min(1,tr.f[i][0]*1.6+.08)}}
+  else if(!G.utter&&!G.timer)return 0;
+  var h=G.hl;if(!h||h.k<0||h.ended)return 0;var w=G.words[h.k],dt=now-h.at,len=w?w.w.length:4;return Math.max(0,Math.min(1,(.55+len*.05)*Math.exp(-dt/(260+len*30))))}
 function stopSpeech(){emitLatestFirst("stopSpeech.before");if(window.speechSynthesis)speechSynthesis.cancel();G.utter=null;if(G.timer){clearInterval(G.timer);G.timer=null}}
 S.guideCfg.voice_en="";S.guideCfg.voice_pt="";
 /* the browser loads its voices lazily: the first getVoices() is empty, so the tour's first step had no voice (captions only) */
@@ -5070,7 +5550,7 @@ function recSay(text,onWord,onEnd){var set=currentSet();if(!set)return{not:"no r
   var r=recFile(text,set);if(!r)return{not:"this line is not recorded in "+setName(set),short:"not recorded"};
   stopSpeech();var words=[],re=/\S+/g,m;while((m=re.exec(text)))words.push({i:m.index,w:m[0]});G.words=words;G.recWords=r.file.words;
   G.hl={k:-1,at:0,p:0,cpm:0,ended:false,last:0,seen:true,start:performance.now(),target:G.hl&&G.hl.target};G.noVoice=false;
-  var a=new Audio(r.url);a.preload="auto";a.muted=!!S.guideMute;a.playbackRate=S.guideCfg.speed||1;G.recAudio=a;G.utter={recorded:true};G.lastWordAt=performance.now();musicDuck(true);
+  var a=new Audio(r.url);a.preload="auto";a.muted=!!S.guideMute;a.playbackRate=guideSpeed();G.rate=a.playbackRate;G.recAudio=a;G.utter={recorded:true};G.lastWordAt=performance.now();musicDuck(true);
   var fin=function(){if(G.recAudio!==a)return;G.recAudio=null;G.utter=null;G.recWords=null;musicDuck(false);if(G.hl)G.hl.ended=true;onEnd()};
   a.addEventListener("ended",fin);a.addEventListener("error",function(){if(G.recAudio!==a)return;G.recAudio=null;G.utter=null;G.recWords=null;sayFrom("recorded",text,onWord,onEnd,{not:"the recording did not play",short:"the recording did not play"})});
   var tick=function(){if(G.recAudio!==a)return;var t=a.currentTime,w=G.recWords,k=-1;for(var j=0;j<w.length;j++){if(w[j][0]<=t+.02)k=j;else break}
@@ -5153,6 +5633,31 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   return d.innerHTML});
 /* the row's demo: Stop pressed mid-sentence at Mini: the toast, or the question */
 rowDemos({"guideCfg.stopUndo":{tour:"g5",dock:"mini",act:function(){var b=ph.querySelector('.gd-mini [data-g="stop"]')||ph.querySelector('.gd-ctl [data-g="stop"]');if(b)b.click()},ring:".gtoast|.gstopask"}});
+
+/* ----- round 11: the speed chip, the visitor's own: 0.5× · 0.75× · 1× · 1.25× · 1.5× · 1.75× · 2× in turn (its first value Narration ›
+   Speed); the voice follows at once: an audio's playbackRate, the device voice spoken again from its word at the new rate. Unity:
+   AudioSource.pitch with a pitch-shifter (the time stretch), or the TextToSpeech rate from the word ----- */
+var SPEEDS=[0.5,0.75,1,1.25,1.5,1.75,2];
+function speedNext(v){for(var i=0;i<SPEEDS.length;i++)if(SPEEDS[i]>v+1e-6)return SPEEDS[i];return SPEEDS[0]}
+function setGuideSpeed(v){S.vis.speed=v;G.rate=v;if(G.recAudio)G.recAudio.playbackRate=v;else if(G.on&&!G.paused&&(G.utter||G.timer)&&G.sayArgs)speakFrom(G.hl&&G.hl.k>=0?G.hl.k:0,false);
+  ph.querySelectorAll(".gd-speed").forEach(function(b){b.textContent=spd(v)+"×";b.setAttribute("aria-label",fmt(TXT("dock_speed"),spd(v)))});dkTick()}
+ph.addEventListener("click",function(e){var b=e.target.closest('[data-g="speed"]');if(!b)return;e.stopPropagation();setGuideSpeed(speedNext(guideSpeed()))},true);
+/* ----- round 11: the progress bar seeks. A drag (its hit area 44 px high) or a tap: the stop under the finger, and within it the sentence
+   at that place (its share of the stop's words); the knob and the time follow the finger, the voice goes there on release. Keys: ← → the
+   stop before / after. Unity: a PointerDown / Move / Up manipulator on the bar's element (CapturePointer), the same rule ----- */
+function seekAt(sk,x){var best=null;sk.querySelectorAll("[data-gseg]").forEach(function(s){var r=s.getBoundingClientRect();if(!best||x>=r.left)best={j:+s.dataset.gseg,r:r}});if(!best)return{j:G.i,f:0};
+  return{j:best.j,f:Math.max(0,Math.min(.999,(x-best.r.left)/Math.max(1,best.r.width)))}}
+function seekShow(d){var sk=d.sk.isConnected?d.sk:ph.querySelector(".gd-seek");if(!sk)return;d.sk=sk;dkKnob(sk,d.j,d.f);var T=dkTimes(),c=T.stops[d.j],el=c?c.at+d.f*(c.len-.7):0;
+  ph.querySelectorAll(".gdock .gd-time").forEach(function(t){var k=t.dataset.t;t.textContent=k==="both"?mmss(el)+" / "+mmss(T.tot):k==="el"?mmss(el):k==="rem"?"-"+mmss(T.tot-el):mmss(T.tot)})}
+/* to stop j, at the first word of the sentence at share f of its words */
+function seekTo(j,f){var st=S.guideSteps[j];if(!st||!G.on)return;var ws=stepText(st).match(/\S+/g)||[],k=Math.min(ws.length-1,Math.floor(f*ws.length)),s=0;for(var i=0;i<k;i++)if(/[.!?…]["”»)]*$/.test(ws[i]))s=i+1;
+  G.seekedTo={j:j,k:s};hideStopUi();stopSpeech();G.paused=false;G.waiting=false;G.tryWait=false;G.askOpen=false;G.startWord=s;if(S.dockH==="full")S.dockH="peek";G.i=j;runStep()}
+ph.addEventListener("pointerdown",function(e){var sk=e.target.closest(".gdock .gd-seek");if(!sk)return;e.preventDefault();e.stopPropagation();try{sk.setPointerCapture(e.pointerId)}catch(x){}
+  G.seekDrag=Object.assign({id:e.pointerId,sk:sk},seekAt(sk,e.clientX));sk.classList.add("dragging");seekShow(G.seekDrag)},true);
+ph.addEventListener("pointermove",function(e){var d=G.seekDrag;if(!d||e.pointerId!==d.id)return;e.stopPropagation();if(!d.sk.isConnected)d.sk=ph.querySelector(".gd-seek")||d.sk;Object.assign(d,seekAt(d.sk,e.clientX));seekShow(d)},true);
+["pointerup","pointercancel"].forEach(function(t){ph.addEventListener(t,function(e){var d=G.seekDrag;if(!d||e.pointerId!==d.id)return;G.seekDrag=null;e.stopPropagation();d.sk.classList.remove("dragging");if(t==="pointerup")seekTo(d.j,d.f)},true)});
+ph.addEventListener("keydown",function(e){var sk=e.target.closest&&e.target.closest(".gd-seek");if(!sk||!G.on)return;var j=e.key==="ArrowRight"?G.i+1:e.key==="ArrowLeft"?G.i-1:e.key==="Home"?0:e.key==="End"?S.guideSteps.length-1:null;
+  if(j==null||j<0||j>=S.guideSteps.length)return;e.preventDefault();seekTo(j,0);setTimeout(function(){var n=ph.querySelector(".gd-seek");if(n)n.focus({preventScroll:true})},0)},true);
 
 /* The blind Voice test: the voice sets side by side, stars, saved. */
 /* ----- the lines of this point, for the coverage and the test ----- */
@@ -5507,10 +6012,11 @@ function gbGo(k){G.fab.menu=false;
 /* a tour from a card at Half: the card rises to Full first (lowered again by the visitor, the tour goes on there) */
 /* a tour starting: the card's ✦, its Azu and their band go (the tour has its own ✦ above the dock); the redraw that puts the card at Full
    runs before G.on is set, so it is marked as the tour's (G.gb.tour): fabLayer draws no second ✦ and Azu behind the tour's (guidance round 7's look fix) */
-on("startTour.before",function(){G.fab.menu=false;ph.querySelectorAll(".gbtn-wrap,.gbmenu,.gbband").forEach(function(x){x.remove()});scr.style.paddingBottom="";if(S.view==="card"&&S.stop!=="full"){S.stop="full";G.gb.tour=true;try{renderPhone(true)}finally{G.gb.tour=false}}});
+on("startTour.before",function(){var b=ph.querySelector(".gbtn-wrap .gbtn");G.morphFrom=b&&b.getClientRects().length?phRect(b):null;G.fab.menu=false;ph.querySelectorAll(".gbtn-wrap,.gbmenu,.gbband").forEach(function(x){x.remove()});scr.style.paddingBottom="";if(S.view==="card"&&S.stop!=="full"){S.stop="full";G.gb.tour=true;try{renderPhone(true)}finally{G.gb.tour=false}}});
 on("stopTour.after",function(){ph.querySelectorAll(".gbtn-wrap.intour,.gbband.tour").forEach(function(x){x.remove()});fabLayer()});
-/* ----- during a tour: the ✦ above the dock (Mini, Peek) or where the dock was (Compact), with the progress ring and, at Compact, a pause; a tap shows or hides the dock ----- */
-on("renderGuide.after",function(){var o=ph.querySelector(".gbtn-wrap.intour");if(o)o.remove();if(!G.on||!gbOn()||!dockOn()||S.dockH==="full")return;
+/* ----- during a tour: the ✦ where the dock was (Compact), with the progress ring and a pause; a tap shows the dock again, the ✦ growing
+   into it. Round 11: while the panel shows (Mini, Peek, Full) the ✦ is hidden: it became the panel (guide/dock.js's dkMorph) ----- */
+on("renderGuide.after",function(){var o=ph.querySelector(".gbtn-wrap.intour");if(o)o.remove();if(!G.on||!gbOn()||!dockOn()||S.dockH!=="compact")return;
   ph.insertAdjacentHTML("beforeend",gbWrapHtml(true));var w=ph.querySelector(".gbtn-wrap.intour"),d=ph.querySelector(".gdock");w.style.bottom=(d?ph.offsetHeight-d.offsetTop+8:22)+"px";placeBubble();gbTourBand()});
 setInterval(function(){if(!G.on)return;var c=ph.querySelector(".gbtn.tour .pg"),b=ph.querySelector(".gbtn.tour .gb-bar"),p=gbProgress();if(c)c.style.strokeDasharray=(GBC*p).toFixed(1)+" "+GBC.toFixed(1);if(b)b.style.width=(p*100).toFixed(1)+"%";
   var w=ph.querySelector(".gbtn-wrap.intour"),d=ph.querySelector(".gdock");if(w)w.style.bottom=(d?ph.offsetHeight-d.offsetTop+8:22)+"px";gbTourBand()},200);
@@ -5519,7 +6025,7 @@ setInterval(function(){var b=ph.querySelector(".gbubble"),w=ph.querySelector(".g
 /* ----- the taps: the ✦ (its menu, or during a tour the dock), a menu item; a tap elsewhere closes the menu ----- */
 ph.addEventListener("click",function(e){var t=e.target.closest("[data-gbtn],[data-gbgo]");
   if(!t){if(G.fab.menu&&!e.target.closest(".gbmenu,.azfab")){G.fab.menu=false;fabLayer()}return}e.stopPropagation();
-  if(t.dataset.gbtn){if(G.on){S.dockH=S.dockH==="compact"?"mini":"compact";G.askOpen=false;renderGuide()}else gbMenu();return}
+  if(t.dataset.gbtn){if(G.on){if(S.dockH==="compact")G.morphFrom=phRect(t);S.dockH=S.dockH==="compact"?"mini":"compact";G.askOpen=false;renderGuide()}else gbMenu();return}
   if(t.dataset.gbgo){gbGo(t.dataset.gbgo);return}},true);
 /* what a tap on Azu does (mascot/azu2d.js asks): with the ✦ beside it, Mascot > Tap on Azu; as the button itself (Azu only), the ✦'s part.
    Points to the ✦ button pulls the guidance's The ✦ at once (guidance/service.js's gdPull; no ✦ to point at: it plays) */
@@ -5531,10 +6037,17 @@ var fabT=0;scr.addEventListener("scroll",function(){if(G.on||S.stop==="closed")r
 setInterval(function(){if(G.on||S.view!=="card"||S.stop==="closed"||S.stop==="peek")return;var had=!!ph.querySelector(".gbtn-wrap"),want=!heroStartSeen();if(had!==want)fabLayer();else if(had){gbClear();gbBand()}},400);
 /* ----- the guide's settings, where the visitor's Settings live: the voice, its speed and the captions (Who's exploring is there already) ----- */
 on("settingsPanel.html",function(h){var c=S.guideCfg,o=function(k,v,lab){return'<button type="button" data-gset="'+k+'|'+v+'" aria-pressed="'+(String(c[k])===v)+'">'+esc(lab)+'</button>'};
+  var mu=musicPick(),mo=function(id,lab){return'<button type="button" data-gmus="'+id+'" aria-pressed="'+(mu===id)+'">'+esc(lab)+'</button>'},
+    music=c.musicVis===false?"":'<div class="vmusic"><small>'+TXH("settings_music")+'</small><div class="vo vmus">'+mo("off",TXT("settings_music_off"))+musicTracks().map(function(t){return mo(t.id,L(t.name))}).join("")+'</div>'+(musicCredit(mu)?'<small class="vcredit">'+esc(musicCredit(mu))+'</small>':"")+
+      '<label class="vvol"><span>'+TXH("settings_music_vol")+'</span><input type="range" min="0" max="100" step="5" data-gmusvol="1" value="'+Math.round(musicVol()*100)+'" aria-label="'+TXH("settings_music_vol")+'"></label>'+(musicCredits().length?'<div class="vcredits"><small>'+TXH("settings_music_credits")+'</small>'+musicCredits().map(function(c){return'<p>'+esc(c)+'</p>'}).join("")+'</div>':"")+'</div>';
   var g='<div class="vguide"><small>'+TXH("settings_guide")+'</small><div class="vo">'+o("voice","recorded",TXT("settings_voice_rec"))+o("voice","device",TXT("settings_voice_dev"))+'</div>'+
-    '<div class="vo">'+o("speed","0.85",TXT("settings_slower"))+o("speed","1",TXT("settings_normal"))+o("speed","1.2",TXT("settings_faster"))+'</div><div class="vo">'+o("captions","true",TXT("settings_cc_on"))+o("captions","false",TXT("settings_cc_off"))+'</div></div>';
+    '<div class="vo">'+o("speed","0.85",TXT("settings_slower"))+o("speed","1",TXT("settings_normal"))+o("speed","1.2",TXT("settings_faster"))+'</div><div class="vo">'+o("captions","true",TXT("settings_cc_on"))+o("captions","false",TXT("settings_cc_off"))+'</div>'+music+'</div>';
   var i=h.indexOf("<small>"+TXH("settings_appearance"));if(i<0)i=h.indexOf("<small>");return i<0?h:h.slice(0,i)+g+h.slice(i)});
-ph.addEventListener("click",function(e){var t=e.target.closest("[data-gset]");if(!t)return;e.stopPropagation();var q=t.dataset.gset.split("|");S.guideCfg[q[0]]=q[0]==="speed"?parseFloat(q[1]):pval(q[1]);renderAll(true)},true);
+ph.addEventListener("click",function(e){var t=e.target.closest("[data-gset]");if(!t)return;e.stopPropagation();var q=t.dataset.gset.split("|");S.guideCfg[q[0]]=q[0]==="speed"?parseFloat(q[1]):pval(q[1]);if(q[0]==="speed")S.vis.speed=null;renderAll(true)},true);
+/* round 11: the visitor's music (Settings › The guide › Music): Off or a track's feeling, and its volume; it plays at once in a tour */
+ph.addEventListener("click",function(e){var t=e.target.closest("[data-gmus]");if(!t)return;e.stopPropagation();S.vis.music=t.dataset.gmus;musicApply();ph.querySelectorAll("[data-gmus]").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.gmus===S.vis.music))});
+  var c=ph.querySelector(".vmusic .vcredit"),w=musicCredit(S.vis.music);if(c&&!w)c.remove();else if(w){if(!c){c=document.createElement("small");c.className="vcredit";ph.querySelector(".vmus").after(c)}c.textContent=w}},true);
+ph.addEventListener("input",function(e){var t=e.target;if(!t.dataset||!t.dataset.gmusvol)return;e.stopPropagation();S.vis.musicVol=+t.value;musicSet(false)},true);
 /* the ✦ and Azu as the card shows them reach the phone's signature */
 on("modelSig.sig",function(h){if(!sigWant(/guideCfg\.(gb|azuTap)/))return h;var m=G.fab.menu;G.fab.menu=false;var x="#gb:"+gbWrapHtml(false);G.fab.menu=m;return h+x});
 
@@ -6239,7 +6752,7 @@ function lvSdk(){if(window.SpeechSDK)return Promise.resolve(window.SpeechSDK);if
    paused while its audio was being made, it waits for Resume ----- */
 function lvPlay(text,onWord,onEnd,r){var held=LV.held;stopSpeech();G.words=lvWords(text);G.recWords=r.words;G.visTrack=r.vis;
   G.hl={k:-1,at:0,p:0,cpm:0,ended:false,last:0,seen:true,start:performance.now(),target:G.hl&&G.hl.target};G.noVoice=false;
-  var url=URL.createObjectURL(new Blob([r.audio],{type:"audio/mpeg"})),a=new Audio(url),vi=-1;a.muted=!!S.guideMute;a.playbackRate=S.guideCfg.speed||1;
+  var url=URL.createObjectURL(new Blob([r.audio],{type:"audio/mpeg"})),a=new Audio(url),vi=-1;a.muted=!!S.guideMute;a.playbackRate=guideSpeed();G.rate=a.playbackRate;
   G.recAudio=a;G.utter={recorded:true,live:true};G.lastWordAt=performance.now();musicDuck(true);
   var rest=function(){var m=ph.querySelector(".mascot");if(m)azMouth(m,restShape(azMood()))};
   var fin=function(){if(G.recAudio!==a)return;G.recAudio=null;G.utter=null;G.recWords=null;G.visTrack=null;musicDuck(false);if(G.hl)G.hl.ended=true;URL.revokeObjectURL(url);rest();onEnd()};
@@ -6789,6 +7302,8 @@ function gdNever(it){var r=[],k=gdKindOf(it),g=gdGroupOf(it),ab=gdNameOf(GD_ABOU
   /* round 7: a point's joke has its words in Specific Marker › Guide script (a point with none says none: never a warning); a Moment only in a tour */
   if(it.form==="moment"&&it.duringTour!=="between")r.push("it is a Moment, but During a tour is Never: a Moment shows only between two steps of a tour");
   if(it.when==="between"&&it.duringTour!=="between")r.push("When Between tour steps, but During a tour is Never");
+  /* round 11: Fun is held while a tour plays, so a Fun item that comes only between tour steps cannot show (until its When changes) */
+  if(it.kind==="fun"&&it.when==="between")r.push("Fun is held while a tour plays, and it comes only between two tour steps: it cannot show until its When changes");
   if(it.ptJokes)return r;
   var says=[].concat(it.says||[]).filter(function(x){return S.tx[x]});langCodes().forEach(function(l){if(!says.some(function(x){return String(S.tx[x][l]||"").trim()}))r.push("it has no words in "+(GD_LANG_NAME[l]||l))});return r}
 /* + Add guidance's templates (_3.8 section 7): each a new item in the group it is added to, with its words (a Moment: form Moment, Azu's
@@ -6966,6 +7481,8 @@ function gdCheck(it,items,visitor,ctx,now){var vm=gdVisitOf(visitor,it.id),em=gd
   /* round 7: Fun never on a Solemn point (fixed for the kind) and no joke on a Solemn day */
   if(it.kindSolemnOff&&ctx.solemn)return{no:"a Solemn point: no fun here"};
   if(it.joke&&ctx.solemnDay)return{no:"a Solemn day ("+ctx.solemnDay+"): no jokes today"};
+  /* round 11: Fun never during a tour: every Fun item is held while a tour plays (not paused); fixed, no option */
+  if(it.kind==="fun"&&ctx.tour&&!ctx.tour.paused)return{no:"held while a tour plays: Fun never shows during a tour"};
   if(ctx.moment==="between"&&it.form!=="moment")return{no:"the tour moves on to its next step: only a Moment holds it"};
   if(it.form==="moment"&&ctx.moment!=="between")return{no:"a Moment comes only as the tour moves on to its next step"};
   if(ctx.tips==="essentials"&&!it.essential)return{no:"the visitor chose Essentials only (Settings › The guide › Tips)"};
@@ -7171,7 +7688,7 @@ function gdContext(){var t=-Infinity,mv=G.gd.movedAt,wa=G.gd.wallAt,st=ph.queryS
     panel:S.settingsOpen?"Settings":G.cam&&G.cam.open?"Ask about the view":G.fab&&G.fab.menu?"the ✦ menu":S.contentsOpen?"Contents":G.gd.tryOpen?"Things to try":null,
     dockFull:!!(G.on&&typeof dockOn==="function"&&dockOn()&&S.dockH==="full"),solemn:gdSolemnNow(),
     /* the tour: between two steps (as it moves on, nothing is said), its narration so far (since it started or the last Moment) and its last step next */
-    tour:G.on?{between:mo==="between"||!!G.gd.between&&!speaking,step:G.i,talked:Math.max(0,(performance.now()-(G.talkFrom||performance.now()))/1000),toEnd:!!(S.guideSteps[G.i+1]&&S.guideSteps[G.i+1].act==="end")}:null,
+    tour:G.on?{paused:!!G.paused,between:mo==="between"||!!G.gd.between&&!speaking,step:G.i,talked:Math.max(0,(performance.now()-(G.talkFrom||performance.now()))/1000),toEnd:!!(S.guideSteps[G.i+1]&&S.guideSteps[G.i+1].act==="end")}:null,
     movedAt:mv,touchAt:G.gd.touchAt,cardAt:S.view==="card"&&S.stop!=="closed"?G.gd.cardAt:null,
     onWall:gdOnWall(),where:S.view!=="card"?"the phone shows "+S.view:G.on?"the tour":S.stop!=="closed"?"a card is open":"",
     marker:gdMarker(),gbtn:gdGbtn(),central:gdCentral(),covers:{},stillSince:Math.max(mv==null?t:mv,wa==null?t:wa),returning:S.gdVisitor.visits>1,tips:gdPrefs().tips,
@@ -9175,12 +9692,14 @@ function gd7Only(ids){gdScSetup(10,true,"fun");S.guidance.kinds.forEach(function
   ["water","cookie","joke","ptjoke","hunt","season"].forEach(function(id){S.guidance.items[id].on=ids.indexOf(id)>=0});S.guideCfg.life="lively";S.m.solemn=false;S.guideCfg.azuTap="play"}
 function gd7Fun(){var c=G.gd.cur;return c&&!c.pull&&c.item.kind==="fun"?c:null}
 var GDSCENES7=[
-  {id:"gd7_water",label:"Guidance · a water break between steps: Azu's glass, one tap, the tour goes on",setup:function(){gd7Keep()},arrange:function(){gd7Only(["water"]);S.guidance.items.water.talkFor=1;S.introSeen=true},
-    q:T("nothing: only Fun › Moments is On, the water break after 1 s of narration; it starts the tour and waits for the first step to end","nada: só Diversão › Momentos está ligado, a pausa para água após 1 s de narração; começa a visita e espera pelo fim do primeiro passo"),
-    expect:T("As the tour moves to its next step, Azu walks to the middle with the glass and holds the step; one tap on the glass: Azu drinks, and the tour goes on to step 2.","Quando a visita passa ao passo seguinte, o Azu vai para o meio com o copo e segura o passo; um toque no copo: o Azu bebe, e a visita continua para o passo 2."),
-    act:function(){var i0=null;this.arrange();startTour();return gdScWait(function(){var c=gd7Fun();return!!(c&&c.item.id==="water"&&G.moment==="water"&&ph.querySelector(".azmoment [data-azprop]"))},40000).then(function(ok){i0=G.i;var held=ok&&G.gd.hold,prop=ph.querySelector(".azmoment [data-azprop]");if(prop)gsTouch(prop);
-      return gdScWait(function(){return!G.moment&&G.i===i0+1},5000).then(function(on){var vm=gdVisitOf(S.gdVisitor,"water");var ans="the water break "+(ok?"shown between steps "+(i0+1)+" and "+(i0+2)+", the next step held: "+(held?"yes":"no"):"not shown ("+gd6Why()+")")+"; a tap on the glass: "+(on?"Azu drank, the tour went on to step "+(G.i+1):"the tour did not go on")+"; its memory: "+vm.shown+" shown, "+(vm.how||"?")+".";
-        return gd7Done(ok&&held&&on&&vm.how==="acted"?[true,"the water break came between steps, through the scheduler, and one tap carried the tour on",ans]:[false,"no water break between steps, or the tour did not go on",ans])})})}},
+  /* round 11: Fun never during a tour (held while it plays): the scene that showed a water break between steps now proves the hold */
+  {id:"gd7_water",label:"Guidance · Fun never during a tour: the water break is held while the tour plays, and Why not now? says so",setup:function(){gd7Keep()},arrange:function(){gd7Only(["water"]);S.guidance.items.water.talkFor=1;S.introSeen=true},
+    q:T("nothing: only Fun › Moments is On, the water break after 1 s of narration; it starts the tour and waits for two steps to end","nada: só Diversão › Momentos está ligado, a pausa para água após 1 s de narração; começa a visita e espera pelo fim de dois passos"),
+    expect:T("The tour moves on twice and no water break shows: Fun is held while a tour plays; Why not now? says so.","A visita avança duas vezes e não aparece pausa para água: a Diversão espera enquanto a visita decorre; Porque não agora? di-lo."),
+    act:function(){this.arrange();startTour();var seen=false,t=setInterval(function(){if(G.moment||ph.querySelector(".azmoment"))seen=true},100);return gdScWait(function(){return G.i>=2},40000).then(function(ok){clearInterval(t);
+      var own=gdAll(gdItems(),S.gdVisitor,gdContext(),gdNow()).filter(function(x){return x.it.id==="water"})[0],why=own&&own.r.no||gdWhyNot(gdItems(),S.gdVisitor,gdContext(),gdNow(),"water")||"",vm=gdVisitOf(S.gdVisitor,"water"),held=/held while a tour plays/.test(why);
+      var ans="the tour "+(ok?"moved on to step "+(G.i+1):"did not move on")+"; a water break "+(seen?"showed":"never showed")+" ("+vm.shown+" shown); Why not now?: "+why+".";
+      return gd7Done(ok&&!seen&&!vm.shown&&held?[true,"no water break during the tour: Fun is held while it plays",ans]:[false,"a water break showed during the tour, or the hold was not said",ans])})}},
   {id:"gd7_joke",label:"Guidance · a joke about this point: the Torreão settles in the middle and says its own joke",setup:function(){gd7Keep()},arrange:function(){gd7Only(["ptjoke"]);var t=gdNow()-60000;S.gdVisitor.used.card=t;S.gdVisitor.used.view=t},
     q:T("nothing: only {point}'s joke is On; the visitor has opened a card and Ask about the view (the visit a third in: a point's joke comes late); it turns the phone to the Torreão (a point with a joke of its own) and holds it still (×10)","nada: só a piada de {point} está ligada; o visitante já abriu um cartão e o Pergunte sobre a vista (a visita a um terço: a piada de um ponto vem tarde); vira o telemóvel para o Torreão (um ponto com piada própria) e segura-o parado (×10)"),
     expect:T("Beside the Torreão, Azu says the Torreão's own joke (one or two lines, nothing over its words); a point with no joke says none.","Junto ao Torreão, o Azu diz a piada do próprio Torreão (uma ou duas linhas, nada sobre as palavras); um ponto sem piada não diz nenhuma."),

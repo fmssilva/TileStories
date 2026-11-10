@@ -16,15 +16,58 @@ var G={on:false,i:0,paused:false,waiting:false,timer:null,utter:null,words:[],mu
 /* the tour's length in minutes, as the hero's button and the guidance's invitation (A tour of {point}) say it */
 function tourMinutes(){return 3}
 function stepText(st){if(st.text)return L(st.text);var r=byId(S.story,st.ref.slice(2));return r&&r.c?L(r.c.text):""}
-/* a soft music bed that ducks under the voice */
-function musicOn(on){try{if(on&&!G.music){actx=actx||new (window.AudioContext||window.webkitAudioContext)();var g=actx.createGain();g.gain.value=0.05;g.connect(actx.destination);
-    [196,246.9,293.7].forEach(function(f,i){var o=actx.createOscillator();o.type="sine";o.frequency.value=f;var l=actx.createOscillator(),lg=actx.createGain();l.frequency.value=.07+i*.03;lg.gain.value=1.2;l.connect(lg);lg.connect(o.frequency);o.connect(g);o.start();l.start()});G.music=g}
-  if(!on&&G.music){G.music.disconnect();G.music=null}}catch(e){}}
-function musicDuck(d){if(G.music)G.music.gain.setTargetAtTime(d?0.015:0.05,actx.currentTime,0.3)}
+/* ----- the music bed (round 11): a track that loops under the voice and ducks while Azu speaks. Music volume 0-100 % (15), Under the
+   voice: how low it ducks, a share of its volume (30 %); Track: the manifest's approved tracks (../music/tracks.js: id, name, file,
+   licence, author, source; the first the default), the Soft drone (built in: three sine tones), or Add your own… (a file, this session).
+   The visitor's Settings › The guide › Music picks a feeling and a volume of their own (Visitor can choose the music). The Lab: a
+   looping <audio> (a file from this computer: its volume is the gain, the page may not route it through Web Audio) or the drone's
+   GainNode. Unity: an AudioSource with loop, an AudioMixer group and two snapshots (normal / ducked) blended while the voice speaks;
+   Add your own is an AudioClip field in the POI Editor ----- */
+S.guideCfg.musicVol=15;S.guideCfg.musicDuck=30;S.guideCfg.musicTrack="exploration";S.guideCfg.musicVis=true;
+var MUSIC_FULL=1/3;
+window.MUSICTRACKS=window.MUSICTRACKS||[];
+(function(){["music/tracks.js","../music/tracks.js"].forEach(function(s){var e=document.createElement("script");e.src=s;e.onload=function(){try{renderEditor()}catch(x){}};e.onerror=function(){};document.head.appendChild(e)})})();
+function musicTracks(){var seen={};return(window.MUSICTRACKS||[]).filter(function(t){if(!t||!t.id||seen[t.id])return false;seen[t.id]=1;return true})}
+/* a track whose licence asks for it (CC BY-SA) carries its credit line {en, pt}: shown under its choice and in Settings' Music credits */
+function musicCredit(id){var t=musicTrackById(id);return t&&t.credit?L(t.credit):""}
+function musicCredits(){return musicTracks().filter(function(t){return t.credit}).map(function(t){return L(t.credit)})}
+function musicTrackById(id){return musicTracks().filter(function(t){return t.id===id})[0]||null}
+/* the track that plays now: the visitor's choice, else the Editor's (Music bed On: its Track; Off: none) */
+function musicPick(){var v=S.vis&&S.vis.music;if(v!=null&&(S.guideCfg.musicVis!==false))return v;return S.guideCfg.music?S.guideCfg.musicTrack:"off"}
+function musicVol(){var v=S.vis&&S.vis.musicVol!=null&&S.guideCfg.musicVis!==false?S.vis.musicVol:S.guideCfg.musicVol;return Math.max(0,Math.min(100,+v||0))/100}
+/* what a pick plays, and why when it stands in for another (no silent fallback) */
+function musicSource(id){if(id==="drone")return{kind:"drone",name:"Soft drone (built in)"};
+  if(id==="own")return G.musicOwn?{kind:"file",url:G.musicOwn.url,name:G.musicOwn.name}:{kind:"drone",name:"Soft drone (built in)",why:"no file chosen yet for Add your own…"};
+  var t=musicTrackById(id);return t?{kind:"file",url:t.url||t.file,name:L(t.name),t:t}:{kind:"drone",name:"Soft drone (built in)",why:"“"+id+"” is not in music/tracks.js on this page"}}
+/* the level: the volume, ducked under the voice */
+function musicTarget(){var g=G.music;if(!g)return 0;var v=musicVol()*(g.kind==="drone"?MUSIC_FULL:1);return g.ducked?v*(Math.max(0,Math.min(100,+S.guideCfg.musicDuck))/100):v}
+function musicLevel(){var g=G.music;if(!g)return 0;return g.kind==="drone"?g.gain.gain.value:g.audio.volume}
+function musicSet(fast){var g=G.music;if(!g)return;var v=musicTarget();if(g.kind==="drone"){g.gain.gain.setTargetAtTime(v,actx.currentTime,fast?0.02:0.3);return}
+  clearInterval(g.tw);if(fast){g.audio.volume=Math.min(1,v);return}var a=g.audio;g.tw=setInterval(function(){var d=v-a.volume;if(Math.abs(d)<.004){a.volume=Math.min(1,v);clearInterval(g.tw);return}a.volume=Math.max(0,Math.min(1,a.volume+d*.25))},40)}
+function musicOn(on,id){try{var want=on?(id||musicPick()):"off";if(G.music&&(!on||G.music.id!==want)){var g=G.music;G.music=null;clearInterval(g.tw);if(g.kind==="drone"){g.oscs.forEach(function(o){try{o.stop()}catch(e){}});g.gain.disconnect()}else{g.audio.pause();g.audio.src=""}}
+  if(!on||want==="off"){G.musicNow=null;musicNowShow();return}if(G.music)return;var src=musicSource(want);
+  if(src.kind==="drone"){actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();var gn=actx.createGain();gn.gain.value=0.0001;gn.connect(actx.destination);var oscs=[];
+    [196,246.9,293.7].forEach(function(f,i){var o=actx.createOscillator();o.type="sine";o.frequency.value=f;var l=actx.createOscillator(),lg=actx.createGain();l.frequency.value=.07+i*.03;lg.gain.value=1.2;l.connect(lg);lg.connect(o.frequency);o.connect(gn);o.start();l.start();oscs.push(o,l)});
+    G.music={id:want,kind:"drone",gain:gn,oscs:oscs,ducked:false}}
+  else{var a=new Audio(src.url);a.loop=true;a.preload="auto";a.volume=0;G.music={id:want,kind:"file",audio:a,ducked:false};var p=a.play();if(p&&p.catch)p.catch(function(){})}
+  G.musicNow=src;musicNowShow();musicSet(false)}catch(e){}}
+function musicDuck(d){if(!G.music||G.music.ducked===!!d)return;G.music.ducked=!!d;musicSet(false)}
+/* a change in the Editor or Settings: the track swapped, the level set */
+function musicApply(){var want=musicPick();if(G.musicDemo&&want==="off")want=S.guideCfg.musicTrack;if((!G.on&&!G.musicDemo)||want==="off"){musicOn(false);return}
+  if(G.music&&G.music.id!==want){var d=G.music.ducked;musicOn(false);musicOn(true,want);if(G.music){G.music.ducked=d;musicSet(true)}}else if(!G.music)musicOn(true,want);else musicSet(false)}
+/* a music row's demo: the music plays a few seconds at that setting, ducking under a line of Azu's (the tour's), then stops */
+function musicDemo(){clearTimeout(G.musicDemoT);G.musicDemo=true;musicApply();G.musicDemoT=setTimeout(function(){G.musicDemo=false;if(!(G.on&&musicPick()!=="off"))musicOn(false)},7000)}
+/* Playing now: the Editor says what plays, and why when it stands in */
+function musicNowText(){var n=G.musicNow;if(!n)return"Nothing at the moment.";return n.name+(n.t?" · "+n.t.licence+", "+n.t.author:"")+(n.why?" (the Soft drone plays: "+n.why+")":"")}
+function musicNowShow(){var e=ed.querySelector(".musicnow");if(e)e.textContent=musicNowText()}
+/* Add your own…: a file from this computer, for this session */
+function musicPickFile(){var i=document.createElement("input");i.type="file";i.accept="audio/*";i.onchange=function(){var f=i.files&&i.files[0];if(!f)return;if(G.musicOwn)URL.revokeObjectURL(G.musicOwn.url);G.musicOwn={name:f.name,url:URL.createObjectURL(f)};S.guideCfg.musicTrack="own";
+    if(G.music&&G.music.id==="own")musicOn(false);musicApply();renderEditor()};i.click()}
+ed.addEventListener("change",function(e){var t=e.target;if(t.dataset&&t.dataset.sel==="@guideCfg.musicTrack"&&t.value==="own"&&!noDraw&&!S._stKey)setTimeout(musicPickFile,0)},false);
 
 /* ----- the tour ----- */
 /* startTour(from): from the start, or from a step kept by a stop (from = {id: the step}; the features before it know which) */
-function startTour(from){emitLatestFirst("startTour.before",from);G.on=true;G.i=0;G.paused=false;S.stop="full";if(from){var j=S.guideSteps.findIndex(function(s){return s.id===from.id});G.i=Math.max(0,j)}if(S.guideCfg.music)musicOn(true);feedback("open");runStep();emit("startTour.after",from)}
+function startTour(from){emitLatestFirst("startTour.before",from);G.on=true;G.i=0;G.paused=false;S.stop="full";if(from){var j=S.guideSteps.findIndex(function(s){return s.id===from.id});G.i=Math.max(0,j)}if(musicPick()!=="off")musicOn(true);feedback("open");runStep();emit("startTour.after",from)}
 function stopTour(){emitLatestFirst("stopTour.before");G.on=false;G.waiting=false;stopSpeech();musicOn(false);clearGuideMarks();renderGuide();emit("stopTour.after")}
 function runStep(){emitLatestFirst("runStep.before");var st=G.on&&S.guideSteps[G.i];if(G.on&&!st)stopTour();else if(st){G.waiting=false;
   if(S.view!==st.view){S.view=st.view;renderPhone(false)}
@@ -88,7 +131,14 @@ on("edCard.html",function(h){var c=S.guideCfg;
   var gb=row("Start from the hero",pseg("guideCfg.heroButton",["true","false"],["Shown","Hidden"]),"A Start the guide button on the hero (replaces the Listen pill).")+
    row("Guide block",pseg("guideCfg.block",["true","false"],["Shown","Hidden"]),"A Guide block first in the first section.")+
    row("Voice",pseg("guideCfg.voice",["recorded","device"],["Recorded, then live, then this device","Device voice"]),"Recorded, then live, then this device: each line plays its audio rendered when authoring (or a human voice), with word timings; a line the recorded set lacks is spoken by the live voice (Ask Azu > Voice of the answers, when its key is on this computer), else by this device's voice. Speaking now says which, and why. Device voice: the phone reads the script (free, offline, plainer).")+
-   row("Speed",pslider("guideCfg.speed",0.7,1.4,0.05),"")+row("Music bed",pseg("guideCfg.music",["true","false"],["On","Off"]),"Soft music that ducks under the voice.")+
+   row("Speed",pslider("guideCfg.speed",0.5,2,0.05),"The voice's speed, 0.5-2: the first value of the visitor's speed chip (the guide panel) and of Settings › The guide.")+row("Music bed",pseg("guideCfg.music",["true","false"],["On","Off"]),"Soft music that loops under the voice and ducks while Azu speaks. Off: none, unless the visitor picks one in Settings › The guide › Music.")+
+   row("Music volume",pslider("guideCfg.musicVol",0,100,5),"0-100 % (15): the music's level against the voice (the visitor's own in Settings when they set it).",true)+
+   row("Under the voice",pslider("guideCfg.musicDuck",0,100,5),"How low the music goes while Azu speaks, as a share of its volume (30 %); it comes back up between the lines. Unity: an AudioMixer snapshot.",true)+
+   row("Track",psel("guideCfg.musicTrack",musicTracks().map(function(t){return[t.id,L(t.name)+" · "+t.licence+", "+t.author]}).concat([["drone","Soft drone (built in)"],["own",G.musicOwn?"Your file · "+G.musicOwn.name:"Add your own…"]])),
+     (musicTracks().length?musicTracks().length+" approved tracks from music/tracks.js (each with its licence and source; the Architect adds them), then the Soft drone, then Add your own… (a file from this computer, for this session; Unity: an AudioClip in the POI Editor). The first track is the default.":"music/tracks.js is not on this page: only the Soft drone and Add your own… (the Exploration default plays the Soft drone, and Playing now says so)."),true)+
+   (musicCredit(S.guideCfg.musicTrack)?row("Credit",'<span class="uses mcredit">'+esc(musicCredit(S.guideCfg.musicTrack))+'</span>',"This track's licence asks for this credit: the visitor sees it under the choice and in Settings › The guide › Music credits.",true):"")+
+   row("Playing now",'<span class="uses musicnow">'+esc(musicNowText())+'</span>',"The music playing now and its licence, and why when the Soft drone stands in for a track this page does not have (no silent fallback).",true)+
+   row("Visitor can choose the music",pseg("guideCfg.musicVis",["true","false"],["Shown","Hidden"]),"Shown: Settings › The guide › Music offers Off and each track's feeling (Exploration, Storyteller, Calm, Cinematic) and a volume; the Track above is the default. Hidden: the Editor's choice only.",true)+
    row("Captions",pseg("guideCfg.captions",["true","false"],["On","Off"]),"On by default (accessibility, noisy places).")+row("Highlight what is read",pseg("guideCfg.highlight",["true","false"],["On","Off"]),"The words light up in the text as they are spoken.")+
    row("Invite to try",pseg("guideCfg.coach",["true","false"],["On","Off"]),"At an interactive block the guide waits for the gesture (9 s at most), with one hint.")+
    row("Mascot",pseg("guideCfg.mascot",["true","false"],["Azu","Off"]),"A small tile character that follows the block being told. Still under Reduce Motion.")+
@@ -104,7 +154,8 @@ ed.addEventListener("click",function(e){var p=e.target.closest('[data-pick="gste
 ed.addEventListener("input",function(e){var t=e.target;if(!t.dataset.gtext)return;e.stopImmediatePropagation();var q=t.dataset.gtext.split("|"),st=byId(S.guideSteps,q[0]);st.text[q[1]]=t.value},true);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(guideCfg\\.(voice|speed|music|captions|highlight|coach|ask)|"));
 /* each row's demo (editor/demo.js): the tour at a step, the part the row changes ringed */
-rowDemos({"guideCfg.voice":{tour:"g1",ring:".gbubble|.gdock|.gcap"},"guideCfg.speed":{tour:"g1",ring:".gbubble|.gdock|.gcap"},"guideCfg.music":{tour:"g1",ring:".gdock|.gbar"},
+rowDemos({"guideCfg.voice":{tour:"g1",ring:".gbubble|.gdock|.gcap"},"guideCfg.speed":{tour:"g1",act:function(){S.vis.speed=null;dkTick()},ring:".gd-speed|.gbubble|.gdock|.gcap"},"guideCfg.music":{tour:"g1",act:function(){musicDemo()},ring:".gdock|.gbar"},"guideCfg.musicVol":{tour:"g1",act:function(){musicDemo()},ring:".gdock|.gbar"},"guideCfg.musicDuck":{tour:"g1",act:function(){musicDemo()},ring:".gdock|.gbar"},
+  "guideCfg.musicTrack":{tour:"g1",act:function(){musicDemo()},ring:".gdock|.gbar"},"guideCfg.musicVis":{act:function(){S.settingsOpen=true;renderPhone(true);var v=ph.querySelector(".vset"),g=v&&v.querySelector(".vmusic");if(v&&g)v.scrollTop=Math.max(0,g.offsetTop-60)},ring:".vmusic|.vguide"},
   "guideCfg.heroButton":{stop:"full",ring:".hero .gstart|.hero"},"guideCfg.block":{stop:"full",scroll:'[data-ref="b:b_guide"]',ring:".gblock|[data-ref=\"sec:about\"]"},
   "guideCfg.captions":{tour:"g1",ring:".gbubble|.gdock|.gbar"},"guideCfg.highlight":{tour:"g4",ring:".gfocus"},"guideCfg.coach":{tour:"g2",ring:".gcoach|.gfocus"},
   "guideCfg.mascot":{tour:"g1",ring:".mascot|.gfocus"},"guideCfg.ask":{tour:true,dock:"full",act:function(){ask(L(S.guideAsks[0]))},ringAfter:1400,ring:".gd-thread|.gask"}});

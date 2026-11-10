@@ -73,10 +73,11 @@ function gbGo(k){G.fab.menu=false;
 /* a tour from a card at Half: the card rises to Full first (lowered again by the visitor, the tour goes on there) */
 /* a tour starting: the card's ✦, its Azu and their band go (the tour has its own ✦ above the dock); the redraw that puts the card at Full
    runs before G.on is set, so it is marked as the tour's (G.gb.tour): fabLayer draws no second ✦ and Azu behind the tour's (guidance round 7's look fix) */
-on("startTour.before",function(){G.fab.menu=false;ph.querySelectorAll(".gbtn-wrap,.gbmenu,.gbband").forEach(function(x){x.remove()});scr.style.paddingBottom="";if(S.view==="card"&&S.stop!=="full"){S.stop="full";G.gb.tour=true;try{renderPhone(true)}finally{G.gb.tour=false}}});
+on("startTour.before",function(){var b=ph.querySelector(".gbtn-wrap .gbtn");G.morphFrom=b&&b.getClientRects().length?phRect(b):null;G.fab.menu=false;ph.querySelectorAll(".gbtn-wrap,.gbmenu,.gbband").forEach(function(x){x.remove()});scr.style.paddingBottom="";if(S.view==="card"&&S.stop!=="full"){S.stop="full";G.gb.tour=true;try{renderPhone(true)}finally{G.gb.tour=false}}});
 on("stopTour.after",function(){ph.querySelectorAll(".gbtn-wrap.intour,.gbband.tour").forEach(function(x){x.remove()});fabLayer()});
-/* ----- during a tour: the ✦ above the dock (Mini, Peek) or where the dock was (Compact), with the progress ring and, at Compact, a pause; a tap shows or hides the dock ----- */
-on("renderGuide.after",function(){var o=ph.querySelector(".gbtn-wrap.intour");if(o)o.remove();if(!G.on||!gbOn()||!dockOn()||S.dockH==="full")return;
+/* ----- during a tour: the ✦ where the dock was (Compact), with the progress ring and a pause; a tap shows the dock again, the ✦ growing
+   into it. Round 11: while the panel shows (Mini, Peek, Full) the ✦ is hidden: it became the panel (guide/dock.js's dkMorph) ----- */
+on("renderGuide.after",function(){var o=ph.querySelector(".gbtn-wrap.intour");if(o)o.remove();if(!G.on||!gbOn()||!dockOn()||S.dockH!=="compact")return;
   ph.insertAdjacentHTML("beforeend",gbWrapHtml(true));var w=ph.querySelector(".gbtn-wrap.intour"),d=ph.querySelector(".gdock");w.style.bottom=(d?ph.offsetHeight-d.offsetTop+8:22)+"px";placeBubble();gbTourBand()});
 setInterval(function(){if(!G.on)return;var c=ph.querySelector(".gbtn.tour .pg"),b=ph.querySelector(".gbtn.tour .gb-bar"),p=gbProgress();if(c)c.style.strokeDasharray=(GBC*p).toFixed(1)+" "+GBC.toFixed(1);if(b)b.style.width=(p*100).toFixed(1)+"%";
   var w=ph.querySelector(".gbtn-wrap.intour"),d=ph.querySelector(".gdock");if(w)w.style.bottom=(d?ph.offsetHeight-d.offsetTop+8:22)+"px";gbTourBand()},200);
@@ -85,7 +86,7 @@ setInterval(function(){var b=ph.querySelector(".gbubble"),w=ph.querySelector(".g
 /* ----- the taps: the ✦ (its menu, or during a tour the dock), a menu item; a tap elsewhere closes the menu ----- */
 ph.addEventListener("click",function(e){var t=e.target.closest("[data-gbtn],[data-gbgo]");
   if(!t){if(G.fab.menu&&!e.target.closest(".gbmenu,.azfab")){G.fab.menu=false;fabLayer()}return}e.stopPropagation();
-  if(t.dataset.gbtn){if(G.on){S.dockH=S.dockH==="compact"?"mini":"compact";G.askOpen=false;renderGuide()}else gbMenu();return}
+  if(t.dataset.gbtn){if(G.on){if(S.dockH==="compact")G.morphFrom=phRect(t);S.dockH=S.dockH==="compact"?"mini":"compact";G.askOpen=false;renderGuide()}else gbMenu();return}
   if(t.dataset.gbgo){gbGo(t.dataset.gbgo);return}},true);
 /* what a tap on Azu does (mascot/azu2d.js asks): with the ✦ beside it, Mascot > Tap on Azu; as the button itself (Azu only), the ✦'s part.
    Points to the ✦ button pulls the guidance's The ✦ at once (guidance/service.js's gdPull; no ✦ to point at: it plays) */
@@ -97,10 +98,17 @@ var fabT=0;scr.addEventListener("scroll",function(){if(G.on||S.stop==="closed")r
 setInterval(function(){if(G.on||S.view!=="card"||S.stop==="closed"||S.stop==="peek")return;var had=!!ph.querySelector(".gbtn-wrap"),want=!heroStartSeen();if(had!==want)fabLayer();else if(had){gbClear();gbBand()}},400);
 /* ----- the guide's settings, where the visitor's Settings live: the voice, its speed and the captions (Who's exploring is there already) ----- */
 on("settingsPanel.html",function(h){var c=S.guideCfg,o=function(k,v,lab){return'<button type="button" data-gset="'+k+'|'+v+'" aria-pressed="'+(String(c[k])===v)+'">'+esc(lab)+'</button>'};
+  var mu=musicPick(),mo=function(id,lab){return'<button type="button" data-gmus="'+id+'" aria-pressed="'+(mu===id)+'">'+esc(lab)+'</button>'},
+    music=c.musicVis===false?"":'<div class="vmusic"><small>'+TXH("settings_music")+'</small><div class="vo vmus">'+mo("off",TXT("settings_music_off"))+musicTracks().map(function(t){return mo(t.id,L(t.name))}).join("")+'</div>'+(musicCredit(mu)?'<small class="vcredit">'+esc(musicCredit(mu))+'</small>':"")+
+      '<label class="vvol"><span>'+TXH("settings_music_vol")+'</span><input type="range" min="0" max="100" step="5" data-gmusvol="1" value="'+Math.round(musicVol()*100)+'" aria-label="'+TXH("settings_music_vol")+'"></label>'+(musicCredits().length?'<div class="vcredits"><small>'+TXH("settings_music_credits")+'</small>'+musicCredits().map(function(c){return'<p>'+esc(c)+'</p>'}).join("")+'</div>':"")+'</div>';
   var g='<div class="vguide"><small>'+TXH("settings_guide")+'</small><div class="vo">'+o("voice","recorded",TXT("settings_voice_rec"))+o("voice","device",TXT("settings_voice_dev"))+'</div>'+
-    '<div class="vo">'+o("speed","0.85",TXT("settings_slower"))+o("speed","1",TXT("settings_normal"))+o("speed","1.2",TXT("settings_faster"))+'</div><div class="vo">'+o("captions","true",TXT("settings_cc_on"))+o("captions","false",TXT("settings_cc_off"))+'</div></div>';
+    '<div class="vo">'+o("speed","0.85",TXT("settings_slower"))+o("speed","1",TXT("settings_normal"))+o("speed","1.2",TXT("settings_faster"))+'</div><div class="vo">'+o("captions","true",TXT("settings_cc_on"))+o("captions","false",TXT("settings_cc_off"))+'</div>'+music+'</div>';
   var i=h.indexOf("<small>"+TXH("settings_appearance"));if(i<0)i=h.indexOf("<small>");return i<0?h:h.slice(0,i)+g+h.slice(i)});
-ph.addEventListener("click",function(e){var t=e.target.closest("[data-gset]");if(!t)return;e.stopPropagation();var q=t.dataset.gset.split("|");S.guideCfg[q[0]]=q[0]==="speed"?parseFloat(q[1]):pval(q[1]);renderAll(true)},true);
+ph.addEventListener("click",function(e){var t=e.target.closest("[data-gset]");if(!t)return;e.stopPropagation();var q=t.dataset.gset.split("|");S.guideCfg[q[0]]=q[0]==="speed"?parseFloat(q[1]):pval(q[1]);if(q[0]==="speed")S.vis.speed=null;renderAll(true)},true);
+/* round 11: the visitor's music (Settings › The guide › Music): Off or a track's feeling, and its volume; it plays at once in a tour */
+ph.addEventListener("click",function(e){var t=e.target.closest("[data-gmus]");if(!t)return;e.stopPropagation();S.vis.music=t.dataset.gmus;musicApply();ph.querySelectorAll("[data-gmus]").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.gmus===S.vis.music))});
+  var c=ph.querySelector(".vmusic .vcredit"),w=musicCredit(S.vis.music);if(c&&!w)c.remove();else if(w){if(!c){c=document.createElement("small");c.className="vcredit";ph.querySelector(".vmus").after(c)}c.textContent=w}},true);
+ph.addEventListener("input",function(e){var t=e.target;if(!t.dataset||!t.dataset.gmusvol)return;e.stopPropagation();S.vis.musicVol=+t.value;musicSet(false)},true);
 /* the ✦ and Azu as the card shows them reach the phone's signature */
 on("modelSig.sig",function(h){if(!sigWant(/guideCfg\.(gb|azuTap)/))return h;var m=G.fab.menu;G.fab.menu=false;var x="#gb:"+gbWrapHtml(false);G.fab.menu=m;return h+x});
 

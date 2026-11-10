@@ -9,12 +9,12 @@ on("sayDevice.ended",function(){G.hl.ended=true});
 /* markWord: before (latest first) and done (always, in module order) share the notes cx; after, in module order */
 function markWord(k,target){var cx={};emitLatestFirst("markWord.before",cx);try{var h=G.hl,now=performance.now();if(G.utter&&!h.est)h.seen=true;if(target!==h.target){hlClear(h.target);h.target=target||null}
   if(k!==h.k){if(h.k>=0&&k>h.k&&!G.timer){var ch=0;for(var j=h.k;j<k;j++)ch+=G.words[j].w.length+1;var per=(now-h.at)/Math.max(1,ch);if(per>15&&per<400)h.cpm=h.cpm?h.cpm*.6+per*.4:per}h.k=k;h.at=now}hlLoop();emit("markWord.after",k,target)}finally{emit("markWord.done",cx)}}
-function wordMs(k){var ans=firstAnswer("wordMs.answer",k);if(ans!==undefined)return ans;var base=60000/(170*S.guideCfg.speed);if(G.timer||!G.words[k])return base;return(G.words[k].w.length+1)*(G.hl.cpm||base/6)}
+function wordMs(k){var ans=firstAnswer("wordMs.answer",k);if(ans!==undefined)return ans;var base=60000/(170*guideSpeed());if(G.timer||!G.words[k])return base;return(G.words[k].w.length+1)*(G.hl.cpm||base/6)}
 function hlLoop(){if(!G.hlRaf)G.hlRaf=requestAnimationFrame(hlTick)}
 function hlTick(now){G.hlRaf=0;var h=G.hl;if(!G.on||!h){return}var dt=h.last?Math.min(100,now-h.last):16;h.last=now;
   if(G.paused){h.at+=dt;h.start+=dt}
   /* some voices send no word events (Chrome's network voices, Android): after 1.2 s without one, the head follows the time, by characters */
-  if(G.utter&&!h.seen&&!h.ended&&now-h.start>1200){h.est=true;var el=now-h.start,per=60000/(170*S.guideCfg.speed)/6,c=0,k=0;for(;k<G.words.length-1;k++){c+=G.words[k].w.length+1;if(c*per>el)break}if(k!==h.k)markWord(k,h.target)}
+  if(G.utter&&!h.seen&&!h.ended&&now-h.start>1200){h.est=true;var el=now-h.start,per=60000/(170*guideSpeed())/6,c=0,k=0;for(;k<G.words.length-1;k++){c+=G.words[k].w.length+1;if(c*per>el)break}if(k!==h.k)markWord(k,h.target)}
   var n=G.words.length,tgt=h.ended?n:h.k<0?0:h.k+Math.min(.97,(now-h.at)/wordMs(h.k)),glide=S.guideCfg.glide&&!S.reduce;
   h.p=glide?h.p+(tgt-h.p)*Math.min(1,dt/90):(h.ended?n:Math.max(0,h.k)+1-1e-6);
   if(!glide&&h.k<0)h.p=0;
