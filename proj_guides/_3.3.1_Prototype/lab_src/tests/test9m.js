@@ -32,7 +32,8 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   /* where Show me played: its gesture, the screen, and the finger's end inside the target's box (its tip rests at the edge) */
   const played = id => until(`!!(G.gd.tryShow&&G.gd.tryShow.id==="${id}"&&G.gd.tryShow.played)`, 3500);
   const onTarget = 'var s=G.gd.tryShow,b=s&&s.box,m=24;[s&&s.gesture,s&&s.view,s&&s.stop,!!(s&&s.end&&b&&s.end[0]>=b.l-m&&s.end[0]<=b.r+m&&s.end[1]>=b.t-m&&s.end[1]<=b.b+m),!!ph.querySelector(".gdfinger"),!ph.querySelector(".gdtry"),s&&s.where]';
-  const editor = async (ops) => { await R(`S.tab="guide";S.ui.level=1;S.op=${JSON.stringify(ops)};renderEditor()`); await W(120); };
+  // round 14: an item's groups are folded: an item opened here shows its groups open too (each by its id, as the author opens them)
+  const editor = async (ops) => { await R(`S.tab="guide";S.ui.level=1;S.op=${JSON.stringify(ops)};Object.keys(S.op).forEach(function(k){var m=/^gd:i:(.+)$/.exec(k),it=m&&S.op[k]&&S.guidance.items[m[1]];if(it)gdFormOf(it).groups.forEach(function(g){if(g)S.op["gd:f:"+m[1]+":"+g.k]=true})});renderEditor()`); await W(120); };
   const px = 'function px(c){var m=String(c).match(/[\\d.]+/g).map(Number);return m}function lum(c){var a=px(c).slice(0,3).map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.2)});return .2126*a[0]+.7152*a[1]+.0722*a[2]}function cr(a,b){var x=lum(a),y=lum(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05)}';
 
   lap('before 1');

@@ -170,19 +170,23 @@ const BEFORE = { rows: ["Fixed rules|", "Voice|guideCfg.voice", "Speaking now|",
   const pill = await R('[!!ph.querySelector(".walltip"),document.getElementById("wall").innerHTML.indexOf("walltip")<0,S.wallTip===undefined]');
   ok('The wall hint\'s pill is gone (no .walltip on the wall, no wallTip state)', !pill[0] && pill[1] && pill[2], pill);
   await R('S.tab="global";S.ui.level=1;S.op={"g:11":true};renderEditor()');
-  const g11 = await R('var f=ed.querySelector(\'[data-fo="g:11"]\'),bt=f&&f.querySelector("[data-goto]");[!!bt&&/Said by the guide: Guide › Guidance › The start/.test(bt.textContent),!f.querySelector(\'[data-set="@wallTip"],[data-set="wallTip"]\'),f.querySelectorAll(".row").length]');
+  const g11 = await R('var f=ed.querySelector(\'[data-fo="g:11"]\'),bt=f&&f.querySelector("[data-goto]");[!!bt&&/Said by the guide: Guide › Azu speaks up › App › The start/.test(bt.textContent),!f.querySelector(\'[data-set="@wallTip"],[data-set="wallTip"]\'),f.querySelectorAll(".row").length]');
   await p.locator('[data-fo="g:11"] [data-goto]').click(); await W(300);
   const went = await R('var g=ed.querySelector(\'[data-fo="gd:g:start"]\');[S.tab,!!g&&g.open,!!g&&g.getBoundingClientRect().top<window.innerHeight&&g.getBoundingClientRect().bottom>0]');
-  ok('Global Scene > Onboarding hints: one link row, "Said by the guide: Guide › Guidance › The start", which opens it', g11[0] && g11[1] && g11[2] === 1 && went[0] === 'guide' && went[1] && went[2], [g11, went]);
+  ok('Global Scene > Onboarding hints: one link row, "Said by the guide: Guide › Azu speaks up › App › The start", which opens it', g11[0] && g11[1] && g11[2] === 1 && went[0] === 'guide' && went[1] && went[2], [g11, went]);
   const words = await R('[TXOWN.wall_tip,TXOWN.gd_opening,TXOWN.gd_opening_back,S.tx.gd_opening.pt.length>10,S.tx.wall_tip.pt,ownerName("gd:i:tapmarker")]');
-  ok('The words in Languages & Terms, owned by their items (Tap a marker reuses wall_tip), in each language', words[0] === 'gd:i:tapmarker' && words[1] === 'gd:i:opening' && words[2] === 'gd:i:opening' && words[3] && words[4] === 'Toque aqui.' && /Guide › Guidance › The start › Tap a marker/.test(words[5]), words);
+  ok('The words in Languages & Terms, owned by their items (Tap a marker reuses wall_tip), in each language', words[0] === 'gd:i:tapmarker' && words[1] === 'gd:i:opening' && words[2] === 'gd:i:opening' && words[3] && words[4] === 'Toque aqui.' && /Guide › Azu speaks up › The start › Tap a marker/.test(words[5]), words);
 
   // ---------- 10. the Guide tab: its sections; every former 6 · Guide row, the same rows ----------
   await R('S.tab="guide";S.ui.level=9;S.op={};renderEditor()');
   const gt = await R('[[].map.call(ed.querySelectorAll(":scope > details[data-fo]"),function(d){return d.dataset.fo+"|"+d.querySelector("summary").textContent.split(" · ").slice(0,2).join(" · ")}),[].map.call(document.querySelectorAll(".utab"),function(t){return t.textContent})]');
-  ok('The Guide tab, after Detail Card: 0 · Preview & Test, 1 · The tour, 2 · Mascot, 3 · Ask, 4 · Guidance', JSON.stringify(gt[0].map(s => s.split('|')[1])) === JSON.stringify(['0 · Preview & Test', '1 · The tour', '2 · Mascot', '3 · Ask', '4 · Guidance']) && gt[1].indexOf('Guide') === gt[1].indexOf('Detail Card') + 1, gt);
-  const after = await R('var o=[];["gt1","gt2","gt3"].forEach(function(id){ed.querySelectorAll(\'[data-fo="\'+id+\'"] .row\').forEach(function(r){var lb=r.querySelector("label");o.push((lb?lb.textContent:"?")+"|"+(rowKey(r)||""))})});o');
+  // guidance round 14: the six sections of the developer's tab (test9r checks them in depth)
+  ok('The Guide tab, after Detail Card: 0 · Preview & Test, 1 · Azu, 2 · The tour, 3 · Games on the tour, 4 · Azu speaks up, 5 · Ask Azu', JSON.stringify(gt[0].map(s => s.split('|')[1])) === JSON.stringify(['0 · Preview & Test', '1 · Azu', '2 · The tour', '3 · Games on the tour', '4 · Azu speaks up', '5 · Ask Azu']) && gt[1].indexOf('Guide') === gt[1].indexOf('Detail Card') + 1, gt);
+  const after = await R('var o=[];["s7vtest","s7mascot","gt1","gt3"].forEach(function(id){ed.querySelectorAll(\'[data-fo="\'+id+\'"] .row\').forEach(function(r){var lb=r.querySelector("label");o.push((lb?lb.textContent:"?")+"|"+(rowKey(r)||""))})});o');
   const sortJ = a => JSON.stringify(a.slice().sort());
+  // round 14: Moments and Water break after are gone (Games on the tour holds them), the engine's Guide mode is a line that names Answers from
+  // (one switch, said once), Tour controls' words are in Guide panel (the foldout had no row)
+  BEFORE.rows = BEFORE.rows.filter(r => !/^(Moments|Water break after)\|/.test(r)).map(r => r === 'Guide mode|guideCfg.ask' ? 'Guide mode|' : r); BEFORE.fos = BEFORE.fos.filter(f => f !== 's7tour');
   const fosIn = await R(`${JSON.stringify(BEFORE.fos)}.filter(function(id){return!ed.querySelector('[data-fo="'+id+'"]')})`);
   ok(`...it holds every former 6 · Guide row: ${BEFORE.rows.length} before, ${after.length} now, the same rows (and the ${BEFORE.fos.length} foldouts)`, sortJ(after) === sortJ(BEFORE.rows) && fosIn.length === 0, { missing: BEFORE.rows.filter(r => after.indexOf(r) < 0), extra: after.filter(r => BEFORE.rows.indexOf(r) < 0), fosIn });
   await R('S.tab="card";renderEditor()');
@@ -194,10 +198,10 @@ const BEFORE = { rows: ["Fixed rules|", "Voice|guideCfg.voice", "Speaking now|",
   // opening a section still shows its part (FOCUS): the Guide panel, Ask about the view, The start
   const fx = [];
   for (const [id, sel] of [['s7dock', '.gblock'], ['s7mascot', '.gblock'], ['gd:g:start', '[data-marker]']]) {
-    await R(`S.tab="guide";S.ui.level=1;S.op={gt1:true,gt3:true,gt4:true,"gd:app":true};renderEditor();document.body.dataset.lastfocus=""`); await W(200);
+    await R(`S.tab="guide";S.ui.level=1;S.op={gt1:true,gt3:true,gt4:true,"gd:app":true,s7mascot:false};renderEditor();document.body.dataset.lastfocus=""`); await W(200);
     await R(`var d=ed.querySelector('[data-fo="${id}"]');d.open=true`); await W(500); fx.push([id, await R('document.body.dataset.lastfocus||""')]);
   }
-  ok('...opening a section shows its part on the phone (FOCUS): Guide panel, Mascot, The start', fx.every(f => /\|found\|/.test(f[1])), fx);
+  ok('...opening a section shows its part on the phone (FOCUS): Guide panel, Azu (Mascot), The start', fx.every(f => /\|found\|/.test(f[1])), fx);
 
   // ---------- 11. 4 · Guidance: the rows, their defaults, each row's demo ----------
   await R(base + 'G.gd.manual=false;G.gd.rate=1;S.tab="guide";S.ui.level=9;S.op={};renderEditor()');

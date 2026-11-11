@@ -25,7 +25,8 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const base = 'S.guidance=JSON.parse(window.__g0);S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;S.reduce=false;S.dark=false;S.lang="en";S.ui.rowDemo=false;S.ui.gdSR=false;S.guidance.items.gbhint.on=false;gdGroupById("inview").on=false;S.guideCfg.gbtn="both";S.guideCfg.mascot=true;G.gd.demo=false;gdChip(null);';
   const fresh = async (extra) => { await R(base + 'if(G.on)stopTour();G.cam.open=false;S.settingsOpen=false;G.fab.menu=false;setWall("ribeira");S.view="card";S.stop="closed";renderPhone(false);G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.onWall=false;gdAdvance(250);' + (extra || '')); await W(120); };
   const show = (id, o) => `gdStart(gdItemNow("${id}"),"test",${o || '{pull:true,ms:60000}'});`;
-  const editor = async (ops) => { await R(`S.tab="guide";S.ui.level=1;S.op=${JSON.stringify(ops)};renderEditor()`); await W(120); };
+  // round 14: an item's groups are folded: an item opened here shows its groups open too (each by its id, as the author opens them)
+  const editor = async (ops) => { await R(`S.tab="guide";S.ui.level=1;S.op=${JSON.stringify(ops)};Object.keys(S.op).forEach(function(k){var m=/^gd:i:(.+)$/.exec(k),it=m&&S.op[k]&&S.guidance.items[m[1]];if(it)gdFormOf(it).groups.forEach(function(g){if(g)S.op["gd:f:"+m[1]+":"+g.k]=true})});renderEditor()`); await W(120); };
 
   lap('before 1');
   // ---------- 1. the scheduler's new rules alone (gdPick on a fake clock) ----------
@@ -189,7 +190,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R(base); await editor({ gt4: true, 'gd:app': true, 'gd:g:wall': true, 'gd:i:askview': true });
   await p.locator('[data-gddup="askview"]').click(); await W(300);
   const dupId = await R('gdGroupById("wall").items[1]'); const d1 = await warns();
-  await R(`S.op["gd:i:${dupId}"]=true;renderEditor()`);
+  await R(`S.op["gd:i:${dupId}"]=true;S.op["gd:f:${dupId}:says"]=true;renderEditor()`); // round 14: its words are in its Says group
   const ins = await R(`[].map.call(ed.querySelectorAll('[data-fo="gd:i:${dupId}"] [data-tx]'),function(x){return x.dataset.tx})`);
   for (const k of ins) { const l = p.locator(`[data-fo="gd:i:${dupId}"] [data-tx="${k}"]`); await l.scrollIntoViewIfNeeded(); await l.fill(k.endsWith('|pt') ? 'Pergunte-me o que quiser.' : 'Ask me anything.'); await l.press('Tab'); await W(250); }
   await W(400); const d2 = await R('[].map.call(ed.querySelectorAll("#gdwarns .gdwl"),function(x){return x.textContent})');

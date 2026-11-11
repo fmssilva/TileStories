@@ -95,7 +95,7 @@ function gdCheck(it,items,visitor,ctx,now){var vm=gdVisitOf(visitor,it.id),em=gd
   /* round 11: Fun never during a tour: every Fun item is held while a tour plays (not paused); fixed, no option (the beats of On the
      tour, made for it, are the exception: above) */
   if(it.kind==="fun"&&ctx.tour&&!ctx.tour.paused)return{no:"held while a tour plays: Fun never shows during a tour"};
-  if(ctx.moment==="between"&&it.form!=="moment")return{no:"the tour moves on to its next step: only a beat of its plan (Fun › On the tour) plays there"};
+  if(ctx.moment==="between"&&it.form!=="moment")return{no:"the tour moves on to its next step: only a beat of its plan (Games on the tour) plays there"};
   if(it.form==="moment"&&ctx.moment!=="between")return{no:"a Moment comes only as the tour moves on to its next step"};
   if(ctx.tips==="essentials"&&!it.essential)return{no:"the visitor chose Essentials only (Settings › The guide › Tips)"};
   if(ctx.moment==="open"&&it.when!=="open")return{no:"the card is opening: only a cue that answers the opening shows now"};
@@ -116,7 +116,7 @@ function gdCheck(it,items,visitor,ctx,now){var vm=gdVisitOf(visitor,it.id),em=gd
   /* a seasonal line: only in its window of dates; a point's joke: only for a point with one of its own (never a generic one) */
   if(it.seasons){var sv=gdSeasonOf(it,ctx.today);if(!sv)return{no:"no season today ("+gdDayWords(ctx.today)+")"};why.push("today ("+gdDayWords(ctx.today)+") is in its window "+gdDayWords(sv.from)+(sv.to!==sv.from?"–"+gdDayWords(sv.to):""))}
   if(it.ptJokes&&!(it.jokes&&it.jokes.length))return{no:(it.pointName||"this point")+" has no joke of its own (never a generic one in its place)"};
-  if(it.lively&&!ctx.lively)return{no:"Lively only: Azu is Calm (Mascot > Liveliness)"};
+  if(it.lively&&!ctx.lively)return{no:"Lively only: Azu is Calm (Azu › Liveliness)"};
   if(it.notSolemn&&ctx.solemn)return{no:"never on a Solemn point"};
   if(it.screen==="wall"&&!ctx.onWall)return{no:"not on the wall ("+(ctx.where||"a card is open")+")"};
   if(it.screen==="card"&&!ctx.onCard&&it.form!=="cue")return{no:"only on a card ("+(ctx.where||"the wall")+")"};
@@ -239,7 +239,7 @@ function gdPlanOn(items,visitor,ctx,T,steps){var n=steps.length,at=[],c=0;steps.
   var gate=function(it){if(!it.on)return"Off";if(it.kindOn===false)return(it.kindName||"Fun")+" is Off";if(it.groupOn===false)return(it.groupName||"On the tour")+" is Off";
     if(ctx.solemn)return"a Solemn point: no beats on it";
     if(T.auds&&!T.auds[A])return(it.groupName||"On the tour")+" is not for "+AN+" (its Audiences)";if(!(it.auds||{})[A])return"not for "+AN+" (its Audiences)";
-    if(!it.calm&&(!ctx.lively||it.groupLife==="calm"))return(it.groupLife==="calm"?"On the tour's Liveliness is Calm":"Calm (Mascot › Liveliness)")+": only the items Calm too";
+    if(!it.calm&&(!ctx.lively||it.groupLife==="calm"))return(it.groupLife==="calm"?"On the tour's Liveliness is Calm":"Calm (Azu › Liveliness)")+": only the items Calm too";
     if(ctx.sr&&it.srPath===false)return it.beat==="word"?"a screen reader is on: Don't say it! is not offered (no button path)":"a screen reader is on, and it has no button path";
     if(it.game&&ctx.games==="off")return"the visitor turned Games on the tour Off (Settings › The guide)";
     if(it.game&&(+ctx.notNow||0)>=2)return"two Not nows this visit: no more games";
@@ -302,7 +302,7 @@ function gdBeatCheck(it,ctx){var T=ctx.tour,P=ctx.plan;
   if(ctx.speaking)return{no:"never over a sentence: the guide is speaking"};
   if(it.game&&ctx.games==="off")return{no:"the visitor turned Games on the tour Off (Settings › The guide)"};
   if(it.game&&(+ctx.notNow||0)>=2)return{no:"two Not nows this visit: no more games"};
-  if(!it.calm&&(!ctx.lively||it.groupLife==="calm"))return{no:(it.groupLife==="calm"?"On the tour's Liveliness is Calm":"Calm (Mascot › Liveliness)")+": only the items Calm too"};
+  if(!it.calm&&(!ctx.lively||it.groupLife==="calm"))return{no:(it.groupLife==="calm"?"On the tour's Liveliness is Calm":"Calm (Azu › Liveliness)")+": only the items Calm too"};
   if(ctx.sr&&it.srPath===false)return{no:it.beat==="word"?"a screen reader is on: Don't say it! is not offered":"a screen reader is on, and it has no button path"};
   /* round 13: Don't say it! in the plan's language only; Find it on the wall never while the wall is lost (a system state wins), on the wall of its point */
   if(it.beat==="word"&&ctx.lang&&P.lang&&ctx.lang!==P.lang)return{no:"the language changed: its word is the "+({en:"English",pt:"Portuguese"}[P.lang]||P.lang)+" one"};

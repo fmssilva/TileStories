@@ -47,7 +47,7 @@ S.guidance={on:true,breathing:15,cueRoom:5,perMinute:2,perVisit:30,freshTau:120,
     {id:"fun",name:"Fun",spoken:"bubble",on:true,cap:4,gap:300,solemnOff:true,groups:[
       /* round 12: Fun › On the tour (it took Moments' place: the water break and the cookie moved in). Its own rhythm (the tour's, never
          Fun's visit cap): one beat per 75 s of narration (every, 60-120), at most 3 a tour (perTour; Short 2, Deep 5), the opening and the
-         finale included; who gets it (auds: Family, Explorer, Expert). Liveliness is Mascot › Liveliness (Calm: only the items Calm too) */
+         finale included; who gets it (auds: Family, Explorer, Expert). Liveliness is Azu › Liveliness (Calm: only the items Calm too) */
       {id:"ontour",name:"On the tour",mode:"all",on:true,weight:1,cap:0,gap:0,tour:true,life:"azu",every:75,perTour:3,perShort:2,perDeep:5,auds:{family:true,explorer:true,expert:true},items:["quizpromise","quizfinale","guessyear","dontsay","findwall","water","cookie"]},
       {id:"play",name:"Play",mode:"all",on:true,weight:1,cap:0,gap:0,items:["joke","ptjoke","hunt","season"]}]}],
   items:{
@@ -571,7 +571,7 @@ function gdTryReadBack(it){var g=gdGroupOf(it);return it.label+" · App › "+(g
    Place in the tour (Opening: after the introduction / Between steps / Finale: before the last step; In a step comes in round 13), The
    visitor answers by (Nothing / Chips / Slider / Tap / Tap or say), Waits (3-12 s: then it carries on by itself; the quiz has no timer),
    Needs (what the point must hold: quiz questions, a year; a named warning when it lacks them), Pairs with (a promise and its payoff are
-   one), Scores, Calm too (allowed when Mascot › Liveliness is Calm), Audiences (Family / Explorer / Expert), Tour length (Every length
+   one), Scores, Calm too (allowed when Azu › Liveliness is Calm), Audiences (Family / Explorer / Expert), Tour length (Every length
    / Not on Short / Deep only), a game (its 4 s Not now chip; two Not nows end games for the visit), a button path (a screen reader may
    get it). The quiz's questions and the guesses are per step, in Specific Marker › Guide script (S.tourQ, S.tourGuess: words EN / PT,
    Draft with AI, a Reviewed tick per language); unreviewed ones never play. Unity: GuidanceItem's beat fields (GuidanceCatalog); the
@@ -645,7 +645,7 @@ function gdBeatReadBack(it){var g=gdGroupOf(it),a=it.auds||{},w=[];
   if(it.scores)w.push("scores");if(it.game)w.push("a game (its 4 s Not now chip)");w.push(it.calm?"Calm too":"Lively only");
   w.push("for "+GD_AUDS.filter(function(x){return a[x[0]]}).map(function(x){return x[1]+(x[0]==="expert"&&it.beat==="promise"&&it.expert==="optin"?" (an opt-in)":"")}).join(", ")||"nobody");
   if(it.tourLen!=="every")w.push(gdNameOf(GD_TOURLEN,it.tourLen).toLowerCase());
-  return it.label+" · Fun › "+(g?g.name:"?")+" · "+w.join(", ")+" · "+gdBeatHowOften(it)+" · never over a sentence, never on a Solemn point, never two seams in a row; the tour's rhythm, never Fun's visit cap."}
+  return it.label+" · "+(g&&g.tour?"Games on the tour":"Fun › "+(g?g.name:"?"))+" · "+w.join(", ")+" · "+gdBeatHowOften(it)+" · never over a sentence, never on a Solemn point, never two seams in a row; the tour's rhythm, never Fun's visit cap."}
 
 /* ----- round 13, Don't say it! as data (research_tour_entertainment.md 5.4). Per point and per language: the word the author picked from
    the Editor's suggestions (or typed), its span (1-2 consecutive steps), and its own Reviewed tick; a language without a reviewed word

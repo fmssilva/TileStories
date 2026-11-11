@@ -5,7 +5,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-07)
 
 - **State:**
-  - **The Lab:** `master` holds guidance rounds 1-13, verified on 2026-11-06/11, published at
+  - **The Lab:** `master` holds guidance rounds 1-14, verified on 2026-11-06/11, published at
     https://claude.ai/artifact/RGofgbUpthqLY5x87wjQLq with the 186 voice files, the music and the capabilities (section 1). The
     developer changes account often (four times on 2026-11-08/09); the old links stay in their accounts (19Uiat… at round 12, RKn3Rr… at round 11, J9J4h… at round 9, 4LpLd4… at round 8, Jq6X2K… at round 7, Jrejv7… at
     round 6, QmhHSz… at round 5, KDs2… at v29). A new account cannot update an old link: publish a new one (section 1, Publishing). Its
@@ -39,9 +39,11 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     - **Level 2, every 3rd-4th round (about 35 min):** every tab and every file. It runs sooner when a round changed existing
       shared code.
     - **Level 3, every 10-12 rounds and before a Unity hand-off:** level 2, every mutation and a new baseline.
-    - Count the rounds since the last level 2 and 3 in every answer. After guidance round 13 that is 0 and 3: level 2 ran
-      after rounds 11, 12 and 13 (round 13, 2026-11-11: the self-test's four walks bad=0, card 710/248, guide 31/1364,
-      marker+global 23/43, words 479/542; 41 files, 1238 checks, about 76 min); level 3 last ran on 2026-11-09.
+    - Count the rounds since the last level 2 and 3 in every answer. After guidance round 14 that is 0 and 4: level 2 ran
+      after rounds 11, 12, 13 and 14 (round 14, 2026-11-11: the self-test's four walks bad=0, card 710/248, guide 31/1364,
+      marker+global 23/43, words 479/542; 42 files, 1267 checks, 104 min on a machine at 66-68 % CPU: 9 files red or
+      crashed at the start; all green when run again alone at 15-20 % CPU except test8o, whose check still wanted the
+      Guide panel before Captions: it now checks round 14's order); level 3 last ran on 2026-11-09.
   - **Where the tests' time goes (measured 2026-11-07):**
     - Starting Edge and loading the 13 MB page costs only about 8 s a file (Edge 0.3-0.8 s, the page 7 s), so one shared Edge
       would save almost nothing.
@@ -175,9 +177,25 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       effects (the developer had picked only the system events simulated in Preview & Test), Global Scene (kept as
       headings, developer), the card blocks' stand-ins (Place in AR, Knowledge Check's Appears), the Sticky Action's demo,
       whether every Detail Card change moves the phone.
-    - **Next: round 14, the Guide tab's organization** (after the developer's answers on the plan).
-    - **Then: round 15, the design pass** of every guide surface (the plan's section 4, with the guide's open look
-      questions from rounds 1-3), and the features (section 5). Prototype only (no Unity) until the developer says so.
+    - **Round 14 (2026-11-11): the Guide tab's organization** (`_3.8_guidance_plans/brief_round14.md`, the plan's
+      section 3). Six sections: `gt0` 0 · Preview & Test (The visitor's table under Details `gd:visitor`; the Voice test
+      `s7vtest` moved here), `s7mascot` 1 · Azu (Model tools `gt:tools`; the Moments and Water break after link rows
+      gone), `gt1` 2 · The tour (Ways in `gt:ways`: Guide button, Hero button, Guide block, Resume; Tour controls'
+      words inside the Guide panel), `gd:g:ontour` 3 · Games on the tour (promoted; the quiz's promise and finale one
+      item `gd:pair:quizpromise`; Cookie marked as the breather's variant), `gt4` 4 · Azu speaks up (Fun keeps Play),
+      `gt3` 5 · Ask Azu (What the visitor sees `s7ask`, Knowledge `gt:know`, The engine `s7agent`). Removed ids: `gt2`,
+      `s7tour` (old saved states map to the new places; a foldout with no home goes to "Not placed yet" with a console
+      warning). A strip of the six names on top (`.gtnav`). Each item's groups are folded foldouts
+      `gd:f:<item>:<group>` with a summary, "N changed" and Reset; Says is one EN | PT list (▸, Remove with Undo);
+      a per-point field links to Specific Marker › Guide script at that field. The tab draws only the guide's part of the
+      document: 1.1 s to 0.35 s. `src/editor/guide-tab.css` (new), `tests/test9r.js` (28 checks),
+      `tests/guide_rows_r13.json` (round 13's 649 row keys, all still there). The Architect's review: the captures right
+      (the strip, the folded groups, the merged Says, Games on the tour, Ask Azu's three parts, the link landing).
+    - The developer (2026-11-11): the Detail Card blocks' design (each point's card blocks) stays valid and is the
+      **next domain once the AI guide is finished**; postponed, not dropped.
+    - **Next: the developer's answers on round 14's organization questions**, then **round 15, the design pass** of every
+      guide surface (the plan's section 4, with the guide's open look questions from rounds 1-3), then the four
+      features (section 5). Prototype only (no Unity) until the developer says so.
   - **MCP:** blender-mcp at user scope (Blender 5.2.3, add-on 1.8, port 9876). The Unity MCP was not connected this stretch.
   - **Keys:** Gemini, Azure Speech and ElevenLabs answer (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).
 - **The tasks, in this order:**

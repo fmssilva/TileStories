@@ -13,7 +13,7 @@ const CAP = process.env.CAP || require('os').tmpdir();  // a picture of each mod
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   // round 7: a change to an Editor row shows its demo on the phone; this test picks models in the Editor mid-scene, so it keeps the phone as it set it
   await R('S.ui.rowDemo=false;S.guideCfg.azuStyle="light";S.guideCfg.voice="device";S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;sampleFn=null;S.view="card";S.stop="half";renderAll(false)');
-  await R('S.tab="guide";renderEditor();ed.querySelector(\'[data-fo="s7mascot"]\').open=true');
+  await R('S.tab="guide";S.op["gt:tools"]=true;renderEditor();ed.querySelector(\'[data-fo="s7mascot"]\').open=true'); // round 14: Model tools opened too
   // 1. the Model row is there only for the 3D source
   ok('Tile of light: no Model row', await R('!ed.querySelector(".az3dpick")'));
   await p.locator('[data-set="@guideCfg.azuStyle"][data-v="glb"]').click();

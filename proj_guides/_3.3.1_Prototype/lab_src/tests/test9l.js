@@ -24,7 +24,8 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const base = 'if(G.gd.pages)gdPagesEnd("test",false);S.guidance=JSON.parse(window.__g0);S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;S.reduce=false;S.dark=false;S.lang="en";S.ui.rowDemo=false;S.ui.gdSR=false;S.ui.gdToday="2026-03-10";S.m.solemn=false;S.vis.aud="explorer";S.vis.len="";S.aud.where="card";S.aud.seen=true;S.guideCfg.life="lively";S.guideCfg.gbtn="both";S.guideCfg.mascot=true;G.gd.demo=false;G.gd.camPerm="allowed";gdChip(null);';
   /* the guidance's other kinds rest (only The start speaks), a first visit on the wall, the clock by hand */
   const fresh = async (extra) => { await R(base + 'gdGroupById("inview").on=false;S.guidance.items.gbhint.on=false;gdGroupById("card").on=false;gdKindById("fun").on=false;if(G.on)stopTour();stopSpeech();G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};S.settingsOpen=false;G.fab.menu=false;setWall("ribeira");S.camZoom=1;S.view="card";S.stop="closed";renderPhone(false);G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;' + (extra || '')); await W(100); };
-  const editor = async (tab, ops) => { await R(`S.tab="${tab}";S.ui.level=1;S.op=${JSON.stringify(ops)};renderEditor()`); await W(120); };
+  // round 14: an item's groups are folded: an item opened here shows its groups open too (each by its id, as the author opens them)
+  const editor = async (tab, ops) => { await R(`S.tab="${tab}";S.ui.level=1;S.op=${JSON.stringify(ops)};Object.keys(S.op).forEach(function(k){var m=/^gd:i:(.+)$/.exec(k),it=m&&S.op[k]&&S.guidance.items[m[1]];if(it)gdFormOf(it).groups.forEach(function(g){if(g)S.op["gd:f:"+m[1]+":"+g.k]=true})});renderEditor()`); await W(120); };
   const page = () => R('var L=ph.querySelector(".gdpages:not(.gd-out)");L?L.dataset.page+(L.dataset.cam?":"+L.dataset.cam:""):""');
   /* a real click on a page's control (a missing control: false, never a crash, so a broken run fails its checks) */
   const tap = async sel => { const ok1 = await p.locator('#ph .gdpages:not(.gd-out) ' + sel).first().click({ timeout: 2500 }).then(() => true, () => false); await W(80); return ok1; };
@@ -245,7 +246,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await p.locator('[data-gdshow="pg_camera"]').click(); real.push(await until('!!ph.querySelector(\'.gdpages[data-page="camera"]\')', 3000));
   ok('...pressed by real clicks: Azu Appears, the chip Hidden, Hello Off, ▸ Show now on the camera: each on the phone at once', real.every(Boolean), real);
   await R('S.ui.rowDemo=false;if(G.gd.pages)gdPagesEnd("test",false);gdChip(null);S.guidance=JSON.parse(window.__g0)');
-  ok('The words and their owners: each page\'s own (Languages & Terms), Skip and the progress the group\'s, the bar\'s Start the app', await R('TXOWN.gd_pg_hello==="gd:i:pg_hello"&&TXOWN.gd_pg_cam==="gd:i:pg_camera"&&TXOWN.gd_pg_wall==="gd:i:pg_wall"&&TXOWN.gd_pg_skip==="gd:g:pages"&&TXOWN.pbar_start==="s0bar"&&S.tx.gd_pg_off.pt.length>0&&!!TX_DOM.gd_pg_hello&&guidePath("gd:i:pg_hello").join(">")==="gt4>gd:seq>gd:g:pages>gd:i:pg_hello"'));
+  ok('The words and their owners: each page\'s own (Languages & Terms), Skip and the progress the group\'s, the bar\'s Start the app', await R('TXOWN.gd_pg_hello==="gd:i:pg_hello"&&TXOWN.gd_pg_cam==="gd:i:pg_camera"&&TXOWN.gd_pg_wall==="gd:i:pg_wall"&&TXOWN.gd_pg_skip==="gd:g:pages"&&TXOWN.pbar_start==="s0bar"&&S.tx.gd_pg_off.pt.length>0&&!!TX_DOM.gd_pg_hello&&guidePath("gd:i:pg_hello").join(">")==="gt4>gd:seq>gd:g:pages>gd:i:pg_hello>gd:f:pg_hello:says"'));
 
   lap('before 12');
   // ---------- 12. the four scenes in Ask Azu's console, pressed as the developer does ----------

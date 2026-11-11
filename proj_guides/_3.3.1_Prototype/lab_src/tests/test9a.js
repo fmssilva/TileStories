@@ -30,7 +30,7 @@ const TEXT = 'O palácio tinha uma ópera, inaugurada em março de 1755.';
   const R = src => p.evaluate(s => LAB.run(s), src); const W = ms => p.waitForTimeout(ms);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   // round 7: a change to an Editor row now shows its demo on the phone; this test changes Voice of the answers mid-scene, so it keeps the phone as it set it
-  await R('S.ui.rowDemo=false;S.guideCfg.voice="device";S.hints.on=false;S.previewBar=false;S.guideMute=false;S.introSeen=true;S.lang="pt";S.guideCfg.azuStyle="tile";S.view="card";S.stop="half";renderAll(false);S.tab="guide";renderEditor();ed.querySelector(\'[data-fo="s7agent"]\').open=true');
+  await R('S.ui.rowDemo=false;S.guideCfg.voice="device";S.hints.on=false;S.previewBar=false;S.guideMute=false;S.introSeen=true;S.lang="pt";S.guideCfg.azuStyle="tile";S.view="card";S.stop="half";renderAll(false);S.tab="guide";S.op.s7ask=true;renderEditor();ed.querySelector(\'[data-fo="s7agent"]\').open=true'); // round 14: Voice of the answers is in Ask Azu › What the visitor sees (s7ask)
   // 1. the Editor: the row and its status, with no keys here
   const opts = await R('Array.from(ed.querySelectorAll(\'[data-set="@agentCfg.liveVoice"]\')).map(function(b){return b.textContent+(b.getAttribute("aria-pressed")==="true"?"*":"")})');
   ok('Editor: Voice of the answers offers the device voice, Azure (live, chosen: the developer\'s default) and ElevenLabs (live)', opts.join('|') === 'Device voice|Azure (live)*|ElevenLabs (live)', opts);
