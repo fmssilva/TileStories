@@ -37,13 +37,21 @@ on("runStep.before",function(){if(G.introPending&&G.i===0){G.introPending=false;
   G.tryKind=null;G.tryDone=false;G.tryWait=false;clearTimeout(G.insistT)});
 on("runStep.after",function(){
   var st=S.guideSteps[G.i];if(st&&st.act==="intro"){var m=ph.querySelector(".mascot");if(m&&!S.reduce){m.classList.add("enter");setTimeout(function(){m.classList.remove("enter")},1400)}}
-  if(st&&st.act==="try")G.tryKind=st.wait;placeStep(st)});
+  if(st&&st.act==="try")G.tryKind=st.wait;G.placedStep=-1;placeStep(st)});
 on("startTour.before",function(from){G.introPending=!from&&!S.howSaved&&(S.guideCfg.intro==="every"||(S.guideCfg.intro==="first"&&!S.introSeen));if(G.introPending)S.introSeen=true});
 
 /* ----- the block being told, placed where the guide panel never covers it: a short block at a third of the free height, a tall one near the top ----- */
-function placeStep(st){if(G.keepScroll||!st||st.act==="intro")return;var el=stepEl(st);if(!el)return;setTimeout(function(){if(!el.isConnected||!G.on)return;var f=freeHeight(),r=el.getBoundingClientRect(),avail=f.bottom-f.top,q=ph.getBoundingClientRect().height/ph.offsetHeight;
+function placeStep(st){if(G.keepScroll||!st||st.act==="intro")return;var el=stepEl(st);if(!el)return;setTimeout(function(){if(!el.isConnected||!G.on)return;var f=freeHeight(),r=el.getBoundingClientRect();G.placedTop=null;var avail=f.bottom-f.top,q=ph.getBoundingClientRect().height/ph.offsetHeight;
     var want=r.height<=avail*.45?f.top+(avail-r.height)/3:f.top+16,dy=(r.top-want);if(st.ref==="hero")dy=-scr.scrollTop;
     if(Math.abs(dy)>4){G.autoScrollTill=performance.now()+900;scr.scrollTo({top:scr.scrollTop+dy/q,behavior:S.reduce?"auto":"smooth"})}},60)}
+/* round 15: the block stays clear when it ends up under the guide mid-step: the panel opened to Open, Azu's bubble with its next line or
+   an ask, the ✦ growing into the panel as a tour starts or resumes at a step (placed during the growth), the card's layout settling after
+   the placing. Placed again (at most 3 times a step) only while the scroll is where the guide put it: once the visitor scrolls, their
+   scroll rules (Keeps going / Pauses) and nothing here; never at Full (the panel is then the whole text). Asked by guide/dock.js's 150 ms loop. Unity: the same check on the panel's and the
+   bubble's geometryChanged, then the ScrollView's scrollOffset tween */
+function keepStepClear(){if(!G.on||G.keepScroll||S.dockH==="full"||performance.now()<(G.autoScrollTill||0))return;var st=S.guideSteps[G.i],el=st&&st.act!=="intro"&&stepEl(st);if(!el)return;
+  var top=Math.round(scr.scrollTop);if(G.placedStep!==G.i){G.placedStep=G.i;G.placeTries=0;G.placedTop=null}if(G.placedTop==null)G.placedTop=top;if(top!==G.placedTop)return;
+  var f=freeHeight(),r=el.getBoundingClientRect(),sb=scr.getBoundingClientRect();if(r.bottom>f.bottom+1&&r.top<sb.bottom&&G.placeTries<3){G.placeTries++;G.placedTop=null;placeStep(st)}}
 
 /* ----- a scroll by the visitor: the guide keeps talking; if its block leaves the screen, it moves on to the block now in view
    (with none in view it pauses the line where it is, whatever voice speaks it, and Resume plays on) ----- */

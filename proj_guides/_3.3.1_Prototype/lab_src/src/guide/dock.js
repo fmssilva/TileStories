@@ -202,7 +202,7 @@ function freeHeight(){var box=scr.getBoundingClientRect(),lo=box.bottom;[".gcap"
 function bubbleSentence(){var b=ph.querySelector(".gbubble .gcap");if(!b)return;var ws=b.querySelectorAll(".gw"),k=Math.max(0,G.hl&&G.hl.k>=0?G.hl.k:0),sid=[],n=0;
   for(var i=0;i<ws.length;i++){sid.push(n);if(/[.!?…]["”»)]*$/.test(ws[i].textContent))n++}var cur=sid[Math.min(k,ws.length-1)];for(var j=0;j<ws.length;j++)ws[j].classList.toggle("gb-off",sid[j]!==cur)}
 setInterval(function(){if(!G.on||!dockOn())return;bubbleSentence();var t=ph.querySelector(".gd-talk"),ts=talkState(),m=ph.querySelector(".mascot");if(m&&m.dataset.state!==ts)m.dataset.state=ts;/* Azu's state follows at every height (round 11: the Mini has no talk button) */if(t&&!t.classList.contains("s-"+ts)){t.className="gd-talk s-"+ts;var h=ph.querySelector(".gd-hint");if(h){h.textContent=TXT(TALKW[ts]);h.classList.toggle("on",/listening|thinking|interrupted|notheard/.test(ts))}}
-  var stt=ph.querySelector(".gd-status");if(stt){var w=dkStatus(ts);if(stt.innerHTML!==w)stt.innerHTML=w}if(ph.querySelector(".gd-bars"))barsStart();placeBubble()},150);
+  var stt=ph.querySelector(".gd-status");if(stt){var w=dkStatus(ts);if(stt.innerHTML!==w)stt.innerHTML=w}if(ph.querySelector(".gd-bars"))barsStart();placeBubble();keepStepClear()},150);
 /* the conversation: the tour's lines and the questions and answers */
 on("runStep.after",function(){var st=S.guideSteps[G.i];if(st){var t=stepText(st);if(t&&(!G.thread.length||G.thread[G.thread.length-1].text!==t))G.thread.push({who:"azu",text:t});if(G.thread.length>60)G.thread.shift()}});
 on("ask.before",function(q){G.thread.push({who:"me",text:q.trim()});G.micNote="";G.talk="idle"});

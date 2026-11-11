@@ -69,7 +69,9 @@
 .gd-kb svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .gd-askrow{display:flex;gap:10px;align-items:center}
 .gd-form{flex:1;min-width:0;display:flex;align-items:center;gap:6px;height:52px;border-radius:26px;background:var(--field);border:1px solid var(--fieldedge);padding:0 6px 0 18px;box-sizing:border-box}
-.gd-form .gin{flex:1;min-width:0;border:0;background:transparent;outline:none;font:400 15px/1 var(--body);color:var(--ink);padding:0}
+.gd-form .gin{flex:1;min-width:0;border:0;background:transparent;outline:none;font:400 15px/1 var(--body);color:var(--ink);padding:0;align-self:stretch}
+/* round 15 (44 px): the input fills its field (52 px; 44 px in Paper glass and the Player's bar), so a tap anywhere on the field types.
+   Unity: the TextField stretched to its row (align-self: stretch, height 100 %) */
 .gd-form .gin::placeholder{color:var(--ink2);opacity:1}
 .gd-send{width:44px;height:44px;border-radius:50%;background:var(--acc)!important;color:var(--onacc)}
 .gd-form:has(.gin:placeholder-shown) .gd-send{display:none}
@@ -120,7 +122,12 @@
 .lk-paper .gd-line .gd-bars{height:14px;gap:2px}
 .lk-paper .gd-mt{font:400 15px/20px var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lk-paper .gd-mstop{color:var(--ink)}
-.gdock.lk-paper:not(.h-mini){--surf:rgba(251,250,247,.97);left:12px;right:12px;bottom:16px;border-radius:30px;padding:24px 16px 16px;gap:12px}
+.gdock.lk-paper:not(.h-mini){--surf:rgba(251,250,247,.97);left:12px;right:12px;bottom:16px;border-radius:30px;padding:28px 16px 16px;gap:6px}
+.lk-paper .gd-handle{top:-16px}
+/* round 15: Paper glass's Open was 2-9 px too tall for the block told on a 390 x 712 phone (its last line under the panel, Open and
+   Listening: 0 px over the words told) and its handle's 44 px hit area took the top 6 px of Aa and the speaker button (44 px): its rows
+   6 px closer (12 to 6 px), its top 4 px lower (24 to 28 px) and the handle's hit area 7 px higher (its bar 7 px nearer the edge) give
+   the block 32 px and Aa its whole 44. Unity: the USS padding-top, the rows' margin and the handle's top */
 .cv.dark .gdock.lk-paper:not(.h-mini){--surf:rgba(31,29,26,.97)}
 .lk-paper .gd-head{display:flex;align-items:center;gap:10px;height:44px}
 .lk-paper .gd-head .gd-av{width:44px;height:44px}
@@ -147,10 +154,15 @@
 .lk-ink .gd-mrow .gd-line{flex:none;display:flex;align-items:center;min-width:44px;height:44px;justify-content:center;padding:0 4px}
 .lk-ink .gd-mrow .gd-bars{height:20px}
 .lk-ink .gd-mini .gd-mpp{margin-left:4px}
-.gdock.lk-ink:not(.h-mini){left:10px;right:10px;bottom:14px;border-radius:32px;padding:34px 18px 18px;gap:14px}
+.gdock.lk-ink:not(.h-mini){left:10px;right:10px;bottom:14px;border-radius:32px;padding:34px 18px 18px;gap:14px;background-color:#1C1A21;background-image:linear-gradient(180deg,#2C2834,#16151A 55%)}
+/* round 15 (4.5:1): Ink glass at Open and Full is opaque (it was the Mini's 92 % glass: over the light card its unsaid words read 4.12:1,
+   now 5.3:1 at the panel's lightest). Unity: the Open state's USS class sets an opaque background-color and the ramp texture at alpha 1 */
 .lk-ink .gd-wrow{display:flex;align-items:flex-start;gap:12px;margin-top:4px}
 .lk-ink .gd-wrow .gd-av{width:40px;height:40px}.lk-ink .gd-wrow .gd-av svg,.lk-ink .gd-wrow .gd-av img{width:36px;height:36px}
 .lk-ink .gd-wrow .gd-tp{flex:1}
+/* round 15 (44 px): the hide chevron's 44 px hit area took the top 4 px of Read all; the chevron 12 px higher (its hit area may pass the
+   panel's edge; its drawing stays inside). Unity: its top */
+.lk-ink .gd-small{top:-6px}
 .lk-ink .gd-tp .tp-prev{font-size:14px;line-height:20px;-webkit-line-clamp:1}
 .lk-ink .gd-tp .tp-now{font-size:22px;line-height:30px;-webkit-line-clamp:3}
 .lk-ink .gd-side button{border:1px solid rgba(255,255,255,.18)}

@@ -5,7 +5,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-07)
 
 - **State:**
-  - **The Lab:** `master` holds guidance rounds 1-14, verified on 2026-11-06/11, published at
+  - **The Lab:** `master` holds guidance rounds 1-15, verified on 2026-11-06/11, published at
     https://claude.ai/artifact/Gpjf7yvoYHjGebmmNhuw2o (round 14b) with the 186 voice files, the music and the capabilities (section 1). The
     developer changes account often (four times on 2026-11-08/09); the old links stay in their accounts (RGofgb… at round 13, 19Uiat… at round 12, RKn3Rr… at round 11, J9J4h… at round 9, 4LpLd4… at round 8, Jq6X2K… at round 7, Jrejv7… at
     round 6, QmhHSz… at round 5, KDs2… at v29). A new account cannot update an old link: publish a new one (section 1, Publishing). Its
@@ -39,7 +39,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     - **Level 2, every 3rd-4th round (about 35 min):** every tab and every file. It runs sooner when a round changed existing
       shared code.
     - **Level 3, every 10-12 rounds and before a Unity hand-off:** level 2, every mutation and a new baseline.
-    - Count the rounds since the last level 2 and 3 in every answer. After guidance round 14 that is 0 and 4: level 2 ran
+    - Count the rounds since the last level 2 and 3 in every answer. After guidance round 15 that is 1 and 5 (round 15 ran level 1: its four new files and the touched modules' files): level 2 ran
       after rounds 11, 12, 13 and 14 (round 14, 2026-11-11: the self-test's four walks bad=0, card 710/248, guide 31/1364,
       marker+global 23/43, words 479/542; 42 files, 1267 checks, 104 min on a machine at 66-68 % CPU: 9 files red or
       crashed at the start; all green when run again alone at 15-20 % CPU except test8o, whose check still wanted the
@@ -201,9 +201,20 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       foldout `gd:var:water` ("The breather · with its variant “Cookie”: never both in a tour", `gdVariantsOf`, `gdVarBaseOf`,
       `gdItemPath`); test9r, test9e, test9p, test9k follow (green: 28, 59, 60, 51; the self-test's guide walk bad=0; test9r's
       mutation red). The spec's table, PROTOTYPE_STRUCTURE and README follow.
-    - **Next: round 15, the design pass** of every
-      guide surface (the plan's section 4, with the guide's open look questions from rounds 1-3), then the four
-      features (section 5). Prototype only (no Unity) until the developer says so.
+    - Round 15 (2026-11-11): **the design pass** of every guide surface. 315 captures of 39 surfaces (390 x 844 and 712,
+      light and dark, Ink and Paper glass, the four Looks, Mini/Compact/Open) in the scratchpad's `g15\` with `index.md`;
+      27 of 39 passed every rule first time, all 315 now. Fixes (rule broken, only): Ink glass opaque at Open/Full (4.12 to
+      5.28:1); Ask Azu's link cards, source, trace and Show me card take the panel's colours in light Looks (1.01 to 7.39:1);
+      the typed-question field and Read all / Aa / Skip at 44 px; Paper glass Open's rows 12 to 6 px apart so the told block
+      clears at 712; `keepStepClear` (guide/person.js, asked by dock.js's 150 ms loop: places the told block again, at most
+      3 times a step, only while the scroll is the guide's, never at Full); Find it on the wall's give-up walk stays inside.
+      Tests: `tests/g15lib.js` with test9s 56, 9sb 37, 9sc 110, 9sd 38 (the Architect's rerun green; both mutations red);
+      test8n/8o/9l/9m/9n/9o/9p/9q green; the self-test's guide walk bad=0. test9da shows one timing red per run on this
+      machine, on master too. **Found, old (master too):** after a quick step jump, Azu sometimes settles over the words
+      (2 of 18 probes on master, 1 of 18 with round 15; 189-271 px2 at steps g5/g7): round 15b fixes it. The open look
+      questions 1-7 went to the developer with images in `g15\open\`.
+    - **Next: round 15b** (the developer's answers on the look questions, Azu over the words after a step jump), then the four
+      features (the plan's section 5). Prototype only (no Unity) until the developer says so.
   - **MCP:** blender-mcp at user scope (Blender 5.2.3, add-on 1.8, port 9876). The Unity MCP was not connected this stretch.
   - **Keys:** Gemini, Azure Speech and ElevenLabs answer (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).
 - **The tasks, in this order:**

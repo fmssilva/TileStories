@@ -292,5 +292,33 @@
   "failed": [],
   "crashed": "",
   "s": 76
+ },
+ "test9s.js": {
+  "pass": 56,
+  "fail": 0,
+  "failed": [],
+  "crashed": "",
+  "s": 206
+ },
+ "test9sb.js": {
+  "pass": 37,
+  "fail": 0,
+  "failed": [],
+  "crashed": "",
+  "s": 265
+ },
+ "test9sc.js": {
+  "pass": 110,
+  "fail": 0,
+  "failed": [],
+  "crashed": "",
+  "s": 257
+ },
+ "test9sd.js": {
+  "pass": 38,
+  "fail": 0,
+  "failed": [],
+  "crashed": "",
+  "s": 102
  }
 }
