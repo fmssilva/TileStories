@@ -248,7 +248,7 @@ ed.addEventListener("change",function(e){var t=e.target;if(t.dataset.gdwhysel){e
 function gdItemNow(id){var all=gdItems(),x=all.filter(function(o){return o.id===id})[0];if(x)return x;var ins=all.filter(function(o){return o.base===id}),c=gdCentral();
   return ins.filter(function(o){return c&&o.point===c.id})[0]||ins[0]}
 /* a demo begins: the guidance waits (gate "an Editor demo is showing") while it runs; a newer demo of any row ends it */
-function gdDemoBegin(){G.gd.demo=true;G.gd.demoOwner=G.demoSeq;clearTimeout(G.gd.demoT);clearInterval(G.gd.demoI);gdStop("an Editor demo");gdChip(null);return G.demoSeq}
+function gdDemoBegin(){G.gd.demo=true;G.gd.demoOwner=G.demoSeq;clearTimeout(G.gd.demoT);clearInterval(G.gd.demoI);gdStop("an Editor demo");gdChip(null);gdWordOff();gdTailEnd();if(G.gd.find)gdFindEnd(G.gd.find);return G.demoSeq}
 function gdDemoLive(my){if(G.demoSeq===my)return true;if(G.gd.demoOwner===my){G.gd.demo=false;gdChip(null);clearInterval(G.gd.demoI)}return false}
 /* a demo ends its own pulled tip only (never a tip the visitor or a scene got meanwhile) */
 function gdDemoEnd(my,ms){G.gd.demoT=setTimeout(function(){if(!gdDemoLive(my))return;gdChip(null);if(G.gd.cur&&G.gd.cur.pull)gdStop("the demo ended");G.gd.demo=false},ms)}
@@ -934,7 +934,7 @@ rowDemos({"ui.gdSim":{wall:true,wait:0,act:function(){var s=gdSimScript(S.ui.gdS
    (gdDemoBeat). Unity: the POI Editor's GuidanceGroup and GuidanceItem inspectors (the beat fields), the GuideStep's QuizQuestion and
    Guess (with a Draft with AI button calling the Worker, and a Reviewed toggle per language) ----- */
 COMP["gd:g:ontour"]=["Guide","Guidance › Fun › On the tour"];FOCUS["gd:g:ontour"]=["card",".gdock","full"];
-["quizpromise","quizfinale","guessyear","water","cookie"].forEach(function(id){var it=S.guidance.items[id];COMP["gd:i:"+id]=["Guide","Guidance › Fun › On the tour › "+it.label];FOCUS["gd:i:"+id]=["card",".gdock","full"]});
+["quizpromise","quizfinale","guessyear","dontsay","findwall","water","cookie"].forEach(function(id){var it=S.guidance.items[id];COMP["gd:i:"+id]=["Guide","Guidance › Fun › On the tour › "+it.label];FOCUS["gd:i:"+id]=["card",".gdock","full"]});
 ["tour_promise","tour_promise_expert","tour_deal","tour_noquiz","tour_yes_please","tour_no_thanks"].forEach(function(k){TX_DOM[k]="said and shown in the quiz promise's card, after the introduction of a tour"});TX_DOM.tour_star="the star at the end of the tour's progress line";
 Object.keys(TXOWN).filter(function(k){return/^tour_/.test(k)&&!TX_DOM[k]}).forEach(function(k){TX_DOM[k]="said and shown in a beat of the tour (Fun › On the tour)"});TX_DOM.settings_games="shown in Settings › The guide";
 /* the plan line: the tour playing (or stopped) now, else the plan a tour would get now */
@@ -951,9 +951,9 @@ function gdTourGroupFo(g,gp,k){var items=g.items.map(function(id){return S.guida
     row("At most a tour",pslider(gp+"perTour",1,6,1),"Beats in one Standard tour (3), whatever its length.")+
     row("At most on Short",pslider(gp+"perShort",1,6,1),"Beats in a Short tour (2).",true)+
     row("At most on Deep",pslider(gp+"perDeep",1,8,1),"Beats in a Deep tour (5).",true)+
-    '<div class="note gdfix">Fixed: never over a sentence · never on a Solemn point · never two seams in a row · never in the tour\'s first 20 s but the opening · never the same item twice in a tour · with a screen reader on, only items with a button path · a game\'s Not now for 4 s, two Not nows end the games for the visit · Fun\'s visit cap does not count them.</div>'+
+    '<div class="note gdfix">Fixed: never over a sentence (In a step: a game between the words, never stopping them) · the quiz\'s promise and the quiz count as one beat, and with the quiz promised the card\'s own quiz step is skipped · never on a Solemn point · never two seams in a row · never in the tour\'s first 20 s but the opening · never the same item twice in a tour · with a screen reader on, only items with a button path · a game\'s Not now for 4 s, two Not nows end the games for the visit · Fun\'s visit cap does not count them.</div>'+
     '<div class="note gdplan" id="gdplan" role="status">'+esc(gdPlanLine())+'</div>'+items.map(gdItemRow).join("");
-  return fo("gd:g:"+g.id,esc(g.name)+' <span class="sub">· the quiz, Guess the year, the breather: what real guides do to keep a tour alive</span>',null,body,3)}
+  return fo("gd:g:"+g.id,esc(g.name)+' <span class="sub">· the quiz, Guess the year, Don\'t say it!, Find it on the wall, the breather: what real guides do to keep a tour alive</span>',null,body,3)}
 /* a beat's form */
 function gdBeatRow(it){var p="guidance.items."+it.id+".",g=gdGroupOf(it),wn=gdWarnsOf(it.id),A=GD_ANSWERS_OF[it.beat]||["chips"],pr=it.pairs&&S.guidance.items[it.pairs],P=gdPlanNow(),pw=P.why[it.id]||"";
   var H=function(t,s){return'<div class="sub2 gdfg">'+t+(s?' <span class="sub">· '+s+'</span>':"")+'</div>'};
@@ -961,12 +961,12 @@ function gdBeatRow(it){var p="guidance.items."+it.id+".",g=gdGroupOf(it),wn=gdWa
     (wn.length?'<span class="badge gdwb" title="'+esc(wn.map(function(w){return w.text}).join(" · "))+'">&#9888; '+wn.length+'</span>':"")+
     '<span class="gdhow">'+esc(gdNameOf(GD_PLACES,it.place)+" · "+(/^planned/.test(pw)?pw.replace(/^planned for /,""):"not planned now"))+'</span><button type="button" class="ubtn sm gdshow" data-gdshow="'+it.id+'" title="Show it on the phone now, in a tour">&#9656; Show now</button></span>';
   var needs=it.needs==="quiz"?langCodes().map(function(l){var q=gdQSteps(l);return(GD_LANG_NAME[l]||l)+" "+q.length+" reviewed ("+q.join(", ")+")"}).join(" · "):it.needs==="year"?langCodes().map(function(l){var s=(S.fullSteps||S.guideSteps).filter(function(st){return gdGuessOk(S.tourGuess[st.id],l)}).map(function(st){return st.id});return(GD_LANG_NAME[l]||l)+": "+(s.join(", ")||"none")}).join(" · "):"";
-  var fixedPlace=!!it.pairs||it.beat==="guess";
+  var fixedPlace=!!it.pairs||it.beat==="guess"||it.beat==="word"||it.beat==="find";
   var body=H("Identity","its name, On and where it lives")+
     row("Label",'<input class="u" data-path="'+p+'label" value="'+esc(it.label)+'">',"Editor only: the item's name in these lists, the plan, the Log and the scenes.")+
     H("Words","what Azu says and the chips' words, in each language (Languages &amp; Terms, owned here)")+txPanel("gd:i:"+it.id)+
     H("Place","where it plays in the tour")+
-    (fixedPlace?'<div class="note">Place in the tour: '+esc(gdNameOf(GD_PLACES,it.place))+' ('+esc(GD_PLACE_WORDS[it.place])+(it.beat==="guess"?"; the seam before the step that holds the year":"; fixed for the pair")+').</div>':
+    (fixedPlace?'<div class="note">Place in the tour: '+esc(gdNameOf(GD_PLACES,it.place))+' ('+esc(GD_PLACE_WORDS[it.place])+(it.beat==="guess"?"; the seam before the step that holds the year":it.beat==="word"?"; its span is the word's (Specific Marker › Guide script)":it.beat==="find"?"; the seam after its step (below)":"; fixed for the pair")+').</div>':
       row("Place in the tour",pseg(p+"place",GD_PLACES.map(function(x){return x[0]}),GD_PLACES.map(function(x){return x[1]})),"Opening: after the introduction, before the first step. Between steps: its own moment (below). Finale: before the tour's last step. In a step comes in round 13."))+
     (it.place==="between"&&it.beat==="breather"?row("After narration (s)",pslider(p+"talkFor",0,180,10),"The first free seam after this much of the tour's narration (never the last seam).",true)+
       row("Before the last step",pseg(p+"beforeEnd",["true","false"],["Yes","No"]),"Yes: at the seam before the tour's last step (the cookie).",true)+
@@ -975,15 +975,16 @@ function gdBeatRow(it){var p="guidance.items."+it.id+".",g=gdGroupOf(it),wn=gdWa
     '<div class="note gdplan2">'+esc("Now: "+(pw||"—"))+'</div>'+
     H("The visitor","how it is answered, and its way out")+
     (A.length>1?row("The visitor answers by",pseg(p+"answers",A,A.map(function(x){return gdNameOf(GD_ANSWERS,x)})),it.beat==="finale"?"Tap: the choices only. Tap or say: the choices, and the mic where it is allowed (the recogniser's words matched to a choice: “the second”, “1755”). Never voice only.":"Chips: the ask and its chips. Nothing: it goes on by itself."):'<div class="note">The visitor answers by: '+esc(gdNameOf(GD_ANSWERS,A[0]))+'.</div>')+
-    (it.beat==="finale"?'<div class="note">Waits: no timer (the quiz waits for each answer; Skip the quiz is always there).</div>':row("Waits (s)",pslider(p+"waits",3,12,1),it.beat==="promise"?"The chips' seconds after the line (4): waiting is a Deal (Expert's opt-in: waiting is no).":"Seconds after it asks; then it carries on by itself (8)."))+
+    (it.beat==="finale"?'<div class="note">Waits: no timer (the quiz waits for each answer; Skip the quiz is always there).</div>':row("Waits (s)",pslider(p+"waits",3,12,1),it.beat==="word"?"Let's play / Not now stay up this long after the announce, while the span starts (4): waiting is Let's play.":it.beat==="find"?"Its Not now chip's seconds (4); the find itself waits for the visitor up to Give up after.":it.beat==="promise"?"The chips' seconds after the line (4): waiting is a Deal (Expert's opt-in: waiting is no).":"Seconds after it asks; then it carries on by itself (8)."))+
     (it.game?'<div class="note">A game: its Not now for its first 4 s'+(it.beat==="promise"?" (No quiz, thanks)":"")+'; two Not nows this visit end the games for the visit (said once, kindly). Settings › The guide › Games on the tour Off: no game.</div>':'<div class="note">Not a game: Games on the tour does not hold it.</div>')+
     H("Needs and pairs","what the point must hold")+
-    '<div class="note">Needs: '+esc(GD_NEEDS[it.needs]||"nothing of the point's")+(needs?" · "+needs:"")+(it.needs?' <button class="ubtn sm gdedited" type="button" data-gdscript="1">Edit in Specific Marker › Guide script &#8250;</button>':"")+'</div>'+
+    '<div class="note">Needs: '+esc(GD_NEEDS[it.needs]||"nothing of the point's")+(needs?" · "+needs:"")+(it.needs&&it.needs!=="wall"?' <button class="ubtn sm gdedited" type="button" data-gdscript="1">Edit in Specific Marker › Guide script &#8250;</button>':"")+'</div>'+
     (it.beat==="promise"?row("Questions it needs",pslider(p+"qMin",2,5,1),"Reviewed questions in the visitor's language, from at least 2 steps (3); fewer: no promise (a promise kept).",true):"")+
     (pr?'<div class="note">Pairs with: “'+esc(pr.label)+'” (a promise and its payoff are one: planned together or not at all; a stop offers the quiz from the ✦ menu, or says it away).</div>':"")+
     (it.beat==="finale"?row("Questions",pslider(p+"qn",2,5,1),"How many it asks (3): from the steps heard (80 % played), one from each third, never two from a step.",true)+
       row("Scores",pseg(p+"scores",["true","false"],["On","Off"]),"On: the score at the end, never mocking, and the best score here kept on the phone.",true)+
       row("Show me after a wrong answer",pseg(p+"showMe",["true","false"],["On","Off"]),"On: a Show me chip that goes to the block the question came from.",true):"")+
+    (it.beat==="word"?gdWordRows(it,p):"")+(it.beat==="find"?gdFindRows(it,p):"")+
     H("Who and when","its audiences, Liveliness and the tour's length")+
     row("Calm too",pseg(p+"calm",["true","false"],["Yes","No"]),"Yes: it plays when Liveliness is Calm too. No: Lively only.")+
     GD_AUDS.map(function(a){return row("For "+a[1],pseg(p+"auds."+a[0],["true","false"],["Yes","No"]),"Its Audiences: "+a[1]+" gets it (Who's exploring).",true)}).join("")+
@@ -1000,23 +1001,29 @@ ed.addEventListener("click",function(e){var t=e.target.closest("[data-gdscript]"
 /* ----- each row's demo: the beat on the phone, in a tour, now. The tour starts (or stays), the phone goes to the beat's seam, and the beat
    plays as a pull (no memory), the value in a chip; the plan's rows: the plan a tour gets now, and its first beat played ----- */
 function gdDemoSeamOf(id){var P=gdPlanNow(),b=P.beats.filter(function(x){return x.id===id})[0];if(b)return b.after;var it=S.guidance.items[id],st=gdStepsNow(),k0=P.k0,kf=P.kf;
-  if(!it)return null;if(it.place==="opening")return P.ids[k0];if(it.place==="finale"||it.beforeEnd)return P.ids[kf];if(it.beat==="guess"){for(var j=k0+2;j<=kf;j++)if(S.tourGuess[st[j].id])return P.ids[j-1]}
+  if(!it)return null;if(it.place==="instep"){var w=gdWordOf(S.lang||"en"),j0=w?st.findIndex(function(s){return s.id===w.span[0]}):-1;if(j0>0)return st[j0-1].id}if(it.beat==="find"&&S.tourFind)return S.tourFind.after;if(it.place==="opening")return P.ids[k0];if(it.place==="finale"||it.beforeEnd)return P.ids[kf];if(it.beat==="guess"){for(var j=k0+2;j<=kf;j++)if(S.tourGuess[st[j].id])return P.ids[j-1]}
   for(var s=k0+1;s<kf;s++)if(P.at[s]>=(+it.talkFor||20))return P.ids[s];return P.ids[Math.min(kf-1,k0+2)]}
 function gdDemoBeat(id,chip,o){o=o||{};var my=gdDemoBegin(),it=gdItems().filter(function(x){return x.id===id})[0]||S.guidance.items[id];if(!it)return;
   if(!G.on){S.view="card";S.stop="full";startTour()}stopSpeech();G.paused=true;var after=o.after||gdDemoSeamOf(id),j=S.guideSteps.findIndex(function(s){return s.id===after});if(j>=0)G.i=j;renderGuide();
   var b={id:id,after:after,place:it.place,label:it.label,seam:j},l=S.lang||"en",qs=null;
+  if(it.place==="instep"){var w=gdWordOf(l);if(w){b.span=w.span.slice();b.endAfter=w.span[w.span.length-1]}}
   if(it.beat==="finale"){qs=o.qs||S.guideSteps.filter(function(st){return gdQOk(S.tourQ[st.id],l)}).map(function(st){return st.id}).slice(0,+it.qn||3);if(!qs.length)qs=[]}
   if(G.gd.plan&&it.beat==="promise")G.gd.plan.quiz=null;
   var c=gdStart(it,"the Editor's demo",{pull:true,beat:b,owed:qs?{qs:qs,n:qs.length}:null});if(chip)gdChip(chip);gdDemoEnd(my,o.ms||9000);return c}
 /* a field's demo: the beat with that value, a chip in words */
 function gdBeatChipWords(id,f){var it=S.guidance.items[id],v=it[f];if(/^auds\./.test(f)){var a=f.slice(5);return"For "+gdNameOf(GD_AUDS,a)+": "+(it.auds[a]?"Yes":"No")+" · "+(it.auds[aud()]?"this visitor ("+gdNameOf(GD_AUDS,aud())+") gets it":"not for this visitor ("+gdNameOf(GD_AUDS,aud())+")")}
-  var nm={place:"Place in the tour: "+gdNameOf(GD_PLACES,v),answers:"Answers by: "+gdNameOf(GD_ANSWERS,v),waits:"Waits "+v+" s",calm:"Calm too: "+(v?"Yes":"No"),tourLen:"Tour length: "+gdNameOf(GD_TOURLEN,v),
+  var nm={tapWin:"Tap window: the word's start to its end + "+v+" s",falseTaps:"False taps: "+(v==="nope"?"a playful Nope!":"counted quietly"),slipBack:"Play my slip back: "+(v?"On":"Off"),giveUp:"Give up after "+v+" s: Azu shows it",hintAfter:"Hint after "+v+" s",
+    place:"Place in the tour: "+gdNameOf(GD_PLACES,v),answers:"Answers by: "+gdNameOf(GD_ANSWERS,v),waits:"Waits "+v+" s",calm:"Calm too: "+(v?"Yes":"No"),tourLen:"Tour length: "+gdNameOf(GD_TOURLEN,v),
     scores:"Scores: "+(v?"On":"Off"),showMe:"Show me after a wrong answer: "+(v?"On":"Off"),qn:"Questions: "+v,qMin:"Needs "+v+" reviewed questions",minSteps:"Only in tours of "+v+" steps or more",talkFor:"After "+v+" s of narration",
     beforeEnd:"Before the last step: "+(v?"Yes":"No"),minNarr:"Only in tours of "+v+" s or more",props:"Prop: "+(v==="date"?"by date ("+(GD_PROP_NAMES[gdPropOf(it,gdTodayMD(),[])]||"")+")":"its own"),shows:"Shows: "+(v==="visit"?"once a visit":"every tour"),
     expert:"For Expert: "+gdNameOf(GD_EXPERT,v),on:it.label+": "+(v?"On":"Off"),label:it.label};var P=gdPlanNow(),w=P.why[id]||"";return(nm[f]||it.label)+" · "+(/^planned/.test(w)?w:"not in a tour's plan now: "+w)}
 function gdDemoBeatField(id,f){var it=S.guidance.items[id];if(!it)return;if(!it.on&&f==="on"){var my=gdDemoBegin();if(!G.on){S.view="card";S.stop="full";startTour()}gdChip(it.label+": Off · no tour plans it");gdDemoEnd(my,3200);return}
   if(f==="answers"&&it.beat==="breather"&&it.answers==="nothing"){gdDemoBeat(id,gdBeatChipWords(id,f));return}
   if(it.beat==="promise"&&f==="expert"){var keep=S.vis.aud;S.vis.aud="expert";gdDemoBeat(id,gdBeatChipWords(id,f));S.vis.aud=keep;return}
+  /* round 13: Don't say it!'s game rows: the span playing (a slip's window, a false tap's Nope!), the result with the slip played back */
+  if(it.beat==="word"&&(f==="tapWin"||f==="falseTaps"||f==="auds.family"||f==="auds.explorer")){gdDemoWord(f==="falseTaps"?"nope":"span",gdBeatChipWords(id,f));return}
+  if(it.beat==="word"&&f==="slipBack"){gdDemoWord("result",gdBeatChipWords(id,f));return}
+  if(it.beat==="find"&&(f==="giveUp"||f==="hintAfter")){gdDemoFind(f==="giveUp"?"giveup":"hint",gdBeatChipWords(id,f));return}
   gdDemoBeat(id,gdBeatChipWords(id,f))}
 on("rowDemo.spec",function(key){var m=/^guidance\.items\.([^.]+)\.([\w.]+)$/.exec(key);if(!m)return;var d=S.guidance.items[m[1]];if(!d||d.form!=="beat")return;var id=m[1],f=m[2];
   return{tour:true,dock:"mini",wait:0,act:function(){gdDemoBeatField(id,f)},ringAfter:500,ring:".gdbeat|.gdchip"}});
@@ -1082,3 +1089,79 @@ BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(tourQ\\.|tourGuess\\.|
 on("rowDemo.spec",function(key){var m=/^(tourQ|tourGuess)\.([^.]+)\./.exec(key);if(!m)return;var id=m[2];
   if(m[1]==="tourQ")return{tour:true,dock:"mini",wait:0,act:function(){gdDemoBeat("quizfinale","The quiz · the question of this step",{qs:[id]})},ringAfter:500,ring:".gdbeat|.gdchip"};
   return{tour:true,dock:"mini",wait:0,act:function(){var P=gdPlanNow(),j=P.ids.indexOf(id);gdDemoBeat("guessyear","Guess the year · before this step",{after:j>0?P.ids[j-1]:null})},ringAfter:500,ring:".gdbeat|.gdchip"}});
+
+/* ----- round 13: Don't say it!'s and Find it on the wall's rows in the beat's form (research 4.4, 4.7), their demos; Specific Marker › 3 ·
+   Guide script's word per language (the Editor's suggestions from the tour's own text, each with its count and span, the author's pick,
+   its Reviewed tick, the warnings for a count of 1 or over 4) and the find's line. Unity: the GuideTour asset's ForbiddenWord per language
+   (a suggestions list drawn by the inspector, a Reviewed toggle) and its WallFind (a point of the wall, its step) ----- */
+function gdWordPickOpts(l){var w=gdWordOf(l),out=[],seen={},cur=w?w.w+"|"+w.span.join(","):"";
+  if(w)out.push([cur,w.w+" · "+gdSpanWords(w.span)+" · "+gdWordCount(w,l)+" times"+(w.src==="typed"?" (typed)":"")]);seen[cur]=1;
+  gdWordSuggest(l).slice(0,8).forEach(function(c){var v=c.w+"|"+c.span.join(",");if(seen[v])return;seen[v]=1;out.push([v,gdWordLine(c)+(c.flags.length?" · "+c.flags.length+" rule"+(c.flags.length>1?"s":"")+" bent":"")])});
+  if(!out.length)out.push(["","no word fits: no game in "+(GD_LANG_NAME[l]||l)]);return out}
+/* the spans the word could have: 1-2 consecutive steps that say it */
+function gdWordSpanOpts(l){var w=gdWordOf(l);if(!w)return[["","—"]];var all=(S.fullSteps||S.guideSteps).filter(function(st){return!/^(intro|teaser|end)$/.test(st.act)}),out=[];
+  for(var i=0;i<all.length;i++)[1,2].forEach(function(n){var sp=all.slice(i,i+n);if(sp.length<n)return;var o={w:w.w,span:sp.map(function(s){return s.id})},c=gdWordCount(o,l);if(!c)return;
+    var secs=sp.reduce(function(a,s){return a+gdStepSecsIn(s,l)},0);out.push([o.span.join(","),gdSpanWords(o.span)+" · "+c+" time"+(c>1?"s":"")+" ("+gdMmss(secs)+")"])});
+  if(!out.some(function(x){return x[0]===w.span.join(",")}))out.unshift([w.span.join(","),gdSpanWords(w.span)+" · "+gdWordCount(w,l)+" times"]);return out}
+function gdWordRows(it,p){var H=function(t,s){return'<div class="sub2 gdfg">'+t+(s?' <span class="sub">· '+s+'</span>':"")+'</div>'};
+  return H("The game","its word and span in each language, the taps, the slip played back")+
+    langCodes().map(function(l){var w=gdWordOf(l);return row("The word · "+l.toUpperCase(),'<select class="u" data-sel="@tourWord.'+l+'.pick">'+gdWordPickOpts(l).map(function(o,i){return'<option value="'+esc(o[0])+'"'+(i?"":" selected")+'>'+esc(o[1])+'</option>'}).join("")+'</select>'+
+      '<div class="note">'+(w?(w.rev?"Reviewed":"NOT reviewed: no game in "+(GD_LANG_NAME[l]||l))+' · <button class="ubtn sm gdedited" type="button" data-gdscript="word">Guide script ›</button>':"No word: no game in "+(GD_LANG_NAME[l]||l))+'</div>',
+      "The word (suggested): from the tour's own text in "+(GD_LANG_NAME[l]||l)+", a word of 4 letters or more said 2-4 times in a span of 1-2 steps (45-120 s), not in the span's first sentence, a noun the story is about; each with its count and span, and the rules it bends. Picking one needs the author's Reviewed tick (Specific Marker › Guide script) before it plays.")}).join("")+
+    langCodes().map(function(l){return row("The span · "+l.toUpperCase(),'<select class="u" data-sel="@tourWord.'+l+'.spanPick">'+gdWordSpanOpts(l).map(function(o){var w=gdWordOf(l);return'<option value="'+esc(o[0])+'"'+(w&&o[0]===w.span.join(",")?" selected":"")+'>'+esc(o[1])+'</option>'}).join("")+'</select>',
+      "The steps the game plays in: announced at the seam before them, its result at the seam after them. Its slips are the word's own times in them (2-4).",true)}).join("")+
+    row("Tap window (s)",pslider(p+"tapWin",1,5,.5),"A tap on Azu counts from the word's start to its end + this (2.5 s: outdoors, a phone in hand; to tune with the five visitors). Pause, a drag and Ask freeze it.")+
+    row("False taps",pseg(p+"falseTaps",["nope","quiet"],["A playful Nope!","Counted quietly"]),"A tap when the word was not said: Azu shakes its head and a tiny “Nope!” for 1 s, no voice (counted, never punished); or counted with nothing shown.")+
+    row("Play my slip back",pseg(p+"slipBack",["true","false"],["On","Off"]),"On: at the result, the first slip the visitor missed is played back (the recorded clip from 1.2 s before the word to 0.3 s after; with the live or device voice, the phrase said again), the word lit.")+
+    '<div class="note">Fixed: pokes are off in the span (a tap on Azu means “you said it”; three quick taps still tickle) · at Compact and with Mascot Off a <b>Heard it!</b> button by the ✦ · a screen reader: not offered · Reduce Motion: the pip only · a language change or a hidden step ends it quietly · the captions light the word like every word · Previous never counts a slip twice.</div>'}
+function gdFindRows(it,p){var H=function(t,s){return'<div class="sub2 gdfg">'+t+(s?' <span class="sub">· '+s+'</span>':"")+'</div>'},fd=S.tourFind||{},pts=(WALLS.ribeira.pois||[]).filter(function(x){return x.id!==(S.m&&S.m.poi||"painting")}),
+    st=(S.fullSteps||S.guideSteps).filter(function(s){return!/^(intro|teaser|end)$/.test(s.act)}),all=S.fullSteps||S.guideSteps;
+  return H("The point","what the visitor finds, and when")+
+    row("The point",psel("tourFind.point",pts.map(function(x){return[x.id,L(x.name)]})),"A detail of the card's wall that the tour's text names (the demo: the Torreão, step 4 says “its great corner tower on the left”). The wall only: the card's point and this one on the wall in view.")+
+    row("After step",psel("tourFind.after",st.map(function(s){return[s.id,(all.indexOf(s)+1)+" · "+(stepTitle(s)||s.id)]})),"The seam after this step: the step that names it.",true)+
+    langCodes().map(function(l){return row("Its name · "+l.toUpperCase(),'<input class="u" data-path="tourFind.thing.'+l+'" value="'+esc(L1(fd.thing,l))+'">',"{thing} in the line: “find "+(L1(fd.thing,l)||"…")+" on the real wall”.",true)}).join("")+
+    row("Give up after (s)",pslider(p+"giveUp",10,40,1),"After this, Azu walks to it and shows it (20 s: the arm tires); I give up does it at once.")+
+    row("Hint after (s)",pslider(p+"hintAfter",3,20,1),"After this, a hint from the point's direction on the screen: “A little to the left…” (10 s).")+
+    '<div class="note">Fixed: the card lowers and the wall comes back, the panel at Mini; a seek ring in the middle; the point settled in the ring 1.2 s (the phone still) is “That\'s it!” with a glint; never while the wall is lost (a system state wins); then back to the card, the tour goes on.</div>'}
+/* the selects: a suggestion picked (the word and its span; it needs Reviewed again), or another span for the same word */
+on("setOpt.answer",function(key,v){var m=/^@?tourWord\.(\w+)\.(pick|spanPick)$/.exec(key);if(!m)return;var l=m[1],o=S.tourWord[l]||(S.tourWord[l]={w:"",span:[],src:"suggested",rev:false});if(!v)return true;
+  /* the choice made is kept as it was picked (what the Editor shows; the word and its span are what plays) */
+  o[m[2]]=String(v);
+  if(m[2]==="pick"){var a=String(v).split("|");if(a[0]!==o.w||a[1]!==o.span.join(",")){o.w=a[0];o.span=(a[1]||"").split(",").filter(Boolean);o.src="suggested";o.rev=false}}
+  else{var sp=String(v).split(",").filter(Boolean);if(sp.join(",")!==o.span.join(",")){o.span=sp;o.rev=false}}renderAll(true);return true});
+ed.addEventListener("change",function(e){var t=e.target;if(!t.dataset||!/^tourWord\.\w+\.w$/.test(t.dataset.path||""))return;var l=t.dataset.path.split(".")[1],o=S.tourWord[l];if(!o)return;o.w=gdWordNorm(t.value)||String(t.value).trim();o.src="typed";o.rev=false;renderEditor()},true);
+ed.addEventListener("click",function(e){var t=e.target.closest("[data-gdwpick]");if(!t)return;e.stopPropagation();var a=t.dataset.gdwpick.split("|"),l=a[0],o=S.tourWord[l]||(S.tourWord[l]={});o.w=a[1];o.span=a[2].split(",");o.src="suggested";o.rev=false;renderEditor()},true);
+/* Specific Marker › 3 · Guide script: the point's word per language, and its find (a read line: edited in the beat's form) */
+function gdWordHtml(){var H=function(t,s){return'<div class="sub2">'+t+(s?' <span class="sub">· '+s+'</span>':"")+'</div>'};
+  var h=H("Don't say it! · the word","each language its own, Reviewed before it plays");
+  h+=langCodes().map(function(l){var w=gdWordOf(l),n=w?gdWordCount(w,l):0,sug=gdWordSuggest(l),warn=!w?"no word: no game in "+(GD_LANG_NAME[l]||l):n<2?"said "+(n?"once":"never")+" in its span: no game":n>4?"said "+n+" times in its span: too easy, too long (2-4)":"",
+      mine=w&&sug.filter(function(c){return c.w===w.w&&c.span.join(",")===w.span.join(",")})[0];
+    return'<div class="tqlang"><b>'+l.toUpperCase()+(w&&w.src==="suggested"?' <span class="badge gdwb">SUGGESTED</span>':w?' <span class="badge gdwb">TYPED</span>':"")+(w&&w.rev?' <span class="badge new">REVIEWED</span>':' <span class="badge">NOT REVIEWED: no game</span>')+'</b>'+
+      row("The word",'<select class="u" data-sel="@tourWord.'+l+'.pick">'+gdWordPickOpts(l).map(function(o,i){return'<option value="'+esc(o[0])+'"'+(i?"":" selected")+'>'+esc(o[1])+'</option>'}).join("")+'</select>',"The word (suggested): picked from the suggestions (each: its count and span). Fun › On the tour › Don't say it! plays it.",true)+
+      row("Or type it",'<input class="u" data-path="tourWord.'+l+'.w" value="'+esc(w?w.w:"")+'">',"A word of your own (it needs Reviewed again; the count and the warnings follow it).",true)+
+      row("The span",'<select class="u" data-sel="@tourWord.'+l+'.spanPick">'+gdWordSpanOpts(l).map(function(o){return'<option value="'+esc(o[0])+'"'+(w&&o[0]===w.span.join(",")?" selected":"")+'>'+esc(o[1])+'</option>'}).join("")+'</select>',"The 1-2 steps it plays in.",true)+
+      '<div class="note gdwcount">'+esc(w?"“"+w.w+"”: "+n+" time"+(n===1?"":"s")+" in "+gdSpanWords(w.span)+(mine?" ("+gdMmss(mine.secs)+")":""):"—")+'</div>'+
+      (warn?'<div class="ovflag" role="note">&#9888; '+esc(warn)+'</div>':"")+(mine&&mine.flags.length?'<div class="note">Rules it bends: '+esc(mine.flags.join(" · "))+'</div>':"")+
+      '<div class="note gdwsug">Suggestions: '+(sug.length?sug.slice(0,6).map(function(c){return'<button class="ubtn sm" type="button" data-gdwpick="'+l+'|'+esc(c.w)+'|'+c.span.join(",")+'" title="'+esc(c.flags.join(" · ")||"fits every rule")+'">'+esc(gdWordLine(c))+(c.flags.length?" · "+c.flags.length+" rule"+(c.flags.length>1?"s":"")+" bent":"")+'</button>'}).join(" "):"none: no word of 4 letters or more is said 2-4 times in a span of 1-2 steps")+'</div>'+
+      '<div class="btnrow"><label class="ovrev"><input type="checkbox" data-gdwrev="'+l+'"'+(w&&w.rev?" checked":"")+(w?"":" disabled")+'> Reviewed: it can play</label></div></div>'}).join("");
+  var fd=S.tourFind,fp=fd&&(WALLS.ribeira.pois||[]).filter(function(x){return x.id===fd.point})[0],all=S.fullSteps||S.guideSteps,ai=fd?all.findIndex(function(s){return s.id===fd.after})+1:0;
+  h+=H("Find it on the wall","after a step, a detail on the real wall")+
+    '<div class="note gdfindln">'+(fd&&fp?esc("“"+(L(fd.thing)||L(fp.name))+"” ("+L(fp.name)+"), after step "+ai+(gdFindOnWall(fd)?"":" · not on the wall in view now: no find"))+' <button class="ubtn sm gdedited" type="button" data-goto="gd:i:findwall">Edited in Guide › Guidance › Fun › On the tour › Find it on the wall &#8250;</button>':"No find on this point.")+'</div>';
+  return'<div class="tqbox gdwbox">'+h+'</div>'}
+on("edMarker.html",function(h){var d=document.createElement("div");d.innerHTML=h;var t=d.querySelector('[data-fo="m3"] table.tbl');if(!t)return h;t.insertAdjacentHTML("afterend",gdWordHtml());return d.innerHTML});
+ed.addEventListener("change",function(e){var t=e.target;if(!t.dataset||!t.dataset.gdwrev)return;e.stopImmediatePropagation();var o=S.tourWord[t.dataset.gdwrev];if(o){o.rev=t.checked;renderEditor()}},true);
+ed.addEventListener("click",function(e){var t=e.target.closest('[data-gdscript="word"]');if(!t)return;e.stopPropagation();S.tab="marker";S.op.m3=true;renderEditor();var f=ed.querySelector(".gdwbox");if(f)f.scrollIntoView({block:"start"})},true);
+BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(tourWord\\.|tourFind\\.|"));
+/* the demos: the announce at its seam (the word's rows), the game playing in its span, a false tap, the result with the slip played back;
+   the find at its seam (its rows), the hint at once, I give up at once */
+function gdDemoWord(stage,chip){var my=gdDemoBegin(),it=gdItems().filter(function(x){return x.id==="dontsay"})[0]||S.guidance.items.dontsay,w=gdWordOf(S.lang||"en");if(!w){gdChip("Don't say it!: no word in this language");gdDemoEnd(my,3200);return}
+  if(!G.on){S.view="card";S.stop="full";startTour()}stopSpeech();gdBeatClose();gdTailEnd();var j=S.guideSteps.findIndex(function(s){return s.id===w.span[0]});if(j<0){gdChip("Don't say it!: its span is not in this tour");gdDemoEnd(my,3200);return}
+  var b={id:"dontsay",span:w.span.slice(),endAfter:w.span[w.span.length-1]};
+  if(stage==="result"){var d=gdWordStart(b);var k=0,st=S.guideSteps[j];G.i=j;G.paused=true;renderGuide();G.words=(stepText(st).match(/\S+/g)||[]).map(function(x){return{w:x}});G.words.some(function(x,i){if(gdWordHit(x.w,w.w,S.lang)){k=i;return true}});
+    d.slips[st.id+":"+k]={key:st.id+":"+k,step:st.id,k:k,caught:false,text:stepText(st),phrase:gdWordPhrase(k),said:1};d.order.push(st.id+":"+k);d.slips.x={key:"x",caught:true};d.order.push("x");d.caught=1;
+    var P=G.gd.plan;d.on=false;clearInterval(d.iv);if(P)P.wordScore={word:d.word,caught:1,n:2,falses:0};gdStart(it,"the Editor's demo",{pull:true,react:true});if(chip)gdChip(chip);gdDemoEnd(my,14000);return}
+  gdWordStart(b);G.i=j;G.paused=false;runStep();if(chip)gdChip(chip);if(stage==="nope")setTimeout(function(){if(G.demoSeq===my||G.gd.demoOwner===my)gdWordTap("the Editor's demo")},900);gdDemoEnd(my,9000)}
+function gdDemoFind(stage,chip){var c=gdDemoBeat("findwall",chip,{ms:12000});setTimeout(function(){var F=G.gd.find;if(!F)return;if(stage==="hint"){F.clock=(+F.B.item.hintAfter||10)*1000;F.hinted=true;gdFindHint(F)}else gdFindGiveUp(F,"the Editor's demo")},1800)}
+on("rowDemo.spec",function(key){var m=/^(tourWord|tourFind)\./.exec(key);if(!m)return;
+  if(m[1]==="tourWord")return{tour:true,dock:"mini",wait:0,act:function(){gdDemoBeat("dontsay","Don't say it! · its word in "+(GD_LANG_NAME[S.lang||"en"]||S.lang))},ringAfter:500,ring:".gdbeat|.gdchip"};
+  return{tour:true,dock:"mini",wait:0,act:function(){gdDemoBeat("findwall","Find it on the wall · "+(S.tourFind?S.tourFind.point:""),{ms:12000})},ringAfter:700,ring:".gdseek|.gdbeat|.gdchip"}});

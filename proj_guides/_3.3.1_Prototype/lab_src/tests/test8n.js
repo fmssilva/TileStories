@@ -61,7 +61,9 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('Not tried: it asks again twice (new words each time), says it is fine, and moves on', want.every(w => seen.some(s => s.indexOf(w) === 0)) && await R('G.i>' + gi), seen.map(s => s.slice(0, 26)));
   await R('stopTour();S.guideCfg.insistAfter=5');
   // 6. a scroll by the visitor: the guide keeps talking; when its block leaves the screen, it moves on to the block in view
-  await R('S.guideCfg.speed=0.7;startTour();G.i=1;runStep()'); await p.waitForTimeout(1400);
+  // (with no games: since round 13 a promised quiz takes the card's "Test yourself" step out of the tour, and that block is
+  // the one at the bottom; the check after this one scrolls to it with the quiz on)
+  await R('gdPrefs().games="off";S.guideCfg.speed=0.7;startTour();G.i=1;runStep()'); await p.waitForTimeout(1400);
   const box = await p.locator('#ph').boundingBox(); await p.mouse.move(box.x + box.width / 2, box.y + 300);
   await p.mouse.wheel(0, 60); await p.waitForTimeout(500);
   ok('A small scroll: the guide keeps going (not paused)', await R('G.on&&!G.paused&&G.i===1'));
@@ -69,6 +71,15 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await p.waitForFunction(() => LAB.run('G.i!==1||G.paused'), null, { timeout: 8000 }).catch(() => {});
   const mv = await R('[G.i,G.paused,CAP()]');
   ok('Its block scrolled away: "Moving on", and the guide tells the block now in view', mv[0] !== 1 && !mv[1] && (mv[2].indexOf(await R('TXT("guide_moving_on")')) === 0 || mv[0] > 1), mv);
+  await R('stopTour();gdPrefs().games="on"');
+  // ...the quiz on: the block at the bottom is "Test yourself", out of the tour (Azu's quiz replaces it); no told block in
+  // view, so it pauses where it is, as with any block it does not tell, and Resume plays on
+  await R('startTour();G.i=1;runStep()'); await p.waitForTimeout(1400);
+  const sk = await R('(G.gd.skipped||[]).map(function(x){return x.st.id})');
+  for (let i = 0; i < 7; i++) { await p.mouse.wheel(0, 400); await p.waitForTimeout(120); }
+  await p.waitForFunction(() => LAB.run('G.i!==1||G.paused'), null, { timeout: 8000 }).catch(() => {});
+  const qv = await R('[G.i,G.paused]');
+  ok('...the quiz promised: scrolled to "Test yourself" (out of the tour): it pauses where it is, as with any block it does not tell', sk.length === 1 && qv[0] === 1 && qv[1], [sk, qv]);
   await R('stopTour();S.guideCfg.speed=1');
   await R('S.guideCfg.onScroll="pause";startTour();G.i=1;runStep()'); await p.waitForTimeout(900); await p.mouse.wheel(0, 120); await p.waitForTimeout(300);
   ok('"Pauses": a scroll pauses, as before', await R('G.paused'));

@@ -25,7 +25,7 @@ on("camLayer.after",function(){var pins=ph.querySelector(".campins");if(pins&&S.
   var a=ph.querySelector(".camask");if(a&&!G.cam.open)a.remove()});
 /* drag (both ways) and zoom (the wheel, or two fingers) stand in for moving the phone; each move emits phone.moved (the guidance waits for the phone to be still) */
 var camPan=null,pinch=null,ptrs={};
-ph.addEventListener("pointerdown",function(e){if(S.stop!=="closed"||S.view!=="card"||e.target.closest(".camask,.cpin,.mk,#ptool,button,.gbtn-wrap,.gbmenu,.gdbub"))return;ptrs[e.pointerId]={x:e.clientX,y:e.clientY};
+ph.addEventListener("pointerdown",function(e){if(S.stop!=="closed"||S.view!=="card"||e.target.closest(".camask,.cpin,.mk,#ptool,button,.gbtn-wrap,.gbmenu,.gdbub,.gdock,.gdbeat,.gdstrip"))return;ptrs[e.pointerId]={x:e.clientX,y:e.clientY};
   camDrag=null;var ids=Object.keys(ptrs);if(ids.length===2){var a=ptrs[ids[0]],b=ptrs[ids[1]];pinch={d:Math.hypot(a.x-b.x,a.y-b.y),z:S.camZoom};camPan=null}else camPan={x:e.clientX,y:e.clientY,cx:S.camX,cy:S.camY};e.stopPropagation()},true);
 ph.addEventListener("pointermove",function(e){if(!ptrs[e.pointerId])return;ptrs[e.pointerId]={x:e.clientX,y:e.clientY};var g=camGeom(),q=ph.getBoundingClientRect().width/ph.offsetWidth;
   if(pinch){var ids=Object.keys(ptrs),a=ptrs[ids[0]],b=ptrs[ids[1]];if(a&&b){S.camZoom=Math.max(1,Math.min(3.2,pinch.z*Math.hypot(a.x-b.x,a.y-b.y)/pinch.d))}}

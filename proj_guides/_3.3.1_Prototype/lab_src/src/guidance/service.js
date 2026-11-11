@@ -96,7 +96,7 @@ function gdContext(){var t=-Infinity,mv=G.gd.movedAt,wa=G.gd.wallAt,st=ph.queryS
     panel:S.settingsOpen?"Settings":G.cam&&G.cam.open?"Ask about the view":G.fab&&G.fab.menu?"the ✦ menu":S.contentsOpen?"Contents":G.gd.tryOpen?"Things to try":null,
     dockFull:!!(G.on&&typeof dockOn==="function"&&dockOn()&&S.dockH==="full"),solemn:gdSolemnNow(),
     /* the tour: between two steps (as it moves on, nothing is said), its narration so far (since it started or the last Moment) and its last step next */
-    plan:G.gd.plan,games:gdPrefs().games||"on",notNow:+S.gdVisitor.visit.notNow||0,sr:!!(S.ui&&S.ui.gdSR),
+    plan:G.gd.plan,games:gdPrefs().games||"on",notNow:+S.gdVisitor.visit.notNow||0,sr:!!(S.ui&&S.ui.gdSR),lang:S.lang||"en",findOff:S.tourFind&&!gdFindOnWall(S.tourFind)?"the wall only: the card's point is not on the wall in view":null,
     tour:G.on?{paused:!!G.paused,between:mo==="between"||!!G.gd.between&&!speaking,step:G.i,stepId:S.guideSteps[G.i]&&S.guideSteps[G.i].id,talked:Math.max(0,(performance.now()-(G.talkFrom||performance.now()))/1000),toEnd:!!(S.guideSteps[G.i+1]&&S.guideSteps[G.i+1].act==="end")}:null,
     movedAt:mv,touchAt:G.gd.touchAt,cardAt:S.view==="card"&&S.stop!=="closed"?G.gd.cardAt:null,
     onWall:gdOnWall(),where:S.view!=="card"?"the phone shows "+S.view:G.on?"the tour":S.stop!=="closed"?"a card is open":"",
@@ -214,7 +214,7 @@ on("next.answer",function(){if(!G.on||G.paused||noDraw||G.gd.demo)return;var c=G
   G.gd.moment="between";var r;try{var ctx=gdContext();ctx.speaking=false;r=gdPick(gdItems(),S.gdVisitor,ctx,gdNow())}finally{G.gd.moment=null}
   G.gd.last=r;if(r.item&&r.item.form==="moment"){G.gd.hold=true;gdStart(r.item,r.why);return true}
   var key="between|"+r.why.replace(/\d+(\.\d+)?/g,"#");if(key!==G.gd.skipKey){G.gd.skipKey=key;gdLog("skipped","between two steps: "+r.why)}});
-on("stopTour.before",function(){G.gd.hold=false;var c=G.gd.cur;if(c&&(c.item.form==="moment"||c.item.onTour&&!c.pull))gdStop("the tour stopped")});
+on("stopTour.before",function(){G.gd.hold=false;gdWordOff();var c=G.gd.cur;if(c&&(c.item.form==="moment"||c.item.onTour&&!c.pull))gdStop("the tour stopped")});
 /* a Moment ends (mascot/azu2d.js): a tap on its prop is acted, 8 s with no tap ignored */
 on("moment.ended",function(k,done){var c=G.gd.cur;if(c&&c.item.form==="moment")gdStop(done?"tapped: Azu "+(k==="cookie"?"eats the cookie":"drinks")+", and the tour goes on":"8 s with no tap: the tour goes on",done?"acted":"ignored")});
 /* a treasure found in Ask about the view's hunt (world/camera-ask.js): the hunt's invitation is done */
@@ -500,20 +500,35 @@ document.addEventListener("click",function(e){var t=e.target;if(!t.closest||!ph.
    scheduler for its beat (gdCheck: the live gates) and holds the next step until it ends. Unity: GuideTour asks
    GuidanceService.PlanTour at Start; the seams are its StepEnded events ----- */
 /* a step's seconds of narration (guide/dock.js's stepSecs: its recorded words' times, else its words at the visitor's speed) */
-function gdTourIn(steps){var l=S.lang||"en",g=gdGroupById("ontour")||{};
-  return{steps:steps.map(function(st){return{id:st.id,act:st.act,secs:stepSecs(st),title:stepTitle(st),q:gdQOk(S.tourQ[st.id],l),guess:gdGuessOk(S.tourGuess[st.id],l)}}),
-    len:typeof lenNow==="function"?lenNow():"standard",aud:typeof aud==="function"?aud():"explorer",lang:l,every:+g.every||75,perTour:+g.perTour||3,perShort:+g.perShort||2,perDeep:+g.perDeep||5,auds:g.auds||null}}
+function gdTourIn(steps){var l=S.lang||"en",g=gdGroupById("ontour")||{},w=gdWordOf(l),fd=S.tourFind;
+  return{steps:steps.map(function(st){return{id:st.id,act:st.act,secs:stepSecs(st),title:stepTitle(st)||(gdQuizStep(st)?TXT("knowledge_check_heading"):""),q:gdQOk(S.tourQ[st.id],l),guess:gdGuessOk(S.tourGuess[st.id],l),quizBlock:gdQuizStep(st)}}),
+    len:typeof lenNow==="function"?lenNow():"standard",aud:typeof aud==="function"?aud():"explorer",lang:l,every:+g.every||75,perTour:+g.perTour||3,perShort:+g.perShort||2,perDeep:+g.perDeep||5,auds:g.auds||null,
+    /* round 13: the point's word in this language (Don't say it!) and its find (Find it on the wall) */
+    word:w?{w:w.w,span:(w.span||[]).slice(),rev:!!w.rev,n:gdWordCount(w,l)}:null,find:fd&&fd.point?{after:fd.after,point:fd.point,onWall:gdFindOnWall(fd)}:null}}
+/* round 13: a step of the card's own quiz (a Knowledge Check block: "Test yourself"), which Azu's promised quiz replaces */
+function gdQuizStep(st){var m=/^b:(.+)$/.exec(st&&st.ref||"");if(!m)return false;var b=byId(S.card,m[1]);return!!(b&&b.kind==="Knowledge Check")}
+/* the wall only: the card's point and the find's point are both on the wall in view */
+function gdFindOnWall(fd){var W=(typeof curWall==="function"?curWall().pois:S.wallPois)||[],me=S.m&&S.m.poi||"painting";return!!fd&&W.some(function(p){return p.id===me})&&W.some(function(p){return p.id===fd.point})}
 function gdPlanCtx(){return{solemn:gdSolemnNow()||!!(S.m&&S.m.solemn&&(G.on||S.view==="card")),lively:S.guideCfg.life==="lively",sr:!!S.ui.gdSR,games:gdPrefs().games||"on",notNow:+S.gdVisitor.visit.notNow||0}}
 /* the steps a tour would play now (not started): the length and the lens (audiences/stepFits), the introduction when it is due */
 function gdStepsNow(){if(G.on&&!S.howSaved)return S.guideSteps;var st=(S.fullSteps||S.guideSteps).filter(function(x){return typeof stepFits!=="function"||stepFits(x)});
   if(S.guideCfg.intro==="every"||(S.guideCfg.intro==="first"&&!S.introSeen))st=[{id:"intro",view:"card",ref:"hero",act:"intro",text:T(fmt(S.tx.guide_intro.en,pointName()),fmt((S.tx.guide_intro.pt||S.tx.guide_intro.en),pointName()))}].concat(st);return st}
 /* the plan a tour would get now (the Editor's line and Why not now? when no tour plays) */
 function gdPlanNow(){return gdTourPlan(gdItems(),S.gdVisitor,gdPlanCtx(),gdTourIn(gdStepsNow()))}
-function gdPlanMake(){var P=gdTourPlan(gdItems(),S.gdVisitor,gdPlanCtx(),gdTourIn(S.guideSteps));P.point=S.m&&S.m.poi||"painting";P.quiz=null;P.at0=gdNow();G.gd.plan=P;G.gd.heard={};G.gd.guess=null;G.gd.owed=null;
-  gdLog("event","the tour's plan: "+gdPlanWords(P));return P}
+function gdPlanMake(){var P=gdTourPlan(gdItems(),S.gdVisitor,gdPlanCtx(),gdTourIn(S.guideSteps));P.point=S.m&&S.m.poi||"painting";P.quiz=null;P.at0=gdNow();G.gd.plan=P;G.gd.heard={};G.gd.guess=null;G.gd.owed=null;G.gd.skipped=[];gdWordOff();
+  gdLog("event","the tour's plan: "+gdPlanWords(P));gdSkipApply(P);return P}
+/* round 13 (the developer's answer on round 12): with the quiz promised, the tour skips the card's own quiz step (the plan says so; the
+   block stays on the card to play freely); the quiz dropped (No quiz, thanks, two Not nows, a skip), the step plays again */
+function gdSkipApply(P){(P.skip||[]).forEach(function(x){var j=S.guideSteps.findIndex(function(s){return s.id===x.id});if(j<0||j<=G.i)return;var st=S.guideSteps.splice(j,1)[0];
+  G.gd.skipped.push({st:st,before:S.guideSteps[j]?S.guideSteps[j].id:null});gdLog("event","the card's “"+(x.title||x.id)+"” step skipped: Azu's quiz replaces it")});
+  /* the panel's progress line redrawn once the ✦ has grown into it (a redraw now would cut its growth or its crossfade) */
+  if(G.on&&(P.skip||[]).length)setTimeout(function(){if(G.on)renderGuide()},(typeof MORPH_MS!=="undefined"?MORPH_MS:320)+120)}
+function gdSkipUndo(why){var k=G.gd.skipped||[];if(!k.length)return;G.gd.skipped=[];var P=G.gd.plan;
+  k.forEach(function(x){if(S.guideSteps.some(function(s){return s.id===x.st.id}))return;var j=x.before?S.guideSteps.findIndex(function(s){return s.id===x.before}):S.guideSteps.length;if(j<0)j=S.guideSteps.length;if(j<=G.i)return;
+    S.guideSteps.splice(j,0,x.st);gdLog("event","the card's “"+(stepTitle(x.st)||x.st.id)+"” step plays again ("+why+")")});if(P)P.skipBack=why;if(G.on)renderGuide()}
 on("startTour.after",function(from){if(S.howSaved)return;var P=G.gd.plan;
   /* Resume (from a kept step): the same plan, its promise kept; a new tour: a new plan */
-  if(from&&P&&P.stopped&&P.point===(S.m&&S.m.poi||"painting")){P.stopped=false;G.gd.owed=null;gdLog("event","the tour resumed: its plan kept");return}gdPlanMake()});
+  if(from&&P&&P.stopped&&P.point===(S.m&&S.m.poi||"painting")){P.stopped=false;G.gd.owed=null;gdLog("event","the tour resumed: its plan kept");var f=gdPlanBeat("quizfinale",P);G.gd.skipped=[];if(f&&f.state==="planned"&&P.quiz!=="off")gdSkipApply(P);return}gdPlanMake()});
 on("stopTour.after",function(){var P=G.gd.plan;if(!P||S.howSaved)return;P.stopped=true;var f=gdPlanBeat("quizfinale");
   /* stopped before its finale, a quiz promised and accepted: offered from the ✦ menu for the rest of the visit, or said away in one line */
   if(f&&f.state==="planned"&&P.quiz==="on"){var q=gdQuizQs(P,true);if(q.length>=2){G.gd.owed={n:q.length,qs:q};gdLog("event","the tour stopped before its quiz: Your "+q.length+" questions in the ✦ menu")}
@@ -522,10 +537,13 @@ on("stopTour.after",function(){var P=G.gd.plan;if(!P||S.howSaved)return;P.stoppe
 function gdPlanBeat(id,P){P=P||G.gd.plan;return P?P.beats.filter(function(b){return b.id===id})[0]||null:null}
 /* a beat dropped (a skip, a gate at its seam, the visitor's Not now): with its reason; a promise dropped takes its payoff with it */
 function gdBeatDrop(b,why){if(!b||b.state!=="planned")return;b.state="dropped";b.why=why;gdLog("skipped","“"+b.label+"”: dropped from the tour's plan ("+why+")");
+  if(b.place==="finale"&&b.pairs)gdSkipUndo("no quiz: "+why);
   if(b.pairs&&b.place==="opening"){var f=gdPlanBeat(b.pairs);if(f&&f.state==="planned")gdBeatDrop(f,"its promise was not made")}}
 /* a seam (the tour moving on, guide/tour.js's next): the guess's answer after the step that held it; else the beat planned after this step */
 function gdSeam(){var P=G.gd.plan,st=S.guideSteps[G.i];if(!P||!st||S.howSaved)return false;
   var gs=G.gd.guess;if(gs&&gs.step===st.id&&!gs.shown){gs.shown=true;G.gd.hold=true;gdGuessAnswer(gs);return true}
+  /* round 13: Don't say it!'s result at the seam after its span */
+  var ds=G.gd.ds;if(ds&&ds.on&&ds.endAfter===st.id){G.gd.hold=true;gdWordEnd();return true}
   var b=P.beats.filter(function(x){return x.state==="planned"&&x.after===st.id})[0];if(!b)return false;
   var it=gdItems().filter(function(x){return x.id===b.id})[0];if(!it){gdBeatDrop(b,"its item is gone");return false}
   /* a seam reached by a skip (Next on a step not heard): its beat drops; the finale still keeps the promise */
@@ -546,3 +564,52 @@ function gdQuizBest(point){var b=S.gdVisitor.quizBest||(S.gdVisitor.quizBest={})
 function gdQuizKeep(point,right,n){var b=S.gdVisitor.quizBest||(S.gdVisitor.quizBest={}),k=point||"painting",o=b[k];if(!o||right/n>o.right/o.n||right/n===o.right/o.n&&n>o.n)b[k]={right:right,n:n};return b[k]}
 /* the ✦ menu's Your 3 questions (world/guide-button.js): while the tour is stopped for good before its quiz */
 function gdQuizOwed(){var o=G.gd.owed;return!G.on&&o&&G.gd.plan&&G.gd.plan.stopped?o.n:0}
+
+/* ----- round 13, Don't say it! at run time (research_tour_entertainment.md 5.4). The game's clock runs with the voice: Pause, a drag of
+   the progress bar and Ask (it pauses the tour) freeze it, so a window waits where it was. Each slip is the word lit in the narration of
+   its span (the tour's word-time events: the recorded line's own word times, the live voice's, the device voice's estimate): its window
+   opens at the word's start and closes at its end + the Tap window (2.5 s). A tap on Azu (or Heard it!) in a window catches that slip,
+   once; more taps in it are ignored; a slip said again by Previous is the same slip (caught once; a missed one can be caught on the
+   replay). A tap outside every window is a false alarm (counted, never punished), unless it is the start of three quick taps (a tickle:
+   no count). The game ends quietly when the language changes or a step of its span leaves the tour. Unity: the AudioSource's time
+   against the recorded word times, a PointerManipulator on the Azu element routed to the game during the span ----- */
+function gdWordOff(){var d=G.gd.ds;if(d){clearInterval(d.iv);clearTimeout(d.pend)}G.gd.ds=null}
+function gdWordRunning(){return G.on&&!G.paused&&!G.seekDrag&&!G.typing}
+function gdWordClock(){var d=G.gd.ds;if(!d)return 0;var now=performance.now();if(gdWordRunning())d.clock+=now-d.tick;d.tick=now;return d.clock}
+/* the game starts as its span's first step starts (the announce's chips still up: waiting is Let's play) */
+function gdWordStart(b){gdWordOff();var it=S.guidance.items.dontsay,w=gdWordOf(S.lang||"en");if(!w)return null;
+  var d=G.gd.ds={on:true,word:w.w,lang:S.lang||"en",span:(b&&b.span||w.span).slice(),endAfter:b&&b.endAfter||w.span[w.span.length-1],slips:{},order:[],wins:[],caught:0,falses:0,clock:0,tick:performance.now(),play:"pending",tapWin:+it.tapWin||2.5};
+  d.iv=setInterval(function(){if(G.gd.ds!==d){clearInterval(d.iv);return}gdWordClock();gdWordWatch()},100);gdLog("event","Don't say it!: “"+d.word+"” in "+gdSpanWords(d.span));return d}
+/* a span's step hidden (Length, a lens) or the language changed: the game ends quietly */
+function gdWordWatch(){var d=G.gd.ds;if(!d||!d.on||!G.on)return;if((S.lang||"en")!==d.lang){gdWordQuiet("the language changed");return}
+  if(d.span.some(function(id){return!S.guideSteps.some(function(s){return s.id===id})})){gdWordQuiet("a step of its span left the tour")}}
+function gdWordQuiet(why){var d=G.gd.ds;if(!d)return;gdLog("event","Don't say it! ends quietly ("+why+")");gdWordOff();var P=G.gd.plan,b=P&&gdPlanBeat("dontsay",P);if(b){b.why=why}gdWordLook("quiet")}
+/* a word lit in the narration: a slip when it is the word, in a step of the span */
+on("markWord.after",function(k){var d=G.gd.ds;if(!d||!d.on||!G.on)return;var st=S.guideSteps[G.i];if(!st||d.span.indexOf(st.id)<0||!G.sayLine||G.sayLine.text!==stepText(st))return;
+  if((S.lang||"en")!==d.lang){gdWordQuiet("the language changed");return}var w=G.words&&G.words[k];
+  if(d.aside&&w&&/[.!?…]["”»)]*$/.test(w.w)){d.aside=false;setTimeout(function(){if(G.gd.ds===d)gdWordLook("aside")},250)}
+  if(!w||!gdWordHit(w.w,d.word,d.lang))return;var key=st.id+":"+k,t=gdWordClock(),dur=Math.max(150,+wordMs(k)||300),sl=d.slips[key];
+  if(!sl){sl=d.slips[key]={key:key,step:st.id,k:k,caught:false,text:stepText(st),phrase:gdWordPhrase(k),said:1};d.order.push(key)}else sl.said++;
+  d.wins.push({key:key,s:t,e:t+dur+d.tapWin*1000});gdLog("event","Don't say it!: a slip (“"+w.w+"”, step "+st.id+", word "+(k+1)+(sl.said>1?", said again":"")+"): its window "+(dur/1000+d.tapWin).toFixed(1)+" s")});
+/* the slip's phrase: a few words around it, in its sentence (said again with the device voice; shown with the word lit) */
+function gdWordPhrase(k){var w=G.words||[],a=Math.max(sentenceStart(k),k-4),e=k;for(var j=k;j<Math.min(w.length,k+4);j++){e=j;if(/[.!?…,;:]["”»)]*$/.test(w[j].w)&&j>k)break}
+  return{words:w.slice(a,e+1).map(function(x){return x.w}),at:k-a,rec:G.recWords&&G.recWords[k]?{from:Math.max(0,G.recWords[k][0]-1.2),to:G.recWords[k][1]+.3,url:G.recAudio&&G.recAudio.src||""}:null}}
+/* a tap on Azu (or Heard it!): a catch in a window, ignored in a window already caught, else a false alarm (after 0.7 s: three quick taps tickle) */
+function gdWordTap(how){var d=G.gd.ds;if(!d||!d.on)return false;var t=gdWordClock(),open=d.wins.filter(function(x){return t>=x.s&&t<=x.e});
+  if(open.length){clearTimeout(d.pend);d.pend=null;var sl=open.map(function(x){return d.slips[x.key]}).filter(function(s){return!s.caught})[0];
+    if(!sl){gdLog("event","Don't say it!: a tap in a window already caught (ignored)");return true}
+    sl.caught=true;sl.how=how||"tap";d.caught++;d.aside=true;if(d.play==="pending")d.play="yes";gdLog("event","Don't say it!: caught "+d.caught+" ("+sl.key+", "+(how||"a tap on Azu")+")");gdWordLook("caught");return true}
+  clearTimeout(d.pend);d.pend=setTimeout(function(){if(G.gd.ds!==d)return;d.pend=null;d.falses++;gdLog("event","Don't say it!: a false alarm ("+d.falses+")");gdWordLook("nope")},700);return true}
+/* Azu's taps during the game (mascot/azu2d.js's azu.tap, azu.tickled): the game's, not a poke */
+on("azu.tap",function(m){var d=G.gd.ds;if(!d||!d.on||!G.on||m&&m.classList.contains("azfab"))return;return gdWordTap("a tap on Azu")});
+on("azu.tickled",function(){var d=G.gd.ds;if(d&&d.pend){clearTimeout(d.pend);d.pend=null;gdLog("event","Don't say it!: three quick taps, a tickle (no count)")}});
+/* the result at the seam after the span (gdSeam): the beat's result card (guidance/present.js's gdWordResult) */
+function gdWordEnd(){var d=G.gd.ds;if(!d)return;
+  /* the last slip's window still open: the result waits for it to close (on the game's clock) */
+  var t=gdWordClock(),open=d.wins.filter(function(x){return t<x.e&&!d.slips[x.key].caught});if(open.length&&!d.waitEnd){d.waitEnd=true;var ms=Math.max.apply(null,open.map(function(x){return x.e-t}));(function w(){if(G.gd.ds!==d||!G.on)return;var u=gdWordClock();if(open.some(function(x){return u<x.e&&!d.slips[x.key].caught})){setTimeout(w,120);return}gdWordEnd()})();return}
+  d.on=false;clearInterval(d.iv);clearTimeout(d.pend);var P=G.gd.plan;if(P)P.wordScore={word:d.word,caught:d.caught,n:d.order.length,falses:d.falses};
+  var it=gdItems().filter(function(x){return x.id==="dontsay"})[0]||S.guidance.items.dontsay;gdLog("event","Don't say it!: the span ended: "+d.caught+" of "+d.order.length+" caught, "+d.falses+" false alarm(s)");
+  gdStart(it,"the result after its span",{pull:true,react:true})}
+/* ----- round 13, Find it on the wall's clock and the phone settling (research 4.7): the point in the seek ring and the phone still 1.2 s
+   (today's settle); a hint after Hint after (10 s), Azu shows it after Give up after (20 s); the clock stops while the tour is paused ----- */
+on("phone.moved",function(){if(G.gd.find)G.gd.find.movedAt=performance.now()});

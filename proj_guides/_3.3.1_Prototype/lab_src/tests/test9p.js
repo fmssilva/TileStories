@@ -38,15 +38,16 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
     o.std=[Ls.budget,Ls.beats.length,sum(Ls)];o.short=[Sh.budget,Sh.beats.length];o.deep=[Dp.budget,Dp.beats.length];o.deepLong=[Dl.budget,Dl.beats.length];o.tiny=[Tn.budget,Tn.beats.length,Tn.why.water];
     o.gaps=[Ls,Sh,Dp,Dl].every(gaps);o.first=[Ls,Dp,Dl].every(function(P){return P.beats.every(function(b){return b.place==="opening"||P.at[b.seam]>=20})});
     o.pair=[Ls,Sh,Dp,Dl,Tn].every(function(P){var a=P.beats.some(function(b){return b.id==="quizpromise"}),f=P.beats.some(function(b){return b.id==="quizfinale"});return a===f});
-    o.full=Ls.why.water||Ls.why.guessyear;o.sol=gdTourPlan(it,V,Object.assign({},c,{solemn:true}),mk(12,25));o.sol={n:o.sol.beats.length,w:o.sol.why.quizpromise};
+    o.full=Sh.why.water||Sh.why.guessyear;o.sol=gdTourPlan(it,V,Object.assign({},c,{solemn:true}),mk(12,25));o.sol={n:o.sol.beats.length,w:o.sol.why.quizpromise};
     var Ca=gdTourPlan(it,V,Object.assign({},c,{lively:false}),mk(20,40,{len:"deep"}));o.calm=[sum(Ca),Ca.why.water,Ca.why.cookie];
     var srIt=it.map(function(x){return x.id==="water"?Object.assign({},x,{srPath:false}):x}),Sr=gdTourPlan(srIt,V,Object.assign({},c,{sr:true}),mk(20,40,{len:"deep"}));o.sr=Sr.why.water;
     var Off=gdTourPlan(it,V,Object.assign({},c,{games:"off"}),mk(20,40,{len:"deep"}));o.games=[sum(Off),Off.why.quizpromise];
     var Nn=gdTourPlan(it,V,Object.assign({},c,{notNow:2}),mk(20,40,{len:"deep"}));o.notnow=Nn.why.guessyear;o.words=gdPlanWords(Ls);o;`);
   ok('The plan is deterministic: the same tour and memory give the same plan', plan.det);
-  ok('[cap] Its rhythm by length: a 4:50 Standard tour has room for 3 beats (one per 75 s, capped at 3), Short 2, Deep 4 (its narration), a 13:25 Deep tour room for 5 (4 items fit: the cookie is a variant of the breather); a 1:05 tour 1', JSON.stringify([plan.std[0], plan.std[1], plan.short, plan.deep, plan.deepLong, plan.tiny[0]]) === JSON.stringify([3, 3, [2, 2], [4, 4], [5, 4], 1]), plan);
+  // round 13: the quiz's promise and the quiz count as one beat, so each plan holds one beat more than its room counts
+  ok('[cap] Its rhythm by length: a 4:50 Standard tour has room for 3 beats (one per 75 s, capped at 3; the quiz pair as one: 4 in the plan), Short 2 (3), Deep 4 (its narration), a 13:25 Deep tour room for 5 (4 items fit: the cookie is a variant of the breather); a 1:05 tour 1 (the pair)', JSON.stringify([plan.std[0], plan.std[1], plan.short, plan.deep, plan.deepLong, plan.tiny[0]]) === JSON.stringify([3, 4, [2, 3], [4, 4], [5, 4], 1]) && plan.tiny[1] === 2, plan);
   ok('[cap] Never two seams in a row, never in the tour\'s first 20 s but the opening; a pair planned whole or not at all', plan.gaps && plan.first && plan.pair, plan.std);
-  ok('[cap] An item left out says why in words ("the tour already has 3 beats…"); a short tour leaves the breather out by its narration', /the tour already has 3 beats/.test(plan.full) && /needs 90 s/.test(plan.tiny[2]), [plan.full, plan.tiny[2]]);
+  ok('[cap] An item left out says why in words ("the tour already has 2 beats…" on Short); a short tour leaves the breather out by its narration', /the tour already has 2 beats, the quiz's promise and the quiz as one/.test(plan.full) && /needs 90 s/.test(plan.tiny[2]), [plan.full, plan.tiny[2]]);
   ok('The plan in words: its narration, its room, each beat at its seam', /4:50 of narration/.test(plan.words) && /room for 3 beats/.test(plan.words) && /at the seam after step \d+/.test(plan.words), plan.words);
   ok('Gates in the plan: a Solemn point gets no beats; Calm only the items Calm too (no breather, no cookie); a screen reader skips an item with no button path; Games on the tour Off and two Not nows: no games (the breather still)',
     plan.sol.n === 0 && /Solemn/.test(plan.sol.w) && plan.calm[0].every(x => !/water|cookie/.test(x)) && /Calm/.test(plan.calm[1]) && /screen reader/.test(plan.sr) &&
@@ -65,28 +66,31 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // ---------- 2. the promise and its star, in every Look ----------
   await fresh(); await R('startTour()');
   const p0 = await R('[gdPlanWords(G.gd.plan),G.gd.plan.beats.map(function(b){return b.id+":"+b.after})]');
-  ok('[cap] A tour plans once as it starts: the demo tour (1:24, no introduction) has room for 2 beats, the quiz\'s pair (after the welcome, before the end)', JSON.stringify(p0[1]) === '["quizpromise:g0","quizfinale:g9"]', p0);
+  // round 13: the promise and its quiz count as one beat, so the demo tour gets the pair and one more (Guess the year); the quiz replaces the card's own quiz step (g9), so the finale is after g8
+  ok('[cap] A tour plans once as it starts: the demo tour (no introduction) has room for 2 beats, the quiz\'s pair as one (after the welcome, before the end) and Guess the year', JSON.stringify(p0[1]) === '["quizpromise:g0","guessyear:g3","quizfinale:g8"]', p0);
   await until('gd12Kind("promise")', 30000);
-  const pr = await R('[G.i,S.guideSteps[G.i].id,TXT("tour_promise")===ph.querySelector(".gdbeat .bt-line").textContent,!!ph.querySelector(".gdock .gd-qstar.pend"),G.sayLine&&G.sayLine.text===TXT("tour_promise"),gdWhyNot(gdItems(),S.gdVisitor,gdContext(),gdNow(),"guessyear")]');
-  ok('The promise after the welcome (the tour held at its seam): its line spoken, the star pending at the end of the progress line; Why not now? for another beat answers from the plan', pr[1] === 'g0' && pr[2] && pr[3] && pr[4] && /tour already has 2 beats/.test(pr[5]), pr);
+  const pr = await R('[G.i,S.guideSteps[G.i].id,TXT("tour_promise")===ph.querySelector(".gdbeat .bt-line").textContent,!!ph.querySelector(".gdock .gd-qstar.pend"),G.sayLine&&G.sayLine.text===TXT("tour_promise"),gdWhyNot(gdItems(),S.gdVisitor,gdContext(),gdNow(),"findwall")]');
+  ok('The promise after the welcome (the tour held at its seam): its line spoken, the star pending at the end of the progress line; Why not now? for another beat answers from the plan (round 13: Find it on the wall, beside Guess the year now planned with the pair)', pr[1] === 'g0' && pr[2] && pr[3] && pr[4] && /never two seams in a row: “Guess the year”/.test(pr[5]), pr);
   const looks = await R('var o={};DLOOKS.forEach(function(L){S.guideCfg.look=L[0];["mini","peek"].forEach(function(h){S.dockH=h;renderGuide();var s=ph.querySelector(".gdock .gd-qstar"),pr=ph.getBoundingClientRect(),r=s&&s.getBoundingClientRect(),c=ph.querySelector(".gdbeat");o[L[0]+"|"+h]=!!s&&r.left>=pr.left&&r.right<=pr.right&&r.top>=pr.top&&r.bottom<=pr.bottom&&!!c&&c.classList.contains("bt-"+L[0])})});S.guideCfg.look="ink";S.dockH="mini";renderGuide();o');
   ok('The star and the card in every round-11 Look, at Mini and Open (inside the phone; the card in the Look\'s colours)', Object.values(looks).length === 8 && Object.values(looks).every(Boolean), looks);
-  const chips = await R('[].map.call(ph.querySelectorAll(".gdbeat .bt-chip"),function(x){var r=x.getBoundingClientRect();return[x.textContent,Math.round(r.height)]})');
+  // round 13: the promise's chips stay up on the strip above the panel while step 1 starts
+  await until('!!ph.querySelector(".gdstrip .bt-chip")', 15000);
+  const chips = await R('[].map.call(ph.querySelectorAll(".gdstrip .bt-chip"),function(x){var r=x.getBoundingClientRect();return[x.textContent,Math.round(r.height)]})');
   ok('Deal / No quiz, thanks: 44 px or more', chips.length === 2 && chips[0][0] === 'Deal' && chips.every(c => c[1] >= 44), chips);
-  await tap('.gdbeat [data-gdbt="deal"]');
-  await until('!G.gd.bt&&G.i>=1', 4000);
+  await tap('.gdstrip [data-gdtl="deal"]');
+  await until('!G.gd.bt&&G.i>=1&&G.gd.plan.quiz==="on"', 4000);
   ok('Deal (a real tap): the quiz is on, the star full, the tour goes on to its next step', await R('G.gd.plan.quiz==="on"&&!!ph.querySelector(".gdock .gd-qstar:not(.pend)")&&G.i>=1'));
   // waiting is a Deal; No quiz, thanks drops the quiz and is a Not now
   await fresh(); await R('startTour()'); await until('gd12Kind("promise")', 30000);
-  const wt = await until('!G.gd.bt', 15000);
+  const wt = await until('G.gd.plan.quiz==="on"', 20000);
   ok('4 s with no answer after the promise: a Deal (a game starts)', wt && await R('G.gd.plan.quiz==="on"'));
-  await fresh(); await R('startTour()'); await until('gd12Kind("promise")', 30000); await tap('.gdbeat [data-gdbt="noquiz"]'); await until('!G.gd.bt', 4000);
+  await fresh(); await R('startTour()'); await until('!!ph.querySelector(\'.gdstrip [data-gdtl="noquiz"]\')', 30000); await tap('.gdstrip [data-gdtl="noquiz"]'); await until('G.gd.plan.quiz==="off"', 4000);
   const nq = await R('var f=gdPlanBeat("quizfinale");[G.gd.plan.quiz,f.state,f.why,S.gdVisitor.visit.notNow,gdQuizStar(),gdWhyNot(gdItems(),S.gdVisitor,gdContext(),gdNow(),"quizfinale")]');
   ok('No quiz, thanks (a real tap): the quiz dropped from the plan, the star gone, one Not now; Why not now? says so', nq[0] === 'off' && nq[1] === 'dropped' && /No quiz/.test(nq[2]) && nq[3] === 1 && nq[4] === '' && /dropped/.test(nq[5]), nq);
   tsec('promise');
 
   // ---------- 3. the quiz ----------
-  await fresh(); await R('startTour();G.gd.plan.quiz="on";gdPlanBeat("quizpromise").state="played";G.gd.heard={}'); await seam('g9');
+  await fresh(); await R('startTour();G.gd.plan.quiz="on";gdPlanBeat("quizpromise").state="played";G.gd.heard={}'); await seam('g8');
   await until('gd12Kind("finale")&&!!ph.querySelector(".gdbeat .bt-choice")', 15000);
   const q1 = await R('var B=G.gd.bt;[B.qs,B.k,ph.querySelector(".gdbeat .bt-eye").textContent,[].map.call(ph.querySelectorAll(".gdbeat .bt-choice"),function(x){return Math.round(x.getBoundingClientRect().height)})]');
   ok('The finale: three questions from the steps heard (one from each third), the count, choices 44 px or more, no timer', JSON.stringify(q1[0]) === '["g1","g4","g7"]' && /QUESTION 1 OF 3/.test(q1[2]) && q1[3].every(h => h >= 44), q1);
@@ -112,14 +116,14 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const lines = await R('[[3,3],[2,3],[1,3],[0,3]].map(function(x){var r=x[0],n=x[1];return fmt(TXT(r===n?"tour_score_all":r===0?"tour_score_none":r*2>n?"tour_score_most":"tour_score_some"),r,n)})');
   ok('The score lines, never mocking (a zero still ends on what was learnt)', JSON.stringify(lines) === JSON.stringify(["3 out of 3! You'd make a fine guide.", '2 out of 3. Very good.', '1 out of 3. The tiles are tricky!', 'Zero… but now you know 3 new things!']), lines);
   // Not sure and Skip the quiz
-  await fresh(); await R('startTour();G.gd.plan.quiz="on";gdPlanBeat("quizpromise").state="played"'); await seam('g9'); await until('!!ph.querySelector(".gdbeat .bt-choice")', 15000);
+  await fresh(); await R('startTour();G.gd.plan.quiz="on";gdPlanBeat("quizpromise").state="played"'); await seam('g8'); await until('!!ph.querySelector(".gdbeat .bt-choice")', 15000);
   await tap('.gdbeat [data-gdbt="unsure"]'); await until('!!ph.querySelector(".gdbeat .bt-verdict")', 3000);
   const ns = await R('[ph.querySelector(".gdbeat .bt-verdict").textContent,!!ph.querySelector(".gdbeat .bt-choice.ok"),!ph.querySelector(".gdbeat .bt-choice.no")]');
   ok('Not sure (a real tap): the right one shows, "The answer: …" with its why', /^The answer: About 250 years\./.test(ns[0]) && ns[1] && ns[2], ns);
   await tap('.gdbeat [data-gdbt="skip"]'); await until('!G.gd.bt', 3000);
   ok('Skip the quiz (a real tap): the quiz ends, the tour goes on to its plain end', await R('!ph.querySelector(".gdbeat")&&G.gd.plan.quizDone&&S.guideSteps[G.i].act==="end"'));
   // too few from the steps heard: saved for next time, the promise kept honestly
-  await fresh(); await R('startTour();G.gd.plan.quiz="on";gdPlanBeat("quizpromise").state="played"'); await R('var j=S.guideSteps.findIndex(function(s){return s.id==="g9"});stopSpeech();G.i=j;G.gd.heard={g1:1};next()');
+  await fresh(); await R('startTour();G.gd.plan.quiz="on";gdPlanBeat("quizpromise").state="played"'); await R('var j=S.guideSteps.findIndex(function(s){return s.id==="g8"});stopSpeech();G.i=j;G.gd.heard={g1:1};next()');
   await until('gd12Kind("finale")', 6000);
   ok('Fewer than 2 questions from the steps heard: "We went fast! I\'ll save the quiz for next time.", the star goes', await R('ph.querySelector(".gdbeat .bt-line").textContent===TXT("tour_quiz_few")&&G.gd.plan.quiz==="off"&&!gdQuizStar()'));
   tsec('quiz');
@@ -174,10 +178,10 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const nn = await R('var c=ph.querySelector(\'.gdbeat [data-gdbt="notnow"] .bt-bar\');c?getComputedStyle(c).animationDuration:""');
   await tap('.gdbeat [data-gdbt="notnow"]'); await until('!G.gd.bt', 4000);
   const n1 = await R('S.gdVisitor.visit.notNow'), gone = true;
-  await R('if(G.on)stopTour();G.gd.plan=null;S.tourQ=JSON.parse(window.QK);startTour()'); await until('gd12Kind("promise")', 30000); await tap('.gdbeat [data-gdbt="noquiz"]');
-  await until('!!ph.querySelector(".gdbeat")&&ph.querySelector(".gdbeat .bt-line").textContent===TXT("tour_nomore")', 4000);
-  const n2 = await R('[S.gdVisitor.visit.notNow,ph.querySelector(".gdbeat .bt-line").textContent,S.gdVisitor.visit.nomore]');
-  ok('A game\'s Not now chip (4 s) by a real tap; a second Not now this visit: "Got it: no more games today, just the story." said once, and no more games', nn === '4s' && n1 === 1 && n2[0] === 2 && n2[1] === "Got it: no more games today, just the story." && n2[2] && gone, [nn, n1, n2]);
+  await R('if(G.on)stopTour();G.gd.plan=null;S.tourQ=JSON.parse(window.QK);startTour()'); await until('!!ph.querySelector(\'.gdstrip [data-gdtl="noquiz"]\')', 30000); await tap('.gdstrip [data-gdtl="noquiz"]');
+  await until('!!ph.querySelector(".gdstrip .tl-msg")', 4000);
+  const n2 = await R('[S.gdVisitor.visit.notNow,(ph.querySelector(".gdstrip .tl-msg")||{}).textContent,S.gdVisitor.visit.nomore]');
+  ok('A game\'s Not now chip (4 s) by a real tap; a second Not now this visit: "Got it: no more games today, just the story." once (on the strip: the step goes on), and no more games', nn === '4s' && n1 === 1 && n2[0] === 2 && n2[1] === "Got it: no more games today, just the story." && n2[2] && gone, [nn, n1, n2]);
   await until('!G.gd.bt', 9000);
   ok('…the next tour plans no game (two Not nows this visit), the breather still could', await R('if(G.on)stopTour();var P=gdPlanNow();!P.beats.some(function(b){return b.game})&&/two Not nows/.test(P.why.quizpromise)'));
   tsec('guess');
