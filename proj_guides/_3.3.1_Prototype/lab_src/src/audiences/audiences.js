@@ -140,5 +140,5 @@ function audWhereShow(){var w=S.aud.where;S.aud.seen=false;
   if(w==="never"){S.aud.seen=true;S.view="card";S.stop="half";renderPhone(false);gdChip("Where to ask · Never: no question, every visitor is an Explorer");setTimeout(function(){gdChip(null)},3200);return}
   S.view="card";if(S.stop==="closed"||S.stop==="peek")S.stop="half";renderPhone(false)}
 rowDemos({"vis.aud":{stop:"full",ring:".hero"},"aud.where":{stop:"half",act:function(){audWhereShow()},ring:".onb|.gdchip"}});
-/* an audience's Guidance preset: that preset simulated (Guide › 0 · Preview & Test › Simulate a visit), two visit-minutes ×10 on the wall */
+/* an audience's Guidance preset: that preset simulated (Guide › 6 · Preview & Test › Simulate a visit), two visit-minutes ×10 on the wall */
 rowDemos(AUDS.reduce(function(m,a){m["aud.looks."+a+".gdPreset"]={wall:true,act:function(){gdDemoAudPreset(a)},ringAfter:600,ring:".gdchip|.gdbub"};return m},{}));

@@ -30,15 +30,15 @@ const R13 = JSON.parse(fs.readFileSync(path.join(__dirname, 'guide_rows_r13.json
   // ---------- 1. the six sections, their names, the moved foldouts' parents ----------
   await guide(9);
   const secs = await R('[].map.call(ed.querySelectorAll(":scope > details[data-fo]"),function(d){return d.dataset.fo+"|"+d.querySelector(":scope > summary").textContent.split(" · ").slice(0,2).join(" · ")})');
-  ok('The six sections in order: 0 · Preview & Test, 1 · Azu, 2 · The tour, 3 · Games on the tour, 4 · Azu speaks up, 5 · Ask Azu (Mascot and Fun › On the tour keep their ids as sections)',
-    JSON.stringify(secs) === JSON.stringify(['gt0|0 · Preview & Test', 's7mascot|1 · Azu', 'gt1|2 · The tour', 'gd:g:ontour|3 · Games on the tour', 'gt4|4 · Azu speaks up', 'gt3|5 · Ask Azu']), secs);
+  ok('The six sections in order: 1 · Azu, 2 · The tour, 3 · Games on the tour, 4 · Azu speaks up, 5 · Ask Azu, 6 · Preview & Test (last: round 14b) (Mascot and Fun › On the tour keep their ids as sections)',
+    JSON.stringify(secs) === JSON.stringify(['s7mascot|1 · Azu', 'gt1|2 · The tour', 'gd:g:ontour|3 · Games on the tour', 'gt4|4 · Azu speaks up', 'gt3|5 · Ask Azu', 'gt0|6 · Preview & Test']), secs);
   const PARENT = { s7vtest: 'gt0', 'gd:sim': 'gt0', 'gd:visitor': 'gt0', 'gt:tools': 's7mascot', s7voice: 'gt1', s7cap: 'gt1', s7focus: 'gt1', s7coach: 'gt1', s7dock: 'gt1', 'gt:ways': 'gt1',
     s7gbtn: 'gt:ways', s7hero: 'gt:ways', s7block: 'gt:ways', s7resume: 'gt:ways', 'gd:pair:quizpromise': 'gd:g:ontour', 'gd:i:quizpromise': 'gd:pair:quizpromise', 'gd:i:quizfinale': 'gd:pair:quizpromise',
-    'gd:i:guessyear': 'gd:g:ontour', 'gd:i:dontsay': 'gd:g:ontour', 'gd:i:findwall': 'gd:g:ontour', 'gd:i:water': 'gd:g:ontour', 'gd:i:cookie': 'gd:g:ontour',
+    'gd:i:guessyear': 'gd:g:ontour', 'gd:i:dontsay': 'gd:g:ontour', 'gd:i:findwall': 'gd:g:ontour', 'gd:var:water': 'gd:g:ontour', 'gd:i:water': 'gd:var:water', 'gd:i:cookie': 'gd:var:water',
     'gd:overall': 'gt4', 'gd:app': 'gt4', 'gd:content': 'gt4', 'gd:fun': 'gt4', 'gd:seq': 'gt4', 'gd:g:play': 'gd:fun', s7ask: 'gt3', s7cam: 's7ask', 'gt:know': 'gt3', s7agent: 'gt3' };
   const par = await R(`var P=${JSON.stringify(PARENT)},o={};Object.keys(P).forEach(function(id){var d=ed.querySelector('[data-fo="'+id+'"]'),q=d&&d.parentElement.closest("details[data-fo]");o[id]=d?(q?q.dataset.fo:null):"missing"});o`);
   const wrong = Object.keys(PARENT).filter(id => par[id] !== PARENT[id]).map(id => id + ' in ' + par[id]);
-  ok('[moved] Each moved foldout under its new parent, by id (the Voice test in Preview & Test; the four ways in under Ways in; Ask about the view in What the visitor sees; the games in 3 · Games on the tour, the quiz\'s pair as one; Fun keeps Play)', wrong.length === 0, wrong);
+  ok('[moved] Each moved foldout under its new parent, by id (the Voice test in Preview & Test; the four ways in under Ways in; Ask about the view in What the visitor sees; the games in 3 · Games on the tour, the quiz\'s pair as one, the cookie inside the breather; Fun keeps Play)', wrong.length === 0, wrong);
   const ask = await R('var c=ed.querySelector(\'[data-fo="s7cam"]\');[!!c&&c.previousElementSibling===rowEl(ed,"s7ask","Answers from"),!ed.querySelector(\'[data-fo="gd:fun"] [data-fo^="gd:i:quiz"]\'),!!ed.querySelector(\'[data-fo="s7dock"] [data-own="tx|s7tour"]\')]');
   ok('[moved] ...Ask about the view right after Answers from; no game left in Fun; Tour controls\' words in Guide panel', ask.every(Boolean), ask);
   // ---------- 2. nothing lost; no empty foldout; no section with a single row ----------
@@ -65,7 +65,7 @@ const R13 = JSON.parse(fs.readFileSync(path.join(__dirname, 'guide_rows_r13.json
   const navs = await R('[].map.call(ed.querySelectorAll(".gtnav [data-gtgo]"),function(b){return b.textContent})');
   await p.locator('.gtnav [data-gtgo="gt3"]').click(); await W(250);
   const nv = await R('var f=ed.querySelector(\'[data-fo="gt3"]\'),r=f.getBoundingClientRect();[f.open,r.top>=-2&&r.top<innerHeight/2]');
-  ok('The tab names its six parts at its top (the first view names every part of the guide); a real click on one opens it at the top of the view', JSON.stringify(navs) === JSON.stringify(['0 · Preview & Test', '1 · Azu', '2 · The tour', '3 · Games on the tour', '4 · Azu speaks up', '5 · Ask Azu']) && nv[0] && nv[1], [navs, nv]);
+  ok('The tab names its six parts at its top (the first view names every part of the guide); a real click on one opens it at the top of the view', JSON.stringify(navs) === JSON.stringify(['1 · Azu', '2 · The tour', '3 · Games on the tour', '4 · Azu speaks up', '5 · Ask Azu', '6 · Preview & Test']) && nv[0] && nv[1], [navs, nv]);
   tsec('levels');
 
   // ---------- 4. an item: its group headers only, each with what it holds and its changed count ----------

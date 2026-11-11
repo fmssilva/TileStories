@@ -214,7 +214,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
 
   lap('before 9');
   // ---------- 9. every new row's demo; the Guide script's Jokes ----------
-  await R(base); await editor('guide', { gt0: true, gt4: true, 'gd:fun': true, 'gd:g:ontour': true, 'gd:g:play': true, 'gd:i:water': true, 'gd:i:cookie': true, 'gd:i:joke': true, 'gd:i:ptjoke': true, 'gd:i:hunt': true, 'gd:i:season': true });
+  await R(base); await editor('guide', { gt0: true, gt4: true, 'gd:fun': true, 'gd:g:ontour': true, 'gd:g:play': true, 'gd:var:water': true, 'gd:i:water': true, 'gd:i:cookie': true, 'gd:i:joke': true, 'gd:i:ptjoke': true, 'gd:i:hunt': true, 'gd:i:season': true });
   const keys = await R('var o=[];ed.querySelectorAll(\'[data-fo="gd:fun"] .row,[data-fo="gd:g:ontour"] .row,[data-fo="gt0"] .row\').forEach(function(r){var k=rowKey(r);if(k&&o.indexOf(k)<0&&/^(guidance\\.(kinds\\.2|items\\.(water|cookie|joke|ptjoke|hunt|season))|ui\\.gdToday)/.test(k))o.push(k)});o');
   const miss = await R(`${JSON.stringify(keys)}.filter(function(k){return!rowDemoOf(k)})`);
   ok(`Every new row has its demo (${keys.length} rows: Fun's kind and groups, its six items' forms, the seasons' From / To / Solemn day, Today is)`, keys.length >= 80 && miss.length === 0 && ['guidance.items.water.props', 'guidance.items.water.talkFor', 'guidance.items.cookie.beforeEnd', 'guidance.items.joke.latePause', 'guidance.items.season.seasons.0.from', 'ui.gdToday'].every(k => keys.indexOf(k) >= 0) && (await R('[0,1,2].every(function(i){return["from","to","solemn"].every(function(f){return!!rowDemoOf("guidance.items.season.seasons."+i+"."+f)})})&&!!rowDemoOf("ui.gdJkPoint")')), { n: keys.length, miss });

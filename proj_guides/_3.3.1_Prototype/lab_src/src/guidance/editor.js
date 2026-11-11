@@ -4,7 +4,7 @@
    groups (their On, weight, own cap a visit and own gap) and each item a row (On, its label, its importance dots, how often, ▸ Show now)
    that opens its fields: Label, Says per language, its own rows (What's in view: Lines per point and the points on the wall now; The ✦:
    After pokes on Azu, After idle), Essential, Shows, At most, Again after, Done when, During a tour, Along the visit, the fixed ones in
-   words and the read-back. Ask › Ask about the view › Azu comments links to What's in view (world/wall.js). 0 · Preview & Test: Show next now and why; Why not now? (an item's reason, in the scheduler's own words); the visitor
+   words and the read-back. Ask › Ask about the view › Azu comments links to What's in view (world/wall.js). 6 · Preview & Test: Show next now and why; Why not now? (an item's reason, in the scheduler's own words); the visitor
    (first or returning, the visits, the active minutes, the stage, the features used, each item's memory; New visit, Leave for 31 min,
    Reset the visitor); the Log of the last 30 decisions; round 5: Simulate a visit (a timeline 0-20 min, lanes App / Content / Fun /
    Quiet, a scripted visitor, ×1 ×10 ×30 or Instant, a tap or a scrub shows a dot's item on the phone, a skip's reason in the
@@ -37,7 +37,7 @@ on("guidePath.answer",function(o){if(o==="gd:g:ontour")return[o];if(o==="gd:over
   if(o.indexOf("gd:g:")===0)return["gt4",gdGroupFo(o.slice(5)),o];var f=/^gd:f:([^:]+):/.exec(o),fi=f&&S.guidance.items[f[1]];if(fi)return gdItemPath(fi).concat([o]);
   var m=o.match(/^gd:i:(.+)$/),it=m&&S.guidance.items[m[1]];if(it)return gdItemPath(it).concat(["gd:f:"+it.id+":says"])});
 /* round 14: an item's place in the tab: a game in 3 · Games on the tour (the quiz's pair as one), any other in 4 · Azu speaks up */
-function gdItemPath(it){if(it.group==="ontour"){var pa=gdPairOf(it);return["gd:g:ontour"].concat(pa?["gd:pair:"+pa[0].id]:[],["gd:i:"+it.id])}return["gt4",gdGroupFo(it.group),"gd:g:"+it.group,"gd:i:"+it.id]}
+function gdItemPath(it){if(it.group==="ontour"){var pa=gdPairOf(it),vb=gdVarBaseOf(it);return["gd:g:ontour"].concat(pa?["gd:pair:"+pa[0].id]:[],vb?["gd:var:"+vb.id]:[],["gd:i:"+it.id])}return["gt4",gdGroupFo(it.group),"gd:g:"+it.group,"gd:i:"+it.id]}
 /* round 8: the foldout a group sits in: its kind's, or Sequences for an In order sequence (How to use the card, First pages) */
 function gdGroupFo(gid){var g=gdGroupById(gid);return g&&g.seq?"gd:seq":"gd:"+(gdKindOfGroup(gid)||"app")}
 /* the self-test: a tip's words show on the wall, at its moment (behaviour); every guidance option is timing (behaviour) */
@@ -237,7 +237,7 @@ function gdTipForm(it){var p="guidance.items."+it.id+".",k=gdKindOf(it),g=gdGrou
 function gdKindWords(k){var w=gdMix(k.id);return"Its weight along the visit: "+w[0]+" % on arrival, "+w[1]+" % a third of the way in, "+w[2]+" % at the end (s = 0 / 0.3 / 1, straight lines between): a weight in each item's score, never a quota; an item's Along the visit shapes it further. "+
   (k.spoken==="bubble"?"Spoken: never, a bubble only.":"Spoken: once the visitor has heard the guide this visit (a tour step, an answer), else a bubble.")}
 function gdKindSub(k){return k.id==="app"?"how to use the app: a bubble, never spoken":k.id==="fun"?"play: a joke, each point's joke, the treasure hunt, a seasonal line; never on a Solemn point":"what is here and what next: spoken once the guide has been heard"}
-/* ----- 0 · Preview & Test: the read-outs ----- */
+/* ----- 6 · Preview & Test: the read-outs ----- */
 /* an item's memory as the Editor reads it: a per-point item's, summed over its points on this wall (the latest line used) */
 function gdMemOf(def){var v=S.gdVisitor,r={shown:0,ever:0,last:null,line:"",acted:0,dismissed:0,done:false,by:""};
   gdInstances(def.id).forEach(function(it){var vm=gdVisitOf(v,it.id),em=gdEverOf(v,it.id);r.shown+=vm.shown;r.ever+=em.shown;r.acted+=em.acted||0;r.dismissed+=em.dismissed||0;
@@ -258,7 +258,7 @@ function gdNowLine(){var c=G.gd.cur;return c?"Now: showing the "+c.item.label+(c
 /* the visitor in one line (Preview & Test): the visit, the stage, heard the guide; the rest is in its Details */
 function gdVisitorShort(){var v=S.gdVisitor,st=gdStage(v,gdNow());return"Visit "+v.visits+(v.visits>1?" (a returning visitor)":" (a first visit)")+" · the stage s "+gdN(st.s)+" ("+gdN(st.active,1)+" active min) · heard the guide this visit: "+(v.visit.heard?"yes":"no")}
 on("edGuide.html",function(h){var d=document.createElement("div");d.innerHTML=h;
-  /* 0 · Preview & Test (round 14): the tools first (Start the app, below; Today is, Show next now, Why not now?, the Log), then the
+  /* 6 · Preview & Test (round 14): the tools first (Start the app, below; Today is, Show next now, Why not now?, the Log), then the
      visitor (one line, its Details folded), the visitor's settings (stand-ins), Simulate a visit; the Voice test after it (guide-tab.js) */
   var g0=innerOf(d,"gt0");if(g0)g0.insertAdjacentHTML("afterbegin",
     row("Today is",'<input type="date" class="u gdtoday" data-sel="@ui.gdToday" value="'+esc(S.ui.gdToday||"")+'" aria-label="Today is">',"The date the phone takes as today: each seasonal line shows only in its window of dates (Azu speaks up › Fun › Play › Seasonal), and a Solemn day (1 November) rests every joke. The real date by default; pick one to try each season.")+
@@ -486,7 +486,7 @@ function gdDemoHow(f){var my=gdDemoBegin(),g=gdGroupById("howto");
 /* (round 7) an item's, a group's and a kind's demo show their tip in the same frame: no wait before or after (the Fun rows doubled the
    Guide tab's rows; a second a row was 3 minutes of the tests) */
 rowDemos(GD_DEMOS);
-/* ----- round 5: Overall's Preset, Talkativeness and the Mix along the visit; 0 · Preview & Test › Simulate a visit ----- */
+/* ----- round 5: Overall's Preset, Talkativeness and the Mix along the visit; 6 · Preview & Test › Simulate a visit ----- */
 COMP["gd:mix"]=["Guide","Azu speaks up › Overall › Mix along the visit"];FOCUS["gd:mix"]=["card","#wall","closed"];COMP["gd:help"]=["Guide","Azu speaks up › Overall › Help"];FOCUS["gd:help"]=["card","#wall","closed"];
 COMP["gd:sim"]=["Guide","Preview & Test › Simulate a visit"];FOCUS["gd:sim"]=["card","#wall","closed"];
 /* the Editor's own state of the simulator: the scripted visitor, the speed (Instant: the whole 20 min at once) */
@@ -536,7 +536,7 @@ function gdMixHtml(){var cols=["On arrival (s 0)","A third in (s 0.3)","At the e
       return'<td><span class="gdmixc"><input class="u" type="number" data-num="'+p+'" min="0" max="100" step="5" value="'+m[i]+'" aria-label="'+k[1]+' '+cols[i]+'"> %</span></td>'}).join("")+'</tr>'}).join("")+'</tbody></table>';
   return fo("gd:mix",'Mix along the visit <span class="sub">· each kind\'s weight at s = 0 / 0.3 / 1, and its curve</span>',null,
     gdWideRow("The weights",tb+gdMixCurve(),"The kinds' weights along the visit (s: 0 on arrival, 1 after 15 active minutes or every milestone done): a weight in each item's score, never a quota. App tips also retire by themselves once learned. The order across kinds is this table, never a drag.")+
-    '<div class="note">Each row\'s weight is read back on its kind (App, Content, Fun). A change re-runs Simulate a visit (0 · Preview & Test) and its demo shows what moved.</div>',3)}
+    '<div class="note">Each row\'s weight is read back on its kind (App, Content, Fun). A change re-runs Simulate a visit (6 · Preview & Test) and its demo shows what moved.</div>',3)}
 /* ----- the simulator in the Editor ----- */
 var GD_SIM_QUIET={tour:"a tour",pan:"panning",card:"a card open",panel:"a panel open"};
 /* the settings now, and the ones before the last change (what moved is between them) */
@@ -779,7 +779,7 @@ ed.addEventListener("pointerup",function(e){var d=G.gd.drag;if(!d)return;G.gd.dr
   var at=0;g.items=g.items.map(function(x){return ids.indexOf(x)>=0?ids[at++]:x});renderAll(true);gdLog("event","the Editor moved the “"+it.label+"” to "+(d.to+1)+" of "+ids.length+" in "+g.name);
   gdEdToast("Moved: the “"+it.label+"” is "+(d.to+1)+" of "+ids.length+" in "+g.name+" ("+(g.mode==="order"?"its place in the sequence":"it wins a tie against the ones below it")+").")},true);
 /* ----- the Editor's new parts: the warnings at the top of 4 · Guidance, + Add guidance in each group, the visitor's Tips and the
-   screen reader in 0 · Preview & Test ----- */
+   screen reader in 6 · Preview & Test ----- */
 /* the warnings are known before the rows are drawn (each item's badge and its own warnings) */
 on("renderEditor.before",function(){if(S.tab==="guide")G.gd.warns=gdWarnings()});
 on("edGuide.html",function(h){var d=document.createElement("div");d.innerHTML=h;
@@ -871,7 +871,7 @@ ed.addEventListener("click",function(e){var t=e.target,q;
    each page a row (On, the page, how long, ▸ Show now) that opens its form (Identity, Words, Show: the Page form, Azu, the language chip,
    a custom page's buttons; When, fixed; the read-back), + Add guidance with the Page template, Duplicate and Delete for a page of its own,
    drag ≡ to reorder (Hello first, Straight to the wall last: the drop line says why while a drag would break that, and the drop is
-   undone with the reason in the field). 0 · Preview & Test › Start the app (a first run / a later launch) and the visitor's first pages;
+   undone with the reason in the field). 6 · Preview & Test › Start the app (a first run / a later launch) and the visitor's first pages;
    the preview bar's Start the app and Later launch. Each row's demo: a page row shows that page on the phone with its value; the group's
    On the run's first page; Start the app plays the run. Unity: the POI Editor's Guide tab, Sequences drawn from GuidanceCatalog (a
    ReorderableList whose ends are pinned), Start the app a Play-mode launch with the GuidanceMemory file cleared (a first run) or kept ----- */
@@ -954,7 +954,7 @@ function gdDemoPage(id,f){var my=gdDemoBegin(),it=S.guidance.items[id];if(!it)re
 on("rowDemo.spec",function(key){var m=/^guidance\.items\.([^.]+)\.(on|azu|langChip|buttons\.\d+\.act)$/.exec(key);if(!m)return;var d=S.guidance.items[m[1]];if(!d||d.form!=="page")return;
   var id=m[1],f=m[2];return{wall:true,wait:0,act:function(){gdDemoPage(id,f)},ringAfter:400,ring:d.page==="wall"?".gdbub|.gdchip":".gdpages|.gdchip"}});
 rowDemos({"ui.gdLaunch":{wall:true,wait:0,act:function(){var k=S.ui.gdLaunch||"first";gdLaunch(k);if(!G.gd.pages){gdChip(k==="later"?"A later launch: no pages; the Opening message says Welcome back":"No page to show: the wall");setTimeout(function(){if(!G.gd.pages)gdChip(null)},3500)}},ringAfter:450,ring:".gdpages|.gdbub|.gdchip"}});
-/* ----- 0 · Preview & Test › Start the app, and the visitor's first pages ----- */
+/* ----- 6 · Preview & Test › Start the app, and the visitor's first pages ----- */
 on("edGuide.html",function(h){var d=document.createElement("div");d.innerHTML=h;var v=d.querySelector('[data-fo="gt0"] [data-sel="@ui.gdToday"]'),r=v&&v.closest(".row");if(!r)return h;
   r.insertAdjacentHTML("beforebegin",row("Start the app",pseg("ui.gdLaunch",["first","later"],["▸ A first run","▸ A later launch"]),"Plays the app's start on the phone, as the preview bar's Start the app and Later launch do. A first run: the visitor reset to a first visit (as Reset the visitor), the audience not yet asked, the camera not yet allowed: the first pages from Hello, then the wall. A later launch: the same visitor opens the app again: no pages, the Opening message's Welcome back (with Remember across visits Off every launch is a first: the pages again). A press plays it again.")+
     '<div class="note gdwhy" id="gdpgseen">'+esc(gdPagesSeenWords())+'</div>');return d.innerHTML});
@@ -971,7 +971,7 @@ ed.addEventListener("click",function(e){var t=e.target,q;
    Hidden): it lives in Overall, not in App's kind row, because the study puts the visitor's controls there (section 7's tree) and because
    it is pull: App's kind row holds the push (its On, cap, gap and weight), and Things to try lists rows from every App group (The start,
    The wall, the card's cues, The guide). Each App item that teaches a feature: In Things to try (Yes / No; Yes when it Teaches), its row's
-   and its answer's words, and what ticks it. App › The guide (pulled only): Pause the guide. 0 · Preview & Test › The visitor: "Things to
+   and its answer's words, and what ticks it. App › The guide (pulled only): Pause the guide. 6 · Preview & Test › The visitor: "Things to
    try: 3 of 8 tried". Each row's demo: the sheet on the phone with the new value (the ✦ menu with or without it; the sheet with the row in
    or out; Show me playing). Unity: the POI Editor's Guidance section (a Toggle per item, a PopupField for In the ✦ menu) ----- */
 COMP["gd:g:guide"]=["Guide","Azu speaks up › The guide"];FOCUS["gd:g:guide"]=["card",".gbtn-wrap","full"];COMP["gd:i:pause"]=["Guide","Azu speaks up › The guide › Pause the guide"];FOCUS["gd:i:pause"]=["card",".gbtn-wrap","full"];
@@ -1027,7 +1027,7 @@ function gdDemoTryShow(id){var my=gdDemoBegin(),it=gdTryItem(id);if(!it)return;g
 rowDemos({"guidance.tryMenu":{wall:true,wait:0,act:gdDemoTryMenu,ringAfter:300,ring:'[data-gbgo="try"]|.gbmenu|.gdchip'}});
 on("rowDemo.spec",function(key){var m=/^guidance\.items\.([^.]+)\.inTry$/.exec(key);if(!m||!S.guidance.items[m[1]])return;var id=m[1];
   return{wall:true,wait:0,act:function(){gdDemoTryRow(id)},ringAfter:300,ring:'[data-gdtryrow="'+id+'"]|.gdtry|.gdchip'}});
-/* ----- round 10: 0 · Preview & Test's simulator rows show on the phone too: The visitor plays its first two visit-minutes (×10);
+/* ----- round 10: 6 · Preview & Test's simulator rows show on the phone too: The visitor plays its first two visit-minutes (×10);
    Speed plays the timeline at that speed, each dot's item on the phone (Instant: the two minutes ×10) ----- */
 rowDemos({"ui.gdSim":{wall:true,wait:0,act:function(){var s=gdSimScript(S.ui.gdSim||"first");gdDemoSim({label:"The visitor: "+(s?s.name:S.ui.gdSim)})},ringAfter:600,ring:".gdchip|.gdbub"},
   "ui.gdSpeed":{wall:true,wait:0,act:function(){if(S.ui.gdSpeed==="instant"||!ed.querySelector("#gdsimtl"))gdDemoSim({label:S.ui.gdSpeed==="instant"?"Instant: the whole visit at once":"×"+S.ui.gdSpeed});else{G.gd.sim.t=0;gdSimPlay()}},ringAfter:600,ring:".gdchip|.gdbub"}});
@@ -1036,7 +1036,7 @@ rowDemos({"ui.gdSim":{wall:true,wait:0,act:function(){var s=gdSimScript(S.ui.gdS
    its rhythm: One beat per, At most a tour, on Short, on Deep), the tour's plan in words ("This tour's plan: …"), and each beat's form
    (gdBeatRow: Place in the tour, The visitor answers by, Waits, Needs, Pairs with, Scores, Calm too, Audiences, Tour length, and its
    own rows); Specific Marker › 3 · Guide script's per-step quiz question and guess (EN / PT, Draft with AI, a Reviewed tick per
-   language); 0 · Preview & Test › The visitor's Games on the tour. Each row's demo plays its beat on the phone, in a tour, now
+   language); 6 · Preview & Test › The visitor's Games on the tour. Each row's demo plays its beat on the phone, in a tour, now
    (gdDemoBeat). Unity: the POI Editor's GuidanceGroup and GuidanceItem inspectors (the beat fields), the GuideStep's QuizQuestion and
    Guess (with a Draft with AI button calling the Worker, and a Reviewed toggle per language) ----- */
 COMP["gd:g:ontour"]=["Guide","Games on the tour"];FOCUS["gd:g:ontour"]=["card",".gdock","full"];
@@ -1050,11 +1050,17 @@ on("gdLog.after",function(){var n=ed.querySelector("#gdplan");if(n)n.textContent
    the fixed rules, then the games: the quiz (its promise and its questions, one beat: drawn as one, gd:pair:<the first>), Guess the year,
    Don't say it!, Find it on the wall, the breather and the cookie (its variant) */
 function gdGamesHtml(){var g=gdGroupById("ontour"),k=gdKindById("fun"),gp=gdGroupPath("ontour");return g&&k&&gp?gdTourGroupFo(g,gp,k):""}
+/* an item and its variants (the breather and the cookie, never both in a tour): drawn as one foldout, gd:var:<the base> (round 14b, the
+   developer: the cookie inside the breather). The base of an item: itself when it has variants in its group, else the item it varies */
+function gdVariantsOf(it){var g=it&&gdGroupById(it.group);return g?g.items.map(function(id){return S.guidance.items[id]}).filter(function(x){return x&&!x.deleted&&x.variantOf===it.id}):[]}
+function gdVarBaseOf(it){if(!it)return null;var b=it.variantOf&&S.guidance.items[it.variantOf],g=gdGroupById(it.group);if(b&&!b.deleted&&g&&g.items.indexOf(b.id)>=0)return b;return gdVariantsOf(it).length?it:null}
 function gdPairOf(it){var pr=it&&it.pairs&&S.guidance.items[it.pairs];if(!pr||pr.deleted)return null;var g=gdGroupById(it.group);if(!g||g.items.indexOf(pr.id)<0)return null;return g.items.indexOf(it.id)<g.items.indexOf(pr.id)?[it,pr]:[pr,it]}
 function gdTourGroupFo(g,gp,k){var items=g.items.map(function(id){return S.guidance.items[id]}).filter(function(x){return x&&!x.deleted}),done={},rows="";
   items.forEach(function(it){if(done[it.id])return;var pa=gdPairOf(it);done[it.id]=1;
     if(pa){pa.forEach(function(x){done[x.id]=1});var fin=pa.filter(function(x){return x.beat==="finale"})[0]||pa[1];
       rows+=fo("gd:pair:"+pa[0].id,esc(fin.label)+' <span class="sub">· “'+esc(pa[0].label)+'” and “'+esc(pa[1].label)+'”: one beat, planned together or not at all</span>',null,pa.map(gdItemRow).join(""),2);return}
+    var vb=gdVarBaseOf(it);if(vb){var vs=[vb].concat(gdVariantsOf(vb));vs.forEach(function(x){done[x.id]=1});
+      rows+=fo("gd:var:"+vb.id,esc(vb.label)+' <span class="sub">· with its variant'+(vs.length>2?"s":"")+" "+vs.slice(1).map(function(x){return"“"+esc(x.label)+"”"}).join(", ")+': never both in a tour</span>',null,vs.map(gdItemRow).join(""),2);return}
     rows+=gdItemRow(it)});
   return'<div class="note">Made for the tour: each plays only at a seam of its tour\'s plan (after the introduction, between two steps, before the last step), never over a sentence. Its own rhythm, never Fun\'s visit cap; Fun\'s hold in a tour does not hold it, but Fun\'s On (4 · Azu speaks up › Fun) turns them off too. A row: On, its name, its place, ▸ Show now; open it for its groups.</div>'+
     row("On",pseg(gp+"on",["true","false"],["On","Off"]),"Off: no beat in any tour (each keeps its own On).")+
@@ -1154,7 +1160,7 @@ function gdDemoPlan(f){var my=gdDemoBegin(),P=gdPlanNow(),b=P.beats[0];if(!G.on)
   if(!b){gdChip("No beats: "+w.replace(/^.*?\)\. /,""));gdDemoEnd(my,4200);return}gdDemoBeat(b.id,w.slice(0,140)+(w.length>140?"…":""))}
 on("rowDemo.spec",function(key){var gp=gdGroupPath("ontour");if(!gp||key.indexOf(gp)!==0)return;var f=key.slice(gp.length);if(!/^(on|life|every|perTour|perShort|perDeep|auds\.\w+)$/.test(f))return;
   return{tour:true,dock:"mini",wait:0,act:function(){gdDemoPlan(f)},ringAfter:500,ring:".gdbeat|.gdchip"}});
-/* 0 · Preview & Test › The visitor: Games on the tour (the visitor's own switch, Settings › The guide) */
+/* 6 · Preview & Test › The visitor: Games on the tour (the visitor's own switch, Settings › The guide) */
 on("edGuide.html",function(h){var d=document.createElement("div");d.innerHTML=h;var r=d.querySelector('[data-fo="gt0"] [data-set="@gdVisitor.prefs.stay"]'),row0=r&&r.closest(".row");if(!row0)return h;
   row0.insertAdjacentHTML("afterend",row("Games on the tour",pseg("gdVisitor.prefs.games",["on","off"],["On","Off"]),"The visitor's own switch (Settings › The guide › Games on the tour): Off, no game in a tour (the quiz, Guess the year); the breather still comes.",true));return d.innerHTML});
 rowDemos({"gdVisitor.prefs.games":{stop:"half",act:function(){var my=gdDemoBegin();S.settingsOpen=true;renderPhone(false);var v=ph.querySelector(".vset"),g=v&&v.querySelector(".vgames");if(v&&g)v.scrollTop=Math.max(0,g.offsetTop-80);gdChip("Games on the tour: "+(gdPrefs().games==="off"?"Off: no game in a tour":"On"));gdDemoEnd(my,3200)},ringAfter:500,ring:".vgames|.gdchip"}});
