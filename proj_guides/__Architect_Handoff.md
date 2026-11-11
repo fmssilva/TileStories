@@ -6,8 +6,8 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 
 - **State:**
   - **The Lab:** `master` holds guidance rounds 1-13, verified on 2026-11-06/11, published at
-    https://claude.ai/artifact/19UiatNtfhVyJrxahvSXp3 with the 186 voice files, the music and the capabilities (section 1). The
-    developer changes account often (four times on 2026-11-08/09); the old links stay in their accounts (RKn3Rr… at round 11, J9J4h… at round 9, 4LpLd4… at round 8, Jq6X2K… at round 7, Jrejv7… at
+    https://claude.ai/artifact/RGofgbUpthqLY5x87wjQLq with the 186 voice files, the music and the capabilities (section 1). The
+    developer changes account often (four times on 2026-11-08/09); the old links stay in their accounts (19Uiat… at round 12, RKn3Rr… at round 11, J9J4h… at round 9, 4LpLd4… at round 8, Jq6X2K… at round 7, Jrejv7… at
     round 6, QmhHSz… at round 5, KDs2… at v29). A new account cannot update an old link: publish a new one (section 1, Publishing). Its
     code is in modules by feature
     (`lab_src/src/<area>/<module>.js`), with no wrappers: `lab_src/PROTOTYPE_STRUCTURE.md` says where each feature lives and
@@ -194,7 +194,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 
 ## 1. Where the work is
 
-- **The target is the Block Components Lab** (https://claude.ai/artifact/19UiatNtfhVyJrxahvSXp3), the record copy
+- **The target is the Block Components Lab** (https://claude.ai/artifact/RGofgbUpthqLY5x87wjQLq), the record copy
   `_3.3.1_Prototype/Block Components Lab.html`, and its sources `_3.3.1_Prototype/lab_src/` (modules by feature, the build,
   the tests; `PROTOTYPE_STRUCTURE.md` says where a change goes, `README.md` how to prove and publish it).
 - **Publishing:** the page goes from the record copy on disk, with `root` `_3.3.1_Prototype` (a redeploy to the same link
