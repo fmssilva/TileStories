@@ -273,11 +273,11 @@
   "s": 262
  },
  "test9q.js": {
-  "pass": 47,
+  "pass": 48,
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 158
+  "s": 175
  },
  "test9qs.js": {
   "pass": 15,
