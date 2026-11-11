@@ -160,7 +160,12 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       centred). Level 2 found one check written for the old state: test8n's scroll ran 2400 px to the bottom of the card,
       where the only block is "Test yourself", now out of the tour, so the guide paused (the existing rule: no told block
       in view, it pauses); the check now runs with Games on the tour Off, and a new one checks that pause with the quiz on.
-    - **Next: the developer's answers on round 13's games** (the closing questions), then the step-by-step review below.
+    - The developer's answers on round 13 (2026-11-11): Don't say it!'s span stays **fixed at 45-120 s**; the tap window
+      stays **2.5 s** and **the result waits until the last window has closed** (a change for the next round: check that
+      the result never comes at a seam while a window is still open); with the device voice **the missed slip is said
+      again** (as built); Find it on the wall keeps **the card at Mini and an arrow at the edge** when the point is off the
+      screen (as built). Open: the Portuguese words ("Não diga!", "Apanhou 1", "Apanhado!", the pastéis de nata line).
+    - **Next:** the one change above (the result after the last window), then the step-by-step review below.
     - **Then: the developer's step-by-step review** of the collected look questions (rounds 1-10; round 10's: build the
       seven missing phone effects so their rows get real demos, Global Scene's rows, stand-ins for block options with
       nothing to see, the Sticky Action's demo with the bar at the bottom, and whether every Detail Card change should
