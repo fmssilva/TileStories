@@ -1,7 +1,7 @@
 /* The Guide tab (edGuide): one place for everything the guide does, on the card, on the wall and at the app's start (_3.8, decision 1).
    Guidance round 14 (the developer's tab, 2026-11-11): six sections, each naming a part of the guide an author looks for:
-   0 · Preview & Test (Editor tools), 1 · Azu (the character), 2 · The tour (the story told), 3 · Games on the tour, 4 · Azu speaks up
-   (the guidance, guidance/editor.js), 5 · Ask Azu (what the visitor sees, what Azu knows, the engine). The guide's modules still make
+   1 · Azu (the character), 2 · The tour (the story told), 3 · Games on the tour, 4 · Azu speaks up (the guidance, guidance/editor.js),
+   5 · Ask Azu (what the visitor sees, what Azu knows, the engine), 6 · Preview & Test (Editor tools: last, the developer, round 14b). The guide's modules still make
    and fill their foldouts (s7voice, s7dock, s7mascot…) in the Detail Card's document; this tab asks for that document's guide part only
    (edCardDoc("guide"), so its draw is fast) and arranges it by GUIDE_PLAN: a foldout by its id (it keeps its id, only its parent
    changes), a row by its label, a node by its class, the words of an owner (its Aa bar). Two are taken apart, their rows and words
@@ -13,17 +13,17 @@
    tab (an IMGUI / UI Toolkit tab beside Detail Card), its foldouts Foldout elements with the same ids, a link a button that opens
    another tab at a foldout. */
 var GUIDE_SECS=[
-  {id:"gt0",n:"0",title:"Preview &amp; Test",sub:"Editor tools, never in the app: start the app, the visitor, the log, a simulated visit",badge:["test","TEST"]},
   {id:"s7mascot",n:"1",title:"Azu",sub:"the character: its look, size, liveliness, mouth and moods, how it moves and plays"},
   {id:"gt1",n:"2",title:"The tour",sub:"the story told: its voice, captions, focus, the panel and the ways in",badge:["new","NEW"]},
   {id:"gd:g:ontour",n:"3",title:"Games on the tour",sub:"the quiz, Guess the year, Don't say it!, Find it on the wall, the breather: at the tour's seams",badge:["new","NEW"]},
   {id:"gt4",n:"4",title:"Azu speaks up",sub:"tips, remarks, play, walkthroughs and the first pages: Azu on its own, one at a time",badge:["new","NEW"]},
-  {id:"gt3",n:"5",title:"Ask Azu",sub:"the visitor's questions: what the visitor sees, what Azu knows, the engine",badge:["new","NEW"]}];
+  {id:"gt3",n:"5",title:"Ask Azu",sub:"the visitor's questions: what the visitor sees, what Azu knows, the engine",badge:["new","NEW"]},
+  {id:"gt0",n:"6",title:"Preview &amp; Test",sub:"Editor tools, never in the app: start the app, the visitor, the log, a simulated visit",badge:["test","TEST"]}];
 /* each section's parts, in order. A part: "Label" (a row of the current source, by its label), {from:id} (the source: that foldout's
    rows and nodes), {fo:id} (a foldout, whole), {fo:id,t,s,parts,deep} (a foldout made here, or one re-titled, with these parts; deep: it
    opens one level later, an Editor or developer part), {add:parts} on {fo:id} (an existing foldout with more at its end), {words:o} (o's
    Aa bar and its panels), {cls:c} (a node by its class), {drop:c} (nodes not shown here), {h,s} (a heading), {rules:1} (the tour's fixed
-   rules). 3 · Games on the tour and 4 · Azu speaks up are drawn by guidance/editor.js (edGuide.html); 0 · Preview & Test is filled there too */
+   rules). 3 · Games on the tour and 4 · Azu speaks up are drawn by guidance/editor.js (edGuide.html); 6 · Preview & Test is filled there too */
 var GUIDE_PLAN={
   gt0:[{fo:"s7vtest"}],
   s7mascot:[{from:"s7mascot"},{h:"Look",s:"what Azu is"},"Character","Mascot source","Glaze","Pattern","Light","Corners","Preview","Model",

@@ -6,7 +6,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 
 - **State:**
   - **The Lab:** `master` holds guidance rounds 1-14, verified on 2026-11-06/11, published at
-    https://claude.ai/artifact/Gpjf7yvoYHjGebmmNhuw2o with the 186 voice files, the music and the capabilities (section 1). The
+    https://claude.ai/artifact/Gpjf7yvoYHjGebmmNhuw2o (round 14b) with the 186 voice files, the music and the capabilities (section 1). The
     developer changes account often (four times on 2026-11-08/09); the old links stay in their accounts (RGofgb… at round 13, 19Uiat… at round 12, RKn3Rr… at round 11, J9J4h… at round 9, 4LpLd4… at round 8, Jq6X2K… at round 7, Jrejv7… at
     round 6, QmhHSz… at round 5, KDs2… at v29). A new account cannot update an old link: publish a new one (section 1, Publishing). Its
     code is in modules by feature
@@ -193,7 +193,15 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       (the strip, the folded groups, the merged Says, Games on the tour, Ask Azu's three parts, the link landing).
     - The developer (2026-11-11): the Detail Card blocks' design (each point's card blocks) stays valid and is the
       **next domain once the AI guide is finished**; postponed, not dropped.
-    - **Next: the developer's answers on round 14's organization questions**, then **round 15, the design pass** of every
+    - The developer's answers on round 14 (2026-11-11): **Preview & Test moves to the end** (6 · Preview & Test: the guide's own
+      parts first, the Editor's tools last); a group with nothing changed **stays quiet** (no "0 changed", as built);
+      **Answers from stays in What the visitor sees** (as built); **the Cookie goes inside The breather** (as the quiz's pair).
+      Ways in stays folded like Model tools and The engine (the Architect's default, said to the developer).
+    - Round 14b (2026-11-11, the Architect): `GUIDE_SECS` with `gt0` last as "6"; the breather and its variant drawn as one
+      foldout `gd:var:water` ("The breather · with its variant “Cookie”: never both in a tour", `gdVariantsOf`, `gdVarBaseOf`,
+      `gdItemPath`); test9r, test9e, test9p, test9k follow (green: 28, 59, 60, 51; the self-test's guide walk bad=0; test9r's
+      mutation red). The spec's table, PROTOTYPE_STRUCTURE and README follow.
+    - **Next: round 15, the design pass** of every
       guide surface (the plan's section 4, with the guide's open look questions from rounds 1-3), then the four
       features (section 5). Prototype only (no Unity) until the developer says so.
   - **MCP:** blender-mcp at user scope (Blender 5.2.3, add-on 1.8, port 9876). The Unity MCP was not connected this stretch.

@@ -181,7 +181,7 @@ const BEFORE = { rows: ["Fixed rules|", "Voice|guideCfg.voice", "Speaking now|",
   await R('S.tab="guide";S.ui.level=9;S.op={};renderEditor()');
   const gt = await R('[[].map.call(ed.querySelectorAll(":scope > details[data-fo]"),function(d){return d.dataset.fo+"|"+d.querySelector("summary").textContent.split(" · ").slice(0,2).join(" · ")}),[].map.call(document.querySelectorAll(".utab"),function(t){return t.textContent})]');
   // guidance round 14: the six sections of the developer's tab (test9r checks them in depth)
-  ok('The Guide tab, after Detail Card: 0 · Preview & Test, 1 · Azu, 2 · The tour, 3 · Games on the tour, 4 · Azu speaks up, 5 · Ask Azu', JSON.stringify(gt[0].map(s => s.split('|')[1])) === JSON.stringify(['0 · Preview & Test', '1 · Azu', '2 · The tour', '3 · Games on the tour', '4 · Azu speaks up', '5 · Ask Azu']) && gt[1].indexOf('Guide') === gt[1].indexOf('Detail Card') + 1, gt);
+  ok('The Guide tab, after Detail Card: 1 · Azu, 2 · The tour, 3 · Games on the tour, 4 · Azu speaks up, 5 · Ask Azu, 6 · Preview & Test (last: round 14b)', JSON.stringify(gt[0].map(s => s.split('|')[1])) === JSON.stringify(['1 · Azu', '2 · The tour', '3 · Games on the tour', '4 · Azu speaks up', '5 · Ask Azu', '6 · Preview & Test']) && gt[1].indexOf('Guide') === gt[1].indexOf('Detail Card') + 1, gt);
   const after = await R('var o=[];["s7vtest","s7mascot","gt1","gt3"].forEach(function(id){ed.querySelectorAll(\'[data-fo="\'+id+\'"] .row\').forEach(function(r){var lb=r.querySelector("label");o.push((lb?lb.textContent:"?")+"|"+(rowKey(r)||""))})});o');
   const sortJ = a => JSON.stringify(a.slice().sort());
   // round 14: Moments and Water break after are gone (Games on the tour holds them), the engine's Guide mode is a line that names Answers from
