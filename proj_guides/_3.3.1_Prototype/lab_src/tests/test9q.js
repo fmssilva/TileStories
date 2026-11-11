@@ -110,6 +110,12 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('The result at the seam after the span: “I said it 2 times. You caught 1!”', /^I said it 2 times\. You caught 1!/.test(res[0]) && res[1].caught === 1 && res[1].n === 2, res);
   ok('…the missed slip played back (the device voice: its phrase said again), the word lit in the card', !!back[0] && /palace/.test(back[1]) && /palace/.test(back[2]), back);
   await until('!G.gd.bt', 15000); ok('…then the tour goes on after the span', await R('S.guideSteps[G.i].id==="g5"&&!G.gd.ds'));
+  // the developer's answer on round 13: the result waits until the last window has closed (a slip said just before the seam)
+  const wt = await R('var b=gdPlanBeat("dontsay",G.gd.plan),d=gdWordStart(b),t=gdWordClock();d.slips.x={key:"x",step:"g4",k:0,caught:false,text:"",phrase:{words:["palace"],at:0,rec:null},said:1};d.order.push("x");d.wins.push({key:"x",s:t,e:t+1500});window.__wt=performance.now();gdWordEnd();[d.on,!!d.waitEnd,!!(G.gd.bt&&G.gd.bt.kind==="wordres")]');
+  await W(800); const wm = await R('[!!(G.gd.ds&&G.gd.ds.on),!!(G.gd.bt&&G.gd.bt.kind==="wordres")]');
+  await until('G.gd.bt&&G.gd.bt.kind==="wordres"', 5000); const wa = await R('Math.round(performance.now()-window.__wt)');
+  ok('[window] The result waits until the last window has closed (a slip 1.5 s before the seam): no result at 0.8 s, the result after the window', wt[0] && wt[1] && !wt[2] && wm[0] && !wm[1] && wa >= 1400 && wa < 2600, [wt, wm, wa]);
+  await R('gdBeatClose();gdWordOff()'); await until('!G.gd.bt', 5000);
   const lines = await R('[fmt(TXT("tour_word_all"),3),fmt(TXT("tour_word_none"),3),fmt(TXT("tour_word_false"),4),TXT("tour_word_dream"),fmt(TXT("tour_word_callback"),2,3).replace("{thing}","palace")]');
   ok('The result lines by score, never mocking; the score said again in the quiz\'s callback', lines[0] === '3 times, and you caught me every time. Sharp ears!' && /didn't tap once/.test(lines[1]) && /Nice try/.test(lines[2]) && /pastéis de nata/.test(lines[3]) && lines[4] === 'And you caught me saying “palace” 2 of 3 times.', lines);
   const cb = await R('G.gd.plan.wordScore={word:"palace",caught:2,n:2,falses:0};G.gd.plan.quiz="on";var it=S.guidance.items.quizfinale;gdStart(it,"t",{owed:{qs:["g1","g4"],n:2}});var B=G.gd.bt;B.right=2;B.k=1;B.answered=0;gdQuizScore();var l=G.gd.bt.said||"";gdBeatClose();gdStop("t");l');

@@ -155,7 +155,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       screen reader) and **Find it on the wall** (Between steps, the point's own wall, Calm too: the card to Mini, a seek
       ring, the 1.2 s settle, a hint at 10 s from the point's screen direction, I give up / 20 s: Azu walks to it; never
       while tracking is lost; `wall.js`: a drag that starts on the panel, a beat card or the strip no longer pans the wall).
-      `tests/test9q.js` (47 checks) and `tests/test9qs.js` (its 15 scenes); 70 scenes in Ask Azu. The Architect's review:
+      `tests/test9q.js` (48 checks) and `tests/test9qs.js` (its 15 scenes); 70 scenes in Ask Azu. The Architect's review:
       the captures fine (the strip sits above the caption, the word card and the result line read well, the seek ring
       centred). Level 2 found one check written for the old state: test8n's scroll ran 2400 px to the bottom of the card,
       where the only block is "Test yourself", now out of the tour, so the guide paused (the existing rule: no told block
@@ -165,7 +165,10 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       the result never comes at a seam while a window is still open); with the device voice **the missed slip is said
       again** (as built); Find it on the wall keeps **the card at Mini and an arrow at the edge** when the point is off the
       screen (as built). Open: the Portuguese words ("Não diga!", "Apanhou 1", "Apanhado!", the pastéis de nata line).
-    - **Next:** the one change above (the result after the last window), then the step-by-step review below.
+    - Round 13b (2026-11-11, the Architect): the result's wait was already built (`gdWordEnd` waits on the game's clock for
+      every open window); test9q gained the check (a slip 1.5 s before the seam: no result at 0.8 s, the result after the
+      window; 48 checks, 175 s; the mutation turns it red with the other [window] checks). The PT words stay.
+    - **Next: the developer's step-by-step review** below.
     - **Then: the developer's step-by-step review** of the collected look questions (rounds 1-10; round 10's: build the
       seven missing phone effects so their rows get real demos, Global Scene's rows, stand-ins for block options with
       nothing to see, the Sticky Action's demo with the bar at the bottom, and whether every Detail Card change should
