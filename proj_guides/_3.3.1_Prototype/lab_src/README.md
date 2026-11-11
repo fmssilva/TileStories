@@ -163,6 +163,27 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
     tour with a console warning; no guide foldout in Detail Card; the Guide tab's draw time, faster than the whole Detail Card document
     round 13 built for every draw, measured in the same page (round 13's own draw on master's build is in `guide_rows_r13.json`, printed beside). `MUTATE=1 node tests/test9r.js` leaves Ask about the view out of its new place: the checks
     named [moved] turn red.
+  - *The design pass of the AI guide, guidance round 15* (no feature, no behaviour: the look of every guide surface measured; the fixes in
+    `guide/dock.css`, `guide/person.js` and `guide/dock.js`, `agent/agent.css`, `agent/scenes.css`, `guidance/present.css`, `audiences/audiences.css`):
+    `tests/g15lib.js` holds the rules as arithmetic, measured on what the app really drew (installed in the page as `G15`): every guide
+    target's hit area 44 × 44 (probed with `elementFromPoint` 20 px each side of its centre and its box at least 43.5 px, so a hit area
+    larger than its drawing counts and a layer over it does not; a target wholly under another layer is listed, not judged); every guide
+    text 4.5:1 against the fills really behind it (a gradient: each stop; a word painted by its background, the read-along: its stops; a
+    glass panel with no opaque fill: over the card's paper, white and black); 0 px between each bubble, beat card, strip, Azu, the ✦ row,
+    the panel (not at Full: it is the whole text) or a focus ring's stroke and the words being told (the told block's word boxes in view,
+    the captions' current line; a word the panel already hides is not judged); inside the phone at 390 × 844 and 390 × 712 (its edges, the
+    notch's 47 px, never partly under the panel); one focal point (a bubble, Azu's bubble, the panel's bubble, a beat card, the ✦ menu, a
+    first page or Things to try: at most one). `tests/test9s.js` opens each surface by the app's own functions or real taps (the ✦ and its
+    menu on the card and the wall, Azu beside a marker and on the card, the panel's four Looks at Mini, Compact and Open, the focus on a
+    block; light for every Look, dark for Ink glass, 712 for Ink and Paper glass) and Reduce Motion; `tests/test9sc.js` the focus on a
+    spot in a picture, the guidance's Glint, Ring and Spotlight on a marker, the bubbles (Tip, Invitation, Remark, Moment, Mascot Off's plain bubble) and the
+    first pages with Welcome back; `tests/test9sd.js` Ask Azu (typed, the talk button's states, an answer with its link cards and trace,
+    Show me) (one table in test9s.js, split to keep each file under 300 s); `tests/test9sb.js` every beat card played by the tour itself (the
+    promise and its strip, the quiz and its verdict, Guess the year's slider and pins, Don't say it!'s announce, word card and result,
+    Find it on the wall's seek ring, hint and Azu at the edge, the breather, the cookie) in Ink and Paper glass at Mini and Compact. Each
+    check is named `[rule] <nn> <surface>` so a red one says which. `CAP=<dir>` saves every state (`<nn>_<surface>_<look>_<height>_<theme>.png`;
+    with CAP every Look and theme). `MUTATE=1 node tests/test9s.js` makes the panel's question chips 36 px tall and draws Azu 170 px to the left over the
+    told words, `MUTATE=1 node tests/test9sb.js` makes a beat card's chips 36 px: the checks named [44 px] (and [0 px]) turn red.
   - *Every Editor row's demo, guidance round 10* (`editor/demo`, the rows' modules: `editor/card-tab`, `card/controls`, `card/blocks`,
     `card/pages`, `card/states`, `card/hints`, `editor/texts`, `editor/components`, `editor/marker-tab`, `mascot/azu2d`, `guidance/editor`):
     `tests/test9n.js` checks that the self-test's NO DEMO check walks every tab and finds no row without a demo but its named exemptions

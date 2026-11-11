@@ -98,5 +98,6 @@ the card). More may come from the design pass.
 
 1. **Round 14: the Guide tab's organization** (section 3): one home per row, nothing lost (every row's key, demo and
    test kept; the self-test and test8u / test9* find each row by its key, not its place).
-2. **Round 15: the design pass** (section 4), fixing as it goes.
+2. **Round 15: the design pass** (section 4), fixing as it goes. Done 2026-11-11: 39 surfaces, 8 fixes, the open look
+   questions to the developer; 15b follows with the answers.
 3. **Round 16 onwards: the features**, one or two a round, in the developer's order.

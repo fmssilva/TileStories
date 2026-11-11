@@ -6,4 +6,6 @@
 .agscsel{max-width:270px}
 .agres td{vertical-align:top;white-space:normal}.agres td.ok{color:#7FD08A}.agres td.bad{color:#F0A49B}
 .agtrace.agvoice:empty{display:none}
+/* round 15 (4.5:1): the trace in the guide panel in the panel's colours (it was light grey on the light Looks: 1.03:1) */
+.gdock .agtrace{color:var(--ink2);border-top-color:var(--line)}
 .agtrace.agvoice{margin-top:2px;padding-top:0;border-top:0}
