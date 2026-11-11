@@ -14,7 +14,7 @@ var AGTOOLS={search_library:{ro:true,label:"Search the library",what:"Searches t
   make_route:{label:"Route",what:"Draws a numbered route over 2-8 points of the wall, in order."},
   start_tour:{label:"Start the tour",what:"Plays the point's authored tour, in Azu's recorded voice."},
   /* round 9 (_3.8 section 3.4): "how do I…?" about the app, answered from the guidance's own App items (their words) with a Show me card */
-  show_how:{ro:true,label:"Show how",what:"Answers a “how do I…” about the app from its own tips (Guide › Guidance: the feature's words) and adds a Show me card under the answer that plays the gesture. Never for the history."}};
+  show_how:{ro:true,label:"Show how",what:"Answers a “how do I…” about the app from its own tips (Guide › Azu speaks up: the feature's words) and adds a Show me card under the answer that plays the gesture. Never for the history."}};
 function agTools(where,turn){var tg=agTargets(),ids=tg.map(function(t){return t.id}),pois=S.wallPois.map(function(p){return"poi:"+p.id}),fk=agFeatures().map(function(f){return f.kind}),out=[];
   function add(name,desc,schema,check,run,label){var pol=S.agentCfg.pol[name]||"auto",d=AGTOOLS[name];if(pol==="off")return;if(!d.ro&&name!=="show_links"&&!S.agentCfg.actions)return;if(name==="show_links"&&!S.agentCfg.links)return;
     out.push({name:name,description:desc,inputSchema:schema,execute:function(a){a=a||{};var bad=check(a),call={name:name,args:a,ok:!bad,policy:d.ro?"auto":pol};turn.calls.push(call);
@@ -38,7 +38,7 @@ function agTools(where,turn){var tg=agTargets(),ids=tg.map(function(t){return t.
   add("navigate_to","Takes the visitor to a block, a story page or a point (on the wall the camera turns to it).",{type:"object",properties:{target_id:{type:"string",enum:ids}},required:["target_id"]},function(a){return only([a.target_id],ids)},
     function(a){return agGo(a.target_id)},function(a){return fmt(TXT("ag_chip_go"),agTitle(a.target_id))});
   add("start_tour","Plays this point's authored tour (about 3 minutes, Azu's recorded voice).",{type:"object",properties:{}},function(){return""},function(){G.cam.open=false;S.view="card";startTour();return"Started."},function(){return TXT("ag_chip_tour")});
-  /* round 9: show_how, the features the App items teach (Guide › Guidance, each item's Teaches): their answer, a Show me card, the item seen */
+  /* round 9: show_how, the features the App items teach (Guide › Azu speaks up, each item's Teaches): their answer, a Show me card, the item seen */
   var how=gdTeachers(),hf=how.map(function(x){return x.teaches});
   if(hf.length)add("show_how","For a question about how to use the app (\"how do I…\": open a card, ask about the view, drag the before and after, pause the guide…): give the feature. Returns the app's own words for it and puts a Show me card under your answer, which plays the gesture. Never for a question about the history or the place.",
     {type:"object",properties:{feature:{type:"string",enum:hf,description:how.map(function(x){return x.teaches+": "+gdTryWord(x)}).join("; ")}},required:["feature"]},function(a){return hf.indexOf(a.feature)<0?"unknown feature "+a.feature:""},

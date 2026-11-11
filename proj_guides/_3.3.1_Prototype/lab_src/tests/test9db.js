@@ -29,7 +29,7 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
 
   const T0 = Date.now(), tsec = s => console.log('TIME ' + s + ' ' + Math.round((Date.now() - T0) / 1000) + ' s');
   // ---------- each Editor row's values on the phone (real clicks on the Editor) ----------
-  await R(base + 'S.tab="guide";S.op={gt1:true,s7dock:true,s7gbtn:true,s7mascot:true};S.view="card";S.stop="full";renderAll(false)');
+  await R(base + 'S.tab="guide";S.op={gt1:true,s7dock:true,"gt:ways":true,s7gbtn:true,s7mascot:true};S.view="card";S.stop="full";renderAll(false)');
   const pick = async (key, v) => { const s = `[data-set="@guideCfg.${key}"][data-v="${v}"]`; await p.locator(s).scrollIntoViewIfNeeded(); await p.locator(s).click(); await W(150); await R('clearTimeout(G.demoT);G.demoSeq++;if(G.on)stopTour();hideStopUi()'); };
   const startAt = async () => { await R('S.view="card";S.stop="full";renderPhone(false);startTour();G.i=S.guideSteps.findIndex(function(s){return s.id==="g1"});stopSpeech();runStep()'); await W(400); };
   const want = [];
@@ -43,7 +43,7 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   await pick('gbFold', 'false'); want.push(['Label folds off', await R('S.guideCfg.gbFold===false')]); await pick('gbFold', 'true');
   for (const v of ['point', 'menu', 'play']) { await pick('azuTap', v); want.push(['Tap on Azu ' + v, await R(`S.guideCfg.azuTap==="${v}"`)]); }
   ok('Each new row, clicked in the Editor, reaches the phone (Starts at, Controls at Mini, Icon, Side, Guide button) or the guide (Stop, Swipe, Label folds, Tap on Azu)', want.every(w => w[1]), want.filter(w => !w[1]));
-  ok('...the Editor: Guide panel has Controls at Mini, Swipe down to Compact, Stop; Guide button follows it; Mascot has Tap on Azu; the old row is gone', await R('var d=ed.querySelector(\'[data-fo="s7dock"]\'),g=ed.querySelector(\'[data-fo="s7gbtn"]\');["Starts at","Controls at Mini","Swipe down to Compact","Stop"].every(function(t){return!!rowEl(ed,"s7dock",t)})&&d.nextElementSibling===g&&["Guide button","Icon","Side","Label folds after 4 s"].every(function(t){return!!rowEl(ed,"s7gbtn",t)})&&!!rowEl(ed,"s7mascot","Tap on Azu")&&!/Azu as the guide/.test(ed.textContent)&&(TXO.s7gbtn||[]).length===9&&TXOWN.gb_hint==="gd:i:gbhint"'));
+  ok('...the Editor: Guide panel has Controls at Mini, Swipe down to Compact, Stop; Guide button in Ways in (round 14); Azu has Tap on Azu; the old row is gone', await R('var d=ed.querySelector(\'[data-fo="s7dock"]\'),g=ed.querySelector(\'[data-fo="s7gbtn"]\');["Starts at","Controls at Mini","Swipe down to Compact","Stop"].every(function(t){return!!rowEl(ed,"s7dock",t)})&&g.parentElement.closest("[data-fo]").dataset.fo==="gt:ways"&&["Guide button","Icon","Side","Label folds after 4 s"].every(function(t){return!!rowEl(ed,"s7gbtn",t)})&&!!rowEl(ed,"s7mascot","Tap on Azu")&&!/Azu as the guide/.test(ed.textContent)&&(TXO.s7gbtn||[]).length===9&&TXOWN.gb_hint==="gd:i:gbhint"'));
 
   // ---------- each row's demo (the Guide tab, 6 · Audiences) ----------
   await R(base + 'S.tab="guide";S.ui.level=9;S.op={};S.view="card";S.stop="full";renderAll(false)');

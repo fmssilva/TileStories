@@ -20,7 +20,8 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const base = 'S.guidance=JSON.parse(window.__g0);S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;S.reduce=false;S.dark=false;S.lang="en";S.ui.rowDemo=false;S.ui.gdSR=false;S.guidance.items.gbhint.on=false;gdGroupById("inview").on=false;S.guideCfg.gbtn="both";S.guideCfg.mascot=true;G.gd.demo=false;gdChip(null);';
   const fresh = async (extra) => { await R(base + 'if(G.on)stopTour();G.cam.open=false;S.settingsOpen=false;G.fab.menu=false;setWall("ribeira");S.view="card";S.stop="closed";renderPhone(false);G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.onWall=false;gdAdvance(250);' + (extra || '')); await W(120); };
   const show = (id, o) => `gdStart(gdItemNow("${id}"),"test",${o || '{pull:true,ms:60000}'});`;
-  const editor = async (ops) => { await R(`S.tab="guide";S.ui.level=1;S.op=${JSON.stringify(ops)};renderEditor()`); await W(120); };
+  // round 14: an item's groups are folded: an item opened here shows its groups open too (each by its id, as the author opens them)
+  const editor = async (ops) => { await R(`S.tab="guide";S.ui.level=1;S.op=${JSON.stringify(ops)};Object.keys(S.op).forEach(function(k){var m=/^gd:i:(.+)$/.exec(k),it=m&&S.op[k]&&S.guidance.items[m[1]];if(it)gdFormOf(it).groups.forEach(function(g){if(g)S.op["gd:f:"+m[1]+":"+g.k]=true})});renderEditor()`); await W(120); };
 
   lap('before 1');
   // ---------- 10. every button of the item form, pressed once by a real click ----------
@@ -29,7 +30,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const ctl = await R('var o=[];ed.querySelectorAll(\'[data-fo="gd:i:tapmarker"] > .inner [data-set]\').forEach(function(b){o.push([b.dataset.set,b.dataset.v])});o');
   // every field once by a real mouse click (its first value not in force), the field put back without a redraw (the click itself redraws);
   // then every other value of every button, select and number pressed in the page as the self-test does (noDraw: no redraw), each checked
-  const missing = [], T0 = 'S.guidance.items.tapmarker', redraw = `S.tab="guide";S.ui.level=1;S.op=${JSON.stringify(op)};renderEditor()`;
+  const missing = [], T0 = 'S.guidance.items.tapmarker', redraw = `S.tab="guide";S.ui.level=1;S.op=${JSON.stringify(op)};Object.keys(S.op).forEach(function(k){var m=/^gd:i:(.+)$/.exec(k),it=m&&S.op[k]&&S.guidance.items[m[1]];if(it)gdFormOf(it).groups.forEach(function(g){if(g)S.op["gd:f:"+m[1]+":"+g.k]=true})});renderEditor()`; // round 14: the item's groups open
   const fields = {}; ctl.forEach(([k, v]) => { (fields[k] = fields[k] || []).push(v); });
   let real = 0;
   for (const k of Object.keys(fields)) {
@@ -68,7 +69,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   rest[1].forEach(x => missing.push(x));
   ok(`Every field of the item form pressed once by a real click (${real}), and every other value of its ${ctl.length} buttons and selects in the page (${rest[0]}): each sets its field`, missing.length === 0 && real >= 30 && ctl.length > 60 && rest[0] > 80, missing);
   // the form's own buttons: a variant, an audience's line, a returning line, a chip's ×, ▸ on a line
-  await R(base + 'S.guidance.items.tapmarker.aud="family";S.tab="guide";S.ui.level=1;S.op=' + JSON.stringify(op) + ';renderEditor()');
+  await R(base + 'S.guidance.items.tapmarker.aud="family";S.tab="guide";S.ui.level=1;S.op=' + JSON.stringify(op) + ';Object.keys(S.op).forEach(function(k){var m=/^gd:i:(.+)$/.exec(k),it=m&&S.op[k]&&S.guidance.items[m[1]];if(it)gdFormOf(it).groups.forEach(function(g){if(g)S.op["gd:f:"+m[1]+":"+g.k]=true})});renderEditor()');
   const clickIn = async sel => { const l = p.locator('[data-fo="gd:i:tapmarker"] ' + sel).first(); await l.scrollIntoViewIfNeeded(); await l.click(); await W(120); };
   await clickIn('[data-gdvaradd]'); const fv1 = await R('[].concat(S.guidance.items.tapmarker.says).length');
   { const l = p.locator('[data-fo="gd:i:tapmarker"] [data-gdvardel]').last(); await l.scrollIntoViewIfNeeded(); await l.click(); await W(120); } const fv2 = await R('[].concat(S.guidance.items.tapmarker.says).length');

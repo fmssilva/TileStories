@@ -153,8 +153,8 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // ---------- 5. Card Controls > Hints: a view of the same data ----------
   await fresh(); await R('S.tab="card";S.ui.level=1;S.op={s5:true,s5hints:true};renderEditor()'); await W(200);
   const vw = await R('var f=ed.querySelector(\'[data-fo="s5hints"]\');[[].map.call(f.querySelectorAll("[data-goto]"),function(b){return b.dataset.goto+"|"+b.textContent.trim()}),f.querySelectorAll("[data-set],[data-sel],[data-num],[data-path]").length,[].map.call(f.querySelectorAll("tbody tr"),function(r){return r.children[0].textContent+"="+r.children[1].textContent}).join()]');
-  ok('Card Controls > Hints: each row reads Edited in Guidance and links to its cue (6), the group and How to use the card; no control of its own (it only reads)',
-    vw[0].length === 8 && vw[0].filter(v => /^gd:i:/.test(v)).every(v => /\|Edited in Guidance ›$/.test(v)) && vw[0].indexOf('gd:g:card|Edited in Guidance › The card ›') >= 0 && vw[0].some(v => /^gd:g:howto\|Edited in Guidance/.test(v)) && vw[1] === 0 &&
+  ok('Card Controls > Hints: each row reads Edited in Azu speaks up and links to its cue (6), the group and How to use the card; no control of its own (it only reads)',
+    vw[0].length === 8 && vw[0].filter(v => /^gd:i:/.test(v)).every(v => /\|Edited in Azu speaks up ›$/.test(v)) && vw[0].indexOf('gd:g:card|Edited in Guide › Azu speaks up › App › The card (cues) ›') >= 0 && vw[0].some(v => /^gd:g:howto\|Edited in Guide › Azu speaks up › Sequences/.test(v)) && vw[1] === 0 &&
     /^Grabber nudge=Once a visit,Locate label=Once a visit,Navigation Bar=Once a visit/.test(vw[2]), vw);
   await R('S.guidance.items.ba.shows="card";S.guidance.items.term.on=false;renderEditor()'); await W(150);
   const vw2 = await R('[].map.call(ed.querySelectorAll(\'[data-fo="s5hints"] tbody tr\'),function(r){return r.children[1].textContent}).join()');
@@ -166,7 +166,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('S.tab="card";S.ui.level=1;S.op={s5:true,s5hints:true};renderEditor();ed.querySelector(\'[data-fo="s5hints"] [data-goto="gd:i:navbar"]\').scrollIntoView({block:"center"})'); await W(150);
   await p.locator('[data-fo="s5hints"] [data-goto="gd:i:navbar"]').click(); await W(400);
   const gone2 = await R('var g=ed.querySelector(\'[data-fo="gd:i:navbar"]\');[S.tab,!!g&&g.open,!!g&&g.getBoundingClientRect().top<window.innerHeight&&g.getBoundingClientRect().bottom>0]');
-  ok('...its links open Guide › 4 · Guidance › App › The card, and a cue\'s own row (Navigation Bar)', gone.every(x => x === true || x === 'guide') && gone2.every(x => x === true || x === 'guide'), [gone, gone2]);
+  ok('...its links open Guide › 4 · Azu speaks up › App › The card, and a cue\'s own row (Navigation Bar)', gone.every(x => x === true || x === 'guide') && gone2.every(x => x === true || x === 'guide'), [gone, gone2]);
   const al = await R('var g=gdGroupById("card"),l=S.guidance.items.label,a=[];S.hints.on=false;a.push(g.on);S.hints.on=true;a.push(g.on);S.ctl.locate.label="open";a.push(l.shows);S.ctl.locate.label="off";a.push(l.on);S.ctl.locate.label="visit";a.push(l.on,l.shows,S.ctl.locate.label);g.on=false;a.push(S.hints.on);g.on=true;a');
   ok('The old names are Guidance\'s values (no copy): S.hints.on is The card (cues)\'s On; S.ctl.locate.label the Locate label\'s Shows and On', JSON.stringify(al) === JSON.stringify([false, true, 'card', false, true, 'visit', 'visit', false]), al);
 

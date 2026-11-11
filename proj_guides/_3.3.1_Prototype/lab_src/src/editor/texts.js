@@ -8,7 +8,8 @@ var COMP={s5viewer:["Card Controls","Picture viewer"],s5player:["Card Controls",
  s5back:["Card Controls","Back button"],s5crumb:["Card Controls","Breadcrumb"],s5prevnext:["Card Controls","Previous / Next buttons"],s5loc:["Card Controls","Locate Button"],
  s5sticky:["Card Controls","Sticky Action"],s5term:["Card Controls","Glossary popup"],s5termpage:["Card Controls","Term page"],
  s7voice:["Guide","Narration"],s7hero:["Guide","Hero button"],s7block:["Guide","Guide block"],s7cap:["Guide","Captions"],s7coach:["Guide","Invite to try"],
- s7tour:["Guide","Tour controls"],s7resume:["Guide","Resume button"],s7mascot:["Guide","Mascot"],s7ask:["Guide","Ask panel"],"g:10":["Global Scene","Select, Filter & Search"],"g:10s":["Global Scene","Search box"],"g:10f":["Global Scene","Filters button"],"g:11":["Global Scene","Onboarding hints"]};
+ s7tour:["Guide","The tour › Guide panel › Tour controls"],s7resume:["Guide","Resume button"],s7mascot:["Guide","Azu"],s7ask:["Guide","Ask Azu › What the visitor sees"],
+ s7agent:["Guide","Ask Azu › What the visitor sees › the answers"],"g:10":["Global Scene","Select, Filter & Search"],"g:10s":["Global Scene","Search box"],"g:10f":["Global Scene","Filters button"],"g:11":["Global Scene","Onboarding hints"]};
 function ownerName(o){var p=o.split(":");if(p[0]==="el")return "Blocks & Components › Elements › "+(KIND[p[1]]?KIND[p[1]].n:p[1]);if(p[0]==="eg")return "Blocks & Components › Elements › "+p[1]+" (every one)";
   if(p[0]==="pt"){var pt=patternById(p[1]);return "Blocks & Components › Patterns › "+(pt?pt.name:"(missing)")}if(p[0]==="bd")return "Blocks & Components › Blocks › "+p[1];
   if(o==="retired")return "(retired)";var c=COMP[o];return c?c[0]+" › "+c[1]:o}
@@ -19,8 +20,9 @@ function missingOf(obj){return S.langs.list.filter(function(l){return !(obj&&obj
 function langHead(){return S.langs.list.map(function(l){return'<th>'+l.code.toUpperCase()+'</th>'}).join("")}
 function txInputs(k){var v=S.tx[k],long=Object.keys(v).some(function(c){return String(v[c]||"").length>34});return S.langs.list.map(function(l){var a='class="u'+(v[l.code]?'':' miss')+'" data-tx="'+k+'|'+l.code+'" placeholder="'+esc(L(v))+' ('+S.langs.fallback.toUpperCase()+')" aria-label="'+esc(TXP[k]+" · "+l.code.toUpperCase())+'"';
   return'<td>'+(long?'<textarea rows="2" '+a+'>'+esc(v[l.code]||"")+'</textarea>':'<input '+a+' value="'+esc(v[l.code]||"")+'">')+'</td>'}).join("")}
-/* Aa: the component's words, one row per word it shows, named by what it is on the phone; the (?) says where it shows */
-function txPanel(o){var ks=TXO[o]||[];return pipe("txPanel.html",'<div class="ownpanel"><table class="tbl txt"><thead><tr><th style="width:30%">On the phone</th>'+langHead()+'<th style="width:22px"></th></tr></thead><tbody>'+ks.map(function(k){
+/* Aa: the component's words, one row per word it shows, named by what it is on the phone; the (?) says where it shows (only: some of
+   them, the ones a part does not draw itself: a guidance item's other words, round 14) */
+function txPanel(o,only){var ks=only||TXO[o]||[];return pipe("txPanel.html",'<div class="ownpanel"><table class="tbl txt"><thead><tr><th style="width:30%">On the phone</th>'+langHead()+'<th style="width:22px"></th></tr></thead><tbody>'+ks.map(function(k){
   return '<tr><td>'+(TXNEW[k]?'<span class="badge new">NEW</span> ':'')+esc(TXP[k]||"Its words")+(TXF[k]?'<span class="fate">'+esc(TXF[k])+'</span>':'')+'</td>'+txInputs(k)+'<td>'+help(TXW[k])+'</td></tr>'}).join("")+'</tbody></table></div>')}
 function dmPanel(o){var p=o.split(":");
   if(p[0]==="el")return '<div class="ownpanel"><div class="sub2">Demo content</div>'+fieldsFor(p[1],S.demoC[p[1]]||{},"demo:"+p[1])+row("Reset",'<button class="ubtn sm" type="button" data-demoreset="'+p[1]+'">Back to the framework\'s demo</button>',"Demo content shows in the Editor\'s previews and on the demo card, never in the app. A marker\'s own content always wins.")+'</div>';
@@ -102,8 +104,9 @@ function changedTexts(){var o={},z=JSON.parse(TX0);Object.keys(S.tx).forEach(fun
 /* ----- events ----- */
 function pathShow(path){if(path.indexOf("termpage:")===0){S.termOpen=path.split(":")[1];show("term");return}var k=path.split("|")[0].slice(5),st=defStyle(k);show("demo",st?"s:"+st.id:null)}
 function goDemo(id){S.tab="marker";if(id==="guide"){S.op.m3=true;renderEditor();show("card");return}}
-function goOwner(spec,still){var q=spec.split("|"),o=q[0];S.tab=o.indexOf("g:")===0?"global":guideOwns(o)?"guide":"card";S.ui.q="";S.ui.cat="All";ownerPath(o).forEach(function(id){S.op[id]=true});if(q[1]==="dm")S.op["own:dm|"+o]=true;renderEditor();
-  var f=ed.querySelector('[data-fo="'+cssq(o)+'"]');if(f){if(!still)f.scrollIntoView({block:"start"});f.classList.add("cur")}if(q[1]==="dm"&&o.indexOf("el:")===0)pathShow("demo:"+o.slice(3))}
+function goOwner(spec,still){var q=spec.split("|"),o=q[0],pth=ownerPath(o);S.tab=o.indexOf("g:")===0?"global":guideOwns(o)?"guide":"card";S.ui.q="";S.ui.cat="All";pth.forEach(function(id){S.op[id]=true});if(q[1]==="dm")S.op["own:dm|"+o]=true;renderEditor();
+  /* a foldout taken apart (the Guide tab, round 14): its words' place, the path's end */
+  var f=ed.querySelector('[data-fo="'+cssq(o)+'"]')||ed.querySelector('[data-fo="'+cssq(pth[pth.length-1])+'"]');if(f){if(!still)f.scrollIntoView({block:"start"});f.classList.add("cur")}if(q[1]==="dm"&&o.indexOf("el:")===0)pathShow("demo:"+o.slice(3))}
 ed.addEventListener("click",function(e){var t=e.target;
   var ob=t.closest("[data-own]");if(ob){e.stopPropagation();e.preventDefault();var k="own:"+ob.dataset.own,pp=ob.dataset.own.split("|");S.op[k]=!S.op[k];renderEditor();if(S.op[k]&&pp[1].indexOf("el:")===0)pathShow("demo:"+pp[1].slice(3));return}
   var da=t.closest('[data-asset^="demo:"],[data-asset^="termpage:"]');if(da){e.stopPropagation();var q=da.dataset.asset.split("|"),c=contentAt(q[0]);c[q[1]]=q[2];renderAll(true);pathShow(q[0]);return}

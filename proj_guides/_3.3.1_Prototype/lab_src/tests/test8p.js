@@ -57,7 +57,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const c = await R('var px=function(c){var m=c.match(/[\\d.]+/g).map(Number);return[m[0],m[1],m[2]]},lum=function(a){return a.map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce(function(s,v,i){return s+v*[.2126,.7152,.0722][i]},0)},cr=function(f,b){var x=lum(px(f)),y=lum(px(b));return Math.round((Math.max(x,y)+.05)/(Math.min(x,y)+.05)*100)/100};[cr(getComputedStyle(ph.querySelector(".ca-ans")).color,getComputedStyle(ph.querySelector(".camask")).backgroundColor),cr("rgb(255,255,255)","rgb(16,18,22)")]');
   ok('The panel\'s words and the pins\' names at 4.5:1 or more', c.every(v => v >= 4.5), c);
   // 8. the Editor
-  ok('Editor: Ask about the view after Ask the guide, its rows, the wall\'s points and its words', await R('S.tab="guide";renderEditor();var f=ed.querySelector(\'[data-fo="s7cam"]\');!!f&&ed.querySelector(\'[data-fo="s7ask"]\').nextElementSibling===f&&/Suggestions/.test(f.textContent)&&f.querySelectorAll("tbody tr").length===S.wallPois.length&&(TXO.s7cam||[]).length===26'));
+  ok('Editor: Ask about the view in What the visitor sees, after Answers from (round 14), its rows, the wall\'s points and its words', await R('S.tab="guide";renderEditor();var f=ed.querySelector(\'[data-fo="s7cam"]\');!!f&&f.parentElement.closest("[data-fo]").dataset.fo==="s7ask"&&f.previousElementSibling===rowEl(ed,"s7ask","Answers from")&&/Suggestions/.test(f.textContent)&&f.querySelectorAll("tbody tr").length===S.wallPois.length&&(TXO.s7cam||[]).length===26'));
   ok('no page errors', errs.length === 0, errs.slice(0, 3));
   console.log(fails ? `${fails} FAILED` : 'ALL PASS');
   await b.close();

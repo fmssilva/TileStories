@@ -12,7 +12,7 @@ const GLB = path.join(__dirname, '..', '..', '..', 'mascote', '3d', 'azu_tile.gl
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   await R('S.guideCfg.voice="device";S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;sampleFn=null;S.view="card";S.stop="half";renderAll(false)');
   // 1. the Editor: Mascot source with 3D model (GLB); choosing it loads the model
-  await R('S.tab="guide";renderEditor();ed.querySelector(\'[data-fo="s7mascot"]\').open=true');
+  await R('S.tab="guide";S.op["gt:tools"]=true;renderEditor();ed.querySelector(\'[data-fo="s7mascot"]\').open=true'); // round 14: Model tools opened too
   const src = await R('Array.from(ed.querySelectorAll(\'[data-set="@guideCfg.azuStyle"]\')).map(function(b){return b.textContent})');
   ok('Editor: Mascot source offers Tile of light, Tile (2.5D) and 3D model (GLB)', src.join('|') === 'Tile of light|Tile (2.5D)|3D model (GLB)', src);
   await p.locator('[data-set="@guideCfg.azuStyle"][data-v="glb"]').click();

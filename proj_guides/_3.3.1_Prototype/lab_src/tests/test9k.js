@@ -24,7 +24,8 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   /* only Fun On (the other kinds rest), a first visit on the wall, the clock by hand */
   const FUN = 'S.guidance.kinds.forEach(function(k){k.on=k.id==="fun"});';
   const fresh = async (extra) => { await R(base + 'if(G.on)stopTour();stopSpeech();G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};S.settingsOpen=false;G.fab.menu=false;setWall("ribeira");S.camZoom=1;S.view="card";S.stop="closed";renderPhone(false);G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;G.gd.onWall=false;' + (extra || '') + 'gdAdvance(250);'); await W(120); };
-  const editor = async (tab, ops) => { await R(`S.tab="${tab}";S.ui.level=1;S.op=${JSON.stringify(ops)};renderEditor()`); await W(120); };
+  // round 14: an item's groups are folded: an item opened here shows its groups open too (each by its id, as the author opens them)
+  const editor = async (tab, ops) => { await R(`S.tab="${tab}";S.ui.level=1;S.op=${JSON.stringify(ops)};Object.keys(S.op).forEach(function(k){var m=/^gd:i:(.+)$/.exec(k),it=m&&S.op[k]&&S.guidance.items[m[1]];if(it)gdFormOf(it).groups.forEach(function(g){if(g)S.op["gd:f:"+m[1]+":"+g.k]=true})});renderEditor()`); await W(120); };
 
   lap('before 1');
   // ---------- 1. the scheduler alone (gdPick / gdWhyNot on a fake clock and a fake memory) ----------
@@ -185,11 +186,13 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
 
   lap('before 7');
   // ---------- 7. Guide › Mascot's link rows; the Mix's Fun row ----------
-  await R(base); await editor('guide', { gt2: true, s7mascot: true });
-  const ml = await R('var f=ed.querySelector(\'[data-fo="s7mascot"]\'),rows=[].filter.call(f.querySelectorAll(".row"),function(r){var l=r.querySelector("label");return l&&/^(Moments|Water break after)$/.test(l.textContent)});rows.map(function(r){return[r.querySelector("label").textContent,rowKey(r),(r.querySelector("[data-goto]")||{}).textContent,(r.querySelector("[data-goto]")||{dataset:{}}).dataset.goto,(r.querySelector(".uses")||{}).textContent]})');
-  ok('Guide › Mascot: Moments and Water break after are link rows ("Edited in Guide › Guidance › Fun › On the tour" since round 12, its On the group\'s; the breather\'s 60 s of narration)', ml.length === 2 && ml[0][1] === 'guidance.kinds.2.groups.0.on' && /^Edited in Guide › Guidance › Fun › On the tour/.test(ml[0][2]) && ml[0][3] === 'gd:g:ontour' && ml[1][1] === null && ml[1][3] === 'gd:i:water' && /60 s of narration/.test(ml[1][4]), ml);
-  await p.locator('[data-fo="s7mascot"] [data-goto="gd:g:ontour"]').click(); await W(400);
-  ok('...its link (a real click) opens Guide › Guidance › Fun › On the tour', await R('var f=ed.querySelector(\'[data-fo="gd:g:ontour"]\');S.tab==="guide"&&!!f&&f.open&&!!f.closest(\'[data-fo="gd:fun"]\')'));
+  // round 14 (the developer's decision): Moments and Water break after (pointer rows only) are gone from Azu; 3 · Games on the tour holds
+  // them: its On (the same key as the old Moments row) and the breather's After narration; the tab's name at the top opens it
+  await R(base); await editor('guide', { s7mascot: true });
+  const ml = await R('var f=ed.querySelector(\'[data-fo="s7mascot"]\'),rows=[].filter.call(f.querySelectorAll(".row"),function(r){var l=r.querySelector("label");return l&&/^(Moments|Water break after)$/.test(l.textContent)});[rows.length,!!ed.querySelector(\'[data-fo="gd:g:ontour"] > .inner > .row [data-set="@\'+gdGroupPath("ontour")+\'on"]\'),!!ed.querySelector(\'[data-fo="gd:g:ontour"] [data-fo="gd:i:water"] [data-num="@guidance.items.water.talkFor"]\'),S.guidance.items.water.talkFor]');
+  ok('Azu: no Moments or Water break after rows (round 14); 3 · Games on the tour holds them: its On (the old Moments row\'s key) and the breather\'s After narration (60 s)', ml[0] === 0 && ml[1] && ml[2] && ml[3] === 60, ml);
+  await p.locator('[data-gtgo="gd:g:ontour"]').click(); await W(400);
+  ok('...the tab\'s name for it at the top (a real click) opens 3 · Games on the tour, a section of its own', await R('var f=ed.querySelector(\'[data-fo="gd:g:ontour"]\');S.tab==="guide"&&!!f&&f.open&&!f.parentElement.closest("[data-fo]")'));
   await editor('guide', { gt4: true, 'gd:overall': true, 'gd:mix': true });
   ok('The Mix\'s Fun row loses "no items yet"; the Fun kind reads its weight back', await R('var t=(ed.querySelector(".gdmixt")||{}).textContent||"";/Fun/.test(t)&&!/no items yet/.test(t)'));
 
@@ -212,7 +215,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   lap('before 9');
   // ---------- 9. every new row's demo; the Guide script's Jokes ----------
   await R(base); await editor('guide', { gt0: true, gt4: true, 'gd:fun': true, 'gd:g:ontour': true, 'gd:g:play': true, 'gd:i:water': true, 'gd:i:cookie': true, 'gd:i:joke': true, 'gd:i:ptjoke': true, 'gd:i:hunt': true, 'gd:i:season': true });
-  const keys = await R('var o=[];ed.querySelectorAll(\'[data-fo="gd:fun"] .row,[data-fo="gt0"] .row\').forEach(function(r){var k=rowKey(r);if(k&&o.indexOf(k)<0&&/^(guidance\\.(kinds\\.2|items\\.(water|cookie|joke|ptjoke|hunt|season))|ui\\.gdToday)/.test(k))o.push(k)});o');
+  const keys = await R('var o=[];ed.querySelectorAll(\'[data-fo="gd:fun"] .row,[data-fo="gd:g:ontour"] .row,[data-fo="gt0"] .row\').forEach(function(r){var k=rowKey(r);if(k&&o.indexOf(k)<0&&/^(guidance\\.(kinds\\.2|items\\.(water|cookie|joke|ptjoke|hunt|season))|ui\\.gdToday)/.test(k))o.push(k)});o');
   const miss = await R(`${JSON.stringify(keys)}.filter(function(k){return!rowDemoOf(k)})`);
   ok(`Every new row has its demo (${keys.length} rows: Fun's kind and groups, its six items' forms, the seasons' From / To / Solemn day, Today is)`, keys.length >= 80 && miss.length === 0 && ['guidance.items.water.props', 'guidance.items.water.talkFor', 'guidance.items.cookie.beforeEnd', 'guidance.items.joke.latePause', 'guidance.items.season.seasons.0.from', 'ui.gdToday'].every(k => keys.indexOf(k) >= 0) && (await R('[0,1,2].every(function(i){return["from","to","solemn"].every(function(f){return!!rowDemoOf("guidance.items.season.seasons."+i+"."+f)})})&&!!rowDemoOf("ui.gdJkPoint")')), { n: keys.length, miss });
   await R('S.ui.rowDemo=true;G.gd.manual=false;G.gd.rate=1');

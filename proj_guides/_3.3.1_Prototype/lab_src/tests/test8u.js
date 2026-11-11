@@ -77,7 +77,8 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('...Stop ends it: the scene running ends, no next one starts, the button reads Run all scenes again', ra[0] >= 8 && at >= 8 && ra[0] <= at + 1 && ra[3] === 'Run all scenes', [at, ra]);
   ok('...the photo scene leaves Photo of the view as it was (Off)', await R('S.agentCfg.photo===false&&!!AG.sceneRes.photo'));
   // 6. the Editor rows
-  ok('Editor: Trace under each answer (Outputs) and Names on the points (Ask about the view)', await R('/Trace under each answer/.test(ed.querySelector(\'[data-fo="s7agent"]\').textContent)&&/Names on the points/.test(ed.querySelector(\'[data-fo="s7cam"]\').textContent)'));
+  // round 14: Trace under each answer is a row of 5 · Ask Azu › What the visitor sees (s7ask), found by its label
+  ok('Editor: Trace under each answer (What the visitor sees) and Names on the points (Ask about the view)', await R('!!rowEl(ed,"s7ask","Trace under each answer")&&/Names on the points/.test(ed.querySelector(\'[data-fo="s7cam"]\').textContent)'));
   ok('no page errors', errs.length === 0, errs.slice(0, 3));
   console.log(fails ? `${fails} FAILED` : 'ALL PASS');
   await b.close();

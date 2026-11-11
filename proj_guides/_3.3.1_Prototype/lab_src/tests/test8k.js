@@ -94,7 +94,8 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   }
   await R('S.dark=false;renderAll(false);stopTour()');
   // 13. the Editor
-  ok('Editor: Mascot has Liveliness, Mouth, Moods, Moments, Water break after and five Try', await R('S.tab="guide";renderEditor();var f=ed.querySelector(\'[data-fo="s7mascot"]\');!!f&&["Liveliness","Mouth","Moods","Moments","Water break after"].every(function(t){return f.textContent.indexOf(t)>=0})&&f.querySelectorAll("[data-aztry]").length===5'));
+  // round 14: Mascot is 1 · Azu (s7mascot, its id kept); Moments and Water break after (link rows) went to 3 · Games on the tour
+  ok('Editor: Azu has Liveliness, Mouth, Moods and five Try; no Moments or Water break after (round 14: Games on the tour holds them)', await R('S.tab="guide";renderEditor();var f=ed.querySelector(\'[data-fo="s7mascot"]\');!!f&&["Liveliness","Mouth","Moods"].every(function(t){return!!rowEl(ed,"s7mascot",t)})&&!rowEl(ed,"s7mascot","Moments")&&!rowEl(ed,"s7mascot","Water break after")&&f.querySelectorAll("[data-aztry]").length===5'));
   ok('Azu\'s words are on the Mascot (Languages & Terms; the jokes are A joke\'s; round 12: the old water and cookie asks are the Try\'s words again)', await R('(TXO.s7mascot||[]).length') >= 8 && await R('TXOWN.mascot_joke_1==="gd:i:joke"&&TXOWN.mascot_water==="s7mascot"'), await R('(TXO.s7mascot||[]).length'));
   await R('S.tab="marker";S.sel.gstep="g2";renderEditor()'); await p.waitForTimeout(300);
   ok('Guide script: Solemn point, and Azu\'s mood on the step', await R('/Solemn point/.test(ed.querySelector(\'[data-fo="m3"]\').textContent)&&!!ed.querySelector("[data-azmood=g2]")'));

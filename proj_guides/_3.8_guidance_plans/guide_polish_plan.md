@@ -89,8 +89,10 @@ mid-sentence in the remark lines, a group's own shorter gap, the remarks countin
 
 From the research (`research_tour_entertainment.md`, `_3.8_Guidance_Study.md`) and the rounds' open ends, to be
 listed and ordered with the developer after the Editor and the design passes: what the guide still cannot do that a
-real guide does (for example: picking up a tour where it stopped on the next visit, the visitor's own pace, a short
-and a deep version of each step, the guide at a point with no tour, Ask Azu during a game).
+real guide does. **Accepted by the developer (2026-11-11), all four:** a tour resumes on the next visit where the visitor
+stopped; each step in a short and a deep version ("tell me more" / "skip ahead", the visitor's own pace); Ask Azu during
+a game (the game pauses, the answer, the game goes on); a point with no written tour (Azu's short spoken summary from
+the card). More may come from the design pass.
 
 ## 6. The order
 
