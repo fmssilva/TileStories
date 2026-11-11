@@ -5,7 +5,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-07)
 
 - **State:**
-  - **The Lab:** `master` holds guidance rounds 1-12, verified on 2026-11-06/10, published at
+  - **The Lab:** `master` holds guidance rounds 1-13, verified on 2026-11-06/11, published at
     https://claude.ai/artifact/19UiatNtfhVyJrxahvSXp3 with the 186 voice files, the music and the capabilities (section 1). The
     developer changes account often (four times on 2026-11-08/09); the old links stay in their accounts (RKn3Rr… at round 11, J9J4h… at round 9, 4LpLd4… at round 8, Jq6X2K… at round 7, Jrejv7… at
     round 6, QmhHSz… at round 5, KDs2… at v29). A new account cannot update an old link: publish a new one (section 1, Publishing). Its
@@ -39,9 +39,9 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     - **Level 2, every 3rd-4th round (about 35 min):** every tab and every file. It runs sooner when a round changed existing
       shared code.
     - **Level 3, every 10-12 rounds and before a Unity hand-off:** level 2, every mutation and a new baseline.
-    - Count the rounds since the last level 2 and 3 in every answer. After guidance round 12 that is 0 and 2: level 2 ran on
-      2026-11-10 after round 11 and again after round 12 (the self-test's four walks bad=0; 39 files, 1175 checks, about 71
-      min); level 3 last ran on 2026-11-09.
+    - Count the rounds since the last level 2 and 3 in every answer. After guidance round 13 that is 0 and 3: level 2 ran
+      after rounds 11, 12 and 13 (round 13, 2026-11-11: the self-test's four walks bad=0, card 710/248, guide 31/1364,
+      marker+global 23/43, words 479/542; 41 files, 1238 checks, about 76 min); level 3 last ran on 2026-11-09.
   - **Where the tests' time goes (measured 2026-11-07):**
     - Starting Edge and loading the 13 MB page costs only about 8 s a file (Edge 0.3-0.8 s, the page 7 s), so one shared Edge
       would save almost nothing.
@@ -145,8 +145,22 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       the promise's **4 s buttons stay up while step 1 starts** (the tour no longer waits about 9 s); **the Cookie stays**
       as the breather's variant (it plays in tours without the quiz). The words ("Not quite.", "Got it: no more games
       today, just the story.", "Toque na resposta, ou diga-a", "Primeiro uma pergunta") were not changed.
-    - **Next: round 13**: first the three changes above, then Don't say it! and Find it on the wall (In a step), on round
-      12's base (research 4.4, 4.7, 5.4).
+    - Round 13 (2026-11-11, `_3.8_guidance_plans/brief_round13.md`): the four answers (a promised quiz takes the card's
+      "Test yourself" step out of the tour, `P.skip` with `gdSkipApply` / `gdSkipUndo`, a dropped quiz puts it back; the pair
+      counts as one beat, `b.one`; the promise's Deal / No quiz, thanks on a strip above the panel while step 1 starts,
+      `.gdstrip`, 0 px over the words being told), then **Don't say it!** (In a step, Family and Explorer, Lively only: the
+      Editor suggests words from the tour's text per language, 4+ letters said 2-4 times in a 1-2 step span, with the
+      author's Reviewed tick; tap windows from the word times + 2.5 s; a catch, a false tap's "Nope!", the result with the
+      missed slip played back; Pause / drag / Ask freeze the windows; Heard it! at Compact and with Mascot Off; not with a
+      screen reader) and **Find it on the wall** (Between steps, the point's own wall, Calm too: the card to Mini, a seek
+      ring, the 1.2 s settle, a hint at 10 s from the point's screen direction, I give up / 20 s: Azu walks to it; never
+      while tracking is lost; `wall.js`: a drag that starts on the panel, a beat card or the strip no longer pans the wall).
+      `tests/test9q.js` (47 checks) and `tests/test9qs.js` (its 15 scenes); 70 scenes in Ask Azu. The Architect's review:
+      the captures fine (the strip sits above the caption, the word card and the result line read well, the seek ring
+      centred). Level 2 found one check written for the old state: test8n's scroll ran 2400 px to the bottom of the card,
+      where the only block is "Test yourself", now out of the tour, so the guide paused (the existing rule: no told block
+      in view, it pauses); the check now runs with Games on the tour Off, and a new one checks that pause with the quiz on.
+    - **Next: the developer's answers on round 13's games** (the closing questions), then the step-by-step review below.
     - **Then: the developer's step-by-step review** of the collected look questions (rounds 1-10; round 10's: build the
       seven missing phone effects so their rows get real demos, Global Scene's rows, stand-ins for block options with
       nothing to see, the Sticky Action's demo with the bar at the bottom, and whether every Detail Card change should

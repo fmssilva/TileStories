@@ -48,7 +48,7 @@ S.guidance={on:true,breathing:15,cueRoom:5,perMinute:2,perVisit:30,freshTau:120,
       /* round 12: Fun › On the tour (it took Moments' place: the water break and the cookie moved in). Its own rhythm (the tour's, never
          Fun's visit cap): one beat per 75 s of narration (every, 60-120), at most 3 a tour (perTour; Short 2, Deep 5), the opening and the
          finale included; who gets it (auds: Family, Explorer, Expert). Liveliness is Mascot › Liveliness (Calm: only the items Calm too) */
-      {id:"ontour",name:"On the tour",mode:"all",on:true,weight:1,cap:0,gap:0,tour:true,life:"azu",every:75,perTour:3,perShort:2,perDeep:5,auds:{family:true,explorer:true,expert:true},items:["quizpromise","quizfinale","guessyear","water","cookie"]},
+      {id:"ontour",name:"On the tour",mode:"all",on:true,weight:1,cap:0,gap:0,tour:true,life:"azu",every:75,perTour:3,perShort:2,perDeep:5,auds:{family:true,explorer:true,expert:true},items:["quizpromise","quizfinale","guessyear","dontsay","findwall","water","cookie"]},
       {id:"play",name:"Play",mode:"all",on:true,weight:1,cap:0,gap:0,items:["joke","ptjoke","hunt","season"]}]}],
   items:{
     /* Opening message: the visit's first words, beside Azu at the ✦; Essential (skips the breathing room and the limits); once a visit */
@@ -160,6 +160,21 @@ S.guidance={on:true,breathing:15,cueRoom:5,perMinute:2,perVisit:30,freshTau:120,
     cookie:{id:"cookie",label:"Cookie",on:true,kind:"fun",group:"ontour",form:"beat",beat:"breather",prop:"cookie",props:"fixed",says:"tour_cookie",spoken:"kind",
       place:"between",beforeEnd:true,variantOf:"water",answers:"chips",waits:8,needs:"",scores:false,calm:false,game:false,
       importance:2,shows:"visit",tourLen:"every"},
+    /* ----- round 13, Fun › On the tour (research_tour_entertainment.md 4.4, 4.7, 5.4). Don't say it!: In a step (its first use), a game
+       inside a span of 1-2 steps: announced at the seam before the span (Let's play / Not now for 4 s; waiting is Let's play), the word
+       card pinned beside Azu while the span is told, each slip (the word in the narration) opening a tap window from its start to its end +
+       2.5 s; a tap on Azu in a window is a catch (flinch, blush, the pip, never stopping the voice), outside every window a playful
+       "Nope!"; the result at the next seam, with the first missed slip played back. Family and Explorer, Lively only, never with a screen
+       reader (no button path: the game is not offered). The word per language is the author's (Specific Marker › Guide script: suggested
+       from the tour's own text, Reviewed); a language without a reviewed word has no game. Find it on the wall: Between steps, the wall
+       only (a tour of a card whose point is on the wall in view), the card lowered, a seek ring in the middle; the point settled in the
+       middle 1.2 s is "That's it!"; a hint after 10 s from the point's direction; I give up (and after 20 s) Azu walks to it ----- */
+    dontsay:{id:"dontsay",label:"Don't say it!",on:true,kind:"fun",group:"ontour",form:"beat",beat:"word",says:"tour_word",spoken:"kind",
+      place:"instep",answers:"tapazu",waits:4,needs:"word",scores:true,calm:false,game:true,srPath:false,auds:{family:true,explorer:true,expert:false},
+      tapWin:2.5,falseTaps:"nope",slipBack:true,importance:3,shows:"every",tourLen:"every"},
+    findwall:{id:"findwall",label:"Find it on the wall",on:true,kind:"fun",group:"ontour",form:"beat",beat:"find",says:"tour_find",spoken:"kind",
+      place:"between",answers:"aim",waits:4,needs:"wall",scores:false,calm:true,game:true,giveUp:20,hintAfter:10,
+      importance:3,shows:"every",tourLen:"every"},
     /* ----- Fun › Play. A joke (it was Azu's joke every third poke): its variants Azu's jokes, the least seen shows; after 3 pokes on Azu
        since it last showed (as before), or rarely at a pause late in the visit (from 10:00, once a visit: latePause); Lively only; a
        bubble at the ✦; never in a tour. After pokes it answers the visitor (as Azu's bubble did): the breathing room and Fun's gap neither hold
@@ -416,6 +431,7 @@ function gdIsTip(it){return!!it&&it.form!=="cue"&&it.form!=="walk"&&it.form!=="p
 /* round 12: a beat's own defaults (Fun › On the tour; the fields below, with the round's data at the end of this file) */
 var GD_BEAT_DEF={beat:"breather",place:"between",answers:"chips",waits:8,needs:"",pairs:"",scores:false,calm:false,auds:{family:true,explorer:true,expert:true},tourLen:"every",
   game:false,srPath:true,talkFor:0,beforeEnd:false,minNarr:0,minSteps:0,qMin:3,qn:3,showMe:true,expert:"optin",props:"fixed",variantOf:"",
+  tapWin:2.5,falseTaps:"nope",slipBack:true,giveUp:20,hintAfter:10,
   when:"tour",duringTour:"between",screen:"any",about:"nothing",mustSee:false,goes:"stays",tap:"close",lively:false};
 function gdFill(it){/* round 9: In Things to try (an App item): Yes when it Teaches a feature; a Try item (pulled only) keeps its own few fields */
   if(it.inTry===undefined&&it.kind==="app"&&it.form!=="walk"&&it.form!=="page")it.inTry=!!it.teaches;if(it.form==="try")return it;
@@ -560,16 +576,16 @@ function gdTryReadBack(it){var g=gdGroupOf(it);return it.label+" · App › "+(g
    get it). The quiz's questions and the guesses are per step, in Specific Marker › Guide script (S.tourQ, S.tourGuess: words EN / PT,
    Draft with AI, a Reviewed tick per language); unreviewed ones never play. Unity: GuidanceItem's beat fields (GuidanceCatalog); the
    questions a QuizQuestion list on each GuideStep (CardStrings keys), the Reviewed flags beside them ----- */
-var GD_PLACES=[["opening","Opening"],["between","Between steps"],["finale","Finale"]];
-var GD_PLACE_WORDS={opening:"after the introduction, before the first step",between:"between two steps",finale:"before the tour's last step"};
-var GD_ANSWERS=[["nothing","Nothing"],["chips","Chips"],["slider","Slider"],["tap","Tap"],["tapsay","Tap or say"]];
+var GD_PLACES=[["opening","Opening"],["between","Between steps"],["instep","In a step"],["finale","Finale"]];
+var GD_PLACE_WORDS={opening:"after the introduction, before the first step",between:"between two steps",instep:"inside its span of 1-2 steps (announced at the seam before it, its result at the seam after it)",finale:"before the tour's last step"};
+var GD_ANSWERS=[["nothing","Nothing"],["chips","Chips"],["slider","Slider"],["tap","Tap"],["tapsay","Tap or say"],["tapazu","Tap Azu"],["aim","Aim at the wall"]];
 /* the answers a beat may offer (the quiz: tap always, voice an extra; a guess: its slider) */
-var GD_ANSWERS_OF={promise:["chips","nothing"],finale:["tap","tapsay"],guess:["slider"],breather:["chips","nothing"]};
-var GD_NEEDS={"":"nothing of the point's",quiz:"its reviewed quiz questions (Specific Marker › Guide script)",year:"a step with a reviewed guess (Specific Marker › Guide script)"};
+var GD_ANSWERS_OF={promise:["chips","nothing"],finale:["tap","tapsay"],guess:["slider"],breather:["chips","nothing"],word:["tapazu"],find:["aim"]};
+var GD_NEEDS={"":"nothing of the point's",quiz:"its reviewed quiz questions (Specific Marker › Guide script)",year:"a step with a reviewed guess (Specific Marker › Guide script)",word:"a reviewed word in each language (Specific Marker › Guide script › Don't say it!)",wall:"a wall point to find, on the wall of the card's point (The point, below)"};
 var GD_TOURLEN=[["every","Every length"],["notshort","Not on Short"],["deep","Deep only"]];
 var GD_AUDS=[["family","Family"],["explorer","Explorer"],["expert","Expert"]];
 var GD_EXPERT=[["optin","An opt-in question"],["same","As the others"]];
-var GD_BEAT_KIND={promise:"the quiz's promise",finale:"the quiz",guess:"a guess",breather:"a breather"};
+var GD_BEAT_KIND={promise:"the quiz's promise",finale:"the quiz",guess:"a guess",breather:"a breather",word:"a forbidden-word game",find:"a find on the wall"};
 
 /* the breather's prop by date (Preview & Test › Today is): a fan in June-September, a scarf in December-February, else the glass; never
    the same prop twice in a visit (the next in turn). The cookie keeps its own */
@@ -605,6 +621,11 @@ function gdQSteps(l,steps){return(steps||S.fullSteps||S.guideSteps).filter(funct
 function gdBeatNever(it){var r=[],langs=langCodes();
   if(it.needs==="quiz"){langs.forEach(function(l){var q=gdQSteps(l),n=q.length;if(n<+it.qMin||n<2)r.push("the quiz needs "+it.qMin+" reviewed questions from 2 steps in "+(GD_LANG_NAME[l]||l)+"; this point has "+n)})}
   if(it.needs==="year")langs.forEach(function(l){if(!(S.fullSteps||S.guideSteps).some(function(st){return gdGuessOk(S.tourGuess[st.id],l)}))r.push("a guess needs a step with a reviewed guess in "+(GD_LANG_NAME[l]||l)+"; this point has none")});
+  if(it.needs==="word")langs.forEach(function(l){var w=gdWordOf(l);if(!w||!w.w)r.push("Don't say it! needs a word in "+(GD_LANG_NAME[l]||l)+"; this point has none: no game in "+(GD_LANG_NAME[l]||l));
+    else if(!w.rev)r.push("the word “"+w.w+"” in "+(GD_LANG_NAME[l]||l)+" is not reviewed: no game in "+(GD_LANG_NAME[l]||l));
+    else{var n=gdWordCount(w,l);if(n<2)r.push("“"+w.w+"” is said "+(n?"once":"never")+" in its span ("+gdSpanWords(w.span)+"): no game in "+(GD_LANG_NAME[l]||l));else if(n>4)r.push("“"+w.w+"” is said "+n+" times in its span: too easy, too long (2-4)")}});
+  if(it.needs==="wall"){var fd=S.tourFind;if(!fd||!fd.point)r.push("Find it on the wall needs a wall point (Guide script › Find it on the wall); this point has none");
+    else{var fp=(WALLS.ribeira.pois||[]).filter(function(p){return p.id===fd.point})[0];if(!fp)r.push("its wall point, "+fd.point+", is not on the card's wall");if(!byId(S.fullSteps||S.guideSteps,fd.after))r.push("its step, "+fd.after+", is not in the tour")}}
   if(it.pairs){var o=S.guidance.items[it.pairs];if(!o||o.deleted)r.push("its pair, "+it.pairs+", is gone: a promise and its payoff are one");else if(!o.on)r.push("its pair, the “"+o.label+"”, is Off: a promise and its payoff are one")}
   var a=it.auds||{};if(!GD_AUDS.some(function(x){return a[x[0]]}))r.push("no audience gets it (Audiences)");
   var g=gdGroupOf(it);if(g&&g.auds&&!GD_AUDS.some(function(x){return g.auds[x[0]]&&a[x[0]]}))r.push("no audience of On the tour gets it");
@@ -617,9 +638,54 @@ function gdBeatReadBack(it){var g=gdGroupOf(it),a=it.auds||{},w=[];
   if(+it.talkFor>0)w.push("after "+it.talkFor+" s of narration");if(it.beforeEnd)w.push("before the last step");if(+it.minNarr>0)w.push("only in a tour of "+it.minNarr+" s of narration or more");
   if(it.variantOf){var vo=S.guidance.items[it.variantOf];if(vo)w.push("a variant of “"+vo.label+"” (never both in a tour)")}
   if(+it.minSteps>0)w.push("only in a tour of "+it.minSteps+" steps or more");
-  w.push("answers by "+gdNameOf(GD_ANSWERS,it.answers).toLowerCase());w.push(+it.waits>0?"waits "+it.waits+" s, then carries on":"no timer");
+  if(it.beat==="word")w.push("a tap window from the word's start to its end + "+it.tapWin+" s, "+(it.falseTaps==="nope"?"a false tap a playful “Nope!”":"a false tap counted quietly")+(it.slipBack?", the first missed slip played back":""));
+  if(it.beat==="find")w.push("a hint after "+it.hintAfter+" s, Azu shows it after "+it.giveUp+" s (or I give up), never while the wall is lost");
+  w.push("answers by "+gdNameOf(GD_ANSWERS,it.answers).toLowerCase());w.push(it.beat==="word"||it.beat==="find"?"its Not now "+it.waits+" s":+it.waits>0?"waits "+it.waits+" s, then carries on":"no timer");
   if(it.needs)w.push("needs "+GD_NEEDS[it.needs]);if(it.pairs){var p=S.guidance.items[it.pairs];if(p)w.push("one pair with “"+p.label+"”")}
   if(it.scores)w.push("scores");if(it.game)w.push("a game (its 4 s Not now chip)");w.push(it.calm?"Calm too":"Lively only");
   w.push("for "+GD_AUDS.filter(function(x){return a[x[0]]}).map(function(x){return x[1]+(x[0]==="expert"&&it.beat==="promise"&&it.expert==="optin"?" (an opt-in)":"")}).join(", ")||"nobody");
   if(it.tourLen!=="every")w.push(gdNameOf(GD_TOURLEN,it.tourLen).toLowerCase());
   return it.label+" · Fun › "+(g?g.name:"?")+" · "+w.join(", ")+" · "+gdBeatHowOften(it)+" · never over a sentence, never on a Solemn point, never two seams in a row; the tour's rhythm, never Fun's visit cap."}
+
+/* ----- round 13, Don't say it! as data (research_tour_entertainment.md 5.4). Per point and per language: the word the author picked from
+   the Editor's suggestions (or typed), its span (1-2 consecutive steps), and its own Reviewed tick; a language without a reviewed word
+   offers no game. The suggestions (gdWordSuggest): each word of 4 letters or more said 2-4 times in a span of 1-2 steps, with its count and
+   its span ("palace: 2 times in steps 7-8 (0:16)"); the research's rules are checked and any it breaks is named (a span of 45-120 s, not in
+   the span's first sentence, a noun the story is about: a word of the point's names and headings, or one the tour comes back to in 3
+   steps or more; never a common word). The slips at run time are the same matches (gdWordHit): the word, its plural, its possessive.
+   Unity: a ForbiddenWord {word, spanFrom, spanTo, reviewed} per language on the GuideTour asset; the suggester plain C# over the steps'
+   text (EditMode-tested on the Lab's cases) ----- */
+S.tourWord={en:{w:"palace",span:["g3","g4"],src:"suggested",rev:true},pt:{w:"palácio",span:["g3","g4"],src:"suggested",rev:true}};
+/* Find it on the wall (research 4.7): the point's one find, after the step that names it */
+S.tourFind={after:"g3",point:"torreao",thing:T("the great corner tower","o grande torreão")};
+var GD_WORD_STOP={en:"about after again also around back before being came come could down each even every first from have here into just last later like little long made make many more most much must never next only other over right same some still such than that their them then there these they thing this those through under until very want were what when where which while will with would your years year hundred hundreds thousand fifty twenty three seven seventy half centuries century morning brand some people",
+  pt:"agora ainda antes apenas aqui assim cada como desde depois deste desta este esta isso isto mais mesmo muito nada para pela pelo pelos pelas pode porque quando quem sobre seus suas também tinha toda todo todos todas uma umas uns vezes onde lado novo nova anos cerca duzentos cinquenta setenta seguintes poucas horas manhã acabada qual então foram durante entre sempre"};
+function gdWordNorm(t){return String(t||"").toLowerCase().replace(/[’']s$/,"").replace(/[^a-zà-ÿ]+/g,"")}
+/* a token of the narration is the word (or its plural, or its possessive) */
+function gdWordHit(tok,w,l){var t=gdWordNorm(tok),x=gdWordNorm(w);if(!t||!x)return false;return t===x||t===x+"s"||(l!=="pt"&&t===x+"es")||(l==="pt"&&/ão$/.test(x)&&t===x.replace(/ão$/,"ões"))}
+function gdWordOf(l){var w=S.tourWord&&S.tourWord[l];return w&&w.w?w:null}
+function gdSpanSteps(span){var all=S.fullSteps||S.guideSteps;return(span||[]).map(function(id){return byId(all,id)}).filter(Boolean)}
+function gdSpanWords(span){var all=S.fullSteps||S.guideSteps,ix=(span||[]).map(function(id){return all.findIndex(function(s){return s.id===id})+1}).filter(function(x){return x>0});return ix.length?"step"+(ix.length>1?"s ":" ")+ix.join("-"):"no steps"}
+/* a step's words in a language (the tour's own text) and its seconds at the voice's pace (the recorded line's times in the visitor's
+   language; else its words at 170 a minute) */
+function gdStepWords(st,l){return(stepTextIn(st,l).match(/\S+/g)||[])}
+function gdStepSecsIn(st,l){return l===(S.lang||"en")&&typeof stepSecs==="function"?stepSecs(st):gdStepWords(st,l).length*60/170+.7}
+function gdWordCount(w,l){if(!w)return 0;var n=0;gdSpanSteps(w.span).forEach(function(st){gdStepWords(st,l).forEach(function(t){if(gdWordHit(t,w.w,l))n++})});return n}
+/* the suggestions in a language, best first: each candidate {w, n, span, secs, flags: the research's rules it breaks} */
+function gdWordSuggest(l){var all=(S.fullSteps||S.guideSteps).filter(function(st){return!/^(intro|teaser|end)$/.test(st.act)}),stop={};(GD_WORD_STOP[l]||"").split(" ").forEach(function(x){stop[x]=1});
+  var names=[];(WALLS.ribeira.pois||[]).forEach(function(p){names.push(p.name&&p.name[l]||"")});S.story.forEach(function(r){if(r.kind==="heading"&&r.c&&r.c.text)names.push(r.c.text[l]||"")});
+  var nameW={};names.join(" ").split(/\s+/).forEach(function(x){var t=gdWordNorm(x);if(t)nameW[t]=1});
+  var inSteps={};all.forEach(function(st){var seen={};gdStepWords(st,l).forEach(function(t){var x=gdWordNorm(t);if(x&&!seen[x]){seen[x]=1;inSteps[x]=(inSteps[x]||0)+1}})});
+  var out=[],key={};
+  for(var i=0;i<all.length;i++)[1,2].forEach(function(len){var sp=all.slice(i,i+len);if(sp.length<len)return;var toks=[],first=0,secs=0;
+    sp.forEach(function(st,j){var ws=gdStepWords(st,l);if(j===0){for(var k=0;k<ws.length;k++){if(/[.!?…]["”»)]*$/.test(ws[k])){first=k+1;break}}if(!first)first=ws.length}toks=toks.concat(ws);secs+=gdStepSecsIn(st,l)});
+    var cnt={},inFirst={};toks.forEach(function(t,k){var x=gdWordNorm(t);if(x.length<4||stop[x])return;cnt[x]=(cnt[x]||0)+1;if(k<first)inFirst[x]=1});
+    Object.keys(cnt).forEach(function(x){var n=0;toks.forEach(function(t){if(gdWordHit(t,x,l))n++});if(n<2||n>4)return;var ids=sp.map(function(s){return s.id}),k=x+"|"+ids.join(",");if(key[k])return;
+      /* a two-step span only when its second step says it too (else the one step is the span) */
+      if(len===2&&!gdStepWords(sp[1],l).some(function(t){return gdWordHit(t,x,l)})||len===2&&!gdStepWords(sp[0],l).some(function(t){return gdWordHit(t,x,l)}))return;key[k]=1;
+      var flags=[];if(secs<45)flags.push("a short span: "+gdMmss(secs)+" (the rule: 45-120 s)");if(secs>120)flags.push("a long span: "+gdMmss(secs)+" (the rule: 45-120 s)");
+      if(inFirst[x])flags.push("said in the span's first sentence (the game would start on a slip)");if(!nameW[x]&&(inSteps[x]||0)<3)flags.push("not a name the story is about");
+      out.push({w:x,n:n,span:ids,secs:secs,flags:flags})})});
+  return out.sort(function(a,b){return a.flags.length-b.flags.length||b.n-a.n||a.secs-b.secs||(a.w<b.w?-1:1)})}
+/* a suggestion in words: "palace: 2 times in steps 7-8 (0:16)" */
+function gdWordLine(c){return c.w+": "+c.n+" times in "+gdSpanWords(c.span)+" ("+gdMmss(c.secs)+")"}

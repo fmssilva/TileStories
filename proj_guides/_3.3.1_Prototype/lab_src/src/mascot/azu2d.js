@@ -99,7 +99,7 @@ var azDown=null;
 function azTarget(e){var m=e.target.closest(".mascot,.azfab");return m&&(G.on||m.classList.contains("azfab"))?m:null}
 ph.addEventListener("pointerdown",function(e){if(!azTarget(e))return;e.stopPropagation();azDown={t:performance.now()}},true);
 ph.addEventListener("pointerup",function(e){if(!azTarget(e)||!azDown){azDown=null;return}e.stopPropagation();var held=performance.now()-azDown.t,now=performance.now();azDown=null;
-  if(held>=500){azFall();return}G.taps=(G.taps||[]).filter(function(t){return now-t<1200}).concat([now]);if(G.taps.length>=3){G.taps=[];azTickle();return}azuTapDo(azuTapAct())},true);
+  if(held>=500){azFall();return}G.taps=(G.taps||[]).filter(function(t){return now-t<1200}).concat([now]);if(G.taps.length>=3){G.taps=[];emit("azu.tickled");azTickle();return}if(firstAnswer("azu.tap",azTarget(e))!==undefined)return;azuTapDo(azuTapAct())},true);
 ph.addEventListener("click",function(e){var p=e.target.closest("[data-azprop]");if(p){e.stopPropagation();azMomentDo();return}if(e.target.closest(".mascot,.azfab"))e.stopPropagation()},true);
 
 /* Moments and Water break after: link rows to the guidance that shows them now. Round 12: the water break and the cookie moved into Guide ›

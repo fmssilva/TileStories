@@ -219,49 +219,78 @@ function gdWhyNot(items,visitor,ctx,now,id){var it=items.filter(function(x){retu
 var GD_TOUR_FIRST=20;
 function gdMmss(s){s=Math.max(0,Math.round(+s||0));return Math.floor(s/60)+":"+("0"+s%60).slice(-2)}
 function gdSeamWords(P,s){var st=P.titles&&P.titles[s+1];return"the seam after step "+(s+1)+(st?" (before “"+st+"”)":"")+", at "+gdMmss(P.at[s])+" of narration"}
-function gdTourPlan(items,visitor,ctx,T){var steps=T.steps||[],n=steps.length,at=[],c=0;steps.forEach(function(st){c+=+st.secs||0;at.push(c)});
+/* round 13: the tour's plan first tries the tour without the card's own quiz step ("Test yourself", a Knowledge Check block): when the
+   quiz's pair fits, Azu's quiz replaces that step (the plan's skip, said in its words); else the step plays as before. The pair counts
+   as one beat in the tour's room (the promise and its quiz). In a step (Don't say it!): its span of steps, announced at the seam before
+   it, its result at the seam after it; both seams are its own (never two seams in a row on either side). Find it on the wall: the seam
+   after the step that names its point, the wall only */
+function gdTourPlan(items,visitor,ctx,T){var all=T.steps||[],qb=all.filter(function(st){return st.quizBlock});
+  if(qb.length){var P1=gdPlanOn(items,visitor,ctx,T,all.filter(function(st){return!st.quizBlock}));
+    if(P1.beats.some(function(b){return b.place==="finale"&&b.pairs})){P1.skip=qb.map(function(st){return{id:st.id,title:st.title||""}});return P1}}
+  var P=gdPlanOn(items,visitor,ctx,T,all);P.skip=[];return P}
+function gdPlanOn(items,visitor,ctx,T,steps){var n=steps.length,at=[],c=0;steps.forEach(function(st){c+=+st.secs||0;at.push(c)});
   var k0=0;for(var j=0;j<n;j++){if(steps[j].act==="intro"||steps[j].act==="teaser")k0=j;else break}
   var kf=n>1&&steps[n-1].act==="end"?n-2:n-1,content=steps.filter(function(st){return!/^(intro|teaser|end)$/.test(st.act)}).length;
   var cap=T.len==="short"?+T.perShort:T.len==="deep"?+T.perDeep:+T.perTour,every=Math.max(1,+T.every||75),budget=Math.max(0,Math.min(cap,Math.ceil(c/every)));
   var P={n:n,narr:c,at:at,k0:k0,kf:kf,cap:cap,every:every,budget:budget,len:T.len||"standard",aud:T.aud||"explorer",lang:T.lang||"en",content:content,titles:steps.map(function(x){return x.title||""}),ids:steps.map(function(x){return x.id}),beats:[],why:{}};
-  var on=items.filter(function(it){return it.onTour}),vis=visitor&&visitor.visit&&visitor.visit.items||{},A=P.aud,AN={family:"Family",explorer:"Explorer",expert:"Expert"}[A]||A;
+  var on=items.filter(function(it){return it.onTour}),vis=visitor&&visitor.visit&&visitor.visit.items||{},A=P.aud,AN={family:"Family",explorer:"Explorer",expert:"Expert"}[A]||A,LN={en:"English",pt:"Portuguese"}[P.lang]||P.lang;
   var qs=steps.filter(function(st){return st.q}),qd={};qs.forEach(function(st){qd[st.id]=1});
+  var W=T.word||null,FD=T.find||null,ix=function(id){return P.ids.indexOf(id)};
   var gate=function(it){if(!it.on)return"Off";if(it.kindOn===false)return(it.kindName||"Fun")+" is Off";if(it.groupOn===false)return(it.groupName||"On the tour")+" is Off";
     if(ctx.solemn)return"a Solemn point: no beats on it";
     if(T.auds&&!T.auds[A])return(it.groupName||"On the tour")+" is not for "+AN+" (its Audiences)";if(!(it.auds||{})[A])return"not for "+AN+" (its Audiences)";
     if(!it.calm&&(!ctx.lively||it.groupLife==="calm"))return(it.groupLife==="calm"?"On the tour's Liveliness is Calm":"Calm (Mascot › Liveliness)")+": only the items Calm too";
-    if(ctx.sr&&it.srPath===false)return"a screen reader is on, and it has no button path";
+    if(ctx.sr&&it.srPath===false)return it.beat==="word"?"a screen reader is on: Don't say it! is not offered (no button path)":"a screen reader is on, and it has no button path";
     if(it.game&&ctx.games==="off")return"the visitor turned Games on the tour Off (Settings › The guide)";
     if(it.game&&(+ctx.notNow||0)>=2)return"two Not nows this visit: no more games";
     if(it.tourLen==="notshort"&&P.len==="short")return"Not on Short (this tour is Short)";if(it.tourLen==="deep"&&P.len!=="deep")return"Deep only (this tour is "+(P.len==="short"?"Short":"Standard")+")";
     if(it.shows==="visit"&&(vis[it.id]||{}).shown>0)return"once a visit: it played this visit";
     if(+it.minNarr>0&&c<+it.minNarr)return"a tour of "+gdMmss(c)+" of narration: it needs "+it.minNarr+" s or more";
     if(+it.minSteps>0&&content<+it.minSteps)return"a tour of "+content+" steps: it needs "+it.minSteps+" or more";
-    if(it.needs==="quiz"&&(qs.length<+it.qMin||Object.keys(qd).length<2))return"too few reviewed questions in "+({en:"English",pt:"Portuguese"}[P.lang]||P.lang)+": "+qs.length+" on this tour's steps (it needs "+it.qMin+", from 2 steps): no promise";
-    if(it.needs==="year"&&!steps.some(function(st){return st.guess}))return"no step of this tour holds a reviewed guess";return null};
-  var free=function(s){for(var i=0;i<P.beats.length;i++){var b=P.beats[i];if(Math.abs(b.seam-s)<2)return b}return null};
-  var room=function(k){return P.beats.length+k<=P.budget};
-  var full=function(){return"the tour already has "+P.beats.length+" beats (room for "+P.budget+": one per "+every+" s of its "+gdMmss(c)+" of narration, at most "+cap+" on "+({short:"Short",deep:"Deep"}[P.len]||"Standard")+")"};
-  var seamOf=function(it){if(it.place==="opening")return k0;if(it.place==="finale")return kf;
-    if(it.beat==="guess"){for(var j=k0+2;j<=kf;j++)if(steps[j].guess)return j-1;return-1}
-    if(it.beforeEnd)return kf;
-    var from=+it.talkFor||0;for(var s=k0+1;s<kf;s++){if(at[s]>=Math.max(from,GD_TOUR_FIRST)&&!free(s))return s}return-1};
-  var why=function(it,s){if(s<0)return it.beat==="guess"?"the step that holds the year comes too soon after the introduction":+it.talkFor>0?"no free seam after "+it.talkFor+" s of narration but the last":"no free seam";
-    if(s>=n-1&&it.place!=="finale"&&!it.beforeEnd)return"no seam there";var o=free(s);if(o)return"never two seams in a row: “"+o.label+"” is at "+gdSeamWords(P,o.seam);
+    if(it.needs==="quiz"&&(qs.length<+it.qMin||Object.keys(qd).length<2))return"too few reviewed questions in "+LN+": "+qs.length+" on this tour's steps (it needs "+it.qMin+", from 2 steps): no promise";
+    if(it.needs==="year"&&!steps.some(function(st){return st.guess}))return"no step of this tour holds a reviewed guess";
+    if(it.needs==="word"){if(!W||!W.w)return"no word in "+LN+" (Specific Marker › Guide script): no game in "+LN;if(!W.rev)return"its word in "+LN+", “"+W.w+"”, is not reviewed: no game";
+      if(W.n<2)return"“"+W.w+"” is said "+(W.n?"once":"never")+" in its span: no game";if(W.n>4)return"“"+W.w+"” is said "+W.n+" times in its span: too easy, too long (2-4)";
+      var si=W.span.map(ix);if(si.some(function(x){return x<0}))return"its span ("+W.span.join(", ")+") is not all in this tour (its length or a lens)";if(si.some(function(x,k){return k&&x!==si[k-1]+1}))return"its span's steps are not consecutive in this tour"}
+    if(it.needs==="wall"){if(!FD||!FD.point)return"no wall point to find on this point (Guide script › Find it on the wall)";if(!FD.onWall)return"the wall only: the card's point is not on the wall in view";
+      if(ix(FD.after)<0)return"its step ("+FD.after+") is not in this tour (its length or a lens)"}
+    return null};
+  /* a beat's seams: [its seam, its last seam] (an In a step game holds the announce's seam and the result's) */
+  var span=function(b){return[b.seam,b.end!=null?b.end:b.seam]};
+  var free=function(s,e){if(e==null)e=s;for(var i=0;i<P.beats.length;i++){var r=span(P.beats[i]);if(s<=r[1]+1&&e>=r[0]-1)return P.beats[i]}return null};
+  var count=function(){return P.beats.filter(function(b){return!b.one}).length};
+  var room=function(k){return count()+k<=P.budget};
+  var full=function(){var pr=P.beats.some(function(b){return b.one});return"the tour already has "+count()+" beats"+(pr?", the quiz's promise and the quiz as one":"")+" (room for "+P.budget+": one per "+every+" s of its "+gdMmss(c)+" of narration, at most "+cap+" on "+({short:"Short",deep:"Deep"}[P.len]||"Standard")+")"};
+  var seamOf=function(it){if(it.place==="opening")return[k0];if(it.place==="finale")return[kf];
+    if(it.place==="instep"){var f=ix(W.span[0]),l=ix(W.span[W.span.length-1]);return[f-1<k0?-1:f-1,l]}
+    if(it.beat==="find"){var a=ix(FD.after);return[a>k0&&a<kf?a:-1]}
+    if(it.beat==="guess"){for(var j=k0+2;j<=kf;j++)if(steps[j].guess)return[j-1];return[-1]}
+    if(it.beforeEnd)return[kf];
+    var from=+it.talkFor||0;for(var s=k0+1;s<kf;s++){if(at[s]>=Math.max(from,GD_TOUR_FIRST)&&!free(s))return[s]}return[-1]};
+  var why=function(it,S2){var s=S2[0],e=S2[1]!=null?S2[1]:s;
+    if(s<0)return it.beat==="guess"?"the step that holds the year comes too soon after the introduction":it.place==="instep"?"its span starts too soon after the introduction (its announce needs a seam before it)":it.beat==="find"?"its step is the introduction or the last one (no seam after it)":+it.talkFor>0?"no free seam after "+it.talkFor+" s of narration but the last":"no free seam";
+    if(e>=n-1&&it.place!=="finale"&&!it.beforeEnd)return it.place==="instep"?"its span ends the tour (no seam after it for the result)":"no seam there";var o=free(s,e);if(o)return"never two seams in a row: “"+o.label+"” is at "+gdSeamWords(P,o.seam);
     if(at[s]<GD_TOUR_FIRST&&it.place!=="opening")return"not in the tour's first "+GD_TOUR_FIRST+" s";return null};
-  var add=function(it,s){P.beats.push({id:it.id,label:it.label,beat:it.beat,place:it.place,seam:s,after:P.ids[s],at:at[s],state:"planned",game:!!it.game,pairs:it.pairs||""});P.why[it.id]="planned for "+gdSeamWords(P,s)};
+  var add=function(it,S2,one){var b={id:it.id,label:it.label,beat:it.beat,place:it.place,seam:S2[0],after:P.ids[S2[0]],at:at[S2[0]],state:"planned",game:!!it.game,pairs:it.pairs||""};
+    if(one)b.one=true;if(it.place==="instep"){b.end=S2[1];b.endAfter=P.ids[S2[1]];b.span=W.span.slice();b.word=W.w}if(it.beat==="find"){b.point=FD.point}
+    P.beats.push(b);P.why[it.id]="planned for "+(it.place==="instep"?gdSpanWords2(P,b):gdSeamWords(P,S2[0]))};
   on.forEach(function(it){if(P.why[it.id])return;var g=gate(it);if(g){P.why[it.id]=g;return}
     if(it.variantOf&&P.beats.some(function(b){return b.id===it.variantOf})){P.why[it.id]="a variant of “"+(on.filter(function(o){return o.id===it.variantOf})[0]||{label:it.variantOf}).label+"”: it is in this tour";return}
     var pr=it.pairs?on.filter(function(o){return o.id===it.pairs})[0]:null;
     if(it.pairs){if(!pr){P.why[it.id]="its pair is not in On the tour";return}var gp=gate(pr);if(gp){P.why[it.id]="its pair, “"+pr.label+"”: "+gp;P.why[pr.id]=gp;return}
-      var s1=seamOf(it),s2=seamOf(pr);if(!(s1>=0&&s2>=0&&Math.abs(s1-s2)>=2)){P.why[it.id]=P.why[pr.id]="the tour is too short for the pair (its two seams in a row)";return}
-      if(!room(2)){P.why[it.id]=P.why[pr.id]=full();return}var w1=why(it,s1)||why(pr,s2);if(w1){P.why[it.id]=P.why[pr.id]=w1;return}
-      var a=s1<s2?[it,s1,pr,s2]:[pr,s2,it,s1];add(a[0],a[1]);add(a[2],a[3]);return}
+      var s1=seamOf(it),s2=seamOf(pr);if(!(s1[0]>=0&&s2[0]>=0&&Math.abs(s1[0]-s2[0])>=2)){P.why[it.id]=P.why[pr.id]="the tour is too short for the pair (its two seams in a row)";return}
+      /* the promise and its quiz count as one beat (the developer's answer on round 12) */
+      if(!room(1)){P.why[it.id]=P.why[pr.id]=full();return}var w1=why(it,s1)||why(pr,s2);if(w1){P.why[it.id]=P.why[pr.id]=w1;return}
+      var a=s1[0]<s2[0]?[it,s1,pr,s2]:[pr,s2,it,s1];add(a[0],a[1]);add(a[2],a[3],true);return}
     var s=seamOf(it),w=why(it,s);if(w){P.why[it.id]=w;return}if(!room(1)){P.why[it.id]=full();return}add(it,s)});
   P.beats.sort(function(a,b){return a.seam-b.seam});return P}
+/* an In a step game's place in words: "steps 7-8 (announced at the seam after step 6, …)" */
+function gdSpanWords2(P,b){var f=P.ids.indexOf(b.span[0])+1,l=P.ids.indexOf(b.span[b.span.length-1])+1;return"step"+(l>f?"s "+f+"-"+l:" "+f)+" (announced at "+gdSeamWords(P,b.seam)+")"}
 /* the plan in words (the Editor's "This tour's plan", the Log) */
-function gdPlanWords(P){if(!P)return"no tour has started yet";var b=P.beats.map(function(x){return x.label+" at "+gdSeamWords(P,x.seam)+(x.state&&x.state!=="planned"?" ("+x.state+(x.why?": "+x.why:"")+")":"")});
-  return gdMmss(P.narr)+" of narration, "+P.content+" steps ("+({short:"Short",deep:"Deep"}[P.len]||"Standard")+"): room for "+P.budget+" beat"+(P.budget===1?"":"s")+" (one per "+P.every+" s, at most "+P.cap+"). "+(b.length?b.join(" · "):"No beats")+"."}
+function gdPlanWords(P){if(!P)return"no tour has started yet";var b=P.beats.map(function(x){return x.label+(x.place==="instep"?" in "+gdSpanWords2(P,x):" at "+gdSeamWords(P,x.seam))+(x.state&&x.state!=="planned"?" ("+x.state+(x.why?": "+x.why:"")+")":"")});
+  var pr=P.beats.some(function(x){return x.one}),sk=(P.skip||[]).map(function(x){return"“"+(x.title||x.id)+"”"}).join(", ");
+  return gdMmss(P.narr)+" of narration, "+P.content+" steps ("+({short:"Short",deep:"Deep"}[P.len]||"Standard")+"): room for "+P.budget+" beat"+(P.budget===1?"":"s")+" (one per "+P.every+" s, at most "+P.cap+(pr?"; the quiz's promise and the quiz count as one":"")+"). "+(b.length?b.join(" · "):"No beats")+"."+
+    (sk?" The card's "+sk+" step is skipped: Azu's quiz replaces it"+(P.quiz==="off"?" (no quiz now: it plays again)":"")+".":"")}
 /* a beat at its seam: planned there, and the live gates (never over a sentence; a game: Games on the tour, two Not nows; Calm; a screen reader) */
 function gdBeatCheck(it,ctx){var T=ctx.tour,P=ctx.plan;
   if(!T)return{no:"only in a tour, at its seams (its tour's plan)"+(ctx.planNow?": "+(ctx.planNow.why[it.id]||"")+" (a tour now)":"")};
@@ -274,8 +303,12 @@ function gdBeatCheck(it,ctx){var T=ctx.tour,P=ctx.plan;
   if(it.game&&ctx.games==="off")return{no:"the visitor turned Games on the tour Off (Settings › The guide)"};
   if(it.game&&(+ctx.notNow||0)>=2)return{no:"two Not nows this visit: no more games"};
   if(!it.calm&&(!ctx.lively||it.groupLife==="calm"))return{no:(it.groupLife==="calm"?"On the tour's Liveliness is Calm":"Calm (Mascot › Liveliness)")+": only the items Calm too"};
-  if(ctx.sr&&it.srPath===false)return{no:"a screen reader is on, and it has no button path"};
-  return{ok:true,why:"planned for "+gdSeamWords(P,b.seam),score:1,f:{score:1}}}
+  if(ctx.sr&&it.srPath===false)return{no:it.beat==="word"?"a screen reader is on: Don't say it! is not offered":"a screen reader is on, and it has no button path"};
+  /* round 13: Don't say it! in the plan's language only; Find it on the wall never while the wall is lost (a system state wins), on the wall of its point */
+  if(it.beat==="word"&&ctx.lang&&P.lang&&ctx.lang!==P.lang)return{no:"the language changed: its word is the "+({en:"English",pt:"Portuguese"}[P.lang]||P.lang)+" one"};
+  if(it.beat==="find"&&ctx.state)return{no:"never while "+ctx.state+" (tracking lost: the system state wins)"};
+  if(it.beat==="find"&&ctx.findOff)return{no:ctx.findOff};
+  return{ok:true,why:"planned for "+(it.place==="instep"?gdSpanWords2(P,b):gdSeamWords(P,b.seam)),score:1,f:{score:1}}}
 /* the quiz's questions, chosen at the finale (research 5.3): only from steps heard (80 % played), one from each third of the tour's
    narration when it can, never two from a step, in the tour's order; n at most. steps: [{id, at (its middle, s), q: a reviewed
    question, heard}]; the thirds from the first content step to the finale */
