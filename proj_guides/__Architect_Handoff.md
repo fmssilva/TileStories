@@ -168,11 +168,16 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     - Round 13b (2026-11-11, the Architect): the result's wait was already built (`gdWordEnd` waits on the game's clock for
       every open window); test9q gained the check (a slip 1.5 s before the seam: no result at 0.8 s, the result after the
       window; 48 checks, 175 s; the mutation turns it red with the other [window] checks). The PT words stay.
-    - **Next: the developer's step-by-step review** below.
-    - **Then: the developer's step-by-step review** of the collected look questions (rounds 1-10; round 10's: build the
-      seven missing phone effects so their rows get real demos, Global Scene's rows, stand-ins for block options with
-      nothing to see, the Sticky Action's demo with the bar at the bottom, and whether every Detail Card change should
-      move the phone). Prototype only (no Unity) until the developer says so.
+    - **The developer's direction (2026-11-11): only the AI guide domain**, until it is finished and polished (great
+      features, design and Editor organization); the rest of the app only where the guide meets it. The plan:
+      `_3.8_guidance_plans/guide_polish_plan.md` (the Guide tab's inventory, 649 rows; what is wrong in its organization;
+      the proposed tab; the design pass; the features; the order). Parked (not the guide): the card's seven missing phone
+      effects (the developer had picked only the system events simulated in Preview & Test), Global Scene (kept as
+      headings, developer), the card blocks' stand-ins (Place in AR, Knowledge Check's Appears), the Sticky Action's demo,
+      whether every Detail Card change moves the phone.
+    - **Next: round 14, the Guide tab's organization** (after the developer's answers on the plan).
+    - **Then: round 15, the design pass** of every guide surface (the plan's section 4, with the guide's open look
+      questions from rounds 1-3), and the features (section 5). Prototype only (no Unity) until the developer says so.
   - **MCP:** blender-mcp at user scope (Blender 5.2.3, add-on 1.8, port 9876). The Unity MCP was not connected this stretch.
   - **Keys:** Gemini, Azure Speech and ElevenLabs answer (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).
 - **The tasks, in this order:**
