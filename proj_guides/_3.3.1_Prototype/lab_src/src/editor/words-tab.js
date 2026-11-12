@@ -4,10 +4,10 @@
 function locRefs(){var out=[];
   Object.keys(TXO).forEach(function(o){TXO[o].forEach(function(k){out.push({ref:"tx:"+k,kind:"Interface",label:TXP[k],where:ownerName(o),go:o})})});
   S.sections.forEach(function(s,i){out.push({ref:"sec:"+i,kind:"Content",label:"Section name",where:"Sections › "+s.name.en,go:"sec:"+s.id})});
-  S.story.forEach(function(r,i){var add=function(kind,c,slot){(FIELDS[kind]||[]).forEach(function(f){if(f[1]==="ltext"&&c&&c[f[0]])out.push({ref:"story:"+r.id+":"+slot+":"+f[0],kind:"Content",label:(KIND[kind]?KIND[kind].n:kind)+" · "+f[2],where:"Ribeira Palace › Story page › row "+(i+1),go:"story:"+r.id})})};
+  S.story.forEach(function(r,i){var add=function(kind,c,slot){(FIELDS[kind]||[]).forEach(function(f){if(f[1]==="ltext"&&c&&c[f[0]])out.push({ref:"story:"+r.id+":"+slot+":"+f[0],kind:"Content",label:(KIND[kind]?KIND[kind].n:kind)+" · "+f[2],where:"The Ribeira Palace › Story page › row "+(i+1),go:"story:"+r.id})})};
     if(r.pattern){var p=patternById(r.pattern);if(p)p.rows.forEach(function(pr,j){add(pr.kind,r.slots[j],"s"+j)})}else add(r.kind,r.c,"c")});
   S.terms.forEach(function(t){out.push({ref:"term:"+t.id,kind:"Content",label:"Definition",where:"Terms › "+(termWords(t)[0]||""),go:"term:"+t.id})});
-  S.guideSteps.forEach(function(st,j){if(st.text)out.push({ref:"gstep:"+st.id,kind:"Content",label:"Guide step "+(j+1),where:"Ribeira Palace › Guide script",go:"gstep:"+st.id})});
+  S.guideSteps.forEach(function(st,j){if(st.text)out.push({ref:"gstep:"+st.id,kind:"Content",label:"Guide step "+(j+1),where:"The Ribeira Palace › Guide script",go:"gstep:"+st.id})});
   return out}
 function refObj(ref){var p=ref.split(":");if(p[0]==="tx")return S.tx[p[1]];if(p[0]==="sec")return S.sections[+p[1]].name;if(p[0]==="term"){var t=byId(S.terms,p[1]);return t&&t.def}
   if(p[0]==="gstep"){var g=byId(S.guideSteps,p[1]);return g&&g.text}if(p[0]==="story"){var r=byId(S.story,p[1]);if(!r)return null;var c=p[2]==="c"?r.c:r.slots[+p[2].slice(1)];return c&&c[p[3]]}return null}

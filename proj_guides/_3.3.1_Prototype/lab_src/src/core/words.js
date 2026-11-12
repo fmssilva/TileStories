@@ -44,7 +44,7 @@ var LABSTR=[["tour_promise", "gd:i:quizpromise", "The quiz promise, after the in
  ["search_filters","g:10f","The Filters button (its count is added after it).","Filters","Filtros","","Button label"],
  ["search_filters_name","g:10f","The Filters button's name for screen readers.","Show filters","Mostrar filtros","","Button name (screen readers)"],
  ["guide_start","s7hero","The button on the hero that starts the tour.","Start the guide","Visita com o guia","","Button label"],
- ["guide_block_title","s7block","The Guide block's title.","Meet the palace with the guide","Conheça o palácio com o guia","","Title"],
+ ["guide_block_title","s7block","The Guide block's title ({0} the point's name, lower case mid-sentence by nameIn: round 17, the developer: true of every point's card).","Meet {0} with the guide","Conheça {0} com o guia","","Title"],
  ["guide_block_line","s7block","The Guide block's second line ({0} the tour's length, as the hero's button says it: round 16c).","Narrated tour · {0} · ask anything, any time","Visita narrada · {0} · pergunte a qualquer momento","","Line"],
  ["guide_your_turn","s7coach","Under the captions while the guide waits for the visitor's gesture.","Your turn…","Experimente…","","Prompt under the captions"],
  ["guide_coach_flip","s7coach","The hint chip at a card that flips.","Tap to flip","Toque para virar","","Hint chip (flip)"],
@@ -54,7 +54,7 @@ var LABSTR=[["tour_promise", "gd:i:quizpromise", "The quiz promise, after the in
  ["guide_ctrl_prev","s7tour","The previous-step button's name.","Previous","Anterior","","Previous button"],
  ["guide_ctrl_pause","s7tour","The pause button's name.","Pause","Pausa","","Pause button"],
  ["guide_ctrl_play","s7tour","The play button's name while paused.","Play","Continuar","","Play button"],
- ["guide_ctrl_next","s7tour","The next-step button's name.","Next","Seguinte","","Next button"],
+ ["guide_ctrl_next","s7tour","The next-step button's name: Skip ahead (round 17: with Tell me more, the visitor's own pace; a few in a row make the tour lighter).","Skip ahead","Avançar","","Next button"],
  ["guide_ctrl_mute","s7tour","The sound button's name.","Sound","Som","","Sound button"],
  ["guide_ctrl_stop","s7tour","The stop button's name.","Stop the guide","Parar o guia","","Stop button"],
  ["guide_ask_button","s7tour","The Ask button of the tour's controls.","Ask","Perguntar","","Ask button"],
@@ -103,7 +103,6 @@ var LABSTR=[["tour_promise", "gd:i:quizpromise", "The quiz promise, after the in
  ["settings_music_credits", "s5settings", "The guide's music: the credits the tracks' licences ask for.", "Music credits", "Créditos da música", "", "Music credits"],
  ["settings_music_vol", "s5settings", "The guide's music: its volume.", "Music volume", "Volume da música", "", "Music volume"],
  ["guide_stopped", "s7tour", "The toast after Stop, for 5 s.", "Tour stopped", "Visita interrompida", "", "Stop toast"],
- ["guide_stop_resume", "s7tour", "The toast's button: back to the step and the sentence it stopped at.", "Resume", "Retomar", "", "Stop toast button"],
  ["guide_stop_ask", "s7tour", "With Stop = Ask first: the question before stopping.", "Stop the tour?", "Parar a visita?", "", "Stop question"],
  ["guide_stop_yes", "s7tour", "Its button that stops.", "Stop", "Parar", "", "Stop question: yes"],
  ["guide_stop_no", "s7tour", "Its button that goes on.", "Keep listening", "Continuar a ouvir", "", "Stop question: no"],
@@ -111,7 +110,6 @@ var LABSTR=[["tour_promise", "gd:i:quizpromise", "The quiz promise, after the in
  ["gb_name", "s7gbtn", "The guide's button, for a screen reader (outside a tour).", "The guide: tour, questions, settings", "O guia: visita, perguntas, definições", "", "Button name"],
  ["gb_toggle", "s7gbtn", "The guide's button during a tour, for a screen reader.", "Show or hide the guide", "Mostrar ou esconder o guia", "", "Button name (tour)"],
  ["gb_start", "s7gbtn", "Its menu: starts the tour.", "Start the tour", "Começar a visita", "", "Menu: start"],
- ["gb_resume", "s7gbtn", "Its menu after a Stop: back to where the tour stopped.", "Resume the tour", "Retomar a visita", "", "Menu: resume"],
  ["gb_ask", "s7gbtn", "Its menu: the conversation, by typing or talking.", "Ask (type or talk)", "Perguntar (escrever ou falar)", "", "Menu: ask"],
  ["gb_view", "s7gbtn", "Its menu on the wall, with no point in the middle.", "Ask about the view", "Perguntar sobre a vista", "", "Menu: the view"],
  ["gb_view_about", "s7gbtn", "Its menu on the wall ({0} = the point in the middle).", "Ask about {0}", "Perguntar sobre {0}", "", "Menu: the view (a point)"],
@@ -137,7 +135,7 @@ var LABSTR=[["tour_promise", "gd:i:quizpromise", "The quiz promise, after the in
   ["gd_season_antonio", "gd:i:season", "Seasonal, in June (Santo António, Lisbon's festas): Fun › Play › Seasonal.", "June in Lisbon: Santo António, sardines and basil!", "Junho em Lisboa: Santo António, sardinhas e manjericos!", "", "Santo António (June)"],
   ["gd_season_xmas", "gd:i:season", "Seasonal, from 1 December to 6 January (Christmas): Fun › Play › Seasonal.", "It's nearly Christmas. These tiles have seen 300 of them!", "Está quase no Natal. Estes azulejos já viram 300!", "", "Christmas (December)"],
   ["gd_season_1755", "gd:i:season", "Seasonal, on 1 November (the 1755 earthquake): a Solemn day, a remembrance, never a joke (no joke shows that day).", "1 November 1755: the earthquake. This wall remembers.", "1 de novembro de 1755: o terramoto. Esta parede lembra-se.", "", "1 November (Solemn)"],
-  ["ptj_painting_1", "gd:i:ptjoke", "A joke of Ribeira Palace (edited in Specific Marker › Guide script › Jokes): said when the point settles in the middle, once a visit (Fun › Play › {point}'s joke).", "A palace by the river: the king went to work by boat.", "Um palácio à beira-rio: o rei ia trabalhar de barco.", "", "Joke · Ribeira Palace"],
+  ["ptj_painting_1", "gd:i:ptjoke", "A joke of the Ribeira Palace (edited in Specific Marker › Guide script › Jokes): said when the point settles in the middle, once a visit (Fun › Play › {point}'s joke).", "A palace by the river: the king went to work by boat.", "Um palácio à beira-rio: o rei ia trabalhar de barco.", "", "Joke · Ribeira Palace"],
   ["ptj_torreao_1", "gd:i:ptjoke", "A joke of the Torreão (edited in Specific Marker › Guide script › Jokes; Fun › Play › {point}'s joke).", "The Torreão had the best view in Lisbon. And the most stairs.", "O Torreão tinha a melhor vista de Lisboa. E as escadas mais longas.", "", "Joke · The Torreão"],
   ["ptj_river_1", "gd:i:ptjoke", "A joke of the Tagus and its ships (edited in Specific Marker › Guide script › Jokes; Fun › Play › {point}'s joke).", "So many ships! Lisbon's first traffic jam.", "Tantos navios! O primeiro engarrafamento de Lisboa.", "", "Joke · The Tagus"],
    ["gd_pg_hello_t", "gd:i:pg_hello", "Hello's title, the app's first word (Guide › Azu speaks up › Sequences › First pages › Hello).", "Olá!", "Olá!", "", "Title"],
@@ -192,8 +190,8 @@ var LABSTR=[["tour_promise", "gd:i:quizpromise", "The quiz promise, after the in
  ["settings_cc_on", "s5settings", "The guide's captions: on.", "Captions on", "Legendas ligadas", "", "Captions: on"],
  ["settings_cc_off", "s5settings", "The guide's captions: off.", "Captions off", "Legendas desligadas", "", "Captions: off"],
   /* guidance round 16: the automatic tour's link words (Guide › 2 · The tour › Tour from the card) */
-  ["at_cover", "s7auto", "The teaser's second sentence: what the tour covers and how long ({0} the minutes, from its words at the voice's speed; {1} the list).", "Come along for about {0} minutes: {1}.", "Venha comigo durante cerca de {0} minutos: {1}.", "", "Teaser · length"],
-  ["at_cover_short", "s7auto", "The teaser's second sentence for a short tour, under 2 minutes ({0} the list; round 16b; warm since round 16c).", "Come along on a short tour: {0}.", "Venha comigo numa visita curta: {0}.", "", "Teaser · short tour"],
+  ["at_time_min", "s7auto", "The tour's length in the teaser's opening line ({time}), from 2 minutes ({0} the minutes, from its words at the voice's speed; round 17).", "tour of about {0} minutes", "visita de uns {0} minutos", "", "Teaser · length"],
+  ["at_time_short", "s7auto", "The tour's length in the teaser's opening line ({time}) for a short tour, under 2 minutes (round 16b's rule; round 17).", "short tour", "visita curta", "", "Teaser · short tour"],
   ["at_cover_story", "s7auto", "In the teaser's list: the tour tells the story.", "its story", "a sua história", "", "Covers · story"],
   ["at_cover_ba", "s7auto", "In the teaser's list: a before and after to drag.", "a before and after", "um antes e depois", "", "Covers · before and after"],
   ["at_cover_flip", "s7auto", "In the teaser's list: a card to flip.", "a surprise to flip", "uma surpresa para virar", "", "Covers · flip card"],
@@ -280,7 +278,41 @@ var LABSTR=[["tour_promise", "gd:i:quizpromise", "The quiz promise, after the in
   ["at_in_end_2", "s7auto", "Azu's last words at the end of a tour made from a card, after its recap: a thank-you and what to do next (round 16c; one of its set, picked by the point; {point} the point's name).", "Thank you for your company. Ask me anything you like, or find another point on the wall.", "Foi bom ter a sua companhia. Pergunte-me o que quiser, ou procure outro ponto na parede.", "", "End 2"],
   ["at_in_end_3", "s7auto", "Azu's last words at the end of a tour made from a card, after its recap: a thank-you and what to do next (round 16c; one of its set, picked by the point; {point} the point's name).", "I hope you enjoyed {point} as much as I do. I'm here if you have a question.", "Espero que tenha gostado de {point} tanto como eu. Estou aqui se tiver alguma pergunta.", "", "End 3"],
   ["at_in_end_4", "s7auto", "Azu's last words at the end of a tour made from a card, after its recap: a thank-you and what to do next (round 16c; one of its set, picked by the point; {point} the point's name).", "That's our tour. Have a question? Just ask me, or let the wall show you its next story.", "E assim termina a nossa visita. Tem alguma pergunta? É só perguntar-me, ou deixe a parede mostrar-lhe a próxima história.", "", "End 4"],
-  ["at_in_end_5", "s7auto", "Azu's last words at the end of a tour made from a card, after its recap: a thank-you and what to do next (round 16c; one of its set, picked by the point; {point} the point's name).", "It was a pleasure telling you this story. Take your time with the picture, and ask me anything.", "Foi um prazer contar-lhe esta história. Demore-se na imagem e pergunte-me o que quiser.", "", "End 5"]];
+  ["at_in_end_5", "s7auto", "Azu's last words at the end of a tour made from a card, after its recap: a thank-you and what to do next (round 16c; one of its set, picked by the point; {point} the point's name).", "It was a pleasure telling you this story. Take your time with the picture, and ask me anything.", "Foi um prazer contar-lhe esta história. Demore-se na imagem e pergunte-me o que quiser.", "", "End 5"],
+  /* round 17 (the developer, 2026-11-12): the teaser's opening is a set too, picked by the point like the intro lines ({time} the tour's
+     length, {0} what it covers); one fact left has its own lines (a single fact, after which the fact itself) */
+  ["at_in_teaser_1", "s7auto", "The teaser's opening line 1, after the hook ({time} the tour's length: short tour, or tour of about N minutes; {0} what it covers; round 17).", "Come along on a {time}: {0}.", "Venha comigo numa {time}: {0}.", "", "Teaser opening 1"],
+  ["at_in_teaser_2", "s7auto", "The teaser's opening line 2, after the hook ({time} the tour's length; {0} what it covers; round 17).", "I've planned a {time} for you: {0}.", "Preparei-lhe uma {time}: {0}.", "", "Teaser opening 2"],
+  ["at_in_teaser_3", "s7auto", "The teaser's opening line 3, after the hook ({time} the tour's length; {0} what it covers; round 17).", "Let me take you on a {time}: {0}.", "Vamos fazer juntos uma {time}: {0}.", "", "Teaser opening 3"],
+  ["at_in_teaser_4", "s7auto", "The teaser's opening line 4, after the hook ({time} the tour's length; {0} what it covers; round 17).", "Join me for a {time}: {0}.", "Junte-se a mim numa {time}: {0}.", "", "Teaser opening 4"],
+  ["at_in_teaser_5", "s7auto", "The teaser's opening line 5, after the hook ({time} the tour's length; {0} what it covers; round 17).", "Here's a {time}, made just for you: {0}.", "Aqui está uma {time}, feita para si: {0}.", "", "Teaser opening 5"],
+  ["at_in_fact1_1", "s7auto", "Azu's intro line 1 for one fact left to tell (Quick Facts with a single fact; round 17), leading into the fact.", "One thing worth knowing:", "Uma coisa que vale a pena saber:", "", "Intro · one fact 1"],
+  ["at_in_fact1_2", "s7auto", "Azu's intro line 2 for one fact left to tell (Quick Facts with a single fact; round 17), leading into the fact.", "Here's a fact I really like:", "Aqui fica um facto de que gosto muito:", "", "Intro · one fact 2"],
+  ["at_in_fact1_3", "s7auto", "Azu's intro line 3 for one fact left to tell (Quick Facts with a single fact; round 17), leading into the fact.", "Just one fact, and a good one:", "Só um facto, mas dos bons:", "", "Intro · one fact 3"],
+  ["at_in_fact1_4", "s7auto", "Azu's intro line 4 for one fact left to tell (Quick Facts with a single fact; round 17), leading into the fact.", "Keep this one in mind:", "Guarde este facto na memória:", "", "Intro · one fact 4"],
+  ["at_in_fact1_5", "s7auto", "Azu's intro line 5 for one fact left to tell (Quick Facts with a single fact; round 17), leading into the fact.", "A little fact I'd like you to know:", "Um pequeno facto que gostava que soubesse:", "", "Intro · one fact 5"],
+  ["at_fact_was", "s7auto", "A single fact whose label is a participle (Lost, Built, Laid out) said as a sentence ({0} the label and its value; round 17).", "it was {0}", "foi {0}", "", "One fact · it was"],
+  ["at_fact_on", "s7auto", "A single fact's date of a day ({0} the date: 1 November 1755; round 17).", "on {0}", "a {0}", "", "One fact · on a day"],
+  /* round 17: Tell me more (Guide › 2 · The tour › Tell me more): the chip, the deep parts' own words */
+  ["tm_more", "s7more", "The chip on the guide panel while a step with more to tell plays (round 17): a tap says the step's deep part, then goes on.", "Tell me more", "Conte-me mais", "", "Chip"],
+  ["tm_more_on", "s7more", "The chip once tapped, or at the visitor's deep pace: the deep part comes after this line (round 17).", "More coming", "Já lhe conto mais", "", "Chip · queued"],
+  ["at_more_pics", "s7more", "A gallery's deep part when its set (Azu's intro lines › A gallery's Tell me more) has no line: its pictures' own captions ({0} the pictures said one after another; round 17).", "In its pictures: {0}.", "Nas suas imagens: {0}.", "", "Deep · pictures"],
+  ["at_then", "s7more", "Joins a gallery's pictures in its deep part, after the first (“the square with the palace…, then the ruins…”; round 17b).", "then", "depois", "", "Then"],
+  /* round 17b (the Architect, from the developer's standing rule: Azu is a warm storyteller, never a list): a gallery's Tell me more opens with
+     a warm lead from its set, {0} the pictures' own captions said one after another (Guide › 2 · The tour › Tour from the card › Azu's intro lines) */
+  ["at_in_morepics_1", "s7auto", "Azu's lead 1 into a gallery's deep part (Tell me more; {0} its pictures said one after another; round 17b).", "Swipe through and you'll find {0}.", "Percorra as imagens e vai encontrar {0}.", "", "Gallery more 1"],
+  ["at_in_morepics_2", "s7auto", "Azu's lead 2 into a gallery's deep part (Tell me more; {0} its pictures said one after another; round 17b).", "Look a little closer and you'll see {0}.", "Olhe com mais atenção e vai ver {0}.", "", "Gallery more 2"],
+  ["at_in_morepics_3", "s7auto", "Azu's lead 3 into a gallery's deep part (Tell me more; {0} its pictures said one after another; round 17b).", "Each picture keeps a moment of its own: first {0}.", "Cada imagem guarda um momento seu: primeiro {0}.", "", "Gallery more 3"],
+  ["at_in_morepics_4", "s7auto", "Azu's lead 4 into a gallery's deep part (Tell me more; {0} its pictures said one after another; round 17b).", "Take your time as you swipe: you'll meet {0}.", "Sem pressa, ao percorrer as imagens vai encontrar {0}.", "", "Gallery more 4"],
+  ["at_more_facts", "s7more", "The facts' deep part: the facts the step left out ({0} the list; round 17).", "A few more: {0}.", "Mais alguns: {0}.", "", "Deep · facts"],
+  ["tm_ask", "s7more", "What Ask Azu hears as Tell me more during a tour, typed or spoken (one phrase a line, | between them; round 17).", "tell me more|more please|go on|i want to know more", "conte-me mais|diga-me mais|mais|quero saber mais|continue", "", "Ask Azu · the phrase"],
+  /* round 17: a tour resumes on the next visit where the visitor stopped; round 17b: the one offer back into a stopped tour, this visit or a later
+     one (Guide › 2 · The tour › Ways in › Continue the tour; the Stop toast's Resume and the ✦ menu's Resume the tour are these words now) */
+  ["sv_continue", "s7resume", "The one offer back into a stopped tour: the Stop toast, the ✦ menu and the hero's button; within the visit back to the sentence, on a later visit after a recap ({0} the step, {1} the tour's steps; round 17, one offer since 17b).", "Continue the tour (step {0} of {1})", "Continuar a visita (passo {0} de {1})", "", "Continue"],
+  ["sv_again", "s7resume", "Beside the offer (the Stop toast, the ✦ menu, the hero, the invitation's chip): the tour from its start (round 17).", "Start again", "Começar de novo", "", "Start again"],
+  ["sv_recap", "s7resume", "Said before the step a visitor continues at: one line from the step before, no new fact ({0} its words; round 17).", "Where we were: {0}.", "Onde íamos: {0}.", "", "Recap"],
+  ["sv_changed", "s7resume", "Said once, before the teaser, when the tour changed since the visitor stopped (another written tour, or its step gone; round 17).", "This tour has changed since your last visit, so let's start from the beginning.", "Esta visita mudou desde a última vez, por isso vamos começar do início.", "", "Changed"],
+  ["gd_tourof_cont", "gd:i:tourof", "The invitation when the visitor stopped this point's tour on an earlier visit ({point} its name, {step} the step, {of} the steps; round 17): a tap continues, its chip Start again.", "Continue the tour of {point} (step {step} of {of})?", "Continuar a visita a {point} (passo {step} de {of})?", "", "Says · a saved place"]];
 S.tx={};var TXO={},TXW={},TXF={},TXP={},TXNEW={},TXOWN={},TXRET=[];
 REALSTR.concat(LABSTR).forEach(function(r){S.tx[r[0]]={en:r[3],pt:r[4]};TXW[r[0]]=r[2];TXF[r[0]]=r[5]||"";TXP[r[0]]=r[6]||"";TXOWN[r[0]]=r[1];
   if(r[1]==="retired")TXRET.push(r[0]);else(TXO[r[1]]=TXO[r[1]]||[]).push(r[0])});

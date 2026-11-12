@@ -36,7 +36,7 @@ Judge: is drawing and reshaping quick enough? Are the three corner types enough?
 
 ## Region Editor Lab (P1 + P2 + P3 merged, 2026-10-29)
 
-Live: https://claude.ai/artifact/X7CadwbEKM9eSaU41Z1ASg · record copy: `Region_Editor_Lab.html`. It supersedes P1.
+Live: https://claude.ai/artifact/MDZ3DZzjDscHEU6dw22Qp6 · record copy: `Region_Editor_Lab.html`. It supersedes P1.
 
 The developer asked for one prototype that looks like the real POI Editor. Geometry (per POI) and style (per wall) are two
 sides of one thing, and separate prototypes hid how they connect.

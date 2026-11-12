@@ -5,7 +5,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-07)
 
 - **State:**
-  - **The Lab:** `master` holds guidance rounds 1-16c, verified on 2026-11-06/11, published at
+  - **The Lab:** `master` holds guidance rounds 1-17b, verified on 2026-11-06/11, published at
     https://claude.ai/artifact/Gpjf7yvoYHjGebmmNhuw2o (round 14b) with the 186 voice files, the music and the capabilities (section 1). The
     developer changes account often (four times on 2026-11-08/09); the old links stay in their accounts (RGofgb… at round 13, 19Uiat… at round 12, RKn3Rr… at round 11, J9J4h… at round 9, 4LpLd4… at round 8, Jq6X2K… at round 7, Jrejv7… at
     round 6, QmhHSz… at round 5, KDs2… at v29). A new account cannot update an old link: publish a new one (section 1, Publishing). Its
@@ -29,8 +29,18 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     answers' traces, a tip rule catching cues; round 7: the card's ✦ and Azu drawn during a tour; round 8: checks of
     round 6's templates and defaults). Two rules came of it: shared code changed means level 2 that round; and every round
     touches `src/guidance/`, so a round's level 1 runs test9e up to its own file, not only the new one.
-  - **Test levels** (decided 2026-11-06; cut twice since: the developer refused 1h30 of tests a round, then a 30-min level 1
-    on 2026-11-07). The rules are in `lab_src/README.md` "Levels". Every brief repeats them.
+  - **Test tiers (the developer, 2026-11-12; these replace the levels below):** "feature tests per round, each 4 rounds core
+    tests, each 12 rounds full tests". Written in `lab_src/README.md` "Levels" and PROTOTYPE_STRUCTURE's rules.
+    - **Feature, every round (~5-15 min):** the round's own file(s) and mutation, the self-test of the tab it touched, at most
+      1-2 files the brief names. Never "the files of every module you change" (rounds 16b-17 pulled 16-50 files; round 17's
+      builder ran about 4.7 h). The Architect reruns the round's file once, plus its mutation when checks were added.
+    - **Core, every 4 rounds (~32 min):** `tests\runtest8.ps1` with no tabs (every walk, ~14 min) and `node run_tests.js --core`
+      (11 files, ~18 min; the list sits once in README between the `<!-- core set -->` markers, each with its reason).
+    - **Full, every 12 rounds and before Unity:** every file, every mutation, a new baseline (~6450 s of files).
+    - Count the rounds since the last core and full run in every answer. Core last ran in round 17b (2026-11-12); full on
+      2026-11-09.
+  - **Old test levels** (decided 2026-11-06; cut twice since: the developer refused 1h30 of tests a round, then a 30-min level 1
+    on 2026-11-07), kept for the history.
     - **While building:** only the build and captures, iterated until the app and the Editor look right
       (`skills/Feature_Prototyping.md` step 3.3).
     - **Level 1, once a round (about 25 min for guidance rounds):** the round's new test file, the file of what it replaced,
@@ -273,8 +283,29 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       green and its mutation. test9db now runs 413 s (over 300): split it in level 2. Seen: the Guide block's PT title says
       "Conheça o palácio com o guia" on every point's card (the square too): round 17. The text: the scratchpad's
       `g16c\tour_en.md`, `tour_pt.md`.
-    - Rounds since level 2: 5 (15, 15b, 16, 16b, 16c); run level 2 after round 17 (test9i's two old reds, test9db's length).
-    - **Next: round 17** (resume on the next visit; short or deep per step), then level 2, then round 18 (Ask Azu during a game).
+    - Round 17 (2026-11-12, brief `_3.8_guidance_plans/brief_round17.md`): `guide/saved-place.js` (a stopped tour is kept per
+      point; the next visit offers "Continue the tour (step N of M)" / "Start again"; Azu first says "Where we were: ...";
+      forgotten after 7 days; a changed tour says so) and `guide/tell-more.js` (a 44 px "Tell me more" chip on a step with a
+      deep part; Next is "Skip ahead"; the pace follows the visitor, 3 in a row either way; "Start deep for" No one / Tour
+      lovers / Everyone; Ask Azu's "tell me more"); the teaser's opening set and the One fact set. The developer: Tour lover =
+      a visitor who chose Deep (the guide's length in Settings or the Audience); the new captions and the g7 deep part stay
+      placeholders; EN and PT teasers may open differently; merge the two ways back into a tour.
+    - Round 17b (2026-11-12, brief `_3.8_guidance_plans/brief_round17b.md`): the core walks crashed since round 16 (0287de1):
+      the Dialogue page drew `KPREV.Dialogue()` with no block and `kindWords(b).lines` was undefined; `kindWords(b, kind)` now
+      falls back field by field and every renderer passes its kind. **One way back into a stopped tour** (`svOffer`): the same
+      "Continue the tour (step 5 of 13)" / "Start again" on the Stop toast, the ✦ menu, the hero and A tour of {point}?;
+      within the visit back to the sentence, on a later visit after the recap; Editor Ways in › Continue the tour (`s7resume`
+      kept). The gallery's Tell me more in the storyteller voice: a lead set `at_in_morepics_1..4` and the captions said one
+      after another ("Each picture keeps a moment of its own: first the square with the palace ..., then the ruins the
+      earthquake left, ..."). Split: test9db → 9db + 9dc, test9e → 9e + 9ea, test9sf → 9sf + 9sg (test9sc, 352 s, still over
+      300). test9i's two old reds were the expectation: since round 16 three more points have a card, so a tapped remark
+      starts a tour (round 3's rule): Fast learner 2 tours, Tour lover 5. **Core run:** walks ok=1618 bad=0 (card 710,
+      guide 69, marker+words+global 839; 14 min), the 11 core files green (test9da crashed once on Azu's button, 67/0 alone).
+      The Architect reran test9u and test9t and their mutations.
+    - Rounds since core: 0 (17b); since full: 2026-11-09.
+    - **Next: round 18** (Ask Azu during a game: the game pauses, Azu answers, the game goes on), feature tests only; then
+      **a final guide polish pass** (the developer tries the whole guide in the Lab and we fix what they notice); then the
+      guide is closed and **the Detail Card blocks' design** starts.
       Prototype only (no Unity) until the developer says so.
   - **MCP:** blender-mcp at user scope (Blender 5.2.3, add-on 1.8, port 9876). The Unity MCP was not connected this stretch.
   - **Keys:** Gemini, Azure Speech and ElevenLabs answer (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).

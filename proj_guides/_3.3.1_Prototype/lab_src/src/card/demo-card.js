@@ -2,7 +2,7 @@
 /* ----- the demo card: a card of its own with every block once, seeded once from the Ribeira Palace, then independent of every marker ----- */
 function demoCardScreen(){var keep=S.card,kt=S.test;S.card=S.demoCard;S.test={on:true,poi:"painting"};inDemoCard=true;var h;try{h=cardScreen()}finally{S.card=keep;S.test=kt;inDemoCard=false}
   h=h.replace(/<i title="([^"]*)">&#10005;<\/i>/,'<i title="$1" data-go="card" role="button" style="cursor:pointer">&#10005;</i>');
-  return h.replace(/<small>[^<]*<\/small><h2>Ribeira Palace<\/h2>/,"<small>"+TXH("democard_tag")+"</small><h2>"+TXH("democard_title")+"</h2>")}
+  return h.replace(/<small>[^<]*<\/small><h2>The Ribeira Palace<\/h2>/,"<small>"+TXH("democard_tag")+"</small><h2>"+TXH("democard_title")+"</h2>")}
 /* ----- the phone's own words for the test tile, the preview bar and the demo card ----- */
 var inDemoCard=false;
 /* ----- the demo card: every kept kind once, in its section's order ----- */

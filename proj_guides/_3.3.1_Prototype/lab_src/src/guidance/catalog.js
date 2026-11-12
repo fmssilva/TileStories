@@ -7,7 +7,7 @@
    gap stands in for its kind's for its items); the kinds' weights along the visit are data (round 5: S.guidance.mix, Overall › Mix along the visit, read by gdScore through
    each item's kindMix). Round 5 also adds Talkativeness (one knob over the room, the limits and the kinds' caps: GD_TALK) and the presets
    (GD_PRESETS: each writes the Overall and kind values, never the items; Custom lists its changes). A per-point item
-   (perPoint) is one item for each point of the wall in view (gdItems: "Ribeira Palace in the middle"), each with its own memory, edited
+   (perPoint) is one item for each point of the wall in view (gdItems: "The Ribeira Palace in the middle"), each with its own memory, edited
    once. An item's words are in Languages & Terms (S.tx), owned by the item's foldout (gd:i:<id>); the bubble's own words (Fewer like
    this?) by Overall (gd:overall). The events the items wait for or retire on are named in GD_EVENTS (the same names in Unity). Unity:
    GuidanceCatalog, a ScriptableObject (kinds, groups, items; a per-point item expanded from the wall's POI list at load; the words as
@@ -339,8 +339,8 @@ function gdLineKey(it,returning,slots){slots=slots||{};var a=slots.aud!==undefin
   return k}
 /* round 16b (the developer): a tour under 2 minutes is offered as a short one, with no minutes: a line with a {min} slot has its "_short"
    word (gd_tourof_short: "A short tour of {point}?"), used when the tour is under 2 minutes */
-function gdLine(it,returning,slots){slots=slots||{};var k=gdLineKey(it,returning,slots);if(!k)return"";if(slots.min!=null&&+slots.min<2&&gdHasWords(k+"_short"))k=k+"_short";
-  return nameIn(nameIn(TXT(k),"{thing}",slots.thing||""),"{point}",slots.point||"").replace(/\{year\}/g,slots.year!=null?slots.year:"").replace(/\{min\}/g,slots.min!=null?slots.min:"").replace(/\{button\}/g,S.guideCfg.gbIcon==="star"?"✦":TXT("gb_label")).replace(/\b1 (minute|minuto)s\b/g,"1 $1")}
+function gdLine(it,returning,slots){slots=slots||{};var k=gdLineKey(it,returning,slots);if(!k)return"";if(slots.cont!=null&&gdHasWords(k+"_cont"))k=k+"_cont";else if(slots.min!=null&&+slots.min<2&&gdHasWords(k+"_short"))k=k+"_short";
+  return nameIn(nameIn(TXT(k),"{thing}",slots.thing||""),"{point}",slots.point||"").replace(/\{year\}/g,slots.year!=null?slots.year:"").replace(/\{min\}/g,slots.min!=null?slots.min:"").replace(/\{step\}/g,slots.cont!=null?slots.cont:"").replace(/\{of\}/g,slots.of!=null?slots.of:"").replace(/\{button\}/g,S.guideCfg.gbIcon==="star"?"✦":TXT("gb_label")).replace(/\b1 (minute|minuto)s\b/g,"1 $1")}
 /* a word key with words in the visitor's language (an empty line falls back to Says) */
 function gdHasWords(k){var o=S.tx[k];return!!(o&&String(L(o)||"").trim())}
 /* the read-back of an item, in words (study 3.2): "Tap a marker · App › The start · when a marker is in view and the phone is still ·

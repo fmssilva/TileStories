@@ -1,6 +1,8 @@
 // Runs the test files in tests/ (not the *_live ones, which spend a provider's quota) and sums them up (README.md, "Prove it").
-// node run_tests.js [out.json] [--only=test8i,test9b] [--changed[=<git rev>]]  -> one line per test, then the failed
+// node run_tests.js [out.json] [--only=test8i,test9b] [--core] [--changed[=<git rev>]]  -> one line per test, then the failed
 // checks; exit 1 on any FAIL.
+//   --core     the core set (README.md, "Levels": the files that test the shared modules, each with why), read from README's list
+//              between <!-- core set --> and <!-- /core set --> (one list, in one place); run every 4 rounds after the self-test.
 //   --changed  the block's tests: the test files PROTOTYPE_STRUCTURE.md names for every module changed since <rev> (default
 //              HEAD: the work not yet committed) and every changed or new test file. A changed module the map names no test
 //              for is shared ground: the line "SHARED GROUND" says the block closes on level 2.
@@ -13,6 +15,14 @@ const out = process.argv.find(a => a.endsWith('.json')) || path.join(D, 'tests_r
 const val = k => { const a = arg(k); return a && a.includes('=') ? a.slice(a.indexOf('=') + 1) : null };
 const all = fs.readdirSync(T).filter(f => /^test[0-9a-z]+\.js$/.test(f) && !/_live/.test(f)).sort();
 let pick = (val('only') || '').split(',').filter(Boolean).map(t => t.replace(/\.js$/, '') + '.js');
+if (arg('core')) {
+  const rd = fs.readFileSync(path.join(D, 'README.md'), 'utf8'), m = rd.match(/<!-- core set -->([\s\S]*?)<!-- \/core set -->/);
+  if (!m) { console.log('README.md has no core set (<!-- core set --> ... <!-- /core set -->)'); process.exit(1) }
+  const core = [...new Set((m[1].match(/`(test[0-9][0-9a-z]*)`/g) || []).map(t => t.slice(1, -1) + '.js'))];
+  const gone = core.filter(t => !all.includes(t)); if (gone.length) { console.log('the core set names files that are not in tests/: ' + gone.join(', ')); process.exit(1) }
+  console.log('the core set (README.md): ' + core.map(t => t.replace(/\.js$/, '')).join(', '));
+  pick = pick.concat(core);
+}
 const SHARED_FILES = /^(build\.py|check_structure\.js|run_tests\.js|src\/page\/)/;
 if (arg('changed')) {
   const rev = val('changed') || 'HEAD', rel = 'proj_guides/_3.3.1_Prototype/lab_src/';

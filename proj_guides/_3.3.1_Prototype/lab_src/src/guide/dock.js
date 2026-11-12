@@ -196,7 +196,7 @@ on("modelSig.sig",function(h){if(!sigWant(/guideCfg\.(dockStart|miniCtl|chips|pa
 function placeBubble(){var b=ph.querySelector(".gbubble"),d=ph.querySelector(".gdock")||ph.querySelector(".gbtn-wrap.intour"),m=ph.querySelector(".mascot");if(!b)return;var hd=d&&d.querySelector(".gd-hide"),top=d?Math.min(phRect(d.querySelector(".gd-mrow")||d).t,hd?phRect(hd).t:1e9):ph.offsetHeight-16;
   b.style.bottom=(ph.offsetHeight-top+10)+"px";var up=m&&m.offsetTop+30<top-b.offsetHeight-10;b.classList.toggle("tail-up",!!up)}
 /* the free height for the block being told: above the dock and the bubble */
-function freeHeight(){var box=scr.getBoundingClientRect(),lo=box.bottom;[".gcap",".gbar",".gdock",".gbubble",".gbtn-wrap.intour"].forEach(function(s){var e=ph.querySelector(s);if(e){var r=e.getBoundingClientRect();if(r.height)lo=Math.min(lo,r.top)}});return{top:box.top,bottom:lo}}
+function freeHeight(){var box=scr.getBoundingClientRect(),lo=box.bottom;[".gcap",".gbar",".gdock",".gbubble",".gbtn-wrap.intour",".gtmore"].forEach(function(s){var e=ph.querySelector(s);if(e){var r=e.getBoundingClientRect();if(r.height)lo=Math.min(lo,r.top)}});return{top:box.top,bottom:lo}}
 /* keep the talk state and the bubble's place in step with the voice */
 /* a bubble shows one sentence at a time (2 lines at most), the sentence being said */
 function bubbleSentence(){var b=ph.querySelector(".gbubble .gcap");if(!b)return;var ws=b.querySelectorAll(".gw"),k=Math.max(0,G.hl&&G.hl.k>=0?G.hl.k:0),sid=[],n=0;

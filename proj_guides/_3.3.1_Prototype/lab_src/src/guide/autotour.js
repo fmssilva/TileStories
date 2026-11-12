@@ -65,6 +65,30 @@ function atProper(parts){var p={};parts.forEach(function(x){atSentences(x).forEa
    about 250 years", "Built in the 1580s", "Lost 1 November 1755"), else with a colon ("River: the Tagus") */
 var AT_LEAD={en:/(\b(for|in|on|at|by|under|since|until|from|of|out|with)|ed|lost|built)$/i,pt:/(\b(durante|em|no|na|nos|nas|de|do|da|desde|até|com|por)|ado|ada|ido|ida|ído|to|ta)$/i};
 function atFact(f,lang,lf,first){var lab=first?f[0]:lf(f[0]),re=AT_LEAD[lang]||AT_LEAD.en;return re.test(f[0].trim())?lab+" "+lf(f[1]):lab+": "+lf(f[1])}
+/* round 17 (the developer): a single fact left to tell is said as a sentence: a label that is a participle (Lost, Built, Laid out) becomes
+   "it was lost on 1 November 1755" ("foi perdido a 1 de novembro de 1755"); any other is the fact as a phrase ("In the paintings: …") */
+var AT_PART={en:/^(?:lost|built|laid|made|founded|begun|rebuilt|opened|finished|\p{L}+ed)\b/iu,pt:/^\p{L}+(?:ad[oa]s?|id[oa]s?|íd[oa]s?|t[oa]s?)$/iu};
+var AT_DAY={en:/^\d{1,2}\s+\p{L}+\s+\d{3,4}$/u,pt:/^\d{1,2}\s+de\s+\p{L}+\s+de\s+\d{3,4}$/u};
+function atOneFact(f,lang,lf,W){var lab=String(f[0]).trim(),val=String(f[1]).trim(),first=(lab.match(/^\S+/)||[""])[0];
+  if((AT_PART[lang]||AT_PART.en).test(lang==="pt"?first:lab)){var v=(AT_DAY[lang]||AT_DAY.en).test(val)?fmt(W("at_fact_on"),val):lf(val);return fmt(W("at_fact_was"),lab.charAt(0).toLowerCase()+lab.slice(1)+" "+v)}
+  /* a label that starts with a preposition goes on with a comma ("in the paintings, ships at anchor off the palace"), any other as a phrase */
+  if((AT_PREP[lang]||AT_PREP.en).test(lab))return lab+", "+lf(val);return atFact(f,lang,lf,true)}
+var AT_PREP={en:/^(in|on|at|by|under|from|near|inside|outside|during)\b/i,pt:/^(em|no|na|nos|nas|sob|junto|durante|perto|dentro|fora)\b/i};
+/* round 17: a step's deep part in words (Tell me more): a text's further sentences as they are, the facts left out ("A few more: …"),
+   a gallery's pictures; units already in the tour's case.
+   Round 17b (the Architect, from the developer's rule that Azu is a warm storyteller, never a list): a gallery's deep part is a warm lead from
+   its set (Azu's intro lines › A gallery's Tell me more, d.lead: {0} the pictures) and the captions said as a guide would, one after another
+   ("Swipe through and you'll find the square with the palace and its corner tower by the river, then the ruins the earthquake left…"): each
+   caption without its medium ("A painting of", "Uma gravura das": atPicPhrase), joined by "then" and "and" (at_then, at_and). With no line
+   in the set, at_more_pics. Only the card's words and the lead. Unity: GuideTourBuilder.DeepPictures, the same rule */
+var AT_MEDIUM={en:/^(?:a|an|the)\s+(?:painting|engraving|drawing|photo|photograph|picture|print|map|plan|sketch|watercolou?r|illustration|etching)\s+of\s+/i,
+  pt:/^(?:uma?|o|a)\s+(?:pintura|gravura|desenho|fotografia|foto|imagem|ilustração|mapa|planta|esboço|aguarela)\s+(de|da|do|das|dos)\s+/i};
+function atPicPhrase(c,lang){var re=AT_MEDIUM[lang]||AT_MEDIUM.en,m=re.exec(c);if(!m)return c;var art={da:"a ",do:"o ",das:"as ",dos:"os "}[(m[1]||"").toLowerCase()]||"";return art+c.slice(m[0].length)}
+function atPicsSay(u,W,lang){if(u.length<2)return u.join("");return u[0]+", "+W("at_then")+" "+atJoin(u.slice(1),W("at_and"),lang)}
+function atDeepText(d,lang,W){if(!d||!d.units||!d.units.length)return"";var u=d.units.map(function(x){return x.t});
+  if(d.kind==="pics"){var ph=atPicsSay(u,W,lang),l=d.lead&&d.lead.t?String(d.lead.t).trim():"",t=!l?fmt(W("at_more_pics"),ph):/\{0\}/.test(l)?fmt(l,ph):/[:,]$/.test(l)?l+" "+ph+".":l+" "+ph.charAt(0).toUpperCase()+ph.slice(1)+".";
+    return t.charAt(0).toUpperCase()+t.slice(1)}
+  if(d.kind==="facts")return fmt(W("at_more_facts"),u.join(", "));return u.join(" ")}
 /* a long text in its first sentences, up to the cap (a first sentence over it is cut at the cap with …) */
 function atCapText(t,cap){var ss=atSentences(t),out=[],n=0;for(var i=0;i<ss.length;i++){var w=atWords(ss[i]);if(out.length&&n+w>cap)break;out.push(ss[i]);n+=w}
   var r=out.join(" ");if(atWords(r)>cap)r=(r.match(/\S+/g)||[]).slice(0,cap-1).join(" ").replace(/[,;:]$/,"")+"…";return{text:r,cut:r!==String(t).trim()}}
@@ -138,7 +162,12 @@ function atNameKeys(name,lang){return atFactKeys(name,lang,{all:true}).filter(fu
 var AT_INTRO_SETS=[["facts","The facts","Quick Facts"],["story","The story, as it opens","Story"],["text","A text","Inline, read in its own words"],["flip","A flip card","Inline with a back"],
   ["callout","A callout","a heading and its words: a story row, an Inline shown with its title"],["pics","A gallery or a picture","Gallery, a story row's picture"],["dates","A timeline","Timeline"],
   ["ba","A before and after","Before and After, a story row's"],["quiz","The quiz","Knowledge Check"],["back","Back on the card","the first block after the story, whatever its kind"],
-  ["other","Any other block","Dialogue, Poll, Status, Compare Points, Video, a story row with no heading…"],["end","The end","the tour's last words, after its recap: a thank-you and what to do next on the wall"]];
+  ["other","Any other block","Dialogue, Poll, Status, Compare Points, Video, a story row with no heading…"],["end","The end","the tour's last words, after its recap: a thank-you and what to do next on the wall"],
+  ["fact1","One fact","Quick Facts with a single fact left to tell: a line that leads into the fact, said as a sentence (“One thing worth knowing: it was lost on 1 November 1755.”)"],
+  ["teaser","The teaser's opening","the teaser's second sentence, after the hook: {time} the tour's length (“short tour” under 2 minutes, else “tour of about N minutes”), {0} what the tour covers"],
+  ["morepics","A gallery's Tell me more","a gallery's deep part (Tell me more, round 17b): the warm lead into its pictures, {0} the pictures' own captions said one after another (“the square with the palace…, then the ruins the earthquake left and…”)"]];
+/* the Editor's order of the sets (round 17: the teaser's opening first, one fact after the facts) */
+var AT_INTRO_SHOW=["teaser","facts","fact1","story","text","flip","callout","pics","morepics","dates","ba","quiz","back","other","end"];
 var AT_INTRO_DEF={};AT_INTRO_SETS.forEach(function(x){AT_INTRO_DEF[x[0]]=Object.keys(S.tx).filter(function(k){return k.indexOf("at_in_"+x[0]+"_")===0}).sort(function(p,q){return+p.split("_").pop()-+q.split("_").pop()})});
 S.guideCfg.atIntro=JSON.parse(JSON.stringify(AT_INTRO_DEF));S.guideCfg.atIntroCap=20;
 function atIntroSalt(set){var i=AT_INTRO_SETS.findIndex(function(x){return x[0]===set});return i<0?0:i}
@@ -183,6 +212,10 @@ function tourFromCard(card,story,lang,o){
     if(!body&&!lone){if(b&&!dup[b.id])dup[b.id]=whyOf(keysOf(raw,x.items),x.what);return null}var at=atPlace(b?b.kind:null);
     var units=x.units||atSentences(body).map(function(s){return{t:s,k:keysOf(s)}});units.forEach(function(u){mark(u.t,x.items,at)});mark(body,false,at);
     st.at={key:st.id,block:b?b.id:null,kind:b?b.kind:null,rule:rule||"",lk:set||null,lw:x.lw||"",ls:"",body:body,units:units,gen:true};steps.push(st);return st};
+  /* round 17: Tell me more: a step's deep part, the words its rule left out, each unit with its fact keys; candidates now (no sentence
+     said, no unit whose facts were all said), checked against the later steps at the end (deep pass); never in the first pass */
+  var deepOf=function(st,kind,units){if(o.pre||!st||!st.at)return;var u=(units||[]).filter(function(x){var n=atNorm(x.t);return n&&!said[n]&&!(x.k.length&&x.k.every(function(k){return atKnown(facts,k)}))});if(u.length)st.at.deep={kind:kind,units:u}};
+  var restOf=function(full,shown){if(/…$/.test(shown))return[];return atSentences(full).slice(atSentences(shown).length).map(function(x){return{t:x,k:keysOf(x)}})};
   var rules=o.rules||{},rule=function(k){var r=AT_RULES[k];return r?(rules[k]||r.opts[0][0]):"skip"};
   /* the hook: the subtitle, the story's first sentence or the first fact, by the Editor's Hook */
   var storyB=card.filter(function(b){return b.kind==="Story"&&rule("Story")!=="skip"})[0],factsB=card.filter(function(b){return b.kind==="Quick Facts"})[0];
@@ -201,22 +234,26 @@ function tourFromCard(card,story,lang,o){
       rows.slice(1).forEach(function(r){if(n>=o.storyMax)return;var rs=atRowSays(r,lang),rid="a:r:"+r.id,rb={id:rid,view:"story",ref:"r:"+r.id},s2=null;
         if(rs.kind==="head"){lead=rs.text;return}
         /* a paragraph goes on with the story, with no intro line */
-        if(rs.kind==="par"){var c=atCapText(rs.text,o.cap);s2=add(Object.assign(rb,{act:"read"}),null,c.text,b,rl);if(s2)s2.at.cut=c.cut}
+        if(rs.kind==="par"){var c=atCapText(rs.text,o.cap);s2=add(Object.assign(rb,{act:"read"}),null,c.text,b,rl);if(s2){s2.at.cut=c.cut;deepOf(s2,"sents",restOf(rs.text,c.text))}}
         else if(rs.kind==="ba"){var hd=rs.lead||lead,tx=fresh(atEnd(rs.text));s2=add(Object.assign(rb,{act:"try",wait:"drag"}),"ba",(hd?atEnd(hd)+" ":"")+tx+(/drag|arraste/i.test(tx)?"":" "+W("at_try_drag")),b,rl)}
         else if(rs.kind==="show"){var l2=bare(rs.lead||lead),cc=atCapText(rs.text,o.cap-8);
-          s2=l2?add(Object.assign(rb,{act:"show"}),"callout",atEnd(l2+": "+lf(cc.text)),b,rl,{lw:"its heading “"+l2+"”"}):add(Object.assign(rb,{act:"show"}),"other",atEnd(cc.text),b,rl);if(s2)s2.at.cut=cc.cut}
+          s2=l2?add(Object.assign(rb,{act:"show"}),"callout",atEnd(l2+": "+lf(cc.text)),b,rl,{lw:"its heading “"+l2+"”"}):add(Object.assign(rb,{act:"show"}),"other",atEnd(cc.text),b,rl);if(s2){s2.at.cut=cc.cut;deepOf(s2,"sents",restOf(rs.text,cc.text))}}
         else if(rs.kind==="cap"){var cp=atEnd(rs.cap),l3=bare(lead);s2=l3?add(Object.assign(rb,{act:"show"}),"callout",atEnd(l3+": "+lf(cp)),b,rl,{lw:"its heading “"+l3+"”"}):add(Object.assign(rb,{act:"show"}),"pics",cp,b,rl,{lw:"its caption"})}
         if(s2){s2.at.key=rid;n++;lead="";lastView="story"}});return}
     if(k==="Quick Facts"){if(o.pre)return;var all=(w.facts||[]).filter(function(f){return f[0]&&f[1]}),fs=hookSrc==="fact"?all.slice(1):all.slice(),gone=hookSrc==="fact"&&all[0]?keysOf(atFact(all[0],lang,lf,true),true):[];
       /* a fact said already, or told later by a sentence of the tour (all its keys in one), is left out */
       fs=fs.filter(function(f){var kk=keysOf(atFact(f,lang,lf,true),true),out=kk.length&&(kk.every(function(x){return atKnown(facts,x)})||(o.later||[]).some(function(L){return kk.every(function(x){return L.k.indexOf(x)>=0})}));if(out)gone=gone.concat(kk);return!out});
+      /* round 17: the facts beyond three are the step's deep part (Tell me more) */
+      var moreF=fs.slice(3).map(function(f){var t=atFact(f,lang,lf,false);return{t:t,k:keysOf(t,true)}});
       fs=fs.slice(0,3);if(w.cat&&fs.length<3&&!old(atFact(w.cat,lang,lf,true),true))fs.push(w.cat);
       if(!fs.length){dup[b.id]=whyOf(gone,"facts");return}
+      /* round 17 (the developer): one fact left has its own lines (One fact) and is said as a sentence */
+      if(fs.length===1){var one=atOneFact(fs[0],lang,lf,W);mk("show","fact1",atEnd(one.charAt(0).toUpperCase()+one.slice(1)),null,{units:[{t:one,k:keysOf(one,true)}],items:true,what:"facts"});deepOf(st,"facts",moreF);return}
       var ps=fs.map(function(f,i){return atFact(f,lang,lf,!i)}),sen=ps.join(ps.some(function(x){return x.indexOf(": ")>=0})?"; ":", "),units=ps.map(function(x){return{t:x,k:keysOf(x,true)}});
-      mk("show","facts",atEnd(sen.charAt(0).toUpperCase()+sen.slice(1)),null,{units:units,items:true,what:"facts"});return}
+      mk("show","facts",atEnd(sen.charAt(0).toUpperCase()+sen.slice(1)),null,{units:units,items:true,what:"facts"});deepOf(st,"facts",moreF);return}
     if(k==="Inline"){if(w.flip&&rl==="read"){mk("try","flip",(w.title?atEnd(w.title)+" ":"")+atEnd(w.text)+" "+W("at_try_flip"),{wait:"flip"});return}
-      if(rl==="read"&&b.c&&w.text){var ct=atCapText(w.text,o.cap);if(mk("read","text",ct.text))st.at.cut=ct.cut;return}
-      var th=bare(w.title),fs1=atSentences(w.text)[0]||"";mk("show",th?"callout":"other",th?atEnd(th+": "+lf(fs1)):atEnd(fs1),null,{lw:th?"its title “"+th+"”":""});return}
+      if(rl==="read"&&b.c&&w.text){var ct=atCapText(w.text,o.cap);if(mk("read","text",ct.text)){st.at.cut=ct.cut;deepOf(st,"sents",restOf(w.text,ct.text))}return}
+      var th=bare(w.title),fs1=atSentences(w.text)[0]||"";if(mk("show",th?"callout":"other",th?atEnd(th+": "+lf(fs1)):atEnd(fs1),null,{lw:th?"its title “"+th+"”":""}))deepOf(st,"sents",restOf(w.text,fs1));return}
     if(k==="Timeline"){/* its first and last events (or all, by its rule), less those whose fact was said, each with its date as said (around 1500, in 1755, in the 1580s) */
       var ev=(w.events||[]).filter(function(e){return e[0]&&e[1]}),gn=[];if(rl==="ends"&&ev.length>2)ev=[ev[0],ev[ev.length-1]];
       ev=ev.map(function(e){var c=/^c\.\s*/.test(e[0]),d=String(e[0]).replace(/^c\.\s*/,""),dec=/^(\d{3}0)s$/.exec(d),
@@ -224,7 +261,9 @@ function tourFromCard(card,story,lang,o){
         .filter(function(u){var out=u.k.length&&u.k.every(function(x){return atKnown(facts,x)});if(out)gn=gn.concat(u.k);return!out});
       if(!ev.length){dup[b.id]=whyOf(gn,"dates");return}
       mk("show","dates",atEnd(ev.map(function(u){return u.t.replace(/[.!?…]+$/,"")}).join("; ")),null,{units:ev.map(function(u){return{t:u.t,k:u.k}}),items:true,lw:ev.length>1?"its dates":"its date",what:"dates"});return}
-    if(k==="Gallery"){var gc=w.cap?fresh(atEnd(w.cap)):"";mk("show","pics",gc||fmt(W("at_pics"),w.n||""),null,{lw:gc?"its caption":""});return}
+    if(k==="Gallery"){var gc=w.cap?fresh(atEnd(w.cap)):"";if(mk("show","pics",gc||fmt(W("at_pics"),w.n||""),null,{lw:gc?"its caption":""}))
+        /* round 17: its deep part, the other pictures' captions */
+        deepOf(st,"pics",(w.caps||[]).filter(Boolean).map(function(c){var t=lf(atPicPhrase(String(c).replace(/[.!?…]+$/,"").trim(),lang));return{t:t,k:keysOf(t)}}));return}
     if(k==="Before and After"){var lb=(w.labels||[]).filter(Boolean),pair=lb.length===2?fresh(atEnd(lb[0]+" "+W("at_and")+" "+lf(lb[1]))):"";
       if(rl==="try")mk("try","ba",(pair?pair+" ":"")+W("at_try_drag"),{wait:"drag"});else mk("show","ba",pair||W("at_show_look"));return}
     if(k==="Knowledge Check"){if(!w.q)return;if(rl==="try")mk("try","quiz",atEnd(w.q)+" "+W("at_try_answer"),{wait:"answer"});else mk("show","quiz",atEnd(w.q));return}
@@ -244,6 +283,21 @@ function tourFromCard(card,story,lang,o){
   var recap=[hookSrc!=="line"?o.line:"",storyB?o.says(storyB).title:"",hookSrc!=="fact"?firstFact:""].filter(function(r,i){return r&&r.indexOf(":")<0&&!said[atNorm(r)]&&!old(r,i===2)})[0]||"";
   var endLine=recap?nameIn(fmt(W("at_recap"),"{0}",lf(recap.replace(/[.!?…]+$/,""))),"{0}",o.name,lang):"";
   steps.push({id:"aend",view:"card",ref:"hero",act:"end",at:{key:"aend",block:null,kind:null,rule:"",lk:null,body:endLine,units:[],gen:true}});
+  /* round 17: the deep pass. Tell me more never makes a later fact a second telling: a deep unit is kept only when, with it and the deep
+     parts kept before it heard, every later unit of the short tour still brings a fact of its own; and no deep unit is a sentence the short
+     tour says later. The deep parts never change the short tour (its words, its facts, its minutes) */
+  if(!o.pre){var flat=[],nk0={};nameKeys.forEach(function(k){nk0[k]=1});
+    var unitsOf=function(s,j){if(j===0)return hook?[{t:hook,k:keysOf(hook,hookSrc==="fact")}]:[];if(s.act==="end")return atSentences(s.at.body).map(function(x){return{t:x,k:keysOf(x)}});return(s.at&&s.at.units)||[]};
+    steps.forEach(function(s,j){unitsOf(s,j).forEach(function(u){flat.push({j:j,k:u.k||[],n:atNorm(u.t)})})});
+    /* round 17b: a gallery's deep part opens with a line of its set (by the point, like the intro lines; a demo's line forced) */
+    var mls=(o.intro?o.intro("morepics"):[]).filter(function(x){return x.max<=(+o.introCap||20)}),nM=0,mLead=function(){if(!mls.length)return null;
+      var f=o.introForce&&o.introForce.set==="morepics"?mls.filter(function(x){return x.key===o.introForce.key})[0]:null,x=f||mls[((+o.seed||0)+atIntroSalt("morepics")+nM++)%mls.length];
+      return{key:x.key,i:x.i,t:/\{point\}/.test(x.text)?nameIn(x.text,"{point}",o.name,lang):x.text}};
+    var D={};steps.forEach(function(s,j){var d=s.at&&s.at.deep;if(!d)return;var keep=[];
+      d.units.forEach(function(u){if(flat.some(function(x){return x.j>j&&x.n===atNorm(u.t)}))return;var heard=Object.assign({},nk0,D);u.k.forEach(function(k){heard[k]=1});
+        var kn=Object.assign({},heard),bad=false;flat.forEach(function(x){if(bad)return;if(x.j>j&&x.k.length&&x.k.every(function(k){return atKnown(kn,k)}))bad=true;x.k.forEach(function(k){kn[k]=1})});
+        if(bad)return;keep.push(u);u.k.forEach(function(k){D[k]=1})});
+      if(keep.length){d.units=keep;if(d.kind==="pics")d.lead=mLead();s.at.deepText=atDeepText(d,lang,W)}else delete s.at.deep})}
   /* round 16c: each step's intro line, in the tour's order: from its set, picked by the point and the step (the seed, the set's place, the
      set's lines used so far), never twice, the name in at most two (a third: "this place"), under its cap */
   var used={},nUsed={},names=0,icap=+o.introCap||20,seed=+o.seed||0;
@@ -276,10 +330,16 @@ function tourFromCard(card,story,lang,o){
   if(atWords(head)>o.teaserCap-12)head=atCapText(head,o.teaserCap-12).text;
   /* round 16b (the developer): a tour under 2 minutes is "a short tour" (round 16c: Come along on a short tour: …), from 2 minutes its minutes (Come along for about 3 minutes: …);
      the minutes from the words as said, the teaser's own included (made again until they agree) */
-  var tease=function(n){return head+(cover.length?" "+(n<2?fmt(W("at_cover_short"),atJoin(cover,W("at_and"),lang)):fmt(W("at_cover"),n,atJoin(cover,W("at_and"),lang))):"")};
+  /* round 17 (the developer): the teaser's opening is a set of Azu's lines too, picked by the point (the four tours open differently);
+     {time} its length (under 2 minutes "short tour", else "tour of about N minutes"), {0} what it covers */
+  var tlx=function(t,n){var tw=n<2?W("at_time_short"):fmt(W("at_time_min"),n),ln=t.split("{time}").join(tw).split("{0}").join(atJoin(cover,W("at_and"),lang));return ln.charAt(0).toUpperCase()+ln.slice(1)};
+  var tls=(o.intro?o.intro("teaser"):[]).filter(function(x){return x.max<=icap}),tf=o.introForce&&o.introForce.set==="teaser"?tls.filter(function(x){return x.key===o.introForce.key})[0]:null,tl=tf||null;
+  for(var ti=0;ti<tls.length&&!tl;ti++){var tx=tls[(seed+atIntroSalt("teaser")+ti)%tls.length];if(!cover.length||atWords(head+" "+tlx(tx.text,10))<=o.teaserCap)tl=tx}
+  if(!tl)tl=tls[(seed+atIntroSalt("teaser"))%Math.max(1,tls.length)]||{key:null,i:-1,text:wordIn(atTxDef("at_in_teaser_1")||{en:"{time}: {0}.",pt:"{time}: {0}."},lang)};
+  var tease=function(n){if(!cover.length)return head;return head+" "+tlx(tl.text,n)};
   var rest=steps.slice(1).map(function(s){return s.text}),mins=atMins(atSecs([tease(2)].concat(rest),o.speed));
   for(var it=0;it<3;it++){var m2=atMins(atSecs([tease(mins)].concat(rest),o.speed));if(m2===mins)break;mins=m2}
-  teaser.text=tease(mins);teaser.at={key:"a0",block:null,kind:"Header",rule:"teaser",lk:null,body:teaser.text,gen:true,hook:hookSrc,mins:mins};
+  teaser.text=tease(mins);teaser.at={key:"a0",block:null,kind:"Header",rule:"teaser",lk:null,body:teaser.text,gen:true,hook:hookSrc,mins:mins,tk:tl.key,ti:tl.i};
   steps.skipped=skipped;steps.said=dup;return steps}
 
 /* ----- the quality rules, checked (the Editor's line under the tour, and the tests): the teaser first at the hero (two sentences at most,
@@ -330,8 +390,10 @@ function atHash(o){return hashOf(o)}
 /* the tour made from a point's card, in every language (EN's steps, each language's line), with its stored AI lines while the box is ticked */
 function atSteps(poi,raw){poi=poi||S.m&&S.m.poi||"painting";var p=pointOf(poi),langs=langCodes(),by={};
   langs.forEach(function(l){by[l]=tourFromCard(p.card||[],p.story||[],l,atOpts(poi,l))});var base=by.en||by[langs[0]],ai=atTour(poi).ai||{};
-  var out=base.map(function(st){var t={},lk={};langs.forEach(function(l){var m=by[l].filter(function(x){return x.id===st.id})[0];t[l]=m?m.text:st.text;lk[l]=m&&m.at?m.at.link||"":""});
-    var s=Object.assign({},st,{text:t,at:Object.assign({},st.at,{tpl:t,links:lk})}),a=ai[st.id];
+  var out=base.map(function(st){var t={},lk={},dp={},hasD=false;langs.forEach(function(l){var m=by[l].filter(function(x){return x.id===st.id})[0];t[l]=m?m.text:st.text;lk[l]=m&&m.at?m.at.link||"":"";
+      /* round 17: each language's deep part (Tell me more), its units with their fact keys */
+      dp[l]=m&&m.at&&m.at.deep?{kind:m.at.deep.kind,units:m.at.deep.units,text:m.at.deepText||"",lead:m.at.deep.lead||null}:null;if(dp[l])hasD=true});
+    var s=Object.assign({},st,{text:t,at:Object.assign({},st.at,{tpl:t,links:lk,deeps:hasD?dp:null})}),a=ai[st.id];
     if(!raw&&S.guideCfg.autoAI&&a&&!a.off&&a.base===atHash(t)&&langs.some(function(l){return a[l]&&a[l]!==t[l]})){s.text={};langs.forEach(function(l){s.text[l]=a[l]||t[l]});s.at.ai=true;if(s.act==="read")s.act="show"}return s});
   out.skipped=base.skipped;out.said=base.said;return out}
 /* the open point's tour as the phone plays it: its written tour, or the one made from its card (made again when no tour plays) */
@@ -352,19 +414,21 @@ on("corpus.list",function(out){var poi=S.m&&S.m.poi||"painting";if(poi==="painti
     return{ref:"b:"+b.id,view:"card",title:b.kind,text:bits.join(" ")}}))});
 
 /* ----- Make it mine, Regenerate this step, the changed blocks, Use the template line ----- */
+/* round 17: a made step's deep part as a written step's Tell me more words ({en, pt}), editable in Specific Marker › 3 · Guide script */
+function atMoreOf(s){var d=s&&s.at&&s.at.deeps;if(!d)return null;var m={};langCodes().forEach(function(l){m[l]=d[l]&&d[l].text||""});return m}
 function atMine(go){var poi=S.m&&S.m.poi||"painting",t=atTour(poi),has=t.written&&t.written.length&&!atIsGen(t.written);
   if(has&&!go){S.atDecide=poi;renderEditor();return}S.atDecide=null;var gen=atSteps(poi);
-  var w=gen.map(function(s){var c=JSON.parse(JSON.stringify(s));c.at.gen=false;c.at.base=JSON.parse(JSON.stringify(c.text));delete c.at.ai;return c});t.written=w;t.src="written";t.made=true;t.dismissed=[];S.guideSteps=w;S.sel.gstep=null;renderAll(true)}
+  var w=gen.map(function(s){var c=JSON.parse(JSON.stringify(s));c.at.gen=false;c.at.base=JSON.parse(JSON.stringify(c.text));delete c.at.ai;var mo=atMoreOf(c);if(mo)c.more=mo;return c});t.written=w;t.src="written";t.made=true;t.dismissed=[];S.guideSteps=w;S.sel.gstep=null;renderAll(true)}
 function atRegen(id){var st=byId(S.guideSteps,id);if(!st||!st.at)return;var g=atSteps().filter(function(x){return x.at.key===st.at.key})[0];
   if(!g){S.atNote="“"+(L(st.text)||"").slice(0,30)+"…”: its block is no longer told by the card's rules, so the step stays as it is.";renderEditor();return}
-  st.text=JSON.parse(JSON.stringify(g.text));st.act=g.act;st.view=g.view;st.ref=g.ref;if(g.wait)st.wait=g.wait;else delete st.wait;st.at.base=JSON.parse(JSON.stringify(st.text));S.atNote=null;renderAll(true)}
+  st.text=JSON.parse(JSON.stringify(g.text));st.act=g.act;st.view=g.view;st.ref=g.ref;if(g.wait)st.wait=g.wait;else delete st.wait;var mo=atMoreOf(g);if(mo)st.more=mo;else delete st.more;st.at.base=JSON.parse(JSON.stringify(st.text));S.atNote=null;renderAll(true)}
 function atEdited(st){return!!(st.at&&st.at.base&&JSON.stringify(st.text)!==JSON.stringify(st.at.base))}
 /* the blocks with something to tell that a made tour does not hold (and were not dismissed) */
 function atNewBlocks(){var poi=S.m&&S.m.poi||"painting",t=atTour(poi);if(!t.made||atSrc(poi)!=="written")return[];var w=S.guideSteps,dis=t.dismissed||[];
   var inT=function(id){return w.some(function(s){return s.at&&s.at.block===id||s.ref==="b:"+id})};
   var gen=atSteps(poi,true),ids=[];gen.forEach(function(s){var b=s.at&&s.at.block;if(b&&ids.indexOf(b)<0&&!inT(b)&&dis.indexOf(b)<0)ids.push(b)});return ids.map(function(id){return byId(S.card,id)}).filter(Boolean)}
 function atAddNew(){var add=atNewBlocks(),gen=atSteps(null,true),w=S.guideSteps,order=S.card.map(function(b){return b.id});
-  add.forEach(function(b){var mine=gen.filter(function(s){return s.at.block===b.id}).map(function(s){var c=JSON.parse(JSON.stringify(s));c.at.gen=false;c.at.base=JSON.parse(JSON.stringify(c.text));return c});
+  add.forEach(function(b){var mine=gen.filter(function(s){return s.at.block===b.id}).map(function(s){var c=JSON.parse(JSON.stringify(s));c.at.gen=false;c.at.base=JSON.parse(JSON.stringify(c.text));var mo=atMoreOf(c);if(mo)c.more=mo;return c});
     var at=order.indexOf(b.id),j=-1;w.forEach(function(s,i){var bi=s.at&&s.at.block?order.indexOf(s.at.block):s.ref&&s.ref.indexOf("b:")===0?order.indexOf(s.ref.slice(2)):-1;if(bi>=0&&bi<at)j=i});
     if(j<0)j=0;var end=w.findIndex(function(s){return s.act==="end"});var ins=Math.min(j+1,end<0?w.length:end);Array.prototype.splice.apply(w,[ins,0].concat(mine))});renderAll(true)}
 
@@ -394,14 +458,17 @@ function atStepBlock(st){if(st.ref==="hero")return st.act==="end"?"The end (on t
 function atChecksHtml(poi){var gen=atSteps(poi,true),rows=langCodes().map(function(l){var st=gen.map(function(s){return Object.assign({},s,{text:s.text[l]})});st.said=gen.said;return{l:l,r:atCheck(st,l,Object.assign(atOpts(poi,l),{rules:S.guideCfg.atRule}))}});
   var bad=[];rows.forEach(function(x){x.r.forEach(function(c){if(!c.ok)bad.push(x.l.toUpperCase()+" · "+c.why)})});
   return'<div class="note '+(bad.length?"warn":"atok")+'">'+(bad.length?"<b>Checks:</b> "+bad.map(esc).join("<br>"):"<b>Checks, EN and PT:</b> the teaser first, at the hero · every line under its cap · no sentence twice · no fact twice · each intro line from its set, never twice, under its cap, the name in at most two · every block with something to tell, in the card's order · only the card's words and the link words.")+'</div>'}
-function atListHtml(where){var poi=S.m&&S.m.poi||"painting",gen=atSteps(poi),secs=0,nm=POINTS[poi]&&POINTS[poi].label||poi,t=atTour(poi);
-  var h='<div class="note">The tour made from '+esc(L(pointOf(poi).hero.title))+'\'s card: '+gen.length+' steps, '+(tourMinutes(poi)<2?"a short tour (under 2 minutes)":"about "+tourMinutes(poi)+" min")+'. Read only: <b>Make it mine</b> copies it into the written tour, to edit each step\'s words, what it does, keep or skip, and its order.</div>';
-  if(S.atDecide===poi){var n=(t.written||[]).length;h+='<div class="decide"><b>Replace the '+n+' written steps of '+esc(L(pointOf(poi).hero.title))+' with the '+gen.length+' made from its card?</b><span>The written tour is kept nowhere else; the card\'s tour stays here, made again from the card.</span><div class="btnrow"><button class="ubtn sm" type="button" data-at="mine-go">Replace the written tour</button><button class="del" type="button" data-at="mine-no">Keep the written tour</button></div></div>'}
+function atListHtml(where){var poi=S.m&&S.m.poi||"painting",gen=atSteps(poi),secs=0,nm=POINTS[poi]&&POINTS[poi].label||poi,t=atTour(poi),spd=typeof guideSpeed==="function"?guideSpeed():1;
+  /* round 17: both lengths, the short version's (the tour's length everywhere) and with every Tell me more heard */
+  var deepT=function(st){var d=st.at&&st.at.deeps&&st.at.deeps[S.lang];return d&&d.text||""},nD=gen.filter(deepT).length,deepMin=atMins(atSecs(gen.map(function(s){return L(s.text)}).concat(gen.map(deepT).filter(Boolean)),spd));
+  var h='<div class="note">The tour made from '+esc(nameMid(L(pointOf(poi).hero.title)))+'\'s card: '+gen.length+' steps, '+(tourMinutes(poi)<2?"a short tour (under 2 minutes)":"about "+tourMinutes(poi)+" min")+(nD?'; with every Tell me more ('+nD+' step'+(nD===1?"":"s")+') about '+deepMin+' min':"")+'. Read only: <b>Make it mine</b> copies it into the written tour, to edit each step\'s words, what it does, keep or skip, and its order.</div>';
+  if(S.atDecide===poi){var n=(t.written||[]).length;h+='<div class="decide"><b>Replace the '+n+' written steps of '+esc(nameMid(L(pointOf(poi).hero.title)))+' with the '+gen.length+' made from its card?</b><span>The written tour is kept nowhere else; the card\'s tour stays here, made again from the card.</span><div class="btnrow"><button class="ubtn sm" type="button" data-at="mine-go">Replace the written tour</button><button class="del" type="button" data-at="mine-no">Keep the written tour</button></div></div>'}
   h+='<div class="btnrow"><button class="ubtn sm" type="button" data-at="mine">Make it mine</button></div>';
   h+='<table class="tbl attbl"><thead><tr><th style="width:22px">#</th><th style="width:24%">Block</th><th style="width:62px">Does</th><th>Says</th><th style="width:58px">Length</th></tr></thead><tbody>'+gen.map(function(st,j){var tx=L(st.text),w=atWords(tx),s=Math.round(atSecs([tx],typeof guideSpeed==="function"?guideSpeed():1));
     var ai=st.at.ai?'<div class="atai-was"><small>Template line</small> '+esc(L(st.at.tpl))+' <button class="del" type="button" data-at="tpl|'+esc(st.id)+'">Use the template line</button></div>':"";
-    var lk=st.at.link?'<div class="atlnk"><small>Intro</small> “'+esc(atLinkIn(st,S.lang))+'” <span>· '+esc(st.at.ls||"from its set")+'</span></div>':st.at.ek?'<div class="atlnk"><small>End line</small> <span>the end, line '+(st.at.ei+1)+'</span></div>':"";
-    return atSkipRows(gen,st,j)+'<tr data-atstep="'+esc(st.id)+'"><td class="uses">'+(j+1)+'</td><td>'+esc(atStepBlock(st))+'</td><td class="uses">'+st.act+(st.wait?" · "+st.wait:"")+'</td><td>'+(st.at.ai?'<small class="atai-tag">AI</small> ':"")+esc(tx)+lk+ai+'</td><td class="uses">'+w+' w · '+s+' s</td></tr>'}).join("")+'</tbody></table>';
+    var lk=st.at.link?'<div class="atlnk"><small>Intro</small> “'+esc(atLinkIn(st,S.lang))+'” <span>· '+esc(st.at.ls||"from its set")+'</span></div>':st.at.ek?'<div class="atlnk"><small>End line</small> <span>the end, line '+(st.at.ei+1)+'</span></div>':st.at.tk?'<div class="atlnk"><small>Opening</small> <span>the teaser\'s opening, line '+(st.at.ti+1)+'</span></div>':"";
+    var dt=deepT(st),dw=atWords(dt),ds=Math.round(atSecs([dt],spd)),dm=dt?'<div class="atmore" data-atmore="'+esc(st.id)+'"><small>Tell me more</small> '+esc(dt)+'</div>':"";
+    return atSkipRows(gen,st,j)+'<tr data-atstep="'+esc(st.id)+'"><td class="uses">'+(j+1)+'</td><td>'+esc(atStepBlock(st))+'</td><td class="uses">'+st.act+(st.wait?" · "+st.wait:"")+'</td><td>'+(st.at.ai?'<small class="atai-tag">AI</small> ':"")+esc(tx)+lk+dm+ai+'</td><td class="uses">'+w+' w · '+s+' s'+(dt?'<br><span class="atmorelen">+'+dw+' w · '+ds+' s</span>':"")+'</td></tr>'}).join("")+'</tbody></table>';
   var sk=gen.skipped||[];if(sk.length)h+='<div class="note">Not in the tour: '+sk.map(function(x){return esc(x.kind)+" ("+esc(x.why.replace(/^Skip \(?|\)$/g,"")||"skipped")+")"}).join(" · ")+'. Their rule is in Guide › 2 · The tour › What each block says.</div>';
   return h+atChecksHtml(poi)}
 /* round 16c (the developer): a block with nothing new has no step; the list shows it, where the card has it, as skipped, named, with why */
@@ -415,11 +482,11 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;v
   var body='<div class="note atbase">Every Detail Card gets an automatic tour made from its blocks, with no AI needed.</div>'+
     row("With AI",'<label class="atchk"><input type="checkbox" data-set="@guideCfg.autoAI" data-v="'+(!ai)+'"'+(ai?" checked":"")+'> Make it more fluid, entertaining and human with AI</label>'+(S.atAINote||noModel?'<span class="uses atainote">'+esc(S.atAINote||"No model on this page (offline, or no key for Ask Azu's model): ticking it keeps the template tours.")+'</span>':""),
       "Off: every automatic tour is the template made from the card's blocks (the base quality: it reads well on its own) and no model is ever called. On: the Editor asks the model Ask Azu is set to (5 · Ask Azu › The engine) to rewrite each automatic tour's teaser, links and long summaries in Azu's voice, from the card's words only; the answer is stored as that tour's lines, so a visitor hears stored words and the app never calls a model for the tour. Ticking it is the acceptance; each step keeps its template line beside it, with Use the template line. A line with a new name or number, or over its cap, keeps the template. With no key or offline, it says so here and the template tours stay.")+
-    row("Tour of "+nm,pseg("tours."+poi+".src",["written","card"],["Written","From the card (automatic)"]),"Written: the tour written for this point (Specific Marker › 3 · Guide script); a written tour always wins. From the card: the tour made from the card's blocks, the default of a point with no written tour; switch to it to compare. A point keeps its own choice.")+
+    row("Tour of "+nameMid(nm),pseg("tours."+poi+".src",["written","card"],["Written","From the card (automatic)"]),"Written: the tour written for this point (Specific Marker › 3 · Guide script); a written tour always wins. From the card: the tour made from the card's blocks, the default of a point with no written tour; switch to it to compare. A point keeps its own choice.")+
     (S.atNote?'<div class="note warn">'+esc(S.atNote)+'</div>':"")+
     (src==="card"?atListHtml("guide"):'<div class="note">'+esc(nm)+' plays its written tour ('+S.guideSteps.length+' steps, Specific Marker › 3 · Guide script). From the card shows the tour made from its blocks.</div>'+atNoticeHtml())+
     fo("at:rules",'What each block says <span class="sub">· one rule a kind of block, in the card\'s order; the blocks with nothing to tell are skipped</span>',null,
-      row("Header · the teaser",psel("guideCfg.atHook",AT_HOOKS),"Step 0, always, said while the hero shows, before the first block: the point's name, one hook from the card and what the tour covers with its minutes (\"Come along for about 4 minutes: its story, a before and after, and a question to finish.\"; under 2 minutes \"Come along on a short tour: …\"; its words in Aa, Teaser · length and Teaser · short tour). Two sentences at most. The hook's facts are said here first: no later step says them again.")+
+      row("Header · the teaser",psel("guideCfg.atHook",AT_HOOKS),"Step 0, always, said while the hero shows, before the first block: the point's name, one hook from the card and what the tour covers with its minutes in a line of Azu's intro lines › The teaser's opening, picked by the point (\"Join me for a tour of about 2 minutes: its story, a before and after, and a question to finish.\"; under 2 minutes \"a short tour\"; the length's words in Aa, Teaser · length and Teaser · short tour). Two sentences at most. The hook's facts are said here first: no later step says them again.")+
       atIntroRowsHtml()+
       Object.keys(AT_RULES).map(function(k){return row(k,psel("guideCfg.atRule."+k,AT_RULES[k].opts),atRuleHelp(k),true)}).join(""),3)+
     row("Words a step",pslider("guideCfg.atCap",20,60,1),"The longest a step's own words may be (40): a long text is said in its first sentences up to it (cut with … only when its first sentence is longer); a link adds a few words.")+
@@ -439,19 +506,19 @@ function atIntroHtml(set){var ks=S.guideCfg.atIntro[set]||[],cap=+S.guideCfg.atI
       (ks.length>1?'<button class="del" type="button" data-atin="del|'+set+'|'+i+'">Remove</button>':"")+'</td></tr>'+(over.length?'<tr class="atinover"><td></td><td colspan="'+(nl+1)+'"><span class="note warn">Over '+cap+' words in '+over.join(" and ")+': never said. Make it shorter.</span></td></tr>':"")}).join("")+'</tbody></table>'+
     '<div class="btnrow">'+(ks.length<8?'<button class="ubtn sm" type="button" data-atin="add|'+set+'">+ Add a line</button>':'<span class="uses">8 lines: the most</span>')+(atIntroIsDef(set)?'':'<button class="del" type="button" data-atin="reset|'+set+'">Back to the defaults</button>')+'</div></div>'}
 function atIntroRowsHtml(){return'<div class="note atinhead"><b>Azu\'s intro lines.</b> The first words at each block, in Azu\'s voice: a warm storyteller, curious and inviting. Every tour made from a card picks its line from the set of the block\'s kind, by the point and the step (the same tour always says the same line; the points say different ones), never the same line twice in a tour, the point\'s name ({point}) in at most two lines of a tour, each line at most '+(+S.guideCfg.atIntroCap||20)+' words. A line ending with : leads into the block\'s own words (\"Here\'s something I love: the square through three centuries.\"), any other is a sentence before them. Make it mine copies the lines said into the written tour, to edit one by one.</div>'+
-  AT_INTRO_SETS.map(function(x){return row(x[1],atIntroHtml(x[0]),"Azu's lines for "+x[2]+". The ▸ plays the tour made from the open point's card at that step, that line said.",true)}).join("")}
+  AT_INTRO_SHOW.map(function(id){return AT_INTRO_SETS.filter(function(x){return x[0]===id})[0]}).filter(Boolean).map(function(x){return row(x[1],atIntroHtml(x[0]),"Azu's lines for "+x[2]+". The ▸ plays the tour made from the open point's card at that step, that line said.",true)}).join("")}
 function atIntroAdd(set){var ks=S.guideCfg.atIntro[set]=(S.guideCfg.atIntro[set]||[]).slice();if(ks.length>=8)return;var n=1,k;while(S.tx[k="at_in_"+set+"_"+n])n++;
   S.tx[k]={en:"",pt:""};(TXO.s7auto=TXO.s7auto||[]).push(k);TXOWN[k]="s7auto";TXP[k]="Intro · "+set+" "+n;TXW[k]="Azu's intro line for "+atIntroLabel(set).toLowerCase()+", added in the Editor (round 16c).";TXF[k]="";ks.push(k);renderEditor()}
 function atIntroReset(set){S.guideCfg.atIntro[set]=AT_INTRO_DEF[set].slice();AT_INTRO_DEF[set].forEach(function(k){var d=atTxDef(k);if(d)S.tx[k]=JSON.parse(JSON.stringify(d))});renderAll(true)}
 /* the demo of a line: the tour made from the open point's card, at the first step of that set, the line said there; none on this card: a chip says so */
-function atIntroDemo(set,key){var poi=S.m&&S.m.poi||"painting";G.atIntroForce={set:set,key:key};var gen=atSteps(poi),st=gen.filter(function(x){return x.at&&x.at.lk===set})[0];G.atIntroForce=null;
-  if(!st){if(G.on)stopTour();S.view="card";S.stop="full";renderPhone(false);if(typeof gdChip==="function"){gdChip("No step of "+L(pointOf(poi).hero.title)+"'s tour opens with "+atIntroLabel(set).toLowerCase()+": its lines apply where one does");clearTimeout(G.atChipT);G.atChipT=setTimeout(function(){gdChip(null)},3200)}return}
-  atDemoAt(null,st.id,{set:set,key:key})}
+function atIntroDemo(set,key){var poi=S.m&&S.m.poi||"painting";G.atIntroForce={set:set,key:key};var gen=atSteps(poi),st=set==="morepics"?gen.filter(function(x){var d=x.at&&x.at.deeps&&x.at.deeps[S.lang];return d&&d.kind==="pics"})[0]:gen.filter(function(x){return x.at&&x.at.lk===set})[0]||(set==="teaser"?gen[0]:null);G.atIntroForce=null;
+  if(!st){if(G.on)stopTour();S.view="card";S.stop="full";renderPhone(false);if(typeof gdChip==="function"){gdChip("No step of "+nameMid(L(pointOf(poi).hero.title))+"'s tour opens with "+atIntroLabel(set).toLowerCase()+": its lines apply where one does");clearTimeout(G.atChipT);G.atChipT=setTimeout(function(){gdChip(null)},3200)}return}
+  atDemoAt(null,st.id,{set:set,key:key});if(set==="morepics"&&G.on&&S.guideCfg.tmOn){S.dockH="mini";renderGuide();stopSpeech();G.tm.want=G.i;next()}}
 ed.addEventListener("click",function(e){var b=e.target.closest("[data-atin]");if(!b)return;e.stopPropagation();var q=b.dataset.atin.split("|");
   if(q[0]==="add"){atIntroAdd(q[1]);return}if(q[0]==="reset"){atIntroReset(q[1]);return}if(q[0]==="say"){atIntroDemo(q[1],q[2]);return}
   if(q[0]==="del"){var ks=(S.guideCfg.atIntro[q[1]]||[]).slice();if(ks.length<2)return;ks.splice(+q[2],1);S.guideCfg.atIntro[q[1]]=ks;renderAll(true);return}},true);
 function atRuleHelp(k){var o=AT_RULES[k].opts;return{"Inline":"A text block is read in its own words, the words lit as they are said (a long one in its first sentences); a flip card becomes a try step: Azu says its front and waits for the flip, then reads its back.",
-  "Story":"The story opens with one of Azu's story lines (\"Let's get to know the story of the Ribeira Palace: there's a lot to discover.\") and its title when not said yet, then its rows are told in order, up to Story pages: a paragraph goes on with no intro line, a callout, a picture or a before and after with its own.","Quick Facts":"The facts as one sentence after Azu's facts line: the first two or three pairs, label and value (\"Royal home for about 250 years, lost 1 November 1755.\"), each fact not said yet and not told later by a sentence of the tour; with none left, no step at all (the list says why).",
+  "Story":"The story opens with one of Azu's story lines (\"Let's get to know the story of the Ribeira Palace: there's a lot to discover.\") and its title when not said yet, then its rows are told in order, up to Story pages: a paragraph goes on with no intro line, a callout, a picture or a before and after with its own.","Quick Facts":"The facts as one sentence after Azu's facts line: the first two or three pairs, label and value (\"Royal home for about 250 years, lost 1 November 1755.\"), each fact not said yet and not told later by a sentence of the tour; one fact left: a line of One fact and the fact as a sentence (\"One thing worth knowing: it was lost on 1 November 1755.\"); the facts beyond three are its Tell me more; with none left, no step at all (the list says why).",
   "Timeline":"Its first and last events (Every date: all of them), each with its date as said (around 1500, in 1755, in the 1580s), less those whose fact the tour said already, after Azu's timeline line (\"The dates tell their own story: around 1500, …\"); none left: no step.","Before and After":"A try step: Azu's before-and-after line, its two labels, then \"Drag across the picture and watch it change.\"; the guide waits for the drag (Invite to try).",
   "Knowledge Check":"A try step: Azu's quiz line (\"Let me ask you something.\"), the question and \"Tap the answer you think is right.\"; the guide waits for the answer."}[k]||(o[0][0]==="skip"?"Nothing to tell by default: "+o[0][1].replace(/^Skip \(|\)$/g,"")+". Show it: Azu's line and its words.":"Shown with its own words: "+o[0][1].toLowerCase()+", after Azu's line for its kind.")}
 on("edMarker.html",function(h){var d=document.createElement("div");d.innerHTML=h;var m3=innerOf(d,"m3");if(!m3)return d.innerHTML;var poi=S.m&&S.m.poi||"painting";

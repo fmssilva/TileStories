@@ -1,6 +1,6 @@
 /* The wall behind the card (wallLayer) and the test walls: Ribeira and Belém, pan and zoom (WALLS, camGeom, camPaint); each drag or zoom is the phone moving (phone.moved). Ask about the view > Azu comments links to the guidance that says them (Guide › 4 · Azu speaks up › Content › What's in view). */
 function wallLayer(){var w=document.getElementById("wall");if(!w){w=document.createElement("div");w.id="wall";w.className="wall";ph.insertBefore(w,ph.firstChild.nextSibling)}
-  w.innerHTML='<button class="mk" type="button" data-marker="painting" style="left:52%;top:30%" aria-label="Ribeira Palace"><span>'+sicon("info",20)+'</span><b>Ribeira Palace</b></button><button class="mk dim" type="button" style="left:22%;top:58%" aria-label="Lisbon Cathedral"><span>'+sicon("star",18)+'</span><b>Lisbon Cathedral</b></button>';
+  w.innerHTML='<button class="mk" type="button" data-marker="painting" style="left:52%;top:30%" aria-label="The Ribeira Palace"><span>'+sicon("info",20)+'</span><b>The Ribeira Palace</b></button><button class="mk dim" type="button" style="left:22%;top:58%" aria-label="Lisbon Cathedral"><span>'+sicon("star",18)+'</span><b>Lisbon Cathedral</b></button>';
   emit("wallLayer.after",w);return w}
 IMG.belem="__BELEM__";
 S.camCfg.wall="ribeira";S.camY=.5;S.camZoom=1;

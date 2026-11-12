@@ -82,7 +82,7 @@ function gdOnCard(){return S.view==="card"?S.stop==="half"||S.stop==="full":S.vi
 function gdCtxBase(){var g=S.guidance,md=gdTodayMD();return{on:!!g.on,breathing:gdRoomNow(),cueRoom:+g.cueRoom||0,reduce:!!S.reduce,limits:{perMinute:gdLimitNow(g.perMinute),perVisit:gdLimitNow(g.perVisit)},tau:+g.freshTau,
   learn:{ignore:g.learnIgnore!==false,dismiss:g.learnDismiss!==false},lively:S.guideCfg.life==="lively",solemn:!!(S.m&&S.m.solemn),aud:typeof aud==="function"?aud():"",
   today:md,solemnDay:gdSolemnDay(md)?gdDayWords(md):null}}
-/* round 7: on a Solemn point now: Specific Marker › Solemn point marks the marker's point (Ribeira Palace): on its card, in a tour, or on
+/* round 7: on a Solemn point now: Specific Marker › Solemn point marks the marker's point (the Ribeira Palace): on its card, in a tour, or on
    the wall with that point in the middle (or no point in the middle); another point in the middle of the wall is not it */
 function gdSolemnNow(){if(!(S.m&&S.m.solemn))return false;if(S.view==="card"&&S.stop==="closed"&&!G.on){var c=gdCentral();return!c||c.id===(S.m.poi||"painting")}return true}
 function gdContext(){var t=-Infinity,mv=G.gd.movedAt,wa=G.gd.wallAt,st=ph.querySelector(".stv"),sk=st&&(st.className.match(/\bst-(\w+)/)||[])[1];
@@ -114,7 +114,9 @@ function gdYearOf(id){var p=(S.wallPois||[]).filter(function(x){return x.id===id
    (the point the treasure hunt asks for: Ask about the view's own pick, camHuntPick) */
 function gdSlots(it,V,c,items){V=V||S.gdVisitor;var o=gdSlotsOf(it,V,c,items);o.today=gdTodayMD();
   /* round 8: the visit's first words right after the first pages: Straight to the wall's short line (when that page is On) */
-  if(it.when==="visit"&&V.visit&&V.visit.pages){var pw=gdPageOf("wall");if(pw&&pw.on&&gdHasWords(pw.says))o.pagesLine=pw.says}if(it.pick==="least")o.seen=gdEverOf(V,it.id).seen||{};if(it.tap==="hunt"||it.button==="hunt")o.thing=gdHuntThing();return o}
+  if(it.when==="visit"&&V.visit&&V.visit.pages){var pw=gdPageOf("wall");if(pw&&pw.on&&gdHasWords(pw.says))o.pagesLine=pw.says}if(it.pick==="least")o.seen=gdEverOf(V,it.id).seen||{};if(it.tap==="hunt"||it.button==="hunt")o.thing=gdHuntThing();
+  /* round 17: a place kept from an earlier visit of the point (guide/saved-place.js): the invitation offers to continue, at its step */
+  if(it.tap==="tour"&&o.id&&typeof svOffer==="function"){var sv=svOffer(o.id);if(sv){o.cont=sv.n;o.of=sv.of}}return o}
 /* the points in view as Ask about the view sees them once it is open (its panel hides the foot of the wall) */
 function gdViewOpen(){var k=G.cam.open;G.cam.open=true;try{return camView().pois}finally{G.cam.open=k}}
 /* the hunt asks for a point in view (Ask about the view's own list), so the invitation names the same one; with no camera (the simulator) the wall's points */
@@ -279,7 +281,7 @@ var GD_SIM_SCRIPTS=[
   {id:"fast",name:"Fast learner",says:"a fast learner: it taps the marker at 0:25 before any tip asks, starts the tour from the card and hears one step, then pans the wall; it opens Ask about the view when offered and taps a remark",
     ev:[[0,"at","painting"],[25,"card",0],[33,"tour",1],[120,"pan","torreao"],[200,"pan","square"],[300,"pan","river"],[420,"pan","castle"],[540,"pan","arcade"],[700,"pan","painting"],[900,"pan","torreao"]],
     react:{askview:[1,1,"tap",15],inview:[3,2,"tap",15]}},
-  {id:"idle",name:"Idle",says:"an idle visitor: it holds the phone on Ribeira Palace, never touches and ignores every tip",
+  {id:"idle",name:"Idle",says:"an idle visitor: it holds the phone on the Ribeira Palace, never touches and ignores every tip",
     ev:[[0,"at","painting"]],react:{}},
   {id:"tour",name:"Tour lover",says:"a tour lover: it taps the marker when Tap a marker shows and starts the tour, takes every tour it is offered, taps each remark and starts the tour again at 13:00",
     ev:[[0,"at","painting"],[290,"pan","torreao"],[400,"pan","painting"],[560,"pan","square"],[700,"pan","painting"],[780,"tour",0],[1000,"pan","river"],[1100,"pan","painting"]],

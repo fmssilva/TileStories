@@ -699,7 +699,7 @@ function gdOnlyList(it){var c=[],x=function(f,t){c.push([f,t])};
 function gdOnlyChips(it){return gdOnlyList(it).map(function(o){var f=o[0],t=o[1];return'<span class="gdchipc">'+esc(t)+(f?'<button type="button" data-gdoff="'+it.id+'|'+f+'" aria-label="Remove: '+esc(t)+'">&#10005;</button>':"")+'</span>'}).join("")}
 /* ----- the named warnings: an item that can never show; a line too long for 2 lines in either language; a line said by two items ----- */
 G.gd.warns=[];
-function gdSample(t){var n=(S.wallPois||[]).map(function(p){return L(p.name)}).filter(function(x){return/Ribeira|Paço/.test(x)})[0]||"Ribeira Palace";return String(t).replace(/\{point\}/g,n).replace(/\{year\}/g,"1755").replace(/\{min\}/g,"4").replace(/\{button\}/g,S.guideCfg.gbIcon==="star"?"✦":TXT("gb_label"))}
+function gdSample(t){var n=(S.wallPois||[]).map(function(p){return L(p.name)}).filter(function(x){return/Ribeira|Paço/.test(x)})[0]||"The Ribeira Palace";return String(t).replace(/\{point\}/g,n).replace(/\{year\}/g,"1755").replace(/\{min\}/g,"4").replace(/\{button\}/g,S.guideCfg.gbIcon==="star"?"✦":TXT("gb_label"))}
 function gdWarnings(){var out=[],seen={},langs=langCodes(),keepL=S.lang;
   gdDefs().filter(gdIsTip).forEach(function(it){gdNever(it).forEach(function(r){out.push({id:it.id,kind:"never",text:"The “"+it.label+"” can never show: "+r+"."})});
     (it.form==="beat"?[]:gdLineKeys(it)).forEach(function(k){langs.forEach(function(l){var t=String(S.tx[k][l]||"").trim();if(!t)return;var n=gdLineCount(gdSample(t),it.form,!!gdBtnOf(it));

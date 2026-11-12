@@ -8,7 +8,7 @@ S.guideSteps=[
  {id:"g4",view:"story",ref:"r:r2",act:"read",text:null},
  {id:"g5",view:"story",ref:"r:r5",act:"show",text:T("Inside: a library of some seventy thousand books, the royal archive, a chapel, and next door a brand new opera house.","Lá dentro: uma biblioteca com cerca de setenta mil livros, o arquivo real, uma capela e, ao lado, uma ópera acabada de construir.")},
  {id:"g6",view:"story",ref:"r:r6",act:"try",wait:"drag",text:T("Drag across the picture: the palace before 1755, and the square that took its place.","Arraste sobre a imagem: o palácio antes de 1755 e a praça que ficou no seu lugar.")},
- {id:"g7",view:"story",ref:"r:r9",act:"read",text:null},
+ {id:"g7",view:"story",ref:"r:r9",act:"read",text:null,more:T("The king and his family were at Belém that morning, outside the city, and were spared.","O rei e a família estavam em Belém nessa manhã, fora da cidade, e escaparam.")},
  {id:"g8",view:"card",ref:"b:b_gal",act:"show",text:T("Back on the card, the gallery shows the square through three centuries.","De volta ao cartão, a galeria mostra a praça ao longo de três séculos.")},
  {id:"g9",view:"card",ref:"b:b_quiz",act:"try",wait:"answer",text:T("Ready for a question? Which king moved the court to the river? Tap your answer.","Pronto para uma pergunta? Que rei mudou a corte para o rio? Toque na sua resposta.")},
  {id:"g10",view:"card",ref:"hero",act:"end",text:T("That was the Ribeira Palace. Ask me anything, or explore on your own.","Este foi o Paço da Ribeira. Pergunte-me o que quiser, ou explore sozinho.")}];
@@ -86,8 +86,9 @@ function runStep(){emitLatestFirst("runStep.before");var st=G.on&&S.guideSteps[G
     if(st.act==="try"&&S.guideCfg.coach){G.waiting=true;renderGuide(text);G.timer=setTimeout(function(){if(G.waiting){G.waiting=false;next()}},9000);return}
     if(st.act==="end"){G.askOpen=S.guideCfg.ask!=="off";renderGuide(text);return}
     setTimeout(function(){if(G.on&&!G.paused)next()},700)})}emit("runStep.after")}
-/* next: a feature may answer for it (next.answer) and go on later with nextStep */
-function next(){if(firstAnswer("next.answer")===undefined)nextStep()}
+/* next: a feature may answer for it (next.answer) and go on later with nextStep; how: "skip" when the visitor pressed Next (Skip ahead,
+   round 17: Tell me more counts it), else the step ended on its own */
+function next(how){if(firstAnswer("next.answer",how)===undefined)nextStep()}
 function nextStep(){teaser(false);if(G.i<S.guideSteps.length-1){G.i++;runStep()}else stopTour()}
 function prev(){teaser(false);if(G.i>0){G.i--;runStep()}}
 function wrapWords(el){if(el.dataset.wrapped)return;var t=el.textContent,re=/\S+/g,m,h="",last=0;while((m=re.exec(t))){h+=esc(t.slice(last,m.index))+'<span class="gw">'+esc(m[0])+'</span>';last=m.index+m[0].length}el.innerHTML=h+esc(t.slice(last));el.dataset.wrapped="1"}
@@ -118,12 +119,12 @@ function renderGuide(text){["gbar","gcap","mascot","gask","gresume"].forEach(fun
 /* ----- hooks into the card: hero button, Guide block, gestures, take-over ----- */
 on("cardScreen.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   if(S.guideCfg.heroButton){var w=d.querySelector(".hero .w");if(w)w.insertAdjacentHTML("beforeend",'<button type="button" class="gstart" data-g="start">&#9654; '+TXH("guide_start")+' · '+esc(tourLength(tourMinutes()))+'</button>')}
-  if(S.guideCfg.block){var ab=d.querySelector('[data-ref="sec:about"] .ey');if(ab)ab.insertAdjacentHTML("afterend",'<div class="item" data-ref="b:b_guide"><button type="button" class="gblock" data-g="start"><span class="gm">'+(S.guideCfg.mascot?mascotStill():sicon("play",48))+'</span><span><b>'+(TXH("guide_block_title"))+'</b><small>'+esc(fmt(TXT("guide_block_line"),tourLength(tourMinutes())))+'</small></span></button></div>')}
+  if(S.guideCfg.block){var ab=d.querySelector('[data-ref="sec:about"] .ey');if(ab)ab.insertAdjacentHTML("afterend",'<div class="item" data-ref="b:b_guide"><button type="button" class="gblock" data-g="start"><span class="gm">'+(S.guideCfg.mascot?mascotStill():sicon("play",48))+'</span><span><b>'+esc(nameIn(TXT("guide_block_title"),"{0}",L(S.hero.title)))+'</b><small>'+esc(fmt(TXT("guide_block_line"),tourLength(tourMinutes())))+'</small></span></button></div>')}
   return d.innerHTML});
 ph.addEventListener("click",function(e){var t=e.target,g=t.closest("[data-g]");
   if(t.closest("[data-flip]"))gesture("flip");if(t.closest(".kq button"))gesture("answer");
   if(!g)return;e.stopPropagation();var k=g.dataset.g;
-  if(k==="start"){if(S.view!=="card"){S.view="card"}startTour()}else if(k==="pause")pauseTour();else if(k==="play"){G.askOpen=false;resumeTour()}else if(k==="next"){stopSpeech();G.paused=false;next()}else if(k==="prev"){if(firstAnswer("prevTap.answer")===undefined){stopSpeech();G.paused=false;prev()}}
+  if(k==="start"){if(S.view!=="card"){S.view="card"}startTour()}else if(k==="pause")pauseTour();else if(k==="play"){G.askOpen=false;resumeTour()}else if(k==="next"){stopSpeech();G.paused=false;next("skip")}else if(k==="prev"){if(firstAnswer("prevTap.answer")===undefined){stopSpeech();G.paused=false;prev()}}
   else if(k==="stop"){if(firstAnswer("stopTap.answer")===undefined)stopTour()}else if(k==="mute"){S.guideMute=!S.guideMute;if(firstAnswer("mute.voice")===undefined&&S.guideMute)stopSpeech();renderGuide()}else if(k==="cc"){S.guideCfg.captions=!S.guideCfg.captions;renderGuide()}
   else if(k==="ask"){pauseTour();G.askOpen=true;renderGuide();var i=ph.querySelector("#gq");if(i)i.focus()}else if(k==="askclose"){G.askOpen=false;renderGuide()}
   else if(k==="stopask"&&G.ctl)G.ctl.abort();

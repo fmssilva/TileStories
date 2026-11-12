@@ -38,6 +38,13 @@
 // [article] the Portuguese names carry their article: "O Paço da Ribeira", "O Terreiro do Paço" (the hero, the marker); mid-sentence
 //   lower case, joined to a preposition ("Uma visita curta ao Terreiro do Paço?", the real invitation about the point in the middle).
 // [length] the ✦ menu's Start the tour and the Guide block's line say the tour's length as the hero's button and the invitation do.
+// Guidance round 17b: [gallery more] a gallery's deep part (Tell me more) opens with a warm lead of its set (Azu's intro lines › A gallery's
+//   Tell me more), EN and PT, the four points, and says the pictures' own captions as a guide would: without their medium ("a painting of"),
+//   one after another ("…, then …"), not a list after a colon; only the card's words and the lead; the lead under its cap; no fact the short
+//   tour says; the row's ▸ (a real click) plays the gallery's deep part with that line. [block words] (the crash the core test found) every
+//   block kind's preview and full page drawn with words of its own that lack a field fall back field by field (a Dialogue whose words have
+//   no lines says its kind's), and a page drawing its kind with no block; no error. MUTATE=1 also says the pictures as round 17's list and
+//   takes a block's words object by object: [gallery more] and [block words] turn red.
 // [edit] an intro line edited in the Editor (typed in its EN box) is said by the next generated tour; + Add a line, Remove, Back to the
 //   defaults by real clicks; the row's ▸ plays the tour at that step, that line said.
 // MUTATE=1: the teaser dropped, a block left out and a link said twice in a row; and (16b) the fact rule off, the neutral link back to
@@ -45,6 +52,17 @@
 //   twice, a step for the Quick Facts with nothing new and no row saying why, the PT names without their article, the Guide block's fixed
 //   "3 min", the intro lines read from their defaults (an edit never said): the checks named [teaser], [blocks], [links], [facts], [short],
 //   [hero words], [crop], [intro], [nothing new], [article], [length] and [edit] turn red.
+// Guidance round 17, Part A (the developer's answers on round 16c, 2026-11-12):
+// [name] "The Ribeira Palace" in English: as written on the hero, the marker's label and the teaser's start; mid-sentence "the Ribeira
+//   Palace" (the story's intro line, the ✦ menu's Ask about, the pill, Ask Azu's context to the model, stubbed).
+// [one fact] one fact left has its own set (One fact) and is said as a sentence ("Keep this one in mind: it was lost on 1 November 1755.",
+//   "…: foi perdido a 1 de novembro de 1755."), a fact after a preposition with a comma; two or more facts keep the facts set.
+// [teaser] the teaser's opening is a set too, picked by the point: the four tours open differently, EN and PT, each line of the set, the
+//   length still said ("short tour" / "visita curta", else its minutes).
+// [block] the Guide block's title names the point on every point's card ("Meet the Torreão with the guide", "Conheça o Terreiro do Paço
+//   com o guia"). The saved place (round 17, Part B: test9u) is Off in this file's base: its offer would change the hero's Start.
+// MUTATE=1 also writes the name without its article, says one fact as round 16c did with no line of its own, gives the teaser one opening
+//   line and the Guide block its old title: the checks named [name], [one fact], [teaser] and [block] turn red.
 const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
@@ -55,18 +73,22 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const until = async (src, ms) => { const t0 = Date.now(); while (Date.now() - t0 < ms) { if (await R(src)) return true; await W(60); } return false; };
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info).slice(0, 900) : '')); };
   const T0 = Date.now(), tsec = s => console.log('TIME ' + s + ' ' + Math.round((Date.now() - T0) / 1000) + ' s');
-  const MUT = 'atKnown=function(){return false};S.tx.gd_tourof_short={en:"",pt:""};S.tx.at_cover_short={en:"Come along for about 1 minutes: {0}.",pt:"Venha comigo durante cerca de 1 minutos: {0}."};' +
+  const MUT = 'atKnown=function(){return false};S.tx.gd_tourof_short={en:"",pt:""};S.tx.at_time_short={en:"tour of about 1 minutes",pt:"visita de uns 1 minutos"};' +
+    'S.hero.title.en="Ribeira Palace";S.wallPois[0].name.en="Ribeira Palace";WALLS.ribeira.markers[0].name.en="Ribeira Palace";atOneFact=function(f,lang,lf){return atFact(f,lang,lf,true)};AT_INTRO_DEF.fact1=[];S.guideCfg.atIntro.fact1=[];AT_INTRO_DEF.teaser=["at_in_teaser_1"];S.guideCfg.atIntro.teaser=["at_in_teaser_1"];S.tx.guide_block_title={en:"Meet the palace with the guide",pt:"Conheça o palácio com o guia"};' +
     'S.tx.guide_block_line={en:"Narrated tour · 3 min · ask anything, any time",pt:"Visita narrada · 3 min · pergunte a qualquer momento"};atSkipRows=function(){return""};' +
     'S.wallPois.concat(WALLS.ribeira.markers).forEach(function(x){if(x.name&&x.name.pt)x.name.pt=x.name.pt.replace(/^O /,"")});S.hero.title.pt="Paço da Ribeira";POINTS.square.hero.title.pt="Terreiro do Paço";' +
     'atIntroLines=function(set,lang){return(AT_INTRO_DEF[set]||[]).map(function(k,i){var o=atTxDef(k)||{};return{key:k,i:i,text:String(wordIn(o,lang)),name:/\\{point\\}/.test(o.en+o.pt),max:10}}).filter(function(x){return x.text})};' +
     'tourLength=function(m){return fmt(TXT("guide_duration"),m)};heroWords=function(){return null};heroCropOf=function(){return null};document.head.insertAdjacentHTML("beforeend","<style>#ph.touring .hero .hact,#ph.touring .hero .gstart{visibility:visible!important}</style>");' +
     'var _tf=tourFromCard;tourFromCard=function(c,s,l,o){var st=_tf(c,s,l,o),sk=st.skipped,sd=st.said;st.shift();var g=st.findIndex(function(x){return x.at&&x.at.kind==="Gallery"});if(g>=0)st.splice(g,1);var qf=c.filter(function(b){return b.kind==="Quick Facts"&&sd&&sd[b.id]})[0];if(qf)st.splice(1,0,{id:"a:"+qf.id,view:"card",ref:"b:"+qf.id,act:"show",text:"First, the facts.",at:{key:"a:"+qf.id,block:qf.id,kind:"Quick Facts",body:"",units:[],gen:true}});' +
     'var ls=st.map(function(x,i){return x.at&&x.at.link?i:-1}).filter(function(i){return i>=0});if(ls.length>1){var a=st[ls[0]],z=st[ls[1]];z.text=z.text.replace(z.at.link,a.at.link);z.at.link=a.at.link}st.skipped=sk;st.said=sd;return st};""';
-  const load = async () => { await p.goto('about:blank'); await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 150000 }); await W(600); if (process.env.MUTATE) await R(MUT); };
+  // round 17b's mutation: the pictures as round 17's list ("In its pictures: a painting of …"), a block's words object by object
+  const MUT17B = 'atPicPhrase=function(c){return c};var _adt=atDeepText;atDeepText=function(d,lang,W){if(d&&d.kind==="pics"&&d.units&&d.units.length)return fmt(W("at_more_pics"),atJoin(d.units.map(function(x){return x.t}),W("at_and"),lang));return _adt(d,lang,W)};' +
+    'kindWords=function(b){return b&&b.c&&Object.keys(b.c).length?b.c:KWORDS[b&&b.kind]||{}};""';
+  const load = async () => { await p.goto('about:blank'); await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 150000 }); await W(600); await R('window.__tf=tourFromCard;""'); if (process.env.MUTATE) { await R(MUT); await R(MUT17B); }; };
   await load();
   if (process.env.MUTATE) console.log('MUTATION: the teaser dropped, the Gallery\'s step left out, the second intro said as the first; the fact rule off, no short-tour words, the hero left at the top with its Start button, no crop; a Quick Facts step with nothing new, the PT names without their article, the Guide block\'s fixed 3 min, the intro lines from their defaults');
   const base = `SCREENS.phone=[390,844];if(G.on)stopTour();S.previewBar=false;S.hints.on=false;S.lang="en";S.guideMute=true;S.introSeen=true;S.reduce=false;S.dark=false;S.cardCfg.mode="light";
-    S.guideCfg.voice="device";S.guideCfg.look="ink";S.ui.rowDemo=false;S.guideCfg.music=false;S.vis.music=null;S.agentCfg.voiceOut=false;G.gd.manual=true;""`;
+    S.guideCfg.voice="device";S.guideCfg.look="ink";S.ui.rowDemo=false;S.guideCfg.music=false;S.vis.music=null;S.agentCfg.voiceOut=false;G.gd.manual=true;S.guideCfg.svOn=false;""`;
   await R(base);
 
   // ---------- 1. the Ribeira card's tour, switched to From the card by the Guide tab's own row ----------
@@ -192,7 +214,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const dq = await R('(ed.querySelector(\'[data-fo="s7auto"] .decide b\')||{}).textContent||""');
   await p.click('[data-fo="s7auto"] [data-at="mine-no"]'); await W(200);
   const kept = JSON.parse(await R('JSON.stringify({src:atSrc(),w:atTour().written.length,first:atTour().written[0].id})'));
-  ok('[mine] on a point with a written tour (Ribeira Palace) Make it mine asks first, in words; Keep the written tour keeps it', /^Replace the 12 written steps of Ribeira Palace with the \d+ made from its card\?$/.test(dq) && kept.src === 'card' && kept.w === 12 && kept.first === 'g0', { dq, kept });
+  ok('[mine] on a point with a written tour (the Ribeira Palace) Make it mine asks first, in words; Keep the written tour keeps it', /^Replace the 12 written steps of the Ribeira Palace with the \d+ made from its card\?$/.test(dq) && kept.src === 'card' && kept.w === 12 && kept.first === 'g0', { dq, kept });
   tsec('mine');
 
   // ---------- 5. Make it more fluid… with AI, the model stubbed ----------
@@ -291,9 +313,9 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const cases = { story: stepOf('painting', 'en', s => s.act === 'open'), storyPt: stepOf('painting', 'pt', s => s.act === 'open'), facts: stepOf('painting', 'en', s => s.kind === 'Quick Facts').text,
     tFacts: stepOf('torreao', 'en', s => s.kind === 'Quick Facts'), tTime: stepOf('torreao', 'en', s => s.kind === 'Timeline').text, vFacts: stepOf('river', 'en', s => s.kind === 'Quick Facts').text,
     any250: TOURS.painting.en.steps.slice(1).some(s => /250|two hundred and fifty/i.test(bodyOf(s))), rqfSaid: rqf && TOURS.painting.en.said[rqf.id] };
-  ok('[facts] [nothing new] the named cases: Ribeira\'s story opens on its intro line alone (its title\'s 250 years told by the teaser), EN and PT; its Quick Facts have no step at all (the 250 years by the teaser, 1 November 1755 by the story: nothing new) and say why; the Torreão\'s facts keep only "Lost 1 November 1755" (the 1580s and Philip I told by its text) and its timeline leaves 1755 out; the Tagus\'s facts leave "River: the Tagus" out',
+  ok('[facts] [nothing new] the named cases: Ribeira\'s story opens on its intro line alone (its title\'s 250 years told by the teaser), EN and PT; its Quick Facts have no step at all (the 250 years by the teaser, 1 November 1755 by the story: nothing new) and say why; the Torreão\'s facts keep only its loss, said as one fact ("it was lost on 1 November 1755"; the 1580s and Philip I told by its text) and its timeline leaves 1755 out; the Tagus\'s facts leave "River: the Tagus" out',
     cases.story.set === 'story' && cases.story.text === cases.story.link && cases.storyPt.set === 'story' && cases.storyPt.text === cases.storyPt.link && cases.facts === undefined && /^nothing new: its facts were said in the teaser/.test(cases.rqfSaid || '') && !cases.any250 &&
-    /^Lost 1 November 1755\.$/.test(bodyOf(cases.tFacts)) && cases.tFacts.set === 'facts' && !!cases.tTime && !/1755/.test(cases.tTime) && !!cases.vFacts && !/River: the Tagus/.test(cases.vFacts), cases);
+    /^it was lost on 1 November 1755\.$/.test(bodyOf(cases.tFacts)) && cases.tFacts.set === 'fact1' && !!cases.tTime && !/1755/.test(cases.tTime) && !!cases.vFacts && !/River: the Tagus/.test(cases.vFacts), cases);
   // [intro] the test's own judge: the line from its set as the words say it, at its step's start, never twice, the name in at most two, under 20 words; a leading line into the block's own words
   const OLD = ['Look at this.', 'Here\'s more.', 'Now, something to see.', 'Take a look.', 'And there\'s this.', 'One more thing.', 'Repare nisto.', 'Há mais.', 'Agora, algo para ver.', 'Veja.', 'E há isto.', 'Só mais uma coisa.',
     'First, the facts.', 'Now, the facts.', 'Now the story.', 'Back on the card.', 'Ready for a question?', 'And now,', 'Primeiro, os factos.', 'Agora, os factos.', 'Agora, a história.', 'De volta ao cartão.', 'Pronto para uma pergunta?', 'E agora,'];
@@ -352,7 +374,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   for (const poi of ['painting', 'torreao', 'square', 'river']) {
     for (const l of ['en', 'pt']) {
       const T = TOURS[poi][l], m = minsOf(T.steps), t0 = T.steps[0].text;
-      const tease = m < 2 ? (l === 'en' ? /Come along on a short tour: /.test(t0) : /Venha comigo numa visita curta: /.test(t0)) && !/\d+ (minutes|minutos)/.test(t0) : t0.indexOf(l === 'en' ? 'Come along for about ' + m + ' minutes: ' : 'Venha comigo durante cerca de ' + m + ' minutos: ') >= 0;
+      const tease = m < 2 ? (l === 'en' ? /\bshort tour\b/.test(t0) : /\bvisita curta\b/.test(t0)) && !/\d+ (minutes|minutos)/.test(t0) : t0.indexOf(l === 'en' ? 'tour of about ' + m + ' minutes' : 'visita de uns ' + m + ' minutos') >= 0;
       await R(`S.lang="${l}";if(G.on)stopTour();S.tours.painting.src="card";pointOpen("${poi}");S.guideCfg.block=true;S.view="card";S.stop="full";renderPhone(false);""`);
       await until('!!scr.querySelector(".hero .gstart")', 3000);
       await until('!!scr.querySelector(".gblock small")', 3000);
@@ -369,7 +391,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   }
   await R('S.lang="en";pointOpen("torreao");S.tab="guide";S.op={};S.op.gt1=true;S.op.s7auto=true;renderAll(false);""'); await until('!!ed.querySelector(\'[data-fo="s7auto"] .attbl\')', 3000);
   const edShort = await R('[].map.call(ed.querySelectorAll(\'[data-fo="s7auto"] .note\'),function(n){return n.textContent}).filter(function(t){return/^The tour made from/.test(t)})[0]||""');
-  ok('[short] a tour under 2 minutes is a short tour, from 2 up its minutes (the test\'s own sum, EN and PT): the teaser ("In a short tour: …" / "Numa visita curta: …", else "In about N minutes: …"), the hero\'s button ("· short" / "· curta", else "· N min"), the invitation ("A short tour of the Torreão?" / "Uma visita curta ao Torreão?", else "… A tour of N minutes?"), the Editor\'s list ("a short tour")',
+  ok('[short] a tour under 2 minutes is a short tour, from 2 up its minutes (the test\'s own sum, EN and PT): the teaser ("… a short tour: …" / "… uma visita curta: …", else "… a tour of about N minutes: …"), the hero\'s button ("· short" / "· curta", else "· N min"), the invitation ("A short tour of the Torreão?" / "Uma visita curta ao Torreão?", else "… A tour of N minutes?"), the Editor\'s list ("a short tour")',
     Object.values(sh).every(x => x.ok) && ['torreao', 'square', 'river'].every(p => sh[p + ':en'].m < 2) && sh['painting:en'].m >= 2 && /a short tour \(under 2 minutes\)/.test(edShort), { bad: Object.keys(sh).filter(k => !sh[k].ok).map(k => [k, sh[k]]), edShort, sh });
   ok('[length] the ✦ menu\'s Start the tour and the Guide block\'s line say the tour\'s length as the hero\'s button and the invitation do ("Start the tour · short", "Narrated tour · short · …"; from 2 minutes "· 2 min"; the written tour keeps its 3), the four points, EN and PT',
     Object.values(sh).every(x => x.lenOk) && sh['torreao:en'].mnu === 'Start the tour · short' && sh['painting:en'].gbk.indexOf('· ' + sh['painting:en'].m + ' min') > 0, Object.keys(sh).map(k => [k, sh[k].mnu, sh[k].gbk, sh[k].lenOk]));
@@ -460,6 +482,76 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
     pl.on && pl.ik === playKey && pl.en.indexOf(pl.line) === 0 && after !== playKey, { pl, after });
   } catch (e) { ok('[edit] the section ran to its end (an edited intro line, add, remove, back to the defaults, the ▸)', false, String(e.message).slice(0, 200)); }
   tsec('edit');
+
+  // ---------- 12. guidance round 17, Part A: the name with its article, one fact, the teaser's openings, the Guide block's title ----------
+  await load(); await R(base);
+  const A = JSON.parse(await R(`(function(){var o={};pointOpen("painting");S.tours.painting.src="card";S.view="card";S.stop="full";renderPhone(false);
+    o.h2=(scr.querySelector(".hero h2")||{}).textContent;o.mk=wordIn(WALLS.ribeira.markers[0].name,"en");o.pin=wordIn(S.wallPois[0].name,"en");var g=atSteps("painting",true);o.teaser=g[0].text.en;
+    o.story=(g.filter(function(s){return s.act==="open"})[0]||{text:{}}).text.en;var it=Object.assign({},S.guidance.items.tourof,{saysAud:{},saysBack:""});o.inv=gdLine(it,false,{point:o.pin,min:3,n:0});
+    o.ask=nameIn(TXT("gb_view_about"),"{0}",o.pin);o.pill=nameIn(TXT("cam_ask_about"),"{0}",o.pin);
+    var one={},open={};["painting","torreao","square","river"].forEach(function(poi){var p=pointOf(poi);langCodes().forEach(function(l){var st=tourFromCard(p.card||[],p.story||[],l,atOpts(poi,l)),f=st.filter(function(s){return s.at&&s.at.kind==="Quick Facts"})[0];
+      one[poi+":"+l]=f?{set:f.at.lk,text:f.text,link:f.at.link}:null;var t=st[0].text,s2=atSentences(t).slice(1).join(" ");open[poi+":"+l]={line:st[0].at.tk,two:s2,mins:st[0].at.mins}})});
+    var two=tourFromCard([pointBlock("x_f","Quick Facts",{facts:[[T("Built","Construído"),T("In the 1580s","Na década de 1580")],[T("Lost","Perdido"),T("1 November 1755","1 de novembro de 1755")]]})],[],"en",atOpts("torreao","en"));
+    o.two=(two.filter(function(s){return s.at&&s.at.kind==="Quick Facts"})[0]||{at:{}}).at.lk;o.one=one;o.open=open;o.teaserSet=S.guideCfg.atIntro.teaser.slice();return JSON.stringify(o)})()`));
+  await R('window.__p="";sampleFn=function(q){window.__p=q;return Promise.resolve({text:"A stub answer."})};S.guideCfg.ask="ai";ask("Who lived here?");""'); await until('!!window.__p', 3000);
+  const prm = await R('window.__p'); await R('G.askOpen=false;if(G.on)stopTour();""');
+  ok('[name] "The Ribeira Palace" in English: as written on the hero, the marker\'s label, the wall\'s point and the teaser\'s start ("The Ribeira Palace: …", the invitation "The Ribeira Palace has a story."); mid-sentence "the Ribeira Palace" (the story\'s intro line, the ✦ menu\'s and the pill\'s Ask about, Ask Azu\'s context to the model, stubbed)',
+    A.h2 === 'The Ribeira Palace' && A.mk === 'The Ribeira Palace' && A.pin === 'The Ribeira Palace' && /^The Ribeira Palace: /.test(A.teaser) && /^The Ribeira Palace has a story\./.test(A.inv) && / the Ribeira Palace/.test(A.story) && !/ The Ribeira/.test(A.story) &&
+    A.ask === 'Ask about the Ribeira Palace' && A.pill === 'Ask about the Ribeira Palace' && /the Ribeira Palace/.test(prm) && !/ Ribeira Palace \(Lisbon\)/.test(prm.replace('the Ribeira Palace (Lisbon)', '')), { A: Object.assign({}, A, { one: undefined, open: undefined }), prm: prm.slice(0, 120) });
+  const o1 = A.one, oneLines = l => A.teaserSet && Object.keys(o1).filter(k => k.endsWith(':' + l) && o1[k] && o1[k].set === 'fact1').length;
+  ok('[one fact] one fact left has its own line (One fact) and is said as a sentence: the Torreão "Keep this one in mind: it was lost on 1 November 1755." / "Guarde este facto na memória: foi perdido a 1 de novembro de 1755."; the square "…: it was laid out around 1500, with the palace."; the Tagus "…: in the paintings, ships at anchor off the palace."; two facts keep the facts set',
+    o1['torreao:en'].set === 'fact1' && /: it was lost on 1 November 1755\.$/.test(o1['torreao:en'].text) && /: foi perdido a 1 de novembro de 1755\.$/.test(o1['torreao:pt'].text) && /: it was laid out around 1500, with the palace\.$/.test(o1['square:en'].text) &&
+    /: foi aberto por volta de 1500, com o paço\.$/.test(o1['square:pt'].text) && /: in the paintings, ships at anchor off the palace\.$/.test(o1['river:en'].text) && oneLines('en') === 3 && oneLines('pt') === 3 && A.two === 'facts', { one: o1, two: A.two });
+  const op = A.open, opens = l => ['painting', 'torreao', 'square', 'river'].map(poi => op[poi + ':' + l]), lead = t => String(t).split(':')[0];
+  const opOk = l => { const xs = opens(l); return new Set(xs.map(x => lead(x.two))).size === 4 && xs.every(x => A.teaserSet.indexOf(x.line) >= 0 && (x.mins < 2 ? (l === 'en' ? /\bshort tour\b/ : /\bvisita curta\b/).test(x.two) : x.two.indexOf(String(x.mins)) >= 0)); };
+  ok('[teaser] the teaser\'s opening is a set, picked by the point: the four tours open differently ("Join me for a tour of about 2 minutes", "Here\'s a short tour, made just for you", …), EN and PT, each a line of the set (the Editor\'s), the length still said', opOk('en') && opOk('pt'), op);
+  const gb = {};
+  for (const [poi, l] of [['painting', 'en'], ['torreao', 'en'], ['square', 'en'], ['river', 'en'], ['painting', 'pt'], ['square', 'pt']]) {
+    await R(`S.lang="${l}";pointOpen("${poi}");S.guideCfg.block=true;S.view="card";S.stop="full";renderPhone(false);""`); await until('!!scr.querySelector(".gblock b")', 3000);
+    gb[poi + ':' + l] = await R('(scr.querySelector(".gblock b")||{}).textContent||""');
+  }
+  await R('S.lang="en";S.guideCfg.block=false;pointOpen("painting");""');
+  ok('[block] the Guide block\'s title names the point on every point\'s card, its article lower case mid-sentence: "Meet the Ribeira Palace with the guide", "Meet the Torreão with the guide", "Meet Terreiro do Paço with the guide", "Meet the Tagus and its ships with the guide", "Conheça o Paço da Ribeira com o guia", "Conheça o Terreiro do Paço com o guia"',
+    gb['painting:en'] === 'Meet the Ribeira Palace with the guide' && gb['torreao:en'] === 'Meet the Torreão with the guide' && gb['square:en'] === 'Meet Terreiro do Paço with the guide' && gb['river:en'] === 'Meet the Tagus and its ships with the guide' &&
+    gb['painting:pt'] === 'Conheça o Paço da Ribeira com o guia' && gb['square:pt'] === 'Conheça o Terreiro do Paço com o guia', gb);
+  tsec('round 17');
+
+  // ---------- 10. guidance round 17b: [gallery more] a gallery's deep part in the storyteller's voice; [block words] ----------
+  await load(); await R(base);
+  const GM = JSON.parse(await R(`(function(){var out={};["painting","torreao","square","river"].forEach(function(poi){var p=pointOf(poi);langCodes().forEach(function(l){var o=atOpts(poi,l),st=(window.__tf||tourFromCard)(p.card||[],p.story||[],l,o),g=st.filter(function(s){return s.at&&s.at.kind==="Gallery"})[0];
+      out[poi+":"+l]={deep:g&&g.at.deepText||"",lead:g&&g.at.deep&&g.at.deep.lead?g.at.deep.lead.key:"",n:g&&g.at.deep?g.at.deep.units.length:0,short:st.map(function(s){return s.text}).join(" "),
+        have:" "+atNorm(atCardWords(p.card||[],p.story||[],p.hero,l)+" "+o.name+" "+atLinkWords(l))+" ",name:o.name}})});
+    out.set={};langCodes().forEach(function(l){out.set[l]=(S.guideCfg.atIntro.morepics||[]).map(function(k){return{key:k,t:wordIn(S.tx[k],l)}})});out.cap=+S.guideCfg.atIntroCap||20;return JSON.stringify(out)})()`));
+  const gmBad = [];
+  for (const poi of ['painting', 'torreao', 'square', 'river']) for (const l of ['en', 'pt']) {
+    const g = GM[poi + ':' + l], line = (GM.set[l].filter(x => x.key === g.lead)[0] || {}).t || '', pre = line.split('{0}')[0];
+    const why = [];
+    if (!g.deep) why.push('no deep part');
+    if (!line || !pre || g.deep.indexOf(pre) !== 0) why.push('not a lead of its set');
+    if ((line.replace('{0}', '').match(/\S+/g) || []).length > GM.cap) why.push('lead over its cap');
+    if (l === 'en' ? /\b(painting|engraving|drawing|photograph) of\b|^In its pictures:/i.test(g.deep) : /\b(pintura|gravura|desenho|fotografia) d|^Nas suas imagens:/i.test(g.deep)) why.push('a list or a medium');
+    if (g.n >= 2 && g.deep.indexOf(l === 'en' ? ', then ' : ', depois ') < 0) why.push('not one after another');
+    const strays = norm(g.deep).split(' ').filter(w => w && !/^\d+$/.test(w) && g.have.indexOf(' ' + w + ' ') < 0); if (strays.length) why.push('words not the card\'s: ' + strays.slice(0, 4).join(' '));
+    const ks = new Set(keysOf(g.short, l, new Set(), g.name.toLowerCase().split(/\s+/))), dk = keysOf(g.deep.slice(pre.length), l, new Set(), g.name.toLowerCase().split(/\s+/)).filter(k => known(ks, k)); if (dk.length) why.push('a fact the tour says: ' + dk.join());
+    if (why.length) gmBad.push(poi + ':' + l + ' ' + why.join('; ') + ' | ' + g.deep);
+  }
+  const leads = new Set(['painting', 'torreao', 'square', 'river'].map(poi => GM[poi + ':en'].lead));
+  // the row's ▸ (a real click): the tour at the gallery, its deep part said with that line
+  await R('pointOpen("painting");S.tours.painting.src="card";S.tab="guide";S.op={};S.op.gt1=true;S.op.s7auto=true;S.op["at:rules"]=true;S.ui.level=3;S.view="card";S.stop="full";renderAll(false);""');
+  await until('!!ed.querySelector(\'[data-atinset="morepics"]\')', 3000);
+  const mk2 = await R('S.guideCfg.atIntro.morepics[1]');
+  await p.click(`[data-atinset="morepics"] [data-atin="say|morepics|${mk2}"]`, { timeout: 4000 }); const gmPlay = await until('G.on&&G.tm.playing', 15000);
+  const gmp = JSON.parse(await R(`JSON.stringify({tp:G.tpText||"",line:wordIn(S.tx["${mk2}"],"en").split("{0}")[0],kind:(S.guideSteps[G.i]&&S.guideSteps[G.i].at||{}).kind||""})`)); await R('if(G.on)stopTour();""');
+  ok('[gallery more] a gallery\'s deep part opens with a lead of its set (Azu\'s intro lines › A gallery\'s Tell me more) and says its pictures as a guide would: no medium, one after another ("…, then …"), not a list; only the card\'s words and the lead, under its cap, no fact the tour says; the four points, EN and PT; the row\'s ▸ (a real click) plays it with that line',
+    !gmBad.length && leads.size >= 3 && gmPlay && gmp.kind === 'Gallery' && gmp.tp.indexOf(gmp.line) === 0, { gmBad, leads: [...leads], gmp, ribeira: GM['painting:en'].deep, pt: GM['painting:pt'].deep });
+  const BW = JSON.parse(await R(`(function(){var errs=[],own=T("Own words","Palavras próprias");Object.keys(KPREV).forEach(function(k){try{KPREV[k]({kind:k,id:"x",c:{zz:own}})}catch(e){errs.push("preview "+k+": "+e.message)}});
+    var pk=S.pageKind,v=S.view;PAGE_KINDS.forEach(function(k){S.pageKind=k;try{kpageScreen()}catch(e){errs.push("page "+k+": "+e.message)}});S.pageKind=pk;S.view=v;
+    var d=KPREV.Dialogue({kind:"Dialogue",id:"x",c:{title:own}}),d0=KPREV.Dialogue(),tl=kindWords({kind:"Timeline",c:{now:"Now X"}}),dl=kindWords({kind:"Dialogue",c:{lines:[T("Mine","Meu")]}});
+    return JSON.stringify({errs:errs,d:d.indexOf("Your Majesty, the river front is finished.")>=0,d0:d0.indexOf("Your Majesty, the river front is finished.")>=0,tl:(tl.events||[]).length===KWORDS.Timeline.events.length&&tl.now==="Now X",dl:dl.lines.length===1&&L(dl.lines[0])==="Mine"})})()`));
+  await R('S.view="kpage";S.pageKind="Dialogue";renderPhone(false);""'); const dlgPage = await R('(scr.querySelector(".dlg")||{}).textContent||""'); await R('S.view="card";renderPhone(false);""');
+  ok('[block words] every block kind\'s preview and full page, drawn with words of its own that lack a field, fall back field by field to its kind\'s (a Dialogue with no lines says its kind\'s; a Timeline\'s own Now keeps the kind\'s events; its own lines win), the Dialogue page with no block of its own too; no error',
+    !BW.errs.length && BW.d && BW.d0 && BW.tl && BW.dl && /Your Majesty, the river front is finished\./.test(dlgPage), { BW, dlgPage: dlgPage.slice(0, 80) });
+  tsec('round 17b');
 
   ok('no page errors', !errs.length, errs.slice(0, 5));
   console.log(fails ? `FAILED ${fails}` : 'ALL PASS');

@@ -3,10 +3,12 @@
 // [azu] Azu 0 px over the words after a quick step jump (the test's own way: stopSpeech();G.i=j;runStep()), 6 repeats at g1, g5, g7,
 //   light and dark, Mini: measured once Azu stands still and again 1.5 s later (the card's words under Azu's whole box, deeper than 1 px).
 // MUTATE=1: (test9se's whole mutation) Azu never placed again after its step's start: the check named [azu] turns red. CAP=<dir> saves g5.
+// Guidance round 17b: split in two to keep each file under 300 s (it ran 370 s): test9sf the repeats 1-3, test9sg.js the repeats 4-6
+// (REP0=3), the same check and mutation in each; REPS sets how many a file runs (3).
 const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
 const fs = require('fs'), path = require('path');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
-const CAP = process.env.CAP || '', REPS = +process.env.REPS || 6;
+const CAP = process.env.CAP || '', REPS = +process.env.REPS || 3, REP0 = +process.env.REP0 || 0;
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--autoplay-policy=no-user-gesture-required'] });
   const p = await b.newPage({ viewport: { width: 1400, height: 1000 } });
@@ -37,7 +39,7 @@ const CAP = process.env.CAP || '', REPS = +process.env.REPS || 6;
 
   // ---------- 3. Azu 0 px over the words after a quick step jump ----------
   const rows = [];
-  for (let rep = 0; rep < REPS; rep++) for (const dark of [false, true]) for (const id of ['g1', 'g5', 'g7']) {
+  for (let rep = REP0; rep < REP0 + REPS; rep++) for (const dark of [false, true]) for (const id of ['g1', 'g5', 'g7']) {
     await R(base({}) + `S.view="card";S.stop="full";renderAll(false);startTour();var j=S.guideSteps.findIndex(function(s){return s.id==="${id}"});if(j>0){stopSpeech();G.i=j;runStep()}S.dockH="mini";renderGuide()`); await W(500);
     await R(`S.dark=${dark};S.cardCfg.mode="${dark ? 'dark' : 'light'}";renderAll(true)`);
     /* Azu standing still: its place and the scroll unchanged for three samples (at most 10 s) */
@@ -47,7 +49,7 @@ const CAP = process.env.CAP || '', REPS = +process.env.REPS || 6;
     /* a red case says where Azu, the block and the scroll were (the phone's px) */
     if (o1 || o2) row.at = await R('var pr=ph.getBoundingClientRect(),m=ph.querySelector(".mascot").getBoundingClientRect(),el=stepEl(S.guideSteps[G.i]).getBoundingClientRect(),f=freeHeight();var M=ph.querySelector(".mascot"),cur=parseFloat(M.style.top),k0=G.wbKey,o0=azuOver(M,cur,G.wb||[]).length;G.wbKey=null;var o1=azuOver(M,cur,wordBoxes(stepEl(S.guideSteps[G.i]))).length;JSON.stringify({azu:+(m.top-pr.top).toFixed(1),styleTop:cur,block:[Math.round(el.top-pr.top),Math.round(el.bottom-pr.top)],free:Math.round(f.bottom-pr.top),scroll:Math.round(scr.scrollTop),tries:G.placeTries,cls:M.className,key:k0,keyNow:G.wbKey,overCached:o0,overFresh:o1,beside:besideWords(M,cur,70,Math.round(f.bottom-pr.top)-72,stepEl(S.guideSteps[G.i]))})');
     rows.push(row);
-    if (CAP && rep === 0 && id === 'g5') await shot(`azu_jump_g5_${dark ? 'dark' : 'light'}`);
+    if (CAP && rep === REP0 && id === 'g5') await shot(`azu_jump_g5_${dark ? 'dark' : 'light'}`);
   }
   const bad = rows.filter(r => r.still > 0 || r.later > 0);
   ok(`[azu] Azu 0 px over the words after a quick step jump: ${REPS} repeats at g1, g5, g7, light and dark (${rows.length} cases), once it stands still and 1.5 s later`, rows.length === REPS * 6 && !bad.length, { bad, sample: rows.slice(0, 6).map(r => r.id + ' ' + r.theme + ' ' + r.still + '/' + r.later) });

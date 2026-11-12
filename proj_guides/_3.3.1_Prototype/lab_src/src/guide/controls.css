@@ -5,3 +5,9 @@
 .gstopask{flex-wrap:wrap;padding:12px 10px 10px 16px}.gstopask b{font-weight:700}.gstopask div{display:flex;gap:8px;margin-left:auto}
 .gstopask button[data-gstop=no]{background:rgba(244,241,234,.14);color:#F4F1EA}
 .reduce .gtoast,.reduce .gstopask{animation:none}
+/* round 17b: the Stop toast offers the one way back (the same words as the ✦ menu, the hero and the invitation): "Tour stopped" and Start
+   again (the outline, the quieter one) on the first row, Continue the tour (step N of M) the full width under them (the gold, the main one).
+   Unity: the toast's two rows, a flex-wrap row and a full-width Button */
+.gtoast.gtsv{flex-wrap:wrap;row-gap:8px;padding:8px 8px 8px 16px}
+.gtoast.gtsv .gtcont{order:3;flex:1 1 100%;padding:0 14px}
+.gtoast.gtsv .gtagain{background:transparent;color:#F4F1EA;border:1px solid rgba(244,241,234,.5);padding:0 14px}
