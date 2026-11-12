@@ -33,3 +33,48 @@ var DEMO={title:T("Two hundred and fifty years by the river","Duzentos e cinquen
 var POIS=[["lamp","1. St George's Castle"],["cathedral","2. Lisbon Cathedral"],["painting","7. Ribeira Palace"],["camera","13. The Camera"]];
 S.card.forEach(function(b){b.grp="inherit";b.enter="inherit";b.tap="inherit";b.orow="inherit"});
 (function(){var i=S.card.findIndex(function(b){return b.id==="b_audio"});if(i>0){var a=S.card.splice(i,1)[0];S.card.splice(1,0,a)}})();
+/* guidance round 16: the words each block kind shows on the demo point's card, one place for them: the card's preview draws them
+   (card/blocks.js's KPREV) and the guide's automatic tour says them (guide/autotour.js, through blockSays). A block's own words (b.c, the
+   wall's other points below) come before its kind's. A picture's or a clip's words are its element's demo content (S.demoC). */
+var KWORDS={
+ "Quick Facts":{facts:[[UI.home,UI.homev],[UI.lost,UI.lostv]],cat:T("Royal palace","Palácio real")},
+ "Inline":{text:T("The palace had its own opera house, opened in March 1755.","O palácio tinha a sua própria ópera, inaugurada em março de 1755."),back:T("It stood for only seven months.","Durou apenas sete meses.")},
+ "Knowledge Check":{q:T("Which king moved the court to the river?","Que rei mudou a corte para o rio?"),choices:["Manuel I","Philip I","José I"],ok:0},
+ "Practical Info":{rows:[[T("Where","Onde"),T("Praça do Comércio","Praça do Comércio")],[T("Today","Hoje"),T("An open square, always","Praça aberta, sempre")],[T("Metro","Metro"),T("Terreiro do Paço","Terreiro do Paço")]]},
+ "Timeline":{events:[["c. 1500",T("The court moves to the river","A corte muda-se para o rio"),"g3"],["1580s",T("The Torreão rises","Ergue-se o Torreão"),"before"],["1755",T("Earthquake, fire and tsunami","Terramoto, incêndio e maremoto"),"g1"]],now:T("The Praça do Comércio","A Praça do Comércio")},
+ "Gallery":{cap:T("The square through three centuries.","A praça ao longo de três séculos."),n:4},
+ "Dialogue":{lines:[T("Your Majesty, the river front is finished.","Majestade, a frente do rio está concluída."),T("And the tower?","E o torreão?")]},
+ "Poll":{q:T("Should the opera house be rebuilt?","Devia a ópera ser reconstruída?"),choices:[T("Yes","Sim"),T("No","Não"),T("Only as a museum","Só como museu")]},
+ "Status":{state:T("Lost","Perdido"),year:"1755"},
+ "Compare Points":{points:["Ribeira Palace","Lisbon Cathedral"]}};
+/* the wall's other points with a card of their own (guidance round 16, the developer: every point gets a tour from its card): the
+   Torreão, the Terreiro do Paço, the Tagus and its ships. Each has its hero and its blocks with their own words (b.c); the palace's are
+   S.card, S.hero and S.story, kept here while another point is open. Opening a point (its pin, Azu's remark, A tour of {point}, the
+   marker, Specific Marker › Marker) is pointOpen: the card, the hero and the story become that point's, S.m.poi names it, and
+   point.opened tells the guide (its tour). Unity: each marker's Detail Card asset; opening one is the card controller's Show(marker) */
+function pointBlock(id,kind,c,o){return Object.assign({id:id,kind:kind,grp:"inherit",enter:"inherit",tap:"inherit",orow:"inherit",c:c},o||{})}
+var POINTS={painting:{label:"7. Ribeira Palace"},
+ torreao:{label:"The Torreão",hero:{title:T("The Torreão","O Torreão"),eyebrow:T("Ribeira Palace · 1580s to 1755","Paço da Ribeira · 1580 a 1755"),line:T("The palace's corner tower, on the water","A torre de canto do palácio, sobre a água"),fx:30,fy:40,pic:"g3",pic2:"before"},story:[],
+  card:[pointBlock("t_facts","Quick Facts",{facts:[[T("Built","Construído"),T("In the 1580s","Na década de 1580")],[T("Under","No reinado de"),T("Philip I","Filipe I")],[T("Lost","Perdido"),T("1 November 1755","1 de novembro de 1755")]]}),
+   pointBlock("t_text","Inline",{title:T("On the river front","Na frente ribeirinha"),text:T("In the 1580s, under Philip I, who ruled Portugal and Spain together, the river front received a new wing and its corner tower, the Torreão. In the paintings of the river front, it is the tower with the dome at the corner of the palace, right on the water.","Na década de 1580, com Filipe I, que reinava em Portugal e em Espanha, a frente ribeirinha ganhou uma nova ala e o seu torreão de canto, o Torreão. Nas pinturas da frente ribeirinha, é a torre com a cúpula no canto do palácio, mesmo sobre a água.")}),
+   pointBlock("t_time","Timeline",{events:[["c. 1500",T("The court moves to the river","A corte muda-se para o rio"),"g3"],["1580s",T("The Torreão rises on the river front","O Torreão ergue-se na frente ribeirinha"),"before"],["1755",T("Lost to the earthquake, the fire and the tsunami","Perdido no terramoto, no incêndio e no maremoto"),"g1"]]}),
+   pointBlock("t_gal","Gallery",{imgs:["g3","before"],n:2,cap:T("The Torreão at the palace's corner, by the water.","O Torreão no canto do palácio, junto à água.")}),
+   pointBlock("t_quiz","Knowledge Check",{q:T("Under which king did the Torreão rise?","Em que reinado se ergueu o Torreão?"),choices:[T("Philip I","Filipe I"),T("Manuel I","D. Manuel I"),T("José I","D. José I")],ok:0}),
+   pointBlock("t_info","Practical Info",{rows:[[T("Where","Onde"),T("Praça do Comércio, the river side","Praça do Comércio, do lado do rio")]]})]},
+ square:{label:"Terreiro do Paço",hero:{title:T("Terreiro do Paço","Terreiro do Paço"),eyebrow:T("Lisbon · the palace square","Lisboa · a praça do paço"),line:T("The square by the palace, open to the river","A praça junto ao paço, aberta para o rio"),fx:50,fy:60,pic:"g1",pic2:"g3"},story:[],
+  card:[pointBlock("q_facts","Quick Facts",{facts:[[T("Laid out","Aberto"),T("Around 1500, with the palace","Por volta de 1500, com o paço")],[T("Today","Hoje"),T("Praça do Comércio","Praça do Comércio")]]}),
+   pointBlock("q_text","Inline",{title:T("Its name","O seu nome"),text:T("Terreiro means an open yard: this was the palace's yard, between the royal palace and the city. After 1755 it was rebuilt as the Praça do Comércio, with arcades on three sides and the river on the fourth.","Terreiro quer dizer um largo aberto: era o largo do paço, entre o palácio real e a cidade. Depois de 1755 foi reconstruído como Praça do Comércio, com arcadas em três lados e o rio no quarto.")}),
+   pointBlock("q_gal","Gallery",{imgs:["g1","g3"],n:2,cap:T("The square beside the palace, before 1755.","A praça junto ao paço, antes de 1755.")}),
+   pointBlock("q_time","Timeline",{events:[["c. 1500",T("The square opens beside the palace","A praça abre-se junto ao paço"),"g3"],["1755",T("The earthquake destroys the palace","O terramoto destrói o paço"),"g1"],["1758",T("A new plan lays the square out to the river","Um novo plano abre a praça para o rio"),"before"]]}),
+   pointBlock("q_quiz","Knowledge Check",{q:T("What is the square called today?","Como se chama hoje a praça?"),choices:["Praça do Comércio","Rossio","Praça da Figueira"],ok:0}),
+   pointBlock("q_info","Practical Info",{rows:[[T("Where","Onde"),T("Baixa, by the river","Baixa, junto ao rio")],[T("Metro","Metro"),T("Terreiro do Paço","Terreiro do Paço")]]})]},
+ river:{label:"The Tagus and its ships",hero:{title:T("The Tagus and its ships","O Tejo e os seus navios"),eyebrow:T("Lisbon · the river front","Lisboa · a frente ribeirinha"),line:T("Where the ships of the voyages came in","Onde chegavam os navios das viagens"),fx:20,fy:60,pic:"before",pic2:"g1"},story:[],
+  card:[pointBlock("v_text","Inline",{title:T("By the docks","Junto às docas"),text:T("Around 1500, King Manuel I moved the court down to the docks, and filled the new palace with the wealth of the voyages to India. The palace opened straight onto the Tagus.","Por volta de 1500, D. Manuel I mudou a corte para junto das docas e encheu o novo palácio com a riqueza das viagens à Índia. O palácio abria diretamente para o Tejo.")}),
+   pointBlock("v_facts","Quick Facts",{facts:[[T("River","Rio"),T("The Tagus","O Tejo")],[T("In the paintings","Nas pinturas"),T("Ships at anchor off the palace","Navios fundeados diante do paço")]]}),
+   pointBlock("v_time","Timeline",{events:[["c. 1500",T("The court moves down to the docks","A corte muda-se para junto das docas"),"g3"],["1755",T("A tsunami comes up the river","Um maremoto sobe o rio"),"g1"]]}),
+   pointBlock("v_gal","Gallery",{imgs:["before","g1"],n:2,cap:T("Ships on the Tagus, off the palace.","Navios no Tejo, diante do paço.")}),
+   pointBlock("v_quiz","Knowledge Check",{q:T("Which river runs past the palace?","Que rio passa diante do paço?"),choices:[T("The Tagus","O Tejo"),T("The Douro","O Douro"),T("The Mondego","O Mondego")],ok:0})]}};
+function pointOpen(id){if(!POINTS[id])return false;var cur=S.m&&S.m.poi||"painting",p=POINTS[cur];if(p){p.card=S.card;p.hero=S.hero;p.story=S.story}
+  if(cur===id)return true;var n=POINTS[id];S.card=n.card;S.hero=n.hero;S.story=n.story;S.m.poi=id;S.sel.cblock=null;emit("point.opened",id,cur);return true}
+/* a point's card, open or kept: its blocks, its hero and its story */
+function pointOf(id){id=id||S.m&&S.m.poi||"painting";return id===(S.m&&S.m.poi||"painting")?{card:S.card,hero:S.hero,story:S.story,id:id}:Object.assign({id:id},POINTS[id]||{})}

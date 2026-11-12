@@ -1,7 +1,7 @@
 /* The card's chrome: the top band, the sticky action, the close and settings buttons, the page foot. */
 function topBand(){var b=ph.querySelector(".topband");if(!b){b=document.createElement("div");b.className="topband";ph.appendChild(b)}
   var show=S.view==="card"&&S.stop==="full"&&scr.scrollTop>230;b.style.display=show?"":"none";b.className="topband tb-"+S.cardCfg.topBand;
-  b.innerHTML='<i title="'+TXH("close")+'">&#10005;</i>'+(S.ctl.top.title?'<b>Ribeira Palace</b>':'<b></b>')+(S.ctl.top.settings?'<i title="'+TXH("visitor_settings")+'">&#9776;</i>':'<i style="visibility:hidden"></i>');emit("topBand.after")}
+  b.innerHTML='<i title="'+TXH("close")+'">&#10005;</i>'+(S.ctl.top.title?'<b>'+esc(L(S.hero.title))+'</b>':'<b></b>')+(S.ctl.top.settings?'<i title="'+TXH("visitor_settings")+'">&#9776;</i>':'<i style="visibility:hidden"></i>');emit("topBand.after")}
 function stickyAction(){var s=ph.querySelector(".sticky");if(s)s.remove();var on=S.ctl.sticky==="shown"||(S.ctl.sticky==="auto"&&!(S.ctl.bar.on&&S.ctl.bar.pos==="bottom"));
   if(S.view==="card"&&on&&(S.stop==="half"||S.stop==="full")){s=document.createElement("div");s.className="sticky";s.innerHTML='<button type="button" data-locate="1">'+(TXH("show_on_wall_button"))+'</button>';ph.appendChild(s)}}
 scr.addEventListener("scroll",function(){if(S.view==="card")topBand()},{passive:true});

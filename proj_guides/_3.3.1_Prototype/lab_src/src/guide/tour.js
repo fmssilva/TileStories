@@ -13,8 +13,10 @@ S.guideSteps=[
  {id:"g9",view:"card",ref:"b:b_quiz",act:"try",wait:"answer",text:T("Ready for a question? Which king moved the court to the river? Tap your answer.","Pronto para uma pergunta? Que rei mudou a corte para o rio? Toque na sua resposta.")},
  {id:"g10",view:"card",ref:"hero",act:"end",text:T("That was the Ribeira Palace. Ask me anything, or explore on your own.","Este foi o Paço da Ribeira. Pergunte-me o que quiser, ou explore sozinho.")}];
 var G={on:false,i:0,paused:false,waiting:false,timer:null,utter:null,words:[],music:null,askOpen:false,answer:"",busy:false,ctl:null};
-/* the tour's length in minutes, as the hero's button and the guidance's invitation (A tour of {point}) say it */
-function tourMinutes(){return 3}
+/* the tour's length in minutes, as the hero's button and the guidance's invitation (A tour of {point}) say it: a point's (id; the open
+   one when none) as a module answers (guidance round 16: a tour made from the card, its words at the voice's speed), else the written
+   tour's 3 */
+function tourMinutes(id){var m=firstAnswer("tourMinutes.answer",id);return m!==undefined?m:3}
 function stepText(st){if(st.text)return L(st.text);var r=byId(S.story,st.ref.slice(2));return r&&r.c?L(r.c.text):""}
 /* ----- the music bed (round 11): a track that loops under the voice and ducks while Azu speaks. Music volume 0-100 % (15), Under the
    voice: how low it ducks, a share of its volume (30 %); Track: the manifest's approved tracks (../music/tracks.js: id, name, file,
@@ -147,9 +149,20 @@ on("edCard.html",function(h){var c=S.guideCfg;
   var sec=fo("s7",'7 · Guide <span class="sub">· the narrated tour and Ask the guide</span>',["new","NEW"],gb,1);
   var i=h.lastIndexOf('<div class="json">');return h.slice(0,i)+sec+h.slice(i)});
 on("edMarker.html",function(h){var t='<div class="note">The tour of this point: one row per step, in order. Each step shows a block, says its words (EN / PT), and may wait for the visitor to try it.</div><table class="tbl"><thead><tr><th style="width:22px">#</th><th style="width:28%">Shows</th><th style="width:70px">Does</th><th>Says</th></tr></thead><tbody>';
-  S.guideSteps.forEach(function(st,j){var c=corpus().filter(function(x){return x.ref===st.ref})[0];t+='<tr class="pick'+(S.sel.gstep===st.id?" sel":"")+'" data-pick="gstep" data-id="'+st.id+'"><td class="uses">'+(j+1)+'</td><td>'+esc(st.ref==="hero"?"The hero (teaser)":c?c.title:st.ref)+'</td><td class="uses">'+st.act+(st.wait?" · "+st.wait:"")+'</td><td class="uses">'+esc(stepText(st))+'</td></tr>';
-    if(S.sel.gstep===st.id)t+='<tr class="slot"><td></td><td colspan="3">'+(st.text?langCodes().map(function(lg){return row("Says · "+lg.toUpperCase(),'<textarea class="u" rows="2" data-gtext="'+st.id+'|'+lg+'">'+esc(st.text[lg]||"")+'</textarea>',"")}).join(""):'<div class="note">Reads the block\'s own text.</div>')+'</td></tr>'});
+  S.guideSteps.forEach(function(st,j){var c=corpus().filter(function(x){return x.ref===st.ref})[0];t+='<tr class="pick'+(S.sel.gstep===st.id?" sel":"")+(st.skip?" gskipped":"")+'" data-pick="gstep" data-id="'+st.id+'"><td class="uses">'+(j+1)+'</td><td>'+esc(st.ref==="hero"?"The hero (teaser)":c?c.title:st.at&&st.at.kind?"The "+st.at.kind+" (no longer on the card)":"A block no longer on the card")+'</td><td class="uses">'+st.act+(st.wait?" · "+st.wait:"")+(st.skip?" · skipped":"")+'</td><td class="uses">'+esc(stepText(st))+'</td></tr>';
+    if(S.sel.gstep===st.id)t+='<tr class="slot"><td></td><td colspan="3">'+gstepCtl(st,j)+(st.text?langCodes().map(function(lg){return row("Says · "+lg.toUpperCase(),'<textarea class="u" rows="2" data-gtext="'+st.id+'|'+lg+'">'+esc(st.text[lg]||"")+'</textarea>',"")}).join(""):'<div class="note">Reads the block\'s own text.</div>')+'</td></tr>'});
   t+='</tbody></table>';var sec=fo("m3","3 · Guide script",["new","NEW"],t,1);var i=h.lastIndexOf('<div class="json">');return h.slice(0,i)+sec+h.slice(i)});
+/* a written step's own controls (guidance round 16, the written tour edited step by step): what it does, kept or skipped, its place */
+var GSTEP_ACTS=[["teaser","The teaser (on the hero)"],["show","Show the block and say its line"],["read","Read the block's own words"],["try","Wait for the visitor to try it"],["open","Open the block's page"],["end","The end (Ask me anything)"]];
+function gstepCtl(st,j){return row("Does",'<select class="u" data-gact="'+st.id+'">'+GSTEP_ACTS.map(function(a){return'<option value="'+a[0]+'"'+(st.act===a[0]?" selected":"")+'>'+esc(a[1])+'</option>'}).join("")+'</select>',"What the guide does at this step. Read lights the block's own words as they are said, so its line must be the block's words.")+
+  row("Keep",'<div class="seg"><button type="button" data-gkeep="'+st.id+'|keep" aria-pressed="'+!st.skip+'">Keep</button><button type="button" data-gkeep="'+st.id+'|skip" aria-pressed="'+!!st.skip+'">Skip</button></div>',"Skip: the tour leaves this step out (it stays here, to bring back).")+
+  row("Order",'<div class="btnrow"><button class="del" type="button" data-gmv="'+st.id+'|-1"'+(j===0?" disabled":"")+'>^ Earlier</button><button class="del" type="button" data-gmv="'+st.id+'|1"'+(j===S.guideSteps.length-1?" disabled":"")+'>v Later</button></div>',"Moves the step one place in the tour.")}
+ed.addEventListener("change",function(e){var t=e.target;if(!t.dataset||!t.dataset.gact)return;e.stopImmediatePropagation();var st=byId(S.guideSteps,t.dataset.gact);if(!st)return;st.act=t.value;if(st.act!=="try")delete st.wait;else st.wait=st.wait||"answer";renderEditor()},true);
+ed.addEventListener("click",function(e){var k=e.target.closest("[data-gkeep],[data-gmv]");if(!k)return;e.stopPropagation();
+  if(k.dataset.gkeep){var q=k.dataset.gkeep.split("|"),st=byId(S.guideSteps,q[0]);if(st){if(q[1]==="skip")st.skip=true;else delete st.skip}renderEditor();return}
+  var m=k.dataset.gmv.split("|"),i=S.guideSteps.findIndex(function(s){return s.id===m[0]}),j=i+(+m[1]);if(i<0||j<0||j>=S.guideSteps.length)return;swap(S.guideSteps,i,j);renderEditor()},true);
+/* a skipped step is left out when the tour starts (the same filter as an audience's length) */
+on("stepFits.ok",function(ok,st){return ok&&!(st&&st.skip)});
 ed.addEventListener("click",function(e){var p=e.target.closest('[data-pick="gstep"]');if(!p||e.target.closest("textarea"))return;e.stopPropagation();S.sel.gstep=p.dataset.id;renderEditor()},true);
 ed.addEventListener("input",function(e){var t=e.target;if(!t.dataset.gtext)return;e.stopImmediatePropagation();var q=t.dataset.gtext.split("|"),st=byId(S.guideSteps,q[0]);st.text[q[1]]=t.value},true);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(guideCfg\\.(voice|speed|music|captions|highlight|coach|ask)|"));

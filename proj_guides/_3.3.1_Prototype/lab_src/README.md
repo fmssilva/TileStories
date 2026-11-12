@@ -193,7 +193,22 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
     Azu's introduction, What am I looking at? and the hunt); Azu 0 px over the words after a quick step jump (`stopSpeech();G.i=j;runStep()`),
     6 repeats at g1, g5, g7, light and dark, once Azu stands still and 1.5 s later (`G15.azuInk`: the card's words under Azu's whole box).
     `MUTATE=1 node tests/test9se.js` puts Azu back beside the ✦ and unsigns the bubble, writes every name as written, and never places Azu
-    again after its step's start: the checks named [mascot off], [article] and [azu] turn red. `CAP=<dir>` saves the changes at 390 px.
+    again after its step's start: the checks named [mascot off], [article] and [azu] turn red. `CAP=<dir>` saves the changes at 390 px. Since guidance round 16 its [azu] check is `tests/test9sf.js` (test9se ran 324-340 s; each
+    file now stays under 300 s), with the same check and mutation.
+  - *The automatic tour, guidance round 16* (`guide/autotour.js`, `core/content.js`'s `KWORDS` and `POINTS`, `card/blocks.js`'s `blockSays`,
+    `guide/tour.js`'s `tourMinutes` and the Guide script's Does / Keep / Order, `world/camera-ask.js`'s points with a card, `card/pages.js`'s
+    quiz tap): `tests/test9t.js` switches the Ribeira card to From the card by the Guide tab's own row and checks its tour in EN and PT
+    against the test's own arithmetic ([teaser] step 0 at the hero, two sentences at most, the name and the minutes; [blocks] every block with
+    something to tell in the card's order; [skip] Audio Guide and Practical Info none; [cap]; [twice]; [links]; [minutes] 170 words a
+    minute and 0.7 s a line, on the hero's button too; [card words] the page's own atCheck); [follows] the Gallery's 🗑 and + Timeline in
+    Specific Marker: the tour follows; [play] the tour through the hero's Guide button and the panel's Next, every step's words in the
+    captions and the focus on its block, the flip card, the before and afters and the quiz answered by real taps and drags, the games on
+    the tour planned on its steps; [mine] Make it mine (a real click), an edit typed in a step's box kept through Regenerate of another, the
+    changed-blocks notice and Add them in the card's order, Dismiss, and Ribeira asking first; [ai] the model stubbed (never the live one):
+    nothing asked until the box is ticked, the stored lines with their template lines, a new number kept as the template, Use the template
+    line, no model said in the row; [point] the Torreão's pin opening its card, A tour of {point} with its minutes and its tap starting
+    that tour, the city on the hill still "has no tour". `MUTATE=1 node tests/test9t.js` drops the teaser, leaves the Gallery out and says
+    a link twice in a row: the checks named [teaser], [blocks] and [links] turn red.
   - *Every Editor row's demo, guidance round 10* (`editor/demo`, the rows' modules: `editor/card-tab`, `card/controls`, `card/blocks`,
     `card/pages`, `card/states`, `card/hints`, `editor/texts`, `editor/components`, `editor/marker-tab`, `mascot/azu2d`, `guidance/editor`):
     `tests/test9n.js` checks that the self-test's NO DEMO check walks every tab and finds no row without a demo but its named exemptions

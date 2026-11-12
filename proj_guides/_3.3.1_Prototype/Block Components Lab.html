@@ -1367,6 +1367,12 @@ body{padding-block:8px}
 .gdbub{position:absolute;z-index:14;width:max-content;max-width:calc(100% - 24px);box-sizing:border-box;background:var(--paper);color:var(--ink1);border-radius:16px;
   box-shadow:0 8px 22px rgba(0,0,0,.3),0 0 0 1px var(--hair)}
 .gdbub button{appearance:none;display:block;width:100%;min-height:44px;border:0;background:none;color:inherit;font:600 14px/1.38 var(--body);text-align:left;padding:11px 14px;cursor:pointer;border-radius:16px}
+/* round 15b: the signed bubble (no Azu beside it: Mascot Off, or Guide button = ✦ only): the ✦ button's own look at 20 px (its dark disc, light rim and gold ✦: seen on the light and the
+   dark paper), inside the top-left corner, level with the first line; the words start 8 px after it. Unity: the child VisualElement's USS
+   (position absolute, left 11 px, top 11 px, 20 × 20, border-radius 10, the ✦ sprite), picking-mode Ignore; the label's padding-left 39 px */
+.gdbub .gdsign{position:absolute;left:11px;top:11px;z-index:1;width:20px;height:20px;box-sizing:border-box;display:grid;place-items:center;border-radius:50%;background:#16181C;border:1.5px solid #F4F1EA;pointer-events:none}
+.gdbub .gdsign svg{width:12px;height:12px;fill:#FFD98A}
+.gdbub .gdsign+button[data-gdbub]{padding-left:39px}
 /* Azu's remark: a › after its words says a tap does more (Unity: a second Label, the glyph in --accent2); narrower, so its two lines
    share the words (no word left alone on the second; Unity: the same max-width in USS) */
 .gdbub.gd-more{max-width:min(296px,calc(100% - 24px))}
@@ -2306,6 +2312,17 @@ function TXH(k){return esc(TXT(k))}
 var LANGPICK=[["fr","Français"],["es","Español"],["de","Deutsch"],["it","Italiano"]];
 function langCodes(){return S.langs.list.map(function(l){return l.code})}
 function fmt(t){var a=arguments;return String(t).replace(/\{(\d)\}/g,function(m,i){return a[+i+1]!=null?a[+i+1]:m})}
+/* guidance round 15b, the developer (2026-11-11): a point's name filling a slot mid-sentence takes a lower-case article ("That's the
+   Torreão right there", "É o Torreão"); at the start of a sentence it stays as written ("The Torreão has a story"); the stored name never
+   changes (the marker's label still says "The Torreão"). nameIn is the one place a name fills a slot of the guide's words: its remarks,
+   tips and invitations (gdLine), Azu's lines (the introduction, Ask about the view's answers and its hunt, Find it on the wall). The
+   articles per language (NAME_ART): EN The (and A, An), PT O, A, Os, As (and Um, Uma, Uns, Umas). A sentence starts at the line's start
+   or after . ! ? … (an opening quote or bracket between); after a colon it goes on. Unity: the same string rule where the localized
+   string's slots are filled (CardStrings.Format's name slots) */
+var NAME_ART={en:/^(The|An?)(?=\s)/,pt:/^(Os?|As?|Uns|Umas?|Um)(?=\s)/};
+function nameMid(name,lang){var re=NAME_ART[lang||S.lang]||NAME_ART.en;return String(name==null?"":name).replace(re,function(a){return a.toLowerCase()})}
+function slotAtStart(t,i){var b=t.slice(0,i).replace(/[\s"“‘'«(¿¡]+$/,"");return!b||/[.!?…]$/.test(b)}
+function nameIn(t,slot,name,lang){t=String(t);var out="",i=0,j;while((j=t.indexOf(slot,i))>=0){out+=t.slice(i,j)+(slotAtStart(t,j)?String(name==null?"":name):nameMid(name,lang));i=j+slot.length}return out+t.slice(i)}
 Object.defineProperty(UI,"read",{get:function(){var o={};langCodes().forEach(function(c){var w=S.tx.open_row_story[c];o[c]=w?fmt(S.tx.open_row_meta[c]||S.tx.open_row_meta.en,w,fmt(S.tx.reading_minutes[c]||S.tx.reading_minutes.en,4)):""});return o}});
 Object.defineProperty(UI,"open",{get:function(){return S.tx.open_block_button}});
 Object.defineProperty(UI,"demo",{get:function(){return S.tx.test_demo_title}});
@@ -3662,7 +3679,7 @@ on("edCard.html",function(h){var c=S.guideCfg;
    row("Visitor can choose the music",pseg("guideCfg.musicVis",["true","false"],["Shown","Hidden"]),"Shown: Settings › The guide › Music offers Off and each track's feeling (Exploration, Storyteller, Calm, Cinematic) and a volume; the Track above is the default. Hidden: the Editor's choice only.",true)+
    row("Captions",pseg("guideCfg.captions",["true","false"],["On","Off"]),"On by default (accessibility, noisy places).")+row("Highlight what is read",pseg("guideCfg.highlight",["true","false"],["On","Off"]),"The words light up in the text as they are spoken.")+
    row("Invite to try",pseg("guideCfg.coach",["true","false"],["On","Off"]),"At an interactive block the guide waits for the gesture (9 s at most), with one hint.")+
-   row("Mascot",pseg("guideCfg.mascot",["true","false"],["Azu","Off"]),"A small tile character that follows the block being told. Still under Reduce Motion.")+
+   row("Mascot",pseg("guideCfg.mascot",["true","false"],["Azu","Off"]),"A small tile character that follows the block being told. Still under Reduce Motion. Off: no Azu anywhere: the ✦ alone on the card and on the wall, and the guide's bubbles signed with a small ✦ in their corner.")+
    row("Ask the guide",pseg("guideCfg.ask",["off","search","ai"],["Off","Search (offline)","AI (cloud)"]),"Search: offline keyword search that jumps to a block. AI: answers only from this card's content and scrolls to the block that helps.")+
    '<div class="note fixed">Fixed rules: one visible pause that stops voice, scroll and mascot (WCAG 2.2.2); any drag by the visitor pauses the tour and offers Resume; captions available; Reduce Motion = no auto-scroll animation, a still mascot.</div>';
   var sec=fo("s7",'7 · Guide <span class="sub">· the narrated tour and Ask the guide</span>',["new","NEW"],gb,1);
@@ -5414,11 +5431,11 @@ function resumeTour(){if(firstAnswer("resumeTour.answer")!==undefined||!G.on)ret
 setInterval(function(){if(!G.on||G.paused||!G.utter||G.recAudio||!G.lastWordAt||!(G.hl&&G.hl.seen))return;if(performance.now()-G.lastWordAt>4000&&window.speechSynthesis&&!speechSynthesis.paused){G.lastWordAt=performance.now();speakFrom(G.hl&&G.hl.k>=0?G.hl.k:0,true)}},1000);
 
 /* ----- the introduction: on the first tour (or every tour), Azu walks in and says who it is and how to ask ----- */
-on("runStep.before",function(){if(G.introPending&&G.i===0){G.introPending=false;S.guideSteps.splice(0,0,{id:"intro",view:"card",ref:"hero",act:"intro",text:T(fmt(S.tx.guide_intro.en,pointName()),fmt((S.tx.guide_intro.pt||S.tx.guide_intro.en),pointName()))});G.introNow=true}
+on("runStep.before",function(){if(G.introPending&&G.i===0){G.introPending=false;S.guideSteps.splice(0,0,{id:"intro",view:"card",ref:"hero",act:"intro",text:T(nameIn(S.tx.guide_intro.en,"{0}",pointName(),"en"),nameIn((S.tx.guide_intro.pt||S.tx.guide_intro.en),"{0}",pointName(),"pt"))});G.introNow=true}
   G.tryKind=null;G.tryDone=false;G.tryWait=false;clearTimeout(G.insistT)});
 on("runStep.after",function(){
   var st=S.guideSteps[G.i];if(st&&st.act==="intro"){var m=ph.querySelector(".mascot");if(m&&!S.reduce){m.classList.add("enter");setTimeout(function(){m.classList.remove("enter")},1400)}}
-  if(st&&st.act==="try")G.tryKind=st.wait;G.placedStep=-1;placeStep(st)});
+  if(st&&st.act==="try")G.tryKind=st.wait;G.placedStep=-1;G.stepAt=performance.now();placeStep(st)});
 on("startTour.before",function(from){G.introPending=!from&&!S.howSaved&&(S.guideCfg.intro==="every"||(S.guideCfg.intro==="first"&&!S.introSeen));if(G.introPending)S.introSeen=true});
 
 /* ----- the block being told, placed where the guide panel never covers it: a short block at a third of the free height, a tall one near the top ----- */
@@ -5427,12 +5444,15 @@ function placeStep(st){if(G.keepScroll||!st||st.act==="intro")return;var el=step
     if(Math.abs(dy)>4){G.autoScrollTill=performance.now()+900;scr.scrollTo({top:scr.scrollTop+dy/q,behavior:S.reduce?"auto":"smooth"})}},60)}
 /* round 15: the block stays clear when it ends up under the guide mid-step: the panel opened to Open, Azu's bubble with its next line or
    an ask, the ✦ growing into the panel as a tour starts or resumes at a step (placed during the growth), the card's layout settling after
-   the placing. Placed again (at most 3 times a step) only while the scroll is where the guide put it: once the visitor scrolls, their
+   the placing; round 15b: a tour's block (in the card's scroll, the card at Full, playing; not How to use the card's marks) wholly off the screen while the visitor has not scrolled since the step began (the guide's own
+   smooth scroll cut short, by a redraw of the phone in place, before it landed: Azu then pointed at nothing, from where words were).
+   Placed again (at most 3 times a step) only while the scroll is where the guide put it: once the visitor scrolls, their
    scroll rules (Keeps going / Pauses) and nothing here; never at Full (the panel is then the whole text). Asked by guide/dock.js's 150 ms loop. Unity: the same check on the panel's and the
    bubble's geometryChanged, then the ScrollView's scrollOffset tween */
 function keepStepClear(){if(!G.on||G.keepScroll||S.dockH==="full"||performance.now()<(G.autoScrollTill||0))return;var st=S.guideSteps[G.i],el=st&&st.act!=="intro"&&stepEl(st);if(!el)return;
   var top=Math.round(scr.scrollTop);if(G.placedStep!==G.i){G.placedStep=G.i;G.placeTries=0;G.placedTop=null}if(G.placedTop==null)G.placedTop=top;if(top!==G.placedTop)return;
-  var f=freeHeight(),r=el.getBoundingClientRect(),sb=scr.getBoundingClientRect();if(r.bottom>f.bottom+1&&r.top<sb.bottom&&G.placeTries<3){G.placeTries++;G.placedTop=null;placeStep(st)}}
+  var f=freeHeight(),r=el.getBoundingClientRect(),sb=scr.getBoundingClientRect(),gone=!S.howSaved&&!G.paused&&S.stop==="full"&&scr.contains(el)&&(r.top>=sb.bottom||r.bottom<=sb.top)&&!(G.userScrollAt>(G.stepAt||0));
+  if((r.bottom>f.bottom+1&&r.top<sb.bottom||gone)&&G.placeTries<3){G.placeTries++;G.placedTop=null;placeStep(st)}}
 
 /* ----- a scroll by the visitor: the guide keeps talking; if its block leaves the screen, it moves on to the block now in view
    (with none in view it pauses the line where it is, whatever voice speaks it, and Resume plays on) ----- */
@@ -5774,27 +5794,54 @@ BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(panel|
 /* Azu's place: never under the dock or the bubble; with the bubble on the welcome (the hero), it sits beside the bubble, just above the dock */
 function pointAt(tg){var m=ph.querySelector(".mascot");if(!m)return;if(G.moment)tg=null;var a=m.querySelector(".marm"),st=S.guideSteps[G.i],b=ph.querySelector(".gbubble");
   if(dockOn()&&b&&st&&st.ref==="hero"){var y0=Math.max(70,b.offsetTop+b.offsetHeight-64),gw=ph.querySelector(".gbtn-wrap.intour.side-right");if(gw)y0=Math.max(70,Math.min(y0,gw.offsetTop-70));if(Math.abs((parseFloat(m.style.top)||0)-y0)>2)m.style.top=y0+"px";if(a)a.classList.remove("on");m.classList.remove("pointing");return}
-  if(!tg){if(a)a.classList.remove("on");m.classList.remove("pointing");return}
+  if(!tg){if(a)a.classList.remove("on");m.classList.remove("pointing");azuKeep(m);return}
   /* the arm is the drawn tile's (2.5D, light); a 3D model points with its own animation (the developer, 2026-11-10: the old arm
      stood beside the model), as the ✦'s Azu already does */
   if(a&&mascotIsModel()){a.remove();a=null}if(!a&&!mascotIsModel()){a=document.createElement("i");a.className="marm";m.appendChild(a)}
-  var fb=freeHeight(),pr=ph.getBoundingClientRect(),q=pr.height/ph.offsetHeight,lo=(fb.bottom-pr.top)/q-72,y=Math.max(70,Math.min(lo,tg.y-27));y=besideWords(m,y,70,lo,tg.el);if(Math.abs((parseFloat(m.style.top)||0)-y)>2)m.style.top=y+"px";
+  var y=azuPlace(m,tg.y,tg.el,false);
   var mx=m.offsetLeft+8,my=y+34,ang=Math.atan2(tg.y-my,tg.x-mx)*180/Math.PI;ang=Math.max(120,Math.min(240,ang<0?ang+360:ang));
   if(a){a.style.transform="rotate("+(ang-180).toFixed(1)+"deg)";a.classList.add("on")}m.classList.add("pointing")}
+/* guidance round 15b: Azu's height, level with what is told (ty, in the phone's px) and never over a word; asked every frame by
+   guide/focus.js's loop, so it follows the scroll. The 2 px dead band (no jitter while the scroll glides) no longer keeps Azu where it now
+   covers a word: a smooth scroll lands a pixel or two from where Azu was placed, the words moved under it, and Azu stood there 1-5 px into
+   a line. stay: only step off a word, from where it stands (paused: the visitor's own scroll). Unity: the same placement on the
+   ScrollView's scroll end (and each frame of a scroll tween) */
+function azuPlace(m,ty,el,stay){var fb=freeHeight(),pr=ph.getBoundingClientRect(),q=pr.height/ph.offsetHeight,lo=(fb.bottom-pr.top)/q-72,cur=parseFloat(m.style.top)||0,
+    y=stay?cur:Math.max(70,Math.min(lo,ty-27)),over=azuOver(m,cur,wordBoxes(el)).length;if(stay&&!over)return cur;
+  y=besideWords(m,y,70,lo,el);if(Math.abs(cur-y)>2||over)m.style.top=y+"px";return y}
+/* not pointing (Azu points Off, a pause, Ask): placed by moveMascot as the step starts, before the block's scroll lands, Azu was never
+   placed again. Now, playing, it follows the block as when it points (without the arm); paused, it only steps off a word scrolled under
+   it. Never in a Moment, a beat of the tour or Find it on the wall (their own places), nor while it waits under the panel (round 15) */
+function azuKeep(m){var st=S.guideSteps[G.i],el=st&&st.act!=="intro"&&stepEl(st);if(!el||!m.getClientRects().length||G.moment||(G.gd&&G.gd.bt)||/\b(gd-onbeat|gd-findto|center)\b/.test(m.className))return;
+  var d=ph.querySelector(".gdock"),mr=m.getBoundingClientRect();if(d&&d.getClientRects().length){var dr=d.getBoundingClientRect(),ov=Math.max(0,Math.min(mr.right,dr.right)-Math.max(mr.left,dr.left))*Math.max(0,Math.min(mr.bottom,dr.bottom)-Math.max(mr.top,dr.top));if(ov>=.9*mr.width*mr.height)return}
+  var r=el.getBoundingClientRect(),box=scr.getBoundingClientRect(),pr=ph.getBoundingClientRect(),q=pr.height/ph.offsetHeight,seen=r.bottom>box.top&&r.top<box.bottom;
+  azuPlace(m,seen?((Math.max(r.top,box.top)+Math.min(r.bottom,box.bottom))/2-pr.top)/q:0,el,G.paused||G.askOpen||!seen)}
 /* Azu points from beside the block, never over words: the ink of the words on the screen (each line of text, as a Range draws it:
    the block's and its neighbours') is measured, and Azu takes the nearest height where its tile covers none of them (above or below a
-   line, or beside the block). Unity: the glyph boxes from TextElement.PostProcessTextVertices, the same search on the Azu element's top */
-function wordBoxes(el){var key=G.i+"|"+S.view+"|"+Math.round(scr.scrollTop)+"|"+ph.offsetHeight;if(G.wbKey===key)return G.wb;
+   line, or beside the block). Unity: the glyph boxes from TextElement.PostProcessTextVertices, the same search on the Azu element's top.
+   Round 15b: the boxes are kept while the scroll, the phone, the card's height, where the sheet's scroll sits in the phone and where the told
+   block sits (its top and height) are unchanged, and for 300 ms at most (measured again once a font has loaded too). On the first tour
+   after the page loads the words of the told block moved under Azu with every one of those unchanged (the card's fonts and pictures still
+   settling): the boxes were stale, Azu stood on a place "free" by them, 103 px² over a line, and the 2 px dead band kept it there
+   (Unity: the glyph boxes measured again on the ScrollView's, the block's and its labels' geometryChanged) */
+if(document.fonts&&document.fonts.addEventListener)document.fonts.addEventListener("loadingdone",function(){G.wbKey=null});
+function wordBoxes(el){var pk=ph.getBoundingClientRect(),qk=pk.height/ph.offsetHeight,er=el?el.getBoundingClientRect():null,
+    key=G.i+"|"+S.view+"|"+scr.scrollTop.toFixed(1)+"|"+ph.offsetHeight+"|"+scr.scrollHeight+"|"+((scr.getBoundingClientRect().top-pk.top)/qk).toFixed(1)+"|"+(er?((er.top-pk.top)/qk).toFixed(1)+"/"+(er.height/qk).toFixed(1):0);var now=performance.now();if(G.wbKey===key&&G.wbEl===el&&now-G.wbAt<300)return G.wb;G.wbEl=el;G.wbAt=now;
   var out=[],pr=ph.getBoundingClientRect(),q=pr.height/ph.offsetHeight,sb=scr.getBoundingClientRect(),w=document.createTreeWalker(scr,NodeFilter.SHOW_TEXT),n,rg=document.createRange();
   while((n=w.nextNode())){if(!/\S/.test(n.nodeValue)||!n.parentElement)continue;var pb=n.parentElement.getBoundingClientRect();if(pb.bottom<sb.top||pb.top>sb.bottom||!pb.height)continue;
     var cs=getComputedStyle(n.parentElement);if(cs.visibility==="hidden"||cs.display==="none"||cs.opacity==="0")continue;rg.selectNodeContents(n);
     Array.prototype.forEach.call(rg.getClientRects(),function(r){if(r.width&&r.height&&r.bottom>sb.top&&r.top<sb.bottom)out.push({l:(r.left-pr.left)/q,t:(r.top-pr.top)/q,r:(r.right-pr.left)/q,b:(r.bottom-pr.top)/q})})}
   G.wbKey=key;G.wb=out;return out}
+/* round 15b: a line counts when Azu's box comes within 1 px of it, above or below (it allowed 1 px into it): with the sub-pixel of a
+   smooth scroll's end and the 2 px dead band, Azu could rest 1.3-1.8 px into a line (21-103 px²) that this check called clear. Beside it
+   the 1 px of a line box's edge still does not count */
 function azuOver(m,y,boxes){var pr=ph.getBoundingClientRect(),q=pr.height/ph.offsetHeight,r=m.getBoundingClientRect(),l=(r.left-pr.left)/q,rt=(r.right-pr.left)/q,h=r.height/q;
-  return boxes.filter(function(b){return b.r>l+1&&b.l<rt-1&&b.b>y+1&&b.t<y+h-1})}
-function besideWords(m,y,top,lo,el){if(!el)return y;var boxes=wordBoxes(el);if(!azuOver(m,y,boxes).length)return y;var h=m.getBoundingClientRect().height/(ph.getBoundingClientRect().height/ph.offsetHeight),best=null;
-  boxes.forEach(function(b){[b.t-h-3,b.b+3].forEach(function(c){if(c<top||c>lo||azuOver(m,c,boxes).length)return;if(best===null||Math.abs(c-y)<Math.abs(best-y))best=c})});
-  return best===null?y:best}
+  return boxes.filter(function(b){return b.r>l+1&&b.l<rt-1&&b.b>y-1&&b.t<y+h+1})}
+function azuCover(m,y,boxes){return azuOver(m,y,boxes).reduce(function(a,b){var r=m.getBoundingClientRect(),q=ph.getBoundingClientRect().height/ph.offsetHeight,h=r.height/q;return a+Math.max(0,Math.min(b.b,y+h)-Math.max(b.t,y))},0)}
+/* the nearest height with no word under Azu; none in reach: the least covered of them (round 15b: it stayed where it was, over the words) */
+function besideWords(m,y,top,lo,el){if(!el)return y;var boxes=wordBoxes(el);if(!azuOver(m,y,boxes).length)return y;var h=m.getBoundingClientRect().height/(ph.getBoundingClientRect().height/ph.offsetHeight),best=null,least=y,lv=azuCover(m,y,boxes);
+  boxes.forEach(function(b){[b.t-h-3,b.b+3].forEach(function(c){if(c<top||c>lo)return;if(azuOver(m,c,boxes).length){var v=azuCover(m,c,boxes);if(v<lv){lv=v;least=c}return}if(best===null||Math.abs(c-y)<Math.abs(best-y))best=c})});
+  return best===null?least:best}
 /* each row's demo: the tour at that height, the part ringed; a swipe; the talk button; the chips at Peek */
 rowDemos({"guideCfg.look":{tour:"g1",dock:"peek",ring:".gdock"},"guideCfg.pWords":{tour:"g1",dock:"peek",ring:".gd-tp|.gd-wrow|.gdock"},"guideCfg.pBars":{tour:"g1",dock:"mini",ring:".gd-bars|.gdock"},
   "guideCfg.pSpeed":{tour:"g1",dock:"peek",ring:".gd-speed|.gd-ctl"},"guideCfg.panel":{tour:"g1",ring:".gdock|.gbar"},"guideCfg.dockStart":{tour:"g1",ring:".gdock|.gbtn-wrap.intour"},"guideCfg.miniCtl":{tour:"g1",dock:"mini",ring:".gd-mini|.gd-line"},
@@ -5983,7 +6030,7 @@ ph.addEventListener("keydown",function(e){var sk=e.target.closest&&e.target.clos
 function guideLines(lang){var keepL=S.lang,keepA=S.vis.aud,out=[],seen={};S.lang=lang;
   var add=function(id,label,t){t=String(t||"").trim();if(!t||seen[t])return;seen[t]=1;out.push({id:id,label:label,text:t})};
   AUDS.forEach(function(a){S.vis.aud=a;ovMap();(S.fullSteps||S.guideSteps).forEach(function(st,j){add(st.id,"Step "+(j+1)+(a!=="explorer"?" · "+AUDN[a]:""),stepText(st));if(st.after)add(st.id+"a","Step "+(j+1)+" · after",L(st.after))})});
-  S.vis.aud=keepA;["guide_intro","guide_moving_on","guide_nudge_flip_1","guide_nudge_flip_2","guide_try_moveon","guide_after_flip","guide_after_answer"].forEach(function(k){add(k,k.replace("guide_","").replace(/_/g," "),k==="guide_intro"?fmt(TXT(k),pointName()||"Ribeira Palace"):TXT(k))});
+  S.vis.aud=keepA;["guide_intro","guide_moving_on","guide_nudge_flip_1","guide_nudge_flip_2","guide_try_moveon","guide_after_flip","guide_after_answer"].forEach(function(k){add(k,k.replace("guide_","").replace(/_/g," "),k==="guide_intro"?nameIn(TXT(k),"{0}",pointName()||"Ribeira Palace"):TXT(k))});
   S.lang=keepL;ovMap();return out}
 /* ----- the blind test: a line, the voices in a shuffled order as A, B, C…, a score each, then the names and everyone's means ----- */
 var vtDB=null,vtUser=null;(window.claude&&window.claude.use?Promise.all([window.claude.use("db"),window.claude.use("user")]):Promise.resolve([null,null])).then(function(r){vtDB=r[0];vtUser=r[1]}).catch(function(){});
@@ -6055,11 +6102,11 @@ function camSay(t){G.cam.busy=false;G.cam.answer=t;camLayer();G.answer=t;say(t,f
 function camLight(ids){G.cam.lit=ids.filter(function(id){return S.wallPois.some(function(p){return p.id===id})});camLayer();emit("camLight.after",ids)}
 /* without the model (offline, or a preview): answers built from the same view */
 function camOffline(kind){var v=camView(),P=v.pois;if(!P.length)return TXT("cam_none");var c=v.central;
-  if(kind==="what"){camLight(P.map(function(p){return p.id}));return fmt(TXT("cam_what_mid"),c.name)+" "+P.slice(1).map(function(p){return fmt(TXT("cam_what_at"),TXT("cam_place_"+p.where.replace(" ","_")),p.name)}).join(" ")}
-  if(kind==="story"){camLight([c.id]);var r=c.card?byId(S.story,"r2"):null;return r?L(r.c.text):fmt(TXT("cam_story_none"),c.name)}
+  if(kind==="what"){camLight(P.map(function(p){return p.id}));return nameIn(TXT("cam_what_mid"),"{0}",c.name)+" "+P.slice(1).map(function(p){return fmt(nameIn(TXT("cam_what_at"),"{1}",p.name),TXT("cam_place_"+p.where.replace(" ","_")))}).join(" ")}
+  if(kind==="story"){camLight([c.id]);var r=c.card?byId(S.story,"r2"):null;return r?L(r.c.text):nameIn(TXT("cam_story_none"),"{0}",c.name)}
   if(kind==="route"){var rt=P.slice().sort(function(a,b){return a.x-b.x}).map(function(p){return p.id});G.cam.route=rt;camLight(rt);return TXT("cam_route")+" "+rt.map(function(id,i){return(i+1)+". "+P.filter(function(p){return p.id===id})[0].name}).join(" · ")}
-  if(kind==="oldest"){var o=P.filter(function(p){return p.year}).sort(function(a,b){return a.year-b.year})[0];if(!o)return TXT("cam_none");camLight([o.id]);return fmt(TXT("cam_oldest"),o.name,o.year)}
-  if(kind==="kids"){var h=camHuntPick(P);G.cam.hunt=h.id;G.cam.lit=[];return fmt(TXT("cam_hunt"),h.name)}
+  if(kind==="oldest"){var o=P.filter(function(p){return p.year}).sort(function(a,b){return a.year-b.year})[0];if(!o)return TXT("cam_none");camLight([o.id]);return nameIn(TXT("cam_oldest"),"{0}",o.name).replace("{1}",o.year)}
+  if(kind==="kids"){var h=camHuntPick(P);G.cam.hunt=h.id;G.cam.lit=[];return nameIn(TXT("cam_hunt"),"{0}",h.name)}
   return""}
 /* the point the treasure hunt asks for (the Tagus, else the last in view): also named by the guidance's hunt invitation ({thing}) */
 function camHuntPick(P){return P.filter(function(p){return p.id==="river"})[0]||P[P.length-1]||null}
@@ -6266,8 +6313,10 @@ var GBSTAR='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 3.2c.65 4.9
   how:'<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.4 2.3c-.7.3-1 .8-1 1.5v.4"/><path d="M12 16.6v.4"/>',
   /* round 9: Things to try, a checklist */
   try:'<path d="M4 7.5l1.8 1.8L9.2 6"/><path d="M12.5 8h7.5"/><path d="M4 15.5l1.8 1.8 3.4-3.3"/><path d="M12.5 16h7.5"/>'};
-function gbOn(){return S.guideCfg.gbtn!=="azu"}
-function gbAzu(){return S.guideCfg.gbtn!=="star"}
+/* guidance round 15b, the developer (2026-11-11): Mascot Off (Guide › 1 · Azu › Mascot) is the ✦ alone: no Azu picture beside it, on the
+   card and on the wall (Guide button = Azu only shows the ✦ then); a guide bubble with no Azu beside it carries a small ✦ (guidance/present.js) */
+function gbOn(){return S.guideCfg.gbtn!=="azu"||S.guideCfg.mascot===false}
+function gbAzu(){return S.guideCfg.gbtn!=="star"&&S.guideCfg.mascot!==false}
 /* ----- the ✦: bottom left (or right), above the Navigation Bar on the card once the hero's Start the guide is out of sight (the hero is the
    way in until then), in the corner on the wall; during a tour above the dock, or at Compact where the dock was ----- */
 function heroStartSeen(){var g=scr.querySelector(".hero .gstart");if(!g)return false;var r=g.getBoundingClientRect(),b=scr.getBoundingClientRect();return r.bottom>b.top&&r.top<b.bottom}
@@ -6376,7 +6425,7 @@ on("modelSig.sig",function(h){if(!sigWant(/guideCfg\.(gb|azuTap)/))return h;var 
 /* Editor: Guide tab > Guide button, after Guide panel */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var dk=d.querySelector('[data-fo="s7dock"]');if(!dk)return d.innerHTML;
   dk.insertAdjacentHTML("afterend",comp("s7gbtn","the visitor's own way in, always in one place, and Azu beside it",
-    row("Guide button",pseg("guideCfg.gbtn",["both","azu","star"],["✦ and Azu beside it","Azu only","✦ only"]),"✦ and Azu beside it: two roles. The ✦ is the visitor's: a tap opens its menu (Start or Resume the tour, Ask by typing or talking, Ask about the view on the wall, the guide's settings); during a tour it shows the progress as a ring and a tap shows or hides the dock. Azu beside it takes the initiative (its remarks on the view and the hint to the ✦, said through Guide › 4 · Azu speaks up) and a tap on Azu plays (Guide › 1 · Azu › Tap on Azu). Azu only: Azu is the button, as before: a tap opens the menu, three taps and a long press still play; during a tour Azu is the guide, and a tap at Compact brings the dock back. ✦ only: no Azu outside the tour; the guide's tips and remarks show as plain bubbles. On the card it shows once the hero's Start the guide is out of sight; on the wall, in the corner.")+
+    row("Guide button",pseg("guideCfg.gbtn",["both","azu","star"],["✦ and Azu beside it","Azu only","✦ only"]),"✦ and Azu beside it: two roles. The ✦ is the visitor's: a tap opens its menu (Start or Resume the tour, Ask by typing or talking, Ask about the view on the wall, the guide's settings); during a tour it shows the progress as a ring and a tap shows or hides the dock. Azu beside it takes the initiative (its remarks on the view and the hint to the ✦, said through Guide › 4 · Azu speaks up) and a tap on Azu plays (Guide › 1 · Azu › Tap on Azu). Azu only: Azu is the button, as before: a tap opens the menu, three taps and a long press still play; during a tour Azu is the guide, and a tap at Compact brings the dock back. ✦ only: no Azu outside the tour; the guide's tips and remarks show as plain bubbles, signed with a small ✦. With Mascot Off (1 · Azu) the ✦ shows alone whatever this says, and the plain bubbles carry the same ✦. On the card it shows once the hero's Start the guide is out of sight; on the wall, in the corner.")+
     row("Icon",pseg("guideCfg.gbIcon",["star","face","word"],["✦","Azu's face","The word"]),"What the button shows: the ✦ (the guide's own sign, gold on the dock's dark), Azu's face (a small tile), or the word (Guide, never folded; during a tour the progress is a line under it).",true)+
     row("Side",pseg("guideCfg.gbSide",["left","right"],["Left","Right"]),"Bottom left (the thumb of a right hand reaches the card's middle; the Locate Button keeps its place) or bottom right. Azu stands beside it, on the inside.",true)+
     row("Label folds after 4 s",pseg("guideCfg.gbFold",["true","false"],["On","Off"]),"On: the button says Guide beside the ✦ for 4 s of being seen (time counts only while it shows), then folds into the ✦, once a visit: the Locate Button's rule and code. Off: the word stays.",true)+
@@ -7527,7 +7576,7 @@ function gdLineKey(it,returning,slots){slots=slots||{};var a=slots.aud!==undefin
   if(Array.isArray(k)){if(slots.card&&it.saysCard&&it.cardLine!==false)k=it.saysCard;else if(it.pick==="least"&&k.length){var sn=slots.seen||{},best=null;k.forEach(function(x){var c=+(sn[x]||0);if(!best||c<best.c)best={k:x,c:c}});k=best.k}else k=k[(+slots.n||0)%k.length]}
   return k}
 function gdLine(it,returning,slots){slots=slots||{};var k=gdLineKey(it,returning,slots);if(!k)return"";
-  return TXT(k).replace(/\{thing\}/g,slots.thing||"").replace(/\{point\}/g,slots.point||"").replace(/\{year\}/g,slots.year!=null?slots.year:"").replace(/\{min\}/g,slots.min!=null?slots.min:"").replace(/\{button\}/g,S.guideCfg.gbIcon==="star"?"✦":TXT("gb_label"))}
+  return nameIn(nameIn(TXT(k),"{thing}",slots.thing||""),"{point}",slots.point||"").replace(/\{year\}/g,slots.year!=null?slots.year:"").replace(/\{min\}/g,slots.min!=null?slots.min:"").replace(/\{button\}/g,S.guideCfg.gbIcon==="star"?"✦":TXT("gb_label"))}
 /* a word key with words in the visitor's language (an empty line falls back to Says) */
 function gdHasWords(k){var o=S.tx[k];return!!(o&&String(L(o)||"").trim())}
 /* the read-back of an item, in words (study 3.2): "Tap a marker · App › The start · when a marker is in view and the phone is still ·
@@ -8725,7 +8774,7 @@ function gdFindOnWall(fd){var W=(typeof curWall==="function"?curWall().pois:S.wa
 function gdPlanCtx(){return{solemn:gdSolemnNow()||!!(S.m&&S.m.solemn&&(G.on||S.view==="card")),lively:S.guideCfg.life==="lively",sr:!!S.ui.gdSR,games:gdPrefs().games||"on",notNow:+S.gdVisitor.visit.notNow||0}}
 /* the steps a tour would play now (not started): the length and the lens (audiences/stepFits), the introduction when it is due */
 function gdStepsNow(){if(G.on&&!S.howSaved)return S.guideSteps;var st=(S.fullSteps||S.guideSteps).filter(function(x){return typeof stepFits!=="function"||stepFits(x)});
-  if(S.guideCfg.intro==="every"||(S.guideCfg.intro==="first"&&!S.introSeen))st=[{id:"intro",view:"card",ref:"hero",act:"intro",text:T(fmt(S.tx.guide_intro.en,pointName()),fmt((S.tx.guide_intro.pt||S.tx.guide_intro.en),pointName()))}].concat(st);return st}
+  if(S.guideCfg.intro==="every"||(S.guideCfg.intro==="first"&&!S.introSeen))st=[{id:"intro",view:"card",ref:"hero",act:"intro",text:T(nameIn(S.tx.guide_intro.en,"{0}",pointName(),"en"),nameIn((S.tx.guide_intro.pt||S.tx.guide_intro.en),"{0}",pointName(),"pt"))}].concat(st);return st}
 /* the plan a tour would get now (the Editor's line and Why not now? when no tour plays) */
 function gdPlanNow(){return gdTourPlan(gdItems(),S.gdVisitor,gdPlanCtx(),gdTourIn(gdStepsNow()))}
 function gdPlanMake(){var P=gdTourPlan(gdItems(),S.gdVisitor,gdPlanCtx(),gdTourIn(S.guideSteps));P.point=S.m&&S.m.poi||"painting";P.quiz=null;P.at0=gdNow();G.gd.plan=P;G.gd.heard={};G.gd.guess=null;G.gd.owed=null;G.gd.skipped=[];gdWordOff();
@@ -8856,7 +8905,12 @@ function gdBox(l,t,w,h){return{l:l,t:t,r:l+w,b:t+h}}
 function gdOver(a,b){var x=Math.min(a.r,b.r)-Math.max(a.l,b.l),y=Math.min(a.b,b.b)-Math.max(a.t,b.t);return x>0&&y>0?x*y:0}
 function gdSeen(e){return e&&e.getClientRects().length>0&&getComputedStyle(e).visibility!=="hidden"}
 /* the mascot beside the ✦, when there is one to show (Mascot Off: none) */
-function gdMascot(){return S.guideCfg.mascot!==false&&gbAzu()?ph.querySelector(".azfab"):null}
+function gdMascot(){return gbAzu()?ph.querySelector(".azfab"):null}
+/* round 15b, the developer (2026-11-11, 2026-11-12): any guide bubble with no Azu beside it is signed by a small ✦ in its top-left corner
+   (Mascot Off; Guide button = ✦ only with the mascot on), so a bubble with no voice and no Azu still says who speaks; not a tap target, it
+   covers no word (the words start after it). With Azu shown (beside the ✦, or the guide's Azu in a tour), nothing changes. Unity: a child
+   VisualElement of the bubble (position absolute, the ✦ sprite, picking-mode Ignore), the label's padding-left past it */
+function gdSign(){return gdMascot()||G.on&&ph.querySelector(".mascot")?"":'<i class="gdsign" aria-hidden="true">'+GBSTAR+'</i>'}
 /* what a tip must keep clear of: the words on the wall (marker and point names, Azu's remark), the markers, the ✦, the bar, the preview
    bar, and during a tour the block being told */
 function gdObstacles(){var out=[];
@@ -8887,7 +8941,7 @@ function gdBtnOf(it){return!it?null:it.cta?{word:it.cta,act:"card"}:it.button&&i
 function gdStays(c){return!!c&&!c.pull&&!c.cue&&(c.item.onScreen==="tap"||!!gdPrefs().stay)}
 function gdBubHtml(c){var bt=gdBtnOf(c.item),cta=bt?'<button type="button" class="gdcta" data-gdcta="'+bt.act+'">'+TXH(bt.word)+'<span aria-hidden="true">&#8250;</span></button>':"";
   var x=gdStays(c)?'<button type="button" class="gdx" data-gdx="1" aria-label="'+TXH("gd_dismiss")+'"><span aria-hidden="true">&#10005;</span></button>':"";
-  return'<button type="button" data-gdbub="1">'+(c.spoken?gdWords(c.text):esc(c.text))+'</button>'+cta+x+'<i class="gdtail"></i>'}
+  return gdSign()+'<button type="button" data-gdbub="1">'+(c.spoken?gdWords(c.text):esc(c.text))+'</button>'+cta+x+'<i class="gdtail"></i>'}
 /* the tip on the phone: its elements made once, then placed (again at each paint of the wall: the marker moves with the picture) */
 function gdPresent(c){gdClearEls();var it=c.item,az=gdMascot();
   /* a Moment: Azu's prop and bubble (as before); when it ends, the tour's next step it held goes on */
@@ -9139,7 +9193,7 @@ var GD_CAMOFF_SVG='<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M17.5 10
 /* the phone's own words (its request, its Settings): not the app's, so not in Languages & Terms; the Lab's stand-in says them */
 var GD_SYS={title:T("Allow the camera?","Permitir a câmara?"),allow:T("Allow","Permitir"),deny:T("Don't Allow","Não permitir"),standin:T("The phone's own request · a stand-in in the Lab","O pedido do próprio telemóvel · uma simulação no Lab"),
   back:T("Back to the app","Voltar à app"),settings:T("Settings","Definições"),access:T("Allow access to","Permitir acesso a"),camera:T("Camera","Câmara"),setin:T("The phone's Settings · a stand-in in the Lab","As Definições do telemóvel · uma simulação no Lab")};
-function gdAzuOn(){return S.guideCfg.mascot!==false&&gbAzu()}
+function gdAzuOn(){return gbAzu()}
 function gdPagesLayer(){ph.querySelectorAll(".gdpages.gd-out").forEach(function(x){x.remove()});var L=ph.querySelector(".gdpages");
   if(!L){L=document.createElement("div");L.className="gdpages";L.setAttribute("role","dialog");L.setAttribute("aria-modal","true");ph.appendChild(L)}return L}
 function gdPagesUnpaint(){var L=ph.querySelector(".gdpages:not(.gd-out)");if(!L)return;L.classList.add("gd-out");L.removeAttribute("aria-modal");setTimeout(function(){L.remove()},S.reduce?0:220)}
@@ -9375,7 +9429,7 @@ function gdQuizNext(){var B=G.gd.bt;if(!B||B.kind!=="finale"||B.answered==null)r
 function gdQuizScore(){var B=G.gd.bt,n=B.qs.length,r=B.right,demo=B.c&&B.c.pull&&G.gd.demo,best=demo?gdQuizBest(B.point)||{right:r,n:n}:gdQuizKeep(B.point,r,n),P=G.gd.plan;if(!demo){if(P)P.quizDone=true;G.gd.owed=null}
   var t=fmt(TXT(r===n?"tour_score_all":r===0?"tour_score_none":r*2>n?"tour_score_most":"tour_score_some"),r,n);gdBeatEye(TXT("tour_star").toUpperCase());
   /* round 13: Don't say it!'s score said once more (research 5.4, step 8) */
-  var ws=P&&P.wordScore;if(ws&&ws.n>0&&!demo)t+=" "+fmt(TXT("tour_word_callback"),ws.caught,ws.n).replace("{thing}",ws.word);
+  var ws=P&&P.wordScore;if(ws&&ws.n>0&&!demo)t+=" "+nameIn(fmt(TXT("tour_word_callback"),ws.caught,ws.n),"{thing}",ws.word);
   gdBeatBody('<div class="bt-score"><b>'+r+'<small>/'+n+'</small></b><span class="bt-best">'+esc(fmt(TXT("tour_best"),best.right,best.n))+'</span></div>',"");var p=ph.querySelector(".gdbeat .bt-line");if(p)p.textContent="";
   gdLog("event","the quiz: "+r+" of "+n+" (the best here "+best.right+" of "+best.n+")");azReact(r===n?"r-jump":"r-wink",900,"big");
   gdBeatSay(t,function(){B.stepT=setTimeout(function(){if(G.gd.bt===B)gdBeatFinish("the quiz: "+r+" of "+n,"acted")},1600)})}
@@ -9538,7 +9592,7 @@ function gdFindFound(F){F.state="found";var B=F.B;haptic();gdFindGlint(F.p);var 
 function gdFindGiveUp(F,why){if(F.state!=="seek")return;F.state="shown";var B=F.B,m=ph.querySelector(".mascot");clearTimeout(B.notNowT);gdBeatBody("","");var s=gdFindGlint(F.p);
   if(m&&S.guideCfg.mascot!==false){m.classList.remove("gd-onbeat");m.classList.add("gd-findto");var mw=m.offsetWidth||56,mh=m.offsetHeight||64,W=ph.offsetWidth,cx=s.x-30;if(cx-mw/2<8)cx=s.x+30;var lx=Math.min(Math.max(cx-mw/2,8),W-8-mw);m.style.right=Math.round(W-lx-mw)+"px";m.style.top=Math.round(s.y-mh-14)+"px"}
   /* round 15 (inside the phone): at the left edge Azu stood 18 px past it (its centre 30 px left of a spot held 40 px in); it takes the spot's other side there, and is kept 8 px inside. Unity: the same clamp on the walk's end */
-  gdLog("event","Find it on the wall: I give up ("+why+"): Azu shows it");var t=TXT(s.edge?"tour_find_edge_"+s.edge:"tour_find_show").replace("{thing}",B.thing||"");
+  gdLog("event","Find it on the wall: I give up ("+why+"): Azu shows it");var t=nameIn(TXT(s.edge?"tour_find_edge_"+s.edge:"tour_find_show"),"{thing}",B.thing||"");
   setTimeout(function(){if(G.gd.find!==F)return;gdBeatSay(t,function(){B.stepT=setTimeout(function(){gdFindBack(F,"shown ("+why+")",why==="I give up"?"dismissed":"ignored")},1100)})},S.reduce?0:900)}
 function gdFindLost(F){F.state="lost";var B=F.B;gdLog("event","Find it on the wall: the wall is lost (a system state wins): it ends");gdBeatBody("","");gdBeatSay(TXT("tour_find_lost"),function(){gdFindBack(F,"the wall was lost","")})}
 function gdFindEnd(F){clearInterval(F.iv);if(G.gd.find===F)G.gd.find=null;ph.querySelectorAll(".gdseek,.gdfound").forEach(function(x){x.remove()});var m=ph.querySelector(".mascot");if(m){m.classList.remove("gd-findto");m.style.right=""}}
@@ -11132,7 +11186,7 @@ var GDSCENES7=[
       return gd7Done(ok&&c&&c.item.point==="torreao"&&c.text===own&&lines>=1&&lines<=2&&ow===0&&/no joke of its own/.test(none)?[true,"the Torreão said its own joke, and a point without one says none",ans]:[false,"the point's own joke did not show as it should",ans])})})}},
   {id:"gd7_hunt",label:"Guidance · the treasure hunt for a family: the invitation, a tap, the hunt, found",setup:function(){gd7Keep()},arrange:function(){gd7Only(["hunt"]);S.vis.aud="family";S.gdVisitor.used.card=gdNow()-60000},
     q:T("nothing: a Family visitor who has opened a card is on the wall (×10); it taps the invitation's chip, then the point the hunt names","nada: um visitante Família que já abriu um cartão está na parede (×10); toca no botão do convite, depois no ponto que a caça nomeia"),
-    expect:T("“Want a treasure hunt? Find The Tagus and its ships on the wall.” with Let's play; a tap opens Ask about the view with the hunt; a tap on the Tagus finds it, and the invitation is done for good.","“Uma caça ao tesouro? Encontre O Tejo e os seus navios na parede.” com Vamos jogar; um toque abre o Pergunte sobre a vista com a caça; um toque no Tejo encontra-o, e o convite fica feito de vez."),
+    expect:T("“Want a treasure hunt? Find the Tagus and its ships on the wall.” with Let's play; a tap opens Ask about the view with the hunt; a tap on the Tagus finds it, and the invitation is done for good.","“Uma caça ao tesouro? Encontre o Tejo e os seus navios na parede.” com Vamos jogar; um toque abre o Pergunte sobre a vista com a caça; um toque no Tejo encontra-o, e o convite fica feito de vez."),
     act:function(){var txt="";this.arrange();return gdScWait(function(){var c=gd7Fun();return!!(c&&c.item.id==="hunt")},9000).then(function(ok){txt=G.gd.cur&&G.gd.cur.text||"";var ch=ph.querySelector(".gdbub:not(.gd-out) [data-gdcta]"),cs=ch?[ch.offsetWidth,ch.offsetHeight]:null;if(ch)gsTouch(ch);
       return gdScWait(function(){return G.cam.open&&!!G.cam.hunt&&!!ph.querySelector('[data-cpin="'+G.cam.hunt+'"]')},4000).then(function(hunting){var id=G.cam.hunt,pin=id&&ph.querySelector('[data-cpin="'+id+'"]');if(pin)gsTouch(pin);
         return gdScWait(function(){return!G.cam.hunt&&gdEverOf(S.gdVisitor,"hunt").done},3000).then(function(found){var em=gdEverOf(S.gdVisitor,"hunt");var ans="the invitation "+(ok?"“"+txt+"”, its chip "+(cs?cs.join(" × ")+" px":"missing"):"not shown ("+gd6Why()+")")+"; the hunt "+(hunting?"started for "+id:"did not start")+"; found: "+(found?"yes, the invitation done ("+(GD_EVENTS[em.by]||em.by)+")":"no")+".";

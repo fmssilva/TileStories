@@ -20,7 +20,7 @@ MODULES = ['src/core/open.js', 'src/core/assets.js', 'src/core/catalogues.js', '
            'src/phone/redraw.js', 'src/card/chrome-pinned.js', 'src/card/locate.js', 'src/card/hints.js', 'src/card/states.js',
            'src/guide/ask.js', 'src/guide/readalong.js', 'src/guide/focus.js', 'src/mascot/azu2d.js',
            'src/audiences/audiences.js', 'src/audiences/lenses.js', 'src/guide/person.js', 'src/guide/dock.js',
-           'src/guide/voice.js', 'src/guide/controls.js', 'src/guide/voice-test.js', 'src/world/camera-ask.js', 'src/mascot/azu-gl.js',
+           'src/guide/voice.js', 'src/guide/controls.js', 'src/guide/voice-test.js', 'src/guide/autotour.js', 'src/world/camera-ask.js', 'src/mascot/azu-gl.js',
            'src/world/wall.js', 'src/world/guide-button.js', 'src/agent/agent.js', 'src/agent/tools.js', 'src/agent/console.js',
            'src/agent/scenes.js', 'src/mascot/azu3d.js', 'src/mascot/models.js', 'src/mascot/tile-styles.js',
            'src/mascot/size.js', 'src/world/markers.js', 'src/guide/guide-scenes.js', 'src/agent/live-voice.js', 'src/mascot/mouth.js',
@@ -34,7 +34,7 @@ STYLES = ['src/core/base.css', 'src/card/card-base.css', 'src/phone/sheet.css', 
           'src/guide/dock.css', 'src/guide/controls.css', 'src/guide/voice-test.css', 'src/world/camera-ask.css', 'src/mascot/azu-gl.css',
           'src/world/guide-button.css', 'src/agent/agent.css', 'src/agent/scenes.css', 'src/world/markers.css',
           'src/mascot/azu3d.css', 'src/mascot/models.css', 'src/mascot/tile-styles.css', 'src/mascot/size.css', 'src/editor/demo.css',
-          'src/guidance/present.css', 'src/guidance/editor.css']
+          'src/guidance/present.css', 'src/guidance/editor.css', 'src/guide/autotour.css']
 
 
 def rd(*p):

@@ -1,5 +1,5 @@
 /* The Specific Marker tab (edMarker): the point's card and pages, the starters, the card's warnings, the preview rows. */
-function edMarkerV3(){var h=row("Marker",sel("m.poi",[["painting","7. Ribeira Palace"]],"painting"),"The marker whose card you edit.");
+function edMarkerV3(){var h=row("Marker",sel("m.poi",Object.keys(POINTS).map(function(k){return[k,POINTS[k].label]}),S.m&&S.m.poi||"painting"),"The marker whose card you edit: the palace, or another point of its wall with a card of its own (its blocks, its hero and its Guide script).");
   h+=locked("Position & Visual")+locked("Labels");
   /* 1. the card */
   var cb='<div class="note">The card as the visitor meets it: blocks in order, in their bar groups, each with its preview and what a tap does. The Header is set above (existing).</div><table class="tbl"><thead><tr><th style="width:22px">#</th><th style="width:80px">Preview</th><th>Block</th><th style="width:70px">Group</th><th style="width:74px"></th></tr></thead><tbody>';
@@ -30,7 +30,7 @@ function edMarkerV3(){var h=row("Marker",sel("m.poi",[["painting","7. Ribeira Pa
   h+=fo("mpages","2 · Pages · each block's content",["new","NEW"],pages,1);
   h+=jsonBox("config.json · the marker's detail card (blocks + the story page)",markerJson());return h;}
 /* ----- Specific Marker: this point's card ----- */
-function edMarker(){var h=row("Marker",sel("m.poi",[["painting","7. Ribeira Palace"]],"painting"),"The marker whose card you edit.")+locked("Position & Visual")+locked("Labels");
+function edMarker(){var h=row("Marker",sel("m.poi",Object.keys(POINTS).map(function(k){return[k,POINTS[k].label]}),S.m&&S.m.poi||"painting"),"The marker whose card you edit: the palace, or another point of its wall with a card of its own (its blocks, its hero and its Guide script).")+locked("Position & Visual")+locked("Labels");
   var sb='<div class="note">This card follows Detail Card. Hide a section only this point does not need.</div><div class="filters">'+S.sections.filter(function(s){return s.shown}).map(function(s){var off=S.poiSec[s.id]==="hide";return'<button class="chip" type="button" data-poisec="'+s.id+'" aria-pressed="'+!off+'">'+esc(s.name.en)+(off?" · hidden here":"")+'</button>'}).join("")+'</div>';
   h+=fo("m0","0 · Sections on this card",["new","NEW"],sb,1);
   var cb='<div class="note">Blocks in order, each in its section. Everything says "As the block" until you override it for this point.</div><table class="tbl"><thead><tr><th style="width:22px">#</th><th style="width:80px">Preview</th><th>Block</th><th style="width:80px">Section</th><th style="width:74px"></th></tr></thead><tbody>';
@@ -109,6 +109,8 @@ ed.addEventListener("click",function(e){var t=e.target;
   var pv=t.closest("[data-prv]");if(pv){e.stopPropagation();var q=pv.dataset.prv.split("|");if(q[0]==="del")S.previewRows.splice(+q[1],1);else if(q[0]==="unlink")S.previewRows[+q[1]]={kind:"pull_quote"};else if(q[0]==="link")S.previewRows.push({link:"r9"});else S.previewRows.push({kind:"paragraph"});renderAll(true);show("card");return}
   var hp=t.closest("[data-heropic]");if(hp){e.stopPropagation();var q2=hp.dataset.heropic.split("|");S.hero[q2[0]]=q2[1];renderAll(true);S.view="card";S.stop="full";renderPhone(false);return}},true);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(m\.starter|"));
+/* Marker: the card of that point opens (core/content.js's pointOpen), at Half on the wall's view */
+ed.addEventListener("change",function(e){var t=e.target;if(!t.dataset||t.dataset.sel!=="m.poi")return;if(G.on)stopTour();pointOpen(t.value);S.view="card";renderAll(false)},true);
 /* ----- the demos of the Specific Marker's rows: its card; a placed block's rows (its options on this card) that block in view, ringed
    (Entrance plays it once); Page of: that page; the Header page's focus point: the hero ----- */
 function mBlockSel(){var b=byId(S.card,S.sel.cblock);return b?'[data-ref="b:'+b.id+'"]':".gsec"}

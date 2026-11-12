@@ -72,7 +72,7 @@ function gdInMiddle(x,y){var W=ph.offsetWidth,H=ph.offsetHeight;return x>=W/3&&x
    middle with its tour (a point with a card has one) */
 function gdGbtn(){if(S.view!=="card"||G.on)return null;var g=ph.querySelector(".gbtn-wrap:not(.intour) .gbtn");if(!g||!g.getClientRects().length)return null;var B=gdPR(g);return{name:"the ✦",x:(B.l+B.r)/2,y:(B.t+B.b)/2,middle:false}}
 function gdCentral(){if(S.view!=="card"||S.stop!=="closed"||typeof camView!=="function")return null;var c=camView().central,W=ph.offsetWidth,H=ph.offsetHeight;
-  if(!c||c.x<40||c.x>W-40||c.y<90||c.y>H-170)return null;return{id:c.id,name:c.name,x:c.x,y:c.y,middle:c.where==="middle",tour:!!c.card,min:c.card?tourMinutes():null}}
+  if(!c||c.x<40||c.x>W-40||c.y<90||c.y>H-170)return null;return{id:c.id,name:c.name,x:c.x,y:c.y,middle:c.where==="middle",tour:!!c.card,min:c.card?tourMinutes(c.id):null}}
 /* the moment, as the scheduler reads it */
 function gdOnWall(){return S.view==="card"&&S.stop==="closed"&&!G.on}
 /* on a card: the sheet at Half or Full, or one of its pages (never the wall, Peek or the Demo Components page): where the cues live */
@@ -125,7 +125,7 @@ function gdSlotsOf(it,V,c,items){if(it.ptJokes)return{id:it.point,point:it.point
   var nn=gdEverOf(V,it.id).shown||0;
   if(it.about==="marker"){var mk=c===undefined&&S.view==="card"?gdMarker():null;return mk?{id:mk.id,point:mk.name,year:gdYearOf(mk.id),n:nn}:{n:nn}}
   if(it.about!=="middle")return{n:nn};if(c===undefined)c=gdCentral();if(c&&c.tour)return{id:c.id,point:c.name,min:c.min,year:gdYearOf(c.id),n:nn};
-  var p=(S.wallPois||[]).filter(function(x){return x.card})[0];return{id:p&&p.id,point:p?L(p.name):"",min:tourMinutes(),year:p?gdYearOf(p.id):"",n:nn}}
+  var p=(S.wallPois||[]).filter(function(x){return x.card})[0];return{id:p&&p.id,point:p?L(p.name):"",min:tourMinutes(p&&p.id),year:p?gdYearOf(p.id):"",n:nn}}
 /* spoken (_3.8 decision 2): App as a bubble only; Content spoken once the visitor has heard the guide this visit, else a bubble */
 /* round 6: Spoken per item (As the kind / A bubble only / Spoken once the guide is heard); never while a screen reader is on (Preview & Test >
    The visitor > Screen reader on, the Lab's stand-in for VoiceOver / TalkBack): the bubble is announced politely instead */
@@ -303,7 +303,7 @@ function gdSimRun(sc){var items=gdItems(),base=gdCtxBase(),V=gdNewMemory(0),pois
   var poi=function(id){return pois.filter(function(p){return p.id===id})[0]};
   var onCard=function(){return w.where==="card"||w.where==="tour"},moving=function(){return now<w.moveTill};
   var marker=function(){return w.where==="wall"&&cardP?{id:cardP.id,name:L(cardP.name),x:195,y:380,d:0,middle:w.point===cardP.id}:null};
-  var central=function(){var p=w.where==="wall"&&!moving()&&w.point?poi(w.point):null;return p?{id:p.id,name:L(p.name),x:195,y:380,middle:true,tour:!!p.card,min:p.card?tourMinutes():null}:null};
+  var central=function(){var p=w.where==="wall"&&!moving()&&w.point?poi(w.point):null;return p?{id:p.id,name:L(p.name),x:195,y:380,middle:true,tour:!!p.card,min:p.card?tourMinutes(p.id):null}:null};
   var gbtn=function(){return w.where==="wall"||w.where==="card"&&w.stage>=2?{name:"the ✦",x:350,y:760,middle:false}:null};
   var cues=function(moment){var o={},st=w.where==="card"&&w.stage>=0?GD_SIM_CARD[w.stage]:null;if(st){st[2].forEach(function(k){o[k]=CUE_WHY[k]});if(moment==="open"&&st[1]==="half")o.grab=CUE_WHY.grab}return o};
   var ctxAt=function(moment){var t=-Infinity,mv=w.movedAt,tr=w.where==="tour"?{between:!!w.tour.between,step:w.tour.i,talked:(now-w.tour.talkFrom)/1000,toEnd:w.tour.i+1===w.tour.n-1}:null,oc=onCard();

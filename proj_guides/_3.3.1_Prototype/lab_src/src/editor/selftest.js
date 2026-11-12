@@ -9,7 +9,7 @@ function curOf(key){var p=key.split("."),st=styleById(S.sel.style);
   if(p[0]==="motion")return(motionById(S.sel.motion)||{})[p[1]];if(p[0]==="o")return st&&st.o[p[1]];if(p[0]==="fx")return(effectById(S.sel.effect)||{o:{}}).o[p[1]];
   if(p[0]==="inter")return(interById(S.sel.inter)||{o:{}}).o[p[1]];if(p[0]==="cb")return(byId(S.card,S.sel.cblock)||{})[p[1]];
   if(key==="style.uses")return st&&st.o.uses;if(p[0]==="style")return st&&st[p[1]];if(p[0]==="prow")return(patternById(p[1])||{rows:[]}).rows[+p[2]]&&patternById(p[1]).rows[+p[2]].style;
-  return{family:S.family,replay:S.replay,focusOn:S.focusOn,previewLang:S.lang,"test.poi":S.test.poi,"m.poi":"painting"}[key]}
+  return{family:S.family,replay:S.replay,focusOn:S.focusOn,previewLang:S.lang,"test.poi":S.test.poi,"m.poi":S.m&&S.m.poi||"painting"}[key]}
 /* ----- self-test: every Editor control must change what the phone shows ----- */
 var BEHAVIOUR=/^@?(inter\.|m\.page|blockDefs\.[^.]+\.chrome|cardCfg\.(tapOutside|keepAudio|audioOverlap|peekNext|enabled)|fb\.|ctl\.jump\.|ctl\.bar\.hide|ui\.|test\.poi|focusOn|previewLang)/;
 /* the phone's signature for the self-test: each feature's piece is made before the older ones (latest first) and appended after them */

@@ -1,0 +1,15 @@
+/* the automatic tour's rows in the Guide tab and the Guide script (guidance round 16) */
+.ued .note.atok,.note.atok{border-color:#2F6B47;background:#16261D;color:#BFE3CB}
+.note.atbase{font-weight:600}
+.atchk{display:inline-flex;align-items:center;gap:6px;cursor:pointer;min-height:28px}
+.atchk input{width:16px;height:16px;accent-color:#F2C14E}
+.atainote{display:block;margin-top:4px;font-size:12px}
+.attbl td{vertical-align:top}
+.atai-was{margin-top:4px;padding-top:4px;border-top:1px dashed #3A3F48;color:var(--u-dim);font-size:12px}
+.atai-was small,.atai-tag{display:inline-block;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:#F2C14E;margin-right:4px}
+.atai-was .del{margin-left:4px}
+tr.gskipped td{opacity:.55;text-decoration:line-through}
+.attbl td{white-space:normal;overflow:visible;text-overflow:clip}
+.attbl th:first-child{width:28px}.attbl th:last-child{width:76px}
+.atchk{font-size:12.5px;line-height:1.35}
+.attbl td:last-child{white-space:nowrap}

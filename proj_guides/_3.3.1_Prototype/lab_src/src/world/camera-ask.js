@@ -1,9 +1,10 @@
 /* Ask about the view: the points in view as text, the middle one, the model's tools to light points and draw routes, a treasure hunt (camLayer, camSay, camAsk). */
 S.camCfg={on:true,chips:true};S.camX=.4;G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};
 COMP.s7cam=["Guide","Ask about the view"];FOCUS.s7cam=["card",".camask","closed"];
-/* the wall's points: where each sits on the wall's picture (u, v: 0-1), its year when known, and whether it has a card */
-S.wallPois=[{id:"painting",name:T("Ribeira Palace","Paço da Ribeira"),u:.46,v:.52,year:1500,card:true},{id:"torreao",name:T("The Torreão","O Torreão"),u:.333,v:.44,year:1580},
-  {id:"river",name:T("The Tagus and its ships","O Tejo e os seus navios"),u:.06,v:.55},{id:"square",name:T("Terreiro do Paço","Terreiro do Paço"),u:.40,v:.78,year:1500},
+/* the wall's points: where each sits on the wall's picture (u, v: 0-1), its year when known, and whether it has a card (guidance round 16:
+   the Torreão, the Terreiro do Paço and the Tagus have theirs, core/content.js's POINTS, each with its tour made from it) */
+S.wallPois=[{id:"painting",name:T("Ribeira Palace","Paço da Ribeira"),u:.46,v:.52,year:1500,card:true},{id:"torreao",name:T("The Torreão","O Torreão"),u:.333,v:.44,year:1580,card:true},
+  {id:"river",name:T("The Tagus and its ships","O Tejo e os seus navios"),u:.06,v:.55,card:true},{id:"square",name:T("Terreiro do Paço","Terreiro do Paço"),u:.40,v:.78,year:1500,card:true},
   {id:"castle",name:T("The city on the hill","A cidade na colina"),u:.62,v:.45},{id:"arcade",name:T("The arcades","As arcadas"),u:.80,v:.70}];
 /* a point on the screen, through the camera (camGeom: the wall's picture as the phone sees it); a drag on the wall moves it, as moving the phone does */
 function poiScreen(p){var g=camGeom();return{x:g.ox+p.u*g.dw,y:g.oy+p.v*g.dh}}
@@ -54,7 +55,7 @@ ph.addEventListener("click",function(e){var t=e.target.closest("[data-camask],[d
   if(t.dataset.camask){if(!G.cam.open){G.cam.open=true;camLayer();emit("view.opened","the pill");return}listen(false);return}
   if(t.dataset.cchip){var k=t.dataset.cchip;camAsk(TXT("cam_chip_"+k),sampleFn&&k!=="kids"?null:k);if(sampleFn&&k!=="kids")G.cam.lastChip=k;return}
   var id=t.dataset.cpin;if(G.cam.hunt){if(id===G.cam.hunt){G.cam.hunt=null;haptic();camLight([id]);camSay(TXT("cam_found"));emit("hunt.found",id)}else{G.cam.answer=TXT("cam_not_it");camLayer()}return}
-  var p=S.wallPois.filter(function(x){return x.id===id})[0];if(p&&p.card){G.cam.open=false;S.stop="half";renderPhone(false);emit("card.opened","pin")}},true);
+  var p=S.wallPois.filter(function(x){return x.id===id})[0];if(p&&p.card){G.cam.open=false;pointOpen(p.id);S.stop="half";renderPhone(false);emit("card.opened","pin")}},true);
 ph.addEventListener("submit",function(e){var f=e.target.closest(".ca-form");if(!f)return;e.preventDefault();e.stopPropagation();var i=f.querySelector("#caq");if(i&&i.value.trim()){var q=i.value;i.value="";camAsk(q)}},true);
 /* a drag on the wall pans the camera (the Lab's stand-in for moving the phone) */
 var camDrag=null;ph.addEventListener("pointerdown",function(e){if(S.stop!=="closed"||S.view!=="card"||e.target.closest(".camask,.cpin,.mk,#ptool,button"))return;camDrag={x:e.clientX,cx:S.camX}},true);
