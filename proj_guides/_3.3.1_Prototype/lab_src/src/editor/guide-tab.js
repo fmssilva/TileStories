@@ -31,7 +31,7 @@ var GUIDE_PLAN={
     {h:"Its moments",s:"when it comes on, and on the wall"},"Introduction","Walks to the wall","Try",
     {fo:"gt:tools",t:"Model tools",s:"the 3D model's clips, Import… and a model from a picture (Mascot source = 3D model)",deep:true,parts:["3D model","Play a clip","Import…","Generate from a picture"]},
     {words:"s7mascot"}],
-  gt1:[{rules:1},{fo:"s7voice"},{fo:"s7cap"},{fo:"s7focus"},{fo:"s7coach"},
+  gt1:[{rules:1},{fo:"s7auto"},{fo:"s7voice"},{fo:"s7cap"},{fo:"s7focus"},{fo:"s7coach"},
     {fo:"s7dock",add:[{h:"Tour controls",s:"previous, pause, next, sound, captions, Ask and stop: their words"},{words:"s7tour"}]},
     {fo:"gt:ways",t:"Ways in",s:"how a visitor starts the tour, or picks it up again",parts:[{fo:"s7gbtn"},{fo:"s7hero"},{fo:"s7block"},{fo:"s7resume"}]}],
   gt3:[{fo:"s7ask",t:"What the visitor sees",s:"the question box, Ask about the view, the answers and how they sound",parts:[{from:"s7ask"},"Answers from",{fo:"s7cam"},{from:"s7agent"},

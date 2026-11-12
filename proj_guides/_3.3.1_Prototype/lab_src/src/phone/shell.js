@@ -2,7 +2,7 @@
 /* ---------- phone ---------- */
 var scr=document.getElementById("scr"),ph=document.getElementById("ph"),hint=document.getElementById("hint"),fit=document.getElementById("fit");
 var SCREENS={phone:[360,740],land:[740,360],tablet:[640,860]};
-function topbar(crumb){var ans=firstAnswer("topbar.answer",crumb);if(ans!==undefined)return ans;return '<div class="topbar"><button type="button" data-go="card" aria-label="'+TXH("page_back")+'">&#8249;</button><span>Ribeira Palace &#8250; '+crumb+'</span></div>';}
+function topbar(crumb){var ans=firstAnswer("topbar.answer",crumb);if(ans!==undefined)return ans;return '<div class="topbar"><button type="button" data-go="card" aria-label="'+TXH("page_back")+'">&#8249;</button><span>'+esc(L(S.hero.title))+' &#8250; '+crumb+'</span></div>';}
 function layerHead(t,s){return '<div class="layerhead">'+t+'<small>'+s+'</small></div>'}
 function demoScreen(){var h=topbar("<b>"+esc(L(UI.demo))+"</b>")+'<div class="pg">';
   h+=layerHead("Motion","Each motion on real parts. Motion Family: <b>"+esc((motionById(S.family)||{}).name)+"</b> · Replay: <b>"+(S.replay==="every"?"Every Pass":"Once")+"</b>.");
@@ -23,7 +23,7 @@ function renderPhone(keep){if(noDraw)return;var cx={};emitLatestFirst("renderPho
   scr.innerHTML=S.view==="card"?cardScreen():S.view==="demo"?demoScreen():S.view==="story"?storyScreen():S.view==="term"?termScreen():S.view==="democard"?demoCardScreen():galleryScreen();
   document.getElementById("ptool").innerHTML=ptool();
   var nb=document.getElementById("navbar");nb.innerHTML=navbar();nb.style.display=S.view==="card"?"":"none";
-  hint.style.display=S.view==="card"?"":"none";hint.firstChild.textContent="The card · Ribeira Palace";
+  hint.style.display=S.view==="card"?"":"none";hint.firstChild.textContent="The card · "+L(S.hero.title);
   splitPieces();scr.scrollTop=top;observe();initTransitions();initBoxes();onScroll(scr);applyFocus();
   emit("renderPhone.after",keep,cx)}
 function applyFocus(){var on=S.focusOn&&S.view==="demo"&&S.focusRef;scr.classList.toggle("focusing",!!on);

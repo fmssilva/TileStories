@@ -165,11 +165,11 @@ function gdTap(){var c=G.gd.cur;if(!c)return;var it=c.item;if(c.pull&&G.gd.demo)
   if(it.tap==="view"){gdStop("tapped: Ask about the view opens","acted");G.fab.menu=false;G.cam.open=true;renderPhone(true);emit("view.opened","the tip");return}
   /* Azu's remark: a point with a card opens it and starts its tour; any other opens Ask about the view about it, the point lit */
   if(it.tap==="remark"){var pid=c.slots.id,p=(S.wallPois||[]).filter(function(x){return x.id===pid})[0];gdStop("tapped: "+(p&&p.card?"the tour of "+(c.slots.point||"the point")+" starts":"Ask about the view opens about "+(c.slots.point||"the point")),"acted");
-    if(p&&p.card){S.stop="half";renderPhone(false);emit("card.opened","Azu's remark");startTour();return}
+    if(p&&p.card){pointOpen(p.id);S.view="card";S.stop="half";renderPhone(false);emit("card.opened","Azu's remark");startTour();return}
     G.fab.menu=false;G.cam.open=true;renderPhone(true);emit("view.opened","Azu's remark");camAsk("",p&&p.year?"oldest":"what");camLight([pid]);return}
   if(it.tap==="menu"){gdStop("tapped: the ✦ menu opens","acted");gbMenu(true);return}
   if(it.tap==="hunt"){gdStop("tapped: the treasure hunt starts","acted");gdHuntGo("the hunt invitation");return}
-  if(it.tap==="tour"){gdStop("tapped: the tour of "+(c.slots.point||"the point")+" starts","acted");S.stop="half";renderPhone(false);emit("card.opened","the tour invitation");startTour();return}
+  if(it.tap==="tour"){gdStop("tapped: the tour of "+(c.slots.point||"the point")+" starts","acted");if(c.slots.id)pointOpen(c.slots.id);S.view="card";S.stop="half";renderPhone(false);emit("card.opened","the tour invitation");startTour();return}
   gdStop("tapped","acted")}
 function gdSwipe(dx){var c=G.gd.cur;if(!c)return;var b=ph.querySelector(".gdbub:not(.gd-out)");if(b){b.style.opacity="";if(!S.reduce)b.style.translate=(dx>0?1:-1)*Math.round(ph.offsetWidth*.7)+"px 0px"}
   if(c.pull){gdStop("swiped away (a demo)");return}gdStop("swiped away","dismissed")}

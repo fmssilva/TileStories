@@ -5,7 +5,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-07)
 
 - **State:**
-  - **The Lab:** `master` holds guidance rounds 1-15, verified on 2026-11-06/11, published at
+  - **The Lab:** `master` holds guidance rounds 1-16, verified on 2026-11-06/11, published at
     https://claude.ai/artifact/Gpjf7yvoYHjGebmmNhuw2o (round 14b) with the 186 voice files, the music and the capabilities (section 1). The
     developer changes account often (four times on 2026-11-08/09); the old links stay in their accounts (RGofgb… at round 13, 19Uiat… at round 12, RKn3Rr… at round 11, J9J4h… at round 9, 4LpLd4… at round 8, Jq6X2K… at round 7, Jrejv7… at
     round 6, QmhHSz… at round 5, KDs2… at v29). A new account cannot update an old link: publish a new one (section 1, Publishing). Its
@@ -227,8 +227,23 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       `tests/test9se.js` 13 checks (36 Azu cases; 5 fresh runs green, the Architect's runs green after the fix; mutation 9 red);
       27 other files green, the self-test's guide walk bad=0. test9se runs 324-340 s, over the 300 s target: split its Azu cases
       into their own file in the next round.
-    - **Next: the four features** (the plan's section 5: a tour resumes on the next visit; short and deep per step; Ask Azu
-      during a game; a point with no written tour), one or two a round. Prototype only (no Unity) until the developer says so.
+    - The developer (2026-11-12): **all four features approved**. A point with no written tour gets **a default tour made from its
+      Detail Card's blocks** (a teaser at the hero first, then every block narrated), which the Editor can change instead of writing
+      from scratch; **deterministic, no AI needed**; one global Editor checkbox "Make it more fluid, entertaining and human with AI"
+      (Off; the Editor writes and stores the AI lines, never at run time); **a written tour always wins** (Ribeira keeps its own).
+    - Round 16 (2026-11-12, brief `_3.8_guidance_plans/brief_round16.md`): **the automatic tour**. `src/guide/autotour.js`
+      (`tourFromCard`, `AT_RULES` one rule a block kind, `atCheck`), the written tour's own step shape; `tourMinutes` computed for
+      a generated tour; Editor Guide › 2 · The tour › Tour from the card (`s7auto`: Written | From the card, the steps read only,
+      Make it mine, What each block says with demos, the AI checkbox `guideCfg.autoAI`); Specific Marker › Guide script: Regenerate
+      this step, the changed-blocks notice, Does / Keep-Skip / Order on every written step; `POINTS` in core/content.js: cards for
+      the Torreão, the Terreiro do Paço and the Tagus (the builder's texts: the developer to review). The quiz answer inside a block
+      preview now reaches the tour (card/pages.js). Tests: test9t 28 (mutation 8 red), test9sf 2 (test9se's [azu] moved out), 11
+      other files green, the self-test's guide walk ok=69 bad=0; the Architect reran test9t, test9sf and its mutation. The text of
+      the four tours: the scratchpad's `g16\tour_en.md`, `tour_pt.md`. Noted for 16b: at the hero's teaser at Mini the dock covers
+      the hero's subtitle and Start (the written tour too); the three new points show the Ribeira's hero picture.
+    - Rounds since level 2: 3 (15, 15b, 16); run level 2 after round 17.
+    - **Next: round 16b** (the developer's answers on the generated tour's words), then round 17 (resume on the next visit;
+      short or deep per step), then round 18 (Ask Azu during a game). Prototype only (no Unity) until the developer says so.
   - **MCP:** blender-mcp at user scope (Blender 5.2.3, add-on 1.8, port 9876). The Unity MCP was not connected this stretch.
   - **Keys:** Gemini, Azure Speech and ElevenLabs answer (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).
 - **The tasks, in this order:**

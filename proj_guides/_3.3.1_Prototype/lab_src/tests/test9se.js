@@ -7,10 +7,10 @@
 // [article] a point's name mid-sentence takes a lower-case article (nameIn, core/words.js): EN and PT, a slot mid-sentence lower-cased, a
 //   slot at the start kept, after a colon lower-cased, a name with no article as written; on the page a remark about the Torreão on the
 //   wall, the marker's label unchanged; Azu's lines (the introduction, Ask about the view's What am I looking at? and the hunt).
-// [azu] Azu 0 px over the words after a quick step jump (the test's own way: stopSpeech();G.i=j;runStep()), 6 repeats at g1, g5, g7,
-//   light and dark, Mini: measured once Azu stands still and again 1.5 s later (the card's words under Azu's whole box, deeper than 1 px).
-// MUTATE=1: Azu beside the ✦ whatever Mascot says and the bubble unsigned; every name as written in its slot; Azu never placed again after
-//   its step's start: the checks named [mascot off], [article] and [azu] turn red. CAP=<dir> saves the three changes at 390 px, light and dark.
+// [azu] (Azu 0 px over the words after a quick step jump) is in test9sf.js since guidance round 16 (test9se ran 324-340 s): the same
+//   checks and its mutation.
+// MUTATE=1: Azu beside the ✦ whatever Mascot says and the bubble unsigned; every name as written in its slot (and Azu never placed again
+//   after its step's start, test9sf's): the checks named [mascot off] and [article] turn red. CAP=<dir> saves the changes at 390 px.
 const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
 const fs = require('fs'), path = require('path');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
@@ -104,24 +104,6 @@ const CAP = process.env.CAP || '', REPS = +process.env.REPS || 6;
   ok('[article] Azu\'s lines: "let\'s meet the Torreão!", "vamos conhecer o Torreão!", What am I looking at? names "the Torreão" after its place, the hunt "Find the Tagus…", a line that starts with the name keeps "The"',
     /let's meet the Torreão!$/.test(az[0]) && /vamos conhecer o Torreão!$/.test(az[1]) && /: the Torreão\./.test(az[2]) && !/[^.] The /.test(az[2]) && /Find the Tagus and its ships/.test(az[3]) && /^The Torreão: /.test(az[4]), az);
   tsec('article');
-
-  // ---------- 3. Azu 0 px over the words after a quick step jump ----------
-  const rows = [];
-  for (let rep = 0; rep < REPS; rep++) for (const dark of [false, true]) for (const id of ['g1', 'g5', 'g7']) {
-    await R(base({}) + `S.view="card";S.stop="full";renderAll(false);startTour();var j=S.guideSteps.findIndex(function(s){return s.id==="${id}"});if(j>0){stopSpeech();G.i=j;runStep()}S.dockH="mini";renderGuide()`); await W(500);
-    await R(`S.dark=${dark};S.cardCfg.mode="${dark ? 'dark' : 'light'}";renderAll(true)`);
-    /* Azu standing still: its place and the scroll unchanged for three samples (at most 10 s) */
-    let last = null, same = 0; const t0 = Date.now(); while (Date.now() - t0 < 10000 && same < 3) { const y = await R('JSON.stringify([Math.round(ph.querySelector(".mascot").getBoundingClientRect().top),Math.round(scr.scrollTop)])'); same = y === last ? same + 1 : 0; last = y; await W(150); }
-    const o1 = await R('G15.azuInk()'); await W(1500); const o2 = await R('G15.azuInk()');
-    const row = { rep, theme: dark ? 'dark' : 'light', id, still: o1, later: o2 };
-    /* a red case says where Azu, the block and the scroll were (the phone's px) */
-    if (o1 || o2) row.at = await R('var pr=ph.getBoundingClientRect(),m=ph.querySelector(".mascot").getBoundingClientRect(),el=stepEl(S.guideSteps[G.i]).getBoundingClientRect(),f=freeHeight();var M=ph.querySelector(".mascot"),cur=parseFloat(M.style.top),k0=G.wbKey,o0=azuOver(M,cur,G.wb||[]).length;G.wbKey=null;var o1=azuOver(M,cur,wordBoxes(stepEl(S.guideSteps[G.i]))).length;JSON.stringify({azu:+(m.top-pr.top).toFixed(1),styleTop:cur,block:[Math.round(el.top-pr.top),Math.round(el.bottom-pr.top)],free:Math.round(f.bottom-pr.top),scroll:Math.round(scr.scrollTop),tries:G.placeTries,cls:M.className,key:k0,keyNow:G.wbKey,overCached:o0,overFresh:o1,beside:besideWords(M,cur,70,Math.round(f.bottom-pr.top)-72,stepEl(S.guideSteps[G.i]))})');
-    rows.push(row);
-    if (CAP && rep === 0 && id === 'g5') await shot(`azu_jump_g5_${dark ? 'dark' : 'light'}`);
-  }
-  const bad = rows.filter(r => r.still > 0 || r.later > 0);
-  ok(`[azu] Azu 0 px over the words after a quick step jump: ${REPS} repeats at g1, g5, g7, light and dark (${rows.length} cases), once it stands still and 1.5 s later`, rows.length === REPS * 6 && !bad.length, { bad, sample: rows.slice(0, 6).map(r => r.id + ' ' + r.theme + ' ' + r.still + '/' + r.later) });
-  tsec('azu');
 
   await R('if(G.on)stopTour();gdStop("test");SCREENS.phone=[360,820];S.dark=false;S.cardCfg.mode="light";S.lang="en";S.guideCfg.mascot=true;S.guideCfg.gbtn="both";S.guidance=JSON.parse(window.__g0);renderAll(false)');
   ok('No page error', errs.length === 0, errs.slice(0, 5));

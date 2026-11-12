@@ -4,15 +4,16 @@
 function blockPreviewHtml(b,i){emitLatestFirst("blockPreviewHtml.before",b,i);var out;
   try{out=firstAnswer("blockPreviewHtml.answer",b,i);if(out===undefined){var m=b.enter==="family"?motionById(S.family):motionById(b.enter),h="",tap=b.tap==="page"?" tap":"";
   var or=b.tap==="page"?'<div class="open'+(b.orow==="nudge"?" nudge":"")+(b.orow==="shine"?" shine":"")+'">'+(b.kind==="Story"?esc(L(UI.read)):esc(L(UI.open))+(b.orow==="nudge"?"":" &#8250;"))+'</div>':"";
-  if(b.kind==="Quick Facts")h='<div class="qf"><div><small>'+esc(L(UI.home))+'</small><b>'+esc(L(UI.homev))+'</b></div><div><small>'+esc(L(UI.lost))+'</small><b>'+esc(L(UI.lostv))+'</b></div></div>';
-  if(b.kind==="Inline"){var p=patternById(b.pattern);h=p?p.rows.map(function(r,j){return renderEl(r.kind,styleById(r.style)||defStyle(r.kind),{},j,true).replace('class="el-callout','class="el-callout')}).join(""):"";
-    if(p&&p.rows[0].kind==="callout"&&(styleById(p.rows[0].style)||{o:{}}).o.calltap==="flip")h=renderEl("callout",styleById(p.rows[0].style),{text:T("The palace had its own opera house, opened in March 1755.","O palácio tinha a sua própria ópera, inaugurada em março de 1755."),back:T("It stood for only seven months.","Durou apenas sete meses.")},0,false).replace(/^<div class="mv[^>]*>|<\/div>$/g,"")}
+  if(b.kind==="Quick Facts")h='<div class="qf">'+kindWords(b).facts.map(function(x){return'<div><small>'+esc(L(x[0]))+'</small><b>'+esc(L(x[1]))+'</b></div>'}).join("")+'</div>';
+  if(b.kind==="Inline"&&b.c&&b.c.text&&!b.pattern){var iw=kindWords(b);h=(iw.title?'<div class="bt">'+esc(L(iw.title))+'</div>':"")+renderEl("paragraph",defStyle("paragraph"),{text:iw.text},0,true)}
+  else if(b.kind==="Inline"){var p=patternById(b.pattern),fw=kindWords(b);h=p?p.rows.map(function(r,j){return renderEl(r.kind,styleById(r.style)||defStyle(r.kind),{},j,true).replace('class="el-callout','class="el-callout')}).join(""):"";
+    if(p&&p.rows[0].kind==="callout"&&(styleById(p.rows[0].style)||{o:{}}).o.calltap==="flip")h=renderEl("callout",styleById(p.rows[0].style),{text:fw.text,back:fw.back},0,false).replace(/^<div class="mv[^>]*>|<\/div>$/g,"")}
   if(b.kind==="Story")h='<img alt="" src="'+IMG.g3+'" style="width:100%;height:170px;object-fit:cover;border-radius:12px;display:block"><div class="bt" style="color:var(--stories);margin-top:12px">'+esc(L(UI.where))+'</div><h3>'+esc(L(DEMO.title))+'</h3><p>'+esc(L(DEMO.lede))+'</p>';
   if(b.kind==="Before and After")h=renderEl("before_after",defStyle("before_after"),{},0,true);
   if(b.kind==="Gallery")h=renderEl("carousel",defStyle("carousel"),{},0,true);
   if(b.kind==="Audio Guide")h=renderEl("audio",defStyle("audio"),{},0,true);
-  if(b.kind==="Knowledge Check")h='<div class="kq" data-kq><b>'+esc(L(T("Which king moved the court to the river?","Que rei mudou a corte para o rio?")))+'</b><button type="button" data-ok="1">Manuel I</button><button type="button">Philip I</button><button type="button">José I</button></div>';
-  if(b.kind==="Practical Info")h='<dl class="info"><dt>'+(S.lang==="pt"?"Onde":"Where")+'</dt><dd>Praça do Comércio</dd></dl><div class="more"><dl class="info" style="margin-top:6px"><dt>'+(S.lang==="pt"?"Hoje":"Today")+'</dt><dd>'+(S.lang==="pt"?"Praça aberta, sempre":"An open square, always")+'</dd><dt>Metro</dt><dd>Terreiro do Paço</dd></dl></div>'+'<div class="open">'+(TXH("open_row_expand"))+' &#8964;</div>';
+  if(b.kind==="Knowledge Check")h=kqHtml(kindWords(b));
+  if(b.kind==="Practical Info"){var pr=kindWords(b).rows||[],dl=function(rs){return rs.map(function(x){return'<dt>'+esc(L(x[0]))+'</dt><dd>'+esc(L(x[1]))+'</dd>'}).join("")};h='<dl class="info">'+dl(pr.slice(0,1))+'</dl>'+(pr.length>1?'<div class="more"><dl class="info" style="margin-top:6px">'+dl(pr.slice(1))+'</dl></div>':"")+'<div class="open">'+(TXH("open_row_expand"))+' &#8964;</div>'}
   var inner='<div class="bprev'+tap+(b.tap==="expand"?" expand":"")+'" '+(b.tap==="page"?'data-go="'+(b.kind==="Story"?"story":"gallery")+'"':b.tap==="expand"?"data-expand":"")+'>'+h+or+'</div>';
   out='<div class="item" data-ref="b:'+b.id+'">'+wrapMv(inner,m,0)+'</div>'}out=pipe("blockPreviewHtml.frame",out,b)}finally{emit("blockPreviewHtml.done",b,i)}
   return pipe("blockPreviewHtml.html",out,b)}
@@ -92,12 +93,38 @@ BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(blockDefs\\.Place In A
 /* ----- previews: one per kind, drawn from its options ----- */
 function hstrip(items){return '<div class="hstrip">'+items.join("")+'</div>'}
 function ring(p,col,label){var r=26,c=2*Math.PI*r;return '<svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true"><circle cx="32" cy="32" r="'+r+'" fill="none" stroke="var(--hair)" stroke-width="7"/><circle cx="32" cy="32" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="7" stroke-dasharray="'+(c*p/100).toFixed(1)+' '+c.toFixed(1)+'" transform="rotate(-90 32 32)" stroke-linecap="round"/><text x="32" y="37" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink1)">'+p+'%</text></svg>'}
+/* a block's words: its own (b.c: the wall's other points) or its kind's on the demo point's card (KWORDS, core/content.js) */
+function kindWords(b){return b&&b.c&&Object.keys(b.c).length?b.c:KWORDS[b&&b.kind]||{}}
+/* a word in one language, whatever its form (a text in each language, or one string for every language) */
+function wordIn(o,lang){return o==null?"":typeof o==="string"?o:String(o[lang]||o.en||"")}
+function kqHtml(w){var ok=w.ok||0;return'<div class="kq" data-kq><b>'+esc(L(w.q))+'</b>'+(w.choices||[]).map(function(c,i){return'<button type="button"'+(i===ok?' data-ok="1"':"")+'>'+esc(L(c))+'</button>'}).join("")+'</div>'}
+/* guidance round 16: a block's words as the guide's automatic tour reads them (guide/autotour.js), in one language, from the same place the
+   preview draws them: a title, a text (its back on a flip card), the facts as [label, value], the events as [date, words], a caption and a
+   count, a question and its choices, the rows of practical info, the dialogue's lines, a before and after's two labels. A kind with no
+   words of its own answers {} (its rule in Guide › 2 · The tour › What each block says decides what the guide does there) */
+function blockSays(b,lang){var w=kindWords(b),x=function(o){return wordIn(o,lang)},k=b.kind,dc=S.demoC||{};
+  if(k==="Quick Facts")return{facts:(w.facts||[]).map(function(f){return[x(f[0]),x(f[1])]}),cat:w.cat&&kopt("Quick Facts","cat")!=="no"?[wordIn(S.tx.facts_category,lang),x(w.cat)]:null};
+  if(k==="Inline"){if(b.c&&b.c.text)return{title:x(w.title),text:x(w.text)};var p=patternById(b.pattern),fl=p&&p.rows[0]&&p.rows[0].kind==="callout"&&(styleById(p.rows[0].style)||{o:{}}).o.calltap==="flip";
+    return{title:fl?wordIn(S.tx.fun_fact_label,lang):"",text:x(w.text),back:fl?x(w.back):"",flip:!!fl}}
+  if(k==="Story"){var cw=b.c||{};return{title:x(cw.title||DEMO.title),text:x(cw.lede||DEMO.lede)}}
+  if(k==="Timeline")return{events:(w.events||[]).map(function(e){return[e[0],x(e[1])]})};
+  if(k==="Gallery")return{cap:x(w.cap),n:w.n||4};
+  if(k==="Knowledge Check")return{q:x(w.q),choices:(w.choices||[]).map(x)};
+  if(k==="Poll")return{q:x(w.q),choices:(w.choices||[]).map(x)};
+  if(k==="Practical Info")return{rows:(w.rows||[]).map(function(r){return[x(r[0]),x(r[1])]})};
+  if(k==="Dialogue")return{lines:(w.lines||[]).map(x)};
+  if(k==="Status")return{text:x(w.state)+(w.year?", "+w.year:"")};
+  if(k==="Compare Points")return{points:(w.points||[]).map(x)};
+  if(k==="Before and After"){var ba=b.c&&b.c.blabel?b.c:dc.before_after||{};return{labels:[x(ba.blabel),x(ba.alabel)]}}
+  if(k==="Video")return{cap:x((b.c&&b.c.cap)||(dc.video||{}).cap).replace(/\s*·\s*\d+:\d+\s*$/,"")};
+  if(k==="Audio Guide")return{cap:x((b.c&&b.c.cap)||(dc.audio||{}).cap).replace(/\s*·\s*\d+:\d+\s*$/,"")};
+  return{}}
 var KPREV={
- "Status":function(){var lv=[T("Intact","Intacto"),T("Altered","Alterado"),T("Damaged","Danificado"),T("Ruin","Ruína"),T("Lost","Perdido")];
+ "Status":function(b){var sw=kindWords(b),lv=[T("Intact","Intacto"),T("Altered","Alterado"),T("Damaged","Danificado"),T("Ruin","Ruína"),T("Lost","Perdido")];
    if(kopt("Status","look")==="scale")return '<div class="bt">'+TXH("status_heading")+'</div><div class="scale5">'+lv.map(function(l,i){return'<span class="'+(i===4?"on":"")+'">'+esc(L(l))+'</span>'}).join("")+'</div>';
-   return '<div class="bt">'+TXH("status_heading")+'</div><div class="ringrow">'+ring(100,"var(--play)")+'<div><b>'+esc(L(lv[4]))+'</b><span>'+esc(fmt(TXT("status_percent"),100))+' · 1755</span></div></div>'},
- "Quick Facts":function(){var lk=kopt("Quick Facts","look"),cat=kopt("Quick Facts","cat"),f=[[L(UI.home),L(UI.homev)],[L(UI.lost),L(UI.lostv)]];
-   if(cat!=="no")f.unshift([TXT("facts_category"),L(T("Royal palace","Palácio real"))+(cat==="catlevel"?" · "+L(T("Level 1","Nível 1")):"")]);
+   return '<div class="bt">'+TXH("status_heading")+'</div><div class="ringrow">'+ring(100,"var(--play)")+'<div><b>'+esc(L(sw.state))+'</b><span>'+esc(fmt(TXT("status_percent"),100))+' · '+esc(sw.year)+'</span></div></div>'},
+ "Quick Facts":function(b){var lk=kopt("Quick Facts","look"),cat=kopt("Quick Facts","cat"),qw=kindWords(b),f=qw.facts.map(function(x){return[L(x[0]),L(x[1])]});
+   if(cat!=="no"&&qw.cat)f.unshift([TXT("facts_category"),L(qw.cat)+(cat==="catlevel"?" · "+L(T("Level 1","Nível 1")):"")]);
    if(lk==="chips")return '<div class="qchips">'+f.map(function(x){return'<span><small>'+esc(x[0])+'</small>'+esc(x[1])+'</span>'}).join("")+'</div>';
    if(lk==="big")return '<div class="qbig"><div><b>c. 1500</b><small>'+esc(f[f.length-2][0])+'</small></div><div><b>1755</b><small>'+esc(f[f.length-1][0])+'</small></div>'+(cat!=="no"?'<div class="wide"><small>'+esc(f[0][0])+'</small>'+esc(f[0][1])+'</div>':"")+'</div>';
    return '<div class="qf">'+f.map(function(x){return'<div><small>'+esc(x[0])+'</small><b>'+esc(x[1])+'</b></div>'}).join("")+'</div>'},
@@ -109,25 +136,25 @@ var KPREV={
    var h=custom?'<div class="bt" style="color:var(--stories)">'+esc(L(UI.where))+'</div><h3>'+esc(L(DEMO.title))+'</h3>'+renderEl("pull_quote",defStyle("pull_quote"),{},0,true):
      '<img alt="" src="'+IMG.g3+'" style="width:100%;height:170px;object-fit:cover;border-radius:12px;display:block"><div class="bt" style="color:var(--stories);margin-top:12px">'+esc(L(UI.where))+'</div><h3>'+esc(L(DEMO.title))+'</h3><p class="capfade">'+esc(L(DEMO.lede))+'</p>';
    return h+(res?'<div class="resume"><button type="button" data-go="story">'+TXH("story_resume")+' &#8250;</button><small>'+esc(L(T("You stopped at Two centuries of additions","Parou em Dois séculos de acrescentos")))+'</small></div>':"")},
- "Timeline":function(){var ev=[["c. 1500",T("The court moves to the river","A corte muda-se para o rio"),"g3"],["1580s",T("The Torreão rises","Ergue-se o Torreão"),"before"],["1755",T("Earthquake, fire and tsunami","Terramoto, incêndio e maremoto"),"g1"]],now=kopt("Timeline","now")==="true",pics=kopt("Timeline","pics")==="true";
-   if(now)ev.push([TXT("timeline_now"),T("The Praça do Comércio","A Praça do Comércio"),"g2"]);
+ "Timeline":function(b){var tw=kindWords(b),ev=tw.events.slice(),now=kopt("Timeline","now")==="true",pics=kopt("Timeline","pics")==="true";
+   if(now&&tw.now)ev.push([TXT("timeline_now"),tw.now,"g2"]);
    if(kopt("Timeline","look")==="vertical")return '<div class="tl">'+ev.map(function(e){return'<div><b>'+esc(e[0])+'</b><span>'+esc(L(e[1]))+'</span></div>'}).join("")+'</div>';
-   return hstrip(ev.map(function(e){return'<div class="tcard">'+(pics?'<img alt="" src="'+IMG[e[2]]+'">':"")+'<b>'+esc(e[0])+'</b><span>'+esc(L(e[1]))+'</span></div>'}))},
- "Compare Points":function(){return '<div class="bt">'+TXH("compare_heading")+'</div><div class="cmp"><div>'+ring(100,"var(--play)")+'<b>Ribeira Palace</b></div><div>'+ring(20,"var(--media)")+'<b>Lisbon Cathedral</b></div></div>'},
- "Dialogue":function(){return '<div class="dlg"><p class="them">'+esc(L(T("Your Majesty, the river front is finished.","Majestade, a frente do rio está concluída.")))+'</p><p class="you"><small>'+TXH("dialogue_you")+'</small>'+esc(L(T("And the tower?","E o torreão?")))+'</p><div class="dopts"><button type="button">'+esc(L(T("Ask about the opera","Perguntar pela ópera")))+'</button><button type="button">'+TXH("dialogue_continue")+'</button></div></div>'},
- "Gallery":function(){var all=kopt("Gallery","from")==="all";return renderEl("carousel",kstyle("Gallery","carousel"),{},0,true)+'<div class="fmt">'+esc(fmt(TXT("gallery_count"),all?9:4))+(all?" · "+esc(L(T("every picture on the card","todas as imagens do cartão"))):"")+'</div>'},
+   return hstrip(ev.map(function(e){return'<div class="tcard">'+(pics?'<img alt="" src="'+IMG[e[2]||"g1"]+'">':"")+'<b>'+esc(e[0])+'</b><span>'+esc(L(e[1]))+'</span></div>'}))},
+ "Compare Points":function(b){var cp=kindWords(b).points;return '<div class="bt">'+TXH("compare_heading")+'</div><div class="cmp"><div>'+ring(100,"var(--play)")+'<b>'+esc(L(cp[0]))+'</b></div><div>'+ring(20,"var(--media)")+'<b>'+esc(L(cp[1]))+'</b></div></div>'},
+ "Dialogue":function(b){var dw=kindWords(b).lines;return '<div class="dlg"><p class="them">'+esc(L(dw[0]))+'</p><p class="you"><small>'+TXH("dialogue_you")+'</small>'+esc(L(dw[1]))+'</p><div class="dopts"><button type="button">'+esc(L(T("Ask about the opera","Perguntar pela ópera")))+'</button><button type="button">'+TXH("dialogue_continue")+'</button></div></div>'},
+ "Gallery":function(b){var all=kopt("Gallery","from")==="all",gw=kindWords(b);return renderEl("carousel",kstyle("Gallery","carousel"),gw.imgs?{imgs:gw.imgs}:{},0,true)+'<div class="fmt">'+esc(fmt(TXT("gallery_count"),all?9:gw.n||4))+(gw.cap?" · "+esc(L(gw.cap)):"")+(all?" · "+esc(L(T("every picture on the card","todas as imagens do cartão"))):"")+'</div>'},
  "Before and After":function(){return renderEl("before_after",kstyle("Before and After","before_after"),{},0,true)},
  "Hotspot Image":function(){return renderEl("hotspot",kstyle("Hotspot Image","hotspot"),{},0,true)},
  "Video":function(){return renderEl("video",kstyle("Video","video"),{},0,true)},
  "3D Model":function(){return renderEl("model_3d",kstyle("3D Model","model_3d"),{},0,true)},
  "360 Panorama":function(){return renderEl("panorama",kstyle("360 Panorama","panorama"),{},0,true)},
  "Audio Guide":function(){return renderEl("audio",kstyle("Audio Guide","audio"),{},0,true)+(kopt("Audio Guide","chapters")==="true"?'<div class="achap"><small>'+TXH("video_chapters")+'</small><button type="button">0:00 '+esc(L(T("The river palace","O palácio do rio")))+'</button><button type="button">1:20 '+esc(L(T("The opera","A ópera")))+'</button><button type="button">2:30 1755</button></div>':"")},
- "Knowledge Check":function(){var t=kopt("Knowledge Check","qtype"),late=kopt("Knowledge Check","appears")==="read",q=L(T("Which king moved the court to the river?","Que rei mudou a corte para o rio?")),h;
+ "Knowledge Check":function(b){var t=kopt("Knowledge Check","qtype"),late=kopt("Knowledge Check","appears")==="read",h;
    if(t==="tf")h='<div class="kq tf"><div class="tfcard">'+esc(L(T("The opera house stood for only seven months.","A ópera durou apenas sete meses.")))+'</div><div class="tfb"><button type="button" data-ok="1">'+TXH("knowledge_true")+'</button><button type="button">'+TXH("knowledge_false")+'</button></div><small>'+TXH("knowledge_swipe_hint")+'</small></div>';
    else if(t==="pic")h='<div class="kq"><b>'+esc(L(T("Which picture shows the palace before 1755?","Que imagem mostra o palácio antes de 1755?")))+'</b><div class="kpic"><button type="button" data-ok="1"><img alt="" src="'+IMG.before+'"></button><button type="button"><img alt="" src="'+IMG.g2+'"></button><button type="button"><img alt="" src="'+IMG.g1+'"></button><button type="button"><img alt="" src="'+IMG.g3+'"></button></div></div>';
-   else h='<div class="kq" data-kq><b>'+esc(q)+'</b><button type="button" data-ok="1">Manuel I</button><button type="button">Philip I</button><button type="button">José I</button></div>';
+   else h=kqHtml(kindWords(b));
    return '<div class="bt">'+TXH("knowledge_check_heading")+' · '+esc(fmt(TXT("knowledge_question_of"),1,3))+'</div>'+h},
- "Poll":function(){return '<div class="poll"><b>'+esc(L(T("Should the opera house be rebuilt?","Devia a ópera ser reconstruída?")))+'</b><button type="button">'+esc(L(T("Yes","Sim")))+'</button><button type="button">'+esc(L(T("No","Não")))+'</button><button type="button">'+esc(L(T("Only as a museum","Só como museu")))+'</button></div>'},
+ "Poll":function(b){var pw=kindWords(b);return '<div class="poll"><b>'+esc(L(pw.q))+'</b>'+pw.choices.map(function(c){return'<button type="button">'+esc(L(c))+'</button>'}).join("")+'</div>'},
  "Collect":function(){return '<div class="collect"><span class="stamp">'+TILE.replace("<svg",'<svg width="40" height="40"')+'</span><div><b>'+TXH("collect_heading")+'</b><small>'+esc(fmt(TXT("collect_progress"),3,12))+'</small></div><button type="button">'+TXH("collect_add")+'</button></div>'},
  "Feedback":function(){if(kopt("Feedback","answer")==="stars")return '<div class="fbk"><b>'+TXH("feedback_stars_question")+'</b><div class="stars">'+[1,2,3,4,5].map(function(n){return'<button type="button" aria-label="'+esc(fmt(TXT("feedback_star"),n,5))+'">&#9734;</button>'}).join("")+'</div></div>';
    return '<div class="fbk"><b>'+TXH("feedback_thumbs_question")+'</b><div class="thumbs2"><button type="button">&#128077; '+TXH("feedback_thumb_up")+'</button><button type="button">&#128078; '+TXH("feedback_thumb_down")+'</button></div></div>'},
