@@ -3,6 +3,8 @@
 // a real wait): 7 days, 30, 1, Never; [changed] the card changed so the step is gone (the Gallery's 🗑 in Specific Marker), or another source
 // (the Ribeira's Written tour by the Guide tab's row): no offer, the next start says so once; [rows] Remember Off, Tell me more Off, each new
 // row's ▸ showing its demo; [blocked] storage blocked: no error, Tell me more works, nothing kept for the next visit and the Editor says so.
+// Round 17b: Ways in › Continue the tour (the old Resume button, s7resume: its id and row keys kept); a tour left by stopTour() (not the
+// panel's Stop) leaves no offer within the visit.
 // Each check keeps a place, then a new visit (the page reloaded) as the visitor would come back. MUTATE=1 (as test9u) never forgets a place:
 // the check named [expiry] turns red.
 const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');

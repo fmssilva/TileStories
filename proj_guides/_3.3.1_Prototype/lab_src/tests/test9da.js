@@ -97,16 +97,17 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   const at = await R('[S.guideSteps[G.i].id,G.hl.k,sentenceStart(G.hl.k)]');
   await tap('.gd-mini [data-g="stop"]'); await W(200);
   const ts = await R('var t=ph.querySelector(".gtoast");[G.on,!!t&&t.textContent,!!ph.querySelector(".gstopask"),!!G.resumeAt]');
-  ok('Stop: no question; the tour stops; a toast "Tour stopped · Resume"', !ts[0] && ts[1] === 'Tour stoppedResume' && !ts[2] && ts[3], ts);
+  // round 17b: the toast offers the one way back: "Continue the tour (step N of M)" and "Start again" (the ✦ menu, the hero and the invitation say the same)
+  ok('Stop: no question; the tour stops; a toast "Tour stopped" with "Continue the tour (step N of M)" and "Start again"', !ts[0] && /^Tour stoppedContinue the tour \(step\s\d+\sof\s\d+\)Start again$/.test(ts[1]) && !ts[2] && ts[3], ts);
   await tap('[data-gstop="resume"]'); await W(300);
   const rs = await R('[G.on,S.guideSteps[G.i].id,G.hl.k,!!ph.querySelector(".gtoast")]');
-  ok('...Resume goes back to the step and the sentence it stopped at', rs[0] && rs[1] === at[0] && rs[2] >= at[2] && rs[2] < at[1] && !rs[3], [at, rs]);
+  ok('...Continue goes back to the step and the sentence it stopped at', rs[0] && rs[1] === at[0] && rs[2] >= at[2] && rs[2] < at[1] && !rs[3], [at, rs]);
   await tourAt('g3', 'mini'); await until('G.hl&&G.hl.k>=13', 9000); await tap('.gd-mini [data-g="stop"]'); await W(5300);
-  ok('...the toast goes after 5 s; the point is kept: the ✦ offers Resume the tour', await R('!ph.querySelector(".gtoast")&&!!G.resumeAt'));
+  ok('...the toast goes after 5 s; the point is kept: the ✦ offers Continue the tour', await R('!ph.querySelector(".gtoast")&&!!G.resumeAt'));
   await R('S.view="card";S.stop="full";renderPhone(true);scr.scrollTop=900;fabLayer()'); await W(300); await tap('.gbtn'); await W(250);
   const mi = await R('ph.querySelector(\'[data-gbgo="tour"]\').textContent');
   await tap('[data-gbgo="tour"]'); await W(300);
-  ok('...its Resume the tour (the step\'s name under it) goes back to that step and sentence', /^Resume the tour/.test(mi) && await R(`G.on&&S.guideSteps[G.i].id==="${at[0]}"&&G.hl.k>=${at[2]}&&G.hl.k<${at[1]}`), mi);
+  ok('...its Continue the tour (step N of M) (the step\'s name under it) goes back to that step and sentence', /^Continue the tour \(step\s\d+\sof\s\d+\)./.test(mi) && await R(`G.on&&S.guideSteps[G.i].id==="${at[0]}"&&G.hl.k>=${at[2]}&&G.hl.k<${at[1]}`), mi);
   await tourAt('g5', 'mini'); await R('S.guideCfg.stopUndo="ask"'); await W(600); await tap('.gd-mini [data-g="stop"]'); await W(200);
   ok('Stop = Ask first: the tour pauses and asks "Stop the tour?"', await R('G.on&&G.paused&&!!ph.querySelector(".gstopask")&&/Stop the tour\\?/.test(ph.querySelector(".gstopask").textContent)'));
   await tap('[data-gstop="no"]'); await W(250); ok('...Keep listening: it goes on', await R('G.on&&!G.paused&&!ph.querySelector(".gstopask")'));

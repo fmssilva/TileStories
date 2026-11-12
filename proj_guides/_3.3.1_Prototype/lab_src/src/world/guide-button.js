@@ -59,16 +59,16 @@ function placeNear(d){var w=ph.querySelector(".gbtn-wrap");if(!w)return;var pr=p
    Guidance › How to use the card, In the ✦ menu: on the card it walks the card, on the wall one bubble says how the wall works), Things to
    try (round 9: Guide › Guidance › Overall › Things to try, In the ✦ menu: the checklist of the App items that teach; it opens whatever the
    visitor's Tips are, and while it has a row), the guide's settings ----- */
-function gbItems(){var wall=S.stop==="closed",out=[],hw=gdGroupById("howto");if(!wall||S.camCfg.wall==="ribeira"){out.push("tour");/* round 17: a place kept from an earlier visit: Continue the tour (the tour item) and Start again */if(!G.resumeAt&&!G.on&&typeof svOffer==="function"&&svOffer())out.push("again")}out.push("ask");if(wall&&S.camCfg.on)out.push("view");if(hw&&hw.on!==false&&hw.inMenu)out.push("how");
+function gbItems(){var wall=S.stop==="closed",out=[],hw=gdGroupById("howto");if(!wall||S.camCfg.wall==="ribeira"){out.push("tour");/* round 17b: the one offer (a Stop in this visit, or a place kept from an earlier visit): Continue the tour (the tour item) and Start again */if(!G.on&&svOffer())out.push("again")}out.push("ask");if(wall&&S.camCfg.on)out.push("view");if(hw&&hw.on!==false&&hw.inMenu)out.push("how");
   if(S.guidance.tryMenu!==false&&gdTryDefs().length)out.push("try");
   /* guidance round 12: the tour stopped for good before its promised quiz: Your 3 questions (from the steps heard), for the rest of the visit */
   if(typeof gdQuizOwed==="function"&&gdQuizOwed())out.splice(1,0,"quiz");out.push("settings");return out}
 function gbMenuHtml(){var c=camView().central;return'<div class="gbmenu" role="menu" aria-label="'+TXH("gb_name")+'">'+gbItems().map(function(k){
-    var sv=k==="tour"&&!G.resumeAt&&!G.on&&typeof svOffer==="function"?svOffer():null,t=k==="again"?TXH("sv_again"):k==="tour"?(G.resumeAt?TXH("gb_resume")+(G.resumeAt.title?'<small>'+esc(G.resumeAt.title)+'</small>':""):sv?esc(svLabel(sv)):TXH("gb_start")+' · '+esc(tourLength(tourMinutes()))):k==="view"?esc(c?nameIn(TXT("gb_view_about"),"{0}",c.name):TXT("gb_view")):k==="how"?TXH("gd_how"):k==="try"?TXH("gd_try"):k==="quiz"?esc(fmt(TXT("tour_menu_quiz"),gdQuizOwed())):TXH("gb_"+k);
+    var sv=k==="tour"&&!G.on?svOffer():null,t=k==="again"?TXH("sv_again"):k==="tour"?(sv?esc(svLabel(sv))+(sv.title?'<small>'+esc(sv.title)+'</small>':""):TXH("gb_start")+' · '+esc(tourLength(tourMinutes()))):k==="view"?esc(c?nameIn(TXT("gb_view_about"),"{0}",c.name):TXT("gb_view")):k==="how"?TXH("gd_how"):k==="try"?TXH("gd_try"):k==="quiz"?esc(fmt(TXT("tour_menu_quiz"),gdQuizOwed())):TXH("gb_"+k);
     return'<button type="button" role="menuitem" data-gbgo="'+k+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+GBICO[k]+'</svg><span>'+t+'</span></button>'}).join("")+'</div>'}
 function gbMenu(open){var was=G.fab.menu;G.fab.menu=open==null?!G.fab.menu:open;fabLayer();if(G.fab.menu&&!was)emit("menu.opened","the ✦")}
 function gbGo(k){G.fab.menu=false;
-  if(k==="tour"){if(G.resumeAt)resumeTourAt();else if(!G.on&&typeof svOffer==="function"&&svOffer())svContinue();else startTour();return}
+  if(k==="tour"){if(!G.on&&svOffer())svContinue();else startTour();return}
   if(k==="again"){startTour();return}
   if(k==="ask"){startTour();pauseTour();G.askOpen=true;S.dockH="full";renderGuide();var i=ph.querySelector("#gq");if(i)i.focus({preventScroll:true});return}
   if(k==="how"){fabLayer();gdWalk("the ✦ menu");return}

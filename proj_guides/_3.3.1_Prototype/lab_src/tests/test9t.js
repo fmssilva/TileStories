@@ -38,6 +38,13 @@
 // [article] the Portuguese names carry their article: "O Paço da Ribeira", "O Terreiro do Paço" (the hero, the marker); mid-sentence
 //   lower case, joined to a preposition ("Uma visita curta ao Terreiro do Paço?", the real invitation about the point in the middle).
 // [length] the ✦ menu's Start the tour and the Guide block's line say the tour's length as the hero's button and the invitation do.
+// Guidance round 17b: [gallery more] a gallery's deep part (Tell me more) opens with a warm lead of its set (Azu's intro lines › A gallery's
+//   Tell me more), EN and PT, the four points, and says the pictures' own captions as a guide would: without their medium ("a painting of"),
+//   one after another ("…, then …"), not a list after a colon; only the card's words and the lead; the lead under its cap; no fact the short
+//   tour says; the row's ▸ (a real click) plays the gallery's deep part with that line. [block words] (the crash the core test found) every
+//   block kind's preview and full page drawn with words of its own that lack a field fall back field by field (a Dialogue whose words have
+//   no lines says its kind's), and a page drawing its kind with no block; no error. MUTATE=1 also says the pictures as round 17's list and
+//   takes a block's words object by object: [gallery more] and [block words] turn red.
 // [edit] an intro line edited in the Editor (typed in its EN box) is said by the next generated tour; + Add a line, Remove, Back to the
 //   defaults by real clicks; the row's ▸ plays the tour at that step, that line said.
 // MUTATE=1: the teaser dropped, a block left out and a link said twice in a row; and (16b) the fact rule off, the neutral link back to
@@ -74,7 +81,10 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
     'tourLength=function(m){return fmt(TXT("guide_duration"),m)};heroWords=function(){return null};heroCropOf=function(){return null};document.head.insertAdjacentHTML("beforeend","<style>#ph.touring .hero .hact,#ph.touring .hero .gstart{visibility:visible!important}</style>");' +
     'var _tf=tourFromCard;tourFromCard=function(c,s,l,o){var st=_tf(c,s,l,o),sk=st.skipped,sd=st.said;st.shift();var g=st.findIndex(function(x){return x.at&&x.at.kind==="Gallery"});if(g>=0)st.splice(g,1);var qf=c.filter(function(b){return b.kind==="Quick Facts"&&sd&&sd[b.id]})[0];if(qf)st.splice(1,0,{id:"a:"+qf.id,view:"card",ref:"b:"+qf.id,act:"show",text:"First, the facts.",at:{key:"a:"+qf.id,block:qf.id,kind:"Quick Facts",body:"",units:[],gen:true}});' +
     'var ls=st.map(function(x,i){return x.at&&x.at.link?i:-1}).filter(function(i){return i>=0});if(ls.length>1){var a=st[ls[0]],z=st[ls[1]];z.text=z.text.replace(z.at.link,a.at.link);z.at.link=a.at.link}st.skipped=sk;st.said=sd;return st};""';
-  const load = async () => { await p.goto('about:blank'); await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 150000 }); await W(600); if (process.env.MUTATE) await R(MUT); };
+  // round 17b's mutation: the pictures as round 17's list ("In its pictures: a painting of …"), a block's words object by object
+  const MUT17B = 'atPicPhrase=function(c){return c};var _adt=atDeepText;atDeepText=function(d,lang,W){if(d&&d.kind==="pics"&&d.units&&d.units.length)return fmt(W("at_more_pics"),atJoin(d.units.map(function(x){return x.t}),W("at_and"),lang));return _adt(d,lang,W)};' +
+    'kindWords=function(b){return b&&b.c&&Object.keys(b.c).length?b.c:KWORDS[b&&b.kind]||{}};""';
+  const load = async () => { await p.goto('about:blank'); await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 150000 }); await W(600); await R('window.__tf=tourFromCard;""'); if (process.env.MUTATE) { await R(MUT); await R(MUT17B); }; };
   await load();
   if (process.env.MUTATE) console.log('MUTATION: the teaser dropped, the Gallery\'s step left out, the second intro said as the first; the fact rule off, no short-tour words, the hero left at the top with its Start button, no crop; a Quick Facts step with nothing new, the PT names without their article, the Guide block\'s fixed 3 min, the intro lines from their defaults');
   const base = `SCREENS.phone=[390,844];if(G.on)stopTour();S.previewBar=false;S.hints.on=false;S.lang="en";S.guideMute=true;S.introSeen=true;S.reduce=false;S.dark=false;S.cardCfg.mode="light";
@@ -505,6 +515,43 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
     gb['painting:en'] === 'Meet the Ribeira Palace with the guide' && gb['torreao:en'] === 'Meet the Torreão with the guide' && gb['square:en'] === 'Meet Terreiro do Paço with the guide' && gb['river:en'] === 'Meet the Tagus and its ships with the guide' &&
     gb['painting:pt'] === 'Conheça o Paço da Ribeira com o guia' && gb['square:pt'] === 'Conheça o Terreiro do Paço com o guia', gb);
   tsec('round 17');
+
+  // ---------- 10. guidance round 17b: [gallery more] a gallery's deep part in the storyteller's voice; [block words] ----------
+  await load(); await R(base);
+  const GM = JSON.parse(await R(`(function(){var out={};["painting","torreao","square","river"].forEach(function(poi){var p=pointOf(poi);langCodes().forEach(function(l){var o=atOpts(poi,l),st=(window.__tf||tourFromCard)(p.card||[],p.story||[],l,o),g=st.filter(function(s){return s.at&&s.at.kind==="Gallery"})[0];
+      out[poi+":"+l]={deep:g&&g.at.deepText||"",lead:g&&g.at.deep&&g.at.deep.lead?g.at.deep.lead.key:"",n:g&&g.at.deep?g.at.deep.units.length:0,short:st.map(function(s){return s.text}).join(" "),
+        have:" "+atNorm(atCardWords(p.card||[],p.story||[],p.hero,l)+" "+o.name+" "+atLinkWords(l))+" ",name:o.name}})});
+    out.set={};langCodes().forEach(function(l){out.set[l]=(S.guideCfg.atIntro.morepics||[]).map(function(k){return{key:k,t:wordIn(S.tx[k],l)}})});out.cap=+S.guideCfg.atIntroCap||20;return JSON.stringify(out)})()`));
+  const gmBad = [];
+  for (const poi of ['painting', 'torreao', 'square', 'river']) for (const l of ['en', 'pt']) {
+    const g = GM[poi + ':' + l], line = (GM.set[l].filter(x => x.key === g.lead)[0] || {}).t || '', pre = line.split('{0}')[0];
+    const why = [];
+    if (!g.deep) why.push('no deep part');
+    if (!line || !pre || g.deep.indexOf(pre) !== 0) why.push('not a lead of its set');
+    if ((line.replace('{0}', '').match(/\S+/g) || []).length > GM.cap) why.push('lead over its cap');
+    if (l === 'en' ? /\b(painting|engraving|drawing|photograph) of\b|^In its pictures:/i.test(g.deep) : /\b(pintura|gravura|desenho|fotografia) d|^Nas suas imagens:/i.test(g.deep)) why.push('a list or a medium');
+    if (g.n >= 2 && g.deep.indexOf(l === 'en' ? ', then ' : ', depois ') < 0) why.push('not one after another');
+    const strays = norm(g.deep).split(' ').filter(w => w && !/^\d+$/.test(w) && g.have.indexOf(' ' + w + ' ') < 0); if (strays.length) why.push('words not the card\'s: ' + strays.slice(0, 4).join(' '));
+    const ks = new Set(keysOf(g.short, l, new Set(), g.name.toLowerCase().split(/\s+/))), dk = keysOf(g.deep.slice(pre.length), l, new Set(), g.name.toLowerCase().split(/\s+/)).filter(k => known(ks, k)); if (dk.length) why.push('a fact the tour says: ' + dk.join());
+    if (why.length) gmBad.push(poi + ':' + l + ' ' + why.join('; ') + ' | ' + g.deep);
+  }
+  const leads = new Set(['painting', 'torreao', 'square', 'river'].map(poi => GM[poi + ':en'].lead));
+  // the row's ▸ (a real click): the tour at the gallery, its deep part said with that line
+  await R('pointOpen("painting");S.tours.painting.src="card";S.tab="guide";S.op={};S.op.gt1=true;S.op.s7auto=true;S.op["at:rules"]=true;S.ui.level=3;S.view="card";S.stop="full";renderAll(false);""');
+  await until('!!ed.querySelector(\'[data-atinset="morepics"]\')', 3000);
+  const mk2 = await R('S.guideCfg.atIntro.morepics[1]');
+  await p.click(`[data-atinset="morepics"] [data-atin="say|morepics|${mk2}"]`, { timeout: 4000 }); const gmPlay = await until('G.on&&G.tm.playing', 15000);
+  const gmp = JSON.parse(await R(`JSON.stringify({tp:G.tpText||"",line:wordIn(S.tx["${mk2}"],"en").split("{0}")[0],kind:(S.guideSteps[G.i]&&S.guideSteps[G.i].at||{}).kind||""})`)); await R('if(G.on)stopTour();""');
+  ok('[gallery more] a gallery\'s deep part opens with a lead of its set (Azu\'s intro lines › A gallery\'s Tell me more) and says its pictures as a guide would: no medium, one after another ("…, then …"), not a list; only the card\'s words and the lead, under its cap, no fact the tour says; the four points, EN and PT; the row\'s ▸ (a real click) plays it with that line',
+    !gmBad.length && leads.size >= 3 && gmPlay && gmp.kind === 'Gallery' && gmp.tp.indexOf(gmp.line) === 0, { gmBad, leads: [...leads], gmp, ribeira: GM['painting:en'].deep, pt: GM['painting:pt'].deep });
+  const BW = JSON.parse(await R(`(function(){var errs=[],own=T("Own words","Palavras próprias");Object.keys(KPREV).forEach(function(k){try{KPREV[k]({kind:k,id:"x",c:{zz:own}})}catch(e){errs.push("preview "+k+": "+e.message)}});
+    var pk=S.pageKind,v=S.view;PAGE_KINDS.forEach(function(k){S.pageKind=k;try{kpageScreen()}catch(e){errs.push("page "+k+": "+e.message)}});S.pageKind=pk;S.view=v;
+    var d=KPREV.Dialogue({kind:"Dialogue",id:"x",c:{title:own}}),d0=KPREV.Dialogue(),tl=kindWords({kind:"Timeline",c:{now:"Now X"}}),dl=kindWords({kind:"Dialogue",c:{lines:[T("Mine","Meu")]}});
+    return JSON.stringify({errs:errs,d:d.indexOf("Your Majesty, the river front is finished.")>=0,d0:d0.indexOf("Your Majesty, the river front is finished.")>=0,tl:(tl.events||[]).length===KWORDS.Timeline.events.length&&tl.now==="Now X",dl:dl.lines.length===1&&L(dl.lines[0])==="Mine"})})()`));
+  await R('S.view="kpage";S.pageKind="Dialogue";renderPhone(false);""'); const dlgPage = await R('(scr.querySelector(".dlg")||{}).textContent||""'); await R('S.view="card";renderPhone(false);""');
+  ok('[block words] every block kind\'s preview and full page, drawn with words of its own that lack a field, fall back field by field to its kind\'s (a Dialogue with no lines says its kind\'s; a Timeline\'s own Now keeps the kind\'s events; its own lines win), the Dialogue page with no block of its own too; no error',
+    !BW.errs.length && BW.d && BW.d0 && BW.tl && BW.dl && /Your Majesty, the river front is finished\./.test(dlgPage), { BW, dlgPage: dlgPage.slice(0, 80) });
+  tsec('round 17b');
 
   ok('no page errors', !errs.length, errs.slice(0, 5));
   console.log(fails ? `FAILED ${fails}` : 'ALL PASS');

@@ -14,7 +14,9 @@
 //   (never live) and never asked for it; any other question still goes to the model.
 // [offer] a tour stopped at a step, the page reloaded: the hero, the ✦ menu and A tour of {point}? offer "Continue the tour (step 5 of 7)"
 //   and "Start again" (PT too). [continue] each way in, on a new visit (a reload): "Where we were: …" (the step before's own words, no new
-//   fact), then that step; within the visit nothing is offered (round 11's Resume carries on).
+//   fact), then that step. [one offer] (round 17b) within the visit, a Stop (the panel's, real taps) is offered in the same words by the Stop
+//   toast, the hero, the ✦ menu and the invitation; Continue from each (real taps) goes back to the step and the sentence, no recap; the
+//   toast's Start again starts from the teaser and clears both places.
 // [again] Start again: the tour from its start, the place cleared, kept again from its next step. [finished] a tour played to its end
 //   clears it. [expiry] Forget after by Preview & Test › Today is (the app's own clock, never a real wait): 7 days, 30, 1, Never.
 // [changed] the card changed so the step is gone, or another source (written / from the card): no offer; the next start says so once.
@@ -53,9 +55,12 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
         steps:st.map(function(s){return{id:s.id,act:s.act,kind:s.at&&s.at.kind||null,text:s.text,link:s.at&&s.at.link||"",deep:s.at&&s.at.deepText||"",cut:!!(s.at&&s.at.cut)}})}})});return JSON.stringify(out)})()`));
   const dp = (poi, l) => TOURS[poi][l].steps.filter(s => s.deep);
   const tor = TOURS.torreao.en.steps, torText = tor.filter(s => s.id === 'a:t_text')[0], torGal = tor.filter(s => s.id === 'a:t_gal')[0], ribGal = TOURS.painting.en.steps.filter(s => s.kind === 'Gallery')[0];
+  // round 17b: a gallery's deep part opens with a lead of its set (Azu's intro lines › A gallery's Tell me more) and says the captions one after another
+  const LEADS = JSON.parse(await R('var o={};langCodes().forEach(function(l){o[l]=(S.guideCfg.atIntro.morepics||[]).map(function(k){return wordIn(S.tx[k],l).split("{0}")[0]})});JSON.stringify(o)'));
+  const lead = (t, l) => LEADS[l].some(x => x && String(t).indexOf(x) === 0);
   const strays = []; for (const poi in TOURS) for (const l of ['en', 'pt']) dp(poi, l).forEach(s => norm(s.deep).split(' ').forEach(w => { if (w && !/^\d+$/.test(w) && TOURS[poi][l].have.indexOf(' ' + w + ' ') < 0) strays.push(poi + ':' + l + ':' + w); }));
-  ok('[deep] each step\'s deep part is the words its rule left out: the Torreão\'s text its further sentence ("In the paintings of the river front…"), each gallery its pictures\' own captions ("In its pictures: …"), EN and PT; only the card\'s words and the deep words',
-    !!torText && /^In the paintings of the river front, it is the tower with the dome/.test(torText.deep) && !!torGal && /^In its pictures: /.test(torGal.deep) && !!ribGal && /^In its pictures: a painting of the square/.test(ribGal.deep) && dp('torreao', 'pt').length === 2 && /^Nas suas imagens: /.test(dp('river', 'pt')[0].deep) && !strays.length,
+  ok('[deep] each step\'s deep part is the words its rule left out: the Torreão\'s text its further sentence ("In the paintings of the river front…"), each gallery its pictures\' own captions after a lead of its set (round 17b: "Swipe through and you\'ll find the square with the palace…, then …"), EN and PT; only the card\'s words and the deep words',
+    !!torText && /^In the paintings of the river front, it is the tower with the dome/.test(torText.deep) && !!torGal && lead(torGal.deep, 'en') && !!ribGal && lead(ribGal.deep, 'en') && /the square with the palace and its corner tower by the river, then /.test(ribGal.deep) && !/painting of/i.test(ribGal.deep) && dp('torreao', 'pt').length === 2 && lead(dp('river', 'pt')[0].deep, 'pt') && !strays.length,
     { torText: torText && torText.deep, torGal: torGal && torGal.deep, strays: strays.slice(0, 6) });
   const noDeep = []; for (const poi in TOURS) TOURS[poi].en.steps.forEach(s => { if (s.deep && (/^(teaser|end|open)$/.test(s.act) || s.kind === 'Knowledge Check' || s.kind === 'Timeline' || s.kind === 'Before and After')) noDeep.push(poi + ':' + s.id); });
   const ribPar = TOURS.painting.en.steps.filter(s => s.act === 'read' && /^a:r:/.test(s.id));
@@ -199,8 +204,8 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
     await R('S.dockH="peek";renderGuide();""'); await p.click('#ph .gdock [data-g="stop"]'); await until('!G.on', 3000);
     return { how, ok: r.act === 'recap' && /^Where we were: /.test(r.t) && norm(prevTxt).indexOf(norm(body)) >= 0 && !fresh.length && r.next === k5.id && thenOk && r.poi === 'torreao', r, fresh };
   };
-  // within a visit Stop keeps round 11's Resume (the sentence); the place is offered on the next visit: a reload before each way in
-  const sameVisit = await R(`gdStop("test");G.gd.cur=null;S.guidance.on=false;S.view="card";S.stop="full";startTour({id:"${k5.id}"});stopTour();renderPhone(false);!!scr.querySelector(".hero .gcont")`);
+  // the place kept in the storage is offered on the next visit: a reload before each way in
+  await R('gdStop("test");G.gd.cur=null;S.guidance.on=false;""');
   await visit();
   await R('S.view="card";S.stop="full";renderPhone(false);scr.scrollTop=900;fabLayer();""'); await W(500); await R('fabLayer();""'); await until('!!ph.querySelector(".gbtn")', 3000);
   await p.click('#ph .gbtn'); await until('!!ph.querySelector(".gbmenu")', 2000); await p.click('#ph .gbmenu [data-gbgo="tour"]'); const cv3 = await recapCheck('the ✦ menu');
@@ -209,8 +214,46 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await visit(); await R('S.guidance.on=true;setWall("ribeira");gdResetVisitor();gdSimAim("torreao");renderPhone(false);gdStop("test");G.gd.cur=null;gdStart(gdItemNow("tourof"),"test",{pull:true,ms:60000});""');
   await until('!!ph.querySelector(".gdbub:not(.gd-out) [data-gdbub]")', 3000); await W(300);
   await p.click('#ph .gdbub:not(.gd-out) [data-gdbub]'); const cv1 = await recapCheck('the invitation'); await R('S.guidance.on=false;""');
-  ok('[continue] Continue from each way in, each on a new visit (real taps: the ✦ menu, the hero, the invitation): "Where we were: …" first (one sentence of the step before, no new fact), then the step it stopped at; within the visit nothing is offered (Stop\'s Resume the tour carries on)', cv1.ok && cv2.ok && cv3.ok && !sameVisit, [cv1, cv2, cv3, sameVisit]);
+  ok('[continue] Continue from each way in, each on a new visit (real taps: the ✦ menu, the hero, the invitation): "Where we were: …" first (one sentence of the step before, no new fact), then the step it stopped at', cv1.ok && cv2.ok && cv3.ok, [cv1, cv2, cv3]);
   tsec('offer');
+
+  // ---------- 5b. [one offer] round 17b: within the visit, a Stop is the same offer everywhere; Continue goes back to the sentence ----------
+  const stopAt5 = async () => { await R('if(G.on)stopTour();gdStop("test");G.gd.cur=null;S.guidance.on=false;S.view="card";S.stop="full";renderPhone(false);scr.scrollTop=0;""'); await W(200);
+    await p.click('#ph .hero .gstart'); await until('G.on', 3000); await W(200);
+    for (let k = 0; k < 4; k++) { const i = await R('G.i'); await R('S.dockH="peek";renderGuide();""'); await p.click('#ph .gdock [data-g="next"]'); await until(`G.i!==${i}`, 3000); }
+    await R('S.dockH="mini";renderGuide();""'); await until('G.hl&&G.hl.k>=3', 8000);
+    await R('S.dockH="peek";renderGuide();""'); await p.click('#ph .gdock [data-g="stop"]'); await until('!G.on', 3000);
+    return JSON.parse(await R('JSON.stringify(G.resumeAt?{id:G.resumeAt.id,s:G.resumeAt.k}:{})')); };
+  const sameStep = async (at, how) => { await until(`G.on&&!!S.guideSteps[G.i]&&S.guideSteps[G.i].id==="${at.id}"`, 4000); const hl = await until(`G.hl&&G.hl.k>=${at.s || 0}`, 4000);
+    const r = JSON.parse(await R('var s=S.guideSteps[G.i];JSON.stringify({id:s&&s.id,act:s&&s.act,recap:S.guideSteps.some(function(x){return x.act==="recap"}),k:G.hl?G.hl.k:-1,kept:!!G.resumeAt})'));
+    await R('stopTour();""'); return { how, ok: r.id === at.id && r.act !== 'recap' && !r.recap && hl && !r.kept, at, r }; };
+  await visit();
+  const w1 = await stopAt5(), wl = await R('svLabel(svOffer())');
+  const wt = JSON.parse(await R('var t=ph.querySelector(".gtoast");JSON.stringify({c:(t&&t.querySelector(".gtcont")||{}).textContent||"",a:(t&&t.querySelector(".gtagain")||{}).textContent||""})'));
+  const wh = JSON.parse(await R('hideStopUi();renderPhone(false);scr.scrollTop=0;JSON.stringify({c:(scr.querySelector(".hero .gcont")||{}).textContent||"",a:(scr.querySelector(".hero .gstart")||{}).textContent||""})'));
+  await R('scr.scrollTop=900;fabLayer();""'); await W(500); await R('fabLayer();""'); await until('!!ph.querySelector(".gbtn")', 3000);
+  await p.click('#ph .gbtn'); await until('!!ph.querySelector(".gbmenu")', 2000);
+  const wm = await R('JSON.stringify([].map.call(ph.querySelectorAll(".gbmenu [data-gbgo]"),function(b){return b.dataset.gbgo+":"+b.textContent}))'); await R('gbMenu(false);""');
+  await R('S.guidance.on=true;setWall("ribeira");S.guidance.kinds.forEach(function(k){k.on=k.id==="content"});gdResetVisitor();gdSimAim("torreao");renderPhone(false);gdStop("test");G.gd.cur=null;gdStart(gdItemNow("tourof"),"test",{pull:true,ms:60000});""');
+  await until('!!ph.querySelector(".gdbub:not(.gd-out) [data-gdbub]")', 3000); await W(300);
+  const wi = JSON.parse(await R('JSON.stringify({t:(ph.querySelector(".gdbub:not(.gd-out) [data-gdbub]")||{}).textContent||"",cta:[].map.call(ph.querySelectorAll(".gdbub:not(.gd-out) [data-gdcta]"),function(b){return b.textContent})})'));
+  await R('gdStop("test");G.gd.cur=null;S.guidance.on=false;S.view="card";S.stop="full";renderPhone(false);""');
+  const wn = await R('svTour().length');
+  ok('[one offer] within the visit, a Stop at step 5 (the panel\'s Stop, real taps): the Stop toast, the hero, the ✦ menu (a real tap) and A tour of {point}? all say "Continue the tour (step 5 of N)" and "Start again"',
+    !!w1.id && wl === 'Continue the tour (step' + nb + '5 of' + nb + wn + ')' && wt.c === wl && wt.a === 'Start again' && wh.c === '▶ ' + wl && wh.a === 'Start again' && wm.indexOf('tour:' + wl) >= 0 && wm.indexOf('again:Start again') >= 0 &&
+    wi.t === 'Continue the tour of the Torreão (step' + nb + '5 of' + nb + wn + ')?' && wi.cta.join() === 'Start again›', { w1, wl, wt, wh, wm, wi });
+  // Continue from each place, each after its own Stop: back to the step and the sentence, no recap
+  const at2 = await stopAt5(); await p.click('#ph .gtoast .gtcont'); const wc1 = await sameStep(at2, 'the toast');
+  const at3 = await stopAt5(); await R('hideStopUi();scr.scrollTop=900;fabLayer();""'); await W(500); await R('fabLayer();""'); await until('!!ph.querySelector(".gbtn")', 3000);
+  await p.click('#ph .gbtn'); await until('!!ph.querySelector(".gbmenu")', 2000); await p.click('#ph .gbmenu [data-gbgo="tour"]'); const wc2 = await sameStep(at3, 'the ✦ menu');
+  const at4 = await stopAt5(); await R('hideStopUi();renderPhone(false);scr.scrollTop=0;""'); await W(200); await p.click('#ph .hero .gcont'); const wc3 = await sameStep(at4, 'the hero');
+  const at6 = await stopAt5(); await R('hideStopUi();S.guidance.on=true;setWall("ribeira");gdResetVisitor();gdSimAim("torreao");renderPhone(false);gdStop("test");G.gd.cur=null;gdStart(gdItemNow("tourof"),"test",{pull:true,ms:60000});""');
+  await until('!!ph.querySelector(".gdbub:not(.gd-out) [data-gdbub]")', 3000); await W(300); await p.click('#ph .gdbub:not(.gd-out) [data-gdbub]'); const wc4 = await sameStep(at6, 'the invitation'); await R('S.guidance.on=false;""');
+  ok('[one offer] Continue within the visit from each place (real taps: the toast, the ✦ menu, the hero, the invitation): back to the step and the sentence it stopped at, no recap, the place used up', wc1.ok && wc2.ok && wc3.ok && wc4.ok, [wc1, wc2, wc3, wc4]);
+  await stopAt5(); await p.click('#ph .gtoast .gtagain'); await until('G.on', 3000); await W(300);
+  const wa = JSON.parse(await R('JSON.stringify({i:G.i,act:S.guideSteps[G.i].act,kept:!!G.resumeAt})')), waK = await kept('torreao'); await R('stopTour();""');
+  ok('[one offer] the toast\'s Start again (a real tap): the tour from its teaser, this visit\'s place and the kept one both cleared', wa.i === 0 && wa.act === 'teaser' && !wa.kept && waK === '' && !(await R('!!svOffer()')), { wa, waK });
+  tsec('one offer');
   // [again] Start again; [finished] a tour to its end
   await visit(); await W(300);
   await p.click('#ph .hero .gstart'); await until('G.on', 3000); await W(200);

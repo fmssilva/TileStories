@@ -6,6 +6,9 @@
 // the wall, 0 px over words, 44 px); the wall's pill gone and Global Scene's link; every Guidance row's demo (the ×10 chip); Show next
 // now and the visitor; the five scenes in Ask Azu's console. MUTATE=1 node test9e.js runs it with a scheduler that ignores Done when:
 // the named checks turn red.
+// Guidance round 17b: split in two to keep each file under 300 s (it ran 415 s): test9e sections 1-9, 12 and 13 (the scheduler, the
+// opening, Tap a marker, the look, Preview & Test, the scenes), test9ea.js (PART=2, this file) sections 10 and 11 (the Guide tab, 4 ·
+// Guidance's rows, defaults and each row's demo). Every check kept; MUTATE=1 runs in both (the [Done when] scene is in test9e).
 const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 // the former Detail Card > 6 · Guide, counted before the move (label|key of each row; the foldouts) (guidance round 11 added the panel's Look, Words, Voice moving, Speed button and the music's Music volume, Under the voice, Track, Playing now, Visitor can choose the music)
@@ -28,6 +31,8 @@ const BEFORE = { rows: ["Fixed rules|", "Voice|guideCfg.voice", "Speaking now|",
   // run the clock until the item shows (or ms of the visit pass): the visit time it started
   const runTill = async (id, ms, step) => R(`var t0=gdNow(),r=null;while(gdNow()-t0<${ms}){gdAdvance(${step || 250});if(G.gd.cur&&G.gd.cur.item.id==="${id}"){r=Math.round(G.gd.cur.at);break}}r`);
 
+  const PART2 = process.env.PART === '2';
+  if (!PART2) {
   // ---------- 1. the scheduler alone: gdPick on a fake clock, each rule by itself ----------
   const pk = (mod, now) => R(`var items=gdItems(),V={visits:1,visit:{n:1,at:0,lastEnd:null,items:{}},ever:{items:{}},used:{}},C={on:true,breathing:15,demo:false,showing:null,remark:null,speaking:false,panel:null,movedAt:null,onWall:true,where:"",marker:{id:"painting",name:"Ribeira Palace",x:200,y:400},stillSince:0,returning:false};
     var op=function(last,end){V.visit.items.opening={shown:1,last:last,end:end,dismissed:0};V.ever.items.opening={shown:1,done:false,by:""};V.visit.lastEnd=end};${mod || ''};var r=gdPick(items,V,C,${now});[r.item?r.item.id:null,r.why]`);
@@ -176,7 +181,8 @@ const BEFORE = { rows: ["Fixed rules|", "Voice|guideCfg.voice", "Speaking now|",
   ok('Global Scene > Onboarding hints: one link row, "Said by the guide: Guide › Azu speaks up › App › The start", which opens it', g11[0] && g11[1] && g11[2] === 1 && went[0] === 'guide' && went[1] && went[2], [g11, went]);
   const words = await R('[TXOWN.wall_tip,TXOWN.gd_opening,TXOWN.gd_opening_back,S.tx.gd_opening.pt.length>10,S.tx.wall_tip.pt,ownerName("gd:i:tapmarker")]');
   ok('The words in Languages & Terms, owned by their items (Tap a marker reuses wall_tip), in each language', words[0] === 'gd:i:tapmarker' && words[1] === 'gd:i:opening' && words[2] === 'gd:i:opening' && words[3] && words[4] === 'Toque aqui.' && /Guide › Azu speaks up › The start › Tap a marker/.test(words[5]), words);
-
+  }
+  if (PART2) {
   // ---------- 10. the Guide tab: its sections; every former 6 · Guide row, the same rows ----------
   await R('S.tab="guide";S.ui.level=9;S.op={};renderEditor()');
   const gt = await R('[[].map.call(ed.querySelectorAll(":scope > details[data-fo]"),function(d){return d.dataset.fo+"|"+d.querySelector("summary").textContent.split(" · ").slice(0,2).join(" · ")}),[].map.call(document.querySelectorAll(".utab"),function(t){return t.textContent})]');
@@ -238,6 +244,8 @@ const BEFORE = { rows: ["Fixed rules|", "Voice|guideCfg.voice", "Speaking now|",
   await R('window.__fake=0;delete S.guidance.noDemoRow;renderEditor()');
   ok('The self-test fails a row of the Guide tab with no demo (NO DEMO)', st.length === 1 && /^guide @guidance\.noDemoRow NO DEMO/.test(st[0]), st);
 
+  }
+  if (!PART2) {
   // ---------- 12. 0 · Preview & Test: Show next now and why; the visitor ----------
   await R(base + 'G.gd.manual=true;gdStop("test");gdResetVisitor();S.tab="guide";S.ui.level=1;S.op={gt0:true};renderEditor()');
   await p.locator('[data-gdnext]').click(); await W(200);
@@ -261,7 +269,9 @@ const BEFORE = { rows: ["Fixed rules|", "Voice|guideCfg.voice", "Speaking now|",
     ok(`${id === 'gd_card' ? '[Done when] ' : ''}Scene "${label}": Set up and ask runs it, ✓`, /Does: nothing:/.test(does) && r && r.ok === true, r && [r.note, r.answer]);
     await R('gdStop("test");G.gd.rate=1');
   }
+  }
   ok('no page errors', errs.length === 0, errs.slice(0, 3));
+  console.log('TIME ' + (PART2 ? 'part 2' : 'part 1') + ' ' + Math.round(process.uptime()) + ' s');
   console.log(fails ? `${fails} FAILED` : 'ALL PASS');
   await b.close();
 })();

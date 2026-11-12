@@ -26,7 +26,7 @@ function tmDeepOf(st,lang){if(!st||/^(teaser|end|intro|recap)$/.test(st.act))ret
   else if(st.at&&st.at.deeps&&st.at.deeps[lang])d=st.at.deeps[lang];
   if(!d||!d.units||!d.units.length)return null;
   var u=d.units.filter(function(x){var n=atNorm(x.t);return n&&!G.tm.said[n]&&!(x.k&&x.k.length&&x.k.every(function(k){return atKnown(G.tm.keys,k)}))});if(!u.length)return null;
-  return{kind:d.kind,units:u,text:u.length===d.units.length&&d.text?d.text:atDeepText({kind:d.kind,units:u},lang,function(k){return wordIn(S.tx[k],lang)})}}
+  return{kind:d.kind,units:u,lead:d.lead||null,text:u.length===d.units.length&&d.text?d.text:atDeepText({kind:d.kind,units:u,lead:d.lead},lang,function(k){return wordIn(S.tx[k],lang)})}}
 function tmDeep(st){return S.guideCfg.tmOn?tmDeepOf(st):null}
 function tmCur(){return G.on?S.guideSteps[G.i]:null}
 /* the step's line still being said (the device voice, a recorded or live audio) */

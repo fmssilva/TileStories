@@ -75,9 +75,20 @@ function atOneFact(f,lang,lf,W){var lab=String(f[0]).trim(),val=String(f[1]).tri
   if((AT_PREP[lang]||AT_PREP.en).test(lab))return lab+", "+lf(val);return atFact(f,lang,lf,true)}
 var AT_PREP={en:/^(in|on|at|by|under|from|near|inside|outside|during)\b/i,pt:/^(em|no|na|nos|nas|sob|junto|durante|perto|dentro|fora)\b/i};
 /* round 17: a step's deep part in words (Tell me more): a text's further sentences as they are, the facts left out ("A few more: …"),
-   the other pictures' captions ("In the other pictures: …"); units already in the tour's case */
+   a gallery's pictures; units already in the tour's case.
+   Round 17b (the Architect, from the developer's rule that Azu is a warm storyteller, never a list): a gallery's deep part is a warm lead from
+   its set (Azu's intro lines › A gallery's Tell me more, d.lead: {0} the pictures) and the captions said as a guide would, one after another
+   ("Swipe through and you'll find the square with the palace and its corner tower by the river, then the ruins the earthquake left…"): each
+   caption without its medium ("A painting of", "Uma gravura das": atPicPhrase), joined by "then" and "and" (at_then, at_and). With no line
+   in the set, at_more_pics. Only the card's words and the lead. Unity: GuideTourBuilder.DeepPictures, the same rule */
+var AT_MEDIUM={en:/^(?:a|an|the)\s+(?:painting|engraving|drawing|photo|photograph|picture|print|map|plan|sketch|watercolou?r|illustration|etching)\s+of\s+/i,
+  pt:/^(?:uma?|o|a)\s+(?:pintura|gravura|desenho|fotografia|foto|imagem|ilustração|mapa|planta|esboço|aguarela)\s+(de|da|do|das|dos)\s+/i};
+function atPicPhrase(c,lang){var re=AT_MEDIUM[lang]||AT_MEDIUM.en,m=re.exec(c);if(!m)return c;var art={da:"a ",do:"o ",das:"as ",dos:"os "}[(m[1]||"").toLowerCase()]||"";return art+c.slice(m[0].length)}
+function atPicsSay(u,W,lang){if(u.length<2)return u.join("");return u[0]+", "+W("at_then")+" "+atJoin(u.slice(1),W("at_and"),lang)}
 function atDeepText(d,lang,W){if(!d||!d.units||!d.units.length)return"";var u=d.units.map(function(x){return x.t});
-  if(d.kind==="pics")return fmt(W("at_more_pics"),atJoin(u,W("at_and"),lang));if(d.kind==="facts")return fmt(W("at_more_facts"),u.join(", "));return u.join(" ")}
+  if(d.kind==="pics"){var ph=atPicsSay(u,W,lang),l=d.lead&&d.lead.t?String(d.lead.t).trim():"",t=!l?fmt(W("at_more_pics"),ph):/\{0\}/.test(l)?fmt(l,ph):/[:,]$/.test(l)?l+" "+ph+".":l+" "+ph.charAt(0).toUpperCase()+ph.slice(1)+".";
+    return t.charAt(0).toUpperCase()+t.slice(1)}
+  if(d.kind==="facts")return fmt(W("at_more_facts"),u.join(", "));return u.join(" ")}
 /* a long text in its first sentences, up to the cap (a first sentence over it is cut at the cap with …) */
 function atCapText(t,cap){var ss=atSentences(t),out=[],n=0;for(var i=0;i<ss.length;i++){var w=atWords(ss[i]);if(out.length&&n+w>cap)break;out.push(ss[i]);n+=w}
   var r=out.join(" ");if(atWords(r)>cap)r=(r.match(/\S+/g)||[]).slice(0,cap-1).join(" ").replace(/[,;:]$/,"")+"…";return{text:r,cut:r!==String(t).trim()}}
@@ -153,9 +164,10 @@ var AT_INTRO_SETS=[["facts","The facts","Quick Facts"],["story","The story, as i
   ["ba","A before and after","Before and After, a story row's"],["quiz","The quiz","Knowledge Check"],["back","Back on the card","the first block after the story, whatever its kind"],
   ["other","Any other block","Dialogue, Poll, Status, Compare Points, Video, a story row with no heading…"],["end","The end","the tour's last words, after its recap: a thank-you and what to do next on the wall"],
   ["fact1","One fact","Quick Facts with a single fact left to tell: a line that leads into the fact, said as a sentence (“One thing worth knowing: it was lost on 1 November 1755.”)"],
-  ["teaser","The teaser's opening","the teaser's second sentence, after the hook: {time} the tour's length (“short tour” under 2 minutes, else “tour of about N minutes”), {0} what the tour covers"]];
+  ["teaser","The teaser's opening","the teaser's second sentence, after the hook: {time} the tour's length (“short tour” under 2 minutes, else “tour of about N minutes”), {0} what the tour covers"],
+  ["morepics","A gallery's Tell me more","a gallery's deep part (Tell me more, round 17b): the warm lead into its pictures, {0} the pictures' own captions said one after another (“the square with the palace…, then the ruins the earthquake left and…”)"]];
 /* the Editor's order of the sets (round 17: the teaser's opening first, one fact after the facts) */
-var AT_INTRO_SHOW=["teaser","facts","fact1","story","text","flip","callout","pics","dates","ba","quiz","back","other","end"];
+var AT_INTRO_SHOW=["teaser","facts","fact1","story","text","flip","callout","pics","morepics","dates","ba","quiz","back","other","end"];
 var AT_INTRO_DEF={};AT_INTRO_SETS.forEach(function(x){AT_INTRO_DEF[x[0]]=Object.keys(S.tx).filter(function(k){return k.indexOf("at_in_"+x[0]+"_")===0}).sort(function(p,q){return+p.split("_").pop()-+q.split("_").pop()})});
 S.guideCfg.atIntro=JSON.parse(JSON.stringify(AT_INTRO_DEF));S.guideCfg.atIntroCap=20;
 function atIntroSalt(set){var i=AT_INTRO_SETS.findIndex(function(x){return x[0]===set});return i<0?0:i}
@@ -251,7 +263,7 @@ function tourFromCard(card,story,lang,o){
       mk("show","dates",atEnd(ev.map(function(u){return u.t.replace(/[.!?…]+$/,"")}).join("; ")),null,{units:ev.map(function(u){return{t:u.t,k:u.k}}),items:true,lw:ev.length>1?"its dates":"its date",what:"dates"});return}
     if(k==="Gallery"){var gc=w.cap?fresh(atEnd(w.cap)):"";if(mk("show","pics",gc||fmt(W("at_pics"),w.n||""),null,{lw:gc?"its caption":""}))
         /* round 17: its deep part, the other pictures' captions */
-        deepOf(st,"pics",(w.caps||[]).filter(Boolean).map(function(c){var t=lf(String(c).replace(/[.!?…]+$/,"").trim());return{t:t,k:keysOf(t)}}));return}
+        deepOf(st,"pics",(w.caps||[]).filter(Boolean).map(function(c){var t=lf(atPicPhrase(String(c).replace(/[.!?…]+$/,"").trim(),lang));return{t:t,k:keysOf(t)}}));return}
     if(k==="Before and After"){var lb=(w.labels||[]).filter(Boolean),pair=lb.length===2?fresh(atEnd(lb[0]+" "+W("at_and")+" "+lf(lb[1]))):"";
       if(rl==="try")mk("try","ba",(pair?pair+" ":"")+W("at_try_drag"),{wait:"drag"});else mk("show","ba",pair||W("at_show_look"));return}
     if(k==="Knowledge Check"){if(!w.q)return;if(rl==="try")mk("try","quiz",atEnd(w.q)+" "+W("at_try_answer"),{wait:"answer"});else mk("show","quiz",atEnd(w.q));return}
@@ -277,11 +289,15 @@ function tourFromCard(card,story,lang,o){
   if(!o.pre){var flat=[],nk0={};nameKeys.forEach(function(k){nk0[k]=1});
     var unitsOf=function(s,j){if(j===0)return hook?[{t:hook,k:keysOf(hook,hookSrc==="fact")}]:[];if(s.act==="end")return atSentences(s.at.body).map(function(x){return{t:x,k:keysOf(x)}});return(s.at&&s.at.units)||[]};
     steps.forEach(function(s,j){unitsOf(s,j).forEach(function(u){flat.push({j:j,k:u.k||[],n:atNorm(u.t)})})});
+    /* round 17b: a gallery's deep part opens with a line of its set (by the point, like the intro lines; a demo's line forced) */
+    var mls=(o.intro?o.intro("morepics"):[]).filter(function(x){return x.max<=(+o.introCap||20)}),nM=0,mLead=function(){if(!mls.length)return null;
+      var f=o.introForce&&o.introForce.set==="morepics"?mls.filter(function(x){return x.key===o.introForce.key})[0]:null,x=f||mls[((+o.seed||0)+atIntroSalt("morepics")+nM++)%mls.length];
+      return{key:x.key,i:x.i,t:/\{point\}/.test(x.text)?nameIn(x.text,"{point}",o.name,lang):x.text}};
     var D={};steps.forEach(function(s,j){var d=s.at&&s.at.deep;if(!d)return;var keep=[];
       d.units.forEach(function(u){if(flat.some(function(x){return x.j>j&&x.n===atNorm(u.t)}))return;var heard=Object.assign({},nk0,D);u.k.forEach(function(k){heard[k]=1});
         var kn=Object.assign({},heard),bad=false;flat.forEach(function(x){if(bad)return;if(x.j>j&&x.k.length&&x.k.every(function(k){return atKnown(kn,k)}))bad=true;x.k.forEach(function(k){kn[k]=1})});
         if(bad)return;keep.push(u);u.k.forEach(function(k){D[k]=1})});
-      if(keep.length){d.units=keep;s.at.deepText=atDeepText(d,lang,W)}else delete s.at.deep})}
+      if(keep.length){d.units=keep;if(d.kind==="pics")d.lead=mLead();s.at.deepText=atDeepText(d,lang,W)}else delete s.at.deep})}
   /* round 16c: each step's intro line, in the tour's order: from its set, picked by the point and the step (the seed, the set's place, the
      set's lines used so far), never twice, the name in at most two (a third: "this place"), under its cap */
   var used={},nUsed={},names=0,icap=+o.introCap||20,seed=+o.seed||0;
@@ -376,7 +392,7 @@ function atSteps(poi,raw){poi=poi||S.m&&S.m.poi||"painting";var p=pointOf(poi),l
   langs.forEach(function(l){by[l]=tourFromCard(p.card||[],p.story||[],l,atOpts(poi,l))});var base=by.en||by[langs[0]],ai=atTour(poi).ai||{};
   var out=base.map(function(st){var t={},lk={},dp={},hasD=false;langs.forEach(function(l){var m=by[l].filter(function(x){return x.id===st.id})[0];t[l]=m?m.text:st.text;lk[l]=m&&m.at?m.at.link||"":"";
       /* round 17: each language's deep part (Tell me more), its units with their fact keys */
-      dp[l]=m&&m.at&&m.at.deep?{kind:m.at.deep.kind,units:m.at.deep.units,text:m.at.deepText||""}:null;if(dp[l])hasD=true});
+      dp[l]=m&&m.at&&m.at.deep?{kind:m.at.deep.kind,units:m.at.deep.units,text:m.at.deepText||"",lead:m.at.deep.lead||null}:null;if(dp[l])hasD=true});
     var s=Object.assign({},st,{text:t,at:Object.assign({},st.at,{tpl:t,links:lk,deeps:hasD?dp:null})}),a=ai[st.id];
     if(!raw&&S.guideCfg.autoAI&&a&&!a.off&&a.base===atHash(t)&&langs.some(function(l){return a[l]&&a[l]!==t[l]})){s.text={};langs.forEach(function(l){s.text[l]=a[l]||t[l]});s.at.ai=true;if(s.act==="read")s.act="show"}return s});
   out.skipped=base.skipped;out.said=base.said;return out}
@@ -495,9 +511,9 @@ function atIntroAdd(set){var ks=S.guideCfg.atIntro[set]=(S.guideCfg.atIntro[set]
   S.tx[k]={en:"",pt:""};(TXO.s7auto=TXO.s7auto||[]).push(k);TXOWN[k]="s7auto";TXP[k]="Intro · "+set+" "+n;TXW[k]="Azu's intro line for "+atIntroLabel(set).toLowerCase()+", added in the Editor (round 16c).";TXF[k]="";ks.push(k);renderEditor()}
 function atIntroReset(set){S.guideCfg.atIntro[set]=AT_INTRO_DEF[set].slice();AT_INTRO_DEF[set].forEach(function(k){var d=atTxDef(k);if(d)S.tx[k]=JSON.parse(JSON.stringify(d))});renderAll(true)}
 /* the demo of a line: the tour made from the open point's card, at the first step of that set, the line said there; none on this card: a chip says so */
-function atIntroDemo(set,key){var poi=S.m&&S.m.poi||"painting";G.atIntroForce={set:set,key:key};var gen=atSteps(poi),st=gen.filter(function(x){return x.at&&x.at.lk===set})[0]||(set==="teaser"?gen[0]:null);G.atIntroForce=null;
+function atIntroDemo(set,key){var poi=S.m&&S.m.poi||"painting";G.atIntroForce={set:set,key:key};var gen=atSteps(poi),st=set==="morepics"?gen.filter(function(x){var d=x.at&&x.at.deeps&&x.at.deeps[S.lang];return d&&d.kind==="pics"})[0]:gen.filter(function(x){return x.at&&x.at.lk===set})[0]||(set==="teaser"?gen[0]:null);G.atIntroForce=null;
   if(!st){if(G.on)stopTour();S.view="card";S.stop="full";renderPhone(false);if(typeof gdChip==="function"){gdChip("No step of "+nameMid(L(pointOf(poi).hero.title))+"'s tour opens with "+atIntroLabel(set).toLowerCase()+": its lines apply where one does");clearTimeout(G.atChipT);G.atChipT=setTimeout(function(){gdChip(null)},3200)}return}
-  atDemoAt(null,st.id,{set:set,key:key})}
+  atDemoAt(null,st.id,{set:set,key:key});if(set==="morepics"&&G.on&&S.guideCfg.tmOn){S.dockH="mini";renderGuide();stopSpeech();G.tm.want=G.i;next()}}
 ed.addEventListener("click",function(e){var b=e.target.closest("[data-atin]");if(!b)return;e.stopPropagation();var q=b.dataset.atin.split("|");
   if(q[0]==="add"){atIntroAdd(q[1]);return}if(q[0]==="reset"){atIntroReset(q[1]);return}if(q[0]==="say"){atIntroDemo(q[1],q[2]);return}
   if(q[0]==="del"){var ks=(S.guideCfg.atIntro[q[1]]||[]).slice();if(ks.length<2)return;ks.splice(+q[2],1);S.guideCfg.atIntro[q[1]]=ks;renderAll(true);return}},true);

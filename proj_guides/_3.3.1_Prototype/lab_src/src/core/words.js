@@ -103,7 +103,6 @@ var LABSTR=[["tour_promise", "gd:i:quizpromise", "The quiz promise, after the in
  ["settings_music_credits", "s5settings", "The guide's music: the credits the tracks' licences ask for.", "Music credits", "Créditos da música", "", "Music credits"],
  ["settings_music_vol", "s5settings", "The guide's music: its volume.", "Music volume", "Volume da música", "", "Music volume"],
  ["guide_stopped", "s7tour", "The toast after Stop, for 5 s.", "Tour stopped", "Visita interrompida", "", "Stop toast"],
- ["guide_stop_resume", "s7tour", "The toast's button: back to the step and the sentence it stopped at.", "Resume", "Retomar", "", "Stop toast button"],
  ["guide_stop_ask", "s7tour", "With Stop = Ask first: the question before stopping.", "Stop the tour?", "Parar a visita?", "", "Stop question"],
  ["guide_stop_yes", "s7tour", "Its button that stops.", "Stop", "Parar", "", "Stop question: yes"],
  ["guide_stop_no", "s7tour", "Its button that goes on.", "Keep listening", "Continuar a ouvir", "", "Stop question: no"],
@@ -111,7 +110,6 @@ var LABSTR=[["tour_promise", "gd:i:quizpromise", "The quiz promise, after the in
  ["gb_name", "s7gbtn", "The guide's button, for a screen reader (outside a tour).", "The guide: tour, questions, settings", "O guia: visita, perguntas, definições", "", "Button name"],
  ["gb_toggle", "s7gbtn", "The guide's button during a tour, for a screen reader.", "Show or hide the guide", "Mostrar ou esconder o guia", "", "Button name (tour)"],
  ["gb_start", "s7gbtn", "Its menu: starts the tour.", "Start the tour", "Começar a visita", "", "Menu: start"],
- ["gb_resume", "s7gbtn", "Its menu after a Stop: back to where the tour stopped.", "Resume the tour", "Retomar a visita", "", "Menu: resume"],
  ["gb_ask", "s7gbtn", "Its menu: the conversation, by typing or talking.", "Ask (type or talk)", "Perguntar (escrever ou falar)", "", "Menu: ask"],
  ["gb_view", "s7gbtn", "Its menu on the wall, with no point in the middle.", "Ask about the view", "Perguntar sobre a vista", "", "Menu: the view"],
  ["gb_view_about", "s7gbtn", "Its menu on the wall ({0} = the point in the middle).", "Ask about {0}", "Perguntar sobre {0}", "", "Menu: the view (a point)"],
@@ -298,12 +296,20 @@ var LABSTR=[["tour_promise", "gd:i:quizpromise", "The quiz promise, after the in
   /* round 17: Tell me more (Guide › 2 · The tour › Tell me more): the chip, the deep parts' own words */
   ["tm_more", "s7more", "The chip on the guide panel while a step with more to tell plays (round 17): a tap says the step's deep part, then goes on.", "Tell me more", "Conte-me mais", "", "Chip"],
   ["tm_more_on", "s7more", "The chip once tapped, or at the visitor's deep pace: the deep part comes after this line (round 17).", "More coming", "Já lhe conto mais", "", "Chip · queued"],
-  ["at_more_pics", "s7more", "A gallery's deep part: its pictures' own captions ({0} the list; round 17).", "In its pictures: {0}.", "Nas suas imagens: {0}.", "", "Deep · pictures"],
+  ["at_more_pics", "s7more", "A gallery's deep part when its set (Azu's intro lines › A gallery's Tell me more) has no line: its pictures' own captions ({0} the pictures said one after another; round 17).", "In its pictures: {0}.", "Nas suas imagens: {0}.", "", "Deep · pictures"],
+  ["at_then", "s7more", "Joins a gallery's pictures in its deep part, after the first (“the square with the palace…, then the ruins…”; round 17b).", "then", "depois", "", "Then"],
+  /* round 17b (the Architect, from the developer's standing rule: Azu is a warm storyteller, never a list): a gallery's Tell me more opens with
+     a warm lead from its set, {0} the pictures' own captions said one after another (Guide › 2 · The tour › Tour from the card › Azu's intro lines) */
+  ["at_in_morepics_1", "s7auto", "Azu's lead 1 into a gallery's deep part (Tell me more; {0} its pictures said one after another; round 17b).", "Swipe through and you'll find {0}.", "Percorra as imagens e vai encontrar {0}.", "", "Gallery more 1"],
+  ["at_in_morepics_2", "s7auto", "Azu's lead 2 into a gallery's deep part (Tell me more; {0} its pictures said one after another; round 17b).", "Look a little closer and you'll see {0}.", "Olhe com mais atenção e vai ver {0}.", "", "Gallery more 2"],
+  ["at_in_morepics_3", "s7auto", "Azu's lead 3 into a gallery's deep part (Tell me more; {0} its pictures said one after another; round 17b).", "Each picture keeps a moment of its own: first {0}.", "Cada imagem guarda um momento seu: primeiro {0}.", "", "Gallery more 3"],
+  ["at_in_morepics_4", "s7auto", "Azu's lead 4 into a gallery's deep part (Tell me more; {0} its pictures said one after another; round 17b).", "Take your time as you swipe: you'll meet {0}.", "Sem pressa, ao percorrer as imagens vai encontrar {0}.", "", "Gallery more 4"],
   ["at_more_facts", "s7more", "The facts' deep part: the facts the step left out ({0} the list; round 17).", "A few more: {0}.", "Mais alguns: {0}.", "", "Deep · facts"],
   ["tm_ask", "s7more", "What Ask Azu hears as Tell me more during a tour, typed or spoken (one phrase a line, | between them; round 17).", "tell me more|more please|go on|i want to know more", "conte-me mais|diga-me mais|mais|quero saber mais|continue", "", "Ask Azu · the phrase"],
-  /* round 17: a tour resumes on the next visit where the visitor stopped (Guide › 2 · The tour › Ways in › Resume button) */
-  ["sv_continue", "s7resume", "The offer of a saved place: the hero's button and the ✦ menu ({0} the step, {1} the tour's steps; round 17).", "Continue the tour (step {0} of {1})", "Continuar a visita (passo {0} de {1})", "", "Continue"],
-  ["sv_again", "s7resume", "Beside the offer: the tour from its start (round 17).", "Start again", "Começar de novo", "", "Start again"],
+  /* round 17: a tour resumes on the next visit where the visitor stopped; round 17b: the one offer back into a stopped tour, this visit or a later
+     one (Guide › 2 · The tour › Ways in › Continue the tour; the Stop toast's Resume and the ✦ menu's Resume the tour are these words now) */
+  ["sv_continue", "s7resume", "The one offer back into a stopped tour: the Stop toast, the ✦ menu and the hero's button; within the visit back to the sentence, on a later visit after a recap ({0} the step, {1} the tour's steps; round 17, one offer since 17b).", "Continue the tour (step {0} of {1})", "Continuar a visita (passo {0} de {1})", "", "Continue"],
+  ["sv_again", "s7resume", "Beside the offer (the Stop toast, the ✦ menu, the hero, the invitation's chip): the tour from its start (round 17).", "Start again", "Começar de novo", "", "Start again"],
   ["sv_recap", "s7resume", "Said before the step a visitor continues at: one line from the step before, no new fact ({0} its words; round 17).", "Where we were: {0}.", "Onde íamos: {0}.", "", "Recap"],
   ["sv_changed", "s7resume", "Said once, before the teaser, when the tour changed since the visitor stopped (another written tour, or its step gone; round 17).", "This tour has changed since your last visit, so let's start from the beginning.", "Esta visita mudou desde a última vez, por isso vamos começar do início.", "", "Changed"],
   ["gd_tourof_cont", "gd:i:tourof", "The invitation when the visitor stopped this point's tour on an earlier visit ({point} its name, {step} the step, {of} the steps; round 17): a tap continues, its chip Start again.", "Continue the tour of {point} (step {step} of {of})?", "Continuar a visita a {point} (passo {step} de {of})?", "", "Says · a saved place"]];
