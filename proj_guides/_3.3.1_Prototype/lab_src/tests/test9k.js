@@ -134,7 +134,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('gdAdvance(3000)');
   const hNo = await R('[G.gd.cur&&G.gd.cur.item.id,gdWhyNot(gdItems(),S.gdVisitor,Object.assign(gdContext(),{showing:null,touchAt:null}),gdNow(),"hunt")]');
   await R('S.gdVisitor.used.card=gdNow();gdAdvance(3000)');
-  const hi = await R('var c=G.gd.cur,ch=ph.querySelector(".gdbub:not(.gd-out) [data-gdcta]");[c&&c.item.id,c&&c.text,ch?[ch.offsetWidth,ch.offsetHeight]:null,gdOverWords(),gdHuntThing()]');
+  const hi = await R('var c=G.gd.cur,ch=ph.querySelector(".gdbub:not(.gd-out) [data-gdcta]");[c&&c.item.id,c&&c.text,ch?[ch.offsetWidth,ch.offsetHeight]:null,gdOverWords(),nameMid(gdHuntThing())]');
   ok('The treasure hunt invitation: not for an Explorer, not before a card, then for a Family: "Want a treasure hunt? Find {thing} on the wall." with its 44 px chip, 0 px over words', /only for Family/.test(hEx[1]) && /only once a card opened/.test(hNo[1]) && hi[0] === 'hunt' && hi[1] === 'Want a treasure hunt? Find ' + hi[4] + ' on the wall.' && hi[2] && hi[2][1] >= 44 && hi[3] === 0, [hEx[1], hNo[1], hi]);
   await p.locator('#ph .gdbub:not(.gd-out) [data-gdcta]').click();
   const hs = await until('G.cam.open&&!!G.cam.hunt&&!!ph.querySelector(\'[data-cpin="\'+G.cam.hunt+\'"]\')', 4000);

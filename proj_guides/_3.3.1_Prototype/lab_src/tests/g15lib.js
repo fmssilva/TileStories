@@ -81,6 +81,17 @@ function inside(){var pr=R(ph),out=[],dock=ph.querySelector(".gdock"),dr=dock&&s
     if(r.t<pr.t-1)why.push("top "+Math.round(pr.t-r.t));else if(r.t<pr.t+NOTCH-1&&!e.matches(".gdpages,.gdtry,.gdock.h-full"))why.push("notch "+Math.round(pr.t+NOTCH-r.t));
     if(dr&&!e.matches(".gdock,.gdbeat")){var a=inter(r,dr);if(a>4){var cx=(Math.max(r.l,dr.l)+Math.min(r.r,dr.r))/2,cy=(Math.max(r.t,dr.t)+Math.min(r.b,dr.b))/2,h=document.elementFromPoint(cx,cy);if(h&&dock.contains(h))why.push("under the dock "+Math.round(a)+" px²")}}
     if(why.length)out.push({el:name(e),why:why.join(", ")})});return out}
+/* round 15b: Mascot Off's ✦ mark in the bubble: present, inside the bubble, its px² over the bubble's words (any overlap), whether a tap at
+   its centre reaches it (elementFromPoint), its pointer-events and aria-hidden */
+function sign(){var b=ph.querySelector(".gdbub:not(.gd-out)");if(!b)return null;var s=b.querySelector(".gdsign"),pl=b.classList.contains("plain");if(!s||!shown(s))return{has:false,plain:pl};
+  var sr=R(s),br=R(b),a=0,w=document.createTreeWalker(b.querySelector("[data-gdbub]")||b,NodeFilter.SHOW_TEXT),n,rg=document.createRange();
+  while((n=w.nextNode())){if(!/\S/.test(n.nodeValue))continue;rg.selectNodeContents(n);[].forEach.call(rg.getClientRects(),function(q){a+=inter(sr,{l:q.left,t:q.top,r:q.right,b:q.bottom})})}
+  var h=document.elementFromPoint(sr.l+sr.w/2,sr.t+sr.h/2);
+  return{has:true,plain:pl,inside:sr.l>=br.l-.5&&sr.t>=br.t-.5&&sr.r<=br.r+.5&&sr.b<=br.b+.5,over:Math.round(a),tap:!!h&&(h===s||s.contains(h)),pe:getComputedStyle(s).pointerEvents,aria:s.getAttribute("aria-hidden"),wh:[Math.round(sr.w),Math.round(sr.h)]}}
+/* round 15b: the card's words under Azu: every text of the card in view under Azu's whole box, deeper than 1 px both ways (the Architect's
+   probe, probe_azu.js: a stricter measure than overWords, which judges the told words with Azu's 2 px margin) */
+function azuInk(){var m=ph.querySelector(".mascot");if(!m)return 0;var r=R(m),a=0,w=document.createTreeWalker(scr,NodeFilter.SHOW_TEXT),n,rg=document.createRange();
+  while((n=w.nextNode())){if(!/\S/.test(n.nodeValue))continue;var cs=getComputedStyle(n.parentElement);if(cs.visibility==="hidden"||cs.display==="none"||cs.opacity==="0")continue;rg.selectNodeContents(n);[].forEach.call(rg.getClientRects(),function(q){a+=deep(r,{l:q.left,t:q.top,r:q.right,b:q.bottom})})}return Math.round(a)}
 function focal(){var out=[];FOCAL.forEach(function(s){roots(s).forEach(function(e){if(out.indexOf(e)<0)out.push(e)})});return out.map(name)}
 function audit(){SAMPLES=null;var tg=targets();return{targets:tg,covered:covered.slice(),text:text(),words:overWords(),inside:inside(),focal:focal(),ph:[ph.offsetWidth,ph.offsetHeight]}}
-return{audit:audit,text:text,targets:targets,told:told,overWords:overWords,inside:inside,focal:focal,col:col,cr:cr}})();true`;
+return{audit:audit,text:text,targets:targets,told:told,overWords:overWords,inside:inside,focal:focal,sign:sign,azuInk:azuInk,col:col,cr:cr}})();true`;

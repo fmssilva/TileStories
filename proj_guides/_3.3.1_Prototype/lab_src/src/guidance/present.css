@@ -5,6 +5,12 @@
 .gdbub{position:absolute;z-index:14;width:max-content;max-width:calc(100% - 24px);box-sizing:border-box;background:var(--paper);color:var(--ink1);border-radius:16px;
   box-shadow:0 8px 22px rgba(0,0,0,.3),0 0 0 1px var(--hair)}
 .gdbub button{appearance:none;display:block;width:100%;min-height:44px;border:0;background:none;color:inherit;font:600 14px/1.38 var(--body);text-align:left;padding:11px 14px;cursor:pointer;border-radius:16px}
+/* round 15b: the signed bubble (no Azu beside it: Mascot Off, or Guide button = ✦ only): the ✦ button's own look at 20 px (its dark disc, light rim and gold ✦: seen on the light and the
+   dark paper), inside the top-left corner, level with the first line; the words start 8 px after it. Unity: the child VisualElement's USS
+   (position absolute, left 11 px, top 11 px, 20 × 20, border-radius 10, the ✦ sprite), picking-mode Ignore; the label's padding-left 39 px */
+.gdbub .gdsign{position:absolute;left:11px;top:11px;z-index:1;width:20px;height:20px;box-sizing:border-box;display:grid;place-items:center;border-radius:50%;background:#16181C;border:1.5px solid #F4F1EA;pointer-events:none}
+.gdbub .gdsign svg{width:12px;height:12px;fill:#FFD98A}
+.gdbub .gdsign+button[data-gdbub]{padding-left:39px}
 /* Azu's remark: a › after its words says a tap does more (Unity: a second Label, the glyph in --accent2); narrower, so its two lines
    share the words (no word left alone on the second; Unity: the same max-width in USS) */
 .gdbub.gd-more{max-width:min(296px,calc(100% - 24px))}

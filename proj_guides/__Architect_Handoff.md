@@ -213,8 +213,22 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       machine, on master too. **Found, old (master too):** after a quick step jump, Azu sometimes settles over the words
       (2 of 18 probes on master, 1 of 18 with round 15; 189-271 px2 at steps g5/g7): round 15b fixes it. The open look
       questions 1-7 went to the developer with images in `g15\open\`.
-    - **Next: round 15b** (the developer's answers on the look questions, Azu over the words after a step jump), then the four
-      features (the plan's section 5). Prototype only (no Unity) until the developer says so.
+    - The developer's answers on round 15 (2026-11-11): **Mascot Off = the ✦ alone, the bubble signed with a small ✦**; a point's
+      name mid-sentence takes a **lower-case article** (the Torreão, o Torreão); **no ring** for the ✦ with the 3D model; **Ink glass
+      stays solid at Open**; the rest as round 15 recommended (PT opening as today, Azu Medium, the ✦ left and hidden in a tour,
+      the group gap as today, the remarks' cap later, Paper Open rows 6 px, Azu hidden while listening).
+    - Round 15b (2026-11-12, brief `_3.8_guidance_plans/brief_round15b.md`): **any guide bubble with no Azu beside it is signed**
+      with a small ✦ (`gdSign` in guidance/present.js: Mascot Off, and Guide button = ✦ only with the mascot on: the developer);
+      Mascot Off hides Azu beside the ✦ (`gbAzu`); **a name mid-sentence takes a lower-case article** (`nameIn` in core/words.js,
+      EN the/a/an, PT o/a/os/as/um/uma; labels and buttons as written; every slot filler uses it); **Azu never rests over the
+      words** (guide/dock.js: `azuPlace`, `azuKeep`, `wordBoxes` re-measured after 300 ms and on a font load, `azuOver` counts 1 px
+      near a line, `besideWords` takes the least covered height; the cause: stale word boxes while the card settles after load,
+      and a 2 px dead band); `keepStepClear` also places a block a redraw left off screen (kept: the developer). New
+      `tests/test9se.js` 13 checks (36 Azu cases; 5 fresh runs green, the Architect's runs green after the fix; mutation 9 red);
+      27 other files green, the self-test's guide walk bad=0. test9se runs 324-340 s, over the 300 s target: split its Azu cases
+      into their own file in the next round.
+    - **Next: the four features** (the plan's section 5: a tour resumes on the next visit; short and deep per step; Ask Azu
+      during a game; a point with no written tour), one or two a round. Prototype only (no Unity) until the developer says so.
   - **MCP:** blender-mcp at user scope (Blender 5.2.3, add-on 1.8, port 9876). The Unity MCP was not connected this stretch.
   - **Keys:** Gemini, Azure Speech and ElevenLabs answer (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).
 - **The tasks, in this order:**

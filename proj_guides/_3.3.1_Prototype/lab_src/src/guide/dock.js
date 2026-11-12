@@ -282,27 +282,54 @@ BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(panel|
 /* Azu's place: never under the dock or the bubble; with the bubble on the welcome (the hero), it sits beside the bubble, just above the dock */
 function pointAt(tg){var m=ph.querySelector(".mascot");if(!m)return;if(G.moment)tg=null;var a=m.querySelector(".marm"),st=S.guideSteps[G.i],b=ph.querySelector(".gbubble");
   if(dockOn()&&b&&st&&st.ref==="hero"){var y0=Math.max(70,b.offsetTop+b.offsetHeight-64),gw=ph.querySelector(".gbtn-wrap.intour.side-right");if(gw)y0=Math.max(70,Math.min(y0,gw.offsetTop-70));if(Math.abs((parseFloat(m.style.top)||0)-y0)>2)m.style.top=y0+"px";if(a)a.classList.remove("on");m.classList.remove("pointing");return}
-  if(!tg){if(a)a.classList.remove("on");m.classList.remove("pointing");return}
+  if(!tg){if(a)a.classList.remove("on");m.classList.remove("pointing");azuKeep(m);return}
   /* the arm is the drawn tile's (2.5D, light); a 3D model points with its own animation (the developer, 2026-11-10: the old arm
      stood beside the model), as the ✦'s Azu already does */
   if(a&&mascotIsModel()){a.remove();a=null}if(!a&&!mascotIsModel()){a=document.createElement("i");a.className="marm";m.appendChild(a)}
-  var fb=freeHeight(),pr=ph.getBoundingClientRect(),q=pr.height/ph.offsetHeight,lo=(fb.bottom-pr.top)/q-72,y=Math.max(70,Math.min(lo,tg.y-27));y=besideWords(m,y,70,lo,tg.el);if(Math.abs((parseFloat(m.style.top)||0)-y)>2)m.style.top=y+"px";
+  var y=azuPlace(m,tg.y,tg.el,false);
   var mx=m.offsetLeft+8,my=y+34,ang=Math.atan2(tg.y-my,tg.x-mx)*180/Math.PI;ang=Math.max(120,Math.min(240,ang<0?ang+360:ang));
   if(a){a.style.transform="rotate("+(ang-180).toFixed(1)+"deg)";a.classList.add("on")}m.classList.add("pointing")}
+/* guidance round 15b: Azu's height, level with what is told (ty, in the phone's px) and never over a word; asked every frame by
+   guide/focus.js's loop, so it follows the scroll. The 2 px dead band (no jitter while the scroll glides) no longer keeps Azu where it now
+   covers a word: a smooth scroll lands a pixel or two from where Azu was placed, the words moved under it, and Azu stood there 1-5 px into
+   a line. stay: only step off a word, from where it stands (paused: the visitor's own scroll). Unity: the same placement on the
+   ScrollView's scroll end (and each frame of a scroll tween) */
+function azuPlace(m,ty,el,stay){var fb=freeHeight(),pr=ph.getBoundingClientRect(),q=pr.height/ph.offsetHeight,lo=(fb.bottom-pr.top)/q-72,cur=parseFloat(m.style.top)||0,
+    y=stay?cur:Math.max(70,Math.min(lo,ty-27)),over=azuOver(m,cur,wordBoxes(el)).length;if(stay&&!over)return cur;
+  y=besideWords(m,y,70,lo,el);if(Math.abs(cur-y)>2||over)m.style.top=y+"px";return y}
+/* not pointing (Azu points Off, a pause, Ask): placed by moveMascot as the step starts, before the block's scroll lands, Azu was never
+   placed again. Now, playing, it follows the block as when it points (without the arm); paused, it only steps off a word scrolled under
+   it. Never in a Moment, a beat of the tour or Find it on the wall (their own places), nor while it waits under the panel (round 15) */
+function azuKeep(m){var st=S.guideSteps[G.i],el=st&&st.act!=="intro"&&stepEl(st);if(!el||!m.getClientRects().length||G.moment||(G.gd&&G.gd.bt)||/\b(gd-onbeat|gd-findto|center)\b/.test(m.className))return;
+  var d=ph.querySelector(".gdock"),mr=m.getBoundingClientRect();if(d&&d.getClientRects().length){var dr=d.getBoundingClientRect(),ov=Math.max(0,Math.min(mr.right,dr.right)-Math.max(mr.left,dr.left))*Math.max(0,Math.min(mr.bottom,dr.bottom)-Math.max(mr.top,dr.top));if(ov>=.9*mr.width*mr.height)return}
+  var r=el.getBoundingClientRect(),box=scr.getBoundingClientRect(),pr=ph.getBoundingClientRect(),q=pr.height/ph.offsetHeight,seen=r.bottom>box.top&&r.top<box.bottom;
+  azuPlace(m,seen?((Math.max(r.top,box.top)+Math.min(r.bottom,box.bottom))/2-pr.top)/q:0,el,G.paused||G.askOpen||!seen)}
 /* Azu points from beside the block, never over words: the ink of the words on the screen (each line of text, as a Range draws it:
    the block's and its neighbours') is measured, and Azu takes the nearest height where its tile covers none of them (above or below a
-   line, or beside the block). Unity: the glyph boxes from TextElement.PostProcessTextVertices, the same search on the Azu element's top */
-function wordBoxes(el){var key=G.i+"|"+S.view+"|"+Math.round(scr.scrollTop)+"|"+ph.offsetHeight;if(G.wbKey===key)return G.wb;
+   line, or beside the block). Unity: the glyph boxes from TextElement.PostProcessTextVertices, the same search on the Azu element's top.
+   Round 15b: the boxes are kept while the scroll, the phone, the card's height, where the sheet's scroll sits in the phone and where the told
+   block sits (its top and height) are unchanged, and for 300 ms at most (measured again once a font has loaded too). On the first tour
+   after the page loads the words of the told block moved under Azu with every one of those unchanged (the card's fonts and pictures still
+   settling): the boxes were stale, Azu stood on a place "free" by them, 103 px² over a line, and the 2 px dead band kept it there
+   (Unity: the glyph boxes measured again on the ScrollView's, the block's and its labels' geometryChanged) */
+if(document.fonts&&document.fonts.addEventListener)document.fonts.addEventListener("loadingdone",function(){G.wbKey=null});
+function wordBoxes(el){var pk=ph.getBoundingClientRect(),qk=pk.height/ph.offsetHeight,er=el?el.getBoundingClientRect():null,
+    key=G.i+"|"+S.view+"|"+scr.scrollTop.toFixed(1)+"|"+ph.offsetHeight+"|"+scr.scrollHeight+"|"+((scr.getBoundingClientRect().top-pk.top)/qk).toFixed(1)+"|"+(er?((er.top-pk.top)/qk).toFixed(1)+"/"+(er.height/qk).toFixed(1):0);var now=performance.now();if(G.wbKey===key&&G.wbEl===el&&now-G.wbAt<300)return G.wb;G.wbEl=el;G.wbAt=now;
   var out=[],pr=ph.getBoundingClientRect(),q=pr.height/ph.offsetHeight,sb=scr.getBoundingClientRect(),w=document.createTreeWalker(scr,NodeFilter.SHOW_TEXT),n,rg=document.createRange();
   while((n=w.nextNode())){if(!/\S/.test(n.nodeValue)||!n.parentElement)continue;var pb=n.parentElement.getBoundingClientRect();if(pb.bottom<sb.top||pb.top>sb.bottom||!pb.height)continue;
     var cs=getComputedStyle(n.parentElement);if(cs.visibility==="hidden"||cs.display==="none"||cs.opacity==="0")continue;rg.selectNodeContents(n);
     Array.prototype.forEach.call(rg.getClientRects(),function(r){if(r.width&&r.height&&r.bottom>sb.top&&r.top<sb.bottom)out.push({l:(r.left-pr.left)/q,t:(r.top-pr.top)/q,r:(r.right-pr.left)/q,b:(r.bottom-pr.top)/q})})}
   G.wbKey=key;G.wb=out;return out}
+/* round 15b: a line counts when Azu's box comes within 1 px of it, above or below (it allowed 1 px into it): with the sub-pixel of a
+   smooth scroll's end and the 2 px dead band, Azu could rest 1.3-1.8 px into a line (21-103 px²) that this check called clear. Beside it
+   the 1 px of a line box's edge still does not count */
 function azuOver(m,y,boxes){var pr=ph.getBoundingClientRect(),q=pr.height/ph.offsetHeight,r=m.getBoundingClientRect(),l=(r.left-pr.left)/q,rt=(r.right-pr.left)/q,h=r.height/q;
-  return boxes.filter(function(b){return b.r>l+1&&b.l<rt-1&&b.b>y+1&&b.t<y+h-1})}
-function besideWords(m,y,top,lo,el){if(!el)return y;var boxes=wordBoxes(el);if(!azuOver(m,y,boxes).length)return y;var h=m.getBoundingClientRect().height/(ph.getBoundingClientRect().height/ph.offsetHeight),best=null;
-  boxes.forEach(function(b){[b.t-h-3,b.b+3].forEach(function(c){if(c<top||c>lo||azuOver(m,c,boxes).length)return;if(best===null||Math.abs(c-y)<Math.abs(best-y))best=c})});
-  return best===null?y:best}
+  return boxes.filter(function(b){return b.r>l+1&&b.l<rt-1&&b.b>y-1&&b.t<y+h+1})}
+function azuCover(m,y,boxes){return azuOver(m,y,boxes).reduce(function(a,b){var r=m.getBoundingClientRect(),q=ph.getBoundingClientRect().height/ph.offsetHeight,h=r.height/q;return a+Math.max(0,Math.min(b.b,y+h)-Math.max(b.t,y))},0)}
+/* the nearest height with no word under Azu; none in reach: the least covered of them (round 15b: it stayed where it was, over the words) */
+function besideWords(m,y,top,lo,el){if(!el)return y;var boxes=wordBoxes(el);if(!azuOver(m,y,boxes).length)return y;var h=m.getBoundingClientRect().height/(ph.getBoundingClientRect().height/ph.offsetHeight),best=null,least=y,lv=azuCover(m,y,boxes);
+  boxes.forEach(function(b){[b.t-h-3,b.b+3].forEach(function(c){if(c<top||c>lo)return;if(azuOver(m,c,boxes).length){var v=azuCover(m,c,boxes);if(v<lv){lv=v;least=c}return}if(best===null||Math.abs(c-y)<Math.abs(best-y))best=c})});
+  return best===null?least:best}
 /* each row's demo: the tour at that height, the part ringed; a swipe; the talk button; the chips at Peek */
 rowDemos({"guideCfg.look":{tour:"g1",dock:"peek",ring:".gdock"},"guideCfg.pWords":{tour:"g1",dock:"peek",ring:".gd-tp|.gd-wrow|.gdock"},"guideCfg.pBars":{tour:"g1",dock:"mini",ring:".gd-bars|.gdock"},
   "guideCfg.pSpeed":{tour:"g1",dock:"peek",ring:".gd-speed|.gd-ctl"},"guideCfg.panel":{tour:"g1",ring:".gdock|.gbar"},"guideCfg.dockStart":{tour:"g1",ring:".gdock|.gbtn-wrap.intour"},"guideCfg.miniCtl":{tour:"g1",dock:"mini",ring:".gd-mini|.gd-line"},

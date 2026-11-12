@@ -121,7 +121,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // a point without a card on the Belém wall: the 3 lines in turn; a tap opens Ask about the view about it
   await fresh(toRem + 'setWall("belem");S.camX=.35;S.camY=.45;S.camZoom=1.3;S.stop="closed";renderPhone(false);G.gd.movedAt=gdNow();');
   await runTo('G.gd.cur.item.base==="inview"', 40000); await W(300);
-  const pl = await R('var c=G.gd.cur;[c.item.id,c.text,gdCentral().name,TXT("fab_comment_1").replace("{point}",gdCentral().name)]');
+  const pl = await R('var c=G.gd.cur;[c.item.id,c.text,gdCentral().name,nameIn(TXT("fab_comment_1"),"{point}",gdCentral().name)]');
   await p.locator('#ph .gdbub button[data-gdbub]').click(); await W(400);
   const tapP2 = await R(`[G.cam.open,!!ph.querySelector(".camask.open"),ph.querySelectorAll(".cpin.lit").length,gdEverOf(S.gdVisitor,"${pl[0]}").acted,S.gdVisitor.used.view!=null]`);
   ok('...on the Belém wall, a point with no card: the first of the 3 lines; a tap opens Ask about the view about it, the point lit, acted', pl[1] === pl[3] && tapP2[0] && tapP2[1] && tapP2[2] >= 1 && tapP2[3] === 1 && tapP2[4], [pl, tapP2]);
