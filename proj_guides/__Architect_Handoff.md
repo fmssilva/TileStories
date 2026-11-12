@@ -5,7 +5,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-07)
 
 - **State:**
-  - **The Lab:** `master` holds guidance rounds 1-16, verified on 2026-11-06/11, published at
+  - **The Lab:** `master` holds guidance rounds 1-16b, verified on 2026-11-06/11, published at
     https://claude.ai/artifact/Gpjf7yvoYHjGebmmNhuw2o (round 14b) with the 186 voice files, the music and the capabilities (section 1). The
     developer changes account often (four times on 2026-11-08/09); the old links stay in their accounts (RGofgb… at round 13, 19Uiat… at round 12, RKn3Rr… at round 11, J9J4h… at round 9, 4LpLd4… at round 8, Jq6X2K… at round 7, Jrejv7… at
     round 6, QmhHSz… at round 5, KDs2… at v29). A new account cannot update an old link: publish a new one (section 1, Publishing). Its
@@ -241,9 +241,26 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       other files green, the self-test's guide walk ok=69 bad=0; the Architect reran test9t, test9sf and its mutation. The text of
       the four tours: the scratchpad's `g16\tour_en.md`, `tour_pt.md`. Noted for 16b: at the hero's teaser at Mini the dock covers
       the hero's subtitle and Start (the written tour too); the three new points show the Ribeira's hero picture.
-    - Rounds since level 2: 3 (15, 15b, 16); run level 2 after round 17.
-    - **Next: round 16b** (the developer's answers on the generated tour's words), then round 17 (resume on the next visit;
-      short or deep per step), then round 18 (Ask Azu during a game). Prototype only (no Unity) until the developer says so.
+    - The developer (2026-11-12) on the generated tour's words: never repeat a fact; links tied to the content; "A short tour?"
+      under 2 minutes; the story up to 6 paragraphs.
+    - Round 16b (2026-11-12, brief `_3.8_guidance_plans/brief_round16b.md`): those answers plus two Architect fixes.
+      autotour.js: a fact key per sentence or list item from its numbers, dates and proper names ("about 250 years" = "Two hundred
+      and fifty years"; titles dropped); a sentence or item is dropped only when all its keys were said; `atCheck` "facts". Links
+      made from each block's own words ("Now, what was inside:", "Here's the square through three centuries.", "And in 1758,"),
+      the neutral "And now," where none fit, never twice in a row, each link's source shown under the step in the Editor.
+      `tourLength`: under 2 minutes "A short tour of {point}?" / "Uma visita curta ao Torreão?" (`nameJoin`: a/de/em/por join
+      the article), the teaser "In a short tour:", the hero's button "· short". Fix: at a step told at the hero the card scrolls
+      the hero's eyebrow, title and line 12 px above the panel and the bubble (person.js `placeStep`/`heroWords`), the hero's Start
+      and Listen hidden while a tour plays (`#ph.touring`: one focal point). Fix: each new point's hero is a crop of the wall
+      painting around that point (background-size/position on the same file; Unity: a RawImage uvRect); the teaser cycles the
+      open point's own pictures. Tests: test9t 37 (mutation 19 red), 22 other files green, the self-test's guide walk bad=0.
+      The Architect: test9t's [hero words] wait raced Azu's placing loop (red once, the card not yet scrolled); it now also waits
+      for the words to be clear (5 s, then measures); then 3 green, 1 crash not reproduced, mutation 19 red. test9i's 2 red
+      (the scripted visitors' tour counts) are the same on round 16's build: old, to look at in level 2. The text:
+      the scratchpad's `g16b\tour_en.md`, `tour_pt.md`.
+    - Rounds since level 2: 4 (15, 15b, 16, 16b); run level 2 after round 17.
+    - **Next: round 17** (resume on the next visit; short or deep per step), then level 2, then round 18 (Ask Azu during a game).
+      Prototype only (no Unity) until the developer says so.
   - **MCP:** blender-mcp at user scope (Blender 5.2.3, add-on 1.8, port 9876). The Unity MCP was not connected this stretch.
   - **Keys:** Gemini, Azure Speech and ElevenLabs answer (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).
 - **The tasks, in this order:**

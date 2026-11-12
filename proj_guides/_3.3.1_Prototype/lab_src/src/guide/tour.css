@@ -4,7 +4,8 @@
 .gblock{appearance:none;display:flex;gap:12px;align-items:center;width:100%;margin:14px 0 4px;padding:12px 14px;border:1px solid var(--hair);border-radius:16px;background:linear-gradient(135deg,var(--famtint),var(--box));color:var(--ink1);text-align:left;cursor:pointer;font:inherit}
 .gblock .gm{width:52px;height:52px;flex:none} .gblock .gm svg{width:52px;height:52px}
 .gblock b{display:block;font:600 17px/1.2 var(--display)} .gblock small{display:block;font-size:12.5px;color:var(--ink2);margin-top:4px}
-.hero.teasing{animation:kb 2.6s ease-in-out infinite alternate;background-size:118%}
+/* round 16b: the teaser's pictures cover the hero (118% of its width left a landscape picture short of a tall hero: a dark band under it) */
+.hero.teasing{animation:kb 2.6s ease-in-out infinite alternate;background-size:cover}
 @keyframes kb{from{background-position:40% 45%}to{background-position:60% 55%}}
 .gfocus{box-shadow:0 0 0 3px #E07A1F,0 0 0 9px rgba(224,122,31,.16);border-radius:14px;transition:box-shadow .3s}
 .gw{transition:color .15s,background .15s;border-radius:3px}

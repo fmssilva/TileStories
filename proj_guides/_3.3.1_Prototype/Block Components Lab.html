@@ -470,7 +470,8 @@ select.u{background-image:linear-gradient(45deg,transparent 50%,#bbb 50%),linear
 .gblock{appearance:none;display:flex;gap:12px;align-items:center;width:100%;margin:14px 0 4px;padding:12px 14px;border:1px solid var(--hair);border-radius:16px;background:linear-gradient(135deg,var(--famtint),var(--box));color:var(--ink1);text-align:left;cursor:pointer;font:inherit}
 .gblock .gm{width:52px;height:52px;flex:none} .gblock .gm svg{width:52px;height:52px}
 .gblock b{display:block;font:600 17px/1.2 var(--display)} .gblock small{display:block;font-size:12.5px;color:var(--ink2);margin-top:4px}
-.hero.teasing{animation:kb 2.6s ease-in-out infinite alternate;background-size:118%}
+/* round 16b: the teaser's pictures cover the hero (118% of its width left a landscape picture short of a tall hero: a dark band under it) */
+.hero.teasing{animation:kb 2.6s ease-in-out infinite alternate;background-size:cover}
 @keyframes kb{from{background-position:40% 45%}to{background-position:60% 55%}}
 .gfocus{box-shadow:0 0 0 3px #E07A1F,0 0 0 9px rgba(224,122,31,.16);border-radius:14px;transition:box-shadow .3s}
 .gw{transition:color .15s,background .15s;border-radius:3px}
@@ -672,6 +673,10 @@ header .lede,header nav.steps{display:none}header h1{font-size:26px;margin:2px 0
 .testtile b{color:#85141E!important}.testtile em{color:#85141E!important}
 .cv.dark .testtile{background:repeating-linear-gradient(135deg,#2A1215 0 10px,#331619 10px 20px)!important}.cv.dark .testtile b,.cv.dark .testtile em{color:#FF8A96!important}
 .ptool{gap:2px!important;padding:4px!important}.ptool button{font-size:11px!important;padding:5px 7px!important}.ptool .egrip{padding:0 2px}
+/* guidance round 16b: a hero drawn as a crop of the wall (heroPaint, hero.js): its motion drifts around the crop, 12 px each way, never off it */
+.hero.hcrop.hm-panzoom,.hero.hcrop.hm-pan,.hero.hcrop.teasing{animation-name:herocrop}.hero.hcrop.hm-zoom{animation:none}
+@keyframes herocrop{from{background-position:var(--hx0) var(--hy)}to{background-position:var(--hx1) var(--hy)}}
+.reduce .hero.hcrop{animation:none}
 /* v8f: close and settings pinned to the sheet's top; a bigger grabber target; a redraw in place has no entrance */
 .scr > .chrome{position:sticky;top:12px;left:auto;right:auto;height:0;margin:0 12px;align-items:flex-start}
 .grab{width:96px;height:32px;margin-left:-48px}
@@ -881,6 +886,8 @@ body{padding-block:8px}
 .mascot.enter svg{animation:azenter 1.3s cubic-bezier(.3,1.25,.5,1)}
 @keyframes azenter{0%{transform:translateX(90px) rotate(18deg);opacity:0}35%{opacity:1}55%{transform:translateX(-6px) translateY(-14px) rotate(-6deg)}75%{transform:translateY(0) scale(1.06,.94)}100%{transform:none}}
 .reduce .mascot.enter svg{animation:none}
+/* guidance round 16b: while a tour plays, the hero's Start button and Listen hide (the tour is already playing; the panel holds its controls) */
+#ph.touring .hero .hact,#ph.touring .hero .gstart{visibility:hidden}
 /* The Guide Dock in its four Looks (round 11; drawn as the Architect's static layouts: gp/project Main = Paper glass, InkGlass,
    Player, Prompter). Unity: one UXML template per Look, swapped with its USS, the same element names; no backdrop blur (the glass
    is a translucent fill with a light edge), a gradient is a ramp texture (Ink glass's fill, Teleprompter's fade); the shadows a
@@ -1870,6 +1877,23 @@ details.fo[data-fo^="gd:f:"]>summary .sp{display:none}
 .row.gdwide{grid-template-columns:minmax(0,1fr) 22px;row-gap:4px}
 .row.gdwide>label{grid-column:1/-1}
 .gdwbox,.gdfindln,.gdjk,[data-gdland],[data-fo="m3"]>.inner>table.tbl{scroll-margin-top:24px}
+/* the automatic tour's rows in the Guide tab and the Guide script (guidance round 16) */
+.ued .note.atok,.note.atok{border-color:#2F6B47;background:#16261D;color:#BFE3CB}
+.note.atbase{font-weight:600}
+.atchk{display:inline-flex;align-items:center;gap:6px;cursor:pointer;min-height:28px}
+.atchk input{width:16px;height:16px;accent-color:#F2C14E}
+.atainote{display:block;margin-top:4px;font-size:12px}
+.attbl td{vertical-align:top}
+.atai-was{margin-top:4px;padding-top:4px;border-top:1px dashed #3A3F48;color:var(--u-dim);font-size:12px}
+.atai-was small,.atai-tag{display:inline-block;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:#F2C14E;margin-right:4px}
+.atai-was .del{margin-left:4px}
+tr.gskipped td{opacity:.55;text-decoration:line-through}
+.attbl td{white-space:normal;overflow:visible;text-overflow:clip}
+.attbl th:first-child{width:28px}.attbl th:last-child{width:76px}
+.atchk{font-size:12.5px;line-height:1.35}
+.attbl td:last-child{white-space:nowrap}
+/* round 16b: each step's link and its source, under its words */
+.attbl .atlnk{margin-top:3px;font-size:11px;color:var(--u-dim)}.attbl .atlnk small{font:700 9px/1 var(--mono);letter-spacing:.05em;text-transform:uppercase;margin-right:4px;color:#8FB3E8}.attbl .atlnk span{opacity:.85}
 </style>
 <div class="wrap">
 <header>
@@ -2149,6 +2173,7 @@ var LABSTR=[["tour_promise", "gd:i:quizpromise", "The quiz promise, after the in
  ["gd_opening_back","gd:i:opening","The opening message for a returning visitor.","Welcome back! Tap a marker to begin.","Bem-vindo de volta! Toque num marcador para começar.","","Says (returning visitor)"],
  ["gd_askview","gd:i:askview","The guide's tip beside the ✦ (its menu holds Ask about the view), Azu pointing at it (Guide › Azu speaks up › The wall › Ask about the view).","Ask me about anything you see.","Pergunte-me sobre tudo o que vê.","","Says"],
  ["gd_tourof","gd:i:tourof","The guide's invitation about the point in the middle; {point} is its name, {min} the minutes of its tour (Guide › Azu speaks up › Tours › A tour of {point}).","{point} has a story. A tour of {min} minutes?","{point} tem uma história. Uma visita de {min} minutos?","","Says"],
+ ["gd_tourof_short","gd:i:tourof","The same invitation for a short tour, under 2 minutes ({point} its name; round 16b, the developer: a short tour says no minutes).","A short tour of {point}?","Uma visita curta a {point}?","","Says · a short tour"],
  ["gd_fewer","gd:overall","A long press on a tip asks this (Guide › Azu speaks up › Overall › Fewer like this?).","Fewer like this?","Menos dicas assim?","","Long press: the question"],
  ["gd_fewer_yes","gd:overall","The answer that rests the tip's group for the visit.","Fewer","Menos","","Long press: fewer"],
  ["gd_fewer_no","gd:overall","The answer that keeps the tip on the screen.","Keep","Manter","","Long press: keep"],
@@ -2185,6 +2210,7 @@ var LABSTR=[["tour_promise", "gd:i:quizpromise", "The quiz promise, after the in
  ["guide_no_mic","s7ask","When the phone gives no microphone.","The microphone is not available in this browser.","O microfone não está disponível neste browser.","","Microphone: unavailable"],
  ["reading_minutes","s5openrow","The reading time after the row's words ({0} = minutes).","{0} min","{0} min","","Reading time"],
  ["guide_duration","s7hero","The tour's length after the button's words ({0} = minutes).","{0} min","{0} min","","Tour length"],
+ ["guide_duration_short","s7hero","The tour's length after the button's words for a short tour, under 2 minutes (round 16b).","short","curta","","Tour length · short"],
  ["guide_ctrl_captions","s7tour","The captions button of the tour's controls.","CC","Legendas","","Captions button"],
  ["guide_ai_offline","s7ask","Before an answer when the AI cannot be reached and the search answered.","(AI unavailable here, offline search) ","(IA indisponível aqui, pesquisa offline) ","","Notice: AI unreachable"],
  ["guide_ai_error","s7ask","Before an answer when the AI failed ({0} = the reason).","(AI unavailable: {0}) ","(IA indisponível: {0}) ","","Notice: AI failed"],
@@ -2301,7 +2327,45 @@ var LABSTR=[["tour_promise", "gd:i:quizpromise", "The quiz promise, after the in
  ["settings_normal", "s5settings", "The guide's speed: as recorded.", "Normal speed", "Velocidade normal", "", "Speed: normal"],
  ["settings_faster", "s5settings", "The guide's speed: faster.", "Faster", "Mais depressa", "", "Speed: faster"],
  ["settings_cc_on", "s5settings", "The guide's captions: on.", "Captions on", "Legendas ligadas", "", "Captions: on"],
- ["settings_cc_off", "s5settings", "The guide's captions: off.", "Captions off", "Legendas desligadas", "", "Captions: off"]];
+ ["settings_cc_off", "s5settings", "The guide's captions: off.", "Captions off", "Legendas desligadas", "", "Captions: off"],
+  /* guidance round 16: the automatic tour's link words (Guide › 2 · The tour › Tour from the card) */
+  ["at_cover", "s7auto", "The teaser's second sentence: what the tour covers and how long ({0} the minutes, from its words at the voice's speed; {1} the list).", "In about {0} minutes: {1}.", "Em cerca de {0} minutos: {1}.", "", "Teaser · length"],
+  ["at_cover_short", "s7auto", "The teaser's second sentence for a short tour, under 2 minutes ({0} the list; round 16b).", "In a short tour: {0}.", "Numa visita curta: {0}.", "", "Teaser · short tour"],
+  ["at_cover_story", "s7auto", "In the teaser's list: the tour tells the story.", "its story", "a sua história", "", "Covers · story"],
+  ["at_cover_ba", "s7auto", "In the teaser's list: a before and after to drag.", "a before and after", "um antes e depois", "", "Covers · before and after"],
+  ["at_cover_flip", "s7auto", "In the teaser's list: a card to flip.", "a surprise to flip", "uma surpresa para virar", "", "Covers · flip card"],
+  ["at_cover_dates", "s7auto", "In the teaser's list: a timeline.", "its dates", "as suas datas", "", "Covers · timeline"],
+  ["at_cover_pics", "s7auto", "In the teaser's list: a gallery.", "its pictures", "as suas imagens", "", "Covers · gallery"],
+  ["at_cover_facts", "s7auto", "In the teaser's list: the facts.", "the facts", "os factos", "", "Covers · facts"],
+  ["at_cover_quiz", "s7auto", "In the teaser's list, always last: the card's quiz.", "a question to finish", "uma pergunta para terminar", "", "Covers · quiz"],
+  ["at_and", "s7auto", "Joins the last two of a list.", "and", "e", "", "And"],
+  ["at_link_facts", "s7auto", "The link before the facts, when they come first.", "First, the facts.", "Primeiro, os factos.", "", "Link · facts"],
+  ["at_link_story", "s7auto", "The link as the story opens.", "Now the story.", "Agora, a história.", "", "Link · the story"],
+  ["at_link_back", "s7auto", "The link back to the card after the story.", "Back on the card.", "De volta ao cartão.", "", "Link · back"],
+  ["at_link_quiz", "s7auto", "The link before the card's quiz.", "Ready for a question?", "Pronto para uma pergunta?", "", "Link · quiz"],
+  ["at_link_facts_n", "s7auto", "The link before the facts when another block comes first (round 16b).", "Now, the facts.", "Agora, os factos.", "", "Link · facts later"],
+  ["at_link_head", "s7auto", "The link made from a block's heading, title or a fact's label ({0} its words, at most 4), leading into its words (round 16b).", "Now, {0}:", "Agora, {0}:", "", "Link · its heading"],
+  ["at_link_cap", "s7auto", "The link before a gallery's or a picture's caption that starts with the, a, its (round 16b).", "Here's", "Aqui está", "", "Link · a caption"],
+  ["at_link_pics", "s7auto", "The link before any other caption of a gallery or a picture (round 16b).", "In the pictures:", "Nas imagens:", "", "Link · pictures"],
+  ["at_link_dates", "s7auto", "The link before a timeline's dates, two or more (round 16b).", "Then the dates:", "Depois, as datas:", "", "Link · dates"],
+  ["at_link_year", "s7auto", "The link before a timeline's one date not said yet ({0} the year; round 16b).", "And in {0},", "E em {0},", "", "Link · a year"],
+  ["at_link_circa", "s7auto", "The link before a timeline's one date not said yet, a c. year ({0} the year; round 16b).", "And around {0},", "E por volta de {0},", "", "Link · around a year"],
+  ["at_link", "s7auto", "The neutral link, where no words of the block fit (never twice in a row; round 16b).", "And now,", "E agora,", "", "Link · neutral"],
+  ["at_try_flip", "s7auto", "A flip card's try step, after its words.", "Your turn: tap the card to flip it.", "A sua vez: toque no cartão para o virar.", "", "Try · flip"],
+  ["at_try_drag", "s7auto", "A before and after's try step, after its labels.", "Your turn: drag across the picture.", "A sua vez: arraste sobre a imagem.", "", "Try · drag"],
+  ["at_try_answer", "s7auto", "The quiz's try step, after its question.", "Tap your answer.", "Toque na sua resposta.", "", "Try · answer"],
+  ["at_circa", "s7auto", "A timeline's c. before a year, as it is said.", "Around", "Por volta de", "", "Around (c.)"],
+  ["at_status", "s7auto", "A Status block ({0} its condition).", "Its condition: {0}.", "O seu estado: {0}.", "", "Status"],
+  ["at_compare", "s7auto", "A Compare Points block ({0} and {1} the two points).", "It sets {0} beside {1}.", "Compara {0} com {1}.", "", "Compare"],
+  ["at_pics", "s7auto", "A gallery with no caption ({0} how many pictures).", "{0} pictures to swipe through.", "{0} imagens para percorrer.", "", "Gallery"],
+  ["at_show_video", "s7auto", "A video's step, after its caption.", "Tap to play it.", "Toque para o ver.", "", "Video"],
+  ["at_show_spots", "s7auto", "A hotspot picture's step.", "Tap a spot to read about it.", "Toque num ponto para saber mais.", "", "Hotspots"],
+  ["at_show_model", "s7auto", "A 3D model's step.", "Turn it with a finger.", "Rode-o com um dedo.", "", "3D model"],
+  ["at_show_360", "s7auto", "A 360 panorama's step.", "Drag to look around.", "Arraste para olhar em volta.", "", "360"],
+  ["at_show_look", "s7auto", "A block shown with no words of its own.", "Have a look.", "Dê uma vista de olhos.", "", "Have a look"],
+  ["at_recap", "s7auto", "The end's recap ({0} the point, {1} its subtitle, the story's title or its first fact: one not said yet).", "That was {0}: {1}.", "{0}, em resumo: {1}.", "", "End · recap"],
+  ["at_recap_plain", "s7auto", "The end's recap with nothing to sum up ({0} the point).", "That was {0}.", "{0}: fim da visita.", "", "End · plain"],
+  ["at_end", "s7auto", "The end step, after the recap.", "Ask me anything, or explore on your own.", "Pergunte-me o que quiser, ou explore sozinho.", "", "End"]];
 S.tx={};var TXO={},TXW={},TXF={},TXP={},TXNEW={},TXOWN={},TXRET=[];
 REALSTR.concat(LABSTR).forEach(function(r){S.tx[r[0]]={en:r[3],pt:r[4]};TXW[r[0]]=r[2];TXF[r[0]]=r[5]||"";TXP[r[0]]=r[6]||"";TXOWN[r[0]]=r[1];
   if(r[1]==="retired")TXRET.push(r[0]);else(TXO[r[1]]=TXO[r[1]]||[]).push(r[0])});
@@ -2318,11 +2382,16 @@ function fmt(t){var a=arguments;return String(t).replace(/\{(\d)\}/g,function(m,
    tips and invitations (gdLine), Azu's lines (the introduction, Ask about the view's answers and its hunt, Find it on the wall). The
    articles per language (NAME_ART): EN The (and A, An), PT O, A, Os, As (and Um, Uma, Uns, Umas). A sentence starts at the line's start
    or after . ! ? … (an opening quote or bracket between); after a colon it goes on. Unity: the same string rule where the localized
-   string's slots are filled (CardStrings.Format's name slots) */
+   string's slots are filled (CardStrings.Format's name slots). Guidance round 16b: in Portuguese a preposition just before the slot
+   joins the name's article mid-sentence (NAME_JOIN, nameJoin: "Uma visita curta a {point}" with O Torreão is "ao Torreão"; de, em, por
+   too: do, no, pelo) */
 var NAME_ART={en:/^(The|An?)(?=\s)/,pt:/^(Os?|As?|Uns|Umas?|Um)(?=\s)/};
 function nameMid(name,lang){var re=NAME_ART[lang||S.lang]||NAME_ART.en;return String(name==null?"":name).replace(re,function(a){return a.toLowerCase()})}
 function slotAtStart(t,i){var b=t.slice(0,i).replace(/[\s"“‘'«(¿¡]+$/,"");return!b||/[.!?…]$/.test(b)}
-function nameIn(t,slot,name,lang){t=String(t);var out="",i=0,j;while((j=t.indexOf(slot,i))>=0){out+=t.slice(i,j)+(slotAtStart(t,j)?String(name==null?"":name):nameMid(name,lang));i=j+slot.length}return out+t.slice(i)}
+var NAME_JOIN={a:{o:"ao",a:"à",os:"aos",as:"às"},de:{o:"do",a:"da",os:"dos",as:"das"},em:{o:"no",a:"na",os:"nos",as:"nas"},por:{o:"pelo",a:"pela",os:"pelos",as:"pelas"}};
+function nameJoin(before,mid,lang){if((lang||S.lang)!=="pt")return[before,mid];var m=/(^|\s)(a|de|em|por)\s+$/i.exec(before),n=/^(os?|as?)(?=\s)/.exec(mid);if(!m||!n)return[before,mid];
+  var w=NAME_JOIN[m[2].toLowerCase()][n[1]],up=/^\p{Lu}/u.test(m[2]);return[before.slice(0,m.index+m[1].length),(up?w.charAt(0).toUpperCase()+w.slice(1):w)+mid.slice(n[1].length)]}
+function nameIn(t,slot,name,lang){t=String(t);var out="",i=0,j;while((j=t.indexOf(slot,i))>=0){if(slotAtStart(t,j))out+=t.slice(i,j)+String(name==null?"":name);else{var pr=nameJoin(out+t.slice(i,j),nameMid(name,lang),lang);out=pr[0]+pr[1]}i=j+slot.length}return out+t.slice(i)}
 Object.defineProperty(UI,"read",{get:function(){var o={};langCodes().forEach(function(c){var w=S.tx.open_row_story[c];o[c]=w?fmt(S.tx.open_row_meta[c]||S.tx.open_row_meta.en,w,fmt(S.tx.reading_minutes[c]||S.tx.reading_minutes.en,4)):""});return o}});
 Object.defineProperty(UI,"open",{get:function(){return S.tx.open_block_button}});
 Object.defineProperty(UI,"demo",{get:function(){return S.tx.test_demo_title}});
@@ -2362,6 +2431,53 @@ var DEMO={title:T("Two hundred and fifty years by the river","Duzentos e cinquen
 var POIS=[["lamp","1. St George's Castle"],["cathedral","2. Lisbon Cathedral"],["painting","7. Ribeira Palace"],["camera","13. The Camera"]];
 S.card.forEach(function(b){b.grp="inherit";b.enter="inherit";b.tap="inherit";b.orow="inherit"});
 (function(){var i=S.card.findIndex(function(b){return b.id==="b_audio"});if(i>0){var a=S.card.splice(i,1)[0];S.card.splice(1,0,a)}})();
+/* guidance round 16: the words each block kind shows on the demo point's card, one place for them: the card's preview draws them
+   (card/blocks.js's KPREV) and the guide's automatic tour says them (guide/autotour.js, through blockSays). A block's own words (b.c, the
+   wall's other points below) come before its kind's. A picture's or a clip's words are its element's demo content (S.demoC). */
+var KWORDS={
+ "Quick Facts":{facts:[[UI.home,UI.homev],[UI.lost,UI.lostv]],cat:T("Royal palace","Palácio real")},
+ "Inline":{text:T("The palace had its own opera house, opened in March 1755.","O palácio tinha a sua própria ópera, inaugurada em março de 1755."),back:T("It stood for only seven months.","Durou apenas sete meses.")},
+ "Knowledge Check":{q:T("Which king moved the court to the river?","Que rei mudou a corte para o rio?"),choices:["Manuel I","Philip I","José I"],ok:0},
+ "Practical Info":{rows:[[T("Where","Onde"),T("Praça do Comércio","Praça do Comércio")],[T("Today","Hoje"),T("An open square, always","Praça aberta, sempre")],[T("Metro","Metro"),T("Terreiro do Paço","Terreiro do Paço")]]},
+ "Timeline":{events:[["c. 1500",T("The court moves to the river","A corte muda-se para o rio"),"g3"],["1580s",T("The Torreão rises","Ergue-se o Torreão"),"before"],["1755",T("Earthquake, fire and tsunami","Terramoto, incêndio e maremoto"),"g1"]],now:T("The Praça do Comércio","A Praça do Comércio")},
+ "Gallery":{cap:T("The square through three centuries.","A praça ao longo de três séculos."),n:4},
+ "Dialogue":{lines:[T("Your Majesty, the river front is finished.","Majestade, a frente do rio está concluída."),T("And the tower?","E o torreão?")]},
+ "Poll":{q:T("Should the opera house be rebuilt?","Devia a ópera ser reconstruída?"),choices:[T("Yes","Sim"),T("No","Não"),T("Only as a museum","Só como museu")]},
+ "Status":{state:T("Lost","Perdido"),year:"1755"},
+ "Compare Points":{points:["Ribeira Palace","Lisbon Cathedral"]}};
+/* the wall's other points with a card of their own (guidance round 16, the developer: every point gets a tour from its card): the
+   Torreão, the Terreiro do Paço, the Tagus and its ships. Each has its hero and its blocks with their own words (b.c); the palace's are
+   S.card, S.hero and S.story, kept here while another point is open. Opening a point (its pin, Azu's remark, A tour of {point}, the
+   marker, Specific Marker › Marker) is pointOpen: the card, the hero and the story become that point's, S.m.poi names it, and
+   point.opened tells the guide (its tour). Unity: each marker's Detail Card asset; opening one is the card controller's Show(marker).
+   Guidance round 16b: each hero's picture is a crop of the wall painting around its own point (crop: the wall, the point, the crop's
+   height, where the point sits; drawn by card/hero.js's heroPaint; Unity: a uvRect on the wall's texture) */
+function pointBlock(id,kind,c,o){return Object.assign({id:id,kind:kind,grp:"inherit",enter:"inherit",tap:"inherit",orow:"inherit",c:c},o||{})}
+var POINTS={painting:{label:"7. Ribeira Palace"},
+ torreao:{label:"The Torreão",hero:{title:T("The Torreão","O Torreão"),eyebrow:T("Ribeira Palace · 1580s to 1755","Paço da Ribeira · 1580 a 1755"),line:T("The palace's corner tower, on the water","A torre de canto do palácio, sobre a água"),fx:30,fy:40,pic:"g1",pic2:"before",crop:{wall:"ribeira",at:"torreao",h:.9,fy:.36}},story:[],
+  card:[pointBlock("t_facts","Quick Facts",{facts:[[T("Built","Construído"),T("In the 1580s","Na década de 1580")],[T("Under","No reinado de"),T("Philip I","Filipe I")],[T("Lost","Perdido"),T("1 November 1755","1 de novembro de 1755")]]}),
+   pointBlock("t_text","Inline",{title:T("On the river front","Na frente ribeirinha"),text:T("In the 1580s, under Philip I, who ruled Portugal and Spain together, the river front received a new wing and its corner tower, the Torreão. In the paintings of the river front, it is the tower with the dome at the corner of the palace, right on the water.","Na década de 1580, com Filipe I, que reinava em Portugal e em Espanha, a frente ribeirinha ganhou uma nova ala e o seu torreão de canto, o Torreão. Nas pinturas da frente ribeirinha, é a torre com a cúpula no canto do palácio, mesmo sobre a água.")}),
+   pointBlock("t_time","Timeline",{events:[["c. 1500",T("The court moves to the river","A corte muda-se para o rio"),"g3"],["1580s",T("The Torreão rises on the river front","O Torreão ergue-se na frente ribeirinha"),"before"],["1755",T("Lost to the earthquake, the fire and the tsunami","Perdido no terramoto, no incêndio e no maremoto"),"g1"]]}),
+   pointBlock("t_gal","Gallery",{imgs:["g3","before"],n:2,cap:T("The Torreão at the palace's corner, by the water.","O Torreão no canto do palácio, junto à água.")}),
+   pointBlock("t_quiz","Knowledge Check",{q:T("Under which king did the Torreão rise?","Em que reinado se ergueu o Torreão?"),choices:[T("Philip I","Filipe I"),T("Manuel I","D. Manuel I"),T("José I","D. José I")],ok:0}),
+   pointBlock("t_info","Practical Info",{rows:[[T("Where","Onde"),T("Praça do Comércio, the river side","Praça do Comércio, do lado do rio")]]})]},
+ square:{label:"Terreiro do Paço",hero:{title:T("Terreiro do Paço","Terreiro do Paço"),eyebrow:T("Lisbon · the palace square","Lisboa · a praça do paço"),line:T("The square by the palace, open to the river","A praça junto ao paço, aberta para o rio"),fx:50,fy:60,pic:"g1",pic2:"g3",crop:{wall:"ribeira",at:"square",h:.9,fy:.5}},story:[],
+  card:[pointBlock("q_facts","Quick Facts",{facts:[[T("Laid out","Aberto"),T("Around 1500, with the palace","Por volta de 1500, com o paço")],[T("Today","Hoje"),T("Praça do Comércio","Praça do Comércio")]]}),
+   pointBlock("q_text","Inline",{title:T("Its name","O seu nome"),text:T("Terreiro means an open yard: this was the palace's yard, between the royal palace and the city. After 1755 it was rebuilt as the Praça do Comércio, with arcades on three sides and the river on the fourth.","Terreiro quer dizer um largo aberto: era o largo do paço, entre o palácio real e a cidade. Depois de 1755 foi reconstruído como Praça do Comércio, com arcadas em três lados e o rio no quarto.")}),
+   pointBlock("q_gal","Gallery",{imgs:["g1","g3"],n:2,cap:T("The square beside the palace, before 1755.","A praça junto ao paço, antes de 1755.")}),
+   pointBlock("q_time","Timeline",{events:[["c. 1500",T("The square opens beside the palace","A praça abre-se junto ao paço"),"g3"],["1755",T("The earthquake destroys the palace","O terramoto destrói o paço"),"g1"],["1758",T("A new plan lays the square out to the river","Um novo plano abre a praça para o rio"),"before"]]}),
+   pointBlock("q_quiz","Knowledge Check",{q:T("What is the square called today?","Como se chama hoje a praça?"),choices:["Praça do Comércio","Rossio","Praça da Figueira"],ok:0}),
+   pointBlock("q_info","Practical Info",{rows:[[T("Where","Onde"),T("Baixa, by the river","Baixa, junto ao rio")],[T("Metro","Metro"),T("Terreiro do Paço","Terreiro do Paço")]]})]},
+ river:{label:"The Tagus and its ships",hero:{title:T("The Tagus and its ships","O Tejo e os seus navios"),eyebrow:T("Lisbon · the river front","Lisboa · a frente ribeirinha"),line:T("Where the ships of the voyages came in","Onde chegavam os navios das viagens"),fx:20,fy:60,pic:"g1",pic2:"before",crop:{wall:"ribeira",at:"river",h:.9,fy:.42}},story:[],
+  card:[pointBlock("v_text","Inline",{title:T("By the docks","Junto às docas"),text:T("Around 1500, King Manuel I moved the court down to the docks, and filled the new palace with the wealth of the voyages to India. The palace opened straight onto the Tagus.","Por volta de 1500, D. Manuel I mudou a corte para junto das docas e encheu o novo palácio com a riqueza das viagens à Índia. O palácio abria diretamente para o Tejo.")}),
+   pointBlock("v_facts","Quick Facts",{facts:[[T("River","Rio"),T("The Tagus","O Tejo")],[T("In the paintings","Nas pinturas"),T("Ships at anchor off the palace","Navios fundeados diante do paço")]]}),
+   pointBlock("v_time","Timeline",{events:[["c. 1500",T("The court moves down to the docks","A corte muda-se para junto das docas"),"g3"],["1755",T("A tsunami comes up the river","Um maremoto sobe o rio"),"g1"]]}),
+   pointBlock("v_gal","Gallery",{imgs:["before","g1"],n:2,cap:T("Ships on the Tagus, off the palace.","Navios no Tejo, diante do paço.")}),
+   pointBlock("v_quiz","Knowledge Check",{q:T("Which river runs past the palace?","Que rio passa diante do paço?"),choices:[T("The Tagus","O Tejo"),T("The Douro","O Douro"),T("The Mondego","O Mondego")],ok:0})]}};
+function pointOpen(id){if(!POINTS[id])return false;var cur=S.m&&S.m.poi||"painting",p=POINTS[cur];if(p){p.card=S.card;p.hero=S.hero;p.story=S.story}
+  if(cur===id)return true;var n=POINTS[id];S.card=n.card;S.hero=n.hero;S.story=n.story;S.m.poi=id;S.sel.cblock=null;emit("point.opened",id,cur);return true}
+/* a point's card, open or kept: its blocks, its hero and its story */
+function pointOf(id){id=id||S.m&&S.m.poi||"painting";return id===(S.m&&S.m.poi||"painting")?{card:S.card,hero:S.hero,story:S.story,id:id}:Object.assign({id:id},POINTS[id]||{})}
 
 /* Small helpers: esc, byId, setPath and getPath (a dotted path into S). */
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
@@ -2932,7 +3048,7 @@ on("showSelfTest.after",function(res){var box=document.getElementById("selftest"
 /* ---------- phone ---------- */
 var scr=document.getElementById("scr"),ph=document.getElementById("ph"),hint=document.getElementById("hint"),fit=document.getElementById("fit");
 var SCREENS={phone:[360,740],land:[740,360],tablet:[640,860]};
-function topbar(crumb){var ans=firstAnswer("topbar.answer",crumb);if(ans!==undefined)return ans;return '<div class="topbar"><button type="button" data-go="card" aria-label="'+TXH("page_back")+'">&#8249;</button><span>Ribeira Palace &#8250; '+crumb+'</span></div>';}
+function topbar(crumb){var ans=firstAnswer("topbar.answer",crumb);if(ans!==undefined)return ans;return '<div class="topbar"><button type="button" data-go="card" aria-label="'+TXH("page_back")+'">&#8249;</button><span>'+esc(L(S.hero.title))+' &#8250; '+crumb+'</span></div>';}
 function layerHead(t,s){return '<div class="layerhead">'+t+'<small>'+s+'</small></div>'}
 function demoScreen(){var h=topbar("<b>"+esc(L(UI.demo))+"</b>")+'<div class="pg">';
   h+=layerHead("Motion","Each motion on real parts. Motion Family: <b>"+esc((motionById(S.family)||{}).name)+"</b> · Replay: <b>"+(S.replay==="every"?"Every Pass":"Once")+"</b>.");
@@ -2953,7 +3069,7 @@ function renderPhone(keep){if(noDraw)return;var cx={};emitLatestFirst("renderPho
   scr.innerHTML=S.view==="card"?cardScreen():S.view==="demo"?demoScreen():S.view==="story"?storyScreen():S.view==="term"?termScreen():S.view==="democard"?demoCardScreen():galleryScreen();
   document.getElementById("ptool").innerHTML=ptool();
   var nb=document.getElementById("navbar");nb.innerHTML=navbar();nb.style.display=S.view==="card"?"":"none";
-  hint.style.display=S.view==="card"?"":"none";hint.firstChild.textContent="The card · Ribeira Palace";
+  hint.style.display=S.view==="card"?"":"none";hint.firstChild.textContent="The card · "+L(S.hero.title);
   splitPieces();scr.scrollTop=top;observe();initTransitions();initBoxes();onScroll(scr);applyFocus();
   emit("renderPhone.after",keep,cx)}
 function applyFocus(){var on=S.focusOn&&S.view==="demo"&&S.focusRef;scr.classList.toggle("focusing",!!on);
@@ -3167,7 +3283,7 @@ on("renderPhone.after",function(keep){var inWall=S.view==="card";
   topBand();stickyAction()});
 /* ----- phone events ----- */
 ph.addEventListener("click",function(e){var t=e.target;
-  var mk=t.closest("[data-marker]");if(mk){S.stop=S.cardCfg.openAt;S.view="card";feedback("open");renderPhone(false);emit("card.opened","marker");return}
+  var mk=t.closest("[data-marker]");if(mk){pointOpen(mk.dataset.marker);S.stop=S.cardCfg.openAt;S.view="card";feedback("open");renderPhone(false);emit("card.opened","marker");return}
   if(S.view==="card"&&t===ph.querySelector("#camera")||t.closest("#wall")&&!t.closest(".mk")){if(S.cardCfg.tapOutside&&S.stop!=="closed"){S.stop="closed";renderPhone(false)}return}
   var ch=t.closest(".chrome i");if(ch&&S.view==="card"&&ch.textContent.charCodeAt(0)===10005){S.stop="closed";renderPhone(false);return}
   var lt=t.closest("[data-tabsec],[data-pagesec]");if(lt){S.activeSec=lt.dataset.tabsec||lt.dataset.pagesec;feedback("jump");renderPhone(true);return}
@@ -3211,7 +3327,7 @@ function curOf(key){var p=key.split("."),st=styleById(S.sel.style);
   if(p[0]==="motion")return(motionById(S.sel.motion)||{})[p[1]];if(p[0]==="o")return st&&st.o[p[1]];if(p[0]==="fx")return(effectById(S.sel.effect)||{o:{}}).o[p[1]];
   if(p[0]==="inter")return(interById(S.sel.inter)||{o:{}}).o[p[1]];if(p[0]==="cb")return(byId(S.card,S.sel.cblock)||{})[p[1]];
   if(key==="style.uses")return st&&st.o.uses;if(p[0]==="style")return st&&st[p[1]];if(p[0]==="prow")return(patternById(p[1])||{rows:[]}).rows[+p[2]]&&patternById(p[1]).rows[+p[2]].style;
-  return{family:S.family,replay:S.replay,focusOn:S.focusOn,previewLang:S.lang,"test.poi":S.test.poi,"m.poi":"painting"}[key]}
+  return{family:S.family,replay:S.replay,focusOn:S.focusOn,previewLang:S.lang,"test.poi":S.test.poi,"m.poi":S.m&&S.m.poi||"painting"}[key]}
 /* ----- self-test: every Editor control must change what the phone shows ----- */
 var BEHAVIOUR=/^@?(inter\.|m\.page|blockDefs\.[^.]+\.chrome|cardCfg\.(tapOutside|keepAudio|audioOverlap|peekNext|enabled)|fb\.|ctl\.jump\.|ctl\.bar\.hide|ui\.|test\.poi|focusOn|previewLang)/;
 /* the phone's signature for the self-test: each feature's piece is made before the older ones (latest first) and appended after them */
@@ -3375,7 +3491,7 @@ var GUIDE_PLAN={
     {h:"Its moments",s:"when it comes on, and on the wall"},"Introduction","Walks to the wall","Try",
     {fo:"gt:tools",t:"Model tools",s:"the 3D model's clips, Import… and a model from a picture (Mascot source = 3D model)",deep:true,parts:["3D model","Play a clip","Import…","Generate from a picture"]},
     {words:"s7mascot"}],
-  gt1:[{rules:1},{fo:"s7voice"},{fo:"s7cap"},{fo:"s7focus"},{fo:"s7coach"},
+  gt1:[{rules:1},{fo:"s7auto"},{fo:"s7voice"},{fo:"s7cap"},{fo:"s7focus"},{fo:"s7coach"},
     {fo:"s7dock",add:[{h:"Tour controls",s:"previous, pause, next, sound, captions, Ask and stop: their words"},{words:"s7tour"}]},
     {fo:"gt:ways",t:"Ways in",s:"how a visitor starts the tour, or picks it up again",parts:[{fo:"s7gbtn"},{fo:"s7hero"},{fo:"s7block"},{fo:"s7resume"}]}],
   gt3:[{fo:"s7ask",t:"What the visitor sees",s:"the question box, Ask about the view, the answers and how they sound",parts:[{from:"s7ask"},"Answers from",{fo:"s7cam"},{from:"s7agent"},
@@ -3457,7 +3573,7 @@ function guidePath(o){var P=guidePaths();if(P[o])return P[o].slice();var p=first
 /* The card's chrome: the top band, the sticky action, the close and settings buttons, the page foot. */
 function topBand(){var b=ph.querySelector(".topband");if(!b){b=document.createElement("div");b.className="topband";ph.appendChild(b)}
   var show=S.view==="card"&&S.stop==="full"&&scr.scrollTop>230;b.style.display=show?"":"none";b.className="topband tb-"+S.cardCfg.topBand;
-  b.innerHTML='<i title="'+TXH("close")+'">&#10005;</i>'+(S.ctl.top.title?'<b>Ribeira Palace</b>':'<b></b>')+(S.ctl.top.settings?'<i title="'+TXH("visitor_settings")+'">&#9776;</i>':'<i style="visibility:hidden"></i>');emit("topBand.after")}
+  b.innerHTML='<i title="'+TXH("close")+'">&#10005;</i>'+(S.ctl.top.title?'<b>'+esc(L(S.hero.title))+'</b>':'<b></b>')+(S.ctl.top.settings?'<i title="'+TXH("visitor_settings")+'">&#9776;</i>':'<i style="visibility:hidden"></i>');emit("topBand.after")}
 function stickyAction(){var s=ph.querySelector(".sticky");if(s)s.remove();var on=S.ctl.sticky==="shown"||(S.ctl.sticky==="auto"&&!(S.ctl.bar.on&&S.ctl.bar.pos==="bottom"));
   if(S.view==="card"&&on&&(S.stop==="half"||S.stop==="full")){s=document.createElement("div");s.className="sticky";s.innerHTML='<button type="button" data-locate="1">'+(TXH("show_on_wall_button"))+'</button>';ph.appendChild(s)}}
 scr.addEventListener("scroll",function(){if(S.view==="card")topBand()},{passive:true});
@@ -3551,8 +3667,12 @@ S.guideSteps=[
  {id:"g9",view:"card",ref:"b:b_quiz",act:"try",wait:"answer",text:T("Ready for a question? Which king moved the court to the river? Tap your answer.","Pronto para uma pergunta? Que rei mudou a corte para o rio? Toque na sua resposta.")},
  {id:"g10",view:"card",ref:"hero",act:"end",text:T("That was the Ribeira Palace. Ask me anything, or explore on your own.","Este foi o Paço da Ribeira. Pergunte-me o que quiser, ou explore sozinho.")}];
 var G={on:false,i:0,paused:false,waiting:false,timer:null,utter:null,words:[],music:null,askOpen:false,answer:"",busy:false,ctl:null};
-/* the tour's length in minutes, as the hero's button and the guidance's invitation (A tour of {point}) say it */
-function tourMinutes(){return 3}
+/* the tour's length in minutes, as the hero's button and the guidance's invitation (A tour of {point}) say it: a point's (id; the open
+   one when none) as a module answers (guidance round 16: a tour made from the card, its words at the voice's speed), else the written
+   tour's 3 */
+function tourMinutes(id){var m=firstAnswer("tourMinutes.answer",id);return m!==undefined?m:3}
+/* a tour's length in words (round 16b, the developer): under 2 minutes "short", from 2 its minutes ("3 min") */
+function tourLength(m){return+m<2?TXT("guide_duration_short"):fmt(TXT("guide_duration"),m)}
 function stepText(st){if(st.text)return L(st.text);var r=byId(S.story,st.ref.slice(2));return r&&r.c?L(r.c.text):""}
 /* ----- the music bed (round 11): a track that loops under the voice and ducks while Azu speaks. Music volume 0-100 % (15), Under the
    voice: how low it ducks, a share of its volume (30 %); Track: the manifest's approved tracks (../music/tracks.js: id, name, file,
@@ -3627,8 +3747,10 @@ function wrapWords(el){if(el.dataset.wrapped)return;var t=el.textContent,re=/\S+
 function clearGuideMarks(){scr.querySelectorAll(".gfocus").forEach(function(x){x.classList.remove("gfocus")});var c=ph.querySelector(".gcoach");if(c)c.remove();emit("clearGuideMarks.after")}
 function coach(el,kind){var c=document.createElement("div");c.className="gcoach";c.innerHTML=({flip:"&#9758; "+TXH("guide_coach_flip"),drag:"&#8596; "+TXH("guide_coach_drag"),answer:"&#9758; "+TXH("guide_coach_answer")}[kind]||TXH("guide_coach_try"));
   var r=el.getBoundingClientRect(),p=ph.getBoundingClientRect(),k=p.width/ph.offsetWidth;c.style.top=((r.top-p.top)/k+30)+"px";ph.appendChild(c)}
-function teaser(on){var h=scr.querySelector(".hero");if(!h)return;h.classList.toggle("teasing",on&&!S.reduce);
-  if(on&&!S.reduce){var imgs=[IMG.hero,IMG.g1,IMG.g3,IMG.g2],i=0;clearInterval(G.tz);G.tz=setInterval(function(){if(!G.on||G.paused)return;i=(i+1)%imgs.length;h.style.backgroundImage="url("+imgs[i]+")"},2600)}else{clearInterval(G.tz);h.style.backgroundImage="url("+IMG.hero+")"}}
+/* the teaser at the hero: its picture drifts, and the point's own pictures follow one another (heroPics, card/hero.js: the palace's four;
+   a point drawn as a crop of the wall keeps its crop, round 16b); after it, the point's own picture again (heroPaint) */
+function teaser(on){var h=scr.querySelector(".hero");if(!h)return;h.classList.toggle("teasing",on&&!S.reduce);clearInterval(G.tz);
+  var imgs=heroPics();if(on&&!S.reduce&&imgs.length>1){var i=0;G.tz=setInterval(function(){if(!G.on||G.paused)return;i=(i+1)%imgs.length;if(i)h.style.backgroundImage="url("+imgs[i]+")";else heroPaint(h)},2600)}else if(!on)heroPaint(h)}
 function renderGuide(text){["gbar","gcap","mascot","gask","gresume"].forEach(function(c){var o=ph.querySelector("."+c);if(o)o.remove()});var pt=document.getElementById("ptool");if(pt)pt.style.display=G.on?"none":"";
   if(!G.on){var nb0=document.getElementById("navbar");if(nb0&&S.view==="card")nb0.style.display=S.ctl.bar.on&&S.stop!=="peek"&&S.stop!=="closed"?"":"none"}else{
   var nb=document.getElementById("navbar");if(nb)nb.style.display="none";var lp=ph.querySelector(".locpin");if(lp)lp.remove();
@@ -3648,7 +3770,7 @@ function renderGuide(text){["gbar","gcap","mascot","gask","gresume"].forEach(fun
      '<form class="gform"><input id="gq" class="gin" type="text" autocomplete="off" placeholder="'+(TXH("guide_ask_placeholder"))+'"><button type="button" data-g="mic" aria-label="'+TXH("guide_ask_mic")+'">&#127908;</button><button type="submit" '+(G.busy?"disabled":"")+'>'+(G.busy?"…":(TXH("guide_ask_send")))+'</button>'+(G.busy?'<button type="button" data-g="stopask">'+TXH("guide_ask_stop")+'</button>':"")+'</form>';ph.appendChild(a)}}emit("renderGuide.after",text)}
 /* ----- hooks into the card: hero button, Guide block, gestures, take-over ----- */
 on("cardScreen.html",function(h){var d=document.createElement("div");d.innerHTML=h;
-  if(S.guideCfg.heroButton){var w=d.querySelector(".hero .w");if(w)w.insertAdjacentHTML("beforeend",'<button type="button" class="gstart" data-g="start">&#9654; '+TXH("guide_start")+' · '+esc(fmt(TXT("guide_duration"),tourMinutes()))+'</button>')}
+  if(S.guideCfg.heroButton){var w=d.querySelector(".hero .w");if(w)w.insertAdjacentHTML("beforeend",'<button type="button" class="gstart" data-g="start">&#9654; '+TXH("guide_start")+' · '+esc(tourLength(tourMinutes()))+'</button>')}
   if(S.guideCfg.block){var ab=d.querySelector('[data-ref="sec:about"] .ey');if(ab)ab.insertAdjacentHTML("afterend",'<div class="item" data-ref="b:b_guide"><button type="button" class="gblock" data-g="start"><span class="gm">'+(S.guideCfg.mascot?mascotStill():sicon("play",48))+'</span><span><b>'+(TXH("guide_block_title"))+'</b><small>'+(TXH("guide_block_line"))+'</small></span></button></div>')}
   return d.innerHTML});
 ph.addEventListener("click",function(e){var t=e.target,g=t.closest("[data-g]");
@@ -3685,9 +3807,20 @@ on("edCard.html",function(h){var c=S.guideCfg;
   var sec=fo("s7",'7 · Guide <span class="sub">· the narrated tour and Ask the guide</span>',["new","NEW"],gb,1);
   var i=h.lastIndexOf('<div class="json">');return h.slice(0,i)+sec+h.slice(i)});
 on("edMarker.html",function(h){var t='<div class="note">The tour of this point: one row per step, in order. Each step shows a block, says its words (EN / PT), and may wait for the visitor to try it.</div><table class="tbl"><thead><tr><th style="width:22px">#</th><th style="width:28%">Shows</th><th style="width:70px">Does</th><th>Says</th></tr></thead><tbody>';
-  S.guideSteps.forEach(function(st,j){var c=corpus().filter(function(x){return x.ref===st.ref})[0];t+='<tr class="pick'+(S.sel.gstep===st.id?" sel":"")+'" data-pick="gstep" data-id="'+st.id+'"><td class="uses">'+(j+1)+'</td><td>'+esc(st.ref==="hero"?"The hero (teaser)":c?c.title:st.ref)+'</td><td class="uses">'+st.act+(st.wait?" · "+st.wait:"")+'</td><td class="uses">'+esc(stepText(st))+'</td></tr>';
-    if(S.sel.gstep===st.id)t+='<tr class="slot"><td></td><td colspan="3">'+(st.text?langCodes().map(function(lg){return row("Says · "+lg.toUpperCase(),'<textarea class="u" rows="2" data-gtext="'+st.id+'|'+lg+'">'+esc(st.text[lg]||"")+'</textarea>',"")}).join(""):'<div class="note">Reads the block\'s own text.</div>')+'</td></tr>'});
+  S.guideSteps.forEach(function(st,j){var c=corpus().filter(function(x){return x.ref===st.ref})[0];t+='<tr class="pick'+(S.sel.gstep===st.id?" sel":"")+(st.skip?" gskipped":"")+'" data-pick="gstep" data-id="'+st.id+'"><td class="uses">'+(j+1)+'</td><td>'+esc(st.ref==="hero"?"The hero (teaser)":c?c.title:st.at&&st.at.kind?"The "+st.at.kind+" (no longer on the card)":"A block no longer on the card")+'</td><td class="uses">'+st.act+(st.wait?" · "+st.wait:"")+(st.skip?" · skipped":"")+'</td><td class="uses">'+esc(stepText(st))+'</td></tr>';
+    if(S.sel.gstep===st.id)t+='<tr class="slot"><td></td><td colspan="3">'+gstepCtl(st,j)+(st.text?langCodes().map(function(lg){return row("Says · "+lg.toUpperCase(),'<textarea class="u" rows="2" data-gtext="'+st.id+'|'+lg+'">'+esc(st.text[lg]||"")+'</textarea>',"")}).join(""):'<div class="note">Reads the block\'s own text.</div>')+'</td></tr>'});
   t+='</tbody></table>';var sec=fo("m3","3 · Guide script",["new","NEW"],t,1);var i=h.lastIndexOf('<div class="json">');return h.slice(0,i)+sec+h.slice(i)});
+/* a written step's own controls (guidance round 16, the written tour edited step by step): what it does, kept or skipped, its place */
+var GSTEP_ACTS=[["teaser","The teaser (on the hero)"],["show","Show the block and say its line"],["read","Read the block's own words"],["try","Wait for the visitor to try it"],["open","Open the block's page"],["end","The end (Ask me anything)"]];
+function gstepCtl(st,j){return row("Does",'<select class="u" data-gact="'+st.id+'">'+GSTEP_ACTS.map(function(a){return'<option value="'+a[0]+'"'+(st.act===a[0]?" selected":"")+'>'+esc(a[1])+'</option>'}).join("")+'</select>',"What the guide does at this step. Read lights the block's own words as they are said, so its line must be the block's words.")+
+  row("Keep",'<div class="seg"><button type="button" data-gkeep="'+st.id+'|keep" aria-pressed="'+!st.skip+'">Keep</button><button type="button" data-gkeep="'+st.id+'|skip" aria-pressed="'+!!st.skip+'">Skip</button></div>',"Skip: the tour leaves this step out (it stays here, to bring back).")+
+  row("Order",'<div class="btnrow"><button class="del" type="button" data-gmv="'+st.id+'|-1"'+(j===0?" disabled":"")+'>^ Earlier</button><button class="del" type="button" data-gmv="'+st.id+'|1"'+(j===S.guideSteps.length-1?" disabled":"")+'>v Later</button></div>',"Moves the step one place in the tour.")}
+ed.addEventListener("change",function(e){var t=e.target;if(!t.dataset||!t.dataset.gact)return;e.stopImmediatePropagation();var st=byId(S.guideSteps,t.dataset.gact);if(!st)return;st.act=t.value;if(st.act!=="try")delete st.wait;else st.wait=st.wait||"answer";renderEditor()},true);
+ed.addEventListener("click",function(e){var k=e.target.closest("[data-gkeep],[data-gmv]");if(!k)return;e.stopPropagation();
+  if(k.dataset.gkeep){var q=k.dataset.gkeep.split("|"),st=byId(S.guideSteps,q[0]);if(st){if(q[1]==="skip")st.skip=true;else delete st.skip}renderEditor();return}
+  var m=k.dataset.gmv.split("|"),i=S.guideSteps.findIndex(function(s){return s.id===m[0]}),j=i+(+m[1]);if(i<0||j<0||j>=S.guideSteps.length)return;swap(S.guideSteps,i,j);renderEditor()},true);
+/* a skipped step is left out when the tour starts (the same filter as an audience's length) */
+on("stepFits.ok",function(ok,st){return ok&&!(st&&st.skip)});
 ed.addEventListener("click",function(e){var p=e.target.closest('[data-pick="gstep"]');if(!p||e.target.closest("textarea"))return;e.stopPropagation();S.sel.gstep=p.dataset.id;renderEditor()},true);
 ed.addEventListener("input",function(e){var t=e.target;if(!t.dataset.gtext)return;e.stopImmediatePropagation();var q=t.dataset.gtext.split("|"),st=byId(S.guideSteps,q[0]);st.text[q[1]]=t.value},true);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(guideCfg\\.(voice|speed|music|captions|highlight|coach|ask)|"));
@@ -4139,15 +4272,16 @@ ph.addEventListener("click",function(e){if(S.view!=="card")return;var t=e.target
 function blockPreviewHtml(b,i){emitLatestFirst("blockPreviewHtml.before",b,i);var out;
   try{out=firstAnswer("blockPreviewHtml.answer",b,i);if(out===undefined){var m=b.enter==="family"?motionById(S.family):motionById(b.enter),h="",tap=b.tap==="page"?" tap":"";
   var or=b.tap==="page"?'<div class="open'+(b.orow==="nudge"?" nudge":"")+(b.orow==="shine"?" shine":"")+'">'+(b.kind==="Story"?esc(L(UI.read)):esc(L(UI.open))+(b.orow==="nudge"?"":" &#8250;"))+'</div>':"";
-  if(b.kind==="Quick Facts")h='<div class="qf"><div><small>'+esc(L(UI.home))+'</small><b>'+esc(L(UI.homev))+'</b></div><div><small>'+esc(L(UI.lost))+'</small><b>'+esc(L(UI.lostv))+'</b></div></div>';
-  if(b.kind==="Inline"){var p=patternById(b.pattern);h=p?p.rows.map(function(r,j){return renderEl(r.kind,styleById(r.style)||defStyle(r.kind),{},j,true).replace('class="el-callout','class="el-callout')}).join(""):"";
-    if(p&&p.rows[0].kind==="callout"&&(styleById(p.rows[0].style)||{o:{}}).o.calltap==="flip")h=renderEl("callout",styleById(p.rows[0].style),{text:T("The palace had its own opera house, opened in March 1755.","O palácio tinha a sua própria ópera, inaugurada em março de 1755."),back:T("It stood for only seven months.","Durou apenas sete meses.")},0,false).replace(/^<div class="mv[^>]*>|<\/div>$/g,"")}
+  if(b.kind==="Quick Facts")h='<div class="qf">'+kindWords(b).facts.map(function(x){return'<div><small>'+esc(L(x[0]))+'</small><b>'+esc(L(x[1]))+'</b></div>'}).join("")+'</div>';
+  if(b.kind==="Inline"&&b.c&&b.c.text&&!b.pattern){var iw=kindWords(b);h=(iw.title?'<div class="bt">'+esc(L(iw.title))+'</div>':"")+renderEl("paragraph",defStyle("paragraph"),{text:iw.text},0,true)}
+  else if(b.kind==="Inline"){var p=patternById(b.pattern),fw=kindWords(b);h=p?p.rows.map(function(r,j){return renderEl(r.kind,styleById(r.style)||defStyle(r.kind),{},j,true).replace('class="el-callout','class="el-callout')}).join(""):"";
+    if(p&&p.rows[0].kind==="callout"&&(styleById(p.rows[0].style)||{o:{}}).o.calltap==="flip")h=renderEl("callout",styleById(p.rows[0].style),{text:fw.text,back:fw.back},0,false).replace(/^<div class="mv[^>]*>|<\/div>$/g,"")}
   if(b.kind==="Story")h='<img alt="" src="'+IMG.g3+'" style="width:100%;height:170px;object-fit:cover;border-radius:12px;display:block"><div class="bt" style="color:var(--stories);margin-top:12px">'+esc(L(UI.where))+'</div><h3>'+esc(L(DEMO.title))+'</h3><p>'+esc(L(DEMO.lede))+'</p>';
   if(b.kind==="Before and After")h=renderEl("before_after",defStyle("before_after"),{},0,true);
   if(b.kind==="Gallery")h=renderEl("carousel",defStyle("carousel"),{},0,true);
   if(b.kind==="Audio Guide")h=renderEl("audio",defStyle("audio"),{},0,true);
-  if(b.kind==="Knowledge Check")h='<div class="kq" data-kq><b>'+esc(L(T("Which king moved the court to the river?","Que rei mudou a corte para o rio?")))+'</b><button type="button" data-ok="1">Manuel I</button><button type="button">Philip I</button><button type="button">José I</button></div>';
-  if(b.kind==="Practical Info")h='<dl class="info"><dt>'+(S.lang==="pt"?"Onde":"Where")+'</dt><dd>Praça do Comércio</dd></dl><div class="more"><dl class="info" style="margin-top:6px"><dt>'+(S.lang==="pt"?"Hoje":"Today")+'</dt><dd>'+(S.lang==="pt"?"Praça aberta, sempre":"An open square, always")+'</dd><dt>Metro</dt><dd>Terreiro do Paço</dd></dl></div>'+'<div class="open">'+(TXH("open_row_expand"))+' &#8964;</div>';
+  if(b.kind==="Knowledge Check")h=kqHtml(kindWords(b));
+  if(b.kind==="Practical Info"){var pr=kindWords(b).rows||[],dl=function(rs){return rs.map(function(x){return'<dt>'+esc(L(x[0]))+'</dt><dd>'+esc(L(x[1]))+'</dd>'}).join("")};h='<dl class="info">'+dl(pr.slice(0,1))+'</dl>'+(pr.length>1?'<div class="more"><dl class="info" style="margin-top:6px">'+dl(pr.slice(1))+'</dl></div>':"")+'<div class="open">'+(TXH("open_row_expand"))+' &#8964;</div>'}
   var inner='<div class="bprev'+tap+(b.tap==="expand"?" expand":"")+'" '+(b.tap==="page"?'data-go="'+(b.kind==="Story"?"story":"gallery")+'"':b.tap==="expand"?"data-expand":"")+'>'+h+or+'</div>';
   out='<div class="item" data-ref="b:'+b.id+'">'+wrapMv(inner,m,0)+'</div>'}out=pipe("blockPreviewHtml.frame",out,b)}finally{emit("blockPreviewHtml.done",b,i)}
   return pipe("blockPreviewHtml.html",out,b)}
@@ -4227,12 +4361,38 @@ BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(blockDefs\\.Place In A
 /* ----- previews: one per kind, drawn from its options ----- */
 function hstrip(items){return '<div class="hstrip">'+items.join("")+'</div>'}
 function ring(p,col,label){var r=26,c=2*Math.PI*r;return '<svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true"><circle cx="32" cy="32" r="'+r+'" fill="none" stroke="var(--hair)" stroke-width="7"/><circle cx="32" cy="32" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="7" stroke-dasharray="'+(c*p/100).toFixed(1)+' '+c.toFixed(1)+'" transform="rotate(-90 32 32)" stroke-linecap="round"/><text x="32" y="37" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink1)">'+p+'%</text></svg>'}
+/* a block's words: its own (b.c: the wall's other points) or its kind's on the demo point's card (KWORDS, core/content.js) */
+function kindWords(b){return b&&b.c&&Object.keys(b.c).length?b.c:KWORDS[b&&b.kind]||{}}
+/* a word in one language, whatever its form (a text in each language, or one string for every language) */
+function wordIn(o,lang){return o==null?"":typeof o==="string"?o:String(o[lang]||o.en||"")}
+function kqHtml(w){var ok=w.ok||0;return'<div class="kq" data-kq><b>'+esc(L(w.q))+'</b>'+(w.choices||[]).map(function(c,i){return'<button type="button"'+(i===ok?' data-ok="1"':"")+'>'+esc(L(c))+'</button>'}).join("")+'</div>'}
+/* guidance round 16: a block's words as the guide's automatic tour reads them (guide/autotour.js), in one language, from the same place the
+   preview draws them: a title, a text (its back on a flip card), the facts as [label, value], the events as [date, words], a caption and a
+   count, a question and its choices, the rows of practical info, the dialogue's lines, a before and after's two labels. A kind with no
+   words of its own answers {} (its rule in Guide › 2 · The tour › What each block says decides what the guide does there) */
+function blockSays(b,lang){var w=kindWords(b),x=function(o){return wordIn(o,lang)},k=b.kind,dc=S.demoC||{};
+  if(k==="Quick Facts")return{facts:(w.facts||[]).map(function(f){return[x(f[0]),x(f[1])]}),cat:w.cat&&kopt("Quick Facts","cat")!=="no"?[wordIn(S.tx.facts_category,lang),x(w.cat)]:null};
+  if(k==="Inline"){if(b.c&&b.c.text)return{title:x(w.title),text:x(w.text)};var p=patternById(b.pattern),fl=p&&p.rows[0]&&p.rows[0].kind==="callout"&&(styleById(p.rows[0].style)||{o:{}}).o.calltap==="flip";
+    return{title:fl?wordIn(S.tx.fun_fact_label,lang):"",text:x(w.text),back:fl?x(w.back):"",flip:!!fl}}
+  if(k==="Story"){var cw=b.c||{};return{title:x(cw.title||DEMO.title),text:x(cw.lede||DEMO.lede)}}
+  if(k==="Timeline")return{events:(w.events||[]).map(function(e){return[e[0],x(e[1])]})};
+  if(k==="Gallery")return{cap:x(w.cap),n:w.n||4};
+  if(k==="Knowledge Check")return{q:x(w.q),choices:(w.choices||[]).map(x)};
+  if(k==="Poll")return{q:x(w.q),choices:(w.choices||[]).map(x)};
+  if(k==="Practical Info")return{rows:(w.rows||[]).map(function(r){return[x(r[0]),x(r[1])]})};
+  if(k==="Dialogue")return{lines:(w.lines||[]).map(x)};
+  if(k==="Status")return{text:x(w.state)+(w.year?", "+w.year:"")};
+  if(k==="Compare Points")return{points:(w.points||[]).map(x)};
+  if(k==="Before and After"){var ba=b.c&&b.c.blabel?b.c:dc.before_after||{};return{labels:[x(ba.blabel),x(ba.alabel)]}}
+  if(k==="Video")return{cap:x((b.c&&b.c.cap)||(dc.video||{}).cap).replace(/\s*·\s*\d+:\d+\s*$/,"")};
+  if(k==="Audio Guide")return{cap:x((b.c&&b.c.cap)||(dc.audio||{}).cap).replace(/\s*·\s*\d+:\d+\s*$/,"")};
+  return{}}
 var KPREV={
- "Status":function(){var lv=[T("Intact","Intacto"),T("Altered","Alterado"),T("Damaged","Danificado"),T("Ruin","Ruína"),T("Lost","Perdido")];
+ "Status":function(b){var sw=kindWords(b),lv=[T("Intact","Intacto"),T("Altered","Alterado"),T("Damaged","Danificado"),T("Ruin","Ruína"),T("Lost","Perdido")];
    if(kopt("Status","look")==="scale")return '<div class="bt">'+TXH("status_heading")+'</div><div class="scale5">'+lv.map(function(l,i){return'<span class="'+(i===4?"on":"")+'">'+esc(L(l))+'</span>'}).join("")+'</div>';
-   return '<div class="bt">'+TXH("status_heading")+'</div><div class="ringrow">'+ring(100,"var(--play)")+'<div><b>'+esc(L(lv[4]))+'</b><span>'+esc(fmt(TXT("status_percent"),100))+' · 1755</span></div></div>'},
- "Quick Facts":function(){var lk=kopt("Quick Facts","look"),cat=kopt("Quick Facts","cat"),f=[[L(UI.home),L(UI.homev)],[L(UI.lost),L(UI.lostv)]];
-   if(cat!=="no")f.unshift([TXT("facts_category"),L(T("Royal palace","Palácio real"))+(cat==="catlevel"?" · "+L(T("Level 1","Nível 1")):"")]);
+   return '<div class="bt">'+TXH("status_heading")+'</div><div class="ringrow">'+ring(100,"var(--play)")+'<div><b>'+esc(L(sw.state))+'</b><span>'+esc(fmt(TXT("status_percent"),100))+' · '+esc(sw.year)+'</span></div></div>'},
+ "Quick Facts":function(b){var lk=kopt("Quick Facts","look"),cat=kopt("Quick Facts","cat"),qw=kindWords(b),f=qw.facts.map(function(x){return[L(x[0]),L(x[1])]});
+   if(cat!=="no"&&qw.cat)f.unshift([TXT("facts_category"),L(qw.cat)+(cat==="catlevel"?" · "+L(T("Level 1","Nível 1")):"")]);
    if(lk==="chips")return '<div class="qchips">'+f.map(function(x){return'<span><small>'+esc(x[0])+'</small>'+esc(x[1])+'</span>'}).join("")+'</div>';
    if(lk==="big")return '<div class="qbig"><div><b>c. 1500</b><small>'+esc(f[f.length-2][0])+'</small></div><div><b>1755</b><small>'+esc(f[f.length-1][0])+'</small></div>'+(cat!=="no"?'<div class="wide"><small>'+esc(f[0][0])+'</small>'+esc(f[0][1])+'</div>':"")+'</div>';
    return '<div class="qf">'+f.map(function(x){return'<div><small>'+esc(x[0])+'</small><b>'+esc(x[1])+'</b></div>'}).join("")+'</div>'},
@@ -4244,25 +4404,25 @@ var KPREV={
    var h=custom?'<div class="bt" style="color:var(--stories)">'+esc(L(UI.where))+'</div><h3>'+esc(L(DEMO.title))+'</h3>'+renderEl("pull_quote",defStyle("pull_quote"),{},0,true):
      '<img alt="" src="'+IMG.g3+'" style="width:100%;height:170px;object-fit:cover;border-radius:12px;display:block"><div class="bt" style="color:var(--stories);margin-top:12px">'+esc(L(UI.where))+'</div><h3>'+esc(L(DEMO.title))+'</h3><p class="capfade">'+esc(L(DEMO.lede))+'</p>';
    return h+(res?'<div class="resume"><button type="button" data-go="story">'+TXH("story_resume")+' &#8250;</button><small>'+esc(L(T("You stopped at Two centuries of additions","Parou em Dois séculos de acrescentos")))+'</small></div>':"")},
- "Timeline":function(){var ev=[["c. 1500",T("The court moves to the river","A corte muda-se para o rio"),"g3"],["1580s",T("The Torreão rises","Ergue-se o Torreão"),"before"],["1755",T("Earthquake, fire and tsunami","Terramoto, incêndio e maremoto"),"g1"]],now=kopt("Timeline","now")==="true",pics=kopt("Timeline","pics")==="true";
-   if(now)ev.push([TXT("timeline_now"),T("The Praça do Comércio","A Praça do Comércio"),"g2"]);
+ "Timeline":function(b){var tw=kindWords(b),ev=tw.events.slice(),now=kopt("Timeline","now")==="true",pics=kopt("Timeline","pics")==="true";
+   if(now&&tw.now)ev.push([TXT("timeline_now"),tw.now,"g2"]);
    if(kopt("Timeline","look")==="vertical")return '<div class="tl">'+ev.map(function(e){return'<div><b>'+esc(e[0])+'</b><span>'+esc(L(e[1]))+'</span></div>'}).join("")+'</div>';
-   return hstrip(ev.map(function(e){return'<div class="tcard">'+(pics?'<img alt="" src="'+IMG[e[2]]+'">':"")+'<b>'+esc(e[0])+'</b><span>'+esc(L(e[1]))+'</span></div>'}))},
- "Compare Points":function(){return '<div class="bt">'+TXH("compare_heading")+'</div><div class="cmp"><div>'+ring(100,"var(--play)")+'<b>Ribeira Palace</b></div><div>'+ring(20,"var(--media)")+'<b>Lisbon Cathedral</b></div></div>'},
- "Dialogue":function(){return '<div class="dlg"><p class="them">'+esc(L(T("Your Majesty, the river front is finished.","Majestade, a frente do rio está concluída.")))+'</p><p class="you"><small>'+TXH("dialogue_you")+'</small>'+esc(L(T("And the tower?","E o torreão?")))+'</p><div class="dopts"><button type="button">'+esc(L(T("Ask about the opera","Perguntar pela ópera")))+'</button><button type="button">'+TXH("dialogue_continue")+'</button></div></div>'},
- "Gallery":function(){var all=kopt("Gallery","from")==="all";return renderEl("carousel",kstyle("Gallery","carousel"),{},0,true)+'<div class="fmt">'+esc(fmt(TXT("gallery_count"),all?9:4))+(all?" · "+esc(L(T("every picture on the card","todas as imagens do cartão"))):"")+'</div>'},
+   return hstrip(ev.map(function(e){return'<div class="tcard">'+(pics?'<img alt="" src="'+IMG[e[2]||"g1"]+'">':"")+'<b>'+esc(e[0])+'</b><span>'+esc(L(e[1]))+'</span></div>'}))},
+ "Compare Points":function(b){var cp=kindWords(b).points;return '<div class="bt">'+TXH("compare_heading")+'</div><div class="cmp"><div>'+ring(100,"var(--play)")+'<b>'+esc(L(cp[0]))+'</b></div><div>'+ring(20,"var(--media)")+'<b>'+esc(L(cp[1]))+'</b></div></div>'},
+ "Dialogue":function(b){var dw=kindWords(b).lines;return '<div class="dlg"><p class="them">'+esc(L(dw[0]))+'</p><p class="you"><small>'+TXH("dialogue_you")+'</small>'+esc(L(dw[1]))+'</p><div class="dopts"><button type="button">'+esc(L(T("Ask about the opera","Perguntar pela ópera")))+'</button><button type="button">'+TXH("dialogue_continue")+'</button></div></div>'},
+ "Gallery":function(b){var all=kopt("Gallery","from")==="all",gw=kindWords(b);return renderEl("carousel",kstyle("Gallery","carousel"),gw.imgs?{imgs:gw.imgs}:{},0,true)+'<div class="fmt">'+esc(fmt(TXT("gallery_count"),all?9:gw.n||4))+(gw.cap?" · "+esc(L(gw.cap)):"")+(all?" · "+esc(L(T("every picture on the card","todas as imagens do cartão"))):"")+'</div>'},
  "Before and After":function(){return renderEl("before_after",kstyle("Before and After","before_after"),{},0,true)},
  "Hotspot Image":function(){return renderEl("hotspot",kstyle("Hotspot Image","hotspot"),{},0,true)},
  "Video":function(){return renderEl("video",kstyle("Video","video"),{},0,true)},
  "3D Model":function(){return renderEl("model_3d",kstyle("3D Model","model_3d"),{},0,true)},
  "360 Panorama":function(){return renderEl("panorama",kstyle("360 Panorama","panorama"),{},0,true)},
  "Audio Guide":function(){return renderEl("audio",kstyle("Audio Guide","audio"),{},0,true)+(kopt("Audio Guide","chapters")==="true"?'<div class="achap"><small>'+TXH("video_chapters")+'</small><button type="button">0:00 '+esc(L(T("The river palace","O palácio do rio")))+'</button><button type="button">1:20 '+esc(L(T("The opera","A ópera")))+'</button><button type="button">2:30 1755</button></div>':"")},
- "Knowledge Check":function(){var t=kopt("Knowledge Check","qtype"),late=kopt("Knowledge Check","appears")==="read",q=L(T("Which king moved the court to the river?","Que rei mudou a corte para o rio?")),h;
+ "Knowledge Check":function(b){var t=kopt("Knowledge Check","qtype"),late=kopt("Knowledge Check","appears")==="read",h;
    if(t==="tf")h='<div class="kq tf"><div class="tfcard">'+esc(L(T("The opera house stood for only seven months.","A ópera durou apenas sete meses.")))+'</div><div class="tfb"><button type="button" data-ok="1">'+TXH("knowledge_true")+'</button><button type="button">'+TXH("knowledge_false")+'</button></div><small>'+TXH("knowledge_swipe_hint")+'</small></div>';
    else if(t==="pic")h='<div class="kq"><b>'+esc(L(T("Which picture shows the palace before 1755?","Que imagem mostra o palácio antes de 1755?")))+'</b><div class="kpic"><button type="button" data-ok="1"><img alt="" src="'+IMG.before+'"></button><button type="button"><img alt="" src="'+IMG.g2+'"></button><button type="button"><img alt="" src="'+IMG.g1+'"></button><button type="button"><img alt="" src="'+IMG.g3+'"></button></div></div>';
-   else h='<div class="kq" data-kq><b>'+esc(q)+'</b><button type="button" data-ok="1">Manuel I</button><button type="button">Philip I</button><button type="button">José I</button></div>';
+   else h=kqHtml(kindWords(b));
    return '<div class="bt">'+TXH("knowledge_check_heading")+' · '+esc(fmt(TXT("knowledge_question_of"),1,3))+'</div>'+h},
- "Poll":function(){return '<div class="poll"><b>'+esc(L(T("Should the opera house be rebuilt?","Devia a ópera ser reconstruída?")))+'</b><button type="button">'+esc(L(T("Yes","Sim")))+'</button><button type="button">'+esc(L(T("No","Não")))+'</button><button type="button">'+esc(L(T("Only as a museum","Só como museu")))+'</button></div>'},
+ "Poll":function(b){var pw=kindWords(b);return '<div class="poll"><b>'+esc(L(pw.q))+'</b>'+pw.choices.map(function(c){return'<button type="button">'+esc(L(c))+'</button>'}).join("")+'</div>'},
  "Collect":function(){return '<div class="collect"><span class="stamp">'+TILE.replace("<svg",'<svg width="40" height="40"')+'</span><div><b>'+TXH("collect_heading")+'</b><small>'+esc(fmt(TXT("collect_progress"),3,12))+'</small></div><button type="button">'+TXH("collect_add")+'</button></div>'},
  "Feedback":function(){if(kopt("Feedback","answer")==="stars")return '<div class="fbk"><b>'+TXH("feedback_stars_question")+'</b><div class="stars">'+[1,2,3,4,5].map(function(n){return'<button type="button" aria-label="'+esc(fmt(TXT("feedback_star"),n,5))+'">&#9734;</button>'}).join("")+'</div></div>';
    return '<div class="fbk"><b>'+TXH("feedback_thumbs_question")+'</b><div class="thumbs2"><button type="button">&#128077; '+TXH("feedback_thumb_up")+'</button><button type="button">&#128078; '+TXH("feedback_thumb_down")+'</button></div></div>'},
@@ -4360,7 +4520,7 @@ function kpageBody(k){var o=function(key){return kopt(k,key)};
   if(k==="Video"){var cap=o("captions")==="inherit"?S.ctl.player.captions:o("captions")==="true";return '<div class="vplayer"><img alt="" src="'+IMG.hero+'"><i>&#9654;</i>'+(cap?'<span class="vcap">'+esc(L(T("From the square, the road climbs to the castle.","Da praça, a rua sobe até ao castelo.")))+'</span>':"")+'<div class="vbar"><span>0:12 / 0:55</span><button type="button" aria-pressed="'+cap+'">'+TXH("player_captions")+'</button><button type="button">'+TXH("video_full_screen")+'</button></div></div><div class="achap"><small>'+TXH("video_chapters")+'</small><button type="button">0:00 The square</button><button type="button">0:30 The castle</button></div><button type="button" class="ubtn2">'+TXH("transcript")+'</button>'}
   if(k==="3D Model")return renderEl("model_3d",kstyle(k,"model_3d"),{},0,false)+(o("room")==="true"?'<button type="button" class="arfocal">'+TXH("model_in_room")+'</button>':"");
   if(k==="360 Panorama")return renderEl("panorama",kstyle(k,"panorama"),{},0,false);
-  if(k==="Knowledge Check")return KPREV["Knowledge Check"]()+'<div class="kq"><b>'+esc(L(T("When did the opera house open?","Quando abriu a ópera?")))+'</b><button type="button" data-ok="1">1755</button><button type="button">1700</button></div>'+(o("score")==="end"?'<div class="kscore">'+esc(fmt(TXT("quiz_score"),2,3))+'</div>':"")+(o("retry")==="true"?'<button type="button" class="ubtn2">'+TXH("quiz_retry")+'</button>':"");
+  if(k==="Knowledge Check")return KPREV["Knowledge Check"](S.card.filter(function(b){return b.kind==="Knowledge Check"})[0]||{kind:"Knowledge Check"})+'<div class="kq"><b>'+esc(L(T("When did the opera house open?","Quando abriu a ópera?")))+'</b><button type="button" data-ok="1">1755</button><button type="button">1700</button></div>'+(o("score")==="end"?'<div class="kscore">'+esc(fmt(TXT("quiz_score"),2,3))+'</div>':"")+(o("retry")==="true"?'<button type="button" class="ubtn2">'+TXH("quiz_retry")+'</button>':"");
   if(k==="Hotspot Image")return renderEl("hotspot",kstyle(k,"hotspot"),{},0,false)+'<ol class="hslist"><li>'+esc(L(T("The Torreão, the corner tower of the 1580s.","O Torreão, a torre de canto dos anos 1580.")))+'</li><li>'+esc(L(T("The royal chapel.","A capela real.")))+'</li></ol>';
   if(k==="Today Map")return KPREV["Today Map"]()+'<button type="button" class="arfocal">'+TXH("today_map_directions")+'</button>';
   return ""}
@@ -4375,7 +4535,7 @@ on("renderPhone.before",function(keep,cx){if(S.view==="kpage"||S.view==="viewer"
 on("renderPhone.after",function(keep,cx){if(cx.page){var v=cx.page;S.view=v;scr.innerHTML=v==="kpage"?kpageScreen():viewerScreen();scr.style.top="0px";
     var nb=document.getElementById("navbar");if(nb)nb.style.display="none";["locpin","sticky","vset","csheet","peekrow","topband"].forEach(function(k){var o=ph.querySelector("."+k);if(o)o.style.display="none"});
     var w=document.getElementById("wall");if(w)w.style.display="none";var gb=document.getElementById("grab");if(gb)gb.style.display="none"}});
-document.addEventListener("click",function(e){var t=e.target;if(!ph.contains(t))return;var g=t.closest('[data-go="kpage"]');if(g){e.stopPropagation();S.pageKind=g.dataset.kind;S.view="kpage";renderPhone(false);return}
+document.addEventListener("click",function(e){var t=e.target;if(!ph.contains(t))return;var g=t.closest('[data-go="kpage"]');if(g&&!t.closest(".kq button")){e.stopPropagation();S.pageKind=g.dataset.kind;S.view="kpage";renderPhone(false);return}
   var gp=t.closest('[data-go="story"][data-kind],[data-go="gallery"][data-kind]');if(gp&&S.view!=="card"){e.stopPropagation();S.view=gp.dataset.go;renderPhone(false);return}
   var vi=t.closest(".blk .el-pic img, .blk .fr img");if(vi&&S.view==="gallery"){e.stopPropagation();var all=Array.prototype.slice.call(scr.querySelectorAll(".blk img"));S.viewerAt=Math.max(0,all.indexOf(vi));S.view="viewer";renderPhone(false);return}
   var va=t.closest("[data-vat]");if(va){e.stopPropagation();S.viewerAt=+va.dataset.vat;renderPhone(false);return}
@@ -4520,7 +4680,7 @@ on("blockPreviewHtml.html",function(h,b){if(b.frame&&b.frame!=="inherit"&&S.secC
 on("modelSig.before",function(cx){var x="";if(sigWant(/frame/)){var look=S.secCfg.look,keep=S.view;S.secCfg.look="cards";S.view="card";x="#cardsR#"+cardScreen();S.secCfg.look=look;S.view=keep}cx.frame=x});on("modelSig.sig",function(s,cx){return s+cx.frame});
 
 /* The Specific Marker tab (edMarker): the point's card and pages, the starters, the card's warnings, the preview rows. */
-function edMarkerV3(){var h=row("Marker",sel("m.poi",[["painting","7. Ribeira Palace"]],"painting"),"The marker whose card you edit.");
+function edMarkerV3(){var h=row("Marker",sel("m.poi",Object.keys(POINTS).map(function(k){return[k,POINTS[k].label]}),S.m&&S.m.poi||"painting"),"The marker whose card you edit: the palace, or another point of its wall with a card of its own (its blocks, its hero and its Guide script).");
   h+=locked("Position & Visual")+locked("Labels");
   /* 1. the card */
   var cb='<div class="note">The card as the visitor meets it: blocks in order, in their bar groups, each with its preview and what a tap does. The Header is set above (existing).</div><table class="tbl"><thead><tr><th style="width:22px">#</th><th style="width:80px">Preview</th><th>Block</th><th style="width:70px">Group</th><th style="width:74px"></th></tr></thead><tbody>';
@@ -4551,7 +4711,7 @@ function edMarkerV3(){var h=row("Marker",sel("m.poi",[["painting","7. Ribeira Pa
   h+=fo("mpages","2 · Pages · each block's content",["new","NEW"],pages,1);
   h+=jsonBox("config.json · the marker's detail card (blocks + the story page)",markerJson());return h;}
 /* ----- Specific Marker: this point's card ----- */
-function edMarker(){var h=row("Marker",sel("m.poi",[["painting","7. Ribeira Palace"]],"painting"),"The marker whose card you edit.")+locked("Position & Visual")+locked("Labels");
+function edMarker(){var h=row("Marker",sel("m.poi",Object.keys(POINTS).map(function(k){return[k,POINTS[k].label]}),S.m&&S.m.poi||"painting"),"The marker whose card you edit: the palace, or another point of its wall with a card of its own (its blocks, its hero and its Guide script).")+locked("Position & Visual")+locked("Labels");
   var sb='<div class="note">This card follows Detail Card. Hide a section only this point does not need.</div><div class="filters">'+S.sections.filter(function(s){return s.shown}).map(function(s){var off=S.poiSec[s.id]==="hide";return'<button class="chip" type="button" data-poisec="'+s.id+'" aria-pressed="'+!off+'">'+esc(s.name.en)+(off?" · hidden here":"")+'</button>'}).join("")+'</div>';
   h+=fo("m0","0 · Sections on this card",["new","NEW"],sb,1);
   var cb='<div class="note">Blocks in order, each in its section. Everything says "As the block" until you override it for this point.</div><table class="tbl"><thead><tr><th style="width:22px">#</th><th style="width:80px">Preview</th><th>Block</th><th style="width:80px">Section</th><th style="width:74px"></th></tr></thead><tbody>';
@@ -4630,6 +4790,8 @@ ed.addEventListener("click",function(e){var t=e.target;
   var pv=t.closest("[data-prv]");if(pv){e.stopPropagation();var q=pv.dataset.prv.split("|");if(q[0]==="del")S.previewRows.splice(+q[1],1);else if(q[0]==="unlink")S.previewRows[+q[1]]={kind:"pull_quote"};else if(q[0]==="link")S.previewRows.push({link:"r9"});else S.previewRows.push({kind:"paragraph"});renderAll(true);show("card");return}
   var hp=t.closest("[data-heropic]");if(hp){e.stopPropagation();var q2=hp.dataset.heropic.split("|");S.hero[q2[0]]=q2[1];renderAll(true);S.view="card";S.stop="full";renderPhone(false);return}},true);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(m\.starter|"));
+/* Marker: the card of that point opens (core/content.js's pointOpen), at Half on the wall's view */
+ed.addEventListener("change",function(e){var t=e.target;if(!t.dataset||t.dataset.sel!=="m.poi")return;if(G.on)stopTour();pointOpen(t.value);S.view="card";renderAll(false)},true);
 /* ----- the demos of the Specific Marker's rows: its card; a placed block's rows (its options on this card) that block in view, ringed
    (Entrance plays it once); Page of: that page; the Header page's focus point: the hero ----- */
 function mBlockSel(){var b=byId(S.card,S.sel.cblock);return b?'[data-ref="b:'+b.id+'"]':".gsec"}
@@ -4665,11 +4827,37 @@ var FOCUS9={w1:["card",".chrome i:last-child","full"]};Object.keys(FOCUS9).forEa
 /* The hero: its content (S.hero), its height by the stop, the bar after it. */
 S.hero={title:T("Ribeira Palace","Palácio da Ribeira"),eyebrow:T("Lisbon · c. 1500 to 1755","Lisboa · c. 1500 a 1755"),line:null,fx:50,fy:50,pic:"hero",pic2:"g2"};
 /* the hero's content (the Header page) */
-on("cardScreen.html",function(h){if(typeof inDemoCard!=="undefined"&&inDemoCard)return h;return h.replace(/<h2>Ribeira Palace<\/h2>/,"<h2>"+esc(L(S.hero.title))+"</h2>").replace(/(<div class="hero[^"]*" style="background-image:url\()[^)]*\)/,"$1"+IMG[S.hero.pic]+");background-position:"+S.hero.fx+"% "+S.hero.fy+"%")});
+on("cardScreen.html",function(h){if(typeof inDemoCard!=="undefined"&&inDemoCard)return h;
+  /* the eyebrow and the line under the title: the point's own (guidance round 16: the wall's other points have their hero), else the demo's */
+  var ey=S.hero.eyebrow?L(S.hero.eyebrow):L(UI.where),ln=S.hero.line?L(S.hero.line):L(UI.line);
+  return h.replace("<small>"+esc(L(UI.where))+"</small><h2>","<small>"+esc(ey)+"</small><h2>").replace("</h2><p>"+esc(L(UI.line))+"</p>","</h2><p>"+esc(ln)+"</p>").replace(/<h2>Ribeira Palace<\/h2>/,"<h2>"+esc(L(S.hero.title))+"</h2>").replace(/(<div class="hero[^"]*" style="background-image:url\()[^)]*\)/,"$1"+IMG[S.hero.pic]+");background-position:"+S.hero.fx+"% "+S.hero.fy+"%")});
 function heroH(){var H=SCREENS[S.screen][1];if(S.screen==="land")return 300;return Math.max(220,H-stopTop(S.stop==="peek"||S.stop==="closed"?"half":S.stop))}
 function barAfterHero(){var nb=document.getElementById("navbar"),c=S.ctl.bar;if(!nb||S.view!=="card"||!c.on||c.showFrom!=="hero"||S.stop==="peek"||S.stop==="closed")return;
   var hero=scr.querySelector(".hero"),past=hero?scr.scrollTop>hero.offsetHeight-140:true;if(!past)nb.style.display="none";else if(S.card.length>=c.minBlocks&&S.sections.filter(shownOnBar).length>=2)nb.style.display=""}
-on("renderPhone.after",function(keep){fitHero();barAfterHero();editorTools()});
+on("renderPhone.after",function(keep){fitHero();heroPaint();barAfterHero();editorTools()});
+/* ----- guidance round 16b: a point's own picture, a crop of the wall painting around that point (the developer: the Torreão, the Terreiro
+   do Paço and the Tagus showed the Ribeira's hero). S.hero.crop = {wall, at (the wall's point), h (the crop's height, a fraction of the
+   picture's, at most), w (the crop's width, a fraction of the picture's, at most: 0.4, so a short hero at Half still shows its point and
+   not the whole wall), fx, fy (where the point sits in the hero, fractions)}: drawn on the same file by background-size and -position (no new file),
+   the point at (fx, fy) of the hero, never past the picture's edges; its motion drifts around the crop (hero.css, .hcrop). It holds while
+   the Picture is the wall's (Specific Marker › Header › Picture: another picture is drawn whole). Unity: the RawImage's uvRect on the
+   same texture (u0 = -x / width, v0 = 1 - (-y + H) / height, its width W / width and height H / height) ----- */
+function heroCropOf(){var c=S.hero.crop;if(!c||typeof WALLS==="undefined")return null;var wl=WALLS[c.wall];if(!wl||IMG[S.hero.pic]!==wl.img())return null;
+  var p=(wl.pois||[]).filter(function(x){return x.id===c.at})[0];return p?{iw:wl.w,ih:wl.h,u:p.u,v:p.v,h:c.h||1,w:c.w||.4,fx:c.fx!=null?c.fx:.5,fy:c.fy!=null?c.fy:.4}:null}
+/* the crop at a hero H high: the picture's drawn size (covering the hero), and its offset as CSS: the point at fx of the hero's width
+   whatever that width (a background-position percentage is of the hero less the picture: fx·100% + (fx − u)·width px = fx·W − u·width),
+   clamped to the picture's edges (100% is the hero less the picture, 0 its left edge); the drift's two ends 12 px each way */
+function heroCropBox(c,W,H){var z=kopt("Header","look")==="spotlight"?Math.max(1,+kopt("Header","zoom")||1):1,s=Math.max(H/(c.ih*Math.min(1,c.h/z)),W/(c.iw*Math.min(1,c.w/z)));var bw=c.iw*s,bh=c.ih*s;
+  var y=Math.min(0,Math.max(H-bh,H*c.fy-c.v*bh)),cx=function(d){return"clamp(100%, calc("+(c.fx*100).toFixed(1)+"% + "+((c.fx-c.u)*bw+d).toFixed(1)+"px), 0px)"};
+  return{bw:bw,bh:bh,y:y,x:cx(0),x0:cx(12),x1:cx(-12)}}
+/* the hero's own picture, drawn again (after a redraw, and after the teaser's pictures); its width and height the screen's target ones
+   (heroH: the phone may still be growing to its new size as it is drawn) */
+function heroPaint(h){h=h||scr.querySelector(".hero");if(!h||S.view!=="card"&&S.view!=="democard")return;var c=heroCropOf();h.classList.toggle("hcrop",!!c);
+  if(h.style.backgroundImage!=="none")h.style.backgroundImage="url("+IMG[S.hero.pic]+")";if(!c)return;
+  var W=(SCREENS[S.screen]||[h.offsetWidth])[0],H=S.heroH||h.offsetHeight,b=heroCropBox(c,W,H),px=function(v){return v.toFixed(1)+"px"};
+  h.style.backgroundSize=px(b.bw)+" "+px(b.bh);h.style.backgroundPosition=b.x+" "+px(b.y);h.style.setProperty("--hx0",b.x0);h.style.setProperty("--hx1",b.x1);h.style.setProperty("--hy",px(b.y))}
+/* the pictures the teaser shows one after another: the palace's four; a point drawn as a crop keeps its own */
+function heroPics(){return heroCropOf()||S.m&&S.m.poi&&S.m.poi!=="painting"?[IMG[S.hero.pic]]:[IMG[S.hero.pic],IMG.g1,IMG.g3,IMG.g2]}
 scr.addEventListener("scroll",barAfterHero,{passive:true});
 /* ----- a change redraws in place: the hero keeps its height, what was on screen stays shown, the scroll stays ----- */
 function fitHero(){var hero=scr.querySelector(".hero");if(!hero||(S.view!=="card"&&S.view!=="democard"))return;
@@ -5439,8 +5627,17 @@ on("runStep.after",function(){
 on("startTour.before",function(from){G.introPending=!from&&!S.howSaved&&(S.guideCfg.intro==="every"||(S.guideCfg.intro==="first"&&!S.introSeen));if(G.introPending)S.introSeen=true});
 
 /* ----- the block being told, placed where the guide panel never covers it: a short block at a third of the free height, a tall one near the top ----- */
+/* round 16b (the Architect: at Mini the panel covered the hero's line and its Start button while the teaser played): at the hero (the
+   teaser, the end) the words told are the hero's own, its eyebrow, title and line (heroWords); the card scrolls just enough to put them
+   12 px above the panel and the bubble (the picture moves up with them; back to the top when there is room), never under the notch. While
+   a tour plays the hero's Start button and Listen hide (#ph.touring, person.css): the tour is already playing and the panel holds its
+   controls, so one focal point, the guide; moved, it would be a second Start beside the panel's Pause. Unity: the same offset on the
+   card's ScrollView (the hero is its first child), the hero's action row hidden while the tour plays */
+function heroWords(){var h=scr.querySelector(".hero"),r=null;if(!h)return null;h.querySelectorAll(".w > small,.w h2,.w > p").forEach(function(e){if(!e.getClientRects().length||!/\S/.test(e.textContent))return;var q=e.getBoundingClientRect();r=r?{top:Math.min(r.top,q.top),bottom:Math.max(r.bottom,q.bottom),height:0}:{top:q.top,bottom:q.bottom,height:0}});if(r)r.height=r.bottom-r.top;return r}
+on("renderGuide.after",function(){ph.classList.toggle("touring",!!G.on)});
 function placeStep(st){if(G.keepScroll||!st||st.act==="intro")return;var el=stepEl(st);if(!el)return;setTimeout(function(){if(!el.isConnected||!G.on)return;var f=freeHeight(),r=el.getBoundingClientRect();G.placedTop=null;var avail=f.bottom-f.top,q=ph.getBoundingClientRect().height/ph.offsetHeight;
-    var want=r.height<=avail*.45?f.top+(avail-r.height)/3:f.top+16,dy=(r.top-want);if(st.ref==="hero")dy=-scr.scrollTop;
+    var want=r.height<=avail*.45?f.top+(avail-r.height)/3:f.top+16,dy=(r.top-want);
+    if(st.ref==="hero"){var hw=heroWords();dy=hw?Math.min(hw.bottom-(f.bottom-12*q),hw.top-(f.top+56*q)):-scr.scrollTop*q;dy=Math.max(dy,-scr.scrollTop*q)}
     if(Math.abs(dy)>4){G.autoScrollTill=performance.now()+900;scr.scrollTo({top:scr.scrollTop+dy/q,behavior:S.reduce?"auto":"smooth"})}},60)}
 /* round 15: the block stays clear when it ends up under the guide mid-step: the panel opened to Open, Azu's bubble with its next line or
    an ask, the ✦ growing into the panel as a tour starts or resumes at a step (placed during the growth), the card's layout settling after
@@ -5451,7 +5648,7 @@ function placeStep(st){if(G.keepScroll||!st||st.act==="intro")return;var el=step
    bubble's geometryChanged, then the ScrollView's scrollOffset tween */
 function keepStepClear(){if(!G.on||G.keepScroll||S.dockH==="full"||performance.now()<(G.autoScrollTill||0))return;var st=S.guideSteps[G.i],el=st&&st.act!=="intro"&&stepEl(st);if(!el)return;
   var top=Math.round(scr.scrollTop);if(G.placedStep!==G.i){G.placedStep=G.i;G.placeTries=0;G.placedTop=null}if(G.placedTop==null)G.placedTop=top;if(top!==G.placedTop)return;
-  var f=freeHeight(),r=el.getBoundingClientRect(),sb=scr.getBoundingClientRect(),gone=!S.howSaved&&!G.paused&&S.stop==="full"&&scr.contains(el)&&(r.top>=sb.bottom||r.bottom<=sb.top)&&!(G.userScrollAt>(G.stepAt||0));
+  var f=freeHeight(),r=st.ref==="hero"&&heroWords()||el.getBoundingClientRect(),sb=scr.getBoundingClientRect(),gone=!S.howSaved&&!G.paused&&S.stop==="full"&&scr.contains(el)&&(r.top>=sb.bottom||r.bottom<=sb.top)&&!(G.userScrollAt>(G.stepAt||0));
   if((r.bottom>f.bottom+1&&r.top<sb.bottom||gone)&&G.placeTries<3){G.placeTries++;G.placedTop=null;placeStep(st)}}
 
 /* ----- a scroll by the visitor: the guide keeps talking; if its block leaves the screen, it moves on to the block now in view
@@ -6069,12 +6266,424 @@ ed.addEventListener("click",function(e){var t=e.target.closest("[data-vtstart],[
 /* the row's demo: a line in the chosen recorded set (Speaking now names it) */
 rowDemos({"guideCfg.voiceSet":{tour:"g1",ring:".gbubble|.gdock"}});
 
+/* The guide's automatic tour (guidance round 16): a tour made from a Detail Card's blocks, the default of every point with no written tour,
+   which the Editor can switch to, compare, make its own and edit. tourFromCard(card, story, lang, opts) is one pure function: it returns
+   steps in the written tour's own shape ({id, view, ref, act, wait, text}), so every part of the guide plays it unchanged (the captions, the
+   focus, Azu, the panel, the games on the tour, Audiences, the scheduler, Ask Azu, the voices). Step 0 is always the teaser at the hero
+   (the point's name, one hook from the card, what the tour covers and its minutes); then one step per block in the card's order by its
+   kind's rule (AT_RULES: Guide › 2 · The tour › Tour from the card › What each block says); links between the steps made from each
+   block's own words, never the same twice in a row (round 16b); never a fact twice (round 16b: atFactKeys); the end step a line of recap
+   and "Ask me anything". It says the card's own words and the link words only (atCheck proves it, with the word caps, no sentence twice,
+   no fact twice and the links). A tour under 2 minutes is "a short tour" (round 16b). A point's tour: S.tours[point] (src: written | card; the
+   written tour once it exists; made: copied by Make it mine; dismissed: blocks the notice no longer names; ai: the stored lines of
+   Make it more fluid… with AI). S.guideSteps is the open point's tour: its written one, or the one made from its card, made again from
+   the card whenever the phone is drawn and no tour plays.
+   Unity: GuideTourBuilder.FromCard(DetailCard, language, rules) in plain C# (EditMode tests on the same cards), run by the POI Editor and
+   at load for a marker with no GuideScript asset; its link words are CardStrings keys (at_*); the AI lines are stored in the marker's
+   GuideScript asset by the Editor; a line with no recorded clip goes to the TTS path Ask Azu's answers take (the device voice or
+   ElevenLabs, as the voice settings say) */
+S.guideCfg.autoAI=false;S.guideCfg.atCap=40;S.guideCfg.atTeaserCap=45;S.guideCfg.atStoryMax=6;S.guideCfg.atHook="auto";
+/* each block kind's rule: what the guide does at a block of that kind (the first value the default; a kind with nothing to tell skips) */
+var AT_RULES={
+ "Inline":{opts:[["read","Read its words (a flip card: try it)"],["show","Say its first sentence"],["skip","Skip"]]},
+ "Story":{opts:[["read","Open it, then read its pages"],["show","Open it and say its title"],["skip","Skip"]]},
+ "Quick Facts":{opts:[["facts","The two or three strongest, as one sentence"],["skip","Skip"]]},
+ "Status":{opts:[["say","Say its condition"],["skip","Skip"]]},
+ "Actions":{opts:[["skip","Skip (buttons, nothing to tell)"],["show","Show it"]]},
+ "Timeline":{opts:[["ends","Its first and last dates"],["all","Every date"],["skip","Skip"]]},
+ "Compare Points":{opts:[["show","Say the two points it compares"],["skip","Skip"]]},
+ "Dialogue":{opts:[["show","Say its first line"],["skip","Skip"]]},
+ "Gallery":{opts:[["show","Show it with its caption"],["skip","Skip"]]},
+ "Before and After":{opts:[["try","Try it: the visitor drags"],["show","Show it with its two labels"],["skip","Skip"]]},
+ "Hotspot Image":{opts:[["show","Show it: tap a spot"],["skip","Skip"]]},
+ "Video":{opts:[["show","Show it with its caption"],["skip","Skip"]]},
+ "3D Model":{opts:[["show","Show it: turn it with a finger"],["skip","Skip"]]},
+ "360 Panorama":{opts:[["show","Show it: drag to look around"],["skip","Skip"]]},
+ "Audio Guide":{opts:[["skip","Skip (the guide already speaks)"],["show","Show it"]]},
+ "Place In AR":{opts:[["skip","Skip (an action)"],["show","Show it"]]},
+ "Knowledge Check":{opts:[["try","Try it: the visitor answers"],["show","Say the question"],["skip","Skip"]]},
+ "Poll":{opts:[["show","Say its question"],["skip","Skip"]]},
+ "Collect":{opts:[["skip","Skip (a stamp, nothing to tell)"],["show","Show it"]]},
+ "Feedback":{opts:[["skip","Skip (asks the visitor)"],["show","Show it"]]},
+ "Wall Locator":{opts:[["skip","Skip (navigation)"],["show","Show it"]]},
+ "Today Map":{opts:[["skip","Skip (navigation)"],["show","Show it"]]},
+ "Related":{opts:[["skip","Skip (links)"],["show","Show it"]]},
+ "Practical Info":{opts:[["skip","Skip (visit details, not the story)"],["show","Say its first row"]]},
+ "Sources":{opts:[["skip","Skip (credits)"],["show","Show it"]]},
+ "Contents":{opts:[["skip","Skip (navigation)"],["show","Show it"]]}};
+S.guideCfg.atRule={};Object.keys(AT_RULES).forEach(function(k){S.guideCfg.atRule[k]=AT_RULES[k].opts[0][0]});
+var AT_HOOKS=[["auto","Automatic: the story's first sentence, else the subtitle, else the first fact"],["line","The subtitle"],["fact","The first fact"],["story","The story's first sentence"]];
+S.tours={painting:{src:"written"}};
+COMP.s7auto=["Guide","Tour from the card"];FOCUS.s7auto=["card",".hero","full"];
+
+/* ----- the pure parts: words, sentences, caps ----- */
+function atWords(t){return(String(t||"").match(/\S+/g)||[]).length}
+/* a sentence ends at . ! ? …, never after a title's abbreviation ("D. Manuel I", "St. George") or c. (circa) */
+function atSentences(t){return String(t||"").trim().split(/(?<=[.!?…])(?<!\b(?:D|Dr|St|Sta|Sto|Mr|Mrs|c)\.)\s+(?=[^\s])/).filter(Boolean)}
+function atNorm(s){return String(s).toLowerCase().replace(/[^\p{L}\p{N}]+/gu," ").trim()}
+function atEnd(t){t=String(t||"").trim();return!t||/[.!?…]$/.test(t)?t:t+"."}
+/* the first word in lower case, mid-sentence, when it is a common word (not a name): the base list or a word the card writes in lower case */
+var AT_LOWER={en:"the a an for in on at by from with about around over under almost nearly some its it this that there here where when what later then today one two three four five six seven eight nine ten hundred",
+  pt:"o a os as um uma uns umas durante em no na nos nas por para com de do da cerca quase mais hoje depois antes quando onde dois duas três quatro cinco cem"};
+function atLowerFirst(t,lang,ok){var m=/^(\S+)/.exec(t||"");if(!m)return t;var w=m[1].replace(/[^\p{L}]/gu,""),lw=w.toLowerCase();
+  if(!w||w===w.toLowerCase()||w.length>1&&w===w.toUpperCase())return t;if((" "+(AT_LOWER[lang]||AT_LOWER.en)+" ").indexOf(" "+lw+" ")<0&&!(ok&&ok(w)))return t;return t.charAt(0).toLowerCase()+t.slice(1)}
+/* a name the card writes with a capital mid-sentence (Philip, Tagus, Praça) stays as written; any other word may go lower case mid-sentence */
+function atProper(parts){var p={};parts.forEach(function(x){atSentences(x).forEach(function(sen){(sen.match(/[\p{L}][\p{L}'’-]*/gu)||[]).forEach(function(w,i){if(i>0&&/^\p{Lu}/u.test(w))p[w]=1})})});return p}
+/* a fact as words: its label and its value joined as a phrase when the label leads into it (a preposition, a participle: "Royal home for
+   about 250 years", "Built in the 1580s", "Lost 1 November 1755"), else with a colon ("River: the Tagus") */
+var AT_LEAD={en:/(\b(for|in|on|at|by|under|since|until|from|of|out|with)|ed|lost|built)$/i,pt:/(\b(durante|em|no|na|nos|nas|de|do|da|desde|até|com|por)|ado|ada|ido|ida|ído|to|ta)$/i};
+function atFact(f,lang,lf,first){var lab=first?f[0]:lf(f[0]),re=AT_LEAD[lang]||AT_LEAD.en;return re.test(f[0].trim())?lab+" "+lf(f[1]):lab+": "+lf(f[1])}
+/* a long text in its first sentences, up to the cap (a first sentence over it is cut at the cap with …) */
+function atCapText(t,cap){var ss=atSentences(t),out=[],n=0;for(var i=0;i<ss.length;i++){var w=atWords(ss[i]);if(out.length&&n+w>cap)break;out.push(ss[i]);n+=w}
+  var r=out.join(" ");if(atWords(r)>cap)r=(r.match(/\S+/g)||[]).slice(0,cap-1).join(" ").replace(/[,;:]$/,"")+"…";return{text:r,cut:r!==String(t).trim()}}
+function atJoin(items,and,lang){if(items.length<2)return items.join("");var last=items[items.length-1],head=items.slice(0,-1).join(", ");return head+(lang==="en"&&items.length>2?", ":" ")+and+" "+last}
+/* a tour's seconds at a voice's speed: each line's words at 170 a minute, and 0.7 s between lines (stepSecs' rule for a line not recorded) */
+function atSecs(texts,speed){return texts.reduce(function(a,t){return a+Math.max(1,atWords(t))*60/(170*(speed||1))+.7},0)}
+function atMins(secs){return Math.max(1,Math.ceil(secs/60-.15))}
+/* a story row's words, in one language: a paragraph, a heading, a before and after, or what it shows (its short title, its text, a caption) */
+function atRowSays(r,lang){var x=function(o){var t=wordIn(o,lang);return typeof plainTerms==="function"?plainTerms(t):t};
+  if(r.kind==="paragraph")return{kind:"par",text:x(r.c&&r.c.text)};if(r.kind==="heading")return{kind:"head",text:x(r.c&&r.c.text)};
+  var parts=r.pattern?(r.slots||[]):[r.c||{}],texts=[],caps=[],ba=false;
+  parts.forEach(function(p){if(!p)return;if(p.before&&p.after)ba=true;if(p.title)texts.push(x(p.title));if(p.text)texts.push(x(p.text));if(p.cap)caps.push(x(p.cap))});
+  if(r.kind==="before_after")ba=true;texts=texts.filter(Boolean);caps=caps.filter(Boolean).map(function(c){return c.replace(/\s*·\s*\d+:\d+\s*$/,"")});
+  var short=function(t){return atWords(t)<=6&&!/[.!?…]$/.test(t)},lead=texts.filter(short)[0]||"",body=texts.filter(function(t){return!short(t)}).sort(function(a,b){return atWords(b)-atWords(a)})[0]||"";
+  return{kind:ba?"ba":body?"show":caps.length?"cap":"none",lead:lead,text:body,cap:caps[0]||"",title:texts.filter(short).slice(-1)[0]||""}}
+
+/* ----- guidance round 16b (the developer, 2026-11-12): never a fact twice. A fact's keys, from each sentence or each item of a list (a
+   fact, an event): its numbers (a year, a decade, a date, a number in digits or in words: "about 250 years" and "Two hundred and fifty
+   years" are the same key, n:250) and its proper names (a run of capitalized words, the first word of a sentence only when the card writes
+   it with a capital mid-sentence; a title such as King or D. left out: "King Manuel I" and "Manuel I" are p:manuel i). A year after
+   before, after, since or until is a reference, not a fact; a bare year repeats a date of that year (1755 after 1 November 1755). A
+   sentence, a fact or an event whose keys were all said already is not said again (one with a new fact stays); the point's own name is
+   no sentence's fact (every line is about it) but it is a fact item's (River: the Tagus, after the teaser named the Tagus). A fact of the
+   Quick Facts that a later sentence of the tour tells (all its keys in one sentence) is left to that sentence: the fuller telling wins,
+   as the teaser's hook takes the strongest. Unity: the same keys in GuideTourBuilder (FactKeys), EditMode-tested on the same cards ----- */
+var AT_MONTHS={en:"january february march april may june july august september october november december".split(" "),pt:"janeiro fevereiro março abril maio junho julho agosto setembro outubro novembro dezembro".split(" ")};
+var AT_NUMW={en:{one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90,hundred:100,thousand:1000},
+  pt:{um:1,uma:1,dois:2,duas:2,"três":3,quatro:4,cinco:5,seis:6,sete:7,oito:8,nove:9,dez:10,onze:11,doze:12,treze:13,catorze:14,quatorze:14,quinze:15,dezasseis:16,dezesseis:16,dezassete:17,dezessete:17,dezoito:18,dezanove:19,dezenove:19,vinte:20,trinta:30,quarenta:40,cinquenta:50,sessenta:60,setenta:70,oitenta:80,noventa:90,cem:100,cento:100,duzentos:200,duzentas:200,trezentos:300,trezentas:300,quatrocentos:400,quatrocentas:400,quinhentos:500,quinhentas:500,seiscentos:600,setecentos:700,oitocentos:800,novecentos:900,mil:1000}};
+var AT_REF={en:/\b(before|after|since|until|till)\s+$/i,pt:/\b(antes\s+de|depois\s+de|desde|até|após)\s+$/i};
+var AT_TITLES=/^(king|queen|prince|princess|saint|st|lord|lady|rei|rainha|príncipe|princesa|d|dom|dona|são|santo|santa|sto|sta)$/i,AT_ARTS=/^(the|a|an|o|os|as|um|uma)$/i;
+/* a text's fact keys. o: proper (the words the card writes with a capital mid-sentence), all (every capitalized word: a name), not (keys
+   left out: the point's name, for a sentence) */
+function atFactKeys(t,lang,o){o=o||{};var s=String(t||""),keys=[],add=function(k){if(keys.indexOf(k)<0)keys.push(k)},mo=AT_MONTHS[lang]||AT_MONTHS.en,de=lang==="pt"?"\\s+de":"",mre="("+mo.join("|")+")";
+  var blank=function(m){return m.replace(/\S/g,"§")};
+  s=s.replace(new RegExp("\\b(\\d{1,2})"+de+"\\s+"+mre+de+"\\s+(\\d{3,4})\\b","gi"),function(m,d,mn,y){add("d:"+(+d)+"-"+(mo.indexOf(mn.toLowerCase())+1)+"-"+y);return blank(m)});
+  s=s.replace(new RegExp("\\b"+mre+de+"\\s+(\\d{3,4})\\b","gi"),function(m,mn,y){add("m:"+(mo.indexOf(mn.toLowerCase())+1)+"-"+y);return blank(m)});
+  s=s.replace(/\b(\d{3}0)s\b|\bdécada\s+de\s+(\d{3}0)\b/gi,function(m,a,b){add("c:"+(a||b));return blank(m)});
+  s.replace(/\b\d{1,3}(?:[,\u00a0\u202f ]\d{3})+\b|\b\d+\b/g,function(m,at){var v=+m.replace(/\D/g,"");if(v>=1000&&v<=2100){if(!(AT_REF[lang]||AT_REF.en).test(s.slice(0,at)))add("y:"+v)}else if(v>=10)add("n:"+v);return m});
+  var nw=AT_NUMW[lang]||AT_NUMW.en,toks=[],re=/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu,m;while((m=re.exec(String(t||""))))toks.push({w:m[0],at:m.index});
+  /* a number in words: a run of number words (and / e between them) */
+  for(var i=0;i<toks.length;i++){var lw=toks[i].w.toLowerCase();if(nw[lw]==null)continue;var tot=0,cur=0,j=i;
+    for(;j<toks.length;j++){var x=toks[j].w.toLowerCase();if((x==="and"||x==="e")&&j>i&&j+1<toks.length&&nw[toks[j+1].w.toLowerCase()]!=null)continue;var v=nw[x];if(v==null)break;
+      if(v===100&&(x==="hundred"))cur=(cur||1)*100;else if(v===1000){tot+=(cur||1)*1000;cur=0}else cur+=v}
+    var val=tot+cur;if(val>=20)add("n:"+val);i=j-1}
+  /* a proper name: a run of capitalized words (do, da, de, of between them; a roman numeral after a name), its title and article left out */
+  var start=function(k){var b=String(t).slice(0,toks[k].at).replace(/["“‘'«(¿¡\s]+$/,"");return!b||/[.!?…]$/.test(b)&&!/\b(D|Dr|St|Sta|Sto|Mr|Mrs|c)\.$/.test(b)};
+  var cap=function(k){var w=toks[k].w;if(!/^\p{Lu}/u.test(w)||mo.indexOf(w.toLowerCase())>=0)return false;if(start(k)&&!o.all&&!(o.proper&&o.proper[w]))return false;return true};
+  for(var a=0;a<toks.length;a++){if(!cap(a))continue;var run=[toks[a].w],b=a+1;
+    for(;b<toks.length;b++){var y=toks[b].w;if(cap(b)||/^[IVX]+$/.test(y)&&run.length){run.push(y);continue}if(/^(do|da|dos|das|de|of)$/.test(y)&&b+1<toks.length&&cap(b+1)){run.push(y);continue}break}
+    a=b-1;while(run.length&&(AT_TITLES.test(run[0])||AT_ARTS.test(run[0])))run.shift();while(run.length&&/^(do|da|dos|das|de|of)$/.test(run[run.length-1]))run.pop();
+    if(!run.length||run.length===1&&run[0].length<2)continue;var key="p:"+run.join(" ").toLowerCase();
+    if(o.not&&o.not.some(function(n){var nw=n.slice(2).split(" ");return key.slice(2).split(" ").every(function(x){return nw.indexOf(x)>=0})}))continue;add(key)}
+  return keys}
+/* a key already said: the same key, or a bare year said as a date of that year */
+function atKnown(said,k){if(said[k])return true;var m=/^y:(\d+)$/.exec(k);return!!m&&Object.keys(said).some(function(x){return/^[dm]:/.test(x)&&x.split("-").pop()===m[1]})}
+/* the points's name as keys (its proper names) */
+function atNameKeys(name,lang){return atFactKeys(name,lang,{all:true}).filter(function(k){return/^p:/.test(k)})}
+
+/* ----- the links (round 16b, the developer: links tied to the content): a link names what comes next from the block's own words, no AI.
+   A sentence link stands alone (First, the facts. · Now, the facts. · Now the story. · Back on the card. · Ready for a question?); a link
+   that leads into the words (Now, {its heading}: · Here's · In the pictures: · Then the dates: · And in {year}, · And around {year},) is at
+   most 6 words before them, the words after it begin in lower case; where no words fit, one neutral link (And now,). Never the same link
+   twice in a row: the second neutral is left out. Each link keeps its source for the Editor's step list (at.ls) ----- */
+var AT_LINK_SRC={facts:"from the Quick Facts, first on the card",facts_n:"from the Quick Facts",story:"from the Story, as it opens",back:"from the card again, after the story",quiz:"from the Knowledge Check",
+  head:"from its heading",cap:"from its caption",pics:"from its caption",dates:"from its dates",year:"from its date",circa:"from its date",neutral:"the neutral link: none of its words fit"};
+var AT_LINK_KEY={facts:"at_link_facts",facts_n:"at_link_facts_n",story:"at_link_story",back:"at_link_back",quiz:"at_link_quiz",head:"at_link_head",cap:"at_link_cap",pics:"at_link_pics",dates:"at_link_dates",year:"at_link_year",circa:"at_link_circa",neutral:"at_link"};
+var AT_DET={en:/^(the|a|an|its|this)\s/i,pt:/^(o|a|um|uma|este|esta)\s/i};
+
+/* the tour from a card, in one language. card: its blocks in order; story: the story's rows; opts: name (the point's), line (its
+   subtitle), says(block) (its words in this language: blockSays), W(key) (a link word in this language), rules, cap, teaserCap, storyMax,
+   hook, speed, lowerOk(word), proper (the card's words written with a capital mid-sentence). Returns the steps, each with at: {key, block,
+   kind, rule, lk (its link's kind), lw (the words in its link), ls (its link's source), link, body, units (each fact unit: its words t and
+   keys k), cut}. A first pass without the Quick Facts finds the facts a later sentence tells (o.later) */
+function tourFromCard(card,story,lang,o){
+  if(!o.pre&&!o.later){var pre=tourFromCard(card,story,lang,Object.assign({},o,{pre:true})),fi=card.findIndex(function(b){return b.kind==="Quick Facts"}),later=[];
+    if(fi>=0)pre.forEach(function(s){var bi=s.at&&s.at.block?card.findIndex(function(b){return b.id===s.at.block}):-1;if(bi>fi&&s.at.kind!=="Timeline")(s.at.units||[]).forEach(function(u){if(u.k.length)later.push(u.k)})});
+    o=Object.assign({},o,{later:later})}
+  var W=o.W,steps=[],said={},facts={},skipped=[],hookSrc="",lf=function(t){return atLowerFirst(t,lang,o.lowerOk)},nameKeys=atNameKeys(o.name,lang);
+  var keysOf=function(t,item){return atFactKeys(t,lang,{proper:o.proper,not:item?null:nameKeys})};
+  var old=function(t,item){var k=keysOf(t,item);return k.length>0&&k.every(function(x){return atKnown(facts,x)})};
+  var fresh=function(t){return atSentences(t).filter(function(x){var n=atNorm(x);return n&&!said[n]&&!old(x)}).join(" ")};
+  var mark=function(t,item){atSentences(t).forEach(function(x){said[atNorm(x)]=1});keysOf(t,item).forEach(function(k){facts[k]=1})};
+  /* a step: its words with what was said left out; a sentence link may stand alone at a show or open step */
+  var LONE={facts:1,facts_n:1,story:1,back:1,quiz:1};
+  var dup={},add=function(st,lk,body,b,rule,x){x=x||{};body=fresh(body);var lone=!body&&lk&&LONE[lk]&&(st.act==="show"||st.act==="open");if(!body&&!lone){if(b)dup[b.id]=1;return null}
+    var units=x.units||atSentences(body).map(function(s){return{t:s,k:keysOf(s)}});units.forEach(function(u){mark(u.t,x.items)});mark(body);
+    st.at={key:st.id,block:b?b.id:null,kind:b?b.kind:null,rule:rule||"",lk:lk||null,lw:x.lw||"",ls:x.ls||"",body:body,units:units,gen:true};steps.push(st);return st};
+  var rules=o.rules||{},rule=function(k){var r=AT_RULES[k];return r?(rules[k]||r.opts[0][0]):"skip"};
+  /* the hook: the subtitle, the story's first sentence or the first fact, by the Editor's Hook */
+  var storyB=card.filter(function(b){return b.kind==="Story"&&rule("Story")!=="skip"})[0],factsB=card.filter(function(b){return b.kind==="Quick Facts"})[0];
+  var storyFirst=storyB?atSentences(o.says(storyB).text)[0]||"":"",ff=factsB?(o.says(factsB).facts||[])[0]:null,firstFact=ff?atFact(ff,lang,lf,true):"";
+  var pick=o.hook==="line"?["line"]:o.hook==="fact"?["fact"]:o.hook==="story"?["story"]:["story","line","fact"],hook="";
+  pick.some(function(k){var v=k==="line"?o.line:k==="story"?storyFirst:firstFact;if(v&&(k!=="story"||atWords(v)<=o.teaserCap-14)){hook=atSentences(v)[0];hookSrc=k;return true}return false});
+  if(hook)mark(hook,hookSrc==="fact");nameKeys.forEach(function(k){facts[k]=1});var teaser={id:"a0",view:"card",ref:"hero",act:"teaser"};steps.push(teaser);
+  /* one step per block, in the card's order */
+  var lastView="card";
+  card.forEach(function(b){var k=b.kind,rl=rule(k),w=o.says(b);if(rl==="skip"){skipped.push({block:b.id,kind:k,why:(AT_RULES[k]?AT_RULES[k].opts.filter(function(x){return x[0]==="skip"})[0][1]:"Skip")});return}
+    var id="a:"+b.id,base={id:id,view:"card",ref:"b:"+b.id},back=lastView==="story",lk=back?"back":"neutral",st=null;
+    var mk=function(act,lk2,body,extra,x){st=add(Object.assign({},base,{act:act},extra||{}),lk2,body,b,rl,x);if(st)lastView=st.view;return st};
+    /* a heading or a title leads the words after it as the link (Now, what was inside:) when it is short enough */
+    var head=function(t){t=String(t||"").replace(/[.:!?…]+$/,"").trim();return t&&atWords(fmt(W("at_link_head"),t))<=6?t:""};
+    if(k==="Story"){var rows=story||[],first=rows[0];var open=add({id:id,view:first?"story":"card",ref:first?"r:"+first.id:"b:"+b.id,act:"open"},"story",atEnd(w.title),b,rl);if(open)lastView=open.view;
+      if(rl!=="read"||!first)return;var n=0,lead="";
+      rows.slice(1).forEach(function(r){if(n>=o.storyMax)return;var rs=atRowSays(r,lang),rid="a:r:"+r.id,rb={id:rid,view:"story",ref:"r:"+r.id},s2=null;
+        if(rs.kind==="head"){lead=rs.text;return}
+        if(rs.kind==="par"){var c=atCapText(rs.text,o.cap);s2=add(Object.assign(rb,{act:"read"}),null,c.text,b,rl);if(s2)s2.at.cut=c.cut}
+        else if(rs.kind==="ba"){var hd=rs.lead||lead,tx=fresh(atEnd(rs.text));s2=add(Object.assign(rb,{act:"try",wait:"drag"}),hd?null:"neutral",(hd?atEnd(hd)+" ":"")+tx+(/drag|arraste/i.test(tx)?"":" "+W("at_try_drag")),b,rl)}
+        else if(rs.kind==="show"){var l2=rs.lead||lead,hh=head(l2),cc=atCapText(rs.text,o.cap-8);
+          s2=hh?add(Object.assign(rb,{act:"show"}),"head",atEnd(cc.text),b,rl,{lw:hh}):add(Object.assign(rb,{act:"show"}),l2?null:"neutral",l2?atEnd(l2.replace(/[.:]$/,"")+": "+lf(cc.text)):atEnd(cc.text),b,rl);if(s2)s2.at.cut=cc.cut}
+        else if(rs.kind==="cap"){var cp=atEnd(rs.cap);s2=lead?add(Object.assign(rb,{act:"show"}),null,atEnd(lead)+" "+cp,b,rl):add(Object.assign(rb,{act:"show"}),(AT_DET[lang]||AT_DET.en).test(cp)?"cap":"pics",cp,b,rl)}
+        if(s2){s2.at.key=rid;n++;lead="";lastView="story"}});return}
+    if(k==="Quick Facts"){if(o.pre)return;var fs=(w.facts||[]).filter(function(f){return f[0]&&f[1]});if(hookSrc==="fact")fs=fs.slice(1);
+      /* a fact said already, or told later by a sentence of the tour (all its keys in one), is left out */
+      fs=fs.filter(function(f){var kk=keysOf(atFact(f,lang,lf,true),true);return!(kk.length&&(kk.every(function(x){return atKnown(facts,x)})||(o.later||[]).some(function(L){return kk.every(function(x){return L.indexOf(x)>=0})})))});
+      fs=fs.slice(0,3);if(w.cat&&fs.length<3&&!old(atFact(w.cat,lang,lf,true),true))fs.push(w.cat);
+      var ps=fs.map(function(f,i){return atFact(f,lang,lf,!i)}),sen=ps.join(ps.some(function(x){return x.indexOf(": ")>=0})?"; ":", "),units=ps.map(function(x){return{t:x,k:keysOf(x,true)}});
+      var fl=back?"back":steps.length===1?"facts":"facts_n";if(fl==="facts_n"&&ps.length===1&&ps[0].indexOf(": ")>0&&head(ps[0].split(": ")[0])){var hd2=ps[0].split(": ");mk("show","head",atEnd(hd2.slice(1).join(": ")),null,{lw:hd2[0],units:units,items:true});return}
+      mk("show",fl,ps.length?atEnd(sen.charAt(0).toUpperCase()+sen.slice(1)):"",null,{units:units,items:true});return}
+    if(k==="Inline"){if(w.flip&&rl==="read"){mk("try",null,(w.title?atEnd(w.title)+" ":"")+atEnd(w.text)+" "+W("at_try_flip"),{wait:"flip"});return}
+      if(rl==="read"&&b.c&&w.text){var ct=atCapText(w.text,o.cap);if(mk("read",null,ct.text))st.at.cut=ct.cut;return}
+      var th=!back&&head(w.title);mk("show",th?"head":lk,atEnd(atSentences(w.text)[0]||""),null,{lw:th||""});return}
+    if(k==="Timeline"){/* its first and last events (or all, by its rule), less those whose fact was said; two or more after Then the dates: …, one as And in 1755, … */
+      var ev=(w.events||[]).filter(function(e){return e[0]&&e[1]});if(rl==="ends"&&ev.length>2)ev=[ev[0],ev[ev.length-1]];ev=ev.map(function(e){var c=/^c\.\s*/.test(e[0]),d=String(e[0]).replace(/^c\.\s*/,""),dt=c?W("at_circa")+" "+d:d,t=atEnd(dt+": "+lf(e[1]));return{c:c,d:d,dt:dt,x:e[1],t:t,k:keysOf(t,true)}})
+        .filter(function(u){return!(u.k.length&&u.k.every(function(x){return atKnown(facts,x)}))});if(!ev.length){dup[b.id]=1;return}
+      var eu=ev.map(function(u){return{t:u.t,k:u.k}});
+      if(back){mk("show","back",ev.map(function(u){return u.t}).join(" "),null,{units:eu,items:true});return}
+      if(ev.length===1){var u=ev[0],yr=/^\d{3,4}$/.test(u.d);if(u.c||yr){mk("show",u.c?"circa":"year",atEnd(u.x.charAt(0).toUpperCase()+u.x.slice(1)),null,{lw:u.d,units:eu,items:true});return}
+        mk("show","neutral",u.t,null,{units:eu,items:true});return}
+      mk("show","dates",atEnd(ev.map(function(u,i){return(i?lf(u.dt):u.dt)+", "+lf(u.x)}).join("; ")),null,{units:eu,items:true});return}
+    if(k==="Gallery"){var gc=w.cap?fresh(atEnd(w.cap)):"";if(gc){mk("show",back?"back":(AT_DET[lang]||AT_DET.en).test(gc)?"cap":"pics",gc);return}mk("show",lk,fmt(W("at_pics"),w.n||""));return}
+    if(k==="Before and After"){var lb=(w.labels||[]).filter(Boolean),pair=lb.length===2?fresh(atEnd(lb[0]+" "+W("at_and")+" "+lf(lb[1]))):"";
+      if(rl==="try")mk("try",lk,(pair?pair+" ":"")+W("at_try_drag"),{wait:"drag"});else mk("show",lk,pair||W("at_show_look"));return}
+    if(k==="Knowledge Check"){if(!w.q)return;if(rl==="try")mk("try",back?"back":"quiz",atEnd(w.q)+" "+W("at_try_answer"),{wait:"answer"});else mk("show",lk,atEnd(w.q));return}
+    if(k==="Poll"){if(w.q)mk("show",lk,atEnd(w.q));return}
+    if(k==="Status"){if(w.text)mk("show",lk,fmt(W("at_status"),lf(w.text)));return}
+    if(k==="Compare Points"){var p=w.points||[];if(p.length>1)mk("show",lk,fmt(W("at_compare"),p[0],p[1]));return}
+    if(k==="Dialogue"){if(w.lines&&w.lines[0])mk("show",lk,atEnd(w.lines[0]));return}
+    if(k==="Video"){mk("show",lk,(w.cap?atEnd(w.cap)+" ":"")+W("at_show_video"));return}
+    if(k==="Audio Guide"){mk("show",lk,(w.cap?atEnd(w.cap)+" ":"")+W("at_show_look"));return}
+    if(k==="Hotspot Image"){mk("show",lk,W("at_show_spots"));return}
+    if(k==="3D Model"){mk("show",lk,W("at_show_model"));return}
+    if(k==="360 Panorama"){mk("show",lk,W("at_show_360"));return}
+    if(k==="Practical Info"){var r0=(w.rows||[])[0];mk("show",lk,r0?atEnd(r0[0]+": "+r0[1]):W("at_show_look"));return}
+    mk("show",lk,W("at_show_look"))});
+  /* the end: one line of recap (the subtitle, else the story's title, else the first fact: one not said yet, no fact said) and "Ask me anything" */
+  var recap=[hookSrc!=="line"?o.line:"",storyB?o.says(storyB).title:"",hookSrc!=="fact"?firstFact:""].filter(function(r,i){return r&&r.indexOf(":")<0&&!said[atNorm(r)]&&!old(r,i===2)})[0]||"";
+  var endLine=(recap?nameIn(fmt(W("at_recap"),"{0}",lf(recap.replace(/[.!?…]+$/,""))),"{0}",o.name,lang):nameIn(W("at_recap_plain"),"{0}",o.name,lang))+" "+W("at_end");
+  steps.push({id:"aend",view:"card",ref:"hero",act:"end",at:{key:"aend",block:null,kind:null,rule:"",lk:null,body:endLine,units:[],gen:true}});
+  /* the links: each from its block's words (its kind's sentence, its heading, its caption, its dates), never the same twice in a row (a
+     second neutral is left out); the words after a link that leads into them begin in lower case */
+  var prev=null;steps.forEach(function(s){if(!s.at||!s.at.lk)return;var lk=s.at.lk,t=W(AT_LINK_KEY[lk]||"at_link");if(/\{0\}/.test(t))t=fmt(t,lk==="head"?lf(s.at.lw):s.at.lw);
+    if(t===prev){s.at.lk=null;s.at.ls="";prev=null;return}s.at.link=t;s.at.ls=(lk==="head"?"from its words “"+s.at.lw+"”":AT_LINK_SRC[lk]||"");prev=t});
+  steps.forEach(function(s){if(!s.at)return;var l=s.at.link,bd=s.at.body;s.text=l?(l+(bd?" "+(/[.!?…]$/.test(l)?bd:lf(bd)):"")):bd.charAt(0).toUpperCase()+bd.slice(1)});
+  /* the teaser: the name, the hook, what the tour covers and how long (its minutes from the whole tour's words at the voice's speed) */
+  var has=function(f){return steps.some(f)},cover=[];
+  if(has(function(s){return s.at&&s.at.kind==="Story"}))cover.push(W("at_cover_story"));
+  if(has(function(s){return s.wait==="drag"}))cover.push(W("at_cover_ba"));
+  if(has(function(s){return s.wait==="flip"}))cover.push(W("at_cover_flip"));
+  if(has(function(s){return s.at&&s.at.kind==="Timeline"}))cover.push(W("at_cover_dates"));
+  if(has(function(s){return s.at&&s.at.kind==="Gallery"}))cover.push(W("at_cover_pics"));
+  if(has(function(s){return s.at&&s.at.kind==="Quick Facts"&&s.at.body}))cover.push(W("at_cover_facts"));
+  cover=cover.slice(0,has(function(s){return s.wait==="answer"})?2:3);if(has(function(s){return s.wait==="answer"}))cover.push(W("at_cover_quiz"));
+  var nameLine=nameIn("{0}","{0}",o.name,lang),head=hook?atEnd(nameLine+": "+lf(hook).replace(/[.!?…]+$/,"")):atEnd(nameLine);
+  if(atWords(head)>o.teaserCap-12)head=atCapText(head,o.teaserCap-12).text;
+  /* round 16b (the developer): a tour under 2 minutes is "a short tour" (In a short tour: …), from 2 minutes its minutes (In about 3 minutes: …);
+     the minutes from the words as said, the teaser's own included (made again until they agree) */
+  var tease=function(n){return head+(cover.length?" "+(n<2?fmt(W("at_cover_short"),atJoin(cover,W("at_and"),lang)):fmt(W("at_cover"),n,atJoin(cover,W("at_and"),lang))):"")};
+  var rest=steps.slice(1).map(function(s){return s.text}),mins=atMins(atSecs([tease(2)].concat(rest),o.speed));
+  for(var it=0;it<3;it++){var m2=atMins(atSecs([tease(mins)].concat(rest),o.speed));if(m2===mins)break;mins=m2}
+  teaser.text=tease(mins);teaser.at={key:"a0",block:null,kind:"Header",rule:"teaser",lk:null,body:teaser.text,gen:true,hook:hookSrc,mins:mins};
+  steps.skipped=skipped;steps.said=dup;return steps}
+
+/* ----- the quality rules, checked (the Editor's line under the tour, and the tests): the teaser first at the hero (two sentences at most,
+   the name, the minutes), each line under its cap, no sentence twice, no two links in a row the same, each block with something to tell
+   in the card's order, and nothing said that is not on the card (each word of a line is the card's, the name's or the link words') ----- */
+function atCardWords(card,story,hero,lang,parts){var out=[];var push=function(v){if(v==null)return;if(Array.isArray(v))v.forEach(push);else if(typeof v==="object")Object.keys(v).forEach(function(k){if(k!=="id")push(v[k])});else out.push(String(v))};
+  card.forEach(function(b){push(blockSays(b,lang))});(story||[]).forEach(function(r){var s=atRowSays(r,lang);push([s.text,s.lead,s.cap,s.title])});if(hero)push([wordIn(hero.title,lang),wordIn(hero.line||UI.line,lang)]);
+  return parts?out:out.join(" ")}
+function atLinkWords(lang){return Object.keys(S.tx).filter(function(k){return/^at_/.test(k)}).map(function(k){return wordIn(S.tx[k],lang)}).join(" ")}
+function atCheck(steps,lang,src){var r=[],ok=function(name,cond,why){r.push({rule:name,ok:!!cond,why:cond?"":why})},cap=src.cap,tc=src.teaserCap,t0=steps[0]||{},tt=t0.text||"";
+  var name=src.name||"";ok("teaser",t0.act==="teaser"&&t0.ref==="hero"&&atSentences(tt).length<=2&&atNorm(tt).indexOf(atNorm(name.replace(/^(the|o|a|os|as)\s+/i,"")))>=0&&/\d|minute|minuto|short|curta/i.test(tt),"step 0 is not the teaser at the hero, with the name and the minutes (or a short tour) in two sentences at most");
+  var over=steps.filter(function(s,i){return atWords(s.text)>(i===0?tc:cap+12)});ok("cap",!over.length,over.length+" line"+(over.length>1?"s":"")+" over the cap: "+over.map(function(s){return"“"+String(s.text).slice(0,40)+"…”"}).join(", "));
+  var seen={},twice=[];steps.forEach(function(s){atSentences(s.text).forEach(function(x){var k=atNorm(x);if(k&&seen[k])twice.push(x);seen[k]=1})});ok("twice",!twice.length,"said twice: “"+twice.join("”, “")+"”");
+  var ls=steps.filter(function(s){return s.at&&s.at.link}).map(function(s){return s.at.link}),rep=ls.filter(function(l,i){return i&&ls[i-1]===l});ok("links",!rep.length,"the same link twice in a row: “"+rep.join("”, “")+"”");
+  var want=src.card.filter(function(b){var k=AT_RULES[b.kind];return k&&(src.rules[b.kind]||k.opts[0][0])!=="skip"}).map(function(b){return b.id}),got=[];steps.forEach(function(s){if(s.at&&s.at.block&&got.indexOf(s.at.block)<0)got.push(s.at.block)});
+  var miss=want.filter(function(id){return got.indexOf(id)<0&&!(steps.said||{})[id]}),order=got.filter(function(id){return want.indexOf(id)>=0}).join()===want.filter(function(id){return got.indexOf(id)>=0}).join();
+  var skipT=steps.filter(function(s){return s.at&&s.at.block&&want.indexOf(s.at.block)<0});
+  ok("blocks",!miss.length&&order&&!skipT.length,(miss.length?"no step for "+miss.map(function(id){return atBlockName(byId(src.card,id))}).join(", "):"")+(order?"":" not in the card's order")+(skipT.length?" a skipped kind told: "+skipT.map(function(s){return s.at.kind}).join(", "):""));
+  var have=" "+atNorm(atCardWords(src.card,src.story,src.hero,lang)+" "+name+" "+atLinkWords(lang))+" ",stray=[];
+  steps.forEach(function(s){atNorm(s.text).split(" ").forEach(function(w){if(w&&!/^\d+$/.test(w)&&have.indexOf(" "+w+" ")<0&&stray.indexOf(w)<0)stray.push(w)})});
+  ok("card",!stray.length,"words not on the card: "+stray.slice(0,8).join(", "));
+  /* round 16b: no fact twice. Each sentence (a list's facts and events each, split at , and ;) with fact keys must bring one not said
+     before (the point's name counts as said by the teaser, for a list's item); a Quick Facts item's keys must not all come again in one
+     later unit (the fuller telling is the later one's) */
+  var nk=atNameKeys(name,lang),known={},units=[],twiceF=[],again=[];
+  steps.forEach(function(s,i){var item=s.at&&(s.at.kind==="Quick Facts"||s.at.kind==="Timeline");atSentences(s.text).forEach(function(x){(item?x.split(/[;,]\s+/):[x]).forEach(function(u){units.push({i:i,t:u,qf:item&&s.at.kind==="Quick Facts",k:atFactKeys(u,lang,{proper:src.proper,not:item?null:nk})})})})});
+  nk.forEach(function(k){known[k]=1});units.forEach(function(u){if(u.i>0&&u.k.length&&u.k.every(function(k){return atKnown(known,k)}))twiceF.push(u.t);u.k.forEach(function(k){known[k]=1})});
+  units.forEach(function(u,j){if(!u.qf||!u.k.length)return;if(units.slice(j+1).some(function(v){return v.i>u.i&&u.k.every(function(k){return v.k.indexOf(k)>=0})}))again.push(u.t)});
+  ok("facts",!twiceF.length&&!again.length,(twiceF.length?"a fact said twice: “"+twiceF.join("”, “")+"”":"")+(again.length?(twiceF.length?"; ":"")+"a fact told again later: “"+again.join("”, “")+"”":""));return r}
+
+/* ----- a point's tour: its source, the steps made from its card (with the stored AI lines), its minutes ----- */
+function atTour(poi){poi=poi||S.m&&S.m.poi||"painting";return S.tours[poi]=S.tours[poi]||{src:"card"}}
+function atSrc(poi){var t=atTour(poi);return t.src==="written"&&(t.written||poi===(S.m&&S.m.poi||"painting")&&!atIsGen(S.guideSteps))?"written":"card"}
+function atIsGen(a){return!!(a&&a.length&&a.every(function(s){return s.act==="intro"||s.at&&s.at.gen}))}
+function atBlockName(b){return b?"the "+b.kind:"a block no longer on the card"}
+function atOpts(poi,lang){var p=pointOf(poi),hero=p.hero||{},cfg=S.guideCfg,proper=atProper(atCardWords(p.card||[],p.story||[],hero,lang,true));
+  return{name:wordIn(hero.title,lang),line:wordIn(hero.line||(poi==="painting"?UI.line:null),lang),says:function(b){return blockSays(b,lang)},W:function(k){return wordIn(S.tx[k],lang)},
+    rules:cfg.atRule,cap:+cfg.atCap,teaserCap:+cfg.atTeaserCap,storyMax:+cfg.atStoryMax,hook:cfg.atHook,speed:typeof guideSpeed==="function"?guideSpeed():1,lowerOk:function(w){return!proper[w]},proper:proper,
+    card:p.card||[],story:p.story||[],hero:hero}}
+function atHash(o){return hashOf(o)}
+/* the tour made from a point's card, in every language (EN's steps, each language's line), with its stored AI lines while the box is ticked */
+function atSteps(poi,raw){poi=poi||S.m&&S.m.poi||"painting";var p=pointOf(poi),langs=langCodes(),by={};
+  langs.forEach(function(l){by[l]=tourFromCard(p.card||[],p.story||[],l,atOpts(poi,l))});var base=by.en||by[langs[0]],ai=atTour(poi).ai||{};
+  var out=base.map(function(st){var t={};langs.forEach(function(l){var m=by[l].filter(function(x){return x.id===st.id})[0];t[l]=m?m.text:st.text});
+    var s=Object.assign({},st,{text:t,at:Object.assign({},st.at,{tpl:t})}),a=ai[st.id];
+    if(!raw&&S.guideCfg.autoAI&&a&&!a.off&&a.base===atHash(t)&&langs.some(function(l){return a[l]&&a[l]!==t[l]})){s.text={};langs.forEach(function(l){s.text[l]=a[l]||t[l]});s.at.ai=true;if(s.act==="read")s.act="show"}return s});
+  out.skipped=base.skipped;out.said=base.said;return out}
+/* the open point's tour as the phone plays it: its written tour, or the one made from its card (made again when no tour plays) */
+function atActivate(){if(G.on||S.fullSteps||S.howSaved)return;var poi=S.m&&S.m.poi||"painting",t=atTour(poi);
+  if(!atIsGen(S.guideSteps))t.written=S.guideSteps;
+  if(t.src==="written"&&t.written){if(S.guideSteps!==t.written)S.guideSteps=t.written}else S.guideSteps=atSteps(poi)}
+on("point.opened",function(id,from){var ft=atTour(from);if(!atIsGen(S.guideSteps))ft.written=S.guideSteps;var t=atTour(id);if(!t.written&&t.src==="written")t.src="card";
+  S.guideSteps=t.src==="written"&&t.written?t.written:atSteps(id);S.sel.gstep=null});
+on("renderPhone.before",function(){atActivate()});
+on("tourMinutes.answer",function(id){var poi=id||S.m&&S.m.poi||"painting";if(!POINTS[poi])return;if(poi===(S.m&&S.m.poi||"painting")?atSrc(poi)==="written":atTour(poi).src==="written"&&atTour(poi).written)return;
+  return atMins(atSecs(atSteps(poi).map(function(s){return L(s.text)}),typeof guideSpeed==="function"?guideSpeed():1))});
+/* a demo plays the tour made from the card even where the written one is the point's: for that tour only */
+on("startTour.before",function(){if(!G.atForce||S.howSaved)return;var poi=S.m&&S.m.poi||"painting";if(!atIsGen(S.guideSteps)){atTour(poi).written=S.guideSteps;S.guideSteps=atSteps(poi);G.atSwapped=true}});
+on("stopTour.after",function(){G.atForce=false;if(G.atSwapped){G.atSwapped=false;var t=atTour();if(t.written)S.guideSteps=t.written}});
+/* Ask Azu and a step's name on another point's card: its blocks' own words (the demo point keeps its corpus) */
+on("corpus.list",function(out){var poi=S.m&&S.m.poi||"painting";if(poi==="painting")return out;
+  return out.filter(function(c){return c.view!=="card"&&c.view!=="story"}).concat(S.card.map(function(b){var w=blockSays(b,S.lang),bits=[];(function walk(v){if(v==null)return;if(Array.isArray(v))v.forEach(walk);else if(typeof v==="object")Object.keys(v).forEach(function(k){walk(v[k])});else if(typeof v==="string")bits.push(v)})(w);
+    return{ref:"b:"+b.id,view:"card",title:b.kind,text:bits.join(" ")}}))});
+
+/* ----- Make it mine, Regenerate this step, the changed blocks, Use the template line ----- */
+function atMine(go){var poi=S.m&&S.m.poi||"painting",t=atTour(poi),has=t.written&&t.written.length&&!atIsGen(t.written);
+  if(has&&!go){S.atDecide=poi;renderEditor();return}S.atDecide=null;var gen=atSteps(poi);
+  var w=gen.map(function(s){var c=JSON.parse(JSON.stringify(s));c.at.gen=false;c.at.base=JSON.parse(JSON.stringify(c.text));delete c.at.ai;return c});t.written=w;t.src="written";t.made=true;t.dismissed=[];S.guideSteps=w;S.sel.gstep=null;renderAll(true)}
+function atRegen(id){var st=byId(S.guideSteps,id);if(!st||!st.at)return;var g=atSteps().filter(function(x){return x.at.key===st.at.key})[0];
+  if(!g){S.atNote="“"+(L(st.text)||"").slice(0,30)+"…”: its block is no longer told by the card's rules, so the step stays as it is.";renderEditor();return}
+  st.text=JSON.parse(JSON.stringify(g.text));st.act=g.act;st.view=g.view;st.ref=g.ref;if(g.wait)st.wait=g.wait;else delete st.wait;st.at.base=JSON.parse(JSON.stringify(st.text));S.atNote=null;renderAll(true)}
+function atEdited(st){return!!(st.at&&st.at.base&&JSON.stringify(st.text)!==JSON.stringify(st.at.base))}
+/* the blocks with something to tell that a made tour does not hold (and were not dismissed) */
+function atNewBlocks(){var poi=S.m&&S.m.poi||"painting",t=atTour(poi);if(!t.made||atSrc(poi)!=="written")return[];var w=S.guideSteps,dis=t.dismissed||[];
+  var inT=function(id){return w.some(function(s){return s.at&&s.at.block===id||s.ref==="b:"+id})};
+  var gen=atSteps(poi,true),ids=[];gen.forEach(function(s){var b=s.at&&s.at.block;if(b&&ids.indexOf(b)<0&&!inT(b)&&dis.indexOf(b)<0)ids.push(b)});return ids.map(function(id){return byId(S.card,id)}).filter(Boolean)}
+function atAddNew(){var add=atNewBlocks(),gen=atSteps(null,true),w=S.guideSteps,order=S.card.map(function(b){return b.id});
+  add.forEach(function(b){var mine=gen.filter(function(s){return s.at.block===b.id}).map(function(s){var c=JSON.parse(JSON.stringify(s));c.at.gen=false;c.at.base=JSON.parse(JSON.stringify(c.text));return c});
+    var at=order.indexOf(b.id),j=-1;w.forEach(function(s,i){var bi=s.at&&s.at.block?order.indexOf(s.at.block):s.ref&&s.ref.indexOf("b:")===0?order.indexOf(s.ref.slice(2)):-1;if(bi>=0&&bi<at)j=i});
+    if(j<0)j=0;var end=w.findIndex(function(s){return s.act==="end"});var ins=Math.min(j+1,end<0?w.length:end);Array.prototype.splice.apply(w,[ins,0].concat(mine))});renderAll(true)}
+
+/* ----- Make it more fluid, entertaining and human with AI (the developer, 2026-11-12): one box for every automatic tour. The Editor (never the
+   app) asks the model Ask Azu is set to for each tour's teaser, links and long summaries in Azu's voice, from the card's words only; the
+   answer is stored as that tour's lines (S.tours[point].ai, each with the template line it rewrote: a changed card brings the template
+   back), so the visitor hears stored words. A line with a new name or number, or over its cap, keeps the template. No model: the row
+   says so and the template stays ----- */
+function atAIWant(st){return st.act==="teaser"||st.act==="end"||!!(st.at&&(st.at.link||st.at.cut))}
+function atAIRun(){if(!S.guideCfg.autoAI)return;if(typeof sampleFn!=="function"||!sampleFn){S.atAINote="No model on this page (offline, or no key for Ask Azu's model): the template tours stay.";renderEditor();return}
+  var pts=Object.keys(POINTS),left=pts.length,res={lines:0,kept:0,why:[]};S.atAINote="Asking the model for "+pts.length+" tours…";S.atAIBusy=true;renderEditor();
+  pts.forEach(function(poi){var gen=atSteps(poi,true),p=pointOf(poi),want=gen.filter(atAIWant),src={en:atCardWords(p.card||[],p.story||[],p.hero,"en"),pt:atCardWords(p.card||[],p.story||[],p.hero,"pt")};
+    var prompt="You are Azu, the warm, lively guide of a heritage app. Rewrite these lines of a narrated tour of "+wordIn((p.hero||{}).title,"en")+" so they sound fluid, entertaining and human, spoken aloud. Use ONLY the facts in the CARD below: never add a name, a date, a number or a fact it does not have. Keep each line's meaning, its instructions to the visitor (tap, drag) and its length (at most "+S.guideCfg.atCap+" words; the teaser "+S.guideCfg.atTeaserCap+", two sentences, with the minutes it says). European Portuguese for pt. Answer with JSON only: {\"steps\":[{\"id\":\"…\",\"en\":\"…\",\"pt\":\"…\"}]}.\n\nCARD (en): "+src.en+"\nCARD (pt): "+src.pt+"\n\nLINES:\n"+JSON.stringify(want.map(function(s){return{id:s.id,en:s.text.en,pt:s.text.pt}}));
+    var done=function(){if(--left>0)return;S.atAIBusy=false;S.atAINote="Rewritten by the model: "+res.lines+" line"+(res.lines===1?"":"s")+" in "+pts.length+" tours"+(res.kept?"; "+res.kept+" kept as the template ("+res.why.slice(0,3).join("; ")+")":"")+". Each step shows its template line beside it.";renderAll(true)};
+    Promise.resolve().then(function(){return sampleFn(prompt,{modelTier:"quick"})}).then(function(r){var txt=String(r&&r.text||""),m=txt.indexOf("{"),j=JSON.parse(txt.slice(m,txt.lastIndexOf("}")+1)),ai={};
+      (j.steps||[]).forEach(function(x){var st=byId(want,x.id);if(!st||!x.en||!x.pt)return;var cap=st.act==="teaser"?+S.guideCfg.atTeaserCap:+S.guideCfg.atCap+12,nw=newTokens([x.en,x.pt].join(" "),{en:src.en+" "+st.text.en+" "+atLinkWords("en"),pt:src.pt+" "+st.text.pt+" "+atLinkWords("pt")});
+        if(nw.length||atWords(x.en)>cap||atWords(x.pt)>cap){res.kept++;res.why.push((nw.length?"new words: "+nw.slice(0,3).join(", "):"over its cap"));return}ai[x.id]={base:atHash(st.text),en:String(x.en),pt:String(x.pt)};res.lines++});
+      atTour(poi).ai=ai;done()}).catch(function(e){res.why.push("the model did not answer for "+(POINTS[poi].label||poi)+" ("+(e&&e.code||e&&e.message||"error")+")");res.kept+=want.length;done()})})}
+on("setOpt.answer",function(key,v){if(key==="@guideCfg.autoAI"){S.guideCfg.autoAI=v==="true";if(S.guideCfg.autoAI)atAIRun();else S.atAINote=null;renderAll(true);return true}
+  var m=/^@tours\.([^.]+)\.src$/.exec(key);if(!m)return;var t=atTour(m[1]);if(v==="written"&&!t.written&&atIsGen(S.guideSteps)){S.atNote="This point has no written tour yet: Make it mine copies the one from its card.";renderEditor();return true}
+  if(m[1]===(S.m&&S.m.poi||"painting")&&!atIsGen(S.guideSteps))t.written=S.guideSteps;t.src=v;S.atNote=null;atActivate();renderAll(true);return true});
+
+/* ----- the Editor: Guide › 2 · The tour › Tour from the card; the same list in Specific Marker › 3 · Guide script ----- */
+function atRuleLabel(k,v){var o=(AT_RULES[k]||{opts:[]}).opts.filter(function(x){return x[0]===v})[0];return o?o[1]:v}
+function atStepBlock(st){if(st.ref==="hero")return st.act==="end"?"The end (on the hero)":"The hero · the teaser";var b=st.at&&st.at.block&&byId(S.card,st.at.block);
+  if(st.ref.indexOf("r:")===0){var r=byId(S.story,st.ref.slice(2)),i=S.story.indexOf(r);return"The Story · page row "+(i+1)}return b?b.kind:st.ref}
+function atChecksHtml(poi){var gen=atSteps(poi,true),rows=langCodes().map(function(l){var st=gen.map(function(s){return Object.assign({},s,{text:s.text[l]})});st.said=gen.said;return{l:l,r:atCheck(st,l,Object.assign(atOpts(poi,l),{rules:S.guideCfg.atRule}))}});
+  var bad=[];rows.forEach(function(x){x.r.forEach(function(c){if(!c.ok)bad.push(x.l.toUpperCase()+" · "+c.why)})});
+  return'<div class="note '+(bad.length?"warn":"atok")+'">'+(bad.length?"<b>Checks:</b> "+bad.map(esc).join("<br>"):"<b>Checks, EN and PT:</b> the teaser first, at the hero · every line under its cap · no sentence twice · no fact twice · no link twice in a row · every block with something to tell, in the card's order · only the card's words and the link words.")+'</div>'}
+function atListHtml(where){var poi=S.m&&S.m.poi||"painting",gen=atSteps(poi),secs=0,nm=POINTS[poi]&&POINTS[poi].label||poi,t=atTour(poi);
+  var h='<div class="note">The tour made from '+esc(L(pointOf(poi).hero.title))+'\'s card: '+gen.length+' steps, '+(tourMinutes(poi)<2?"a short tour (under 2 minutes)":"about "+tourMinutes(poi)+" min")+'. Read only: <b>Make it mine</b> copies it into the written tour, to edit each step\'s words, what it does, keep or skip, and its order.</div>';
+  if(S.atDecide===poi){var n=(t.written||[]).length;h+='<div class="decide"><b>Replace the '+n+' written steps of '+esc(L(pointOf(poi).hero.title))+' with the '+gen.length+' made from its card?</b><span>The written tour is kept nowhere else; the card\'s tour stays here, made again from the card.</span><div class="btnrow"><button class="ubtn sm" type="button" data-at="mine-go">Replace the written tour</button><button class="del" type="button" data-at="mine-no">Keep the written tour</button></div></div>'}
+  h+='<div class="btnrow"><button class="ubtn sm" type="button" data-at="mine">Make it mine</button></div>';
+  h+='<table class="tbl attbl"><thead><tr><th style="width:22px">#</th><th style="width:24%">Block</th><th style="width:62px">Does</th><th>Says</th><th style="width:58px">Length</th></tr></thead><tbody>'+gen.map(function(st,j){var tx=L(st.text),w=atWords(tx),s=Math.round(atSecs([tx],typeof guideSpeed==="function"?guideSpeed():1));
+    var ai=st.at.ai?'<div class="atai-was"><small>Template line</small> '+esc(L(st.at.tpl))+' <button class="del" type="button" data-at="tpl|'+esc(st.id)+'">Use the template line</button></div>':"";
+    var lk=st.at.link?'<div class="atlnk"><small>Link</small> “'+esc(st.at.link)+'” <span>· '+esc(st.at.ls||"from its block")+'</span></div>':"";
+    return'<tr data-atstep="'+esc(st.id)+'"><td class="uses">'+(j+1)+'</td><td>'+esc(atStepBlock(st))+'</td><td class="uses">'+st.act+(st.wait?" · "+st.wait:"")+'</td><td>'+(st.at.ai?'<small class="atai-tag">AI</small> ':"")+esc(tx)+lk+ai+'</td><td class="uses">'+w+' w · '+s+' s</td></tr>'}).join("")+'</tbody></table>';
+  var sk=gen.skipped||[];if(sk.length)h+='<div class="note">Not in the tour: '+sk.map(function(x){return esc(x.kind)+" ("+esc(x.why.replace(/^Skip \(?|\)$/g,"")||"skipped")+")"}).join(" · ")+'. Their rule is in Guide › 2 · The tour › What each block says.</div>';
+  return h+atChecksHtml(poi)}
+function atGoneSteps(){var poi=S.m&&S.m.poi||"painting",t=atTour(poi);if(!t.made||atSrc(poi)!=="written")return[];return S.guideSteps.filter(function(s){var id=s.at&&s.at.block||(s.ref&&s.ref.indexOf("b:")===0?s.ref.slice(2):null);return id&&!byId(S.card,id)&&!s.skip})}
+function atNoticeHtml(){var nb=atNewBlocks(),gone=atGoneSteps(),gh=gone.length?'<div class="note warn">'+gone.length+' step'+(gone.length===1?"'s block is":"s' blocks are")+' no longer on the card: '+gone.map(function(s){return esc(s.at&&s.at.kind?"the "+s.at.kind:"a block")}).join(", ")+'. '+(gone.length===1?"It stays":"They stay")+' in the tour until you skip '+(gone.length===1?"it":"them")+' (Keep › Skip) or Regenerate.</div>':"";if(!nb.length)return gh;return'<div class="decide atnew"><b>'+nb.length+' new block'+(nb.length===1?"":"s")+' not in the tour: '+nb.map(function(b){return esc(atBlockName(b).replace(/^the /,"the "))}).join(", ")+'.</b><span>The card changed after Make it mine. Add them puts their steps where the card has them.</span><div class="btnrow"><button class="ubtn sm" type="button" data-at="addnew">Add them</button><button class="del" type="button" data-at="dismiss">Dismiss</button></div></div>'+gh}
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var at=d.querySelector('[data-fo="s7voice"]');if(!at)return d.innerHTML;var poi=S.m&&S.m.poi||"painting",src=atSrc(poi),nm=L(pointOf(poi).hero.title),c=S.guideCfg;
+  var ai=!!c.autoAI,noModel=typeof sampleFn!=="function"||!sampleFn;
+  var body='<div class="note atbase">Every Detail Card gets an automatic tour made from its blocks, with no AI needed.</div>'+
+    row("With AI",'<label class="atchk"><input type="checkbox" data-set="@guideCfg.autoAI" data-v="'+(!ai)+'"'+(ai?" checked":"")+'> Make it more fluid, entertaining and human with AI</label>'+(S.atAINote||noModel?'<span class="uses atainote">'+esc(S.atAINote||"No model on this page (offline, or no key for Ask Azu's model): ticking it keeps the template tours.")+'</span>':""),
+      "Off: every automatic tour is the template made from the card's blocks (the base quality: it reads well on its own) and no model is ever called. On: the Editor asks the model Ask Azu is set to (5 · Ask Azu › The engine) to rewrite each automatic tour's teaser, links and long summaries in Azu's voice, from the card's words only; the answer is stored as that tour's lines, so a visitor hears stored words and the app never calls a model for the tour. Ticking it is the acceptance; each step keeps its template line beside it, with Use the template line. A line with a new name or number, or over its cap, keeps the template. With no key or offline, it says so here and the template tours stay.")+
+    row("Tour of "+nm,pseg("tours."+poi+".src",["written","card"],["Written","From the card (automatic)"]),"Written: the tour written for this point (Specific Marker › 3 · Guide script); a written tour always wins. From the card: the tour made from the card's blocks, the default of a point with no written tour; switch to it to compare. A point keeps its own choice.")+
+    (S.atNote?'<div class="note warn">'+esc(S.atNote)+'</div>':"")+
+    (src==="card"?atListHtml("guide"):'<div class="note">'+esc(nm)+' plays its written tour ('+S.guideSteps.length+' steps, Specific Marker › 3 · Guide script). From the card shows the tour made from its blocks.</div>'+atNoticeHtml())+
+    fo("at:rules",'What each block says <span class="sub">· one rule a kind of block, in the card\'s order; the blocks with nothing to tell are skipped</span>',null,
+      row("Header · the teaser",psel("guideCfg.atHook",AT_HOOKS),"Step 0, always, said while the hero shows, before the first block: the point's name, one hook from the card and what the tour covers with its minutes (\"In about 4 minutes: its story, a before and after, and a question to finish.\"; under 2 minutes \"In a short tour: …\"). Two sentences at most. The hook's facts are said here first: no later step says them again.")+
+      Object.keys(AT_RULES).map(function(k){return row(k,psel("guideCfg.atRule."+k,AT_RULES[k].opts),atRuleHelp(k),true)}).join(""),3)+
+    row("Words a step",pslider("guideCfg.atCap",20,60,1),"The longest a step's own words may be (40): a long text is said in its first sentences up to it (cut with … only when its first sentence is longer); a link adds a few words.")+
+    row("Teaser words",pslider("guideCfg.atTeaserCap",25,60,1),"The longest the teaser may be (45 words), its two sentences together.")+
+    row("Story pages",pslider("guideCfg.atStoryMax",2,12,1),"How many of the story's rows the tour tells (6), in order: the paragraphs read, a picture or a callout shown, a before and after tried; a heading leads the row after it.")+
+    '<div class="note">Unity: GuideTourBuilder.FromCard(card, language, rules), plain C#, run by the POI Editor and at load for a marker with no Guide Script; its link words are CardStrings (at_*). A line with no recorded clip is spoken by the TTS path Ask Azu\'s answers take (this device\'s voice, or ElevenLabs as Ask Azu › Voice of the answers says); Narration › Speaking now says which.</div>';
+  at.insertAdjacentHTML("beforebegin",comp("s7auto","the tour made from each point's card: the default with no written tour",body));
+  var f=innerOf(d,"s7auto");if(f)f.insertAdjacentHTML("beforeend",ownbar("s7auto")+ownPanels("s7auto"));return d.innerHTML});
+function atRuleHelp(k){var o=AT_RULES[k].opts;return{"Inline":"A text block is read in its own words, the words lit as they are said (a long one in its first sentences); a flip card becomes a try step: Azu says its front and waits for the flip, then reads its back.",
+  "Story":"The story opens at its title (\"Now the story.\"), then its rows are told in order, up to Story pages.","Quick Facts":"The facts as one sentence: the first two or three pairs, label and value (\"Royal home for about 250 years, lost 1 November 1755.\"), each fact not said yet and not told later by a sentence of the tour; with none left, only its link (\"First, the facts.\").",
+  "Timeline":"Its first and last events (Every date: all of them), each with its date (c. is said as Around), less those whose fact the tour said already: two or more after \"Then the dates:\", one as \"And in 1755, …\".","Before and After":"A try step: its two labels, then \"Your turn: drag across the picture.\"; the guide waits for the drag (Invite to try).",
+  "Knowledge Check":"A try step: \"Ready for a question?\", the question and \"Tap your answer.\"; the guide waits for the answer."}[k]||(o[0][0]==="skip"?"Nothing to tell by default: "+o[0][1].replace(/^Skip \(|\)$/g,"")+". Show it: a link and its words.":"Shown with its own words: "+o[0][1].toLowerCase()+".")}
+on("edMarker.html",function(h){var d=document.createElement("div");d.innerHTML=h;var m3=innerOf(d,"m3");if(!m3)return d.innerHTML;var poi=S.m&&S.m.poi||"painting";
+  if(atSrc(poi)==="card"){var tb=m3.querySelector(":scope > table.tbl"),nt=m3.querySelector(":scope > .note");var x=document.createElement("div");x.className="atlist";
+    x.innerHTML='<div class="note">This point plays the tour made from its card (Guide › 2 · The tour › Tour from the card).</div>'+atListHtml("marker");if(tb)tb.replaceWith(x);else m3.insertAdjacentElement("afterbegin",x);if(nt)nt.remove();return d.innerHTML}
+  m3.insertAdjacentHTML("afterbegin",(S.atNote?'<div class="note warn">'+esc(S.atNote)+'</div>':"")+atNoticeHtml());
+  var st=S.sel.gstep&&byId(S.guideSteps,S.sel.gstep),slot=st&&st.at&&m3.querySelector('[data-pick="gstep"][data-id="'+cssq(st.id)+'"] + tr.slot td:last-child');
+  if(slot)slot.insertAdjacentHTML("afterbegin",row("From the card",'<button class="del" type="button" data-at="regen|'+esc(st.id)+'">Regenerate this step</button>'+(atEdited(st)?' <span class="uses">edited</span>':""),"Made from "+atStepBlock(st)+" by Make it mine. Regenerate this step makes it again from the card as it is now (its words, what it does); the other steps keep their edits."));
+  m3.querySelectorAll('tr.pick[data-pick="gstep"]').forEach(function(r){var s=byId(S.guideSteps,r.dataset.id);if(s&&atEdited(s)){var c=r.querySelector("td:nth-child(3)");if(c)c.insertAdjacentHTML("beforeend",' · edited')}});return d.innerHTML});
+ed.addEventListener("click",function(e){var b=e.target.closest("[data-at]");if(!b)return;e.stopPropagation();var q=b.dataset.at.split("|"),t=atTour();
+  if(q[0]==="mine"){atMine(false);return}if(q[0]==="mine-go"){atMine(true);return}if(q[0]==="mine-no"){S.atDecide=null;renderEditor();return}
+  if(q[0]==="regen"){atRegen(q[1]);return}if(q[0]==="addnew"){atAddNew();return}
+  if(q[0]==="dismiss"){t.dismissed=(t.dismissed||[]).concat(atNewBlocks().map(function(x){return x.id}));renderEditor();return}
+  if(q[0]==="tpl"){var a=(t.ai||{})[q[1]];if(a)a.off=true;renderAll(true);return}},true);
+/* the tour's state reaches the phone's signature: the open point's tour as it would play, and the demo card's tour (every kind's rule) */
+on("modelSig.sig",function(h){if(!sigWant(/guideCfg\.(at|autoAI)|^@?tours\./))return h;var a=function(st){return st.map(function(s){return s.id+":"+s.act+":"+L(s.text)}).join("|")};
+  var src=atSrc(),cur=src==="card"?atSteps():S.guideSteps,dc=tourFromCard(S.demoCard,POINTS.painting.story||S.story,S.lang,atOpts(null,S.lang)),d0=tourFromCard(S.demoCard,[],S.lang,atOpts(null,S.lang));
+  /* round 16b: the demo card's tour without the story's rows too (the story tells most dates, so a Timeline's rule shows only there), and what each leaves out */
+  var lo=function(st){return(st.skipped||[]).map(function(x){return x.kind}).join()+"/"+Object.keys(st.said||{}).join()};
+  return h+"#at:"+src+"#"+a(cur)+"#"+tourMinutes()+"#demo:"+a(dc)+"#"+lo(dc)+"#demo0:"+a(d0)+"#"+lo(d0)});
+BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(guideCfg\\.autoAI|"));
+/* each row's demo: the tour made from the card at that block's step, the block ringed (a demo plays it where the written tour is the
+   point's); a kind not on this card or skipped: the card, and a chip saying why */
+function atRing(){var st=G.on&&S.guideSteps[G.i];return st?(st.ref==="hero"?".hero":'[data-ref="'+st.ref+'"]'):".hero"}
+function atDemoAt(kind,id){if(G.on)stopTour();var gen=atSteps(),j=id?gen.findIndex(function(s){return s.id===id}):!kind||kind==="Header"?0:gen.findIndex(function(s){return s.at&&s.at.kind===kind});
+  if(j<0){var b=S.card.filter(function(x){return x.kind===kind})[0];S.view="card";S.stop="full";renderPhone(false);if(b){var e=scr.querySelector('[data-ref="b:'+b.id+'"]');if(e)scr.scrollTop=Math.max(0,e.offsetTop-160)}
+    if(typeof gdChip==="function"){gdChip(b?kind+": skipped by its rule (nothing to tell)":"No "+kind+" on this card: its rule applies where one is");clearTimeout(G.atChipT);G.atChipT=setTimeout(function(){gdChip(null)},3200)}return}
+  G.atForce=true;S.view="card";S.stop="full";S.introSeen=true;startTour();var want=gen[j].id,k=S.guideSteps.findIndex(function(s){return s.id===want});if(k>0){stopSpeech();G.i=k;runStep()}}
+rowDemos(function(key){var m=/^guideCfg\.atRule\.(.+)$/.exec(key);if(m)return{act:function(){atDemoAt(m[1])},ringAfter:400,ring:function(){return G.on?atRing():'[data-ref^="b:"]'}};
+  if(key==="guideCfg.atHook")return{act:function(){atDemoAt("Header")},ring:".hero"};
+  if(key==="guideCfg.atTeaserCap")return{act:function(){atDemoAt("Header")},ring:".gdock|.gcap|.hero"};
+  if(key==="guideCfg.atStoryMax")return{act:function(){atDemoAt("Story")},ringAfter:400,ring:function(){return atRing()}};
+  if(key==="guideCfg.atCap"){return{act:function(){var g=atSteps(),best=g.slice(1).sort(function(a,b){return atWords(L(b.text))-atWords(L(a.text))})[0];atDemoAt(null,best&&best.id)},ringAfter:400,ring:function(){return atRing()}}}
+  if(key==="guideCfg.autoAI")return{act:function(){atDemoAt("Header")},ring:".gdock|.gcap"};
+  if(/^tours\.[^.]+\.src$/.test(key))return{act:function(){if(G.on)stopTour();S.view="card";S.stop="full";S.introSeen=true;startTour()},ring:".gdock|.gcap"}});
+
 /* Ask about the view: the points in view as text, the middle one, the model's tools to light points and draw routes, a treasure hunt (camLayer, camSay, camAsk). */
 S.camCfg={on:true,chips:true};S.camX=.4;G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};
 COMP.s7cam=["Guide","Ask about the view"];FOCUS.s7cam=["card",".camask","closed"];
-/* the wall's points: where each sits on the wall's picture (u, v: 0-1), its year when known, and whether it has a card */
-S.wallPois=[{id:"painting",name:T("Ribeira Palace","Paço da Ribeira"),u:.46,v:.52,year:1500,card:true},{id:"torreao",name:T("The Torreão","O Torreão"),u:.333,v:.44,year:1580},
-  {id:"river",name:T("The Tagus and its ships","O Tejo e os seus navios"),u:.06,v:.55},{id:"square",name:T("Terreiro do Paço","Terreiro do Paço"),u:.40,v:.78,year:1500},
+/* the wall's points: where each sits on the wall's picture (u, v: 0-1), its year when known, and whether it has a card (guidance round 16:
+   the Torreão, the Terreiro do Paço and the Tagus have theirs, core/content.js's POINTS, each with its tour made from it) */
+S.wallPois=[{id:"painting",name:T("Ribeira Palace","Paço da Ribeira"),u:.46,v:.52,year:1500,card:true},{id:"torreao",name:T("The Torreão","O Torreão"),u:.333,v:.44,year:1580,card:true},
+  {id:"river",name:T("The Tagus and its ships","O Tejo e os seus navios"),u:.06,v:.55,card:true},{id:"square",name:T("Terreiro do Paço","Terreiro do Paço"),u:.40,v:.78,year:1500,card:true},
   {id:"castle",name:T("The city on the hill","A cidade na colina"),u:.62,v:.45},{id:"arcade",name:T("The arcades","As arcadas"),u:.80,v:.70}];
 /* a point on the screen, through the camera (camGeom: the wall's picture as the phone sees it); a drag on the wall moves it, as moving the phone does */
 function poiScreen(p){var g=camGeom();return{x:g.ox+p.u*g.dw,y:g.oy+p.v*g.dh}}
@@ -6125,7 +6734,7 @@ ph.addEventListener("click",function(e){var t=e.target.closest("[data-camask],[d
   if(t.dataset.camask){if(!G.cam.open){G.cam.open=true;camLayer();emit("view.opened","the pill");return}listen(false);return}
   if(t.dataset.cchip){var k=t.dataset.cchip;camAsk(TXT("cam_chip_"+k),sampleFn&&k!=="kids"?null:k);if(sampleFn&&k!=="kids")G.cam.lastChip=k;return}
   var id=t.dataset.cpin;if(G.cam.hunt){if(id===G.cam.hunt){G.cam.hunt=null;haptic();camLight([id]);camSay(TXT("cam_found"));emit("hunt.found",id)}else{G.cam.answer=TXT("cam_not_it");camLayer()}return}
-  var p=S.wallPois.filter(function(x){return x.id===id})[0];if(p&&p.card){G.cam.open=false;S.stop="half";renderPhone(false);emit("card.opened","pin")}},true);
+  var p=S.wallPois.filter(function(x){return x.id===id})[0];if(p&&p.card){G.cam.open=false;pointOpen(p.id);S.stop="half";renderPhone(false);emit("card.opened","pin")}},true);
 ph.addEventListener("submit",function(e){var f=e.target.closest(".ca-form");if(!f)return;e.preventDefault();e.stopPropagation();var i=f.querySelector("#caq");if(i&&i.value.trim()){var q=i.value;i.value="";camAsk(q)}},true);
 /* a drag on the wall pans the camera (the Lab's stand-in for moving the phone) */
 var camDrag=null;ph.addEventListener("pointerdown",function(e){if(S.stop!=="closed"||S.view!=="card"||e.target.closest(".camask,.cpin,.mk,#ptool,button"))return;camDrag={x:e.clientX,cx:S.camX}},true);
@@ -7575,8 +8184,10 @@ function gdLineKey(it,returning,slots){slots=slots||{};var a=slots.aud!==undefin
   var k=returning&&it.saysBack&&gdHasWords(it.saysBack)?it.saysBack:ak&&gdHasWords(ak)?ak:it.says;
   if(Array.isArray(k)){if(slots.card&&it.saysCard&&it.cardLine!==false)k=it.saysCard;else if(it.pick==="least"&&k.length){var sn=slots.seen||{},best=null;k.forEach(function(x){var c=+(sn[x]||0);if(!best||c<best.c)best={k:x,c:c}});k=best.k}else k=k[(+slots.n||0)%k.length]}
   return k}
-function gdLine(it,returning,slots){slots=slots||{};var k=gdLineKey(it,returning,slots);if(!k)return"";
-  return nameIn(nameIn(TXT(k),"{thing}",slots.thing||""),"{point}",slots.point||"").replace(/\{year\}/g,slots.year!=null?slots.year:"").replace(/\{min\}/g,slots.min!=null?slots.min:"").replace(/\{button\}/g,S.guideCfg.gbIcon==="star"?"✦":TXT("gb_label"))}
+/* round 16b (the developer): a tour under 2 minutes is offered as a short one, with no minutes: a line with a {min} slot has its "_short"
+   word (gd_tourof_short: "A short tour of {point}?"), used when the tour is under 2 minutes */
+function gdLine(it,returning,slots){slots=slots||{};var k=gdLineKey(it,returning,slots);if(!k)return"";if(slots.min!=null&&+slots.min<2&&gdHasWords(k+"_short"))k=k+"_short";
+  return nameIn(nameIn(TXT(k),"{thing}",slots.thing||""),"{point}",slots.point||"").replace(/\{year\}/g,slots.year!=null?slots.year:"").replace(/\{min\}/g,slots.min!=null?slots.min:"").replace(/\{button\}/g,S.guideCfg.gbIcon==="star"?"✦":TXT("gb_label")).replace(/\b1 (minute|minuto)s\b/g,"1 $1")}
 /* a word key with words in the visitor's language (an empty line falls back to Says) */
 function gdHasWords(k){var o=S.tx[k];return!!(o&&String(L(o)||"").trim())}
 /* the read-back of an item, in words (study 3.2): "Tap a marker · App › The start · when a marker is in view and the phone is still ·
@@ -8334,7 +8945,7 @@ function gdInMiddle(x,y){var W=ph.offsetWidth,H=ph.offsetHeight;return x>=W/3&&x
    middle with its tour (a point with a card has one) */
 function gdGbtn(){if(S.view!=="card"||G.on)return null;var g=ph.querySelector(".gbtn-wrap:not(.intour) .gbtn");if(!g||!g.getClientRects().length)return null;var B=gdPR(g);return{name:"the ✦",x:(B.l+B.r)/2,y:(B.t+B.b)/2,middle:false}}
 function gdCentral(){if(S.view!=="card"||S.stop!=="closed"||typeof camView!=="function")return null;var c=camView().central,W=ph.offsetWidth,H=ph.offsetHeight;
-  if(!c||c.x<40||c.x>W-40||c.y<90||c.y>H-170)return null;return{id:c.id,name:c.name,x:c.x,y:c.y,middle:c.where==="middle",tour:!!c.card,min:c.card?tourMinutes():null}}
+  if(!c||c.x<40||c.x>W-40||c.y<90||c.y>H-170)return null;return{id:c.id,name:c.name,x:c.x,y:c.y,middle:c.where==="middle",tour:!!c.card,min:c.card?tourMinutes(c.id):null}}
 /* the moment, as the scheduler reads it */
 function gdOnWall(){return S.view==="card"&&S.stop==="closed"&&!G.on}
 /* on a card: the sheet at Half or Full, or one of its pages (never the wall, Peek or the Demo Components page): where the cues live */
@@ -8387,7 +8998,7 @@ function gdSlotsOf(it,V,c,items){if(it.ptJokes)return{id:it.point,point:it.point
   var nn=gdEverOf(V,it.id).shown||0;
   if(it.about==="marker"){var mk=c===undefined&&S.view==="card"?gdMarker():null;return mk?{id:mk.id,point:mk.name,year:gdYearOf(mk.id),n:nn}:{n:nn}}
   if(it.about!=="middle")return{n:nn};if(c===undefined)c=gdCentral();if(c&&c.tour)return{id:c.id,point:c.name,min:c.min,year:gdYearOf(c.id),n:nn};
-  var p=(S.wallPois||[]).filter(function(x){return x.card})[0];return{id:p&&p.id,point:p?L(p.name):"",min:tourMinutes(),year:p?gdYearOf(p.id):"",n:nn}}
+  var p=(S.wallPois||[]).filter(function(x){return x.card})[0];return{id:p&&p.id,point:p?L(p.name):"",min:tourMinutes(p&&p.id),year:p?gdYearOf(p.id):"",n:nn}}
 /* spoken (_3.8 decision 2): App as a bubble only; Content spoken once the visitor has heard the guide this visit, else a bubble */
 /* round 6: Spoken per item (As the kind / A bubble only / Spoken once the guide is heard); never while a screen reader is on (Preview & Test >
    The visitor > Screen reader on, the Lab's stand-in for VoiceOver / TalkBack): the bubble is announced politely instead */
@@ -8565,7 +9176,7 @@ function gdSimRun(sc){var items=gdItems(),base=gdCtxBase(),V=gdNewMemory(0),pois
   var poi=function(id){return pois.filter(function(p){return p.id===id})[0]};
   var onCard=function(){return w.where==="card"||w.where==="tour"},moving=function(){return now<w.moveTill};
   var marker=function(){return w.where==="wall"&&cardP?{id:cardP.id,name:L(cardP.name),x:195,y:380,d:0,middle:w.point===cardP.id}:null};
-  var central=function(){var p=w.where==="wall"&&!moving()&&w.point?poi(w.point):null;return p?{id:p.id,name:L(p.name),x:195,y:380,middle:true,tour:!!p.card,min:p.card?tourMinutes():null}:null};
+  var central=function(){var p=w.where==="wall"&&!moving()&&w.point?poi(w.point):null;return p?{id:p.id,name:L(p.name),x:195,y:380,middle:true,tour:!!p.card,min:p.card?tourMinutes(p.id):null}:null};
   var gbtn=function(){return w.where==="wall"||w.where==="card"&&w.stage>=2?{name:"the ✦",x:350,y:760,middle:false}:null};
   var cues=function(moment){var o={},st=w.where==="card"&&w.stage>=0?GD_SIM_CARD[w.stage]:null;if(st){st[2].forEach(function(k){o[k]=CUE_WHY[k]});if(moment==="open"&&st[1]==="half")o.grab=CUE_WHY.grab}return o};
   var ctxAt=function(moment){var t=-Infinity,mv=w.movedAt,tr=w.where==="tour"?{between:!!w.tour.between,step:w.tour.i,talked:(now-w.tour.talkFrom)/1000,toEnd:w.tour.i+1===w.tour.n-1}:null,oc=onCard();
@@ -9043,11 +9654,11 @@ function gdTap(){var c=G.gd.cur;if(!c)return;var it=c.item;if(c.pull&&G.gd.demo)
   if(it.tap==="view"){gdStop("tapped: Ask about the view opens","acted");G.fab.menu=false;G.cam.open=true;renderPhone(true);emit("view.opened","the tip");return}
   /* Azu's remark: a point with a card opens it and starts its tour; any other opens Ask about the view about it, the point lit */
   if(it.tap==="remark"){var pid=c.slots.id,p=(S.wallPois||[]).filter(function(x){return x.id===pid})[0];gdStop("tapped: "+(p&&p.card?"the tour of "+(c.slots.point||"the point")+" starts":"Ask about the view opens about "+(c.slots.point||"the point")),"acted");
-    if(p&&p.card){S.stop="half";renderPhone(false);emit("card.opened","Azu's remark");startTour();return}
+    if(p&&p.card){pointOpen(p.id);S.view="card";S.stop="half";renderPhone(false);emit("card.opened","Azu's remark");startTour();return}
     G.fab.menu=false;G.cam.open=true;renderPhone(true);emit("view.opened","Azu's remark");camAsk("",p&&p.year?"oldest":"what");camLight([pid]);return}
   if(it.tap==="menu"){gdStop("tapped: the ✦ menu opens","acted");gbMenu(true);return}
   if(it.tap==="hunt"){gdStop("tapped: the treasure hunt starts","acted");gdHuntGo("the hunt invitation");return}
-  if(it.tap==="tour"){gdStop("tapped: the tour of "+(c.slots.point||"the point")+" starts","acted");S.stop="half";renderPhone(false);emit("card.opened","the tour invitation");startTour();return}
+  if(it.tap==="tour"){gdStop("tapped: the tour of "+(c.slots.point||"the point")+" starts","acted");if(c.slots.id)pointOpen(c.slots.id);S.view="card";S.stop="half";renderPhone(false);emit("card.opened","the tour invitation");startTour();return}
   gdStop("tapped","acted")}
 function gdSwipe(dx){var c=G.gd.cur;if(!c)return;var b=ph.querySelector(".gdbub:not(.gd-out)");if(b){b.style.opacity="";if(!S.reduce)b.style.translate=(dx>0?1:-1)*Math.round(ph.offsetWidth*.7)+"px 0px"}
   if(c.pull){gdStop("swiped away (a demo)");return}gdStop("swiped away","dismissed")}

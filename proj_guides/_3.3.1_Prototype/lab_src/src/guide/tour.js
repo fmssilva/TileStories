@@ -17,6 +17,8 @@ var G={on:false,i:0,paused:false,waiting:false,timer:null,utter:null,words:[],mu
    one when none) as a module answers (guidance round 16: a tour made from the card, its words at the voice's speed), else the written
    tour's 3 */
 function tourMinutes(id){var m=firstAnswer("tourMinutes.answer",id);return m!==undefined?m:3}
+/* a tour's length in words (round 16b, the developer): under 2 minutes "short", from 2 its minutes ("3 min") */
+function tourLength(m){return+m<2?TXT("guide_duration_short"):fmt(TXT("guide_duration"),m)}
 function stepText(st){if(st.text)return L(st.text);var r=byId(S.story,st.ref.slice(2));return r&&r.c?L(r.c.text):""}
 /* ----- the music bed (round 11): a track that loops under the voice and ducks while Azu speaks. Music volume 0-100 % (15), Under the
    voice: how low it ducks, a share of its volume (30 %); Track: the manifest's approved tracks (../music/tracks.js: id, name, file,
@@ -91,8 +93,10 @@ function wrapWords(el){if(el.dataset.wrapped)return;var t=el.textContent,re=/\S+
 function clearGuideMarks(){scr.querySelectorAll(".gfocus").forEach(function(x){x.classList.remove("gfocus")});var c=ph.querySelector(".gcoach");if(c)c.remove();emit("clearGuideMarks.after")}
 function coach(el,kind){var c=document.createElement("div");c.className="gcoach";c.innerHTML=({flip:"&#9758; "+TXH("guide_coach_flip"),drag:"&#8596; "+TXH("guide_coach_drag"),answer:"&#9758; "+TXH("guide_coach_answer")}[kind]||TXH("guide_coach_try"));
   var r=el.getBoundingClientRect(),p=ph.getBoundingClientRect(),k=p.width/ph.offsetWidth;c.style.top=((r.top-p.top)/k+30)+"px";ph.appendChild(c)}
-function teaser(on){var h=scr.querySelector(".hero");if(!h)return;h.classList.toggle("teasing",on&&!S.reduce);
-  if(on&&!S.reduce){var imgs=[IMG.hero,IMG.g1,IMG.g3,IMG.g2],i=0;clearInterval(G.tz);G.tz=setInterval(function(){if(!G.on||G.paused)return;i=(i+1)%imgs.length;h.style.backgroundImage="url("+imgs[i]+")"},2600)}else{clearInterval(G.tz);h.style.backgroundImage="url("+IMG.hero+")"}}
+/* the teaser at the hero: its picture drifts, and the point's own pictures follow one another (heroPics, card/hero.js: the palace's four;
+   a point drawn as a crop of the wall keeps its crop, round 16b); after it, the point's own picture again (heroPaint) */
+function teaser(on){var h=scr.querySelector(".hero");if(!h)return;h.classList.toggle("teasing",on&&!S.reduce);clearInterval(G.tz);
+  var imgs=heroPics();if(on&&!S.reduce&&imgs.length>1){var i=0;G.tz=setInterval(function(){if(!G.on||G.paused)return;i=(i+1)%imgs.length;if(i)h.style.backgroundImage="url("+imgs[i]+")";else heroPaint(h)},2600)}else if(!on)heroPaint(h)}
 function renderGuide(text){["gbar","gcap","mascot","gask","gresume"].forEach(function(c){var o=ph.querySelector("."+c);if(o)o.remove()});var pt=document.getElementById("ptool");if(pt)pt.style.display=G.on?"none":"";
   if(!G.on){var nb0=document.getElementById("navbar");if(nb0&&S.view==="card")nb0.style.display=S.ctl.bar.on&&S.stop!=="peek"&&S.stop!=="closed"?"":"none"}else{
   var nb=document.getElementById("navbar");if(nb)nb.style.display="none";var lp=ph.querySelector(".locpin");if(lp)lp.remove();
@@ -112,7 +116,7 @@ function renderGuide(text){["gbar","gcap","mascot","gask","gresume"].forEach(fun
      '<form class="gform"><input id="gq" class="gin" type="text" autocomplete="off" placeholder="'+(TXH("guide_ask_placeholder"))+'"><button type="button" data-g="mic" aria-label="'+TXH("guide_ask_mic")+'">&#127908;</button><button type="submit" '+(G.busy?"disabled":"")+'>'+(G.busy?"…":(TXH("guide_ask_send")))+'</button>'+(G.busy?'<button type="button" data-g="stopask">'+TXH("guide_ask_stop")+'</button>':"")+'</form>';ph.appendChild(a)}}emit("renderGuide.after",text)}
 /* ----- hooks into the card: hero button, Guide block, gestures, take-over ----- */
 on("cardScreen.html",function(h){var d=document.createElement("div");d.innerHTML=h;
-  if(S.guideCfg.heroButton){var w=d.querySelector(".hero .w");if(w)w.insertAdjacentHTML("beforeend",'<button type="button" class="gstart" data-g="start">&#9654; '+TXH("guide_start")+' · '+esc(fmt(TXT("guide_duration"),tourMinutes()))+'</button>')}
+  if(S.guideCfg.heroButton){var w=d.querySelector(".hero .w");if(w)w.insertAdjacentHTML("beforeend",'<button type="button" class="gstart" data-g="start">&#9654; '+TXH("guide_start")+' · '+esc(tourLength(tourMinutes()))+'</button>')}
   if(S.guideCfg.block){var ab=d.querySelector('[data-ref="sec:about"] .ey');if(ab)ab.insertAdjacentHTML("afterend",'<div class="item" data-ref="b:b_guide"><button type="button" class="gblock" data-g="start"><span class="gm">'+(S.guideCfg.mascot?mascotStill():sicon("play",48))+'</span><span><b>'+(TXH("guide_block_title"))+'</b><small>'+(TXH("guide_block_line"))+'</small></span></button></div>')}
   return d.innerHTML});
 ph.addEventListener("click",function(e){var t=e.target,g=t.closest("[data-g]");

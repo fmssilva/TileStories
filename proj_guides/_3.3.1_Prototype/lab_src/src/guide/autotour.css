@@ -13,3 +13,5 @@ tr.gskipped td{opacity:.55;text-decoration:line-through}
 .attbl th:first-child{width:28px}.attbl th:last-child{width:76px}
 .atchk{font-size:12.5px;line-height:1.35}
 .attbl td:last-child{white-space:nowrap}
+/* round 16b: each step's link and its source, under its words */
+.attbl .atlnk{margin-top:3px;font-size:11px;color:var(--u-dim)}.attbl .atlnk small{font:700 9px/1 var(--mono);letter-spacing:.05em;text-transform:uppercase;margin-right:4px;color:#8FB3E8}.attbl .atlnk span{opacity:.85}
