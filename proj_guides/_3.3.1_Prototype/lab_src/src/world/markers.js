@@ -1,7 +1,7 @@
 /* The card's markers on the wall's picture, the Wall button, the markers' test scene; the scenes that act instead of asking (act: [ok, note, what it did], or a promise of it). */
 /* each marker is a place on its wall's picture (u, v: 0-1 across and down), placed with camGeom() at every paint, as the pins are.
    The palace's marker stands for its point ("painting"), so that point draws no pin while the marker shows. */
-WALLS.ribeira.markers=[{id:"painting",u:.46,v:.52,name:T("Ribeira Palace","Paço da Ribeira"),icon:"info",card:true},
+WALLS.ribeira.markers=[{id:"painting",u:.46,v:.52,name:T("Ribeira Palace","O Paço da Ribeira"),icon:"info",card:true},
   {id:"cathedral",u:.70,v:.47,name:T("Lisbon Cathedral","Sé de Lisboa"),icon:"star"}];
 WALLS.belem.markers=[];
 function wallMarkers(){return curWall().markers||[]}

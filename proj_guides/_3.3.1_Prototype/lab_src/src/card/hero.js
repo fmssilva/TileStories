@@ -1,5 +1,5 @@
 /* The hero: its content (S.hero), its height by the stop, the bar after it. */
-S.hero={title:T("Ribeira Palace","Palácio da Ribeira"),eyebrow:T("Lisbon · c. 1500 to 1755","Lisboa · c. 1500 a 1755"),line:null,fx:50,fy:50,pic:"hero",pic2:"g2"};
+S.hero={title:T("Ribeira Palace","O Paço da Ribeira"),eyebrow:T("Lisbon · c. 1500 to 1755","Lisboa · c. 1500 a 1755"),line:null,fx:50,fy:50,pic:"hero",pic2:"g2"};
 /* the hero's content (the Header page) */
 on("cardScreen.html",function(h){if(typeof inDemoCard!=="undefined"&&inDemoCard)return h;
   /* the eyebrow and the line under the title: the point's own (guidance round 16: the wall's other points have their hero), else the demo's */

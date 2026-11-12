@@ -31,7 +31,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('S.camX=.9;S.camZoom=1;camPaint();camLayer()'); await W(150);
   const cat = (await gaps())[2].find(i => i[0] === 'cathedral');
   ok('Lisbon Cathedral rides on the picture too', cat && cat[3] <= 1.5 && cat[1] > 0 && cat[1] < 360, cat);
-  ok('The markers\' names follow the language', await R('S.lang="pt";renderAll(true);var t=ph.querySelector("[data-mk=painting] b").textContent;S.lang="en";renderAll(true);t') === 'Paço da Ribeira');
+  ok('The markers\' names follow the language', await R('S.lang="pt";renderAll(true);var t=ph.querySelector("[data-mk=painting] b").textContent;S.lang="en";renderAll(true);t') === 'O Paço da Ribeira');
   // 5. the Wall switch on the preview bar
   await R('S.previewBar=true;S.view="demo";S.stop="closed";renderAll(false)'); await W(200);
   const w0 = await R('ph.querySelector(\'[data-pt="wall"]\').textContent');
