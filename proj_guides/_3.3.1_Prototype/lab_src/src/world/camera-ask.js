@@ -31,11 +31,11 @@ function camSay(t){G.cam.busy=false;G.cam.answer=t;camLayer();G.answer=t;say(t,f
 function camLight(ids){G.cam.lit=ids.filter(function(id){return S.wallPois.some(function(p){return p.id===id})});camLayer();emit("camLight.after",ids)}
 /* without the model (offline, or a preview): answers built from the same view */
 function camOffline(kind){var v=camView(),P=v.pois;if(!P.length)return TXT("cam_none");var c=v.central;
-  if(kind==="what"){camLight(P.map(function(p){return p.id}));return fmt(TXT("cam_what_mid"),c.name)+" "+P.slice(1).map(function(p){return fmt(TXT("cam_what_at"),TXT("cam_place_"+p.where.replace(" ","_")),p.name)}).join(" ")}
-  if(kind==="story"){camLight([c.id]);var r=c.card?byId(S.story,"r2"):null;return r?L(r.c.text):fmt(TXT("cam_story_none"),c.name)}
+  if(kind==="what"){camLight(P.map(function(p){return p.id}));return nameIn(TXT("cam_what_mid"),"{0}",c.name)+" "+P.slice(1).map(function(p){return fmt(nameIn(TXT("cam_what_at"),"{1}",p.name),TXT("cam_place_"+p.where.replace(" ","_")))}).join(" ")}
+  if(kind==="story"){camLight([c.id]);var r=c.card?byId(S.story,"r2"):null;return r?L(r.c.text):nameIn(TXT("cam_story_none"),"{0}",c.name)}
   if(kind==="route"){var rt=P.slice().sort(function(a,b){return a.x-b.x}).map(function(p){return p.id});G.cam.route=rt;camLight(rt);return TXT("cam_route")+" "+rt.map(function(id,i){return(i+1)+". "+P.filter(function(p){return p.id===id})[0].name}).join(" · ")}
-  if(kind==="oldest"){var o=P.filter(function(p){return p.year}).sort(function(a,b){return a.year-b.year})[0];if(!o)return TXT("cam_none");camLight([o.id]);return fmt(TXT("cam_oldest"),o.name,o.year)}
-  if(kind==="kids"){var h=camHuntPick(P);G.cam.hunt=h.id;G.cam.lit=[];return fmt(TXT("cam_hunt"),h.name)}
+  if(kind==="oldest"){var o=P.filter(function(p){return p.year}).sort(function(a,b){return a.year-b.year})[0];if(!o)return TXT("cam_none");camLight([o.id]);return nameIn(TXT("cam_oldest"),"{0}",o.name).replace("{1}",o.year)}
+  if(kind==="kids"){var h=camHuntPick(P);G.cam.hunt=h.id;G.cam.lit=[];return nameIn(TXT("cam_hunt"),"{0}",h.name)}
   return""}
 /* the point the treasure hunt asks for (the Tagus, else the last in view): also named by the guidance's hunt invitation ({thing}) */
 function camHuntPick(P){return P.filter(function(p){return p.id==="river"})[0]||P[P.length-1]||null}

@@ -199,6 +199,17 @@ function TXH(k){return esc(TXT(k))}
 var LANGPICK=[["fr","Français"],["es","Español"],["de","Deutsch"],["it","Italiano"]];
 function langCodes(){return S.langs.list.map(function(l){return l.code})}
 function fmt(t){var a=arguments;return String(t).replace(/\{(\d)\}/g,function(m,i){return a[+i+1]!=null?a[+i+1]:m})}
+/* guidance round 15b, the developer (2026-11-11): a point's name filling a slot mid-sentence takes a lower-case article ("That's the
+   Torreão right there", "É o Torreão"); at the start of a sentence it stays as written ("The Torreão has a story"); the stored name never
+   changes (the marker's label still says "The Torreão"). nameIn is the one place a name fills a slot of the guide's words: its remarks,
+   tips and invitations (gdLine), Azu's lines (the introduction, Ask about the view's answers and its hunt, Find it on the wall). The
+   articles per language (NAME_ART): EN The (and A, An), PT O, A, Os, As (and Um, Uma, Uns, Umas). A sentence starts at the line's start
+   or after . ! ? … (an opening quote or bracket between); after a colon it goes on. Unity: the same string rule where the localized
+   string's slots are filled (CardStrings.Format's name slots) */
+var NAME_ART={en:/^(The|An?)(?=\s)/,pt:/^(Os?|As?|Uns|Umas?|Um)(?=\s)/};
+function nameMid(name,lang){var re=NAME_ART[lang||S.lang]||NAME_ART.en;return String(name==null?"":name).replace(re,function(a){return a.toLowerCase()})}
+function slotAtStart(t,i){var b=t.slice(0,i).replace(/[\s"“‘'«(¿¡]+$/,"");return!b||/[.!?…]$/.test(b)}
+function nameIn(t,slot,name,lang){t=String(t);var out="",i=0,j;while((j=t.indexOf(slot,i))>=0){out+=t.slice(i,j)+(slotAtStart(t,j)?String(name==null?"":name):nameMid(name,lang));i=j+slot.length}return out+t.slice(i)}
 Object.defineProperty(UI,"read",{get:function(){var o={};langCodes().forEach(function(c){var w=S.tx.open_row_story[c];o[c]=w?fmt(S.tx.open_row_meta[c]||S.tx.open_row_meta.en,w,fmt(S.tx.reading_minutes[c]||S.tx.reading_minutes.en,4)):""});return o}});
 Object.defineProperty(UI,"open",{get:function(){return S.tx.open_block_button}});
 Object.defineProperty(UI,"demo",{get:function(){return S.tx.test_demo_title}});

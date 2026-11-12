@@ -27,7 +27,12 @@ function gdBox(l,t,w,h){return{l:l,t:t,r:l+w,b:t+h}}
 function gdOver(a,b){var x=Math.min(a.r,b.r)-Math.max(a.l,b.l),y=Math.min(a.b,b.b)-Math.max(a.t,b.t);return x>0&&y>0?x*y:0}
 function gdSeen(e){return e&&e.getClientRects().length>0&&getComputedStyle(e).visibility!=="hidden"}
 /* the mascot beside the ✦, when there is one to show (Mascot Off: none) */
-function gdMascot(){return S.guideCfg.mascot!==false&&gbAzu()?ph.querySelector(".azfab"):null}
+function gdMascot(){return gbAzu()?ph.querySelector(".azfab"):null}
+/* round 15b, the developer (2026-11-11, 2026-11-12): any guide bubble with no Azu beside it is signed by a small ✦ in its top-left corner
+   (Mascot Off; Guide button = ✦ only with the mascot on), so a bubble with no voice and no Azu still says who speaks; not a tap target, it
+   covers no word (the words start after it). With Azu shown (beside the ✦, or the guide's Azu in a tour), nothing changes. Unity: a child
+   VisualElement of the bubble (position absolute, the ✦ sprite, picking-mode Ignore), the label's padding-left past it */
+function gdSign(){return gdMascot()||G.on&&ph.querySelector(".mascot")?"":'<i class="gdsign" aria-hidden="true">'+GBSTAR+'</i>'}
 /* what a tip must keep clear of: the words on the wall (marker and point names, Azu's remark), the markers, the ✦, the bar, the preview
    bar, and during a tour the block being told */
 function gdObstacles(){var out=[];
@@ -58,7 +63,7 @@ function gdBtnOf(it){return!it?null:it.cta?{word:it.cta,act:"card"}:it.button&&i
 function gdStays(c){return!!c&&!c.pull&&!c.cue&&(c.item.onScreen==="tap"||!!gdPrefs().stay)}
 function gdBubHtml(c){var bt=gdBtnOf(c.item),cta=bt?'<button type="button" class="gdcta" data-gdcta="'+bt.act+'">'+TXH(bt.word)+'<span aria-hidden="true">&#8250;</span></button>':"";
   var x=gdStays(c)?'<button type="button" class="gdx" data-gdx="1" aria-label="'+TXH("gd_dismiss")+'"><span aria-hidden="true">&#10005;</span></button>':"";
-  return'<button type="button" data-gdbub="1">'+(c.spoken?gdWords(c.text):esc(c.text))+'</button>'+cta+x+'<i class="gdtail"></i>'}
+  return gdSign()+'<button type="button" data-gdbub="1">'+(c.spoken?gdWords(c.text):esc(c.text))+'</button>'+cta+x+'<i class="gdtail"></i>'}
 /* the tip on the phone: its elements made once, then placed (again at each paint of the wall: the marker moves with the picture) */
 function gdPresent(c){gdClearEls();var it=c.item,az=gdMascot();
   /* a Moment: Azu's prop and bubble (as before); when it ends, the tour's next step it held goes on */
@@ -310,7 +315,7 @@ var GD_CAMOFF_SVG='<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M17.5 10
 /* the phone's own words (its request, its Settings): not the app's, so not in Languages & Terms; the Lab's stand-in says them */
 var GD_SYS={title:T("Allow the camera?","Permitir a câmara?"),allow:T("Allow","Permitir"),deny:T("Don't Allow","Não permitir"),standin:T("The phone's own request · a stand-in in the Lab","O pedido do próprio telemóvel · uma simulação no Lab"),
   back:T("Back to the app","Voltar à app"),settings:T("Settings","Definições"),access:T("Allow access to","Permitir acesso a"),camera:T("Camera","Câmara"),setin:T("The phone's Settings · a stand-in in the Lab","As Definições do telemóvel · uma simulação no Lab")};
-function gdAzuOn(){return S.guideCfg.mascot!==false&&gbAzu()}
+function gdAzuOn(){return gbAzu()}
 function gdPagesLayer(){ph.querySelectorAll(".gdpages.gd-out").forEach(function(x){x.remove()});var L=ph.querySelector(".gdpages");
   if(!L){L=document.createElement("div");L.className="gdpages";L.setAttribute("role","dialog");L.setAttribute("aria-modal","true");ph.appendChild(L)}return L}
 function gdPagesUnpaint(){var L=ph.querySelector(".gdpages:not(.gd-out)");if(!L)return;L.classList.add("gd-out");L.removeAttribute("aria-modal");setTimeout(function(){L.remove()},S.reduce?0:220)}
@@ -546,7 +551,7 @@ function gdQuizNext(){var B=G.gd.bt;if(!B||B.kind!=="finale"||B.answered==null)r
 function gdQuizScore(){var B=G.gd.bt,n=B.qs.length,r=B.right,demo=B.c&&B.c.pull&&G.gd.demo,best=demo?gdQuizBest(B.point)||{right:r,n:n}:gdQuizKeep(B.point,r,n),P=G.gd.plan;if(!demo){if(P)P.quizDone=true;G.gd.owed=null}
   var t=fmt(TXT(r===n?"tour_score_all":r===0?"tour_score_none":r*2>n?"tour_score_most":"tour_score_some"),r,n);gdBeatEye(TXT("tour_star").toUpperCase());
   /* round 13: Don't say it!'s score said once more (research 5.4, step 8) */
-  var ws=P&&P.wordScore;if(ws&&ws.n>0&&!demo)t+=" "+fmt(TXT("tour_word_callback"),ws.caught,ws.n).replace("{thing}",ws.word);
+  var ws=P&&P.wordScore;if(ws&&ws.n>0&&!demo)t+=" "+nameIn(fmt(TXT("tour_word_callback"),ws.caught,ws.n),"{thing}",ws.word);
   gdBeatBody('<div class="bt-score"><b>'+r+'<small>/'+n+'</small></b><span class="bt-best">'+esc(fmt(TXT("tour_best"),best.right,best.n))+'</span></div>',"");var p=ph.querySelector(".gdbeat .bt-line");if(p)p.textContent="";
   gdLog("event","the quiz: "+r+" of "+n+" (the best here "+best.right+" of "+best.n+")");azReact(r===n?"r-jump":"r-wink",900,"big");
   gdBeatSay(t,function(){B.stepT=setTimeout(function(){if(G.gd.bt===B)gdBeatFinish("the quiz: "+r+" of "+n,"acted")},1600)})}
@@ -709,7 +714,7 @@ function gdFindFound(F){F.state="found";var B=F.B;haptic();gdFindGlint(F.p);var 
 function gdFindGiveUp(F,why){if(F.state!=="seek")return;F.state="shown";var B=F.B,m=ph.querySelector(".mascot");clearTimeout(B.notNowT);gdBeatBody("","");var s=gdFindGlint(F.p);
   if(m&&S.guideCfg.mascot!==false){m.classList.remove("gd-onbeat");m.classList.add("gd-findto");var mw=m.offsetWidth||56,mh=m.offsetHeight||64,W=ph.offsetWidth,cx=s.x-30;if(cx-mw/2<8)cx=s.x+30;var lx=Math.min(Math.max(cx-mw/2,8),W-8-mw);m.style.right=Math.round(W-lx-mw)+"px";m.style.top=Math.round(s.y-mh-14)+"px"}
   /* round 15 (inside the phone): at the left edge Azu stood 18 px past it (its centre 30 px left of a spot held 40 px in); it takes the spot's other side there, and is kept 8 px inside. Unity: the same clamp on the walk's end */
-  gdLog("event","Find it on the wall: I give up ("+why+"): Azu shows it");var t=TXT(s.edge?"tour_find_edge_"+s.edge:"tour_find_show").replace("{thing}",B.thing||"");
+  gdLog("event","Find it on the wall: I give up ("+why+"): Azu shows it");var t=nameIn(TXT(s.edge?"tour_find_edge_"+s.edge:"tour_find_show"),"{thing}",B.thing||"");
   setTimeout(function(){if(G.gd.find!==F)return;gdBeatSay(t,function(){B.stepT=setTimeout(function(){gdFindBack(F,"shown ("+why+")",why==="I give up"?"dismissed":"ignored")},1100)})},S.reduce?0:900)}
 function gdFindLost(F){F.state="lost";var B=F.B;gdLog("event","Find it on the wall: the wall is lost (a system state wins): it ends");gdBeatBody("","");gdBeatSay(TXT("tour_find_lost"),function(){gdFindBack(F,"the wall was lost","")})}
 function gdFindEnd(F){clearInterval(F.iv);if(G.gd.find===F)G.gd.find=null;ph.querySelectorAll(".gdseek,.gdfound").forEach(function(x){x.remove()});var m=ph.querySelector(".mascot");if(m){m.classList.remove("gd-findto");m.style.right=""}}

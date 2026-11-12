@@ -184,6 +184,16 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
     check is named `[rule] <nn> <surface>` so a red one says which. `CAP=<dir>` saves every state (`<nn>_<surface>_<look>_<height>_<theme>.png`;
     with CAP every Look and theme). `MUTATE=1 node tests/test9s.js` makes the panel's question chips 36 px tall and draws Azu 170 px to the left over the
     told words, `MUTATE=1 node tests/test9sb.js` makes a beat card's chips 36 px: the checks named [44 px] (and [0 px]) turn red.
+  - *The developer's answers on the design pass, guidance round 15b* (`world/guide-button`, `guidance/present`, `core/words`' `nameIn`,
+    `guidance/catalog`, `world/camera-ask`, `guide/person`, `guide/dock`'s `azuPlace`): `tests/test9se.js` checks Mascot Off (no Azu picture
+    beside the ✦ on the card past the hero and on the wall, light and dark, Guide button = Azu only showing the ✦; the plain bubble of a tip
+    and a remark signed by a small ✦: present, inside the bubble, 0 px over its words, not a tap target, aria-hidden, and round 15's rules
+    on it; Guide button = ✦ only with the mascot on signed too; Azu beside the ✦: unchanged); a point's name mid-sentence with a lower-case article (EN and PT, a slot mid-sentence, after a colon, at
+    the start kept, a name with no article; on the page a remark about the Torreão on the wall with the point's label still "The Torreão";
+    Azu's introduction, What am I looking at? and the hunt); Azu 0 px over the words after a quick step jump (`stopSpeech();G.i=j;runStep()`),
+    6 repeats at g1, g5, g7, light and dark, once Azu stands still and 1.5 s later (`G15.azuInk`: the card's words under Azu's whole box).
+    `MUTATE=1 node tests/test9se.js` puts Azu back beside the ✦ and unsigns the bubble, writes every name as written, and never places Azu
+    again after its step's start: the checks named [mascot off], [article] and [azu] turn red. `CAP=<dir>` saves the changes at 390 px.
   - *Every Editor row's demo, guidance round 10* (`editor/demo`, the rows' modules: `editor/card-tab`, `card/controls`, `card/blocks`,
     `card/pages`, `card/states`, `card/hints`, `editor/texts`, `editor/components`, `editor/marker-tab`, `mascot/azu2d`, `guidance/editor`):
     `tests/test9n.js` checks that the self-test's NO DEMO check walks every tab and finds no row without a demo but its named exemptions

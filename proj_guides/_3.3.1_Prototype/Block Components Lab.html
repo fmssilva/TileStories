@@ -848,7 +848,7 @@ img.gzimg{transform:none!important}
 .onb-ic{flex:0 0 44px;height:44px;border-radius:14px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent2) 12%,var(--paper))}
 .onb-ic svg{width:28px;height:28px;fill:none;stroke:var(--accent2);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .onb-tx strong{display:block;font:700 17px/1.2 var(--body);color:var(--ink1)}.onb-tx small{display:block;font:400 14px/1.35 var(--body);color:var(--ink2);margin-top:3px}
-.onb-skip{appearance:none;border:0;background:none;color:var(--ink1);font:600 15px/1 var(--body);padding:14px;margin-top:4px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.onb-skip{appearance:none;border:0;background:none;color:var(--ink1);font:600 15px/1 var(--body);padding:14px;min-height:44px;margin-top:4px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .onb-note{text-align:center;color:var(--ink2);font:400 13px/1.3 var(--body)}
 .reduce .onb{animation:none}
 /* Specific Marker > 4 · Audiences: the coverage cells */
@@ -952,7 +952,9 @@ body{padding-block:8px}
 .gd-kb svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .gd-askrow{display:flex;gap:10px;align-items:center}
 .gd-form{flex:1;min-width:0;display:flex;align-items:center;gap:6px;height:52px;border-radius:26px;background:var(--field);border:1px solid var(--fieldedge);padding:0 6px 0 18px;box-sizing:border-box}
-.gd-form .gin{flex:1;min-width:0;border:0;background:transparent;outline:none;font:400 15px/1 var(--body);color:var(--ink);padding:0}
+.gd-form .gin{flex:1;min-width:0;border:0;background:transparent;outline:none;font:400 15px/1 var(--body);color:var(--ink);padding:0;align-self:stretch}
+/* round 15 (44 px): the input fills its field (52 px; 44 px in Paper glass and the Player's bar), so a tap anywhere on the field types.
+   Unity: the TextField stretched to its row (align-self: stretch, height 100 %) */
 .gd-form .gin::placeholder{color:var(--ink2);opacity:1}
 .gd-send{width:44px;height:44px;border-radius:50%;background:var(--acc)!important;color:var(--onacc)}
 .gd-form:has(.gin:placeholder-shown) .gd-send{display:none}
@@ -1003,7 +1005,12 @@ body{padding-block:8px}
 .lk-paper .gd-line .gd-bars{height:14px;gap:2px}
 .lk-paper .gd-mt{font:400 15px/20px var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lk-paper .gd-mstop{color:var(--ink)}
-.gdock.lk-paper:not(.h-mini){--surf:rgba(251,250,247,.97);left:12px;right:12px;bottom:16px;border-radius:30px;padding:24px 16px 16px;gap:12px}
+.gdock.lk-paper:not(.h-mini){--surf:rgba(251,250,247,.97);left:12px;right:12px;bottom:16px;border-radius:30px;padding:28px 16px 16px;gap:6px}
+.lk-paper .gd-handle{top:-16px}
+/* round 15: Paper glass's Open was 2-9 px too tall for the block told on a 390 x 712 phone (its last line under the panel, Open and
+   Listening: 0 px over the words told) and its handle's 44 px hit area took the top 6 px of Aa and the speaker button (44 px): its rows
+   6 px closer (12 to 6 px), its top 4 px lower (24 to 28 px) and the handle's hit area 7 px higher (its bar 7 px nearer the edge) give
+   the block 32 px and Aa its whole 44. Unity: the USS padding-top, the rows' margin and the handle's top */
 .cv.dark .gdock.lk-paper:not(.h-mini){--surf:rgba(31,29,26,.97)}
 .lk-paper .gd-head{display:flex;align-items:center;gap:10px;height:44px}
 .lk-paper .gd-head .gd-av{width:44px;height:44px}
@@ -1030,10 +1037,15 @@ body{padding-block:8px}
 .lk-ink .gd-mrow .gd-line{flex:none;display:flex;align-items:center;min-width:44px;height:44px;justify-content:center;padding:0 4px}
 .lk-ink .gd-mrow .gd-bars{height:20px}
 .lk-ink .gd-mini .gd-mpp{margin-left:4px}
-.gdock.lk-ink:not(.h-mini){left:10px;right:10px;bottom:14px;border-radius:32px;padding:34px 18px 18px;gap:14px}
+.gdock.lk-ink:not(.h-mini){left:10px;right:10px;bottom:14px;border-radius:32px;padding:34px 18px 18px;gap:14px;background-color:#1C1A21;background-image:linear-gradient(180deg,#2C2834,#16151A 55%)}
+/* round 15 (4.5:1): Ink glass at Open and Full is opaque (it was the Mini's 92 % glass: over the light card its unsaid words read 4.12:1,
+   now 5.3:1 at the panel's lightest). Unity: the Open state's USS class sets an opaque background-color and the ramp texture at alpha 1 */
 .lk-ink .gd-wrow{display:flex;align-items:flex-start;gap:12px;margin-top:4px}
 .lk-ink .gd-wrow .gd-av{width:40px;height:40px}.lk-ink .gd-wrow .gd-av svg,.lk-ink .gd-wrow .gd-av img{width:36px;height:36px}
 .lk-ink .gd-wrow .gd-tp{flex:1}
+/* round 15 (44 px): the hide chevron's 44 px hit area took the top 4 px of Read all; the chevron 12 px higher (its hit area may pass the
+   panel's edge; its drawing stays inside). Unity: its top */
+.lk-ink .gd-small{top:-6px}
 .lk-ink .gd-tp .tp-prev{font-size:14px;line-height:20px;-webkit-line-clamp:1}
 .lk-ink .gd-tp .tp-now{font-size:22px;line-height:30px;-webkit-line-clamp:3}
 .lk-ink .gd-side button{border:1px solid rgba(255,255,255,.18)}
@@ -1282,6 +1294,10 @@ body{padding-block:8px}
 .aglink b{font:700 13.5px/1.25 var(--body)}
 .aglink small{grid-column:1;font:500 12px/1.3 var(--body);opacity:.75}
 .aglink i{grid-row:1/span 2;grid-column:2;font-style:normal;font-size:20px;opacity:.6}
+/* round 15 (4.5:1): in the guide panel the cards and the source line take the panel's own colours (every Look, light and dark: 7:1 or more);
+   the wall's Ask about the view keeps the dark look above. Unity: the link card's USS reads the panel theme's variables */
+.gdock .aglink{border-color:var(--line);background:var(--chip);color:var(--ink)}.gdock .aglink small,.gdock .aglink i{opacity:1;color:var(--ink2)}
+.gdock .agsrc{opacity:1;color:var(--ink2)}
 .agchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .agchip{appearance:none;border:1px solid rgba(255,255,255,.3);background:transparent;color:#F4F1EA;font:600 13px/1 var(--body);padding:9px 12px;border-radius:999px;cursor:pointer}
 .agchip.confirm span{display:inline-block;margin-left:6px;padding:3px 8px;border-radius:999px;background:#F4F1EA;color:#1B1B1B}
@@ -1307,6 +1323,8 @@ body{padding-block:8px}
 .agscsel{max-width:270px}
 .agres td{vertical-align:top;white-space:normal}.agres td.ok{color:#7FD08A}.agres td.bad{color:#F0A49B}
 .agtrace.agvoice:empty{display:none}
+/* round 15 (4.5:1): the trace in the guide panel in the panel's colours (it was light grey on the light Looks: 1.03:1) */
+.gdock .agtrace{color:var(--ink2);border-top-color:var(--line)}
 .agtrace.agvoice{margin-top:2px;padding-top:0;border-top:0}
 /* v8v: a marker sits on its point: the circle's centre is the place in the picture, the name hangs below */
 .wall .mk{transform:translate(-50%,-23px)}
@@ -1532,6 +1550,8 @@ body{padding-block:8px}
 .gdhowc b{font:700 13.5px/1.25 var(--body)}
 .gdhowc small{grid-column:2;font:500 12px/1.3 var(--body);color:rgba(244,241,234,.8)}
 .gdhowc i{grid-row:1/span 2;grid-column:3;font-style:normal;font-size:20px;opacity:.7}
+/* round 15 (4.5:1): the Show me card in the guide panel in the panel's colours (1.04:1 in Paper glass before); its accent edge kept */
+.gdock .gdhowc{border-color:var(--acc);background:var(--chip);color:var(--ink)}.gdock .gdhowc small,.gdock .gdhowc i{opacity:1;color:var(--ink2)}.gdock .gdhowc-ic svg{fill:var(--acctx)}
 
 /* ----- round 12, Fun › On the tour: the beat card (`.gdbeat`), set on the dock in the Look's own colours: an opaque surface (it sits over
    the card; a beat plays at a seam, when no words are told), its line spoken with the word lit, chips 44 px or more, every word 4.5:1 or
@@ -5398,13 +5418,21 @@ on("runStep.before",function(){if(G.introPending&&G.i===0){G.introPending=false;
   G.tryKind=null;G.tryDone=false;G.tryWait=false;clearTimeout(G.insistT)});
 on("runStep.after",function(){
   var st=S.guideSteps[G.i];if(st&&st.act==="intro"){var m=ph.querySelector(".mascot");if(m&&!S.reduce){m.classList.add("enter");setTimeout(function(){m.classList.remove("enter")},1400)}}
-  if(st&&st.act==="try")G.tryKind=st.wait;placeStep(st)});
+  if(st&&st.act==="try")G.tryKind=st.wait;G.placedStep=-1;placeStep(st)});
 on("startTour.before",function(from){G.introPending=!from&&!S.howSaved&&(S.guideCfg.intro==="every"||(S.guideCfg.intro==="first"&&!S.introSeen));if(G.introPending)S.introSeen=true});
 
 /* ----- the block being told, placed where the guide panel never covers it: a short block at a third of the free height, a tall one near the top ----- */
-function placeStep(st){if(G.keepScroll||!st||st.act==="intro")return;var el=stepEl(st);if(!el)return;setTimeout(function(){if(!el.isConnected||!G.on)return;var f=freeHeight(),r=el.getBoundingClientRect(),avail=f.bottom-f.top,q=ph.getBoundingClientRect().height/ph.offsetHeight;
+function placeStep(st){if(G.keepScroll||!st||st.act==="intro")return;var el=stepEl(st);if(!el)return;setTimeout(function(){if(!el.isConnected||!G.on)return;var f=freeHeight(),r=el.getBoundingClientRect();G.placedTop=null;var avail=f.bottom-f.top,q=ph.getBoundingClientRect().height/ph.offsetHeight;
     var want=r.height<=avail*.45?f.top+(avail-r.height)/3:f.top+16,dy=(r.top-want);if(st.ref==="hero")dy=-scr.scrollTop;
     if(Math.abs(dy)>4){G.autoScrollTill=performance.now()+900;scr.scrollTo({top:scr.scrollTop+dy/q,behavior:S.reduce?"auto":"smooth"})}},60)}
+/* round 15: the block stays clear when it ends up under the guide mid-step: the panel opened to Open, Azu's bubble with its next line or
+   an ask, the ✦ growing into the panel as a tour starts or resumes at a step (placed during the growth), the card's layout settling after
+   the placing. Placed again (at most 3 times a step) only while the scroll is where the guide put it: once the visitor scrolls, their
+   scroll rules (Keeps going / Pauses) and nothing here; never at Full (the panel is then the whole text). Asked by guide/dock.js's 150 ms loop. Unity: the same check on the panel's and the
+   bubble's geometryChanged, then the ScrollView's scrollOffset tween */
+function keepStepClear(){if(!G.on||G.keepScroll||S.dockH==="full"||performance.now()<(G.autoScrollTill||0))return;var st=S.guideSteps[G.i],el=st&&st.act!=="intro"&&stepEl(st);if(!el)return;
+  var top=Math.round(scr.scrollTop);if(G.placedStep!==G.i){G.placedStep=G.i;G.placeTries=0;G.placedTop=null}if(G.placedTop==null)G.placedTop=top;if(top!==G.placedTop)return;
+  var f=freeHeight(),r=el.getBoundingClientRect(),sb=scr.getBoundingClientRect();if(r.bottom>f.bottom+1&&r.top<sb.bottom&&G.placeTries<3){G.placeTries++;G.placedTop=null;placeStep(st)}}
 
 /* ----- a scroll by the visitor: the guide keeps talking; if its block leaves the screen, it moves on to the block now in view
    (with none in view it pauses the line where it is, whatever voice speaks it, and Resume plays on) ----- */
@@ -5666,7 +5694,7 @@ function freeHeight(){var box=scr.getBoundingClientRect(),lo=box.bottom;[".gcap"
 function bubbleSentence(){var b=ph.querySelector(".gbubble .gcap");if(!b)return;var ws=b.querySelectorAll(".gw"),k=Math.max(0,G.hl&&G.hl.k>=0?G.hl.k:0),sid=[],n=0;
   for(var i=0;i<ws.length;i++){sid.push(n);if(/[.!?…]["”»)]*$/.test(ws[i].textContent))n++}var cur=sid[Math.min(k,ws.length-1)];for(var j=0;j<ws.length;j++)ws[j].classList.toggle("gb-off",sid[j]!==cur)}
 setInterval(function(){if(!G.on||!dockOn())return;bubbleSentence();var t=ph.querySelector(".gd-talk"),ts=talkState(),m=ph.querySelector(".mascot");if(m&&m.dataset.state!==ts)m.dataset.state=ts;/* Azu's state follows at every height (round 11: the Mini has no talk button) */if(t&&!t.classList.contains("s-"+ts)){t.className="gd-talk s-"+ts;var h=ph.querySelector(".gd-hint");if(h){h.textContent=TXT(TALKW[ts]);h.classList.toggle("on",/listening|thinking|interrupted|notheard/.test(ts))}}
-  var stt=ph.querySelector(".gd-status");if(stt){var w=dkStatus(ts);if(stt.innerHTML!==w)stt.innerHTML=w}if(ph.querySelector(".gd-bars"))barsStart();placeBubble()},150);
+  var stt=ph.querySelector(".gd-status");if(stt){var w=dkStatus(ts);if(stt.innerHTML!==w)stt.innerHTML=w}if(ph.querySelector(".gd-bars"))barsStart();placeBubble();keepStepClear()},150);
 /* the conversation: the tour's lines and the questions and answers */
 on("runStep.after",function(){var st=S.guideSteps[G.i];if(st){var t=stepText(st);if(t&&(!G.thread.length||G.thread[G.thread.length-1].text!==t))G.thread.push({who:"azu",text:t});if(G.thread.length>60)G.thread.shift()}});
 on("ask.before",function(q){G.thread.push({who:"me",text:q.trim()});G.micNote="";G.talk="idle"});
@@ -9508,7 +9536,8 @@ function gdFindGlint(p){var g=ph.querySelector(".gdfound");if(!g){g=document.cre
 function gdFindFound(F){F.state="found";var B=F.B;haptic();gdFindGlint(F.p);var r=ph.querySelector(".gdseek");if(r)r.classList.add("got");azReact("r-jump",900,"big");gdLog("event","Find it on the wall: found (settled in the ring 1.2 s, after "+(F.clock/1000).toFixed(1)+" s)");
   gdBeatBody("","");gdBeatSay(TXT("tour_find_found"),function(){B.stepT=setTimeout(function(){gdFindBack(F,"found","acted")},900)})}
 function gdFindGiveUp(F,why){if(F.state!=="seek")return;F.state="shown";var B=F.B,m=ph.querySelector(".mascot");clearTimeout(B.notNowT);gdBeatBody("","");var s=gdFindGlint(F.p);
-  if(m&&S.guideCfg.mascot!==false){m.classList.remove("gd-onbeat");m.classList.add("gd-findto");var mw=m.offsetWidth||56,mh=m.offsetHeight||64;m.style.right=Math.round(ph.offsetWidth-s.x-mw/2+30)+"px";m.style.top=Math.round(s.y-mh-14)+"px"}
+  if(m&&S.guideCfg.mascot!==false){m.classList.remove("gd-onbeat");m.classList.add("gd-findto");var mw=m.offsetWidth||56,mh=m.offsetHeight||64,W=ph.offsetWidth,cx=s.x-30;if(cx-mw/2<8)cx=s.x+30;var lx=Math.min(Math.max(cx-mw/2,8),W-8-mw);m.style.right=Math.round(W-lx-mw)+"px";m.style.top=Math.round(s.y-mh-14)+"px"}
+  /* round 15 (inside the phone): at the left edge Azu stood 18 px past it (its centre 30 px left of a spot held 40 px in); it takes the spot's other side there, and is kept 8 px inside. Unity: the same clamp on the walk's end */
   gdLog("event","Find it on the wall: I give up ("+why+"): Azu shows it");var t=TXT(s.edge?"tour_find_edge_"+s.edge:"tour_find_show").replace("{thing}",B.thing||"");
   setTimeout(function(){if(G.gd.find!==F)return;gdBeatSay(t,function(){B.stepT=setTimeout(function(){gdFindBack(F,"shown ("+why+")",why==="I give up"?"dismissed":"ignored")},1100)})},S.reduce?0:900)}
 function gdFindLost(F){F.state="lost";var B=F.B;gdLog("event","Find it on the wall: the wall is lost (a system state wins): it ends");gdBeatBody("","");gdBeatSay(TXT("tour_find_lost"),function(){gdFindBack(F,"the wall was lost","")})}

@@ -512,7 +512,7 @@ function gdFindOnWall(fd){var W=(typeof curWall==="function"?curWall().pois:S.wa
 function gdPlanCtx(){return{solemn:gdSolemnNow()||!!(S.m&&S.m.solemn&&(G.on||S.view==="card")),lively:S.guideCfg.life==="lively",sr:!!S.ui.gdSR,games:gdPrefs().games||"on",notNow:+S.gdVisitor.visit.notNow||0}}
 /* the steps a tour would play now (not started): the length and the lens (audiences/stepFits), the introduction when it is due */
 function gdStepsNow(){if(G.on&&!S.howSaved)return S.guideSteps;var st=(S.fullSteps||S.guideSteps).filter(function(x){return typeof stepFits!=="function"||stepFits(x)});
-  if(S.guideCfg.intro==="every"||(S.guideCfg.intro==="first"&&!S.introSeen))st=[{id:"intro",view:"card",ref:"hero",act:"intro",text:T(fmt(S.tx.guide_intro.en,pointName()),fmt((S.tx.guide_intro.pt||S.tx.guide_intro.en),pointName()))}].concat(st);return st}
+  if(S.guideCfg.intro==="every"||(S.guideCfg.intro==="first"&&!S.introSeen))st=[{id:"intro",view:"card",ref:"hero",act:"intro",text:T(nameIn(S.tx.guide_intro.en,"{0}",pointName(),"en"),nameIn((S.tx.guide_intro.pt||S.tx.guide_intro.en),"{0}",pointName(),"pt"))}].concat(st);return st}
 /* the plan a tour would get now (the Editor's line and Why not now? when no tour plays) */
 function gdPlanNow(){return gdTourPlan(gdItems(),S.gdVisitor,gdPlanCtx(),gdTourIn(gdStepsNow()))}
 function gdPlanMake(){var P=gdTourPlan(gdItems(),S.gdVisitor,gdPlanCtx(),gdTourIn(S.guideSteps));P.point=S.m&&S.m.poi||"painting";P.quiz=null;P.at0=gdNow();G.gd.plan=P;G.gd.heard={};G.gd.guess=null;G.gd.owed=null;G.gd.skipped=[];gdWordOff();
