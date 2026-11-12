@@ -209,6 +209,19 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
     line, no model said in the row; [point] the Torreão's pin opening its card, A tour of {point} with its minutes and its tap starting
     that tour, the city on the hill still "has no tour". `MUTATE=1 node tests/test9t.js` drops the teaser, leaves the Gallery out and says
     a link twice in a row: the checks named [teaser], [blocks] and [links] turn red.
+  - *The developer's answers on the automatic tour, guidance round 16b* (`guide/autotour.js`'s fact keys and links, `guide/tour.js`'s
+    `tourLength` and the teaser's pictures, `guidance/catalog.js`'s short line, `core/words.js`'s `nameJoin`, `guide/person.js`'s hero placing,
+    `card/hero.js`'s crop): `tests/test9t.js` also checks [facts] no fact twice in the four points' tours, EN and PT, by the test's own fact keys
+    (numbers, dates, decades, numbers in words, proper names; a reference year; a bare year repeating a date; the point's name), the page's
+    atCheck agreeing and the named cases (Ribeira's story on its link alone, the Torreão's facts and timeline, the Tagus's River); [links]
+    every link from its block's own words or the neutral one, at most 6 words, none of round 16's generic links, never twice in a row, and the
+    Editor's step list showing each link with its source; [short] under 2 minutes "a short tour" in the teaser, the hero's button, the
+    invitation and the Editor, from 2 up the minutes; [hero words] the hero's eyebrow, title and line clear of the panel, the bubble and Azu
+    at the teaser at Mini (`G15.hero`, `tests/g15lib.js`), the four tours and the written g0, the Start button hidden while the tour plays;
+    [crop] each new point's hero a crop of the wall around its point (the wall's file, its size and offset by the test's own arithmetic, at
+    Full and Half, three different, kept during the teaser); [follows] now adds a Timeline (its dates all told by the story: no step) and a
+    Dialogue (its step with the neutral link). `MUTATE=1` also turns the fact rule off, puts "Look at this." back as the neutral link, takes the short-tour words away, leaves
+    the hero at the top with its Start button and draws no crop: the checks named [facts], [links], [short], [hero words] and [crop] turn red.
   - *Every Editor row's demo, guidance round 10* (`editor/demo`, the rows' modules: `editor/card-tab`, `card/controls`, `card/blocks`,
     `card/pages`, `card/states`, `card/hints`, `editor/texts`, `editor/components`, `editor/marker-tab`, `mascot/azu2d`, `guidance/editor`):
     `tests/test9n.js` checks that the self-test's NO DEMO check walks every tab and finds no row without a demo but its named exemptions

@@ -329,11 +329,11 @@
   "s": 101
  },
  "test9t.js": {
-  "pass": 28,
+  "pass": 37,
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 81
+  "s": 107
  },
  "test9sf.js": {
   "pass": 2,

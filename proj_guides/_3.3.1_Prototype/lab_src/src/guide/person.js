@@ -41,8 +41,17 @@ on("runStep.after",function(){
 on("startTour.before",function(from){G.introPending=!from&&!S.howSaved&&(S.guideCfg.intro==="every"||(S.guideCfg.intro==="first"&&!S.introSeen));if(G.introPending)S.introSeen=true});
 
 /* ----- the block being told, placed where the guide panel never covers it: a short block at a third of the free height, a tall one near the top ----- */
+/* round 16b (the Architect: at Mini the panel covered the hero's line and its Start button while the teaser played): at the hero (the
+   teaser, the end) the words told are the hero's own, its eyebrow, title and line (heroWords); the card scrolls just enough to put them
+   12 px above the panel and the bubble (the picture moves up with them; back to the top when there is room), never under the notch. While
+   a tour plays the hero's Start button and Listen hide (#ph.touring, person.css): the tour is already playing and the panel holds its
+   controls, so one focal point, the guide; moved, it would be a second Start beside the panel's Pause. Unity: the same offset on the
+   card's ScrollView (the hero is its first child), the hero's action row hidden while the tour plays */
+function heroWords(){var h=scr.querySelector(".hero"),r=null;if(!h)return null;h.querySelectorAll(".w > small,.w h2,.w > p").forEach(function(e){if(!e.getClientRects().length||!/\S/.test(e.textContent))return;var q=e.getBoundingClientRect();r=r?{top:Math.min(r.top,q.top),bottom:Math.max(r.bottom,q.bottom),height:0}:{top:q.top,bottom:q.bottom,height:0}});if(r)r.height=r.bottom-r.top;return r}
+on("renderGuide.after",function(){ph.classList.toggle("touring",!!G.on)});
 function placeStep(st){if(G.keepScroll||!st||st.act==="intro")return;var el=stepEl(st);if(!el)return;setTimeout(function(){if(!el.isConnected||!G.on)return;var f=freeHeight(),r=el.getBoundingClientRect();G.placedTop=null;var avail=f.bottom-f.top,q=ph.getBoundingClientRect().height/ph.offsetHeight;
-    var want=r.height<=avail*.45?f.top+(avail-r.height)/3:f.top+16,dy=(r.top-want);if(st.ref==="hero")dy=-scr.scrollTop;
+    var want=r.height<=avail*.45?f.top+(avail-r.height)/3:f.top+16,dy=(r.top-want);
+    if(st.ref==="hero"){var hw=heroWords();dy=hw?Math.min(hw.bottom-(f.bottom-12*q),hw.top-(f.top+56*q)):-scr.scrollTop*q;dy=Math.max(dy,-scr.scrollTop*q)}
     if(Math.abs(dy)>4){G.autoScrollTill=performance.now()+900;scr.scrollTo({top:scr.scrollTop+dy/q,behavior:S.reduce?"auto":"smooth"})}},60)}
 /* round 15: the block stays clear when it ends up under the guide mid-step: the panel opened to Open, Azu's bubble with its next line or
    an ask, the ✦ growing into the panel as a tour starts or resumes at a step (placed during the growth), the card's layout settling after
@@ -53,7 +62,7 @@ function placeStep(st){if(G.keepScroll||!st||st.act==="intro")return;var el=step
    bubble's geometryChanged, then the ScrollView's scrollOffset tween */
 function keepStepClear(){if(!G.on||G.keepScroll||S.dockH==="full"||performance.now()<(G.autoScrollTill||0))return;var st=S.guideSteps[G.i],el=st&&st.act!=="intro"&&stepEl(st);if(!el)return;
   var top=Math.round(scr.scrollTop);if(G.placedStep!==G.i){G.placedStep=G.i;G.placeTries=0;G.placedTop=null}if(G.placedTop==null)G.placedTop=top;if(top!==G.placedTop)return;
-  var f=freeHeight(),r=el.getBoundingClientRect(),sb=scr.getBoundingClientRect(),gone=!S.howSaved&&!G.paused&&S.stop==="full"&&scr.contains(el)&&(r.top>=sb.bottom||r.bottom<=sb.top)&&!(G.userScrollAt>(G.stepAt||0));
+  var f=freeHeight(),r=st.ref==="hero"&&heroWords()||el.getBoundingClientRect(),sb=scr.getBoundingClientRect(),gone=!S.howSaved&&!G.paused&&S.stop==="full"&&scr.contains(el)&&(r.top>=sb.bottom||r.bottom<=sb.top)&&!(G.userScrollAt>(G.stepAt||0));
   if((r.bottom>f.bottom+1&&r.top<sb.bottom||gone)&&G.placeTries<3){G.placeTries++;G.placedTop=null;placeStep(st)}}
 
 /* ----- a scroll by the visitor: the guide keeps talking; if its block leaves the screen, it moves on to the block now in view

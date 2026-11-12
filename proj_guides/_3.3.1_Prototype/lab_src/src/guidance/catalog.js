@@ -337,7 +337,9 @@ function gdLineKey(it,returning,slots){slots=slots||{};var a=slots.aud!==undefin
   var k=returning&&it.saysBack&&gdHasWords(it.saysBack)?it.saysBack:ak&&gdHasWords(ak)?ak:it.says;
   if(Array.isArray(k)){if(slots.card&&it.saysCard&&it.cardLine!==false)k=it.saysCard;else if(it.pick==="least"&&k.length){var sn=slots.seen||{},best=null;k.forEach(function(x){var c=+(sn[x]||0);if(!best||c<best.c)best={k:x,c:c}});k=best.k}else k=k[(+slots.n||0)%k.length]}
   return k}
-function gdLine(it,returning,slots){slots=slots||{};var k=gdLineKey(it,returning,slots);if(!k)return"";
+/* round 16b (the developer): a tour under 2 minutes is offered as a short one, with no minutes: a line with a {min} slot has its "_short"
+   word (gd_tourof_short: "A short tour of {point}?"), used when the tour is under 2 minutes */
+function gdLine(it,returning,slots){slots=slots||{};var k=gdLineKey(it,returning,slots);if(!k)return"";if(slots.min!=null&&+slots.min<2&&gdHasWords(k+"_short"))k=k+"_short";
   return nameIn(nameIn(TXT(k),"{thing}",slots.thing||""),"{point}",slots.point||"").replace(/\{year\}/g,slots.year!=null?slots.year:"").replace(/\{min\}/g,slots.min!=null?slots.min:"").replace(/\{button\}/g,S.guideCfg.gbIcon==="star"?"✦":TXT("gb_label")).replace(/\b1 (minute|minuto)s\b/g,"1 $1")}
 /* a word key with words in the visitor's language (an empty line falls back to Says) */
 function gdHasWords(k){var o=S.tx[k];return!!(o&&String(L(o)||"").trim())}

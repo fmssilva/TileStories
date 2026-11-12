@@ -36,6 +36,7 @@ var LABSTR=[["tour_promise", "gd:i:quizpromise", "The quiz promise, after the in
  ["gd_opening_back","gd:i:opening","The opening message for a returning visitor.","Welcome back! Tap a marker to begin.","Bem-vindo de volta! Toque num marcador para começar.","","Says (returning visitor)"],
  ["gd_askview","gd:i:askview","The guide's tip beside the ✦ (its menu holds Ask about the view), Azu pointing at it (Guide › Azu speaks up › The wall › Ask about the view).","Ask me about anything you see.","Pergunte-me sobre tudo o que vê.","","Says"],
  ["gd_tourof","gd:i:tourof","The guide's invitation about the point in the middle; {point} is its name, {min} the minutes of its tour (Guide › Azu speaks up › Tours › A tour of {point}).","{point} has a story. A tour of {min} minutes?","{point} tem uma história. Uma visita de {min} minutos?","","Says"],
+ ["gd_tourof_short","gd:i:tourof","The same invitation for a short tour, under 2 minutes ({point} its name; round 16b, the developer: a short tour says no minutes).","A short tour of {point}?","Uma visita curta a {point}?","","Says · a short tour"],
  ["gd_fewer","gd:overall","A long press on a tip asks this (Guide › Azu speaks up › Overall › Fewer like this?).","Fewer like this?","Menos dicas assim?","","Long press: the question"],
  ["gd_fewer_yes","gd:overall","The answer that rests the tip's group for the visit.","Fewer","Menos","","Long press: fewer"],
  ["gd_fewer_no","gd:overall","The answer that keeps the tip on the screen.","Keep","Manter","","Long press: keep"],
@@ -72,6 +73,7 @@ var LABSTR=[["tour_promise", "gd:i:quizpromise", "The quiz promise, after the in
  ["guide_no_mic","s7ask","When the phone gives no microphone.","The microphone is not available in this browser.","O microfone não está disponível neste browser.","","Microphone: unavailable"],
  ["reading_minutes","s5openrow","The reading time after the row's words ({0} = minutes).","{0} min","{0} min","","Reading time"],
  ["guide_duration","s7hero","The tour's length after the button's words ({0} = minutes).","{0} min","{0} min","","Tour length"],
+ ["guide_duration_short","s7hero","The tour's length after the button's words for a short tour, under 2 minutes (round 16b).","short","curta","","Tour length · short"],
  ["guide_ctrl_captions","s7tour","The captions button of the tour's controls.","CC","Legendas","","Captions button"],
  ["guide_ai_offline","s7ask","Before an answer when the AI cannot be reached and the search answered.","(AI unavailable here, offline search) ","(IA indisponível aqui, pesquisa offline) ","","Notice: AI unreachable"],
  ["guide_ai_error","s7ask","Before an answer when the AI failed ({0} = the reason).","(AI unavailable: {0}) ","(IA indisponível: {0}) ","","Notice: AI failed"],
@@ -191,7 +193,7 @@ var LABSTR=[["tour_promise", "gd:i:quizpromise", "The quiz promise, after the in
  ["settings_cc_off", "s5settings", "The guide's captions: off.", "Captions off", "Legendas desligadas", "", "Captions: off"],
   /* guidance round 16: the automatic tour's link words (Guide › 2 · The tour › Tour from the card) */
   ["at_cover", "s7auto", "The teaser's second sentence: what the tour covers and how long ({0} the minutes, from its words at the voice's speed; {1} the list).", "In about {0} minutes: {1}.", "Em cerca de {0} minutos: {1}.", "", "Teaser · length"],
-  ["at_cover_1", "s7auto", "The teaser's second sentence for a tour of a minute or less ({0} the list).", "In about a minute: {0}.", "Em cerca de um minuto: {0}.", "", "Teaser · a minute"],
+  ["at_cover_short", "s7auto", "The teaser's second sentence for a short tour, under 2 minutes ({0} the list; round 16b).", "In a short tour: {0}.", "Numa visita curta: {0}.", "", "Teaser · short tour"],
   ["at_cover_story", "s7auto", "In the teaser's list: the tour tells the story.", "its story", "a sua história", "", "Covers · story"],
   ["at_cover_ba", "s7auto", "In the teaser's list: a before and after to drag.", "a before and after", "um antes e depois", "", "Covers · before and after"],
   ["at_cover_flip", "s7auto", "In the teaser's list: a card to flip.", "a surprise to flip", "uma surpresa para virar", "", "Covers · flip card"],
@@ -204,12 +206,14 @@ var LABSTR=[["tour_promise", "gd:i:quizpromise", "The quiz promise, after the in
   ["at_link_story", "s7auto", "The link as the story opens.", "Now the story.", "Agora, a história.", "", "Link · the story"],
   ["at_link_back", "s7auto", "The link back to the card after the story.", "Back on the card.", "De volta ao cartão.", "", "Link · back"],
   ["at_link_quiz", "s7auto", "The link before the card's quiz.", "Ready for a question?", "Pronto para uma pergunta?", "", "Link · quiz"],
-  ["at_link_1", "s7auto", "A link between two steps (five in turn, never the same twice in a row).", "Look at this.", "Repare nisto.", "", "Link 1"],
-  ["at_link_2", "s7auto", "A link between two steps (five in turn).", "Here's more.", "Há mais.", "", "Link 2"],
-  ["at_link_3", "s7auto", "A link between two steps (five in turn).", "Now, something to see.", "Agora, algo para ver.", "", "Link 3"],
-  ["at_link_4", "s7auto", "A link between two steps (five in turn).", "Take a look.", "Veja.", "", "Link 4"],
-  ["at_link_5", "s7auto", "A link between two steps (five in turn).", "And there's this.", "E há isto.", "", "Link 5"],
-  ["at_link_last", "s7auto", "The link of the last block before the end.", "One more thing.", "Só mais uma coisa.", "", "Link · last"],
+  ["at_link_facts_n", "s7auto", "The link before the facts when another block comes first (round 16b).", "Now, the facts.", "Agora, os factos.", "", "Link · facts later"],
+  ["at_link_head", "s7auto", "The link made from a block's heading, title or a fact's label ({0} its words, at most 4), leading into its words (round 16b).", "Now, {0}:", "Agora, {0}:", "", "Link · its heading"],
+  ["at_link_cap", "s7auto", "The link before a gallery's or a picture's caption that starts with the, a, its (round 16b).", "Here's", "Aqui está", "", "Link · a caption"],
+  ["at_link_pics", "s7auto", "The link before any other caption of a gallery or a picture (round 16b).", "In the pictures:", "Nas imagens:", "", "Link · pictures"],
+  ["at_link_dates", "s7auto", "The link before a timeline's dates, two or more (round 16b).", "Then the dates:", "Depois, as datas:", "", "Link · dates"],
+  ["at_link_year", "s7auto", "The link before a timeline's one date not said yet ({0} the year; round 16b).", "And in {0},", "E em {0},", "", "Link · a year"],
+  ["at_link_circa", "s7auto", "The link before a timeline's one date not said yet, a c. year ({0} the year; round 16b).", "And around {0},", "E por volta de {0},", "", "Link · around a year"],
+  ["at_link", "s7auto", "The neutral link, where no words of the block fit (never twice in a row; round 16b).", "And now,", "E agora,", "", "Link · neutral"],
   ["at_try_flip", "s7auto", "A flip card's try step, after its words.", "Your turn: tap the card to flip it.", "A sua vez: toque no cartão para o virar.", "", "Try · flip"],
   ["at_try_drag", "s7auto", "A before and after's try step, after its labels.", "Your turn: drag across the picture.", "A sua vez: arraste sobre a imagem.", "", "Try · drag"],
   ["at_try_answer", "s7auto", "The quiz's try step, after its question.", "Tap your answer.", "Toque na sua resposta.", "", "Try · answer"],
@@ -241,11 +245,16 @@ function fmt(t){var a=arguments;return String(t).replace(/\{(\d)\}/g,function(m,
    tips and invitations (gdLine), Azu's lines (the introduction, Ask about the view's answers and its hunt, Find it on the wall). The
    articles per language (NAME_ART): EN The (and A, An), PT O, A, Os, As (and Um, Uma, Uns, Umas). A sentence starts at the line's start
    or after . ! ? … (an opening quote or bracket between); after a colon it goes on. Unity: the same string rule where the localized
-   string's slots are filled (CardStrings.Format's name slots) */
+   string's slots are filled (CardStrings.Format's name slots). Guidance round 16b: in Portuguese a preposition just before the slot
+   joins the name's article mid-sentence (NAME_JOIN, nameJoin: "Uma visita curta a {point}" with O Torreão is "ao Torreão"; de, em, por
+   too: do, no, pelo) */
 var NAME_ART={en:/^(The|An?)(?=\s)/,pt:/^(Os?|As?|Uns|Umas?|Um)(?=\s)/};
 function nameMid(name,lang){var re=NAME_ART[lang||S.lang]||NAME_ART.en;return String(name==null?"":name).replace(re,function(a){return a.toLowerCase()})}
 function slotAtStart(t,i){var b=t.slice(0,i).replace(/[\s"“‘'«(¿¡]+$/,"");return!b||/[.!?…]$/.test(b)}
-function nameIn(t,slot,name,lang){t=String(t);var out="",i=0,j;while((j=t.indexOf(slot,i))>=0){out+=t.slice(i,j)+(slotAtStart(t,j)?String(name==null?"":name):nameMid(name,lang));i=j+slot.length}return out+t.slice(i)}
+var NAME_JOIN={a:{o:"ao",a:"à",os:"aos",as:"às"},de:{o:"do",a:"da",os:"dos",as:"das"},em:{o:"no",a:"na",os:"nos",as:"nas"},por:{o:"pelo",a:"pela",os:"pelos",as:"pelas"}};
+function nameJoin(before,mid,lang){if((lang||S.lang)!=="pt")return[before,mid];var m=/(^|\s)(a|de|em|por)\s+$/i.exec(before),n=/^(os?|as?)(?=\s)/.exec(mid);if(!m||!n)return[before,mid];
+  var w=NAME_JOIN[m[2].toLowerCase()][n[1]],up=/^\p{Lu}/u.test(m[2]);return[before.slice(0,m.index+m[1].length),(up?w.charAt(0).toUpperCase()+w.slice(1):w)+mid.slice(n[1].length)]}
+function nameIn(t,slot,name,lang){t=String(t);var out="",i=0,j;while((j=t.indexOf(slot,i))>=0){if(slotAtStart(t,j))out+=t.slice(i,j)+String(name==null?"":name);else{var pr=nameJoin(out+t.slice(i,j),nameMid(name,lang),lang);out=pr[0]+pr[1]}i=j+slot.length}return out+t.slice(i)}
 Object.defineProperty(UI,"read",{get:function(){var o={};langCodes().forEach(function(c){var w=S.tx.open_row_story[c];o[c]=w?fmt(S.tx.open_row_meta[c]||S.tx.open_row_meta.en,w,fmt(S.tx.reading_minutes[c]||S.tx.reading_minutes.en,4)):""});return o}});
 Object.defineProperty(UI,"open",{get:function(){return S.tx.open_block_button}});
 Object.defineProperty(UI,"demo",{get:function(){return S.tx.test_demo_title}});

@@ -7,3 +7,5 @@ body{padding-block:8px}
 .mascot.enter svg{animation:azenter 1.3s cubic-bezier(.3,1.25,.5,1)}
 @keyframes azenter{0%{transform:translateX(90px) rotate(18deg);opacity:0}35%{opacity:1}55%{transform:translateX(-6px) translateY(-14px) rotate(-6deg)}75%{transform:translateY(0) scale(1.06,.94)}100%{transform:none}}
 .reduce .mascot.enter svg{animation:none}
+/* guidance round 16b: while a tour plays, the hero's Start button and Listen hide (the tour is already playing; the panel holds its controls) */
+#ph.touring .hero .hact,#ph.touring .hero .gstart{visibility:hidden}

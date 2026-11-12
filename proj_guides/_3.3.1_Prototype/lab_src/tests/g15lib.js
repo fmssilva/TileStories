@@ -92,6 +92,14 @@ function sign(){var b=ph.querySelector(".gdbub:not(.gd-out)");if(!b)return null;
    probe, probe_azu.js: a stricter measure than overWords, which judges the told words with Azu's 2 px margin) */
 function azuInk(){var m=ph.querySelector(".mascot");if(!m)return 0;var r=R(m),a=0,w=document.createTreeWalker(scr,NodeFilter.SHOW_TEXT),n,rg=document.createRange();
   while((n=w.nextNode())){if(!/\S/.test(n.nodeValue))continue;var cs=getComputedStyle(n.parentElement);if(cs.visibility==="hidden"||cs.display==="none"||cs.opacity==="0")continue;rg.selectNodeContents(n);[].forEach.call(rg.getClientRects(),function(q){a+=deep(r,{l:q.left,t:q.top,r:q.right,b:q.bottom})})}return Math.round(a)}
+/* round 16b: the hero's words at a step told at the hero (the teaser, the end; the written tour's g0): its eyebrow, title, line and any
+   button still shown, each word's box against the panel (not at Full), the bubbles, Azu, the ✦ and the beat cards (px² deeper than 1 px
+   both ways) and inside the phone's free height; at Mini the panel covered the line and the Start button (the Architect's captures) */
+function hero(){var h=scr.querySelector(".hero");if(!h)return null;var W=[],rg=document.createRange(),w=document.createTreeWalker(h,NodeFilter.SHOW_TEXT),n,sv=R(scr);
+  while((n=w.nextNode())){if(!/\S/.test(n.nodeValue)||!shown(n.parentElement))continue;rg.selectNodeContents(n);[].forEach.call(rg.getClientRects(),function(q){if(q.width>1&&q.height>1&&q.bottom>sv.t&&q.top<sv.b)W.push({t:n.nodeValue.trim().slice(0,20),r:{l:q.left,t:q.top,r:q.right,b:q.bottom}})})}
+  var out=[],d=ph.querySelector(".gdock");if(d&&shown(d)&&!d.classList.contains("h-full")){var a=0,dr=R(d);W.forEach(function(x){a+=deep(dr,x.r)});if(a>.5)out.push({el:"the panel",px:Math.round(a)})}
+  roots(COVER).forEach(function(e){if(e.closest(".gdock"))return;var r=coverRect(e),a=0;W.forEach(function(x){a+=deep(r,x.r)});if(a>.5)out.push({el:name(e),px:Math.round(a)})});
+  return{n:W.length,words:W.map(function(x){return x.t}).filter(function(t,i,a){return a.indexOf(t)===i}),over:out,btn:!!(h.querySelector(".gstart")&&shown(h.querySelector(".gstart")))}}
 function focal(){var out=[];FOCAL.forEach(function(s){roots(s).forEach(function(e){if(out.indexOf(e)<0)out.push(e)})});return out.map(name)}
 function audit(){SAMPLES=null;var tg=targets();return{targets:tg,covered:covered.slice(),text:text(),words:overWords(),inside:inside(),focal:focal(),ph:[ph.offsetWidth,ph.offsetHeight]}}
-return{audit:audit,text:text,targets:targets,told:told,overWords:overWords,inside:inside,focal:focal,sign:sign,azuInk:azuInk,col:col,cr:cr}})();true`;
+return{audit:audit,text:text,targets:targets,told:told,overWords:overWords,inside:inside,focal:focal,sign:sign,azuInk:azuInk,hero:hero,col:col,cr:cr}})();true`;
