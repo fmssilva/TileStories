@@ -145,7 +145,7 @@ const BEFORE = { rows: ["Fixed rules|", "Voice|guideCfg.voice", "Speaking now|",
   const r1 = await R('[G.gd.cur&&G.gd.cur.item.id,!!ph.querySelector(".gdbub.gd-more"),gdWhyNot(gdItems(),S.gdVisitor,gdContext(),gdNow(),"inview:painting")]');
   ok('While a tip shows, Azu\'s remark waits (the point settled 2.5 s in the middle: no remark)', r1[0] === 'opening' && !r1[1] && /one at a time: the Opening message is showing/.test(r1[2]), r1);
   const r2 = await R('var t0=gdNow();while(gdNow()-t0<40000){gdAdvance(250);if(G.gd.cur&&G.gd.cur.item.base==="inview")break}var c=G.gd.cur,e=gdVisitOf(S.gdVisitor,"opening").end;[c&&c.item.base,!!ph.querySelector(".gdbub.gd-more"),gdWhyNot(gdItems(),S.gdVisitor,gdContext(),gdNow(),"askview"),c&&e!=null?Math.round((c.at-e)/1000):null]');
-  ok('...while Azu\'s remark shows, no tip starts (one at a time: the remark), and it came after the breathing room', r2[0] === 'inview' && r2[1] && /one at a time: the Ribeira Palace in the middle is showing/.test(r2[2]) && r2[3] >= 15, r2);
+  ok('...while Azu\'s remark shows, no tip starts (one at a time: the remark), and it came after the breathing room', r2[0] === 'inview' && r2[1] && /one at a time: [Tt]he Ribeira Palace in the middle is showing/.test(r2[2]) && r2[3] >= 15, r2);
   await R('gdStop("test");gdGroupById("inview").on=false;S.guidance.items.tapmarker.on=true');
 
   // ---------- 7. Mascot Off: a plain bubble at the marker ----------
@@ -182,9 +182,10 @@ const BEFORE = { rows: ["Fixed rules|", "Voice|guideCfg.voice", "Speaking now|",
   const gt = await R('[[].map.call(ed.querySelectorAll(":scope > details[data-fo]"),function(d){return d.dataset.fo+"|"+d.querySelector("summary").textContent.split(" · ").slice(0,2).join(" · ")}),[].map.call(document.querySelectorAll(".utab"),function(t){return t.textContent})]');
   // guidance round 14: the six sections of the developer's tab (test9r checks them in depth)
   ok('The Guide tab, after Detail Card: 1 · Azu, 2 · The tour, 3 · Games on the tour, 4 · Azu speaks up, 5 · Ask Azu, 6 · Preview & Test (last: round 14b)', JSON.stringify(gt[0].map(s => s.split('|')[1])) === JSON.stringify(['1 · Azu', '2 · The tour', '3 · Games on the tour', '4 · Azu speaks up', '5 · Ask Azu', '6 · Preview & Test']) && gt[1].indexOf('Guide') === gt[1].indexOf('Detail Card') + 1, gt);
-  const after = await R('var o=[];["s7vtest","s7mascot","gt1","gt3"].forEach(function(id){ed.querySelectorAll(\'[data-fo="\'+id+\'"] .row\').forEach(function(r){if(r.closest(\'[data-fo="s7auto"]\'))return;var lb=r.querySelector("label");o.push((lb?lb.textContent:"?")+"|"+(rowKey(r)||""))})});o');
+  const after = await R('var o=[];["s7vtest","s7mascot","gt1","gt3"].forEach(function(id){ed.querySelectorAll(\'[data-fo="\'+id+\'"] .row\').forEach(function(r){if(r.closest(\'[data-fo="s7auto"],[data-fo="s7more"]\'))return;var lb=r.querySelector("label");if(lb&&/^(Remember where the visitor stopped|Forget after|Kept now)$/.test(lb.textContent))return;o.push((lb?lb.textContent:"?")+"|"+(rowKey(r)||""))})});o');
   const sortJ = a => JSON.stringify(a.slice().sort());
-  // guidance round 16: Tour from the card (s7auto) is a new foldout of 2 · The tour, not a former 6 · Guide row: its rows are left out here
+  // guidance round 16: Tour from the card (s7auto) is a new foldout of 2 · The tour, not a former 6 · Guide row: its rows are left out here;
+  // round 17: Tell me more (s7more) and the saved place's rows in Resume button (Remember where the visitor stopped, Forget after, Kept now) too
   // round 14: Moments and Water break after are gone (Games on the tour holds them), the engine's Guide mode is a line that names Answers from
   // (one switch, said once), Tour controls' words are in Guide panel (the foldout had no row)
   BEFORE.rows = BEFORE.rows.filter(r => !/^(Moments|Water break after)\|/.test(r)).map(r => r === 'Guide mode|guideCfg.ask' ? 'Guide mode|' : r); BEFORE.fos = BEFORE.fos.filter(f => f !== 's7tour');

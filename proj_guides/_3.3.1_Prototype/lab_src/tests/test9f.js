@@ -146,12 +146,12 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await fresh(); await R(toTour); await W(500);
   const tv = await R(look());
   const tp = await R('var c=G.gd.cur,az=ph.querySelector(".azfab"),A=gdPR(az),M=gdCentral();[c&&c.item.id,c&&c.spoken,!!(G.timer||G.utter),Math.round(Math.hypot((A.l+A.r)/2-M.x,(A.t+A.b)/2-M.y)),!!ph.querySelector(".gdpoint"),!ph.querySelector(".gdring")]');
-  ok('A tour of {point}: about the point in the middle, its slots filled ("Ribeira Palace has a story. A tour of 3 minutes?"), Azu beside it and pointing, no ring; a bubble only (the guide not heard yet); 2 lines, 7:1, 0 px over words', tp[0] === 'tourof' && tp[1] === false && !tp[2] && tp[3] < 120 && tp[4] && tp[5] && tv[7] === 'Ribeira Palace has a story. A tour of 3 minutes?' && tv[0] <= 2 && tv[1] >= 7 && tv[2] === 0, [tp, tv]);
+  ok('A tour of {point}: about the point in the middle, its slots filled ("The Ribeira Palace has a story. A tour of 3 minutes?"), Azu beside it and pointing, no ring; a bubble only (the guide not heard yet); 2 lines, 7:1, 0 px over words', tp[0] === 'tourof' && tp[1] === false && !tp[2] && tp[3] < 120 && tp[4] && tp[5] && tv[7] === 'The Ribeira Palace has a story. A tour of 3 minutes?' && tv[0] <= 2 && tv[1] >= 7 && tv[2] === 0, [tp, tv]);
   await fresh(); await R('S.gdVisitor.visit.heard=true;' + toTour.replace('gdResetVisitor();', '')); await W(250);
   const sp = await R('var c=G.gd.cur,lit=0;[c&&c.item.id,c&&c.spoken,!!(G.timer||G.utter),ph.querySelectorAll(".gdbub .gdw").length,G.gd.log.filter(function(l){return l.what==="shown"}).slice(-1)[0].why]');
   const litSeen = await until('!!ph.querySelector(".gdbub .gdw.on")', 3000);
   const litCr = await R(CR + 'var w=ph.querySelector(".gdbub .gdw.on")||ph.querySelector(".gdbub .gdw");cr(px(getComputedStyle(w).color),px(getComputedStyle(w).backgroundColor))');
-  ok('...once the visitor has heard the guide this visit: spoken (the one order of voices) and in the bubble, the word being said lit, 7:1 on its light', sp[0] === 'tourof' && sp[1] === true && sp[2] && sp[3] === 10 && /spoken/.test(sp[4]) && litSeen && litCr >= 7, [sp, litSeen, litCr]);
+  ok('...once the visitor has heard the guide this visit: spoken (the one order of voices) and in the bubble, the word being said lit, 7:1 on its light', sp[0] === 'tourof' && sp[1] === true && sp[2] && sp[3] === 11 && /spoken/.test(sp[4]) && litSeen && litCr >= 7, [sp, litSeen, litCr]);
   await R('var b=ph.querySelector(".gdbub button[data-gdbub]");gsTouch(b)'); await W(400);
   const tapT = await R('[G.on,S.stop,gdEverOf(S.gdVisitor,"tourof").acted,!G.gd.cur,!G.timer||G.on]');
   const stepEnd = await until('gdEverOf(S.gdVisitor,"tourof").done', 30000); // ends as soon as the step is heard; the cap only matters on a busy machine

@@ -58,7 +58,7 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
     setRow(d,id,"Start",row("Start",psel("sections."+i+".start",startOpts(true)),"Overrides All sections › Section start for this section only."));
     setRow(d,id,"On the bar",row("Shown",pseg("sections."+i+".shown",["true","card","false"],["On the card and the bar","On the card only","Hidden"]),"On the card only: its blocks stay on the card, with no bar item. Hidden: the section and its blocks leave every card."))});
   var s2i=innerOf(d,"s2");if(s2i){var br=s2i.querySelector(":scope > .btnrow:last-of-type");var busy=S.sections.filter(shownOnBar).length;
-    var html='<div class="btnrow"><button class="ubtn sm" type="button" data-secreset="1">Reset to the framework\'s sections</button></div>'+(busy>S.ctl.bar.more?'<div class="note warn">Ribeira Palace shows '+busy+' sections and the bar holds '+S.ctl.bar.more+': the rest go under More.</div>':"");
+    var html='<div class="btnrow"><button class="ubtn sm" type="button" data-secreset="1">Reset to the framework\'s sections</button></div>'+(busy>S.ctl.bar.more?'<div class="note warn">'+esc(L(S.hero.title))+' shows '+busy+' sections and the bar holds '+S.ctl.bar.more+': the rest go under More.</div>':"");
     if(br)br.insertAdjacentHTML("afterend",html);else s2i.insertAdjacentHTML("beforeend",html)}
   /* ----- Motion: the wall's level ----- */
   addRows(d,"s4m",row("Motion level",pseg("motionLevel",["full","reduced"],["Full","Reduced"]),"Reduced gives every visitor whole, still parts: no reveals, no parallax, no loops. A phone set to Reduce Motion, or a visitor who picks Reduced, always gets Reduced."));
@@ -140,7 +140,7 @@ on("renderPhone.after",function(keep){var inCard=S.view==="card",nb=document.get
     if(S.card.length<c.minBlocks||vis.length<2||(c.showAt==="full"&&c.pos==="top"&&S.stop!=="full")||(c.showFrom==="hero"&&scr.scrollTop<200))nb.style.display="none";
     nb.classList.toggle("nb-full",c.shape==="full");nb.classList.toggle("nb-glass",c.fill==="glass");nb.classList.toggle("nb-clear",c.fill==="clear")}
   ["vset","csheet","peekrow"].forEach(function(k){var o=ph.querySelector("."+k);if(o)o.remove()});
-  if(inCard&&S.stop==="peek"){var pr=document.createElement("div");pr.className="peekrow";pr.style.top=(stopTop("peek")+14)+"px";pr.innerHTML='<b>Ribeira Palace</b><small>'+esc(L(UI.where))+'</small>';ph.appendChild(pr)}
+  if(inCard&&S.stop==="peek"){var pr=document.createElement("div");pr.className="peekrow";pr.style.top=(stopTop("peek")+14)+"px";pr.innerHTML='<b>'+esc(L(S.hero.title))+'</b><small>'+esc(L(UI.where))+'</small>';ph.appendChild(pr)}
   if(inCard&&S.settingsOpen){ph.insertAdjacentHTML("beforeend",settingsPanel())}
   if(inCard&&S.contentsOpen&&S.ctl.contents.on){ph.insertAdjacentHTML("beforeend",contentsSheet())}
   var tb=ph.querySelector(".topband");if(tb)tb.querySelectorAll("i").forEach(function(i){if(i.textContent==="☰")i.innerHTML=SLIDERS})});

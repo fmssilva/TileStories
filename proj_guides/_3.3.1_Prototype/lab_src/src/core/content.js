@@ -30,12 +30,18 @@ var DEMO={title:T("Two hundred and fifty years by the river","Duzentos e cinquen
  quote:T("Where the palace had stood, an open square was laid out to the river.","Onde estivera o palácio, abriu-se uma praça para o rio."),cite:"The Pombaline plan, 1758",
  list:{en:["The royal library","The chapel","The opera house, opened in 1755"],pt:["A biblioteca real","A capela","A ópera, inaugurada em 1755"]},
  piccap:T("The Terreiro do Paço in 1662.","O Terreiro do Paço em 1662."),paircap:T("Before 1755 and today.","Antes de 1755 e hoje."),vidcap:T("From the square to the castle · 0:55","Da praça ao castelo · 0:55")};
-var POIS=[["lamp","1. St George's Castle"],["cathedral","2. Lisbon Cathedral"],["painting","7. Ribeira Palace"],["camera","13. The Camera"]];
+var POIS=[["lamp","1. St George's Castle"],["cathedral","2. Lisbon Cathedral"],["painting","7. The Ribeira Palace"],["camera","13. The Camera"]];
 S.card.forEach(function(b){b.grp="inherit";b.enter="inherit";b.tap="inherit";b.orow="inherit"});
 (function(){var i=S.card.findIndex(function(b){return b.id==="b_audio"});if(i>0){var a=S.card.splice(i,1)[0];S.card.splice(1,0,a)}})();
 /* guidance round 16: the words each block kind shows on the demo point's card, one place for them: the card's preview draws them
    (card/blocks.js's KPREV) and the guide's automatic tour says them (guide/autotour.js, through blockSays). A block's own words (b.c, the
    wall's other points below) come before its kind's. A picture's or a clip's words are its element's demo content (S.demoC). */
+/* round 17: each picture's own caption (the gallery's page and the automatic tour's Tell me more: "In the other pictures: …"); Unity: the
+   picture's caption field on the Gallery block */
+var PIC_CAPS={g1:T("A painting of the square with the palace and its corner tower by the river","Uma pintura da praça com o paço e o seu torreão junto ao rio"),
+  g2:T("An engraving of the ruins the earthquake left","Uma gravura das ruínas que o terramoto deixou"),
+  g3:T("A drawing of fireworks over a garden laid out on the square","Um desenho de fogo de artifício sobre um jardim desenhado na praça"),
+  before:T("The palace as it looked before 1755","O paço tal como era antes de 1755")};
 var KWORDS={
  "Quick Facts":{facts:[[UI.home,UI.homev],[UI.lost,UI.lostv]],cat:T("Royal palace","Palácio real")},
  "Inline":{text:T("The palace had its own opera house, opened in March 1755.","O palácio tinha a sua própria ópera, inaugurada em março de 1755."),back:T("It stood for only seven months.","Durou apenas sete meses.")},
@@ -55,8 +61,8 @@ var KWORDS={
    Guidance round 16b: each hero's picture is a crop of the wall painting around its own point (crop: the wall, the point, the crop's
    height, where the point sits; drawn by card/hero.js's heroPaint; Unity: a uvRect on the wall's texture) */
 function pointBlock(id,kind,c,o){return Object.assign({id:id,kind:kind,grp:"inherit",enter:"inherit",tap:"inherit",orow:"inherit",c:c},o||{})}
-var POINTS={painting:{label:"7. Ribeira Palace"},
- torreao:{label:"The Torreão",hero:{title:T("The Torreão","O Torreão"),eyebrow:T("Ribeira Palace · 1580s to 1755","Paço da Ribeira · 1580 a 1755"),line:T("The palace's corner tower, on the water","A torre de canto do palácio, sobre a água"),fx:30,fy:40,pic:"g1",pic2:"before",crop:{wall:"ribeira",at:"torreao",h:.9,fy:.36}},story:[],
+var POINTS={painting:{label:"7. The Ribeira Palace"},
+ torreao:{label:"The Torreão",hero:{title:T("The Torreão","O Torreão"),eyebrow:T("The Ribeira Palace · 1580s to 1755","Paço da Ribeira · 1580 a 1755"),line:T("The palace's corner tower, on the water","A torre de canto do palácio, sobre a água"),fx:30,fy:40,pic:"g1",pic2:"before",crop:{wall:"ribeira",at:"torreao",h:.9,fy:.36}},story:[],
   card:[pointBlock("t_facts","Quick Facts",{facts:[[T("Built","Construído"),T("In the 1580s","Na década de 1580")],[T("Under","No reinado de"),T("Philip I","Filipe I")],[T("Lost","Perdido"),T("1 November 1755","1 de novembro de 1755")]]}),
    pointBlock("t_text","Inline",{title:T("On the river front","Na frente ribeirinha"),text:T("In the 1580s, under Philip I, who ruled Portugal and Spain together, the river front received a new wing and its corner tower, the Torreão. In the paintings of the river front, it is the tower with the dome at the corner of the palace, right on the water.","Na década de 1580, com Filipe I, que reinava em Portugal e em Espanha, a frente ribeirinha ganhou uma nova ala e o seu torreão de canto, o Torreão. Nas pinturas da frente ribeirinha, é a torre com a cúpula no canto do palácio, mesmo sobre a água.")}),
    pointBlock("t_time","Timeline",{events:[["c. 1500",T("The court moves to the river","A corte muda-se para o rio"),"g3"],["1580s",T("The Torreão rises on the river front","O Torreão ergue-se na frente ribeirinha"),"before"],["1755",T("Lost to the earthquake, the fire and the tsunami","Perdido no terramoto, no incêndio e no maremoto"),"g1"]]}),

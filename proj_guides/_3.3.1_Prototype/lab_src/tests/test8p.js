@@ -12,7 +12,8 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // 1. the way in names the point nearest the middle (round 7: the guide's button replaces the pill; its menu item names the point)
   await p.locator('#ph .gbtn').click(); await p.waitForTimeout(200);
   const pill = await R('var b=ph.querySelector("[data-gbgo=view]");[!!b,b&&b.textContent,camView().central&&camView().central.name]');
-  ok('On the wall: the guide button\'s Ask about … names the point nearest the middle', pill[0] && pill[1] === 'Ask about ' + pill[2], pill);
+  // round 17: the name mid-sentence by nameIn (round 15b's rule): "Ask about the Ribeira Palace"
+  ok('On the wall: the guide button\'s Ask about … names the point nearest the middle (its article lower case mid-sentence)', pill[0] && pill[1] === 'Ask about ' + String(pill[2]).replace(/^(The|An?)(?=\s)/, a => a.toLowerCase()), pill);
   await p.locator('#ph [data-gbgo="view"]').click(); await p.waitForTimeout(200);
   const open = await R('[ph.classList.contains("camopen"),ph.querySelectorAll(".cpin").length,!!ph.querySelector(".cpin.central b"),getComputedStyle(ph.querySelector(".cpin.central b")).opacity,ph.querySelectorAll("[data-cchip]").length]');
   ok('A tap opens the panel: the points in view as pins, the middle one ringed with its name, five suggestions', open[0] && open[1] >= 2 && open[2] && open[3] === '1' && open[4] === 5, open);
@@ -39,7 +40,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const before = await R('camView().central.id');
   const box = await p.locator('#ph').boundingBox(); await p.mouse.move(box.x + 40, box.y + 260); await p.mouse.down(); await p.mouse.move(box.x + 330, box.y + 260, { steps: 8 }); await p.mouse.up(); await p.waitForTimeout(200);
   const after = await R('[S.camX,camView().central&&camView().central.id,ph.querySelector(".ca-pill").textContent]');
-  ok('A drag on the wall (moving the phone): the view and the middle point change, and the pill follows', after[0] < 0.5 && after[1] !== before && after[2].indexOf(after[1] ? (await R(`L(S.wallPois.filter(function(p){return p.id==="${after[1]}"})[0].name)`)) : '') > 0, [before, after]);
+  ok('A drag on the wall (moving the phone): the view and the middle point change, and the pill follows', after[0] < 0.5 && after[1] !== before && after[2].indexOf(after[1] ? (await R(`nameMid(L(S.wallPois.filter(function(p){return p.id==="${after[1]}"})[0].name))`)) : '') > 0, [before, after]);
   // 5. with the model: its tools light the points and draw the route (a stand-in model)
   await R('S.camX=.4;camLayer()');
   await R('window.SAMPLE=[];sampleFn=function(prompt,opts){SAMPLE.push(prompt);var t=opts.tools;t[0].execute({ids:[camView().pois[0].id]});t[1].execute({ids:camView().pois.map(function(p){return p.id}).slice(0,2)});return Promise.resolve({text:"Here you go."})}');

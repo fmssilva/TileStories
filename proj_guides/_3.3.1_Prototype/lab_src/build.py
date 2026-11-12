@@ -25,7 +25,7 @@ MODULES = ['src/core/open.js', 'src/core/assets.js', 'src/core/catalogues.js', '
            'src/agent/scenes.js', 'src/mascot/azu3d.js', 'src/mascot/models.js', 'src/mascot/tile-styles.js',
            'src/mascot/size.js', 'src/world/markers.js', 'src/guide/guide-scenes.js', 'src/agent/live-voice.js', 'src/mascot/mouth.js',
            'src/guidance/catalog.js', 'src/guidance/scheduler.js', 'src/guidance/service.js', 'src/guidance/present.js',
-           'src/guidance/editor.js', 'src/guidance/scenes.js', 'src/core/boot.js']
+           'src/guidance/editor.js', 'src/guidance/scenes.js', 'src/guide/tell-more.js', 'src/guide/saved-place.js', 'src/core/boot.js']
 # the cascade depends on this order: a new style goes at the end, or beside the rule it overrides
 STYLES = ['src/core/base.css', 'src/card/card-base.css', 'src/phone/sheet.css', 'src/guide/tour.css', 'src/editor/texts.css', 'src/editor/guide-tab.css',
           'src/card/controls.css', 'src/card/blocks.css', 'src/card/elements.css', 'src/editor/marker-tab.css', 'src/card/hero.css',
@@ -34,7 +34,8 @@ STYLES = ['src/core/base.css', 'src/card/card-base.css', 'src/phone/sheet.css', 
           'src/guide/dock.css', 'src/guide/controls.css', 'src/guide/voice-test.css', 'src/world/camera-ask.css', 'src/mascot/azu-gl.css',
           'src/world/guide-button.css', 'src/agent/agent.css', 'src/agent/scenes.css', 'src/world/markers.css',
           'src/mascot/azu3d.css', 'src/mascot/models.css', 'src/mascot/tile-styles.css', 'src/mascot/size.css', 'src/editor/demo.css',
-          'src/guidance/present.css', 'src/guidance/editor.css', 'src/guide/autotour.css']
+          'src/guidance/present.css', 'src/guidance/editor.css', 'src/guide/autotour.css', 'src/guide/tell-more.css',
+          'src/guide/saved-place.css']
 
 
 def rd(*p):

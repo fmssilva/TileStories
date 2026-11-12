@@ -2,7 +2,7 @@
 S.guideCfg.stopUndo="toast";G.resumeAt=null;
 /* ----- the resume point: where the visitor's Stop left the tour, the step and the first word of the sentence being said. It is kept
    after the toast is gone (the guide's button offers Resume the tour) until the tour is resumed or reaches its end ----- */
-function keepResume(){var st=S.guideSteps[G.i];if(!G.on||!st||st.act==="end"){G.resumeAt=null;return null}var intro=st.act==="intro",nx=intro?S.guideSteps[G.i+1]:st;
+function keepResume(){var st=S.guideSteps[G.i];if(!G.on||!st||st.act==="end"){G.resumeAt=null;return null}var intro=st.act==="intro"||st.act==="recap",nx=intro?S.guideSteps[G.i+1]:st;
   return G.resumeAt={id:(nx||st).id,k:intro||!(G.hl&&G.hl.k>=0)?0:sentenceStart(G.hl.k),title:stepTitle(nx||st)}}
 function resumeTourAt(pt){pt=pt||G.resumeAt;if(!pt)return;G.resumeAt=null;hideStopUi();if(G.on)stopTour();G.startWord=pt.k||0;startTour({id:pt.id})}
 /* the step's line, said again from the kept sentence (guide/voice.js's seekWord: an audio seeks, the device voice speaks from the word) */

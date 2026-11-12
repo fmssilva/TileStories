@@ -3,7 +3,7 @@ S.camCfg={on:true,chips:true};S.camX=.4;G.cam={open:false,answer:"",busy:false,l
 COMP.s7cam=["Guide","Ask about the view"];FOCUS.s7cam=["card",".camask","closed"];
 /* the wall's points: where each sits on the wall's picture (u, v: 0-1), its year when known, and whether it has a card (guidance round 16:
    the Torreão, the Terreiro do Paço and the Tagus have theirs, core/content.js's POINTS, each with its tour made from it) */
-S.wallPois=[{id:"painting",name:T("Ribeira Palace","O Paço da Ribeira"),u:.46,v:.52,year:1500,card:true},{id:"torreao",name:T("The Torreão","O Torreão"),u:.333,v:.44,year:1580,card:true},
+S.wallPois=[{id:"painting",name:T("The Ribeira Palace","O Paço da Ribeira"),u:.46,v:.52,year:1500,card:true},{id:"torreao",name:T("The Torreão","O Torreão"),u:.333,v:.44,year:1580,card:true},
   {id:"river",name:T("The Tagus and its ships","O Tejo e os seus navios"),u:.06,v:.55,card:true},{id:"square",name:T("Terreiro do Paço","O Terreiro do Paço"),u:.40,v:.78,year:1500,card:true},
   {id:"castle",name:T("The city on the hill","A cidade na colina"),u:.62,v:.45},{id:"arcade",name:T("The arcades","As arcadas"),u:.80,v:.70}];
 /* a point on the screen, through the camera (camGeom: the wall's picture as the phone sees it); a drag on the wall moves it, as moving the phone does */
@@ -22,7 +22,7 @@ function camLayer(){var o=ph.querySelector(".campins");if(o)o.remove();var b=ph.
   a.innerHTML=(G.cam.open?'<div class="ca-ans" aria-live="polite">'+(G.cam.busy?'<span class="ca-dots"><i></i><i></i><i></i></span>':esc(G.cam.answer||TXT("cam_hint")))+'</div>'+
     (S.camCfg.chips?'<div class="gd-chips ca-chips">'+["what","story","route","oldest","kids"].map(function(k){return'<button type="button" data-cchip="'+k+'">'+TXH("cam_chip_"+k)+'</button>'}).join("")+'</div>':"")+
     '<form class="gd-form ca-form"><input class="gin" id="caq" type="text" autocomplete="off" placeholder="'+TXH("dock_type")+'"><button type="submit" aria-label="'+TXH("dock_send")+'">&#10148;</button></form>':"")+
-    '<div class="ca-bar"><button type="button" class="ca-pill" data-camask="1">'+MIC+'<span>'+esc(cen?fmt(TXT("cam_ask_about"),cen.name):TXT("cam_ask"))+'</span></button>'+(G.cam.open?'<button type="button" class="ca-x" data-camclose="1" aria-label="'+TXH("close")+'">&#10005;</button>':"")+'</div>';
+    '<div class="ca-bar"><button type="button" class="ca-pill" data-camask="1">'+MIC+'<span>'+esc(cen?nameIn(TXT("cam_ask_about"),"{0}",cen.name):TXT("cam_ask"))+'</span></button>'+(G.cam.open?'<button type="button" class="ca-x" data-camclose="1" aria-label="'+TXH("close")+'">&#10005;</button>':"")+'</div>';
   ph.appendChild(a)}emit("camLayer.after")}
 /* ----- the answers: the model gets the points in view (names, grid places, the middle one), the card, the audience; its tools light points and make routes ----- */
 function camContext(){var v=camView();return{in_view:v.pois.map(function(p){return{id:p.id,name:p.name,place:p.where,year:p.year,has_card:p.card}}),middle:v.central&&v.central.id,audience:aud(),lens:S.lens||null,language:S.lang==="pt"?"pt-PT":"en"}}
@@ -65,7 +65,7 @@ ph.addEventListener("pointerup",function(){camDrag=null},true);
 /* Editor: Guide tab > Ask about the view */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var at=d.querySelector('[data-fo="s7ask"]');if(!at)return d.innerHTML;
   at.insertAdjacentHTML("afterend",comp("s7cam","on the wall, with no card open: questions about the points in view",
-    row("Ask about the view",pseg("camCfg.on",["true","false"],["Shown","Hidden"]),"A pill at the foot of the camera view: “Ask about Ribeira Palace”, the point nearest the middle (it has a ring and its name). No photo is sent: the model gets the points in view, each one’s place on the screen (top right, middle…), the middle one, the audience and the lens. Its tools light the points it names (the rest dimmed) and draw a numbered route. A tap on a point with a card opens it. In the Lab, a drag on the wall stands in for moving the phone.")+
+    row("Ask about the view",pseg("camCfg.on",["true","false"],["Shown","Hidden"]),"A pill at the foot of the camera view: “Ask about the Ribeira Palace”, the point nearest the middle (it has a ring and its name). No photo is sent: the model gets the points in view, each one’s place on the screen (top right, middle…), the middle one, the audience and the lens. Its tools light the points it names (the rest dimmed) and draw a numbered route. A tap on a point with a card opens it. In the Lab, a drag on the wall stands in for moving the phone.")+
     row("Suggestions",pseg("camCfg.chips",["true","false"],["Shown","Hidden"]),"What am I looking at? · Tell me a story about this wall · Make me a 20-min route · What’s the oldest here? · Kids’ treasure hunt (find the point Azu names, then tap it).")+
     row("Try",'<button class="del" type="button" data-camtry="1">Try</button>',"Closes the card and opens Ask about the view.")+
     '<table class="tbl"><thead><tr><th>The wall’s points</th><th>u</th><th>v</th><th>Year</th></tr></thead><tbody>'+S.wallPois.map(function(p){return'<tr><td>'+esc(L(p.name))+'</td><td>'+p.u+'</td><td>'+p.v+'</td><td>'+(p.year||"")+'</td></tr>'}).join("")+'</tbody></table>'));

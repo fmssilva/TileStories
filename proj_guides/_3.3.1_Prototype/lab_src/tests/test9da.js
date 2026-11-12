@@ -153,7 +153,7 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   const wl = await R('var w=ph.querySelector(".gbtn-wrap");[!!w&&w.classList.contains("onwall"),Math.round(ph.getBoundingClientRect().bottom-w.getBoundingClientRect().bottom)]');
   await tap('.gbtn'); await W(250);
   const wi = await R('[[].map.call(ph.querySelectorAll(".gbmenu [data-gbgo]"),function(b){return b.dataset.gbgo}).join(),(ph.querySelector(\'[data-gbgo="view"]\')||{}).textContent,camView().central&&camView().central.name]');
-  ok('On the wall: the ✦ in the corner; its menu adds Ask about the view, named after the point in the middle', wl[0] && wl[1] <= 30 && wi[0] === 'tour,ask,view,how,try,settings' && wi[1] === 'Ask about ' + wi[2], [wl, wi]);
+  ok('On the wall: the ✦ in the corner; its menu adds Ask about the view, named after the point in the middle', wl[0] && wl[1] <= 30 && wi[0] === 'tour,ask,view,how,try,settings' && wi[1] === 'Ask about ' + String(wi[2]).replace(/^(The|An?)(?=\s)/, a => a.toLowerCase()), [wl, wi]);
   await tap('[data-gbgo="view"]'); await W(300);
   ok('...Ask about the view: its panel opens on the wall', await R('G.cam.open&&!!ph.querySelector(".camask.open")'));
   await R('G.cam.open=false;renderPhone(true)'); await tap('.gbtn'); await W(200); await tap('[data-gbgo="tour"]'); await W(500);

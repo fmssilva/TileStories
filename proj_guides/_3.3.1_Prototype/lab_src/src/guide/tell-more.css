@@ -1,0 +1,18 @@
+/* Tell me more (guidance round 17): the chip above the guide panel (at Compact on the ✦'s row), left; 44 px; its text 4.5:1 or more on its
+   own fill, light and dark; queued (More coming): the warm fill of Stop's Resume. Unity: a USS class on a Button above the panel */
+.gtmore{position:absolute;left:16px;z-index:16;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px 0 10px;border-radius:22px;
+  border:1px solid rgba(26,24,20,.14);background:#FFFFFF;color:#1A1814;font:700 14px/1 var(--body);cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.22);
+  animation:gbin .22s ease;-webkit-tap-highlight-color:transparent}
+.gtmore .tmi{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#14213D;flex:none}
+.gtmore .tmi svg{width:14px;height:14px;fill:none;stroke:#FFFFFF;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.gtmore.on{background:#FFD98A;border-color:rgba(26,24,20,.2)}
+.gtmore.on .tmi{background:#1A1814}
+.gtmore:focus-visible{outline:3px solid #1F5FAD;outline-offset:2px}
+.cv.dark .gtmore{background:#26232B;color:#F4F1EA;border-color:rgba(255,255,255,.18);box-shadow:0 8px 22px rgba(0,0,0,.5)}
+.cv.dark .gtmore .tmi{background:#FFD98A}.cv.dark .gtmore .tmi svg{stroke:#1A1814}
+.cv.dark .gtmore.on{background:#FFD98A;color:#1A1814}.cv.dark .gtmore.on .tmi{background:#1A1814}.cv.dark .gtmore.on .tmi svg{stroke:#FFD98A}
+.reduce .gtmore{animation:none}
+/* the Editor: a step's deep part under its words in the step lists (generated: read only; written: its own boxes) */
+.attbl .atmore,.tbl .atmore{margin-top:4px;padding:4px 6px;border-left:2px solid #2FB36B;background:rgba(47,179,107,.08);font-size:11.5px;line-height:1.4;color:var(--u-dim);white-space:normal}
+.atmore small{font:700 9px/1 var(--mono);letter-spacing:.05em;text-transform:uppercase;margin-right:4px;color:#7FD6A4}
+.attbl .atmorelen{color:#7FD6A4;font-size:11px}

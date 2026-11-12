@@ -234,6 +234,27 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
     said by the next tour, + Add a line, Remove, Back to the defaults and the row's ▸ by real clicks. `MUTATE=1` also says an intro twice,
     puts a lone Quick Facts step back with no row saying why, takes the article away, writes the Guide block's 3 min and reads the lines
     from their defaults: the checks named [intro], [nothing new], [article], [length] and [edit] turn red too.
+  - *The developer's answers on round 16c and the plan's two features, guidance round 17* (Part A: `core/words.js`'s "The Ribeira Palace" and the
+    Guide block's title, `guide/autotour.js`'s teaser openings and one fact; Part B: `guide/saved-place.js`, `guide/tell-more.js`, the deep parts in
+    `guide/autotour.js`, the ways in of `card/hero.js`, `world/guide-button.js` and `guidance/`): `tests/test9t.js` also checks [name] "The Ribeira
+    Palace" as written on the hero, the marker, the wall's point and the teaser's start, "the Ribeira Palace" mid-sentence (the story's intro line, the
+    ✦ menu's and the pill's Ask about, Ask Azu's context to the model, stubbed); [one fact] the One fact set and the fact as a sentence ("Keep this one
+    in mind: it was lost on 1 November 1755.", PT "…: foi perdido a 1 de novembro de 1755."), two facts keeping the facts set; [teaser] the four tours
+    opening differently, EN and PT, each a line of the set, the length still said; [block] the Guide block's title naming the point on every card
+    (its base turns the saved place Off: its offer would change the hero's Start). `tests/test9u.js` and `tests/test9ub.js` (split to keep each file under 300 s: [expiry], [changed], [rows], [blocked]) check Part B through the app's own controls:
+    [deep] each step's deep part, the words its rule left out, only the card's words, none where there is nothing deeper; [facts] no fact twice with
+    every deep part heard (the test's own fact keys, the four points, EN and PT) and a card made for the deep pass; [minutes] the short version's
+    length, both in the Editor's list; [more] the chip only where there is more (44 px, inside the phone, above the panel), Next as Skip ahead, a
+    real tap: More coming, the deep part after the line, then on; [pace] three Tell me more in a row: deep first; three Skip ahead: lighter; Start
+    deep for: Everyone; [edit] a written step's Tell me more typed in Specific Marker said; [ask] "tell me more" typed (real keys) and spoken (the
+    recogniser stand-in), the model stubbed and never asked for it; [offer] a tour stopped at step 5, the page reloaded (a place is offered on the next visit only): the hero, the ✦ menu and A
+    tour of {point}? offering "Continue the tour (step 5 of 7)" and "Start again", PT too; [continue] each way in: "Where we were: …" (the step
+    before's words, no new fact), then that step; [again]; [finished]; [expiry] by Preview & Test › Today is (7, 30, 1 days, Never); [changed] the
+    step gone (the Gallery's 🗑) and another source (the Ribeira's Written), the notice once; [rows] Remember Off, Tell me more Off, each row's ▸;
+    [blocked] storage blocked: no error, nothing kept for the next visit, the Editor saying so; within a visit nothing is offered (round 11's Resume carries on). `MUTATE=1 node tests/test9t.js` also writes the name
+    without its article, says one fact with no line of its own, gives the teaser one opening and the Guide block its old title: [name], [one fact],
+    [teaser], [block] turn red; `MUTATE=1 node tests/test9u.js` takes the recap away (Continue from the start), never forgets a place, never goes
+    deep and turns the fact rule off: [continue], [pace] and [facts] turn red, and in test9ub [expiry].
   - *Every Editor row's demo, guidance round 10* (`editor/demo`, the rows' modules: `editor/card-tab`, `card/controls`, `card/blocks`,
     `card/pages`, `card/states`, `card/hints`, `editor/texts`, `editor/components`, `editor/marker-tab`, `mascot/azu2d`, `guidance/editor`):
     `tests/test9n.js` checks that the self-test's NO DEMO check walks every tab and finds no row without a demo but its named exemptions

@@ -108,7 +108,7 @@ function blockSays(b,lang){var w=kindWords(b),x=function(o){return wordIn(o,lang
     return{title:fl?wordIn(S.tx.fun_fact_label,lang):"",text:x(w.text),back:fl?x(w.back):"",flip:!!fl}}
   if(k==="Story"){var cw=b.c||{};return{title:x(cw.title||DEMO.title),text:x(cw.lede||DEMO.lede)}}
   if(k==="Timeline")return{events:(w.events||[]).map(function(e){return[e[0],x(e[1])]})};
-  if(k==="Gallery")return{cap:x(w.cap),n:w.n||4};
+  if(k==="Gallery")return{cap:x(w.cap),n:w.n||4,caps:(w.imgs||["g1","g2","g3","before"]).map(function(i){return PIC_CAPS[i]?x(PIC_CAPS[i]):""}).filter(Boolean)};
   if(k==="Knowledge Check")return{q:x(w.q),choices:(w.choices||[]).map(x)};
   if(k==="Poll")return{q:x(w.q),choices:(w.choices||[]).map(x)};
   if(k==="Practical Info")return{rows:(w.rows||[]).map(function(r){return[x(r[0]),x(r[1])]})};
@@ -159,7 +159,7 @@ var KPREV={
  "Feedback":function(){if(kopt("Feedback","answer")==="stars")return '<div class="fbk"><b>'+TXH("feedback_stars_question")+'</b><div class="stars">'+[1,2,3,4,5].map(function(n){return'<button type="button" aria-label="'+esc(fmt(TXT("feedback_star"),n,5))+'">&#9734;</button>'}).join("")+'</div></div>';
    return '<div class="fbk"><b>'+TXH("feedback_thumbs_question")+'</b><div class="thumbs2"><button type="button">&#128077; '+TXH("feedback_thumb_up")+'</button><button type="button">&#128078; '+TXH("feedback_thumb_down")+'</button></div></div>'},
  "Place In AR":function(){return '<div class="placear"><div class="arstill" style="background-image:url('+IMG.g1+')"></div><button type="button" class="arfocal">'+TXH("place_in_ar_button")+'</button><small>'+TXH("place_in_ar_not_localised")+'</small></div>'},
- "Wall Locator":function(){if(kopt("Wall Locator","look")==="neighbours")return '<div class="bt">'+TXH("wall_locator_heading")+'</div><div class="nbrs"><span>&#8592; Lisbon Cathedral</span><b>Ribeira Palace</b><span>St George\'s Castle &#8594;</span></div>';
+ "Wall Locator":function(){if(kopt("Wall Locator","look")==="neighbours")return '<div class="bt">'+TXH("wall_locator_heading")+'</div><div class="nbrs"><span>&#8592; Lisbon Cathedral</span><b>The Ribeira Palace</b><span>St George\'s Castle &#8594;</span></div>';
    return '<div class="bt">'+TXH("wall_locator_heading")+'</div><div class="wstrip"><i style="left:12%"></i><i style="left:34%"></i><i class="me" style="left:58%"></i><i style="left:81%"></i><em style="left:46%">'+TXH("wall_locator_you")+'</em></div>'},
  "Today Map":function(){var h=kopt("Today Map","look")==="thennow"?'<div class="tnmap"><div><small>'+TXH("today_map_then")+'</small><img alt="" src="'+IMG.g3+'"></div><div><small>'+TXH("today_map_now")+'</small>'+renderEl("map",defStyle("map"),{},0,true)+'</div></div>':renderEl("map",defStyle("map"),{},0,true);
    return '<div class="bt">'+TXH("today_map_heading")+'</div>'+h+'<div class="fmt">'+esc(fmt(TXT("today_map_coordinates"),"38.7075","-9.1364"))+'</div>'},

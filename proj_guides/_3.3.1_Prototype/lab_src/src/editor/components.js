@@ -11,7 +11,7 @@ function motionDemo(m){var ans=firstAnswer("motionDemo.answer",m);if(ans!==undef
   var head='<div class="mhead"><div><b>'+esc(m.name)+'</b>'+pathBadge(m.id)+'<small>'+esc(motionSummary(m))+'</small></div><button type="button" data-play="'+m.id+'">&#9654; Play</button></div>',body="";
   if(m.type==="entrance"){
     if(m.pieces==="words")body=wrapMv('<h3 class="el-title">'+esc(L(DEMO.title))+'</h3>',m,0);
-    else if(m.pieces==="letters")body=wrapMv('<h3 class="el-title a-centre">Ribeira Palace</h3>',m,0);
+    else if(m.pieces==="letters")body=wrapMv('<h3 class="el-title a-centre">The Ribeira Palace</h3>',m,0);
     else body=wrapMv('<div class="el-eyebrow t-family">'+esc(L(DEMO.eyebrow))+'</div>',m,0)+wrapMv('<h4 class="el-heading">'+esc(L(DEMO.heading))+'</h4>',m,1)+wrapMv('<p class="el-par" style="font-size:15px">'+esc(L(T("Later kings kept adding to it: a new wing and its corner tower, the Torreão.","Os reis seguintes foram acrescentando: uma nova ala e o seu torreão de canto.")))+'</p>',m,2)+wrapMv('<figure class="el-pic" style="margin:6px 0 0"><div class="fr" style="aspect-ratio:16/8"><img alt="" src="'+IMG.g2+'"></div></figure>',m,3);}
   else if(m.type==="transition")body='<div class="trv'+(m.style==="deck"?" deck":"")+'" data-trv="'+m.id+'" data-imgs="g1,g2,g3"></div><div class="ctrl"><button type="button" data-turn="-1">&#8249; Back</button><button type="button" data-turn="1">Next &#8250;</button></div>';
   else if(m.type==="scroll")body='<div class="mbox"><div class="pad">Scroll inside this box (or press Play)</div><figure class="el-pic"><div class="fr"><img alt="" src="'+IMG.g3+'" data-scroll="'+m.id+'"></div></figure><div class="pad">&#8595;</div><div class="pad"></div></div>';

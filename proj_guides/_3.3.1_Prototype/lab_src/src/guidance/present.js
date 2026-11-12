@@ -62,6 +62,8 @@ function gdWords(t){return String(t).split(/(\s+)/).map(function(w){return/^\s*$
 function gdBtnOf(it){return!it?null:it.cta?{word:it.cta,act:"card"}:it.button&&it.button!=="none"&&GD_BTN_WORD[it.button]?{word:GD_BTN_WORD[it.button],act:it.button}:null}
 function gdStays(c){return!!c&&!c.pull&&!c.cue&&(c.item.onScreen==="tap"||!!gdPrefs().stay)}
 function gdBubHtml(c){var bt=gdBtnOf(c.item),cta=bt?'<button type="button" class="gdcta" data-gdcta="'+bt.act+'">'+TXH(bt.word)+'<span aria-hidden="true">&#8250;</span></button>':"";
+  /* round 17: the invitation to continue a kept place has its second way: Start again */
+  if(c.slots&&c.slots.cont!=null&&c.item.tap==="tour")cta+='<button type="button" class="gdcta" data-gdcta="again">'+TXH("sv_again")+'<span aria-hidden="true">&#8250;</span></button>';
   var x=gdStays(c)?'<button type="button" class="gdx" data-gdx="1" aria-label="'+TXH("gd_dismiss")+'"><span aria-hidden="true">&#10005;</span></button>':"";
   return gdSign()+'<button type="button" data-gdbub="1">'+(c.spoken?gdWords(c.text):esc(c.text))+'</button>'+cta+x+'<i class="gdtail"></i>'}
 /* the tip on the phone: its elements made once, then placed (again at each paint of the wall: the marker moves with the picture) */
@@ -169,7 +171,7 @@ function gdTap(){var c=G.gd.cur;if(!c)return;var it=c.item;if(c.pull&&G.gd.demo)
     G.fab.menu=false;G.cam.open=true;renderPhone(true);emit("view.opened","Azu's remark");camAsk("",p&&p.year?"oldest":"what");camLight([pid]);return}
   if(it.tap==="menu"){gdStop("tapped: the ✦ menu opens","acted");gbMenu(true);return}
   if(it.tap==="hunt"){gdStop("tapped: the treasure hunt starts","acted");gdHuntGo("the hunt invitation");return}
-  if(it.tap==="tour"){gdStop("tapped: the tour of "+(c.slots.point||"the point")+" starts","acted");if(c.slots.id)pointOpen(c.slots.id);S.view="card";S.stop="half";renderPhone(false);emit("card.opened","the tour invitation");startTour();return}
+  if(it.tap==="tour"){var cont=c.slots.cont!=null;gdStop("tapped: the tour of "+(c.slots.point||"the point")+(cont?" continues at step "+c.slots.cont:" starts"),"acted");if(c.slots.id)pointOpen(c.slots.id);S.view="card";S.stop="half";renderPhone(false);emit("card.opened","the tour invitation");if(cont&&typeof svContinue==="function")svContinue(c.slots.id);else startTour();return}
   gdStop("tapped","acted")}
 function gdSwipe(dx){var c=G.gd.cur;if(!c)return;var b=ph.querySelector(".gdbub:not(.gd-out)");if(b){b.style.opacity="";if(!S.reduce)b.style.translate=(dx>0?1:-1)*Math.round(ph.offsetWidth*.7)+"px 0px"}
   if(c.pull){gdStop("swiped away (a demo)");return}gdStop("swiped away","dismissed")}
@@ -192,6 +194,8 @@ ph.addEventListener("pointermove",function(e){var p=G.gd.press;if(!p||e.pointerI
 /* an invitation's chip (How does this work? on the wall: Open a card): the card of the marker Azu points at opens, at its stop */
 function gdCta(act){var c=G.gd.cur;if(!c)return;var it=c.item,bt=gdBtnOf(it),w=bt?TXT(bt.word):"",M=gdTarget(it);act=act||bt&&bt.act||"card";
   if(act==="tour"){gdStop("tapped its button: "+w,"acted");S.stop="half";renderPhone(false);emit("card.opened","the tip's button");startTour();return}
+  /* round 17: Start again, beside the invitation to continue a kept place: that point's tour from its start */
+  if(act==="again"){gdStop("tapped: Start again (the tour of "+(c.slots.point||"the point")+" from its start)","acted");if(c.slots.id)pointOpen(c.slots.id);S.view="card";S.stop="half";renderPhone(false);emit("card.opened","the tour invitation");startTour();return}
   if(act==="view"){gdStop("tapped its button: "+w,"acted");G.fab.menu=false;G.cam.open=true;renderPhone(true);emit("view.opened","the tip's button");return}
   if(act==="hunt"){gdStop("tapped its button: "+w,"acted");gdHuntGo("the tip's button");return}
   /* Show me: the gesture on its target (the ghost finger, the ring), or How does this work? when it has no target */
