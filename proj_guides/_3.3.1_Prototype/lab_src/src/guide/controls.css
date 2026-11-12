@@ -11,3 +11,8 @@
 .gtoast.gtsv{flex-wrap:wrap;row-gap:8px;padding:8px 8px 8px 16px}
 .gtoast.gtsv .gtcont{order:3;flex:1 1 100%;padding:0 14px}
 .gtoast.gtsv .gtagain{background:transparent;color:#F4F1EA;border:1px solid rgba(244,241,234,.5);padding:0 14px}
+/* round 17c (the developer): the gold Continue full width, under it one quiet line of two text buttons (Start again · What next?), each 44 px */
+.gtoast.gtsv .gtquiet{order:4;flex:1 1 100%;display:flex;align-items:center;justify-content:center;gap:2px;margin:-4px 0 -2px}
+.gtoast.gtsv .gtquiet button{background:transparent;border:0;color:#E9E4DA;font:600 14px/1 var(--body);padding:0 14px;min-height:44px;min-width:44px;border-radius:10px;text-decoration:underline;text-decoration-color:rgba(244,241,234,.35);text-underline-offset:4px}
+.gtoast.gtsv .gtquiet button:focus-visible{outline:3px solid #FFD98A;outline-offset:-2px}
+.gtoast.gtsv .gtquiet .gtdot{width:3px;height:3px;border-radius:50%;background:rgba(244,241,234,.5);flex:none}

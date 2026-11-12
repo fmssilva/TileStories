@@ -165,9 +165,10 @@ var AT_INTRO_SETS=[["facts","The facts","Quick Facts"],["story","The story, as i
   ["other","Any other block","Dialogue, Poll, Status, Compare Points, Video, a story row with no heading…"],["end","The end","the tour's last words, after its recap: a thank-you and what to do next on the wall"],
   ["fact1","One fact","Quick Facts with a single fact left to tell: a line that leads into the fact, said as a sentence (“One thing worth knowing: it was lost on 1 November 1755.”)"],
   ["teaser","The teaser's opening","the teaser's second sentence, after the hook: {time} the tour's length (“short tour” under 2 minutes, else “tour of about N minutes”), {0} what the tour covers"],
-  ["morepics","A gallery's Tell me more","a gallery's deep part (Tell me more, round 17b): the warm lead into its pictures, {0} the pictures' own captions said one after another (“the square with the palace…, then the ruins the earthquake left and…”)"]];
+  ["morepics","A gallery's Tell me more","a gallery's deep part (Tell me more, round 17b): the warm lead into its pictures, {0} the pictures' own captions said one after another (“the square with the palace…, then the ruins the earthquake left and…”)"],
+  ["after","After the tour","Azu's question beside the What next? panel once the tour has ended (round 17c, guide/tour-end.js): warm, never a menu read out; {point} the point's name"]];
 /* the Editor's order of the sets (round 17: the teaser's opening first, one fact after the facts) */
-var AT_INTRO_SHOW=["teaser","facts","fact1","story","text","flip","callout","pics","morepics","dates","ba","quiz","back","other","end"];
+var AT_INTRO_SHOW=["teaser","facts","fact1","story","text","flip","callout","pics","morepics","dates","ba","quiz","back","other","end","after"];
 var AT_INTRO_DEF={};AT_INTRO_SETS.forEach(function(x){AT_INTRO_DEF[x[0]]=Object.keys(S.tx).filter(function(k){return k.indexOf("at_in_"+x[0]+"_")===0}).sort(function(p,q){return+p.split("_").pop()-+q.split("_").pop()})});
 S.guideCfg.atIntro=JSON.parse(JSON.stringify(AT_INTRO_DEF));S.guideCfg.atIntroCap=20;
 function atIntroSalt(set){var i=AT_INTRO_SETS.findIndex(function(x){return x[0]===set});return i<0?0:i}
@@ -511,7 +512,7 @@ function atIntroAdd(set){var ks=S.guideCfg.atIntro[set]=(S.guideCfg.atIntro[set]
   S.tx[k]={en:"",pt:""};(TXO.s7auto=TXO.s7auto||[]).push(k);TXOWN[k]="s7auto";TXP[k]="Intro · "+set+" "+n;TXW[k]="Azu's intro line for "+atIntroLabel(set).toLowerCase()+", added in the Editor (round 16c).";TXF[k]="";ks.push(k);renderEditor()}
 function atIntroReset(set){S.guideCfg.atIntro[set]=AT_INTRO_DEF[set].slice();AT_INTRO_DEF[set].forEach(function(k){var d=atTxDef(k);if(d)S.tx[k]=JSON.parse(JSON.stringify(d))});renderAll(true)}
 /* the demo of a line: the tour made from the open point's card, at the first step of that set, the line said there; none on this card: a chip says so */
-function atIntroDemo(set,key){var poi=S.m&&S.m.poi||"painting";G.atIntroForce={set:set,key:key};var gen=atSteps(poi),st=set==="morepics"?gen.filter(function(x){var d=x.at&&x.at.deeps&&x.at.deeps[S.lang];return d&&d.kind==="pics"})[0]:gen.filter(function(x){return x.at&&x.at.lk===set})[0]||(set==="teaser"?gen[0]:null);G.atIntroForce=null;
+function atIntroDemo(set,key){var poi=S.m&&S.m.poi||"painting";/* round 17c: After the tour plays the tour's end with that line (guide/tour-end.js) */if(set==="after"){teDemo("asks",{line:key});return}G.atIntroForce={set:set,key:key};var gen=atSteps(poi),st=set==="morepics"?gen.filter(function(x){var d=x.at&&x.at.deeps&&x.at.deeps[S.lang];return d&&d.kind==="pics"})[0]:gen.filter(function(x){return x.at&&x.at.lk===set})[0]||(set==="teaser"?gen[0]:null);G.atIntroForce=null;
   if(!st){if(G.on)stopTour();S.view="card";S.stop="full";renderPhone(false);if(typeof gdChip==="function"){gdChip("No step of "+nameMid(L(pointOf(poi).hero.title))+"'s tour opens with "+atIntroLabel(set).toLowerCase()+": its lines apply where one does");clearTimeout(G.atChipT);G.atChipT=setTimeout(function(){gdChip(null)},3200)}return}
   atDemoAt(null,st.id,{set:set,key:key});if(set==="morepics"&&G.on&&S.guideCfg.tmOn){S.dockH="mini";renderGuide();stopSpeech();G.tm.want=G.i;next()}}
 ed.addEventListener("click",function(e){var b=e.target.closest("[data-atin]");if(!b)return;e.stopPropagation();var q=b.dataset.atin.split("|");

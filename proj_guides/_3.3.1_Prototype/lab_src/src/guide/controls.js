@@ -15,7 +15,9 @@ on("runStep.after",function(){var st=S.guideSteps[G.i];if(st&&st.act==="end")G.r
    the one offer's words). Ask first: the tour pauses and asks ----- */
 function stopUiHtml(kind){if(kind==="ask")return'<b>'+TXH("guide_stop_ask")+'</b><div><button type="button" data-gstop="yes">'+TXH("guide_stop_yes")+'</button><button type="button" data-gstop="no">'+TXH("guide_stop_no")+'</button></div>';
   var of=svOffer()||{n:G.i+1,of:Math.max(1,svTour().length)};
-  return'<span>'+TXH("guide_stopped")+'</span><button type="button" class="gtcont" data-gstop="resume">'+esc(svLabel(of))+'</button><button type="button" class="gtagain" data-gstop="again">'+TXH("sv_again")+'</button>'}
+  /* round 17c (the developer): under the gold Continue, one quiet line: Start again and What next? (the tour's end panel, paused: guide/tour-end.js) */
+  return'<span>'+TXH("guide_stopped")+'</span><button type="button" class="gtcont" data-gstop="resume">'+esc(svLabel(of))+'</button><div class="gtquiet"><button type="button" class="gtagain" data-gstop="again">'+TXH("sv_again")+'</button>'+
+    (typeof teOpenPaused==="function"&&S.guideCfg.teOn?'<i class="gtdot" aria-hidden="true"></i><button type="button" class="gtnext" data-gstop="next">'+TXH("te_title")+'</button>':"")+'</div>'}
 function hideStopUi(){clearTimeout(G.toastT);ph.querySelectorAll(".gtoast,.gstopask").forEach(function(x){x.remove()})}
 /* above whatever is at the foot of the phone: the dock, the guide's button, the Navigation Bar */
 function placeStopUi(d){var pr=ph.getBoundingClientRect(),q=pr.height/ph.offsetHeight,top=ph.offsetHeight-12;
@@ -26,7 +28,7 @@ function stopUi(kind){hideStopUi();var d=document.createElement("div");d.classNa
 on("stopTap.answer",function(){if(!G.on)return;if(S.guideCfg.stopUndo==="ask"){G.explicitPause=true;pauseTour();G.explicitPause=false;stopUi("ask");return true}
   keepResume();stopTour();stopUi("toast");return true});
 ph.addEventListener("click",function(e){var t=e.target.closest("[data-gstop]");if(!t)return;e.stopPropagation();var k=t.dataset.gstop;
-  if(k==="resume"){svContinue();return}if(k==="again"){hideStopUi();startTour();return}hideStopUi();if(k==="yes"){keepResume();stopTour()}else if(k==="no")resumeTour()},true);
+  if(k==="resume"){svContinue();return}if(k==="again"){hideStopUi();startTour();return}if(k==="next"){hideStopUi();teOpenPaused();return}hideStopUi();if(k==="yes"){keepResume();stopTour()}else if(k==="no")resumeTour()},true);
 /* a start from the start (not a demo's tour) is Start again: this visit's place goes (round 17b; the next visit's: guide/saved-place.js) */
 on("startTour.before",function(from){hideStopUi();if(!from&&!(G.demoTour||G.atForce||S.howSaved))G.resumeAt=null});
 /* ----- Previous: mid-sentence it says the sentence again from its first word; a second tap within 2 s goes to the step before ----- */

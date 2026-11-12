@@ -312,7 +312,38 @@ var LABSTR=[["tour_promise", "gd:i:quizpromise", "The quiz promise, after the in
   ["sv_again", "s7resume", "Beside the offer (the Stop toast, the ✦ menu, the hero, the invitation's chip): the tour from its start (round 17).", "Start again", "Começar de novo", "", "Start again"],
   ["sv_recap", "s7resume", "Said before the step a visitor continues at: one line from the step before, no new fact ({0} its words; round 17).", "Where we were: {0}.", "Onde íamos: {0}.", "", "Recap"],
   ["sv_changed", "s7resume", "Said once, before the teaser, when the tour changed since the visitor stopped (another written tour, or its step gone; round 17).", "This tour has changed since your last visit, so let's start from the beginning.", "Esta visita mudou desde a última vez, por isso vamos começar do início.", "", "Changed"],
-  ["gd_tourof_cont", "gd:i:tourof", "The invitation when the visitor stopped this point's tour on an earlier visit ({point} its name, {step} the step, {of} the steps; round 17): a tap continues, its chip Start again.", "Continue the tour of {point} (step {step} of {of})?", "Continuar a visita a {point} (passo {step} de {of})?", "", "Says · a saved place"]];
+  ["gd_tourof_cont", "gd:i:tourof", "The invitation when the visitor stopped this point's tour on an earlier visit ({point} its name, {step} the step, {of} the steps; round 17): a tap continues, its chip Start again.", "Continue the tour of {point} (step {step} of {of})?", "Continuar a visita a {point} (passo {step} de {of})?", "", "Says · a saved place"],
+  /* round 17c: the tour's end. Azu's question after the tour (Azu's intro lines › After the tour, a set picked by the point, as the others) and the
+     What next? panel's words (Guide › 2 · The tour › The tour's end, owner s7end) */
+  ["at_in_after_1", "s7auto", "Azu's question beside the What next? panel after a tour (round 17c; one of its set, picked by the point; {point} the point's name).", "So, what would you like to do now?", "Então, o que gostaria de fazer agora?", "", "After the tour 1"],
+  ["at_in_after_2", "s7auto", "Azu's question beside the What next? panel after a tour (round 17c; one of its set, picked by the point; {point} the point's name).", "So, where shall we go next?", "Então, para onde vamos agora?", "", "After the tour 2"],
+  ["at_in_after_3", "s7auto", "Azu's question beside the What next? panel after a tour (round 17c; one of its set, picked by the point; {point} the point's name).", "I loved showing you {point}. What shall we do now?", "Adorei mostrar-lhe {point}. O que fazemos agora?", "", "After the tour 3"],
+  ["at_in_after_4", "s7auto", "Azu's question beside the What next? panel after a tour (round 17c; one of its set, picked by the point; {point} the point's name).", "There's more to discover around here. Where to next?", "Há mais para descobrir por aqui. Para onde vamos a seguir?", "", "After the tour 4"],
+  ["te_title", "s7end", "The What next? panel's name: its small pill when minimal, and the ✦ menu's item that brings it back (round 17c).", "What next?", "O que fazer a seguir?", "", "Name"],
+  ["te_paused", "s7end", "The panel's header when it opens from the Stop bar's What next? ({0} the step, {1} the tour's steps; round 17c, the developer).", "Tour paused · step {0} of {1}", "Visita em pausa · passo {0} de {1}", "", "Header · paused"],
+  ["te_done", "s7end", "The panel's header after a tour ({0} its length, “2 min”; round 17c).", "Tour complete · {0}", "Visita concluída · {0}", "", "Header"],
+  ["te_done_short", "s7end", "The panel's header after a tour under 2 minutes (round 17c).", "Short tour complete", "Visita curta concluída", "", "Header · short"],
+  ["te_score", "s7end", "Beside the header's star when the quiz was played ({0} right, {1} questions; round 17c).", "{0} of {1}", "{0} de {1}", "", "Quiz score"],
+  ["te_ask_ph", "s7end", "The panel's question field ({point} the point's name; round 17c).", "Ask about {point}…", "Pergunte sobre {point}…", "", "Ask field"],
+  ["te_mic", "s7end", "The panel's microphone button, read by screen readers (round 17c).", "Ask by voice", "Perguntar por voz", "", "Microphone"],
+  ["te_qs", "s7end", "The suggested questions' row, read by screen readers (round 17c).", "Questions you could ask", "Perguntas que pode fazer", "", "Questions row"],
+  ["te_near", "s7end", "The nearby points' row, read by screen readers (round 17c).", "Explore nearby", "Explorar por perto", "", "Nearby row"],
+  ["te_min", "s7end", "The panel's chevron, read by screen readers: makes it the small pill (round 17c).", "Make it smaller", "Reduzir", "", "Chevron"],
+  ["te_close", "s7end", "The pill's ×, read by screen readers: closes What next? (round 17c).", "Close", "Fechar", "", "Close"],
+  ["te_again", "s7end", "Small actions: the tour from its start (round 17c).", "Start again", "Começar de novo", "", "Start again"],
+  ["te_quiz", "s7end", "Small actions: the card's quiz, while it is not played (round 17c).", "Play the quiz", "Fazer o quiz", "", "Play the quiz"],
+  ["te_done_btn", "s7end", "Small actions: closes the panel; the ✦ menu offers What next? until the visitor leaves the point (round 17c).", "Done", "Concluído", "", "Done"],
+  ["te_why_palace", "s7end", "A nearby card's reason: a point of the same palace (round 17c).", "Part of this palace", "Parte deste paço", "", "Why · palace"],
+  ["te_why_square", "s7end", "A nearby card's reason: a point on the same square (round 17c).", "On the same square", "Na mesma praça", "", "Why · square"],
+  ["te_why_near", "s7end", "A nearby card's reason: among the nearest on the wall ({0} what it offers; round 17c).", "Nearby · {0}", "Perto · {0}", "", "Why · nearby"],
+  ["te_why_pick", "s7end", "A nearby card's reason: the Editor's own pick for this point ({0} what it offers; round 17c).", "Recommended · {0}", "Recomendado · {0}", "", "Why · a pick"],
+  ["te_len", "s7end", "What a nearby point offers: its tour ({0} its minutes; round 17c).", "{0} min tour", "visita de {0} min", "", "Offers · a tour"],
+  ["te_len_short", "s7end", "What a nearby point offers: a tour under 2 minutes (round 17c).", "short tour", "visita curta", "", "Offers · a short tour"],
+  ["te_len_view", "s7end", "What a nearby point with no card offers: Ask about the view about it (round 17c).", "ask Azu", "pergunte ao Azu", "", "Offers · ask"],
+  ["te_tq_heading", "s7end", "A suggested question from a heading that asks (“What was inside”; {0} the heading, {point} the point's name; round 17c).", "{0} {point}?", "{0} de {point}?", "", "Template · a heading that asks"],
+  ["te_tq_year", "s7end", "A suggested question from a date of the card (a timeline's, a fact's; {0} the year; round 17c).", "What happened in {0}?", "O que aconteceu em {0}?", "", "Template · a date"],
+  ["te_tq_who", "s7end", "A suggested question from a king or queen the card names ({0} the name; round 17c).", "Who was {0}?", "Quem foi {0}?", "", "Template · a person"],
+  ["te_tq_more", "s7end", "A suggested question from a heading or a name of the card ({0} it; round 17c).", "Tell me about {0}", "Fale-me de {0}", "", "Template · a heading or a name"]];
 S.tx={};var TXO={},TXW={},TXF={},TXP={},TXNEW={},TXOWN={},TXRET=[];
 REALSTR.concat(LABSTR).forEach(function(r){S.tx[r[0]]={en:r[3],pt:r[4]};TXW[r[0]]=r[2];TXF[r[0]]=r[5]||"";TXP[r[0]]=r[6]||"";TXOWN[r[0]]=r[1];
   if(r[1]==="retired")TXRET.push(r[0]);else(TXO[r[1]]=TXO[r[1]]||[]).push(r[0])});

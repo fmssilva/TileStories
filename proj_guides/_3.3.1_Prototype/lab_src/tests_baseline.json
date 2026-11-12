@@ -376,5 +376,12 @@
   "failed": [],
   "crashed": "",
   "s": 136
+ },
+ "test9v.js": {
+  "pass": 27,
+  "fail": 0,
+  "failed": [],
+  "crashed": "",
+  "s": 256
  }
 }

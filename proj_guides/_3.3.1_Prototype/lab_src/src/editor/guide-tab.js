@@ -33,7 +33,7 @@ var GUIDE_PLAN={
     {words:"s7mascot"}],
   gt1:[{rules:1},{fo:"s7auto"},{fo:"s7more"},{fo:"s7voice"},{fo:"s7cap"},{fo:"s7focus"},{fo:"s7coach"},
     {fo:"s7dock",add:[{h:"Tour controls",s:"previous, pause, next, sound, captions, Ask and stop: their words"},{words:"s7tour"}]},
-    {fo:"gt:ways",t:"Ways in",s:"how a visitor starts the tour, or picks it up again",parts:[{fo:"s7gbtn"},{fo:"s7hero"},{fo:"s7block"},{fo:"s7resume"}]}],
+    {fo:"gt:ways",t:"Ways in",s:"how a visitor starts the tour, or picks it up again",parts:[{fo:"s7gbtn"},{fo:"s7hero"},{fo:"s7block"},{fo:"s7resume"}]},{fo:"s7end"}],
   gt3:[{fo:"s7ask",t:"What the visitor sees",s:"the question box, Ask about the view, the answers and how they sound",parts:[{from:"s7ask"},"Answers from",{fo:"s7cam"},{from:"s7agent"},
       "Spoken answer","Voice of the answers","Link cards","Trace under each answer",{h:"The panel's words",s:"the question box, the mic, Ask's title"},{words:"s7ask"},{h:"The answers' words",s:"under an answer, its chips, its notes"},{words:"s7agent"}]},
     {fo:"gt:know",t:"Knowledge",s:"what Azu answers from, and what it may do in the app",parts:[{from:"s7agent"},"App context","",{cls:"agpre"},"Photo of the view","Library","General knowledge",

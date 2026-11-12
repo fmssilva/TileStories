@@ -7,7 +7,9 @@ var GBSTAR='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 3.2c.65 4.9
   GBICO={again:'<path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v4h4"/>',quiz:'<path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/>',tour:'<path d="M8 5l11 7-11 7z"/>',ask:'<path d="M5 6h14v9H9l-4 3.5z"/>',view:'<path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.6"/>',settings:'<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
   how:'<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.4 2.3c-.7.3-1 .8-1 1.5v.4"/><path d="M12 16.6v.4"/>',
   /* round 9: Things to try, a checklist */
-  try:'<path d="M4 7.5l1.8 1.8L9.2 6"/><path d="M12.5 8h7.5"/><path d="M4 15.5l1.8 1.8 3.4-3.3"/><path d="M12.5 16h7.5"/>'};
+  try:'<path d="M4 7.5l1.8 1.8L9.2 6"/><path d="M12.5 8h7.5"/><path d="M4 15.5l1.8 1.8 3.4-3.3"/><path d="M12.5 16h7.5"/>',
+  /* round 17c: What next? (a compass), after a tour ended on this point */
+  next:'<circle cx="12" cy="12" r="8.5"/><path d="M15.4 8.6l-2 5.2-4.8 1.6 2-5.2z"/>'};
 /* guidance round 15b, the developer (2026-11-11): Mascot Off (Guide › 1 · Azu › Mascot) is the ✦ alone: no Azu picture beside it, on the
    card and on the wall (Guide button = Azu only shows the ✦ then); a guide bubble with no Azu beside it carries a small ✦ (guidance/present.js) */
 function gbOn(){return S.guideCfg.gbtn!=="azu"||S.guideCfg.mascot===false}
@@ -62,14 +64,17 @@ function placeNear(d){var w=ph.querySelector(".gbtn-wrap");if(!w)return;var pr=p
 function gbItems(){var wall=S.stop==="closed",out=[],hw=gdGroupById("howto");if(!wall||S.camCfg.wall==="ribeira"){out.push("tour");/* round 17b: the one offer (a Stop in this visit, or a place kept from an earlier visit): Continue the tour (the tour item) and Start again */if(!G.on&&svOffer())out.push("again")}out.push("ask");if(wall&&S.camCfg.on)out.push("view");if(hw&&hw.on!==false&&hw.inMenu)out.push("how");
   if(S.guidance.tryMenu!==false&&gdTryDefs().length)out.push("try");
   /* guidance round 12: the tour stopped for good before its promised quiz: Your 3 questions (from the steps heard), for the rest of the visit */
-  if(typeof gdQuizOwed==="function"&&gdQuizOwed())out.splice(1,0,"quiz");out.push("settings");return out}
+  if(typeof gdQuizOwed==="function"&&gdQuizOwed())out.splice(1,0,"quiz");out.push("settings");
+  /* round 17c: after a tour ended here, What next? comes first until the visitor leaves the point (guide/tour-end.js) */
+  if(!G.on&&typeof teOffered==="function"&&teOffered())out.unshift("next");return out}
 function gbMenuHtml(){var c=camView().central;return'<div class="gbmenu" role="menu" aria-label="'+TXH("gb_name")+'">'+gbItems().map(function(k){
-    var sv=k==="tour"&&!G.on?svOffer():null,t=k==="again"?TXH("sv_again"):k==="tour"?(sv?esc(svLabel(sv))+(sv.title?'<small>'+esc(sv.title)+'</small>':""):TXH("gb_start")+' · '+esc(tourLength(tourMinutes()))):k==="view"?esc(c?nameIn(TXT("gb_view_about"),"{0}",c.name):TXT("gb_view")):k==="how"?TXH("gd_how"):k==="try"?TXH("gd_try"):k==="quiz"?esc(fmt(TXT("tour_menu_quiz"),gdQuizOwed())):TXH("gb_"+k);
+    var sv=k==="tour"&&!G.on?svOffer():null,t=k==="again"?TXH("sv_again"):k==="tour"?(sv?esc(svLabel(sv))+(sv.title?'<small>'+esc(sv.title)+'</small>':""):TXH("gb_start")+' · '+esc(tourLength(tourMinutes()))):k==="view"?esc(c?nameIn(TXT("gb_view_about"),"{0}",c.name):TXT("gb_view")):k==="how"?TXH("gd_how"):k==="try"?TXH("gd_try"):k==="quiz"?esc(fmt(TXT("tour_menu_quiz"),gdQuizOwed())):k==="next"?TXH("te_title"):TXH("gb_"+k);
     return'<button type="button" role="menuitem" data-gbgo="'+k+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+GBICO[k]+'</svg><span>'+t+'</span></button>'}).join("")+'</div>'}
 function gbMenu(open){var was=G.fab.menu;G.fab.menu=open==null?!G.fab.menu:open;fabLayer();if(G.fab.menu&&!was)emit("menu.opened","the ✦")}
 function gbGo(k){G.fab.menu=false;
   if(k==="tour"){if(!G.on&&svOffer())svContinue();else startTour();return}
   if(k==="again"){startTour();return}
+  if(k==="next"){teSet("open");return}
   if(k==="ask"){startTour();pauseTour();G.askOpen=true;S.dockH="full";renderGuide();var i=ph.querySelector("#gq");if(i)i.focus({preventScroll:true});return}
   if(k==="how"){fabLayer();gdWalk("the ✦ menu");return}
   if(k==="try"){fabLayer();gdTryOpen("the ✦ menu");return}
