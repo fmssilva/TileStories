@@ -17,7 +17,8 @@ var G={on:false,i:0,paused:false,waiting:false,timer:null,utter:null,words:[],mu
    one when none) as a module answers (guidance round 16: a tour made from the card, its words at the voice's speed), else the written
    tour's 3 */
 function tourMinutes(id){var m=firstAnswer("tourMinutes.answer",id);return m!==undefined?m:3}
-/* a tour's length in words (round 16b, the developer): under 2 minutes "short", from 2 its minutes ("3 min") */
+/* a tour's length in words (round 16b, the developer): under 2 minutes "short", from 2 its minutes ("3 min"); round 16c (the developer:
+   the minutes everywhere): the hero's button, the Guide block's line and the ✦ menu's Start the tour all say it */
 function tourLength(m){return+m<2?TXT("guide_duration_short"):fmt(TXT("guide_duration"),m)}
 function stepText(st){if(st.text)return L(st.text);var r=byId(S.story,st.ref.slice(2));return r&&r.c?L(r.c.text):""}
 /* ----- the music bed (round 11): a track that loops under the voice and ducks while Azu speaks. Music volume 0-100 % (15), Under the
@@ -117,7 +118,7 @@ function renderGuide(text){["gbar","gcap","mascot","gask","gresume"].forEach(fun
 /* ----- hooks into the card: hero button, Guide block, gestures, take-over ----- */
 on("cardScreen.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   if(S.guideCfg.heroButton){var w=d.querySelector(".hero .w");if(w)w.insertAdjacentHTML("beforeend",'<button type="button" class="gstart" data-g="start">&#9654; '+TXH("guide_start")+' · '+esc(tourLength(tourMinutes()))+'</button>')}
-  if(S.guideCfg.block){var ab=d.querySelector('[data-ref="sec:about"] .ey');if(ab)ab.insertAdjacentHTML("afterend",'<div class="item" data-ref="b:b_guide"><button type="button" class="gblock" data-g="start"><span class="gm">'+(S.guideCfg.mascot?mascotStill():sicon("play",48))+'</span><span><b>'+(TXH("guide_block_title"))+'</b><small>'+(TXH("guide_block_line"))+'</small></span></button></div>')}
+  if(S.guideCfg.block){var ab=d.querySelector('[data-ref="sec:about"] .ey');if(ab)ab.insertAdjacentHTML("afterend",'<div class="item" data-ref="b:b_guide"><button type="button" class="gblock" data-g="start"><span class="gm">'+(S.guideCfg.mascot?mascotStill():sicon("play",48))+'</span><span><b>'+(TXH("guide_block_title"))+'</b><small>'+esc(fmt(TXT("guide_block_line"),tourLength(tourMinutes())))+'</small></span></button></div>')}
   return d.innerHTML});
 ph.addEventListener("click",function(e){var t=e.target,g=t.closest("[data-g]");
   if(t.closest("[data-flip]"))gesture("flip");if(t.closest(".kq button"))gesture("answer");

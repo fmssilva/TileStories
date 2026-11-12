@@ -29,9 +29,22 @@
 //   15's family), the four tours and the written tour's g0; the hero's Start button hidden while a tour plays, back after it.
 // [crop] each new point's hero, a crop of the wall painting around its own point (the wall's file, its size and offset by the test's own
 //   arithmetic, the point inside the hero where the crop puts it), at Full and at Half, three different crops, kept during the teaser.
+// Guidance round 16c (the developer's answers, 2026-11-12):
+// [intro] every step's intro line from its kind's set (the Editor's lines, as the test reads them from the words), at its step's start,
+//   never twice in a tour, the point's name in at most two (a set made all {point} lines: the third says "this place" / "este lugar"),
+//   under its cap (20 words), EN and PT, the four points; a line ending with : leads into the block's own words (lower case), the content
+//   kept (the caption, the date, the heading); none of round 16's or 16b's robot links; the Editor's step list shows each intro and its set.
+// [nothing new] a block with nothing new has no step (Ribeira's Quick Facts): the Editor's list shows it skipped, named, with why.
+// [article] the Portuguese names carry their article: "O Paço da Ribeira", "O Terreiro do Paço" (the hero, the marker); mid-sentence
+//   lower case, joined to a preposition ("Uma visita curta ao Terreiro do Paço?", the real invitation about the point in the middle).
+// [length] the ✦ menu's Start the tour and the Guide block's line say the tour's length as the hero's button and the invitation do.
+// [edit] an intro line edited in the Editor (typed in its EN box) is said by the next generated tour; + Add a line, Remove, Back to the
+//   defaults by real clicks; the row's ▸ plays the tour at that step, that line said.
 // MUTATE=1: the teaser dropped, a block left out and a link said twice in a row; and (16b) the fact rule off, the neutral link back to
-//   "Look at this.", the short-tour words off, the hero left at the top with its Start button shown, the crop off: the checks named
-//   [teaser], [blocks], [links], [facts], [short], [hero words] and [crop] turn red.
+//   "Look at this.", the short-tour words off, the hero left at the top with its Start button shown, the crop off; (16c) an intro line said
+//   twice, a step for the Quick Facts with nothing new and no row saying why, the PT names without their article, the Guide block's fixed
+//   "3 min", the intro lines read from their defaults (an edit never said): the checks named [teaser], [blocks], [links], [facts], [short],
+//   [hero words], [crop], [intro], [nothing new], [article], [length] and [edit] turn red.
 const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
@@ -42,13 +55,16 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const until = async (src, ms) => { const t0 = Date.now(); while (Date.now() - t0 < ms) { if (await R(src)) return true; await W(60); } return false; };
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info).slice(0, 900) : '')); };
   const T0 = Date.now(), tsec = s => console.log('TIME ' + s + ' ' + Math.round((Date.now() - T0) / 1000) + ' s');
-  const MUT = 'atKnown=function(){return false};S.tx.at_link={en:"Look at this.",pt:"Repare nisto."};S.tx.gd_tourof_short={en:"",pt:""};S.tx.at_cover_short={en:"In about 1 minutes: {0}.",pt:"Em cerca de 1 minutos: {0}."};' +
+  const MUT = 'atKnown=function(){return false};S.tx.gd_tourof_short={en:"",pt:""};S.tx.at_cover_short={en:"Come along for about 1 minutes: {0}.",pt:"Venha comigo durante cerca de 1 minutos: {0}."};' +
+    'S.tx.guide_block_line={en:"Narrated tour · 3 min · ask anything, any time",pt:"Visita narrada · 3 min · pergunte a qualquer momento"};atSkipRows=function(){return""};' +
+    'S.wallPois.concat(WALLS.ribeira.markers).forEach(function(x){if(x.name&&x.name.pt)x.name.pt=x.name.pt.replace(/^O /,"")});S.hero.title.pt="Paço da Ribeira";POINTS.square.hero.title.pt="Terreiro do Paço";' +
+    'atIntroLines=function(set,lang){return(AT_INTRO_DEF[set]||[]).map(function(k,i){var o=atTxDef(k)||{};return{key:k,i:i,text:String(wordIn(o,lang)),name:/\\{point\\}/.test(o.en+o.pt),max:10}}).filter(function(x){return x.text})};' +
     'tourLength=function(m){return fmt(TXT("guide_duration"),m)};heroWords=function(){return null};heroCropOf=function(){return null};document.head.insertAdjacentHTML("beforeend","<style>#ph.touring .hero .hact,#ph.touring .hero .gstart{visibility:visible!important}</style>");' +
-    'var _tf=tourFromCard;tourFromCard=function(c,s,l,o){var st=_tf(c,s,l,o),sk=st.skipped,sd=st.said;st.shift();var g=st.findIndex(function(x){return x.at&&x.at.kind==="Gallery"});if(g>=0)st.splice(g,1);' +
+    'var _tf=tourFromCard;tourFromCard=function(c,s,l,o){var st=_tf(c,s,l,o),sk=st.skipped,sd=st.said;st.shift();var g=st.findIndex(function(x){return x.at&&x.at.kind==="Gallery"});if(g>=0)st.splice(g,1);var qf=c.filter(function(b){return b.kind==="Quick Facts"&&sd&&sd[b.id]})[0];if(qf)st.splice(1,0,{id:"a:"+qf.id,view:"card",ref:"b:"+qf.id,act:"show",text:"First, the facts.",at:{key:"a:"+qf.id,block:qf.id,kind:"Quick Facts",body:"",units:[],gen:true}});' +
     'var ls=st.map(function(x,i){return x.at&&x.at.link?i:-1}).filter(function(i){return i>=0});if(ls.length>1){var a=st[ls[0]],z=st[ls[1]];z.text=z.text.replace(z.at.link,a.at.link);z.at.link=a.at.link}st.skipped=sk;st.said=sd;return st};""';
   const load = async () => { await p.goto('about:blank'); await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 150000 }); await W(600); if (process.env.MUTATE) await R(MUT); };
   await load();
-  if (process.env.MUTATE) console.log('MUTATION: the teaser dropped, the Gallery\'s step left out, the second link said as the first; the fact rule off, the neutral link "Look at this.", no short-tour words, the hero left at the top with its Start button, no crop');
+  if (process.env.MUTATE) console.log('MUTATION: the teaser dropped, the Gallery\'s step left out, the second intro said as the first; the fact rule off, no short-tour words, the hero left at the top with its Start button, no crop; a Quick Facts step with nothing new, the PT names without their article, the Guide block\'s fixed 3 min, the intro lines from their defaults');
   const base = `SCREENS.phone=[390,844];if(G.on)stopTour();S.previewBar=false;S.hints.on=false;S.lang="en";S.guideMute=true;S.introSeen=true;S.reduce=false;S.dark=false;S.cardCfg.mode="light";
     S.guideCfg.voice="device";S.guideCfg.look="ink";S.ui.rowDemo=false;S.guideCfg.music=false;S.vis.music=null;S.agentCfg.voiceOut=false;G.gd.manual=true;""`;
   await R(base);
@@ -59,7 +75,8 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await p.click('[data-fo="s7auto"] [data-set="@tours.painting.src"][data-v="card"]'); await W(400);
   const DATA = `(function(){var st=S.guideSteps,lang=S.lang;return JSON.stringify({src:atSrc(),min:tourMinutes(),name:wordIn(S.hero.title,"en"),namePt:wordIn(S.hero.title,"pt"),hero:(scr.querySelector(".hero .gstart")||{}).textContent,
     card:S.card.map(function(b){return{id:b.id,kind:b.kind}}),said:Object.keys(atSteps(null,true).said||{}),rules:S.guideCfg.atRule,cap:S.guideCfg.atCap,tcap:S.guideCfg.atTeaserCap,
-    steps:st.map(function(s){return{id:s.id,act:s.act,ref:s.ref,view:s.view,wait:s.wait||"",en:s.text.en,pt:s.text.pt,link:s.at&&s.at.link||"",block:s.at&&s.at.block||null,kind:s.at&&s.at.kind||null}}),
+    steps:st.map(function(s){return{id:s.id,act:s.act,ref:s.ref,view:s.view,wait:s.wait||"",en:s.text.en,pt:s.text.pt,link:s.at&&s.at.link||"",block:s.at&&s.at.block||null,kind:s.at&&s.at.kind||null}}),icap:+S.guideCfg.atIntroCap,
+    other:(S.guideCfg.atIntro.other||[]).map(function(k){return wordIn(S.tx[k],"en")}),
     page:langCodes().map(function(l){var g=atSteps(null,true),x=g.map(function(s){return Object.assign({},s,{text:s.text[l]})});x.said=g.said;return atCheck(x,l,Object.assign(atOpts(null,l),{rules:S.guideCfg.atRule})).filter(function(c){return!c.ok}).map(function(c){return l+":"+c.rule})})})})()`;
   const d = JSON.parse(await R(DATA));
   const words = t => (String(t).match(/\S+/g) || []).length, sents = t => String(t).trim().split(/(?<=[.!?…])\s+/).filter(Boolean), norm = s => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
@@ -70,9 +87,9 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
       const secs = st.reduce((a, s) => a + Math.max(1, words(s[l])) * 60 / 170 + .7, 0), mins = Math.max(1, Math.ceil(secs / 60 - .15));
       const name = l === 'en' ? d.name : d.namePt || '';
       out[l] = {
-        teaser: t0.act === 'teaser' && t0.ref === 'hero' && sents(tx).length <= 2 && tx.indexOf(name) >= 0 && (mins < 2 ? /In a short tour:|Numa visita curta:/.test(tx) && !/\d+ min/.test(tx) : tx.indexOf(String(mins)) >= 0),
+        teaser: t0.act === 'teaser' && t0.ref === 'hero' && sents(tx).length <= 2 && tx.indexOf(name) >= 0 && (mins < 2 ? /Come along on a short tour:|Venha comigo numa visita curta:/.test(tx) && !/\d+ min/.test(tx) : tx.indexOf(String(mins)) >= 0),
         mins, secs: Math.round(secs),
-        cap: st.every((s, i) => words(s[l]) <= (i === 0 ? d.tcap : d.cap + 12)),
+        cap: st.every((s, i) => words(s[l]) <= (i === 0 ? d.tcap : d.cap + 12 + d.icap)),
         twice: (() => { const seen = {}; let dup = []; st.forEach(s => sents(s[l]).forEach(x => { const k = norm(x); if (seen[k]) dup.push(x); seen[k] = 1 })); return dup })(),
         links: st.filter(s => s.link).map(s => s.link).filter((x, i, a) => i && a[i - 1] === x)
       };
@@ -87,7 +104,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('[teaser] Ribeira, From the card (the Guide tab\'s own row): step 0 is the teaser at the hero, two sentences at most, the point\'s name, the minutes it says, EN and PT', before.src === 'written' && d.src === 'card' && j.en.teaser && j.pt.teaser, { before, src: d.src, en: d.steps[0] && d.steps[0].en, pt: d.steps[0] && d.steps[0].pt, mins: j.en.mins });
   ok('[blocks] every block with something to tell has its step, in the card\'s order (the story with its rows)', j.blocks.inOrder && j.blocks.tell.length >= 5, j.blocks);
   ok('[skip] the kinds with nothing to tell have no step (Audio Guide, Practical Info)', j.skipped.length >= 2 && j.skipped.every(x => /:0$/.test(x)) && j.skipped.some(x => /^Audio Guide/.test(x)) && j.skipped.some(x => /^Practical Info/.test(x)), j.skipped);
-  ok('[cap] each line under its cap (the teaser 45 words, a step 40 and its link), EN and PT', j.en.cap && j.pt.cap, d.steps.map(s => words(s.en) + '/' + words(s.pt)));
+  ok('[cap] each line under its cap (the teaser 45 words, a step 40 and its intro line, 20), EN and PT', j.en.cap && j.pt.cap, d.steps.map(s => words(s.en) + '/' + words(s.pt)));
   ok('[twice] no sentence said twice, EN and PT', !j.en.twice.length && !j.pt.twice.length, [j.en.twice, j.pt.twice]);
   ok('[links] no two links in a row the same, EN and PT; the links varied (at least 4 different)', !j.en.links.length && !j.pt.links.length && new Set(d.steps.map(s => s.link).filter(Boolean)).size >= 4, d.steps.map(s => s.link).filter(Boolean));
   ok('[minutes] the minutes computed from the words at the voice\'s speed: tourMinutes() = the test\'s own sum, said by the teaser and the hero\'s button (the written tour said 3)', d.min === j.en.mins && before.min === 3 && (d.min < 2 ? /· short$/.test(d.hero) : d.hero.indexOf('· ' + d.min + ' min') >= 0), { min: d.min, test: j.en.mins, secs: j.en.secs, hero: d.hero });
@@ -102,7 +119,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await p.click('[data-fo="mcard"] [data-cadd="Dialogue"]'); await until('S.card.some(function(b){return b.kind==="Dialogue"})', 3000);
   const f = JSON.parse(await R(DATA)), jf = judge(f), fsaid = JSON.parse(await R('JSON.stringify(Object.keys(atSteps(null,true).said||{}))'));
   const tl = f.card.filter(c => c.kind === 'Timeline')[0], tlStep = tl && f.steps.filter(s => s.block === tl.id)[0], dl = f.card.filter(c => c.kind === 'Dialogue')[0], dlStep = dl && f.steps.filter(s => s.block === dl.id)[0], endI = f.steps.findIndex(s => s.act === 'end');
-  ok('[follows] [facts] the Gallery removed (its 🗑), a Timeline and a Dialogue added (+ Timeline, + Dialogue) by Specific Marker\'s controls: no Gallery step; the Timeline none (its dates c. 1500, 1580s and 1755 all told by the story: nothing new); the Dialogue\'s step before the end in the card\'s order, with the neutral link', !f.steps.some(s => s.kind === 'Gallery') && !tlStep && fsaid.indexOf(tl && tl.id) >= 0 && !!dlStep && f.steps.indexOf(dlStep) === endI - 1 && /^And now, your Majesty, the river front is finished\.$/.test(dlStep.en) && jf.blocks.inOrder, { dl: dlStep && dlStep.en, tl: tlStep && tlStep.en, fsaid, order: jf.blocks });
+  ok('[follows] [facts] the Gallery removed (its 🗑), a Timeline and a Dialogue added (+ Timeline, + Dialogue) by Specific Marker\'s controls: no Gallery step; the Timeline none (its dates c. 1500, 1580s and 1755 all told by the story: nothing new); the Dialogue\'s step before the end in the card\'s order, opened by a line of Any other block (16c)', !f.steps.some(s => s.kind === 'Gallery') && !tlStep && fsaid.indexOf(tl && tl.id) >= 0 && !!dlStep && f.steps.indexOf(dlStep) === endI - 1 && f.other.some(o => /:$/.test(o) && dlStep.en === o + ' your Majesty, the river front is finished.') && jf.blocks.inOrder, { dl: dlStep && dlStep.en, tl: tlStep && tlStep.en, fsaid, order: jf.blocks });
   tsec('follows');
 
   // ---------- 3. the tour played through the real Guide button and Next ----------
@@ -228,9 +245,9 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
     var src=function(s){if(!s.at||!s.at.block)return"";if(s.ref&&s.ref.indexOf("r:")===0){var rows=p.story||[],r=byId(rows,s.ref.slice(2)),i=rows.indexOf(r),rs=r?atRowSays(r,l):{},hd=i>0&&rows[i-1].kind==="heading"?atRowSays(rows[i-1],l).text:"";return[rs.text,rs.lead,rs.cap,rs.title,hd].join(" | ")}
       var b=byId(p.card||[],s.at.block),bits=[];(function walk(v){if(v==null)return;if(Array.isArray(v))v.forEach(walk);else if(typeof v==="object")Object.keys(v).forEach(function(k){walk(v[k])});else bits.push(String(v))})(b?blockSays(b,l):{});return bits.join(" | ")};
     out[poi][l]={name:o.name,said:Object.keys(st.said||{}),checks:atCheck(st,l,Object.assign(o,{rules:S.guideCfg.atRule})).filter(function(c){return!c.ok}).map(function(c){return c.rule+": "+c.why}),
-      neutral:wordIn(S.tx.at_link,l),sentence:["at_link_facts","at_link_facts_n","at_link_story","at_link_back","at_link_quiz"].map(function(k){return wordIn(S.tx[k],l)}),circa:wordIn(S.tx.at_circa,l),
-      tpl:{head:wordIn(S.tx.at_link_head,l),cap:wordIn(S.tx.at_link_cap,l),pics:wordIn(S.tx.at_link_pics,l),dates:wordIn(S.tx.at_link_dates,l),year:wordIn(S.tx.at_link_year,l),circa:wordIn(S.tx.at_link_circa,l)},
-      steps:st.map(function(s){return{id:s.id,act:s.act,text:s.text,kind:s.at&&s.at.kind||null,link:s.at&&s.at.link||"",src:src(s)}})}})});return JSON.stringify(out)})()`));
+      sets:(function(){var o2={};Object.keys(S.guideCfg.atIntro).forEach(function(k){o2[k]=S.guideCfg.atIntro[k].map(function(x){return{key:x,en:wordIn(S.tx[x],"en"),pt:wordIn(S.tx[x],"pt")}})});return o2})(),it:wordIn(S.tx.at_name_it,l),
+      said:st.said||{},card:(p.card||[]).map(function(b){return{id:b.id,kind:b.kind}}),
+      steps:st.map(function(s){return{id:s.id,act:s.act,text:s.text,kind:s.at&&s.at.kind||null,link:s.at&&s.at.link||"",set:s.at&&s.at.lk||"",ik:s.at&&s.at.ik||"",body:s.at&&s.at.body||"",src:src(s)}})}})});return JSON.stringify(out)})()`));
   // the test's own fact keys (the developer's rule, written again here): numbers, dates, decades, numbers in words, proper names
   const MON = { en: 'january february march april may june july august september october november december'.split(' '), pt: 'janeiro fevereiro março abril maio junho julho agosto setembro outubro novembro dezembro'.split(' ') };
   const NUM = { en: { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90, hundred: 100, thousand: 1000 },
@@ -259,7 +276,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const factJudge = (T, lang) => {
     const proper = new Set(); T.steps.forEach(s => sents(s.text).forEach(x => (x.match(/[\p{L}][\p{L}'’-]*/gu) || []).forEach((w, i) => { if (i && /^\p{Lu}/u.test(w)) proper.add(w); })));
     const nameW = T.name.toLowerCase().split(/\s+/).filter(w => !ART.test(w)), nameK = keysOf(T.name, lang, new Set(T.name.split(/\s+/)), null);
-    const units = []; T.steps.forEach((s, i) => { const item = s.kind === 'Quick Facts' || s.kind === 'Timeline'; sents(s.text).forEach(x => (item ? x.split(/[;,]\s+/) : [x]).forEach(u => units.push({ i, t: u, qf: s.kind === 'Quick Facts', k: keysOf(u, lang, proper, item ? null : nameW) }))); });
+    const units = []; T.steps.forEach((s, i) => { const item = s.kind === 'Quick Facts' || s.kind === 'Timeline', tx = s.link && s.text.indexOf(s.link) === 0 ? s.text.slice(s.link.length).trim() : s.text; sents(tx).forEach(x => (item ? x.split(/[;,]\s+/) : [x]).forEach(u => units.push({ i, t: u, qf: s.kind === 'Quick Facts', k: keysOf(u, lang, proper, item ? null : nameW) }))); });
     const said = new Set(nameK), twice = [], again = [];
     units.forEach(u => { if (u.i > 0 && u.k.length && u.k.every(k => known(said, k))) twice.push(u.t + ' ' + JSON.stringify(u.k)); u.k.forEach(k => said.add(k)); });
     units.forEach((u, j) => { if (u.qf && u.k.length && units.slice(j + 1).some(v => v.i > u.i && u.k.every(k => v.k.indexOf(k) >= 0))) again.push(u.t); });
@@ -269,44 +286,64 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('[facts] no fact twice, the four points, EN and PT (the test\'s own keys: each sentence or list item with a fact brings one not said before; no Quick Facts item told again later)', Object.values(fj).every(x => !x.twice.length && !x.again.length) && Object.values(fj).every(x => x.n >= 2), fj);
   ok('[facts] the page\'s own atCheck agrees (its "facts" rule and every other), the four points, EN and PT', Object.keys(TOURS).every(poi => ['en', 'pt'].every(l => !TOURS[poi][l].checks.length)), Object.keys(TOURS).map(poi => poi + ':' + JSON.stringify(TOURS[poi].en.checks.concat(TOURS[poi].pt.checks))));
   const stepOf = (poi, l, f) => TOURS[poi][l].steps.filter(f)[0] || {};
-  const cases = { story: stepOf('painting', 'en', s => s.act === 'open').text, storyPt: stepOf('painting', 'pt', s => s.act === 'open').text, facts: stepOf('painting', 'en', s => s.kind === 'Quick Facts').text,
-    tFacts: stepOf('torreao', 'en', s => s.kind === 'Quick Facts').text, tTime: stepOf('torreao', 'en', s => s.kind === 'Timeline').text, vFacts: stepOf('river', 'en', s => s.kind === 'Quick Facts').text,
-    any250: TOURS.painting.en.steps.slice(1).some(s => /250|two hundred and fifty/i.test(s.text)) };
-  ok('[facts] the named cases: Ribeira\'s story opens on its link alone ("Now the story." / "Agora, a história.": its title\'s 250 years told by the teaser) and its facts on "First, the facts." alone (the 250 years by the teaser, 1 November 1755 by the story); the Torreão\'s facts keep only "Lost 1 November 1755" (the 1580s and Philip I told by its text) and its timeline leaves 1755 out; the Tagus\'s facts leave "River: the Tagus" out',
-    cases.story === 'Now the story.' && cases.storyPt === 'Agora, a história.' && cases.facts === 'First, the facts.' && !cases.any250 && cases.tFacts === 'First, the facts. Lost 1 November 1755.' && !!cases.tTime && !/1755/.test(cases.tTime) && !!cases.vFacts && !/River: the Tagus/.test(cases.vFacts), cases);
-  // the links: from the block's own words or the neutral one, at most 6 words, none of round 16's generic links, never twice in a row
-  const OLD = ['Look at this.', 'Here\'s more.', 'Now, something to see.', 'Take a look.', 'And there\'s this.', 'One more thing.', 'Repare nisto.', 'Há mais.', 'Agora, algo para ver.', 'Veja.', 'E há isto.', 'Só mais uma coisa.'];
-  const nn = s => norm(String(s || ''));
-  const slot = (tpl, link) => { const [a, b] = tpl.split('{0}'); return link.startsWith(a) && link.endsWith(b) && link.length > a.length + b.length ? link.slice(a.length, link.length - b.length) : null; };
-  const linkJudge = (T) => {
-    const bad = [], seen = [];
-    T.steps.forEach((s, i) => {
-      if (!s.link) return; const L = s.link, rest = s.text.slice(L.length).trim(), why = [];
-      if (OLD.indexOf(L) >= 0) why.push('a generic link');
-      if (words(L) > 6) why.push('over 6 words');
-      let from = '';
-      if (L === T.neutral) from = 'neutral';
-      else if (T.sentence.indexOf(L) >= 0) from = 'its kind\'s sentence';
-      else if (L === T.tpl.cap || L === T.tpl.pics) from = (' ' + nn(s.src) + ' ').indexOf(' ' + nn(rest) + ' ') >= 0 ? 'its caption' : '';
-      else if (L === T.tpl.dates) from = s.kind === 'Timeline' ? 'its dates' : '';
-      else if (slot(T.tpl.year, L) != null || slot(T.tpl.circa, L) != null) { const y = slot(T.tpl.year, L) || slot(T.tpl.circa, L); from = s.kind === 'Timeline' && s.src.indexOf(y) >= 0 ? 'its date' : ''; }
-      else if (slot(T.tpl.head, L) != null) { const h = slot(T.tpl.head, L); from = (' ' + nn(s.src) + ' ').indexOf(' ' + nn(h) + ' ') >= 0 ? 'its heading' : ''; }
-      if (!from) why.push('not from its block\'s words');
-      if (seen.length && seen[seen.length - 1] === L) why.push('twice in a row');
-      seen.push(L); if (why.length) bad.push(s.id + ': “' + L + '” ' + why.join(', '));
+  const bodyOf = s => s.link && s.text.indexOf(s.link) === 0 ? s.text.slice(s.link.length).trim() : s.text || '';
+  const rqf = TOURS.painting.en.card.filter(c => c.kind === 'Quick Facts')[0];
+  const cases = { story: stepOf('painting', 'en', s => s.act === 'open'), storyPt: stepOf('painting', 'pt', s => s.act === 'open'), facts: stepOf('painting', 'en', s => s.kind === 'Quick Facts').text,
+    tFacts: stepOf('torreao', 'en', s => s.kind === 'Quick Facts'), tTime: stepOf('torreao', 'en', s => s.kind === 'Timeline').text, vFacts: stepOf('river', 'en', s => s.kind === 'Quick Facts').text,
+    any250: TOURS.painting.en.steps.slice(1).some(s => /250|two hundred and fifty/i.test(bodyOf(s))), rqfSaid: rqf && TOURS.painting.en.said[rqf.id] };
+  ok('[facts] [nothing new] the named cases: Ribeira\'s story opens on its intro line alone (its title\'s 250 years told by the teaser), EN and PT; its Quick Facts have no step at all (the 250 years by the teaser, 1 November 1755 by the story: nothing new) and say why; the Torreão\'s facts keep only "Lost 1 November 1755" (the 1580s and Philip I told by its text) and its timeline leaves 1755 out; the Tagus\'s facts leave "River: the Tagus" out',
+    cases.story.set === 'story' && cases.story.text === cases.story.link && cases.storyPt.set === 'story' && cases.storyPt.text === cases.storyPt.link && cases.facts === undefined && /^nothing new: its facts were said in the teaser/.test(cases.rqfSaid || '') && !cases.any250 &&
+    /^Lost 1 November 1755\.$/.test(bodyOf(cases.tFacts)) && cases.tFacts.set === 'facts' && !!cases.tTime && !/1755/.test(cases.tTime) && !!cases.vFacts && !/River: the Tagus/.test(cases.vFacts), cases);
+  // [intro] the test's own judge: the line from its set as the words say it, at its step's start, never twice, the name in at most two, under 20 words; a leading line into the block's own words
+  const OLD = ['Look at this.', 'Here\'s more.', 'Now, something to see.', 'Take a look.', 'And there\'s this.', 'One more thing.', 'Repare nisto.', 'Há mais.', 'Agora, algo para ver.', 'Veja.', 'E há isto.', 'Só mais uma coisa.',
+    'First, the facts.', 'Now, the facts.', 'Now the story.', 'Back on the card.', 'Ready for a question?', 'And now,', 'Primeiro, os factos.', 'Agora, os factos.', 'Agora, a história.', 'De volta ao cartão.', 'Pronto para uma pergunta?', 'E agora,'];
+  const fill = (tpl, name, lang) => { const at = tpl.indexOf('{point}'); if (at < 0) return tpl; const before = tpl.slice(0, at), start = !before.replace(/[\s"“]+$/, '') || /[.!?…]$/.test(before.replace(/\s+$/, ''));
+    let nm = start ? name : name.replace(/^(The|O|A|Os|As)(?=\s)/, a => a.toLowerCase()), pre = before;
+    if (!start && lang === 'pt') { const m = /(^|\s)(a|de|em|por)\s+$/.exec(before), n = /^(os?|as?)(?=\s)/.exec(nm); if (m && n) { const J = { a: { o: 'ao', a: 'à', os: 'aos', as: 'às' }, de: { o: 'do', a: 'da', os: 'dos', as: 'das' }, em: { o: 'no', a: 'na', os: 'nos', as: 'nas' }, por: { o: 'pelo', a: 'pela', os: 'pelos', as: 'pelas' } }; pre = before.slice(0, m.index + m[1].length); nm = J[m[2]][n[1]] + nm.slice(n[1].length); } }
+    return pre + nm + tpl.slice(at + 7); };
+  const introJudge = (T, lang) => {
+    const bad = [], seen = {}; let names = 0, n = 0;
+    T.steps.forEach(s => {
+      if (!s.link) { if (s.set) bad.push(s.id + ': a set and no line'); return; }
+      n++; const line = (T.sets[s.set] || []).filter(x => x.key === s.ik)[0];
+      if (!line) { bad.push(s.id + ': “' + s.link + '” not in its set ' + s.set); return; }
+      const tpl = line[lang], named = /\{point\}/.test(line.en + line.pt);
+      const want = [fill(tpl, T.name, lang), tpl.replace('{point}', T.it)].map(x => x.charAt(0).toUpperCase() + x.slice(1));
+      const said = want.some(w => s.link === w || s.link === w.replace(/[:,]$/, '.') || (lang === 'pt' && s.link === w.replace(/\bde este\b/, 'deste').replace(/\bem este\b/, 'neste')));
+      if (!said) bad.push(s.id + ': “' + s.link + '” is not its line “' + tpl + '”');
+      if (s.text.indexOf(s.link) !== 0) bad.push(s.id + ': the line not at the start');
+      if (seen[s.ik]) bad.push(s.id + ': “' + s.link + '” twice'); seen[s.ik] = 1;
+      if (named && s.link.indexOf(T.it) < 0) names++;
+      if (words(tpl.replace('{point}', 'X')) > 20) bad.push(s.id + ': over 20 words');
+      if (OLD.indexOf(s.link) >= 0) bad.push(s.id + ': a robot link');
+      const rest = s.text.slice(s.link.length).trim();
+      if (/[:,]$/.test(s.link) && rest && /^\p{Lu}/u.test(rest) && !/^(Praça|Philip|Manuel|King|Tagus|Torreão|Filipe|Tejo|D\.|I\b)/.test(rest)) bad.push(s.id + ': the words after a leading line begin in upper case');
+      if (s.kind === 'Gallery' && s.set === 'pics' && (' ' + nn(s.src) + ' ').indexOf(' ' + nn(rest) + ' ') < 0) bad.push(s.id + ': its caption not kept');
+      if (s.kind === 'Timeline' && !/\b\d{4}s?\b/.test(rest)) bad.push(s.id + ': its date not kept');
     });
-    return { bad, links: seen };
+    if (names > 2) bad.push('the name in ' + names + ' intro lines');
+    return { bad, n, names, lines: T.steps.filter(s => s.link).map(s => s.set + ':' + s.link) };
   };
-  const lj = {}; for (const poi in TOURS) for (const l of ['en', 'pt']) lj[poi + ':' + l] = linkJudge(TOURS[poi][l]);
-  ok('[links] every link from its block\'s own words (a heading or label, a caption, its date or dates, its kind\'s sentence) or the neutral one ("And now," / "E agora,"), at most 6 words, none of round 16\'s generic links, never twice in a row; the four points, EN and PT',
-    Object.values(lj).every(x => !x.bad.length) && new Set(lj['painting:en'].links).size >= 6 && lj['painting:en'].links.indexOf('Now, what was inside:') >= 0 && lj['painting:en'].links.indexOf('Here\'s') >= 0 && lj['square:en'].links.indexOf('And in 1758,') >= 0, lj);
-  // the Editor's step list shows each link with its source (Guide › 2 · The tour › Tour from the card, Ribeira From the card)
+  const nn = s => norm(String(s || ''));
+  const ij = {}; for (const poi in TOURS) for (const l of ['en', 'pt']) ij[poi + ':' + l] = introJudge(TOURS[poi][l], l);
+  const allLines = Object.keys(ij).filter(k => /:en$/.test(k)).map(k => ij[k].lines).flat(), dupAcross = allLines.filter((x, i) => allLines.indexOf(x) !== i);
+  ok('[intro] [links] every step\'s intro line from its kind\'s set (the words the Editor edits), at its step\'s start, never twice in a tour, the name in at most two, under 20 words; a leading line goes on into the block\'s own words (its caption, its date kept); none of the robot links ("Now the story.", "First, the facts.", "And now,"); the four points, EN and PT; no line repeated across the four tours',
+    Object.values(ij).every(x => !x.bad.length && x.n >= 4 && x.names <= 2) && ij['painting:en'].n >= 7 && !dupAcross.length && ij['painting:en'].lines.indexOf('pics:Here\'s something I love:') >= 0, { ij, dupAcross });
+  // the name a third time: every line of every set made a {point} line; at most two say the name, the others "this place" / "este lugar"
+  const nm3 = JSON.parse(await R(`(function(){var keep=JSON.stringify(S.tx);Object.keys(S.guideCfg.atIntro).forEach(function(set){S.guideCfg.atIntro[set].forEach(function(k,i){S.tx[k]={en:"A word about {point}, line "+set+(i+1)+".",pt:"Uma palavra sobre {point}, linha "+set+(i+1)+"."}})});
+    var g=atSteps("painting",true),r={};langCodes().forEach(function(l){r[l]=g.filter(function(s){return s.at.link}).map(function(s){return s.text[l].slice(0,s.text[l].indexOf(".")+1)})});S.tx=JSON.parse(keep);return JSON.stringify(r)})()`));
+  const nmc = l => nm3[l].filter(t => /Ribeira/.test(t)).length, itc = (l, w) => nm3[l].filter(t => t.indexOf(w) >= 0).length;
+  ok('[intro] the name in at most two intro lines: with every line a {point} line, two say "Ribeira Palace" / "o Paço da Ribeira", the others "this place" / "este lugar"',
+    nmc('en') === 2 && nmc('pt') === 2 && itc('en', 'about this place') === nm3.en.length - 2 && itc('pt', 'sobre este lugar') === nm3.pt.length - 2 && nm3.en.length >= 6, nm3);
+  // the Editor's step list (Guide › 2 · The tour › Tour from the card): each intro and its set; the Quick Facts skipped, named, with why
   await R('S.tours.painting.src="card";S.tab="guide";S.op={};S.op.gt1=true;S.op.s7auto=true;S.ui.level=2;renderAll(false);""');
   await until('!!ed.querySelector(\'[data-fo="s7auto"] .attbl\')', 3000);
-  const edl = JSON.parse(await R('JSON.stringify({rows:[].map.call(ed.querySelectorAll(\'[data-fo="s7auto"] .attbl tbody tr\'),function(r){var a=r.querySelector(".atlnk");return a?a.textContent:""}),note:(ed.querySelector(\'[data-fo="s7auto"] .atlist,[data-fo="s7auto"] .note\')||{}).textContent})'));
+  const edl = JSON.parse(await R('JSON.stringify({rows:[].map.call(ed.querySelectorAll(\'[data-fo="s7auto"] .attbl tbody tr[data-atstep]\'),function(r){var a=r.querySelector(".atlnk");return a?a.textContent:""}),skip:[].map.call(ed.querySelectorAll(\'[data-fo="s7auto"] .attbl tbody tr.atskip\'),function(r){return r.textContent}),order:[].map.call(ed.querySelectorAll(\'[data-fo="s7auto"] .attbl tbody tr\'),function(r){return r.dataset.atstep||(r.dataset.atskip?"skip:"+r.dataset.atskip:"")})})'));
   const withLink = TOURS.painting.en.steps.map(s => s.link);
-  ok('[links] the Editor\'s step list (Guide › 2 · The tour › Tour from the card) shows each step\'s link and its source ("Link “Now, what was inside:” · from its words “What was inside”"; the neutral one says so), and none for a step with no link',
-    edl.rows.length === withLink.length && edl.rows.every((t, i) => withLink[i] ? t.indexOf('“' + withLink[i] + '”') >= 0 && /· (from |the neutral link)/.test(t) : !t) && edl.rows.some(t => /from its words “What was inside”/.test(t)), edl.rows);
+  ok('[intro] [links] the Editor\'s step list shows each step\'s intro line and its set ("Intro “Here\'s something I love:” · a gallery or a picture, line 1 · with its caption"), and none for a step with no line',
+    edl.rows.length === withLink.length && edl.rows.every((t, i) => withLink[i] ? t.indexOf('“' + withLink[i] + '”') >= 0 && /· (the |a |an |back |any )[a-z ,()]*, line \d/.test(t) : !/^Intro/.test(t)) && edl.rows.some(t => /with its caption/.test(t)), edl.rows);
+  ok('[nothing new] the Editor\'s list shows the Quick Facts with nothing new as skipped where the card has it (after the teaser), named, with why ("No step: nothing new: its facts were said in the teaser …")',
+    edl.skip.length === 1 && /^–Quick Factsskipped/.test(edl.skip[0]) && /No step: nothing new: its facts were said in the teaser/.test(edl.skip[0]) && edl.order[1] === 'skip:' + (rqf && rqf.id), edl);
   tsec('facts and links');
 
   // ---------- 8. [short] under 2 minutes "a short tour", from 2 up the minutes: the teaser, the hero's button, the invitation, the Editor ----------
@@ -315,21 +352,33 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   for (const poi of ['painting', 'torreao', 'square', 'river']) {
     for (const l of ['en', 'pt']) {
       const T = TOURS[poi][l], m = minsOf(T.steps), t0 = T.steps[0].text;
-      const tease = m < 2 ? (l === 'en' ? /In a short tour: /.test(t0) : /Numa visita curta: /.test(t0)) && !/\d+ (minutes|minutos)/.test(t0) : t0.indexOf(l === 'en' ? 'In about ' + m + ' minutes: ' : 'Em cerca de ' + m + ' minutos: ') >= 0;
-      await R(`S.lang="${l}";if(G.on)stopTour();S.tours.painting.src="card";pointOpen("${poi}");S.view="card";S.stop="full";renderPhone(false);""`);
+      const tease = m < 2 ? (l === 'en' ? /Come along on a short tour: /.test(t0) : /Venha comigo numa visita curta: /.test(t0)) && !/\d+ (minutes|minutos)/.test(t0) : t0.indexOf(l === 'en' ? 'Come along for about ' + m + ' minutes: ' : 'Venha comigo durante cerca de ' + m + ' minutos: ') >= 0;
+      await R(`S.lang="${l}";if(G.on)stopTour();S.tours.painting.src="card";pointOpen("${poi}");S.guideCfg.block=true;S.view="card";S.stop="full";renderPhone(false);""`);
       await until('!!scr.querySelector(".hero .gstart")', 3000);
+      await until('!!scr.querySelector(".gblock small")', 3000);
       const hb = await R('(scr.querySelector(".hero .gstart")||{}).textContent||""'), page = await R(`tourMinutes("${poi}")`);
+      const gbk = await R('(scr.querySelector(".gblock small")||{}).textContent||""'), mnu = await R('var d=document.createElement("div");d.innerHTML=gbMenuHtml();(d.querySelector(\'[data-gbgo="tour"]\')||{}).textContent||""');
+      await R('S.guideCfg.block=false;""');
+      const len = m < 2 ? (l === 'en' ? 'short' : 'curta') : m + ' min', lenOk = gbk === (l === 'en' ? 'Narrated tour · ' + len + ' · ask anything, any time' : 'Visita narrada · ' + len + ' · pergunte a qualquer momento') && mnu === (l === 'en' ? 'Start the tour · ' : 'Começar a visita · ') + len;
       const hero = m < 2 ? hb.endsWith(l === 'en' ? '· short' : '· curta') : hb.endsWith('· ' + m + ' min');
       const nm = T.name, mid = nm.replace(/^(The|O|A|Os|As)(?=\s)/, a => a.toLowerCase());
       const inv = await R(`(function(){S.lang="${l}";var it=Object.assign({},S.guidance.items.tourof,{saysAud:{},saysBack:""});return gdLine(it,false,{point:${JSON.stringify(nm)},min:tourMinutes("${poi}"),n:0})})()`);
       const want = m < 2 ? (l === 'en' ? 'A short tour of ' + mid + '?' : 'Uma visita curta ' + (/^o /.test(mid) ? 'ao ' + mid.slice(2) : /^a /.test(mid) ? 'à ' + mid.slice(2) : /^os /.test(mid) ? 'aos ' + mid.slice(3) : 'a ' + mid) + '?') : (l === 'en' ? nm + ' has a story. A tour of ' + m + ' minutes?' : nm + ' tem uma história. Uma visita de ' + m + ' minutos?');
-      sh[poi + ':' + l] = { m, page, tease, hero, hb, inv, ok: tease && hero && inv === want && (l !== 'en' || page === m), want };
+      sh[poi + ':' + l] = { m, page, tease, hero, hb, inv, gbk, mnu, lenOk, ok: tease && hero && inv === want && (l !== 'en' || page === m), want };
     }
   }
   await R('S.lang="en";pointOpen("torreao");S.tab="guide";S.op={};S.op.gt1=true;S.op.s7auto=true;renderAll(false);""'); await until('!!ed.querySelector(\'[data-fo="s7auto"] .attbl\')', 3000);
   const edShort = await R('[].map.call(ed.querySelectorAll(\'[data-fo="s7auto"] .note\'),function(n){return n.textContent}).filter(function(t){return/^The tour made from/.test(t)})[0]||""');
   ok('[short] a tour under 2 minutes is a short tour, from 2 up its minutes (the test\'s own sum, EN and PT): the teaser ("In a short tour: …" / "Numa visita curta: …", else "In about N minutes: …"), the hero\'s button ("· short" / "· curta", else "· N min"), the invitation ("A short tour of the Torreão?" / "Uma visita curta ao Torreão?", else "… A tour of N minutes?"), the Editor\'s list ("a short tour")',
     Object.values(sh).every(x => x.ok) && ['torreao', 'square', 'river'].every(p => sh[p + ':en'].m < 2) && sh['painting:en'].m >= 2 && /a short tour \(under 2 minutes\)/.test(edShort), { bad: Object.keys(sh).filter(k => !sh[k].ok).map(k => [k, sh[k]]), edShort, sh });
+  ok('[length] the ✦ menu\'s Start the tour and the Guide block\'s line say the tour\'s length as the hero\'s button and the invitation do ("Start the tour · short", "Narrated tour · short · …"; from 2 minutes "· 2 min"; the written tour keeps its 3), the four points, EN and PT',
+    Object.values(sh).every(x => x.lenOk) && sh['torreao:en'].mnu === 'Start the tour · short' && sh['painting:en'].gbk.indexOf('· ' + sh['painting:en'].m + ' min') > 0, Object.keys(sh).map(k => [k, sh[k].mnu, sh[k].gbk, sh[k].lenOk]));
+  // [article] the PT names carry their article: the hero, the marker, the invitation about the point in the middle (the real path: gdCentral)
+  await R('S.lang="pt";if(G.on)stopTour();S.guidance.on=true;S.stop="closed";pointOpen("painting");setWall("ribeira");gdResetVisitor();gdSimAim("square");renderPhone(false);""'); await W(300);
+  const art = JSON.parse(await R('var c=gdCentral(),it=Object.assign({},S.guidance.items.tourof,{saysAud:{},saysBack:""});JSON.stringify({c:c&&c.name,inv:c?gdLine(it,false,{point:c.name,min:c.min,n:0}):"",min:c&&c.min,hero:wordIn(POINTS.square.hero.title||S.hero.title,"pt"),rib:wordIn(S.hero.title,"pt"),mk:(ph.querySelector("[data-mk=painting] b")||{}).textContent||"",tz:L(atSteps("square")[0].text),story:(atSteps("painting").filter(function(s){return s.act==="open"})[0]||{text:{}}).text.pt})'));
+  await R('S.guidance.on=false;S.lang="en";S.stop="full";pointOpen("painting");""');
+  ok('[article] the Portuguese names carry their article: the hero ("O Terreiro do Paço", "O Paço da Ribeira") and the marker as written, the teaser starting with it; mid-sentence lower case and joined to its preposition: the real invitation about the square in the middle "Uma visita curta ao Terreiro do Paço?"',
+    art.c === 'O Terreiro do Paço' && art.min < 2 && art.inv === 'Uma visita curta ao Terreiro do Paço?' && art.hero === 'O Terreiro do Paço' && art.rib === 'O Paço da Ribeira' && art.mk === 'O Paço da Ribeira' && /^O Terreiro do Paço: /.test(art.tz) && !/ O Paço| O Terreiro/.test(art.story || ''), art);
   await R('S.lang="en";pointOpen("painting");""');
   tsec('short');
 
@@ -379,6 +428,38 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('[crop] the Torreão, the Terreiro do Paço and the Tagus each show a crop of the wall painting around its own point (the wall\'s own file, never the Ribeira\'s hero; its size and offset by the test\'s own arithmetic, the point inside the hero where the crop puts it), at Full and at Half; three different crops; kept during the teaser (its drift around the crop)',
     Object.values(cr).every(x => x.ok) && distinct && tz.wall && tz.crop && tz.anim === 'herocrop', { cr, distinct, tz });
   tsec('crop');
+
+  // ---------- 11. [edit] Azu's intro lines in the Editor: an edited line said by the next tour; add, remove, back to the defaults; the ▸ ----------
+  try {
+  await load(); await R(base);
+  await R('pointOpen("painting");S.tours.painting.src="card";S.tab="guide";S.op={};S.op.gt1=true;S.op.s7auto=true;S.op["at:rules"]=true;S.ui.level=3;S.view="card";S.stop="full";renderAll(false);""');
+  await until('!!ed.querySelector(\'[data-atinset="pics"]\')', 3000);
+  const g0 = JSON.parse(await R('var s=atSteps().filter(function(x){return x.at&&x.at.kind==="Gallery"})[0]||{at:{},text:{}};JSON.stringify({ik:s.at.ik,en:s.text.en})'));
+  await p.fill(`[data-atinset="pics"] [data-tx="${g0.ik}|en"]`, 'Now look at this beauty:', { timeout: 4000 }); await R('document.activeElement.blur();""'); await W(300);
+  const g1 = JSON.parse(await R('var s=atSteps().filter(function(x){return x.at&&x.at.kind==="Gallery"})[0]||{at:{},text:{}};JSON.stringify({ik:s.at.ik,en:s.text.en,phone:(S.guideSteps.filter(function(x){return x.at&&x.at.kind==="Gallery"})[0]||{text:{}}).text.en})'));
+  ok('[edit] an intro line edited in the Editor (typed in its EN box, Guide › 2 · The tour › Tour from the card › What each block says › A gallery or a picture) is said by the next generated tour, the phone\'s too, the caption kept after it',
+    g1.ik === g0.ik && g1.en === 'Now look at this beauty: the square through three centuries.' && g1.phone === g1.en && g0.en !== g1.en, { g0, g1 });
+  const n0 = await R('S.guideCfg.atIntro.pics.length');
+  await p.click('[data-atinset="pics"] [data-atin="add|pics"]', { timeout: 4000 }); await until(`S.guideCfg.atIntro.pics.length===${n0 + 1}`, 2000);
+  const nk = await R('S.guideCfg.atIntro.pics[S.guideCfg.atIntro.pics.length-1]');
+  await p.fill(`[data-atinset="pics"] [data-tx="${nk}|en"]`, 'A brand new line:', { timeout: 4000 }); await p.fill(`[data-atinset="pics"] [data-tx="${nk}|pt"]`, 'Uma linha nova:', { timeout: 4000 }); await R('document.activeElement.blur();""'); await W(300);
+  const added = JSON.parse(await R(`JSON.stringify({set:atIntroLines("pics","en").map(function(x){return x.text}),def:!!ed.querySelector('[data-atin="reset|pics"]')})`));
+  await p.click('[data-atinset="pics"] [data-atin="del|pics|0"]'); await until(`S.guideCfg.atIntro.pics.length===${n0}`, 2000);
+  const removed = JSON.parse(await R('JSON.stringify(S.guideCfg.atIntro.pics)'));
+  await p.click('[data-atinset="pics"] [data-atin="reset|pics"]'); await until('JSON.stringify(S.guideCfg.atIntro.pics)===JSON.stringify(AT_INTRO_DEF.pics)', 2000);
+  const back = JSON.parse(await R('var s=atSteps().filter(function(x){return x.at&&x.at.kind==="Gallery"})[0]||{at:{},text:{}};JSON.stringify({en:s.text.en,def:atIntroIsDef("pics"),btn:!!ed.querySelector(\'[data-atin="reset|pics"]\')})'));
+  ok('[edit] + Add a line (a real click) adds a row to the set, said where the set picks it; Remove takes the first line out; Back to the defaults brings the set and its words back (the button then gone)',
+    added.set.length === n0 + 1 && added.set[n0] === 'A brand new line:' && added.def && removed.length === n0 && removed.indexOf(g0.ik) < 0 && removed.indexOf(nk) >= 0 && back.def && !back.btn && back.en === g0.en, { added, removed, back });
+  // the row's ▸ (a real click): the tour at that kind's step, that line said
+  const playKey = await R('S.guideCfg.atIntro.ba[1]');
+  await p.click(`[data-atinset="ba"] [data-atin="say|ba|${playKey}"]`); await until('G.on&&!!S.guideSteps[G.i]&&!!S.guideSteps[G.i].at&&S.guideSteps[G.i].at.lk==="ba"', 4000);
+  const pl = JSON.parse(await R('var s=S.guideSteps[G.i];JSON.stringify({on:G.on,id:s&&s.id,ik:s&&s.at&&s.at.ik,line:wordIn(S.tx[S.guideCfg.atIntro.ba[1]],"en"),en:s&&s.text.en})'));
+  await R('if(G.on)stopTour();""'); await until('!G.on', 2000);
+  const after = await R('var s=atSteps().filter(function(x){return x.at&&x.at.lk==="ba"})[0];s?s.at.ik:""');
+  ok('[edit] the row\'s ▸ (a real click) plays the tour made from the card at that kind\'s step with that line said; the tour after it picks its own line again',
+    pl.on && pl.ik === playKey && pl.en.indexOf(pl.line) === 0 && after !== playKey, { pl, after });
+  } catch (e) { ok('[edit] the section ran to its end (an edited intro line, add, remove, back to the defaults, the ▸)', false, String(e.message).slice(0, 200)); }
+  tsec('edit');
 
   ok('no page errors', !errs.length, errs.slice(0, 5));
   console.log(fails ? `FAILED ${fails}` : 'ALL PASS');

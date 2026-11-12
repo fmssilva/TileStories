@@ -5,7 +5,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-07)
 
 - **State:**
-  - **The Lab:** `master` holds guidance rounds 1-16b, verified on 2026-11-06/11, published at
+  - **The Lab:** `master` holds guidance rounds 1-16c, verified on 2026-11-06/11, published at
     https://claude.ai/artifact/Gpjf7yvoYHjGebmmNhuw2o (round 14b) with the 186 voice files, the music and the capabilities (section 1). The
     developer changes account often (four times on 2026-11-08/09); the old links stay in their accounts (RGofgb… at round 13, 19Uiat… at round 12, RKn3Rr… at round 11, J9J4h… at round 9, 4LpLd4… at round 8, Jq6X2K… at round 7, Jrejv7… at
     round 6, QmhHSz… at round 5, KDs2… at v29). A new account cannot update an old link: publish a new one (section 1, Publishing). Its
@@ -258,7 +258,22 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       for the words to be clear (5 s, then measures); then 3 green, 1 crash not reproduced, mutation 19 red. test9i's 2 red
       (the scripted visitors' tour counts) are the same on round 16's build: old, to look at in level 2. The text:
       the scratchpad's `g16b\tour_en.md`, `tour_pt.md`.
-    - Rounds since level 2: 4 (15, 15b, 16, 16b); run level 2 after round 17.
+    - The developer (2026-11-12) on round 16b: skip a block with nothing new; **warm, motivating block intros, never "Now + the
+      block's name"** (tone: a warm storyteller, curious and inviting); PT names with their article; the tour's length everywhere;
+      the new points' card texts stay placeholders.
+    - Round 16c (2026-11-12, brief `_3.8_guidance_plans/brief_round16c.md`): autotour.js `AT_INTRO_SETS`, 12 sets of warm intro
+      lines (the facts, the story, a text, a flip card, a callout, a gallery, a timeline, a before and after, the quiz, back on the
+      card, any other block, the end), EN and PT (`at_in_*` words); a line ending in ":" leads into the block's own words (its
+      caption, date or heading); picked with no AI by the point and the step, never twice in a tour, the name in at most two, 20
+      words at most; editable in Guide › 2 · The tour › What each block says › Azu's intro lines (add, edit, remove, back to the
+      defaults, a ▸ demo a line). Round 16b's link words are gone. A block with nothing new has no step (the Editor names why).
+      PT names with their article ("O Paço da Ribeira", "O Terreiro do Paço"; "Uma visita curta ao Terreiro do Paço?"). The
+      ✦ menu and the Guide block say the tour's length (`tourLength`). Tests: test9t 44 (mutation 25 red), 15 other files green
+      (test9k and test9da red once in a batch, green alone), the self-test's guide walk bad=0; the Architect reran test9t twice
+      green and its mutation. test9db now runs 413 s (over 300): split it in level 2. Seen: the Guide block's PT title says
+      "Conheça o palácio com o guia" on every point's card (the square too): round 17. The text: the scratchpad's
+      `g16c\tour_en.md`, `tour_pt.md`.
+    - Rounds since level 2: 5 (15, 15b, 16, 16b, 16c); run level 2 after round 17 (test9i's two old reds, test9db's length).
     - **Next: round 17** (resume on the next visit; short or deep per step), then level 2, then round 18 (Ask Azu during a game).
       Prototype only (no Unity) until the developer says so.
   - **MCP:** blender-mcp at user scope (Blender 5.2.3, add-on 1.8, port 9876). The Unity MCP was not connected this stretch.

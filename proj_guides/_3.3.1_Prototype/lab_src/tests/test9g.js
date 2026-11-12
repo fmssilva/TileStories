@@ -112,7 +112,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
     ok(`The remark (${dark ? 'dark' : 'light'}): beside Ribeira Palace, its card's own line, 2 lines at most, 7:1, 0 px over words, not over its point, the ✦ or the bar, 44 px, a › to say a tap does more`, l[0] <= 2 && l[1] >= 7 && l[2] === 0 && l[3] === 0 && l[4] === 0 && l[5] >= 44 && l[7] === 0 && l[6] === "In the middle: Ribeira Palace. Tap and I'll show you around." && await R('ph.querySelector(".gdbub").classList.contains("gd-more")&&/›/.test(getComputedStyle(ph.querySelector(".gdbub button"),"::after").content)'), l);
   }
   await R('S.dark=false;S.lang="pt";renderAll(true)'); await W(250); const lpt = await R(look);
-  ok('...in Portuguese: its words from Languages & Terms, 2 lines at most', lpt[6] === await R('S.tx.fab_comment_card.pt.replace("{point}","Paço da Ribeira")') && lpt[0] <= 2 && lpt[2] === 0, lpt);
+  ok('...in Portuguese: its words from Languages & Terms, 2 lines at most', lpt[6] === await R('nameIn(S.tx.fab_comment_card.pt,"{point}","O Paço da Ribeira","pt")') && lpt[0] <= 2 && lpt[2] === 0, lpt);
   await R('S.lang="en";renderAll(true)'); await W(150);
   await p.locator('#ph .gdbub button[data-gdbub]').click(); await W(400);
   const tapC = await R('[G.on,S.stop,gdEverOf(S.gdVisitor,"inview:painting").acted,!G.gd.cur]');

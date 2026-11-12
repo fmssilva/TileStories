@@ -64,7 +64,7 @@ function gbItems(){var wall=S.stop==="closed",out=[],hw=gdGroupById("howto");if(
   /* guidance round 12: the tour stopped for good before its promised quiz: Your 3 questions (from the steps heard), for the rest of the visit */
   if(typeof gdQuizOwed==="function"&&gdQuizOwed())out.splice(1,0,"quiz");out.push("settings");return out}
 function gbMenuHtml(){var c=camView().central;return'<div class="gbmenu" role="menu" aria-label="'+TXH("gb_name")+'">'+gbItems().map(function(k){
-    var t=k==="tour"?(G.resumeAt?TXH("gb_resume")+(G.resumeAt.title?'<small>'+esc(G.resumeAt.title)+'</small>':""):TXH("gb_start")):k==="view"?esc(c?fmt(TXT("gb_view_about"),c.name):TXT("gb_view")):k==="how"?TXH("gd_how"):k==="try"?TXH("gd_try"):k==="quiz"?esc(fmt(TXT("tour_menu_quiz"),gdQuizOwed())):TXH("gb_"+k);
+    var t=k==="tour"?(G.resumeAt?TXH("gb_resume")+(G.resumeAt.title?'<small>'+esc(G.resumeAt.title)+'</small>':""):TXH("gb_start")+' · '+esc(tourLength(tourMinutes()))):k==="view"?esc(c?fmt(TXT("gb_view_about"),c.name):TXT("gb_view")):k==="how"?TXH("gd_how"):k==="try"?TXH("gd_try"):k==="quiz"?esc(fmt(TXT("tour_menu_quiz"),gdQuizOwed())):TXH("gb_"+k);
     return'<button type="button" role="menuitem" data-gbgo="'+k+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+GBICO[k]+'</svg><span>'+t+'</span></button>'}).join("")+'</div>'}
 function gbMenu(open){var was=G.fab.menu;G.fab.menu=open==null?!G.fab.menu:open;fabLayer();if(G.fab.menu&&!was)emit("menu.opened","the ✦")}
 function gbGo(k){G.fab.menu=false;

@@ -25,7 +25,7 @@
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 34
+  "s": 37
  },
  "test8j.js": {
   "pass": 18,
@@ -60,21 +60,21 @@
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 49
+  "s": 48
  },
  "test8o.js": {
   "pass": 24,
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 34
+  "s": 33
  },
  "test8p.js": {
   "pass": 15,
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 17
+  "s": 20
  },
  "test8q.js": {
   "pass": 14,
@@ -95,14 +95,14 @@
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 28
+  "s": 33
  },
  "test8t.js": {
   "pass": 36,
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 30
+  "s": 41
  },
  "test8u.js": {
   "pass": 23,
@@ -116,7 +116,7 @@
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 21
+  "s": 27
  },
  "test8w.js": {
   "pass": 18,
@@ -165,21 +165,21 @@
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 36
+  "s": 37
  },
  "test9da.js": {
   "pass": 67,
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 226
+  "s": 210
  },
  "test9db.js": {
   "pass": 8,
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 234
+  "s": 413
  },
  "test9e.js": {
   "pass": 59,
@@ -193,14 +193,14 @@
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 209
+  "s": 294
  },
  "test9g.js": {
   "pass": 46,
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 127
+  "s": 156
  },
  "test9h.js": {
   "pass": 40,
@@ -235,7 +235,7 @@
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 142
+  "s": 179
  },
  "test9l.js": {
   "pass": 48,
@@ -263,7 +263,7 @@
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 96
+  "s": 110
  },
  "test9p.js": {
   "pass": 60,
@@ -298,7 +298,7 @@
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 190
+  "s": 215
  },
  "test9sb.js": {
   "pass": 37,
@@ -326,14 +326,14 @@
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 101
+  "s": 110
  },
  "test9t.js": {
-  "pass": 37,
+  "pass": 44,
   "fail": 0,
   "failed": [],
   "crashed": "",
-  "s": 107
+  "s": 158
  },
  "test9sf.js": {
   "pass": 2,

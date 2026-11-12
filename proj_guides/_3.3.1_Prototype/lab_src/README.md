@@ -222,6 +222,18 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
     Full and Half, three different, kept during the teaser); [follows] now adds a Timeline (its dates all told by the story: no step) and a
     Dialogue (its step with the neutral link). `MUTATE=1` also turns the fact rule off, puts "Look at this." back as the neutral link, takes the short-tour words away, leaves
     the hero at the top with its Start button and draws no crop: the checks named [facts], [links], [short], [hero words] and [crop] turn red.
+  - *The developer's answers on the guide's words, guidance round 16c* (`guide/autotour.js`'s intro sets and skipped blocks, `core/words.js`'s
+    `at_in_*` words, `guide/tour.js`'s Guide block, `world/guide-button.js`'s ✦ menu, the PT names in `card/hero.js`, `core/content.js`,
+    `world/markers.js`, `world/camera-ask.js`, `agent/tools.js`'s start_tour): `tests/test9t.js` also checks [intro] every step's intro line
+    from its kind's set (the words the Editor edits), at its step's start, never twice in a tour, the point's name in at most two (every line
+    made a {point} line: the third says "this place" / "este lugar"), under 20 words, a leading line going on into the block's own words with
+    its content kept, none of round 16b's links, no line repeated across the four tours, EN and PT, and the Editor's step list showing each
+    line and its set; [nothing new] Ribeira's Quick Facts with no step, shown skipped with why; [article] "O Terreiro do Paço", "O Paço da
+    Ribeira" (the hero, the marker, the teaser) and the real invitation "Uma visita curta ao Terreiro do Paço?"; [length] the ✦ menu's Start
+    the tour and the Guide block's line saying the same length as the hero's button and the invitation; [edit] a line typed in its EN box
+    said by the next tour, + Add a line, Remove, Back to the defaults and the row's ▸ by real clicks. `MUTATE=1` also says an intro twice,
+    puts a lone Quick Facts step back with no row saying why, takes the article away, writes the Guide block's 3 min and reads the lines
+    from their defaults: the checks named [intro], [nothing new], [article], [length] and [edit] turn red too.
   - *Every Editor row's demo, guidance round 10* (`editor/demo`, the rows' modules: `editor/card-tab`, `card/controls`, `card/blocks`,
     `card/pages`, `card/states`, `card/hints`, `editor/texts`, `editor/components`, `editor/marker-tab`, `mascot/azu2d`, `guidance/editor`):
     `tests/test9n.js` checks that the self-test's NO DEMO check walks every tab and finds no row without a demo but its named exemptions

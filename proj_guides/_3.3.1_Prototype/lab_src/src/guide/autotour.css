@@ -15,3 +15,14 @@ tr.gskipped td{opacity:.55;text-decoration:line-through}
 .attbl td:last-child{white-space:nowrap}
 /* round 16b: each step's link and its source, under its words */
 .attbl .atlnk{margin-top:3px;font-size:11px;color:var(--u-dim)}.attbl .atlnk small{font:700 9px/1 var(--mono);letter-spacing:.05em;text-transform:uppercase;margin-right:4px;color:#8FB3E8}.attbl .atlnk span{opacity:.85}
+/* round 16c: Azu's intro lines, a row a set (its lines EN | PT, the green ▸ plays the tour at that step, that line said), the skipped blocks */
+.row:has(> div > .atin) > label{align-self:start;padding-top:24px}
+.atin .atint{margin:0}.atin td.gdvn{font:600 11px/1 var(--mono);color:#9AA0A6;padding-top:10px}
+.atin td.gdva{white-space:nowrap;vertical-align:top;padding-top:6px}.atin td.gdva .del{margin-left:6px;vertical-align:middle}
+.atin textarea,.atin input{width:100%;box-sizing:border-box}
+.atin .atplay{width:24px;height:24px;border:0;border-radius:50%;padding:0;cursor:pointer;vertical-align:middle;
+  background:#2FB36B url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Cpath d='M8.5 6.2v9.6a.8.8 0 0 0 1.2.7l7.4-4.8a.8.8 0 0 0 0-1.4L9.7 5.5a.8.8 0 0 0-1.2.7z' fill='%230F2A1A'/%3E%3C/svg%3E") center/24px 24px no-repeat;box-shadow:0 1px 2px rgba(0,0,0,.35)}
+.atin .atplay:hover{background-color:#3CC97C}.atin .atplay:focus-visible{outline:2px solid #F2C14E;outline-offset:2px}
+.atin .btnrow{margin-top:6px}.atin tr.atinover td{padding-top:0}.atin tr.atinover .note{display:block;margin:0}
+.note.atinhead{margin-top:10px}
+.attbl tr.atskip td{color:var(--u-dim);font-style:italic}.attbl tr.atskip td:nth-child(2){font-style:normal}
