@@ -1,0 +1,88 @@
+/* The tour's end (guidance round 17c): the What next? panel above the bottom bar (the card's own surface, light and dark: its --paper,
+   --ink1, --ink2, --box, --hair), at most 34 % of the phone's height; every target 44 px; Azu on its top edge with its bubble; the minimal
+   pill (56 px); a nearby point's invitation above the card at Half. Unity: one USS file for the panel's VisualElements, the rise and the
+   cards' stagger as USS transitions (translate, opacity, transition-delay), Reduced Motion: opacity only */
+.tepanel{position:absolute;left:0;right:0;z-index:14;max-height:34%;overflow:hidden;box-sizing:border-box;padding:10px 0 6px;background:var(--paper);color:var(--ink1);
+  border-radius:22px 22px 0 0;box-shadow:0 -12px 32px rgba(0,0,0,.16),0 -1px 0 var(--hair);font-family:var(--body)}
+.cv.dark .tepanel{box-shadow:0 -14px 34px rgba(0,0,0,.55),0 -1px 0 var(--hair)}
+.tepanel .te-grab{position:absolute;top:6px;left:50%;width:36px;height:4px;margin-left:-18px;border-radius:2px;background:var(--hair)}
+.tepanel button,.tepill button,.teinv button{appearance:none;font-family:var(--body);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.tepanel button:focus-visible,.tepill button:focus-visible,.teinv button:focus-visible,.tepanel .te-field:focus-visible{outline:3px solid #1F5FAD;outline-offset:-3px}
+.cv.dark .tepanel button:focus-visible,.cv.dark .tepill button:focus-visible,.cv.dark .teinv button:focus-visible{outline-color:#FFD98A}
+.te-head{display:flex;align-items:center;gap:9px;height:44px;margin-top:4px;padding:0 4px 0 16px}
+.te-ok{display:inline-flex;align-items:center;justify-content:center;flex:none;width:22px;height:22px;border-radius:50%;background:#1F6B3A}
+.te-ok svg{width:14px;height:14px;fill:none;stroke:#FFFFFF;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.cv.dark .te-ok{background:#8FD3A6}.cv.dark .te-ok svg{stroke:#10231A}
+.te-hd{flex:1 1 auto;min-width:0;font:700 15.5px/1.2 var(--body);letter-spacing:-.005em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.te-star{display:inline-flex;align-items:center;gap:4px;flex:none;padding:4px 9px 4px 7px;border-radius:999px;background:#FFF1CC;color:#5B3B00;font:700 12.5px/1 var(--body)}
+.te-star svg{width:13px;height:13px;fill:#E0A21B;stroke:none}
+.cv.dark .te-star{background:rgba(255,217,138,.16);color:#FFD98A}.cv.dark .te-star svg{fill:#FFD98A}
+.te-chev{flex:none;width:44px;height:44px;border:0;border-radius:22px;background:transparent;color:var(--ink2);display:inline-flex;align-items:center;justify-content:center}
+.te-chev svg,.te-po>svg,.te-x svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* the rows that scroll sideways (the chips, the cards): inside the panel, never the page */
+.te-sc{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;padding:0 16px;scrollbar-width:none;scroll-padding:0 16px;scroll-snap-type:x proximity}
+.te-sc::-webkit-scrollbar{display:none}
+.te-qs{margin-top:4px}
+.te-q{flex:none;height:44px;padding:0 15px;border-radius:22px;border:1px solid var(--hair);background:var(--box);color:var(--ink1);font:600 14px/1 var(--body);white-space:nowrap;scroll-snap-align:start}
+.te-ask{display:flex;gap:8px;margin:8px 0 0;padding:0 16px}
+.te-field{flex:1 1 auto;min-width:0;height:44px;box-sizing:border-box;padding:0 16px;border-radius:22px;border:1px solid var(--hair);background:var(--box);color:var(--ink1);font:500 15px/1 var(--body)}
+.te-field::placeholder{color:var(--ink2);opacity:1}
+.te-mic{flex:none;width:44px;height:44px;border:0;border-radius:50%;background:#14213D;color:#FFFFFF;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(20,33,61,.28)}
+.te-mic svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.cv.dark .te-mic{background:#FFD98A;color:#1A1814;box-shadow:none}
+.te-near{margin-top:10px}
+.te-card{flex:none;display:flex;align-items:center;gap:10px;width:178px;height:60px;box-sizing:border-box;padding:7px 10px 7px 7px;border-radius:16px;border:1px solid var(--hair);background:var(--paper);color:var(--ink1);text-align:left;scroll-snap-align:start;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.cv.dark .te-card{background:var(--box);box-shadow:none}
+.te-th{flex:none;width:44px;height:44px;border-radius:12px;background-color:var(--box);background-repeat:no-repeat;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+.te-ct{display:flex;flex-direction:column;gap:3px;min-width:0}
+.te-ct b{font:700 13.5px/1.2 var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.te-ct small{font:500 12px/1.2 var(--body);color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.te-acts{display:flex;align-items:center;justify-content:center;gap:0;margin-top:4px;padding:0 10px;white-space:nowrap;overflow-x:auto;scrollbar-width:none}
+.te-acts::-webkit-scrollbar{display:none}
+.te-acts button{flex:none;min-width:44px;height:44px;padding:0 11px;border:0;border-radius:22px;background:transparent;color:var(--ink2);font:600 14px/1 var(--body)}
+.te-acts .te-fin{color:var(--ink1);font-weight:700}
+.te-acts .te-cont{background:#FFD98A;color:#1A1814;font-weight:700;padding:0 14px}
+.te-acts.te-pz{justify-content:flex-start;gap:6px;padding:0 16px}.te-acts.te-pz button:not(.te-cont){color:var(--ink1)}
+.te-head .te-hx{margin-left:-6px}
+.te-acts .te-dot{width:3px;height:3px;border-radius:50%;background:var(--ink2);opacity:.55;flex:none;margin:0 1px}
+/* Azu on the panel's top edge, its bubble beside it (it fades a few seconds after it is said) */
+.teazu{position:absolute;left:14px;z-index:15;width:50px;height:56px;pointer-events:none;filter:drop-shadow(0 4px 8px rgba(0,0,0,.2))}
+.teazu svg,.teazu img{width:100%;height:100%;display:block;object-fit:contain}
+.tebub{position:absolute;left:70px;max-width:calc(100% - 92px);z-index:16;box-sizing:border-box;padding:11px 15px;border-radius:18px;background:var(--paper);color:var(--ink1);
+  font:600 15px/1.35 var(--body);box-shadow:0 10px 26px rgba(0,0,0,.2),0 0 0 1px var(--hair);pointer-events:none;transition:opacity .4s ease}
+.cv.dark .tebub{background:#26232B;color:#F4F1EA;box-shadow:0 10px 26px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.12)}
+.tebub .te-tail{position:absolute;left:-5px;bottom:12px;width:12px;height:12px;background:inherit;transform:rotate(45deg);box-shadow:-1px 1px 0 var(--hair);border-radius:0 0 0 3px}
+.tebub.noazu{left:16px}.tebub.noazu .te-tail{display:none}
+.tebub.te-out{opacity:0}
+.te-sign{font-style:normal;font-size:11px;color:var(--ink2);margin-right:6px}
+/* the minimal pill */
+.tepill{position:absolute;z-index:14;display:flex;align-items:center;height:56px;box-sizing:border-box;padding:0 4px 0 6px;border-radius:28px;background:var(--paper);color:var(--ink1);box-shadow:0 10px 26px rgba(0,0,0,.2),0 0 0 1px var(--hair)}
+.cv.dark .tepill{background:#26232B;color:#F4F1EA;box-shadow:0 10px 26px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.12)}
+.te-po{display:flex;align-items:center;gap:8px;height:56px;padding:0 8px 0 2px;border:0;background:transparent;color:inherit;font:700 15px/1 var(--body);border-radius:28px}
+.te-po>svg{width:18px;height:18px;color:var(--ink2)}.cv.dark .te-po>svg{color:#C9C3B8}
+.te-face{position:relative;display:inline-flex;flex:none;width:40px;height:40px;border-radius:50%;background:var(--box);align-items:center;justify-content:center;overflow:hidden;box-shadow:inset 0 0 0 1px var(--hair)}
+.te-face>svg{width:24px;height:24px}
+/* Azu's own art (the guide button's Azu), cropped to its head. Unity: the same sprite in a round mask, its uvRect on the head */
+.te-head-crop{position:absolute;left:50%;top:1px;width:60px;height:69px;margin-left:-30px}.te-head-crop svg,.te-head-crop img{width:100%;height:100%;display:block;object-fit:contain}
+.te-x{width:44px;height:44px;border:0;border-radius:22px;background:transparent;color:var(--ink2);display:inline-flex;align-items:center;justify-content:center;border-left:1px solid var(--hair);border-radius:0 22px 22px 0}
+.te-x svg{width:18px;height:18px}
+/* a nearby point's invitation, above its card at Half: Azu and its words; a tap starts the tour */
+.teinv{position:absolute;left:12px;right:12px;z-index:16;display:flex;align-items:flex-end;gap:6px;pointer-events:none;animation:teFade .3s ease both}
+.teinv .te-iaz{flex:none;width:50px;height:56px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.25))}.teinv .te-iaz svg,.teinv .te-iaz img{width:100%;height:100%;display:block}
+.teinv button{pointer-events:auto;min-height:48px;max-width:calc(100% - 56px);box-sizing:border-box;padding:12px 16px;border:0;border-radius:18px 18px 18px 6px;background:var(--paper);color:var(--ink1);
+  font:600 15px/1.35 var(--body);text-align:left;box-shadow:0 10px 26px rgba(0,0,0,.28),0 0 0 1px var(--hair)}
+.cv.dark .teinv button{background:#26232B;color:#F4F1EA}
+/* the entrances: the panel rises (240 ms, ease-out), the chips and cards follow 40 ms apart; Reduced motion: a fade only */
+.tepanel.te-in{animation:teRise .24s cubic-bezier(.2,.8,.2,1) both}
+.tepanel.te-in .te-card,.tepanel.te-in .te-q{animation:teCard .3s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(140ms + var(--i,0) * 40ms)}
+.teazu.te-in{animation:teFade .3s ease .2s both}.tebub{animation:teBub .3s cubic-bezier(.2,.8,.2,1) .25s backwards}
+.tepill.te-in{animation:teRise .22s cubic-bezier(.2,.8,.2,1) both}
+@keyframes teRise{from{transform:translateY(100%);opacity:.4}to{transform:none;opacity:1}}
+@keyframes teCard{from{transform:translateX(18px);opacity:0}to{transform:none;opacity:1}}
+@keyframes teBub{from{transform:translateY(6px) scale(.97);opacity:0}to{transform:none;opacity:1}}
+@keyframes teFade{from{opacity:0}to{opacity:1}}
+.reduce .tepanel.te-in,.reduce .tepill.te-in,.reduce .teazu.te-in,.reduce .tebub,.reduce .teinv{animation:teFade .24s ease backwards}
+.reduce .tepanel.te-in .te-card,.reduce .tepanel.te-in .te-q{animation:teFade .24s ease both;animation-delay:0s}
+/* the Editor: the parts' ▲▼ beside their On / Off */
+.teord{display:inline-flex;gap:4px;margin-left:8px;vertical-align:middle}.teord .del{min-width:26px;padding:0 6px}
+.note.tesub{margin:6px 0 2px 18px}

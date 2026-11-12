@@ -552,7 +552,7 @@ function gdQuizAns(i,how){var B=G.gd.bt;if(!B||B.kind!=="finale"||B.answered!=nu
   var row=ph.querySelector(".gdbeat .bt-row");if(row)row.outerHTML='<p class="bt-verdict '+(right?"ok":"no")+'" aria-live="polite">'+esc(t)+'</p><div class="bt-chips">'+sm+nx+'</div>';gdBeatPlace();
   gdBeatSay(t,function(){gdBeatWait(right?1.2:3.5,function(){if(!B.away)gdQuizNext()})},".bt-verdict")}
 function gdQuizNext(){var B=G.gd.bt;if(!B||B.kind!=="finale"||B.answered==null)return;clearTimeout(B.waitT);B.k++;if(B.k<B.qs.length){gdQuizAsk();return}gdQuizScore()}
-function gdQuizScore(){var B=G.gd.bt,n=B.qs.length,r=B.right,demo=B.c&&B.c.pull&&G.gd.demo,best=demo?gdQuizBest(B.point)||{right:r,n:n}:gdQuizKeep(B.point,r,n),P=G.gd.plan;if(!demo){if(P)P.quizDone=true;G.gd.owed=null}
+function gdQuizScore(){var B=G.gd.bt,n=B.qs.length,r=B.right,demo=B.c&&B.c.pull&&G.gd.demo,best=demo?gdQuizBest(B.point)||{right:r,n:n}:gdQuizKeep(B.point,r,n),P=G.gd.plan;if(!demo){if(P){P.quizDone=true;/* round 17c: the score, for the tour's end */P.quizScore={right:r,n:n}}G.gd.owed=null}
   var t=fmt(TXT(r===n?"tour_score_all":r===0?"tour_score_none":r*2>n?"tour_score_most":"tour_score_some"),r,n);gdBeatEye(TXT("tour_star").toUpperCase());
   /* round 13: Don't say it!'s score said once more (research 5.4, step 8) */
   var ws=P&&P.wordScore;if(ws&&ws.n>0&&!demo)t+=" "+nameIn(fmt(TXT("tour_word_callback"),ws.caught,ws.n),"{thing}",ws.word);

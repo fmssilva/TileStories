@@ -287,6 +287,18 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
     preview and full page drawn with words of its own that lack a field fall back field by field to the kind's (a Dialogue with no lines says the
     kind's lines), no error; `MUTATE=1` puts the list back ("In its pictures: a painting of …") and the words object by object: [gallery more] and
     [block words] turn red.
+  - *The tour's end, guidance round 17c* (`guide/tour-end.js`, `guide/tour.js`'s `tourEnd.answer`, `guide/controls.js`'s Stop bar, `world/guide-button.js`'s
+    What next?, `guide/autotour.js`'s After the tour set, `world/camera-ask.js`'s categories): `tests/test9v.js` checks [showcase] the showcase whole
+    between the card's top (47 px) and the panel by the test's own arithmetic: the quiz not played, the quiz played (a real tap) and so the gallery,
+    a block picked, the hero; [asks] Azu's bubble a line of After the tour (EN and PT), warm, spoken, never twice in a row, faded; [panel] at most
+    34 % of 844 px, above the bottom bar, inside the phone, no sideways scroll, every target 44 px, its words 4.5:1, light and dark; [header] the
+    length the hero's button says, the quiz's star; [questions] 2-3 chips from the point's own or the templates, none a sentence the tour said, a
+    heading the tour told word for word gives none, a real tap asks (stubbed); [ask] the field and the microphone, and (the Architect) Ask from the panel keeps the card's scroll and runs no step,
+    the panel back when it closes; [nearby] the points with a card first, then the places without, each picks -> category -> distance (the test's own), a tap flies to the point and opens its card with its invitation, whose tap starts its tour; [minimal] the chevron, the
+    swipe, the pill, Done, the ✦ menu's What next?; [written] the written tour and a tour from the card end the same way; [stop bar] the Stop bar's
+    three choices (44 px, light and dark), each by a real tap, the paused panel and its Continue; [editor] each new row by a real click and its ▸;
+    [reduced motion]. `MUTATE=1 node tests/test9v.js` asks through the ✦ menu's path (the tour restarted), forgets the quiz was played, turns the answered rule off, ignores the distances and makes the
+    Stop bar's What next? do nothing: the checks named [ask], [showcase], [header], [questions], [nearby] and [stop bar] turn red.
   - *Every Editor row's demo, guidance round 10* (`editor/demo`, the rows' modules: `editor/card-tab`, `card/controls`, `card/blocks`,
     `card/pages`, `card/states`, `card/hints`, `editor/texts`, `editor/components`, `editor/marker-tab`, `mascot/azu2d`, `guidance/editor`):
     `tests/test9n.js` checks that the self-test's NO DEMO check walks every tab and finds no row without a demo but its named exemptions

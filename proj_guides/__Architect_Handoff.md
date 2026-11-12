@@ -5,7 +5,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-07)
 
 - **State:**
-  - **The Lab:** `master` holds guidance rounds 1-17b, verified on 2026-11-06/11, published at
+  - **The Lab:** `master` holds guidance rounds 1-17c, verified on 2026-11-06/11, published at
     https://claude.ai/artifact/Gpjf7yvoYHjGebmmNhuw2o (round 14b) with the 186 voice files, the music and the capabilities (section 1). The
     developer changes account often (four times on 2026-11-08/09); the old links stay in their accounts (RGofgb… at round 13, 19Uiat… at round 12, RKn3Rr… at round 11, J9J4h… at round 9, 4LpLd4… at round 8, Jq6X2K… at round 7, Jrejv7… at
     round 6, QmhHSz… at round 5, KDs2… at v29). A new account cannot update an old link: publish a new one (section 1, Publishing). Its
@@ -302,7 +302,18 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       starts a tour (round 3's rule): Fast learner 2 tours, Tour lover 5. **Core run:** walks ok=1618 bad=0 (card 710,
       guide 69, marker+words+global 839; 14 min), the 11 core files green (test9da crashed once on Azu's button, 67/0 alone).
       The Architect reran test9u and test9t and their mutations.
-    - Rounds since core: 0 (17b); since full: 2026-11-09.
+    - Round 17c (2026-11-12, brief `_3.8_guidance_plans/brief_round17c.md`; the developer asked for a better end of the tour):
+      `guide/tour-end.js`. Every tour (written or from the card) ends the same way: the card scrolls to its showcase (an unplayed
+      quiz or game, a 3D model, a video, a gallery, a before and after; else the hero's words), Azu asks a line of the new set
+      After the tour, and a non-modal **What next?** panel rises (282 px of 844): Tour complete · N min (+ the quiz's star),
+      2-3 suggested questions (the point's own, then templates from the card's words, no AI), an ask field and mic (Ask Azu,
+      the card kept where it is), Explore nearby (3-5: points with a card first, then wall places without one; picks, then
+      category, then nearest), Start again · Play the quiz · Done. A chevron or swipe makes a 56 px pill with Azu's face; Done
+      closes it; the ✦ menu offers What next? until the visitor leaves. The Stop bar: gold Continue + quiet "Start again · What
+      next?" (the panel paused, silent, Continue first). Editor: Guide › 2 · The tour › The tour's end. The developer: the
+      showcase by default; keep the places without a card, cards first; the paused panel stays silent. Tests (feature): test9v
+      (the Architect's rerun and mutation), the guide walk, test9u and test9t.
+    - Rounds since core: 1 (17c); since full: 2026-11-09.
     - **Next: round 18** (Ask Azu during a game: the game pauses, Azu answers, the game goes on), feature tests only; then
       **a final guide polish pass** (the developer tries the whole guide in the Lab and we fix what they notice); then the
       guide is closed and **the Detail Card blocks' design** starts.

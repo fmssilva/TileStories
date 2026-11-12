@@ -84,7 +84,8 @@ function runStep(){emitLatestFirst("runStep.before");var st=G.on&&S.guideSteps[G
   if(st.act==="try"&&S.guideCfg.coach&&el)coach(el,st.wait);
   say(text,function(k){markWord(k,target)},function(){if(!G.on||G.paused)return;emit("tourStep.ended",st);
     if(st.act==="try"&&S.guideCfg.coach){G.waiting=true;renderGuide(text);G.timer=setTimeout(function(){if(G.waiting){G.waiting=false;next()}},9000);return}
-    if(st.act==="end"){G.askOpen=S.guideCfg.ask!=="off";renderGuide(text);return}
+    /* the end (round 17c): a feature may answer for it (tourEnd.answer: guide/tour-end.js, where the tour leaves the visitor and What next?), else Ask opens */
+    if(st.act==="end"){if(firstAnswer("tourEnd.answer",st)===undefined){G.askOpen=S.guideCfg.ask!=="off";renderGuide(text)}return}
     setTimeout(function(){if(G.on&&!G.paused)next()},700)})}emit("runStep.after")}
 /* next: a feature may answer for it (next.answer) and go on later with nextStep; how: "skip" when the visitor pressed Next (Skip ahead,
    round 17: Tell me more counts it), else the step ended on its own */
