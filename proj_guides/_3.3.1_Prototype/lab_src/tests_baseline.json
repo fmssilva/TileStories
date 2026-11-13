@@ -390,5 +390,12 @@
   "failed": [],
   "crashed": "",
   "s": 181
+ },
+ "test9x.js": {
+  "pass": 27,
+  "fail": 0,
+  "failed": [],
+  "crashed": "",
+  "s": 168
  }
 }

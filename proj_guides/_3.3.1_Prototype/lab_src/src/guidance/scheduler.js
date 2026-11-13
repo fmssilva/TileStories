@@ -116,7 +116,7 @@ function gdCheck(it,items,visitor,ctx,now){var vm=gdVisitOf(visitor,it.id),em=gd
   /* a seasonal line: only in its window of dates; a point's joke: only for a point with one of its own (never a generic one) */
   if(it.seasons){var sv=gdSeasonOf(it,ctx.today);if(!sv)return{no:"no season today ("+gdDayWords(ctx.today)+")"};why.push("today ("+gdDayWords(ctx.today)+") is in its window "+gdDayWords(sv.from)+(sv.to!==sv.from?"–"+gdDayWords(sv.to):""))}
   if(it.ptJokes&&!(it.jokes&&it.jokes.length))return{no:(it.pointName||"this point")+" has no joke of its own (never a generic one in its place)"};
-  if(it.lively&&!ctx.lively)return{no:"Lively only: Azu is Calm (Azu › Liveliness)"};
+  if(it.lively&&!ctx.lively)return{no:"Lively only: the mascot is Calm (The mascot › Liveliness)"};
   if(it.notSolemn&&ctx.solemn)return{no:"never on a Solemn point"};
   if(it.screen==="wall"&&!ctx.onWall)return{no:"not on the wall ("+(ctx.where||"a card is open")+")"};
   if(it.screen==="card"&&!ctx.onCard&&it.form!=="cue")return{no:"only on a card ("+(ctx.where||"the wall")+")"};
@@ -143,9 +143,9 @@ function gdCheck(it,items,visitor,ctx,now){var vm=gdVisitOf(visitor,it.id),em=gd
   /* round 7: a Fun item counts the pokes since it last showed (a joke every third poke, as before); latePause: or a pause late in the visit, once a visit */
   if(+it.pokes>0||iN>0){var pc=(+ctx.pokes||0)-(it.kind==="fun"?+vm.pk||0:0),pk=+it.pokes>0&&pc>=+it.pokes,iS=ctx.idleSince,idl=iN>0&&iS!=null&&now-iS>=iN*1000;
     var late=!pk&&!idl&&lp>0&&!vm.shown&&gdVisitT(v,now)>=lp*1000;
-    if(!pk&&!idl&&!late){var ow=[];if(+it.pokes>0)ow.push(it.pokes+" pokes on Azu ("+pc+" so far"+(it.kind==="fun"&&vm.shown?" since it last showed":"")+")");if(iN>0)ow.push(iN+" s idle ("+(iS==null?"not idle":gdLeft(iN*1000-(now-iS)))+")");
+    if(!pk&&!idl&&!late){var ow=[];if(+it.pokes>0)ow.push(it.pokes+" pokes on the mascot ("+pc+" so far"+(it.kind==="fun"&&vm.shown?" since it last showed":"")+")");if(iN>0)ow.push(iN+" s idle ("+(iS==null?"not idle":gdLeft(iN*1000-(now-iS)))+")");
       if(lp>0)ow.push(vm.shown?"a pause late in the visit (once a visit: it has shown)":"a pause late in the visit (from "+Math.floor(lp/60)+":"+("0"+lp%60).slice(-2)+": "+gdLeft(lp*1000-gdVisitT(v,now))+")");return{no:"after "+ow.join(" or ")}}
-    viaPokes=pk;why.push(pk?pc+" pokes on Azu":idl?"idle "+Math.floor((now-iS)/1000)+" s":"a pause late in the visit")}
+    viaPokes=pk;why.push(pk?pc+" pokes on the mascot":idl?"idle "+Math.floor((now-iS)/1000)+" s":"a pause late in the visit")}
   if(+it.notBefore>0){var at=now-(v.at||0)-(v.away||0);if(at<+it.notBefore*1000)return{no:"not before "+it.notBefore+" s of the visit: "+gdLeft(+it.notBefore*1000-at)}}
   var p=gdPrevOf(it,items);if(p){var pm=gdVisitOf(visitor,p.id);if(!pm.shown)return{no:"after the "+p.label+" (not shown yet this visit)"};
     var since=now-pm.last;if(since<+it.afterPrev*1000)return{no:it.afterPrev+" s after the "+p.label+": "+gdLeft(+it.afterPrev*1000-since)};if(+it.afterPrev>0)why.push(Math.floor(since/1000)+" s after the "+p.label)}
@@ -239,7 +239,7 @@ function gdPlanOn(items,visitor,ctx,T,steps){var n=steps.length,at=[],c=0;steps.
   var gate=function(it){if(!it.on)return"Off";if(it.kindOn===false)return(it.kindName||"Fun")+" is Off";if(it.groupOn===false)return(it.groupName||"On the tour")+" is Off";
     if(ctx.solemn)return"a Solemn point: no beats on it";
     if(T.auds&&!T.auds[A])return(it.groupName||"On the tour")+" is not for "+AN+" (its Audiences)";if(!(it.auds||{})[A])return"not for "+AN+" (its Audiences)";
-    if(!it.calm&&(!ctx.lively||it.groupLife==="calm"))return(it.groupLife==="calm"?"On the tour's Liveliness is Calm":"Calm (Azu › Liveliness)")+": only the items Calm too";
+    if(!it.calm&&(!ctx.lively||it.groupLife==="calm"))return(it.groupLife==="calm"?"On the tour's Liveliness is Calm":"Calm (The mascot › Liveliness)")+": only the items Calm too";
     if(ctx.sr&&it.srPath===false)return it.beat==="word"?"a screen reader is on: Don't say it! is not offered (no button path)":"a screen reader is on, and it has no button path";
     if(it.game&&ctx.games==="off")return"the visitor turned Games on the tour Off (Settings › The guide)";
     if(it.game&&(+ctx.notNow||0)>=2)return"two Not nows this visit: no more games";
@@ -290,7 +290,7 @@ function gdSpanWords2(P,b){var f=P.ids.indexOf(b.span[0])+1,l=P.ids.indexOf(b.sp
 function gdPlanWords(P){if(!P)return"no tour has started yet";var b=P.beats.map(function(x){return x.label+(x.place==="instep"?" in "+gdSpanWords2(P,x):" at "+gdSeamWords(P,x.seam))+(x.state&&x.state!=="planned"?" ("+x.state+(x.why?": "+x.why:"")+")":"")});
   var pr=P.beats.some(function(x){return x.one}),sk=(P.skip||[]).map(function(x){return"“"+(x.title||x.id)+"”"}).join(", ");
   return gdMmss(P.narr)+" of narration, "+P.content+" steps ("+({short:"Short",deep:"Deep"}[P.len]||"Standard")+"): room for "+P.budget+" beat"+(P.budget===1?"":"s")+" (one per "+P.every+" s, at most "+P.cap+(pr?"; the quiz's promise and the quiz count as one":"")+"). "+(b.length?b.join(" · "):"No beats")+"."+
-    (sk?" The card's "+sk+" step is skipped: Azu's quiz replaces it"+(P.quiz==="off"?" (no quiz now: it plays again)":"")+".":"")}
+    (sk?" The card's "+sk+" step is skipped: the mascot's quiz replaces it"+(P.quiz==="off"?" (no quiz now: it plays again)":"")+".":"")}
 /* a beat at its seam: planned there, and the live gates (never over a sentence; a game: Games on the tour, two Not nows; Calm; a screen reader) */
 function gdBeatCheck(it,ctx){var T=ctx.tour,P=ctx.plan;
   if(!T)return{no:"only in a tour, at its seams (its tour's plan)"+(ctx.planNow?": "+(ctx.planNow.why[it.id]||"")+" (a tour now)":"")};
@@ -302,7 +302,7 @@ function gdBeatCheck(it,ctx){var T=ctx.tour,P=ctx.plan;
   if(ctx.speaking)return{no:"never over a sentence: the guide is speaking"};
   if(it.game&&ctx.games==="off")return{no:"the visitor turned Games on the tour Off (Settings › The guide)"};
   if(it.game&&(+ctx.notNow||0)>=2)return{no:"two Not nows this visit: no more games"};
-  if(!it.calm&&(!ctx.lively||it.groupLife==="calm"))return{no:(it.groupLife==="calm"?"On the tour's Liveliness is Calm":"Calm (Azu › Liveliness)")+": only the items Calm too"};
+  if(!it.calm&&(!ctx.lively||it.groupLife==="calm"))return{no:(it.groupLife==="calm"?"On the tour's Liveliness is Calm":"Calm (The mascot › Liveliness)")+": only the items Calm too"};
   if(ctx.sr&&it.srPath===false)return{no:it.beat==="word"?"a screen reader is on: Don't say it! is not offered":"a screen reader is on, and it has no button path"};
   /* round 13: Don't say it! in the plan's language only; Find it on the wall never while the wall is lost (a system state wins), on the wall of its point */
   if(it.beat==="word"&&ctx.lang&&P.lang&&ctx.lang!==P.lang)return{no:"the language changed: its word is the "+({en:"English",pt:"Portuguese"}[P.lang]||P.lang)+" one"};

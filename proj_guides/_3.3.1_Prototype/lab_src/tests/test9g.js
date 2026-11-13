@@ -73,7 +73,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // The ✦
   P.p3 = await pk(ONLY_S + 'C.pokes=3', N, 'gbhint'); P.p4 = await pk(ONLY_S + 'C.pokes=4', N, 'gbhint');
   P.i24 = await pk(ONLY_S + 'C.idleSince=' + (N - 24000), N, 'gbhint'); P.i25 = await pk(ONLY_S + 'C.idleSince=' + (N - 25000), N, 'gbhint');
-  ok('The ✦, alone: after 4 pokes on Azu (3: it waits, and says so; 4: it shows)', P.p3[0] === null && /The ✦: after 4 pokes on Azu \(3 so far\) or 25 s idle \(20 s left\)/.test(P.p3[2]) && P.p4[0] === 'gbhint' && /4 pokes on Azu/.test(P.p4[1]), [P.p3[2], P.p4[1]]);
+  ok('The ✦, alone: after 4 pokes on Azu (3: it waits, and says so; 4: it shows)', P.p3[0] === null && /The ✦: after 4 pokes on the mascot \(3 so far\) or 25 s idle \(20 s left\)/.test(P.p3[2]) && P.p4[0] === 'gbhint' && /4 pokes on Azu/.test(P.p4[1]), [P.p3[2], P.p4[1]]);
   ok('...or after 25 s idle (24 s: 1 s left; 25 s: it shows)', P.i24[0] === null && /25 s idle \(1 s left\)/.test(P.i24[2]) && P.i25[0] === 'gbhint' && /idle 25 s/.test(P.i25[1]), [P.i24[2], P.i25[1]]);
   P.calm = await pk(ONLY_S + 'C.pokes=4;C.lively=false', N, 'gbhint'); P.sol = await pk(ONLY_S + 'C.pokes=4;C.solemn=true', N, 'gbhint');
   ok('...Lively only, never on a Solemn point', P.calm[0] === null && /The ✦: Lively only: Azu is Calm/.test(P.calm[2]) && P.sol[0] === null && /The ✦: never on a Solemn point/.test(P.sol[2]), [P.calm[2], P.sol[2]]);
@@ -180,7 +180,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // ---------- 4. the Editor: the link row, the new rows' demos, Why not now? and the Log, the words ----------
   await fresh(); await R('S.tab="guide";S.ui.level=1;S.op={gt3:true,s7ask:true,s7cam:true};renderEditor()'); await W(200);
   const gp = await R('gdGroupPath("inview")');
-  const lr = await R(`var r=rowEl(ed,"s7cam","Azu comments");[!!r,!!r&&!!r.querySelector('[data-set="@${gp}on"]'),!!r&&/Said by the guide: Guide › Azu speaks up › Content › What's in view/.test((r.querySelector("[data-goto]")||{}).textContent||""),!rowEl(ed,"s7cam","Between comments")]`);
+  const lr = await R(`var r=rowEl(ed,"s7cam","The mascot comments");[!!r,!!r&&!!r.querySelector('[data-set="@${gp}on"]'),!!r&&/Said by the guide: Guide › The mascot speaks up › Content › What's in view/.test((r.querySelector("[data-goto]")||{}).textContent||""),!rowEl(ed,"s7cam","Between comments")]`);
   await p.locator(`[data-fo="s7cam"] [data-set="@${gp}on"][data-v="false"]`).click(); await W(150);
   const off1 = await R('gdGroupById("inview").on');
   await p.locator(`[data-fo="s7cam"] [data-set="@${gp}on"][data-v="true"]`).click(); await W(150);
@@ -209,7 +209,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('...a press on each new row shows its demo on the phone: the tip (or its chip) ringed', missing.length === 0, { missing, shown: newRows.length - missing.length });
   ok('...the group\'s gap on the ×10 clock with its countdown chip; the cap; Lines per point; The ✦\'s pokes (Azu poked, then the tip) and idle (the countdown)', Object.keys(CHIP_RE).every(k => (seen[k] || []).some(c => CHIP_RE[k].test(c))), Object.keys(CHIP_RE).map(k => [k, seen[k]]));
   const rb = await R('[gdReadBack(S.guidance.items.inview),gdReadBack(S.guidance.items.gbhint),ed.querySelector(\'[data-fo="gd:i:inview"] .gdpts\').textContent]');
-  ok('...the read-backs in words: once a visit for each point, the group together at most 12 a visit and 7 s apart; after 4 pokes or 25 s idle, Lively only, never Solemn, until the ✦ menu; the points on the wall now', /when its point settles in the middle, the phone still 1\.2 s · once a visit for each point · What's in view together: at most 12 a visit, at least 7 s apart/.test(rb[0]) && /after 4 pokes on Azu or after 25 s idle \(no touch, the phone still\), Lively only, never on a Solemn point · once a visit, until the visitor opens the ✦ menu/.test(rb[1]) && /6 points\): The Ribeira Palace \(a card: its own line\), The Torreão/.test(rb[2]) && !/later round/i.test(await R('ed.querySelector(\'[data-fo="gt4"]\').textContent')), rb);
+  ok('...the read-backs in words: once a visit for each point, the group together at most 12 a visit and 7 s apart; after 4 pokes or 25 s idle, Lively only, never Solemn, until the ✦ menu; the points on the wall now', /when its point settles in the middle, the phone still 1\.2 s · once a visit for each point · What's in view together: at most 12 a visit, at least 7 s apart/.test(rb[0]) && /after 4 pokes on the mascot or after 25 s idle \(no touch, the phone still\), Lively only, never on a Solemn point · once a visit, until the visitor opens the ✦ menu/.test(rb[1]) && /6 points\): The Ribeira Palace \(a card: its own line\), The Torreão/.test(rb[2]) && !/later round/i.test(await R('ed.querySelector(\'[data-fo="gt4"]\').textContent')), rb);
   // Why not now? and the Log name them
   await fresh(toRem); await R('S.tab="guide";S.ui.level=1;S.op={gt0:true};renderEditor()'); await W(150);
   const opts = await R('[].map.call(ed.querySelectorAll("[data-gdwhysel] option"),function(o){return o.textContent})');

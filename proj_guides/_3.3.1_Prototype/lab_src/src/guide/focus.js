@@ -64,11 +64,11 @@ on("stopTour.before",function(){unzoomAll();var sp=ph.querySelector(".gspot");if
 
 /* Editor: Guide tab gets Focus, after Captions; Specific Marker > Guide script gets each step's spots, drawn on its picture */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var ca=d.querySelector('[data-fo="s7cap"]');if(!ca)return d.innerHTML;
-  ca.insertAdjacentHTML("afterend",comp("s7focus","the spotlight on what is told, the zoom to a spot in a picture, Azu pointing",
+  ca.insertAdjacentHTML("afterend",comp("s7focus","the spotlight on what is told, the zoom to a spot in a picture, the mascot pointing",
     row("Focus",pseg("guideCfg.cue",["spotlight","ring","none"],["Spotlight","Soft ring","None"]),"Spotlight: the rest of the card dims and a soft light rings what the guide is telling. Soft ring: only the ring. One at a time; it follows the scroll and hides while the visitor takes over.")+
     row("Dim the rest",pslider("guideCfg.scrim",0.2,0.6,0.05),"Spotlight only: how dark the rest of the card goes (0.4 = 40 %).",true)+
     row("Into pictures",pseg("guideCfg.zoom",["zoom","spot"],["Slow zoom","Light the spot"]),"When the guide names a spot in a picture (the step's spots, in the Guide script). Slow zoom: the picture glides in to the spot (1.5 s). Light the spot: the picture stays and the spotlight closes on the spot. Reduce Motion: a crossfade instead of the glide.")+
-    row("Azu points",pseg("guideCfg.point",["true","false"],["On","Off"]),"Azu stands level with what is being told and points at it with one arm (with the mascot on).")+
+    row("The mascot points",pseg("guideCfg.point",["true","false"],["On","Off"]),"The mascot stands level with what is being told and points at it with one arm (with the mascot on).")+
     row("Try",'<button class="del" type="button" data-fctry="g3">Try</button>',"Starts the tour at the step that names three spots in the 1662 drawing.")));
   return d.innerHTML});
 function stepPic(st){var el=stepEl(st),i=stepImg(el);if(i)return i.currentSrc||i.src;var r=st.ref&&st.ref.indexOf("r:")===0?byId(S.story,st.ref.slice(2)):null,k=null;
@@ -81,7 +81,7 @@ on("edMarker.html",function(html){var d=document.createElement("div");d.innerHTM
     return'<div class="cue"><div class="cuehd">When it says <select class="u" data-cueat="'+st.id+'|'+i+'">'+(words.indexOf(cur)<0?'<option value="">(pick a word)</option>':"")+words.map(function(w){return'<option'+(w===cur?" selected":"")+'>'+esc(w)+'</option>'}).join("")+'</select> it shows this spot <button class="del" type="button" data-cuedel="'+st.id+'|'+i+'">Remove</button></div>'+
       (pic?'<div class="cuepic" data-cuepic="'+st.id+'|'+i+'"><img src="'+pic+'" alt="" draggable="false"><i style="left:'+r[0]*100+'%;top:'+r[1]*100+'%;width:'+r[2]*100+'%;height:'+r[3]*100+'%"></i></div>':'<div class="note">This step\'s block has no picture: the spotlight shows the whole block.</div>')+'</div>'}).join("");
   slot.insertAdjacentHTML("beforeend",row("Spots it names",'<div class="cues">'+(h||'<span class="uses">None: the spotlight shows the whole block.</span>')+'<div class="btnrow"><button class="ubtn sm" type="button" data-cueadd="'+st.id+'">+ Add a spot</button>'+(cues.length?'<button class="ubtn sm" type="button" data-fctry="'+st.id+'">Try this step</button>':"")+'</div></div>',
-    "A word of what the guide says, and the spot in the picture it means: when the voice reaches the word, the picture zooms to the spot and Azu points at it. Drag on the picture to draw the spot."));
+    "A word of what the guide says, and the spot in the picture it means: when the voice reaches the word, the picture zooms to the spot and the mascot points at it. Drag on the picture to draw the spot."));
   return d.innerHTML});
 ed.addEventListener("click",function(e){var t=e.target.closest("[data-fctry],[data-cueadd],[data-cuedel]");if(!t)return;e.stopPropagation();
   if(t.dataset.fctry){var j=S.guideSteps.findIndex(function(s){return s.id===t.dataset.fctry});if(G.on)stopTour();startTour();if(j>0){G.i=j;runStep()}return}

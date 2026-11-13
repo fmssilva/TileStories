@@ -154,7 +154,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await fresh(); await R('S.tab="card";S.ui.level=1;S.op={s5:true,s5hints:true};renderEditor()'); await W(200);
   const vw = await R('var f=ed.querySelector(\'[data-fo="s5hints"]\');[[].map.call(f.querySelectorAll("[data-goto]"),function(b){return b.dataset.goto+"|"+b.textContent.trim()}),f.querySelectorAll("[data-set],[data-sel],[data-num],[data-path]").length,[].map.call(f.querySelectorAll("tbody tr"),function(r){return r.children[0].textContent+"="+r.children[1].textContent}).join()]');
   ok('Card Controls > Hints: each row reads Edited in Azu speaks up and links to its cue (6), the group and How to use the card; no control of its own (it only reads)',
-    vw[0].length === 8 && vw[0].filter(v => /^gd:i:/.test(v)).every(v => /\|Edited in Azu speaks up ›$/.test(v)) && vw[0].indexOf('gd:g:card|Edited in Guide › Azu speaks up › App › The card (cues) ›') >= 0 && vw[0].some(v => /^gd:g:howto\|Edited in Guide › Azu speaks up › Sequences/.test(v)) && vw[1] === 0 &&
+    vw[0].length === 8 && vw[0].filter(v => /^gd:i:/.test(v)).every(v => /\|Edited in The mascot speaks up ›$/.test(v)) && vw[0].indexOf('gd:g:card|Edited in Guide › The mascot speaks up › App › The card (cues) ›') >= 0 && vw[0].some(v => /^gd:g:howto\|Edited in Guide › Azu speaks up › Sequences/.test(v)) && vw[1] === 0 &&
     /^Grabber nudge=Once a visit,Locate label=Once a visit,Navigation Bar=Once a visit/.test(vw[2]), vw);
   await R('S.guidance.items.ba.shows="card";S.guidance.items.term.on=false;renderEditor()'); await W(150);
   const vw2 = await R('[].map.call(ed.querySelectorAll(\'[data-fo="s5hints"] tbody tr\'),function(r){return r.children[1].textContent}).join()');

@@ -3,7 +3,7 @@ S.agentCfg.liveVoice="azure";S.agentCfg.elevenModel="eleven_flash_v2_5";   /* wi
 var AZ_SDK="https://cdn.jsdelivr.net/npm/microsoft-cognitiveservices-speech-sdk@1.43.0/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js";
 var LV={last:null,sdk:null};
 /* the keys: only this computer's (keys.local.js, from .secrets/keys.env); the published Lab has none and speaks with the device voice */
-function lvKeys(){var k=window.LABKEYS||{};return{azure:!!(k.azure&&k.azureRegion),eleven:!!(k.eleven&&(k.elevenPT||k.elevenEN))}}
+function lvKeys(){var k=window.LABKEYS||{};return{azure:!!(k.azure&&k.azureRegion),eleven:!!(k.eleven&&elevenVoice("en"))}}
 /* a letter's shape (ElevenLabs gives letters, not visemes) */
 var LV_CH={a:"A",á:"A",à:"A",ã:"A",â:"A",e:"E",é:"E",ê:"E",i:"E",í:"E",y:"E",o:"O",ó:"O",ô:"O",õ:"O",u:"O",ú:"O",w:"O",m:"M",b:"M",p:"M",f:"chew",v:"chew"};
 function lvWords(text){var out=[],re=/\S+/g,m;while((m=re.exec(text)))out.push({i:m.index,w:m[0]});return out}
@@ -12,7 +12,7 @@ function lvBuf(b64){var s=atob(b64),u=new Uint8Array(s.length);for(var i=0;i<s.l
 function lvFill(ws,n){var out=[];for(var j=0;j<n;j++)out.push(ws[j]||null);for(j=0;j<n;j++)if(!out[j]){var p=j-1;while(p>=0&&!out[p])p--;var q=j+1;while(q<n&&!out[q])q++;var a=p>=0?out[p][1]:0,b=q<n&&out[q]?out[q][0]:a+.3;out[j]=[a,Math.max(a+.05,b)]}return out}
 
 /* ----- ElevenLabs: /with-timestamps gives the audio and each character's start and end ----- */
-function lvEleven(text){var k=window.LABKEYS,voice=S.lang==="pt"?(k.elevenPT||k.elevenEN):(k.elevenEN||k.elevenPT);
+function lvEleven(text){var k=window.LABKEYS,voice=elevenVoice(S.lang);
   return fetch("https://api.elevenlabs.io/v1/text-to-speech/"+voice+"/with-timestamps?output_format=mp3_44100_64",{method:"POST",headers:{"xi-api-key":k.eleven,"Content-Type":"application/json"},
       body:JSON.stringify({text:text,model_id:S.agentCfg.elevenModel,voice_settings:{stability:.45,similarity_boost:.8}})})
     .then(function(r){if(!r.ok)throw new Error("ElevenLabs answered "+r.status);return r.json()})
@@ -50,7 +50,7 @@ var LVN={device:"the device voice",azure:"Azure",eleven:"ElevenLabs"};
 function lvDevice(t,w,e){var l=LV.last||{},n=LVN[l.voice]||"The live voice";sayFrom("live",t,w,e,{not:n+" failed ("+(l.err||"no audio")+")",short:n+" failed"})}
 /* the source say.live: any line its turn comes to (sayOrder: an answer first, a line not recorded after the recorded set) */
 function lvSay(text,onWord,onEnd){if(!text)return;var v=S.agentCfg.liveVoice;
-  if(v==="device")return{not:"Ask Azu's Voice of the answers is the device voice",short:"no live voice chosen"};
+  if(v==="device")return{not:"Ask the mascot's Voice of the answers is the device voice",short:"no live voice chosen"};
   if(!lvKeys()[v])return{not:"no "+LVN[v]+" key on this page",short:"no live key on this page"};
   var t0=performance.now(),my=G.lvSeq=(G.lvSeq||0)+1,ans=text===G.answer;LV.wait=true;LV.held=false;
   (v==="azure"?lvAzure(text):lvEleven(text)).then(function(r){if(G.lvSeq!==my)return;LV.wait=false;LV.last={voice:v,answer:ans,ms:Math.round(performance.now()-t0),shapes:r.shapes||r.vis.length,words:r.words.length,from:r.from};lvPlay(text,onWord,onEnd,r);lvStatus()})
@@ -72,7 +72,7 @@ function lvStatus(){var e=ed.querySelector(".lvstat");if(e)e.textContent=lvStatu
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   var lab=Array.from(d.querySelectorAll('[data-fo="s7agent"] .row > label')).filter(function(l){return l.firstChild&&l.firstChild.textContent==="Spoken answer"})[0];
   if(lab)lab.parentNode.insertAdjacentHTML("afterend",row("Voice of the answers",pseg("agentCfg.liveVoice",["device","azure","eleven"],["Device voice","Azure (live)","ElevenLabs (live)"])+'<div class="uses lvstat">'+esc(lvStatusText())+'</div>',
-      "Device voice: the phone's own, free; the mouth follows each word's letters over the word's time. Azure (live): the narration's voice (Sonia in English, Raquel in Portuguese) made for each answer; the mouth follows Azure's visemes. ElevenLabs (live): the voices picked for the recorded set, with each letter's time; the mouth follows the letters at their times. The live voices need a key (on this computer from .secrets/keys.env, by keys_local.py; in the app, on the server, which streams the audio and its timings a sentence at a time). Without a key, or on an error, the device voice reads the answer. The live voice also speaks the tour's lines the recorded set lacks (Narration > Voice = Recorded, then live, then this device); Narration > Speaking now says which voice speaks and why.",true)+
+      "Device voice: the phone's own, free; the mouth follows each word's letters over the word's time. Azure (live): the mascot's own voice (The voice's Azure voices: Ryan in English, Duarte in Portuguese by default) made for each answer; the mouth follows Azure's visemes. ElevenLabs (live): the voices picked for the recorded set, with each letter's time; the mouth follows the letters at their times. The live voices need a key (on this computer from .secrets/keys.env, by keys_local.py; in the app, on the server, which streams the audio and its timings a sentence at a time). Without a key, or on an error, the device voice reads the answer. The live voice also speaks the tour's lines the recorded set lacks (A line with no recording = The device voice); Speaking now says which voice speaks and why.",true)+
     (S.agentCfg.liveVoice==="eleven"?row("ElevenLabs model",pseg("agentCfg.elevenModel",["eleven_flash_v2_5","eleven_multilingual_v2"],["Flash v2.5 (fastest)","Multilingual v2 (richest)"]),"Flash: about 75 ms to the first audio and half the credits; Multilingual v2: the richest voice, slower. Both speak European Portuguese with a pt-PT voice.",true):""));
   return d.innerHTML});
 /* each row's demo: a question answered aloud in the conversation (Speaking now says by which voice) */

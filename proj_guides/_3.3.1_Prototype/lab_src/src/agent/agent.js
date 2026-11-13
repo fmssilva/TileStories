@@ -2,7 +2,7 @@
 S.agentCfg={provider:"auto",gemModel:"gemini-flash-lite-latest",claudeModel:"claude-haiku-5-5",tier:"quick",maxOut:400,steps:3,timeout:12,cap:40,
   photo:false,ctx:true,general:true,voiceOut:true,links:true,actions:true,
   pol:{search_library:"auto",find:"auto",show_links:"auto",highlight_points:"auto",open_feature:"suggest",navigate_to:"auto",make_route:"suggest",start_tour:"confirm",show_how:"auto"}};
-COMP.s7agent=["Guide","Ask Azu (the live agent)"];
+COMP.s7agent=["Guide","Ask the mascot (the live agent)"];
 var AG={claude:null,fn:null,keys:{},log:[],evals:[],count:0,last:null,mock:null,con:{q:"",text:"",calls:[],st:null,busy:false},showCtx:false,sig:""};
 try{var kk=JSON.parse(localStorage.getItem("lab.agentKeys")||"{}");if(kk&&typeof kk==="object")AG.keys=kk}catch(e){}
 /* the providers' prices, $ per 1M tokens in / out (approximate, as of 2026-11; check the pricing pages) */
@@ -88,7 +88,7 @@ function agGo(id){if(id==="story"){S.view="story";S.stop="full";renderPhone(fals
 function agCenter(id){var p=S.wallPois.filter(function(x){return x.id===id})[0];if(!p)return;var g=camGeom();
   if(g.dw>g.W)S.camX=Math.max(0,Math.min(1,(g.W/2-p.u*g.dw)/(g.W-g.dw)));if(g.dh>g.H)S.camY=Math.max(0,Math.min(1,(g.H*.45-p.v*g.dh)/(g.H-g.dh)));camPaint();camLayer()}
 function agPrompt(q,where,ctx){var lib=corpus().map(function(c){return'<doc id="'+c.ref+'" title="'+c.title+'">'+c.text+'</doc>'}).join("\n");
-  return pipe("agPrompt.text","You are Azu, the guide of TileStories, a heritage app for the tiled walls (azulejos) of Lisbon. You are warm, brief and exact.\n"+
+  return pipe("agPrompt.text","You are "+mascotName()+", the guide of TileStories, a heritage app for the tiled walls (azulejos) of Lisbon. You are warm, brief and exact.\n"+
     "Answer in "+(S.lang==="pt"?"European Portuguese (Portugal, never Brazilian; address the visitor politely in the third person, as a museum guide does: Pode ver, para si; never tu, você or Vossa Excelência)":"English")+", in at most 3 short spoken sentences, for a "+ctx.audience+" visitor"+(ctx.lens?", through the lens: "+ctx.lens:"")+".\n"+
     (S.agentCfg.ctx?"WHERE THE VISITOR IS (the app's state; you do not see the camera's picture"+(S.agentCfg.photo&&where==="wall"?", except the photo attached":"")+"): "+JSON.stringify(ctx)+"\n":"")+
     "LIBRARY of this point (the Ribeira Palace):\n"+lib+"\n"+
@@ -155,7 +155,7 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;v
     row("Targets",'<span class="uses">'+agTargets().length+': '+corpus().length+' blocks and pages, '+S.wallPois.length+' points on this wall</span>',"Auto: it happens. Suggest: a button under the answer the visitor taps. Confirm: a button that asks first. The ids the model may name are the real ones only; a wrong id is refused and shown in the console.")+
     sub("5 · Knowledge")+row("Library",'<span class="uses">This point: '+corpus().length+' texts, ≈'+agTok()+' tokens, in the prompt</span>',"Each wall's library goes in the prompt (cached by the provider) while it fits, under about 100K tokens. Beyond that: BM25 (SQLite FTS5) + embeddings + a re-rank. Answers cite their texts; a cited id that does not exist is dropped.")+
     row("General knowledge",pseg("agentCfg.general",["true","false"],["Allowed, with a badge","Library only"]),"Allowed: when the library has no answer, the model may use what is well established, and the answer shows General knowledge. Library only: it says it does not know and offers link cards.")+
-    sub("6 · Outputs")+row("Spoken answer",pseg("agentCfg.voiceOut",["true","false"],["On","Off"]),"The answer read aloud (the device voice in the Lab; in the app, Azu's voice, streamed a sentence at a time).")+
+    sub("6 · Outputs")+row("Spoken answer",pseg("agentCfg.voiceOut",["true","false"],["On","Off"]),"The answer read aloud (the device voice in the Lab; in the app, the mascot's voice, streamed a sentence at a time).")+
     row("Link cards",pseg("agentCfg.links",["true","false"],["On","Off"]),"Up to 4 cards under the answer, each a block, a page or a point with its reason. A tap goes there.")+
     row("Actions in the app",pseg("agentCfg.actions",["true","false"],["On","Off"]),"Off: the agent only answers and offers link cards.")+
     sub("7 · Services and keys")+'<div class="agstat">'+agStatus()+'</div>'+

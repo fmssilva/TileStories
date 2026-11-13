@@ -40,7 +40,7 @@ function ldShapeFromWords(){return function(){var k=G.hl&&G.hl.k,w=k>=0&&G.words
 function lvSsml(text,voice){var head='<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="http://www.w3.org/2001/mstts" xml:lang="'+voice.slice(0,5)+'"><voice name="'+voice+'"><mstts:viseme type="FacialExpression"/>',body="",back=[];
   for(var i=0;i<text.length;i++){var c=text[i],e=c==="&"?"&amp;":c==="<"?"&lt;":c===">"?"&gt;":c;body+=e;for(var j=0;j<e.length;j++)back.push(i)}return{ssml:head+body+"</voice></speak>",at:head.length,back:back}}
 function lvAzure(text){var k=window.LABKEYS;return lvSdk().then(function(SDK){return new Promise(function(res,rej){
-    var voice=S.lang==="pt"?"pt-PT-RaquelNeural":"en-GB-SoniaNeural",cfg=SDK.SpeechConfig.fromSubscription(k.azure,k.azureRegion);cfg.speechSynthesisVoiceName=voice;
+    var voice=azureVoice(S.lang),cfg=SDK.SpeechConfig.fromSubscription(k.azure,k.azureRegion);cfg.speechSynthesisVoiceName=voice;
     cfg.speechSynthesisOutputFormat=SDK.SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3;
     var syn=new SDK.SpeechSynthesizer(cfg,null),chunks=[],bounds=[],sm=lvSsml(text,voice),ids=0;
     syn.visemeReceived=function(s,e){ids++;if(e.animation)try{chunks.push(JSON.parse(e.animation))}catch(x){}};
@@ -62,5 +62,7 @@ function mouthNow(){return{kind:MT.kind||(G.visTrack?"shapes":"letters"),talk:Az
 
 /* ----- Editor: Guide tab > Mascot: how the mouth moves now ----- */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var r=rowEl(d,"s7mascot","Mouth");
-  if(r)r.insertAdjacentHTML("afterend",row("How it moves",'<span class="uses">Azure\'s facial curves: 60 frames a second, the jaw, the lips\' closing, their rounding and widening (the live answers in Azure, the recorded Azure lines). Other recorded voices and ElevenLabs: the sound\'s loudness opens it, the letters shape it. The device voice: the letters at the word times.</span>',"The same three values (open, round, wide) move every source: the 3D models' morphs Open, Round and Wide, the tile of light's opening, the 2D tile's nearest drawn mouth. Unity: the Worker streams Azure's blend shapes with the audio; SetViseme takes the three values; uLipSync gives the same from any audio.",true));
+  if(r)r.insertAdjacentHTML("afterend",row("How it moves",'<span class="uses">Azure\'s facial curves: 60 frames a second, the jaw, the lips\' closing, their rounding and widening (the live answers in Azure, the recorded Azure lines). Other recorded voices and ElevenLabs: the sound\'s loudness opens it, the letters shape it. The device voice: the letters at the word times.</span>'+mpPlay("moves"),"The same three values (open, round, wide) move every source: the 3D models' morphs Open, Round and Wide, the tile of light's opening, the 2D tile's nearest drawn mouth. Unity: the Worker streams Azure's blend shapes with the audio; SetViseme takes the three values; uLipSync gives the same from any audio.",true));
   return d.innerHTML});
+/* round 19: How it moves (a line, no control) gets its ▸ too: the mascot talking on the phone */
+rowDemos({"mp:moves":{tour:"g1",ring:".mascot|.gdock"}});

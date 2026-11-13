@@ -20,7 +20,18 @@
    (mascot/azu2d.js's azMoment, its words the item's Says); no bubble of the guidance. Unity: the prop and Azu's reactions are the Rive
    file's states (drink, eat), the bubble as every tip's. A tap on the treasure hunt's invitation (or its chip, Start the hunt) opens Ask
    about the view and starts its hunt (camAsk's own, no copy). */
-var GD_RING=36,GD_GUT=12,GD_SWIPE=40,GD_HOLD=600;
+var GD_RING=36,GD_GUT=12,GD_SWIPE=40,GD_HOLD=600,GD_TIP=9;
+/* the mascot's figure (round 19): the picture's drawn part, by its alpha for a still image (object-fit: contain, the thumbnail's transparent
+   margins left out; measured once a picture), else its drawing's box; its head: the figure's top 40 %, its middle 60 % wide. Unity: the
+   mascot prefab's head anchor (a child Transform), projected to the panel */
+var GD_FIG={};
+function gdFigure(az){var i=az&&az.querySelector(".azstill"),e=i||az&&az.querySelector("svg,canvas")||az;if(!e)return null;var r=gdPR(e);if(!i)return r;
+  var k=i.currentSrc||i.src,f=GD_FIG[k];if(!f&&i.naturalWidth){try{var c=document.createElement("canvas");c.width=i.naturalWidth;c.height=i.naturalHeight;var x=c.getContext("2d");x.drawImage(i,0,0);var d=x.getImageData(0,0,c.width,c.height).data,l=1e9,t=1e9,rr=-1,b=-1;
+      for(var y=0;y<c.height;y++)for(var q=0;q<c.width;q++)if(d[(y*c.width+q)*4+3]>40){if(q<l)l=q;if(q>rr)rr=q;if(y<t)t=y;if(y>b)b=y}f=GD_FIG[k]=rr<0?null:{l:l/c.width,t:t/c.height,r:(rr+1)/c.width,b:(b+1)/c.height,a:c.width/c.height}}catch(e2){f=GD_FIG[k]={l:0,t:0,r:1,b:1,a:1}}}
+  if(!f)return r;var W=r.r-r.l,H=r.b-r.t,s=Math.min(W/f.a,H),dw=s*f.a,dh=s,ox=r.l+(W-dw)/2,oy=r.t+(H-dh)/2;return{l:ox+f.l*dw,t:oy+f.t*dh,r:ox+f.r*dw,b:oy+f.b*dh}}
+function gdHeadOf(F){var w=F.r-F.l,h=F.b-F.t;return{l:F.l+w*.2,r:F.r-w*.2,t:F.t,b:F.t+h*.4}}
+/* the figure's place inside the mascot's box at home (no translate), for the solver's candidate places */
+function gdFigRel(az,home){var a=gdPR(az),f=gdFigure(az)||a;return{l:f.l-a.l,t:f.t-a.t,w:f.r-f.l,h:f.b-f.t}}
 G.gd.az=null;
 function gdPR(el){var pr=ph.getBoundingClientRect(),q=pr.height/ph.offsetHeight,r=el.getBoundingClientRect();return{l:(r.left-pr.left)/q,t:(r.top-pr.top)/q,r:(r.right-pr.left)/q,b:(r.bottom-pr.top)/q}}
 function gdBox(l,t,w,h){return{l:l,t:t,r:l+w,b:t+h}}
@@ -91,12 +102,14 @@ function gdSolve(c,bw,bh){var it=c.item,W=ph.offsetWidth,H=ph.offsetHeight,az=gd
   var clampL=function(l){return Math.max(GD_GUT,Math.min(W-GD_GUT-bw,l))};
   var M=gdTarget(it),home=null,best=null;
   if(az){var cur=az.style.translate;az.style.translate="";home=gdPR(az);az.style.translate=cur}
-  if(M&&M.beside&&gdGoes(it)&&az){var aw=home.r-home.l,ah=home.b-home.t,ring=M.box;
+  if(M&&M.beside&&gdGoes(it)&&az){var aw=home.r-home.l,ah=home.b-home.t,ring=M.box,fr=gdFigRel(az,home);
+    /* round 19 (19.7, print 14: the bubble sat above the mascot, its tail short of the head): the bubble sits beside the mascot's head, its
+       tail's tip on the head's edge (GD_TIP: the tail's reach past the bubble), so it plainly comes from the mascot; above or below the head
+       only when neither side has room */
     [["right",M.x+GD_RING+6,M.y-ah/2],["left",M.x-GD_RING-6-aw,M.y-ah/2],["above",M.x-aw/2,M.y-GD_RING-6-ah],["below",M.x-aw/2,M.y+GD_RING+30]].forEach(function(a,ai){
-      var A1=gdBox(a[1],a[2],aw,ah),cx=(A1.l+A1.r)/2;
-      [["down",gdBox(clampL(cx-bw/2),A1.t-10-bh,bw,bh)],["up",gdBox(clampL(cx-bw/2),A1.b+10,bw,bh)],
-       ["left",gdBox(A1.r+10,(A1.t+A1.b)/2-bh/2,bw,bh)],["right",gdBox(A1.l-10-bw,(A1.t+A1.b)/2-bh/2,bw,bh)]].forEach(function(q,qi){
-        var s=cost(A1,[ring])+cost(q[1],[ring,A1])+ai*30+qi*20;if(!best||s<best.s)best={s:s,side:a[0],A:A1,B:q[1],tail:q[0]}})})}
+      var A1=gdBox(a[1],a[2],aw,ah),F1=gdBox(A1.l+fr.l,A1.t+fr.t,fr.w,fr.h),H1=gdHeadOf(F1),hy=(H1.t+H1.b)/2,body=gdBox(F1.l,H1.b,fr.w,Math.max(1,F1.b-H1.b)),cx=(H1.l+H1.r)/2,by=Math.min(hy-bh/2,H1.b+4-bh);
+      [["left",gdBox(H1.r+GD_TIP,by,bw,bh),0],["right",gdBox(H1.l-GD_TIP-bw,by,bw,bh),0],["down",gdBox(clampL(cx-bw/2),H1.t-GD_TIP-bh,bw,bh),60],["up",gdBox(clampL(cx-bw/2),F1.b+GD_TIP,bw,bh),90]].forEach(function(q,qi){
+        var s=cost(A1,[ring])+cost(q[1],[ring,body])+ai*30+q[2]+qi*4;if(!best||s<best.s)best={s:s,side:a[0],A:A1,B:q[1],tail:q[0],head:H1}})})}
   else if(M&&M.beside){var ring2=M.box;
     [["down",gdBox(clampL(M.x-bw/2),M.y-GD_RING-10-bh,bw,bh)],["left",gdBox(M.x+GD_RING+10,M.y-bh/2,bw,bh)],["right",gdBox(M.x-GD_RING-10-bw,M.y-bh/2,bw,bh)],["up",gdBox(clampL(M.x-bw/2),M.y+GD_RING+34,bw,bh)]].forEach(function(q,qi){
       var s=cost(q[1],[ring2])+qi*20;if(!best||s<best.s)best={s:s,B:q[1],tail:q[0],at:M}})}
@@ -110,7 +123,7 @@ function gdSolve(c,bw,bh){var it=c.item,W=ph.offsetWidth,H=ph.offsetHeight,az=gd
 function gdPlace(c,first){var b=ph.querySelector(".gdbub:not(.gd-out)");if(!b||!c)return;var it=c.item,az=gdMascot(),bw=b.offsetWidth,best=gdSolve(c,bw,b.offsetHeight),M=best.M,A=best.A;
   b.style.left=Math.round(best.B.l)+"px";b.style.top=Math.round(best.B.t)+"px";b.dataset.tail=best.tail;b.dataset.side=best.side||"";
   /* the tail: towards Azu, or (Mascot Off) towards the target; none for a plain tip with no target */
-  var to=A?{x:(A.l+A.r)/2,y:(A.t+A.b)/2}:best.at||null,tl=b.querySelector(".gdtail"),bh=b.offsetHeight;
+  var to=best.head?{x:(best.head.l+best.head.r)/2,y:(best.head.t+best.head.b)/2}:A?{x:(A.l+A.r)/2,y:(A.t+A.b)/2}:best.at||null,tl=b.querySelector(".gdtail"),bh=b.offsetHeight;
   if(!to){b.dataset.tail="none"}else if(tl){if(best.tail==="down"||best.tail==="up")tl.style.left=Math.round(Math.max(14,Math.min(bw-28,to.x-best.B.l-7)))+"px";else tl.style.top=Math.round(Math.max(10,Math.min(bh-24,to.y-best.B.t-7)))+"px"}
   var fc=gdFocusNow(it),rg=fc==="ring"&&M?gdRing(it,false):null;
   if(rg&&M&&M.rect){rg.style.left=Math.round(M.rect.l-5)+"px";rg.style.top=Math.round(M.rect.t-5)+"px";rg.style.width=Math.round(M.rect.r-M.rect.l+10)+"px";rg.style.height=Math.round(M.rect.b-M.rect.t+10)+"px"}
@@ -167,8 +180,8 @@ function gdTap(){var c=G.gd.cur;if(!c)return;var it=c.item;if(c.pull&&G.gd.demo)
   if(it.tap==="view"){gdStop("tapped: Ask about the view opens","acted");G.fab.menu=false;G.cam.open=true;renderPhone(true);emit("view.opened","the tip");return}
   /* Azu's remark: a point with a card opens it and starts its tour; any other opens Ask about the view about it, the point lit */
   if(it.tap==="remark"){var pid=c.slots.id,p=(S.wallPois||[]).filter(function(x){return x.id===pid})[0];gdStop("tapped: "+(p&&p.card?"the tour of "+(c.slots.point||"the point")+" starts":"Ask about the view opens about "+(c.slots.point||"the point")),"acted");
-    if(p&&p.card){pointOpen(p.id);S.view="card";S.stop="half";renderPhone(false);emit("card.opened","Azu's remark");startTour();return}
-    G.fab.menu=false;G.cam.open=true;renderPhone(true);emit("view.opened","Azu's remark");camAsk("",p&&p.year?"oldest":"what");camLight([pid]);return}
+    if(p&&p.card){pointOpen(p.id);S.view="card";S.stop="half";renderPhone(false);emit("card.opened","The mascot's remark");startTour();return}
+    G.fab.menu=false;G.cam.open=true;renderPhone(true);emit("view.opened","The mascot's remark");camAsk("",p&&p.year?"oldest":"what");camLight([pid]);return}
   if(it.tap==="menu"){gdStop("tapped: the ✦ menu opens","acted");gbMenu(true);return}
   if(it.tap==="hunt"){gdStop("tapped: the treasure hunt starts","acted");gdHuntGo("the hunt invitation");return}
   if(it.tap==="tour"){var cont=c.slots.cont!=null;gdStop("tapped: the tour of "+(c.slots.point||"the point")+(cont?" continues at step "+c.slots.cont:" starts"),"acted");if(c.slots.id)pointOpen(c.slots.id);S.view="card";S.stop="half";renderPhone(false);emit("card.opened","the tour invitation");if(cont&&typeof svContinue==="function")svContinue(c.slots.id);else startTour();return}
@@ -421,7 +434,7 @@ on("agTurnHtml.html",function(h,turn){if(!turn||!turn.shows||!turn.shows.length)
 /* the taps: the ✕, a row's Show me, Settings' link, Ask's Show me card */
 ph.addEventListener("click",function(e){var t=e.target.closest("[data-gdtry],[data-gdtryx],[data-gdtryshow],[data-gdhow]");if(!t)return;e.stopPropagation();e.preventDefault();
   if(t.dataset.gdtryx){gdTryClose();return}if(t.dataset.gdtry){gdTryOpen(t.dataset.gdtry==="settings"?"Settings › The guide":t.dataset.gdtry);return}
-  if(t.dataset.gdtryshow){gdTryShow(t.dataset.gdtryshow,"Things to try");return}if(t.dataset.gdhow){gdTryShow(t.dataset.gdhow,"Ask Azu")}},true);
+  if(t.dataset.gdtryshow){gdTryShow(t.dataset.gdtryshow,"Things to try");return}if(t.dataset.gdhow){gdTryShow(t.dataset.gdhow,"Ask the mascot")}},true);
 
 /* ----- round 12, Fun › On the tour: the beats' look (research_tour_entertainment.md 5.1, 5.3, 4.5). A beat shows in the panel: the beat card
    (`.gdbeat`), one opaque surface in the Look's own colours, set on the dock (at Mini: the dock's controls, its progress line and the quiz's
@@ -445,7 +458,12 @@ function gdBeatLook(){return typeof dkLook==="function"?dkLook():"ink"}
 /* where the card sits: on the dock's top edge (Mini), at the foot above the ✦ (Compact), else 16 px from the foot */
 function gdBeatPlace(){var b=ph.querySelector(".gdbeat");if(!b)return;var lk=gdBeatLook();if(!b.classList.contains("bt-"+lk)){b.classList.remove("bt-ink","bt-paper","bt-player","bt-prompter");b.classList.add("bt-"+lk)}var H=ph.offsetHeight,d=ph.querySelector(".gdock"),w=ph.querySelector(".gbtn-wrap"),bot=16;
   if(d&&d.getClientRects().length){var r=phRect(d);bot=Math.round(H-r.t+10)}else if(w&&w.getClientRects().length){var q=phRect(w);bot=Math.round(H-q.t+10)}
-  b.style.bottom=bot+"px";var m=ph.querySelector(".mascot");if(m&&m.getClientRects().length&&!b.classList.contains("bt-away")){var br=phRect(b),mh=m.offsetHeight||64;ph.style.setProperty("--gd-bt-top",Math.max(64,Math.round(br.t-mh+8))+"px");m.classList.add("gd-onbeat")}}
+  b.style.bottom=bot+"px";var m=ph.querySelector(".mascot");if(m&&m.getClientRects().length&&!b.classList.contains("bt-away")){var br=phRect(b),mh=m.offsetHeight||64;ph.style.setProperty("--gd-bt-top",Math.max(64,Math.round(br.t-mh+8))+"px");m.classList.add("gd-onbeat")}
+}
+/* round 19 (19.6, print 17: the quiz promise's dark card covered the hero's line "Royal palace, lost in 1755"): a beat card is part of what
+   covers the card's foot (guide/dock.js's freeHeight), so a step told at the hero (the teaser, the end) puts the hero's words 12 px above
+   it, as above the panel (guide/person.js's placeStep and keepStepClear); while the card shows, the words only rise (its chips come and go).
+   Unity: the same offset on the card's ScrollView */
 /* the line's words, each its own span (the word being said lit) */
 function gdBeatWords(t){return String(t||"").split(/(\s+)/).map(function(w){return/^\s+$/.test(w)?w:'<span class="btw">'+esc(w)+'</span>'}).join("")}
 /* a beat's line: spoken through the one order of voices (say), its word lit; with a screen reader on, announced (aria-live) instead.
@@ -475,7 +493,7 @@ function gdBeatFreeze(B,on){if(!B||!!B.frozen===!!on)return;var now=performance.
   if(c&&!c.done){if(c.pend){c.pend=false;c.fin()}else if(c.cut){c.cut=false;gdBeatVoice(B,c,c.k||0)}}}
 /* the card: its eyebrow, its line, its body (chips, the quiz, the slider) and foot */
 function gdBeatHtml(B){var L=gdBeatLook();return'<div class="gdbeat bt-'+L+(B.kind?" bk-"+B.kind:"")+(S.reduce?"":" bt-in")+'" role="dialog" aria-label="'+esc(B.label||"")+'" aria-live="polite">'+
-  '<small class="bt-eye">'+esc(B.eye||"AZU")+'</small><p class="bt-line">'+gdBeatWords(B.said||"")+'</p><div class="bt-body"></div><div class="bt-foot"></div></div>'}
+  '<small class="bt-eye">'+esc(B.eye||mascotName().toUpperCase())+'</small><p class="bt-line">'+gdBeatWords(B.said||"")+'</p><div class="bt-body"></div><div class="bt-foot"></div></div>'}
 function gdBeatDraw(B){var o=ph.querySelector(".gdbeat");if(o)o.remove();ph.insertAdjacentHTML("beforeend",gdBeatHtml(B));ph.classList.add("gd-beating");gdBeatPlace()}
 function gdBeatBody(h,foot){var b=ph.querySelector(".gdbeat .bt-body"),f=ph.querySelector(".gdbeat .bt-foot");if(b)b.innerHTML=h||"";if(f)f.innerHTML=foot||"";gdBeatPlace()}
 function gdBeatEye(t){var e=ph.querySelector(".gdbeat .bt-eye");if(e)e.textContent=t}
@@ -490,7 +508,7 @@ function gdBeatClose(){var B=G.gd.bt;if(B){Object.keys(B.tm||{}).forEach(functio
   ph.querySelectorAll(".gdbeat,.gdshowback").forEach(function(x){x.remove()});var m=ph.querySelector(".mascot");if(m)m.classList.remove("gd-onbeat");if(G.moment)azMomentEnd(false)}
 /* a beat on the phone (guidance/service.js's gdStart): by its kind */
 function gdBeatPresent(c){var it=c.item;gdBeatClose();if(G.on){clearGuideMarks();if(S.dockH!=="mini"&&S.dockH!=="compact"){S.dockH="mini";renderGuide()}}
-  var B=G.gd.bt={item:it,c:c,kind:it.beat,label:it.label,eye:"AZU",said:"",clk:{acc:0,at:performance.now()}};
+  var B=G.gd.bt={item:it,c:c,kind:it.beat,label:it.label,eye:mascotName().toUpperCase(),said:"",clk:{acc:0,at:performance.now()}};
   if(c.react){if(it.beat==="word"){B.kind="wordres";gdWordResult(B)}else{B.kind="guess";gdGuessReact(B)}return}
   if(it.beat==="promise")gdPromise(B);else if(it.beat==="finale")gdQuiz(B);else if(it.beat==="guess")gdGuess(B);else if(it.beat==="word")gdWordAnnounce(B);else if(it.beat==="find")gdFind(B);else gdBreather(B)}
 /* a game's Not now: counted (two this visit: no more games, said once) */
@@ -498,7 +516,7 @@ function gdBeatNotNow(B){var t=gdNotNow(B.item);if(t){gdBeatBody("","");gdBeatSa
 /* --- the quiz promise --- */
 /* round 13 (the developer's answer on round 12): the promise says its line on the card, then the card goes and its two chips stay up for
    4 s above the dock while step 1 starts (the tour no longer waits about 9 s); waiting is a Deal (Expert's opt-in: waiting is no) */
-function gdPromise(B){var it=B.item,ex=aud()==="expert"&&it.expert==="optin",P=G.gd.plan;B.eye="AZU · "+TXT("tour_star").toUpperCase();B.optin=ex;
+function gdPromise(B){var it=B.item,ex=aud()==="expert"&&it.expert==="optin",P=G.gd.plan;B.eye=mascotName().toUpperCase()+" · "+TXT("tour_star").toUpperCase();B.optin=ex;
   B.said=ex?TXT("tour_promise_expert"):gdLine(it,false,{aud:""});if(P&&!ex)P.quiz="pending";gdBeatDraw(B);if(G.on&&!ex)renderGuide();
   var w=+it.waits||4,chips=ex?[["yes",TXT("tour_yes_please"),"pri",0],["no",TXT("tour_no_thanks"),"",w]]:[["deal",TXT("tour_deal"),"pri",w],["noquiz",TXT("tour_noquiz"),"",0]];
   gdBeatSay(B.said,function(){if(G.gd.bt!==B)return;var pull=B.c&&B.c.pull&&G.gd.demo;gdTailShow({kind:"promise",item:it,optin:ex,chips:chips,secs:w,wait:function(){gdPromiseAns(ex?"no":"deal",true)}});
@@ -525,18 +543,22 @@ function gdBreatherAns(a,waited){var B=G.gd.bt;if(!B||B.kind!=="breather"||B.sta
 /* the answer given (guide/ask.js or the agent: ask.after): once it has been said, "Back to our story." and the next step */
 on("ask.after",function(t){var q=G.gd.askFirst;if(!q||q.answered)return;q.answered=true;var t0=performance.now(),est=Math.min(20000,String(t||"").split(/\s+/).length*60000/170+1500);
   (function w(){if(!G.gd.askFirst)return;if((G.utter||G.recAudio||G.timer)&&performance.now()-t0<est){setTimeout(w,300);return}G.gd.askFirst=null;if(!G.on)return;
-    S.dockH="mini";G.askOpen=false;G.paused=false;G.resumeVoice=false;renderGuide();var B=G.gd.bt={kind:"back",label:TXT("tour_back"),eye:"AZU",said:TXT("tour_back"),clk:{acc:0,at:performance.now()}};gdBeatDraw(B);gdBeatSay(B.said,function(){gdBeatClose();gdResume(false)})})()});
+    S.dockH="mini";G.askOpen=false;G.paused=false;G.resumeVoice=false;renderGuide();var B=G.gd.bt={kind:"back",label:TXT("tour_back"),eye:mascotName().toUpperCase(),said:TXT("tour_back"),clk:{acc:0,at:performance.now()}};gdBeatDraw(B);gdBeatSay(B.said,function(){gdBeatClose();gdResume(false)})})()});
 /* Play or Next on the dock while it waits for the question: back to the story */
 ph.addEventListener("click",function(e){if(!G.gd.askFirst||!G.on)return;var t=e.target.closest('[data-g="next"],[data-g="play"]');if(!t)return;e.stopPropagation();e.preventDefault();G.gd.askFirst=null;G.paused=false;G.resumeVoice=false;G.askOpen=false;S.dockH="mini";gdBeatClose();gdResume(false)},true);
 /* --- guess the year --- */
 function gdGuessOf(B){var P=G.gd.plan,b=B.c&&B.c.beat||gdPlanBeat("guessyear"),j=P&&b?P.ids.indexOf(b.after)+1:-1,id=j>0?P.ids[j]:null;return id?{step:id,g:S.tourGuess[id]}:null}
-function gdGuess(B){var x=gdGuessOf(B);if(!x||!x.g){gdBeatFinish("no guess on the next step","");return}B.eye="AZU · "+(S.lang==="pt"?"PALPITE":"GUESS");B.gs=x;var g=x.g,mid=Math.round((+g.from+ +g.to)/2);B.v=mid;B.touched=false;
+function gdGuess(B){var x=gdGuessOf(B);if(!x||!x.g){gdBeatFinish("no guess on the next step","");return}B.eye=mascotName().toUpperCase()+" · "+(S.lang==="pt"?"PALPITE":"GUESS");B.gs=x;var g=x.g,mid=Math.round((+g.from+ +g.to)/2);B.v=mid;B.touched=false;
   B.said=gdLine(B.item,false,{aud:""});gdBeatDraw(B);
   gdBeatBody('<p class="bt-q">'+esc(L(g.q))+'</p><div class="bt-slider"><output class="bt-val">'+mid+'</output><input type="range" class="bt-range" min="'+g.from+'" max="'+g.to+'" step="1" value="'+mid+'" aria-label="'+esc(L(g.q))+'"><div class="bt-ends"><span>'+g.from+'</span><span>'+g.to+'</span></div></div>'+
     '<div class="bt-chips">'+gdBeatChip("tell",TXT("tour_tellme"),"pri",0)+gdBeatChip("notnow",TXT("tour_notnow"),"",4)+'</div>',"");
   gdBeatSay(B.said);gdBT(B,"notNowT",function(){var n=ph.querySelector('.gdbeat [data-gdbt="notnow"]');if(n&&G.gd.bt===B){n.classList.add("bt-gone");setTimeout(function(){if(n.isConnected)n.remove()},300)}},4000);
-  gdBeatWait(+B.item.waits||8,function(){if(!B.touched)gdGuessIdle()})}
-function gdGuessIdle(){var B=G.gd.bt;if(!B||B.kind!=="guess")return;gdBeatBody("","");gdBeatSay(TXT("tour_keepgoing"),function(){gdBeatFinish(B.item.waits+" s with no guess: the tour goes on","ignored")})}
+  var vm=S.gdVisitor&&S.gdVisitor.visit;B.first=!(vm&&vm.guessed);if(vm)vm.guessed=true;B.waitS=gdGuessWait(B);gdBeatWait(B.waitS,function(){if(!B.touched)gdGuessIdle()})}
+/* round 19 (19.11, the developer: "Before I tell you, a guess: it was too fast"): its time to answer, from the card's showing: Waits (the
+   default 14 s, it was 8: the line is about 2 s, reading the question about 4 s, a first drag and a thought about 6 s, a margin of 2 s),
+   and the first guess of a visit longer still (First guess of a visit: + 4 s), when the slider is new to the visitor (the visit's memory: S.gdVisitor.visit.guessed). A drag starts it again */
+function gdGuessWait(B){var it=B.item||{},w=+it.waits||14;return w+(B.first?+(it.waitsFirst!=null?it.waitsFirst:4):0)}
+function gdGuessIdle(){var B=G.gd.bt;if(!B||B.kind!=="guess")return;gdBeatBody("","");gdBeatSay(TXT("tour_keepgoing"),function(){gdBeatFinish((B.waitS||B.item.waits)+" s with no guess: the tour goes on","ignored")})}
 function gdGuessTell(){var B=G.gd.bt;if(!B||B.kind!=="guess"||B.told)return;B.told=true;gdBTClr(B,"waitT");gdBTClr(B,"notNowT");var v=+B.v;
   G.gd.guess={step:B.gs.step,v:v,g:B.gs.g,shown:false};gdLog("event","Guess the year: "+v+" (the step "+B.gs.step+" says it)");gdBeatBody(gdGuessTrack(B.gs.g,v,null),"");gdBeatSay(TXT("tour_guess_wait"),function(){gdBeatFinish("Tell me: "+v,"acted")})}
 /* the track with its pins (the guess; the answer once the step said it) */
@@ -544,13 +566,13 @@ function gdGuessTrack(g,v,ans){var pc=function(x){return Math.max(0,Math.min(100
   return'<div class="bt-track" aria-hidden="true"><i class="bt-rail"></i><b class="bt-pin you" style="left:'+pc(v)+'%"><span>'+esc(TXT("tour_guess_you"))+' · '+v+'</span></b>'+(ans!=null?'<b class="bt-pin ans" style="left:'+pc(ans)+'%"><span>'+esc(TXT("tour_guess_it"))+' · '+ans+'</span></b>':"")+'</div><div class="bt-ends"><span>'+g.from+'</span><span>'+g.to+'</span></div>'}
 /* after the step that held the year (guidance/service.js's seam): the two pins and Azu's reaction by distance; then on */
 function gdGuessAnswer(gs){var it=gdItems().filter(function(x){return x.id==="guessyear"})[0]||S.guidance.items.guessyear;gdStart(it,"the answer after its step",{pull:true,react:true})}
-function gdGuessReact(B){var gs=G.gd.guess;if(!gs){gdBeatFinish("","");return}var g=gs.g,v=gs.v,band=gdGuessBand(g,v),d=Math.abs(v-g.n),ans=String(g.n);B.eye="AZU · "+(S.lang==="pt"?"PALPITE":"GUESS");B.band=band;
+function gdGuessReact(B){var gs=G.gd.guess;if(!gs){gdBeatFinish("","");return}var g=gs.g,v=gs.v,band=gdGuessBand(g,v),d=Math.abs(v-g.n),ans=String(g.n);B.eye=mascotName().toUpperCase()+" · "+(S.lang==="pt"?"PALPITE":"GUESS");B.band=band;
   var t=band===1?fmt(TXT("tour_guess_b1")).replace("{answer}",ans):band===2?fmt(TXT("tour_guess_b2"),d):TXT(g.n<v?"tour_guess_b3_older":"tour_guess_b3_newer").replace("{answer}",ans);B.said=t;
   gdBeatDraw(B);gdBeatBody(gdGuessTrack(g,v,g.n),"");azReact(band===1?"r-jump":band===2?"r-wink":"r-blush",900,"big");gdLog("event","Guess the year: "+v+" against "+g.n+", band "+band);
   gdBeatSay(t,function(){gdBT(B,"stepT",function(){if(G.gd.bt===B)gdBeatFinish("the guess's answer said","")},1400)})}
-ph.addEventListener("input",function(e){var r=e.target.closest(".gdbeat .bt-range");if(!r)return;var B=G.gd.bt;if(!B)return;if(B.frozen){r.value=B.v;return}B.v=+r.value;B.touched=true;var o=ph.querySelector(".gdbeat .bt-val");if(o)o.textContent=r.value;gdBeatWait(+B.item.waits||8,function(){gdGuessIdle()})},true);
+ph.addEventListener("input",function(e){var r=e.target.closest(".gdbeat .bt-range");if(!r)return;var B=G.gd.bt;if(!B)return;if(B.frozen){r.value=B.v;return}B.v=+r.value;B.touched=true;var o=ph.querySelector(".gdbeat .bt-val");if(o)o.textContent=r.value;gdBeatWait(B.waitS||gdGuessWait(B),function(){gdGuessIdle()})},true);
 /* --- the quiz (the finale) --- */
-function gdQuiz(B){var it=B.item,P=G.gd.plan,owed=B.c.owed;B.qs=owed?owed.qs:gdQuizQs(P);B.k=0;B.right=0;B.eye="AZU · "+TXT("tour_star").toUpperCase();B.point=P&&P.point||"painting";
+function gdQuiz(B){var it=B.item,P=G.gd.plan,owed=B.c.owed;B.qs=owed?owed.qs:gdQuizQs(P);B.k=0;B.right=0;B.eye=mascotName().toUpperCase()+" · "+TXT("tour_star").toUpperCase();B.point=P&&P.point||"painting";
   if(B.qs.length<2){B.said=TXT("tour_quiz_few");if(P)P.quiz="off";gdBeatDraw(B);if(G.on)renderGuide();gdLog("event","the quiz: "+B.qs.length+" question(s) from the steps heard: saved for next time");
     gdBeatSay(B.said,function(){gdBT(B,"stepT",function(){gdBeatFinish("too few questions from the steps heard","")},1000)});return}
   B.said=gdLine(it,false,{aud:""});gdBeatDraw(B);gdLog("event","the quiz: "+B.qs.length+" questions ("+B.qs.join(", ")+")");gdBeatSay(B.said,function(){gdQuizAsk()})}
@@ -662,7 +684,7 @@ ph.addEventListener("click",function(e){var t=e.target.closest("[data-gdtl]");if
    Animator trigger, the blush a morph or a Rive input ----- */
 var GD_NOSAY='<svg viewBox="0 0 24 24"><path d="M4 5.5h16a1.5 1.5 0 0 1 1.5 1.5v8a1.5 1.5 0 0 1-1.5 1.5h-8l-4.5 3.5V16.5H4A1.5 1.5 0 0 1 2.5 15V7A1.5 1.5 0 0 1 4 5.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M5 3.5L19 18.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
 function gdWordAnnounce(B){var it=B.item,w=gdWordOf(S.lang||"en");if(!w){gdBeatFinish("no word in this language","");return}var P=G.gd.plan,b=B.c&&B.c.beat||gdPlanBeat("dontsay",P)||{span:w.span,endAfter:w.span[w.span.length-1]};
-  B.eye="AZU · "+TXT("tour_word_eye").toUpperCase();B.said=gdLine(it,false,{aud:"",thing:w.w});gdBeatDraw(B);
+  B.eye=mascotName().toUpperCase()+" · "+TXT("tour_word_eye").toUpperCase();B.said=gdLine(it,false,{aud:"",thing:w.w});gdBeatDraw(B);
   gdBeatBody('<div class="bt-word"><span class="tl-ic" aria-hidden="true">'+GD_NOSAY+'</span><b>'+esc(w.w)+'</b></div>',"");
   gdBeatSay(B.said,function(){if(G.gd.bt!==B)return;var pull=B.c&&B.c.pull&&G.gd.demo;gdWordStart(b);var wt=+it.waits||4;
     gdTailShow({kind:"word",item:it,chips:[["play",TXT("tour_letsplay"),"pri",wt],["notnow",TXT("tour_notnow"),"",0]],secs:wt,wait:function(){var d=G.gd.ds;if(d)d.play="yes";gdLog("event","Don't say it!: 4 s with no answer: Let's play");gdTailEnd()}});
@@ -677,7 +699,7 @@ function gdWordLook(kind){var d=G.gd.ds,m=ph.querySelector(".mascot"),az=m&&m.ge
   if(kind==="quiet"){gdTailMsg(TXT("tour_word_later"),2600)}}
 /* the result, at the seam after the span: the lines by the score, and the first missed slip played back with its word lit */
 function gdWordResult(B){var P=G.gd.plan,ws=P&&P.wordScore||{word:"",caught:0,n:0,falses:0},d=G.gd.ds,it=B.item,n=ws.n,c=ws.caught;gdTailEnd();
-  B.eye="AZU · "+TXT("tour_word_eye").toUpperCase();var miss=d?d.order.map(function(k){return d.slips[k]}).filter(function(s){return!s.caught})[0]:null;
+  B.eye=mascotName().toUpperCase()+" · "+TXT("tour_word_eye").toUpperCase();var miss=d?d.order.map(function(k){return d.slips[k]}).filter(function(s){return!s.caught})[0]:null;
   var lines=[],t1=n===0?TXT("tour_word_zero"):c===n?(n===1?TXT("tour_word_all1"):fmt(TXT("tour_word_all"),n)):c===0?fmt(TXT("tour_word_none"),n):fmt(TXT("tour_word_some"),n,c);lines.push(t1);
   if(ws.falses>=3)lines.push(fmt(TXT("tour_word_false"),ws.falses));B.said=lines.join(" ");B.kind="wordres";gdBeatDraw(B);
   gdBeatBody('<div class="bt-wscore"><b>'+c+'<small>/'+n+'</small></b><span>“'+esc(ws.word)+'”'+(ws.falses?" · "+esc(fmt(TXT("tour_word_nopes"),ws.falses)):"")+'</span></div>',"");
@@ -708,7 +730,7 @@ function gdFindPoint(){var fd=S.tourFind;if(!fd)return null;var W=(typeof curWal
 function gdFindR(){return Math.round(ph.offsetWidth/6)}
 function gdFindC(){return{x:ph.offsetWidth/2,y:ph.offsetHeight/2}}
 function gdFind(B){var it=B.item,fd=S.tourFind,p=gdFindPoint();if(!fd||!p){gdBeatFinish("no point to find on this wall","");return}
-  var thing=L(fd.thing)||L(p.name);B.eye="AZU · "+TXT("tour_find_eye").toUpperCase();B.said=gdLine(it,false,{aud:"",thing:thing});B.thing=thing;gdBeatDraw(B);
+  var thing=L(fd.thing)||L(p.name);B.eye=mascotName().toUpperCase()+" · "+TXT("tour_find_eye").toUpperCase();B.said=gdLine(it,false,{aud:"",thing:thing});B.thing=thing;gdBeatDraw(B);
   gdBeatBody('<div class="bt-chips">'+gdBeatChip("giveup",TXT("tour_find_giveup"),"",0)+gdBeatChip("notnow",TXT("tour_notnow"),"",4)+'</div>',"");
   gdBT(B,"notNowT",function(){var n=ph.querySelector('.gdbeat [data-gdbt="notnow"]');if(n&&G.gd.bt===B){n.classList.add("bt-gone");setTimeout(function(){if(n.isConnected)n.remove();gdBeatPlace()},300)}},4000);
   /* the card lowers: the wall's view comes back, the panel stays at Mini */
@@ -737,7 +759,7 @@ function gdFindFound(F){F.state="found";var B=F.B;haptic();gdFindGlint(F.p);var 
 function gdFindGiveUp(F,why){if(F.state!=="seek")return;F.state="shown";var B=F.B,m=ph.querySelector(".mascot");gdBTClr(B,"notNowT");gdBeatBody("","");var s=gdFindGlint(F.p);
   if(m&&S.guideCfg.mascot!==false){m.classList.remove("gd-onbeat");m.classList.add("gd-findto");var mw=m.offsetWidth||56,mh=m.offsetHeight||64,W=ph.offsetWidth,cx=s.x-30;if(cx-mw/2<8)cx=s.x+30;var lx=Math.min(Math.max(cx-mw/2,8),W-8-mw);m.style.right=Math.round(W-lx-mw)+"px";m.style.top=Math.round(s.y-mh-14)+"px"}
   /* round 15 (inside the phone): at the left edge Azu stood 18 px past it (its centre 30 px left of a spot held 40 px in); it takes the spot's other side there, and is kept 8 px inside. Unity: the same clamp on the walk's end */
-  gdLog("event","Find it on the wall: I give up ("+why+"): Azu shows it");var t=nameIn(TXT(s.edge?"tour_find_edge_"+s.edge:"tour_find_show"),"{thing}",B.thing||"");
+  gdLog("event","Find it on the wall: I give up ("+why+"): the mascot shows it");var t=nameIn(TXT(s.edge?"tour_find_edge_"+s.edge:"tour_find_show"),"{thing}",B.thing||"");
   setTimeout(function(){if(G.gd.find!==F)return;gdBeatSay(t,function(){gdBT(B,"stepT",function(){gdFindBack(F,"shown ("+why+")",why==="I give up"?"dismissed":"ignored")},1100)})},S.reduce?0:900)}
 function gdFindLost(F){F.state="lost";var B=F.B;gdLog("event","Find it on the wall: the wall is lost (a system state wins): it ends");gdBeatBody("","");gdBeatSay(TXT("tour_find_lost"),function(){gdFindBack(F,"the wall was lost","")})}
 function gdFindEnd(F){clearInterval(F.iv);if(G.gd.find===F)G.gd.find=null;ph.querySelectorAll(".gdseek,.gdfound").forEach(function(x){x.remove()});var m=ph.querySelector(".mascot");if(m){m.classList.remove("gd-findto");m.style.right=""}}

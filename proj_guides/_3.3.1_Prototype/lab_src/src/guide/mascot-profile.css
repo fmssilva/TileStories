@@ -1,0 +1,12 @@
+/* The mascot's global settings in the Editor (Guide › 1 · The mascot › Who), round 19 */
+#ed .mpname{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#ed .mpl{display:flex;align-items:center;gap:6px}
+#ed .mpl input{width:120px}
+#ed .mplang{font:700 10.5px/1 var(--body);letter-spacing:.06em;opacity:.7}
+#ed .mpintro{display:grid;gap:10px}
+#ed .mpil textarea{width:100%;margin-top:4px}
+#ed .mpnow{display:block;margin-top:4px}
+#ed .vsmiss{margin-top:6px}
+#ed .vsmiss ul{margin:6px 0 0;padding-left:18px;max-height:220px;overflow:auto}
+#ed .vsmiss li{margin:2px 0}
+#ed .vslive{display:block;margin-top:6px}

@@ -40,7 +40,9 @@ python render.py gemini --en Kore --pt Kore               # needs: pip install l
 - **Output:** `out/<set>/` (MP3 + `set.json`) and `out/voicesets.js`, which the Lab loads.
 - **Published sets:** `azure-sonia-raquel` and `azure-ryan-duarte` (2026-11-03), and the ElevenLabs set
   `eleven-hpp4j3vqnfwauoo0d1us-ejartsrf33xovlh9hmuy` (2026-11-04: Luis, pt-PT, and Bella, en-US; Multilingual v2; 5,173
-  characters sent; the set's id is made from the voice ids), every line. The partial Gemini set left the
+  characters sent; the set's id is made from the voice ids), every line of that day (58 files each). **Round 19 (2026-11-13):** `export_script.js` now asks the Lab's `guideScript()` for every
+  line the guide can say (511 lines); the 459 missing ones were rendered in Ryan · Duarte only (30,747 characters, Azure F0), the
+  guide's default voice. The partial Gemini set left the
   manifest (its `set.json` was never kept, and its one listed line had no audio); its MP3s stay in `out/gemini-kore-kore/`.
 - **Install:** `python -m pip install azure-cognitiveservices-speech` (plain `pip` on this computer installs into a conda
   environment, not the Python that runs `render.py`).
@@ -58,5 +60,10 @@ python render.py gemini --en Kore --pt Kore               # needs: pip install l
 
 - The Lab's record copy (`../Block Components Lab.html`) and the published Lab load `voicebench/out/voicesets.js` and the
   audio beside it.
-- Publish `out/` with the page (the Architect does it with the Artifact tool's `files`).
+- **Packs (round 19, 2026-11-13):** the published Lab is one artifact holding at most 511 files, and Ryan · Duarte now has 517
+  lines. So `python pack.py azure-ryan-duarte` packs a set's MP3s into a few scripts of data URIs (`out/<set>/pack-N.js`, about
+  7 MB each, listed in `out/packs.js`; git-ignored, made again before each publish). The page loads them when it is not opened
+  from disk; from disk it reads the MP3s directly.
+- Publish `voicesets.js`, `packs.js` and the packs with the page (the Architect does it with the Artifact tool's `files`); the
+  older sets' MP3s stay published one file each.
 - The Voice test's scores are saved in the published Lab's shared data, each listener's own.

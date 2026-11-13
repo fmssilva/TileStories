@@ -12,9 +12,9 @@ var AGTOOLS={search_library:{ro:true,label:"Search the library",what:"Searches t
   open_feature:{label:"Open a feature",what:"Opens one of the point's features: the before and after, the gallery, the story, the video."},
   navigate_to:{label:"Go to",what:"Takes the visitor to a block, a story page, or a point (on the wall, the camera turns to it; a point with a card opens it)."},
   make_route:{label:"Route",what:"Draws a numbered route over 2-8 points of the wall, in order."},
-  start_tour:{label:"Start the tour",what:"Plays the point's authored tour, in Azu's recorded voice."},
+  start_tour:{label:"Start the tour",what:"Plays the point's authored tour, in the mascot's recorded voice."},
   /* round 9 (_3.8 section 3.4): "how do I…?" about the app, answered from the guidance's own App items (their words) with a Show me card */
-  show_how:{ro:true,label:"Show how",what:"Answers a “how do I…” about the app from its own tips (Guide › Azu speaks up: the feature's words) and adds a Show me card under the answer that plays the gesture. Never for the history."}};
+  show_how:{ro:true,label:"Show how",what:"Answers a “how do I…” about the app from its own tips (Guide › The mascot speaks up: the feature's words) and adds a Show me card under the answer that plays the gesture. Never for the history."}};
 function agTools(where,turn){var tg=agTargets(),ids=tg.map(function(t){return t.id}),pois=S.wallPois.map(function(p){return"poi:"+p.id}),fk=agFeatures().map(function(f){return f.kind}),out=[];
   function add(name,desc,schema,check,run,label){var pol=S.agentCfg.pol[name]||"auto",d=AGTOOLS[name];if(pol==="off")return;if(!d.ro&&name!=="show_links"&&!S.agentCfg.actions)return;if(name==="show_links"&&!S.agentCfg.links)return;
     out.push({name:name,description:desc,inputSchema:schema,execute:function(a){a=a||{};var bad=check(a),call={name:name,args:a,ok:!bad,policy:d.ro?"auto":pol};turn.calls.push(call);
@@ -37,12 +37,12 @@ function agTools(where,turn){var tg=agTargets(),ids=tg.map(function(t){return t.
     function(a){var f=agFeatures().filter(function(x){return x.kind===a.kind})[0];return agGo(f.ref)},function(a){var f=agFeatures().filter(function(x){return x.kind===a.kind})[0];return fmt(TXT("ag_chip_open"),f?L(f.name):a.kind)});
   add("navigate_to","Takes the visitor to a block, a story page or a point (on the wall the camera turns to it).",{type:"object",properties:{target_id:{type:"string",enum:ids}},required:["target_id"]},function(a){return only([a.target_id],ids)},
     function(a){return agGo(a.target_id)},function(a){return fmt(TXT("ag_chip_go"),agTitle(a.target_id))});
-  add("start_tour","Plays this point's tour (its written tour, else the one made from its card; its length as the hero's button says it), in Azu's voice.",{type:"object",properties:{}},function(){return""},function(){G.cam.open=false;S.view="card";startTour();return"Started."},function(){return TXT("ag_chip_tour")});
+  add("start_tour","Plays this point's tour (its written tour, else the one made from its card; its length as the hero's button says it), in the mascot's voice.",{type:"object",properties:{}},function(){return""},function(){G.cam.open=false;S.view="card";startTour();return"Started."},function(){return TXT("ag_chip_tour")});
   /* round 9: show_how, the features the App items teach (Guide › Azu speaks up, each item's Teaches): their answer, a Show me card, the item seen */
   var how=gdTeachers(),hf=how.map(function(x){return x.teaches});
   if(hf.length)add("show_how","For a question about how to use the app (\"how do I…\": open a card, ask about the view, drag the before and after, pause the guide…): give the feature. Returns the app's own words for it and puts a Show me card under your answer, which plays the gesture. Never for a question about the history or the place.",
     {type:"object",properties:{feature:{type:"string",enum:hf,description:how.map(function(x){return x.teaches+": "+gdTryWord(x)}).join("; ")}},required:["feature"]},function(a){return hf.indexOf(a.feature)<0?"unknown feature "+a.feature:""},
-    function(a){var it=how[hf.indexOf(a.feature)],sh=turn.shows||(turn.shows=[]);if(sh.indexOf(it.id)<0)sh.push(it.id);gdTold(it.id,"Ask Azu, the live agent");return{feature:a.feature,does:gdTryWord(it),says:gdTryHowLine(it),card:"A Show me card is under your answer: say it in one short phrase."}},function(){return""});
+    function(a){var it=how[hf.indexOf(a.feature)],sh=turn.shows||(turn.shows=[]);if(sh.indexOf(it.id)<0)sh.push(it.id);gdTold(it.id,"Ask the mascot, the live agent");return{feature:a.feature,does:gdTryWord(it),says:gdTryHowLine(it),card:"A Show me card is under your answer: say it in one short phrase."}},function(){return""});
   return out}
 /* the show_how policy's demo: a scripted "how do I…" answer in the dock's conversation, with its Show me card (no model asked) */
 var GD_HOW_DEMO_Q=T("How do I see the before and after?","Como vejo o antes e depois?");

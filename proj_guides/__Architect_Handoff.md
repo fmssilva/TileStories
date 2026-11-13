@@ -5,7 +5,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-07)
 
 - **State:**
-  - **The Lab:** `master` holds guidance rounds 1-18, verified on 2026-11-06/11, published at
+  - **The Lab:** `master` holds guidance rounds 1-19, verified on 2026-11-06/11, published at
     https://claude.ai/artifact/Gpjf7yvoYHjGebmmNhuw2o (round 14b) with the 186 voice files, the music and the capabilities (section 1). The
     developer changes account often (four times on 2026-11-08/09); the old links stay in their accounts (RGofgb… at round 13, 19Uiat… at round 12, RKn3Rr… at round 11, J9J4h… at round 9, 4LpLd4… at round 8, Jq6X2K… at round 7, Jrejv7… at
     round 6, QmhHSz… at round 5, KDs2… at v29). A new account cannot update an old link: publish a new one (section 1, Publishing). Its
@@ -328,9 +328,31 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       answered with hint 1's "Have a look at …: the answer is hiding there" (it should say warmly that the answer would give
       the quiz away, for after); the card's quiz chip touches its eyebrow ("… OF 3"); Azu on the What next? panel's edge covers
       ~10 px of the Up next card.
-    - Rounds since core: 2 (17c, 18); since full: 2026-11-09.
-    - **Next: a final guide polish pass** (the developer tries the whole guide in the Lab and we fix what they notice); then the
-      guide is closed and **the Detail Card blocks' design** starts.
+    - **The polish pass (2026-11-13):** the developer tried route steps 1-4 and wrote notes with prints in
+      `proj_guides/___todo.md` (theirs, untracked, never staged). Below the notes the Architect keeps **THE CHECKLIST**: rounds
+      19 (one mascot, one voice), 20 (the Editor as an accordion, sticky headers; core tests), 21 (speech on screen: a smaller
+      panel, one comet highlighter, ±10 s, the bubble by the mascot, a teleprompter during tours, lighter panels picked from
+      2-3 looks), 22 (the tour as a demo of the app: natural scroll, a ghost hand and tap ripple, the app's own page openings,
+      interactive blocks in use, no dimming, a left bar), and G.x (the known game items). An item is ticked [DONE] only after
+      it is built, seen in captures and tested; the Architect checks each tick before merging. The developer will try route
+      steps 5-12 after round 19 is published.
+    - Round 19 (2026-11-13, brief `_3.8_guidance_plans/brief_round19.md`): Guide › 1 · The mascot holds the global settings
+      (Who: the name EN/PT and the first introduction; Look; Voice: the voice, sources, speed, a line with no recording, the
+      answers' voice, Coverage, Speaking now; Speech on screen, a placeholder for round 21; Manner; Moments), read by every
+      part (`guide/mascot-profile.js`; only `guide/voice.js` touches the device voice). The Editor says "the mascot"; the
+      visitor's words fill `{name}`. Why the device voice was heard: the recorded sets held only the 106 lines of 2026-11-03;
+      `voice-script.js` `guideScript()` now lists 511 lines and all are recorded in **Ryan · Duarte (Azure), the default by id**
+      (30,747 characters, Azure F0). The live Azure voice is the chosen set's too. The first introduction is warmer and names
+      the control on screen; the quiz promise card clears the hero's words; Tap here sits by the mascot's head; the opened
+      card keeps the mascot beside a glowing Start the guide (`guide/hero-start.js`); Guess the year waits 14 s (18 s the
+      first time). **Publishing the voices:** the artifact holds at most 511 files, so `voicebench/pack.py <set>` packs a
+      set's MP3s into ~7 MB scripts (`out/<set>/pack-N.js`, `out/packs.js`, git-ignored, made again before each publish);
+      the page loads them when not opened from disk. Tests: test9x 27 (mutation 13 red), test9v 28, the guide walk bad=0.
+      Nine long files had their Editor labels updated but were not run (8g, 8s, 8t, 8x, 9db, 9e, 9ea, 9g, 9h, 9k): the core
+      run of round 20 covers what it covers; run the rest if a label fails.
+    - Rounds since core: 3 (17c, 18, 19); since full: 2026-11-09.
+    - **Next: round 20** (the Editor as an accordion, core tests), then 21, 22; then the guide is closed and **the Detail
+      Card blocks' design** starts.
       Prototype only (no Unity) until the developer says so.
   - **MCP:** blender-mcp at user scope (Blender 5.2.3, add-on 1.8, port 9876). The Unity MCP was not connected this stretch.
   - **Keys:** Gemini, Azure Speech and ElevenLabs answer (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).

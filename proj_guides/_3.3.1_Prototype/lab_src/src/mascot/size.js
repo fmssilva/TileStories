@@ -16,7 +16,7 @@ BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(guideCfg\\.azuSize|aud
 /* ----- Editor: Guide tab > Mascot gets Size; 6 · Audiences > Looks per audience gets Character ----- */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   var r=rowEl(d,"s7mascot","Liveliness");
-  if(r)r.insertAdjacentHTML("beforebegin",row("Size",pseg("guideCfg.azuSize",["s","m","l"],["Small","Medium","Large"]),"How big Azu is on the card and as the guide's button: Small (80 %), Medium, Large (135 %). Its peek from behind a block and its walk to the wall keep their own sizes. Unity: the Azu element's scale."));
+  if(r)r.insertAdjacentHTML("beforebegin",row("Size",pseg("guideCfg.azuSize",["s","m","l"],["Small","Medium","Large"]),"How big the mascot is on the card and as the guide's button: Small (80 %), Medium, Large (135 %). Its peek from behind a block and its walk to the wall keep their own sizes. Unity: the mascot element's scale."));
   var tb=d.querySelector('[data-fo="s8look"] table tbody');
   if(tb)tb.insertAdjacentHTML("afterbegin",'<tr><td>Character</td>'+AUDS.map(function(a){return'<td>'+psel("aud.looks."+a+".char",azCharOpts())+'</td>'}).join("")+'</tr>');
   return d.innerHTML});

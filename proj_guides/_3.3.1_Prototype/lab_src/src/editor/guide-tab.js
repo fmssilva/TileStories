@@ -13,11 +13,11 @@
    tab (an IMGUI / UI Toolkit tab beside Detail Card), its foldouts Foldout elements with the same ids, a link a button that opens
    another tab at a foldout. */
 var GUIDE_SECS=[
-  {id:"s7mascot",n:"1",title:"Azu",sub:"the character: its look, size, liveliness, mouth and moods, how it moves and plays"},
+  {id:"s7mascot",n:"1",title:"The mascot",sub:"its global settings, read by every part of the guide: who it is, its look, its voice, its speech on screen, its manner and moments"},
   {id:"gt1",n:"2",title:"The tour",sub:"the story told: its voice, captions, focus, the panel and the ways in",badge:["new","NEW"]},
   {id:"gd:g:ontour",n:"3",title:"Games on the tour",sub:"the quiz, Guess the year, Don't say it!, Find it on the wall, the breather: at the tour's seams",badge:["new","NEW"]},
-  {id:"gt4",n:"4",title:"Azu speaks up",sub:"tips, remarks, play, walkthroughs and the first pages: Azu on its own, one at a time",badge:["new","NEW"]},
-  {id:"gt3",n:"5",title:"Ask Azu",sub:"the visitor's questions: what the visitor sees, what Azu knows, the engine",badge:["new","NEW"]},
+  {id:"gt4",n:"4",title:"The mascot speaks up",sub:"tips, remarks, play, walkthroughs and the first pages: the mascot on its own, one at a time",badge:["new","NEW"]},
+  {id:"gt3",n:"5",title:"Ask the mascot",sub:"the visitor's questions: what the visitor sees, what the mascot knows, the engine",badge:["new","NEW"]},
   {id:"gt0",n:"6",title:"Preview &amp; Test",sub:"Editor tools, never in the app: start the app, the visitor, the log, a simulated visit",badge:["test","TEST"]}];
 /* each section's parts, in order. A part: "Label" (a row of the current source, by its label), {from:id} (the source: that foldout's
    rows and nodes), {fo:id} (a foldout, whole), {fo:id,t,s,parts,deep} (a foldout made here, or one re-titled, with these parts; deep: it
@@ -26,17 +26,23 @@ var GUIDE_SECS=[
    rules). 3 · Games on the tour and 4 · Azu speaks up are drawn by guidance/editor.js (edGuide.html); 6 · Preview & Test is filled there too */
 var GUIDE_PLAN={
   gt0:[{fo:"s7vtest"}],
-  s7mascot:[{from:"s7mascot"},{h:"Look",s:"what Azu is"},"Character","Mascot source","Glaze","Pattern","Light","Corners","Preview","Model",
-    {h:"Its manner",s:"how big, how lively, how it speaks and moves"},"Size","Liveliness","Mouth","How it moves","Moods","Tap on Azu","Try",
-    {h:"Its moments",s:"when it comes on, and on the wall"},"Introduction","Walks to the wall","Try",
-    {fo:"gt:tools",t:"Model tools",s:"the 3D model's clips, Import… and a model from a picture (Mascot source = 3D model)",deep:true,parts:["3D model","Play a clip","Import…","Generate from a picture"]},
+  /* round 19 (the developer): the mascot's global settings, one foldout each, in this order; the rows of its voice and of speech on screen
+     are borrowed from the foldouts that make them (Narration, Captions, Ask's engine), which keep a one-line link to here */
+  s7mascot:[{from:"s7mascot"},{fo:"s7who"},
+    {fo:"gt:look",t:"Look",s:"what the mascot is: its character, its source, its tile or its model",parts:[{from:"s7mascot"},"Character","Mascot source","Glaze","Pattern","Light","Corners","Preview","Model",
+      {fo:"gt:tools",t:"Model tools",s:"the 3D model's clips, Import… and a model from a picture (Mascot source = 3D model)",deep:true,parts:["3D model","Play a clip","Import…","Generate from a picture"]}]},
+    {fo:"gt:voice",t:"Voice",s:"its recorded voice, its speed, a line with no recording, the answers' voice, the coverage",parts:[{from:"s7voice",borrow:true},"The voice","Sources","Speed","A line with no recording","Voice in this browser",
+      {from:"s7agent",borrow:true},"Voice of the answers","ElevenLabs model",{from:"s7voice",borrow:true},"Coverage","Speaking now"]},
+    {fo:"gt:speech",t:"Speech on screen",s:"the bubble, the teleprompter and the highlight (round 21)",parts:[{from:"s7cap",borrow:true},{cls:"mpspeech"},"Highlight what is read","Highlight style","Trail","Glide","Try"]},
+    {fo:"gt:manner",t:"Manner",s:"how big, how lively, how it speaks and moves",parts:[{from:"s7mascot"},"Size","Liveliness","Mouth","How it moves","Moods","Tap on the mascot","Try"]},
+    {fo:"gt:moments",t:"Moments",s:"when it comes on, and on the wall",parts:[{from:"s7mascot"},"Introduction","Walks to the wall","Try"]},
     {words:"s7mascot"}],
   gt1:[{rules:1},{fo:"s7auto"},{fo:"s7more"},{fo:"s7voice"},{fo:"s7cap"},{fo:"s7focus"},{fo:"s7coach"},
     {fo:"s7dock",add:[{h:"Tour controls",s:"previous, pause, next, sound, captions, Ask and stop: their words"},{words:"s7tour"}]},
     {fo:"gt:ways",t:"Ways in",s:"how a visitor starts the tour, or picks it up again",parts:[{fo:"s7gbtn"},{fo:"s7hero"},{fo:"s7block"},{fo:"s7resume"}]},{fo:"s7end"}],
   gt3:[{fo:"s7ask",t:"What the visitor sees",s:"the question box, Ask about the view, the answers and how they sound",parts:[{from:"s7ask"},"Answers from",{fo:"s7cam"},{from:"s7agent"},
-      "Spoken answer","Voice of the answers","Link cards","Trace under each answer",{h:"The panel's words",s:"the question box, the mic, Ask's title"},{words:"s7ask"},{h:"The answers' words",s:"under an answer, its chips, its notes"},{words:"s7agent"}]},
-    {fo:"gt:know",t:"Knowledge",s:"what Azu answers from, and what it may do in the app",parts:[{from:"s7agent"},"App context","",{cls:"agpre"},"Photo of the view","Library","General knowledge",
+      "Spoken answer","The answers' voice","Link cards","Trace under each answer",{h:"The panel's words",s:"the question box, the mic, Ask's title"},{words:"s7ask"},{h:"The answers' words",s:"under an answer, its chips, its notes"},{words:"s7agent"}]},
+    {fo:"gt:know",t:"Knowledge",s:"what the mascot answers from, and what it may do in the app",parts:[{from:"s7agent"},"App context","",{cls:"agpre"},"Photo of the view","Library","General knowledge",
       {h:"Its tools",s:"what it can do in the app"},{cls:"agtools"},"Targets","Actions in the app"]},
     {fo:"s7agent",t:"The engine",s:"the model, its key, its limits and the test console (for the developer)",deep:true,parts:[{from:"s7agent"},{drop:"agh"},"Guide mode",
       {h:"The model"},"Model","Gemini model","Claude API model","Claude tier (published)","Longest answer","Cost",{h:"Inputs"},"Text and voice",
@@ -57,7 +63,7 @@ function gtWords(cx,o){var box=cx.box[o];if(!box)return"";var b=box.querySelecto
   while(n&&n.classList.contains("ownpanel")){var x=n.nextElementSibling;h+=n.outerHTML;n.remove();n=x}return h}
 function gtBody(cx,parts){var h="";parts.forEach(function(p){
   if(typeof p==="string"){var r=gtRow(cx.from,p);if(r){r.remove();h+=r.outerHTML}return}
-  if(p.from){cx.from=cx.box[p.from]||null;if(cx.el[p.from])cx.el[p.from].remove();if(cx.from&&cx.srcs.indexOf(p.from)<0)cx.srcs.push(p.from);return}
+  if(p.from){cx.from=cx.box[p.from]||null;if(p.borrow)return;if(cx.el[p.from])cx.el[p.from].remove();if(cx.from&&cx.srcs.indexOf(p.from)<0)cx.srcs.push(p.from);return}
   if(p.h){h+='<div class="sub2 gth">'+p.h+(p.s?' <span class="sub">· '+p.s+'</span>':"")+'</div>';return}
   if(p.cls){var n=cx.from&&cx.from.querySelector(":scope > ."+p.cls);if(n){n.remove();h+=n.outerHTML}return}
   if(p.drop){if(cx.from)cx.from.querySelectorAll(":scope > ."+p.drop).forEach(function(x){x.remove()});return}

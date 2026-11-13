@@ -100,7 +100,7 @@ function ring(p,col,label){var r=26,c=2*Math.PI*r;return '<svg viewBox="0 0 64 6
 function kindWords(b,kind){var base=KWORDS[kind||b&&b.kind]||{},own=b&&b.c||{},out={};Object.keys(base).forEach(function(k){out[k]=base[k]});
   Object.keys(own).forEach(function(k){var v=own[k];if(v!=null&&!(Array.isArray(v)&&!v.length))out[k]=v});return out}
 /* a word in one language, whatever its form (a text in each language, or one string for every language) */
-function wordIn(o,lang){return o==null?"":typeof o==="string"?o:String(o[lang]||o.en||"")}
+function wordIn(o,lang){return o==null?"":typeof o==="string"?nameFill(o,lang):nameFill(String(o[lang]||o.en||""),lang)}
 function kqHtml(w){var ok=w.ok||0;return'<div class="kq" data-kq><b>'+esc(L(w.q))+'</b>'+(w.choices||[]).map(function(c,i){return'<button type="button"'+(i===ok?' data-ok="1"':"")+'>'+esc(L(c))+'</button>'}).join("")+'</div>'}
 /* guidance round 16: a block's words as the guide's automatic tour reads them (guide/autotour.js), in one language, from the same place the
    preview draws them: a title, a text (its back on a flip card), the facts as [label, value], the events as [date, words], a caption and a
