@@ -75,7 +75,7 @@ function gbGo(k){G.fab.menu=false;
   if(k==="tour"){if(!G.on&&svOffer())svContinue();else startTour();return}
   if(k==="again"){startTour();return}
   if(k==="next"){teSet("open");return}
-  if(k==="ask"){startTour();pauseTour();G.askOpen=true;S.dockH="full";renderGuide();var i=ph.querySelector("#gq");if(i)i.focus({preventScroll:true});return}
+  if(k==="ask"){if(firstAnswer("gbAsk.answer")!==undefined)return;startTour();pauseTour();G.askOpen=true;S.dockH="full";renderGuide();var i=ph.querySelector("#gq");if(i)i.focus({preventScroll:true});return}
   if(k==="how"){fabLayer();gdWalk("the ✦ menu");return}
   if(k==="try"){fabLayer();gdTryOpen("the ✦ menu");return}
   if(k==="quiz"){fabLayer();gdQuizPull();return}
