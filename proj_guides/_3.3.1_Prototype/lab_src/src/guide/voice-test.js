@@ -3,7 +3,7 @@
 function guideLines(lang){var keepL=S.lang,keepA=S.vis.aud,out=[],seen={};S.lang=lang;
   var add=function(id,label,t){t=String(t||"").trim();if(!t||seen[t])return;seen[t]=1;out.push({id:id,label:label,text:t})};
   AUDS.forEach(function(a){S.vis.aud=a;ovMap();(S.fullSteps||S.guideSteps).forEach(function(st,j){add(st.id,"Step "+(j+1)+(a!=="explorer"?" · "+AUDN[a]:""),stepText(st));if(st.after)add(st.id+"a","Step "+(j+1)+" · after",L(st.after))})});
-  S.vis.aud=keepA;["guide_intro","guide_moving_on","guide_nudge_flip_1","guide_nudge_flip_2","guide_try_moveon","guide_after_flip","guide_after_answer"].forEach(function(k){add(k,k.replace("guide_","").replace(/_/g," "),k==="guide_intro"?nameIn(TXT(k),"{0}",pointName()||"The Ribeira Palace"):TXT(k))});
+  S.vis.aud=keepA;["guide_intro","guide_moving_on","guide_nudge_flip_1","guide_nudge_flip_2","guide_try_moveon","guide_after_flip","guide_after_answer"].forEach(function(k){add(k,k.replace("guide_","").replace(/_/g," "),k==="guide_intro"?introLine(S.lang,pointName()||"The Ribeira Palace"):TXT(k))});
   S.lang=keepL;ovMap();return out}
 /* ----- the blind test: a line, the voices in a shuffled order as A, B, C…, a score each, then the names and everyone's means ----- */
 var vtDB=null,vtUser=null;(window.claude&&window.claude.use?Promise.all([window.claude.use("db"),window.claude.use("user")]):Promise.resolve([null,null])).then(function(r){vtDB=r[0];vtUser=r[1]}).catch(function(){});
@@ -19,9 +19,11 @@ function vtLoad(){var sum={},add=function(rs){Object.keys(rs||{}).forEach(functi
 function stars(id,k,v){var h="";for(var i=1;i<=5;i++)h+='<button type="button" class="vstar'+(i<=v?" on":"")+'" data-vtr="'+id+'|'+k+'|'+i+'" aria-label="'+i+'">★</button>';return'<span class="vstars">'+h+'</span>'}
 
 /* Editor: Narration gets the recorded voice and its coverage; Guide tab gets Voice test */
-on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var sets=voiceSets(),cur=currentSet(),lines=guideLines(S.lang),have=cur?lines.filter(function(l){return!!recFile(l.text,cur)}).length:0;
-  addRows(d,"s7voice",row("Recorded voice",sets.length?psel("guideCfg.voiceSet",[["","Best available"]].concat(sets.map(function(s){return[s.id,s.label+" · "+Object.keys(s.files||{}).length+" lines"+(s.timings==="estimated"?", word times estimated":"")+(s.private?" (this computer only)":"")]}))):'<span class="uses">None rendered yet</span>',
-    "With Voice = Recorded, then live, then this device: the audio rendered at authoring time (voicebench: a provider's voice, rendered once, with each word's time), as the app plays it. "+(cur?have+" of "+lines.length+" lines rendered in "+S.lang.toUpperCase()+" for this point; a line not rendered (an edited text, an answer) is spoken by the live voice when its key is on this computer, else by the device voice (Speaking now says which).":"Render a set with voicebench/render.py (see voicebench/README).")));
+/* round 19: The voice (Guide › 1 · The mascot › Voice; it was Narration › Recorded voice): each set named by its voices, Ryan · Duarte (Azure)
+   the default by its id (guide/voice.js's VOICE_DEFAULT); Best available keeps the set with the most lines */
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var sets=voiceSets(),lines=guideLines(S.lang);
+  addRows(d,"s7voice",row("The voice",sets.length?psel("guideCfg.voiceSet",sets.map(function(s){return[s.id,voiceSetName(s)+(s.id===VOICE_DEFAULT?" · the default":"")+" · "+Object.keys(s.files||{}).length+" lines"+(s.timings==="estimated"?", word times estimated":"")+(s.private?" (this computer only)":"")]}).concat([["","Best available (the most lines)"]])):'<span class="uses">None rendered yet</span>',
+    "The mascot's recorded voice: a set rendered at authoring time by voicebench (one provider's voice for each language, each word timed, the mouth's curves), as the app plays it. Ryan · Duarte (Azure) by default, by its name: the voice the Ribeira Palace's tour is told in. Coverage (below) says how many of the guide's lines it has; a line it lacks follows A line with no recording. Sources = Device voice only leaves the recordings out. Unity: MascotProfile.voiceSet, the VoiceSet asset of clips and word times."));
   var vt=d.querySelector('[data-fo="s7voice"]');if(!vt)return d.innerHTML;
   var line=S.vt.line||"",opts=lines.filter(function(l){return vtSets(l.text).length>=2}),body;
   if(sets.length<2)body='<div class="note">Render at least two voice sets (two providers or two voices) to compare them here.</div>';

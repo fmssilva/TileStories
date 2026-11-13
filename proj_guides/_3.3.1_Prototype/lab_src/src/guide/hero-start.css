@@ -1,0 +1,21 @@
+/* The hero's Start the guide (round 19): the mascot beside it, pointing; the button's calm glow and pulse once the card has settled */
+.hero .hact.hs-row{align-items:flex-end;gap:6px}
+.hero .hsazu{position:relative;flex:0 0 auto;width:52px;height:60px;margin:0 8px -4px -6px;pointer-events:auto;cursor:pointer;filter:drop-shadow(0 4px 8px rgba(0,0,0,.35))}
+.hero .hsfig{display:block;width:100%;height:100%;transform-origin:50% 90%;rotate:6deg}
+.hero .hsfig svg,.hero .hsfig img{display:block;width:100%;height:100%;object-fit:contain}
+.hero .hspoint{position:absolute;right:-8px;top:24px;width:12px;height:12px;pointer-events:none;filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}
+.hero .hspoint svg{display:block;width:100%;height:100%;fill:#FFFFFF}
+.hero .hsazu.hsjump .hsfig{animation:hsjump .55s cubic-bezier(.3,1.5,.5,1)}
+@keyframes hsjump{0%{translate:0 0}40%{translate:0 -10px}100%{translate:0 0}}
+.hero .hact.hs-row .gstart{min-height:44px;padding:0 18px;margin-bottom:3px}
+/* the "tap me" life: a soft warm glow and a slow pulse (2.8 s), calm, once the card has settled; gone once tapped */
+.hero .gstart{transition:box-shadow .6s ease}
+.hero .gstart.hsglow{box-shadow:0 0 0 2px rgba(255,236,196,.75),0 0 18px 4px rgba(255,206,120,.55),0 6px 18px rgba(0,0,0,.3);animation:hspulse 2.8s ease-in-out infinite}
+/* the pulse is the glow's breath alone (no scale: the button never moves under a finger, and a test's tap finds it still) */
+@keyframes hspulse{0%,100%{box-shadow:0 0 0 2px rgba(255,236,196,.55),0 0 12px 2px rgba(255,206,120,.35),0 6px 18px rgba(0,0,0,.3)}50%{box-shadow:0 0 0 3px rgba(255,236,196,.95),0 0 28px 10px rgba(255,206,120,.7),0 6px 18px rgba(0,0,0,.3)}}
+.reduce .hero .gstart.hsglow{animation:none}
+.reduce .hero .hsazu.hsjump .hsfig{animation:none}
+/* the Locate Button's label at the hero (card/locate.js): the hero's words rise a row while it shows, so neither covers the other */
+.hero .w{transition:bottom .35s ease}
+.hero .w.hsroom{bottom:70px}
+.reduce .hero .w{transition:none}

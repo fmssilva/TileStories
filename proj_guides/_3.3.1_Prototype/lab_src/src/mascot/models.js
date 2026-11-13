@@ -1,6 +1,6 @@
 /* The 3D models to choose from (AZ3D_MODELS): the explorer (the default), Azu, the mouse, the poet, the soldier. */
 var AZ3D_MODELS=[
-  {id:"azu",name:"Azu, detailed",file:"azu.glb",glb:"__AZUGLB_AZU__",thumb:"__AZTHUMB_AZU__",
+  {id:"azu",name:"The tile, detailed",file:"azu.glb",glb:"__AZUGLB_AZU__",thumb:"__AZTHUMB_AZU__",
    about:"Meshy model of the tile with the Belém tower (CC BY 4.0: credit Meshy), reduced to 24,000 triangles; the arms lift freely"},
   {id:"mouse",name:"The mouse",file:"mouse.glb",glb:"__AZUGLB_MOUSE__",thumb:"__AZTHUMB_MOUSE__",
    about:"Meshy model (CC BY 4.0) with a swinging tail; its arms are part of the coat, so it points and waves with the arm out, not up"},
@@ -21,7 +21,7 @@ BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(guideCfg\\.azuModel|")
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   if(az3dOn()){var r=rowEl(d,"s7mascot","Mascot source");
     if(r)r.insertAdjacentHTML("afterend",row("Model",'<div class="thumbs az3dpick">'+AZ3D_MODELS.map(function(m){return'<button class="sc" type="button" data-set="@guideCfg.azuModel" data-v="'+m.id+'" aria-pressed="'+(S.guideCfg.azuModel===m.id)+'" title="'+esc(m.about)+'"><img src="'+m.thumb+'" alt="" width="96" height="96"><span class="nm"><span>'+esc(m.name)+'</span></span></button>'}).join("")+'</div>',
-      "Which 3D model is Azu. Each has the same skeleton contract: the clips idle, talk, listen, think, point, walk and wave; the morphs Blink, Open, Wide and Round; the front arm as its own mesh. "+AZ3D_MODELS.map(function(m){return m.name+": "+m.about+"."}).join(" ")+" Import… below tries a GLB of your own.",true))}
+      "Which 3D model is the mascot. Each has the same skeleton contract: the clips idle, talk, listen, think, point, walk and wave; the morphs Blink, Open, Wide and Round; the front arm as its own mesh. "+AZ3D_MODELS.map(function(m){return m.name+": "+m.about+"."}).join(" ")+" Import… below tries a GLB of your own.",true))}
   return d.innerHTML});
 /* the row's demo: the guide's Azu as that model */
 rowDemos({"guideCfg.azuModel":{tour:"g1",ring:".mascot"}});

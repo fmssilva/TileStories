@@ -311,6 +311,21 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
     (the Stop bar's Continue back to the step); [no spoiler] (the Architect) the paused quiz's answer never in an answer, EN and PT, in figures and words, offline and from the model (stubbed), the model told the answer it must never say; the card's own quiz pausing only once started (Play the quiz), before that its hint with nothing paused; [editor] the foldout's rows, each changed by a real click changing the signature and playing its demo, the Back lines' ▸, a
     question's own hint typed in Specific Marker and said; [reduced motion]. `MUTATE=1 node tests/test9w.js` freezes no clock, knows no question about the question and checks no
     answer for the right one: the checks named [today], [pause], [back], [about], [no spoiler] and [ladder] turn red.
+  - *One mascot, one voice, guidance round 19* (`guide/mascot-profile.js`, `guide/voice-script.js`, `guide/hero-start.js`, `guide/voice.js`'s default set and
+    `noRec`, `editor/guide-tab.js`'s 1 · The mascot, `core/words.js`'s `{name}`, `guidance/present.js`'s beat card at the hero, the tail on the head and Guess the
+    year's time, `card/locate.js`'s room for its label): `tests/test9x.js` checks [settings] 1 · The mascot's foldouts in order (Who, Look, Voice, Speech on
+    screen, Manner, Moments) with their rows, the link rows where the moved rows were, every row's ▸ pressed by a real click; [name] a new name typed (real keys)
+    shows on the panel, its ask field, the player's eyebrow, a game's card, the ✦'s name, the pill, the first introduction and What next?, EN and PT, and no "Azu"
+    left in the Guide tab's text and help; [voice] the default set Ryan · Duarte by its id (a set with more lines does not take its place), every line of the
+    Ribeira Palace's script recorded and Coverage empty but for the live lines, the first introduction and the quiz promise said by the recorded source (the audio
+    stubbed); [audit] no module but `guide/voice.js` touches the device voice or picks a voice, the live Azure voice is Ryan / Duarte; [intro] the new words (warm,
+    no "Now", no "tap Ask", about 8 s by its recording) naming the control on the screen (the arrow at Mini, the face in Player sheet, the ✦ at Compact); [promise]
+    the quiz promise's card under the hero's line, EN and PT; [tap here] the tail's tip on the mascot's head within 4 px (the test's own figure from the picture's
+    opaque pixels), the mascot leaning and pointing at the marker; [card] the Ribeira Palace opened by a real tap: the mascot left of Start, nothing over anything
+    (the hero's words, the mascot, Start, Find it on the wall, the pin), each text whole, 44 px, the glow and its pulse, gone after a real tap, PT; [guess] 14 s,
+    18 s the first time, the two Editor rows; [reduced motion] the glow alone, no hop. `MUTATE=1 node tests/test9x.js` picks the set by its count, puts the old
+    introduction back, leaves the hero's words under a beat card, takes the hero's mascot away, moves the tail off the head and waits 8 s: the checks named
+    [voice], [intro], [promise], [card], [tap here] and [guess] turn red.
   - *Every Editor row's demo, guidance round 10* (`editor/demo`, the rows' modules: `editor/card-tab`, `card/controls`, `card/blocks`,
     `card/pages`, `card/states`, `card/hints`, `editor/texts`, `editor/components`, `editor/marker-tab`, `mascot/azu2d`, `guidance/editor`):
     `tests/test9n.js` checks that the self-test's NO DEMO check walks every tab and finds no row without a demo but its named exemptions

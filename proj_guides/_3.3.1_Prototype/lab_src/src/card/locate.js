@@ -9,9 +9,17 @@ function pinLift(anim){var lp=ph.querySelector(".locpin");if(!lp)return;var k=fi
    visit / Every card): the label is open only while that cue is on (gdCueOn), and its 4 s seen end the cue (gdCueSeen). */
 S.locShown=0;
 function locLabel(){return ph.querySelector(".locpin > span:first-child:not(.floatpin)")}
-function foldLabel(){S.locFolded=true;var lb=locLabel();if(lb)lb.classList.add("fold");gdCueSeen("label")}
+function foldLabel(){S.locFolded=true;var lb=locLabel();if(lb)lb.classList.add("fold");locRoom(false);gdCueSeen("label")}
+/* round 19 (19.9, print 15: "Start the guide · 3 min" cut by "Find it on the wall"): at the hero the label shares the foot with the hero's
+   action row (the mascot and Start the guide, guide/hero-start.js); when it would cover that row, the hero's words rise a row while the
+   label shows (hsroom, 0.35 s; G.locRoom keeps it across a redraw), and settle back once it folds: each text whole, nothing over another.
+   Unity: a USS class on the hero's text block (its bottom offset, with a transition) */
+function locRoom(on){G.locRoom=!!on;var w=scr.querySelector(".hero .w");if(w)w.classList.toggle("hsroom",!!on)}
 /* room = no overlap with the INK of the hero's words (their text and the guide button), not the box that holds them */
-function locFit(){var lb=locLabel();if(!lb)return;var wait=650-(performance.now()-(S.movedAt||0));if(wait>0){lb.style.visibility="hidden";clearTimeout(S.fitT);S.fitT=setTimeout(locFit,wait+20);return}lb.style.visibility="";var a=lb.getBoundingClientRect();if(!a.width)return;
+function locFit(){var lb=locLabel();if(!lb)return;var wait=650-(performance.now()-(S.movedAt||0));if(wait>0){lb.style.visibility="hidden";clearTimeout(S.fitT);S.fitT=setTimeout(locFit,wait+20);return}lb.style.visibility="";var a=lb.getBoundingClientRect(),open=!lb.classList.contains("fold");if(!open){if(G.locRoom)locRoom(false);if(!a.width)return}
+  /* the label opens by a 0.35 s transition: its whole width (scrollWidth and its padding) is what it will cover */
+  else{var row=scr.querySelector(".hero .w:not(.hsroom) .hact"),al=a.right-Math.max(a.width,lb.scrollWidth+24);if(row){var rr=row.getBoundingClientRect();if(rr.width&&!(a.right<rr.left||al>rr.right||a.bottom<rr.top||a.top>rr.bottom)){locRoom(true);lb.style.visibility="hidden";clearTimeout(S.fitT);S.fitT=setTimeout(locFit,400);return}}
+    if(a.width+2<lb.scrollWidth){clearTimeout(S.fitT);S.fitT=setTimeout(locFit,400)}if(!a.width)return}
   var hit=Array.prototype.some.call(scr.querySelectorAll(".hero .w small,.hero .w h2,.hero .w p,.hero .w button"),function(el){var c;if(el.tagName==="BUTTON")c=el.getBoundingClientRect();else{var rg=document.createRange();rg.selectNodeContents(el);c=rg.getBoundingClientRect()}
     return c.width&&!(a.right<c.left||a.left>c.right||a.bottom<c.top||a.top>c.bottom)});
   if(hit)lb.style.visibility="hidden"}

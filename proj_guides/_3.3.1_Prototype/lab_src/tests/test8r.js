@@ -30,7 +30,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('stopTour();byId(S.guideSteps,"g1").text.pt=KEEP');
   // the Editor: the recorded voice and its coverage; the blind test
   await R('S.tab="guide";renderEditor()');
-  ok('Narration: Recorded voice lists the sets, with the coverage of this point\'s lines', await R('var v=ed.querySelector(\'[data-fo="s7voice"]\');!!v&&!!v.querySelector(\'select[data-sel="@guideCfg.voiceSet"]\')&&/\\d+ of \\d+ lines rendered/.test(v.innerHTML)'));
+  ok('Narration: Recorded voice lists the sets, with the coverage of this point\'s lines', await R('var v=ed.querySelector(\'[data-fo="gt:voice"]\');!!v&&!!v.querySelector(\'select[data-sel="@guideCfg.voiceSet"]\')&&/\\d+ of \\d+ lines recorded/.test(v.innerHTML)'));
   await R('var o=ed.querySelector(\'select[data-vtline] option:nth-child(2)\');S.vt.line=o.value;renderEditor()');
   // the foldouts are closed in the Editor: click through the page (the same handlers)
   const C = sel => R('var e=ed.querySelector(' + JSON.stringify(sel) + ');e&&e.click();!!e');

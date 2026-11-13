@@ -90,7 +90,7 @@ function gdContext(){var t=-Infinity,mv=G.gd.movedAt,wa=G.gd.wallAt,st=ph.queryS
   var onCard=gdOnCard(),mo=G.gd.moment||null;
   return Object.assign(gdCtxBase(),{scrollAt:G.gd.scrollAt,onCard:onCard,cues:onCard?cueTargets(mo==="open"):{},moment:mo,
     demo:!!G.gd.demo,showing:G.gd.cur?G.gd.cur.item.label:gdTryPlaying()?"Show me ("+gdTryWord(gdTryItem(G.gd.tryShow.id)||{teaches:""})+")":null,
-    remark:ph.querySelector(".azbub")?"Azu's bubble":null,
+    remark:ph.querySelector(".azbub")?"The mascot's bubble":null,
     pokes:S.gdVisitor.visit.pokes||0,idleSince:Math.max(G.gd.actAt==null?t:G.gd.actAt,mv==null?t:mv,S.gdVisitor.visit.at||0),
     speaking:speaking,state:sk?GD_STATES[sk]||sk:null,
     panel:S.settingsOpen?"Settings":G.cam&&G.cam.open?"Ask about the view":G.fab&&G.fab.menu?"the ✦ menu":S.contentsOpen?"Contents":G.gd.tryOpen?"Things to try":null,
@@ -218,7 +218,7 @@ on("next.answer",function(){if(!G.on||G.paused||noDraw||G.gd.demo)return;var c=G
   var key="between|"+r.why.replace(/\d+(\.\d+)?/g,"#");if(key!==G.gd.skipKey){G.gd.skipKey=key;gdLog("skipped","between two steps: "+r.why)}});
 on("stopTour.before",function(){G.gd.hold=false;gdWordOff();var c=G.gd.cur;if(c&&(c.item.form==="moment"||c.item.onTour&&!c.pull))gdStop("the tour stopped")});
 /* a Moment ends (mascot/azu2d.js): a tap on its prop is acted, 8 s with no tap ignored */
-on("moment.ended",function(k,done){var c=G.gd.cur;if(c&&c.item.form==="moment")gdStop(done?"tapped: Azu "+(k==="cookie"?"eats the cookie":"drinks")+", and the tour goes on":"8 s with no tap: the tour goes on",done?"acted":"ignored")});
+on("moment.ended",function(k,done){var c=G.gd.cur;if(c&&c.item.form==="moment")gdStop(done?"tapped: the mascot "+(k==="cookie"?"eats the cookie":"drinks")+", and the tour goes on":"8 s with no tap: the tour goes on",done?"acted":"ignored")});
 /* a treasure found in Ask about the view's hunt (world/camera-ask.js): the hunt's invitation is done */
 on("hunt.found",function(id){gdUsed("hunt","found")});
 /* the loop: the wall seen since when, the tip on screen ends, or the scheduler is asked (a choice that would cover its target is asked again without it) */
@@ -474,11 +474,11 @@ function gdTryClose(){if(!G.gd.tryOpen)return;G.gd.tryOpen=false;G.gd.tryOwner=n
 on("card.opened",function(){G.gd.tryOpen=false;G.gd.tryOwner=null});
 /* an answer to "how do I…" seen: its item shown this visit and ever (as a step of How to use the card is seen), never done */
 function gdTold(id,how){var now=gdNow(),vm=gdVM(id),em=gdEM(id);vm.shown++;vm.last=now;em.shown++;em.last=now;vm.told=(vm.told||0)+1;em.told=(em.told||0)+1;
-  var it=S.guidance.items[id];gdLog("event","Ask Azu answered how to "+(it?gdTryWord(it).toLowerCase():id)+" ("+how+"): the "+(it?it.label:id)+" seen, not done")}
+  var it=S.guidance.items[id];gdLog("event","Ask the mascot answered how to "+(it?gdTryWord(it).toLowerCase():id)+" ("+how+"): the "+(it?it.label:id)+" seen, not done")}
 /* the offline answer (no key: the scripted answers): the feature's words and a Show me card, in the dock's conversation or on the wall */
 function gdHowTurn(q,it,t){return{q:q,links:[],chips:[],calls:[],cites:[],source:"",text:t,ctx:null,shows:[it.id],how:true}}
 function gdHowAsk(q,it){it=it||gdHowFind(q);if(!it)return false;emitLatestFirst("ask.before",q);pauseTour();G.askOpen=true;G.busy=false;var t=gdTryHowLine(it),turn=gdHowTurn(q,it,t);
-  G.answer=t;G.agTurn=turn;gdTold(it.id,"Ask Azu, offline");emit("ask.after",t,turn);renderGuide();say(t,function(){},function(){});return true}
+  G.answer=t;G.agTurn=turn;gdTold(it.id,"Ask the mascot, offline");emit("ask.after",t,turn);renderGuide();say(t,function(){},function(){});return true}
 /* joined latest first, so before the live agent: with the live agent on, the agent answers (its tool show_how); without, the match */
 on("ask.answer",function(q){if(G.agTurn&&G.agTurn.how)G.agTurn=null;if(!q||!String(q).trim()||agLive())return;var it=gdHowFind(q);if(!it)return;return gdHowAsk(q,it)});
 on("camAsk.answer",function(q,kind){if(G.cam.turn&&G.cam.turn.how)G.cam.turn=null;if(kind||!q||!String(q).trim()||agLive())return;var it=gdHowFind(q);if(!it)return;
@@ -514,7 +514,7 @@ function gdFindOnWall(fd){var W=(typeof curWall==="function"?curWall().pois:S.wa
 function gdPlanCtx(){return{solemn:gdSolemnNow()||!!(S.m&&S.m.solemn&&(G.on||S.view==="card")),lively:S.guideCfg.life==="lively",sr:!!S.ui.gdSR,games:gdPrefs().games||"on",notNow:+S.gdVisitor.visit.notNow||0}}
 /* the steps a tour would play now (not started): the length and the lens (audiences/stepFits), the introduction when it is due */
 function gdStepsNow(){if(G.on&&!S.howSaved)return S.guideSteps;var st=(S.fullSteps||S.guideSteps).filter(function(x){return typeof stepFits!=="function"||stepFits(x)});
-  if(S.guideCfg.intro==="every"||(S.guideCfg.intro==="first"&&!S.introSeen))st=[{id:"intro",view:"card",ref:"hero",act:"intro",text:T(nameIn(S.tx.guide_intro.en,"{0}",pointName(),"en"),nameIn((S.tx.guide_intro.pt||S.tx.guide_intro.en),"{0}",pointName(),"pt"))}].concat(st);return st}
+  if(S.guideCfg.intro==="every"||(S.guideCfg.intro==="first"&&!S.introSeen))st=[introStep()].concat(st);return st}
 /* the plan a tour would get now (the Editor's line and Why not now? when no tour plays) */
 function gdPlanNow(){return gdTourPlan(gdItems(),S.gdVisitor,gdPlanCtx(),gdTourIn(gdStepsNow()))}
 function gdPlanMake(){var P=gdTourPlan(gdItems(),S.gdVisitor,gdPlanCtx(),gdTourIn(S.guideSteps));P.point=S.m&&S.m.poi||"painting";P.quiz=null;P.at0=gdNow();G.gd.plan=P;G.gd.heard={};G.gd.guess=null;G.gd.owed=null;G.gd.skipped=[];gdWordOff();
@@ -522,7 +522,7 @@ function gdPlanMake(){var P=gdTourPlan(gdItems(),S.gdVisitor,gdPlanCtx(),gdTourI
 /* round 13 (the developer's answer on round 12): with the quiz promised, the tour skips the card's own quiz step (the plan says so; the
    block stays on the card to play freely); the quiz dropped (No quiz, thanks, two Not nows, a skip), the step plays again */
 function gdSkipApply(P){(P.skip||[]).forEach(function(x){var j=S.guideSteps.findIndex(function(s){return s.id===x.id});if(j<0||j<=G.i)return;var st=S.guideSteps.splice(j,1)[0];
-  G.gd.skipped.push({st:st,before:S.guideSteps[j]?S.guideSteps[j].id:null});gdLog("event","the card's “"+(x.title||x.id)+"” step skipped: Azu's quiz replaces it")});
+  G.gd.skipped.push({st:st,before:S.guideSteps[j]?S.guideSteps[j].id:null});gdLog("event","the card's “"+(x.title||x.id)+"” step skipped: the mascot's quiz replaces it")});
   /* the panel's progress line redrawn once the ✦ has grown into it (a redraw now would cut its growth or its crossfade) */
   if(G.on&&(P.skip||[]).length)setTimeout(function(){if(G.on)renderGuide()},(typeof MORPH_MS!=="undefined"?MORPH_MS:320)+120)}
 function gdSkipUndo(why){var k=G.gd.skipped||[];if(!k.length)return;G.gd.skipped=[];var P=G.gd.plan;
@@ -600,10 +600,10 @@ function gdWordPhrase(k){var w=G.words||[],a=Math.max(sentenceStart(k),k-4),e=k;
 function gdWordTap(how){var d=G.gd.ds;if(!d||!d.on)return false;var t=gdWordClock(),open=d.wins.filter(function(x){return t>=x.s&&t<=x.e});
   if(open.length){clearTimeout(d.pend);d.pend=null;var sl=open.map(function(x){return d.slips[x.key]}).filter(function(s){return!s.caught})[0];
     if(!sl){gdLog("event","Don't say it!: a tap in a window already caught (ignored)");return true}
-    sl.caught=true;sl.how=how||"tap";d.caught++;d.aside=true;if(d.play==="pending")d.play="yes";gdLog("event","Don't say it!: caught "+d.caught+" ("+sl.key+", "+(how||"a tap on Azu")+")");gdWordLook("caught");return true}
+    sl.caught=true;sl.how=how||"tap";d.caught++;d.aside=true;if(d.play==="pending")d.play="yes";gdLog("event","Don't say it!: caught "+d.caught+" ("+sl.key+", "+(how||"a tap on the mascot")+")");gdWordLook("caught");return true}
   clearTimeout(d.pend);d.pend=setTimeout(function(){if(G.gd.ds!==d)return;d.pend=null;d.falses++;gdLog("event","Don't say it!: a false alarm ("+d.falses+")");gdWordLook("nope")},700);return true}
 /* Azu's taps during the game (mascot/azu2d.js's azu.tap, azu.tickled): the game's, not a poke */
-on("azu.tap",function(m){var d=G.gd.ds;if(!d||!d.on||!G.on||m&&m.classList.contains("azfab"))return;return gdWordTap("a tap on Azu")});
+on("azu.tap",function(m){var d=G.gd.ds;if(!d||!d.on||!G.on||m&&m.classList.contains("azfab"))return;return gdWordTap("a tap on the mascot")});
 on("azu.tickled",function(){var d=G.gd.ds;if(d&&d.pend){clearTimeout(d.pend);d.pend=null;gdLog("event","Don't say it!: three quick taps, a tickle (no count)")}});
 /* the result at the seam after the span (gdSeam): the beat's result card (guidance/present.js's gdWordResult) */
 function gdWordEnd(){var d=G.gd.ds;if(!d)return;

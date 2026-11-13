@@ -37,7 +37,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // tip on the card now takes turns with them: it is kept off here, so each cue's own moment is checked alone.
   await R('S.guidance.items.gbhint.on=false');
   const hview = await R('var f=ed.querySelector(\'[data-fo="s5hints"]\');f?[].map.call(f.querySelectorAll(\'[data-goto^="gd:i:"]\'),function(b){return b.textContent.trim()+"|"+b.dataset.goto}):null');
-  ok('Editor: the Hints component is a view: each hint reads Edited in Azu speaks up (round 14) and links to its cue', hview && hview.length === 6 && hview.every(v => /^Edited in Azu speaks up ›\|gd:i:/.test(v)), hview);
+  ok('Editor: the Hints component is a view: each hint reads Edited in Azu speaks up (round 14) and links to its cue', hview && hview.length === 6 && hview.every(v => /^Edited in The mascot speaks up ›\|gd:i:/.test(v)), hview);
   // a cue tried: its memory forgotten, the phone where it shows (the Locate label counted as seen, so it does not take its turn)
   const cue = id => R(`gdStop("test");var v=S.gdVisitor.visit.items,e=S.gdVisitor.ever.items;delete v["${id}"];delete e["${id}"];gdVM("label").shown=1;cuePlace("${id}")`);
   await cue('navbar'); await p.waitForTimeout(1600);

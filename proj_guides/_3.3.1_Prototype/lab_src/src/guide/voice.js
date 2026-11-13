@@ -10,11 +10,14 @@ function say(text,onWord,onEnd){emitLatestFirst("say.before",text);G.sayLine={te
 function sayFrom(src,text,onWord,onEnd,why){var line=G.sayLine&&G.sayLine.text===text?G.sayLine:(G.sayLine={text:text,why:[]});if(why)line.why.push(why);
   var o=sayOrder(text),i=src?o.indexOf(src)+1:0;
   for(;i<o.length;i++){var r=firstAnswer("say."+o[i],text,onWord,onEnd);if(r&&r.speaks){sayNow(o[i],r.speaks,line);return}if(r&&r.not)line.why.push(r)}
+  /* round 19 (1 · The mascot › Voice › A line with no recording): Silent shows its words on screen by their time, with no voice; an answer
+     still speaks (it can never be recorded) */
+  if(S.guideCfg.noRec==="silent"&&!(text&&text===G.answer)){sayNow("silent","",line);G.silentLine=true;try{sayDevice(text,onWord,onEnd)}finally{G.silentLine=false}return}
   sayNow("device","",line);sayDevice(text,onWord,onEnd)}
 /* the device voice: before it (latest first), a wait for the voices (sayDevice.wait gets go), started once it speaks, ended when done, after it */
-function sayDevice(text,onWord,onEnd){emitLatestFirst("sayDevice.before",text,onWord,onEnd);var end=function(){emit("sayDevice.ended");onEnd()};
+function sayDevice(text,onWord,onEnd){emitLatestFirst("sayDevice.before",text,onWord,onEnd);var silent=!!G.silentLine||!!(G.sayInner&&G.sayNow&&G.sayNow.src==="silent"),end=function(){emit("sayDevice.ended");onEnd()};
   var go=function(){stopSpeech();var words=[],re=/\S+/g,m;while((m=re.exec(text)))words.push({i:m.index,w:m[0]});G.words=words;
-    var v=voiceFor(S.lang);musicDuck(true);
+    var v=silent?null:voiceFor(S.lang);musicDuck(true);
     if(v&&!S.guideMute){var u=new SpeechSynthesisUtterance(text);u.voice=v;u.lang=v.lang;u.rate=guideSpeed();G.rate=u.rate;
       u.onboundary=function(e){if(e.name&&e.name!=="word")return;var k=0;for(var j=0;j<words.length;j++)if(words[j].i<=e.charIndex)k=j;onWord(k)};
       u.onend=function(){musicDuck(false);if(G.utter===u)end()};G.utter=u;speechSynthesis.speak(u)}
@@ -32,7 +35,12 @@ function voiceLevel(){if(!G.on||G.paused||G.moment)return 0;var a=G.recAudio,now
     if(typeof MT!=="undefined"&&MT.audio===a&&MT.track){var tr=MT.track,i=Math.min(tr.f.length-1,Math.floor(a.currentTime*tr.fps));if(i>=0)return Math.min(1,tr.f[i][0]*1.6+.08)}}
   else if(!G.utter&&!G.timer)return 0;
   var h=G.hl;if(!h||h.k<0||h.ended)return 0;var w=G.words[h.k],dt=now-h.at,len=w?w.w.length:4;return Math.max(0,Math.min(1,(.55+len*.05)*Math.exp(-dt/(260+len*30))))}
-function stopSpeech(){emitLatestFirst("stopSpeech.before");if(window.speechSynthesis)speechSynthesis.cancel();G.utter=null;if(G.timer){clearInterval(G.timer);G.timer=null}}
+function stopSpeech(){emitLatestFirst("stopSpeech.before");deviceVoiceCancel();G.utter=null;if(G.timer){clearInterval(G.timer);G.timer=null}}
+/* round 19 (the audit: one home for the voice): the device voice is only touched here; the person's pause and its watchdog ask these */
+function deviceVoiceCancel(){try{if(window.speechSynthesis)speechSynthesis.cancel()}catch(e){}}
+function deviceVoiceSpeaking(){return!!window.speechSynthesis&&!speechSynthesis.paused}
+/* the live ElevenLabs voice for a language: the voice ids on this computer's keys (agent/live-voice.js asks here) */
+function elevenVoice(lang){var k=window.LABKEYS||{};return lang==="pt"?(k.elevenPT||k.elevenEN):(k.elevenEN||k.elevenPT)}
 S.guideCfg.voice_en="";S.guideCfg.voice_pt="";
 /* the browser loads its voices lazily: the first getVoices() is empty, so the tour's first step had no voice (captions only) */
 var VOICES=[];function loadVoices(){if(window.speechSynthesis)VOICES=speechSynthesis.getVoices()||[];return VOICES.length}
@@ -45,25 +53,41 @@ function voicesFor(lang){var want=lang==="pt"?["pt-PT","pt"]:["en-GB","en"],out=
 function voiceFor(lang){var vs=voicesFor(lang),pick=S.guideCfg["voice_"+lang];for(var i=0;i<vs.length;i++)if(vs[i].name===pick)return vs[i];return vs[0]||null}
 on("sayDevice.wait",function(go){if(window.speechSynthesis&&!S.guideMute&&!loadVoices()){var t0=Date.now();G.voiceWait=setInterval(function(){if(loadVoices()||Date.now()-t0>1500){clearInterval(G.voiceWait);G.voiceWait=null;go()}},50);return true}});
 on("stopSpeech.before",function(){if(G.voiceWait){clearInterval(G.voiceWait);G.voiceWait=null}});
-S.guideCfg.voiceSet="";S.vt={line:"",order:[],ratings:{},saved:false,results:null,note:""};
+/* round 19 (the developer, 2026-11-13: "check the voice we are using as default during the Ribeira Palace and use that one"): the
+   default is Ryan · Duarte (Azure) by its id, not the set with the most lines; "" (Best available) is still offered. A line with no
+   recording: the device voice (after the live one, when its key is here) or Silent (the words on screen by their time) */
+var VOICE_DEFAULT="azure-ryan-duarte";S.guideCfg.voiceSet=VOICE_DEFAULT;S.guideCfg.noRec="device";S.vt={line:"",order:[],ratings:{},saved:false,results:null,note:""};
 COMP.s7vtest=["Guide","Voice test"];FOCUS.s7vtest=["card",".gblock","full"];
 /* the voice sets (voicebench/out: rendered with a provider's key; out-private: Edge, on this computer only, never published) */
 window.VOICESETS=window.VOICESETS||[];
 (function(){var srcs=["voicebench/out/voicesets.js","../voicebench/out/voicesets.js"];if(location.protocol==="file:")srcs.push("voicebench/out-private/voicesets.js","../voicebench/out-private/voicesets.js");
-  srcs.forEach(function(s){var e=document.createElement("script");e.src=s;e.onload=function(){try{renderEditor()}catch(x){}};e.onerror=function(){};document.head.appendChild(e)})})();
+  srcs.forEach(function(s){var e=document.createElement("script");e.src=s;e.onload=function(){try{renderEditor()}catch(x){}};e.onerror=function(){};document.head.appendChild(e)})
+  /* the published Lab (one artifact, at most 511 files): a set's lines come packed, a few scripts of data URIs (voicebench/pack.py,
+     out/packs.js lists them); from this computer's disk the MP3s beside the manifest are read directly. Unity: the VoiceSet asset's clips */
+  if(location.protocol!=="file:"){var l=document.createElement("script");l.src="voicebench/out/packs.js";l.onerror=function(){};
+    l.onload=function(){(window.VOICEPACKS||[]).forEach(function(p){var e=document.createElement("script");e.src="voicebench/out/"+p;e.onerror=function(){};document.head.appendChild(e)})};document.head.appendChild(l)}})();
 /* a line is found by what it says: FNV-1a of "lang|text", the same key voicebench writes */
 function fnvKey(s){var b=new TextEncoder().encode(s),h=0x811c9dc5;for(var i=0;i<b.length;i++){h^=b[i];h=Math.imul(h,0x01000193)>>>0}return("0000000"+h.toString(16)).slice(-8)}
 function voiceSets(){return window.VOICESETS||[]}
-/* Best available: a published set first (this computer's private sets only when no published one exists), then the most lines, so one voice tells the tour */
+/* the chosen set (1 · The mascot › Voice › The voice, by its id); Best available (""), or a chosen set not on this page: a published set
+   first (this computer's private sets only when no published one exists), then the most lines, so one voice tells the tour; a set standing
+   in for the chosen one is said where the voice is shown (currentSetWhy: Speaking now, Coverage) */
 function currentSet(){var s=voiceSets(),id=S.guideCfg.voiceSet,pick=s.filter(function(x){return x.id===id})[0];if(pick)return pick;
   var n=function(x){return Object.keys(x.files||{}).length};return s.slice().sort(function(a,b){return(a.private?1:0)-(b.private?1:0)||n(b)-n(a)})[0]||null}
-function recFile(text,set){set=set||currentSet();if(!set||!text)return null;var f=set.files[fnvKey(S.lang+"|"+String(text).trim())];return f?{set:set,file:f,url:set.url+f.src}:null}
-/* a set's short name: its provider and voices ("Azure Neural · en-GB-SoniaNeural / pt-PT-RaquelNeural" is Azure Sonia + Raquel) */
-function setName(set){var p=String(set.label||set.id).split(" · "),who=(p[0]||"").replace(/ Neural$/,""),vs=(p[1]||"").split(" / ").map(function(v){return v.replace(/\s*\(.*?\)\s*/g,"").replace(/^[a-z]{2}-[A-Z]{2}-/,"").replace(/Neural$/,"").trim()}).filter(Boolean);
-  return vs.length?who+" "+vs.join(" + "):who}
+function currentSetWhy(){var id=S.guideCfg.voiceSet,c=currentSet();if(!id||!c||c.id===id)return"";return voiceIdName(id)+" is not on this page: "+voiceSetName(c)+" stands in"}
+/* a set named by its voices, "Ryan · Duarte (Azure)": its English and Portuguese voices, then its provider */
+var VOICE_PROV={azure:"Azure",eleven:"ElevenLabs",gemini:"Gemini",edge:"Edge, this computer only"};
+function voiceSetName(set){if(!set)return"";var p=String(set.label||"").split(" · ")[1]||"",vs=p.split(" / ").map(function(v){return v.replace(/\s*\(.*?\)\s*/g,"").replace(/^[a-z]{2}-[A-Z]{2}-/,"").replace(/Neural$/,"").trim()}).filter(Boolean);
+  if(vs.length<2&&set.voices)vs=["en","pt"].map(function(l){return String(set.voices[l]||"").replace(/^[a-z]{2}-[A-Z]{2}-/,"").replace(/Neural$/,"")}).filter(Boolean);
+  return vs.join(" · ")+" ("+(VOICE_PROV[set.provider]||set.provider||"?")+")"}
+function voiceIdName(id){var s=voiceSets().filter(function(x){return x.id===id})[0];if(s)return voiceSetName(s);var q=String(id).split("-");return q.length>2?q.slice(1).map(function(w){return w.charAt(0).toUpperCase()+w.slice(1)}).join(" · ")+" ("+(VOICE_PROV[q[0]]||q[0])+")":id}
+/* the live voice speaks in the chosen voice too (mascot/mouth.js's Azure: before round 19 it was Sonia and Raquel whatever the recorded
+   voice): the chosen set's Azure voice for the language, else Ryan and Duarte */
+function azureVoice(lang){var c=currentSet(),v=c&&c.provider==="azure"&&c.voices&&c.voices[lang];return v||(lang==="pt"?"pt-PT-DuarteNeural":"en-GB-RyanNeural")}
+function recFile(text,set){set=set||currentSet();if(!set||!text)return null;var f=set.files[fnvKey(S.lang+"|"+String(text).trim())];return f?{set:set,file:f,url:(window.VOICEPACK&&window.VOICEPACK[set.id+"/"+f.src])||set.url+f.src}:null}
 /* ----- playing a recorded line, the source say.recorded: the audio's clock lights each word (its real start and end: the glide is exact) ----- */
 function recSay(text,onWord,onEnd){var set=currentSet();if(!set)return{not:"no recorded voice set on this page",short:"no recorded set"};
-  var r=recFile(text,set);if(!r)return{not:"this line is not recorded in "+setName(set),short:"not recorded"};
+  var r=recFile(text,set);if(!r)return{not:"this line is not recorded in "+voiceSetName(set),short:"not recorded"};
   stopSpeech();var words=[],re=/\S+/g,m;while((m=re.exec(text)))words.push({i:m.index,w:m[0]});G.words=words;G.recWords=r.file.words;
   G.hl={k:-1,at:0,p:0,cpm:0,ended:false,last:0,seen:true,start:performance.now(),target:G.hl&&G.hl.target};G.noVoice=false;
   var a=new Audio(r.url);a.preload="auto";a.muted=!!S.guideMute;a.playbackRate=guideSpeed();G.rate=a.playbackRate;G.recAudio=a;G.utter={recorded:true};G.lastWordAt=performance.now();musicDuck(true);
@@ -71,7 +95,7 @@ function recSay(text,onWord,onEnd){var set=currentSet();if(!set)return{not:"no r
   a.addEventListener("ended",fin);a.addEventListener("error",function(){if(G.recAudio!==a)return;G.recAudio=null;G.utter=null;G.recWords=null;sayFrom("recorded",text,onWord,onEnd,{not:"the recording did not play",short:"the recording did not play"})});
   var tick=function(){if(G.recAudio!==a)return;var t=a.currentTime,w=G.recWords,k=-1;for(var j=0;j<w.length;j++){if(w[j][0]<=t+.02)k=j;else break}
     if(k>=0&&k!==G.hl.k){onWord(k);G.lastWordAt=performance.now()}if(k>=0&&G.hl){G.hl.at=performance.now()-(t-w[k][0])*1000/(a.playbackRate||1)}if(!a.paused)G.lastWordAt=performance.now();requestAnimationFrame(tick)};
-  var p=a.play();if(p&&p.catch)p.catch(function(){if(G.recAudio===a){a.muted=true;a.play().catch(function(){})}});requestAnimationFrame(tick);return{speaks:setName(set)}}
+  var p=a.play();if(p&&p.catch)p.catch(function(){if(G.recAudio===a){a.muted=true;a.play().catch(function(){})}});requestAnimationFrame(tick);return{speaks:voiceSetName(set)}}
 on("say.recorded",recSay);
 /* the glide uses the word's real length */
 on("wordMs.answer",function(k){if(G.recWords&&G.recWords[k])return Math.max(60,(G.recWords[k][1]-G.recWords[k][0])*1000/((G.recAudio&&G.recAudio.playbackRate)||1))});
@@ -98,13 +122,22 @@ on("say.before",function(){G.seekOnPlay=null;G.seekOnStart=null});
 /* ----- what speaks now, and why when one source stands in for another (no silent fallback) ----- */
 function sayNow(src,who,line){G.sayNow={src:src,by:who,why:line.why.slice(),text:line.text,answer:!!line.text&&line.text===G.answer};sayNowShow()}
 function sayNowText(){var n=G.sayNow;if(!n)return"Nothing at the moment.";var w=n.why,why=w.length>1?w.map(function(x){return x.short}).join("; "):w.length?w[0].not:"";
+  var sw=currentSetWhy();if(sw)why=why?why+"; "+sw:sw;
   if(n.src==="recorded")return"Recorded · "+n.by+(why?" ("+why+")":"");
+  if(n.src==="silent")return"Silent: the words on screen, no voice ("+(why?why+"; ":"")+"A line with no recording is Silent)";
   if(n.src==="live")return"Live · "+n.by+(why?" ("+why+")":n.answer?" (an answer: the live voice comes first)":"");
-  return"This device's voice"+(why?" ("+why+")":" (Voice is Device voice)")+(G.noVoice?" · it has no voice for "+S.lang.toUpperCase()+" here: captions only":"")}
+  return"This device's voice"+(why?" ("+why+")":" (Sources is Device voice)")+(G.noVoice?" · it has no voice for "+S.lang.toUpperCase()+" here: captions only":"")}
 function sayNowShow(){var e=ed.querySelector(".saynow");if(e)e.textContent=sayNowText();emit("sayNow.after",G.sayNow)}
 on("sayDevice.started",function(){sayNowShow()});
 on("stopTour.after",function(){G.sayLine=null;G.sayNow=null;sayNowShow()});
+/* Editor: the device voice for the language (round 19: from guide/readalong.js, so the voice has one home), shown in Guide › 1 · The mascot › Voice */
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var vs=voicesFor(S.lang),key="guideCfg.voice_"+S.lang;
+  addRows(d,"s7voice",row("Voice in this browser",psel(key,[["","Best available"]].concat(vs.map(function(v){return[v.name,v.name+(v.localService?"":" · online")]}))),
+    "The prototype speaks with this browser's voices (in Edge, the Natural voices are online and sound best). The app speaks with recorded files or the phone's voice. "+(vs.length?vs.length+" voice(s) for this language here.":"No voice for this language in this browser: captions only.")));
+  return d.innerHTML});
+BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(voice_en|voice_pt|"));
+rowDemos({"mp:saynow":{tour:"g1",ring:".gdock|.gcap"},"guideCfg.voice_en":{tour:"g1",ring:".gbubble|.gdock"},"guideCfg.voice_pt":{tour:"g1",ring:".gbubble|.gdock"}});
 /* Editor: Narration > Speaking now, under Voice */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
-  addRows(d,"s7voice",row("Speaking now",'<span class="uses saynow">'+esc(sayNowText())+'</span>',"The voice of the line being said, as it starts: Recorded (the set's file), Live (Ask Azu > Voice of the answers, with its key on this computer) or this device's voice, and why when one stands in for another. The tour's lines and Azu's own words try them in that order; an answer tries the live voice first."),"Speed");
+  addRows(d,"s7voice",row("Speaking now",'<span class="uses saynow">'+esc(sayNowText())+'</span>'+mpPlay("saynow"),"The voice of the line being said, as it starts: Recorded (the set's file), Live (Ask the mascot > Voice of the answers, with its key on this computer) or this device's voice, and why when one stands in for another. The tour's lines and the mascot's own words try them in that order; an answer tries the live voice first."),"Speed");
   return d.innerHTML});

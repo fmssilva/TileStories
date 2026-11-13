@@ -152,7 +152,7 @@ S.guidance={on:true,breathing:15,cueRoom:5,perMinute:2,perVisit:30,freshTau:120,
       place:"finale",answers:"tapsay",waits:0,needs:"quiz",pairs:"quizpromise",scores:true,calm:true,game:true,qn:3,showMe:true,
       importance:4,shows:"every",tourLen:"every"},
     guessyear:{id:"guessyear",label:"Guess the year",on:true,kind:"fun",group:"ontour",form:"beat",beat:"guess",says:"tour_guess",spoken:"kind",
-      place:"between",answers:"slider",waits:8,needs:"year",scores:false,calm:true,game:true,
+      place:"between",answers:"slider",waits:14,waitsFirst:4,needs:"year",scores:false,calm:true,game:true,
       importance:3,shows:"every",tourLen:"every"},
     water:{id:"water",label:"The breather",on:true,kind:"fun",group:"ontour",form:"beat",beat:"breather",prop:"water",props:"date",says:"tour_breather",spoken:"kind",
       place:"between",answers:"chips",waits:8,talkFor:60,minNarr:90,needs:"",scores:false,calm:false,game:false,
@@ -222,7 +222,7 @@ var GD_UNTIL={card:"the visitor opens a card",view:"the visitor opens Ask about 
   navbar:"the visitor uses the Navigation Bar",locate:"the visitor taps the Locate Button",ba:"the visitor drags a Before / After",strip:"the visitor swipes a strip",pause:"the visitor pauses the guide"};
 var GD_EVENTS={visit:"the visit started",marker:"a marker in view",moving:"the phone moving",still:"the phone still",card:"the visitor opened a card",
   view:"the visitor opened Ask about the view",tour:"a step of the tour was heard",ask:"the visitor asked a question",intro:"the guide's introduction was heard",
-  menu:"the visitor opened the ✦ menu",poked:"the visitor poked Azu",idle:"the visitor idle",opened:"the card opened",hunt:"the visitor found the treasure",
+  menu:"the visitor opened the ✦ menu",poked:"the visitor poked the mascot",idle:"the visitor idle",opened:"the card opened",hunt:"the visitor found the treasure",
   navbar:"the visitor used the Navigation Bar",locate:"the visitor tapped the Locate Button",ba:"the visitor dragged a Before / After",strip:"the visitor swiped a strip",pause:"the visitor paused the guide"};
 /* How to use the card's steps as events: a step seen (its line heard) retires the cue whose Done when names it */
 ["wk_grab","wk_settings","wk_bar","wk_locate","wk_block"].forEach(function(id){var n=S.guidance.items[id].label;GD_EVENTS[id]="the visitor saw How to use the card's step “"+n+"”";GD_UNTIL[id]="the visitor has seen it in How to use the card"});
@@ -345,17 +345,17 @@ function gdLine(it,returning,slots){slots=slots||{};var k=gdLineKey(it,returning
 function gdHasWords(k){var o=S.tx[k];return!!(o&&String(L(o)||"").trim())}
 /* the read-back of an item, in words (study 3.2): "Tap a marker · App › The start · when a marker is in view and the phone is still ·
    at most about every 25 s, up to 3 times a visit, until the visitor opens a card." */
-function gdHowOften(it){var n=+it.max,ag=+it.again;if(it.form==="beat")return gdBeatHowOften(it);if(it.form==="walk")return"pulled only: never on its own";if(it.form==="page")return"at the app's start, a first run only";if(it.form==="try")return"pulled only: Things to try and Ask Azu's how do I…";
+function gdHowOften(it){var n=+it.max,ag=+it.again;if(it.form==="beat")return gdBeatHowOften(it);if(it.form==="walk")return"pulled only: never on its own";if(it.form==="page")return"at the app's start, a first run only";if(it.form==="try")return"pulled only: Things to try and Ask the mascot's how do I…";
   var s=it.shows==="once"?"once ever":it.shows==="visit"?"once a visit":it.shows==="card"?"once on each card":it.shows==="upto"?"up to "+n+(n===1?" time":" times")+" a visit":it.shows==="until"?"up to "+n+(n===1?" time":" times")+" a visit":"every time";
   if(ag>0&&it.shows!=="once"&&it.shows!=="visit")s="at most about every "+ag+" s, "+s;
   /* round 7: a joke every n pokes (and rarely once at a pause late) */
-  if(it.shows==="every"&&+it.pokes>0)s="every "+it.pokes+" pokes on Azu"+(+it.latePause>0?", or once at a pause late":"");
+  if(it.shows==="every"&&+it.pokes>0)s="every "+it.pokes+" pokes on the mascot"+(+it.latePause>0?", or once at a pause late":"");
   if(it.perPoint)s+=" for each point";if(it.doneWhen)s+=", until "+GD_UNTIL[it.doneWhen];return s}
 var GD_ABOUT={nothing:"",marker:"when a marker is in view",gbtn:"when the ✦ is on the screen",middle:"when a point with a tour is in the middle",point:"when its point settles in the middle",pause:"when the guide's Pause is on the screen (in a tour)"};
 /* round 7: its moment between two tour steps, in words (the water break's narration, the cookie's last step) */
 function gdBetweenWords(it){var w=["between two steps of a tour, as it moves on (it holds the next step until a tap or 8 s)"];if(+it.talkFor>0)w.push("after "+it.talkFor+" s of the tour's narration");if(it.beforeEnd)w.push("before the tour's last step");return w.join(", ")}
 /* its own When, in words: after n pokes on Azu, or n s idle; Lively only, never on a Solemn point */
-function gdWhenWords(it){var w=[],o=[];if(+it.pokes>0)o.push("after "+it.pokes+" pokes on Azu"+(it.kind==="fun"?" since it last showed":""));if(+it.idleFor>0)o.push("after "+it.idleFor+" s idle (no touch, the phone still)");if(+it.latePause>0)o.push("rarely at a pause late in the visit (from "+gdClockW(+it.latePause)+", once a visit)");if(o.length)w.push(o.join(" or "));
+function gdWhenWords(it){var w=[],o=[];if(+it.pokes>0)o.push("after "+it.pokes+" pokes on the mascot"+(it.kind==="fun"?" since it last showed":""));if(+it.idleFor>0)o.push("after "+it.idleFor+" s idle (no touch, the phone still)");if(+it.latePause>0)o.push("rarely at a pause late in the visit (from "+gdClockW(+it.latePause)+", once a visit)");if(o.length)w.push(o.join(" or "));
   if(it.lively)w.push("Lively only");if(it.notSolemn||gdKindSolemnOff(it))w.push("never on a Solemn point"+(gdKindSolemnOff(it)?" (fixed for Fun)":""));
   if(it.seasons)w.push("only in its window of dates ("+it.seasons.map(function(x){return gdDayWords(x.from)+(x.to!==x.from?"–"+gdDayWords(x.to):"")}).join(", ")+")");
   if(it.ptJokes)w.push("only a point with a joke of its own (Specific Marker › Guide script › Jokes)");if(it.joke)w.push("no joke on a Solemn day");return w}
@@ -406,7 +406,7 @@ var GD_FORMS=[["tip","Tip"],["invitation","Invitation"],["remark","Remark"],["mo
 /* a Moment's prop (Azu's: the Rive file's states in Unity) */
 var GD_PROPS=[["water","A glass of water"],["cookie","A cookie"]];
 var GD_WHEN=[["pause","At a pause"],["visit","At the visit's start"],["settle","When its target settles"],["idle","After idle"],["event","On an event"],["between","Between tour steps"]];
-var GD_WHEN_EVENTS=[["card","a card opened"],["view","Ask about the view opened"],["tour","a tour step heard"],["ask","a question asked"],["menu","the ✦ menu opened"],["poked","Azu poked"]];
+var GD_WHEN_EVENTS=[["card","a card opened"],["view","Ask about the view opened"],["tour","a tour step heard"],["ask","a question asked"],["menu","the ✦ menu opened"],["poked","The mascot poked"]];
 var GD_SPOKEN=[["kind","As the kind"],["bubble","A bubble only"],["heard","Spoken once the guide is heard"]];
 var GD_AFTER_DISMISS=[["wait","Wait ×3"],["visit","Not again this visit"],["never","Never again"]];
 var GD_EXPIRES=[["target","When its target leaves the screen"],["never","Never (its time only)"]];
@@ -458,7 +458,7 @@ function gdOnlyWords(it){var w=[];if(it.screen==="card")w.push("only on a card")
   if(it.hasUsed)w.push("only once "+gdNameOf(GD_USED,it.hasUsed));if(it.notUsed)w.push("only until "+gdNameOf(GD_USED,it.notUsed));if(+it.notAfter>0)w.push("not after "+it.notAfter+" s of the visit");return w}
 /* the look, in words, after the read-back */
 function gdLookWords(it){var f=gdFocusNow(it),g=gdGestureOf(it),b=it.button&&it.button!=="none"?gdNameOf(GD_BUTTONS,it.button):"";
-  return" Look: "+gdNameOf(GD_FORMS,it.form).toLowerCase()+", "+(it.goes==="walk"?"Azu walks to it":it.goes==="beside"?"Azu hops beside it":"Azu stays")+(it.points?" and points":"")+", focus "+gdNameOf(GD_FOCUS,f)+
+  return" Look: "+gdNameOf(GD_FORMS,it.form).toLowerCase()+", "+(it.goes==="walk"?"The mascot walks to it":it.goes==="beside"?"The mascot hops beside it":"The mascot stays")+(it.points?" and points":"")+", focus "+gdNameOf(GD_FOCUS,f)+
     (f!==it.focus?" (a Spotlight shows as a Ring: "+gdSpotWhy(it).replace(/^Spotlight /,"")+")":"")+(g?", the ghost finger shows "+GD_GESTURE_WORDS[g]:"")+(b?", its button “"+b+"”":"")+"."}
 /* every line an item can say (its variants, a point with a card's own, the returning visitor's, each audience's) */
 function gdLineKeys(it){var k=[].concat(it.says||[]);if(it.saysCard)k.push(it.saysCard);if(it.saysBack)k.push(it.saysBack);Object.keys(it.saysAud||{}).forEach(function(a){if(it.saysAud[a])k.push(it.saysAud[a])});return k.filter(function(x){return x&&S.tx[x]})}
@@ -520,7 +520,7 @@ function gdPageWhen(it){return it.page==="hello"?"first":it.page==="aud"?"only w
 function gdPageLook(it){if(it.page==="aud")return"The first card's own screen, reused (Family, Explorer, Expert; its Skip = Explorer): it sets the audience, and with it the guidance preset";
   if(it.page==="wall")return"No screen: the Opening message says this short line on the wall, then Tap a marker comes as The start's";
   var an={next:"the next page",how:"the next page, and How to use the card after the pages",camera:"the phone's own request"},b=(it.buttons||[]).filter(function(x){return x.word}).map(function(x){return"“"+TXT(x.word)+"” ("+(an[x.act]||x.act)+")"}),w=[];
-  if(it.azu&&it.azu!=="none")w.push("Azu "+(it.azu==="form"?"forms from a tile and waves (Reduce Motion: it appears; Mascot Off: no Azu)":"appears (Mascot Off: no Azu)"));if(it.langChip)w.push("the language as a chip (EN / PT: the app's language)");
+  if(it.azu&&it.azu!=="none")w.push("The mascot "+(it.azu==="form"?"forms from a tile and waves (Reduce Motion: it appears; Mascot Off: no mascot)":"appears (Mascot Off: na mascote)"));if(it.langChip)w.push("the language as a chip (EN / PT: the app's language)");
   w.push("its title and line");w.push(b.length?b.join(" and "):"no button");var t=w.join(", ");
   return t.charAt(0).toUpperCase()+t.slice(1)+(it.page==="camera"?"; then the phone's own request (Allow / Don't Allow); refused: how to allow it, Open Settings and Try again, never the wall without the camera":"")}
 function gdPageReadBack(it){var all=gdPagesPlan(),i=all.indexOf(it);
@@ -566,7 +566,7 @@ function gdHowScore(n,it){var ws=n.trim().split(" "),s=0,f=it.teaches;(GD_TRY_KE
   row.forEach(function(x){if(ws.some(function(w){return gdHowWordHit(w,x)}))s+=1});return s}
 function gdHowFind(q){var n=gdHowNorm(q);if(!gdHowAsks(n))return null;var best=null,bs=1;gdTeachers().forEach(function(it){var sc=gdHowScore(n,it);if(sc>bs){bs=sc;best=it}});return best}
 /* a Try item's read-back (pulled only) */
-function gdTryReadBack(it){var g=gdGroupOf(it);return it.label+" · App › "+(g?g.name:"?")+" · pulled only: a row of Things to try ("+(gdTryIn(it)?"In":"Out")+") and Ask Azu's answer to how do I… · never on its own (no bubble, never scheduled, never capped) · "+
+function gdTryReadBack(it){var g=gdGroupOf(it);return it.label+" · App › "+(g?g.name:"?")+" · pulled only: a row of Things to try ("+(gdTryIn(it)?"In":"Out")+") and Ask the mascot's answer to how do I… · never on its own (no bubble, never scheduled, never capped) · "+
   (GD_ABOUT[it.about]?"about "+GD_ABOUT[it.about].replace(/^when /,"")+" · ":"")+"Show me: "+(GD_GESTURE_WORDS[GD_GESTURE[it.about]]||"a tap")+" on it, the visitor taken there first · done when "+(GD_UNTIL[it.doneWhen]||GD_EVENTS[it.doneWhen]||"never")+"."}
 
 /* ----- round 12, Fun › On the tour, as data (research_tour_entertainment.md 3.2-3.5). A beat's fields (GD_BEAT_DEF, set once by gdFill):
@@ -580,7 +580,7 @@ function gdTryReadBack(it){var g=gdGroupOf(it);return it.label+" · App › "+(g
    questions a QuizQuestion list on each GuideStep (CardStrings keys), the Reviewed flags beside them ----- */
 var GD_PLACES=[["opening","Opening"],["between","Between steps"],["instep","In a step"],["finale","Finale"]];
 var GD_PLACE_WORDS={opening:"after the introduction, before the first step",between:"between two steps",instep:"inside its span of 1-2 steps (announced at the seam before it, its result at the seam after it)",finale:"before the tour's last step"};
-var GD_ANSWERS=[["nothing","Nothing"],["chips","Chips"],["slider","Slider"],["tap","Tap"],["tapsay","Tap or say"],["tapazu","Tap Azu"],["aim","Aim at the wall"]];
+var GD_ANSWERS=[["nothing","Nothing"],["chips","Chips"],["slider","Slider"],["tap","Tap"],["tapsay","Tap or say"],["tapazu","Tap the mascot"],["aim","Aim at the wall"]];
 /* the answers a beat may offer (the quiz: tap always, voice an extra; a guess: its slider) */
 var GD_ANSWERS_OF={promise:["chips","nothing"],finale:["tap","tapsay"],guess:["slider"],breather:["chips","nothing"],word:["tapazu"],find:["aim"]};
 var GD_NEEDS={"":"nothing of the point's",quiz:"its reviewed quiz questions (Specific Marker › Guide script)",year:"a step with a reviewed guess (Specific Marker › Guide script)",word:"a reviewed word in each language (Specific Marker › Guide script › Don't say it!)",wall:"a wall point to find, on the wall of the card's point (The point, below)"};
@@ -643,7 +643,7 @@ function gdBeatReadBack(it){var g=gdGroupOf(it),a=it.auds||{},w=[];
   if(it.variantOf){var vo=S.guidance.items[it.variantOf];if(vo)w.push("a variant of “"+vo.label+"” (never both in a tour)")}
   if(+it.minSteps>0)w.push("only in a tour of "+it.minSteps+" steps or more");
   if(it.beat==="word")w.push("a tap window from the word's start to its end + "+it.tapWin+" s, "+(it.falseTaps==="nope"?"a false tap a playful “Nope!”":"a false tap counted quietly")+(it.slipBack?", the first missed slip played back":""));
-  if(it.beat==="find")w.push("a hint after "+it.hintAfter+" s, Azu shows it after "+it.giveUp+" s (or I give up), never while the wall is lost");
+  if(it.beat==="find")w.push("a hint after "+it.hintAfter+" s, the mascot shows it after "+it.giveUp+" s (or I give up), never while the wall is lost");
   w.push("answers by "+gdNameOf(GD_ANSWERS,it.answers).toLowerCase());w.push(it.beat==="word"||it.beat==="find"?"its Not now "+it.waits+" s":+it.waits>0?"waits "+it.waits+" s, then carries on":"no timer");
   if(it.needs)w.push("needs "+GD_NEEDS[it.needs]);if(it.pairs){var p=S.guidance.items[it.pairs];if(p)w.push("one pair with “"+p.label+"”")}
   if(it.scores)w.push("scores");if(it.game)w.push("a game (its 4 s Not now chip)");w.push(it.calm?"Calm too":"Lively only");

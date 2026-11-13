@@ -24,16 +24,16 @@ function speakFrom(k,retry){var a=G.sayArgs;if(!a)return;var full=G.words.slice(
 /* pauseTour and resumeTour: a feature may answer for them (the latest first). pauseNow pauses whatever speaks: a source with its own
    audio pauses it (pauseNow.voice, and resumeNow.voice plays it on); else the device voice stops and keeps its word */
 function pauseTour(){if(firstAnswer("pauseTour.answer")===undefined)pauseNow()}
-function pauseNow(){if(!G.on)return;G.paused=true;if(firstAnswer("pauseNow.voice")===undefined&&G.utter){G.pausedAt=G.hl&&G.hl.k>=0?G.hl.k:0;G.utter=null;try{speechSynthesis.cancel()}catch(e){}G.resumeVoice=true}renderGuide()}
+function pauseNow(){if(!G.on)return;G.paused=true;if(firstAnswer("pauseNow.voice")===undefined&&G.utter){G.pausedAt=G.hl&&G.hl.k>=0?G.hl.k:0;G.utter=null;deviceVoiceCancel();G.resumeVoice=true}renderGuide()}
 function resumeTour(){if(firstAnswer("resumeTour.answer")!==undefined||!G.on)return;G.paused=false;G.askOpen=false;
   if(firstAnswer("resumeNow.voice")!==undefined){renderGuide();return}
   if(G.resumeVoice){G.resumeVoice=false;renderGuide();speakFrom(G.pausedAt||0,false);return}
   if(!G.utter&&!G.timer&&!G.waiting&&!G.tryWait)runStep();renderGuide()}
 /* the device voice gone quiet for 4 s while speaking, not paused: start again from its word */
-setInterval(function(){if(!G.on||G.paused||!G.utter||G.recAudio||!G.lastWordAt||!(G.hl&&G.hl.seen))return;if(performance.now()-G.lastWordAt>4000&&window.speechSynthesis&&!speechSynthesis.paused){G.lastWordAt=performance.now();speakFrom(G.hl&&G.hl.k>=0?G.hl.k:0,true)}},1000);
+setInterval(function(){if(!G.on||G.paused||!G.utter||G.recAudio||!G.lastWordAt||!(G.hl&&G.hl.seen))return;if(performance.now()-G.lastWordAt>4000&&deviceVoiceSpeaking()){G.lastWordAt=performance.now();speakFrom(G.hl&&G.hl.k>=0?G.hl.k:0,true)}},1000);
 
 /* ----- the introduction: on the first tour (or every tour), Azu walks in and says who it is and how to ask ----- */
-on("runStep.before",function(){if(G.introPending&&G.i===0){G.introPending=false;S.guideSteps.splice(0,0,{id:"intro",view:"card",ref:"hero",act:"intro",text:T(nameIn(S.tx.guide_intro.en,"{0}",pointName(),"en"),nameIn((S.tx.guide_intro.pt||S.tx.guide_intro.en),"{0}",pointName(),"pt"))});G.introNow=true}
+on("runStep.before",function(){if(G.introPending&&G.i===0){G.introPending=false;S.guideSteps.splice(0,0,introStep());G.introNow=true}
   G.tryKind=null;G.tryDone=false;G.tryWait=false;clearTimeout(G.insistT)});
 on("runStep.after",function(){
   var st=S.guideSteps[G.i];if(st&&st.act==="intro"){var m=ph.querySelector(".mascot");if(m&&!S.reduce){m.classList.add("enter");setTimeout(function(){m.classList.remove("enter")},1400)}}
@@ -51,7 +51,7 @@ function heroWords(){var h=scr.querySelector(".hero"),r=null;if(!h)return null;h
 on("renderGuide.after",function(){ph.classList.toggle("touring",!!G.on)});
 function placeStep(st){if(G.keepScroll||!st||st.act==="intro")return;var el=stepEl(st);if(!el)return;setTimeout(function(){if(!el.isConnected||!G.on)return;var f=freeHeight(),r=el.getBoundingClientRect();G.placedTop=null;var avail=f.bottom-f.top,q=ph.getBoundingClientRect().height/ph.offsetHeight;
     var want=r.height<=avail*.45?f.top+(avail-r.height)/3:f.top+16,dy=(r.top-want);
-    if(st.ref==="hero"){var hw=heroWords();dy=hw?Math.min(hw.bottom-(f.bottom-12*q),hw.top-(f.top+56*q)):-scr.scrollTop*q;dy=Math.max(dy,-scr.scrollTop*q)}
+    if(st.ref==="hero"){var hw=heroWords();dy=hw?Math.min(hw.bottom-(f.bottom-12*q),hw.top-(f.top+56*q)):-scr.scrollTop*q;dy=Math.max(dy,-scr.scrollTop*q);/* round 19: while a game's card shows at the hero (its chips come and go), the hero's words only ever rise: no back and forth */if(ph.querySelector(".gdbeat:not(.bt-away)"))dy=Math.max(dy,0)}
     if(Math.abs(dy)>4){G.autoScrollTill=performance.now()+900;scr.scrollTo({top:scr.scrollTop+dy/q,behavior:S.reduce?"auto":"smooth"})}},60)}
 /* round 15: the block stays clear when it ends up under the guide mid-step: the panel opened to Open, Azu's bubble with its next line or
    an ask, the ✦ growing into the panel as a tour starts or resumes at a step (placed during the growth), the card's layout settling after
@@ -108,7 +108,7 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   addRows(d,"s7coach",row("Insists",pseg("guideCfg.insist",["0","1","2"],["Never","Once","Twice"]),"When the visitor has not tried yet, the guide asks again, each time with new words, then says it is fine and moves on. It never blocks the tour. Done at any moment, even while the guide is still asking, it carries on at once and says what was revealed (a flipped card's back, read in place).")+
     row("Waits",pslider("guideCfg.insistAfter",3,12,1),"Seconds before each new ask.",true));
   addRows(d,"s7resume",row("When the visitor scrolls",pseg("guideCfg.onScroll",["follow","pause"],["Keeps going","Pauses"]),"Keeps going: the guide talks on while its block is on the screen; when the block leaves it, the guide says “Moving on” and tells the block now in view (or pauses when none is). Pauses: any scroll pauses and offers Resume."));
-  addRows(d,"s7mascot",row("Introduction",pseg("guideCfg.intro",["first","every","off"],["First tour","Every tour","Off"]),"Azu walks in and says who it is and how to ask, before the first step."));
+  addRows(d,"s7mascot",row("Introduction",pseg("guideCfg.intro",["first","every","off"],["First tour","Every tour","Off"]),"The mascot walks in and says who it is and how to ask, before the first step."));
   return d.innerHTML});
 on("edMarker.html",function(h){var d=document.createElement("div");d.innerHTML=h;var st=S.sel.gstep&&byId(S.fullSteps||S.guideSteps,S.sel.gstep);if(!st||st.act!=="try")return d.innerHTML;
   var slot=d.querySelector('[data-pick="gstep"][data-id="'+cssq(st.id)+'"] + tr.slot td:last-child');if(!slot)return d.innerHTML;var a=st.after||{en:"",pt:""};

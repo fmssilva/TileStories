@@ -20,13 +20,13 @@ const CAP = process.env.CAP || require('os').tmpdir();  // a picture of each mod
   await p.waitForFunction(() => LAB.run('Azu3D.state().ready||Azu3D.state().failed'), null, { timeout: 60000 });
   await R('ed.querySelector(\'[data-fo="s7mascot"]\').open=true');
   const cards = await R('Array.from(ed.querySelectorAll(".az3dpick .sc")).map(function(c){var i=c.querySelector("img");return[c.textContent,c.getAttribute("aria-pressed"),i&&i.complete&&i.naturalWidth]})');
-  ok('3D model: the Model row shows five cards by name, each with its picture', cards.map(c => c[0]).join('|') === 'Azu, detailed|The mouse|The explorer|The poet|The soldier' && cards.every(c => c[2] >= 96), cards);
+  ok('3D model: the Model row shows five cards by name, each with its picture', cards.map(c => c[0]).join('|') === 'The tile, detailed|The mouse|The explorer|The poet|The soldier' && cards.every(c => c[2] >= 96), cards);
   ok('...The explorer is chosen by default', cards[2] && cards[2][1] === 'true' && cards.filter(c => c[1] === 'true').length === 1);
   const st0 = await R('var s=Azu3D.state();[s.ready,s.src,s.model]');
   ok('...and it is the model loaded', st0[0] && st0[2] === 'explorer' && /The explorer \(explorer\.glb\)/.test(st0[1]), st0);
   await R('startTour();pauseTour()'); await W(600);
   // 2. each card: the model swaps in, holds the whole contract, is drawn and fits its frame, plays a clip, moves its mouth
-  const models = [['azu', 'Azu, detailed'], ['mouse', 'The mouse'], ['explorer', 'The explorer'], ['poet', 'The poet'], ['soldier', 'The soldier']];
+  const models = [['azu', 'The tile, detailed'], ['mouse', 'The mouse'], ['explorer', 'The explorer'], ['poet', 'The poet'], ['soldier', 'The soldier']];
   for (const [id, name] of models) {
     await p.locator(`.az3dpick [data-v="${id}"]`).click();
     await p.waitForFunction(i => LAB.run('Azu3D.state().model===' + JSON.stringify(i) + '&&!Azu3D.state().swapping'), id, { timeout: 30000 }).catch(() => {});

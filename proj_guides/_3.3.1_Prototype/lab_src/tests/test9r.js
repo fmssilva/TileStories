@@ -31,8 +31,8 @@ const R13 = JSON.parse(fs.readFileSync(path.join(__dirname, 'guide_rows_r13.json
   await guide(9);
   const secs = await R('[].map.call(ed.querySelectorAll(":scope > details[data-fo]"),function(d){return d.dataset.fo+"|"+d.querySelector(":scope > summary").textContent.split(" · ").slice(0,2).join(" · ")})');
   ok('The six sections in order: 1 · Azu, 2 · The tour, 3 · Games on the tour, 4 · Azu speaks up, 5 · Ask Azu, 6 · Preview & Test (last: round 14b) (Mascot and Fun › On the tour keep their ids as sections)',
-    JSON.stringify(secs) === JSON.stringify(['s7mascot|1 · Azu', 'gt1|2 · The tour', 'gd:g:ontour|3 · Games on the tour', 'gt4|4 · Azu speaks up', 'gt3|5 · Ask Azu', 'gt0|6 · Preview & Test']), secs);
-  const PARENT = { s7vtest: 'gt0', 'gd:sim': 'gt0', 'gd:visitor': 'gt0', 'gt:tools': 's7mascot', s7voice: 'gt1', s7cap: 'gt1', s7focus: 'gt1', s7coach: 'gt1', s7dock: 'gt1', 'gt:ways': 'gt1',
+    JSON.stringify(secs) === JSON.stringify(['s7mascot|1 · The mascot', 'gt1|2 · The tour', 'gd:g:ontour|3 · Games on the tour', 'gt4|4 · The mascot speaks up', 'gt3|5 · Ask the mascot', 'gt0|6 · Preview & Test']), secs);
+  const PARENT = { s7vtest: 'gt0', 'gd:sim': 'gt0', 'gd:visitor': 'gt0', 'gt:tools': 'gt:look', s7voice: 'gt1', s7cap: 'gt1', s7focus: 'gt1', s7coach: 'gt1', s7dock: 'gt1', 'gt:ways': 'gt1',
     s7gbtn: 'gt:ways', s7hero: 'gt:ways', s7block: 'gt:ways', s7resume: 'gt:ways', 'gd:pair:quizpromise': 'gd:g:ontour', 'gd:i:quizpromise': 'gd:pair:quizpromise', 'gd:i:quizfinale': 'gd:pair:quizpromise',
     'gd:i:guessyear': 'gd:g:ontour', 'gd:i:dontsay': 'gd:g:ontour', 'gd:i:findwall': 'gd:g:ontour', 'gd:var:water': 'gd:g:ontour', 'gd:i:water': 'gd:var:water', 'gd:i:cookie': 'gd:var:water',
     'gd:overall': 'gt4', 'gd:app': 'gt4', 'gd:content': 'gt4', 'gd:fun': 'gt4', 'gd:seq': 'gt4', 'gd:g:play': 'gd:fun', s7ask: 'gt3', s7cam: 's7ask', 'gt:know': 'gt3', s7agent: 'gt3' };
@@ -57,15 +57,15 @@ const R13 = JSON.parse(fs.readFileSync(path.join(__dirname, 'guide_rows_r13.json
   const lv = await R(`var o={};[1,2,3].forEach(function(l){S.ui.level=l;S.op={};renderEditor();var open=function(sel){return[].filter.call(ed.querySelectorAll(sel),function(d){return d.open}).length},all=function(sel){return ed.querySelectorAll(sel).length};
     o[l]={secs:open(":scope > details[data-fo]"),second:[].filter.call(ed.querySelectorAll(":scope > details > .inner > details[data-fo]"),function(d){return d.open}).map(function(d){return d.dataset.fo}).length,
       deep:["gd:visitor","gt:tools","s7agent"].filter(function(id){var d=ed.querySelector('[data-fo="'+id+'"]');return d&&d.open}),items:open('details[data-fo^="gd:i:"]'),itemsAll:all('details[data-fo^="gd:i:"]'),games:open('[data-fo="gd:g:ontour"] details[data-fo^="gd:i:"]'),gamesAll:all('[data-fo="gd:g:ontour"] details[data-fo^="gd:i:"]'),groups:open('details[data-fo^="gd:f:"]')}});o`);
-  ok('Level 1: the six sections open, their foldouts closed; level 2: their foldouts open (an Editor or developer part, Details, Model tools and The engine, one level later; an item closed); level 3: the games open to their group headers (4 · Azu speaks up\'s items one level deeper, in their groups)',
-    lv[1].secs === 6 && lv[1].second === 0 && lv[2].second >= 14 && lv[2].deep.length === 0 && lv[2].items === 0 && lv[3].deep.length === 3 && lv[3].games === lv[3].gamesAll && lv[3].gamesAll === 7 && lv[3].items === 7, lv);
+  ok('Level 1: the six sections open, their foldouts closed; level 2: their foldouts open (an Editor or developer part, Details and The engine, one level later; round 19: Model tools is inside 1 · The mascot › Look, so it opens at level 4; an item closed); level 3: the games open to their group headers (4 · Azu speaks up\'s items one level deeper, in their groups)',
+    lv[1].secs === 6 && lv[1].second === 0 && lv[2].second >= 14 && lv[2].deep.length === 0 && lv[2].items === 0 && lv[3].deep.length === 2 && lv[3].deep.indexOf('gt:tools') < 0 && lv[3].games === lv[3].gamesAll && lv[3].gamesAll === 7 && lv[3].items === 7, lv);
   ok('...an item\'s groups never open by level alone (levels 1, 2, 3: none open)', lv[1].groups === 0 && lv[2].groups === 0 && lv[3].groups === 0, lv);
   // the tab's names at the top: a real click opens that section
   await R('S.op={gt0:false,s7mascot:false,gt1:false,"gd:g:ontour":false,gt4:false,gt3:false};renderEditor()');
   const navs = await R('[].map.call(ed.querySelectorAll(".gtnav [data-gtgo]"),function(b){return b.textContent})');
   await p.locator('.gtnav [data-gtgo="gt3"]').click(); await W(250);
   const nv = await R('var f=ed.querySelector(\'[data-fo="gt3"]\'),r=f.getBoundingClientRect();[f.open,r.top>=-2&&r.top<innerHeight/2]');
-  ok('The tab names its six parts at its top (the first view names every part of the guide); a real click on one opens it at the top of the view', JSON.stringify(navs) === JSON.stringify(['1 · Azu', '2 · The tour', '3 · Games on the tour', '4 · Azu speaks up', '5 · Ask Azu', '6 · Preview & Test']) && nv[0] && nv[1], [navs, nv]);
+  ok('The tab names its six parts at its top (the first view names every part of the guide); a real click on one opens it at the top of the view', JSON.stringify(navs) === JSON.stringify(['1 · The mascot', '2 · The tour', '3 · Games on the tour', '4 · The mascot speaks up', '5 · Ask the mascot', '6 · Preview & Test']) && nv[0] && nv[1], [navs, nv]);
   tsec('levels');
 
   // ---------- 4. an item: its group headers only, each with what it holds and its changed count ----------
@@ -100,7 +100,7 @@ const R13 = JSON.parse(fs.readFileSync(path.join(__dirname, 'guide_rows_r13.json
   ok('A real edit of a line\'s PT text is Languages & Terms\' own word (the same key, owned by the item): the words tab shows it; the group says 1 changed', w1[0] === 'O azul é a minha cor preferida. Obviamente.' && w1[1] === 'gd:i:joke' && w1[2] === 1 && lw[0] === w1[0] && /A joke/.test(lw[1]), [w1, lw]);
   const go = p.locator('tr:has(input[data-loc="tx:mascot_joke_2|pt"]) [data-goloc]'); await go.scrollIntoViewIfNeeded(); await go.click(); await W(400);
   const gw = await R('var s=ed.querySelector(\'[data-fo="gd:f:joke:says"]\'),i=ed.querySelector(\'[data-fo="gd:i:joke"]\'),r=i&&i.getBoundingClientRect();[S.tab,!!s&&s.open,!!i&&i.open,!!r&&r.top<innerHeight&&r.bottom>0]');
-  ok('...its Go to (a real click) opens the Guide tab at the item, its Says group open (Languages & Terms\' owner link: Guide › Azu speaks up › Fun › Play › A joke)', gw[0] === 'guide' && gw[1] && gw[2] && gw[3] && await R('ownerName("gd:i:joke")==="Guide › Azu speaks up › Fun › Play › A joke"'), gw);
+  ok('...its Go to (a real click) opens the Guide tab at the item, its Says group open (Languages & Terms\' owner link: Guide › Azu speaks up › Fun › Play › A joke)', gw[0] === 'guide' && gw[1] && gw[2] && gw[3] && await R('ownerName("gd:i:joke")==="Guide › The mascot speaks up › Fun › Play › A joke"'), gw);
   await p.locator('[data-fo="gd:f:joke:says"] [data-gdvaradd="joke"]').click(); await W(200);
   const a1 = await R('var s=[].concat(S.guidance.items.joke.says);[s.length,TXOWN[s[3]],ed.querySelectorAll(\'[data-fo="gd:f:joke:says"] tr[data-gdvark]\').length,/4 variants: the most/.test(ed.querySelector(\'[data-fo="gd:f:joke:says"]\').textContent)]');
   ok('+ Add a variant (a real click): a fourth line, its words owned by the item, the list at its most', a1[0] === 4 && a1[1] === 'gd:i:joke' && a1[2] === 4 && a1[3], a1);

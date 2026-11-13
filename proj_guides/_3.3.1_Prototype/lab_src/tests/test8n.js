@@ -19,7 +19,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // 2. the introduction: first tour only, with the point's name; Azu walks in
   await R('S.guideMute=true;startTour()'); await p.waitForTimeout(150);
   const intro = await R('[S.guideSteps[0].id,L(S.guideSteps[0].text),!!ph.querySelector(".mascot.enter")]');
-  ok('First tour: Azu walks in and introduces itself, naming the point', intro[0] === 'intro' && /I'm Azu/.test(intro[1]) && /Ribeira Palace/.test(intro[1]) && intro[2], intro);
+  ok('First tour: the mascot walks in and introduces itself (round 19: its name, and the control to ask that the visitor sees, the panel\'s arrow)', intro[0] === 'intro' && /I'm Azu/.test(intro[1]) && /the Ask button at the bottom/.test(intro[1]) && intro[2], intro);
   await R('stopTour();startTour()'); await p.waitForTimeout(100);
   ok('...not on the next tour (First tour)', await R('S.guideSteps[0].id') !== 'intro');
   await R('stopTour()');
