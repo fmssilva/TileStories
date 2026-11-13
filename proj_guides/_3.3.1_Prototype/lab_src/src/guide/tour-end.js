@@ -52,14 +52,16 @@ function teShowcase(poi){poi=poi||svPoi();var c=teCfg(),card=teBlocks(poi);if(c.
 function teShowEl(sc){return sc.ref==="hero"?scr.querySelector(".hero .w")||scr.querySelector(".hero"):scr.querySelector('[data-ref="'+sc.ref+'"]')}
 function tePR(el){var pr=ph.getBoundingClientRect(),q=pr.height/ph.offsetHeight||1,r=el.getBoundingClientRect();return{t:(r.top-pr.top)/q,b:(r.bottom-pr.top)/q,l:(r.left-pr.left)/q,r:(r.right-pr.left)/q,h:r.height/q,q:q}}
 /* the part of the screen above the panel (its top, its bottom), and Azu's bubble's top while it shows */
-function teRegion(){var H=ph.offsetHeight,bot=H,bub=null,p=ph.querySelector(".tepanel,.tepill"),b=ph.querySelector(".tebub:not(.te-out)");if(p)bot=tePR(p).t;if(b)bub=tePR(b).t;return{top:TE_TOP,bot:bot-12,bub:bub!=null?bub-10:null}}
+/* round 18 (the Architect): the panel and the bubble by their layout (their final place, not where their rise is now), so the showcase is
+   placed once, while they still rise */
+function teLay(el){var t=0,e=el;while(e&&e!==ph){t+=e.offsetTop;e=e.offsetParent}return t}
+function teRegion(){var H=ph.offsetHeight,bot=H,bub=null,p=ph.querySelector(".tepanel,.tepill"),b=ph.querySelector(".tebub:not(.te-out)");if(p)bot=teLay(p);if(b)bub=teLay(b);return{top:TE_TOP,bot:bot-12,bub:bub!=null?bub-10:null}}
 /* the scroll that puts the block whole in that part, a little above its middle (the hero: the top) */
 function teShowTop(el,hero){if(hero)return 0;var R=teRegion(),r=tePR(el),s=tePR(scr),y0=r.t-s.t+scr.scrollTop,bot=R.bub!=null&&r.h<=R.bub-R.top?R.bub:R.bot,room=bot-R.top,want=r.h<=room?R.top+(room-r.h)*.4:R.top;
   return Math.max(0,Math.min(scr.scrollHeight-scr.clientHeight,Math.round(y0-(want-s.t))))}
 function teShowcaseGo(){var sc=teShowcase(G.te.poi),el=teShowEl(sc);G.te.sc=sc;if(!el)return;var hero=el.classList.contains("hero"),top=teShowTop(el,hero);G.te.scTop=top;G.te.userScroll=false;
-  scr.scrollTo({top:top,behavior:S.reduce?"auto":"smooth"});
-  /* the card may settle after the scroll began (the panel's padding, a redraw): once more, unless the visitor scrolled */
-  clearTimeout(G.te.scT);G.te.scT=setTimeout(function(){if(!G.te.open||G.te.userScroll||G.on)return;var e=teShowEl(sc);if(!e)return;var t=teShowTop(e,hero);if(Math.abs(scr.scrollTop-t)>2)scr.scrollTo({top:t,behavior:S.reduce?"auto":"smooth"});G.te.scTop=t},S.reduce?120:720)}
+  /* one smooth scroll to the final place (computed after the panel, its foot padding and Azu's bubble are laid out): no correction */
+  scr.scrollTo({top:top,behavior:S.reduce?"auto":"smooth"})}
 ["wheel","touchmove","pointerdown"].forEach(function(ev){scr.addEventListener(ev,function(){G.te.userScroll=true},{passive:true})});
 /* ----- 2. Azu asks: a line of After the tour, picked by the point, the next one at each end there (never the same twice in a row) ----- */
 function teAfterLine(poi,lang,k){var cap=+teCfg().atIntroCap||20,ls=atIntroLines("after",lang).filter(function(x){return x.max<=cap});if(!ls.length)return null;
@@ -177,7 +179,7 @@ function teOpenPaused(){var poi=svPoi(),of=svOffer(poi);if(!of)return;G.te.mode=
 /* the end: the line said, the tour stops, the card goes to its showcase, the panel rises and Azu asks (Off: Ask opens, as before) */
 on("tourEnd.answer",function(st){if(!teCfg().teOn)return;var poi=svPoi(),dk=G.te.demoKey;G.te.demoKey=null;
   G.te.steps=(S.guideSteps||[]).slice();G.te.poi=poi;G.te.len=tourMinutes(poi);G.te.quiz=teQuizNow(poi);G.te.k=(G.te.ends[poi]=(G.te.ends[poi]||0)+1)-1;
-  stopTour();G.te.mode="end";G.te.pof=null;G.te.offer=true;G.te.open=teCfg().teStart==="min"?"min":"open";G.te.anim=true;teDraw();teShowcaseGo();teAzuAsk();
+  stopTour();G.te.mode="end";G.te.pof=null;G.te.offer=true;G.te.open=teCfg().teStart==="min"?"min":"open";G.te.anim=true;teDraw();teAzuAsk();teShowcaseGo();
   if(dk)setTimeout(function(){ringPart(dk,teRingSel(dk))},S.reduce?60:320);return true});
 /* another tour closes it (and the offer: a new tour has its own end); Ask Azu's full view closes it and keeps the offer; leaving the point ends both */
 on("startTour.before",function(){if(G.te.askMode)teAskDrop();G.te.open=false;G.te.offer=false;G.te.inv=null;teBubFade();teDraw()});

@@ -602,7 +602,9 @@ S.tourQ={
   g1:{q:T("How long was the palace the royal home?","Durante quanto tempo foi o palácio casa real?"),a:[T("About 250 years","Cerca de 250 anos"),T("About 50 years","Cerca de 50 anos"),T("About 500 years","Cerca de 500 anos")],ok:0,
     why:T("Kings lived here about 250 years, until 1755.","Os reis viveram aqui cerca de 250 anos, até 1755."),src:"human",rev:{en:true,pt:true}},
   g4:{q:T("What filled the new palace?","O que encheu o novo palácio?"),a:[T("The wealth of the India voyages","A riqueza das viagens à Índia"),T("Gold from Brazil","Ouro do Brasil"),T("Spanish silver","Prata espanhola")],ok:0,
-    why:T("Manuel I filled it with the riches of the India voyages.","D. Manuel I encheu-o com a riqueza das viagens à Índia."),src:"human",rev:{en:true,pt:true}},
+    why:T("Manuel I filled it with the riches of the India voyages.","D. Manuel I encheu-o com a riqueza das viagens à Índia."),src:"human",rev:{en:true,pt:true},
+    /* round 18: its own hint (Asking during a game › hint 1), reviewed per language */
+    hint:T("Think of where the king's ships were sailing home from.","Pense de onde voltavam os navios do rei."),hrev:{en:true,pt:true}},
   g5:{q:T("How many books did the palace library hold?","Quantos livros tinha a biblioteca do palácio?"),a:[T("About 7,000","Cerca de 7 000"),T("About 70,000","Cerca de 70 000"),T("About 700,000","Cerca de 700 000")],ok:1,
     why:T("Some seventy thousand books, beside the royal archive.","Cerca de setenta mil livros, ao lado do arquivo real."),src:"human",rev:{en:true,pt:true}},
   g6:{q:T("What took the palace's place?","O que ficou no lugar do palácio?"),a:[T("A square","Uma praça"),T("A cathedral","Uma catedral"),T("A harbour","Um porto")],ok:0,

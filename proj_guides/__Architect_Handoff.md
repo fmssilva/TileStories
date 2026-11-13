@@ -5,7 +5,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-07)
 
 - **State:**
-  - **The Lab:** `master` holds guidance rounds 1-17c, verified on 2026-11-06/11, published at
+  - **The Lab:** `master` holds guidance rounds 1-18, verified on 2026-11-06/11, published at
     https://claude.ai/artifact/Gpjf7yvoYHjGebmmNhuw2o (round 14b) with the 186 voice files, the music and the capabilities (section 1). The
     developer changes account often (four times on 2026-11-08/09); the old links stay in their accounts (RGofgb… at round 13, 19Uiat… at round 12, RKn3Rr… at round 11, J9J4h… at round 9, 4LpLd4… at round 8, Jq6X2K… at round 7, Jrejv7… at
     round 6, QmhHSz… at round 5, KDs2… at v29). A new account cannot update an old link: publish a new one (section 1, Publishing). Its
@@ -313,9 +313,23 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       next?" (the panel paused, silent, Continue first). Editor: Guide › 2 · The tour › The tour's end. The developer: the
       showcase by default; keep the places without a card, cards first; the paused panel stays silent. Tests (feature): test9v
       (the Architect's rerun and mutation), the guide walk, test9u and test9t.
-    - Rounds since core: 1 (17c); since full: 2026-11-09.
-    - **Next: round 18** (Ask Azu during a game: the game pauses, Azu answers, the game goes on), feature tests only; then
-      **a final guide polish pass** (the developer tries the whole guide in the Lab and we fix what they notice); then the
+    - Round 18 (2026-11-13, brief `_3.8_guidance_plans/brief_round18.md`): `guide/game-ask.js`, asking during a game. Before
+      it Guess the year and the breather timed out during Ask, the offline answer gave the quiz away, and the card's quiz
+      restarted the tour. Now every game (the tour's quiz, Guess the year, Don't say it!, the breather, the card's quiz once
+      started) pauses on Ask: its clocks (one game clock, `gdBT` / `gdBeatFreeze`), choices, slider and voice frozen, a 44 px
+      "Game paused" chip, the panel halfway so the game stays in sight; Back to the game (button, the chip, or by itself 4 s
+      after the answer) with a line of the new set Back to the game. A question about the question gets the hint ladder
+      (where to look + Show me; one wrong answer out, or Guess the year's band; "Shall I just tell you? … won't earn its
+      star" Tell me / I'll try); no answer may carry the open question's right answer (figures and words, EN and PT; the
+      model told too). Editor: Guide › 3 · Games on the tour › Asking during a game. The developer: a hint, not the answer;
+      back by itself after 4 s; the panel halfway. The showcase scroll of 17c now lands once (no 720 ms correction). Tests:
+      test9w 31 (mutation 21 red), test9v 28, test9p 60, the guide walk bad=0.
+    - **For the polish pass** (seen by the Architect): an off-topic question during an open quiz ("Who lived here?") is
+      answered with hint 1's "Have a look at …: the answer is hiding there" (it should say warmly that the answer would give
+      the quiz away, for after); the card's quiz chip touches its eyebrow ("… OF 3"); Azu on the What next? panel's edge covers
+      ~10 px of the Up next card.
+    - Rounds since core: 2 (17c, 18); since full: 2026-11-09.
+    - **Next: a final guide polish pass** (the developer tries the whole guide in the Lab and we fix what they notice); then the
       guide is closed and **the Detail Card blocks' design** starts.
       Prototype only (no Unity) until the developer says so.
   - **MCP:** blender-mcp at user scope (Blender 5.2.3, add-on 1.8, port 9876). The Unity MCP was not connected this stretch.

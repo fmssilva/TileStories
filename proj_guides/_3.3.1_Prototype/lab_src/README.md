@@ -299,6 +299,18 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
     three choices (44 px, light and dark), each by a real tap, the paused panel and its Continue; [editor] each new row by a real click and its ▸;
     [reduced motion]. `MUTATE=1 node tests/test9v.js` asks through the ✦ menu's path (the tour restarted), forgets the quiz was played, turns the answered rule off, ignores the distances and makes the
     Stop bar's What next? do nothing: the checks named [ask], [showcase], [header], [questions], [nearby] and [stop bar] turn red.
+  - *Asking during a game, guidance round 18* (`guide/game-ask.js`, `guidance/present.js`'s game clock, `guide/ask.js`'s `goTo.answer` and `askPrompt.text`,
+    `world/guide-button.js`'s `gbAsk.answer`, `guide/autotour.js`'s Back to the game set): `tests/test9w.js` checks [today] every case of the round's table now pausing: the
+    tour's quiz (the panel raised; its own microphone, a question heard with no choice matched going to Ask), Guess the year (the keyboard), the breather (its 8 s), Don't
+    say it! (its clock), the card's own quiz outside a tour (the ✦ menu's Ask keeping its place, Tap on Azu's menu, What next?'s field) and a Poll; [pause] Guess the year's
+    clock and 8 s still by the test's own readings, the slider unmoved by a real drag, the chip 44 px, no scroll, no restart; [back] Back to the game by a real tap and Back by
+    itself (a bar), the clock on within 100 ms of where it stopped, a line of the set never twice in a row, a tap cancelling Back by itself; [about] the detection at Loose,
+    Normal and Strict, EN and PT (about the question, a short one, a near miss, something else, a choice named, a hint asked) and the model's context with the game, its
+    question, the rule and the hint (stubbed); [ladder] hint 1 from the card's words with Show me, a written hint, hint 2's faded choice and Guess the year's band, step 3's
+    Tell me (told, no star: the quiz's score 2 of 3) and I'll try, the words in Portuguese, the card's quiz's hint in the story with Show me there and back; [off]; [stop]
+    (the Stop bar's Continue back to the step); [no spoiler] (the Architect) the paused quiz's answer never in an answer, EN and PT, in figures and words, offline and from the model (stubbed), the model told the answer it must never say; the card's own quiz pausing only once started (Play the quiz), before that its hint with nothing paused; [editor] the foldout's rows, each changed by a real click changing the signature and playing its demo, the Back lines' ▸, a
+    question's own hint typed in Specific Marker and said; [reduced motion]. `MUTATE=1 node tests/test9w.js` freezes no clock, knows no question about the question and checks no
+    answer for the right one: the checks named [today], [pause], [back], [about], [no spoiler] and [ladder] turn red.
   - *Every Editor row's demo, guidance round 10* (`editor/demo`, the rows' modules: `editor/card-tab`, `card/controls`, `card/blocks`,
     `card/pages`, `card/states`, `card/hints`, `editor/texts`, `editor/components`, `editor/marker-tab`, `mascot/azu2d`, `guidance/editor`):
     `tests/test9n.js` checks that the self-test's NO DEMO check walks every tab and finds no row without a demo but its named exemptions

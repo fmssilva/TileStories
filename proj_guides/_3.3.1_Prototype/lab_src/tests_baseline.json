@@ -378,10 +378,17 @@
   "s": 136
  },
  "test9v.js": {
-  "pass": 27,
+  "pass": 28,
   "fail": 0,
   "failed": [],
   "crashed": "",
   "s": 256
+ },
+ "test9w.js": {
+  "pass": 31,
+  "fail": 0,
+  "failed": [],
+  "crashed": "",
+  "s": 181
  }
 }

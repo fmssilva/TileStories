@@ -166,9 +166,10 @@ var AT_INTRO_SETS=[["facts","The facts","Quick Facts"],["story","The story, as i
   ["fact1","One fact","Quick Facts with a single fact left to tell: a line that leads into the fact, said as a sentence (“One thing worth knowing: it was lost on 1 November 1755.”)"],
   ["teaser","The teaser's opening","the teaser's second sentence, after the hook: {time} the tour's length (“short tour” under 2 minutes, else “tour of about N minutes”), {0} what the tour covers"],
   ["morepics","A gallery's Tell me more","a gallery's deep part (Tell me more, round 17b): the warm lead into its pictures, {0} the pictures' own captions said one after another (“the square with the palace…, then the ruins the earthquake left and…”)"],
-  ["after","After the tour","Azu's question beside the What next? panel once the tour has ended (round 17c, guide/tour-end.js): warm, never a menu read out; {point} the point's name"]];
+  ["after","After the tour","Azu's question beside the What next? panel once the tour has ended (round 17c, guide/tour-end.js): warm, never a menu read out; {point} the point's name"],
+  ["gameback","Back to the game","Azu's line when the visitor goes back to a game after asking during it (round 18, guide/game-ask.js): short and warm, picked by the point, never the same twice in a row; {point} the point's name"]];
 /* the Editor's order of the sets (round 17: the teaser's opening first, one fact after the facts) */
-var AT_INTRO_SHOW=["teaser","facts","fact1","story","text","flip","callout","pics","morepics","dates","ba","quiz","back","other","end","after"];
+var AT_INTRO_SHOW=["teaser","facts","fact1","story","text","flip","callout","pics","morepics","dates","ba","quiz","back","other","end","after","gameback"];
 var AT_INTRO_DEF={};AT_INTRO_SETS.forEach(function(x){AT_INTRO_DEF[x[0]]=Object.keys(S.tx).filter(function(k){return k.indexOf("at_in_"+x[0]+"_")===0}).sort(function(p,q){return+p.split("_").pop()-+q.split("_").pop()})});
 S.guideCfg.atIntro=JSON.parse(JSON.stringify(AT_INTRO_DEF));S.guideCfg.atIntroCap=20;
 function atIntroSalt(set){var i=AT_INTRO_SETS.findIndex(function(x){return x[0]===set});return i<0?0:i}

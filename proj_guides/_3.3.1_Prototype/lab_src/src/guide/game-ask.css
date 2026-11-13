@@ -1,0 +1,43 @@
+/* Ask during a game (guidance round 18, guide/game-ask.js): the quiet "Game paused" chip on the game, the paused game dimmed and still,
+   a faded wrong choice, the panel's Back row (the panel's own primary style), Show me's way back, Off's line. Reduced motion: no fade */
+.kq.ga-paused,.poll.ga-paused{position:relative}
+#ph .ga-chip{position:absolute;z-index:3;top:-22px;width:auto;text-align:left;left:18px;height:44px;min-width:44px;box-sizing:border-box;display:inline-flex;align-items:center;gap:8px;padding:0 16px 0 13px;margin:0;
+  border-radius:22px;border:1px solid rgba(26,24,20,.16);background:#FBFAF7;color:#4F4A42;font:600 14px/1 var(--body);letter-spacing:.01em;cursor:pointer;
+  box-shadow:0 6px 16px rgba(10,9,12,.16);animation:ga-in .2s ease-out;-webkit-tap-highlight-color:transparent}
+#ph .ga-chip svg{width:16px;height:16px;fill:currentColor;flex:none}
+#ph .gdbeat>.ga-chip,#ph .gdstrip>.ga-chip{background:var(--bt-bg);color:var(--bt-ink2);border-color:var(--bt-line)}
+#ph.dark .ga-chip:not(.gdbeat>.ga-chip):not(.gdstrip>.ga-chip){background:#26231F;color:#E4DED3;border-color:rgba(255,255,255,.18)}
+/* the back line on the chip, said as the game goes on */
+#ph .ga-chip.ga-line{height:auto;min-height:44px;max-width:calc(100% - 32px);padding:10px 16px;font:600 14px/19px var(--body);color:var(--bt-ink,#1A1814);text-align:left}
+#ph.dark .ga-chip.ga-line:not(.gdbeat>.ga-chip){color:#F4F1EA}
+@keyframes ga-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+#ph.reduce .ga-chip,#ph.reduce .ga-note{animation:none}
+/* the game still: its answers wait, its own hints and foot step aside while the panel is up */
+.gdbeat.ga-paused .bt-row,.gdbeat.ga-paused .bt-foot,.gdbeat.ga-paused .bt-chips{display:none}
+.gdbeat.ga-paused .bt-body,.gdbeat.ga-paused .bt-line,.gdbeat.ga-paused .bt-eye{opacity:.62}
+.ga-paused :is(button,input):not(.ga-chip),.ga-paused .bt-range{pointer-events:none}
+/* on the card's own quiz the chip sits on its lower edge, at the right: clear of its heading and its question */
+#ph .kq>.ga-chip,#ph .poll>.ga-chip{top:auto;bottom:-22px;left:auto;right:16px}
+#ph .kq>.ga-chip.ga-top,#ph .poll>.ga-chip.ga-top{top:-22px;bottom:auto}
+.kq.ga-paused>button:not(.ga-chip),.poll.ga-paused>button:not(.ga-chip){opacity:.62}
+/* hint 2: one wrong choice out (no fade with Reduced Motion: at once) */
+.gdbeat .bt-choice.ga-out,.kq>button.ga-out{opacity:.34!important;text-decoration:line-through;text-decoration-thickness:1.5px;transition:opacity .45s ease}
+.reduce .gdbeat .bt-choice.ga-out,.reduce .kq>button.ga-out{transition:none}
+/* the panel while a game is paused: shorter than Full, the game in sight above it; the stops' bar and the suggestions step aside */
+.gdock.ga-on.h-full{top:var(--ga-top,46%)!important}
+.gdock.ga-on .gd-where,.gdock.ga-on .gd-chips,.gdock.ga-on .gd-thread>.ga-old{display:none!important}
+.ga-row{display:flex;gap:8px;align-items:center;flex:none}
+.gdock .ga-btn{position:relative;overflow:hidden;display:inline-flex!important;align-items:center;justify-content:center;min-height:44px;padding:0 18px!important;border-radius:22px;
+  font:700 15px/1 var(--body)!important;background:var(--chip);color:var(--ink);border:1px solid var(--line)!important;white-space:nowrap}
+.gdock .ga-btn.pri{flex:1 1 auto;background:var(--acc);color:var(--onacc);border-color:transparent!important}
+.ga-bar{position:absolute;left:0;right:0;bottom:0;height:4px;background:currentColor;opacity:.45;transform-origin:left center;animation:ga-drain 4s linear forwards}
+@keyframes ga-drain{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+/* Show me: the card at the block, the game waiting; the way back */
+.ga-showback{position:absolute;z-index:16;left:50%;bottom:24px;translate:-50% 0;min-height:48px;padding:0 22px;border:0;border-radius:24px;cursor:pointer;
+  background:#1A1814;color:#FFFFFF;font:700 15px/1 var(--body);box-shadow:0 10px 24px rgba(0,0,0,.3);white-space:nowrap}
+.dark .ga-showback{background:#F4F1EA;color:#1A1814}
+/* Off: the line on the game, shown (the game's voice goes on) */
+.ga-note{position:absolute;z-index:3;top:-26px;left:16px;right:16px;box-sizing:border-box;min-height:44px;padding:11px 16px;border-radius:22px;text-align:center;
+  background:var(--bt-ink,#1A1814);color:var(--bt-bg,#FFFFFF);font:600 14px/20px var(--body);box-shadow:0 8px 20px rgba(10,9,12,.24);animation:ga-in .2s ease-out}
+.kq>.ga-note,.poll>.ga-note{background:#1A1814;color:#FFFFFF}
+.dark .kq>.ga-note,.dark .poll>.ga-note{background:#F4F1EA;color:#1A1814}

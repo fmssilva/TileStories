@@ -343,7 +343,25 @@ var LABSTR=[["tour_promise", "gd:i:quizpromise", "The quiz promise, after the in
   ["te_tq_heading", "s7end", "A suggested question from a heading that asks (“What was inside”; {0} the heading, {point} the point's name; round 17c).", "{0} {point}?", "{0} de {point}?", "", "Template · a heading that asks"],
   ["te_tq_year", "s7end", "A suggested question from a date of the card (a timeline's, a fact's; {0} the year; round 17c).", "What happened in {0}?", "O que aconteceu em {0}?", "", "Template · a date"],
   ["te_tq_who", "s7end", "A suggested question from a king or queen the card names ({0} the name; round 17c).", "Who was {0}?", "Quem foi {0}?", "", "Template · a person"],
-  ["te_tq_more", "s7end", "A suggested question from a heading or a name of the card ({0} it; round 17c).", "Tell me about {0}", "Fale-me de {0}", "", "Template · a heading or a name"]];
+  ["te_tq_more", "s7end", "A suggested question from a heading or a name of the card ({0} it; round 17c).", "Tell me about {0}", "Fale-me de {0}", "", "Template · a heading or a name"],
+  ["at_in_gameback_1", "s7auto", "Azu's line going back to a game after a question asked during it (round 18; one of its set, picked by the point; {point} the point's name).", "Right, back to our game. Where were we?", "Bem, de volta ao jogo. Onde é que íamos?", "", "Back to the game 1"],
+  ["at_in_gameback_2", "s7auto", "Azu's line going back to a game after a question asked during it (round 18; one of its set, picked by the point; {point} the point's name).", "Good question! Now, back to the game.", "Boa pergunta! Agora, de volta ao jogo.", "", "Back to the game 2"],
+  ["at_in_gameback_3", "s7auto", "Azu's line going back to a game after a question asked during it (round 18; one of its set, picked by the point; {point} the point's name).", "Lovely. Let's pick up the game where we left it.", "Ótimo. Vamos retomar o jogo onde o deixámos.", "", "Back to the game 3"],
+  ["at_in_gameback_4", "s7auto", "Azu's line going back to a game after a question asked during it (round 18; one of its set, picked by the point; {point} the point's name).", "Now, where was I? Ah yes, our game!", "Ora, onde é que eu ia? Ah, sim, o nosso jogo!", "", "Back to the game 4"],
+  ["ga_paused", "s7gask", "The small chip on a game while the visitor asks Azu during it (round 18).", "Game paused", "Jogo em pausa", "", "Paused chip"],
+  ["ga_back", "s7gask", "The button that goes back to the paused game after Azu's answer (round 18).", "Back to the game", "Voltar ao jogo", "", "Back to the game"],
+  ["ga_off", "s7gask", "Azu's line when the visitor asks during a game and Ask during a game is Off: the game goes on (round 18).", "Let's talk about it once you've answered", "Falamos disso assim que responder", "", "Off"],
+  ["ga_h1_look", "s7gask", "Hint 1, where to look: the card's block whose words hold the answer ({0} its heading; round 18).", "Have a look at “{0}”: the answer is hiding there.", "Espreite “{0}”: a resposta está lá escondida.", "", "Hint 1 · where to look"],
+  ["ga_h1_own", "s7gask", "Hint 1 when the question has its own written hint ({0} the hint; round 18).", "Here's a little clue: {0}", "Aqui vai uma pequena pista: {0}", "", "Hint 1 · its own hint"],
+  ["ga_showme", "s7gask", "Hint 1's chip: the card scrolls to the block while the game stays paused (round 18).", "Show me", "Mostre-me", "", "Show me"],
+  ["ga_h2_opt", "s7gask", "Hint 2 on a multiple choice: one wrong answer fades ({0} the wrong answer; round 18).", "It's not {0}, that much I can tell you.", "Não é {0}, isso posso dizer-lhe.", "", "Hint 2 · one wrong answer out"],
+  ["ga_h2_before", "s7gask", "Hint 2 on Guess the year: the band narrows ({0} the year; round 18).", "It's before {0}.", "É antes de {0}.", "", "Hint 2 · before"],
+  ["ga_h2_after", "s7gask", "Hint 2 on Guess the year: the band narrows ({0} the year; round 18).", "It's after {0}.", "É depois de {0}.", "", "Hint 2 · after"],
+  ["ga_h3", "s7gask", "Step 3: the visitor's choice, the answer now without its star, or another try (round 18).", "Shall I just tell you? Then this one won't earn its star.", "Quer que lhe diga? Assim esta não ganha a estrela.", "", "Step 3 · the choice"],
+  ["ga_tell", "s7gask", "Step 3's button: the answer and its explanation, no star (round 18).", "Tell me", "Diga-me", "", "Tell me"],
+  ["ga_try", "s7gask", "Step 3's button: back to the game to try again (round 18).", "I'll try", "Vou tentar", "", "I'll try"],
+  ["ga_told", "s7gask", "Tell me: the answer and its explanation ({0} the answer, {1} why; round 18).", "The answer: {0}. {1}", "A resposta: {0}. {1}", "", "Told"],
+  ["ga_none", "s7gask", "A question about the game's question with every step of the hint ladder Off (round 18).", "That's the question I'm asking you! Have a go first.", "Essa é a pergunta que lhe faço! Experimente primeiro.", "", "No hint"]];
 S.tx={};var TXO={},TXW={},TXF={},TXP={},TXNEW={},TXOWN={},TXRET=[];
 REALSTR.concat(LABSTR).forEach(function(r){S.tx[r[0]]={en:r[3],pt:r[4]};TXW[r[0]]=r[2];TXF[r[0]]=r[5]||"";TXP[r[0]]=r[6]||"";TXOWN[r[0]]=r[1];
   if(r[1]==="retired")TXRET.push(r[0]);else(TXO[r[1]]=TXO[r[1]]||[]).push(r[0])});
