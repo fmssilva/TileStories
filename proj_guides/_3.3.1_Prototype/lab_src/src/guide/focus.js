@@ -1,5 +1,13 @@
-/* Focus: the spotlight, the zoom to a spot named in a picture, Azu pointing; the script's spots. */
-S.guideCfg.cue="spotlight";S.guideCfg.scrim=0.4;S.guideCfg.zoom="zoom";S.guideCfg.point=true;
+/* Focus: the left bar (round 22, the default), the spotlight, the zoom to a spot named in a picture, Azu pointing; the script's spots. */
+/* round 22 (22.5; the developer, 2026-11-13: "Remove the focus that highlights the block and darkens the rest of the app: it damages the
+   sense of navigation. Have only a little bar that appears smoothly on the left side, pulsing a bit, to show we are talking about that
+   block. Nothing else gets darker: everything stays the same."): Focus = The left bar (the default): a slim bar (4 px, the block's
+   seen height, the card's accent --accent2: 8.6:1 on the paper, 7.8:1 on the dark card) in the card's left margin, its right edge 6 px
+   from the block's left edge (it never touches the block or moves its layout); it fades in (0.35 s), breathes very softly (opacity 1 to
+   0.78, 2.6 s) while the block is told and fades out when the tour moves on; nothing else changes colour. Dim the rest (today's
+   spotlight), Soft ring and Off (nothing marks the block) stay as options. Reduce Motion: no breath. Unity: an Image anchored to the
+   block's left edge in the ScrollView's content (its height the block's), its alpha tweened (DOTween, a yoyo loop) */
+S.guideCfg.cue="bar";S.guideCfg.scrim=0.4;S.guideCfg.zoom="zoom";S.guideCfg.point=true;
 COMP.s7focus=["Guide","Focus"];FOCUS.s7focus=["story",'[data-ref="r:r1"]',"full"];
 /* the demo point: step 4 tells the 1662 drawing, and names three spots in it */
 (function(){var g=byId(S.guideSteps,"g3");if(!g)return;
@@ -51,22 +59,36 @@ function fcTick(){G.fcRaf=0;var sp=ph.querySelector(".gspot:not(.gdspot)");if(!G
   if(el){r=now>=0&&img?regionRect(img,cues[now].region):visRect(el)}
   /* a new target: glide from where the light was, towards where the target is now (so a scroll during the glide is followed) */
   var key=G.i+":"+now,tn=performance.now();if(G.fc.key!==key){G.fc.key=key;G.fc.at=tn;G.fc.from=G.fc.last||null}
-  if(cfg.cue==="none"||!r||G.paused||G.askOpen||G.moment){if(sp)sp.classList.remove("on")}
+  fcBar(cfg.cue==="bar"&&r&&!G.paused&&!G.askOpen&&!G.moment?(st.ref==="hero"&&scr.querySelector(".hero .w")||el):null,p,q,box);
+  if(cfg.cue==="none"||cfg.cue==="bar"||!r||G.paused||G.askOpen||G.moment){if(sp)sp.classList.remove("on")}
   else{if(!sp){sp=document.createElement("div");sp.className="gspot";sp.setAttribute("aria-hidden","true");ph.appendChild(sp)}
     var t=Math.max(r.top,box.top+4),b=Math.min(r.bottom,box.bottom-4),pad=now>=0?4:6;
     var g=[(r.left-p.left)/q-pad,(t-p.top)/q-pad,r.width/q+2*pad,Math.max(0,b-t)/q+2*pad],f=G.fc.from,e=S.reduce||!f?1:Math.min(1,(tn-G.fc.at)/550);
     if(e<1){e=1-Math.pow(1-e,3);g=g.map(function(v,i){return f[i]+(v-f[i])*e})}G.fc.last=g;
     spotPaint(sp,g,cfg.cue,cfg.scrim)}
-  ph.classList.toggle("gspotting",cfg.cue!=="none");
+  ph.classList.toggle("gspotting",true);
   pointAt(r&&cfg.point&&!G.paused?{x:(r.left+r.width/2-p.left)/q,y:((Math.max(r.top,box.top)+Math.min(r.bottom,box.bottom))/2-p.top)/q,el:el}:null);
   G.fcRaf=requestAnimationFrame(fcTick)}
-on("stopTour.before",function(){unzoomAll();var sp=ph.querySelector(".gspot");if(sp)sp.remove();ph.classList.remove("gspotting")});
+/* the left bar on the block told (its right edge FC_BAR_GAP px left of the block's left edge, the block's seen height); a new step's block:
+   the old bar fades out, a new one fades in */
+var FC_BAR_W=4,FC_BAR_GAP=6;
+/* the card's own top bar over its scroll (the close, the title band, settings): what lies under it is not seen; its bottom in the
+   phone's px (at least 0) */
+function cardTopClear(){var p=ph.getBoundingClientRect(),q=p.width/ph.offsetWidth||1,y=0;ph.querySelectorAll(".topband,.chrome,.sticky,.topbar").forEach(function(e){var r=e.getBoundingClientRect();if(r.height>1&&r.top-p.top<140&&getComputedStyle(e).display!=="none")y=Math.max(y,(r.bottom-p.top)/q)});return y}
+/* the block's drawn height: its seen box, from its first drawn part's top to its last's bottom (not the item's own spacing) */
+function fcBarRect(el){var r=visRect(el),t=Infinity,b=-Infinity;[].forEach.call(el.children,function(k){var q=k.getBoundingClientRect();if(q.height>1){t=Math.min(t,q.top);b=Math.max(b,q.bottom)}});
+  return t<b?{left:r.left,top:Math.max(r.top,t),bottom:Math.min(r.bottom,b)}:r}
+function fcBar(el,p,q,box){var bar=ph.querySelector(".gtold:not(.out)");if(bar&&(!el||bar._el!==el)){bar.classList.remove("on");bar.classList.add("out");(function(b){setTimeout(function(){b.remove()},340)})(bar);bar=null}
+  if(!el)return;var r=fcBarRect(el),t=Math.max(r.top,box.top+4,p.top+cardTopClear()*q),b=Math.min(r.bottom,box.bottom-4);if(b-t<8)return;
+  if(!bar){bar=document.createElement("div");bar.className="gtold";bar.setAttribute("aria-hidden","true");bar._el=el;ph.appendChild(bar);void bar.offsetWidth;bar.classList.add("on")}
+  bar.style.left=Math.max(2,(r.left-p.left)/q-FC_BAR_GAP-FC_BAR_W).toFixed(1)+"px";bar.style.top=((t-p.top)/q).toFixed(1)+"px";bar.style.height=((b-t)/q).toFixed(1)+"px"}
+on("stopTour.before",function(){unzoomAll();var sp=ph.querySelector(".gspot");if(sp)sp.remove();ph.querySelectorAll(".gtold").forEach(function(b){b.remove()});ph.classList.remove("gspotting")});
 
 /* Editor: Guide tab gets Focus, after Captions; Specific Marker > Guide script gets each step's spots, drawn on its picture */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var ca=d.querySelector('[data-fo="s7cap"]');if(!ca)return d.innerHTML;
-  ca.insertAdjacentHTML("afterend",comp("s7focus","the spotlight on what is told, the zoom to a spot in a picture, the mascot pointing, a scroll by the visitor",
-    row("Focus",pseg("guideCfg.cue",["spotlight","ring","none"],["Spotlight","Soft ring","None"]),"Spotlight: the rest of the card dims and a soft light rings what the guide is telling. Soft ring: only the ring. One at a time; it follows the scroll and hides while the visitor takes over.")+
-    row("Dim the rest",pslider("guideCfg.scrim",0.2,0.6,0.05),"Spotlight only: how dark the rest of the card goes (0.4 = 40 %).",true)+
+  ca.insertAdjacentHTML("afterend",comp("s7focus","the left bar on what is told, the zoom to a spot in a picture, the mascot pointing, a scroll by the visitor",
+    row("Focus",pseg("guideCfg.cue",["bar","spotlight","ring","none"],["The left bar","Dim the rest","Soft ring","Off"]),"How the block being told is marked. The left bar: a slim bar in the card's accent fades in beside the block's left edge and breathes softly while it is told; nothing else changes, so the visitor keeps the sense of the page. Dim the rest: the rest of the card dims and a soft light rings the block (the spotlight). Soft ring: only the ring. Off: nothing marks it. One at a time; it follows the scroll and hides while the visitor takes over. Reduce Motion: the bar does not breathe.")+
+    row("How dark",pslider("guideCfg.scrim",0.2,0.6,0.05),"Dim the rest only: how dark the rest of the card goes (0.4 = 40 %).",true)+
     row("Into pictures",pseg("guideCfg.zoom",["zoom","spot"],["Slow zoom","Light the spot"]),"When the guide names a spot in a picture (the step's spots, in the Guide script). Slow zoom: the picture glides in to the spot (1.5 s). Light the spot: the picture stays and the spotlight closes on the spot. Reduce Motion: a crossfade instead of the glide.")+
     row("The mascot points",pseg("guideCfg.point",["true","false"],["On","Off"]),"The mascot stands level with what is being told and points at it with one arm (with the mascot on).")+
     row("Try",'<button class="del" type="button" data-fctry="g3">Try</button>',"Starts the tour at the step that names three spots in the 1662 drawing.")));
@@ -99,4 +121,4 @@ ed.addEventListener("pointerup",function(e){if(!cueDraw)return;var g=cueAt(e),q=
   if(G.on&&G.fc){G.fc.cue=-2}},true);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(cue|scrim|zoom|point|"));
 /* each row's demo: the light on the block being told; the zoom on the step that names three spots */
-rowDemos({"guideCfg.cue":{tour:"g1",ring:".gspot|.gfocus"},"guideCfg.scrim":{tour:"g1",ring:".gspot|.gfocus"},"guideCfg.zoom":{tour:"g3",ringAfter:1500,ring:".gspot|.gfocus"},"guideCfg.point":{tour:"g1",ring:".mascot"}});
+rowDemos({"guideCfg.cue":{tour:"g1",ringAfter:900,ring:".gtold|.gspot|.gfocus"},"guideCfg.scrim":{tour:"g1",act:function(){if(S.guideCfg.cue!=="spotlight")gdChip("How dark: for Dim the rest (Focus); the left bar dims nothing")},ring:".gspot|.gtold|.gfocus"},"guideCfg.zoom":{tour:"g3",ringAfter:1500,ring:".gspot|.gfocus"},"guideCfg.point":{tour:"g1",ring:".mascot"}});

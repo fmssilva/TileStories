@@ -353,6 +353,20 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
     off-topic answer and the warm after-the-quiz line, EN and PT; [chip] 8 px from its eyebrow; [editor] each new row and its ▸. `MUTATE=1` turns
     them red (the glide instant, ±10 s dead, nothing follows, no teleprompter, the theme always Dark, the words 30 px, the mascot on the panel's edge,
     every question about the quiz, the chip never moved).
+  - *The tour as a demo of the app, guidance round 22* (`guide/demo-hand`, `guide/tour-scroll`, `card/page-open`, `guide/focus`'s left bar,
+    `editor/card-tab`'s switches): `tests/test10a.js` checks [hand] during a tour (the flip card to the story, the tour going on) the hand
+    starting about 2 cm away (60-130 px; the module says 88), its tip ending within 6 px of the ripple and the ripple on the preview's centre,
+    then one click on the preview as a visitor's tap fires it and the same opening, never over the words told on any frame; a visitor's real
+    touch on the card removing it and pausing, Resume going on; [scroll] every frame monotonic, eased (the first 15 % of its time under 12 %
+    of the way), no frame over 12 %, 0.42-1.3 s, the pill near the bottom going down and near the top going up, gone after; [opening] the
+    page's rectangle starting at the preview's and growing, the same for a visitor's real tap, back closing into the preview with the card
+    where it was; [blocks] the before and after, the 3D model, the flip card and the gallery's strip changed and back, once per block per
+    tour, never under a held finger, the hand's flips not the visitor's try; [focus] the bar in the margin (6 px from the block, its drawn
+    height), 3:1 at its faintest light and dark, nothing outside the block darker (the test's own luma, before and during), Dim the rest
+    still dimming; [reduced motion]; [editor] each new row by real clicks and its ▸; [switches] no Foldouts row on the Detail Card tab, One
+    section open at a time closing the open section. `MUTATE=1 node tests/test10a.js` starts the hand on its target, makes the scroll a
+    jump, drops the opening zoom, the blocks in use and the bar and dims the rest: the checks named [hand], [opening], [scroll], [blocks],
+    [focus] and [reduced motion] turn red.
   - *Every Editor row's demo, guidance round 10* (`editor/demo`, the rows' modules: `editor/card-tab`, `card/controls`, `card/blocks`,
     `card/pages`, `card/states`, `card/hints`, `editor/texts`, `editor/components`, `editor/marker-tab`, `mascot/azu2d`, `guidance/editor`):
     `tests/test9n.js` checks that the self-test's NO DEMO check walks every tab and finds no row without a demo but its named exemptions

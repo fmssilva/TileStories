@@ -15,7 +15,7 @@ MODULES = ['src/core/open.js', 'src/core/assets.js', 'src/core/catalogues.js', '
            'src/card/contents.js', 'src/card/effects.js', 'src/guide/tour.js', 'src/editor/texts.js',
            'src/phone/preview-bar.js', 'src/phone/settings.js', 'src/card/terms.js', 'src/card/controls.js',
            'src/phone/preview-tools.js', 'src/phone/grabber.js', 'src/card/blocks.js', 'src/card/demo-card.js',
-           'src/card/pages.js', 'src/card/elements.js', 'src/editor/setup-note.js', 'src/card/block-looks.js',
+           'src/card/pages.js', 'src/card/page-open.js', 'src/card/elements.js', 'src/editor/setup-note.js', 'src/card/block-looks.js',
            'src/editor/marker-tab.js', 'src/card/languages.js', 'src/card/hero.js', 'src/card/story.js', 'src/card/peek.js',
            'src/phone/redraw.js', 'src/card/chrome-pinned.js', 'src/card/locate.js', 'src/card/hints.js', 'src/card/states.js',
            'src/guide/ask.js', 'src/guide/readalong.js', 'src/guide/highlight.js', 'src/guide/focus.js', 'src/mascot/azu2d.js',
@@ -25,7 +25,7 @@ MODULES = ['src/core/open.js', 'src/core/assets.js', 'src/core/catalogues.js', '
            'src/agent/scenes.js', 'src/mascot/azu3d.js', 'src/mascot/models.js', 'src/mascot/tile-styles.js',
            'src/mascot/size.js', 'src/world/markers.js', 'src/guide/guide-scenes.js', 'src/agent/live-voice.js', 'src/mascot/mouth.js',
            'src/guidance/catalog.js', 'src/guidance/scheduler.js', 'src/guidance/service.js', 'src/guidance/present.js',
-           'src/guidance/editor.js', 'src/guidance/scenes.js', 'src/guide/tell-more.js', 'src/guide/saved-place.js', 'src/guide/tour-end.js', 'src/guide/game-ask.js', 'src/guide/voice-script.js', 'src/guide/mascot-profile.js', 'src/guide/hero-start.js', 'src/guide/teleprompter.js', 'src/guide/panel-look.js', 'src/core/boot.js']
+           'src/guidance/editor.js', 'src/guidance/scenes.js', 'src/guide/tell-more.js', 'src/guide/saved-place.js', 'src/guide/tour-end.js', 'src/guide/game-ask.js', 'src/guide/voice-script.js', 'src/guide/mascot-profile.js', 'src/guide/hero-start.js', 'src/guide/teleprompter.js', 'src/guide/panel-look.js', 'src/guide/demo-hand.js', 'src/guide/tour-scroll.js', 'src/core/boot.js']
 # the cascade depends on this order: a new style goes at the end, or beside the rule it overrides
 STYLES = ['src/core/base.css', 'src/card/card-base.css', 'src/phone/sheet.css', 'src/guide/tour.css', 'src/editor/texts.css', 'src/editor/accordion.css',
           'src/card/controls.css', 'src/card/blocks.css', 'src/card/elements.css', 'src/editor/marker-tab.css', 'src/card/hero.css',
@@ -35,7 +35,7 @@ STYLES = ['src/core/base.css', 'src/card/card-base.css', 'src/phone/sheet.css', 
           'src/world/guide-button.css', 'src/agent/agent.css', 'src/agent/scenes.css', 'src/world/markers.css',
           'src/mascot/azu3d.css', 'src/mascot/models.css', 'src/mascot/tile-styles.css', 'src/mascot/size.css', 'src/editor/demo.css',
           'src/guidance/present.css', 'src/guidance/editor.css', 'src/guide/autotour.css', 'src/guide/tell-more.css',
-          'src/guide/saved-place.css', 'src/guide/tour-end.css', 'src/guide/game-ask.css', 'src/guide/mascot-profile.css', 'src/guide/hero-start.css', 'src/guide/highlight.css', 'src/guide/teleprompter.css', 'src/guide/panel-look.css']
+          'src/guide/saved-place.css', 'src/guide/tour-end.css', 'src/guide/game-ask.css', 'src/guide/mascot-profile.css', 'src/guide/hero-start.css', 'src/guide/highlight.css', 'src/guide/teleprompter.css', 'src/guide/panel-look.css', 'src/card/page-open.css', 'src/guide/demo-hand.css', 'src/guide/tour-scroll.css']
 
 
 def rd(*p):

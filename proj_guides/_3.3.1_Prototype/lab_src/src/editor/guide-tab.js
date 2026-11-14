@@ -39,7 +39,7 @@ var GUIDE_PLAN={
     {fo:"gt:manner",t:"Manner",s:"how big, how lively, how it speaks and moves",parts:[{from:"s7mascot"},"Size","Liveliness","Mouth","How it moves","Moods","Tap on the mascot","Try"]},
     {fo:"gt:moments",t:"Moments",s:"when it introduces itself, and its walk to the wall",parts:[{from:"s7mascot"},"Introduction","Walks to the wall","Try"]},
     {words:"s7mascot"}],
-  gt1:[{rules:1},{fo:"s7auto"},{fo:"s7more"},{fo:"s7voice"},{fo:"s7cap"},{fo:"s7focus"},{fo:"s7coach"},
+  gt1:[{rules:1},{fo:"s7auto"},{fo:"s7more"},{fo:"s7voice"},{fo:"s7cap"},{fo:"s7focus"},{fo:"s7move"},{fo:"s7coach"},
     {fo:"s7dock",add:[{h:"Tour controls",s:"previous, pause, next, sound, captions, Ask and stop: their words"},{words:"s7tour"}]},
     {fo:"gt:ways",t:"Ways in",s:"how a visitor starts the tour, or picks it up again",parts:[{fo:"s7gbtn"},{fo:"s7hero"},{fo:"s7block"},{fo:"s7resume"}]},{fo:"s7end"}],
   gt3:[{fo:"s7ask",t:"What the visitor sees",s:"the question box, Ask about the view, the answers and how they sound",parts:[{from:"s7ask"},"Answers from",{fo:"s7cam"},{from:"s7agent"},

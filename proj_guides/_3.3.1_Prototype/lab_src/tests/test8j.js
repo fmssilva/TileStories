@@ -8,7 +8,8 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 20000 }); await p.waitForTimeout(400);
   const R = src => p.evaluate(s => LAB.run(s), src);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
-  await R('S.hints.on=false;S.previewBar=false;S.lang="en";S.guideMute=true;S.guideCfg.intro="off";renderAll(false)');
+  // round 22 (22.5): the left bar is the default Focus; the spotlight (Dim the rest) is an option: these checks set it
+  await R('S.hints.on=false;S.previewBar=false;S.lang="en";S.guideMute=true;S.guideCfg.intro="off";S.guideCfg.cue="spotlight";renderAll(false)');
   // helpers in the page: the spotlight's box, the picture's seen box, the view box's centre (as fractions of the picture)
   await R(`window.T8={rel:function(r){var p=ph.getBoundingClientRect();return[r.left-p.left,r.top-p.top,r.width,r.height].map(Math.round)},
     spot:function(){var s=ph.querySelector(".gspot.on"),d=G.fc&&G.fc.cue>=0?4:6;if(!s)return null;var r=T8.rel(s.getBoundingClientRect());return[r[0]+d,r[1]+d,r[2]-2*d,r[3]-2*d]},
@@ -43,8 +44,11 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // 4. Soft ring and None
   await go('S.guideCfg.zoom="zoom";S.guideCfg.cue="ring"');
   ok('Soft ring: the ring without the dimming', await R('var g=ph.querySelector(".gspot.on");!!g&&!/2400px/.test(getComputedStyle(g).boxShadow)'));
+  // round 22: Off marks nothing (no spotlight, no bar, the step's own outline hidden too); The left bar: the bar, no spotlight
   await go('S.guideCfg.cue="none"');
-  ok('None: no spotlight (the step\'s own outline is back)', await R('!ph.querySelector(".gspot.on")&&!ph.classList.contains("gspotting")'));
+  ok('Off: nothing marks the block (no spotlight, no bar, no outline)', await R('!ph.querySelector(".gspot.on")&&!ph.querySelector(".gtold.on")&&ph.classList.contains("gspotting")'));
+  await go('S.guideCfg.cue="bar"');
+  ok('The left bar (round 22, the default): the bar beside the block, no spotlight', await R('!ph.querySelector(".gspot.on")&&!!ph.querySelector(".gtold.on")'));
   // 5. Reduce Motion: a crossfade, not a glide
   await go('S.guideCfg.cue="spotlight";S.reduce=true'); await reach(0);
   ok('Reduce Motion: the picture crossfades to the spot (no glide)', await R('var t=T8.img().style.transition;/opacity/.test(t)&&!/object-view-box/.test(t)'));
@@ -63,7 +67,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('Stop: no light, the picture back (no zoom, its scroll effect back)', await R('!ph.querySelector(".gspot")&&!scr.querySelector("img.gzimg")&&!scr.querySelector("img[data-gz]")'));
   // 9. the Editor: Focus after Captions; the Guide script's spots, drawn with the mouse
   // round 19 (21.10): the Editor says "the mascot": Azu points is The mascot points
-  ok('Editor: Focus after Captions, its four rows (The mascot points, round 19) and a Try', await R('S.tab="guide";renderEditor();var c=ed.querySelector(\'[data-fo="s7cap"]\'),f=ed.querySelector(\'[data-fo="s7focus"]\');!!f&&c.nextElementSibling===f&&/Spotlight/.test(f.textContent)&&/Dim the rest/.test(f.textContent)&&/Slow zoom/.test(f.textContent)&&/The mascot points/.test(f.textContent)&&!!f.querySelector("[data-fctry]")'));
+  ok('Editor: Focus after Captions, its four rows (The mascot points, round 19) and a Try', await R('S.tab="guide";renderEditor();var c=ed.querySelector(\'[data-fo="s7cap"]\'),f=ed.querySelector(\'[data-fo="s7focus"]\');!!f&&c.nextElementSibling===f&&/The left bar/.test(f.textContent)&&/Dim the rest/.test(f.textContent)&&/Slow zoom/.test(f.textContent)&&/The mascot points/.test(f.textContent)&&!!f.querySelector("[data-fctry]")'));
   await R('S.tab="marker";S.sel.gstep="g3";renderEditor()'); await p.waitForTimeout(300);
   ok('Guide script: the step names three spots, each on its picture', await R('ed.querySelectorAll("[data-cuepic]").length===3&&ed.querySelectorAll("[data-cuepic] img").length===3'));
   const pic = p.locator('[data-cuepic="g3|0"]'); await pic.scrollIntoViewIfNeeded(); const bx = await pic.boundingBox();

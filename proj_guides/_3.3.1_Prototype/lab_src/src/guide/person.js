@@ -52,7 +52,7 @@ on("renderGuide.after",function(){ph.classList.toggle("touring",!!G.on)});
 function placeStep(st){if(G.keepScroll||!st||st.act==="intro")return;var el=stepEl(st);if(!el)return;setTimeout(function(){if(!el.isConnected||!G.on)return;var f=freeHeight(),r=el.getBoundingClientRect();G.placedTop=null;var avail=f.bottom-f.top,q=ph.getBoundingClientRect().height/ph.offsetHeight;
     var want=r.height<=avail*.45?f.top+(avail-r.height)/3:f.top+16,dy=(r.top-want);
     if(st.ref==="hero"){var hw=heroWords();dy=hw?Math.min(hw.bottom-(f.bottom-12*q),hw.top-(f.top+56*q)):-scr.scrollTop*q;dy=Math.max(dy,-scr.scrollTop*q);/* round 19: while a game's card shows at the hero (its chips come and go), the hero's words only ever rise: no back and forth */if(ph.querySelector(".gdbeat:not(.bt-away)"))dy=Math.max(dy,0)}
-    if(Math.abs(dy)>4){G.autoScrollTill=performance.now()+900;scr.scrollTo({top:scr.scrollTop+dy/q,behavior:S.reduce?"auto":"smooth"})}},60)}
+    if(Math.abs(dy)>4){G.autoScrollTill=performance.now()+900;tourScroll(scr.scrollTop+dy/q)}},60)}
 /* round 15: the block stays clear when it ends up under the guide mid-step: the panel opened to Open, Azu's bubble with its next line or
    an ask, the ✦ growing into the panel as a tour starts or resumes at a step (placed during the growth), the card's layout settling after
    the placing; round 15b: a tour's block (in the card's scroll, the card at Full, playing; not How to use the card's marks) wholly off the screen while the visitor has not scrolled since the step began (the guide's own
@@ -92,7 +92,7 @@ setInterval(function(){if(!G.on||G.paused||!G.waiting||G.tryWait)return;var st=S
 function insistLater(st){clearTimeout(G.insistT);G.insistT=setTimeout(function(){if(!G.on||G.paused||!G.tryWait||S.guideSteps[G.i]!==st)return;var n=nudgeN[st.id]=(nudgeN[st.id]||0)+1;
   var t=n>S.guideCfg.insist?TXT("guide_try_moveon"):TXT("guide_nudge_"+st.wait+"_"+Math.min(2,n));renderGuide(t);var m=ph.querySelector(".mascot");if(m&&n<=S.guideCfg.insist){m.classList.remove("r-jump");void m.offsetWidth;m.classList.add("r-jump");setTimeout(function(){m.classList.remove("r-jump")},700)}
   say(t,function(k){markWord(k,null)},function(){if(!G.on||!G.tryWait||S.guideSteps[G.i]!==st)return;if(n>S.guideCfg.insist){G.tryWait=false;setTimeout(function(){if(G.on&&!G.paused)next()},500)}else insistLater(st)})},S.guideCfg.insistAfter*1000)}
-function gesture(kind){if(!G.on)return;var st=S.guideSteps[G.i];if(!st||st.act!=="try"||st.wait!==kind||G.tryDone)return;G.tryDone=true;feedback("right");
+function gesture(kind){if(!G.on||G.handAct)return;/* round 22: the guide's own hand showing a block in use (guide/demo-hand.js) is not the visitor trying it */var st=S.guideSteps[G.i];if(!st||st.act!=="try"||st.wait!==kind||G.tryDone)return;G.tryDone=true;feedback("right");
   if(G.tryWait||G.waiting){clearTimeout(G.timer);G.waiting=false;G.tryWait=true;clearTimeout(G.insistT);stopSpeech();setTimeout(function(){afterTry(st)},kind==="flip"?650:350);return}
   /* done while the guide is still asking: it stops and reacts */
   if(G.utter||G.timer){stopSpeech();G.tryWait=true;setTimeout(function(){afterTry(st)},kind==="flip"?650:350)}}

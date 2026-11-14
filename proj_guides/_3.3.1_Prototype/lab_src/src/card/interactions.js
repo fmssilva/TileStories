@@ -15,7 +15,7 @@ function initBoxes(){scr.querySelectorAll(".mbox").forEach(function(bx){bx.addEv
       if(Math.abs(dx)>need/2){top.style.transform="translateX("+(dx>0?400:-400)+"px) rotate("+(dx>0?25:-25)+"deg)";top.style.opacity=0;setTimeout(function(){dk.insertBefore(top,dk.firstChild);top.style.transform="translateY(6px) scale(.92)";top.style.opacity=1;restack(dk)},350)}else top.style.transform=""}
     top.addEventListener("pointermove",mv);top.addEventListener("pointerup",up)})});}
 function restack(dk){var cards=dk.querySelectorAll(".cd");cards.forEach(function(c,i){c.style.zIndex=i;c.style.transform="translateY("+((cards.length-1-i)*6)+"px) scale("+(1-(cards.length-1-i)*.04)+")"})}
-function dragX(fn,rel){return function(el){el.addEventListener("pointerdown",function(e){el.setPointerCapture(e.pointerId);var x0=e.clientX,last=e.clientX;
+function dragX(fn,rel){return function(el){el.addEventListener("pointerdown",function(e){try{el.setPointerCapture(e.pointerId)}catch(x){}var x0=e.clientX,last=e.clientX;
   function mv(ev){var b=el.getBoundingClientRect();fn(el,Math.max(0,Math.min(1,(ev.clientX-b.left)/b.width)),ev.clientX-last);last=ev.clientX}
   function up(){el.removeEventListener("pointermove",mv);el.removeEventListener("pointerup",up)}
   if(!rel)mv(e);el.addEventListener("pointermove",mv);el.addEventListener("pointerup",up)})}}

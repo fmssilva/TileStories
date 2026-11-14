@@ -805,6 +805,13 @@ img.gzimg{transform:none!important}
 .cues .cue{margin:0 0 10px}.cuehd{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px;font-size:12px}.cuehd select{width:auto}
 .cuepic{position:relative;max-width:260px;cursor:crosshair;touch-action:none;user-select:none;border-radius:6px;overflow:hidden}.cuepic img{display:block;width:100%;height:auto;pointer-events:none}
 .cuepic i{position:absolute;border:2px solid #FFD98A;box-shadow:0 0 0 999px rgba(0,0,0,.35);border-radius:4px;pointer-events:none}
+/* round 22 (22.5): the left bar on the block being told: 4 px in the card's accent, in the left margin 6 px from the block; it fades in,
+   breathes softly (opacity 1 to 0.78) while the block is told, fades out when the tour moves on. Reduce Motion: no breath */
+.gtold{position:absolute;z-index:10;width:4px;border-radius:2px;background:var(--accent2,#1F4E9C);pointer-events:none;opacity:0;transition:opacity .35s ease}
+.gtold.on{opacity:1;animation:gtold 2.6s ease-in-out .45s infinite}
+.gtold.out{opacity:0;transition:opacity .3s ease}
+.reduce .gtold.on{animation:none}
+@keyframes gtold{0%,100%{opacity:1}50%{opacity:.78}}
 /* v8k: Azu. Tappable; 2.5D (its thickness, light from the top left, feet, a shadow); moods move the brows and eyes; reactions are short */
 .mascot{pointer-events:auto;cursor:pointer;width:56px;height:64px;transition:top .6s cubic-bezier(.3,1.4,.5,1),right .7s cubic-bezier(.4,0,.2,1)}
 .mascot svg{width:56px;height:64px;overflow:visible;transform-origin:50% 92%;transition:transform .35s}
@@ -2295,6 +2302,31 @@ tr.gskipped td{opacity:.55;text-decoration:line-through}
 #ph .sk-aurora .gd-talk .ring{background:radial-gradient(circle,rgba(94,240,200,0) 55%,rgba(94,240,200,.36) 70%,rgba(94,240,200,0) 100%)}
 /* Dark (round 11's Ink glass): its lightest point, for the checks */
 #ph .gdock.lk-ink.sk-dark{--sksurf:rgba(44,40,52,.92);--skglow:rgba(0,0,0,0)}#ph .gdock.lk-ink.sk-dark:not(.h-mini){--sksurf:#2C2834}
+/* round 22 (22.3): the card under a page that opens, the page over the card while it closes: copies of the screen, never touched */
+.scr.po-ghost{pointer-events:none;overflow:hidden}
+/* round 22 (22.2): the visitor's hand: the guidance's ghost finger at 30 x 39 px, white at 72 % with a soft shadow and a dark edge,
+   turned about its tip; its comet trail a short tapered streak; the tap's ripple a soft grey ring growing to 44 px and fading (400 ms).
+   Above the card and the bar, under the guide's panel and bubbles' words (it is placed off them) */
+.dhand{position:absolute;left:0;top:0;z-index:16;width:30px;height:39px;transform-origin:10.5px 3px;pointer-events:none;opacity:0;filter:drop-shadow(0 3px 5px rgba(0,0,0,.28))}
+.dhand svg{display:block;width:30px;height:39px;fill:rgba(255,255,255,.92);stroke:rgba(22,24,28,.7);stroke-width:1.8;stroke-linejoin:round}
+.dhand.dh-out{opacity:0!important;transition:opacity .25s}
+.dhtrail{position:absolute;left:0;top:0;z-index:15;height:6px;border-radius:3px;transform-origin:0 50%;pointer-events:none;opacity:0;
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.55));box-shadow:0 0 6px rgba(255,255,255,.35)}
+.dhripple{position:absolute;z-index:15;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;pointer-events:none;box-sizing:border-box;
+  border:2px solid rgba(70,72,78,.72);background:rgba(110,112,118,.32);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35);animation:dhripple .4s ease-out forwards}
+@keyframes dhripple{0%{transform:scale(.35);opacity:1}45%{opacity:.85}100%{transform:scale(1);opacity:0}}
+/* round 22 (22.1): the tour's scroll cue: a soft grey see-through pill, its chevron the way the page moves; it pulses gently while the
+   tour scrolls (a small drift the way it goes), fades out when the scroll lands. Never a tap target. Reduce Motion: shown still */
+.gscue{position:absolute;left:50%;z-index:12;width:46px;height:26px;margin-left:-23px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+  background:rgba(96,98,104,.30);color:rgba(255,255,255,.95);box-shadow:0 2px 10px rgba(0,0,0,.14);pointer-events:none;opacity:0;transition:opacity .22s ease}
+.gscue svg{display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}
+.gscue.up svg{transform:rotate(180deg)}
+.gscue.on{opacity:1;animation:gscue-dn .9s ease-in-out infinite}
+.gscue.on.up{animation-name:gscue-up}
+.gscue.out{opacity:0;transition:opacity .3s ease}
+.gscue.still,.reduce .gscue{animation:none!important}
+@keyframes gscue-dn{0%,100%{translate:0 0;background:rgba(96,98,104,.24)}50%{translate:0 4px;background:rgba(96,98,104,.40)}}
+@keyframes gscue-up{0%,100%{translate:0 0;background:rgba(96,98,104,.24)}50%{translate:0 -4px;background:rgba(96,98,104,.40)}}
 </style>
 <div class="wrap">
 <header>
@@ -3329,7 +3361,10 @@ function edCard(){return pipe("edCard.tab",edCardDoc())}
 /* edCardDoc("guide"): the guide's part only (the Guide tab's draw): the card's own sections are not drawn, so each joiner works on the
    guide's foldouts alone (guidance round 14: the Guide tab's draw went from about 1.3 s to a fraction of it) */
 function edCardDoc(part){var h="";if(part==="guide")return pipe("edCard.html",h);
-  h+='<div class="fo" style="padding:6px 8px"><div class="row"><label>Foldouts</label><div>'+seg("ui.single",["false","true"],["Many open","One at a time"],String(S.ui.single))+'</div>'+help("Editor preference, not saved to the wall.")+'</div>'+row("Open to level",seg("ui.level",["0","1","2","3"],["Closed","1","2","3"],String(S.ui.level)),"How deep the foldouts open.")+
+  /* round 22 (22.6, the developer, 2026-11-14): the old Foldouts row (Many open / One at a time) is gone: the accordion's One section open
+     at a time, at the top of every tab (editor/accordion.js), does it. Open to level stays: it opens every section and foldout to a depth
+     at once, which the accordion (Collapse all, a section at a time) does not */
+  h+='<div class="fo" style="padding:6px 8px">'+row("Open to level",seg("ui.level",["0","1","2","3"],["Closed","1","2","3"],String(S.ui.level)),"How deep the foldouts open.")+
    '<div class="filters"><input class="u" data-q="1" placeholder="Find a setting or part..." value="'+esc(S.ui.q)+'">'+["All"].concat(CATS).map(function(c){return'<button class="chip" type="button" data-cat="'+c+'" aria-pressed="'+(S.ui.cat===c)+'">'+c+'</button>'}).join("")+'</div></div>';
   /* 0. Preview & Test */
   h+=fo("s0",sectionTitle("0","Preview &amp; Test","Editor tools, never in the app"),["test","TEST"],
@@ -3748,7 +3783,7 @@ function initBoxes(){scr.querySelectorAll(".mbox").forEach(function(bx){bx.addEv
       if(Math.abs(dx)>need/2){top.style.transform="translateX("+(dx>0?400:-400)+"px) rotate("+(dx>0?25:-25)+"deg)";top.style.opacity=0;setTimeout(function(){dk.insertBefore(top,dk.firstChild);top.style.transform="translateY(6px) scale(.92)";top.style.opacity=1;restack(dk)},350)}else top.style.transform=""}
     top.addEventListener("pointermove",mv);top.addEventListener("pointerup",up)})});}
 function restack(dk){var cards=dk.querySelectorAll(".cd");cards.forEach(function(c,i){c.style.zIndex=i;c.style.transform="translateY("+((cards.length-1-i)*6)+"px) scale("+(1-(cards.length-1-i)*.04)+")"})}
-function dragX(fn,rel){return function(el){el.addEventListener("pointerdown",function(e){el.setPointerCapture(e.pointerId);var x0=e.clientX,last=e.clientX;
+function dragX(fn,rel){return function(el){el.addEventListener("pointerdown",function(e){try{el.setPointerCapture(e.pointerId)}catch(x){}var x0=e.clientX,last=e.clientX;
   function mv(ev){var b=el.getBoundingClientRect();fn(el,Math.max(0,Math.min(1,(ev.clientX-b.left)/b.width)),ev.clientX-last);last=ev.clientX}
   function up(){el.removeEventListener("pointermove",mv);el.removeEventListener("pointerup",up)}
   if(!rel)mv(e);el.addEventListener("pointermove",mv);el.addEventListener("pointerup",up)})}}
@@ -4120,7 +4155,7 @@ var GUIDE_PLAN={
     {fo:"gt:manner",t:"Manner",s:"how big, how lively, how it speaks and moves",parts:[{from:"s7mascot"},"Size","Liveliness","Mouth","How it moves","Moods","Tap on the mascot","Try"]},
     {fo:"gt:moments",t:"Moments",s:"when it introduces itself, and its walk to the wall",parts:[{from:"s7mascot"},"Introduction","Walks to the wall","Try"]},
     {words:"s7mascot"}],
-  gt1:[{rules:1},{fo:"s7auto"},{fo:"s7more"},{fo:"s7voice"},{fo:"s7cap"},{fo:"s7focus"},{fo:"s7coach"},
+  gt1:[{rules:1},{fo:"s7auto"},{fo:"s7more"},{fo:"s7voice"},{fo:"s7cap"},{fo:"s7focus"},{fo:"s7move"},{fo:"s7coach"},
     {fo:"s7dock",add:[{h:"Tour controls",s:"previous, pause, next, sound, captions, Ask and stop: their words"},{words:"s7tour"}]},
     {fo:"gt:ways",t:"Ways in",s:"how a visitor starts the tour, or picks it up again",parts:[{fo:"s7gbtn"},{fo:"s7hero"},{fo:"s7block"},{fo:"s7resume"}]},{fo:"s7end"}],
   gt3:[{fo:"s7ask",t:"What the visitor sees",s:"the question box, Ask about the view, the answers and how they sound",parts:[{from:"s7ask"},"Answers from",{fo:"s7cam"},{from:"s7agent"},
@@ -4360,10 +4395,13 @@ ed.addEventListener("change",function(e){var t=e.target;if(t.dataset&&t.dataset.
 /* startTour(from): from the start, or from a step kept by a stop (from = {id: the step}; the features before it know which) */
 function startTour(from){emitLatestFirst("startTour.before",from);G.on=true;G.i=0;G.paused=false;S.stop="full";if(from){var j=S.guideSteps.findIndex(function(s){return s.id===from.id});G.i=Math.max(0,j)}if(musicPick()!=="off")musicOn(true);feedback("open");runStep();emit("startTour.after",from)}
 function stopTour(){emitLatestFirst("stopTour.before");G.on=false;G.waiting=false;stopSpeech();musicOn(false);clearGuideMarks();renderGuide();emit("stopTour.after")}
-function runStep(){emitLatestFirst("runStep.before");var st=G.on&&S.guideSteps[G.i];if(G.on&&!st)stopTour();else if(st){G.waiting=false;
+/* round 22 (22.3): a step in another view is first reached as a visitor would (runStep.travel: guide/demo-hand.js taps the story's
+   preview or the page's back, the app's own opening plays, then it runs this step again); the scroll is the tour's natural scroll
+   (guide/tour-scroll.js's tourScroll) */
+function runStep(){if(G.on&&firstAnswer("runStep.travel",S.guideSteps[G.i])===true)return;emitLatestFirst("runStep.before");var st=G.on&&S.guideSteps[G.i];if(G.on&&!st)stopTour();else if(st){G.waiting=false;
   if(S.view!==st.view){S.view=st.view;renderPhone(false)}
   clearGuideMarks();var el=st.ref==="hero"?scr.querySelector(".hero"):scr.querySelector('[data-ref="'+st.ref+'"]');
-  if(el){el.classList.add("gfocus");var y=el.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-80;scr.scrollTo({top:Math.max(0,st.ref==="hero"?0:y),behavior:S.reduce?"auto":"smooth"})}
+  if(el){el.classList.add("gfocus");var y=el.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-80;tourScroll(Math.max(0,st.ref==="hero"?0:y))}
   if(st.act==="teaser")teaser(true);
   var text=stepText(st),target=st.act==="read"&&S.guideCfg.highlight&&el?el.querySelector(".el-par,.el-lede"):null;if(target)wrapWords(target);
   renderGuide(text);moveMascot(el);
@@ -5182,6 +5220,66 @@ document.addEventListener("click",function(e){var t=e.target;if(!ph.contains(t))
 /* a block kind's full page on the phone (a row's demo, the spec's page): the story, the gallery, or its own page */
 function pageOpen(kind){if(kind==="Story")S.view="story";else if(kind==="Gallery")S.view="gallery";else{S.pageKind=kind;S.view="kpage"}}
 
+/* The card's page openings (guidance round 22, 22.3; the developer, 2026-11-13: "then the page opening with the normal effects and
+   animations (a zoom from the whole screen to the block's preview position, or others)"). Before this round a tap on a block's preview
+   (the Story, the Gallery, a page row) swapped the screen at once: there was no opening. Built once, for the visitor's tap and the
+   tour's alike (the tour taps the same preview, guide/demo-hand.js): the page zooms out of the preview's rectangle to the whole screen
+   (its top left on the preview's, one scale from the preview's width to the screen's, clipped to the preview's height and corners, a
+   quick fade in over its first quarter; 460 ms, cubic-bezier(.2,.8,.2,1)), the card staying still under it. Back (the page's ‹, its
+   Previous / Next to the card) plays the closing: the card where the visitor left it (its scroll kept, the old behaviour went back to
+   the top) and the page shrinking into the same preview, fading as it lands (380 ms); a preview no longer on the screen: the page
+   shrinks a little and fades. Reduce Motion: a crossfade (200 ms), no zoom. PO.log keeps each one's rectangles for the checks.
+   Unity: the page's root VisualElement (or a RectTransform) tweened from the preview's worldBound (translate and scale, DOTween,
+   the same curve), the card's ScrollView kept under it; the same tap's handler opens it, the back button's closes it. */
+var PO={rec:null,last:null,log:[]};
+var PO_MS=460,PO_BACK_MS=380;
+function poRect(el){var p=ph.getBoundingClientRect(),q=p.width/ph.offsetWidth||1,r=el.getBoundingClientRect(),s=scr.getBoundingClientRect(),t=Math.max(r.top,s.top),b=Math.min(r.bottom,s.bottom);
+  return{l:(r.left-p.left)/q,t:(t-p.top)/q,w:r.width/q,h:Math.max(0,b-t)/q,seen:b-t>24}}
+/* a tap: noted before any handler (the window's capture), used by the redraw it causes */
+window.addEventListener("click",function(e){var t=e.target;if(!t||!t.closest||!ph.contains(t)||t.closest(".kq"))return;var g=t.closest("[data-go]");if(!g||!scr.contains(g))return;var to=g.dataset.go;
+  if(S.view==="card"&&/^(story|gallery|kpage)$/.test(to)){var it=g.closest('.item[data-ref]')||g;PO.rec={dir:"open",to:to,from:poRect(it),ref:it.dataset.ref||null,top:scr.scrollTop,rel:it.getBoundingClientRect().top-scr.getBoundingClientRect().top}}
+  else if(S.view!=="card"&&to==="card"&&PO.last&&PO.last.view===S.view)PO.rec={dir:"close",to:"card",ref:PO.last.ref,top:PO.last.top,rel:PO.last.rel};
+  /* a page reached another way (the tour's jump to a step): back lands on the card at this page's preview */
+  else if(/^(story|gallery)$/.test(S.view)&&to==="card"){var pv=poPreview(S.view);PO.rec={dir:"close",to:"card",ref:pv,top:null,rel:pv?90:null}}
+  else return;setTimeout(function(){PO.rec=null},0)},true);
+function poPreview(view){var b=S.card.filter(function(x){return x.kind===(view==="story"?"Story":"Gallery")})[0];return b?"b:"+b.id:null}
+function poClone(){var c=scr.cloneNode(true);c.removeAttribute("id");c.classList.add("po-ghost");c.querySelectorAll("[id]").forEach(function(x){x.removeAttribute("id")});c.setAttribute("aria-hidden","true");c.style.pointerEvents="none";return c}
+on("renderPhone.before",function(keep,cx){var r=PO.rec;if(!r||keep)return;var want=r.dir==="open"?r.to:"card";if(S.view!==want&&!(want==="kpage"&&S.view==="kpage"))return;
+  PO.rec=null;cx.po={rec:r,ghost:poClone(),top:scr.scrollTop}});
+on("renderPhone.after",function(keep,cx){var o=cx.po;if(!o)return;var r=o.rec,g=o.ghost,an=!!scr.animate,still=!!S.reduce;
+  PO.anims&&PO.anims.forEach(function(a){try{a.finish()}catch(x){}});PO.anims=[];ph.querySelectorAll(".po-ghost").forEach(function(x){x.remove()});
+  var F={l:scr.offsetLeft,t:scr.offsetTop,w:scr.offsetWidth,h:scr.offsetHeight},ent={dir:r.dir,at:performance.now(),ref:r.ref,full:[F.l,F.t,F.w,F.h].map(Math.round)};PO.log.push(ent);
+  if(r.dir==="open"){PO.last={view:S.view,ref:r.ref,top:r.top,rel:r.rel};
+    scr.parentNode.insertBefore(g,scr);g.scrollTop=o.top;var R=r.from;ent.from=[R.l,R.t,R.w,R.h].map(Math.round);
+    if(!an){g.remove();return}
+    var done=function(){g.remove()};
+    if(still||!R||R.w<40){var a0=scr.animate([{opacity:0},{opacity:1}],{duration:200,easing:"ease-out"});a0.onfinish=done;PO.anims.push(a0);ent.fade=true;return}
+    var s=R.w/F.w,x=R.l-F.l,y=R.t-F.t,clipB=Math.max(0,F.h-R.h/s),rad=(14/s).toFixed(1);
+    scr.style.transformOrigin="0 0";
+    var a=scr.animate([{transform:"translate("+x+"px,"+y+"px) scale("+s+")",clipPath:"inset(0px 0px "+clipB.toFixed(1)+"px 0px round "+rad+"px)",opacity:0},
+      {transform:"translate("+(x*.7)+"px,"+(y*.7)+"px) scale("+(s+(1-s)*.3)+")",opacity:1,offset:.25},
+      {transform:"translate(0px,0px) scale(1)",clipPath:"inset(0px 0px 0px 0px round 0px)",opacity:1}],{duration:PO_MS,easing:"cubic-bezier(.2,.8,.2,1)"});
+    a.onfinish=function(){scr.style.transformOrigin="";done()};PO.anims.push(a);return}
+  /* the closing: the card where the visitor left it, the page shrinking into its preview */
+  PO.last=null;if(r.top!=null)scr.scrollTop=r.top;else{var pi=r.ref&&scr.querySelector('[data-ref="'+r.ref+'"]');if(pi)scr.scrollTop=Math.max(0,pi.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-r.rel)}poKeep(r);
+  scr.parentNode.insertBefore(g,scr.nextSibling);g.scrollTop=o.top;g.style.zIndex="5";
+  if(!an){g.remove();return}
+  var it=r.ref&&scr.querySelector('[data-ref="'+r.ref+'"]'),T=it?poRect(it):null;ent.to=T?[T.l,T.t,T.w,T.h].map(Math.round):null;
+  var end=function(){g.remove()};
+  if(still){var b0=g.animate([{opacity:1},{opacity:0}],{duration:200,easing:"ease-in",fill:"forwards"});b0.onfinish=end;PO.anims.push(b0);ent.fade=true;return}
+  var k,fr;g.style.transformOrigin="0 0";
+  if(T&&T.seen&&T.w>40){k=T.w/F.w;fr=[{transform:"translate(0px,0px) scale(1)",clipPath:"inset(0px 0px 0px 0px round 0px)",opacity:1},
+      {opacity:1,offset:.6},{transform:"translate("+(T.l-F.l)+"px,"+(T.t-F.t)+"px) scale("+k+")",clipPath:"inset(0px 0px "+Math.max(0,F.h-T.h/k).toFixed(1)+"px 0px round "+(14/k).toFixed(1)+"px)",opacity:0}]}
+  else{g.style.transformOrigin="50% 40%";fr=[{transform:"scale(1)",opacity:1},{transform:"scale(.92)",opacity:0}]}
+  var b=g.animate(fr,{duration:PO_BACK_MS,easing:"cubic-bezier(.3,0,.2,1)",fill:"forwards"});b.onfinish=end;PO.anims.push(b)});
+/* the card where the visitor left it: its preview back at the same height on the screen, held while the card settles (its pictures,
+   its parts' heights) for 0.6 s, until the visitor scrolls */
+function poKeep(r){var it=r.ref&&scr.querySelector('[data-ref="'+r.ref+'"]');if(!it||r.rel==null)return;var t0=performance.now(),moved=false,
+    stop=function(e){if(e.isTrusted)moved=true},put=function(){if(moved||!it.isConnected||S.view!=="card")return;var d=it.getBoundingClientRect().top-scr.getBoundingClientRect().top-r.rel;if(Math.abs(d)>.5)scr.scrollTop+=d;if(performance.now()-t0<600)requestAnimationFrame(put);else{scr.removeEventListener("wheel",stop,true);scr.removeEventListener("touchstart",stop,true)}};
+  scr.addEventListener("wheel",stop,true);scr.addEventListener("touchstart",stop,true);put()}
+/* the page's own way back keeps its preview: any other way to the card (a redraw, the tour's jump) forgets it */
+on("renderPhone.after",function(keep){if(S.view==="card"&&PO.last&&!keep)PO.last=null});
+
 /* The elements: renderEl, their options merged with Unity's, the steps list and the carousel. */
 function colourVar(c){return c==="accent"?"var(--accent2)":c==="neutral"?"var(--ink2)":"var(--fam)"}
 /* ---------- render one element ---------- */
@@ -5837,8 +5935,16 @@ BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(hl|tra
 /* each row's demo: a block read in place, its words lit */
 rowDemos({"guideCfg.hl":{tour:"g4",ring:".gfocus"},"guideCfg.trail":{tour:"g4",ring:".gfocus"},"guideCfg.glide":{tour:"g4",ring:".gfocus"}});
 
-/* Focus: the spotlight, the zoom to a spot named in a picture, Azu pointing; the script's spots. */
-S.guideCfg.cue="spotlight";S.guideCfg.scrim=0.4;S.guideCfg.zoom="zoom";S.guideCfg.point=true;
+/* Focus: the left bar (round 22, the default), the spotlight, the zoom to a spot named in a picture, Azu pointing; the script's spots. */
+/* round 22 (22.5; the developer, 2026-11-13: "Remove the focus that highlights the block and darkens the rest of the app: it damages the
+   sense of navigation. Have only a little bar that appears smoothly on the left side, pulsing a bit, to show we are talking about that
+   block. Nothing else gets darker: everything stays the same."): Focus = The left bar (the default): a slim bar (4 px, the block's
+   seen height, the card's accent --accent2: 8.6:1 on the paper, 7.8:1 on the dark card) in the card's left margin, its right edge 6 px
+   from the block's left edge (it never touches the block or moves its layout); it fades in (0.35 s), breathes very softly (opacity 1 to
+   0.78, 2.6 s) while the block is told and fades out when the tour moves on; nothing else changes colour. Dim the rest (today's
+   spotlight), Soft ring and Off (nothing marks the block) stay as options. Reduce Motion: no breath. Unity: an Image anchored to the
+   block's left edge in the ScrollView's content (its height the block's), its alpha tweened (DOTween, a yoyo loop) */
+S.guideCfg.cue="bar";S.guideCfg.scrim=0.4;S.guideCfg.zoom="zoom";S.guideCfg.point=true;
 COMP.s7focus=["Guide","Focus"];FOCUS.s7focus=["story",'[data-ref="r:r1"]',"full"];
 /* the demo point: step 4 tells the 1662 drawing, and names three spots in it */
 (function(){var g=byId(S.guideSteps,"g3");if(!g)return;
@@ -5890,22 +5996,36 @@ function fcTick(){G.fcRaf=0;var sp=ph.querySelector(".gspot:not(.gdspot)");if(!G
   if(el){r=now>=0&&img?regionRect(img,cues[now].region):visRect(el)}
   /* a new target: glide from where the light was, towards where the target is now (so a scroll during the glide is followed) */
   var key=G.i+":"+now,tn=performance.now();if(G.fc.key!==key){G.fc.key=key;G.fc.at=tn;G.fc.from=G.fc.last||null}
-  if(cfg.cue==="none"||!r||G.paused||G.askOpen||G.moment){if(sp)sp.classList.remove("on")}
+  fcBar(cfg.cue==="bar"&&r&&!G.paused&&!G.askOpen&&!G.moment?(st.ref==="hero"&&scr.querySelector(".hero .w")||el):null,p,q,box);
+  if(cfg.cue==="none"||cfg.cue==="bar"||!r||G.paused||G.askOpen||G.moment){if(sp)sp.classList.remove("on")}
   else{if(!sp){sp=document.createElement("div");sp.className="gspot";sp.setAttribute("aria-hidden","true");ph.appendChild(sp)}
     var t=Math.max(r.top,box.top+4),b=Math.min(r.bottom,box.bottom-4),pad=now>=0?4:6;
     var g=[(r.left-p.left)/q-pad,(t-p.top)/q-pad,r.width/q+2*pad,Math.max(0,b-t)/q+2*pad],f=G.fc.from,e=S.reduce||!f?1:Math.min(1,(tn-G.fc.at)/550);
     if(e<1){e=1-Math.pow(1-e,3);g=g.map(function(v,i){return f[i]+(v-f[i])*e})}G.fc.last=g;
     spotPaint(sp,g,cfg.cue,cfg.scrim)}
-  ph.classList.toggle("gspotting",cfg.cue!=="none");
+  ph.classList.toggle("gspotting",true);
   pointAt(r&&cfg.point&&!G.paused?{x:(r.left+r.width/2-p.left)/q,y:((Math.max(r.top,box.top)+Math.min(r.bottom,box.bottom))/2-p.top)/q,el:el}:null);
   G.fcRaf=requestAnimationFrame(fcTick)}
-on("stopTour.before",function(){unzoomAll();var sp=ph.querySelector(".gspot");if(sp)sp.remove();ph.classList.remove("gspotting")});
+/* the left bar on the block told (its right edge FC_BAR_GAP px left of the block's left edge, the block's seen height); a new step's block:
+   the old bar fades out, a new one fades in */
+var FC_BAR_W=4,FC_BAR_GAP=6;
+/* the card's own top bar over its scroll (the close, the title band, settings): what lies under it is not seen; its bottom in the
+   phone's px (at least 0) */
+function cardTopClear(){var p=ph.getBoundingClientRect(),q=p.width/ph.offsetWidth||1,y=0;ph.querySelectorAll(".topband,.chrome,.sticky,.topbar").forEach(function(e){var r=e.getBoundingClientRect();if(r.height>1&&r.top-p.top<140&&getComputedStyle(e).display!=="none")y=Math.max(y,(r.bottom-p.top)/q)});return y}
+/* the block's drawn height: its seen box, from its first drawn part's top to its last's bottom (not the item's own spacing) */
+function fcBarRect(el){var r=visRect(el),t=Infinity,b=-Infinity;[].forEach.call(el.children,function(k){var q=k.getBoundingClientRect();if(q.height>1){t=Math.min(t,q.top);b=Math.max(b,q.bottom)}});
+  return t<b?{left:r.left,top:Math.max(r.top,t),bottom:Math.min(r.bottom,b)}:r}
+function fcBar(el,p,q,box){var bar=ph.querySelector(".gtold:not(.out)");if(bar&&(!el||bar._el!==el)){bar.classList.remove("on");bar.classList.add("out");(function(b){setTimeout(function(){b.remove()},340)})(bar);bar=null}
+  if(!el)return;var r=fcBarRect(el),t=Math.max(r.top,box.top+4,p.top+cardTopClear()*q),b=Math.min(r.bottom,box.bottom-4);if(b-t<8)return;
+  if(!bar){bar=document.createElement("div");bar.className="gtold";bar.setAttribute("aria-hidden","true");bar._el=el;ph.appendChild(bar);void bar.offsetWidth;bar.classList.add("on")}
+  bar.style.left=Math.max(2,(r.left-p.left)/q-FC_BAR_GAP-FC_BAR_W).toFixed(1)+"px";bar.style.top=((t-p.top)/q).toFixed(1)+"px";bar.style.height=((b-t)/q).toFixed(1)+"px"}
+on("stopTour.before",function(){unzoomAll();var sp=ph.querySelector(".gspot");if(sp)sp.remove();ph.querySelectorAll(".gtold").forEach(function(b){b.remove()});ph.classList.remove("gspotting")});
 
 /* Editor: Guide tab gets Focus, after Captions; Specific Marker > Guide script gets each step's spots, drawn on its picture */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var ca=d.querySelector('[data-fo="s7cap"]');if(!ca)return d.innerHTML;
-  ca.insertAdjacentHTML("afterend",comp("s7focus","the spotlight on what is told, the zoom to a spot in a picture, the mascot pointing, a scroll by the visitor",
-    row("Focus",pseg("guideCfg.cue",["spotlight","ring","none"],["Spotlight","Soft ring","None"]),"Spotlight: the rest of the card dims and a soft light rings what the guide is telling. Soft ring: only the ring. One at a time; it follows the scroll and hides while the visitor takes over.")+
-    row("Dim the rest",pslider("guideCfg.scrim",0.2,0.6,0.05),"Spotlight only: how dark the rest of the card goes (0.4 = 40 %).",true)+
+  ca.insertAdjacentHTML("afterend",comp("s7focus","the left bar on what is told, the zoom to a spot in a picture, the mascot pointing, a scroll by the visitor",
+    row("Focus",pseg("guideCfg.cue",["bar","spotlight","ring","none"],["The left bar","Dim the rest","Soft ring","Off"]),"How the block being told is marked. The left bar: a slim bar in the card's accent fades in beside the block's left edge and breathes softly while it is told; nothing else changes, so the visitor keeps the sense of the page. Dim the rest: the rest of the card dims and a soft light rings the block (the spotlight). Soft ring: only the ring. Off: nothing marks it. One at a time; it follows the scroll and hides while the visitor takes over. Reduce Motion: the bar does not breathe.")+
+    row("How dark",pslider("guideCfg.scrim",0.2,0.6,0.05),"Dim the rest only: how dark the rest of the card goes (0.4 = 40 %).",true)+
     row("Into pictures",pseg("guideCfg.zoom",["zoom","spot"],["Slow zoom","Light the spot"]),"When the guide names a spot in a picture (the step's spots, in the Guide script). Slow zoom: the picture glides in to the spot (1.5 s). Light the spot: the picture stays and the spotlight closes on the spot. Reduce Motion: a crossfade instead of the glide.")+
     row("The mascot points",pseg("guideCfg.point",["true","false"],["On","Off"]),"The mascot stands level with what is being told and points at it with one arm (with the mascot on).")+
     row("Try",'<button class="del" type="button" data-fctry="g3">Try</button>',"Starts the tour at the step that names three spots in the 1662 drawing.")));
@@ -5938,7 +6058,7 @@ ed.addEventListener("pointerup",function(e){if(!cueDraw)return;var g=cueAt(e),q=
   if(G.on&&G.fc){G.fc.cue=-2}},true);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(cue|scrim|zoom|point|"));
 /* each row's demo: the light on the block being told; the zoom on the step that names three spots */
-rowDemos({"guideCfg.cue":{tour:"g1",ring:".gspot|.gfocus"},"guideCfg.scrim":{tour:"g1",ring:".gspot|.gfocus"},"guideCfg.zoom":{tour:"g3",ringAfter:1500,ring:".gspot|.gfocus"},"guideCfg.point":{tour:"g1",ring:".mascot"}});
+rowDemos({"guideCfg.cue":{tour:"g1",ringAfter:900,ring:".gtold|.gspot|.gfocus"},"guideCfg.scrim":{tour:"g1",act:function(){if(S.guideCfg.cue!=="spotlight")gdChip("How dark: for Dim the rest (Focus); the left bar dims nothing")},ring:".gspot|.gtold|.gfocus"},"guideCfg.zoom":{tour:"g3",ringAfter:1500,ring:".gspot|.gfocus"},"guideCfg.point":{tour:"g1",ring:".mascot"}});
 
 /* Azu in 2D: depth, feet, moods, the mouth by the letters, blinks; play (poke, tickle, a fall, a cookie, a water break). */
 function moveMascot(el){var m=ph.querySelector(".mascot");if(!m)return;var p=ph.getBoundingClientRect(),k=p.width/ph.offsetWidth,y=120;
@@ -6335,7 +6455,7 @@ on("renderGuide.after",function(){ph.classList.toggle("touring",!!G.on)});
 function placeStep(st){if(G.keepScroll||!st||st.act==="intro")return;var el=stepEl(st);if(!el)return;setTimeout(function(){if(!el.isConnected||!G.on)return;var f=freeHeight(),r=el.getBoundingClientRect();G.placedTop=null;var avail=f.bottom-f.top,q=ph.getBoundingClientRect().height/ph.offsetHeight;
     var want=r.height<=avail*.45?f.top+(avail-r.height)/3:f.top+16,dy=(r.top-want);
     if(st.ref==="hero"){var hw=heroWords();dy=hw?Math.min(hw.bottom-(f.bottom-12*q),hw.top-(f.top+56*q)):-scr.scrollTop*q;dy=Math.max(dy,-scr.scrollTop*q);/* round 19: while a game's card shows at the hero (its chips come and go), the hero's words only ever rise: no back and forth */if(ph.querySelector(".gdbeat:not(.bt-away)"))dy=Math.max(dy,0)}
-    if(Math.abs(dy)>4){G.autoScrollTill=performance.now()+900;scr.scrollTo({top:scr.scrollTop+dy/q,behavior:S.reduce?"auto":"smooth"})}},60)}
+    if(Math.abs(dy)>4){G.autoScrollTill=performance.now()+900;tourScroll(scr.scrollTop+dy/q)}},60)}
 /* round 15: the block stays clear when it ends up under the guide mid-step: the panel opened to Open, Azu's bubble with its next line or
    an ask, the ✦ growing into the panel as a tour starts or resumes at a step (placed during the growth), the card's layout settling after
    the placing; round 15b: a tour's block (in the card's scroll, the card at Full, playing; not How to use the card's marks) wholly off the screen while the visitor has not scrolled since the step began (the guide's own
@@ -6375,7 +6495,7 @@ setInterval(function(){if(!G.on||G.paused||!G.waiting||G.tryWait)return;var st=S
 function insistLater(st){clearTimeout(G.insistT);G.insistT=setTimeout(function(){if(!G.on||G.paused||!G.tryWait||S.guideSteps[G.i]!==st)return;var n=nudgeN[st.id]=(nudgeN[st.id]||0)+1;
   var t=n>S.guideCfg.insist?TXT("guide_try_moveon"):TXT("guide_nudge_"+st.wait+"_"+Math.min(2,n));renderGuide(t);var m=ph.querySelector(".mascot");if(m&&n<=S.guideCfg.insist){m.classList.remove("r-jump");void m.offsetWidth;m.classList.add("r-jump");setTimeout(function(){m.classList.remove("r-jump")},700)}
   say(t,function(k){markWord(k,null)},function(){if(!G.on||!G.tryWait||S.guideSteps[G.i]!==st)return;if(n>S.guideCfg.insist){G.tryWait=false;setTimeout(function(){if(G.on&&!G.paused)next()},500)}else insistLater(st)})},S.guideCfg.insistAfter*1000)}
-function gesture(kind){if(!G.on)return;var st=S.guideSteps[G.i];if(!st||st.act!=="try"||st.wait!==kind||G.tryDone)return;G.tryDone=true;feedback("right");
+function gesture(kind){if(!G.on||G.handAct)return;/* round 22: the guide's own hand showing a block in use (guide/demo-hand.js) is not the visitor trying it */var st=S.guideSteps[G.i];if(!st||st.act!=="try"||st.wait!==kind||G.tryDone)return;G.tryDone=true;feedback("right");
   if(G.tryWait||G.waiting){clearTimeout(G.timer);G.waiting=false;G.tryWait=true;clearTimeout(G.insistT);stopSpeech();setTimeout(function(){afterTry(st)},kind==="flip"?650:350);return}
   /* done while the guide is still asking: it stops and reacts */
   if(G.utter||G.timer){stopSpeech();G.tryWait=true;setTimeout(function(){afterTry(st)},kind==="flip"?650:350)}}
@@ -10288,11 +10408,11 @@ on("ask.answer",function(q){if(G.agTurn&&G.agTurn.how)G.agTurn=null;if(!q||!Stri
 on("camAsk.answer",function(q,kind){if(G.cam.turn&&G.cam.turn.how)G.cam.turn=null;if(kind||!q||!String(q).trim()||agLive())return;var it=gdHowFind(q);if(!it)return;
   var t=gdTryHowLine(it);G.cam.open=true;G.cam.route=[];G.cam.lit=[];G.cam.hunt=null;G.cam.turn=gdHowTurn(q,it,t);gdTold(it.id,"Ask about the view, offline");camSay(t);return true});
 /* the features used, from the visitor's own touch (registered on the document, so a module that stops a tap from going on never hides it) */
-document.addEventListener("pointerdown",function(e){var b=ph.contains(e.target)&&e.target.closest("[data-ba]");G.gd.baDrag=b?{x:e.clientX,id:e.pointerId,used:false}:null},{capture:true,passive:true});
+document.addEventListener("pointerdown",function(e){var b=!G.handAct&&ph.contains(e.target)&&e.target.closest("[data-ba]");G.gd.baDrag=b?{x:e.clientX,id:e.pointerId,used:false}:null},{capture:true,passive:true});
 document.addEventListener("pointermove",function(e){var d=G.gd.baDrag;if(!d||d.used||e.pointerId!==d.id)return;if(Math.abs(e.clientX-d.x)>12){d.used=true;gdUsed("ba","dragged")}},{capture:true,passive:true});
 document.addEventListener("pointerup",function(){G.gd.baDrag=null},{capture:true,passive:true});
-scr.addEventListener("scroll",function(e){var t=e.target;if(t===scr||!t.matches||!t.matches(".el-car,.hstrip")||t._gdSwiped||t.scrollLeft<24)return;t._gdSwiped=true;gdUsed("strip","swiped")},{capture:true,passive:true});
-document.addEventListener("click",function(e){var t=e.target;if(!t.closest||!ph.contains(t)||G.gd.demo)return;
+scr.addEventListener("scroll",function(e){var t=e.target;if(G.handAct||t===scr||!t.matches||!t.matches(".el-car,.hstrip")||t._gdSwiped||t.scrollLeft<24)return;t._gdSwiped=true;gdUsed("strip","swiped")},{capture:true,passive:true});
+document.addEventListener("click",function(e){var t=e.target;if(!t.closest||!ph.contains(t)||G.gd.demo||G.handAct)return;
   if(t.closest("#navbar [data-navsec],#navbar [data-navmore]")){gdUsed("navbar","tapped");return}
   if(t.closest(".locpin")){gdUsed("locate","tapped");return}
   if(t.closest('[data-g="pause"]'))gdUsed("pause","tapped")},true);
@@ -14264,6 +14384,219 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
 /* the phone's signature (the self-test): the dock's surface as the visitor sees it */
 on("modelSig.sig",function(h){return sigWant(/guideCfg\.pSkin/)?h+'#skin:<div class="gdock lk-'+dkLook()+' sk-'+pSkin()+'"></div>':h});
 rowDemos({"guideCfg.pSkin":{tour:"g2",dock:"mini",ring:".gdock"}});
+
+/* The visitor's hand (guidance round 22, 22.2-22.4; the developer, 2026-11-13: "I want the guide to replicate all the movements and
+   motion the visitor would need to do by hand to take that tour ... a little see-through hand moving like a comet from some 2 cm away
+   towards the place to be clicked, then a click effect (a grey see-through circle), and then the page opening with the normal effects
+   ... so every tour is a demo of how to use the app. The same with the interactive elements").
+   One module for every action a visitor would do by hand during a tour: dhTap(el), dhDrag(el, points), the turn of a 3D model, the
+   swipe of a strip (and of the page, at the start of a long scroll). The hand: the guidance's ghost finger drawn smaller (one drawing
+   for the app's hand, guidance/present.js's GD_FINGER: 30 x 39 px, white at 72 % with a soft shadow and a dark edge, so it reads on
+   paper and on pictures). It glides in on an eased curve (a slight arc, ease-out: quick, then slowing like a comet; 620 ms) from
+   DH_FROM = 88 px away with a short comet trail behind it, presses (a scale to 0.86, 120 ms), and the press leaves a soft grey ripple (a
+   ring growing to 44 px and fading in 420 ms); then, as a finger lifts (DH_UP, 140 ms later, so the press is seen on the preview before its
+   page opens), the real action: the same event a visitor's tap fires on the same element (a click, or pointer events for a drag), never a shortcut past the app's own animation; then it lifts and fades. 88 px and why: 2 cm on a
+   phone 390 pt wide (163 pt to the inch) is about 128 pt, a third of the screen: a glide that long crosses other blocks and words; 88 px
+   (about 1.4 cm) still reads as a hand coming from a little way off, and the trail carries the eye further. It comes from the side that
+   covers none of the words being told (the teleprompter, the panel, the captions, a bubble, the block's lit words), below and to the
+   right first (a right thumb), turned to point where it goes. A visitor's touch on the card takes the hand away and pauses the tour
+   there (the visitor's hand wins); a touch on the guide's panel only hides it (the action still happens).
+   Reduce Motion: no glide, no trail: the ripple and the action. The visitor's hand Off: neither, the action alone.
+   The tour's moves (22.3, runStep.travel): a step in another view than the one shown is reached as a visitor would: the card scrolled
+   (the natural scroll) to the story's preview, the hand taps it, the app's own opening plays (card/page-open.js), then the step runs;
+   back to the card, the hand taps the page's back (‹), the closing plays. Only between two steps that follow each other (Next, the
+   tour going on, Previous); a jump to a step (a row's demo, Continue) is instant as before.
+   Blocks in use (22.4, Show blocks in use): when a step tells an interactive block, once its scroll has landed, the hand shows it in use,
+   once per block per tour, never while the visitor touches the screen: drags the Before / After across and back, turns the 3D model (and
+   a panorama) a little and back, flips the flip card and back, swipes the gallery's strip once and back; each through the block's own
+   handlers (the hand's events never count as the visitor trying it: G.handAct). Not the quiz (its answer is the visitor's).
+   Unity: the hand a UI Toolkit Image (or a RectTransform) tweened along a curve by DOTween (Ease.OutCubic, a quadratic path), its trail
+   a TrailRenderer or a stretched gradient Image, the ripple a ring Image scaled and faded; the action sent through the same UI event
+   the visitor fires (ExecuteEvents.pointerClickHandler / a ClickEvent on the same element, drag events for the slider and the orbit). */
+S.guideCfg.hand="shown";S.guideCfg.inUse=true;
+var DH={job:null,used:{},log:[],touching:false,useLog:[]};
+var DH_FROM=88,DH_GLIDE=620,DH_W=30,DH_H=39,DH_TX=10.5,DH_TY=3,DH_PID=41;
+function dhShown(){return S.guideCfg.hand!=="off"}
+function dhQ(){var p=ph.getBoundingClientRect();return{p:p,q:p.width/ph.offsetWidth||1}}
+function dhIn(x,y){var o=dhQ();return{x:(x-o.p.left)/o.q,y:(y-o.p.top)/o.q}}
+function dhOut(x,y){var o=dhQ();return{x:o.p.left+x*o.q,y:o.p.top+y*o.q}}
+function dhRectIn(el){var o=dhQ(),r=el.getBoundingClientRect();return{l:(r.left-o.p.left)/o.q,t:(r.top-o.p.top)/o.q,r:(r.right-o.p.left)/o.q,b:(r.bottom-o.p.top)/o.q}}
+/* the hand's box with its tip at (x, y), turned deg about the tip */
+function dhBox(x,y,deg){var a=deg*Math.PI/180,c=Math.cos(a),s=Math.sin(a),xs=[],ys=[];[[-DH_TX,-DH_TY],[DH_W-DH_TX,-DH_TY],[DH_W-DH_TX,DH_H-DH_TY],[-DH_TX,DH_H-DH_TY]].forEach(function(k){xs.push(x+k[0]*c-k[1]*s);ys.push(y+k[0]*s+k[1]*c)});
+  return{l:Math.min.apply(null,xs),t:Math.min.apply(null,ys),r:Math.max.apply(null,xs),b:Math.max.apply(null,ys)}}
+function dhOver(a,b){return Math.max(0,Math.min(a.r,b.r)-Math.max(a.l,b.l))*Math.max(0,Math.min(a.b,b.b)-Math.max(a.t,b.t))}
+/* the words being told: the teleprompter, the panel, the captions, a bubble, a game's card, and the block's own lit words */
+function dhWords(){var out=[];[".gtele:not(.tl-out)",".gdock",".gcap",".gbubble",".gdbub:not(.gd-out)",".gdbeat:not(.bt-away)",".gbar",".tepanel"].forEach(function(s){ph.querySelectorAll(s).forEach(function(e){var r=e.getBoundingClientRect();if(r.width>1&&r.height>1)out.push(dhRectIn(e))})});
+  var t=G.hl&&G.hl.target;if(t&&t.isConnected){var r=dhRectIn(t);if(r.r-r.l>1)out.push(r)}return out}
+/* where the glide starts: DH_FROM away from the tip, from the side that covers no words (below right first), turned towards the target */
+var DH_ANGLES=[55,125,25,155,90,-35,-145,0,180,-90];
+function dhApproach(x,y){var W=ph.offsetWidth,H=ph.offsetHeight,avoid=dhWords(),best=null;
+  DH_ANGLES.forEach(function(an,k){var a=an*Math.PI/180,sx=x+Math.cos(a)*DH_FROM,sy=y+Math.sin(a)*DH_FROM,raw=Math.atan2(y-sy,x-sx)*180/Math.PI+90;if(raw>180)raw-=360;
+    var deg=Math.max(-45,Math.min(45,raw*.6)),c=0;[0,.5,1].forEach(function(u){var b=dhBox(sx+(x-sx)*u,sy+(y-sy)*u,deg);avoid.forEach(function(w){c+=dhOver(b,w)});c+=(Math.max(0,4-b.l)+Math.max(0,b.r-(W-4))+Math.max(0,4-b.t)+Math.max(0,b.b-(H-4)))*40});
+    c+=k*.5;if(!best||c<best.c)best={c:c,x:sx,y:sy,deg:deg,an:an}});return best}
+/* ----- the sprite, its trail and the ripple ----- */
+function dhSprite(){var h=ph.querySelector(".dhand");if(!h){h=document.createElement("div");h.className="dhand";h.setAttribute("aria-hidden","true");h.innerHTML=typeof GD_FINGER==="string"?GD_FINGER:"";ph.appendChild(h)}return h}
+function dhPut(j,x,y,deg,sc,op){j.at={x:x,y:y};if(j.hidden||!j.shown)return;var h=dhSprite();h.style.translate=(x-DH_TX).toFixed(1)+"px "+(y-DH_TY).toFixed(1)+"px";h.style.rotate=deg.toFixed(1)+"deg";h.style.scale=String(sc);h.style.opacity=String(op);
+  h.dataset.tip=Math.round(x)+","+Math.round(y)}
+function dhTrail(j,pts){if(j.hidden||!j.shown||S.reduce)return;var t=ph.querySelector(".dhtrail");if(!t){t=document.createElement("div");t.className="dhtrail";t.setAttribute("aria-hidden","true");ph.appendChild(t)}
+  if(pts.length<2){t.style.opacity="0";return}var a=pts[0],b=pts[pts.length-1],L=Math.hypot(b.x-a.x,b.y-a.y);if(L<3){t.style.opacity="0";return}
+  t.style.width=L.toFixed(1)+"px";t.style.translate=a.x.toFixed(1)+"px "+(a.y-3).toFixed(1)+"px";t.style.rotate=(Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI).toFixed(1)+"deg";t.style.opacity=String(Math.min(1,L/30))}
+function dhSpriteOff(now){ph.querySelectorAll(".dhand,.dhtrail").forEach(function(e){if(now)e.remove();else{e.classList.add("dh-out");setTimeout(function(){e.remove()},260)}})}
+function dhRipple(x,y){var r=document.createElement("i");r.className="dhripple";r.setAttribute("aria-hidden","true");r.style.left=Math.round(x)+"px";r.style.top=Math.round(y)+"px";ph.appendChild(r);
+  DH.log.push({ripple:[Math.round(x),Math.round(y)],at:performance.now()});setTimeout(function(){r.remove()},460);return r}
+/* ----- a job: one action of the hand at a time; a visitor's touch ends it ----- */
+function dhKill(){var j=DH.job;DH.job=null;if(j){j.dead=true;j.t.forEach(clearTimeout);if(j.raf)cancelAnimationFrame(j.raf);if(j.down)dhFire("pointerup",j.down.el,j.down.x,j.down.y)}G.handAct=false;dhSpriteOff(true)}
+function dhJob(kind){dhKill();var j={kind:kind,dead:false,t:[],shown:dhShown()&&!S.reduce,at:null};DH.job=j;return j}
+function dhWait(j,ms,f){j.t.push(setTimeout(function(){if(!j.dead)f()},ms))}
+function dhAnim(j,ms,frame,end){var t0=performance.now();(function tick(){if(j.dead)return;var u=ms>0?Math.min(1,(performance.now()-t0)/ms):1;frame(u);if(u<1)j.raf=requestAnimationFrame(tick);else if(end)end()})()}
+function dhEnd(j){if(DH.job===j)DH.job=null;G.handAct=false}
+function dhOutCubic(u){return 1-Math.pow(1-u,3)}
+/* the visitor's event, as a finger fires it (pointer events for a drag; a click for a tap), on the same element */
+function dhFire(type,el,x,y){if(!el||!el.isConnected)return;var c=dhOut(x,y),o={bubbles:true,cancelable:true,composed:true,clientX:c.x,clientY:c.y,view:window,button:0,buttons:type==="pointerup"||type==="click"?0:1};
+  var ev=type==="click"?new MouseEvent("click",o):new PointerEvent(type,Object.assign(o,{pointerId:DH_PID,pointerType:"touch",isPrimary:true}));var was=G.handAct;G.handAct=true;try{el.dispatchEvent(ev)}finally{G.handAct=was}}
+/* the glide to the tip (x, y) in the phone's px: from DH_FROM away on a slight arc, ease-out, the trail behind it */
+function dhGlide(j,x,y,done){if(!j.shown){j.at={x:x,y:y};done();return}var s=dhApproach(x,y),mx=(s.x+x)/2,my=(s.y+y)/2,nx=-(y-s.y)/DH_FROM,ny=(x-s.x)/DH_FROM,cx=mx+nx*14,cy=my+ny*14,hist=[];
+  j.from={x:s.x,y:s.y,deg:s.deg};DH.log.push({glide:[Math.round(s.x),Math.round(s.y)],to:[Math.round(x),Math.round(y)],at:performance.now(),dist:Math.round(Math.hypot(x-s.x,y-s.y))});
+  dhAnim(j,DH_GLIDE,function(u){var e=dhOutCubic(u),k=1-e,px=k*k*s.x+2*k*e*cx+e*e*x,py=k*k*s.y+2*k*e*cy+e*e*y,now=performance.now();dhPut(j,px,py,s.deg,1,Math.min(.72,u*3.6));
+    hist.push({x:px,y:py,t:now});while(hist.length&&now-hist[0].t>90)hist.shift();dhTrail(j,hist)},function(){dhTrail(j,[]);done()})}
+function dhPress(j,done){var a=j.at;if(!j.shown){done();return}dhAnim(j,120,function(u){dhPut(j,a.x,a.y,j.from?j.from.deg:0,1-.14*u,.72)},done)}
+function dhLift(j,stay,done){var a=j.at,f=j.from||{x:a.x+30,y:a.y+40,deg:0},d=Math.hypot(f.x-a.x,f.y-a.y)||1,ux=(f.x-a.x)/d,uy=(f.y-a.y)/d;if(!j.shown){if(done)done();return}
+  dhAnim(j,stay?160:260,function(u){dhPut(j,a.x+ux*(stay?10:12)*u,a.y+uy*(stay?10:12)*u,f.deg,.86+.14*u,stay?.72:.72*(1-u))},function(){j.at=a;if(!stay)dhSpriteOff(true);if(done)done()})}
+/* a tap on el at the phone point pt: glide, press, the ripple and the visitor's click, lift. acted(): right after the click */
+/* as a finger: the ripple on the press, the click on the release DH_UP ms later (so the press is seen on the preview before its page opens) */
+var DH_UP=140;
+function dhTapIn(j,el,pt,acted,stay){var shownR=dhShown(),act=function(then){var c=dhOut(pt.x,pt.y),u=document.elementFromPoint(c.x,c.y),t=u&&el.contains(u)?u:el;
+    if(shownR)dhRipple(pt.x,pt.y);dhWait(j,shownR?DH_UP:0,function(){DH.log.push({tap:t.className||t.tagName,at:performance.now(),pt:[Math.round(pt.x),Math.round(pt.y)]});dhFire("click",t,pt.x,pt.y);if(acted)acted();if(then)then()})};
+  if(!dhShown()){dhWait(j,200,function(){act()});return}
+  if(S.reduce){act();return}
+  dhGlide(j,pt.x,pt.y,function(){dhPress(j,function(){act(function(){dhWait(j,60,function(){dhLift(j,stay)})})})})}
+/* a drag along pts (phone px) in ms: glide to the first, press, the pointer events along the way, release */
+function dhDragIn(j,el,pts,ms,done){var go=function(){j.down={el:el,x:pts[0].x,y:pts[0].y};G.handAct=true;dhFire("pointerdown",el,pts[0].x,pts[0].y);var seg=[],tot=0;for(var i=1;i<pts.length;i++){var d=Math.hypot(pts[i].x-pts[i-1].x,pts[i].y-pts[i-1].y);seg.push(d);tot+=d}
+    var at=function(u){var w=u*tot;for(var i=0;i<seg.length;i++){if(w<=seg[i]||i===seg.length-1){var f=seg[i]?Math.min(1,w/seg[i]):1;return{x:pts[i].x+(pts[i+1].x-pts[i].x)*f,y:pts[i].y+(pts[i+1].y-pts[i].y)*f}}w-=seg[i]}return pts[pts.length-1]};
+    var fin=function(){var e=pts[pts.length-1];dhFire("pointermove",el,e.x,e.y);dhFire("pointerup",el,e.x,e.y);j.down=null;G.handAct=false;dhLift(j,false,done)};
+    if(S.reduce){var k=1;(function stepTo(){if(j.dead)return;if(k>=pts.length){fin();return}j.down.x=pts[k].x;j.down.y=pts[k].y;dhFire("pointermove",el,pts[k].x,pts[k].y);k++;dhWait(j,450,stepTo)})();return}
+    dhAnim(j,ms,function(u){var e=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2,p=at(e);j.down.x=p.x;j.down.y=p.y;dhPut(j,p.x,p.y,j.from?j.from.deg:0,.86,.72);dhFire("pointermove",el,p.x,p.y)},fin)};
+  if(S.reduce||!dhShown()){if(dhShown())dhRipple(pts[0].x,pts[0].y);go();return}
+  dhGlide(j,pts[0].x,pts[0].y,function(){dhPress(j,go)})}
+/* ----- the visitor's own touch: theirs wins ----- */
+window.addEventListener("pointerdown",function(e){if(!e.isTrusted||!ph.contains(e.target))return;DH.touching=true;var j=DH.job;if(!j)return;
+  if(j.kind==="travel"&&!scr.contains(e.target)){j.hidden=true;dhSpriteOff(true);return}
+  DH.log.push({visitor:j.kind,at:performance.now()});dhKill();if(j.kind==="travel"&&G.trav){G.trav=null;if(G.on&&!G.paused)pauseNow()}},true);
+["pointerup","pointercancel"].forEach(function(ev){window.addEventListener(ev,function(e){if(e.isTrusted)DH.touching=false},true)});
+window.addEventListener("wheel",function(e){if(e.isTrusted&&DH.job&&ph.contains(e.target)&&DH.job.kind!=="travel")dhKill()},{capture:true,passive:true});
+/* ----- the tour's moves: a step in another view, reached as a visitor would (22.3) ----- */
+function dhWay(st){if(S.view==="card"&&st.view==="story"){var g=scr.querySelector('.item[data-ref] [data-go="story"]');if(!g)return null;return{kind:"open story",el:g,item:g.closest(".item[data-ref]")}}
+  if(S.view==="story"&&st.view==="card"){var b=scr.querySelector('.topbar [data-go="card"]');return b?{kind:"back to the card",el:b}:null}return null}
+on("runStep.travel",function(st){if(!st||!G.on)return;if(G.trav&&G.trav.i===G.i&&G.trav.done)return;if(st.view===S.view)return;
+  var sh=G.trShown;if(!sh||Math.abs(sh.i-G.i)!==1||sh.view!==S.view)return;var way=dhWay(st);if(!way)return;
+  var tr=G.trav={i:G.i,done:false,way:way.kind,at:performance.now()};DH.log.push({travel:way.kind,i:G.i,at:tr.at});dhTravel(tr,way);return true});
+function dhArrive(tr){if(G.trav!==tr)return;tr.done=true;if(DH.job&&DH.job.kind==="travel")dhEnd(DH.job);if(!G.on||G.i!==tr.i){G.trav=null;return}if(G.paused){G.travelHeld=true;return}runStep()}
+/* the card's own top bar (its close and settings, the title band) over the scroll: the preview is put under it */
+function dhTopClear(){return Math.max(64,Math.min(140,cardTopClear()+10))}
+function dhTravel(tr,way){var j=dhJob("travel");clearGuideMarks();
+  var tap=function(){if(j.dead||G.trav!==tr)return;if(!way.el.isConnected){tr.done=true;S.view=S.guideSteps[tr.i].view;renderPhone(false);dhArrive(tr);return}
+    var r=dhRectIn(way.el),img=way.el.querySelector("img"),ri=img?dhRectIn(img):null,pt=ri&&ri.b-ri.t>40?{x:(ri.l+ri.r)/2,y:(ri.t+ri.b)/2}:{x:(r.l+r.r)/2,y:(r.t+r.b)/2};
+    dhTapIn(j,way.el,pt,function(){dhWait(j,(way.kind==="open story"?PO_MS:PO_BACK_MS)+60,function(){dhArrive(tr)})})};
+  if(way.item){var o=dhQ(),ir=way.item.getBoundingClientRect(),want=o.p.top+dhTopClear()*o.q,dy=(ir.top-want)/o.q;if(Math.abs(dy)>8){tourScroll(scr.scrollTop+dy,function(){dhWait(j,140,tap)});return}}
+  dhWait(j,160,tap)}
+on("runStep.after",function(){G.trShown=G.on?{i:G.i,view:S.view}:null;G.trav=null;G.travelHeld=false});
+on("startTour.before",function(){G.trShown=null;G.trav=null;DH.used={};dhKill()});
+on("stopTour.before",function(){G.trav=null;G.travelHeld=false;dhKill()});
+/* a travel held by a pause goes on with Resume */
+on("resumeTour.answer",function(){if(!G.travelHeld||!G.on)return;G.travelHeld=false;G.paused=false;G.askOpen=false;runStep();renderGuide();return true});
+/* a long scroll starts with the hand's swipe up (or down) the screen, as a visitor's thumb would (no event: the scroll is the tour's) */
+on("tourScroll.start",function(o){if(!G.on||!dhShown()||S.reduce||DH.job||o.dist<scr.clientHeight*.9)return;var j=dhJob("swipe the page"),W=ph.offsetWidth,f=freeHeight(),q=dhQ(),bot=(f.bottom-q.p.top)/q.q,top=(f.top-q.p.top)/q.q;
+  var y0=o.dir==="down"?Math.max(top+180,bot-90):top+120,y1=o.dir==="down"?y0-150:y0+150,x=W*.66,hist=[];j.from={x:x,y:y0,deg:-12};DH.log.push({swipe:o.dir,at:performance.now()});
+  dhAnim(j,520,function(u){var e=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2,y=y0+(y1-y0)*e,now=performance.now();dhPut(j,x,y,-12,u<.15?1-u:.86,Math.min(.62,u*4)*(u>.8?(1-u)*5:1));hist.push({x:x,y:y,t:now});while(hist.length&&now-hist[0].t>90)hist.shift();dhTrail(j,hist)},function(){dhSpriteOff(true);dhEnd(j)})});
+/* ----- blocks in use (22.4) ----- */
+function dhUseOf(el){if(!el)return null;var f=function(s){return el.matches(s)?el:el.querySelector(s)},e;
+  if((e=f("[data-ba]")))return{kind:"ba",el:e};if((e=f("[data-flip]")))return{kind:"flip",el:e};if((e=f("[data-turnt]")))return{kind:"turn",el:e};if((e=f("[data-pano]")))return{kind:"turn",el:e};
+  e=f(".el-car");if(e&&e.scrollWidth>e.clientWidth+20)return{kind:"swipe",el:e};return null}
+function dhUse(w,ref){var j=dhJob("use"),el=w.el,r=dhRectIn(el),cy=(r.t+r.b)/2,cx=(r.l+r.r)/2,wd=r.r-r.l,rec={kind:w.kind,ref:ref,at:performance.now()};DH.useLog.push(rec);
+  var fin=function(){rec.end=performance.now();dhEnd(j)};
+  if(w.kind==="ba"){var x0=(parseFloat(el.style.getPropertyValue("--x"))||50)/100,y=r.t+(r.b-r.t)*.74;rec.x0=x0;
+    dhDragIn(j,el,[{x:r.l+wd*x0,y:y},{x:r.l+wd*.84,y:y},{x:r.l+wd*.16,y:y},{x:r.l+wd*x0,y:y}],2100,fin);return}
+  if(w.kind==="turn"){var y2=r.t+(r.b-r.t)*.62;dhDragIn(j,el,[{x:cx,y:y2},{x:cx+64,y:y2},{x:cx-48,y:y2},{x:cx,y:y2}],1700,fin);return}
+  if(w.kind==="flip"){var pt={x:cx,y:r.t+(r.b-r.t)*.62};dhTapIn(j,el,pt,function(){dhWait(j,1500,function(){var again=function(){var c=dhOut(pt.x,pt.y);DH.log.push({tap:"flip back",at:performance.now()});if(dhShown())dhRipple(pt.x,pt.y);dhWait(j,dhShown()?DH_UP:0,function(){dhFire("click",el,pt.x,pt.y);dhWait(j,700,fin)})};
+      if(j.shown&&j.at){dhPress(j,function(){again();dhWait(j,120,function(){dhLift(j,false)})})}else again()})},true);return}
+  if(w.kind==="swipe"){var kids=el.children,step=kids.length>1?kids[1].offsetLeft-kids[0].offsetLeft:el.clientWidth*.8,l0=el.scrollLeft,snap=el.style.scrollSnapType,yy=cy+10;rec.l0=l0;
+    var slide=function(to,x1,x2,done){el.style.scrollSnapType="none";var from=el.scrollLeft;G.handAct=true;
+      var move=function(u){var e=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;el.scrollLeft=from+(to-from)*e;if(j.shown)dhPut(j,x1+(x2-x1)*e,yy,j.from?j.from.deg:0,.86,.72)};
+      if(S.reduce){el.scrollLeft=to;dhWait(j,60,function(){G.handAct=false;el.style.scrollSnapType=snap;done()});return}
+      dhAnim(j,520,move,function(){dhWait(j,80,function(){G.handAct=false;el.style.scrollSnapType=snap;done()})})};
+    var x1=r.l+wd*.78,x2=r.l+wd*.36,start=function(f){if(!j.shown){if(dhShown())dhRipple(x1,yy);f();return}dhGlide(j,x1,yy,function(){dhPress(j,f)})};
+    start(function(){slide(l0+step,x1,x2,function(){dhLift(j,true,function(){dhWait(j,900,function(){if(j.shown){dhPut(j,x2,yy,j.from?j.from.deg:0,.86,.72)}else if(dhShown())dhRipple(x2,yy);slide(l0,x2,x1,function(){dhLift(j,false,fin)})})})})});return}}
+on("runStep.after",function(){if(!G.on||!S.guideCfg.inUse)return;var st=S.guideSteps[G.i];if(!st||/^(teaser|end|intro)$/.test(st.act)||DH.used[st.ref])return;var my=G.i,n=0;
+  var wait=function(){if(!G.on||G.i!==my||S.guideSteps[G.i]!==st)return;if(G.paused||G.askOpen||tsBusy()||performance.now()<(G.autoScrollTill||0)||DH.touching||DH.job){if(++n<40)setTimeout(wait,120);return}
+    var w=dhUseOf(stepEl(st));if(!w)return;DH.used[st.ref]=true;dhUse(w,st.ref)};setTimeout(wait,380)});
+on("pauseTour.answer",function(){if(DH.job&&DH.job.kind!=="travel")dhKill()});
+
+/* ----- Editor: 2 · The tour › The tour's movement (after Focus) ----- */
+COMP.s7move=["Guide","The tour's movement"];FOCUS.s7move=["card",'[data-ref="b:b_story"]',"full"];
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var fc=d.querySelector('[data-fo="s7focus"]');if(!fc)return h;
+  fc.insertAdjacentHTML("afterend",comp("s7move","the tour moves as a visitor would: the hand, the blocks in use, the scroll",
+    row("The visitor's hand",pseg("guideCfg.hand",["shown","off"],["Shown","Off"]),"Shown: when the tour taps something (a story's preview to open it, the page's ‹ to go back), a small see-through hand glides in from a little way off (88 px) with a short trail, presses, and a soft grey ripple marks the tap; then the app does what the visitor's own tap does (the page opening from the preview). It never covers the words being told, and goes away when the visitor touches the screen. Off: the same tap and opening, with no hand and no ripple. Reduce Motion: the ripple only.")+
+    row("Show blocks in use",pseg("guideCfg.inUse",["true","false"],["On","Off"]),"On: when a step tells an interactive block, the hand shows it in use once, gently, after the scroll lands: it drags the before and after across and back, turns a 3D model a little, flips the flip card and back, swipes the gallery once and back. Once per block per tour, never while the visitor touches the screen; the quiz stays the visitor's. Off: the blocks wait for the visitor.")));
+  return d.innerHTML});
+BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(hand|inUse|"));
+/* each row's demo: from the flip card to the story (the hand taps the story's preview, the page opens); the flip card in use */
+rowDemos({"guideCfg.hand":{tour:"g2",act:function(){stopSpeech();G.paused=false;next()},ringAfter:900,ring:".dhand|.dhripple|.topbar"},
+  "guideCfg.inUse":{tour:"g2",ringAfter:1600,ring:'[data-ref="b:b_fun"]'}});
+
+/* The tour's natural scroll (guidance round 22, 22.1; the developer, 2026-11-13: "the scroll should be slower and more natural, with
+   some scrolling effect to show we are moving down or up the page (a grey see-through element pulsing while we scroll?)").
+   Every scroll the tour makes (guide/tour.js's runStep, guide/person.js's placing) goes through tourScroll(top): a visitor's flick,
+   eased in and out (a cubic in-out: slow start, the speed at its height half way, a soft landing), its time by the distance
+   (450 ms + 0.75 ms a px, between 500 and 1200 ms: 100 px 525 ms, a screen 1080 ms, more 1200 ms), never a jump. A second call while a
+   scroll is young (its first 40 %), in the same direction, only moves its end (the placing 60 ms after the step's own scroll): one
+   motion, not two. While it moves, a quiet cue at the screen's edge says which way: a soft grey see-through pill with a chevron,
+   pulsing near the bottom of the free screen moving down, near the top moving up, gone when the scroll lands (.gscue). The visitor's
+   own wheel, touch or press stops it where it is (theirs wins). The Scroll row (2 · The tour › The tour's movement): Natural (this) or
+   Quick (the browser's own smooth scroll, round 21 and before, no cue). Reduce Motion: a short fade-scroll (the card fades out 140 ms,
+   jumps, fades back) and the cue shown still. Long distances start with the visitor's hand's swipe (guide/demo-hand.js joins
+   tourScroll.start). Unity: ScrollView.scrollOffset tweened by DOTween (Ease.InOutCubic, the same time by distance), the cue a small
+   Image faded in and out (its pulse a looping alpha and translate tween); the visitor's PointerDownEvent kills the tween. */
+S.guideCfg.scroll="natural";
+var TS={tw:null,raf:0,log:null};
+function tsMs(d){return Math.round(Math.max(500,Math.min(1200,450+Math.abs(d)*0.75)))}
+function tsEase(u){return u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2}
+function tourScroll(top,done){var max=Math.max(0,scr.scrollHeight-scr.clientHeight);top=Math.max(0,Math.min(max,top));var from=scr.scrollTop,d=top-from,now=performance.now();
+  if(S.guideCfg.scroll==="quick"){tsStop();scr.scrollTo({top:top,behavior:S.reduce?"auto":"smooth"});if(done)setTimeout(done,S.reduce?0:450);return}
+  if(Math.abs(d)<2){if(!TS.tw){if(done)done();return}}
+  var tw=TS.tw;
+  /* the same scroll, young, the same way: only its end moves */
+  if(tw&&Math.sign(tw.to-tw.from)===Math.sign(top-tw.from)&&(now-tw.t0)<tw.ms*.4&&!S.reduce){tw.to=top;tw.ms=tsMs(top-tw.from);if(done)tw.done.push(done);G.autoScrollTill=tw.t0+tw.ms+120;tsCue(top>tw.from?"down":"up");return}
+  tsStop();if(Math.abs(d)<2){if(done)done();return}
+  var dir=d>0?"down":"up";emit("tourScroll.start",{dir:dir,dist:Math.abs(d),from:from,to:top});
+  if(S.reduce){G.autoScrollTill=now+420;tsCue(dir);scr.style.transition="opacity .14s";scr.style.opacity="0";
+    TS.tw={from:from,to:top,t0:now,ms:300,done:done?[done]:[],fade:true};
+    TS.tw.t=setTimeout(function(){scr.scrollTop=top;scr.style.opacity="";setTimeout(function(){if(TS.tw&&TS.tw.fade){var w=TS.tw;TS.tw=null;scr.style.transition="";tsCueOff();w.done.forEach(function(f){f()})}},160)},140);return}
+  TS.tw={from:from,to:top,t0:now,ms:tsMs(d),done:done?[done]:[]};G.autoScrollTill=now+TS.tw.ms+120;tsCue(dir);TS.raf=requestAnimationFrame(tsTick)}
+function tsTick(){TS.raf=0;var tw=TS.tw;if(!tw||tw.fade)return;var u=Math.min(1,(performance.now()-tw.t0)/tw.ms),y=tw.from+(tw.to-tw.from)*tsEase(u);scr.scrollTop=y;
+  if(TS.log)TS.log.push([Math.round(performance.now()),Math.round(scr.scrollTop*10)/10]);
+  if(u<1){TS.raf=requestAnimationFrame(tsTick);return}TS.tw=null;tsCueOff();tw.done.forEach(function(f){f()})}
+/* stops where it is (no callback: a visitor's touch, a new page) */
+function tsStop(){var tw=TS.tw;TS.tw=null;if(TS.raf)cancelAnimationFrame(TS.raf);TS.raf=0;if(tw&&tw.fade){clearTimeout(tw.t);scr.style.opacity="";scr.style.transition=""}tsCueOff()}
+function tsBusy(){return!!TS.tw}
+/* the cue: a pill near the free screen's bottom (down) or top (up), its chevron pointing the way */
+function tsCue(dir){var c=ph.querySelector(".gscue");if(!c){c=document.createElement("div");c.className="gscue";c.setAttribute("aria-hidden","true");
+    c.innerHTML='<svg viewBox="0 0 24 14" width="20" height="12"><path d="M3 3l9 8 9-8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';ph.appendChild(c)}
+  var p=ph.getBoundingClientRect(),q=p.width/ph.offsetWidth||1,f=typeof freeHeight==="function"&&G.on?freeHeight():{top:scr.getBoundingClientRect().top,bottom:scr.getBoundingClientRect().bottom},
+    top=Math.max(56,(f.top-p.top)/q+60),bot=Math.min(ph.offsetHeight-8,(f.bottom-p.top)/q)-12;
+  c.dataset.dir=dir;c.classList.toggle("up",dir==="up");c.classList.toggle("still",!!S.reduce);c.style.top=Math.round(dir==="down"?bot-26:top)+"px";clearTimeout(c._out);c.classList.remove("out");void c.offsetWidth;c.classList.add("on")}
+function tsCueOff(){var c=ph.querySelector(".gscue");if(!c)return;c.classList.remove("on");c.classList.add("out");clearTimeout(c._out);c._out=setTimeout(function(){if(c.classList.contains("out"))c.remove()},320)}
+/* the visitor's own wheel, touch or press on the card stops it where it is */
+["wheel","touchstart","pointerdown"].forEach(function(ev){scr.addEventListener(ev,function(e){if(e.isTrusted&&TS.tw)tsStop()},{capture:true,passive:true})});
+on("renderPhone.before",function(keep){if(!keep)tsStop()});
+on("stopTour.before",function(){tsStop()});
+
+/* Editor: 2 · The tour › The tour's movement › The scroll */
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;if(!d.querySelector('[data-fo="s7move"]'))return h;
+  addRows(d,"s7move",row("The scroll",pseg("guideCfg.scroll",["natural","quick"],["Natural","Quick"]),"How the tour scrolls to the block it tells. Natural: like a visitor's flick, eased in and out, 0.5-1.2 s by the distance, with a soft grey pill pulsing at the screen's edge for the way it moves (down: near the bottom; up: near the top), gone when it lands. Quick: the browser's own smooth scroll, no pill. Reduce Motion: a short fade instead of the glide, the pill still."));
+  return d.innerHTML});
+BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(scroll|"));
+/* its demo: the tour goes on from the facts to the next block, the scroll and its pill seen */
+rowDemos({"guideCfg.scroll":{tour:"g1",act:function(){stopSpeech();G.paused=false;next()},ringAfter:350,ring:".gscue|.gfocus"}});
 
 /* Starts the page (the #hash routes) and closes the shared scope. */
 /* #selftest walks every tab; #selftest=guide,words only those (the texts come with "words") */

@@ -17,3 +17,10 @@ img.gzimg{transform:none!important}
 .cues .cue{margin:0 0 10px}.cuehd{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px;font-size:12px}.cuehd select{width:auto}
 .cuepic{position:relative;max-width:260px;cursor:crosshair;touch-action:none;user-select:none;border-radius:6px;overflow:hidden}.cuepic img{display:block;width:100%;height:auto;pointer-events:none}
 .cuepic i{position:absolute;border:2px solid #FFD98A;box-shadow:0 0 0 999px rgba(0,0,0,.35);border-radius:4px;pointer-events:none}
+/* round 22 (22.5): the left bar on the block being told: 4 px in the card's accent, in the left margin 6 px from the block; it fades in,
+   breathes softly (opacity 1 to 0.78) while the block is told, fades out when the tour moves on. Reduce Motion: no breath */
+.gtold{position:absolute;z-index:10;width:4px;border-radius:2px;background:var(--accent2,#1F4E9C);pointer-events:none;opacity:0;transition:opacity .35s ease}
+.gtold.on{opacity:1;animation:gtold 2.6s ease-in-out .45s infinite}
+.gtold.out{opacity:0;transition:opacity .3s ease}
+.reduce .gtold.on{animation:none}
+@keyframes gtold{0%,100%{opacity:1}50%{opacity:.78}}

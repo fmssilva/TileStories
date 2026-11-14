@@ -1,0 +1,12 @@
+/* round 22 (22.1): the tour's scroll cue: a soft grey see-through pill, its chevron the way the page moves; it pulses gently while the
+   tour scrolls (a small drift the way it goes), fades out when the scroll lands. Never a tap target. Reduce Motion: shown still */
+.gscue{position:absolute;left:50%;z-index:12;width:46px;height:26px;margin-left:-23px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+  background:rgba(96,98,104,.30);color:rgba(255,255,255,.95);box-shadow:0 2px 10px rgba(0,0,0,.14);pointer-events:none;opacity:0;transition:opacity .22s ease}
+.gscue svg{display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}
+.gscue.up svg{transform:rotate(180deg)}
+.gscue.on{opacity:1;animation:gscue-dn .9s ease-in-out infinite}
+.gscue.on.up{animation-name:gscue-up}
+.gscue.out{opacity:0;transition:opacity .3s ease}
+.gscue.still,.reduce .gscue{animation:none!important}
+@keyframes gscue-dn{0%,100%{translate:0 0;background:rgba(96,98,104,.24)}50%{translate:0 4px;background:rgba(96,98,104,.40)}}
+@keyframes gscue-up{0%,100%{translate:0 0;background:rgba(96,98,104,.24)}50%{translate:0 -4px;background:rgba(96,98,104,.40)}}
