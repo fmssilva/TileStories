@@ -391,7 +391,8 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       keeps the card's scroll; for the visitor's tap too); blocks in use once per tour (before/after, flip card, gallery, 3D
       model); no dimming: a breathing 4 px bar in the card's margin beside the block (Focus: The left bar / Dim the rest / Soft
       ring / Off); the Detail Card's old Foldouts row gone. Editor: 2 · The tour › Focus and The tour's movement. Tests: test10a
-      28 (mutation 17 red), test8j 19, test9ja 50, test9t 50, test9u 19, test9ub 5, test9da 67, walks guide and card bad=0.
+      28 (mutation 17 red), test8j 19, test9ja 50, test9t 50, test9u 19, test9ub 5, test9da 67, walks guide and card bad=0. The developer kept
+      the hand at 88 px, the bar in the margin and Back keeping the card's scroll (2026-11-14).
     - Rounds since core: 2 (21, 22); since full: 1 (22). Core runs alongside after round 24.
     - **Next:** the developer tries route steps 5-12 on version 14; then the guide is closed and **the Detail Card blocks'
       design** starts.
