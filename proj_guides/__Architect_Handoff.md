@@ -393,9 +393,18 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       ring / Off); the Detail Card's old Foldouts row gone. Editor: 2 · The tour › Focus and The tour's movement. Tests: test10a
       28 (mutation 17 red), test8j 19, test9ja 50, test9t 50, test9u 19, test9ub 5, test9da 67, walks guide and card bad=0. The developer kept
       the hand at 88 px, the bar in the margin and Back keeping the card's scroll (2026-11-14).
-    - Rounds since core: 2 (21, 22); since full: 1 (22). Core runs alongside after round 24.
-    - **Next:** the developer tries route steps 5-12 on version 14; then the guide is closed and **the Detail Card blocks'
-      design** starts.
+    - Full tier after round 22 (2026-11-14, the developer: "so we are solid"): 60 files and 33 mutations on a worktree of master
+      (212 min), the walks of card, guide, marker and global, and words bad=0, every mutation caught. Reds fixed: three real bugs, the
+      Classic panel's captions out of the screen once lit (round 21's highlighter made them relative; so the guide also paused instead
+      of moving on when the visitor scrolled its block away), the games' cards' words 1.45:1 inside the Ink glass panel (the panel's
+      word colours won), and the hand row's demo ringing nothing while the hand was still on its way; the rest stale checks after
+      rounds 21-22 (the highlighter's classes in test8i, 9f, 9g; the moving tour's timing in 9o, 9z; round 22's rows in 9e) and load
+      clashes (8f, 8m, 9v). New baseline: 60 files, 1770 checks.
+    - Rounds since core: 0; since full: 0 (after 22). Core runs alongside after round 26, full after round 34.
+    - **Next: round 23, the Detail Card blocks' design.** The check (`_3.8_guidance_plans/check_round23_blocks.md`: 27 kinds,
+      6 high, 13 medium, captures in the session scratchpad `b23check`) waits for the developer's answers on the gesture blocks'
+      tap, the Status ring, the answers' visible state and the visitors' names for kinds; the developer chose to start the round
+      only once the full tier was green.
       Prototype only (no Unity) until the developer says so.
   - **MCP:** blender-mcp at user scope (Blender 5.2.3, add-on 1.8, port 9876). The Unity MCP was not connected this stretch.
   - **Keys:** Gemini, Azure Speech and ElevenLabs answer (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).

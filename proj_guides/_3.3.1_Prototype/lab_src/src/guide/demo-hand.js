@@ -153,5 +153,5 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;v
   return d.innerHTML});
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(hand|inUse|"));
 /* each row's demo: from the flip card to the story (the hand taps the story's preview, the page opens); the flip card in use */
-rowDemos({"guideCfg.hand":{tour:"g2",act:function(){stopSpeech();G.paused=false;next()},ringAfter:900,ring:".dhand|.dhripple|.topbar"},
+rowDemos({"guideCfg.hand":{tour:"g2",act:function(){stopSpeech();G.paused=false;next()},ringAfter:900,ring:'.dhand|.dhripple|.topbar|[data-ref="b:b_story"]'},
   "guideCfg.inUse":{tour:"g2",ringAfter:1600,ring:'[data-ref="b:b_fun"]'}});
