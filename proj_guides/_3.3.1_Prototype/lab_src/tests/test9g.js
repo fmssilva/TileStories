@@ -129,7 +129,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // spoken once the guide has been heard this visit, the word being said lit
   await fresh(toRem + 'S.gdVisitor.visit.heard=true;'); await runTo('G.gd.cur.item.base==="inview"', 40000);
   const sp = await R('var c=G.gd.cur;[c.spoken,!!(G.timer||G.utter),ph.querySelectorAll(".gdbub .gdw").length>5,G.gd.log.filter(function(l){return l.what==="shown"}).slice(-1)[0].why]');
-  const lit = await until('!!ph.querySelector(".gdbub .gdw.on")', 3000);
+  const lit = await until('!!ph.querySelector(".gdbub .gdw.hl-on")', 3000); // round 21: the one highlighter's class
   ok('...once the guide has been heard this visit: spoken (the one order of voices), the word being said lit', sp[0] === true && sp[1] && sp[2] && /· spoken$/.test(sp[3]) && lit, [sp, lit]);
   await R('gdStop("test");stopSpeech()');
 

@@ -149,8 +149,13 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('A tour of {point}: about the point in the middle, its slots filled ("The Ribeira Palace has a story. A tour of 3 minutes?"), Azu beside it and pointing, no ring; a bubble only (the guide not heard yet); 2 lines, 7:1, 0 px over words', tp[0] === 'tourof' && tp[1] === false && !tp[2] && tp[3] < 120 && tp[4] && tp[5] && tv[7] === 'The Ribeira Palace has a story. A tour of 3 minutes?' && tv[0] <= 2 && tv[1] >= 7 && tv[2] === 0, [tp, tv]);
   await fresh(); await R('S.gdVisitor.visit.heard=true;' + toTour.replace('gdResetVisitor();', '')); await W(250);
   const sp = await R('var c=G.gd.cur,lit=0;[c&&c.item.id,c&&c.spoken,!!(G.timer||G.utter),ph.querySelectorAll(".gdbub .gdw").length,G.gd.log.filter(function(l){return l.what==="shown"}).slice(-1)[0].why]');
-  const litSeen = await until('!!ph.querySelector(".gdbub .gdw.on")', 3000);
-  const litCr = await R(CR + 'var w=ph.querySelector(".gdbub .gdw.on")||ph.querySelector(".gdbub .gdw");cr(px(getComputedStyle(w).color),px(getComputedStyle(w).backgroundColor))');
+  // round 21: one highlighter (guide/highlight.js) lights the word said (.hl-on) with a soft shape behind it (.hl-quad): the word's ink
+  // is measured on that light laid over the bubble's paper
+  const litSeen = await until('!!ph.querySelector(".gdbub .gdw.hl-on")', 3000);
+  const litCr = await R(CR + 'var pc=function(s){var m=s.match(/[\\d.]+/g).map(Number),k=/^color\\(/.test(s)?255:1;return{r:m[0]*k,g:m[1]*k,b:m[2]*k,a:m.length>3?m[3]:1}};' +
+    'var w=ph.querySelector(".gdbub .gdw.hl-on")||ph.querySelector(".gdbub .gdw"),box=w.closest(".hl-box")||w.parentElement,q=box.querySelector(":scope > .hl-quad"),base={r:255,g:255,b:255,a:1};' +
+    'for(var e=box;e;e=e.parentElement){var c=pc(getComputedStyle(e).backgroundColor);if(c.a>.5){base=c;break}}' +
+    'var qc=q?pc(getComputedStyle(q).backgroundColor):{r:0,g:0,b:0,a:0},bg={r:qc.r*qc.a+base.r*(1-qc.a),g:qc.g*qc.a+base.g*(1-qc.a),b:qc.b*qc.a+base.b*(1-qc.a)};cr(pc(getComputedStyle(w).color),bg)');
   ok('...once the visitor has heard the guide this visit: spoken (the one order of voices) and in the bubble, the word being said lit, 7:1 on its light', sp[0] === 'tourof' && sp[1] === true && sp[2] && sp[3] === 11 && /spoken/.test(sp[4]) && litSeen && litCr >= 7, [sp, litSeen, litCr]);
   await R('var b=ph.querySelector(".gdbub button[data-gdbub]");gsTouch(b)'); await W(400);
   const tapT = await R('[G.on,S.stop,gdEverOf(S.gdVisitor,"tourof").acted,!G.gd.cur,!G.timer||G.on]');

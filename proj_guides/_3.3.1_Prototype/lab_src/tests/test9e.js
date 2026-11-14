@@ -208,6 +208,8 @@ const BEFORE = { rows: ["Fixed rules|", "Voice|guideCfg.voice", "Speaking now|",
   BEFORE.rows = BEFORE.rows.filter(r => r !== 'Wall (the Lab)|camCfg.wall').map(r => r === '|' ? 'What is sent|' : r).concat(['Start the guide glows|guideCfg.heroGlow']);
   // round 21: Speech on screen's new rows (where the words go during a tour, the teleprompter's height, a tip's bubble, the panels' look)
   BEFORE.rows = BEFORE.rows.concat(['Words during a tour|guideCfg.tourWords', 'Its height|guideCfg.teleH', "A tip's bubble|guideCfg.bubbleOut", "The panels' look|guideCfg.pSkin"]);
+  // round 22: the dimming is now an option of Focus (Dim the rest became How dark); the tour's movement rows are new
+  BEFORE.rows = BEFORE.rows.map(r => r === 'Dim the rest|guideCfg.scrim' ? 'How dark|guideCfg.scrim' : r).concat(["The visitor's hand|guideCfg.hand", 'Show blocks in use|guideCfg.inUse', 'The scroll|guideCfg.scroll']);
   const fosIn = await R(`${JSON.stringify(BEFORE.fos)}.filter(function(id){return!ed.querySelector('[data-fo="'+id+'"]')})`);
   ok(`...it holds every former 6 · Guide row: ${BEFORE.rows.length} before, ${after.length} now, the same rows (and the ${BEFORE.fos.length} foldouts)`, sortJ(after) === sortJ(BEFORE.rows) && fosIn.length === 0, { missing: BEFORE.rows.filter(r => after.indexOf(r) < 0), extra: after.filter(r => BEFORE.rows.indexOf(r) < 0), fosIn });
   await R('S.tab="card";renderEditor()');

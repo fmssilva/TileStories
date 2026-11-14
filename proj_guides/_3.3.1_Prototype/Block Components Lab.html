@@ -2176,7 +2176,9 @@ tr.gskipped td{opacity:.55;text-decoration:line-through}
    --hlc the light's colour, --hla the shape's strength, --hlln the underline, --hlt the tail's strength, --hlun the words not yet said,
    --hlink the words said and being said. Unity: the quad a VisualElement behind the label (its colour and radius in USS), the tail
    per-character vertex colours. */
-.hl-box{position:relative;isolation:isolate}
+.hl-box{isolation:isolate}
+/* the light's frame; the classic captions keep their own place (absolute over the card: made relative they left the screen) */
+.hl-box:where(:not(.gcap)){position:relative}
 /* a place drawn static by its own rules (the bubble's words) becomes the light's frame too; the classic captions stay absolute */
 .gbubble .gcap.hl-box,.gd-tp .tp-now.hl-box{position:relative}
 .hl-box>.hl-quad{position:absolute;left:-4px;top:-1px;padding:1px 4px;box-sizing:content-box;z-index:-1;pointer-events:none;border-radius:7px;opacity:0;
@@ -2194,11 +2196,12 @@ tr.gskipped td{opacity:.55;text-decoration:line-through}
 /* the bubbles (the dock's, the tips'): the paper's words, the accent's light */
 .gbubble .gcap.hl-box,.gdbub .hl-box{--hlc:#F2B544;--hla:.34;--hlln:var(--accent2,#B5651D);--hlt:.24;--hlun:var(--ink2);--hlink:var(--ink1)}
 .dark .gbubble .gcap.hl-box,.dark .gdbub .hl-box{--hla:.26;--hlln:#F2B544;--hlt:.2}
-/* the games' cards: their own light */
-.gdbeat .hl-box{--hlc:var(--bt-hl,#F2B544);--hla:.5;--hlln:var(--bt-acctx,#9E3B1A);--hlt:.3;--hlink:inherit}
 /* the panel (its lines, the whole text, the Mini's line): the Look's accent */
 .gdock .hl-box{--hlc:var(--acc);--hla:.26;--hlln:var(--acc);--hlt:.12;--hlun:var(--tpun);--hlink:var(--ink)}
 .gdock.lk-paper .hl-box,.gdock.lk-player .hl-box,.gdock.lk-prompter .hl-box{--hla:.16;--hlt:.12}
+/* the games' cards: their own light and their own ink, also inside the panel (after its rules, and as strong: the Ink glass panel's
+   pale words were 1.45:1 on a card's paper) */
+.gdbeat .hl-box,.gdock .gdbeat .hl-box,.gdock[class*="lk-"] .gdbeat .hl-box{--hlc:var(--bt-hl,#F2B544);--hla:.5;--hlln:var(--bt-acctx,#9E3B1A);--hlt:.3;--hlun:inherit;--hlink:inherit}
 /* The teleprompter (round 21, guide/teleprompter.js): a strip from the screen's bottom edge, behind the Mini (z 13), its glass melting into
    the card above (a 22 px mask, no hard top edge); its small row (the mascot's name, a live dot, Full script ›); the line said now (17 px,
    two lines at most) lit by the highlighter, the line before sliding up and fading out, the next faint below. Its colours come from the
@@ -14540,7 +14543,7 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;v
   return d.innerHTML});
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(hand|inUse|"));
 /* each row's demo: from the flip card to the story (the hand taps the story's preview, the page opens); the flip card in use */
-rowDemos({"guideCfg.hand":{tour:"g2",act:function(){stopSpeech();G.paused=false;next()},ringAfter:900,ring:".dhand|.dhripple|.topbar"},
+rowDemos({"guideCfg.hand":{tour:"g2",act:function(){stopSpeech();G.paused=false;next()},ringAfter:900,ring:'.dhand|.dhripple|.topbar|[data-ref="b:b_story"]'},
   "guideCfg.inUse":{tour:"g2",ringAfter:1600,ring:'[data-ref="b:b_fun"]'}});
 
 /* The tour's natural scroll (guidance round 22, 22.1; the developer, 2026-11-13: "the scroll should be slower and more natural, with

@@ -102,10 +102,13 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   /* put the voice 3 s before the end of its step (a seek from outside the controls), then forward 10 s crosses into the next step */
   const prep = JSON.parse(await R('var T=dkTimes(),c=T.stops[G.i],L=seekLand(c.at+c.len-3.2);stopSpeech();G.startWord=L.k;runStep();JSON.stringify({i:G.i,at:c.at,len:c.len,k:L.k})')); await W(700);
   const s0 = JSON.parse(await R('JSON.stringify({i:G.i,el:dkElapsed(dkTimes())})'));
-  await tap('.gdock .gd-ctl [data-g="fwd10"]'); await W(700);
-  const s1 = JSON.parse(await R('JSON.stringify({i:G.i,to:G.seekedTo,el:dkElapsed(dkTimes()),shown:(ph.querySelector(".gdock .gd-time[data-t=el]")||{}).textContent})'));
-  await tap('.gdock .gd-ctl [data-g="back10"]'); await W(700);
-  const s2 = JSON.parse(await R('JSON.stringify({i:G.i,to:G.seekedTo,el:dkElapsed(dkTimes()),shown:(ph.querySelector(".gdock .gd-time[data-t=el]")||{}).textContent})'));
+  // round 22: a seek into a step in another view travels there as a visitor would (the hand's tap, the page opening); the voice then
+  // starts at the word sought (G.startWord, taken when it speaks): each landing is read once the voice has started there
+  const landed = 'G.startWord===0&&!G.trav&&!DH.job&&!tsBusy()&&!!(G.utter||G.timer||G.recAudio)';
+  await tap('.gdock .gd-ctl [data-g="fwd10"]'); await W(150); await until(landed, 6000);
+  const s1 =JSON.parse(await R('JSON.stringify({i:G.i,to:G.seekedTo,el:dkElapsed(dkTimes()),shown:(ph.querySelector(".gdock .gd-time[data-t=el]")||{}).textContent})'));
+  await tap('.gdock .gd-ctl [data-g="back10"]'); await W(150); await until(landed, 6000);
+  const s2 =JSON.parse(await R('JSON.stringify({i:G.i,to:G.seekedTo,el:dkElapsed(dkTimes()),shown:(ph.querySelector(".gdock .gd-time[data-t=el]")||{}).textContent})'));
   const mm = s => { const a = String(s || '').split(':'); return +a[0] * 60 + +a[1]; };
   ok('[seek] forward 10 s (a real tap) lands 10 s on along the tour\'s timeline, in the next step, the time shown there; back 10 s lands back in the step before',
     s1.to && Math.abs(s1.to.t - (s0.el + 10)) < 0.8 && s1.i === s0.i + 1 && Math.abs(s1.el - s1.to.t) < 1.2 && Math.abs(mm(s1.shown) - s1.to.t) <= 1.5 &&
