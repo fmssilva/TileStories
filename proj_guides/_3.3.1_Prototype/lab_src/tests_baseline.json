@@ -28,7 +28,7 @@
   "s": 38
  },
  "test8j.js": {
-  "pass": 18,
+  "pass": 19,
   "fail": 0,
   "failed": [],
   "crashed": "",
@@ -411,5 +411,12 @@
   "failed": [],
   "crashed": "",
   "s": 143
+ },
+ "test10a.js": {
+  "pass": 28,
+  "fail": 0,
+  "failed": [],
+  "crashed": "",
+  "s": 127
  }
 }

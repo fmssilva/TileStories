@@ -74,10 +74,13 @@ ed.addEventListener("change",function(e){var t=e.target;if(t.dataset&&t.dataset.
 /* startTour(from): from the start, or from a step kept by a stop (from = {id: the step}; the features before it know which) */
 function startTour(from){emitLatestFirst("startTour.before",from);G.on=true;G.i=0;G.paused=false;S.stop="full";if(from){var j=S.guideSteps.findIndex(function(s){return s.id===from.id});G.i=Math.max(0,j)}if(musicPick()!=="off")musicOn(true);feedback("open");runStep();emit("startTour.after",from)}
 function stopTour(){emitLatestFirst("stopTour.before");G.on=false;G.waiting=false;stopSpeech();musicOn(false);clearGuideMarks();renderGuide();emit("stopTour.after")}
-function runStep(){emitLatestFirst("runStep.before");var st=G.on&&S.guideSteps[G.i];if(G.on&&!st)stopTour();else if(st){G.waiting=false;
+/* round 22 (22.3): a step in another view is first reached as a visitor would (runStep.travel: guide/demo-hand.js taps the story's
+   preview or the page's back, the app's own opening plays, then it runs this step again); the scroll is the tour's natural scroll
+   (guide/tour-scroll.js's tourScroll) */
+function runStep(){if(G.on&&firstAnswer("runStep.travel",S.guideSteps[G.i])===true)return;emitLatestFirst("runStep.before");var st=G.on&&S.guideSteps[G.i];if(G.on&&!st)stopTour();else if(st){G.waiting=false;
   if(S.view!==st.view){S.view=st.view;renderPhone(false)}
   clearGuideMarks();var el=st.ref==="hero"?scr.querySelector(".hero"):scr.querySelector('[data-ref="'+st.ref+'"]');
-  if(el){el.classList.add("gfocus");var y=el.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-80;scr.scrollTo({top:Math.max(0,st.ref==="hero"?0:y),behavior:S.reduce?"auto":"smooth"})}
+  if(el){el.classList.add("gfocus");var y=el.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-80;tourScroll(Math.max(0,st.ref==="hero"?0:y))}
   if(st.act==="teaser")teaser(true);
   var text=stepText(st),target=st.act==="read"&&S.guideCfg.highlight&&el?el.querySelector(".el-par,.el-lede"):null;if(target)wrapWords(target);
   renderGuide(text);moveMascot(el);

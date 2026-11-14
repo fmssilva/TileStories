@@ -5,7 +5,10 @@ function edCard(){return pipe("edCard.tab",edCardDoc())}
 /* edCardDoc("guide"): the guide's part only (the Guide tab's draw): the card's own sections are not drawn, so each joiner works on the
    guide's foldouts alone (guidance round 14: the Guide tab's draw went from about 1.3 s to a fraction of it) */
 function edCardDoc(part){var h="";if(part==="guide")return pipe("edCard.html",h);
-  h+='<div class="fo" style="padding:6px 8px"><div class="row"><label>Foldouts</label><div>'+seg("ui.single",["false","true"],["Many open","One at a time"],String(S.ui.single))+'</div>'+help("Editor preference, not saved to the wall.")+'</div>'+row("Open to level",seg("ui.level",["0","1","2","3"],["Closed","1","2","3"],String(S.ui.level)),"How deep the foldouts open.")+
+  /* round 22 (22.6, the developer, 2026-11-14): the old Foldouts row (Many open / One at a time) is gone: the accordion's One section open
+     at a time, at the top of every tab (editor/accordion.js), does it. Open to level stays: it opens every section and foldout to a depth
+     at once, which the accordion (Collapse all, a section at a time) does not */
+  h+='<div class="fo" style="padding:6px 8px">'+row("Open to level",seg("ui.level",["0","1","2","3"],["Closed","1","2","3"],String(S.ui.level)),"How deep the foldouts open.")+
    '<div class="filters"><input class="u" data-q="1" placeholder="Find a setting or part..." value="'+esc(S.ui.q)+'">'+["All"].concat(CATS).map(function(c){return'<button class="chip" type="button" data-cat="'+c+'" aria-pressed="'+(S.ui.cat===c)+'">'+c+'</button>'}).join("")+'</div></div>';
   /* 0. Preview & Test */
   h+=fo("s0",sectionTitle("0","Preview &amp; Test","Editor tools, never in the app"),["test","TEST"],

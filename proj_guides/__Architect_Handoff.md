@@ -5,7 +5,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-07)
 
 - **State:**
-  - **The Lab:** `master` holds guidance rounds 1-21, verified on 2026-11-06/11, published at
+  - **The Lab:** `master` holds guidance rounds 1-22, verified on 2026-11-06/11, published at
     https://claude.ai/artifact/Gpjf7yvoYHjGebmmNhuw2o (round 14b) with the 186 voice files, the music and the capabilities (section 1). The
     developer changes account often (four times on 2026-11-08/09); the old links stay in their accounts (RGofgb… at round 13, 19Uiat… at round 12, RKn3Rr… at round 11, J9J4h… at round 9, 4LpLd4… at round 8, Jq6X2K… at round 7, Jrejv7… at
     round 6, QmhHSz… at round 5, KDs2… at v29). A new account cannot update an old link: publish a new one (section 1, Publishing). Its
@@ -384,9 +384,17 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       stops pre-mixed). test9v is intermittent under load (cause not found). The full tier skips `*_live` files (they call the
       live model). Tests: test9z 22 (mutation 18 red), test9y 32, test9x 27, the card, guide and words walks bad=0.
       Open for the developer: the duplicate "Foldouts: One at a time" and "One section open at a time" on the Detail Card tab.
-    - Rounds since core: 1 (21); since full: 0 (the full tier closed in round 21, its reds fixed there).
-    - **Next: round 22** (the tour as a demo of the app); then the developer tries route steps 5-12, the guide is closed and
-      **the Detail Card blocks' design** starts.
+    - Round 22 (2026-11-14, brief `_3.8_guidance_plans/brief_round22.md`): the tour as a demo of the app. The visitor's hand
+      (`guide/demo-hand.js`: glides in from 88 px, presses, a 44 px ripple, then the same click a visitor's tap fires); the
+      natural scroll (`guide/tour-scroll.js`: eased 0.5-1.2 s by distance, a pulsing direction pill, the visitor's touch stops
+      it); the app's own page opening (`card/page-open.js`: a page zooms out of its preview, back shrinks it into the preview and
+      keeps the card's scroll; for the visitor's tap too); blocks in use once per tour (before/after, flip card, gallery, 3D
+      model); no dimming: a breathing 4 px bar in the card's margin beside the block (Focus: The left bar / Dim the rest / Soft
+      ring / Off); the Detail Card's old Foldouts row gone. Editor: 2 · The tour › Focus and The tour's movement. Tests: test10a
+      28 (mutation 17 red), test8j 19, test9ja 50, test9t 50, test9u 19, test9ub 5, test9da 67, walks guide and card bad=0.
+    - Rounds since core: 2 (21, 22); since full: 1 (22). Core runs alongside after round 24.
+    - **Next:** the developer tries route steps 5-12 on version 14; then the guide is closed and **the Detail Card blocks'
+      design** starts.
       Prototype only (no Unity) until the developer says so.
   - **MCP:** blender-mcp at user scope (Blender 5.2.3, add-on 1.8, port 9876). The Unity MCP was not connected this stretch.
   - **Keys:** Gemini, Azure Speech and ElevenLabs answer (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).

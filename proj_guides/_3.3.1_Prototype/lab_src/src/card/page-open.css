@@ -1,0 +1,2 @@
+/* round 22 (22.3): the card under a page that opens, the page over the card while it closes: copies of the screen, never touched */
+.scr.po-ghost{pointer-events:none;overflow:hidden}

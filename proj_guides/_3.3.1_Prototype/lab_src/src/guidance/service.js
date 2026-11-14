@@ -484,11 +484,11 @@ on("ask.answer",function(q){if(G.agTurn&&G.agTurn.how)G.agTurn=null;if(!q||!Stri
 on("camAsk.answer",function(q,kind){if(G.cam.turn&&G.cam.turn.how)G.cam.turn=null;if(kind||!q||!String(q).trim()||agLive())return;var it=gdHowFind(q);if(!it)return;
   var t=gdTryHowLine(it);G.cam.open=true;G.cam.route=[];G.cam.lit=[];G.cam.hunt=null;G.cam.turn=gdHowTurn(q,it,t);gdTold(it.id,"Ask about the view, offline");camSay(t);return true});
 /* the features used, from the visitor's own touch (registered on the document, so a module that stops a tap from going on never hides it) */
-document.addEventListener("pointerdown",function(e){var b=ph.contains(e.target)&&e.target.closest("[data-ba]");G.gd.baDrag=b?{x:e.clientX,id:e.pointerId,used:false}:null},{capture:true,passive:true});
+document.addEventListener("pointerdown",function(e){var b=!G.handAct&&ph.contains(e.target)&&e.target.closest("[data-ba]");G.gd.baDrag=b?{x:e.clientX,id:e.pointerId,used:false}:null},{capture:true,passive:true});
 document.addEventListener("pointermove",function(e){var d=G.gd.baDrag;if(!d||d.used||e.pointerId!==d.id)return;if(Math.abs(e.clientX-d.x)>12){d.used=true;gdUsed("ba","dragged")}},{capture:true,passive:true});
 document.addEventListener("pointerup",function(){G.gd.baDrag=null},{capture:true,passive:true});
-scr.addEventListener("scroll",function(e){var t=e.target;if(t===scr||!t.matches||!t.matches(".el-car,.hstrip")||t._gdSwiped||t.scrollLeft<24)return;t._gdSwiped=true;gdUsed("strip","swiped")},{capture:true,passive:true});
-document.addEventListener("click",function(e){var t=e.target;if(!t.closest||!ph.contains(t)||G.gd.demo)return;
+scr.addEventListener("scroll",function(e){var t=e.target;if(G.handAct||t===scr||!t.matches||!t.matches(".el-car,.hstrip")||t._gdSwiped||t.scrollLeft<24)return;t._gdSwiped=true;gdUsed("strip","swiped")},{capture:true,passive:true});
+document.addEventListener("click",function(e){var t=e.target;if(!t.closest||!ph.contains(t)||G.gd.demo||G.handAct)return;
   if(t.closest("#navbar [data-navsec],#navbar [data-navmore]")){gdUsed("navbar","tapped");return}
   if(t.closest(".locpin")){gdUsed("locate","tapped");return}
   if(t.closest('[data-g="pause"]'))gdUsed("pause","tapped")},true);
