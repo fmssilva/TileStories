@@ -13,12 +13,12 @@ const CAP = process.env.CAP || require('os').tmpdir();  // a picture of each mod
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   // round 7: a change to an Editor row shows its demo on the phone; this test picks models in the Editor mid-scene, so it keeps the phone as it set it
   await R('S.ui.rowDemo=false;S.guideCfg.azuStyle="light";S.guideCfg.voice="device";S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;sampleFn=null;S.view="card";S.stop="half";renderAll(false)');
-  await R('S.tab="guide";S.op["gt:tools"]=true;renderEditor();ed.querySelector(\'[data-fo="s7mascot"]\').open=true'); // round 14: Model tools opened too
+  await R('S.tab="guide";S.op["gt:tools"]=true;renderEditor();ed.querySelector(\'[data-fo="s7mascot"]\').open=true;var b=ed.querySelector(\'[data-set="@guideCfg.azuStyle"]\');for(var d=b&&b.closest("details");d;d=d.parentElement&&d.parentElement.closest("details"))d.open=true'); // round 14: Model tools opened too; round 20: the accordion starts collapsed, so every foldout above the style row is opened
   // 1. the Model row is there only for the 3D source
   ok('Tile of light: no Model row', await R('!ed.querySelector(".az3dpick")'));
   await p.locator('[data-set="@guideCfg.azuStyle"][data-v="glb"]').click();
   await p.waitForFunction(() => LAB.run('Azu3D.state().ready||Azu3D.state().failed'), null, { timeout: 60000 });
-  await R('ed.querySelector(\'[data-fo="s7mascot"]\').open=true');
+  await R('ed.querySelector(\'[data-fo="s7mascot"]\').open=true;var b=ed.querySelector(\'[data-set="@guideCfg.azuStyle"]\');for(var d=b&&b.closest("details");d;d=d.parentElement&&d.parentElement.closest("details"))d.open=true');
   const cards = await R('Array.from(ed.querySelectorAll(".az3dpick .sc")).map(function(c){var i=c.querySelector("img");return[c.textContent,c.getAttribute("aria-pressed"),i&&i.complete&&i.naturalWidth]})');
   ok('3D model: the Model row shows five cards by name, each with its picture', cards.map(c => c[0]).join('|') === 'The tile, detailed|The mouse|The explorer|The poet|The soldier' && cards.every(c => c[2] >= 96), cards);
   ok('...The explorer is chosen by default', cards[2] && cards[2][1] === 'true' && cards.filter(c => c[1] === 'true').length === 1);

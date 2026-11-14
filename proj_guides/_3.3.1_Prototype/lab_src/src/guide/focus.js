@@ -64,7 +64,7 @@ on("stopTour.before",function(){unzoomAll();var sp=ph.querySelector(".gspot");if
 
 /* Editor: Guide tab gets Focus, after Captions; Specific Marker > Guide script gets each step's spots, drawn on its picture */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var ca=d.querySelector('[data-fo="s7cap"]');if(!ca)return d.innerHTML;
-  ca.insertAdjacentHTML("afterend",comp("s7focus","the spotlight on what is told, the zoom to a spot in a picture, the mascot pointing",
+  ca.insertAdjacentHTML("afterend",comp("s7focus","the spotlight on what is told, the zoom to a spot in a picture, the mascot pointing, a scroll by the visitor",
     row("Focus",pseg("guideCfg.cue",["spotlight","ring","none"],["Spotlight","Soft ring","None"]),"Spotlight: the rest of the card dims and a soft light rings what the guide is telling. Soft ring: only the ring. One at a time; it follows the scroll and hides while the visitor takes over.")+
     row("Dim the rest",pslider("guideCfg.scrim",0.2,0.6,0.05),"Spotlight only: how dark the rest of the card goes (0.4 = 40 %).",true)+
     row("Into pictures",pseg("guideCfg.zoom",["zoom","spot"],["Slow zoom","Light the spot"]),"When the guide names a spot in a picture (the step's spots, in the Guide script). Slow zoom: the picture glides in to the spot (1.5 s). Light the spot: the picture stays and the spotlight closes on the spot. Reduce Motion: a crossfade instead of the glide.")+

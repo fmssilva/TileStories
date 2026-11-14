@@ -210,7 +210,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .reduce .mv{transition:none!important;opacity:1!important;transform:none!important;clip-path:none!important}
 
 /* ---------- POI Editor ---------- */
-.ed{background:var(--u-bg);border:1px solid #111;border-radius:8px;overflow:hidden;color:var(--u-text);font:12px/1.35 system-ui,"Segoe UI",sans-serif;min-width:0}
+.ed{background:var(--u-bg);border:1px solid #111;border-radius:8px;overflow:clip;color:var(--u-text);font:12px/1.35 system-ui,"Segoe UI",sans-serif;min-width:0}
 .edtitle{display:flex;align-items:center;gap:8px;padding:6px 10px;background:#1F1F1F;border-bottom:1px solid #111;font-size:12.5px}
 .edtitle span{opacity:.75}
 .edtool{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;background:var(--u-dark);border-bottom:1px solid #111}
@@ -534,10 +534,33 @@ em.missing{font-style:normal;color:#FF8A7A}
 .pfocus{outline:3px solid #E07A1F!important;outline-offset:3px;border-radius:10px}
 /* the Open Row on a preview: the ring just outside its words (never over them) */
 .bprev .open.pfocus{outline-offset:-3px;padding:2px 9px;margin-left:-9px;margin-right:-9px;margin-bottom:-4px}
-/* the Guide tab's sections named at its top, each a jump (guidance round 14): editor/guide-tab.js */
-.gtnav{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0 8px;padding:6px 8px;border:1px solid #2E2E2E;border-radius:4px;background:#333}
-.gtnav span{font:600 11px/1 system-ui;color:#B4BAC1;margin-right:2px}
-.gtnav .chip{height:24px;padding:0 10px;font-size:11.5px}
+/* The Editor's accordion and its sticky headers (guidance round 20): editor/accordion.js. A tab drawn as an accordion (#ed.acc): its
+   sections one line each, the open section's header pinned at the top while scrolling and its open foldout's header just under it.
+   The two heights are fixed, so the second pins exactly at the first's bottom and a link lands under both (scroll-margin). */
+#ed.acc{--acc1:34px;--acc2:32px}
+.accbar{display:flex;align-items:center;gap:8px;margin:2px 0 8px;padding:5px 8px;border:1px solid #2E2E2E;border-radius:4px;background:#333}
+.accbar .sp{flex:1}
+.accbar .acclab{font:600 11px/1 system-ui;color:#B4BAC1;white-space:nowrap}
+.accbar .seg{flex:none;width:110px;flex-wrap:nowrap}
+/* level 1: a section on one line: its number and name, a short sub-line (cut with an ellipsis), its quiet count, its badge */
+#ed.acc > details.fo{margin:4px 0}
+#ed.acc > details.fo > summary{position:sticky;top:0;z-index:4;height:var(--acc1);box-sizing:border-box;padding:0 10px;background:#3C3C3C;white-space:nowrap;border-radius:3px}
+#ed.acc > details.fo[open] > summary{border-radius:3px 3px 0 0;box-shadow:0 1px 0 #262626}
+#ed.acc > details.fo > summary .acct{flex:none;font-size:12.5px}
+#ed.acc summary > .sub{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#ed.acc > details.fo > summary .accn{flex:none;font:500 11px/1 system-ui;color:#9AA0A6}
+#ed.acc > details.fo > summary .badge{flex:none}
+/* level 2: a section's foldout; pinned just under its section's header while open */
+#ed.acc > details.fo > .inner > details.fo{scroll-margin-top:var(--acc1)}
+#ed.acc > details.fo > .inner > details.fo > summary{position:sticky;top:var(--acc1);z-index:3;height:var(--acc2);box-sizing:border-box;padding-top:0;padding-bottom:0;background:#414141;white-space:nowrap;overflow:hidden}
+#ed.acc > details.fo > .inner > details.fo[open] > summary{box-shadow:0 1px 0 #2C2C2C}
+/* an item's own line (3 · Games on the tour): one line too, its place cut with an ellipsis, its ▸ Show now kept */
+#ed.acc > details.fo > .inner > details.fo > summary .gdi{flex-wrap:nowrap;overflow:hidden}
+#ed.acc > details.fo > .inner > details.fo > summary .gdi > *{flex:none}
+#ed.acc > details.fo > .inner > details.fo > summary .gdi .gdhow{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* a row or a deeper foldout scrolled to by a link lands under the pinned headers */
+#ed.acc > details.fo > .inner > .row,#ed.acc > details.fo > .inner > :not(details){scroll-margin-top:calc(var(--acc1) + 4px)}
+#ed.acc > details.fo > .inner > details.fo .row,#ed.acc > details.fo > .inner > details.fo details.fo{scroll-margin-top:calc(var(--acc1) + var(--acc2) + 4px)}
 /* ===== v8: the merged options ===== */
 .prop{font:600 9px/1 var(--mono);letter-spacing:.05em;padding:2px 4px;border-radius:3px;background:#4A3A12;color:#F2C14E;margin-left:4px;vertical-align:1px}
 .chrome i{pointer-events:auto;cursor:pointer}
@@ -2101,6 +2124,11 @@ tr.gskipped td{opacity:.55;text-decoration:line-through}
 /* the pulse is the glow's breath alone (no scale: the button never moves under a finger, and a test's tap finds it still) */
 @keyframes hspulse{0%,100%{box-shadow:0 0 0 2px rgba(255,236,196,.55),0 0 12px 2px rgba(255,206,120,.35),0 6px 18px rgba(0,0,0,.3)}50%{box-shadow:0 0 0 3px rgba(255,236,196,.95),0 0 28px 10px rgba(255,206,120,.7),0 6px 18px rgba(0,0,0,.3)}}
 .reduce .hero .gstart.hsglow{animation:none}
+/* the glow row's demo (round 20): a tap on Start shown as a soft ring that fades out (the tour does not start) */
+.hero .gstart.hstap{position:relative}
+.hero .gstart.hstap::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:0 0 0 0 rgba(255,255,255,.7);animation:hstap .7s ease-out forwards}
+@keyframes hstap{to{box-shadow:0 0 0 16px rgba(255,255,255,0)}}
+.reduce .hero .gstart.hstap::after{animation:none;box-shadow:none}
 .reduce .hero .hsazu.hsjump .hsfig{animation:none}
 /* the Locate Button's label at the hero (card/locate.js): the hero's words rise a row while it shows, so neither covers the other */
 .hero .w{transition:bottom .35s ease}
@@ -3006,8 +3034,8 @@ function seg(key,vals,labels,cur){return '<div class="seg">'+vals.map(function(v
 function row(label,ctrl,h,ind){return '<div class="row'+(ind?" ind":"")+'"><label>'+esc(label)+'</label><div>'+ctrl+'</div>'+(h?help(h):"<span></span>")+'</div>'}
 function sel(key,opts,cur){return '<select class="u" data-sel="'+key+'">'+opts.map(function(o){return'<option value="'+esc(o[0])+'"'+(o[0]===cur?" selected":"")+'>'+esc(o[1])+'</option>'}).join("")+'</select>'}
 function slider(key,min,max,step,val,adv){return '<div class="sl2"><input type="range" data-num="'+key+'" min="'+min+'" max="'+max+'" step="'+step+'" value="'+val+'" aria-label="'+key+'"><input class="u" type="number" data-num="'+key+'" min="'+min+'" max="'+max+'" step="'+step+'" value="'+val+'" aria-label="'+key+'"></div>'+(adv?'<div class="note warn">'+adv+'</div>':"")}
-/* foldouts: open state by id; depth for "open to level" */
-function isOpen(id,depth){if(S.op.hasOwnProperty(id))return S.op[id];return depth<=S.ui.level}
+/* foldouts: open state by id; depth for "open to level" (isOpen.answer: a tab drawn as an accordion, editor/accordion.js, answers for its sections) */
+function isOpen(id,depth){if(S.op.hasOwnProperty(id))return S.op[id];var a=firstAnswer("isOpen.answer",id,depth);return a!==undefined?a:depth<=S.ui.level}
 function fo(id,title,badge,body,depth,cur){return '<details class="fo'+(cur?" cur":"")+'" data-fo="'+id+'" data-depth="'+depth+'"'+(isOpen(id,depth)?" open":"")+'><summary>'+title+'<span class="sp"></span>'+(badge?'<span class="badge '+badge[0]+'">'+badge[1]+'</span>':"")+'</summary>'+(body?'<div class="inner">'+body+'</div>':"")+'</details>'}
 function locked(t){return '<details class="fo locked"><summary>'+esc(t)+'<span class="sp"></span><span class="badge">EXISTING</span></summary></details>'}
 function contentAt(path){var ans=firstAnswer("contentAt.answer",path);if(ans!==undefined)return ans;var p=path.split("."),r=byId(S.story,p[0]);if(!r)return null;if(p[1]==="c")return r.c=r.c||{};var j=+p[1].slice(1);return r.slots[j]=r.slots[j]||{}}
@@ -3818,6 +3846,49 @@ ed.addEventListener("toggle",function(e){var d=e.target;if(!d.dataset||!d.datase
   if(k[0]==="sec"){focusPhone("card",'[data-ref="sec:'+k[1]+'"]',"full");return}
   if(k[0]==="eg"){var K=KINDS.filter(function(x){return x.c===k[1]})[0];if(K){var st=defStyle(K.k);if(st)show("demo","s:"+st.id)}}},true);
 
+/* The Editor's accordion and its sticky headers (guidance round 20): one Editor feature any tab switches on (ACC_TABS.<tab>; the Guide tab
+   does, editor/guide-tab.js). Such a tab opens as a list of its sections, each collapsed on one line (its number, name, a short sub-line
+   and a quiet count of its parts), with Collapse all and One section open at a time at its top. A section opens alone (the others stay as
+   they are) and its foldouts start collapsed; the open state is S.op as everywhere. While scrolling, the open section's header stays
+   pinned at the top of the Editor and its open foldout's header just under it (two levels; a third does not pin); a tap on a pinned header
+   scrolls back to its start (it does not collapse it). A link into the tab lands under the pinned headers (their scroll-margin).
+   The developer (2026-11-13): "let's use some sort of accordion style. We start with the sections collapsed so the developer sees clearly
+   all we have, and then he can open it, and we keep a sort of sticky headers of the sections and sub sections so they are still visible
+   at the top when we scroll down". Unity: the POI Editor's tab as UI Toolkit Foldouts (value persisted per id, EditorPrefs), its toolbar
+   a Button and a Toggle; the pinned headers: two header elements (position: absolute) at the top of the tab's ScrollView, filled with
+   the section's and the foldout's names and moved from ScrollView.verticalScroller.valueChanged (the foldout whose header has scrolled
+   above the view's top is the one pinned); a click on one sets scrollOffset to its foldout's top */
+var ACC_TABS={};
+S.ui.accOne=false;
+function accOn(tab){return!!ACC_TABS[tab===undefined?S.tab:tab]}
+/* the tab's sections start collapsed: level 1 (the default) shows them as the accordion's list, level 2 opens them (and their foldouts),
+   the self-test's walk (level 9) every one; a section the developer opened or closed keeps it (S.op, before this answer) */
+on("isOpen.answer",function(id,depth){if(depth===1&&accOn())return S.ui.level>=2});
+/* the tab's top: Collapse all, and One section open at a time (an Editor preference, Off by default) */
+function accBar(){return'<div class="accbar" role="toolbar" aria-label="Sections"><button class="ubtn sm" type="button" data-acc="collapse">Collapse all</button><span class="sp"></span>'+
+  '<span class="acclab">One section open at a time</span>'+seg("ui.accOne",["false","true"],["Off","On"],String(!!S.ui.accOne))+
+  help("An Editor preference, not saved to the wall. Off: each section opens and closes on its own. On: opening a section closes the one that was open. Collapse all closes every section and foldout of this tab. While you scroll, the open section's name stays at the top, its open foldout's just under it; a tap on either scrolls back to its start.")+'</div>'}
+/* each section's quiet count, on its line: its foldouts ("6 parts"), or its rows when it has none */
+function accCount(t){[].forEach.call(t.querySelectorAll(":scope > details[data-fo]"),function(d){var sm=d.querySelector(":scope > summary"),sp=sm&&sm.querySelector(":scope > .sp");if(!sp||sm.querySelector(":scope > .accn"))return;
+  var n=d.querySelectorAll(":scope > .inner > details[data-fo]").length,r=d.querySelectorAll(":scope > .inner > .row").length,w=n?n+(n===1?" part":" parts"):r+(r===1?" row":" rows");
+  sp.insertAdjacentHTML("afterend",'<span class="accn">'+w+'</span>')})}
+/* a foldout's level in the tab: 1 a section, 2 a foldout of it (pinned too), 3 and deeper (not pinned) */
+function accLevel(d){var n=1,p=d.parentElement&&d.parentElement.closest("details[data-fo]");while(p&&ed.contains(p)){n++;p=p.parentElement&&p.parentElement.closest("details[data-fo]")}return n}
+/* a header is pinned when its foldout's top has scrolled above it */
+function accPinned(d){var s=d.querySelector(":scope > summary");return!!s&&d.open&&s.getBoundingClientRect().top-d.getBoundingClientRect().top>1}
+/* back to a foldout's start: its top just under the headers pinned above it (its scroll-margin) */
+function accBack(d){d.scrollIntoView({block:"start",behavior:"smooth"})}
+on("renderEditor.after",function(){ed.classList.toggle("acc",accOn())});
+on("setOpt.answer",function(key,v){if(key==="ui.accOne"){S.ui.accOne=v==="true";renderEditor();return true}});
+/* One section open at a time: a section opened by the developer closes the one that was open (never a draw's own toggle) */
+ed.addEventListener("toggle",function(e){var d=e.target;if(!accOn()||!S.ui.accOne||!d.open||!d.dataset||!d.dataset.fo||d.parentElement!==ed||edQuiet(d))return;
+  [].forEach.call(ed.querySelectorAll(":scope > details[data-fo][open]"),function(s){if(s!==d){s.open=false;S.op[s.dataset.fo]=false}})},true);
+ed.addEventListener("click",function(e){if(!accOn())return;var t=e.target;
+  if(t.closest("[data-acc]")){e.stopPropagation();ed.querySelectorAll("details[data-fo]").forEach(function(d){S.op[d.dataset.fo]=false});renderEditor();var top=ed.closest(".ed");if(top&&top.getBoundingClientRect().top<0)top.scrollIntoView({block:"start"});return}
+  /* a tap on a pinned header (sections and their foldouts): back to its start, still open; a control inside the header keeps its own tap */
+  var sm=t.closest("summary"),d=sm&&sm.parentElement;if(!d||!d.matches("details[data-fo]")||t.closest("button,input,select,textarea,a,label,[data-set]"))return;
+  if(accLevel(d)<=2&&accPinned(d)){e.preventDefault();e.stopPropagation();accBack(d)}},true);
+
 /* The Guide tab (edGuide): one place for everything the guide does, on the card, on the wall and at the app's start (_3.8, decision 1).
    Guidance round 14 (the developer's tab, 2026-11-11): six sections, each naming a part of the guide an author looks for:
    1 · Azu (the character), 2 · The tour (the story told), 3 · Games on the tour, 4 · Azu speaks up (the guidance, guidance/editor.js),
@@ -3833,19 +3904,20 @@ ed.addEventListener("toggle",function(e){var d=e.target;if(!d.dataset||!d.datase
    tab (an IMGUI / UI Toolkit tab beside Detail Card), its foldouts Foldout elements with the same ids, a link a button that opens
    another tab at a foldout. */
 var GUIDE_SECS=[
-  {id:"s7mascot",n:"1",title:"The mascot",sub:"its global settings, read by every part of the guide: who it is, its look, its voice, its speech on screen, its manner and moments"},
-  {id:"gt1",n:"2",title:"The tour",sub:"the story told: its voice, captions, focus, the panel and the ways in",badge:["new","NEW"]},
-  {id:"gd:g:ontour",n:"3",title:"Games on the tour",sub:"the quiz, Guess the year, Don't say it!, Find it on the wall, the breather: at the tour's seams",badge:["new","NEW"]},
-  {id:"gt4",n:"4",title:"The mascot speaks up",sub:"tips, remarks, play, walkthroughs and the first pages: the mascot on its own, one at a time",badge:["new","NEW"]},
-  {id:"gt3",n:"5",title:"Ask the mascot",sub:"the visitor's questions: what the visitor sees, what the mascot knows, the engine",badge:["new","NEW"]},
-  {id:"gt0",n:"6",title:"Preview &amp; Test",sub:"Editor tools, never in the app: start the app, the visitor, the log, a simulated visit",badge:["test","TEST"]}];
+  {id:"s7mascot",n:"1",title:"The mascot",sub:"who it is, its look, voice, speech on screen, manner and moments: read by every part of the guide"},
+  {id:"gt1",n:"2",title:"The tour",sub:"the story told: what it says, its music, captions, focus, the panel, the ways in and its end"},
+  {id:"gd:g:ontour",n:"3",title:"Games on the tour",sub:"the quiz, Guess the year, Don't say it!, Find it on the wall, the breather, and asking during a game"},
+  {id:"gt4",n:"4",title:"The mascot speaks up",sub:"tips, remarks, play, walkthroughs and the first pages: the mascot on its own, one at a time"},
+  {id:"gt3",n:"5",title:"Ask the mascot",sub:"the visitor's questions: what the visitor sees, what the mascot knows, the engine"},
+  {id:"gt0",n:"6",title:"Preview &amp; Test",sub:"Editor tools, never in the app: start the app, the visitor, a simulated visit, the Lab's wall, the voice test",badge:["test","TEST"]}];
 /* each section's parts, in order. A part: "Label" (a row of the current source, by its label), {from:id} (the source: that foldout's
    rows and nodes), {fo:id} (a foldout, whole), {fo:id,t,s,parts,deep} (a foldout made here, or one re-titled, with these parts; deep: it
    opens one level later, an Editor or developer part), {add:parts} on {fo:id} (an existing foldout with more at its end), {words:o} (o's
    Aa bar and its panels), {cls:c} (a node by its class), {drop:c} (nodes not shown here), {h,s} (a heading), {rules:1} (the tour's fixed
    rules). 3 · Games on the tour and 4 · Azu speaks up are drawn by guidance/editor.js (edGuide.html); 6 · Preview & Test is filled there too */
 var GUIDE_PLAN={
-  gt0:[{fo:"s7vtest"}],
+  /* round 20: the Lab's wall (Ask about the view's Wall (the Lab)) is a stand-in only the Lab has: an Editor tool, so it is here */
+  gt0:[{h:"The Lab's wall",s:"its stand-in for the camera, never in the app"},{from:"s7cam",borrow:true},"Wall (the Lab)",{fo:"s7vtest"}],
   /* round 19 (the developer): the mascot's global settings, one foldout each, in this order; the rows of its voice and of speech on screen
      are borrowed from the foldouts that make them (Narration, Captions, Ask's engine), which keep a one-line link to here */
   s7mascot:[{from:"s7mascot"},{fo:"s7who"},
@@ -3853,16 +3925,16 @@ var GUIDE_PLAN={
       {fo:"gt:tools",t:"Model tools",s:"the 3D model's clips, Import… and a model from a picture (Mascot source = 3D model)",deep:true,parts:["3D model","Play a clip","Import…","Generate from a picture"]}]},
     {fo:"gt:voice",t:"Voice",s:"its recorded voice, its speed, a line with no recording, the answers' voice, the coverage",parts:[{from:"s7voice",borrow:true},"The voice","Sources","Speed","A line with no recording","Voice in this browser",
       {from:"s7agent",borrow:true},"Voice of the answers","ElevenLabs model",{from:"s7voice",borrow:true},"Coverage","Speaking now"]},
-    {fo:"gt:speech",t:"Speech on screen",s:"the bubble, the teleprompter and the highlight (round 21)",parts:[{from:"s7cap",borrow:true},{cls:"mpspeech"},"Highlight what is read","Highlight style","Trail","Glide","Try"]},
+    {fo:"gt:speech",t:"Speech on screen",s:"how its words show while it speaks: the highlight now, the bubble and the teleprompter next",parts:[{from:"s7cap",borrow:true},{cls:"mpspeech"},"Highlight what is read","Highlight style","Trail","Glide","Try"]},
     {fo:"gt:manner",t:"Manner",s:"how big, how lively, how it speaks and moves",parts:[{from:"s7mascot"},"Size","Liveliness","Mouth","How it moves","Moods","Tap on the mascot","Try"]},
-    {fo:"gt:moments",t:"Moments",s:"when it comes on, and on the wall",parts:[{from:"s7mascot"},"Introduction","Walks to the wall","Try"]},
+    {fo:"gt:moments",t:"Moments",s:"when it introduces itself, and its walk to the wall",parts:[{from:"s7mascot"},"Introduction","Walks to the wall","Try"]},
     {words:"s7mascot"}],
   gt1:[{rules:1},{fo:"s7auto"},{fo:"s7more"},{fo:"s7voice"},{fo:"s7cap"},{fo:"s7focus"},{fo:"s7coach"},
     {fo:"s7dock",add:[{h:"Tour controls",s:"previous, pause, next, sound, captions, Ask and stop: their words"},{words:"s7tour"}]},
     {fo:"gt:ways",t:"Ways in",s:"how a visitor starts the tour, or picks it up again",parts:[{fo:"s7gbtn"},{fo:"s7hero"},{fo:"s7block"},{fo:"s7resume"}]},{fo:"s7end"}],
   gt3:[{fo:"s7ask",t:"What the visitor sees",s:"the question box, Ask about the view, the answers and how they sound",parts:[{from:"s7ask"},"Answers from",{fo:"s7cam"},{from:"s7agent"},
       "Spoken answer","The answers' voice","Link cards","Trace under each answer",{h:"The panel's words",s:"the question box, the mic, Ask's title"},{words:"s7ask"},{h:"The answers' words",s:"under an answer, its chips, its notes"},{words:"s7agent"}]},
-    {fo:"gt:know",t:"Knowledge",s:"what the mascot answers from, and what it may do in the app",parts:[{from:"s7agent"},"App context","",{cls:"agpre"},"Photo of the view","Library","General knowledge",
+    {fo:"gt:know",t:"Knowledge",s:"what the mascot answers from, and what it may do in the app",parts:[{from:"s7agent"},"App context","What is sent",{cls:"agpre"},"Photo of the view","Library","General knowledge",
       {h:"Its tools",s:"what it can do in the app"},{cls:"agtools"},"Targets","Actions in the app"]},
     {fo:"s7agent",t:"The engine",s:"the model, its key, its limits and the test console (for the developer)",deep:true,parts:[{from:"s7agent"},{drop:"agh"},"Guide mode",
       {h:"The model"},"Model","Gemini model","Claude API model","Claude tier (published)","Longest answer","Cost",{h:"Inputs"},"Text and voice",
@@ -3871,6 +3943,10 @@ var GUIDE_PLAN={
    opens now (once). Two foldouts became sections and keep their ids: Mascot (s7mascot, now 1 · Azu: its rows, no "Mascot › Mascot") and
    Fun › On the tour (gd:g:ontour, now 3 · Games on the tour), so a saved state that opened them opens them by id */
 var GUIDE_WAS={gt2:"s7mascot",s7tour:"s7dock"};
+/* the order the sections are drawn in, when it differs from the order shown: a section that takes rows from another's parts goes first */
+var GUIDE_DRAW=["gt0"];
+/* the tab is an accordion (round 20): its sections collapsed on one line each, sticky headers (editor/accordion.js) */
+ACC_TABS.guide=true;
 function guideOpMap(){Object.keys(GUIDE_WAS).forEach(function(o){if(!S.op.hasOwnProperty(o))return;var n=GUIDE_WAS[o];if(!S.op.hasOwnProperty(n))S.op[n]=S.op[o];delete S.op[o]})}
 /* the Guide tab's button, after Detail Card */
 (function(){var tabs=document.querySelector(".utabs"),c=tabs&&tabs.querySelector('[data-tab="card"]');if(!c||tabs.querySelector('[data-tab="guide"]'))return;
@@ -3900,13 +3976,14 @@ function edGuide(){guideOpMap();var d=document.createElement("div");d.innerHTML=
   var rules=g&&g.querySelector(":scope > .row");rules=rules&&/Fixed rules/.test(rules.textContent)?rules:null;if(rules)rules.remove();
   var cx={from:null,srcs:[],rules:rules?rules.outerHTML:"",box:{},el:{}};
   if(g)g.querySelectorAll("details[data-fo]").forEach(function(x){cx.el[x.dataset.fo]=x;cx.box[x.dataset.fo]=x.querySelector(":scope > .inner")});
-  var body={};GUIDE_SECS.forEach(function(s){cx.from=null;body[s.id]=gtBody(cx,GUIDE_PLAN[s.id]||[]);body[s.id]+=gtLeft(cx,s.n+" · "+s.title.replace(/&amp;/g,"&"))});
+  /* drawn in GUIDE_DRAW's order (6 · Preview & Test first: it borrows the Editor tools from the parts that make them), shown in GUIDE_SECS' */
+  var body={};GUIDE_SECS.slice().sort(function(a,b){return GUIDE_DRAW.indexOf(b.id)-GUIDE_DRAW.indexOf(a.id)}).forEach(function(s){cx.from=null;body[s.id]=gtBody(cx,GUIDE_PLAN[s.id]||[]);body[s.id]+=gtLeft(cx,s.n+" · "+s.title.replace(/&amp;/g,"&"))});
   /* a foldout a module adds later, with no place in GUIDE_PLAN: the end of 2 · The tour, said in the console */
   var rest=g?[].slice.call(g.children).filter(function(x){var i=x.matches("details")&&x.querySelector(":scope > .inner");if(i&&!i.children.length){x.remove();return false}return true}):[];if(rest.length){body.gt1+='<div class="sub2 gth">Not placed yet <span class="sub">· a part with no place in the Guide tab (GUIDE_PLAN)</span></div>';
     rest.forEach(function(x){console.warn("Guide tab: "+(x.dataset.fo||(x.querySelector("label")||{}).textContent||x.className)+" has no place in GUIDE_PLAN; shown at the end of 2 · The tour");body.gt1+=x.outerHTML})}
-  h='<div class="gtnav" role="navigation" aria-label="The Guide tab\'s sections"><span>The guide:</span>'+GUIDE_SECS.map(function(s){return'<button class="chip" type="button" data-gtgo="'+s.id+'" title="'+esc(s.sub)+'">'+s.n+' · '+s.title+'</button>'}).join("")+'</div>';
-  GUIDE_SECS.forEach(function(s){h+=fo(s.id,sectionTitle(s.n,s.title,s.sub),s.badge,body[s.id]||" ",1)});
-  h=pipe("edGuide.html",h);var t=document.createElement("div");t.innerHTML=h;guideDepths(t);
+  /* round 20 (the developer): an accordion, its six sections collapsed on one line each (editor/accordion.js); the chip row is gone */
+  h=accBar();GUIDE_SECS.forEach(function(s){h+=fo(s.id,'<span class="acct">'+s.n+' · '+s.title+'</span> <span class="sub">· '+s.sub+'</span>',s.badge,body[s.id]||" ",1)});
+  h=pipe("edGuide.html",h);var t=document.createElement("div");t.innerHTML=h;guideDepths(t);accCount(t);
   return t.innerHTML+jsonBox("config.json · guide",guideJson())}
 /* how deep each foldout opens (S.ui.level): its place in this tab, not where its module drew it. Level 1: the six sections; level 2 their
    foldouts (an Editor or developer part one level later: The visitor's Details, Model tools, The engine); an item (gd:i:) from level 3;
@@ -3917,8 +3994,6 @@ function guideDepths(t){t.querySelectorAll("details[data-fo]").forEach(function(
 var GUIDE_DEEP={"gd:visitor":1,"gt:tools":1,s7agent:1};
 function guideJson(){var a=JSON.parse(JSON.stringify(S.agentCfg||{}));Object.keys(a).forEach(function(k){if(/key/i.test(k))delete a[k]});return{guide:S.guideCfg,view:S.camCfg,agent:a,guidance:S.guidance}}
 on("renderEditor.tab",function(){if(S.tab==="guide")return edGuide()});
-/* a section's name at the top: that section, open, at the top of the view */
-ed.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-gtgo]");if(!b)return;e.stopPropagation();var id=b.dataset.gtgo;S.op[id]=true;renderEditor();var f=ed.querySelector('[data-fo="'+cssq(id)+'"]');if(f)f.scrollIntoView({block:"start"})},true);
 on("refreshJsonV4.answer",function(){if(S.tab==="guide"){var pre=ed.querySelector(".json pre");if(pre)pre.textContent=JSON.stringify(guideJson(),null,2);return true}});
 /* the Detail Card's tab: the Guide is in its own tab now */
 on("edCard.tab",function(h){var d=document.createElement("div");d.innerHTML=h;var g=d.querySelector('[data-fo="s7"]');if(g)g.remove();return d.innerHTML});
@@ -4209,7 +4284,7 @@ var COMP={s5viewer:["Card Controls","Picture viewer"],s5player:["Card Controls",
  s5pager:["Card Controls","Section pager"],s5openrow:["Card Controls","Open Row"],s5expand:["Card Controls","Expand Row"],
  s5back:["Card Controls","Back button"],s5crumb:["Card Controls","Breadcrumb"],s5prevnext:["Card Controls","Previous / Next buttons"],s5loc:["Card Controls","Locate Button"],
  s5sticky:["Card Controls","Sticky Action"],s5term:["Card Controls","Glossary popup"],s5termpage:["Card Controls","Term page"],
- s7voice:["Guide","Narration"],s7hero:["Guide","Hero button"],s7block:["Guide","Guide block"],s7cap:["Guide","Captions"],s7coach:["Guide","Invite to try"],
+ s7voice:["Guide","Music"],s7hero:["Guide","Start the guide"],s7block:["Guide","Guide block"],s7cap:["Guide","Captions"],s7coach:["Guide","Invite to try"],
  s7tour:["Guide","The tour › Guide panel › Tour controls"],s7resume:["Guide","Continue the tour"],s7mascot:["Guide","The mascot"],s7ask:["Guide","Ask the mascot › What the visitor sees"],
  s7agent:["Guide","Ask the mascot › What the visitor sees › the answers"],"g:10":["Global Scene","Select, Filter & Search"],"g:10s":["Global Scene","Search box"],"g:10f":["Global Scene","Filters button"],"g:11":["Global Scene","Onboarding hints"]};
 function ownerName(o){var p=o.split(":");if(p[0]==="el")return "Blocks & Components › Elements › "+(KIND[p[1]]?KIND[p[1]].n:p[1]);if(p[0]==="eg")return "Blocks & Components › Elements › "+p[1]+" (every one)";
@@ -4286,7 +4361,7 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   /* 7 · Guide: one component per element of the tour */
   var s7=innerOf(d,"s7");if(s7){var g=function(l,r){return takeRow(s7,l,r)},rules=s7.querySelector(":scope > .note.fixed");rules=rules?row("Fixed rules",'<span class="uses">pause, take-over, captions, Reduce Motion</span>',rules.textContent.replace(/^Fixed rules:\s*/,"")):"";
     var vo=g("Sources")+g("Speed")+g("Music bed")+g("Music volume")+g("Under the voice")+g("Track")+g("Credit")+g("Playing now")+g("Visitor can choose the music"),he=g("Start from the hero","Shown"),bl=g("Guide block","Shown"),ca=g("Captions","Shown")+g("Highlight what is read"),co2=g("Invite to try","Shown"),ma=g("Mascot","Character"),as=g("Ask the guide","Answers from");
-    s7.innerHTML=rules+comp("s7voice","the voice, its speed and the music under it",vo)+comp("s7hero","the button on the hero that starts the tour",he)+comp("s7block","the tile that starts the tour, first in About",bl)+
+    s7.innerHTML=rules+comp("s7voice","the music under the voice (the voice itself: 1 · The mascot › Voice)",vo)+comp("s7hero","the hero's button that starts the tour, and its glow",he)+comp("s7block","the tile that starts the tour, first in About",bl)+
      comp("s7cap","the words being read, at the bottom",ca)+comp("s7coach","at a block to try, the guide waits for the gesture",co2)+
      comp("s7tour","progress, previous, pause, next, sound, captions, Ask and stop","")+comp("s7resume","one way back into a stopped tour: this visit at its sentence, a later visit after a recap","")+comp("s7mascot","a small tile that follows the block being told",ma)+comp("s7ask","questions by text or voice",as)}
   /* every owner gets its Aa and its Demo content at the top of its own foldout */
@@ -5587,7 +5662,7 @@ on("stopTour.before",function(){unzoomAll();var sp=ph.querySelector(".gspot");if
 
 /* Editor: Guide tab gets Focus, after Captions; Specific Marker > Guide script gets each step's spots, drawn on its picture */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var ca=d.querySelector('[data-fo="s7cap"]');if(!ca)return d.innerHTML;
-  ca.insertAdjacentHTML("afterend",comp("s7focus","the spotlight on what is told, the zoom to a spot in a picture, the mascot pointing",
+  ca.insertAdjacentHTML("afterend",comp("s7focus","the spotlight on what is told, the zoom to a spot in a picture, the mascot pointing, a scroll by the visitor",
     row("Focus",pseg("guideCfg.cue",["spotlight","ring","none"],["Spotlight","Soft ring","None"]),"Spotlight: the rest of the card dims and a soft light rings what the guide is telling. Soft ring: only the ring. One at a time; it follows the scroll and hides while the visitor takes over.")+
     row("Dim the rest",pslider("guideCfg.scrim",0.2,0.6,0.05),"Spotlight only: how dark the rest of the card goes (0.4 = 40 %).",true)+
     row("Into pictures",pseg("guideCfg.zoom",["zoom","spot"],["Slow zoom","Light the spot"]),"When the guide names a spot in a picture (the step's spots, in the Guide script). Slow zoom: the picture glides in to the spot (1.5 s). Light the spot: the picture stays and the spotlight closes on the spot. Reduce Motion: a crossfade instead of the glide.")+
@@ -6074,7 +6149,7 @@ function afterTry(st){if(!G.on||S.guideSteps[G.i]!==st)return;clearTimeout(G.ins
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   addRows(d,"s7coach",row("Insists",pseg("guideCfg.insist",["0","1","2"],["Never","Once","Twice"]),"When the visitor has not tried yet, the guide asks again, each time with new words, then says it is fine and moves on. It never blocks the tour. Done at any moment, even while the guide is still asking, it carries on at once and says what was revealed (a flipped card's back, read in place).")+
     row("Waits",pslider("guideCfg.insistAfter",3,12,1),"Seconds before each new ask.",true));
-  addRows(d,"s7resume",row("When the visitor scrolls",pseg("guideCfg.onScroll",["follow","pause"],["Keeps going","Pauses"]),"Keeps going: the guide talks on while its block is on the screen; when the block leaves it, the guide says “Moving on” and tells the block now in view (or pauses when none is). Pauses: any scroll pauses and offers Resume."));
+  addRows(d,"s7focus",row("When the visitor scrolls",pseg("guideCfg.onScroll",["follow","pause"],["Keeps going","Pauses"]),"Keeps going: the guide talks on while its block is on the screen; when the block leaves it, the guide says “Moving on” and tells the block now in view (or pauses when none is). Pauses: any scroll pauses and offers Resume."),"Try");
   addRows(d,"s7mascot",row("Introduction",pseg("guideCfg.intro",["first","every","off"],["First tour","Every tour","Off"]),"The mascot walks in and says who it is and how to ask, before the first step."));
   return d.innerHTML});
 on("edMarker.html",function(h){var d=document.createElement("div");d.innerHTML=h;var st=S.sel.gstep&&byId(S.fullSteps||S.guideSteps,S.sel.gstep);if(!st||st.act!=="try")return d.innerHTML;
@@ -6352,7 +6427,7 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;v
     row("Look",pseg("guideCfg.look",DLOOKS.map(function(x){return x[0]}),DLOOKS.map(function(x){return x[1]})),LOOKW[dkLook()]+" Each in light and dark, the same controls, the same heights. Unity: one UXML template per Look with the same element names, swapped with its USS; no backdrop blur (a translucent fill with a light edge), a gradient as a ramp texture.",true)+
     row("Words",pseg("guideCfg.pWords",["prompter","off"],["Teleprompter","Off"]),"Teleprompter: the line said now, its spoken word marked, the line before faded above it and the next below; they move up as the voice goes on (never fixed bubbles). The visitor's Aa shows or hides them, Read all shows the whole text. Off: no words in the panel (a block's words still light up in the block; the mascot's own words go to its bubble).",true)+
     row("Voice moving",pseg("guideCfg.pBars",["true","false"],["On","Off"]),"On: bars (Ink glass's Mini: with the mascot's ring) move only while the voice speaks: a recorded or live voice by its level (the Lab: an AnalyserNode where the page may read the audio, else the line's own mouth curve or its word times; Unity: AudioSource.GetOutputData), the device voice by its word events. Still when paused.",true)+
-    row("Speed button",pseg("guideCfg.pSpeed",["true","false"],["Shown","Hidden"]),"A chip in the controls: 0.5× · 0.75× · 1× · 1.25× · 1.5× · 1.75× · 2×, the visitor's own (the voice follows at once); its first value is Narration › Speed.",true)+
+    row("Speed button",pseg("guideCfg.pSpeed",["true","false"],["Shown","Hidden"]),"A chip in the controls: 0.5× · 0.75× · 1× · 1.25× · 1.5× · 1.75× · 2×, the visitor's own (the voice follows at once); its first value is 1 · The mascot › Voice › Speed.",true)+
     row("Starts at",pseg("guideCfg.dockStart",["mini","peek","compact"],["Mini","Peek","Compact"]),"Its height when the tour starts (the ✦ grows into it). Compact: the tour starts hidden; a tap on the guide's button brings the dock at Mini.",true)+
     row("Controls at Mini",pseg("guideCfg.miniCtl",["pausestop","pause","line"],["Pause + Stop","Pause only","Tap on the line"]),"Pause + Stop: two buttons (44 px) in the Mini, in the Look's style. Pause only: the same without Stop (Stop is in Open). Tap on the line: no buttons; a tap on the Mini's line (or the voice's bars) pauses or plays, and a keyboard button asks by typing.",true)+
     row("Swipe down to Compact",pseg("guideCfg.swipeCompact",["true","false"],["On","Off"]),"On: a swipe down on the Mini hides the dock (Compact); the voice goes on. Off: Mini is the lowest a swipe goes; the chevron and the guide's button still hide it.",true)+
@@ -7779,7 +7854,7 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;v
     row("Cost",'<span class="uses">'+esc(agCostQ())+'</span>',"Two model steps a question, the library in the prompt. Prices as of 2026-11, approximate.",true)+
     sub("3 · Inputs")+row("Text and voice",'<span class="uses">The question box and the talk button (the phone’s speech recognition)</span>',"Voice is turned into text on the phone, free and without a wait; the model gets text.")+
     row("App context",pseg("agentCfg.ctx",["true","false"],["Sent","Not sent"]),"The screen, the point, the audience, the lens, the language and, on the wall, the points in view with their places and the one in the middle. It is what lets the model act without asking the phone.")+
-    row("",'<button class="ubtn sm" type="button" data-agctx="1">'+(AG.showCtx?"Hide":"Show")+' what is sent</button>',"",true)+(AG.showCtx?'<pre class="agpre">'+esc(JSON.stringify(agContext(agWhere()),null,1))+'</pre>':"")+
+    row("What is sent",'<button class="ubtn sm" type="button" data-agctx="1">'+(AG.showCtx?"Hide":"Show")+' what is sent</button>',"The app context exactly as the model gets it with a question, at this moment (the screen, the point, the audience, the language, the points in view). Showing it sends nothing.",true)+(AG.showCtx?'<pre class="agpre">'+esc(JSON.stringify(agContext(agWhere()),null,1))+'</pre>':"")+
     row("Photo of the view",pseg("agentCfg.photo",["false","true"],["Off","On"]),"On the wall, the part of the wall on the screen goes with the question, as a JPEG (Gemini only in the Lab). The app sends it only on Look closer, with a privacy note.")+
     sub("4 · Tools (what the agent can do in the app)")+'<table class="tbl agtools"><thead><tr><th>Tool</th><th>What it does</th><th>Policy</th></tr></thead><tbody>'+Object.keys(AGTOOLS).map(function(n){return'<tr><td><b>'+esc(AGTOOLS[n].label)+'</b><br><code>'+n+'</code></td><td>'+esc(AGTOOLS[n].what)+'</td><td>'+psel("agentCfg.pol."+n,pol(n))+'</td></tr>'}).join("")+'</tbody></table>'+
     row("Targets",'<span class="uses">'+agTargets().length+': '+corpus().length+' blocks and pages, '+S.wallPois.length+' points on this wall</span>',"Auto: it happens. Suggest: a button under the answer the visitor taps. Confirm: a button that asks first. The ids the model may name are the real ones only; a wrong id is refused and shown in the console.")+
@@ -12297,7 +12372,7 @@ var GDSCENES3=[
         r.whyAgain=gdWhyNot(gdItems(),S.gdVisitor,Object.assign(gdContext(),{showing:null,touchAt:null,remark:null}),gdNow(),"gbhint");gsTouch(ph.querySelector(".gbtn"));r.menu=!!ph.querySelector(".gbmenu");r.done=gdEverOf(S.gdVisitor,"gbhint").done;
         r.whyDone=gdWhyNot(gdItems(),S.gdVisitor,Object.assign(gdContext(),{showing:null,panel:null,remark:null,touchAt:null}),gdNow(),"gbhint");G.fab.menu=false;fabLayer();
         var ans=r.pokes+" pokes: The ✦ "+(r.shown?"“"+r.text+"”, the mascot's arm "+(r.arm?"to the ✦":"down")+", "+r.over+" px² over the ✦, "+r.words+" px² over words ("+r.why+")":"not shown")+"; 4 more: "+(r.again?"again":"not again")+" (“"+r.whyAgain+"”); the ✦ tapped: the menu "+(r.menu?"open":"closed")+", “"+r.whyDone+"”.";
-        return gdScDone(r.pokes===4&&r.shown&&r.text===gdLine(S.guidance.items.gbhint)&&r.arm&&r.over===0&&r.words===0&&/4 pokes on Azu/.test(r.why)&&!r.again&&/shown once this visit/.test(r.whyAgain)&&r.menu&&r.done&&/done for good \(the visitor opened the ✦ menu\)/.test(r.whyDone)?[true,"four pokes bring The ✦ once a visit, beside the ✦, pointing; the menu retires it",ans]:[false,"The ✦ did not come after four pokes, came twice, or the menu did not retire it",ans])})}}];
+        return gdScDone(r.pokes===4&&r.shown&&r.text===gdLine(S.guidance.items.gbhint)&&r.arm&&r.over===0&&r.words===0&&/4 pokes on the mascot/.test(r.why)&&!r.again&&/shown once this visit/.test(r.whyAgain)&&r.menu&&r.done&&/done for good \(the visitor opened the ✦ menu\)/.test(r.whyDone)?[true,"four pokes bring The ✦ once a visit, beside the ✦, pointing; the menu retires it",ans]:[false,"The ✦ did not come after four pokes, came twice, or the menu did not retire it",ans])})}}];
 GDSCENES3.forEach(function(s){s.where="wall";AGSCENES.push(s)});
 /* ----- round 4: two more scenes (ids gd4_*): a hint and a tip never at once; How does this work? on the card and on the wall ----- */
 /* the cues rest in the scenes not about them (as the remarks do); a scene about them keeps only its own */
@@ -12668,7 +12743,7 @@ var GDSCENES13=[
     act:function(){this.arrange();startTour();return gdScWait(function(){return!!ph.querySelector('.gdstrip [data-gdtl="deal"]')},30000).then(function(c){gd12Tap('.gdstrip [data-gdtl="deal"]');
       return gdScWait(function(){return G.gd.plan&&G.gd.plan.quiz==="on"},4000).then(function(){var P=G.gd.plan,ids=S.guideSteps.map(function(s){return s.id}),f=gdPlanBeat("quizfinale"),w=gdPlanWords(P),blk=!!scr.querySelector('[data-ref="b:b_quiz"]');
         var ans="the steps now: "+ids.join(", ")+"; the quiz at the seam after "+(f&&f.after)+"; the plan: "+w.slice(-90)+"; the card's quiz block "+(blk?"still on the card":"gone")+".";
-        return gd13Done(c&&ids.indexOf("g9")<0&&f&&f.after==="g8"&&/is skipped: Azu's quiz replaces it/.test(w)&&blk?[true,"the card's own quiz step skipped, the mascot's quiz in its place",ans]:[false,"the step was not skipped as it should",ans])})})}},
+        return gd13Done(c&&ids.indexOf("g9")<0&&f&&f.after==="g8"&&/is skipped: the mascot's quiz replaces it/.test(w)&&blk?[true,"the card's own quiz step skipped, the mascot's quiz in its place",ans]:[false,"the step was not skipped as it should",ans])})})}},
   {id:"gd13_noquiz",label:"Guidance · On the tour: No quiz, thanks brings Test yourself back",setup:function(){gd12Keep()},arrange:function(){gd13Only(["quizpromise","quizfinale"])},
     q:T("nothing: the tour starts; the mascot promises three questions and the visitor taps No quiz, thanks","nada: a visita começa; a mascote promete três perguntas e o visitante toca em Sem perguntas, obrigado"),
     expect:T("No quiz in the plan; the card's own “Test yourself” step plays as before.","Nenhuma pergunta no plano; o passo “Teste-se” do cartão volta a tocar como antes."),
@@ -13740,17 +13815,40 @@ rowDemos({"mp:name":{tour:"g1",dock:"peek",ring:".gd-who|.gd-eye|.gdock"},"mp:wh
    mascot's still image or its 3D prefab's RenderTexture, then the Start button); the glow a child image behind the button, its pulse a
    USS transition loop (or a DOTween loop on its scale and alpha), stopped by the button's first click; Reduce Motion: the glow alone */
 G.hs={glow:false,tapped:false,t:0};
+/* round 20 (the developer, 2026-11-13: "make it an Editor option; as default it can stay once per visit"): Start the guide glows Once per
+   visit (from the first card the visitor opens until the first tap on Start; after it, no card glows again this visit), On every new card
+   (each card opened glows again until its Start is tapped) or Off. Unity: GuideConfig.heroGlow (an enum), read by the hero's action row */
+S.guideCfg.heroGlow="visit";
+function hsGlowOn(){return S.guideCfg.heroGlow!=="off"}
 function hsOn(){return!!S.guideCfg.heroButton&&typeof gbAzu==="function"&&gbAzu()}
 on("cardScreen.html",function(h){if(!hsOn())return h;var d=document.createElement("div");d.innerHTML=h;var a=d.querySelector(".hero .hact"),g=a&&a.querySelector(".gstart");if(!g)return h;
   a.classList.add("hs-row");a.insertAdjacentHTML("afterbegin",'<span class="hsazu" aria-hidden="true"><span class="hsfig">'+mascotStill()+'</span><i class="hspoint"><svg viewBox="0 0 16 16"><path d="M2.5 2.5 14 8 2.5 13.5Z"/></svg></i></span>');
-  if(G.hs.glow&&!G.hs.tapped)g.classList.add("hsglow");
+  if(G.hs.glow&&!G.hs.tapped&&hsGlowOn())g.classList.add("hsglow");
   /* the room the Locate Button's label asked for (card/locate.js's locRoom), kept across a redraw while the label shows */
   var w=d.querySelector(".hero .w");if(w&&G.locRoom&&!S.locFolded)w.classList.add("hsroom");return d.innerHTML});
 /* the glow comes once the card has settled (the sheet's move ended: 900 ms after it moved), and stays until the button is tapped */
-function hsSettle(){clearTimeout(G.hs.t);if(G.hs.tapped||G.hs.glow)return;var g=scr.querySelector(".hero .gstart");if(!g||S.view!=="card"||S.stop==="closed"||S.stop==="peek")return;
+function hsSettle(){clearTimeout(G.hs.t);if(G.hs.tapped||G.hs.glow||!hsGlowOn())return;var g=scr.querySelector(".hero .gstart");if(!g||S.view!=="card"||S.stop==="closed"||S.stop==="peek")return;
   var wait=Math.max(0,900-(performance.now()-(S.movedAt||0)));G.hs.t=setTimeout(function(){var b=scr.querySelector(".hero .gstart");if(!b||G.hs.tapped||S.view!=="card"||S.stop==="closed")return;G.hs.glow=true;b.classList.add("hsglow")},wait)}
 on("renderPhone.after",function(){hsSettle()});
-ph.addEventListener("click",function(e){var g=e.target.closest&&e.target.closest(".hero .gstart");if(g){G.hs.tapped=true;G.hs.glow=false;clearTimeout(G.hs.t);g.classList.remove("hsglow");return}
+/* On every new card: a card opened (a marker, a pin, an invitation, What next?) or another point's card made the open one glows again */
+function hsNewCard(){if(S.guideCfg.heroGlow!=="card")return;clearTimeout(G.hs.t);G.hs.glow=false;G.hs.tapped=false;var b=scr.querySelector(".hero .gstart");if(b)b.classList.remove("hsglow");hsSettle()}
+on("card.opened",hsNewCard);on("point.opened",hsNewCard);
+/* the row, in Guide › 2 · The tour › Ways in › Start the guide (the button's own rows: Shown, its words, now its glow) */
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
+  addRows(d,"s7hero",row("Start the guide glows",pseg("guideCfg.heroGlow",["visit","card","off"],["Once per visit","On every new card","Off"]),
+    "A soft warm glow and a slow pulse on Start the guide once the card has settled, gone when the visitor taps it. Once per visit (the default): it glows from the first card the visitor opens until the first tap on Start; after that no card glows again this visit. On every new card: each card the visitor opens glows again until its Start is tapped. Off: never. Reduce Motion: the glow without its pulse. Unity: GuideConfig.heroGlow, the glow a child image of the button, its pulse a USS transition loop."));
+  return d.innerHTML});
+BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(heroGlow|"));
+/* its demo: a fresh visit, the Ribeira Palace's card opened (its Start glows once the card settles, or not when Off), a tap on Start
+   (the glow goes; the tour does not start), then a second card, the Torreão's: it glows again On every new card, not Once per visit */
+function hsDemo(){var my=G.demoSeq,alive=function(){return G.demoSeq===my},open=function(id){S.movedAt=performance.now();pointOpen(id);S.view="card";S.stop="half";renderPhone(false)};
+  clearTimeout(G.hs.t);G.hs.glow=false;G.hs.tapped=false;open("painting");
+  setTimeout(function(){if(!alive())return;var b=scr.querySelector(".hero .gstart");G.hs.tapped=true;G.hs.glow=false;clearTimeout(G.hs.t);if(b){b.classList.remove("hsglow");b.classList.remove("hstap");void b.offsetWidth;b.classList.add("hstap")}document.body.dataset.hsdemo="tapped"},2600);
+  setTimeout(function(){if(!alive())return;open("torreao");if(S.guideCfg.heroGlow==="card")hsNewCard();document.body.dataset.hsdemo="second"},3800)}
+rowDemos({"guideCfg.heroGlow":{view:"card",stop:"half",act:hsDemo,ring:".hero .gstart",ringAfter:1200}});
+ph.addEventListener("click",function(e){var g=e.target.closest&&e.target.closest(".hero .gstart");if(g){G.hs.tapped=true;G.hs.glow=false;clearTimeout(G.hs.t);g.classList.remove("hsglow");
+    /* round 20: the tour's own tap handler (an earlier module) has already redrawn the phone with the glow on: the new button too */
+    ph.querySelectorAll(".hero .gstart.hsglow").forEach(function(x){x.classList.remove("hsglow")});return}
   var m=e.target.closest&&e.target.closest(".hsazu");if(m){e.stopPropagation();if(typeof haptic==="function")haptic();m.classList.remove("hsjump");void m.offsetWidth;m.classList.add("hsjump")}},true);
 
 /* Starts the page (the #hash routes) and closes the shared scope. */

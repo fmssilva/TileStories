@@ -115,6 +115,15 @@ the Live assembly); full EditMode ~4.4 min (2218 tests); CardSmoke ~1.3 min (22 
   session or a build.
 - A wider tier confirms, never discovers: green on BLOCK before CORE, green on CORE before FULL. The report names the tier, its
   counts, and the blocks since the last CORE and the last FULL.
+- **Count by blocks, never by date** (the developer, 2026-11-13): every brief is one block (a 17b or a 17c counts). The
+  counts since the last CORE and the last FULL are block numbers, kept in the Architect's handoff and said in every answer; a
+  FULL tracked by its date was once missed for 14 blocks.
+- **CORE and FULL run alongside the next block** (the developer, 2026-11-13): once a block is green on its own tier it is
+  merged, the long run starts on a separate copy of the merged code (a `git worktree` of `master`), and the next block starts at
+  the same time. A red found by the long run is fixed in the block then running (its brief gets the item), never by holding the
+  next block back. Where the two cannot share a resource (one Unity Editor runs one job: 4.2.5), the next block does its
+  Unity-free parts first (the brief, the design, pure code, docs) while the long run holds Unity, or the long run uses a second
+  project copy opened in its own Unity Editor when the machine can carry both.
 
 - **SHARED GROUND:** what every fixture stands on -- the test infrastructure (`CardTestInput`, `SearchSceneFixture`, the harnesses,
   `FixedFrameForTheRun`), `WallSession`, `PanelSettings`, the card tokens, the sheet / stack / host's stops, layout or binding

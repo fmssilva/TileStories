@@ -73,10 +73,10 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // The ✦
   P.p3 = await pk(ONLY_S + 'C.pokes=3', N, 'gbhint'); P.p4 = await pk(ONLY_S + 'C.pokes=4', N, 'gbhint');
   P.i24 = await pk(ONLY_S + 'C.idleSince=' + (N - 24000), N, 'gbhint'); P.i25 = await pk(ONLY_S + 'C.idleSince=' + (N - 25000), N, 'gbhint');
-  ok('The ✦, alone: after 4 pokes on Azu (3: it waits, and says so; 4: it shows)', P.p3[0] === null && /The ✦: after 4 pokes on the mascot \(3 so far\) or 25 s idle \(20 s left\)/.test(P.p3[2]) && P.p4[0] === 'gbhint' && /4 pokes on Azu/.test(P.p4[1]), [P.p3[2], P.p4[1]]);
+  ok('The ✦, alone: after 4 pokes on Azu (3: it waits, and says so; 4: it shows)', P.p3[0] === null && /The ✦: after 4 pokes on the mascot \(3 so far\) or 25 s idle \(20 s left\)/.test(P.p3[2]) && P.p4[0] === 'gbhint' && /4 pokes on the mascot/.test(P.p4[1]), [P.p3[2], P.p4[1]]);
   ok('...or after 25 s idle (24 s: 1 s left; 25 s: it shows)', P.i24[0] === null && /25 s idle \(1 s left\)/.test(P.i24[2]) && P.i25[0] === 'gbhint' && /idle 25 s/.test(P.i25[1]), [P.i24[2], P.i25[1]]);
   P.calm = await pk(ONLY_S + 'C.pokes=4;C.lively=false', N, 'gbhint'); P.sol = await pk(ONLY_S + 'C.pokes=4;C.solemn=true', N, 'gbhint');
-  ok('...Lively only, never on a Solemn point', P.calm[0] === null && /The ✦: Lively only: Azu is Calm/.test(P.calm[2]) && P.sol[0] === null && /The ✦: never on a Solemn point/.test(P.sol[2]), [P.calm[2], P.sol[2]]);
+  ok('...Lively only, never on a Solemn point', P.calm[0] === null && /The ✦: Lively only: the mascot is Calm/.test(P.calm[2]) && P.sol[0] === null && /The ✦: never on a Solemn point/.test(P.sol[2]), [P.calm[2], P.sol[2]]);
   P.once2 = await pk(ONLY_S + 'C.pokes=8;vm("gbhint",{shown:1,last:100000,end:104000})', N, 'gbhint');
   P.done = await pk(ONLY_S + 'C.pokes=4;em("gbhint",{shown:1,done:true,by:"menu"})', N, 'gbhint');
   ok('...once a visit; done for good once the ✦ menu has been opened', P.once2[0] === null && /The ✦: shown once this visit/.test(P.once2[2]) && P.done[0] === null && /The ✦: done for good \(the visitor opened the ✦ menu\)/.test(P.done[2]), [P.once2[2], P.done[2]]);
@@ -140,7 +140,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await pokeAzu(1);
   const got = await until('gdIs("gbhint")', 8000); await W(400);
   const st = await R(look); const arm = await R('[ph.querySelector(".azfab").classList.contains("point-gb"),G.gd.cur&&G.gd.cur.why,S.gdVisitor.visit.pokes]');
-  ok('The ✦ after 4 pokes (real clicks on Azu): not after 3; after the 4th, Azu lifts its arm to the ✦ and says it beside it: 7:1, 0 px over the ✦, words or bar, 44 px', p3[0] === 3 && p3[1] === 0 && got && arm[0] && /4 pokes on Azu/.test(arm[1]) && st[6] === 'Need anything? Tap ✦.' && st[1] >= 7 && st[2] === 0 && st[3] === 0 && st[4] === 0 && st[5] >= 44, [p3, got, arm, st]);
+  ok('The ✦ after 4 pokes (real clicks on Azu): not after 3; after the 4th, Azu lifts its arm to the ✦ and says it beside it: 7:1, 0 px over the ✦, words or bar, 44 px', p3[0] === 3 && p3[1] === 0 && got && arm[0] && /4 pokes on the mascot/.test(arm[1]) && st[6] === 'Need anything? Tap ✦.' && st[1] >= 7 && st[2] === 0 && st[3] === 0 && st[4] === 0 && st[5] >= 44, [p3, got, arm, st]);
   await until('!G.gd.cur', 9000);
   await pokeAzu(4);
   const again = await until('gdIs("gbhint")', 2000);
@@ -195,7 +195,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const newRows = await R('var o=[];ed.querySelectorAll(\'[data-fo="gt4"] .row,[data-fo="gd:g:ontour"] .row\').forEach(function(r){var k=rowKey(r);if(k&&o.indexOf(k)<0&&k.indexOf(gdGroupPath("card"))!==0&&k.indexOf(gdGroupPath("howto"))!==0&&k.indexOf(gdGroupPath("pages"))!==0&&/^guidance\\.(kinds\\.\\d+\\.groups\\.\\d+\\.(on|cap|gap)|items\\.(inview|gbhint)\\.)/.test(k))o.push(k)});o');
   ok(`every new row has its demo (${newRows.length} rows: the 4 groups' On, At most a visit and Gap; {point} in the middle's and The ✦'s, Lines per point, After pokes and After idle among them; round 6's full item form gave each item 32 rows; round 7 adds Fun's 2 groups' 6 and The ✦'s Or a pause late; round 9 The ✦'s In Things to try; round 12: On the tour has no At most a visit or Gap rows of a group, its own rhythm instead)`, newRows.length === 82 && newRows.indexOf('guidance.items.inview.cardLine') >= 0 && newRows.indexOf('guidance.items.gbhint.pokes') >= 0 && newRows.indexOf('guidance.items.gbhint.idleFor') >= 0 && (await R(`${JSON.stringify(newRows)}.filter(function(k){return!rowDemoOf(k)})`)).length === 0, newRows.length);
   const seen = {}, missing = [];
-  const CHIP_RE = { [gp + 'gap']: /×10 · What's in view's gap: \d+ s/, 'guidance.items.gbhint.pokes': /A poke on Azu: 4 of 4/, 'guidance.items.gbhint.idleFor': /×10 · Idle: no touch, the phone still: \d+ s/, 'guidance.items.inview.cardLine': /Lines per point: a point with a card says its own line/, [gp + 'cap']: /What's in view: at most 12 a visit/ };
+  const CHIP_RE = { [gp + 'gap']: /×10 · What's in view's gap: \d+ s/, 'guidance.items.gbhint.pokes': /A poke on the mascot: 4 of 4/, 'guidance.items.gbhint.idleFor': /×10 · Idle: no touch, the phone still: \d+ s/, 'guidance.items.inview.cardLine': /Lines per point: a point with a card says its own line/, [gp + 'cap']: /What's in view: at most 12 a visit/ };
   for (const k of newRows) {
     await R('document.body.dataset.rowdemo="";window.__chips=[];clearInterval(window.__chI);window.__chI=setInterval(function(){var c=ph.querySelector(".gdchip");if(c&&window.__chips.indexOf(c.textContent)<0)window.__chips.push(c.textContent)},50)');
     const lb = await R(`var c=ed.querySelector('[data-fo="gt4"] .row [data-set="@${k}"],[data-fo="gt4"] .row [data-num="@${k}"],[data-fo="gd:g:ontour"] .row [data-set="@${k}"]'),l=c&&c.closest(".row").querySelector("label.rd");if(l){l.scrollIntoView({block:"center"});var r=l.getBoundingClientRect();[r.left+12,r.top+r.height/2]}else null`);

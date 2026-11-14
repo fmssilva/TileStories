@@ -93,6 +93,10 @@ domain items -> the domain guide's `## TODOs` (tagged with the step that picks t
   the next ones), every block runs only BLOCK -- the fixtures of the component under review + full EditMode; everything else
   only has to compile. CORE still runs at least every 4th block (deferring it over 8 blocks of P1-R1 left 16 reds from
   several blocks to untangle at once); FULL waits for the end of that review. Say in every answer how many blocks since the last CORE.
+- **Count by blocks and run the long tiers alongside** (the developer, 2026-11-13; `40-testing.md` 4.2): every brief is one block
+  (17b counts), the counts since the last CORE and FULL are block numbers, never dates. A block green on its own tier is merged;
+  CORE or FULL then runs on a `git worktree` of `master` while the next block is built, and a red it finds becomes an item in the
+  block then running. With one Unity Editor, the next block starts with its Unity-free parts while the long run holds Unity.
 - **Maintenance cadence:** every ~12 blocks (with that FULL run, and before a domain close-out) the next block is MAINTENANCE, in
   this order: `skills/Test_Suite_Review.md` (faster, still trustworthy), `skills/Code_Health_Review.md` (simple, in its place, no
   dead / duplicated / speculative code), then `skills/Guidelines_Review.md` (rules true, short, no history). Count the blocks

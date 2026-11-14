@@ -1,0 +1,27 @@
+/* The Editor's accordion and its sticky headers (guidance round 20): editor/accordion.js. A tab drawn as an accordion (#ed.acc): its
+   sections one line each, the open section's header pinned at the top while scrolling and its open foldout's header just under it.
+   The two heights are fixed, so the second pins exactly at the first's bottom and a link lands under both (scroll-margin). */
+#ed.acc{--acc1:34px;--acc2:32px}
+.accbar{display:flex;align-items:center;gap:8px;margin:2px 0 8px;padding:5px 8px;border:1px solid #2E2E2E;border-radius:4px;background:#333}
+.accbar .sp{flex:1}
+.accbar .acclab{font:600 11px/1 system-ui;color:#B4BAC1;white-space:nowrap}
+.accbar .seg{flex:none;width:110px;flex-wrap:nowrap}
+/* level 1: a section on one line: its number and name, a short sub-line (cut with an ellipsis), its quiet count, its badge */
+#ed.acc > details.fo{margin:4px 0}
+#ed.acc > details.fo > summary{position:sticky;top:0;z-index:4;height:var(--acc1);box-sizing:border-box;padding:0 10px;background:#3C3C3C;white-space:nowrap;border-radius:3px}
+#ed.acc > details.fo[open] > summary{border-radius:3px 3px 0 0;box-shadow:0 1px 0 #262626}
+#ed.acc > details.fo > summary .acct{flex:none;font-size:12.5px}
+#ed.acc summary > .sub{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#ed.acc > details.fo > summary .accn{flex:none;font:500 11px/1 system-ui;color:#9AA0A6}
+#ed.acc > details.fo > summary .badge{flex:none}
+/* level 2: a section's foldout; pinned just under its section's header while open */
+#ed.acc > details.fo > .inner > details.fo{scroll-margin-top:var(--acc1)}
+#ed.acc > details.fo > .inner > details.fo > summary{position:sticky;top:var(--acc1);z-index:3;height:var(--acc2);box-sizing:border-box;padding-top:0;padding-bottom:0;background:#414141;white-space:nowrap;overflow:hidden}
+#ed.acc > details.fo > .inner > details.fo[open] > summary{box-shadow:0 1px 0 #2C2C2C}
+/* an item's own line (3 · Games on the tour): one line too, its place cut with an ellipsis, its ▸ Show now kept */
+#ed.acc > details.fo > .inner > details.fo > summary .gdi{flex-wrap:nowrap;overflow:hidden}
+#ed.acc > details.fo > .inner > details.fo > summary .gdi > *{flex:none}
+#ed.acc > details.fo > .inner > details.fo > summary .gdi .gdhow{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* a row or a deeper foldout scrolled to by a link lands under the pinned headers */
+#ed.acc > details.fo > .inner > .row,#ed.acc > details.fo > .inner > :not(details){scroll-margin-top:calc(var(--acc1) + 4px)}
+#ed.acc > details.fo > .inner > details.fo .row,#ed.acc > details.fo > .inner > details.fo details.fo{scroll-margin-top:calc(var(--acc1) + var(--acc2) + 4px)}

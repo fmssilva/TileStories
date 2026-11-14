@@ -46,7 +46,7 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
       a stopped tour, Previous, the ✦ and its menu on the card and the wall.
     - `test9n` (87 s): the Editor's shell (`editor/shell`, `editor/demo`, `editor/card-tab`): every row of every tab has its demo
       (NO DEMO), a sample of each kind of row by real clicks.
-    - `test9r` (71 s): the Guide tab (`editor/guide-tab`): its six sections, every row key and foldout kept, the levels, the draw time.
+    - `test9r` (71 s): the Guide tab (`editor/guide-tab`): its six sections (an accordion since round 20), every row key and foldout kept, the levels, the draw time.
     - `test9se` (201 s): the shared words (`core/words`' `nameIn`: a name's article mid-sentence) and Mascot Off's ✦ alone.
     - `test9t` (271 s): the tour from each card (`guide/autotour`, `core/content`'s `KWORDS` and `POINTS`, `card/blocks`'
       `blockSays`): the four points' tours, EN and PT, no fact twice, the links, the intro lines, the teaser, the play by real taps.
@@ -61,6 +61,11 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
     test9db into test9db and test9dc, test9e into test9e and test9ea, test9sf into test9sf and test9sg).
   - A wider tier confirms, never discovers: green on the feature tests before the core tests, on the core before the full. A
     round's report names the tier it closed on and the rounds since the last core and full tests.
+  - **Counted by rounds, never by date** (the developer, 2026-11-13): every brief is one round (17b and 17c count). The full
+    tests, tracked once by their date, were missed for 14 rounds (11 to 20).
+  - **Core and full run alongside the next round** (the developer, 2026-11-13): a round green on its feature tests is merged;
+    the core or full run starts on a `git worktree` of `master` outside this folder, while the next round is built here. A red
+    it finds becomes an item of the round then running, never a reason to hold it. Both check the CPU before each file.
 - **The tests, by feature:**
   - *The sheet and the card's chrome* (`phone/sheet`, `phone/grabber`, `phone/redraw`, `card/chrome-pinned`, `card/locate`):
     `tests/test8f.js` checks the sheet's gestures, the pinned close and settings, the demo card's X, and that a change moves no
@@ -326,6 +331,17 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
     18 s the first time, the two Editor rows; [reduced motion] the glow alone, no hop. `MUTATE=1 node tests/test9x.js` picks the set by its count, puts the old
     introduction back, leaves the hero's words under a beat card, takes the hero's mascot away, moves the tail off the head and waits 8 s: the checks named
     [voice], [intro], [promise], [card], [tap here] and [guess] turn red.
+  - *The Editor as an accordion, guidance round 20* (`editor/accordion.js`, `editor/guide-tab.js`, `guide/hero-start.js`'s glow option, the review's moved
+    rows in `guide/person.js`, `world/wall.js`'s row placed by `GUIDE_PLAN`, `agent/agent.js`): `tests/test9y.js` checks [collapsed] a fresh page, the Guide tab opened by a
+    real click: the six sections collapsed, one line each (34 px: number and name, a sub-line on one line, a quiet count), all six in the first screen, no foldout
+    open, no chip row, Collapse all and One section open at a time; [open] a real click opens one, the others as they were, its foldouts collapsed, remembered
+    after a re-render and a trip to another tab, One section open at a time On closing the others, Collapse all; [links] Ask about the view's link to What's in
+    view and Captions' Highlight link (real clicks) opening their path and landing under the pinned headers; [sticky] by the test's own arithmetic at 5 wheel
+    steps: the section's header at 0 px, the foldout's at its bottom, no overlap, one line each on opaque colours, a row scrolled to under them, a third level not
+    pinned, a real tap on each pinned header back to its start, still open; [review] the moved and renamed rows where the report says, each with its ? and its
+    ▸ (pressed: the demo on the phone); [glow] Once per visit, On every new card and Off by real clicks, each by real taps on the Ribeira Palace's marker, its
+    Start and the Torreão's pin, and the row's ▸ playing its demo. `MUTATE=1 node tests/test9y.js` opens the sections by level, unpins the headers, leaves the
+    Lab's wall row in Ask about the view and ignores the glow option: the checks named [collapsed], [sticky], [review] and [glow] turn red.
   - *Every Editor row's demo, guidance round 10* (`editor/demo`, the rows' modules: `editor/card-tab`, `card/controls`, `card/blocks`,
     `card/pages`, `card/states`, `card/hints`, `editor/texts`, `editor/components`, `editor/marker-tab`, `mascot/azu2d`, `guidance/editor`):
     `tests/test9n.js` checks that the self-test's NO DEMO check walks every tab and finds no row without a demo but its named exemptions

@@ -7,7 +7,7 @@ var COMP={s5viewer:["Card Controls","Picture viewer"],s5player:["Card Controls",
  s5pager:["Card Controls","Section pager"],s5openrow:["Card Controls","Open Row"],s5expand:["Card Controls","Expand Row"],
  s5back:["Card Controls","Back button"],s5crumb:["Card Controls","Breadcrumb"],s5prevnext:["Card Controls","Previous / Next buttons"],s5loc:["Card Controls","Locate Button"],
  s5sticky:["Card Controls","Sticky Action"],s5term:["Card Controls","Glossary popup"],s5termpage:["Card Controls","Term page"],
- s7voice:["Guide","Narration"],s7hero:["Guide","Hero button"],s7block:["Guide","Guide block"],s7cap:["Guide","Captions"],s7coach:["Guide","Invite to try"],
+ s7voice:["Guide","Music"],s7hero:["Guide","Start the guide"],s7block:["Guide","Guide block"],s7cap:["Guide","Captions"],s7coach:["Guide","Invite to try"],
  s7tour:["Guide","The tour › Guide panel › Tour controls"],s7resume:["Guide","Continue the tour"],s7mascot:["Guide","The mascot"],s7ask:["Guide","Ask the mascot › What the visitor sees"],
  s7agent:["Guide","Ask the mascot › What the visitor sees › the answers"],"g:10":["Global Scene","Select, Filter & Search"],"g:10s":["Global Scene","Search box"],"g:10f":["Global Scene","Filters button"],"g:11":["Global Scene","Onboarding hints"]};
 function ownerName(o){var p=o.split(":");if(p[0]==="el")return "Blocks & Components › Elements › "+(KIND[p[1]]?KIND[p[1]].n:p[1]);if(p[0]==="eg")return "Blocks & Components › Elements › "+p[1]+" (every one)";
@@ -84,7 +84,7 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   /* 7 · Guide: one component per element of the tour */
   var s7=innerOf(d,"s7");if(s7){var g=function(l,r){return takeRow(s7,l,r)},rules=s7.querySelector(":scope > .note.fixed");rules=rules?row("Fixed rules",'<span class="uses">pause, take-over, captions, Reduce Motion</span>',rules.textContent.replace(/^Fixed rules:\s*/,"")):"";
     var vo=g("Sources")+g("Speed")+g("Music bed")+g("Music volume")+g("Under the voice")+g("Track")+g("Credit")+g("Playing now")+g("Visitor can choose the music"),he=g("Start from the hero","Shown"),bl=g("Guide block","Shown"),ca=g("Captions","Shown")+g("Highlight what is read"),co2=g("Invite to try","Shown"),ma=g("Mascot","Character"),as=g("Ask the guide","Answers from");
-    s7.innerHTML=rules+comp("s7voice","the voice, its speed and the music under it",vo)+comp("s7hero","the button on the hero that starts the tour",he)+comp("s7block","the tile that starts the tour, first in About",bl)+
+    s7.innerHTML=rules+comp("s7voice","the music under the voice (the voice itself: 1 · The mascot › Voice)",vo)+comp("s7hero","the hero's button that starts the tour, and its glow",he)+comp("s7block","the tile that starts the tour, first in About",bl)+
      comp("s7cap","the words being read, at the bottom",ca)+comp("s7coach","at a block to try, the guide waits for the gesture",co2)+
      comp("s7tour","progress, previous, pause, next, sound, captions, Ask and stop","")+comp("s7resume","one way back into a stopped tour: this visit at its sentence, a later visit after a recap","")+comp("s7mascot","a small tile that follows the block being told",ma)+comp("s7ask","questions by text or voice",as)}
   /* every owner gets its Aa and its Demo content at the top of its own foldout */
