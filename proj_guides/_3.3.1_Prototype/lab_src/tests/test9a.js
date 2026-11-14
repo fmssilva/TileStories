@@ -28,13 +28,17 @@ const TEXT = 'O palácio tinha uma ópera, inaugurada em março de 1755.';
   await p.route('**/microsoft-cognitiveservices-speech-sdk@*/**', r => r.fulfill({ status: 200, contentType: 'application/javascript', body: FAKE_SDK }));
   await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 90000 }); await p.waitForTimeout(500);
   const R = src => p.evaluate(s => LAB.run(s), src); const W = ms => p.waitForTimeout(ms);
+  // round 21 (21.10): an Editor row inside closed foldouts (the accordions of rounds 20 and 21) is reached as the developer does: each
+  // closed foldout above it opened by a real click on its header, from the outside in, then the row's own control clicked (edClick)
+  const openAbove = async sel => { for (let i = 0; i < 8; i++) { const m = await p.evaluate(s => LAB.run(`(function(){var b=document.querySelector(${JSON.stringify(s)});if(!b)return false;var ds=[];for(var d=b.closest("details");d;d=d.parentElement&&d.parentElement.closest("details"))ds.unshift(d);var c=ds.filter(function(d){return!d.open})[0];if(!c)return false;c.querySelector(":scope > summary").setAttribute("data-t21","1");return true})()`), sel); if (!m) return; await p.locator('summary[data-t21="1"]').first().click(); await p.evaluate(() => LAB.run('document.querySelectorAll("[data-t21]").forEach(function(x){x.removeAttribute("data-t21")});""')); await p.waitForTimeout(120); } };
+  const edClick = async (sel, o) => { await openAbove(sel); await p.locator(sel).first().click(o); };
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   // round 7: a change to an Editor row now shows its demo on the phone; this test changes Voice of the answers mid-scene, so it keeps the phone as it set it
   await R('S.ui.rowDemo=false;S.guideCfg.voice="device";S.hints.on=false;S.previewBar=false;S.guideMute=false;S.introSeen=true;S.lang="pt";S.guideCfg.azuStyle="tile";S.view="card";S.stop="half";renderAll(false);S.tab="guide";S.op.s7ask=true;renderEditor();ed.querySelector(\'[data-fo="s7agent"]\').open=true'); // round 14: Voice of the answers is in Ask Azu › What the visitor sees (s7ask)
   // 1. the Editor: the row and its status, with no keys here
   const opts = await R('Array.from(ed.querySelectorAll(\'[data-set="@agentCfg.liveVoice"]\')).map(function(b){return b.textContent+(b.getAttribute("aria-pressed")==="true"?"*":"")})');
   ok('Editor: Voice of the answers offers the device voice, Azure (live, chosen: the developer\'s default) and ElevenLabs (live)', opts.join('|') === 'Device voice|Azure (live)*|ElevenLabs (live)', opts);
-  await p.locator('[data-set="@agentCfg.liveVoice"][data-v="eleven"]').click(); await W(300);
+  await edClick('[data-set="@agentCfg.liveVoice"][data-v="eleven"]'); await W(300);
   ok('...ElevenLabs with no key here: the Editor says the device voice reads the answers', /ElevenLabs none.*Without its key the answers use the device voice/.test(await R('ed.querySelector(".lvstat").textContent')));
   ok('...and its model row appears (Flash v2.5 chosen)', await R('(ed.querySelector(\'[data-set="@agentCfg.elevenModel"][aria-pressed="true"]\')||{}).textContent') === 'Flash v2.5 (fastest)');
   // 2. ElevenLabs, live (faked): the request, the audio, the words, the mouth from the letters at their times
@@ -49,14 +53,15 @@ const TEXT = 'O palácio tinha uma ópera, inaugurada em março de 1755.';
   ok('...the mouth moves with the voice (several shapes) and rests at the end', e1.shapes >= 3 && e1.rest, [e1.shapes, e1.rest]);
   ok('...the Editor names what happened (ElevenLabs, its time, the shapes from the letters)', /Last answer: ElevenLabs, \d+ ms to the audio, \d+ mouth shapes from the letters at their times/.test(await R('lvStatusText()')), await R('lvStatusText()'));
   // 3. Azure, live (a fake SDK): the voice, the visemes as the mouth
-  await p.locator('[data-set="@agentCfg.liveVoice"][data-v="azure"]').click(); await W(300);
+  await edClick('[data-set="@agentCfg.liveVoice"][data-v="azure"]'); await W(300);
   const a1 = await speak();
-  ok('Azure: the SDK loads on demand, with the key, the region and Raquel for Portuguese, asking for the facial curves (SSML)', JSON.stringify(await R('window.__az')) === JSON.stringify({ key: 'az-key', region: 'westeurope', voice: 'pt-PT-RaquelNeural', ssml: true }), await R('window.__az'));
+  // round 19 (21.10): the live voice speaks in the chosen voice set's own (the default Ryan · Duarte), no longer Sonia and Raquel
+  ok('Azure: the SDK loads on demand, with the key, the region and Duarte for Portuguese (the chosen voice, round 19), asking for the facial curves (SSML)', JSON.stringify(await R('window.__az')) === JSON.stringify({ key: 'az-key', region: 'westeurope', voice: 'pt-PT-DuarteNeural', ssml: true }), await R('window.__az'));
   ok('...the answer plays and ends; the mouth follows the facial curves (180 frames, several shapes)', a1.rec && a1.end === 1 && a1.shapes >= 3 && /Azure's facial curves/.test(a1.last && a1.last.from || '') && a1.last.shapes === 180, a1);
   // 4. the tour's own lines keep their voice (only the agent's answers go live)
   ok('A tour line (not an answer) does not call a live voice', await R('(function(){var n=0,f=lvAzure;lvAzure=function(t){n++;return f(t)};G.answer="";say("Bem-vindo ao Paço da Ribeira.",function(){},function(){});lvAzure=f;stopSpeech();return n})()') === 0);
   // 5. a refused key: the device voice reads the answer, and the Editor says so
-  await p.locator('[data-set="@agentCfg.liveVoice"][data-v="eleven"]').click(); await W(300); elStatus = 401;
+  await edClick('[data-set="@agentCfg.liveVoice"][data-v="eleven"]'); await W(300); elStatus = 401;
   await R('G.answer=' + JSON.stringify(TEXT) + ';window.__dev=0;var f=lvDevice;lvDevice=function(t,w,e){window.__dev++;stopSpeech()};say(G.answer,function(){},function(){})'); await W(1500);
   ok('ElevenLabs refuses the key: the device voice reads the answer instead', await R('window.__dev') === 1);
   ok('...and the Editor says it failed', /ElevenLabs failed \(ElevenLabs answered 401\); the device voice read it/.test(await R('lvStatusText()')), await R('lvStatusText()'));

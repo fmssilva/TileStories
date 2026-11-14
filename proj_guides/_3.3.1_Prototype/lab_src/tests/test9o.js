@@ -15,6 +15,10 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const errs = []; p.on('pageerror', e => errs.push(e.message));
   await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 90000 }); await p.waitForTimeout(800);
   const R = src => p.evaluate(s => LAB.run(s), src); const W = ms => p.waitForTimeout(ms);
+  // round 21 (21.10): an Editor row inside closed foldouts (the accordions of rounds 20 and 21) is reached as the developer does: each
+  // closed foldout above it opened by a real click on its header, from the outside in, then the row's own control clicked (edClick)
+  const openAbove = async sel => { for (let i = 0; i < 8; i++) { const m = await p.evaluate(s => LAB.run(`(function(){var b=document.querySelector(${JSON.stringify(s)});if(!b)return false;var ds=[];for(var d=b.closest("details");d;d=d.parentElement&&d.parentElement.closest("details"))ds.unshift(d);var c=ds.filter(function(d){return!d.open})[0];if(!c)return false;c.querySelector(":scope > summary").setAttribute("data-t21","1");return true})()`), sel); if (!m) return; await p.locator('summary[data-t21="1"]').first().click(); await p.evaluate(() => LAB.run('document.querySelectorAll("[data-t21]").forEach(function(x){x.removeAttribute("data-t21")});""')); await p.waitForTimeout(120); } };
+  const edClick = async (sel, o) => { await openAbove(sel); await p.locator(sel).first().click(o); };
   const until = async (src, ms) => { const t0 = Date.now(); while (Date.now() - t0 < ms) { if (await R(src)) return true; await W(60); } return false; };
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   const box = async sel => p.locator('#ph ' + sel).first().boundingBox();
@@ -80,8 +84,10 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('A real drag: the knob follows the finger and the time shows where it will go; on release the tour is at that stop (10) and that sentence (not its first), speaking from it', Math.abs(mid[0] - tx) < 3 && mid[1] && mid[2] === 9 && mid[3] && after[0] === 9 && want > 0 && after[1] === want && after[3], [mid, after, want]);
   await until(`G.hl&&G.hl.k>=${want}`, 3000);
   ok('...the voice goes on from the sentence\'s first word (the words lit from there)', await R(`G.hl.k>=${want}`), await R('G.hl.k'));
-  const tm = await R('var s=ph.querySelector(".gd-time").textContent;[s,/^\\d+:\\d\\d \\/ \\d+:\\d\\d$/.test(s),mmss(dkTimes().tot)]');
-  ok('The time "m:ss / m:ss" from the words\' timing', tm[1] && tm[0].endsWith(tm[2]), tm);
+  // round 21 (21.1): Ink glass's Open shows the time at the progress line's two ends (where the tour is, and its whole), no longer "m:ss / m:ss"
+  const tm = await R('var e=ph.querySelector(".gd-time[data-t=el]"),t=ph.querySelector(".gd-time[data-t=tot]");[e&&e.textContent,!!e&&/^\\d+:\\d\\d$/.test(e.textContent),mmss(dkTimes().tot),t&&t.textContent,mmss(dkElapsed(dkTimes()))]');
+  const sec = s => { const a = String(s || '').split(':'); return +a[0] * 60 + +a[1]; };
+  ok('The time from the words\' timing at the progress line\'s ends (round 21): where the tour is, and its whole length', tm[1] && tm[3] === tm[2] && Math.abs(sec(tm[0]) - sec(tm[4])) <= 1, tm);
 
   // ---------- 5. the voice moving: bars move while it speaks, still when paused ----------
   await tourAt('ink', 'g5', 'mini'); await until('G.timer||G.utter', 3000); await W(300);
@@ -194,7 +200,9 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const shown = [];
   for (const k of keys) {
     await R(base + 'if(G.on)stopTour();document.body.dataset.rowdemo="";S.tab="guide";renderEditor();ed.querySelectorAll(\'[data-fo="gt1"],[data-fo="s7dock"],[data-fo="s7voice"]\').forEach(function(f){f.open=true})');
-    const lb = p.locator(`.row:has([data-set="@${k}"],[data-sel="@${k}"],[data-num="@${k}"]) > label.rd`).first();
+    // round 21 (21.10): Speed moved to 1 · The mascot › Voice (round 19): the foldouts above each row opened by real clicks, as the developer does
+    const rsel = `.row:has([data-set="@${k}"],[data-sel="@${k}"],[data-num="@${k}"])`; await openAbove(rsel + ' > label');
+    const lb = p.locator(rsel + ' > label.rd').first();
     if (await lb.count()) await lb.scrollIntoViewIfNeeded(); const bb = await lb.boundingBox(); if (!bb) { shown.push(k + ' (no ▸)'); continue; }
     await p.mouse.click(bb.x + bb.width - 12, bb.y + bb.height / 2); // on the green button itself
     await until('/found/.test(document.body.dataset.rowdemo||"")', 3500); shown.push(await R('document.body.dataset.rowdemo'));
@@ -204,7 +212,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const md = await R('[!!G.music,G.musicDemo,+musicTarget().toFixed(4)]'); await R('musicOn(false);G.musicDemo=false;S.guideCfg.musicVol=15');
   ok('A music row\'s demo plays the music at that setting for a few seconds, even with the Music bed Off', md[0] && md[1] && Math.abs(md[2] - 0.1) < 1e-3, md);
   await R(base + 'if(G.on)stopTour();S.guideCfg.look="paper";S.ui.rowDemo=true;S.tab="guide";renderEditor();ed.querySelector(\'[data-fo="s7dock"]\').open=true'); await W(200);
-  await p.locator('[data-set="@guideCfg.look"][data-v="player"]').click(); await until('/guideCfg\\.look\\|found/.test(document.body.dataset.rowdemo||"")', 3500);
+  await edClick('[data-set="@guideCfg.look"][data-v="player"]'); await until('/guideCfg\\.look\\|found/.test(document.body.dataset.rowdemo||"")', 3500);
   ok('A change to Look (a real click) shows its demo: the tour at Open in that Look', await R('S.guideCfg.look==="player"&&!!ph.querySelector(".gdock.lk-player.h-peek")'));
   await R('if(G.on)stopTour();S.guideCfg.look="ink"');
   ok('The words and their owners (the panel\'s, the music\'s)', await R('["dock_speed","dock_readall","dock_seek","dock_open","dock_small"].every(function(k){return TXOWN[k]==="s7dock"})&&["settings_music","settings_music_vol","settings_music_credits"].every(function(k){return TXOWN[k]==="s5settings"})&&L(S.tx.dock_readall)==="Read all"'));

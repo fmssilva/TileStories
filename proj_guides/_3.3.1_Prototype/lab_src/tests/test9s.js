@@ -95,6 +95,9 @@ const CAP = process.env.CAP || '';
   /* run each surface in each variant; measure; capture */
   /* three files of one table: test9s the ✦, Azu, the panel, the captions and the focus on a block (01-09); test9sc the focus on a spot and on a
      marker, the bubbles and the first pages (10-22, 29-33); test9sd Ask Azu (23-28); CAP or ALL=1 runs every surface */
+  // round 21 (21.10: MUTATE=1 on PART=c caught nothing, its surfaces have no panel chips nor told words): PART=c's own mutation: the
+  // bubbles' and the pages' words faint (2:1) and their buttons 30 px tall
+  if (process.env.MUTATE && process.env.PART === 'c') { await R('var __mc=document.createElement("style");__mc.textContent="#ph .gdbub,#ph .gdbub *,#ph .gdpages,#ph .gdpages *{color:#C9C4BC!important}#ph .gdbub .gdcta,#ph .gdpages button{height:30px!important;min-height:0!important;max-height:30px!important}";document.head.appendChild(__mc)'); console.log('MUTATION (PART=c): the bubbles\' and the pages\' words faint, their buttons 30 px'); }
   const PART = process.env.PART || '1', inPart = nn => process.env.ALL || CAP ? true : PART === '1' ? +nn <= 9 : PART === 'c' ? (+nn >= 10 && +nn <= 22) || +nn >= 29 : +nn >= 23 && +nn <= 28;
   const only = (process.env.ONLY || '').split(',').filter(Boolean);
   if (CAP) fs.mkdirSync(CAP, { recursive: true });

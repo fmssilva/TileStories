@@ -10,7 +10,9 @@
    a Button and a Toggle; the pinned headers: two header elements (position: absolute) at the top of the tab's ScrollView, filled with
    the section's and the foldout's names and moved from ScrollView.verticalScroller.valueChanged (the foldout whose header has scrolled
    above the view's top is the one pinned); a click on one sets scrollOffset to its foldout's top */
-var ACC_TABS={};
+/* round 21 (21.9, the developer, 2026-11-14): the Detail Card and Global tabs are accordions too; the Guide tab switches itself on
+   (editor/guide-tab.js). On these two the bar (Collapse all, One section open at a time) is put at the tab's top after its draw */
+var ACC_TABS={card:true,global:true};
 S.ui.accOne=false;
 function accOn(tab){return!!ACC_TABS[tab===undefined?S.tab:tab]}
 /* the tab's sections start collapsed: level 1 (the default) shows them as the accordion's list, level 2 opens them (and their foldouts),
@@ -22,7 +24,7 @@ function accBar(){return'<div class="accbar" role="toolbar" aria-label="Sections
   help("An Editor preference, not saved to the wall. Off: each section opens and closes on its own. On: opening a section closes the one that was open. Collapse all closes every section and foldout of this tab. While you scroll, the open section's name stays at the top, its open foldout's just under it; a tap on either scrolls back to its start.")+'</div>'}
 /* each section's quiet count, on its line: its foldouts ("6 parts"), or its rows when it has none */
 function accCount(t){[].forEach.call(t.querySelectorAll(":scope > details[data-fo]"),function(d){var sm=d.querySelector(":scope > summary"),sp=sm&&sm.querySelector(":scope > .sp");if(!sp||sm.querySelector(":scope > .accn"))return;
-  var n=d.querySelectorAll(":scope > .inner > details[data-fo]").length,r=d.querySelectorAll(":scope > .inner > .row").length,w=n?n+(n===1?" part":" parts"):r+(r===1?" row":" rows");
+  var n=d.querySelectorAll(":scope > .inner > details[data-fo]").length,r=d.querySelectorAll(":scope > .inner > .row").length;if(!n&&!r)return;var w=n?n+(n===1?" part":" parts"):r+(r===1?" row":" rows");
   sp.insertAdjacentHTML("afterend",'<span class="accn">'+w+'</span>')})}
 /* a foldout's level in the tab: 1 a section, 2 a foldout of it (pinned too), 3 and deeper (not pinned) */
 function accLevel(d){var n=1,p=d.parentElement&&d.parentElement.closest("details[data-fo]");while(p&&ed.contains(p)){n++;p=p.parentElement&&p.parentElement.closest("details[data-fo]")}return n}
@@ -30,7 +32,7 @@ function accLevel(d){var n=1,p=d.parentElement&&d.parentElement.closest("details
 function accPinned(d){var s=d.querySelector(":scope > summary");return!!s&&d.open&&s.getBoundingClientRect().top-d.getBoundingClientRect().top>1}
 /* back to a foldout's start: its top just under the headers pinned above it (its scroll-margin) */
 function accBack(d){d.scrollIntoView({block:"start",behavior:"smooth"})}
-on("renderEditor.after",function(){ed.classList.toggle("acc",accOn())});
+on("renderEditor.after",function(){ed.classList.toggle("acc",accOn());if(!accOn())return;if(!ed.querySelector(":scope > .accbar"))ed.insertAdjacentHTML("afterbegin",accBar());accCount(ed)});
 on("setOpt.answer",function(key,v){if(key==="ui.accOne"){S.ui.accOne=v==="true";renderEditor();return true}});
 /* One section open at a time: a section opened by the developer closes the one that was open (never a draw's own toggle) */
 ed.addEventListener("toggle",function(e){var d=e.target;if(!accOn()||!S.ui.accOne||!d.open||!d.dataset||!d.dataset.fo||d.parentElement!==ed||edQuiet(d))return;

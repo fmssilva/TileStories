@@ -55,6 +55,25 @@ function speedNext(v){for(var i=0;i<SPEEDS.length;i++)if(SPEEDS[i]>v+1e-6)return
 function setGuideSpeed(v){S.vis.speed=v;G.rate=v;if(G.recAudio)G.recAudio.playbackRate=v;else if(G.on&&!G.paused&&(G.utter||G.timer)&&G.sayArgs)speakFrom(G.hl&&G.hl.k>=0?G.hl.k:0,false);
   ph.querySelectorAll(".gd-speed").forEach(function(b){b.textContent=spd(v)+"×";b.setAttribute("aria-label",fmt(TXT("dock_speed"),spd(v)))});dkTick()}
 ph.addEventListener("click",function(e){var b=e.target.closest('[data-g="speed"]');if(!b)return;e.stopPropagation();setGuideSpeed(speedNext(guideSpeed()))},true);
+/* ----- round 21 (the developer, 2026-11-13: "back 10 seconds and forward 10 seconds buttons, both in the minimal panel and in the big
+   one; in the minimal one maybe only the back 10 seconds"): 10 s back or on along the tour's own timeline (the steps' lengths summed,
+   guide/dock.js's dkTimes), across steps. Within the step said now the voice goes to the word at that time (a recorded line by its word
+   times; the device voice speaks again from that word); paused, it lands there and stays paused. In another step, that step starts from
+   that word (as a seek on the bar does). The time shows where it landed. Unity: the seek on the tour timeline (the sum of the steps'
+   clip lengths), AudioSource.time set to the word's start, the device TTS spoken from the word ----- */
+var SKIP_S=10;
+/* the step and the word at a time of the tour (s from its start) */
+function seekLand(sec){var T=dkTimes(),t=Math.max(0,Math.min(T.tot-.05,sec)),j=0;for(var i=0;i<T.stops.length;i++)if(T.stops[i].at<=t+1e-6)j=i;
+  var c=T.stops[j],o=Math.max(0,t-c.at),text=stepText(S.guideSteps[j]),n=(text.match(/\S+/g)||[]).length,sp=guideSpeed(),r=typeof recFile==="function"?recFile(text):null,w=r&&r.file&&r.file.words,k=0;
+  if(w&&w.length){for(var q=0;q<w.length;q++)if(w[q][0]/sp<=o)k=q}else k=Math.floor(o/(60/(170*sp)));
+  return{j:j,k:Math.max(0,Math.min(Math.max(0,n-1),k)),t:t}}
+function seekBy(d){if(!G.on)return null;var T=dkTimes(),from=dkElapsed(T),L=seekLand(from+d),st=S.guideSteps[G.i];G.seekedTo={j:L.j,k:L.k,by:d,t:L.t,from:from};
+  var here=L.j===G.i&&st&&G.sayLine&&G.sayLine.text===stepText(st)&&!!(G.recAudio||G.utter||G.timer||G.resumeVoice||G.voiceWait||G.paused);
+  if(here&&G.paused){if(G.recAudio&&G.recWords){var w=G.recWords[L.k];G.recAudio.currentTime=w?w[0]:0}else G.pausedAt=L.k;if(G.hl){G.hl.k=L.k;G.hl.p=L.k;G.hl.at=performance.now()}}
+  else if(here){hideStopUi();if(!seekWord(L.k))here=false;else if(G.hl&&!G.recAudio){G.hl.k=L.k;G.hl.p=L.k}}
+  if(!here){hideStopUi();stopSpeech();G.paused=false;G.waiting=false;G.tryWait=false;G.askOpen=false;G.startWord=L.k;if(S.dockH==="full")S.dockH="peek";G.i=L.j;runStep()}
+  dkTick();return L}
+ph.addEventListener("click",function(e){var b=e.target.closest('[data-g="back10"],[data-g="fwd10"]');if(!b||!G.on)return;e.stopPropagation();seekBy(b.dataset.g==="back10"?-SKIP_S:SKIP_S)},true);
 /* ----- round 11: the progress bar seeks. A drag (its hit area 44 px high) or a tap: the stop under the finger, and within it the sentence
    at that place (its share of the stop's words); the knob and the time follow the finger, the voice goes there on release. Keys: ← → the
    stop before / after. Unity: a PointerDown / Move / Up manipulator on the bar's element (CapturePointer), the same rule ----- */

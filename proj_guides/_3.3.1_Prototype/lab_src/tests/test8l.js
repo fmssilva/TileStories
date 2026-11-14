@@ -36,7 +36,9 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('Expert: the quiz is hidden; tight corners; no ornaments', await R('getComputedStyle(scr.querySelector(\'[data-ref="b:b_quiz"]\')).display==="none"&&ph.dataset.corners==="tight"&&ph.dataset.orn==="off"'));
   // 4. the guide: length per audience, Azu's liveliness per audience
   await R('S.vis.aud="family";S.vis.len="";renderAll(false);startTour()');
-  const fs = await R('[S.guideSteps.map(function(s){return s.id}).join(","),S.guideCfg.life,L(S.guideSteps[0].text).slice(0,20)]');
+  // round 19 (21.10): the tour opens with the mascot's own introduction (its intro step, 1 · The mascot › Who); the family's welcome is the
+  // tour's first step after it (g0)
+  const fs = await R('var g0=S.guideSteps.filter(function(s){return s.id==="g0"})[0];[S.guideSteps.map(function(s){return s.id}).join(","),S.guideCfg.life,g0?L(g0.text).slice(0,20):""]');
   ok('Family: Short (no g5, g8, no deep step), Azu Lively, the guide\'s own welcome', !/g5|g8|g7x/.test(fs[0]) && fs[1] === 'lively' && /Hi! I'm Azu/.test(fs[2]), fs);
   await R('stopTour();S.vis.aud="expert";renderAll(false);startTour()');
   const es = await R('[S.guideSteps.map(function(s){return s.id}).join(","),S.guideCfg.life]');

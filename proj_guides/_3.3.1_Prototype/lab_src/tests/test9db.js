@@ -1,6 +1,7 @@
 // test9db (Playwright + the installed Edge): node test9db.js -> PASS/FAIL per check. The second half of round 9's test9d (split in
 // guidance round 10, by its own sections; every check kept as it was): each Editor row's values on the phone; each row's demo (the Guide tab, 6 · Audiences: a press on each label, a change) and the self-test failing a row without one.
-// (Its mutation is test9da's: the toast's Resume; test9n mutates the NO DEMO check itself.)
+// MUTATE=1 (round 21): the Mini's controls ignore Controls at Mini: the rows' values check turns red
+// (test9da keeps its own mutation, the toast's Resume; test9n mutates the NO DEMO check itself).
 // Guidance round 17b: split in two to keep each file under 300 s (it ran 530 s): test9db the rows' values, the first half of the rows'
 // demos (and the controls' three) and the NO DEMO checks; test9dc.js (HALF=2, this file) the second half of the rows' demos. Every check kept.
 const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
@@ -31,6 +32,9 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
 
   const T0 = Date.now(), tsec = s => console.log('TIME ' + s + ' ' + Math.round((Date.now() - T0) / 1000) + ' s');
   const HALF2 = process.env.HALF === '2';
+  // round 21 (21.10, the full tests: MUTATE=1 here caught nothing, the mutation was only test9da's): a mutation of what this file checks:
+  // the dock's controls at Mini come out as Pause only whatever the row says (a dead demo made the file wait past its 10 minutes)
+  if (process.env.MUTATE) { await R('dkMiniCtl=function(){return\'<div class="gd-mini">\'+dkPP("gd-mc gd-mpp")+\'</div>\'}'); console.log('MUTATION: the Mini\'s controls ignore Controls at Mini'); }
   if (!HALF2) {
   // ---------- each Editor row's values on the phone (real clicks on the Editor) ----------
   await R(base + 'S.tab="guide";S.op={gt1:true,s7dock:true,"gt:ways":true,s7gbtn:true,s7mascot:true};S.view="card";S.stop="full";renderAll(false)');
@@ -39,7 +43,7 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   const startAt = async () => { await R('S.view="card";S.stop="full";renderPhone(false);startTour();G.i=S.guideSteps.findIndex(function(s){return s.id==="g1"});stopSpeech();runStep()'); await W(400); };
   const want = [];
   for (const [v, chk] of [['compact', '!ph.querySelector(".gdock")&&!!ph.querySelector(".gbtn.tour .gb-ring")'], ['peek', '!!ph.querySelector(".gdock.h-peek")'], ['mini', '!!ph.querySelector(".gdock.h-mini")']]) { await pick('dockStart', v); await startAt(); want.push(['Starts at ' + v, await R(chk)]); await R('stopTour()'); }
-  for (const [v, chk] of [['pause', '!!ph.querySelector(\'.gd-mini [data-g="pause"]\')&&!ph.querySelector(\'.gd-mini [data-g="stop"]\')'], ['line', '!ph.querySelector(".gd-mini")&&!!ph.querySelector(".gd-main .gd-kb")'], ['pausestop', 'ph.querySelectorAll(".gd-mini button").length===2']]) { await pick('miniCtl', v); await startAt(); want.push(['Controls at Mini ' + v, await R(chk)]); await R('stopTour()'); }
+  for (const [v, chk] of [['pause', '!!ph.querySelector(\'.gd-mini [data-g="pause"]\')&&!ph.querySelector(\'.gd-mini [data-g="stop"]\')'], ['line', '!ph.querySelector(".gd-mini")&&!!ph.querySelector(".gd-main .gd-kb")'], ['pausestop', '!!ph.querySelector(\'.gd-mini [data-g="pause"]\')&&!!ph.querySelector(\'.gd-mini [data-g="stop"]\')&&!!ph.querySelector(\'.gd-mini [data-g="back10"]\')']]) { /* round 21 (21.3): the Mini has back 10 s too */ await pick('miniCtl', v); await startAt(); want.push(['Controls at Mini ' + v, await R(chk)]); await R('stopTour()'); }
   for (const [v, chk] of [['face', '!!ph.querySelector(".gbtn.ic-face .gb-ic svg rect")'], ['word', '!ph.querySelector(".gbtn .gb-ic")&&ph.querySelector(".gbtn").textContent==="Guide"'], ['star', '!!ph.querySelector(".gbtn.ic-star .gb-ic svg")']]) { await pick('gbIcon', v); await R('S.view="card";S.stop="full";renderPhone(false);scr.scrollTop=900;fabLayer()'); want.push(['Icon ' + v, await R(chk)]); }
   for (const [v, chk] of [['right', 'ph.querySelector(".gbtn-wrap").getBoundingClientRect().left-ph.getBoundingClientRect().left>180&&ph.querySelector(".azfab").getBoundingClientRect().right<=ph.querySelector(".gbtn").getBoundingClientRect().left'], ['left', 'ph.querySelector(".gbtn-wrap").getBoundingClientRect().left-ph.getBoundingClientRect().left<20']]) { await pick('gbSide', v); await R('S.view="card";S.stop="full";renderPhone(false);scr.scrollTop=900;fabLayer()'); const drawn = await until('!!ph.querySelector(".gbtn-wrap")&&!!ph.querySelector(".azfab")&&!!ph.querySelector(".gbtn")', 3000); want.push(['Side ' + v, drawn && await R(chk)]); }
   for (const [v, chk] of [['azu', '!ph.querySelector(".gbtn")&&!!ph.querySelector(".azfab")'], ['star', '!!ph.querySelector(".gbtn")&&!ph.querySelector(".azfab")'], ['both', '!!ph.querySelector(".gbtn")&&!!ph.querySelector(".azfab")']]) { await pick('gbtn', v); await R('S.view="card";S.stop="full";renderPhone(false);scr.scrollTop=900;fabLayer()'); want.push(['Guide button ' + v, await R(chk)]); }

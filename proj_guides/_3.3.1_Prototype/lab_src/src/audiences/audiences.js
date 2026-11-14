@@ -83,7 +83,7 @@ on("edCard.html",function(h){var lk=S.aud.looks;
       row("Try",'<button class="del" type="button" data-onbtry="1">Show it now</button>',""))+
     comp("s8set","in the visitor's Settings: who's exploring, and Short / Standard / Deep","")+
     comp("s8look","per audience: the mascot, the length, the type, the ornaments, the corners",looks+'<div class="note">Contrast and tap sizes pass in every set (the same tokens, a few values changed).</div>');
-  var sec=fo("s8",'6 · Audiences <span class="sub">· Family, Explorer, Expert</span>',["new","NEW"],body,1);
+  var sec=fo("s8",'<span class="acct">6 · Audiences</span> <span class="sub">· who the card speaks to (Family, Explorer, Expert): their looks, words and guide</span>',["new","NEW"],body,1);
   var d=document.createElement("div");d.innerHTML=h;var g=d.querySelector('[data-fo="s7"]');if(g)g.insertAdjacentHTML("afterend",sec);else{var i=d.innerHTML.lastIndexOf('<div class="json">');d.innerHTML=d.innerHTML.slice(0,i)+sec+d.innerHTML.slice(i)}
   ["s8onb","s8set"].forEach(function(o){var f=innerOf(d,o);if(f)f.insertAdjacentHTML("beforeend",ownbar(o)+ownPanels(o))});
   return d.innerHTML});

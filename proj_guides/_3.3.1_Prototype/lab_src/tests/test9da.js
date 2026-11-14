@@ -85,11 +85,12 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   await tap('.gd-hide'); await W(250); ok('The hide chevron hides the dock too (Compact)', await R('S.dockH==="compact"&&!ph.querySelector(".gdock")'));
   await tap('.gbtn.tour'); await until('!!ph.querySelector(".gd-grab")', 5000); await R('S.guideCfg.swipeCompact=false'); await drag('.gd-grab', 90); await W(250);
   ok('Swipe down to Compact Off: a swipe down at Mini stays at Mini', await R('S.dockH') === 'mini');
-  // Azu's own words at Compact: in its bubble above the ✦, or nowhere with captions off
+  // round 21 (21.5): at Compact a tour's words go to the teleprompter (Words during a tour, the default), never a bubble over the ✦; with
+  // captions off, nowhere
   await tourAt('g0', 'compact'); await W(400);
-  const bw = await R('var b=ph.querySelector(".gbubble"),w=ph.querySelector(".gbtn-wrap.intour");[!!b&&!!b.querySelector(".gw"),b&&w?Math.round(w.getBoundingClientRect().top-b.getBoundingClientRect().bottom):null]');
-  ok('Compact: Azu\'s own words in its bubble, above the ✦', bw[0] && bw[1] >= 0, bw);
-  await R('S.guideCfg.captions=false;renderGuide()'); ok('...with captions off, nowhere', await R('!ph.querySelector(".gbubble")&&!ph.querySelector(".gcap")'));
+  const bw = await R('var t=ph.querySelector(".gtele:not(.tl-out)"),w=ph.querySelector(".gbtn-wrap.intour");[!!t&&!!t.querySelector(".tl-now .tw"),!ph.querySelector(".gbubble"),!!w]');
+  ok('Compact: the mascot\'s words in the teleprompter (round 21), no bubble, the ✦ there', bw[0] && bw[1] && bw[2], bw);
+  await R('S.guideCfg.captions=false;renderGuide()'); ok('...with captions off, nowhere', await R('!ph.querySelector(".gbubble")&&!ph.querySelector(".gcap")&&!ph.querySelector(".gtele:not(.tl-out)")'));
   await R('S.guideCfg.captions=true');
 
   // ---------- Stop: the toast and Resume; Ask first ----------
@@ -205,7 +206,9 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
     const a = await R(CR + 'var disc=px(cs(".gbtn").backgroundColor),card=bgOf("#scr .item")||px(getComputedStyle(scr).backgroundColor),rim=px(cs(".gbtn").borderTopColor),pg=bgOf("#scr");[cr(px(cs(".gb-ic svg").fill),disc),cr(px(cs(".gbtn").color),disc),Math.max(cr(disc,pg),cr(rim,pg)),cr(px(cs(".gbmenu button").color),px(cs(".gbmenu").backgroundColor)),cr(px(getComputedStyle(ph.querySelector(".gbmenu small")||ph.querySelector(".gbmenu button")).color),px(cs(".gbmenu").backgroundColor))]');
     await tourAt('g5', 'mini'); await R(`S.dark=${dark};renderAll(true)`); await W(300);
     const dk = { r: 22, g: 24, b: 28, a: 1 };
-    const t = await R(CR + 'var dk={r:22,g:24,b:28,a:1},ic=over(px(cs(".gd-mc").backgroundColor),dk);[cr(px(cs(".gd-mc").color),ic),cr(over(px(cs(".gd-hide").color),dk),dk)]');
+    // round 21 (21.6): the Mini is no longer always dark (The panels' look follows the theme): its icons are measured on its own glass over
+    // the worst backdrop (black and white), the hide chevron on its own tab
+    const t = await R(CR + 'var sf=px(cs(".gdock").backgroundColor),bk=[{r:0,g:0,b:0,a:1},{r:255,g:255,b:255,a:1}].map(function(b){return over(sf,b)}),mc=function(b){return cr(px(cs(".gd-mc").color),over(px(cs(".gd-mc").backgroundColor),b))},tab=px(getComputedStyle(ph.querySelector(".gd-hide"),"::before").backgroundColor);[Math.min.apply(null,bk.map(mc)),cr(over(px(cs(".gd-hide").color),tab),tab)]');
     t.push(await R(CR + 'S.dockH="compact";renderGuide();var r=cr(px(cs(".gb-ring .pg").stroke),px(cs(".gbtn.tour").backgroundColor));S.dockH="mini";renderGuide();r')); // round 11: the ✦ and its ring show at Compact
     await R('ph.querySelector(\'.gd-mini [data-g="stop"]\').click()'); await W(200);
     const tt = await R(CR + 'var t=ph.querySelector(".gtoast");[cr(px(cs(".gtoast").color),px(cs(".gtoast").backgroundColor)),cr(px(cs(".gtoast button").color),px(cs(".gtoast button").backgroundColor))]');

@@ -14,8 +14,11 @@
 //   What is sent named in Knowledge; Music and Start the guide renamed), each with its ▸ (pressed: its demo on the phone) and its ?.
 // [glow] Start the guide glows: Once per visit, On every new card, Off by real clicks in the Editor; each by real taps on the wall's
 //   marker, the Torreão's pin and Start: what the visitor sees on the first card, after a tap, on a second card; the row's ▸ plays its demo.
+// [card & global] (round 21, 21.9) the Detail Card and Global tabs the same: a fresh open by real clicks, every section collapsed on one
+//   line with its sub-line and count, Collapse all and One section; a section opened alone; two headers pinned by the wheel's arithmetic;
+//   Languages & Terms' Go to into each tab lands under the pinned header.
 // MUTATE=1: the sections open by level as before, the headers not sticky, the moved Lab wall row back in Ask about the view and the glow
-//   option ignored (Off glows, a new card never glows again): the checks named [collapsed], [sticky], [review] and [glow] turn red.
+//   option ignored (Off glows, a new card never glows again): the checks named [collapsed], [sticky], [review], [glow] and [card & global] turn red.
 const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
@@ -174,6 +177,42 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
     dmo.card.glow && dmo.card.ring && dmo.card.tapped && dmo.card.second && dmo.card.glowAgain && !dmo.card.tour && dmo.visit.glow && dmo.visit.tapped && dmo.visit.second && !dmo.visit.glowAgain, dmo);
   await R('S.guideCfg.heroGlow="visit";if(G.on)stopTour();""');
   tsec('glow');
+
+  // ---------- [card & global] round 21 (21.9, the developer): the Detail Card and Global tabs are accordions too ----------
+  const tabSecs = () => R(`[].map.call(ed.querySelectorAll(":scope > details[data-fo]"),function(d){var m=d.querySelector(":scope > summary"),r=m.getBoundingClientRect(),t=m.querySelector(".acct"),u=m.querySelector(":scope > .sub"),n=m.querySelector(".accn"),
+      body=!!d.querySelector(":scope > .inner > details[data-fo]")||!!d.querySelector(":scope > .inner > .row");return{id:d.dataset.fo,open:d.open,h:r.height,t:t&&t.textContent,sub:!!u&&u.textContent.length>10&&getComputedStyle(u).whiteSpace==="nowrap",n:n&&n.textContent,body:body}})`);
+  const ct = {};
+  for (const tab of ['card', 'global']) {
+    await R('S.op={};S.ui.level=1;S.tab="guide";renderEditor();scrollTo(0,0);""');
+    await p.locator(`.utab[data-tab="${tab}"]`).click(CT).catch(NC); await W(400);
+    const ss = await tabSecs(), bar = await R('[!!ed.querySelector(\':scope > .accbar [data-acc="collapse"]\'),!!ed.querySelector(\':scope > .accbar [data-set="ui.accOne"]\'),ed.querySelectorAll("details[open]").length,ed.classList.contains("acc")]');
+    ct[tab] = { ss, bar };
+    ok(`[card & global] ${tab === 'card' ? 'Detail Card' : 'Global'} (a real click on its tab, fresh): ${ss.length} sections, every one collapsed on one line (34 px) with its name, a plain sub-line and (when it holds something) a quiet count; no foldout open; Collapse all and One section open at a time at the top`,
+      ss.length >= (tab === 'card' ? 7 : 12) && ss.every(s => !s.open && Math.abs(s.h - 34) < 0.6 && s.t && s.sub && (s.body ? /^\d+ (parts?|rows?)$/.test(s.n || '') : true)) && bar[0] && bar[1] && bar[2] === 0 && bar[3],
+      { secs: ss.map(s => [s.id, s.open, Math.round(s.h), s.t, s.n]), bar });
+  }
+  /* Detail Card: a real click opens 5 · Card Controls alone, its foldouts collapsed; its Top bar opened; the wheel: two headers pinned */
+  await R('S.op={};S.ui.level=1;renderEditor();scrollTo(0,0);""'); await p.locator('.utab[data-tab="card"]').click(CT).catch(NC); await W(300);
+  await click('s5'); const co = await R('[[].filter.call(ed.querySelectorAll(":scope > details[data-fo]"),function(d){return d.open}).map(function(d){return d.dataset.fo}),[].filter.call(ed.querySelectorAll(\'[data-fo="s5"] details[data-fo]\'),function(d){return d.open}).length]');
+  ok('[card & global] Detail Card: a real click opens 5 · Card Controls alone, its foldouts collapsed', JSON.stringify(co[0]) === '["s5"]' && co[1] === 0, co);
+  /* the Navigation Bar's foldout (about 540 px open: a header stays pinned only while its foldout runs on under it) */
+  await click('s5bar');
+  const cpin = () => R(`var a=${sum('s5')}.getBoundingClientRect(),c=${sum('s5bar')}.getBoundingClientRect(),d=ed.querySelector('[data-fo="s5bar"]').getBoundingClientRect();[a.top,a.bottom,c.top,c.bottom,d.top,d.height]`);
+  const c0 = await R(`ed.querySelector('[data-fo="s5bar"]').getBoundingClientRect().top+scrollY`);
+  await p.evaluate(y => window.scrollTo(0, y - 60), c0); await W(150);
+  const eb = await p.locator('#ed').boundingBox(); await p.mouse.move(eb.x + eb.width / 2, 450);
+  const cst = []; for (let i = 0; i < 4; i++) { await p.mouse.wheel(0, 70); await W(140); cst.push(await cpin()); }
+  ok('[card & global] ...its Navigation Bar opened too (a real click), scrolled by the wheel: 5 · Card Controls pinned at the top (0 px) and the Navigation Bar\'s header just under it (its top = the section header\'s bottom), at every wheel step',
+    cst.slice(1).every(s => Math.abs(s[0]) < 0.6 && Math.abs(s[2] - s[1]) < 0.6 && s[4] < s[2] - 1), cst.map(s => s.map(x => Math.round(x * 10) / 10)));
+  /* the links into both tabs: Languages & Terms' Go to (real clicks) opens the path and lands under the pinned headers */
+  const land = async (owner, sec) => { await R('S.op={};S.ui.level=1;S.tab="words";renderEditor();scrollTo(0,0);""'); await W(200);
+    await p.locator(`#ed [data-goloc="${owner}"]`).first().click(CT).catch(NC); await W(500);
+    return R(`var t=ed.querySelector('[data-fo="${owner}"]'),a=${sum(sec)}.getBoundingClientRect(),r=t?t.getBoundingClientRect():{top:-1};[S.tab,!!t&&t.open&&ed.querySelector('[data-fo="${sec}"]').open,a.top,a.bottom,r.top,innerHeight]`); };
+  const lc = await land('s5top', 's5'), lg = await land('g:10s', 'g:10');
+  ok(`[card & global] Languages & Terms' Go to (real clicks) opens the path in Detail Card (5 · Card Controls › Top bar) and in Global (Select, Filter & Search › its search field), each landing under the pinned header (at ${Math.round(lc[4])} and ${Math.round(lg[4])} px, the headers' bottoms ${Math.round(lc[3])} and ${Math.round(lg[3])} px), in the upper half of the screen`,
+    lc[0] === 'card' && lc[1] && lc[4] >= lc[3] - 0.5 && lc[4] < lc[5] / 2 && lg[0] === 'global' && lg[1] && lg[4] >= lg[3] - 0.5 && lg[4] < lg[5] / 2, { card: lc, global: lg });
+  await R('S.op={};S.ui.level=1;S.tab="guide";renderEditor();scrollTo(0,0);""');
+  tsec('card & global');
 
   ok('no page errors', errs.length === 0, errs.slice(0, 5));
   console.log('fails', fails);

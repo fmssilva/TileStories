@@ -1,0 +1,47 @@
+/* The teleprompter (round 21, guide/teleprompter.js): a strip from the screen's bottom edge, behind the Mini (z 13), its glass melting into
+   the card above (a 22 px mask, no hard top edge); its small row (the mascot's name, a live dot, Full script ›); the line said now (17 px,
+   two lines at most) lit by the highlighter, the line before sliding up and fading out, the next faint below. Its colours come from the
+   panels' look (guide/panel-look.css): --tlbg, --tlink, --tlink2, --tlun, --tlacc, --tlglow. Unity: a UI Toolkit panel, a gradient mask
+   image at its top, the lines in a vertical layout moved by a DOTween */
+.gtele{position:absolute;left:0;right:0;bottom:0;height:var(--tlh,184px);z-index:13;pointer-events:none;color:var(--tlink);
+  --tlbg:linear-gradient(180deg,rgba(28,26,33,.86),rgba(22,21,26,.95));--tlink:#F4F1EA;--tlink2:#C9C2B6;--tlun:#A39C90;--tlacc:#F2B544}
+.gtele.tl-in{animation:tlin .38s cubic-bezier(.2,.8,.2,1)}
+.gtele.tl-out{opacity:0;transform:translateY(16px);transition:opacity .24s ease-in,transform .24s ease-in}
+@keyframes tlin{from{opacity:0;transform:translateY(24px)}}
+.tl-glass{position:absolute;inset:0;overflow:hidden;background:var(--tlbg);-webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3);
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 22px);mask-image:linear-gradient(180deg,transparent 0,#000 22px)}
+.tl-glow{position:absolute;inset:-25% -10%;background:var(--tlglow,none);animation:tldrift 28s ease-in-out infinite alternate}
+@keyframes tldrift{from{transform:translate3d(-5%,3%,0) scale(1)}to{transform:translate3d(6%,-4%,0) scale(1.1)}}
+.tl-head{position:absolute;left:16px;right:8px;top:18px;height:26px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tl-who{display:inline-flex;align-items:center;gap:7px;font:700 11px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--tlink2);white-space:nowrap}
+.tl-dot{width:7px;height:7px;border-radius:50%;background:var(--tlacc);opacity:.5}
+.gtele.tl-live .tl-dot{opacity:1;animation:tldot 1.6s ease-in-out infinite}
+@keyframes tldot{50%{box-shadow:0 0 0 4px color-mix(in srgb,var(--tlacc) 28%,transparent)}}
+.tl-full{pointer-events:auto;appearance:none;border:0;background:none;cursor:pointer;height:44px;margin:-9px 0;padding:0 10px;display:inline-flex;align-items:center;gap:4px;font:600 12px/1 var(--body);color:var(--tlink2);border-radius:22px;-webkit-tap-highlight-color:transparent}
+.tl-full span{font-size:17px;line-height:1;margin-top:-2px}
+.tl-lines{position:absolute;left:var(--tlpl,16px);right:var(--tlpr,16px);bottom:var(--tlb,20px)}
+.gtele .tl-lines p{margin:0}
+.tl-now{position:relative;font:500 17px/23px var(--display);color:var(--tlink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tl-prev,.tl-next{position:absolute;left:0;right:0;font:400 14px/19px var(--body);color:var(--tlink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl-prev{bottom:100%;opacity:0}
+.tl-next{top:100%;padding-top:4px;opacity:.6}
+.gtele.tl-compact .tl-prev{opacity:.42}
+/* at Mini the next line would only peek out beside the Mini: it waits (Compact, with the room, shows it faint) */
+.gtele.tl-mini .tl-next{opacity:0}
+.tl-empty{visibility:hidden}
+.tl-lines.tl-up .tl-now{animation:tlnow .42s cubic-bezier(.2,.8,.2,1)}
+.tl-lines.tl-up .tl-prev{animation:tlprev .5s ease-out forwards}
+.gtele.tl-compact .tl-lines.tl-up .tl-prev{animation-name:tlprevc}
+@keyframes tlnow{from{transform:translateY(23px);opacity:.3}}
+@keyframes tlprev{from{transform:translateY(23px);opacity:.95}to{transform:translateY(-6px);opacity:0}}
+@keyframes tlprevc{from{transform:translateY(23px);opacity:.95}to{transform:none;opacity:.42}}
+.tl-lines.tl-fade .tl-now{animation:tlfade .3s ease-out}
+@keyframes tlfade{from{opacity:0}}
+.reduce .gtele,.reduce .tl-glow,.reduce .tl-dot{animation:none!important}
+.reduce .gtele.tl-out{transition:none}
+/* the one highlighter's colours in the strip */
+.gtele .hl-box{--hlc:var(--tlacc);--hla:.26;--hlln:var(--tlacc);--hlt:.14;--hlun:var(--tlun);--hlink:var(--tlink)}
+/* the bubble anchored to the mascot's head (Where the words go during a tour = The bubble): placed each frame, its tail at the head */
+.gbubble.gb-head{right:auto;bottom:auto;box-sizing:border-box;animation:none}
+.gbubble.gb-head::after{bottom:auto;top:calc(var(--tly,24px) - 8px)}
+.gbubble.gb-head.gb-flip::after{right:auto;left:-7px}

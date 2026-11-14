@@ -241,9 +241,20 @@ function gaRowHtml(){var A=G.ga,b=function(k,w,pri,bar){return'<button type="but
   if(!A.on)return'<div class="ga-row" role="group">'+b("show",TXT("ga_showme"),true,"")+'</div>';
   return'<div class="ga-row" role="group">'+(A.where?b("show",TXT("ga_showme"),false,""):"")+b("back",TXT("ga_back"),true,bar)+'</div>'}
 /* the panel during the pause: shorter than Full, so the game stays in sight above it (its card's top at most 46 % down the phone) */
+/* round 21 (G.2: the chip touched its eyebrow "TEST YOURSELF · QUESTION 1 OF 3"): on the quiz's upper edge the chip keeps 8 px or more from
+   the words of the block's eyebrow above it: with its words when they fit beside the eyebrow, else its pause sign alone (44 px, its name
+   for a screen reader), else inside the quiz's top corner. Unity: the chip's position from the eyebrow label's text bounds */
+function gaEyebrow(host){var e=host.previousElementSibling;while(e&&!/\S/.test(e.textContent||""))e=e.previousElementSibling;return e&&e.getClientRects().length?e:null}
+function gaTextBox(el){var rg=document.createRange();rg.selectNodeContents(el);var r=rg.getBoundingClientRect(),pr=ph.getBoundingClientRect(),q=pr.height/(ph.offsetHeight||1);return{l:(r.left-pr.left)/q,t:(r.top-pr.top)/q,r:(r.right-pr.left)/q,b:(r.bottom-pr.top)/q}}
+function gaGap(a,b){return Math.max(b.l-(a.l+a.w),a.l-b.r,b.t-(a.t+a.h),a.t-b.b)}
+function gaChipGap(cp,host){var ey=gaEyebrow(host);return ey?gaGap(phRect(cp),gaTextBox(ey)):1e9}
+function gaChipClear(cp,host){cp.style.left="";cp.style.right="";if(gaChipGap(cp,host)>=8)return;cp.classList.add("ga-icon");
+  /* the pause sign just after the eyebrow's words (clear of the mascot standing at the screen's edge) */
+  var ey=gaEyebrow(host),hr=phRect(host);if(ey){var tb=gaTextBox(ey),x=Math.round(tb.r-hr.l+12);if(x+44<=hr.w-8){cp.style.left=x+"px";cp.style.right="auto"}}
+  if(gaChipGap(cp,host)>=8)return;cp.style.left="";cp.style.right="";cp.classList.remove("ga-top");cp.classList.add("ga-inside")}
 function gaDockPlace(d){var H=ph.offsetHeight,g=G.ga.g,top=Math.round(H*.46);if(g&&(g.kind==="kc"||g.kind==="poll")){var h=gaHost(g);if(h){var r=phRect(h);top=Math.round(Math.max(H*.4,Math.min(H*.56,r.t+r.h+14)))}}d.style.setProperty("--ga-top",top+"px");if(typeof gdBeatPlace==="function")gdBeatPlace();
   /* the card's quiz: its chip on its lower edge, or on its upper edge when the panel would cover it */
-  var ch=g&&(g.kind==="kc"||g.kind==="poll")&&gaHost(g),cp=ch&&ch.querySelector(":scope > .ga-chip");if(cp){cp.classList.remove("ga-top");var cr=phRect(cp);if(cr.t+cr.h>top-4)cp.classList.add("ga-top")}
+  var ch=g&&(g.kind==="kc"||g.kind==="poll")&&gaHost(g),cp=ch&&ch.querySelector(":scope > .ga-chip");if(cp){cp.classList.remove("ga-top","ga-icon","ga-inside");cp.style.left="";cp.style.right="";var cr=phRect(cp);if(cr.t+cr.h>top-4){cp.classList.add("ga-top");gaChipClear(cp,ch)}}
   /* the conversation shows this pause's questions and answers only, the latest in sight */
   var th=d.querySelector(".gd-thread");if(th){var n=Math.max(0,G.thread.length-(G.ga.th0||0)),ms=[].slice.call(th.children).filter(function(x){return/\bgm-(me|azu)\b/.test(x.className)&&!x.classList.contains("typing")}),keep=n?ms.slice(-n):[];
     [].slice.call(th.children).forEach(function(x){if(!x.classList.contains("typing")&&keep.indexOf(x)<0)x.classList.add("ga-old")});th.scrollTop=th.scrollHeight}}
@@ -286,8 +297,14 @@ function gaSentences(t){return(String(t||"").match(/[^.!?…]+[.!?…]+["”»)]
 /* the game whose answer is kept: the paused one, else the card's own quiz on screen (started or not); not when already answered */
 function gaGuarded(){var A=G.ga,g=A.on?A.g:gaGame({any:true});return g&&!g.answered&&(g.kind==="quiz"||g.kind==="guess"||g.kind==="kc")?g:null}
 function gaWhereLine(g){var w=gaWhere(g);return w?fmt(TXT("ga_h1_look"),w.title):g.hint?fmt(TXT("ga_h1_own"),g.hint):TXT("ga_none")}
-on("answer.text",function(t){var g=gaGuarded(),k=g&&gaKeys(g);if(!t||!gaSpoils(t,k))return t;var pre=(/^\([^)]*\)\s*/.exec(t)||[""])[0],ss=gaSentences(t.slice(pre.length)).filter(function(s){return!gaSpoils(s,k)});
-  if(!ss.length&&G.askFound)ss=gaSentences(G.askFound).filter(function(s){return!gaSpoils(s,k)}).slice(0,1);var out=ss.length?ss.join(" "):gaWhereLine(g);
+/* round 21 (G.1, the Architect: "Who lived here?" during the quiz got hint 1's "Have a look at …: the answer is hiding there"): a question
+   about the quiz's own question keeps the hint (where to look); any other question is answered with every sentence that does not give the
+   quiz away, and only when something had to go the mascot says warmly that it will tell after the quiz (ga_spoil; ga_spoil_more after the
+   part it could say) */
+on("answer.text",function(t,q){var g=gaGuarded(),k=g&&gaKeys(g);if(!t||!gaSpoils(t,k))return t;var pre=(/^\([^)]*\)\s*/.exec(t)||[""])[0],ss=gaSentences(t.slice(pre.length)).filter(function(s){return!gaSpoils(s,k)});
+  var about=!!q&&gaAbout(String(q),g,S.guideCfg.gaStrict).about;
+  if(about&&!ss.length&&G.askFound)ss=gaSentences(G.askFound).filter(function(s){return!gaSpoils(s,k)}).slice(0,1);
+  var out=about?(ss.length?ss.join(" "):gaWhereLine(g)):ss.length?ss.join(" ")+" "+TXT("ga_spoil_more"):TXT("ga_spoil");
   if(typeof gdLog==="function")gdLog("event","Ask during a game: an answer would have given "+g.label+"'s answer away; said instead: “"+out+"”");return pre+out});
 
 /* ----- the Editor: Guide › 3 · Games on the tour › Asking during a game ----- */

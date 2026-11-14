@@ -157,7 +157,10 @@ function teDraw(){var want=teShown()?G.te.open:null,pn=ph.querySelector(".tepane
 function teFoot(){var nb=document.getElementById("navbar");if(nb&&getComputedStyle(nb).display!=="none"&&nb.offsetHeight)return Math.max(0,ph.offsetHeight-nb.offsetTop);return 0}
 function tePlace(){var pn=ph.querySelector(".tepanel"),pl=ph.querySelector(".tepill"),f=teFoot(),H=ph.offsetHeight;
   if(pn){pn.style.bottom=f+"px";var top=H-f-pn.offsetHeight,az=ph.querySelector(".teazu"),bb=ph.querySelector(".tebub");
-    if(az){az.style.bottom=(H-top-6)+"px"}if(bb){bb.style.bottom=(H-top+12)+"px";bb.classList.toggle("noazu",!az)}
+    /* round 21 (21.7: the mascot on the panel's edge covered about 10 px of the card's Up next card behind it): the mascot sits inside the
+       panel's top corner, beside its header (which makes room for it), so it covers nothing of the card; its bubble above the panel points
+       down to its head. Unity: the mascot a child of the panel's header row */
+    pn.classList.toggle("te-azin",!!az);if(az){az.style.bottom=(H-top-62)+"px"}if(bb){bb.style.bottom=(H-top+12)+"px";bb.classList.toggle("noazu",!az);bb.classList.toggle("te-azdown",!!az)}
     var pad=(H-top+16)+"px";if(scr.style.paddingBottom!==pad)scr.style.paddingBottom=pad;G.te.pad=true}
   if(pl){pl.style.bottom=(f+12)+"px";var right=S.guideCfg.gbSide!=="right";pl.style.right=right?"16px":"auto";pl.style.left=right?"auto":"16px"}}
 setInterval(function(){if(noDraw)return;if(G.te.open&&(ph.querySelector(".tepanel,.tepill")||teShown())){if(teShown()!==!!ph.querySelector(".tepanel,.tepill"))teDraw();else tePlace()}teInvPlace()},250);

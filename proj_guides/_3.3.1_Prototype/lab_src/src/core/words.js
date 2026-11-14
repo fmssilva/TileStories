@@ -105,6 +105,9 @@ var LABSTR=[["tour_promise", "gd:i:quizpromise", "The quiz promise, after the in
  ["dock_telling", "s7dock", "Under the mascot's name while it speaks (Paper glass).", "Telling the story", "A contar a história", "", "Status: telling"],
  ["dock_paused", "s7dock", "Under the mascot's name while the tour is paused.", "Paused", "Em pausa", "", "Status: paused"],
  ["dock_seek", "s7dock", "The progress bar, for a screen reader (a drag seeks).", "Where the tour is", "Onde vai a visita", "", "Progress bar"],
+ ["dock_back10", "s7dock", "The panel's back 10 s button, for a screen reader (round 21: Open and Mini).", "Back 10 seconds", "Recuar 10 segundos", "", "Back 10 s"],
+ ["dock_fwd10", "s7dock", "The open panel's forward 10 s button, for a screen reader (round 21).", "Forward 10 seconds", "Avançar 10 segundos", "", "Forward 10 s"],
+ ["tele_full", "s7cap", "The teleprompter's link to the whole text, the open panel's script (round 21).", "Full script", "Texto completo", "", "Full script"],
  ["dock_ask_ph", "s7dock", "The ask field's placeholder; {name} the mascot's name.", "Ask {name} anything", "Pergunte ao {name}", "", "Ask field"],
  ["dock_voice", "s7dock", "The talk button's word (Player sheet).", "Voice", "Voz", "", "Voice button"],
  ["settings_music", "s5settings", "The guide's music: the title of its choices (Settings › The guide).", "Music", "Música", "", "Music title"],
@@ -370,6 +373,8 @@ var LABSTR=[["tour_promise", "gd:i:quizpromise", "The quiz promise, after the in
   ["ga_tell", "s7gask", "Step 3's button: the answer and its explanation, no star (round 18).", "Tell me", "Diga-me", "", "Tell me"],
   ["ga_try", "s7gask", "Step 3's button: back to the game to try again (round 18).", "I'll try", "Vou tentar", "", "I'll try"],
   ["ga_told", "s7gask", "Tell me: the answer and its explanation ({0} the answer, {1} why; round 18).", "The answer: {0}. {1}", "A resposta: {0}. {1}", "", "Told"],
+  ["ga_spoil", "s7gask", "The mascot's answer to a question about something else during a game, when the whole answer would give the game's answer away (round 21).", "I'd love to, but that would give our quiz away. Ask me again once you've answered!", "Adorava, mas isso revelava o nosso quiz. Pergunte-me outra vez depois de responder!", "", "After the game · nothing to say"],
+  ["ga_spoil_more", "s7gask", "After the part of an answer the mascot can say during a game, when the rest would give the game's answer away (round 21).", "The rest would give our quiz away: ask me again once you've answered!", "O resto revelava o nosso quiz: pergunte-me outra vez depois de responder!", "", "After the game · the rest"],
   ["ga_none", "s7gask", "A question about the game's question with every step of the hint ladder Off (round 18).", "That's the question I'm asking you! Have a go first.", "Essa é a pergunta que lhe faço! Experimente primeiro.", "", "No hint"]];
 S.tx={};var TXO={},TXW={},TXF={},TXP={},TXNEW={},TXOWN={},TXRET=[];
 REALSTR.concat(LABSTR).forEach(function(r){S.tx[r[0]]={en:r[3],pt:r[4]};TXW[r[0]]=r[2];TXF[r[0]]=r[5]||"";TXP[r[0]]=r[6]||"";TXOWN[r[0]]=r[1];

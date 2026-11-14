@@ -1,6 +1,7 @@
 /* Starts the page (the #hash routes) and closes the shared scope. */
 /* #selftest walks every tab; #selftest=guide,words only those (the texts come with "words") */
-if(isSelfTest()){var r0=selfTest(selfTestTabs());showSelfTest(r0)}
+/* round 21 (21.8): the texts' walk after the controls, in slices (editor/selftest-texts.js's selfTestWordsAsync); its JSON pending until done */
+if(isSelfTest()){G.stwAsync=true;var r0=selfTest(selfTestTabs());if(stWalks("words")){G.stwPending=true;showSelfTest(r0);selfTestWordsAsync(function(r1){G.stwPending=false;showSelfTest(r0.concat(r1))})}else showSelfTest(r0)}
 S.view="card";S.tab="card";if(!isSelfTest())renderAll(false);
 if(location.hash==="#guide"){S.stop="full";renderAll(false);startTour();G.i=4;runStep()}
 if(location.hash==="#words"){S.tab="words";S.sel.term="t1";renderEditor();S.view="story";renderPhone(false)}

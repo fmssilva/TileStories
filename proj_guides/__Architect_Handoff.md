@@ -5,7 +5,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-07)
 
 - **State:**
-  - **The Lab:** `master` holds guidance rounds 1-20, verified on 2026-11-06/11, published at
+  - **The Lab:** `master` holds guidance rounds 1-21, verified on 2026-11-06/11, published at
     https://claude.ai/artifact/Gpjf7yvoYHjGebmmNhuw2o (round 14b) with the 186 voice files, the music and the capabilities (section 1). The
     developer changes account often (four times on 2026-11-08/09); the old links stay in their accounts (RGofgb… at round 13, 19Uiat… at round 12, RKn3Rr… at round 11, J9J4h… at round 9, 4LpLd4… at round 8, Jq6X2K… at round 7, Jrejv7… at
     round 6, QmhHSz… at round 5, KDs2… at v29). A new account cannot update an old link: publish a new one (section 1, Publishing). Its
@@ -369,11 +369,24 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       tier had run); two Lab scenes had the same stale words (a real red, fixed in `guidance/scenes.js`); test9y 27 (mutation
       18 red); walks card, guide, marker, global bad=0. The words walk runs past 40 min (14 at round 17b) and slows as it goes,
       the same on master: checklist 21.8.
-    - Rounds since core: 0 (core ran in 20); since full: 14 rounds (11-20 with 14b, 16b, 17b, 17c; the last full run after round 10). Full runs alongside
-      round 21 on a `git worktree` of master outside the repo (`git -c core.longpaths=true worktree add`: the scratchpad's
-      long path needs it).
-    - **Next: round 21** (speech on screen and the panels, plus 21.8), then 22; then the guide is closed and **the Detail
-      Card blocks' design** starts.
+    - Round 21 (2026-11-14, brief `_3.8_guidance_plans/brief_round21.md`): speech on screen. One highlighter for every place
+      speech shows (`guide/highlight.js` `hlGlide`: a pill gliding word to word, a warm tail over Trail); the open panel 374 px,
+      words 18 px, one row of controls with back and forward 10 s on the tour's timeline (the Mini: back 10 s); a teleprompter
+      during tours (`guide/teleprompter.js`, 184 px from the bottom edge, Full script ›); the bubble anchored to the mascot's
+      head; the panels' looks (`guide/panel-look.js`: Follows the theme, the default / Light glass / Aurora / Dark, text
+      >= 4.5:1); the mascot inside What next?'s corner; G.1 the warm "that would give our quiz away" (recorded in Ryan ·
+      Duarte: 513 of 513 lines); G.2 the quiz chip spaced. 21.8: the words walk is 3.7 min again (each field drew the phone's
+      signature twice, and the one long task piled up the parsed HTML: the signature is drawn once per tab, the texts walked in
+      slices of 20). 21.9 (the developer): the accordion on the Detail Card and Global tabs too. 21.10: **the full tier ran
+      alongside on a worktree of master** (91 runs, 231 min): 17 files red and 3 mutations uncaught, all fixed in round 21:
+      stale checks after the renames of round 19 and the accordion of round 20 (tests reach rows by opening their foldouts),
+      load-flaky files green on rerun, two real code fixes (the bubbles row's demo rings the teleprompter; the looks' gradient
+      stops pre-mixed). test9v is intermittent under load (cause not found). The full tier skips `*_live` files (they call the
+      live model). Tests: test9z 22 (mutation 18 red), test9y 32, test9x 27, the card, guide and words walks bad=0.
+      Open for the developer: the duplicate "Foldouts: One at a time" and "One section open at a time" on the Detail Card tab.
+    - Rounds since core: 1 (21); since full: 0 (the full tier closed in round 21, its reds fixed there).
+    - **Next: round 22** (the tour as a demo of the app); then the developer tries route steps 5-12, the guide is closed and
+      **the Detail Card blocks' design** starts.
       Prototype only (no Unity) until the developer says so.
   - **MCP:** blender-mcp at user scope (Blender 5.2.3, add-on 1.8, port 9876). The Unity MCP was not connected this stretch.
   - **Keys:** Gemini, Azure Speech and ElevenLabs answer (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).

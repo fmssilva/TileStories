@@ -32,6 +32,9 @@ const BEFORE = { rows: ["Fixed rules|", "Voice|guideCfg.voice", "Speaking now|",
   const runTill = async (id, ms, step) => R(`var t0=gdNow(),r=null;while(gdNow()-t0<${ms}){gdAdvance(${step || 250});if(G.gd.cur&&G.gd.cur.item.id==="${id}"){r=Math.round(G.gd.cur.at);break}}r`);
 
   const PART2 = process.env.PART === '2';
+  // round 21 (21.10: MUTATE=1 on PART=2 caught nothing, the scheduler mutation reaches only the first half): PART=2's own mutation: the Guide
+  // tab's sections in the reverse order and the NO DEMO check blind (a dead demo would make the file wait too long)
+  if (process.env.MUTATE && PART2) { await R('GUIDE_SECS.reverse();rowsWithoutDemo=function(){return[]}'); console.log('MUTATION (PART=2): the Guide tab\'s sections reversed; the NO DEMO check blind'); }
   if (!PART2) {
   // ---------- 1. the scheduler alone: gdPick on a fake clock, each rule by itself ----------
   const pk = (mod, now) => R(`var items=gdItems(),V={visits:1,visit:{n:1,at:0,lastEnd:null,items:{}},ever:{items:{}},used:{}},C={on:true,breathing:15,demo:false,showing:null,remark:null,speaking:false,panel:null,movedAt:null,onWall:true,where:"",marker:{id:"painting",name:"Ribeira Palace",x:200,y:400},stillSince:0,returning:false};
@@ -203,6 +206,8 @@ const BEFORE = { rows: ["Fixed rules|", "Voice|guideCfg.voice", "Speaking now|",
   // round 17c: The tour's end (s7end) is a new foldout of 2 · The tour, its rows left out; The mascot asks is one of its rows;
   // round 20 (the review): Wall (the Lab) moved to 6 · Preview & Test (a Lab stand-in), Knowledge's unnamed row is What is sent, Start the guide glows is new
   BEFORE.rows = BEFORE.rows.filter(r => r !== 'Wall (the Lab)|camCfg.wall').map(r => r === '|' ? 'What is sent|' : r).concat(['Start the guide glows|guideCfg.heroGlow']);
+  // round 21: Speech on screen's new rows (where the words go during a tour, the teleprompter's height, a tip's bubble, the panels' look)
+  BEFORE.rows = BEFORE.rows.concat(['Words during a tour|guideCfg.tourWords', 'Its height|guideCfg.teleH', "A tip's bubble|guideCfg.bubbleOut", "The panels' look|guideCfg.pSkin"]);
   const fosIn = await R(`${JSON.stringify(BEFORE.fos)}.filter(function(id){return!ed.querySelector('[data-fo="'+id+'"]')})`);
   ok(`...it holds every former 6 · Guide row: ${BEFORE.rows.length} before, ${after.length} now, the same rows (and the ${BEFORE.fos.length} foldouts)`, sortJ(after) === sortJ(BEFORE.rows) && fosIn.length === 0, { missing: BEFORE.rows.filter(r => after.indexOf(r) < 0), extra: after.filter(r => BEFORE.rows.indexOf(r) < 0), fosIn });
   await R('S.tab="card";renderEditor()');

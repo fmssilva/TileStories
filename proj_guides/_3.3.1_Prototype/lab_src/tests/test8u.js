@@ -7,6 +7,10 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const errs = []; p.on('pageerror', e => errs.push(e.message));
   await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 90000 }); await p.waitForTimeout(500);
   const R = src => p.evaluate(s => LAB.run(s), src);
+  // round 21 (21.10): an Editor row inside closed foldouts (the accordions of rounds 20 and 21) is reached as the developer does: each
+  // closed foldout above it opened by a real click on its header, from the outside in, then the row's own control clicked (edClick)
+  const openAbove = async sel => { for (let i = 0; i < 8; i++) { const m = await p.evaluate(s => LAB.run(`(function(){var b=document.querySelector(${JSON.stringify(s)});if(!b)return false;var ds=[];for(var d=b.closest("details");d;d=d.parentElement&&d.parentElement.closest("details"))ds.unshift(d);var c=ds.filter(function(d){return!d.open})[0];if(!c)return false;c.querySelector(":scope > summary").setAttribute("data-t21","1");return true})()`), sel); if (!m) return; await p.locator('summary[data-t21="1"]').first().click(); await p.evaluate(() => LAB.run('document.querySelectorAll("[data-t21]").forEach(function(x){x.removeAttribute("data-t21")});""')); await p.waitForTimeout(120); } };
+  const edClick = async (sel, o) => { await openAbove(sel); await p.locator(sel).first().click(o); };
   const W = ms => p.waitForTimeout(ms);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   await R('S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;S.agentCfg.voiceOut=false;gdGroupById("inview").on=false;AG.mock={text:"ok"};S.agentCfg.provider="mock";applyProvider();S.view="card";S.stop="full";renderAll(false)');
@@ -46,12 +50,12 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const s0 = await R('[AGSCENES.length,ed.querySelectorAll(".agscsel option").length]');
   ok('Scenes: 8 in the console, the guide\'s 7 (round 7: its controls\' scenes) and the guidance\'s 55 (rounds g1 and g2: 5 each; g3: 2; g4: 2; g5: 3; g6: 4; g7: 5; g8: 4; g9: 4; g12: 8; g13: 13)', s0[0] === 70 && s0[1] === 70, s0);
   await R('var s=ed.querySelector(".agscsel");s.value="3";s.dispatchEvent(new Event("change",{bubbles:true}))');
-  await p.locator('[data-agsetup]').click(); await W(400);
+  await edClick('[data-agsetup]'); await W(400);
   const s1 = await R('[S.camCfg.wall,S.stop,G.cam.open,camView().pois.map(function(p){return p.id}).join(),/In view now: .*Jerónimos/.test(ed.querySelector(".agscenes").textContent),ed.querySelector("#agq").value]');
   ok('...Set up (the oldest here): the Belém wall, the card closed, Ask open, the monastery in view; the question filled in', s1[0] === 'belem' && s1[1] === 'closed' && s1[2] && /jeronimos/.test(s1[3]) && s1[4] && /oldest|antigo/.test(s1[5]), s1);
   // the checks: an answer that names a point off the screen fails; the right one passes
   await R('AG.mock={calls:[{name:"highlight_points",args:{poi_ids:["poi:jeronimos"]}}],text:"The oldest here is the Jerónimos Monastery, from 1501."};AG.sceneRes={}');
-  await p.locator('[data-agscrun]').click(); await W(1500);
+  await edClick('[data-agscrun]'); await W(1500);
   ok('...Set up and ask: the right answer passes (the oldest in view, by year)', await R('AG.sceneRes.right&&AG.sceneRes.right.ok'), await R('AG.sceneRes.right'));
   await R('AG.mock={text:"The oldest here is Belém Tower."};agRunScene(3)'); await W(1500);
   ok('...naming a point that is not in view fails, and says which', await R('var r=AG.sceneRes.right;r&&!r.ok&&/not in view: Belém Tower/.test(r.note)'), await R('AG.sceneRes.right'));
@@ -63,14 +67,14 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // 5. Run all: the scenes in turn, each with its check; the console's 8, then Stop (the guide's and the guidance's scenes are
   //    pressed one by one in test9da, test9e and test9f, so they are not run a second time here)
   await R('AG.mock={text:"Ok."};AG.sceneRes={}');
-  await p.locator('[data-agscall]').click();
+  await edClick('[data-agscall]');
   const ran8 = await p.waitForFunction(() => Object.keys(LAB.run('AG.sceneRes')).length >= 8, null, { timeout: 120000 }).then(() => true).catch(() => false);
   const runLabel = await R('ed.querySelector("[data-agscall]").textContent');
   // (round 12 review) the count is taken as Stop lands: Playwright waits for a still button, and the Guide tab's redraws (about 1 s
   //  each, twice in a scene) can hold the click while one or two more scenes finish; the rule is the same: after Stop, only the
   //  scene running may finish
   await R('ed.addEventListener("click",function(e){if(e.target.closest("[data-agscall]"))window.__t8uAt=Object.keys(AG.sceneRes).length},{capture:true,once:true})');
-  await p.locator('[data-agscall]').click(); await p.waitForFunction(() => !LAB.run('AG.runAll'), null, { timeout: 120000 }).catch(() => {});
+  await edClick('[data-agscall]'); await p.waitForFunction(() => !LAB.run('AG.runAll'), null, { timeout: 120000 }).catch(() => {});
   const at = await R('window.__t8uAt');
   const ra = await R('var k=Object.keys(AG.sceneRes),ids=AGSCENES.map(function(s){return s.id});[k.length,k.slice(0,8).join()===ids.slice(0,8).join(),ed.querySelectorAll(".agres tbody tr").length,ed.querySelector("[data-agscall]").textContent]');
   ok('Run all scenes: the console\'s eight in order, each with its result in the table; while it runs the button is Stop', ran8 && runLabel === 'Stop' && ra[1] && ra[2] === ra[0], [ran8, runLabel, ra]);

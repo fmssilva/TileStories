@@ -1,0 +1,56 @@
+/* The panels' look (round 21, 21.6, guide/panel-look.js): Light glass, Aurora and Dark for Ink glass's Mini and Open and for the
+   teleprompter. --sksurf is the glass's own fill (its lightest or darkest point) and --skglow its strongest light shape: the checks
+   compose them over the worst backdrop to measure every word. Unity: one USS class per look; the glass a blurred backdrop (or a frosted
+   texture), the light shapes gradient sprites on a slow tween, the rim a 9-slice border */
+/* round 21 (21.10, test9sc): each glass's gradient carries its own fill's strength (its stops pre-mixed over the fill), so a check that reads
+   the gradient's stops alone sees the same glass as the eye */
+/* the light shapes, behind the content, inside the panel's corners, drifting very slowly */
+#ph .gdock.lk-ink.sk-light::before,#ph .gdock.lk-ink.sk-aurora::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;
+  background:var(--skglows);background-size:170% 170%;background-position:0% 0%,100% 0%,50% 100%;animation:skdrift 26s ease-in-out infinite alternate}
+@keyframes skdrift{to{background-position:35% 25%,65% 35%,45% 65%}}
+#ph.reduce .gdock::before{animation:none}
+/* ----- Light glass: frosted white glass, pastel light, a fine bright rim, a soft inner light at the foot ----- */
+#ph .gdock.lk-ink.sk-light{--ink:#1B1E2E;--ink2:#3F4560;--faded:#4E5570;--tpun:#4E5570;--acc:#5B5BD6;--onacc:#FFFFFF;--acctx:#4646C2;--hl:#5B5BD6;--hltx:#FFFFFF;
+  --trk:rgba(27,30,46,.14);--chip:rgba(255,255,255,.78);--line:rgba(27,30,46,.14);--field:rgba(255,255,255,.74);--fieldedge:rgba(27,30,46,.1);--grab:rgba(27,30,46,.24);--surfsolid:#F6F7FC;
+  --sksurf:rgba(246,247,252,.9);--skglow:rgba(255,170,210,.34);
+  --skglows:radial-gradient(38% 60% at 12% 18%,rgba(255,170,210,.34),transparent 70%),radial-gradient(42% 70% at 88% 22%,rgba(150,195,255,.36),transparent 70%),radial-gradient(48% 60% at 58% 104%,rgba(170,236,214,.32),transparent 70%);
+  color:var(--ink);background-color:rgba(246,247,252,.9);background-image:linear-gradient(160deg,rgba(252,253,255,.93),rgba(240,243,252,.9));
+  -webkit-backdrop-filter:blur(22px) saturate(1.5);backdrop-filter:blur(22px) saturate(1.5);border:1px solid rgba(255,255,255,.95);
+  box-shadow:0 18px 44px rgba(52,60,110,.22),0 2px 6px rgba(52,60,110,.08),inset 0 1px 0 #FFFFFF,inset 0 -16px 30px rgba(150,165,235,.14)}
+#ph .gdock.lk-ink.sk-light:not(.h-mini){--sksurf:rgba(246,247,252,.97);background-color:rgba(246,247,252,.97);background-image:linear-gradient(160deg,rgba(252,253,255,.98),rgba(242,244,252,.97))}
+#ph .sk-light .gd-play,#ph .sk-light .gd-mpp{background:linear-gradient(135deg,#D9468F,#5260D8);color:#FFFFFF;box-shadow:0 8px 20px rgba(82,96,216,.32),inset 0 1px 0 rgba(255,255,255,.35)}
+#ph .sk-light .gd-talk{background:#FFFFFF;color:#4646C2;border:1px solid rgba(91,91,214,.32)!important;box-shadow:0 6px 16px rgba(52,60,110,.16)}
+#ph .sk-light .gd-ring .tr{stroke:rgba(27,30,46,.12)}#ph .sk-light .gd-ring .pg{stroke:#5B5BD6}
+#ph .sk-light .sk-track i::after{background:rgba(27,30,46,.3)}#ph .sk-light .sk-track i.done::after,#ph .sk-light .sk-track i.now::after{background:#5B5BD6}
+#ph .sk-light .sk-knob{background:#FFFFFF;box-shadow:0 0 0 4px rgba(91,91,214,.28),0 2px 6px rgba(27,30,46,.2)}
+#ph .sk-light .gd-hide{--tab:#F6F7FC;color:#3F4560}#ph .sk-light .gd-qstar.m-ring{background:#F6F7FC}
+#ph .sk-light .gd-chips [data-chip]{border:1px solid rgba(27,30,46,.08)}
+/* the whole text's Tips (guidance/present.css draws them for a dark panel) on the light glass */
+#ph .gdock.sk-light .gm-tips{background:rgba(91,91,214,.06);border-color:rgba(91,91,214,.24);color:#1B1E2E}#ph .gdock.sk-light .gm-tips small{color:#4646C2}
+/* ----- Aurora: deep glass, coloured light drifting, a glowing mint rim; Play a dark pill with a green glow ----- */
+#ph .gdock.lk-ink.sk-aurora{--ink:#F3F5FF;--ink2:#C9CFEA;--faded:#B4BCE0;--tpun:#B4BCE0;--acc:#5EF0C8;--onacc:#0B1220;--acctx:#5EF0C8;--hl:#5EF0C8;--hltx:#0B1220;
+  --trk:rgba(255,255,255,.18);--chip:rgba(255,255,255,.09);--line:rgba(255,255,255,.16);--field:rgba(255,255,255,.07);--fieldedge:rgba(255,255,255,.14);--grab:rgba(255,255,255,.3);--surfsolid:#121833;
+  --sksurf:rgba(18,22,48,.92);--skglow:rgba(139,92,246,.22);
+  --skglows:radial-gradient(40% 60% at 10% 0%,rgba(94,240,200,.16),transparent 70%),radial-gradient(48% 70% at 92% 8%,rgba(139,92,246,.22),transparent 70%),radial-gradient(60% 60% at 50% 115%,rgba(56,189,248,.16),transparent 70%);
+  color:var(--ink);background-color:rgba(18,22,48,.92);background-image:linear-gradient(160deg,rgba(32,30,76,.93),rgba(17,21,46,.92) 65%);
+  -webkit-backdrop-filter:blur(22px) saturate(1.4);backdrop-filter:blur(22px) saturate(1.4);border:1px solid rgba(140,255,225,.3);
+  box-shadow:0 18px 44px rgba(4,8,24,.5),0 0 26px rgba(94,240,200,.16),inset 0 1px 0 rgba(255,255,255,.16)}
+#ph .gdock.lk-ink.sk-aurora:not(.h-mini){--sksurf:rgba(18,22,48,.98);background-color:rgba(18,22,48,.98);background-image:linear-gradient(160deg,rgba(32,30,76,.98),rgba(17,21,46,.98) 65%)}
+#ph .sk-aurora .gd-play,#ph .sk-aurora .gd-mpp{background:#0B1220;color:#5EF0C8;box-shadow:0 0 0 1.5px rgba(94,240,200,.75),0 0 24px rgba(94,240,200,.38),inset 0 1px 0 rgba(255,255,255,.14)}
+#ph .sk-aurora .gd-talk{background:#0B1220;color:#5EF0C8;border:1.5px solid rgba(94,240,200,.7)!important;box-shadow:0 0 18px rgba(94,240,200,.3)}
+#ph .sk-aurora .gd-ring .tr{stroke:rgba(255,255,255,.14)}#ph .sk-aurora .gd-ring .pg{stroke:#5EF0C8}
+#ph .sk-aurora .sk-track i::after{background:rgba(255,255,255,.45)}#ph .sk-aurora .sk-track i.done::after,#ph .sk-aurora .sk-track i.now::after{background:#5EF0C8}
+#ph .sk-aurora .sk-knob{background:#F3F5FF;box-shadow:0 0 0 4px rgba(94,240,200,.3),0 0 14px rgba(94,240,200,.5)}
+#ph .sk-aurora .gd-hide{--tab:#121833;color:#F3F5FF}#ph .sk-aurora .gd-qstar.m-ring{background:#121833}
+/* ----- the teleprompter in each look ----- */
+#ph .gtele.sk-light{--tlbg:linear-gradient(180deg,rgba(248,249,254,.86),rgba(244,246,253,.95) 60%);--tlink:#1B1E2E;--tlink2:#3F4560;--tlun:#4E5570;--tlacc:#5B5BD6;
+  --sksurf:rgba(248,249,254,.86);--skglow:rgba(255,170,210,.34);
+  --tlglow:radial-gradient(30% 50% at 16% 58%,rgba(255,170,210,.34),transparent 70%),radial-gradient(34% 56% at 84% 42%,rgba(150,195,255,.38),transparent 70%),radial-gradient(40% 50% at 55% 100%,rgba(170,236,214,.34),transparent 70%)}
+#ph .gtele.sk-aurora{--tlbg:linear-gradient(180deg,rgba(18,22,48,.84),rgba(12,16,38,.95) 60%);--tlink:#F3F5FF;--tlink2:#C9CFEA;--tlun:#B4BCE0;--tlacc:#5EF0C8;
+  --sksurf:rgba(18,22,48,.84);--skglow:rgba(139,92,246,.22);
+  --tlglow:radial-gradient(30% 50% at 14% 50%,rgba(94,240,200,.16),transparent 70%),radial-gradient(36% 56% at 86% 40%,rgba(139,92,246,.22),transparent 70%),radial-gradient(44% 50% at 50% 104%,rgba(56,189,248,.16),transparent 70%)}
+#ph .gtele.sk-dark{--tlbg:linear-gradient(180deg,rgba(28,26,33,.9),rgba(22,21,26,.96) 60%);--sksurf:rgba(28,26,33,.9);--skglow:rgba(0,0,0,0)}
+#ph .sk-light .gd-talk .ring{background:radial-gradient(circle,rgba(91,91,214,0) 55%,rgba(91,91,214,.32) 70%,rgba(91,91,214,0) 100%)}
+#ph .sk-aurora .gd-talk .ring{background:radial-gradient(circle,rgba(94,240,200,0) 55%,rgba(94,240,200,.36) 70%,rgba(94,240,200,0) 100%)}
+/* Dark (round 11's Ink glass): its lightest point, for the checks */
+#ph .gdock.lk-ink.sk-dark{--sksurf:rgba(44,40,52,.92);--skglow:rgba(0,0,0,0)}#ph .gdock.lk-ink.sk-dark:not(.h-mini){--sksurf:#2C2834}

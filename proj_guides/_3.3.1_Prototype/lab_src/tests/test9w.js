@@ -139,9 +139,11 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const ns3 = await R('[G.answer,' + spoil + ',/THE ANSWER, never to be said[^“]*“About 250 years”/.test(window.__calls[0]||"")]');
   const ns4 = await R('var q=S.tourQ.g1,g={kind:"quiz",q:q.q.pt,opts:q.a.map(function(a){return a.pt}),ok:q.ok,lad:{}},k=gaKeys(g);[gaSpoils("Os reis viveram aqui duzentos e cinquenta anos.",k),gaSpoils("Viveram aqui cerca de 250 anos.",k),gaSpoils("Os reis gostavam do rio.",k)]');
   await R('S.guideCfg.ask="search";sampleFn=null;S.lang="en";""');
-  ok('[no spoiler] the quiz paused on “How long was the palace the royal home?”: “Who lived here?” answered with no 250 in figures or words (hint 1\'s where to look instead), the question still open', ns1[0] === 'Have a look at “Quick facts”: the answer is hiding there.' && !ns1[1] && ns1[2] && ns1[3] == null, ns1);
+  // round 21 (G.1): a question about something else is answered without the quiz's answer; when nothing else is left to say, the warm
+  // after-the-quiz line (it was hint 1's where to look)
+  ok('[no spoiler] the quiz paused on “How long was the palace the royal home?”: “Who lived here?” answered with no 250 in figures or words (round 21: the warm “after the quiz” line, not hint 1\'s where to look), the question still open', ns1[0] === "I'd love to, but that would give our quiz away. Ask me again once you've answered!" && !ns1[1] && ns1[2] && ns1[3] == null, ns1);
   ok('[no spoiler] the same in Portuguese: “Quem viveu aqui?” with no 250 nor “duzentos e cinquenta”', !!ns2[0] && !ns2[1] && ns2[2], ns2);
-  ok('[no spoiler] the model\'s answer (stubbed) said without its sentence that gives the answer, the next one kept; the model told the answer it must never say', ns3[0] === 'They loved the light on the river.' && !ns3[1] && ns3[2], ns3);
+  ok('[no spoiler] the model\'s answer (stubbed) said without its sentence that gives the answer, the next one kept and (round 21) the warm line that the rest waits for the quiz; the model told the answer it must never say', ns3[0] === "They loved the light on the river. The rest would give our quiz away: ask me again once you've answered!" && !ns3[1] && ns3[2], ns3);
   ok('[no spoiler] the check in Portuguese, figures and words: “duzentos e cinquenta” and “250” caught, a sentence without them kept', ns4[0] === true && ns4[1] === true && ns4[2] === false, ns4);
   tsec('no spoiler');
 

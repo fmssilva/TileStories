@@ -1304,1763 +1304,1775 @@
  {
   "key": "l217",
   "lang": "en",
+  "text": "I'd love to, but that would give our quiz away. Ask me again once you've answered!",
+  "where": "Games on the tour · After the game · nothing to say (Asking during a game)"
+ },
+ {
+  "key": "l218",
+  "lang": "en",
   "text": "How long was the palace the royal home?",
   "where": "The quiz · its question at step 1"
  },
  {
-  "key": "l218",
+  "key": "l219",
   "lang": "en",
   "text": "Not quite. The answer: About 250 years. Kings lived here about 250 years, until 1755.",
   "where": "The quiz · a wrong answer at step 1"
  },
  {
-  "key": "l219",
+  "key": "l220",
   "lang": "en",
   "text": "The answer: About 250 years. Kings lived here about 250 years, until 1755.",
   "where": "The quiz · Not sure at step 1"
  },
  {
-  "key": "l220",
+  "key": "l221",
   "lang": "en",
   "text": "The answer: About 250 years.",
   "where": "Asking during a game · Tell me at step 1"
  },
  {
-  "key": "l221",
+  "key": "l222",
   "lang": "en",
   "text": "What filled the new palace?",
   "where": "The quiz · its question at step 4"
  },
  {
-  "key": "l222",
+  "key": "l223",
   "lang": "en",
   "text": "Not quite. The answer: The wealth of the India voyages. Manuel I filled it with the riches of the India voyages.",
   "where": "The quiz · a wrong answer at step 4"
  },
  {
-  "key": "l223",
+  "key": "l224",
   "lang": "en",
   "text": "The answer: The wealth of the India voyages. Manuel I filled it with the riches of the India voyages.",
   "where": "The quiz · Not sure at step 4"
  },
  {
-  "key": "l224",
+  "key": "l225",
   "lang": "en",
   "text": "The answer: The wealth of the India voyages.",
   "where": "Asking during a game · Tell me at step 4"
  },
  {
-  "key": "l225",
+  "key": "l226",
   "lang": "en",
   "text": "How many books did the palace library hold?",
   "where": "The quiz · its question at step 5"
  },
  {
-  "key": "l226",
+  "key": "l227",
   "lang": "en",
   "text": "Not quite. The answer: About 70,000. Some seventy thousand books, beside the royal archive.",
   "where": "The quiz · a wrong answer at step 5"
  },
  {
-  "key": "l227",
+  "key": "l228",
   "lang": "en",
   "text": "The answer: About 70,000. Some seventy thousand books, beside the royal archive.",
   "where": "The quiz · Not sure at step 5"
  },
  {
-  "key": "l228",
+  "key": "l229",
   "lang": "en",
   "text": "The answer: About 70,000.",
   "where": "Asking during a game · Tell me at step 5"
  },
  {
-  "key": "l229",
+  "key": "l230",
   "lang": "en",
   "text": "What took the palace's place?",
   "where": "The quiz · its question at step 6"
  },
  {
-  "key": "l230",
+  "key": "l231",
   "lang": "en",
   "text": "Not quite. The answer: A square. The square, the Terreiro do Paço, took its place.",
   "where": "The quiz · a wrong answer at step 6"
  },
  {
-  "key": "l231",
+  "key": "l232",
   "lang": "en",
   "text": "The answer: A square. The square, the Terreiro do Paço, took its place.",
   "where": "The quiz · Not sure at step 6"
  },
  {
-  "key": "l232",
+  "key": "l233",
   "lang": "en",
   "text": "The answer: A square.",
   "where": "Asking during a game · Tell me at step 6"
  },
  {
-  "key": "l233",
+  "key": "l234",
   "lang": "en",
   "text": "What destroyed the palace in 1755?",
   "where": "The quiz · its question at step 7"
  },
  {
-  "key": "l234",
+  "key": "l235",
   "lang": "en",
   "text": "Not quite. The answer: An earthquake, a fire and a tsunami. All three struck on the morning of 1 November.",
   "where": "The quiz · a wrong answer at step 7"
  },
  {
-  "key": "l235",
+  "key": "l236",
   "lang": "en",
   "text": "The answer: An earthquake, a fire and a tsunami. All three struck on the morning of 1 November.",
   "where": "The quiz · Not sure at step 7"
  },
  {
-  "key": "l236",
+  "key": "l237",
   "lang": "en",
   "text": "The answer: An earthquake, a fire and a tsunami.",
   "where": "Asking during a game · Tell me at step 7"
  },
  {
-  "key": "l237",
+  "key": "l238",
   "lang": "en",
   "text": "What does the gallery show?",
   "where": "The quiz · its question at step 8"
  },
  {
-  "key": "l238",
+  "key": "l239",
   "lang": "en",
   "text": "Not quite. The answer: The square through three centuries. Three centuries of the square, in pictures.",
   "where": "The quiz · a wrong answer at step 8"
  },
  {
-  "key": "l239",
+  "key": "l240",
   "lang": "en",
   "text": "The answer: The square through three centuries. Three centuries of the square, in pictures.",
   "where": "The quiz · Not sure at step 8"
  },
  {
-  "key": "l240",
+  "key": "l241",
   "lang": "en",
   "text": "The answer: The square through three centuries.",
   "where": "Asking during a game · Tell me at step 8"
  },
  {
-  "key": "l241",
+  "key": "l242",
   "lang": "en",
   "text": "Zero… but now you know 3 new things!",
   "where": "The quiz · the score 0 of 3"
  },
  {
-  "key": "l242",
+  "key": "l243",
   "lang": "en",
   "text": "1 out of 3. The tiles are tricky!",
   "where": "The quiz · the score 1 of 3"
  },
  {
-  "key": "l243",
+  "key": "l244",
   "lang": "en",
   "text": "2 out of 3. Very good.",
   "where": "The quiz · the score 2 of 3"
  },
  {
-  "key": "l244",
+  "key": "l245",
   "lang": "en",
   "text": "3 out of 3! You'd make a fine guide.",
   "where": "The quiz · the score 3 of 3"
  },
  {
-  "key": "l245",
+  "key": "l246",
   "lang": "en",
   "text": "Spot on: 1500!",
   "where": "Guess the year · spot on"
  },
  {
-  "key": "l246",
+  "key": "l247",
   "lang": "en",
   "text": "1500: older than you'd think!",
   "where": "Guess the year · older than they thought"
  },
  {
-  "key": "l247",
+  "key": "l248",
   "lang": "en",
   "text": "1500: later than you'd think!",
   "where": "Guess the year · later than they thought"
  },
  {
-  "key": "l248",
+  "key": "l249",
   "lang": "en",
   "text": "Just for fun: in this part I'll try not to say “palace”. If I say it, tap me so I know you're paying attention!",
   "where": "Don't say it! · its announce"
  },
  {
-  "key": "l249",
+  "key": "l250",
   "lang": "en",
   "text": "Lower the card and find the great corner tower on the real wall. Point me at it.",
   "where": "Find it on the wall · its ask"
  },
  {
-  "key": "l250",
+  "key": "l251",
   "lang": "en",
   "text": "There it is: the great corner tower.",
   "where": "Find it on the wall · Shown"
  },
  {
-  "key": "l251",
+  "key": "l252",
   "lang": "en",
   "text": "Just past the left edge: the great corner tower.",
   "where": "Find it on the wall · Shown, off the screen"
  },
  {
-  "key": "l252",
+  "key": "l253",
   "lang": "en",
   "text": "Just past the right edge: the great corner tower.",
   "where": "Find it on the wall · Shown, off the screen"
  },
  {
-  "key": "l253",
+  "key": "l254",
   "lang": "en",
   "text": "Just above the screen: the great corner tower.",
   "where": "Find it on the wall · Shown, off the screen"
  },
  {
-  "key": "l254",
+  "key": "l255",
   "lang": "en",
   "text": "Just below the screen: the great corner tower.",
   "where": "Find it on the wall · Shown, off the screen"
  },
  {
-  "key": "l255",
+  "key": "l256",
   "lang": "pt",
   "text": "Olá, sou o Azu e mal posso esperar por lhe mostrar tudo! Tem curiosidade sobre alguma coisa? Toque na pequena seta lá em baixo.",
   "where": "The first introduction (the panel's arrow)"
  },
  {
-  "key": "l256",
+  "key": "l257",
   "lang": "pt",
   "text": "Olá, sou o Azu e mal posso esperar por lhe mostrar tudo! Tem curiosidade sobre alguma coisa? Toque na minha cara lá em baixo.",
   "where": "The first introduction (the mascot's face)"
  },
  {
-  "key": "l257",
+  "key": "l258",
   "lang": "pt",
   "text": "Olá, sou o Azu e mal posso esperar por lhe mostrar tudo! Tem curiosidade sobre alguma coisa? Toque no microfone lá em baixo.",
   "where": "The first introduction (the microphone)"
  },
  {
-  "key": "l258",
+  "key": "l259",
   "lang": "pt",
   "text": "Olá, sou o Azu e mal posso esperar por lhe mostrar tudo! Tem curiosidade sobre alguma coisa? Toque na estrela lá em baixo.",
   "where": "The first introduction (the ✦)"
  },
  {
-  "key": "l259",
+  "key": "l260",
   "lang": "pt",
   "text": "Olá, sou o Azu e mal posso esperar por lhe mostrar tudo! Tem curiosidade sobre alguma coisa? Toque no botão Perguntar lá em baixo.",
   "where": "The first introduction (the Ask button)"
  },
  {
-  "key": "l260",
+  "key": "l261",
   "lang": "pt",
   "text": "Olá! Sou o Azu. Reis e rainhas viveram aqui, junto ao rio, durante muito tempo. Queres ver o palácio deles?",
   "where": "The written tour of The Ribeira Palace · step 1 · Family"
  },
  {
-  "key": "l261",
+  "key": "l262",
   "lang": "pt",
   "text": "Foi casa real durante cerca de duzentos e cinquenta anos, até se perder a um de novembro de 1755.",
   "where": "The written tour of The Ribeira Palace · step 2 · Family"
  },
  {
-  "key": "l262",
+  "key": "l263",
   "lang": "pt",
   "text": "Aqui está algo surpreendente. Toque no cartão para o virar.",
   "where": "The written tour of The Ribeira Palace · step 3 · Family"
  },
  {
-  "key": "l263",
+  "key": "l264",
   "lang": "pt",
   "text": "Agora a história. Este desenho mostra a praça em 1662: o longo palácio ao fundo, o grande torreão à esquerda e uma fonte erguida para uma noite de fogo de artifício.",
   "where": "The written tour of The Ribeira Palace · step 4 · Family"
  },
  {
-  "key": "l264",
+  "key": "l265",
   "lang": "pt",
   "text": "Quando D. Manuel I achou o velho castelo da colina demasiado apertado, mudou a corte para junto das docas por volta de 1500 e encheu o novo palácio com a riqueza das viagens à Índia.",
   "where": "The written tour of The Ribeira Palace · step 5 · Family"
  },
  {
-  "key": "l265",
+  "key": "l266",
   "lang": "pt",
   "text": "Lá dentro: uma biblioteca com cerca de setenta mil livros, o arquivo real, uma capela e, ao lado, uma ópera acabada de construir.",
   "where": "The written tour of The Ribeira Palace · step 6 · Family"
  },
  {
-  "key": "l266",
+  "key": "l267",
   "lang": "pt",
   "text": "Arraste sobre a imagem: o palácio antes de 1755 e a praça que ficou no seu lugar.",
   "where": "The written tour of The Ribeira Palace · step 7 · Family"
  },
  {
-  "key": "l267",
+  "key": "l268",
   "lang": "pt",
   "text": "É isso: o palácio antes de 1755 e a praça aberta que ficou no seu lugar.",
   "where": "The written tour of The Ribeira Palace · step 7 · Family · after the gesture"
  },
  {
-  "key": "l268",
+  "key": "l269",
   "lang": "pt",
   "text": "Na manhã de 1 de novembro de 1755, Dia de Todos os Santos, um terramoto, um incêndio e um maremoto destruíram em poucas horas o palácio, a biblioteca e a ópera.",
   "where": "The written tour of The Ribeira Palace · step 8 · Family"
  },
  {
-  "key": "l269",
+  "key": "l270",
   "lang": "pt",
   "text": "O rei e a família estavam em Belém nessa manhã, fora da cidade, e escaparam.",
   "where": "The written tour of The Ribeira Palace · step 8 · Family · Tell me more"
  },
  {
-  "key": "l270",
+  "key": "l271",
   "lang": "pt",
   "text": "O que se perdeu com ele: a biblioteca de cerca de setenta mil livros e o arquivo real, queimados no incêndio que se seguiu ao terramoto.",
   "where": "The written tour of The Ribeira Palace · step 9 · Family"
  },
  {
-  "key": "l271",
+  "key": "l272",
   "lang": "pt",
   "text": "De volta ao cartão, a galeria mostra a praça ao longo de três séculos.",
   "where": "The written tour of The Ribeira Palace · step 10 · Family"
  },
  {
-  "key": "l272",
+  "key": "l273",
   "lang": "pt",
   "text": "Pronto para uma pergunta? Que rei mudou a corte para o rio? Toque na sua resposta.",
   "where": "The written tour of The Ribeira Palace · step 11 · Family"
  },
  {
-  "key": "l273",
+  "key": "l274",
   "lang": "pt",
   "text": "Foi D. Manuel I, por volta de 1500.",
   "where": "The written tour of The Ribeira Palace · step 11 · Family · after the gesture"
  },
  {
-  "key": "l274",
+  "key": "l275",
   "lang": "pt",
   "text": "Este foi o Paço da Ribeira. Pergunte-me o que quiser, ou explore sozinho.",
   "where": "The written tour of The Ribeira Palace · step 12 · Family"
  },
  {
-  "key": "l275",
+  "key": "l276",
   "lang": "pt",
   "text": "Onde íamos: Bem-vindo ao Paço da Ribeira.",
   "where": "The written tour of The Ribeira Palace · Continue at step 2 (the recap)"
  },
  {
-  "key": "l276",
+  "key": "l277",
   "lang": "pt",
   "text": "Onde íamos: Foi casa real durante cerca de duzentos e cinquenta anos, até se perder a um de novembro de 1755.",
   "where": "The written tour of The Ribeira Palace · Continue at step 3 (the recap)"
  },
  {
-  "key": "l277",
+  "key": "l278",
   "lang": "pt",
   "text": "Onde íamos: Toque no cartão para o virar.",
   "where": "The written tour of The Ribeira Palace · Continue at step 4 (the recap)"
  },
  {
-  "key": "l278",
+  "key": "l279",
   "lang": "pt",
   "text": "Onde íamos: Este desenho mostra a praça em 1662: o longo palácio ao fundo, o grande torreão à esquerda e uma fonte erguida para uma noite de fogo de artifício.",
   "where": "The written tour of The Ribeira Palace · Continue at step 5 (the recap)"
  },
  {
-  "key": "l279",
+  "key": "l280",
   "lang": "pt",
   "text": "Onde íamos: quando D. Manuel I achou o velho castelo da colina demasiado apertado, mudou a corte para junto das docas por volta de 1500 e encheu o novo palácio com a riqueza das viagens à Índia.",
   "where": "The written tour of The Ribeira Palace · Continue at step 6 (the recap)"
  },
  {
-  "key": "l280",
+  "key": "l281",
   "lang": "pt",
   "text": "Onde íamos: Lá dentro: uma biblioteca com cerca de setenta mil livros, o arquivo real, uma capela e, ao lado, uma ópera acabada de construir.",
   "where": "The written tour of The Ribeira Palace · Continue at step 7 (the recap)"
  },
  {
-  "key": "l281",
+  "key": "l282",
   "lang": "pt",
   "text": "Onde íamos: Arraste sobre a imagem: o palácio antes de 1755 e a praça que ficou no seu lugar.",
   "where": "The written tour of The Ribeira Palace · Continue at step 8 (the recap)"
  },
  {
-  "key": "l282",
+  "key": "l283",
   "lang": "pt",
   "text": "Onde íamos: na manhã de 1 de novembro de 1755, Dia de Todos os Santos, um terramoto, um incêndio e um maremoto destruíram em poucas horas o palácio, a biblioteca e a ópera.",
   "where": "The written tour of The Ribeira Palace · Continue at step 9 (the recap)"
  },
  {
-  "key": "l283",
+  "key": "l284",
   "lang": "pt",
   "text": "Onde íamos: o que se perdeu com ele: a biblioteca de cerca de setenta mil livros e o arquivo real, queimados no incêndio que se seguiu ao terramoto.",
   "where": "The written tour of The Ribeira Palace · Continue at step 10 (the recap)"
  },
  {
-  "key": "l284",
+  "key": "l285",
   "lang": "pt",
   "text": "Onde íamos: de volta ao cartão, a galeria mostra a praça ao longo de três séculos.",
   "where": "The written tour of The Ribeira Palace · Continue at step 11 (the recap)"
  },
  {
-  "key": "l285",
+  "key": "l286",
   "lang": "pt",
   "text": "Onde íamos: Que rei mudou a corte para o rio.",
   "where": "The written tour of The Ribeira Palace · Continue at step 12 (the recap)"
  },
  {
-  "key": "l286",
+  "key": "l287",
   "lang": "pt",
   "text": "Bem-vindo ao Paço da Ribeira. Durante dois séculos e meio, os reis de Portugal viveram aqui, mesmo à beira do rio. Deixe-me mostrar-lhe o que aqui existia.",
   "where": "The written tour of The Ribeira Palace · step 1"
  },
  {
-  "key": "l287",
+  "key": "l288",
   "lang": "pt",
   "text": "O Paço da Ribeira: residência real durante cerca de dois séculos e meio, até ao terramoto de 1755. Vejamos o que se sabe dele.",
   "where": "The written tour of The Ribeira Palace · step 1 · Expert"
  },
  {
-  "key": "l288",
+  "key": "l289",
   "lang": "pt",
   "text": "O Paço da Ribeira: durante cerca de 250 anos, os reis de Portugal viveram à beira do rio, num palácio aberto diretamente para o Tejo. Venha comigo numa visita de uns 2 minutos: a sua história, um antes e depois e uma pergunta para terminar.",
   "where": "The tour of The Ribeira Palace (from its card) · step 1"
  },
  {
-  "key": "l289",
+  "key": "l290",
   "lang": "pt",
   "text": "Guardei-lhe uma pequena surpresa neste cartão. Sabia que? O palácio tinha a sua própria ópera, inaugurada em março de 1755. Toque no cartão e vire-o: há mais no verso.",
   "where": "The tour of The Ribeira Palace (from its card) · step 2"
  },
  {
-  "key": "l290",
+  "key": "l291",
   "lang": "pt",
   "text": "Vamos conhecer a história do Paço da Ribeira: há muito para descobrir.",
   "where": "The tour of The Ribeira Palace (from its card) · step 3"
  },
  {
-  "key": "l291",
+  "key": "l292",
   "lang": "pt",
   "text": "Os reis seguintes foram acrescentando obra. Na década de 1580, com Filipe I, que reinava em Portugal e em Espanha, a frente ribeirinha ganhou uma nova ala e o seu torreão de canto, o Torreão.",
   "where": "The tour of The Ribeira Palace (from its card) · step 5"
  },
  {
-  "key": "l292",
+  "key": "l293",
   "lang": "pt",
   "text": "Aqui está uma parte que me encanta sempre. O que havia lá dentro: uma biblioteca com cerca de 70 000 livros, pinturas e mapas, o arquivo real, uma capela, gabinetes e oficinas e, ao lado, a nova ópera.",
   "where": "The tour of The Ribeira Palace (from its card) · step 6"
  },
  {
-  "key": "l293",
+  "key": "l294",
   "lang": "pt",
   "text": "Esta é uma das coisas que mais gosto de mostrar. Antes e agora. Arraste: o palácio antes de 1755 e a praça que ficou no seu lugar.",
   "where": "The tour of The Ribeira Palace (from its card) · step 7"
  },
  {
-  "key": "l294",
+  "key": "l295",
   "lang": "pt",
   "text": "E aqui está outro pormenor: onde estivera o palácio, abriu-se uma praça para o rio.",
   "where": "The tour of The Ribeira Palace (from its card) · step 8"
  },
  {
-  "key": "l295",
+  "key": "l296",
   "lang": "pt",
   "text": "Vamos sair da história e voltar ao cartão. Antes de 1755 e hoje. Arraste sobre a imagem e veja a mudança.",
   "where": "The tour of The Ribeira Palace (from its card) · step 10"
  },
  {
-  "key": "l296",
+  "key": "l297",
   "lang": "pt",
   "text": "Aqui está algo de que gosto muito: a praça ao longo de três séculos.",
   "where": "The tour of The Ribeira Palace (from its card) · step 11"
  },
  {
-  "key": "l297",
+  "key": "l298",
   "lang": "pt",
   "text": "Cada imagem guarda um momento seu: primeiro a praça com o paço e o seu torreão junto ao rio, depois as ruínas que o terramoto deixou, fogo de artifício sobre um jardim desenhado na praça e o paço tal como era antes de 1755.",
   "where": "The tour of The Ribeira Palace (from its card) · step 11 · Tell me more"
  },
  {
-  "key": "l298",
+  "key": "l299",
   "lang": "pt",
   "text": "Deixe-me fazer-lhe uma pergunta. Que rei mudou a corte para o rio? Toque na resposta que lhe parece certa.",
   "where": "The tour of The Ribeira Palace (from its card) · step 12"
  },
  {
-  "key": "l299",
+  "key": "l300",
   "lang": "pt",
   "text": "Foi bom ter a sua companhia. Pergunte-me o que quiser, ou procure outro ponto na parede.",
   "where": "The tour of The Ribeira Palace (from its card) · step 13"
  },
  {
-  "key": "l300",
+  "key": "l301",
   "lang": "pt",
   "text": "Onde íamos: durante cerca de 250 anos, os reis de Portugal viveram à beira do rio, num palácio aberto diretamente para o Tejo.",
   "where": "The tour of The Ribeira Palace (from its card) · Continue at step 2 (the recap)"
  },
  {
-  "key": "l301",
+  "key": "l302",
   "lang": "pt",
   "text": "Onde íamos: o palácio tinha a sua própria ópera, inaugurada em março de 1755.",
   "where": "The tour of The Ribeira Palace (from its card) · Continue at step 3 (the recap)"
  },
  {
-  "key": "l302",
+  "key": "l303",
   "lang": "pt",
   "text": "Onde íamos: os reis seguintes foram acrescentando obra.",
   "where": "The tour of The Ribeira Palace (from its card) · Continue at step 6 (the recap)"
  },
  {
-  "key": "l303",
+  "key": "l304",
   "lang": "pt",
   "text": "Onde íamos: o que havia lá dentro: uma biblioteca com cerca de 70 000 livros, pinturas e mapas, o arquivo real, uma capela, gabinetes e oficinas e, ao lado, a nova ópera.",
   "where": "The tour of The Ribeira Palace (from its card) · Continue at step 7 (the recap)"
  },
  {
-  "key": "l304",
+  "key": "l305",
   "lang": "pt",
   "text": "Onde íamos: Arraste: o palácio antes de 1755 e a praça que ficou no seu lugar.",
   "where": "The tour of The Ribeira Palace (from its card) · Continue at step 8 (the recap)"
  },
  {
-  "key": "l305",
+  "key": "l306",
   "lang": "pt",
   "text": "Onde íamos: onde estivera o palácio, abriu-se uma praça para o rio.",
   "where": "The tour of The Ribeira Palace (from its card) · Continue at step 9 (the recap)"
  },
  {
-  "key": "l306",
+  "key": "l307",
   "lang": "pt",
   "text": "Onde íamos: antes de 1755 e hoje.",
   "where": "The tour of The Ribeira Palace (from its card) · Continue at step 11 (the recap)"
  },
  {
-  "key": "l307",
+  "key": "l308",
   "lang": "pt",
   "text": "Onde íamos: a praça ao longo de três séculos.",
   "where": "The tour of The Ribeira Palace (from its card) · Continue at step 12 (the recap)"
  },
  {
-  "key": "l308",
+  "key": "l309",
   "lang": "pt",
   "text": "Então, o que gostaria de fazer agora?",
   "where": "The tour's end at The Ribeira Palace (the mascot's question 1)"
  },
  {
-  "key": "l309",
+  "key": "l310",
   "lang": "pt",
   "text": "Então, para onde vamos agora?",
   "where": "The tour's end at The Ribeira Palace (the mascot's question 2)"
  },
  {
-  "key": "l310",
+  "key": "l311",
   "lang": "pt",
   "text": "Adorei mostrar-lhe o Paço da Ribeira. O que fazemos agora?",
   "where": "The tour's end at The Ribeira Palace (the mascot's question 3)"
  },
  {
-  "key": "l311",
+  "key": "l312",
   "lang": "pt",
   "text": "Há mais para descobrir por aqui. Para onde vamos a seguir?",
   "where": "The tour's end at The Ribeira Palace (the mascot's question 4)"
  },
  {
-  "key": "l312",
+  "key": "l313",
   "lang": "pt",
   "text": "O Paço da Ribeira tem uma história. Uma visita de 3 minutos?",
   "where": "A tour of The Ribeira Palace? (the invitation)"
  },
  {
-  "key": "l313",
+  "key": "l314",
   "lang": "pt",
   "text": "Continuar a visita ao Paço da Ribeira (passo 1 de 12)?",
   "where": "Continue the tour of The Ribeira Palace? (step 1 of 12)"
  },
  {
-  "key": "l314",
+  "key": "l315",
   "lang": "pt",
   "text": "Continuar a visita ao Paço da Ribeira (passo 2 de 12)?",
   "where": "Continue the tour of The Ribeira Palace? (step 2 of 12)"
  },
  {
-  "key": "l315",
+  "key": "l316",
   "lang": "pt",
   "text": "Continuar a visita ao Paço da Ribeira (passo 3 de 12)?",
   "where": "Continue the tour of The Ribeira Palace? (step 3 of 12)"
  },
  {
-  "key": "l316",
+  "key": "l317",
   "lang": "pt",
   "text": "Continuar a visita ao Paço da Ribeira (passo 4 de 12)?",
   "where": "Continue the tour of The Ribeira Palace? (step 4 of 12)"
  },
  {
-  "key": "l317",
+  "key": "l318",
   "lang": "pt",
   "text": "Continuar a visita ao Paço da Ribeira (passo 5 de 12)?",
   "where": "Continue the tour of The Ribeira Palace? (step 5 of 12)"
  },
  {
-  "key": "l318",
+  "key": "l319",
   "lang": "pt",
   "text": "Continuar a visita ao Paço da Ribeira (passo 6 de 12)?",
   "where": "Continue the tour of The Ribeira Palace? (step 6 of 12)"
  },
  {
-  "key": "l319",
+  "key": "l320",
   "lang": "pt",
   "text": "Continuar a visita ao Paço da Ribeira (passo 7 de 12)?",
   "where": "Continue the tour of The Ribeira Palace? (step 7 of 12)"
  },
  {
-  "key": "l320",
+  "key": "l321",
   "lang": "pt",
   "text": "Continuar a visita ao Paço da Ribeira (passo 8 de 12)?",
   "where": "Continue the tour of The Ribeira Palace? (step 8 of 12)"
  },
  {
-  "key": "l321",
+  "key": "l322",
   "lang": "pt",
   "text": "Continuar a visita ao Paço da Ribeira (passo 9 de 12)?",
   "where": "Continue the tour of The Ribeira Palace? (step 9 of 12)"
  },
  {
-  "key": "l322",
+  "key": "l323",
   "lang": "pt",
   "text": "Continuar a visita ao Paço da Ribeira (passo 10 de 12)?",
   "where": "Continue the tour of The Ribeira Palace? (step 10 of 12)"
  },
  {
-  "key": "l323",
+  "key": "l324",
   "lang": "pt",
   "text": "Continuar a visita ao Paço da Ribeira (passo 11 de 12)?",
   "where": "Continue the tour of The Ribeira Palace? (step 11 of 12)"
  },
  {
-  "key": "l324",
+  "key": "l325",
   "lang": "pt",
   "text": "Continuar a visita ao Paço da Ribeira (passo 12 de 12)?",
   "where": "Continue the tour of The Ribeira Palace? (step 12 of 12)"
  },
  {
-  "key": "l325",
+  "key": "l326",
   "lang": "pt",
   "text": "Bem, de volta ao jogo. Onde é que íamos?",
   "where": "Back to the game at The Ribeira Palace (1)"
  },
  {
-  "key": "l326",
+  "key": "l327",
   "lang": "pt",
   "text": "Boa pergunta! Agora, de volta ao jogo.",
   "where": "Back to the game at The Ribeira Palace (2)"
  },
  {
-  "key": "l327",
+  "key": "l328",
   "lang": "pt",
   "text": "Ótimo. Vamos retomar o jogo onde o deixámos.",
   "where": "Back to the game at The Ribeira Palace (3)"
  },
  {
-  "key": "l328",
+  "key": "l329",
   "lang": "pt",
   "text": "Ora, onde é que eu ia? Ah, sim, o nosso jogo!",
   "where": "Back to the game at The Ribeira Palace (4)"
  },
  {
-  "key": "l329",
+  "key": "l330",
   "lang": "pt",
   "text": "O Torreão: a torre de canto do palácio, sobre a água. Aqui está uma visita curta, feita para si: as suas datas, as suas imagens e uma pergunta para terminar.",
   "where": "The tour of The Torreão (from its card) · step 1"
  },
  {
-  "key": "l330",
+  "key": "l331",
   "lang": "pt",
   "text": "Guarde este facto na memória: foi perdido a 1 de novembro de 1755.",
   "where": "The tour of The Torreão (from its card) · step 2"
  },
  {
-  "key": "l331",
+  "key": "l332",
   "lang": "pt",
   "text": "Deixe-me contar-lhe um pouco mais sobre o Torreão. Na década de 1580, com Filipe I, que reinava em Portugal e em Espanha, a frente ribeirinha ganhou uma nova ala e o seu torreão de canto, o Torreão.",
   "where": "The tour of The Torreão (from its card) · step 3"
  },
  {
-  "key": "l332",
+  "key": "l333",
   "lang": "pt",
   "text": "Nas pinturas da frente ribeirinha, é a torre com a cúpula no canto do palácio, mesmo sobre a água.",
   "where": "The tour of The Torreão (from its card) · step 3 · Tell me more"
  },
  {
-  "key": "l333",
+  "key": "l334",
   "lang": "pt",
   "text": "As datas contam a sua própria história: por volta de 1500, a corte muda-se para o rio.",
   "where": "The tour of The Torreão (from its card) · step 4"
  },
  {
-  "key": "l334",
+  "key": "l335",
   "lang": "pt",
   "text": "Repare bem nas imagens: o Torreão no canto do palácio, junto à água.",
   "where": "The tour of The Torreão (from its card) · step 5"
  },
  {
-  "key": "l335",
+  "key": "l336",
   "lang": "pt",
   "text": "Sem pressa, ao percorrer as imagens vai encontrar fogo de artifício sobre um jardim desenhado na praça, depois o paço tal como era antes de 1755.",
   "where": "The tour of The Torreão (from its card) · step 5 · Tell me more"
  },
  {
-  "key": "l336",
+  "key": "l337",
   "lang": "pt",
   "text": "Aqui fica uma pergunta para ver o que recorda. Em que reinado se ergueu o Torreão? Toque na resposta que lhe parece certa.",
   "where": "The tour of The Torreão (from its card) · step 6"
  },
  {
-  "key": "l337",
+  "key": "l338",
   "lang": "pt",
   "text": "Espero que tenha gostado do Torreão tanto como eu. Estou aqui se tiver alguma pergunta.",
   "where": "The tour of The Torreão (from its card) · step 7"
  },
  {
-  "key": "l338",
+  "key": "l339",
   "lang": "pt",
   "text": "Onde íamos: a torre de canto do palácio, sobre a água.",
   "where": "The tour of The Torreão (from its card) · Continue at step 2 (the recap)"
  },
  {
-  "key": "l339",
+  "key": "l340",
   "lang": "pt",
   "text": "Onde íamos: foi perdido a 1 de novembro de 1755.",
   "where": "The tour of The Torreão (from its card) · Continue at step 3 (the recap)"
  },
  {
-  "key": "l340",
+  "key": "l341",
   "lang": "pt",
   "text": "Onde íamos: na década de 1580, com Filipe I, que reinava em Portugal e em Espanha, a frente ribeirinha ganhou uma nova ala e o seu torreão de canto, o Torreão.",
   "where": "The tour of The Torreão (from its card) · Continue at step 4 (the recap)"
  },
  {
-  "key": "l341",
+  "key": "l342",
   "lang": "pt",
   "text": "Onde íamos: por volta de 1500, a corte muda-se para o rio.",
   "where": "The tour of The Torreão (from its card) · Continue at step 5 (the recap)"
  },
  {
-  "key": "l342",
+  "key": "l343",
   "lang": "pt",
   "text": "Onde íamos: o Torreão no canto do palácio, junto à água.",
   "where": "The tour of The Torreão (from its card) · Continue at step 6 (the recap)"
  },
  {
-  "key": "l343",
+  "key": "l344",
   "lang": "pt",
   "text": "Onde íamos: em que reinado se ergueu o Torreão.",
   "where": "The tour of The Torreão (from its card) · Continue at step 7 (the recap)"
  },
  {
-  "key": "l344",
+  "key": "l345",
   "lang": "pt",
   "text": "Adorei mostrar-lhe o Torreão. O que fazemos agora?",
   "where": "The tour's end at The Torreão (the mascot's question 3)"
  },
  {
-  "key": "l345",
+  "key": "l346",
   "lang": "pt",
   "text": "Uma visita curta ao Torreão?",
   "where": "A tour of The Torreão? (the invitation)"
  },
  {
-  "key": "l346",
+  "key": "l347",
   "lang": "pt",
   "text": "Continuar a visita ao Torreão (passo 1 de 7)?",
   "where": "Continue the tour of The Torreão? (step 1 of 7)"
  },
  {
-  "key": "l347",
+  "key": "l348",
   "lang": "pt",
   "text": "Continuar a visita ao Torreão (passo 2 de 7)?",
   "where": "Continue the tour of The Torreão? (step 2 of 7)"
  },
  {
-  "key": "l348",
+  "key": "l349",
   "lang": "pt",
   "text": "Continuar a visita ao Torreão (passo 3 de 7)?",
   "where": "Continue the tour of The Torreão? (step 3 of 7)"
  },
  {
-  "key": "l349",
+  "key": "l350",
   "lang": "pt",
   "text": "Continuar a visita ao Torreão (passo 4 de 7)?",
   "where": "Continue the tour of The Torreão? (step 4 of 7)"
  },
  {
-  "key": "l350",
+  "key": "l351",
   "lang": "pt",
   "text": "Continuar a visita ao Torreão (passo 5 de 7)?",
   "where": "Continue the tour of The Torreão? (step 5 of 7)"
  },
  {
-  "key": "l351",
+  "key": "l352",
   "lang": "pt",
   "text": "Continuar a visita ao Torreão (passo 6 de 7)?",
   "where": "Continue the tour of The Torreão? (step 6 of 7)"
  },
  {
-  "key": "l352",
+  "key": "l353",
   "lang": "pt",
   "text": "Continuar a visita ao Torreão (passo 7 de 7)?",
   "where": "Continue the tour of The Torreão? (step 7 of 7)"
  },
  {
-  "key": "l353",
+  "key": "l354",
   "lang": "pt",
   "text": "O Tejo e os seus navios: onde chegavam os navios das viagens. Preparei-lhe uma visita curta: as suas datas, as suas imagens e uma pergunta para terminar.",
   "where": "The tour of The Tagus and its ships (from its card) · step 1"
  },
  {
-  "key": "l354",
+  "key": "l355",
   "lang": "pt",
   "text": "Esta é uma parte da história que gosto muito de contar. Por volta de 1500, D. Manuel I mudou a corte para junto das docas e encheu o novo palácio com a riqueza das viagens à Índia. O palácio abria diretamente para o Tejo.",
   "where": "The tour of The Tagus and its ships (from its card) · step 2"
  },
  {
-  "key": "l355",
+  "key": "l356",
   "lang": "pt",
   "text": "Uma coisa que vale a pena saber: nas pinturas, navios fundeados diante do paço.",
   "where": "The tour of The Tagus and its ships (from its card) · step 3"
  },
  {
-  "key": "l356",
+  "key": "l357",
   "lang": "pt",
   "text": "Vamos recuar no tempo por um momento: em 1755, um maremoto sobe o rio.",
   "where": "The tour of The Tagus and its ships (from its card) · step 4"
  },
  {
-  "key": "l357",
+  "key": "l358",
   "lang": "pt",
   "text": "As imagens contam-no lindamente: navios no Tejo, diante do paço.",
   "where": "The tour of The Tagus and its ships (from its card) · step 5"
  },
  {
-  "key": "l358",
+  "key": "l359",
   "lang": "pt",
   "text": "Olhe com mais atenção e vai ver o paço tal como era antes de 1755, depois a praça com o paço e o seu torreão junto ao rio.",
   "where": "The tour of The Tagus and its ships (from its card) · step 5 · Tell me more"
  },
  {
-  "key": "l359",
+  "key": "l360",
   "lang": "pt",
   "text": "Vamos ver o que lhe ficou na memória. Que rio passa diante do paço? Toque na resposta que lhe parece certa.",
   "where": "The tour of The Tagus and its ships (from its card) · step 6"
  },
  {
-  "key": "l360",
+  "key": "l361",
   "lang": "pt",
   "text": "Foi um prazer contar-lhe esta história. Demore-se na imagem e pergunte-me o que quiser.",
   "where": "The tour of The Tagus and its ships (from its card) · step 7"
  },
  {
-  "key": "l361",
+  "key": "l362",
   "lang": "pt",
   "text": "Onde íamos: onde chegavam os navios das viagens.",
   "where": "The tour of The Tagus and its ships (from its card) · Continue at step 2 (the recap)"
  },
  {
-  "key": "l362",
+  "key": "l363",
   "lang": "pt",
   "text": "Onde íamos: por volta de 1500, D. Manuel I mudou a corte para junto das docas e encheu o novo palácio com a riqueza das viagens à Índia.",
   "where": "The tour of The Tagus and its ships (from its card) · Continue at step 3 (the recap)"
  },
  {
-  "key": "l363",
+  "key": "l364",
   "lang": "pt",
   "text": "Onde íamos: nas pinturas, navios fundeados diante do paço.",
   "where": "The tour of The Tagus and its ships (from its card) · Continue at step 4 (the recap)"
  },
  {
-  "key": "l364",
+  "key": "l365",
   "lang": "pt",
   "text": "Onde íamos: em 1755, um maremoto sobe o rio.",
   "where": "The tour of The Tagus and its ships (from its card) · Continue at step 5 (the recap)"
  },
  {
-  "key": "l365",
+  "key": "l366",
   "lang": "pt",
   "text": "Onde íamos: navios no Tejo, diante do paço.",
   "where": "The tour of The Tagus and its ships (from its card) · Continue at step 6 (the recap)"
  },
  {
-  "key": "l366",
+  "key": "l367",
   "lang": "pt",
   "text": "Onde íamos: Que rio passa diante do paço.",
   "where": "The tour of The Tagus and its ships (from its card) · Continue at step 7 (the recap)"
  },
  {
-  "key": "l367",
+  "key": "l368",
   "lang": "pt",
   "text": "Adorei mostrar-lhe o Tejo e os seus navios. O que fazemos agora?",
   "where": "The tour's end at The Tagus and its ships (the mascot's question 3)"
  },
  {
-  "key": "l368",
+  "key": "l369",
   "lang": "pt",
   "text": "Uma visita curta ao Tejo e os seus navios?",
   "where": "A tour of The Tagus and its ships? (the invitation)"
  },
  {
-  "key": "l369",
+  "key": "l370",
   "lang": "pt",
   "text": "Continuar a visita ao Tejo e os seus navios (passo 1 de 7)?",
   "where": "Continue the tour of The Tagus and its ships? (step 1 of 7)"
  },
  {
-  "key": "l370",
+  "key": "l371",
   "lang": "pt",
   "text": "Continuar a visita ao Tejo e os seus navios (passo 2 de 7)?",
   "where": "Continue the tour of The Tagus and its ships? (step 2 of 7)"
  },
  {
-  "key": "l371",
+  "key": "l372",
   "lang": "pt",
   "text": "Continuar a visita ao Tejo e os seus navios (passo 3 de 7)?",
   "where": "Continue the tour of The Tagus and its ships? (step 3 of 7)"
  },
  {
-  "key": "l372",
+  "key": "l373",
   "lang": "pt",
   "text": "Continuar a visita ao Tejo e os seus navios (passo 4 de 7)?",
   "where": "Continue the tour of The Tagus and its ships? (step 4 of 7)"
  },
  {
-  "key": "l373",
+  "key": "l374",
   "lang": "pt",
   "text": "Continuar a visita ao Tejo e os seus navios (passo 5 de 7)?",
   "where": "Continue the tour of The Tagus and its ships? (step 5 of 7)"
  },
  {
-  "key": "l374",
+  "key": "l375",
   "lang": "pt",
   "text": "Continuar a visita ao Tejo e os seus navios (passo 6 de 7)?",
   "where": "Continue the tour of The Tagus and its ships? (step 6 of 7)"
  },
  {
-  "key": "l375",
+  "key": "l376",
   "lang": "pt",
   "text": "Continuar a visita ao Tejo e os seus navios (passo 7 de 7)?",
   "where": "Continue the tour of The Tagus and its ships? (step 7 of 7)"
  },
  {
-  "key": "l376",
+  "key": "l377",
   "lang": "pt",
   "text": "O Terreiro do Paço: a praça junto ao paço, aberta para o rio. Venha comigo numa visita curta: as suas datas, as suas imagens e uma pergunta para terminar.",
   "where": "The tour of Terreiro do Paço (from its card) · step 1"
  },
  {
-  "key": "l377",
+  "key": "l378",
   "lang": "pt",
   "text": "Um pequeno facto que gostava que soubesse: foi aberto por volta de 1500, com o paço.",
   "where": "The tour of Terreiro do Paço (from its card) · step 2"
  },
  {
-  "key": "l378",
+  "key": "l379",
   "lang": "pt",
   "text": "Aqui está um pormenor que acho encantador. Terreiro quer dizer um largo aberto: era o largo do paço, entre o palácio real e a cidade. Depois de 1755 foi reconstruído como Praça do Comércio, com arcadas em três lados e o rio no quarto.",
   "where": "The tour of Terreiro do Paço (from its card) · step 3"
  },
  {
-  "key": "l379",
+  "key": "l380",
   "lang": "pt",
   "text": "Uma das minhas vistas favoritas: a praça junto ao paço, antes de 1755.",
   "where": "The tour of Terreiro do Paço (from its card) · step 4"
  },
  {
-  "key": "l380",
+  "key": "l381",
   "lang": "pt",
   "text": "Percorra as imagens e vai encontrar a praça com o paço e o seu torreão junto ao rio, depois fogo de artifício sobre um jardim desenhado na praça.",
   "where": "The tour of Terreiro do Paço (from its card) · step 4 · Tell me more"
  },
  {
-  "key": "l381",
+  "key": "l382",
   "lang": "pt",
   "text": "Veja como os anos se sucederam: em 1758, um novo plano abre a praça para o rio.",
   "where": "The tour of Terreiro do Paço (from its card) · step 5"
  },
  {
-  "key": "l382",
+  "key": "l383",
   "lang": "pt",
   "text": "Agora, uma pequena pergunta sobre o Terreiro do Paço. Como se chama hoje a praça? Toque na resposta que lhe parece certa.",
   "where": "The tour of Terreiro do Paço (from its card) · step 6"
  },
  {
-  "key": "l383",
+  "key": "l384",
   "lang": "pt",
   "text": "E assim termina a nossa visita. Tem alguma pergunta? É só perguntar-me, ou deixe a parede mostrar-lhe a próxima história.",
   "where": "The tour of Terreiro do Paço (from its card) · step 7"
  },
  {
-  "key": "l384",
+  "key": "l385",
   "lang": "pt",
   "text": "Onde íamos: a praça junto ao paço, aberta para o rio.",
   "where": "The tour of Terreiro do Paço (from its card) · Continue at step 2 (the recap)"
  },
  {
-  "key": "l385",
+  "key": "l386",
   "lang": "pt",
   "text": "Onde íamos: foi aberto por volta de 1500, com o paço.",
   "where": "The tour of Terreiro do Paço (from its card) · Continue at step 3 (the recap)"
  },
  {
-  "key": "l386",
+  "key": "l387",
   "lang": "pt",
   "text": "Onde íamos: Terreiro quer dizer um largo aberto: era o largo do paço, entre o palácio real e a cidade.",
   "where": "The tour of Terreiro do Paço (from its card) · Continue at step 4 (the recap)"
  },
  {
-  "key": "l387",
+  "key": "l388",
   "lang": "pt",
   "text": "Onde íamos: a praça junto ao paço, antes de 1755.",
   "where": "The tour of Terreiro do Paço (from its card) · Continue at step 5 (the recap)"
  },
  {
-  "key": "l388",
+  "key": "l389",
   "lang": "pt",
   "text": "Onde íamos: em 1758, um novo plano abre a praça para o rio.",
   "where": "The tour of Terreiro do Paço (from its card) · Continue at step 6 (the recap)"
  },
  {
-  "key": "l389",
+  "key": "l390",
   "lang": "pt",
   "text": "Onde íamos: Como se chama hoje a praça.",
   "where": "The tour of Terreiro do Paço (from its card) · Continue at step 7 (the recap)"
  },
  {
-  "key": "l390",
+  "key": "l391",
   "lang": "pt",
   "text": "Adorei mostrar-lhe o Terreiro do Paço. O que fazemos agora?",
   "where": "The tour's end at Terreiro do Paço (the mascot's question 3)"
  },
  {
-  "key": "l391",
+  "key": "l392",
   "lang": "pt",
   "text": "Uma visita curta ao Terreiro do Paço?",
   "where": "A tour of Terreiro do Paço? (the invitation)"
  },
  {
-  "key": "l392",
+  "key": "l393",
   "lang": "pt",
   "text": "Continuar a visita ao Terreiro do Paço (passo 1 de 7)?",
   "where": "Continue the tour of Terreiro do Paço? (step 1 of 7)"
  },
  {
-  "key": "l393",
+  "key": "l394",
   "lang": "pt",
   "text": "Continuar a visita ao Terreiro do Paço (passo 2 de 7)?",
   "where": "Continue the tour of Terreiro do Paço? (step 2 of 7)"
  },
  {
-  "key": "l394",
+  "key": "l395",
   "lang": "pt",
   "text": "Continuar a visita ao Terreiro do Paço (passo 3 de 7)?",
   "where": "Continue the tour of Terreiro do Paço? (step 3 of 7)"
  },
  {
-  "key": "l395",
+  "key": "l396",
   "lang": "pt",
   "text": "Continuar a visita ao Terreiro do Paço (passo 4 de 7)?",
   "where": "Continue the tour of Terreiro do Paço? (step 4 of 7)"
  },
  {
-  "key": "l396",
+  "key": "l397",
   "lang": "pt",
   "text": "Continuar a visita ao Terreiro do Paço (passo 5 de 7)?",
   "where": "Continue the tour of Terreiro do Paço? (step 5 of 7)"
  },
  {
-  "key": "l397",
+  "key": "l398",
   "lang": "pt",
   "text": "Continuar a visita ao Terreiro do Paço (passo 6 de 7)?",
   "where": "Continue the tour of Terreiro do Paço? (step 6 of 7)"
  },
  {
-  "key": "l398",
+  "key": "l399",
   "lang": "pt",
   "text": "Continuar a visita ao Terreiro do Paço (passo 7 de 7)?",
   "where": "Continue the tour of Terreiro do Paço? (step 7 of 7)"
  },
  {
-  "key": "l399",
+  "key": "l400",
   "lang": "pt",
   "text": "Muito bem, seguimos. Vejamos isto.",
   "where": "Invite to try · Moving on"
  },
  {
-  "key": "l400",
+  "key": "l401",
   "lang": "pt",
   "text": "Vá, toque no cartão para o virar.",
   "where": "Invite to try · Flip, again"
  },
  {
-  "key": "l401",
+  "key": "l402",
   "lang": "pt",
   "text": "Basta um toque no cartão e vê o que está do outro lado.",
   "where": "Invite to try · Flip, again (2)"
  },
  {
-  "key": "l402",
+  "key": "l403",
   "lang": "pt",
   "text": "Arraste a linha sobre a imagem.",
   "where": "Invite to try · Drag, again"
  },
  {
-  "key": "l403",
+  "key": "l404",
   "lang": "pt",
   "text": "Deslize até ao fim e veja o que mudou.",
   "where": "Invite to try · Drag, again (2)"
  },
  {
-  "key": "l404",
+  "key": "l405",
   "lang": "pt",
   "text": "Arrisque: toque numa das respostas.",
   "where": "Invite to try · Answer, again"
  },
  {
-  "key": "l405",
+  "key": "l406",
   "lang": "pt",
   "text": "Sem pressão, qualquer resposta serve.",
   "where": "Invite to try · Answer, again (2)"
  },
  {
-  "key": "l406",
+  "key": "l407",
   "lang": "pt",
   "text": "Não faz mal. Vamos continuar.",
   "where": "Invite to try · Moving on"
  },
  {
-  "key": "l407",
+  "key": "l408",
   "lang": "pt",
   "text": "Aí está.",
   "where": "Invite to try · After a flip"
  },
  {
-  "key": "l408",
+  "key": "l409",
   "lang": "pt",
   "text": "Muito bem.",
   "where": "Invite to try · After an answer"
  },
  {
-  "key": "l409",
+  "key": "l410",
   "lang": "pt",
   "text": "Esta visita mudou desde a última vez, por isso vamos começar do início.",
   "where": "Invite to try · Changed"
  },
  {
-  "key": "l410",
+  "key": "l411",
   "lang": "pt",
   "text": "Ao centro: o Paço da Ribeira. Toque para saber mais.",
   "where": "The mascot's remark on The Ribeira Palace (Says (1 of 3, in turn))"
  },
  {
-  "key": "l411",
+  "key": "l412",
   "lang": "pt",
   "text": "Ali está o Paço da Ribeira. Quer a história? Toque-me.",
   "where": "The mascot's remark on The Ribeira Palace (Says (2 of 3, in turn))"
  },
  {
-  "key": "l412",
+  "key": "l413",
   "lang": "pt",
   "text": "Olhe: o Paço da Ribeira! Toque para saber mais.",
   "where": "The mascot's remark on The Ribeira Palace (Says (3 of 3, in turn))"
  },
  {
-  "key": "l413",
+  "key": "l414",
   "lang": "pt",
   "text": "Ao centro: o Paço da Ribeira. Toque e eu mostro-lhe tudo.",
   "where": "The mascot's remark on The Ribeira Palace (Says (a point with a card))"
  },
  {
-  "key": "l414",
+  "key": "l415",
   "lang": "pt",
   "text": "Ao centro: o Torreão. Toque para saber mais.",
   "where": "The mascot's remark on The Torreão (Says (1 of 3, in turn))"
  },
  {
-  "key": "l415",
+  "key": "l416",
   "lang": "pt",
   "text": "Ali está o Torreão. Quer a história? Toque-me.",
   "where": "The mascot's remark on The Torreão (Says (2 of 3, in turn))"
  },
  {
-  "key": "l416",
+  "key": "l417",
   "lang": "pt",
   "text": "Olhe: o Torreão! Toque para saber mais.",
   "where": "The mascot's remark on The Torreão (Says (3 of 3, in turn))"
  },
  {
-  "key": "l417",
+  "key": "l418",
   "lang": "pt",
   "text": "Ao centro: o Torreão. Toque e eu mostro-lhe tudo.",
   "where": "The mascot's remark on The Torreão (Says (a point with a card))"
  },
  {
-  "key": "l418",
+  "key": "l419",
   "lang": "pt",
   "text": "Ao centro: o Tejo e os seus navios. Toque para saber mais.",
   "where": "The mascot's remark on The Tagus and its ships (Says (1 of 3, in turn))"
  },
  {
-  "key": "l419",
+  "key": "l420",
   "lang": "pt",
   "text": "Ali está o Tejo e os seus navios. Quer a história? Toque-me.",
   "where": "The mascot's remark on The Tagus and its ships (Says (2 of 3, in turn))"
  },
  {
-  "key": "l420",
+  "key": "l421",
   "lang": "pt",
   "text": "Olhe: o Tejo e os seus navios! Toque para saber mais.",
   "where": "The mascot's remark on The Tagus and its ships (Says (3 of 3, in turn))"
  },
  {
-  "key": "l421",
+  "key": "l422",
   "lang": "pt",
   "text": "Ao centro: o Tejo e os seus navios. Toque e eu mostro-lhe tudo.",
   "where": "The mascot's remark on The Tagus and its ships (Says (a point with a card))"
  },
  {
-  "key": "l422",
+  "key": "l423",
   "lang": "pt",
   "text": "Ao centro: o Terreiro do Paço. Toque para saber mais.",
   "where": "The mascot's remark on Terreiro do Paço (Says (1 of 3, in turn))"
  },
  {
-  "key": "l423",
+  "key": "l424",
   "lang": "pt",
   "text": "Ali está o Terreiro do Paço. Quer a história? Toque-me.",
   "where": "The mascot's remark on Terreiro do Paço (Says (2 of 3, in turn))"
  },
  {
-  "key": "l424",
+  "key": "l425",
   "lang": "pt",
   "text": "Olhe: o Terreiro do Paço! Toque para saber mais.",
   "where": "The mascot's remark on Terreiro do Paço (Says (3 of 3, in turn))"
  },
  {
-  "key": "l425",
+  "key": "l426",
   "lang": "pt",
   "text": "Ao centro: o Terreiro do Paço. Toque e eu mostro-lhe tudo.",
   "where": "The mascot's remark on Terreiro do Paço (Says (a point with a card))"
  },
  {
-  "key": "l426",
+  "key": "l427",
   "lang": "pt",
   "text": "Ao centro: a cidade na colina. Toque para saber mais.",
   "where": "The mascot's remark on The city on the hill (Says (1 of 3, in turn))"
  },
  {
-  "key": "l427",
+  "key": "l428",
   "lang": "pt",
   "text": "Ali está a cidade na colina. Quer a história? Toque-me.",
   "where": "The mascot's remark on The city on the hill (Says (2 of 3, in turn))"
  },
  {
-  "key": "l428",
+  "key": "l429",
   "lang": "pt",
   "text": "Olhe: a cidade na colina! Toque para saber mais.",
   "where": "The mascot's remark on The city on the hill (Says (3 of 3, in turn))"
  },
  {
-  "key": "l429",
+  "key": "l430",
   "lang": "pt",
   "text": "Ao centro: as arcadas. Toque para saber mais.",
   "where": "The mascot's remark on The arcades (Says (1 of 3, in turn))"
  },
  {
-  "key": "l430",
+  "key": "l431",
   "lang": "pt",
   "text": "Ali está as arcadas. Quer a história? Toque-me.",
   "where": "The mascot's remark on The arcades (Says (2 of 3, in turn))"
  },
  {
-  "key": "l431",
+  "key": "l432",
   "lang": "pt",
   "text": "Olhe: as arcadas! Toque para saber mais.",
   "where": "The mascot's remark on The arcades (Says (3 of 3, in turn))"
  },
  {
-  "key": "l432",
+  "key": "l433",
   "lang": "pt",
   "text": "Junho em Lisboa: Santo António, sardinhas e manjericos!",
   "where": "The mascot speaks up · Santo António (June)"
  },
  {
-  "key": "l433",
+  "key": "l434",
   "lang": "pt",
   "text": "Está quase no Natal. Estes azulejos já viram 300!",
   "where": "The mascot speaks up · Christmas (December)"
  },
  {
-  "key": "l434",
+  "key": "l435",
   "lang": "pt",
   "text": "1 de novembro de 1755: o terramoto. Esta parede lembra-se.",
   "where": "The mascot speaks up · 1 November (Solemn)"
  },
  {
-  "key": "l435",
+  "key": "l436",
   "lang": "pt",
   "text": "Estou em paredes há séculos. Bem, a minha bisavó está.",
   "where": "The mascot speaks up · Joke 1"
  },
  {
-  "key": "l436",
+  "key": "l437",
   "lang": "pt",
   "text": "Cuidado! Lasco-me com facilidade.",
   "where": "The mascot speaks up · Joke 2"
  },
  {
-  "key": "l437",
+  "key": "l438",
   "lang": "pt",
   "text": "O azul é a minha cor preferida. Claro.",
   "where": "The mascot speaks up · Joke 3"
  },
  {
-  "key": "l438",
+  "key": "l439",
   "lang": "pt",
   "text": "Um gole de água? Toque no copo.",
   "where": "The mascot speaks up · Water break"
  },
  {
-  "key": "l439",
+  "key": "l440",
   "lang": "pt",
   "text": "Ahh! Onde é que íamos?",
   "where": "The mascot speaks up · After the sip"
  },
  {
-  "key": "l440",
+  "key": "l441",
   "lang": "pt",
   "text": "Uma fominha... uma bolacha? Toque nela.",
   "where": "The mascot speaks up · Cookie"
  },
  {
-  "key": "l441",
+  "key": "l442",
   "lang": "pt",
   "text": "Que bom! Obrigado!",
   "where": "The mascot speaks up · After the cookie"
  },
  {
-  "key": "l442",
+  "key": "l443",
   "lang": "pt",
   "text": "Só para saber: no fim faço-lhe três perguntas. Esteja atento ;)",
   "where": "Games on the tour · Says (The quiz promise)"
  },
  {
-  "key": "l443",
+  "key": "l444",
   "lang": "pt",
   "text": "Quer três perguntas difíceis no fim?",
   "where": "Games on the tour · Expert's line (The quiz promise)"
  },
  {
-  "key": "l444",
+  "key": "l445",
   "lang": "pt",
   "text": "Hora das minhas perguntas!",
   "where": "Games on the tour · Says (The quiz)"
  },
  {
-  "key": "l445",
+  "key": "l446",
   "lang": "pt",
   "text": "Fomos depressa! Guardo as perguntas para a próxima.",
   "where": "Games on the tour · Too few (The quiz)"
  },
  {
-  "key": "l446",
+  "key": "l447",
   "lang": "pt",
   "text": "Guardamos as perguntas para a próxima.",
   "where": "Games on the tour · Said away (The quiz)"
  },
  {
-  "key": "l447",
+  "key": "l448",
   "lang": "pt",
   "text": "Exato!",
   "where": "Games on the tour · Right (The quiz)"
  },
  {
-  "key": "l448",
+  "key": "l449",
   "lang": "pt",
   "text": "É isso!",
   "where": "Games on the tour · Right (The quiz)"
  },
  {
-  "key": "l449",
+  "key": "l450",
   "lang": "pt",
   "text": "Em cheio.",
   "where": "Games on the tour · Right (The quiz)"
  },
  {
-  "key": "l450",
+  "key": "l451",
   "lang": "pt",
   "text": "Certo!",
   "where": "Games on the tour · Right (The quiz)"
  },
  {
-  "key": "l451",
+  "key": "l452",
   "lang": "pt",
   "text": "Antes de lhe dizer, um palpite!",
   "where": "Games on the tour · Says (Guess the year)"
  },
  {
-  "key": "l452",
+  "key": "l453",
   "lang": "pt",
   "text": "Vamos ouvir.",
   "where": "Games on the tour · After Tell me (Guess the year)"
  },
  {
-  "key": "l453",
+  "key": "l454",
   "lang": "pt",
   "text": "Está a gostar até agora? Deixe-me só recuperar o fôlego…",
   "where": "Games on the tour · Says (The breather)"
  },
  {
-  "key": "l454",
+  "key": "l455",
   "lang": "pt",
   "text": "Ufa! Vamos continuar?",
   "where": "Games on the tour · The ask (The breather)"
  },
  {
-  "key": "l455",
+  "key": "l456",
   "lang": "pt",
   "text": "Vamos continuar.",
   "where": "Games on the tour · Go on (The breather)"
  },
  {
-  "key": "l456",
+  "key": "l457",
   "lang": "pt",
   "text": "De volta à nossa história.",
   "where": "Games on the tour · Back (The breather)"
  },
  {
-  "key": "l457",
+  "key": "l458",
   "lang": "pt",
   "text": "Hum, uma bolacha antes da última parte…",
   "where": "Games on the tour · Says (Cookie)"
  },
  {
-  "key": "l458",
+  "key": "l459",
   "lang": "pt",
   "text": "É mesmo aí!",
   "where": "Games on the tour · Found (Find it on the wall)"
  },
  {
-  "key": "l459",
+  "key": "l460",
   "lang": "pt",
   "text": "Um pouco mais para a esquerda…",
   "where": "Games on the tour · Hint (Find it on the wall)"
  },
  {
-  "key": "l460",
+  "key": "l461",
   "lang": "pt",
   "text": "Um pouco mais para a direita…",
   "where": "Games on the tour · Hint (Find it on the wall)"
  },
  {
-  "key": "l461",
+  "key": "l462",
   "lang": "pt",
   "text": "Um pouco mais acima…",
   "where": "Games on the tour · Hint (Find it on the wall)"
  },
  {
-  "key": "l462",
+  "key": "l463",
   "lang": "pt",
   "text": "Um pouco mais abaixo…",
   "where": "Games on the tour · Hint (Find it on the wall)"
  },
  {
-  "key": "l463",
+  "key": "l464",
   "lang": "pt",
   "text": "Procuramos noutra altura.",
   "where": "Games on the tour · The wall lost (Find it on the wall)"
  },
  {
-  "key": "l464",
+  "key": "l465",
   "lang": "pt",
   "text": "Não a disse nem uma vez. Ufa!",
   "where": "Games on the tour · Not said (Don't say it!)"
  },
  {
-  "key": "l465",
+  "key": "l466",
   "lang": "pt",
   "text": "Disse-a uma vez, e apanhou-me. Que ouvido!",
   "where": "Games on the tour · All caught (one) (Don't say it!)"
  },
  {
-  "key": "l466",
+  "key": "l467",
   "lang": "pt",
   "text": "Aqui está a que lhe escapou:",
   "where": "Games on the tour · Missed (Don't say it!)"
  },
  {
-  "key": "l467",
+  "key": "l468",
   "lang": "pt",
   "text": "Apanhado!",
   "where": "Games on the tour · After the slip (Don't say it!)"
  },
  {
-  "key": "l468",
+  "key": "l469",
   "lang": "pt",
   "text": "Estava a sonhar com pastéis de nata?",
   "where": "Games on the tour · After the slip (none) (Don't say it!)"
  },
  {
-  "key": "l469",
+  "key": "l470",
   "lang": "pt",
   "text": "Jogamos noutra altura.",
   "where": "Games on the tour · Quiet end (Don't say it!)"
  },
  {
-  "key": "l470",
+  "key": "l471",
   "lang": "pt",
   "text": "Falamos disso assim que responder",
   "where": "Games on the tour · Off (Asking during a game)"
  },
  {
-  "key": "l471",
+  "key": "l472",
   "lang": "pt",
   "text": "Quer que lhe diga? Assim esta não ganha a estrela.",
   "where": "Games on the tour · Step 3 · the choice (Asking during a game)"
  },
  {
-  "key": "l472",
+  "key": "l473",
   "lang": "pt",
   "text": "Essa é a pergunta que lhe faço! Experimente primeiro.",
   "where": "Games on the tour · No hint (Asking during a game)"
  },
  {
-  "key": "l473",
+  "key": "l474",
+  "lang": "pt",
+  "text": "Adorava, mas isso revelava o nosso quiz. Pergunte-me outra vez depois de responder!",
+  "where": "Games on the tour · After the game · nothing to say (Asking during a game)"
+ },
+ {
+  "key": "l475",
   "lang": "pt",
   "text": "Durante quanto tempo foi o palácio casa real?",
   "where": "The quiz · its question at step 1"
  },
  {
-  "key": "l474",
+  "key": "l476",
   "lang": "pt",
   "text": "Não é bem. A resposta: Cerca de 250 anos. Os reis viveram aqui cerca de 250 anos, até 1755.",
   "where": "The quiz · a wrong answer at step 1"
  },
  {
-  "key": "l475",
+  "key": "l477",
   "lang": "pt",
   "text": "A resposta: Cerca de 250 anos. Os reis viveram aqui cerca de 250 anos, até 1755.",
   "where": "The quiz · Not sure at step 1"
  },
  {
-  "key": "l476",
+  "key": "l478",
   "lang": "pt",
   "text": "A resposta: Cerca de 250 anos.",
   "where": "Asking during a game · Tell me at step 1"
  },
  {
-  "key": "l477",
+  "key": "l479",
   "lang": "pt",
   "text": "O que encheu o novo palácio?",
   "where": "The quiz · its question at step 4"
  },
  {
-  "key": "l478",
+  "key": "l480",
   "lang": "pt",
   "text": "Não é bem. A resposta: A riqueza das viagens à Índia. D. Manuel I encheu-o com a riqueza das viagens à Índia.",
   "where": "The quiz · a wrong answer at step 4"
  },
  {
-  "key": "l479",
+  "key": "l481",
   "lang": "pt",
   "text": "A resposta: A riqueza das viagens à Índia. D. Manuel I encheu-o com a riqueza das viagens à Índia.",
   "where": "The quiz · Not sure at step 4"
  },
  {
-  "key": "l480",
+  "key": "l482",
   "lang": "pt",
   "text": "A resposta: A riqueza das viagens à Índia.",
   "where": "Asking during a game · Tell me at step 4"
  },
  {
-  "key": "l481",
+  "key": "l483",
   "lang": "pt",
   "text": "Quantos livros tinha a biblioteca do palácio?",
   "where": "The quiz · its question at step 5"
  },
  {
-  "key": "l482",
+  "key": "l484",
   "lang": "pt",
   "text": "Não é bem. A resposta: Cerca de 70 000. Cerca de setenta mil livros, ao lado do arquivo real.",
   "where": "The quiz · a wrong answer at step 5"
  },
  {
-  "key": "l483",
+  "key": "l485",
   "lang": "pt",
   "text": "A resposta: Cerca de 70 000. Cerca de setenta mil livros, ao lado do arquivo real.",
   "where": "The quiz · Not sure at step 5"
  },
  {
-  "key": "l484",
+  "key": "l486",
   "lang": "pt",
   "text": "A resposta: Cerca de 70 000.",
   "where": "Asking during a game · Tell me at step 5"
  },
  {
-  "key": "l485",
+  "key": "l487",
   "lang": "pt",
   "text": "O que ficou no lugar do palácio?",
   "where": "The quiz · its question at step 6"
  },
  {
-  "key": "l486",
+  "key": "l488",
   "lang": "pt",
   "text": "Não é bem. A resposta: Uma praça. A praça, o Terreiro do Paço, ficou no seu lugar.",
   "where": "The quiz · a wrong answer at step 6"
  },
  {
-  "key": "l487",
+  "key": "l489",
   "lang": "pt",
   "text": "A resposta: Uma praça. A praça, o Terreiro do Paço, ficou no seu lugar.",
   "where": "The quiz · Not sure at step 6"
  },
  {
-  "key": "l488",
+  "key": "l490",
   "lang": "pt",
   "text": "A resposta: Uma praça.",
   "where": "Asking during a game · Tell me at step 6"
  },
  {
-  "key": "l489",
+  "key": "l491",
   "lang": "pt",
   "text": "O que destruiu o palácio em 1755?",
   "where": "The quiz · its question at step 7"
  },
  {
-  "key": "l490",
+  "key": "l492",
   "lang": "pt",
   "text": "Não é bem. A resposta: Um terramoto, um incêndio e um maremoto. Os três chegaram na manhã de 1 de novembro.",
   "where": "The quiz · a wrong answer at step 7"
  },
  {
-  "key": "l491",
+  "key": "l493",
   "lang": "pt",
   "text": "A resposta: Um terramoto, um incêndio e um maremoto. Os três chegaram na manhã de 1 de novembro.",
   "where": "The quiz · Not sure at step 7"
  },
  {
-  "key": "l492",
+  "key": "l494",
   "lang": "pt",
   "text": "A resposta: Um terramoto, um incêndio e um maremoto.",
   "where": "Asking during a game · Tell me at step 7"
  },
  {
-  "key": "l493",
+  "key": "l495",
   "lang": "pt",
   "text": "O que mostra a galeria?",
   "where": "The quiz · its question at step 8"
  },
  {
-  "key": "l494",
+  "key": "l496",
   "lang": "pt",
   "text": "Não é bem. A resposta: A praça ao longo de três séculos. Três séculos da praça, em imagens.",
   "where": "The quiz · a wrong answer at step 8"
  },
  {
-  "key": "l495",
+  "key": "l497",
   "lang": "pt",
   "text": "A resposta: A praça ao longo de três séculos. Três séculos da praça, em imagens.",
   "where": "The quiz · Not sure at step 8"
  },
  {
-  "key": "l496",
+  "key": "l498",
   "lang": "pt",
   "text": "A resposta: A praça ao longo de três séculos.",
   "where": "Asking during a game · Tell me at step 8"
  },
  {
-  "key": "l497",
+  "key": "l499",
   "lang": "pt",
   "text": "Zero… mas agora sabe 3 coisas novas!",
   "where": "The quiz · the score 0 of 3"
  },
  {
-  "key": "l498",
+  "key": "l500",
   "lang": "pt",
   "text": "1 em 3. Os azulejos enganam!",
   "where": "The quiz · the score 1 of 3"
  },
  {
-  "key": "l499",
+  "key": "l501",
   "lang": "pt",
   "text": "2 em 3. Muito bem.",
   "where": "The quiz · the score 2 of 3"
  },
  {
-  "key": "l500",
+  "key": "l502",
   "lang": "pt",
   "text": "3 em 3! Dava um ótimo guia.",
   "where": "The quiz · the score 3 of 3"
  },
  {
-  "key": "l501",
+  "key": "l503",
   "lang": "pt",
   "text": "Em cheio: 1500!",
   "where": "Guess the year · spot on"
  },
  {
-  "key": "l502",
+  "key": "l504",
   "lang": "pt",
   "text": "1500: mais antigo do que pensava!",
   "where": "Guess the year · older than they thought"
  },
  {
-  "key": "l503",
+  "key": "l505",
   "lang": "pt",
   "text": "1500: mais tarde do que pensava!",
   "where": "Guess the year · later than they thought"
  },
  {
-  "key": "l504",
+  "key": "l506",
   "lang": "pt",
   "text": "Só por diversão: nesta parte vou tentar não dizer “palácio”. Se eu a disser, toque-me, para eu saber que está atento!",
   "where": "Don't say it! · its announce"
  },
  {
-  "key": "l505",
+  "key": "l507",
   "lang": "pt",
   "text": "Baixe o cartão e procure o grande torreão na parede verdadeira. Aponte-me para lá.",
   "where": "Find it on the wall · its ask"
  },
  {
-  "key": "l506",
+  "key": "l508",
   "lang": "pt",
   "text": "Ali está: o grande torreão.",
   "where": "Find it on the wall · Shown"
  },
  {
-  "key": "l507",
+  "key": "l509",
   "lang": "pt",
   "text": "Logo além da margem esquerda: o grande torreão.",
   "where": "Find it on the wall · Shown, off the screen"
  },
  {
-  "key": "l508",
+  "key": "l510",
   "lang": "pt",
   "text": "Logo além da margem direita: o grande torreão.",
   "where": "Find it on the wall · Shown, off the screen"
  },
  {
-  "key": "l509",
+  "key": "l511",
   "lang": "pt",
   "text": "Logo acima do ecrã: o grande torreão.",
   "where": "Find it on the wall · Shown, off the screen"
  },
  {
-  "key": "l510",
+  "key": "l512",
   "lang": "pt",
   "text": "Logo abaixo do ecrã: o grande torreão.",
   "where": "Find it on the wall · Shown, off the screen"
