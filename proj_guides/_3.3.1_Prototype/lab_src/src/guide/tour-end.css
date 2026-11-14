@@ -86,3 +86,6 @@
 /* the Editor: the parts' ▲▼ beside their On / Off */
 .teord{display:inline-flex;gap:4px;margin-left:8px;vertical-align:middle}.teord .del{min-width:26px;padding:0 6px}
 .note.tesub{margin:6px 0 2px 18px}
+/* round 21 (21.7): the mascot inside the panel's top corner (its header makes room), the bubble above the panel, its tail down to the head */
+.tepanel.te-azin .te-head{padding-left:70px}
+.tebub.te-azdown{left:16px}.tebub.te-azdown .te-tail{left:22px;bottom:-5px;box-shadow:1px 1px 0 var(--hair);border-radius:0 0 3px 0}

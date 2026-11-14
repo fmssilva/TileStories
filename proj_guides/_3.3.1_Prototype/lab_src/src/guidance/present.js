@@ -88,6 +88,14 @@ function gdPresent(c){gdClearEls();var it=c.item,az=gdMascot();
   if(gdFocusNow(it)==="ring")gdRing(it,!S.reduce);
   if(it.points&&az&&gdGoes(it)){var p=document.createElement("i");p.className="gdpoint";p.setAttribute("aria-hidden","true");p.innerHTML='<svg viewBox="0 0 16 16"><path d="M2.5 2.5 14 8 2.5 13.5Z"/></svg>';ph.appendChild(p)}
   gdPlace(c,true)}
+/* round 21 (21.4; the developer: "the balloon is pointing at the mascot's head, but then the mascot moves away and the balloon stays in the
+   same place"): while the mascot hops or walks to its place, its bubble goes with it, each frame, its tail on the head (the bubble at its
+   place beside the head at the end, as the solver placed it), kept inside the phone. Unity: the bubble's anchor follows the mascot's head
+   Transform projected to the panel each frame */
+function gdBubFollow(c,az,B,dx,dy,ms){var t0=performance.now(),W=ph.offsetWidth,H=ph.offsetHeight;
+  (function fol(){var b=ph.querySelector(".gdbub:not(.gd-out)");if(!b||G.gd.cur!==c)return;var a=gdMascot()||az,tr=String(getComputedStyle(a).translate||"0px 0px").split(" ").map(parseFloat),x=isFinite(tr[0])?tr[0]:0,y=isFinite(tr[1])?tr[1]:0,end=performance.now()-t0>=ms+40,
+      l=end?B.l:Math.max(GD_GUT,Math.min(W-GD_GUT-b.offsetWidth,B.l+x-dx)),t=end?B.t:Math.max(44,Math.min(H-GD_GUT-b.offsetHeight,B.t+y-dy));
+    b.style.left=Math.round(l)+"px";b.style.top=Math.round(t)+"px";if(!end)requestAnimationFrame(fol)})()}
 /* the rings: on a marker it sits in the wall's layer under the markers, so the marker and its name are drawn over it (never covered; a
    redrawn wall gets it back); round the ✦ it sits just under the button's own layer */
 function gdRing(it,pulse){if(it&&it.about==="gbtn"){var q=ph.querySelector(".gdring.gd-rect");if(!q){q=document.createElement("div");q.className="gdring gd-rect"+(pulse?" gd-pulse":"");q.setAttribute("aria-hidden","true");var w0=ph.querySelector(".gbtn-wrap");ph.insertBefore(q,w0||null)}return q}
@@ -108,7 +116,9 @@ function gdSolve(c,bw,bh){var it=c.item,W=ph.offsetWidth,H=ph.offsetHeight,az=gd
        only when neither side has room */
     [["right",M.x+GD_RING+6,M.y-ah/2],["left",M.x-GD_RING-6-aw,M.y-ah/2],["above",M.x-aw/2,M.y-GD_RING-6-ah],["below",M.x-aw/2,M.y+GD_RING+30]].forEach(function(a,ai){
       var A1=gdBox(a[1],a[2],aw,ah),F1=gdBox(A1.l+fr.l,A1.t+fr.t,fr.w,fr.h),H1=gdHeadOf(F1),hy=(H1.t+H1.b)/2,body=gdBox(F1.l,H1.b,fr.w,Math.max(1,F1.b-H1.b)),cx=(H1.l+H1.r)/2,by=Math.min(hy-bh/2,H1.b+4-bh);
-      [["left",gdBox(H1.r+GD_TIP,by,bw,bh),0],["right",gdBox(H1.l-GD_TIP-bw,by,bw,bh),0],["down",gdBox(clampL(cx-bw/2),H1.t-GD_TIP-bh,bw,bh),60],["up",gdBox(clampL(cx-bw/2),F1.b+GD_TIP,bw,bh),90]].forEach(function(q,qi){
+      /* round 21 (Speech on screen › The bubble outside a tour): Above the mascot puts the bubble above its head first */
+      var pen=S.guideCfg.bubbleOut==="above"?[60,60,0,90]:[0,0,60,90];
+      [["left",gdBox(H1.r+GD_TIP,by,bw,bh),pen[0]],["right",gdBox(H1.l-GD_TIP-bw,by,bw,bh),pen[1]],["down",gdBox(clampL(cx-bw/2),H1.t-GD_TIP-bh,bw,bh),pen[2]],["up",gdBox(clampL(cx-bw/2),F1.b+GD_TIP,bw,bh),pen[3]]].forEach(function(q,qi){
         var s=cost(A1,[ring])+cost(q[1],[ring,body])+ai*30+q[2]+qi*4;if(!best||s<best.s)best={s:s,side:a[0],A:A1,B:q[1],tail:q[0],head:H1}})})}
   else if(M&&M.beside){var ring2=M.box;
     [["down",gdBox(clampL(M.x-bw/2),M.y-GD_RING-10-bh,bw,bh)],["left",gdBox(M.x+GD_RING+10,M.y-bh/2,bw,bh)],["right",gdBox(M.x-GD_RING-10-bw,M.y-bh/2,bw,bh)],["up",gdBox(clampL(M.x-bw/2),M.y+GD_RING+34,bw,bh)]].forEach(function(q,qi){
@@ -131,7 +141,7 @@ function gdPlace(c,first){var b=ph.querySelector(".gdbub:not(.gd-out)");if(!b||!
   /* Azu: hops to its place beside the target (Reduce Motion: it is there), points at it; at the ✦ it stays and lifts its arm to it */
   G.gd.hopMs=0;
   if(az&&best.A&&gdGoes(it)&&M&&M.beside){var dx=Math.round(best.A.l-best.home.l),dy=Math.round(best.A.t-best.home.t),left=M.x<(best.A.l+best.A.r)/2;
-    G.gd.az={dx:dx,dy:dy,left:left,walk:it.goes==="walk"};gdApplyAz(az,first&&!S.reduce);
+    G.gd.az={dx:dx,dy:dy,left:left,walk:it.goes==="walk"};gdApplyAz(az,first&&!S.reduce);if(first&&!S.reduce&&G.gd.hopMs)gdBubFollow(c,az,best.B,dx,dy,G.gd.hopMs);
     var pt=ph.querySelector(".gdpoint");if(pt){var ax=(best.A.l+best.A.r)/2,ay=(best.A.t+best.A.b)/2,ang=Math.atan2(M.y-ay,M.x-ax),px=M.x-Math.cos(ang)*(GD_RING-5),py=M.y-Math.sin(ang)*(GD_RING-5);
       /* in the gap between the marker and Azu; below the marker its name sits there, so Azu's arm points alone */
       pt.style.display=best.side==="below"?"none":"";pt.style.left=Math.round(px)+"px";pt.style.top=Math.round(py)+"px";pt.style.rotate=(ang*180/Math.PI).toFixed(1)+"deg";if(first&&!S.reduce){pt.classList.remove("gd-in");void pt.offsetWidth;pt.classList.add("gd-in")}}}
@@ -165,7 +175,10 @@ function gdCovers(it){if(!gdTarget(it))return null;var m=document.createElement(
   m.innerHTML=gdBubHtml({item:it,text:gdLine(it,S.gdVisitor.visits>1,gdSlots(it))});ph.appendChild(m);var best=gdSolve({item:it},m.offsetWidth,m.offsetHeight);m.remove();return best.cover||null}
 /* a spoken tip: its line through the one order of voices (guide/voice.js's say), the word being said lit */
 /* (the line voiced last, G.gd.voiced: what the screen-reader scene reads) */
-function gdVoice(c){G.gd.voiced={text:c.text,at:c.at};say(c.text,function(k){ph.querySelectorAll(".gdbub:not(.gd-out) .gdw").forEach(function(w,i){w.classList.toggle("on",i===k)})},function(){ph.querySelectorAll(".gdbub .gdw.on").forEach(function(w){w.classList.remove("on")})})}
+function gdVoice(c){G.gd.voiced={text:c.text,at:c.at};say(c.text,function(k){markWord(k,null)},function(){})}
+/* round 21: the bubble's words and the games' cards' lines are lit by the one highlighter (guide/highlight.js), as the reading head goes */
+on("hlBoxes.add",function(out){var v=G.gd.voiced;if(v&&hlSaying(v.text))ph.querySelectorAll(".gdbub:not(.gd-out) > [data-gdbub]").forEach(function(b){out.push([b,"bubble"])});
+  var B=G.gd.bt,c=B&&B.sayCur;if(c&&!B.frozen&&hlSaying(c.sub)){var p=ph.querySelector(".gdbeat "+(c.sel||".bt-line"));if(p)out.push([p,"card",c.k0||0])}});
 on("fabLayer.after",function(){if(G.gd.az)gdApplyAz(ph.querySelector(".azfab"),false);if(G.gd.ptGb&&G.gd.cur){var az=ph.querySelector(".azfab");if(az)az.classList.add("point-gb")}});
 on("camPaint.after",function(){if(G.gd.cur)gdPlace(G.gd.cur,false)});
 /* and 4 times a second: what it keeps clear of may move (the ✦'s label folds, a remark comes), never during Azu's hop */
@@ -473,7 +486,7 @@ function gdBeatSay(t,then,sel){var B=G.gd.bt;if(!B)return;var my=B.lineSeq=G.gd.
   if(S.ui.gdSR){c.sr=true;gdBT(B,"sayT",fin,Math.min(ms,2600));return}gdBT(B,"sayT",fin,ms+1400);if(B.frozen){c.cut=true;return}gdBeatVoice(B,c,0)}
 /* the line said from its word k0 (0: the whole line; after a pause, the rest from the word it stopped at), its word lit */
 function gdBeatVoice(B,c,k0){var ws=[],re=/\S+/g,m;while((m=re.exec(c.t)))ws.push(m.index);if(k0>=ws.length){c.fin();return}var sub=k0>0?c.t.slice(ws[k0]):c.t;
-  try{say(sub,function(k){if(G.gd.bt!==B||B.lineSeq!==c.my||B.frozen)return;c.k=k+k0;var p=ph.querySelector(".gdbeat "+(c.sel||".bt-line"));(p?p.querySelectorAll(".btw"):[]).forEach(function(w,i){w.classList.toggle("on",i===k+k0)})},c.fin)}catch(e){}}
+  c.sub=sub;c.k0=k0;try{say(sub,function(k){if(G.gd.bt!==B||B.lineSeq!==c.my||B.frozen)return;c.k=k+k0;markWord(k,null)},c.fin)}catch(e){}}
 /* ----- round 18 (Ask during a game, guide/game-ask.js): a beat's timers and its clock run on the game's clock. gdBT arms one of the
    beat's named timers (waitT, sayT, notNowT, stepT), gdBTClr clears it; while the game is paused (B.frozen) none runs: gdBeatFreeze(B,true)
    keeps each one's time left, stops the bars' animations and cuts the line being said at its word; gdBeatFreeze(B,false) arms them again

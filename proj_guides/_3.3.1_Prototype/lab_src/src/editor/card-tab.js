@@ -55,10 +55,10 @@ function edCardDoc(part){var h="";if(part==="guide")return pipe("edCard.html",h)
       :'<div class="note">This block has no page: everything shows on the card.</div>';
     bl+=fo("bd:"+k,'<b>'+esc(k)+'</b> <span class="sub">· in '+esc(L(secById(secOfKind(k)).name))+'</span>',null,'<div class="sub2">Preview · on the card</div>'+prev+'<div class="sub2">Full page</div>'+page,9,true)}
   bc+=fo("s3b","Blocks <span class=\"sub\">· the Block Library: preview + full page defaults</span>",["ext","EXTENDED"],bl,2);
-  h+=fo("s3",sectionTitle("3","Blocks &amp; Components","elements → patterns → blocks"),["new","NEW"],bc,1);
+  h+=fo("s3",sectionTitle("3","Blocks &amp; Components","the card's building blocks: its elements, the patterns made of them, the blocks"),["new","NEW"],bc,1);
   /* 4. Motion & Effects */
   var me=fo("s4m","Motion",["new","NEW"],extractInner(elv,"motion"),2)+fo("s4i","Interaction",["new","NEW"],extractInner(elv,"interaction"),2)+fo("s4f","Effects",["ext","EXTENDED"],extractInner(elv,"effects"),2);
-  h+=fo("s4",sectionTitle("4","Motion &amp; Effects","used by elements, blocks, sections and the card"),["new","NEW"],me,1);
+  h+=fo("s4",sectionTitle("4","Motion &amp; Effects","how parts move and shine: the motions and effects of elements, blocks, sections and the card"),["new","NEW"],me,1);
   /* 5. Navigation & Controls */
   var b=S.ctl.bar,nc=fo("s5bar","Navigation Bar",null,row("Enabled",pseg("ctl.bar.on",["true","false"],["On","Off"]),"The bar of sections.")+row("Position",pseg("ctl.bar.pos",["bottom","top"],["Bottom","Top"]),"")+
      row("Indicator",pseg("ctl.bar.indicator",["raised","pill","underline"],["Raised","Pill","Underline"]),"How the chosen section is marked.")+(b.indicator==="raised"?row("Raised depth",pslider("ctl.bar.depth",-1,1,0.1),"+1 a bell, 0 flat, below 0 a cradle.",true):"")+

@@ -36,7 +36,8 @@ var FI={prev:'<path d="M18 5.5v13a1 1 0 0 1-1.55.83L7 13v5H5V6h2v5l9.45-6.33A1 1
   pause:'<rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/>',play:'<path d="M8 5.6v12.8a1 1 0 0 0 1.53.85l10.2-6.4a1 1 0 0 0 0-1.7L9.53 4.75A1 1 0 0 0 8 5.6z"/>',
   stop:'<rect x="5" y="5" width="14" height="14" rx="3"/>',up:'<polyline points="6 15 12 9 18 15"/>',down:'<polyline points="6 9 12 15 18 9"/>',
   all:'<polyline points="7 10 12 5 17 10"/><polyline points="7 14 12 19 17 14"/>',lines:'<line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/>',
-  send:'<line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>',wave:'<path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4"/>'};
+  send:'<line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>',
+  back10:'<path d="M5.6 9.2A7.4 7.4 0 1 1 4.6 13"/><polyline points="4.2 4.6 5.6 9.2 10.2 8"/><text x="12.6" y="15.6">10</text>',fwd10:'<path d="M18.4 9.2A7.4 7.4 0 1 0 19.4 13"/><polyline points="19.8 4.6 18.4 9.2 13.8 8"/><text x="11.4" y="15.6">10</text>',wave:'<path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4"/>'};
 function fi(k){return'<svg viewBox="0 0 24 24" aria-hidden="true" class="fi">'+FI[k]+'</svg>'}
 function si(k){return'<svg viewBox="0 0 24 24" aria-hidden="true" class="si">'+FI[k]+'</svg>'}
 /* ----- the time: each stop's length from its words' timing (a recorded line's own word times, else the words at the voice's speed) ----- */
@@ -82,6 +83,8 @@ function dkWord(k){if(!dkWordsOn()||G.tpText==null||!G.sayLine||G.sayLine.text!=
     tp.querySelectorAll(".tp-now .tw").forEach(function(w){var j=+w.dataset.k;w.classList.toggle("said",j<k);w.classList.toggle("on",j===k)})});
   ph.querySelectorAll(".gdock .gm-now .tw").forEach(function(w){var j=+w.dataset.k;w.classList.toggle("said",j<k);w.classList.toggle("on",j===k)})}
 on("markWord.after",function(k){if(G.on&&dockOn())dkWord(k)});
+/* round 21: the panel's lines, its whole text and the Mini's line are lit by the one highlighter (guide/highlight.js) */
+on("hlBoxes.add",function(out){if(!G.on||!dockOn()||!hlSaying(G.tpText))return;ph.querySelectorAll(".gdock .gd-tp .tp-now,.gdock .gm-now").forEach(function(b){out.push([b,"panel"])})});
 /* ----- the parts every Look shares ----- */
 function dkAv(c){return'<span class="gd-av'+(c?" "+c:"")+'" aria-hidden="true">'+mascotStill()+'</span>'}
 function dkBars(n){if(!S.guideCfg.pBars)return"";var h="";for(var i=0;i<n;i++)h+="<i></i>";return'<span class="gd-bars" aria-hidden="true">'+h+'</span>'}
@@ -90,10 +93,12 @@ function dkStopB(c){return'<button type="button" class="'+c+'" data-g="stop" ari
 function dkStep(k,c){return'<button type="button" class="'+c+'" data-g="'+k+'" aria-label="'+TXH("guide_ctrl_"+k)+'">'+fi(k)+'</button>'}
 function spd(v){return String(+(+v).toFixed(2))}
 function dkSpeed(){if(S.guideCfg.pSpeed===false)return"";var v=guideSpeed();return'<button type="button" class="gd-speed" data-g="speed" aria-label="'+esc(fmt(TXT("dock_speed"),spd(v)))+'">'+spd(v)+'×</button>'}
-function dkCtl(c){return'<div class="gd-ctl'+(c?" "+c:"")+'">'+dkSpeed()+dkStep("prev","gd-pn")+dkPP("gd-play")+dkStep("next","gd-pn")+dkStopB("gd-stopb")+'</div>'}
+/* round 21: back 10 s and forward 10 s beside Play (guide/controls.js's seekBy, on the tour's timeline) */
+function dkSkip(k,c){return'<button type="button" class="gd-skip '+(c||"")+'" data-g="'+k+'" aria-label="'+TXH(k==="back10"?"dock_back10":"dock_fwd10")+'"><svg viewBox="0 0 24 24" aria-hidden="true" class="si sk10">'+FI[k]+'</svg></button>'}
+function dkCtl(c){return'<div class="gd-ctl'+(c?" "+c:"")+'">'+dkSpeed()+dkStep("prev","gd-pn")+dkSkip("back10")+dkPP("gd-play")+dkSkip("fwd10")+dkStep("next","gd-pn")+dkStopB("gd-stopb")+'</div>'}
 function dkKb(){return'<button type="button" class="gd-kb" data-dock="type" aria-label="'+TXH("dock_type")+'">'+KBD+'</button>'}
 /* Controls at Mini: Pause + Stop, Pause only, or Tap on the line (no buttons; the keyboard to ask by typing) */
-function dkMiniCtl(){var mc=S.guideCfg.miniCtl;if(mc==="line")return dkKb();return'<div class="gd-mini">'+dkPP("gd-mc gd-mpp")+(mc==="pausestop"?dkStopB("gd-mc gd-mstop"):"")+'</div>'}
+function dkMiniCtl(){var mc=S.guideCfg.miniCtl;if(mc==="line")return dkKb();return'<div class="gd-mini">'+dkSkip("back10","gd-mc gd-mback")+dkPP("gd-mc gd-mpp")+(mc==="pausestop"?dkStopB("gd-mc gd-mstop"):"")+'</div>'}
 function dkOpenB(c){return'<button type="button" class="gd-grab '+(c||"gd-openb")+'" data-dock="cycle" aria-label="'+TXH("dock_open")+'">'+(c?dkAv():si("up"))+'</button>'}
 function dkHide(){return'<button type="button" class="gd-hide" data-dock="hide" aria-label="'+TXH("dock_hide")+'">'+si("down")+'</button>'}
 function dkHandle(h){return'<button type="button" class="gd-grab gd-handle" data-dock="cycle" aria-label="'+TXH(h==="full"?"dock_collapse":"dock_expand")+'"><i></i></button>'}
@@ -130,8 +135,10 @@ function dockOpen(L,h,ts){var n=S.guideSteps.length,st=S.guideSteps[G.i],lab=fmt
     '<div class="gd-where gd-hrow">'+dkTimeHtml("el")+dkSeek("hair")+dkTimeHtml("tot")+'</div><div class="gd-lab gd-lab1">'+stop+'</div>'+(typing||h==="full"?'<div class="gd-askrow">'+dkForm()+'</div>'+dkChips(false):dkChips(true))+
     '<div class="gd-botrow">'+dkCtl("gd-capsule")+dkTalk(ts)+'</div>'+dkHint(ts);
   /* Ink glass */
-  return dkHandle(h)+dkSmall()+'<div class="gd-wrow">'+dkAv()+dkWords(h,"ink")+'<div class="gd-side">'+dkAll(h,"all")+dkAa()+'</div></div>'+
-    '<div class="gd-where">'+dkSeek("dots")+'<div class="gd-lab">'+stop+dkTimeHtml("both")+'</div></div>'+dkCtl()+dkChips(false)+'<div class="gd-askrow">'+dkForm()+dkTalk(ts)+'</div>'+dkHint(ts)}
+  /* round 21 (21.1, the developer: "too big, with too big elements"): a head row (the mascot, its name and the stop, Aa, Read all, small),
+     the words full width at 18 px, the controls in one row */
+  return dkHandle(h)+'<div class="gd-head">'+dkAv()+'<small class="gd-eye">'+esc(mascotName())+' · '+esc(lab)+'</small><span class="gd-sp"></span>'+dkAa()+dkAll(h,"all")+dkSmall()+'</div>'+'<div class="gd-wrow">'+dkWords(h,"ink")+'</div>'+
+    '<div class="gd-where gd-hrow">'+dkTimeHtml("el")+dkSeek("dots")+dkTimeHtml("tot")+'</div>'+dkCtl()+dkChips(false)+'<div class="gd-askrow">'+dkForm()+dkTalk(ts)+'</div>'+dkHint(ts)}
 function dockHtml(h){var L=dkLook(),ts=talkState();return h==="mini"?dockMini(L):dockOpen(L,h,ts)}
 /* ----- the progress, the time and the ring follow the voice (4 times a second); a drag on the bar holds them (guide/controls.js) ----- */
 function dkTick(){var d=ph.querySelector(".gdock");if(!d||!G.on)return;var T=dkTimes(),el=dkElapsed(T),sh=dkShare(),f=T.tot?el/T.tot:0;
@@ -158,9 +165,12 @@ on("renderGuide.after",function(text){var old=ph.querySelector(".gdock"),oldR=ol
   var cap=ph.querySelector(".gcap"),bar=ph.querySelector(".gbar"),ask=ph.querySelector(".gask");if(bar)bar.remove();if(ask)ask.remove();
   var st=S.guideSteps[G.i],t=text!=null?text:stepText(st),own=cap&&!blockWords(t);G.tpText=t;if(G.askOpen&&S.dockH!=="full")S.dockH="full";if(S.dockH!=="peek")G.typing=false;
   var ts=talkState(),compact=S.dockH==="compact",L=dkLook(),line=L==="paper"||L==="prompter",d=null;
-  if(!compact){d=document.createElement("div");d.className="gdock h-"+S.dockH+" lk-"+L;d.dataset.h=S.dockH;d.dataset.look=L;d.setAttribute("role","region");d.setAttribute("aria-label",TXT("dock_label"));d.innerHTML=dockHtml(S.dockH);ph.appendChild(d)}
+  if(!compact){d=document.createElement("div");d.className="gdock h-"+S.dockH+" lk-"+L+pipe("dock.cls","");d.dataset.h=S.dockH;d.dataset.look=L;d.setAttribute("role","region");d.setAttribute("aria-label",TXT("dock_label"));d.innerHTML=dockHtml(S.dockH);ph.appendChild(d)}
   /* the words: Azu's own in its bubble (Compact; Mini of a Look with no line), else in the panel; a block's words are lit in the block */
-  if(cap){if(own&&(compact||S.guideCfg.bubbles==="own"&&(S.dockH==="mini"&&(!line||!dkWordsOn())||S.dockH==="peek"&&dkWordsOff()))){var b=document.createElement("div");b.className="gbubble";b.setAttribute("role","status");cap.classList.add("gb-text");b.appendChild(cap);ph.appendChild(b);placeBubble()}
+  /* round 21: at Mini and Compact a tour's words go where Speech on screen › Words during a tour says (guide/teleprompter.js):
+     the teleprompter (no bubble), the bubble by the mascot's head, or Off */
+  var tw=S.guideCfg.tourWords,low=compact||S.dockH==="mini",toBub=!low||tw==="bubble";
+  if(cap){if(own&&toBub&&(compact||S.guideCfg.bubbles==="own"&&(S.dockH==="mini"&&(!line||!dkWordsOn())||S.dockH==="peek"&&dkWordsOff()))){var b=document.createElement("div");b.className="gbubble";b.setAttribute("role","status");cap.classList.add("gb-text");b.appendChild(cap);ph.appendChild(b);placeBubble()}
     else cap.remove()}
   var th=d&&d.querySelector(".gd-thread");if(th){var nw=th.querySelector(".gm-now");th.scrollTop=nw&&!G.askOpen?Math.max(0,nw.offsetTop-th.offsetTop-24):th.scrollHeight}var m=ph.querySelector(".mascot");if(m)m.dataset.state=ts;
   if(d){dkTick();barsStart();if(!oldR)dkMorph(G.morphFrom||dkStarAt(),d,L);else if(oldH!==S.dockH&&oldL===L)dkMorph(oldR,d,L);else if(G.morph&&performance.now()<G.morph.end)dkHold(d)}else if(oldR)dkMorph(oldR,null,oldL);G.morphFrom=null;
@@ -193,12 +203,12 @@ function dkStarIn(ms){var w=ph.querySelector(".gbtn-wrap");if(w&&w.animate)w.ani
 /* the dock's markup reaches the phone's signature: its Look, its height at the start and its Open, its controls at Mini, its parts */
 on("modelSig.sig",function(h){if(!sigWant(/guideCfg\.(dockStart|miniCtl|chips|panel|look|pWords|pBars|pSpeed)/))return h;var keep=S.dockH;S.dockH=S.guideCfg.dockStart;var x="#dock:"+S.guideCfg.panel+"|"+S.dockH+"|"+(S.dockH==="compact"?"":dockHtml(S.dockH))+"|"+dockHtml("peek");S.dockH=keep;return h+x});
 /* the bubble sits just above the dock, its tail towards Azu */
-function placeBubble(){var b=ph.querySelector(".gbubble"),d=ph.querySelector(".gdock")||ph.querySelector(".gbtn-wrap.intour"),m=ph.querySelector(".mascot");if(!b)return;var hd=d&&d.querySelector(".gd-hide"),top=d?Math.min(phRect(d.querySelector(".gd-mrow")||d).t,hd?phRect(hd).t:1e9):ph.offsetHeight-16;
+function placeBubble(){var b=ph.querySelector(".gbubble"),d=ph.querySelector(".gdock")||ph.querySelector(".gbtn-wrap.intour"),m=ph.querySelector(".mascot");if(!b||b.classList.contains("gb-head"))return;var hd=d&&d.querySelector(".gd-hide"),top=d?Math.min(phRect(d.querySelector(".gd-mrow")||d).t,hd?phRect(hd).t:1e9):ph.offsetHeight-16;
   b.style.bottom=(ph.offsetHeight-top+10)+"px";var up=m&&m.offsetTop+30<top-b.offsetHeight-10;b.classList.toggle("tail-up",!!up)}
 /* the free height for the block being told: above the dock and the bubble */
 /* round 19: a beat card of the games on the tour (not one sent away) is part of what covers the card's foot, so the step's words (the hero's at the
    teaser) are placed above it too (print 17) */
-function freeHeight(){var box=scr.getBoundingClientRect(),lo=box.bottom;[".gcap",".gbar",".gdock",".gbubble",".gbtn-wrap.intour",".gtmore",".gdbeat:not(.bt-away)"].forEach(function(s){var e=ph.querySelector(s);if(e){var r=e.getBoundingClientRect();if(r.height)lo=Math.min(lo,r.top)}});return{top:box.top,bottom:lo}}
+function freeHeight(){var box=scr.getBoundingClientRect(),lo=box.bottom;[".gcap",".gbar",".gdock",".gbubble:not(.gb-head)",".gbtn-wrap.intour",".gtmore",".gdbeat:not(.bt-away)",".gtele:not(.tl-out)"].forEach(function(s){var e=ph.querySelector(s);if(e){var r=e.getBoundingClientRect();if(r.height)lo=Math.min(lo,r.top)}});return{top:box.top,bottom:lo}}
 /* keep the talk state and the bubble's place in step with the voice */
 /* a bubble shows one sentence at a time (2 lines at most), the sentence being said */
 function bubbleSentence(){var b=ph.querySelector(".gbubble .gcap");if(!b)return;var ws=b.querySelectorAll(".gw"),k=Math.max(0,G.hl&&G.hl.k>=0?G.hl.k:0),sid=[],n=0;
@@ -336,4 +346,4 @@ function besideWords(m,y,top,lo,el){if(!el)return y;var boxes=wordBoxes(el);if(!
 rowDemos({"guideCfg.look":{tour:"g1",dock:"peek",ring:".gdock"},"guideCfg.pWords":{tour:"g1",dock:"peek",ring:".gd-tp|.gd-wrow|.gdock"},"guideCfg.pBars":{tour:"g1",dock:"mini",ring:".gd-bars|.gdock"},
   "guideCfg.pSpeed":{tour:"g1",dock:"peek",ring:".gd-speed|.gd-ctl"},"guideCfg.panel":{tour:"g1",ring:".gdock|.gbar"},"guideCfg.dockStart":{tour:"g1",ring:".gdock|.gbtn-wrap.intour"},"guideCfg.miniCtl":{tour:"g1",dock:"mini",ring:".gd-mini|.gd-line"},
   "guideCfg.swipeCompact":{tour:"g1",dock:"mini",act:function(){var g=ph.querySelector(".gd-grab");if(g)gsTouch(g,90)},ring:function(){return S.dockH==="compact"?".gbtn-wrap.intour":".gd-grab"}},
-  "guideCfg.bubbles":{tour:true,ring:".gbubble|.gd-tp"},"guideCfg.talk":{tour:"g1",dock:"peek",ring:".gd-talk"},"guideCfg.earcons":{tour:"g1",dock:"peek",act:function(){earcon(true)},ring:".gd-talk"},"guideCfg.chips":{tour:"g1",dock:"peek",ring:".gd-chips"}});
+  "guideCfg.bubbles":{tour:true,ring:".gbubble|.gd-tp|.gtele"},"guideCfg.talk":{tour:"g1",dock:"peek",ring:".gd-talk"},"guideCfg.earcons":{tour:"g1",dock:"peek",act:function(){earcon(true)},ring:".gd-talk"},"guideCfg.chips":{tour:"g1",dock:"peek",ring:".gd-chips"}});

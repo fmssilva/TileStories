@@ -272,7 +272,6 @@
 .gbubble.tail-up::after{bottom:auto;top:12px}
 @keyframes gbin{from{opacity:0;transform:translateY(6px) scale(.98)}}
 .gbubble .gcap{position:static;inset:auto;background:none;box-shadow:none;padding:0;border-radius:0;max-height:none;color:var(--ink1);font:500 15px/1.45 var(--body)}
-.gbubble .gcap.gread .gw{-webkit-text-fill-color:transparent;background-image:linear-gradient(90deg,color-mix(in srgb,var(--accent2) calc(var(--a,0)*100%),var(--ink1)) calc(var(--f,0)*112% - 12%),var(--ink2) calc(var(--f,0)*112%))}
 .gbubble .gw.gb-off{display:none}
 .gbubble .gnovoice{color:var(--ink2)}.gbubble .gcap em{color:var(--accent2)}
 .reduce .gbubble,.reduce .gd-talk,.reduce .gd-talk .ring,.reduce .gd-tp.tp-up{animation:none!important}.reduce .sk-knob,.reduce .gd-mprog b,.reduce .gd-ring .pg{transition:none}
@@ -305,3 +304,38 @@
 .gd-capsule{position:relative}
 .gd-qstar.m-cap{position:absolute;right:10px;top:-11px;background:var(--cap);color:var(--capink);border-radius:50%}
 .lk-player .gd-qstar.sk,.lk-player .gd-qstar.m-player{color:#9E3B1A}.cv.dark .lk-player .gd-qstar.sk,.cv.dark .lk-player .gd-qstar.m-player{color:#F0A27E}
+/* ===== round 21 (21.1, 21.3; the developer, 2026-11-13: "the panel ... is too big, with too big elements: the speech has too big words"):
+   Open smaller and calmer, the words at 18 px (they were 22), the controls in one row with back 10 s and forward 10 s beside Play, every
+   target 44 px; the Mini gets back 10 s before Pause. Ink glass's Open is 374 px (it was about 460): under half of an 844 phone,
+   with room. Unity: the dock's UXML (a head row, the controls row's two new Buttons), its USS sizes ===== */
+.gd-skip{width:44px;height:44px;border-radius:50%;color:var(--ink)}
+.gd-skip .sk10{width:25px;height:25px;stroke-width:1.7}
+.gd-skip .sk10 text{font:700 7.4px/1 var(--body);fill:currentColor;stroke:none;text-anchor:middle}
+.gd-ctl .gd-pn,.gd-ctl .gd-stopb{width:44px;height:44px}.gd-ctl .gd-pn .fi{width:21px;height:21px}.gd-ctl .gd-stopb .fi{width:16px;height:16px}
+.gd-ctl .gd-play{width:54px;height:54px}.gd-ctl .gd-play .fi{width:22px;height:22px}
+.gd-ctl .gd-speed{min-width:48px;padding:0 8px!important;font-size:13px!important}
+.lk-player .gd-ctl .gd-play{width:62px;height:62px}
+/* the Teleprompter Look's capsule shares its row with the microphone: back and forward 10 s take the place of Previous and Next there
+   (the stops stay on its progress line and the keyboard) */
+.lk-prompter .gd-capsule .gd-pn{display:none}
+.lk-prompter .gd-capsule .gd-skip{color:#FFFFFF}
+.gdock.lk-ink:not(.h-mini){padding:18px 16px 14px;gap:8px;border-radius:28px}
+.lk-ink .gd-head{display:flex;align-items:center;gap:2px;height:44px;margin-top:-2px}
+.lk-ink .gd-head .gd-av{width:30px;height:30px;margin-right:8px}.lk-ink .gd-head .gd-av svg,.lk-ink .gd-head .gd-av img{width:27px;height:27px}
+.lk-ink .gd-head .gd-eye{font:600 12px/16px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.lk-ink .gd-head .gd-small{position:static!important;color:var(--ink2)}
+.lk-ink .gd-head .gd-aa,.lk-ink .gd-head .gd-all{color:var(--ink2);border:0!important}
+.lk-ink .gd-wrow{margin:0;display:block}
+.lk-ink .gd-tp{gap:4px}.lk-ink .gd-tp .tp-prev{font-size:13px;line-height:18px}
+.lk-ink .gd-tp .tp-now{font-size:18px;line-height:26px;-webkit-line-clamp:2}
+.lk-ink.h-peek .gd-tp{height:74px;flex:none}
+.lk-ink .gd-lab{font-size:12px;line-height:16px}
+.lk-ink .gd-pn{background:none}
+.lk-ink .gd-play{box-shadow:0 0 0 6px rgba(242,181,68,.14)}
+.lk-ink .gd-form{height:48px}.lk-ink .gd-chips{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent)}
+.lk-ink .gd-talk{width:48px;height:48px;box-shadow:0 0 0 4px #16151A,0 0 0 6px rgba(242,181,68,.22)}
+.lk-ink .gd-chips [data-chip]{font-size:13px;padding:0 14px}
+.gdock.lk-ink.h-full .gd-wrow{flex:1 1 0;min-height:0;display:flex}
+.gd-mini .gd-mback{width:44px;height:44px;color:var(--ink)}
+.lk-ink .gd-hrow{flex-direction:row;align-items:center;gap:10px}
+.lk-ink .gd-hrow .gd-seek{flex:1}.lk-ink .gd-hrow .gd-time{font:600 12px/16px var(--body);color:var(--ink2);min-width:30px}.lk-ink .gd-hrow .gd-time[data-t=tot]{text-align:right}

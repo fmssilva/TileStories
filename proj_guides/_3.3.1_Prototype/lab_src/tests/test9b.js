@@ -23,7 +23,8 @@ const TEXT = 'O palácio tinha uma ópera, inaugurada em março de 1755.';
       kinds.add(s[0]); talks.add(Math.round(s[1] * 100)); if (s[2]) d2.add(s[2]); if (s[3] !== null) { n++; if (Math.abs(s[3] - s[1]) < .2) near++; } if (s[4]) { ended = true; break; } await W(40); }
     return { kinds: [...kinds], talks: talks.size, shapes2d: d2.size, near, n, ended }; };
   await R('S.tab="guide";renderEditor();ed.querySelector(\'[data-fo="s7mascot"]\').open=true');
-  ok('Editor: Mascot says how the mouth moves', /Azure's facial curves: 60 frames a second/.test(await R('(rowEl(ed,"s7mascot","How it moves")||{}).textContent||""')));
+  // round 19 (21.10): How it moves is in 1 · The mascot › Manner
+  ok('Editor: 1 · The mascot › Manner says how the mouth moves', /Azure's facial curves: 60 frames a second/.test(await R('(rowEl(ed,"gt:manner","How it moves")||{}).textContent||""')));
   // 1. a recorded Azure line: its curves, on the audio's clock, on the tile of light
   await setup('light', 'azure-sonia-raquel');
   ok('The recorded Azure set carries the mouth\'s curves for every line', await R('(function(){var s=voiceSets().filter(function(x){return x.id==="azure-sonia-raquel"})[0];var f=Object.keys(s.files).map(function(k){return s.files[k]});return f.length>50&&f.every(function(x){return x.mouth&&x.mouth.length>=90})})()'));

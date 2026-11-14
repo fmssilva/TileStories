@@ -31,6 +31,7 @@ $out = Get-Content $dom -Raw
 $m = [regex]::Match($out, 'data-json="([^"]*)"')
 if ($m.Success) {
   $j = [System.Net.WebUtility]::HtmlDecode($m.Groups[1].Value); $j | Set-Content "$d\selftest$sfx.json" -Encoding utf8
-  $o = $j | ConvertFrom-Json; "ok={0} behaviour={1} bad={2}{3}" -f $o.ok, $o.behaviour, $o.bad.Count, $(if ($tabs) { " (tabs: $tabs)" } else { "" })
+  $o = $j | ConvertFrom-Json; if ($o.pending) { "INCOMPLETE: $($o.pending) had not finished when the page was dumped" }
+  "ok={0} behaviour={1} bad={2}{3}" -f $o.ok, $o.behaviour, $o.bad.Count, $(if ($tabs) { " (tabs: $tabs)" } else { "" })
   $o.bad | ForEach-Object { "{0} | {1} | {2} = {3} | {4}" -f $_.tab, $_.label, $_.key, $_.v, $_.result } | Select-Object -First 80
 } elseif ($hash -like "selftest*") { "no json; length " + $out.Length }

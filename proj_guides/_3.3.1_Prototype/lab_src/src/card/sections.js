@@ -60,7 +60,7 @@ on("renderPhone.after",function(keep){var nb=document.getElementById("navbar"),c
     ph.appendChild(pin)}});
 
 /* ----- the Detail Card tab, reorganised ----- */
-function sectionTitle(n,t,sub){return n+" · "+t+(sub?' <span class="sub">· '+sub+'</span>':"")}
+function sectionTitle(n,t,sub){return'<span class="acct">'+n+" · "+t+'</span>'+(sub?' <span class="sub">· '+sub+'</span>':"")}
 /* ----- the sections' events ----- */
 ed.addEventListener("click",function(e){var t=e.target;
   if(t.closest("[data-seckind],[data-secicon],[data-seccol],[data-secmove],[data-secdel],[data-secadd],[data-blockdef],[data-poisec]"))e.stopPropagation();

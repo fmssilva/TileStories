@@ -8,7 +8,9 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 20000 }); await p.waitForTimeout(400);
   const R = src => p.evaluate(s => LAB.run(s), src);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
-  await R('S.hints.on=false;S.previewBar=false;S.lang="en";S.guideMute=true;S.view="card";S.stop="full";renderAll(false)');
+  // round 21 (21.5): during a tour the words go to the teleprompter by default; this file checks the dock's bubble, still an option
+  // (1 · The mascot › Speech on screen › Words during a tour = The bubble), so it chooses it
+  await R('S.hints.on=false;S.previewBar=false;S.lang="en";S.guideMute=true;S.guideCfg.tourWords="bubble";S.view="card";S.stop="full";renderAll(false)');
   // 1. one panel: the dock, not the captions box over the bar; Azu's own words in a bubble, one sentence at a time
   await R('startTour()'); await p.waitForTimeout(1500);
   const d1 = await R('[!!ph.querySelector(".gdock.h-mini"),!!ph.querySelector(".gbar"),!!ph.querySelector(".gbubble .gcap"),S.guideSteps[G.i].id]');
@@ -72,7 +74,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('stopTour();S.guideCfg.panel="dock"');
   // 8. the Editor
   // round 14: The tour's order is Narration, Captions, Focus, Invite to try, Guide panel, then Ways in (the Guide button inside it)
-  ok('Editor: Guide panel in The tour after Captions and Invite to try, then Ways in, its rows and its words', await R('S.tab="guide";renderEditor();var f=ed.querySelector(\'[data-fo="s7dock"]\'),A=function(a,b){return !!(a&&b&&(a.compareDocumentPosition(b)&Node.DOCUMENT_POSITION_FOLLOWING))};!!f&&f.closest(\'[data-fo="gt1"]\')&&A(ed.querySelector(\'[data-fo="s7cap"]\'),f)&&A(ed.querySelector(\'[data-fo="s7coach"]\'),f)&&f.nextElementSibling===ed.querySelector(\'[data-fo="gt:ways"]\')&&!!ed.querySelector(\'[data-fo="gt:ways"] [data-fo="s7gbtn"]\')&&["Panel","Starts at","The mascot\'s own words","Talk button","Sounds","Suggested questions"].every(function(t){return f.textContent.indexOf(t)>=0})&&(TXO.s7dock||[]).length===28'));  // round 11: 11 new words of the panel (dock_speed, dock_readall…)
+  ok('Editor: Guide panel in The tour after Captions and Invite to try, then Ways in, its rows and its words', await R('S.tab="guide";renderEditor();var f=ed.querySelector(\'[data-fo="s7dock"]\'),A=function(a,b){return !!(a&&b&&(a.compareDocumentPosition(b)&Node.DOCUMENT_POSITION_FOLLOWING))};!!f&&f.closest(\'[data-fo="gt1"]\')&&A(ed.querySelector(\'[data-fo="s7cap"]\'),f)&&A(ed.querySelector(\'[data-fo="s7coach"]\'),f)&&f.nextElementSibling===ed.querySelector(\'[data-fo="gt:ways"]\')&&!!ed.querySelector(\'[data-fo="gt:ways"] [data-fo="s7gbtn"]\')&&["Panel","Starts at","The mascot\'s own words","Talk button","Sounds","Suggested questions"].every(function(t){return f.textContent.indexOf(t)>=0})&&(TXO.s7dock||[]).length===30'));  // round 11: 11 new words of the panel (dock_speed, dock_readall…); round 21: back and forward 10 s (dock_back10, dock_fwd10)
   await R('S.tab="marker";renderEditor()');
   await p.locator('input[data-gask="0|en"]').fill('When was it built?'); await R('startTour();S.dockH="peek";renderGuide()'); await p.waitForTimeout(200);
   ok('Specific Marker: a suggested question, typed, on its chip', await R('ph.querySelector(\'[data-chip="0"]\').textContent') === 'When was it built?');

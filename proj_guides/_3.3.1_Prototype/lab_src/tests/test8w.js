@@ -9,13 +9,17 @@ const GLB = path.join(__dirname, '..', '..', '..', 'mascote', '3d', 'azu_tile.gl
   const errs = []; p.on('pageerror', e => errs.push(e.message));
   await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 90000 }); await p.waitForTimeout(500);
   const R = src => p.evaluate(s => LAB.run(s), src); const W = ms => p.waitForTimeout(ms);
+  // round 21 (21.10): an Editor row inside closed foldouts (the accordions of rounds 20 and 21) is reached as the developer does: each
+  // closed foldout above it opened by a real click on its header, from the outside in, then the row's own control clicked (edClick)
+  const openAbove = async sel => { for (let i = 0; i < 8; i++) { const m = await p.evaluate(s => LAB.run(`(function(){var b=document.querySelector(${JSON.stringify(s)});if(!b)return false;var ds=[];for(var d=b.closest("details");d;d=d.parentElement&&d.parentElement.closest("details"))ds.unshift(d);var c=ds.filter(function(d){return!d.open})[0];if(!c)return false;c.querySelector(":scope > summary").setAttribute("data-t21","1");return true})()`), sel); if (!m) return; await p.locator('summary[data-t21="1"]').first().click(); await p.evaluate(() => LAB.run('document.querySelectorAll("[data-t21]").forEach(function(x){x.removeAttribute("data-t21")});""')); await p.waitForTimeout(120); } };
+  const edClick = async (sel, o) => { await openAbove(sel); await p.locator(sel).first().click(o); };
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   await R('S.guideCfg.voice="device";S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;sampleFn=null;S.view="card";S.stop="half";renderAll(false)');
   // 1. the Editor: Mascot source with 3D model (GLB); choosing it loads the model
   await R('S.tab="guide";S.op["gt:tools"]=true;renderEditor();ed.querySelector(\'[data-fo="s7mascot"]\').open=true'); // round 14: Model tools opened too
   const src = await R('Array.from(ed.querySelectorAll(\'[data-set="@guideCfg.azuStyle"]\')).map(function(b){return b.textContent})');
   ok('Editor: Mascot source offers Tile of light, Tile (2.5D) and 3D model (GLB)', src.join('|') === 'Tile of light|Tile (2.5D)|3D model (GLB)', src);
-  await p.locator('[data-set="@guideCfg.azuStyle"][data-v="glb"]').click();
+  await edClick('[data-set="@guideCfg.azuStyle"][data-v="glb"]');
   await p.waitForFunction(() => LAB.run('Azu3D.state().ready||Azu3D.state().failed'), null, { timeout: 60000 });
   const st = await R('var s=Azu3D.state();[s.ready,s.err,s.info&&s.info.clips,s.info&&s.info.morphs,s.info&&s.info.front]');
   ok('The built-in GLB loads with its seven clips, four morphs and the front arm as its own mesh', st[0] && st[2].length === 7 && ['Blink', 'Open', 'Wide', 'Round'].every(m => st[3].indexOf(m) >= 0) && st[4], st);
@@ -30,13 +34,15 @@ const GLB = path.join(__dirname, '..', '..', '..', 'mascote', '3d', 'azu_tile.gl
   // 3. each state its clip
   const clipOf = async (setup) => { await R(setup); await W(450); return R('Azu3D.state().clip'); };
   await R('G.azWaveTill=0');
-  const sp = await clipOf('G.paused=false;G.talk="idle";G.busy=false;G.timer=G.timer||1;var m=ph.querySelector(".mascot");m.dataset.state="speaking";m.classList.remove("pointing")');
+  // round 21 (21.10): the guide's own loop points at the step's block every frame (round 15b), so the states are read with The mascot
+  // points Off, and pointing with it On again
+  const sp = await clipOf('S.guideCfg.point=false;G.paused=false;G.talk="idle";G.busy=false;G.timer=G.timer||1;var m=ph.querySelector(".mascot");m.dataset.state="speaking";m.classList.remove("pointing")');
   // (round 12 review) the states come from the app's own (talkState: the dock's timer copies it onto Azu at every height), not set on Azu
   const li = await clipOf('G.talk="listening";ph.querySelector(".mascot").dataset.state="listening"');
   const th = await clipOf('G.talk="idle";G.busy=true;ph.querySelector(".mascot").dataset.state="thinking"');
   await R('G.busy=false');
   // pointing: the guide's own pointAt (as a step with a spot calls it); the clip changes on the next frame
-  const pt = await R('ph.querySelector(".mascot").dataset.state="speaking";G.moment=null;G.i=S.guideSteps.findIndex(function(x){return x.ref!=="hero"});pointAt({x:150,y:330});new Promise(function(r){requestAnimationFrame(function(){requestAnimationFrame(function(){r(Azu3D.state().clip)})})})');
+  const pt = await R('S.guideCfg.point=true;ph.querySelector(".mascot").dataset.state="speaking";G.moment=null;G.i=S.guideSteps.findIndex(function(x){return x.ref!=="hero"});pointAt({x:150,y:330});new Promise(function(r){requestAnimationFrame(function(){requestAnimationFrame(function(){r(Azu3D.state().clip)})})})');
   ok('Each state its clip: speaking -> talk, listening -> listen, thinking -> think, pointing -> point', sp === 'talk' && li === 'listen' && th === 'think' && pt === 'point', [sp, li, th, pt]);
   // 4. the mouth: visemes move the morphs (the tour paused, so its own words do not drive the mouth); blink
   await R('pauseTour();ph.querySelector(".mascot").dataset.state="idle"'); await W(300);
@@ -47,7 +53,7 @@ const GLB = path.join(__dirname, '..', '..', '..', 'mascote', '3d', 'azu_tile.gl
   const bl = await R('new Promise(function(res){var seen=0,t0=performance.now();(function f(){if(Azu3D.morphNow("Blink")>.5)seen=1;if(seen||performance.now()-t0>6000)res(seen);else requestAnimationFrame(f)})()})');
   ok('...it blinks within six seconds', bl === 1);
   // 5. Play a clip, from the Editor
-  await p.locator('[data-az3d="walk"]').click(); await W(300);
+  await edClick('[data-az3d="walk"]'); await W(300);
   ok('Editor: Play a clip plays it on the guide\'s Azu', await R('Azu3D.state().clip') === 'walk');
   // 6. the peek: the 3D Azu rises from behind the block
   await R('Azu3D.force(null,0);azPeek()'); await W(500);
@@ -67,14 +73,14 @@ const GLB = path.join(__dirname, '..', '..', '..', 'mascote', '3d', 'azu_tile.gl
   const im2 = await R('ed.querySelector(".az3dres")&&ed.querySelector(".az3dres").textContent');
   ok('...a GLB with no clips is told what it lacks, by name, and the guide keeps its model', /box\.glb: missing clips: idle, talk, listen, think, point, walk, wave · missing morphs: Blink, Open, Wide, Round · no front-arm mesh/.test(im2 || '') && await R('Azu3D.state().info.clips.length===7'), im2);
   // 9. back to the Tile of light: the 3D canvas leaves, the shader returns
-  await p.locator('[data-set="@guideCfg.azuStyle"][data-v="light"]').click(); await W(500);
+  await edClick('[data-set="@guideCfg.azuStyle"][data-v="light"]'); await W(500);
   ok('Back to Tile of light: the 3D model leaves the guide', await R('!ph.querySelector(".az3d")&&!!ph.querySelector(".mascot .azgl")'));
   ok('no page errors', errs.length === 0, errs.slice(0, 3));
   // 10. with no network: the 3D source says so and the guide shows the Tile of light
   const p2 = await b.newPage({ viewport: { width: 1400, height: 900 } }); const errs2 = []; p2.on('pageerror', e => errs2.push(e.message));
   await p2.route('**/cdn.jsdelivr.net/**', r => r.abort());
   await p.close();
-  await p2.goto(url, { waitUntil: 'domcontentloaded', timeout: 120000 }); await p2.waitForFunction(() => window.LAB, null, { timeout: 90000 });
+  await p2.goto(url, { waitUntil: 'domcontentloaded', timeout: 150000 }); await p2.waitForFunction(() => window.LAB, null, { timeout: 150000 }); // round 21: 150 s as the other files (a second page after the 3D import starts slower)
   const R2 = s => p2.evaluate(x => LAB.run(x), s);
   await R2('S.hints.on=false;S.guideMute=true;S.introSeen=true;S.view="card";S.stop="half";S.guideCfg.azuStyle="glb";renderAll(false);S.tab="guide";renderEditor();ed.querySelector(\'[data-fo="s7mascot"]\')&&(ed.querySelector(\'[data-fo="s7mascot"]\').open=true);startTour()');
   await p2.waitForFunction(() => LAB.run('Azu3D.state().failed'), null, { timeout: 30000 }).catch(() => {});

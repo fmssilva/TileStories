@@ -11,7 +11,7 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
   record copy) and publish it to https://claude.ai/artifact/Gpjf7yvoYHjGebmmNhuw2o.
 - **Prove it:** `powershell -ExecutionPolicy Bypass -File tests/runtest8.ps1` opens the page headless with `#selftest`: every option,
   text and demo field must change the phone or be classed behaviour, and every row of every tab has its demo but the named
-  exemptions (`ROW_DEMO_EXEMPT`, each with its reason; guidance round 10) (it prints `bad=0` when all is well). It walks the tabs as three walks side by side and sums them (about 14 minutes at round 17b);
+  exemptions (`ROW_DEMO_EXEMPT`, each with its reason; guidance round 10) (it prints `bad=0` when all is well). It walks the tabs as three walks side by side and sums them (about 14 minutes at round 17b); the texts' walk goes in slices of 20 fields, each its own task, and draws the signature before a field once per tab and language (round 21: it had passed 40 min; `-tabs words` now about 4 min), its JSON pending (INCOMPLETE) until done;
   `-tabs guide` walks one tab (`#selftest=guide`; add `words` for the texts); `-single` is the old one walk, many times slower.
   `tests/shots8b.ps1` captures the demo card at each kind (`#dcshot=<kind>`); `#pshot=<stop>|<scroll>` opens the card at a
   stop and a scroll. `node run_tests.js` runs every test in `tests/` (not the `*_live` ones) and lists the failed checks:
@@ -341,7 +341,18 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
     pinned, a real tap on each pinned header back to its start, still open; [review] the moved and renamed rows where the report says, each with its ? and its
     ▸ (pressed: the demo on the phone); [glow] Once per visit, On every new card and Off by real clicks, each by real taps on the Ribeira Palace's marker, its
     Start and the Torreão's pin, and the row's ▸ playing its demo. `MUTATE=1 node tests/test9y.js` opens the sections by level, unpins the headers, leaves the
-    Lab's wall row in Ask about the view and ignores the glow option: the checks named [collapsed], [sticky], [review] and [glow] turn red.
+    Lab's wall row in Ask about the view and ignores the glow option: the checks named [collapsed], [sticky], [review] and [glow] turn red. Round 21 (21.9): [card & global], the Detail Card and Global tabs
+    as accordions too (collapsed by real clicks, a section alone, two headers pinned by the wheel's arithmetic, Languages & Terms' Go to into each).
+  - *Speech on screen and the panels, guidance round 21* (`guide/highlight`, `guide/teleprompter`, `guide/panel-look`, `guide/dock`'s Open and ±10 s,
+    `guide/controls`' `seekBy`, `guidance/present`'s bubble that follows, `guide/tour-end`'s mascot, `guide/game-ask`'s after-the-quiz line and chip):
+    `tests/test9z.js` checks [highlighter] one painter for the bubble, the teleprompter, the panel and the block (a hook count), the glide eased (sampled
+    mid-way, between the words, on the in-out curve), the tail's fade, reduced motion; [panel] Open at most half of 844, its words at most 20 px, every
+    target 44 px, nothing cut; [seek] ±10 s by real taps across a step, the time shown, the Mini's back 10 s; [bubble] the tail on the walking mascot's
+    head within 4 px, a tip's bubble with the hop; [teleprompter] the words there and in no bubble, the told block above it, the line before fading,
+    Full script; [looks] every word 4.5:1 on each look, light and dark, Follows the theme; [what next] the mascot covers nothing; [quiz ask] the
+    off-topic answer and the warm after-the-quiz line, EN and PT; [chip] 8 px from its eyebrow; [editor] each new row and its ▸. `MUTATE=1` turns
+    them red (the glide instant, ±10 s dead, nothing follows, no teleprompter, the theme always Dark, the words 30 px, the mascot on the panel's edge,
+    every question about the quiz, the chip never moved).
   - *Every Editor row's demo, guidance round 10* (`editor/demo`, the rows' modules: `editor/card-tab`, `card/controls`, `card/blocks`,
     `card/pages`, `card/states`, `card/hints`, `editor/texts`, `editor/components`, `editor/marker-tab`, `mascot/azu2d`, `guidance/editor`):
     `tests/test9n.js` checks that the self-test's NO DEMO check walks every tab and finds no row without a demo but its named exemptions

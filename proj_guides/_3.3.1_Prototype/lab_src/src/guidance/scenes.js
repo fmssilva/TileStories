@@ -184,7 +184,7 @@ var GDSCENES4=[
       r.walk=G.on&&S.guideSteps[G.i]&&S.guideSteps[G.i].id==="how0";r.mark=!!ph.querySelector("#grab.gfocus");
       return gdScWait(function(){return gdEverOf(S.gdVisitor,"nudge").done},12000).then(function(d){r.done=d&&gdEverOf(S.gdVisitor,"nudge").by==="wk_grab";stopTour();S.stop="closed";renderPhone(false);
         return gdScWait(function(){return!!ph.querySelector(".gbtn")},2000)}).then(function(){gsTouch(ph.querySelector(".gbtn"));var w=ph.querySelector('[data-gbgo="how"]');if(w)gsTouch(w);
-        return gdScWait(function(){return gdIs("howto:wall")||!!(G.gd.cur&&G.gd.cur.item.id==="howto:wall")},2000)}).then(function(a){return gdScWait(function(){return false},500).then(function(){var b=ph.querySelector(".gdbub:not(.gd-out)"),g=ph.querySelector(".gbtn");
+        return gdScWait(function(){return gdIs("howto:wall")||!!(G.gd.cur&&G.gd.cur.item.id==="howto:wall")},2000)}).then(function(a){/* round 21: the bubble goes with the mascot's hop (21.4), so its place is read once the hop has ended */return gdScWait(function(){return false},Math.max(500,(G.gd.hopMs||0)+250)).then(function(){var b=ph.querySelector(".gdbub:not(.gd-out)"),g=ph.querySelector(".gbtn");
         r.wall=a;r.text=a?G.gd.cur.text:"";r.cta=!!(b&&b.querySelector("[data-gdcta]"));r.words=gdOverWords();r.overStar=b&&g?Math.round(gdOver(gdPR(b),gdPR(g))):-1;r.ring=!!ph.querySelector(".gdring");
         var c=b&&b.querySelector("[data-gdcta]");if(c)gsTouch(c);r.open=S.stop!=="closed";
         S.guidance.on=k.on;S.guideMute=k.mute;S.introSeen=k.intro;

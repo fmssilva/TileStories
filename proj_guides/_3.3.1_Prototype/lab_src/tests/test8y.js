@@ -9,17 +9,22 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const errs = []; p.on('pageerror', e => errs.push(e.message));
   await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 90000 }); await p.waitForTimeout(500);
   const R = src => p.evaluate(s => LAB.run(s), src); const W = ms => p.waitForTimeout(ms);
+  // round 21 (21.10): an Editor row inside closed foldouts (the accordions of rounds 20 and 21) is reached as the developer does: each
+  // closed foldout above it opened by a real click on its header, from the outside in, then the row's own control clicked (edClick)
+  const openAbove = async sel => { for (let i = 0; i < 8; i++) { const m = await p.evaluate(s => LAB.run(`(function(){var b=document.querySelector(${JSON.stringify(s)});if(!b)return false;var ds=[];for(var d=b.closest("details");d;d=d.parentElement&&d.parentElement.closest("details"))ds.unshift(d);var c=ds.filter(function(d){return!d.open})[0];if(!c)return false;c.querySelector(":scope > summary").setAttribute("data-t21","1");return true})()`), sel); if (!m) return; await p.locator('summary[data-t21="1"]').first().click(); await p.evaluate(() => LAB.run('document.querySelectorAll("[data-t21]").forEach(function(x){x.removeAttribute("data-t21")});""')); await p.waitForTimeout(120); } };
+  const edClick = async (sel, o) => { await openAbove(sel); await p.locator(sel).first().click(o); };
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   // a picture's colour counts, in the page
   await R('window.azCount=function(src){return new Promise(function(res){var im=new Image();im.onload=function(){var c=document.createElement("canvas");c.width=im.width;c.height=im.height;var x=c.getContext("2d");x.drawImage(im,0,0);var d=x.getImageData(0,0,c.width,c.height).data,n={cover:0,blue:0,purple:0,ochre:0,r:0,b:0};for(var i=0;i<d.length;i+=4){if(d[i+3]<200)continue;var r=d[i],g=d[i+1],bl=d[i+2];n.cover++;n.r+=r;n.b+=bl;if(bl>r+60)n.blue++;if(r-g>18&&g<.8*r&&g<.85*bl)n.purple++;if(r>170&&bl<r-90)n.ochre++}n.r=Math.round(n.r/Math.max(1,n.cover));n.b=Math.round(n.b/Math.max(1,n.cover));res(n)};im.src=src})}');
   const prev = async (i) => R('azCount(ed.querySelectorAll(".azprev img")[' + i + '].src)');
-  const press = async (key, v) => { await p.locator(`[data-set="@guideCfg.${key}"][data-v="${v}"]`).click(); await W(250); await R('ed.querySelector(\'[data-fo="s7mascot"]\').open=true'); };
+  const press = async (key, v) => { await edClick(`[data-set="@guideCfg.${key}"][data-v="${v}"]`); await W(250); await R('ed.querySelector(\'[data-fo="s7mascot"]\').open=true'); };
   await R('S.guideCfg.azuStyle="light";S.guideCfg.voice="device";S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;sampleFn=null;S.view="card";S.stop="half";renderAll(false)');
   await R('S.tab="guide";renderEditor();ed.querySelector(\'[data-fo="s7mascot"]\').open=true');
   // 1. the rows, by name, with the defaults pressed; the defaults are the shader's look before the styles
-  const rows = await R('["Glaze","Pattern","Light","Corners","Preview"].map(function(l){return !!rowEl(ed,"s7mascot",l)})');
+  // round 19 (21.10): these rows are in 1 · The mascot › Look
+  const rows = await R('["Glaze","Pattern","Light","Corners","Preview"].map(function(l){return !!rowEl(ed,"gt:look",l)})');
   const pressed = await R('["azuGlaze","azuMotif","azuLight","azuShape"].map(function(k){var b=ed.querySelector(\'[data-set="@guideCfg.\'+k+\'"][aria-pressed="true"]\');return b&&b.textContent})');
-  ok('Tile of light: the Editor shows Glaze, Pattern, Light, Corners and Preview', rows.every(Boolean), rows);
+  ok('Tile of light: the Editor shows Glaze, Pattern, Light, Corners and Preview (in 1 · The mascot › Look)', rows.every(Boolean), rows);
   ok('...the defaults: Cobalt, Rosette, Pastel clouds, Soft', pressed.join('|') === 'Cobalt|Rosette|Pastel clouds|Soft', pressed);
   ok('...which are the look the tile had (the same colours, pattern, corners and light)', await R('JSON.stringify([AZU_UNI.uCream,AZU_UNI.uInk,AZU_UNI.uMotif,AZU_UNI.uRound,AZU_UNI.uP0])') === JSON.stringify([[.96, .93, .87], [.12, .31, .61], 0, .12, [.48, .86, 1]]));
   const pv = await R('Array.from(ed.querySelectorAll(".azprev img")).map(function(i){return [i.alt,i.complete&&i.naturalWidth]})');

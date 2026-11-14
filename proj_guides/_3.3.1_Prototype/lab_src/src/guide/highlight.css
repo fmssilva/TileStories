@@ -1,0 +1,28 @@
+/* The one highlighter (round 21, guide/highlight.js): a soft shape gliding from word to word behind the text, a fine underline, and the
+   words just said keeping a warm tint that fades (the comet). Every place uses these rules; a place sets only its colours:
+   --hlc the light's colour, --hla the shape's strength, --hlln the underline, --hlt the tail's strength, --hlun the words not yet said,
+   --hlink the words said and being said. Unity: the quad a VisualElement behind the label (its colour and radius in USS), the tail
+   per-character vertex colours. */
+.hl-box{position:relative;isolation:isolate}
+/* a place drawn static by its own rules (the bubble's words) becomes the light's frame too; the classic captions stay absolute */
+.gbubble .gcap.hl-box,.gd-tp .tp-now.hl-box{position:relative}
+.hl-box>.hl-quad{position:absolute;left:-4px;top:-1px;padding:1px 4px;box-sizing:content-box;z-index:-1;pointer-events:none;border-radius:7px;opacity:0;
+  background:color-mix(in srgb,var(--hlc,#F2B544) calc(var(--hla,.3)*100%),transparent);box-shadow:inset 0 -2px 0 var(--hlln,#F2B544);transition:opacity .18s ease-out;will-change:transform}
+.hl-box :is(.gw,.tw,.gdw,.btw){padding:1px .17em!important;margin:0 -.17em!important;border-radius:2px!important;box-shadow:none!important;transition:none!important;
+  background:color-mix(in srgb,var(--hlc,#F2B544) calc(var(--t,0)*var(--hlt,.22)*100%),transparent)!important;-webkit-text-fill-color:currentColor}
+.hl-box :is(.gw,.tw,.gdw,.btw).hl-un{color:var(--hlun,inherit)!important}
+.hl-box :is(.gw,.tw,.gdw,.btw):is(.hl-on,.hl-said){color:var(--hlink,inherit)!important}
+.reduce .hl-box>.hl-quad{transition:none}
+/* the block's own text (the read-along), on the card's paper; dark: a quieter light */
+.cv .hl-box{--hlc:#FFD98A;--hla:.62;--hlln:#C98A12;--hlt:.5;--hlun:var(--ink2);--hlink:var(--ink1)}
+.cv.dark .hl-box{--hla:.24;--hlln:#FFD98A;--hlt:.26}
+/* the classic captions (the dark bar) */
+.gcap.hl-box{--hlc:#FFD98A;--hla:.22;--hlln:#FFD98A;--hlt:.2;--hlun:rgba(244,241,234,.62);--hlink:#F4F1EA}
+/* the bubbles (the dock's, the tips'): the paper's words, the accent's light */
+.gbubble .gcap.hl-box,.gdbub .hl-box{--hlc:#F2B544;--hla:.34;--hlln:var(--accent2,#B5651D);--hlt:.24;--hlun:var(--ink2);--hlink:var(--ink1)}
+.dark .gbubble .gcap.hl-box,.dark .gdbub .hl-box{--hla:.26;--hlln:#F2B544;--hlt:.2}
+/* the games' cards: their own light */
+.gdbeat .hl-box{--hlc:var(--bt-hl,#F2B544);--hla:.5;--hlln:var(--bt-acctx,#9E3B1A);--hlt:.3;--hlink:inherit}
+/* the panel (its lines, the whole text, the Mini's line): the Look's accent */
+.gdock .hl-box{--hlc:var(--acc);--hla:.26;--hlln:var(--acc);--hlt:.12;--hlun:var(--tpun);--hlink:var(--ink)}
+.gdock.lk-paper .hl-box,.gdock.lk-player .hl-box,.gdock.lk-prompter .hl-box{--hla:.16;--hlt:.12}

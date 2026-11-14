@@ -781,21 +781,11 @@ header .lede,header nav.steps{display:none}header h1{font-size:26px;margin:2px 0
 /* Reduce Motion: still shapes, a static line */
 .reduce .stv *,.reduce .stv{animation:none!important}
 .reduce .st-scanline{top:42%}.reduce .st-dots i{opacity:1}.reduce .st-tiles i:nth-child(odd){transform:rotateY(0)}
-/* v8i: the read-along light. Captions (always on the dark bar): the words fill with warm light, the unread ones dimmer.
-   The block's own text: a highlighter wipes through the word being said, with a gold line under it; the trail is a softer wash. */
+/* v8i: the captions' box (round 21: the light on its words, and on every place's, is guide/highlight.css's) */
 /* the captions' box is solid enough that the card behind never shows through the dimmer unread words */
 .gcap{background:rgba(18,18,20,.95);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
 .gcap .gnovoice{display:block;font:600 12px/1.3 var(--body);color:#FFD98A;margin-bottom:4px}.gcap .gnovoice[hidden]{display:none}
-.gcap.gread .gw{--hl:#FFD98A;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;background-color:transparent;box-shadow:none;
-  background-image:linear-gradient(90deg,color-mix(in srgb,var(--hl) calc(var(--a,0)*100%),#F4F1EA) calc(var(--f,0)*112% - 12%),rgba(244,241,234,.62) calc(var(--f,0)*112%));transition:none}
 .cv .el-par .gw:not(.done):not(.on),.cv .el-lede .gw:not(.done):not(.on){color:inherit}
-.cv{--hlw:#FFD98A;--hlln:#C98A12;--hlt:.55}.cv.dark{--hlw:color-mix(in srgb,#FFD98A 36%,transparent);--hlln:#FFD98A;--hlt:.26}
-/* each word's light reaches half-way into the spaces beside it, so the trail and the band read as one continuous stroke (no layout change) */
-.cv .el-par.gread .gw,.cv .el-lede.gread .gw{border-radius:5px;padding:1px .13em;margin:0 -.13em;transition:none;box-shadow:none;
-  background-color:color-mix(in srgb,#FFD98A calc(var(--t,0)*var(--hlt)*100%),transparent);
-  background-image:linear-gradient(90deg,var(--hlw) calc(var(--h,0)*112% - 12%),transparent calc(var(--h,0)*112%)),linear-gradient(90deg,var(--hlln) calc(var(--h,0)*112% - 12%),transparent calc(var(--h,0)*112%));
-  background-size:100% 100%,100% 2px;background-position:0 0,0 100%;background-repeat:no-repeat}
-.cv .el-par.gread .gw.un:not(.done),.cv .el-lede.gread .gw.un:not(.done){color:var(--ink2)}
 /* v8j: Focus. The spotlight: a hole in a soft scrim with a warm ring (the rest of the card at --scrim); it glides from block to spot */
 /* placed every frame (it stays on its block during a scroll); a change of target glides in 0.55 s, in the script */
 .gspot{position:absolute;z-index:10;border-radius:14px;pointer-events:none;opacity:0;transition:opacity .35s}
@@ -1185,7 +1175,6 @@ body{padding-block:8px}
 .gbubble.tail-up::after{bottom:auto;top:12px}
 @keyframes gbin{from{opacity:0;transform:translateY(6px) scale(.98)}}
 .gbubble .gcap{position:static;inset:auto;background:none;box-shadow:none;padding:0;border-radius:0;max-height:none;color:var(--ink1);font:500 15px/1.45 var(--body)}
-.gbubble .gcap.gread .gw{-webkit-text-fill-color:transparent;background-image:linear-gradient(90deg,color-mix(in srgb,var(--accent2) calc(var(--a,0)*100%),var(--ink1)) calc(var(--f,0)*112% - 12%),var(--ink2) calc(var(--f,0)*112%))}
 .gbubble .gw.gb-off{display:none}
 .gbubble .gnovoice{color:var(--ink2)}.gbubble .gcap em{color:var(--accent2)}
 .reduce .gbubble,.reduce .gd-talk,.reduce .gd-talk .ring,.reduce .gd-tp.tp-up{animation:none!important}.reduce .sk-knob,.reduce .gd-mprog b,.reduce .gd-ring .pg{transition:none}
@@ -1218,6 +1207,41 @@ body{padding-block:8px}
 .gd-capsule{position:relative}
 .gd-qstar.m-cap{position:absolute;right:10px;top:-11px;background:var(--cap);color:var(--capink);border-radius:50%}
 .lk-player .gd-qstar.sk,.lk-player .gd-qstar.m-player{color:#9E3B1A}.cv.dark .lk-player .gd-qstar.sk,.cv.dark .lk-player .gd-qstar.m-player{color:#F0A27E}
+/* ===== round 21 (21.1, 21.3; the developer, 2026-11-13: "the panel ... is too big, with too big elements: the speech has too big words"):
+   Open smaller and calmer, the words at 18 px (they were 22), the controls in one row with back 10 s and forward 10 s beside Play, every
+   target 44 px; the Mini gets back 10 s before Pause. Ink glass's Open is 374 px (it was about 460): under half of an 844 phone,
+   with room. Unity: the dock's UXML (a head row, the controls row's two new Buttons), its USS sizes ===== */
+.gd-skip{width:44px;height:44px;border-radius:50%;color:var(--ink)}
+.gd-skip .sk10{width:25px;height:25px;stroke-width:1.7}
+.gd-skip .sk10 text{font:700 7.4px/1 var(--body);fill:currentColor;stroke:none;text-anchor:middle}
+.gd-ctl .gd-pn,.gd-ctl .gd-stopb{width:44px;height:44px}.gd-ctl .gd-pn .fi{width:21px;height:21px}.gd-ctl .gd-stopb .fi{width:16px;height:16px}
+.gd-ctl .gd-play{width:54px;height:54px}.gd-ctl .gd-play .fi{width:22px;height:22px}
+.gd-ctl .gd-speed{min-width:48px;padding:0 8px!important;font-size:13px!important}
+.lk-player .gd-ctl .gd-play{width:62px;height:62px}
+/* the Teleprompter Look's capsule shares its row with the microphone: back and forward 10 s take the place of Previous and Next there
+   (the stops stay on its progress line and the keyboard) */
+.lk-prompter .gd-capsule .gd-pn{display:none}
+.lk-prompter .gd-capsule .gd-skip{color:#FFFFFF}
+.gdock.lk-ink:not(.h-mini){padding:18px 16px 14px;gap:8px;border-radius:28px}
+.lk-ink .gd-head{display:flex;align-items:center;gap:2px;height:44px;margin-top:-2px}
+.lk-ink .gd-head .gd-av{width:30px;height:30px;margin-right:8px}.lk-ink .gd-head .gd-av svg,.lk-ink .gd-head .gd-av img{width:27px;height:27px}
+.lk-ink .gd-head .gd-eye{font:600 12px/16px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.lk-ink .gd-head .gd-small{position:static!important;color:var(--ink2)}
+.lk-ink .gd-head .gd-aa,.lk-ink .gd-head .gd-all{color:var(--ink2);border:0!important}
+.lk-ink .gd-wrow{margin:0;display:block}
+.lk-ink .gd-tp{gap:4px}.lk-ink .gd-tp .tp-prev{font-size:13px;line-height:18px}
+.lk-ink .gd-tp .tp-now{font-size:18px;line-height:26px;-webkit-line-clamp:2}
+.lk-ink.h-peek .gd-tp{height:74px;flex:none}
+.lk-ink .gd-lab{font-size:12px;line-height:16px}
+.lk-ink .gd-pn{background:none}
+.lk-ink .gd-play{box-shadow:0 0 0 6px rgba(242,181,68,.14)}
+.lk-ink .gd-form{height:48px}.lk-ink .gd-chips{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent)}
+.lk-ink .gd-talk{width:48px;height:48px;box-shadow:0 0 0 4px #16151A,0 0 0 6px rgba(242,181,68,.22)}
+.lk-ink .gd-chips [data-chip]{font-size:13px;padding:0 14px}
+.gdock.lk-ink.h-full .gd-wrow{flex:1 1 0;min-height:0;display:flex}
+.gd-mini .gd-mback{width:44px;height:44px;color:var(--ink)}
+.lk-ink .gd-hrow{flex-direction:row;align-items:center;gap:10px}
+.lk-ink .gd-hrow .gd-seek{flex:1}.lk-ink .gd-hrow .gd-time{font:600 12px/16px var(--body);color:var(--ink2);min-width:30px}.lk-ink .gd-hrow .gd-time[data-t=tot]{text-align:right}
 /* The Stop's toast and its question: the dock's dark, the action in the dock's gold, 44 px targets. Unity: a VisualElement above the
    dock (or the Navigation Bar), shown for 5 s by schedule.Execute; no blur. */
 .gtoast,.gstopask{position:absolute;left:12px;right:12px;z-index:17;display:flex;align-items:center;gap:10px;justify-content:space-between;background:#16181C;color:#F4F1EA;border:1px solid rgba(244,241,234,.16);border-radius:16px;padding:6px 6px 6px 16px;font:600 15px/1.3 var(--body);box-shadow:0 10px 28px rgba(0,0,0,.4);animation:gbin .22s ease}
@@ -2053,6 +2077,9 @@ tr.gskipped td{opacity:.55;text-decoration:line-through}
 /* the Editor: the parts' ▲▼ beside their On / Off */
 .teord{display:inline-flex;gap:4px;margin-left:8px;vertical-align:middle}.teord .del{min-width:26px;padding:0 6px}
 .note.tesub{margin:6px 0 2px 18px}
+/* round 21 (21.7): the mascot inside the panel's top corner (its header makes room), the bubble above the panel, its tail down to the head */
+.tepanel.te-azin .te-head{padding-left:70px}
+.tebub.te-azdown{left:16px}.tebub.te-azdown .te-tail{left:22px;bottom:-5px;box-shadow:1px 1px 0 var(--hair);border-radius:0 0 3px 0}
 /* Ask during a game (guidance round 18, guide/game-ask.js): the quiet "Game paused" chip on the game, the paused game dimmed and still,
    a faded wrong choice, the panel's Back row (the panel's own primary style), Show me's way back, Off's line. Reduced motion: no fade */
 .kq.ga-paused,.poll.ga-paused{position:relative}
@@ -2096,6 +2123,9 @@ tr.gskipped td{opacity:.55;text-decoration:line-through}
   background:var(--bt-ink,#1A1814);color:var(--bt-bg,#FFFFFF);font:600 14px/20px var(--body);box-shadow:0 8px 20px rgba(10,9,12,.24);animation:ga-in .2s ease-out}
 .kq>.ga-note,.poll>.ga-note{background:#1A1814;color:#FFFFFF}
 .dark .kq>.ga-note,.dark .poll>.ga-note{background:#F4F1EA;color:#1A1814}
+/* round 21 (G.2): the chip clear of the block's eyebrow: its pause sign alone (44 px), or inside the quiz's top corner */
+#ph .ga-chip.ga-icon{width:44px;padding:0;justify-content:center}#ph .ga-chip.ga-icon>span{display:none}
+#ph .kq>.ga-chip.ga-inside,#ph .poll>.ga-chip.ga-inside{top:8px;bottom:auto;right:8px}
 /* The mascot's global settings in the Editor (Guide › 1 · The mascot › Who), round 19 */
 #ed .mpname{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 #ed .mpl{display:flex;align-items:center;gap:6px}
@@ -2134,6 +2164,137 @@ tr.gskipped td{opacity:.55;text-decoration:line-through}
 .hero .w{transition:bottom .35s ease}
 .hero .w.hsroom{bottom:70px}
 .reduce .hero .w{transition:none}
+/* The one highlighter (round 21, guide/highlight.js): a soft shape gliding from word to word behind the text, a fine underline, and the
+   words just said keeping a warm tint that fades (the comet). Every place uses these rules; a place sets only its colours:
+   --hlc the light's colour, --hla the shape's strength, --hlln the underline, --hlt the tail's strength, --hlun the words not yet said,
+   --hlink the words said and being said. Unity: the quad a VisualElement behind the label (its colour and radius in USS), the tail
+   per-character vertex colours. */
+.hl-box{position:relative;isolation:isolate}
+/* a place drawn static by its own rules (the bubble's words) becomes the light's frame too; the classic captions stay absolute */
+.gbubble .gcap.hl-box,.gd-tp .tp-now.hl-box{position:relative}
+.hl-box>.hl-quad{position:absolute;left:-4px;top:-1px;padding:1px 4px;box-sizing:content-box;z-index:-1;pointer-events:none;border-radius:7px;opacity:0;
+  background:color-mix(in srgb,var(--hlc,#F2B544) calc(var(--hla,.3)*100%),transparent);box-shadow:inset 0 -2px 0 var(--hlln,#F2B544);transition:opacity .18s ease-out;will-change:transform}
+.hl-box :is(.gw,.tw,.gdw,.btw){padding:1px .17em!important;margin:0 -.17em!important;border-radius:2px!important;box-shadow:none!important;transition:none!important;
+  background:color-mix(in srgb,var(--hlc,#F2B544) calc(var(--t,0)*var(--hlt,.22)*100%),transparent)!important;-webkit-text-fill-color:currentColor}
+.hl-box :is(.gw,.tw,.gdw,.btw).hl-un{color:var(--hlun,inherit)!important}
+.hl-box :is(.gw,.tw,.gdw,.btw):is(.hl-on,.hl-said){color:var(--hlink,inherit)!important}
+.reduce .hl-box>.hl-quad{transition:none}
+/* the block's own text (the read-along), on the card's paper; dark: a quieter light */
+.cv .hl-box{--hlc:#FFD98A;--hla:.62;--hlln:#C98A12;--hlt:.5;--hlun:var(--ink2);--hlink:var(--ink1)}
+.cv.dark .hl-box{--hla:.24;--hlln:#FFD98A;--hlt:.26}
+/* the classic captions (the dark bar) */
+.gcap.hl-box{--hlc:#FFD98A;--hla:.22;--hlln:#FFD98A;--hlt:.2;--hlun:rgba(244,241,234,.62);--hlink:#F4F1EA}
+/* the bubbles (the dock's, the tips'): the paper's words, the accent's light */
+.gbubble .gcap.hl-box,.gdbub .hl-box{--hlc:#F2B544;--hla:.34;--hlln:var(--accent2,#B5651D);--hlt:.24;--hlun:var(--ink2);--hlink:var(--ink1)}
+.dark .gbubble .gcap.hl-box,.dark .gdbub .hl-box{--hla:.26;--hlln:#F2B544;--hlt:.2}
+/* the games' cards: their own light */
+.gdbeat .hl-box{--hlc:var(--bt-hl,#F2B544);--hla:.5;--hlln:var(--bt-acctx,#9E3B1A);--hlt:.3;--hlink:inherit}
+/* the panel (its lines, the whole text, the Mini's line): the Look's accent */
+.gdock .hl-box{--hlc:var(--acc);--hla:.26;--hlln:var(--acc);--hlt:.12;--hlun:var(--tpun);--hlink:var(--ink)}
+.gdock.lk-paper .hl-box,.gdock.lk-player .hl-box,.gdock.lk-prompter .hl-box{--hla:.16;--hlt:.12}
+/* The teleprompter (round 21, guide/teleprompter.js): a strip from the screen's bottom edge, behind the Mini (z 13), its glass melting into
+   the card above (a 22 px mask, no hard top edge); its small row (the mascot's name, a live dot, Full script ›); the line said now (17 px,
+   two lines at most) lit by the highlighter, the line before sliding up and fading out, the next faint below. Its colours come from the
+   panels' look (guide/panel-look.css): --tlbg, --tlink, --tlink2, --tlun, --tlacc, --tlglow. Unity: a UI Toolkit panel, a gradient mask
+   image at its top, the lines in a vertical layout moved by a DOTween */
+.gtele{position:absolute;left:0;right:0;bottom:0;height:var(--tlh,184px);z-index:13;pointer-events:none;color:var(--tlink);
+  --tlbg:linear-gradient(180deg,rgba(28,26,33,.86),rgba(22,21,26,.95));--tlink:#F4F1EA;--tlink2:#C9C2B6;--tlun:#A39C90;--tlacc:#F2B544}
+.gtele.tl-in{animation:tlin .38s cubic-bezier(.2,.8,.2,1)}
+.gtele.tl-out{opacity:0;transform:translateY(16px);transition:opacity .24s ease-in,transform .24s ease-in}
+@keyframes tlin{from{opacity:0;transform:translateY(24px)}}
+.tl-glass{position:absolute;inset:0;overflow:hidden;background:var(--tlbg);-webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3);
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 22px);mask-image:linear-gradient(180deg,transparent 0,#000 22px)}
+.tl-glow{position:absolute;inset:-25% -10%;background:var(--tlglow,none);animation:tldrift 28s ease-in-out infinite alternate}
+@keyframes tldrift{from{transform:translate3d(-5%,3%,0) scale(1)}to{transform:translate3d(6%,-4%,0) scale(1.1)}}
+.tl-head{position:absolute;left:16px;right:8px;top:18px;height:26px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tl-who{display:inline-flex;align-items:center;gap:7px;font:700 11px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--tlink2);white-space:nowrap}
+.tl-dot{width:7px;height:7px;border-radius:50%;background:var(--tlacc);opacity:.5}
+.gtele.tl-live .tl-dot{opacity:1;animation:tldot 1.6s ease-in-out infinite}
+@keyframes tldot{50%{box-shadow:0 0 0 4px color-mix(in srgb,var(--tlacc) 28%,transparent)}}
+.tl-full{pointer-events:auto;appearance:none;border:0;background:none;cursor:pointer;height:44px;margin:-9px 0;padding:0 10px;display:inline-flex;align-items:center;gap:4px;font:600 12px/1 var(--body);color:var(--tlink2);border-radius:22px;-webkit-tap-highlight-color:transparent}
+.tl-full span{font-size:17px;line-height:1;margin-top:-2px}
+.tl-lines{position:absolute;left:var(--tlpl,16px);right:var(--tlpr,16px);bottom:var(--tlb,20px)}
+.gtele .tl-lines p{margin:0}
+.tl-now{position:relative;font:500 17px/23px var(--display);color:var(--tlink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tl-prev,.tl-next{position:absolute;left:0;right:0;font:400 14px/19px var(--body);color:var(--tlink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl-prev{bottom:100%;opacity:0}
+.tl-next{top:100%;padding-top:4px;opacity:.6}
+.gtele.tl-compact .tl-prev{opacity:.42}
+/* at Mini the next line would only peek out beside the Mini: it waits (Compact, with the room, shows it faint) */
+.gtele.tl-mini .tl-next{opacity:0}
+.tl-empty{visibility:hidden}
+.tl-lines.tl-up .tl-now{animation:tlnow .42s cubic-bezier(.2,.8,.2,1)}
+.tl-lines.tl-up .tl-prev{animation:tlprev .5s ease-out forwards}
+.gtele.tl-compact .tl-lines.tl-up .tl-prev{animation-name:tlprevc}
+@keyframes tlnow{from{transform:translateY(23px);opacity:.3}}
+@keyframes tlprev{from{transform:translateY(23px);opacity:.95}to{transform:translateY(-6px);opacity:0}}
+@keyframes tlprevc{from{transform:translateY(23px);opacity:.95}to{transform:none;opacity:.42}}
+.tl-lines.tl-fade .tl-now{animation:tlfade .3s ease-out}
+@keyframes tlfade{from{opacity:0}}
+.reduce .gtele,.reduce .tl-glow,.reduce .tl-dot{animation:none!important}
+.reduce .gtele.tl-out{transition:none}
+/* the one highlighter's colours in the strip */
+.gtele .hl-box{--hlc:var(--tlacc);--hla:.26;--hlln:var(--tlacc);--hlt:.14;--hlun:var(--tlun);--hlink:var(--tlink)}
+/* the bubble anchored to the mascot's head (Where the words go during a tour = The bubble): placed each frame, its tail at the head */
+.gbubble.gb-head{right:auto;bottom:auto;box-sizing:border-box;animation:none}
+.gbubble.gb-head::after{bottom:auto;top:calc(var(--tly,24px) - 8px)}
+.gbubble.gb-head.gb-flip::after{right:auto;left:-7px}
+/* The panels' look (round 21, 21.6, guide/panel-look.js): Light glass, Aurora and Dark for Ink glass's Mini and Open and for the
+   teleprompter. --sksurf is the glass's own fill (its lightest or darkest point) and --skglow its strongest light shape: the checks
+   compose them over the worst backdrop to measure every word. Unity: one USS class per look; the glass a blurred backdrop (or a frosted
+   texture), the light shapes gradient sprites on a slow tween, the rim a 9-slice border */
+/* round 21 (21.10, test9sc): each glass's gradient carries its own fill's strength (its stops pre-mixed over the fill), so a check that reads
+   the gradient's stops alone sees the same glass as the eye */
+/* the light shapes, behind the content, inside the panel's corners, drifting very slowly */
+#ph .gdock.lk-ink.sk-light::before,#ph .gdock.lk-ink.sk-aurora::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;
+  background:var(--skglows);background-size:170% 170%;background-position:0% 0%,100% 0%,50% 100%;animation:skdrift 26s ease-in-out infinite alternate}
+@keyframes skdrift{to{background-position:35% 25%,65% 35%,45% 65%}}
+#ph.reduce .gdock::before{animation:none}
+/* ----- Light glass: frosted white glass, pastel light, a fine bright rim, a soft inner light at the foot ----- */
+#ph .gdock.lk-ink.sk-light{--ink:#1B1E2E;--ink2:#3F4560;--faded:#4E5570;--tpun:#4E5570;--acc:#5B5BD6;--onacc:#FFFFFF;--acctx:#4646C2;--hl:#5B5BD6;--hltx:#FFFFFF;
+  --trk:rgba(27,30,46,.14);--chip:rgba(255,255,255,.78);--line:rgba(27,30,46,.14);--field:rgba(255,255,255,.74);--fieldedge:rgba(27,30,46,.1);--grab:rgba(27,30,46,.24);--surfsolid:#F6F7FC;
+  --sksurf:rgba(246,247,252,.9);--skglow:rgba(255,170,210,.34);
+  --skglows:radial-gradient(38% 60% at 12% 18%,rgba(255,170,210,.34),transparent 70%),radial-gradient(42% 70% at 88% 22%,rgba(150,195,255,.36),transparent 70%),radial-gradient(48% 60% at 58% 104%,rgba(170,236,214,.32),transparent 70%);
+  color:var(--ink);background-color:rgba(246,247,252,.9);background-image:linear-gradient(160deg,rgba(252,253,255,.93),rgba(240,243,252,.9));
+  -webkit-backdrop-filter:blur(22px) saturate(1.5);backdrop-filter:blur(22px) saturate(1.5);border:1px solid rgba(255,255,255,.95);
+  box-shadow:0 18px 44px rgba(52,60,110,.22),0 2px 6px rgba(52,60,110,.08),inset 0 1px 0 #FFFFFF,inset 0 -16px 30px rgba(150,165,235,.14)}
+#ph .gdock.lk-ink.sk-light:not(.h-mini){--sksurf:rgba(246,247,252,.97);background-color:rgba(246,247,252,.97);background-image:linear-gradient(160deg,rgba(252,253,255,.98),rgba(242,244,252,.97))}
+#ph .sk-light .gd-play,#ph .sk-light .gd-mpp{background:linear-gradient(135deg,#D9468F,#5260D8);color:#FFFFFF;box-shadow:0 8px 20px rgba(82,96,216,.32),inset 0 1px 0 rgba(255,255,255,.35)}
+#ph .sk-light .gd-talk{background:#FFFFFF;color:#4646C2;border:1px solid rgba(91,91,214,.32)!important;box-shadow:0 6px 16px rgba(52,60,110,.16)}
+#ph .sk-light .gd-ring .tr{stroke:rgba(27,30,46,.12)}#ph .sk-light .gd-ring .pg{stroke:#5B5BD6}
+#ph .sk-light .sk-track i::after{background:rgba(27,30,46,.3)}#ph .sk-light .sk-track i.done::after,#ph .sk-light .sk-track i.now::after{background:#5B5BD6}
+#ph .sk-light .sk-knob{background:#FFFFFF;box-shadow:0 0 0 4px rgba(91,91,214,.28),0 2px 6px rgba(27,30,46,.2)}
+#ph .sk-light .gd-hide{--tab:#F6F7FC;color:#3F4560}#ph .sk-light .gd-qstar.m-ring{background:#F6F7FC}
+#ph .sk-light .gd-chips [data-chip]{border:1px solid rgba(27,30,46,.08)}
+/* the whole text's Tips (guidance/present.css draws them for a dark panel) on the light glass */
+#ph .gdock.sk-light .gm-tips{background:rgba(91,91,214,.06);border-color:rgba(91,91,214,.24);color:#1B1E2E}#ph .gdock.sk-light .gm-tips small{color:#4646C2}
+/* ----- Aurora: deep glass, coloured light drifting, a glowing mint rim; Play a dark pill with a green glow ----- */
+#ph .gdock.lk-ink.sk-aurora{--ink:#F3F5FF;--ink2:#C9CFEA;--faded:#B4BCE0;--tpun:#B4BCE0;--acc:#5EF0C8;--onacc:#0B1220;--acctx:#5EF0C8;--hl:#5EF0C8;--hltx:#0B1220;
+  --trk:rgba(255,255,255,.18);--chip:rgba(255,255,255,.09);--line:rgba(255,255,255,.16);--field:rgba(255,255,255,.07);--fieldedge:rgba(255,255,255,.14);--grab:rgba(255,255,255,.3);--surfsolid:#121833;
+  --sksurf:rgba(18,22,48,.92);--skglow:rgba(139,92,246,.22);
+  --skglows:radial-gradient(40% 60% at 10% 0%,rgba(94,240,200,.16),transparent 70%),radial-gradient(48% 70% at 92% 8%,rgba(139,92,246,.22),transparent 70%),radial-gradient(60% 60% at 50% 115%,rgba(56,189,248,.16),transparent 70%);
+  color:var(--ink);background-color:rgba(18,22,48,.92);background-image:linear-gradient(160deg,rgba(32,30,76,.93),rgba(17,21,46,.92) 65%);
+  -webkit-backdrop-filter:blur(22px) saturate(1.4);backdrop-filter:blur(22px) saturate(1.4);border:1px solid rgba(140,255,225,.3);
+  box-shadow:0 18px 44px rgba(4,8,24,.5),0 0 26px rgba(94,240,200,.16),inset 0 1px 0 rgba(255,255,255,.16)}
+#ph .gdock.lk-ink.sk-aurora:not(.h-mini){--sksurf:rgba(18,22,48,.98);background-color:rgba(18,22,48,.98);background-image:linear-gradient(160deg,rgba(32,30,76,.98),rgba(17,21,46,.98) 65%)}
+#ph .sk-aurora .gd-play,#ph .sk-aurora .gd-mpp{background:#0B1220;color:#5EF0C8;box-shadow:0 0 0 1.5px rgba(94,240,200,.75),0 0 24px rgba(94,240,200,.38),inset 0 1px 0 rgba(255,255,255,.14)}
+#ph .sk-aurora .gd-talk{background:#0B1220;color:#5EF0C8;border:1.5px solid rgba(94,240,200,.7)!important;box-shadow:0 0 18px rgba(94,240,200,.3)}
+#ph .sk-aurora .gd-ring .tr{stroke:rgba(255,255,255,.14)}#ph .sk-aurora .gd-ring .pg{stroke:#5EF0C8}
+#ph .sk-aurora .sk-track i::after{background:rgba(255,255,255,.45)}#ph .sk-aurora .sk-track i.done::after,#ph .sk-aurora .sk-track i.now::after{background:#5EF0C8}
+#ph .sk-aurora .sk-knob{background:#F3F5FF;box-shadow:0 0 0 4px rgba(94,240,200,.3),0 0 14px rgba(94,240,200,.5)}
+#ph .sk-aurora .gd-hide{--tab:#121833;color:#F3F5FF}#ph .sk-aurora .gd-qstar.m-ring{background:#121833}
+/* ----- the teleprompter in each look ----- */
+#ph .gtele.sk-light{--tlbg:linear-gradient(180deg,rgba(248,249,254,.86),rgba(244,246,253,.95) 60%);--tlink:#1B1E2E;--tlink2:#3F4560;--tlun:#4E5570;--tlacc:#5B5BD6;
+  --sksurf:rgba(248,249,254,.86);--skglow:rgba(255,170,210,.34);
+  --tlglow:radial-gradient(30% 50% at 16% 58%,rgba(255,170,210,.34),transparent 70%),radial-gradient(34% 56% at 84% 42%,rgba(150,195,255,.38),transparent 70%),radial-gradient(40% 50% at 55% 100%,rgba(170,236,214,.34),transparent 70%)}
+#ph .gtele.sk-aurora{--tlbg:linear-gradient(180deg,rgba(18,22,48,.84),rgba(12,16,38,.95) 60%);--tlink:#F3F5FF;--tlink2:#C9CFEA;--tlun:#B4BCE0;--tlacc:#5EF0C8;
+  --sksurf:rgba(18,22,48,.84);--skglow:rgba(139,92,246,.22);
+  --tlglow:radial-gradient(30% 50% at 14% 50%,rgba(94,240,200,.16),transparent 70%),radial-gradient(36% 56% at 86% 40%,rgba(139,92,246,.22),transparent 70%),radial-gradient(44% 50% at 50% 104%,rgba(56,189,248,.16),transparent 70%)}
+#ph .gtele.sk-dark{--tlbg:linear-gradient(180deg,rgba(28,26,33,.9),rgba(22,21,26,.96) 60%);--sksurf:rgba(28,26,33,.9);--skglow:rgba(0,0,0,0)}
+#ph .sk-light .gd-talk .ring{background:radial-gradient(circle,rgba(91,91,214,0) 55%,rgba(91,91,214,.32) 70%,rgba(91,91,214,0) 100%)}
+#ph .sk-aurora .gd-talk .ring{background:radial-gradient(circle,rgba(94,240,200,0) 55%,rgba(94,240,200,.36) 70%,rgba(94,240,200,0) 100%)}
+/* Dark (round 11's Ink glass): its lightest point, for the checks */
+#ph .gdock.lk-ink.sk-dark{--sksurf:rgba(44,40,52,.92);--skglow:rgba(0,0,0,0)}#ph .gdock.lk-ink.sk-dark:not(.h-mini){--sksurf:#2C2834}
 </style>
 <div class="wrap">
 <header>
@@ -2300,7 +2461,7 @@ FIELDS.before_after=FIELDS.before_after.concat([["blabel","ltext","Before label"
 /* The root of the state S: the Editor's selection, the element styles, motions, effects, patterns and interactions. */
 var uid=200;function nid(p){return p+(++uid)}
 var S={tab:"card",step:1,dark:false,reduce:false,lang:"en",screen:"phone",focusOn:true,view:"demo",focusRef:null,family:"rise",replay:"every",
- test:{on:true,poi:"painting"},ui:{single:false,level:1,q:"",cat:"All"},op:{s3:false,s4:false,s5:false,s6:false,s2:true},
+ test:{on:true,poi:"painting"},ui:{single:false,level:1,q:"",cat:"All"},op:{},
  motions:[
   {id:"rise",name:"Rise",type:"entrance",from:"below",dist:18,dur:420,ease:"out",stagger:70,pieces:"whole",rot:0},
   {id:"slide",name:"Slide In",type:"entrance",from:"left",dist:40,dur:450,ease:"out",stagger:70,pieces:"whole",rot:0},
@@ -2482,6 +2643,9 @@ var LABSTR=[["tour_promise", "gd:i:quizpromise", "The quiz promise, after the in
  ["dock_telling", "s7dock", "Under the mascot's name while it speaks (Paper glass).", "Telling the story", "A contar a história", "", "Status: telling"],
  ["dock_paused", "s7dock", "Under the mascot's name while the tour is paused.", "Paused", "Em pausa", "", "Status: paused"],
  ["dock_seek", "s7dock", "The progress bar, for a screen reader (a drag seeks).", "Where the tour is", "Onde vai a visita", "", "Progress bar"],
+ ["dock_back10", "s7dock", "The panel's back 10 s button, for a screen reader (round 21: Open and Mini).", "Back 10 seconds", "Recuar 10 segundos", "", "Back 10 s"],
+ ["dock_fwd10", "s7dock", "The open panel's forward 10 s button, for a screen reader (round 21).", "Forward 10 seconds", "Avançar 10 segundos", "", "Forward 10 s"],
+ ["tele_full", "s7cap", "The teleprompter's link to the whole text, the open panel's script (round 21).", "Full script", "Texto completo", "", "Full script"],
  ["dock_ask_ph", "s7dock", "The ask field's placeholder; {name} the mascot's name.", "Ask {name} anything", "Pergunte ao {name}", "", "Ask field"],
  ["dock_voice", "s7dock", "The talk button's word (Player sheet).", "Voice", "Voz", "", "Voice button"],
  ["settings_music", "s5settings", "The guide's music: the title of its choices (Settings › The guide).", "Music", "Música", "", "Music title"],
@@ -2747,6 +2911,8 @@ var LABSTR=[["tour_promise", "gd:i:quizpromise", "The quiz promise, after the in
   ["ga_tell", "s7gask", "Step 3's button: the answer and its explanation, no star (round 18).", "Tell me", "Diga-me", "", "Tell me"],
   ["ga_try", "s7gask", "Step 3's button: back to the game to try again (round 18).", "I'll try", "Vou tentar", "", "I'll try"],
   ["ga_told", "s7gask", "Tell me: the answer and its explanation ({0} the answer, {1} why; round 18).", "The answer: {0}. {1}", "A resposta: {0}. {1}", "", "Told"],
+  ["ga_spoil", "s7gask", "The mascot's answer to a question about something else during a game, when the whole answer would give the game's answer away (round 21).", "I'd love to, but that would give our quiz away. Ask me again once you've answered!", "Adorava, mas isso revelava o nosso quiz. Pergunte-me outra vez depois de responder!", "", "After the game · nothing to say"],
+  ["ga_spoil_more", "s7gask", "After the part of an answer the mascot can say during a game, when the rest would give the game's answer away (round 21).", "The rest would give our quiz away: ask me again once you've answered!", "O resto revelava o nosso quiz: pergunte-me outra vez depois de responder!", "", "After the game · the rest"],
   ["ga_none", "s7gask", "A question about the game's question with every step of the hint ladder Off (round 18).", "That's the question I'm asking you! Have a go first.", "Essa é a pergunta que lhe faço! Experimente primeiro.", "", "No hint"]];
 S.tx={};var TXO={},TXW={},TXF={},TXP={},TXNEW={},TXOWN={},TXRET=[];
 REALSTR.concat(LABSTR).forEach(function(r){S.tx[r[0]]={en:r[3],pt:r[4]};TXW[r[0]]=r[2];TXF[r[0]]=r[5]||"";TXP[r[0]]=r[6]||"";TXOWN[r[0]]=r[1];
@@ -3213,10 +3379,10 @@ function edCardDoc(part){var h="";if(part==="guide")return pipe("edCard.html",h)
       :'<div class="note">This block has no page: everything shows on the card.</div>';
     bl+=fo("bd:"+k,'<b>'+esc(k)+'</b> <span class="sub">· in '+esc(L(secById(secOfKind(k)).name))+'</span>',null,'<div class="sub2">Preview · on the card</div>'+prev+'<div class="sub2">Full page</div>'+page,9,true)}
   bc+=fo("s3b","Blocks <span class=\"sub\">· the Block Library: preview + full page defaults</span>",["ext","EXTENDED"],bl,2);
-  h+=fo("s3",sectionTitle("3","Blocks &amp; Components","elements → patterns → blocks"),["new","NEW"],bc,1);
+  h+=fo("s3",sectionTitle("3","Blocks &amp; Components","the card's building blocks: its elements, the patterns made of them, the blocks"),["new","NEW"],bc,1);
   /* 4. Motion & Effects */
   var me=fo("s4m","Motion",["new","NEW"],extractInner(elv,"motion"),2)+fo("s4i","Interaction",["new","NEW"],extractInner(elv,"interaction"),2)+fo("s4f","Effects",["ext","EXTENDED"],extractInner(elv,"effects"),2);
-  h+=fo("s4",sectionTitle("4","Motion &amp; Effects","used by elements, blocks, sections and the card"),["new","NEW"],me,1);
+  h+=fo("s4",sectionTitle("4","Motion &amp; Effects","how parts move and shine: the motions and effects of elements, blocks, sections and the card"),["new","NEW"],me,1);
   /* 5. Navigation & Controls */
   var b=S.ctl.bar,nc=fo("s5bar","Navigation Bar",null,row("Enabled",pseg("ctl.bar.on",["true","false"],["On","Off"]),"The bar of sections.")+row("Position",pseg("ctl.bar.pos",["bottom","top"],["Bottom","Top"]),"")+
      row("Indicator",pseg("ctl.bar.indicator",["raised","pill","underline"],["Raised","Pill","Underline"]),"How the chosen section is marked.")+(b.indicator==="raised"?row("Raised depth",pslider("ctl.bar.depth",-1,1,0.1),"+1 a bell, 0 flat, below 0 a cradle.",true):"")+
@@ -3392,45 +3558,67 @@ on("selfTest.res",function(res){rowsWithoutDemoAll().forEach(function(r){res.pus
 function edGlobal(){var h='<div class="note">The top level only: the wall\'s markers and how a visitor finds them.</div>';
   var gc=function(id,sub){return fo(id,esc(COMP[id][1])+' <span class="sub">· '+sub+'</span>',null,ownbar(id)+' '+ownPanels(id),2)};
   GSECS.forEach(function(g,i){var srch=i===GSECS.length-1,body=srch?row("Synonym Groups",'<button class="ubtn sm" type="button" data-goloc="term:t3">Languages &amp; Terms › Terms &#8250;</button>',"One list with the card\'s glossary. Keyword Fields stay here: only the search reads them.")+gc("g:10s","where the visitor types a search")+gc("g:10f","opens the filters, with how many are on"):' ';
-   h+=fo("g:"+i,esc(g[0])+' <span class="sub">· '+esc(g[1])+'</span>',srch?["ext","EXTENDED"]:["","EXISTING"],body,1)});
-  h+=fo("g:11",'Onboarding hints <span class="sub">· the first-use hints over the wall</span>',["new","NEW"],row("Wall hint",'<button class="ubtn sm" type="button" data-goto="gd:g:start">Said by the guide: Guide › The mascot speaks up › App › The start &#8250;</button>',"The pill over the wall is gone: the guide says it now, beside the nearest marker, at a pause (Opening message, then Tap a marker). Its words, its timing and how often: Guide › The mascot speaks up › App › The start.")+ownbar("g:11")+ownPanels("g:11"),1);return h}
+   h+=fo("g:"+i,'<span class="acct">'+esc(g[0])+'</span> <span class="sub">· '+esc(g[1])+'</span>',srch?["ext","EXTENDED"]:["","EXISTING"],body,1)});
+  h+=fo("g:11",'<span class="acct">Onboarding hints</span> <span class="sub">· the first-use hints over the wall, now said by the guide</span>',["new","NEW"],row("Wall hint",'<button class="ubtn sm" type="button" data-goto="gd:g:start">Said by the guide: Guide › The mascot speaks up › App › The start &#8250;</button>',"The pill over the wall is gone: the guide says it now, beside the nearest marker, at a pause (Opening message, then Tap a marker). Its words, its timing and how often: Guide › The mascot speaks up › App › The start.")+ownbar("g:11")+ownPanels("g:11"),1);return h}
 /* ----- Global Scene: the top level only ----- */
 var GSECS=[["Labels, Text & Fonts","the marker labels' words, sizes and fonts"],["Marker","shape, icon and the category table"],["Orientation","how markers, labels and badges face the camera"],
  ["Badge","the second sign on a marker, and its table"],["Outline","the ring around a marker, and its levels"],["Effects","glow, pulse and the other marker effects, with their Test grid"],
  ["Hierarchy Levels","what shows at each level of the wall"],["LOD","how much detail shows with the distance"],["Zoom","how far the visitor zooms, and its steps"],
  ["Displacement","how labels make room for each other"],["Select, Filter & Search","selection, search, filters, results, minimap, voice, keyword fields"]];
 
-/* The self-test of the texts: each text field must reach the phone (selfTestWords). */
+/* The self-test of the texts: each text field must reach the phone (selfTestWords; the page's own #selftest walks it in slices, selfTestWordsAsync). */
 var TX_EXPECT={reading_minutes:1,guide_duration:1,pbar_tip_theme:1,pbar_tip_motion:1,pbar_tip_lang:1,pbar_tip_focus:1,pbar_tip_screen:1,term_crumb:1,test_tile_tag:1,test_tile_title:1,test_tile_line:1,test_demo_line:1,democard_title:1,democard_tag:1,pbar_label:1,pbar_light:1,pbar_motion:1,pbar_focus:1,pbar_phone:1,term_eyebrow:1,close:1,visitor_settings:1,page_back:1,gallery_name:1,page_previous:1,page_next:1,locate_label:1,open_block_button:1,open_row_story:1,fun_fact_label:1,
  before_label:1,after_label:1,model_3d_hint:1,panorama_360_drag_hint:1,audio_play:1,test_demo_title:1,open_row_expand:1,guide_start:1,guide_block_title:1,guide_block_line:1};
 var TX_DOM={peek_next_label:"shown at Peek",show_on_wall_button:"shown on the sticky button",audio_pause:"after a tap on Play",term_read_more:"shown in the glossary popup",pbar_dark:"the bar in dark mode",pbar_still:"the bar under Reduce Motion",pbar_wide:"the bar on a wide screen",pbar_tablet:"the bar on a tablet"};
-function selfTestWords(){emitLatestFirst("selfTestWords.before");var res=[];
-  S.ui.level=9;S.op={};S.ui.single=false;S.ownAll=true;S.ui.txf="content";
-  ["card","guide","words","global"].forEach(function(tab){S.tab=tab;renderEditor();var base=JSON.stringify(S);noDraw=true;
-    var acts=[];function lg(s){return langCodes().indexOf(s)>=0?s:null}
-    ed.querySelectorAll("[data-tx]").forEach(function(x){var p=x.dataset.tx.split("|");acts.push({el:x,key:"tx:"+x.dataset.tx,tx:p[0],lang:p[1],v:"Zz"+p[0],kind:"input"})});
-    ed.querySelectorAll("[data-loc]").forEach(function(x){var p=x.dataset.loc.split("|");acts.push({el:x,key:"loc:"+x.dataset.loc,lang:lg(p[1]),v:"Zz",kind:"input"})});
-    ed.querySelectorAll('[data-field^="demo:"],[data-field^="termpage:"]').forEach(function(x){var p=x.dataset.field.split("|");acts.push({el:x,key:"demo:"+x.dataset.field,lang:lg(p[2]),v:p[3]==="lines"?"Zz1\nZz2\nZz3":"Zz",kind:"input"})});
-    ed.querySelectorAll('[data-asset^="demo:"],[data-asset^="termpage:"]').forEach(function(x){if(x.getAttribute("aria-pressed")!=="true")acts.push({el:x,key:"demo:"+x.dataset.asset,kind:"click"})});
-    ed.querySelectorAll('[data-assets^="demo:"],[data-assets^="termpage:"]').forEach(function(x){acts.push({el:x,key:"demo:"+x.dataset.assets,kind:"click"})});
-    ed.querySelectorAll("[data-term]").forEach(function(x){acts.push({el:x,key:"term:"+x.dataset.term,lang:lg(x.dataset.term.split("|")[2]),v:"Zz",kind:"input"})});
-    acts.forEach(function(a){var B=JSON.parse(base);Object.keys(B).forEach(function(k){S[k]=B[k]});if(a.lang)S.lang=a.lang;var before=modelSig(),state=JSON.stringify(S),lab=a.key;
-      try{if(a.kind==="click")a.el.click();else{a.el.value=a.v;a.el.dispatchEvent(new Event("input",{bubbles:true}))}}catch(err){res.push({tab:tab,key:a.key,v:a.v,label:lab,result:"ERROR "+err.message});return}
-      var changed=modelSig()!==before,stateChanged=JSON.stringify(S)!==state,k=a.tx,r;
-      if(changed)r="changes the phone";else if(!stateChanged)r="NOT WIRED (state unchanged)";
-      else if(k&&/^s7/.test(TXOWN[k])&&!TX_EXPECT[k])r="behaviour (shown during the tour)";else if(k&&TX_DOM[k])r="behaviour ("+TX_DOM[k]+")";
-      else if(k&&!TX_EXPECT[k])r="elsewhere (its part is not drawn on the Lab's card)";
-      else if(/^loc:gstep:/.test(a.key))r="behaviour (shown during the tour)";
-      else if(/^(term:|loc:term:)/.test(a.key)&&!termUses(byId(S.terms,a.key.replace(/^loc:/,"").split(":")[1].split("|")[0])||{words:""}).n)r="elsewhere (no card text links this term)";
-      else r="NO EFFECT (state changes, phone does not)";
-      res.push({tab:tab,key:a.key,v:a.v||"",label:lab,result:r})});
-    noDraw=false});
-  S.ownAll=false;S.ui.txf="all";return res}
-on("selfTest.res",function(a){return stWalks("words")?a.concat(selfTestWords()):a});
+var STW_TABS=["card","guide","words","global"];
+/* the walk's steps: its start, a tab's fields (the tab drawn, the state it starts from), one field worked and judged, its end */
+function stwStart(){emitLatestFirst("selfTestWords.before");S.ui.level=9;S.op={};S.ui.single=false;S.ownAll=true;S.ui.txf="content"}
+function stwEnd(){noDraw=false;S.ownAll=false;S.ui.txf="all"}
+function stwTab(tab){S.tab=tab;renderEditor();var base=JSON.stringify(S);noDraw=true;
+  var acts=[];function lg(s){return langCodes().indexOf(s)>=0?s:null}
+  ed.querySelectorAll("[data-tx]").forEach(function(x){var p=x.dataset.tx.split("|");acts.push({el:x,key:"tx:"+x.dataset.tx,tx:p[0],lang:p[1],v:"Zz"+p[0],kind:"input"})});
+  ed.querySelectorAll("[data-loc]").forEach(function(x){var p=x.dataset.loc.split("|");acts.push({el:x,key:"loc:"+x.dataset.loc,lang:lg(p[1]),v:"Zz",kind:"input"})});
+  ed.querySelectorAll('[data-field^="demo:"],[data-field^="termpage:"]').forEach(function(x){var p=x.dataset.field.split("|");acts.push({el:x,key:"demo:"+x.dataset.field,lang:lg(p[2]),v:p[3]==="lines"?"Zz1\nZz2\nZz3":"Zz",kind:"input"})});
+  ed.querySelectorAll('[data-asset^="demo:"],[data-asset^="termpage:"]').forEach(function(x){if(x.getAttribute("aria-pressed")!=="true")acts.push({el:x,key:"demo:"+x.dataset.asset,kind:"click"})});
+  ed.querySelectorAll('[data-assets^="demo:"],[data-assets^="termpage:"]').forEach(function(x){acts.push({el:x,key:"demo:"+x.dataset.assets,kind:"click"})});
+  ed.querySelectorAll("[data-term]").forEach(function(x){acts.push({el:x,key:"term:"+x.dataset.term,lang:lg(x.dataset.term.split("|")[2]),v:"Zz",kind:"input"})});
+  return{tab:tab,base:base,acts:acts}}
+/* the phone before a field is worked: every field of a tab starts from the same state (its base, in the field's language), so its signature is
+   drawn once per language and kept, after two fields in a row drew it the same (a tab whose signature ever differs draws it every time) */
+function stwBefore(T){var l=S.lang,c=T.sig||(T.sig={}),x=c[l];if(T.noCache)return modelSig();if(x&&x.n>=2)return x.s;var s=modelSig();
+  if(!x)c[l]={s:s,n:1};else if(x.s===s)x.n++;else{T.noCache=true;G.stwNoCache=(G.stwNoCache||0)+1}return s}
+function stwAct(T,a,res){var tab=T.tab,B=JSON.parse(T.base);Object.keys(B).forEach(function(k){S[k]=B[k]});if(a.lang)S.lang=a.lang;var before=stwBefore(T),state=JSON.stringify(S),lab=a.key;
+  try{if(a.kind==="click")a.el.click();else{a.el.value=a.v;a.el.dispatchEvent(new Event("input",{bubbles:true}))}}catch(err){res.push({tab:tab,key:a.key,v:a.v,label:lab,result:"ERROR "+err.message});return}
+  var changed=modelSig()!==before,stateChanged=JSON.stringify(S)!==state,k=a.tx,r;
+  if(changed)r="changes the phone";else if(!stateChanged)r="NOT WIRED (state unchanged)";
+  else if(k&&/^s7/.test(TXOWN[k])&&!TX_EXPECT[k])r="behaviour (shown during the tour)";else if(k&&TX_DOM[k])r="behaviour ("+TX_DOM[k]+")";
+  else if(k&&!TX_EXPECT[k])r="elsewhere (its part is not drawn on the Lab's card)";
+  else if(/^loc:gstep:/.test(a.key))r="behaviour (shown during the tour)";
+  else if(/^(term:|loc:term:)/.test(a.key)&&!termUses(byId(S.terms,a.key.replace(/^loc:/,"").split(":")[1].split("|")[0])||{words:""}).n)r="elsewhere (no card text links this term)";
+  else r="NO EFFECT (state changes, phone does not)";
+  res.push({tab:tab,key:a.key,v:a.v||"",label:lab,result:r})}
+/* in one go (the Editor's Run the self-test, the checks' probes) */
+function selfTestWords(){var res=[];stwStart();STW_TABS.forEach(function(tab){var T=stwTab(tab);T.acts.forEach(function(a){stwAct(T,a,res)});noDraw=false});stwEnd();return res}
+/* round 21 (21.8; the words walk ran past 40 min, 14 at round 17b, and slowed as it went). What builds up: each field drew the phone's
+   signature twice, and each signature parses about 1.7 MB of HTML into detached elements (the card's screen made again by its
+   cardScreen.html handlers for the card, the demo card and the other views: about 60 parses, some 95 % of a field's time); that DOM
+   garbage piles up within one long task (the walk ran as one task of about 1,770 fields). Measured (every field walked, bad=0): one task
+   with two signatures a field passed 10 min; one task with the signature before a field drawn once per tab and language (stwBefore):
+   1.9 min; slices of 20 fields with two signatures: 3.5 min. Both are kept: stwBefore (every field of a tab starts from the same
+   state; checked equal on two fields first) and, for the page's own self-test, slices of STW_SLICE fields, each its own task (a
+   MessageChannel message: no timer, so the headless run's virtual time does not move and its DOM dump waits for the end), the same
+   fields and the same judgement; its JSON says pending until the last slice */
+var STW_SLICE=20;
+function selfTestWordsAsync(done){var res=[],ti=-1,T=null,i=0,mc=new MessageChannel();stwStart();
+  var go=function(){var n=0;while(true){if(!T||i>=T.acts.length){noDraw=false;ti++;if(ti>=STW_TABS.length){stwEnd();mc.port1.onmessage=null;done(res);return}T=stwTab(STW_TABS[ti]);i=0}
+      stwAct(T,T.acts[i++],res);if(++n>=STW_SLICE){mc.port2.postMessage(0);return}}};
+  mc.port1.onmessage=function(){noDraw=true;go()};go()}
+/* the page's own #selftest (core/boot.js) walks the texts after the controls, in slices; the Editor's button keeps the one go */
+on("selfTest.res",function(a){return stWalks("words")&&!G.stwAsync?a.concat(selfTestWords()):a});
 on("showSelfTest.after",function(res){var box=document.getElementById("selftest"),els=res.filter(function(r){return/^elsewhere/.test(r.result)}).length,
   cnt=function(re){var x=res.filter(function(r){return re.test(r.key)});return[x.length,x.filter(function(r){return r.result==="changes the phone"}).length]},tx=cnt(/^tx:/),lc=cnt(/^loc:/),dm=cnt(/^demo:/);
   box.insertAdjacentHTML("beforeend",'<p>Texts on their parts: <b>'+tx[1]+'</b> of '+tx[0]+' fields change the phone; the rest belong to parts the Lab does not draw (<b>'+els+'</b> elsewhere) or show during the tour. Content in the Texts check: <b>'+lc[1]+'</b> of '+lc[0]+'. Demo content and term pages: <b>'+dm[1]+'</b> of '+dm[0]+'.</p>');
-  var j=JSON.parse(box.dataset.json||"{}");j.elsewhere=els;j.texts={fields:tx[0],ok:tx[1]};j.content={fields:lc[0],ok:lc[1]};j.demo={fields:dm[0],ok:dm[1]};box.dataset.json=JSON.stringify(j)});
+  var j=JSON.parse(box.dataset.json||"{}");j.elsewhere=els;j.texts={fields:tx[0],ok:tx[1]};j.content={fields:lc[0],ok:lc[1]};j.demo={fields:dm[0],ok:dm[1]};if(G.stwPending)j.pending="the words walk";box.dataset.json=JSON.stringify(j)});
 
 /* The phone: renderPhone, the screens' top bar, the demo screen, show and the phone's own taps. */
 /* ---------- phone ---------- */
@@ -3627,7 +3815,7 @@ on("renderPhone.after",function(keep){var nb=document.getElementById("navbar"),c
     ph.appendChild(pin)}});
 
 /* ----- the Detail Card tab, reorganised ----- */
-function sectionTitle(n,t,sub){return n+" · "+t+(sub?' <span class="sub">· '+sub+'</span>':"")}
+function sectionTitle(n,t,sub){return'<span class="acct">'+n+" · "+t+'</span>'+(sub?' <span class="sub">· '+sub+'</span>':"")}
 /* ----- the sections' events ----- */
 ed.addEventListener("click",function(e){var t=e.target;
   if(t.closest("[data-seckind],[data-secicon],[data-seccol],[data-secmove],[data-secdel],[data-secadd],[data-blockdef],[data-poisec]"))e.stopPropagation();
@@ -3858,7 +4046,9 @@ ed.addEventListener("toggle",function(e){var d=e.target;if(!d.dataset||!d.datase
    a Button and a Toggle; the pinned headers: two header elements (position: absolute) at the top of the tab's ScrollView, filled with
    the section's and the foldout's names and moved from ScrollView.verticalScroller.valueChanged (the foldout whose header has scrolled
    above the view's top is the one pinned); a click on one sets scrollOffset to its foldout's top */
-var ACC_TABS={};
+/* round 21 (21.9, the developer, 2026-11-14): the Detail Card and Global tabs are accordions too; the Guide tab switches itself on
+   (editor/guide-tab.js). On these two the bar (Collapse all, One section open at a time) is put at the tab's top after its draw */
+var ACC_TABS={card:true,global:true};
 S.ui.accOne=false;
 function accOn(tab){return!!ACC_TABS[tab===undefined?S.tab:tab]}
 /* the tab's sections start collapsed: level 1 (the default) shows them as the accordion's list, level 2 opens them (and their foldouts),
@@ -3870,7 +4060,7 @@ function accBar(){return'<div class="accbar" role="toolbar" aria-label="Sections
   help("An Editor preference, not saved to the wall. Off: each section opens and closes on its own. On: opening a section closes the one that was open. Collapse all closes every section and foldout of this tab. While you scroll, the open section's name stays at the top, its open foldout's just under it; a tap on either scrolls back to its start.")+'</div>'}
 /* each section's quiet count, on its line: its foldouts ("6 parts"), or its rows when it has none */
 function accCount(t){[].forEach.call(t.querySelectorAll(":scope > details[data-fo]"),function(d){var sm=d.querySelector(":scope > summary"),sp=sm&&sm.querySelector(":scope > .sp");if(!sp||sm.querySelector(":scope > .accn"))return;
-  var n=d.querySelectorAll(":scope > .inner > details[data-fo]").length,r=d.querySelectorAll(":scope > .inner > .row").length,w=n?n+(n===1?" part":" parts"):r+(r===1?" row":" rows");
+  var n=d.querySelectorAll(":scope > .inner > details[data-fo]").length,r=d.querySelectorAll(":scope > .inner > .row").length;if(!n&&!r)return;var w=n?n+(n===1?" part":" parts"):r+(r===1?" row":" rows");
   sp.insertAdjacentHTML("afterend",'<span class="accn">'+w+'</span>')})}
 /* a foldout's level in the tab: 1 a section, 2 a foldout of it (pinned too), 3 and deeper (not pinned) */
 function accLevel(d){var n=1,p=d.parentElement&&d.parentElement.closest("details[data-fo]");while(p&&ed.contains(p)){n++;p=p.parentElement&&p.parentElement.closest("details[data-fo]")}return n}
@@ -3878,7 +4068,7 @@ function accLevel(d){var n=1,p=d.parentElement&&d.parentElement.closest("details
 function accPinned(d){var s=d.querySelector(":scope > summary");return!!s&&d.open&&s.getBoundingClientRect().top-d.getBoundingClientRect().top>1}
 /* back to a foldout's start: its top just under the headers pinned above it (its scroll-margin) */
 function accBack(d){d.scrollIntoView({block:"start",behavior:"smooth"})}
-on("renderEditor.after",function(){ed.classList.toggle("acc",accOn())});
+on("renderEditor.after",function(){ed.classList.toggle("acc",accOn());if(!accOn())return;if(!ed.querySelector(":scope > .accbar"))ed.insertAdjacentHTML("afterbegin",accBar());accCount(ed)});
 on("setOpt.answer",function(key,v){if(key==="ui.accOne"){S.ui.accOne=v==="true";renderEditor();return true}});
 /* One section open at a time: a section opened by the developer closes the one that was open (never a draw's own toggle) */
 ed.addEventListener("toggle",function(e){var d=e.target;if(!accOn()||!S.ui.accOne||!d.open||!d.dataset||!d.dataset.fo||d.parentElement!==ed||edQuiet(d))return;
@@ -3925,7 +4115,8 @@ var GUIDE_PLAN={
       {fo:"gt:tools",t:"Model tools",s:"the 3D model's clips, Import… and a model from a picture (Mascot source = 3D model)",deep:true,parts:["3D model","Play a clip","Import…","Generate from a picture"]}]},
     {fo:"gt:voice",t:"Voice",s:"its recorded voice, its speed, a line with no recording, the answers' voice, the coverage",parts:[{from:"s7voice",borrow:true},"The voice","Sources","Speed","A line with no recording","Voice in this browser",
       {from:"s7agent",borrow:true},"Voice of the answers","ElevenLabs model",{from:"s7voice",borrow:true},"Coverage","Speaking now"]},
-    {fo:"gt:speech",t:"Speech on screen",s:"how its words show while it speaks: the highlight now, the bubble and the teleprompter next",parts:[{from:"s7cap",borrow:true},{cls:"mpspeech"},"Highlight what is read","Highlight style","Trail","Glide","Try"]},
+    {fo:"gt:speech",t:"Speech on screen",s:"how its words show while it speaks: one highlighter, the teleprompter, the bubble, the panels' look",parts:[{from:"s7cap",borrow:true},{cls:"mpspeech"},"Highlight what is read","Highlight style","Trail","Glide",
+      {h:"Where the words show",s:"during a tour and outside it"},"Words during a tour","Its height","A tip's bubble",{h:"The panels",s:"the Mini, the open panel and the teleprompter"},"The panels' look","Try"]},
     {fo:"gt:manner",t:"Manner",s:"how big, how lively, how it speaks and moves",parts:[{from:"s7mascot"},"Size","Liveliness","Mouth","How it moves","Moods","Tap on the mascot","Try"]},
     {fo:"gt:moments",t:"Moments",s:"when it introduces itself, and its walk to the wall",parts:[{from:"s7mascot"},"Introduction","Walks to the wall","Try"]},
     {words:"s7mascot"}],
@@ -5545,50 +5736,100 @@ function ask(q){if(firstAnswer("ask.answer",q)!==undefined||!q||!q.trim())return
   .then(function(r){done(r.text)}).catch(function(e){G.busy=false;if(e&&e.code==="cancelled"){G.answer=e.text||"";renderGuide();return}var t=searchAnswer(q);done(TXT("guide_ai_error").replace("{0}",(e&&e.code||"error"))+t)})}
 ph.addEventListener("submit",function(e){if(!e.target.classList.contains("gform"))return;e.preventDefault();var i=ph.querySelector("#gq");if(i)ask(i.value)},true);
 
-/* The read-along light: Comet, Sentence + word, Fill, One word; the trail and the glide (markWord, hlTick). */
-S.guideCfg.hl="comet";S.guideCfg.trail=6;S.guideCfg.glide=true;
+/* The reading head (markWord, hlTick): which word is being said, and the share of it said, for every place that lights the words (round 21:
+   the light itself, its style, trail and glide are guide/highlight.js's, the one highlighter). */
 /* the device voice waits up to 1.5 s for the voices, inside the tap's activation, before it falls back to captions only; its read-along starts with each line */
 on("sayDevice.before",function(){if(G.voiceWait){clearInterval(G.voiceWait);G.voiceWait=null}
   G.hl={k:-1,at:0,p:0,cpm:0,ended:false,last:0,seen:false,start:performance.now(),target:G.hl&&G.hl.target};G.noVoice=false});
 on("sayDevice.started",function(){G.noVoice=!S.guideMute&&!G.utter&&!!G.timer;var n=ph.querySelector(".gnovoice");if(n)n.hidden=!G.noVoice;hlLoop()});
-on("sayDevice.ended",function(){G.hl.ended=true});
+on("sayDevice.ended",function(){G.hl.ended=true;G.hl.endAt=performance.now()});
 /* the reading head: a word boundary (the voice) or a tick (no voice) sets the word; between them the head glides through it */
 /* markWord: before (latest first) and done (always, in module order) share the notes cx; after, in module order */
 function markWord(k,target){var cx={};emitLatestFirst("markWord.before",cx);try{var h=G.hl,now=performance.now();if(G.utter&&!h.est)h.seen=true;if(target!==h.target){hlClear(h.target);h.target=target||null}
   if(k!==h.k){if(h.k>=0&&k>h.k&&!G.timer){var ch=0;for(var j=h.k;j<k;j++)ch+=G.words[j].w.length+1;var per=(now-h.at)/Math.max(1,ch);if(per>15&&per<400)h.cpm=h.cpm?h.cpm*.6+per*.4:per}h.k=k;h.at=now}hlLoop();emit("markWord.after",k,target)}finally{emit("markWord.done",cx)}}
 function wordMs(k){var ans=firstAnswer("wordMs.answer",k);if(ans!==undefined)return ans;var base=60000/(170*guideSpeed());if(G.timer||!G.words[k])return base;return(G.words[k].w.length+1)*(G.hl.cpm||base/6)}
 function hlLoop(){if(!G.hlRaf)G.hlRaf=requestAnimationFrame(hlTick)}
-function hlTick(now){G.hlRaf=0;var h=G.hl;if(!G.on||!h){return}var dt=h.last?Math.min(100,now-h.last):16;h.last=now;
+function hlTick(now){G.hlRaf=0;var h=G.hl;if(!h)return;
+  /* round 21: the head runs while a line is said anywhere (a tip's bubble, What next?'s line, an answer: not only in a tour), and 400 ms after
+     its end (the light's last glide and the tail's fade) */
+  if(!G.on&&!G.utter&&!G.timer&&!G.recAudio&&(!h.ended||now-(h.endAt||0)>400))return;var dt=h.last?Math.min(100,now-h.last):16;h.last=now;
   if(G.paused){h.at+=dt;h.start+=dt}
   /* some voices send no word events (Chrome's network voices, Android): after 1.2 s without one, the head follows the time, by characters */
   if(G.utter&&!h.seen&&!h.ended&&now-h.start>1200){h.est=true;var el=now-h.start,per=60000/(170*guideSpeed())/6,c=0,k=0;for(;k<G.words.length-1;k++){c+=G.words[k].w.length+1;if(c*per>el)break}if(k!==h.k)markWord(k,h.target)}
   var n=G.words.length,tgt=h.ended?n:h.k<0?0:h.k+Math.min(.97,(now-h.at)/wordMs(h.k)),glide=S.guideCfg.glide&&!S.reduce;
   h.p=glide?h.p+(tgt-h.p)*Math.min(1,dt/90):(h.ended?n:Math.max(0,h.k)+1-1e-6);
-  if(!glide&&h.k<0)h.p=0;
-  hlPaint(ph.querySelector(".gcap"),h.p,glide);hlPaint(h.target,h.p,glide);
+  if(!glide&&h.k<0)h.p=0;if(glide&&h.k>=0&&h.p<h.k)h.p=h.k;
+  hlPaintAll(h);
   G.hlRaf=requestAnimationFrame(hlTick)}
-/* per word: --f its fill (read = 1), --h the head's fill, --t the trail behind (comet: fades over Trail words; fill: stays; sentence: the band), --a head or trail */
-function hlPaint(box,p,glide){if(!box)return;var ws=box.querySelectorAll(".gw");if(!ws.length)return;box.classList.add("gread");
-  var k=Math.floor(p),f=glide?p-k:1,mode=S.guideCfg.hl,tr=Math.max(1,+S.guideCfg.trail||6);
-  var sid=[],n=0;for(var i=0;i<ws.length;i++){sid.push(n);if(/[.!?…][”»")\]]*$/.test(ws[i].textContent))n++}
-  for(var j=0;j<ws.length;j++){var w=ws[j],fi,hd,t;
-    if(j>k){fi=0;hd=0;t=0}else if(j===k){fi=glide?f:1;hd=fi;t=0}else{fi=1;hd=0;t=mode==="comet"?Math.max(0,1-(p-j-1)/tr):mode==="fill"?1:0}
-    if(mode==="sentence")t=k<ws.length&&sid[j]===sid[Math.min(k,ws.length-1)]&&j!==k?.22:0;
-    w.style.setProperty("--f",fi.toFixed(3));w.style.setProperty("--h",hd.toFixed(3));w.style.setProperty("--t",t.toFixed(3));w.style.setProperty("--a",(j===k?1:t).toFixed(3));
-    w.classList.toggle("un",j>k)}}
-function hlClear(box){if(!box)return;box.classList.remove("gread");box.querySelectorAll(".gw").forEach(function(w){w.removeAttribute("style");w.classList.remove("un")})}
 on("clearGuideMarks.after",function(){if(G.hl&&G.hl.target){hlClear(G.hl.target);G.hl.target=null}});
 on("stopTour.before",function(){if(G.hl&&G.hl.target){hlClear(G.hl.target);G.hl.target=null}});
 /* the captions say when this device has no voice for the language */
 on("renderGuide.after",function(text){var cap=ph.querySelector(".gcap");if(!cap)return;
-  cap.insertAdjacentHTML("afterbegin",'<small class="gnovoice"'+(G.noVoice?"":" hidden")+'>'+TXH("guide_novoice")+'</small>');if(G.hl)hlPaint(cap,G.hl.p,S.guideCfg.glide&&!S.reduce)});
+  cap.insertAdjacentHTML("afterbegin",'<small class="gnovoice"'+(G.noVoice?"":" hidden")+'>'+TXH("guide_novoice")+'</small>');if(G.hl)hlGlide(cap,cap.closest(".gbubble")?"bubble":"captions",G.hl.p,G.hl.ended)});
 
-/* Editor: Captions gets the highlight's style, its trail, the glide and a Try (round 19: shown in Guide › 1 · The mascot › Speech on screen;
-   Voice in this browser is guide/voice.js's, the one home of the voice) */
+
+/* The one highlighter (round 21; the developer, 2026-11-13: "make some interpolation so the highlighting is smooth, leaving the
+   highlighted colours vanishing behind like a comet ... in all speech text highlighting: in the balloon, in this panel, and in the blocks
+   directly when the guide reads them"). Every place that shows the words being spoken lights them here, with one function (hlGlide):
+   the bubbles (the dock's, the tips'), the teleprompter (guide/teleprompter.js), the open panel (its lines, its whole text, the Mini's
+   line), the block's own text (the read-along), the games' cards and the classic captions. A module names its places at the point
+   hlBoxes.add ([box, place, offset]); the reading head (guide/readalong.js's hlTick) paints them all each frame (hlPaintAll).
+   The light: a soft shape (a pill with a fine underline) moves and resizes from word to word on an ease (in-out cubic; its time from the
+   word's own length: a recorded line's word times, the device voice's boundaries, so it never lags the voice), and the words just said
+   keep a warm tint fading over Trail words behind it (the comet). Highlight style keeps its other ways: Sentence + word (a soft band on
+   the sentence, the shape on the word), Fill (the said words stay tinted), One word (the shape alone, no tail). Glide = Word by word,
+   or Reduce Motion: no glide, the shape is on the word at once; the tail stays. A new line: the shape grows from the word's start on its
+   line (it never crosses the text diagonally). Each place picks only its size and its colours, from its theme: --hlc (the light's
+   colour), --hla (the shape's strength), --hlln (the underline), --hlt (the tail's strength), --hlun (the words not yet said).
+   Unity: a TextMeshPro / UI Toolkit label with a highlight quad (a VisualElement behind the text) tweened between the words' bounds
+   (DOTween, Ease.InOutCubic; the bounds from TMP_TextInfo.characterInfo, or the TextElement's glyph rects), the tail as per-character
+   vertex colours fading (TMP colors32), the word's state a rich-text-free colour per character. */
+S.guideCfg.hl="comet";S.guideCfg.trail=6;S.guideCfg.glide=true;
+var HL={hooks:{}};
+/* the places showing the line being said now: [box, place, offset] (offset: the head's word k is the box's word k + offset) */
+function hlBoxes(h){var out=[];emit("hlBoxes.add",out,h);return out}
+function hlPaintAll(h){if(!h)return;hlBoxes(h).forEach(function(b){hlGlide(b[0],b[1],h.p+(b[2]||0),h.ended)})}
+/* is this text the line being said? */
+function hlSaying(t){return!!G.sayLine&&t!=null&&G.sayLine.text===t}
+function hlEase(x){return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2}
+/* the glide's time: about half the word's spoken length (it arrives as the word is heard), 90-260 ms */
+function hlMs(k){var ms=typeof wordMs==="function"&&G.words&&G.words[k]?wordMs(k):180;return Math.max(90,Math.min(260,ms*.55))}
+/* a word's box in its place's own px (the place's padding box; the phone's scale taken out) */
+function hlRectOf(box,w){var b=box.getBoundingClientRect(),q=b.width/(box.offsetWidth||1)||1,rs=w.getClientRects(),r=rs.length?rs[0]:w.getBoundingClientRect();
+  return{x:(r.left-b.left)/q-box.clientLeft+box.scrollLeft,y:(r.top-b.top)/q-box.clientTop+box.scrollTop,w:r.width/q,h:r.height/q}}
+function hlWords(box){return box.querySelectorAll(".gw,.tw,.gdw,.btw")}
+function hlIdx(w,j){return w.dataset.k!=null?+w.dataset.k:j}
+/* the one painter: p the reading head (k + the share of word k said), ended when the line is over */
+function hlGlide(box,place,p,ended){if(!box||!box.isConnected)return;HL.hooks[place]=(HL.hooks[place]||0)+1;var ws=hlWords(box),n=ws.length;if(!n)return;
+  box.classList.add("hl-box","gread");box.dataset.hlp=place;
+  var mode=S.guideCfg.hl,tr=Math.max(1,+S.guideCfg.trail||6),glide=S.guideCfg.glide!==false&&!S.reduce,k=ended?1e9:Math.floor(p),sid=[],s=0,hw=null,hs=-1,st=box._hl||(box._hl={k:null,cur:null}),now=performance.now();
+  /* the line said: its tail fades away over 0.7 s (Fill keeps the said words tinted) */
+  if(ended&&st.endAt==null)st.endAt=now;if(!ended)st.endAt=null;var fade=ended&&mode!=="fill"?Math.max(0,1-(now-st.endAt)/700):1;
+  for(var i=0;i<n;i++){sid.push(s);if(/[.!?…]["”»)\]]*$/.test(ws[i].textContent))s++;if(hlIdx(ws[i],i)===k){hw=ws[i];hs=sid[i]}}
+  for(var j=0;j<n;j++){var w=ws[j],x=hlIdx(w,j),t=0;
+    if(x<k)t=(mode==="comet"?Math.max(0,1-(p-x-1)/tr):mode==="fill"?1:0)*fade;
+    if(mode==="sentence")t=hs>=0&&sid[j]===hs&&x!==k?.6:0;
+    w.classList.toggle("hl-un",x>k);w.classList.toggle("hl-on",x===k);w.classList.toggle("hl-said",x<k);w.style.setProperty("--t",t.toFixed(3))}
+  var q=box.querySelector(":scope > .hl-quad");if(!q){q=document.createElement("i");q.className="hl-quad";q.setAttribute("aria-hidden","true");box.insertBefore(q,box.firstChild)}
+  if(!hw||!hw.getClientRects().length){q.style.opacity="0";st.k=null;return}
+  var to=hlRectOf(box,hw);
+  if(st.k!==k){var from=glide&&st.k!=null&&st.cur?st.cur:null;if(from&&Math.abs(from.y-to.y)>to.h*.5)from={x:to.x,y:to.y,w:Math.min(6,to.w),h:to.h};
+    st.from=from||to;st.t0=now;st.dur=from?hlMs(k):0;st.k=k}
+  var fr=st.dur?Math.min(1,(now-st.t0)/st.dur):1,e=st.dur?hlEase(fr):1,f=st.from,c={x:f.x+(to.x-f.x)*e,y:f.y+(to.y-f.y)*e,w:f.w+(to.w-f.w)*e,h:f.h+(to.h-f.h)*e};st.cur=c;st.e=e;st.fr=fr;st.to=to;
+  q.style.transform="translate("+c.x.toFixed(2)+"px,"+c.y.toFixed(2)+"px)";q.style.width=c.w.toFixed(2)+"px";q.style.height=c.h.toFixed(2)+"px";q.style.opacity="1"}
+function hlClear(box){if(!box)return;box.classList.remove("gread","hl-box");delete box.dataset.hlp;box._hl=null;var q=box.querySelector(":scope > .hl-quad");if(q)q.remove();
+  hlWords(box).forEach(function(w){w.style.removeProperty("--t");w.classList.remove("hl-un","hl-on","hl-said")})}
+/* the light's state for the checks: where the shape is now (the place's px) and its word */
+function hlState(box){var st=box&&box._hl,q=box&&box.querySelector(":scope > .hl-quad");return st&&st.cur?{k:st.k,x:st.cur.x,y:st.cur.y,w:st.cur.w,h:st.cur.h,e:st.e,shown:!!q&&q.style.opacity!=="0"}:null}
+/* the places this module knows: the classic captions or the dock's bubble (.gcap), and the block being read (the reading head's target) */
+on("hlBoxes.add",function(out,h){ph.querySelectorAll(".gcap").forEach(function(c){out.push([c,c.closest(".gbubble")?"bubble":"captions"])});if(h.target&&h.target.isConnected)out.push([h.target,"block"])});
+
+/* Editor: Guide › 1 · The mascot › Speech on screen: the highlight's style, its trail, the glide and a Try (round 21: from guide/readalong.js,
+   so the highlighter has one home; Captions keeps its link row) */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
-  addRows(d,"s7cap",row("Highlight style",pseg("guideCfg.hl",["comet","sentence","fill","word"],["Comet","Sentence + word","Fill","One word"]),"How the words being read light up, in the captions and in the block's own text. Comet: the word being said is bright and the words behind it fade away. Sentence + word: a soft band over the sentence being said, the word in it brighter (a small study found a sentence band easiest to follow for readers with dyslexia). Fill: the words already said stay lit. One word: only the word being said.")+
-    row("Trail",pslider("guideCfg.trail",2,14,1),"Comet only: how many words the fading trail covers behind the word being said.",true)+
-    row("Glide",pseg("guideCfg.glide",["true","false"],["Smooth","Word by word"]),"Smooth: the light moves through each word as it is spoken, without jumps. Word by word: it jumps from word to word. Reduce Motion: word by word.")+
+  addRows(d,"s7cap",row("Highlight style",pseg("guideCfg.hl",["comet","sentence","fill","word"],["Comet","Sentence + word","Fill","One word"]),"How the words being said light up, in every place speech is shown: the bubble, the teleprompter, the open panel, the block being read, the games' cards. Comet: a soft light glides from word to word and the words behind it keep a warm tint that fades away. Sentence + word: a soft band over the sentence being said, the light on the word in it (a small study found a sentence band easiest to follow for readers with dyslexia). Fill: the words already said stay tinted. One word: only the light on the word being said. Unity: a highlight quad behind the TextMeshPro text, tweened between the words' bounds; the tail as vertex colours.")+
+    row("Trail",pslider("guideCfg.trail",2,14,1),"Comet only: how many words the fading tail covers behind the word being said.",true)+
+    row("Glide",pseg("guideCfg.glide",["true","false"],["Smooth","Word by word"]),"Smooth: the light moves and resizes from one word to the next on an ease, timed by the voice (a recorded line's word times; the device voice's word boundaries). Word by word: it is on each word at once. Reduce Motion: word by word, the tail stays.")+
     row("Try",'<button class="del" type="button" data-hltry="1">Try</button>',"Starts the tour with these settings."));
   return d.innerHTML});
 ed.addEventListener("click",function(e){var t=e.target.closest("[data-hltry]");if(t){e.stopPropagation();if(G.on)stopTour();startTour()}},true);
@@ -5914,7 +6155,7 @@ on("edCard.html",function(h){var lk=S.aud.looks;
       row("Try",'<button class="del" type="button" data-onbtry="1">Show it now</button>',""))+
     comp("s8set","in the visitor's Settings: who's exploring, and Short / Standard / Deep","")+
     comp("s8look","per audience: the mascot, the length, the type, the ornaments, the corners",looks+'<div class="note">Contrast and tap sizes pass in every set (the same tokens, a few values changed).</div>');
-  var sec=fo("s8",'6 · Audiences <span class="sub">· Family, Explorer, Expert</span>',["new","NEW"],body,1);
+  var sec=fo("s8",'<span class="acct">6 · Audiences</span> <span class="sub">· who the card speaks to (Family, Explorer, Expert): their looks, words and guide</span>',["new","NEW"],body,1);
   var d=document.createElement("div");d.innerHTML=h;var g=d.querySelector('[data-fo="s7"]');if(g)g.insertAdjacentHTML("afterend",sec);else{var i=d.innerHTML.lastIndexOf('<div class="json">');d.innerHTML=d.innerHTML.slice(0,i)+sec+d.innerHTML.slice(i)}
   ["s8onb","s8set"].forEach(function(o){var f=innerOf(d,o);if(f)f.insertAdjacentHTML("beforeend",ownbar(o)+ownPanels(o))});
   return d.innerHTML});
@@ -6201,7 +6442,8 @@ var FI={prev:'<path d="M18 5.5v13a1 1 0 0 1-1.55.83L7 13v5H5V6h2v5l9.45-6.33A1 1
   pause:'<rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/>',play:'<path d="M8 5.6v12.8a1 1 0 0 0 1.53.85l10.2-6.4a1 1 0 0 0 0-1.7L9.53 4.75A1 1 0 0 0 8 5.6z"/>',
   stop:'<rect x="5" y="5" width="14" height="14" rx="3"/>',up:'<polyline points="6 15 12 9 18 15"/>',down:'<polyline points="6 9 12 15 18 9"/>',
   all:'<polyline points="7 10 12 5 17 10"/><polyline points="7 14 12 19 17 14"/>',lines:'<line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/>',
-  send:'<line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>',wave:'<path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4"/>'};
+  send:'<line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>',
+  back10:'<path d="M5.6 9.2A7.4 7.4 0 1 1 4.6 13"/><polyline points="4.2 4.6 5.6 9.2 10.2 8"/><text x="12.6" y="15.6">10</text>',fwd10:'<path d="M18.4 9.2A7.4 7.4 0 1 0 19.4 13"/><polyline points="19.8 4.6 18.4 9.2 13.8 8"/><text x="11.4" y="15.6">10</text>',wave:'<path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4"/>'};
 function fi(k){return'<svg viewBox="0 0 24 24" aria-hidden="true" class="fi">'+FI[k]+'</svg>'}
 function si(k){return'<svg viewBox="0 0 24 24" aria-hidden="true" class="si">'+FI[k]+'</svg>'}
 /* ----- the time: each stop's length from its words' timing (a recorded line's own word times, else the words at the voice's speed) ----- */
@@ -6247,6 +6489,8 @@ function dkWord(k){if(!dkWordsOn()||G.tpText==null||!G.sayLine||G.sayLine.text!=
     tp.querySelectorAll(".tp-now .tw").forEach(function(w){var j=+w.dataset.k;w.classList.toggle("said",j<k);w.classList.toggle("on",j===k)})});
   ph.querySelectorAll(".gdock .gm-now .tw").forEach(function(w){var j=+w.dataset.k;w.classList.toggle("said",j<k);w.classList.toggle("on",j===k)})}
 on("markWord.after",function(k){if(G.on&&dockOn())dkWord(k)});
+/* round 21: the panel's lines, its whole text and the Mini's line are lit by the one highlighter (guide/highlight.js) */
+on("hlBoxes.add",function(out){if(!G.on||!dockOn()||!hlSaying(G.tpText))return;ph.querySelectorAll(".gdock .gd-tp .tp-now,.gdock .gm-now").forEach(function(b){out.push([b,"panel"])})});
 /* ----- the parts every Look shares ----- */
 function dkAv(c){return'<span class="gd-av'+(c?" "+c:"")+'" aria-hidden="true">'+mascotStill()+'</span>'}
 function dkBars(n){if(!S.guideCfg.pBars)return"";var h="";for(var i=0;i<n;i++)h+="<i></i>";return'<span class="gd-bars" aria-hidden="true">'+h+'</span>'}
@@ -6255,10 +6499,12 @@ function dkStopB(c){return'<button type="button" class="'+c+'" data-g="stop" ari
 function dkStep(k,c){return'<button type="button" class="'+c+'" data-g="'+k+'" aria-label="'+TXH("guide_ctrl_"+k)+'">'+fi(k)+'</button>'}
 function spd(v){return String(+(+v).toFixed(2))}
 function dkSpeed(){if(S.guideCfg.pSpeed===false)return"";var v=guideSpeed();return'<button type="button" class="gd-speed" data-g="speed" aria-label="'+esc(fmt(TXT("dock_speed"),spd(v)))+'">'+spd(v)+'×</button>'}
-function dkCtl(c){return'<div class="gd-ctl'+(c?" "+c:"")+'">'+dkSpeed()+dkStep("prev","gd-pn")+dkPP("gd-play")+dkStep("next","gd-pn")+dkStopB("gd-stopb")+'</div>'}
+/* round 21: back 10 s and forward 10 s beside Play (guide/controls.js's seekBy, on the tour's timeline) */
+function dkSkip(k,c){return'<button type="button" class="gd-skip '+(c||"")+'" data-g="'+k+'" aria-label="'+TXH(k==="back10"?"dock_back10":"dock_fwd10")+'"><svg viewBox="0 0 24 24" aria-hidden="true" class="si sk10">'+FI[k]+'</svg></button>'}
+function dkCtl(c){return'<div class="gd-ctl'+(c?" "+c:"")+'">'+dkSpeed()+dkStep("prev","gd-pn")+dkSkip("back10")+dkPP("gd-play")+dkSkip("fwd10")+dkStep("next","gd-pn")+dkStopB("gd-stopb")+'</div>'}
 function dkKb(){return'<button type="button" class="gd-kb" data-dock="type" aria-label="'+TXH("dock_type")+'">'+KBD+'</button>'}
 /* Controls at Mini: Pause + Stop, Pause only, or Tap on the line (no buttons; the keyboard to ask by typing) */
-function dkMiniCtl(){var mc=S.guideCfg.miniCtl;if(mc==="line")return dkKb();return'<div class="gd-mini">'+dkPP("gd-mc gd-mpp")+(mc==="pausestop"?dkStopB("gd-mc gd-mstop"):"")+'</div>'}
+function dkMiniCtl(){var mc=S.guideCfg.miniCtl;if(mc==="line")return dkKb();return'<div class="gd-mini">'+dkSkip("back10","gd-mc gd-mback")+dkPP("gd-mc gd-mpp")+(mc==="pausestop"?dkStopB("gd-mc gd-mstop"):"")+'</div>'}
 function dkOpenB(c){return'<button type="button" class="gd-grab '+(c||"gd-openb")+'" data-dock="cycle" aria-label="'+TXH("dock_open")+'">'+(c?dkAv():si("up"))+'</button>'}
 function dkHide(){return'<button type="button" class="gd-hide" data-dock="hide" aria-label="'+TXH("dock_hide")+'">'+si("down")+'</button>'}
 function dkHandle(h){return'<button type="button" class="gd-grab gd-handle" data-dock="cycle" aria-label="'+TXH(h==="full"?"dock_collapse":"dock_expand")+'"><i></i></button>'}
@@ -6295,8 +6541,10 @@ function dockOpen(L,h,ts){var n=S.guideSteps.length,st=S.guideSteps[G.i],lab=fmt
     '<div class="gd-where gd-hrow">'+dkTimeHtml("el")+dkSeek("hair")+dkTimeHtml("tot")+'</div><div class="gd-lab gd-lab1">'+stop+'</div>'+(typing||h==="full"?'<div class="gd-askrow">'+dkForm()+'</div>'+dkChips(false):dkChips(true))+
     '<div class="gd-botrow">'+dkCtl("gd-capsule")+dkTalk(ts)+'</div>'+dkHint(ts);
   /* Ink glass */
-  return dkHandle(h)+dkSmall()+'<div class="gd-wrow">'+dkAv()+dkWords(h,"ink")+'<div class="gd-side">'+dkAll(h,"all")+dkAa()+'</div></div>'+
-    '<div class="gd-where">'+dkSeek("dots")+'<div class="gd-lab">'+stop+dkTimeHtml("both")+'</div></div>'+dkCtl()+dkChips(false)+'<div class="gd-askrow">'+dkForm()+dkTalk(ts)+'</div>'+dkHint(ts)}
+  /* round 21 (21.1, the developer: "too big, with too big elements"): a head row (the mascot, its name and the stop, Aa, Read all, small),
+     the words full width at 18 px, the controls in one row */
+  return dkHandle(h)+'<div class="gd-head">'+dkAv()+'<small class="gd-eye">'+esc(mascotName())+' · '+esc(lab)+'</small><span class="gd-sp"></span>'+dkAa()+dkAll(h,"all")+dkSmall()+'</div>'+'<div class="gd-wrow">'+dkWords(h,"ink")+'</div>'+
+    '<div class="gd-where gd-hrow">'+dkTimeHtml("el")+dkSeek("dots")+dkTimeHtml("tot")+'</div>'+dkCtl()+dkChips(false)+'<div class="gd-askrow">'+dkForm()+dkTalk(ts)+'</div>'+dkHint(ts)}
 function dockHtml(h){var L=dkLook(),ts=talkState();return h==="mini"?dockMini(L):dockOpen(L,h,ts)}
 /* ----- the progress, the time and the ring follow the voice (4 times a second); a drag on the bar holds them (guide/controls.js) ----- */
 function dkTick(){var d=ph.querySelector(".gdock");if(!d||!G.on)return;var T=dkTimes(),el=dkElapsed(T),sh=dkShare(),f=T.tot?el/T.tot:0;
@@ -6323,9 +6571,12 @@ on("renderGuide.after",function(text){var old=ph.querySelector(".gdock"),oldR=ol
   var cap=ph.querySelector(".gcap"),bar=ph.querySelector(".gbar"),ask=ph.querySelector(".gask");if(bar)bar.remove();if(ask)ask.remove();
   var st=S.guideSteps[G.i],t=text!=null?text:stepText(st),own=cap&&!blockWords(t);G.tpText=t;if(G.askOpen&&S.dockH!=="full")S.dockH="full";if(S.dockH!=="peek")G.typing=false;
   var ts=talkState(),compact=S.dockH==="compact",L=dkLook(),line=L==="paper"||L==="prompter",d=null;
-  if(!compact){d=document.createElement("div");d.className="gdock h-"+S.dockH+" lk-"+L;d.dataset.h=S.dockH;d.dataset.look=L;d.setAttribute("role","region");d.setAttribute("aria-label",TXT("dock_label"));d.innerHTML=dockHtml(S.dockH);ph.appendChild(d)}
+  if(!compact){d=document.createElement("div");d.className="gdock h-"+S.dockH+" lk-"+L+pipe("dock.cls","");d.dataset.h=S.dockH;d.dataset.look=L;d.setAttribute("role","region");d.setAttribute("aria-label",TXT("dock_label"));d.innerHTML=dockHtml(S.dockH);ph.appendChild(d)}
   /* the words: Azu's own in its bubble (Compact; Mini of a Look with no line), else in the panel; a block's words are lit in the block */
-  if(cap){if(own&&(compact||S.guideCfg.bubbles==="own"&&(S.dockH==="mini"&&(!line||!dkWordsOn())||S.dockH==="peek"&&dkWordsOff()))){var b=document.createElement("div");b.className="gbubble";b.setAttribute("role","status");cap.classList.add("gb-text");b.appendChild(cap);ph.appendChild(b);placeBubble()}
+  /* round 21: at Mini and Compact a tour's words go where Speech on screen › Words during a tour says (guide/teleprompter.js):
+     the teleprompter (no bubble), the bubble by the mascot's head, or Off */
+  var tw=S.guideCfg.tourWords,low=compact||S.dockH==="mini",toBub=!low||tw==="bubble";
+  if(cap){if(own&&toBub&&(compact||S.guideCfg.bubbles==="own"&&(S.dockH==="mini"&&(!line||!dkWordsOn())||S.dockH==="peek"&&dkWordsOff()))){var b=document.createElement("div");b.className="gbubble";b.setAttribute("role","status");cap.classList.add("gb-text");b.appendChild(cap);ph.appendChild(b);placeBubble()}
     else cap.remove()}
   var th=d&&d.querySelector(".gd-thread");if(th){var nw=th.querySelector(".gm-now");th.scrollTop=nw&&!G.askOpen?Math.max(0,nw.offsetTop-th.offsetTop-24):th.scrollHeight}var m=ph.querySelector(".mascot");if(m)m.dataset.state=ts;
   if(d){dkTick();barsStart();if(!oldR)dkMorph(G.morphFrom||dkStarAt(),d,L);else if(oldH!==S.dockH&&oldL===L)dkMorph(oldR,d,L);else if(G.morph&&performance.now()<G.morph.end)dkHold(d)}else if(oldR)dkMorph(oldR,null,oldL);G.morphFrom=null;
@@ -6358,12 +6609,12 @@ function dkStarIn(ms){var w=ph.querySelector(".gbtn-wrap");if(w&&w.animate)w.ani
 /* the dock's markup reaches the phone's signature: its Look, its height at the start and its Open, its controls at Mini, its parts */
 on("modelSig.sig",function(h){if(!sigWant(/guideCfg\.(dockStart|miniCtl|chips|panel|look|pWords|pBars|pSpeed)/))return h;var keep=S.dockH;S.dockH=S.guideCfg.dockStart;var x="#dock:"+S.guideCfg.panel+"|"+S.dockH+"|"+(S.dockH==="compact"?"":dockHtml(S.dockH))+"|"+dockHtml("peek");S.dockH=keep;return h+x});
 /* the bubble sits just above the dock, its tail towards Azu */
-function placeBubble(){var b=ph.querySelector(".gbubble"),d=ph.querySelector(".gdock")||ph.querySelector(".gbtn-wrap.intour"),m=ph.querySelector(".mascot");if(!b)return;var hd=d&&d.querySelector(".gd-hide"),top=d?Math.min(phRect(d.querySelector(".gd-mrow")||d).t,hd?phRect(hd).t:1e9):ph.offsetHeight-16;
+function placeBubble(){var b=ph.querySelector(".gbubble"),d=ph.querySelector(".gdock")||ph.querySelector(".gbtn-wrap.intour"),m=ph.querySelector(".mascot");if(!b||b.classList.contains("gb-head"))return;var hd=d&&d.querySelector(".gd-hide"),top=d?Math.min(phRect(d.querySelector(".gd-mrow")||d).t,hd?phRect(hd).t:1e9):ph.offsetHeight-16;
   b.style.bottom=(ph.offsetHeight-top+10)+"px";var up=m&&m.offsetTop+30<top-b.offsetHeight-10;b.classList.toggle("tail-up",!!up)}
 /* the free height for the block being told: above the dock and the bubble */
 /* round 19: a beat card of the games on the tour (not one sent away) is part of what covers the card's foot, so the step's words (the hero's at the
    teaser) are placed above it too (print 17) */
-function freeHeight(){var box=scr.getBoundingClientRect(),lo=box.bottom;[".gcap",".gbar",".gdock",".gbubble",".gbtn-wrap.intour",".gtmore",".gdbeat:not(.bt-away)"].forEach(function(s){var e=ph.querySelector(s);if(e){var r=e.getBoundingClientRect();if(r.height)lo=Math.min(lo,r.top)}});return{top:box.top,bottom:lo}}
+function freeHeight(){var box=scr.getBoundingClientRect(),lo=box.bottom;[".gcap",".gbar",".gdock",".gbubble:not(.gb-head)",".gbtn-wrap.intour",".gtmore",".gdbeat:not(.bt-away)",".gtele:not(.tl-out)"].forEach(function(s){var e=ph.querySelector(s);if(e){var r=e.getBoundingClientRect();if(r.height)lo=Math.min(lo,r.top)}});return{top:box.top,bottom:lo}}
 /* keep the talk state and the bubble's place in step with the voice */
 /* a bubble shows one sentence at a time (2 lines at most), the sentence being said */
 function bubbleSentence(){var b=ph.querySelector(".gbubble .gcap");if(!b)return;var ws=b.querySelectorAll(".gw"),k=Math.max(0,G.hl&&G.hl.k>=0?G.hl.k:0),sid=[],n=0;
@@ -6501,7 +6752,7 @@ function besideWords(m,y,top,lo,el){if(!el)return y;var boxes=wordBoxes(el);if(!
 rowDemos({"guideCfg.look":{tour:"g1",dock:"peek",ring:".gdock"},"guideCfg.pWords":{tour:"g1",dock:"peek",ring:".gd-tp|.gd-wrow|.gdock"},"guideCfg.pBars":{tour:"g1",dock:"mini",ring:".gd-bars|.gdock"},
   "guideCfg.pSpeed":{tour:"g1",dock:"peek",ring:".gd-speed|.gd-ctl"},"guideCfg.panel":{tour:"g1",ring:".gdock|.gbar"},"guideCfg.dockStart":{tour:"g1",ring:".gdock|.gbtn-wrap.intour"},"guideCfg.miniCtl":{tour:"g1",dock:"mini",ring:".gd-mini|.gd-line"},
   "guideCfg.swipeCompact":{tour:"g1",dock:"mini",act:function(){var g=ph.querySelector(".gd-grab");if(g)gsTouch(g,90)},ring:function(){return S.dockH==="compact"?".gbtn-wrap.intour":".gd-grab"}},
-  "guideCfg.bubbles":{tour:true,ring:".gbubble|.gd-tp"},"guideCfg.talk":{tour:"g1",dock:"peek",ring:".gd-talk"},"guideCfg.earcons":{tour:"g1",dock:"peek",act:function(){earcon(true)},ring:".gd-talk"},"guideCfg.chips":{tour:"g1",dock:"peek",ring:".gd-chips"}});
+  "guideCfg.bubbles":{tour:true,ring:".gbubble|.gd-tp|.gtele"},"guideCfg.talk":{tour:"g1",dock:"peek",ring:".gd-talk"},"guideCfg.earcons":{tour:"g1",dock:"peek",act:function(){earcon(true)},ring:".gd-talk"},"guideCfg.chips":{tour:"g1",dock:"peek",ring:".gd-chips"}});
 
 /* The voice: one order of sources for every line (sayOrder): a recorded line (recSay), the live voice (say.live), then the device voice (sayDevice); the device voices per language; what speaks now and why (G.sayNow, Speaking now). */
 /* ----- the order of sources, written once, for every line (the tour's, Azu's own words, the answers) -----
@@ -6704,6 +6955,25 @@ function speedNext(v){for(var i=0;i<SPEEDS.length;i++)if(SPEEDS[i]>v+1e-6)return
 function setGuideSpeed(v){S.vis.speed=v;G.rate=v;if(G.recAudio)G.recAudio.playbackRate=v;else if(G.on&&!G.paused&&(G.utter||G.timer)&&G.sayArgs)speakFrom(G.hl&&G.hl.k>=0?G.hl.k:0,false);
   ph.querySelectorAll(".gd-speed").forEach(function(b){b.textContent=spd(v)+"×";b.setAttribute("aria-label",fmt(TXT("dock_speed"),spd(v)))});dkTick()}
 ph.addEventListener("click",function(e){var b=e.target.closest('[data-g="speed"]');if(!b)return;e.stopPropagation();setGuideSpeed(speedNext(guideSpeed()))},true);
+/* ----- round 21 (the developer, 2026-11-13: "back 10 seconds and forward 10 seconds buttons, both in the minimal panel and in the big
+   one; in the minimal one maybe only the back 10 seconds"): 10 s back or on along the tour's own timeline (the steps' lengths summed,
+   guide/dock.js's dkTimes), across steps. Within the step said now the voice goes to the word at that time (a recorded line by its word
+   times; the device voice speaks again from that word); paused, it lands there and stays paused. In another step, that step starts from
+   that word (as a seek on the bar does). The time shows where it landed. Unity: the seek on the tour timeline (the sum of the steps'
+   clip lengths), AudioSource.time set to the word's start, the device TTS spoken from the word ----- */
+var SKIP_S=10;
+/* the step and the word at a time of the tour (s from its start) */
+function seekLand(sec){var T=dkTimes(),t=Math.max(0,Math.min(T.tot-.05,sec)),j=0;for(var i=0;i<T.stops.length;i++)if(T.stops[i].at<=t+1e-6)j=i;
+  var c=T.stops[j],o=Math.max(0,t-c.at),text=stepText(S.guideSteps[j]),n=(text.match(/\S+/g)||[]).length,sp=guideSpeed(),r=typeof recFile==="function"?recFile(text):null,w=r&&r.file&&r.file.words,k=0;
+  if(w&&w.length){for(var q=0;q<w.length;q++)if(w[q][0]/sp<=o)k=q}else k=Math.floor(o/(60/(170*sp)));
+  return{j:j,k:Math.max(0,Math.min(Math.max(0,n-1),k)),t:t}}
+function seekBy(d){if(!G.on)return null;var T=dkTimes(),from=dkElapsed(T),L=seekLand(from+d),st=S.guideSteps[G.i];G.seekedTo={j:L.j,k:L.k,by:d,t:L.t,from:from};
+  var here=L.j===G.i&&st&&G.sayLine&&G.sayLine.text===stepText(st)&&!!(G.recAudio||G.utter||G.timer||G.resumeVoice||G.voiceWait||G.paused);
+  if(here&&G.paused){if(G.recAudio&&G.recWords){var w=G.recWords[L.k];G.recAudio.currentTime=w?w[0]:0}else G.pausedAt=L.k;if(G.hl){G.hl.k=L.k;G.hl.p=L.k;G.hl.at=performance.now()}}
+  else if(here){hideStopUi();if(!seekWord(L.k))here=false;else if(G.hl&&!G.recAudio){G.hl.k=L.k;G.hl.p=L.k}}
+  if(!here){hideStopUi();stopSpeech();G.paused=false;G.waiting=false;G.tryWait=false;G.askOpen=false;G.startWord=L.k;if(S.dockH==="full")S.dockH="peek";G.i=L.j;runStep()}
+  dkTick();return L}
+ph.addEventListener("click",function(e){var b=e.target.closest('[data-g="back10"],[data-g="fwd10"]');if(!b||!G.on)return;e.stopPropagation();seekBy(b.dataset.g==="back10"?-SKIP_S:SKIP_S)},true);
 /* ----- round 11: the progress bar seeks. A drag (its hit area 44 px high) or a tap: the stop under the finger, and within it the sentence
    at that place (its share of the stop's words); the knob and the time follow the finger, the voice goes there on release. Keys: ← → the
    stop before / after. Unity: a PointerDown / Move / Up manipulator on the bar's element (CapturePointer), the same rule ----- */
@@ -10240,6 +10510,14 @@ function gdPresent(c){gdClearEls();var it=c.item,az=gdMascot();
   if(gdFocusNow(it)==="ring")gdRing(it,!S.reduce);
   if(it.points&&az&&gdGoes(it)){var p=document.createElement("i");p.className="gdpoint";p.setAttribute("aria-hidden","true");p.innerHTML='<svg viewBox="0 0 16 16"><path d="M2.5 2.5 14 8 2.5 13.5Z"/></svg>';ph.appendChild(p)}
   gdPlace(c,true)}
+/* round 21 (21.4; the developer: "the balloon is pointing at the mascot's head, but then the mascot moves away and the balloon stays in the
+   same place"): while the mascot hops or walks to its place, its bubble goes with it, each frame, its tail on the head (the bubble at its
+   place beside the head at the end, as the solver placed it), kept inside the phone. Unity: the bubble's anchor follows the mascot's head
+   Transform projected to the panel each frame */
+function gdBubFollow(c,az,B,dx,dy,ms){var t0=performance.now(),W=ph.offsetWidth,H=ph.offsetHeight;
+  (function fol(){var b=ph.querySelector(".gdbub:not(.gd-out)");if(!b||G.gd.cur!==c)return;var a=gdMascot()||az,tr=String(getComputedStyle(a).translate||"0px 0px").split(" ").map(parseFloat),x=isFinite(tr[0])?tr[0]:0,y=isFinite(tr[1])?tr[1]:0,end=performance.now()-t0>=ms+40,
+      l=end?B.l:Math.max(GD_GUT,Math.min(W-GD_GUT-b.offsetWidth,B.l+x-dx)),t=end?B.t:Math.max(44,Math.min(H-GD_GUT-b.offsetHeight,B.t+y-dy));
+    b.style.left=Math.round(l)+"px";b.style.top=Math.round(t)+"px";if(!end)requestAnimationFrame(fol)})()}
 /* the rings: on a marker it sits in the wall's layer under the markers, so the marker and its name are drawn over it (never covered; a
    redrawn wall gets it back); round the ✦ it sits just under the button's own layer */
 function gdRing(it,pulse){if(it&&it.about==="gbtn"){var q=ph.querySelector(".gdring.gd-rect");if(!q){q=document.createElement("div");q.className="gdring gd-rect"+(pulse?" gd-pulse":"");q.setAttribute("aria-hidden","true");var w0=ph.querySelector(".gbtn-wrap");ph.insertBefore(q,w0||null)}return q}
@@ -10260,7 +10538,9 @@ function gdSolve(c,bw,bh){var it=c.item,W=ph.offsetWidth,H=ph.offsetHeight,az=gd
        only when neither side has room */
     [["right",M.x+GD_RING+6,M.y-ah/2],["left",M.x-GD_RING-6-aw,M.y-ah/2],["above",M.x-aw/2,M.y-GD_RING-6-ah],["below",M.x-aw/2,M.y+GD_RING+30]].forEach(function(a,ai){
       var A1=gdBox(a[1],a[2],aw,ah),F1=gdBox(A1.l+fr.l,A1.t+fr.t,fr.w,fr.h),H1=gdHeadOf(F1),hy=(H1.t+H1.b)/2,body=gdBox(F1.l,H1.b,fr.w,Math.max(1,F1.b-H1.b)),cx=(H1.l+H1.r)/2,by=Math.min(hy-bh/2,H1.b+4-bh);
-      [["left",gdBox(H1.r+GD_TIP,by,bw,bh),0],["right",gdBox(H1.l-GD_TIP-bw,by,bw,bh),0],["down",gdBox(clampL(cx-bw/2),H1.t-GD_TIP-bh,bw,bh),60],["up",gdBox(clampL(cx-bw/2),F1.b+GD_TIP,bw,bh),90]].forEach(function(q,qi){
+      /* round 21 (Speech on screen › The bubble outside a tour): Above the mascot puts the bubble above its head first */
+      var pen=S.guideCfg.bubbleOut==="above"?[60,60,0,90]:[0,0,60,90];
+      [["left",gdBox(H1.r+GD_TIP,by,bw,bh),pen[0]],["right",gdBox(H1.l-GD_TIP-bw,by,bw,bh),pen[1]],["down",gdBox(clampL(cx-bw/2),H1.t-GD_TIP-bh,bw,bh),pen[2]],["up",gdBox(clampL(cx-bw/2),F1.b+GD_TIP,bw,bh),pen[3]]].forEach(function(q,qi){
         var s=cost(A1,[ring])+cost(q[1],[ring,body])+ai*30+q[2]+qi*4;if(!best||s<best.s)best={s:s,side:a[0],A:A1,B:q[1],tail:q[0],head:H1}})})}
   else if(M&&M.beside){var ring2=M.box;
     [["down",gdBox(clampL(M.x-bw/2),M.y-GD_RING-10-bh,bw,bh)],["left",gdBox(M.x+GD_RING+10,M.y-bh/2,bw,bh)],["right",gdBox(M.x-GD_RING-10-bw,M.y-bh/2,bw,bh)],["up",gdBox(clampL(M.x-bw/2),M.y+GD_RING+34,bw,bh)]].forEach(function(q,qi){
@@ -10283,7 +10563,7 @@ function gdPlace(c,first){var b=ph.querySelector(".gdbub:not(.gd-out)");if(!b||!
   /* Azu: hops to its place beside the target (Reduce Motion: it is there), points at it; at the ✦ it stays and lifts its arm to it */
   G.gd.hopMs=0;
   if(az&&best.A&&gdGoes(it)&&M&&M.beside){var dx=Math.round(best.A.l-best.home.l),dy=Math.round(best.A.t-best.home.t),left=M.x<(best.A.l+best.A.r)/2;
-    G.gd.az={dx:dx,dy:dy,left:left,walk:it.goes==="walk"};gdApplyAz(az,first&&!S.reduce);
+    G.gd.az={dx:dx,dy:dy,left:left,walk:it.goes==="walk"};gdApplyAz(az,first&&!S.reduce);if(first&&!S.reduce&&G.gd.hopMs)gdBubFollow(c,az,best.B,dx,dy,G.gd.hopMs);
     var pt=ph.querySelector(".gdpoint");if(pt){var ax=(best.A.l+best.A.r)/2,ay=(best.A.t+best.A.b)/2,ang=Math.atan2(M.y-ay,M.x-ax),px=M.x-Math.cos(ang)*(GD_RING-5),py=M.y-Math.sin(ang)*(GD_RING-5);
       /* in the gap between the marker and Azu; below the marker its name sits there, so Azu's arm points alone */
       pt.style.display=best.side==="below"?"none":"";pt.style.left=Math.round(px)+"px";pt.style.top=Math.round(py)+"px";pt.style.rotate=(ang*180/Math.PI).toFixed(1)+"deg";if(first&&!S.reduce){pt.classList.remove("gd-in");void pt.offsetWidth;pt.classList.add("gd-in")}}}
@@ -10317,7 +10597,10 @@ function gdCovers(it){if(!gdTarget(it))return null;var m=document.createElement(
   m.innerHTML=gdBubHtml({item:it,text:gdLine(it,S.gdVisitor.visits>1,gdSlots(it))});ph.appendChild(m);var best=gdSolve({item:it},m.offsetWidth,m.offsetHeight);m.remove();return best.cover||null}
 /* a spoken tip: its line through the one order of voices (guide/voice.js's say), the word being said lit */
 /* (the line voiced last, G.gd.voiced: what the screen-reader scene reads) */
-function gdVoice(c){G.gd.voiced={text:c.text,at:c.at};say(c.text,function(k){ph.querySelectorAll(".gdbub:not(.gd-out) .gdw").forEach(function(w,i){w.classList.toggle("on",i===k)})},function(){ph.querySelectorAll(".gdbub .gdw.on").forEach(function(w){w.classList.remove("on")})})}
+function gdVoice(c){G.gd.voiced={text:c.text,at:c.at};say(c.text,function(k){markWord(k,null)},function(){})}
+/* round 21: the bubble's words and the games' cards' lines are lit by the one highlighter (guide/highlight.js), as the reading head goes */
+on("hlBoxes.add",function(out){var v=G.gd.voiced;if(v&&hlSaying(v.text))ph.querySelectorAll(".gdbub:not(.gd-out) > [data-gdbub]").forEach(function(b){out.push([b,"bubble"])});
+  var B=G.gd.bt,c=B&&B.sayCur;if(c&&!B.frozen&&hlSaying(c.sub)){var p=ph.querySelector(".gdbeat "+(c.sel||".bt-line"));if(p)out.push([p,"card",c.k0||0])}});
 on("fabLayer.after",function(){if(G.gd.az)gdApplyAz(ph.querySelector(".azfab"),false);if(G.gd.ptGb&&G.gd.cur){var az=ph.querySelector(".azfab");if(az)az.classList.add("point-gb")}});
 on("camPaint.after",function(){if(G.gd.cur)gdPlace(G.gd.cur,false)});
 /* and 4 times a second: what it keeps clear of may move (the ✦'s label folds, a remark comes), never during Azu's hop */
@@ -10625,7 +10908,7 @@ function gdBeatSay(t,then,sel){var B=G.gd.bt;if(!B)return;var my=B.lineSeq=G.gd.
   if(S.ui.gdSR){c.sr=true;gdBT(B,"sayT",fin,Math.min(ms,2600));return}gdBT(B,"sayT",fin,ms+1400);if(B.frozen){c.cut=true;return}gdBeatVoice(B,c,0)}
 /* the line said from its word k0 (0: the whole line; after a pause, the rest from the word it stopped at), its word lit */
 function gdBeatVoice(B,c,k0){var ws=[],re=/\S+/g,m;while((m=re.exec(c.t)))ws.push(m.index);if(k0>=ws.length){c.fin();return}var sub=k0>0?c.t.slice(ws[k0]):c.t;
-  try{say(sub,function(k){if(G.gd.bt!==B||B.lineSeq!==c.my||B.frozen)return;c.k=k+k0;var p=ph.querySelector(".gdbeat "+(c.sel||".bt-line"));(p?p.querySelectorAll(".btw"):[]).forEach(function(w,i){w.classList.toggle("on",i===k+k0)})},c.fin)}catch(e){}}
+  c.sub=sub;c.k0=k0;try{say(sub,function(k){if(G.gd.bt!==B||B.lineSeq!==c.my||B.frozen)return;c.k=k+k0;markWord(k,null)},c.fin)}catch(e){}}
 /* ----- round 18 (Ask during a game, guide/game-ask.js): a beat's timers and its clock run on the game's clock. gdBT arms one of the
    beat's named timers (waitT, sayT, notNowT, stepT), gdBTClr clears it; while the game is paused (B.frozen) none runs: gdBeatFreeze(B,true)
    keeps each one's time left, stops the bars' animations and cuts the line being said at its word; gdBeatFreeze(B,false) arms them again
@@ -12403,7 +12686,7 @@ var GDSCENES4=[
       r.walk=G.on&&S.guideSteps[G.i]&&S.guideSteps[G.i].id==="how0";r.mark=!!ph.querySelector("#grab.gfocus");
       return gdScWait(function(){return gdEverOf(S.gdVisitor,"nudge").done},12000).then(function(d){r.done=d&&gdEverOf(S.gdVisitor,"nudge").by==="wk_grab";stopTour();S.stop="closed";renderPhone(false);
         return gdScWait(function(){return!!ph.querySelector(".gbtn")},2000)}).then(function(){gsTouch(ph.querySelector(".gbtn"));var w=ph.querySelector('[data-gbgo="how"]');if(w)gsTouch(w);
-        return gdScWait(function(){return gdIs("howto:wall")||!!(G.gd.cur&&G.gd.cur.item.id==="howto:wall")},2000)}).then(function(a){return gdScWait(function(){return false},500).then(function(){var b=ph.querySelector(".gdbub:not(.gd-out)"),g=ph.querySelector(".gbtn");
+        return gdScWait(function(){return gdIs("howto:wall")||!!(G.gd.cur&&G.gd.cur.item.id==="howto:wall")},2000)}).then(function(a){/* round 21: the bubble goes with the mascot's hop (21.4), so its place is read once the hop has ended */return gdScWait(function(){return false},Math.max(500,(G.gd.hopMs||0)+250)).then(function(){var b=ph.querySelector(".gdbub:not(.gd-out)"),g=ph.querySelector(".gbtn");
         r.wall=a;r.text=a?G.gd.cur.text:"";r.cta=!!(b&&b.querySelector("[data-gdcta]"));r.words=gdOverWords();r.overStar=b&&g?Math.round(gdOver(gdPR(b),gdPR(g))):-1;r.ring=!!ph.querySelector(".gdring");
         var c=b&&b.querySelector("[data-gdcta]");if(c)gsTouch(c);r.open=S.stop!=="closed";
         S.guidance.on=k.on;S.guideMute=k.mute;S.introSeen=k.intro;
@@ -13185,7 +13468,10 @@ function teDraw(){var want=teShown()?G.te.open:null,pn=ph.querySelector(".tepane
 function teFoot(){var nb=document.getElementById("navbar");if(nb&&getComputedStyle(nb).display!=="none"&&nb.offsetHeight)return Math.max(0,ph.offsetHeight-nb.offsetTop);return 0}
 function tePlace(){var pn=ph.querySelector(".tepanel"),pl=ph.querySelector(".tepill"),f=teFoot(),H=ph.offsetHeight;
   if(pn){pn.style.bottom=f+"px";var top=H-f-pn.offsetHeight,az=ph.querySelector(".teazu"),bb=ph.querySelector(".tebub");
-    if(az){az.style.bottom=(H-top-6)+"px"}if(bb){bb.style.bottom=(H-top+12)+"px";bb.classList.toggle("noazu",!az)}
+    /* round 21 (21.7: the mascot on the panel's edge covered about 10 px of the card's Up next card behind it): the mascot sits inside the
+       panel's top corner, beside its header (which makes room for it), so it covers nothing of the card; its bubble above the panel points
+       down to its head. Unity: the mascot a child of the panel's header row */
+    pn.classList.toggle("te-azin",!!az);if(az){az.style.bottom=(H-top-62)+"px"}if(bb){bb.style.bottom=(H-top+12)+"px";bb.classList.toggle("noazu",!az);bb.classList.toggle("te-azdown",!!az)}
     var pad=(H-top+16)+"px";if(scr.style.paddingBottom!==pad)scr.style.paddingBottom=pad;G.te.pad=true}
   if(pl){pl.style.bottom=(f+12)+"px";var right=S.guideCfg.gbSide!=="right";pl.style.right=right?"16px":"auto";pl.style.left=right?"auto":"16px"}}
 setInterval(function(){if(noDraw)return;if(G.te.open&&(ph.querySelector(".tepanel,.tepill")||teShown())){if(teShown()!==!!ph.querySelector(".tepanel,.tepill"))teDraw();else tePlace()}teInvPlace()},250);
@@ -13571,9 +13857,20 @@ function gaRowHtml(){var A=G.ga,b=function(k,w,pri,bar){return'<button type="but
   if(!A.on)return'<div class="ga-row" role="group">'+b("show",TXT("ga_showme"),true,"")+'</div>';
   return'<div class="ga-row" role="group">'+(A.where?b("show",TXT("ga_showme"),false,""):"")+b("back",TXT("ga_back"),true,bar)+'</div>'}
 /* the panel during the pause: shorter than Full, so the game stays in sight above it (its card's top at most 46 % down the phone) */
+/* round 21 (G.2: the chip touched its eyebrow "TEST YOURSELF · QUESTION 1 OF 3"): on the quiz's upper edge the chip keeps 8 px or more from
+   the words of the block's eyebrow above it: with its words when they fit beside the eyebrow, else its pause sign alone (44 px, its name
+   for a screen reader), else inside the quiz's top corner. Unity: the chip's position from the eyebrow label's text bounds */
+function gaEyebrow(host){var e=host.previousElementSibling;while(e&&!/\S/.test(e.textContent||""))e=e.previousElementSibling;return e&&e.getClientRects().length?e:null}
+function gaTextBox(el){var rg=document.createRange();rg.selectNodeContents(el);var r=rg.getBoundingClientRect(),pr=ph.getBoundingClientRect(),q=pr.height/(ph.offsetHeight||1);return{l:(r.left-pr.left)/q,t:(r.top-pr.top)/q,r:(r.right-pr.left)/q,b:(r.bottom-pr.top)/q}}
+function gaGap(a,b){return Math.max(b.l-(a.l+a.w),a.l-b.r,b.t-(a.t+a.h),a.t-b.b)}
+function gaChipGap(cp,host){var ey=gaEyebrow(host);return ey?gaGap(phRect(cp),gaTextBox(ey)):1e9}
+function gaChipClear(cp,host){cp.style.left="";cp.style.right="";if(gaChipGap(cp,host)>=8)return;cp.classList.add("ga-icon");
+  /* the pause sign just after the eyebrow's words (clear of the mascot standing at the screen's edge) */
+  var ey=gaEyebrow(host),hr=phRect(host);if(ey){var tb=gaTextBox(ey),x=Math.round(tb.r-hr.l+12);if(x+44<=hr.w-8){cp.style.left=x+"px";cp.style.right="auto"}}
+  if(gaChipGap(cp,host)>=8)return;cp.style.left="";cp.style.right="";cp.classList.remove("ga-top");cp.classList.add("ga-inside")}
 function gaDockPlace(d){var H=ph.offsetHeight,g=G.ga.g,top=Math.round(H*.46);if(g&&(g.kind==="kc"||g.kind==="poll")){var h=gaHost(g);if(h){var r=phRect(h);top=Math.round(Math.max(H*.4,Math.min(H*.56,r.t+r.h+14)))}}d.style.setProperty("--ga-top",top+"px");if(typeof gdBeatPlace==="function")gdBeatPlace();
   /* the card's quiz: its chip on its lower edge, or on its upper edge when the panel would cover it */
-  var ch=g&&(g.kind==="kc"||g.kind==="poll")&&gaHost(g),cp=ch&&ch.querySelector(":scope > .ga-chip");if(cp){cp.classList.remove("ga-top");var cr=phRect(cp);if(cr.t+cr.h>top-4)cp.classList.add("ga-top")}
+  var ch=g&&(g.kind==="kc"||g.kind==="poll")&&gaHost(g),cp=ch&&ch.querySelector(":scope > .ga-chip");if(cp){cp.classList.remove("ga-top","ga-icon","ga-inside");cp.style.left="";cp.style.right="";var cr=phRect(cp);if(cr.t+cr.h>top-4){cp.classList.add("ga-top");gaChipClear(cp,ch)}}
   /* the conversation shows this pause's questions and answers only, the latest in sight */
   var th=d.querySelector(".gd-thread");if(th){var n=Math.max(0,G.thread.length-(G.ga.th0||0)),ms=[].slice.call(th.children).filter(function(x){return/\bgm-(me|azu)\b/.test(x.className)&&!x.classList.contains("typing")}),keep=n?ms.slice(-n):[];
     [].slice.call(th.children).forEach(function(x){if(!x.classList.contains("typing")&&keep.indexOf(x)<0)x.classList.add("ga-old")});th.scrollTop=th.scrollHeight}}
@@ -13616,8 +13913,14 @@ function gaSentences(t){return(String(t||"").match(/[^.!?…]+[.!?…]+["”»)]
 /* the game whose answer is kept: the paused one, else the card's own quiz on screen (started or not); not when already answered */
 function gaGuarded(){var A=G.ga,g=A.on?A.g:gaGame({any:true});return g&&!g.answered&&(g.kind==="quiz"||g.kind==="guess"||g.kind==="kc")?g:null}
 function gaWhereLine(g){var w=gaWhere(g);return w?fmt(TXT("ga_h1_look"),w.title):g.hint?fmt(TXT("ga_h1_own"),g.hint):TXT("ga_none")}
-on("answer.text",function(t){var g=gaGuarded(),k=g&&gaKeys(g);if(!t||!gaSpoils(t,k))return t;var pre=(/^\([^)]*\)\s*/.exec(t)||[""])[0],ss=gaSentences(t.slice(pre.length)).filter(function(s){return!gaSpoils(s,k)});
-  if(!ss.length&&G.askFound)ss=gaSentences(G.askFound).filter(function(s){return!gaSpoils(s,k)}).slice(0,1);var out=ss.length?ss.join(" "):gaWhereLine(g);
+/* round 21 (G.1, the Architect: "Who lived here?" during the quiz got hint 1's "Have a look at …: the answer is hiding there"): a question
+   about the quiz's own question keeps the hint (where to look); any other question is answered with every sentence that does not give the
+   quiz away, and only when something had to go the mascot says warmly that it will tell after the quiz (ga_spoil; ga_spoil_more after the
+   part it could say) */
+on("answer.text",function(t,q){var g=gaGuarded(),k=g&&gaKeys(g);if(!t||!gaSpoils(t,k))return t;var pre=(/^\([^)]*\)\s*/.exec(t)||[""])[0],ss=gaSentences(t.slice(pre.length)).filter(function(s){return!gaSpoils(s,k)});
+  var about=!!q&&gaAbout(String(q),g,S.guideCfg.gaStrict).about;
+  if(about&&!ss.length&&G.askFound)ss=gaSentences(G.askFound).filter(function(s){return!gaSpoils(s,k)}).slice(0,1);
+  var out=about?(ss.length?ss.join(" "):gaWhereLine(g)):ss.length?ss.join(" ")+" "+TXT("ga_spoil_more"):TXT("ga_spoil");
   if(typeof gdLog==="function")gdLog("event","Ask during a game: an answer would have given "+g.label+"'s answer away; said instead: “"+out+"”");return pre+out});
 
 /* ----- the Editor: Guide › 3 · Games on the tour › Asking during a game ----- */
@@ -13715,7 +14018,7 @@ function guideScript(o){o=o||{};var out=[],seen={},keep={lang:S.lang,aud:S.vis.a
       ["gd_season_antonio","gd_season_xmas","gd_season_1755","mascot_joke_1","mascot_joke_2","mascot_joke_3","mascot_water","mascot_ahh","mascot_hungry","mascot_thanks"].forEach(function(k){if(S.tx[k])add("The mascot speaks up · "+(TXP[k]||k),l,tx(k,l))});
       /* the games on the tour: the quiz (its promise, questions, verdicts, scores), Guess the year, Don't say it!, Find it on the wall, the breather, the cookie */
       ["tour_promise","tour_promise_expert","tour_quiz_start","tour_quiz_few","tour_quiz_saved","tour_right_1","tour_right_2","tour_right_3","tour_right_4","tour_guess","tour_guess_wait","tour_keepgoing","tour_breather","tour_breather_ask","tour_continue","tour_back","tour_cookie",
-        "tour_find_found","tour_find_left","tour_find_right","tour_find_up","tour_find_down","tour_find_lost","tour_word_zero","tour_word_all1","tour_word_missed","tour_word_gotcha","tour_word_dream","tour_word_later","ga_off","ga_h3","ga_none"].forEach(function(k){if(S.tx[k])add("Games on the tour · "+(TXP[k]||k)+" ("+ownerName(TXOWN[k]).replace(/^.*› /,"")+")",l,tx(k,l))});
+        "tour_find_found","tour_find_left","tour_find_right","tour_find_up","tour_find_down","tour_find_lost","tour_word_zero","tour_word_all1","tour_word_missed","tour_word_gotcha","tour_word_dream","tour_word_later","ga_off","ga_h3","ga_none","ga_spoil"].forEach(function(k){if(S.tx[k])add("Games on the tour · "+(TXP[k]||k)+" ("+ownerName(TXOWN[k]).replace(/^.*› /,"")+")",l,tx(k,l))});
       Object.keys(S.tourQ||{}).forEach(function(id){var q=S.tourQ[id];if(!q)return;add("The quiz · its question at step "+id.replace(/^g/,""),l,wordIn(q.q,l));var why=wordIn(q.why,l);
         (q.a||[]).forEach(function(a,i){if(i!==+q.ok)return;var an=wordIn(a,l);add("The quiz · a wrong answer at step "+id.replace(/^g/,""),l,tx("tour_wrong",l).replace("{answer}",an).replace("{why}",why));add("The quiz · Not sure at step "+id.replace(/^g/,""),l,tx("tour_unsure",l).replace("{answer}",an).replace("{why}",why));
           add("Asking during a game · Tell me at step "+id.replace(/^g/,""),l,fmt(tx("ga_told",l),an,"").trim())})});
@@ -13795,7 +14098,7 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;v
   /* where these rows were: one line each, a link to their one place */
   addRows(d,"s7voice",row("Voice and speed",mpGo("gt:voice","Guide › 1 · The mascot › Voice"),"The mascot's voice, its speed, a line with no recording, its coverage and what speaks now are global settings: every part of the guide (the tour, the games, the tips, the answers) speaks in them (round 19)."),"Music bed");
   addRows(d,"s7agent",row("The answers' voice",mpGo("gt:voice","Guide › 1 · The mascot › Voice › Voice of the answers"),"The voice that speaks the answers (the device's, or Azure or ElevenLabs live) is one of the mascot's global settings, beside its recorded voice (round 19)."),"Link cards");
-  addRows(d,"s7cap",'<div class="note mpspeech">The bubble, the teleprompter and the highlight: how the mascot’s words show on screen while it speaks. Round 21 makes them one smooth highlighter for every place speech is shown (the bubble, the teleprompter, the panel, the block being read); until then these rows light the captions and the block’s own words, and the bubbles and the panel light the word being said.</div>');
+  addRows(d,"s7cap",'<div class="note mpspeech">How the mascot’s words show on screen while it speaks: one smooth highlighter for every place speech is shown (the bubbles, the teleprompter, the open panel, the block being read, the games’ cards), where the words go during a tour, and the panels they are read on (round 21).</div>');
   addRows(d,"s7cap",row("Highlight",mpGo("gt:speech","Guide › 1 · The mascot › Speech on screen"),"How the spoken words light up is one setting for the whole guide (round 19; one highlighter in round 21)."));
   return d.innerHTML});
 function mpGo(id,t){return'<button class="ubtn sm" type="button" data-goto="'+id+'">'+esc(t)+' &#8250;</button>'}
@@ -13851,9 +14154,121 @@ ph.addEventListener("click",function(e){var g=e.target.closest&&e.target.closest
     ph.querySelectorAll(".hero .gstart.hsglow").forEach(function(x){x.classList.remove("hsglow")});return}
   var m=e.target.closest&&e.target.closest(".hsazu");if(m){e.stopPropagation();if(typeof haptic==="function")haptic();m.classList.remove("hsjump");void m.offsetWidth;m.classList.add("hsjump")}},true);
 
+/* The teleprompter and where the mascot's words go (round 21; the developer, 2026-11-13: "when not possible, for example during the guide
+   where the mascot moves around to explain the blocks and a moving balloon would hide those blocks, have a moving teleprompter panel at
+   the bottom of the screen ... a card coming from the base of the screen behind the minimal panel, going some 2 or 3 cm up, showing the
+   text being spoken highlighted, and transparent, disappearing as we move forward").
+   During a tour (Words during a tour: Teleprompter, the default; The bubble; Off), at Mini and Compact, the words being said
+   show in a strip rising from the screen's bottom edge behind the Mini (Teleprompter height, 184 px: about 3 cm on a 6.1-inch phone,
+   whose 390 px are about 64 mm; it leaves about 1.7 cm above the Mini, two lines of 17 px words and the strip's own small row). Above the
+   card, below the Mini (z 13: the card's 0-12, the Mini 14). The line said now in the one highlighter (guide/highlight.js); a new line
+   slides up, the line before it fading up and out; the next line faint below; the glass melts into the card above (a 22 px fade, no hard
+   top edge). Its small row: the mascot's name with a live dot, and Full script › (the open panel's whole text, Read all). In the Looks
+   whose Mini has its own line of words (Paper glass, Teleprompter) the Mini's line is the teleprompter; a game's card on the tour or Ask
+   hides it. The told block is kept above it (freeHeight counts it), and the mascot too. Reduced Motion: the lines change with a fade.
+   The bubble (The bubble): the mascot's own words in a bubble anchored to its head, its tail on the head, following it every frame as
+   it moves, flipping side at the screen's edge. Outside a tour (A tip's bubble), a tip's bubble sits beside the mascot's
+   head (the default) or above it, and follows its hop (guidance/present.js).
+   Unity: a UI Toolkit panel (position absolute, bottom 0, its height the option) with a gradient mask image at its top; the lines in a
+   vertical layout scrolled by a DOTween (Ease.OutCubic, 420 ms), the old line's opacity tweened out; its surface the panel's look
+   (guide/panel-look.js); the bubble's anchor the mascot's head Transform projected to the panel each frame (RuntimePanelUtils
+   .CameraTransformWorldToPanel), its side flipped when it would leave the safe area. */
+S.guideCfg.tourWords="tele";S.guideCfg.teleH=184;S.guideCfg.bubbleOut="beside";
+/* the strip is wanted now: a tour at Mini or Compact, its words on (Aa), no Ask, no game's card; the Looks with a Mini line keep theirs */
+function teleWant(){if(!G.on||!dockOn()||S.guideCfg.tourWords!=="tele"||!S.guideCfg.captions||G.askOpen||G.typing||G.tpText==null||!String(G.tpText).trim())return false;
+  var h=S.dockH;if(h!=="mini"&&h!=="compact")return false;if(h==="mini"&&(dkLook()==="paper"||dkLook()==="prompter")&&dkWordsOn())return false;
+  return!ph.querySelector(".gdbeat:not(.bt-away)")}
+/* the line said now (its index), from the reading head when this text is being said */
+function teleLineNow(t){var P=tpLines(t),k=hlSaying(t)&&G.hl&&G.hl.k>=0?(G.hl.ended?P.ws.length-1:G.hl.k):0;return{P:P,i:tpLineOf(P.ls,k)}}
+function teleLine(P,x,c){var l=P.ls[x];return'<p class="'+c+(l?"":" tl-empty")+'">'+(l?tpWords(P,l.a,l.b,-1):"&nbsp;")+'</p>'}
+function teleLinesHtml(P,i,prev){return'<div class="tl-lines'+(prev?" tl-up":"")+'" aria-hidden="true">'+teleLine(P,i-1,"tl-prev")+teleLine(P,i,"tl-now")+teleLine(P,i+1,"tl-next")+'</div>'}
+function teleHtml(t){var L=teleLineNow(t);return'<div class="tl-glass" aria-hidden="true"><i class="tl-glow"></i></div><div class="tl-head"><span class="tl-who"><i class="tl-dot" aria-hidden="true"></i>'+esc(mascotName())+'</span>'+
+  '<button type="button" class="tl-full" data-tele="full">'+TXH("tele_full")+'<span aria-hidden="true">&#8250;</span></button></div>'+teleLinesHtml(L.P,L.i,false)}
+function teleCls(){return"gtele"+pipe("dock.cls","")+(S.dockH==="compact"?" tl-compact":" tl-mini")}
+/* the strip on the phone: made once a tour's words want it, its lines moved on as the voice goes; it fades down when not wanted */
+function teleDraw(){var el=ph.querySelector(".gtele:not(.tl-out)");if(!teleWant()){if(el)teleOut(el);return}
+  if(!el){el=document.createElement("div");el._t=null;el.setAttribute("role","region");el.setAttribute("aria-label",TXT("tele_full"));ph.appendChild(el);el.className=teleCls()+(S.reduce?"":" tl-in")}
+  else el.className=teleCls();el.style.setProperty("--tlh",Math.round(+S.guideCfg.teleH||184)+"px");
+  if(el._t!==G.tpText){el._t=G.tpText;el._i=teleLineNow(G.tpText).i;el.innerHTML=teleHtml(G.tpText)}
+  el.classList.toggle("tl-live",talkState()==="speaking");telePlace(el)}
+function teleOut(el){el.classList.add("tl-out");if(S.reduce){el.remove();return}setTimeout(function(){if(el.parentNode)el.remove()},260)}
+/* the lines' foot: just above the Mini (its row; the hide tab's side kept clear), or near the screen's foot at Compact */
+function telePlace(el){var H=ph.offsetHeight,W=ph.offsetWidth,d=ph.querySelector(".gdock.h-mini"),r=d&&(d.querySelector(".gd-mrow")||d),foot=20,pr=16;
+  if(r&&r.getClientRects().length){foot=Math.round(H-phRect(r).t+12);var hd=d.querySelector(".gd-hide");if(hd&&hd.getClientRects().length){var hr=phRect(hd);if(hr.t+hr.h>H-foot-60)pr=Math.max(16,Math.round(W-hr.l+4))}}
+  else{var gb=ph.querySelector(".gbtn-wrap.intour");if(gb&&gb.getClientRects().length){var gr=phRect(gb);pr=S.guideCfg.gbSide==="right"?Math.max(16,Math.round(W-gr.l+6)):16;el.style.setProperty("--tlpl",(S.guideCfg.gbSide==="right"?16:Math.round(gr.l+gr.w+6))+"px")}}
+  el.style.setProperty("--tlb",foot+"px");el.style.setProperty("--tlpr",pr+"px")}
+/* the voice goes on: a new line slides up (the one before fading up and out); within a line the highlighter lights the word */
+function teleWord(){var el=ph.querySelector(".gtele:not(.tl-out)");if(!el||!hlSaying(el._t))return;var L=teleLineNow(el._t);if(L.i===el._i)return;var up=L.i>el._i;el._i=L.i;
+  var x=document.createElement("div");x.innerHTML=teleLinesHtml(L.P,L.i,up&&!S.reduce);var n=x.firstChild;if(S.reduce)n.classList.add("tl-fade");var o=el.querySelector(".tl-lines");if(o)o.replaceWith(n);else el.appendChild(n)}
+on("markWord.after",function(){teleWord()});
+on("renderGuide.after",function(){teleDraw()});
+on("stopTour.after",function(){var el=ph.querySelector(".gtele");if(el)teleOut(el)});
+/* the one highlighter lights the line said now */
+on("hlBoxes.add",function(out){var el=ph.querySelector(".gtele:not(.tl-out)");if(el&&hlSaying(el._t)){var n=el.querySelector(".tl-now");if(n)out.push([n,"prompter"])}});
+/* Full script: the open panel's whole text (Read all) */
+ph.addEventListener("click",function(e){var t=e.target.closest("[data-tele]");if(!t)return;e.stopPropagation();S.dockH="full";G.askOpen=false;G.typing=false;renderGuide()},true);
+/* keep its place and its live dot in step (the Mini's width changes with its controls; the voice starts and stops) */
+setInterval(function(){var el=ph.querySelector(".gtele:not(.tl-out)");if(!el)return;if(!G.on){teleOut(el);return}el.classList.toggle("tl-live",talkState()==="speaking");telePlace(el)},250);
+
+/* ----- the bubble in a tour (The bubble): anchored to the mascot's head, following it every frame; kept inside the phone and above the
+   panel only (a game's card or a Tell me more chip may sit under it: its tail stays on the head) ----- */
+/* the head: the drawn figure's top 40 % (guidance/present.js's gdFigure, gdHeadOf), else the tile's */
+function gbHead(m){var f=typeof gdFigure==="function"?gdFigure(m):null;if(f&&f.r>f.l)return gdHeadOf(f);var r=phRect(m);return{l:r.l+r.w*.2,r:r.l+r.w*.8,t:r.t,b:r.t+r.h*.4}}
+var GB_TIP=10;
+function gbFollow(){G.gbRaf=0;if(gbPlace())G.gbRaf=requestAnimationFrame(gbFollow)}
+function gbPlace(){var b=ph.querySelector(".gbubble.gb-head"),m=ph.querySelector(".mascot");if(!b||!m||!m.getClientRects().length)return false;
+  var W=ph.offsetWidth,H=ph.offsetHeight,hd=gbHead(m),hy=(hd.t+hd.b)/2,room=hd.l-GB_TIP-12,flip=room<170,bw=Math.min(300,flip?W-12-(hd.r+GB_TIP):room);
+  b.style.bottom="";b.style.right="";b.style.width=Math.round(bw)+"px";var bh=b.offsetHeight,dk=ph.querySelector(".gdock"),lo=(dk&&dk.getClientRects().length?phRect(dk.querySelector(".gd-mrow")||dk).t-8:H-12)-bh,
+    top=Math.max(56,Math.min(lo,hy-bh/2)),left=flip?hd.r+GB_TIP:hd.l-GB_TIP-bw;
+  b.style.left=left.toFixed(1)+"px";b.style.top=top.toFixed(1)+"px";b.classList.toggle("gb-flip",flip);b.style.setProperty("--tly",Math.round(Math.max(12,Math.min(bh-12,hy-top)))+"px");return true}
+function gbFollowStart(){if(!G.gbRaf)G.gbRaf=requestAnimationFrame(gbFollow)}
+on("renderGuide.after",function(){var b=ph.querySelector(".gbubble");if(!b||!G.on||S.guideCfg.tourWords!=="bubble")return;b.classList.add("gb-head");gbPlace();gbFollowStart()});
+/* the tail's tip (the checks): the bubble's edge plus the tail's reach, at its height */
+function gbTailTip(){var b=ph.querySelector(".gbubble.gb-head");if(!b)return null;var r=phRect(b),y=r.t+(parseFloat(b.style.getPropertyValue("--tly"))||r.h/2),f=b.classList.contains("gb-flip");return{x:f?r.l-GB_TIP:r.l+r.w+GB_TIP,y:y}}
+
+/* ----- the Editor: Guide › 1 · The mascot › Speech on screen ----- */
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
+  addRows(d,"s7cap",row("Words during a tour",pseg("guideCfg.tourWords",["tele","bubble","off"],["Teleprompter","The bubble","Off"]),"While the mascot walks around the card to point at the blocks, at Mini and Compact. Teleprompter: a strip rises from the screen's bottom edge behind the Mini, the line being said lit by the highlighter, the line before sliding up and fading, the next one faint below; it never covers the block being told (the block is kept above it) and its Full script › opens the whole text. The bubble: the mascot's own words in a bubble by its head, following it as it moves (it may cover the words around the mascot). Off: no words on screen at Mini (the block's own words still light up as they are read; Aa and Read all show them). In Paper glass and the Teleprompter Look the Mini's own line of words stays the teleprompter. Unity: a UI Toolkit panel with a gradient mask, its lines scrolled by a DOTween.")+
+    row("Its height",pslider("guideCfg.teleH",130,240,2),"Its height from the screen's bottom edge, in px of a 390 px wide phone (184: about 3 cm on a 6.1-inch phone, about 1.7 cm of it above the Mini, room for two lines of words and its small row).",true)+
+    row("A tip's bubble",pseg("guideCfg.bubbleOut",["beside","above"],["Beside the mascot's head","Above the mascot"]),"A tip's bubble on the wall or the card: beside the mascot's head, its tail on the head (above only when neither side has room), or above the mascot first. Either way it follows the mascot as it hops to its place."));
+  return d.innerHTML});
+BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(bubbleOut|"));
+/* the phone's signature (the self-test): the strip as the visitor sees it, for the tour's first line, or none */
+on("modelSig.sig",function(h){if(!sigWant(/guideCfg\.(tourWords|teleH|pSkin)/))return h;var t=TXT("tour_promise");return h+"#tele:"+S.guideCfg.tourWords+"|"+(S.guideCfg.tourWords==="tele"?'<div class="'+teleCls()+'" style="--tlh:'+Math.round(+S.guideCfg.teleH||184)+'px">'+teleHtml(t)+'</div>':"")});
+/* each row's demo: the tour at Mini, a step whose words the mascot says while it moves; the tip on the wall */
+rowDemos({"guideCfg.tourWords":{tour:"g2",dock:"mini",ring:function(){return S.guideCfg.tourWords==="tele"?".gtele":S.guideCfg.tourWords==="bubble"?".gbubble|.mascot":".gdock"}},
+  "guideCfg.teleH":{tour:"g2",dock:"mini",ring:".gtele|.gdock"},
+  "guideCfg.bubbleOut":{wall:true,wait:300,act:function(){gdDemoItem("tapmarker")},ringAfter:900,ring:".gdbub"}});
+
+/* The panels' look (round 21, 21.6; the developer, 2026-11-13: "the AI Guide panels, the minimal and the half screen, are black and too flat.
+   Maybe make them more light, smooth, immersive, technological, with some light shapes and colours, 3D shapes, light and gradients and a
+   little motion"; their references: a pastel glass app with soft pink-blue gradient cards on white, and a dark pill button with a soft
+   green glow and a gradient edge). One option for the Mini, the open panel and the teleprompter together (Guide › 1 · The mascot ›
+   Speech on screen › The panels' look; there because it is the surface the mascot's words are read on): Light glass (frosted white
+   glass, soft pastel light shapes drifting very slowly behind, a fine bright rim and a soft inner light at its foot), Aurora (deep blue
+   glass with coloured light drifting, a softly glowing mint rim, Play a dark pill with a green glow), Dark (round 11's Ink glass, kept),
+   and Follows the theme (Light glass in light, Aurora in dark; the default). The drift is one slow loop of 26-28 s, off with Reduce
+   Motion; every word 4.5:1 or more over the worst backdrop and the brightest light shape (test9z's arithmetic). The Look (Ink glass,
+   Paper glass, Player sheet, Teleprompter) is still the panel's layout; the panels' look dresses Ink glass (the default) and the
+   teleprompter; the other Looks keep their own paper surfaces.
+   Unity: the glass a pre-blurred backdrop (a URP blur of the camera into a RenderTexture, sampled under the panel; a frosted texture when
+   blur is off), the light shapes gradient sprites moved by a slow DOTween loop, the rim a 9-slice border image, the inner light a
+   gradient image; one USS class per look on the dock's and the teleprompter's root (sk-light, sk-aurora, sk-dark). */
+S.guideCfg.pSkin="theme";
+var PSKINS=[["theme","Follows the theme"],["light","Light glass"],["aurora","Aurora"],["dark","Dark"]];
+function pSkin(){var v=S.guideCfg.pSkin;return v==="light"||v==="aurora"||v==="dark"?v:(S.dark?"aurora":"light")}
+on("dock.cls",function(c){return c+" sk-"+pSkin()});
+on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
+  addRows(d,"s7cap",row("The panels' look",pseg("guideCfg.pSkin",PSKINS.map(function(x){return x[0]}),PSKINS.map(function(x){return x[1]})),"The surface of the Mini, the open panel and the teleprompter, together. Light glass: frosted white glass, soft pastel light (pink, blue, mint) drifting very slowly behind, a fine bright rim. Aurora: deep blue glass with coloured light drifting, a softly glowing mint rim, Play a dark pill with a green glow. Dark: the dark ink glass of before. Follows the theme: Light glass in light mode, Aurora in dark mode. The drift is one slow loop (26-28 s), still with Reduce Motion; every word stays 4.5:1 or more. It dresses the Ink glass Look (the default) and the teleprompter; Paper glass, Player sheet and the Teleprompter Look keep their own paper. Unity: a pre-blurred backdrop (URP blur into a RenderTexture) or a frosted texture, gradient sprites on a slow tween, a 9-slice rim."));
+  return d.innerHTML});
+/* the phone's signature (the self-test): the dock's surface as the visitor sees it */
+on("modelSig.sig",function(h){return sigWant(/guideCfg\.pSkin/)?h+'#skin:<div class="gdock lk-'+dkLook()+' sk-'+pSkin()+'"></div>':h});
+rowDemos({"guideCfg.pSkin":{tour:"g2",dock:"mini",ring:".gdock"}});
+
 /* Starts the page (the #hash routes) and closes the shared scope. */
 /* #selftest walks every tab; #selftest=guide,words only those (the texts come with "words") */
-if(isSelfTest()){var r0=selfTest(selfTestTabs());showSelfTest(r0)}
+/* round 21 (21.8): the texts' walk after the controls, in slices (editor/selftest-texts.js's selfTestWordsAsync); its JSON pending until done */
+if(isSelfTest()){G.stwAsync=true;var r0=selfTest(selfTestTabs());if(stWalks("words")){G.stwPending=true;showSelfTest(r0);selfTestWordsAsync(function(r1){G.stwPending=false;showSelfTest(r0.concat(r1))})}else showSelfTest(r0)}
 S.view="card";S.tab="card";if(!isSelfTest())renderAll(false);
 if(location.hash==="#guide"){S.stop="full";renderAll(false);startTour();G.i=4;runStep()}
 if(location.hash==="#words"){S.tab="words";S.sel.term="t1";renderEditor();S.view="story";renderPhone(false)}

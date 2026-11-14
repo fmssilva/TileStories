@@ -7,6 +7,10 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const errs = []; p.on('pageerror', e => errs.push(e.message));
   await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 90000 }); await p.waitForTimeout(500);
   const R = src => p.evaluate(s => LAB.run(s), src); const W = ms => p.waitForTimeout(ms);
+  // round 21 (21.10): an Editor row inside closed foldouts (the accordions of rounds 20 and 21) is reached as the developer does: each
+  // closed foldout above it opened by a real click on its header, from the outside in, then the row's own control clicked (edClick)
+  const openAbove = async sel => { for (let i = 0; i < 8; i++) { const m = await p.evaluate(s => LAB.run(`(function(){var b=document.querySelector(${JSON.stringify(s)});if(!b)return false;var ds=[];for(var d=b.closest("details");d;d=d.parentElement&&d.parentElement.closest("details"))ds.unshift(d);var c=ds.filter(function(d){return!d.open})[0];if(!c)return false;c.querySelector(":scope > summary").setAttribute("data-t21","1");return true})()`), sel); if (!m) return; await p.locator('summary[data-t21="1"]').first().click(); await p.evaluate(() => LAB.run('document.querySelectorAll("[data-t21]").forEach(function(x){x.removeAttribute("data-t21")});""')); await p.waitForTimeout(120); } };
+  const edClick = async (sel, o) => { await openAbove(sel); await p.locator(sel).first().click(o); };
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   const gaps = () => R('var g=wallGaps();[g.pic.x,g.pic.y,g.items.map(function(i){return[i.id,Math.round(i.x),Math.round(i.y),+i.gap.toFixed(2)]})]');
   await R('S.hints.on=false;S.guideMute=true;S.introSeen=true;sampleFn=null;gdGroupById("inview").on=false;S.camCfg.wall="ribeira";S.view="card";S.stop="closed";S.camX=.4;S.camY=.5;S.camZoom=1.3;renderAll(false)');
@@ -46,7 +50,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R(`var s=ed.querySelector(".agscsel");s.value="${idx}";s.dispatchEvent(new Event("change",{bubbles:true}))`); await W(200);
   const lbl = await R('ed.querySelector(".agscenes").textContent');
   ok('The console lists the scene "Ribeira wall · a drag moves the markers with the picture", which says what it does', /a drag moves the markers with the picture/.test(lbl) && /Does: nothing: it drags the wall/.test(lbl), lbl.slice(0, 200));
-  await p.locator('[data-agscrun]').click(); await W(1000);
+  await edClick('[data-agscrun]'); await W(1000);
   const sr = await R('AG.sceneRes.markers');
   ok('...Set up and ask runs it with no model: ✓', sr && sr.ok === true, sr);
   ok('...the result row shows in the console', await R('/✓ every marker and point stays on the picture/.test(ed.querySelector(".agres").textContent)'));

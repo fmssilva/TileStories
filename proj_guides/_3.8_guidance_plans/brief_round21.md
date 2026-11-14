@@ -4,7 +4,7 @@ change's Unity path). Work only in the Lab. This round is **"Speech on screen an
 speaks (one smooth highlighter everywhere, the bubble that stays by the mascot, a teleprompter during tours), the guide panels smaller,
 lighter and more immersive, and ±10 s.
 
-THE CHECKLIST: `C:\Users\franc\Desktop\TileStories\proj_guides\___todo.md`, section "THE CHECKLIST", items **21.1 to 21.7, G.1 and G.2**
+THE CHECKLIST: `C:\Users\franc\Desktop\TileStories\proj_guides\___todo.md`, section "THE CHECKLIST", items **21.1 to 21.8, G.1 and G.2**
 (and any item the Architect adds under round 21 while you work). The developer's notes and the prints they describe are above it; read
 them. Mark an item `[DONE]` (replace `[ ]`) only after it is built, looked at in your captures and tested; an item you change or cannot
 finish gets one line under it saying what and why. Keep the file's CRLF line endings; edit only those items.
@@ -78,6 +78,13 @@ panels, the panel looks of round 11), the bubble's code, `src/guide/voice.js` (`
    it will tell after the quiz ("I'd love to, but that would give our quiz away. Ask me again once you've answered!" / PT). A question
    about the quiz question keeps the hint ladder.
 8. **The card's quiz chip (G.2).** It touches its eyebrow "… OF 3": space them (the arithmetic: ≥ 8 px).
+9. **The words walk (21.8, from round 20's core run).** `tests\runtest8.ps1 -tabs words` (the self-test of Languages & Terms: every
+   text field of every tab, `editor/selftest-texts.js` `selfTestWords`) ran past 40 min (about 14 at round 17b), the same on master.
+   The Architect's probe: each field costs a few ms (modelSig about 40 ms, the state copy 1-2 ms), and run from outside one field at a
+   time or in batches of 50 the whole walk takes about 3 min; run in one synchronous go (as the page does at `#selftest=words`) it
+   slows as it goes (card and 458 guide fields in 90 s, 803 in 220 s, pauses of 1-2.5 s on single fields: something builds up,
+   likely garbage or timers that cannot run between fields). Find what builds up and make the walk fast again (the target: the
+   words walk under 5 min); say what it was. Do not lower what the walk checks.
 
 ## Tests for this round (feature tier: ~5-15 min)
 
@@ -92,6 +99,10 @@ panels, the panel looks of round 11), the bubble's code, `src/guide/voice.js` (`
   each new row changes what the visitor sees and its ▸ demo plays it.
 - The self-test of the tab you touch: `tests\runtest8.ps1 -tabs guide` (bad=0).
 - test9w (asking during a game) and test9t (the tour's lines).
+- 21.8: `tests\runtest8.ps1 -tabs words -minutes 10` finishes with bad=0 (say its time), and the guide walk still bad=0.
+- **Every test run has a time limit** (round 20's builder stopped on a hung walk and nobody noticed for hours): run each file
+  with a 10-min limit (e.g. `Start-Process` + `WaitForExit(600000)`, then `taskkill /T /F`), a walk with `-minutes 10`; a run that
+  hits the limit is a finding to report, never a reason to wait. Keep going on the next item meanwhile.
 - **Feature tier only.** Core ran in round 20 (round 21 is the 1st round since core). The Architect is running the **full** tests at the
   same time on a separate copy of the code: the CPU will be busier than usual; check it before each run
   (`powershell -NoProfile -Command "(Get-CimInstance Win32_Processor).LoadPercentage"`; above about 40 %: wait, with `until(...)`).

@@ -41,3 +41,6 @@
   background:var(--bt-ink,#1A1814);color:var(--bt-bg,#FFFFFF);font:600 14px/20px var(--body);box-shadow:0 8px 20px rgba(10,9,12,.24);animation:ga-in .2s ease-out}
 .kq>.ga-note,.poll>.ga-note{background:#1A1814;color:#FFFFFF}
 .dark .kq>.ga-note,.dark .poll>.ga-note{background:#F4F1EA;color:#1A1814}
+/* round 21 (G.2): the chip clear of the block's eyebrow: its pause sign alone (44 px), or inside the quiz's top corner */
+#ph .ga-chip.ga-icon{width:44px;padding:0;justify-content:center}#ph .ga-chip.ga-icon>span{display:none}
+#ph .kq>.ga-chip.ga-inside,#ph .poll>.ga-chip.ga-inside{top:8px;bottom:auto;right:8px}

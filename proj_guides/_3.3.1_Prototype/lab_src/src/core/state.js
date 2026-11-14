@@ -1,7 +1,7 @@
 /* The root of the state S: the Editor's selection, the element styles, motions, effects, patterns and interactions. */
 var uid=200;function nid(p){return p+(++uid)}
 var S={tab:"card",step:1,dark:false,reduce:false,lang:"en",screen:"phone",focusOn:true,view:"demo",focusRef:null,family:"rise",replay:"every",
- test:{on:true,poi:"painting"},ui:{single:false,level:1,q:"",cat:"All"},op:{s3:false,s4:false,s5:false,s6:false,s2:true},
+ test:{on:true,poi:"painting"},ui:{single:false,level:1,q:"",cat:"All"},op:{},
  motions:[
   {id:"rise",name:"Rise",type:"entrance",from:"below",dist:18,dur:420,ease:"out",stagger:70,pieces:"whole",rot:0},
   {id:"slide",name:"Slide In",type:"entrance",from:"left",dist:40,dur:450,ease:"out",stagger:70,pieces:"whole",rot:0},
