@@ -44,7 +44,9 @@ const R13 = JSON.parse(fs.readFileSync(path.join(__dirname, 'guide_rows_r13.json
   // ---------- 2. nothing lost; no empty foldout; no section with a single row ----------
   const now = await R('var keys={},fos={};ed.querySelectorAll(".row").forEach(function(r){keys[rowKey(r)||("label:"+((r.querySelector("label")||{}).textContent||"").trim())]=1});ed.querySelectorAll("details[data-fo]").forEach(function(d){fos[d.dataset.fo]=1});[Object.keys(keys),Object.keys(fos),ed.querySelectorAll(".row").length]');
   const keySet = new Set(now[0]), foSet = new Set(now[1]), TAKEN = ['label:Water break after'], APART = { gt2: 's7mascot', s7tour: 's7dock' };
-  const lostKeys = R13.keys.filter(k => !keySet.has(k) && TAKEN.indexOf(k) < 0), lostFos = R13.foldouts.map(f => f.id).filter(id => !foSet.has(id) && !APART[id]);
+  // round 20's review: Knowledge's unnamed row (Show what is sent) got its name
+  const RENAMED = { 'label:': 'label:What is sent' };
+  const lostKeys = R13.keys.filter(k => !keySet.has(k) && TAKEN.indexOf(k) < 0 && !(RENAMED[k] && keySet.has(RENAMED[k]))), lostFos = R13.foldouts.map(f => f.id).filter(id => !foSet.has(id) && !APART[id]);
   ok(`Every row key of round 13's tab is still here (${R13.keys.length} keys, ${R13.rows} rows then; ${now[2]} rows now), but Water break after (taken out by the developer: Games on the tour holds it)`, lostKeys.length === 0, lostKeys);
   ok(`[moved] ...and every foldout id (${R13.foldouts.length}), but the two taken apart: the old Mascot section (gt2, around one foldout: Mascot is 1 · Azu now) and Tour controls (s7tour, no row: its words in Guide panel)`, lostFos.length === 0 && !foSet.has('gt2') && !foSet.has('s7tour'), lostFos);
   const empty = await R('var z=[],one=[];ed.querySelectorAll("details[data-fo]").forEach(function(d){if(!d.querySelector(".row,[data-tx]"))z.push(d.dataset.fo)});ed.querySelectorAll(":scope > details[data-fo]").forEach(function(d){if(d.querySelectorAll(".row").length<2)one.push(d.dataset.fo)});[z,one]');
@@ -57,15 +59,15 @@ const R13 = JSON.parse(fs.readFileSync(path.join(__dirname, 'guide_rows_r13.json
   const lv = await R(`var o={};[1,2,3].forEach(function(l){S.ui.level=l;S.op={};renderEditor();var open=function(sel){return[].filter.call(ed.querySelectorAll(sel),function(d){return d.open}).length},all=function(sel){return ed.querySelectorAll(sel).length};
     o[l]={secs:open(":scope > details[data-fo]"),second:[].filter.call(ed.querySelectorAll(":scope > details > .inner > details[data-fo]"),function(d){return d.open}).map(function(d){return d.dataset.fo}).length,
       deep:["gd:visitor","gt:tools","s7agent"].filter(function(id){var d=ed.querySelector('[data-fo="'+id+'"]');return d&&d.open}),items:open('details[data-fo^="gd:i:"]'),itemsAll:all('details[data-fo^="gd:i:"]'),games:open('[data-fo="gd:g:ontour"] details[data-fo^="gd:i:"]'),gamesAll:all('[data-fo="gd:g:ontour"] details[data-fo^="gd:i:"]'),groups:open('details[data-fo^="gd:f:"]')}});o`);
-  ok('Level 1: the six sections open, their foldouts closed; level 2: their foldouts open (an Editor or developer part, Details and The engine, one level later; round 19: Model tools is inside 1 · The mascot › Look, so it opens at level 4; an item closed); level 3: the games open to their group headers (4 · Azu speaks up\'s items one level deeper, in their groups)',
-    lv[1].secs === 6 && lv[1].second === 0 && lv[2].second >= 14 && lv[2].deep.length === 0 && lv[2].items === 0 && lv[3].deep.length === 2 && lv[3].deep.indexOf('gt:tools') < 0 && lv[3].games === lv[3].gamesAll && lv[3].gamesAll === 7 && lv[3].items === 7, lv);
+  ok('Level 1: the six sections collapsed (round 20: the tab is an accordion, its sections on one line each), their foldouts closed; level 2: the sections and their foldouts open (an Editor or developer part, Details and The engine, one level later; round 19: Model tools is inside 1 · The mascot › Look, so it opens at level 4; an item closed); level 3: the games open to their group headers (4 · Azu speaks up\'s items one level deeper, in their groups)',
+    lv[1].secs === 0 && lv[1].second === 0 && lv[2].secs === 6 && lv[2].second >= 14 && lv[2].deep.length === 0 && lv[2].items === 0 && lv[3].deep.length === 2 && lv[3].deep.indexOf('gt:tools') < 0 && lv[3].games === lv[3].gamesAll && lv[3].gamesAll === 7 && lv[3].items === 7, lv);
   ok('...an item\'s groups never open by level alone (levels 1, 2, 3: none open)', lv[1].groups === 0 && lv[2].groups === 0 && lv[3].groups === 0, lv);
-  // the tab's names at the top: a real click opens that section
-  await R('S.op={gt0:false,s7mascot:false,gt1:false,"gd:g:ontour":false,gt4:false,gt3:false};renderEditor()');
-  const navs = await R('[].map.call(ed.querySelectorAll(".gtnav [data-gtgo]"),function(b){return b.textContent})');
-  await p.locator('.gtnav [data-gtgo="gt3"]').click(); await W(250);
-  const nv = await R('var f=ed.querySelector(\'[data-fo="gt3"]\'),r=f.getBoundingClientRect();[f.open,r.top>=-2&&r.top<innerHeight/2]');
-  ok('The tab names its six parts at its top (the first view names every part of the guide); a real click on one opens it at the top of the view', JSON.stringify(navs) === JSON.stringify(['1 · The mascot', '2 · The tour', '3 · Games on the tour', '4 · The mascot speaks up', '5 · Ask the mascot', '6 · Preview & Test']) && nv[0] && nv[1], [navs, nv]);
+  // the tab's names: round 20, the accordion's list (the chip row is gone); a real click on a section's line opens it, in view
+  await R('S.op={gt0:false,s7mascot:false,gt1:false,"gd:g:ontour":false,gt4:false,gt3:false};renderEditor();scrollTo(0,0)');
+  const navs = await R('[].map.call(ed.querySelectorAll(":scope > details[data-fo] > summary .acct"),function(b){return b.textContent})');
+  await p.locator('[data-fo="gt3"] > summary .acct').click(); await W(250);
+  const nv = await R('var f=ed.querySelector(\'[data-fo="gt3"]\'),r=f.getBoundingClientRect();[f.open,r.top>=-2&&r.top<innerHeight/2,!ed.querySelector(".gtnav,[data-gtgo]")]');
+  ok('The tab names its six parts at its top, one collapsed line each (the first view names every part of the guide); a real click on one opens it, in view', JSON.stringify(navs) === JSON.stringify(['1 · The mascot', '2 · The tour', '3 · Games on the tour', '4 · The mascot speaks up', '5 · Ask the mascot', '6 · Preview & Test']) && nv[0] && nv[1] && nv[2], [navs, nv]);
   tsec('levels');
 
   // ---------- 4. an item: its group headers only, each with what it holds and its changed count ----------

@@ -98,7 +98,7 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   await tap('.gd-mini [data-g="stop"]'); await W(200);
   const ts = await R('var t=ph.querySelector(".gtoast");[G.on,!!t&&t.textContent,!!ph.querySelector(".gstopask"),!!G.resumeAt]');
   // round 17b: the toast offers the one way back: "Continue the tour (step N of M)" and "Start again" (the ✦ menu, the hero and the invitation say the same)
-  ok('Stop: no question; the tour stops; a toast "Tour stopped" with "Continue the tour (step N of M)" and "Start again"', !ts[0] && /^Tour stoppedContinue the tour \(step\s\d+\sof\s\d+\)Start again$/.test(ts[1]) && !ts[2] && ts[3], ts);
+  ok('Stop: no question; the tour stops; a toast "Tour stopped" with "Continue the tour (step N of M)", "Start again" and What next? (round 17c)', !ts[0] && /^Tour stoppedContinue the tour \(step\s\d+\sof\s\d+\)Start again(What next\?)?$/.test(ts[1]) && !ts[2] && ts[3], ts);
   await tap('[data-gstop="resume"]'); await W(300);
   const rs = await R('[G.on,S.guideSteps[G.i].id,G.hl.k,!!ph.querySelector(".gtoast")]');
   ok('...Continue goes back to the step and the sentence it stopped at', rs[0] && rs[1] === at[0] && rs[2] >= at[2] && rs[2] < at[1] && !rs[3], [at, rs]);

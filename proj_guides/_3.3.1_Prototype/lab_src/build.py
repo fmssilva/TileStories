@@ -10,7 +10,7 @@ MODULES = ['src/core/open.js', 'src/core/assets.js', 'src/core/catalogues.js', '
            'src/editor/json.js', 'src/editor/card-tab.js', 'src/editor/demo.js', 'src/editor/global-tab.js',
            'src/editor/selftest-texts.js', 'src/phone/shell.js', 'src/card/motion.js', 'src/card/interactions.js',
            'src/card/sections.js', 'src/phone/sheet.js', 'src/phone/feedback.js', 'src/editor/selftest.js',
-           'src/editor/words-tab.js', 'src/editor/focus.js', 'src/editor/guide-tab.js',
+           'src/editor/words-tab.js', 'src/editor/focus.js', 'src/editor/accordion.js', 'src/editor/guide-tab.js',
            'src/card/chrome.js', 'src/card/gallery.js',
            'src/card/contents.js', 'src/card/effects.js', 'src/guide/tour.js', 'src/editor/texts.js',
            'src/phone/preview-bar.js', 'src/phone/settings.js', 'src/card/terms.js', 'src/card/controls.js',
@@ -27,7 +27,7 @@ MODULES = ['src/core/open.js', 'src/core/assets.js', 'src/core/catalogues.js', '
            'src/guidance/catalog.js', 'src/guidance/scheduler.js', 'src/guidance/service.js', 'src/guidance/present.js',
            'src/guidance/editor.js', 'src/guidance/scenes.js', 'src/guide/tell-more.js', 'src/guide/saved-place.js', 'src/guide/tour-end.js', 'src/guide/game-ask.js', 'src/guide/voice-script.js', 'src/guide/mascot-profile.js', 'src/guide/hero-start.js', 'src/core/boot.js']
 # the cascade depends on this order: a new style goes at the end, or beside the rule it overrides
-STYLES = ['src/core/base.css', 'src/card/card-base.css', 'src/phone/sheet.css', 'src/guide/tour.css', 'src/editor/texts.css', 'src/editor/guide-tab.css',
+STYLES = ['src/core/base.css', 'src/card/card-base.css', 'src/phone/sheet.css', 'src/guide/tour.css', 'src/editor/texts.css', 'src/editor/accordion.css',
           'src/card/controls.css', 'src/card/blocks.css', 'src/card/elements.css', 'src/editor/marker-tab.css', 'src/card/hero.css',
           'src/phone/grabber.css', 'src/card/hints.css', 'src/card/states.css', 'src/guide/readalong.css', 'src/guide/focus.css',
           'src/mascot/azu2d.css', 'src/audiences/audiences.css', 'src/audiences/lenses.css', 'src/guide/person.css',

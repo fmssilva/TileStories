@@ -6,8 +6,8 @@ function seg(key,vals,labels,cur){return '<div class="seg">'+vals.map(function(v
 function row(label,ctrl,h,ind){return '<div class="row'+(ind?" ind":"")+'"><label>'+esc(label)+'</label><div>'+ctrl+'</div>'+(h?help(h):"<span></span>")+'</div>'}
 function sel(key,opts,cur){return '<select class="u" data-sel="'+key+'">'+opts.map(function(o){return'<option value="'+esc(o[0])+'"'+(o[0]===cur?" selected":"")+'>'+esc(o[1])+'</option>'}).join("")+'</select>'}
 function slider(key,min,max,step,val,adv){return '<div class="sl2"><input type="range" data-num="'+key+'" min="'+min+'" max="'+max+'" step="'+step+'" value="'+val+'" aria-label="'+key+'"><input class="u" type="number" data-num="'+key+'" min="'+min+'" max="'+max+'" step="'+step+'" value="'+val+'" aria-label="'+key+'"></div>'+(adv?'<div class="note warn">'+adv+'</div>':"")}
-/* foldouts: open state by id; depth for "open to level" */
-function isOpen(id,depth){if(S.op.hasOwnProperty(id))return S.op[id];return depth<=S.ui.level}
+/* foldouts: open state by id; depth for "open to level" (isOpen.answer: a tab drawn as an accordion, editor/accordion.js, answers for its sections) */
+function isOpen(id,depth){if(S.op.hasOwnProperty(id))return S.op[id];var a=firstAnswer("isOpen.answer",id,depth);return a!==undefined?a:depth<=S.ui.level}
 function fo(id,title,badge,body,depth,cur){return '<details class="fo'+(cur?" cur":"")+'" data-fo="'+id+'" data-depth="'+depth+'"'+(isOpen(id,depth)?" open":"")+'><summary>'+title+'<span class="sp"></span>'+(badge?'<span class="badge '+badge[0]+'">'+badge[1]+'</span>':"")+'</summary>'+(body?'<div class="inner">'+body+'</div>':"")+'</details>'}
 function locked(t){return '<details class="fo locked"><summary>'+esc(t)+'<span class="sp"></span><span class="badge">EXISTING</span></summary></details>'}
 function contentAt(path){var ans=firstAnswer("contentAt.answer",path);if(ans!==undefined)return ans;var p=path.split("."),r=byId(S.story,p[0]);if(!r)return null;if(p[1]==="c")return r.c=r.c||{};var j=+p[1].slice(1);return r.slots[j]=r.slots[j]||{}}

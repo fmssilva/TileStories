@@ -1,4 +1,0 @@
-/* the Guide tab's sections named at its top, each a jump (guidance round 14): editor/guide-tab.js */
-.gtnav{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0 8px;padding:6px 8px;border:1px solid #2E2E2E;border-radius:4px;background:#333}
-.gtnav span{font:600 11px/1 system-ui;color:#B4BAC1;margin-right:2px}
-.gtnav .chip{height:24px;padding:0 10px;font-size:11.5px}

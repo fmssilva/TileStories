@@ -45,12 +45,13 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const seen = () => R('var l=ph.querySelector(".locpin .loclab");l&&l.style.visibility!=="hidden"&&!l.classList.contains("fold")');
   const inkHit = () => R('var a=ph.querySelector(".locpin .loclab").getBoundingClientRect();Array.prototype.some.call(scr.querySelectorAll(".hero .w small,.hero .w h2,.hero .w p,.hero .w button"),function(el){var c;if(el.tagName==="BUTTON")c=el.getBoundingClientRect();else{var rg=document.createRange();rg.selectNodeContents(el);c=rg.getBoundingClientRect()}return c.width&&!(a.right<c.left||a.left>c.right||a.bottom<c.top||a.top>c.bottom)})');
   await R('S.ctl.locate.label="visit";S.locSeen=false;S.locFolded=false;S.locShown=0');
-  await openFromWall(); await p.waitForTimeout(4500);
-  const v0 = [await seen(), await folded(), await R('S.locShown')];
-  ok('Once a visit: no room beside the hero words at Half -> hidden, not folded, no time counted', v0[0] === false && v0[1] === false && v0[2] === 0, v0);
+  // round 19 (the developer: "keep it as it is"): the hero's words rose one row, so at Half the label has room and shows at once
+  await openFromWall(); await p.waitForTimeout(600);
+  const v0 = [await seen(), await inkHit()];
+  ok('Once a visit: at Half the label shows beside the hero words (round 19: they rose one row), over no word', v0[0] === true && v0[1] === false, v0);
   await R('scr.scrollTop=260'); await p.waitForTimeout(400);
   const v1 = [await seen(), await inkHit()];
-  ok('a scroll gives it room: it shows, over no word (a scroll never folds it)', v1[0] === true && v1[1] === false, v1);
+  ok('a scroll keeps it shown, over no word (a scroll never folds it)', v1[0] === true && v1[1] === false, v1);
   await p.waitForTimeout(4300); const v2 = await folded(); await openFromWall(); const v3 = await folded();
   ok('Once a visit: folded after 4 s seen, still folded on the next card', v2 === true && v3 === true, [v2, v3]);
   await R('S.ctl.locate.label="open";S.locSeen=false;S.locFolded=false;S.locShown=0'); await openFromWall(); await R('scr.scrollTop=260'); await p.waitForTimeout(4600);

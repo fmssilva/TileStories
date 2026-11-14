@@ -14,6 +14,11 @@
 /* the pulse is the glow's breath alone (no scale: the button never moves under a finger, and a test's tap finds it still) */
 @keyframes hspulse{0%,100%{box-shadow:0 0 0 2px rgba(255,236,196,.55),0 0 12px 2px rgba(255,206,120,.35),0 6px 18px rgba(0,0,0,.3)}50%{box-shadow:0 0 0 3px rgba(255,236,196,.95),0 0 28px 10px rgba(255,206,120,.7),0 6px 18px rgba(0,0,0,.3)}}
 .reduce .hero .gstart.hsglow{animation:none}
+/* the glow row's demo (round 20): a tap on Start shown as a soft ring that fades out (the tour does not start) */
+.hero .gstart.hstap{position:relative}
+.hero .gstart.hstap::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:0 0 0 0 rgba(255,255,255,.7);animation:hstap .7s ease-out forwards}
+@keyframes hstap{to{box-shadow:0 0 0 16px rgba(255,255,255,0)}}
+.reduce .hero .gstart.hstap::after{animation:none;box-shadow:none}
 .reduce .hero .hsazu.hsjump .hsfig{animation:none}
 /* the Locate Button's label at the hero (card/locate.js): the hero's words rise a row while it shows, so neither covers the other */
 .hero .w{transition:bottom .35s ease}

@@ -5,7 +5,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 0. Start here (next conversation, from 2026-11-07)
 
 - **State:**
-  - **The Lab:** `master` holds guidance rounds 1-19, verified on 2026-11-06/11, published at
+  - **The Lab:** `master` holds guidance rounds 1-20, verified on 2026-11-06/11, published at
     https://claude.ai/artifact/Gpjf7yvoYHjGebmmNhuw2o (round 14b) with the 186 voice files, the music and the capabilities (section 1). The
     developer changes account often (four times on 2026-11-08/09); the old links stay in their accounts (RGofgb… at round 13, 19Uiat… at round 12, RKn3Rr… at round 11, J9J4h… at round 9, 4LpLd4… at round 8, Jq6X2K… at round 7, Jrejv7… at
     round 6, QmhHSz… at round 5, KDs2… at v29). A new account cannot update an old link: publish a new one (section 1, Publishing). Its
@@ -37,8 +37,15 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
     - **Core, every 4 rounds (~32 min):** `tests\runtest8.ps1` with no tabs (every walk, ~14 min) and `node run_tests.js --core`
       (11 files, ~18 min; the list sits once in README between the `<!-- core set -->` markers, each with its reason).
     - **Full, every 12 rounds and before Unity:** every file, every mutation, a new baseline (~6450 s of files).
-    - Count the rounds since the last core and full run in every answer. Core last ran in round 17b (2026-11-12); full on
-      2026-11-09.
+    - Count the rounds since the last core and full run in every answer, **by rounds, every brief one round (17b and 17c count)**,
+      never by date. Core last ran in round 17b (2026-11-12). Full last ran after round 10 (2026-11-09); counted by date it was
+      missed: rounds 11, 12, 13, 14, 14b, 15, 16, 16b, 17, 17b, 17c, 18, 19 and 20 make 14, so the full tier runs after round 20
+      (the builder runs core and the ten label files; the Architect runs every other file and every mutation and writes the new
+      baseline). Each brief names its tier in its Tests section, and the builders read README "Levels" first.
+    - **Core and full run alongside the next round** (the developer, 2026-11-13; also in `.clinerules/40-testing.md` 4.2,
+      `__AI_Architect.md` and the Lab's README "Levels"): a round green on its own tier is merged; the long run starts on a
+      `git worktree` of `master` (outside the repo folder, e.g. the scratchpad) while the next round's builder works in the main
+      folder; a red it finds becomes an item of the round then running. The CPU check still applies to both.
   - **Old test levels** (decided 2026-11-06; cut twice since: the developer refused 1h30 of tests a round, then a 30-min level 1
     on 2026-11-07), kept for the history.
     - **While building:** only the build and captures, iterated until the app and the Editor look right
@@ -350,8 +357,22 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       the page loads them when not opened from disk. Tests: test9x 27 (mutation 13 red), test9v 28, the guide walk bad=0.
       Nine long files had their Editor labels updated but were not run (8g, 8s, 8t, 8x, 9db, 9e, 9ea, 9g, 9h, 9k): the core
       run of round 20 covers what it covers; run the rest if a label fails.
-    - Rounds since core: 3 (17c, 18, 19); since full: 2026-11-09.
-    - **Next: round 20** (the Editor as an accordion, core tests), then 21, 22; then the guide is closed and **the Detail
+    - Round 20 (2026-11-13, brief `_3.8_guidance_plans/brief_round20.md`): the Guide tab is an accordion
+      (`editor/accordion.js`, one Editor feature any tab switches on with `ACC_TABS.<tab>`): six one-line sections with a
+      sub-line and a count, Collapse all, One section open at a time (Off), the open section's and open foldout's headers
+      pinned while scrolling. The review: Narration is Music, Hero button is Start the guide, When the visitor scrolls moved to
+      Focus, Knowledge's unnamed row is What is sent, Wall (the Lab) moved to 6 · Preview & Test. Start the guide glows: Once
+      per visit (default) / On every new card / Off, in 2 · The tour › Ways in › Start the guide. **The builder stopped at
+      14:30 without a report (a walk hung) and nothing noticed for 7 hours:** the Architect now runs every test file with a
+      10-min limit and watches a builder's files (no change for 20 min: look). Core closed by the Architect: the 11 core files,
+      the ten long files and test9q green after their stale checks were updated (the renames of rounds 17c and 19 that no
+      tier had run); two Lab scenes had the same stale words (a real red, fixed in `guidance/scenes.js`); test9y 27 (mutation
+      18 red); walks card, guide, marker, global bad=0. The words walk runs past 40 min (14 at round 17b) and slows as it goes,
+      the same on master: checklist 21.8.
+    - Rounds since core: 0 (core ran in 20); since full: 14 rounds (11-20 with 14b, 16b, 17b, 17c; the last full run after round 10). Full runs alongside
+      round 21 on a `git worktree` of master outside the repo (`git -c core.longpaths=true worktree add`: the scratchpad's
+      long path needs it).
+    - **Next: round 21** (speech on screen and the panels, plus 21.8), then 22; then the guide is closed and **the Detail
       Card blocks' design** starts.
       Prototype only (no Unity) until the developer says so.
   - **MCP:** blender-mcp at user scope (Blender 5.2.3, add-on 1.8, port 9876). The Unity MCP was not connected this stretch.

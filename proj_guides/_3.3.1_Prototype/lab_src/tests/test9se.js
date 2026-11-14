@@ -101,8 +101,8 @@ const CAP = process.env.CAP || '', REPS = +process.env.REPS || 6;
   // Azu's lines: the introduction (EN, PT), What am I looking at? and the hunt on the Ribeira wall
   await R(base({}) + 'S.camCfg.names="all";' + wall + 'gdSimAim("torreao");renderPhone(false)');
   const az = await R('var w=camOffline("what");gdSimAim("river");renderPhone(false);var k=camOffline("kids");G.cam.hunt=null;G.cam.lit=[];[nameIn(S.tx.guide_intro.en,"{0}","The Torreão","en"),nameIn(S.tx.guide_intro.pt,"{0}","O Torreão","pt"),w,k,nameIn(TXT("cam_story_none"),"{0}","The Torreão")]');
-  ok('[article] Azu\'s lines: "let\'s meet the Torreão!", "vamos conhecer o Torreão!", What am I looking at? names "the Torreão" after its place, the hunt "Find the Tagus…", a line that starts with the name keeps "The"',
-    /let's meet the Torreão!$/.test(az[0]) && /vamos conhecer o Torreão!$/.test(az[1]) && /: the Torreão\./.test(az[2]) && !/[^.] The /.test(az[2]) && /Find the Tagus and its ships/.test(az[3]) && /^The Torreão: /.test(az[4]), az);
+  ok('[article] Azu\'s lines: the introduction (round 19: it names the mascot, never a point, so no article to fix), What am I looking at? names "the Torreão" after its place, the hunt "Find the Tagus…", a line that starts with the name keeps "The"',
+    !/Torre/.test(az[0]) && !/Torre/.test(az[1]) && /: the Torreão\./.test(az[2]) && !/[^.] The /.test(az[2]) && /Find the Tagus and its ships/.test(az[3]) && /^The Torreão: /.test(az[4]), az);
   tsec('article');
 
   await R('if(G.on)stopTour();gdStop("test");SCREENS.phone=[360,820];S.dark=false;S.cardCfg.mode="light";S.lang="en";S.guideCfg.mascot=true;S.guideCfg.gbtn="both";S.guidance=JSON.parse(window.__g0);renderAll(false)');

@@ -207,7 +207,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .reduce .mv{transition:none!important;opacity:1!important;transform:none!important;clip-path:none!important}
 
 /* ---------- POI Editor ---------- */
-.ed{background:var(--u-bg);border:1px solid #111;border-radius:8px;overflow:hidden;color:var(--u-text);font:12px/1.35 system-ui,"Segoe UI",sans-serif;min-width:0}
+.ed{background:var(--u-bg);border:1px solid #111;border-radius:8px;overflow:clip;color:var(--u-text);font:12px/1.35 system-ui,"Segoe UI",sans-serif;min-width:0}
 .edtitle{display:flex;align-items:center;gap:8px;padding:6px 10px;background:#1F1F1F;border-bottom:1px solid #111;font-size:12.5px}
 .edtitle span{opacity:.75}
 .edtool{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;background:var(--u-dark);border-bottom:1px solid #111}

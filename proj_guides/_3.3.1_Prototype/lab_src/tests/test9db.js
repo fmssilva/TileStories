@@ -34,7 +34,8 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   if (!HALF2) {
   // ---------- each Editor row's values on the phone (real clicks on the Editor) ----------
   await R(base + 'S.tab="guide";S.op={gt1:true,s7dock:true,"gt:ways":true,s7gbtn:true,s7mascot:true};S.view="card";S.stop="full";renderAll(false)');
-  const pick = async (key, v) => { const s = `[data-set="@guideCfg.${key}"][data-v="${v}"]`; await p.locator(s).scrollIntoViewIfNeeded(); await p.locator(s).click(); await W(150); await R('clearTimeout(G.demoT);G.demoSeq++;if(G.on)stopTour();hideStopUi()'); };
+  // round 19 moved rows into 1 · The mascot's foldouts (round 20: they start collapsed): open every foldout above the row, as the developer would
+  const pick = async (key, v) => { const s = `[data-set="@guideCfg.${key}"][data-v="${v}"]`; await R(`var b=ed.querySelector('${s}');for(var d=b&&b.closest("details");d;d=d.parentElement&&d.parentElement.closest("details"))d.open=true`); await p.locator(s).scrollIntoViewIfNeeded(); await p.locator(s).click(); await W(150); await R('clearTimeout(G.demoT);G.demoSeq++;if(G.on)stopTour();hideStopUi()'); };
   const startAt = async () => { await R('S.view="card";S.stop="full";renderPhone(false);startTour();G.i=S.guideSteps.findIndex(function(s){return s.id==="g1"});stopSpeech();runStep()'); await W(400); };
   const want = [];
   for (const [v, chk] of [['compact', '!ph.querySelector(".gdock")&&!!ph.querySelector(".gbtn.tour .gb-ring")'], ['peek', '!!ph.querySelector(".gdock.h-peek")'], ['mini', '!!ph.querySelector(".gdock.h-mini")']]) { await pick('dockStart', v); await startAt(); want.push(['Starts at ' + v, await R(chk)]); await R('stopTour()'); }
