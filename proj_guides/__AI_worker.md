@@ -1,6 +1,12 @@
 
 # `claude agent`
-- **GATE TASK:** start by confirming UnityMCP server mcp is working in this claude chat. (don't confuse with a failed and different unity-mcp). check telemetry_status to confirm the good one if needed. If UnityMCP tools appear unavailable, don't assume they're unimplemented. STOP and tell the user what to check to confirm unity mcp works - check /mcp and reconnect...
+- **Two kinds of round.** A **Unity block** (the brief says `GATE: Unity`) follows this file as written. A **Lab round** (the brief
+  says `GATE: Lab`) builds the HTML prototype: no Unity MCP; the Lab's own folder, `PROTOTYPE_STRUCTURE.md`, `README.md` and build
+  replace the Unity paths, `10-structure.md` and the compile; `skills/Feature_Prototyping.md` step 3 is the cycle of 2.3. Lines below
+  marked *(Unity)* apply to Unity blocks only.
+- **Run by the Architect as a subagent:** the developer does not see your chat. Do not wait for answers or call AskUserQuestion: put
+  the learning summaries, decisions and questions in your final report (STEP 1's plan included, short), and stop there.
+- **GATE TASK** *(Unity)*: start by confirming UnityMCP server mcp is working in this claude chat. (don't confuse with a failed and different unity-mcp). check telemetry_status to confirm the good one if needed. If UnityMCP tools appear unavailable, don't assume they're unimplemented. STOP and tell the user what to check to confirm unity mcp works - check /mcp and reconnect...
 
 - **CLAUDE.md:** I don't have it in this project. Instead i have this .clinerules folder with these files which are the general guidelines for this project:
   .clinerules\00-process.md
@@ -13,31 +19,82 @@
 So start by reading them all. 
 
 
-## `And now: domain proj_guides\_3.3_POI_Card_Styles.md`
-M3 -- the reference card: FIX chunks F3 + F6 of `proj_guides/_Test_Suite_2.md` (`_3.3` fourth round > "The reference card").
-GATE: as before (MCP; push: origin = the Architect's last commit; SDF fonts; compile clean before every run, editor_state confirms a run
-STARTED and Play Mode is off; Unity c for runs, b for captures). No opening test run.
-WORKER MODEL: Opus + effort Medium (config content + a test helper + moving tests; no new product feature).
-SUBAGENTS: per 00-process -- a Sonnet + medium pass to draft the new blocks' text from the Ribeira source (you check every fact against
-it); a Haiku pass to list every test that reads a Ribeira block key.
-TEST PLAN: the component selections that read the Ribeira (NavBar, Sections, Locate, BrightPage, Story, PageChrome, NavBarRule ...) +
-CardSmoke + EditMode without Live; then ONE FULL in the background (owed since M2 deleted helpers; it closes the maintenance's tests).
-PART 1 -- the content (LOOK first): the Ribeira Palace gains the ~20 blocks of 1.4, one per missing kind, at its default look, with
-REAL content from `proj_guides/detail_card/content/text/PACO_RIBEIRA_text.md` (and the existing Ribeira media; a missing picture or
-clip -> name it, use a clearly marked stand-in, add it to the TODOs); `show_after_viewed` on block_15. Both config copies, through the
-classes. LOOK at the whole card at Half and Full, light and dark (order, rhythm, nothing broken), then show the developer the block
-list with one line of content each and ask once: accepted?
-PART 2 -- `ReferenceCard` (test side): Golden = the Ribeira, BlockOf(kind[, look]) read from the shipped config, SecondCard, Edge.*;
-its EditMode test: every registered kind exactly once on the golden card. Then `.clinerules/00-process.md` "Real fixtures, one home"
-may name it (the helper now exists).
-PART 3 -- move the single-card tests that read Ribeira / Lamp block keys onto ReferenceCard (no hard-coded block_NN left for the
-golden card); F6: the sticky action owned by the bar's fixture, the Locate sweep's bar matrix deleted, NavBarRule tests out of
-LocateFabRuleTests, the under_title runtime copy, the footer / default duplicates, Chrome names.
-PART 4 -- one chunk from the M2 report: the Editor log grows ~140 MB per full EditMode run (`40-testing.md` 4.2.6): find the noisiest
-loggers in the test runs and silence them in tests (not in product warnings), measure the growth after.
-PART 5 -- runs as the TEST PLAN says; docs (_Test_Suite_2 3.2 current, _Test_Suite_1, 10-structure); report with the Subagents line and
-one commit message. STOP with one AskUserQuestion.
-OUT OF SCOPE: F5, F7 (each block moves when it is reviewed), F8 (trim the Lamp), F9, any redesign.
+## `And now: Lab round -- merge P1a.2 (router, devices, shot tools, first publish), proj_guides\_4.2_Lab_Merge_Plan.md`
+GATE: Lab.
+- The Lab: `proj_guides/_4.2_TileStories_Lab/lab_src`. Read `PROTOTYPE_STRUCTURE.md`, `README.md` and `STATE_MAP.md` in full.
+- `npm install` is done; `python build.py` must show every check at 0.
+- No git writes: the Architect reviews and commits.
+
+Domain spec, read ALL lines: `proj_guides/_4.2_Lab_Merge_Plan.md` (§1-3, §5), then the "P1a.2" row of its table.
+
+REQUIRED READING:
+- `proj_guides/skills/Feature_Prototyping.md` step 3 (the round's cycle and the test tiers);
+- `.clinerules/00-process.md` Shared Core Rules (no shims);
+- `.clinerules/30-ui-content.md` ("every core feature must work without the camera").
+
+Port FROM the frozen World Lab (`proj_guides/_4.1.2_Prototype/lab_src`, read only):
+- `js/12_device.js`;
+- its device buttons;
+- `tools/review/state_shots.py`, `section_shots.py`, `inventory.py`.
+
+WORKER MODEL: Opus + effort High. This round brings a new shared owner (the router) and rewires the phone shell.
+
+SUBAGENTS: read-only audits only (Sonnet).
+
+TEST PLAN:
+- No opening baseline: P1a.1 closed green on CORE.
+- The Architect runs the FULL tier on a `git worktree` at `LAB_PORT=8643`. **While the flag file `C:\Users\franc\AppData\Local\Temp\claude\40339de5183b80ad\2bab6f8c-33fb-4cd2-9e78-7d5d95377279\scratchpad\FULL_RUNNING` exists, run no test, self-test or shot tool**; `build.py` is fine. Do the code, look and docs first.
+- The round closes on CORE (self-test every walk `bad=0`, then `node run_tests.js --core`). Its new test files join the core set.
+
+WHAT (acceptance):
+1. **Events.** `configChanged` (D), `profileChanged` (P) and `screenChanged`, emitted once each where they happen, through `core/ext.js`. Existing listeners convert only when touched.
+2. **The router** (`src/screen/`, Unity: the UI Toolkit screen stack):
+   - a screen registry, `go` / `back`, an overlay stack, and action views registered by key;
+   - every screen change goes through it;
+   - the wall, the card sheet, Settings and the guide's overlays become its screens and overlays, looking exactly as today.
+3. **The non-AR path.** An **Explore** screen without the camera: a list of the points that have a card → their card → a tour from the card works there.
+   - It is reached from the wall and from a "No camera" preview switch.
+   - It is built from the existing parts, not designed now.
+4. **Devices.** W's four devices replace `SCREENS`:
+
+   | Device | Size |
+   |---|---|
+   | phone portrait | 390 × 844 |
+   | phone landscape | 844 × 390 |
+   | tablet portrait | 820 × 1180 |
+   | tablet landscape | 1180 × 820 |
+
+   - W's device buttons; B's preview-bar extras kept; `ui.device` in STATE_MAP.
+   - The card and the guide stay correct in all four. Layouts never designed for landscape or tablet are listed, not designed.
+5. **Profile-matrix shot tools in this Lab.**
+   - Rows: light / dark × text default / larger; looks join at P1b.
+   - Columns: the 4 devices.
+   - States: the wall, Explore, the card at peek / half / full, Settings, the dock in a tour.
+   - Sections: every Editor fold with a demo.
+6. **The first publish, prepared.**
+   - The page becomes "TileStories Lab" (`tilestories-lab.html` + `assets/`); the old record copy stays as a frozen reference.
+   - A publish list gives the files map and the total size: the page, `assets/`, the public voice packs (never `out-private`) and the music. Limits: 16 MB a file, 64 MB / 255 files a publish.
+   - The page's relative URLs work both from the server and from the published layout, proven from a temp folder. The Architect publishes.
+
+LOOK:
+- Before and after captures of the wall, the card and the dock on phone portrait must be identical.
+- Judge the new device cells and Explore, light and dark. Fix anything broken (clipped, overlapping, unreadable); list what only needs design (P3 / P4).
+
+TESTS (real input, each with `MUTATE=1`):
+- the router: order, back, overlays, one `screenChanged` per change;
+- the non-AR path, end to end, until the guide speaks a line;
+- each device's size and orientation, with the card's stops;
+- the publish layout: the page, a GLB, a voice line and a music track load.
+
+DOCS: PROTOTYPE_STRUCTURE (router rule, new modules), README (devices, Explore / No camera, shot tools, publish), STATE_MAP.
+
+OUT OF SCOPE:
+- tokens and looks (P1b);
+- the voice service (P2);
+- W's app screens (P4);
+- designing landscape or tablet.
+
+Stop when CORE is green, the new tests and mutations pass, the captures are judged and the publish list is ready. Final report: STEP 1's plan (short), the learning summaries, changes by area, test counts, capture paths with verdicts, the publish list and its size, anything open, and one commit message.
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`
@@ -57,7 +114,7 @@ Before you start executing and implementing things, perform a critical review of
 
 *Read File:* for big files use `read_file` paginate with `start_line`/`end_line`__ (1-indexed) on the same path. for binary prefabs use the MCP `manage_prefabs get_hierarchy` to get live Unity-resolved structure
 
-- Confirm the project compiles via Unity MCP (if unity MCP is not available STOP immediately and report). Do NOT run a baseline test suite at the start: the last commit is green (the Architect only commits green trees); run one only if the brief's TEST PLAN asks for it.
+- *(Unity)* Confirm the project compiles via Unity MCP (if unity MCP is not available STOP immediately and report). *(Lab)* `python build.py` with its checks at 0. Do NOT run a baseline test suite at the start: the last commit is green (the Architect only commits green trees); run one only if the brief's TEST PLAN asks for it.
 
 ### 1.3. Online & Technical Research (If Needed)
 If a decision genuinely needs outside confirmation (Unity patterns, package APIs, platform constraints...), search or inspect local node_modules documentation rather than relying on memory.
@@ -111,7 +168,7 @@ After the plan, lets continue for the implementation. You are now already in ACT
 For every step/group of sub-tasks execute the following cycle:
 1. **Read:** Confirm the step to do next (ground in the ./proj_guides/__curr_plan_tracker.md file if the plan is there). 
 2. **Implement Code:** Write or modify only the files strictly required for that step/task, where the structure map says it belongs (reuse first). Maintain clear alignment with .clinerules.
-3. **Compile:** refresh, zero `error CS`, the assemblies rebuilt (.clinerules/40-testing.md 4.2.5).
+3. **Compile:** *(Unity)* refresh, zero `error CS`, the assemblies rebuilt (.clinerules/40-testing.md 4.2.5). *(Lab)* `python build.py`, every check at 0.
 4. **Look and polish FIRST (before any PlayMode test):** for anything with a visible result (the card, a render, POI Editor rows / tables / popups), run it and take several captures (light and dark, the stops it lives at, over the hero and on paper, the motion as a short frame sequence) and judge them as a designer: modern, premium, minimalist, immersive, a "wow", motion that feels alive, nothing clipped, contrast right. Fix and capture again until it looks good (.clinerules/40-testing.md 4.5, "Look before you test"). Unity is open and unobstructed for this. Never report "not looked at".
 5. **Implement and Run Tests:** only once the design is accepted -- EditMode for the pure rules, then the PlayMode tests that pin the details: real input as a visitor would do it, edge cases, motion and effects, contrast as seen (.clinerules/40-testing.md: the layers each test really needs, no boilerplate) - TESTS THAT ACTUALLY CONFIRM IF THINGS WORK OK FOR REAL, LIKE IF THE USER WAS CLICKING AND DOING THEM - NO MOCK TESTS. Then the block's tier.
 6. **Learning Summary** present a "Learning Summary" for these steps we just did in chat, for me to keep track of what is beeing done, with all important details BUT in a concise manner, like i explained above. 
@@ -143,7 +200,7 @@ Per ./.clinerules/50-terminal_and_tools.md:
   long runs without polling (`40-testing.md` 4.2.5 "Wait without burning tokens"): every poll re-reads the whole session.
 
 ### 2.5. Hard Stop
-When you complete all the Iterative Execution Cycles for each step/task in the plan AND WE ACHIEVE AND TESTED WITH REAL TEST THAT ALL FEATURES WORK, ALL CONFIG PARAMS WORK AND ALL TESTS PASS, so then **STOP immediately**. Output the final learning summary, PUT the "LivingRoom Sene" to be ready to play in unity (not the test scenes tc...), and STOP with one `AskUserQuestion` (`60-finishing.md` 6.4) so the developer's alarm rings. 
+When you complete all the Iterative Execution Cycles for each step/task in the plan AND WE ACHIEVE AND TESTED WITH REAL TEST THAT ALL FEATURES WORK, ALL CONFIG PARAMS WORK AND ALL TESTS PASS, so then **STOP immediately**. Output the final learning summary. *(Unity)* PUT the "LivingRoom Sene" to be ready to play in unity (not the test scenes tc...), and STOP with one `AskUserQuestion` (`60-finishing.md` 6.4) so the developer's alarm rings. *(Lab, run as a subagent)* stop with the final report. 
 
 
 ## `DURING THE WHOLE PROCESS: BE A TEACHER!!! - GIVE LEARNING SUMMARIES`

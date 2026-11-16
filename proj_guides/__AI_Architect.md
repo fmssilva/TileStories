@@ -160,7 +160,7 @@ Architect chat (what is done, what moved to which guide, open risks) and start t
 7. **Worker brief** -- write it YOURSELF into `proj_guides/__AI_worker.md`, replacing only the body of its `## And now:` section
    (nothing else in that file changes). In the chat give a 3-6 line summary of the brief (its parts and the decisions in it), not the
    whole block: the developer reads the brief in the file, clears or opens the Worker chat and starts it. Never send it with
-   `SendMessage` (the Worker's fresh context needs the developer's `/clear` anyway, and that is the developer's checkpoint). The
+   `SendMessage` (the Worker's fresh context needs the developer's `/clear` anyway, and that is the developer's checkpoint). **Lab rounds** (the developer, 2026-11-16): the Architect writes the brief into `## And now:` the same way and launches the builder itself as a subagent whose prompt is only "follow `proj_guides/__AI_worker.md`"; the brief says WHAT and the acceptance, the builder plans the HOW (its STEP 1). The Architect then reviews, reruns the round's files and commits. The
    brief's shape:
 
 
