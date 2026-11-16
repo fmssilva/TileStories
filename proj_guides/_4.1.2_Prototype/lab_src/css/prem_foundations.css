@@ -1,0 +1,51 @@
+/* v19 section review: Premium (12+) fixes for this group, scoped to .tapc:not(.look-playful). Unity-feasible only. */
+/* R2 · Foundations + controls. Every state is a token colour or a transform: no filter (USS has no brightness/saturate),
+   no outline; inset rings are a real border in Unity (tagged), the check and lock are glyph/sprite children. */
+
+/* ---- pressed: a darker token fill and a small scale, the label keeps its full contrast (was filter:brightness, which also dimmed the label) ---- */
+.tapc:not(.look-playful) .ds-btn:is(.pressed, :active){filter:none}
+.tapc:not(.look-playful) .ds-btn.main:is(.pressed, :active){background:color-mix(in srgb,var(--cta) 84%,#000)!important;color:var(--cta-fg)   /* unity: the --btn-pressed token (precomputed) */}
+.tapc.light:not(.look-playful) .ds-btn:is(.tonal, .glass):is(.pressed, :active){background-color:#E4DED3!important}
+.tapc.dark:not(.look-playful) .ds-btn:is(.tonal, .glass):is(.pressed, :active){background-color:#14130F!important}
+
+/* ---- disabled: no fill and no elevation (an empty outline), a hairline, soft text at 7:1 and a lock glyph in front, so it never reads as enabled and is still legible ---- */
+.tapc:not(.look-playful) .ds-btn.disabled:not(.text){opacity:1;filter:none;cursor:default;transform:none;gap:calc(6 * var(--P))}
+.tapc.light:not(.look-playful) .ds-btn.disabled:not(.text){background:transparent!important;color:#4A433A!important;box-shadow:inset 0 0 0 calc(1.5 * var(--P)) rgba(20,17,13,.26)!important   /* unity: a 1.5 pt border; no fill, so it never reads as the tonal button */}
+.tapc.dark:not(.look-playful) .ds-btn.disabled:not(.text){background:transparent!important;color:#C9C1B3!important;box-shadow:inset 0 0 0 calc(1.5 * var(--P)) rgba(255,255,255,.24)!important   /* unity: a 1.5 pt border; no fill */}
+.tapc:not(.look-playful) .ds-btn.disabled:not(.text)::before{content:"";flex:none;width:calc(14 * var(--P));height:calc(14 * var(--P));background:center/contain no-repeat   /* unity: a lock sprite child, tinted the label colour */}
+.tapc.light:not(.look-playful) .ds-btn.disabled:not(.text)::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%234A433A' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='7' width='10' height='7' rx='1.6'/%3E%3Cpath d='M5.5 7V5a2.5 2.5 0 0 1 5 0v2'/%3E%3C/svg%3E")}
+.tapc.dark:not(.look-playful) .ds-btn.disabled:not(.text)::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23C9C1B3' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='7' width='10' height='7' rx='1.6'/%3E%3Cpath d='M5.5 7V5a2.5 2.5 0 0 1 5 0v2'/%3E%3C/svg%3E")}
+
+/* ---- icon buttons (.kb .a-rad): pressed = darker token fill; selected = the accent + a check badge; disabled = flat, no fill, soft icon ---- */
+.tapc.kit:not(.look-playful) .a-rad.pressed .c{filter:none;transform:scale(.94)}
+.tapc.light:not(.look-playful) .kb .a-rad.pressed .c{background:#E4DED3!important}
+.tapc.dark:not(.look-playful) .kb .a-rad.pressed .c{background:#14130F!important}
+.tapc:not(.look-playful) .kb .a-rad.on .c{position:relative;overflow:visible}
+.tapc:not(.look-playful) .kb .a-rad.on .c::before{content:"✓";position:absolute;right:calc(-6 * var(--P));top:calc(-6 * var(--P));width:calc(18 * var(--P));height:calc(18 * var(--P));display:grid;place-items:center;
+  border-radius:99px;background:var(--acc-fg);color:var(--acc);box-shadow:0 0 0 calc(1.5 * var(--P)) var(--acc);font:800 calc(11 * var(--P))/1 var(--font)   /* unity: a badge sprite child */}
+.tapc.kit:not(.look-playful) .kb .a-rad.off{opacity:1;filter:none}
+.tapc.light:not(.look-playful) .kb .a-rad.off .c{background:#E8E3DA!important;color:#6B6358!important;box-shadow:inset 0 0 0 1px rgba(20,17,13,.16)!important}
+.tapc.dark:not(.look-playful) .kb .a-rad.off .c{background:#24221E!important;color:#9A9286!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)!important}
+
+/* ---- filter chips: selected = tint + an accent ring + a leading check (light lost its ring under the .g shadow; never colour alone) ---- */
+.tapc:not(.look-playful):not(.sel-fill) .lchip.on:not(.tsel){box-shadow:inset 0 0 0 calc(1.5 * var(--P)) var(--acc)!important   /* unity: a 1.5 pt accent border */}
+.tapc:not(.look-playful) .lchip.on:not(.tsel)::before{content:"✓";font:800 calc(13 * var(--ts,1) * var(--P))/1 var(--font);color:var(--acc);margin-right:calc(-2 * var(--P))}
+.tapc.sel-fill:not(.look-playful) .lchip.on:not(.tsel)::before{color:var(--acc-fg)   /* the filled chip's ink (ds.css .sel-fill .lchip.on) */}
+
+/* ---- the kit page: a focused button's ring (4.5 pt outside the box) must not touch its caption ---- */
+.tapc.kit:not(.look-playful) .kst2 .ds-btn.focus{margin-bottom:calc(4 * var(--P))}
+
+/* ---- Colour page · the accent list: the chosen accent wears a check badge and a bold name, not only a ring ---- */
+.tapc.kit:not(.look-playful) .kac i{position:relative}
+.tapc.kit:not(.look-playful) .kac.on i::after{content:"✓";position:absolute;right:calc(-6 * var(--P));top:calc(-6 * var(--P));width:calc(20 * var(--P));height:calc(20 * var(--P));display:grid;place-items:center;border-radius:99px;
+  background:var(--tx);color:var(--page);font:800 calc(12 * var(--P))/1 var(--font)   /* unity: a badge sprite child */}
+.tapc.kit:not(.look-playful) .kac.on small{font-weight:800}
+
+/* ---- the kit header's backdrop switch: the chosen segment is a lifted pill (as in the segmented control), not a faint tint ---- */
+.tapc.light.kit:not(.look-playful) .kh .kbg.ds-seg span.on{background:#FFFFFF;color:var(--tx);font-weight:700;box-shadow:0 1px 3px rgba(20,17,13,.14)   /* unity: sprite (the shared soft-shadow 9-slice) */}
+.tapc.dark.kit:not(.look-playful) .kh .kbg.ds-seg span.on{background:#3A3631;color:var(--tx);font-weight:700;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)   /* unity: a 1 px border */}
+
+/* ---- Spacing page · touch target: the "48 pt" caption sat across the dashed box's bottom edge; it now sits under the box (unity: a label element) ---- */
+.tapc.kit:not(.look-playful) .ktouch{margin-bottom:calc(30 * var(--P))}
+.tapc.kit:not(.look-playful) .ktouch::after{content:"";padding:0}
+.tapc.kit:not(.look-playful) .ktouch::before{content:"48 pt";position:absolute;left:calc(-6 * var(--P));right:calc(-6 * var(--P));top:calc(100% + 12 * var(--P));text-align:center;font:700 calc(13 * var(--P))/1 var(--font);color:var(--acc)}

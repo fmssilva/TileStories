@@ -1,0 +1,365 @@
+/* v19 Playful (kids) look: kids_50_flows. Scoped to .tapc.look-playful; Unity-feasible techniques only (mk_review/unity_feasibility.md) */
+/* Owner: group "flows" (mk_review/v19/flows). Screens: onboarding, Settings, Explore, plus the new DOM proposed in
+   mk_review/v19/flows/proposals.md (Azu greeting, onboarding parallax layers, the sticker-earned moment, the album).
+   Doodle sprites: the kit's KIDS_DOODLE_* (cobalt line, light) and media/KIDS_FLOWS_*_D|ON|DON|GOLD (the same art recoloured;
+   Unity: ONE grey sprite per doodle, -unity-background-image-tint-color = the token). */
+
+/* ---------- tokens for this file ---------- */
+.tapc.look-playful.light{
+  --kf-ros:url("@@KIDS_DOODLE_ROSETTE@@");--kf-ros-on:url("@@KIDS_FLOWS_ROSETTE_ON@@");
+  --kf-ship:url("@@KIDS_DOODLE_SHIP@@");--kf-wave:url("@@KIDS_DOODLE_WAVE@@");--kf-swirl:url("@@KIDS_DOODLE_SWIRL@@");--kf-compass:url("@@KIDS_DOODLE_COMPASS@@");
+  --kf-star:url("@@KIDS_DOODLE_STAR@@");--kf-spark:url("@@KIDS_DOODLE_SPARKLE@@");--kf-gold-spark:url("@@KIDS_FLOWS_SPARKLE_GOLD@@");--kf-gold-star:url("@@KIDS_FLOWS_STAR_GOLD@@");
+  --kf-icon-bg:#E3E9F8;--kf-slot:rgba(14,36,102,.42);--kf-doodle-o:.16;
+  --ob-bg:var(--k-tex) 0 0/var(--k-tex-size) var(--k-tin);   /* the sticky onboarding footer (ds.css): the page paper behind the buttons */
+  --kf-frag-a:#F2C14E;--kf-frag-b:#FFFDF8;--kf-frag-c:#1F3F9A;--kf-frag-line:#0E2466}
+.tapc.look-playful.dark{
+  --kf-ros:url("@@KIDS_FLOWS_ROSETTE_D@@");--kf-ros-on:url("@@KIDS_FLOWS_ROSETTE_DON@@");
+  --kf-ship:url("@@KIDS_FLOWS_SHIP_D@@");--kf-wave:url("@@KIDS_FLOWS_WAVE_D@@");--kf-swirl:url("@@KIDS_FLOWS_SWIRL_D@@");--kf-compass:url("@@KIDS_FLOWS_COMPASS_D@@");
+  --kf-star:url("@@KIDS_FLOWS_STAR_D@@");--kf-spark:url("@@KIDS_FLOWS_SPARKLE_D@@");--kf-gold-spark:url("@@KIDS_FLOWS_SPARKLE_DGOLD@@");--kf-gold-star:url("@@KIDS_FLOWS_STAR_DGOLD@@");
+  --kf-icon-bg:#2E3A80;--kf-slot:rgba(201,209,240,.5);--kf-doodle-o:.2;
+  --ob-bg:var(--k-tex) 0 0/var(--k-tex-size) var(--k-tin);
+  --kf-frag-a:#F2C14E;--kf-frag-b:#C3B0E3;--kf-frag-c:#A9B8F2;--kf-frag-line:#060A22}   /* confetti on navy: no white glare, no cobalt that vanishes */
+
+/* ---------- shared: section headers in Fredoka, no doodle (doodle discipline: at most one rosette and one sparkle per screen) ---------- */
+.tapc.look-playful:is(.ds-onb, .ds-settings, .ds-explore, .ds-album) .ds-sh{display:flex;align-items:center;gap:calc(7 * var(--P));font-family:var(--tfont);font-weight:600;letter-spacing:.01em;text-transform:none;font-size:calc(17 * var(--ts,1) * var(--P))}
+.tapc.look-playful:is(.ds-onb, .ds-settings, .ds-explore, .ds-album) .ds-sh .ds-cap{font-family:var(--font);letter-spacing:0;font-weight:400;text-transform:none;margin-left:calc(-2 * var(--P))}
+/* segments inside the flow screens (language, Settings rows): the selected item's ✓ sits beside its label, not above it */
+.tapc.look-playful :is(.olang, .sheet-set .srow) .ds-seg span{display:inline-flex;align-items:center;justify-content:center;gap:calc(2 * var(--P));white-space:nowrap}
+.tapc.look-playful :is(.olang, .sheet-set .srow) .ds-seg span.on::before{margin-right:0}
+/* interest chips: stickers, each stuck on at its own small angle (chips only, never body text) */
+.tapc.look-playful :is(.ds-onb, .ds-settings) .kchips .lchip{min-height:calc(48 * var(--P))}   /* 48 pt targets */
+.tapc.look-playful :is(.ds-onb, .ds-settings) .kchips .lchip:nth-child(3n+1){rotate:-1.2deg}
+.tapc.look-playful :is(.ds-onb, .ds-settings) .kchips .lchip:nth-child(3n+2){rotate:.9deg}
+.tapc.look-playful :is(.ds-onb, .ds-settings) .kchips .lchip:nth-child(3n){rotate:-.4deg}
+.tapc.look-playful :is(.ds-onb, .ds-settings) .kchips .lchip .ic{color:var(--k-line)}
+.tapc.look-playful.dark :is(.ds-onb, .ds-settings) .kchips .lchip .ic{color:var(--k-line)}
+.tapc.look-playful.ds-onb .kchips,.tapc.look-playful .sheet-set .sint{gap:calc(10 * var(--P)) calc(9 * var(--P))}
+
+/* =====================================================================================================================
+   ONBOARDING
+   ===================================================================================================================== */
+.tapc.look-playful.ds-onb .ds-d{font-size:calc(30 * var(--ts,1) * var(--P));line-height:1.08}
+.tapc.look-playful.ds-onb .ob1 .ds-eyebrow{color:var(--td)}
+/* "Who is this tour for?": the icon becomes a little painted tile (ink glyph on a decor fill), the chosen card is pressed in + stitched (kit) */
+.tapc.look-playful.ds-onb .ds-opts.two .ds-opt .oi{width:calc(44 * var(--P));height:calc(44 * var(--P));border-radius:calc(10 * var(--P));border:calc(2 * var(--P)) solid var(--k-line);background:#C9D4F0;color:#0E2466;rotate:-3deg}
+.tapc.look-playful.ds-onb .ds-opts.two .ds-opt.kid .oi{background:#F2C14E;rotate:3deg}
+.tapc.look-playful.dark.ds-onb .ds-opts.two .ds-opt .oi{border-color:#0E2466}
+.tapc.look-playful.ds-onb .ds-opts.two .ds-opt .ds-h2{font-family:var(--tfont);font-size:calc(20 * var(--ts,1) * var(--P))}
+.tapc.look-playful.ds-onb .ds-opts.two .ds-opt .ds-cap{font-size:calc(14 * var(--ts,1) * var(--P));line-height:1.3;color:var(--td)}
+.tapc.look-playful.ds-onb .ds-opts.two .ds-opt{padding-right:calc(14 * var(--P))}
+.tapc.look-playful.ds-onb .ds-opts.two .ds-opt .ck{border-radius:50%;border:calc(2 * var(--P)) solid var(--k-line);display:grid;place-items:center}
+/* ONE "selected choice" style (age cards and time cards, light and dark): the stitched frame pressed in + a yellow ✓ badge (ink ring, ink check) */
+.tapc.look-playful.ds-onb .ds-opts.two .ds-opt.on .ck{background:#F2C14E;color:#0E2466;border-color:#0E2466;rotate:-8deg;scale:1.15}
+.tapc.look-playful.ds-onb .ds-opts.two .ds-opt.on .ck svg{width:72%;height:72%}
+/* time cards: Fredoka name + a row of little tiles that says how much (1 / 2 / 3: never colour alone) */
+.tapc.look-playful.ds-onb .ds-opts.three .ds-opt{gap:calc(3 * var(--P));padding-top:calc(10 * var(--P))}
+.tapc.look-playful.ds-onb .ds-opts.three .ds-opt .ds-h2{font-family:var(--tfont);font-size:calc(18 * var(--ts,1) * var(--P))}
+.tapc.look-playful.ds-onb .ds-opts.three .ds-opt::before{content:"";display:block;height:calc(14 * var(--P));width:calc(14 * var(--P));margin-bottom:calc(2 * var(--P));background:var(--kf-ros) left center/calc(14 * var(--P)) calc(14 * var(--P)) repeat-x   /* unity: a tiled background (-unity-slice-type: tiled) */}
+.tapc.look-playful.ds-onb .ds-opts.three .ds-opt:nth-child(2)::before{width:calc(31 * var(--P));background-size:calc(15.5 * var(--P)) calc(14 * var(--P))}
+.tapc.look-playful.ds-onb .ds-opts.three .ds-opt:nth-child(3)::before{width:calc(46.5 * var(--P));background-size:calc(15.5 * var(--P)) calc(14 * var(--P))}
+.tapc.look-playful .ds-opts.three .ds-opt.on{border-image:var(--kb-stitch)!important;translate:var(--kt-panel);background:transparent!important;color:var(--tx)!important}
+.tapc.look-playful .ds-opts.three .ds-opt.on :is(.ds-h2, .ds-cap){color:var(--tx)!important}
+.tapc.look-playful .ds-opts.three .ds-opt.on .tcs{color:var(--td)!important}
+.tapc.look-playful .ds-opts.three .ds-opt{position:relative}
+.tapc.look-playful .ds-opts.three .ds-opt.on .ds-h2::before{content:"✓";position:absolute;right:calc(-6 * var(--P));top:calc(-8 * var(--P));width:calc(24 * var(--P));height:calc(24 * var(--P));
+  display:grid;place-items:center;box-sizing:border-box;border-radius:99px;background:#F2C14E;color:#0E2466;border:calc(2 * var(--P)) solid #0E2466;font:800 calc(13 * var(--P))/1 var(--font);rotate:-8deg   /* unity: the same check-badge sprite as the age cards */}
+.tapc.look-playful.ds-onb .ds-opts.three .ds-opt .tcs{opacity:1}
+/* "What you'll get": a postcard. Sketch-panel frame, a gold sticker tab for the eyebrow, a ship doodle from the panel in the corner */
+.tapc.look-playful.ds-onb .oprev{position:relative;border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--kq))!important;border-image:var(--kb-stitch-up)!important;background:transparent!important;box-shadow:none!important;
+  padding:calc(18 * var(--P)) calc(18 * var(--P)) calc(14 * var(--P));margin-top:calc(8 * var(--P));gap:calc(5 * var(--P))}
+.tapc.look-playful.ds-onb .oprev>.ds-eyebrow{position:absolute;top:calc(-13 * var(--P));left:calc(14 * var(--P));padding:calc(3 * var(--P)) calc(11 * var(--P));border-style:solid;border-color:transparent;border-width:calc(2 * var(--kq));border-image:var(--kb-badge-up)!important;color:#0E2466;rotate:-2deg;letter-spacing:.06em}
+.tapc.look-playful.ds-onb .oprev::after{content:"";position:absolute;top:calc(8 * var(--P));right:calc(10 * var(--P));width:calc(40 * var(--P));height:calc(40 * var(--P));background:var(--kf-ship) center/contain no-repeat;opacity:.9;rotate:6deg;pointer-events:none}
+.tapc.look-playful.ds-onb .oprev .ds-h2{font-family:var(--tfont);font-size:calc(20 * var(--ts,1) * var(--P));padding-right:calc(44 * var(--P))}
+.tapc.look-playful.ds-onb .oprev .ds-body{font-size:calc(15 * var(--ts,1) * var(--P))}
+.tapc.look-playful.ds-onb .oprev .opm{gap:calc(8 * var(--P));margin-top:calc(6 * var(--P))}
+.tapc.look-playful.ds-onb .oprev .opm span{padding:calc(4 * var(--P)) calc(9 * var(--P)) calc(4 * var(--P)) calc(7 * var(--P));border-radius:calc(99 * var(--P));background:var(--kf-icon-bg);color:var(--tx)}
+.tapc.look-playful.ds-onb .oprev .opm svg{color:var(--k-line)}
+/* the preview changes live: its content settles in (tween: 240 ms, translate 0 4pt → 0 + opacity .4 → 1, ease-out; Unity: DOTween on the content element, only when a choice changes) */
+@keyframes kf-settle{from{translate:0 calc(4 * var(--P));opacity:.4}to{translate:0 0;opacity:1}}   /* tween: kf-settle, 240 ms ease-out */
+.tapc.look-playful.ds-onb .oprev :is(.ds-h2, .ds-body, .opm){animation:kf-settle .24s ease-out both   /* tween: kf-settle */}
+.tapc.look-playful.m-reduced.ds-onb .oprev :is(.ds-h2, .ds-body, .opm){animation:none}
+.tapc.look-playful.ds-onb .onote,.tapc.look-playful.ds-onb .ofoot{font-size:calc(14 * var(--ts,1) * var(--P));color:var(--td)}
+.tapc.look-playful.ds-onb .ds-acts .ds-btn.main{min-height:calc(56 * var(--P));font-size:calc(19 * var(--ts,1) * var(--P))}
+.tapc.look-playful.ds-onb .ds-acts .ds-btn.text{min-height:calc(48 * var(--P))}
+
+/* ---- proposal DOM: Azu greets beside the title, stepping out of a tile (proposals.md §1) ---- */
+.tapc.look-playful.ds-onb .ob1.has-azu{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto 1fr;column-gap:calc(6 * var(--P));row-gap:calc(6 * var(--P));align-items:end}
+.tapc.look-playful.ds-onb .ob1.has-azu .obtop{grid-column:1 / -1}
+.tapc.look-playful.ds-onb .ob1.has-azu .ds-d{grid-column:1;align-self:center}
+.tapc.look-playful .ob-hello{grid-column:2;position:relative;width:calc(96 * var(--P));height:calc(128 * var(--P));flex:none}
+.tapc.look-playful .ob-hello .ob-tile{position:absolute;left:calc(8 * var(--P));right:calc(4 * var(--P));bottom:0;height:calc(70 * var(--P));rotate:-4deg;background:transparent!important;border-width:calc(2 * var(--kq))}   /* the frame's own fill is the paper: no square corners */
+.tapc.look-playful .ob-hello .k-azu{position:absolute;left:55%;bottom:calc(6 * var(--P));height:calc(108 * var(--P));translate:-50% 0}
+.tapc.look-playful .ob-hello .ob-bub{position:absolute;left:calc(-30 * var(--P));top:calc(2 * var(--P));z-index:1;white-space:nowrap;padding:calc(4 * var(--P)) calc(10 * var(--P));font:600 calc(14 * var(--ts,1) * var(--P))/1.2 var(--tfont);color:var(--tx);rotate:-3deg}
+/* Azu's entrance: once per onboarding, out of the tile (tween: 420 ms ease-out-back, translate 0 24pt → 0 + scale .9 → 1; Reduce Motion: none) */
+@keyframes kf-stepout{from{translate:-50% calc(24 * var(--P));scale:.9;opacity:0}to{translate:-50% 0;scale:1;opacity:1}}   /* tween: kf-stepout, 420 ms ease-out-back */
+.tapc.look-playful .ob-hello .k-azu.enter{animation:kf-stepout .42s var(--k-back) both   /* tween: kf-stepout (Unity: ease-out-back) */}
+.tapc.look-playful.m-reduced .ob-hello .k-azu.enter{animation:none}
+
+/* ---- proposal DOM: onboarding parallax (proposals.md §2). Three layers behind the content, moved by translate only.
+   JS writes --px/--py (−1…1, low-pass filtered) on the layer root; each layer multiplies by its depth.
+   Unity: three VisualElements behind the scroll view; style.translate = gyro attitude × depth (4 / 6 / 8 pt), clamped, smoothed;
+   Reduce Motion: not driven (0). ---- */
+.tapc.look-playful.ds-onb.has-par{background-image:none}   /* the texture moves into layer 0 (JS adds .has-par with the layers) */
+.tapc.look-playful .ob-par{position:absolute;inset:calc(-12 * var(--P));pointer-events:none;overflow:hidden;--px:0;--py:0}
+.tapc.look-playful .ob-par>i{position:absolute;inset:0;display:block;transition:translate .18s linear}
+.tapc.look-playful .ob-par .l0{background-image:var(--k-tex);background-size:var(--k-tex-size);translate:calc(var(--px) * 4 * var(--P)) calc(var(--py) * 4 * var(--P))}
+.tapc.look-playful .ob-par .l1{translate:calc(var(--px) * -6 * var(--P)) calc(var(--py) * -6 * var(--P))}
+.tapc.look-playful .ob-par .l2{translate:calc(var(--px) * -9 * var(--P)) calc(var(--py) * -9 * var(--P))}
+.tapc.look-playful .ob-par b{position:absolute;display:block;width:calc(var(--s,40) * var(--P));height:calc(var(--s,40) * var(--P));background:center/contain no-repeat;opacity:var(--kf-doodle-o)}
+.tapc.look-playful .ob-par .l2 b{opacity:calc(var(--kf-doodle-o) * 1.7)}
+.tapc.look-playful .ob-par .d-ship{background-image:var(--kf-ship)}.tapc.look-playful .ob-par .d-wave{background-image:var(--kf-wave)}
+.tapc.look-playful .ob-par .d-swirl{background-image:var(--kf-swirl)}.tapc.look-playful .ob-par .d-compass{background-image:var(--kf-compass)}
+.tapc.look-playful .ob-par .d-star{background-image:var(--kf-star)}.tapc.look-playful .ob-par .d-spark{background-image:var(--kf-spark)}
+.tapc.look-playful .ob-par .d-ros{background-image:var(--kf-ros)}
+.tapc.look-playful.m-reduced .ob-par>i{translate:none;transition:none}
+/* doodle discipline: the hero button's sparkle is the screen's one sparkle and the time cards' tiles its one rosette, so the parallax carries neither */
+.tapc.look-playful .ob-par :is(.d-spark, .d-ros){display:none}
+/* tablets: three far doodles only (ship, wave, compass), none clipped by the screen edge */
+.tapc.look-playful.tablet .ob-par .l2,.tapc.look-playful.tablet .ob-par .l1 b:nth-child(n+4){display:none}
+.tapc.look-playful.tablet .ob-par .l1 b[style*="left:-"]{margin-left:calc(64 * var(--P))}
+
+/* =====================================================================================================================
+   SETTINGS and EXPLORE (sheets: the kit's sheet frame + texture; nested lists sit flat in it)
+   ===================================================================================================================== */
+.tapc.look-playful :is(.sheet-set, .sheet-ex, .sheet-album) .khd .ds-h1{display:inline-flex;align-items:center;gap:calc(8 * var(--P));font-size:calc(26 * var(--ts,1) * var(--P))}
+.tapc.look-playful :is(.sheet-set, .sheet-ex, .sheet-album) .khd .ds-h1::after{content:"";width:calc(24 * var(--P));height:calc(24 * var(--P));background:var(--kf-gold-spark) center/contain no-repeat;rotate:12deg}
+.tapc.look-playful :is(.sheet-set, .sheet-ex) .ds-sh{margin-top:calc(14 * var(--P));margin-bottom:calc(4 * var(--P))}
+/* row icons: a little painted tile (the kit's paper chip frame, flat) carrying the row's OWN glyph (KIDS.rowIcon: the ship for the river tour,
+   the compass for the walk, a puzzle piece, a quiz bubble; Settings keep their meaningful icons). No pastel squares */
+.tapc.look-playful .sheet-set .srow .i,.tapc.look-playful .sheet-ex .ds-row .ic{flex:none;display:grid;place-items:center;width:calc(42 * var(--P));height:calc(42 * var(--P));box-sizing:border-box;
+  border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--P))!important;border-image:var(--kb-chip)!important;border-radius:0!important;background:transparent!important;color:var(--k-line)!important}
+.tapc.look-playful.light :is(.sheet-set .srow .i, .sheet-ex .ds-row .ic){color:#1F3F9A!important}
+.tapc.look-playful .sheet-set .srow .i svg,.tapc.look-playful .sheet-ex .ds-row .ic svg{width:calc(22 * var(--P));height:calc(22 * var(--P))}
+.tapc.look-playful .sheet-ex .ds-row .ic svg{width:calc(26 * var(--P));height:calc(26 * var(--P))}
+.tapc.look-playful :is(.sheet-set .srow, .sheet-ex .ds-row):nth-child(3n+1) :is(.i, .ic){rotate:-3deg}
+.tapc.look-playful :is(.sheet-set .srow, .sheet-ex .ds-row):nth-child(3n+2) :is(.i, .ic){rotate:2deg}
+.tapc.look-playful :is(.sheet-set .srow, .sheet-ex .ds-row):nth-child(3n) :is(.i, .ic){rotate:-1deg}
+.tapc.look-playful .sheet-ex .ds-row{min-height:calc(60 * var(--P))}
+.tapc.look-playful .sheet-ex .ds-row .tt b{font-family:var(--tfont);font-weight:600;font-size:calc(17 * var(--ts,1) * var(--P))}
+.tapc.look-playful .sheet-ex .ds-row .tt small{font-size:calc(13.5 * var(--ts,1) * var(--P));color:var(--sheet-fg2)}
+.tapc.look-playful .sheet-set .srow{min-height:calc(60 * var(--P))}
+.tapc.look-playful .sheet-set .srow .rt b{font-size:calc(16 * var(--ts,1) * var(--P))}
+.tapc.look-playful .sheet-set>.sbody>.ds-cap{font-size:calc(14 * var(--ts,1) * var(--P));margin-top:calc(10 * var(--P))}
+
+/* ---- proposal DOM: the album entry at the top of Explore (proposals.md §4) ---- */
+.tapc.look-playful .al-entry{position:relative;display:grid;grid-template-columns:1fr auto;align-items:center;gap:calc(4 * var(--P)) calc(10 * var(--P));padding:calc(14 * var(--P)) calc(16 * var(--P));margin:calc(8 * var(--P)) 0 calc(4 * var(--P));min-height:calc(96 * var(--P));cursor:pointer;color:var(--tx)}
+.tapc.look-playful .al-entry b{font:600 calc(20 * var(--ts,1) * var(--P))/1.15 var(--tfont)}
+.tapc.look-playful .al-entry .ds-cap{font-size:calc(14 * var(--ts,1) * var(--P));color:var(--td)}
+.tapc.look-playful .al-entry .al-strip{grid-column:1;display:flex;gap:calc(5 * var(--P));margin-top:calc(6 * var(--P))}
+.tapc.look-playful .al-entry .al-strip i{display:block;width:calc(26 * var(--P));height:calc(26 * var(--P));border-radius:calc(5 * var(--P));border:calc(1.5 * var(--P)) solid var(--k-line);background-size:cover}
+.tapc.look-playful .al-entry .al-strip i.e{border-style:solid;border-color:transparent;border-width:calc(1.5 * var(--P));border-image:var(--kb-slot-s);border-radius:0;background:transparent}   /* unity: KIDS_FRAME_SLOT, slice-scale .167 */
+.tapc.look-playful .al-entry .k-azu{grid-column:2;grid-row:1 / span 3;height:calc(84 * var(--P));margin:calc(-22 * var(--P)) calc(-4 * var(--P)) calc(-8 * var(--P)) 0}
+
+/* =====================================================================================================================
+   THE ALBUM (proposals.md §4): a blank azulejo panel that fills tile by tile. Sets = areas of the wall; no points, no streaks.
+   ===================================================================================================================== */
+.tapc.look-playful .sheet-album .al-intro{font-size:calc(15 * var(--ts,1) * var(--P));color:var(--sheet-fg2);margin:0}
+.tapc.look-playful .al-set{display:flex;flex-direction:column;gap:calc(10 * var(--P));padding:calc(14 * var(--P)) calc(14 * var(--P)) calc(16 * var(--P));margin-top:calc(14 * var(--P));color:var(--tx);background-color:transparent!important}
+.tapc.look-playful .al-head{display:flex;align-items:center;gap:calc(10 * var(--P))}
+.tapc.look-playful .al-head .k-doodle{flex:none;width:calc(30 * var(--P));height:calc(30 * var(--P))}
+.tapc.look-playful .al-head .al-ht{flex:1;min-width:0;display:flex;flex-direction:column;gap:calc(1 * var(--P))}
+.tapc.look-playful .al-head b{font:600 calc(18 * var(--ts,1) * var(--P))/1.2 var(--tfont)}
+.tapc.look-playful .al-head small{font:400 calc(13.5 * var(--ts,1) * var(--P))/1.3 var(--font);color:var(--td)}
+.tapc.look-playful .al-head .al-n{flex:none;padding:calc(3 * var(--P)) calc(9 * var(--P));font:600 calc(14 * var(--ts,1) * var(--P))/1.2 var(--tfont);color:#0E2466}
+.tapc.look-playful .al-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(calc(92 * var(--P)),1fr));gap:calc(12 * var(--P)) calc(10 * var(--P))}
+.tapc.look-playful .al-tile{display:flex;flex-direction:column;align-items:stretch;gap:calc(5 * var(--P));min-width:0;cursor:pointer}
+.tapc.look-playful .al-tile .al-sq{position:relative;aspect-ratio:1;display:grid;place-items:center}
+.tapc.look-playful .al-tile.got .al-sq{padding:calc(5 * var(--P))}
+.tapc.look-playful .al-tile.got .al-ph{width:100%;height:100%;border-radius:calc(3 * var(--P));background-color:#F7F2E7;box-shadow:inset 0 0 0 calc(1.5 * var(--P)) #1F3F9A   /* the painted tile itself: the panel crop (KIDS.tileArt) on its glaze */}
+.tapc.look-playful .al-tile.got:nth-child(3n+1) .al-sq{rotate:-2deg}.tapc.look-playful .al-tile.got:nth-child(3n+2) .al-sq{rotate:1.5deg}.tapc.look-playful .al-tile.got:nth-child(3n) .al-sq{rotate:-.5deg}
+.tapc.look-playful .al-tile .al-ck{position:absolute;right:calc(-7 * var(--P));top:calc(-7 * var(--P));width:calc(26 * var(--P));height:calc(26 * var(--P));display:grid;place-items:center;padding:0;color:#0E2466}
+.tapc.look-playful .al-tile .al-ck svg{width:calc(15 * var(--P));height:calc(15 * var(--P));stroke-width:3}
+.tapc.look-playful .al-tile.e .al-sq{border-style:solid;border-color:transparent;border-width:calc(2 * var(--P));border-image:var(--kb-slot);border-radius:0}   /* unity: KIDS_FRAME_SLOT 9-slice (36 px at 3x) */
+.tapc.look-playful .al-tile.e .al-sq .k-doodle{width:calc(38 * var(--P));height:calc(38 * var(--P));opacity:.45}
+.tapc.look-playful .al-tile small{font:600 calc(13 * var(--ts,1) * var(--P))/1.25 var(--font);color:var(--tx);text-align:center;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.tapc.look-playful .al-tile.e small{font-weight:400;color:var(--td)}
+.tapc.look-playful .al-story{align-self:flex-start;display:inline-flex;align-items:center;gap:calc(8 * var(--P));min-height:calc(48 * var(--P));padding:0 calc(18 * var(--P)) 0 calc(14 * var(--P));font:600 calc(16 * var(--ts,1) * var(--P))/1 var(--tfont);color:var(--tx);cursor:pointer}
+.tapc.look-playful .al-story svg{width:calc(20 * var(--P));height:calc(20 * var(--P))}
+
+/* =====================================================================================================================
+   STICKER EARNED (proposals.md §3). A card above the bottom chrome, never full-screen over the wall; motion ≤ 1.2 s, then it
+   holds and slides back into the album. Timeline (Unity: one DOTween Sequence; haptic "success" + chime at 0 ms):
+     0–380 ms   card rises 24 pt → 0 + fades in            (ease-out-back)
+   120–520 ms   the sticker slaps on: scale .6 → 1, rotate −14° → −4°   (ease-out-back)
+   180–1100 ms  8 tile fragments fly out from the sticker (translate + rotate + fade)   (ease-out)
+   300–620 ms   Azu pops up behind the card (translate 30 pt → 0)       (ease-out-back)
+   2600 ms      the card slides down 16 pt + fades (300 ms): back to the wall
+   Reduce Motion: a 120 ms fade in / out, no fragments, nothing moves.
+   ===================================================================================================================== */
+.tapc.ds-cel{pointer-events:none}
+.tapc.look-playful .cel{position:absolute;left:calc(16 * var(--P));right:calc(16 * var(--P));bottom:calc(112 * var(--P));display:flex;justify-content:center;pointer-events:none}
+.tapc.look-playful.land .cel{left:50%;right:auto;width:calc(400 * var(--P));translate:-50% 0;bottom:calc(28 * var(--P))}
+.tapc.look-playful.tablet:not(.land) .cel{left:50%;right:auto;width:calc(440 * var(--P));translate:-50% 0}
+.tapc.look-playful .cel-card{position:relative;flex:1;display:flex;align-items:center;gap:calc(14 * var(--P));padding:calc(14 * var(--P)) calc(16 * var(--P));min-height:calc(110 * var(--P));color:var(--tx);pointer-events:auto;background-color:transparent!important}
+.tapc.look-playful .cel-stk{position:relative;flex:none;width:calc(84 * var(--P));height:calc(84 * var(--P));padding:calc(5 * var(--P));rotate:-4deg}
+.tapc.look-playful .cel-stk .al-ph{width:100%;height:100%;border-radius:calc(3 * var(--P));background-color:#F7F2E7;box-shadow:inset 0 0 0 calc(1.5 * var(--P)) #1F3F9A}
+.tapc.look-playful .cel-stk .al-ck{position:absolute;right:calc(-8 * var(--P));top:calc(-8 * var(--P));width:calc(28 * var(--P));height:calc(28 * var(--P));display:grid;place-items:center;padding:0;color:#0E2466}
+.tapc.look-playful .cel-stk .al-ck svg{width:calc(16 * var(--P));height:calc(16 * var(--P));stroke-width:3}
+.tapc.look-playful .cel-tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:calc(3 * var(--P));padding-right:calc(4 * var(--P))}
+.tapc.look-playful .cel-tx .ds-eyebrow{color:var(--acc);font-family:var(--tfont);letter-spacing:.06em}
+.tapc.look-playful.dark .cel-tx .ds-eyebrow{color:#F2C14E}
+.tapc.look-playful .cel-tx b{font:600 calc(19 * var(--ts,1) * var(--P))/1.2 var(--tfont)}
+.tapc.look-playful .cel-tx span{font-size:calc(14 * var(--ts,1) * var(--P));line-height:1.3;color:var(--td)}
+.tapc.look-playful .cel .k-azu.cel-azu{position:absolute;right:calc(10 * var(--P));top:calc(-62 * var(--P));height:calc(92 * var(--P));z-index:0}   /* behind the card: he pops up over its edge */
+.tapc.look-playful .cel-card{z-index:1}
+.tapc.look-playful .cel-burst{position:absolute;left:calc(58 * var(--P));top:calc(50% - 6 * var(--P));width:0;height:0;z-index:3}
+.tapc.look-playful .cel-burst i{position:absolute;left:0;top:0;width:calc(12 * var(--P));height:calc(12 * var(--P));border:calc(2 * var(--P)) solid var(--kf-frag-line);border-radius:calc(2 * var(--P));background:var(--kf-frag-a);opacity:0}
+.tapc.look-playful .cel-burst i:nth-child(even){background:var(--kf-frag-b);width:calc(9 * var(--P));height:calc(9 * var(--P))}
+.tapc.look-playful .cel-burst i:nth-child(3n){background:var(--kf-frag-c)}
+@keyframes kf-cel-in{0%{translate:0 calc(24 * var(--P));opacity:0}100%{translate:0 0;opacity:1}}   /* tween: card in, 380 ms ease-out-back */
+@keyframes kf-cel-slap{0%{scale:.6;rotate:-14deg}100%{scale:1;rotate:-4deg}}   /* tween: sticker slap, 400 ms ease-out-back, delay 120 ms */
+@keyframes kf-cel-azu{0%{translate:0 calc(30 * var(--P));opacity:0}100%{translate:0 0;opacity:1}}   /* tween: Azu pops, 320 ms ease-out-back, delay 300 ms */
+@keyframes kf-cel-frag{0%{translate:0 0;rotate:0deg;opacity:1}70%{opacity:1}100%{translate:var(--fx) var(--fy);rotate:var(--fr);opacity:0}}   /* tween: fragment, 920 ms ease-out, delay 180 ms; --fx/--fy/--fr per fragment */
+@keyframes kf-cel-out{0%{translate:0 0;opacity:1}100%{translate:0 calc(16 * var(--P));opacity:0}}   /* tween: back to the wall, 300 ms ease-in, at 2600 ms */
+.tapc.look-playful .cel.go .cel-card{animation:kf-cel-in .38s var(--k-back) both   /* tween: ease-out-back */}
+.tapc.look-playful .cel.go .cel-stk{animation:kf-cel-slap .4s .12s var(--k-back) both   /* tween: ease-out-back */}
+.tapc.look-playful .cel.go .cel-azu{animation:kf-cel-azu .32s .3s var(--k-back) both   /* tween: ease-out-back */}
+.tapc.look-playful .cel.go .cel-burst i{animation:kf-cel-frag .92s .18s ease-out both   /* tween: kf-cel-frag */}
+.tapc.look-playful .cel.out{animation:kf-cel-out .3s ease-in both   /* tween: kf-cel-out */}
+.tapc.look-playful .cel-burst i:nth-child(1){--fx:calc(-46 * var(--P));--fy:calc(-58 * var(--P));--fr:-120deg}
+.tapc.look-playful .cel-burst i:nth-child(2){--fx:calc(8 * var(--P));--fy:calc(-74 * var(--P));--fr:90deg}
+.tapc.look-playful .cel-burst i:nth-child(3){--fx:calc(34 * var(--P));--fy:calc(-70 * var(--P));--fr:160deg}
+.tapc.look-playful .cel-burst i:nth-child(4){--fx:calc(-30 * var(--P));--fy:calc(-84 * var(--P));--fr:-80deg}
+.tapc.look-playful .cel-burst i:nth-child(5){--fx:calc(-66 * var(--P));--fy:calc(-10 * var(--P));--fr:140deg}
+.tapc.look-playful .cel-burst i:nth-child(6){--fx:calc(-40 * var(--P));--fy:calc(46 * var(--P));--fr:-150deg}
+.tapc.look-playful .cel-burst i:nth-child(7){--fx:calc(14 * var(--P));--fy:calc(58 * var(--P));--fr:110deg}
+.tapc.look-playful .cel-burst i:nth-child(8){--fx:calc(-8 * var(--P));--fy:calc(-40 * var(--P));--fr:200deg}
+/* a still frame for review shots: the end of the motion, fragments mid-flight */
+.tapc.look-playful .cel.still .cel-burst i{opacity:.9;translate:calc(var(--fx) * .7) calc(var(--fy) * .7);rotate:var(--fr)}
+.tapc.look-playful.m-reduced .cel :is(.cel-card, .cel-stk, .cel-azu){animation:none}
+.tapc.look-playful.m-reduced .cel-burst{display:none}
+.tapc.look-playful.m-reduced .cel.go{animation:none;opacity:1;transition:opacity .12s linear}
+/* landscape: the two onboarding columns are short; Azu stays smaller there */
+.tapc.look-playful.ds-onb.land .ob-hello{width:calc(78 * var(--P));height:calc(98 * var(--P))}
+.tapc.look-playful.ds-onb.land .ob-hello .k-azu{height:calc(84 * var(--P))}
+.tapc.look-playful.ds-onb.land .ob-hello .ob-tile{height:calc(54 * var(--P))}
+.tapc.look-playful.ds-onb.land .ds-d{font-size:calc(28 * var(--ts,1) * var(--P))}
+.tapc.look-playful.ds-onb.land .ds-btn.main.l::before{display:none}
+
+/* integration: while a sticker is earned, wall labels step aside (the card never hides a label under it) */
+.ph.celebrating .mk .lbl{opacity:0}
+
+/* =====================================================================================================================
+   v19 section review (R1): onboarding footer + status band, Start in landscape / tablet, the sticker card's width
+   ===================================================================================================================== */
+/* the sticky footer sat 30 pt above the bottom edge (a sticky box stops at the scroller's padding), so chips and the preview showed
+   BELOW "Skip". The scroller loses its bottom padding; the footer carries it (the home-indicator zone), on the page paper.
+   unity: a footer element outside the ScrollView; the ScrollView's bottom inset = the footer's height */
+.tapc.look-playful.ds-onb .ds-onbp:not(.cols){padding-bottom:0}
+.tapc.look-playful.ds-onb .ds-onbp:not(.cols) .ds-acts{margin-bottom:0;padding:calc(12 * var(--P)) 0 calc(24 * var(--P))}
+.tapc.look-playful.ds-onb .ds-onbp .ds-acts{position:sticky}
+/* a short tin-glaze fade above the footer: text slides under it instead of being cut by an edge (unity: ramp, tinted --k-tin) */
+.tapc.look-playful.ds-onb .ds-onbp .ds-acts::before{content:"";position:absolute;left:calc(-4 * var(--P));right:calc(-4 * var(--P));top:calc(-18 * var(--P));height:calc(18 * var(--P));pointer-events:none;
+  background:linear-gradient(to bottom,transparent,var(--k-tin))   /* unity: ramp */}
+/* the status bar: content scrolled under "9:41" and the notch. A band of the page paper (the same tiled texture, so it reads as the page) */
+.tapc.look-playful.ds-onb::before{content:"";position:absolute;left:0;right:0;top:0;height:calc(34 * var(--P));z-index:3;pointer-events:none;background:var(--ob-bg)}
+.tapc.look-playful.ds-onb.land::before{height:calc(26 * var(--P))}
+
+/* START. Tablet portrait: the panel art stopped at 70 % (kids_30), so a bare paper band showed beside the narrower card: full bleed there */
+.tapc.ds-start.look-playful.tablet:not(.land) .ds-hero{inset:-4%}
+/* landscape: the card ran from the status bar to the bottom edge (and past both at text L): wider (fewer lines), centred in the safe area */
+.tapc.ds-start.look-playful.land .ds-center.st{width:calc(420 * var(--P));top:calc(50% + 10 * var(--P));max-height:calc(100% - 56 * var(--P));gap:calc(6 * var(--P));padding:calc(16 * var(--P)) calc(24 * var(--P)) calc(18 * var(--P))}
+.tapc.ds-start.look-playful.land .ds-center.st .ds-body{font-size:calc(16 * var(--ts,1) * var(--P));max-width:none}
+.tapc.ds-start.look-playful.land .ds-hero-t{font-size:calc(32 * var(--ts,1) * var(--P))!important}   /* kids_30 sets the font with !important */
+.tapc.ds-start.look-playful.land .ds-center.st :is(.ds-cap.ld, .ds-body, .ds-tiles){margin-top:0;margin-bottom:0}
+.tapc.ds-start.look-playful.land .ds-go{margin-top:calc(4 * var(--P))}
+/* phone landscape: the left column (welcome, who's visiting, the buttons) must show the two age cards above the sticky buttons.
+   Azu's greeting stays on portrait and tablets (one mascot moment, where there is room); the title and the cards are compact here */
+.tapc.look-playful.ds-onb.land:not(.tablet) .ob-hello{display:none}
+.tapc.look-playful.ds-onb.land:not(.tablet) .ob1.has-azu{display:flex;flex-direction:column}
+.tapc.look-playful.ds-onb.land:not(.tablet) .ds-d{font-size:calc(26 * var(--ts,1) * var(--P))}
+.tapc.look-playful.ds-onb.land:not(.tablet) .ds-opts.two .ds-opt .oi{width:calc(34 * var(--P));height:calc(34 * var(--P))}
+.tapc.look-playful.ds-onb.land:not(.tablet) .ds-opts.two .ds-opt .ds-h2{font-size:calc(18 * var(--ts,1) * var(--P))}
+.tapc.look-playful.ds-onb.land:not(.tablet) .ds-opts.two .ds-opt .ds-cap{font-size:calc(13.5 * var(--ts,1) * var(--P))}
+.tapc.look-playful.ds-onb.land:not(.tablet) .ds-onbp.cols .ds-acts .ds-btn.main{min-height:calc(52 * var(--P))}
+.tapc.look-playful.ds-onb.land .ds-onbp.cols .ds-acts::before{top:calc(-10 * var(--P));height:calc(10 * var(--P))}
+.tapc.look-playful.ds-onb.land:not(.tablet) .ob1.has-azu .ds-d{align-self:flex-start}
+/* the sticker card: the line "In your album: …, 2 of 2" broke before its last number on phones; a slightly smaller sticker gives the text room,
+   and the landscape / tablet cards are wider */
+.tapc.look-playful .cel-card{gap:calc(12 * var(--P));padding:calc(12 * var(--P)) calc(14 * var(--P)) calc(12 * var(--P)) calc(12 * var(--P))}
+.tapc.look-playful .cel-stk{width:calc(74 * var(--P));height:calc(74 * var(--P))}
+.tapc.look-playful .cel-burst{left:calc(50 * var(--P))}
+.tapc.look-playful.land .cel{width:calc(440 * var(--P))}
+.tapc.look-playful.tablet:not(.land) .cel{width:calc(480 * var(--P))}
+
+/* =====================================================================================================================
+   v20 (A1): onboarding v2, Settings by area, You
+   ===================================================================================================================== */
+/* who the tour is for: two plain buttons that always fit (text L too). The chosen one: stitched + pressed in + the yellow ✓ badge on its corner */
+.tapc.look-playful.ds-onb .ds-opts.two.oaud .ds-opt.oab{position:relative;padding:calc(10 * var(--P)) calc(10 * var(--P));gap:calc(8 * var(--P))}
+.tapc.look-playful.ds-onb .ds-opts.two.oaud .ds-opt.oab .oi{width:calc(34 * var(--P));height:calc(34 * var(--P))}
+.tapc.look-playful.ds-onb .ds-opts.two.oaud .ds-opt.oab .oi svg{width:calc(22 * var(--P));height:calc(22 * var(--P))}
+.tapc.look-playful.ds-onb .ds-opts.two.oaud .ds-opt.oab .ds-h2{font-size:calc(18 * var(--ts,1) * var(--P))}
+.tapc.look-playful.ds-onb .ds-opts.two.oaud .ds-opt.oab .ck{position:absolute;top:calc(-9 * var(--P));right:calc(-7 * var(--P));width:calc(26 * var(--P));height:calc(26 * var(--P));margin:0}
+.tapc.look-playful.ds-onb .ds-opts.two.oaud .ds-opt.oab:not(.on) .ck{display:none}
+/* the one example card: a flat sketched panel (information, not a button), on the page paper in light and dark */
+.tapc.look-playful.ds-onb .oex{border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--kq))!important;border-image:var(--kb-panel)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;padding:calc(14 * var(--P)) calc(14 * var(--P)) calc(16 * var(--P))}
+.tapc.look-playful.ds-onb .oex .ds-eyebrow{font:600 calc(15 * var(--ts,1) * var(--P))/1.2 var(--tfont);letter-spacing:0;text-transform:none;color:var(--td)}
+.tapc.look-playful.ds-onb .oex-tx b{font-family:var(--tfont);font-size:calc(18 * var(--ts,1) * var(--P))}
+.tapc.look-playful.ds-onb .oex-th{border:calc(2 * var(--P)) solid var(--k-line);border-radius:calc(8 * var(--P));rotate:-2deg}
+.tapc.look-playful.ds-onb .oex-say .bub{position:relative;border:calc(2 * var(--P)) solid var(--k-line);background:var(--kf-icon-bg);border-radius:calc(14 * var(--P)) calc(14 * var(--P)) calc(14 * var(--P)) calc(3 * var(--P));font-size:calc(15 * var(--ts,1) * var(--P))}
+.tapc.look-playful.ds-onb .oex-tag{border:calc(1.5 * var(--P)) solid color-mix(in srgb,var(--k-line) 55%,transparent);background:transparent;min-height:calc(30 * var(--P))}
+.tapc.look-playful.ds-onb .oex-tag svg{stroke:var(--k-line)}
+/* Settings › Help and about: the rows' icons wear the same painted-tile chip as the other Settings rows (no pastel squares) */
+.tapc.look-playful .sheet-set .ds-row .ic{flex:none;display:grid;place-items:center;width:calc(42 * var(--P));height:calc(42 * var(--P));box-sizing:border-box;
+  border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--P))!important;border-image:var(--kb-chip)!important;border-radius:0!important;background:transparent!important;color:var(--k-line)!important}
+.tapc.look-playful.light .sheet-set .ds-row .ic{color:#1F3F9A!important}
+.tapc.look-playful .sheet-set .ds-row .ic svg{width:calc(22 * var(--P));height:calc(22 * var(--P))}
+.tapc.look-playful .sheet-set .ds-row:nth-child(odd) .ic{rotate:-2deg}
+.tapc.look-playful .sheet-set .ds-row:nth-child(even) .ic{rotate:2deg}
+.tapc.look-playful .sheet-set .ds-row{min-height:calc(60 * var(--P))}
+.tapc.look-playful .sheet-set .ds-row .tt b{font-size:calc(16 * var(--ts,1) * var(--P))}
+/* You: the hero is a sketched panel; the three counts are painted tiles; the empty "saved" slot a dashed cobalt line */
+.tapc.look-playful.ds-you .yhead{border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--kq))!important;border-image:var(--kb-panel)!important;border-radius:0!important;background:transparent!important}
+.tapc.look-playful.ds-you .yhi{font-size:calc(21 * var(--ts,1) * var(--P))}
+.tapc.look-playful.ds-you .yav{background:var(--kf-icon-bg);border:calc(2 * var(--P)) solid var(--k-line)}
+.tapc.look-playful.ds-you .ychip{background:transparent;border:calc(1.5 * var(--P)) solid color-mix(in srgb,var(--k-line) 55%,transparent)}
+.tapc.look-playful.ds-you .ychip svg{color:var(--k-line)}
+.tapc.look-playful.ds-you .ystat{background:var(--kf-icon-bg);border:calc(2 * var(--P)) solid var(--k-line);border-radius:calc(10 * var(--P))}
+.tapc.look-playful.ds-you .ystat:nth-child(1){rotate:-1.5deg}.tapc.look-playful.ds-you .ystat:nth-child(2){rotate:1deg}.tapc.look-playful.ds-you .ystat:nth-child(3){rotate:-.5deg}
+.tapc.look-playful.ds-you .ystat .yi{color:var(--k-line)}
+.tapc.look-playful.ds-you .ybar{height:calc(10 * var(--P));border:calc(2 * var(--P)) solid var(--k-line);background:transparent}
+.tapc.look-playful.ds-you .ybar i{background:#F2C14E}
+.tapc.look-playful.ds-you .yempty{border-style:solid;border-color:transparent;border-width:calc(2 * var(--P));border-image:var(--kb-slot);border-radius:0}   /* unity: KIDS_FRAME_SLOT 9-slice */
+.tapc.look-playful.ds-you .yempty .yei{background:var(--kf-icon-bg);color:var(--k-line)}
+.tapc.look-playful.ds-you .yempty b{font-family:var(--tfont)}
+.tapc.look-playful.ds-you .ystrip i{border:calc(1.5 * var(--P)) solid var(--k-line);border-radius:calc(5 * var(--P))}
+.tapc.look-playful.ds-you .ystrip i.e{border-style:solid;border-color:transparent;border-width:calc(1.5 * var(--P));border-image:var(--kb-slot-s);border-radius:0;background:transparent}   /* unity: KIDS_FRAME_SLOT, slice-scale .167 */
+.tapc.look-playful.ds-you .ds-sh{font-family:var(--tfont);font-weight:600;letter-spacing:.01em;text-transform:none;font-size:calc(17 * var(--ts,1) * var(--P))}
+/* phone landscape: the right column (how long, interests, the buttons) fits at text M */
+.tapc.look-playful.ds-onb.land:not(.tablet) .ds-onbp.cols .ocol.c2{gap:calc(8 * var(--P));padding-top:calc(30 * var(--P))}
+.tapc.look-playful.ds-onb.land:not(.tablet) .ds-onbp.cols .ob2{gap:calc(8 * var(--P))}
+.tapc.look-playful.ds-onb.land:not(.tablet) .ds-onbp.cols .ds-opts.three .ds-opt{min-height:0;padding-top:calc(6 * var(--P));padding-bottom:calc(6 * var(--P))}
+.tapc.look-playful.ds-onb.land:not(.tablet) .ds-onbp.cols .kchips{gap:calc(8 * var(--P))}
+.tapc.look-playful.ds-onb.land:not(.tablet) .ds-onbp.cols .kchips .lchip{min-height:calc(38 * var(--P))}
+.tapc.look-playful.ds-onb.land:not(.tablet) .ds-onbp.cols .ds-sh{font-size:calc(16 * var(--ts,1) * var(--P))}
+
+/* =====================================================================================================================
+   v20 F (final fixer): the quick icons as a sticker, the chosen duration tile inked, phone landscape fits
+   ===================================================================================================================== */
+/* the quick icons (light / language / text): a cobalt-framed sticker strip on the paper, not Premium's grey glass. unity: KIDS_FRAME_CHIP_UP 9-slice */
+.tapc.look-playful.ds-onb .oqt{border-style:solid;border-color:transparent;border-width:calc(2 * var(--kq));border-image:var(--kb-chip-up)!important;border-radius:0;background:transparent;box-shadow:none;padding:0 calc(2 * var(--P));rotate:-1.5deg}
+.tapc.look-playful.ds-onb .oq{color:var(--tx)}
+.tapc.look-playful.ds-onb .oq .i{color:var(--k-line)}
+.tapc.look-playful.light.ds-onb .oq .i{color:#1F3F9A}
+.tapc.look-playful.ds-onb .oq .i svg{stroke-width:2.2}
+.tapc.look-playful.ds-onb .oq small{font:600 calc(12.5 * var(--P))/1 var(--tfont);letter-spacing:.01em}
+.tapc.look-playful.ds-onb .oq+.oq::before{background:color-mix(in srgb,var(--k-line) 35%,transparent);width:calc(1.5 * var(--P))}
+.tapc.look-playful.ds-onb .oq:active{translate:0 calc(1 * var(--P))}
+/* the chosen duration: inked. The tile fills with cobalt (the chosen-chip frame), its name and minutes turn light, the rosettes sit on a light
+   tile, and the yellow ✓ badge stays: chosen reads at a glance, not only by the check. unity: KIDS_FRAME_CHIP_ON 9-slice, pressed */
+.tapc.look-playful .ds-opts.three .ds-opt.on{border-image:var(--kb-chip-on)!important;translate:var(--kt-panel);color:var(--acc-fg)!important}
+.tapc.look-playful .ds-opts.three .ds-opt.on :is(.ds-h2, .ds-cap, .tcs){color:var(--acc-fg)!important}
+.tapc.look-playful.ds-onb .ds-opts.three .ds-opt.on::before{background-color:#FFF8EC;border-radius:calc(3 * var(--P));box-shadow:0 0 0 calc(2 * var(--P)) #FFF8EC}
+/* phone landscape: the right column (how long, interests) clears the "Let's go" fade at text M and L; the buttons a touch lower */
+.tapc.look-playful.ds-onb.land:not(.tablet) .ds-onbp.cols .ocol.c2{padding-top:calc(28 * var(--P))}
+.tapc.look-playful.ds-onb.land:not(.tablet) .ds-onbp.cols .ds-opts.three{margin-top:calc(6 * var(--P))}
+.tapc.look-playful.ds-onb.land:not(.tablet) .ds-onbp.cols .ds-opts.three .ds-opt{padding-top:calc(8 * var(--P))}
+.tapc.look-playful.ds-onb.land:not(.tablet) .ds-onbp.cols .ds-opts.three .ds-opt::before{position:absolute;top:calc(-7 * var(--P));left:50%;translate:-50% 0;margin:0;background-color:var(--k-tin);box-shadow:0 0 0 calc(2 * var(--P)) var(--k-tin)}   /* the rosettes ride on the tile's top edge, a sticker */
+.tapc.look-playful.ds-onb.land:not(.tablet) .ds-onbp.cols .ds-acts{padding-bottom:calc(10 * var(--P))}
+.tapc.look-playful.ds-onb.land:not(.tablet) .ds-onbp.cols .ds-acts .ds-btn.main{min-height:calc(48 * var(--P))}
+/* phone landscape: the big title stays one line at every text size (it is display type, 24 pt; the readable text still scales), so the age buttons show */
+.tapc.look-playful.ds-onb.land:not(.tablet) .ob1 .ds-d{font-size:calc(24 * var(--P))}
+.tapc.look-playful.ds-onb.land:not(.tablet) .ds-onbp.cols .kchips{gap:calc(6 * var(--P)) calc(8 * var(--P))}
+/* Settings: the switches (34 pt) get a centred 48 pt hit area too (unity: a 48 pt transparent hit box) */
+.tapc.look-playful .sheet-set .ds-sw::after{content:"";position:absolute;top:calc(-9 * var(--P));bottom:calc(-9 * var(--P));left:calc(-4 * var(--P));right:calc(-4 * var(--P))}

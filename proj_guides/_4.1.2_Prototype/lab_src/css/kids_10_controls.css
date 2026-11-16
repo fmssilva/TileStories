@@ -1,0 +1,238 @@
+/* v19 Playful (kids) look: kids_10_controls. Scoped to .tapc.look-playful; Unity-feasible techniques only (mk_review/unity_feasibility.md) */
+/* Controls as tactile stickers: every control is a kit 9-slice frame (raised = shadow baked in), pressed = the flat frame + translate.
+   Selected = the accent sprite + a check (never colour alone). Focus = a solid ring element (box-shadow spread, 0 blur; unity: a sibling
+   ring element, same radius), never `outline`. Disabled = the stitched "cut-out" frame, flat, full-opacity soft text (still 7:1).
+   Two signature details, used sparingly: a sticker sparkle on the LARGE main button only (one per screen), and a hand-drawn squiggle
+   under text buttons. Over the camera (the main screen) nothing here applies: the search bar and corner buttons belong to kids_30. */
+
+/* ---- local tokens ---- */
+.tapc.look-playful.light{--kc-sh:#0E2466;--kc-ring:#1F3F9A;--kc-ringgap:#FFFDF8;--kc-dot:#FFA285;--kc-ink:#0E2466;
+  --kc-spark:url("@@KIDS_CONTROLS_SPARKLE@@");--kc-squig:url("@@KIDS_CONTROLS_SQUIGGLE@@");--kc-lock:url("@@KIDS_CONTROLS_LOCK@@")}
+.tapc.look-playful.dark{--kc-sh:#060A22;--kc-ring:#FFC83D;--kc-ringgap:#10173A;--kc-dot:#FFA285;--kc-ink:#0E2466;
+  --kc-spark:url("@@KIDS_CONTROLS_SPARKLE_D@@");--kc-squig:url("@@KIDS_CONTROLS_SQUIGGLE_D@@");--kc-lock:url("@@KIDS_CONTROLS_LOCK_D@@")}
+.tapc.look-playful{--kc-focus:0 0 0 calc(2.5 * var(--kq)) var(--kc-ringgap),0 0 0 calc(5.5 * var(--kq)) var(--kc-ring)   /* the focus ring: gap + ring, hard (unity: a sibling ring element) */;
+  --kb-dis:var(--k-stitch) 48 fill / calc(17 * var(--kq)) / 0 stretch;   /* disabled: the stitched frame, scaled to a button */
+  --kb-chip-s:var(--k-chip) 28 fill / calc(11 * var(--kq)) / 0 stretch;
+  --kb-chip-on-s:var(--k-chip-on) 28 fill / calc(11 * var(--kq)) / 0 stretch}
+
+/* ============================== BUTTONS ============================== */
+/* every framed button: the frame carries fill, line and shadow */
+.tapc.look-playful :is(.ds-btn.main, .ds-btn.tonal, .ds-btn.glass, .ds-btn.outline){position:relative;border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--kq))!important;
+  background:transparent!important;box-shadow:none!important;filter:none;transform:none;transition:translate .22s var(--k-back)   /* unity: ease-out-back */}
+.tapc.look-playful .ds-btn:not(.text){border-radius:0}   /* framed: the drawn corner is the shape (focus restores a radius for the ring) */
+.tapc.look-playful .ds-btn.main{border-image:var(--kb-btn-up)!important;color:var(--acc-fg);font-family:var(--tfont);font-weight:600;letter-spacing:.01em}
+.tapc.look-playful :is(.ds-btn.tonal, .ds-btn.glass){border-image:var(--kb-btn2-up)!important;color:var(--sheet-fg);font-family:var(--tfont);font-weight:600;letter-spacing:.01em}
+.tapc.look-playful .ds-btn.outline{border-image:var(--kb-btn2)!important;color:var(--sheet-fg);font-weight:700}
+.tapc.look-playful :is(.ds-btn.tonal, .ds-btn.glass, .ds-btn.outline) .i{color:var(--acc)}
+.tapc.look-playful.dark :is(.ds-btn.tonal, .ds-btn.glass, .ds-btn.outline) .i{color:var(--k-line)}
+.tapc.look-playful .ds-btn.s{font-family:var(--font);font-weight:700;letter-spacing:0}
+/* pressed: the flat sprite, sunk into its shadow */
+.tapc.look-playful :is(.ds-btn.main, .ds-btn.tonal, .ds-btn.glass):is(:active, .pressed){translate:var(--kt-btn);transform:none;filter:none;transition:translate .08s ease-out}
+.tapc.look-playful .ds-btn.main:is(:active, .pressed){border-image:var(--kb-btn)!important}
+.tapc.look-playful :is(.ds-btn.tonal, .ds-btn.glass):is(:active, .pressed){border-image:var(--kb-btn2)!important}
+.tapc.look-playful .ds-btn.outline:is(:active, .pressed){translate:0 calc(1.5 * var(--kq));transform:none;filter:none}
+/* disabled: an empty dashed SLOT (no fill, no shadow: it cannot be pressed), soft text at full opacity (7:1) and a small lock in front of the
+   label, so it never reads as enabled in either mode (unity: the KIDS_FRAME_SLOT 9-slice + a lock sprite child) */
+.tapc.look-playful .ds-btn.disabled:is(.main, .tonal, .glass, .outline),.tapc.look-playful .ds-btn.disabled:not(.text){border-image:var(--kb-slot)!important;color:var(--sheet-fg2)!important;opacity:1;filter:none;translate:none;cursor:default;font-family:var(--font);font-weight:700}
+.tapc.look-playful .ds-btn.disabled .i{color:var(--sheet-fg2)}
+.tapc.look-playful .ds-btn.disabled:not(.text)::before{content:"";flex:none;display:block;position:static;width:calc(16 * var(--kq));height:calc(16 * var(--kq));margin-right:calc(6 * var(--kq));background:var(--kc-lock) center/contain no-repeat;rotate:0deg}
+.tapc.look-playful.kit .ds-btn.disabled:is(.main, .tonal, .glass, .outline){color:var(--td)!important}
+/* sizes: s 40 (its hit area stays 48), m 48, l 56; the label size follows the kit (Fredoka from 16 pt) */
+.tapc.look-playful .ds-btn.l{height:calc(58 * var(--kq));padding:0 calc(34 * var(--kq));font-size:calc(19 * var(--ts,1) * var(--kq))}
+.tapc.look-playful .ds-btn.main:not(.s){font-size:calc(17 * var(--ts,1) * var(--kq))}
+.tapc.look-playful .ds-btn.main.l{font-size:calc(19 * var(--ts,1) * var(--kq))}
+.tapc.look-playful .ds-btn.s::after{content:"";position:absolute;inset:calc(-6 * var(--kq)) 0}   /* 48 pt hit area */
+/* signature 1: a sticker sparkle on the large main button (the one hero action of a screen: Start, Let's go) */
+.tapc.look-playful .ds-btn.main.l:not(.disabled)::before{content:"";position:absolute;width:calc(26 * var(--kq));height:calc(26 * var(--kq));right:calc(-11 * var(--kq));top:calc(-14 * var(--kq));
+  background:var(--kc-spark) center/contain no-repeat;rotate:8deg;pointer-events:none}
+.tapc.look-playful .ds-btn.main.l:is(:active, .pressed)::before{rotate:-6deg;scale:.9;transition:rotate .08s ease-out,scale .08s ease-out}
+.tapc.look-playful .ds-btn.main.l::before{transition:rotate .22s var(--k-back),scale .22s var(--k-back)   /* unity: ease-out-back */}
+/* text buttons. signature 2: a hand-drawn squiggle under the link (the accent line), lifted a little when pressed */
+.tapc.look-playful .ds-btn.text{position:relative;color:var(--acc);font-family:var(--tfont);font-weight:600;letter-spacing:.01em;text-decoration:none;filter:none;transform:none;transition:translate .22s var(--k-back)   /* unity: ease-out-back */}
+.tapc.look-playful.dark .ds-btn.text{color:var(--acc)}
+.tapc.look-playful .ds-btn.text:not(.soft) span:last-child,.tapc.look-playful .ds-btn.text:not(.soft){text-decoration:none}
+.tapc.look-playful .ds-btn.text:not(.soft)::before{content:"";position:absolute;left:calc(6 * var(--kq));right:calc(6 * var(--kq));top:calc(50% + 11 * var(--kq));height:calc(7 * var(--kq));
+  background:var(--kc-squig) 0 0/100% 100% no-repeat;pointer-events:none}
+.tapc.look-playful .ds-btn.text.soft{color:var(--sheet-fg2);font-family:var(--font);font-weight:700}
+.tapc.look-playful .ds-btn.text:is(:active, .pressed){translate:0 calc(1.5 * var(--kq));transform:none;filter:none;transition:translate .08s ease-out}
+.tapc.look-playful .ds-btn.text.disabled{border-image:none!important;background:none!important;opacity:1}
+.tapc.look-playful .ds-btn.text.disabled::before{display:none}
+/* on the camera-free pages a dimmed backdrop sits behind the kit: the soft text keeps its own ground */
+.tapc.look-playful.kit .ds-btn.text.soft{color:var(--td)}
+
+/* icon buttons (the kit's action buttons: .kb .a-rad .c). Raised paper sticker; selected = accent sticker + a check badge; off = stitched */
+.tapc.look-playful .kb .a-rad .c{border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--kq))!important;border-image:var(--kb-btn2-up)!important;
+  background:transparent!important;box-shadow:none!important;color:var(--sheet-fg)!important;border-radius:0;position:relative;filter:none;transform:none;transition:translate .22s var(--k-back)   /* unity: ease-out-back */}
+.tapc.look-playful .kb .a-rad .c svg{width:calc(24 * var(--kq));height:calc(24 * var(--kq))}
+.tapc.look-playful .kb .a-rad:is(:active, .pressed) .c,.tapc.look-playful .kb .a-rad .c:active{border-image:var(--kb-btn2)!important;translate:var(--kt-btn);transform:none;filter:none;transition:translate .08s ease-out}
+.tapc.look-playful .kb .a-rad.on .c{border-image:var(--kb-btn-up)!important;color:var(--acc-fg)!important}
+.tapc.look-playful .kb .a-rad.on .c::before{content:"✓";position:absolute;right:calc(-9 * var(--kq));top:calc(-9 * var(--kq));width:calc(20 * var(--kq));height:calc(20 * var(--kq));display:grid;place-items:center;
+  border-radius:99px;background:#F2C14E;color:var(--kc-ink);border:calc(2 * var(--kq)) solid var(--kc-ink);font:800 calc(12 * var(--kq))/1 var(--font)}
+/* disabled = the same empty dashed SLOT as a disabled button (no fill, no shadow), soft glyph: it no longer reads as a normal sticker (v19 R2) */
+.tapc.look-playful .kb .a-rad.off .c{border-image:var(--kb-slot)!important;color:var(--sheet-fg2)!important;opacity:1;filter:none}
+.tapc.look-playful.kit .kb .a-rad.off .c{color:var(--td)!important}
+.tapc.look-playful .kb .a-rad.off{opacity:1;filter:none}
+.tapc.look-playful .kb .a-rad.more .c{border-image:var(--kb-btn2-up)!important}
+.tapc.look-playful .kb .l{font-weight:700}
+
+/* ============================== CHIPS ============================== */
+/* the kit gives the frames (chip-up, chip-on-up, pressed flat); here: the check, the label, the category dot */
+.tapc.look-playful .lchip{height:calc(36 * var(--kq));padding:0 calc(14 * var(--kq));font-weight:600;gap:calc(6 * var(--kq))}
+.tapc.look-playful .lchip.on,.tapc.look-playful .lchip.tsel.on{font-weight:700;color:var(--acc-fg)!important;background:transparent!important;box-shadow:none!important}
+.tapc.look-playful .lchip.on:active{border-image:var(--kb-chip-on)!important;translate:var(--kt-chip)}
+/* selected filter chip (no check icon of its own): a leading check, drawn as a glyph (unity: a text or sprite) */
+.tapc.look-playful .lchip.on:not(.tsel)::before{content:"✓";font:800 calc(14 * var(--kq))/1 var(--font);margin-right:calc(-1 * var(--kq))}
+.tapc.look-playful .lchip .ckm{width:calc(16 * var(--kq));height:calc(16 * var(--kq))}
+.tapc.look-playful .lchip .ckm svg{stroke-width:3}
+/* the category dot: a little ink-ringed bead (the colour is a hint, the label says it) */
+.tapc.look-playful .lchip i{width:calc(10 * var(--kq));height:calc(10 * var(--kq));box-shadow:0 0 0 calc(1.5 * var(--kq)) var(--kc-ink)}
+.tapc.look-playful.dark .lchip i{box-shadow:0 0 0 calc(1.5 * var(--kq)) var(--k-paper)}
+.tapc.look-playful.light .lchip.on i{box-shadow:0 0 0 calc(1.5 * var(--kq)) #FFFDF8}
+.tapc.look-playful.dark .lchip.on i{box-shadow:0 0 0 calc(1.5 * var(--kq)) var(--kc-ink)}
+/* the kit header's backdrop switch is a chip row too */
+.tapc.look-playful.kit .kbg .lchip{height:calc(32 * var(--kq))}
+
+/* ============================== SEGMENTED ============================== */
+/* a recessed tray (the flat input frame) holding a raised accent sticker with a check; labels stay full-strength text */
+.tapc.look-playful:is(.light, .dark) .ds-seg{border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--kq))!important;border-image:var(--kb-input)!important;
+  background:transparent!important;box-shadow:none!important;height:calc(44 * var(--kq));padding:calc(3 * var(--kq));gap:calc(2 * var(--kq))}
+/* tray heights, defined here only: 44 pt in the app (onboarding, Settings: with the row padding the target is ≥ 48 pt); 40 pt on the kit pages */
+.tapc.look-playful.kit:is(.light, .dark) .ds-seg{height:calc(40 * var(--kq));padding:calc(2.5 * var(--kq))}
+.tapc.look-playful .ds-seg span{display:flex!important;align-items:center;justify-content:center;gap:calc(4 * var(--kq));padding:0 calc(10 * var(--kq));border-style:solid;border-color:transparent;border-width:calc(2 * var(--kq));
+  color:var(--tx)!important;font-weight:600;white-space:nowrap;background:transparent!important;box-shadow:none!important;transition:translate .22s var(--k-back)   /* unity: ease-out-back */}
+.tapc.look-playful .ds-seg span:active:not(.on){translate:0 calc(1.5 * var(--kq));transition:translate .08s ease-out}
+.tapc.look-playful:is(.light, .dark) .ds-seg span.on{border-image:var(--kb-chip-on-up)!important;color:var(--acc-fg)!important;font-weight:700;background:transparent!important;box-shadow:none!important}
+.tapc.look-playful.sel-fill .ds-seg span.on::before,.tapc.look-playful .ds-seg span.on::before{content:"✓";margin:0;font-weight:800;line-height:1}
+/* the compact trays (settings rows, the language switch, the kit backdrop switch): smaller labels; each segment keeps a 48 pt hit area */
+.tapc.look-playful :is(.olang, .sheet-set .srow, .kh) .ds-seg span{padding:0 calc(10 * var(--kq));font-size:calc(14 * var(--ts,1) * var(--kq))}
+.tapc.look-playful .kh .kbg.ds-seg span.on{background:transparent!important}
+
+/* ============================== SWITCHES ============================== */
+/* the track: a paper chip (off) or the accent chip (on), flat; the knob: a raised paper bead with an ink rim; on = the knob carries a check */
+.tapc.look-playful .ds-sw{width:calc(56 * var(--kq));height:calc(34 * var(--kq));border-style:solid;border-color:transparent;border-width:calc(2 * var(--kq));border-image:var(--kb-chip)!important;
+  background:transparent!important;box-shadow:none;border-radius:0}
+.tapc.look-playful.light .ds-sw:not(.on),.tapc.look-playful.dark .ds-sw:not(.on){background:transparent!important}
+.tapc.look-playful .ds-sw.on{border-image:var(--kb-chip-on)!important;background:transparent!important}
+.tapc.look-playful .ds-sw i{left:calc(2 * var(--kq));top:calc(2 * var(--kq));width:calc(26 * var(--kq));height:calc(26 * var(--kq));display:grid;place-items:center;box-sizing:border-box;
+  background:var(--k-paper);border:calc(2 * var(--kq)) solid var(--k-line);box-shadow:0 calc(2 * var(--kq)) 0 var(--kc-sh);transition:translate .22s var(--k-back)   /* unity: ease-out-back */}
+.tapc.look-playful.light .ds-sw i{background:#FFFDF8;border-color:#1F3F9A}
+.tapc.look-playful.dark .ds-sw.on i{background:#FFF8EC;border-color:var(--kc-ink)}
+.tapc.look-playful .ds-sw.on i{translate:calc(22 * var(--kq)) 0;transform:none}   /* v19 R2: ds.css also moves it with transform: translateX, which pushed the knob past the track */
+.tapc.look-playful .ds-sw.on i::before{content:"✓";color:var(--kc-ink);font:800 calc(14 * var(--kq))/1 var(--font)}
+.tapc.look-playful.light .ds-sw.on i::before{color:#1F3F9A}
+.tapc.look-playful .ds-sw:active i{box-shadow:0 0 0 var(--kc-sh);translate:0 calc(1.5 * var(--kq));transition:translate .08s ease-out}
+.tapc.look-playful .ds-sw.on:active i{translate:calc(22 * var(--kq)) calc(1.5 * var(--kq))}   /* one combined translate (unity: a single style.translate) */
+
+/* ============================== SLIDER ============================== */
+/* a thick inked groove, filled with the accent up to the value; the thumb is a raised paper bead with an accent heart */
+.tapc.look-playful .ds-range{height:calc(40 * var(--kq))}
+.tapc.look-playful .ds-range::-webkit-slider-runnable-track{height:calc(14 * var(--kq));border-radius:99px;border:calc(2 * var(--kq)) solid var(--k-line);box-sizing:border-box;
+  background:linear-gradient(90deg,var(--acc) var(--v,50%),var(--k-paper) var(--v,50%))   /* unity: sprite (two elements: the groove frame + a fill element sized to the value) */}
+.tapc.look-playful .ds-range::-moz-range-track{height:calc(14 * var(--kq));border-radius:99px;border:calc(2 * var(--kq)) solid var(--k-line);
+  background:linear-gradient(90deg,var(--acc) var(--v,50%),var(--k-paper) var(--v,50%))   /* unity: sprite (two elements) */}
+.tapc.look-playful .ds-range::-webkit-slider-thumb{width:calc(30 * var(--kq));height:calc(30 * var(--kq));margin-top:calc(-10 * var(--kq));border-radius:99px;box-sizing:border-box;
+  background:var(--acc);   /* v19 R2: a paper bead with a clean accent centre (the 12 pt inset left a stray paper speck) */
+  border:calc(2.5 * var(--kq)) solid var(--k-line);box-shadow:inset 0 0 0 calc(6 * var(--kq)) var(--k-paper),0 calc(2.5 * var(--kq)) 0 var(--kc-sh)}
+.tapc.look-playful .ds-range::-moz-range-thumb{width:calc(30 * var(--kq));height:calc(30 * var(--kq));border-radius:99px;box-sizing:border-box;
+  background:var(--k-paper);border:calc(2.5 * var(--kq)) solid var(--k-line);box-shadow:0 calc(2.5 * var(--kq)) 0 var(--kc-sh)}
+.tapc.look-playful.light .ds-range::-webkit-slider-runnable-track{border-color:#1F3F9A}
+.tapc.look-playful.light .ds-range::-webkit-slider-thumb{border-color:#1F3F9A}
+.tapc.look-playful .ds-range:active::-webkit-slider-thumb{box-shadow:inset 0 0 0 calc(6 * var(--kq)) var(--k-paper),0 calc(.5 * var(--kq)) 0 var(--kc-sh);translate:0 calc(2 * var(--kq))}
+.tapc.look-playful .ds-panel .khd .ds-lbl.num{font-family:var(--tfont);font-weight:600}
+
+/* ============================== SEARCH FIELD AND INPUTS ============================== */
+/* on the kit pages and inside sheets only (the main screen's search bar over the camera is kids_30's) */
+.tapc.look-playful:is(.kit, .ds-onb, .ds-settings, .ds-explore) .msearch,.tapc.look-playful .ds-sheet .msearch{border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--kq))!important;
+  border-image:var(--kb-input-up)!important;background:transparent!important;box-shadow:none!important;height:calc(50 * var(--kq));padding:0 calc(14 * var(--kq));color:var(--sheet-fg2)}
+.tapc.look-playful:is(.kit, .ds-onb, .ds-settings, .ds-explore) .msearch .mi,.tapc.look-playful .ds-sheet .msearch .mi{color:var(--acc)}
+.tapc.look-playful.dark:is(.kit, .ds-onb, .ds-settings, .ds-explore) .msearch .mi{color:var(--k-line)}
+.tapc.look-playful:is(.kit, .ds-onb, .ds-settings, .ds-explore) .msearch .ph1{color:var(--sheet-fg2);font-weight:500}
+/* typing: the field sinks flat into its shadow and wears the focus ring */
+.tapc.look-playful:is(.kit, .ds-onb, .ds-settings, .ds-explore) .msearch.focus,.tapc.look-playful .ds-sheet .msearch.focus{border-image:var(--kb-input)!important;translate:var(--kt-chip);box-shadow:var(--kc-focus)!important;border-radius:calc(18 * var(--kq))!important}
+.tapc.look-playful .msearch .typed{color:var(--sheet-fg);font-weight:600}
+.tapc.look-playful .msearch .caret{background:var(--acc)}
+.tapc.look-playful .ds-cancel{color:var(--acc);font-family:var(--tfont);font-weight:600}
+/* text inputs (new DOM: input.k-field / textarea.k-field) */
+.tapc.look-playful .k-field{border-style:solid;border-color:transparent;border-width:calc(2 * var(--kq));border-image:var(--kb-input-up)!important;background:transparent;box-shadow:none;
+  height:calc(50 * var(--kq));padding:0 calc(14 * var(--kq));font:500 calc(16 * var(--ts,1) * var(--kq)) var(--font);color:var(--sheet-fg)}
+.tapc.look-playful .k-field::placeholder{color:var(--sheet-fg2)}
+.tapc.look-playful .k-field:focus{border-image:var(--kb-input)!important;translate:var(--kt-chip);box-shadow:var(--kc-focus);border-radius:calc(18 * var(--kq))!important}
+
+/* ============================== FOCUS (keyboard, switch control) ============================== */
+/* a solid ring (gap + ring) that follows the control's radius; no outline (unity: a sibling ring element, shown on :focus) */
+.tapc.look-playful :is(.ds-btn, .lchip, .ds-seg span, .ds-sw, .ds-opt, .kb .a-rad .c, .ds-x):is(:focus-visible, .focus){box-shadow:var(--kc-focus)!important}
+.tapc.look-playful .ds-btn:is(:focus-visible, .focus){border-radius:calc(22 * var(--kq))!important}   /* the ring only (unity: the ring element's radius) */
+.tapc.look-playful .lchip:is(:focus-visible, .focus),.tapc.look-playful .ds-sw:is(:focus-visible, .focus){border-radius:99px!important}
+.tapc.look-playful .ds-range:focus-visible::-webkit-slider-thumb{box-shadow:inset 0 0 0 calc(6 * var(--kq)) var(--k-paper),var(--kc-focus)}
+
+/* ============================== BADGES AND COUNTERS ============================== */
+/* badge: the kit's yellow sticker frame, ink numerals; soft ("Seen"): a small paper chip, flat */
+.tapc.look-playful .ds-badge{border-style:solid;border-color:transparent;border-width:calc(1.5 * var(--kq));border-image:var(--kb-badge-up)!important;background:transparent!important;color:#0E2466!important;
+  box-shadow:none!important;height:calc(24 * var(--kq));padding:0 calc(9 * var(--kq));font:600 calc(13 * var(--kq))/1 var(--tfont);letter-spacing:.02em}
+.tapc.look-playful .ds-badge.soft{border-image:var(--kb-chip-s)!important;color:var(--sheet-fg)!important;font-family:var(--font);font-weight:700}
+.tapc.look-playful.kit .ds-badge.soft{color:var(--tx)!important}
+/* counter on an icon: a coral bead with an ink rim, ink numerals (#FFA285: 7.35:1; v19 R2, #FF8A66 was 6.2:1) */
+.tapc.look-playful .ds-dot{background:var(--kc-dot)!important;color:#0E2466!important;border:calc(2 * var(--kq)) solid #0E2466;box-shadow:0 calc(1.5 * var(--kq)) 0 var(--kc-sh)!important;
+  min-width:calc(22 * var(--kq));height:calc(22 * var(--kq));font:600 calc(13 * var(--kq))/1 var(--tfont);right:calc(-8 * var(--kq));top:calc(-8 * var(--kq));box-sizing:border-box;z-index:1}
+
+/* ============================== PROGRESS AND STEPS ============================== */
+/* bar: an inked groove (paper), the fill the accent with a darker ink stripe tile (unity: a tiled stripe sprite) */
+.tapc.look-playful .ds-prog{height:calc(16 * var(--kq));border:calc(2 * var(--kq)) solid var(--k-line);background:var(--k-paper);box-sizing:border-box;border-radius:99px;padding:calc(2 * var(--kq))}
+.tapc.look-playful.light .ds-prog{border-color:#1F3F9A;background:#FFFDF8}
+.tapc.look-playful .ds-prog i{border-radius:99px;background-color:var(--acc);
+  background-image:repeating-linear-gradient(-45deg,transparent 0 calc(5 * var(--kq)),rgba(255,255,255,.18) calc(5 * var(--kq)) calc(9 * var(--kq)))   /* unity: sprite (a tiled stripe sprite) */}
+.tapc.look-playful.dark .ds-prog i{background-image:repeating-linear-gradient(-45deg,transparent 0 calc(5 * var(--kq)),rgba(14,36,102,.16) calc(5 * var(--kq)) calc(9 * var(--kq)))   /* unity: sprite */}
+/* steps (new DOM: div.k-steps > i, i.done, i.on): ink-ringed beads, done = filled + check, current = a wider accent pill */
+.tapc.look-playful .k-steps{display:flex;align-items:center;justify-content:center;gap:calc(8 * var(--kq))}
+.tapc.look-playful .k-steps i{display:grid;place-items:center;width:calc(14 * var(--kq));height:calc(14 * var(--kq));border-radius:99px;box-sizing:border-box;
+  border:calc(2 * var(--kq)) solid var(--k-line);background:var(--k-paper);font:800 calc(9 * var(--kq))/1 var(--font);font-style:normal;color:var(--acc-fg);transition:width .22s ease-out}
+.tapc.look-playful .k-steps i.done{background:var(--acc)}
+.tapc.look-playful .k-steps i.done::before{content:"✓"}
+.tapc.look-playful .k-steps i.on{width:calc(30 * var(--kq));background:var(--acc);box-shadow:0 calc(2 * var(--kq)) 0 var(--kc-sh)}
+
+/* ============================== STEPPER (new DOM: div.k-stepper > span.k-sb "−", b, span.k-sb "+") ============================== */
+.tapc.look-playful .k-stepper{display:inline-flex;align-items:center;gap:calc(10 * var(--kq));border-style:solid;border-color:transparent;border-width:calc(2 * var(--kq));border-image:var(--kb-input)!important;padding:calc(3 * var(--kq))}
+.tapc.look-playful .k-stepper b{min-width:calc(32 * var(--kq));text-align:center;font:600 calc(18 * var(--kq))/1 var(--tfont);color:var(--sheet-fg)}
+.tapc.look-playful .k-stepper .k-sb{display:grid;place-items:center;width:calc(40 * var(--kq));height:calc(40 * var(--kq));border-style:solid;border-color:transparent;border-width:calc(2 * var(--kq));
+  border-image:var(--kb-btn2-up)!important;font:700 calc(20 * var(--kq))/1 var(--font);color:var(--sheet-fg);cursor:pointer;transition:translate .22s var(--k-back)   /* unity: ease-out-back */}
+.tapc.look-playful .k-stepper .k-sb:active{border-image:var(--kb-btn2)!important;translate:var(--kt-btn);transition:translate .08s ease-out}
+.tapc.look-playful .k-stepper .k-sb.disabled{border-image:var(--kb-dis)!important;color:var(--sheet-fg2)}
+
+/* Reduce Motion: no travel, the state changes in place */
+.tapc.look-playful.m-reduced :is(.ds-btn, .lchip, .ds-seg span, .ds-sw i, .kb .a-rad .c, .k-steps i, .k-stepper .k-sb){transition:none}
+.tapc.look-playful.m-reduced .ds-btn.main.l::before{transition:none}
+
+/* dark: the knob and the thumb are cream beads (a navy bead on a navy track vanished) */
+.tapc.look-playful.dark .ds-sw i{background:#DCD6F5;border-color:var(--kc-ink)}
+.tapc.look-playful.dark .ds-range::-webkit-slider-thumb{background:var(--acc);border-color:var(--kc-ink);box-shadow:inset 0 0 0 calc(6 * var(--kq)) #FFF8EC,0 calc(2.5 * var(--kq)) 0 var(--kc-sh)}
+
+/* v19 R2 · the kit pages: a focused button's ring (5.5 pt outside the frame) cleared its caption; icon-button captions keep apart at text L */
+.tapc.look-playful.kit .kst2 .ds-btn.focus{margin:calc(4 * var(--kq)) calc(4 * var(--kq)) calc(7 * var(--kq))}
+.tapc.look-playful.kit.pg-buttons .krow{column-gap:calc(16 * var(--kq))}
+/* v19 R2 · Colour page, the accent list: inked sticker swatches; the chosen one is pressed in and wears the yellow check badge (not a ring alone) */
+.tapc.look-playful.kit .kac i{position:relative;box-sizing:border-box;border:calc(2 * var(--kq)) solid var(--kc-ink);border-radius:calc(14 * var(--kq));box-shadow:0 calc(3 * var(--kq)) 0 var(--kc-sh)   /* unity: the sibling shadow plate */}
+.tapc.look-playful.dark.kit .kac i{border-color:var(--k-line)}
+.tapc.look-playful.kit .kac.on i{translate:0 calc(2 * var(--kq));box-shadow:0 calc(1 * var(--kq)) 0 var(--kc-sh)}
+.tapc.look-playful.kit .kac.on i::after{content:"✓";position:absolute;right:calc(-9 * var(--kq));top:calc(-9 * var(--kq));width:calc(20 * var(--kq));height:calc(20 * var(--kq));display:grid;place-items:center;
+  border-radius:99px;background:#F2C14E;color:var(--kc-ink);border:calc(2 * var(--kq)) solid var(--kc-ink);font:800 calc(12 * var(--kq))/1 var(--font)}
+.tapc.look-playful.kit .kac.on small{font-weight:800}
+/* v19 R2 · Type page: the specimen rows part with the soft list divider (spec: dividers never use the ink) */
+.tapc.look-playful.kit .ktr+.ktr{border-top:calc(1.5 * var(--kq)) solid color-mix(in srgb,var(--sheet-fg2) 24%,transparent)   /* unity: precomputed colour */}
+/* v19 R2 · Spacing page, touch target: the "48 pt" caption moves under the dashed box (it crossed the box's bottom edge) */
+.tapc.look-playful.kit .ktouch{margin-bottom:calc(30 * var(--kq))}
+.tapc.look-playful.kit .ktouch::after{content:"";padding:0}
+.tapc.look-playful.kit .ktouch::before{content:"48 pt";position:absolute;left:calc(-6 * var(--kq));right:calc(-6 * var(--kq));top:calc(100% + 12 * var(--kq));text-align:center;font:700 calc(13 * var(--kq))/1 var(--font);color:var(--acc)}
+/* v19 R2 · Depth page. Elevation: each level is its own kit frame (floating = the button sticker, raised = the panel, overlay = the bold panel),
+   so the page shows the Playful depth language (hard drawn-in shadows that grow with the level) instead of plain outlined cards */
+.tapc.look-playful.kit .kl:is(.l1, .l2, .l3){border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--kq))!important;background:transparent!important;box-shadow:none!important;border-radius:0}
+.tapc.look-playful.kit .kl.l1{border-image:var(--kb-btn2-up)!important}
+.tapc.look-playful.kit .kl.l2{border-image:var(--kb-panel-up)!important}
+.tapc.look-playful.kit .kl.l3{border-image:var(--kb-panel-b-up)!important}
+.tapc.look-playful.kit .kl:is(.l1, .l2, .l3) b{font-family:var(--tfont);font-weight:600;color:var(--sheet-fg)}
+.tapc.look-playful.kit .kl:is(.l1, .l2, .l3) small{color:var(--sheet-fg2)}
+.tapc.look-playful.kit .kl.l0{border-radius:calc(14 * var(--kq))}
+/* Motion: the expressive spring overshoots the end stop; the groove now runs on past it (a right border in the groove colour: the dot's travel
+   is measured inside the border), so the bead never leaves its groove or the panel */
+.tapc.look-playful.light.kit .ktrack{background:#DCE2F3;border-right:calc(40 * var(--kq)) solid #DCE2F3}
+.tapc.look-playful.dark.kit .ktrack{background:#2E3A78;border-right:calc(40 * var(--kq)) solid #2E3A78}
+.tapc.look-playful.kit .ktrack i{box-shadow:0 0 0 calc(2 * var(--kq)) var(--k-paper);--spring:var(--k-back)   /* the kit's one overshoot (unity: ease-out-back) */}

@@ -1,0 +1,119 @@
+/* v19 section review: Premium (12+) fixes for this group, scoped to .tapc:not(.look-playful). Unity-feasible only. */
+/* Sizes in pt (--P = 1 pt). */
+
+/* ---- Base elements (the buttons gallery): the header is plain text on the panel's glass (it was a second glass pill inside the glass panel) ---- */
+.tapc.gal:not(.look-playful) .galh{background:none!important;padding:0!important;border-radius:0}
+.tapc.gal:not(.look-playful) .galh small{opacity:1;color:var(--td)}
+/* landscape: the panel is wider than tall: 7 buttons a row (13 = 2 rows) under the status bar, so nothing runs off the bottom.
+   The "On the wall" row is the portrait demo; in landscape there is no room for it under the panel, so it is hidden (both looks: see kids_40) */
+.ph.land .tapc.gal:not(.look-playful) .galp{top:calc(8 * var(--u))!important;left:calc(4 * var(--u))!important;right:calc(4 * var(--u))!important;max-width:none!important;padding:calc(3 * var(--u)) calc(4 * var(--u))!important}
+.ph.land .tapc.gal:not(.look-playful) .galg{grid-template-columns:repeat(7,1fr)!important;gap:calc(2.4 * var(--u)) calc(1 * var(--u))!important;margin-top:calc(2.5 * var(--u))!important}
+.ph.land .tapc.gal:not(.look-playful) :is(.galw, .galcap){display:none}
+
+/* ---- 5 · Floating panel ---- */
+/* text always reads from the left (a right-aligned 4-line summary is hard to read); the panel still opens on the POI's side */
+.tapc:not(.look-playful) .t-pan .tx{text-align:left!important}
+.tapc:not(.look-playful) .t-pan .tx .im.in{margin-left:0}
+.tapc:not(.look-playful) .t-pan .lk{justify-content:flex-start!important}
+.tapc:not(.look-playful) .t-pan .lk span{min-height:calc(48 * var(--P))}   /* 48 pt targets (was 44) */
+.tapc:not(.look-playful) .t-pan .tx>span{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}   /* unity: maxLines / text-overflow ellipsis */
+/* landscape: little height. The panel sits beside the POI (centred on it, clear of the marker), a shorter photo strip, three summary lines (the wall plane's layer has no .land: hence .ph.land);
+   above or below it the panel ran under the status bar and over its own marker at text L */
+.tapc:not(.look-playful).land .t-pan .tx,.ph.land .tapc:not(.look-playful) .t-pan .tx{top:0!important;transform:none!important;translate:0 -50%!important;margin:0 calc(74 * var(--P));width:calc(250 * var(--P))!important}
+.tapc:not(.look-playful).land .t-pan .tx .im.in,.ph.land .tapc:not(.look-playful) .t-pan .tx .im.in{height:calc(64 * var(--P))}
+.tapc:not(.look-playful).land .t-pan .tx>span,.ph.land .tapc:not(.look-playful) .t-pan .tx>span{-webkit-line-clamp:3}
+.tapc:not(.look-playful).land .t-pan .ln,.ph.land .tapc:not(.look-playful) .t-pan .ln{display:none}
+
+/* ---- 4 · Dock ---- */
+/* centred by auto margins between both edges: left:50% + translate shrank it to half the screen, so it clipped "more" (landscape, text L) */
+.tapc:not(.look-playful) .a-dock{left:0!important;right:0!important;margin:0 auto;width:max-content;transform:none!important;max-width:calc(100% - 6 * var(--u))}
+/* portrait: four pills side by side did not fit a phone, and "more" was scrolled out of sight. A tab-bar row instead: icon over label */
+.tapc:not(.look-playful):not(.land) .a-dock{gap:calc(2 * var(--P));padding:calc(4 * var(--P))!important}
+.tapc:not(.look-playful):not(.land) .a-dock .pill{flex-direction:column;justify-content:center;gap:calc(3 * var(--P));height:auto!important;min-height:calc(54 * var(--P));min-width:calc(64 * var(--P));
+  padding:calc(5 * var(--P)) calc(10 * var(--P))!important;font-size:calc(13 * var(--ts,1) * var(--P))!important;line-height:1.1;white-space:nowrap}
+
+/* ---- legibility: the gallery's conditions and caption at full strength (opacity .62 put them under 7:1), the tag chevrons solid ---- */
+.tapc.gal:not(.look-playful) .gi small{opacity:1!important;color:var(--td)!important}
+.tapc.gal:not(.look-playful) .galcap{opacity:1!important}
+.tapc:not(.look-playful) :is(.t-card, .t-chip) .chev{opacity:1}
+
+/* ---- 5 · Tiles in the screen card (Sheet with tiles): content-sized tiles packed in rows, 3 a row on a phone (5 actions = 2 rows, not 3),
+   so the peek's top stays well under the POI (it sat at the 55 %-wall limit). unity: flex-wrap row, the gap as child margins ---- */
+.tapc:not(.look-playful) .s-card .tiles{display:flex;flex-wrap:wrap;gap:calc(8 * var(--P))}
+.tapc:not(.look-playful) .s-card .tiles .tile{flex:1 1 auto;justify-content:center;white-space:nowrap;min-height:calc(48 * var(--P));padding:calc(6 * var(--P)) calc(10 * var(--P));gap:calc(7 * var(--P));grid-column:auto}
+
+/* ---- action views (360, Then & now, 3D): a 48 pt close target (it was 9 u ≈ 34 pt), the same 34 pt glass disc drawn inside it.
+   unity: the button is 48 pt with no background; a child disc carries the glass. Same centre as before ---- */
+.tapc:not(.look-playful) .tv:not(.tv-card)>.x{top:calc(17.5 * var(--u) - 24 * var(--P));right:calc(8.5 * var(--u) - 24 * var(--P));width:calc(48 * var(--P));height:calc(48 * var(--P));
+  padding:calc(15 * var(--P));background:none}
+.tapc:not(.look-playful) .tv:not(.tv-card)>.x::before{content:"";position:absolute;inset:calc(7 * var(--P));z-index:-1;border-radius:50%;background:rgba(10,12,18,.62);box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)   /* unity: a solid tint disc, no blur (62 % ink: the white ✕ keeps 5.6:1 on a white sky) + a 1 px border */}
+/* no glass on these Premium parts: tap.css gives them a blurred glass; here they are solid (the close button's 48 pt box, the category words,
+   the paper heart, the action-row icons). Lab-only reset of the base rule; unity: nothing to build (no camera-blur material on them) */
+.tapc:not(.look-playful) .tv:not(.tv-card)>.x,.tapc:not(.look-playful) .t-imm .bd .cat,.tapc:not(.look-playful) .t-imm .heart,
+.tapc:not(.look-playful) .irow.acts .ii .i,.tapc:not(.look-playful) .irow.acts .ii.pri .i{backdrop-filter:none;-webkit-backdrop-filter:none}
+/* Then & now with no "today" photo: the note sits in the right ("today") half, clear of the drag handle and the "then" photo; 7:1 on the slate */
+.tapc:not(.look-playful) .wipe.nophoto{place-items:center start;padding:0 7% 0 57%;text-align:left;color:#B9C1CF;line-height:1.4}
+
+/* ================= v20 (A3) · On tap, Premium: the immersive card, the action row, the panel, Coming soon. Calm museum quality ================= */
+/* ---- the immersive card: picture-led, a clean paper card; the photo carries it, the words stay short ---- */
+.tapc:not(.look-playful) .t-imm{border-radius:calc(20 * var(--P))!important;border:1px solid var(--tb)!important;
+  box-shadow:0 calc(10 * var(--P)) calc(28 * var(--P)) rgba(8,10,16,.28),0 calc(1 * var(--P)) calc(3 * var(--P)) rgba(8,10,16,.16)!important   /* unity: sprite (the shared 9-sliced soft-shadow sprite) */}
+.tapc:not(.look-playful) .t-imm .im{aspect-ratio:16/9;background-color:#2A3550}
+.tapc:not(.look-playful) .t-imm .bd{gap:calc(3 * var(--P));padding:calc(12 * var(--P)) calc(12 * var(--P)) calc(12 * var(--P)) calc(14 * var(--P))}
+/* the category: quiet words with its dot (the grey pill read 3:1) */
+.tapc:not(.look-playful) .t-imm .bd .cat{display:inline-flex;align-items:center;gap:calc(6 * var(--P));padding:0;background:none!important;border-radius:0;
+  font:700 calc(11.5 * var(--ts,1) * var(--P))/1.2 var(--font)!important;letter-spacing:.09em;text-transform:uppercase;color:var(--sheet-fg2)!important}
+.tapc:not(.look-playful) .t-imm .bd .cat::before{content:"";flex:none;width:calc(7 * var(--P));height:calc(7 * var(--P));border-radius:99px;background:var(--cc)}
+.tapc:not(.look-playful) .t-imm .bd b{font:600 calc(21 * var(--ts,1) * var(--P))/1.12 var(--tfont,var(--font))!important;letter-spacing:-.005em}
+/* the heart: a paper disc on the photo's corner, 48 pt to tap */
+.tapc:not(.look-playful) .t-imm .heart{width:calc(36 * var(--P));height:calc(36 * var(--P));padding:calc(9 * var(--P));border-radius:99px;display:grid;place-items:center;
+  background:var(--sheet);color:var(--sheet-fg);border:0;box-shadow:0 calc(1 * var(--P)) calc(4 * var(--P)) rgba(0,0,0,.25)   /* unity: sprite */}
+.tapc:not(.look-playful) .t-imm .heart::before{content:"";position:absolute;inset:calc(-6 * var(--P))}
+.tapc:not(.look-playful) .t-imm .heart svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2}
+.tapc:not(.look-playful) .t-imm .heart.on{color:#B3263E}.tapc:not(.look-playful) .t-imm .heart.on svg{fill:currentColor}
+
+/* ---- the action row: tiles (icon over its word), tinted with the accent so they read as buttons; the story is the one filled tile.
+   Pressed: the tile sinks (scale .94) and deepens. 56 pt tall, ≥ 48 pt wide on a phone ---- */
+.tapc:not(.look-playful) .irow.acts{gap:calc(6 * var(--P))!important;margin-top:calc(10 * var(--P))}
+.tapc:not(.look-playful) .irow.acts .ii{min-height:calc(56 * var(--P));padding:calc(7 * var(--P)) calc(3 * var(--P)) calc(6 * var(--P));gap:calc(4 * var(--P));border-radius:calc(14 * var(--P));
+  background:color-mix(in srgb,var(--acc) 10%,var(--sheet));transition:scale .18s ease-out}
+.tapc:not(.look-playful) .irow.acts .ii .i,.tapc:not(.look-playful) .irow.acts .ii.pri .i{width:calc(22 * var(--P))!important;height:calc(22 * var(--P))!important;padding:0!important;border-radius:0;background:none!important;border:0!important;
+  color:var(--acc)!important;box-shadow:none!important}
+.tapc:not(.look-playful) .irow.acts .ii .i svg{stroke-width:1.9}
+.tapc:not(.look-playful) .irow.acts .ii small{font:600 calc(12.5 * (.6 + .4 * var(--ts,1)) * var(--P))/1.1 var(--font)!important;color:var(--sheet-fg)!important;letter-spacing:.005em}
+/* the one-word labels grow 40 % of the text-size step (L: 13.5 pt), so four still fit a phone card; the name and the line above grow fully */
+.tapc:not(.look-playful) .irow.acts .ii.pri{background:var(--cta)}
+.tapc:not(.look-playful) .irow.acts .ii.pri .i,.tapc:not(.look-playful) .irow.acts .ii.pri small{color:var(--cta-fg)!important}
+.tapc:not(.look-playful) .irow.acts .ii:active{scale:.94;background:color-mix(in srgb,var(--acc) 20%,var(--sheet));transition:scale .08s ease-out}
+.tapc:not(.look-playful) .irow.acts .ii.pri:active{background:color-mix(in srgb,var(--cta) 82%,#000)}
+/* the floating panel: the same row on its glass; the tiles a touch stronger so they hold over the camera */
+.tapc:not(.look-playful) .t-pan .tx .irow.acts .ii:not(.pri){background:color-mix(in srgb,var(--acc) 13%,var(--tagbg))}
+.tapc:not(.look-playful) .t-pan .tx .sm{-webkit-line-clamp:2}
+
+/* ---- landscape: little height. The card becomes a row (the photo a column on the left, the words and buttons on the right), short
+   enough to sit beside the POI under the status bar (the portrait card ran off the bottom at text L) ---- */
+.tapc:not(.look-playful).land .t-imm,.ph.land .tapc:not(.look-playful) .t-imm{flex-direction:row;align-items:stretch;width:calc(392 * var(--P))!important;max-width:64%}
+.tapc:not(.look-playful).land .t-imm .im,.ph.land .tapc:not(.look-playful) .t-imm .im{width:36%;aspect-ratio:auto;height:auto;min-height:calc(120 * var(--P))}
+.tapc:not(.look-playful).land .t-imm .bd,.ph.land .tapc:not(.look-playful) .t-imm .bd{flex:1 1 auto;min-width:0;padding:calc(10 * var(--P)) calc(10 * var(--P)) calc(10 * var(--P)) calc(12 * var(--P))}
+.tapc:not(.look-playful).land .t-imm .bd b,.ph.land .tapc:not(.look-playful) .t-imm .bd b{font-size:calc(18 * var(--ts,1) * var(--P))!important}
+.tapc:not(.look-playful).land .t-imm .sm,.ph.land .tapc:not(.look-playful) .t-imm .sm{-webkit-line-clamp:1!important}
+.tapc:not(.look-playful).land .irow.acts,.ph.land .tapc:not(.look-playful) .irow.acts{margin-top:calc(6 * var(--P))}
+.tapc:not(.look-playful).land .irow.acts .ii,.ph.land .tapc:not(.look-playful) .irow.acts .ii{min-height:calc(52 * var(--P))}
+.tapc:not(.look-playful).land .t-imm .heart,.ph.land .tapc:not(.look-playful) .t-imm .heart{right:auto;left:calc(36% - 44 * var(--P))}
+
+/* ---- Coming soon, calm: a paper badge (a clock in the accent), never a warning colour ---- */
+.tapc:not(.look-playful) .soonb{background:color-mix(in srgb,var(--acc) 12%,var(--sheet))!important;color:var(--sheet-fg)!important;border:1px solid color-mix(in srgb,var(--acc) 30%,transparent);letter-spacing:.01em}
+.tapc:not(.look-playful) .soonb svg{color:var(--acc)}
+.tapc:not(.look-playful) :is(.t-imm, .t-pan) .im .soonb{background:var(--sheet)!important;border:0;box-shadow:0 calc(1 * var(--P)) calc(4 * var(--P)) rgba(0,0,0,.22)   /* unity: sprite */}
+.tapc:not(.look-playful) .t-chip small.soonl{color:var(--td)!important;text-transform:none;letter-spacing:.01em;font-weight:600}
+.tapc:not(.look-playful) .t-chip small.soonl svg{color:var(--acc)}
+/* the "What's coming" page: the photo, the name, one honest line, what's on its way, save it */
+.tapc:not(.look-playful) .tv-soon .soonb.big{background:var(--sheet)!important;border:0}
+.tapc:not(.look-playful) .tv-soon .sn-t{font-size:calc(30 * var(--ts,1) * var(--P))}
+.tapc:not(.look-playful) .tv-soon .sn-slot svg{color:var(--acc);opacity:1}
+.tapc:not(.look-playful).land .t-imm.soon .sm,.ph.land .tapc:not(.look-playful) .t-imm.soon .sm{-webkit-line-clamp:2!important}   /* a soon place: its one honest line is the message, never cut */
+/* v20 F (final fixer): landscape panel: it cleared the POI's centre but not its own marker (the 46 pt disc and its ring touched the panel's edge).
+   The side gap now clears the marker's ring by 12 pt or more (phone and tablet). Unity: the panel's side offset = marker radius + ring + 12 pt */
+.tapc:not(.look-playful).land .t-pan .tx,.ph.land .tapc:not(.look-playful) .t-pan .tx{margin:0 calc(98 * var(--P))}
+/* v20 F: the "What's coming" page's close: a 40 pt disc (was 34) inside its 48 pt target */
+.tapc:not(.look-playful) .tv.tv-soon>.x::before{inset:calc(4 * var(--P))}

@@ -1,0 +1,673 @@
+{
+ "app": [
+  {
+   "id": "app_prof",
+   "title": "0 \u00b7 Profiles",
+   "depth": 0,
+   "demo": true,
+   "rows": 0
+  },
+  {
+   "id": "prof_vis",
+   "title": "Visitors",
+   "depth": 1,
+   "demo": true,
+   "rows": 6
+  },
+  {
+   "id": "prof_time",
+   "title": "Time",
+   "depth": 1,
+   "demo": true,
+   "rows": 7
+  },
+  {
+   "id": "prof_int",
+   "title": "Interests",
+   "depth": 1,
+   "demo": true,
+   "rows": 2
+  },
+  {
+   "id": "app_ds",
+   "title": "1 \u00b7 Design system",
+   "depth": 0,
+   "demo": true,
+   "rows": 0
+  },
+  {
+   "id": "ds_look",
+   "title": "Look and mode",
+   "depth": 1,
+   "demo": true,
+   "rows": 5
+  },
+  {
+   "id": "ds_colour",
+   "title": "Colour",
+   "depth": 1,
+   "demo": true,
+   "rows": 2
+  },
+  {
+   "id": "theme",
+   "title": "Colour roles",
+   "depth": 2,
+   "demo": true,
+   "rows": 18
+  },
+  {
+   "id": "ds_type",
+   "title": "Type",
+   "depth": 1,
+   "demo": true,
+   "rows": 2
+  },
+  {
+   "id": "ds_space",
+   "title": "Spacing and shape",
+   "depth": 1,
+   "demo": true,
+   "rows": 3
+  },
+  {
+   "id": "ds_depth",
+   "title": "Depth and motion",
+   "depth": 1,
+   "demo": true,
+   "rows": 3
+  },
+  {
+   "id": "ds_buttons",
+   "title": "Buttons",
+   "depth": 1,
+   "demo": true,
+   "rows": 2
+  },
+  {
+   "id": "ds_panels",
+   "title": "Panels",
+   "depth": 1,
+   "demo": true,
+   "rows": 0
+  },
+  {
+   "id": "ds_controls",
+   "title": "Controls",
+   "depth": 1,
+   "demo": true,
+   "rows": 1
+  },
+  {
+   "id": "ds_lists",
+   "title": "Lists and messages",
+   "depth": 1,
+   "demo": true,
+   "rows": 0
+  },
+  {
+   "id": "ds_nav",
+   "title": "Navigation",
+   "depth": 1,
+   "demo": true,
+   "rows": 6
+  },
+  {
+   "id": "ds_sheets",
+   "title": "Sheets and dialogs",
+   "depth": 1,
+   "demo": true,
+   "rows": 2
+  },
+  {
+   "id": "app_start",
+   "title": "2 \u00b7 Start",
+   "depth": 0,
+   "demo": true,
+   "rows": 1
+  },
+  {
+   "id": "app_onb",
+   "title": "3 \u00b7 Onboarding",
+   "depth": 0,
+   "demo": true,
+   "rows": 7
+  },
+  {
+   "id": "app_main",
+   "title": "4 \u00b7 Main AR screen",
+   "depth": 0,
+   "demo": true,
+   "rows": 11
+  },
+  {
+   "id": "app_bar",
+   "title": "Action bar \u00b7 the main buttons",
+   "depth": 1,
+   "demo": true,
+   "rows": 6
+  },
+  {
+   "id": "lblcol",
+   "title": "Label colours",
+   "depth": 1,
+   "demo": false,
+   "rows": 3
+  },
+  {
+   "id": "app_point",
+   "title": "Pointing \u00b7 off-screen POIs",
+   "depth": 1,
+   "demo": false,
+   "rows": 9
+  },
+  {
+   "id": "app_tap",
+   "title": "5 \u00b7 On tap",
+   "depth": 0,
+   "demo": true,
+   "rows": 2
+  },
+  {
+   "id": "tap_base",
+   "title": "Base elements",
+   "depth": 1,
+   "demo": true,
+   "rows": 1
+  },
+  {
+   "id": "tap_tags",
+   "title": "Tag components",
+   "depth": 1,
+   "demo": true,
+   "rows": 0
+  },
+  {
+   "id": "tagc_tag_comp_1",
+   "title": "Label",
+   "depth": 2,
+   "demo": false,
+   "rows": 2
+  },
+  {
+   "id": "tagc_tag_comp_2",
+   "title": "Chip",
+   "depth": 2,
+   "demo": false,
+   "rows": 5
+  },
+  {
+   "id": "tagc_tag_comp_3",
+   "title": "Compact card",
+   "depth": 2,
+   "demo": false,
+   "rows": 6
+  },
+  {
+   "id": "tagc_tag_comp_4",
+   "title": "Immersive card",
+   "depth": 2,
+   "demo": false,
+   "rows": 7
+  },
+  {
+   "id": "tagc_tag_comp_5",
+   "title": "Floating panel",
+   "depth": 2,
+   "demo": false,
+   "rows": 6
+  },
+  {
+   "id": "tagcol",
+   "title": "Tag colours",
+   "depth": 2,
+   "demo": false,
+   "rows": 2
+  },
+  {
+   "id": "tap_acts",
+   "title": "Action components",
+   "depth": 1,
+   "demo": true,
+   "rows": 0
+  },
+  {
+   "id": "actc_act_comp_1",
+   "title": "Radial ring",
+   "depth": 2,
+   "demo": false,
+   "rows": 4
+  },
+  {
+   "id": "actc_act_comp_2",
+   "title": "Capsule",
+   "depth": 2,
+   "demo": false,
+   "rows": 4
+  },
+  {
+   "id": "actc_act_comp_3",
+   "title": "Links in the tag",
+   "depth": 2,
+   "demo": false,
+   "rows": 4
+  },
+  {
+   "id": "actc_act_comp_4",
+   "title": "Dock",
+   "depth": 2,
+   "demo": false,
+   "rows": 4
+  },
+  {
+   "id": "actc_act_comp_5",
+   "title": "Tiles",
+   "depth": 2,
+   "demo": false,
+   "rows": 4
+  },
+  {
+   "id": "tap_styles",
+   "title": "On-tap styles",
+   "depth": 1,
+   "demo": true,
+   "rows": 1
+  },
+  {
+   "id": "tapL_tap_layout_1",
+   "title": "Minimal",
+   "depth": 2,
+   "demo": false,
+   "rows": 11
+  },
+  {
+   "id": "tapL_tap_layout_2",
+   "title": "Radial",
+   "depth": 2,
+   "demo": false,
+   "rows": 11
+  },
+  {
+   "id": "tapL_tap_layout_3",
+   "title": "Immersive card",
+   "depth": 2,
+   "demo": false,
+   "rows": 11
+  },
+  {
+   "id": "tapL_tap_layout_4",
+   "title": "Floating panels",
+   "depth": 2,
+   "demo": false,
+   "rows": 11
+  },
+  {
+   "id": "tapL_tap_layout_5",
+   "title": "Sheet with tiles",
+   "depth": 2,
+   "demo": false,
+   "rows": 11
+  },
+  {
+   "id": "tapL_tap_layout_6",
+   "title": "Card only",
+   "depth": 2,
+   "demo": false,
+   "rows": 10
+  },
+  {
+   "id": "tap_soon",
+   "title": "Coming soon \u00b7 places without a story yet",
+   "depth": 1,
+   "demo": true,
+   "rows": 4
+  },
+  {
+   "id": "app_exp",
+   "title": "6 \u00b7 Explore menu",
+   "depth": 0,
+   "demo": true,
+   "rows": 4
+  },
+  {
+   "id": "app_set",
+   "title": "7 \u00b7 Settings and You",
+   "depth": 0,
+   "demo": true,
+   "rows": 4
+  }
+ ],
+ "global": [
+  {
+   "id": "wall",
+   "title": "Wall",
+   "depth": 0,
+   "demo": false,
+   "rows": 3
+  },
+  {
+   "id": "georef",
+   "title": "Geo-reference",
+   "depth": 0,
+   "demo": false,
+   "rows": 0
+  },
+  {
+   "id": "cats",
+   "title": "Categories",
+   "depth": 0,
+   "demo": false,
+   "rows": 0
+  },
+  {
+   "id": "x_Text & Fonts",
+   "title": "Text & Fonts",
+   "depth": 0,
+   "demo": false,
+   "rows": 0
+  },
+  {
+   "id": "pointstyles",
+   "title": "Point styles",
+   "depth": 0,
+   "demo": false,
+   "rows": 1
+  },
+  {
+   "id": "pstyle_body",
+   "title": "Point style \u00b7 Glass chip",
+   "depth": 1,
+   "demo": true,
+   "rows": 21
+  },
+  {
+   "id": "styles",
+   "title": "Region styles",
+   "depth": 0,
+   "demo": false,
+   "rows": 1
+  },
+  {
+   "id": "style_body",
+   "title": "Style \u00b7 Soft glow",
+   "depth": 1,
+   "demo": false,
+   "rows": 0
+  },
+  {
+   "id": "st_line",
+   "title": "Line",
+   "depth": 2,
+   "demo": false,
+   "rows": 10
+  },
+  {
+   "id": "st_vert",
+   "title": "Vertices",
+   "depth": 2,
+   "demo": false,
+   "rows": 1
+  },
+  {
+   "id": "st_fill",
+   "title": "Fill",
+   "depth": 2,
+   "demo": false,
+   "rows": 5
+  },
+  {
+   "id": "st_motion",
+   "title": "Motion",
+   "depth": 2,
+   "demo": false,
+   "rows": 0
+  },
+  {
+   "id": "st_intro",
+   "title": "Intro (reveal)",
+   "depth": 3,
+   "demo": false,
+   "rows": 3
+  },
+  {
+   "id": "st_idle",
+   "title": "Idle (while visible)",
+   "depth": 3,
+   "demo": false,
+   "rows": 3
+  },
+  {
+   "id": "st_focus",
+   "title": "Focus (on tap)",
+   "depth": 3,
+   "demo": false,
+   "rows": 3
+  },
+  {
+   "id": "tagstyles",
+   "title": "Tag styles",
+   "depth": 0,
+   "demo": false,
+   "rows": 0
+  },
+  {
+   "id": "modelstyles",
+   "title": "Model styles",
+   "depth": 0,
+   "demo": true,
+   "rows": 0
+  },
+  {
+   "id": "levels",
+   "title": "Hierarchy Levels",
+   "depth": 0,
+   "demo": false,
+   "rows": 0
+  },
+  {
+   "id": "life_g",
+   "title": "Wall Life",
+   "depth": 0,
+   "demo": false,
+   "rows": 0
+  },
+  {
+   "id": "life_settings",
+   "title": "Settings",
+   "depth": 1,
+   "demo": false,
+   "rows": 2
+  },
+  {
+   "id": "sound",
+   "title": "Ambient sound",
+   "depth": 0,
+   "demo": false,
+   "rows": 0
+  },
+  {
+   "id": "x_Orientation",
+   "title": "Orientation",
+   "depth": 0,
+   "demo": false,
+   "rows": 0
+  },
+  {
+   "id": "x_LOD",
+   "title": "LOD",
+   "depth": 0,
+   "demo": false,
+   "rows": 0
+  },
+  {
+   "id": "x_Zoom",
+   "title": "Zoom",
+   "depth": 0,
+   "demo": false,
+   "rows": 0
+  },
+  {
+   "id": "x_Displacement",
+   "title": "Displacement",
+   "depth": 0,
+   "demo": false,
+   "rows": 0
+  },
+  {
+   "id": "x_Select, Filter & Search",
+   "title": "Select, Filter & Search",
+   "depth": 0,
+   "demo": false,
+   "rows": 0
+  },
+  {
+   "id": "wayfind",
+   "title": "Wayfinding helpers",
+   "depth": 0,
+   "demo": true,
+   "rows": 0
+  },
+  {
+   "id": "rs_test",
+   "title": "Test",
+   "depth": 0,
+   "demo": false,
+   "rows": 1
+  },
+  {
+   "id": "json_g",
+   "title": "config.json (live preview)",
+   "depth": 0,
+   "demo": false,
+   "rows": 0
+  }
+ ],
+ "specific": [
+  {
+   "id": "id_0",
+   "title": "1 \u00b7 Identity",
+   "depth": 0,
+   "demo": false,
+   "rows": 3
+  },
+  {
+   "id": "pos_0",
+   "title": "2 \u00b7 Position",
+   "depth": 0,
+   "demo": false,
+   "rows": 2
+  },
+  {
+   "id": "pres_0",
+   "title": "3 \u00b7 Presentation",
+   "depth": 0,
+   "demo": false,
+   "rows": 0
+  },
+  {
+   "id": "rest_0",
+   "title": "At rest \u00b7 how it is seen",
+   "depth": 1,
+   "demo": false,
+   "rows": 5
+  },
+  {
+   "id": "shapes_0",
+   "title": "Shapes",
+   "depth": 2,
+   "demo": false,
+   "rows": 1
+  },
+  {
+   "id": "shape",
+   "title": "Shape \u00b7 Outline",
+   "depth": 3,
+   "demo": false,
+   "rows": 3
+  },
+  {
+   "id": "tap_0",
+   "title": "On tap \u00b7 what a tap does",
+   "depth": 1,
+   "demo": true,
+   "rows": 5
+  },
+  {
+   "id": "content_0",
+   "title": "Alive \u00b7 Wall Life rows",
+   "depth": 1,
+   "demo": false,
+   "rows": 0
+  },
+  {
+   "id": "life_item_0",
+   "title": "Row \u00b7 Night facade",
+   "depth": 2,
+   "demo": false,
+   "rows": 9
+  },
+  {
+   "id": "kp_0",
+   "title": "Repaint settings",
+   "depth": 3,
+   "demo": false,
+   "rows": 5
+  },
+  {
+   "id": "acts_0",
+   "title": "4 \u00b7 Content for actions",
+   "depth": 0,
+   "demo": true,
+   "rows": 0
+  },
+  {
+   "id": "am_twin_tower_church",
+   "title": "3D model",
+   "depth": 1,
+   "demo": true,
+   "rows": 5
+  },
+  {
+   "id": "ap_twin_tower_church",
+   "title": "360 visit",
+   "depth": 1,
+   "demo": true,
+   "rows": 0
+  },
+  {
+   "id": "amap_twin_tower_church",
+   "title": "Today on the map",
+   "depth": 1,
+   "demo": true,
+   "rows": 0
+  },
+  {
+   "id": "atn_twin_tower_church",
+   "title": "Then & now \u00b7 not in this POI's action set",
+   "depth": 1,
+   "demo": true,
+   "rows": 0
+  },
+  {
+   "id": "aq_twin_tower_church",
+   "title": "Quiz \u00b7 not in this POI's action set",
+   "depth": 1,
+   "demo": true,
+   "rows": 0
+  },
+  {
+   "id": "cc_0",
+   "title": "5 \u00b7 Card",
+   "depth": 0,
+   "demo": false,
+   "rows": 0
+  },
+  {
+   "id": "json_s",
+   "title": "config.json (live preview)",
+   "depth": 0,
+   "demo": false,
+   "rows": 0
+  }
+ ]
+}

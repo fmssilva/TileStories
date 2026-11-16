@@ -1,0 +1,153 @@
+/* v19 Playful (kids) look: kids_00_kit. Scoped to .tapc.look-playful; Unity-feasible techniques only (mk_review/unity_feasibility.md) */
+
+/* moved from ds.css (v18 Playful), made Unity-feasible: no mask, no outline, no filter; hard shadows only (unity: a sibling element, translate) */
+/* the v18 lists use :where() (specificity 0,2,0) so any `.tapc.look-playful …` rule in the group files wins over them */
+/* ===== v18: the Playful look's treatments, driven by its tokens (outline_pt → .outlined, shadow_style hard → .sh-hard) ===== */
+.tapc.outlined :where(.ds-btn:not(.text), .lchip, .ds-seg, .ds-opt, .ds-list, .ds-panel, .ds-solid, .ds-dialog, .ds-banner, .msearch, .mbar, .ds-nav, .t-chip, .t-card, .t-label, .t-pan .tx, .s-card, .a-rad .c, .pill, .tile, .tib .i, .mtip, .ktoast, .ds-x, .mcorner, .mavatar, .mazu, .t-imm){border:calc(var(--outline) * var(--u)) solid var(--ink)!important}
+.tapc.outlined .ds-sheet{border-top:calc(var(--outline) * var(--u)) solid var(--ink)}
+.tapc.sh-hard :where(.ds-btn.main, .ds-btn.tonal, .ds-btn.glass, .ds-btn.outline, .lchip, .ds-opt, .a-rad .c, .pill, .tile, .msearch, .mbar, .ds-nav, .t-card, .t-chip, .t-label, .mtip, .ds-x, .mcorner){box-shadow:0 calc(3 * var(--P)) 0 var(--hs)!important}
+.tapc.sh-hard :where(.ds-list, .ds-panel, .ds-dialog, .s-card, .t-pan .tx, .ds-banner){box-shadow:0 calc(4 * var(--P)) 0 var(--hs)!important}
+.tapc.sh-hard :where(.msearch, .mbar, .t-card, .t-chip, .t-label, .mcorner, .mazu, .t-imm){box-shadow:0 calc(3 * var(--P)) 0 var(--hs),0 calc(6 * var(--P)) calc(12 * var(--P)) rgba(0,0,0,.18)!important   /* over the camera: a faint halo too. unity: sprite (one shared 9-sliced soft-shadow sprite) */}
+.tapc.sh-hard :where(.ds-sheet) :where(.ds-list, .ds-panel){box-shadow:none!important}   /* nested panels sit flat */
+.tapc.sh-hard :where(.ds-btn, .lchip, .ds-opt, .a-rad .c, .pill, .tile, .mbtn){transition:translate .22s var(--k-back),box-shadow .22s ease-out   /* unity: ease-out-back */}
+/* pressed: ONE translate (the property, never a transform on top of it), so a group file's own `translate: var(--kt-*)` replaces it instead of adding to it */
+.tapc.sh-hard :where(.ds-btn, .lchip, .ds-opt, .a-rad .c, .pill, .tile, .mbtn):active,.tapc.sh-hard :where(.ds-btn.pressed){translate:0 calc(2 * var(--P));transition:translate .08s ease-out,box-shadow .08s}
+.tapc.sh-hard :where(.ds-btn.main, .ds-btn.tonal, .ds-btn.glass, .ds-btn.outline, .lchip, .ds-opt, .a-rad .c, .pill, .tile):active,.tapc.sh-hard :where(.ds-btn.pressed){box-shadow:0 calc(1 * var(--P)) 0 var(--hs)!important}
+.tapc.sh-hard :where(.ds-opt.on){box-shadow:inset 0 0 0 calc(2.5 * var(--P)) var(--acc),0 calc(3 * var(--P)) 0 var(--hs)!important}
+.tapc.sh-hard :where(.ds-opts.three .ds-opt.on){box-shadow:0 calc(3 * var(--P)) 0 var(--hs)!important}
+.tapc.look-playful .ds-btn.main,.tapc.look-playful .ds-btn.l{font-family:var(--tfont);letter-spacing:.01em}
+.tapc.look-playful .ds-btn.s{font-family:var(--font)}
+.tapc.look-playful :is(.ds-d, .ds-h1){font-family:var(--tfont);font-weight:600;letter-spacing:-.005em}
+/* selected = the accent fill plus a check (never colour alone) */
+.tapc.sel-fill .ds-seg span.on{background:var(--acc)!important;color:var(--acc-fg)!important;font-weight:700;box-shadow:none}
+.tapc.sel-fill .ds-seg span.on::before{content:"✓";font-weight:800;margin-right:calc(3 * var(--P))}   /* a glyph, not a mask (Unity: a text or sprite) */
+.tapc.sel-fill .ds-opts.three .ds-opt.on .ds-h2::before{content:"✓ ";font-weight:700}
+/* Playful: no Premium warm greys; badges; the immersive card becomes a solid card under its photo */
+.tapc.look-playful.dark{--tonal:#263070;--navbg:#263070;--page:#10173A}
+.tapc.look-playful.light{--tonal:#FFFDF8;--page:#F7F2E7}
+.tapc.look-playful.dark :is(.mbar,.ds-seg){background:var(--tagbg)!important}
+.tapc.look-playful .ds-badge{background:#F2C14E!important;color:#0E2466!important;box-shadow:0 0 0 calc(1.5 * var(--P)) #0E2466;font-family:var(--tfont)}
+.tapc.look-playful .t-imm .sh{background:linear-gradient(180deg,rgba(0,0,0,0) 30%,rgba(0,0,0,.08) 44%,transparent 46%)   /* unity: ramp (the shared alpha-ramp sprite) */}
+.tapc.look-playful .t-imm .bd{left:0;right:0;bottom:0;padding:calc(12 * var(--P)) calc(16 * var(--P)) calc(14 * var(--P));background:var(--sheet);color:var(--sheet-fg);border-top:calc(var(--outline) * var(--u)) solid var(--ink)}
+.tapc.look-playful .t-imm .bd span{opacity:1;color:var(--sheet-fg2)}
+.tapc.look-playful .t-imm .cat{color:var(--acc-fg)!important;background:var(--acc)!important}
+.tapc.look-playful .ds-opt.kid .oi{background:rgba(242,193,78,.34);color:var(--tx)}
+.tapc.look-playful .ds-opt .oi{background:rgba(201,212,240,.6);color:var(--tx)}
+.tapc.look-playful.dark .ds-opt .oi{background:rgba(169,184,242,.18)}
+.tapc.look-playful.dark .ds-opt.kid .oi{background:rgba(242,193,78,.22)}
+
+/* =====================================================================================================================
+   v19 · THE AZULEJO KIT (step 1). Hand-drawn 9-slice frames (media/KIDS_FRAME_*), doodles, the tile texture, Azu.
+   Units: every frame SVG is authored at 2 px per pt, so a slice of 36 = 18 pt. Each frame comes flat and "_UP" (raised: the ink
+   shadow baked in, offset down-right; the sprite then extends past the element by the offset: border-image-outset).
+   Pressed = the flat sprite + translate by the offset (the element sinks into its shadow). Unity: -unity-slice-* with the same
+   numbers on the 3x PNGs (mk_review/v19/kit/png); shadows can also be the _SH silhouette as a sibling, tinted ink, translated.
+
+   API for the group files (CSS only). NB: a `border` shorthand resets border-image, and v18's .outlined sets `border:…!important`, so write border-image with !important:
+     border-image: var(--kb-<shape>-up)     raised (frame + baked shadow)     shapes: panel panel-b stitch btn btn2 chip chip-on input badge
+     border-image: var(--kb-<shape>)        flat (nested, pressed, selected)  sheet (top edge + sides, line only)
+     translate: var(--kt-<size>)            the pressed offset                sizes: panel btn chip badge
+     plus: border-color:transparent; background:transparent; box-shadow:none (the frame carries the fill)
+   or, on new DOM: class="k-frame k-btn k-press" (k-panel k-panel-b k-card k-btn k-btn2 k-chip k-chip-on k-input k-badge; k-flat; k-press)
+   ===================================================================================================================== */
+.tapc.look-playful.light{
+  --k-panel:url("@@KIDS_FRAME_PANEL@@");--k-panel-up:url("@@KIDS_FRAME_PANEL_UP@@");--k-panel-b:url("@@KIDS_FRAME_PANEL_B@@");--k-panel-b-up:url("@@KIDS_FRAME_PANEL_B_UP@@");
+  --k-stitch:url("@@KIDS_FRAME_CARD_STITCH@@");--k-stitch-up:url("@@KIDS_FRAME_CARD_STITCH_UP@@");--k-sheet:url("@@KIDS_FRAME_SHEET@@");
+  --k-btn:url("@@KIDS_FRAME_BTN@@");--k-btn-up:url("@@KIDS_FRAME_BTN_UP@@");--k-btn2:url("@@KIDS_FRAME_BTN2@@");--k-btn2-up:url("@@KIDS_FRAME_BTN2_UP@@");
+  --k-chip:url("@@KIDS_FRAME_CHIP@@");--k-chip-up:url("@@KIDS_FRAME_CHIP_UP@@");--k-chip-on:url("@@KIDS_FRAME_CHIP_ON@@");--k-chip-on-up:url("@@KIDS_FRAME_CHIP_ON_UP@@");
+  --k-input:url("@@KIDS_FRAME_INPUT@@");--k-input-up:url("@@KIDS_FRAME_INPUT_UP@@");--k-badge:url("@@KIDS_FRAME_BADGE@@");--k-badge-up:url("@@KIDS_FRAME_BADGE_UP@@");
+  --k-slot:url("@@KIDS_FRAME_SLOT@@");--k-tex:url("@@KIDS_TEX_TILE@@");--k-line:#1F3F9A;--k-paper:#FFFDF8;--k-tin:#F7F2E7}
+.tapc.look-playful.dark{
+  --k-panel:url("@@KIDS_SURFACES_TPANEL_D@@");--k-panel-up:url("@@KIDS_SURFACES_TPANEL_UP_D@@");   /* v19: every dark panel is the glazed tile (R3) */
+  --k-panel-b:url("@@KIDS_FRAME_PANEL_B_D@@");--k-panel-b-up:url("@@KIDS_FRAME_PANEL_B_UP_D@@");
+  --k-stitch:url("@@KIDS_FRAME_CARD_STITCH_D@@");--k-stitch-up:url("@@KIDS_FRAME_CARD_STITCH_UP_D@@");--k-sheet:url("@@KIDS_FRAME_SHEET_D@@");
+  --k-btn:url("@@KIDS_FRAME_BTN_D@@");--k-btn-up:url("@@KIDS_FRAME_BTN_UP_D@@");--k-btn2:url("@@KIDS_FRAME_BTN2_D@@");--k-btn2-up:url("@@KIDS_FRAME_BTN2_UP_D@@");
+  --k-chip:url("@@KIDS_FRAME_CHIP_D@@");--k-chip-up:url("@@KIDS_FRAME_CHIP_UP_D@@");--k-chip-on:url("@@KIDS_FRAME_CHIP_ON_D@@");--k-chip-on-up:url("@@KIDS_FRAME_CHIP_ON_UP_D@@");
+  --k-input:url("@@KIDS_FRAME_INPUT_D@@");--k-input-up:url("@@KIDS_FRAME_INPUT_UP_D@@");--k-badge:url("@@KIDS_FRAME_BADGE_D@@");--k-badge-up:url("@@KIDS_FRAME_BADGE_UP_D@@");
+  --k-slot:url("@@KIDS_FRAME_SLOT_D@@");--k-tex:url("@@KIDS_TEX_TILE_D@@");--k-line:#A9B8F2;--k-paper:#1B2456;--k-tin:#182050}
+/* the one overshoot easing (press releases, entrances). Unity: DOTween Ease.OutBack (overshoot 1.70158) / a USS transition with ease-out-back */
+.tapc.look-playful{--k-back:cubic-bezier(.34,1.56,.64,1)   /* unity: ease-out-back */}
+/* ONE dark shadow colour for the whole look: the _D frames bake #060A22 (kitgen.py) and every CSS drop uses it (Unity: the --hs token tinting _SH) */
+.tapc.look-playful.dark{--hs:#060A22!important;--k-sh:#060A22}
+.tapc.look-playful.light{--k-sh:#0E2466}
+/* the bundles: source, slices (SVG px), widths (pt), outset (the baked shadow), stretch (Unity: sliced) */
+.tapc.look-playful{
+  --kq:var(--P);
+  --kb-panel:var(--k-panel) 48 fill / calc(24 * var(--kq)) / 0 stretch;
+  --kb-panel-up:var(--k-panel-up) 48 54 56 48 fill / calc(24 * var(--kq)) calc(27 * var(--kq)) calc(28 * var(--kq)) calc(24 * var(--kq)) / 0 calc(3 * var(--kq)) calc(4 * var(--kq)) 0 stretch;
+  --kb-panel-b:var(--k-panel-b) 48 fill / calc(24 * var(--kq)) / 0 stretch;
+  --kb-panel-b-up:var(--k-panel-b-up) 48 54 56 48 fill / calc(24 * var(--kq)) calc(27 * var(--kq)) calc(28 * var(--kq)) calc(24 * var(--kq)) / 0 calc(3 * var(--kq)) calc(4 * var(--kq)) 0 stretch;
+  --kb-stitch:var(--k-stitch) 48 fill / calc(24 * var(--kq)) / 0 stretch;
+  --kb-stitch-up:var(--k-stitch-up) 48 54 56 48 fill / calc(24 * var(--kq)) calc(27 * var(--kq)) calc(28 * var(--kq)) calc(24 * var(--kq)) / 0 calc(3 * var(--kq)) calc(4 * var(--kq)) 0 stretch;
+  --kb-sheet:var(--k-sheet) 72 72 8 72 / calc(36 * var(--kq)) calc(36 * var(--kq)) calc(4 * var(--kq)) calc(36 * var(--kq)) / 0 stretch;
+  --kb-btn:var(--k-btn) 36 fill / calc(18 * var(--kq)) / 0 stretch;
+  --kb-btn-up:var(--k-btn-up) 36 40 42 36 fill / calc(18 * var(--kq)) calc(20 * var(--kq)) calc(21 * var(--kq)) calc(18 * var(--kq)) / 0 calc(2 * var(--kq)) calc(3 * var(--kq)) 0 stretch;
+  --kb-btn2:var(--k-btn2) 36 fill / calc(18 * var(--kq)) / 0 stretch;
+  --kb-btn2-up:var(--k-btn2-up) 36 40 42 36 fill / calc(18 * var(--kq)) calc(20 * var(--kq)) calc(21 * var(--kq)) calc(18 * var(--kq)) / 0 calc(2 * var(--kq)) calc(3 * var(--kq)) 0 stretch;
+  --kb-chip:var(--k-chip) 28 fill / calc(14 * var(--kq)) / 0 stretch;
+  --kb-chip-up:var(--k-chip-up) 28 32 34 28 fill / calc(14 * var(--kq)) calc(16 * var(--kq)) calc(17 * var(--kq)) calc(14 * var(--kq)) / 0 calc(2 * var(--kq)) calc(3 * var(--kq)) 0 stretch;
+  --kb-chip-on:var(--k-chip-on) 28 fill / calc(14 * var(--kq)) / 0 stretch;
+  --kb-chip-on-up:var(--k-chip-on-up) 28 32 34 28 fill / calc(14 * var(--kq)) calc(16 * var(--kq)) calc(17 * var(--kq)) calc(14 * var(--kq)) / 0 calc(2 * var(--kq)) calc(3 * var(--kq)) 0 stretch;
+  --kb-input:var(--k-input) 32 fill / calc(16 * var(--kq)) / 0 stretch;
+  --kb-input-up:var(--k-input-up) 32 36 38 32 fill / calc(16 * var(--kq)) calc(18 * var(--kq)) calc(19 * var(--kq)) calc(16 * var(--kq)) / 0 calc(2 * var(--kq)) calc(3 * var(--kq)) 0 stretch;
+  --kb-badge:var(--k-badge) 16 fill / calc(8 * var(--kq)) / 0 stretch;
+  --kb-badge-up:var(--k-badge-up) 16 18 20 16 fill / calc(8 * var(--kq)) calc(9 * var(--kq)) calc(10 * var(--kq)) calc(8 * var(--kq)) / 0 calc(1 * var(--kq)) calc(2 * var(--kq)) 0 stretch;
+  --kt-panel:calc(3 * var(--kq)) calc(4 * var(--kq));--kt-btn:calc(2 * var(--kq)) calc(3 * var(--kq));--kt-chip:calc(2 * var(--kq)) calc(3 * var(--kq));--kt-badge:calc(1 * var(--kq)) calc(2 * var(--kq));
+  /* the empty slot (a sticker goes here): a broken hand-drawn line, flat, no shadow. 24 = 12 pt corners; the small variant (Explore strip) at half scale */
+  --kb-slot:var(--k-slot) 24 fill / calc(12 * var(--kq)) / 0 stretch;--kb-slot-s:var(--k-slot) 24 fill / calc(6 * var(--kq)) / 0 stretch;
+  --k-tex-size:calc(80 * var(--kq))}
+
+/* utility classes (for new DOM: step 3 and the groups' JS proposals) */
+.tapc.look-playful .k-frame{border-style:solid;border-color:transparent!important;border-width:calc(2 * var(--kq));background:transparent!important;box-shadow:none!important;border-radius:0;transition:translate .22s var(--k-back)   /* unity: ease-out-back */}
+.tapc.look-playful .k-slot{border-image:var(--kb-slot)!important;--kf-flat:var(--kb-slot)}
+.tapc.look-playful .k-panel{border-image:var(--kb-panel-up)!important;--kf-flat:var(--kb-panel);--kt:var(--kt-panel)}
+.tapc.look-playful .k-panel-b{border-image:var(--kb-panel-b-up)!important;--kf-flat:var(--kb-panel-b);--kt:var(--kt-panel)}
+.tapc.look-playful .k-card{border-image:var(--kb-stitch-up)!important;--kf-flat:var(--kb-stitch);--kt:var(--kt-panel)}
+.tapc.look-playful .k-btn{border-image:var(--kb-btn-up)!important;--kf-flat:var(--kb-btn);--kt:var(--kt-btn);color:var(--acc-fg)}
+.tapc.look-playful .k-btn2{border-image:var(--kb-btn2-up)!important;--kf-flat:var(--kb-btn2);--kt:var(--kt-btn)}
+.tapc.look-playful .k-chip{border-image:var(--kb-chip-up)!important;--kf-flat:var(--kb-chip);--kt:var(--kt-chip)}
+.tapc.look-playful .k-chip-on{border-image:var(--kb-chip-on-up)!important;--kf-flat:var(--kb-chip-on);--kt:var(--kt-chip);color:var(--acc-fg)}
+.tapc.look-playful .k-input{border-image:var(--kb-input-up)!important;--kf-flat:var(--kb-input);--kt:var(--kt-chip)}
+.tapc.look-playful .k-badge{border-image:var(--kb-badge-up)!important;--kf-flat:var(--kb-badge);--kt:var(--kt-badge);color:#0E2466}
+.tapc.look-playful .k-frame.k-flat{border-image:var(--kf-flat)!important}
+.tapc.look-playful .k-frame.k-press:active,.tapc.look-playful .k-frame.k-press.pressed{border-image:var(--kf-flat)!important;translate:var(--kt);transition:translate .08s ease-out}
+.tapc.look-playful .k-doodle{display:inline-grid;width:calc(32 * var(--kq));height:calc(32 * var(--kq));color:var(--k-line)}
+.tapc.look-playful .k-doodle svg{width:100%;height:100%}
+.tapc.look-playful .k-azu{display:block;height:calc(120 * var(--kq));width:auto;pointer-events:none;user-select:none}
+.tapc.look-playful .k-tex{background-color:var(--k-tin);background-image:var(--k-tex);background-size:var(--k-tex-size)}
+.tapc.look-playful.m-reduced :is(.k-frame, .ds-btn.main, .ds-panel, .ds-list, .ds-opt, .lchip){transition:none}
+
+/* ---- the base, applied to the generic parts (the group files refine each component) ---- */
+/* pages and sheets that never show the camera: tin-glaze white + the faint tile texture */
+.tapc.ds-onb.look-playful,.tapc.ds-start.look-playful{background-color:var(--k-tin);background-image:var(--k-tex);background-size:var(--k-tex-size);color:var(--tx)}
+.tapc.look-playful .ds-sheet{background-color:var(--sheet);background-image:var(--k-tex);background-size:var(--k-tex-size);
+  border-style:solid;border-color:transparent;border-width:calc(2.5 * var(--kq)) calc(2.5 * var(--kq)) 0;border-image:var(--kb-sheet)!important;
+  border-radius:calc(35 * var(--kq)) calc(35 * var(--kq)) 0 0;box-shadow:none!important}
+/* the generic parts: the hand-drawn frame replaces v18's ruled outline and hard box-shadow */
+.tapc.look-playful :is(.ds-panel, .ds-list, .ds-btn.main, .ds-opt, .lchip){border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--kq))!important;background:transparent!important;box-shadow:none!important;transition:translate .22s var(--k-back)   /* unity: ease-out-back */}
+.tapc.look-playful :is(.ds-panel, .ds-list, .ds-btn.main, .ds-opt, .lchip):is(:active, .pressed, .on){box-shadow:none!important}
+.tapc.look-playful :is(.ds-panel, .ds-list){border-image:var(--kb-panel-up)!important}
+.tapc.look-playful :is(.ds-sheet, .ds-solid, .ds-dialog) :is(.ds-panel, .ds-list){border-image:var(--kb-panel)!important}   /* nested panels sit flat */
+.tapc.look-playful .ds-list .ds-row+.ds-row{border-color:color-mix(in srgb,var(--sheet-fg2) 22%,transparent)}
+.tapc.look-playful .ds-btn.main{border-image:var(--kb-btn-up)!important;color:var(--acc-fg)}
+.tapc.look-playful .ds-btn.main:is(:active, .pressed){border-image:var(--kb-btn)!important;translate:var(--kt-btn);transform:none;transition:translate .08s ease-out}
+.tapc.look-playful .ds-opt{border-image:var(--kb-panel-up)!important;color:var(--tx)}
+.tapc.look-playful .ds-opt:active{border-image:var(--kb-panel)!important;translate:var(--kt-panel);transform:none}
+.tapc.look-playful .ds-opt.on{border-image:var(--kb-stitch)!important;translate:var(--kt-panel)}   /* chosen: pressed in, with the stitched border (and the check) */
+.tapc.look-playful .ds-opts.three .ds-opt.on{border-image:var(--kb-stitch)!important;translate:var(--kt-panel)}   /* one "selected choice" style: stitched + pressed in; the yellow ✓ badge is kids_50's */
+.tapc.look-playful .lchip{border-image:var(--kb-chip-up)!important;color:var(--tx)}
+.tapc.look-playful .lchip:active{border-image:var(--kb-chip)!important;translate:var(--kt-chip);transform:none}
+.tapc.look-playful .lchip.on,.tapc.look-playful .lchip.tsel.on{border-image:var(--kb-chip-on-up)!important;color:var(--acc-fg)}
+.tapc.look-playful .lchip.on .ckm{color:var(--acc-fg)}
+
+/* v19 fix: a framed element has NO corner radius (the hand-drawn corner is the shape; in UI Toolkit a radius rounds the background geometry
+   and cuts the art). The radius returns only for the focus ring (kids_10: unity, a separate ring element). :where() keeps this at 0,2,0 so the focus rules win. Sheets keep their top radius:
+   their own background (colour + texture) must stop at the ink corner. */
+.tapc.look-playful :where(.k-frame, .ds-panel, .ds-list, .ds-solid, .ds-dialog, .ds-btn:not(.text), .ds-opt, .lchip, .ds-seg, .ds-seg span, .ds-sw, .kb .a-rad .c, .ds-badge,
+  .k-field, .k-stepper, .k-stepper .k-sb, .ktoast, .toast, .ds-banner, .ds-photo, .s-card .ban, .s-card .tcta, .s-card .ask, .tv.tv-card>div:first-child, .tv.tv-card>.x,
+  .ds-sheet .ds-x, .ds-solid .ds-x, .ds-dialog .ds-x, .ds-main .ds-x){border-radius:0!important}
+.tapc.look-playful.land .s-card{border-radius:0!important}
+.tapc.look-playful:is(.kit, .ds-onb, .ds-settings, .ds-explore) .msearch,.tapc.look-playful .ds-sheet .msearch{border-radius:0!important}
+.tapc.look-playful :is(.ds-seg span, .ds-opt, .kb .a-rad .c, .ds-x, .k-stepper .k-sb):is(:focus-visible, .focus){border-radius:calc(16 * var(--kq))!important}   /* the focus ring keeps a radius */
+/* F-kit: phone-landscape kit pages: a shorter polaroid photo, so the card's title sits above the page's end ramp */
+.tapc.look-playful.kit.land.phone .ds-photo{padding-top:calc(84 * var(--kq));min-height:0}

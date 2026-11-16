@@ -1,0 +1,1089 @@
+/* ---------- App › 1 Design system: tokens → components → patterns (32_design.js) ---------- */
+.tapc svg{stroke-width:var(--stroke,1.6)}
+.tapc{--S:calc(var(--sp,1) * var(--u))}
+
+/* type scale */
+.tapc .ds-d{display:block;font:650 calc(7 * var(--ts,1) * var(--u))/1.05 var(--tfont,var(--font));letter-spacing:-.015em}
+.tapc .ds-h1{display:block;font:650 calc(5.2 * var(--ts,1) * var(--u))/1.12 var(--tfont,var(--font));letter-spacing:-.01em}
+.tapc .ds-h2{display:block;font:650 calc(4 * var(--ts,1) * var(--u))/1.2 var(--tfont,var(--font))}
+.tapc .ds-body{margin:0;font:450 calc(3.1 * var(--ts,1) * var(--u))/1.45 var(--font)}
+.tapc .ds-lbl{font:650 calc(3 * var(--ts,1) * var(--u))/1.2 var(--font)}
+.tapc .ds-eyebrow{display:block;font:700 calc(2.4 * var(--ts,1) * var(--u))/1.2 var(--font);letter-spacing:.09em;text-transform:uppercase;opacity:.75}
+.tapc .soft{color:var(--td)}
+.tapc .ds-solid .soft,.tapc .ds-sheet .soft,.tapc .ds-dialog .soft,.tapc .ds-app .ds-main:not(.x) .ds-view>.ds-body{color:var(--sheet-fg2)}
+
+/* buttons */
+.tapc .ds-btn{display:inline-flex;align-items:center;justify-content:center;gap:calc(1.6 * var(--u));height:calc(11 * var(--u));padding:0 calc(5 * var(--u));border-radius:calc(min(var(--r-btn,3.4), 5.5) * var(--u));font:650 calc(3 * var(--ts,1) * var(--u))/1 var(--font);cursor:pointer;pointer-events:auto;white-space:nowrap;transition:transform var(--dur) cubic-bezier(.2,.8,.2,1),filter var(--dur);user-select:none}
+.tapc:not(.kids) .ds-btn{border-radius:99px}
+.tapc .ds-btn .i{width:calc(4.4 * var(--u));height:calc(4.4 * var(--u));display:grid}
+.tapc .ds-btn.main{background:var(--cta);color:var(--cta-fg);box-shadow:0 calc(1 * var(--u)) calc(3.4 * var(--u)) rgba(0,0,0,calc(var(--depth,.35) * .7))}
+.tapc .ds-btn.tonal{background:color-mix(in srgb,var(--sheet-fg,#fff) 11%,transparent);color:var(--sheet-fg,var(--tx))}
+.tapc .ds-btn.glass{color:var(--tx)}
+.tapc .ds-btn.text{height:auto;padding:calc(1.4 * var(--u)) calc(1 * var(--u));background:none;color:var(--acc);box-shadow:none}
+.tapc .ds-btn.text.soft{color:var(--td)}
+.tapc .ds-btn.pressed,.tapc .ds-btn:active{transform:scale(.95);filter:brightness(.9)}
+.tapc .ds-btn.disabled{opacity:.38;filter:saturate(.4);box-shadow:none}
+.tapc .ds-btn.s{height:calc(8.4 * var(--u));padding:0 calc(3.6 * var(--u));font-size:calc(2.7 * var(--ts,1) * var(--u))}
+.tapc .ds-btn.l{height:calc(13.4 * var(--u));padding:0 calc(8 * var(--u));font-size:calc(3.4 * var(--ts,1) * var(--u))}
+.tapc .ds-btns{display:flex;gap:calc(2.4 * var(--S));flex-wrap:wrap;margin-top:calc(1 * var(--S))}
+
+/* panels */
+.tapc .ds-panel{display:flex;flex-direction:column;gap:calc(2 * var(--S));padding:calc(4.4 * var(--S));border-radius:calc(var(--r-card,5) * var(--u));color:var(--tx);pointer-events:auto}
+.tapc .ds-solid{display:flex;flex-direction:column;gap:calc(2 * var(--S));padding:calc(4.4 * var(--S));border-radius:calc(var(--r-card,5) * var(--u));background:var(--sheet);color:var(--sheet-fg);backdrop-filter:blur(22px) saturate(1.2);-webkit-backdrop-filter:blur(22px) saturate(1.2);box-shadow:0 calc(2 * var(--u)) calc(8 * var(--u)) rgba(0,0,0,calc(var(--depth,.35) * 1.1));pointer-events:auto}
+.tapc .ds-photo{position:relative;min-height:calc(44 * var(--u));border-radius:calc(var(--r-card,5) * var(--u));overflow:hidden;background-color:#26324A;display:flex;align-items:flex-end;box-shadow:0 calc(2 * var(--u)) calc(7 * var(--u)) rgba(0,0,0,calc(var(--depth,.35) * 1.1))}
+.tapc .ds-photo .scr{position:absolute;inset:0;background:linear-gradient(180deg,transparent 25%,rgba(6,8,14,var(--scrim,.55)) 62%,rgba(6,8,14,calc(var(--scrim,.55) + .25)))}
+.tapc .ds-photo .tx{position:relative;padding:calc(4.4 * var(--S));color:#fff;display:flex;flex-direction:column;gap:calc(.8 * var(--u))}
+.tapc .ds-photo .tx span{font:450 calc(2.9 * var(--ts,1) * var(--u))/1.3 var(--font);opacity:.85}
+.tapc .khd{display:flex;align-items:center;justify-content:space-between;gap:calc(3 * var(--u))}
+.tapc .ds-x{flex:none;width:calc(8.4 * var(--u));height:calc(8.4 * var(--u));display:grid;place-items:center;border-radius:99px;background:color-mix(in srgb,currentColor 10%,transparent);cursor:pointer;pointer-events:auto}
+.tapc .ds-x svg{width:55%;height:55%}
+.tapc .ds-solid .tiles,.tapc .ds-sheet .tiles{margin:0}
+
+/* controls */
+.tapc .lchip{pointer-events:auto}
+.tapc.sel-ring:not(.kids) .lchip.on{background:var(--tg);color:var(--tx);box-shadow:inset 0 0 0 calc(.55 * var(--u)) var(--acc)}
+.tapc .ds-seg{display:flex;padding:calc(.8 * var(--u));border-radius:calc(min(var(--r-chip,99), 4) * var(--u));pointer-events:auto}
+.tapc .ds-seg span{flex:1;text-align:center;padding:calc(2.4 * var(--u)) 0;border-radius:calc(min(var(--r-chip,99), 3.2) * var(--u));font:650 calc(3 * var(--ts,1) * var(--u))/1 var(--font);color:var(--td);cursor:pointer;transition:background var(--dur),color var(--dur)}
+.tapc .ds-seg span.on{background:var(--acc);color:var(--acc-fg)}
+.tapc.sel-ring .ds-seg span.on{background:none;color:var(--tx);box-shadow:inset 0 0 0 calc(.55 * var(--u)) var(--acc)}
+.tapc .ds-sw{flex:none;position:relative;width:calc(11.6 * var(--u));height:calc(7 * var(--u));border-radius:99px;background:color-mix(in srgb,currentColor 22%,transparent);cursor:pointer;pointer-events:auto;transition:background var(--dur)}
+.tapc .ds-sw i{position:absolute;left:calc(.8 * var(--u));top:calc(.8 * var(--u));width:calc(5.4 * var(--u));height:calc(5.4 * var(--u));border-radius:99px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35);transition:transform var(--dur) cubic-bezier(.3,1.4,.5,1)}
+.tapc .ds-sw.on{background:var(--acc)}
+.tapc .ds-sw.on i{transform:translateX(calc(4.6 * var(--u)))}
+.tapc .msearch.focus{box-shadow:0 0 0 calc(.6 * var(--u)) var(--acc),0 calc(1.6 * var(--u)) calc(6 * var(--u)) rgba(0,0,0,var(--depth,.35))}
+.tapc .msearch .typed{color:var(--tx);flex:1;display:flex;align-items:center}
+.tapc .caret{display:inline-block;width:1.5px;height:1.1em;margin-left:2px;background:var(--acc);animation:dsblink 1s steps(2) infinite}
+@keyframes dsblink{50%{opacity:0}}
+.tapc .ds-cancel{color:var(--acc);font:650 calc(3 * var(--ts,1) * var(--u))/1 var(--font)}
+.tapc .ds-range{-webkit-appearance:none;appearance:none;width:100%;height:calc(7 * var(--u));background:transparent;pointer-events:auto;cursor:pointer;margin:0}
+.tapc .ds-range::-webkit-slider-runnable-track{height:calc(1.6 * var(--u));border-radius:99px;background:linear-gradient(90deg,var(--acc) var(--v,50%),color-mix(in srgb,var(--tx) 20%,transparent) var(--v,50%))}
+.tapc .ds-range::-webkit-slider-thumb{-webkit-appearance:none;width:calc(6.4 * var(--u));height:calc(6.4 * var(--u));margin-top:calc(-2.4 * var(--u));border-radius:99px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.tapc .ds-range::-moz-range-track{height:calc(1.6 * var(--u));border-radius:99px;background:linear-gradient(90deg,var(--acc) var(--v,50%),color-mix(in srgb,var(--tx) 20%,transparent) var(--v,50%))}
+.tapc .ds-range::-moz-range-thumb{width:calc(6.4 * var(--u));height:calc(6.4 * var(--u));border:0;border-radius:99px;background:#fff}
+
+/* lists and messages */
+.tapc .ds-list{display:flex;flex-direction:column;padding:0 calc(3.6 * var(--S));border-radius:calc(var(--r-card,5) * var(--u));color:var(--tx);pointer-events:auto}
+.tapc .ds-row{display:flex;align-items:center;gap:calc(3 * var(--S));min-height:calc(11.3 * var(--u));padding:calc(2.6 * var(--S)) 0}
+.tapc .ds-row+.ds-row{border-top:1px solid var(--tb)}
+.tapc .ds-row.hit{cursor:pointer}
+.tapc .ds-row .ic{flex:none;width:calc(8.4 * var(--u));height:calc(8.4 * var(--u));display:grid;place-items:center;border-radius:calc(2.4 * var(--u));background:var(--btn);color:var(--btn-fg)}
+.tapc .ds-row .ic svg{width:58%;height:58%}
+.tapc .ds-row .tt{flex:1;min-width:0;display:flex;flex-direction:column;gap:calc(.5 * var(--u))}
+.tapc .ds-row .tt b{font:600 calc(3.2 * var(--ts,1) * var(--u))/1.2 var(--font)}
+.tapc .ds-row .tt small{font:450 calc(2.7 * var(--ts,1) * var(--u))/1.25 var(--font);color:var(--td)}
+.tapc .ds-row .tr{flex:none;display:flex;align-items:center;gap:calc(1.6 * var(--u));color:var(--td)}
+.tapc .ds-row .tr>svg{width:calc(4.4 * var(--u));height:calc(4.4 * var(--u))}
+.tapc .ds-badge{display:inline-flex;align-items:center;height:calc(5 * var(--u));padding:0 calc(2 * var(--u));border-radius:99px;background:var(--acc);color:var(--acc-fg);font:700 calc(2.4 * var(--ts,1) * var(--u))/1 var(--font)}
+.tapc .ds-badge.soft{background:color-mix(in srgb,var(--tx) 16%,transparent);color:var(--tx)}
+.tapc .kbdg{position:relative}
+.tapc .ds-dot{position:absolute;right:calc(-1 * var(--u));top:calc(-1 * var(--u));min-width:calc(5 * var(--u));height:calc(5 * var(--u));padding:0 calc(1.2 * var(--u));border-radius:99px;display:grid;place-items:center;background:#E5484D;color:#fff;font:700 calc(2.5 * var(--u))/1 var(--font);box-shadow:0 0 0 calc(.5 * var(--u)) rgba(0,0,0,.25)}
+.tapc .ds-banner{display:flex;align-items:center;gap:calc(2.4 * var(--S));padding:calc(2 * var(--S)) calc(3.6 * var(--S));border-radius:calc(var(--r-card,5) * var(--u));color:var(--tx);font:550 calc(2.9 * var(--ts,1) * var(--u))/1.3 var(--font)}
+.tapc .ds-banner .bt{flex:1}.tapc .ds-banner .mi,.tapc .ktoast .mi{width:calc(4.8 * var(--u));height:calc(4.8 * var(--u));display:grid;color:var(--acc)}
+.tapc .ds-prog{height:calc(1.6 * var(--u));border-radius:99px;background:color-mix(in srgb,currentColor 18%,transparent);overflow:hidden}
+.tapc .ds-prog i{display:block;height:100%;border-radius:99px;background:var(--acc)}
+.tapc .shimmer{background:linear-gradient(90deg,currentColor 30%,color-mix(in srgb,currentColor 35%,transparent) 50%,currentColor 70%) 0 0/250% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:dsshim calc(var(--dur) * 7) linear infinite}
+@keyframes dsshim{to{background-position:-250% 0}}
+.tapc .ds-empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:calc(2.4 * var(--S));padding:calc(10 * var(--u)) calc(6 * var(--u))}
+.tapc .ds-empty .ei{width:calc(16 * var(--u));height:calc(16 * var(--u));display:grid;place-items:center;border-radius:99px;background:color-mix(in srgb,var(--acc) 18%,transparent);color:var(--acc)}
+.tapc .ds-empty .ei svg{width:48%;height:48%}
+
+/* nav bar (floating capsule or full-width bar; a rail in landscape) */
+.tapc .ds-nav{display:flex;align-items:stretch;justify-content:space-around;pointer-events:auto;flex:none}
+.tapc .ds-nav.nav-floating{margin:0 auto calc(5 * var(--u));width:calc(100% - 10 * var(--u));max-width:calc(92 * var(--u));height:calc(16 * var(--u));padding:0 calc(2 * var(--u));border-radius:99px}
+.tapc .ds-nav.nav-bar{height:calc(20 * var(--u));padding:0 calc(2 * var(--u)) calc(5 * var(--u));border-radius:0;border-width:1px 0 0;box-shadow:none}
+.tapc .ds-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(.8 * var(--u));color:var(--td);cursor:pointer;position:relative;transition:color var(--dur)}
+.tapc .ds-tab .ti{display:grid;place-items:center;width:calc(13 * var(--u));height:calc(7.4 * var(--u));border-radius:99px;transition:background var(--dur),transform var(--dur) cubic-bezier(.3,1.4,.5,1)}
+.tapc .ds-tab .ti svg{width:calc(5.6 * var(--u));height:calc(5.6 * var(--u))}
+.tapc .ds-tab .tl{font:600 calc(2.5 * var(--ts,1) * var(--u))/1 var(--font)}
+.tapc .ds-tab.on{color:var(--tx)}
+.tapc .ds-nav.ind-pill .ds-tab.on .ti{background:var(--acc);color:var(--acc-fg)}
+.tapc.sel-ring .ds-nav.ind-pill .ds-tab.on .ti{background:none;color:var(--acc);box-shadow:inset 0 0 0 calc(.5 * var(--u)) var(--acc)}
+.tapc .ds-nav.ind-dot .ds-tab.on{color:var(--acc)}
+.tapc .ds-nav.ind-dot .ds-tab.on::after{content:"";position:absolute;bottom:calc(1.4 * var(--u));width:calc(1.4 * var(--u));height:calc(1.4 * var(--u));border-radius:99px;background:var(--acc)}
+.tapc .ds-nav.ind-dot.lab-always .ds-tab.on::after,.tapc .ds-nav.ind-dot.lab-selected .ds-tab.on::after{bottom:calc(.4 * var(--u))}
+.tapc .ds-nav.ind-glow .ds-tab.on{color:var(--acc)}
+.tapc .ds-nav.ind-glow .ds-tab.on .ti{filter:drop-shadow(0 0 calc(2 * var(--u)) var(--acc));transform:translateY(calc(-.4 * var(--u)))}
+.tapc .ds-nav.lab-off .tl{display:none}
+.tapc .ds-nav.lab-selected .ds-tab:not(.on) .tl{display:none}
+.tapc .ds-nav.rail{flex-direction:column;justify-content:center;gap:calc(3 * var(--u));width:calc(18 * var(--u));height:auto;max-width:none;margin:0;padding:calc(4 * var(--u)) 0;align-self:center;border-radius:calc(9 * var(--u))}
+.tapc .ds-nav.rail.nav-floating{margin-left:calc(3 * var(--u))}
+.tapc .ds-nav.rail.nav-bar{align-self:stretch;border-width:0 1px 0 0;border-radius:0;padding:calc(6 * var(--u)) 0}
+.tapc .ds-nav.rail .ds-tab{flex:none;padding:calc(1 * var(--u)) 0}
+.tapc.kit .kitp>.ds-nav{margin:0;width:100%;flex:none}
+
+/* the Navigation page: a tiny app */
+.tapc.kit.full::before{display:none}
+.tapc .ds-app{position:absolute;inset:0;display:flex;flex-direction:column;pointer-events:auto}
+.tapc .ds-app.land{flex-direction:row}
+.tapc .ds-main{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;background:var(--sheet);color:var(--sheet-fg);backdrop-filter:blur(26px) saturate(1.2);-webkit-backdrop-filter:blur(26px) saturate(1.2);transition:background var(--dur)}
+.tapc .ds-app.onwall .ds-main{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none}
+.tapc .ds-app:not(.onwall) .ds-nav.nav-floating{position:relative;z-index:2}
+.tapc .ds-app:not(.land) .ds-nav.nav-floating{position:absolute;left:0;right:0;bottom:0}
+.tapc .ds-app:not(.land):not(.onwall) .ds-view{padding-bottom:calc(26 * var(--u))}
+.tapc .ds-app.land .ds-main{border-radius:0}
+.tapc .ds-top{flex:none;display:grid;grid-template-columns:auto 1fr auto;align-items:end;gap:calc(2 * var(--u));padding:calc(13 * var(--u)) calc(5 * var(--S)) calc(2 * var(--S))}
+.tapc .ds-app.land .ds-top{padding-top:calc(6 * var(--u))}
+.tapc .ds-top.large b{grid-column:1/3;grid-row:1}
+.tapc .ds-top.large>span:first-child{display:none}
+.tapc .ds-top.inline{align-items:center}
+.tapc .ds-top.inline b{text-align:center}
+.tapc .ds-back{display:inline-flex;align-items:center;gap:calc(.6 * var(--u));color:var(--acc);font:600 calc(3.1 * var(--ts,1) * var(--u))/1 var(--font);cursor:pointer}
+.tapc .ds-back svg{width:calc(5.4 * var(--u));height:calc(5.4 * var(--u))}
+.tapc .ds-view{flex:1;min-height:0;overflow-y:auto;scrollbar-width:none;display:flex;flex-direction:column;gap:calc(3.6 * var(--S));padding:calc(2 * var(--S)) calc(5 * var(--S)) calc(6 * var(--u));animation:dsfade var(--dur) ease-out}
+.tapc .ds-view::-webkit-scrollbar{display:none}
+.tapc .ds-view.pushed{animation:dspush calc(var(--dur) * 1.2) cubic-bezier(.2,.85,.25,1)}
+.tapc.m-reduced .ds-view.pushed{animation:dsfade var(--dur) ease-out}
+@keyframes dspush{from{transform:translateX(30%);opacity:0}}
+@keyframes dsfade{from{opacity:0}}
+.tapc .ds-main .ds-list{background:color-mix(in srgb,var(--sheet-fg) 6%,transparent);color:var(--sheet-fg);border-color:transparent;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.tapc .ds-main .ds-list .ds-row+.ds-row{border-color:color-mix(in srgb,var(--sheet-fg) 12%,transparent)}
+.tapc .ds-main .ds-row .tt small,.tapc .ds-main .ds-row .tr{color:var(--sheet-fg2)}
+.tapc .kwall{flex:1;display:flex;align-items:center;justify-content:center;padding-top:calc(30 * var(--u))}
+.tapc .ds-view .hit{pointer-events:auto;cursor:pointer}
+
+/* sheets and dialogs */
+.tapc .ds-sheets{position:absolute;inset:0;pointer-events:none}
+.tapc .ds-trig{position:absolute;left:0;right:0;top:calc(14 * var(--u));display:flex;gap:calc(2.4 * var(--u));justify-content:center;flex-wrap:wrap;padding:0 calc(4 * var(--u))}
+.tapc .ds-dim{position:absolute;inset:0;background:rgba(4,6,10,var(--sdim,.35));opacity:0;transition:opacity var(--dur);pointer-events:none}
+.tapc .ds-dim.d-half{opacity:.8}.tapc .ds-dim.d-full{opacity:1}
+.tapc .ds-sheet{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:calc(3 * var(--S));padding:0 calc(5 * var(--S)) calc(6 * var(--u));border-radius:calc(var(--r-sheet,7) * var(--u)) calc(var(--r-sheet,7) * var(--u)) 0 0;background:var(--sheet);color:var(--sheet-fg);backdrop-filter:blur(26px) saturate(1.2);-webkit-backdrop-filter:blur(26px) saturate(1.2);box-shadow:0 calc(-2 * var(--u)) calc(8 * var(--u)) rgba(0,0,0,calc(var(--depth,.35) * 1.2));pointer-events:auto;transition:height calc(var(--dur) * 1.3) cubic-bezier(.2,.85,.25,1);overflow:hidden}
+.tapc .ds-sheet.d-peek{height:calc(30 * var(--u))}
+.tapc .ds-sheet.d-half{height:52%}
+.tapc .ds-sheet.d-full{height:calc(100% - 12 * var(--u))}
+.tapc.land .ds-sheet{left:50%;right:auto;width:calc(110 * var(--u));translate:-50% 0}
+.tapc.land .ds-sheet.d-full{height:calc(100% - 6 * var(--u))}
+.tapc .ds-sheet .grab{flex:none;display:grid;place-items:center;height:calc(6 * var(--u));cursor:pointer}
+.tapc .ds-sheet .grab i{width:calc(10 * var(--u));height:calc(1.3 * var(--u));border-radius:99px;background:color-mix(in srgb,currentColor 30%,transparent)}
+.tapc .ds-sheet .grab0{height:calc(4 * var(--u))}
+.tapc .ds-sheet .sbody{flex:1;min-height:0;overflow-y:auto;scrollbar-width:none;display:flex;flex-direction:column;gap:calc(3 * var(--S))}
+.tapc .ds-sheet .ds-list{background:color-mix(in srgb,var(--sheet-fg) 6%,transparent);color:var(--sheet-fg);border-color:transparent;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.tapc .ds-sheet .ds-row .tt small,.tapc .ds-sheet .ds-row .tr{color:var(--sheet-fg2)}
+.tapc .ds-sheet .ds-row+.ds-row{border-color:color-mix(in srgb,var(--sheet-fg) 12%,transparent)}
+.tapc .ds-sheet .kc{color:var(--sheet-fg2);text-shadow:none;margin-top:calc(1 * var(--S))}
+.tapc .ds-scrim{position:absolute;inset:0;background:rgba(4,6,10,calc(var(--sdim,.35) + .15));pointer-events:auto;animation:dsfade var(--dur)}
+.tapc .ds-dialog{position:absolute;left:50%;top:50%;translate:-50% -50%;width:calc(78 * var(--u));max-width:80%;display:flex;flex-direction:column;gap:calc(2.4 * var(--S));padding:calc(5.6 * var(--S));border-radius:calc(var(--r-card,5) * 1.4 * var(--u));background:var(--sheet);color:var(--sheet-fg);backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px);box-shadow:0 calc(3 * var(--u)) calc(14 * var(--u)) rgba(0,0,0,calc(var(--depth,.35) * 1.4));pointer-events:auto;animation:dspop calc(var(--dur) * 1.1) cubic-bezier(.3,1.3,.5,1)}
+.tapc.m-reduced .ds-dialog{animation:dsfade var(--dur)}
+@keyframes dspop{from{transform:scale(.9);opacity:0}}
+.tapc .ds-dialog .ds-btns{justify-content:flex-end}
+
+/* kit page furniture */
+.tapc.kit .keb{font:700 calc(2.2 * var(--u))/1 var(--font);letter-spacing:.16em;text-transform:uppercase;opacity:.7}
+.tapc.kit .krow.sm{gap:calc(2 * var(--u))}
+.tapc .krow.c{justify-content:center}
+.tapc.kit .kst2{display:flex;flex-direction:column;align-items:center;gap:calc(1.2 * var(--u))}
+.tapc.kit .kst2 small,.tapc.kit .kc1 small,.tapc.kit .ksp small{font:600 calc(2.3 * var(--u))/1 var(--font);color:#fff;opacity:.85;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.tapc.kit.light:not(.bg-tiles) .kst2 small,.tapc.kit.light:not(.bg-tiles) .kc1 small,.tapc.kit.light:not(.bg-tiles) .ksp small,.tapc.kit.light:not(.bg-tiles) .knote:not(.in){color:#15171C;text-shadow:none}
+.tapc.kit .knote{margin:0;font:500 calc(2.6 * var(--u))/1.4 var(--font);color:#fff;opacity:.85;text-shadow:0 1px 3px rgba(0,0,0,.6);flex:1;min-width:0}
+.tapc.kit .knote.in{color:var(--sheet-fg2);text-shadow:none;opacity:1}
+.tapc.kit .ktr{display:flex;flex-direction:column;gap:calc(.6 * var(--u))}
+.tapc.kit .ktr+.ktr{padding-top:calc(2 * var(--S));border-top:1px solid var(--tb)}
+.tapc.kit .kmeta{font:600 calc(2.1 * var(--u))/1 var(--mono);color:var(--acc);letter-spacing:.02em}
+.tapc.kit .kspace{display:flex;align-items:flex-end;gap:calc(4 * var(--u))}
+.tapc.kit .ksp{display:flex;flex-direction:column;align-items:center;gap:calc(1.4 * var(--u))}
+.tapc.kit .ksp i{display:block;background:var(--acc);border-radius:2px;opacity:.9}
+.tapc.kit .ds-panel .ksp small{color:var(--tx);text-shadow:none}
+.tapc.kit .kcorn{display:grid;grid-template-columns:repeat(4,1fr);gap:calc(3 * var(--u))}
+.tapc.kit .kc1{display:flex;flex-direction:column;align-items:center;gap:calc(1.4 * var(--u))}
+.tapc.kit .kc1 i{display:block;width:100%;aspect-ratio:1;border-width:calc(.5 * var(--u))}
+.tapc.kit .kicons{display:flex;justify-content:space-between;padding:calc(3.4 * var(--u)) calc(4 * var(--u));border-radius:calc(var(--r-card,5) * var(--u));color:var(--tx)}
+.tapc.kit .kicons span{width:calc(6.4 * var(--u));height:calc(6.4 * var(--u));display:grid}
+.tapc.kit .ktouch{position:relative;padding:calc(1.4 * var(--u))}
+.tapc.kit .ktouch::after{content:"44 pt";position:absolute;inset:calc(-1.2 * var(--u));border:1.5px dashed var(--acc);border-radius:calc(2.4 * var(--u));font:700 calc(1.9 * var(--u))/1 var(--mono);color:var(--acc);display:flex;align-items:flex-end;justify-content:center;padding-bottom:calc(.6 * var(--u));pointer-events:none}
+.tapc.kit .ktouch .kb{min-width:calc(11.3 * var(--u));min-height:calc(11.3 * var(--u));justify-content:center}
+.tapc.kit .klev{position:relative;height:calc(56 * var(--u))}
+.tapc.kit .kl{position:absolute;width:62%;height:calc(20 * var(--u));padding:calc(3 * var(--u)) calc(4 * var(--u));border-radius:calc(var(--r-card,5) * var(--u));display:flex;flex-direction:column;gap:calc(.6 * var(--u));color:var(--tx)}
+.tapc.kit .kl b{font:650 calc(3.2 * var(--ts,1) * var(--u))/1.1 var(--font)}.tapc.kit .kl small{font:500 calc(2.5 * var(--u))/1.2 var(--font);color:var(--td)}
+.tapc.kit .kl.l0{left:0;top:0;border:1.5px dashed color-mix(in srgb,#fff 45%,transparent);color:#fff}
+.tapc.kit.light:not(.bg-tiles) .kl.l0{border-color:rgba(0,0,0,.3);color:#15171C}
+.tapc.kit .kl.l0 small{color:inherit;opacity:.75}
+.tapc.kit .kl.l1{left:12%;top:24%;box-shadow:0 calc(1 * var(--u)) calc(3 * var(--u)) rgba(0,0,0,calc(var(--depth,.35) * .7))}
+.tapc.kit .kl.l2{left:24%;top:48%;background:var(--sheet);color:var(--sheet-fg);box-shadow:0 calc(2.4 * var(--u)) calc(8 * var(--u)) rgba(0,0,0,calc(var(--depth,.35) * 1.1))}
+.tapc.kit .kl.l2 small,.tapc.kit .kl.l3 small{color:var(--sheet-fg2)}
+.tapc.kit .kl.l3{left:36%;top:72%;background:var(--sheet);color:var(--sheet-fg);box-shadow:0 calc(4 * var(--u)) calc(14 * var(--u)) rgba(0,0,0,calc(var(--depth,.35) * 1.5))}
+.tapc.kit .kmo{display:flex;flex-direction:column;gap:calc(1.4 * var(--u))}
+.tapc.kit .kmo+.kmo{padding-top:calc(2 * var(--S));border-top:1px solid var(--tb)}
+.tapc.kit .kmt{display:flex;justify-content:space-between;align-items:baseline;gap:calc(2 * var(--u))}
+.tapc.kit .kmt b{font:650 calc(3 * var(--ts,1) * var(--u))/1 var(--font)}.tapc.kit .kmt small{font:500 calc(2.4 * var(--u))/1 var(--font);color:var(--td)}
+.tapc.kit .ktrack{position:relative;height:calc(5 * var(--u));border-radius:99px;background:color-mix(in srgb,var(--tx) 10%,transparent)}
+.tapc.kit .ktrack i{position:absolute;left:calc(.6 * var(--u));top:calc(.6 * var(--u));width:calc(3.8 * var(--u));height:calc(3.8 * var(--u));border-radius:99px;background:var(--acc);animation:dsmove 1s cubic-bezier(.45,0,.2,1) infinite alternate}
+@keyframes dsmove{to{left:calc(100% - 4.4 * var(--u))}}
+.tapc.kit.m-reduced .ktrack i{left:calc(50% - 1.9 * var(--u));animation-name:dspulse}
+@keyframes dspulse{from{opacity:.15}}
+.tapc.kit .ksw{grid-template-columns:repeat(4,1fr)}
+.tapc.kit .ds-panel .krow .lchip{font-size:calc(2.8 * var(--ts,1) * var(--u))}
+
+/* the app's own screens built from the kit: Start, Onboarding, Explore */
+.tapc.scrn{pointer-events:auto}
+.tapc.ds-start,.tapc.ds-onb{background:linear-gradient(170deg,#0E1424,#1D2B4A 70%,#2B3B5E);color:#F4F1EA}
+.tapc.ds-start.light,.tapc.ds-onb.light{background:linear-gradient(170deg,#F7F3EA,#E8DFCB)}
+.tapc.ds-start.light .ds-center,.tapc.ds-onb.light .ds-center{color:#15171C}
+.tapc .ds-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(4 * var(--S));padding:calc(12 * var(--u)) calc(8 * var(--u));text-align:center;color:#F4F1EA}
+.tapc.land .ds-center{padding:calc(5 * var(--u)) calc(30 * var(--u))}
+.tapc .ds-center .soft{color:inherit;opacity:.75}
+.tapc .ds-center .ds-prog{width:60%;color:inherit}
+.tapc .ds-opts{display:flex;flex-direction:column;gap:calc(2.6 * var(--S));width:100%;max-width:calc(90 * var(--u))}
+.tapc .ds-opt{display:flex;align-items:center;gap:calc(3 * var(--u));padding:calc(4 * var(--S));border-radius:calc(var(--r-card,5) * var(--u));text-align:left;cursor:pointer;color:var(--tx);transition:box-shadow var(--dur)}
+.tapc .ds-opt>div{flex:1;display:flex;flex-direction:column;gap:calc(.8 * var(--u))}
+.tapc .ds-opt.on{box-shadow:inset 0 0 0 calc(.6 * var(--u)) var(--acc),0 calc(1.6 * var(--u)) calc(6 * var(--u)) rgba(0,0,0,var(--depth,.35))}
+.tapc .ds-opt .ck{flex:none;width:calc(7 * var(--u));height:calc(7 * var(--u));border-radius:99px;display:grid;place-items:center;border:calc(.5 * var(--u)) solid var(--tb)}
+.tapc .ds-opt.on .ck{background:var(--acc);color:var(--acc-fg);border-color:transparent}
+.tapc .ds-opt .ck svg{width:62%;height:62%}
+.tapc.ds-explore .ds-sheet{max-height:calc(100% - 12 * var(--u))}
+.tapc.ds-explore.land .ds-sheet{height:calc(100% - 6 * var(--u))}
+.tapc.kit .kitp>*,.tapc.kit .ks>*,.tapc .ds-view>*,.tapc .ds-sheet>*,.tapc .sbody>*{flex-shrink:0}
+.tapc.kit .mlens{position:relative;left:auto;right:auto;top:auto;bottom:auto;transform:none;width:auto}
+.tapc.land .ds-nav.rail.nav-floating{margin-left:calc(13 * var(--u))}
+.tapc.land.tablet .ds-nav.rail.nav-floating{margin-left:calc(3 * var(--u))}
+.tapc.land .ds-nav.rail.nav-bar{padding-left:calc(10 * var(--u));width:calc(28 * var(--u))}
+.tapc .krow{display:flex;align-items:center;gap:calc(4 * var(--u));flex-wrap:wrap}
+.tapc .ds-sh{margin-top:calc(1.4 * var(--S));font:700 calc(2.4 * var(--ts,1) * var(--u))/1 var(--font);letter-spacing:.12em;text-transform:uppercase;color:var(--sheet-fg2)}
+.ph.light:has(.scrn,.tapc.kit:not(.bg-tiles):not(.full),.ds-main) .sb{color:#15171C;text-shadow:none}
+.tapc.kit.land .kitp{padding-left:max(calc(14 * var(--u)),calc(50% - 75 * var(--u)));padding-right:max(calc(14 * var(--u)),calc(50% - 75 * var(--u)));top:calc(6 * var(--u))}
+.tapc.kit.land.tablet .kitp{padding-left:max(calc(6 * var(--u)),calc(50% - 75 * var(--u)));padding-right:max(calc(6 * var(--u)),calc(50% - 75 * var(--u)))}
+.tapc.kit .lchip{flex:none}
+/* critics v15: light separation, landscape nav, tablet column, chips row */
+.tapc.light:not(.kids) .g,.tapc.light:not(.kids) .ds-solid,.tapc.light:not(.kids) .ds-photo{box-shadow:0 0 0 1px rgba(21,23,28,.08),0 calc(2 * var(--u)) calc(6 * var(--u)) rgba(21,23,28,calc(var(--depth,.35) * .45))}
+.tapc.light .ds-btn.disabled{opacity:.45;filter:grayscale(1);background:transparent;box-shadow:inset 0 0 0 1px rgba(21,23,28,.25);color:rgba(21,23,28,.55)}
+.tapc.light .ds-badge.soft{background:rgba(21,23,28,.1);color:#3C414B}
+.tapc .ds-app.land:not(.onwall){background:var(--sheet);backdrop-filter:blur(26px) saturate(1.2);-webkit-backdrop-filter:blur(26px) saturate(1.2)}
+.tapc .ds-app.land:not(.onwall) .ds-main{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none}
+.tapc.kit.tablet:not(.land) .kitp{padding-left:max(calc(6 * var(--u)),calc(50% - 62 * var(--u)));padding-right:max(calc(6 * var(--u)),calc(50% - 62 * var(--u)))}
+.tapc.kit.tablet .ksw i{height:calc(7 * var(--u))}
+.tapc.kit.tablet .kcorn{max-width:calc(90 * var(--u))}
+.tapc.kit .mlens.kl{padding:0;margin:0;gap:calc(2 * var(--u))}
+.tapc .ds-skel{display:flex;align-items:center;gap:calc(3 * var(--S));padding:calc(2.6 * var(--S)) 0}
+.tapc .ds-skel+.ds-skel{border-top:1px solid var(--tb)}
+.tapc .ds-skel i,.tapc .ds-skel b,.tapc .ds-skel small{display:block;border-radius:calc(1.6 * var(--u));background:linear-gradient(90deg,color-mix(in srgb,var(--tx) 10%,transparent) 30%,color-mix(in srgb,var(--tx) 22%,transparent) 50%,color-mix(in srgb,var(--tx) 10%,transparent) 70%) 0 0/250% 100%;animation:dsshim calc(var(--dur) * 6) linear infinite}
+.tapc .ds-skel i{flex:none;width:calc(8.4 * var(--u));height:calc(8.4 * var(--u))}
+.tapc .ds-skel div{flex:1;display:flex;flex-direction:column;gap:calc(1.4 * var(--u))}
+.tapc .ds-skel b{height:calc(3 * var(--u));width:60%}.tapc .ds-skel small{height:calc(2.4 * var(--u));width:40%}
+.tapc.m-reduced .ds-skel i,.tapc.m-reduced .ds-skel b,.tapc.m-reduced .ds-skel small{animation:none}
+.tapc.kit .mlens.kl{overflow:visible;flex-wrap:wrap}
+.tapc.land .ds-sheet.d-half{height:72%}
+.tapc.land .ds-sheet.d-peek{height:calc(26 * var(--u))}
+.tapc.tablet:not(.land) .ds-sheet{left:50%;right:auto;width:min(100%,calc(120 * var(--u)));translate:-50% 0}
+.tapc.tablet:not(.land) .ds-sheet.d-half{height:42%}
+.tapc.tablet:not(.land) .ds-sheet.d-full{height:min(calc(100% - 12 * var(--u)),calc(170 * var(--u)))}
+.tapc.tablet .ds-view{padding-left:max(calc(5 * var(--S)),calc(50% - 62 * var(--u)));padding-right:max(calc(5 * var(--S)),calc(50% - 62 * var(--u)))}
+.tapc.kit .kl.l2{background:color-mix(in srgb,var(--sheet),#fff 6%)}
+.tapc.kit .kl.l3{background:color-mix(in srgb,var(--sheet),#fff 13%)}
+.tapc.kit.light .kl.l2,.tapc.kit.light .kl.l3{background:#fff}
+.tapc.kit .kl.l1,.tapc.kit .kl.l2,.tapc.kit .kl.l3{box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 calc(var(--lv) * 1.2 * var(--u)) calc(var(--lv) * 4 * var(--u)) rgba(0,0,0,calc(var(--depth,.35) * (.5 + var(--lv) * .35)))}
+.tapc.kit .kl.l1{--lv:1}.tapc.kit .kl.l2{--lv:2.4}.tapc.kit .kl.l3{--lv:4}
+
+/* ===== v16: the final tokens (Unity theme): type scale in pt, 48 pt controls, roundness sets, glass rendering, dark elevation ===== */
+.tapc{--P:calc(var(--u) / 3.9)}   /* 1 pt */
+.tapc .ds-d{font:600 calc(28 * var(--ts,1) * var(--P))/1.08 var(--tfont,var(--font));letter-spacing:-.01em}
+.tapc .ds-h1{font:600 calc(24 * var(--ts,1) * var(--P))/1.12 var(--tfont,var(--font));letter-spacing:-.005em}
+.tapc .ds-h2{font:700 calc(20 * var(--ts,1) * var(--P))/1.2 var(--font)}
+.tapc .ds-body{font:400 calc(16 * var(--ts,1) * var(--P))/1.5 var(--font)}
+.tapc .ds-lbl{font:700 calc(16 * var(--ts,1) * var(--P))/1.2 var(--font)}
+.tapc .ds-cap{font:400 calc(14 * var(--ts,1) * var(--P))/1.35 var(--font);color:var(--td)}
+.tapc .ds-eyebrow{font:700 calc(13 * var(--ts,1) * var(--P))/1.2 var(--font);letter-spacing:.08em;opacity:1;color:var(--td)}
+.tapc .ds-photo .ds-eyebrow{color:#F1E9DA}
+.tapc .ds-solid .ds-eyebrow,.tapc .ds-sheet .ds-eyebrow,.tapc .ds-dialog .ds-eyebrow,.tapc .ds-main .ds-eyebrow{color:var(--sheet-fg2)}
+.tapc.kit .kh b{font:600 calc(28 * var(--ts,1) * var(--P))/1.1 var(--tfont,var(--font))}
+.tapc.kit .kh span,.tapc.kit .keb{font-size:calc(13 * var(--P))}
+.tapc.kit .kc{font:700 calc(13 * var(--P))/1 var(--font);letter-spacing:.1em}
+.tapc.kit .kmeta{font:700 calc(13 * var(--P))/1.2 var(--font);letter-spacing:0;color:var(--acc)}
+.tapc.kit .knote,.tapc.kit .kst2 small,.tapc.kit .kc1 small,.tapc.kit .ksp small,.tapc.kit .sw b{font-size:calc(13 * var(--P))}
+.tapc.kit .sw small{font:500 calc(13 * var(--P))/1 var(--font)}
+.tapc.kit .kbg .lchip{font-size:calc(13 * var(--P));padding:0 calc(12 * var(--P));height:calc(32 * var(--P))}
+/* buttons: 48 high (S 40, L 56), label 16 / 700, icon 20; pills unless Sharp */
+.tapc .ds-btn{height:calc(48 * var(--P));padding:0 calc(24 * var(--P));gap:calc(8 * var(--P));font:700 calc(16 * var(--ts,1) * var(--P))/1 var(--font);border-radius:calc(var(--r-btn,99) * var(--u));transition:transform var(--dur-f) var(--ease),filter var(--dur-f)}
+.tapc:not(.kids) .ds-btn{border-radius:calc(var(--r-btn,99) * var(--u))}
+.tapc .ds-btn .i{width:calc(20 * var(--P));height:calc(20 * var(--P))}
+.tapc .ds-btn.s{height:calc(40 * var(--P));padding:0 calc(16 * var(--P));font-size:calc(14 * var(--ts,1) * var(--P))}
+.tapc .ds-btn.l{height:calc(56 * var(--P));padding:0 calc(32 * var(--P));font-size:calc(17 * var(--ts,1) * var(--P))}
+.tapc .ds-btn.text{height:calc(48 * var(--P));padding:0 calc(8 * var(--P))}
+.tapc .ds-btn.tonal{background:var(--tonal);color:var(--sheet-fg)}
+.tapc .ds-btn.outline{background:transparent;color:var(--tx);box-shadow:inset 0 0 0 1.5px var(--tx)}
+.tapc.light{--tonal:#E9E3D8}.tapc.dark{--tonal:#302D28}
+.tapc .ds-btn.pressed,.tapc .ds-btn:active{transform:scale(.97);filter:brightness(.92)}
+.tapc .ds-btns{gap:calc(12 * var(--P))}
+/* panels */
+.tapc .ds-panel,.tapc .ds-solid{padding:calc(16 * var(--sp) * var(--P));gap:calc(8 * var(--sp) * var(--P))}
+.tapc .ds-photo{min-height:calc(180 * var(--P))}
+.tapc .ds-photo .scr{background:linear-gradient(180deg,transparent 30%,rgba(10,8,6,calc(var(--scrim,.85) * .7)) 62%,rgba(10,8,6,var(--scrim,.85)))}
+.tapc .ds-photo .tx{padding:calc(16 * var(--P))}
+.tapc .ds-photo .tx span{font:400 calc(14 * var(--ts,1) * var(--P))/1.35 var(--font);opacity:1;color:#F1E9DA}
+.tapc .ds-x{width:calc(32 * var(--P));height:calc(32 * var(--P))}
+/* controls: chip 32 (target 48), segmented 40, switch 52 × 32, slider thumb 28 */
+.tapc .lchip{height:calc(32 * var(--P));padding:0 calc(12 * var(--P));gap:calc(6 * var(--P));font:500 calc(15 * var(--ts,1) * var(--P))/1 var(--font);border-radius:calc(var(--r-chip,99) * var(--u))}
+.tapc .lchip.on{font-weight:700}
+.tapc .lchip i{width:calc(8 * var(--P));height:calc(8 * var(--P));border-radius:99px;flex:none}
+.tapc .msearch{height:calc(48 * var(--P));font:400 calc(16 * var(--ts,1) * var(--P))/1 var(--font);border-radius:calc(var(--r-chip,99) * var(--u))}
+.tapc .ds-cancel{font:700 calc(16 * var(--ts,1) * var(--P))/1 var(--font)}
+.tapc .ds-seg{height:calc(40 * var(--P));padding:calc(4 * var(--P));border-radius:calc(var(--r-chip,99) * var(--u))}
+.tapc .ds-seg span{display:grid;place-items:center;padding:0;border-radius:calc(var(--r-chip,99) * var(--u));font:600 calc(15 * var(--ts,1) * var(--P))/1 var(--font);transition:background var(--dur) var(--ease),color var(--dur)}
+.tapc .ds-seg span.on{font-weight:700}
+.tapc .ds-sw{width:calc(52 * var(--P));height:calc(32 * var(--P))}
+.tapc .ds-sw i{left:calc(4 * var(--P));top:calc(4 * var(--P));width:calc(24 * var(--P));height:calc(24 * var(--P));transition:transform var(--dur) var(--spring)}
+.tapc .ds-sw.on i{transform:translateX(calc(20 * var(--P)))}
+.tapc .ds-range{height:calc(32 * var(--P))}
+.tapc .ds-range::-webkit-slider-runnable-track{height:calc(6 * var(--P))}
+.tapc .ds-range::-webkit-slider-thumb{width:calc(28 * var(--P));height:calc(28 * var(--P));margin-top:calc(-11 * var(--P))}
+/* lists: rows 56 (one line) / 72 (two), icon tile 36, title 16, line 14 */
+.tapc .ds-list{padding:0 calc(16 * var(--sp) * var(--P))}
+.tapc .ds-row{min-height:calc(56 * var(--P));padding:calc(12 * var(--sp) * var(--P)) 0;gap:calc(12 * var(--P))}
+.tapc .ds-row .ic{width:calc(36 * var(--P));height:calc(36 * var(--P));border-radius:calc(var(--r-m,3) * var(--u))}
+.tapc .ds-row .tt b{font:600 calc(16 * var(--ts,1) * var(--P))/1.25 var(--font)}
+.tapc .ds-row .tt small{font:400 calc(14 * var(--ts,1) * var(--P))/1.3 var(--font)}
+.tapc .ds-row .tr>svg{width:calc(20 * var(--P));height:calc(20 * var(--P))}
+.tapc .ds-badge{height:calc(22 * var(--P));padding:0 calc(8 * var(--P));font:700 calc(13 * var(--P))/1 var(--font)}
+.tapc .ds-dot{min-width:calc(20 * var(--P));height:calc(20 * var(--P));font:700 calc(13 * var(--P))/1 var(--font);background:#B3261E}
+.tapc.dark .ds-dot{background:#F2B8B5;color:#3A0A08}
+.tapc .ktoast,.tapc .ds-banner{min-height:calc(48 * var(--P));font:500 calc(15 * var(--ts,1) * var(--P))/1.3 var(--font)}
+.tapc .ktoast{padding:0 calc(20 * var(--P)) 0 calc(14 * var(--P))}
+.tapc .ds-banner{border-radius:calc(var(--r-m,3) * var(--u))}
+.tapc .ds-prog{height:calc(6 * var(--P))}
+.tapc .ds-empty .ei{width:calc(64 * var(--P));height:calc(64 * var(--P))}
+/* sheet stops: Peek 57, Half 40 %, Full 48 from the top; grabber 36 × 5 in a 48 target; dialog 342 wide */
+.tapc .ds-sheet.d-peek{height:calc(57 * var(--P) + 20 * var(--P))}
+.tapc .ds-sheet.d-half{height:40%}
+.tapc .ds-sheet.d-full{height:calc(100% - 48 * var(--P))}
+.tapc .ds-sheet{padding:0 calc(16 * var(--P)) calc(24 * var(--P));gap:calc(16 * var(--sp) * var(--P))}
+.tapc .ds-sheet .grab{height:calc(20 * var(--P));margin-bottom:calc(-8 * var(--P));position:relative}
+.tapc .ds-sheet .grab::after{content:"";position:absolute;left:50%;top:0;width:calc(96 * var(--P));height:calc(48 * var(--P));translate:-50% -30%}
+.tapc .ds-sheet .grab i{width:calc(36 * var(--P));height:calc(5 * var(--P))}
+.tapc .ds-sheet.d-peek .sbody{opacity:0;pointer-events:none}
+.tapc .ds-dialog{width:calc(342 * var(--P));max-width:88%;padding:calc(24 * var(--P));gap:calc(12 * var(--P));border-radius:calc(var(--r-sheet,7.7) * var(--u))}
+.tapc .ds-dialog .ds-h2{font-size:calc(20 * var(--ts,1) * var(--P))}
+.tapc .ds-scrim{background:rgba(4,6,10,calc(var(--sdim,.35) + .2))}
+.tapc .ds-dim.d-half{opacity:0}
+/* motion: tokens */
+.tapc .ds-view.pushed{animation:dspush var(--dur-s) var(--spring)}
+.tapc .ds-dialog{animation:dspop var(--dur) var(--spring)}
+.tapc .ds-sheet{transition:height var(--dur-s) var(--spring)}
+/* glass rendering: solid = no blur, a dense tint (Unity 6.3 as is) */
+.tapc.glass-solid .g,.tapc.glass-solid .ds-solid,.tapc.glass-solid .ds-sheet,.tapc.glass-solid .ds-dialog,.tapc.glass-solid .ds-main,.tapc.glass-solid .ds-nav,.tapc.glass-solid .ds-app{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.ph.glass-solid *{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+/* elevation: light = three levels; dark = no shadows on panels (tone + rim); glass over the camera keeps a soft one in both */
+.tapc.light .ds-solid{box-shadow:0 0 0 1px rgba(20,17,13,.06),0 calc(4 * var(--P)) calc(16 * var(--P)) rgba(20,17,13,calc(var(--depth,.35) * .6))}
+.tapc.dark .ds-solid,.tapc.dark .ds-dialog,.tapc.dark .ds-sheet,.tapc.dark .kl.l2,.tapc.dark .kl.l3{box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
+.tapc.dark .ds-photo{box-shadow:none}
+.tapc .g{box-shadow:0 calc(6 * var(--P)) calc(16 * var(--P)) rgba(0,0,0,calc(var(--depth,.35) * .8))}
+.tapc.light .g{box-shadow:0 0 0 1px rgba(20,17,13,.06),0 calc(6 * var(--P)) calc(16 * var(--P)) rgba(20,17,13,calc(var(--depth,.35) * .55))}
+.tapc .ds-main .g,.tapc .ds-sheet .g,.tapc .ds-solid .g{box-shadow:none}
+
+/* ===== the nav bar: 64 high, icons 24, labels 13; Raised = a 48 pt disc riding in a bump ===== */
+.tapc .ds-nav{--navbg:var(--sheet)}
+.tapc .ds-nav.fill-solid{background:var(--navbg);backdrop-filter:none;-webkit-backdrop-filter:none;color:var(--sheet-fg)}
+.tapc .ds-nav.fill-solid .ds-tab{color:var(--sheet-fg2)}.tapc .ds-nav.fill-solid .ds-tab.on{color:var(--sheet-fg)}
+.tapc .ds-nav.fill-glass{--navbg:var(--tg)}
+.tapc .ds-nav.nav-floating{height:calc(64 * var(--P));width:calc(100% - 32 * var(--P));max-width:calc(420 * var(--P));margin:0 auto calc(30 * var(--P));padding:0 calc(8 * var(--P));border-radius:calc(min(var(--r-sheet,7.7), 6.15) * var(--u))}
+.tapc .ds-nav.nav-dock{height:calc(60 * var(--P));width:auto;max-width:calc(100% - 32 * var(--P));margin:0 auto calc(30 * var(--P));padding:0 calc(10 * var(--P));border-radius:99px;gap:calc(4 * var(--P))}
+.tapc .ds-nav.nav-dock .ds-tab{flex:none;min-width:calc(62 * var(--P))}
+.tapc .ds-nav.nav-bar{height:calc(64 * var(--P) + 26 * var(--P));padding:0 calc(8 * var(--P)) calc(26 * var(--P));border-radius:0;border-width:1px 0 0}
+.tapc .ds-app:not(.land) .ds-nav.nav-dock{position:absolute;left:0;right:0;bottom:0;width:fit-content}
+.tapc .ds-app:not(.land) .ds-nav.nav-bar{position:relative}
+.tapc .ds-app.onwall .ds-nav{display:none}
+.tapc .ds-tab{gap:calc(4 * var(--P))}
+.tapc .ds-tab .ti{width:calc(56 * var(--P));height:calc(32 * var(--P))}
+.tapc .ds-tab .ti svg{width:calc(24 * var(--P));height:calc(24 * var(--P))}
+.tapc .ds-tab .tl{font:500 calc(13 * var(--P))/1 var(--font)}
+.tapc .ds-tab.on .tl{font-weight:700}
+.tapc .ds-nav.ind-pill .ds-tab.on .ti{background:color-mix(in srgb,var(--acc) 22%,transparent);color:var(--acc)}
+.tapc.light .ds-nav.ind-pill .ds-tab.on .ti{color:var(--acc)}
+.tapc .ds-nav.ind-pill .ds-tab.on .ti svg{fill:currentColor;fill-opacity:.18}
+.tapc .ds-nav.ind-underline .ds-tab.on::after{content:"";position:absolute;bottom:calc(6 * var(--P));width:calc(24 * var(--P));height:calc(3 * var(--P));border-radius:99px;background:var(--acc)}
+.tapc .ds-nav.ind-underline .ds-tab.on,.tapc .ds-nav.ind-none .ds-tab.on{color:var(--acc)}
+.tapc .ds-nav.ind-underline .ds-tab.on .ti svg,.tapc .ds-nav.ind-none .ds-tab.on .ti svg{fill:currentColor;fill-opacity:.18}
+/* raised: the chosen icon lifts into a filled 48 pt disc; the bar's edge rises in a bump around it */
+.tapc .ds-nav.ind-raised{overflow:visible}
+.tapc .ds-nav.ind-raised .ds-tab{justify-content:flex-end;padding-bottom:calc(10 * var(--P))}
+.tapc .ds-nav.ind-raised .ds-tab:not(.on) .ti{position:absolute;top:calc(10 * var(--P))}
+.tapc .ds-nav.ind-raised.lab-off .ds-tab:not(.on) .ti,.tapc .ds-nav.ind-raised.lab-selected .ds-tab:not(.on) .ti{top:50%;translate:0 -50%}
+.tapc .ds-nav.ind-raised .ds-tab.on .ti{position:absolute;top:calc(-22 * var(--P));width:calc(48 * var(--P));height:calc(48 * var(--P));border-radius:99px;background:var(--acc);color:var(--acc-fg);box-shadow:0 calc(4 * var(--P)) calc(12 * var(--P)) rgba(0,0,0,.28);z-index:2;transition:top var(--dur-s) var(--spring)}
+.tapc .ds-nav.ind-raised .ds-tab.on::before{content:"";position:absolute;top:calc(-30 * var(--P));width:calc(64 * var(--P));height:calc(64 * var(--P));border-radius:99px;background:var(--navbg);clip-path:inset(0 0 calc(34 * var(--P)) 0);z-index:1}
+.tapc .ds-nav.ind-raised .ds-tab.on::after{content:"";position:absolute;top:calc(-4 * var(--P));width:calc(96 * var(--P));height:calc(8 * var(--P));background:radial-gradient(calc(14 * var(--P)) calc(10 * var(--P)) at 0 0,transparent 98%,var(--navbg) 100%) left top/calc(16 * var(--P)) 100% no-repeat,radial-gradient(calc(14 * var(--P)) calc(10 * var(--P)) at 100% 0,transparent 98%,var(--navbg) 100%) right top/calc(16 * var(--P)) 100% no-repeat;z-index:1;pointer-events:none}
+.tapc .ds-nav.ind-raised.lab-off .ds-tab.on .ti{top:calc(-16 * var(--P))}
+.tapc .ds-nav.fill-glass.ind-raised .ds-tab.on::before,.tapc .ds-nav.fill-glass.ind-raised .ds-tab.on::after{display:none}
+.tapc .ds-nav.rail.ind-raised .ds-tab.on .ti{position:static}
+.tapc .ds-nav.rail.ind-raised .ds-tab.on::before,.tapc .ds-nav.rail.ind-raised .ds-tab.on::after{display:none}
+.tapc .ds-nav.rail.ind-raised .ds-tab{justify-content:center;padding:calc(4 * var(--P)) 0}
+.tapc .ds-nav.rail.ind-raised .ds-tab:not(.on) .ti{position:static;translate:none}
+.tapc.light .ds-nav.fill-solid{box-shadow:0 0 0 1px rgba(20,17,13,.06),0 calc(8 * var(--P)) calc(24 * var(--P)) rgba(20,17,13,calc(var(--depth,.35) * .7))}
+.tapc.dark .ds-nav.fill-solid{box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
+.tapc .ds-app:not(.land):not(.onwall) .ds-view{padding-bottom:calc(120 * var(--P))}
+.tapc .ds-top{padding:calc(54 * var(--P)) calc(20 * var(--P)) calc(8 * var(--P))}
+.tapc .ds-top.large b.ds-h1{font-size:calc(32 * var(--ts,1) * var(--P))}
+.tapc .ds-back{font:600 calc(16 * var(--ts,1) * var(--P))/1 var(--font)}
+.tapc .ds-view{padding:calc(8 * var(--P)) calc(16 * var(--P)) calc(24 * var(--P));gap:calc(16 * var(--sp) * var(--P))}
+.tapc .ds-sh{font:700 calc(13 * var(--P))/1 var(--font)}
+/* kit page: accent list */
+.tapc.kit .kacc{display:grid;grid-template-columns:repeat(5,1fr);gap:calc(8 * var(--P))}
+.tapc.kit .kac{display:flex;flex-direction:column;align-items:center;gap:calc(6 * var(--P));cursor:pointer}
+.tapc.kit .kac i{width:100%;aspect-ratio:1;border-radius:calc(var(--r-m,3) * var(--u));display:grid;place-items:center;font:600 calc(18 * var(--P))/1 var(--tfont,var(--font));font-style:normal}
+.tapc.kit .kac.on i{box-shadow:0 0 0 calc(2 * var(--P)) var(--tx)}
+.tapc.kit .kac small{font:600 calc(13 * var(--P))/1 var(--font);color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.tapc.kit.light:not(.bg-tiles) .kac small{color:#14110D;text-shadow:none}
+.tapc.kit .knote.in2{color:var(--td);text-shadow:none;opacity:1}
+.tapc.kit .ksp i{border-radius:2px}
+.tapc.kit .ds-panel .krow .lchip{font-size:calc(15 * var(--ts,1) * var(--P))}
+.tapc.kit .kl b{font:700 calc(16 * var(--ts,1) * var(--P))/1.15 var(--font)}.tapc.kit .kl small{font:400 calc(13 * var(--P))/1.2 var(--font)}
+.tapc.kit .kl{height:calc(80 * var(--P));padding:calc(12 * var(--P)) calc(16 * var(--P))}
+.tapc.kit .klev{height:calc(250 * var(--P))}
+.tapc.kit .kmt b{font:700 calc(16 * var(--ts,1) * var(--P))/1 var(--font)}.tapc.kit .kmt small{font:400 calc(13 * var(--P))/1 var(--font)}.tapc.kit .ktrack{height:calc(20 * var(--P))}.tapc.kit .ktrack i{width:calc(14 * var(--P));height:calc(14 * var(--P));top:calc(3 * var(--P));left:calc(3 * var(--P))}
+
+/* ===== v16 critics, round 1 ===== */
+/* raised nav: one outline (bar + bump), drawn by navShape() */
+.tapc .ds-nav.shaped{background:none!important;box-shadow:none!important;border-color:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;max-width:none}
+.tapc .ds-nav.shaped.nav-floating{padding:0 calc(16 * var(--P))}
+.tapc .ds-nav.shaped.nav-dock{padding:0 calc(10 * var(--P));gap:calc(4 * var(--P))}
+.tapc .ds-nav.shaped.nav-dock .ds-tab{width:calc(62 * var(--P));min-width:0}
+.tapc .ds-navshape{position:absolute;left:0;top:calc(-24 * var(--P));width:100%;height:calc(100% + 24 * var(--P));overflow:visible;pointer-events:none;z-index:0}
+.tapc .ds-navshape path{fill:var(--navbg);stroke:rgba(20,17,13,.08);stroke-width:1px;vector-effect:non-scaling-stroke}
+.tapc.light .ds-navshape{filter:drop-shadow(0 calc(6 * var(--P)) calc(10 * var(--P)) rgba(20,17,13,calc(var(--depth,.35) * .5)))}
+.tapc.dark .ds-navshape path{stroke:rgba(255,255,255,.12)}
+.tapc.dark .ds-navshape{filter:drop-shadow(0 calc(6 * var(--P)) calc(12 * var(--P)) rgba(0,0,0,.35))}
+.tapc .ds-nav.fill-glass .ds-navshape path{fill:var(--tg)}
+.tapc .ds-nav.shaped .ds-tab{z-index:1}
+.tapc .ds-nav.ind-raised .ds-tab.on::before,.tapc .ds-nav.ind-raised .ds-tab.on::after{display:none}
+.tapc .ds-nav.ind-raised .ds-tab.on .ti{top:calc(-14 * var(--P));box-shadow:0 0 0 calc(2 * var(--P)) var(--navbg),0 calc(4 * var(--P)) calc(12 * var(--P)) rgba(0,0,0,.22)}
+.tapc .ds-nav.ind-raised.lab-off .ds-tab.on .ti{top:calc(-14 * var(--P))}
+.tapc .ds-tab .tl{line-height:calc(16 * var(--P))}
+.tapc .ds-nav.rail.nav-floating,.tapc .ds-nav.rail.nav-dock{height:auto!important;width:calc(72 * var(--P))!important;max-width:none;border-radius:calc(30 * var(--P));padding:calc(12 * var(--P)) 0}
+.tapc .ds-nav.rail .ds-tab{flex:none;width:100%}
+/* kit header: title 24 (so Display stands out), a quiet background switch, no debug line */
+.tapc.kit .kh{flex-direction:column;gap:calc(12 * var(--P))}
+.tapc.kit .kht{display:flex;flex-direction:column;gap:calc(4 * var(--P))}
+.tapc.kit .kh b{font:600 calc(24 * var(--ts,1) * var(--P))/1.12 var(--tfont,var(--font))}
+.tapc.kit .kh span{font:400 calc(14 * var(--P))/1.3 var(--font);opacity:1}
+.tapc.kit .kbg.ds-seg{align-self:flex-start;height:calc(32 * var(--P));margin:0;padding:calc(3 * var(--P));gap:0}
+.tapc.kit .kbg.ds-seg span{padding:0 calc(12 * var(--P));font:600 calc(13 * var(--P))/1 var(--font);color:var(--td)}
+.tapc.kit .kbg.ds-seg span.on{background:var(--tonal);color:var(--tx);box-shadow:none}
+.tapc.kit.land .kh{flex-direction:row;align-items:flex-end;justify-content:space-between}
+.tapc.kit.land .kh .kht span{display:none}
+.tapc.kit .kitp{padding-bottom:calc(96 * var(--P))}
+/* quick-action labels: plain text; "more" is neutral (it is not selected) */
+.tapc.kit .kb .l{background:none;padding:0;border-radius:0;font:500 calc(13 * var(--ts,1) * var(--P))/1.2 var(--font);color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6);min-width:calc(64 * var(--P));text-align:center}
+.tapc.kit.light:not(.bg-tiles) .kb .l{color:#14110D;text-shadow:none}
+.tapc .ds-panel .kb .l{color:var(--tx)!important;text-shadow:none!important}
+.tapc .a-rad.more .c,.tapc.kit .a-rad.more .c{background:var(--btn)!important;color:var(--btn-fg)!important;border:1px solid var(--tb)!important;box-shadow:none}
+/* touch target: 48 pt, its label at 13 pt outside the box */
+.tapc.kit .ktouch{margin:calc(4 * var(--P)) calc(4 * var(--P)) calc(22 * var(--P))}
+.tapc.kit .ktouch::after{content:"48 pt";inset:calc(-6 * var(--P));width:auto;font:700 calc(13 * var(--P))/1 var(--font);align-items:flex-start;padding:0;padding-top:calc(100% + 18 * var(--P));justify-content:center}
+.tapc.kit .ktouch .kb{width:calc(48 * var(--P));height:calc(48 * var(--P));min-width:0;min-height:0}
+.tapc.kit .ksp i{border-radius:1px}
+/* buttons page */
+.tapc.kit .krow{gap:calc(12 * var(--P))}
+.tapc.dark .ds-btn.disabled{opacity:1;filter:none;background:rgba(255,255,255,.06);color:rgba(246,241,232,.45);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.tapc.light .ds-btn.disabled{opacity:1;filter:none;background:rgba(20,17,13,.05);color:rgba(20,17,13,.42);box-shadow:inset 0 0 0 1px rgba(20,17,13,.14)}
+.tapc .ds-btns.grid2{display:grid;grid-template-columns:1fr 1.4fr}
+.tapc .ds-btns.grid2 .ds-btn{width:100%}
+/* tiles on panels and sheets: 3 up; tonal in dark */
+.tapc .ds-solid .tiles,.tapc .ds-sheet .tiles{grid-template-columns:repeat(3,1fr);gap:calc(8 * var(--P))}
+.tapc .ds-solid .tiles .tile,.tapc .ds-sheet .tiles .tile{flex-direction:column;align-items:flex-start;justify-content:center;min-height:calc(64 * var(--P));padding:calc(10 * var(--P)) calc(12 * var(--P));gap:calc(6 * var(--P));font:600 calc(14 * var(--ts,1) * var(--P))/1.15 var(--font);border-radius:calc(var(--r-m,3) * var(--u))}
+.tapc .ds-solid .tiles .tile .i,.tapc .ds-sheet .tiles .tile .i{width:calc(22 * var(--P));height:calc(22 * var(--P));color:var(--acc)}
+.tapc .ds-solid .tiles .tile:last-child:nth-child(odd),.tapc .ds-sheet .tiles .tile:last-child:nth-child(odd){grid-column:auto}
+.tapc.light .ds-solid .tile,.tapc.light .ds-sheet .tile{background:#fff;box-shadow:0 0 0 1px rgba(20,17,13,.06)}
+.tapc.dark .ds-solid .tile,.tapc.dark .ds-sheet .tile{background:var(--tonal);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+/* chips row: hug the content */
+.tapc .kchips{display:flex;flex-wrap:wrap;gap:calc(8 * var(--P))}
+.tapc .kchips .lchip{flex:none;width:auto}
+.tapc .ds-lbl.num{font-variant-numeric:tabular-nums}
+.tapc .ds-range::-webkit-slider-runnable-track{background:linear-gradient(90deg,var(--acc) var(--v,50%),color-mix(in srgb,var(--tx) 18%,transparent) var(--v,50%))}
+/* elevation tones in dark; motion tracks with a trail */
+.tapc.dark .kl.l1{background:color-mix(in srgb,var(--tg),#fff 4%)}
+.tapc.dark .kl.l2{background:color-mix(in srgb,var(--sheet),#fff 9%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}
+.tapc.dark .kl.l3{background:color-mix(in srgb,var(--sheet),#fff 15%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
+.tapc.kit .kl.l1{top:22%}.tapc.kit .kl.l2{top:44%}.tapc.kit .kl.l3{top:66%}
+.tapc.kit .ktrack{background:color-mix(in srgb,var(--acc) 16%,transparent)}
+.tapc.dark .ds-skel i,.tapc.dark .ds-skel b,.tapc.dark .ds-skel small{background:linear-gradient(90deg,rgba(255,255,255,.14) 30%,rgba(255,255,255,.28) 50%,rgba(255,255,255,.14) 70%) 0 0/250% 100%}
+.tapc.dark .ds-dot{background:#FF6B5E;color:#2A0705}
+.tapc.kit .kbdg .kb .a-rad .c{width:calc(48 * var(--P));height:calc(48 * var(--P))}
+/* light glass: cleaner, so panels read as glass, not paper */
+.tapc.light .ds-photo .tx{color:#fff}
+/* sheets demo and app screens: clear the island */
+.tapc .ds-trig{top:calc(60 * var(--P))}
+.tapc.light .ds-sheet .g,.tapc.light .ds-main .g,.tapc.light .ds-solid .g{box-shadow:0 0 0 1px rgba(20,17,13,.06)!important}
+.tapc.dark .ds-sheet .g,.tapc.dark .ds-main .g,.tapc.dark .ds-solid .g{box-shadow:none!important}
+/* tablet portrait: the kit in two columns */
+.tapc.kit.tablet:not(.land) .kitp{display:grid;grid-template-columns:1fr 1fr;column-gap:calc(24 * var(--P));row-gap:calc(20 * var(--P));align-content:start;padding-left:max(calc(24 * var(--P)),calc(50% - 360 * var(--P)));padding-right:max(calc(24 * var(--P)),calc(50% - 360 * var(--P)))}
+.tapc.kit.tablet:not(.land) .kitp>.kh,.tapc.kit.tablet:not(.land) .kitp>.ds-nav{grid-column:1/-1}
+.tapc.kit.tablet .kitp>.ds-nav{justify-self:center}
+.tapc.tablet .ds-view{padding-left:max(calc(16 * var(--P)),calc(50% - 280 * var(--P)));padding-right:max(calc(16 * var(--P)),calc(50% - 280 * var(--P)))}
+.tapc.tablet:not(.land) .ds-sheet{width:min(100%,calc(560 * var(--P)))}
+/* Start: the wall itself, slowly drifting, under a warm shade; a row of tiles fills as the panorama loads, then Start */
+.tapc.ds-start{background:#100F0D;color:#F6F1E8}
+.tapc .ds-hero{position:absolute;inset:-6%;background-size:cover;background-position:30% 50%;animation:dsdrift 26s ease-in-out infinite alternate}
+@keyframes dsdrift{to{transform:translate(-4%,-2%) scale(1.06)}}
+.tapc.m-reduced .ds-hero{animation:none}
+.tapc .ds-heroshade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(16,15,13,.35),rgba(16,15,13,.55) 40%,rgba(16,15,13,.94) 78%)}
+.tapc .ds-center.st{justify-content:flex-end;gap:calc(12 * var(--P));padding:calc(60 * var(--P)) calc(28 * var(--P)) calc(56 * var(--P));color:#F6F1E8}
+.tapc .ds-center.st .ds-eyebrow{color:#F1E9DA}
+.tapc .ds-hero-t{font:600 calc(40 * var(--ts,1) * var(--P))/1.05 var(--display,"Fraunces");letter-spacing:-.015em}
+.tapc .ds-center.st .ds-body{color:#E9E1D2;max-width:calc(300 * var(--P))}
+.tapc .ds-tiles{display:grid;grid-template-columns:repeat(12,calc(12 * var(--P)));gap:calc(4 * var(--P));margin-top:calc(12 * var(--P))}
+.tapc .ds-tiles i{height:calc(12 * var(--P));border-radius:calc(2 * var(--P));background:rgba(255,255,255,.16);animation:dstile var(--dur) var(--ease) both}
+@keyframes dstile{to{background:var(--acc)}}
+.tapc.light .ds-tiles i{animation-name:dstilel}@keyframes dstilel{to{background:#F2B544}}
+.tapc .ds-center.st .ds-cap.ld{color:#D9D1C3}
+.tapc .ds-go{margin-top:calc(16 * var(--P));animation:dsfade var(--dur-s) var(--ease) both;animation-delay:calc(12 * var(--dur-f) + var(--dur))}
+.tapc .ds-start .ds-btn.main,.tapc.ds-start .ds-btn.main{background:#F2B544;color:#1A1206}
+.tapc.land .ds-center.st{padding:calc(24 * var(--P)) calc(60 * var(--P)) calc(32 * var(--P))}
+/* Onboarding: the warm ground, one accent fill (Let's go); chosen chips are tonal with a check */
+.tapc.ds-onb{background:#F4F0E8;color:#14110D}
+.tapc.ds-onb.dark{background:#100F0D;color:#F6F1E8}
+.tapc .ds-onbp{position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;display:flex;flex-direction:column;justify-content:center;gap:calc(20 * var(--P));padding:calc(64 * var(--P)) calc(24 * var(--P)) calc(40 * var(--P));pointer-events:auto}
+.tapc .ds-onbp .ob1,.tapc .ds-onbp .ob2{display:flex;flex-direction:column;gap:calc(12 * var(--P))}
+.tapc .ds-onbp .ds-sh{margin-top:calc(8 * var(--P))}
+.tapc.ds-onb .ds-opt{color:inherit}
+.tapc.ds-onb.light .ds-opt{background:#fff}
+.tapc.ds-onb.dark .ds-opt{background:#1C1A17}
+.tapc.ds-onb .ds-opt .ds-cap{color:var(--td)}
+.tapc .lchip.tsel.on{background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--tx);box-shadow:inset 0 0 0 1.5px var(--acc)}
+.tapc .lchip .ckm{width:calc(16 * var(--P));height:calc(16 * var(--P));display:grid;color:var(--acc)}
+.tapc .ds-acts{display:flex;flex-direction:column;align-items:stretch;gap:calc(4 * var(--P));margin-top:calc(16 * var(--P))}
+.tapc .ds-acts .ds-btn.main{width:100%}
+.tapc .ds-btn.text.soft{color:var(--td)}
+.tapc.ds-onb.land .ds-onbp{display:grid;grid-template-columns:1fr 1fr;column-gap:calc(32 * var(--P));align-content:center;padding:calc(28 * var(--P)) calc(64 * var(--P))}
+.tapc.ds-onb.tablet .ds-onbp{padding-left:max(calc(24 * var(--P)),calc(50% - 220 * var(--P)));padding-right:max(calc(24 * var(--P)),calc(50% - 220 * var(--P)))}
+/* main AR: the mascot is the accent (no gradient); the coach tip wraps evenly */
+.tapc .mazu.mascot{background:var(--acc)!important;color:var(--acc-fg)!important;border:calc(2 * var(--P)) solid var(--navbg,var(--sheet))!important;box-shadow:0 calc(4 * var(--P)) calc(12 * var(--P)) rgba(0,0,0,.28)!important}
+.tapc .mtip .az{background:var(--acc)!important;color:var(--acc-fg)!important}
+.tapc .mtip{max-width:calc(240 * var(--P))!important;text-wrap:balance}
+/* ===== on tap (critics v16): 48 pt targets, the light focus ring, the kit family ===== */
+.tapc.light .f-ring{border-color:#fff!important;box-shadow:0 0 0 calc(2 * var(--P)) var(--acc),0 0 calc(16 * var(--P)) rgba(0,0,0,.35)}
+.tapc .irow .i{width:calc(44 * var(--bk,1) * var(--P));height:calc(44 * var(--bk,1) * var(--P));padding:calc(11 * var(--P))}
+.tapc .irow{position:relative}
+.tapc .tib .i{width:calc(44 * var(--bk,1) * var(--P));height:calc(44 * var(--bk,1) * var(--P));padding:calc(11 * var(--P));background:rgba(127,127,127,.08)}
+.tapc .tib{min-width:calc(48 * var(--P))}
+.tapc .a-dock .pill,.tapc .pill{height:calc(48 * var(--P))}
+.tapc .a-dock .pill{background:transparent!important;border-color:transparent!important;box-shadow:none!important}
+.tapc .heart{width:calc(40 * var(--P));height:calc(40 * var(--P))}
+.tapc .heart::before,.tapc .ask .mi::before{content:"";position:absolute;inset:calc(-6 * var(--P))}
+.tapc .ask .mi{position:relative;width:calc(32 * var(--P));height:calc(32 * var(--P))}
+.tapc .t-pan .lk span{min-height:calc(44 * var(--P));display:inline-flex;align-items:center;border-bottom:0;text-decoration:underline;text-underline-offset:calc(4 * var(--P))}
+.tapc .t-pan .lk{overflow:visible;flex-wrap:wrap}
+.tapc .a-cap{width:auto!important;max-width:92%}
+.tapc .a-cap .row{gap:calc(12 * var(--P))}
+.tapc .t-card{width:calc(72 * var(--u))}
+.tapc .t-card .th{width:calc(18 * var(--u));height:calc(18 * var(--u))}
+.tapc .t-card span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tapc .t-chip svg{opacity:1!important;color:var(--td)}
+/* the buttons gallery: 4 across, labels on one line, wall labels like the radial ones, "off" readable */
+.tapc.gal .galg{grid-template-columns:repeat(4,1fr)!important}
+.tapc.gal .gl{white-space:nowrap}
+.tapc.gal .galw .gi{width:calc(18 * var(--u))}
+.tapc.gal .galw .gl{background:var(--btl)!important;color:var(--btl-fg)!important;backdrop-filter:none}
+.tapc.gal .gi.off{opacity:.6}
+.tapc.gal .gi.off .gl{text-decoration:line-through}
+.tapc.gal .galp b{font-family:var(--tfont,var(--font))}
+/* wall labels: 13 pt */
+.ph .mk .lbl{font:600 calc(13 * var(--U,3.9px) / 3.9) var(--body);padding:calc(3 * var(--U,3.9px) / 3.9) calc(9 * var(--U,3.9px) / 3.9)}
+.tapc.ds-start.light .ds-center,.tapc.ds-start .ds-center{color:#F6F1E8}
+.tapc.light{--navbg:#FFFFFF;--page:#F4F0E8}.tapc.dark{--navbg:#26231F;--page:#100F0D}
+.tapc .ds-nav{--navbg:inherit}
+.tapc .ds-nav.fill-solid{background:var(--navbg)}
+.tapc .ds-main{background:var(--page)}
+.tapc .ds-app.land:not(.onwall){background:var(--page)}
+.tapc .ds-main .ds-list{background:var(--navbg)}
+.tapc.light .ds-main .ds-list{box-shadow:0 0 0 1px rgba(20,17,13,.05)!important}
+.tapc .ds-nav.ind-raised .ds-tab.on .ti svg{stroke-width:calc(var(--stroke,1.5) + .4)}
+/* the status bar stays legible over a bright wall: a soft top shade (Unity: a ramp texture, --ts-top-shade) */
+.tapc.mainc::before{content:"";position:absolute;left:0;right:0;top:0;height:calc(110 * var(--P));background:linear-gradient(rgba(10,8,6,.38),rgba(10,8,6,0));pointer-events:none;z-index:0}
+.tapc .irow.lab{gap:calc(8 * var(--P))}
+.tapc .irow .ii{display:flex;flex-direction:column;align-items:center;gap:calc(4 * var(--P));min-width:calc(48 * var(--P))}
+.tapc .irow .ii .i{width:calc(40 * var(--bk,1) * var(--P));height:calc(40 * var(--bk,1) * var(--P));padding:calc(10 * var(--P));display:grid;border-radius:50%;background:var(--btn);color:var(--btn-fg)}
+.tapc.b-round .irow .ii .i{border-radius:30%}
+.tapc .irow .ii small{font:600 calc(13 * var(--ts,1) * var(--P))/1 var(--font);white-space:nowrap;color:inherit}
+.tapc .tile.nol{justify-content:center}
+.tapc .a-dock .pill:not(:has(> :nth-child(2))){padding:0 calc(12 * var(--P))}
+
+/* ===== critics round 2 (light) ===== */
+.tapc .ds-nav{position:relative}
+.tapc.kit .kitp>.ds-nav.shaped{height:calc(64 * var(--P));margin-top:calc(24 * var(--P));flex:none}
+/* selected chips: a quiet accent wash + ring + bold (D5: one accent fill per view); "fill" makes them solid */
+.tapc .lchip.on,.tapc .lchip.tsel.on{background:color-mix(in srgb,var(--acc) 12%,var(--navbg,#fff));color:var(--tx);box-shadow:inset 0 0 0 1.5px var(--acc);font-weight:700}
+.tapc.dark .lchip.on,.tapc.dark .lchip.tsel.on{background:color-mix(in srgb,var(--acc) 18%,#1C1A17)}
+.tapc.sel-fill .lchip.on{background:var(--acc);color:var(--acc-fg);box-shadow:none}
+.tapc.kit .kbg .lchip.on{box-shadow:none}
+/* segmented: a raised thumb, not an accent fill */
+.tapc .ds-seg span.on,.tapc.sel-ring .ds-seg span.on{background:#FFFFFF;color:#14110D;box-shadow:0 1px 3px rgba(20,17,13,.18)}
+.tapc.dark .ds-seg span.on{background:#3A3631;color:#F6F1E8;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
+.tapc.light .ds-seg{background:#EDE8DE;backdrop-filter:none;box-shadow:none!important;border-color:transparent}
+.tapc.dark .ds-seg{background:#1C1A17;backdrop-filter:none;box-shadow:none!important;border-color:rgba(255,255,255,.08)}
+/* immersive tag: the actions fit; a stronger shade under the words */
+.tapc .t-imm .irow{gap:calc(8 * var(--P));flex-wrap:nowrap}
+.tapc .t-imm .irow .i{width:calc(40 * var(--P));height:calc(40 * var(--P));padding:calc(10 * var(--P));position:relative}
+.tapc .t-imm .irow .i::before{content:"";position:absolute;inset:calc(-4 * var(--P))}
+.tapc .t-imm .sh{background:linear-gradient(180deg,rgba(10,8,6,0) 12%,rgba(10,8,6,calc(var(--scrim,.85) * .82)) 45%,rgba(10,8,6,var(--scrim,.85)) 72%)}
+/* landscape sheet: the actions stay in view */
+.tapc.land .ds-sheet{max-height:calc(100% - 56 * var(--P))}
+.tapc.land .ds-sheet .sbody .ds-btns{position:sticky;bottom:0;background:var(--sheet);padding:calc(8 * var(--P)) 0 calc(4 * var(--P))}
+/* main AR: the bar is the kit's (solid, the mascot a 48 pt disc), the coach tip roomier */
+.tapc .mbar .mazu{width:calc(52 * var(--P));height:calc(52 * var(--P));padding:calc(13 * var(--P));margin-top:calc(-18 * var(--P))}
+.tapc.light .mbar{background:#FFFFFF;backdrop-filter:none;-webkit-backdrop-filter:none}
+.tapc.dark .mbar{background:#26231F;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1),0 calc(6 * var(--P)) calc(16 * var(--P)) rgba(0,0,0,.4)}
+.tapc .mbar .mbtn span{font:500 calc(13 * var(--P))/1 var(--font)}
+.tapc .mtip{max-width:calc(300 * var(--P))!important}
+/* the screen card on tap: the panel tokens, a neutral category pill with its colour dot */
+.tapc .s-card{background:var(--sheet)!important;color:var(--sheet-fg)!important}
+.tapc.light .s-card{box-shadow:0 calc(-8 * var(--P)) calc(24 * var(--P)) rgba(20,17,13,.14)}
+.tapc.dark .s-card{box-shadow:inset 0 1px 0 rgba(255,255,255,.1)}
+.tapc .s-card p{color:var(--sheet-fg2)}
+.tapc .s-card .cat{display:inline-flex;align-items:center;gap:calc(6 * var(--P));background:var(--tonal)!important;color:var(--sheet-fg)!important;padding:calc(5 * var(--P)) calc(10 * var(--P))}
+.tapc .s-card .cat::before{content:"";width:calc(8 * var(--P));height:calc(8 * var(--P));border-radius:99px;background:var(--cc,var(--acc))}
+.tapc .cat2{opacity:1;color:var(--td)}
+.tapc:not(.land) .s-card.tuck::after{opacity:1;color:var(--sheet-fg2);font-size:calc(13 * var(--P))}
+.tapc:not(.land) .s-card.tuck{padding-bottom:calc(24 * var(--P))}
+.tapc.light .s-card .tile{background:#fff;box-shadow:0 0 0 1px rgba(20,17,13,.06)}
+.tapc.dark .s-card .tile{background:var(--tonal)}
+/* small things */
+.tapc.kit .ktouch::after{color:var(--acc)}
+.tapc.light .ds-badge.soft{color:#3D362D}
+.tapc.gal .gi.off{opacity:1}.tapc.gal .gi.off .gl{text-decoration:none}.tapc.gal .gi.off .a-rad,.tapc.gal .gi.off .c{opacity:.45}
+.tapc.light .ds-sw:not(.on){background:#8A8378}
+.tapc.dark .ds-sw:not(.on){background:#5C564D}
+.tapc .ds-opt .ck{box-shadow:inset 0 0 0 1.5px #8A8378;border:0}
+.tapc.dark .ds-opt .ck{box-shadow:inset 0 0 0 1.5px #8F887D}
+.tapc .ds-opt.on .ck{box-shadow:none}
+.tapc .a-rad.more .l{display:none}
+.tapc.light .ds-sheet .ds-list{background:#FFFFFF;box-shadow:0 0 0 1px rgba(20,17,13,.05)!important}
+.tapc.dark .ds-sheet .ds-list{background:#26231F}
+.tapc.tablet .ds-top{padding-left:max(calc(20 * var(--P)),calc(50% - 280 * var(--P)));padding-right:max(calc(20 * var(--P)),calc(50% - 280 * var(--P)))}
+/* the status bar over the camera: a soft top shade on every layer drawn over the wall */
+.tapc .ds-sheets::before{content:"";position:absolute;left:0;right:0;top:0;height:calc(110 * var(--P));background:linear-gradient(rgba(10,8,6,.42),rgba(10,8,6,0));pointer-events:none}
+.ph .ui:has(> .tapc:not(.kit):not(.scrn))::before{content:"";position:absolute;left:0;right:0;top:0;height:calc(110 * var(--U,3.9px) / 3.9);background:linear-gradient(rgba(10,8,6,.42),rgba(10,8,6,0));pointer-events:none;z-index:1}
+.tapc .onbt{position:absolute;left:50%;top:calc(60 * var(--P));translate:-50% 0;white-space:nowrap;animation:dsfade var(--dur) var(--ease) both}
+/* ===== critics round 2 (dark) ===== */
+.tapc .mtip .az{background:var(--tonal)!important;color:var(--acc)!important}
+.ph .edge{font:600 calc(13 * var(--U,3.9px) / 3.9) var(--body);min-height:calc(32 * var(--U,3.9px) / 3.9);padding:0 calc(10 * var(--U,3.9px) / 3.9);border-radius:99px}
+.ph .edge .chev{color:var(--lbl-fg,#F6F1E8);opacity:.85}
+.tapc .a-dock{-webkit-mask-image:none;mask-image:none;padding-right:0;justify-content:center}
+.tapc .a-dock .pill{padding:0 calc(12 * var(--P));font-size:calc(14 * var(--ts,1) * var(--P))}
+.tapc .t-card .irow{padding-right:calc(12 * var(--P))}
+.tapc.kit .ksw i{box-shadow:inset 0 0 0 1px rgba(127,127,127,.35)}
+.tapc.dark.kit .ktrack{background:rgba(255,255,255,.10)}
+.tapc.dark .ds-badge.soft{background:var(--tonal);color:var(--tx)}
+.ph .credit,.ph .cr{right:calc(24 * var(--U,3.9px) / 3.9)!important;bottom:calc(20 * var(--U,3.9px) / 3.9)!important}
+.tapc:not(.kids) .lchip.on,.tapc:not(.kids) .lchip.tsel.on{color:var(--tx)}
+.tapc.sel-fill:not(.kids) .lchip.on{color:var(--acc-fg)}
+.tapc.ds-onb .lchip.on{color:inherit}
+/* the colour page: icon buttons as they float over the camera, label pills included */
+.tapc.kit .krow.lp .kb .l{background:var(--btl);color:var(--btl-fg);padding:calc(3 * var(--P)) calc(8 * var(--P));border-radius:99px;text-shadow:none;min-width:0}
+
+/* ===== final reviewer ===== */
+/* accent text only on solid surfaces; on glass and over the camera, text buttons are ink */
+.tapc .ds-btn.text{color:var(--tx)}
+.tapc .ds-solid .ds-btn.text,.tapc .ds-sheet .ds-btn.text,.tapc .ds-main .ds-btn.text,.tapc .ds-dialog .ds-btn.text{color:var(--acc)}
+.tapc .ds-btn.text{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:calc(4 * var(--P))}
+.tapc .ds-btn.text.soft{text-decoration:none}
+/* badges: an accent wash, not a second fill; meta lines in ink-2 */
+.tapc .ds-badge{background:color-mix(in srgb,var(--acc) 16%,var(--navbg,#fff));color:var(--tx);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 40%,transparent)}
+.tapc.kit .kmeta{color:var(--td)}
+.tapc .ds-dot{background:#A1201A;color:#fff}
+.tapc.dark .ds-dot{background:#F2B8B5;color:#3A0A08}
+.tapc .ds-btn.main.pressed,.tapc .ds-btn.main:active{filter:brightness(.82);transform:scale(.97)}
+/* coaching hides unrelated labels (AR: "avoid cluttering the screen") */
+.ph.coaching .mk:not(.coach) .lbl{opacity:0;transition:opacity var(--dur,.22s)}
+.ph.coaching .edge{opacity:0}
+/* the dock: centred when it fits, never clipped at the start */
+.tapc .a-dock{justify-content:safe center}
+/* the buttons gallery: the "On the wall" caption on glass */
+.tapc.gal .galh,.tapc.gal .galw-t{background:var(--tg);color:var(--tx);padding:calc(4 * var(--P)) calc(10 * var(--P));border-radius:99px;text-shadow:none}
+/* Start in landscape: the block anchored low, shade over the whole text area */
+.tapc.ds-start.land .ds-heroshade{background:linear-gradient(90deg,rgba(16,15,13,.92),rgba(16,15,13,.7) 55%,rgba(16,15,13,.35))}
+.tapc.ds-start.land .ds-center.st{align-items:flex-start;text-align:left;justify-content:center;padding:calc(20 * var(--P)) calc(60 * var(--P));gap:calc(8 * var(--P))}
+.tapc.ds-start.land .ds-hero-t{font-size:calc(32 * var(--ts,1) * var(--P))}
+.tapc.ds-start.land .ds-go{margin-top:calc(8 * var(--P))}
+.tapc.gal .galcap{left:50%!important;translate:-50% 0;width:auto!important;background:var(--tg);color:var(--tx)!important;padding:calc(4 * var(--P)) calc(12 * var(--P));border-radius:99px;text-shadow:none!important;font:700 calc(13 * var(--P))/1 var(--font)!important;letter-spacing:.08em;border:1px solid var(--tb)}
+
+/* ===== v17: point markers on the phone (the same routine as the wall: a canvas per marker) ===== */
+.ph .mk{width:calc(48 * var(--U,3.9px) / 3.9);height:calc(48 * var(--U,3.9px) / 3.9)}
+.ph .mk .mkc{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none}
+.ph .mk .lbl{position:absolute;white-space:nowrap;line-height:1;font-weight:700;margin:0}
+.ph .mk .lbl{left:auto;top:auto}
+.ph .mk .lbl.ls-chip{padding:calc(6 * var(--U,3.9px) / 3.9) calc(10 * var(--U,3.9px) / 3.9);border-radius:99px;background:var(--lbl);color:var(--lbl-fg);border:1px solid var(--tb);backdrop-filter:blur(12px);box-shadow:0 calc(1.5 * var(--U,3.9px) / 3.9) calc(6 * var(--U,3.9px) / 3.9) rgba(0,0,0,.25)}
+.ph .mk .lbl.ls-halo{padding:0;background:none!important;border:0!important;backdrop-filter:none!important;box-shadow:none;color:#14110D;text-shadow:0 0 2px #fff,0 0 4px #fff,0 0 6px rgba(255,255,255,.9)}
+.ph.dark .mk .lbl.ls-halo{color:#fff;text-shadow:0 0 2px rgba(10,8,6,.95),0 0 4px rgba(10,8,6,.9),0 0 7px rgba(10,8,6,.8)}
+.ph .mk .lbl.lf-display{font-family:"Fraunces",Georgia,serif;font-weight:600}
+.ph .mk.sel .lbl{left:auto}
+
+/* v17: halo labels stay plain text with a soft halo (beats the glass label rule) */
+.ph:not(.kids) .mk .lbl.ls-halo,.ph .mk .lbl.ls-halo{background:none!important;border:0!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;padding:0!important}
+
+/* ===== v18: onboarding (who's visiting, how long, interests), Settings, profile effects ===== */
+.tapc .ds-onbp{justify-content:flex-start;gap:calc(22 * var(--P));padding:calc(70 * var(--P)) calc(20 * var(--P)) calc(30 * var(--P))}
+.tapc .ds-onbp .ob1{gap:calc(6 * var(--P))}
+.tapc .ds-onbp .ob2{gap:calc(10 * var(--P))}
+.tapc .ds-onbp .ds-sh{margin-top:0}
+.tapc .ds-onbp .ds-sh .ds-cap{text-transform:none;letter-spacing:0;font-weight:400}
+.tapc .obtop{display:flex;align-items:center;justify-content:space-between;gap:calc(10 * var(--P))}
+.tapc .olang .ds-seg{font-size:calc(13 * var(--ts,1) * var(--P))}
+.tapc .ds-opts.two,.tapc .ds-opts.three{display:grid;gap:calc(10 * var(--P));max-width:none}
+.tapc .ds-opts.two{grid-template-columns:1fr 1fr}
+.tapc .ds-opts.three{grid-template-columns:1fr 1fr 1fr}
+.tapc .ds-opts.two .ds-opt{position:relative;flex-direction:column;align-items:flex-start;gap:calc(10 * var(--P));padding:calc(14 * var(--P));padding-right:calc(40 * var(--P));min-height:calc(124 * var(--P))}
+.tapc .ds-opts.two .ds-opt>div{gap:calc(3 * var(--P))}
+.tapc .ds-opts .ds-opt .oi{display:grid;place-items:center;width:calc(40 * var(--P));height:calc(40 * var(--P));border-radius:calc(var(--r-m,3) * var(--u));background:color-mix(in srgb,var(--acc) 12%,transparent);color:var(--acc)}
+.tapc .ds-opts .ds-opt .oi svg{width:calc(26 * var(--P));height:calc(26 * var(--P))}
+.tapc .ds-opts.two .ds-opt .ds-h2{font-size:calc(17 * var(--ts,1) * var(--P))}
+.tapc .ds-opts.two .ds-opt .ds-cap{font-size:calc(13 * var(--ts,1) * var(--P))}
+.tapc .ds-opts.two .ds-opt .ck{position:absolute;top:calc(12 * var(--P));right:calc(12 * var(--P));width:calc(24 * var(--P));height:calc(24 * var(--P))}
+.tapc .ds-opts.three .ds-opt{flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:calc(2 * var(--P));padding:calc(12 * var(--P)) calc(6 * var(--P));min-height:calc(84 * var(--P))}
+.tapc .ds-opts.three .ds-opt .ds-h2{font-size:calc(17 * var(--ts,1) * var(--P))}
+.tapc .ds-opts.three .ds-opt .ds-cap{font-size:calc(13 * var(--ts,1) * var(--P));white-space:nowrap}
+.tapc .ds-opts.three .ds-opt .tcs{opacity:.85}
+.tapc .ds-opts.three .ds-opt.on{background:var(--acc)!important;color:var(--acc-fg)!important}
+.tapc .ds-opts.three .ds-opt.on .ds-cap{color:var(--acc-fg)}
+.tapc .ds-onbp .kchips{display:flex;flex-wrap:wrap;gap:calc(8 * var(--P))}
+.tapc .lchip .ic{display:inline-grid;place-items:center;width:calc(18 * var(--P));height:calc(18 * var(--P));margin-right:calc(5 * var(--P));color:var(--acc)}
+.tapc .lchip .ic svg{width:100%;height:100%}
+.tapc .ds-onbp .ds-acts{margin-top:calc(4 * var(--P))}
+.tapc .ds-onbp .ofoot{text-align:center;margin-top:calc(-10 * var(--P))}
+.tapc.ds-onb.tablet:not(.land) .ds-onbp{justify-content:safe center}
+.tapc.light:not(.sh-hard) .ds-opt.on{box-shadow:inset 0 0 0 calc(2 * var(--P)) var(--acc),0 calc(6 * var(--P)) calc(18 * var(--P)) rgba(21,23,28,.14)!important}
+/* landscape: two columns, each sized by its own content */
+.tapc.ds-onb .ds-onbp.cols{display:flex;flex-direction:row;align-items:safe center;justify-content:center;gap:calc(28 * var(--P));padding:calc(20 * var(--P)) calc(40 * var(--P)) calc(14 * var(--P))}
+.tapc.ds-onb .ds-onbp.cols .ocol{flex:1 1 0;min-width:0;max-width:calc(420 * var(--P));display:flex;flex-direction:column;gap:calc(14 * var(--P))}
+.tapc.ds-onb .ds-onbp.cols .ds-acts{flex-direction:row;align-items:center;gap:calc(10 * var(--P));margin:0}
+.tapc.ds-onb .ds-onbp.cols .ds-acts .ds-btn.main{flex:1}
+.tapc.ds-onb .ds-onbp.cols .ofoot{margin:0;text-align:left}
+.tapc.ds-onb .ds-onbp.cols .ds-opts.two .ds-opt{min-height:0;padding:calc(12 * var(--P));padding-right:calc(40 * var(--P));gap:calc(6 * var(--P))}
+.tapc.ds-onb .ds-onbp.cols .ds-opts.two .ds-opt .oi{width:calc(32 * var(--P));height:calc(32 * var(--P))}
+.tapc.ds-onb .ds-onbp.cols .ds-opts.three .ds-opt{min-height:calc(72 * var(--P))}
+/* Settings */
+.tapc .sheet-set .srow{display:flex;align-items:center;gap:calc(12 * var(--P));min-height:calc(56 * var(--P));padding:calc(6 * var(--P)) calc(14 * var(--P))}
+.tapc .sheet-set .srow .i{display:grid;place-items:center;width:calc(24 * var(--P));color:var(--acc)}
+.tapc .sheet-set .srow .i svg{width:calc(22 * var(--P));height:calc(22 * var(--P))}
+.tapc .sheet-set .srow .rt{flex:1;min-width:0}
+.tapc .sheet-set .srow .rt b{font:600 calc(15 * var(--ts,1) * var(--P))/1.25 var(--font)}
+.tapc .sheet-set .srow .ds-seg{flex:none;font-size:calc(13 * var(--ts,1) * var(--P))}
+.tapc .sheet-set .sint{display:flex;flex-wrap:wrap;gap:calc(8 * var(--P));margin:calc(10 * var(--P)) 0 calc(4 * var(--P))}
+.tapc .olang .ds-seg,.tapc .sheet-set .srow .ds-seg{height:calc(36 * var(--P))}
+.tapc .olang .ds-seg span,.tapc .sheet-set .srow .ds-seg span{flex:none;padding:0 calc(11 * var(--P));display:grid;place-items:center;font-size:calc(13 * var(--ts,1) * var(--P))}
+.tapc .sheet-set .ds-seg span.on,.tapc .olang .ds-seg span.on{font-weight:700;box-shadow:inset 0 0 0 calc(1.5 * var(--P)) var(--acc)}
+/* the card's deep-dive row (Time › Deep): a real row, 48 pt, a chevron */
+.tapc .ddive{display:flex;align-items:center;gap:calc(8 * var(--P));margin:calc(6 * var(--P)) 0;min-height:calc(48 * var(--P));cursor:pointer;font:600 calc(13 * var(--ts,1) * var(--P))/1.3 var(--font);color:var(--acc)}
+.tapc .ddive svg{width:calc(18 * var(--P));height:calc(18 * var(--P))}
+.tapc .ddive::before{content:"›";order:3;margin-left:auto;font-size:calc(20 * var(--P))}
+/* interests: a warm glow on the marker, and a star on its label (never the glow alone) */
+.ph .mk.fav::before{content:"";position:absolute;left:50%;top:50%;width:calc(44 * var(--U) / 3.9);height:calc(44 * var(--U) / 3.9);transform:translate(-50%,-50%);border-radius:50%;border:calc(2.5 * var(--U) / 3.9) solid #F2CA71;background:rgba(242,202,113,.22);pointer-events:none}   /* unity: a gold ring sprite behind the marker (no filter) */
+.ph .mk.fav .lbl::before{content:"★ ";color:#E3A520}
+/* the screen card keeps its planned height (it sizes the safe area): peek shows one line, half four; the full card has it all */
+.tapc .s-card p{display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;-webkit-line-clamp:1}
+.tapc .s-card.sh-half p{-webkit-line-clamp:4}
+/* the immersive card's buttons always fit (66 u wide by default); more wrap to a second row */
+.tapc .t-imm .irow{display:flex;flex-wrap:wrap;justify-content:space-between;gap:calc(6 * var(--P)) calc(4 * var(--P))}
+/* 48 pt hit areas around small controls (the visual size stays; the heart is already absolute) */
+.tapc :is(.ds-x, .lchip, .mbtn, .tile, .tcta, .ask, .msearch .mi, .olang .ds-seg span, .sheet-set .ds-seg span, .ddive){position:relative}
+.tapc :is(.ds-x, .lchip, .mbtn, .tile, .tcta, .ask, .msearch .mi, .heart, .olang .ds-seg span, .sheet-set .ds-seg span, .ddive)::after{content:"";position:absolute;top:min(0px,calc((100% - 48 * var(--P)) / 2));bottom:min(0px,calc((100% - 48 * var(--P)) / 2));left:min(0px,calc((100% - 48 * var(--P)) / 2));right:min(0px,calc((100% - 48 * var(--P)) / 2))}
+.tapc .mbtn{min-width:calc(56 * var(--P))}
+/* main screen: the search bar sits above the top shade; its placeholder at 7:1 */
+.tapc.mainc :is(.msearch,.mtop){position:relative;z-index:1}
+.tapc .msearch .ph1{color:var(--td)}
+.tapc .mtip .mi.az svg{width:calc(16 * var(--P));height:calc(16 * var(--P))}
+.tapc.land .ds-sheet .ds-scroll{padding-bottom:calc(72 * var(--P))}
+
+.tapc .sheet-set .srow{flex-wrap:wrap;row-gap:calc(6 * var(--P))}
+.tapc .sheet-set .srow .rt{min-width:calc(84 * var(--P))}
+/* onboarding: the live "what you'll get" sample */
+.tapc .oprev{display:flex;flex-direction:column;gap:calc(4 * var(--P));padding:calc(12 * var(--P)) calc(14 * var(--P));border-radius:calc(var(--r-l,4) * var(--u))}
+.tapc .oprev .ds-body{font-size:calc(14 * var(--ts,1) * var(--P));line-height:1.4;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+.tapc .oprev .opm{display:flex;flex-wrap:wrap;gap:calc(6 * var(--P)) calc(12 * var(--P));margin-top:calc(2 * var(--P))}
+.tapc .oprev .opm span{display:inline-flex;align-items:center;gap:calc(4 * var(--P));font:600 calc(13 * var(--ts,1) * var(--P))/1.2 var(--font);color:var(--td)}
+.tapc .oprev .opm svg{width:calc(16 * var(--P));height:calc(16 * var(--P));color:var(--acc)}
+.tapc .ds-empty .ei-azu{display:none}   /* Azu only in the Playful look */
+.ph .mk .lbl.covered{opacity:0!important;pointer-events:none}   /* a label under a bar or a sheet hides */
+/* Premium keyboard focus (tabindex on the components): a hard ring, no outline (Unity: a sibling ring element) */
+.tapc:not(.look-playful) :is(.ds-btn, .lchip, .ds-seg span, .ds-sw, .ds-opt):is(:focus-visible, .focus){box-shadow:0 0 0 calc(2 * var(--P)) var(--page,#fff),0 0 0 calc(4.5 * var(--P)) var(--acc)!important}
+/* onboarding: the buttons stay in reach (a footer that sticks at the bottom of the scroll) */
+.tapc .ds-onbp:not(.cols) .ds-acts{position:sticky;bottom:0;z-index:2;padding:calc(10 * var(--P)) 0 calc(6 * var(--P));margin-bottom:calc(-6 * var(--P));background:var(--ob-bg,transparent)}
+
+/* ===== F-kit (v19 final): the kit pages' bottom edge, landscape columns, the Sheets page (kit pages only: .tapc.kit…) ===== */
+/* the page end: no mask (Unity has none); a ramp element from clear to the backdrop over the last 72 pt, so a row is never seen
+   sliced, and a "More" cue while the page has more below (hidden at the end: .kend). Unity: a ramp sprite + a button. */
+.tapc.kit .kitp{-webkit-mask-image:none;mask-image:none}
+.tapc.kit .kfoot{position:absolute;left:0;right:0;bottom:0;height:calc(84 * var(--P));pointer-events:none;z-index:2;
+  background:linear-gradient(rgba(8,10,16,0),rgba(8,10,16,.72) 45%,rgba(8,10,16,.82))   /* unity: ramp */}
+.tapc.kit.light.bg-dim .kfoot{background:linear-gradient(rgba(240,237,230,0),rgba(240,237,230,.93) 45%,rgba(240,237,230,.97))   /* unity: ramp */}
+.tapc.kit.bg-plain .kfoot{background:linear-gradient(rgba(18,20,28,0),#12141C 50%)   /* unity: ramp */}
+.tapc.kit.light.bg-plain .kfoot{background:linear-gradient(rgba(244,241,234,0),#F4F1EA 50%)   /* unity: ramp */}
+.tapc.kit.full .kfoot,.tapc.kit.full .kmore{display:none}
+.tapc.kit .kmore{position:absolute;left:50%;translate:-50% 0;bottom:calc(14 * var(--P));z-index:3;display:inline-flex;align-items:center;gap:calc(4 * var(--P));
+  height:calc(36 * var(--P));padding:0 calc(14 * var(--P)) 0 calc(10 * var(--P));border-radius:99px;background:var(--btn);color:var(--btn-fg);border:1px solid var(--tb);
+  font:700 calc(13 * var(--ts,1) * var(--P))/1 var(--font);cursor:pointer;pointer-events:auto;box-shadow:0 calc(2 * var(--P)) calc(8 * var(--P)) rgba(0,0,0,.18)   /* unity: sprite */}
+.tapc.kit .kmore::after{content:"";position:absolute;inset:calc(-6 * var(--P)) calc(-4 * var(--P))}   /* the 48 pt touch area */
+.tapc.kit .kmore .i{display:grid;width:calc(18 * var(--P));height:calc(18 * var(--P));rotate:90deg}
+.tapc.kit .kmore .i svg{width:100%;height:100%}
+.tapc.kit.kend .kmore{display:none}
+/* landscape: a wider page and two columns of sections (Unity: a row of two column elements) */
+.tapc.kit.land .kitp{padding-left:max(calc(14 * var(--u)),calc(50% - 90 * var(--u)));padding-right:max(calc(14 * var(--u)),calc(50% - 90 * var(--u)))}
+.tapc.kit.land .kcols{display:flex;align-items:flex-start;gap:calc(28 * var(--P))}
+.tapc.kit.land .kcol{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:calc(4 * var(--u))}
+.tapc.kit.land .kcol>*{flex-shrink:0}
+/* landscape Overview: the nav bar is the rail on the leading edge, as in the app */
+.tapc.kit.land.has-rail .kitp{padding-left:calc(126 * var(--P));padding-right:calc(28 * var(--P))}
+.tapc.kit.land.has-rail .kcols{gap:calc(20 * var(--P))}
+.tapc.kit.land.tablet.has-rail .kitp{padding-left:max(calc(130 * var(--P)),calc(50% - 90 * var(--u)));padding-right:max(calc(36 * var(--P)),calc(50% - 90 * var(--u)))}
+.tapc.kit.land .ds-nav.rail.krail{position:absolute;left:calc(52 * var(--P));top:50%;translate:0 -50%;margin:0;z-index:4}
+.tapc.kit.land.tablet .ds-nav.rail.krail{left:calc(28 * var(--P))}
+/* portrait Overview: the nav bar pinned at the bottom, the page (and its end ramp) stops above it */
+.tapc.kit .ds-nav.kbar{position:absolute;left:50%;translate:-50% 0;bottom:calc(20 * var(--P));margin:0;z-index:4}
+.tapc.kit.has-bar .kitp{bottom:calc(100 * var(--P));padding-bottom:calc(40 * var(--P))}
+.tapc.kit.has-bar .kfoot{height:calc(156 * var(--P))}   /* down behind the bar: one band, no seam */
+.tapc.kit.has-bar .kmore{bottom:calc(108 * var(--P))}
+/* landscape Type: the seven roles 2-up in their panel */
+.tapc.kit.land.pg-type .kitp>.ds-panel{display:grid;grid-template-columns:1fr 1fr;column-gap:calc(28 * var(--P));row-gap:calc(12 * var(--P))}
+.tapc.kit.land.pg-type .kitp>.ds-panel .ktr{padding-top:calc(12 * var(--P));border-top:1px solid var(--tb)}
+.tapc.kit.land.pg-type .kitp>.ds-panel .ktr:nth-child(-n+2){padding-top:0;border-top:0}
+/* Sheets page: the actions pinned under the scrolling body; landscape: the sheet on the trailing side, the demo buttons beside it */
+.tapc.kit.pg-sheets .ds-sheet .sfoot{flex:none;display:grid;grid-template-columns:auto 1fr;margin:0}   /* the secondary at its own width, the main takes the rest */
+.tapc.kit.pg-sheets .ds-sheet .sfoot .ds-btn{width:100%;min-width:0;white-space:nowrap;padding-left:calc(20 * var(--P));padding-right:calc(20 * var(--P))}
+.tapc.kit.pg-sheets .ds-sheet.d-peek .sfoot{display:none}
+.tapc.kit.pg-sheets.land .ds-sheet{left:auto;right:calc(24 * var(--P));translate:none;width:min(calc(122 * var(--u)),calc(100% - 300 * var(--P)))}
+.tapc.kit.pg-sheets.land .ds-trig{top:50%;translate:0 -50%;left:calc(56 * var(--P));right:auto;width:calc(100% - min(calc(122 * var(--u)),calc(100% - 300 * var(--P))) - 104 * var(--P));flex-direction:column;align-items:center;padding:0}
+/* landscape Colour: lower swatches so the twelve roles fit the first column */
+.tapc.kit.land.pg-colour .ksw i{height:calc(26 * var(--P))}
+/* landscape Sheets: row tiles (icon beside the label, 48 pt) and a tighter rhythm, so the tiles clear the pinned actions even at text L */
+.tapc.kit.pg-sheets.land .ds-sheet{gap:calc(10 * var(--P))}
+.tapc.kit.pg-sheets.land .ds-sheet .sbody{gap:calc(10 * var(--P))}
+.tapc.kit.pg-sheets .ds-sheet.big .sbody{gap:calc(10 * var(--P))}
+.tapc.kit.pg-sheets .ds-sheet.big .tiles .tile,.tapc.kit.pg-sheets.land .ds-sheet .tiles .tile{white-space:nowrap;flex-direction:row;align-items:center;justify-content:flex-start;min-height:calc(48 * var(--P));padding-top:calc(6 * var(--P));padding-bottom:calc(6 * var(--P))}
+.tapc.kit.land .kcol .kc{white-space:normal}   /* a long section title wraps inside its column */
+.tapc.kit.land.pg-depth .klev{height:calc(46 * var(--u))}   /* landscape: the elevation stack a little tighter, Overlay above the fold */
+.tapc.kit.land.pg-look .kcol:first-child{flex:0 1 calc(372 * var(--P))}
+.tapc.kit.land.pg-look .kcol>.krow{column-gap:calc(8 * var(--P))!important}   /* the overview card keeps its two buttons on one line */
+.tapc.kit.land.tablet .ds-nav.rail.krail{left:calc(max(calc(130 * var(--P)),calc(50% - 90 * var(--u))) - 104 * var(--P))}   /* the rail beside the content, not at the far edge */
+.tapc.kit.pg-sheets.land.tablet .ds-sheet.d-half{height:50%}   /* tablet landscape: the half stop fits its content, no empty band above the actions */
+/* tablet landscape: two columns need the width (each as wide as a phone page) */
+.tapc.kit.land.tablet .kitp{padding-left:max(calc(10 * var(--u)),calc(50% - 120 * var(--u)));padding-right:max(calc(10 * var(--u)),calc(50% - 120 * var(--u)))}
+.tapc.kit.land.tablet.has-rail .kitp{padding-left:max(calc(130 * var(--P)),calc(50% - 120 * var(--u)))}
+.tapc.kit.land.tablet .ds-nav.rail.krail{left:calc(max(calc(130 * var(--P)),calc(50% - 120 * var(--u))) - 104 * var(--P))}
+.tapc.kit.land.tablet.pg-look .kcol:first-child{flex:1 1 0}
+
+/* ================= v20 (_4.1.12): onboarding v2, Settings by area, You, the gear, the action bar, the immersive card, Coming soon =================
+   Base (both looks, Premium-neutral). Playful refines in kids_30/40/50; Premium in prem_*. Unity: USS, sprites for the two look samples. */
+/* --- onboarding: the quick icons (optional): one quiet capsule of three 48 pt buttons, top right, beside the welcome line --- */
+.tapc .oqt{display:flex;gap:0;flex:none;padding:calc(2 * var(--P));border-radius:99px;background:color-mix(in srgb,var(--tx) 6%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--tx) 10%,transparent)}
+.tapc .oq{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(3 * var(--P));min-width:calc(48 * var(--P));height:calc(48 * var(--P));padding:0 calc(4 * var(--P));border-radius:99px;color:var(--td);cursor:pointer;position:relative;}
+.tapc .oq+.oq::before{content:"";position:absolute;left:0;top:calc(14 * var(--P));bottom:calc(14 * var(--P));width:1px;background:color-mix(in srgb,var(--tx) 14%,transparent)}
+.tapc .oq .i{display:grid;place-items:center;width:calc(19 * var(--P));height:calc(19 * var(--P));color:var(--tx)}
+.tapc .oq .i svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tapc .oq small{font:600 calc(12 * var(--P))/1 var(--font);letter-spacing:.01em;white-space:nowrap}   /* v20 F: 12 pt labels (was 11) */
+.tapc .ds-onbp .obtop{display:flex;align-items:flex-start;justify-content:space-between;gap:calc(10 * var(--P))}
+.tapc .ds-onbp .obtop .ds-eyebrow{padding-top:calc(8 * var(--P));min-width:0;max-width:calc(170 * var(--P))}
+.tapc .ds-sh .oopt{margin-left:calc(8 * var(--P));padding:calc(3 * var(--P)) calc(8 * var(--P));border-radius:99px;font:500 calc(12 * var(--P))/1.1 var(--font);text-transform:none;letter-spacing:0;color:var(--td);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--tx) 22%,transparent)}
+/* --- the look cards: a fixed picture of each look (Unity: two sprites) --- */
+.tapc .ds-opts.two .ds-opt.olk{padding:calc(10 * var(--P));padding-right:calc(10 * var(--P));min-height:0;gap:calc(8 * var(--P))}
+.tapc .ds-opt.olk .olt{display:flex;flex-direction:column;gap:calc(2 * var(--P));padding:0 calc(28 * var(--P)) 0 calc(2 * var(--P))}
+.tapc .ds-opts.two .ds-opt.olk .ck{top:auto;bottom:calc(12 * var(--P))}
+.tapc .lks,.tapc .ds-opt>.lks{display:block;position:relative;width:100%;height:calc(78 * var(--P));border-radius:calc(10 * var(--P));overflow:hidden;flex:none}
+/* Premium: the camera on the wall, a glass card over it (serif title, quiet lines, one round accent) */
+.tapc .lks-prem{background:#1E2430}
+.tapc .lks-prem .lks-ph{position:absolute;inset:0;opacity:.9}
+.tapc .lks-prem::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,18,26,.05),rgba(14,18,26,.55))   /* unity: sprite (the sample is one baked sprite) */}
+.tapc .lks-prem .lks-pin{position:absolute;left:24%;top:16%;z-index:1;width:calc(12 * var(--P));height:calc(12 * var(--P));border-radius:99px;background:rgba(255,255,255,.95);box-shadow:0 0 0 calc(3 * var(--P)) rgba(255,255,255,.35)}
+.tapc .lks-prem .lks-card{position:absolute;left:calc(10 * var(--P));right:calc(10 * var(--P));bottom:calc(8 * var(--P));z-index:1;padding:calc(6 * var(--P)) calc(10 * var(--P));border-radius:calc(9 * var(--P));background:rgba(250,248,244,.93);display:flex;flex-direction:column;gap:calc(4 * var(--P))}
+.tapc .lks-prem .lks-card b{font:600 calc(15 * var(--P))/1 "Fraunces",Georgia,serif;color:#1B1F27}
+.tapc .lks-card i{display:block;height:calc(3 * var(--P));border-radius:2px;background:#C9C3B8;width:70%}
+.tapc .lks-card i.s{width:45%}
+.tapc .lks-prem .lks-btn{position:absolute;right:calc(18 * var(--P));bottom:calc(17 * var(--P));z-index:2;width:calc(16 * var(--P));height:calc(16 * var(--P));border-radius:99px;background:#2F4A9E}
+/* Playful: tin-glaze paper, a cobalt sketched card at a tilt, Azu peeking, a yellow "Go!" sticker */
+.tapc .lks-play{background:#FFF8EC;box-shadow:inset 0 0 0 2px #1B1446}
+.tapc .lks-play .lks-tile{position:absolute;left:calc(8 * var(--P));top:calc(8 * var(--P));width:calc(18 * var(--P));height:calc(18 * var(--P));border:2px solid #2638B8;border-radius:3px;background:#DCE3FA;rotate:-8deg}
+.tapc .lks-play .lks-tile.t2{left:auto;right:calc(10 * var(--P));top:calc(10 * var(--P));width:calc(13 * var(--P));height:calc(13 * var(--P));background:#FFE08A;rotate:12deg}
+.tapc .lks-play .lks-card{position:absolute;left:calc(22 * var(--P));right:calc(36 * var(--P));top:calc(22 * var(--P));padding:calc(6 * var(--P)) calc(9 * var(--P));border-radius:calc(10 * var(--P));background:#FFFFFF;border:2px solid #1B1446;box-shadow:3px 3px 0 #1B1446;display:flex;flex-direction:column;gap:calc(4 * var(--P));rotate:-3deg}
+.tapc .lks-play .lks-card b{font:600 calc(16 * var(--P))/1 "Fredoka",system-ui,sans-serif;color:#2638B8}
+.tapc .lks-play .lks-card i{background:#9AA3D9}
+.tapc .lks-play .lks-azu{position:absolute;right:calc(4 * var(--P));bottom:calc(-6 * var(--P));width:calc(40 * var(--P));height:calc(40 * var(--P));rotate:-8deg}
+.tapc .lks-play .lks-btn{position:absolute;left:calc(10 * var(--P));bottom:calc(6 * var(--P));padding:calc(3 * var(--P)) calc(8 * var(--P));border-radius:99px;background:#FFC83D;border:2px solid #1B1446;font:700 calc(11 * var(--P))/1 "Fredoka",system-ui,sans-serif;color:#1B1446;rotate:-4deg}
+/* --- who the tour is for: two plain buttons + one example card --- */
+.tapc .ds-opts.two.oaud .ds-opt.oab{flex-direction:row;align-items:center;min-height:calc(56 * var(--P));padding:calc(8 * var(--P)) calc(12 * var(--P));gap:calc(10 * var(--P))}
+.tapc .ds-opts.two.oaud .ds-opt.oab .oi{width:calc(32 * var(--P));height:calc(32 * var(--P));flex:none}
+.tapc .ds-opts.two.oaud .ds-opt.oab .oi svg{width:calc(22 * var(--P));height:calc(22 * var(--P))}
+.tapc .ds-opts.two.oaud .ds-opt.oab{position:relative;justify-content:center}
+/* the chosen one: its accent outline + a ✓ badge on its corner (never colour alone); the other carries no ring, so both labels have the whole width */
+.tapc .ds-opts.two.oaud .ds-opt.oab .ck{position:absolute;top:calc(-8 * var(--P));right:calc(-8 * var(--P));bottom:auto;width:calc(24 * var(--P));height:calc(24 * var(--P));margin:0;box-shadow:0 0 0 calc(3 * var(--P)) var(--ob-bg,#F4F0E8)}
+.tapc .ds-opts.two.oaud .ds-opt.oab:not(.on) .ck{display:none}
+/* landscape: the old two-column card padding (room for a corner ✓) must not squeeze the look pictures or push "Ages 12+" out */
+.tapc.ds-onb .ds-onbp.cols .ds-opts.two .ds-opt.olk{padding:calc(10 * var(--P))}
+.tapc.ds-onb .ds-onbp.cols .ds-opts.two.oaud .ds-opt.oab{padding:calc(8 * var(--P)) calc(12 * var(--P))}
+.tapc.ds-onb.land:not(.tablet) .lks{height:calc(60 * var(--P))}
+/* phone landscape: the right column (how long, interests, the buttons) should fit without scrolling at text M: the time cards lose their third line
+   (the minutes say it), the footnote goes (Settings says it again) */
+.tapc.ds-onb.land:not(.tablet) .ds-opts.three .ds-opt .tcs,.tapc.ds-onb.land:not(.tablet) .ds-onbp.cols .ofoot{display:none}
+.tapc.ds-onb.land:not(.tablet) .ds-onbp.cols .ds-opts.three .ds-opt{min-height:calc(60 * var(--P))}
+.tapc.ds-onb.land:not(.tablet) .ds-onbp.cols .ocol.c2{gap:calc(12 * var(--P))}
+.tapc .ds-opts.two.oaud .ds-opt.oab .ds-h2{font-size:calc(16 * var(--ts,1) * var(--P));white-space:nowrap}
+.tapc .oex{display:flex;flex-direction:column;gap:calc(10 * var(--P));padding:calc(14 * var(--P));border-radius:calc(var(--r-card,5) * var(--u));color:var(--tx)}
+.tapc.ds-onb.light .oex{background:#fff}.tapc.ds-onb.dark .oex{background:#1C1A17}
+.tapc .oex .ds-eyebrow{color:var(--td)}
+.tapc .oex-poi{display:flex;align-items:center;gap:calc(10 * var(--P))}
+.tapc .oex-th{flex:none;width:calc(52 * var(--P));height:calc(52 * var(--P));border-radius:calc(10 * var(--P))}
+.tapc .oex-tx{display:flex;flex-direction:column;gap:calc(4 * var(--P));min-width:0}
+.tapc .oex-tx .cat{align-self:flex-start;font:700 calc(11 * var(--ts,1) * var(--P))/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--td);display:inline-flex;align-items:center;gap:calc(5 * var(--P))}
+.tapc .oex-tx .cat::before{content:"";width:calc(8 * var(--P));height:calc(8 * var(--P));border-radius:99px;background:var(--cc)}
+.tapc .oex-tx b{font:600 calc(17 * var(--ts,1) * var(--P))/1.15 var(--tfont,var(--font))}
+.tapc .oex-story{margin:0;font-size:calc(14 * var(--ts,1) * var(--P));line-height:1.45;color:var(--tx)}
+.tapc .oex-say{display:flex;align-items:flex-end;gap:calc(8 * var(--P))}
+.tapc .oex-say .oex-azu{flex:none;width:calc(54 * var(--P));height:auto}
+.tapc .oex-say .bub{margin:0;flex:1;padding:calc(10 * var(--P)) calc(12 * var(--P));border-radius:calc(14 * var(--P)) calc(14 * var(--P)) calc(14 * var(--P)) calc(3 * var(--P));background:color-mix(in srgb,var(--acc) 10%,transparent);font-size:calc(14 * var(--ts,1) * var(--P));line-height:1.4}
+.tapc .oex-tags{display:flex;flex-wrap:wrap;gap:calc(6 * var(--P))}
+.tapc .oex-tag{display:inline-flex;align-items:center;gap:calc(5 * var(--P));min-height:calc(28 * var(--P));padding:0 calc(9 * var(--P));border-radius:99px;font:600 calc(12 * var(--ts,1) * var(--P))/1 var(--font);background:color-mix(in srgb,var(--acc) 10%,transparent);color:var(--tx)}
+.tapc .oex-tag svg{width:calc(15 * var(--P));height:calc(15 * var(--P));fill:none;stroke:var(--acc);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.tapc .otm{display:flex;align-items:center;gap:calc(6 * var(--P));margin:0}
+.tapc .otm svg{width:calc(16 * var(--P));height:calc(16 * var(--P));fill:none;stroke:currentColor;stroke-width:1.8}
+.tapc .ds-opts.three .ds-opt{position:relative}
+/* --- onboarding in landscape: two columns, each its own scroller (Unity: two ScrollViews); "Let's go" sticks to the bottom of the right one --- */
+.tapc.ds-onb .ds-onbp.cols{position:absolute;inset:0;display:flex;flex-direction:row;align-items:stretch;justify-content:center;gap:calc(32 * var(--P));padding:0 calc(52 * var(--P));overflow:hidden}
+.tapc.ds-onb .ds-onbp.cols .ocol{flex:1 1 0;min-width:0;max-width:calc(420 * var(--P));overflow-y:auto;scrollbar-width:none;display:flex;flex-direction:column;gap:calc(16 * var(--P));padding:calc(34 * var(--P)) calc(10 * var(--P)) calc(20 * var(--P))}
+.tapc.ds-onb .ds-onbp.cols .ocol.c2{padding-bottom:0}
+.tapc.ds-onb .ds-onbp.cols .ds-acts{position:sticky;bottom:0;z-index:2;margin:auto 0 0;flex-direction:row;align-items:center;gap:calc(10 * var(--P));padding:calc(10 * var(--P)) 0 calc(14 * var(--P));background:var(--ob-bg,transparent)}
+.tapc.ds-onb .ds-onbp.cols .ds-acts .ds-btn.main{flex:1}
+.tapc.ds-onb .ds-onbp.cols .ofoot{margin:0;text-align:left}
+.tapc.ds-onb.tablet .ds-onbp.cols{padding:0 calc(64 * var(--P))}
+.tapc.ds-onb.tablet .ds-onbp.cols .ocol{padding-top:calc(64 * var(--P))}
+.tapc.ds-onb.tablet .ds-onbp.cols .ds-acts{margin-top:calc(4 * var(--P))}
+.tapc .ds-opts .ds-opt .oi svg,.tapc .ds-opt .ck svg{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+/* --- Settings by area --- */
+.tapc .sheet-set .khd{display:flex;align-items:center;gap:calc(10 * var(--P))}
+.tapc .sheet-set .khd .khi{display:grid;place-items:center;width:calc(26 * var(--P));height:calc(26 * var(--P));color:var(--acc)}
+.tapc .sheet-set .khd .khi svg,.tapc .sheet-set .sarea svg,.tapc.ds-you svg{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tapc .sheet-set .khd .khi svg{width:100%;height:100%}
+.tapc .sheet-set .khd .ds-h1{flex:1}
+.tapc .sheet-set .sarea{display:flex;align-items:center;gap:calc(7 * var(--P));margin-top:calc(18 * var(--P))}
+.tapc .sheet-set .sarea svg{width:calc(16 * var(--P));height:calc(16 * var(--P));color:var(--acc)}
+.tapc .sheet-set .srow.stk{flex-direction:column;align-items:stretch;gap:calc(8 * var(--P));padding:calc(10 * var(--P)) calc(14 * var(--P))}
+.tapc .sheet-set .srow .sth{display:flex;align-items:center;gap:calc(12 * var(--P))}
+.tapc .sheet-set .srow.stk .ds-seg{align-self:stretch;display:flex}
+.tapc .sheet-set .srow.stk .ds-seg span{flex:1 1 0;min-width:0;white-space:nowrap;padding-left:calc(4 * var(--P));padding-right:calc(4 * var(--P))}
+.tapc .sheet-set .srow .rs{display:block;margin-top:calc(2 * var(--P));font-size:calc(13 * var(--ts,1) * var(--P));line-height:1.3;color:var(--sheet-fg2,var(--td))}
+.tapc .sheet-set .srow .ds-sw{flex:none}
+.tapc .sheet-set .srow.stk .sint{margin:0}
+/* --- Settings and You in landscape: a wider sheet, two columns in one scroller (Unity: a row of two columns inside the ScrollView) --- */
+.tapc.land :is(.sheet-set, .sheet-you){width:min(calc(100% - 96 * var(--P)),calc(720 * var(--P)))}
+.tapc .sbody.scols{flex-direction:row;align-items:flex-start;gap:calc(20 * var(--P))}
+.tapc .sbody.scols>.scol{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:calc(12 * var(--P));padding-bottom:calc(8 * var(--P))}
+.tapc .sbody.scols>.scol>.sarea:first-child,.tapc .sbody.scols>.scol>.ds-sh:first-child{margin-top:calc(4 * var(--P))}
+/* --- You: the visitor's own panel --- */
+.tapc.ds-you .yhead{display:flex;flex-direction:column;gap:calc(14 * var(--P));padding:calc(16 * var(--P));border-radius:calc(var(--r-card,5) * var(--u));margin-top:calc(6 * var(--P));background:color-mix(in srgb,var(--sheet-fg) 6%,transparent);color:var(--sheet-fg);box-shadow:none;border-color:transparent;backdrop-filter:none;-webkit-backdrop-filter:none}
+.tapc.ds-you .ytop{display:flex;align-items:center;gap:calc(12 * var(--P))}
+.tapc.ds-you .yav{flex:none;display:grid;place-items:center;width:calc(56 * var(--P));height:calc(56 * var(--P));border-radius:99px;background:color-mix(in srgb,var(--acc) 16%,transparent);color:var(--acc);overflow:hidden}
+.tapc.ds-you .yav svg{width:52%;height:52%}.tapc.ds-you .yav img{width:100%;height:100%}
+.tapc.ds-you .ytx{flex:1;min-width:0;display:flex;flex-direction:column;gap:calc(3 * var(--P))}
+.tapc.ds-you .yhi{font:600 calc(19 * var(--ts,1) * var(--P))/1.2 var(--tfont,var(--font))}
+.tapc.ds-you .ysub{font:400 calc(14 * var(--ts,1) * var(--P))/1.3 var(--font);color:var(--sheet-fg2,var(--td))}
+.tapc.ds-you .ychips{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:calc(6 * var(--P));min-height:calc(48 * var(--P));cursor:pointer}
+.tapc.ds-you .ychip{display:inline-flex;align-items:center;gap:calc(5 * var(--P));min-height:calc(30 * var(--P));padding:0 calc(10 * var(--P));border-radius:99px;font:600 calc(13 * var(--ts,1) * var(--P))/1 var(--font);background:color-mix(in srgb,var(--sheet-fg,var(--tx)) 8%,transparent)}
+.tapc.ds-you .ychip svg{width:calc(15 * var(--P));height:calc(15 * var(--P))}
+.tapc.ds-you .ychg{margin-left:auto;padding:0 calc(4 * var(--P));font:600 calc(14 * var(--ts,1) * var(--P))/1 var(--font);color:var(--acc);text-decoration:underline;text-underline-offset:3px}
+.tapc.ds-you .ystats{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(8 * var(--P))}
+.tapc.ds-you .ystat{display:flex;flex-direction:column;align-items:flex-start;gap:calc(3 * var(--P));padding:calc(10 * var(--P)) calc(10 * var(--P)) calc(11 * var(--P));border-radius:calc(12 * var(--P));background:var(--sheet);min-width:0}
+.tapc.ds-you .ystat .yi{display:grid;place-items:center;width:calc(20 * var(--P));height:calc(20 * var(--P));color:var(--acc)}
+.tapc.ds-you .ystat .yi svg{width:100%;height:100%}
+.tapc.ds-you .ystat b{font:600 calc(24 * var(--ts,1) * var(--P))/1.05 var(--tfont,var(--font))}
+.tapc.ds-you .ystat b small{font:500 calc(14 * var(--ts,1) * var(--P))/1 var(--font);color:var(--sheet-fg2,var(--td))}
+.tapc.ds-you .ystat>span:last-child{font:500 calc(13 * var(--ts,1) * var(--P))/1.2 var(--font);color:var(--sheet-fg2,var(--td))}
+.tapc.ds-you .ybar{height:calc(6 * var(--P));border-radius:99px;background:color-mix(in srgb,var(--sheet-fg,var(--tx)) 12%,transparent);overflow:hidden}
+.tapc.ds-you .ybar i{display:block;height:100%;border-radius:99px;background:var(--acc);min-width:calc(6 * var(--P))}
+.tapc.ds-you .yempty{display:flex;align-items:center;gap:calc(14 * var(--P));padding:calc(14 * var(--P)) calc(16 * var(--P));border-radius:calc(var(--r-card,5) * var(--u));border:calc(1.5 * var(--P)) dashed color-mix(in srgb,var(--sheet-fg) 26%,transparent);background:transparent;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;color:var(--sheet-fg)   /* unity: a dashed 9-slice sprite */}
+.tapc.ds-you .yempty .yei{flex:none;display:grid;place-items:center;width:calc(44 * var(--P));height:calc(44 * var(--P));border-radius:99px;background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--acc)}
+.tapc.ds-you .yempty .yei svg{width:calc(22 * var(--P));height:calc(22 * var(--P))}
+.tapc.ds-you .yempty>div{display:flex;flex-direction:column;gap:calc(3 * var(--P));min-width:0}
+.tapc.ds-you .yempty b{font:600 calc(16 * var(--ts,1) * var(--P))/1.2 var(--font)}
+.tapc.ds-you .yempty span{font:400 calc(14 * var(--ts,1) * var(--P))/1.35 var(--font);color:var(--sheet-fg2,var(--td))}
+.tapc.ds-you .yalb .tt{gap:calc(4 * var(--P))}
+.tapc.ds-you .ystrip{display:flex;gap:calc(5 * var(--P));margin-top:calc(6 * var(--P))}
+.tapc.ds-you .ystrip i{display:block;width:calc(32 * var(--P));height:calc(32 * var(--P));border-radius:calc(6 * var(--P));background-color:#F7F2E7}
+.tapc.ds-you .ystrip i.e{background:transparent;border:calc(1.5 * var(--P)) dashed color-mix(in srgb,var(--sheet-fg) 30%,transparent)}
+/* --- main: the gear left of the search; the bar with 2–5 buttons --- */
+/* the row is the search's own width plus the gear (a pill stays a pill; "Full-width bar" fills); the search shrinks, never the gear */
+.tapc .msrow{display:flex;align-items:center;gap:calc(8 * var(--P));width:min(100%,calc(76 * var(--u) + 56 * var(--P)));max-width:100%;flex:none;justify-content:center}
+.tapc .msrow.s-bar{width:100%}
+.tapc .msrow .msearch{flex:1 1 0;width:auto;min-width:0;max-width:none}
+.tapc .mgear{flex:none;display:grid;place-items:center;width:calc(48 * var(--P));height:calc(48 * var(--P));border-radius:99px;color:var(--tx);cursor:pointer;pointer-events:auto;position:relative}
+.tapc .mgear svg{width:calc(22 * var(--P));height:calc(22 * var(--P));fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+/* 2–5 buttons: each sits centred in an equal column; the bar's width follows the count (2 = compact, 5 = near full) */
+.tapc .mbar>*{justify-self:center}
+.tapc .mbar.n2{grid-template-columns:1fr 1fr;width:calc(56 * var(--u))}
+.tapc .mbar.n4{grid-template-columns:repeat(4,1fr);width:calc(86 * var(--u))}
+.tapc .mbar.n5{grid-template-columns:repeat(5,1fr);width:calc(92 * var(--u));padding:0 calc(2 * var(--u))}
+.tapc .mbar.n4 .mbtn,.tapc .mbar.n5 .mbtn{min-width:0}
+/* landscape rail: more buttons, tighter rhythm, so five still clear the status bar on a phone */
+.tapc.land.mainc .mbar.rail.n4{gap:calc(3 * var(--u))}
+.tapc.land.mainc .mbar.rail.n5{gap:calc(2 * var(--u));padding:calc(3 * var(--u)) 0}
+.tapc .mbtn.on{color:var(--acc)}
+/* --- on tap: the immersive card v20 (A3): picture-led. The photo on top (a child Image), the name, two lines at most, the action row.
+   Shared structure for both looks; each look dresses it (prem_tap.css, kids_40_tap.css) --- */
+.tapc .t-imm{aspect-ratio:auto!important;height:auto;display:flex;flex-direction:column;overflow:hidden;background:var(--sheet)!important;color:var(--sheet-fg)!important}
+.tapc .t-imm>.sh{display:none}
+.tapc .t-imm .im{position:relative;display:block;width:100%;aspect-ratio:16/10;flex:none;background-size:cover}
+.tapc .t-imm .bd{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;display:flex;flex-direction:column;gap:calc(4 * var(--P));padding:calc(12 * var(--P)) calc(14 * var(--P)) calc(12 * var(--P))}
+.tapc .t-imm .bd .cat{align-self:flex-start}
+.tapc .t-imm .bd b{margin:0!important;color:var(--sheet-fg)}
+.tapc .t-imm .bd .sm,.tapc .t-pan .tx .sm{display:-webkit-box!important;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:calc(14 * var(--ts,1) * var(--P))!important;line-height:1.4!important;color:var(--sheet-fg2)!important;opacity:1!important}   /* unity: maxLines 2 */
+.tapc .t-imm .heart{position:absolute;top:calc(8 * var(--P));right:calc(8 * var(--P));z-index:2}
+/* the action row (immersive and panel): the story first, in the accent; then icon buttons with one-word labels */
+.tapc .irow.acts{display:flex!important;flex-wrap:nowrap!important;align-items:stretch;justify-content:flex-start;gap:calc(6 * var(--P))!important;margin-top:calc(8 * var(--P))}
+.tapc .irow.acts .ii{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(4 * var(--P));cursor:pointer}
+.tapc .irow.acts .ii .i{width:calc(44 * var(--P))!important;height:calc(44 * var(--P))!important;padding:calc(11 * var(--P))!important;border-radius:calc(14 * var(--P));display:grid;place-items:center;background:var(--btn);color:var(--btn-fg)}
+.tapc .irow.acts .ii .i svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tapc .irow.acts .ii small{font:600 calc(12 * var(--ts,1) * var(--P))/1.1 var(--font);color:var(--sheet-fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.tapc .irow.acts .ii.pri{flex:1.3 1 0}
+.tapc .irow.acts.soon .ii.pri{flex:2.6 1 0}   /* a soon place: two buttons, "What's coming" gets the room */
+.tapc .irow.acts .ii.pri .i{width:100%!important;background:var(--cta)!important;color:var(--cta-fg)!important}
+/* the entrance: each button pops in after the card has risen (JS staggers the delay). backwards fill only, so :active can still scale it */
+.tapc .irow.acts .ii.apop{animation:actpop .34s ease-out backwards}
+@keyframes actpop{from{opacity:0;scale:.72;translate:0 calc(6 * var(--P))}to{opacity:1;scale:1;translate:0 0}}   /* tween: scale .72→1, fade, rise 6 pt, ease-out (DOTween OutQuad), delay .2 s + .07 s per button */
+.tapc.m-reduced .irow.acts .ii.apop{animation:none}
+.tapc .irow.acts .ii:active{scale:.94;transition:scale .08s ease-out}
+/* the floating panel uses the same row */
+.tapc .t-pan .tx{display:flex;flex-direction:column;gap:calc(4 * var(--P))}
+.tapc .t-pan .tx .irow.acts .ii small{color:inherit}
+.tapc .t-pan .tx .irow.acts :is(.ii, .i, small){opacity:1!important;margin:0;max-width:none;text-transform:none}   /* the panel's old ".t-pan span" rule (opacity .82, caps) is for its text, not the buttons */
+/* --- Coming soon: the badge, the chip line, the page --- */
+.tapc .soonb{display:inline-flex;align-items:center;gap:calc(5 * var(--P));align-self:flex-start;min-height:calc(24 * var(--P));padding:0 calc(10 * var(--P)) 0 calc(8 * var(--P));border-radius:99px;background:#F2C27A!important;color:#1B1446!important;font:700 calc(12 * var(--ts,1) * var(--P))/1 var(--font)!important;letter-spacing:.02em;white-space:nowrap;opacity:1!important}
+.tapc .soonb svg{flex:none;width:calc(14 * var(--P));height:calc(14 * var(--P));fill:none;stroke:currentColor;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}
+.tapc .t-imm .im .soonb,.tapc .t-pan .im .soonb{position:absolute;left:calc(8 * var(--P));top:calc(8 * var(--P))}
+.tapc .t-chip small.soonl{display:flex;align-items:center;gap:calc(4 * var(--P))}
+.tapc .t-chip small.soonl svg{flex:none;width:calc(13 * var(--P));height:calc(13 * var(--P));fill:none;stroke:currentColor;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}
+.tapc .tv.tv-soon{display:flex;flex-direction:column;background:var(--sheet)!important;color:var(--sheet-fg)!important;overflow-y:auto;scrollbar-width:none}
+.tapc.light .tv.tv-soon{background:#F8F6F2!important}.tapc.dark .tv.tv-soon{background:#1C1A17!important}   /* solid: the wall must not ghost through a full page */
+.tapc .tv-soon .sn-hero{position:relative;flex:none;height:38%}
+.tapc .tv-soon .soonb.big{position:absolute;left:calc(16 * var(--P));bottom:calc(14 * var(--P));min-height:calc(32 * var(--P));font-size:calc(14 * var(--ts,1) * var(--P))!important}
+.tapc .tv-soon .sn-bd{display:flex;flex-direction:column;gap:calc(10 * var(--P));padding:calc(18 * var(--P)) calc(20 * var(--P)) calc(28 * var(--P))}
+.tapc .tv-soon .cat{align-self:flex-start;font:700 calc(12 * var(--ts,1) * var(--P))/1 var(--font);letter-spacing:.08em;text-transform:uppercase;display:inline-flex;align-items:center;gap:calc(6 * var(--P));color:var(--sheet-fg2)}
+.tapc .tv-soon .cat::before{content:"";width:calc(8 * var(--P));height:calc(8 * var(--P));border-radius:99px;background:var(--cc)}
+.tapc .tv-soon .sn-t{font:600 calc(28 * var(--ts,1) * var(--P))/1.08 var(--tfont,var(--font))}
+.tapc .tv-soon .sn-l{margin:0;font:600 calc(17 * var(--ts,1) * var(--P))/1.35 var(--font)}
+.tapc .tv-soon .sn-b{margin:0;font-size:calc(15 * var(--ts,1) * var(--P));line-height:1.5;color:var(--sheet-fg2)}
+.tapc .tv-soon .sn-say{display:flex;align-items:flex-end;gap:calc(8 * var(--P))}
+.tapc .tv-soon .sn-say .sn-azu{flex:none;width:calc(64 * var(--P));height:auto}
+.tapc .tv-soon .sn-say .bub{margin:0;flex:1;padding:calc(10 * var(--P)) calc(12 * var(--P));border-radius:calc(14 * var(--P)) calc(14 * var(--P)) calc(14 * var(--P)) calc(3 * var(--P));background:color-mix(in srgb,var(--acc) 12%,transparent);font:600 calc(16 * var(--ts,1) * var(--P))/1.35 var(--font)}
+/* what's on its way: the parts the place will get, as slots still to fill (the heading says they are not here yet) */
+.tapc .tv-soon .sn-way{display:flex;flex-direction:column;gap:calc(8 * var(--P))}
+.tapc .tv-soon .sn-way>small{font:700 calc(12 * var(--ts,1) * var(--P))/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--sheet-fg2)}
+.tapc .tv-soon .sn-slots{display:flex;flex-wrap:wrap;gap:calc(8 * var(--P))}
+.tapc .tv-soon .sn-slot{display:inline-flex;align-items:center;gap:calc(6 * var(--P));min-height:calc(36 * var(--P));padding:0 calc(12 * var(--P)) 0 calc(10 * var(--P));border-radius:99px;border:calc(1.5 * var(--P)) solid color-mix(in srgb,var(--sheet-fg) 22%,transparent);background:color-mix(in srgb,var(--sheet-fg) 4%,transparent);font:600 calc(14 * var(--ts,1) * var(--P))/1 var(--font);color:var(--sheet-fg)}
+.tapc .tv-soon .sn-slot svg{flex:none;width:calc(17 * var(--P));height:calc(17 * var(--P));fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.8}
+.tapc .tv-soon .sn-acts{display:flex;flex-direction:column;gap:calc(6 * var(--P));margin-top:calc(8 * var(--P))}
+.tapc .tv-soon>.x{position:absolute;top:calc(12 * var(--P));right:calc(12 * var(--P))}
+.tapc.land .tv.tv-soon{flex-direction:row}
+.tapc.land .tv-soon .sn-hero{height:auto;width:40%}
+.tapc.land .tv-soon .sn-bd{flex:1;min-width:0;overflow-y:auto;scrollbar-width:none;padding:calc(28 * var(--P)) calc(72 * var(--P)) calc(24 * var(--P)) calc(28 * var(--P))}
+
+/* v20 F (final fixer): phone landscape onboarding. The left column showed the look cards but not the audience buttons; the right column hid its
+   interest chips under the "Let's go" fade. Here: the look pictures are shorter and the look cards keep only their names (the picture says the rest),
+   the gaps are tighter, the "places on the wall" line goes (the minutes say it). Unity: the same USS under the landscape-phone class */
+.tapc.ds-onb.land:not(.tablet) .ds-onbp.cols .ocol{gap:calc(10 * var(--P));padding-top:calc(28 * var(--P))}
+.tapc.ds-onb.land:not(.tablet) .ds-onbp.cols .ob1,.tapc.ds-onb.land:not(.tablet) .ds-onbp.cols .ob2{gap:calc(8 * var(--P))}
+.tapc.ds-onb.land:not(.tablet) .ds-onbp.cols .ob1{gap:calc(2 * var(--P))}
+.tapc.ds-onb.land:not(.tablet) .lks{height:calc(50 * var(--P))}
+.tapc.ds-onb.land:not(.tablet) .ds-onbp.cols .ds-opts.two .ds-opt.olk{padding:calc(8 * var(--P));gap:calc(6 * var(--P))}
+.tapc.ds-onb.land:not(.tablet) .ds-opt.olk .olt .ds-cap{display:none}
+.tapc.ds-onb.land:not(.tablet) .ds-opts.two .ds-opt.olk .ck{bottom:calc(9 * var(--P))}
+.tapc.ds-onb.land:not(.tablet) .ds-onbp.cols .otm{display:none}
+.tapc.ds-onb.land:not(.tablet) .ds-onbp.cols .ds-opts.three .ds-opt{min-height:calc(54 * var(--P))}
+/* v20 F: the "What's coming" page in landscape. The status-bar shade (a grey ramp for the camera) lay over the page's solid paper as a dirty band:
+   it now covers the photo only (Premium: the left 40 %), or nothing (Playful: the photo sits inside the paper); the status text on the paper is ink.
+   Tablet landscape: the text block sits in the middle of its column, not in the top third. Unity: the status shade is a child of the hero image */
+.ph.land.look-premium .ui:has(.tv-soon)::before{right:60%}
+.ph.land.look-playful .ui:has(.tv-soon)::before{display:none}
+.ph.land.light.look-premium:has(.tv-soon) .sb span:last-child,.ph.land.light.look-playful:has(.tv-soon) .sb span{color:#15171C;text-shadow:none}
+.ph.land.dark.look-playful:has(.tv-soon) .sb span{text-shadow:none}
+.tapc.land .tv-soon .sn-bd{justify-content:safe center}
+.tapc.land.tablet .tv-soon .sn-bd{padding-left:calc(40 * var(--P));padding-right:calc(88 * var(--P))}

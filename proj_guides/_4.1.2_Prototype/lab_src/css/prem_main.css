@@ -1,0 +1,65 @@
+/* v19 section review: Premium (12+) fixes for this group, scoped to .tapc:not(.look-playful). Unity-feasible only. */
+/* R4 · Main AR screen: wall labels, pointers, bar labels, the hint when the wall is out of view, the selected POI's pin.
+   Wall labels and pointers live on the phone's .ph root (not .tapc): they are scoped .ph:not(.look-playful). */
+
+/* ---------- 1 · pointers to POIs off the screen: a visible arrow, on the side of the edge it points to; 48 pt target ---------- */
+/* the chevron was a 14 pt filled triangle at 85 % (invisible in dark): a 16 pt stroked chevron in the label's own ink */
+.ph:not(.look-playful) .edge .chev{width:calc(16 * var(--U,3.9px) / 3.9);height:calc(16 * var(--U,3.9px) / 3.9);flex:none;display:grid;opacity:1!important;color:var(--lbl-fg,#fff)!important   /* the pill's ink */}
+.ph:not(.look-playful) .edge .chev svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+/* a pointer on the left edge puts its arrow first, next to the edge (unity: C# adds .at-l; the Lab reads the anchor until the JS lands) */
+.ph:not(.look-playful) .edge.at-l .chev{order:-1;margin-left:calc(-3 * var(--U,3.9px) / 3.9)}
+/* the 32 pt pill keeps its size; the picking box around it is 48 pt (unity: a 48 pt layout box with the pill as its child) */
+.ph:not(.look-playful) .edge::after{content:"";position:absolute;top:calc(-8 * var(--U,3.9px) / 3.9);bottom:calc(-8 * var(--U,3.9px) / 3.9);left:calc(-6 * var(--U,3.9px) / 3.9);right:calc(-6 * var(--U,3.9px) / 3.9)}
+.ph:not(.look-playful) .edge.arrow::after,.ph:not(.look-playful) .edge.dot::after{top:calc(-14 * var(--U,3.9px) / 3.9);bottom:calc(-14 * var(--U,3.9px) / 3.9);left:calc(-14 * var(--U,3.9px) / 3.9);right:calc(-14 * var(--U,3.9px) / 3.9)}
+.ph:not(.look-playful) .edge.arrow .chev{width:calc(16 * var(--U,3.9px) / 3.9);height:calc(16 * var(--U,3.9px) / 3.9)}
+.ph:not(.look-playful) .edge small{opacity:1;font-weight:500;color:var(--lbl-fg,#fff)   /* the pill's ink */}
+/* text size: pointers follow the visitor's text size (S / M / L). Wall labels stay at their fixed 13-15 pt: they hang off a marker
+   and grow towards the screen edge, so at L they were cut at the side (the pointer is clamped to the edge and anchored inwards) */
+.ph:not(.look-playful) .edge{font-size:calc(13 * var(--ts,1) * var(--U,3.9px) / 3.9)}
+
+/* ---------- 2 · the selected POI off the screen (pin): the arrow sits on the side of the edge it points to ---------- */
+.tapc:not(.look-playful) .pin .chev{width:calc(16 * var(--P));height:calc(16 * var(--P));flex:none;display:grid}
+.tapc:not(.look-playful) .pin .chev svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.tapc:not(.look-playful) .pin.at-l .chev{order:-1}
+.tapc:not(.look-playful) .pin{min-height:calc(36 * var(--P))}
+.tapc:not(.look-playful) .pin::after{content:"";position:absolute;top:calc(-6 * var(--P));bottom:calc(-6 * var(--P));left:calc(-6 * var(--P));right:calc(-6 * var(--P))}
+
+/* ---------- 3 · the bottom bar / rail: the labels follow the text size ---------- */
+.tapc.mainc:not(.look-playful) .mbtn span{font-size:calc(13 * var(--ts,1) * var(--P))}
+
+/* ---------- 4 · the wall is out of view, landscape: the hint and the mini-map side by side, centred (the hint covered the map's top) ---------- */
+.tapc.mainc.land:not(.look-playful) .mhint{top:50%;left:calc(50% - 138 * var(--P));width:calc(260 * var(--P))}   /* centred on its own half (the base transform centres it) */
+.tapc.mainc.land:not(.look-playful) .mmap.lost{top:50%;bottom:auto;right:auto;left:calc(50% + 8 * var(--P));translate:0 -50%}
+
+/* ---------- 5 · landscape: the top stack (search, lenses, "near" chip) stops before the rail; the lens row ran under it ---------- */
+.tapc.mainc.land:not(.look-playful) .mtop{right:calc(4 * var(--u) + 74 * var(--P))}
+
+/* ---------- 6 · corners arrangement: the 39 pt avatar keeps its size; its picking box is 48 pt ---------- */
+.tapc.mainc:not(.look-playful) .mavatar{position:relative}
+.tapc.mainc:not(.look-playful) .mavatar::after{content:"";position:absolute;inset:calc(-5 * var(--P))}
+
+/* ---------- 7 · pointer looks "Arrow" and "Coloured dot": round discs (the pill's min-height and padding made them ovals) ---------- */
+.ph:not(.look-playful) .edge.arrow{width:calc(32 * var(--U,3.9px) / 3.9);height:calc(32 * var(--U,3.9px) / 3.9);min-height:0;padding:0;justify-content:center}
+.ph:not(.look-playful) .edge.dot{width:calc(18 * var(--U,3.9px) / 3.9);height:calc(18 * var(--U,3.9px) / 3.9);min-height:0;padding:0;justify-content:center}
+.ph:not(.look-playful) .edge.dot .cd{width:calc(10 * var(--U,3.9px) / 3.9);height:calc(10 * var(--U,3.9px) / 3.9)}
+
+/* ---------- 8 · the chevron glyph fills only ~30 % of its 24-unit box: the box is 22 pt (arrow-only discs 26 pt) so the stroke reads at arm's length ---------- */
+.ph:not(.look-playful) .edge .chev,.tapc:not(.look-playful) .pin .chev{width:calc(22 * var(--U,3.9px) / 3.9);height:calc(22 * var(--U,3.9px) / 3.9);margin:0 calc(-5 * var(--U,3.9px) / 3.9)}
+.tapc:not(.look-playful) .pin .chev{width:calc(22 * var(--P));height:calc(22 * var(--P));margin:0 calc(-5 * var(--P));color:var(--tx)}
+.ph:not(.look-playful) .edge.arrow .chev{width:calc(26 * var(--U,3.9px) / 3.9);height:calc(26 * var(--U,3.9px) / 3.9);margin:0}
+.tapc:not(.look-playful) .pin.arrow .chev{width:calc(26 * var(--P));height:calc(26 * var(--P));margin:0}
+.ph:not(.look-playful) .edge .chev svg,.tapc:not(.look-playful) .pin .chev svg{stroke-width:2.75}
+
+/* ---------- 9 · v20 the gear left of the search: the search's own glass (same fill, blur, ring and shadow), 48 pt, the same height ---------- */
+/* the top stack stays absolutely placed (a shared "position:relative" for the z-index made it as wide as the screen, shifted by its inset: the search ran off the right edge) */
+.tapc.mainc:not(.look-playful) .mtop{position:absolute}
+.tapc.mainc:not(.look-playful) .mgear{color:var(--btn-fg);background:var(--btn)}   /* the search pill's own fill (the buttons glass: white .94 / warm black .94) */
+.tapc.mainc:not(.look-playful) .mgear svg{width:calc(22 * var(--P));height:calc(22 * var(--P));stroke-width:1.75}
+.tapc.mainc:not(.look-playful) .mgear:active{scale:.94;transition:scale .08s ease-out}
+/* the filter button while the chips are open: an accent-tinted disc behind the accent glyph (never colour alone) */
+.tapc.mainc:not(.look-playful) .msearch .mi.hit.on{width:calc(34 * var(--P));height:calc(34 * var(--P));margin-right:calc(-8 * var(--P));display:grid;place-items:center;border-radius:99px;background:color-mix(in srgb,var(--acc) 16%,transparent)}
+.tapc.mainc:not(.look-playful) .msearch .mi.hit.on svg{width:calc(20 * var(--P));height:calc(20 * var(--P))}
+/* "Full-width bar" search: the Lab's progress-bar rule (.ph .bar i) painted "Near" as a yellow block on its own line; it stays inline text */
+.tapc.mainc:not(.look-playful) .msearch.bar .ph1 i{display:inline;width:auto;height:auto;background:none}
+/* …and its fill: the pill's buttons glass (white .94 / warm black .94), so the bar and the gear beside it read as one material (the bar fell back to the thinner .78 glass and went grey under the top shade) */
+.tapc.mainc:not(.look-playful) .msearch.bar{background:var(--btn)}

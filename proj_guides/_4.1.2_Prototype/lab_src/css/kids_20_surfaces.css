@@ -1,0 +1,221 @@
+/* v19 Playful (kids) look: kids_20_surfaces. Scoped to .tapc.look-playful; Unity-feasible techniques only (mk_review/unity_feasibility.md) */
+/* Surfaces: panels, photo (polaroid) cards, lists and rows, sheets (ds-sheet, the tap card sheet .s-card, the full card), dialogs, toasts,
+   banners, empty states, section headings and eyebrows. Built on the kit (kids_00_kit.css) + media/KIDS_SURFACES_* (mk_review/v19/surfaces/src/gen.py).
+   Texture (--k-tex) only on opaque, non-camera surfaces: sheets, the full card, empty pages. Glass panels, toasts and banners stay plain.
+   Every text pair ≥ 7:1: paper/sheet + sheet-fg / sheet-fg2 (kit palette), deep cobalt #0E2466 on the decor fills. */
+
+/* ---- assets (light / dark) ---- */
+.tapc.look-playful.light{--ks-rule:url("@@KIDS_SURFACES_RULE@@");--ks-grab:url("@@KIDS_SURFACES_GRAB@@");--ks-squig:url("@@KIDS_SURFACES_SQUIG@@");--ks-ros:url("@@KIDS_SURFACES_ROSETTE@@");--ks-tile:#C9D4F0}
+.tapc.look-playful.dark{--ks-rule:url("@@KIDS_SURFACES_RULE_D@@");--ks-grab:url("@@KIDS_SURFACES_GRAB_D@@");--ks-squig:url("@@KIDS_SURFACES_SQUIG_D@@");--ks-ros:url("@@KIDS_SURFACES_ROSETTE_D@@");--ks-tile:#C9D4F0}
+.tapc.look-playful{--ks-tape:url("@@KIDS_SURFACES_TAPE@@");
+  /* the polaroid frame: the kit panel sprite at 0.75 scale, WITHOUT fill (the photo shows in the middle). unity: -unity-slice-* 48/54/56/48, slice-scale .75, no centre */
+  --kb-photo:var(--k-panel-up) 48 54 56 48 / calc(18 * var(--kq)) calc(20.25 * var(--kq)) calc(21 * var(--kq)) calc(18 * var(--kq)) / 0 calc(2.25 * var(--kq)) calc(3 * var(--kq)) 0 stretch}
+
+/* ---- type: section headings and eyebrows (sentence case, Fredoka for headings; NO doodle: at most one rosette and one sparkle per screen) ---- */
+.tapc.look-playful .ds-sh{display:flex;align-items:center;gap:calc(6 * var(--kq));margin-top:calc(10 * var(--kq));font:600 calc(18 * var(--ts,1) * var(--kq))/1.2 var(--tfont);letter-spacing:0;text-transform:none;color:var(--sheet-fg)}
+.tapc.look-playful.kit .kc{font:600 calc(17 * var(--ts,1) * var(--kq))/1.2 var(--tfont);letter-spacing:0;text-transform:none}
+.tapc.look-playful.kit .keb{font:700 calc(14 * var(--kq))/1 var(--font);letter-spacing:.02em;text-transform:none;opacity:1}
+.tapc.look-playful .ds-eyebrow{font:700 calc(14 * var(--ts,1) * var(--kq))/1.25 var(--font);letter-spacing:.01em;text-transform:none}
+.tapc.look-playful .ds-h2{font-family:var(--tfont);font-weight:600;letter-spacing:0}   /* 20 pt and up → Fredoka (playful_spec §3) */
+/* the sheet / dialog / page title gets a hand-drawn squiggle under it */
+.tapc.look-playful :is(.ds-sheet:not(.sheet-set, .sheet-ex, .sheet-album), .ds-dialog) .khd .ds-h1,.tapc.look-playful .ds-dialog>.ds-h2{padding-bottom:calc(9 * var(--kq));background:var(--ks-squig) left bottom/calc(60 * var(--kq)) calc(6 * var(--kq)) no-repeat   /* unity: a sprite under the label */}
+
+/* ---- lists and rows: hand-drawn dividers, icon tiles in the panel's pigments ---- */
+.tapc.look-playful .ds-row+.ds-row{border-top-width:0!important;background:var(--ks-rule) left top/100% calc(4 * var(--kq)) no-repeat   /* unity: a stretched sprite element above the row */}
+.tapc.look-playful .ds-row .ic{width:calc(36 * var(--kq));height:calc(36 * var(--kq));border-radius:calc(9 * var(--kq));background:#F2C14E;color:#0E2466;border:calc(2 * var(--kq)) solid #0E2466;rotate:-3deg}
+.tapc.look-playful .ds-row:nth-child(4n+2) .ic{background:#8ACBA8;rotate:2deg}
+.tapc.look-playful .ds-row:nth-child(4n+3) .ic{background:var(--ks-tile);rotate:-2deg}
+.tapc.look-playful .ds-row:nth-child(4n) .ic{background:#C3B0E3;rotate:3deg}
+.tapc.look-playful .ds-row .ic svg{stroke-width:2.25}
+.tapc.look-playful .ds-row .tt b{font-weight:700}
+.tapc.look-playful .ds-row .tr{color:var(--k-line)}
+.tapc.look-playful .ds-row .tr>svg{stroke-width:2.75}
+.tapc.look-playful .ds-row.hit:active{translate:0 calc(1.5 * var(--kq));transition:translate .08s ease-out}
+.tapc.look-playful.dark .ds-row .ic{border-color:#0E2466}
+/* settings rows: the leading icon (.srow .i) in the same tile, smaller */
+.tapc.look-playful .ds-row.srow>.i{display:grid;place-items:center;width:calc(32 * var(--kq));height:calc(32 * var(--kq));border-radius:calc(10 * var(--kq));background:#F2C14E;color:#0E2466;border:calc(2 * var(--kq)) solid #0E2466;rotate:-3deg}
+.tapc.look-playful .ds-row.srow+.ds-row.srow>.i{background:#8ACBA8;rotate:2deg}
+.tapc.look-playful .ds-row.srow>.i svg{width:62%;height:62%}
+
+/* ---- photo card: a polaroid sticker (the photo crop inside a hand-drawn paper mat, a strip of tape, a 1° tilt; words on the paper, not on a shade) ---- */
+.tapc.look-playful .ds-photo{overflow:visible!important;border-style:solid!important;border-color:transparent!important;border-width:calc(12 * var(--kq))!important;border-image:var(--kb-photo)!important;
+  border-radius:0;background-color:var(--k-paper)!important;background-clip:padding-box!important;background-origin:padding-box!important;box-shadow:none!important;
+  min-height:calc(200 * var(--kq));rotate:-1deg;margin:calc(6 * var(--kq)) calc(4 * var(--kq)) calc(4 * var(--kq))}
+.tapc.look-playful .ds-photo .scr{display:none}
+.tapc.look-playful .ds-photo .tx{flex:1;align-self:flex-end;margin:0;width:100%;padding:calc(10 * var(--kq)) calc(6 * var(--kq)) calc(2 * var(--kq));background:var(--k-paper);border-radius:0;color:var(--sheet-fg)}
+.tapc.look-playful .ds-photo .tx .ds-eyebrow,.tapc.look-playful .ds-photo .tx span{color:var(--sheet-fg2)!important;opacity:1}
+.tapc.look-playful .ds-photo::after{content:"";position:absolute;top:calc(-13 * var(--kq));left:50%;width:calc(64 * var(--kq));height:calc(20 * var(--kq));translate:-50% 0;rotate:4deg;background:var(--ks-tape) center/100% 100% no-repeat;pointer-events:none   /* unity: a sprite child, rotated */}
+.tapc.look-playful .ds-view .hit:nth-child(2n) .ds-photo{rotate:1deg}
+.tapc.look-playful .ds-view .hit:nth-child(2n) .ds-photo::after{rotate:-3deg;left:70%}
+/* the photo needs a height of its own once the caption sits under it */
+.tapc.look-playful .ds-photo{display:flex;flex-direction:column;justify-content:flex-end;padding-top:calc(130 * var(--kq))}
+
+/* ---- panels: solid panels carry the paper frame; nested ones sit flat (kit). The glass panel over the camera stays untextured ---- */
+.tapc.look-playful .ds-solid{border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--kq))!important;border-image:var(--kb-panel-up)!important;background:transparent!important;box-shadow:none!important;}
+.tapc.look-playful :is(.ds-panel, .ds-solid) .khd .ds-h2{font-size:calc(21 * var(--ts,1) * var(--kq))}
+/* the close button on any surface: a small paper sticker */
+.tapc.look-playful :is(.ds-sheet, .ds-solid, .ds-dialog, .ds-main) .ds-x{width:calc(40 * var(--kq));height:calc(40 * var(--kq));border-style:solid;border-color:transparent!important;border-width:calc(2 * var(--kq));border-image:var(--kb-chip-up)!important;background:transparent!important;box-shadow:none!important;color:var(--sheet-fg);transition:translate .22s var(--k-back)   /* unity: ease-out-back */}
+.tapc.look-playful :is(.ds-sheet, .ds-solid, .ds-dialog, .ds-main) .ds-x:active{border-image:var(--kb-chip)!important;translate:var(--kt-chip);transition:translate .08s ease-out}
+.tapc.look-playful .ds-x svg{stroke-width:2.75}
+
+/* ---- sheets: the hand-drawn top edge + tile texture (kit), a brush-stroke grab handle; tap card sheet (.s-card) gets the same ---- */
+.tapc.look-playful .ds-sheet .grab{height:calc(26 * var(--kq))}
+.tapc.look-playful .ds-sheet .grab i,.tapc.look-playful .s-card .gr{width:calc(44 * var(--kq));height:calc(7 * var(--kq));border-radius:0;background:var(--ks-grab) center/100% 100% no-repeat!important;opacity:1!important   /* unity: a sprite */}
+.tapc.look-playful .s-card{background-color:var(--sheet)!important;background-image:var(--k-tex)!important;background-size:var(--k-tex-size)!important;color:var(--sheet-fg)!important;
+  border-style:solid;border-color:transparent;border-width:calc(2.5 * var(--kq)) calc(2.5 * var(--kq)) 0;border-image:var(--kb-sheet)!important;
+  border-radius:calc(35 * var(--kq)) calc(35 * var(--kq)) 0 0!important;box-shadow:none!important;padding:calc(10 * var(--kq)) calc(20 * var(--kq)) calc(20 * var(--kq))}
+.tapc.look-playful .s-card .gr{margin:0 auto calc(10 * var(--kq))}
+.tapc.look-playful .s-card>b{font:600 calc(26 * var(--ts,1) * var(--kq))/1.1 var(--tfont)!important;letter-spacing:0;color:var(--sheet-fg);margin:calc(8 * var(--kq)) 0 calc(4 * var(--kq))}
+.tapc.look-playful .s-card>p{font-size:calc(17 * var(--ts,1) * var(--kq));color:var(--sheet-fg2)!important}
+.tapc.look-playful .s-card .cat{font:700 calc(14 * var(--ts,1) * var(--kq))/1 var(--font)!important;letter-spacing:.01em!important;text-transform:none!important;color:var(--sheet-fg)!important}
+.tapc.look-playful .s-card .ban{border-style:solid;border-color:transparent;border-width:calc(12 * var(--kq));border-image:var(--kb-photo)!important;border-radius:0;background-clip:padding-box;background-origin:padding-box;
+  height:calc(150 * var(--kq));margin:calc(4 * var(--kq)) calc(6 * var(--kq)) calc(14 * var(--kq));rotate:-1deg;position:relative}
+.tapc.look-playful .s-card .ban::after{content:"";position:absolute;top:calc(-13 * var(--kq));left:50%;width:calc(60 * var(--kq));height:calc(18 * var(--kq));translate:-50% 0;rotate:4deg;background:var(--ks-tape) center/100% 100% no-repeat}
+.tapc.look-playful .s-card .ask{border-style:solid;border-color:transparent!important;border-width:calc(2 * var(--kq));border-image:var(--kb-input)!important;background:transparent!important;color:var(--sheet-fg2)!important}
+.tapc.look-playful .s-card .tcta{border-style:solid;border-color:transparent!important;border-width:calc(2 * var(--kq));border-image:var(--kb-btn-up)!important;background:transparent!important;box-shadow:none!important;color:var(--acc-fg)!important;
+  min-height:calc(52 * var(--kq));padding:0 calc(18 * var(--kq));font:600 calc(18 * var(--ts,1) * var(--kq))/1 var(--tfont)!important;transition:translate .22s var(--k-back)   /* unity: ease-out-back */}
+.tapc.look-playful .s-card .tcta:active{border-image:var(--kb-btn)!important;translate:var(--kt-btn);transition:translate .08s ease-out}
+.tapc.look-playful.land .s-card{border-width:calc(2 * var(--kq));border-image:var(--kb-panel-up)!important;border-radius:0!important;background:transparent!important}   /* landscape: a floating card, the raised paper panel */
+.tapc.look-playful.land .s-card .ban{rotate:0deg}
+
+/* ---- the full card (tap › Open the full card): a paper page, the photo as a polaroid. Lab: the .tv is matched by its inline colour (proposals.md: a class) ---- */
+.tapc.look-playful .tv.tv-card{background-color:var(--sheet)!important;background-image:var(--k-tex)!important;background-size:var(--k-tex-size)!important;color:var(--sheet-fg)!important;overflow-y:auto}
+.tapc.look-playful .tv.tv-card>div:first-child{height:42%!important;margin:calc(76 * var(--kq)) calc(22 * var(--kq)) calc(6 * var(--kq));border-style:solid;border-color:transparent;border-width:calc(12 * var(--kq));border-image:var(--kb-photo);border-radius:0;background-clip:padding-box!important;background-origin:padding-box!important;rotate:-1deg;position:relative}
+.tapc.look-playful .tv.tv-card>div:first-child::after{content:"";position:absolute;top:calc(-14 * var(--kq));left:50%;width:calc(72 * var(--kq));height:calc(22 * var(--kq));translate:-50% 0;rotate:4deg;background:var(--ks-tape) center/100% 100% no-repeat}
+.tapc.look-playful .tv.tv-card>div:nth-child(2){padding:calc(14 * var(--kq)) calc(24 * var(--kq)) calc(32 * var(--kq))!important}
+.tapc.look-playful .tv.tv-card .cat{font:700 calc(14 * var(--ts,1) * var(--kq))/1 var(--font)!important;letter-spacing:.01em!important;text-transform:none!important;color:#0E2466!important;padding:calc(6 * var(--kq)) calc(12 * var(--kq))!important;display:inline-block;border:calc(2 * var(--kq)) solid #0E2466;rotate:-2deg}
+.tapc.look-playful .tv.tv-card b{font:600 calc(32 * var(--ts,1) * var(--kq))/1.1 var(--tfont)!important;color:var(--sheet-fg)}
+.tapc.look-playful .tv.tv-card p{font-size:calc(17 * var(--ts,1) * var(--kq))!important;color:var(--sheet-fg2)!important}
+.tapc.look-playful .tv.tv-card p:last-child{font:600 calc(13 * var(--kq))/1.3 var(--font)!important;color:var(--sheet-fg2)!important}
+.tapc.look-playful .tv.tv-card>div:nth-child(2)>div{height:calc(10 * var(--kq))!important;background:color-mix(in srgb,var(--sheet-fg) 12%,transparent)!important;border-radius:calc(5 * var(--kq))!important}
+.tapc.look-playful .tv.tv-card>.x{width:calc(48 * var(--kq))!important;height:calc(48 * var(--kq))!important;border-style:solid;border-color:transparent!important;border-width:calc(2 * var(--kq));border-image:var(--kb-chip-up)!important;background:transparent!important;box-shadow:none!important;color:var(--sheet-fg)!important;}
+
+/* ---- dialog: the raised paper panel, a squiggle under the title; the scrim stays ---- */
+.tapc.look-playful .ds-dialog{border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--kq))!important;border-image:var(--kb-panel-up)!important;background:transparent!important;box-shadow:none!important;
+  padding:calc(24 * var(--kq)) calc(24 * var(--kq)) calc(22 * var(--kq))!important;gap:calc(12 * var(--kq))!important}
+.tapc.look-playful .ds-dialog>.ds-h2{font-size:calc(24 * var(--ts,1) * var(--kq))}
+.tapc.look-playful .ds-dialog>.ds-body{font-size:calc(17 * var(--ts,1) * var(--kq))}
+
+/* ---- toasts and banners: paper stickers; the leading icon in an antimony disc. Over the camera: no texture, no tilt ---- */
+.tapc.look-playful :is(.ktoast, .ds-banner, .toast){border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--kq))!important;background:transparent!important;box-shadow:none!important;color:var(--tx)!important}
+.tapc.look-playful :is(.ktoast, .toast){border-image:var(--kb-btn2-up)!important;font:700 calc(16 * var(--ts,1) * var(--kq))/1.2 var(--font)!important}
+.tapc.look-playful .toast{padding:calc(12 * var(--kq)) calc(20 * var(--kq))!important}
+.tapc.look-playful .ds-banner{border-image:var(--kb-panel-b-up)!important;padding:calc(10 * var(--kq)) calc(14 * var(--kq))!important;font-weight:600!important}
+.tapc.look-playful :is(.ktoast, .ds-banner) .mi{flex:none;width:calc(28 * var(--kq));height:calc(28 * var(--kq));place-items:center;border-radius:99px;background:#F2C14E;color:#0E2466;border:calc(2 * var(--kq)) solid #0E2466}
+.tapc.look-playful :is(.ktoast, .ds-banner) .mi svg{width:62%;height:62%;stroke-width:2.75}
+
+/* ---- empty state: Azu points the way (the kit's figure as an image; proposals.md: a real <img> via KIDS.azuImg) ---- */
+.tapc.look-playful .ds-empty{padding:calc(24 * var(--kq)) calc(24 * var(--kq));gap:calc(10 * var(--kq))}
+.tapc.look-playful .ds-empty .ei{width:calc(110 * var(--kq));height:calc(132 * var(--kq));border-radius:0;background:none;rotate:-2deg   /* unity: an Image (the Azu sprite) */}
+.tapc.look-playful .ds-empty .ei .ei-azu{display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom}
+.tapc.look-playful .ds-empty .ei svg{display:none}
+.tapc.look-playful .ds-empty .ds-h2{font-size:calc(24 * var(--ts,1) * var(--kq));padding-bottom:calc(9 * var(--kq));background:var(--ks-squig) center bottom/calc(60 * var(--kq)) calc(6 * var(--kq)) no-repeat}
+.tapc.look-playful .ds-empty .ds-body{font-size:calc(17 * var(--ts,1) * var(--kq));max-width:calc(280 * var(--kq))}
+
+.tapc.look-playful.m-reduced :is(.ds-row, .ds-x, .s-card .tcta){transition:none}
+
+/* ---- landscape and fit ---- */
+.tapc.look-playful.land .ds-sheet .grab{height:calc(18 * var(--kq))}
+.tapc.look-playful.land .ds-empty{padding:calc(8 * var(--kq)) calc(24 * var(--kq));gap:calc(6 * var(--kq))}
+.tapc.look-playful.land .ds-empty .ei{width:calc(72 * var(--kq));height:calc(86 * var(--kq))}
+.tapc.look-playful.land :is(.ds-photo, .s-card .ban){rotate:-.5deg}
+.tapc.look-playful.land .tv.tv-card>div:first-child{rotate:-1deg}
+/* landscape sheets: the sticky button row sits on the textured sheet paper under a hand-drawn rule, pinned to the true bottom edge
+   (ds.css pads the scroll by 72 pt), with its own bottom padding, so the text and tiles scroll clear above it (unity: a footer element
+   outside the ScrollView, the sheet's own background + the rule sprite) */
+.tapc.look-playful.land .ds-sheet .sbody .ds-btns{bottom:calc(-72 * var(--P));z-index:2;padding:calc(14 * var(--P)) 0 calc(18 * var(--P));
+  background:var(--ks-rule) left top/100% calc(4 * var(--kq)) no-repeat,var(--k-tex) 0 0/var(--k-tex-size) var(--sheet)}
+
+/* integration: the sheet's category tag matches the card and panel tags (one sentence-case pill with a line) */
+.tapc.look-playful .s-card .cat{border:calc(1.5 * var(--kq)) solid var(--k-line)!important;border-radius:99px!important;padding:calc(3 * var(--kq)) calc(9 * var(--kq))!important}
+
+/* ---- v19 R3 section review ---- */
+/* photo card: a polaroid is a print, not a banner. Capped at 360 pt and centred, the photo keeps its own shape (full width, height from its
+   aspect; never stretched) and fills a 4:3-ish window above the caption. Landscape and tablets no longer crop it into a thin strip.
+   unity: the photo is an Image child (scale-mode scale-and-crop) inside the 9-slice mat; the same 360 pt max-width */
+.tapc.look-playful .ds-photo{width:100%;max-width:calc(360 * var(--kq));align-self:center;margin-left:auto!important;margin-right:auto!important;
+  padding-top:calc(178 * var(--kq));background-size:100% auto!important;background-position:center top!important;background-repeat:no-repeat!important}
+.tapc.look-playful .ds-photo .tx{gap:calc(3 * var(--kq))}
+
+/* dark panels: the flat #1B2456 navy read heavy over the dark camera. Now a glazed tile: a lighter indigo field #26306E
+   (cream 10.9:1, soft text 8.0:1, antimony as text 7.2:1) with the tile's inner border line (the kit's stitched-card sprite, recoloured:
+   media/KIDS_SURFACES_TPANEL*_D, tools/gen_r3.py). Nested panels sit flat, as before. unity: the same 9-slice, two sprites */
+.tapc.look-playful.dark{
+  --kb-tpanel-up:url("@@KIDS_SURFACES_TPANEL_UP_D@@") 48 54 56 48 fill / calc(24 * var(--kq)) calc(27 * var(--kq)) calc(28 * var(--kq)) calc(24 * var(--kq)) / 0 calc(3 * var(--kq)) calc(4 * var(--kq)) 0 stretch;
+  --kb-tpanel:url("@@KIDS_SURFACES_TPANEL_D@@") 48 fill / calc(24 * var(--kq)) / 0 stretch}
+.tapc.look-playful.dark :is(.ds-panel, .ds-list, .ds-solid, .ds-dialog){border-image:var(--kb-tpanel-up)!important}
+.tapc.look-playful.dark :is(.ds-sheet, .ds-solid, .ds-dialog) :is(.ds-panel, .ds-list){border-image:var(--kb-tpanel)!important}
+.tapc.look-playful.dark.land .s-card:not(.tuck){border-image:var(--kb-tpanel-up)!important}
+
+/* loading text: the background-clip shimmer dipped to ~3:1 (and Unity has no background-clip:text). Solid main text that breathes in opacity
+   (tween: opacity 1 → .82, 1.4 s, ping-pong; off with Reduce Motion) */
+.tapc.look-playful .ds-panel .shimmer{background:none!important;-webkit-text-fill-color:currentColor!important;color:var(--sheet-fg)!important;animation:r3breath 1.4s ease-in-out infinite alternate}
+@keyframes r3breath{to{opacity:.82}}   /* tween: */
+.tapc.look-playful.m-reduced .ds-panel .shimmer{animation:none}
+
+/* sheet buttons side by side: at text L "Open the story" ran past the sheet edge. A wrapping row instead of a fixed 1 : 1.4 grid: each button
+   is as wide as its label (main grows more); when both don't fit they stack, full width. unity: flex-wrap + flex-grow, the same */
+.tapc.look-playful .ds-btns.grid2{display:flex;flex-wrap:wrap-reverse}   /* stacked: the main button on top, so a half sheet still shows it */
+.tapc.look-playful .ds-btns.grid2 .ds-btn{width:auto;flex:1 1 auto;padding-left:calc(16 * var(--kq))!important;padding-right:calc(16 * var(--kq))!important}
+.tapc.look-playful .ds-btns.grid2 .ds-btn.main{flex-grow:1.4}
+
+/* the screen card, tucked to its title in landscape (the tapped POI is near it): a compact title tab that hugs its text instead of a
+   351 x 74 pt slab. 48 pt high (the tap target), Fredoka 20 pt, flush to the bottom-right corner. With proposals.md P1 it moves to the
+   top-right corner when even the tab would cover the POI (.tuck-top) */
+.tapc.look-playful.land .s-card.tuck{width:auto!important;max-width:calc(90 * var(--u));min-height:calc(48 * var(--kq));display:flex;align-items:center;
+  padding:calc(6 * var(--kq)) calc(18 * var(--kq))!important;bottom:calc(10 * var(--kq))!important;right:calc(12 * var(--kq))!important}
+.tapc.look-playful.land .s-card.tuck>b{font-size:calc(20 * var(--ts,1) * var(--kq))!important;margin:0!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tapc.land .s-card.tuck.tuck-top{top:calc(16 * var(--u))!important;bottom:auto!important}
+
+/* the full card: portrait, the polaroid clears the close sticker (it sat on the frame's corner). Landscape: a strip-cropped photo over text
+   that ran off the bottom; now two columns, the polaroid on the left at full height (a real print shape), the story scrolling on the right.
+   unity: a row VisualElement, the right column a ScrollView */
+.tapc.look-playful:not(.land) .tv.tv-card>div:first-child{margin-top:calc(92 * var(--kq))}
+.tapc.look-playful.land .tv.tv-card{display:grid;grid-template-columns:44% minmax(0,1fr);overflow:hidden}
+.tapc.look-playful.land .tv.tv-card>div:first-child{height:auto!important;margin:calc(30 * var(--kq)) calc(10 * var(--kq)) calc(24 * var(--kq)) calc(40 * var(--kq))!important}
+.tapc.look-playful.land .tv.tv-card>div:nth-child(2){overflow-y:auto;scrollbar-width:none;padding:calc(64 * var(--kq)) calc(72 * var(--kq)) calc(28 * var(--kq)) calc(22 * var(--kq))!important}
+
+/* the screen card at half height (Card only): it took 52 % of the phone, under the 55 %-wall rule. A shorter polaroid (92 pt), tighter
+   gaps and 3 story lines bring it to ~44 % */
+.tapc.look-playful:not(.land) .s-card.sh-half .ban{height:calc(92 * var(--kq));margin:calc(2 * var(--kq)) calc(6 * var(--kq)) calc(10 * var(--kq))}
+.tapc.look-playful:not(.land) .s-card.sh-half>b{margin-top:calc(4 * var(--kq))}
+.tapc.look-playful .s-card.sh-half p{-webkit-line-clamp:3}
+
+/* tablet portrait (the kit's two columns): the panel's action tiles wrapped "3D / here" in the narrow column. One line, tighter sides */
+.tapc.look-playful .ds-solid .tiles .tile{white-space:nowrap;padding-left:calc(8 * var(--kq))!important;padding-right:calc(8 * var(--kq))!important;min-width:0}
+/* loading rows: the skeleton divider was a full-strength ink line (spec: dividers never use the ink). The same hand-drawn rule as list rows */
+.tapc.look-playful .ds-skel+.ds-skel{border-top-width:0!important;background:var(--ks-rule) left top/100% calc(4 * var(--kq)) no-repeat}
+
+/* ---- v20 (A3) · the "What's coming" page: the full card's paper page, the photo a taped polaroid, Azu pointing at it with the honest line in a
+   speech bubble, the parts still to find as stitched slots (the kit's stitch frame = "a sticker still to collect"), save it ---- */
+.tapc.look-playful .tv.tv-soon{background-color:var(--sheet)!important;background-image:var(--k-tex)!important;background-size:var(--k-tex-size)!important}
+.tapc.look-playful .tv-soon .sn-hero{height:34%;margin:calc(76 * var(--kq)) calc(26 * var(--kq)) calc(4 * var(--kq));border-style:solid;border-color:transparent;border-width:calc(12 * var(--kq));border-image:var(--kb-photo);
+  background-clip:padding-box!important;background-origin:padding-box!important;rotate:-1deg;overflow:visible}
+.tapc.look-playful .tv-soon .sn-hero::after{content:"";position:absolute;top:calc(-26 * var(--kq));left:50%;width:calc(72 * var(--kq));height:calc(22 * var(--kq));translate:-50% 0;rotate:4deg;background:var(--ks-tape) center/100% 100% no-repeat}
+.tapc.look-playful .tv-soon .soonb.big{left:auto;right:calc(-14 * var(--kq));bottom:calc(-20 * var(--kq));min-height:calc(34 * var(--kq));font-size:calc(16 * var(--ts,1) * var(--kq))!important;rotate:4deg}
+.tapc.look-playful .tv-soon .sn-bd{gap:calc(12 * var(--kq));padding:calc(16 * var(--kq)) calc(24 * var(--kq)) calc(32 * var(--kq))}
+.tapc.look-playful .tv-soon .cat{font:700 calc(14 * var(--ts,1) * var(--kq))/1 var(--font);letter-spacing:.01em;text-transform:none;color:var(--sheet-fg);padding:calc(6 * var(--kq)) calc(12 * var(--kq));
+  border:calc(1.5 * var(--kq)) solid var(--k-line);border-radius:99px;background:var(--tonal)}
+.tapc.look-playful .tv-soon .sn-t{font:600 calc(30 * var(--ts,1) * var(--kq))/1.08 var(--tfont);color:var(--sheet-fg)}
+.tapc.look-playful .tv-soon .sn-say{align-items:flex-end;gap:calc(4 * var(--kq))}
+.tapc.look-playful .tv-soon .sn-say .sn-azu{width:calc(72 * var(--kq));margin-bottom:calc(-4 * var(--kq))}
+.tapc.look-playful .tv-soon .sn-say .bub{position:relative;background:var(--ko-fill);color:var(--ko-fg);border:calc(2 * var(--kq)) solid var(--ko-line);box-shadow:var(--kt-btn) 0 var(--ko-sh);
+  border-radius:calc(18 * var(--kq)) calc(16 * var(--kq)) calc(18 * var(--kq)) calc(4 * var(--kq));padding:calc(10 * var(--kq)) calc(13 * var(--kq));font:600 calc(17 * var(--ts,1) * var(--kq))/1.3 var(--tfont)}
+.tapc.look-playful .tv-soon .sn-b{font-size:calc(16 * var(--ts,1) * var(--kq));color:var(--sheet-fg2)}
+.tapc.look-playful .tv-soon .sn-way>small{font:700 calc(14 * var(--ts,1) * var(--kq))/1 var(--font);letter-spacing:.01em;text-transform:none;color:var(--sheet-fg)}
+.tapc.look-playful .tv-soon .sn-slot{min-height:calc(40 * var(--kq));border-style:solid;border-color:transparent;border-width:calc(2 * var(--kq));border-image:var(--kb-stitch);border-radius:calc(14 * var(--kq));background:transparent;
+  font:700 calc(14 * var(--ts,1) * var(--kq))/1 var(--font);color:var(--sheet-fg);padding:0 calc(12 * var(--kq)) 0 calc(10 * var(--kq))}
+.tapc.look-playful .tv-soon .sn-slot svg{color:var(--ko-line);stroke-width:2.2;opacity:1;width:calc(18 * var(--kq));height:calc(18 * var(--kq))}
+.tapc.look-playful .tv-soon .sn-acts{gap:calc(10 * var(--kq));margin-top:calc(6 * var(--kq))}
+.tapc.look-playful.land .tv-soon .sn-hero{width:38%;height:auto;margin:calc(40 * var(--kq)) calc(10 * var(--kq)) calc(30 * var(--kq)) calc(44 * var(--kq))}
+.tapc.look-playful.land .tv-soon .sn-bd{padding:calc(30 * var(--kq)) calc(76 * var(--kq)) calc(24 * var(--kq)) calc(20 * var(--kq))}
+/* landscape: a phone is short, so the page tightens (Azu smaller, the slots one row) and "Keep it in my list" stays in view */
+.tapc.look-playful.land .tv-soon .sn-bd{gap:calc(8 * var(--kq));padding-top:calc(22 * var(--kq))}
+.tapc.look-playful.land .tv-soon .sn-t{font-size:calc(26 * var(--ts,1) * var(--kq))}
+.tapc.look-playful.land .tv-soon .sn-say .sn-azu{width:calc(50 * var(--kq))}
+.tapc.look-playful.land .tv-soon .sn-say .bub{font-size:calc(15 * var(--ts,1) * var(--kq));padding:calc(8 * var(--kq)) calc(11 * var(--kq))}
+.tapc.look-playful.land .tv-soon .sn-b{font-size:calc(15 * var(--ts,1) * var(--kq));line-height:1.4}
+.tapc.look-playful.land .tv-soon .sn-slots{flex-wrap:nowrap;gap:calc(6 * var(--kq))}
+.tapc.look-playful.land .tv-soon .sn-slot{min-height:calc(34 * var(--kq));padding:0 calc(9 * var(--kq)) 0 calc(8 * var(--kq));white-space:nowrap}
+/* the half card with image in landscape (style 6): a shorter photo strip, so "What's coming" / "Open the full card" stays in view (it scrolled under the edge) */
+.tapc.look-playful.land .s-card.sh-half:not(.tuck) .ban{height:calc(70 * var(--kq))!important;margin-bottom:calc(6 * var(--kq))}

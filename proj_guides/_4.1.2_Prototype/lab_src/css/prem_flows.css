@@ -1,0 +1,85 @@
+/* v19 section review: Premium (12+) fixes for this group, scoped to .tapc:not(.look-playful). Unity-feasible only. */
+/* Owner: R1 Flows (mk_review/v19/sections/R1). Screens: Start, Onboarding, Explore, Settings, the tile album and the "found" toast. */
+
+/* ---------- ONBOARDING ---------- */
+/* the page colour behind the sticky buttons (ds.css left it transparent: chips and "Skip" overlapped) */
+.tapc:not(.look-playful).ds-onb.light{--ob-bg:#F4F0E8}
+.tapc:not(.look-playful).ds-onb.dark{--ob-bg:#100F0D}
+/* the sticky footer sat 30 pt above the bottom edge (a sticky box stops at the scroller's padding), so content scrolled UNDER it and showed
+   below it. The scroller loses its bottom padding; the footer carries it (the home-indicator zone), on the page colour.
+   unity: a footer element outside the ScrollView, the ScrollView's bottom inset = the footer's height */
+.tapc:not(.look-playful).ds-onb .ds-onbp:not(.cols){padding-bottom:0}
+.tapc:not(.look-playful).ds-onb .ds-onbp:not(.cols) .ds-acts{margin-bottom:0;padding:calc(12 * var(--P)) 0 calc(26 * var(--P))}
+/* a soft fade above the footer, so text slides under it instead of being cut by an edge (unity: ramp, the shared alpha-ramp sprite tinted --ob-bg) */
+.tapc:not(.look-playful).ds-onb .ds-onbp .ds-acts::before{content:"";position:absolute;left:0;right:0;top:calc(-20 * var(--P));height:calc(20 * var(--P));pointer-events:none;
+  background:linear-gradient(to bottom,transparent,var(--ob-bg))   /* unity: ramp */}
+.tapc:not(.look-playful).ds-onb .ds-onbp .ds-acts{position:sticky}
+.tapc:not(.look-playful).ds-onb .ds-onbp.cols .ds-acts::before{top:calc(-12 * var(--P));height:calc(12 * var(--P))}
+/* the status bar: content scrolled under "9:41" and the notch. A band in the page colour with a short fade (unity: ramp) */
+.tapc:not(.look-playful).ds-onb::before{content:"";position:absolute;left:0;right:0;top:0;height:calc(46 * var(--P));z-index:3;pointer-events:none;
+  background:linear-gradient(to bottom,var(--ob-bg) 0,var(--ob-bg) calc(30 * var(--P)),transparent)   /* unity: ramp */}
+.tapc:not(.look-playful).ds-onb.land::before{height:calc(26 * var(--P));background:linear-gradient(to bottom,var(--ob-bg) 0,var(--ob-bg) calc(18 * var(--P)),transparent)   /* unity: ramp (the portrait band's alpha-ramp texture, 26 pt tall) */}
+/* the chosen time card: the accent fill AND a check before its name (selection never by colour alone, like the age cards' ✓) */
+.tapc:not(.look-playful).ds-onb .ds-opts.three .ds-opt.on .ds-h2::before{content:"✓";margin-right:calc(4 * var(--P));font-weight:700   /* unity: the check glyph of the icon font */}
+
+/* ---------- THE TILE ALBUM (Premium: a quiet collection, the panel's own crops in a museum grid; no doodles, no mascot) ---------- */
+.tapc:not(.look-playful) .sheet-album .al-intro{margin:0;font:400 calc(15 * var(--ts,1) * var(--P))/1.45 var(--font);color:var(--sheet-fg2)}
+.tapc:not(.look-playful) .al-set{display:flex;flex-direction:column;gap:calc(14 * var(--P));margin-top:calc(14 * var(--P));padding:calc(16 * var(--P));
+  border-radius:calc(var(--r-card,5) * var(--u));background:color-mix(in srgb,var(--sheet-fg) 6%,transparent);color:var(--sheet-fg)}
+.tapc:not(.look-playful) .al-head{display:flex;align-items:center;gap:calc(12 * var(--P))}
+.tapc:not(.look-playful) .al-head>.k-doodle{display:none}
+.tapc:not(.look-playful) .al-head .al-ht{flex:1;min-width:0;display:flex;flex-direction:column;gap:calc(2 * var(--P))}
+.tapc:not(.look-playful) .al-head b{font:600 calc(19 * var(--ts,1) * var(--P))/1.2 var(--display,"Fraunces"),serif;letter-spacing:-.005em}
+.tapc:not(.look-playful) .al-head small{font:400 calc(14 * var(--ts,1) * var(--P))/1.3 var(--font);color:var(--sheet-fg2)}
+.tapc:not(.look-playful) .al-head .al-n{flex:none;display:inline-flex;align-items:center;height:calc(26 * var(--P));padding:0 calc(10 * var(--P));border-radius:99px;
+  background:var(--tonal);color:var(--sheet-fg);font:700 calc(13 * var(--ts,1) * var(--P))/1 var(--font);white-space:nowrap}
+.tapc:not(.look-playful) .al-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(calc(88 * var(--P)),1fr));gap:calc(14 * var(--P)) calc(12 * var(--P))}
+.tapc:not(.look-playful) .al-tile{display:flex;flex-direction:column;gap:calc(6 * var(--P));min-width:0;min-height:calc(48 * var(--P));cursor:pointer}
+.tapc:not(.look-playful) .al-tile .al-sq{position:relative;aspect-ratio:1;border-radius:calc(10 * var(--P));display:grid;place-items:center}
+.tapc:not(.look-playful) .al-tile.got .al-ph{width:100%;height:100%;border-radius:calc(10 * var(--P));background-color:#F7F2E7}
+.tapc:not(.look-playful) .al-ck{position:absolute;right:calc(6 * var(--P));top:calc(6 * var(--P));width:calc(22 * var(--P));height:calc(22 * var(--P));display:grid;place-items:center;
+  border-radius:99px;background:var(--acc);color:var(--acc-fg);box-shadow:0 0 0 calc(2 * var(--P)) var(--sheet)   /* unity: a ring element in the sheet colour */}
+.tapc:not(.look-playful) .al-ck svg{width:calc(13 * var(--P));height:calc(13 * var(--P));stroke-width:2.6}
+/* not found yet: an empty slot (a solid hairline round a faint wash) with the hint's motif, faint; the word under it says what to look for */
+.tapc:not(.look-playful) .al-tile.e .al-sq{border:calc(1 * var(--P)) solid color-mix(in srgb,var(--sheet-fg) 26%,transparent);background:color-mix(in srgb,var(--sheet-fg) 4%,transparent)   /* unity: border-width/color + background-color, tokens precomputed */}
+.tapc:not(.look-playful) .al-tile.e .al-sq .k-doodle{display:grid;width:calc(30 * var(--P));height:calc(30 * var(--P));color:var(--sheet-fg2);opacity:.55}
+.tapc:not(.look-playful) .al-tile.e .al-sq .k-doodle svg{width:100%;height:100%}
+.tapc:not(.look-playful) .al-tile small{font:600 calc(13 * var(--ts,1) * var(--P))/1.25 var(--font);color:var(--sheet-fg);text-align:center;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.tapc:not(.look-playful) .al-tile.e small{font-weight:400;color:var(--sheet-fg2)}
+.tapc:not(.look-playful) .al-story{align-self:flex-start;display:inline-flex;align-items:center;gap:calc(8 * var(--P));min-height:calc(48 * var(--P));padding:0 calc(20 * var(--P)) 0 calc(16 * var(--P));
+  border-radius:99px;background:var(--tonal);color:var(--sheet-fg);font:600 calc(15 * var(--ts,1) * var(--P))/1 var(--font);cursor:pointer}
+.tapc:not(.look-playful) .al-story svg{width:calc(18 * var(--P));height:calc(18 * var(--P))}
+
+/* ---------- FOUND (the sticker moment, Premium): a quiet toast above the bottom chrome. No mascot, no confetti.
+   tween: 280 ms ease-out (translate 0 12pt → 0 + opacity), holds, then 240 ms ease-in out; Reduce Motion: a 120 ms fade ---------- */
+.tapc:not(.look-playful) .cel{position:absolute;left:calc(16 * var(--P));right:calc(16 * var(--P));bottom:calc(112 * var(--P));display:flex;justify-content:center;pointer-events:none}
+.tapc:not(.look-playful).land .cel{left:50%;right:auto;width:calc(380 * var(--P));translate:-50% 0;bottom:calc(24 * var(--P))}
+.tapc:not(.look-playful).tablet:not(.land) .cel{left:50%;right:auto;width:calc(420 * var(--P));translate:-50% 0}
+.tapc:not(.look-playful) .cel .k-azu,.tapc:not(.look-playful) .cel-burst{display:none}
+.tapc:not(.look-playful) .cel-card{flex:1;display:flex;align-items:center;gap:calc(14 * var(--P));padding:calc(12 * var(--P)) calc(18 * var(--P)) calc(12 * var(--P)) calc(12 * var(--P));min-height:calc(88 * var(--P));
+  border-radius:calc(var(--r-card,5) * var(--u));background:var(--sheet);color:var(--sheet-fg);pointer-events:auto;
+  box-shadow:0 calc(8 * var(--P)) calc(24 * var(--P)) rgba(0,0,0,.22)   /* unity: sprite (the shared soft-shadow 9-slice) */}
+.tapc:not(.look-playful) .cel-stk{position:relative;flex:none;width:calc(64 * var(--P));height:calc(64 * var(--P))}
+.tapc:not(.look-playful) .cel-stk .al-ph{width:100%;height:100%;border-radius:calc(10 * var(--P));background-color:#F7F2E7}
+.tapc:not(.look-playful) .cel-stk .al-ck{right:calc(-6 * var(--P));top:calc(-6 * var(--P))}
+.tapc:not(.look-playful) .cel-tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:calc(3 * var(--P))}
+.tapc:not(.look-playful) .cel-tx .ds-eyebrow{color:var(--sheet-fg2)}
+.tapc:not(.look-playful) .cel-tx b{font:600 calc(18 * var(--ts,1) * var(--P))/1.2 var(--display,"Fraunces"),serif}
+.tapc:not(.look-playful) .cel-tx span{font:400 calc(14 * var(--ts,1) * var(--P))/1.3 var(--font);color:var(--sheet-fg2)}
+@keyframes r1-cel-in{from{translate:0 calc(12 * var(--P));opacity:0}to{translate:0 0;opacity:1}}   /* tween: 280 ms ease-out */
+@keyframes r1-cel-out{to{translate:0 calc(10 * var(--P));opacity:0}}   /* tween: 240 ms ease-in */
+.tapc:not(.look-playful) .cel.go .cel-card{animation:r1-cel-in .28s ease-out both   /* tween: r1-cel-in */}
+.tapc:not(.look-playful) .cel.out{animation:r1-cel-out .24s ease-in both   /* tween: r1-cel-out */}
+.tapc:not(.look-playful).m-reduced .cel.go .cel-card{animation:none}
+
+/* ---------- v20 (A1): onboarding ---------- */
+/* one flat page colour (the old light ramp showed as a lighter band behind the sticky "Let's go" in landscape) */
+.tapc:not(.look-playful).ds-onb.light{background:var(--ob-bg)}
+
+/* ---------- v20 F (final fixer): Settings ---------- */
+/* phone landscape: one column (two left the left column empty at the end of the scroll); a narrower sheet so the rows read well */
+.tapc:not(.look-playful).land:not(.tablet) .sheet-set{width:min(calc(100% - 96 * var(--P)),calc(540 * var(--P)))}
+/* 48 pt targets: the interest chips are 32 pt and their 48 pt hit areas (ds.css ::after) overlapped the next row: a 16 pt row gap gives each its own 48;
+   the switches (32 pt) get the same centred 48 pt hit area. Unity: a 48 pt transparent hit box around the visual (picking mode on the box) */
+.tapc:not(.look-playful) .sheet-set .sint{row-gap:calc(16 * var(--P))}
+.tapc:not(.look-playful) .sheet-set .ds-sw::after{content:"";position:absolute;top:calc(-8 * var(--P));bottom:calc(-8 * var(--P));left:calc(-4 * var(--P));right:calc(-4 * var(--P))}

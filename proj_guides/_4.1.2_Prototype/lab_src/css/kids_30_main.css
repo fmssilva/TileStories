@@ -1,0 +1,219 @@
+/* v19 Playful (kids) look: kids_30_main. Scoped to .tapc.look-playful; Unity-feasible techniques only (mk_review/unity_feasibility.md) */
+/* Group main: the main AR screen over the live wall (search, bottom bar / rail, corners, Azu button, coach tip, pointers, wall labels,
+   the "point at the tiles" hint and mini-map), the Start screen, and the kit's nav page.
+   Attention budget: over the camera the chrome is the kit's hand-drawn frames on the two bars only; no doodles, no wobble, no loops
+   except the coach ring (first visit only). Azu appears over the wall only inside the coach tip and as the centre button.
+   Wall labels and pointers live on the phone's .ph root (not .tapc): they are scoped .ph.look-playful, Playful only. */
+
+/* ---------- 1 · the search bar: the kit's input frame, raised (shadow baked); cobalt icons; 48 pt ---------- */
+.tapc.mainc.look-playful .msearch{border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--kq))!important;
+  border-image:var(--kb-input-up)!important;background:transparent!important;box-shadow:none!important;border-radius:calc(16 * var(--kq))!important;
+  height:calc(48 * var(--kq));padding:0 calc(10 * var(--kq)) 0 calc(14 * var(--kq));gap:calc(8 * var(--kq));color:var(--td)}
+.tapc.mainc.look-playful .msearch .mi{color:var(--acc);display:grid;place-items:center}
+.tapc.mainc.look-playful.dark .msearch .mi{color:var(--k-line)}
+.tapc.mainc.look-playful .msearch .mi svg{width:calc(22 * var(--kq));height:calc(22 * var(--kq));stroke-width:2.25}
+.tapc.mainc.look-playful .msearch .ph1{font:400 calc(16 * var(--ts,1) * var(--kq))/1.1 var(--font);color:var(--td)}
+.tapc.mainc.look-playful .msearch .ph1 b,.tapc.mainc.look-playful .msearch .ph1{font-weight:400}
+.tapc.mainc.look-playful .msearch .ph1 i{opacity:1;color:var(--td)}
+.tapc.mainc.look-playful .msearch .mi.on{border-radius:calc(10 * var(--kq));background:var(--acc);color:var(--acc-fg)}   /* the lenses are open: filled + its chips show below (never colour alone) */
+.tapc.mainc.look-playful .mnear{border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--kq))!important;border-image:var(--kb-chip)!important;background:transparent!important;box-shadow:none!important;color:var(--td)}
+
+/* ---------- 2 · the bottom bar (Explore · Azu · You) and its landscape rail: the input frame, raised; Atkinson labels ---------- */
+.tapc.mainc.look-playful .mbar{border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--kq))!important;
+  border-image:var(--kb-input-up)!important;background:transparent!important;box-shadow:none!important;border-radius:calc(16 * var(--kq))!important;
+  height:calc(64 * var(--kq));width:min(100%,calc(300 * var(--kq)));padding:0 calc(12 * var(--kq))}
+.tapc.mainc.look-playful .mbar.rail{height:auto;width:calc(72 * var(--kq));padding:calc(14 * var(--kq)) 0;gap:calc(14 * var(--kq))}
+.tapc.mainc.look-playful .mbtn{color:var(--tx);gap:calc(3 * var(--kq));min-height:calc(48 * var(--kq));justify-content:center}
+.tapc.mainc.look-playful .mbtn svg{width:calc(24 * var(--kq));height:calc(24 * var(--kq));stroke-width:2.25;color:var(--acc)}
+.tapc.mainc.look-playful.dark .mbtn svg{color:var(--k-line)}
+.tapc.mainc.look-playful .mbtn span{font:700 calc(13 * var(--ts,1.0625) / 1.0625 * var(--kq))/1 var(--font)!important;color:var(--tx)}
+.tapc.mainc.look-playful .mbtn:active{translate:calc(1.5 * var(--kq)) calc(2 * var(--kq));transition:translate .08s ease-out}
+/* corner buttons (Main AR › buttons: corners): the same frame, smaller; the avatar is a cobalt-ringed disc */
+.tapc.mainc.look-playful .mcorner{border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--kq))!important;border-image:var(--kb-input-up)!important;background:transparent!important;box-shadow:none!important;padding:calc(6 * var(--kq)) calc(12 * var(--kq))}
+.tapc.mainc.look-playful .mavatar{width:calc(48 * var(--kq));height:calc(48 * var(--kq));padding:calc(11 * var(--kq));background:var(--k-paper)!important;color:var(--acc);border:calc(2 * var(--kq)) solid #0E2466!important;border-radius:var(--ko-disc,50% 47% 52% 49%)!important;
+  box-shadow:var(--kt-btn) 0 var(--hs)!important   /* the kit's button offset, down-right. unity: a sibling disc */}
+.tapc.mainc.look-playful.dark .mavatar{border-color:var(--k-line)!important}
+
+/* ---------- 3 · the Azu button: Azu's own face on the accent tile-disc (cobalt / antimony), ink ring, hard shadow that presses in ---------- */
+.tapc.mainc.look-playful .mazu.mascot{width:calc(60 * var(--kq))!important;height:calc(60 * var(--kq))!important;padding:0!important;
+  background:var(--acc) url("@@KIDS_AZU_HEAD@@") center 60% / 86% auto no-repeat!important;   /* Azu's head sprite (unity: an atlas sprite) */
+  border:calc(2.5 * var(--kq)) solid #0E2466!important;border-radius:var(--ko-disc,50% 47% 52% 49%)!important;box-shadow:var(--kt-btn) 0 var(--hs)!important;transition:translate .22s ease-out   /* unity: ease-out-back; the shadow is a static sibling disc */}
+.tapc.mainc.look-playful.dark .mazu.mascot{border-color:var(--k-line)!important}   /* an ink ring vanishes on the navy bar: the periwinkle line */
+.tapc.mainc.look-playful .mazu.mascot svg{display:none}
+.tapc.mainc.look-playful .mbar .mazu.mascot{margin-top:calc(-26 * var(--kq))}
+.tapc.mainc.look-playful .mbar.rail .mazu.mascot{margin:0}
+.tapc.mainc.look-playful .mazu.mascot:active{transform:none;translate:var(--kt-btn);box-shadow:none!important;transition:translate .08s ease-out}   /* sinks exactly into its shadow */
+.tapc.mainc.look-playful .mazu.g{background:var(--k-paper)!important;color:var(--acc);border:calc(2 * var(--kq)) solid #0E2466!important;border-radius:var(--ko-disc,50% 47% 52% 49%)!important;box-shadow:var(--kt-btn) 0 var(--hs)!important}   /* Azu = "plain button": a paper disc with the star */
+.tapc.mainc.look-playful.dark .mazu.g{border-color:var(--k-line)!important}
+.tapc.mainc.look-playful :is(.mbtn, .mazu, .mavatar):active{transform:none}   /* only translate presses (v18's transform would stack on it) */
+.tapc.mainc.look-playful .mbtn:active{box-shadow:none!important}   /* Azu = "plain button": a paper disc with the star */
+
+/* ---------- 4 · the coach mark: one cobalt ring on the POI, and Azu (pointing) beside a hand-drawn speech bubble ---------- */
+.tapc.mainc.look-playful .mcoach .rg{border-width:calc(3 * var(--kq));border-color:#1F3F9A;box-shadow:0 0 0 calc(1.5 * var(--kq)) #FFFDF8,inset 0 0 0 calc(1.5 * var(--kq)) #FFFDF8   /* the wall doesn't change with the mode, so neither does the ring. unity: 2 ring elements */}
+.tapc.mainc.look-playful .mcoach .rg.d2{display:none}   /* one motion at a time: the marker already breathes */
+.tapc.mainc.look-playful .mtip{border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--kq))!important;
+  border-image:var(--kb-panel-b-up)!important;background:transparent!important;box-shadow:none!important;border-radius:calc(18 * var(--kq))!important;
+  color:var(--tx);font:600 calc(17 * var(--ts,1) * var(--kq))/1.25 var(--tfont)!important;letter-spacing:.005em;
+  padding:calc(12 * var(--kq)) calc(16 * var(--kq)) calc(13 * var(--kq)) calc(16 * var(--kq))!important;width:max-content;max-width:calc(236 * var(--kq))!important;min-height:calc(52 * var(--kq))}
+.tapc.mainc.look-playful .mtip.has-az{padding-left:calc(62 * var(--kq))!important;max-width:calc(262 * var(--kq))!important}
+/* the tail: a paper square with the ink line on its two outer sides only; it covers the frame's line where it joins (Unity: a tail sprite) */
+.tapc.mainc.look-playful .mtip::after{background:var(--k-paper)!important;border:calc(2.5 * var(--kq)) solid #0E2466!important;width:calc(14 * var(--kq));height:calc(14 * var(--kq));margin-left:calc(-7 * var(--kq));z-index:1}
+.tapc.mainc.look-playful.dark .mtip::after{border-color:#A9B8F2!important}
+.tapc.mainc.look-playful .mtip.up::after{bottom:calc(-7 * var(--kq));border-top:0!important;border-left:0!important}
+.tapc.mainc.look-playful .mtip.down::after{top:calc(-7 * var(--kq));border-bottom:0!important;border-right:0!important}
+/* Azu, pointing at the words and down at the spot: the kit's figure, standing on the bubble's leading edge (cut-out, not a doodle) */
+.tapc.mainc.look-playful .mtip .az{position:absolute;left:calc(-14 * var(--kq));bottom:calc(-10 * var(--kq));width:calc(70 * var(--kq))!important;height:calc(84 * var(--kq))!important;
+  padding:0!important;border-radius:0!important;background:url("@@KIDS_AZU_POINT@@") center / contain no-repeat!important;color:transparent!important}
+.tapc.mainc.look-playful .mtip .az svg{display:none}
+.tapc.mainc.look-playful .mtip.down .az{bottom:auto;top:calc(-14 * var(--kq))}
+
+/* ---------- 5 · the lenses (category chips under the search): kit chips; the "All" chip and the ones on the wall stay calm ---------- */
+.tapc.mainc.look-playful .mlens{padding:calc(2 * var(--kq)) calc(6 * var(--kq)) calc(6 * var(--kq))}
+
+/* ---------- 6 · the wall is out of view: the hint as a kit panel with Azu waving; the mini-map in an ink frame ---------- */
+.tapc.mainc.look-playful .mhint{border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--kq))!important;border-image:var(--kb-panel-up)!important;
+  background:transparent!important;box-shadow:none!important;padding:calc(20 * var(--kq)) calc(20 * var(--kq)) calc(22 * var(--kq));gap:calc(6 * var(--kq));width:min(calc(280 * var(--kq)),86%)}
+.tapc.mainc.look-playful .mhint .scan{width:calc(60 * var(--kq));height:calc(72 * var(--kq));background:url("@@KIDS_AZU_WAVE@@") center / contain no-repeat;animation:none}
+.tapc.mainc.look-playful .mhint .scan svg{display:none}
+.tapc.mainc.look-playful .mhint b{font:600 calc(20 * var(--ts,1) * var(--kq))/1.2 var(--tfont);color:var(--tx)}
+.tapc.mainc.look-playful .mhint small{font:400 calc(16 * var(--ts,1) * var(--kq))/1.4 var(--font);color:var(--td)}
+.tapc.mainc.look-playful .mmap{background:var(--k-paper)!important;border:calc(2 * var(--kq)) solid #0E2466!important;box-shadow:var(--kt-panel) 0 var(--hs)!important;padding:calc(4 * var(--kq))!important;border-radius:calc(12 * var(--kq))!important}
+.tapc.mainc.look-playful.dark .mmap{border-color:var(--k-line)!important}
+.tapc.mainc.look-playful .mmap .pic{border-radius:calc(8 * var(--kq))}
+.tapc.mainc.look-playful .mmap .vw{border-color:#F2C14E;border-width:calc(2.5 * var(--kq));box-shadow:0 0 0 999px rgba(14,36,102,.45)!important}   /* the view window: antimony on a cobalt dim (no soft glow) */
+.tapc.mainc.look-playful .mmap i{border:calc(1.5 * var(--kq)) solid #0E2466;width:calc(9 * var(--kq));height:calc(9 * var(--kq));margin:calc(-4.5 * var(--kq)) 0 0 calc(-4.5 * var(--kq))}
+
+/* ---------- 7 · the selected POI off the screen (pin): the selected-chip frame, flat over the camera, with its arrow ---------- */
+.tapc.look-playful .pin{border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--kq))!important;border-image:var(--kb-chip-on)!important;
+  background:transparent!important;box-shadow:none!important;color:var(--acc-fg)!important;font:700 calc(15 * var(--ts,1) * var(--kq))/1 var(--font)!important;
+  min-height:calc(40 * var(--kq));padding:0 calc(12 * var(--kq))!important;gap:calc(6 * var(--kq))}
+.tapc.look-playful .pin .cd{width:calc(10 * var(--kq));height:calc(10 * var(--kq));border:calc(1.5 * var(--kq)) solid var(--acc-fg)}
+.tapc.look-playful .pin .chev{width:calc(16 * var(--kq));height:calc(16 * var(--kq));color:var(--acc-fg)}
+.tapc.look-playful .pin .chev svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.tapc.look-playful .pin.at-l .chev{order:-1}   /* on the left edge the arrow comes first, next to the edge (unity: C# adds .at-l) */
+.tapc.look-playful .pin.arrow{width:calc(44 * var(--kq));height:calc(44 * var(--kq));padding:0!important;justify-content:center}
+
+/* ---------- 8 · wall labels and pointers (on the phone's .ph root): the kit's flat chip frame, no shadow, no blur ---------- */
+.ph.look-playful{--kq:calc(var(--U,3.9px) / 3.9)}
+.ph.look-playful.light{--km-chip:url("@@KIDS_FRAME_CHIP@@");--km-ink:#0E2466;--km-paper:#FFFDF8;--km-line:#1F3F9A}
+.ph.look-playful.dark{--km-chip:url("@@KIDS_FRAME_CHIP_D@@");--km-ink:#F7F2E7;--km-paper:#1B2456;--km-line:#A9B8F2}
+.ph.look-playful .mk .lbl.ls-chip,.ph.look-playful .edge:not(.dot):not(.arrow){border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--kq))!important;
+  border-image:var(--km-chip) 28 fill / calc(12 * var(--kq)) / 0 stretch!important;   /* unity: -unity-slice 28 (the 3x PNG: 42), flat (no baked shadow over the wall) */
+  background:transparent!important;box-shadow:none!important;border-radius:calc(12 * var(--kq))!important;color:var(--km-ink)!important}
+.ph.look-playful .mk .lbl.ls-chip{font-family:"Atkinson Hyperlegible Next",system-ui,sans-serif!important;font-weight:700!important;line-height:1!important;padding:calc(6 * var(--kq)) calc(11 * var(--kq)) calc(7 * var(--kq))!important}
+.ph.look-playful .mk .lbl.lf-display{font-family:"Fredoka","Atkinson Hyperlegible Next",system-ui,sans-serif!important;font-weight:600!important}
+/* halo labels: one ink text outline (unity: -unity-text-outline), never the stacked white glow */
+.ph.look-playful .mk .lbl.ls-halo{color:var(--km-ink)!important;text-shadow:none!important;-webkit-text-stroke:calc(4 * var(--kq)) var(--km-paper);paint-order:stroke fill}
+.ph.look-playful .mk.fav .lbl::before{content:"♥ ";color:#C2412F}   /* an interest: a heart glyph (not colour alone) */
+.ph.look-playful.dark .mk.fav .lbl::before{color:#F2C14E}
+/* pointers to POIs off the screen: a chip with the category dot, the name and a bold cobalt arrow */
+.ph.look-playful .edge{font:700 calc(14 * var(--ts,1.0625) / 1.0625 * var(--kq))/1 "Atkinson Hyperlegible Next",system-ui,sans-serif!important;min-height:calc(36 * var(--kq))!important;padding:0 calc(10 * var(--kq))!important;gap:calc(6 * var(--kq))!important}
+/* 48 pt target around the 36 pt chip (unity: the picking box is the element; a 48 pt layout box with the chip as its child) */
+.ph.look-playful .edge::after{content:"";position:absolute;top:calc(-6 * var(--kq));bottom:calc(-6 * var(--kq));left:calc(-6 * var(--kq));right:calc(-6 * var(--kq))}
+.ph.look-playful .edge.dot::after{top:calc(-14 * var(--kq));bottom:calc(-14 * var(--kq));left:calc(-14 * var(--kq));right:calc(-14 * var(--kq))}
+.ph.look-playful .edge .cd{width:calc(10 * var(--kq));height:calc(10 * var(--kq));border:calc(1.5 * var(--kq)) solid var(--km-ink)}
+.ph.look-playful .edge .chev{width:calc(18 * var(--kq));height:calc(18 * var(--kq));flex:none;display:grid;color:var(--km-line)!important;opacity:1!important}
+.ph.look-playful .edge .chev svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:3.25;stroke-linecap:round;stroke-linejoin:round}   /* a stroked chevron (the icon is a path: filled, it was a black triangle) */
+/* the arrow sits on the side nearest the screen edge: pointers on the left edge put it first (unity: C# adds .at-l; the Lab reads the anchor) */
+.ph.look-playful .edge.at-l .chev{order:-1;margin-left:calc(-2 * var(--kq))}
+.ph.look-playful .edge small{font-weight:400;opacity:1;color:var(--km-ink)}
+.ph.look-playful .edge.arrow,.ph.look-playful .edge.dot{background:var(--km-paper)!important;border:calc(2 * var(--kq)) solid var(--km-line)!important;box-shadow:none!important;border-radius:50% 47% 52% 49%!important}   /* the hand-cut disc */
+.ph.look-playful .edge.arrow{width:calc(36 * var(--kq));height:calc(36 * var(--kq))}
+.ph.look-playful .edge.dot{width:calc(20 * var(--kq));height:calc(20 * var(--kq))}
+
+/* ---------- 9 · the Start screen: the wall above, a tin-glaze panel below with Azu waving; Fredoka title; tile progress ---------- */
+.tapc.ds-start.look-playful{background-color:var(--k-tin)}
+.tapc.ds-start.look-playful .ds-hero{inset:-4% -4% 30% -4%}
+.tapc.ds-start.look-playful .ds-heroshade{background:linear-gradient(180deg,rgba(14,36,102,0) 40%,rgba(14,36,102,.28) 72%)   /* unity: ramp (the shared alpha-ramp sprite, tinted cobalt) */}
+.tapc.ds-start.look-playful .ds-center.st{inset:auto calc(16 * var(--kq)) calc(30 * var(--kq)) calc(16 * var(--kq));padding:calc(26 * var(--kq)) calc(22 * var(--kq)) calc(26 * var(--kq));gap:calc(10 * var(--kq));
+  border-style:solid;border-color:transparent;border-width:calc(2 * var(--kq));border-image:var(--kb-panel-up)!important;color:var(--tx)!important}
+.tapc.ds-start.look-playful .ds-center.st::before{content:"";position:absolute;right:calc(10 * var(--kq));top:calc(-92 * var(--kq));width:calc(90 * var(--kq));height:calc(108 * var(--kq));
+  background:url("@@KIDS_AZU_WAVE@@") center bottom / contain no-repeat;pointer-events:none}   /* Azu peeks over the panel's top edge (non-camera screen) */
+.tapc.ds-start.look-playful .ds-center.st .ds-eyebrow{color:var(--td)!important;opacity:1}
+.tapc.ds-start.look-playful .ds-hero-t{font:600 calc(42 * var(--ts,1) * var(--kq))/1.05 var(--tfont)!important;color:var(--acc);letter-spacing:-.005em}
+.tapc.ds-start.look-playful.dark .ds-hero-t{color:var(--tx)}
+.tapc.ds-start.look-playful .ds-center.st .ds-body{color:var(--tx)!important;font-size:calc(17 * var(--ts,1) * var(--kq))}
+.tapc.ds-start.look-playful .ds-center.st .ds-cap.ld{color:var(--td)!important;font:400 calc(15 * var(--ts,1) * var(--kq))/1.35 var(--font)}
+.tapc.ds-start.look-playful .ds-tiles{grid-template-columns:repeat(12,calc(14 * var(--kq)));gap:calc(4 * var(--kq));margin-top:calc(4 * var(--kq))}
+.tapc.ds-start.look-playful .ds-tiles i{height:calc(14 * var(--kq));border-radius:calc(3 * var(--kq));border:calc(1.5 * var(--kq)) solid var(--k-line);background:var(--k-paper)}
+.tapc.ds-start.look-playful .ds-tiles i{animation-name:kmtile}
+@keyframes kmtile{to{background:#F2C14E}}   /* tween: the tile fills antimony, one after another (the shared stagger; Reduce Motion: shown filled) */
+.tapc.ds-start.look-playful.m-reduced .ds-tiles i{animation:none;background:#F2C14E}
+.tapc.ds-start.look-playful .ds-go{margin-top:calc(6 * var(--kq));width:100%;display:flex;justify-content:center}
+.tapc.ds-start.look-playful .ds-go .ds-btn.main{min-width:calc(200 * var(--kq));background:transparent!important;color:var(--acc-fg)!important}
+/* landscape: the wall fills the screen, the panel sits on the leading side */
+.tapc.ds-start.look-playful.land .ds-hero{inset:-4%}
+.tapc.ds-start.look-playful.land .ds-heroshade{background:linear-gradient(90deg,rgba(14,36,102,.3),rgba(14,36,102,0) 60%)   /* unity: ramp */}
+.tapc.ds-start.look-playful.land .ds-center.st{inset:calc(24 * var(--kq)) auto calc(20 * var(--kq)) calc(56 * var(--kq));width:calc(340 * var(--kq));justify-content:center;padding:calc(16 * var(--kq)) calc(24 * var(--kq));gap:calc(6 * var(--kq))}
+.tapc.ds-start.look-playful.land .ds-center.st::before{right:calc(-70 * var(--kq));top:auto;bottom:calc(-8 * var(--kq))}
+.tapc.ds-start.look-playful.land .ds-hero-t{font-size:calc(34 * var(--ts,1) * var(--kq))}
+
+/* ---------- 10 · the kit's nav page: the bar in the input frame; the selected tab = a raised accent disc + bold label ---------- */
+.tapc.look-playful .ds-nav.nav-floating,.tapc.look-playful .ds-nav.nav-dock,.tapc.look-playful .ds-nav.rail{border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--kq))!important;
+  border-image:var(--kb-input-up)!important;background:transparent!important;box-shadow:none!important;border-radius:calc(16 * var(--kq))!important}
+.tapc.look-playful .ds-nav.nav-bar{border-top:0!important;border-image:var(--kb-sheet)!important;border-style:solid!important;border-width:calc(2.5 * var(--kq)) 0 0!important;background:var(--sheet)!important;box-shadow:none!important}
+.tapc.look-playful .ds-nav .ds-navshape{display:none}   /* the hand-drawn frame replaces the drawn bar-and-bump outline */
+.tapc.look-playful .ds-nav.shaped{background:transparent!important}
+.tapc.look-playful .ds-nav .ds-tab{color:var(--td)}
+.tapc.look-playful .ds-nav .ds-tab .ti svg{stroke-width:2.25}
+.tapc.look-playful .ds-nav .ds-tab .tl{font:400 calc(13 * var(--kq))/1 var(--font)}
+.tapc.look-playful .ds-nav .ds-tab.on{color:var(--tx)}
+.tapc.look-playful .ds-nav .ds-tab.on .tl{font-weight:700}
+.tapc.look-playful .ds-nav.ind-raised .ds-tab.on .ti{border:calc(2.5 * var(--kq)) solid #0E2466;border-radius:var(--ko-disc,50% 47% 52% 49%);box-shadow:var(--kt-btn) 0 var(--hs)!important;top:calc(-24 * var(--kq));width:calc(52 * var(--kq));height:calc(52 * var(--kq))}
+.tapc.look-playful.dark .ds-nav.ind-raised .ds-tab.on .ti{border-color:var(--k-line)}
+.tapc.look-playful .ds-nav.rail.ind-raised .ds-tab.on .ti{top:auto}
+.tapc.look-playful .ds-nav.ind-pill .ds-tab.on .ti{border:calc(2 * var(--kq)) solid var(--ink)}
+/* the tap layer's own .tapc carries no .light/.dark: the pin reads the frame from the phone root */
+.ph.look-playful.light .tapc.look-playful .pin{border-image:url("@@KIDS_FRAME_CHIP_ON@@") 28 fill / calc(14 * var(--kq)) / 0 stretch!important;color:#FFFFFF!important}
+.ph.look-playful.dark .tapc.look-playful .pin{border-image:url("@@KIDS_FRAME_CHIP_ON_D@@") 28 fill / calc(14 * var(--kq)) / 0 stretch!important;color:#0E2466!important}
+.ph.look-playful.light .tapc.look-playful .pin :is(.chev,.cd){color:#FFFFFF;border-color:#FFFFFF}
+.ph.look-playful.dark .tapc.look-playful .pin :is(.chev,.cd){color:#0E2466;border-color:#0E2466}
+/* landscape: the hint is a short row (Azu beside the words) so the mini-map below stays clear */
+.tapc.mainc.look-playful.land .mhint{display:grid;grid-template-columns:auto 1fr;column-gap:calc(14 * var(--kq));row-gap:calc(4 * var(--kq));text-align:left;align-items:center;width:calc(300 * var(--kq));top:50%;left:calc(50% - 160 * var(--kq));padding:calc(14 * var(--kq)) calc(18 * var(--kq))}
+/* the hint and the mini-map side by side, centred: the hint no longer runs under the search bar or over the map (the base transform centres the hint) */
+.tapc.mainc.look-playful.land .mmap.lost{top:50%;bottom:auto;right:auto;left:calc(50% + 10 * var(--kq));translate:0 -50%}
+.tapc.mainc.look-playful.land .mhint .scan{grid-row:1/3;width:calc(50 * var(--kq));height:calc(60 * var(--kq))}
+.tapc.mainc.look-playful.land .mhint b{align-self:end}.tapc.mainc.look-playful.land .mhint small{align-self:start}
+/* the Start panel keeps a readable measure on tablets */
+.tapc.ds-start.look-playful .ds-center.st{left:50%;right:auto;translate:-50% 0;width:min(calc(100% - 32 * var(--kq)),calc(440 * var(--kq)))}
+.tapc.ds-start.look-playful.land .ds-center.st{left:calc(56 * var(--kq));top:50%;bottom:auto;translate:0 -50%;width:calc(340 * var(--kq));max-height:calc(100% - 40 * var(--kq))}
+
+/* integration: Azu in the coach tip is a real image now (an Image element in Unity) */
+.tapc.mainc.look-playful .mtip .az{background:none!important}
+.tapc.mainc.look-playful .mtip .az .az-img{display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom}
+.tapc.mainc.look-playful.dark .mazu.mascot{background-image:url("@@KIDS_AZU_HEAD_D@@")!important}
+/* landscape: the top stack (search, lenses, "near" chip) stops before the rail: the lens chips ran over the Explore button */
+.tapc.mainc.look-playful.land .mtop{right:calc(4 * var(--u) + 84 * var(--kq))}
+/* pointer looks "Arrow" and "Coloured dot": round hand-cut discs (the chip's min-height and padding made them ovals) */
+.ph.look-playful .edge.arrow,.ph.look-playful .edge.dot{min-height:0!important;padding:0!important;justify-content:center}
+/* the chevron glyph fills only ~30 % of its 24-unit box: bigger boxes so the cobalt arrow reads (negative margins keep the chip's size) */
+.ph.look-playful .edge .chev{width:calc(24 * var(--kq));height:calc(24 * var(--kq));margin:0 calc(-5 * var(--kq))}
+.ph.look-playful .edge.at-l .chev{margin-left:calc(-6 * var(--kq))}
+.ph.look-playful .edge.arrow .chev{width:calc(28 * var(--kq));height:calc(28 * var(--kq));margin:0!important}
+.tapc.look-playful .pin .chev{width:calc(22 * var(--kq));height:calc(22 * var(--kq));margin:0 calc(-4 * var(--kq))}
+.tapc.look-playful .pin.arrow .chev{width:calc(30 * var(--kq));height:calc(30 * var(--kq));margin:0}
+
+/* ---------- 11 · v20 the gear left of the search: a raised paper sticker (the kit's action-button frame), cobalt gear, 48 pt = the search's height ---------- */
+/* the top stack stays absolutely placed (a shared "position:relative" for the z-index made it as wide as the screen, shifted by its inset) */
+.tapc.mainc.look-playful .mtop{position:absolute}
+.tapc.mainc.look-playful .mgear{width:calc(48 * var(--kq));height:calc(48 * var(--kq));border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--kq))!important;
+  border-image:var(--kb-btn2-up)!important;background:transparent!important;box-shadow:none!important;border-radius:0!important;
+  color:var(--acc);rotate:-4deg;transition:translate .22s var(--k-back)   /* stuck on at a small angle, like the interest stickers. unity: rotate + ease-out-back */}
+.tapc.mainc.look-playful.dark .mgear{color:var(--k-line)}
+.tapc.mainc.look-playful .mgear svg{width:calc(24 * var(--kq));height:calc(24 * var(--kq));stroke-width:2.25}
+.tapc.mainc.look-playful .mgear:active{border-image:var(--kb-btn2)!important;translate:var(--kt-btn);transition:translate .08s ease-out}   /* pressed: the flat frame, sunk into its shadow */
+.tapc.mainc.look-playful .msrow{gap:calc(10 * var(--kq))}
+/* ---------- 12 · v20 the action bar with 2–5 buttons: the frame's width follows the count; Azu keeps clear of its neighbours ---------- */
+.tapc.mainc.look-playful .mbar.n2{width:min(100%,calc(220 * var(--kq)))}
+.tapc.mainc.look-playful .mbar.n4{width:min(100%,calc(330 * var(--kq)))}
+.tapc.mainc.look-playful .mbar.n5{width:min(100%,calc(352 * var(--kq)));padding:0 calc(6 * var(--kq))}
+.tapc.mainc.look-playful .mbar.rail{width:calc(72 * var(--kq))}   /* the rail never takes the bar's width */
+.tapc.mainc.look-playful .mbar.rail.n4{gap:calc(8 * var(--kq));padding:calc(10 * var(--kq)) 0}
+.tapc.mainc.look-playful .mbar.rail.n5{gap:calc(4 * var(--kq));padding:calc(8 * var(--kq)) 0}
+.tapc.mainc.look-playful .mbar.rail:is(.n4,.n5) .mazu.mascot{width:calc(54 * var(--kq))!important;height:calc(54 * var(--kq))!important}
+/* the filter button while the chips are open: a 34 pt accent tile with the sliders inside it (the glyph ran to the tile's edge and read as a bus) */
+.tapc.mainc.look-playful .msearch .mi.hit.on{width:calc(34 * var(--kq));height:calc(34 * var(--kq));margin-right:calc(-4 * var(--kq))}
+.tapc.mainc.look-playful .msearch .mi.hit.on svg{width:calc(20 * var(--kq));height:calc(20 * var(--kq))}
+/* "Full-width bar" search: the Lab's progress-bar rule (.ph .bar i) painted "Near" as a yellow block on its own line; it stays inline text */
+.tapc.mainc.look-playful .msearch.bar .ph1 i{display:inline;width:auto;height:auto;background:none}
+.tapc.mainc.look-playful .mbar.rail.n2{padding:calc(14 * var(--kq)) 0 calc(20 * var(--kq))}   /* two buttons: Azu's disc kept clear of the frame's foot */

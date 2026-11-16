@@ -1,0 +1,262 @@
+/* v19 Playful (kids) look: kids_40_tap. Scoped to .tapc.look-playful; Unity-feasible techniques only (mk_review/unity_feasibility.md) */
+/* On tap (js/30_tap.js): the focus ring, the 5 tag components, the 5 action components and the pieces the 7 on-tap styles combine.
+   The tap is the focus moment, so the tags are hand-drawn paper (the kit's 9-slice frames); over the wall everything else stays a
+   cobalt ring or a small sticker. Action buttons are sticker discs: paper, a cobalt line, a hard ink shadow they press into.
+   Hard shadows here are box-shadows with no blur, all down-right at the kit's button offset (--kt-btn, 2.5/3.5 pt): unity = a sibling disc tinted ink, translated.
+   Sizes in pt (--kq). The screen card body (.s-card, .tcta, .ask, .cat, .ban) belongs to kids_20_surfaces; its tiles are here. */
+
+/* ---- tokens: the sticker disc (light: paper + cobalt; dark: navy + periwinkle line, the kit's dark button) ---- */
+.tapc.look-playful.light{--ko-fill:#FFFDF8;--ko-line:#1F3F9A;--ko-sh:#0E2466;--ko-fg:#0E2466;--ko-fg2:#33447F;
+  --ko-acc:#1F3F9A;--ko-acc-line:#0E2466;--ko-acc-sh:#0E2466;--ko-acc-fg:#FFFFFF}
+.tapc.look-playful.dark{--ko-fill:#263070;--ko-line:#A9B8F2;--ko-sh:#060A22;--ko-fg:#F7F2E7;--ko-fg2:#C9D1F0;
+  --ko-acc:#F2C14E;--ko-acc-line:#3B2A06;--ko-acc-sh:#060A22;--ko-acc-fg:#0E2466}
+.tapc.look-playful{--ko-sun:#F2C14E;--ko-ink:#0E2466;--ko-paper:#FFFDF8;
+  --ko-disc:50% 47% 52% 49%   /* a hand-cut circle: four slightly different corner radii (USS: per-corner radius) */}
+
+/* ---- focus: a tile ring, painted like the wall (light: a cobalt band; dark: the antimony band), edged with paper lines — no glow ---- */
+.tapc.look-playful .f-ring{border:calc(4 * var(--kq)) solid #1F3F9A!important;box-shadow:none!important;background:transparent}
+.tapc.look-playful.dark .f-ring{border-color:var(--ko-sun)!important}
+.tapc.look-playful .f-ring::after{inset:calc(-5.5 * var(--kq));border:calc(1.5 * var(--kq)) solid var(--ko-paper);border-radius:50%}
+.tapc.look-playful .f-ring::before{content:"";position:absolute;inset:0;border:calc(1.5 * var(--kq)) solid var(--ko-paper);border-radius:50%}
+.tapc.look-playful.dark .f-ring::after,.tapc.look-playful.dark .f-ring::before{border-color:var(--ko-ink)}
+.tapc.look-playful .f-dot{background:var(--ko-paper);border:calc(2 * var(--kq)) solid var(--ko-ink);box-shadow:none}
+.tapc.look-playful .f-pulse{border-color:var(--ko-paper);border-width:calc(2.5 * var(--kq))}
+
+/* ---- the thread from the POI to a card (immersive connector, floating-panel post): ink with paper edges ---- */
+.tapc.look-playful .t-conn,.tapc.look-playful .t-pan .ln{width:calc(5 * var(--kq))!important;margin-left:0;background:var(--ko-ink)!important;box-shadow:none!important;
+  border-left:calc(1.5 * var(--kq)) solid var(--ko-paper);border-right:calc(1.5 * var(--kq)) solid var(--ko-paper);border-radius:99px}
+.tapc.look-playful .t-pan .ln{translate:-50% 0}
+.tapc.look-playful .t-pan .ln::after{width:calc(11 * var(--kq));height:calc(11 * var(--kq));margin-left:calc(-5.5 * var(--kq));bottom:calc(-6 * var(--kq));background:var(--ko-paper);border:calc(2.5 * var(--kq)) solid var(--ko-ink);box-shadow:none}
+.tapc.look-playful .t-pan .ln.up::after{bottom:auto;top:calc(-6 * var(--kq))}
+
+/* ---- shared: a 9-slice frame replaces glass, v18's ruled outline and hard box-shadow ---- */
+.tapc.look-playful :is(.t-label, .t-chip, .t-card, .t-imm, .t-pan .tx, .a-cap, .a-dock, .t-pan .lk span, .tiles .tile){border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--kq))!important;
+  background-color:transparent!important;box-shadow:none!important;color:var(--sheet-fg)!important;text-shadow:none!important}
+.tapc.look-playful :is(.t-label, .t-chip, .t-card, .t-pan .tx, .a-cap, .a-dock, .t-pan .lk span, .tiles .tile){background-image:none!important}
+
+/* ---- 1 · Label: a paper sticker chip ---- */
+.tapc.look-playful .t-label{border-image:var(--kb-chip-up)!important;border-radius:99px;padding:calc(7 * var(--kq)) calc(14 * var(--kq)) calc(8 * var(--kq));
+  font:700 calc(15 * var(--ts,1) * var(--kq))/1.15 var(--font)}
+
+/* ---- 2 · Chip: the sticker chip with the category as a tile dot ---- */
+.tapc.look-playful .t-chip{border-image:var(--kb-chip-up)!important;border-radius:99px;gap:calc(9 * var(--kq));padding:calc(8 * var(--kq)) calc(12 * var(--kq)) calc(9 * var(--kq)) calc(12 * var(--kq))}
+.tapc.look-playful .t-chip .cd{width:calc(14 * var(--kq));height:calc(14 * var(--kq));border:calc(2 * var(--kq)) solid var(--ko-ink);border-radius:var(--ko-disc);flex:none}
+.tapc.look-playful .t-chip b{font:600 calc(17 * var(--ts,1) * var(--kq))/1.1 var(--tfont)!important;letter-spacing:.005em;color:var(--sheet-fg)}
+.tapc.look-playful .t-chip small{font:700 calc(14 * var(--ts,1) * var(--kq))/1.2 var(--font)!important;letter-spacing:.01em!important;text-transform:none!important;color:var(--sheet-fg2)!important;margin-top:calc(2 * var(--kq))}   /* the category in sentence case; the chip's own dot is its tag dot */
+.tapc.look-playful .t-chip .chev{width:calc(18 * var(--kq));height:calc(18 * var(--kq));opacity:1}
+.tapc.look-playful .t-chip .chev svg{color:var(--sheet-fg)!important;stroke-width:2.6}
+
+/* the category: ONE treatment everywhere (compact card, floating panel, immersive card = the screen card's tag): a tonal pill with the
+   category dot and a thin kit line (a sticker on paper), sentence case, bold, upright (no tilt over the camera). The dot reads --cc when
+   the tag sets it, else the accent. */
+.tapc.look-playful :is(.t-card .cat2, .t-pan .cat2, .t-imm .cat){display:inline-flex;align-items:center;gap:calc(6 * var(--kq));width:auto;border:calc(1.5 * var(--kq)) solid var(--k-line)!important;border-image:none!important;
+  background:var(--tonal)!important;color:var(--sheet-fg)!important;opacity:1!important;font:700 calc(14 * var(--ts,1) * var(--kq))/1 var(--font)!important;letter-spacing:.01em!important;text-transform:none!important;
+  padding:calc(5 * var(--kq)) calc(10 * var(--kq));border-radius:99px;margin:0 0 calc(6 * var(--kq));rotate:none;white-space:nowrap}
+.tapc.look-playful :is(.t-card .cat2, .t-pan .cat2, .t-imm .cat)::before{content:"";flex:none;width:calc(8 * var(--kq));height:calc(8 * var(--kq));border-radius:99px;background:var(--cc,var(--acc))}
+
+/* ---- 3 · Compact card: raised paper, the photo pasted in with an ink edge ---- */
+.tapc.look-playful .t-card{border-image:var(--kb-panel-up)!important;width:calc(270 * var(--kq))!important;max-width:92%;padding:calc(10 * var(--kq)) calc(12 * var(--kq)) calc(11 * var(--kq)) calc(11 * var(--kq));gap:calc(11 * var(--kq))}
+.tapc.look-playful .t-card .th{width:calc(68 * var(--kq));height:calc(68 * var(--kq));border:calc(2.5 * var(--kq)) solid var(--ko-line);border-radius:calc(12 * var(--kq))}   /* upright: no tilt over the camera */
+.tapc.look-playful .t-card b{font:600 calc(17 * var(--ts,1) * var(--kq))/1.1 var(--tfont)!important;color:var(--sheet-fg)}
+.tapc.look-playful .t-card span:not(.i):not(.cat2){font-size:calc(14 * var(--ts,1) * var(--kq))!important;line-height:1.35;color:var(--sheet-fg2)!important;margin-top:calc(3 * var(--kq))}
+.tapc.look-playful .t-card .chev{width:calc(18 * var(--kq));height:calc(18 * var(--kq));opacity:1;color:var(--sheet-fg)}
+.tapc.look-playful .t-card .chev svg{stroke-width:2.6}
+
+/* ---- 4 · Immersive card: a storybook card. Stitched paper (the kit's stitch frame WITH its fill), the photo a framed child (.im: unity = an
+   Image child with the panel 9-slice on top, no fill), then the body on the same paper: no clipping, no paper patch over the photo. ---- */
+.tapc.look-playful .t-imm{width:calc(252 * var(--kq))!important;max-width:92%;aspect-ratio:auto!important;height:auto;overflow:visible!important;
+  border-image:var(--kb-stitch-up)!important;border-radius:calc(26 * var(--kq))!important;padding:calc(11 * var(--kq))!important;background:none!important}
+.tapc.look-playful .t-imm .im{display:block;position:relative;box-sizing:border-box;height:calc(100 * var(--kq));
+  border-style:solid;border-color:transparent;border-width:calc(12 * var(--kq));border-image:var(--k-panel) 48 / calc(12 * var(--kq)) / 0 stretch;   /* unity: -unity-slice 72, scale .167; no fill */
+  border-radius:calc(14 * var(--kq));background-origin:border-box!important;background-clip:padding-box!important;background-repeat:no-repeat!important}
+.tapc.look-playful .t-imm .sh{display:none}
+.tapc.look-playful .t-imm .vidb{top:calc(56 * var(--kq))}
+.tapc.look-playful .t-imm .bd{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;background:none!important;border-top:0!important;
+  padding:calc(8 * var(--kq)) calc(5 * var(--kq)) calc(5 * var(--kq))!important;color:var(--sheet-fg)!important}
+.tapc.look-playful .t-imm .bd .cat{position:static;margin:0 0 calc(6 * var(--kq))}
+.tapc.look-playful .t-imm b{font:600 calc(22 * var(--ts,1) * var(--kq))/1.08 var(--tfont)!important;letter-spacing:0!important;margin:0 0 calc(4 * var(--kq))!important;color:var(--sheet-fg)}
+.tapc.look-playful .t-imm .bd>span:not(.cat){font-size:calc(15 * var(--ts,1) * var(--kq))!important;line-height:1.35;color:var(--sheet-fg2)!important;opacity:1!important;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tapc.look-playful .t-imm .irow{margin-top:calc(10 * var(--kq));flex-wrap:nowrap!important;justify-content:space-between;gap:calc(5 * var(--kq))}
+/* the heart: a small sticker disc on the photo's corner */
+.tapc.look-playful .t-imm .heart{top:calc(27 * var(--kq));right:calc(27 * var(--kq));width:calc(40 * var(--kq));height:calc(40 * var(--kq));padding:calc(9 * var(--kq));
+  background:var(--ko-fill);color:var(--ko-fg);border:calc(2 * var(--kq)) solid var(--ko-line);border-radius:var(--ko-disc);box-shadow:var(--kt-btn) 0 var(--ko-sh)   /* unity: a sibling disc */}
+.tapc.look-playful .t-imm .heart svg{stroke-width:2.5}
+.tapc.look-playful .t-imm .heart.on{color:#C2334A}
+
+/* ---- 5 · Floating panel: raised paper on a post; links become small sticker chips ---- */
+.tapc.look-playful .t-pan .tx{border-image:var(--kb-panel-up)!important;border-radius:calc(24 * var(--kq))!important;padding:calc(11 * var(--kq)) calc(12 * var(--kq)) calc(12 * var(--kq))!important;
+  width:calc(264 * var(--kq))!important;max-width:none}
+.tapc.look-playful .t-pan .tx .im.in{width:100%;height:calc(104 * var(--kq));border:calc(2.5 * var(--kq)) solid var(--ko-line)!important;border-radius:calc(14 * var(--kq));margin-bottom:calc(10 * var(--kq))}
+.tapc.look-playful .t-pan b{font:600 calc(20 * var(--ts,1) * var(--kq))/1.1 var(--tfont)!important;letter-spacing:0;color:var(--sheet-fg)!important}
+.tapc.look-playful .t-pan .tx>span{font:400 calc(15 * var(--ts,1) * var(--kq))/1.35 var(--font)!important;color:var(--sheet-fg2)!important;opacity:1!important;margin-top:calc(4 * var(--kq))}
+.tapc.look-playful .t-pan .lk{gap:calc(6 * var(--kq));margin-top:calc(10 * var(--kq));flex-wrap:wrap;overflow:visible}
+.tapc.look-playful .t-pan .lk span{border-image:var(--kb-chip-up)!important;min-height:calc(44 * var(--kq));padding:0 calc(10 * var(--kq));border-radius:99px;text-decoration:none!important;
+  font:700 calc(13.5 * var(--ts,1) * var(--kq))/1 var(--font)!important;letter-spacing:.01em;color:var(--sheet-fg)!important;transition:translate .22s ease-out   /* unity: ease-out-back */}
+.tapc.look-playful .t-pan .lk span:active{border-image:var(--kb-chip)!important;translate:var(--kt-chip);transition:translate .08s ease-out}
+
+/* ================= actions ================= */
+/* the sticker disc: every round action button (radial ring, capsule, links in a tag) */
+.tapc.look-playful :is(.tapc > .a-rad .c, .tib .i, .irow .i){background:var(--ko-fill)!important;color:var(--ko-fg)!important;border:calc(2.5 * var(--kq)) solid var(--ko-line)!important;border-radius:var(--ko-disc)!important;
+  box-shadow:var(--kt-btn) 0 var(--ko-sh)!important   /* down-right, the kit's button offset. unity: a static sibling disc tinted ink, translated */;transition:translate .22s ease-out   /* unity: ease-out-back */}
+.tapc.look-playful :is(.tapc > .a-rad .c, .tib .i, .irow .i) svg{stroke-width:2.4}
+.tapc.look-playful :is(.tapc > .a-rad:active .c, .tib:active .i, .irow .i:active, .irow .ii:active .i, .t-imm .heart:active){transform:none;translate:var(--kt-btn);box-shadow:none!important;transition:translate .08s ease-out}   /* sinks exactly into its shadow */
+.tapc.look-playful :is(.a-rad, .a-rad .c, .tib, .tib .i, .irow .i, .irow .ii, .a-dock .pill, .tiles .tile, .t-pan .lk span):active{transform:none}   /* v18's transform:translateY would stack on translate */
+/* "more" is not selected: a paper disc like the others, its three dots bold (the filled cobalt disc means "selected") */
+.tapc.look-playful > .a-rad.more .c svg,.tapc.look-playful .tib.more .i svg{fill:currentColor;stroke:currentColor;stroke-width:3.5}
+
+/* ---- 1 · Radial ring: discs around the POI, each with a paper name tag ---- */
+/* 48 pt discs (was 54: quieter over the wall); the name is a small paper tag stuck across the disc's lower edge, so it never reaches the next disc */
+.tapc.look-playful > .a-rad{width:calc(48 * var(--kq));height:calc(48 * var(--kq));margin:calc(-24 * var(--kq)) 0 0 calc(-24 * var(--kq))}
+.tapc.look-playful > .a-rad .c{padding:calc(11.5 * var(--kq))}
+.tapc.look-playful > .a-rad .l{top:calc(100% - 9 * var(--kq));margin-top:0;transform:none;translate:-50% 0;padding:calc(2 * var(--kq)) calc(7 * var(--kq)) calc(3 * var(--kq));border-radius:99px;background:var(--ko-fill)!important;color:var(--ko-fg)!important;
+  border:calc(1.5 * var(--kq)) solid var(--ko-line);font:700 calc(13 * var(--ts,1) * var(--kq))/1.1 var(--font)!important;text-shadow:none}
+
+/* ---- 2 · Capsule: a raised paper tray of discs with names ---- */
+.tapc.look-playful .a-cap{border-image:var(--kb-panel-up)!important;border-radius:calc(24 * var(--kq))!important;padding:calc(12 * var(--kq)) calc(14 * var(--kq)) calc(12 * var(--kq))!important}
+.tapc.look-playful .a-cap .row{gap:calc(10 * var(--kq))}
+.tapc.look-playful .tib{gap:calc(7 * var(--kq))}
+.tapc.look-playful .tib .i{width:calc(46 * var(--kq));height:calc(46 * var(--kq));padding:calc(10 * var(--kq))}
+.tapc.look-playful .tib .l{font:700 calc(13 * var(--ts,1) * var(--kq))/1 var(--font)!important;color:var(--sheet-fg)!important}
+.tapc.look-playful .a-cap .ask{border-style:solid;border-color:transparent!important;border-width:calc(2 * var(--kq));border-image:var(--kb-input)!important;background:transparent!important;color:var(--sheet-fg2)!important}
+
+/* ---- 3 · Links in the tag: small discs inside the card (nested: a smaller shadow) ---- */
+.tapc.look-playful .irow .i{width:calc(42 * var(--bk,1) * var(--kq));height:calc(42 * var(--bk,1) * var(--kq));padding:calc(9 * var(--kq))}
+.tapc.look-playful .t-imm .irow .i,.tapc.look-playful .t-card .irow .i{width:calc(40 * var(--kq));height:calc(40 * var(--kq));padding:calc(8.5 * var(--kq));position:relative}
+.tapc.look-playful .t-card .irow .i::before{content:"";position:absolute;inset:calc(-6 * var(--kq))}   /* 48 pt hit area */
+.tapc.look-playful .t-card.top{width:calc(300 * var(--kq))!important}
+.tapc.look-playful .t-card .irow{gap:calc(6 * var(--kq));margin-top:calc(9 * var(--kq))!important}
+.tapc.look-playful .irow .ii small{font:700 calc(13 * var(--ts,1) * var(--kq))/1 var(--font)!important;color:var(--sheet-fg)}
+.tapc.look-playful > .irow .ii small{background:var(--ko-fill);color:var(--ko-fg);border:calc(1.5 * var(--kq)) solid var(--ko-line);border-radius:99px;padding:calc(3 * var(--kq)) calc(7 * var(--kq))}
+
+/* ---- 4 · Dock: a hand-drawn tray at the bottom; the actions are ink pills that press in ---- */
+.tapc.look-playful .a-dock{border-image:var(--kb-panel-b-up)!important;border-radius:calc(24 * var(--kq))!important;padding:calc(6 * var(--kq)) calc(8 * var(--kq))!important;gap:calc(2 * var(--kq));overflow:visible}
+.tapc.look-playful .a-dock .pill{height:calc(48 * var(--kq))!important;padding:0 calc(12 * var(--kq))!important;border-radius:calc(16 * var(--kq));gap:calc(7 * var(--kq));
+  font:700 calc(15 * var(--ts,1) * var(--kq))/1 var(--font)!important;color:var(--sheet-fg)!important;transition:translate .22s ease-out   /* unity: ease-out-back */}
+.tapc.look-playful .a-dock .pill+.pill{border-left:calc(1.5 * var(--kq)) solid color-mix(in srgb,var(--sheet-fg2) 30%,transparent)!important;border-radius:0}
+.tapc.look-playful .a-dock .pill .i{width:calc(22 * var(--kq));height:calc(22 * var(--kq));color:var(--ko-line)}
+.tapc.look-playful .a-dock .pill .i svg{stroke-width:2.4}
+.tapc.look-playful .a-dock .pill:active{translate:var(--kt-chip);transition:translate .08s ease-out}
+/* centred by auto margins between both edges: left:50% + translate shrank the dock to half the screen, so "+4" spilled out (landscape, text L) */
+.tapc.look-playful .a-dock{left:0!important;right:0!important;margin:0 auto;width:max-content;transform:none!important;max-width:calc(100% - 6 * var(--u))}
+/* portrait: four pills in a row did not fit a phone ("more" scrolled out of sight). A tab-bar tray instead: icon over label, 54 pt tall */
+.tapc.look-playful:not(.land) .a-dock{padding:calc(5 * var(--kq)) calc(6 * var(--kq))!important}
+.tapc.look-playful:not(.land) .a-dock .pill{flex-direction:column;justify-content:center;gap:calc(3 * var(--kq));height:auto!important;min-height:calc(54 * var(--kq));min-width:calc(62 * var(--kq));
+  padding:calc(5 * var(--kq)) calc(9 * var(--kq))!important;font-size:calc(14 * var(--ts,1) * var(--kq))!important;line-height:1.1!important;white-space:nowrap}
+
+/* ---- 5 · Tiles in the screen card: secondary paper buttons that press in ---- */
+.tapc.look-playful .tiles{gap:calc(10 * var(--kq)) calc(10 * var(--kq));margin-top:calc(12 * var(--kq))}
+.tapc.look-playful .tiles .tile{border-image:var(--kb-btn2-up)!important;border-radius:calc(18 * var(--kq))!important;min-height:calc(48 * var(--kq));padding:calc(6 * var(--kq)) calc(12 * var(--kq))!important;gap:calc(7 * var(--kq));
+  font:700 calc(15 * var(--ts,1) * var(--kq))/1.15 var(--font)!important;transition:translate .22s ease-out   /* unity: ease-out-back */}
+.tapc.look-playful .tiles .tile .i{width:calc(22 * var(--kq));height:calc(22 * var(--kq));color:var(--ko-line)!important}
+/* the screen card over the wall: content-sized tiles packed in rows (5 actions = 2 rows, not 3), so the peek leaves the wall visible.
+   unity: flex-wrap row; the gap as child margins */
+.tapc.look-playful .s-card .tiles{display:flex;flex-wrap:wrap;gap:calc(7 * var(--kq)) calc(8 * var(--kq));margin-top:calc(6 * var(--kq))}
+.tapc.look-playful .s-card .tiles .tile{flex:1 1 auto;justify-content:center;white-space:nowrap;padding:calc(6 * var(--kq)) calc(9 * var(--kq))!important;gap:calc(6 * var(--kq))}   /* 9 pt sides: 3 tiles a row on a phone (6 actions = 2 rows, so the peek stays below the POI) */
+.tapc.look-playful .s-card.sh-peek .ask{display:none}   /* the peek stays short: Ask Azu is one tap up, in the full card */
+.tapc.look-playful .tiles .tile .i svg{stroke-width:2.4}
+.tapc.look-playful .tiles .tile:active{border-image:var(--kb-btn2)!important;transform:none;translate:var(--kt-btn);transition:translate .08s ease-out}
+/* the tucked screen card: "⌃ more" readable (14 pt bold, full ink) */
+.tapc.look-playful:not(.land) .s-card.tuck::after{font:700 calc(14 * var(--ts,1) * var(--kq))/1 var(--font)!important;opacity:1!important;color:var(--sheet-fg)!important;margin-top:calc(6 * var(--kq))}
+
+/* toast after an action: a paper sticker */
+.tapc.look-playful > .toast{border-style:solid!important;border-color:transparent!important;border-width:calc(2 * var(--kq))!important;border-image:var(--kb-chip-up)!important;background:transparent!important;box-shadow:none!important;
+  color:var(--sheet-fg)!important;padding:calc(10 * var(--kq)) calc(16 * var(--kq));font:700 calc(15 * var(--ts,1) * var(--kq))/1 var(--font)}
+
+/* Reduce Motion: no travel, the state changes in place */
+.tapc.look-playful.m-reduced :is(.tapc > .a-rad .c, .tib .i, .irow .i, .a-dock .pill, .tiles .tile, .t-pan .lk span){transition:none}
+.tapc.look-playful.m-reduced :is(.tapc > .a-rad:active .c, .tib:active .i, .irow .i:active, .a-dock .pill:active, .tiles .tile:active, .t-pan .lk span:active){translate:none}
+
+/* landscape: little height, so the floating panel's photo is a strip and its summary two lines */
+.tapc.look-playful.land .t-pan .tx>span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* landscape, immersive card: a compact row (photo left, words and links right), short enough to sit beside the POI under the status bar */
+.tapc.look-playful.land .t-imm,.ph.land .tapc.look-playful .t-imm{display:flex!important;flex-direction:row;align-items:stretch;width:calc(372 * var(--kq))!important;max-width:70%}
+.tapc.look-playful.land .t-imm .im,.ph.land .tapc.look-playful .t-imm .im{flex:none;width:calc(108 * var(--kq));height:auto;min-height:calc(108 * var(--kq))}   /* a framed photo column */
+.tapc.look-playful.land .t-imm .bd,.ph.land .tapc.look-playful .t-imm .bd{flex:1 1 auto;min-width:0;margin:0;padding:calc(3 * var(--kq)) calc(2 * var(--kq)) calc(5 * var(--kq)) calc(12 * var(--kq))!important}
+.tapc.look-playful.land .t-imm b,.ph.land .tapc.look-playful .t-imm b{font-size:calc(20 * var(--ts,1) * var(--kq))!important}
+.tapc.look-playful.land .t-imm .bd>span:not(.cat),.ph.land .tapc.look-playful .t-imm .bd>span:not(.cat){font-size:calc(14 * var(--ts,1) * var(--kq))!important}
+.tapc.look-playful.land .t-imm .irow,.ph.land .tapc.look-playful .t-imm .irow{margin-top:calc(8 * var(--kq))}
+.tapc.look-playful.land .t-imm .heart,.ph.land .tapc.look-playful .t-imm .heart{right:auto;left:calc(62 * var(--kq))}   /* the photo column's top-right corner, as in portrait */
+.tapc.look-playful.land .t-imm .vidb,.ph.land .tapc.look-playful .t-imm .vidb{top:calc(70 * var(--kq))}
+/* landscape, floating panel: no photo, text left-aligned, beside the POI (not above or below it, where it clipped or sat on its marker) */
+.tapc.look-playful.land .t-pan .tx,.ph.land .tapc.look-playful .t-pan .tx{top:0!important;transform:none!important;translate:0 -50%!important;margin:0 calc(74 * var(--kq));text-align:left!important;width:calc(286 * var(--kq))!important}
+.tapc.look-playful.land .t-pan .tx>span,.ph.land .tapc.look-playful .t-pan .tx>span{-webkit-line-clamp:2}
+.tapc.look-playful.land .t-pan .lk span,.ph.land .tapc.look-playful .t-pan .lk span{padding:0 calc(9 * var(--kq))}
+.tapc.look-playful.land .t-pan .tx .im.in,.ph.land .tapc.look-playful .t-pan .tx .im.in{display:none}
+.tapc.look-playful.land .t-pan .ln,.ph.land .tapc.look-playful .t-pan .ln{display:none}
+.tapc.look-playful.land .t-pan .lk,.ph.land .tapc.look-playful .t-pan .lk{justify-content:flex-start!important}
+.tapc.look-playful .t-pan .tx>span{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+
+
+/* ---- Base elements (the buttons gallery) ---- */
+/* landscape: 7 buttons a row (13 = 2 rows) under the status bar, so nothing runs off the bottom; no room for the "On the wall" row (it stays in portrait) */
+.ph.land .tapc.gal.look-playful .galp{top:calc(8 * var(--u))!important;left:calc(4 * var(--u))!important;right:calc(4 * var(--u))!important;max-width:none!important;padding:calc(3 * var(--u)) calc(4 * var(--u))!important}
+.ph.land .tapc.gal.look-playful .galg{grid-template-columns:repeat(7,1fr)!important;gap:calc(2.4 * var(--u)) calc(1 * var(--u))!important;margin-top:calc(2.5 * var(--u))!important}
+.ph.land .tapc.gal.look-playful :is(.galw, .galcap){display:none}
+.tapc.gal.look-playful .galcap{opacity:1!important}   /* full ink (was .85) */
+.tapc.gal.look-playful :is(.gi small, .galh small){opacity:1!important;color:var(--ko-fg2)!important}   /* the conditions in the soft ink at full strength (opacity .62 fell under 7:1) */
+
+/* ---- action views (360, Then & now, 3D): over the full-screen photo the words sit on paper stickers, the title in the look's title face
+   (Fredoka, it was the Premium serif); the close is a 48 pt target with the kit's sticker disc inside (it was 9 u ≈ 34 pt) ---- */
+.tapc.look-playful .tv:not(.tv-card)>.vt{background:var(--ko-fill);color:var(--ko-fg);text-shadow:none;border:calc(2 * var(--kq)) solid var(--ko-line);border-radius:calc(16 * var(--kq));
+  box-shadow:var(--kt-btn) 0 var(--ko-sh);padding:calc(7 * var(--kq)) calc(12 * var(--kq)) calc(8 * var(--kq));max-width:calc(100% - 10 * var(--u) - 56 * var(--kq));
+  font:700 calc(14 * var(--ts,1) * var(--kq))/1.25 var(--font);letter-spacing:.01em;text-transform:none}
+.tapc.look-playful .tv:not(.tv-card)>.vt b{font:600 calc(20 * var(--ts,1) * var(--kq))/1.1 var(--tfont);color:var(--ko-fg);margin-top:calc(2 * var(--kq))}
+.tapc.look-playful .tv:not(.tv-card)>.x{top:calc(17.5 * var(--u) - 24 * var(--kq));right:calc(8.5 * var(--u) - 24 * var(--kq));width:calc(48 * var(--kq));height:calc(48 * var(--kq));
+  padding:calc(14 * var(--kq));background:none;color:var(--ko-fg)}
+.tapc.look-playful .tv:not(.tv-card)>.x::before{content:"";position:absolute;inset:calc(5 * var(--kq));z-index:-1;background:var(--ko-fill);border:calc(2.5 * var(--kq)) solid var(--ko-line);border-radius:var(--ko-disc);
+  box-shadow:var(--kt-btn) 0 var(--ko-sh)   /* unity: a child disc + a sibling shadow disc */}
+.tapc.look-playful .tv:not(.tv-card)>.x svg{stroke-width:2.6}
+.tapc.look-playful .tv>.yr{background:var(--ko-fill);color:var(--ko-fg);border:calc(2 * var(--kq)) solid var(--ko-line);font:700 calc(14 * var(--ts,1) * var(--kq))/1 var(--font);padding:calc(6 * var(--kq)) calc(11 * var(--kq))}
+/* Then & now with no "today" photo: tin-glaze paper on the "today" side, the note in that half, clear of the drag handle */
+.tapc.look-playful .wipe.nophoto{background:var(--ko-fill);place-items:center start;padding:0 7% 0 57%;text-align:left;color:var(--ko-fg2);font:600 calc(15 * var(--ts,1) * var(--kq))/1.4 var(--font)}
+
+/* ================= v20 (A3) · On tap, Playful: the immersive card on the new structure (.im, .bd, .sm, .irow.acts), the panel's row, Coming soon ================= */
+/* the storybook card a little wider, so four buttons and their words fit (text L too); the photo a framed picture that leads */
+.tapc.look-playful:not(.land) .t-imm{width:calc(272 * var(--kq))!important}
+.tapc.look-playful:not(.land) .t-imm .im{height:calc(124 * var(--kq))}
+.tapc.look-playful .t-imm .im{aspect-ratio:auto}
+.tapc.look-playful .t-imm .bd{gap:0;padding:calc(9 * var(--kq)) calc(4 * var(--kq)) calc(3 * var(--kq))!important}
+.tapc.look-playful .t-imm .bd .sm{font-size:calc(15 * var(--ts,1) * var(--kq))!important;line-height:1.35!important}
+/* the action row: sticker discs with their word under them; the story is the big filled sticker (a pill), the one to press */
+.tapc.look-playful .irow.acts{gap:calc(4 * var(--kq))!important;margin-top:calc(11 * var(--kq))!important;justify-content:space-between}
+.tapc.look-playful .irow.acts .ii{gap:calc(5 * var(--kq))}
+.tapc.look-playful .tapc .irow.acts .ii .i,.tapc.look-playful .irow.acts .ii .i{width:calc(44 * var(--kq))!important;height:calc(44 * var(--kq))!important;padding:calc(9.5 * var(--kq))!important;flex:none}
+.tapc.look-playful .irow.acts .ii.pri .i{width:100%!important;border-radius:calc(22 * var(--kq)) calc(20 * var(--kq)) calc(23 * var(--kq)) calc(21 * var(--kq))!important;
+  background:var(--ko-acc)!important;color:var(--ko-acc-fg)!important;border-color:var(--ko-acc-line)!important;box-shadow:var(--kt-btn) 0 var(--ko-acc-sh)!important}
+.tapc.look-playful .irow.acts .ii.pri .i svg{stroke-width:2.6}
+.tapc.look-playful .irow.acts .ii small{font:700 calc(13 * (.6 + .4 * var(--ts,1)) * var(--kq))/1.05 var(--font)!important;color:var(--sheet-fg)!important;letter-spacing:0}
+.tapc.look-playful .irow.acts .ii.pri small{font-family:var(--tfont)!important;font-weight:600!important;font-size:calc(14 * (.6 + .4 * var(--ts,1)) * var(--kq))!important}
+.tapc.look-playful .irow.acts .ii:active{scale:none}   /* Playful presses by sinking the disc into its shadow (above), not by shrinking */
+/* the entrance: a bouncier pop for stickers */
+.tapc.look-playful .irow.acts .ii.apop{animation:kactpop .42s ease-out backwards}
+@keyframes kactpop{0%{opacity:0;scale:.5;rotate:-8deg}60%{opacity:1;scale:1.08;rotate:2deg}100%{opacity:1;scale:1;rotate:0deg}}   /* tween: scale .5→1.08→1 with a small wobble (DOTween OutBack), delay .2 s + .07 s per button */
+.tapc.look-playful.m-reduced .irow.acts .ii.apop{animation:none}
+/* the floating panel: the same row on its paper; the summary two lines */
+.tapc.look-playful .t-pan .tx .irow.acts{margin-top:calc(10 * var(--kq))!important}
+.tapc.look-playful .t-pan .tx>span.sm{-webkit-line-clamp:2}
+.tapc.look-playful .t-pan .tx .cat2{align-self:flex-start}
+/* landscape: the compact row card keeps its words to one line each, so the buttons fit under them */
+.tapc.look-playful.land .t-imm .bd .sm,.ph.land .tapc.look-playful .t-imm .bd .sm{-webkit-line-clamp:1}
+.tapc.look-playful.land .irow.acts,.ph.land .tapc.look-playful .irow.acts{margin-top:calc(8 * var(--kq))!important}
+
+/* ---- Coming soon: a sun-yellow sticker with Azu's spade, stuck on a little crooked. Fun, and the words say it plainly ---- */
+.tapc.look-playful .soonb{background:var(--ko-sun)!important;color:#0E2466!important;border:calc(2 * var(--kq)) solid #0E2466;box-shadow:calc(2 * var(--kq)) calc(2.5 * var(--kq)) 0 #0E2466;
+  font:600 calc(13 * var(--ts,1) * var(--kq))/1 var(--tfont)!important;letter-spacing:.01em;min-height:calc(28 * var(--kq));padding:0 calc(10 * var(--kq)) 0 calc(7 * var(--kq));rotate:-3deg}
+.tapc.look-playful .soonb svg{width:calc(16 * var(--kq));height:calc(16 * var(--kq));stroke-width:2.4}
+.tapc.look-playful .t-imm .im .soonb{left:calc(-8 * var(--kq));top:calc(-8 * var(--kq))}
+.tapc.look-playful .t-pan .im .soonb{left:calc(6 * var(--kq));top:calc(6 * var(--kq))}
+.tapc.look-playful .t-pan .tx>.soonb{margin-bottom:calc(6 * var(--kq))}
+.tapc.look-playful.land .t-imm .im .soonb,.ph.land .tapc.look-playful .t-imm .im .soonb{top:auto;bottom:calc(-10 * var(--kq));left:calc(-10 * var(--kq))}
+.tapc.look-playful .t-chip small.soonl{color:var(--sheet-fg)!important}
+.tapc.look-playful .t-chip small.soonl svg{width:calc(15 * var(--kq));height:calc(15 * var(--kq));stroke-width:2.4;color:var(--ko-line)}
+.tapc.look-playful .t-imm.soon .bd .sm{color:var(--sheet-fg)!important;font-weight:600}
+.tapc.look-playful.land .t-imm.soon .bd .sm,.ph.land .tapc.look-playful .t-imm.soon .bd .sm{-webkit-line-clamp:2}   /* a soon place: its one honest line is the message, never cut */
+/* v20 F (final fixer): a soon place's first button read as an empty bar (an icon-only pill, "What's coming" under it). Now the pill IS the button:
+   the spade and "What's coming" sit inside it, in the button's own colours; Save stays a disc with its word under it. unity: KIDS_FRAME_BTN pill, label inside */
+.tapc.look-playful .irow.acts.soon{align-items:flex-start}
+.tapc.look-playful .irow.acts.soon .ii.pri{flex-direction:row;gap:calc(7 * var(--kq));min-height:calc(48 * var(--kq));padding:0 calc(14 * var(--kq));box-sizing:border-box;
+  border:calc(2 * var(--kq)) solid var(--ko-acc-line);border-radius:calc(24 * var(--kq)) calc(22 * var(--kq)) calc(25 * var(--kq)) calc(23 * var(--kq));background:var(--ko-acc);box-shadow:var(--kt-btn) 0 var(--ko-acc-sh)}
+.tapc.look-playful .irow.acts.soon .ii.pri .i{width:calc(22 * var(--kq))!important;height:calc(22 * var(--kq))!important;padding:0!important;background:none!important;border:0!important;box-shadow:none!important;border-radius:0!important;color:var(--ko-acc-fg)!important}
+.tapc.look-playful .irow.acts.soon .ii.pri small{color:var(--ko-acc-fg)!important;font-size:calc(15 * (.6 + .4 * var(--ts,1)) * var(--kq))!important;overflow:visible}
+.tapc.look-playful .irow.acts.soon .ii.pri:active{translate:var(--kt-btn);box-shadow:none}

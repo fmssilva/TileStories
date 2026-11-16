@@ -1,0 +1,33 @@
+{
+ "_note": "Allowed Unity-lint items per rule name in the shared app UI. Counts may only go down.",
+ "ds.css": {
+  ":has()": 8,
+  "@keyframes untagged": 10,
+  "backdrop-filter (camera glass only)": 6,
+  "background-clip:text": 1,
+  "clip-path": 1,
+  "cubic-bezier (use named easing)": 7,
+  "dashed border (Unity: a slot sprite)": 4,
+  "filter drop-shadow/brightness/saturate": 11,
+  "gradient untagged": 17,
+  "inherit": 8,
+  "mask": 4,
+  "soft box-shadow untagged": 27,
+  "transform: translate (use the translate property)": 7
+ },
+ "tap.css": {
+  "3D rotate": 3,
+  "@keyframes untagged": 10,
+  "backdrop-filter (camera glass only)": 14,
+  "cubic-bezier (use named easing)": 2,
+  "dashed border (Unity: a slot sprite)": 1,
+  "filter drop-shadow/brightness/saturate": 4,
+  "gradient untagged": 12,
+  "inherit": 1,
+  "mask": 8,
+  "perspective": 2,
+  "preserve-3d": 1,
+  "soft box-shadow untagged": 16,
+  "transform: translate (use the translate property)": 7
+ }
+}

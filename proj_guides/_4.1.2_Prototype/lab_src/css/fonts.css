@@ -1,0 +1,6 @@
+/* The app's two faces, the same files as the Unity project (Runtime/UI/Theme/Fonts, OFL 1.1): display = Fraunces SemiBold, body = Atkinson Hyperlegible Next 400 / 500 / 700 */
+@font-face{font-family:"Fraunces";font-weight:600;font-style:normal;src:url(@@FONT_FRAUNCES@@) format("truetype")}
+@font-face{font-family:"Atkinson Hyperlegible Next";font-weight:400;font-style:normal;src:url(@@FONT_ATK400@@) format("truetype")}
+@font-face{font-family:"Atkinson Hyperlegible Next";font-weight:500;font-style:normal;src:url(@@FONT_ATK500@@) format("truetype")}
+@font-face{font-family:"Atkinson Hyperlegible Next";font-weight:700;font-style:normal;src:url(@@FONT_ATK700@@) format("truetype")}
+@font-face{font-family:"Fredoka";font-weight:600;font-style:normal;src:url(@@FONT_FREDOKA@@) format("woff2")}   /* Playful look titles (OFL 1.1, @fontsource/fredoka latin 600) */

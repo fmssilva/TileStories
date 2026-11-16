@@ -1,0 +1,31 @@
+/* v19 section review: Premium (12+) fixes for this group, scoped to .tapc:not(.look-playful). Unity-feasible only. */
+
+/* landscape sheet: the sticky button row floated 72 pt above the bottom (ds.css pads the scroll for it), so it sat on the action tiles and cut
+   the body text. Pinned to the true bottom edge on the sheet's own colour with a hairline, so content scrolls clear above it.
+   unity: a footer element outside the ScrollView */
+.tapc:not(.look-playful).land .ds-sheet .sbody .ds-btns{bottom:calc(-72 * var(--P));z-index:2;padding:calc(12 * var(--P)) 0 calc(18 * var(--P));
+  background:var(--sheet);border-top:1px solid color-mix(in srgb,var(--sheet-fg) 12%,transparent)}
+
+/* loading text: the background-clip shimmer dipped to ~3:1 and Unity has no background-clip:text. Solid text that breathes in opacity
+   (tween: opacity 1 → .82, 1.4 s, ping-pong; off with Reduce Motion) */
+.tapc:not(.look-playful) .ds-panel .shimmer{background:none;-webkit-text-fill-color:currentColor;color:var(--tx);animation:r3breathq 1.4s ease-in-out infinite alternate}
+@keyframes r3breathq{to{opacity:.82}}   /* tween: */
+.tapc:not(.look-playful).m-reduced .ds-panel .shimmer{animation:none}
+
+/* the screen card tucked to its title in landscape: a tab that hugs the title instead of a 351 pt bar, so less of the wall (and the POI
+   beside it) is covered. With proposals.md P1 it moves to the top-right corner when it would still cover the POI (.tuck-top) */
+.tapc:not(.look-playful).land .s-card.tuck{width:auto;max-width:calc(90 * var(--u));min-height:calc(48 * var(--P));display:flex;align-items:center;padding:calc(8 * var(--P)) calc(20 * var(--P))}
+.tapc:not(.look-playful).land .s-card.tuck b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* sheet buttons side by side: at text L "Open the story" ran past the sheet edge. A wrapping row instead of a fixed 1 : 1.4 grid (main grows
+   more); when both labels don't fit they stack, full width. unity: flex-wrap + flex-grow */
+.tapc:not(.look-playful) .ds-btns.grid2{display:flex;flex-wrap:wrap-reverse}   /* stacked: the main button on top */
+.tapc:not(.look-playful) .ds-btns.grid2 .ds-btn{width:auto;flex:1 1 auto}
+.tapc:not(.look-playful) .ds-btns.grid2 .ds-btn.main{flex-grow:1.4}
+
+/* the full card in landscape: a 52 % strip of photo over text that was cut off (no scroll). Two columns: the photo at full height on the left,
+   the story scrolling on the right. unity: a row VisualElement + a ScrollView */
+.tapc:not(.look-playful).land .tv.tv-card{display:grid;grid-template-columns:46% minmax(0,1fr)}
+.tapc:not(.look-playful).land .tv.tv-card>div:first-child{height:auto!important}
+.tapc:not(.look-playful).land .tv.tv-card>div:nth-child(2){overflow-y:auto;scrollbar-width:none;padding:calc(56 * var(--P)) calc(64 * var(--P)) calc(24 * var(--P)) calc(28 * var(--P))!important}
+.tapc:not(.look-playful):not(.land) .tv.tv-card{overflow-y:auto}

@@ -1,0 +1,715 @@
+{
+ "errors": [],
+ "checks": {
+  "every editor section starts collapsed": {
+   "ok": true,
+   "info": ""
+  },
+  "region styles = 9": {
+   "ok": true,
+   "info": ""
+  },
+  "precision chips in cm": {
+   "ok": true,
+   "info": ""
+  },
+  "fill modes = 6": {
+   "ok": true,
+   "info": ""
+  },
+  "focus presets include appear": {
+   "ok": true,
+   "info": ""
+  },
+  "levels layers P R T M": {
+   "ok": true,
+   "info": ""
+  },
+  "categories editable": {
+   "ok": true,
+   "info": ""
+  },
+  "draw a polygon adds a shape": {
+   "ok": true,
+   "info": ""
+  },
+  "undo removes it": {
+   "ok": true,
+   "info": ""
+  },
+  "shape media select for the door": {
+   "ok": true,
+   "info": ""
+  },
+  "content for actions: model moments": {
+   "ok": true,
+   "info": ""
+  },
+  "tap shows the app default style on the wall (Immersive, buttons inside)": {
+   "ok": true,
+   "info": ""
+  },
+  "focus set on the church": {
+   "ok": true,
+   "info": ""
+  },
+  "tap wall deselects": {
+   "ok": true,
+   "info": ""
+  },
+  "wall life kinds K1..K6 present": {
+   "ok": true,
+   "info": ""
+  },
+  "shutters open on focus": {
+   "ok": true,
+   "info": ""
+  },
+  "app main: edge arrow": {
+   "ok": true,
+   "info": ""
+  },
+  "app tapped: Hub uses the app default (Immersive)": {
+   "ok": true,
+   "info": ""
+  },
+  "a level can pick its own style (Detail \u2192 Minimal)": {
+   "ok": true,
+   "info": ""
+  },
+  "radial: 4 buttons + more": {
+   "ok": true,
+   "info": ""
+  },
+  "app tapped: the tag is shown": {
+   "ok": true,
+   "info": ""
+  },
+  "layout tap_layout_1 renders .a-cap": {
+   "ok": true,
+   "info": ""
+  },
+  "layout tap_layout_3 renders .t-imm": {
+   "ok": true,
+   "info": ""
+  },
+  "layout tap_layout_4 renders .t-pan": {
+   "ok": true,
+   "info": ""
+  },
+  "layout tap_layout_5 renders .tiles": {
+   "ok": true,
+   "info": ""
+  },
+  "layout tap_layout_6 renders .s-card .ban": {
+   "ok": true,
+   "info": ""
+  },
+  "action view pano": {
+   "ok": true,
+   "info": ""
+  },
+  "action view then_now": {
+   "ok": true,
+   "info": ""
+  },
+  "action view model_wall": {
+   "ok": true,
+   "info": ""
+  },
+  "action view card": {
+   "ok": true,
+   "info": ""
+  },
+  "favourite toggles": {
+   "ok": true,
+   "info": ""
+  },
+  "demo: a finger taps the POI": {
+   "ok": true,
+   "info": ""
+  },
+  "demo: then the layout opens": {
+   "ok": true,
+   "info": ""
+  },
+  "layouts are one foldout each": {
+   "ok": true,
+   "info": ""
+  },
+  "app explore lists tours+games+moments": {
+   "ok": true,
+   "info": ""
+  },
+  "profile: Kids opens the Playful look (its own tokens over Premium)": {
+   "ok": true,
+   "info": ""
+  },
+  "then & now uses the castle photo": {
+   "ok": true,
+   "info": ""
+  },
+  "off-screen POI shrinks to a pin": {
+   "ok": true,
+   "info": ""
+  },
+  "the pin stays inside the phone": {
+   "ok": true,
+   "info": ""
+  },
+  "editor has the tap behaviour rows": {
+   "ok": true,
+   "info": ""
+  },
+  "device phone_l has its screen shape": {
+   "ok": true,
+   "info": "2.164 vs 2.164"
+  },
+  "device tablet_p has its screen shape": {
+   "ok": true,
+   "info": "0.695 vs 0.695"
+  },
+  "device tablet_l has its screen shape": {
+   "ok": true,
+   "info": "1.439 vs 1.439"
+  },
+  "device phone_p has its screen shape": {
+   "ok": true,
+   "info": "0.462 vs 0.462"
+  },
+  "unproject inverts the projection (side view)": {
+   "ok": true,
+   "info": ""
+  },
+  "floating panels are glued to the wall": {
+   "ok": true,
+   "info": ""
+  },
+  "glued parts move with the wall": {
+   "ok": true,
+   "info": "[357.5931091308594, 328.38385009765625] \u2192 [285.18829345703125, 335.65325927734375]"
+  },
+  "from the side, 10 cm off the wall shows parallax": {
+   "ok": true,
+   "info": "58.7px"
+  },
+  "pointing: off / best 1 / all": {
+   "ok": true,
+   "info": "0/1/4"
+  },
+  "the castle uses its photos; the other POIs their own tile crop (no wrong photo)": {
+   "ok": true,
+   "info": ""
+  },
+  "json preview has the on-tap components": {
+   "ok": true,
+   "info": ""
+  },
+  "device buttons: click again turns it": {
+   "ok": true,
+   "info": "phone_l tablet_p tablet_l"
+  },
+  "no side panel next to the device": {
+   "ok": true,
+   "info": ""
+  },
+  "a level with no style uses the app default": {
+   "ok": true,
+   "info": ""
+  },
+  "region style falls back to the app default": {
+   "ok": true,
+   "info": ""
+  },
+  "POI field override: castle gap 6, rest inherited": {
+   "ok": true,
+   "info": ""
+  },
+  "buttons come from content (no model \u2192 no 3D)": {
+   "ok": true,
+   "info": ""
+  },
+  "a POI can hide a button (castle: no Save)": {
+   "ok": true,
+   "info": ""
+  },
+  "distance to the marker moves the tag away": {
+   "ok": true,
+   "info": "62 \u2192 106 px"
+  },
+  "tag component without picture": {
+   "ok": true,
+   "info": ""
+  },
+  "pointing: how far in metres": {
+   "ok": true,
+   "info": ""
+  },
+  "pointing: how far in degrees": {
+   "ok": true,
+   "info": ""
+  },
+  "base elements preview: every button in the gallery": {
+   "ok": true,
+   "info": ""
+  },
+  "every tag component has its own preview": {
+   "ok": true,
+   "info": ""
+  },
+  "every action component has its own preview": {
+   "ok": true,
+   "info": ""
+  },
+  "icons inside a compact card are full size": {
+   "ok": true,
+   "info": ""
+  },
+  "distance from the wall never moves the marker": {
+   "ok": true,
+   "info": "0.0px"
+  },
+  "floating panel has a glass backing": {
+   "ok": true,
+   "info": ""
+  },
+  "App sections are numbered 0-7": {
+   "ok": true,
+   "info": ""
+  },
+  "dark and light designs give different tags": {
+   "ok": true,
+   "info": "[['rgba(28, 26, 23, 0.96)', 'rgb(246, 241, 232)'], ['rgba(255, 255, 255, 0.94)', 'rgb(20, 17, 13)']]"
+  },
+  "a light-design button colour reaches the buttons": {
+   "ok": true,
+   "info": "rgb(255, 0, 0)"
+  },
+  "the dark design is untouched by a light edit": {
+   "ok": true,
+   "info": ""
+  },
+  "glass blur reaches the surfaces": {
+   "ok": true,
+   "info": ""
+  },
+  "screen card, CTA and wall labels follow the design": {
+   "ok": true,
+   "info": ""
+  },
+  "'Always dark' locks the app to the dark design": {
+   "ok": true,
+   "info": ""
+  },
+  "a tag component can show the buttons inside": {
+   "ok": true,
+   "info": "[0, 4]"
+  },
+  "base elements gallery has a row straight on the wall": {
+   "ok": true,
+   "info": ""
+  },
+  "the default style lives in On-tap styles": {
+   "ok": true,
+   "info": ""
+  },
+  "floating panel post is visible": {
+   "ok": true,
+   "info": ""
+  },
+  "the room around the wall fills the screen": {
+   "ok": true,
+   "info": ""
+  },
+  "tablet UI unit is 1.2\u00d7 the phone's": {
+   "ok": true,
+   "info": ""
+  },
+  "side view: the needle stands on the marker": {
+   "ok": true,
+   "info": "0.6px"
+  },
+  "visitor UI uses no monospace": {
+   "ok": true,
+   "info": ""
+  },
+  "main defaults are calm: search with 'Near \u2026', bar with Azu; no chips, no map": {
+   "ok": true,
+   "info": ""
+  },
+  "main: the filter button opens the lenses": {
+   "ok": true,
+   "info": ""
+  },
+  "main: every part can be shown (chips, chip, map)": {
+   "ok": true,
+   "info": ""
+  },
+  "main: the coach mark sits on a POI": {
+   "ok": true,
+   "info": ""
+  },
+  "main: the coach mark goes after the first tap": {
+   "ok": true,
+   "info": ""
+  },
+  "main: a lens dims the other POIs": {
+   "ok": true,
+   "info": ""
+  },
+  "main: the mini-map window follows the camera": {
+   "ok": true,
+   "info": ""
+  },
+  "main: out of view \u2192 the hint and the mini-map, no pointers": {
+   "ok": true,
+   "info": ""
+  },
+  "main: corners layout keeps the bottom parts clear of the corner buttons": {
+   "ok": true,
+   "info": ""
+  },
+  "main: every part can be switched off": {
+   "ok": true,
+   "info": ""
+  },
+  "main: Pointing is a subsection of Main AR": {
+   "ok": true,
+   "info": ""
+  },
+  "main: every part stays inside the screen on every device": {
+   "ok": true,
+   "info": ""
+  },
+  "demo of a tiles component frames the POI so the card opens": {
+   "ok": true,
+   "info": ""
+  },
+  "\u2026and the tiles show": {
+   "ok": true,
+   "info": ""
+  },
+  "Profiles then Design system open the App tab": {
+   "ok": true,
+   "info": ""
+  },
+  "opening it shows the UI kit": {
+   "ok": true,
+   "info": ""
+  },
+  "tokens reach the components (text size, titles, corners, density, scrim, chip shape, icon line, motion style)": {
+   "ok": true,
+   "info": "[['22.9479px', 'Fraunces, Georgia, serif', '19.1232px', '15.2986px', 'linear-gradient(rgba(0, 0, 0, 0) 30%, rgba(10, 8, 6, 0.596) 62%, rgba(10, 8, 6, 0.85))', '369.174px', '1.5px', 'cubic-bezier(0.22, 1, 0.36, 1)'], ['26.39px', '\"Atkinson Hyperlegible Next\", \"Segoe UI\", system-ui, sans-serif', '7.64929px', '11.4739px', 'linear-gradient(rgba(0, 0, 0, 0) 30%, rgba(10, 8, 6, 0.42) 62%, rgba(10, 8, 6, 0.6))', '4.78081px', '2.25px', 'cubic-bezier(0.34, 1.56, 0.64, 1)']]"
+  },
+  "design-system buttons used everywhere; On tap can override": {
+   "ok": true,
+   "info": ""
+  },
+  "reduced motion removes the springs": {
+   "ok": true,
+   "info": ""
+  },
+  "the depth token sets the shadow": {
+   "ok": true,
+   "info": ""
+  },
+  "every Design system subsection opens its own page on the phone": {
+   "ok": true,
+   "info": "{'Look and mode': 'look', 'Colour': 'colour', 'Type': 'type', 'Spacing and shape': 'space', 'Depth and motion': 'depth', 'Buttons': 'buttons', 'Panels': 'panels', 'Controls': 'controls', 'Lists and messages': 'lists', 'Navigation': 'nav', 'Sheets and dialogs': 'sheets'}"
+  },
+  "Design system: foundations, components, patterns": {
+   "ok": true,
+   "info": ""
+  },
+  "nav bar: tabs switch, a row pushes a page, back returns": {
+   "ok": true,
+   "info": "['Explore', 'Tours', True, 'Explore', True]"
+  },
+  "nav bar settings: destinations, labels, indicator, rail in landscape": {
+   "ok": true,
+   "info": ""
+  },
+  "sheet: three heights from the grabber; a dialog opens and closes": {
+   "ok": true,
+   "info": "['ds-sheet d-half', 'ds-sheet d-full', True, True]"
+  },
+  "controls respond (chip, segment, switch, search)": {
+   "ok": true,
+   "info": ""
+  },
+  "the app's screens use the kit (start, onboarding, explore)": {
+   "ok": true,
+   "info": ""
+  },
+  "every editor section has a demo on the phone (except plans with nothing built and the JSON preview)": {
+   "ok": true,
+   "info": "['Geo-reference', 'Ambient sound', 'config.json (live preview)', 'config.json (live preview)', 'Capture & share']"
+  },
+  "a click inside a section puts the phone on its demo": {
+   "ok": true,
+   "info": ""
+  },
+  "the Unity faces are embedded and used (Fraunces titles, Atkinson body)": {
+   "ok": true,
+   "info": ""
+  },
+  "nothing under 13 pt on the kit pages": {
+   "ok": true,
+   "info": "[]"
+  },
+  "accent is a closed list that sets both designs; the main button is the accent": {
+   "ok": true,
+   "info": ""
+  },
+  "glass: solid = no blur and a dense tint (Unity 6.3)": {
+   "ok": true,
+   "info": ""
+  },
+  "controls are 48 pt high (buttons, search) and chips 32": {
+   "ok": true,
+   "info": ""
+  },
+  "nav bar: Raised lifts the chosen icon into a disc": {
+   "ok": true,
+   "info": ""
+  },
+  "light is the default mode": {
+   "ok": true,
+   "info": ""
+  },
+  "state demos: the wall out of view, the coach mark, a tapped POI off the screen": {
+   "ok": true,
+   "info": ""
+  },
+  "labels toggles reach the links, dock and tiles": {
+   "ok": true,
+   "info": ""
+  },
+  "onboarding off: Start opens the camera": {
+   "ok": true,
+   "info": ""
+  },
+  "section titles stick to the top": {
+   "ok": true,
+   "info": ""
+  },
+  "v17: five point styles, default glass chip": {
+   "ok": true,
+   "info": ""
+  },
+  "v17: levels pick point styles": {
+   "ok": true,
+   "info": ""
+  },
+  "v17: app markers drawn as canvases": {
+   "ok": true,
+   "info": ""
+  },
+  "v17: nine region presets": {
+   "ok": true,
+   "info": ""
+  },
+  "v17: corner smoothing rounds outlines": {
+   "ok": true,
+   "info": ""
+  },
+  "v17: wall ink is the same in light and dark": {
+   "ok": true,
+   "info": ""
+  },
+  "v17: every region style has a demo shape": {
+   "ok": true,
+   "info": ""
+  },
+  "v17: brackets and spotlight presets": {
+   "ok": true,
+   "info": ""
+  },
+  "v17: badge marks differ per status (never colour alone)": {
+   "ok": true,
+   "info": ""
+  },
+  "v17: label sits past its marker": {
+   "ok": true,
+   "info": ""
+  },
+  "v17: corner smoothing rounds a sampled outline": {
+   "ok": true,
+   "info": ""
+  },
+  "v17: the Point styles section previews its style on the wall": {
+   "ok": true,
+   "info": ""
+  },
+  "v17: ranges are sliders (corner, density, icon line)": {
+   "ok": true,
+   "info": ""
+  },
+  "v18: profile bar has look, mode, visitors, time, text": {
+   "ok": true,
+   "info": ""
+  },
+  "v18: a token edited in Playful leaves Premium alone": {
+   "ok": true,
+   "info": ""
+  },
+  "v18: a colour edited in dark leaves light alone; shared tokens follow both": {
+   "ok": true,
+   "info": ""
+  },
+  "v18: back to the base value keeps no difference": {
+   "ok": true,
+   "info": ""
+  },
+  "v18: fields show their scope; Playful marks inherited and own values": {
+   "ok": true,
+   "info": ""
+  },
+  "v18: no light / dark fold pairs left": {
+   "ok": true,
+   "info": ""
+  },
+  "v18: undo keeps the views": {
+   "ok": true,
+   "info": ""
+  },
+  "v18: Quick shows only the top levels on the main screen": {
+   "ok": true,
+   "info": ""
+  },
+  "v18: card text by time, children's text by visitors": {
+   "ok": true,
+   "info": ""
+  },
+  "v18: children: mascot coach line and games first": {
+   "ok": true,
+   "info": ""
+  },
+  "v18: onboarding sets the profile (and the look follows)": {
+   "ok": true,
+   "info": ""
+  },
+  "v18: Settings lets the visitor change everything": {
+   "ok": true,
+   "info": ""
+  },
+  "v18: the Playful font is embedded": {
+   "ok": true,
+   "info": ""
+  },
+  "v18: config.json carries the profiles": {
+   "ok": true,
+   "info": ""
+  },
+  "v18: a POI hidden by Time is not tappable in Play": {
+   "ok": true,
+   "info": ""
+  },
+  "v18: choosing on the phone refreshes the editor's profile": {
+   "ok": true,
+   "info": ""
+  },
+  "v18: the visitor's light / dark does not change the app's default": {
+   "ok": true,
+   "info": ""
+  }
+ },
+ "tabs": {
+  "App": {
+   "headers": [
+    "0 \u00b7 Profiles",
+    "1 \u00b7 Design system",
+    "2 \u00b7 Start",
+    "3 \u00b7 Onboarding",
+    "4 \u00b7 Main AR screen",
+    "5 \u00b7 On tap",
+    "6 \u00b7 Explore menu",
+    "7 \u00b7 Settings and You"
+   ],
+   "rows": 0
+  },
+  "Global": {
+   "headers": [
+    "1 \u00b7 Wall & contentwhat the wall is and what its POIs are",
+    "Wall",
+    "Geo-reference",
+    "Categories",
+    "Text & Fonts",
+    "2 \u00b7 Looksnamed styles, defined once; levels assign them, a POI may pick another",
+    "Point styles",
+    "Region styles",
+    "Tag styles",
+    "Model styles",
+    "3 \u00b7 Levelsthe hub: each level assigns layers, a region style and an on-tap style (or keeps the app defaults)",
+    "Hierarchy Levels",
+    "4 \u00b7 Lifewall-level content that moves; per-POI rows live in each POI",
+    "Wall Life",
+    "Ambient sound",
+    "5 \u00b7 Behaviour on the wallsystems that act on all POIs at once",
+    "Orientation",
+    "LOD",
+    "Zoom",
+    "Displacement",
+    "Select, Filter & Search",
+    "Wayfinding helpers",
+    "6 \u00b7 Test & validate",
+    "Test",
+    "config.json (live preview)"
+   ],
+   "rows": 0
+  },
+  "Specific": {
+   "headers": [
+    "1. Twin-tower church",
+    "1 \u00b7 Identity",
+    "2 \u00b7 Position",
+    "3 \u00b7 Presentation",
+    "4 \u00b7 Content for actions",
+    "5 \u00b7 Card",
+    "2. Domed church",
+    "3. Arched gate",
+    "4. Castle hill",
+    "5. Hilltop convent",
+    "6. Arcaded house",
+    "config.json (live preview)"
+   ],
+   "rows": 0
+  },
+  "Experiences": {
+   "headers": [
+    "Tours & routes",
+    "Moments on the wall",
+    "Games",
+    "Wall layers",
+    "Capture & share"
+   ],
+   "rows": 0
+  },
+  "Decisions": {
+   "headers": [],
+   "rows": 0
+  }
+ },
+ "screens": {
+  "wall": {
+   "nonblank": true,
+   "hud": "SCENE \u00b7 CLICK A SHAPE TO OPEN ITS STYLE"
+  },
+  "style": {
+   "nonblank": true,
+   "hud": "STYLE \u00b7 SOFT GLOW \u00b7 INTRO \u00b7 2 SHAPES"
+  },
+  "precision": {
+   "nonblank": true,
+   "hud": "PRECISION \u00b7 SOFT GLOW \u00b7 HIDES \u22484.0 CM \u00b7 MEASURED 0 CM: HOLDS"
+  },
+  "life": {
+   "nonblank": true,
+   "hud": "SCENE \u00b7 WALL LIFE ANCHORS \u00b7 CLICK ONE TO EDIT IT"
+  },
+  "app": {
+   "phone": true,
+   "device buttons": 2
+  }
+ }
+}

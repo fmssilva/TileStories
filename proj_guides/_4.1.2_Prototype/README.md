@@ -1,64 +1,58 @@
-# _4.1.2 Prototype -- World Design studies (2026-10-29)
+# _4.1.2 Prototype -- the World Editor Lab and its study pages
 
-Design studies the `_4.1` plan is judged on. They are the **reference for look, timing and precision**, not code to port: each
+Prototypes for the World phase (`_4.1`). They are the **reference for look, timing and precision**, not code to port: each
 effect names the Unity mechanism it maps to (`_4.1.1_World_Design_Research.md` section 4).
 
-## Study 1 -- Wall Effects (`Study1_Wall_Effects.html`)
-- **Live version:** https://claude.ai/artifact/NjRLSTLwgv5hWf5Tm9pgAm (private to the developer). The file here is its record;
-  it runs on its own in a browser (the picture is embedded).
-- **Stand-in wall:** a phone photo of the LivingRoom painting (388 x 447 px). Blue and golden strokes are found by colour inside
-  the frame and play buildings ("Cobalt Tower", "Golden Palace", "Navy Gate"); small strokes play windows. The same painting is in
-  the current Immersal map's textured GLB (texture 0, about 850 x 1350 px of a 4096 atlas), so the Unity work can use it too.
-- **Effects:** Selection moment (spotlight + outline draw-on + name with a leader line), Spotlight, Outline draw-on, Breathing
-  glow, Light sweep, Tile reveal (wave from the tap), Windows light up, Lock-on (wall edges + corner marks), Theme glow.
-- **Tweaks:** tempo, alignment error (cm, assuming a 1 m wide painting), dim strength, soft edge, line width, light colour
-  (gold / warm white / cobalt), presence (marker / region / both), reduce motion.
-- **What to judge:** which effects feel premium; the timings; which survive 2-4 cm of error (the precision chip per effect).
+## What is in this folder
 
----
+| File | What it is |
+|---|---|
+| `World_Editor_Lab.html` | **The one current Lab.** One self-contained page: the app on a phone or tablet (left) and a Unity-style POI Editor (right). Built from `lab_src/`; never edit it by hand. Published at https://claude.ai/artifact/AmWUgE6nA9VLY7YeoUB4ir (always republished over that link). |
+| `lab_src/` | The Lab's source: JS and CSS parts, media, build script, tests and review tools. `lab_src/README.md` explains every file and the safety net. |
+| `_archive/` | Snapshots of the source (`lab_src_v19.tgz`, `lab_src_v20.tgz`). |
+| `lab_v12.zip` | An older source snapshot, kept as a record. |
+| `Study1_Wall_Effects.html` | Superseded study: wall effects on a photo of the painting. |
+| `P1_Region_Geometry.html` | Superseded study: drawing and reshaping a region. |
+| `Region_Editor_Lab.html`, `Region Editor Lab_exported.html` | Superseded study: region geometry and style in one Editor-like page. |
 
-## P1 Region Geometry (2026-10-29)
+The study pages are records only. They run on their own in a browser and are not maintained. Their live copies:
+- Study 1: https://claude.ai/artifact/NjRLSTLwgv5hWf5Tm9pgAm
+- P1 Region Geometry: https://claude.ai/artifact/LxjMpnDXQAj1sZ753aHGo5
+- Region Editor Lab: the old account's link, retired.
 
-Live: https://claude.ai/artifact/LxjMpnDXQAj1sZ753aHGo5 · record copy: `P1_Region_Geometry.html`.
-First prototype of the series in `_4.1.3_World_Editor_Spec.md` section 9. It replaces Study 1's colour detection: the author
-draws the shape. On the painting photo, you can:
-- draw a polygon, a path or a rectangle (the rectangle becomes a 4-knot polygon);
-- drag knots, drag a whole shape, and insert a knot with the + handle;
-- set each knot's corner to sharp, rounded (with a radius in cm) or smooth;
-- keep several shapes per POI, with undo and redo and a visitor view.
+## The World Editor Lab
 
-The right-hand panel copies the planned Specific Marker > Region section, and the POI's `world.shapes` JSON updates live. An
-"In Unity" line names the Splines equivalent of each action.
+The page is full height, with no title or text above or below the view. The view has the screen tabs, the device buttons
+(phone, tablet; click again for portrait / landscape), ▶ / ↻, Undo / Redo and a ⌨ button for the shortcuts. The editor
+scrolls on its own. Every screen is seen through the device, with a 3D camera (scroll, drag, Alt+drag, Shift+scroll; see ⌨).
+The wall is the real Grande Panorama de Lisboa, with sample photos of the castle.
 
-Judge: is drawing and reshaping quick enough? Are the three corner types enough? Is the panel organisation right?
+**Screens (left)**
+- **Wall** -- the wall as the visitor sees it (▶) and the Scene view for drawing shapes (Specific Marker).
+- **Style** -- the shapes that use the selected Region Style, looping intro → idle → focus → back.
+- **Precision** -- the selected style at 0, 2, 4 and 6 cm of tracking error, the true contour dashed.
+- **Wall Life** -- the six kinds on the painting; each row's anchor with its K code; ▶ plays the rows on their triggers.
+- **App** -- the app's screens on the phone: Start, Onboarding, Main AR, a tapped POI, Explore, Settings, You, the album,
+  Coming soon.
 
----
+**Editor → screen.** A click or focus anywhere in the editor opens the screen that shows it. Every section has a demo, except
+the plans with nothing built yet.
 
-## Region Editor Lab (P1 + P2 + P3 merged, 2026-10-29)
+**Editor tabs (right)**, above them the profile bar (look, mode, audience, time, text) that switches the visitor profile from
+any tab:
+- **App**: 0 Profiles · 1 Design system (the UI kit) · 2 Start · 3 Onboarding · 4 Main AR (category filter, action bar,
+  pointing) · 5 On tap (base elements, tags, actions, styles, coming soon) · 6 Explore · 7 Settings and You.
+- **Global Scene**: the wall and its content, the looks (point, region, label, tag styles), levels, Wall Life, behaviour, test.
+- **Specific Marker**: per POI: identity, position, presentation (shapes, on tap, alive), content (ready / coming soon), card.
+- **Experiences**: tours and routes, games, wall layers, capture and share.
+- **Decisions**: what is settled and what is open.
 
-Live: https://claude.ai/artifact/MDZ3DZzjDscHEU6dw22Qp6 · record copy: `Region_Editor_Lab.html`. It supersedes P1.
+Two looks: **Premium** (calm glass over the camera) and **Playful** (hand-drawn azulejo, the Azu mascot; ages 7-11).
 
-The developer asked for one prototype that looks like the real POI Editor. Geometry (per POI) and style (per wall) are two
-sides of one thing, and separate prototypes hid how they connect.
-
-Left, the Scene / Game view:
-- Scene tools: Edit, Polygon, Path, Points, Rectangle.
-- ▶ Play shows the reveal (after each level's delay), the idle motion and a tap. A tap runs the focus moment and opens a
-  card-sheet peek.
-
-Right, a Unity-skinned POI Editor:
-- **Global Scene › Region Styles (NEW):**
-  - A styles table with name, preview, precision chip and use count, plus duplicate and delete. Delete is blocked while a
-    style is in use.
-  - For the selected style, foldouts for Line / Vertices / Fill / Motion (Intro, Idle, Focus).
-  - A Test sub-foldout with alignment error and reduce motion.
-- **Global Scene › Hierarchy Levels (EXTENDED):** the Presence and Region style columns.
-- **Specific Marker › POI › Region (NEW):**
-  - Presence and style overrides (the style choice only).
-  - A Shapes table with name, type, a per-shape style, knot count, edit and delete.
-  - Buttons to add a polygon, path, points or rectangle.
-  - A selected-shape foldout with its default corner and the selected knot's corner and radius.
-- A live config.json preview in each tab.
-
-Sample: Golden Palace has 4 shapes (an outline in Facade, a door in Detail, windows as Points in Windows, a cornice path in
-Detail). Cobalt Tower has a smooth outline. Navy Gate is a point plus a dashed "street" path.
+## Where to read more
+- `lab_src/README.md` -- the source, the build, the tests, the Unity lint.
+- `../_4.1.3_World_Editor_Spec.md` (the editor and the Region spec), `../_4.1.4_Wall_Life_Spec.md`,
+  `../_4.1.5_World_Features_Plan.md` (feature map, App screens, On tap).
+- `../_4.1.7_App_Design_System.md`, `../_4.1.8_Markers_And_Regions_Design.md`, `../_4.1.9_Visitor_Profiles.md`,
+  `../_4.1.9b_Playful_Look_Spec.md`, `../_4.1.9d_Unity_Feasibility.md`, `../_4.1.12_Onboarding_Settings_OnTap.md`.
+- `../_4.1.6_Session_Log.md` -- the version history; `../_4.1.13_Handoff.md` -- the current state and what comes next.

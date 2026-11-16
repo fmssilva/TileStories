@@ -1,0 +1,61 @@
+</style></head><body>
+<div class="app">
+  <section class="view" aria-label="Scene and Game view">
+    <div class="vbar">
+      <div class="stabs" role="tablist" id="stabs">
+        <button role="tab" data-screen="wall">Wall</button>
+        <button role="tab" data-screen="style">Style</button>
+        <button role="tab" data-screen="precision">Precision</button>
+        <button role="tab" data-screen="life">Wall Life</button>
+        <button role="tab" data-screen="app">App</button>
+      </div>
+      <div class="devbtns" id="devbtns" role="group" aria-label="Device">
+        <button data-dev="phone" title="Phone · click again: portrait ⇄ landscape"><svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M11 5h2"/></svg></button>
+        <button data-dev="tablet" title="Tablet · click again: portrait ⇄ landscape"><svg viewBox="0 0 24 24"><rect x="4.5" y="2.5" width="15" height="19" rx="2"/><path d="M11 19h2"/></svg></button>
+      </div>
+      <span class="grow"></span>
+      <span class="hud" id="hud"></span>
+      <div class="play"><button id="play" aria-pressed="false" title="Play (Ctrl+P)">▶</button><button id="replay" title="Replay">↻</button></div>
+      <button class="ubtn" id="undo" title="Undo (Ctrl+Z)">Undo</button>
+      <button class="ubtn" id="redo" title="Redo (Ctrl+Shift+Z)">Redo</button>
+      <button class="ubtn" id="keysbtn" aria-pressed="false" title="Keyboard and mouse">⌨</button>
+    </div>
+    <div class="stage" id="stage">
+      <div class="tools" id="tools" role="group" aria-label="Scene tools">
+        <button data-tool="edit">Edit</button>
+        <button data-tool="polygon">Polygon</button>
+        <button data-tool="path">Path</button>
+        <button data-tool="points">Points</button>
+        <button data-tool="rect">Rectangle</button>
+      </div>
+      <div id="devwrap"><canvas id="cv" aria-label="The wall"></canvas></div>
+      <ul class="keys" id="keys" hidden>
+        <li><kbd>Click</kbd> add knot · <kbd>Click 1st knot</kbd> close · <kbd>Enter</kbd> finish · <kbd>Esc</kbd> cancel</li>
+        <li><kbd>Shift</kbd> snap 45° · drag <kbd>+</kbd> insert knot · <kbd>Del</kbd> remove knot · arrows nudge</li>
+        <li><kbd>S</kbd>/<kbd>O</kbd>/<kbd>C</kbd> sharp, rounded, smooth · <kbd>Ctrl+Z</kbd> undo · <kbd>Ctrl+P</kbd> play</li>
+        <li>Camera: <kbd>Scroll</kbd> closer / further · <kbd>Drag</kbd> look around (<kbd>Ctrl</kbd>+drag while editing) · <kbd>Alt</kbd>+drag walk around · <kbd>Shift</kbd>+scroll tilt · <kbd>F</kbd> frame · <kbd>0</kbd> reset</li>
+        <li>Square knot = sharp, rounded square = rounded, circle = smooth, diamond = the marker point</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="ed" aria-label="POI Editor window">
+    <div class="ed-title">POI Editor <span>· Assets/Apps/LivingRoom/config.json · wall mesh 146267-LivingRoom2-tex (GLB)</span></div>
+    <div class="ed-top">
+      <div class="btnrow"><button class="ubtn" disabled>Load &amp; Populate Rig</button><button class="ubtn" disabled>Save All to JSON</button><button class="ubtn" id="eundo">Undo</button><button class="ubtn" id="eredo">Redo</button></div>
+      <div class="pbar" id="pbar" aria-label="Profile being edited and previewed"></div>
+      <div class="tabs" role="tablist">
+        <button role="tab" id="tab-app" style="background:#8A5A1E" title="The app's screens: start, onboarding, main AR screen, what a tap shows">App</button>
+        <button role="tab" id="tab-global" style="background:var(--u-global)">Global Scene</button>
+        <button role="tab" id="tab-specific" style="background:var(--u-specific)">Specific Marker</button>
+        <button role="tab" style="background:var(--u-card)" disabled title="Not part of this prototype">Detail Card</button>
+        <button role="tab" id="tab-exp" style="background:#6B3A55" title="The wall's sequences and layers: tours, games, wall layers">Experiences</button>
+        <button role="tab" style="background:#3E5A6B" disabled title="Not part of this prototype (its own Lab)">Guide</button>
+        <button role="tab" id="tab-lab" style="background:var(--u-lab)" title="Lab only: settled and open decisions">Decisions</button>
+      </div>
+    </div>
+    <div class="ed-body" id="edb"></div>
+  </section>
+</div>
+
+<script>
