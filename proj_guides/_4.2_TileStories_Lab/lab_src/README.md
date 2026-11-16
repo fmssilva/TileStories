@@ -14,6 +14,8 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
   second declarations, defaults set twice, references to the old root `S`: all 0) and the Unity lint (`tools/unity_lint.py`, a
   ratchet per CSS file in `tools/unity_lint_ratchet.json`); either one failing fails the build (`PROTOTYPE_STRUCTURE.md`, "Rules").
 - **Serve:** `python tools/serve.py` serves the Lab's folder on this computer: open http://localhost:8642/lab_src/block-components-lab.html
+  (`LAB_PORT=8643` picks another port: one per copy of the Lab, e.g. a `git worktree` running the full tier beside the next round; the tests,
+  `run_tests.js` and the .ps1 scripts read the same variable. `--ensure` accepts a server only if it serves this folder, else it says which and exits 1.)
   (Ctrl+C stops it). Over http the page loads its `assets/` (the 3D mascot) and reads a picture back from a canvas (Photo of the view, the
   mascot's measured figure); the voice sets and the music (`../voicebench/`, `../music/`) and `keys.local.js` load as from disk. Opened
   by a double-click (`file://`) the page still runs, without the 3D mascot or photos, and the Editor says so on one line. The tests,
@@ -33,7 +35,7 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
      prints) plus `voicebench/out/voicesets.js`, `packs.js` and the packs (`voicebench/out/<set>/pack-N.js`). A publish holds at
      most 255 files and 64 MB; more go in a second publish to the same `url`.
   5. Open the published link: the 3D mascot shows, Ask about the view sends its photo, and no "Open with tools/serve.py" line shows.
-- **Prove it:** `powershell -ExecutionPolicy Bypass -File tests/runtest8.ps1` opens the page headless over the local server with `#selftest`: every option,
+- **Prove it:** (`LAB_PORT` as under Serve: a second copy uses its own port.) `powershell -ExecutionPolicy Bypass -File tests/runtest8.ps1` opens the page headless over the local server with `#selftest`: every option,
   text and demo field must change the phone or be classed behaviour, and every row of every tab has its demo but the named
   exemptions (`ROW_DEMO_EXEMPT`, each with its reason; guidance round 10) (it prints `bad=0` when all is well). It walks the tabs as three walks side by side and sums them (about 14 minutes at round 17b); the texts' walk goes in slices of 20 fields, each its own task, and draws the signature before a field once per tab and language (round 21: it had passed 40 min; `-tabs words` now about 4 min), its JSON pending (INCOMPLETE) until done;
   `-tabs guide` walks one tab (`#selftest=guide`; add `words` for the texts); `-single` is the old one walk, many times slower.

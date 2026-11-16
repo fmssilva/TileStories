@@ -23,7 +23,8 @@ if ($tabs -and $hash -eq "selftest") { $hash = "selftest=$tabs"; $sfx = "_" + ($
 $prof = "edgeprof11$sfx"; $dom = "$d\dom$sfx.txt"; $err = "$d\err$sfx.txt"
 & python "$d\tools\serve.py" --ensure | Out-Null
 if ($LASTEXITCODE) { "The Lab server did not start: python tools/serve.py"; exit 1 }
-$url = "http://localhost:8642/lab_src/block-components-lab.html#$hash"
+$labPort = if ($env:LAB_PORT) { $env:LAB_PORT } else { "8642" }
+$url = "http://localhost:$labPort/lab_src/block-components-lab.html#$hash"
 Remove-Item $dom, $err -ErrorAction SilentlyContinue
 $p = Start-Process -FilePath $edge -ArgumentList @('--headless=new', '--disable-gpu', '--window-size=1400,1500', '--virtual-time-budget=15000', '--enable-logging=stderr', '--v=0', "--user-data-dir=$d\$prof", '--dump-dom', $url) -PassThru -WindowStyle Hidden -RedirectStandardOutput $dom -RedirectStandardError $err
 if (-not $p.WaitForExit($minutes * 60000)) {

@@ -51,7 +51,7 @@ if (arg('changed')) {
   if (!pick.length) { console.log('no test file for this change'); process.exit(shared.length || unmapped.length ? 1 : 0) }
 }
 // the tests open the page over the Lab's local http server (tools/serve.py, tests/pw.js's labUrl): started here once if it is not running
-try { execSync('python "' + path.join(D, 'tools', 'serve.py') + '" --ensure', { stdio: 'pipe' }) } catch (e) { console.log('The Lab server did not start: python tools/serve.py ' + String(e.stdout || '')); process.exit(1) }
+try { execSync('python "' + path.join(D, 'tools', 'serve.py') + '" --ensure', { stdio: 'pipe' }) } catch (e) { console.log('The Lab server did not start (LAB_PORT ' + (process.env.LAB_PORT || 8642) + '): python tools/serve.py ' + String(e.stdout || '')); process.exit(1) }
 const tests = all.filter(f => !pick.length || pick.includes(f));
 const res = {};
 const run = t => new Promise(done => {

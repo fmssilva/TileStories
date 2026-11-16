@@ -1,7 +1,7 @@
 // test10c (Playwright + the installed Edge): node test10c.js -> PASS/FAIL per check. Merge round P1a.1: the Lab's local http server
 // (tools/serve.py) and the assets out of the page (build.py: the page, its pictures in assets/, the 3D mascot's models and thumbnails in
 // assets/mascot/).
-// [http] the page comes over http://localhost:8642/lab_src/ and is under 5 MB; every assets/ file it names answers.
+// [http] the page comes over http://localhost:$LAB_PORT/lab_src/ (default 8642) and is under 5 MB; every assets/ file it names answers.
 // [glb] the 3D mascot's model loads over http (fetched, parsed, drawn); [photo] Photo of the view reads its canvas back (a JPEG);
 // [figure] guidance/present.js measures the mascot's picture (its thumbnail's pixels, not the whole box); [local] over the local
 //   server the page is on this computer (labLocal: the keys, the private voice sets and the MP3s as from disk).
@@ -24,7 +24,7 @@ const fileUrl = 'file:///' + path.join(__dirname, '..', 'block-components-lab.ht
 
   // ---------- [http] ----------
   const loc = await p.evaluate(() => location.href.split('#')[0]);
-  ok('[http] the page comes from the local server and is under 5 MB', loc === 'http://localhost:8642/lab_src/block-components-lab.html' && pageBytes > 1e6 && pageBytes < 5e6, { loc, MB: +(pageBytes / 1e6).toFixed(2) });
+  ok('[http] the page comes from the local server and is under 5 MB', loc === 'http://localhost:' + (Number(process.env.LAB_PORT) || 8642) + '/lab_src/block-components-lab.html' && pageBytes > 1e6 && pageBytes < 5e6, { loc, MB: +(pageBytes / 1e6).toFixed(2) });
   const named = await p.evaluate(async () => { const html = document.documentElement.outerHTML, list = [...new Set(html.match(/assets\/[\w./-]+\.(?:jpg|png|glb)/g) || [])];
     const st = await Promise.all(list.map(a => fetch(a, { method: 'HEAD' }).then(r => r.status).catch(() => 0))); return list.map((a, i) => [a, st[i]]) });
   ok(`[http] every assets/ file the page names answers (${named.length}: the pictures, the 5 models, their thumbnails)`, named.length >= 16 && named.every(x => x[1] === 200) && named.filter(x => /\.glb$/.test(x[0])).length === 5, named.filter(x => x[1] !== 200));
