@@ -1,0 +1,10 @@
+Frente	Feito	Falta
+Triagem e encaminhamento	Encaminhamento pelo domínio do caso, com tabela fechada de guias; os orçamentos vão primeiro para o worker de orçamentos; os 5 lotes da triagem tratados	Uma triagem nova, para testar tudo de ponta a ponta
+Caixa de entrada	32 conversas marcadas «Arquivo Admin», com a etiqueta do caso; a regra já junta as duas etiquetas	Arquivares tu; registar 2 conversas sem caso (Tranquilidade 5C e Kone); 21 conversas ficaram na caixa por dúvida
+Rascunhos	Todos revistos; os 7 antigos do Gmail estão na folha; marcação automática de «Enviado»; registo automático do email enviado; fecho dos emails e parágrafos pelo script	Colar o rascunhos.gs novo e ver o fim do rsTeste; refazer o R0031 (Sofia) e a adjudicação do gás ao ISQ
+Resumos dos casos	10 casos com resumo (5 ontem, 5 hoje); a consulta do resumo já traz só o que é do caso; a conferência é curta	Dividir o caso Chaminés e gás em dois
+Limpeza das tarefas	4 casos revistos (Chaminés e gás, Dívidas, Instalação de água, 6A); prazos e decisões tuas registados	Apólice partes comuns, Vistoria elétrica, e depois os outros casos com tarefas vencidas
+Painel	—	Atualizá-lo a partir das Tarefas e dos Casos, no fim da limpeza das tarefas
+Contas e dívidas	Os 6 envios de 12/11 já registados no diário; rascunho à 1B pronto com ⚠️; o pacote do worker de contas tem as regras da Propagar	Encolher a consulta de cobrança da 1B, que ainda tem 578 mil caracteres (um construtor está nisto); acertar os prazos das 2.as notificações (T1246, T1247); pacote do worker de contas grande, com 131 mil
+Propagar (tarefas e diários em Sim)	Script corrigido: as diferenças desceram de 16 para 5; regras das colunas completas	Corrigir as 21 linhas antigas com erro e conferires 2 ou 3 vezes antes de passar a Sim
+Processo e eficiência	Limite de tamanho na consulta, registo passo a passo, tarefas mínimas sem briefing, retorno com as chamadas por tipo, contacto só pela chave	A consulta de orçamentos ainda é pesada (até 673 mil); 2 melhorias da consulta do resumo ficaram por fazer

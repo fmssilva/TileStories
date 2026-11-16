@@ -28,7 +28,7 @@ async def main(states, devs):
             for (lk, m, tx) in PROFILES:
                 for dv in devs:
                     vis = "children" if lk == "playful" else "adults"
-                    await pg.evaluate(f"(()=>{{ui.device='{dv}';buildDevice();setScreen('app');D.app.appearance='{m}';ui.appearance='{m}';ui.forceMode=null;D.profile.appearance=null;D.profile.visitors='{vis}';D.profile.look='{lk}';D.profile.time='classic';D.profile.text='{tx}';lookCache=null;ui.coachDone=true;ui.compPreview=null;ui.previewLayout=null;tapState.view=null;{ST[st]}renderPhone();}})()")
+                    await pg.evaluate(f"(()=>{{ui.device='{dv}';buildDevice();setScreen('app');D.app.appearance='{m}';ui.appearance='{m}';ui.forceMode=null;D.profile.appearance=null;D.profile.visitors='{vis}';D.profile.look='{lk}';D.profile.time='classic';D.profile.text='{tx}';ui.coachDone=true;ui.compPreview=null;ui.previewLayout=null;tapState.view=null;{ST[st]}renderPhone();}})()")
                     await pg.wait_for_timeout(250)
                     r = await pg.evaluate(CHECK)
                     if r: n += len(r); print(f"{st} {lk}/{m}/{tx} {dv}:"); [print("   ", x) for x in r]

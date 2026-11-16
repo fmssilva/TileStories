@@ -1,7 +1,5 @@
 /* ---------- App: the app's screens on a phone (start, onboarding, main AR screen, a tapped POI, the Explore menu) ---------- */
-const STEPS = [["start", "1 · Start"], ["onboarding", "3 · Onboarding"], ["main", "4 · Main AR screen"], ["tapped", "4 · A POI tapped"], ["explore", "6 · Explore menu"], ["settings", "7 · Settings"], ["you", "7 · You"], ["album", "8 · Tile album (7–11)"]];
 let phoneEls = null;
-const ACT_ICON = { card: "▤", model_wall: "◆", model_screen: "◇", pano: "◎", map: "⌖", then_now: "◐", play: "▶", ask: "✦", navigate: "➜", favourite: "♡", share: "⇪", tour: "⋯", quiz: "?" };
 
 /* where the label sits beside a marker on the phone: the style's side, past the marker's own size */
 function lblPos(P, flip, up) {   // up: a "below" label near the bottom edge goes above the marker;   // measured from the marker's centre: past its radius, its status ring and a 6 pt gap, so a label never covers its own marker
@@ -18,7 +16,7 @@ function renderPhone() {
 }
 function buildPhone(step) {
   const A = D.app, kids = forKids(), go = st => () => { ui.appStep = st; tapState.view = null; renderPhone(); };
-  dev.scr.classList.remove("kids"); dev.scr.classList.add("premium"); for (const k of Object.keys(D.looks)) dev.scr.classList.toggle("look-" + k, activeLook() === k); dev.scr.classList.toggle("kidtone", forKids());
+  dev.scr.classList.remove("kids"); dev.scr.classList.add("premium"); for (const k of Object.keys(D.looks)) dev.scr.classList.toggle("look-" + k, activeLook() === k); 
   dev.glue.replaceChildren(); phoneEls = null;
   applyGlass(dev.scr);
   if (step === "start") { dev.layer.replaceChildren(startScreen(go(A.onboarding.on ? "onboarding" : "main"))); return; }   // built from the Design system

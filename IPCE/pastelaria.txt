@@ -1,0 +1,9 @@
+Puro-açúcar 230 4
+Leite-Condensado 0.1
+Açúcar 0.76
+Farinha 0.12
+Fermento 0.02
+Delícia-compacta 127 2
+Farinha 0.99
+Leite 0.01
+Puro-ar 230 0

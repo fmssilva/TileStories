@@ -126,15 +126,15 @@ print(joao[2])                  # Lisboa
 # Um erro no número e o programa usa a peça errada sem dar erro nenhum.
 
 
-# Podemos usar constantes para "guardar o numero de cada atributo no tuplo)
-# Mas começa-se a aumentar a complexidade e duplicação... 
+# Podemos usar constantes para guardar a posição de cada peça no tuplo,
+# mas a complexidade e a duplicação começam a crescer...
 IDX_NAME = 0
 IDX_YEAR = 1
 IDX_CITY = 2
 IDX_EMAIL = 3
 
-print(maria[IDX_NAME])
-print(joao[IDX_NAME])
+print(maria[IDX_NAME])          # Maria
+print(joao[IDX_NAME])           # João
 
 
 
@@ -160,8 +160,12 @@ print(maria["year"])            # 1990
 #   - não existe um "tipo pessoa": é só um dicionário qualquer
 
 
-# O ideal era consguir definir um tipo de dados que: 
-#       seja fácil de usar e intuitivo
+
+
+
+
+# O ideal era conseguir definir um tipo de dados que:
+#       seja fácil de usar e intuitivo (maria.year em vez de maria[1])
 #       obrigue a ter todos os atributos definidos
 # É exatamente isto que uma classe de dados nos dá:
 
@@ -207,19 +211,23 @@ print(joao)                     # Person(name='João', year=1970, address='Lisbo
 # É um tipo novo, tal como int ou str:
 print(type(maria))              # <class '__main__.Person'>
 
-# Ou seja: 
-# Class == o template onde definimos o nome da class e atributos que deve ter
-# Objeto == as instâncias de entidades reais que são criadas com base no template definido pela class 
+# Ou seja:
+#   classe -> o molde (template): o nome do tipo e os atributos que deve ter
+#   objeto -> cada coisa concreta criada a partir desse molde (maria, joao)
 
 
-#%%
+
+
+
+
+# %%
 # Ler uma peça: objeto.atributo
 print(maria.name)               # Maria
 print(maria.year)               # 1990
 
 # Alterar uma peça: a Maria vai morar para o Algarve
 maria.address = "Faro"
-print(maria)                    # Person(name='Maria', year=1990, address='Faro', email='')
+print(maria.address)            # Faro
 
 
 
@@ -231,6 +239,8 @@ print(maria)                    # Person(name='Maria', year=1990, address='Faro'
 #
 # Nome da classe com maiúscula (Person, Date, CakeShop).
 # É a convenção: assim distingue-se logo de uma função ou variável.
+
+
 
 
 
@@ -255,14 +265,14 @@ for p in people:
 
 # %%
 """
-c) Exercícios: As classes Point e Book [5 min -> 10:38] -------------------------------
+c) Exercícios: As classes Point e Book [4 min -> 10:37] -------------------------------
 
     1. Point
         Definam uma classe de dados Point, com atributos x, y, z (float).
         Criem 2 pontos (objetos dessa classe): (3, 4, 5) e (1, 2, 3).
 
-        Escrevam os 2 pontos completos com todos os atributos.
-        Escrevam só a coordenada x de cada um.
+        Print os 2 pontos completos com todos os atributos.
+        Print só a coordenada x de cada um.
         Mudem o y de cada um para 10 e 20 e voltem a escrever os pontos.
 """
 
@@ -288,7 +298,7 @@ print(p2)                       # Point(x=1, y=2, z=3)
 
 
 # %%
-# (precisa da célula de cima)
+# Print só a coordenada x de cada um (precisa da célula de cima)
 print(p1.x)                     # 3
 print(p2.x)                     # 1
 
@@ -298,7 +308,7 @@ print(p2.x)                     # 1
 
 
 # %%
-# (precisa da célula de cima)
+# Mudar o y de cada um para 10 e 20 (precisa da célula de cima)
 p1.y = 10
 p2.y = 20
 print(p1)                       # Point(x=3, y=10, z=5)
@@ -320,6 +330,7 @@ print(p2)                       # Point(x=1, y=20, z=3)
        Criem dois livros com páginas diferentes
        Print o livro com maior numero de paginas
 """
+
 from dataclasses import dataclass
 
 @dataclass
@@ -331,10 +342,10 @@ class Book:
 b1 = Book("Os Maias", "Eça de Queirós", 600)
 b2 = Book("Mensagem", "Fernando Pessoa", 100)
 
-if b1.pages > b2.pages:
-    print(b1.title)             # Os Maias
+if b1.pages >= b2.pages:
+    print(b1)                   # Book(title='Os Maias', author='Eça de Queirós', pages=600)
 else:
-    print(b2.title)
+    print(b2)
 
 # Reparem: o b1.pages é um int normal.
 # Tudo o que já sabem fazer com int (comparar, somar...) funciona igual.
@@ -346,7 +357,7 @@ else:
 
 # %%
 """
-d) Funções para a classe de dados [8 min -> 10:46] -------------------------
+d) Funções para a classe de dados [8 min -> 10:45] -------------------------
 
     A classe é um tipo de dados e só guarda os atributos que definem um objeto.
 
@@ -355,7 +366,7 @@ d) Funções para a classe de dados [8 min -> 10:46] -------------------------
         a str tem len(), o + que junta, os [ ] para ir buscar um carácter
         a list tem len(), append(), sort()...
 
-    Os nossos tipos também podem, e normalmente devem, ter as suas póprias funções associadas. 
+    Os nossos tipos também podem, e normalmente devem, ter as suas próprias funções.
     Então escrevemos as funções que fazem sentido para eles.
     Por exemplo, para o Point: a distância entre dois pontos, duplicar um ponto, mover um ponto...
 
@@ -396,15 +407,37 @@ def point_move_new(p: Point, dx: float, dy: float) -> Point:
 p1 = Point(0, 0)
 p2 = Point(3, 4)
 
+print(p1)                       # Point(x=0, y=0)
+print(p2)                       # Point(x=3, y=4)
+
+
+
+
+
+
+# %%
 # usar as funções:
 print(point_distance(p1, p2))   # 5.0
 
-print(p1)                       # Point(x=0, y=0)
+p5 = point_duplicate(p2)
+print(p5, p5 == p2, p5 is p2)   # Point(x=3, y=4) True False   igual em valor, mas outro ponto
 
+
+
+
+
+
+# %%
 p3 = point_move_in_place(p1, 10, 0)
 print(p1)                       # Point(x=10, y=0)   o próprio p1 mudou!
 print(p3)                       # None   a função não devolve nada (-> None)
 
+
+
+
+
+
+# %%
 p4 = point_move_new(p1, 10, 0)
 print(p4)                       # Point(x=20, y=0)   um ponto novo
 print(p1)                       # Point(x=10, y=0)   o p1 ficou igual
@@ -426,7 +459,7 @@ print(p1)                       # Point(x=10, y=0)   o p1 ficou igual
 
 # %%
 """
-e) Valor por omissão e argumentos com nome [3 min -> 10:49] ----------------
+e) Valor por omissão e argumentos com nome [3 min -> 10:48] ----------------
 """
 
 from dataclasses import dataclass
@@ -444,28 +477,45 @@ class Point:
 print(Point("Origem", "O ponto de origem"))
 # Point(name='Origem', description='O ponto de origem', x=0.0, y=0.0, z=0.0)
 
-# Com coordenadas: substituem os valores por omissão
-print(Point("Ponto A", "Um ponto qualquer", 3, 4, 5))
-# Point(name='Ponto A', description='Um ponto qualquer', x=3, y=4, z=5)
 
+
+
+
+
+# %%
+# Com coordenadas: substituem os valores por omissão
+print(Point("Ponto A", "Um ponto qualquer", 3, 4))
+# Point(name='Ponto A', description='Um ponto qualquer', x=3, y=4, z=0.0)   o z ficou o de omissão
+
+
+
+
+
+
+# %%
 # Com o nome dos atributos: aí a ordem já não importa
-print(Point("Ponto B", "Outro ponto qualquer", y=10, x=20, z=30))
+print(Point("Ponto B", "Outro ponto qualquer", y=10, z=30, x=20))
 # Point(name='Ponto B', description='Outro ponto qualquer', x=20, y=10, z=30)
 
+
+
+
+
+
+# %%
 # E só o z, saltando o x e o y:
 print(Point("Ponto C", "Só com altura", z=7))
 # Point(name='Ponto C', description='Só com altura', x=0.0, y=0.0, z=7)
 
-# Os atributos com valor por omissão têm de ficar no FIM da classe.
-# Ou seja, a partir do momento que escrevemos um atributo com nome, 
-# todos os restantes para a direita tem de ter nome:
+# Duas regras parecidas, que não se devem confundir:
+#   1. Na CLASSE, os atributos com valor por omissão ficam no FIM (Erro 4, no fim da aula).
+#   2. Na CHAMADA, a partir do primeiro argumento com nome, todos os seguintes têm nome:
 print(Point("Ponto D", description="Um ponto qualquer", x=3, y=4, z=5))   # certo
+# Point(name='Ponto D', description='Um ponto qualquer', x=3, y=4, z=5)
 
-# Erro (temos atributo sem nome depois de um com nome): 
-# print(Point("Ponto E", description="Um ponto qualquer", 3, 4, 5))   # TypeError: Point() takes no positional arguments after keyword arguments
-# »» SyntaxError: positional argument follows keyword argument
-
-
+# Errado (argumento sem nome depois de um com nome). Descomentem e corram:
+# print(Point("Ponto E", description="Um ponto qualquer", 3, 4, 5))
+# SyntaxError: positional argument follows keyword argument
 
 
 
@@ -498,9 +548,15 @@ d2 = Date(31, 12, 2026)         # outra data, com os mesmos valores
 d3 = d1                         # NÃO cria nada: fica a apontar para o mesmo objeto
 
 print(d1 == d2)                 # True    o @dataclass compara as peças todas
-print(d1 is d2)                 # False   mas são duas datas diferentes
+print(d1 is d2)                 # False   são duas datas diferentes
 print(d1 is d3)                 # True    d1 e d3 são a mesma data
 
+
+
+
+
+
+# %%
 # A prova: mudar o d2 não mexe no d1; mudar o d3 mexe!
 d2.day = 30
 print(d1)                       # Date(day=31, month=12, year=2026)
@@ -529,14 +585,18 @@ print(d1)                       # Date(day=1, month=12, year=2026)
 
     Uma função de PROCURA nem sempre encontra o que procura.
     Nesse caso devolve None: "não há nada para devolver".
-    Quem chama tem de perguntar "é None?" ANTES de usar o resultado.
+
+    Quem chama essa função tem de verificar se recebeu mesmo um objeto
+    ou se recebeu None, ANTES de usar o resultado.
 
     Vamos ver isto já no guião:
-        date_input   devolve None quando a linha vem vazia      (ex 49)
-        cake_shop_find_variety   None quando o bolo não existe  (ex 51)
+        date_input               devolve None quando a linha vem vazia  (ex 49)
+        cake_shop_find_variety   devolve None quando o bolo não existe  (ex 51)
 
     Precisa da Date da célula de cima.
 """
+
+agenda = [Date(30, 10, 2026), Date(1, 1, 2025), Date(31, 12, 2026)]
 
 def dates_first_in_year(dates: list[Date], year: int) -> Date | None:
     """ The first date of that year; None if there is none. """
@@ -545,21 +605,22 @@ def dates_first_in_year(dates: list[Date], year: int) -> Date | None:
             return d                # encontrou: devolve a data
     return None                     # deu a volta toda: não há
 
-agenda = [Date(30, 10, 2026), Date(1, 1, 2000), Date(31, 12, 2026)]
 
-for year in [2000, 1999]:
+for year in [2025, 2026, 1900]:
     d = dates_first_in_year(agenda, year)
     if d is None:
         print(f"Não há datas de {year}.")
     else:
         print(f"Encontrei: {d.day}/{d.month}/{d.year}")
-# Encontrei: 1/1/2000
-# Não há datas de 1999.
+# Encontrei: 1/1/2025
+# Encontrei: 30/10/2026    a primeira de 2026 na lista (não a mais antiga)
+# Não há datas de 1900.
+
 
 # O tipo "-> Date | None" avisa logo quem lê: pode vir uma Date, ou None.
 #
 # E se nos esquecermos de perguntar? Descomentem e corram:
-# print(dates_first_in_year(agenda, 1999).day)
+# print(dates_first_in_year(agenda, 1900).day)
 # AttributeError: 'NoneType' object has no attribute 'day'
 # O None não tem peças: é o erro mais comum com funções de procura.
 #
@@ -568,24 +629,12 @@ for year in [2000, 1999]:
 
 
 
-# E o type(...)? Responde a outra pergunta: DE QUE TIPO é isto?
-print(type(agenda[0]), type(None))  # <class '__main__.Date'> <class 'NoneType'>
-#
-# Em IPCE não se usa o type para validar argumentos:
-# os tipos e as pré-condições dizem o que a função recebe, e quem chama cumpre.
-# Se alguém chamar dates_first_in_year("texto", 2000), o erro é de quem chamou.
-# O None é diferente: não é um engano, é uma resposta prevista ("não encontrei").
-# Por isso esse caso testa-se sempre, com is None.
-
-
-
-
 
 
 
 # %%
 """
-g) EXERCICIO 49 (GUIÃO, Mooshak S) - o tipo Date: o que já vem feito [3 min -> 10:56]
+g) EXERCICIO 49 (GUIÃO, Mooshak S) - o tipo Date: o que já vem feito [3 min -> 10:57]
 
     O guião dá a classe Date e várias funções prontas.
     Corram esta célula ANTES das seguintes: elas usam estas funções.
@@ -656,9 +705,7 @@ print(date_is_valid(Date(31, 4, 2026)))         # False   abril tem 30 dias
 #   - durations começa com None: assim durations[1] é janeiro, sem fazer -1.
 #   - date_input devolve None para dizer "não há data" (linha vazia).
 #     O tipo "-> Date | None" diz isso mesmo: devolve uma Date OU None.
-#   - Para perguntar "é None?" usa-se "is None" (e "is not None"), não "== None".
-#     O == pode ser redefinido por quem escreve uma classe; o "is" não.
-#     (o Python não se queixa do == None, mas a convenção é o is)
+#   - Para perguntar "é None?" usa-se "is None" (secção f)).
 #   - date_is_valid está partida em várias linhas: os parênteses à volta deixam.
 
 
@@ -668,7 +715,7 @@ print(date_is_valid(Date(31, 4, 2026)))         # False   abril tem 30 dias
 
 # %%
 """
-h) EXERCICIO 49 (GUIÃO) - date_is_less [6 min -> 11:02] --------------------
+h) EXERCICIO 49 (GUIÃO) - date_is_less [6 min -> 11:03] --------------------
 
     Precisa da célula g) (corram-na primeiro).
 
@@ -693,6 +740,11 @@ print(date_is_less(Date(1, 1, 2027), Date(31, 12, 2026)))    # False
 print(date_is_less(Date(5, 5, 2026), Date(5, 5, 2026)))      # False   igual não é menor
 
 
+
+
+
+
+# %%
 # Encontrem o bug nesta versão "mais curta":
 def date_is_less_bug(dt1: Date, dt2: Date) -> bool:
     """ Does one date come before the other? (with a bug!) """
@@ -717,7 +769,7 @@ print(date_is_less_bug(Date(30, 1, 2026), Date(1, 2, 2026)))  # False   errado!
 
 # %%
 """
-i) EXERCICIO 49 (GUIÃO) - date_order_in_year [6 min -> 11:08] --------------
+i) EXERCICIO 49 (GUIÃO) - date_order_in_year [5 min -> 11:08] --------------
 
     Precisa da célula g).
 
@@ -770,32 +822,48 @@ j) EXERCICIO 49 (GUIÃO) - date_next e date_prev [12 min -> 11:20] ----------
 def date_next(dt: Date) -> Date:
     """ The following day.
         Precondition: date_is_valid(dt) """
-    if dt.day < date_month_length(dt.month, dt.year):
+    if dt.day == 31 and dt.month == 12:
+        return Date(1, 1, dt.year + 1)                  # 31 de dezembro: vira o ano
+    elif dt.day == date_month_length(dt.month, dt.year):
+        return Date(1, dt.month + 1, dt.year)           # último dia do mês: vira o mês
+    else:
         return Date(dt.day + 1, dt.month, dt.year)      # caso normal
-    elif dt.month < 12:
-        return Date(1, dt.month + 1, dt.year)           # último dia do mês
-    else:
-        return Date(1, 1, dt.year + 1)                  # 31 de dezembro
 
-def date_prev(dt: Date) -> Date:
-    """ The previous day.
-        Precondition: date_is_valid(dt) """
-    if dt.day > 1:
-        return Date(dt.day - 1, dt.month, dt.year)      # caso normal
-    elif dt.month > 1:
-        prev_month = dt.month - 1                       # dia 1: vai para o fim do mês anterior
-        return Date(date_month_length(prev_month, dt.year), prev_month, dt.year)
-    else:
-        return Date(31, 12, dt.year - 1)                # 1 de janeiro
 
 print(date_as_str(date_next(Date(30, 10, 2026))))   # 31/10/2026
 print(date_as_str(date_next(Date(31, 10, 2026))))   # 1/11/2026
 print(date_as_str(date_next(Date(31, 12, 2026))))   # 1/1/2027
+
+
+
+
+
+
+# %%
+def date_prev(dt: Date) -> Date:
+    """ The previous day.
+        Precondition: date_is_valid(dt) """
+    res = Date(dt.day, dt.month, dt.year)   # uma CÓPIA: assim podemos alterá-la à vontade
+    if res.day > 1:
+        res.day -= 1                                    # caso normal
+    elif res.month > 1:
+        res.day = date_month_length(res.month - 1, res.year)   # dia 1: fim do mês anterior
+        res.month -= 1
+    else:
+        res.day = 31                                    # 1 de janeiro: 31/12 do ano anterior
+        res.month = 12
+        res.year -= 1
+    return res
+
 print(date_as_str(date_prev(Date(1, 3, 2024))))     # 29/2/2024
 print(date_as_str(date_prev(Date(1, 3, 2026))))     # 28/2/2026
 print(date_as_str(date_prev(Date(1, 1, 2026))))     # 31/12/2025
 
 # Testem sempre as viragens: o caso normal quase nunca tem o bug.
+#
+# O date_next cria logo a data certa em cada caso; o date_prev faz uma cópia
+# e altera a cópia. As duas maneiras devolvem uma data NOVA: o dt fica igual.
+# (são as duas da solução oficial; o importante é nunca alterar o próprio dt)
 
 
 
@@ -907,12 +975,19 @@ def circle_intersection(c1: Circle, c2: Circle) -> bool:
 
 
 # Criar e usar círculos
-c = Circle(Point(0, 0), 5)
+p1 = Point(0, 0)
+c = Circle(p1, 5)
 print(c)                        # Circle(center=Point(x=0, y=0), radius=5)
 print(c.center)                 # Point(x=0, y=0)
 print(c.center.x)               # 0       lê-se da esquerda para a direita: o x do centro do c
 print(c.radius)                 # 5
 
+
+
+
+
+
+# %%
 print(round(circle_area(c), 2))         # 78.54
 print(round(circle_perimeter(c), 2))    # 31.42
 print(circle_intersection(c, Circle(Point(8, 0), 2)))   # False   distância 8 > 5 + 2
@@ -928,7 +1003,8 @@ print(c)                        # Circle(center=Point(x=2, y=0), radius=5)
 
 
 
-#%%
+
+# %%
 # Molde do Polygon (polígono)
 @dataclass
 class Polygon:
@@ -1023,29 +1099,36 @@ def dates_print(ds: Dates) -> None:
     for d in ds.dates:
         print(d)
 
+
+
 def dates_len(ds: Dates) -> int:
     """ Number of dates in the sequence. """
     return len(ds.dates)
 
+
 def dates_maximum(ds: Dates) -> Date:
     """ The maximum.
         Precondition: dates_len(ds) > 0 """
-    max = ds.dates[0]           # começar com uma data que existe mesmo
+    max_date = ds.dates[0]
     for d in ds.dates:
-        if date_is_less(max, d):    # o d é maior do que o max?
-            max = d
-    return max
+        if date_is_less(max_date, d):
+            max_date = d
+    return max_date
 
 def dates_minimum(ds: Dates) -> Date:
     """ The minimum.
         Precondition: dates_len(ds) > 0 """
-    min = ds.dates[0]
+    min_date = ds.dates[0]
     for d in ds.dates:
-        if date_is_less(d, min):    # o d é menor do que o min?
-            min = d
-    return min
+        if date_is_less(d, min_date):
+            min_date = d
+    return min_date
 
-ds = Dates([Date(30, 10, 2026), Date(1, 1, 2000), Date(31, 12, 2026)])
+
+
+ds = Dates( [    Date(30, 10, 2026),
+                 Date(1, 1, 2000),
+                 Date(31, 12, 2026)])
 print(dates_len(ds))                        # 3
 print(date_as_str(dates_maximum(ds)))       # 31/12/2026
 print(date_as_str(dates_minimum(ds)))       # 1/1/2000
@@ -1077,9 +1160,27 @@ c) EXERCICIO 49 (GUIÃO) - a UI e o main [5 min -> 12:00] -------------------
         - o que o programa tem de lembrar (aqui as datas, no 51 a loja)
           fica guardado num sítio só: o objeto ui
 
-    Inputs para experimentar:
-        30/10/2026, 1/1/2000, 31/12/2026, e uma linha vazia
-        (e depois corram outra vez só com uma linha vazia)
+    Definimos a classe de dados UI com uma função ui_run que:
+        - Leia uma sequência de datas.
+        - Se a sequência for vazia, diz que não há datas.
+        - Caso contrário escreve: data máxima, data mínima, posição da data máxima no ano, dia seguinte da data máxima, dia anterior da data máxima.
+
+    Exemplo de execução
+        Introduza uma data por linha, tudo terminado por uma linha vazia:
+        D/M/Y:
+        Não há datas!
+
+    Exemplo de execução
+        Introduza uma data por linha, tudo terminado por uma linha vazia:
+        D/M/Y: 30/10/2026
+        D/M/Y: 1/1/2000
+        D/M/Y: 31/12/2026
+        D/M/Y:
+        Data máxima: 31/12/2026
+        Data mínima: 1/1/2000
+        Ord max: 365
+        Next max: 1/1/2027
+        Prev max: 30/12/2026
 """
 
 ############# type UI #############
@@ -1190,8 +1291,22 @@ print(l)                        # [1, 2, 3]   a própria lista mudou
 """
 e) EXERCICIO 50 (GUIÃO, Mooshak T) - Frações: rational_normalize [8 min -> 12:12]
 
+    Escreva um programa que faça contas com números racionais (frações).
+    O programa deve suportar as quatro operações básicas +, -, *, /.
+    Escreva o programa sem recorrer a nenhum tipo existente ou a uma biblioteca existente.
+
+    O resultado de qualquer operação deve ser uma fração simplificada e normalizada.
+    Isto consegue-se dividindo tanto o numerador como o denominador pelo maior divisor comum.
+    Além disso, a normalização deve também garantir que apenas o numerador pode ser negativo.
+
+    Escreva o programa usando duas classes de dados:
+        Uma classe de dados Rational que implementa o tipo das frações.
+        Uma classe de dados UI (user interface) que implementa a interação com o utilizador. Esta classe de dados preocupa-se apenas com a interação com o utilizador, e recorre à outra classe de dados para todos os aspetos lógicos dos números racionais.
+
+
     Uma fração está na forma normal quando:
-        1. está simplificada: numerador e denominador divididos pelo maior divisor comum
+        1. está simplificada: numerador
+           e denominador divididos pelo maior divisor comum
            6/4 -> 3/2
         2. só o numerador pode ser negativo
            3/-5 -> -3/5      -30/-50 -> 3/5
@@ -1235,10 +1350,18 @@ def rational_is_zero(r: Rational) -> bool:
         Precondition: rational_is_valid(r) """
     return r.num == 0
 
+
+
+
+
+
+# %%
 def rational_normalize(r: Rational) -> Rational:
     """ Put the rational in the normal form.
         Precondition: r.den != 0 """
-    g = gcd(abs(r.num), abs(r.den))     # abs: o gcd só aceita números >= 0
+    # ATENÇÃO: o gcd do guião só aceita números >= 0 (pré-condição).
+    # Com um número negativo, o while do gcd nunca acaba. Daí o abs.
+    g = gcd(abs(r.num), abs(r.den))
     num = r.num // g
     den = r.den // g
     if den < 0:                 # o sinal passa para o numerador
@@ -1246,11 +1369,13 @@ def rational_normalize(r: Rational) -> Rational:
         den = -den
     return Rational(num, den)
 
+
 def rational_create(num: int, den: int) -> Rational:
     """ Simplify rational number.
         Precondition: den != 0
     """
     return rational_normalize(Rational(num, den))
+
 
 print(rational_as_str(rational_create(6, 4)))       # 3/2
 print(rational_as_str(rational_create(3, -5)))      # -3/5
@@ -1260,12 +1385,15 @@ print(gcd(30, 50), gcd(0, 4))                       # 10 4
 
 # Porquê o abs?
 # O gcd do guião só funciona com números >= 0 (é a pré-condição).
+# Sem abs: rational_create(3, -5) ou rational_create(-30, -50) nunca acabam.
 # Com gcd(-30, -50): -30 > -50, então m -= n dá 20; depois 20 > -50 dá 70...
 # o m nunca chega ao n: um while que nunca acaba (aula 7!).
 # E -30/-50 é precisamente um dos exemplos do guião.
 #
 # E o zero? gcd(0, 7) dá 7, e 0 // 7 = 0, 7 // 7 = 1: fica 0/1, como deve.
 # (numa versão antiga do guião, o gcd(0, ...) também nunca acabava)
+# (a solução oficial, com classes, tem o abs DENTRO do seu gcd; o guião tirou-o
+#  de lá, por isso aqui o abs vai na chamada)
 #
 # O // aqui é seguro: o g divide os dois certinho, por isso não há arredondamentos.
 # E o normalize devolve uma fração NOVA: não mexe no r.
@@ -1286,7 +1414,10 @@ f) EXERCICIO 50 (GUIÃO) - as 4 operações e a UI [8 min -> 12:20] -----------
         a/b - c/d = (a*d - c*b) / (b*d)
         a/b * c/d = (a*c) / (b*d)
         a/b / c/d = (a*d) / (b*c)        (multiplicar pelo inverso)
+
     Depois é só criar com rational_create, que normaliza.
+    (com Rational(...) direto o resultado não fica normalizado:
+     -30/-50 * 1/1 dava -30/-50 em vez de 3/5)
 
     Inputs para experimentar (um de cada vez):
         3/5 + 2/1      ->  13/5
@@ -1322,11 +1453,36 @@ a = Rational(1, 2)
 b = Rational(1, 3)
 print(rational_as_str(rational_add(a, b)))      # 5/6
 print(rational_as_str(rational_sub(a, b)))      # 1/6
+print(rational_as_str(rational_mul(a, b)))      # 1/6
 print(rational_as_str(rational_div(a, Rational(-1, 4))))    # -2/1
 print(a, b)                     # Rational(num=1, den=2) Rational(num=1, den=3)   não mudaram
 
 
-#########   User Interface   #########
+
+
+
+
+# %%
+"""
+    EXERCICIO 50 (GUIÃO) - a UI (continuação da secção f)
+
+    Precisa das células e) e f).
+
+    User Interface
+    Escreva uma classe de dados UI (user interface) que implementa a interação com o utilizador. Esta classe de dados preocupa-se apenas com a interação com o utilizador, e recorre à outra classe de dados para todos os aspetos lógicos dos números racionais.
+
+    Exemplo de execução
+        A/B OP C/D: 3/5 + 2/1
+        13/5
+
+    Exemplo de execução
+        A/B OP C/D: -30/-50 * 1/1
+        3/5
+
+    Exemplo de execução
+        A/B OP C/D: 2/5 / 1/2
+        4/5
+    """
 
 # No validation here. We are assuming all the inputs are valid (to simplify).
 
@@ -1334,10 +1490,12 @@ print(a, b)                     # Rational(num=1, den=2) Rational(num=1, den=3) 
 class UI:    # User Interface.
     pass     # no attributes
 
+
 def ui_make_rational(s: str) -> Rational:
     """ Create a rational number from the format: 'n/d'. """
     n, d = s.split('/')
     return Rational(int(n), int(d))
+
 
 def ui_process_input(s: str) -> tuple[Rational, str, Rational]:
     """ Process the format: 'n/d op n/d'. """
@@ -1345,6 +1503,7 @@ def ui_process_input(s: str) -> tuple[Rational, str, Rational]:
     x = ui_make_rational(r1)
     y = ui_make_rational(r2)
     return (x, op, y)
+
 
 def ui_eval_input(s: str) -> Rational | None:
     """ Decode the input and perform the operation. """
@@ -1359,6 +1518,7 @@ def ui_eval_input(s: str) -> Rational | None:
         return rational_div(x, y)
     else:
         return None
+
 
 def ui_run() -> None:
     """ Run the user interface. """
@@ -1404,15 +1564,42 @@ main()
 """
 g) EXERCICIO 51 (GUIÃO, Mooshak U) - Pastelaria: CakeVariety [9 min -> 12:29]
 
-    Uma pastelaria tem várias variedades de bolos.
-    Cada variedade tem: nome, quantas unidades há, e a lista dos ingredientes.
-    Cada ingrediente tem: nome e percentagem na receita.
+    A pastelaria tem um stock corrente de bolos.
+    O stock é constituído por várias unidades de cada variedade de bolo.
+    Para cada variedade de bolo é preciso saber quantas unidades estão disponíveis para venda.
+    Neste programa também queremos saber quais são os ingredientes usados para fazer cada variedade de bolo
+    e qual a percentagem de cada ingrediente na receita.
 
-    Quatro data classes, umas dentro das outras:
-        UI
-         └── CakeShop          stock: list[CakeVariety]
-              └── CakeVariety  name, amount, ingredients: list[Ingredient]
-                   └── Ingredient  name, percent
+    O programa funciona assim:
+        Lê o stock inicial a partir do teclado;
+        Pede ao utilizador o nome duma variedade de bolos e o número de unidades pretendidas;
+        Efetua a venda, mostrando a quantidade efetivamente vendida
+            (pode ser inferior à quantidade pedida por falta de stock);
+        Escreve-se ainda o nome do ingrediente principal da variedade de bolo que foi vendida.
+
+
+    Escreva o programa usando quatro classes de dados:
+        Uma classe de dados Ingredient, que provavelmente não precisará de ter nenhum método para além do construtor. Os ingredientes são passivos.
+        Uma classe de dados CakeVariety, com um método que descobre qual o ingrediente principal duma variedade bolos (se não houver ingredientes, retorna None), e outro método para concretizar as alterações internas relativas a uma venda (retorna o número de unidades realmente vendidas, que podem ser menos do que as pedidas).
+        Uma classe de dados CakeShop que guarda o stock numa lista, com um método para descobrir uma variedade de bolo (se não existir, retorna None), e outro método para efetuar a venda duma variedade de bolo (se não existir, retorna None).
+        Uma classe de dados UI (user interface) que implementa a interação com o utilizador. Cria-se apenas uma instância desta classe de dados. Essa instância precisa de guardar uma CakeShop. A classe de dados UI preocupa-se apenas com a interação com o utilizador, respeitando as responsabilidades das outras classes de dados.
+
+        Quatro data classes, umas dentro das outras:
+            UI
+            └── CakeShop            stock: list[CakeVariety]
+                └── CakeVariety     name, amount, ingredients: list[Ingredient]
+                    └── Ingredient  name, percent
+
+        ou seja:
+            Uma pastelaria tem várias variedades de bolos.
+            Cada variedade tem: nome, quantas unidades há, e a lista dos ingredientes.
+            Cada ingrediente tem: nome e percentagem na receita.
+
+    Ao contrário do exercício anterior, que fornece simples operações sobre frações,
+    este programa tem estado interno porque precisa de gerir a situação corrente do stock da pastelaria,
+    o qual pode variar ao longo do tempo.
+    Uma pastelaria é um objeto mutável.
+
 
     Agora:
         cake_variety_main_ingredient -> o ingrediente com maior percentagem
@@ -1444,21 +1631,22 @@ class CakeVariety:
 def cake_variety_main_ingredient(variety: CakeVariety) -> Ingredient | None:
     """ The main ingredient of the recipe of a cake variety. """
     if len(variety.ingredients) == 0:
-        return None
-    main = variety.ingredients[0]
-    for ingr in variety.ingredients:
-        if ingr.percent > main.percent:
-            main = ingr
-    return main
+        return None                         # sem ingredientes: não há principal
+    else:
+        max_ingr = variety.ingredients[0]
+        for ingr in variety.ingredients:
+            if ingr.percent > max_ingr.percent:
+                max_ingr = ingr
+        return max_ingr
 
 def cake_variety_sell(variety: CakeVariety, units: int) -> int:
     """ Sell some units.
         Precondition: units >= 0 """
-    if units > variety.amount:
-        sold = variety.amount   # não há que chegue: vende-se o que há
+    if units <= variety.amount:
+        sold = units                        # há que chegue
     else:
-        sold = units
-    variety.amount -= sold      # ALTERA a variedade: o stock muda mesmo
+        sold = variety.amount               # não há que chegue: vende-se o que há
+    variety.amount -= sold                  # ALTERA a variedade: o stock muda mesmo
     return sold
 
 delicia = CakeVariety("Delícia-compacta", 127,
@@ -1492,19 +1680,6 @@ h) EXERCICIO 51 (GUIÃO) - CakeShop e a UI [9 min -> 12:38] -----------------
 
         cake_shop_find_variety -> procura uma variedade pelo nome (None se não existir)
         cake_shop_sell         -> vende (None se a variedade não existir)
-
-    Input para experimentar (o 1º exemplo do guião, linha a linha):
-        Puro-açúcar 230 4
-        Leite-Condensado 0.1
-        Açúcar 0.76
-        Farinha 0.12
-        Fermento 0.02
-        Delícia-compacta 127 2
-        Farinha 0.99
-        Leite 0.01
-        fim
-        BOLO: Delícia-compacta
-        UNIDADES: 1000
 """
 
 #########   type CakeShop   #########
@@ -1519,19 +1694,18 @@ def cake_shop_size(shop: CakeShop) -> int:
 
 def cake_shop_find_variety(shop: CakeShop, vname: str) -> CakeVariety | None:
     """ Find a cake variety by name. """
-    for variety in shop.stock:
-        if variety.name == vname:
-            return variety      # encontrou: sai logo da função
-    return None                 # deu a volta toda e não encontrou
+    for cake in shop.stock:
+        if cake.name == vname:
+            return cake                     # encontrou: sai logo da função
+    return None                             # deu a volta toda e não encontrou
 
 def cake_shop_sell(shop: CakeShop, vname: str, units: int) -> int | None:
     """ Sell some units of a named cake variety.
         Precondition: units >= 0 """
-    variety = cake_shop_find_variety(shop, vname)
-    if variety is None:
+    cake = cake_shop_find_variety(shop, vname)
+    if cake is None:
         return None
-    return cake_variety_sell(variety, units)
-
+    return cake_variety_sell(cake, units)
 
 # Experiência antes da UI: vender duas vezes na mesma loja.
 shop = CakeShop([CakeVariety("Delícia-compacta", 127, [Ingredient("Farinha", 0.99)])])
@@ -1550,7 +1724,32 @@ print(shop.stock[0].amount)                            # 0
 # desistia logo à primeira variedade que não fosse a certa.
 
 
-#########   User Interface   #########
+"""
+    #########   User Interface   #########
+
+    Exemplo de execução
+        Puro-açúcar 230 4
+        Leite-Condensado 0.1
+        Açúcar 0.76
+        Farinha 0.12
+        Fermento 0.02
+        Delícia-compacta 127 2
+        Farinha 0.99
+        Leite 0.01
+        fim
+        BOLO: Delícia-compacta
+        UNIDADES: 1000
+        Vendidas 127 unidades de Delícia-compacta
+        Ingrediente principal: Farinha
+
+    Exemplo de execução
+        Puro-ar 230 0
+        fim
+        BOLO: Puro-ar
+        UNIDADES: 100
+        Vendidas 100 unidades de Puro-ar
+        Ingrediente principal: Sem ingredientes
+"""
 
 # No validation here. We are assuming all the inputs are valid (to simplify).
 
@@ -1761,10 +1960,10 @@ class Point:
 
 # %%
 """
-    Erro 5: uma gralha no nome do atributo. 
-    
+    Erro 5: uma gralha no nome do atributo.
+
     Este é o pior: NÃO dá erro!!!
-    
+
     Antes de correr: onde mora a Maria?
 """
 
@@ -1778,17 +1977,20 @@ class Person:
     email: str = ""
 
 maria = Person("Maria", 1990, "Coimbra")
-maria.ad_ress = "Faro"          # adress, com um d só!
+maria.ad_ress = "Faro"          # gralha: ad_ress em vez de address!
 
 print(maria.address)            # Coimbra   a mudança não foi para a morada!
 print(maria)                    # Person(name='Maria', year=1990, address='Coimbra', email='')
-
-print(maria.ad_ress)             # AttributeError: 'Person' object has no attribute 'adress'
+print(maria.ad_ress)            # Faro      o Python criou um atributo NOVO, ad_ress
 
 # Ao alterar, o Python não confirma se o atributo existe:
 # criou um atributo NOVO "ad_ress" e a morada ficou igual.
+# E nem o print(maria) o mostra: só mostra os atributos da classe.
 # Se a morada não muda quando devia, procurem uma gralha.
-# (ao LER é diferente: print(maria.adres) já dava AttributeError)
+#
+# Ao LER um atributo que nunca existiu, aí sim dá erro. Descomentem e corram:
+# print(maria.adress)
+# AttributeError: 'Person' object has no attribute 'adress'. Did you mean: 'address'?
 
 
 
@@ -1821,7 +2023,7 @@ print(ana)                      # Person(name='Ana', year='1990', address='Lisbo
 """
     Erro 7: achar que "=" faz uma cópia.
 
-    Não faz. Com objetos é como com as listas:
+    Não faz (é o d3 = d1 da secção f) da 1ª parte). Com objetos é como com as listas:
     várias variáveis (ou parâmetros de funções) podem apontar para o MESMO objeto,
     e uma alteração por qualquer uma delas vê-se em todas.
 

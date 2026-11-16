@@ -13,7 +13,7 @@ async def main(st, devs, profs, expr):
             for dv in devs:
                 vis = "children" if lk == "playful" else "adults"
                 js = (f"(()=>{{ui.device='{dv}';buildDevice();setScreen('app');D.app.appearance='{m}';ui.appearance='{m}';ui.forceMode=null;D.profile.appearance=null;"
-                      f"D.profile.visitors='{vis}';D.profile.look='{lk}';D.profile.time='classic';D.profile.text='{tx}';lookCache=null;ui.coachDone=true;ui.lensOpen=false;"
+                      f"D.profile.visitors='{vis}';D.profile.look='{lk}';D.profile.time='classic';D.profile.text='{tx}';ui.coachDone=true;ui.lensOpen=false;"
                       f"ui.compPreview=null;ui.previewLayout=null;tapState.view=null;ui.cam={{...CAM0}};{STATES[st]}renderPhone();}})()")
                 await pg.evaluate(js); await pg.wait_for_timeout(900)
                 r = await pg.evaluate(expr)

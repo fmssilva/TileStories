@@ -1,0 +1,859 @@
+Delivered-To: condcidpraia370@gmail.com
+Received: by 2002:a05:7301:1289:b0:373:16ee:776c with SMTP id li9csp39695dyb; Mon, 9 Nov 2026 08:22:52 -0800 (PST)
+X-Received: by 2002:a05:600c:4eca:b0:4b8:d17e:da27 with SMTP id 5b1f17b1804b1-4b963c9bdfamr86215795e9.27.1794241372340; Mon, 09 Nov 2026 08:22:52 -0800 (PST)
+ARC-Seal: i=2; a=rsa-sha256; t=1794241372; cv=pass; d=google.com; s=arc-20260327; b=IcNy0fattviYh9cXks1hnC8aYRxJ5xuiG67bYxgd9UjIuHUPV0Z0F2LsXcL66J7sP8 TpuHpcr3uJmqRUg/Vny1My+Oz/qmOK8Hl70CXsbaeHInrn2ywExMioVF5uUEOzsNanWK 01GebVJtRO+4FSUYO3cjO5dKjrzGQgTiIOCB6fMIfzTXpXIS9RbjuP1401KciNyWPoOr 75rZy7qwnNbOxx6DK1BUQvQY1DoPi8zo5NuT8pOm6dno0ZdSCNbGnHsFxWtamaNtmHyJ 5U1HiuaTrY+MsYR2qjUvfqZzBeimKOPxx861VnHWX1aV8Mr7Ic4wKCU/Jax5Atm3GA+e gllw==
+ARC-Message-Signature: i=2; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327; h=content-transfer-encoding:mime-version:user-agent:in-reply-to :references:subject:to:from:message-id:date:dkim-signature; bh=nm3Rt6yp3MdLYHXg+mJ6C+i32Vs6hYKKjY2qqfvdlNo=; fh=RbiwwXFVodh1RWaGLqhxOjlSVI54MKhz5bJx1O+V5mI=; b=WdTUnUb4WMdvjEcrv9yoQZiB1Nx7K+D5N6O8ivCJcuOrUf1oHk0KufmsJ0vyolwSbr qLlGuSil3ooxNVV5/M90DVBFWFkoBPDXewBjVNY1MG5iI7tDMTXyHsECuhMvonFPJe73 3Fzbtpbpp64QDRmxQwpv4v04l5y7BM/u2jJ5MxoDOpsmtLisjKqphBlsheo4FXa7Hv1i kiyDPbDw0G1XxbjyzYoK9Och7toPDrO6oy2RS9YjkeD0V29w1Y5mU+8FwOfra7FQ5Tgs +4kiB2GX7IMUFeWizG/lYkAjG3FObprD1MDy47D30FJc6bWQZoxk/87gVOosATzHi6Ob BTXg==; dara=google.com
+ARC-Authentication-Results: i=2; mx.google.com; dkim=pass header.i=@sapo.pt header.s=sapo20240325 header.b=W5j2rwBv; arc=pass (i=1); spf=pass (google.com: domain of nelsonalexandre32@sapo.pt designates 212.55.154.23 as permitted sender) smtp.mailfrom=nelsonalexandre32@sapo.pt; dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=sapo.pt
+Return-Path: <nelsonalexandre32@sapo.pt>
+Received: from relay3.ptmail.sapo.pt (relay3.ptmail.sapo.pt. [212.55.154.23]) by mx.google.com with ESMTPS id ffacd0b85a97d-4967003ff65si6463451f8f.98.2026.11.09.08.22.51 for <condcidpraia370@gmail.com> (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256); Mon, 09 Nov 2026 08:22:52 -0800 (PST)
+Received-SPF: pass (google.com: domain of nelsonalexandre32@sapo.pt designates 212.55.154.23 as permitted sender) client-ip=212.55.154.23;
+Authentication-Results: mx.google.com; dkim=pass header.i=@sapo.pt header.s=sapo20240325 header.b=W5j2rwBv; arc=pass (i=1); spf=pass (google.com: domain of nelsonalexandre32@sapo.pt designates 212.55.154.23 as permitted sender) smtp.mailfrom=nelsonalexandre32@sapo.pt; dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=sapo.pt
+Authentication-Results: ptmail-relay3; arc=none smtp.remote-ip=10.134.36.48
+ARC-Seal: i=1; a=rsa-sha256; d=sapo.pt; s=sapo20260925a; t=1794241371; cv=none; b=YBbpps2Z5Rybqn6mXPS/me0Y4f0HVccNR4pdjpMZe7zzLf2aOWzmfzZXXIKnJloE2v1JEOgmhWvfVzBPQ76H0kVbx9xw8WTBMdA3E77whVxjhHfKWQQ8gMV9CNCRcyCxWQY8+QvnNQIDVY14MOXDId5e3Qc7mYm2NJKWdqD1qx1CHVXh1OUrbSwlS0Oej6lTwKon3mRft4v+8nF5HUfacuBWbFRxYWfKTReM9szBmwVUXc9AJMy2fVnPwA91erxOGaCT658l0cSXKj8/HKUJV41cB0ip3FXmaJO5YInD+4GoectWjMDqSiR/LljgUHoilsmmPSK6megf12V6SDgPzw==
+ARC-Message-Signature: i=1; a=rsa-sha256; d=sapo.pt; s=sapo20260925a; t=1794241371; c=relaxed/simple; bh=NDpasVSEh+PDi+FS6URmJyomA3zHyL1qTyI3nSjswtk=; h=DKIM-Signature:Date:Message-ID:From:To:Subject; b=JSszgunXr8YrIn0eHEti/mg2WI2xH0+Jv307Bn3M7IHgy5Vo8f8lL6zZW1BhFgQN+nEuwKvs9zIgTk/1P8sAhYJjHvhjCk3OzD6QpPOQN3mI+JvO87olMik4G/T3IDgf44rzOQm9GefPuIhUh42Ym/vJVTRYP8cxNfvQ6YWg7NssynMjHuJ1n67HmOTn88F7Dc7m9BoQhwu0vlFYTzgdGC1xdqe9oGiO53p+W2Rr2tRlaXeTvEMApUuZ+/HZIjncPQksrJf718UTgwQ5QeQDYYqf+IQzRvMjYziC1wsh8liHPt9NeCWzKpBhucTRBc6p8nN20mAfhc8ha3OQVYwdSg==
+ARC-Authentication-Results: i=1; ptmail-relay3
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sapo.pt; s=sapo20240325; t=1794241371; bh=nm3Rt6yp3MdLYHXg+mJ6C+i32Vs6hYKKjY2qqfvdlNo=; h=Date:Message-ID:From:To:Subject:From:To:Cc:Subject:Date: Message-ID; b=W5j2rwBv8Zg9sVvPIdaNSlu7rttIjrcs03WjkX48T4bfFZ7LaOniejUGETjfkJNfg weU2lgchY3BP8KPUJzx/VOhwx53hR24+7gcwa+tTEpTJgzIY5KkW7kUHwonl4bZXAs qpk5FgLEOkXWaE8ANEJ2+10aZUzWJswYplqD3V5uDOS2SPPS1jWT+ZfYGz4mSEZqZh 2psBy0PA1+HYZ1Aqx4ZGGwyoghPZx+/wPiTvITYBn5CTqqVCDKZDSc3Znq8o3YgbHI 5IJGJiRBfIq2q0RQsCnfu9U8kBXLRRAxO8CEjFCF8eWo3isSJAW1jf02bOkT3xobWd ZRJ+5dAjR1E6g==
+Received: from mail.sapo.pt (unknown [10.134.36.48]) by relay3.ptmail.sapo.pt (Postfix) with ESMTP id 3D1D7B4FB47 for <condcidpraia370@gmail.com>; Mon, 09 Nov 2026 16:22:51 +0000 (WET)
+Received: from [::ffff:176.223.63.83] ([::ffff:176.223.63.83]) by mail.sapo.pt (Horde Framework) with HTTPS; Mon, 09 Nov 2026 16:22:51 +0000
+Date: Mon, 09 Nov 2026 16:22:51 +0000
+Message-ID: <20261109162251.Horde.fwWablqHPTXVp7hfgTxFlMV@mail.sapo.pt>
+From: nelsonalexandre32@sapo.pt
+To: condcidpraia370 <condcidpraia370@gmail.com>
+Subject: Re: Divida total 6A
+References: <20260311205359.Horde._U8FvlR4eoTLtPcMQQ6pfgv@mail.sapo.pt> <CAOMvFq0ToZjM908_vZz7JAAPtNvpW5s4XtRfUSq21uvtbCa=pw@mail.gmail.com> <20260317133534.Horde.AHbS_vUxpfp8M2OtcuMPrnd@mail.sapo.pt> <CAOMvFq3iOBuJ+WXPuKvBsiUy35Of3OVV0Pe4CqnD86Bh6u2Sng@mail.gmail.com> <20260318151400.Horde.h0OSwQikHDrRymCZg6JpAWP@mail.sapo.pt> <20260525145010.Horde.GjrieiyqT-MxH38wNNf94fG@mail.sapo.pt> <CAOMvFq2nVPnQ8d8e96+vD-ynGNznErUisuYhzH_Zjiousy4M6Q@mail.gmail.com> <20260526195433.Horde.gGQMx0CHWTid6pTEskWkLD3@mail.sapo.pt> <CAOMvFq155qh9vmsTpJhU81SoaoYLWtL2wqqYQcC9_PQzWPFTyw@mail.gmail.com> <20260526211611.Horde.fG5GmU_fK-McDZ1R7ZUOp4F@mail.sapo.pt> <20260605133113.Horde.SoOJ9tu2kifyu9HCk6VBFnG@mail.sapo.pt> <CAOMvFq2MHzE1+gSyrzpsiMHFLvLLjZ-WWX6E4r4o4aANGMotUA@mail.gmail.com> <20260609083352.Horde.4biEH_a4L7VOfVDseusumO_@mail.sapo.pt> <CAOMvFq0uC3bLQgiw+NQ1jYD=eejyNwhxNXEN+OKZ7zx7xFqHpQ@mail.gmail.com> <CAOMvFq1LotY9NRtbrBG44L7MYuhyiCZYU2kyo6W7c64j5c8TKg@mail.gmail.com> <20261106165353.Horde.7KM5t4r19muzNvtd7tYyHwg@mail.sapo.pt> <CAOMvFq2qae2ioa63gnusSerPOkLMSR2PCW6+NdXeX2KUOhhq=w@mail.gmail.com>
+In-Reply-To: <CAOMvFq2qae2ioa63gnusSerPOkLMSR2PCW6+NdXeX2KUOhhq=w@mail.gmail.com>
+User-Agent: PTMAIL 7.2.2r003
+X-Originating-IP: ::ffff:176.223.63.83
+X-PTMail-Version: 7.2.2r003
+X-PTMail-User: eyJpdiI6IkhXbnVvYTNTdjRrNnBLWFJPU1FQdkE9PSIsImQiOiIzbThNdTJ5RUkrY0JNcnBVamtpeDh4ZjRJK0lySHd4TUkzZWozdDNlY0FjPSJ9
+Content-Type: multipart/mixed; boundary="=_-_Ta_xrjQSTmqNw8pM-jYtQ"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+
+--=_-_Ta_xrjQSTmqNw8pM-jYtQ
+Content-Type: multipart/alternative; boundary="=_Qt5Uu37nGvbye8R3x5HwkIK"
+Content-Transfer-Encoding: 8bit
+
+--=_Qt5Uu37nGvbye8R3x5HwkIK
+Content-Type: text/plain; charset=utf-8; format=flowed; DelSp=Yes
+Content-Description: Mensagem de Texto
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+
+Boa tarde Francisco Silva 
+
+Segue em anexo comprovativo de transferência imediata.
+
+Qq dúvida disponha
+
+Atentamente
+
+Nelson Cordeiro
+
+> Mensagem de Condomínio Cidade da Praia 370 <condcidpraia370@gmail.com>
+>
+>  Data: Fri, 6 Nov 2026 22:07:32 +0000
+>
+>  De: Condomínio Cidade da Praia 370 <condcidpraia370@gmail.com>
+>
+>  Assunto: Re: Divida total 6A
+>
+>  Para: nelsonalexandre32@sapo.pt
+>
+> Boa noite Sr. Nelson Cordeiro
+>
+>
+>
+>  Respondo à sua pergunta sobre a obra do telhado.
+>
+>
+>
+>  A obra de renovação do terraço e da torre da casa das máquinas e a  
+> respetiva quota extraordinária foram aprovadas na assembleia de  
+> condóminos de 12/03/2026 (Ata n.º 22, ponto 3), como lhe indicámos  
+> no email desse dia e na declaração de 22/03/2026. A mesma  
+> deliberação estabeleceu que a obra só é adjudicada e iniciada quando  
+> o condomínio tiver em caixa pelo menos 95% do valor orçamentado e  
+> que, não sendo atingido esse valor durante o verão de 2026, fica  
+> agendada para o verão de 2027. Foi o que aconteceu: a obra não foi  
+> cancelada; ficou agendada para o verão de 2027, nos termos da  
+> própria deliberação.
+>
+>
+>
+>  Os 791,62 € pagos a 17/03/2026 correspondem à quota extraordinária  
+> da fração 6A. A quota foi deliberada quando a herança era a  
+> proprietária e foi paga antes da venda, pelo que está registada como  
+> paga por essa fração. Cada fração paga a sua quota uma só vez, e a  
+> da 6A está paga. Foi nesses termos que a declaração de não dívida  
+> que nos pediu para a escritura, enviada a 09/06/2026, indicou a  
+> quota extraordinária como já paga. O valor está afeto à obra  
+> deliberada e não há lugar à sua devolução pelo condomínio.
+>
+>
+>
+>  Se a herança entende que este encargo devia ser suportado pelo novo  
+> proprietário, é um acerto a fazer diretamente entre vendedor e  
+> comprador, nos termos que entre si combinarem. O condomínio não é  
+> parte nesse acerto e não intervém nele.
+>
+> Relativamente ao pagamento do valor da quota mensal de dezembro de  
+> 2025, que erradamente alocamos ao 6A um pagamento do 5A, transfira  
+> sff esse valor de 37.88€ para a conta do condomínio, IBAN: PT50 0170  
+> 3028 0304 0012 3215 3; Titular/Beneficiário: CONDOMINIO P S R CIDADE  
+> DA PRAIA LOTE 370.
+>
+> Muito Obrigado, 
+>
+> Com os melhores cumprimentos,
+>
+>
+>
+>  Francisco Silva
+>
+>  Administrador de Condomínio
+>
+>  Rua Cidade da Praia, Lote 370, Olivais, Lisboa
+>
+> On Fri, Nov 06, 2026 04:53 PM, nelsonalexandre32@sapo.pt wrote:
+>
+>> Boa tarde Francisco Silva
+>>
+>> Aguardo resposta à questão que coloquei sobre a obra do telhado.
+>>
+>> Atentamente
+>>
+>> Nelson Cordeiro
+>>
+>>> Mensagem de Condomínio Cidade da Praia 370 <condcidpraia370@gmail.com>
+>>>
+>>> Data: Thu, 5 Nov 2026 04:22:32 +0000
+>>>
+>>> De: Condomínio Cidade da Praia 370 <condcidpraia370@gmail.com>
+>>>
+>>> Assunto: Re: Divida total 6A
+>>>
+>>> Para: nelsonalexandre32@sapo.pt
+>>>
+>>> Bom dia, Sr. Nelson Cordeiro
+>>>
+>>> Espero que esteja bem. Escrevo-lhe sobre um engano nas contas da  
+>>> fração 6A, que só agora detetámos e peço desde já desculpa pelo  
+>>> incómodo.
+>>>
+>>> A 12/03/2026 indicámos-lhe 151,52 € de quotas de 2025 em atraso,  
+>>> valor que pagou a 16/03/2026. Esse valor estava errado: contava  
+>>> como sendo da 6A um pagamento de 37,88 € feito em dezembro de 2025  
+>>> que afinal foi feito por outra fração. 
+>>>
+>>> Sabemos que as declarações de não dívida de 22/03/2026 e de  
+>>> 09/06/2026 foram feitas com os números errados e não mostram esta  
+>>> diferença. Por isso pedimos à herança que pague estes 37,88 € até  
+>>> 30/11/2026, por transferência para a conta do condomínio (IBAN  
+>>> PT50 0170 3028 0304 0012 3215 3), com a referência "6A quotas 2025".
+>>>
+>>> Fico ao dispor para qualquer esclarecimento e para lhe enviar o  
+>>> detalhe dos movimentos.
+>>>
+>>> Com os melhores cumprimentos,
+>>>
+>>> Francisco Silva
+>>>
+>>> Administrador de Condomínio
+>>>
+>>> Rua Cidade da Praia, Lote 370, Olivais, Lisboa
+>>>
+>>> On Thu, Jun 11, 2026 10:19 AM, Condomínio Cidade da Praia 370  
+>>> <condcidpraia370@gmail.com> wrote:
+>>>
+>>>> Bom dia
+>>>>
+>>>> Obrigado pela colaboração e boa relação ao longo deste tempo.
+>>>>
+>>>> Tomámos nota da mudança de proprietário e passaremos a tratar dos  
+>>>> assuntos do condomínio diretamente com os novos proprietários.
+>>>>
+>>>> Desejo-lhe as maiores felicidades para esta nova fase e muito  
+>>>> sucesso para o futuro.
+>>>>
+>>>> Cumprimentos,
+>>>>
+>>>> Francisco Silva
+>>>>
+>>>> Administração do Condomínio
+>>>>
+>>>> <nelsonalexandre32@sapo.pt> escreveu (terça, 9/06/2026 à(s) 08:33):
+>>>>
+>>>>> Bom dia Francisco
+>>>>>
+>>>>> Desde ja agradeço a colaboração nestes quase 24 meses.
+>>>>>
+>>>>> Hoje o imóvel terá um novo proprietário e tudo será tratado com  
+>>>>> eles,têm os contactos da administração do condomínio tal como o  
+>>>>> condominio tem deles.
+>>>>>
+>>>>> Me despeço desejando-lhe felicidades.
+>>>>>
+>>>>> Qq dúvida disponha 
+>>>>>
+>>>>> Atentamente
+>>>>>
+>>>>> Nelson Cordeiro  
+>>>>>
+>>>>>> Mensagem de Condomínio Cidade da Praia 370 <>
+>>>>>>
+>>>>>> Data: Tue, 9 Jun 2026 03:08:36 +0100
+>>>>>>
+>>>>>> De: Condomínio Cidade da Praia 370 <>
+>>>>>>
+>>>>>> Assunto: Re: Divida total 6A
+>>>>>>
+>>>>>> Para:
+>>>>>>
+>>>>>> Bom dia
+>>>>>>
+>>>>>> Junto envio em anexo a declaração de não dívida da fração 6A.
+>>>>>>
+>>>>>> Atenciosamente, 
+>>>>>>
+>>>>>> Francisco Silva
+>>>>>>
+>>>>>> <nelsonalexandre32@sapo.pt> escreveu (sexta, 5/06/2026 à(s) 13:31):
+>>>>>>
+>>>>>>> Boa tarde Francisco 
+>>>>>>>
+>>>>>>> agradeço que me faça chegar até 2a feira documento de não  
+>>>>>>> divida do referido condomínio (6A).
+>>>>>>>
+>>>>>>> Atentamente 
+>>>>>>>
+>>>>>>> Nelson Cordeiro 
+>>>>>>>
+>>>>>>>> Mensagem de
+>>>>>>>>
+>>>>>>>> Data: Tue, 26 May 2026 21:16:11 +0100
+>>>>>>>>
+>>>>>>>> De:
+>>>>>>>>
+>>>>>>>> Assunto: Re: Divida total 6A
+>>>>>>>>
+>>>>>>>> Para: condcidpraia370 <>
+>>>>>>>>
+>>>>>>>> Boa noite
+>>>>>>>>
+>>>>>>>> O comprador  conseguiu marcar para dia 9 de junho.
+>>>>>>>>
+>>>>>>>> Irei estar ausente regressarei a 8/9 agradeço nesse dia sff  
+>>>>>>>> que ja tenha enviado a declaração.
+>>>>>>>>
+>>>>>>>> Ja.confirmou o pagamento de junho ou necessita que envie comprovativo?
+>>>>>>>>
+>>>>>>>> Atentamente
+>>>>>>>>
+>>>>>>>>> Mensagem de Condomínio Cidade da Praia 370 <>
+>>>>>>>>>
+>>>>>>>>> Data: Tue, 26 May 2026 20:01:27 +0100
+>>>>>>>>>
+>>>>>>>>> De: Condomínio Cidade da Praia 370 <>
+>>>>>>>>>
+>>>>>>>>> Assunto: Re: Divida total 6A
+>>>>>>>>>
+>>>>>>>>> Para:
+>>>>>>>>>
+>>>>>>>>> Boa tarde 
+>>>>>>>>>
+>>>>>>>>> No email anterior tinha dito que a escritura era dia 15.
+>>>>>>>>>
+>>>>>>>>> Sendo assim se é dia 9 posso mandar antes desse dia. No  
+>>>>>>>>> entanto será sempre só para a semana. 
+>>>>>>>>>
+>>>>>>>>> Obrigado 
+>>>>>>>>>
+>>>>>>>>> Francisco Silva 
+>>>>>>>>>
+>>>>>>>>> On Tue, May 26, 2026, 19:54 <nelsonalexandre32@sapo.pt> wrote:
+>>>>>>>>>
+>>>>>>>>>> Boa tarde Francisco Silva
+>>>>>>>>>>
+>>>>>>>>>> A escritura está marcada para dia 9/6,no entanto irei me  
+>>>>>>>>>> ausentar do pais entre 29/5 e 6/6 por isso agradeço por  
+>>>>>>>>>> favor entre amanha e 5a feira que me faça chegar a  
+>>>>>>>>>> declaração 
+>>>>>>>>>>
+>>>>>>>>>> Cumprimentos 
+>>>>>>>>>>
+>>>>>>>>>> Nelson Cordeiro
+>>>>>>>>>>
+>>>>>>>>>>> Mensagem de Condomínio Cidade da Praia 370 <>
+>>>>>>>>>>>
+>>>>>>>>>>> Data: Tue, 26 May 2026 19:30:01 +0100
+>>>>>>>>>>>
+>>>>>>>>>>> De: Condomínio Cidade da Praia 370 <>
+>>>>>>>>>>>
+>>>>>>>>>>> Assunto: Re: Divida total 6A
+>>>>>>>>>>>
+>>>>>>>>>>> Para:
+>>>>>>>>>>>
+>>>>>>>>>>> Boa tarde
+>>>>>>>>>>>
+>>>>>>>>>>> Acuso receção. 
+>>>>>>>>>>>
+>>>>>>>>>>> Envio a declaração mais perto da data, dia 11 ou 12. 
+>>>>>>>>>>>
+>>>>>>>>>>> Assim confirmo tudo aí mais perto. 
+>>>>>>>>>>>
+>>>>>>>>>>> Obrigado
+>>>>>>>>>>>
+>>>>>>>>>>> Francisco Silva
+>>>>>>>>>>>
+>>>>>>>>>>> <nelsonalexandre32@sapo.pt> escreveu (segunda, 25/05/2026  
+>>>>>>>>>>> à(s) 14:50):
+>>>>>>>>>>>
+>>>>>>>>>>>> Boa tarde Francisco
+>>>>>>>>>>>>
+>>>>>>>>>>>> Espero que este email o encontre bem.
+>>>>>>>>>>>>
+>>>>>>>>>>>> paguei agora a mensalidade do condominio relativamente ao  
+>>>>>>>>>>>> mes de junho pois a escritura da venda do imóvel irá  
+>>>>>>>>>>>> efetua-se dia 15/6/26.
+>>>>>>>>>>>>
+>>>>>>>>>>>> Nesse sentido agradeço por favor declaração de não divida.
+>>>>>>>>>>>>
+>>>>>>>>>>>> Qq dúvida disponha
+>>>>>>>>>>>>
+>>>>>>>>>>>> Atentamente
+>>>>>>>>>>>>
+>>>>>>>>>>>> Nelson Cordeiro
+>>>>>>>>>>>>
+>>>>>>>>>>>>> Mensagem de
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> Data: Wed, 18 Mar 2026 15:14:00 +0000
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> De:
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> Assunto: Re: Divida total 6A
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> Para: condcidpraia370 <>
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> Boa tarde
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> Os recibos O nif   é  750 078 987 Pedro Miguel Almeida  
+>>>>>>>>>>>>> Cândido (falecido) cabeça de casal Rosa Maria Almeida  
+>>>>>>>>>>>>> Cândido , certidão não divida  nif 513 022 627 Dupla  
+>>>>>>>>>>>>> Habitação unipessoal lda
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> Pedro Cardoso e Marco Costa
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> Tm 966 677 805
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> Email duplahabitacao@gmail.com
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> atentamente
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> Nelson Cordeiro
+>>>>>>>>>>>>>
+>>>>>>>>>>>>>> Mensagem de Condomínio Cidade da Praia 370 <>
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>> Data: Wed, 18 Mar 2026 03:11:20 +0000
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>> De: Condomínio Cidade da Praia 370 <>
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>> Assunto: Re: Divida total 6A
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>> Para:
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>> Bom dia
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>> Quer os recibos ou a declaração de não divida do condomínio? 
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>> Envie-me o seu NIF e o nome que é para ficar. 
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>> E para a declaração envie-me os dados do comprador  
+>>>>>>>>>>>>>> (Nome completo, Telemóvel, Email).
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>> Obrigado
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>> Francisco Silva
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>  
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>> <nelsonalexandre32@sapo.pt> escreveu (terça, 17/03/2026  
+>>>>>>>>>>>>>> à(s) 13:35):
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>> Boa tarde Francisco 
+>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>> Segue em anexo comprovativo da liquidação total do  
+>>>>>>>>>>>>>>> acordo do condomínio.
+>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>> Agradeço documento comprovativo a confirmação  
+>>>>>>>>>>>>>>> liquidação total do acordo estabelecido entre o meu  
+>>>>>>>>>>>>>>> tio falecido Pedro Cândido e a administração do  
+>>>>>>>>>>>>>>> condomínio. 
+>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>> cumprimentos
+>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>> Nelson Cordeiro
+>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> Mensagem de Condomínio Cidade da Praia 370 <>
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> Data: Thu, 12 Mar 2026 23:02:09 +0000
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> De: Condomínio Cidade da Praia 370 <>
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> Assunto: Re: Divida total 6A
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> Para:
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> Boa noite
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> A dívida total a 31 de Maio de 2026 (ou seja  
+>>>>>>>>>>>>>>>> incluindo a quota mensal do mês de maio) será: 
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> - Divida antiga do acordo de pagamento: 1241.98
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> - Quotas em atraso de 2025: 151.52
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> - Quotas de 2026 até maio inclusive: 189.40
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> - Quota extraordinária deliberada hoje na assembleia  
+>>>>>>>>>>>>>>>> geral para obras a fazer no terraço no verão de  
+>>>>>>>>>>>>>>>> 2026: 791.62
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> - Valor pago em 2026 = 37.88€ em fevereiro
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> Então total de dívida a 31 de maio de 2026: -2336.64
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> Depois diga então a data em que quiser mesmo a  
+>>>>>>>>>>>>>>>> declaração para eu confirmar na altura os valores já  
+>>>>>>>>>>>>>>>> pagos até aí. E envie também os dados do futuro  
+>>>>>>>>>>>>>>>> proprietário (Nome completo, Telemóvel, Email). 
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> Obrigado, 
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> Francisco Silva
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> <nelsonalexandre32@sapo.pt> escreveu (quarta,  
+>>>>>>>>>>>>>>>> 11/03/2026 à(s) 20:54):
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>> Boa noite,francisco
+>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>> Solicito divida total do acordo de condomínio  
+>>>>>>>>>>>>>>>>> realizado entre a administração e o condómino do 6A  
+>>>>>>>>>>>>>>>>> à presente data.
+>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>> E acrescentar sff valor do condominio do mês 3,4 e 5  
+>>>>>>>>>>>>>>>>> de 2026 em virtude de o apartamento ir ser vendido.
+>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>> Após boa cobrança Solicito para efeitos de venda uma  
+>>>>>>>>>>>>>>>>> declaração de não divida até 31/5.
+>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>> Qq dúvida disponha. 
+>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>> Atentamente 
+>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>> Nelson Cordeiro 6A
+>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>> ----- Fim da mensagem de Condomínio Cidade da Praia  
+>>>>>>>>>>>>>>>> 370 <> -----
+>>>>>>>>>>>>>>
+>>>>>>>>>>>>>> ----- Fim da mensagem de Condomínio Cidade da Praia 370 <> -----
+>>>>>>>>>>>>>
+>>>>>>>>>>>>> ----- Fim da mensagem de  -----
+>>>>>>>>>>>
+>>>>>>>>>>> ----- Fim da mensagem de Condomínio Cidade da Praia 370 <> -----
+>>>>>>>>>
+>>>>>>>>> ----- Fim da mensagem de Condomínio Cidade da Praia 370 <> -----
+>>>>>>>>
+>>>>>>>> ----- Fim da mensagem de  -----
+>>>>>>
+>>>>>> ----- Fim da mensagem de Condomínio Cidade da Praia 370 <> -----
+>>>
+>>> ----- Fim da mensagem de Condomínio Cidade da Praia 370  
+>>> <condcidpraia370@gmail.com> -----
+>
+> ----- Fim da mensagem de Condomínio Cidade da Praia 370  
+> <condcidpraia370@gmail.com> -----
+
+--=_Qt5Uu37nGvbye8R3x5HwkIK
+Content-Type: text/html; charset=utf-8
+Content-Description: Mensagem HTML
+Content-Disposition: inline
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+"http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title></title>
+</head>
+<body style="font-family:Arial">
+<p><span class="font" style="font-family: Arial,Helvetica,sans-serif, sans-serif;"><span class="size" style="font-size: normal">Boa tarde Francisco Silva&nbsp;</span></span><br></p>
+<p><br></p>
+<p><span class="font" style="font-family: Arial,Helvetica,sans-serif, sans-serif;"><span class="size" style="font-size: normal">Segue em anexo comprovativo de transfer&ecirc;ncia imediata.</span></span><br></p>
+<p><span class="font" style="font-family: Arial,Helvetica,sans-serif, sans-serif;"><span class="size" style="font-size: normal">Qq d&uacute;vida disponha</span></span><br></p>
+<p><br></p>
+<p><span class="font" style="font-family: Arial,Helvetica,sans-serif, sans-serif;"><span class="size" style="font-size: normal">Atentamente</span></span><br></p>
+<p><span class="font" style="font-family: Arial,Helvetica,sans-serif, sans-serif;"><span class="size" style="font-size: normal">Nelson Cordeiro</span></span><br></p>
+<blockquote style="border:none; background: transparent; margin:30px 0 30px 20px; padding:0 0 0 20px; border-left:1px solid #999;" type="cite">
+<div>Mensagem de Condom&iacute;nio Cidade da Praia 370 &lt;<a href="mailto:condcidpraia370@gmail.com">condcidpraia370@gmail.com</a>&gt;<br></div>
+<div>Data: Fri, 6 Nov 2026 22:07:32 +0000<br></div>
+<div>De: Condom&iacute;nio Cidade da Praia 370 &lt;<a href="mailto:condcidpraia370@gmail.com">condcidpraia370@gmail.com</a>&gt;<br></div>
+<div>Assunto: Re: Divida total 6A<br></div>
+<div>Para: <a href="mailto:nelsonalexandre32@sapo.pt">nelsonalexandre32@sapo.pt</a><br></div>
+<div><br></div>
+<div><br></div>
+<div dir="ltr">
+<div>
+<div dir="auto">
+<div>Boa <span style="color:rgb(0,0,0)" class="gmail_default">noite</span>&nbsp;Sr. Nelson Cordeiro<br></div>
+<div><br></div>
+<div>Respondo &agrave; sua pergunta sobre a obra do telhado.<br></div>
+<div><br></div>
+<div>A obra de renova&ccedil;&atilde;o do terra&ccedil;o e da torre da casa das m&aacute;quinas e a respetiva quota extraordin&aacute;ria foram aprovadas na assembleia de cond&oacute;minos de 12/03/2026 (Ata n.&ordm; 22, ponto 3), como lhe indic&aacute;mos no email desse dia e na declara&ccedil;&atilde;o de 22/03/2026. A mesma delibera&ccedil;&atilde;o estabeleceu que a obra s&oacute; &eacute; adjudicada e iniciada quando o condom&iacute;nio tiver em caixa pelo menos 95% do valor or&ccedil;amentado e que, n&atilde;o sendo atingido esse valor durante o ver&atilde;o de 2026, fica agendada para o ver&atilde;o de 2027. Foi o que aconteceu: a obra n&atilde;o foi cancelada; ficou agendada para o ver&atilde;o de 2027, nos termos da pr&oacute;pria delibera&ccedil;&atilde;o.<br></div>
+<div><br></div>
+<div>Os 791,62 &euro; pagos a 17/03/2026 correspondem &agrave; quota extraordin&aacute;ria da fra&ccedil;&atilde;o 6A. A quota foi deliberada quando a heran&ccedil;a era a propriet&aacute;ria e foi paga antes da venda, pelo que est&aacute; registada como paga por essa fra&ccedil;&atilde;o. Cada fra&ccedil;&atilde;o paga a sua quota uma s&oacute; vez, e a da 6A est&aacute; paga. Foi nesses termos que a declara&ccedil;&atilde;o de n&atilde;o d&iacute;vida que nos pediu para a escritura, enviada a 09/06/2026, indicou a quota extraordin&aacute;ria como j&aacute; paga. O valor est&aacute; afeto &agrave; obra deliberada e n&atilde;o h&aacute; lugar &agrave; sua devolu&ccedil;&atilde;o pelo condom&iacute;nio.<br></div>
+<div><br></div>
+<div>Se a heran&ccedil;a entende que este encargo devia ser suportado pelo novo propriet&aacute;rio, &eacute; um acerto a fazer diretamente entre vendedor e comprador, nos termos que entre si combinarem. O condom&iacute;nio n&atilde;o &eacute; parte nesse acerto e n&atilde;o interv&eacute;m nele.<br></div>
+</div>
+<div dir="auto"><br></div>
+<div dir="auto">
+<div style="color:rgb(0,0,0)" class="gmail_default">Relativamente ao pagamento do valor da quota mensal de dezembro de 2025, que erradamente alocamos ao 6A um pagamento do 5A, transfira sff esse valor de 37.88&euro; para a conta do condom&iacute;nio,&nbsp;<span style="background-color:transparent;color:rgb(34,34,34)">IBAN: PT50 0170 3028 0304 0012 3215 3;&nbsp;</span><span style="background-color:transparent;color:rgb(34,34,34)">Titular/Benefici&aacute;rio:</span> CONDOMINIO <span style="background-color:transparent;color:rgb(34,34,34)">P S R CIDADE DA PRAIA LOTE 370.</span><br></div>
+<div style="color:rgb(0,0,0)" class="gmail_default"><br></div>
+<div style="color:rgb(0,0,0)" class="gmail_default">Muito Obrigado,&nbsp;<br></div>
+</div>
+<div dir="auto">
+<div>Com os melhores cumprimentos,<br></div>
+<div><br></div>
+<div>Francisco Silva<br></div>
+<div>Administrador de Condom&iacute;nio<br></div>
+<div>Rua Cidade da Praia, Lote 370, Olivais, Lisboa<br></div>
+</div>
+</div>
+</div>
+<p><br></p>
+<div class="gmail_extra">
+<div>
+<div>On Fri, Nov 06, 2026 04:53 PM, <a href="mailto:nelsonalexandre32@sapo.pt">nelsonalexandre32@sapo.pt</a> wrote:<br></div>
+<blockquote style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex" class="gmail_quote">
+<div style="font-family:Arial">
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Boa tarde Francisco Silva</span></span><br></p>
+<p><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Aguardo resposta &agrave; quest&atilde;o que coloquei sobre a obra do telhado.</span></span><br></p>
+<p><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Atentamente</span></span><br></p>
+<p><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Nelson Cordeiro</span></span><br></p>
+<p><br></p>
+<blockquote type="cite" style="border-width:medium medium medium 1px;border-style:none none none solid;border-color:currentcolor currentcolor currentcolor rgb(153,153,153);background:transparent;margin:30px 0px 30px 20px;padding:0px 0px 0px 20px">
+<div>Mensagem de Condom&iacute;nio Cidade da Praia 370 &lt;<a href="mailto:condcidpraia370@gmail.com">condcidpraia370@gmail.com</a>&gt;<br></div>
+<div>Data: Thu, 5 Nov 2026 04:22:32 +0000<br></div>
+<div>De: Condom&iacute;nio Cidade da Praia 370 &lt;<a href="mailto:condcidpraia370@gmail.com">condcidpraia370@gmail.com</a>&gt;<br></div>
+<div>Assunto: Re: Divida total 6A<br></div>
+<div>Para: <a href="mailto:nelsonalexandre32@sapo.pt">nelsonalexandre32@sapo.pt</a><br></div>
+<div><br></div>
+<div><br></div>
+<div dir="ltr">
+<div>
+<div dir="auto">
+<div>Bom dia, Sr. Nelson Cordeiro<br></div>
+<div><br></div>
+<div>Espero que esteja bem. Escrevo-lhe sobre um engano nas contas da fra&ccedil;&atilde;o 6A, que s&oacute; agora detet&aacute;mos&nbsp;e pe&ccedil;o desde j&aacute; desculpa pelo inc&oacute;modo.<br></div>
+<div><br></div>
+<div>A 12/03/2026 indic&aacute;mos-lhe 151,52 &euro; de quotas de 2025 em atraso, valor que pagou a 16/03/2026. Esse valor estava errado: contava como sendo da 6A um pagamento de 37,88 &euro; feito em dezembro de 2025 que <span class="gmail_default" style="color:rgb(0,0,0)">afinal&nbsp;</span>foi feito por outra fra&ccedil;&atilde;o.&nbsp;<br></div>
+<div><br></div>
+<div>Sabemos que as declara&ccedil;&otilde;es de n&atilde;o d&iacute;vida de 22/03/2026 e de 09/06/2026 foram feitas com os n&uacute;meros errados e n&atilde;o mostram esta diferen&ccedil;a. Por isso pedimos &agrave; heran&ccedil;a que pague estes 37,88 &euro; at&eacute; 30/11/2026, por transfer&ecirc;ncia para a conta do condom&iacute;nio (IBAN PT50 0170 3028 0304 0012 3215 3), com a refer&ecirc;ncia "6A quotas 2025".<br></div>
+<div><br></div>
+<div>Fico ao dispor para qualquer esclarecimento e para lhe enviar o detalhe dos movimentos.<br></div>
+<div><br></div>
+<div>Com os melhores cumprimentos,<br></div>
+<div><br></div>
+<div>Francisco Silva<br></div>
+<div>Administrador de Condom&iacute;nio<br></div>
+<div>Rua Cidade da Praia, Lote 370, Olivais, Lisboa<br></div>
+</div>
+</div>
+</div>
+<p><br></p>
+<div class="gmail_extra">
+<div>
+<div>On Thu, Jun 11, 2026 10:19 AM, Condom&iacute;nio Cidade da Praia 370 &lt;<a href="mailto:condcidpraia370@gmail.com">condcidpraia370@gmail.com</a>&gt; wrote:<br></div>
+<blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">
+<div dir="ltr">
+<div class="gmail_default" style="color:rgb(7,55,99)">
+<div>Bom dia<br></div>
+<div><br></div>
+<div>Obrigado pela colabora&ccedil;&atilde;o e boa rela&ccedil;&atilde;o ao longo deste tempo.<br></div>
+<div><br></div>
+<div>Tom&aacute;mos nota da mudan&ccedil;a de propriet&aacute;rio e passaremos a tratar dos assuntos do condom&iacute;nio diretamente com os novos propriet&aacute;rios.<br></div>
+<div><br></div>
+<div>Desejo-lhe as maiores felicidades para esta nova fase e muito sucesso para o futuro.<br></div>
+<div><br></div>
+<div>Cumprimentos,<br></div>
+<div><br></div>
+<div>Francisco Silva<br></div>
+<div>Administra&ccedil;&atilde;o do Condom&iacute;nio<br></div>
+</div>
+<div class="gmail_default" style="color:rgb(7,55,99)"><br></div>
+</div>
+<div><br></div>
+<div class="gmail_quote">
+<div dir="ltr" class="gmail_attr">&lt;<a href="mailto:nelsonalexandre32@sapo.pt">nelsonalexandre32@sapo.pt</a>&gt; escreveu (ter&ccedil;a, 9/06/2026 &agrave;(s) 08:33):<br></div>
+<blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">
+<div style="font-family:Arial">
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Bom dia Francisco</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Desde ja agrade&ccedil;o a colabora&ccedil;&atilde;o nestes quase 24 meses.</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Hoje o im&oacute;vel ter&aacute; um novo propriet&aacute;rio e tudo ser&aacute; tratado com eles,t&ecirc;m os contactos da administra&ccedil;&atilde;o do condom&iacute;nio tal como o condominio tem deles.</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Me despe&ccedil;o desejando-lhe felicidades.</span></span><br></p>
+<p>Qq d&uacute;vida disponha&nbsp;<br></p>
+<p><br></p>
+<p>Atentamente<br></p>
+<p>Nelson Cordeiro&nbsp;&nbsp;<br></p>
+<p><br></p>
+<blockquote style="border-width:medium medium medium 1px;border-style:none none none solid;border-color:currentcolor currentcolor currentcolor rgb(153,153,153);background:transparent;margin:30px 0px 30px 20px;padding:0px 0px 0px 20px" type="cite">
+<div>Mensagem de Condom&iacute;nio Cidade da Praia 370 &lt;&gt;<br></div>
+<div>Data: Tue, 9 Jun 2026 03:08:36 +0100<br></div>
+<div>De: Condom&iacute;nio Cidade da Praia 370 &lt;&gt;<br></div>
+<div>Assunto: Re: Divida total 6A<br></div>
+<div>Para:<br></div>
+<div><br></div>
+<div><br></div>
+<div dir="ltr">
+<div style="color:rgb(7,55,99)" class="gmail_default">Bom dia<br></div>
+<div style="color:rgb(7,55,99)" class="gmail_default">Junto envio em anexo a declara&ccedil;&atilde;o de n&atilde;o d&iacute;vida da fra&ccedil;&atilde;o 6A.<br></div>
+<div style="color:rgb(7,55,99)" class="gmail_default">Atenciosamente,&nbsp;<br></div>
+<div style="color:rgb(7,55,99)" class="gmail_default">Francisco Silva<br></div>
+</div>
+<p><br></p>
+<div class="gmail_quote">
+<div class="gmail_attr" dir="ltr">&lt;<a href="mailto:nelsonalexandre32@sapo.pt">nelsonalexandre32@sapo.pt</a>&gt; escreveu (sexta, 5/06/2026 &agrave;(s) 13:31):<br></div>
+<blockquote style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex" class="gmail_quote">
+<div style="font-family:Arial">
+<p>Boa tarde Francisco&nbsp;<br></p>
+<p>agrade&ccedil;o que me fa&ccedil;a chegar at&eacute; 2a feira documento de n&atilde;o divida do referido condom&iacute;nio (6A).<br></p>
+<p>Atentamente&nbsp;<br></p>
+<p>Nelson Cordeiro&nbsp;<br></p>
+<blockquote type="cite" style="border-width:medium medium medium 1px;border-style:none none none solid;border-color:currentcolor currentcolor currentcolor rgb(153,153,153);background:transparent;margin:30px 0px 30px 20px;padding:0px 0px 0px 20px">
+<div>Mensagem de<br></div>
+<div>Data: Tue, 26 May 2026 21:16:11 +0100<br></div>
+<div>De:<br></div>
+<div>Assunto: Re: Divida total 6A<br></div>
+<div>Para: condcidpraia370 &lt;&gt;<br></div>
+<div><br></div>
+<div><br></div>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Boa noite</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>O comprador&nbsp; conseguiu marcar para dia 9 de junho.</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Irei estar ausente regressarei a 8/9 agrade&ccedil;o nesse dia sff que ja tenha enviado a declara&ccedil;&atilde;o.</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Ja.confirmou o pagamento de junho ou necessita que envie comprovativo?</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Atentamente</span></span><br></p>
+<blockquote style="border-width:medium medium medium 1px;border-style:none none none solid;border-color:currentcolor currentcolor currentcolor rgb(153,153,153);background:transparent;margin:30px 0px 30px 20px;padding:0px 0px 0px 20px" type="cite">
+<div>Mensagem de Condom&iacute;nio Cidade da Praia 370 &lt;&gt;<br></div>
+<div>Data: Tue, 26 May 2026 20:01:27 +0100<br></div>
+<div>De: Condom&iacute;nio Cidade da Praia 370 &lt;&gt;<br></div>
+<div>Assunto: Re: Divida total 6A<br></div>
+<div>Para:<br></div>
+<div><br></div>
+<div><br></div>
+<div dir="auto">
+<div>
+<div>Boa tarde&nbsp;<br></div>
+<div dir="auto">No email anterior tinha dito que a escritura era dia 15.<br></div>
+<div dir="auto">Sendo assim se &eacute; dia 9 posso mandar antes desse dia. No entanto ser&aacute; sempre s&oacute; para a semana.&nbsp;<br></div>
+<div dir="auto">Obrigado&nbsp;<br></div>
+<div dir="auto">Francisco Silva&nbsp;<br></div>
+<div><br></div>
+<div><br></div>
+<div class="gmail_quote">
+<div class="gmail_attr" dir="ltr">On Tue, May 26, 2026, 19:54 &lt;<a href="mailto:nelsonalexandre32@sapo.pt">nelsonalexandre32@sapo.pt</a>&gt; wrote:<br></div>
+<blockquote style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex" class="gmail_quote">
+<div style="font-family:Arial">
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Boa tarde Francisco Silva</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>A escritura est&aacute; marcada para dia 9/6,no entanto irei me ausentar do pais entre 29/5 e 6/6 por isso agrade&ccedil;o por favor entre amanha e 5a feira que me fa&ccedil;a chegar a declara&ccedil;&atilde;o&nbsp;</span></span><br></p>
+<p>Cumprimentos&nbsp;<br></p>
+<p>Nelson Cordeiro<br></p>
+<blockquote type="cite" style="border-width:medium medium medium 1px;border-style:none none none solid;border-color:currentcolor currentcolor currentcolor rgb(153,153,153);background:transparent;margin:30px 0px 30px 20px;padding:0px 0px 0px 20px">
+<div>Mensagem de Condom&iacute;nio Cidade da Praia 370 &lt;&gt;<br></div>
+<div>Data: Tue, 26 May 2026 19:30:01 +0100<br></div>
+<div>De: Condom&iacute;nio Cidade da Praia 370 &lt;&gt;<br></div>
+<div>Assunto: Re: Divida total 6A<br></div>
+<div>Para:<br></div>
+<div><br></div>
+<div><br></div>
+<div dir="ltr">
+<div class="gmail_default" style="color:rgb(7,55,99)">
+<div>Boa tarde<br></div>
+<div>Acuso rece&ccedil;&atilde;o.&nbsp;<br></div>
+<div>Envio a declara&ccedil;&atilde;o mais perto da data, dia 11 ou 12.&nbsp;<br></div>
+</div>
+<div class="gmail_default" style="color:rgb(7,55,99)">
+<div>Assim confirmo tudo a&iacute; mais perto.&nbsp;<br></div>
+<div>Obrigado<br></div>
+<div>Francisco Silva<br></div>
+</div>
+</div>
+<p><br></p>
+<div class="gmail_quote">
+<div dir="ltr" class="gmail_attr">&lt;<a rel="noreferrer" href="mailto:nelsonalexandre32@sapo.pt">nelsonalexandre32@sapo.pt</a>&gt; escreveu (segunda, 25/05/2026 &agrave;(s) 14:50):<br></div>
+<blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">
+<div style="font-family:Arial">
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Boa tarde Francisco</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Espero que este email o encontre bem.</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>paguei agora a mensalidade do condominio relativamente ao mes de junho pois a escritura da venda do im&oacute;vel ir&aacute; efetua-se dia 15/6/26.</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Nesse sentido agrade&ccedil;o por favor declara&ccedil;&atilde;o de n&atilde;o divida.</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Qq d&uacute;vida disponha</span></span><br></p>
+<p><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Atentamente</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Nelson Cordeiro</span></span><br></p>
+<blockquote style="border-width:medium medium medium 1px;border-style:none none none solid;border-color:currentcolor currentcolor currentcolor rgb(153,153,153);background:transparent;margin:30px 0px 30px 20px;padding:0px 0px 0px 20px" type="cite">
+<div>Mensagem de<br></div>
+<div>Data: Wed, 18 Mar 2026 15:14:00 +0000<br></div>
+<div>De:<br></div>
+<div>Assunto: Re: Divida total 6A<br></div>
+<div>Para: condcidpraia370 &lt;&gt;<br></div>
+<div><br></div>
+<div><br></div>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Boa tarde</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Os recibos O nif&nbsp; &nbsp;&eacute;&nbsp; 750 078 987 Pedro Miguel Almeida C&acirc;ndido (falecido) cabe&ccedil;a de casal Rosa Maria Almeida C&acirc;ndido , certid&atilde;o n&atilde;o divida&nbsp; nif 513 022 627 Dupla Habita&ccedil;&atilde;o unipessoal lda</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Pedro Cardoso e Marco Costa</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Tm 966 677 805</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Email <a rel="noreferrer" href="mailto:duplahabitacao@gmail.com">duplahabitacao@gmail.com</a></span></span><br></p>
+<p><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>atentamente</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Nelson Cordeiro</span></span><br></p>
+<blockquote type="cite" style="border-width:medium medium medium 1px;border-style:none none none solid;border-color:currentcolor currentcolor currentcolor rgb(153,153,153);background:transparent;margin:30px 0px 30px 20px;padding:0px 0px 0px 20px">
+<div>Mensagem de Condom&iacute;nio Cidade da Praia 370 &lt;&gt;<br></div>
+<div>Data: Wed, 18 Mar 2026 03:11:20 +0000<br></div>
+<div>De: Condom&iacute;nio Cidade da Praia 370 &lt;&gt;<br></div>
+<div>Assunto: Re: Divida total 6A<br></div>
+<div>Para:<br></div>
+<div><br></div>
+<div><br></div>
+<div dir="ltr">
+<div class="gmail_default" style="color:rgb(7,55,99)">
+<div>Bom dia<br></div>
+<div>Quer os recibos ou a declara&ccedil;&atilde;o de n&atilde;o divida do condom&iacute;nio?&nbsp;<br></div>
+<div>Envie-me o seu NIF e o nome que &eacute; para ficar.&nbsp;<br></div>
+<div>E para a declara&ccedil;&atilde;o envie-me os dados do comprador (Nome completo, Telem&oacute;vel, Email).<br></div>
+</div>
+<div class="gmail_default" style="color:rgb(7,55,99)">Obrigado<br></div>
+<div class="gmail_default" style="color:rgb(7,55,99)">Francisco Silva<br></div>
+<div class="gmail_default" style="color:rgb(7,55,99)">&nbsp;<br></div>
+</div>
+<p><br></p>
+<div class="gmail_quote">
+<div dir="ltr" class="gmail_attr">&lt;<a rel="noreferrer" href="mailto:nelsonalexandre32@sapo.pt">nelsonalexandre32@sapo.pt</a>&gt; escreveu (ter&ccedil;a, 17/03/2026 &agrave;(s) 13:35):<br></div>
+<blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">
+<div style="font-family:Arial">
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Boa tarde Francisco&nbsp;</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Segue em anexo comprovativo da liquida&ccedil;&atilde;o total do acordo do condom&iacute;nio.</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Agrade&ccedil;o documento comprovativo a confirma&ccedil;&atilde;o liquida&ccedil;&atilde;o total do acordo estabelecido entre o meu tio falecido Pedro C&acirc;ndido e a administra&ccedil;&atilde;o do condom&iacute;nio.&nbsp;</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>cumprimentos</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Nelson Cordeiro</span></span><br></p>
+<blockquote style="border-width:medium medium medium 1px;border-style:none none none solid;border-color:currentcolor currentcolor currentcolor rgb(153,153,153);background:transparent;margin:30px 0px 30px 20px;padding:0px 0px 0px 20px" type="cite">
+<div>Mensagem de Condom&iacute;nio Cidade da Praia 370 &lt;&gt;<br></div>
+<div>Data: Thu, 12 Mar 2026 23:02:09 +0000<br></div>
+<div>De: Condom&iacute;nio Cidade da Praia 370 &lt;&gt;<br></div>
+<div>Assunto: Re: Divida total 6A<br></div>
+<div>Para:<br></div>
+<div><br></div>
+<div><br></div>
+<div dir="ltr">
+<div dir="ltr">
+<div style="color:rgb(7,55,99)" class="gmail_default">Boa noite<br></div>
+<div style="color:rgb(7,55,99)" class="gmail_default"><br></div>
+<div style="color:rgb(7,55,99)" class="gmail_default">A d&iacute;vida total a 31 de Maio de 2026 (ou seja incluindo a quota mensal do m&ecirc;s de maio) ser&aacute;:&nbsp;<br></div>
+<div style="color:rgb(7,55,99)" class="gmail_default">- Divida antiga do acordo de pagamento:&nbsp;<span style="color:rgb(34,34,34)">1241.98</span><br></div>
+<div style="color:rgb(7,55,99)" class="gmail_default"><span style="color:rgb(34,34,34)">- Quotas em atraso de 2025:&nbsp;</span><span style="color:rgb(34,34,34)">151.52</span><br></div>
+<div style="color:rgb(7,55,99)" class="gmail_default"><span style="color:rgb(34,34,34)">- Quotas de 2026 at&eacute; maio inclusive:&nbsp;</span><span style="color:rgb(34,34,34)">189.40</span><br></div>
+<div style="color:rgb(7,55,99)" class="gmail_default"><span style="color:rgb(34,34,34)">- Quota extraordin&aacute;ria deliberada hoje na assembleia geral para obras a fazer no terra&ccedil;o no ver&atilde;o de 2026:&nbsp;</span><span style="color:rgb(34,34,34)">791.62</span><br></div>
+<div style="color:rgb(7,55,99)" class="gmail_default"><br></div>
+<div style="color:rgb(7,55,99)" class="gmail_default"><span style="color:rgb(34,34,34)">- Valor pago em 2026 = 37.88&euro; em fevereiro</span><br></div>
+<div style="color:rgb(7,55,99)" class="gmail_default"><br></div>
+<div style="color:rgb(7,55,99)" class="gmail_default"><span style="color:rgb(34,34,34)">Ent&atilde;o total de d&iacute;vida a 31 de maio de 2026:&nbsp;</span><span style="color:rgb(34,34,34)">-2336.64</span><br></div>
+<div style="color:rgb(7,55,99)" class="gmail_default"><br></div>
+<div style="color:rgb(7,55,99)" class="gmail_default">Depois diga ent&atilde;o a data em que quiser mesmo a declara&ccedil;&atilde;o para eu confirmar na altura os valores j&aacute; pagos at&eacute; a&iacute;. E envie tamb&eacute;m os dados do futuro propriet&aacute;rio (Nome completo,&nbsp;Telem&oacute;vel,&nbsp;Email).&nbsp;<br></div>
+<div style="color:rgb(7,55,99)" class="gmail_default"><br></div>
+<div style="color:rgb(7,55,99)" class="gmail_default">Obrigado,&nbsp;<br></div>
+<div style="color:rgb(7,55,99)" class="gmail_default"><br></div>
+<div style="color:rgb(7,55,99)" class="gmail_default">Francisco Silva<br></div>
+<div style="color:rgb(7,55,99)" class="gmail_default"><br></div>
+<div style="color:rgb(7,55,99)" class="gmail_default"><br></div>
+<div style="color:rgb(7,55,99)" class="gmail_default"><br></div>
+<div style="color:rgb(7,55,99)" class="gmail_default"><br></div>
+</div>
+<div class="gmail_quote">
+<div class="gmail_attr" dir="ltr">&lt;<a rel="noreferrer" href="mailto:nelsonalexandre32@sapo.pt">nelsonalexandre32@sapo.pt</a>&gt; escreveu (quarta, 11/03/2026 &agrave;(s) 20:54):<br></div>
+<blockquote style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex" class="gmail_quote">
+<div style="font-family:Arial">
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Boa noite,francisco</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Solicito divida total do acordo de condom&iacute;nio realizado entre a administra&ccedil;&atilde;o e o cond&oacute;mino do 6A &agrave; presente data.</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>E acrescentar sff valor do condominio do m&ecirc;s 3,4 e 5 de 2026 em virtude de o apartamento ir ser vendido.</span></span><br></p>
+<p><span class="font" style="font-family:Arial, Helvetica, sans-serif, sans-serif"><span>Ap&oacute;s boa cobran&ccedil;a Solicito para efeitos de venda uma declara&ccedil;&atilde;o de n&atilde;o divida at&eacute; 31/5.</span></span><br></p>
+<p>Qq d&uacute;vida disponha.&nbsp;<br></p>
+<p><br></p>
+<p>Atentamente&nbsp;<br></p>
+<p>Nelson Cordeiro 6A<br></p>
+</div>
+</blockquote>
+</div>
+</div>
+<div><br></div>
+<div>----- Fim da mensagem de Condom&iacute;nio Cidade da Praia 370 &lt;&gt; -----<br></div>
+</blockquote>
+</div>
+</blockquote>
+</div>
+<div><br></div>
+<div>----- Fim da mensagem de Condom&iacute;nio Cidade da Praia 370 &lt;&gt; -----<br></div>
+</blockquote>
+<div><br></div>
+<div>----- Fim da mensagem de&nbsp; -----<br></div>
+</blockquote>
+</div>
+</blockquote>
+</div>
+<div><br></div>
+<div>----- Fim da mensagem de Condom&iacute;nio Cidade da Praia 370 &lt;&gt; -----<br></div>
+</blockquote>
+</div>
+</blockquote>
+</div>
+</div>
+</div>
+<div><br></div>
+<div>----- Fim da mensagem de Condom&iacute;nio Cidade da Praia 370 &lt;&gt; -----<br></div>
+</blockquote>
+<div><br></div>
+<div>----- Fim da mensagem de&nbsp; -----<br></div>
+</blockquote>
+</div>
+</blockquote>
+</div>
+<div><br></div>
+<div>----- Fim da mensagem de Condom&iacute;nio Cidade da Praia 370 &lt;&gt; -----<br></div>
+</blockquote>
+</div>
+</blockquote>
+</div>
+</blockquote>
+</div>
+</div>
+<div><br></div>
+<div>----- Fim da mensagem de Condom&iacute;nio Cidade da Praia 370 &lt;<a href="mailto:condcidpraia370@gmail.com">condcidpraia370@gmail.com</a>&gt; -----<br></div>
+</blockquote>
+</div>
+</blockquote>
+</div>
+</div>
+<div><br></div>
+<div>----- Fim da mensagem de Condom&iacute;nio Cidade da Praia 370 &lt;<a href="mailto:condcidpraia370@gmail.com">condcidpraia370@gmail.com</a>&gt; -----<br></div>
+</blockquote>
+</body>
+</html>
+--=_Qt5Uu37nGvbye8R3x5HwkIK--
+--=_-_Ta_xrjQSTmqNw8pM-jYtQ
+Content-Type: image/jpeg; name="Screenshot_20261109_161954_Adobe Acrobat.jpg"
+Content-Disposition: attachment; size=406804; filename="Screenshot_20261109_161954_Adobe Acrobat.jpg"
+Content-Transfer-Encoding: base64
+
+
+--=_-_Ta_xrjQSTmqNw8pM-jYtQ--

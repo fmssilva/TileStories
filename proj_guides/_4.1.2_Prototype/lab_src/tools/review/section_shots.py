@@ -30,7 +30,7 @@ async def main(outdir, tab, ids, devs):
                 for dv in devs:
                     vis = "children" if lk == "playful" else "adults"
                     js = (f"(()=>{{ui.device='{dv}';buildDevice();D.app.appearance='{m}';ui.appearance='{m}';ui.forceMode=null;D.profile.appearance=null;"
-                          f"D.profile.visitors='{vis}';D.profile.look='{lk}';D.profile.time='classic';D.profile.text='{tx}';lookCache=null;ui.coachDone=true;"
+                          f"D.profile.visitors='{vis}';D.profile.look='{lk}';D.profile.time='classic';D.profile.text='{tx}';ui.coachDone=true;"
                           f"ui.compPreview=null;ui.previewLayout=null;ui.cam={{...CAM0}};ui.open={{}};" +
                           "".join(f"ui.open['{a}']=true;" for a in anc[f["id"]]) + "renderEditor();"
                           f"const h=document.querySelector('#edb .fold[data-id=\"{f['id']}\"] > .fh'); if(h) h.click(); return !!h}})()")

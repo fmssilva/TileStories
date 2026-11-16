@@ -7,7 +7,6 @@
   Object.assign(P.tokens, { outline_pt: 2, shadow_style: "hard", title_face: "rounded", corner: 24, icon_stroke: 2.25 });
   P.colours = { light: {"glass": {"color": "#FFFDF8", "tint": 0.97, "blur": 0}, "text": {"main": "#0E2466", "soft": "#33447F"}, "border": {"color": "#0E2466", "opacity": 1.0}, "accent": "#1F3F9A", "accent_text": "#FFFFFF", "buttons": {"color": "#FFFDF8", "tint": 1.0, "icon": "#0E2466", "label": "#FFFDF8", "label_text": "#0E2466"}, "tags": {"color": "#FFFDF8", "tint": 1.0}, "sheet": {"color": "#F7F2E7", "tint": 1.0, "text": "#0E2466", "soft": "#33447F"}, "labels": {"color": "#FFFDF8", "tint": 0.96, "text": "#0E2466"}},
     dark: {"glass": {"color": "#1B2456", "tint": 0.98, "blur": 0}, "text": {"main": "#F7F2E7", "soft": "#C9D1F0"}, "border": {"color": "#A9B8F2", "opacity": 1.0}, "accent": "#F2C14E", "accent_text": "#0E2466", "buttons": {"color": "#263070", "tint": 1.0, "icon": "#F7F2E7", "label": "#263070", "label_text": "#F7F2E7"}, "tags": {"color": "#263070", "tint": 1.0}, "sheet": {"color": "#182050", "tint": 1.0, "text": "#F7F2E7", "soft": "#C9D1F0"}, "labels": {"color": "#141B45", "tint": 0.95, "text": "#F7F2E7"}} };
-  lookCache = null;
 })();
 /* the kit, for JS that builds Playful-only DOM (Azu, celebrations, decorations). Over the camera: none of it except Azu in a tip */
 const KIDS = {

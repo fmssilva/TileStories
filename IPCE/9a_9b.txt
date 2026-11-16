@@ -1,0 +1,515 @@
+
+Introdução à Programação para a Ciência e Engenharia (2026/2027)
+Lista de exercícios
+Artur Miguel Dias
+Prática 09a (Semana de 09-13/nov/2026)
+Sumário: Conjuntos, dicionários e strings. Exercícios 52 a 55.
+
+52 - [Conjuntos] Escreva e teste uma função has_duplicates para verificar se uma lista de palavras contém palavras duplicadas - basta existir uma palavra duplicada para a resposta ser True.
+Escreva e teste uma segunda função same_words para verificar se duas listas contêm exatamente as mesmas palavras, podendo haver diferenças na ordem e no número de ocorrências de cada palavra em cada lista.
+
+Use conjuntos [teórica 15] para simplificar a resolução destes problemas.
+
+Complete o programa:
+
+type WordList = list[str]
+
+def has_duplicates(l: WordList) -> bool:
+    """ Has the list l any duplicate values? """
+    pass # FAZER ... (usando conjuntos, basta um return com uma expressão booleana)
+
+def same_words(a: WordList, b: WordList) -> bool:
+    """ Do the lists a and b have  exactly the same words? """
+    pass # FAZER ... (usando conjuntos, basta um return com uma expressão booleana)
+
+def main() -> None:
+    a = ['a', 'mera', 'gnosiologia', 'explícita', 'ou', 'deliberadamente', 'divorciada', 'da',
+         'axiologia', 'por', 'um', 'lado', 'e', 'da', 'ontologia', 'por', 'outro', 'não', 'se',
+         'converte', 'sem', 'mais', 'em', 'fundamentação', 'deontológica', 'em', 'razão', 'do',
+         'dever', 'ser']
+    b = ['a', 'mera', 'gnosiologia', 'simples', 'afirmação', 'teorética', 'deliberadamente',
+         'divorciada', 'da', 'axiologia', 'e', 'da', 'ontologia', 'não', 'nos', 'pode', 'fornecer',
+         'uma', 'fundamentação', 'deontológica']
+    c = ['a', 'axiologia', 'converte', 'da', 'deliberadamente', 'deontológica', 'dever', 'divorciada',
+         'do', 'e', 'em', 'em', 'explícita', 'fundamentação', 'gnosiologia', 'lado', 'mais', 'mera',
+         'não', 'ontologia', 'ou', 'outro', 'por', 'por', 'razão', 'se', 'sem', 'ser', 'um']    
+    print(has_duplicates(a))
+    print(has_duplicates(b))
+    print(has_duplicates(c))
+    print()
+    print(same_words(a,b))
+    print(same_words(a,c))
+    print(same_words(b,c))
+
+main()
+Execução deste programa de teste:
+
+>>> main()
+True
+True
+True
+
+False
+True
+False
+53 - [Dicionários] Escreva e teste uma função how_many_of_each para contar, numa lista de palavras, o número de ocorrências de cada palavra. O resultado deve ser um dicionário [teórica 15] que associe a cada palavra um número inteiro.
+[Ajuda: é possível resolver este problema usando apenas as operações essenciais dos dicionários: in (pertença), d[str] (acesso indexado), d[str] = v (atribuição indexada).]
+
+Complete o programa:
+
+type WordList = list[str]
+
+def how_many_of_each(l:  WordList) -> dict[str, int]:
+    """ Count the ocurrences of each word in the list l. """
+    d = dict()      # cria dicionário vazio
+    pass # FAZER ...
+    return d
+
+def main() -> None:
+    a = ['a', 'mera', 'gnosiologia', 'explícita', 'ou', 'deliberadamente', 'divorciada', 'da',
+         'axiologia', 'por', 'um', 'lado', 'e', 'da', 'ontologia', 'por', 'outro', 'não', 'se',
+         'converte', 'sem', 'mais', 'em', 'fundamentação', 'deontológica', 'em', 'razão', 'do',
+         'dever', 'ser']
+    b = ['a', 'mera', 'gnosiologia', 'simples', 'afirmação', 'teorética', 'deliberadamente',
+         'divorciada', 'da', 'axiologia', 'e', 'da', 'ontologia', 'não', 'nos', 'pode', 'fornecer',
+         'uma', 'fundamentação', 'deontológica']
+    c = ['a', 'axiologia', 'converte', 'da', 'deliberadamente', 'deontológica', 'dever', 'divorciada',
+         'do', 'e', 'em', 'em', 'explícita', 'fundamentação', 'gnosiologia', 'lado', 'mais', 'mera',
+         'não', 'ontologia', 'ou', 'outro', 'por', 'por', 'razão', 'se', 'sem', 'ser', 'um']    
+    for wl in [a,b,c]:
+        print(how_many_of_each(wl))
+
+main()
+Execução deste programa de teste. Olhe bem para os dicionários que estão a ser escritos:
+
+>>> main()
+{'a': 1, 'mera': 1, 'gnosiologia': 1, 'explícita': 1, 'ou': 1, 'deliberadamente': 1, 'divorciada': 1,
+ 'da': 2, 'axiologia': 1, 'por': 2, 'um': 1, 'lado': 1, 'e': 1, 'ontologia': 1, 'outro': 1, 'não': 1,
+ 'se': 1, 'converte': 1, 'sem': 1, 'mais': 1, 'em': 2, 'fundamentação': 1, 'deontológica': 1, 'razão': 1,
+ 'do': 1, 'dever': 1, 'ser': 1}
+{'a': 1, 'mera': 1, 'gnosiologia': 1, 'simples': 1, 'afirmação': 1, 'teorética': 1, 'deliberadamente': 1,
+ 'divorciada': 1, 'da': 2, 'axiologia': 1, 'e': 1, 'ontologia': 1, 'não': 1, 'nos': 1, 'pode': 1, 'fornecer': 1,
+ 'uma': 1, 'fundamentação': 1, 'deontológica': 1}
+{'a': 1, 'axiologia': 1, 'converte': 1, 'da': 1, 'deliberadamente': 1, 'deontológica': 1, 'dever': 1,
+ 'divorciada': 1, 'do': 1, 'e': 1, 'em': 2, 'explícita': 1, 'fundamentação': 1, 'gnosiologia': 1, 'lado': 1,
+ 'mais': 1, 'mera': 1, 'não': 1, 'ontologia': 1, 'ou': 1, 'outro': 1, 'por': 2, 'razão': 1, 'se': 1, 'sem': 1,
+ 'ser': 1, 'um': 1}
+V : 54 - [Dicionários] Escreva um programa que informe sobre as capitais de diversos países.
+No início, o programa conhece apenas um pequeno número de países. Mas o programa vai aprendendo. O programa pede a resposta certa ao utilizador nos casos em que não conhece a resposta. O programa termina quando o utilizador introduz a palavra "fim".
+
+[Ajuda: é possível resolver este problema usando as operações mais usadas sobre dicionários: in (pertença), d[str] acesso indexado, d[str] = v atribuição indexada.]
+
+Complete o programa:
+
+type Atlas = dict[str, str]            # país -> capital
+
+END_MARK = "fim"
+
+def interaction(atlas: Atlas) -> None:
+    """ User interaction. """
+    while True:
+        country = input("PAÍS: ")
+        if country == "fim":
+            break
+        pass # FAZER ...
+
+def main() -> None:  
+    atlas = {"Portugal":"Lisboa", "Espanha":"Madrid", "França":"Paris"}
+    interaction(atlas)
+
+main()
+Exemplo de execução
+PAÍS: Portugal
+Portugal -> Lisboa
+PAÍS: Alemanha
+Não conheço a capital de Alemanha. Por favor ensine-me: Berlim
+PAÍS: Burkina Faso
+Não conheço a capital de Burkina Faso. Por favor ensine-me: Ouagadougou
+PAÍS: Espanha
+Espanha -> Madrid
+PAÍS: Alemanha
+Alemanha -> Berlim
+PAÍS: Burkina Faso
+Burkina Faso -> Ouagadougou
+PAÍS: fim
+W : 55 - [Strings] Escreva uma versão do Jogo da Forca (Hangman), no qual o utilizador tenta adivinhar uma palavra ou frase secreta usando o máximo de 10 tentativas.
+O programa começa por mostrar vários '#' no lugar das várias letras do segredo a descobrir. Na primeira jogada, o utilizador escolhe uma letra e o programa mostra todas as ocorrências dessa letra. Em sucessivas jogadas, o utilizador vai adivinhando sucessivas letras e revelando o segredo a pouco e pouco. Interessa ao jogador minimizar o número de tentativas. Percebe-se melhor esta explicação, olhando para o exemplo no final.
+
+Complete o programa:
+
+def update_visible(visible: list[str], secret: str, c: str) -> None:
+    """ Copy to 'visible' all the ocurrences of 'c' in 'secret'.
+        Precondition: len(c) == 1
+    """
+    n = len(secret)
+    pass # FAZER ...
+
+def print_visible(visible: list[str]) -> None:
+    """ Show the current state of the discovery. """
+    print(' '.join(visible))
+
+def got_it_right(visible: list[str], secret: str) -> bool:
+    """ Has discovered the secret yet? """
+    return ''.join(visible) == secret
+
+def input_letter(prompt: str) -> str:
+    """ Input a letter (alphabetic char). """
+    while True:
+        s = input(prompt)
+        if len(s) == 1 and s.isalpha():
+            return s
+
+def end_game(visible: list[str], secret: str, attempts: int) -> None:
+    """ Action at the end of the game. """
+    if got_it_right(visible, secret):
+        print(f"Parabéns! Adivinhou em {attempts} tentativas o segredo '{secret}'!")
+    else:
+        print(f"Lamento, mas esgotou o número de tentativas. O segredo era '{secret}'.")
+
+def interaction(secret: str, max_attempts: int) -> None:
+    """ User interaction. """
+    print("Bem-vindo ao Jogo da Forca!")
+    visible = ['#'] * len(secret)   # é preciso usar uma lista mutável; uma string não serve
+    attempts = 0
+    print_visible(visible)
+    pass # FAZER ...
+
+def main() -> None:
+    MAX_ATTEMPTS = 10
+    interaction("ananas", MAX_ATTEMPTS)
+
+main()
+Exemplo de execução
+Bem-vindo ao Jogo da Forca!
+# # # # # #
+01 - Adivinhe uma letra: a
+a # a # a #
+02 - Adivinhe uma letra: g
+A letra 'g' não faz parte do segredo.
+a # a # a #
+03 - Adivinhe uma letra: i
+A letra 'i' não faz parte do segredo.
+a # a # a #
+04 - Adivinhe uma letra: s
+a # a # a s
+05 - Adivinhe uma letra: z
+A letra 'z' não faz parte do segredo.
+a # a # a s
+06 - Adivinhe uma letra: n
+Parabéns! Adivinhou em 6 tentativas o segredo 'ananas'!
+Ajuda: Escrever inteiro n usando 2 carateres com zeros à esquerda: print(f"{n:02d}").
+
+
+
+
+
+
+
+Introdução à Programação para a Ciência e Engenharia (2026/2027)
+Lista de exercícios
+Artur Miguel Dias
+Prática 09b (Semana de 09-13/nov/2026)
+Sumário: Ficheiros. Exercícios 56 a 59.
+
+
+X : 56 - O seguinte ficheiro de texto - "alice.txt" - contém uma tradução para português do Brasil (pré-acordo ortográfico de 1990) de uma famosa obra da literatura em inglês do século XIX: "Alice no País das Maravilhas". Para obter o ficheiro, clique no link com o botão direito do rato, escolha "Save link as..." e guarde o ficheiro na mesma pasta do seu programa.
+Pedimos-lhe para escrever um programa para fazer estas três contagens no ficheiro "alice.txt":
+
+Número de linhas do ficheiro;
+Número de linhas do ficheiro onde ocorre a palavra "Alice". [A palavra "ALICE", que também ocorre no ficheiro, não entra nas contagens.]
+Número de vezes que a palavra "Alice" ocorre no ficheiro. [Ajuda: pode usar a função get_words da teórica 05b e o método count das listas da teórica 04b.]
+Por favor, resolva este problema sem carregar o conteúdo do ficheiro em memória. Percorra o ficheiro uma única vez e vá atualizando três contadores.
+Percorrer o ficheiro apenas uma vez impede-nos de decompor o programa em muitas funções (como geralmente gostamos). Portanto, escreva apenas uma função chamada process_file que recebe o nome do ficheiro e a string a procurar, faz as contagens e produz um triplo ordenado.
+
+Na aula teórica 08a, na secção Exemplos de processamentos simples, encontra exemplos de processamento de ficheiros nos quais se poderá inspirar.
+
+Problemas técnicos: Se você começar a ter problemas de acesso ao ficheiro de texto ou a obter erros de encoding, leia a secção Problemas na abertura de ficheiros da teórica 08a.
+
+Complete o programa:
+
+def file_exists(file_name: str) -> bool:
+    """ Check if a file can be opened in read mode. """
+    try:
+       f = open(file_name, 'r')
+       f.close()
+       return True
+    except FileNotFoundError:
+       return False
+
+def process_file(file_name: str, search_str: str) -> tuple[int,int,int]:
+    """ Count three things in the file:
+            - number of lines,
+            - number of lines where the search_str occurs,
+            - number of occurrences of search_str in the file
+        Precondition: file_exists(file_name)
+    """
+    pass # FAZER ...
+
+def main() -> None:
+    SEARCH = "Alice"
+    fname = input("Nome do ficheiro: ")
+    if not (file_exists(fname)):
+        print("Não foi possível abrir o ficheiro")
+    else:
+        res = process_file(fname, SEARCH)
+        print(res)
+
+main()
+Exemplo de execução
+Nome do ficheiro: alice.txt
+(2652, 436, 437)
+Exemplo de execução
+Nome do ficheiro: inexistente.txt
+Não foi possível abrir o ficheiro
+NOTA: Se o objetivo fosse reconhecer a palavra "Alice" independentemente das minúsculas e maiúsculas, a técnica a usar seria converter tudo para maiúsculas antes de comparar. O método upper das string, cria uma cópia duma string convertendo para maiúsculas.
+
+57 - Considere o seguinte ficheiro que foi usado na teórica 08a: "jogadores.txt". Neste ficheiro, os dados de cada jogador ocupam duas linhas.
+Crie um programa que faça a cópia do ficheiro, com mudança de formato. Na cópia, cada jogador passa a ocupar apenas uma linha. Eis um exemplo do formato pretendido: "jogadores_new.txt".
+
+Depois de feita a conversão, o conteúdo do novo ficheiro é mostrado no ecrã.
+
+Por favor, resolva este problema sem carregar o conteúdo do ficheiro em memória.
+
+Complete o programa:
+
+def file_exists(file_name: str) -> bool:
+    """ Check if a file can be opened in read mode. """
+    try:
+       f = open(file_name, 'r')
+       f.close()
+       return True
+    except FileNotFoundError:
+       return False
+
+def print_file(file_name: str) -> None:
+    """ Print a file on the screen.
+        Precondition: file_exists(src_name)
+    """
+    f = open(file_name, 'r')
+    for line in f:
+        print(line, end='')
+    f.close()
+
+def convert_file(src_name: str, target_name: str) -> None:
+    """ Convert a file of players to the new format.
+        Precondition: file_exists(src_name)
+    """
+    pass # FAZER ...
+
+def main() -> None:
+    src_name = input("Nome do ficheiro: ")
+    target_name = src_name.replace(".txt","_new.txt")
+    if not (file_exists(src_name)):
+        print("Não foi possível abrir o ficheiro")
+    else:
+        convert_file(src_name, target_name)
+        print_file(target_name)
+
+main()
+Exemplo de execução:
+Nome do ficheiro: jogadores.txt
+João Leixões 5
+Tarquínio Benfica 6
+Pedro Sporting 3
+Luís Belenenses 8
+Miguel Leixões 2
+João Sporting 1
+Manuel Académica 5
+Camões Porto 5
+Fernando Benfica 10
+Joaquim Boavista 7
+Gervásio Belenenses 7
+58 - O programa do exercício 54 (o programa dos países e capitais) é um programa que aprende. Mas aquilo que ele aprende não fica registado. Na próxima execução o programa já esqueceu tudo e recomeça a aprendizagem do início.
+Para resolver esse problema, vamos adicionar persistência aos dados, usando um ficheiro auxiliar:
+
+No início do programa, os dados iniciais são lidos a partir de um ficheiro de texto.
+No final da execução, todos os dados que o programa conhece são guardados no mesmo ficheiro de texto.
+Ao usar sempre o mesmo ficheiro de texto, conseguimos que os dados se tornem persistentes, continuando a existir mesmo quando o programa não está a correr.
+Se o ficheiro não existir, o programa começa com dados vazios, ou seja, o programa não conhece qualquer país e respetiva capital.
+Para guardar os dados, use um ficheiro chamado atlas.txt, onde a informação referente a cada país ocupa duas linhas.
+Complete o programa:
+
+type Atlas = dict[str, str]  # país -> capital
+
+ATLAS_FILE_NAME = "atlas.txt"
+END_MARK = "fim"
+
+def file_exists(file_name: str) -> bool:
+    """ Check if a file can be opened in read mode. """
+    try:
+       f = open(file_name, 'r')
+       f.close()
+       return True
+    except FileNotFoundError:
+       return False
+
+def load_atlas(file_name: str) -> Atlas:
+    """ Load the initial atlas from a file.
+        The file is allowed to not exist.
+    """
+    atlas = dict()
+    pass # FAZER ...
+    return atlas
+
+def store_atlas(file_name: str, atlas: Atlas) -> None:
+    """ Store the data of the atlas. """
+    pass # FAZER ...
+
+def interaction(atlas: Atlas) -> None:
+    """ User interaction. """
+    pass # FEITO: o mesmo código do exercício 54
+
+def main() -> None:  
+    at = load_atlas(ATLAS_FILE_NAME)
+    print(f"{len(at)} países carregados")
+    interaction(at)
+    store_atlas(ATLAS_FILE_NAME, at)
+    print(f"{len(at)} países armazenados")
+
+main()
+Exemplo de 1ª execução:
+>>> main()
+Nome do ficheiro: paises.txt
+0 países carregados
+PAÍS: Portugal
+Não conheço a capital de Portugal. Por favor ensine-me: Lisboa
+PAÍS: Espanha
+Não conheço a capital de Espanha. Por favor ensine-me: Madrid
+PAÍS: França
+Não conheço a capital de França. Por favor ensine-me: Paris
+PAÍS: fim
+3 países armazenados
+Exemplo de 2ª execução:
+>>> main()
+Nome do ficheiro: paises.txt
+3 países carregados
+PAÍS: Portugal
+Portugal -> Lisboa
+PAÍS: Angola
+Não conheço a capital de Angola. Por favor ensine-me: Luanda
+PAÍS: fim
+4 países armazenados
+59 - Volte a olhar para o exercício 51, o exercício da "Pastelaria da Esquina". Se não o terminou, talvez tenha tempo de o acabar agora.
+No entanto, o que se pretende de novo é acrescentar persistência aos dados. Imite o que se fez no exercício anterior.
+
+Use um ficheiro de dados chamado pastelaria.txt para guardar o stock corrente. O formato dos dados é para manter.
+
+Só é preciso alterar partes da classe UI: o método input_shop deve ser ajustado e passar a chamar-se load_shop; também é preciso um método novo chamado store_shop.
+
+from dataclasses import dataclass
+
+#########   type File   #########
+
+import _io
+type File = _io.TextIOWrapper   # tipo dos ficheiros
+
+def file_exists(file_name: str) -> bool:
+    try:
+       f = open(file_name, 'r')
+       f.close()
+       return True
+    except FileNotFoundError:
+       return False
+
+
+#########   type Ingredient   #########
+
+@dataclass
+class Ingredient:
+    name: str
+    percent: float
+
+# Sem funções.
+
+
+#########   type CakeVariety   #########
+
+@dataclass
+class CakeVariety:
+    name: str
+    amount: int
+    ingredients: list[Ingredient]
+    
+def cake_variety_main_ingredient(variety: CakeVariety) -> Ingredient | None:
+    """ The main ingredient of the recipe of a cake variety. """
+    pass # FEITO: o mesmo código do exercício 51
+
+def cake_variety_sell(variety: CakeVariety, units: int) -> int:
+    """ Sell some units.
+        Precondition: units >= 0 """
+    pass # FEITO: o mesmo código do exercício 51
+
+#########   type CakeShop   #########
+
+@dataclass
+class CakeShop:
+    stock: list[CakeVariety]
+
+def cake_shop_size(shop: CakeShop) -> int:
+    """ Number of cake varieties in the shop. """
+    return len(shop.stock)
+
+def cake_shop_find_variety(shop: CakeShop, vname: str) -> CakeVariety | None:
+    """ Find a cake variety by name. """
+    pass # FEITO: o mesmo código do exercício 51
+
+def cake_shop_sell(shop: CakeShop, vname: str, units: int) -> int | None:
+    """ Sell some units of a named cake variety.
+        Precondition: units >= 0 """
+    pass # FEITO: o mesmo código do exercício 51
+
+
+#########   User Interface   #########
+
+# No validation here. We are assuming all the inputs are valid (to simplify).
+
+@dataclass
+class UI:
+    shop: CakeShop
+
+CAKE_SHOP_FILE_NAME = "pastelaria.txt"  # poderá ser necessário o path
+
+def ui_make_ingredient(line: str) -> Ingredient:
+    """ Create an ingredient from an input line. """
+    pass # FEITO: o mesmo código do exercício 51
+
+def ui_make_cake_variety(line: str, f: File) -> CakeVariety:
+    """ Create a cake variety ingredient from an input line plus ingredient lines. """
+    pass # AJUSTAR - novo argumento f
+
+def ui_load_shop(ui: UI, file_name: str) -> None:
+    """ Load the data of the shop.
+        Precondition: file_exists(file_name)
+    """
+    pass # FAZER
+
+def ui_store_shop(ui: UI, file_name: str) -> None:
+    """ Store the data of the shop.
+        Precondition: file_exists(file_name)
+    """
+    pass # FAZER
+
+def ui_process(ui: UI, name: str, units: int) -> None:
+    """ User interface for selling some units of a cake variety.
+        Precondition: units >= 0 """
+    pass # FEITO: o mesmo código do exercício 51
+
+def ui_run(ui: UI) -> None:
+    """ Run the user interface. """
+    if not (file_exists(CAKE_SHOP_FILE_NAME)):
+        print("Não foi possível abrir o ficheiro")
+    else:   
+      ui_load_shop(ui, CAKE_SHOP_FILE_NAME)
+      name = input("BOLO: ")            # pergunta o nome do bolo
+      units = int(input("UNIDADES: "))  # pergunta a quantidade
+      ui_process(ui, name, units)       # processa o pedido
+      ui_store_shop(ui, CAKE_SHOP_FILE_NAME)
+
+
+############# main #############
+
+def main() -> None:
+    ui = UI(CakeShop([]))
+    ui_run(ui)
+
+main()

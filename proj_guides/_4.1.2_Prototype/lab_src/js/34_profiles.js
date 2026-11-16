@@ -59,7 +59,7 @@ function view(kind, path, lookKey) {   // kind: "tokens" | "colours:<mode>"
       const p = [...path, key], base = L.base ? (() => { for (const B of lookChain(L.base)) { const v = getPath(store(B) || {}, p); if (v !== undefined) return v; } })() : undefined;
       if (L.base && base !== undefined && JSON.stringify(base) === JSON.stringify(val)) delPath(store(L), p);   // back to the base value: no difference kept
       else setPath(store(L), p, isObj(val) ? JSON.parse(JSON.stringify(val)) : val);
-      lookCache = null; return true;
+      return true;
     },
     has(t, key) { return read([...path, key]) !== undefined; },
     ownKeys() { return keys(); },
@@ -74,7 +74,7 @@ function scopeOf(obj, key) {
   const own = getPath(store || {}, [...s.path, key]) !== undefined, mode = s.kind === "tokens" ? null : s.kind.slice(8);
   return { label: L.name + (mode ? " · " + mode : ""), look: s.look, mode, own, inherited: !!L.base && !own, base: L.base ? D.looks[L.base].name : null, path: [...s.path, key], kind: s.kind };
 }
-function resetScoped(sc) { const L = D.looks[sc.look]; snap(); delPath(sc.kind === "tokens" ? L.tokens : L.colours[sc.mode], sc.path); lookCache = null; changed(); renderEditor(); renderPhone?.(); }
+function resetScoped(sc) { const L = D.looks[sc.look]; snap(); delPath(sc.kind === "tokens" ? L.tokens : L.colours[sc.mode], sc.path); changed(); renderEditor(); renderPhone?.(); }
 /* time and visitors rows: the editor edits the option chosen in the profile bar */
 function dimView(dim) {
   const rowOf = () => (dim === "time" ? D.time : D.visitors)[D.profile[dim]];
@@ -86,11 +86,10 @@ function dimView(dim) {
 }
 
 /* ---- install: move the v17 design (D.ds, D.themes) into the Premium look once, then expose the views ---- */
-let lookCache = null;
 function installViews() {
   if (!D.looks) {
     const ds = Object.getOwnPropertyDescriptor(D, "ds")?.value, th = Object.getOwnPropertyDescriptor(D, "themes")?.value;
-    const tokens = JSON.parse(JSON.stringify(ds || {})); delete tokens.audiences;
+    const tokens = JSON.parse(JSON.stringify(ds || {}));
     D.looks = {
       premium: { name: "Premium", tokens: { ...LOOK_NEW, ...tokens }, colours: JSON.parse(JSON.stringify(th || {})) },
       // the Playful look (_4.1.9 §5, mk_review/playful_spec): only what differs from Premium; every text pair 7:1 in both modes
@@ -100,17 +99,9 @@ function installViews() {
         colours: { light: {"glass": {"color": "#FFF8EC", "tint": 0.96, "blur": 0}, "text": {"main": "#1B1446", "soft": "#3B3272"}, "border": {"color": "#1B1446", "opacity": 1.0}, "accent": "#2638B8", "accent_text": "#FFFFFF", "buttons": {"color": "#FFFFFF", "tint": 1.0, "icon": "#1B1446", "label": "#FFFFFF", "label_text": "#1B1446"}, "tags": {"color": "#FFFFFF", "tint": 1.0}, "sheet": {"color": "#FFF8EC", "tint": 1.0, "text": "#1B1446", "soft": "#3B3272"}, "labels": {"color": "#FFFFFF", "tint": 0.96, "text": "#1B1446"}}, dark: {"glass": {"color": "#221D45", "tint": 0.97, "blur": 0}, "text": {"main": "#FFF8EC", "soft": "#DCD6F5"}, "border": {"color": "#0B0820", "opacity": 1.0}, "accent": "#FFC83D", "accent_text": "#1B1446", "buttons": {"color": "#2D2760", "tint": 1.0, "icon": "#FFF8EC", "label": "#2D2760", "label_text": "#FFF8EC"}, "tags": {"color": "#2D2760", "tint": 1.0}, "sheet": {"color": "#221D45", "tint": 1.0, "text": "#FFF8EC", "soft": "#DCD6F5"}, "labels": {"color": "#140F33", "tint": 0.94, "text": "#FFFFFF"}} } },
     };
   }
-  delete D.ds; delete D.themes; delete D.app.theme;
+  delete D.ds; delete D.themes;
   Object.defineProperty(D, "ds", { get: () => view("tokens", []), configurable: true, enumerable: false });
   Object.defineProperty(D, "themes", { get: () => ({ light: view("colours:light", []), dark: view("colours:dark", []) }), configurable: true, enumerable: false });
-  lookCache = null;
-}
-/* one flat resolved table per profile (look, mode, text): what Unity would bake into USS variables */
-function resolvedLook() {
-  const key = activeLook() + "|" + appearance() + "|" + textScale();
-  if (lookCache && lookCache.key === key) return lookCache.t;
-  const plain = v => JSON.parse(JSON.stringify(v)), t = { ...plain(D.ds), colours: plain(D.themes[appearance()]), look: activeLook(), mode: appearance() };
-  lookCache = { key, t }; return t;
 }
 installViews();
 
@@ -120,7 +111,7 @@ function setProfile(k, v) {
   if (k === "mode") { const def = (() => { const x = D.profile.appearance || D.app.appearance; return x === "follow" ? ui.appearance : x; })(); ui.forceMode = v === def ? null : v; }
   else if (k === "look") D.profile.look = v === visitorRow().look ? "auto" : v;
   else D.profile[k] = v;
-  lookCache = null; renderEditor(); if (ui.screen === "app") renderPhone(); else renderTapWall?.();
+  renderEditor(); if (ui.screen === "app") renderPhone(); else renderTapWall?.();
 }
 function renderProfileBar() {   // one line above the tabs: switch profile from any tab
   const bar = document.getElementById("pbar"); if (!bar) return;
@@ -186,7 +177,7 @@ function lookSample(k) {
 /* ---- onboarding (v20): the look first (the page restyles as you pick), who the tour is for (with a live example), how long,
    then optional interests. Light / dark, language and text size sit as small optional icons at the top. One page, skippable. ---- */
 function onboardingScreen(go) {
-  const O = D.app.onboarding, P = D.profile, root = dsScreenRoot("ds-onb"), rp2 = () => { lookCache = null; renderEditor(); renderPhone(); };   // the editor follows: its rows now save into the new look
+  const O = D.app.onboarding, P = D.profile, root = dsScreenRoot("ds-onb"), rp2 = () => { renderEditor(); renderPhone(); };   // the editor follows: its rows now save into the new look
   const kids = forKids(), lk = activeLook();
   // the small optional tools: each one tap, no wrong answer (the phone's own settings are the default)
   const qb = (icon, label, tip, cb) => h("span", { class: "oq hit", role: "button", tabindex: 0, title: tip, "aria-label": tip, onclick: cb }, h("span", { class: "i" }, svg(icon)), h("small", {}, label));
@@ -240,7 +231,7 @@ function audienceExample() {
 
 /* ---- Settings (v20): everything the visitor can change, by area. Opened from the gear next to the search, or from You ---- */
 function settingsScreen(close) {
-  const P = D.profile, R = prefs(), S = D.app.settings, root = dsScreenRoot("ds-settings"), rp2 = () => { lookCache = null; renderEditor(); renderPhone(); };
+  const P = D.profile, R = prefs(), S = D.app.settings, root = dsScreenRoot("ds-settings"), rp2 = () => { renderEditor(); renderPhone(); };
   const line = (icon, t, ctl, sub) => h("div", { class: "ds-row srow" + (sub ? " two" : "") }, h("span", { class: "i" }, svg(icon)), h("div", { class: "rt" }, h("b", {}, t), sub ? h("span", { class: "rs" }, sub) : null), ctl);
   const stack = (icon, t, ctl, sub) => h("div", { class: "ds-row srow stk" }, h("div", { class: "sth" }, h("span", { class: "i" }, svg(icon)), h("div", { class: "rt" }, h("b", {}, t), sub ? h("span", { class: "rs" }, sub) : null)), ctl);   // a wide control under its title
   const seg = (opts, cur, cb) => dsSeg(opts.map(o => o[1]), Math.max(0, opts.findIndex(o => o[0] === cur)), i => cb(opts[i][0]));
@@ -320,7 +311,7 @@ Object.assign(ICONS, {
 
 /* ---- App › 0 Profiles: the dimensions' own rows. Each row edits the option chosen in the profile bar ---- */
 function profilesBody() {
-  const V = dimView("visitors"), T = dimView("time"), rp2 = () => { lookCache = null; renderEditor(); renderPhone(); };
+  const V = dimView("visitors"), T = dimView("time"), rp2 = () => { renderEditor(); renderPhone(); };
   const toTap = () => { runDemo({ step: "tapped", preview: null }, true); rp2(); }, toMain = () => { ui.appStep = "main"; rp2(); };
   const toWide = () => { ui.appStep = "main"; ui.compPreview = null; ui.cam = camCover({ ...CAM0, z: 1 }); rp2(); };   // the whole panel: every POI (and its interest glow) in view
   const toSheet = () => { ui.previewLayout = "tap_layout_5"; ui.appStep = "tapped"; ui.appPoi = D.pois.findIndex(p => p.id === "castle_hill"); tapState.view = null; ui.cam = camCover(camPoseFor(D.pois[ui.appPoi].pos, 50, 35, 1.1)); rp2(); };   // a screen card, where the deep-dive row sits

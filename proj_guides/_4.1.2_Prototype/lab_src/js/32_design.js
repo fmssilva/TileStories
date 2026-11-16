@@ -20,10 +20,6 @@ D.ds = {
   motion: "follow",          // follow the phone's Reduce Motion · full · reduced
   scheme: "standard",        // standard (calm, no overshoot) · expressive (springs that overshoot a little)
   scrim: 0.85,               // the shade under words on a photo (worst pixel 4.5:1)
-  audiences: {               // what Family and Expert change from the Explorer base (_3.5 §3.5)
-    family: { corner: 24, text_step: 1.0625, scheme: "expressive", icon_stroke: 2 },
-    expert: { corner: 12, text_step: 1, density: 0.75, icon_stroke: 1.5 },
-  },
   nav: { style: "raised", shape: "floating", fill: "solid", labels: "always", tabs: "4", title: "large" },
   sheet: { grabber: true, backdrop: 0.35, detent: "half" },
 };
@@ -32,7 +28,7 @@ const DS_FONT = '"Atkinson Hyperlegible Next","Segoe UI",system-ui,sans-serif', 
 const radiiFor = r => [Math.round(r * 0.3), Math.round(r * 0.6), Math.round(r), Math.round(r * 1.5)];
 const PT = v => v / 3.9;   // pt → u (1 u = 1 % of a 390 pt phone width)
 /* the look classes on a screen root: the live look, and the children's tone (visitors) */
-const audCls = () => " look-" + activeLook() + (forKids() ? " kidtone" : "");
+const audCls = () => " look-" + activeLook();
 /* the tokens in use: the live look's (resolved through its base), times the visitor's text size */
 function dsT() { const S = D.ds; return { ...S, text: S.text_size * textScale() }; }
 Object.assign(ICONS, {
@@ -53,10 +49,9 @@ function applyDS(root) {
   set("--ease", "cubic-bezier(.33,1,.68,1)"); set("--spring", T.scheme === "expressive" ? "cubic-bezier(.34,1.56,.64,1)" : "cubic-bezier(.22,1,.36,1)");
   set("--scrim", T.scrim); set("--sdim", T.sheet.backdrop);
   set("--depth", (0.35 * T.depth).toFixed(3));
-  root.classList.toggle("m-reduced", reducedMotion()); root.classList.toggle("sel-fill", T.selected === "fill"); root.classList.toggle("sel-ring", false);
+  root.classList.toggle("m-reduced", reducedMotion()); root.classList.toggle("sel-fill", T.selected === "fill");
   root.classList.toggle("glass-solid", T.glass === "solid"); root.classList.toggle("expressive", T.scheme === "expressive");
   for (const k of Object.keys(D.looks)) root.classList.toggle("look-" + k, activeLook() === k);
-  root.classList.toggle("kidtone", forKids());
   set("--outline", PT(+T.outline_pt || 0)); root.classList.toggle("outlined", +T.outline_pt > 0); root.classList.toggle("sh-hard", T.shadow_style === "hard");
   set("--tfont", T.title_face === "rounded" ? DS_ROUNDED : T.title_face === "body" ? DS_FONT : (T.titles === "serif" ? DS_DISPLAY : DS_FONT));
 }

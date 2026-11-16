@@ -41,11 +41,9 @@
 
 /* controls */
 .tapc .lchip{pointer-events:auto}
-.tapc.sel-ring:not(.kids) .lchip.on{background:var(--tg);color:var(--tx);box-shadow:inset 0 0 0 calc(.55 * var(--u)) var(--acc)}
 .tapc .ds-seg{display:flex;padding:calc(.8 * var(--u));border-radius:calc(min(var(--r-chip,99), 4) * var(--u));pointer-events:auto}
 .tapc .ds-seg span{flex:1;text-align:center;padding:calc(2.4 * var(--u)) 0;border-radius:calc(min(var(--r-chip,99), 3.2) * var(--u));font:650 calc(3 * var(--ts,1) * var(--u))/1 var(--font);color:var(--td);cursor:pointer;transition:background var(--dur),color var(--dur)}
 .tapc .ds-seg span.on{background:var(--acc);color:var(--acc-fg)}
-.tapc.sel-ring .ds-seg span.on{background:none;color:var(--tx);box-shadow:inset 0 0 0 calc(.55 * var(--u)) var(--acc)}
 .tapc .ds-sw{flex:none;position:relative;width:calc(11.6 * var(--u));height:calc(7 * var(--u));border-radius:99px;background:color-mix(in srgb,currentColor 22%,transparent);cursor:pointer;pointer-events:auto;transition:background var(--dur)}
 .tapc .ds-sw i{position:absolute;left:calc(.8 * var(--u));top:calc(.8 * var(--u));width:calc(5.4 * var(--u));height:calc(5.4 * var(--u));border-radius:99px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35);transition:transform var(--dur) cubic-bezier(.3,1.4,.5,1)}
 .tapc .ds-sw.on{background:var(--acc)}
@@ -97,7 +95,6 @@
 .tapc .ds-tab .tl{font:600 calc(2.5 * var(--ts,1) * var(--u))/1 var(--font)}
 .tapc .ds-tab.on{color:var(--tx)}
 .tapc .ds-nav.ind-pill .ds-tab.on .ti{background:var(--acc);color:var(--acc-fg)}
-.tapc.sel-ring .ds-nav.ind-pill .ds-tab.on .ti{background:none;color:var(--acc);box-shadow:inset 0 0 0 calc(.5 * var(--u)) var(--acc)}
 .tapc .ds-nav.ind-dot .ds-tab.on{color:var(--acc)}
 .tapc .ds-nav.ind-dot .ds-tab.on::after{content:"";position:absolute;bottom:calc(1.4 * var(--u));width:calc(1.4 * var(--u));height:calc(1.4 * var(--u));border-radius:99px;background:var(--acc)}
 .tapc .ds-nav.ind-dot.lab-always .ds-tab.on::after,.tapc .ds-nav.ind-dot.lab-selected .ds-tab.on::after{bottom:calc(.4 * var(--u))}
@@ -601,8 +598,7 @@
 .tapc.sel-fill .lchip.on{background:var(--acc);color:var(--acc-fg);box-shadow:none}
 .tapc.kit .kbg .lchip.on{box-shadow:none}
 /* segmented: a raised thumb, not an accent fill */
-.tapc .ds-seg span.on,.tapc.sel-ring .ds-seg span.on{background:#FFFFFF;color:#14110D;box-shadow:0 1px 3px rgba(20,17,13,.18)}
-.tapc.dark .ds-seg span.on{background:#3A3631;color:#F6F1E8;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
+.tapc .ds-seg span.on,.tapc.dark .ds-seg span.on{background:#3A3631;color:#F6F1E8;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
 .tapc.light .ds-seg{background:#EDE8DE;backdrop-filter:none;box-shadow:none!important;border-color:transparent}
 .tapc.dark .ds-seg{background:#1C1A17;backdrop-filter:none;box-shadow:none!important;border-color:rgba(255,255,255,.08)}
 /* immersive tag: the actions fit; a stronger shade under the words */

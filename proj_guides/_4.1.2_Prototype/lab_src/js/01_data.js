@@ -138,7 +138,7 @@ D.pois[0].actions = { model: { file: "twin_tower_church.glb", controls: { rotate
 D.pois[1].actions = { model: { file: "", controls: { rotate: true, zoom: true, move: false }, moments: [] } };
 D.pois[2].actions = { model: { file: "", controls: { rotate: true, zoom: true, move: false }, moments: [] } };
 D.pois[3].actions = { model: { file: "castle_photogrammetry.fbx", controls: { rotate: true, zoom: true, move: true }, moments: [{ name: "The castle at night", plays: "Timeline · Night" }] } };
-D.app = { theme: "premium",
+D.app = {
   start: { loading_lines: true },
   onboarding: { on: true, ask_visitors: true, ask_time: true, ask_language: true, ask_interests: true },
   explore: { tours: true, games: true, moments: true, layers: false },

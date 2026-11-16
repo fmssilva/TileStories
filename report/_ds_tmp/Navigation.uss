@@ -1,0 +1,927 @@
+/* The card's navigation elements (_3.2 section 5), written only with the --ts-* tokens (CardTokens.uss). The slot that holds an
+   element is the container's (PoiCard.uss, .poi-card__nav-top). A family's colour is not written here: it is data (FamilyDefinition
+   .ColorToken), read by the views through CardTokenColours and painted on the icon, the dot or the bar -- never on its own. */
+
+/* ---- the tabs (TabsNavView: icon_tabs_chips' tabs): a clipped strip, its row of tabs moved sideways by the view ---- */
+
+/* the first word starts where the header's title does (this padding + a tab's own = the header's --ts-space-4) */
+.nav-tabs__viewport {
+    flex-direction: row;
+    overflow: hidden;
+    padding: 0 var(--ts-space-1);
+}
+
+.nav-tabs__row {
+    flex-direction: row;
+    flex-shrink: 0;
+}
+
+/* a whole tab is the tap target: never smaller than the touch token, never shrunk below its word (the strip scrolls instead) */
+.nav-tabs__tab {
+    flex-shrink: 0;
+    min-height: var(--ts-touch-target);
+    min-width: var(--ts-touch-target);
+    margin: 0;
+    padding: 0 var(--ts-space-3);
+    justify-content: center;
+    align-items: center;
+    border-width: 0;
+    border-radius: 0;
+    background-color: var(--ts-clear);
+}
+
+.nav-tabs__tab:hover,
+.nav-tabs__tab:active {
+    background-color: var(--ts-clear);
+}
+
+/* an icon tab: the family's icon above its word, the pair centred in the tab */
+.nav-tabs__tab--icon {
+    flex-direction: column;
+    padding: var(--ts-space-1) var(--ts-space-3) var(--ts-space-2) var(--ts-space-3);
+}
+
+.nav-tabs__icon {
+    margin-bottom: var(--ts-space-1);
+}
+
+.nav-tabs__words {
+    flex-direction: row;
+    align-items: center;
+}
+
+.nav-tabs__label {
+    font-size: var(--ts-size-body);
+    -unity-font-style: normal;
+    color: var(--ts-ink-2);
+    white-space: nowrap;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-tabs__tab--icon .nav-tabs__label {
+    font-size: var(--ts-size-caption);
+}
+
+/* the marked section: an underline AND a bolder, brighter label */
+.nav-tabs__underline {
+    position: absolute;
+    left: var(--ts-space-3);
+    right: var(--ts-space-3);
+    bottom: 0;
+    height: var(--ts-tab-underline);
+    border-radius: var(--ts-radius-s);
+    background-color: var(--ts-accent);
+    display: none;
+}
+
+.nav-tabs__tab--current .nav-tabs__label {
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+}
+
+.nav-tabs__tab--current .nav-tabs__underline {
+    display: flex;
+}
+
+/* in the floating icon strip (S4a review) the chosen tab sits on a soft pill, its underline a short mark under the pill's words */
+.nav-tabs__tab--icon {
+    border-radius: var(--ts-radius-l);
+    margin: var(--ts-space-1) 0;
+}
+
+.nav-tabs__tab--icon.nav-tabs__tab--current,
+.nav-tabs__tab--icon.nav-tabs__tab--current:hover,
+.nav-tabs__tab--icon.nav-tabs__tab--current:active {
+    background-color: var(--ts-button-glass);
+}
+
+.nav-tabs__tab--icon .nav-tabs__underline {
+    left: 40%;
+    right: 40%;
+    bottom: var(--ts-space-1);
+}
+
+/* Show Counts: an item's block count, after its words, quieter than them */
+.nav-item__count {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: nowrap;
+    margin: 0 0 0 var(--ts-space-1);
+    padding: 0;
+}
+
+/* ---- the chips (NavChipRow: kind_chips, icon_tabs_chips' row): a strip of pills, each in a full-size tap target ---- */
+
+.nav-chips__viewport {
+    flex-direction: row;
+    overflow: hidden;
+    padding: 0 var(--ts-space-2);
+}
+
+.nav-chips__row {
+    flex-direction: row;
+    flex-shrink: 0;
+}
+
+.nav-chip {
+    flex-shrink: 0;
+    min-height: var(--ts-touch-target);
+    min-width: var(--ts-touch-target);
+    margin: 0;
+    padding: 0 var(--ts-space-1);
+    justify-content: center;
+    align-items: center;
+    border-width: 0;
+    border-radius: 0;
+    background-color: var(--ts-clear);
+}
+
+.nav-chip:hover,
+.nav-chip:active {
+    background-color: var(--ts-clear);
+}
+
+.nav-chip__pill {
+    flex-direction: row;
+    align-items: center;
+    height: var(--ts-chip-height);
+    padding: 0 var(--ts-space-3);
+    border-radius: var(--ts-chip-radius);
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    background-color: var(--ts-surface-2);
+}
+
+/* the family's colour, as a dot BESIDE the words (painted by the view; ink-3 until the token resolves) */
+.nav-chip__dot {
+    width: var(--ts-dot-size);
+    height: var(--ts-dot-size);
+    border-radius: var(--ts-dot-size);
+    margin-right: var(--ts-space-2);
+    background-color: var(--ts-ink-3);
+}
+
+.nav-chip__label {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: nowrap;
+    margin: 0;
+    padding: 0;
+}
+
+/* the chip of the kind being read: an accent outline AND bolder words */
+.nav-chip--current .nav-chip__pill {
+    border-width: var(--ts-choice-border);
+    border-color: var(--ts-accent);
+}
+
+.nav-chip--current .nav-chip__label {
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+}
+
+/* the facet chips of the two menus (_3.2 step 18): ONE row of chips under the menu's title, scrolling sideways when wider than the menu.
+   They reuse the kind chip (a 48 px target holding a pill); a chip that is on has the accent border and bold words of the current kind chip */
+.nav-facets {
+    flex-shrink: 0;
+    border-bottom-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+}
+
+.nav-facets__viewport {
+    flex-direction: row;
+    overflow: hidden;
+    padding: 0 var(--ts-space-2);
+}
+
+.nav-facets__row {
+    flex-direction: row;
+    flex-shrink: 0;
+}
+
+/* Clear is no filter: no pill, accent words */
+.nav-facets__clear .nav-chip__pill {
+    border-color: var(--ts-clear);
+    background-color: var(--ts-clear);
+}
+
+.nav-facets__clear .nav-chip__label {
+    color: var(--ts-accent);
+    -unity-font-style: bold;
+}
+
+/* icon_tabs_chips: the chip row sits right under the tabs */
+.nav-tabs-chips .nav-chips__viewport {
+    padding-bottom: var(--ts-space-1);
+}
+
+/* its row keeps a chip's height when the section read has no chips (emptied, hidden): the strip keeps one height, so the reading space
+   under it never jumps -- an emptied row that collapsed moved the spy line back over the section boundary, which filled the row again,
+   in a loop Unity reported as "Layout update is struggling" (_3.2 step 17b) */
+.nav-tabs-chips .nav-chips__row {
+    min-height: var(--ts-touch-target);
+}
+
+/* ---- progress_map (ProgressMapNavView): one piece of a thin bar per section, its icon above it ---- */
+
+.nav-progress__viewport {
+    flex-direction: row;
+    overflow: hidden;
+    padding: 0 var(--ts-space-1);
+}
+
+.nav-progress__row {
+    flex-direction: row;
+    flex-shrink: 0;
+}
+
+/* the view sets each piece's width (ProgressMapRule); the touch token is its least, both ways */
+.nav-progress__segment {
+    flex-shrink: 0;
+    flex-direction: column;
+    min-height: var(--ts-touch-target);
+    min-width: var(--ts-touch-target);
+    margin: 0;
+    padding: var(--ts-space-1) var(--ts-rail-width) var(--ts-space-2) var(--ts-rail-width);
+    justify-content: flex-end;
+    align-items: center;
+    border-width: 0;
+    border-radius: 0;
+    background-color: var(--ts-clear);
+}
+
+.nav-progress__segment:hover,
+.nav-progress__segment:active {
+    background-color: var(--ts-clear);
+}
+
+.nav-progress__icon {
+    margin-bottom: var(--ts-space-1);
+}
+
+.nav-progress__label {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: nowrap;
+    margin: 0 0 var(--ts-space-1) 0;
+    padding: 0;
+}
+
+/* the piece of bar: as wide as its segment, faint until the visitor has read that far (painted in the family's colour) */
+.nav-progress__bar {
+    align-self: stretch;
+    height: var(--ts-segment-height);
+    border-radius: var(--ts-segment-height);
+    background-color: var(--ts-ink-3);
+    opacity: var(--ts-ahead-opacity);
+}
+
+.nav-progress__segment--passed .nav-progress__bar {
+    opacity: 1;
+}
+
+/* the section being read: a thicker piece AND bolder words */
+.nav-progress__segment--current .nav-progress__bar {
+    height: var(--ts-progress-height);
+}
+
+.nav-progress__segment--current .nav-progress__label {
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+}
+
+/* ---- the bottom bar (BottomBarNavView: bottom_bar, _3.2 section 5.2): a few slots sharing the width equally, More last; the More
+   list opens above them, inside the bottom area. Its items are icon tabs (NavTab), so the tab rules above give them their icon, word and
+   underline ---- */
+
+.nav-bar__items {
+    flex-direction: row;
+    padding: 0 var(--ts-space-1);
+}
+
+/* every slot the same share of the bar, and never under the touch token; a word never wraps or gets cut (the test measures it) */
+.nav-bar__item {
+    flex-grow: 1;
+    flex-basis: 0;
+    flex-shrink: 1;
+    padding: var(--ts-space-1) var(--ts-space-1) var(--ts-space-2) var(--ts-space-1);
+}
+
+/* the list of the sections More holds: one row per section, the icon beside its word, the whole row the tap target */
+.nav-bar__more-list {
+    padding: var(--ts-space-1) var(--ts-space-2);
+    border-bottom-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    background-color: var(--ts-surface);
+}
+
+.nav-bar__more-row {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 0 var(--ts-space-3);
+}
+
+.nav-bar__more-row .nav-tabs__icon {
+    margin: 0 var(--ts-space-3) 0 0;
+}
+
+.nav-bar__more-row .nav-tabs__label {
+    font-size: var(--ts-size-body);
+}
+
+/* a row's mark is its bolder word and a bar at its start (an underline under a whole-width row would read as a divider) */
+.nav-bar__more-row .nav-tabs__underline {
+    left: 0;
+    right: auto;
+    top: var(--ts-space-2);
+    bottom: var(--ts-space-2);
+    width: var(--ts-tab-underline);
+    height: auto;
+}
+
+/* ---- bar_sheet (BarSheetNavView): the bar's arrow on the slot being read, up -- "a tap here opens a list above". It sits just right
+   of the slot's icon (the icon is centred: half the slot plus a little), at the icon's own height, so it reads as part of it in a wide
+   slot and in a narrow one ---- */
+
+.nav-bar__arrow {
+    position: absolute;
+    top: var(--ts-space-1);
+    left: 50%;
+    margin-left: var(--ts-space-3);
+    rotate: 180deg;
+}
+
+/* ---- next_up (NextUpNavView): "Up next", the next block's heading and its place, beside a Next button ---- */
+
+.nav-next-up {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--ts-space-2) var(--ts-space-4);
+    border-top-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    background-color: var(--ts-surface);
+}
+
+/* a whole touch target tall even at the end of the card (no button), so the bar never shrinks under the reader's thumb */
+.nav-next-up__text {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    min-height: var(--ts-touch-target);
+    justify-content: center;
+    margin-right: var(--ts-space-3);
+}
+
+.nav-next-up__line {
+    flex-direction: row;
+    align-items: center;
+}
+
+.nav-next-up__caption,
+.nav-next-up__position {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: nowrap;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-next-up__position {
+    margin-left: var(--ts-space-2);
+}
+
+/* the heading wraps whole (the gallery's check: no word is ever cut) */
+.nav-next-up__heading {
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+/* Next is the bar's one action but the card's SECOND: the sticky call to action above it (The Lamp's "Show me where it is") is the accent
+   fill, so Next is an accent outline with ink words -- two filled pills stacked in the thumb zone would compete */
+.nav-next-up__button,
+.nav-next-up__button:hover,
+.nav-next-up__button:active {
+    flex-shrink: 0;
+    margin: 0;
+    border-width: var(--ts-choice-border);
+    border-color: var(--ts-accent);
+    background-color: var(--ts-surface-2);
+}
+
+.nav-next-up__button-label {
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    margin: 0;
+    padding: 0;
+}
+
+/* the end of the card: with no block and no button to look at, the finished words are what the bar is -- body size, full ink, bold */
+.nav-next-up--done .nav-next-up__caption {
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+}
+
+/* ---- the menu overlay (CardMenuOverlay, _3.2 section 5.3): a layer over the sheet, under the full view. A MENU draws its panel on a scrim
+   over the whole card (a tap on the scrim closes it); a bar's More / kinds list is anchored in place and needs no layer at all ---- */
+
+.card-menu {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.card-menu__scrim {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: var(--ts-scrim);
+}
+
+.card-menu__panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+/* ---- a menu's top (NavMenuHeader): its title and a visible close X, the card's own round button ---- */
+
+.nav-menu__header {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    padding: var(--ts-space-2) var(--ts-space-2) var(--ts-space-2) var(--ts-space-4);
+    border-bottom-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+}
+
+.nav-menu__title {
+    flex-grow: 1;
+    flex-shrink: 1;
+    margin: 0;
+    padding: 0;
+    font-size: var(--ts-size-heading);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+}
+
+.nav-menu__close {
+    flex-shrink: 0;
+    width: var(--ts-touch-target);
+    height: var(--ts-touch-target);
+    margin: 0;
+    padding: 0;
+    background-color: var(--ts-surface-2);
+    border-color: var(--ts-line);
+    border-width: var(--ts-line-width);
+    border-radius: var(--ts-touch-target);
+}
+
+/* ---- drawer_tree (DrawerTreeNavView): a drawer from the left over the scrim, the card's outline in it ---- */
+
+.nav-drawer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: var(--ts-drawer-width);
+    max-width: var(--ts-drawer-max-width);
+    background-color: var(--ts-surface);
+    border-right-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    border-top-right-radius: var(--ts-radius-l);
+    border-bottom-right-radius: var(--ts-radius-l);
+    overflow: hidden;
+}
+
+.nav-drawer__list {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+/* a whole line is the tap target: as wide as the drawer, one touch target tall */
+.nav-drawer__row {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 0 var(--ts-space-4);
+}
+
+.nav-drawer__row .nav-tabs__icon {
+    margin: 0 var(--ts-space-3) 0 0;
+}
+
+.nav-drawer__section .nav-tabs__label {
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink);
+}
+
+/* a kind sits under its section's words, quieter */
+.nav-drawer__kind {
+    padding-left: var(--ts-drawer-kind-indent);
+}
+
+.nav-drawer__kind .nav-tabs__label {
+    font-size: var(--ts-size-caption);
+}
+
+/* a line's mark is its bolder word and a bar at its start (an underline under a whole-width line would read as a divider) */
+.nav-drawer__row .nav-tabs__underline {
+    left: 0;
+    right: auto;
+    top: var(--ts-space-2);
+    bottom: var(--ts-space-2);
+    width: var(--ts-tab-underline);
+    height: auto;
+}
+
+/* ---- the contents nav BLOCK (nav_contents, _3.2 step 11b): under each section's name (icon + words) a row per block -- a marker, the
+   block's heading, its minutes. A READ row is marked twice, never by the tick alone: the marker fills (an empty ring -> a filled accent
+   disc holding the tick) and the heading drops from bold to regular, like a read message in an inbox. Both headings stay --ts-ink (no
+   fading: a read row must stay as readable as an unread one) ---- */
+
+.nav-contents {
+    flex-direction: column;
+}
+
+.nav-contents__section {
+    flex-direction: row;
+    align-items: center;
+    margin: var(--ts-space-3) 0 var(--ts-space-1) 0;
+}
+
+.nav-contents__section-icon {
+    margin: 0 var(--ts-space-2) 0 0;
+}
+
+.nav-contents__section-words {
+    margin: 0;
+    padding: 0;
+    font-size: var(--ts-size-caption);
+    -unity-font-style: bold;
+    color: var(--ts-ink-2);
+}
+
+/* Rows = Sections First (_3.2 step 13): the title is the card's compact row (CardParts.uss card-compact*), the whole width of the list */
+.nav-contents__section-header {
+    flex-grow: 1;
+    /* - the compact row's own side margin is for a bare stack slot; the contents block already has its edges (its rows start there) */
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.nav-contents__row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    flex-shrink: 0;
+    min-height: var(--ts-touch-target);
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    border-bottom-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    border-radius: 0;
+    background-color: var(--ts-clear);
+}
+
+.nav-contents__row:hover,
+.nav-contents__row:active {
+    background-color: var(--ts-clear);
+}
+
+/* the marker: an empty ring until the block was read */
+.nav-contents__marker {
+    width: var(--ts-space-5);
+    height: var(--ts-space-5);
+    flex-shrink: 0;
+    margin: 0 var(--ts-space-3) 0 0;
+    border-width: var(--ts-icon-stroke);
+    border-color: var(--ts-ink-3);
+    border-radius: var(--ts-radius-round);
+    background-color: var(--ts-clear);
+    justify-content: center;
+    align-items: center;
+}
+
+.nav-contents__tick {
+    width: var(--ts-space-4);
+    height: var(--ts-space-4);
+    color: var(--ts-on-accent);
+}
+
+.nav-contents__row--read .nav-contents__marker {
+    border-color: var(--ts-accent);
+    background-color: var(--ts-accent);
+}
+
+.nav-contents__heading {
+    flex-grow: 1;
+    flex-shrink: 1;
+    margin: 0;
+    padding: var(--ts-space-2) 0;
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    -unity-text-align: middle-left;
+}
+
+.nav-contents__row--read .nav-contents__heading {
+    -unity-font-style: normal;
+}
+
+.nav-contents__minutes {
+    flex-shrink: 0;
+    margin: 0 0 0 var(--ts-space-3);
+    padding: 0;
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: nowrap;
+}
+
+/* ---- family_pager (FamilyPagerNavView, step 14): the section being read between two chevrons -- the pages layout's header ---- */
+
+.nav-pager {
+    flex-direction: row;
+    align-items: center;
+    padding: 0 var(--ts-space-1);
+}
+
+/* each chevron is a whole touch target; hidden (not removed) at the first / last section, so the name never shifts */
+.nav-pager__chevron {
+    flex-shrink: 0;
+    width: var(--ts-touch-target);
+    height: var(--ts-touch-target);
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    border-radius: var(--ts-radius-round);
+    align-items: center;
+    justify-content: center;
+    background-color: var(--ts-clear);
+}
+
+.nav-pager__chevron:hover,
+.nav-pager__chevron:active {
+    background-color: var(--ts-surface-2);
+}
+
+.nav-pager__glyph {
+    width: var(--ts-icon-size);
+    height: var(--ts-icon-size);
+    color: var(--ts-ink);
+}
+
+/* the shared chevron points down: turned to point back and on */
+.nav-pager__chevron--previous .nav-pager__glyph {
+    rotate: 90deg;
+}
+
+.nav-pager__chevron--next .nav-pager__glyph {
+    rotate: -90deg;
+}
+
+.nav-pager__middle {
+    flex-grow: 1;
+    flex-shrink: 1;
+    align-items: center;
+    justify-content: center;
+    padding: var(--ts-space-1) 0;
+}
+
+.nav-pager__name {
+    flex-direction: row;
+    align-items: center;
+}
+
+.nav-pager__icon {
+    margin-right: var(--ts-space-2);
+}
+
+.nav-pager__words {
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: nowrap;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-pager__position {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    margin: 0;
+    padding: 0;
+}
+
+/* ---- the pages layout's cues (CardPagerView, step 14): a page-wide panel beside the shown page, its family icon and words; at rest only
+   --ts-page-peek of the NEXT one shows at the viewport's right edge. They lie over the stack's box (CardPagerView sets top, height, left
+   and width, the sheet clips them); they never take a finger ---- */
+
+.card-pager__peek {
+    position: absolute;
+    justify-content: center;
+    background-color: var(--ts-surface-2);
+    border-color: var(--ts-line);
+}
+
+.card-pager__peek--next {
+    border-left-width: var(--ts-line-width);
+    border-top-left-radius: var(--ts-radius-m);
+    border-bottom-left-radius: var(--ts-radius-m);
+}
+
+.card-pager__peek--back {
+    align-items: flex-end;
+    border-right-width: var(--ts-line-width);
+    border-top-right-radius: var(--ts-radius-m);
+    border-bottom-right-radius: var(--ts-radius-m);
+}
+
+.card-pager__peek-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 0 var(--ts-space-2);
+}
+
+/* the back cue shows its words first, its icon nearest the page it comes back to */
+.card-pager__peek--back .card-pager__peek-row {
+    flex-direction: row-reverse;
+}
+
+.card-pager__peek-icon {
+    flex-shrink: 0;
+}
+
+.card-pager__peek-words {
+    font-size: var(--ts-size-heading);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: nowrap;
+    margin: 0 var(--ts-space-2);
+    padding: 0;
+}
+
+/* while a drag is claimed the cue lists its page's blocks as the card's compact rows (CardPagerView.ShowTeasers): the title goes to the
+   top and the rows fill under it, clipped by the cue; none of it takes a finger */
+.card-pager__peek--teaser {
+    justify-content: flex-start;
+    overflow: hidden;
+    padding-top: var(--ts-space-3);
+}
+
+.card-pager__peek-list {
+    align-self: stretch;
+    margin-top: var(--ts-space-2);
+}
+
+/* ---- the Navigation Bar (NavBarView, _3.3 S4 third round, v5): ONE configurable bar of the card's groups ----
+   The bar itself is PAINTED (the surface: one path with its fill, hairline, shadow and the raised bump; NavBarShapeRule) and its colours
+   come from the theme in C#; its numbers are the card's --ts-navbar-* tokens. Here: the items' row, the words, the icons, the disc, the
+   pill and the underline. Its host is clear (PoiCard.uss .poi-card__nav-top--bar / .poi-card__nav-bottom--bar). */
+.nav-bar {
+    overflow: visible;
+}
+
+.nav-bar__surface {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* the bar's own band: placed and sized by NavBarView (under the room at the bottom, on top at Top) */
+.nav-bar__row {
+    position: absolute;
+    left: 0;
+    right: 0;
+    flex-direction: row;
+    align-items: stretch;
+    padding: 0 var(--ts-navbar-pad);
+}
+
+/* one group: its whole share of the bar is the tap target, never under the touch token */
+.nav-bar__item {
+    flex-grow: 1;
+    flex-basis: 0;
+    min-width: var(--ts-touch-target);
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    border-radius: 0;
+    background-color: var(--ts-clear);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.nav-bar__item:hover,
+.nav-bar__item:active {
+    background-color: var(--ts-clear);
+}
+
+/* v5: a thin line icon, a heavier one on the chosen group under Bold Chosen Icon (v5's 1.6 / 2.2 SVG strokes, set apart enough that the
+   borders UI Toolkit snaps to whole pixels still differ: 1.4 / 2.6) */
+.nav-bar__icon {
+    width: var(--ts-navbar-icon);
+    height: var(--ts-navbar-icon);
+    --ts-icon-stroke: 1.4px;
+}
+
+.nav-bar--bold .nav-bar__item--chosen .nav-bar__icon {
+    --ts-icon-stroke: 2.6px;
+}
+
+/* Bold Chosen Icon wherever the chosen icon is drawn: in the disc too (Raised, Filled) */
+.nav-bar--bold .nav-bar__disc-icon {
+    --ts-icon-stroke: 2.6px;
+}
+
+.nav-bar__label {
+    font-size: var(--ts-navbar-label);
+    -unity-font-style: normal;
+    white-space: nowrap;
+    margin: var(--ts-space-1) 0 0 0;
+    padding: 0;
+}
+
+/* words alone: larger, no icon above them */
+.nav-bar--labels-text .nav-bar__label {
+    font-size: var(--ts-navbar-label-text);
+    margin: 0;
+}
+
+/* At Top the bar is the bottom bar mirrored: its bump hangs below it, so each group's icon sits at the bottom (the disc's side) and its
+   words above it -- the hanging disc never covers the chosen group's words */
+.nav-bar--top .nav-bar__item {
+    flex-direction: column-reverse;
+}
+
+.nav-bar--top .nav-bar__label {
+    margin: 0 0 var(--ts-space-1) 0;
+}
+
+/* Clear over the hero: no ground at all, so the white words carry the hero words' halo (Words On Picture: the soft glow and the close
+   shade) -- they read on any picture, measured on the render (PoiCardNavBarSceneTests) */
+.nav-bar--over-hero.nav-bar--fill-clear .nav-bar__label {
+    text-shadow: 0 1px var(--ts-text-halo-blur) var(--ts-text-halo);
+    -unity-text-outline-width: var(--ts-text-halo-close-width);
+    -unity-text-outline-color: var(--ts-text-halo);
+}
+
+/* the chosen group: its words bolder (with the indicator: never colour alone) */
+.nav-bar__item--chosen .nav-bar__label {
+    -unity-font-style: bold;
+}
+
+/* the disc carrying the chosen icon: Raised's (rising out of the bump) or Filled's (at the icon's place); colours inline */
+.nav-bar__disc {
+    position: absolute;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-bar__disc-icon {
+    width: var(--ts-navbar-disc-icon-filled);
+    height: var(--ts-navbar-disc-icon-filled);
+    --ts-icon-stroke: 2px;
+}
+
+.nav-bar--indicator-raised .nav-bar__disc-icon {
+    width: var(--ts-navbar-disc-icon-raised);
+    height: var(--ts-navbar-disc-icon-raised);
+}
+
+/* the pill behind the chosen group (a wash of its colour) and the underline under it */
+.nav-bar__pill {
+    position: absolute;
+    top: var(--ts-space-1);
+    bottom: var(--ts-space-1);
+    border-radius: var(--ts-radius-xl);
+}
+
+.nav-bar__underline {
+    position: absolute;
+    /* centred on its left edge (NavBarView sets left to the chosen group's centre) */
+    translate: -50% 0;
+    bottom: var(--ts-space-1);
+    width: var(--ts-navbar-icon);
+    height: var(--ts-tab-underline);
+    border-radius: var(--ts-tab-underline);
+}
