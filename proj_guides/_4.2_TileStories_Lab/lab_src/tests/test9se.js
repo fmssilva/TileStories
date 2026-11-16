@@ -11,7 +11,7 @@
 //   checks and its mutation.
 // MUTATE=1: Azu beside the ✦ whatever Mascot says and the bubble unsigned; every name as written in its slot (and Azu never placed again
 //   after its step's start, test9sf's): the checks named [mascot off] and [article] turn red. CAP=<dir> saves the changes at 390 px.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const fs = require('fs'), path = require('path');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 const CAP = process.env.CAP || '', REPS = +process.env.REPS || 6;

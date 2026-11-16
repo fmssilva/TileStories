@@ -1,0 +1,254 @@
+{
+ "src/agent/agent.css": {
+  "inherit": 1
+ },
+ "src/agent/scenes.css": {
+  "dashed border (Unity: a slot sprite)": 1
+ },
+ "src/audiences/audiences.css": {
+  "@keyframes untagged": 1,
+  "backdrop-filter (camera glass only)": 1,
+  "cubic-bezier (use named easing)": 1,
+  "gradient untagged": 1,
+  "inherit": 2,
+  "outline": 2,
+  "transform: translate (use the translate property)": 1
+ },
+ "src/card/blocks.css": {
+  "@keyframes untagged": 2,
+  "gradient untagged": 3,
+  "mask": 2,
+  "soft box-shadow untagged": 1,
+  "transform: translate (use the translate property)": 3
+ },
+ "src/card/card-base.css": {
+  "3D rotate": 2,
+  "@keyframes untagged": 5,
+  "clip-path": 1,
+  "conic-gradient": 1,
+  "cubic-bezier (use named easing)": 1,
+  "filter drop-shadow/brightness/saturate": 2,
+  "inherit": 1,
+  "perspective": 1,
+  "preserve-3d": 1,
+  "soft box-shadow untagged": 6,
+  "transform: translate (use the translate property)": 2
+ },
+ "src/card/controls.css": {
+  "@keyframes untagged": 1,
+  "backdrop-filter (camera glass only)": 1,
+  "cubic-bezier (use named easing)": 1,
+  "gradient untagged": 1,
+  "soft box-shadow untagged": 2,
+  "transform: translate (use the translate property)": 1
+ },
+ "src/card/elements.css": {
+  "@keyframes untagged": 2,
+  "soft box-shadow untagged": 1,
+  "transform: translate (use the translate property)": 1
+ },
+ "src/card/hero.css": {
+  "@keyframes untagged": 1,
+  "cubic-bezier (use named easing)": 1,
+  "dashed border (Unity: a slot sprite)": 1,
+  "gradient untagged": 2
+ },
+ "src/card/hints.css": {
+  "@keyframes untagged": 4,
+  "inherit": 1,
+  "soft box-shadow untagged": 1,
+  "transform: translate (use the translate property)": 4
+ },
+ "src/card/states.css": {
+  "3D rotate": 3,
+  "@keyframes untagged": 10,
+  "filter drop-shadow/brightness/saturate": 2,
+  "gradient untagged": 3,
+  "inherit": 1,
+  "perspective": 1,
+  "soft box-shadow untagged": 8,
+  "transform: translate (use the translate property)": 9
+ },
+ "src/core/base.css": {
+  "3D rotate": 1,
+  "@keyframes untagged": 5,
+  "background-clip:text": 1,
+  "clip-path": 5,
+  "cubic-bezier (use named easing)": 2,
+  "dashed border (Unity: a slot sprite)": 1,
+  "filter drop-shadow/brightness/saturate": 1,
+  "gradient untagged": 6,
+  "inherit": 3,
+  "outline": 1,
+  "perspective": 2,
+  "soft box-shadow untagged": 2,
+  "transform: translate (use the translate property)": 5
+ },
+ "src/editor/demo.css": {
+  "soft box-shadow untagged": 1
+ },
+ "src/editor/texts.css": {
+  "dashed border (Unity: a slot sprite)": 1,
+  "outline": 2,
+  "soft box-shadow untagged": 1
+ },
+ "src/guidance/editor.css": {
+  ":has()": 1,
+  "dashed border (Unity: a slot sprite)": 2,
+  "inherit": 1,
+  "outline": 4,
+  "soft box-shadow untagged": 2
+ },
+ "src/guidance/present.css": {
+  "@keyframes untagged": 14,
+  "cubic-bezier (use named easing)": 12,
+  "dashed border (Unity: a slot sprite)": 1,
+  "filter drop-shadow/brightness/saturate": 2,
+  "gradient untagged": 2,
+  "inherit": 5,
+  "outline": 2,
+  "soft box-shadow untagged": 18,
+  "transform: translate (use the translate property)": 5
+ },
+ "src/guide/autotour.css": {
+  ":has()": 1,
+  "dashed border (Unity: a slot sprite)": 1,
+  "outline": 1,
+  "soft box-shadow untagged": 1
+ },
+ "src/guide/controls.css": {
+  "outline": 1,
+  "soft box-shadow untagged": 1
+ },
+ "src/guide/demo-hand.css": {
+  "@keyframes untagged": 1,
+  "filter drop-shadow/brightness/saturate": 1,
+  "gradient untagged": 1,
+  "soft box-shadow untagged": 1
+ },
+ "src/guide/dock.css": {
+  ":has()": 1,
+  "@keyframes untagged": 11,
+  "clip-path": 1,
+  "conic-gradient": 1,
+  "cubic-bezier (use named easing)": 2,
+  "gradient untagged": 8,
+  "inherit": 1,
+  "mask": 4,
+  "outline": 2,
+  "soft box-shadow untagged": 14,
+  "transform: translate (use the translate property)": 7
+ },
+ "src/guide/focus.css": {
+  "@keyframes untagged": 1,
+  "cubic-bezier (use named easing)": 1,
+  "soft box-shadow untagged": 2
+ },
+ "src/guide/game-ask.css": {
+  "@keyframes untagged": 2,
+  "soft box-shadow untagged": 3,
+  "transform: translate (use the translate property)": 1
+ },
+ "src/guide/hero-start.css": {
+  "@keyframes untagged": 3,
+  "cubic-bezier (use named easing)": 1,
+  "filter drop-shadow/brightness/saturate": 2,
+  "inherit": 1,
+  "soft box-shadow untagged": 6
+ },
+ "src/guide/highlight.css": {
+  "inherit": 1
+ },
+ "src/guide/panel-look.css": {
+  "@keyframes untagged": 1,
+  "backdrop-filter (camera glass only)": 2,
+  "filter drop-shadow/brightness/saturate": 2,
+  "gradient untagged": 10,
+  "inherit": 1,
+  "soft box-shadow untagged": 10
+ },
+ "src/guide/person.css": {
+  "@keyframes untagged": 1,
+  "cubic-bezier (use named easing)": 1,
+  "transform: translate (use the translate property)": 3
+ },
+ "src/guide/readalong.css": {
+  "backdrop-filter (camera glass only)": 1,
+  "inherit": 1
+ },
+ "src/guide/saved-place.css": {
+  "soft box-shadow untagged": 1
+ },
+ "src/guide/teleprompter.css": {
+  "@keyframes untagged": 7,
+  "backdrop-filter (camera glass only)": 1,
+  "cubic-bezier (use named easing)": 2,
+  "filter drop-shadow/brightness/saturate": 1,
+  "gradient untagged": 2,
+  "mask": 2,
+  "transform: translate (use the translate property)": 8
+ },
+ "src/guide/tell-more.css": {
+  "outline": 1,
+  "soft box-shadow untagged": 2
+ },
+ "src/guide/tour-end.css": {
+  "@keyframes untagged": 4,
+  "cubic-bezier (use named easing)": 4,
+  "filter drop-shadow/brightness/saturate": 2,
+  "inherit": 2,
+  "outline": 1,
+  "soft box-shadow untagged": 9,
+  "transform: translate (use the translate property)": 3
+ },
+ "src/guide/tour-scroll.css": {
+  "@keyframes untagged": 2,
+  "filter drop-shadow/brightness/saturate": 1,
+  "soft box-shadow untagged": 1
+ },
+ "src/guide/tour.css": {
+  "@keyframes untagged": 3,
+  "cubic-bezier (use named easing)": 2,
+  "filter drop-shadow/brightness/saturate": 1,
+  "gradient untagged": 1,
+  "inherit": 2,
+  "soft box-shadow untagged": 5,
+  "transform: translate (use the translate property)": 7
+ },
+ "src/mascot/azu-gl.css": {
+  "cubic-bezier (use named easing)": 6
+ },
+ "src/mascot/azu2d.css": {
+  "3D rotate": 3,
+  "@keyframes untagged": 10,
+  "cubic-bezier (use named easing)": 5,
+  "perspective": 3,
+  "soft box-shadow untagged": 2,
+  "transform: translate (use the translate property)": 12
+ },
+ "src/phone/grabber.css": {
+  "cubic-bezier (use named easing)": 1,
+  "outline": 1
+ },
+ "src/phone/sheet.css": {
+  "@keyframes untagged": 2,
+  "backdrop-filter (camera glass only)": 1,
+  "gradient untagged": 1,
+  "inherit": 1,
+  "soft box-shadow untagged": 5,
+  "transform: translate (use the translate property)": 7
+ },
+ "src/world/camera-ask.css": {
+  "gradient untagged": 1,
+  "soft box-shadow untagged": 5,
+  "transform: translate (use the translate property)": 2
+ },
+ "src/world/guide-button.css": {
+  "filter drop-shadow/brightness/saturate": 1,
+  "gradient untagged": 2,
+  "soft box-shadow untagged": 3
+ },
+ "src/world/markers.css": {
+  "transform: translate (use the translate property)": 2
+ }
+}

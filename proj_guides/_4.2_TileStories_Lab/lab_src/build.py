@@ -1,5 +1,7 @@
-"""Builds the Block Components Lab: joins the modules in MODULES and the styles in STYLES, and embeds the assets.
-It never rewrites code. python build.py -> block-components-lab.html (not committed). PROTOTYPE_STRUCTURE.md says what each module owns."""
+"""Builds the TileStories Lab: joins the modules in MODULES and the styles in STYLES, and embeds the assets.
+It never rewrites code. python build.py -> block-components-lab.html (not committed, one self-contained page), then the structure
+check (check_structure.js) and the Unity lint (tools/unity_lint.py): either one failing fails the build.
+PROTOTYPE_STRUCTURE.md says what each module owns."""
 import base64, io, os, subprocess, sys
 D = os.path.dirname(os.path.abspath(__file__))
 M3 = os.path.join(D, '..', '..', 'mascote', '3d')
@@ -27,7 +29,7 @@ MODULES = ['src/core/open.js', 'src/core/assets.js', 'src/core/catalogues.js', '
            'src/guidance/catalog.js', 'src/guidance/scheduler.js', 'src/guidance/service.js', 'src/guidance/present.js',
            'src/guidance/editor.js', 'src/guidance/scenes.js', 'src/guide/tell-more.js', 'src/guide/saved-place.js', 'src/guide/tour-end.js', 'src/guide/game-ask.js', 'src/guide/voice-script.js', 'src/guide/mascot-profile.js', 'src/guide/hero-start.js', 'src/guide/teleprompter.js', 'src/guide/panel-look.js', 'src/guide/demo-hand.js', 'src/guide/tour-scroll.js', 'src/core/boot.js']
 # the cascade depends on this order: a new style goes at the end, or beside the rule it overrides
-STYLES = ['src/core/base.css', 'src/card/card-base.css', 'src/phone/sheet.css', 'src/guide/tour.css', 'src/editor/texts.css', 'src/editor/accordion.css',
+STYLES = ['src/core/fonts.css', 'src/core/base.css', 'src/card/card-base.css', 'src/phone/sheet.css', 'src/guide/tour.css', 'src/editor/texts.css', 'src/editor/accordion.css',
           'src/card/controls.css', 'src/card/blocks.css', 'src/card/elements.css', 'src/editor/marker-tab.css', 'src/card/hero.css',
           'src/phone/grabber.css', 'src/card/hints.css', 'src/card/states.css', 'src/guide/readalong.css', 'src/guide/focus.css',
           'src/mascot/azu2d.css', 'src/audiences/audiences.css', 'src/audiences/lenses.css', 'src/guide/person.css',
@@ -46,11 +48,17 @@ def b64(path):
     return base64.b64encode(open(path, 'rb').read()).decode()
 
 
-# the assets: each placeholder in the code becomes its file, as a data: URL
+# the assets: each placeholder in the code (or the styles) becomes its file, as a data: URL (a .txt or .json one as it is).
+# All of them stay in the page while the Lab is opened from a file (file://, the tests and the self-test): there a GLB cannot be
+# fetched and a canvas that drew a picture from a file cannot be read back (Photo of the view, the mascot's measured figure).
+# P1a moves the GLBs and the pictures out together: a local http server for dev and tests, a multi-file artifact to publish.
 ASSETS = [('__REALSTR__', None, os.path.join(D, 'src', 'core', 'realstrings.json'))]
 ASSETS += [('__' + k + '__', 'image/jpeg', os.path.join(D, 'assets', f + '.jpg')) for k, f in
            (('HERO', 'paco_hero'), ('G1', 'paco_gallery_1'), ('G2', 'paco_gallery_2'), ('G3', 'paco_gallery_3'),
             ('BEFORE', 'paco_before_1755'), ('BELEM', 'belem_wall'))]
+# the faces (src/core/fonts.css): media/FONT_*.txt, each a data: URL
+ASSETS += [('__FONT_' + k + '__', None, os.path.join(D, 'media', 'FONT_' + k + '.txt')) for k in
+           ('FRAUNCES', 'ATK400', 'ATK600', 'ATK700', 'MONO400', 'MONO500')]
 ASSETS += [('__AZUGLB_' + k + '__', 'model/gltf-binary', os.path.join(M3, f)) for k, f in
            (('AZU', 'azu.glb'), ('MOUSE', 'mouse.glb'), ('EXPLORER', 'explorer.glb'), ('POET', 'poet.glb'), ('SOLDIER', 'soldier.glb'))]
 ASSETS += [('__AZTHUMB_' + k + '__', 'image/png', os.path.join(M3, 'thumbs', k.lower() + '.png')) for k in
@@ -59,11 +67,11 @@ ASSETS += [('__AZTHUMB_' + k + '__', 'image/png', os.path.join(M3, 'thumbs', k.l
 
 def build():
     js = '\n'.join(rd(m) for m in MODULES)
-    for key, mime, path in ASSETS:
-        assert key in js, key
-        data = io.open(path, encoding='utf-8').read() if mime is None else 'data:' + mime + ';base64,' + b64(path)
-        js = js.replace(key, data)
     css = ''.join(rd(s) for s in STYLES)
+    for key, mime, path in ASSETS:
+        assert key in js or key in css, key
+        data = io.open(path, encoding='utf-8').read() if mime is None else 'data:' + mime + ';base64,' + b64(path)
+        js, css = js.replace(key, data), css.replace(key, data)
     html = rd('src', 'page', 'head.html') + '<style>' + css + '</style>\n' + rd('src', 'page', 'page.html') + '\n<script>\n' + js + '\n</script>\n'
     io.open(os.path.join(D, 'block-components-lab.html'), 'w', encoding='utf-8').write(html)
     print('built', len(html))
@@ -71,5 +79,7 @@ def build():
 
 if __name__ == '__main__':
     build()
-    if os.path.exists(os.path.join(D, 'check_structure.js')) and '--no-check' not in sys.argv:
-        sys.exit(subprocess.call(['node', os.path.join(D, 'check_structure.js')]))
+    if '--no-check' not in sys.argv:
+        rc = subprocess.call(['node', os.path.join(D, 'check_structure.js')])
+        rc = subprocess.call([sys.executable, os.path.join(D, 'tools', 'unity_lint.py')]) or rc
+        sys.exit(rc)

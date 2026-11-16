@@ -9,7 +9,7 @@
 // Fewer like this's toast line on an App group, not on a Content group (the rest as before); the visitor's line in Preview & Test; every
 // new row's demo; the four scenes in Ask Azu's console. MUTATE=1 node test9m.js makes Tips Off hide Things to try too: the checks named
 // [tips off] turn red.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
   const t00 = Date.now();

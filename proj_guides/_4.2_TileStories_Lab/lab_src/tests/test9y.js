@@ -19,7 +19,7 @@
 //   Languages & Terms' Go to into each tab lands under the pinned header.
 // MUTATE=1: the sections open by level as before, the headers not sticky, the moved Lab wall row back in Ask about the view and the glow
 //   option ignored (Off glows, a new card never glows again): the checks named [collapsed], [sticky], [review], [glow] and [card & global] turn red.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe' });

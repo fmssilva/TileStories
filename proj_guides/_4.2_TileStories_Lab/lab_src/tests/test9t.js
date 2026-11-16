@@ -63,7 +63,7 @@
 //   com o guia"). The saved place (round 17, Part B: test9u) is Off in this file's base: its offer would change the hero's Start.
 // MUTATE=1 also writes the name without its article, says one fact as round 16c did with no line of its own, gives the teaser one opening
 //   line and the Guide block its old title: the checks named [name], [one fact], [teaser] and [block] turn red.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--autoplay-policy=no-user-gesture-required'] });

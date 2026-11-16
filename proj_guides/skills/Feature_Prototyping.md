@@ -51,14 +51,39 @@
       - Reference: `skills/feature_prototipe_planning_example.html` / `.png` (the `_4.1` Region Editor Lab).
    3. **Look until it is right, then publish.** Build each feature in this order (the Lab's version of `__AI_worker.md`
       2.3 steps 3-5, "Look and polish FIRST"):
-      1. **Build:** the page joins with no error (in a Lab with a build, its check at 0).
-      2. **Run it and capture:** the app (the phone at 390 px, light and dark, every state the feature has) and its Editor
-         tab (the new rows, a popup open). Open each capture and judge it as a designer: modern, premium, minimalist, a
-         "wow"; one focal point; nothing covering its target or other words; text 4.5:1 or more; 44 px targets.
-      3. **Iterate steps 1-2** until the app and the Editor both look right. Only the build runs during this loop.
-      4. **Then the automated tests,** once the look is accepted: the behaviour on the real page (taps, gestures, the clock),
-         the edge cases, the measured rules (contrast, overlap, sizes), and pure checks without a browser for the logic. They
-         run once when the feature is done, not after every change.
+      0. **Built from the shared parts.** A new or changed feature uses the Lab's base components and global tokens wherever
+         one fits. No literal colour, size, radius or duration; a missing token or component is added to the shared layer,
+         never written locally. That way one profile switch shows every part's design.
+      1. **Implement, then build:** the page joins with no error (in a Lab with a build, its checks at 0: structure, Unity
+         lint).
+      2. **Capture and judge the design** in the profile matrix:
+         - every look (Premium / Playful) × mode (light / dark), plus text L;
+         - phone and tablet, portrait and landscape;
+         - every state the feature has.
+
+         Open each capture and judge it as a designer: modern, premium, minimalist, a "wow"; one focal point; nothing
+         covering its target or other words; nothing clipped at text L; text 4.5:1 or more (body 7:1); 48 pt targets.
+      3. **Iterate steps 1-2** until every cell of the matrix looks right. Only the build runs during this loop.
+      4. **Confirm the Editor:** every good option and config of the feature has its row, with a good default and a demo
+         (step 5 below), in the right tab and section. Capture the Editor tab and judge it too.
+      5. **Then the automated tests,** once the look and the Editor are accepted:
+         - the behaviour on the real page (taps, gestures, the clock);
+         - the edge cases;
+         - the measured rules (contrast, overlap, sizes);
+         - pure checks without a browser for the logic.
+
+         Each feature's checks come in two tiers:
+         - **all:** every check of the feature;
+         - **core:** the few essential checks of its critical path that another feature could break. They are tagged, and
+           the prototype's core run collects them from every feature.
+      6. **Test cadence (counted in rounds, never dates):**
+         - **every round:** the feature's "all";
+         - **every 4-5 rounds:** the prototype's core (every feature's core checks);
+         - **every 12-15 rounds, and before a hand-off to Unity:** the prototype's "all" (every check, a new baseline).
+
+         Once a round is green on its own tier it is merged. A core or full run then runs on a separate copy of the merged
+         code (a `git worktree`, a branch of its own) while the next round is built. A red it finds becomes an item of the
+         round then running.
       Then publish it as an artifact. Save a record copy and a README entry in `_x.y.N_Prototype/`: the link, what it shows,
       what to judge.
    4. **Feed back.** Fold each answer and each correction the developer makes in the Lab into the spec the same round, as a rule

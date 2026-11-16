@@ -20,7 +20,7 @@
 // [switches] the Detail Card tab has no Foldouts row; One section open at a time (real clicks) closes the open section.
 // MUTATE=1: the hand starts on its target, the scroll a linear jump, no opening zoom, no block in use, the bar never drawn and the rest dimmed,
 //   reduced motion ignored: the checks named [hand], [scroll], [opening], [blocks], [focus] and [reduced motion] turn red.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe' });

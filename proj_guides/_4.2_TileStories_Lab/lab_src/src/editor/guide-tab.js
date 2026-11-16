@@ -31,7 +31,7 @@ var GUIDE_PLAN={
      are borrowed from the foldouts that make them (Narration, Captions, Ask's engine), which keep a one-line link to here */
   s7mascot:[{from:"s7mascot"},{fo:"s7who"},
     {fo:"gt:look",t:"Look",s:"what the mascot is: its character, its source, its tile or its model",parts:[{from:"s7mascot"},"Character","Mascot source","Glaze","Pattern","Light","Corners","Preview","Model",
-      {fo:"gt:tools",t:"Model tools",s:"the 3D model's clips, Import… and a model from a picture (Mascot source = 3D model)",deep:true,parts:["3D model","Play a clip","Import…","Generate from a picture"]}]},
+      {fo:"gt:tools",t:"Model tools",s:"the 3D model's clips, Import… and a model from a picture (Mascot source = 3D model)",deep:true,badge:LAB_ONLY,parts:["3D model","Play a clip","Import…","Generate from a picture"]}]},
     {fo:"gt:voice",t:"Voice",s:"its recorded voice, its speed, a line with no recording, the answers' voice, the coverage",parts:[{from:"s7voice",borrow:true},"The voice","Sources","Speed","A line with no recording","Voice in this browser",
       {from:"s7agent",borrow:true},"Voice of the answers","ElevenLabs model",{from:"s7voice",borrow:true},"Coverage","Speaking now"]},
     {fo:"gt:speech",t:"Speech on screen",s:"how its words show while it speaks: one highlighter, the teleprompter, the bubble, the panels' look",parts:[{from:"s7cap",borrow:true},{cls:"mpspeech"},"Highlight what is read","Highlight style","Trail","Glide",
@@ -48,7 +48,7 @@ var GUIDE_PLAN={
       {h:"Its tools",s:"what it can do in the app"},{cls:"agtools"},"Targets","Actions in the app"]},
     {fo:"s7agent",t:"The engine",s:"the model, its key, its limits and the test console (for the developer)",deep:true,parts:[{from:"s7agent"},{drop:"agh"},"Guide mode",
       {h:"The model"},"Model","Gemini model","Claude API model","Claude tier (published)","Longest answer","Cost",{h:"Inputs"},"Text and voice",
-      {h:"Services and keys"},{cls:"agstat"},"Paste a key","Test the key",{h:"Limits"},"Model steps","Timeout","Questions a session",{h:"Test console",s:"the scenes, by hand"},{cls:"agcon"}]}]};
+      {h:"Services and keys",s:"this computer's keys",lab:1},{cls:"agstat"},"Paste a key","Test the key",{h:"Limits"},"Model steps","Timeout","Questions a session",{h:"Test console",s:"the scenes, by hand",lab:1},{cls:"agcon"}]}]};
 /* the foldouts taken apart (Mascot's section around its one foldout; Tour controls, words only), and the place a saved open state of each
    opens now (once). Two foldouts became sections and keep their ids: Mascot (s7mascot, now 1 · Azu: its rows, no "Mascot › Mascot") and
    Fun › On the tour (gd:g:ontour, now 3 · Games on the tour), so a saved state that opened them opens them by id */
@@ -70,7 +70,7 @@ function gtWords(cx,o){var box=cx.box[o];if(!box)return"";var b=box.querySelecto
 function gtBody(cx,parts){var h="";parts.forEach(function(p){
   if(typeof p==="string"){var r=gtRow(cx.from,p);if(r){r.remove();h+=r.outerHTML}return}
   if(p.from){cx.from=cx.box[p.from]||null;if(p.borrow)return;if(cx.el[p.from])cx.el[p.from].remove();if(cx.from&&cx.srcs.indexOf(p.from)<0)cx.srcs.push(p.from);return}
-  if(p.h){h+='<div class="sub2 gth">'+p.h+(p.s?' <span class="sub">· '+p.s+'</span>':"")+'</div>';return}
+  if(p.h){h+='<div class="sub2 gth">'+p.h+(p.s?' <span class="sub">· '+p.s+'</span>':"")+(p.lab?' '+labOnlyTag():"")+'</div>';return}
   if(p.cls){var n=cx.from&&cx.from.querySelector(":scope > ."+p.cls);if(n){n.remove();h+=n.outerHTML}return}
   if(p.drop){if(cx.from)cx.from.querySelectorAll(":scope > ."+p.drop).forEach(function(x){x.remove()});return}
   if(p.words){h+=gtWords(cx,p.words);return}
@@ -78,7 +78,7 @@ function gtBody(cx,parts){var h="";parts.forEach(function(p){
   if(p.fo){var el=cx.el[p.fo];if(el)el.remove();
     if(!p.parts){if(!el)return;if(p.add){var a=gtBody(cx,p.add),inn=el.querySelector(":scope > .inner");if(inn&&a)inn.insertAdjacentHTML("beforeend",a)}h+=el.outerHTML;return}
     var keep=cx.from,inner=gtBody(cx,p.parts);cx.from=keep;if(!inner.replace(/<div class="sub2 gth">[\s\S]*?<\/div>/g,"").trim())return;
-    h+=fo(p.fo,esc(p.t)+' <span class="sub">· '+esc(p.s)+'</span>',null,inner,p.deep?3:2)}});return h}
+    h+=fo(p.fo,esc(p.t)+' <span class="sub">· '+esc(p.s)+'</span>',p.badge||null,inner,p.deep?3:2)}});return h}
 /* whatever a source still holds once its section is drawn: never lost, said in the console */
 function gtLeft(cx,where){var h="";cx.srcs.forEach(function(s){var b=cx.box[s];if(!b)return;[].slice.call(b.children).forEach(function(x){if(!x.classList.contains("row")&&!x.matches("details,.note,table,div"))return;
   console.warn("Guide tab: a part of "+s+" ("+(x.dataset.fo||(x.querySelector("label")||{}).textContent||x.className)+") has no place in GUIDE_PLAN; shown at the end of "+where);h+=x.outerHTML;x.remove()})});cx.srcs=[];return h}

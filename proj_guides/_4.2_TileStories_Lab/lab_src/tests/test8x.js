@@ -1,6 +1,6 @@
 // v8x checks (Playwright + the installed Edge, WebGL by SwiftShader, three.js from jsdelivr): node test8x.js -> PASS/FAIL per check
 // Every check presses the Editor's own controls: Mascot source = 3D model, then each card of Model, then Play a clip.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const path = require('path');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 const CAP = process.env.CAP || require('os').tmpdir();  // a picture of each model in the guide, to look at

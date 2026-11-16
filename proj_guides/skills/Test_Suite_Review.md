@@ -1,7 +1,7 @@
 # SKILL: Test Suite Review
 
 1. **Name:** "review the test suite" -- keep it trustworthy and fast enough to run.
-2. **Trigger:** the maintenance cadence (`__AI_Architect.md` section 4: every ~12 blocks), or when a tier outgrows its time (BLOCK
+2. **Trigger:** the maintenance cadence (`__AI_Architect.md` section 4: every 12-15 blocks), or when a tier outgrows its time (BLOCK
    past ~10 min, CORE past ~35, FULL past ~90). Input: the last full runs' per-fixture times (the run report / `TestRunRecorder`), `40-testing.md`, the watched flakes in
    `__mixed_TODOs.md`. If no per-fixture times exist, the first step is to produce them.
 3. **Procedure (Worker, Opus-class; AUDIT first, then FIX chunks):**

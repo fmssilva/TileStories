@@ -1,6 +1,6 @@
 // v8u live check, by hand only (it spends the key's quota): node test8u_live.js [shots dir]. Needs keys.local.js (python keys_local.py).
 // It does what the developer does in the prototype: Editor > Guide > 3 · Ask > Ask Azu > 9 · Test console > Run all scenes; then a drag on the wall and a typed question.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe-live';
 const shots = process.argv[2] || '';
 (async () => {

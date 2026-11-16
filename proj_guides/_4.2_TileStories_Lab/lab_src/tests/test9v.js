@@ -24,7 +24,7 @@
 // MUTATE=1: Ask through the ✦ menu's path (the tour restarted), the showcase forgets the quiz was played, the answered rule off, the wall's
 //   distances ignored, the Stop bar's What next? doing nothing: the checks named [ask], [showcase], [header], [questions], [nearby] and [stop
 //   bar] turn red.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--autoplay-policy=no-user-gesture-required'] });

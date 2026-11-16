@@ -25,7 +25,7 @@
 // Split in round 17 to keep each file under 300 s: [expiry], [changed], [rows] and [blocked] are test9ub.js (the same helpers).
 // MUTATE=1: the recap gone and Continue from the start, a saved place never forgotten, the pace never deep, the fact rule off: the checks
 //   named [continue], [expiry], [pace] and [facts] turn red.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--autoplay-policy=no-user-gesture-required'] });

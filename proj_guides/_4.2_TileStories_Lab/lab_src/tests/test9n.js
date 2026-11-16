@@ -7,7 +7,7 @@
 // block's option: that block in view; a page option: the page; a section row: its section; a Card Controls row: its control; a marker
 // row: the marker's block; a Guide row: its simulation). The demo starts within one frame of the change and rings after 60 ms.
 // MUTATE=1 node test9n.js drops the Specific Marker tab from the NO DEMO check: the checks named [every tab] turn red.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
   const T0 = Date.now();

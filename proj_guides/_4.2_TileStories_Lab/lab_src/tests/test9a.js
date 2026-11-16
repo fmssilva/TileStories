@@ -1,7 +1,7 @@
 // v9a checks (Playwright + the installed Edge), with no network for the voices: node test9a.js -> PASS/FAIL per check
 // ElevenLabs is answered by a fake server (a real MP3 of the Azure set and even letter times); Azure by a fake Speech SDK
 // (the same MP3, word boundaries and visemes). The live run with real keys is by hand (it spends credits): see the README.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const fs = require('fs'), path = require('path');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 const MP3 = fs.readFileSync(path.join(__dirname, '..', '..', 'voicebench', 'out', 'azure-sonia-raquel', fs.readdirSync(path.join(__dirname, '..', '..', 'voicebench', 'out', 'azure-sonia-raquel')).filter(f => f.endsWith('.mp3'))[0]));

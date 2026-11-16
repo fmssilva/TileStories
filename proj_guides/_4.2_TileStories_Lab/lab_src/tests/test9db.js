@@ -4,7 +4,7 @@
 // (test9da keeps its own mutation, the toast's Resume; test9n mutates the NO DEMO check itself).
 // Guidance round 17b: split in two to keep each file under 300 s (it ran 530 s): test9db the rows' values, the first half of the rows'
 // demos (and the controls' three) and the NO DEMO checks; test9dc.js (HALF=2, this file) the second half of the rows' demos. Every check kept.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const fs = require('fs'), path = require('path');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 const OUT = path.join(__dirname, '..', '..', 'voicebench', 'out', 'azure-sonia-raquel');

@@ -3,6 +3,10 @@
 var ed=document.getElementById("ed");
 function help(t){return '<button class="help" type="button" data-help="'+esc(t)+'" aria-label="Help">?</button>'}
 function seg(key,vals,labels,cur){return '<div class="seg">'+vals.map(function(v,i){return'<button type="button" data-set="'+key+'" data-v="'+v+'" aria-pressed="'+(String(cur)===String(v))+'">'+esc(labels[i])+'</button>'}).join("")+'</div>'}
+/* Lab only (PROTOTYPE_STRUCTURE.md, "Lab-only"): an Editor part that looks like an app feature but is never ported to Unity (the
+   DevFeatureBuildGuard idea) carries this badge; fo(id,title,LAB_ONLY,...) or labOnlyTag() beside a heading */
+var LAB_ONLY=["lab","LAB ONLY"];
+function labOnlyTag(){return '<span class="badge '+LAB_ONLY[0]+'" title="The Lab\'s own tool: never in the app or the Unity Editor">'+LAB_ONLY[1]+'</span>'}
 function row(label,ctrl,h,ind){return '<div class="row'+(ind?" ind":"")+'"><label>'+esc(label)+'</label><div>'+ctrl+'</div>'+(h?help(h):"<span></span>")+'</div>'}
 function sel(key,opts,cur){return '<select class="u" data-sel="'+key+'">'+opts.map(function(o){return'<option value="'+esc(o[0])+'"'+(o[0]===cur?" selected":"")+'>'+esc(o[1])+'</option>'}).join("")+'</select>'}
 function slider(key,min,max,step,val,adv){return '<div class="sl2"><input type="range" data-num="'+key+'" min="'+min+'" max="'+max+'" step="'+step+'" value="'+val+'" aria-label="'+key+'"><input class="u" type="number" data-num="'+key+'" min="'+min+'" max="'+max+'" step="'+step+'" value="'+val+'" aria-label="'+key+'"></div>'+(adv?'<div class="note warn">'+adv+'</div>':"")}

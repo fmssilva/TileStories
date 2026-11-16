@@ -1,4 +1,11 @@
-# _3.3.1 Prototype -- the POI detail card's look, feel and motion (2026-10-23)
+# TileStories Lab (the merged Lab; was the Block Components Lab)
+
+The one Lab of TileStories: the Block Components Lab (`lab_src/`, its sources; "Block Components Lab" below) is its home, and the
+World Editor Lab (`../_4.1.2_Prototype/lab_src`, frozen at v20.1) is ported into it, phase by phase: `../_4.2_Lab_Merge_Plan.md`.
+The page's title and its published artifact are renamed at P1a; until then they keep the Block Components Lab's name. This folder
+began as the `_3.3.1` prototype (below), whose records it still holds.
+
+## The _3.3.1 prototype -- the POI detail card's look, feel and motion (2026-10-23)
 
 The interactive design prototype the `_3.3` re-plan was judged on (R9-R11 of `_3.3_POI_Card_Styles.md`). It is the
 **reference for the look**, not code to port: every effect in it maps to a UI Toolkit 6.3 mechanism listed in `_3.3` R11.

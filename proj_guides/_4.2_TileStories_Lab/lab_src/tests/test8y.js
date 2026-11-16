@@ -1,7 +1,7 @@
 // v8y checks (Playwright + the installed Edge, WebGL by SwiftShader): node test8y.js -> PASS/FAIL per check
 // The tile of light's styles, pressed in the Editor: each choice reaches the shader, the preview and the guide's own Azu.
 // Colours are counted in the pictures: blue ink (b > r + 60), aubergine (green under 80 % of red and 85 % of blue), ochre or gold (r > 170, b < r - 90).
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });

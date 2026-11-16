@@ -229,7 +229,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .fo.locked{opacity:.55} .fo.locked>summary{cursor:default}
 .fo.cur{box-shadow:0 0 0 1px #E07A1F}
 .badge{font:600 9.5px/1 var(--mono);letter-spacing:.06em;padding:3px 5px;border-radius:3px;background:#2A2A2A;color:var(--u-dim)}
-.badge.new{background:#1F4A2A;color:var(--u-new)} .badge.ext{background:#433414;color:var(--u-warn)} .badge.test{background:#5A3410;color:#F2A35E}
+.badge.new{background:#1F4A2A;color:var(--u-new)} .badge.ext{background:#433414;color:var(--u-warn)} .badge.test,.badge.lab{background:#5A3410;color:#F2A35E}
 .badge.nat{background:#1F4A2A;color:var(--u-new)} .badge.bld{background:#1F3550;color:#9CC4F0} .badge.bro{background:#4A2420;color:#F0A89C}
 .row{display:grid;grid-template-columns:150px minmax(0,1fr) 22px;gap:8px;align-items:center;min-height:24px;margin:3px 0}
 .row.ind{padding-left:16px;grid-template-columns:134px minmax(0,1fr) 22px}

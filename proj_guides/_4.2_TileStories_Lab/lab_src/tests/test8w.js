@@ -1,5 +1,5 @@
 // v8w checks (Playwright + the installed Edge, WebGL by SwiftShader, three.js from jsdelivr): node test8w.js -> PASS/FAIL per check
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const path = require('path');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 const GLB = path.join(__dirname, '..', '..', '..', 'mascote', '3d', 'azu_tile.glb');

@@ -6,7 +6,7 @@
 // the seven scenes in Ask Azu's console; and the fixes: Azu beside the block (0 px over words), the mouth of a paused recorded line,
 // the wall's answers in the one order. MUTATE=1 node test9da.js runs it with the toast's Resume starting the tour again from the
 // start (the named checks turn red). The other half: test9db.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const fs = require('fs'), path = require('path');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 const OUT = path.join(__dirname, '..', '..', 'voicebench', 'out', 'azure-sonia-raquel');

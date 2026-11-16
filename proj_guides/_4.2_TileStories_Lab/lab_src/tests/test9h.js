@@ -11,7 +11,7 @@
 // Edited in Guidance and its links open the group and the cue; the old names (S.hints.on, S.ctl.locate.label) are Guidance's values.
 // 6. Every new row's demo, the words and their owners, the old timers gone. 7. The two new scenes in Ask Azu's console.
 // MUTATE=1 node test9h.js runs it with the cues past the one-at-a-time gate: the checks named [at once] turn red.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });

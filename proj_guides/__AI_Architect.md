@@ -86,8 +86,8 @@ domain items -> the domain guide's `## TODOs` (tagged with the step that picks t
   in the brief the targeted PlayMode fixtures that close it instead, and the full run it rides on. Count the blocks since the
   last full PlayMode run in your answer, and say which block the next one falls on. Full runs are taken with Unity in the
   background unless you ask for the front.
-- **Test tiers in the brief's TEST PLAN line (`40-testing.md` 4.2):** every block BLOCK (a few minutes); every 3rd-4th block,
-  and a block on shared ground, CORE (~30 min); every ~12 blocks and at the milestones (domain close-out, device session, build)
+- **Test tiers in the brief's TEST PLAN line (`40-testing.md` 4.2):** every block BLOCK (a few minutes); every 4th-5th block,
+  and a block on shared ground, CORE (~30 min); every 12-15 blocks and at the milestones (domain close-out, device session, build)
   FULL (~90 min). Count the blocks since the last CORE and the last FULL in every answer.
   **While the developer reviews the card component by component** (from 2026-10-28: the hero, the Navigation Bar, the story, then
   the next ones), every block runs only BLOCK -- the fixtures of the component under review + full EditMode; everything else
@@ -97,7 +97,7 @@ domain items -> the domain guide's `## TODOs` (tagged with the step that picks t
   (17b counts), the counts since the last CORE and FULL are block numbers, never dates. A block green on its own tier is merged;
   CORE or FULL then runs on a `git worktree` of `master` while the next block is built, and a red it finds becomes an item in the
   block then running. With one Unity Editor, the next block starts with its Unity-free parts while the long run holds Unity.
-- **Maintenance cadence:** every ~12 blocks (with that FULL run, and before a domain close-out) the next block is MAINTENANCE, in
+- **Maintenance cadence:** every 12-15 blocks (with that FULL run, and before a domain close-out) the next block is MAINTENANCE, in
   this order: `skills/Test_Suite_Review.md` (faster, still trustworthy), `skills/Code_Health_Review.md` (simple, in its place, no
   dead / duplicated / speculative code), then `skills/Guidelines_Review.md` (rules true, short, no history). Count the blocks
   since the last maintenance in every answer.

@@ -7,7 +7,7 @@
 // The beat cards are test9sb.js. CAP=<dir> saves a capture of each state (<nn>_<surface>_<look>_<height>_<theme>.png).
 // MUTATE=1 node test9s.js makes the panel's question chips 36 px tall and draws Azu 170 px to the left, over the told words: the checks
 // named [44 px] and [0 px] turn red. One table, three files (each under 300 s): this file 01-09, test9sc.js 10-22 and 29-33, test9sd.js 23-28.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const fs = require('fs'), path = require('path');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 const CAP = process.env.CAP || '';

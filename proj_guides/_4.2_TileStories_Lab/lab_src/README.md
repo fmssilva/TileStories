@@ -7,8 +7,11 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
   the pictures in `assets/`. Each module is described in `PROTOTYPE_STRUCTURE.md`.
 - **Words:** `src/core/realstrings.json` (the framework's real words, with their owner part; `python strings.py` re-imports them
   from Unity's `CardStrings.asset`); the Lab's own words are in `src/core/words.js`'s `LABSTR`.
-- **Build:** `python build.py` writes `block-components-lab.html` here (not committed). Copy it to `../Block Components Lab.html` (the
-  record copy) and publish it to https://claude.ai/artifact/Gpjf7yvoYHjGebmmNhuw2o.
+- **Build:** `npm install` once here (acorn, for `check_structure.js`; playwright-core, for the tests: `tests/pw.js`, `PW=<path>` names another copy). `python build.py` writes `block-components-lab.html` here
+  (not committed: one self-contained page, its pictures, GLBs and faces embedded), then runs the structure check and the Unity lint
+  (`tools/unity_lint.py`, a ratchet per CSS file in `tools/unity_lint_ratchet.json`); either one failing fails the build
+  (`PROTOTYPE_STRUCTURE.md`, "Rules"). Copy it to `../Block Components Lab.html` (the record copy) and publish it to
+  https://claude.ai/artifact/Gpjf7yvoYHjGebmmNhuw2o. (P1a: a local http server for dev and tests, and a multi-file publish.)
 - **Prove it:** `powershell -ExecutionPolicy Bypass -File tests/runtest8.ps1` opens the page headless with `#selftest`: every option,
   text and demo field must change the phone or be classed behaviour, and every row of every tab has its demo but the named
   exemptions (`ROW_DEMO_EXEMPT`, each with its reason; guidance round 10) (it prints `bad=0` when all is well). It walks the tabs as three walks side by side and sums them (about 14 minutes at round 17b); the texts' walk goes in slices of 20 fields, each its own task, and draws the signature before a field once per tab and language (round 21: it had passed 40 min; `-tabs words` now about 4 min), its JSON pending (INCOMPLETE) until done;
@@ -20,7 +23,9 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
   `#probe` opens a handle on the page's state) and prints PASS / FAIL per check. Never run the self-test and `run_tests.js`
   together: each slows the other past its limits.
 - **Levels: what a round runs** (the developer, 2026-11-12: "Feature tests per round, each 4 rounds core tests, each 12 rounds full
-  tests"; it replaces the levels 1 to 3 of 2026-11-06 to 11-09). A prototype's tests never cost more than building it. A round is one
+  tests", widened on 2026-11-16 to core every 4-5 rounds and full every 12-15; it replaces the levels 1 to 3 of 2026-11-06 to 11-09).
+  The rule's home is `../../skills/Feature_Prototyping.md` step 3, items 5-6 (each feature's checks in two tiers, "all" and a tagged "core" subset
+  the prototype's core run collects: P1a's job here; until then the core set is the list of files below). A prototype's tests never cost more than building it. A round is one
   change the developer can look at (a feature, a fix, a family of rows).
   - **While building, look first** (`../../skills/Feature_Prototyping.md` step 3.3): after each change only `python build.py`
     (the check 0/0/0/0), then run it and capture the phone at 390 px, light and dark, and the Editor tab, open each capture
@@ -32,7 +37,7 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
     - A walk holds one big tab alone: a walk's cost grows faster than its controls (the Guide tab alone is about 1300
       controls, 61 s, but `-tabs guide,words` took 65 min). Run `-tabs guide`, `-tabs words` and `-tabs card` as separate calls.
     - The pure logic checks run in Node, with no browser, where that is simple.
-  - **Core tests, every 4 rounds (about 30 min):** `tests/runtest8.ps1` with no `-tabs` (every walk side by side, about 14
+  - **Core tests, every 4-5 rounds (about 30 min):** `tests/runtest8.ps1` with no `-tabs` (every walk side by side, about 14
     min at round 17b: the card walk is the long one; bad=0), then `node run_tests.js --core`: the core set, the files that test the shared modules (`core/`, the phone and
     the card's chrome, the Editor's shell, the guide's engine: the tour, the dock, the person, the tour from the card, the saved
     place), about 18 min at round 17b's timings (25 min at the baseline's). `run_tests.js --core` reads this list (one list, in one place):
@@ -53,7 +58,7 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
     - `test9u` (229 s) and `test9ub` (240 s): the saved place and Tell me more (`guide/saved-place`, `guide/tell-more`): the one
       offer in each place, Continue within a visit and on the next, the deep parts, the pace, expiry, a changed tour, blocked storage.
     <!-- /core set -->
-  - **Full tests, every 12 rounds and before a hand-off to Unity:** `tests/runtest8.ps1`, then `node run_tests.js` (every file,
+  - **Full tests, every 12-15 rounds and before a hand-off to Unity:** `tests/runtest8.ps1`, then `node run_tests.js` (every file,
     about 2 h at round 17's timings), then every mutation the tests name (`MUTATE=1`); the results replace `tests_baseline.json`
     (a new baseline).
   - **Every file stays under 300 s**, so a full run stays bounded: a file over it is split by its own sections, the same checks and

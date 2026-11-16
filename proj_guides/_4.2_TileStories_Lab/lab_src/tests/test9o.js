@@ -7,7 +7,7 @@
 // room); the green ▸ (its size and contrast, still pressing the demo); the music rows (the volume and the ducking read from the gain,
 // the tracks, the credit); every new row's demo. MUTATE=1 node test9o.js lets Fun through during a tour: the checks named [fun hold]
 // turn red.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--autoplay-policy=no-user-gesture-required'] });

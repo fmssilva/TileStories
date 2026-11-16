@@ -5,7 +5,7 @@
 // MUTATE=1: (test9se's whole mutation) Azu never placed again after its step's start: the check named [azu] turns red. CAP=<dir> saves g5.
 // Guidance round 17b: split in two to keep each file under 300 s (it ran 370 s): test9sf the repeats 1-3, test9sg.js the repeats 4-6
 // (REP0=3), the same check and mutation in each; REPS sets how many a file runs (3).
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const fs = require('fs'), path = require('path');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 const CAP = process.env.CAP || '', REPS = +process.env.REPS || 3, REP0 = +process.env.REP0 || 0;

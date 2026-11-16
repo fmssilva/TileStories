@@ -7,7 +7,7 @@
 // panel's Stop) leaves no offer within the visit.
 // Each check keeps a place, then a new visit (the page reloaded) as the visitor would come back. MUTATE=1 (as test9u) never forgets a place:
 // the check named [expiry] turns red.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--autoplay-policy=no-user-gesture-required'] });

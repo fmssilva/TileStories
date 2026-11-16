@@ -1,6 +1,6 @@
 // v8r checks (Playwright + the installed Edge): node test8r.js -> PASS/FAIL per check
 // Needs two voice sets rendered by voicebench (out/ or, on this computer, out-private/).
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--autoplay-policy=no-user-gesture-required'] });

@@ -1,7 +1,7 @@
 // v9b checks (Playwright + the installed Edge, WebGL by SwiftShader), no network for the voices: node test9b.js -> PASS/FAIL per check
 // The real mouth: a recorded Azure line moves the mouth by its facial curves on the audio's clock; a live ElevenLabs answer
 // (faked: a real MP3) opens it by the sound's loudness; a recorded set without curves, opened from a file, falls back to the letters.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const fs = require('fs'), path = require('path');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 const OUT = path.join(__dirname, '..', '..', 'voicebench', 'out');

@@ -1,5 +1,5 @@
 // v8t live check, by hand only (it spends the key's quota): node test8t_live.js [shots dir]. Needs keys.local.js (python keys_local.py)
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe-live';
 const shots = process.argv[2] || '';
 (async () => {

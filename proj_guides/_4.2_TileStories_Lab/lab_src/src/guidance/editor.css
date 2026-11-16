@@ -153,6 +153,7 @@ details.fo[data-fo^="gd:f:"]>summary .sp{display:none}
 /* the tab's own headings inside a section, and a field a link landed on */
 .sub2.gth{margin-top:14px;color:#C9D6E6}
 .sub2.gth:first-child{margin-top:4px}
+.sub2.gth .badge.lab{margin-left:6px;vertical-align:1px}
 .note.gdvline{color:#E2E2E2}
 .gdland{outline:2px solid #E8B04A;outline-offset:2px;transition:outline-color .3s}
 /* a row whose content takes its whole width (Help's and the Mix's tables), its label above */

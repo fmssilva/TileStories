@@ -10,7 +10,7 @@
 // the end of 2 · The tour with a console warning; the Detail Card has no guide foldout; NO DEMO for none; the Guide tab's draw time, now and
 // round 13's (measured on master's build the same way: tests/guide_rows_r13.json's drawMs), not slower.
 // MUTATE=1 node test9r.js leaves Ask about the view out of its new place (GUIDE_PLAN): the checks named [moved] turn red.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const fs = require('fs'), path = require('path');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 const R13 = JSON.parse(fs.readFileSync(path.join(__dirname, 'guide_rows_r13.json'), 'utf8'));

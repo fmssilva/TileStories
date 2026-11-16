@@ -10,7 +10,7 @@
 // a window, the result with the slip played back, Heard it! at Compact and with Mascot Off, the screen reader, a language change; Find it on
 // the wall (a real drag on the wall to the point, the 1.2 s settle, the hint's direction, I give up at 20 s, the wall lost, the wall only);
 // every new row's demo (a real click on a sample), the Guide script's word with Reviewed; the twelve scenes in Ask Azu's console.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--autoplay-policy=no-user-gesture-required'] });

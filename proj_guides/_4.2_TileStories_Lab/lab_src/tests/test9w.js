@@ -16,7 +16,7 @@
 // [reduced motion] the faded choice at once.
 // MUTATE=1: the game's clock never freezes, the detection never knows a question about the question and no answer is checked for
 //   the right one: the checks named [today], [pause], [back], [about], [no spoiler] and [ladder] turn red (and with them [editor]'s demos and [reduced motion], which need a hint).
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--autoplay-policy=no-user-gesture-required'] });

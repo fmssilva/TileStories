@@ -1,3 +1,5 @@
+Frozen at v20.1 (2026-11-16): the source of the port into `_4.2_TileStories_Lab` (`_4.2_Lab_Merge_Plan.md`). Bug fixes only.
+
 # World Editor Lab -- source
 
 ## Working rules (same as the main project)
@@ -67,13 +69,13 @@ A difference from the baseline must be one you meant; when it is, save the new r
 The steps it runs, each usable on its own:
 ```
 python build.py out/lab.html
-python tests/regress.py out/lab.html out/report.json     # 153 feature checks + every editor header + screens
+python tests/regress.py out/lab.html out/report.json     # 168 feature checks + every editor header + screens
 python tests/compare.py tests/report_baseline.json out/report.json   # what changed against the baseline
 python tests/sweep.py out/lab.html --verbose             # 4 devices × 6 styles × 80 poses + side views + big markers: rules R1-R6
 SWEEP_INIT="setProfile('visitors','children')" python tests/sweep.py out/lab.html   # the same under Playful
 python tests/unity_lint.py                               # 0 problems: only Unity-feasible CSS
 ```
-Expect: regress 153 checks, 0 failed; both sweeps clean (2,640 poses each), page errors 0; lint 0 problems.
+Expect: regress 168 checks, 0 failed; both sweeps clean (2,640 poses each), page errors 0; lint 0 problems.
 
 ### Unity lint
 `tests/unity_lint.py` keeps the CSS inside what UI Toolkit can do (`../../_4.1.9d_Unity_Feasibility.md`).

@@ -7,7 +7,7 @@
 // later launch (no pages, Welcome back) and Remember across visits Off (the pages again); Reduce Motion and Mascot Off; Start the app in
 // Preview & Test and the visitor's line; + Add guidance's Page template and the drag within the rules; every new row's demo; the four
 // scenes in Ask Azu's console. MUTATE=1 node test9l.js lets a refused camera go on to the wall: the checks named [camera] turn red.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
   const t00 = Date.now();

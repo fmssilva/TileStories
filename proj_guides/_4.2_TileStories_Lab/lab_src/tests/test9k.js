@@ -6,7 +6,7 @@
 // for every Fun item, with Why not now?'s words; Calm and Lively only; the Fun lane and the sixth visitor's timeline (Instant, in the
 // page); Guide › Mascot's link rows; the ✦ fix (0 px over words on the card past the hero); every new row's demo; the five scenes in Ask
 // Azu's console. MUTATE=1 node test9k.js removes the Fun kind's Solemn gate: the checks named [solemn] turn red.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
   const t00 = Date.now();

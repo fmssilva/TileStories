@@ -7,7 +7,7 @@
 // never playing, Draft with AI with sampleFn stubbed); guess the year (a real drag on the slider, the pins, the bands); every new row's
 // demo; the eight scenes in Ask Azu's console (a stop then the ✦, a skipped step, too few questions, Expert's opt-in among them).
 // MUTATE=1 node test9p.js lets the plan ignore the tour's cap: the checks named [cap] turn red.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--autoplay-policy=no-user-gesture-required'] });

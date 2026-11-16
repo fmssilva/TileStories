@@ -18,7 +18,7 @@
 //   visit; its two Editor rows. [reduced motion] the glow without its pulse; the mascot beside the marker with no hop.
 // MUTATE=1: the set picked by its count, the old introduction, no room for the hero's words under a beat card, no mascot at the hero, the
 //   bubble's tail off the head, Guess the year at 8 s: the checks named [voice], [intro], [promise], [card], [tap here] and [guess] turn red.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const fs = require('fs'), path = require('path');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {

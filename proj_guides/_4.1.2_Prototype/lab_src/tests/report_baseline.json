@@ -187,7 +187,7 @@
   },
   "glued parts move with the wall": {
    "ok": true,
-   "info": "[357.5931091308594, 328.38385009765625] \u2192 [285.18829345703125, 335.65325927734375]"
+   "info": "[357.5931091308594, 327.56146240234375] \u2192 [285.18829345703125, 335.65325927734375]"
   },
   "from the side, 10 cm off the wall shows parallax": {
    "ok": true,
@@ -610,6 +610,66 @@
    "info": ""
   },
   "v18: the visitor's light / dark does not change the app's default": {
+   "ok": true,
+   "info": ""
+  },
+  "v20: the profile bar switches look, mode, audience, time and text": {
+   "ok": true,
+   "info": ""
+  },
+  "v20: the profile bar has one segment per choice (looks, light/dark, audiences, times, text sizes)": {
+   "ok": true,
+   "info": ""
+  },
+  "v20 onboarding: the look first, then 7-11 | 12+ with one example card, then time and interests": {
+   "ok": true,
+   "info": ""
+  },
+  "v20 onboarding: a tap on the look restyles that page; the audience example follows the choice": {
+   "ok": true,
+   "info": ""
+  },
+  "v20: Settings has its 5 areas": {
+   "ok": true,
+   "info": ""
+  },
+  "v20: Settings areas can be switched off by the editor (wall, sound, help)": {
+   "ok": true,
+   "info": ""
+  },
+  "v20: visitor prefs apply at once (names off, arrows off, mini-map)": {
+   "ok": true,
+   "info": ""
+  },
+  "v20: a switch in Settings changes the pref and the phone": {
+   "ok": true,
+   "info": ""
+  },
+  "v20 You: the counts and the saved places": {
+   "ok": true,
+   "info": ""
+  },
+  "v20: the action bar holds 2 to 5 buttons": {
+   "ok": true,
+   "info": ""
+  },
+  "v20: Settings is hidden from the bar while the gear shows, and shown without it": {
+   "ok": true,
+   "info": ""
+  },
+  "v20: the immersive card shows the photo, two lines and Story first": {
+   "ok": true,
+   "info": ""
+  },
+  "v20 Coming soon: both places are marked and the tap UI shows the badge and the honest line per audience": {
+   "ok": true,
+   "info": ""
+  },
+  "v20 Coming soon: the What's coming page names the place and offers Save": {
+   "ok": true,
+   "info": ""
+  },
+  "v20 Coming soon: every tap style shows the badge": {
    "ok": true,
    "info": ""
   }

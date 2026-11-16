@@ -8,7 +8,7 @@
 // new rules alone on a fake clock. Part B (test9jb.js) presses every button of the item form. Split from test9j.js on 2026-11-09 (level 3
 // after guidance round 10: the one file reached its 600 s kill on a busy machine). MUTATE=1 node test9ja.js runs it with the Spotlight
 // offered on any item and a Delete with no Undo: the checks named [spot] and [undo] turn red.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
   const t00 = Date.now();

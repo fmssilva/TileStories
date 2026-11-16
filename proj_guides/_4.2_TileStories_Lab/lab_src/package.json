@@ -1,0 +1,9 @@
+{
+  "name": "tilestories-lab",
+  "private": true,
+  "description": "The TileStories Lab's build and test tools (npm install, once): check_structure.js parses the joined modules with acorn; the tests drive the installed Edge with playwright-core (tests/pw.js).",
+  "devDependencies": {
+    "acorn": "8.15.0",
+    "playwright-core": "1.58.0"
+  }
+}

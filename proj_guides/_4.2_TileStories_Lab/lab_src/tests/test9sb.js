@@ -5,7 +5,7 @@
 // result), Find it on the wall (the seek ring, the hint, Azu at the edge with its arrow), the breather and the cookie; the rules of
 // tests/g15lib.js on each (44 px, 4.5:1, 0 px over the words being told, inside the phone, one focal point). CAP=<dir> saves each state.
 // MUTATE=1 node test9sb.js makes a beat card's chips 36 px tall: the checks named [44 px] turn red.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const fs = require('fs'), path = require('path');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 const CAP = process.env.CAP || '';

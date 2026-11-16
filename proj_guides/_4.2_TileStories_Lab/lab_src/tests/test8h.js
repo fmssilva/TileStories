@@ -1,5 +1,5 @@
 // v8h checks (Playwright + the installed Edge): node test8h.js -> PASS/FAIL per check
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 const LOOKS = { loading: ['skeleton', 'spinner', 'mascot', 'tiles', 'scan'], lost: ['frame', 'mascot', 'simple'], empty: ['mascot', 'simple'], offline: ['banner', 'mascot'], done: ['button', 'toast', 'mascot'] };
 (async () => {

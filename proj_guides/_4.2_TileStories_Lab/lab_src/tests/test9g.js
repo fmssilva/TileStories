@@ -10,7 +10,7 @@
 // ends it for the visit; the old timers gone; 4. the Editor: the link row in Ask about the view, every new row's demo (the ×10 chip),
 // Why not now? and the Log naming them, the words and their owners; 5. the two new scenes in Ask Azu's console.
 // MUTATE=1 node test9g.js runs it with the breathing room ignored for the remarks: the checks named [breathing] turn red.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });

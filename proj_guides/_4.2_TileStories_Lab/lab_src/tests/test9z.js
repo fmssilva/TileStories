@@ -23,7 +23,7 @@
 //   always Dark, the panel's words 30 px, the mascot back on the panel's edge, the quiz's detection always "about", the chip never moved:
 //   [highlighter] (glide), [seek], [bubble], [teleprompter], [looks] (theme), [panel], [what next], [quiz ask] and [chip] turn red (and with
 //   them [highlighter]'s one painter, [looks]' contrast and [editor], which need the strip): 18 red of 22 (round 21).
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--autoplay-policy=no-user-gesture-required'] });

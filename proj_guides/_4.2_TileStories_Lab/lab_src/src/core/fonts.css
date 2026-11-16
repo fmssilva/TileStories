@@ -1,0 +1,12 @@
+/* The Lab's faces, embedded (no network): the build puts each media/FONT_*.txt (a data: URL) in for its placeholder. OFL 1.1.
+   Fraunces SemiBold and Atkinson Hyperlegible Next 400 / 700: the Unity project's files (Runtime/UI/Theme/Fonts), the World Lab's
+   media/FONT_*.txt. Atkinson 600: the same family (2.001, Google Fonts' static SemiBold), the weight the card's labels use.
+   IBM Plex Mono 400 / 500: the Lab's own labels (kickers, badges), Latin subset. These are the faces the page drew with Google
+   Fonts (P0, 2026-11-16): a 500 of Atkinson falls to 400 and a 400 / 500 of Fraunces to 600, as they looked. Atkinson 500 (the
+   World Lab's FONT_ATK500) would make the guide's 500 words a little wider: it comes with the World Lab's styles (P1). */
+@font-face{font-family:"Fraunces";font-weight:600;font-style:normal;src:url(__FONT_FRAUNCES__) format("truetype")}
+@font-face{font-family:"Atkinson Hyperlegible Next";font-weight:400;font-style:normal;src:url(__FONT_ATK400__) format("truetype")}
+@font-face{font-family:"Atkinson Hyperlegible Next";font-weight:600;font-style:normal;src:url(__FONT_ATK600__) format("truetype")}
+@font-face{font-family:"Atkinson Hyperlegible Next";font-weight:700;font-style:normal;src:url(__FONT_ATK700__) format("truetype")}
+@font-face{font-family:"IBM Plex Mono";font-weight:400;font-style:normal;src:url(__FONT_MONO400__) format("truetype")}
+@font-face{font-family:"IBM Plex Mono";font-weight:500;font-style:normal;src:url(__FONT_MONO500__) format("truetype")}

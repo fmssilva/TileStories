@@ -1,4 +1,6 @@
-/* The pictures the build embeds (IMG, as blob URLs) and the shared icons (TILE, PIN, ANIMSVG). */
+/* The pictures the build embeds (IMG, as blob URLs) and the shared icons (TILE, PIN, ANIMSVG). Embedded, so a page opened from a
+   file (file://) can draw them on a canvas and read it back (Photo of the view); they leave the page at P1a, with the GLBs, when
+   the tests run on a local http server and the publish is a multi-file artifact. */
 var IMG={hero:"__HERO__",g1:"__G1__",g2:"__G2__",g3:"__G3__",before:"__BEFORE__"};
 Object.keys(IMG).forEach(function(k){try{var b64=IMG[k].split(",")[1],bin=atob(b64),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);IMG[k]=URL.createObjectURL(new Blob([u],{type:"image/jpeg"}))}catch(e){}});
 var ASSETS=["hero","g1","g2","g3","before"];

@@ -4,7 +4,7 @@
 // chip's ×, ▸ on a line). Part A (test9ja.js) holds the rest of round 6's checks. Split from test9j.js on 2026-11-09 (level 3 after
 // guidance round 10: the one file reached its 600 s kill on a busy machine). It names no mutation: its checks are counts of values set,
 // and part A's mutation covers round 6's rules.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
   const t00 = Date.now();

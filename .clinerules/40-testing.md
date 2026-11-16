@@ -109,9 +109,9 @@ the Live assembly); full EditMode ~4.4 min (2218 tests); CardSmoke ~1.3 min (22 
     test current.
   Tests stay on scope: a block's own tests run every OTHER component at its default (e.g. the card's Navigation Bar at Bottom with
   its default look); another component's option matrix lives only in that component's own fixture, so it is never re-run for nothing.
-- **CORE -- `category_names: ["Core"]`, PlayMode then EditMode, ~12 min, background:** every 3rd-4th block, and at the end of a block on SHARED GROUND
+- **CORE -- `category_names: ["Core"]`, PlayMode then EditMode, ~12 min, background:** every 4th-5th block, and at the end of a block on SHARED GROUND
   (the definition below).
-- **FULL -- everything, <= 90 min, background:** every ~12 blocks with the maintenance, before a domain close-out, a device
+- **FULL -- everything, <= 90 min, background:** every 12-15 blocks with the maintenance, before a domain close-out, a device
   session or a build.
 - A wider tier confirms, never discovers: green on BLOCK before CORE, green on CORE before FULL. The report names the tier, its
   counts, and the blocks since the last CORE and the last FULL.

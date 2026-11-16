@@ -3,7 +3,7 @@
 // says which and why; pause, resume, stop and mute act on every source; an answer reaches the conversation once, whatever speaks it.
 // ElevenLabs is answered by a fake server (a real MP3 of the Azure set, the request's letters at even times); Azure by a fake Speech SDK.
 // MUTATE=1 node test9c.js runs it with the order broken (the device voice before the recorded one) to show which checks turn red.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const fs = require('fs'), path = require('path');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 const OUT = path.join(__dirname, '..', '..', 'voicebench', 'out', 'azure-sonia-raquel');

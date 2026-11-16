@@ -9,7 +9,7 @@
 // own words; 9. every new Editor row's demo (the ×10 chip), the Log and the visitor; 10. the five new scenes in Ask Azu's console.
 // MUTATE=1 node test9f.js runs it with a score that ignores the stage of the visit (the kinds' weights and Along the visit held at ×1):
 // the checks named [the stage] turn red.
-const { chromium } = require(process.env.PW || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/playwright');
+const { chromium } = require('./pw');
 const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });

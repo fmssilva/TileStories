@@ -707,11 +707,9 @@ textarea.uin{height:auto;min-height:38px;padding:4px 6px;resize:vertical;font:12
 
 /* controls */
 .tapc .lchip{pointer-events:auto}
-.tapc.sel-ring:not(.kids) .lchip.on{background:var(--tg);color:var(--tx);box-shadow:inset 0 0 0 calc(.55 * var(--u)) var(--acc)}
 .tapc .ds-seg{display:flex;padding:calc(.8 * var(--u));border-radius:calc(min(var(--r-chip,99), 4) * var(--u));pointer-events:auto}
 .tapc .ds-seg span{flex:1;text-align:center;padding:calc(2.4 * var(--u)) 0;border-radius:calc(min(var(--r-chip,99), 3.2) * var(--u));font:650 calc(3 * var(--ts,1) * var(--u))/1 var(--font);color:var(--td);cursor:pointer;transition:background var(--dur),color var(--dur)}
 .tapc .ds-seg span.on{background:var(--acc);color:var(--acc-fg)}
-.tapc.sel-ring .ds-seg span.on{background:none;color:var(--tx);box-shadow:inset 0 0 0 calc(.55 * var(--u)) var(--acc)}
 .tapc .ds-sw{flex:none;position:relative;width:calc(11.6 * var(--u));height:calc(7 * var(--u));border-radius:99px;background:color-mix(in srgb,currentColor 22%,transparent);cursor:pointer;pointer-events:auto;transition:background var(--dur)}
 .tapc .ds-sw i{position:absolute;left:calc(.8 * var(--u));top:calc(.8 * var(--u));width:calc(5.4 * var(--u));height:calc(5.4 * var(--u));border-radius:99px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35);transition:transform var(--dur) cubic-bezier(.3,1.4,.5,1)}
 .tapc .ds-sw.on{background:var(--acc)}
@@ -763,7 +761,6 @@ textarea.uin{height:auto;min-height:38px;padding:4px 6px;resize:vertical;font:12
 .tapc .ds-tab .tl{font:600 calc(2.5 * var(--ts,1) * var(--u))/1 var(--font)}
 .tapc .ds-tab.on{color:var(--tx)}
 .tapc .ds-nav.ind-pill .ds-tab.on .ti{background:var(--acc);color:var(--acc-fg)}
-.tapc.sel-ring .ds-nav.ind-pill .ds-tab.on .ti{background:none;color:var(--acc);box-shadow:inset 0 0 0 calc(.5 * var(--u)) var(--acc)}
 .tapc .ds-nav.ind-dot .ds-tab.on{color:var(--acc)}
 .tapc .ds-nav.ind-dot .ds-tab.on::after{content:"";position:absolute;bottom:calc(1.4 * var(--u));width:calc(1.4 * var(--u));height:calc(1.4 * var(--u));border-radius:99px;background:var(--acc)}
 .tapc .ds-nav.ind-dot.lab-always .ds-tab.on::after,.tapc .ds-nav.ind-dot.lab-selected .ds-tab.on::after{bottom:calc(.4 * var(--u))}
@@ -1267,8 +1264,7 @@ textarea.uin{height:auto;min-height:38px;padding:4px 6px;resize:vertical;font:12
 .tapc.sel-fill .lchip.on{background:var(--acc);color:var(--acc-fg);box-shadow:none}
 .tapc.kit .kbg .lchip.on{box-shadow:none}
 /* segmented: a raised thumb, not an accent fill */
-.tapc .ds-seg span.on,.tapc.sel-ring .ds-seg span.on{background:#FFFFFF;color:#14110D;box-shadow:0 1px 3px rgba(20,17,13,.18)}
-.tapc.dark .ds-seg span.on{background:#3A3631;color:#F6F1E8;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
+.tapc .ds-seg span.on,.tapc.dark .ds-seg span.on{background:#3A3631;color:#F6F1E8;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
 .tapc.light .ds-seg{background:#EDE8DE;backdrop-filter:none;box-shadow:none!important;border-color:transparent}
 .tapc.dark .ds-seg{background:#1C1A17;backdrop-filter:none;box-shadow:none!important;border-color:rgba(255,255,255,.08)}
 /* immersive tag: the actions fit; a stronger shade under the words */
@@ -3772,7 +3768,7 @@ D.pois[0].actions = { model: { file: "twin_tower_church.glb", controls: { rotate
 D.pois[1].actions = { model: { file: "", controls: { rotate: true, zoom: true, move: false }, moments: [] } };
 D.pois[2].actions = { model: { file: "", controls: { rotate: true, zoom: true, move: false }, moments: [] } };
 D.pois[3].actions = { model: { file: "castle_photogrammetry.fbx", controls: { rotate: true, zoom: true, move: true }, moments: [{ name: "The castle at night", plays: "Timeline · Night" }] } };
-D.app = { theme: "premium",
+D.app = {
   start: { loading_lines: true },
   onboarding: { on: true, ask_visitors: true, ask_time: true, ask_language: true, ask_interests: true },
   explore: { tours: true, games: true, moments: true, layers: false },
@@ -5469,9 +5465,7 @@ function onTapPoiBody(p, pi, lv) {
   ];
 }
 /* ---------- App: the app's screens on a phone (start, onboarding, main AR screen, a tapped POI, the Explore menu) ---------- */
-const STEPS = [["start", "1 · Start"], ["onboarding", "3 · Onboarding"], ["main", "4 · Main AR screen"], ["tapped", "4 · A POI tapped"], ["explore", "6 · Explore menu"], ["settings", "7 · Settings"], ["you", "7 · You"], ["album", "8 · Tile album (7–11)"]];
 let phoneEls = null;
-const ACT_ICON = { card: "▤", model_wall: "◆", model_screen: "◇", pano: "◎", map: "⌖", then_now: "◐", play: "▶", ask: "✦", navigate: "➜", favourite: "♡", share: "⇪", tour: "⋯", quiz: "?" };
 
 /* where the label sits beside a marker on the phone: the style's side, past the marker's own size */
 function lblPos(P, flip, up) {   // up: a "below" label near the bottom edge goes above the marker;   // measured from the marker's centre: past its radius, its status ring and a 6 pt gap, so a label never covers its own marker
@@ -5488,7 +5482,7 @@ function renderPhone() {
 }
 function buildPhone(step) {
   const A = D.app, kids = forKids(), go = st => () => { ui.appStep = st; tapState.view = null; renderPhone(); };
-  dev.scr.classList.remove("kids"); dev.scr.classList.add("premium"); for (const k of Object.keys(D.looks)) dev.scr.classList.toggle("look-" + k, activeLook() === k); dev.scr.classList.toggle("kidtone", forKids());
+  dev.scr.classList.remove("kids"); dev.scr.classList.add("premium"); for (const k of Object.keys(D.looks)) dev.scr.classList.toggle("look-" + k, activeLook() === k); 
   dev.glue.replaceChildren(); phoneEls = null;
   applyGlass(dev.scr);
   if (step === "start") { dev.layer.replaceChildren(startScreen(go(A.onboarding.on ? "onboarding" : "main"))); return; }   // built from the Design system
@@ -6692,10 +6686,6 @@ D.ds = {
   motion: "follow",          // follow the phone's Reduce Motion · full · reduced
   scheme: "standard",        // standard (calm, no overshoot) · expressive (springs that overshoot a little)
   scrim: 0.85,               // the shade under words on a photo (worst pixel 4.5:1)
-  audiences: {               // what Family and Expert change from the Explorer base (_3.5 §3.5)
-    family: { corner: 24, text_step: 1.0625, scheme: "expressive", icon_stroke: 2 },
-    expert: { corner: 12, text_step: 1, density: 0.75, icon_stroke: 1.5 },
-  },
   nav: { style: "raised", shape: "floating", fill: "solid", labels: "always", tabs: "4", title: "large" },
   sheet: { grabber: true, backdrop: 0.35, detent: "half" },
 };
@@ -6704,7 +6694,7 @@ const DS_FONT = '"Atkinson Hyperlegible Next","Segoe UI",system-ui,sans-serif', 
 const radiiFor = r => [Math.round(r * 0.3), Math.round(r * 0.6), Math.round(r), Math.round(r * 1.5)];
 const PT = v => v / 3.9;   // pt → u (1 u = 1 % of a 390 pt phone width)
 /* the look classes on a screen root: the live look, and the children's tone (visitors) */
-const audCls = () => " look-" + activeLook() + (forKids() ? " kidtone" : "");
+const audCls = () => " look-" + activeLook();
 /* the tokens in use: the live look's (resolved through its base), times the visitor's text size */
 function dsT() { const S = D.ds; return { ...S, text: S.text_size * textScale() }; }
 Object.assign(ICONS, {
@@ -6725,10 +6715,9 @@ function applyDS(root) {
   set("--ease", "cubic-bezier(.33,1,.68,1)"); set("--spring", T.scheme === "expressive" ? "cubic-bezier(.34,1.56,.64,1)" : "cubic-bezier(.22,1,.36,1)");
   set("--scrim", T.scrim); set("--sdim", T.sheet.backdrop);
   set("--depth", (0.35 * T.depth).toFixed(3));
-  root.classList.toggle("m-reduced", reducedMotion()); root.classList.toggle("sel-fill", T.selected === "fill"); root.classList.toggle("sel-ring", false);
+  root.classList.toggle("m-reduced", reducedMotion()); root.classList.toggle("sel-fill", T.selected === "fill");
   root.classList.toggle("glass-solid", T.glass === "solid"); root.classList.toggle("expressive", T.scheme === "expressive");
   for (const k of Object.keys(D.looks)) root.classList.toggle("look-" + k, activeLook() === k);
-  root.classList.toggle("kidtone", forKids());
   set("--outline", PT(+T.outline_pt || 0)); root.classList.toggle("outlined", +T.outline_pt > 0); root.classList.toggle("sh-hard", T.shadow_style === "hard");
   set("--tfont", T.title_face === "rounded" ? DS_ROUNDED : T.title_face === "body" ? DS_FONT : (T.titles === "serif" ? DS_DISPLAY : DS_FONT));
 }
@@ -7355,7 +7344,7 @@ function view(kind, path, lookKey) {   // kind: "tokens" | "colours:<mode>"
       const p = [...path, key], base = L.base ? (() => { for (const B of lookChain(L.base)) { const v = getPath(store(B) || {}, p); if (v !== undefined) return v; } })() : undefined;
       if (L.base && base !== undefined && JSON.stringify(base) === JSON.stringify(val)) delPath(store(L), p);   // back to the base value: no difference kept
       else setPath(store(L), p, isObj(val) ? JSON.parse(JSON.stringify(val)) : val);
-      lookCache = null; return true;
+      return true;
     },
     has(t, key) { return read([...path, key]) !== undefined; },
     ownKeys() { return keys(); },
@@ -7370,7 +7359,7 @@ function scopeOf(obj, key) {
   const own = getPath(store || {}, [...s.path, key]) !== undefined, mode = s.kind === "tokens" ? null : s.kind.slice(8);
   return { label: L.name + (mode ? " · " + mode : ""), look: s.look, mode, own, inherited: !!L.base && !own, base: L.base ? D.looks[L.base].name : null, path: [...s.path, key], kind: s.kind };
 }
-function resetScoped(sc) { const L = D.looks[sc.look]; snap(); delPath(sc.kind === "tokens" ? L.tokens : L.colours[sc.mode], sc.path); lookCache = null; changed(); renderEditor(); renderPhone?.(); }
+function resetScoped(sc) { const L = D.looks[sc.look]; snap(); delPath(sc.kind === "tokens" ? L.tokens : L.colours[sc.mode], sc.path); changed(); renderEditor(); renderPhone?.(); }
 /* time and visitors rows: the editor edits the option chosen in the profile bar */
 function dimView(dim) {
   const rowOf = () => (dim === "time" ? D.time : D.visitors)[D.profile[dim]];
@@ -7382,11 +7371,10 @@ function dimView(dim) {
 }
 
 /* ---- install: move the v17 design (D.ds, D.themes) into the Premium look once, then expose the views ---- */
-let lookCache = null;
 function installViews() {
   if (!D.looks) {
     const ds = Object.getOwnPropertyDescriptor(D, "ds")?.value, th = Object.getOwnPropertyDescriptor(D, "themes")?.value;
-    const tokens = JSON.parse(JSON.stringify(ds || {})); delete tokens.audiences;
+    const tokens = JSON.parse(JSON.stringify(ds || {}));
     D.looks = {
       premium: { name: "Premium", tokens: { ...LOOK_NEW, ...tokens }, colours: JSON.parse(JSON.stringify(th || {})) },
       // the Playful look (_4.1.9 §5, mk_review/playful_spec): only what differs from Premium; every text pair 7:1 in both modes
@@ -7396,17 +7384,9 @@ function installViews() {
         colours: { light: {"glass": {"color": "#FFF8EC", "tint": 0.96, "blur": 0}, "text": {"main": "#1B1446", "soft": "#3B3272"}, "border": {"color": "#1B1446", "opacity": 1.0}, "accent": "#2638B8", "accent_text": "#FFFFFF", "buttons": {"color": "#FFFFFF", "tint": 1.0, "icon": "#1B1446", "label": "#FFFFFF", "label_text": "#1B1446"}, "tags": {"color": "#FFFFFF", "tint": 1.0}, "sheet": {"color": "#FFF8EC", "tint": 1.0, "text": "#1B1446", "soft": "#3B3272"}, "labels": {"color": "#FFFFFF", "tint": 0.96, "text": "#1B1446"}}, dark: {"glass": {"color": "#221D45", "tint": 0.97, "blur": 0}, "text": {"main": "#FFF8EC", "soft": "#DCD6F5"}, "border": {"color": "#0B0820", "opacity": 1.0}, "accent": "#FFC83D", "accent_text": "#1B1446", "buttons": {"color": "#2D2760", "tint": 1.0, "icon": "#FFF8EC", "label": "#2D2760", "label_text": "#FFF8EC"}, "tags": {"color": "#2D2760", "tint": 1.0}, "sheet": {"color": "#221D45", "tint": 1.0, "text": "#FFF8EC", "soft": "#DCD6F5"}, "labels": {"color": "#140F33", "tint": 0.94, "text": "#FFFFFF"}} } },
     };
   }
-  delete D.ds; delete D.themes; delete D.app.theme;
+  delete D.ds; delete D.themes;
   Object.defineProperty(D, "ds", { get: () => view("tokens", []), configurable: true, enumerable: false });
   Object.defineProperty(D, "themes", { get: () => ({ light: view("colours:light", []), dark: view("colours:dark", []) }), configurable: true, enumerable: false });
-  lookCache = null;
-}
-/* one flat resolved table per profile (look, mode, text): what Unity would bake into USS variables */
-function resolvedLook() {
-  const key = activeLook() + "|" + appearance() + "|" + textScale();
-  if (lookCache && lookCache.key === key) return lookCache.t;
-  const plain = v => JSON.parse(JSON.stringify(v)), t = { ...plain(D.ds), colours: plain(D.themes[appearance()]), look: activeLook(), mode: appearance() };
-  lookCache = { key, t }; return t;
 }
 installViews();
 
@@ -7416,7 +7396,7 @@ function setProfile(k, v) {
   if (k === "mode") { const def = (() => { const x = D.profile.appearance || D.app.appearance; return x === "follow" ? ui.appearance : x; })(); ui.forceMode = v === def ? null : v; }
   else if (k === "look") D.profile.look = v === visitorRow().look ? "auto" : v;
   else D.profile[k] = v;
-  lookCache = null; renderEditor(); if (ui.screen === "app") renderPhone(); else renderTapWall?.();
+  renderEditor(); if (ui.screen === "app") renderPhone(); else renderTapWall?.();
 }
 function renderProfileBar() {   // one line above the tabs: switch profile from any tab
   const bar = document.getElementById("pbar"); if (!bar) return;
@@ -7482,7 +7462,7 @@ function lookSample(k) {
 /* ---- onboarding (v20): the look first (the page restyles as you pick), who the tour is for (with a live example), how long,
    then optional interests. Light / dark, language and text size sit as small optional icons at the top. One page, skippable. ---- */
 function onboardingScreen(go) {
-  const O = D.app.onboarding, P = D.profile, root = dsScreenRoot("ds-onb"), rp2 = () => { lookCache = null; renderEditor(); renderPhone(); };   // the editor follows: its rows now save into the new look
+  const O = D.app.onboarding, P = D.profile, root = dsScreenRoot("ds-onb"), rp2 = () => { renderEditor(); renderPhone(); };   // the editor follows: its rows now save into the new look
   const kids = forKids(), lk = activeLook();
   // the small optional tools: each one tap, no wrong answer (the phone's own settings are the default)
   const qb = (icon, label, tip, cb) => h("span", { class: "oq hit", role: "button", tabindex: 0, title: tip, "aria-label": tip, onclick: cb }, h("span", { class: "i" }, svg(icon)), h("small", {}, label));
@@ -7536,7 +7516,7 @@ function audienceExample() {
 
 /* ---- Settings (v20): everything the visitor can change, by area. Opened from the gear next to the search, or from You ---- */
 function settingsScreen(close) {
-  const P = D.profile, R = prefs(), S = D.app.settings, root = dsScreenRoot("ds-settings"), rp2 = () => { lookCache = null; renderEditor(); renderPhone(); };
+  const P = D.profile, R = prefs(), S = D.app.settings, root = dsScreenRoot("ds-settings"), rp2 = () => { renderEditor(); renderPhone(); };
   const line = (icon, t, ctl, sub) => h("div", { class: "ds-row srow" + (sub ? " two" : "") }, h("span", { class: "i" }, svg(icon)), h("div", { class: "rt" }, h("b", {}, t), sub ? h("span", { class: "rs" }, sub) : null), ctl);
   const stack = (icon, t, ctl, sub) => h("div", { class: "ds-row srow stk" }, h("div", { class: "sth" }, h("span", { class: "i" }, svg(icon)), h("div", { class: "rt" }, h("b", {}, t), sub ? h("span", { class: "rs" }, sub) : null)), ctl);   // a wide control under its title
   const seg = (opts, cur, cb) => dsSeg(opts.map(o => o[1]), Math.max(0, opts.findIndex(o => o[0] === cur)), i => cb(opts[i][0]));
@@ -7616,7 +7596,7 @@ Object.assign(ICONS, {
 
 /* ---- App › 0 Profiles: the dimensions' own rows. Each row edits the option chosen in the profile bar ---- */
 function profilesBody() {
-  const V = dimView("visitors"), T = dimView("time"), rp2 = () => { lookCache = null; renderEditor(); renderPhone(); };
+  const V = dimView("visitors"), T = dimView("time"), rp2 = () => { renderEditor(); renderPhone(); };
   const toTap = () => { runDemo({ step: "tapped", preview: null }, true); rp2(); }, toMain = () => { ui.appStep = "main"; rp2(); };
   const toWide = () => { ui.appStep = "main"; ui.compPreview = null; ui.cam = camCover({ ...CAM0, z: 1 }); rp2(); };   // the whole panel: every POI (and its interest glow) in view
   const toSheet = () => { ui.previewLayout = "tap_layout_5"; ui.appStep = "tapped"; ui.appPoi = D.pois.findIndex(p => p.id === "castle_hill"); tapState.view = null; ui.cam = camCover(camPoseFor(D.pois[ui.appPoi].pos, 50, 35, 1.1)); rp2(); };   // a screen card, where the deep-dive row sits
@@ -7658,7 +7638,6 @@ function profilesBody() {
   Object.assign(P.tokens, { outline_pt: 2, shadow_style: "hard", title_face: "rounded", corner: 24, icon_stroke: 2.25 });
   P.colours = { light: {"glass": {"color": "#FFFDF8", "tint": 0.97, "blur": 0}, "text": {"main": "#0E2466", "soft": "#33447F"}, "border": {"color": "#0E2466", "opacity": 1.0}, "accent": "#1F3F9A", "accent_text": "#FFFFFF", "buttons": {"color": "#FFFDF8", "tint": 1.0, "icon": "#0E2466", "label": "#FFFDF8", "label_text": "#0E2466"}, "tags": {"color": "#FFFDF8", "tint": 1.0}, "sheet": {"color": "#F7F2E7", "tint": 1.0, "text": "#0E2466", "soft": "#33447F"}, "labels": {"color": "#FFFDF8", "tint": 0.96, "text": "#0E2466"}},
     dark: {"glass": {"color": "#1B2456", "tint": 0.98, "blur": 0}, "text": {"main": "#F7F2E7", "soft": "#C9D1F0"}, "border": {"color": "#A9B8F2", "opacity": 1.0}, "accent": "#F2C14E", "accent_text": "#0E2466", "buttons": {"color": "#263070", "tint": 1.0, "icon": "#F7F2E7", "label": "#263070", "label_text": "#F7F2E7"}, "tags": {"color": "#263070", "tint": 1.0}, "sheet": {"color": "#182050", "tint": 1.0, "text": "#F7F2E7", "soft": "#C9D1F0"}, "labels": {"color": "#141B45", "tint": 0.95, "text": "#F7F2E7"}} };
-  lookCache = null;
 })();
 /* the kit, for JS that builds Playful-only DOM (Azu, celebrations, decorations). Over the camera: none of it except Azu in a tip */
 const KIDS = {

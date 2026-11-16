@@ -7,7 +7,8 @@
 // and one rule: no module or style is named after a version (v3.js, v8b.css...), so the layers cannot come back.
 // structure_baseline.json holds the allowed counts: a count may only go down (all four are 0).
 const fs = require('fs'), path = require('path');
-const acorn = require(process.env.ACORN || 'C:/Users/franc/Desktop/TileStories_Website/node_modules/acorn');
+// acorn: package.json's devDependency (npm install, once, in this folder); ACORN=<path> names another copy
+let acorn; try { acorn = require(process.env.ACORN || 'acorn') } catch (e) { console.log('check_structure.js needs acorn: run "npm install" in ' + __dirname + ' (package.json), or set ACORN to a copy of it. ' + e.message); process.exit(2) }
 const D = __dirname, BASE = path.join(D, 'structure_baseline.json');
 const py = fs.readFileSync(path.join(D, 'build.py'), 'utf8');
 const pyList = name => JSON.parse(py.match(new RegExp(name + ' = (\\[[\\s\\S]*?\\])'))[1].replace(/'/g, '"'));
