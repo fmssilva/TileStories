@@ -407,7 +407,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
       only once the full tier was green.
       Prototype only (no Unity) until the developer says so.
   - **MCP:** blender-mcp at user scope (Blender 5.2.3, add-on 1.8, port 9876). The Unity MCP was not connected this stretch.
-  - **Keys:** Gemini, Azure Speech and ElevenLabs answer (`python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`).
+  - **Keys:** Gemini, Azure Speech and ElevenLabs answer (`python proj_guides/_4.2_TileStories_Lab/lab_src/keys_local.py --check`).
 - **The tasks, in this order:**
   1. **Guidance rounds 1-10 are done** (`_3.8` section 8), each verified and published. Next: the developer's look review,
      step by step, then what it decides.
@@ -436,9 +436,9 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
 ## 1. Where the work is
 
 - **The target is the Block Components Lab** (https://claude.ai/artifact/Gpjf7yvoYHjGebmmNhuw2o), the record copy
-  `_3.3.1_Prototype/Block Components Lab.html`, and its sources `_3.3.1_Prototype/lab_src/` (modules by feature, the build,
+  `_4.2_TileStories_Lab/Block Components Lab.html`, and its sources `_4.2_TileStories_Lab/lab_src/` (modules by feature, the build,
   the tests; `PROTOTYPE_STRUCTURE.md` says where a change goes, `README.md` how to prove and publish it).
-- **Publishing:** the page goes from the record copy on disk, with `root` `_3.3.1_Prototype` (a redeploy to the same link
+- **Publishing:** the page goes from the record copy on disk, with `root` `_4.2_TileStories_Lab` (a redeploy to the same link
   keeps the voice files and the capabilities). From an account that cannot open the link (a read says "not found"): the owner
   shares it with edit access (the page's Share menu), or the session publishes a new artifact: the record copy, `files` listing
   every `voicebench/out/...` file at its own path (186), and the capabilities `db` (rules: `voicerate` read view / write owner,
@@ -457,7 +457,7 @@ Read this first in a new Architect chat, then `__AI_Architect.md`. It says where
   `_3.5_Audiences_Study.md`, `_3.6_Guide_Agent_Study.md` (the live agent), `_3.7_Mascot_Pipeline_Study.md` (from a picture to
   the mascot, the Meshy models, `rig_meshy.py`), `_3.8_Guidance_Study.md` (when and how the guide speaks up). The spec is
   `_3.3` section 11 (the Guide) and 11b (Audiences).
-- **Voices:** `_3.3.1_Prototype/voicebench/` (`render.py`: azure / eleven / edge / gemini). Published sets: Azure Sonia +
+- **Voices:** `_4.2_TileStories_Lab/voicebench/` (`render.py`: azure / eleven / edge / gemini). Published sets: Azure Sonia +
   Raquel, Azure Ryan + Duarte, ElevenLabs Luis + Bella (29 lines a language each); Edge sets are private (`out-private/`).
 - **Keys and accounts:** `__Services_And_Keys.md`; every key in `.secrets/keys.env`; the developer replaces every key once it
   all works.

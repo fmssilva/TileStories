@@ -152,8 +152,8 @@ only into `.secrets/keys.env`, never into a script, even for a moment: `keys_loc
    2. **Create API key** in the same project.
    3. Paste it into `GEMINI_API_KEY`.
 3. **Every other key:** create a new one in its console, paste it into `.secrets/keys.env`, then delete the old one.
-4. Run `python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py` so the local Lab picks up the new keys.
-5. Check that each key answers by running `python proj_guides/_3.3.1_Prototype/lab_src/keys_local.py --check`. It prints `ok` or
+4. Run `python proj_guides/_4.2_TileStories_Lab/lab_src/keys_local.py` so the local Lab picks up the new keys.
+5. Check that each key answers by running `python proj_guides/_4.2_TileStories_Lab/lab_src/keys_local.py --check`. It prints `ok` or
    the HTTP error for each service, never the key.
 6. If a key ever reaches a commit:
    1. Delete it in its console first, since the history keeps it.

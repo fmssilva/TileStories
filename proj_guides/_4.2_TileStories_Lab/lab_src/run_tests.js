@@ -25,7 +25,7 @@ if (arg('core')) {
 }
 const SHARED_FILES = /^(build\.py|check_structure\.js|run_tests\.js|src\/page\/)/;
 if (arg('changed')) {
-  const rev = val('changed') || 'HEAD', rel = 'proj_guides/_3.3.1_Prototype/lab_src/';
+  const rev = val('changed') || 'HEAD', rel = 'proj_guides/_4.2_TileStories_Lab/lab_src/';
   const git = c => execSync('git ' + c, { cwd: D, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).split(/\r?\n/).filter(Boolean);
   const top = git('rev-parse --show-toplevel')[0];
   const files = [...new Set(git('diff --name-only ' + rev).concat(git('ls-files --others --exclude-standard').map(f => path.relative(top, path.join(D, f)).replace(/\\/g, '/'))))]

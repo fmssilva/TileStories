@@ -32,8 +32,8 @@ Thumbs.db
 # Node / npm (if any scripts at root)
 node_modules/
 # voicebench: API keys and private A/B audio never leave this machine
-proj_guides/_3.3.1_Prototype/voicebench/.env
-proj_guides/_3.3.1_Prototype/voicebench/out-private/
+proj_guides/_4.2_TileStories_Lab/voicebench/.env
+proj_guides/_4.2_TileStories_Lab/voicebench/out-private/
 # Every API key lives in .secrets/keys.env (never committed); only the template is
 /.secrets/*
 !/.secrets/keys.env.example
