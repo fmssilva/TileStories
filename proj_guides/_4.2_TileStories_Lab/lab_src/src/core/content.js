@@ -1,6 +1,6 @@
-/* The demo point's content: its card's blocks (S.card), its story rows (S.story), the demo texts (DEMO), the wall's points (POIS). */
+/* The demo point's content: its card's blocks (D.poi.card), its story rows (D.poi.story), the demo texts (DEMO), the wall's points (POIS). */
 /* the card of the marker: blocks in order with their preview settings */
-S.card=[
+D.poi.card=[
  {id:"b_facts",kind:"Quick Facts",grp:"about",enter:"family",tap:"nothing",orow:"plain"},
  {id:"b_fun",kind:"Inline",grp:"about",pattern:"pt6",enter:"pop",tap:"nothing",orow:"plain"},
  {id:"b_story",kind:"Story",grp:"stories",enter:"family",tap:"page",orow:"nudge",preview:"auto"},
@@ -10,7 +10,7 @@ S.card=[
  {id:"b_quiz",kind:"Knowledge Check",grp:"play",enter:"tilt",tap:"nothing",orow:"plain"},
  {id:"b_info",kind:"Practical Info",grp:"visit",enter:"family",tap:"expand",orow:"plain"}];
 /* the story page (place: content only) */
-S.story=[
+D.poi.story=[
  {id:"r1",pattern:"pt1",slots:[{img:"g3",cap:T("The Terreiro do Paço in 1662, the palace along the river front.","O Terreiro do Paço em 1662, o palácio ao longo da frente ribeirinha."),credit:"Dirk Stoop"},{text:T("Lisbon · c. 1500 to 1755","Lisboa · c. 1500 a 1755")},{text:T("Two hundred and fifty years by the river","Duzentos e cinquenta anos à beira-rio")},{text:T("For about 250 years the kings of Portugal lived by the river, in a palace that opened straight onto the Tagus.","Durante cerca de 250 anos, os reis de Portugal viveram à beira do rio, num palácio aberto diretamente para o Tejo.")}]},
  {id:"r2",kind:"paragraph",style:"st9",c:{text:T("When King Manuel I found the old castle on the hill too cramped, he moved the court down to the docks around 1500 and filled the new palace with the wealth of the voyages to India.","Quando D. Manuel I achou o velho castelo da colina demasiado apertado, mudou a corte para junto das docas por volta de 1500 e encheu o novo palácio com a riqueza das viagens à Índia.")}},
  {id:"r3",kind:"heading",style:null,c:{text:T("Two centuries of additions","Dois séculos de acrescentos")}},
@@ -31,11 +31,11 @@ var DEMO={title:T("Two hundred and fifty years by the river","Duzentos e cinquen
  list:{en:["The royal library","The chapel","The opera house, opened in 1755"],pt:["A biblioteca real","A capela","A ópera, inaugurada em 1755"]},
  piccap:T("The Terreiro do Paço in 1662.","O Terreiro do Paço em 1662."),paircap:T("Before 1755 and today.","Antes de 1755 e hoje."),vidcap:T("From the square to the castle · 0:55","Da praça ao castelo · 0:55")};
 var POIS=[["lamp","1. St George's Castle"],["cathedral","2. Lisbon Cathedral"],["painting","7. The Ribeira Palace"],["camera","13. The Camera"]];
-S.card.forEach(function(b){b.grp="inherit";b.enter="inherit";b.tap="inherit";b.orow="inherit"});
-(function(){var i=S.card.findIndex(function(b){return b.id==="b_audio"});if(i>0){var a=S.card.splice(i,1)[0];S.card.splice(1,0,a)}})();
+D.poi.card.forEach(function(b){b.grp="inherit";b.enter="inherit";b.tap="inherit";b.orow="inherit"});
+(function(){var i=D.poi.card.findIndex(function(b){return b.id==="b_audio"});if(i>0){var a=D.poi.card.splice(i,1)[0];D.poi.card.splice(1,0,a)}})();
 /* guidance round 16: the words each block kind shows on the demo point's card, one place for them: the card's preview draws them
    (card/blocks.js's KPREV) and the guide's automatic tour says them (guide/autotour.js, through blockSays). A block's own words (b.c, the
-   wall's other points below) come before its kind's. A picture's or a clip's words are its element's demo content (S.demoC). */
+   wall's other points below) come before its kind's. A picture's or a clip's words are its element's demo content (LAB.demoC). */
 /* round 17: each picture's own caption (the gallery's page and the automatic tour's Tell me more: "In the other pictures: …"); Unity: the
    picture's caption field on the Gallery block */
 var PIC_CAPS={g1:T("A painting of the square with the palace and its corner tower by the river","Uma pintura da praça com o paço e o seu torreão junto ao rio"),
@@ -55,8 +55,8 @@ var KWORDS={
  "Compare Points":{points:["Ribeira Palace","Lisbon Cathedral"]}};
 /* the wall's other points with a card of their own (guidance round 16, the developer: every point gets a tour from its card): the
    Torreão, the Terreiro do Paço, the Tagus and its ships. Each has its hero and its blocks with their own words (b.c); the palace's are
-   S.card, S.hero and S.story, kept here while another point is open. Opening a point (its pin, Azu's remark, A tour of {point}, the
-   marker, Specific Marker › Marker) is pointOpen: the card, the hero and the story become that point's, S.m.poi names it, and
+   D.poi.card, D.poi.hero and D.poi.story, kept here while another point is open. Opening a point (its pin, Azu's remark, A tour of {point}, the
+   marker, Specific Marker › Marker) is pointOpen: the card, the hero and the story become that point's, ui.m.poi names it, and
    point.opened tells the guide (its tour). Unity: each marker's Detail Card asset; opening one is the card controller's Show(marker).
    Guidance round 16b: each hero's picture is a crop of the wall painting around its own point (crop: the wall, the point, the crop's
    height, where the point sits; drawn by card/hero.js's heroPaint; Unity: a uvRect on the wall's texture) */
@@ -82,7 +82,7 @@ var POINTS={painting:{label:"7. The Ribeira Palace"},
    pointBlock("v_time","Timeline",{events:[["c. 1500",T("The court moves down to the docks","A corte muda-se para junto das docas"),"g3"],["1755",T("A tsunami comes up the river","Um maremoto sobe o rio"),"g1"]]}),
    pointBlock("v_gal","Gallery",{imgs:["before","g1"],n:2,cap:T("Ships on the Tagus, off the palace.","Navios no Tejo, diante do paço.")}),
    pointBlock("v_quiz","Knowledge Check",{q:T("Which river runs past the palace?","Que rio passa diante do paço?"),choices:[T("The Tagus","O Tejo"),T("The Douro","O Douro"),T("The Mondego","O Mondego")],ok:0})]}};
-function pointOpen(id){if(!POINTS[id])return false;var cur=S.m&&S.m.poi||"painting",p=POINTS[cur];if(p){p.card=S.card;p.hero=S.hero;p.story=S.story}
-  if(cur===id)return true;var n=POINTS[id];S.card=n.card;S.hero=n.hero;S.story=n.story;S.m.poi=id;S.sel.cblock=null;emit("point.opened",id,cur);return true}
+function pointOpen(id){if(!POINTS[id])return false;var cur=ui.m&&ui.m.poi||"painting",p=POINTS[cur];if(p){p.card=D.poi.card;p.hero=D.poi.hero;p.story=D.poi.story}
+  if(cur===id)return true;var n=POINTS[id];D.poi.card=n.card;D.poi.hero=n.hero;D.poi.story=n.story;ui.m.poi=id;ui.sel.cblock=null;emit("point.opened",id,cur);return true}
 /* a point's card, open or kept: its blocks, its hero and its story */
-function pointOf(id){id=id||S.m&&S.m.poi||"painting";return id===(S.m&&S.m.poi||"painting")?{card:S.card,hero:S.hero,story:S.story,id:id}:Object.assign({id:id},POINTS[id]||{})}
+function pointOf(id){id=id||ui.m&&ui.m.poi||"painting";return id===(ui.m&&ui.m.poi||"painting")?{card:D.poi.card,hero:D.poi.hero,story:D.poi.story,id:id}:Object.assign({id:id},POINTS[id]||{})}

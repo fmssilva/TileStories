@@ -16,24 +16,24 @@ function ownerName(o){var p=o.split(":");if(p[0]==="el")return "Blocks & Compone
 function ownerPath(o){if(guideOwns(o))return guidePath(o);var p=o.split(":");if(p[0]==="el")return["s3","s3e","eg:"+KIND[p[1]].c,o];if(p[0]==="eg")return["s3","s3e",o];if(p[0]==="pt")return["s3","s3p",o];
   if(p[0]==="bd")return["s3","s3b","bs:"+secOfKind(p[1]),o];if(o==="g:10s"||o==="g:10f")return["g:10",o];if(p[0]==="g")return[o];var c=o.match(/^s(\d)/);return c?["s"+c[1],o]:[o]}
 function hasDemo(o){var p=o.split(":");if(p[0]==="el")return(FIELDS[p[1]]||[]).length>0;return p[0]==="bd"||p[0]==="pt"}
-function missingOf(obj){return S.langs.list.filter(function(l){return !(obj&&obj[l.code])}).length}
-function langHead(){return S.langs.list.map(function(l){return'<th>'+l.code.toUpperCase()+'</th>'}).join("")}
-function txInputs(k){var v=S.tx[k],long=Object.keys(v).some(function(c){return String(v[c]||"").length>34});return S.langs.list.map(function(l){var a='class="u'+(v[l.code]?'':' miss')+'" data-tx="'+k+'|'+l.code+'" placeholder="'+esc(L(v))+' ('+S.langs.fallback.toUpperCase()+')" aria-label="'+esc(TXP[k]+" · "+l.code.toUpperCase())+'"';
+function missingOf(obj){return D.wall.langs.list.filter(function(l){return !(obj&&obj[l.code])}).length}
+function langHead(){return D.wall.langs.list.map(function(l){return'<th>'+l.code.toUpperCase()+'</th>'}).join("")}
+function txInputs(k){var v=D.words.tx[k],long=Object.keys(v).some(function(c){return String(v[c]||"").length>34});return D.wall.langs.list.map(function(l){var a='class="u'+(v[l.code]?'':' miss')+'" data-tx="'+k+'|'+l.code+'" placeholder="'+esc(L(v))+' ('+D.wall.langs.fallback.toUpperCase()+')" aria-label="'+esc(TXP[k]+" · "+l.code.toUpperCase())+'"';
   return'<td>'+(long?'<textarea rows="2" '+a+'>'+esc(v[l.code]||"")+'</textarea>':'<input '+a+' value="'+esc(v[l.code]||"")+'">')+'</td>'}).join("")}
 /* Aa: the component's words, one row per word it shows, named by what it is on the phone; the (?) says where it shows (only: some of
    them, the ones a part does not draw itself: a guidance item's other words, round 14) */
 function txPanel(o,only){var ks=only||TXO[o]||[];return pipe("txPanel.html",'<div class="ownpanel"><table class="tbl txt"><thead><tr><th style="width:30%">On the phone</th>'+langHead()+'<th style="width:22px"></th></tr></thead><tbody>'+ks.map(function(k){
   return '<tr><td>'+(TXNEW[k]?'<span class="badge new">NEW</span> ':'')+esc(TXP[k]||"Its words")+(TXF[k]?'<span class="fate">'+esc(TXF[k])+'</span>':'')+'</td>'+txInputs(k)+'<td>'+help(TXW[k])+'</td></tr>'}).join("")+'</tbody></table></div>')}
 function dmPanel(o){var p=o.split(":");
-  if(p[0]==="el")return '<div class="ownpanel"><div class="sub2">Demo content</div>'+fieldsFor(p[1],S.demoC[p[1]]||{},"demo:"+p[1])+row("Reset",'<button class="ubtn sm" type="button" data-demoreset="'+p[1]+'">Back to the framework\'s demo</button>',"Demo content shows in the Editor\'s previews and on the demo card, never in the app. A marker\'s own content always wins.")+'</div>';
-  if(p[0]==="bd"){var b=S.demoCard.filter(function(x){return x.kind===p[1]})[0];return '<div class="ownpanel">'+
+  if(p[0]==="el")return '<div class="ownpanel"><div class="sub2">Demo content</div>'+fieldsFor(p[1],LAB.demoC[p[1]]||{},"demo:"+p[1])+row("Reset",'<button class="ubtn sm" type="button" data-demoreset="'+p[1]+'">Back to the framework\'s demo</button>',"Demo content shows in the Editor\'s previews and on the demo card, never in the app. A marker\'s own content always wins.")+'</div>';
+  if(p[0]==="bd"){var b=LAB.demoCard.filter(function(x){return x.kind===p[1]})[0];return '<div class="ownpanel">'+
     row("On the demo card",b?'<button class="ubtn sm" type="button" data-democard="'+b.id+'">Show it &#8250;</button>':'<span class="uses">Not on the Lab\'s demo card</span>',"A block\'s demo is its block on the demo card (Preview & Test › Demo card), with its own content.")+'</div>'}
   if(p[0]==="pt"){var pt=patternById(p[1]);return '<div class="ownpanel"><div class="btnrow"><span class="uses">Its elements\' demo content:</span> '+(pt?pt.rows.map(function(r){return'<button class="ubtn sm" type="button" data-goto="el:'+r.kind+'|dm">'+esc(KIND[r.kind].n)+' &#8250;</button>'}).join(""):"")+'</div></div>'}return ""}
 function ownbar(o){var ks=TXO[o]||[],dm=hasDemo(o);if(!ks.length&&!dm)return "";
-  var miss=ks.filter(function(k){return missingOf(S.tx[k])>0}).length,ot=S.ownAll||S.op["own:tx|"+o],od=S.ownAll||S.op["own:dm|"+o];
+  var miss=ks.filter(function(k){return missingOf(D.words.tx[k])>0}).length,ot=LAB.ownAll||ui.op["own:tx|"+o],od=LAB.ownAll||ui.op["own:dm|"+o];
   return '<div class="ownbar">'+(ks.length?'<button class="ownb" type="button" data-own="tx|'+o+'" aria-pressed="'+!!ot+'"><b>Aa</b> '+ks.length+' word'+(ks.length>1?"s":"")+(miss?' <em>'+miss+' missing</em>':'')+'</button>':'')+
    (dm?'<button class="ownb" type="button" data-own="dm|'+o+'" aria-pressed="'+!!od+'"><b>&#9635;</b> Demo content</button>':'')+'</div>'}
-function ownPanels(o){var ks=TXO[o]||[],dm=hasDemo(o),ot=S.ownAll||S.op["own:tx|"+o],od=S.ownAll||S.op["own:dm|"+o];return(ot&&ks.length?txPanel(o):"")+(od&&dm?dmPanel(o):"")}
+function ownPanels(o){var ks=TXO[o]||[],dm=hasDemo(o),ot=LAB.ownAll||ui.op["own:tx|"+o],od=LAB.ownAll||ui.op["own:dm|"+o];return(ot&&ks.length?txPanel(o):"")+(od&&dm?dmPanel(o):"")}
 /* move rows between foldouts by their label (the rows the Editor already draws are reused, never redrawn) */
 function takeRow(inner,label,relabel){if(!inner)return "";var rows=inner.querySelectorAll(":scope > .row");for(var i=0;i<rows.length;i++){var lb=rows[i].querySelector("label");if(lb&&lb.textContent===label){rows[i].remove();if(relabel)lb.textContent=relabel;return rows[i].outerHTML}}return ""}
 function innerOf(d,id){return d.querySelector('[data-fo="'+cssq(id)+'"] > .inner')}
@@ -45,8 +45,8 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   var s0=innerOf(d,"s0");if(s0)s0.innerHTML=
     comp("s0card","every block once with its demo content, and a tile to the Block Components page",row("Demo card",'<button class="ubtn sm" type="button" data-democard="">Open it &#8250;</button>',"Filled once with the Ribeira Palace\'s content, independent since: a block removed from a real point stays here. The tests read it, never a real point.")+
       row("Components page",'<button class="ubtn sm" type="button" data-democard="" data-then="demo">Open it &#8250;</button>',"Opened by the first tile of the demo card: every motion, interaction, effect, element and pattern, on real parts."))+
-    comp("s0tile","on a marker's card, it opens the demo card",row("Shown",pseg("test.on",["true","false"],["On","Off"]),"Scene and Play only.")+row("On marker",sel("test.poi",POIS,S.test.poi),"The marker whose card shows the tile.",true))+
-    comp("s0bar","floating on the phone: theme, motion, language, focus, screen",row("Shown",pseg("previewBar",["true","false"],["Shown","Hidden"]),"Scene and Play only. Its Focus button makes the phone jump to the part being edited."));
+    comp("s0tile","on a marker's card, it opens the demo card",row("Shown",pseg("LAB.test.on",["true","false"],["On","Off"]),"Scene and Play only.")+row("On marker",sel("test.poi",POIS,LAB.test.poi),"The marker whose card shows the tile.",true))+
+    comp("s0bar","floating on the phone: theme, motion, language, focus, screen",row("Shown",pseg("LAB.previewBar",["true","false"],["Shown","Hidden"]),"Scene and Play only. Its Focus button makes the phone jump to the part being edited."));
   /* 1 · Card: Media holds the media folders */
   var s1=innerOf(d,"s1");if(s1)s1.insertAdjacentHTML("beforeend",comp("s1m","where the card's media files live",
     row("Media folder",'<input class="u" value="LivingRoom/CardMedia" readonly>',"Where this wall's card pictures, sounds and models live.")+
@@ -88,7 +88,7 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
      comp("s7cap","the words being read, at the bottom",ca)+comp("s7coach","at a block to try, the guide waits for the gesture",co2)+
      comp("s7tour","progress, previous, pause, next, sound, captions, Ask and stop","")+comp("s7resume","one way back into a stopped tour: this visit at its sentence, a later visit after a recap","")+comp("s7mascot","a small tile that follows the block being told",ma)+comp("s7ask","questions by text or voice",as)}
   /* every owner gets its Aa and its Demo content at the top of its own foldout */
-  var owners={};Object.keys(TXO).forEach(function(o){owners[o]=1});KINDS.forEach(function(K){owners["el:"+K.k]=1});LIB.forEach(function(r){owners["bd:"+r[1]]=1});S.patterns.forEach(function(p){owners["pt:"+p.id]=1});
+  var owners={};Object.keys(TXO).forEach(function(o){owners[o]=1});KINDS.forEach(function(K){owners["el:"+K.k]=1});LIB.forEach(function(r){owners["bd:"+r[1]]=1});D.blocks.patterns.forEach(function(p){owners["pt:"+p.id]=1});
   Object.keys(owners).forEach(function(o){var f=innerOf(d,o);if(!f)return;f.insertAdjacentHTML("beforeend",ownbar(o)+ownPanels(o))});
   [["s4m","entrances, transitions, scroll and emphasis, picked by elements and blocks"],["s4i","flip, hold, compare, swipe, tilt, hotspots"],["s4f","edges, dividers, light and moving effects"]].forEach(function(x){var sm=d.querySelector('[data-fo="'+x[0]+'"] > summary');if(sm&&sm.innerHTML.indexOf('class="sub"')<0)sm.innerHTML=sm.innerHTML.replace(/^(Motion|Interaction|Effects)/,'$1 <span class="sub">· '+x[1]+'</span>')});
   var en=innerOf(d,"s3e");if(en){var n1=en.querySelector(":scope > .note");if(n1)n1.remove()}
@@ -100,36 +100,36 @@ var ROWHELP={"Tap outside closes":"A tap outside the card closes it.","Shown":"S
  "A jump opens the card to":"The stop the card rises to when a bar item is tapped at Peek.","Size":"1 = the size of the chosen section's disc on the bar.",
  "Speed":"1 = the voice's normal speed.","Labels":"What each bar item shows.","Icon colour":"The colour of the bar's icons.","Colour":"Its colour.",
  "Raised depth":"+1 a bell, 0 flat, below 0 a cradle."};
-function changedTexts(){var o={},z=JSON.parse(TX0);Object.keys(S.tx).forEach(function(k){if(JSON.stringify(S.tx[k])!==JSON.stringify(z[k]))o[k]=S.tx[k]});return o}
+function changedTexts(){var o={},z=JSON.parse(TX0);Object.keys(D.words.tx).forEach(function(k){if(JSON.stringify(D.words.tx[k])!==JSON.stringify(z[k]))o[k]=D.words.tx[k]});return o}
 /* ----- events ----- */
-function pathShow(path){if(path.indexOf("termpage:")===0){S.termOpen=path.split(":")[1];show("term");return}var k=path.split("|")[0].slice(5),st=defStyle(k);show("demo",st?"s:"+st.id:null)}
-function goDemo(id){S.tab="marker";if(id==="guide"){S.op.m3=true;renderEditor();show("card");return}}
-function goOwner(spec,still){var q=spec.split("|"),o=q[0],pth=ownerPath(o);S.tab=o.indexOf("g:")===0?"global":guideOwns(o)?"guide":"card";S.ui.q="";S.ui.cat="All";pth.forEach(function(id){S.op[id]=true});if(q[1]==="dm")S.op["own:dm|"+o]=true;renderEditor();
+function pathShow(path){if(path.indexOf("termpage:")===0){ui.termOpen=path.split(":")[1];show("term");return}var k=path.split("|")[0].slice(5),st=defStyle(k);show("demo",st?"s:"+st.id:null)}
+function goDemo(id){ui.tab="marker";if(id==="guide"){ui.op.m3=true;renderEditor();show("card");return}}
+function goOwner(spec,still){var q=spec.split("|"),o=q[0],pth=ownerPath(o);ui.tab=o.indexOf("g:")===0?"global":guideOwns(o)?"guide":"card";ui.q="";ui.cat="All";pth.forEach(function(id){ui.op[id]=true});if(q[1]==="dm")ui.op["own:dm|"+o]=true;renderEditor();
   /* a foldout taken apart (the Guide tab, round 14): its words' place, the path's end */
   var f=ed.querySelector('[data-fo="'+cssq(o)+'"]')||ed.querySelector('[data-fo="'+cssq(pth[pth.length-1])+'"]');if(f){if(!still)f.scrollIntoView({block:"start"});f.classList.add("cur")}if(q[1]==="dm"&&o.indexOf("el:")===0)pathShow("demo:"+o.slice(3))}
 ed.addEventListener("click",function(e){var t=e.target;
-  var ob=t.closest("[data-own]");if(ob){e.stopPropagation();e.preventDefault();var k="own:"+ob.dataset.own,pp=ob.dataset.own.split("|");S.op[k]=!S.op[k];renderEditor();if(S.op[k]&&pp[1].indexOf("el:")===0)pathShow("demo:"+pp[1].slice(3));return}
+  var ob=t.closest("[data-own]");if(ob){e.stopPropagation();e.preventDefault();var k="own:"+ob.dataset.own,pp=ob.dataset.own.split("|");ui.op[k]=!ui.op[k];renderEditor();if(ui.op[k]&&pp[1].indexOf("el:")===0)pathShow("demo:"+pp[1].slice(3));return}
   var da=t.closest('[data-asset^="demo:"],[data-asset^="termpage:"]');if(da){e.stopPropagation();var q=da.dataset.asset.split("|"),c=contentAt(q[0]);c[q[1]]=q[2];renderAll(true);pathShow(q[0]);return}
   var ds=t.closest('[data-assets^="demo:"],[data-assets^="termpage:"]');if(ds){e.stopPropagation();var q2=ds.dataset.assets.split("|"),c2=contentAt(q2[0]),arr=(c2[q2[1]]||[]).slice(),ix=arr.indexOf(q2[2]);if(ix>=0){if(arr.length>1)arr.splice(ix,1)}else{arr.push(q2[2]);if(q2[0]==="demo:picture_pair"&&arr.length>2)arr.shift()}c2[q2[1]]=arr;renderAll(true);pathShow(q2[0]);return}
-  var dr=t.closest("[data-demoreset]");if(dr){e.stopPropagation();var dk=dr.dataset.demoreset;S.demoC[dk]=JSON.parse(JSON.stringify(DEMOC0[dk]||{}));renderAll(true);pathShow("demo:"+dk);return}
+  var dr=t.closest("[data-demoreset]");if(dr){e.stopPropagation();var dk=dr.dataset.demoreset;LAB.demoC[dk]=JSON.parse(JSON.stringify(DEMOC0[dk]||{}));renderAll(true);pathShow("demo:"+dk);return}
   var dc=t.closest("[data-democard]");if(dc){e.stopPropagation();if(dc.dataset.then){show(dc.dataset.then);return}show("democard",dc.dataset.democard?"b:"+dc.dataset.democard:null);return}
   var dg=t.closest("[data-demogo]");if(dg){e.stopPropagation();goDemo(dg.dataset.demogo);return}
   var gt=t.closest("[data-goto]");if(gt){e.stopPropagation();goOwner(gt.dataset.goto);return}
   var gl=t.closest("[data-goloc]");if(gl){e.stopPropagation();goLoc(gl.dataset.goloc);return}
-  var tf=t.closest("[data-txf]");if(tf){e.stopPropagation();S.ui.txf=tf.dataset.txf;renderEditor();return}
-  var la=t.closest("[data-langadd]");if(la){e.stopPropagation();var pk=document.getElementById("langpick");if(!pk||!pk.value)return;var nm=LANGPICK.filter(function(x){return x[0]===pk.value})[0];S.langs.list.push({code:nm[0],name:nm[1]});renderAll(true);return}
-  var ld=t.closest("[data-langdel]");if(ld){e.stopPropagation();var cd=ld.dataset.langdel;S.langs.list=S.langs.list.filter(function(l){return l.code!==cd});if(S.lang===cd)S.lang="en";if(S.langs.fallback===cd)S.langs.fallback="en";renderAll(true);return}
-  var ta=t.closest("[data-termadd]");if(ta){e.stopPropagation();var nt={id:nid("t"),words:"",def:T("",""),page:[]};S.terms.push(nt);S.sel.term=nt.id;renderEditor();return}
-  var tdl=t.closest("[data-termdel]");if(tdl){e.stopPropagation();if(tdl.disabled)return;S.terms=S.terms.filter(function(x){return x.id!==tdl.dataset.termdel});S.sel.term=null;renderAll(true);return}
-  var tpa=t.closest("[data-tpadd]");if(tpa){e.stopPropagation();var qa=tpa.dataset.tpadd.split("|"),tt=byId(S.terms,qa[0]);tt.page.push({kind:qa[1],c:JSON.parse(JSON.stringify(DEMOC0[qa[1]]||{}))});S.termOpen=tt.id;renderEditor();show("term");return}
-  var tpr=t.closest("[data-tprm]");if(tpr){e.stopPropagation();var qr=tpr.dataset.tprm.split("|"),tr=byId(S.terms,qr[0]);tr.page.splice(+qr[1],1);S.termOpen=tr.id;renderEditor();show("term");return}
-  var tp=t.closest("[data-termpick]");if(tp&&!t.closest("input,textarea,button")){e.stopPropagation();S.sel.term=S.sel.term===tp.dataset.termpick?null:tp.dataset.termpick;if(S.sel.term){S.termOpen=S.sel.term}renderEditor();return}},true);
+  var tf=t.closest("[data-txf]");if(tf){e.stopPropagation();ui.txf=tf.dataset.txf;renderEditor();return}
+  var la=t.closest("[data-langadd]");if(la){e.stopPropagation();var pk=document.getElementById("langpick");if(!pk||!pk.value)return;var nm=LANGPICK.filter(function(x){return x[0]===pk.value})[0];D.wall.langs.list.push({code:nm[0],name:nm[1]});renderAll(true);return}
+  var ld=t.closest("[data-langdel]");if(ld){e.stopPropagation();var cd=ld.dataset.langdel;D.wall.langs.list=D.wall.langs.list.filter(function(l){return l.code!==cd});if(P.lang===cd)P.lang="en";if(D.wall.langs.fallback===cd)D.wall.langs.fallback="en";renderAll(true);return}
+  var ta=t.closest("[data-termadd]");if(ta){e.stopPropagation();var nt={id:nid("t"),words:"",def:T("",""),page:[]};D.wall.terms.push(nt);ui.sel.term=nt.id;renderEditor();return}
+  var tdl=t.closest("[data-termdel]");if(tdl){e.stopPropagation();if(tdl.disabled)return;D.wall.terms=D.wall.terms.filter(function(x){return x.id!==tdl.dataset.termdel});ui.sel.term=null;renderAll(true);return}
+  var tpa=t.closest("[data-tpadd]");if(tpa){e.stopPropagation();var qa=tpa.dataset.tpadd.split("|"),tt=byId(D.wall.terms,qa[0]);tt.page.push({kind:qa[1],c:JSON.parse(JSON.stringify(DEMOC0[qa[1]]||{}))});ui.termOpen=tt.id;renderEditor();show("term");return}
+  var tpr=t.closest("[data-tprm]");if(tpr){e.stopPropagation();var qr=tpr.dataset.tprm.split("|"),tr=byId(D.wall.terms,qr[0]);tr.page.splice(+qr[1],1);ui.termOpen=tr.id;renderEditor();show("term");return}
+  var tp=t.closest("[data-termpick]");if(tp&&!t.closest("input,textarea,button")){e.stopPropagation();ui.sel.term=ui.sel.term===tp.dataset.termpick?null:tp.dataset.termpick;if(ui.sel.term){ui.termOpen=ui.sel.term}renderEditor();return}},true);
 ed.addEventListener("input",function(e){var t=e.target;
-  if(t.dataset.tx){e.stopImmediatePropagation();var q=t.dataset.tx.split("|");S.tx[q[0]][q[1]]=t.value;t.classList.toggle("miss",!t.value);renderPhone(true);refreshJsonV4();return}
+  if(t.dataset.tx){e.stopImmediatePropagation();var q=t.dataset.tx.split("|");D.words.tx[q[0]][q[1]]=t.value;t.classList.toggle("miss",!t.value);renderPhone(true);refreshJsonV4();return}
   if(t.dataset.loc){e.stopImmediatePropagation();var ql=t.dataset.loc.split("|"),o=refObj(ql[0]);if(!o)return;o[ql[1]]=t.value;t.classList.toggle("miss",!t.value);renderPhone(true);refreshJsonV4();return}
-  if(t.dataset.term){e.stopImmediatePropagation();var q2=t.dataset.term.split("|"),tm=byId(S.terms,q2[0]);if(!tm)return;if(q2[1]==="words")tm.words=t.value;else tm.def[q2[2]]=t.value;renderPhone(true);refreshJsonV4();return}
+  if(t.dataset.term){e.stopImmediatePropagation();var q2=t.dataset.term.split("|"),tm=byId(D.wall.terms,q2[0]);if(!tm)return;if(q2[1]==="words")tm.words=t.value;else tm.def[q2[2]]=t.value;renderPhone(true);refreshJsonV4();return}
   if(t.dataset.termtry){e.stopImmediatePropagation();var tw=document.getElementById("termtry");if(tw)tw.textContent=tryWord(t.value);return}
-  if(t.dataset.txq){e.stopImmediatePropagation();S.ui.txq=t.value;var tb=document.getElementById("txrows");if(tb)tb.innerHTML=txRows();return}},true);
+  if(t.dataset.txq){e.stopImmediatePropagation();ui.txq=t.value;var tb=document.getElementById("txrows");if(tb)tb.innerHTML=txRows();return}},true);
 ed.addEventListener("change",function(e){var t=e.target;if(t.dataset.tx||t.dataset.term){var y=window.scrollY;renderEditor();window.scrollTo(0,y)}},true);
 /* the Preview bar's Shown: the bar on the phone (Hidden: the card's top, where it was) */
-rowDemos({"previewBar":{stop:"half",wait:0,ring:function(){return S.previewBar?"#ptool":".chrome"}}});
+rowDemos({"LAB.previewBar":{stop:"half",wait:0,ring:function(){return LAB.previewBar?"#ptool":".chrome"}}});

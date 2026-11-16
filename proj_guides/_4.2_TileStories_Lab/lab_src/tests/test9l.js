@@ -7,8 +7,8 @@
 // later launch (no pages, Welcome back) and Remember across visits Off (the pages again); Reduce Motion and Mascot Off; Start the app in
 // Preview & Test and the visitor's line; + Add guidance's Page template and the drag within the rules; every new row's demo; the four
 // scenes in Ask Azu's console. MUTATE=1 node test9l.js lets a refused camera go on to the wall: the checks named [camera] turn red.
-const { chromium } = require('./pw');
-const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
+const { chromium, labUrl } = require('./pw');
+const url = labUrl('#probe');
 (async () => {
   const t00 = Date.now();
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe' });
@@ -20,27 +20,27 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const lap = n => { if (process.env.TIMING) console.log('TIME ' + n + ' ' + Math.round((Date.now() - t00) / 1000) + ' s'); };
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   if (process.env.MUTATE) { await R('var __ca=gdCamAnswer;gdCamAnswer=function(ok){if(!ok&&G.gd.pages){G.gd.camPerm="denied";gdPagesNext();return}return __ca(ok)}'); console.log('MUTATION: a refused camera goes on to the wall'); }
-  await R('window.__g0=JSON.stringify(S.guidance)');
-  const base = 'if(G.gd.pages)gdPagesEnd("test",false);S.guidance=JSON.parse(window.__g0);S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;S.reduce=false;S.dark=false;S.lang="en";S.ui.rowDemo=false;S.ui.gdSR=false;S.ui.gdToday="2026-03-10";S.m.solemn=false;S.vis.aud="explorer";S.vis.len="";S.aud.where="card";S.aud.seen=true;S.guideCfg.life="lively";S.guideCfg.gbtn="both";S.guideCfg.mascot=true;G.gd.demo=false;G.gd.camPerm="allowed";gdChip(null);';
+  await R('window.__g0=JSON.stringify(D.guidance)');
+  const base = 'if(G.gd.pages)gdPagesEnd("test",false);D.guidance=JSON.parse(window.__g0);D.card.hints.on=false;LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;P.lang="en";LAB.rowDemo=false;LAB.gdSR=false;LAB.gdToday="2026-03-10";D.poi.solemn=false;P.vis.aud="explorer";P.vis.len="";D.wall.aud.where="card";D.wall.aud.seen=true;D.guide.life="lively";D.guide.gbtn="both";D.guide.mascot=true;G.gd.demo=false;G.gd.camPerm="allowed";gdChip(null);';
   /* the guidance's other kinds rest (only The start speaks), a first visit on the wall, the clock by hand */
-  const fresh = async (extra) => { await R(base + 'gdGroupById("inview").on=false;S.guidance.items.gbhint.on=false;gdGroupById("card").on=false;gdKindById("fun").on=false;if(G.on)stopTour();stopSpeech();G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};S.settingsOpen=false;G.fab.menu=false;setWall("ribeira");S.camZoom=1;S.view="card";S.stop="closed";renderPhone(false);G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;' + (extra || '')); await W(100); };
+  const fresh = async (extra) => { await R(base + 'gdGroupById("inview").on=false;D.guidance.items.gbhint.on=false;gdGroupById("card").on=false;gdKindById("fun").on=false;if(G.on)stopTour();stopSpeech();G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};ui.settingsOpen=false;G.fab.menu=false;setWall("ribeira");ui.camZoom=1;ui.view="card";ui.stop="closed";renderPhone(false);G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;' + (extra || '')); await W(100); };
   // round 14: an item's groups are folded: an item opened here shows its groups open too (each by its id, as the author opens them)
-  const editor = async (tab, ops) => { await R(`S.tab="${tab}";S.ui.level=1;S.op=${JSON.stringify(ops)};Object.keys(S.op).forEach(function(k){var m=/^gd:i:(.+)$/.exec(k),it=m&&S.op[k]&&S.guidance.items[m[1]];if(it)gdFormOf(it).groups.forEach(function(g){if(g)S.op["gd:f:"+m[1]+":"+g.k]=true})});renderEditor()`); await W(120); };
+  const editor = async (tab, ops) => { await R(`ui.tab="${tab}";ui.level=1;ui.op=${JSON.stringify(ops)};Object.keys(ui.op).forEach(function(k){var m=/^gd:i:(.+)$/.exec(k),it=m&&ui.op[k]&&D.guidance.items[m[1]];if(it)gdFormOf(it).groups.forEach(function(g){if(g)ui.op["gd:f:"+m[1]+":"+g.k]=true})});renderEditor()`); await W(120); };
   const page = () => R('var L=ph.querySelector(".gdpages:not(.gd-out)");L?L.dataset.page+(L.dataset.cam?":"+L.dataset.cam:""):""');
   /* a real click on a page's control (a missing control: false, never a crash, so a broken run fails its checks) */
   const tap = async sel => { const ok1 = await p.locator('#ph .gdpages:not(.gd-out) ' + sel).first().click({ timeout: 2500 }).then(() => true, () => false); await W(80); return ok1; };
   const at = (pg, ms) => until(`(function(){var L=ph.querySelector(".gdpages:not(.gd-out)");return!!L&&L.dataset.page+(L.dataset.cam?":"+L.dataset.cam:"")==="${pg}"})()`, ms || 2500);
-  const launch = async kind => { await R('S.previewBar=true;renderPhone(false)'); await p.locator(`#ptool [data-gdlaunch="${kind}"]`).click(); await W(120); };
+  const launch = async kind => { await R('LAB.previewBar=true;renderPhone(false)'); await p.locator(`#ptool [data-gdlaunch="${kind}"]`).click(); await W(120); };
   const opening = 'G.gd.cur&&!G.gd.cur.pull&&G.gd.cur.item.id==="opening"';
 
   lap('before 1');
   // ---------- 1. alone: the gate, the order's rules, the run's pages, the short line ----------
   const pure = await R(`var C={on:true,pages:"the first pages"},C2={on:true,pages:"a page shown by the Editor"},o=[gdGate(C,0),gdGate(C2,0),gdGate({on:true,pages:null,demo:false,tips:"all"},0)];
     o.push(gdPagesRule(["pg_hello","pg_aud","pg_camera","pg_wall"]),gdPagesRule(["pg_aud","pg_hello","pg_camera","pg_wall"]),gdPagesRule(["pg_hello","pg_wall","pg_camera"]));
-    var run=function(w,cam,seen){S.aud.where=w;S.aud.seen=seen;G.gd.camPerm=cam;return gdPagesRun().join(",")};o.push(run("start","ask",false),run("card","ask",false),run("never","ask",false),run("start","allowed",false),run("start","ask",true));
-    S.guidance.items.pg_camera.on=false;o.push(run("card","ask",false));S.guidance.items.pg_camera.on=true;gdGroupById("pages").on=false;o.push(run("card","ask",false),run("card","allowed",false));gdGroupById("pages").on=true;
-    var op=S.guidance.items.opening;o.push(gdLineKey(op,false,{pagesLine:"gd_pg_wall"}),gdLineKey(op,true,{pagesLine:"gd_pg_wall"}),gdLineKey(op,false,{}));
-    S.aud.where="start";o.push(gdPagesSecs(gdPagesPlan()),gdPagesPlan().map(function(x){return x.id}).join(","));S.aud.where="card";G.gd.camPerm="allowed";S.aud.seen=true;o`);
+    var run=function(w,cam,seen){D.wall.aud.where=w;D.wall.aud.seen=seen;G.gd.camPerm=cam;return gdPagesRun().join(",")};o.push(run("start","ask",false),run("card","ask",false),run("never","ask",false),run("start","allowed",false),run("start","ask",true));
+    D.guidance.items.pg_camera.on=false;o.push(run("card","ask",false));D.guidance.items.pg_camera.on=true;gdGroupById("pages").on=false;o.push(run("card","ask",false),run("card","allowed",false));gdGroupById("pages").on=true;
+    var op=D.guidance.items.opening;o.push(gdLineKey(op,false,{pagesLine:"gd_pg_wall"}),gdLineKey(op,true,{pagesLine:"gd_pg_wall"}),gdLineKey(op,false,{}));
+    D.wall.aud.where="start";o.push(gdPagesSecs(gdPagesPlan()),gdPagesPlan().map(function(x){return x.id}).join(","));D.wall.aud.where="card";G.gd.camPerm="allowed";D.wall.aud.seen=true;o`);
   ok('The scheduler is quiet while the first pages run (a gate, in words; a page the Editor shows too); none otherwise', /quiet while the first pages run \(the app's start\)/.test(pure[0]) && /quiet while a page shown by the Editor shows/.test(pure[1]) && pure[2] === null, pure.slice(0, 3));
   ok('The order\'s ends: Hello stays first, Straight to the wall last (in words); the default order keeps them', pure[3] === '' && /^Hello stays first/.test(pure[4]) && /^Straight to the wall stays last/.test(pure[5]), pure.slice(3, 6));
   ok('A first run\'s pages: Who\'s exploring only when asked at the app\'s start (not on the first card, not Never, not once answered); the camera only while not allowed; its page Off: the phone\'s request alone; the group Off: the request only when needed',
@@ -50,22 +50,22 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
 
   lap('before 2');
   // ---------- 2. the run in order, by real taps: Start the app, Hello, the chip, Let's go, Family, the camera, the wall ----------
-  await fresh('S.aud.where="start";');
+  await fresh('D.wall.aud.where="start";');
   await launch('first');
-  const r1 = await R('[!!ph.querySelector(".gdpages"),S.gdVisitor.visits,G.gd.camPerm,S.aud.seen,(ph.querySelector(".gdpages .gdpg-t")||{}).textContent,(ph.querySelector(".gdpages .gdpg-l")||{}).textContent,ph.querySelectorAll(".gdpages .gdpg-dots i").length,[].map.call(ph.querySelectorAll(".gdpages .gdpg-foot button"),function(b){return b.textContent}).join("|")]');
+  const r1 = await R('[!!ph.querySelector(".gdpages"),P.gdVisitor.visits,G.gd.camPerm,D.wall.aud.seen,(ph.querySelector(".gdpages .gdpg-t")||{}).textContent,(ph.querySelector(".gdpages .gdpg-l")||{}).textContent,ph.querySelectorAll(".gdpages .gdpg-dots i").length,[].map.call(ph.querySelectorAll(".gdpages .gdpg-foot button"),function(b){return b.textContent}).join("|")]');
   ok('Start the app (the preview bar, a real click): a first visit, the camera not yet allowed, the audience not yet asked; Hello first: “Olá!”, its line, 3 steps, Let\'s go, Show me how it works, Skip',
     r1[0] && r1[1] === 1 && r1[2] === 'ask' && r1[3] === false && r1[4] === 'Olá!' && r1[5] === "I'm your guide to Lisbon's tiles." && r1[6] === 3 && r1[7] === "Let's go|Show me how it works|Skip", r1);
   await R('gdAdvance(3000)');
   ok('...the scheduler quiet meanwhile (3 s of the visit: no tip; Why: the first pages)', await R('!G.gd.cur&&!!G.gd.last&&/quiet while the first pages run/.test(G.gd.last.why)'), await R('G.gd.last&&G.gd.last.why'));
   await tap('[data-gdpg="lang:pt"]');
-  const pt = await R('[S.lang,(ph.querySelector(".gdpages .gdpg-l")||{}).textContent,(ph.querySelector(".gdpages .gdpg-pri")||{}).textContent,(ph.querySelector(\'.gdpages [data-gdpg="lang:pt"]\')||{}).getAttribute("aria-pressed"),(document.getElementById("ptool")||{}).textContent]');
+  const pt = await R('[P.lang,(ph.querySelector(".gdpages .gdpg-l")||{}).textContent,(ph.querySelector(".gdpages .gdpg-pri")||{}).textContent,(ph.querySelector(\'.gdpages [data-gdpg="lang:pt"]\')||{}).getAttribute("aria-pressed"),(document.getElementById("ptool")||{}).textContent]');
   await tap('[data-gdpg="lang:en"]');
-  ok('The language chip (a real click on PT): the app\'s language is Portuguese at once (the page, its buttons, the app around it); EN back', pt[0] === 'pt' && pt[1] === 'Sou o seu guia dos azulejos de Lisboa.' && pt[2] === 'Vamos lá' && pt[3] === 'true' && /Iniciar a app/.test(pt[4]) && await R('S.lang') === 'en', pt);
+  ok('The language chip (a real click on PT): the app\'s language is Portuguese at once (the page, its buttons, the app around it); EN back', pt[0] === 'pt' && pt[1] === 'Sou o seu guia dos azulejos de Lisboa.' && pt[2] === 'Vamos lá' && pt[3] === 'true' && /Iniciar a app/.test(pt[4]) && await R('P.lang') === 'en', pt);
   await tap('[data-gdpg="next"]'); const a1 = await at('aud');
   const r2 = await R('[!!ph.querySelector(".gdpages .gdpg-stage .onb.onb-start"),ph.querySelectorAll(".gdpages .onb [data-onb]").length,(ph.querySelector(".gdpages .onb-t")||{}).textContent,ph.querySelectorAll(".onb").length,(ph.querySelector(".gdpages .gdpg-dots i.on")?[].indexOf.call(ph.querySelectorAll(".gdpages .gdpg-dots i"),ph.querySelector(".gdpages .gdpg-dots i.on")):-1)]');
   ok('Let\'s go (a real click): Who\'s exploring, the first card\'s own screen in the pages (one home: three choices and Skip), step 2 of 3', a1 && r2[0] && r2[1] === 4 && r2[2] === "Who's exploring today?" && r2[3] === 1 && r2[4] === 1, r2);
   await p.locator('#ph .gdpages .onb [data-onb="family"]').click(); const a2 = await at('camera');
-  const r3 = await R('[S.vis.aud,S.aud.seen,gdPresetNow(),S.guidance.breathing,(ph.querySelector(".gdpages .gdpg-t")||{}).textContent,(ph.querySelector(".gdpages .gdpg-l")||{}).textContent,(ph.querySelector(".gdpages .gdpg-pri")||{}).textContent]');
+  const r3 = await R('[P.vis.aud,D.wall.aud.seen,gdPresetNow(),D.guidance.breathing,(ph.querySelector(".gdpages .gdpg-t")||{}).textContent,(ph.querySelector(".gdpages .gdpg-l")||{}).textContent,(ph.querySelector(".gdpages .gdpg-pri")||{}).textContent]');
   ok('Family (a real click) sets the audience, and with it the guidance preset (Family: 12 s between two tips); then the camera: its title, “I need the camera to see the tiles. Nothing is recorded.”, Allow the camera',
     a2 && r3[0] === 'family' && r3[1] === true && r3[2] === 'family' && r3[3] === 12 && r3[4] === 'Let me see the tiles' && r3[5] === 'I need the camera to see the tiles. Nothing is recorded.' && r3[6] === 'Allow the camera', r3);
   await tap('[data-gdpg="camera"]'); const a3 = await at('camera:prompt');
@@ -73,39 +73,39 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('Allow the camera (a real click): the phone\'s own request (a stand-in, said so), with the app\'s line', a3 && r4[0] && r4[1] === 'To see the tiles you point at. Nothing is recorded.' && /stand-in/.test(r4[2]) && r4[3] === 'ask', r4);
   await tap('[data-gdpg="sys:allow"]'); const gone = await until('!ph.querySelector(".gdpages:not(.gd-out)")', 1500);
   await R('gdAdvance(1000)');
-  const r5 = await R(`[G.gd.camPerm,${opening},G.gd.cur&&G.gd.cur.text,!!S.gdVisitor.pages,S.gdVisitor.visit.pages,S.view,S.stop]`);
+  const r5 = await R(`[G.gd.camPerm,${opening},G.gd.cur&&G.gd.cur.text,!!P.gdVisitor.pages,P.gdVisitor.visit.pages,ui.view,ui.stop]`);
   ok('Allow: the pages end on the wall; the Opening message says the short line “Point at the tiles and tap a glowing marker.”; the visitor\'s memory says the pages were seen',
     gone && r5[0] === 'allowed' && r5[1] && r5[2] === 'Point at the tiles and tap a glowing marker.' && r5[3] && r5[4] === true && r5[5] === 'card' && r5[6] === 'closed', r5);
   const log = await R('G.gd.log.filter(function(l){return l.what==="event"&&/first pages/.test(l.why)}).map(function(l){return l.why})');
   ok('The run in order (the Log): Hello → Who\'s exploring → The camera → the wall', /Hello → Who's exploring → The camera → the wall/.test(log[0] || '') && log.some(l => /Hello done/.test(l)) && log.some(l => /The camera done/.test(l)), log);
   await R('gdAdvance(9000);gdStop("test");G.gd.movedAt=null;for(var i=0;i<100&&!(G.gd.cur&&G.gd.cur.item.id==="tapmarker");i++)gdAdvance(250)');
-  const tm = await R('[G.gd.cur&&G.gd.cur.item.id,Math.round(((G.gd.cur&&G.gd.cur.at)-gdVisitOf(S.gdVisitor,"opening").last)/1000)]');
+  const tm = await R('[G.gd.cur&&G.gd.cur.item.id,Math.round(((G.gd.cur&&G.gd.cur.at)-gdVisitOf(P.gdVisitor,"opening").last)/1000)]');
   ok('Then Tap a marker, as round 1 does (at least 20 s after the Opening message, beside the nearest marker)', tm[0] === 'tapmarker' && tm[1] >= 20, tm);
-  await R('S.view="card";S.stop="half";renderPhone(false)');
+  await R('ui.view="card";ui.stop="half";renderPhone(false)');
   ok('Asked at the app\'s start: the first card does not ask again', await R('!ph.querySelector(".onb")'));
 
   lap('before 3');
   // ---------- 3. each Skip, and skipping all ----------
-  await fresh('S.aud.where="start";'); await launch('first');
+  await fresh('D.wall.aud.where="start";'); await launch('first');
   await tap('[data-gdpg="skip"]'); const s1 = await at('camera:prompt');
-  const sk = await R('[S.aud.seen,S.vis.aud,!ph.querySelector(".gdpages .onb"),!ph.querySelector(\'.gdpages [data-gdpg="skip"]\')]');
+  const sk = await R('[D.wall.aud.seen,P.vis.aud,!ph.querySelector(".gdpages .onb"),!ph.querySelector(\'.gdpages [data-gdpg="skip"]\')]');
   await tap('[data-gdpg="sys:allow"]'); await until('!ph.querySelector(".gdpages:not(.gd-out)")', 1500); await R('gdAdvance(1000)');
-  const sk2 = await R(`[${opening},!!(S.gdVisitor.pages&&S.gdVisitor.pages.skipped)]`); await R('S.view="card";S.stop="half";renderPhone(false)'); const sk3 = await R('!ph.querySelector(".onb")');
+  const sk2 = await R(`[${opening},!!(P.gdVisitor.pages&&P.gdVisitor.pages.skipped)]`); await R('ui.view="card";ui.stop="half";renderPhone(false)'); const sk3 = await R('!ph.querySelector(".onb")');
   ok('Skip on Hello (a real click) skips all the rest: no Who\'s exploring (Explorer, answered), straight to the phone\'s camera request (never the wall without it); Allow: the wall and the Opening message; the first card asks nothing', s1 && sk[0] && sk[1] === 'explorer' && sk[2] && sk[3] && sk2[0] && sk2[1] && sk3, [s1, sk, sk2, sk3]);
-  await fresh('S.aud.where="start";'); await launch('first'); await tap('[data-gdpg="next"]'); await at('aud');
-  await p.locator('#ph .gdpages .onb [data-onb="skip"]').click(); const s2 = await at('camera'); const s2b = await R('[S.vis.aud,S.aud.seen]');
+  await fresh('D.wall.aud.where="start";'); await launch('first'); await tap('[data-gdpg="next"]'); await at('aud');
+  await p.locator('#ph .gdpages .onb [data-onb="skip"]').click(); const s2 = await at('camera'); const s2b = await R('[P.vis.aud,D.wall.aud.seen]');
   await tap('[data-gdpg="skip"]'); const s3 = await at('camera:prompt');
   ok('Who\'s exploring\'s own Skip (a real click): Explorer, the next page; Skip on the camera\'s page: straight to the phone\'s request', s2 && s2b[0] === 'explorer' && s2b[1] && s3, [s2, s2b, s3]);
   await R('gdCamAnswer(true)');
-  await fresh('S.guidance.remember=false;'); await launch('later'); await at('hello'); await tap('[data-gdpg="skip"]');
+  await fresh('D.guidance.remember=false;'); await launch('later'); await at('hello'); await tap('[data-gdpg="skip"]');
   const s4 = await until('!ph.querySelector(".gdpages:not(.gd-out)")', 1500);
-  ok('Skip with the camera already allowed (a later launch, Remember across visits Off): straight to the wall', s4 && await R('G.gd.camPerm==="allowed"&&!!S.gdVisitor.pages'));
+  ok('Skip with the camera already allowed (a later launch, Remember across visits Off): straight to the wall', s4 && await R('G.gd.camPerm==="allowed"&&!!P.gdVisitor.pages'));
 
   lap('before 4');
   // ---------- 4. Show me how it works ----------
   await fresh(); await launch('first'); await tap('[data-gdpg="how"]'); await at('camera'); await tap('[data-gdpg="camera"]'); await at('camera:prompt'); await tap('[data-gdpg="sys:allow"]');
   await until('!ph.querySelector(".gdpages:not(.gd-out)")', 1500); await R('gdAdvance(500)');
-  const hw = await R('[G.gd.cur&&G.gd.cur.item.id,G.gd.cur&&G.gd.cur.pull,!!ph.querySelector(".gdbub:not(.gd-out) [data-gdcta]"),gdVisitOf(S.gdVisitor,"opening").shown,!!(S.gdVisitor.pages&&S.gdVisitor.pages.how)]');
+  const hw = await R('[G.gd.cur&&G.gd.cur.item.id,G.gd.cur&&G.gd.cur.pull,!!ph.querySelector(".gdbub:not(.gd-out) [data-gdcta]"),gdVisitOf(P.gdVisitor,"opening").shown,!!(P.gdVisitor.pages&&P.gdVisitor.pages.how)]');
   ok('Show me how it works (a real click): after the pages, How to use the card\'s bubble on the wall (with Open a card); it says the visit\'s first words (the Opening message counted, not said twice)', hw[0] === 'howto:wall' && hw[1] && hw[2] && hw[3] === 1 && hw[4], hw);
 
   lap('before 5');
@@ -115,7 +115,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const cr = await R('[G.gd.camPerm,(ph.querySelector(".gdpages .gdpg-t")||{}).textContent,(ph.querySelector(".gdpages .gdpg-l")||{}).textContent,[].map.call(ph.querySelectorAll(".gdpages .gdpg-foot button"),function(b){return b.dataset.gdpg}).join(",")]');
   ok('[camera] Don\'t Allow (a real click): “The camera is off”, how to allow it, Open Settings and Try again, no Skip', c1 && cr[0] === 'denied' && cr[1] === 'The camera is off' && /Settings › Camera/.test(cr[2]) && cr[3] === 'settings,retry', cr);
   await R('gdAdvance(30000)');
-  ok('[camera] Never the wall without the camera: 30 s later still the camera\'s page, no tip, no Opening message', await R('!!ph.querySelector(".gdpages:not(.gd-out)")&&!G.gd.cur&&!S.gdVisitor.visit.pages&&gdVisitOf(S.gdVisitor,"opening").shown===0'));
+  ok('[camera] Never the wall without the camera: 30 s later still the camera\'s page, no tip, no Opening message', await R('!!ph.querySelector(".gdpages:not(.gd-out)")&&!G.gd.cur&&!P.gdVisitor.visit.pages&&gdVisitOf(P.gdVisitor,"opening").shown===0'));
   await tap('[data-gdpg="retry"]'); const c2 = await at('camera:prompt'); await tap('[data-gdpg="sys:deny"]'); const c3 = await at('camera:refused');
   ok('[camera] Try again (a real click): the phone\'s request again; refused again, the same page', c2 && c3);
   await tap('[data-gdpg="settings"]'); const c4 = await at('camera:settings');
@@ -135,7 +135,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const looks = [];
   for (const dark of [false, true]) {
     for (const st of ['hello', 'camera', 'prompt', 'refused', 'settings']) {
-      await fresh(`S.dark=${dark};renderAll(true);`); await R('gdLaunch("first")'); await at('hello');
+      await fresh(`P.dark=${dark};renderAll(true);`); await R('gdLaunch("first")'); await at('hello');
       if (st !== 'hello') { await R('gdPagesNext()'); await at('camera'); }
       if (st === 'prompt' || st === 'refused' || st === 'settings') { await R('gdCamAsk()'); }
       if (st === 'refused' || st === 'settings') { await R('gdCamAnswer(false)'); }
@@ -147,38 +147,38 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
 
   lap('before 6');
   // ---------- 6. Where to ask: each of the three, the first card asking or not (real clicks on the row) ----------
-  await fresh(); await R('S.ui.rowDemo=true'); await editor('card', { s8: true, s8onb: true });
+  await fresh(); await R('LAB.rowDemo=true'); await editor('card', { s8: true, s8onb: true });
   const where = {};
   for (const w of ['start', 'card', 'never']) {
-    await R('document.body.dataset.rowdemo=""'); await p.locator(`[data-set="@aud.where"][data-v="${w}"]`).click();
+    await R('document.body.dataset.rowdemo=""'); await p.locator(`[data-set="@D.wall.aud.where"][data-v="${w}"]`).click();
     await until('/\\|(found|missing)\\|/.test(document.body.dataset.rowdemo||"")', 3000); await W(200);
-    where[w] = await R('[S.aud.where,document.body.dataset.rowdemo,!!ph.querySelector(".gdpages .onb-start"),!!ph.querySelector(".onb:not(.onb-start)"),(ph.querySelector(".gdchip")||{}).textContent||""]');
+    where[w] = await R('[D.wall.aud.where,document.body.dataset.rowdemo,!!ph.querySelector(".gdpages .onb-start"),!!ph.querySelector(".onb:not(.onb-start)"),(ph.querySelector(".gdchip")||{}).textContent||""]');
     await R('if(G.gd.pages)gdPagesEnd("test",false)');
-    await R(`gdStop("test");S.ui.rowDemo=false;G.gd.camPerm="allowed";gdLaunch("first");`); if (await page()) { await R('while(G.gd.pages){var n=gdPageNow();if(n.it&&n.it.page==="aud"){window.__askedStart=1;S.vis.aud="expert";S.aud.seen=true;emit("audience.asked","expert",false)}else gdPagesNext()}'); }
-    await R('S.view="card";S.stop="half";renderPhone(false)'); where[w].push(await R('!!window.__askedStart'), await R('!!ph.querySelector(".onb:not(.onb-start)")'), await R('S.vis.aud'), await R('gdPresetNow()'));
-    await R('window.__askedStart=0;S.stop="closed";S.ui.rowDemo=true;renderPhone(false)');
+    await R(`gdStop("test");LAB.rowDemo=false;G.gd.camPerm="allowed";gdLaunch("first");`); if (await page()) { await R('while(G.gd.pages){var n=gdPageNow();if(n.it&&n.it.page==="aud"){window.__askedStart=1;P.vis.aud="expert";D.wall.aud.seen=true;emit("audience.asked","expert",false)}else gdPagesNext()}'); }
+    await R('ui.view="card";ui.stop="half";renderPhone(false)'); where[w].push(await R('!!window.__askedStart'), await R('!!ph.querySelector(".onb:not(.onb-start)")'), await R('P.vis.aud'), await R('gdPresetNow()'));
+    await R('window.__askedStart=0;ui.stop="closed";LAB.rowDemo=true;renderPhone(false)');
   }
   ok('Where to ask = At the app\'s start (a real click): its demo shows Who\'s exploring in the first pages; a first run asks it there (Expert: the Expert preset) and the first card does not', where.start[0] === 'start' && /\|found\|/.test(where.start[1]) && where.start[2] && where.start[5] && !where.start[6] && where.start[7] === 'expert' && where.start[8] === 'expert', where.start);
   ok('Where to ask = On the first card (today\'s, the default): its demo shows the card\'s screen; a first run does not ask, the first card does', where.card[0] === 'card' && where.card[3] && !where.card[5] && where.card[6], where.card);
   ok('Where to ask = Never: its demo says so; neither asks (Explorer)', where.never[0] === 'never' && /Never/.test(where.never[4]) && !where.never[5] && !where.never[6] && where.never[7] === 'explorer', where.never);
-  await R('S.ui.rowDemo=false;S.aud.where="card";S.aud.seen=true');
+  await R('LAB.rowDemo=false;D.wall.aud.where="card";D.wall.aud.seen=true');
 
   lap('before 7');
   // ---------- 7. a later launch; Remember across visits Off ----------
   await fresh(); await R('gdLaunch("first");gdPagesSkip();gdCamAnswer(true);gdAdvance(9000);gdStop("test")'); await W(250);
   await launch('later'); await R('gdAdvance(1000)');
-  const lt = await R(`[!ph.querySelector(".gdpages:not(.gd-out)"),S.gdVisitor.visits,${opening},G.gd.cur&&G.gd.cur.text]`);
+  const lt = await R(`[!ph.querySelector(".gdpages:not(.gd-out)"),P.gdVisitor.visits,${opening},G.gd.cur&&G.gd.cur.text]`);
   ok('Later launch (the preview bar, a real click): no pages; the Opening message says “Welcome back! Tap a marker to begin.”', lt[0] && lt[1] === 2 && lt[2] && lt[3] === 'Welcome back! Tap a marker to begin.', lt);
-  await R('gdStop("test");S.guidance.remember=false'); await launch('later'); const lt2 = await at('hello');
-  ok('Remember across visits Off: every launch is a first: the pages again, from Hello (a first visit)', lt2 && await R('S.gdVisitor.visits===1&&!S.gdVisitor.pages'));
+  await R('gdStop("test");D.guidance.remember=false'); await launch('later'); const lt2 = await at('hello');
+  ok('Remember across visits Off: every launch is a first: the pages again, from Hello (a first visit)', lt2 && await R('P.gdVisitor.visits===1&&!P.gdVisitor.pages'));
 
   lap('before 8');
   // ---------- 8. Reduce Motion and Mascot Off ----------
   await fresh(); await R('gdLaunch("first")'); await at('hello');
   const mo = await R('var a=ph.querySelector(".gdpages .gdpg-art");[a&&a.dataset.azu,a?a.querySelector(".gdpg-tile").getAnimations().length:0,a?a.querySelector(".gdpg-azu").getAnimations().length:0,!!ph.querySelector(".gdpages .gdpg-azu img,.gdpages .gdpg-azu svg")]');
-  await fresh('S.reduce=true;renderPhone(false);'); await R('gdLaunch("first")'); await at('hello');
+  await fresh('P.reduce=true;renderPhone(false);'); await R('gdLaunch("first")'); await at('hello');
   const rd = await R('var a=ph.querySelector(".gdpages .gdpg-art");[a&&a.dataset.azu,a?getComputedStyle(a.querySelector(".gdpg-tile")).opacity:"",a?a.querySelector(".gdpg-azu").getAnimations().length:-1,ph.querySelector(".gdpages .gdpg-body").getAnimations().length,(ph.querySelector(".gdpages .gdpg-t")||{}).textContent]');
-  await fresh('S.guideCfg.mascot=false;'); await R('gdLaunch("first")'); await at('hello');
+  await fresh('D.guide.mascot=false;'); await R('gdLaunch("first")'); await at('hello');
   const mf = await R('[!ph.querySelector(".gdpages .gdpg-art"),(ph.querySelector(".gdpages .gdpg-t")||{}).textContent,ph.querySelectorAll(".gdpages .gdpg-foot button").length]');
   ok('Hello: Azu forms from a tile (the tile turns in and dissolves) and waves (its animations run)', mo[0] === 'form' && mo[1] >= 1 && mo[2] >= 2 && mo[3], mo);
   ok('Reduce Motion: Azu appears (no tile, no wave, no entrance); the words stay', rd[0] === 'still' && rd[1] === '0' && rd[2] === 0 && rd[3] === 0 && rd[4] === 'Olá!', rd);
@@ -186,16 +186,16 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
 
   lap('before 9');
   // ---------- 9. Start the app in Preview & Test, and the visitor's line ----------
-  await fresh(); await R('S.ui.rowDemo=true'); await editor('guide', { gt0: true });
+  await fresh(); await R('LAB.rowDemo=true'); await editor('guide', { gt0: true });
   const v0 = await R('ed.querySelector("#gdpgseen").textContent');
-  await p.locator('[data-set="@ui.gdLaunch"][data-v="first"]').click(); const pv1 = await at('hello', 3000);
+  await p.locator('[data-set="@LAB.gdLaunch"][data-v="first"]').click(); const pv1 = await at('hello', 3000);
   const v1 = await R('ed.querySelector("#gdpgseen").textContent');
   await R('gdPagesSkip();gdCamAnswer(true)'); await W(150); const v2 = await R('ed.querySelector("#gdpgseen").textContent');
-  await p.locator('[data-set="@ui.gdLaunch"][data-v="later"]').click(); await until('/\\|(found|missing)\\|/.test(document.body.dataset.rowdemo||"")', 3000);
-  const pv2 = await R('[!ph.querySelector(".gdpages:not(.gd-out)"),S.gdVisitor.visits,/Welcome back/.test((ph.querySelector(".gdchip")||{}).textContent||"")]');
+  await p.locator('[data-set="@LAB.gdLaunch"][data-v="later"]').click(); await until('/\\|(found|missing)\\|/.test(document.body.dataset.rowdemo||"")', 3000);
+  const pv2 = await R('[!ph.querySelector(".gdpages:not(.gd-out)"),P.gdVisitor.visits,/Welcome back/.test((ph.querySelector(".gdchip")||{}).textContent||"")]');
   ok('Preview & Test › Start the app (real clicks): a first run (the pages from Hello) and a later launch (no pages, Welcome back); The visitor says whether the first pages were seen',
     /not seen yet/.test(v0) && pv1 && /running now, Hello/.test(v1) && /seen at visit 1, skipped/.test(v2) && pv2[0] && pv2[1] === 2 && pv2[2], [v0, v1, v2, pv2]);
-  await R('S.ui.rowDemo=false;gdChip(null)');
+  await R('LAB.rowDemo=false;gdChip(null)');
 
   lap('before 10');
   // ---------- 10. the Editor: Sequences, + Add guidance's Page template, the drag within the rules ----------
@@ -205,7 +205,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await p.locator('[data-gdadd="pages"]').click(); await W(150);
   const tpl = await R('[].map.call(ed.querySelectorAll(".gdtpl [data-gdtpl]"),function(b){return b.textContent}).join("|")');
   await p.locator('[data-gdtpl="pages|page"]').click(); await W(300);
-  const np = await R('var g=gdGroupById("pages"),id=g.items[g.items.length-2],it=S.guidance.items[id];[g.items.join(","),it&&it.form,it&&TXT(it.title),it&&TXT(it.says),it&&it.buttons.length,it&&TXT(it.buttons[0].word),TXOWN[it.title],gdPagesPlan().map(function(x){return x.id}).join(","),id]');
+  const np = await R('var g=gdGroupById("pages"),id=g.items[g.items.length-2],it=D.guidance.items[id];[g.items.join(","),it&&it.form,it&&TXT(it.title),it&&TXT(it.says),it&&it.buttons.length,it&&TXT(it.buttons[0].word),TXOWN[it.title],gdPagesPlan().map(function(x){return x.id}).join(","),id]');
   ok('+ Add guidance in First pages offers the Page template only (real clicks); a new page (a title, a line, one button) goes before Straight to the wall, its words its own, in the run',
     tpl === 'Page' && np[1] === 'page' && np[2] === 'A new page' && np[3] === 'A short line under the title.' && np[4] === 1 && np[5] === 'Next' && np[6] === 'gd:i:' + np[8] && /,gdn\d+,pg_wall$/.test(np[0]) && np[7].indexOf(np[8]) > 0, [tpl, np]);
   const nid = np[8];
@@ -228,8 +228,8 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
 
   lap('before 11');
   // ---------- 11. every new row's demo ----------
-  await R('if(G.gd.pages)gdPagesEnd("test",false);S.ui.rowDemo=false;gdChip(null);gdStop("test")');
-  const keys = await R(`[gdGroupPath("pages")+"on","guidance.items.pg_hello.on","guidance.items.pg_hello.azu","guidance.items.pg_hello.langChip","guidance.items.pg_aud.on","guidance.items.pg_camera.on","guidance.items.pg_wall.on","guidance.items.${nid}.on","guidance.items.${nid}.azu","guidance.items.${nid}.buttons.0.act","aud.where","ui.gdLaunch"]`);
+  await R('if(G.gd.pages)gdPagesEnd("test",false);LAB.rowDemo=false;gdChip(null);gdStop("test")');
+  const keys = await R(`[gdGroupPath("pages")+"on","D.guidance.items.pg_hello.on","D.guidance.items.pg_hello.azu","D.guidance.items.pg_hello.langChip","D.guidance.items.pg_aud.on","D.guidance.items.pg_camera.on","D.guidance.items.pg_wall.on","D.guidance.items.${nid}.on","D.guidance.items.${nid}.azu","D.guidance.items.${nid}.buttons.0.act","D.wall.aud.where","LAB.gdLaunch"]`);
   const shown = [], miss = [];
   for (const k of keys) {
     await R('document.body.dataset.rowdemo=""'); await R(`showRowDemo("${k}")`);
@@ -239,18 +239,18 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('Every new row\'s demo shows its part on the phone (the group, each page with its value, Where to ask, Start the app)', miss.length === 0 && shown.length === keys.length, { miss, shown });
   await R('if(G.gd.pages)gdPagesEnd("test",false);gdStop("test")');
   const real = [];
-  await R(base + 'S.ui.rowDemo=true'); await editor('guide', { gt4: true, 'gd:seq': true, 'gd:g:pages': true, 'gd:i:pg_hello': true });
-  await p.locator('[data-fo="gd:i:pg_hello"] [data-set="@guidance.items.pg_hello.azu"][data-v="appear"]').click(); real.push(await until('!!ph.querySelector(\'.gdpages .gdpg-art[data-azu="appear"]\')', 3000));
-  await p.locator('[data-fo="gd:i:pg_hello"] [data-set="@guidance.items.pg_hello.langChip"][data-v="false"]').click(); real.push(await until('!!ph.querySelector(".gdpages")&&!ph.querySelector(".gdpages .gdpg-lang")', 3000));
-  await p.locator('[data-fo="gd:i:pg_hello"] [data-set="@guidance.items.pg_hello.on"][data-v="false"]').click(); real.push(await until('!ph.querySelector(".gdpages:not(.gd-out)")&&/Off: the first run skips Hello/.test((ph.querySelector(".gdchip")||{}).textContent||"")', 3000));
+  await R(base + 'LAB.rowDemo=true'); await editor('guide', { gt4: true, 'gd:seq': true, 'gd:g:pages': true, 'gd:i:pg_hello': true });
+  await p.locator('[data-fo="gd:i:pg_hello"] [data-set="@D.guidance.items.pg_hello.azu"][data-v="appear"]').click(); real.push(await until('!!ph.querySelector(\'.gdpages .gdpg-art[data-azu="appear"]\')', 3000));
+  await p.locator('[data-fo="gd:i:pg_hello"] [data-set="@D.guidance.items.pg_hello.langChip"][data-v="false"]').click(); real.push(await until('!!ph.querySelector(".gdpages")&&!ph.querySelector(".gdpages .gdpg-lang")', 3000));
+  await p.locator('[data-fo="gd:i:pg_hello"] [data-set="@D.guidance.items.pg_hello.on"][data-v="false"]').click(); real.push(await until('!ph.querySelector(".gdpages:not(.gd-out)")&&/Off: the first run skips Hello/.test((ph.querySelector(".gdchip")||{}).textContent||"")', 3000));
   await p.locator('[data-gdshow="pg_camera"]').click(); real.push(await until('!!ph.querySelector(\'.gdpages[data-page="camera"]\')', 3000));
   ok('...pressed by real clicks: Azu Appears, the chip Hidden, Hello Off, ▸ Show now on the camera: each on the phone at once', real.every(Boolean), real);
-  await R('S.ui.rowDemo=false;if(G.gd.pages)gdPagesEnd("test",false);gdChip(null);S.guidance=JSON.parse(window.__g0)');
-  ok('The words and their owners: each page\'s own (Languages & Terms), Skip and the progress the group\'s, the bar\'s Start the app', await R('TXOWN.gd_pg_hello==="gd:i:pg_hello"&&TXOWN.gd_pg_cam==="gd:i:pg_camera"&&TXOWN.gd_pg_wall==="gd:i:pg_wall"&&TXOWN.gd_pg_skip==="gd:g:pages"&&TXOWN.pbar_start==="s0bar"&&S.tx.gd_pg_off.pt.length>0&&!!TX_DOM.gd_pg_hello&&guidePath("gd:i:pg_hello").join(">")==="gt4>gd:seq>gd:g:pages>gd:i:pg_hello>gd:f:pg_hello:says"'));
+  await R('LAB.rowDemo=false;if(G.gd.pages)gdPagesEnd("test",false);gdChip(null);D.guidance=JSON.parse(window.__g0)');
+  ok('The words and their owners: each page\'s own (Languages & Terms), Skip and the progress the group\'s, the bar\'s Start the app', await R('TXOWN.gd_pg_hello==="gd:i:pg_hello"&&TXOWN.gd_pg_cam==="gd:i:pg_camera"&&TXOWN.gd_pg_wall==="gd:i:pg_wall"&&TXOWN.gd_pg_skip==="gd:g:pages"&&TXOWN.pbar_start==="s0bar"&&D.words.tx.gd_pg_off.pt.length>0&&!!TX_DOM.gd_pg_hello&&guidePath("gd:i:pg_hello").join(">")==="gt4>gd:seq>gd:g:pages>gd:i:pg_hello>gd:f:pg_hello:says"'));
 
   lap('before 12');
   // ---------- 12. the four scenes in Ask Azu's console, pressed as the developer does ----------
-  await R(base + 'G.gd.manual=false;G.gd.rate=1;S.ui.level=1;S.tab="guide";S.op={gt3:true,s7agent:true};renderEditor();var f=ed.querySelector(\'[data-fo="s7agent"]\');if(f)f.open=true');
+  await R(base + 'G.gd.manual=false;G.gd.rate=1;ui.level=1;ui.tab="guide";ui.op={gt3:true,s7agent:true};renderEditor();var f=ed.querySelector(\'[data-fo="s7agent"]\');if(f)f.open=true');
   const scenes = await R('AGSCENES.map(function(s,i){return[i,s.id,s.label]}).filter(function(x){return/^gd8_/.test(x[1])})');
   ok('The console lists the four new scenes', scenes.length === 4 && JSON.stringify(scenes.map(s => s[1])) === JSON.stringify(['gd8_first', 'gd8_skip', 'gd8_camera', 'gd8_later']), scenes.map(s => s[2]));
   for (const [i, id, label] of scenes) {

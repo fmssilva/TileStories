@@ -5,9 +5,9 @@
 // MUTATE=1: (test9se's whole mutation) Azu never placed again after its step's start: the check named [azu] turns red. CAP=<dir> saves g5.
 // Guidance round 17b: split in two to keep each file under 300 s (it ran 370 s): test9sf the repeats 1-3, test9sg.js the repeats 4-6
 // (REP0=3), the same check and mutation in each; REPS sets how many a file runs (3).
-const { chromium } = require('./pw');
+const { chromium, labUrl } = require('./pw');
 const fs = require('fs'), path = require('path');
-const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
+const url = labUrl('#probe');
 const CAP = process.env.CAP || '', REPS = +process.env.REPS || 3, REP0 = +process.env.REP0 || 0;
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--autoplay-policy=no-user-gesture-required'] });
@@ -20,34 +20,34 @@ const CAP = process.env.CAP || '', REPS = +process.env.REPS || 3, REP0 = +proces
   const T0 = Date.now(), tsec = s => console.log('TIME ' + s + ' ' + Math.round((Date.now() - T0) / 1000) + ' s');
   const shot = async name => { if (!CAP) return; fs.mkdirSync(CAP, { recursive: true }); const r = await p.locator('#ph').boundingBox(); await p.screenshot({ path: path.join(CAP, name + '.png'), clip: { x: r.x, y: r.y, width: r.width, height: r.height } }); };
   await R(require('./g15lib.js'));
-  await R('window.__g0=JSON.stringify(S.guidance)');
+  await R('window.__g0=JSON.stringify(D.guidance)');
   if (process.env.MUTATE) {
-    await R('gbAzu=function(){return S.guideCfg.gbtn!=="star"};gbOn=function(){return S.guideCfg.gbtn!=="azu"};gdSign=function(){return""};nameMid=function(n){return String(n==null?"":n)};azuPlace=function(m){return parseFloat(m.style.top)||0}');
+    await R('gbAzu=function(){return D.guide.gbtn!=="star"};gbOn=function(){return D.guide.gbtn!=="azu"};gdSign=function(){return""};nameMid=function(n){return String(n==null?"":n)};azuPlace=function(m){return parseFloat(m.style.top)||0}');
     console.log('MUTATION: Azu beside the ✦ whatever Mascot says, the bubble unsigned; every name as written in its slot; Azu never placed again after its step\'s start');
   }
   /* the state every check starts from (test9s.js's): a 390 px phone, the device voice muted, the guidance quiet */
-  const base = (o) => `SCREENS.phone=[390,844];if(G.on)stopTour();if(G.moment)azMomentEnd(false);ph.querySelectorAll(".azbub").forEach(function(x){x.remove()});gdBeatClose();gdStop("test");S.guidance=JSON.parse(window.__g0);
-    S.hints.on=false;S.previewBar=false;S.lang="${o.lang || 'en'}";S.guideMute=true;S.introSeen=true;S.reduce=false;S.dark=${o.theme === 'dark'};S.cardCfg.mode="${o.theme === 'dark' ? 'dark' : 'light'}";
-    S.guideCfg.voice="device";S.guideCfg.panel="dock";S.guideCfg.dockStart="mini";S.guideCfg.captions=true;S.guideCfg.music=false;S.vis.music=null;S.ui.rowDemo=false;S.ui.gdSR=false;S.m.solemn=false;S.vis.aud="explorer";S.guideCfg.life="lively";
-    S.guideCfg.gbtn="${o.gbtn || 'both'}";S.guideCfg.mascot=${o.mascot !== false};S.guideCfg.look="ink";S.agentCfg.voiceOut=false;
-    G.gd.demo=false;gdChip(null);G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};S.settingsOpen=false;G.fab.menu=false;G.askOpen=false;
-    S.guidance.on=true;S.guidance.kinds.forEach(function(k){k.on=false});G.gd.manual=true;gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;`;
-  const wall = 'setWall("ribeira");S.camZoom=1;S.view="card";S.stop="closed";renderAll(false);';
-  const card = 'S.view="card";S.stop="full";renderAll(false);scr.scrollTop=900;scr.dispatchEvent(new Event("scroll"));';
+  const base = (o) => `SCREENS.phone=[390,844];if(G.on)stopTour();if(G.moment)azMomentEnd(false);ph.querySelectorAll(".azbub").forEach(function(x){x.remove()});gdBeatClose();gdStop("test");D.guidance=JSON.parse(window.__g0);
+    D.card.hints.on=false;LAB.previewBar=false;P.lang="${o.lang || 'en'}";P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=${o.theme === 'dark'};D.card.cardCfg.mode="${o.theme === 'dark' ? 'dark' : 'light'}";
+    D.guide.voice="device";D.guide.panel="dock";D.guide.dockStart="mini";D.guide.captions=true;D.guide.music=false;P.vis.music=null;LAB.rowDemo=false;LAB.gdSR=false;D.poi.solemn=false;P.vis.aud="explorer";D.guide.life="lively";
+    D.guide.gbtn="${o.gbtn || 'both'}";D.guide.mascot=${o.mascot !== false};D.guide.look="ink";D.agent.voiceOut=false;
+    G.gd.demo=false;gdChip(null);G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};ui.settingsOpen=false;G.fab.menu=false;G.askOpen=false;
+    D.guidance.on=true;D.guidance.kinds.forEach(function(k){k.on=false});G.gd.manual=true;gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;`;
+  const wall = 'setWall("ribeira");ui.camZoom=1;ui.view="card";ui.stop="closed";renderAll(false);';
+  const card = 'ui.view="card";ui.stop="full";renderAll(false);scr.scrollTop=900;scr.dispatchEvent(new Event("scroll"));';
   const show = (id) => `gdStart(gdItemNow("${id}"),"test",{pull:true,ms:60000});`;
   const LT = ['light', 'dark'];
 
   // ---------- 3. Azu 0 px over the words after a quick step jump ----------
   const rows = [];
   for (let rep = REP0; rep < REP0 + REPS; rep++) for (const dark of [false, true]) for (const id of ['g1', 'g5', 'g7']) {
-    await R(base({}) + `S.view="card";S.stop="full";renderAll(false);startTour();var j=S.guideSteps.findIndex(function(s){return s.id==="${id}"});if(j>0){stopSpeech();G.i=j;runStep()}S.dockH="mini";renderGuide()`); await W(500);
-    await R(`S.dark=${dark};S.cardCfg.mode="${dark ? 'dark' : 'light'}";renderAll(true)`);
+    await R(base({}) + `ui.view="card";ui.stop="full";renderAll(false);startTour();var j=D.tour.guideSteps.findIndex(function(s){return s.id==="${id}"});if(j>0){stopSpeech();G.i=j;runStep()}ui.dockH="mini";renderGuide()`); await W(500);
+    await R(`P.dark=${dark};D.card.cardCfg.mode="${dark ? 'dark' : 'light'}";renderAll(true)`);
     /* Azu standing still: its place and the scroll unchanged for three samples (at most 10 s) */
     let last = null, same = 0; const t0 = Date.now(); while (Date.now() - t0 < 10000 && same < 3) { const y = await R('JSON.stringify([Math.round(ph.querySelector(".mascot").getBoundingClientRect().top),Math.round(scr.scrollTop)])'); same = y === last ? same + 1 : 0; last = y; await W(150); }
     const o1 = await R('G15.azuInk()'); await W(1500); const o2 = await R('G15.azuInk()');
     const row = { rep, theme: dark ? 'dark' : 'light', id, still: o1, later: o2 };
     /* a red case says where Azu, the block and the scroll were (the phone's px) */
-    if (o1 || o2) row.at = await R('var pr=ph.getBoundingClientRect(),m=ph.querySelector(".mascot").getBoundingClientRect(),el=stepEl(S.guideSteps[G.i]).getBoundingClientRect(),f=freeHeight();var M=ph.querySelector(".mascot"),cur=parseFloat(M.style.top),k0=G.wbKey,o0=azuOver(M,cur,G.wb||[]).length;G.wbKey=null;var o1=azuOver(M,cur,wordBoxes(stepEl(S.guideSteps[G.i]))).length;JSON.stringify({azu:+(m.top-pr.top).toFixed(1),styleTop:cur,block:[Math.round(el.top-pr.top),Math.round(el.bottom-pr.top)],free:Math.round(f.bottom-pr.top),scroll:Math.round(scr.scrollTop),tries:G.placeTries,cls:M.className,key:k0,keyNow:G.wbKey,overCached:o0,overFresh:o1,beside:besideWords(M,cur,70,Math.round(f.bottom-pr.top)-72,stepEl(S.guideSteps[G.i]))})');
+    if (o1 || o2) row.at = await R('var pr=ph.getBoundingClientRect(),m=ph.querySelector(".mascot").getBoundingClientRect(),el=stepEl(D.tour.guideSteps[G.i]).getBoundingClientRect(),f=freeHeight();var M=ph.querySelector(".mascot"),cur=parseFloat(M.style.top),k0=G.wbKey,o0=azuOver(M,cur,G.wb||[]).length;G.wbKey=null;var o1=azuOver(M,cur,wordBoxes(stepEl(D.tour.guideSteps[G.i]))).length;JSON.stringify({azu:+(m.top-pr.top).toFixed(1),styleTop:cur,block:[Math.round(el.top-pr.top),Math.round(el.bottom-pr.top)],free:Math.round(f.bottom-pr.top),scroll:Math.round(scr.scrollTop),tries:G.placeTries,cls:M.className,key:k0,keyNow:G.wbKey,overCached:o0,overFresh:o1,beside:besideWords(M,cur,70,Math.round(f.bottom-pr.top)-72,stepEl(D.tour.guideSteps[G.i]))})');
     rows.push(row);
     if (CAP && rep === REP0 && id === 'g5') await shot(`azu_jump_g5_${dark ? 'dark' : 'light'}`);
   }
@@ -55,7 +55,7 @@ const CAP = process.env.CAP || '', REPS = +process.env.REPS || 3, REP0 = +proces
   ok(`[azu] Azu 0 px over the words after a quick step jump: ${REPS} repeats at g1, g5, g7, light and dark (${rows.length} cases), once it stands still and 1.5 s later`, rows.length === REPS * 6 && !bad.length, { bad, sample: rows.slice(0, 6).map(r => r.id + ' ' + r.theme + ' ' + r.still + '/' + r.later) });
   tsec('azu');
 
-  await R('if(G.on)stopTour();gdStop("test");SCREENS.phone=[360,820];S.dark=false;S.cardCfg.mode="light";S.lang="en";S.guideCfg.mascot=true;S.guideCfg.gbtn="both";S.guidance=JSON.parse(window.__g0);renderAll(false)');
+  await R('if(G.on)stopTour();gdStop("test");SCREENS.phone=[360,820];P.dark=false;D.card.cardCfg.mode="light";P.lang="en";D.guide.mascot=true;D.guide.gbtn="both";D.guidance=JSON.parse(window.__g0);renderAll(false)');
   ok('No page error', errs.length === 0, errs.slice(0, 5));
   tsec('end');
   console.log(fails ? `FAILED ${fails}` : 'ALL PASS');

@@ -3,9 +3,10 @@
 //   wraps     - a function saved and replaced by one that calls it (var fOld=f; f=function(){...fOld()...})
 //   replaces  - a function assigned again by a later module
 //   redeclared - a function declared in more than one module
-//   defaults  - an S.* value set at the top level of more than one module
+//   defaults  - a value of a state root (D, P, ui, LAB: STATE_MAP.md) set at the top level of more than one module
+//   sRefs     - references to the old one root S (S.x, S[k], S itself): the state lives in its four roots, none left
 // and one rule: no module or style is named after a version (v3.js, v8b.css...), so the layers cannot come back.
-// structure_baseline.json holds the allowed counts: a count may only go down (all four are 0).
+// structure_baseline.json holds the allowed counts: a count may only go down (all five are 0).
 const fs = require('fs'), path = require('path');
 // acorn: package.json's devDependency (npm install, once, in this folder); ACORN=<path> names another copy
 let acorn; try { acorn = require(process.env.ACORN || 'acorn') } catch (e) { console.log('check_structure.js needs acorn: run "npm install" in ' + __dirname + ' (package.json), or set ACORN to a copy of it. ' + e.message); process.exit(2) }
@@ -36,24 +37,34 @@ const visit = list => list.forEach(s => {
     if (x.type === 'CallExpression' && isFn(x.callee) && x.callee.body.type === 'BlockStatement') { visit(x.callee.body.body); return }
     if (x.type !== 'AssignmentExpression' || x.operator !== '=') return; const p = mpath(x.left); if (!p) return;
     if (x.left.type === 'Identifier' && isFn(x.right)) { if (saved[p]) { F(p).wrap.push(m); delete saved[p] } else F(p).replace.push(m); return }
-    if (p.indexOf('S.') === 0) (st[p] = st[p] || new Set()).add(m) });
+    if (/^(D|P|ui|LAB)\./.test(p)) (st[p] = st[p] || new Set()).add(m) });
 });
 visit(body);
+// the old root: every identifier S that is not a property name (x.S, {S: 1})
+const sRefs = [];
+(function walk(n, parent, key) {
+  if (!n || typeof n.type !== 'string') return;
+  if (n.type === 'Identifier' && n.name === 'S' && !(parent && ((parent.type === 'MemberExpression' && key === 'property' && !parent.computed) || (parent.type === 'Property' && key === 'key' && !parent.computed && !parent.shorthand)))) sRefs.push(owner(n.start));
+  for (const k in n) { const v = n[k]; if (Array.isArray(v)) v.forEach(x => walk(x, n, k)); else if (v && typeof v.type === 'string') walk(v, n, k) }
+})(ast, null, null);
 const list = k => Object.keys(fn).filter(n => k(fn[n]));
 const now = {
   wraps: list(f => f.wrap.length).reduce((a, n) => a + fn[n].wrap.length, 0),
   replaces: list(f => f.replace.length).reduce((a, n) => a + fn[n].replace.length, 0),
   redeclared: list(f => f.def.length > 1).length,
   defaults: Object.keys(st).filter(p => st[p].size > 1).length,
+  sRefs: sRefs.length,
 };
 if (process.argv.includes('--write-baseline')) { fs.writeFileSync(BASE, JSON.stringify(now, null, 1) + '\n'); console.log('baseline written', JSON.stringify(now)); process.exit(0) }
-const base = fs.existsSync(BASE) ? JSON.parse(fs.readFileSync(BASE, 'utf8')) : { wraps: 0, replaces: 0, redeclared: 0, defaults: 0 };
+const base = Object.assign({ wraps: 0, replaces: 0, redeclared: 0, defaults: 0, sRefs: 0 }, fs.existsSync(BASE) ? JSON.parse(fs.readFileSync(BASE, 'utf8')) : {});
 let bad = 0;
 console.log((versioned.length ? 'FAIL ' : 'ok   ') + 'named after a version: ' + (versioned.join(' ') || 'none')); if (versioned.length) bad++;
-for (const k in now) { const up = now[k] > base[k]; if (up) bad++; console.log((up ? 'FAIL ' : 'ok   ') + k.padEnd(11) + now[k] + ' (allowed ' + base[k] + ')') }
+const NAME = { sRefs: 'references to S.' };
+for (const k in now) { const up = now[k] > base[k]; if (up) bad++; console.log((up ? 'FAIL ' : 'ok   ') + (NAME[k] || k).padEnd(11) + ' ' + now[k] + ' (allowed ' + base[k] + ')') }
 if (process.argv.includes('--list')) {
   list(f => f.def.length + f.wrap.length + f.replace.length > 1).forEach(n => console.log('  ' + n + ': def[' + fn[n].def + '] wrap[' + fn[n].wrap + '] replace[' + fn[n].replace + ']'));
   Object.keys(st).filter(p => st[p].size > 1).forEach(p => console.log('  ' + p + ' set in ' + [...st[p]].join(' ')));
+  [...new Set(sRefs)].forEach(m => console.log('  S referenced in ' + m + ' (' + sRefs.filter(x => x === m).length + ')'));
 }
-if (bad) console.log('The structure got worse: a wrapper, a re-assignment, a second declaration or a default set twice was added, or a file is named after a version. See PROTOTYPE_STRUCTURE.md, "Rules".');
+if (bad) console.log('The structure got worse: a wrapper, a re-assignment, a second declaration, a default set twice or a reference to the old root S was added, or a file is named after a version. See PROTOTYPE_STRUCTURE.md, "Rules", and STATE_MAP.md.');
 process.exit(bad ? 1 : 0);

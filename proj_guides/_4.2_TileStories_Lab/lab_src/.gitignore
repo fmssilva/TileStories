@@ -7,3 +7,4 @@ selftest*.json
 tests_result*.json
 __pycache__/
 *.pyc
+assets/mascot/

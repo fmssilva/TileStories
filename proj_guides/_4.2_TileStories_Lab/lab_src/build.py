@@ -1,14 +1,15 @@
-"""Builds the TileStories Lab: joins the modules in MODULES and the styles in STYLES, and embeds the assets.
-It never rewrites code. python build.py -> block-components-lab.html (not committed, one self-contained page), then the structure
-check (check_structure.js) and the Unity lint (tools/unity_lint.py): either one failing fails the build.
+"""Builds the TileStories Lab: joins the modules in MODULES and the styles in STYLES, embeds the words and the faces, and puts the
+3D mascot's files in assets/ beside the page. It never rewrites code. python build.py -> block-components-lab.html (not committed)
+and assets/mascot/ (copied, not committed), then the structure check (check_structure.js) and the Unity lint (tools/unity_lint.py):
+either one failing fails the build. The page with its assets/ is served by tools/serve.py and published as page + files (README.md).
 PROTOTYPE_STRUCTURE.md says what each module owns."""
-import base64, io, os, subprocess, sys
+import io, os, re, shutil, subprocess, sys
 D = os.path.dirname(os.path.abspath(__file__))
 M3 = os.path.join(D, '..', '..', 'mascote', '3d')
 
 # the order is the load order: a module may use what an earlier one sets up at load, and the points are joined in this order
 MODULES = ['src/core/open.js', 'src/core/assets.js', 'src/core/catalogues.js', 'src/core/state.js', 'src/core/words.js',
-           'src/core/content.js', 'src/core/util.js', 'src/core/ext.js', 'src/editor/components.js', 'src/editor/shell.js',
+           'src/core/content.js', 'src/core/util.js', 'src/core/ext.js', 'src/core/undo.js', 'src/editor/components.js', 'src/editor/shell.js',
            'src/editor/json.js', 'src/editor/card-tab.js', 'src/editor/demo.js', 'src/editor/global-tab.js',
            'src/editor/selftest-texts.js', 'src/phone/shell.js', 'src/card/motion.js', 'src/card/interactions.js',
            'src/card/sections.js', 'src/phone/sheet.js', 'src/phone/feedback.js', 'src/editor/selftest.js',
@@ -44,37 +45,44 @@ def rd(*p):
     return io.open(os.path.join(D, *p), encoding='utf-8').read()
 
 
-def b64(path):
-    return base64.b64encode(open(path, 'rb').read()).decode()
+# embedded: each placeholder becomes its file as it is: the framework's words (realstrings.json) and the faces (src/core/fonts.css:
+# media/FONT_*.txt, each a data: URL), so the page has its words and its faces even opened from disk
+EMBED = [('__REALSTR__', os.path.join(D, 'src', 'core', 'realstrings.json'))]
+EMBED += [('__FONT_' + k + '__', os.path.join(D, 'media', 'FONT_' + k + '.txt')) for k in
+          ('FRAUNCES', 'ATK400', 'ATK600', 'ATK700', 'MONO400', 'MONO500')]
+# beside the page, in assets/: the pictures live there (committed); the 3D mascot's models and thumbnails are copied there from
+# proj_guides/mascote/3d (assets/mascot/, not committed). The code names each file by its path ("assets/..."); a path it names that
+# assets/ lacks fails the build. Over http (tools/serve.py, the published Lab) they load; opened from disk the models cannot be
+# fetched nor a picture read back from a canvas, and the Editor says so (editor/shell.js's fileOnlyNotice)
+MASCOT = ('azu', 'mouse', 'explorer', 'poet', 'soldier')
+COPY = [(os.path.join(M3, m + '.glb'), os.path.join('assets', 'mascot', m + '.glb')) for m in MASCOT]
+COPY += [(os.path.join(M3, 'thumbs', m + '.png'), os.path.join('assets', 'mascot', 'thumbs', m + '.png')) for m in MASCOT]
+ASSET_REF = re.compile(r'assets/[\w./-]+\.(?:jpg|jpeg|png|glb|webp|mp3)')
 
 
-# the assets: each placeholder in the code (or the styles) becomes its file, as a data: URL (a .txt or .json one as it is).
-# All of them stay in the page while the Lab is opened from a file (file://, the tests and the self-test): there a GLB cannot be
-# fetched and a canvas that drew a picture from a file cannot be read back (Photo of the view, the mascot's measured figure).
-# P1a moves the GLBs and the pictures out together: a local http server for dev and tests, a multi-file artifact to publish.
-ASSETS = [('__REALSTR__', None, os.path.join(D, 'src', 'core', 'realstrings.json'))]
-ASSETS += [('__' + k + '__', 'image/jpeg', os.path.join(D, 'assets', f + '.jpg')) for k, f in
-           (('HERO', 'paco_hero'), ('G1', 'paco_gallery_1'), ('G2', 'paco_gallery_2'), ('G3', 'paco_gallery_3'),
-            ('BEFORE', 'paco_before_1755'), ('BELEM', 'belem_wall'))]
-# the faces (src/core/fonts.css): media/FONT_*.txt, each a data: URL
-ASSETS += [('__FONT_' + k + '__', None, os.path.join(D, 'media', 'FONT_' + k + '.txt')) for k in
-           ('FRAUNCES', 'ATK400', 'ATK600', 'ATK700', 'MONO400', 'MONO500')]
-ASSETS += [('__AZUGLB_' + k + '__', 'model/gltf-binary', os.path.join(M3, f)) for k, f in
-           (('AZU', 'azu.glb'), ('MOUSE', 'mouse.glb'), ('EXPLORER', 'explorer.glb'), ('POET', 'poet.glb'), ('SOLDIER', 'soldier.glb'))]
-ASSETS += [('__AZTHUMB_' + k + '__', 'image/png', os.path.join(M3, 'thumbs', k.lower() + '.png')) for k in
-           ('AZU', 'MOUSE', 'EXPLORER', 'POET', 'SOLDIER')]
+def copy_assets():
+    for src, dst in COPY:
+        dst = os.path.join(D, dst)
+        if not os.path.exists(dst) or os.path.getmtime(dst) < os.path.getmtime(src) or os.path.getsize(dst) != os.path.getsize(src):
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            shutil.copy2(src, dst)
 
 
 def build():
+    copy_assets()
     js = '\n'.join(rd(m) for m in MODULES)
     css = ''.join(rd(s) for s in STYLES)
-    for key, mime, path in ASSETS:
+    for key, path in EMBED:
         assert key in js or key in css, key
-        data = io.open(path, encoding='utf-8').read() if mime is None else 'data:' + mime + ';base64,' + b64(path)
+        data = io.open(path, encoding='utf-8').read()
         js, css = js.replace(key, data), css.replace(key, data)
+    named = sorted(set(ASSET_REF.findall(js + css)))
+    missing = [a for a in named if not os.path.isfile(os.path.join(D, a))]
+    assert not missing, 'the page names files that assets/ lacks: ' + ', '.join(missing)
     html = rd('src', 'page', 'head.html') + '<style>' + css + '</style>\n' + rd('src', 'page', 'page.html') + '\n<script>\n' + js + '\n</script>\n'
     io.open(os.path.join(D, 'block-components-lab.html'), 'w', encoding='utf-8').write(html)
-    print('built', len(html))
+    size = sum(os.path.getsize(os.path.join(D, a)) for a in named)
+    print('built', len(html), '+ assets/: %d files, %.1f MB' % (len(named), size / 1e6))
 
 
 if __name__ == '__main__':

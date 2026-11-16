@@ -15,19 +15,19 @@ function poRect(el){var p=ph.getBoundingClientRect(),q=p.width/ph.offsetWidth||1
   return{l:(r.left-p.left)/q,t:(t-p.top)/q,w:r.width/q,h:Math.max(0,b-t)/q,seen:b-t>24}}
 /* a tap: noted before any handler (the window's capture), used by the redraw it causes */
 window.addEventListener("click",function(e){var t=e.target;if(!t||!t.closest||!ph.contains(t)||t.closest(".kq"))return;var g=t.closest("[data-go]");if(!g||!scr.contains(g))return;var to=g.dataset.go;
-  if(S.view==="card"&&/^(story|gallery|kpage)$/.test(to)){var it=g.closest('.item[data-ref]')||g;PO.rec={dir:"open",to:to,from:poRect(it),ref:it.dataset.ref||null,top:scr.scrollTop,rel:it.getBoundingClientRect().top-scr.getBoundingClientRect().top}}
-  else if(S.view!=="card"&&to==="card"&&PO.last&&PO.last.view===S.view)PO.rec={dir:"close",to:"card",ref:PO.last.ref,top:PO.last.top,rel:PO.last.rel};
+  if(ui.view==="card"&&/^(story|gallery|kpage)$/.test(to)){var it=g.closest('.item[data-ref]')||g;PO.rec={dir:"open",to:to,from:poRect(it),ref:it.dataset.ref||null,top:scr.scrollTop,rel:it.getBoundingClientRect().top-scr.getBoundingClientRect().top}}
+  else if(ui.view!=="card"&&to==="card"&&PO.last&&PO.last.view===ui.view)PO.rec={dir:"close",to:"card",ref:PO.last.ref,top:PO.last.top,rel:PO.last.rel};
   /* a page reached another way (the tour's jump to a step): back lands on the card at this page's preview */
-  else if(/^(story|gallery)$/.test(S.view)&&to==="card"){var pv=poPreview(S.view);PO.rec={dir:"close",to:"card",ref:pv,top:null,rel:pv?90:null}}
+  else if(/^(story|gallery)$/.test(ui.view)&&to==="card"){var pv=poPreview(ui.view);PO.rec={dir:"close",to:"card",ref:pv,top:null,rel:pv?90:null}}
   else return;setTimeout(function(){PO.rec=null},0)},true);
-function poPreview(view){var b=S.card.filter(function(x){return x.kind===(view==="story"?"Story":"Gallery")})[0];return b?"b:"+b.id:null}
+function poPreview(view){var b=D.poi.card.filter(function(x){return x.kind===(view==="story"?"Story":"Gallery")})[0];return b?"b:"+b.id:null}
 function poClone(){var c=scr.cloneNode(true);c.removeAttribute("id");c.classList.add("po-ghost");c.querySelectorAll("[id]").forEach(function(x){x.removeAttribute("id")});c.setAttribute("aria-hidden","true");c.style.pointerEvents="none";return c}
-on("renderPhone.before",function(keep,cx){var r=PO.rec;if(!r||keep)return;var want=r.dir==="open"?r.to:"card";if(S.view!==want&&!(want==="kpage"&&S.view==="kpage"))return;
+on("renderPhone.before",function(keep,cx){var r=PO.rec;if(!r||keep)return;var want=r.dir==="open"?r.to:"card";if(ui.view!==want&&!(want==="kpage"&&ui.view==="kpage"))return;
   PO.rec=null;cx.po={rec:r,ghost:poClone(),top:scr.scrollTop}});
-on("renderPhone.after",function(keep,cx){var o=cx.po;if(!o)return;var r=o.rec,g=o.ghost,an=!!scr.animate,still=!!S.reduce;
+on("renderPhone.after",function(keep,cx){var o=cx.po;if(!o)return;var r=o.rec,g=o.ghost,an=!!scr.animate,still=!!P.reduce;
   PO.anims&&PO.anims.forEach(function(a){try{a.finish()}catch(x){}});PO.anims=[];ph.querySelectorAll(".po-ghost").forEach(function(x){x.remove()});
   var F={l:scr.offsetLeft,t:scr.offsetTop,w:scr.offsetWidth,h:scr.offsetHeight},ent={dir:r.dir,at:performance.now(),ref:r.ref,full:[F.l,F.t,F.w,F.h].map(Math.round)};PO.log.push(ent);
-  if(r.dir==="open"){PO.last={view:S.view,ref:r.ref,top:r.top,rel:r.rel};
+  if(r.dir==="open"){PO.last={view:ui.view,ref:r.ref,top:r.top,rel:r.rel};
     scr.parentNode.insertBefore(g,scr);g.scrollTop=o.top;var R=r.from;ent.from=[R.l,R.t,R.w,R.h].map(Math.round);
     if(!an){g.remove();return}
     var done=function(){g.remove()};
@@ -53,7 +53,7 @@ on("renderPhone.after",function(keep,cx){var o=cx.po;if(!o)return;var r=o.rec,g=
 /* the card where the visitor left it: its preview back at the same height on the screen, held while the card settles (its pictures,
    its parts' heights) for 0.6 s, until the visitor scrolls */
 function poKeep(r){var it=r.ref&&scr.querySelector('[data-ref="'+r.ref+'"]');if(!it||r.rel==null)return;var t0=performance.now(),moved=false,
-    stop=function(e){if(e.isTrusted)moved=true},put=function(){if(moved||!it.isConnected||S.view!=="card")return;var d=it.getBoundingClientRect().top-scr.getBoundingClientRect().top-r.rel;if(Math.abs(d)>.5)scr.scrollTop+=d;if(performance.now()-t0<600)requestAnimationFrame(put);else{scr.removeEventListener("wheel",stop,true);scr.removeEventListener("touchstart",stop,true)}};
+    stop=function(e){if(e.isTrusted)moved=true},put=function(){if(moved||!it.isConnected||ui.view!=="card")return;var d=it.getBoundingClientRect().top-scr.getBoundingClientRect().top-r.rel;if(Math.abs(d)>.5)scr.scrollTop+=d;if(performance.now()-t0<600)requestAnimationFrame(put);else{scr.removeEventListener("wheel",stop,true);scr.removeEventListener("touchstart",stop,true)}};
   scr.addEventListener("wheel",stop,true);scr.addEventListener("touchstart",stop,true);put()}
 /* the page's own way back keeps its preview: any other way to the card (a redraw, the tour's jump) forgets it */
-on("renderPhone.after",function(keep){if(S.view==="card"&&PO.last&&!keep)PO.last=null});
+on("renderPhone.after",function(keep){if(ui.view==="card"&&PO.last&&!keep)PO.last=null});

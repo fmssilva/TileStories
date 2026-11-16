@@ -1,8 +1,7 @@
-/* The pictures the build embeds (IMG, as blob URLs) and the shared icons (TILE, PIN, ANIMSVG). Embedded, so a page opened from a
-   file (file://) can draw them on a canvas and read it back (Photo of the view); they leave the page at P1a, with the GLBs, when
-   the tests run on a local http server and the publish is a multi-file artifact. */
-var IMG={hero:"__HERO__",g1:"__G1__",g2:"__G2__",g3:"__G3__",before:"__BEFORE__"};
-Object.keys(IMG).forEach(function(k){try{var b64=IMG[k].split(",")[1],bin=atob(b64),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);IMG[k]=URL.createObjectURL(new Blob([u],{type:"image/jpeg"}))}catch(e){}});
+/* The pictures (IMG: files in assets/ beside the page) and the shared icons (TILE, PIN, ANIMSVG). Served over http (tools/serve.py,
+   the published Lab) a picture drawn on a canvas can be read back (Photo of the view); opened from disk (file://) it cannot, and the
+   Editor says so at that moment (editor/shell.js's fileOnlyNotice). */
+var IMG={hero:"assets/paco_hero.jpg",g1:"assets/paco_gallery_1.jpg",g2:"assets/paco_gallery_2.jpg",g3:"assets/paco_gallery_3.jpg",before:"assets/paco_before_1755.jpg"};
 var ASSETS=["hero","g1","g2","g3","before"];
 var TILE='<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" fill="currentColor" opacity=".16"/><path d="M0 0H7A7 7 0 0 1 0 7ZM24 0V7A7 7 0 0 1 17 0ZM24 24H17A7 7 0 0 1 24 17ZM0 24V17A7 7 0 0 1 7 24Z" fill="currentColor" opacity=".55"/><path d="M12 3.2C14.8 6.6 14.8 9.4 12 12C9.2 9.4 9.2 6.6 12 3.2ZM20.8 12C17.4 14.8 14.6 14.8 12 12C14.6 9.2 17.4 9.2 20.8 12ZM12 20.8C9.2 17.4 9.2 14.6 12 12C14.8 14.6 14.8 17.4 12 20.8ZM3.2 12C6.6 9.2 9.4 9.2 12 12C9.4 14.8 6.6 14.8 3.2 12Z" fill="currentColor"/></svg>';
 var PIN='<svg viewBox="0 0 48 64" aria-hidden="true"><defs><linearGradient id="pg" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#7fe3c4"/><stop offset="1" stop-color="#0e9a7c"/></linearGradient></defs><path d="M24 62C24 62 4 38.5 4 23.5C4 12.2 12.9 3 24 3s20 9.2 20 20.5C44 38.5 24 62 24 62Z" fill="url(#pg)" stroke="#0b7a62"/><circle cx="24" cy="23" r="11.5" fill="#fff"/><circle cx="24" cy="23" r="3.6" fill="#0e9a7c"/></svg>';

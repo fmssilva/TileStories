@@ -1,6 +1,6 @@
 // v8u checks (Playwright + the installed Edge): node test8u.js -> PASS/FAIL per check. The model is a test double: no network
-const { chromium } = require('./pw');
-const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
+const { chromium, labUrl } = require('./pw');
+const url = labUrl('#probe');
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
   const p = await b.newPage({ viewport: { width: 1400, height: 900 } });
@@ -13,7 +13,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const edClick = async (sel, o) => { await openAbove(sel); await p.locator(sel).first().click(o); };
   const W = ms => p.waitForTimeout(ms);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
-  await R('S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;S.agentCfg.voiceOut=false;gdGroupById("inview").on=false;AG.mock={text:"ok"};S.agentCfg.provider="mock";applyProvider();S.view="card";S.stop="full";renderAll(false)');
+  await R('D.card.hints.on=false;LAB.previewBar=false;P.guideMute=true;P.introSeen=true;D.agent.voiceOut=false;gdGroupById("inview").on=false;AG.mock={text:"ok"};D.agent.provider="mock";applyProvider();ui.view="card";ui.stop="full";renderAll(false)');
   await W(300);
   // 1. the trace under an answer: the model, the times, the tokens, the calls; the text and the link cards untouched
   await R('agCardAsk();AG.mock={calls:[{name:"navigate_to",args:{target_id:"b:b_fun"}},{name:"show_links",args:{items:[{target_id:"b:b_ba"}]}},{name:"navigate_to",args:{target_id:"b:zz"}}],text:"An opera [src:b:b_fun]."};ask("Opera?")');
@@ -28,30 +28,30 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('...a failed call keeps a trace too (it says why)', await R('var m=ph.querySelectorAll(".gd-thread > div"),tr=m[m.length-1].querySelector(".agtrace");!!tr&&/rate_limited/.test(tr.textContent)'));
   await R('AG.mock={text:"Use the *slider* or the **gallery** [src:b:b_ba]."};ask("How?")'); await W(400);
   ok('Markdown a model writes is taken out of the answer; the prompt asks for plain text', await R('G.agTurn.text==="Use the slider or the gallery."&&/Plain spoken text: no markdown/.test(AG.mockSeen.prompt)'), await R('G.agTurn.text'));
-  await R('S.agentCfg.trace=false;renderGuide()');
+  await R('D.agent.trace=false;renderGuide()');
   ok('...Off: no trace', await R('!ph.querySelector(".agtrace")'));
-  await R('S.agentCfg.trace=true;stopTour()');
+  await R('D.agent.trace=true;stopTour()');
   // 2. the wall: every point in view named; the middle only, as in the app
   await R('agWall(.4,.5,1)'); await W(300);
   const n1 = await R('[].map.call(ph.querySelectorAll(".cpin b"),function(b){return getComputedStyle(b).opacity}).every(function(o){return +o>.5})');
   ok('Wall: every point in view shows its name (testing)', n1, n1);
-  await R('S.camCfg.names="middle";camLayer()'); await W(400);
+  await R('D.wall.camCfg.names="middle";camLayer()'); await W(400);
   ok('...The middle one: the others are dots', await R('[].filter.call(ph.querySelectorAll(".cpin:not(.central):not(.lit) b"),function(b){return +getComputedStyle(b).opacity>.5}).length===0'));
-  await R('S.camCfg.names="all";camLayer()');
+  await R('D.wall.camCfg.names="all";camLayer()');
   // 3. a remark about a point that has left the screen goes
   // (guidance round 3: Azu's remarks are the guidance's What's in view, one item a point of the wall in view)
-  ok('Azu\'s remark about a point not on this wall is dropped', await R('gdItems().filter(function(x){return x.base==="inview"}).every(function(x){return S.wallPois.some(function(p){return p.id===x.point})})&&!gdItems().some(function(x){return x.id==="inview:painting"})&&gdItems().some(function(x){return x.id==="inview:houses"})'));
+  ok('Azu\'s remark about a point not on this wall is dropped', await R('gdItems().filter(function(x){return x.base==="inview"}).every(function(x){return D.wall.wallPois.some(function(p){return p.id===x.point})})&&!gdItems().some(function(x){return x.id==="inview:painting"})&&gdItems().some(function(x){return x.id==="inview:houses"})'));
   await R('G.cam.open=false;camLayer();G.gd.manual=false;gdStop("t");var c=camView().central,it=gdItems().filter(function(x){return x.id==="inview:"+c.id})[0];gdStart(it,"test")'); await W(300);
   const bb = await R('!!ph.querySelector(".gdbub:not(.gd-out)")&&G.gd.cur&&G.gd.cur.item.base==="inview"');
-  await R('S.camX=.98;camPaint();camLayer()'); await W(700);
+  await R('ui.camX=.98;camPaint();camLayer()'); await W(700);
   ok('...one about a point in view stays, and goes when a pan takes the point off the screen', bb && await R('!G.gd.cur&&!ph.querySelector(".gdbub:not(.gd-out)")'), bb);
   // 4. the scenes: each sets the prototype as a visitor would be, and the console says what it asks and expects
-  await R('S.tab="guide";renderEditor();ed.querySelector(\'[data-fo="s7agent"]\').open=true');
+  await R('ui.tab="guide";renderEditor();ed.querySelector(\'[data-fo="s7agent"]\').open=true');
   const s0 = await R('[AGSCENES.length,ed.querySelectorAll(".agscsel option").length]');
   ok('Scenes: 8 in the console, the guide\'s 7 (round 7: its controls\' scenes) and the guidance\'s 55 (rounds g1 and g2: 5 each; g3: 2; g4: 2; g5: 3; g6: 4; g7: 5; g8: 4; g9: 4; g12: 8; g13: 13)', s0[0] === 70 && s0[1] === 70, s0);
   await R('var s=ed.querySelector(".agscsel");s.value="3";s.dispatchEvent(new Event("change",{bubbles:true}))');
   await edClick('[data-agsetup]'); await W(400);
-  const s1 = await R('[S.camCfg.wall,S.stop,G.cam.open,camView().pois.map(function(p){return p.id}).join(),/In view now: .*Jerónimos/.test(ed.querySelector(".agscenes").textContent),ed.querySelector("#agq").value]');
+  const s1 = await R('[LAB.wall,ui.stop,G.cam.open,camView().pois.map(function(p){return p.id}).join(),/In view now: .*Jerónimos/.test(ed.querySelector(".agscenes").textContent),ed.querySelector("#agq").value]');
   ok('...Set up (the oldest here): the Belém wall, the card closed, Ask open, the monastery in view; the question filled in', s1[0] === 'belem' && s1[1] === 'closed' && s1[2] && /jeronimos/.test(s1[3]) && s1[4] && /oldest|antigo/.test(s1[5]), s1);
   // the checks: an answer that names a point off the screen fails; the right one passes
   await R('AG.mock={calls:[{name:"highlight_points",args:{poi_ids:["poi:jeronimos"]}}],text:"The oldest here is the Jerónimos Monastery, from 1501."};AG.sceneRes={}');
@@ -79,7 +79,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const ra = await R('var k=Object.keys(AG.sceneRes),ids=AGSCENES.map(function(s){return s.id});[k.length,k.slice(0,8).join()===ids.slice(0,8).join(),ed.querySelectorAll(".agres tbody tr").length,ed.querySelector("[data-agscall]").textContent]');
   ok('Run all scenes: the console\'s eight in order, each with its result in the table; while it runs the button is Stop', ran8 && runLabel === 'Stop' && ra[1] && ra[2] === ra[0], [ran8, runLabel, ra]);
   ok('...Stop ends it: the scene running ends, no next one starts, the button reads Run all scenes again', ra[0] >= 8 && at >= 8 && ra[0] <= at + 1 && ra[3] === 'Run all scenes', [at, ra]);
-  ok('...the photo scene leaves Photo of the view as it was (Off)', await R('S.agentCfg.photo===false&&!!AG.sceneRes.photo'));
+  ok('...the photo scene leaves Photo of the view as it was (Off)', await R('D.agent.photo===false&&!!AG.sceneRes.photo'));
   // 6. the Editor rows
   // round 14: Trace under each answer is a row of 5 · Ask Azu › What the visitor sees (s7ask), found by its label
   ok('Editor: Trace under each answer (What the visitor sees) and Names on the points (Ask about the view)', await R('!!rowEl(ed,"s7ask","Trace under each answer")&&/Names on the points/.test(ed.querySelector(\'[data-fo="s7cam"]\').textContent)'));

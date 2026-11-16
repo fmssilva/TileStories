@@ -1,7 +1,21 @@
-/* The root of the state S: the Editor's selection, the element styles, motions, effects, patterns and interactions. */
+/* The state's four roots (STATE_MAP.md, one row per old key):
+   D   what the author sets: the Editor writes it and Undo / Redo steps through it (core/undo.js). Each part is named after the
+       Unity asset or class that will hold it; the modules fill their parts.
+   P   the visitor's profile and choices: Settings, the onboarding, the tour's own buttons. It never writes D; Forget clears it.
+   ui  what is happening now: the phone's view and stop, the Editor's tab, selection and foldouts, timers.
+   LAB the Lab's own tools, never ported: Preview & Test, the preview bar, the self-test, the probe.
+   Set here: the Block Library's motions, interactions, effects, element styles and patterns, and the roots' first values. */
 var uid=200;function nid(p){return p+(++uid)}
-var S={tab:"card",step:1,dark:false,reduce:false,lang:"en",screen:"phone",focusOn:true,view:"demo",focusRef:null,family:"rise",replay:"every",
- test:{on:true,poi:"painting"},ui:{single:false,level:1,q:"",cat:"All"},op:{},
+var D={
+ guide:{},     /* new: the guide-config asset (GuideConfig): guide/tour.js and the guide's modules */
+ agent:{},     /* new: the guide-config asset, its Ask part: agent/agent.js */
+ tour:{},      /* new: the tour per marker (GuideTour): the script, the tours, the games' words, the jokes, Ask's suggestions */
+ guidance:{},  /* new: the GuidanceCatalog asset: guidance/catalog.js */
+ card:{},      /* config.json card_settings (CardConfigData.CardSettings: sections, components, locate): card/sections.js and others */
+ poi:{},       /* config.json POIData / POICardData, the open point's: core/content.js, card/hero.js */
+ wall:{},      /* config.json WallConfigData: the points, the languages, the terms, the audiences */
+ words:{},     /* CardStrings.asset (the CardStringTable): core/words.js */
+ blocks:{family:"rise",replay:"every",   /* config.json card_settings: the Block Library */
  motions:[
   {id:"rise",name:"Rise",type:"entrance",from:"below",dist:18,dur:420,ease:"out",stagger:70,pieces:"whole",rot:0},
   {id:"slide",name:"Slide In",type:"entrance",from:"left",dist:40,dur:450,ease:"out",stagger:70,pieces:"whole",rot:0},
@@ -72,6 +86,12 @@ var S={tab:"card",step:1,dark:false,reduce:false,lang:"en",screen:"phone",focusO
   {id:"pt4",name:"Person",cat:"Text",rows:[{kind:"picture",style:"st18"},{kind:"heading",style:"st5"},{kind:"eyebrow",style:"st4"},{kind:"paragraph",style:"st8"}]},
   {id:"pt5",name:"Steps",cat:"Text",rows:[{kind:"heading",style:"st5"},{kind:"list",style:"st15"}]},
   {id:"pt7",name:"Then and Now",cat:"Interactive",rows:[{kind:"heading",style:"st6"},{kind:"before_after",style:"st35"},{kind:"paragraph",style:"st8"}]},
-  {id:"pt8",name:"Scrollytelling",cat:"Interactive",rows:[{kind:"scrolly",style:"st39"}]}],
- sel:{layer:"motion",kind:"callout",style:"st10",motion:"rise",inter:"flip",effect:"e_arches",pattern:"pt1",block:"Story",row:"r1",cblock:"b_story",picker:null}
-};
+  {id:"pt8",name:"Scrollytelling",cat:"Interactive",rows:[{kind:"scrolly",style:"st39"}]}]
+ }};
+var P={lang:"en",dark:false,reduce:false,guide:{}};
+var ui={tab:"card",step:1,view:"demo",single:false,level:1,q:"",cat:"All",op:{},
+ sel:{layer:"motion",kind:"callout",style:"st10",motion:"rise",inter:"flip",effect:"e_arches",pattern:"pt1",block:"Story",row:"r1",cblock:"b_story",picker:null}};
+var LAB={screen:"phone",focusOn:true,focusRef:null,test:{on:true,poi:"painting"}};
+/* the whole state as one JSON (the self-test's base and its restore: every root's keys put back as they were) */
+function stateJson(){return JSON.stringify({D:D,P:P,ui:ui,LAB:LAB})}
+function stateRestore(json){var o=JSON.parse(json),roots={D:D,P:P,ui:ui,LAB:LAB};Object.keys(o).forEach(function(r){Object.keys(o[r]).forEach(function(k){roots[r][k]=o[r][k]})})}

@@ -14,8 +14,9 @@ var Azu3D=(function(){var T=null,GL=null,cv=null,R=null,scene=null,cam=null,mode
   function parse(buf){return new Promise(function(res,rej){new GL().parse(buf,"",res,rej)})}
   /* each model is decoded and parsed once; a switch back reuses it */
   var cache={};
-  function get(m){if(cache[m.id])return Promise.resolve(cache[m.id]);var b=atob(m.glb.split(",").pop()),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);
-    st.parses=(st.parses||0)+1;return parse(u.buffer).then(function(g){cache[m.id]=g;return g})}
+  function get(m){if(cache[m.id])return Promise.resolve(cache[m.id]);
+    return fetch(m.glb).then(function(r){if(!r.ok)throw new Error(m.glb+": "+r.status);return r.arrayBuffer()})
+      .catch(function(e){fileOnlyNotice();throw e}).then(function(buf){st.parses=(st.parses||0)+1;return parse(buf)}).then(function(g){cache[m.id]=g;return g})}
   /* what a GLB holds, against the contract: each missing part is named */
   function check(g){var clips=g.animations.map(function(a){return a.name}),morphs=[],meshes=[],front=false;
     g.scene.traverse(function(o){if(o.isMesh){meshes.push(o.name);if(/armfront|front_?arm/i.test(o.name))front=true;Object.keys(o.morphTargetDictionary||{}).forEach(function(k){if(morphs.indexOf(k)<0)morphs.push(k)})}});
@@ -29,7 +30,7 @@ var Azu3D=(function(){var T=null,GL=null,cv=null,R=null,scene=null,cam=null,mode
   function morph(name,v){if(!model)return;model.traverse(function(o){var i=o.morphTargetDictionary&&o.morphTargetDictionary[name];if(i!==undefined)o.morphTargetInfluences[i]=v})}
   function play(name,fade){if(!acts[name])name=acts.idle?"idle":Object.keys(acts)[0];if(!name||name===st.clip)return;var nx=acts[name],cu=acts[st.clip];
     nx.reset().play();if(cu&&fade){nx.crossFadeFrom(cu,fade,false)}else if(cu)cu.stop();st.clip=name}
-  function frame(now){raf=0;if(!cv||!cv.isConnected||!model)return;var dt=Math.min(.05,(now-(last||now))/1000);last=now;var still=S.reduce;
+  function frame(now){raf=0;if(!cv||!cv.isConnected||!model)return;var dt=Math.min(.05,(now-(last||now))/1000);last=now;var still=P.reduce;
     var want=st.force&&now<st.forceTill?st.force:az3dWant();play(want,.25);if(still){mixer.setTime(0)}else mixer.update(dt);
     Object.keys(st.mouth).forEach(function(k){st.mouth[k]+=(st.to[k]-st.mouth[k])*Math.min(1,dt*18);morph(k,st.mouth[k])});
     if(now>st.nextBlink){st.blinkT=now;st.nextBlink=now+2500+Math.random()*2500}morph("Blink",!still&&now-st.blinkT<140?1:0);
@@ -52,7 +53,7 @@ var Azu3D=(function(){var T=null,GL=null,cv=null,R=null,scene=null,cam=null,mode
     fits:function(){if(!model)return null;var b=bounds(model),m=0;[b.min.x,b.max.x].forEach(function(x){[b.min.y,b.max.y].forEach(function(y){[b.min.z,b.max.z].forEach(function(z){var v=new T.Vector3(x,y,z).project(cam);m=Math.max(m,Math.abs(v.x),Math.abs(v.y))})})});return m},
     state:function(){return st},morphNow:function(name){var v=null;if(model)model.traverse(function(o){var i=o.morphTargetDictionary&&o.morphTargetDictionary[name];if(i!==undefined)v=o.morphTargetInfluences[i]});return v},
     pixel:function(){if(!R)return null;var g=R.getContext(),px=new Uint8Array(4);g.readPixels(128,128,1,1,g.RGBA,g.UNSIGNED_BYTE,px);return Array.from(px)}}})();
-function az3dOn(){return S.guideCfg.azuStyle==="glb"}
+function az3dOn(){return D.guide.azuStyle==="glb"}
 /* the guide's state picks the clip: the same states the other sources show */
 function az3dWant(){var m=ph.querySelector(".mascot"),ts=m&&m.dataset.state,now=performance.now();
   if(G.azWalk||ph.querySelector(".azwalker:not(.arrived)"))return"walk";if(ts==="listening")return"listen";if(ts==="thinking"||(G.azThinkTill||0)>now)return"think";
@@ -73,7 +74,7 @@ var AZ3D_GEN=[["Hyper3D Rodin","the add-on's shared trial key: no credit left on
   ["Tripo","about 300 credits a month on the web (CC BY, not for commercial use)","a Tripo API key in the add-on"],
   ["Meshy","100 credits a month on the web (outputs CC BY 4.0)","the API starts at Pro (about $20 a month)"]];
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
-  var r=rowEl(d,"s7mascot","Style");if(r)r.outerHTML=row("Mascot source",pseg("guideCfg.azuStyle",["light","tile","glb"],["Tile of light","Tile (2.5D)","3D model (GLB)"]),"Tile of light: a glazed tile drawn by a shader (it turns to light to listen, think and travel). Tile (2.5D): the drawing. 3D model: a GLB with a skeleton, clips and morphs (built in Blender from the developer's picture), drawn by three.js here and by glTFast in Unity. Rive files and sprite sheets are other sources of the same contract (Unity import; the Lab does not draw them).");
+  var r=rowEl(d,"s7mascot","Style");if(r)r.outerHTML=row("Mascot source",pseg("D.guide.azuStyle",["light","tile","glb"],["Tile of light","Tile (2.5D)","3D model (GLB)"]),"Tile of light: a glazed tile drawn by a shader (it turns to light to listen, think and travel). Tile (2.5D): the drawing. 3D model: a GLB with a skeleton, clips and morphs (built in Blender from the developer's picture), drawn by three.js here and by glTFast in Unity. Rive files and sprite sheets are other sources of the same contract (Unity import; the Lab does not draw them).");
   if(az3dOn()){var s=Azu3D.state(),i=s.info;
     addRows(d,"s7mascot",
       row("3D model",'<span class="uses">'+esc(s.failed?"Could not load three.js or the model ("+s.err+"): the guide shows the Tile of light.":!s.ready?"Loading…":s.src+" · clips: "+i.clips.join(", ")+" · morphs: "+i.morphs.join(", ")+(i.front?" · the front arm is its own mesh":""))+'</span>',"The guide's state picks the clip: idle; talk while it speaks; listen while the microphone is open; think while the answer comes; point when it points at a block; walk on the way to the wall; wave as the tour starts. The mouth opens with the words (the Open, Wide and Round morphs); it blinks every few seconds. Reduce Motion: still, no blink.",true)+
@@ -85,9 +86,9 @@ function az3dReport(r){if(r.err)return esc(r.name+": not a GLB the loader can re
   p.push(i.missClips.length?"missing clips: "+i.missClips.join(", "):"all seven clips");p.push(i.missMorphs.length?"missing morphs: "+i.missMorphs.join(", "):"all four morphs");
   p.push(i.front?"the front arm is its own mesh":"no front-arm mesh (name one Azu_ArmFront) so the arm cannot be drawn in front of the card");p.push("size "+i.size.map(function(v){return v.toFixed(2)}).join(" × ")+" (1 = one tile; Unity scales it to 0.15 m on the wall)");
   return esc(r.name+": "+p.join(" · ")+".")}
-ed.addEventListener("click",function(e){var t=e.target.closest("[data-az3d]");if(!t)return;e.stopPropagation();if(!G.on){S.view="card";if(S.stop==="closed")S.stop="half";renderPhone(false);startTour();pauseTour()}Azu3D.force(t.dataset.az3d,3000)},true);
+ed.addEventListener("click",function(e){var t=e.target.closest("[data-az3d]");if(!t)return;e.stopPropagation();if(!G.on){ui.view="card";if(ui.stop==="closed")ui.stop="half";renderPhone(false);startTour();pauseTour()}Azu3D.force(t.dataset.az3d,3000)},true);
 ed.addEventListener("change",function(e){var t=e.target;if(!t.dataset||!t.dataset.az3dimport||!t.files||!t.files[0])return;e.stopPropagation();Azu3D.importFile(t.files[0]).then(function(){renderEditor()})},true);
 /* choosing the source loads the model (once) */
 on("renderEditor.after",function(){if(az3dOn())Azu3D.load()});
 /* the row's demo: the guide's Azu drawn by that source */
-rowDemos({"guideCfg.azuStyle":{tour:"g1",ring:".mascot"}});
+rowDemos({"D.guide.azuStyle":{tour:"g1",ring:".mascot"}});

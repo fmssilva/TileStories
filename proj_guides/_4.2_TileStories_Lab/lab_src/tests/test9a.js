@@ -1,9 +1,9 @@
 // v9a checks (Playwright + the installed Edge), with no network for the voices: node test9a.js -> PASS/FAIL per check
 // ElevenLabs is answered by a fake server (a real MP3 of the Azure set and even letter times); Azure by a fake Speech SDK
 // (the same MP3, word boundaries and visemes). The live run with real keys is by hand (it spends credits): see the README.
-const { chromium } = require('./pw');
+const { chromium, labUrl } = require('./pw');
 const fs = require('fs'), path = require('path');
-const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
+const url = labUrl('#probe');
 const MP3 = fs.readFileSync(path.join(__dirname, '..', '..', 'voicebench', 'out', 'azure-sonia-raquel', fs.readdirSync(path.join(__dirname, '..', '..', 'voicebench', 'out', 'azure-sonia-raquel')).filter(f => f.endsWith('.mp3'))[0]));
 const TEXT = 'O palácio tinha uma ópera, inaugurada em março de 1755.';
 (async () => {
@@ -34,13 +34,13 @@ const TEXT = 'O palácio tinha uma ópera, inaugurada em março de 1755.';
   const edClick = async (sel, o) => { await openAbove(sel); await p.locator(sel).first().click(o); };
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   // round 7: a change to an Editor row now shows its demo on the phone; this test changes Voice of the answers mid-scene, so it keeps the phone as it set it
-  await R('S.ui.rowDemo=false;S.guideCfg.voice="device";S.hints.on=false;S.previewBar=false;S.guideMute=false;S.introSeen=true;S.lang="pt";S.guideCfg.azuStyle="tile";S.view="card";S.stop="half";renderAll(false);S.tab="guide";S.op.s7ask=true;renderEditor();ed.querySelector(\'[data-fo="s7agent"]\').open=true'); // round 14: Voice of the answers is in Ask Azu › What the visitor sees (s7ask)
+  await R('LAB.rowDemo=false;D.guide.voice="device";D.card.hints.on=false;LAB.previewBar=false;P.guideMute=false;P.introSeen=true;P.lang="pt";D.guide.azuStyle="tile";ui.view="card";ui.stop="half";renderAll(false);ui.tab="guide";ui.op.s7ask=true;renderEditor();ed.querySelector(\'[data-fo="s7agent"]\').open=true'); // round 14: Voice of the answers is in Ask Azu › What the visitor sees (s7ask)
   // 1. the Editor: the row and its status, with no keys here
-  const opts = await R('Array.from(ed.querySelectorAll(\'[data-set="@agentCfg.liveVoice"]\')).map(function(b){return b.textContent+(b.getAttribute("aria-pressed")==="true"?"*":"")})');
+  const opts = await R('Array.from(ed.querySelectorAll(\'[data-set="@D.agent.liveVoice"]\')).map(function(b){return b.textContent+(b.getAttribute("aria-pressed")==="true"?"*":"")})');
   ok('Editor: Voice of the answers offers the device voice, Azure (live, chosen: the developer\'s default) and ElevenLabs (live)', opts.join('|') === 'Device voice|Azure (live)*|ElevenLabs (live)', opts);
-  await edClick('[data-set="@agentCfg.liveVoice"][data-v="eleven"]'); await W(300);
+  await edClick('[data-set="@D.agent.liveVoice"][data-v="eleven"]'); await W(300);
   ok('...ElevenLabs with no key here: the Editor says the device voice reads the answers', /ElevenLabs none.*Without its key the answers use the device voice/.test(await R('ed.querySelector(".lvstat").textContent')));
-  ok('...and its model row appears (Flash v2.5 chosen)', await R('(ed.querySelector(\'[data-set="@agentCfg.elevenModel"][aria-pressed="true"]\')||{}).textContent') === 'Flash v2.5 (fastest)');
+  ok('...and its model row appears (Flash v2.5 chosen)', await R('(ed.querySelector(\'[data-set="@D.agent.elevenModel"][aria-pressed="true"]\')||{}).textContent') === 'Flash v2.5 (fastest)');
   // 2. ElevenLabs, live (faked): the request, the audio, the words, the mouth from the letters at their times
   await R('window.LABKEYS={eleven:"test-key",elevenPT:"voice-pt",elevenEN:"voice-en",azure:"az-key",azureRegion:"westeurope"};renderEditor();startTour();pauseTour()'); await W(600);
   const speak = async () => { await R('G.answer=' + JSON.stringify(TEXT) + ';window.__w=[];window.__end=0;say(G.answer,function(k){window.__w.push(k);G.hl.k=k},function(){window.__end=1})');
@@ -53,7 +53,7 @@ const TEXT = 'O palácio tinha uma ópera, inaugurada em março de 1755.';
   ok('...the mouth moves with the voice (several shapes) and rests at the end', e1.shapes >= 3 && e1.rest, [e1.shapes, e1.rest]);
   ok('...the Editor names what happened (ElevenLabs, its time, the shapes from the letters)', /Last answer: ElevenLabs, \d+ ms to the audio, \d+ mouth shapes from the letters at their times/.test(await R('lvStatusText()')), await R('lvStatusText()'));
   // 3. Azure, live (a fake SDK): the voice, the visemes as the mouth
-  await edClick('[data-set="@agentCfg.liveVoice"][data-v="azure"]'); await W(300);
+  await edClick('[data-set="@D.agent.liveVoice"][data-v="azure"]'); await W(300);
   const a1 = await speak();
   // round 19 (21.10): the live voice speaks in the chosen voice set's own (the default Ryan · Duarte), no longer Sonia and Raquel
   ok('Azure: the SDK loads on demand, with the key, the region and Duarte for Portuguese (the chosen voice, round 19), asking for the facial curves (SSML)', JSON.stringify(await R('window.__az')) === JSON.stringify({ key: 'az-key', region: 'westeurope', voice: 'pt-PT-DuarteNeural', ssml: true }), await R('window.__az'));
@@ -61,7 +61,7 @@ const TEXT = 'O palácio tinha uma ópera, inaugurada em março de 1755.';
   // 4. the tour's own lines keep their voice (only the agent's answers go live)
   ok('A tour line (not an answer) does not call a live voice', await R('(function(){var n=0,f=lvAzure;lvAzure=function(t){n++;return f(t)};G.answer="";say("Bem-vindo ao Paço da Ribeira.",function(){},function(){});lvAzure=f;stopSpeech();return n})()') === 0);
   // 5. a refused key: the device voice reads the answer, and the Editor says so
-  await edClick('[data-set="@agentCfg.liveVoice"][data-v="eleven"]'); await W(300); elStatus = 401;
+  await edClick('[data-set="@D.agent.liveVoice"][data-v="eleven"]'); await W(300); elStatus = 401;
   await R('G.answer=' + JSON.stringify(TEXT) + ';window.__dev=0;var f=lvDevice;lvDevice=function(t,w,e){window.__dev++;stopSpeech()};say(G.answer,function(){},function(){})'); await W(1500);
   ok('ElevenLabs refuses the key: the device voice reads the answer instead', await R('window.__dev') === 1);
   ok('...and the Editor says it failed', /ElevenLabs failed \(ElevenLabs answered 401\); the device voice read it/.test(await R('lvStatusText()')), await R('lvStatusText()'));

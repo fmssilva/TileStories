@@ -1,7 +1,7 @@
 /* The agent's test console and its status (agConHtml, agStatus). */
 /* ----- Editor: Guide tab > Ask Azu (the live agent) ----- */
 function agTok(){return Math.round(corpus().reduce(function(n,c){return n+c.title.length+c.text.length+30},0)/4)}
-function agCostQ(){var p=agProvider(),pr=AGPRICE[agModel(p)];if(p==="claude")return"on the viewer's Claude plan";if(!pr)return"-";var tin=(agTok()+700)*2,tout=S.agentCfg.maxOut;return"≈ $"+((tin*pr[0]+tout*pr[1])/1e6).toFixed(4)+" a question"}
+function agCostQ(){var p=agProvider(),pr=AGPRICE[agModel(p)];if(p==="claude")return"on the viewer's Claude plan";if(!pr)return"-";var tin=(agTok()+700)*2,tout=D.agent.maxOut;return"≈ $"+((tin*pr[0]+tout*pr[1])/1e6).toFixed(4)+" a question"}
 function agStatus(){var p=agProvider(),w=window.LABKEYS||{};
   var line=function(n,ok,how){return'<div class="agst"><b class="'+(ok?"ok":"no")+'">'+(ok?"&#10003;":"&#8211;")+'</b> '+esc(n)+' <span class="uses">'+esc(how)+'</span></div>'};
   return line("Claude (the published Lab)",!!AG.claude,AG.claude?"available here, through the artifact (no key)":"only inside the published Lab")+

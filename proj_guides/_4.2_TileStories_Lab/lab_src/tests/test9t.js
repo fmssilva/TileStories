@@ -63,8 +63,8 @@
 //   com o guia"). The saved place (round 17, Part B: test9u) is Off in this file's base: its offer would change the hero's Start.
 // MUTATE=1 also writes the name without its article, says one fact as round 16c did with no line of its own, gives the teaser one opening
 //   line and the Guide block its old title: the checks named [name], [one fact], [teaser] and [block] turn red.
-const { chromium } = require('./pw');
-const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
+const { chromium, labUrl } = require('./pw');
+const url = labUrl('#probe');
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--autoplay-policy=no-user-gesture-required'] });
   const p = await b.newPage({ viewport: { width: 1500, height: 1000 } });
@@ -73,10 +73,10 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const until = async (src, ms) => { const t0 = Date.now(); while (Date.now() - t0 < ms) { if (await R(src)) return true; await W(60); } return false; };
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info).slice(0, 900) : '')); };
   const T0 = Date.now(), tsec = s => console.log('TIME ' + s + ' ' + Math.round((Date.now() - T0) / 1000) + ' s');
-  const MUT = 'atKnown=function(){return false};S.tx.gd_tourof_short={en:"",pt:""};S.tx.at_time_short={en:"tour of about 1 minutes",pt:"visita de uns 1 minutos"};' +
-    'S.hero.title.en="Ribeira Palace";S.wallPois[0].name.en="Ribeira Palace";WALLS.ribeira.markers[0].name.en="Ribeira Palace";atOneFact=function(f,lang,lf){return atFact(f,lang,lf,true)};AT_INTRO_DEF.fact1=[];S.guideCfg.atIntro.fact1=[];AT_INTRO_DEF.teaser=["at_in_teaser_1"];S.guideCfg.atIntro.teaser=["at_in_teaser_1"];S.tx.guide_block_title={en:"Meet the palace with the guide",pt:"Conheça o palácio com o guia"};' +
-    'S.tx.guide_block_line={en:"Narrated tour · 3 min · ask anything, any time",pt:"Visita narrada · 3 min · pergunte a qualquer momento"};atSkipRows=function(){return""};' +
-    'S.wallPois.concat(WALLS.ribeira.markers).forEach(function(x){if(x.name&&x.name.pt)x.name.pt=x.name.pt.replace(/^O /,"")});S.hero.title.pt="Paço da Ribeira";POINTS.square.hero.title.pt="Terreiro do Paço";' +
+  const MUT = 'atKnown=function(){return false};D.words.tx.gd_tourof_short={en:"",pt:""};D.words.tx.at_time_short={en:"tour of about 1 minutes",pt:"visita de uns 1 minutos"};' +
+    'D.poi.hero.title.en="Ribeira Palace";D.wall.wallPois[0].name.en="Ribeira Palace";WALLS.ribeira.markers[0].name.en="Ribeira Palace";atOneFact=function(f,lang,lf){return atFact(f,lang,lf,true)};AT_INTRO_DEF.fact1=[];D.guide.atIntro.fact1=[];AT_INTRO_DEF.teaser=["at_in_teaser_1"];D.guide.atIntro.teaser=["at_in_teaser_1"];D.words.tx.guide_block_title={en:"Meet the palace with the guide",pt:"Conheça o palácio com o guia"};' +
+    'D.words.tx.guide_block_line={en:"Narrated tour · 3 min · ask anything, any time",pt:"Visita narrada · 3 min · pergunte a qualquer momento"};atSkipRows=function(){return""};' +
+    'D.wall.wallPois.concat(WALLS.ribeira.markers).forEach(function(x){if(x.name&&x.name.pt)x.name.pt=x.name.pt.replace(/^O /,"")});D.poi.hero.title.pt="Paço da Ribeira";POINTS.square.hero.title.pt="Terreiro do Paço";' +
     'atIntroLines=function(set,lang){return(AT_INTRO_DEF[set]||[]).map(function(k,i){var o=atTxDef(k)||{};return{key:k,i:i,text:String(wordIn(o,lang)),name:/\\{point\\}/.test(o.en+o.pt),max:10}}).filter(function(x){return x.text})};' +
     'tourLength=function(m){return fmt(TXT("guide_duration"),m)};heroWords=function(){return null};heroCropOf=function(){return null};document.head.insertAdjacentHTML("beforeend","<style>#ph.touring .hero .hact,#ph.touring .hero .gstart{visibility:visible!important}</style>");' +
     'var _tf=tourFromCard;tourFromCard=function(c,s,l,o){var st=_tf(c,s,l,o),sk=st.skipped,sd=st.said;st.shift();var g=st.findIndex(function(x){return x.at&&x.at.kind==="Gallery"});if(g>=0)st.splice(g,1);var qf=c.filter(function(b){return b.kind==="Quick Facts"&&sd&&sd[b.id]})[0];if(qf)st.splice(1,0,{id:"a:"+qf.id,view:"card",ref:"b:"+qf.id,act:"show",text:"First, the facts.",at:{key:"a:"+qf.id,block:qf.id,kind:"Quick Facts",body:"",units:[],gen:true}});' +
@@ -87,19 +87,19 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const load = async () => { await p.goto('about:blank'); await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 150000 }); await W(600); await R('window.__tf=tourFromCard;""'); if (process.env.MUTATE) { await R(MUT); await R(MUT17B); }; };
   await load();
   if (process.env.MUTATE) console.log('MUTATION: the teaser dropped, the Gallery\'s step left out, the second intro said as the first; the fact rule off, no short-tour words, the hero left at the top with its Start button, no crop; a Quick Facts step with nothing new, the PT names without their article, the Guide block\'s fixed 3 min, the intro lines from their defaults');
-  const base = `SCREENS.phone=[390,844];if(G.on)stopTour();S.previewBar=false;S.hints.on=false;S.lang="en";S.guideMute=true;S.introSeen=true;S.reduce=false;S.dark=false;S.cardCfg.mode="light";
-    S.guideCfg.voice="device";S.guideCfg.look="ink";S.ui.rowDemo=false;S.guideCfg.music=false;S.vis.music=null;S.agentCfg.voiceOut=false;G.gd.manual=true;S.guideCfg.svOn=false;""`;
+  const base = `SCREENS.phone=[390,844];if(G.on)stopTour();LAB.previewBar=false;D.card.hints.on=false;P.lang="en";P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;D.card.cardCfg.mode="light";
+    D.guide.voice="device";D.guide.look="ink";LAB.rowDemo=false;D.guide.music=false;P.vis.music=null;D.agent.voiceOut=false;G.gd.manual=true;D.guide.svOn=false;""`;
   await R(base);
 
   // ---------- 1. the Ribeira card's tour, switched to From the card by the Guide tab's own row ----------
-  await R('S.tab="guide";S.op={};S.op.gt1=true;S.op.s7auto=true;S.ui.level=2;pointOpen("painting");S.view="card";S.stop="full";renderAll(false);""');
-  const before = JSON.parse(await R('JSON.stringify({src:atSrc(),n:S.guideSteps.length,first:S.guideSteps[0].id,min:tourMinutes()})'));
-  await p.click('[data-fo="s7auto"] [data-set="@tours.painting.src"][data-v="card"]'); await W(400);
-  const DATA = `(function(){var st=S.guideSteps,lang=S.lang;return JSON.stringify({src:atSrc(),min:tourMinutes(),name:wordIn(S.hero.title,"en"),namePt:wordIn(S.hero.title,"pt"),hero:(scr.querySelector(".hero .gstart")||{}).textContent,
-    card:S.card.map(function(b){return{id:b.id,kind:b.kind}}),said:Object.keys(atSteps(null,true).said||{}),rules:S.guideCfg.atRule,cap:S.guideCfg.atCap,tcap:S.guideCfg.atTeaserCap,
-    steps:st.map(function(s){return{id:s.id,act:s.act,ref:s.ref,view:s.view,wait:s.wait||"",en:s.text.en,pt:s.text.pt,link:s.at&&s.at.link||"",block:s.at&&s.at.block||null,kind:s.at&&s.at.kind||null}}),icap:+S.guideCfg.atIntroCap,
-    other:(S.guideCfg.atIntro.other||[]).map(function(k){return wordIn(S.tx[k],"en")}),
-    page:langCodes().map(function(l){var g=atSteps(null,true),x=g.map(function(s){return Object.assign({},s,{text:s.text[l]})});x.said=g.said;return atCheck(x,l,Object.assign(atOpts(null,l),{rules:S.guideCfg.atRule})).filter(function(c){return!c.ok}).map(function(c){return l+":"+c.rule})})})})()`;
+  await R('ui.tab="guide";ui.op={};ui.op.gt1=true;ui.op.s7auto=true;ui.level=2;pointOpen("painting");ui.view="card";ui.stop="full";renderAll(false);""');
+  const before = JSON.parse(await R('JSON.stringify({src:atSrc(),n:D.tour.guideSteps.length,first:D.tour.guideSteps[0].id,min:tourMinutes()})'));
+  await p.click('[data-fo="s7auto"] [data-set="@D.tour.tours.painting.src"][data-v="card"]'); await W(400);
+  const DATA = `(function(){var st=D.tour.guideSteps,lang=P.lang;return JSON.stringify({src:atSrc(),min:tourMinutes(),name:wordIn(D.poi.hero.title,"en"),namePt:wordIn(D.poi.hero.title,"pt"),hero:(scr.querySelector(".hero .gstart")||{}).textContent,
+    card:D.poi.card.map(function(b){return{id:b.id,kind:b.kind}}),said:Object.keys(atSteps(null,true).said||{}),rules:D.guide.atRule,cap:D.guide.atCap,tcap:D.guide.atTeaserCap,
+    steps:st.map(function(s){return{id:s.id,act:s.act,ref:s.ref,view:s.view,wait:s.wait||"",en:s.text.en,pt:s.text.pt,link:s.at&&s.at.link||"",block:s.at&&s.at.block||null,kind:s.at&&s.at.kind||null}}),icap:+D.guide.atIntroCap,
+    other:(D.guide.atIntro.other||[]).map(function(k){return wordIn(D.words.tx[k],"en")}),
+    page:langCodes().map(function(l){var g=atSteps(null,true),x=g.map(function(s){return Object.assign({},s,{text:s.text[l]})});x.said=g.said;return atCheck(x,l,Object.assign(atOpts(null,l),{rules:D.guide.atRule})).filter(function(c){return!c.ok}).map(function(c){return l+":"+c.rule})})})})()`;
   const d = JSON.parse(await R(DATA));
   const words = t => (String(t).match(/\S+/g) || []).length, sents = t => String(t).trim().split(/(?<=[.!?…])\s+/).filter(Boolean), norm = s => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
   const judge = (d, tag) => {
@@ -134,32 +134,32 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   tsec('generate');
 
   // ---------- 2. the card changed through Specific Marker's own block controls: the tour follows ----------
-  await R('S.tab="marker";S.op={};S.op.mcard=true;renderAll(false);""'); await W(300);
-  const gi = await R('S.card.findIndex(function(b){return b.kind==="Gallery"})');
+  await R('ui.tab="marker";ui.op={};ui.op.mcard=true;renderAll(false);""'); await W(300);
+  const gi = await R('D.poi.card.findIndex(function(b){return b.kind==="Gallery"})');
   await p.locator(`[data-fo="mcard"] [data-cmove="${gi}"][data-dir="0"]`).dispatchEvent('click'); await W(300);
-  await p.click('[data-fo="mcard"] [data-cadd="Timeline"]'); await until('S.card.some(function(b){return b.kind==="Timeline"})', 3000);
-  await p.click('[data-fo="mcard"] [data-cadd="Dialogue"]'); await until('S.card.some(function(b){return b.kind==="Dialogue"})', 3000);
+  await p.click('[data-fo="mcard"] [data-cadd="Timeline"]'); await until('D.poi.card.some(function(b){return b.kind==="Timeline"})', 3000);
+  await p.click('[data-fo="mcard"] [data-cadd="Dialogue"]'); await until('D.poi.card.some(function(b){return b.kind==="Dialogue"})', 3000);
   const f = JSON.parse(await R(DATA)), jf = judge(f), fsaid = JSON.parse(await R('JSON.stringify(Object.keys(atSteps(null,true).said||{}))'));
   const tl = f.card.filter(c => c.kind === 'Timeline')[0], tlStep = tl && f.steps.filter(s => s.block === tl.id)[0], dl = f.card.filter(c => c.kind === 'Dialogue')[0], dlStep = dl && f.steps.filter(s => s.block === dl.id)[0], endI = f.steps.findIndex(s => s.act === 'end');
   ok('[follows] [facts] the Gallery removed (its 🗑), a Timeline and a Dialogue added (+ Timeline, + Dialogue) by Specific Marker\'s controls: no Gallery step; the Timeline none (its dates c. 1500, 1580s and 1755 all told by the story: nothing new); the Dialogue\'s step before the end in the card\'s order, opened by a line of Any other block (16c)', !f.steps.some(s => s.kind === 'Gallery') && !tlStep && fsaid.indexOf(tl && tl.id) >= 0 && !!dlStep && f.steps.indexOf(dlStep) === endI - 1 && f.other.some(o => /:$/.test(o) && dlStep.en === o + ' your Majesty, the river front is finished.') && jf.blocks.inOrder, { dl: dlStep && dlStep.en, tl: tlStep && tlStep.en, fsaid, order: jf.blocks });
   tsec('follows');
 
   // ---------- 3. the tour played through the real Guide button and Next ----------
-  await load(); await R(base); await R('S.tours.painting.src="card";S.tab="guide";S.view="card";S.stop="full";S.guidance.on=true;renderAll(false);""'); await W(400);
+  await load(); await R(base); await R('D.tour.tours.painting.src="card";ui.tab="guide";ui.view="card";ui.stop="full";D.guidance.on=true;renderAll(false);""'); await W(400);
   await p.click('#ph .hero .gstart'); await until('G.on&&!!G.gd.plan', 4000);
-  const plan = JSON.parse(await R('var P=G.gd.plan;JSON.stringify({n:P?P.beats.length:0,beats:P?P.beats.map(function(b){return{id:b.id,after:b.after||null,seam:b.seam}}):[],ids:S.guideSteps.map(function(s){return s.id}),gen:atIsGen(S.guideSteps)})'));
+  const plan = JSON.parse(await R('var P=G.gd.plan;JSON.stringify({n:P?P.beats.length:0,beats:P?P.beats.map(function(b){return{id:b.id,after:b.after||null,seam:b.seam}}):[],ids:D.tour.guideSteps.map(function(s){return s.id}),gen:atIsGen(D.tour.guideSteps)})'));
   ok('[play] the games on the tour are planned on the tour made from the card (its beats at its own steps)', plan.gen && plan.n >= 1 && plan.beats.every(x => !x.after || plan.ids.indexOf(x.after) >= 0), plan);
-  await R('stopTour();gdPrefs().games="off";S.guideCfg.dockStart="peek";renderAll(false);""'); await W(300);
+  await R('stopTour();gdPrefs().games="off";D.guide.dockStart="peek";renderAll(false);""'); await W(300);
   await p.click('#ph .hero .gstart'); await until('G.on', 3000);
   const seen = [];
   for (let k = 0; k < 30; k++) {
-    if (!(await until('G.on&&!!S.guideSteps[G.i]', 4000))) break;
-    await until('var st=S.guideSteps[G.i];G.tpText===L(st.text)&&!!scr.querySelector(".gfocus")', 3000);
-    const s = JSON.parse(await R('S.dockH="peek";renderGuide();var st=S.guideSteps[G.i],el=stepEl(st),fc=scr.querySelector(".gfocus");JSON.stringify({i:G.i,n:S.guideSteps.length,id:st.id,act:st.act,wait:st.wait||"",cap:G.tpText===L(st.text),focus:!!fc&&fc===el,line:(ph.querySelector(".gdock .gd-stop")||{}).textContent||""})'));
+    if (!(await until('G.on&&!!D.tour.guideSteps[G.i]', 4000))) break;
+    await until('var st=D.tour.guideSteps[G.i];G.tpText===L(st.text)&&!!scr.querySelector(".gfocus")', 3000);
+    const s = JSON.parse(await R('ui.dockH="peek";renderGuide();var st=D.tour.guideSteps[G.i],el=stepEl(st),fc=scr.querySelector(".gfocus");JSON.stringify({i:G.i,n:D.tour.guideSteps.length,id:st.id,act:st.act,wait:st.wait||"",cap:G.tpText===L(st.text),focus:!!fc&&fc===el,line:(ph.querySelector(".gdock .gd-stop")||{}).textContent||""})'));
     seen.push(s);
     if (s.act === 'try') {
       // the panel at Mini, the block where the guide placed it: a finger's tap or drag at what the visitor sees (no scrolling by the test)
-      await R('S.dockH="mini";renderGuide();""'); await W(700);
+      await R('ui.dockH="mini";renderGuide();""'); await W(700);
       const sel = s.wait === 'flip' ? '#ph .gfocus [data-flip]' : s.wait === 'answer' ? '#ph .gfocus .kq button[data-ok]' : '#ph .gfocus [data-ba]';
       const r = await p.locator(sel).first().boundingBox(); s.box = r && [Math.round(r.y), Math.round(r.height)];
       // a point of the target the visitor can touch (not under the coach's hint or the panel): the first one elementFromPoint gives back
@@ -168,7 +168,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
       else if (r) { await p.mouse.move(r.x + r.width * .5, r.y + r.height * .5); await p.mouse.down(); await p.mouse.move(r.x + r.width * .2, r.y + r.height * .5, { steps: 6 }); await p.mouse.up(); }
       s.tried = await until(`G.tryDone||G.i!==${s.i}||!G.on`, 3000);
       await until(`G.i!==${s.i}||!G.on`, 9000);
-      if (await R(`G.on&&G.i===${s.i}`)) { await R('S.dockH="peek";renderGuide();""'); await p.click('#ph .gdock [data-g="next"]'); }
+      if (await R(`G.on&&G.i===${s.i}`)) { await R('ui.dockH="peek";renderGuide();""'); await p.click('#ph .gdock [data-g="next"]'); }
     } else if (s.act === 'end') { break }
     else { await p.click('#ph .gdock [data-g="next"]'); await until(`G.i!==${s.i}||!G.on`, 3000); }
   }
@@ -181,35 +181,35 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
 
   // ---------- 4. Make it mine, an edit kept through Regenerate, the changed blocks ----------
   await load(); await R(base);
-  await R('pointOpen("torreao");S.tab="marker";S.op={};S.op.m3=true;S.view="card";S.stop="full";renderAll(false);""'); await W(300);
+  await R('pointOpen("torreao");ui.tab="marker";ui.op={};ui.op.m3=true;ui.view="card";ui.stop="full";renderAll(false);""'); await W(300);
   const t0 = JSON.parse(await R('JSON.stringify({src:atSrc(),gen:atSteps().map(function(s){return s.text.en})})'));
   await p.click('[data-fo="m3"] [data-at="mine"]'); await W(400);
-  const t1 = JSON.parse(await R('JSON.stringify({src:atSrc(),made:!!atTour().made,mine:S.guideSteps.map(function(s){return s.text.en}),gen:atIsGen(S.guideSteps),pickable:ed.querySelectorAll(\'[data-fo="m3"] [data-pick="gstep"]\').length})'));
+  const t1 = JSON.parse(await R('JSON.stringify({src:atSrc(),made:!!atTour().made,mine:D.tour.guideSteps.map(function(s){return s.text.en}),gen:atIsGen(D.tour.guideSteps),pickable:ed.querySelectorAll(\'[data-fo="m3"] [data-pick="gstep"]\').length})'));
   ok('[mine] Make it mine (a real click, Specific Marker › 3 · Guide script): the steps copied into the written tour, now the Torreão\'s, editable step by step', t0.src === 'card' && t1.src === 'written' && t1.made && !t1.gen && JSON.stringify(t1.mine) === JSON.stringify(t0.gen) && t1.pickable === t1.mine.length, { t0: t0.src, t1 });
   // edit step 2's words (its own textarea), then Regenerate step 4
   await p.click('[data-fo="m3"] [data-pick="gstep"][data-id="a:t_facts"]'); await W(300);
   await p.fill('[data-fo="m3"] textarea[data-gtext="a:t_facts|en"]', 'My own words about the Torreão.'); await W(200);
   await R('renderEditor();""');
   await p.click('[data-fo="m3"] [data-pick="gstep"][data-id="a:t_time"]'); await W(300);
-  await R('byId(S.guideSteps,"a:t_time").text.en="Something else.";renderEditor();""');
+  await R('byId(D.tour.guideSteps,"a:t_time").text.en="Something else.";renderEditor();""');
   await p.click('[data-fo="m3"] [data-at="regen|a:t_time"]'); await W(300);
-  const t2 = JSON.parse(await R('JSON.stringify({facts:byId(S.guideSteps,"a:t_facts").text.en,time:byId(S.guideSteps,"a:t_time").text.en,gen:byId(atSteps(),"a:t_time").text.en,edited:atEdited(byId(S.guideSteps,"a:t_facts"))})'));
+  const t2 = JSON.parse(await R('JSON.stringify({facts:byId(D.tour.guideSteps,"a:t_facts").text.en,time:byId(D.tour.guideSteps,"a:t_time").text.en,gen:byId(atSteps(),"a:t_time").text.en,edited:atEdited(byId(D.tour.guideSteps,"a:t_facts"))})'));
   ok('[mine] an edited step stays after Regenerate of another (the edit typed in its EN box; the Timeline\'s step regenerated from the card)', t2.facts === 'My own words about the Torreão.' && t2.edited && t2.time === t2.gen, t2);
   // the card changes: + Before and After (Specific Marker's own button): the notice names it; Add them; then + Dialogue and Dismiss
-  await R('S.op.mcard=true;renderEditor();""'); await p.click('[data-fo="mcard"] [data-cadd="Before and After"]'); await W(300);
-  await R('S.op.m3=true;renderEditor();""'); await W(200);
+  await R('ui.op.mcard=true;renderEditor();""'); await p.click('[data-fo="mcard"] [data-cadd="Before and After"]'); await W(300);
+  await R('ui.op.m3=true;renderEditor();""'); await W(200);
   const nt = await R('(ed.querySelector(\'[data-fo="m3"] .atnew b\')||{}).textContent||""');
   await p.click('[data-fo="m3"] [data-at="addnew"]'); await W(300);
-  const t3 = JSON.parse(await R('var b=S.card.filter(function(x){return x.kind==="Before and After"})[0];JSON.stringify({ids:S.guideSteps.map(function(s){return s.at&&s.at.block||s.id}),ba:b.id,card:S.card.map(function(x){return x.id}),notice:!!ed.querySelector(\'[data-fo="m3"] .atnew\'),facts:byId(S.guideSteps,"a:t_facts").text.en})'));
+  const t3 = JSON.parse(await R('var b=D.poi.card.filter(function(x){return x.kind==="Before and After"})[0];JSON.stringify({ids:D.tour.guideSteps.map(function(s){return s.at&&s.at.block||s.id}),ba:b.id,card:D.poi.card.map(function(x){return x.id}),notice:!!ed.querySelector(\'[data-fo="m3"] .atnew\'),facts:byId(D.tour.guideSteps,"a:t_facts").text.en})'));
   const baAt = t3.ids.indexOf(t3.ba), endAt = t3.ids.indexOf('aend');
   ok('[mine] the changed-blocks notice names the new block in words ("1 new block not in the tour: the Before and After."); Add them puts its step in the card\'s order (last block: before the end); the edit kept', /^1 new block not in the tour: the Before and After\.$/.test(nt) && baAt === endAt - 1 && !t3.notice && t3.facts === 'My own words about the Torreão.', { nt, t3 });
-  await R('S.op.mcard=true;renderEditor();""'); await p.click('[data-fo="mcard"] [data-cadd="Dialogue"]'); await W(300); await R('S.op.m3=true;renderEditor();""');
+  await R('ui.op.mcard=true;renderEditor();""'); await p.click('[data-fo="mcard"] [data-cadd="Dialogue"]'); await W(300); await R('ui.op.m3=true;renderEditor();""');
   const nt2 = await R('(ed.querySelector(\'[data-fo="m3"] .atnew b\')||{}).textContent||""');
   await p.click('[data-fo="m3"] [data-at="dismiss"]'); await W(300);
-  const t4 = JSON.parse(await R('JSON.stringify({notice:!!ed.querySelector(\'[data-fo="m3"] .atnew\'),poll:S.guideSteps.some(function(s){return s.at&&s.at.kind==="Dialogue"})})'));
+  const t4 = JSON.parse(await R('JSON.stringify({notice:!!ed.querySelector(\'[data-fo="m3"] .atnew\'),poll:D.tour.guideSteps.some(function(s){return s.at&&s.at.kind==="Dialogue"})})'));
   ok('[mine] Dismiss: the notice about the Dialogue goes and the tour stays as it is', /the Dialogue\./.test(nt2) && !t4.notice && !t4.poll, { nt2, t4 });
   // the palace has a written tour: Make it mine asks first
-  await R('pointOpen("painting");S.tours.painting.src="card";S.tab="guide";S.op={};S.op.gt1=true;S.op.s7auto=true;renderAll(false);""'); await W(300);
+  await R('pointOpen("painting");D.tour.tours.painting.src="card";ui.tab="guide";ui.op={};ui.op.gt1=true;ui.op.s7auto=true;renderAll(false);""'); await W(300);
   await p.click('[data-fo="s7auto"] [data-at="mine"]'); await W(300);
   const dq = await R('(ed.querySelector(\'[data-fo="s7auto"] .decide b\')||{}).textContent||""');
   await p.click('[data-fo="s7auto"] [data-at="mine-no"]'); await W(200);
@@ -219,45 +219,45 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
 
   // ---------- 5. Make it more fluid… with AI, the model stubbed ----------
   await load(); await R(base);
-  await R('pointOpen("painting");S.tours.painting.src="card";S.tab="guide";S.op={};S.op.gt1=true;S.op.s7auto=true;S.view="card";S.stop="full";renderAll(false);""'); await W(200);
+  await R('pointOpen("painting");D.tour.tours.painting.src="card";ui.tab="guide";ui.op={};ui.op.gt1=true;ui.op.s7auto=true;ui.view="card";ui.stop="full";renderAll(false);""'); await W(200);
   await R(`window.__calls=0;sampleFn=function(pr){window.__calls++;var m=JSON.parse(pr.slice(pr.indexOf("LINES:")+7));return Promise.resolve({text:"Here you are: "+JSON.stringify({steps:m.map(function(x){var en=x.id==="a:b_gal"?"In 1999 the square had three centuries.":x.id==="a0"?x.en:"Oh! "+x.en;return{id:x.id,en:en,pt:x.id==="a0"?x.pt:"Olhe! "+x.pt}})})})};
-    pointOpen("painting");S.tours.painting.src="card";S.tab="guide";S.op={};S.op.gt1=true;S.op.s7auto=true;S.view="card";S.stop="full";renderAll(false);""`); await W(300);
-  const a0 = JSON.parse(await R('JSON.stringify({calls:window.__calls,steps:S.guideSteps.map(function(s){return s.text.en}),ai:S.guideCfg.autoAI})'));
-  await p.click('[data-fo="s7auto"] input[data-set="@guideCfg.autoAI"]');
+    pointOpen("painting");D.tour.tours.painting.src="card";ui.tab="guide";ui.op={};ui.op.gt1=true;ui.op.s7auto=true;ui.view="card";ui.stop="full";renderAll(false);""`); await W(300);
+  const a0 = JSON.parse(await R('JSON.stringify({calls:window.__calls,steps:D.tour.guideSteps.map(function(s){return s.text.en}),ai:D.guide.autoAI})'));
+  await p.click('[data-fo="s7auto"] input[data-set="@D.guide.autoAI"]');
   await until('/Rewritten by the model/.test((ed.querySelector(".atainote")||{}).textContent||"")', 4000); await W(300);
-  const a1 = JSON.parse(await R('JSON.stringify({calls:window.__calls,note:(ed.querySelector(".atainote")||{}).textContent,steps:S.guideSteps.map(function(s){return{id:s.id,en:s.text.en,ai:!!(s.at&&s.at.ai),tpl:s.at&&s.at.tpl&&s.at.tpl.en}}),was:ed.querySelectorAll(\'[data-fo="s7auto"] .atai-was\').length})'));
+  const a1 = JSON.parse(await R('JSON.stringify({calls:window.__calls,note:(ed.querySelector(".atainote")||{}).textContent,steps:D.tour.guideSteps.map(function(s){return{id:s.id,en:s.text.en,ai:!!(s.at&&s.at.ai),tpl:s.at&&s.at.tpl&&s.at.tpl.en}}),was:ed.querySelectorAll(\'[data-fo="s7auto"] .atai-was\').length})'));
   const aiN = a1.steps.filter(s => s.ai).length, gal = a1.steps.filter(s => s.id === 'a:b_gal')[0], teaser = a1.steps[0];
   ok('[ai] nothing changes and the model is not asked until the box is ticked (Off is the template tour)', a0.calls === 0 && !a0.ai && a0.steps.every(t => !/^Oh! /.test(t)), a0);
   ok('[ai] ticked (a real click): the stored lines play (a step\'s link and words, Azu\'s voice), each with its template line beside it in the list; the teaser the model left as it was stays the template', a1.calls === 4 && aiN >= 6 && a1.steps.filter(s => s.ai).every(s => /^Oh! /.test(s.en) && s.tpl && s.en === 'Oh! ' + s.tpl) && a1.was === aiN && !teaser.ai, { calls: a1.calls, aiN, was: a1.was, note: a1.note });
   ok('[ai] a line with a new number (1999) keeps the template, and the row says so', gal && !gal.ai && !/1999/.test(gal.en) && /kept as the template \(new words: 1999/.test(a1.note), { gal, note: a1.note });
   const one = a1.steps.filter(s => s.ai)[0];
   await p.click(`[data-fo="s7auto"] [data-at="tpl|${one.id}"]`); await W(300);
-  const a2 = JSON.parse(await R(`var s=byId(S.guideSteps,"${one.id}");JSON.stringify({en:s.text.en,ai:!!s.at.ai,others:S.guideSteps.filter(function(x){return x.at&&x.at.ai}).length})`));
+  const a2 = JSON.parse(await R(`var s=byId(D.tour.guideSteps,"${one.id}");JSON.stringify({en:s.text.en,ai:!!s.at.ai,others:D.tour.guideSteps.filter(function(x){return x.at&&x.at.ai}).length})`));
   ok('[ai] Use the template line (a real click) brings that step\'s template back; the others keep theirs', !a2.ai && a2.en === one.tpl && a2.others === aiN - 1, a2);
-  await R('sampleFn=null;S.guideCfg.autoAI=false;S.atAINote=null;S.tours.painting.ai={};renderAll(false);""'); await W(200);
-  await p.click('[data-fo="s7auto"] input[data-set="@guideCfg.autoAI"]'); await W(300);
-  const a3 = JSON.parse(await R('JSON.stringify({note:(ed.querySelector(".atainote")||{}).textContent,ai:S.guideSteps.some(function(s){return s.at&&s.at.ai}),on:S.guideCfg.autoAI})'));
+  await R('sampleFn=null;D.guide.autoAI=false;ui.atAINote=null;D.tour.tours.painting.ai={};renderAll(false);""'); await W(200);
+  await p.click('[data-fo="s7auto"] input[data-set="@D.guide.autoAI"]'); await W(300);
+  const a3 = JSON.parse(await R('JSON.stringify({note:(ed.querySelector(".atainote")||{}).textContent,ai:D.tour.guideSteps.some(function(s){return s.at&&s.at.ai}),on:D.guide.autoAI})'));
   ok('[ai] no model on the page: ticking says so in the row and the template tour stays', a3.on && /No model on this page/.test(a3.note) && !a3.ai, a3);
   tsec('ai');
 
   // ---------- 6. another point: the Torreão's pin, A tour of {point}?, the scheduler ----------
   await load(); await R(base);
-  await R('setWall("ribeira");S.guidance.on=true;S.guidance.kinds.forEach(function(k){k.on=k.id==="content"});gdResetVisitor();gdSimAim("torreao");renderPhone(false);""'); await W(400);
+  await R('setWall("ribeira");D.guidance.on=true;D.guidance.kinds.forEach(function(k){k.on=k.id==="content"});gdResetVisitor();gdSimAim("torreao");renderPhone(false);""'); await W(400);
   await p.click('#ph [data-cpin="torreao"]'); await W(500);
-  const pc = JSON.parse(await R('JSON.stringify({poi:S.m.poi,title:(scr.querySelector(".hero h2")||{}).textContent,stop:S.stop,hero:(scr.querySelector(".hero .gstart")||{}).textContent,min:tourMinutes(),blocks:scr.querySelectorAll(\'[data-ref^="b:t_"]\').length})'));
+  const pc = JSON.parse(await R('JSON.stringify({poi:ui.m.poi,title:(scr.querySelector(".hero h2")||{}).textContent,stop:ui.stop,hero:(scr.querySelector(".hero .gstart")||{}).textContent,min:tourMinutes(),blocks:scr.querySelectorAll(\'[data-ref^="b:t_"]\').length})'));
   ok('[point] the Torreão\'s pin on the wall (a real tap) opens its own card: its hero, its blocks, the Guide button with its tour\'s length (a short one: "· short")', pc.poi === 'torreao' && pc.title === 'The Torreão' && pc.blocks >= 5 && (pc.min < 2 ? /· short$/.test(pc.hero) : pc.hero.indexOf('· ' + pc.min + ' min') >= 0), pc);
-  await R('S.stop="closed";pointOpen("painting");setWall("ribeira");gdResetVisitor();gdSimAim("torreao");renderPhone(false);""'); await W(500);
+  await R('ui.stop="closed";pointOpen("painting");setWall("ribeira");gdResetVisitor();gdSimAim("torreao");renderPhone(false);""'); await W(500);
   const QUIET = 'gdStop("test");G.gd.cur=null;G.gd.touchAt=null;G.gd.actAt=null;G.gd.movedAt=null;gdAdvance(3000);if(G.gd.cur){gdStop("test");G.gd.cur=null}';
-  const sc = JSON.parse(await R(QUIET + 'var c=gdCentral(),it=gdItemNow("tourof");JSON.stringify({c:c,why:gdWhyNot(gdItems(),S.gdVisitor,gdContext(),gdNow(),"tourof"),min:tourMinutes("torreao")})'));
+  const sc = JSON.parse(await R(QUIET + 'var c=gdCentral(),it=gdItemNow("tourof");JSON.stringify({c:c,why:gdWhyNot(gdItems(),P.gdVisitor,gdContext(),gdNow(),"tourof"),min:tourMinutes("torreao")})'));
   await R('gdStart(gdItemNow("tourof"),"test",{pull:true,ms:60000});""');
   await until('!!ph.querySelector(".gdbub:not(.gd-out) [data-gdbub]")', 3000); await W(400);
   const bub = await R('(ph.querySelector(".gdbub:not(.gd-out) [data-gdbub]")||{}).textContent||""');
   await p.click('#ph .gdbub:not(.gd-out) [data-gdbub]'); await until('G.on', 3000); await W(400);
-  const tr = JSON.parse(await R('JSON.stringify({on:G.on,poi:S.m.poi,first:S.guideSteps[0]&&S.guideSteps[0].id,gen:atIsGen(S.guideSteps),teaser:S.guideSteps[0]&&L(S.guideSteps[0].text),title:(scr.querySelector(".hero h2")||{}).textContent})'));
+  const tr = JSON.parse(await R('JSON.stringify({on:G.on,poi:ui.m.poi,first:D.tour.guideSteps[0]&&D.tour.guideSteps[0].id,gen:atIsGen(D.tour.guideSteps),teaser:D.tour.guideSteps[0]&&L(D.tour.guideSteps[0].text),title:(scr.querySelector(".hero h2")||{}).textContent})'));
   ok('[point] [short] "A tour of {point}?" about the Torreão in the middle: its name, and its tour under 2 minutes offered as a short one ("A short tour of the Torreão?")', sc.c && sc.c.id === 'torreao' && sc.c.tour && sc.c.min === sc.min && (sc.min < 2 ? bub === 'A short tour of the Torreão?' : bub === 'The Torreão has a story. A tour of ' + sc.min + ' minutes?'), { sc, bub });
   ok('[point] a tap on it opens the Torreão\'s card and starts its tour made from the card (the teaser names it)', tr.on && tr.poi === 'torreao' && tr.gen && tr.first === 'a0' && /^The Torreão: /.test(tr.teaser) && tr.title === 'The Torreão', tr);
-  await R('if(G.on)stopTour();gdStop("test");S.stop="closed";pointOpen("painting");setWall("ribeira");gdResetVisitor();gdSimAim("castle");renderPhone(false);""'); await W(300);
-  const cs = JSON.parse(await R(QUIET + 'var c=gdCentral();JSON.stringify({c:c,why:gdWhyNot(gdItems(),S.gdVisitor,gdContext(),gdNow(),"tourof")})'));
+  await R('if(G.on)stopTour();gdStop("test");ui.stop="closed";pointOpen("painting");setWall("ribeira");gdResetVisitor();gdSimAim("castle");renderPhone(false);""'); await W(300);
+  const cs = JSON.parse(await R(QUIET + 'var c=gdCentral();JSON.stringify({c:c,why:gdWhyNot(gdItems(),P.gdVisitor,gdContext(),gdNow(),"tourof")})'));
   ok('[point] the scheduler: a point with no card (the city on the hill) still "has no tour"; the points with a card have one now', cs.c && !cs.c.tour && /has no tour/.test(cs.why) && !/has no tour/.test(sc.why), { castle: cs.why, torreao: sc.why });
   tsec('point');
 
@@ -266,8 +266,8 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const TOURS = JSON.parse(await R(`(function(){var out={};["painting","torreao","square","river"].forEach(function(poi){var p=pointOf(poi);out[poi]={};langCodes().forEach(function(l){var o=atOpts(poi,l),st=tourFromCard(p.card||[],p.story||[],l,o);
     var src=function(s){if(!s.at||!s.at.block)return"";if(s.ref&&s.ref.indexOf("r:")===0){var rows=p.story||[],r=byId(rows,s.ref.slice(2)),i=rows.indexOf(r),rs=r?atRowSays(r,l):{},hd=i>0&&rows[i-1].kind==="heading"?atRowSays(rows[i-1],l).text:"";return[rs.text,rs.lead,rs.cap,rs.title,hd].join(" | ")}
       var b=byId(p.card||[],s.at.block),bits=[];(function walk(v){if(v==null)return;if(Array.isArray(v))v.forEach(walk);else if(typeof v==="object")Object.keys(v).forEach(function(k){walk(v[k])});else bits.push(String(v))})(b?blockSays(b,l):{});return bits.join(" | ")};
-    out[poi][l]={name:o.name,said:Object.keys(st.said||{}),checks:atCheck(st,l,Object.assign(o,{rules:S.guideCfg.atRule})).filter(function(c){return!c.ok}).map(function(c){return c.rule+": "+c.why}),
-      sets:(function(){var o2={};Object.keys(S.guideCfg.atIntro).forEach(function(k){o2[k]=S.guideCfg.atIntro[k].map(function(x){return{key:x,en:wordIn(S.tx[x],"en"),pt:wordIn(S.tx[x],"pt")}})});return o2})(),it:wordIn(S.tx.at_name_it,l),
+    out[poi][l]={name:o.name,said:Object.keys(st.said||{}),checks:atCheck(st,l,Object.assign(o,{rules:D.guide.atRule})).filter(function(c){return!c.ok}).map(function(c){return c.rule+": "+c.why}),
+      sets:(function(){var o2={};Object.keys(D.guide.atIntro).forEach(function(k){o2[k]=D.guide.atIntro[k].map(function(x){return{key:x,en:wordIn(D.words.tx[x],"en"),pt:wordIn(D.words.tx[x],"pt")}})});return o2})(),it:wordIn(D.words.tx.at_name_it,l),
       said:st.said||{},card:(p.card||[]).map(function(b){return{id:b.id,kind:b.kind}}),
       steps:st.map(function(s){return{id:s.id,act:s.act,text:s.text,kind:s.at&&s.at.kind||null,link:s.at&&s.at.link||"",set:s.at&&s.at.lk||"",ik:s.at&&s.at.ik||"",body:s.at&&s.at.body||"",src:src(s)}})}})});return JSON.stringify(out)})()`));
   // the test's own fact keys (the developer's rule, written again here): numbers, dates, decades, numbers in words, proper names
@@ -352,13 +352,13 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('[intro] [links] every step\'s intro line from its kind\'s set (the words the Editor edits), at its step\'s start, never twice in a tour, the name in at most two, under 20 words; a leading line goes on into the block\'s own words (its caption, its date kept); none of the robot links ("Now the story.", "First, the facts.", "And now,"); the four points, EN and PT; no line repeated across the four tours',
     Object.values(ij).every(x => !x.bad.length && x.n >= 4 && x.names <= 2) && ij['painting:en'].n >= 7 && !dupAcross.length && ij['painting:en'].lines.indexOf('pics:Here\'s something I love:') >= 0, { ij, dupAcross });
   // the name a third time: every line of every set made a {point} line; at most two say the name, the others "this place" / "este lugar"
-  const nm3 = JSON.parse(await R(`(function(){var keep=JSON.stringify(S.tx);Object.keys(S.guideCfg.atIntro).forEach(function(set){S.guideCfg.atIntro[set].forEach(function(k,i){S.tx[k]={en:"A word about {point}, line "+set+(i+1)+".",pt:"Uma palavra sobre {point}, linha "+set+(i+1)+"."}})});
-    var g=atSteps("painting",true),r={};langCodes().forEach(function(l){r[l]=g.filter(function(s){return s.at.link}).map(function(s){return s.text[l].slice(0,s.text[l].indexOf(".")+1)})});S.tx=JSON.parse(keep);return JSON.stringify(r)})()`));
+  const nm3 = JSON.parse(await R(`(function(){var keep=JSON.stringify(D.words.tx);Object.keys(D.guide.atIntro).forEach(function(set){D.guide.atIntro[set].forEach(function(k,i){D.words.tx[k]={en:"A word about {point}, line "+set+(i+1)+".",pt:"Uma palavra sobre {point}, linha "+set+(i+1)+"."}})});
+    var g=atSteps("painting",true),r={};langCodes().forEach(function(l){r[l]=g.filter(function(s){return s.at.link}).map(function(s){return s.text[l].slice(0,s.text[l].indexOf(".")+1)})});D.words.tx=JSON.parse(keep);return JSON.stringify(r)})()`));
   const nmc = l => nm3[l].filter(t => /Ribeira/.test(t)).length, itc = (l, w) => nm3[l].filter(t => t.indexOf(w) >= 0).length;
   ok('[intro] the name in at most two intro lines: with every line a {point} line, two say "Ribeira Palace" / "o Paço da Ribeira", the others "this place" / "este lugar"',
     nmc('en') === 2 && nmc('pt') === 2 && itc('en', 'about this place') === nm3.en.length - 2 && itc('pt', 'sobre este lugar') === nm3.pt.length - 2 && nm3.en.length >= 6, nm3);
   // the Editor's step list (Guide › 2 · The tour › Tour from the card): each intro and its set; the Quick Facts skipped, named, with why
-  await R('S.tours.painting.src="card";S.tab="guide";S.op={};S.op.gt1=true;S.op.s7auto=true;S.ui.level=2;renderAll(false);""');
+  await R('D.tour.tours.painting.src="card";ui.tab="guide";ui.op={};ui.op.gt1=true;ui.op.s7auto=true;ui.level=2;renderAll(false);""');
   await until('!!ed.querySelector(\'[data-fo="s7auto"] .attbl\')', 3000);
   const edl = JSON.parse(await R('JSON.stringify({rows:[].map.call(ed.querySelectorAll(\'[data-fo="s7auto"] .attbl tbody tr[data-atstep]\'),function(r){var a=r.querySelector(".atlnk");return a?a.textContent:""}),skip:[].map.call(ed.querySelectorAll(\'[data-fo="s7auto"] .attbl tbody tr.atskip\'),function(r){return r.textContent}),order:[].map.call(ed.querySelectorAll(\'[data-fo="s7auto"] .attbl tbody tr\'),function(r){return r.dataset.atstep||(r.dataset.atskip?"skip:"+r.dataset.atskip:"")})})'));
   const withLink = TOURS.painting.en.steps.map(s => s.link);
@@ -375,46 +375,46 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
     for (const l of ['en', 'pt']) {
       const T = TOURS[poi][l], m = minsOf(T.steps), t0 = T.steps[0].text;
       const tease = m < 2 ? (l === 'en' ? /\bshort tour\b/.test(t0) : /\bvisita curta\b/.test(t0)) && !/\d+ (minutes|minutos)/.test(t0) : t0.indexOf(l === 'en' ? 'tour of about ' + m + ' minutes' : 'visita de uns ' + m + ' minutos') >= 0;
-      await R(`S.lang="${l}";if(G.on)stopTour();S.tours.painting.src="card";pointOpen("${poi}");S.guideCfg.block=true;S.view="card";S.stop="full";renderPhone(false);""`);
+      await R(`P.lang="${l}";if(G.on)stopTour();D.tour.tours.painting.src="card";pointOpen("${poi}");D.guide.block=true;ui.view="card";ui.stop="full";renderPhone(false);""`);
       await until('!!scr.querySelector(".hero .gstart")', 3000);
       await until('!!scr.querySelector(".gblock small")', 3000);
       const hb = await R('(scr.querySelector(".hero .gstart")||{}).textContent||""'), page = await R(`tourMinutes("${poi}")`);
       const gbk = await R('(scr.querySelector(".gblock small")||{}).textContent||""'), mnu = await R('var d=document.createElement("div");d.innerHTML=gbMenuHtml();(d.querySelector(\'[data-gbgo="tour"]\')||{}).textContent||""');
-      await R('S.guideCfg.block=false;""');
+      await R('D.guide.block=false;""');
       const len = m < 2 ? (l === 'en' ? 'short' : 'curta') : m + ' min', lenOk = gbk === (l === 'en' ? 'Narrated tour · ' + len + ' · ask anything, any time' : 'Visita narrada · ' + len + ' · pergunte a qualquer momento') && mnu === (l === 'en' ? 'Start the tour · ' : 'Começar a visita · ') + len;
       const hero = m < 2 ? hb.endsWith(l === 'en' ? '· short' : '· curta') : hb.endsWith('· ' + m + ' min');
       const nm = T.name, mid = nm.replace(/^(The|O|A|Os|As)(?=\s)/, a => a.toLowerCase());
-      const inv = await R(`(function(){S.lang="${l}";var it=Object.assign({},S.guidance.items.tourof,{saysAud:{},saysBack:""});return gdLine(it,false,{point:${JSON.stringify(nm)},min:tourMinutes("${poi}"),n:0})})()`);
+      const inv = await R(`(function(){P.lang="${l}";var it=Object.assign({},D.guidance.items.tourof,{saysAud:{},saysBack:""});return gdLine(it,false,{point:${JSON.stringify(nm)},min:tourMinutes("${poi}"),n:0})})()`);
       const want = m < 2 ? (l === 'en' ? 'A short tour of ' + mid + '?' : 'Uma visita curta ' + (/^o /.test(mid) ? 'ao ' + mid.slice(2) : /^a /.test(mid) ? 'à ' + mid.slice(2) : /^os /.test(mid) ? 'aos ' + mid.slice(3) : 'a ' + mid) + '?') : (l === 'en' ? nm + ' has a story. A tour of ' + m + ' minutes?' : nm + ' tem uma história. Uma visita de ' + m + ' minutos?');
       sh[poi + ':' + l] = { m, page, tease, hero, hb, inv, gbk, mnu, lenOk, ok: tease && hero && inv === want && (l !== 'en' || page === m), want };
     }
   }
-  await R('S.lang="en";pointOpen("torreao");S.tab="guide";S.op={};S.op.gt1=true;S.op.s7auto=true;renderAll(false);""'); await until('!!ed.querySelector(\'[data-fo="s7auto"] .attbl\')', 3000);
+  await R('P.lang="en";pointOpen("torreao");ui.tab="guide";ui.op={};ui.op.gt1=true;ui.op.s7auto=true;renderAll(false);""'); await until('!!ed.querySelector(\'[data-fo="s7auto"] .attbl\')', 3000);
   const edShort = await R('[].map.call(ed.querySelectorAll(\'[data-fo="s7auto"] .note\'),function(n){return n.textContent}).filter(function(t){return/^The tour made from/.test(t)})[0]||""');
   ok('[short] a tour under 2 minutes is a short tour, from 2 up its minutes (the test\'s own sum, EN and PT): the teaser ("… a short tour: …" / "… uma visita curta: …", else "… a tour of about N minutes: …"), the hero\'s button ("· short" / "· curta", else "· N min"), the invitation ("A short tour of the Torreão?" / "Uma visita curta ao Torreão?", else "… A tour of N minutes?"), the Editor\'s list ("a short tour")',
     Object.values(sh).every(x => x.ok) && ['torreao', 'square', 'river'].every(p => sh[p + ':en'].m < 2) && sh['painting:en'].m >= 2 && /a short tour \(under 2 minutes\)/.test(edShort), { bad: Object.keys(sh).filter(k => !sh[k].ok).map(k => [k, sh[k]]), edShort, sh });
   ok('[length] the ✦ menu\'s Start the tour and the Guide block\'s line say the tour\'s length as the hero\'s button and the invitation do ("Start the tour · short", "Narrated tour · short · …"; from 2 minutes "· 2 min"; the written tour keeps its 3), the four points, EN and PT',
     Object.values(sh).every(x => x.lenOk) && sh['torreao:en'].mnu === 'Start the tour · short' && sh['painting:en'].gbk.indexOf('· ' + sh['painting:en'].m + ' min') > 0, Object.keys(sh).map(k => [k, sh[k].mnu, sh[k].gbk, sh[k].lenOk]));
   // [article] the PT names carry their article: the hero, the marker, the invitation about the point in the middle (the real path: gdCentral)
-  await R('S.lang="pt";if(G.on)stopTour();S.guidance.on=true;S.stop="closed";pointOpen("painting");setWall("ribeira");gdResetVisitor();gdSimAim("square");renderPhone(false);""'); await W(300);
-  const art = JSON.parse(await R('var c=gdCentral(),it=Object.assign({},S.guidance.items.tourof,{saysAud:{},saysBack:""});JSON.stringify({c:c&&c.name,inv:c?gdLine(it,false,{point:c.name,min:c.min,n:0}):"",min:c&&c.min,hero:wordIn(POINTS.square.hero.title||S.hero.title,"pt"),rib:wordIn(S.hero.title,"pt"),mk:(ph.querySelector("[data-mk=painting] b")||{}).textContent||"",tz:L(atSteps("square")[0].text),story:(atSteps("painting").filter(function(s){return s.act==="open"})[0]||{text:{}}).text.pt})'));
-  await R('S.guidance.on=false;S.lang="en";S.stop="full";pointOpen("painting");""');
+  await R('P.lang="pt";if(G.on)stopTour();D.guidance.on=true;ui.stop="closed";pointOpen("painting");setWall("ribeira");gdResetVisitor();gdSimAim("square");renderPhone(false);""'); await W(300);
+  const art = JSON.parse(await R('var c=gdCentral(),it=Object.assign({},D.guidance.items.tourof,{saysAud:{},saysBack:""});JSON.stringify({c:c&&c.name,inv:c?gdLine(it,false,{point:c.name,min:c.min,n:0}):"",min:c&&c.min,hero:wordIn(POINTS.square.hero.title||D.poi.hero.title,"pt"),rib:wordIn(D.poi.hero.title,"pt"),mk:(ph.querySelector("[data-mk=painting] b")||{}).textContent||"",tz:L(atSteps("square")[0].text),story:(atSteps("painting").filter(function(s){return s.act==="open"})[0]||{text:{}}).text.pt})'));
+  await R('D.guidance.on=false;P.lang="en";ui.stop="full";pointOpen("painting");""');
   ok('[article] the Portuguese names carry their article: the hero ("O Terreiro do Paço", "O Paço da Ribeira") and the marker as written, the teaser starting with it; mid-sentence lower case and joined to its preposition: the real invitation about the square in the middle "Uma visita curta ao Terreiro do Paço?"',
     art.c === 'O Terreiro do Paço' && art.min < 2 && art.inv === 'Uma visita curta ao Terreiro do Paço?' && art.hero === 'O Terreiro do Paço' && art.rib === 'O Paço da Ribeira' && art.mk === 'O Paço da Ribeira' && /^O Terreiro do Paço: /.test(art.tz) && !/ O Paço| O Terreiro/.test(art.story || ''), art);
-  await R('S.lang="en";pointOpen("painting");""');
+  await R('P.lang="en";pointOpen("painting");""');
   tsec('short');
 
   // ---------- 9. [hero words] the hero's words clear at the teaser at Mini (G15.hero), the four tours and the written g0 ----------
   await load(); await R(base); await R(require('./g15lib.js'));
   const hw = {};
   for (const [poi, src] of [['painting', 'card'], ['torreao', 'card'], ['square', 'card'], ['river', 'card'], ['painting', 'written']]) {
-    await R(`if(G.on)stopTour();S.guideCfg.dockStart="mini";S.tours.painting.src="${src}";pointOpen("${poi}");S.view="card";S.stop="full";S.tab="guide";renderAll(false);""`);
+    await R(`if(G.on)stopTour();D.guide.dockStart="mini";D.tour.tours.painting.src="${src}";pointOpen("${poi}");ui.view="card";ui.stop="full";ui.tab="guide";renderAll(false);""`);
     await until('!!scr.querySelector(".hero .gstart")', 3000);
     await p.click('#ph .hero .gstart');
-    const atT = await until('G.on&&!!S.guideSteps[G.i]&&S.guideSteps[G.i].act==="teaser"', 4000);
-    await R('S.dockH="mini";renderGuide();""');
+    const atT = await until('G.on&&!!D.tour.guideSteps[G.i]&&D.tour.guideSteps[G.i].act==="teaser"', 4000);
+    await R('ui.dockH="mini";renderGuide();""');
     await until('G.placedStep===G.i&&performance.now()>(G.autoScrollTill||0)+400&&!!ph.querySelector(".gdock")&&!G15.hero().over.length', 5000);
-    const m = JSON.parse(await R('JSON.stringify(Object.assign(G15.hero(),{top:Math.round(scr.scrollTop),step:S.guideSteps[G.i].id,told:G15.overWords().over}))'));
+    const m = JSON.parse(await R('JSON.stringify(Object.assign(G15.hero(),{top:Math.round(scr.scrollTop),step:D.tour.guideSteps[G.i].id,told:G15.overWords().over}))'));
     await R('stopTour();""'); await until('!G.on', 2000);
     const after = JSON.parse(await R('JSON.stringify(G15.hero())'));
     hw[poi + ':' + src] = Object.assign(m, { atT, btnAfter: after.btn });
@@ -427,9 +427,9 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // ---------- 10. [crop] each new point's hero: a crop of the wall painting around its own point ----------
   const cr = {};
   for (const poi of ['torreao', 'square', 'river']) for (const stop of ['full', 'half']) {
-    await R(`if(G.on)stopTour();pointOpen("${poi}");S.view="card";S.stop="${stop}";renderPhone(false);""`);
-    await until('var h=scr.querySelector(".hero");!!h&&Math.abs(h.offsetHeight-S.heroH)<1', 3000);
-    const g = JSON.parse(await R(`(function(){var h=scr.querySelector(".hero"),c=S.hero.crop||{},pt=(WALLS[c.wall||"ribeira"].pois||[]).filter(function(x){return x.id===c.at})[0]||{};return JSON.stringify({W:h.offsetWidth,H:h.offsetHeight,size:h.style.backgroundSize,pos:h.style.backgroundPosition,img:getComputedStyle(h).backgroundImage,wall:"url(\\""+WALLS.ribeira.img()+"\\")",ribeira:"url(\\""+IMG.hero+"\\")",iw:WALLS.ribeira.w,ih:WALLS.ribeira.h,c:c,u:pt.u,v:pt.v})})()`));
+    await R(`if(G.on)stopTour();pointOpen("${poi}");ui.view="card";ui.stop="${stop}";renderPhone(false);""`);
+    await until('var h=scr.querySelector(".hero");!!h&&Math.abs(h.offsetHeight-ui.heroH)<1', 3000);
+    const g = JSON.parse(await R(`(function(){var h=scr.querySelector(".hero"),c=D.poi.hero.crop||{},pt=(WALLS[c.wall||"ribeira"].pois||[]).filter(function(x){return x.id===c.at})[0]||{};return JSON.stringify({W:h.offsetWidth,H:h.offsetHeight,size:h.style.backgroundSize,pos:h.style.backgroundPosition,img:getComputedStyle(h).backgroundImage,wall:"url(\\""+new URL(WALLS.ribeira.img(),location.href).href+"\\")",ribeira:"url(\\""+new URL(IMG.hero,location.href).href+"\\")",iw:WALLS.ribeira.w,ih:WALLS.ribeira.h,c:c,u:pt.u,v:pt.v})})()`));
     // the test's own arithmetic: covering the hero, the crop's height h of the picture at most and its width w (0.4) at most; the point at (fx, fy)
     const h = g.c.h || 1, w = g.c.w || .4, fx = g.c.fx != null ? g.c.fx : .5, fy = g.c.fy != null ? g.c.fy : .4;
     const s = Math.max(g.H / (g.ih * h), g.W / (g.iw * w)), bw = g.iw * s, bh = g.ih * s, cl = (v, lo) => Math.min(0, Math.max(lo, v));
@@ -442,10 +442,10 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const fulls = ['torreao', 'square', 'river'].map(p => cr[p + ':full']);
   const distinct = fulls.every((a, i) => fulls.every((b, j) => i === j || Math.abs(parseFloat(a.pos.split('+')[1]) - parseFloat(b.pos.split('+')[1])) > 20 || a.pos.split(' ').pop() !== b.pos.split(' ').pop()));
   // kept during the teaser: the Torreão's tour started by its hero's button, 3 s into the teaser (the teaser's pictures change every 2.6 s)
-  await R('if(G.on)stopTour();pointOpen("torreao");S.view="card";S.stop="full";renderPhone(false);""'); await until('!!scr.querySelector(".hero .gstart")', 3000);
-  await p.click('#ph .hero .gstart'); await until('G.on&&!!S.guideSteps[G.i]&&S.guideSteps[G.i].act==="teaser"', 4000);
+  await R('if(G.on)stopTour();pointOpen("torreao");ui.view="card";ui.stop="full";renderPhone(false);""'); await until('!!scr.querySelector(".hero .gstart")', 3000);
+  await p.click('#ph .hero .gstart'); await until('G.on&&!!D.tour.guideSteps[G.i]&&D.tour.guideSteps[G.i].act==="teaser"', 4000);
   const tzAt = await R('performance.now()'); await until(`performance.now()-${tzAt}>3000`, 4000);
-  const tz = JSON.parse(await R('var h=scr.querySelector(".hero"),cs=getComputedStyle(h);JSON.stringify({teaser:G.on&&S.guideSteps[G.i].act==="teaser",wall:cs.backgroundImage==="url(\\""+WALLS.ribeira.img()+"\\")",crop:h.classList.contains("hcrop"),anim:cs.animationName})'));
+  const tz = JSON.parse(await R('var h=scr.querySelector(".hero"),cs=getComputedStyle(h);JSON.stringify({teaser:G.on&&D.tour.guideSteps[G.i].act==="teaser",wall:cs.backgroundImage==="url(\\""+new URL(WALLS.ribeira.img(),location.href).href+"\\")",crop:h.classList.contains("hcrop"),anim:cs.animationName})'));
   await R('if(G.on)stopTour();pointOpen("painting");""');
   ok('[crop] the Torreão, the Terreiro do Paço and the Tagus each show a crop of the wall painting around its own point (the wall\'s own file, never the Ribeira\'s hero; its size and offset by the test\'s own arithmetic, the point inside the hero where the crop puts it), at Full and at Half; three different crops; kept during the teaser (its drift around the crop)',
     Object.values(cr).every(x => x.ok) && distinct && tz.wall && tz.crop && tz.anim === 'herocrop', { cr, distinct, tz });
@@ -454,28 +454,28 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // ---------- 11. [edit] Azu's intro lines in the Editor: an edited line said by the next tour; add, remove, back to the defaults; the ▸ ----------
   try {
   await load(); await R(base);
-  await R('pointOpen("painting");S.tours.painting.src="card";S.tab="guide";S.op={};S.op.gt1=true;S.op.s7auto=true;S.op["at:rules"]=true;S.ui.level=3;S.view="card";S.stop="full";renderAll(false);""');
+  await R('pointOpen("painting");D.tour.tours.painting.src="card";ui.tab="guide";ui.op={};ui.op.gt1=true;ui.op.s7auto=true;ui.op["at:rules"]=true;ui.level=3;ui.view="card";ui.stop="full";renderAll(false);""');
   await until('!!ed.querySelector(\'[data-atinset="pics"]\')', 3000);
   const g0 = JSON.parse(await R('var s=atSteps().filter(function(x){return x.at&&x.at.kind==="Gallery"})[0]||{at:{},text:{}};JSON.stringify({ik:s.at.ik,en:s.text.en})'));
   await p.fill(`[data-atinset="pics"] [data-tx="${g0.ik}|en"]`, 'Now look at this beauty:', { timeout: 4000 }); await R('document.activeElement.blur();""'); await W(300);
-  const g1 = JSON.parse(await R('var s=atSteps().filter(function(x){return x.at&&x.at.kind==="Gallery"})[0]||{at:{},text:{}};JSON.stringify({ik:s.at.ik,en:s.text.en,phone:(S.guideSteps.filter(function(x){return x.at&&x.at.kind==="Gallery"})[0]||{text:{}}).text.en})'));
+  const g1 = JSON.parse(await R('var s=atSteps().filter(function(x){return x.at&&x.at.kind==="Gallery"})[0]||{at:{},text:{}};JSON.stringify({ik:s.at.ik,en:s.text.en,phone:(D.tour.guideSteps.filter(function(x){return x.at&&x.at.kind==="Gallery"})[0]||{text:{}}).text.en})'));
   ok('[edit] an intro line edited in the Editor (typed in its EN box, Guide › 2 · The tour › Tour from the card › What each block says › A gallery or a picture) is said by the next generated tour, the phone\'s too, the caption kept after it',
     g1.ik === g0.ik && g1.en === 'Now look at this beauty: the square through three centuries.' && g1.phone === g1.en && g0.en !== g1.en, { g0, g1 });
-  const n0 = await R('S.guideCfg.atIntro.pics.length');
-  await p.click('[data-atinset="pics"] [data-atin="add|pics"]', { timeout: 4000 }); await until(`S.guideCfg.atIntro.pics.length===${n0 + 1}`, 2000);
-  const nk = await R('S.guideCfg.atIntro.pics[S.guideCfg.atIntro.pics.length-1]');
+  const n0 = await R('D.guide.atIntro.pics.length');
+  await p.click('[data-atinset="pics"] [data-atin="add|pics"]', { timeout: 4000 }); await until(`D.guide.atIntro.pics.length===${n0 + 1}`, 2000);
+  const nk = await R('D.guide.atIntro.pics[D.guide.atIntro.pics.length-1]');
   await p.fill(`[data-atinset="pics"] [data-tx="${nk}|en"]`, 'A brand new line:', { timeout: 4000 }); await p.fill(`[data-atinset="pics"] [data-tx="${nk}|pt"]`, 'Uma linha nova:', { timeout: 4000 }); await R('document.activeElement.blur();""'); await W(300);
   const added = JSON.parse(await R(`JSON.stringify({set:atIntroLines("pics","en").map(function(x){return x.text}),def:!!ed.querySelector('[data-atin="reset|pics"]')})`));
-  await p.click('[data-atinset="pics"] [data-atin="del|pics|0"]'); await until(`S.guideCfg.atIntro.pics.length===${n0}`, 2000);
-  const removed = JSON.parse(await R('JSON.stringify(S.guideCfg.atIntro.pics)'));
-  await p.click('[data-atinset="pics"] [data-atin="reset|pics"]'); await until('JSON.stringify(S.guideCfg.atIntro.pics)===JSON.stringify(AT_INTRO_DEF.pics)', 2000);
+  await p.click('[data-atinset="pics"] [data-atin="del|pics|0"]'); await until(`D.guide.atIntro.pics.length===${n0}`, 2000);
+  const removed = JSON.parse(await R('JSON.stringify(D.guide.atIntro.pics)'));
+  await p.click('[data-atinset="pics"] [data-atin="reset|pics"]'); await until('JSON.stringify(D.guide.atIntro.pics)===JSON.stringify(AT_INTRO_DEF.pics)', 2000);
   const back = JSON.parse(await R('var s=atSteps().filter(function(x){return x.at&&x.at.kind==="Gallery"})[0]||{at:{},text:{}};JSON.stringify({en:s.text.en,def:atIntroIsDef("pics"),btn:!!ed.querySelector(\'[data-atin="reset|pics"]\')})'));
   ok('[edit] + Add a line (a real click) adds a row to the set, said where the set picks it; Remove takes the first line out; Back to the defaults brings the set and its words back (the button then gone)',
     added.set.length === n0 + 1 && added.set[n0] === 'A brand new line:' && added.def && removed.length === n0 && removed.indexOf(g0.ik) < 0 && removed.indexOf(nk) >= 0 && back.def && !back.btn && back.en === g0.en, { added, removed, back });
   // the row's ▸ (a real click): the tour at that kind's step, that line said
-  const playKey = await R('S.guideCfg.atIntro.ba[1]');
-  await p.click(`[data-atinset="ba"] [data-atin="say|ba|${playKey}"]`); await until('G.on&&!!S.guideSteps[G.i]&&!!S.guideSteps[G.i].at&&S.guideSteps[G.i].at.lk==="ba"', 4000);
-  const pl = JSON.parse(await R('var s=S.guideSteps[G.i];JSON.stringify({on:G.on,id:s&&s.id,ik:s&&s.at&&s.at.ik,line:wordIn(S.tx[S.guideCfg.atIntro.ba[1]],"en"),en:s&&s.text.en})'));
+  const playKey = await R('D.guide.atIntro.ba[1]');
+  await p.click(`[data-atinset="ba"] [data-atin="say|ba|${playKey}"]`); await until('G.on&&!!D.tour.guideSteps[G.i]&&!!D.tour.guideSteps[G.i].at&&D.tour.guideSteps[G.i].at.lk==="ba"', 4000);
+  const pl = JSON.parse(await R('var s=D.tour.guideSteps[G.i];JSON.stringify({on:G.on,id:s&&s.id,ik:s&&s.at&&s.at.ik,line:wordIn(D.words.tx[D.guide.atIntro.ba[1]],"en"),en:s&&s.text.en})'));
   await R('if(G.on)stopTour();""'); await until('!G.on', 2000);
   const after = await R('var s=atSteps().filter(function(x){return x.at&&x.at.lk==="ba"})[0];s?s.at.ik:""');
   ok('[edit] the row\'s ▸ (a real click) plays the tour made from the card at that kind\'s step with that line said; the tour after it picks its own line again',
@@ -485,15 +485,15 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
 
   // ---------- 12. guidance round 17, Part A: the name with its article, one fact, the teaser's openings, the Guide block's title ----------
   await load(); await R(base);
-  const A = JSON.parse(await R(`(function(){var o={};pointOpen("painting");S.tours.painting.src="card";S.view="card";S.stop="full";renderPhone(false);
-    o.h2=(scr.querySelector(".hero h2")||{}).textContent;o.mk=wordIn(WALLS.ribeira.markers[0].name,"en");o.pin=wordIn(S.wallPois[0].name,"en");var g=atSteps("painting",true);o.teaser=g[0].text.en;
-    o.story=(g.filter(function(s){return s.act==="open"})[0]||{text:{}}).text.en;var it=Object.assign({},S.guidance.items.tourof,{saysAud:{},saysBack:""});o.inv=gdLine(it,false,{point:o.pin,min:3,n:0});
+  const A = JSON.parse(await R(`(function(){var o={};pointOpen("painting");D.tour.tours.painting.src="card";ui.view="card";ui.stop="full";renderPhone(false);
+    o.h2=(scr.querySelector(".hero h2")||{}).textContent;o.mk=wordIn(WALLS.ribeira.markers[0].name,"en");o.pin=wordIn(D.wall.wallPois[0].name,"en");var g=atSteps("painting",true);o.teaser=g[0].text.en;
+    o.story=(g.filter(function(s){return s.act==="open"})[0]||{text:{}}).text.en;var it=Object.assign({},D.guidance.items.tourof,{saysAud:{},saysBack:""});o.inv=gdLine(it,false,{point:o.pin,min:3,n:0});
     o.ask=nameIn(TXT("gb_view_about"),"{0}",o.pin);o.pill=nameIn(TXT("cam_ask_about"),"{0}",o.pin);
     var one={},open={};["painting","torreao","square","river"].forEach(function(poi){var p=pointOf(poi);langCodes().forEach(function(l){var st=tourFromCard(p.card||[],p.story||[],l,atOpts(poi,l)),f=st.filter(function(s){return s.at&&s.at.kind==="Quick Facts"})[0];
       one[poi+":"+l]=f?{set:f.at.lk,text:f.text,link:f.at.link}:null;var t=st[0].text,s2=atSentences(t).slice(1).join(" ");open[poi+":"+l]={line:st[0].at.tk,two:s2,mins:st[0].at.mins}})});
     var two=tourFromCard([pointBlock("x_f","Quick Facts",{facts:[[T("Built","Construído"),T("In the 1580s","Na década de 1580")],[T("Lost","Perdido"),T("1 November 1755","1 de novembro de 1755")]]})],[],"en",atOpts("torreao","en"));
-    o.two=(two.filter(function(s){return s.at&&s.at.kind==="Quick Facts"})[0]||{at:{}}).at.lk;o.one=one;o.open=open;o.teaserSet=S.guideCfg.atIntro.teaser.slice();return JSON.stringify(o)})()`));
-  await R('window.__p="";sampleFn=function(q){window.__p=q;return Promise.resolve({text:"A stub answer."})};S.guideCfg.ask="ai";ask("Who lived here?");""'); await until('!!window.__p', 3000);
+    o.two=(two.filter(function(s){return s.at&&s.at.kind==="Quick Facts"})[0]||{at:{}}).at.lk;o.one=one;o.open=open;o.teaserSet=D.guide.atIntro.teaser.slice();return JSON.stringify(o)})()`));
+  await R('window.__p="";sampleFn=function(q){window.__p=q;return Promise.resolve({text:"A stub answer."})};D.guide.ask="ai";ask("Who lived here?");""'); await until('!!window.__p', 3000);
   const prm = await R('window.__p'); await R('G.askOpen=false;if(G.on)stopTour();""');
   ok('[name] "The Ribeira Palace" in English: as written on the hero, the marker\'s label, the wall\'s point and the teaser\'s start ("The Ribeira Palace: …", the invitation "The Ribeira Palace has a story."); mid-sentence "the Ribeira Palace" (the story\'s intro line, the ✦ menu\'s and the pill\'s Ask about, Ask Azu\'s context to the model, stubbed)',
     A.h2 === 'The Ribeira Palace' && A.mk === 'The Ribeira Palace' && A.pin === 'The Ribeira Palace' && /^The Ribeira Palace: /.test(A.teaser) && /^The Ribeira Palace has a story\./.test(A.inv) && / the Ribeira Palace/.test(A.story) && !/ The Ribeira/.test(A.story) &&
@@ -507,10 +507,10 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('[teaser] the teaser\'s opening is a set, picked by the point: the four tours open differently ("Join me for a tour of about 2 minutes", "Here\'s a short tour, made just for you", …), EN and PT, each a line of the set (the Editor\'s), the length still said', opOk('en') && opOk('pt'), op);
   const gb = {};
   for (const [poi, l] of [['painting', 'en'], ['torreao', 'en'], ['square', 'en'], ['river', 'en'], ['painting', 'pt'], ['square', 'pt']]) {
-    await R(`S.lang="${l}";pointOpen("${poi}");S.guideCfg.block=true;S.view="card";S.stop="full";renderPhone(false);""`); await until('!!scr.querySelector(".gblock b")', 3000);
+    await R(`P.lang="${l}";pointOpen("${poi}");D.guide.block=true;ui.view="card";ui.stop="full";renderPhone(false);""`); await until('!!scr.querySelector(".gblock b")', 3000);
     gb[poi + ':' + l] = await R('(scr.querySelector(".gblock b")||{}).textContent||""');
   }
-  await R('S.lang="en";S.guideCfg.block=false;pointOpen("painting");""');
+  await R('P.lang="en";D.guide.block=false;pointOpen("painting");""');
   ok('[block] the Guide block\'s title names the point on every point\'s card, its article lower case mid-sentence: "Meet the Ribeira Palace with the guide", "Meet the Torreão with the guide", "Meet Terreiro do Paço with the guide", "Meet the Tagus and its ships with the guide", "Conheça o Paço da Ribeira com o guia", "Conheça o Terreiro do Paço com o guia"',
     gb['painting:en'] === 'Meet the Ribeira Palace with the guide' && gb['torreao:en'] === 'Meet the Torreão with the guide' && gb['square:en'] === 'Meet Terreiro do Paço with the guide' && gb['river:en'] === 'Meet the Tagus and its ships with the guide' &&
     gb['painting:pt'] === 'Conheça o Paço da Ribeira com o guia' && gb['square:pt'] === 'Conheça o Terreiro do Paço com o guia', gb);
@@ -521,7 +521,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const GM = JSON.parse(await R(`(function(){var out={};["painting","torreao","square","river"].forEach(function(poi){var p=pointOf(poi);langCodes().forEach(function(l){var o=atOpts(poi,l),st=(window.__tf||tourFromCard)(p.card||[],p.story||[],l,o),g=st.filter(function(s){return s.at&&s.at.kind==="Gallery"})[0];
       out[poi+":"+l]={deep:g&&g.at.deepText||"",lead:g&&g.at.deep&&g.at.deep.lead?g.at.deep.lead.key:"",n:g&&g.at.deep?g.at.deep.units.length:0,short:st.map(function(s){return s.text}).join(" "),
         have:" "+atNorm(atCardWords(p.card||[],p.story||[],p.hero,l)+" "+o.name+" "+atLinkWords(l))+" ",name:o.name}})});
-    out.set={};langCodes().forEach(function(l){out.set[l]=(S.guideCfg.atIntro.morepics||[]).map(function(k){return{key:k,t:wordIn(S.tx[k],l)}})});out.cap=+S.guideCfg.atIntroCap||20;return JSON.stringify(out)})()`));
+    out.set={};langCodes().forEach(function(l){out.set[l]=(D.guide.atIntro.morepics||[]).map(function(k){return{key:k,t:wordIn(D.words.tx[k],l)}})});out.cap=+D.guide.atIntroCap||20;return JSON.stringify(out)})()`));
   const gmBad = [];
   for (const poi of ['painting', 'torreao', 'square', 'river']) for (const l of ['en', 'pt']) {
     const g = GM[poi + ':' + l], line = (GM.set[l].filter(x => x.key === g.lead)[0] || {}).t || '', pre = line.split('{0}')[0];
@@ -537,18 +537,18 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   }
   const leads = new Set(['painting', 'torreao', 'square', 'river'].map(poi => GM[poi + ':en'].lead));
   // the row's ▸ (a real click): the tour at the gallery, its deep part said with that line
-  await R('pointOpen("painting");S.tours.painting.src="card";S.tab="guide";S.op={};S.op.gt1=true;S.op.s7auto=true;S.op["at:rules"]=true;S.ui.level=3;S.view="card";S.stop="full";renderAll(false);""');
+  await R('pointOpen("painting");D.tour.tours.painting.src="card";ui.tab="guide";ui.op={};ui.op.gt1=true;ui.op.s7auto=true;ui.op["at:rules"]=true;ui.level=3;ui.view="card";ui.stop="full";renderAll(false);""');
   await until('!!ed.querySelector(\'[data-atinset="morepics"]\')', 3000);
-  const mk2 = await R('S.guideCfg.atIntro.morepics[1]');
+  const mk2 = await R('D.guide.atIntro.morepics[1]');
   await p.click(`[data-atinset="morepics"] [data-atin="say|morepics|${mk2}"]`, { timeout: 4000 }); const gmPlay = await until('G.on&&G.tm.playing', 15000);
-  const gmp = JSON.parse(await R(`JSON.stringify({tp:G.tpText||"",line:wordIn(S.tx["${mk2}"],"en").split("{0}")[0],kind:(S.guideSteps[G.i]&&S.guideSteps[G.i].at||{}).kind||""})`)); await R('if(G.on)stopTour();""');
+  const gmp = JSON.parse(await R(`JSON.stringify({tp:G.tpText||"",line:wordIn(D.words.tx["${mk2}"],"en").split("{0}")[0],kind:(D.tour.guideSteps[G.i]&&D.tour.guideSteps[G.i].at||{}).kind||""})`)); await R('if(G.on)stopTour();""');
   ok('[gallery more] a gallery\'s deep part opens with a lead of its set (Azu\'s intro lines › A gallery\'s Tell me more) and says its pictures as a guide would: no medium, one after another ("…, then …"), not a list; only the card\'s words and the lead, under its cap, no fact the tour says; the four points, EN and PT; the row\'s ▸ (a real click) plays it with that line',
     !gmBad.length && leads.size >= 3 && gmPlay && gmp.kind === 'Gallery' && gmp.tp.indexOf(gmp.line) === 0, { gmBad, leads: [...leads], gmp, ribeira: GM['painting:en'].deep, pt: GM['painting:pt'].deep });
   const BW = JSON.parse(await R(`(function(){var errs=[],own=T("Own words","Palavras próprias");Object.keys(KPREV).forEach(function(k){try{KPREV[k]({kind:k,id:"x",c:{zz:own}})}catch(e){errs.push("preview "+k+": "+e.message)}});
-    var pk=S.pageKind,v=S.view;PAGE_KINDS.forEach(function(k){S.pageKind=k;try{kpageScreen()}catch(e){errs.push("page "+k+": "+e.message)}});S.pageKind=pk;S.view=v;
+    var pk=ui.pageKind,v=ui.view;PAGE_KINDS.forEach(function(k){ui.pageKind=k;try{kpageScreen()}catch(e){errs.push("page "+k+": "+e.message)}});ui.pageKind=pk;ui.view=v;
     var d=KPREV.Dialogue({kind:"Dialogue",id:"x",c:{title:own}}),d0=KPREV.Dialogue(),tl=kindWords({kind:"Timeline",c:{now:"Now X"}}),dl=kindWords({kind:"Dialogue",c:{lines:[T("Mine","Meu")]}});
     return JSON.stringify({errs:errs,d:d.indexOf("Your Majesty, the river front is finished.")>=0,d0:d0.indexOf("Your Majesty, the river front is finished.")>=0,tl:(tl.events||[]).length===KWORDS.Timeline.events.length&&tl.now==="Now X",dl:dl.lines.length===1&&L(dl.lines[0])==="Mine"})})()`));
-  await R('S.view="kpage";S.pageKind="Dialogue";renderPhone(false);""'); const dlgPage = await R('(scr.querySelector(".dlg")||{}).textContent||""'); await R('S.view="card";renderPhone(false);""');
+  await R('ui.view="kpage";ui.pageKind="Dialogue";renderPhone(false);""'); const dlgPage = await R('(scr.querySelector(".dlg")||{}).textContent||""'); await R('ui.view="card";renderPhone(false);""');
   ok('[block words] every block kind\'s preview and full page, drawn with words of its own that lack a field, fall back field by field to its kind\'s (a Dialogue with no lines says its kind\'s; a Timeline\'s own Now keeps the kind\'s events; its own lines win), the Dialogue page with no block of its own too; no error',
     !BW.errs.length && BW.d && BW.d0 && BW.tl && BW.dl && /Your Majesty, the river front is finished\./.test(dlgPage), { BW, dlgPage: dlgPage.slice(0, 80) });
   tsec('round 17b');

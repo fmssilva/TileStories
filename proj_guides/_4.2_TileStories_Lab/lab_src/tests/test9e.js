@@ -9,10 +9,10 @@
 // Guidance round 17b: split in two to keep each file under 300 s (it ran 415 s): test9e sections 1-9, 12 and 13 (the scheduler, the
 // opening, Tap a marker, the look, Preview & Test, the scenes), test9ea.js (PART=2, this file) sections 10 and 11 (the Guide tab, 4 ·
 // Guidance's rows, defaults and each row's demo). Every check kept; MUTATE=1 runs in both (the [Done when] scene is in test9e).
-const { chromium } = require('./pw');
-const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
+const { chromium, labUrl } = require('./pw');
+const url = labUrl('#probe');
 // the former Detail Card > 6 · Guide, counted before the move (label|key of each row; the foldouts) (guidance round 11 added the panel's Look, Words, Voice moving, Speed button and the music's Music volume, Under the voice, Track, Playing now, Visitor can choose the music)
-const BEFORE = { rows: ["Fixed rules|", "Voice|guideCfg.voice", "Speaking now|", "Speed|guideCfg.speed", "Music bed|guideCfg.music", "Music volume|guideCfg.musicVol", "Under the voice|guideCfg.musicDuck", "Track|guideCfg.musicTrack", "Playing now|", "Visitor can choose the music|guideCfg.musicVis", "Voice in this browser|guideCfg.voice_en", "Recorded voice|guideCfg.voiceSet", "Line|", "Shown|guideCfg.heroButton", "Shown|guideCfg.block", "Panel|guideCfg.panel", "Look|guideCfg.look", "Words|guideCfg.pWords", "Voice moving|guideCfg.pBars", "Speed button|guideCfg.pSpeed", "Starts at|guideCfg.dockStart", "Controls at Mini|guideCfg.miniCtl", "Swipe down to Compact|guideCfg.swipeCompact", "Stop|guideCfg.stopUndo", "Azu's own words|guideCfg.bubbles", "Talk button|guideCfg.talk", "Sounds|guideCfg.earcons", "Suggested questions|guideCfg.chips", "Try|", "Guide button|guideCfg.gbtn", "Icon|guideCfg.gbIcon", "Side|guideCfg.gbSide", "Label folds after 4 s|guideCfg.gbFold", "Shown|guideCfg.captions", "Highlight what is read|guideCfg.highlight", "Highlight style|guideCfg.hl", "Trail|guideCfg.trail", "Glide|guideCfg.glide", "Try|", "Focus|guideCfg.cue", "Dim the rest|guideCfg.scrim", "Into pictures|guideCfg.zoom", "Azu points|guideCfg.point", "Try|", "Shown|guideCfg.coach", "Insists|guideCfg.insist", "Waits|guideCfg.insistAfter", "When the visitor scrolls|guideCfg.onScroll", "Character|guideCfg.mascot", "Tap on Azu|guideCfg.azuTap", "Size|guideCfg.azuSize", "Liveliness|guideCfg.life", "Mouth|guideCfg.lips", "How it moves|", "Moods|guideCfg.moods", "Moments|guidance.kinds.2.groups.0.on", "Water break after|", "Try|", "Introduction|guideCfg.intro", "Mascot source|guideCfg.azuStyle", "Model|guideCfg.azuModel", "3D model|", "Play a clip|", "Import…|", "Generate from a picture|", "Walks to the wall|guideCfg.azuWalk", "Try|", "Answers from|guideCfg.ask", "Ask about the view|camCfg.on", "Suggestions|camCfg.chips", "Azu comments|guidance.kinds.1.groups.0.on", "Names on the points|camCfg.names", "Wall (the Lab)|camCfg.wall", "Try|", "Guide mode|guideCfg.ask", "Model|agentCfg.provider", "Gemini model|agentCfg.gemModel", "Claude API model|agentCfg.claudeModel", "Claude tier (published)|agentCfg.tier", "Longest answer|agentCfg.maxOut", "Cost|", "Text and voice|", "App context|agentCfg.ctx", "|", "Photo of the view|agentCfg.photo", "Targets|", "Library|", "General knowledge|agentCfg.general", "Trace under each answer|agentCfg.trace", "Spoken answer|agentCfg.voiceOut", "Voice of the answers|agentCfg.liveVoice", "Link cards|agentCfg.links", "Actions in the app|agentCfg.actions", "Paste a key|", "Test the key|", "Model steps|agentCfg.steps", "Timeout|agentCfg.timeout", "Questions a session|agentCfg.cap"],
+const BEFORE = { rows: ["Fixed rules|", "Voice|D.guide.voice", "Speaking now|", "Speed|D.guide.speed", "Music bed|D.guide.music", "Music volume|D.guide.musicVol", "Under the voice|D.guide.musicDuck", "Track|D.guide.musicTrack", "Playing now|", "Visitor can choose the music|D.guide.musicVis", "Voice in this browser|D.guide.voice_en", "Recorded voice|D.guide.voiceSet", "Line|", "Shown|D.guide.heroButton", "Shown|D.guide.block", "Panel|D.guide.panel", "Look|D.guide.look", "Words|D.guide.pWords", "Voice moving|D.guide.pBars", "Speed button|D.guide.pSpeed", "Starts at|D.guide.dockStart", "Controls at Mini|D.guide.miniCtl", "Swipe down to Compact|D.guide.swipeCompact", "Stop|D.guide.stopUndo", "Azu's own words|D.guide.bubbles", "Talk button|D.guide.talk", "Sounds|D.guide.earcons", "Suggested questions|D.guide.chips", "Try|", "Guide button|D.guide.gbtn", "Icon|D.guide.gbIcon", "Side|D.guide.gbSide", "Label folds after 4 s|D.guide.gbFold", "Shown|D.guide.captions", "Highlight what is read|D.guide.highlight", "Highlight style|D.guide.hl", "Trail|D.guide.trail", "Glide|D.guide.glide", "Try|", "Focus|D.guide.cue", "Dim the rest|D.guide.scrim", "Into pictures|D.guide.zoom", "Azu points|D.guide.point", "Try|", "Shown|D.guide.coach", "Insists|D.guide.insist", "Waits|D.guide.insistAfter", "When the visitor scrolls|D.guide.onScroll", "Character|D.guide.mascot", "Tap on Azu|D.guide.azuTap", "Size|D.guide.azuSize", "Liveliness|D.guide.life", "Mouth|D.guide.lips", "How it moves|", "Moods|D.guide.moods", "Moments|D.guidance.kinds.2.groups.0.on", "Water break after|", "Try|", "Introduction|D.guide.intro", "Mascot source|D.guide.azuStyle", "Model|D.guide.azuModel", "3D model|", "Play a clip|", "Import…|", "Generate from a picture|", "Walks to the wall|D.guide.azuWalk", "Try|", "Answers from|D.guide.ask", "Ask about the view|D.wall.camCfg.on", "Suggestions|D.wall.camCfg.chips", "Azu comments|D.guidance.kinds.1.groups.0.on", "Names on the points|D.wall.camCfg.names", "Wall (the Lab)|LAB.wall", "Try|", "Guide mode|D.guide.ask", "Model|D.agent.provider", "Gemini model|D.agent.gemModel", "Claude API model|D.agent.claudeModel", "Claude tier (published)|D.agent.tier", "Longest answer|D.agent.maxOut", "Cost|", "Text and voice|", "App context|D.agent.ctx", "|", "Photo of the view|D.agent.photo", "Targets|", "Library|", "General knowledge|D.agent.general", "Trace under each answer|D.agent.trace", "Spoken answer|D.agent.voiceOut", "Voice of the answers|D.agent.liveVoice", "Link cards|D.agent.links", "Actions in the app|D.agent.actions", "Paste a key|", "Test the key|", "Model steps|D.agent.steps", "Timeout|D.agent.timeout", "Questions a session|D.agent.cap"],
   fos: ["s7voice", "s7vtest", "s7hero", "s7block", "s7dock", "s7gbtn", "s7cap", "s7focus", "s7coach", "s7tour", "s7resume", "s7mascot", "s7ask", "s7cam", "s7agent"] };
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
@@ -24,8 +24,8 @@ const BEFORE = { rows: ["Fixed rules|", "Voice|guideCfg.voice", "Speaking now|",
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   if (process.env.MUTATE) { await R('var __gc=gdCheck;gdCheck=function(it,items,v,ctx,now){var e=gdEverOf(v,it.id);if(e.done){var v2=JSON.parse(JSON.stringify(v));v2.ever.items[it.id].done=false;return __gc(it,items,v2,ctx,now)}return __gc(it,items,v,ctx,now)}'); console.log('MUTATION: the scheduler ignores Done when (a card opened no longer retires Tap a marker)'); }
   // the set-up: the Ribeira wall, a first visit, the clock moved by hand (deterministic), the remarks and the ✦ hint resting
-  const base = 'S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;S.reduce=false;S.dark=false;S.lang="en";S.ui.rowDemo=false;S.guidance.items.gbhint.on=false;gdGroupById("inview").on=false;S.guideCfg.gbtn="both";S.guideCfg.mascot=true;S.guidance.on=true;S.guidance.breathing=15;G.gd.demo=false;gdChip(null);';
-  const fresh = async (extra) => { await R(base + 'if(G.on)stopTour();G.cam.open=false;S.settingsOpen=false;G.fab.menu=false;setWall("ribeira");S.view="card";S.stop="closed";renderPhone(false);G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.onWall=false;' + (extra || '') + 'gdAdvance(250)'); await W(150); };
+  const base = 'D.card.hints.on=false;LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;P.lang="en";LAB.rowDemo=false;D.guidance.items.gbhint.on=false;gdGroupById("inview").on=false;D.guide.gbtn="both";D.guide.mascot=true;D.guidance.on=true;D.guidance.breathing=15;G.gd.demo=false;gdChip(null);';
+  const fresh = async (extra) => { await R(base + 'if(G.on)stopTour();G.cam.open=false;ui.settingsOpen=false;G.fab.menu=false;setWall("ribeira");ui.view="card";ui.stop="closed";renderPhone(false);G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.onWall=false;' + (extra || '') + 'gdAdvance(250)'); await W(150); };
   const cur = () => R('G.gd.cur?[G.gd.cur.item.id,Math.round(G.gd.cur.at),G.gd.cur.text]:null');
   const adv = async ms => { await R('gdAdvance(' + ms + ')'); };
   // run the clock until the item shows (or ms of the visit pass): the visit time it started
@@ -83,30 +83,30 @@ const BEFORE = { rows: ["Fixed rules|", "Voice|guideCfg.voice", "Speaking now|",
   const look = 'var b=ph.querySelector(".gdbub"),bt=b.querySelector("button"),cs=getComputedStyle(bt),lh=parseFloat(cs.lineHeight),lines=Math.round((bt.offsetHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom))/lh),B=gdPR(b),g=ph.querySelector(".gbtn"),G1=g?gdPR(g):null,nb=document.getElementById("navbar"),N=nb&&gdSeen(nb)?gdPR(nb):null;' +
     '[lines,cr(px(cs.color),px(getComputedStyle(b).backgroundColor)),gdOverWords(),G1?gdOver(B,G1):0,N?gdOver(B,N):0,Math.round(bt.offsetHeight),b.dataset.tail]';
   for (const dark of [false, true]) {
-    await R(`S.dark=${dark};renderAll(true)`); await W(200);
+    await R(`P.dark=${dark};renderAll(true)`); await W(200);
     const l = await R(CR + look);
     ok(`...its look, ${dark ? 'dark' : 'light'}: at most 2 lines, the words at 7:1 or more, 0 px over words, not under the ✦ or the bar, 44 px to tap, its tail to Azu`, l[0] <= 2 && l[1] >= 7 && l[2] === 0 && l[3] === 0 && l[4] === 0 && l[5] >= 44 && l[6] === 'down', l);
   }
-  await R('S.dark=false;S.lang="pt";renderAll(true)'); await W(200);
+  await R('P.dark=false;P.lang="pt";renderAll(true)'); await W(200);
   const lpt = await R(CR + look);
   ok('...in Portuguese too: at most 2 lines', lpt[0] <= 2 && lpt[2] === 0, lpt);
-  await R('S.lang="en";renderAll(true)');
+  await R('P.lang="en";renderAll(true)');
   await adv(10000); const o2 = await cur();
   await adv(60000);
-  const oc = await R('[gdVisitOf(S.gdVisitor,"opening").shown,G.gd.log.filter(function(l){return l.what==="shown"&&/^Opening/.test(l.why)}).length]');
+  const oc = await R('[gdVisitOf(P.gdVisitor,"opening").shown,G.gd.log.filter(function(l){return l.what==="shown"&&/^Opening/.test(l.why)}).length]');
   ok('...once a visit: it ends by itself (9 s), and in the next 60 s it does not come again', o2 === null || o2[0] !== 'opening', [o2, oc]);
   ok('...shown once in this visit', oc[0] === 1, oc);
 
   // ---------- 3. Tap a marker: 20 s after the opening, the phone still 1.2 s, never while the wall is dragged ----------
-  await fresh('S.guidance.breathing=5;'); const t0 = await R('gdVisitOf(S.gdVisitor,"opening").last');
+  await fresh('D.guidance.breathing=5;'); const t0 = await R('gdVisitOf(P.gdVisitor,"opening").last');
   const tA = await runTill('tapmarker', 40000);
   ok('Tap a marker at least 20 s after the opening (breathing room 5 s, so the 20 s rule is the one that waits)', tA !== null && tA - t0 >= 20000 && tA - t0 <= 20500, [t0, tA]);
-  await fresh('S.guidance.breathing=5;');
+  await fresh('D.guidance.breathing=5;');
   await adv(19500); await R('emit("phone.moved")'); const mv = await R('Math.round(G.gd.movedAt)');
   const tB = await runTill('tapmarker', 10000);
   ok('...only after the phone has been still 1.2 s (moved at 19.5 s: it waits until 20.7 s)', tB !== null && tB - mv >= 1200 && tB - mv <= 1500, [mv, tB]);
   // a real drag on the wall (Playwright's mouse) while the visit's clock goes on: nothing while it moves
-  await fresh('S.guidance.breathing=5;');
+  await fresh('D.guidance.breathing=5;');
   await adv(19000);
   const ph = await p.locator('#ph').boundingBox(); let during = 0;
   await p.mouse.move(ph.x + 80, ph.y + 450); await p.mouse.down();
@@ -132,12 +132,12 @@ const BEFORE = { rows: ["Fixed rules|", "Voice|guideCfg.voice", "Speaking now|",
   ok('Ignored, Tap a marker comes again after 25 s, at most 3 a visit (then not in the next 4 min)', starts.length === 3 && gaps.every(g => g >= 25), [starts, ends, gaps]);
 
   // ---------- 5. never after a card opens: this visit, and the next, until Reset the visitor ----------
-  await fresh('S.guidance.breathing=5;');
+  await fresh('D.guidance.breathing=5;');
   await runTill('tapmarker', 30000); await W(600);
   const mkb = await p.locator('#ph [data-marker] span').boundingBox(); await p.mouse.click(mkb.x + mkb.width / 2, mkb.y + mkb.height / 2); await W(300);
-  const op1 = await R('[S.stop,!G.gd.cur,gdEverOf(S.gdVisitor,"tapmarker").done]');
+  const op1 = await R('[ui.stop,!G.gd.cur,gdEverOf(P.gdVisitor,"tapmarker").done]');
   ok('A tap on the marker opens the card: the tip ends and Tap a marker is done', op1[0] !== 'closed' && op1[1] && op1[2], op1);
-  await R('S.stop="closed";renderPhone(false)');
+  await R('ui.stop="closed";renderPhone(false)');
   const n1 = await runTill('tapmarker', 90000);
   ok('[Done when] ...never again in this visit (90 s on the wall)', n1 === null, n1);
   await R('gdNewVisit()'); await adv(500); const back = await cur();
@@ -149,45 +149,45 @@ const BEFORE = { rows: ["Fixed rules|", "Voice|guideCfg.voice", "Speaking now|",
 
   // ---------- 6. never at the same time as Azu's remark ----------
   // (guidance round 3: the remark is the guidance's What's in view, so one at a time is the scheduler's own gate; Tap a marker resting here)
-  await fresh('gdGroupById("inview").on=true;S.guidance.items.tapmarker.on=false;'); await adv(2500);
-  const r1 = await R('[G.gd.cur&&G.gd.cur.item.id,!!ph.querySelector(".gdbub.gd-more"),gdWhyNot(gdItems(),S.gdVisitor,gdContext(),gdNow(),"inview:painting")]');
+  await fresh('gdGroupById("inview").on=true;D.guidance.items.tapmarker.on=false;'); await adv(2500);
+  const r1 = await R('[G.gd.cur&&G.gd.cur.item.id,!!ph.querySelector(".gdbub.gd-more"),gdWhyNot(gdItems(),P.gdVisitor,gdContext(),gdNow(),"inview:painting")]');
   ok('While a tip shows, Azu\'s remark waits (the point settled 2.5 s in the middle: no remark)', r1[0] === 'opening' && !r1[1] && /one at a time: the Opening message is showing/.test(r1[2]), r1);
-  const r2 = await R('var t0=gdNow();while(gdNow()-t0<40000){gdAdvance(250);if(G.gd.cur&&G.gd.cur.item.base==="inview")break}var c=G.gd.cur,e=gdVisitOf(S.gdVisitor,"opening").end;[c&&c.item.base,!!ph.querySelector(".gdbub.gd-more"),gdWhyNot(gdItems(),S.gdVisitor,gdContext(),gdNow(),"askview"),c&&e!=null?Math.round((c.at-e)/1000):null]');
+  const r2 = await R('var t0=gdNow();while(gdNow()-t0<40000){gdAdvance(250);if(G.gd.cur&&G.gd.cur.item.base==="inview")break}var c=G.gd.cur,e=gdVisitOf(P.gdVisitor,"opening").end;[c&&c.item.base,!!ph.querySelector(".gdbub.gd-more"),gdWhyNot(gdItems(),P.gdVisitor,gdContext(),gdNow(),"askview"),c&&e!=null?Math.round((c.at-e)/1000):null]');
   ok('...while Azu\'s remark shows, no tip starts (one at a time: the remark), and it came after the breathing room', r2[0] === 'inview' && r2[1] && /one at a time: [Tt]he Ribeira Palace in the middle is showing/.test(r2[2]) && r2[3] >= 15, r2);
-  await R('gdStop("test");gdGroupById("inview").on=false;S.guidance.items.tapmarker.on=true');
+  await R('gdStop("test");gdGroupById("inview").on=false;D.guidance.items.tapmarker.on=true');
 
   // ---------- 7. Mascot Off: a plain bubble at the marker ----------
-  for (const [nm, set] of [['Guide button = ✦ only', 'S.guideCfg.gbtn="star";'], ['Mascot > Character Off', 'S.guideCfg.mascot=false;']]) {
-    await fresh('S.guidance.breathing=5;' + set + 'fabLayer();'); const tt = await runTill('tapmarker', 30000); await W(300);
+  for (const [nm, set] of [['Guide button = ✦ only', 'D.guide.gbtn="star";'], ['Mascot > Character Off', 'D.guide.mascot=false;']]) {
+    await fresh('D.guidance.breathing=5;' + set + 'fabLayer();'); const tt = await runTill('tapmarker', 30000); await W(300);
     const m = await R('var b=ph.querySelector(".gdbub"),B=gdPR(b),M=gdMarker();[b.classList.contains("plain"),!G.gd.az,Math.round(Math.max(0,B.l-M.x,M.x-B.r)+Math.max(0,B.t-M.y,M.y-B.b)),b.dataset.tail,!!ph.querySelector(".gdring"),gdOverWords(),!ph.querySelector(".gdpoint")]');
     ok(`Mascot Off (${nm}): a plain bubble at the marker, its tail to it, the ring; no character, nothing over the words`, tt !== null && m[0] && m[1] && m[2] < 90 && m[3] !== 'none' && m[4] && m[5] === 0 && m[6], m);
   }
-  await fresh('S.guideCfg.gbtn="star";fabLayer();'); const pl = await R('var b=ph.querySelector(".gdbub");[G.gd.cur&&G.gd.cur.item.id,b.classList.contains("plain"),b.dataset.tail]');
+  await fresh('D.guide.gbtn="star";fabLayer();'); const pl = await R('var b=ph.querySelector(".gdbub");[G.gd.cur&&G.gd.cur.item.id,b.classList.contains("plain"),b.dataset.tail]');
   ok('...the opening with Mascot Off: a plain bubble, no tail', pl[0] === 'opening' && pl[1] && pl[2] === 'none', pl);
-  await R('S.guideCfg.gbtn="both";S.guideCfg.mascot=true;fabLayer()');
+  await R('D.guide.gbtn="both";D.guide.mascot=true;fabLayer()');
 
   // ---------- 8. Reduce Motion: no hop, a still ring, the words stay ----------
-  await fresh('S.reduce=true;S.guidance.breathing=5;renderPhone(false);');
+  await fresh('P.reduce=true;D.guidance.breathing=5;renderPhone(false);');
   await runTill('tapmarker', 30000);
   const rm = await R('var az=ph.querySelector(".azfab"),rg=ph.querySelector(".gdring"),b=ph.querySelector(".gdbub");[az.getAnimations().length,az.style.translate,rg.classList.contains("gd-pulse"),getComputedStyle(rg).animationName,b.classList.contains("gd-in"),b.textContent]');
   ok('Reduce Motion: Azu is beside the marker at once (no hop), the ring is still, the bubble has no motion, its words stay', rm[0] === 0 && /px/.test(rm[1]) && !rm[2] && rm[3] === 'none' && !rm[4] && rm[5] === 'Tap here.', rm);
-  await R('S.reduce=false;renderPhone(false)');
+  await R('P.reduce=false;renderPhone(false)');
 
   // ---------- 9. the wall's pill is gone; Global Scene links to the guidance ----------
-  await R('gdStop("test");S.view="card";S.stop="closed";renderPhone(false)');
-  const pill = await R('[!!ph.querySelector(".walltip"),document.getElementById("wall").innerHTML.indexOf("walltip")<0,S.wallTip===undefined]');
+  await R('gdStop("test");ui.view="card";ui.stop="closed";renderPhone(false)');
+  const pill = await R('[!!ph.querySelector(".walltip"),document.getElementById("wall").innerHTML.indexOf("walltip")<0,ui.wallTip===undefined]');
   ok('The wall hint\'s pill is gone (no .walltip on the wall, no wallTip state)', !pill[0] && pill[1] && pill[2], pill);
-  await R('S.tab="global";S.ui.level=1;S.op={"g:11":true};renderEditor()');
+  await R('ui.tab="global";ui.level=1;ui.op={"g:11":true};renderEditor()');
   const g11 = await R('var f=ed.querySelector(\'[data-fo="g:11"]\'),bt=f&&f.querySelector("[data-goto]");[!!bt&&/Said by the guide: Guide › The mascot speaks up › App › The start/.test(bt.textContent),!f.querySelector(\'[data-set="@wallTip"],[data-set="wallTip"]\'),f.querySelectorAll(".row").length]');
   await p.locator('[data-fo="g:11"] [data-goto]').click(); await W(300);
-  const went = await R('var g=ed.querySelector(\'[data-fo="gd:g:start"]\');[S.tab,!!g&&g.open,!!g&&g.getBoundingClientRect().top<window.innerHeight&&g.getBoundingClientRect().bottom>0]');
+  const went = await R('var g=ed.querySelector(\'[data-fo="gd:g:start"]\');[ui.tab,!!g&&g.open,!!g&&g.getBoundingClientRect().top<window.innerHeight&&g.getBoundingClientRect().bottom>0]');
   ok('Global Scene > Onboarding hints: one link row, "Said by the guide: Guide › Azu speaks up › App › The start", which opens it', g11[0] && g11[1] && g11[2] === 1 && went[0] === 'guide' && went[1] && went[2], [g11, went]);
-  const words = await R('[TXOWN.wall_tip,TXOWN.gd_opening,TXOWN.gd_opening_back,S.tx.gd_opening.pt.length>10,S.tx.wall_tip.pt,ownerName("gd:i:tapmarker")]');
+  const words = await R('[TXOWN.wall_tip,TXOWN.gd_opening,TXOWN.gd_opening_back,D.words.tx.gd_opening.pt.length>10,D.words.tx.wall_tip.pt,ownerName("gd:i:tapmarker")]');
   ok('The words in Languages & Terms, owned by their items (Tap a marker reuses wall_tip), in each language', words[0] === 'gd:i:tapmarker' && words[1] === 'gd:i:opening' && words[2] === 'gd:i:opening' && words[3] && words[4] === 'Toque aqui.' && /Guide › The mascot speaks up › The start › Tap a marker/.test(words[5]), words);
   }
   if (PART2) {
   // ---------- 10. the Guide tab: its sections; every former 6 · Guide row, the same rows ----------
-  await R('S.tab="guide";S.ui.level=9;S.op={};renderEditor()');
+  await R('ui.tab="guide";ui.level=9;ui.op={};renderEditor()');
   const gt = await R('[[].map.call(ed.querySelectorAll(":scope > details[data-fo]"),function(d){return d.dataset.fo+"|"+d.querySelector("summary").textContent.split(" · ").slice(0,2).join(" · ")}),[].map.call(document.querySelectorAll(".utab"),function(t){return t.textContent})]');
   // guidance round 14: the six sections of the developer's tab (test9r checks them in depth)
   ok('The Guide tab, after Detail Card: 1 · Azu, 2 · The tour, 3 · Games on the tour, 4 · Azu speaks up, 5 · Ask Azu, 6 · Preview & Test (last: round 14b)', JSON.stringify(gt[0].map(s => s.split('|')[1])) === JSON.stringify(['1 · The mascot', '2 · The tour', '3 · Games on the tour', '4 · The mascot speaks up', '5 · Ask the mascot', '6 · Preview & Test']) && gt[1].indexOf('Guide') === gt[1].indexOf('Detail Card') + 1, gt);
@@ -197,39 +197,39 @@ const BEFORE = { rows: ["Fixed rules|", "Voice|guideCfg.voice", "Speaking now|",
   // round 17: Tell me more (s7more) and the saved place's rows in Resume button (Remember where the visitor stopped, Forget after, Kept now) too
   // round 14: Moments and Water break after are gone (Games on the tour holds them), the engine's Guide mode is a line that names Answers from
   // (one switch, said once), Tour controls' words are in Guide panel (the foldout had no row)
-  BEFORE.rows = BEFORE.rows.filter(r => !/^(Moments|Water break after)\|/.test(r)).map(r => r === 'Guide mode|guideCfg.ask' ? 'Guide mode|' : r); BEFORE.fos = BEFORE.fos.filter(f => f !== 's7tour');
+  BEFORE.rows = BEFORE.rows.filter(r => !/^(Moments|Water break after)\|/.test(r)).map(r => r === 'Guide mode|D.guide.ask' ? 'Guide mode|' : r); BEFORE.fos = BEFORE.fos.filter(f => f !== 's7tour');
   // guidance round 19: the Editor says "the mascot" (these rows renamed); Narration's Voice is Sources and Recorded voice is The voice (both in
   // 1 · The mascot › Voice); new: Who's three rows, A line with no recording, Coverage, and a link row where rows moved from
-  const R19 = { 'Voice|guideCfg.voice': 'Sources|guideCfg.voice', 'Recorded voice|guideCfg.voiceSet': 'The voice|guideCfg.voiceSet', "Azu's own words|guideCfg.bubbles": "The mascot's own words|guideCfg.bubbles",
-    'Azu points|guideCfg.point': 'The mascot points|guideCfg.point', 'Tap on Azu|guideCfg.azuTap': 'Tap on the mascot|guideCfg.azuTap', 'Azu comments|guidance.kinds.1.groups.0.on': 'The mascot comments|guidance.kinds.1.groups.0.on' };
-  BEFORE.rows = BEFORE.rows.map(r => R19[r] || r).concat(['Name|', 'First introduction|', 'Where the name shows|', 'A line with no recording|guideCfg.noRec', 'Coverage|', 'Voice and speed|', "The answers' voice|", 'Highlight|']);
+  const R19 = { 'Voice|D.guide.voice': 'Sources|D.guide.voice', 'Recorded voice|D.guide.voiceSet': 'The voice|D.guide.voiceSet', "Azu's own words|D.guide.bubbles": "The mascot's own words|D.guide.bubbles",
+    'Azu points|D.guide.point': 'The mascot points|D.guide.point', 'Tap on Azu|D.guide.azuTap': 'Tap on the mascot|D.guide.azuTap', 'Azu comments|D.guidance.kinds.1.groups.0.on': 'The mascot comments|D.guidance.kinds.1.groups.0.on' };
+  BEFORE.rows = BEFORE.rows.map(r => R19[r] || r).concat(['Name|', 'First introduction|', 'Where the name shows|', 'A line with no recording|D.guide.noRec', 'Coverage|', 'Voice and speed|', "The answers' voice|", 'Highlight|']);
   // round 17c: The tour's end (s7end) is a new foldout of 2 · The tour, its rows left out; The mascot asks is one of its rows;
   // round 20 (the review): Wall (the Lab) moved to 6 · Preview & Test (a Lab stand-in), Knowledge's unnamed row is What is sent, Start the guide glows is new
-  BEFORE.rows = BEFORE.rows.filter(r => r !== 'Wall (the Lab)|camCfg.wall').map(r => r === '|' ? 'What is sent|' : r).concat(['Start the guide glows|guideCfg.heroGlow']);
+  BEFORE.rows = BEFORE.rows.filter(r => r !== 'Wall (the Lab)|LAB.wall').map(r => r === '|' ? 'What is sent|' : r).concat(['Start the guide glows|D.guide.heroGlow']);
   // round 21: Speech on screen's new rows (where the words go during a tour, the teleprompter's height, a tip's bubble, the panels' look)
-  BEFORE.rows = BEFORE.rows.concat(['Words during a tour|guideCfg.tourWords', 'Its height|guideCfg.teleH', "A tip's bubble|guideCfg.bubbleOut", "The panels' look|guideCfg.pSkin"]);
+  BEFORE.rows = BEFORE.rows.concat(['Words during a tour|D.guide.tourWords', 'Its height|D.guide.teleH', "A tip's bubble|D.guide.bubbleOut", "The panels' look|D.guide.pSkin"]);
   // round 22: the dimming is now an option of Focus (Dim the rest became How dark); the tour's movement rows are new
-  BEFORE.rows = BEFORE.rows.map(r => r === 'Dim the rest|guideCfg.scrim' ? 'How dark|guideCfg.scrim' : r).concat(["The visitor's hand|guideCfg.hand", 'Show blocks in use|guideCfg.inUse', 'The scroll|guideCfg.scroll']);
+  BEFORE.rows = BEFORE.rows.map(r => r === 'Dim the rest|D.guide.scrim' ? 'How dark|D.guide.scrim' : r).concat(["The visitor's hand|D.guide.hand", 'Show blocks in use|D.guide.inUse', 'The scroll|D.guide.scroll']);
   const fosIn = await R(`${JSON.stringify(BEFORE.fos)}.filter(function(id){return!ed.querySelector('[data-fo="'+id+'"]')})`);
   ok(`...it holds every former 6 · Guide row: ${BEFORE.rows.length} before, ${after.length} now, the same rows (and the ${BEFORE.fos.length} foldouts)`, sortJ(after) === sortJ(BEFORE.rows) && fosIn.length === 0, { missing: BEFORE.rows.filter(r => after.indexOf(r) < 0), extra: after.filter(r => BEFORE.rows.indexOf(r) < 0), fosIn });
-  await R('S.tab="card";renderEditor()');
+  await R('ui.tab="card";renderEditor()');
   const dc = await R('[!ed.querySelector(\'[data-fo^="s7"]\'),(ed.querySelector(\'[data-fo="s8"] > summary\')||{}).textContent.indexOf("6 · Audiences")===0]');
   ok('...the Detail Card has none of them, and 6 · Audiences stays there', dc[0] && dc[1], dc);
   // a Guide word's owner opens in the Guide tab (Languages & Terms' links)
-  await R('goOwner("s7dock")'); const ow = await R('[S.tab,!!ed.querySelector(\'[data-fo="s7dock"]\')&&ed.querySelector(\'[data-fo="s7dock"]\').open,ed.querySelector(\'[data-fo="gt1"]\').open]');
+  await R('goOwner("s7dock")'); const ow = await R('[ui.tab,!!ed.querySelector(\'[data-fo="s7dock"]\')&&ed.querySelector(\'[data-fo="s7dock"]\').open,ed.querySelector(\'[data-fo="gt1"]\').open]');
   ok('...a word of the Guide panel opens its foldout in the Guide tab', ow[0] === 'guide' && ow[1] && ow[2], ow);
   // opening a section still shows its part (FOCUS): the Guide panel, Ask about the view, The start
   const fx = [];
   for (const [id, sel] of [['s7dock', '.gblock'], ['s7mascot', '.gblock'], ['gd:g:start', '[data-marker]']]) {
-    await R(`S.tab="guide";S.ui.level=1;S.op={gt1:true,gt3:true,gt4:true,"gd:app":true,s7mascot:false};renderEditor();document.body.dataset.lastfocus=""`); await W(200);
+    await R(`ui.tab="guide";ui.level=1;ui.op={gt1:true,gt3:true,gt4:true,"gd:app":true,s7mascot:false};renderEditor();document.body.dataset.lastfocus=""`); await W(200);
     await R(`var d=ed.querySelector('[data-fo="${id}"]');d.open=true`); await W(500); fx.push([id, await R('document.body.dataset.lastfocus||""')]);
   }
   ok('...opening a section shows its part on the phone (FOCUS): Guide panel, Azu (Mascot), The start', fx.every(f => /\|found\|/.test(f[1])), fx);
 
   // ---------- 11. 4 · Guidance: the rows, their defaults, each row's demo ----------
-  await R(base + 'G.gd.manual=false;G.gd.rate=1;S.tab="guide";S.ui.level=9;S.op={};renderEditor()');
+  await R(base + 'G.gd.manual=false;G.gd.rate=1;ui.tab="guide";ui.level=9;ui.op={};renderEditor()');
   const rows = await R('var o=[];ed.querySelectorAll(\'[data-fo="gt4"] .row, [data-fo="gt4"] summary [data-set]\').forEach(function(r){var k=r.matches(".row")?rowKey(r):r.dataset.set.slice(1);if(k&&o.indexOf(k)<0)o.push(k)});o');
-  const defs = await R('var i=S.guidance.items;[S.guidance.on,S.guidance.breathing,i.opening.essential,i.opening.shows,i.tapmarker.shows,i.tapmarker.max,i.tapmarker.again,i.tapmarker.doneWhen,i.tapmarker.stillFor,i.tapmarker.afterPrev,ed.querySelector(\'[data-fo="gd:i:tapmarker"] .gdrb\').textContent]');
+  const defs = await R('var i=D.guidance.items;[D.guidance.on,D.guidance.breathing,i.opening.essential,i.opening.shows,i.tapmarker.shows,i.tapmarker.max,i.tapmarker.again,i.tapmarker.doneWhen,i.tapmarker.stillFor,i.tapmarker.afterPrev,ed.querySelector(\'[data-fo="gd:i:tapmarker"] .gdrb\').textContent]');
   ok('Guidance\'s defaults: On, breathing 15 s; Opening Essential once a visit; Tap a marker until done at most 3, again after 25 s, done when a card opens, still 1.2 s, 20 s after the opening; its read-back in words',
     JSON.stringify(defs.slice(0, 10)) === JSON.stringify([true, 15, true, 'visit', 'until', 3, 25, 'card', 1.2, 20]) && /at most about every 25 s, up to 3 times a visit, until the visitor opens a card/.test(defs[10]), defs);
   ok(`...every Guidance row has its demo (${rows.length} rows: Overall, each item's On, importance, Essential, Shows, At most, Again after, Done when)`, rows.length >= 14 && (await R(`${JSON.stringify(rows)}.filter(function(k){return!rowDemoOf(k)})`)).length === 0, rows);
@@ -243,26 +243,26 @@ const BEFORE = { rows: ["Fixed rules|", "Voice|guideCfg.voice", "Speaking now|",
   }
   ok('...a press on each Guidance row shows its demo on the phone: the tip (or its chip) ringed', missing.length === 0, { missing, shown: shown.length });
   // ▸ Show now on an item's row: the phone on the wall, the item now (pulled: the visitor's memory unchanged)
-  await R('S.guidance.on=false;gdResetVisitor();S.stop="full";renderPhone(false)'); const mem0 = await R('JSON.stringify(S.gdVisitor.visit.items)');
+  await R('D.guidance.on=false;gdResetVisitor();ui.stop="full";renderPhone(false)'); const mem0 = await R('JSON.stringify(P.gdVisitor.visit.items)');
   await p.locator('[data-gdshow="tapmarker"]').click(); await until('!!G.gd.cur', 2500); await W(700);
-  const sn = await R('[S.stop,G.gd.cur&&G.gd.cur.item.id,G.gd.cur&&G.gd.cur.pull,!!ph.querySelector(".gdring"),JSON.stringify(S.gdVisitor.visit.items)]');
-  await R('S.guidance.on=true');
+  const sn = await R('[ui.stop,G.gd.cur&&G.gd.cur.item.id,G.gd.cur&&G.gd.cur.pull,!!ph.querySelector(".gdring"),JSON.stringify(P.gdVisitor.visit.items)]');
+  await R('D.guidance.on=true');
   ok('▸ Show now on Tap a marker: the phone on the wall, the tip at the marker now; a demo writes no memory', sn[0] === 'closed' && sn[1] === 'tapmarker' && sn[2] && sn[3] && sn[4] === mem0, sn);
   // Again after: twice, with the ×10 countdown chip between
-  await R('document.body.dataset.rowdemo="";var lb=ed.querySelector(\'[data-num="@guidance.items.tapmarker.again"]\').closest(".row").querySelector("label.rd");lb.click()');
+  await R('document.body.dataset.rowdemo="";var lb=ed.querySelector(\'[data-num="@D.guidance.items.tapmarker.again"]\').closest(".row").querySelector("label.rd");lb.click()');
   const chips = new Set(); let pulls = 0, wasOn = false; const t1 = Date.now();
   while (Date.now() - t1 < 12000) { const s = await R('[(ph.querySelector(".gdchip")||{}).textContent||"",!!(G.gd.cur&&G.gd.cur.pull)]'); if (s[0]) chips.add(s[0].replace(/\d+ s$/, 'n s')); if (s[1] && !wasOn) pulls++; wasOn = s[1]; await W(100); }
   ok('...Again after\'s demo: the tip, a ×10 countdown chip ("Again after 25 s"), the tip again, then how often in words', pulls === 2 && chips.has('×10 · Again after 25 s: n s') && [...chips].some(c => /at most about every 25 s/.test(c)), { pulls, chips: [...chips] });
   // the self-test fails a Guide tab row with no demo
-  await R('on("edGuide.html",function(h){if(!window.__fake)return h;var d=document.createElement("div");d.innerHTML=h;addRows(d,"gd:overall",row("A row with no demo",pseg("guidance.noDemoRow",["a","b"],["A","B"]),""));return d.innerHTML});window.__fake=1;S.guidance.noDemoRow="a"');
+  await R('on("edGuide.html",function(h){if(!window.__fake)return h;var d=document.createElement("div");d.innerHTML=h;addRows(d,"gd:overall",row("A row with no demo",pseg("D.guidance.noDemoRow",["a","b"],["A","B"]),""));return d.innerHTML});window.__fake=1;D.guidance.noDemoRow="a"');
   const st = await R('var j=extPoint("selfTest.res").filter(function(f){return String(f).indexOf("rowsWithoutDemo")>=0})[0],r=j([]);r.map(function(x){return x.tab+" "+x.key+" "+x.result.slice(0,7)})');
-  await R('window.__fake=0;delete S.guidance.noDemoRow;renderEditor()');
-  ok('The self-test fails a row of the Guide tab with no demo (NO DEMO)', st.length === 1 && /^guide @guidance\.noDemoRow NO DEMO/.test(st[0]), st);
+  await R('window.__fake=0;delete D.guidance.noDemoRow;renderEditor()');
+  ok('The self-test fails a row of the Guide tab with no demo (NO DEMO)', st.length === 1 && /^guide @D\.guidance\.noDemoRow NO DEMO/.test(st[0]), st);
 
   }
   if (!PART2) {
   // ---------- 12. 0 · Preview & Test: Show next now and why; the visitor ----------
-  await R(base + 'G.gd.manual=true;gdStop("test");gdResetVisitor();S.tab="guide";S.ui.level=1;S.op={gt0:true};renderEditor()');
+  await R(base + 'G.gd.manual=true;gdStop("test");gdResetVisitor();ui.tab="guide";ui.level=1;ui.op={gt0:true};renderEditor()');
   await p.locator('[data-gdnext]').click(); await W(200);
   const nx1 = await R('[G.gd.cur&&G.gd.cur.item.id,ed.querySelector("#gdwhy").textContent]');
   await p.locator('[data-gdnext]').click(); await W(200);
@@ -273,7 +273,7 @@ const BEFORE = { rows: ["Fixed rules|", "Voice|guideCfg.voice", "Speaking now|",
   ok('The visitor: New visit (a returning visitor) and Reset the visitor (a first visit), said in words', /^Visit 2 \(a returning visitor\)/.test(v1) && /^Visit 1 \(a first visit\) · Opening message: \d this visit/.test(v2), [v1, v2]);
 
   // ---------- 13. the scenes in Ask Azu's console, pressed as the developer does ----------
-  await R(base + 'G.gd.manual=false;G.gd.rate=1;S.ui.level=1;S.tab="guide";S.op={gt3:true,s7agent:true};renderEditor();var f=ed.querySelector(\'[data-fo="s7agent"]\');if(f)f.open=true');
+  await R(base + 'G.gd.manual=false;G.gd.rate=1;ui.level=1;ui.tab="guide";ui.op={gt3:true,s7agent:true};renderEditor();var f=ed.querySelector(\'[data-fo="s7agent"]\');if(f)f.open=true');
   const scenes = await R('AGSCENES.map(function(s,i){return[i,s.id,s.label]}).filter(function(x){return/^gd_/.test(x[1])})');
   ok('The console lists the guidance\'s five scenes (first visit, ignore it, open a card, panning, Mascot Off)', scenes.length === 5, scenes.map(s => s[2]));
   for (const [i, id, label] of scenes) {

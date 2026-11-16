@@ -17,7 +17,7 @@ function renderEl(kind,style,c,i,still){var a={kind:kind,style:style,c:c,i:i,sti
      if(o.calltap==="flip"&&!still)h='<div class="flip" data-flip><div class="in2"><div class="fc"><b>'+esc(TXT("fun_fact_label"))+'</b><p>'+esc(tx)+'</p></div><div class="bc"><b>'+esc(ti)+'</b><p>'+esc(C(c,"back",DEMO.back))+'</p></div></div></div>';
      else h='<div class="el-callout '+(o.tone||"neutral")+size+'"><b class="'+tone+'">'+esc(ti)+'</b><p>'+esc(tx)+'</p></div>';break;
    case"pull_quote":h='<blockquote class="el-quote '+(o.variant||"serif")+'"><q>'+esc(C(c,"text",DEMO.quote))+'</q><cite>'+esc(c.cite||DEMO.cite)+'</cite></blockquote>';break;
-   case"list":var tag=o.marker==="numbers"?"ol":"ul",items=(c.items&&c.items[S.lang])||DEMO.list[S.lang];h='<'+tag+' class="el-list">'+items.map(function(x){return"<li>"+esc(x)+"</li>"}).join("")+'</'+tag+'>';break;
+   case"list":var tag=o.marker==="numbers"?"ol":"ul",items=(c.items&&c.items[P.lang])||DEMO.list[P.lang];h='<'+tag+' class="el-list">'+items.map(function(x){return"<li>"+esc(x)+"</li>"}).join("")+'</'+tag+'>';break;
    case"picture":var im=c.img||"g3",cap=C(c,"cap",DEMO.piccap);
      if(o.pictap==="hold"&&!still)h='<div class="hold cover" data-hold><img alt="" src="'+IMG[im]+'"><div class="ring"></div></div>';
      else if(o.pictap==="tilt"&&!still)h='<div class="tilt" data-tilt><img alt="" src="'+IMG[im]+'"></div>';
@@ -35,9 +35,9 @@ function renderEl(kind,style,c,i,still){var a={kind:kind,style:style,c:c,i:i,sti
    case"model_3d":h='<div class="turn" data-turnt style="background-image:url('+IMG[c.img||"g1"]+')"><span class="hint2">'+(TXH("model_3d_hint"))+'</span></div>';break;
    case"panorama":h='<div class="pano" data-pano style="background-image:url('+IMG[c.img||"hero"]+')"><span class="hint2">'+(TXH("panorama_360_drag_hint"))+'</span></div>';break;
    case"scrolly":h=still?'<figure class="el-pic"><div class="fr"><img alt="" src="'+IMG.g3+'"></div></figure>':'<div class="scrub" data-scrub><div class="stick"><img alt="" src="'+IMG.g3+'"><img alt="" src="'+IMG.before+'" style="opacity:0"><img alt="" src="'+IMG.g2+'" style="opacity:0"></div>'+
-     [T("1662: the palace along the river.","1662: o palácio ao longo do rio."),T("Before 1755: the Torreão and the opera.","Antes de 1755: o Torreão e a ópera."),T("Today: the square that took its place.","Hoje: a praça que ficou no seu lugar.")].map(function(s,j){var it=c.items&&(c.items[S.lang]||c.items.en);return'<div class="step">'+esc(it&&it[j]!=null?it[j]:L(s))+'</div>'}).join("")+'<div style="height:60px"></div></div>';break;
+     [T("1662: the palace along the river.","1662: o palácio ao longo do rio."),T("Before 1755: the Torreão and the opera.","Antes de 1755: o Torreão e a ópera."),T("Today: the square that took its place.","Hoje: a praça que ficou no seu lugar.")].map(function(s,j){var it=c.items&&(c.items[P.lang]||c.items.en);return'<div class="step">'+esc(it&&it[j]!=null?it[j]:L(s))+'</div>'}).join("")+'<div style="height:60px"></div></div>';break;
    case"map":h='<div class="map"><svg viewBox="0 0 320 200"><path d="M0 150C60 130 120 165 180 150S290 120 320 135V200H0Z" fill="#9FC1D6" opacity=".7"/><text x="230" y="185" font-size="11" fill="#2E5870" font-family="sans-serif">Tagus</text><rect x="120" y="92" width="70" height="42" fill="none" stroke="var(--fam)" stroke-width="2"/><path d="M60 40L120 92M190 92L260 50M155 92V20" stroke="var(--ink2)" stroke-width="1.5" opacity=".5"/><g transform="translate(145 70)">'+PIN.replace("<svg",'<svg width="22" height="30"')+'</g></svg></div>';break;
-   case"timeline":var ev=[["c. 1500",T("The court moves to the river","A corte muda-se para o rio")],["1580s",T("The Torreão rises","Ergue-se o Torreão")],["1755",T("Earthquake, fire and tsunami","Terramoto, incêndio e maremoto")]];if(c.items&&(c.items[S.lang]||c.items.en))ev=(c.items[S.lang]||c.items.en).map(function(s){var p=s.split(" · ");return[p[0],p.slice(1).join(" · ")]});
+   case"timeline":var ev=[["c. 1500",T("The court moves to the river","A corte muda-se para o rio")],["1580s",T("The Torreão rises","Ergue-se o Torreão")],["1755",T("Earthquake, fire and tsunami","Terramoto, incêndio e maremoto")]];if(c.items&&(c.items[P.lang]||c.items.en))ev=(c.items[P.lang]||c.items.en).map(function(s){var p=s.split(" · ");return[p[0],p.slice(1).join(" · ")]});
      h='<div class="tl">'+ev.map(function(e){return'<div><b>'+e[0]+'</b><span>'+esc(L(e[1]))+'</span></div>'}).join("")+'</div>';break;
    case"swatches":h='<div class="sw">'+[["#1F4E9C","Cobalt"],["#C99A3B","Ochre"],["#B4572E","Terracotta"],["#EFE9DC","Lime white"],["#4E7A6B","River green"]].map(function(s){return'<div><i style="background:'+s[0]+';'+(o.swsize==="s"?"height:28px":"")+'"></i><small>'+s[1]+'</small></div>'}).join("")+'</div>';break;
    case"divider":var f=effectById(o.uses||"l_hair");h=f?(f.grp==="edge"?'<div style="margin:16px -20px">'+edgeSvg(f)+'</div>':lineSvg(f)):'<div class="el-div missing"></div>';break;
@@ -66,14 +66,14 @@ OPTS.heading=["tone","size","align","rule"];OPTS.pull_quote=["variant","tone"];O
 OPTS.picture_pair=["width","frame","pptap"];OPTS.carousel=["layout","marks","width","frame"];OPTS.video=["width","frame","vtap"];OPTS.audio=["alook","speed","acap"];
 OPTS.model_3d=["fit","spin"];OPTS.map=[];OPTS.swatches=["swsize","swlayout","code"];
 var ODEF={tone:"neutral",align:"start",cshape:"box",ratio:"auto",pictap:"viewer",noimg:"hide",frame:"rect",pptap:"viewer",marks:"dots",width:"inset",vtap:"here",speed:"narration",acap:"on",fit:"yaw",code:"off",swlayout:"row"};
-Object.keys(S.styles).forEach(function(k){(S.styles[k]||[]).forEach(function(st){(OPTS[k]||[]).forEach(function(o){if(st.o[o]==null)st.o[o]=ODEF[o]!=null?ODEF[o]:OPTDEF[o].v[0]});if(st.o.pictap==="none"&&k==="picture"&&st.id==="st16")st.o.pictap="viewer"})});
-(S.styles.carousel||[]).forEach(function(st){st.o.width="bleed"});(S.styles.pull_quote||[]).forEach(function(st){st.o.tone="family"});
-S.styles.title[0].o.size="l";S.styles.lede[0].o.size="l";(S.styles.panorama||[]).forEach(function(st){st.o.gyro="off"});
-S.styles.callout.push({id:"st46",name:"Postcard",o:{tone:"family",size:"m",cshape:"postcard",calltap:"none"},enter:"tilt",proposed:1});
-S.styles.list.push({id:"st47",name:"Steps",o:{marker:"steps"},enter:"family"});
-S.styles.carousel.push({id:"st48",name:"Grid",o:{layout:"grid",marks:"none",width:"inset",frame:"rect"},enter:"fade"},{id:"st49",name:"Filmstrip",o:{layout:"film",marks:"count",width:"inset",frame:"rect"},enter:"fade"});
+Object.keys(D.blocks.styles).forEach(function(k){(D.blocks.styles[k]||[]).forEach(function(st){(OPTS[k]||[]).forEach(function(o){if(st.o[o]==null)st.o[o]=ODEF[o]!=null?ODEF[o]:OPTDEF[o].v[0]});if(st.o.pictap==="none"&&k==="picture"&&st.id==="st16")st.o.pictap="viewer"})});
+(D.blocks.styles.carousel||[]).forEach(function(st){st.o.width="bleed"});(D.blocks.styles.pull_quote||[]).forEach(function(st){st.o.tone="family"});
+D.blocks.styles.title[0].o.size="l";D.blocks.styles.lede[0].o.size="l";(D.blocks.styles.panorama||[]).forEach(function(st){st.o.gyro="off"});
+D.blocks.styles.callout.push({id:"st46",name:"Postcard",o:{tone:"family",size:"m",cshape:"postcard",calltap:"none"},enter:"tilt",proposed:1});
+D.blocks.styles.list.push({id:"st47",name:"Steps",o:{marker:"steps"},enter:"family"});
+D.blocks.styles.carousel.push({id:"st48",name:"Grid",o:{layout:"grid",marks:"none",width:"inset",frame:"rect"},enter:"fade"},{id:"st49",name:"Filmstrip",o:{layout:"film",marks:"count",width:"inset",frame:"rect"},enter:"fade"});
 var ptSteps=patternById("pt5");if(ptSteps)ptSteps.rows[1].style="st47";
-S.patterns.push({id:"pt9",name:"Text",cat:"Text",rows:[{kind:"paragraph",style:"st8"}]},{id:"pt10",name:"Text with headings",cat:"Text",rows:[{kind:"heading",style:"st5"},{kind:"paragraph",style:"st8"}]});
+D.blocks.patterns.push({id:"pt9",name:"Text",cat:"Text",rows:[{kind:"paragraph",style:"st8"}]},{id:"pt10",name:"Text with headings",cat:"Text",rows:[{kind:"heading",style:"st5"},{kind:"paragraph",style:"st8"}]});
 /* ----- drawing the new options ----- */
 function stepsList(items){return '<ol class="el-steps">'+items.map(function(x,i){var p=String(x).split(": ");return'<li><i>'+(i+1)+'</i><div><b>'+esc(p[0])+'</b>'+(p[1]?'<span>'+esc(p[1])+'</span>':"")+'</div></li>'}).join("")+'</ol>'}
 function carouselStill(st,c){var o=st.o,ci=c.imgs||["g1","g2","g3","before"],arch=o.frame==="arch"?" arch":"",h;
@@ -85,8 +85,8 @@ function carouselStill(st,c){var o=st.o,ci=c.imgs||["g1","g2","g3","before"],arc
   else h='<div class="el-car'+(o.width==="inset"?" inset":"")+'">'+ci.map(function(x){return'<div class="fr'+arch+'"><img alt="" src="'+IMG[x]+'"></div>'}).join("")+'</div>';
   return h+marks}
 on("renderEl.answer",function(a){var kind=a.kind,style=a.style,c=a.c,i=a.i,still=a.still,o=(style&&style.o)||{};c=c||{};
-  if(kind==="carousel"&&(still||o.layout!=="one")){if(!Object.keys(c).length)c=S.demoC.carousel||{};var hc=carouselStill(style,c)+(c.cap?'<div class="el-pic" style="margin-top:6px"><figcaption>'+esc(L(c.cap))+'</figcaption></div>':"");return still?hc:wrapMv(hc,entranceOf(style),i)}
-  if(kind==="list"&&o.marker==="steps"){if(!Object.keys(c).length)c=S.demoC.list||{};var it=(c.items&&(c.items[S.lang]||c.items.en))||DEMO.list[S.lang];var hl=stepsList(it);return still?hl:wrapMv(hl,entranceOf(style),i)}
+  if(kind==="carousel"&&(still||o.layout!=="one")){if(!Object.keys(c).length)c=LAB.demoC.carousel||{};var hc=carouselStill(style,c)+(c.cap?'<div class="el-pic" style="margin-top:6px"><figcaption>'+esc(L(c.cap))+'</figcaption></div>':"");return still?hc:wrapMv(hc,entranceOf(style),i)}
+  if(kind==="list"&&o.marker==="steps"){if(!Object.keys(c).length)c=LAB.demoC.list||{};var it=(c.items&&(c.items[P.lang]||c.items.en))||DEMO.list[P.lang];var hl=stepsList(it);return still?hl:wrapMv(hl,entranceOf(style),i)}
   if(kind==="picture"&&c.img==="__none"){var hn=o.noimg==="initial"?'<figure class="el-pic arch noimg"><div class="fr"><span>'+esc(L(DEMO.heading).charAt(0))+'</span></div></figure>':"";return hn}});
 on("renderEl.html",function(h,a){var kind=a.kind,o=(a.style&&a.style.o)||{};
   if(kind==="heading"&&o.align==="centre")h=h.replace('class="el-heading','class="el-heading a-centre');
@@ -103,17 +103,17 @@ on("renderEl.html",function(h,a){var kind=a.kind,o=(a.style&&a.style.o)||{};
   if(kind==="spacer")h=h.replace(/--h:\d+px/,"--h:"+({s:16,m:32,l:48}[o.space||"m"])+"px");
   return h});
 /* the Lab's map look leaves: the map is an authored picture */
-(S.styles.map||[]).forEach(function(st){delete st.o.mlook});
-ed.addEventListener("change",function(e){var t=e.target;if(t.dataset.sel!=="style.self")return;e.stopImmediatePropagation();var st=styleById(S.sel.style);if(!st)return;st.self=t.value;renderAll(true);show("demo","s:"+st.id)},true);
+(D.blocks.styles.map||[]).forEach(function(st){delete st.o.mlook});
+ed.addEventListener("change",function(e){var t=e.target;if(t.dataset.sel!=="style.self")return;e.stopImmediatePropagation();var st=styleById(ui.sel.style);if(!st)return;st.self=t.value;renderAll(true);show("demo","s:"+st.id)},true);
 /* ----- the Editor: notes and rows ----- */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   var en=innerOf(d,"s3e");if(en)en.insertAdjacentHTML("afterbegin",'<div class="note">An app may register its own element kinds; they appear here with their styles.</div>');
   d.querySelectorAll('[data-fo^="el:"] .inner').forEach(function(f){f.querySelectorAll(":scope > .row").forEach(function(r){var lb=r.querySelector("label");if(lb&&lb.textContent==="Proportion")lb.insertAdjacentHTML("beforeend",' <span class="prop">PROPOSED</span>')})});
-  var st=styleById(S.sel.style);if(st&&(kindOfStyle(st.id)==="picture"||kindOfStyle(st.id)==="video")){var f=innerOf(d,"el:"+kindOfStyle(st.id)),ws=f&&Array.prototype.filter.call(f.querySelectorAll(":scope > .row"),function(r){var l=r.querySelector("label");return l&&l.textContent==="With the scroll"})[0];
-    if(ws)ws.insertAdjacentHTML("afterend",row("By itself",sel("style.self",[["none","None"]].concat(S.motions.filter(function(m){return m.type==="self"}).map(function(m){return[m.id,m.name]})),st.self||"none"),"A slow move with no scroll (Unity's Slow Zoom and Pan). Only the picture nearest the middle moves by itself.",true))}
+  var st=styleById(ui.sel.style);if(st&&(kindOfStyle(st.id)==="picture"||kindOfStyle(st.id)==="video")){var f=innerOf(d,"el:"+kindOfStyle(st.id)),ws=f&&Array.prototype.filter.call(f.querySelectorAll(":scope > .row"),function(r){var l=r.querySelector("label");return l&&l.textContent==="With the scroll"})[0];
+    if(ws)ws.insertAdjacentHTML("afterend",row("By itself",sel("style.self",[["none","None"]].concat(D.blocks.motions.filter(function(m){return m.type==="self"}).map(function(m){return[m.id,m.name]})),st.self||"none"),"A slow move with no scroll (Unity's Slow Zoom and Pan). Only the picture nearest the middle moves by itself.",true))}
   addRows(d,"s4m",'<div class="note fixed">Fixed rules: the stagger stops growing after 5 rows; only the picture nearest the middle moves by itself; Reduce Motion makes every part whole and still.</div>');
   var bt=d.querySelector('button[disabled][title^="Lab: an SVG"]');if(bt)bt.textContent="+ Import an edge (SVG or a tileable PNG strip)";
-  if(S.ctl.openrow==="shine"&&S.secCfg.look==="cards"&&S.secCfg.rim)addRows(d,"s5openrow",'<div class="note warn">Rim light is on (Sections › All sections): the card already has its one glow (D5). Shine adds a second.</div>');
+  if(D.card.ctl.openrow==="shine"&&D.card.secCfg.look==="cards"&&D.card.secCfg.rim)addRows(d,"s5openrow",'<div class="note warn">Rim light is on (Sections › All sections): the card already has its one glow (D5). Shine adds a second.</div>');
   return d.innerHTML});
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(o\\.speed|o\\.pptap|"));
-on("modelSig.before",function(cx){var x="";if(sigWant(/^o\.noimg/))(S.styles.picture||[]).forEach(function(st){x+=renderEl("picture",st,{img:"__none"},0,true)});cx.noimg=x});on("modelSig.sig",function(s,cx){return s+cx.noimg});
+on("modelSig.before",function(cx){var x="";if(sigWant(/^o\.noimg/))(D.blocks.styles.picture||[]).forEach(function(st){x+=renderEl("picture",st,{img:"__none"},0,true)});cx.noimg=x});on("modelSig.sig",function(s,cx){return s+cx.noimg});

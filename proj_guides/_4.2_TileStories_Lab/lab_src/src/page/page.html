@@ -20,7 +20,7 @@
 
   <section class="ed" aria-label="POI Editor (mock)">
     <div class="edtitle">&#9881; <b>POI Editor</b> <span>· Lab mock of the Unity window</span></div>
-    <div class="edtool"><button class="ubtn" disabled>Load &amp; Populate Rig</button><button class="ubtn clear" disabled>Clear Rig</button><button class="ubtn save" disabled>Save All to JSON</button><button class="ubtn" disabled>Copy to StreamingAssets</button></div>
+    <div class="edtool"><button class="ubtn" type="button" id="undo" disabled title="Undo the last Editor change (Ctrl+Z)">&#8630; Undo</button><button class="ubtn" type="button" id="redo" disabled title="Redo the change undone (Ctrl+Y)">&#8631; Redo</button><span class="edsep" aria-hidden="true"></span><button class="ubtn" disabled>Load &amp; Populate Rig</button><button class="ubtn clear" disabled>Clear Rig</button><button class="ubtn save" disabled>Save All to JSON</button><button class="ubtn" disabled>Copy to StreamingAssets</button></div>
     <div class="utabs" role="tablist">
       <button class="utab g" role="tab" type="button" data-tab="global" aria-selected="false">Global Scene</button>
       <button class="utab s" role="tab" type="button" data-tab="marker" aria-selected="false">Specific Marker</button>

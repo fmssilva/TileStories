@@ -1,14 +1,14 @@
 /* The guide as a person: the introduction, the invitation ladder, pause and resume, the gesture, the step placed above the panel; the phone takes the window's height. */
-S.guideCfg.intro="first";S.guideCfg.insist=2;S.guideCfg.insistAfter=5;S.guideCfg.onScroll="follow";
+D.guide.intro="first";D.guide.insist=2;D.guide.insistAfter=5;D.guide.onScroll="follow";
 /* the demo point's words after the gesture: what the visitor has just revealed */
 (function(){var a={g6:T("That's it: the palace before 1755, and the open square that took its place.","É isso: o palácio antes de 1755 e a praça aberta que ficou no seu lugar."),g9:T("It was Manuel the First, around 1500.","Foi D. Manuel I, por volta de 1500.")};
-  S.guideSteps.forEach(function(s){if(a[s.id])s.after=a[s.id]})})();
+  D.tour.guideSteps.forEach(function(s){if(a[s.id])s.after=a[s.id]})})();
 function pointName(){var h=document.querySelector("#scr .hero h2");return h?h.textContent:""}
 
 /* ----- the page: nothing above or below the phone; the phone takes the height there is ----- */
 function fitPhoneHeight(){var h=Math.round(Math.max(640,Math.min(820,window.innerHeight-48)));if(SCREENS.phone[1]!==h){SCREENS.phone[1]=h;return true}return false}
 fitPhoneHeight();
-var resizeT=0;window.addEventListener("resize",function(){clearTimeout(resizeT);resizeT=setTimeout(function(){if(fitPhoneHeight()&&S.screen==="phone")renderPhone(true)},120)});
+var resizeT=0;window.addEventListener("resize",function(){clearTimeout(resizeT);resizeT=setTimeout(function(){if(fitPhoneHeight()&&LAB.screen==="phone")renderPhone(true)},120)});
 
 /* ----- the voice survives a pause: pausing stops it and keeps the word; going on speaks again from that word (as the app seeks
    its recorded audio). A voice that fails, or goes quiet without a pause, starts again from its word once, then the words go on by time ----- */
@@ -17,9 +17,9 @@ on("sayDevice.after",function(){
   if(G.utter){var u=G.utter;u.addEventListener("error",function(e){if(G.utter!==u||e.error==="interrupted"||e.error==="canceled")return;speakFrom(G.hl&&G.hl.k>=0?G.hl.k:0,true)});
     u.addEventListener("boundary",function(){G.lastWordAt=performance.now()});G.lastWordAt=performance.now()}});
 function speakFrom(k,retry){var a=G.sayArgs;if(!a)return;var full=G.words.slice(),w=full[k];if(!w){a.onEnd();return}
-  if(retry){a.retries++;if(a.retries>1){S.guideMuteOnce=true}}
-  var off=k,sub=a.text.slice(w.i);G.sayInner=true;var mute=S.guideMute;if(S.guideMuteOnce)S.guideMute=true;
-  sayDevice(sub,function(j){a.onWord(j+off)},a.onEnd);S.guideMute=mute;S.guideMuteOnce=false;G.sayInner=false;
+  if(retry){a.retries++;if(a.retries>1){ui.guideMuteOnce=true}}
+  var off=k,sub=a.text.slice(w.i);G.sayInner=true;var mute=P.guideMute;if(ui.guideMuteOnce)P.guideMute=true;
+  sayDevice(sub,function(j){a.onWord(j+off)},a.onEnd);P.guideMute=mute;ui.guideMuteOnce=false;G.sayInner=false;
   G.words=full;if(G.hl){G.hl.k=k;G.hl.p=k;G.hl.at=performance.now()}}
 /* pauseTour and resumeTour: a feature may answer for them (the latest first). pauseNow pauses whatever speaks: a source with its own
    audio pauses it (pauseNow.voice, and resumeNow.voice plays it on); else the device voice stops and keeps its word */
@@ -33,12 +33,12 @@ function resumeTour(){if(firstAnswer("resumeTour.answer")!==undefined||!G.on)ret
 setInterval(function(){if(!G.on||G.paused||!G.utter||G.recAudio||!G.lastWordAt||!(G.hl&&G.hl.seen))return;if(performance.now()-G.lastWordAt>4000&&deviceVoiceSpeaking()){G.lastWordAt=performance.now();speakFrom(G.hl&&G.hl.k>=0?G.hl.k:0,true)}},1000);
 
 /* ----- the introduction: on the first tour (or every tour), Azu walks in and says who it is and how to ask ----- */
-on("runStep.before",function(){if(G.introPending&&G.i===0){G.introPending=false;S.guideSteps.splice(0,0,introStep());G.introNow=true}
+on("runStep.before",function(){if(G.introPending&&G.i===0){G.introPending=false;D.tour.guideSteps.splice(0,0,introStep());G.introNow=true}
   G.tryKind=null;G.tryDone=false;G.tryWait=false;clearTimeout(G.insistT)});
 on("runStep.after",function(){
-  var st=S.guideSteps[G.i];if(st&&st.act==="intro"){var m=ph.querySelector(".mascot");if(m&&!S.reduce){m.classList.add("enter");setTimeout(function(){m.classList.remove("enter")},1400)}}
+  var st=D.tour.guideSteps[G.i];if(st&&st.act==="intro"){var m=ph.querySelector(".mascot");if(m&&!P.reduce){m.classList.add("enter");setTimeout(function(){m.classList.remove("enter")},1400)}}
   if(st&&st.act==="try")G.tryKind=st.wait;G.placedStep=-1;G.stepAt=performance.now();placeStep(st)});
-on("startTour.before",function(from){G.introPending=!from&&!S.howSaved&&(S.guideCfg.intro==="every"||(S.guideCfg.intro==="first"&&!S.introSeen));if(G.introPending)S.introSeen=true});
+on("startTour.before",function(from){G.introPending=!from&&!ui.howSaved&&(D.guide.intro==="every"||(D.guide.intro==="first"&&!P.introSeen));if(G.introPending)P.introSeen=true});
 
 /* ----- the block being told, placed where the guide panel never covers it: a short block at a third of the free height, a tall one near the top ----- */
 /* round 16b (the Architect: at Mini the panel covered the hero's line and its Start button while the teaser played): at the hero (the
@@ -60,22 +60,22 @@ function placeStep(st){if(G.keepScroll||!st||st.act==="intro")return;var el=step
    Placed again (at most 3 times a step) only while the scroll is where the guide put it: once the visitor scrolls, their
    scroll rules (Keeps going / Pauses) and nothing here; never at Full (the panel is then the whole text). Asked by guide/dock.js's 150 ms loop. Unity: the same check on the panel's and the
    bubble's geometryChanged, then the ScrollView's scrollOffset tween */
-function keepStepClear(){if(!G.on||G.keepScroll||S.dockH==="full"||performance.now()<(G.autoScrollTill||0))return;var st=S.guideSteps[G.i],el=st&&st.act!=="intro"&&stepEl(st);if(!el)return;
+function keepStepClear(){if(!G.on||G.keepScroll||ui.dockH==="full"||performance.now()<(G.autoScrollTill||0))return;var st=D.tour.guideSteps[G.i],el=st&&st.act!=="intro"&&stepEl(st);if(!el)return;
   var top=Math.round(scr.scrollTop);if(G.placedStep!==G.i){G.placedStep=G.i;G.placeTries=0;G.placedTop=null}if(G.placedTop==null)G.placedTop=top;if(top!==G.placedTop)return;
-  var f=freeHeight(),r=st.ref==="hero"&&heroWords()||el.getBoundingClientRect(),sb=scr.getBoundingClientRect(),gone=!S.howSaved&&!G.paused&&S.stop==="full"&&scr.contains(el)&&(r.top>=sb.bottom||r.bottom<=sb.top)&&!(G.userScrollAt>(G.stepAt||0));
+  var f=freeHeight(),r=st.ref==="hero"&&heroWords()||el.getBoundingClientRect(),sb=scr.getBoundingClientRect(),gone=!ui.howSaved&&!G.paused&&ui.stop==="full"&&scr.contains(el)&&(r.top>=sb.bottom||r.bottom<=sb.top)&&!(G.userScrollAt>(G.stepAt||0));
   if((r.bottom>f.bottom+1&&r.top<sb.bottom||gone)&&G.placeTries<3){G.placeTries++;G.placedTop=null;placeStep(st)}}
 
 /* ----- a scroll by the visitor: the guide keeps talking; if its block leaves the screen, it moves on to the block now in view
    (with none in view it pauses the line where it is, whatever voice speaks it, and Resume plays on) ----- */
 ph.addEventListener("wheel",function(){G.userScrollAt=performance.now()},{capture:true,passive:true});
 ph.addEventListener("touchmove",function(){G.userScrollAt=performance.now()},{capture:true,passive:true});
-on("pauseTour.answer",function(){if(S.guideCfg.onScroll==="follow"&&G.userScrollAt&&performance.now()-G.userScrollAt<60&&!G.explicitPause)return true});
-setInterval(function(){if(!G.on||G.paused||G.askOpen||G.moment||S.guideCfg.onScroll!=="follow")return;var st=S.guideSteps[G.i];if(!st||st.act==="intro"||st.act==="end")return;
+on("pauseTour.answer",function(){if(D.guide.onScroll==="follow"&&G.userScrollAt&&performance.now()-G.userScrollAt<60&&!G.explicitPause)return true});
+setInterval(function(){if(!G.on||G.paused||G.askOpen||G.moment||D.guide.onScroll!=="follow")return;var st=D.tour.guideSteps[G.i];if(!st||st.act==="intro"||st.act==="end")return;
   if(!G.userScrollAt||performance.now()-G.userScrollAt>1500||performance.now()<(G.autoScrollTill||0))return;
   var el=stepEl(st);if(!el)return;var f=freeHeight(),r=el.getBoundingClientRect();if(r.bottom>f.top+8&&r.top<f.bottom-8){G.goneSince=0;return}
   if(!G.goneSince){G.goneSince=performance.now();return}if(performance.now()-G.goneSince<700)return;G.goneSince=0;
   /* the step whose block is now most in view */
-  var best=-1,bv=0;S.guideSteps.forEach(function(s,j){if(j===G.i||s.act==="intro"||s.act==="end"||s.view!==S.view)return;var e=stepEl(s);if(!e)return;var q=e.getBoundingClientRect(),v=Math.max(0,Math.min(q.bottom,f.bottom)-Math.max(q.top,f.top));if(v>bv){bv=v;best=j}});
+  var best=-1,bv=0;D.tour.guideSteps.forEach(function(s,j){if(j===G.i||s.act==="intro"||s.act==="end"||s.view!==ui.view)return;var e=stepEl(s);if(!e)return;var q=e.getBoundingClientRect(),v=Math.max(0,Math.min(q.bottom,f.bottom)-Math.max(q.top,f.top));if(v>bv){bv=v;best=j}});
   if(best<0&&!G.waiting&&!G.tryWait){pauseNow();return}
   stopSpeech();G.waiting=false;G.tryWait=false;clearTimeout(G.insistT);
   if(best<0){pauseNow();return}
@@ -87,36 +87,36 @@ ph.addEventListener("click",function(e){var b=e.target.closest('[data-g="pause"]
 /* ----- an invitation to try: never blocking. Done while the guide still speaks: it stops and reacts. Not done: it waits, insists
    gently (Insists times, a new line each time), then moves on. Done: it says what was revealed (a flipped card's back, read in place) ----- */
 var nudgeN={};
-setInterval(function(){if(!G.on||G.paused||!G.waiting||G.tryWait)return;var st=S.guideSteps[G.i];if(!st||st.act!=="try")return;clearTimeout(G.timer);G.timer=null;G.waiting=false;G.tryWait=true;
+setInterval(function(){if(!G.on||G.paused||!G.waiting||G.tryWait)return;var st=D.tour.guideSteps[G.i];if(!st||st.act!=="try")return;clearTimeout(G.timer);G.timer=null;G.waiting=false;G.tryWait=true;
   if(G.tryDone){afterTry(st);return}nudgeN[st.id]=0;insistLater(st)},120);
-function insistLater(st){clearTimeout(G.insistT);G.insistT=setTimeout(function(){if(!G.on||G.paused||!G.tryWait||S.guideSteps[G.i]!==st)return;var n=nudgeN[st.id]=(nudgeN[st.id]||0)+1;
-  var t=n>S.guideCfg.insist?TXT("guide_try_moveon"):TXT("guide_nudge_"+st.wait+"_"+Math.min(2,n));renderGuide(t);var m=ph.querySelector(".mascot");if(m&&n<=S.guideCfg.insist){m.classList.remove("r-jump");void m.offsetWidth;m.classList.add("r-jump");setTimeout(function(){m.classList.remove("r-jump")},700)}
-  say(t,function(k){markWord(k,null)},function(){if(!G.on||!G.tryWait||S.guideSteps[G.i]!==st)return;if(n>S.guideCfg.insist){G.tryWait=false;setTimeout(function(){if(G.on&&!G.paused)next()},500)}else insistLater(st)})},S.guideCfg.insistAfter*1000)}
-function gesture(kind){if(!G.on||G.handAct)return;/* round 22: the guide's own hand showing a block in use (guide/demo-hand.js) is not the visitor trying it */var st=S.guideSteps[G.i];if(!st||st.act!=="try"||st.wait!==kind||G.tryDone)return;G.tryDone=true;feedback("right");
+function insistLater(st){clearTimeout(G.insistT);G.insistT=setTimeout(function(){if(!G.on||G.paused||!G.tryWait||D.tour.guideSteps[G.i]!==st)return;var n=nudgeN[st.id]=(nudgeN[st.id]||0)+1;
+  var t=n>D.guide.insist?TXT("guide_try_moveon"):TXT("guide_nudge_"+st.wait+"_"+Math.min(2,n));renderGuide(t);var m=ph.querySelector(".mascot");if(m&&n<=D.guide.insist){m.classList.remove("r-jump");void m.offsetWidth;m.classList.add("r-jump");setTimeout(function(){m.classList.remove("r-jump")},700)}
+  say(t,function(k){markWord(k,null)},function(){if(!G.on||!G.tryWait||D.tour.guideSteps[G.i]!==st)return;if(n>D.guide.insist){G.tryWait=false;setTimeout(function(){if(G.on&&!G.paused)next()},500)}else insistLater(st)})},D.guide.insistAfter*1000)}
+function gesture(kind){if(!G.on||G.handAct)return;/* round 22: the guide's own hand showing a block in use (guide/demo-hand.js) is not the visitor trying it */var st=D.tour.guideSteps[G.i];if(!st||st.act!=="try"||st.wait!==kind||G.tryDone)return;G.tryDone=true;feedback("right");
   if(G.tryWait||G.waiting){clearTimeout(G.timer);G.waiting=false;G.tryWait=true;clearTimeout(G.insistT);stopSpeech();setTimeout(function(){afterTry(st)},kind==="flip"?650:350);return}
   /* done while the guide is still asking: it stops and reacts */
   if(G.utter||G.timer){stopSpeech();G.tryWait=true;setTimeout(function(){afterTry(st)},kind==="flip"?650:350)}}
-function afterTry(st){if(!G.on||S.guideSteps[G.i]!==st)return;clearTimeout(G.insistT);G.tryWait=true;var el=stepEl(st),target=null,t="";
+function afterTry(st){if(!G.on||D.tour.guideSteps[G.i]!==st)return;clearTimeout(G.insistT);G.tryWait=true;var el=stepEl(st),target=null,t="";
   var done=function(){G.tryWait=false;if(G.on&&!G.paused)setTimeout(next,700)};
   /* a flip: "There it is", then the back is read in place, its words lighting up on the card */
   if(st.wait==="flip"&&!(st.after&&L(st.after))){var back=el&&el.querySelector(".bc p")||el&&el.querySelector(".bc"),lead=TXT("guide_after_flip");
-    renderGuide(lead);say(lead,function(k){markWord(k,null)},function(){if(!G.on||S.guideSteps[G.i]!==st)return;if(!back){done();return}var bt=back.textContent.trim();wrapWords(back);renderGuide(bt);say(bt,function(k){markWord(k,back)},done)});return}
+    renderGuide(lead);say(lead,function(k){markWord(k,null)},function(){if(!G.on||D.tour.guideSteps[G.i]!==st)return;if(!back){done();return}var bt=back.textContent.trim();wrapWords(back);renderGuide(bt);say(bt,function(k){markWord(k,back)},done)});return}
   t=st.after&&L(st.after)?L(st.after):TXT(st.wait==="answer"?"guide_after_answer":"guide_after_flip");renderGuide(t);say(t,function(k){markWord(k,null)},done)}
 
 /* Editor: Invite to try gets Insists and Waits; the tour gets What a scroll does; the mascot gets the Introduction; the Guide script gets each step's After words */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
-  addRows(d,"s7coach",row("Insists",pseg("guideCfg.insist",["0","1","2"],["Never","Once","Twice"]),"When the visitor has not tried yet, the guide asks again, each time with new words, then says it is fine and moves on. It never blocks the tour. Done at any moment, even while the guide is still asking, it carries on at once and says what was revealed (a flipped card's back, read in place).")+
-    row("Waits",pslider("guideCfg.insistAfter",3,12,1),"Seconds before each new ask.",true));
-  addRows(d,"s7focus",row("When the visitor scrolls",pseg("guideCfg.onScroll",["follow","pause"],["Keeps going","Pauses"]),"Keeps going: the guide talks on while its block is on the screen; when the block leaves it, the guide says “Moving on” and tells the block now in view (or pauses when none is). Pauses: any scroll pauses and offers Resume."),"Try");
-  addRows(d,"s7mascot",row("Introduction",pseg("guideCfg.intro",["first","every","off"],["First tour","Every tour","Off"]),"The mascot walks in and says who it is and how to ask, before the first step."));
+  addRows(d,"s7coach",row("Insists",pseg("D.guide.insist",["0","1","2"],["Never","Once","Twice"]),"When the visitor has not tried yet, the guide asks again, each time with new words, then says it is fine and moves on. It never blocks the tour. Done at any moment, even while the guide is still asking, it carries on at once and says what was revealed (a flipped card's back, read in place).")+
+    row("Waits",pslider("D.guide.insistAfter",3,12,1),"Seconds before each new ask.",true));
+  addRows(d,"s7focus",row("When the visitor scrolls",pseg("D.guide.onScroll",["follow","pause"],["Keeps going","Pauses"]),"Keeps going: the guide talks on while its block is on the screen; when the block leaves it, the guide says “Moving on” and tells the block now in view (or pauses when none is). Pauses: any scroll pauses and offers Resume."),"Try");
+  addRows(d,"s7mascot",row("Introduction",pseg("D.guide.intro",["first","every","off"],["First tour","Every tour","Off"]),"The mascot walks in and says who it is and how to ask, before the first step."));
   return d.innerHTML});
-on("edMarker.html",function(h){var d=document.createElement("div");d.innerHTML=h;var st=S.sel.gstep&&byId(S.fullSteps||S.guideSteps,S.sel.gstep);if(!st||st.act!=="try")return d.innerHTML;
+on("edMarker.html",function(h){var d=document.createElement("div");d.innerHTML=h;var st=ui.sel.gstep&&byId(ui.fullSteps||D.tour.guideSteps,ui.sel.gstep);if(!st||st.act!=="try")return d.innerHTML;
   var slot=d.querySelector('[data-pick="gstep"][data-id="'+cssq(st.id)+'"] + tr.slot td:last-child');if(!slot)return d.innerHTML;var a=st.after||{en:"",pt:""};
   slot.insertAdjacentHTML("beforeend",row("After the gesture · EN",'<textarea class="u" rows="2" data-gafter="'+st.id+'|en" placeholder="'+(st.wait==="flip"?"(reads the card’s back)":"")+'">'+esc(a.en||"")+'</textarea>',"What the guide says once the visitor has done it: what was revealed.")+
     row("After the gesture · PT",'<textarea class="u" rows="2" data-gafter="'+st.id+'|pt">'+esc(a.pt||"")+'</textarea>',""));return d.innerHTML});
-ed.addEventListener("input",function(e){var t=e.target;if(!t.dataset||!t.dataset.gafter)return;e.stopImmediatePropagation();var q=t.dataset.gafter.split("|"),st=byId(S.fullSteps||S.guideSteps,q[0]);st.after=st.after||{en:"",pt:""};st.after[q[1]]=t.value},true);
-BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(intro|insist|insistAfter|onScroll|"));
+ed.addEventListener("input",function(e){var t=e.target;if(!t.dataset||!t.dataset.gafter)return;e.stopImmediatePropagation();var q=t.dataset.gafter.split("|"),st=byId(ui.fullSteps||D.tour.guideSteps,q[0]);st.after=st.after||{en:"",pt:""};st.after[q[1]]=t.value},true);
+BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("D\\.guide\\.(","D\\.guide\\.(intro|insist|insistAfter|onScroll|"));
 /* each row's demo: the invitation at the flip card; a scroll by the visitor; Azu's introduction */
-rowDemos({"guideCfg.insist":{tour:"g2",ring:".gcoach|.gfocus"},"guideCfg.insistAfter":{tour:"g2",ring:".gcoach|.gfocus"},
-  "guideCfg.onScroll":{tour:"g1",act:function(){G.userScrollAt=performance.now();scr.dispatchEvent(new WheelEvent("wheel",{deltaY:300,bubbles:true}));scr.scrollTop+=360},ringAfter:1200,ring:".gdock|.gresume"},
-  "guideCfg.intro":{tour:true,intro:true,ring:".mascot"}});
+rowDemos({"D.guide.insist":{tour:"g2",ring:".gcoach|.gfocus"},"D.guide.insistAfter":{tour:"g2",ring:".gcoach|.gfocus"},
+  "D.guide.onScroll":{tour:"g1",act:function(){G.userScrollAt=performance.now();scr.dispatchEvent(new WheelEvent("wheel",{deltaY:300,bubbles:true}));scr.scrollTop+=360},ringAfter:1200,ring:".gdock|.gresume"},
+  "D.guide.intro":{tour:true,intro:true,ring:".mascot"}});

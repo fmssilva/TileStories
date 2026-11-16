@@ -5,9 +5,9 @@
 // result), Find it on the wall (the seek ring, the hint, Azu at the edge with its arrow), the breather and the cookie; the rules of
 // tests/g15lib.js on each (44 px, 4.5:1, 0 px over the words being told, inside the phone, one focal point). CAP=<dir> saves each state.
 // MUTATE=1 node test9sb.js makes a beat card's chips 36 px tall: the checks named [44 px] turn red.
-const { chromium } = require('./pw');
+const { chromium, labUrl } = require('./pw');
 const fs = require('fs'), path = require('path');
-const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
+const url = labUrl('#probe');
 const CAP = process.env.CAP || '';
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--autoplay-policy=no-user-gesture-required'] });
@@ -22,10 +22,10 @@ const CAP = process.env.CAP || '';
   const T0 = Date.now(), tsec = s => console.log('TIME ' + s + ' ' + Math.round((Date.now() - T0) / 1000) + ' s');
   await R(require('./g15lib.js'));
   if (process.env.MUTATE) { await R('var __m=document.createElement("style");__m.textContent="#ph .gdbeat .bt-chip,#ph .gdstrip .bt-chip{height:36px!important;min-height:0!important;max-height:36px!important}";document.head.appendChild(__m)'); console.log('MUTATION: a beat card\'s chips 36 px tall'); }
-  const base = o => `SCREENS.phone=[390,${o.H}];S.hints.on=false;S.previewBar=false;S.lang="en";S.guideMute=true;S.reduce=false;S.dark=${o.theme === 'dark'};S.cardCfg.mode="${o.theme === 'dark' ? 'dark' : 'light'}";
-    S.guideCfg.voice="device";S.guideCfg.panel="dock";S.guideCfg.dockStart="${o.h}";S.guideCfg.look="${o.look}";S.guideCfg.captions=true;S.guideCfg.pWords="prompter";S.ui.rowDemo=false;S.ui.gdSR=false;S.guideCfg.gbtn="both";S.guideCfg.mascot=true;S.vis.speed=null;`;
+  const base = o => `SCREENS.phone=[390,${o.H}];D.card.hints.on=false;LAB.previewBar=false;P.lang="en";P.guideMute=true;P.reduce=false;P.dark=${o.theme === 'dark'};D.card.cardCfg.mode="${o.theme === 'dark' ? 'dark' : 'light'}";
+    D.guide.voice="device";D.guide.panel="dock";D.guide.dockStart="${o.h}";D.guide.look="${o.look}";D.guide.captions=true;D.guide.pWords="prompter";LAB.rowDemo=false;LAB.gdSR=false;D.guide.gbtn="both";D.guide.mascot=true;P.vis.speed=null;`;
   const keep = async o => { await R('if(G.gd.sc12){gd12Done([true,"",""])}'); await R(base(o) + 'gd12Keep();'); };
-  const dockTo = h => `if(S.dockH!=="${h}"){S.dockH="${h}";renderGuide();gdBeatPlace()}`;
+  const dockTo = h => `if(ui.dockH!=="${h}"){ui.dockH="${h}";renderGuide();gdBeatPlace()}`;
   /* each game: how it is opened, then its stages (each waited for, measured and captured as the visitor sees it) */
   const G_ = [
     { nn: '40', name: 'quiz', open: o => `gd12Only(["quizpromise","quizfinale"]);startTour();`, stages: [
@@ -36,18 +36,18 @@ const CAP = process.env.CAP || '';
     { nn: '41', name: 'guess', open: o => `gd12Only(["guessyear"]);startTour();`, stages: [
       ['slider', null, 0, `var b=G.gd.plan&&gdPlanBeat("guessyear");b&&gd12Seam(b.after);`, '!!ph.querySelector(".gdbeat .bt-range")', 12000, 'G.gd.plan'],
       ['pins', null, 0, `var r=ph.querySelector(".gdbeat .bt-range");r.value=1620;r.dispatchEvent(new Event("input",{bubbles:true}));gd12Tap('[data-gdbt="tell"]');`, '!!G.on&&!G.gd.bt', 6000],
-      ['pins2', null, 0, `gd12Seam(S.guideSteps[G.i].id);`, '!!ph.querySelector(".gdbeat .bt-pin.ans")', 20000]] },
+      ['pins2', null, 0, `gd12Seam(D.tour.guideSteps[G.i].id);`, '!!ph.querySelector(".gdbeat .bt-pin.ans")', 20000]] },
     { nn: '42', name: 'dontsay', open: o => `gd13Only(["dontsay"]);startTour();`, stages: [
       ['announce', null, 0, `G.gd.plan&&gd13Word();`, 'gd12Kind("word")', 12000, 'G.gd.plan'],
       ['wordcard', '!!G.gd.ds&&G.gd.ds.on&&!G.gd.bt', 30000],
-      ['result', null, 0, `G.gd.plan.wordScore={word:G.gd.ds?G.gd.ds.word:"palace",caught:1,n:2,falses:0};gdBeatPresent({item:S.guidance.items.dontsay,react:true});`, 'G.gd.bt&&G.gd.bt.kind==="wordres"&&!!ph.querySelector(".gdbeat")', 4000]] },
+      ['result', null, 0, `G.gd.plan.wordScore={word:G.gd.ds?G.gd.ds.word:"palace",caught:1,n:2,falses:0};gdBeatPresent({item:D.guidance.items.dontsay,react:true});`, 'G.gd.bt&&G.gd.bt.kind==="wordres"&&!!ph.querySelector(".gdbeat")', 4000]] },
     { nn: '43', name: 'find', open: o => `gd13Only(["findwall"]);startTour();`, stages: [
-      ['seek', null, 0, `var b=G.gd.plan&&gdPlanBeat("findwall");b&&gd12Seam(b.after);`, '!!G.gd.find&&!!ph.querySelector(".gdseek")&&S.stop==="closed"', 12000, 'G.gd.plan'],
+      ['seek', null, 0, `var b=G.gd.plan&&gdPlanBeat("findwall");b&&gd12Seam(b.after);`, '!!G.gd.find&&!!ph.querySelector(".gdseek")&&ui.stop==="closed"', 12000, 'G.gd.plan'],
       ['hint', null, 0, `G.gd.find.clock=Math.max(G.gd.find.clock,9950);`, 'G.gd.find&&G.gd.find.hinted', 4000],
       ['edge', null, 0, `var F=G.gd.find;gd13Aim(F.p,-160,ph.offsetHeight*0.4);gd12Tap('.gdbeat [data-gdbt="giveup"]');`, '!!ph.querySelector(".mascot.gd-findto")', 4000]] },
-    { nn: '44', name: 'breather', open: o => `gd12Only(["water"]);S.introSeen=false;startTour();`, stages: [
+    { nn: '44', name: 'breather', open: o => `gd12Only(["water"]);P.introSeen=false;startTour();`, stages: [
       ['ask', null, 0, `var b=G.gd.plan&&gdPlanBeat("water");b&&gd12Seam(b.after);`, '!!ph.querySelector(\'.gdbeat [data-gdbt="goon"]\')', 15000, 'G.gd.plan']] },
-    { nn: '45', name: 'cookie', open: o => `gd12Only(["cookie"]);S.introSeen=false;startTour();`, stages: [
+    { nn: '45', name: 'cookie', open: o => `gd12Only(["cookie"]);P.introSeen=false;startTour();`, stages: [
       ['ask', null, 0, `var b=G.gd.plan&&gdPlanBeat("cookie");b&&gd12Seam(b.after);`, '!!ph.querySelector(\'.gdbeat [data-gdbt="goon"]\')', 15000, 'G.gd.plan']] }];
   const VARS = [];
   for (const look of ['ink', 'paper']) for (const theme of ['light', 'dark']) for (const h of ['mini', 'compact']) VARS.push({ look, theme, h, H: 844 });
@@ -93,7 +93,7 @@ const CAP = process.env.CAP || '';
   }
   await R('if(G.gd.sc12){gd12Done([true,"",""])}');
   if (CAP) fs.writeFileSync(path.join(CAP, 'g15_9sb.json'), JSON.stringify(results.map(x => ({ nn: x.g.nn, name: x.g.name, rows: x.rows })), null, 1));
-  await R('if(G.on)stopTour();SCREENS.phone=[360,820];S.dark=false;S.cardCfg.mode="light";S.vis.speed=null;renderAll(false)');
+  await R('if(G.on)stopTour();SCREENS.phone=[360,820];P.dark=false;D.card.cardCfg.mode="light";P.vis.speed=null;renderAll(false)');
   ok('No page error', errs.length === 0, errs.slice(0, 5));
   tsec('end');
   console.log(fails ? `FAILED ${fails}` : 'ALL PASS');

@@ -1,6 +1,6 @@
 // v8i checks (Playwright + the installed Edge): node test8i.js -> PASS/FAIL per check
-const { chromium } = require('./pw');
-const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
+const { chromium, labUrl } = require('./pw');
+const url = labUrl('#probe');
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe' });
   const p = await b.newPage({ viewport: { width: 1400, height: 900 } });
@@ -8,29 +8,29 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 20000 }); await p.waitForTimeout(400);
   const R = src => p.evaluate(s => LAB.run(s), src);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
-  await R('S.guideCfg.voice="device";S.hints.on=false;S.previewBar=false;S.lang="en";S.guideCfg.panel="classic";renderAll(false)');
+  await R('D.guide.voice="device";D.card.hints.on=false;LAB.previewBar=false;P.lang="en";D.guide.panel="classic";renderAll(false)');
   // the voice: the browser has not loaded its voices yet (the first getVoices() is empty); the first step still speaks
   // the browser's voices arrive 700 ms after the tap (as on a fresh page, where the first getVoices() is empty)
   await R('window.__vAt=Infinity;var g0=speechSynthesis.getVoices.bind(speechSynthesis);speechSynthesis.getVoices=function(){return performance.now()<window.__vAt?[]:g0()};VOICES=[]');
-  await R('S.view="card";S.stop="full";renderPhone(false)'); await p.waitForTimeout(400);
+  await R('ui.view="card";ui.stop="full";renderPhone(false)'); await p.waitForTimeout(400);
   await R('window.__vAt=performance.now()+700');
   await p.locator('#ph .gstart').first().click(); await p.waitForTimeout(1800);
   const first = await R('[!!G.utter,!!G.timer,G.noVoice,VOICES.length]');
   ok('voices that arrive after the tap: the first step still speaks (it waited), not captions only', first[0] && !first[1] && first[2] === false, first);
   await R('stopTour()');
   // no voice for the language: captions only, said in the captions, and the words still light up
-  await R('S.lang="pt";VOICES=VOICES.filter(function(v){return !/^pt/.test(v.lang)});startTour()'); await p.waitForTimeout(2200);
+  await R('P.lang="pt";VOICES=VOICES.filter(function(v){return !/^pt/.test(v.lang)});startTour()'); await p.waitForTimeout(2200);
   ok('no voice for the language: the captions say so', await R('var n=ph.querySelector(".gnovoice");!!n&&!n.hidden&&n.textContent.indexOf("legendas")>0'));
   // round 21: one highlighter (guide/highlight.js, hlGlide) lights every place: the word said has .hl-on, the words said .hl-said, the
   // words to come .hl-un, each word's tail strength is --t, and a soft shape (.hl-quad) glides behind the word said (its ease in box._hl.e)
   ok('...and the words still light up', await R('[].some.call(ph.querySelectorAll(".gcap :is(.gw,.tw)"),function(w){return w.classList.contains("hl-on")||w.classList.contains("hl-said")})'));
-  await R('stopTour();S.lang="en"');
+  await R('stopTour();P.lang="en"');
   // the highlight: a read step, muted (a tick per word, ~353 ms), so the timing is known
-  const ri = await R('S.guideSteps.findIndex(function(s){return s.act==="read"})');
-  const run = async (mode, extra, wait) => { await R(`S.guideMute=true;S.guideCfg.hl="${mode}";${extra || ''};startTour();G.i=${ri};runStep()`); await p.waitForTimeout(wait || 2600); };
+  const ri = await R('D.tour.guideSteps.findIndex(function(s){return s.act==="read"})');
+  const run = async (mode, extra, wait) => { await R(`P.guideMute=true;D.guide.hl="${mode}";${extra || ''};startTour();G.i=${ri};runStep()`); await p.waitForTimeout(wait || 2600); };
   const snap = 'var t=G.hl.target,ws=t?[].slice.call(t.querySelectorAll(".gw")):[];ws.map(function(w){return[w.classList.contains("hl-on")?1:0,+w.style.getPropertyValue("--t")||0,w.classList.contains("hl-un")?1:0]})';
   const headOf = s => s.findIndex(x => x[0] === 1);
-  await run('comet', 'S.guideCfg.trail=4;S.guideCfg.glide=true');
+  await run('comet', 'D.guide.trail=4;D.guide.glide=true');
   let s = await R(snap), k = headOf(s);
   const tails = s.slice(Math.max(0, k - 6), k).map(x => x[1]);
   ok('Comet: the word said is the head; the trail fades behind it, and is gone past Trail words', k > 4 && tails.every((v, i) => i === 0 || v >= tails[i - 1]) && tails[tails.length - 1] > 0.5 && s[k - 6][1] === 0 && s[k + 1][2] === 1, { k, tails });
@@ -46,14 +46,14 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('Sentence + word: a band over the sentence being said, the word in it the head', band[3], band);
   await R('stopTour()');
   // the glide: the light's shape moves from word to word on its ease (in-between states, not a jump)
-  await run('comet', 'S.guideCfg.glide=true', 1200);
+  await run('comet', 'D.guide.glide=true', 1200);
   const eases = []; for (let i = 0; i < 16; i++) { eases.push(await R('var h=G.hl.target&&G.hl.target._hl;h&&h.e!=null?+h.e.toFixed(3):-1')); await p.waitForTimeout(30); }
   ok('Glide: the light moves from word to word (in-between states)', eases.filter(e => e > 0.02 && e < 0.98).length >= 2, eases);
   await R('stopTour()');
-  await run('comet', 'S.reduce=true', 1500);
+  await run('comet', 'P.reduce=true', 1500);
   const eR = []; for (let i = 0; i < 10; i++) { eR.push(await R('var h=G.hl.target&&G.hl.target._hl;h&&h.e!=null?h.e:-1')); await p.waitForTimeout(40); }
   ok('Reduce Motion: word by word (the light on the word at once)', eR.every(e => e === 1), eR);
-  await R('stopTour();S.reduce=false');
+  await R('stopTour();P.reduce=false');
   // contrast: the words over their light, light and dark, block text and captions (composited over the real backgrounds)
   const C = `(function(){var px=function(c){var m=c.match(/[\\d.]+/g).map(Number),k=c.indexOf("color(")===0?255:1;return{r:m[0]*k,g:m[1]*k,b:m[2]*k,a:m.length>3?m[3]:1}};
     var lum=function(c){return[c.r,c.g,c.b].map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce(function(a,v,i){return a+v*[.2126,.7152,.0722][i]},0)};
@@ -65,17 +65,17 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
     var cap=ph.querySelector(".gcap"),cb=bgOf(cap);
     return{head:cr(px(getComputedStyle(head).color),hb),tail:cr(px(getComputedStyle(tail).color),tb),unread:cr(px(getComputedStyle(un).color),paper),capDim:cr(over({r:244,g:241,b:234,a:.62},cb),cb),capHead:cr({r:244,g:241,b:234,a:1},over({r:255,g:217,b:138,a:.22},cb))}})()`;
   for (const dark of [false, true]) {
-    await run('comet', `S.dark=${dark};renderAll(false);S.guideCfg.glide=false`, 2000);
+    await run('comet', `P.dark=${dark};renderAll(false);D.guide.glide=false`, 2000);
     const c = await R(C);
     ok(`${dark ? 'dark' : 'light'}: the head, the trail, the unread words and the captions at 4.5:1 or more`, Object.values(c).every(v => v >= 4.5), c);
     await R('stopTour()');
   }
-  await R('S.dark=false;S.guideCfg.glide=true;S.guideMute=false;renderAll(false)');
+  await R('P.dark=false;D.guide.glide=true;P.guideMute=false;renderAll(false)');
   // the text goes back to normal when the guide moves on or stops
   await run('comet', '', 1500); await R('stopTour()');
   ok('after the tour, the block text is plain again', await R('!document.querySelector(".gread")&&!document.querySelector("#ph .hl-on,#ph .hl-said,#ph .hl-un")&&![].some.call(document.querySelectorAll("#ph .gw"),function(w){return w.getAttribute("style")})'));
   // the Editor: Captions has the style, Trail, Glide and a Try; Narration has the voice in this browser
-  ok('Editor: Highlight style (4), Trail, Glide, Try, Voice in this browser', await R('S.tab="guide";renderEditor();var c=ed.querySelector(\'[data-fo="gt:speech"]\'),v=ed.querySelector(\'[data-fo="gt:voice"]\');!!c&&c.querySelectorAll(\'[data-k="@guideCfg.hl"] button, .seg [data-v]\').length>=0&&/Highlight style/.test(c.textContent)&&/Comet/.test(c.textContent)&&/Sentence \\+ word/.test(c.textContent)&&/Trail/.test(c.textContent)&&/Glide/.test(c.textContent)&&!!c.querySelector("[data-hltry]")&&!!v&&!!v.querySelector(\'select[data-sel="@guideCfg.voice_en"]\')'));
+  ok('Editor: Highlight style (4), Trail, Glide, Try, Voice in this browser', await R('ui.tab="guide";renderEditor();var c=ed.querySelector(\'[data-fo="gt:speech"]\'),v=ed.querySelector(\'[data-fo="gt:voice"]\');!!c&&c.querySelectorAll(\'[data-k="@D.guide.hl"] button, .seg [data-v]\').length>=0&&/Highlight style/.test(c.textContent)&&/Comet/.test(c.textContent)&&/Sentence \\+ word/.test(c.textContent)&&/Trail/.test(c.textContent)&&/Glide/.test(c.textContent)&&!!c.querySelector("[data-hltry]")&&!!v&&!!v.querySelector(\'select[data-sel="@D.guide.voice_en"]\')'));
   ok('no page errors', errs.length === 0, errs.slice(0, 3));
   console.log(fails ? `${fails} FAILED` : 'ALL PASS');
   await b.close();

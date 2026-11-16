@@ -77,14 +77,14 @@ var FIELDS={title:[["text","ltext","Text"]],eyebrow:[["text","ltext","Text"]],he
  picture:[["img","img","Picture"],["cap","ltext","Caption"],["credit","text","Credit"]],picture_pair:[["imgs","imgs","Pictures (two)"],["cap","ltext","Caption"]],carousel:[["imgs","imgs","Pictures"],["cap","ltext","Caption"]],
  video:[["img","img","Poster (the clip's frame)"],["cap","ltext","Caption"]],audio:[["cap","ltext","Title"]],animation:[["file","text","File"]],before_after:[["before","img","Before"],["after","img","After"]],
  hotspot:[["img","img","Picture"]],model_3d:[["img","img","Model (stand-in picture)"]],panorama:[["img","img","Panorama"]],scrolly:[],map:[],timeline:[],swatches:[],divider:[],spacer:[]};
-function styleById(id){for(var k in S.styles){var a=S.styles[k];for(var i=0;i<a.length;i++)if(a[i].id===id)return a[i]}return null}
-function kindOfStyle(id){for(var k in S.styles){if(S.styles[k].some(function(s){return s.id===id}))return k}return null}
-function defStyle(kind){var a=S.styles[kind]||[];for(var i=0;i<a.length;i++)if(a[i].def)return a[i];return a[0]}
-function motionById(id){return byId(S.motions,id)} function effectById(id){return byId(S.effects,id)} function patternById(id){return byId(S.patterns,id)} function interById(id){return byId(S.inter,id)}
-function styleUses(id){var n=0;S.patterns.forEach(function(p){p.rows.forEach(function(r){if(r.style===id)n++})});S.story.forEach(function(r){if(!r.pattern&&(r.style===id||(!r.style&&defStyle(r.kind).id===id)))n++});return n}
-function motionUses(id){var n=0;for(var k in S.styles)S.styles[k].forEach(function(s){if(s.enter===id||s.scroll===id||s.turn===id)n++});S.card.forEach(function(b){if(b.enter===id)n++});if(S.family===id)n++;return pipe("motionUses.count",n,id)}
-function effectUses(id){var n=0;S.styles.divider.forEach(function(s){if(s.o.uses===id)n++});return n}
-function patternUses(id){return S.story.filter(function(r){return r.pattern===id}).length+S.card.filter(function(b){return b.pattern===id}).length}
+function styleById(id){for(var k in D.blocks.styles){var a=D.blocks.styles[k];for(var i=0;i<a.length;i++)if(a[i].id===id)return a[i]}return null}
+function kindOfStyle(id){for(var k in D.blocks.styles){if(D.blocks.styles[k].some(function(s){return s.id===id}))return k}return null}
+function defStyle(kind){var a=D.blocks.styles[kind]||[];for(var i=0;i<a.length;i++)if(a[i].def)return a[i];return a[0]}
+function motionById(id){return byId(D.blocks.motions,id)} function effectById(id){return byId(D.blocks.effects,id)} function patternById(id){return byId(D.blocks.patterns,id)} function interById(id){return byId(D.blocks.inter,id)}
+function styleUses(id){var n=0;D.blocks.patterns.forEach(function(p){p.rows.forEach(function(r){if(r.style===id)n++})});D.poi.story.forEach(function(r){if(!r.pattern&&(r.style===id||(!r.style&&defStyle(r.kind).id===id)))n++});return n}
+function motionUses(id){var n=0;for(var k in D.blocks.styles)D.blocks.styles[k].forEach(function(s){if(s.enter===id||s.scroll===id||s.turn===id)n++});D.poi.card.forEach(function(b){if(b.enter===id)n++});if(D.blocks.family===id)n++;return pipe("motionUses.count",n,id)}
+function effectUses(id){var n=0;D.blocks.styles.divider.forEach(function(s){if(s.o.uses===id)n++});return n}
+function patternUses(id){return D.poi.story.filter(function(r){return r.pattern===id}).length+D.poi.card.filter(function(b){return b.pattern===id}).length}
 /* ----- demo content of each element: what it shows in the Editor's previews and the demo card (never in the app) ----- */
 FIELDS.timeline=[["items","litems","Events (date · words, one per line)"]];FIELDS.scrolly=[["items","litems","Steps (one per line)"]];
 FIELDS.before_after=FIELDS.before_after.concat([["blabel","ltext","Before label"],["alabel","ltext","After label"]]);

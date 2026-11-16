@@ -2,41 +2,41 @@
 /* ---------- phone ---------- */
 var scr=document.getElementById("scr"),ph=document.getElementById("ph"),hint=document.getElementById("hint"),fit=document.getElementById("fit");
 var SCREENS={phone:[360,740],land:[740,360],tablet:[640,860]};
-function topbar(crumb){var ans=firstAnswer("topbar.answer",crumb);if(ans!==undefined)return ans;return '<div class="topbar"><button type="button" data-go="card" aria-label="'+TXH("page_back")+'">&#8249;</button><span>'+esc(L(S.hero.title))+' &#8250; '+crumb+'</span></div>';}
+function topbar(crumb){var ans=firstAnswer("topbar.answer",crumb);if(ans!==undefined)return ans;return '<div class="topbar"><button type="button" data-go="card" aria-label="'+TXH("page_back")+'">&#8249;</button><span>'+esc(L(D.poi.hero.title))+' &#8250; '+crumb+'</span></div>';}
 function layerHead(t,s){return '<div class="layerhead">'+t+'<small>'+s+'</small></div>'}
 function demoScreen(){var h=topbar("<b>"+esc(L(UI.demo))+"</b>")+'<div class="pg">';
-  h+=layerHead("Motion","Each motion on real parts. Motion Family: <b>"+esc((motionById(S.family)||{}).name)+"</b> · Replay: <b>"+(S.replay==="every"?"Every Pass":"Once")+"</b>.");
-  Object.keys(TYPES).forEach(function(t){S.motions.filter(function(m){return m.type===t}).forEach(function(m){h+=motionDemo(m)})});
-  h+=layerHead("Interaction","Try each one: tap, hold, drag, swipe, scroll, tilt.");S.inter.forEach(function(x){h+=interDemo(x)});
-  h+=layerHead("Effects","Edges, line dividers, light and moving effects (the Look Kit).");S.effects.forEach(function(f){h+=effectDemo(f)});
+  h+=layerHead("Motion","Each motion on real parts. Motion Family: <b>"+esc((motionById(D.blocks.family)||{}).name)+"</b> · Replay: <b>"+(D.blocks.replay==="every"?"Every Pass":"Once")+"</b>.");
+  Object.keys(TYPES).forEach(function(t){D.blocks.motions.filter(function(m){return m.type===t}).forEach(function(m){h+=motionDemo(m)})});
+  h+=layerHead("Interaction","Try each one: tap, hold, drag, swipe, scroll, tilt.");D.blocks.inter.forEach(function(x){h+=interDemo(x)});
+  h+=layerHead("Effects","Edges, line dividers, light and moving effects (the Look Kit).");D.blocks.effects.forEach(function(f){h+=effectDemo(f)});
   h+=layerHead("Elements","Each element in each of its styles. ★ = the default a new row gets.");
-  KINDS.forEach(function(K){(S.styles[K.k]||[]).forEach(function(st){h+='<div class="item" data-ref="s:'+st.id+'"><span class="tag">'+esc(K.n)+' · <b>'+esc(st.name)+(st.def?" ★":"")+'</b></span><div class="blk">'+renderEl(K.k,st,{},0)+'</div></div>'})});
+  KINDS.forEach(function(K){(D.blocks.styles[K.k]||[]).forEach(function(st){h+='<div class="item" data-ref="s:'+st.id+'"><span class="tag">'+esc(K.n)+' · <b>'+esc(st.name)+(st.def?" ★":"")+'</b></span><div class="blk">'+renderEl(K.k,st,{},0)+'</div></div>'})});
   h+=layerHead("Patterns","Groups of elements with their styles; a marker fills the content.");
-  S.patterns.forEach(function(p){h+='<div class="item" data-ref="p:'+p.id+'"><span class="tag">Pattern · <b>'+esc(p.name)+'</b></span><div class="blk">'+p.rows.map(function(r,i){return renderEl(r.kind,styleById(r.style)||defStyle(r.kind),{},i)}).join("")+'</div></div>'});
+  D.blocks.patterns.forEach(function(p){h+='<div class="item" data-ref="p:'+p.id+'"><span class="tag">Pattern · <b>'+esc(p.name)+'</b></span><div class="blk">'+p.rows.map(function(r,i){return renderEl(r.kind,styleById(r.style)||defStyle(r.kind),{},i)}).join("")+'</div></div>'});
   return pipe("demoScreen.html",h+'</div>');}
 /* the phone: the features before (latest first) and after (in module order), sharing the call's notes cx */
-function renderPhone(keep){if(noDraw)return;var cx={};emitLatestFirst("renderPhone.before",keep,cx);var top=keep?scr.scrollTop:0,sz=SCREENS[S.screen];
-  ph.style.width=sz[0]+"px";ph.style.height=sz[1]+"px";ph.classList.toggle("land",S.screen==="land");
+function renderPhone(keep){if(noDraw)return;var cx={};emitLatestFirst("renderPhone.before",keep,cx);var top=keep?scr.scrollTop:0,sz=SCREENS[LAB.screen];
+  ph.style.width=sz[0]+"px";ph.style.height=sz[1]+"px";ph.classList.toggle("land",LAB.screen==="land");
   var k=Math.min(1,390/sz[0]);fit.style.transform="scale("+k+")";fit.style.height=(sz[1]*k)+"px";fit.style.width=(sz[0]*k)+"px";fit.style.transformOrigin="top left";
-  document.getElementById("camera").style.backgroundImage=S.screen==="land"?"url("+IMG.hero+")":"none";
-  ph.classList.toggle("dark",S.dark);ph.classList.toggle("reduce",S.reduce);
-  scr.innerHTML=S.view==="card"?cardScreen():S.view==="demo"?demoScreen():S.view==="story"?storyScreen():S.view==="term"?termScreen():S.view==="democard"?demoCardScreen():galleryScreen();
+  document.getElementById("camera").style.backgroundImage=LAB.screen==="land"?"url("+IMG.hero+")":"none";
+  ph.classList.toggle("dark",P.dark);ph.classList.toggle("reduce",P.reduce);
+  scr.innerHTML=ui.view==="card"?cardScreen():ui.view==="demo"?demoScreen():ui.view==="story"?storyScreen():ui.view==="term"?termScreen():ui.view==="democard"?demoCardScreen():galleryScreen();
   document.getElementById("ptool").innerHTML=ptool();
-  var nb=document.getElementById("navbar");nb.innerHTML=navbar();nb.style.display=S.view==="card"?"":"none";
-  hint.style.display=S.view==="card"?"":"none";hint.firstChild.textContent="The card · "+L(S.hero.title);
+  var nb=document.getElementById("navbar");nb.innerHTML=navbar();nb.style.display=ui.view==="card"?"":"none";
+  hint.style.display=ui.view==="card"?"":"none";hint.firstChild.textContent="The card · "+L(D.poi.hero.title);
   splitPieces();scr.scrollTop=top;observe();initTransitions();initBoxes();onScroll(scr);applyFocus();
   emit("renderPhone.after",keep,cx)}
-function applyFocus(){var on=S.focusOn&&S.view==="demo"&&S.focusRef;scr.classList.toggle("focusing",!!on);
-  scr.querySelectorAll(".item.focus").forEach(function(x){x.classList.remove("focus")});if(on){var el=scr.querySelector('[data-ref="'+S.focusRef+'"]');if(el)el.classList.add("focus")}}
+function applyFocus(){var on=LAB.focusOn&&ui.view==="demo"&&LAB.focusRef;scr.classList.toggle("focusing",!!on);
+  scr.querySelectorAll(".item.focus").forEach(function(x){x.classList.remove("focus")});if(on){var el=scr.querySelector('[data-ref="'+LAB.focusRef+'"]');if(el)el.classList.add("focus")}}
 function flashRef(ref){if(noDraw)return;var el=scr.querySelector('[data-ref="'+ref+'"]');if(!el)return;var y=el.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-70;
-  scr.scrollTo({top:Math.max(0,y),behavior:S.reduce?"auto":"smooth"});if(S.view!=="demo"){el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash")}}
-function show(view,ref){if(noDraw){S.view=view;return}if(ref&&view==="demo")S.focusRef=ref;if(S.view!==view){S.view=view;renderPhone(false)}else applyFocus();if(ref)setTimeout(function(){flashRef(ref)},40)}
+  scr.scrollTo({top:Math.max(0,y),behavior:P.reduce?"auto":"smooth"});if(ui.view!=="demo"){el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash")}}
+function show(view,ref){if(noDraw){ui.view=view;return}if(ref&&view==="demo")LAB.focusRef=ref;if(ui.view!==view){ui.view=view;renderPhone(false)}else applyFocus();if(ref)setTimeout(function(){flashRef(ref)},40)}
 /* replay: jump back without a transition, then play forward */
 function replayIn(root){var els=root.querySelectorAll(".mv");els.forEach(function(el){el.style.transition="none";el.classList.remove("in")});void root.offsetWidth;
   requestAnimationFrame(function(){els.forEach(function(el){el.style.transition=""});requestAnimationFrame(function(){els.forEach(function(el){el.classList.add("in")})})})}
 ph.addEventListener("click",function(e){var t=e.target;
-  var pt=t.closest("[data-pt]");if(pt){var k=pt.dataset.pt;if(k==="screen")S.screen=pt.dataset.v;else if(k==="lang")S.lang=S.lang==="en"?"pt":"en";else S[k]=!S[k];renderAll(true);return}
-  var g=t.closest("[data-go]");if(g&&!t.closest(".kq")){S.view=g.dataset.go;renderPhone(false);return}
+  var pt=t.closest("[data-pt]");if(pt){var k=pt.dataset.pt;if(k==="screen")LAB.screen=pt.dataset.v;else if(k==="lang")P.lang=P.lang==="en"?"pt":"en";else if(k==="focusOn")LAB.focusOn=!LAB.focusOn;else P[k]=!P[k];renderAll(true);return}
+  var g=t.closest("[data-go]");if(g&&!t.closest(".kq")){ui.view=g.dataset.go;renderPhone(false);return}
   var ex=t.closest("[data-expand]");if(ex){ex.classList.toggle("opened");return}
   var kq=t.closest(".kq button");if(kq){kq.classList.add(kq.dataset.ok?"ok":"no");return}
   var fl=t.closest("[data-flip]");if(fl){fl.classList.toggle("on");return}
@@ -53,4 +53,4 @@ ph.addEventListener("click",function(e){var t=e.target;
     else if(m.type==="scroll"){var mb=bx.querySelector(".mbox");mb.scrollTop=0;setTimeout(function(){mb.scrollTo({top:mb.scrollHeight,behavior:"smooth"})},60)}
     else if(m.type==="imported"){var a2=bx.querySelector("[data-anim]");if(a2){a2.classList.remove("play","loop");a2.querySelectorAll(".draw").forEach(function(d){d.style.strokeDashoffset=""});void a2.offsetWidth;a2.classList.add("play")}var d2=bx.querySelector("[data-door]");if(d2)d2.click()}
     else{var em=bx.querySelector("[data-em]");em.style.animation="none";void em.offsetWidth;em.style.animation=""}}});
-document.getElementById("replay").addEventListener("click",function(){scr.scrollTop=0;renderPhone(false);if(S.focusRef&&S.view==="demo")setTimeout(function(){flashRef(S.focusRef)},60)});
+document.getElementById("replay").addEventListener("click",function(){scr.scrollTop=0;renderPhone(false);if(LAB.focusRef&&ui.view==="demo")setTimeout(function(){flashRef(LAB.focusRef)},60)});

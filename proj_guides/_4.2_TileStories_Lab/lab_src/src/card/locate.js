@@ -1,25 +1,25 @@
 /* The Locate Button: it rides with the bar, its label folds after it is seen (pinLift, locFit); the rule of a label seen 4 s (seenLabel). */
 /* ----- the Locate Button rests at the foot of the screen; the Navigation Bar (or the Sticky Action) lifts it when it comes ----- */
-function pinLift(anim){var lp=ph.querySelector(".locpin");if(!lp)return;var k=fit.getBoundingClientRect().height/SCREENS[S.screen][1],pr=ph.getBoundingClientRect(),b=22;
+function pinLift(anim){var lp=ph.querySelector(".locpin");if(!lp)return;var k=fit.getBoundingClientRect().height/SCREENS[LAB.screen][1],pr=ph.getBoundingClientRect(),b=22;
   [document.getElementById("navbar"),ph.querySelector(".sticky")].forEach(function(el){if(!el||getComputedStyle(el).display==="none"||el.classList.contains("away"))return;
     var r=el.getBoundingClientRect();if(r.height&&r.top>pr.top+pr.height/2)b=Math.max(b,Math.round((pr.bottom-r.top)/k)+12)});
-  if(anim&&!S.reduce){lp.style.bottom=b+"px";return}lp.style.transition="none";lp.style.bottom=b+"px";void lp.offsetHeight;lp.style.transition=""}
+  if(anim&&!P.reduce){lp.style.bottom=b+"px";return}lp.style.transition="none";lp.style.bottom=b+"px";void lp.offsetHeight;lp.style.transition=""}
 /* its label says what the pin does for 4 s of being SEEN (time counts only while it has room beside the pin), then folds into it;
    a tap on the pin counts as read. When it shows is a cue of the guidance (Guide › Guidance › App › The card › Locate label: Once a
    visit / Every card): the label is open only while that cue is on (gdCueOn), and its 4 s seen end the cue (gdCueSeen). */
-S.locShown=0;
+ui.locShown=0;
 function locLabel(){return ph.querySelector(".locpin > span:first-child:not(.floatpin)")}
-function foldLabel(){S.locFolded=true;var lb=locLabel();if(lb)lb.classList.add("fold");locRoom(false);gdCueSeen("label")}
+function foldLabel(){ui.locFolded=true;var lb=locLabel();if(lb)lb.classList.add("fold");locRoom(false);gdCueSeen("label")}
 /* round 19 (19.9, print 15: "Start the guide · 3 min" cut by "Find it on the wall"): at the hero the label shares the foot with the hero's
    action row (the mascot and Start the guide, guide/hero-start.js); when it would cover that row, the hero's words rise a row while the
    label shows (hsroom, 0.35 s; G.locRoom keeps it across a redraw), and settle back once it folds: each text whole, nothing over another.
    Unity: a USS class on the hero's text block (its bottom offset, with a transition) */
 function locRoom(on){G.locRoom=!!on;var w=scr.querySelector(".hero .w");if(w)w.classList.toggle("hsroom",!!on)}
 /* room = no overlap with the INK of the hero's words (their text and the guide button), not the box that holds them */
-function locFit(){var lb=locLabel();if(!lb)return;var wait=650-(performance.now()-(S.movedAt||0));if(wait>0){lb.style.visibility="hidden";clearTimeout(S.fitT);S.fitT=setTimeout(locFit,wait+20);return}lb.style.visibility="";var a=lb.getBoundingClientRect(),open=!lb.classList.contains("fold");if(!open){if(G.locRoom)locRoom(false);if(!a.width)return}
+function locFit(){var lb=locLabel();if(!lb)return;var wait=650-(performance.now()-(ui.movedAt||0));if(wait>0){lb.style.visibility="hidden";clearTimeout(ui.fitT);ui.fitT=setTimeout(locFit,wait+20);return}lb.style.visibility="";var a=lb.getBoundingClientRect(),open=!lb.classList.contains("fold");if(!open){if(G.locRoom)locRoom(false);if(!a.width)return}
   /* the label opens by a 0.35 s transition: its whole width (scrollWidth and its padding) is what it will cover */
-  else{var row=scr.querySelector(".hero .w:not(.hsroom) .hact"),al=a.right-Math.max(a.width,lb.scrollWidth+24);if(row){var rr=row.getBoundingClientRect();if(rr.width&&!(a.right<rr.left||al>rr.right||a.bottom<rr.top||a.top>rr.bottom)){locRoom(true);lb.style.visibility="hidden";clearTimeout(S.fitT);S.fitT=setTimeout(locFit,400);return}}
-    if(a.width+2<lb.scrollWidth){clearTimeout(S.fitT);S.fitT=setTimeout(locFit,400)}if(!a.width)return}
+  else{var row=scr.querySelector(".hero .w:not(.hsroom) .hact"),al=a.right-Math.max(a.width,lb.scrollWidth+24);if(row){var rr=row.getBoundingClientRect();if(rr.width&&!(a.right<rr.left||al>rr.right||a.bottom<rr.top||a.top>rr.bottom)){locRoom(true);lb.style.visibility="hidden";clearTimeout(ui.fitT);ui.fitT=setTimeout(locFit,400);return}}
+    if(a.width+2<lb.scrollWidth){clearTimeout(ui.fitT);ui.fitT=setTimeout(locFit,400)}if(!a.width)return}
   var hit=Array.prototype.some.call(scr.querySelectorAll(".hero .w small,.hero .w h2,.hero .w p,.hero .w button"),function(el){var c;if(el.tagName==="BUTTON")c=el.getBoundingClientRect();else{var rg=document.createRange();rg.selectNodeContents(el);c=rg.getBoundingClientRect()}
     return c.width&&!(a.right<c.left||a.left>c.right||a.bottom<c.top||a.top>c.bottom)});
   if(hit)lb.style.visibility="hidden"}
@@ -30,11 +30,11 @@ var SEEN_MS=4000,SEEN=[];
 function seenLabel(o){SEEN.push(o)}
 setInterval(function(){if(document.hidden)return;SEEN.forEach(function(o){var lb=o.label();if(!lb||o.done()||!o.live())return;
   if(lb.style.visibility!=="hidden"&&!lb.classList.contains("fold")&&o.add(250)>=SEEN_MS)o.fold()})},250);
-seenLabel({label:locLabel,live:function(){return S.view==="card"&&S.stop!=="closed"&&S.stop!=="peek"},done:function(){return S.locFolded},add:function(ms){return S.locShown+=ms},fold:foldLabel});
+seenLabel({label:locLabel,live:function(){return ui.view==="card"&&ui.stop!=="closed"&&ui.stop!=="peek"},done:function(){return ui.locFolded},add:function(ms){return ui.locShown+=ms},fold:foldLabel});
 on("renderPhone.after",function(keep){pinLift(false);
   var lb=locLabel();if(!lb)return;lb.classList.add("loclab");
   if(!gdCueOn("label"))lb.classList.add("fold");
   locFit()});/* while the sheet and the hero settle (650 ms after a stop change) the words are not in place: it waits */
-scr.addEventListener("scroll",function(){if(S.view!=="card")return;pinLift(true);locFit()},{passive:true});
+scr.addEventListener("scroll",function(){if(ui.view!=="card")return;pinLift(true);locFit()},{passive:true});
 ph.addEventListener("click",function(e){if(e.target.closest(".locpin"))foldLabel()},true);
-BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("ctl\\.jump\\.","ctl\\.jump\\.|ctl\\.locate\\.label"));
+BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("D\\.card\\.ctl\\.jump\\.","D\\.card\\.ctl\\.jump\\.|D\\.card\\.ctl\\.locate\\.label"));

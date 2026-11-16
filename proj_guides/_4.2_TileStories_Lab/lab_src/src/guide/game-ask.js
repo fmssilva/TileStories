@@ -23,7 +23,7 @@
    and threshold, the ladder, the block finder over the card's CardStrings); the pause a GameClock every game's coroutines wait on (unscaled
    time summed while not paused), the chip and the Back button UI Toolkit elements (USS, 44 px), the voice an AudioSource paused and resumed
    at its word time (the device TTS from its word) ----- */
-S.guideCfg.gaOn=true;S.guideCfg.gaBack=true;S.guideCfg.gaBackS=4;S.guideCfg.gaH1=true;S.guideCfg.gaH2=true;S.guideCfg.gaH3=true;S.guideCfg.gaStrict="normal";
+D.guide.gaOn=true;D.guide.gaBack=true;D.guide.gaBackS=4;D.guide.gaH1=true;D.guide.gaH2=true;D.guide.gaH3=true;D.guide.gaStrict="normal";
 COMP.s7gask=["Guide","Asking during a game"];FOCUS.s7gask=["card",".gdock","full"];
 G.ga={on:false,lad:{},polled:{},started:{},k:0};
 var GA_PAUSE='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="5.5" width="3.4" height="13" rx="1.2"/><rect x="13.6" y="5.5" width="3.4" height="13" rx="1.2"/></svg>';
@@ -33,18 +33,18 @@ var GA_KIND={"Quick Facts":T("Quick facts","Factos rápidos"),"Before and After"
 
 /* ----- the game on screen now: its kind, its question (words, choices, the right one, why, its own hint), answered or not ----- */
 /* o.any: the card's quiz too before the visitor started it (idle: its hint ladder, no pause, no chip) */
-function gaGame(o){var B=G.gd&&G.gd.bt,l=S.lang||"en",inTour=G.on&&!(G.te&&G.te.askMode)&&!G.ga.card;
+function gaGame(o){var B=G.gd&&G.gd.bt,l=P.lang||"en",inTour=G.on&&!(G.te&&G.te.askMode)&&!G.ga.card;
   if(G.on&&B&&B.clk&&!B.away){
-    if(B.kind==="finale"&&B.qs&&B.k<B.qs.length){var id=B.qs[B.k],q=S.tourQ[id];if(!q)return null;
+    if(B.kind==="finale"&&B.qs&&B.k<B.qs.length){var id=B.qs[B.k],q=D.tour.tourQ[id];if(!q)return null;
       return{kind:"quiz",B:B,label:"the quiz",key:"tq:"+id,step:id,q:L(q.q),opts:(q.a||[]).map(function(a){return L(a)}),ok:+q.ok,why:L(q.why),hint:q.hint&&q.hrev&&q.hrev[l]?String(q.hint[l]||"").trim():"",answered:B.answered!=null,lad:gaLadOf(B,id)}}
     if(B.kind==="guess"&&B.gs){var g=B.gs.g;return{kind:"guess",B:B,label:"Guess the year",key:"tg:"+B.gs.step,step:B.gs.step,q:L(g.q),opts:[],n:+g.n,from:+g.from,to:+g.to,answered:!!B.told,lad:gaLadOf(B,"guess")}}
     if(B.kind==="breather"||B.kind==="find"||B.kind==="word")return{kind:B.kind,B:B,label:B.kind==="breather"?"the breather":B.kind==="find"?"Find it on the wall":"Don't say it!",key:"b:"+B.kind,q:"",opts:[],answered:false,lad:{}}}
   if(G.on&&G.gd&&G.gd.ds&&G.gd.ds.on&&!B)return{kind:"word",label:"Don't say it!",key:"ds",q:"",opts:[],answered:false,lad:{}};
   if(B)return null;
   /* the card's own Knowledge Check (and Poll): in view and not answered; in a tour, only at its own step */
-  if(S.view!=="card"&&S.view!=="kpage"||S.stop==="closed")return null;
-  var st=inTour?S.guideSteps[G.i]:null,poi=svPoi(),sr=scr.getBoundingClientRect(),best=null;
-  scr.querySelectorAll(".kq,.poll").forEach(function(el){if(best)return;var blk=el.closest('[data-ref^="b:"]'),bid=blk?blk.dataset.ref.slice(2):S.view==="kpage"?(S.card.filter(function(x){return x.kind===S.pageKind})[0]||{}).id:null;if(!bid)return;
+  if(ui.view!=="card"&&ui.view!=="kpage"||ui.stop==="closed")return null;
+  var st=inTour?D.tour.guideSteps[G.i]:null,poi=svPoi(),sr=scr.getBoundingClientRect(),best=null;
+  scr.querySelectorAll(".kq,.poll").forEach(function(el){if(best)return;var blk=el.closest('[data-ref^="b:"]'),bid=blk?blk.dataset.ref.slice(2):ui.view==="kpage"?(D.poi.card.filter(function(x){return x.kind===ui.pageKind})[0]||{}).id:null;if(!bid)return;
     if(inTour&&(!st||st.ref!=="b:"+bid))return;var r=el.getBoundingClientRect();if(!r.height||Math.min(r.bottom,sr.bottom)-Math.max(r.top,sr.top)<r.height*.5)return;
     var poll=el.classList.contains("poll"),key=poi+"|"+bid;if(poll?G.ga.polled[key]:G.te&&G.te.played[key])return;var idle=!poll&&!inTour&&!G.ga.started[key];if(idle&&!(o&&o.any))return;
     var bs=[].slice.call(el.querySelectorAll(":scope > button:not(.ga-chip), .tfb > button, .kpic > button")),qt=el.querySelector("b,.tfcard");
@@ -75,7 +75,7 @@ function gaStem(w){return/^\d+$/.test(w)?w:w.slice(0,5)}
 function gaToks(t){var o=[];gaWords(t).forEach(function(w){var s=gaStem(w);if(o.indexOf(s)<0)o.push(s)});return o}
 function gaAbout(q,g,level){var r={about:false,shared:[],opt:0,n:0,asks:false};if(!g||!g.q)return r;var qs=gaToks(q),gq=gaToks(g.q),go=[];(g.opts||[]).forEach(function(o){gaToks(o).forEach(function(s){if(go.indexOf(s)<0)go.push(s)})});
   r.n=qs.length;r.asks=gaWords(q).some(function(w){return GA_ASKS.indexOf(w)>=0});qs.forEach(function(s){if(gq.indexOf(s)>=0||go.indexOf(s)>=0)r.shared.push(s);if(go.indexOf(s)>=0)r.opt++});
-  var sh=r.shared.length,ra=r.n?sh/r.n:0;level=level||S.guideCfg.gaStrict||"normal";
+  var sh=r.shared.length,ra=r.n?sh/r.n:0;level=level||D.guide.gaStrict||"normal";
   r.about=r.asks||(level==="loose"?sh>=1:level==="strict"?ra>=GA_RATIO&&(sh>=2||r.opt>=1):sh>=2||r.opt>=1);return r}
 
 /* ----- hint 1, where to look, with no AI: the card's block (or the story's row) whose words hold the right answer, the question's own
@@ -84,24 +84,24 @@ function gaRowText(r,l){var x=function(o){return wordIn(o,l)},t=[];if(r.pattern)
 function gaHeadOf(r,l){if(r.kind==="heading"&&r.c&&r.c.text)return wordIn(r.c.text,l);if(!r.pattern)return"";
   var s=(r.slots||[]).map(function(x){return wordIn(x.title||x.text,l)}).filter(function(t){return t&&t.split(/\s+/).length<=8&&!/[.·:]$|·/.test(t.trim())})[0];return s||""}
 function gaUnits(l){var out=[];
-  (S.card||[]).forEach(function(b){if(/^(Knowledge Check|Poll)$/.test(b.kind))return;var w=blockSays(b,l)||{},p=[w.title,w.text,w.back,w.cap,w.q];
+  (D.poi.card||[]).forEach(function(b){if(/^(Knowledge Check|Poll)$/.test(b.kind))return;var w=blockSays(b,l)||{},p=[w.title,w.text,w.back,w.cap,w.q];
     (w.facts||[]).concat(w.events||[],w.rows||[]).forEach(function(f){p.push((f||[]).join(" "))});(w.lines||[]).concat(w.caps||[],w.points||[]).forEach(function(x){p.push(x)});
     var t=p.filter(Boolean).join(" ").trim();if(t)out.push({ref:"b:"+b.id,view:"card",text:t,title:w.title||(GA_KIND[b.kind]?wordIn(GA_KIND[b.kind],l):b.kind)})});
-  var head=wordIn(DEMO.title,l);(S.story||[]).forEach(function(r){var h=gaHeadOf(r,l);if(h)head=h;var t=gaRowText(r,l);if(t)out.push({ref:"r:"+r.id,view:"story",text:t,title:head})});return out}
-function gaWhere(g,l){l=l||S.lang||"en";if(!g||g.ok==null||g.ok<0||!g.opts[g.ok])return null;var ans=gaToks(g.opts[g.ok]),qt=gaToks(g.q),best=null,bs=0,st=g.step&&byId(S.fullSteps||S.guideSteps,g.step);
+  var head=wordIn(DEMO.title,l);(D.poi.story||[]).forEach(function(r){var h=gaHeadOf(r,l);if(h)head=h;var t=gaRowText(r,l);if(t)out.push({ref:"r:"+r.id,view:"story",text:t,title:head})});return out}
+function gaWhere(g,l){l=l||P.lang||"en";if(!g||g.ok==null||g.ok<0||!g.opts[g.ok])return null;var ans=gaToks(g.opts[g.ok]),qt=gaToks(g.q),best=null,bs=0,st=g.step&&byId(ui.fullSteps||D.tour.guideSteps,g.step);
   gaUnits(l).forEach(function(u){var ut=gaToks(u.text),a=ans.filter(function(s){return ut.indexOf(s)>=0}).length;if(!a)return;var sc=3*a+qt.filter(function(s){return ut.indexOf(s)>=0}).length+(st&&st.ref===u.ref?2:0);if(sc>bs){bs=sc;best=u}});
-  if(!best)return null;var title=gaSpoils(best.title,gaKeys(g))||gaToks(best.title).some(function(s){return ans.indexOf(s)>=0})?(best.view==="story"?wordIn(GA_KIND.Story,l):wordIn(GA_KIND[(byId(S.card,best.ref.slice(2))||{}).kind]||"",l)):best.title;
+  if(!best)return null;var title=gaSpoils(best.title,gaKeys(g))||gaToks(best.title).some(function(s){return ans.indexOf(s)>=0})?(best.view==="story"?wordIn(GA_KIND.Story,l):wordIn(GA_KIND[(byId(D.poi.card,best.ref.slice(2))||{}).kind]||"",l)):best.title;
   return{ref:best.ref,view:best.view,title:String(title||"").replace(/[.!?…]+$/,"")}}
 
 /* ----- the ladder: the steps the Editor keeps, one per ask; past the last, the last again ----- */
-function gaSteps(g){var c=S.guideCfg,o=[];if(c.gaH1&&(g.hint||gaWhere(g)))o.push(1);if(c.gaH2&&gaCanH2(g))o.push(2);if(c.gaH3&&(g.kind==="quiz"||g.kind==="kc"||g.kind==="guess"))o.push(3);return o}
+function gaSteps(g){var c=D.guide,o=[];if(c.gaH1&&(g.hint||gaWhere(g)))o.push(1);if(c.gaH2&&gaCanH2(g))o.push(2);if(c.gaH3&&(g.kind==="quiz"||g.kind==="kc"||g.kind==="guess"))o.push(3);return o}
 function gaCanH2(g){if(g.kind==="guess")return isFinite(g.n)&&g.to>g.from;return(g.kind==="quiz"||g.kind==="kc")&&g.opts.length>=3&&gaWrongOf(g)>=0}
 /* the wrong choice that fades: the last wrong one still in play */
 function gaWrongOf(g){for(var i=g.opts.length-1;i>=0;i--)if(i!==g.ok&&g.lad.out!==i)return i;return-1}
 /* Guess the year's band: the half that holds the answer, its edge a round year (to 100, else 50, else the middle) */
 function gaBand(g){var b=g.lad.band||{from:g.from,to:g.to},mid=(b.from+b.to)/2,r=[100,50,10,1].map(function(u){return Math.round(mid/u)*u}).filter(function(m){return m>b.from&&m<b.to&&m!==g.n})[0];if(r==null)return null;
   return g.n<r?{from:b.from,to:r,word:"before",at:r}:{from:r,to:b.to,word:"after",at:r}}
-function gaStepWords(st,g,l){l=l||S.lang||"en";var w=function(k){return wordIn(S.tx[k],l)};
+function gaStepWords(st,g,l){l=l||P.lang||"en";var w=function(k){return wordIn(D.words.tx[k],l)};
   if(st===1){if(g.hint)return fmt(w("ga_h1_own"),g.hint);var wh=gaWhere(g,l);return wh?fmt(w("ga_h1_look"),wh.title):""}
   if(st===2){if(g.kind==="guess"){var bd=gaBand(g);return bd?fmt(w(bd.word==="before"?"ga_h2_before":"ga_h2_after"),bd.at):""}var i=gaWrongOf(g);return i>=0?fmt(w("ga_h2_opt"),gaMid(g.opts[i])):""}
   if(st===3)return w("ga_h3");return w("ga_none")}
@@ -117,16 +117,16 @@ function gaHost(g){if(!g)return null;if(g.el&&g.el.isConnected)return g.el;if(g.
 function gaPause(g,how){var A=G.ga;if(A.on||!g)return;A.on=true;A.g=g;A.how=how;A.asked=false;A.answered=false;A.where=null;A.choice=false;A.away=null;A.left=false;A.step=0;A.wasPaused=!!G.paused;A.voice=null;A.poi=svPoi();A.at=performance.now();
   A.clock0=gaClock();A.th0=(G.thread||[]).length;A.keep=true;G.keepScroll=true;clearTimeout(A.backT);A.backT=0;A.backAt=0;
   /* the tour's own line (Don't say it!'s narration): kept with its word, said on from it when the game goes on */
-  if(G.on&&!G.paused){var st=S.guideSteps[G.i];if(G.sayArgs&&G.sayLine&&st&&G.sayLine.text===stepText(st)&&(G.utter||G.timer))A.voice={a:G.sayArgs,words:(G.words||[]).slice(),k:G.hl&&G.hl.k>=0?G.hl.k:0,line:G.sayLine};pauseNow()}
+  if(G.on&&!G.paused){var st=D.tour.guideSteps[G.i];if(G.sayArgs&&G.sayLine&&st&&G.sayLine.text===stepText(st)&&(G.utter||G.timer))A.voice={a:G.sayArgs,words:(G.words||[]).slice(),k:G.hl&&G.hl.k>=0?G.hl.k:0,line:G.sayLine};pauseNow()}
   if(g.B)gdBeatFreeze(g.B,true);
   if(typeof gdLog==="function")gdLog("event","Ask during a game: "+g.label+" paused ("+how+")");gaDraw()}
 /* the game's clock: the beat's (its timers run on it), Don't say it!'s, Find it on the wall's; the card's own quiz has none */
 function gaClock(){var B=G.gd&&G.gd.bt;if(G.gd&&G.gd.ds&&G.gd.ds.on&&!B)return gdWordClock();if(B&&B.clk)return gdBeatClock(B);return null}
 /* the game goes on: the line from Azu's intro lines › Back to the game on the chip, said, then the clock where it stopped */
-function gaBackLine(poi,lang,k){var ls=atIntroLines("gameback",lang||S.lang).filter(function(x){return x.max<=(+S.guideCfg.atIntroCap||20)});if(!ls.length)return null;
-  var x=ls[(atSeed(poi||svPoi())+atIntroSalt("gameback")+(k||0))%ls.length],t=/\{point\}/.test(x.text)?nameIn(x.text,"{point}",teName(poi||svPoi(),lang||S.lang),lang||S.lang):x.text;return{key:x.key,text:t}}
+function gaBackLine(poi,lang,k){var ls=atIntroLines("gameback",lang||P.lang).filter(function(x){return x.max<=(+D.guide.atIntroCap||20)});if(!ls.length)return null;
+  var x=ls[(atSeed(poi||svPoi())+atIntroSalt("gameback")+(k||0))%ls.length],t=/\{point\}/.test(x.text)?nameIn(x.text,"{point}",teName(poi||svPoi(),lang||P.lang),lang||P.lang):x.text;return{key:x.key,text:t}}
 function gaBack(how){var A=G.ga;if(!A.on||A.leaving)return;var g=A.g;A.leaving=true;gaCancelBack();if(A.away)gaShowBack();
-  gaCloseAsk();var l=gaBackLine(A.poi,S.lang,A.k++);A.line=l;var host=gaHost(g),c=host&&host.querySelector(":scope > .ga-chip");
+  gaCloseAsk();var l=gaBackLine(A.poi,P.lang,A.k++);A.line=l;var host=gaHost(g),c=host&&host.querySelector(":scope > .ga-chip");
   if(typeof gdLog==="function")gdLog("event","Ask during a game: back to "+g.label+" ("+(how||"Back to the game")+")");
   if(!l){gaGo();return}if(c){c.classList.add("ga-line");c.innerHTML='<span>'+esc(l.text)+'</span>';c.setAttribute("aria-label",l.text)}
   var done=false,fin=function(){if(done)return;done=true;clearTimeout(A.lineT);gaGo()},n=l.text.split(/\s+/).length;A.lineT=setTimeout(fin,n*60000/(170*(typeof guideSpeed==="function"?guideSpeed():1))+1600);
@@ -134,55 +134,55 @@ function gaBack(how){var A=G.ga;if(!A.on||A.leaving)return;var g=A.g;A.leaving=t
 /* the clock goes on where it stopped, the voice from its word, the chip goes */
 function gaGo(){var A=G.ga,g=A.g;A.on=false;A.leaving=false;A.g=null;gaKeepOff();clearTimeout(A.lineT);if(A.line&&G.sayLine&&G.sayLine.text===A.line.text){G.utter=null;stopSpeech()}
   if(g&&g.B&&G.gd.bt===g.B)gdBeatFreeze(g.B,false);
-  if(G.on&&!A.wasPaused){G.paused=false;G.resumeVoice=false;var v=A.voice;A.voice=null;if(v&&S.guideSteps[G.i]&&v.line.text===stepText(S.guideSteps[G.i])){G.sayArgs=v.a;G.words=v.words;G.sayLine=v.line;speakFrom(v.k,false)}}
+  if(G.on&&!A.wasPaused){G.paused=false;G.resumeVoice=false;var v=A.voice;A.voice=null;if(v&&D.tour.guideSteps[G.i]&&v.line.text===stepText(D.tour.guideSteps[G.i])){G.sayArgs=v.a;G.words=v.words;G.sayLine=v.line;speakFrom(v.k,false)}}
   gaDraw();if(G.on)renderGuide()}
 /* the card held where it is during the pause (the tour never places its step meanwhile); after it, as the Ask that is still open wants */
 function gaKeepOff(){var A=G.ga;if(!A.keep)return;A.keep=false;G.keepScroll=!!A.card||!!(G.te&&G.te.askMode)}
 /* Ask closes: the panel lowered (or the card's own Ask left: the card where it was) */
-function gaCloseAsk(){var A=G.ga;A.lowering=true;try{if(G.te&&G.te.askMode)teAskLeave();else if(A.card)gaCardLeave();else{G.askOpen=false;G.typing=false;if(G.rec)try{G.rec.abort()}catch(e){}G.talk="idle";if(G.on&&(S.dockH==="peek"||S.dockH==="full"))S.dockH="mini";if(G.on)renderGuide()}}finally{A.lowering=false}}
+function gaCloseAsk(){var A=G.ga;A.lowering=true;try{if(G.te&&G.te.askMode)teAskLeave();else if(A.card)gaCardLeave();else{G.askOpen=false;G.typing=false;if(G.rec)try{G.rec.abort()}catch(e){}G.talk="idle";if(G.on&&(ui.dockH==="peek"||ui.dockH==="full"))ui.dockH="mini";if(G.on)renderGuide()}}finally{A.lowering=false}}
 /* the pause ends with no line (a Stop, Next, the game gone) */
 function gaEnd(why){var A=G.ga;if(!A.on)return;var g=A.g;gaCancelBack();if(A.away)gaShowBack(true);A.on=false;A.leaving=false;A.g=null;gaKeepOff();clearTimeout(A.lineT);
   if(g&&g.B&&G.gd.bt===g.B)gdBeatFreeze(g.B,false);if(typeof gdLog==="function")gdLog("event","Ask during a game: the pause ends ("+why+")");gaDraw()}
 
 /* ----- the card's own Ask (the ✦ menu's, Tap on Azu's) while its quiz is on screen: over the card where it is, as round 17c's What next? ----- */
-function gaCardEnter(){ph.scrollLeft=0;var A=G.ga,g=gaGame(),el=g&&g.bid?scr.querySelector('[data-ref="b:'+g.bid+'"]'):null;A.card={top:scr.scrollTop,view:S.view,stop:S.stop,ref:el?el.dataset.ref:null,off:el?el.getBoundingClientRect().top-scr.getBoundingClientRect().top:0};G.fab.menu=false;ph.querySelectorAll(".gbtn-wrap,.gbmenu,.gbband").forEach(function(x){x.remove()});G.keepScroll=true;G.on=true;G.paused=true;G.waiting=false;G.askOpen=true;S.dockH="full";renderGuide();scr.scrollTop=A.card.top;
+function gaCardEnter(){ph.scrollLeft=0;var A=G.ga,g=gaGame(),el=g&&g.bid?scr.querySelector('[data-ref="b:'+g.bid+'"]'):null;A.card={top:scr.scrollTop,view:ui.view,stop:ui.stop,ref:el?el.dataset.ref:null,off:el?el.getBoundingClientRect().top-scr.getBoundingClientRect().top:0};G.fab.menu=false;ph.querySelectorAll(".gbtn-wrap,.gbmenu,.gbband").forEach(function(x){x.remove()});G.keepScroll=true;G.on=true;G.paused=true;G.waiting=false;G.askOpen=true;ui.dockH="full";renderGuide();scr.scrollTop=A.card.top;
   var i=ph.querySelector("#gq");if(i)i.focus({preventScroll:true})}
 function gaCardLeave(){var A=G.ga,b=A.card;A.card=null;G.keepScroll=false;stopSpeech();G.on=false;G.paused=false;G.askOpen=false;G.typing=false;clearGuideMarks();renderGuide();if(typeof fabLayer==="function")fabLayer();if(!b)return;
-  if(S.view!==b.view||S.stop!==b.stop){S.view=b.view;S.stop=b.stop;renderPhone(false)}/* the card back where it was: its quiz at the same place on the screen (a scroll offset alone drifts while the page's layout settles) */
+  if(ui.view!==b.view||ui.stop!==b.stop){ui.view=b.view;ui.stop=b.stop;renderPhone(false)}/* the card back where it was: its quiz at the same place on the screen (a scroll offset alone drifts while the page's layout settles) */
   var put=function(){if(G.on)return;scr.scrollTop=b.top;var e=b.ref&&scr.querySelector('[data-ref="'+b.ref+'"]');if(e)scr.scrollTop+=e.getBoundingClientRect().top-scr.getBoundingClientRect().top-b.off};put();requestAnimationFrame(put);setTimeout(put,250);setTimeout(put,600)}
-on("gbAsk.answer",function(){var g=G.on?null:gaGame({any:true});if(!g)return;if(!S.guideCfg.gaOn&&!g.idle){G.fab.menu=false;fabLayer();gaNote(g,TXT("ga_off"));return true}gaCardEnter();return true});
+on("gbAsk.answer",function(){var g=G.on?null:gaGame({any:true});if(!g)return;if(!D.guide.gaOn&&!g.idle){G.fab.menu=false;fabLayer();gaNote(g,TXT("ga_off"));return true}gaCardEnter();return true});
 
 /* ----- the ways in: the panel raised, the microphone, the keyboard (renderGuide.after); a question (ask.answer, ask.before) ----- */
 on("renderGuide.after",function(){var A=G.ga;
   /* Ask opening: the panel raised to Open or Full, the microphone, the keyboard (a panel already open as a step's game begins is not an Ask: a question then pauses it) */
-  var open=G.on&&(S.dockH==="peek"||S.dockH==="full"||G.talk==="listening"||!!G.typing),was=A.open;A.open=open;if(A.idle&&!G.askOpen){A.idle=null}if(!A.on&&A.idle){gaDraw();return}
-  if(!A.on){if(!S.guideCfg.gaOn||!open||was&&G.talk!=="listening")return;var g=gaGame();if(g)gaPause(g,G.talk==="listening"?"the microphone":G.typing?"the keyboard":"the panel opened");return}
+  var open=G.on&&(ui.dockH==="peek"||ui.dockH==="full"||G.talk==="listening"||!!G.typing),was=A.open;A.open=open;if(A.idle&&!G.askOpen){A.idle=null}if(!A.on&&A.idle){gaDraw();return}
+  if(!A.on){if(!D.guide.gaOn||!open||was&&G.talk!=="listening")return;var g=gaGame();if(g)gaPause(g,G.talk==="listening"?"the microphone":G.typing?"the keyboard":"the panel opened");return}
   if(A.g&&A.g.B&&G.gd.bt!==A.g.B){gaEnd("the game ended");return}
-  if(G.on&&!A.lowering&&!A.leaving&&!A.away&&!A.left&&(S.dockH==="mini"||S.dockH==="compact")){setTimeout(function(){if(G.ga.on&&!G.ga.leaving&&!G.ga.away&&(S.dockH==="mini"||S.dockH==="compact"))gaBack("the panel lowered")},0);return}
+  if(G.on&&!A.lowering&&!A.leaving&&!A.away&&!A.left&&(ui.dockH==="mini"||ui.dockH==="compact")){setTimeout(function(){if(G.ga.on&&!G.ga.leaving&&!G.ga.away&&(ui.dockH==="mini"||ui.dockH==="compact"))gaBack("the panel lowered")},0);return}
   gaDraw()});
 on("renderPhone.after",function(){var A=G.ga;if(!A.on)return;
   /* leaving the point: Ask closes, the game stays paused (Play, or a tap on its chip, goes back) */
-  if(!A.left&&!A.away&&(S.stop==="closed"||svPoi()!==A.poi)){A.left=true;gaCancelBack();A.lowering=true;try{G.askOpen=false;G.typing=false;if(A.card){var b=A.card;A.card=null;G.keepScroll=false;G.on=false;G.paused=false;renderGuide()}else if(G.on&&(S.dockH==="peek"||S.dockH==="full")){S.dockH="mini";renderGuide()}}finally{A.lowering=false}
+  if(!A.left&&!A.away&&(ui.stop==="closed"||svPoi()!==A.poi)){A.left=true;gaCancelBack();A.lowering=true;try{G.askOpen=false;G.typing=false;if(A.card){var b=A.card;A.card=null;G.keepScroll=false;G.on=false;G.paused=false;renderGuide()}else if(G.on&&(ui.dockH==="peek"||ui.dockH==="full")){ui.dockH="mini";renderGuide()}}finally{A.lowering=false}
     if(typeof gdLog==="function")gdLog("event","Ask during a game: the point left, Ask closed, "+A.g.label+" stays paused")}
   gaDraw()});
 on("ask.answer",function(q){if(!q||!String(q).trim())return;var A=G.ga,g=A.on?A.g:gaGame();A.idle=null;
   if(!g){var gi=gaGame({any:true});if(gi&&gi.idle&&gi.q&&gaAbout(q,gi).about){gaHint(q,gi);return true}return}
-  if(!S.guideCfg.gaOn){gaNote(g,TXT("ga_off"));G.askOpen=false;G.typing=false;if(G.on&&(S.dockH==="peek"||S.dockH==="full")){S.dockH="mini";renderGuide()}var gq=ph.querySelector("#gq");if(gq)gq.value="";return true}
+  if(!D.guide.gaOn){gaNote(g,TXT("ga_off"));G.askOpen=false;G.typing=false;if(G.on&&(ui.dockH==="peek"||ui.dockH==="full")){ui.dockH="mini";renderGuide()}var gq=ph.querySelector("#gq");if(gq)gq.value="";return true}
   if(!A.on){if(!G.on&&!(g.kind==="kc"||g.kind==="poll"))return;if(!G.on){gaCardEnter()}gaPause(g,"a question")}
   A.asked=true;gaCancelBack();A.choice=false;var ab=!g.answered&&g.q?gaAbout(q,g):{about:false};A.lastAbout=ab;if(!ab.about)return;gaHint(q,g);return true});
-on("ask.before",function(){var A=G.ga;if(!A.on){if(S.guideCfg.gaOn){var g=gaGame();if(g&&G.on)gaPause(g,"a question")}if(!G.ga.on)return}G.ga.asked=true;gaCancelBack()});
+on("ask.before",function(){var A=G.ga;if(!A.on){if(D.guide.gaOn){var g=gaGame();if(g&&G.on)gaPause(g,"a question")}if(!G.ga.on)return}G.ga.asked=true;gaCancelBack()});
 /* the answer heard (its words' time at the most), then Back by itself's seconds */
 on("ask.after",function(t){var A=G.ga;if(!A.on)return;A.answered=true;var t0=performance.now(),est=Math.min(20000,String(t||"").split(/\s+/).length*60000/170+1500),seq=A.seq=(A.seq||0)+1;
   (function w(){if(!G.ga.on||G.ga.seq!==seq)return;if((G.utter||G.recAudio||G.timer||G.busy)&&performance.now()-t0<est){setTimeout(w,200);return}gaArmBack()})()});
-function gaArmBack(){var A=G.ga;if(!A.on||!S.guideCfg.gaBack||A.choice||A.away||A.left)return;var s=Math.max(2,Math.min(8,+S.guideCfg.gaBackS||4));clearTimeout(A.backT);A.backAt=performance.now();A.backS=s;
+function gaArmBack(){var A=G.ga;if(!A.on||!D.guide.gaBack||A.choice||A.away||A.left)return;var s=Math.max(2,Math.min(8,+D.guide.gaBackS||4));clearTimeout(A.backT);A.backAt=performance.now();A.backS=s;
   A.backT=setTimeout(function(){A.backT=0;gaBack("Back by itself, "+s+" s after the answer")},s*1000);gaDraw()}
 function gaCancelBack(){var A=G.ga;if(!A.backT&&!A.backAt)return;clearTimeout(A.backT);A.backT=0;A.backAt=0;ph.querySelectorAll(".ga-bar").forEach(function(x){x.remove()})}
 /* any tap or a key typed cancels Back by itself (the Back button itself goes back) */
 ph.addEventListener("pointerdown",function(e){if(G.ga.backT&&!(e.target.closest&&e.target.closest('[data-ga="back"]')))gaCancelBack()},true);
 ph.addEventListener("keydown",function(){if(G.ga.backT)gaCancelBack()},true);
 /* the microphone during the quiz's question: what matches a choice is its answer (the game goes on at once); anything else is a question */
-on("heard.answer",function(q){var A=G.ga;if(!A.on||!q||!String(q).trim()||!S.guideCfg.gaOn)return;var B=G.gd.bt,g=A.g;
-  if(g.kind==="quiz"&&!A.asked&&B&&B.kind==="finale"&&B.answered==null){var qq=gdQuizQ(B,B.k),i=gdQuizMatch(q,qq.a.map(function(a){return L(a)}),S.lang||"en");if(i>=0){gaCloseAsk();gaGo();return}}
+on("heard.answer",function(q){var A=G.ga;if(!A.on||!q||!String(q).trim()||!D.guide.gaOn)return;var B=G.gd.bt,g=A.g;
+  if(g.kind==="quiz"&&!A.asked&&B&&B.kind==="finale"&&B.answered==null){var qq=gdQuizQ(B,B.k),i=gdQuizMatch(q,qq.a.map(function(a){return L(a)}),P.lang||"en");if(i>=0){gaCloseAsk();gaGo();return}}
   G.talk="idle";ask(q);return true});
 
 /* ----- the hint ladder: one step an ask, in the panel as Azu's answer ----- */
@@ -207,16 +207,16 @@ function gaTell(){var A=G.ga,g=A.on?A.g:A.idle;if(!g)return;A.choice=false;A.idl
 
 /* ----- Show me (hint 1, or an answer's block): the card goes to the block while the game stays paused; Back to the game comes back ----- */
 on("goTo.answer",function(ref){var A=G.ga;if(!A.on)return;var c=corpus().filter(function(x){return x.ref===ref})[0];if(!c)return;if(!A.where)A.where={ref:ref,view:c.view,title:c.title};return"Offered as Show me: "+c.title+" (a game is paused)"});
-function gaShow(){var A=G.ga,w=A.where;if(!A.on||!w)return;gaCancelBack();A.away={view:S.view,top:scr.scrollTop,stop:S.stop};var bt=ph.querySelector(".gdbeat");if(bt)bt.classList.add("bt-away");
-  A.lowering=true;try{G.askOpen=false;G.typing=false;if(G.on){S.dockH="mini";renderGuide()}}finally{A.lowering=false}
-  if(S.view!==w.view){S.view=w.view;renderPhone(false)}var tries=0;(function ring(){var e=scr.querySelector('[data-ref="'+w.ref+'"]');if(!e&&tries++<8){setTimeout(ring,60);return}if(!e)return;
-    var y=e.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-90;scr.scrollTo({top:Math.max(0,y),behavior:S.reduce?"auto":"smooth"});e.classList.add("gdshowme");setTimeout(function(){e.classList.remove("gdshowme")},4200)})();
+function gaShow(){var A=G.ga,w=A.where;if(!A.on||!w)return;gaCancelBack();A.away={view:ui.view,top:scr.scrollTop,stop:ui.stop};var bt=ph.querySelector(".gdbeat");if(bt)bt.classList.add("bt-away");
+  A.lowering=true;try{G.askOpen=false;G.typing=false;if(G.on){ui.dockH="mini";renderGuide()}}finally{A.lowering=false}
+  if(ui.view!==w.view){ui.view=w.view;renderPhone(false)}var tries=0;(function ring(){var e=scr.querySelector('[data-ref="'+w.ref+'"]');if(!e&&tries++<8){setTimeout(ring,60);return}if(!e)return;
+    var y=e.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-90;scr.scrollTo({top:Math.max(0,y),behavior:P.reduce?"auto":"smooth"});e.classList.add("gdshowme");setTimeout(function(){e.classList.remove("gdshowme")},4200)})();
   if(typeof gdLog==="function")gdLog("event","Ask during a game: Show me “"+w.title+"”, the game still paused");gaDraw()}
 function gaShowBack(quiet){var A=G.ga,a=A.away;if(!a)return;A.away=null;ph.querySelectorAll(".ga-showback").forEach(function(x){x.remove()});var bt=ph.querySelector(".gdbeat");if(bt)bt.classList.remove("bt-away");
-  if(S.view!==a.view||S.stop!==a.stop){S.view=a.view;S.stop=a.stop;renderPhone(false)}scr.scrollTop=a.top;requestAnimationFrame(function(){scr.scrollTop=a.top});if(typeof gdBeatPlace==="function")gdBeatPlace()}
+  if(ui.view!==a.view||ui.stop!==a.stop){ui.view=a.view;ui.stop=a.stop;renderPhone(false)}scr.scrollTop=a.top;requestAnimationFrame(function(){scr.scrollTop=a.top});if(typeof gdBeatPlace==="function")gdBeatPlace()}
 
 /* ----- Off: the line on the game, never spoken over it (the game goes on); a voice the microphone paused goes on ----- */
-on("pauseTour.answer",function(){if(!S.guideCfg.gaOn&&!G.explicitPause&&!G.ga.on&&G.on&&gaGame())return true});
+on("pauseTour.answer",function(){if(!D.guide.gaOn&&!G.explicitPause&&!G.ga.on&&G.on&&gaGame())return true});
 function gaNote(g,t){var host=gaHost(g);ph.querySelectorAll(".ga-note").forEach(function(x){x.remove()});if(!host)return;host.insertAdjacentHTML("beforeend",'<div class="ga-note" role="status">'+esc(t)+'</div>');var n=host.querySelector(":scope > .ga-note");
   clearTimeout(G.ga.noteT);G.ga.noteT=setTimeout(function(){if(n&&n.isConnected)n.remove()},3200);if(typeof gdLog==="function")gdLog("event","Ask during a game: “"+t+"”")}
 
@@ -231,10 +231,10 @@ function gaDraw(){var A=G.ga,d=ph.querySelector(".gdock");
   ph.querySelectorAll(".ga-paused").forEach(function(x){if(!A.on||x!==gaHost(A.g))x.classList.remove("ga-paused")});ph.querySelectorAll(".ga-chip").forEach(function(x){if(!A.on||x.parentNode!==gaHost(A.g))x.remove()});
   if(d){d.classList.toggle("ga-on",A.on&&!A.left);var row=d.querySelector(".ga-row");if(row)row.remove()}
   ph.querySelectorAll(".ga-showback").forEach(function(x){if(!A.away)x.remove()});ph.classList.toggle("ga-pausing",A.on);
-  if(!A.on){if(A.idle&&d&&G.askOpen&&(S.dockH==="full"||S.dockH==="peek")&&(A.where||A.choice)){var a0=d.querySelector(".gd-where,.gd-ctl,.gd-askrow,.gd-askbar,.gd-botrow");if(a0)a0.insertAdjacentHTML("beforebegin",gaRowHtml())}return}var g=A.g,host=gaHost(g);gaApply(g);
+  if(!A.on){if(A.idle&&d&&G.askOpen&&(ui.dockH==="full"||ui.dockH==="peek")&&(A.where||A.choice)){var a0=d.querySelector(".gd-where,.gd-ctl,.gd-askrow,.gd-askbar,.gd-botrow");if(a0)a0.insertAdjacentHTML("beforebegin",gaRowHtml())}return}var g=A.g,host=gaHost(g);gaApply(g);
   if(host){host.classList.add("ga-paused");if(!host.querySelector(":scope > .ga-chip"))host.insertAdjacentHTML("beforeend",'<button type="button" class="ga-chip" data-ga="back" aria-label="'+TXH("ga_paused")+' · '+TXH("ga_back")+'">'+GA_PAUSE+'<span>'+TXH("ga_paused")+'</span></button>')}
   if(A.away){if(!ph.querySelector(".ga-showback")){ph.insertAdjacentHTML("beforeend",'<button type="button" class="ga-showback" data-ga="back">'+TXH("ga_back")+'</button>')}var sb=ph.querySelector(".ga-showback"),dk=ph.querySelector(".gdock");if(sb)sb.style.bottom=(dk&&dk.getClientRects().length?Math.round(ph.offsetHeight-phRect(dk).t+12):24)+"px";return}
-  if(d&&!A.left&&(S.dockH==="full"||S.dockH==="peek")){var at=d.querySelector(".gd-where,.gd-ctl,.gd-askrow,.gd-askbar,.gd-botrow");if(at)at.insertAdjacentHTML("beforebegin",gaRowHtml());else d.insertAdjacentHTML("beforeend",gaRowHtml());gaDockPlace(d)}}
+  if(d&&!A.left&&(ui.dockH==="full"||ui.dockH==="peek")){var at=d.querySelector(".gd-where,.gd-ctl,.gd-askrow,.gd-askbar,.gd-botrow");if(at)at.insertAdjacentHTML("beforebegin",gaRowHtml());else d.insertAdjacentHTML("beforeend",gaRowHtml());gaDockPlace(d)}}
 function gaRowHtml(){var A=G.ga,b=function(k,w,pri,bar){return'<button type="button" class="ga-btn'+(pri?" pri":"")+'" data-ga="'+k+'">'+esc(w)+bar+'</button>'},bar="";
   if(A.backT&&A.backAt){var el=(performance.now()-A.backAt)/1000;bar='<i class="ga-bar" style="animation-duration:'+A.backS+'s;animation-delay:-'+el.toFixed(2)+'s"></i>'}
   if(A.choice)return'<div class="ga-row" role="group">'+b("tell",TXT("ga_tell"),false,"")+b("try",TXT("ga_try"),true,"")+'</div>';
@@ -262,8 +262,8 @@ ph.addEventListener("click",function(e){var t=e.target.closest&&e.target.closest
   if(!G.ga.on&&G.ga.idle){var g=G.ga.idle;if(k==="tell"){gaTell();return}var w=G.ga.where;G.ga.idle=null;G.ga.choice=false;gaCloseAsk();if(k==="show"&&w)gaShowIdle(w);gaDraw();return}
   if(k==="back"||k==="try"){gaBack(k==="try"?"I'll try":"Back to the game");return}if(k==="tell"){gaTell();return}if(k==="show"){gaShow();return}},true);
 /* Show me with nothing paused (the card's quiz not started): Ask closes and the card goes to the block, ringed */
-function gaShowIdle(w){if(S.view!==w.view){S.view=w.view;renderPhone(false)}var e=scr.querySelector('[data-ref="'+w.ref+'"]');if(!e)return;var y=e.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-90;
-  scr.scrollTo({top:Math.max(0,y),behavior:S.reduce?"auto":"smooth"});e.classList.add("gdshowme");setTimeout(function(){e.classList.remove("gdshowme")},4200)}
+function gaShowIdle(w){if(ui.view!==w.view){ui.view=w.view;renderPhone(false)}var e=scr.querySelector('[data-ref="'+w.ref+'"]');if(!e)return;var y=e.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-90;
+  scr.scrollTo({top:Math.max(0,y),behavior:P.reduce?"auto":"smooth"});e.classList.add("gdshowme");setTimeout(function(){e.classList.remove("gdshowme")},4200)}
 
 /* ----- the model's context: the game on screen, its question and its rule ----- */
 function gaRule(){var g=gaGuarded();if(!g||!g.q)return"";var ans=g.kind==="guess"?String(g.n):g.opts[g.ok]||"";
@@ -302,28 +302,28 @@ function gaWhereLine(g){var w=gaWhere(g);return w?fmt(TXT("ga_h1_look"),w.title)
    quiz away, and only when something had to go the mascot says warmly that it will tell after the quiz (ga_spoil; ga_spoil_more after the
    part it could say) */
 on("answer.text",function(t,q){var g=gaGuarded(),k=g&&gaKeys(g);if(!t||!gaSpoils(t,k))return t;var pre=(/^\([^)]*\)\s*/.exec(t)||[""])[0],ss=gaSentences(t.slice(pre.length)).filter(function(s){return!gaSpoils(s,k)});
-  var about=!!q&&gaAbout(String(q),g,S.guideCfg.gaStrict).about;
+  var about=!!q&&gaAbout(String(q),g,D.guide.gaStrict).about;
   if(about&&!ss.length&&G.askFound)ss=gaSentences(G.askFound).filter(function(s){return!gaSpoils(s,k)}).slice(0,1);
   var out=about?(ss.length?ss.join(" "):gaWhereLine(g)):ss.length?ss.join(" ")+" "+TXT("ga_spoil_more"):TXT("ga_spoil");
   if(typeof gdLog==="function")gdLog("event","Ask during a game: an answer would have given "+g.label+"'s answer away; said instead: “"+out+"”");return pre+out});
 
 /* ----- the Editor: Guide › 3 · Games on the tour › Asking during a game ----- */
 /* the card's own quiz as a game (no screen needed): the Editor's read-backs, the self-test's signature */
-function gaSample(l){var b=(S.card||[]).filter(function(x){return x.kind==="Knowledge Check"})[0];if(!b)return null;var w=kindWords(b),x=function(o){return wordIn(o,l||S.lang)};
+function gaSample(l){var b=(D.poi.card||[]).filter(function(x){return x.kind==="Knowledge Check"})[0];if(!b)return null;var w=kindWords(b),x=function(o){return wordIn(o,l||P.lang)};
   return{kind:"kc",bid:b.id,label:"the card's quiz",q:x(w.q),opts:(w.choices||[]).map(x),ok:+w.ok||0,why:"",hint:"",answered:false,lad:{}}}
 var GA_TRY={en:["Which king moved the court?","Which king moved his great ships, soldiers and horses to Belém?","Which king rebuilt the city after the earthquake?","Who built the library?"],pt:["Que rei mudou a corte?","Que rei mudou os seus grandes navios, soldados e cavalos para Belém?","Que rei reconstruiu a cidade depois do terramoto?","Quem construiu a biblioteca?"]};
-function gaLadderNow(l){var g=gaSample(l);if(!g)return[];var o=[];for(var i=0;i<3;i++){var s=gaSteps(g),n=Math.min(g.lad.n||0,Math.max(0,s.length-1)),st=s.length?s[n]:0;o.push(st?gaStepWords(st,g,l):wordIn(S.tx.ga_none,l));if(s.length)g.lad.n=n+1;if(st===2){if(g.kind==="guess"){var bd=gaBand(g);if(bd)g.lad.band=bd}else g.lad.out=gaWrongOf(g)}}return o}
+function gaLadderNow(l){var g=gaSample(l);if(!g)return[];var o=[];for(var i=0;i<3;i++){var s=gaSteps(g),n=Math.min(g.lad.n||0,Math.max(0,s.length-1)),st=s.length?s[n]:0;o.push(st?gaStepWords(st,g,l):wordIn(D.words.tx.ga_none,l));if(s.length)g.lad.n=n+1;if(st===2){if(g.kind==="guess"){var bd=gaBand(g);if(bd)g.lad.band=bd}else g.lad.out=gaWrongOf(g)}}return o}
 function gaDetectNow(l,level){var g=gaSample(l);return(GA_TRY[l]||GA_TRY.en).map(function(q){return gaAbout(q,g,level).about})}
-function gaEdHtml(){var c=S.guideCfg,l=S.lang||"en",lad=gaLadderNow(l),yn=function(b){return b?"yes":"no"},det=function(lv){return gaDetectNow(l,lv).map(yn).join(" · ")},bl=gaBackLine(svPoi(),l,0),q0=Object.keys(S.tourQ).filter(function(id){return gdQOk(S.tourQ[id],l)})[0]||"g1";
+function gaEdHtml(){var c=D.guide,l=P.lang||"en",lad=gaLadderNow(l),yn=function(b){return b?"yes":"no"},det=function(lv){return gaDetectNow(l,lv).map(yn).join(" · ")},bl=gaBackLine(svPoi(),l,0),q0=Object.keys(D.tour.tourQ).filter(function(id){return gdQOk(D.tour.tourQ[id],l)})[0]||"g1";
   return'<div class="note teone"><b>One rule for every game on screen</b> (the quiz, Guess the year, Don\'t say it!, the breather, Find it on the wall, and the card\'s own quiz and poll outside a tour): Ask opens, the game pauses where it is with a small “'+TXH("ga_paused")+'” chip on it; the mascot answers in the panel; “'+TXH("ga_back")+'” (or by itself) and the game goes on exactly where it stopped. A question about the question itself gets a hint, never the answer.</div>'+
-    row("Ask during a game",pseg("guideCfg.gaOn",["true","false"],["On","Off"]),"On: Ask opens during a game and the game pauses. Off: the game never pauses; a question during it gets “"+TXT("ga_off")+"” on the game, and the answer comes once it is played.")+
-    row("Back by itself",pseg("guideCfg.gaBack",["true","false"],["On","Off"]),"On: after the mascot's answer has been said, the game goes on by itself after the delay below (a bar empties on “"+TXT("ga_back")+"”); any tap or a new question cancels it. Off: only the button (or Play) goes back.")+
-    (c.gaBack?row("Its delay",pslider("guideCfg.gaBackS",2,8,1),"Seconds after the answer has been said (2-8; 4 by default).",true):"")+
+    row("Ask during a game",pseg("D.guide.gaOn",["true","false"],["On","Off"]),"On: Ask opens during a game and the game pauses. Off: the game never pauses; a question during it gets “"+TXT("ga_off")+"” on the game, and the answer comes once it is played.")+
+    row("Back by itself",pseg("D.guide.gaBack",["true","false"],["On","Off"]),"On: after the mascot's answer has been said, the game goes on by itself after the delay below (a bar empties on “"+TXT("ga_back")+"”); any tap or a new question cancels it. Off: only the button (or Play) goes back.")+
+    (c.gaBack?row("Its delay",pslider("D.guide.gaBackS",2,8,1),"Seconds after the answer has been said (2-8; 4 by default).",true):"")+
     '<div class="sub2 gth">The hint ladder <span class="sub">· a question about the question on screen: one step an ask, the Off steps skipped</span></div>'+
-    row("Where to look",pseg("guideCfg.gaH1",["true","false"],["On","Off"]),"Hint 1: the question's own written hint (below, beside each question), else the card's block whose words hold the answer, found with no AI and named by its heading, with a Show me chip that takes the card there while the game stays paused. Now for the card's quiz: “"+(lad[0]||"")+"”")+
-    row("One answer out",pseg("guideCfg.gaH2",["true","false"],["On","Off"]),"Hint 2: a wrong choice fades (a question with 3 choices; with 2 it would give the answer away, so it is skipped); Guess the year's slider narrows to the half that holds the year. A game with no choices skips it. Now: “"+(lad[1]||"")+"”")+
-    row("Tell me, no star",pseg("guideCfg.gaH3",["true","false"],["On","Off"]),"Step 3: “"+TXT("ga_h3")+"” with "+TXT("ga_tell")+" (the answer and its why; the question counts as not earned, then the next question) and "+TXT("ga_try")+" (back to the game). With every step Off: “"+TXT("ga_none")+"”")+
-    row("Detection",psel("guideCfg.gaStrict",[["loose","Loose"],["normal","Normal"],["strict","Strict"]]),"How a question is known to be about the question on screen, with no AI: its content words shared with the question or its choices (the little words of EN and PT left out). Loose: any word shared (catches the most, and some questions about something else, “Did the king live here?”). Normal: two words, or a choice's word. Strict: as Normal, and half the visitor's words at least (misses a long question that only touches it). Words that ask for the answer itself (answer, hint, clue; resposta, pista, dica) always count. For the card's quiz now: “"+GA_TRY[l==="pt"?"pt":"en"].join("”, “")+"”: "+det(c.gaStrict)+". Loose "+det("loose")+"; Strict "+det("strict")+".")+
+    row("Where to look",pseg("D.guide.gaH1",["true","false"],["On","Off"]),"Hint 1: the question's own written hint (below, beside each question), else the card's block whose words hold the answer, found with no AI and named by its heading, with a Show me chip that takes the card there while the game stays paused. Now for the card's quiz: “"+(lad[0]||"")+"”")+
+    row("One answer out",pseg("D.guide.gaH2",["true","false"],["On","Off"]),"Hint 2: a wrong choice fades (a question with 3 choices; with 2 it would give the answer away, so it is skipped); Guess the year's slider narrows to the half that holds the year. A game with no choices skips it. Now: “"+(lad[1]||"")+"”")+
+    row("Tell me, no star",pseg("D.guide.gaH3",["true","false"],["On","Off"]),"Step 3: “"+TXT("ga_h3")+"” with "+TXT("ga_tell")+" (the answer and its why; the question counts as not earned, then the next question) and "+TXT("ga_try")+" (back to the game). With every step Off: “"+TXT("ga_none")+"”")+
+    row("Detection",psel("D.guide.gaStrict",[["loose","Loose"],["normal","Normal"],["strict","Strict"]]),"How a question is known to be about the question on screen, with no AI: its content words shared with the question or its choices (the little words of EN and PT left out). Loose: any word shared (catches the most, and some questions about something else, “Did the king live here?”). Normal: two words, or a choice's word. Strict: as Normal, and half the visitor's words at least (misses a long question that only touches it). Words that ask for the answer itself (answer, hint, clue; resposta, pista, dica) always count. For the card's quiz now: “"+GA_TRY[l==="pt"?"pt":"en"].join("”, “")+"”: "+det(c.gaStrict)+". Loose "+det("loose")+"; Strict "+det("strict")+".")+
     '<div class="row"><label>Each question\'s own hint</label><div><span class="uses">Written beside each quiz question, EN and PT, with Draft with AI and Reviewed (an unreviewed hint never plays; the card\'s words stand in, and the row says so)</span> <button class="ubtn sm gdedited gdpplink" type="button" data-gdscript="q:'+esc(q0)+'" title="Opens Specific Marker › Guide script at a step\'s quiz question">Specific Marker › Guide script &#8250;</button></div>'+help("Hint 1 says a question's own hint when it has one, reviewed in the visitor's language (“"+TXT("ga_h1_own").replace("{0}","…")+"”); else the card's block is found from the card's words.")+'</div>'+
     '<div class="row"><label>Back to the game lines</label><div><span class="uses">“'+esc(bl?bl.text:"(no line)")+'” and '+Math.max(0,atIntroLines("gameback",l).length-1)+' more, in turn (never twice in a row)</span> <span class="atin"><button class="atplay" type="button" data-gademo="back" title="Play a game paused and back" aria-label="Show the game going on again on the phone">&#9656;</button></span> <button class="ubtn sm" type="button" data-goto="s7auto">Edit: Tour from the card › The mascot\'s intro lines › Back to the game &#8250;</button></div>'+help("The mascot's line on the game's chip as it goes on again, spoken: a set of the mascot's intro lines (Back to the game), picked by the point like the others, the next one each time.")+'</div>'+
     '<div class="note">Unity: GuideGameAsk (plain C#, EditMode-tested: the detection, its stop words and threshold, the ladder, the block finder over the card\'s CardStrings); a GameClock every game\'s coroutines wait on (unscaled time summed while not paused); the chip and the Back row UI Toolkit elements (USS, 44 px), the faded choice a USS class (no transition with Reduced Motion); the voice paused at its word time and resumed from it.</div>'}
@@ -332,26 +332,26 @@ on("edGuide.html",function(h){var d=document.createElement("div");d.innerHTML=h;
 on("guidePath.answer",function(o){if(o==="s7gask")return["gd:g:ontour","s7gask"]});
 /* each quiz question's own hint, beside its Why in Specific Marker › 3 · Guide script, per language: Draft with AI (never in the tests), Reviewed */
 on("edMarker.html",function(h){if(h.indexOf("tqlang")<0)return h;var d=document.createElement("div");d.innerHTML=h;
-  d.querySelectorAll(".tqlang").forEach(function(box){var why=box.querySelector('input[data-path$=".why.en"],input[data-path$=".why.pt"]');if(!why)return;var m=/^tourQ\.([^.]+)\.why\.(\w+)$/.exec(why.dataset.path);if(!m)return;var id=m[1],l=m[2],q=S.tourQ[id];if(!q)return;
+  d.querySelectorAll(".tqlang").forEach(function(box){var why=box.querySelector('input[data-path$=".why.en"],input[data-path$=".why.pt"]');if(!why)return;var m=/^D\.tour\.tourQ\.([^.]+)\.why\.(\w+)$/.exec(why.dataset.path);if(!m)return;var id=m[1],l=m[2],q=D.tour.tourQ[id];if(!q)return;
     q.hint=q.hint||{};if(q.hint[l]==null)q.hint[l]="";q.hrev=q.hrev||{};var r=why.closest(".row");if(!r)return;
-    r.insertAdjacentHTML("afterend",row("Hint",'<input class="u" data-path="tourQ.'+id+'.hint.'+l+'" value="'+esc(L1(q.hint,l))+'" placeholder="'+esc(l==="pt"?"Uma pista, sem dar a resposta":"A clue, never the answer")+'">'+
-      '<div class="btnrow">'+(q.hsrc==="ai"?'<span class="badge gdwb">AI draft</span>':"")+'<button class="ubtn sm" type="button" data-gahai="'+id+'|'+l+'">'+(S.gaBusy===id+"|"+l?"Drafting…":"Draft with AI")+'</button><label class="ovrev"><input type="checkbox" data-gahrev="'+id+'|'+l+'"'+(q.hrev[l]?" checked":"")+'> Reviewed: the mascot can say it</label></div>'+
+    r.insertAdjacentHTML("afterend",row("Hint",'<input class="u" data-path="D.tour.tourQ.'+id+'.hint.'+l+'" value="'+esc(L1(q.hint,l))+'" placeholder="'+esc(l==="pt"?"Uma pista, sem dar a resposta":"A clue, never the answer")+'">'+
+      '<div class="btnrow">'+(q.hsrc==="ai"?'<span class="badge gdwb">AI draft</span>':"")+'<button class="ubtn sm" type="button" data-gahai="'+id+'|'+l+'">'+(ui.gaBusy===id+"|"+l?"Drafting…":"Draft with AI")+'</button><label class="ovrev"><input type="checkbox" data-gahrev="'+id+'|'+l+'"'+(q.hrev[l]?" checked":"")+'> Reviewed: the mascot can say it</label></div>'+
       (String(q.hint[l]||"").trim()&&!q.hrev[l]?'<div class="ovflag" role="note">Not reviewed: hint 1 uses the card\'s words instead.</div>':!String(q.hint[l]||"").trim()?'<div class="uses">None: hint 1 names the card\'s block that holds the answer.</div>':""),
       "Asking during a game › hint 1: what the mascot says when the visitor asks about this question during the quiz (a clue from the step's words, never the answer). Reviewed per language; an unreviewed hint never plays.",true))});return d.innerHTML});
-function gaHintDraft(id,l){var q=S.tourQ[id],st=byId(S.fullSteps||S.guideSteps,id);if(!q||!st)return;if(typeof sampleFn!=="function"||!sampleFn){S.tqNote="AI is not available here (it runs inside the published Lab).";renderEditor();return}S.gaBusy=id+"|"+l;renderEditor();
+function gaHintDraft(id,l){var q=D.tour.tourQ[id],st=byId(ui.fullSteps||D.tour.guideSteps,id);if(!q||!st)return;if(typeof sampleFn!=="function"||!sampleFn){ui.tqNote="AI is not available here (it runs inside the published Lab).";renderEditor();return}ui.gaBusy=id+"|"+l;renderEditor();
   var prompt="Write one short hint (at most 14 words) for this quiz question, for a visitor who heard the text below. Point them to where the answer is or to a clue in the text; never say the answer or rule out a choice. Use ONLY the text. Language: "+(l==="pt"?"European Portuguese (the visitor addressed politely in the third person)":"English")+". Return the hint only.\n\nQUESTION: "+L1(q.q,l)+"\nRIGHT ANSWER (never say it): "+L1((q.a||[])[+q.ok],l)+"\nTEXT: "+stepTextIn(st,l);
-  sampleFn(prompt,{modelTier:"quick"}).then(function(r){S.gaBusy=null;q.hint=q.hint||{};q.hint[l]=String(r&&r.text||"").trim().replace(/^["“]|["”]$/g,"");q.hsrc="ai";q.hrev=q.hrev||{};q.hrev[l]=false;renderEditor()}).catch(function(){S.gaBusy=null;S.tqNote="The AI could not answer; try again.";renderEditor()})}
+  sampleFn(prompt,{modelTier:"quick"}).then(function(r){ui.gaBusy=null;q.hint=q.hint||{};q.hint[l]=String(r&&r.text||"").trim().replace(/^["“]|["”]$/g,"");q.hsrc="ai";q.hrev=q.hrev||{};q.hrev[l]=false;renderEditor()}).catch(function(){ui.gaBusy=null;ui.tqNote="The AI could not answer; try again.";renderEditor()})}
 ed.addEventListener("click",function(e){var t=e.target.closest&&e.target.closest("[data-gahai],[data-gademo]");if(!t)return;e.stopPropagation();if(t.dataset.gahai){var q=t.dataset.gahai.split("|");gaHintDraft(q[0],q[1]);return}if(t.dataset.gademo)gaDemo("back")},true);
-ed.addEventListener("change",function(e){var t=e.target;if(!t.dataset||!t.dataset.gahrev)return;e.stopImmediatePropagation();var q=t.dataset.gahrev.split("|"),o=S.tourQ[q[0]];if(o){(o.hrev=o.hrev||{})[q[1]]=t.checked;renderEditor()}},true);
+ed.addEventListener("change",function(e){var t=e.target;if(!t.dataset||!t.dataset.gahrev)return;e.stopImmediatePropagation();var q=t.dataset.gahrev.split("|"),o=D.tour.tourQ[q[0]];if(o){(o.hrev=o.hrev||{})[q[1]]=t.checked;renderEditor()}},true);
 /* each row's demo: a game started (the quiz on the open point), paused by a question typed in the panel, the answer or the hint, and back */
 var GA_DEMO_Q={en:{about:"Which king moved the court?",other:"Who lived here?",near:"Which king rebuilt the city after the earthquake?"},pt:{about:"Que rei mudou a corte?",other:"Quem viveu aqui?",near:"Que rei reconstruiu a cidade depois do terramoto?"}};
-function gaDemo(key){var l=S.lang==="pt"?"pt":"en",D=GA_DEMO_Q[l],c=S.guideCfg,id=null,m=/^tourQ\.([^.]+)\./.exec(key||"");if(m)id=m[1];
-  var first=id||"g4",qs=[first].concat(Object.keys(S.tourQ).filter(function(k){return k!==first&&gdQOk(S.tourQ[k],l)}).slice(0,2)),qq=S.tourQ[first],aq=id||/gaH|gaStrict/.test(key)?null:D.other,step=/gaH2/.test(key)?2:/gaH3/.test(key)?3:1;
-  if(G.ga.on)gaEnd("an Editor demo");gdDemoBeat("quizfinale","Asking during a game · "+(key==="back"?"back to the game":key.replace(/^guideCfg\./,"")),{qs:qs,ms:30000});var my=G.demoSeq,tries=0;
+function gaDemo(key){var l=P.lang==="pt"?"pt":"en",Dt=GA_DEMO_Q[l],c=D.guide,id=null,m=/^D\.tour\.tourQ\.([^.]+)\./.exec(key||"");if(m)id=m[1];
+  var first=id||"g4",qs=[first].concat(Object.keys(D.tour.tourQ).filter(function(k){return k!==first&&gdQOk(D.tour.tourQ[k],l)}).slice(0,2)),qq=D.tour.tourQ[first],aq=id||/gaH|gaStrict/.test(key)?null:Dt.other,step=/gaH2/.test(key)?2:/gaH3/.test(key)?3:1;
+  if(G.ga.on)gaEnd("an Editor demo");gdDemoBeat("quizfinale","Asking during a game · "+(key==="back"?"back to the game":key.replace(/^D\.guide\./,"")),{qs:qs,ms:30000});var my=G.demoSeq,tries=0;
   (function go(){if(G.demoSeq!==my&&key!=="back")return;var B=G.gd.bt;if(!B||B.kind!=="finale"||!ph.querySelector(".gdbeat .bt-choice")){if(tries++<60)setTimeout(go,100);return}
-    var g=gaGame();if(!g)return;var q=aq||(qq?L(qq.q):D.about);if(/gaStrict/.test(key))q=D.near;g.lad.n=Math.max(0,step-1);
-    S.dockH="peek";renderGuide();setTimeout(function(){if(G.gd.bt===B)ask(q)},350)})()}
-rowDemos(function(key){if(!/^guideCfg\.ga[A-Z]/.test(key)&&!/^tourQ\.[^.]+\.(hint|hrev)\./.test(key))return;return{tour:true,dock:"mini",wait:0,act:function(){gaDemo(key)},ringAfter:2600,ring:function(){return G.ga.on?".ga-row|.ga-chip|.gdock":".ga-note|.gdbeat|.gdock"}}});
+    var g=gaGame();if(!g)return;var q=aq||(qq?L(qq.q):Dt.about);if(/gaStrict/.test(key))q=Dt.near;g.lad.n=Math.max(0,step-1);
+    ui.dockH="peek";renderGuide();setTimeout(function(){if(G.gd.bt===B)ask(q)},350)})()}
+rowDemos(function(key){if(!/^D\.guide\.ga[A-Z]/.test(key)&&!/^D\.tour\.tourQ\.[^.]+\.(hint|hrev)\./.test(key))return;return{tour:true,dock:"mini",wait:0,act:function(){gaDemo(key)},ringAfter:2600,ring:function(){return G.ga.on?".ga-row|.ga-chip|.gdock":".ga-note|.gdbeat|.gdock"}}});
 /* the phone's signature (the self-test): what the visitor gets from these rows, for the open point's quiz */
-on("modelSig.sig",function(h){if(!sigWant(/guideCfg\.ga[A-Z]/))return h;var c=S.guideCfg,l=S.lang||"en";if(!c.gaOn)return h+"#ga:off|"+TXT("ga_off");
+on("modelSig.sig",function(h){if(!sigWant(/D\.guide\.ga[A-Z]/))return h;var c=D.guide,l=P.lang||"en";if(!c.gaOn)return h+"#ga:off|"+TXT("ga_off");
   return h+"#ga:"+(c.gaBack?c.gaBackS:0)+"|"+gaLadderNow(l).join("|")+"|"+gaDetectNow(l,c.gaStrict).join(",")});

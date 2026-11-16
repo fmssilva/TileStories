@@ -14,7 +14,7 @@
    Unity: a TextMeshPro / UI Toolkit label with a highlight quad (a VisualElement behind the text) tweened between the words' bounds
    (DOTween, Ease.InOutCubic; the bounds from TMP_TextInfo.characterInfo, or the TextElement's glyph rects), the tail as per-character
    vertex colours fading (TMP colors32), the word's state a rich-text-free colour per character. */
-S.guideCfg.hl="comet";S.guideCfg.trail=6;S.guideCfg.glide=true;
+D.guide.hl="comet";D.guide.trail=6;D.guide.glide=true;
 var HL={hooks:{}};
 /* the places showing the line being said now: [box, place, offset] (offset: the head's word k is the box's word k + offset) */
 function hlBoxes(h){var out=[];emit("hlBoxes.add",out,h);return out}
@@ -32,7 +32,7 @@ function hlIdx(w,j){return w.dataset.k!=null?+w.dataset.k:j}
 /* the one painter: p the reading head (k + the share of word k said), ended when the line is over */
 function hlGlide(box,place,p,ended){if(!box||!box.isConnected)return;HL.hooks[place]=(HL.hooks[place]||0)+1;var ws=hlWords(box),n=ws.length;if(!n)return;
   box.classList.add("hl-box","gread");box.dataset.hlp=place;
-  var mode=S.guideCfg.hl,tr=Math.max(1,+S.guideCfg.trail||6),glide=S.guideCfg.glide!==false&&!S.reduce,k=ended?1e9:Math.floor(p),sid=[],s=0,hw=null,hs=-1,st=box._hl||(box._hl={k:null,cur:null}),now=performance.now();
+  var mode=D.guide.hl,tr=Math.max(1,+D.guide.trail||6),glide=D.guide.glide!==false&&!P.reduce,k=ended?1e9:Math.floor(p),sid=[],s=0,hw=null,hs=-1,st=box._hl||(box._hl={k:null,cur:null}),now=performance.now();
   /* the line said: its tail fades away over 0.7 s (Fill keeps the said words tinted) */
   if(ended&&st.endAt==null)st.endAt=now;if(!ended)st.endAt=null;var fade=ended&&mode!=="fill"?Math.max(0,1-(now-st.endAt)/700):1;
   for(var i=0;i<n;i++){sid.push(s);if(/[.!?…]["”»)\]]*$/.test(ws[i].textContent))s++;if(hlIdx(ws[i],i)===k){hw=ws[i];hs=sid[i]}}
@@ -57,12 +57,12 @@ on("hlBoxes.add",function(out,h){ph.querySelectorAll(".gcap").forEach(function(c
 /* Editor: Guide › 1 · The mascot › Speech on screen: the highlight's style, its trail, the glide and a Try (round 21: from guide/readalong.js,
    so the highlighter has one home; Captions keeps its link row) */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
-  addRows(d,"s7cap",row("Highlight style",pseg("guideCfg.hl",["comet","sentence","fill","word"],["Comet","Sentence + word","Fill","One word"]),"How the words being said light up, in every place speech is shown: the bubble, the teleprompter, the open panel, the block being read, the games' cards. Comet: a soft light glides from word to word and the words behind it keep a warm tint that fades away. Sentence + word: a soft band over the sentence being said, the light on the word in it (a small study found a sentence band easiest to follow for readers with dyslexia). Fill: the words already said stay tinted. One word: only the light on the word being said. Unity: a highlight quad behind the TextMeshPro text, tweened between the words' bounds; the tail as vertex colours.")+
-    row("Trail",pslider("guideCfg.trail",2,14,1),"Comet only: how many words the fading tail covers behind the word being said.",true)+
-    row("Glide",pseg("guideCfg.glide",["true","false"],["Smooth","Word by word"]),"Smooth: the light moves and resizes from one word to the next on an ease, timed by the voice (a recorded line's word times; the device voice's word boundaries). Word by word: it is on each word at once. Reduce Motion: word by word, the tail stays.")+
+  addRows(d,"s7cap",row("Highlight style",pseg("D.guide.hl",["comet","sentence","fill","word"],["Comet","Sentence + word","Fill","One word"]),"How the words being said light up, in every place speech is shown: the bubble, the teleprompter, the open panel, the block being read, the games' cards. Comet: a soft light glides from word to word and the words behind it keep a warm tint that fades away. Sentence + word: a soft band over the sentence being said, the light on the word in it (a small study found a sentence band easiest to follow for readers with dyslexia). Fill: the words already said stay tinted. One word: only the light on the word being said. Unity: a highlight quad behind the TextMeshPro text, tweened between the words' bounds; the tail as vertex colours.")+
+    row("Trail",pslider("D.guide.trail",2,14,1),"Comet only: how many words the fading tail covers behind the word being said.",true)+
+    row("Glide",pseg("D.guide.glide",["true","false"],["Smooth","Word by word"]),"Smooth: the light moves and resizes from one word to the next on an ease, timed by the voice (a recorded line's word times; the device voice's word boundaries). Word by word: it is on each word at once. Reduce Motion: word by word, the tail stays.")+
     row("Try",'<button class="del" type="button" data-hltry="1">Try</button>',"Starts the tour with these settings."));
   return d.innerHTML});
 ed.addEventListener("click",function(e){var t=e.target.closest("[data-hltry]");if(t){e.stopPropagation();if(G.on)stopTour();startTour()}},true);
-BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(hl|trail|glide|"));
+BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("D\\.guide\\.(","D\\.guide\\.(hl|trail|glide|"));
 /* each row's demo: a block read in place, its words lit */
-rowDemos({"guideCfg.hl":{tour:"g4",ring:".gfocus"},"guideCfg.trail":{tour:"g4",ring:".gfocus"},"guideCfg.glide":{tour:"g4",ring:".gfocus"}});
+rowDemos({"D.guide.hl":{tour:"g4",ring:".gfocus"},"D.guide.trail":{tour:"g4",ring:".gfocus"},"D.guide.glide":{tour:"g4",ring:".gfocus"}});

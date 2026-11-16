@@ -9,8 +9,8 @@
 // the wall (a real drag on the wall to the point, the 1.2 s settle, the hint's direction, I give up at 20 s, the wall lost, the wall only);
 // every new row's demo (a real click on a sample), the Guide script's word with Reviewed. Its thirteen scenes in Ask Azu's console: test9qs.js.
 // MUTATE=1 node test9q.js makes the tap window ignore its end: the checks named [window] turn red.
-const { chromium } = require('./pw');
-const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
+const { chromium, labUrl } = require('./pw');
+const url = labUrl('#probe');
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--autoplay-policy=no-user-gesture-required'] });
   const p = await b.newPage({ viewport: { width: 1400, height: 900 } });
@@ -25,10 +25,10 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // the mutation: every window of Don't say it! stays open (the tap window ignores its end)
   if (process.env.MUTATE) { await R('setInterval(function(){var d=G.gd.ds;if(d)d.wins.forEach(function(w){w.e=1e12})},20)'); console.log('MUTATION: the tap window ignores its end'); }
   // the device voice, muted (its words go on by time); only Fun › On the tour speaks; Ink glass at Mini
-  const base = 'S.hints.on=false;S.previewBar=false;S.lang="en";S.guideMute=true;S.introSeen=true;S.reduce=false;S.dark=false;S.cardCfg.mode="light";S.guideCfg.voice="device";S.guideCfg.panel="dock";S.guideCfg.dockStart="mini";S.guideCfg.look="ink";S.guideCfg.life="lively";S.guideCfg.mascot=true;S.vis.aud="explorer";S.vis.len="";S.vis.speed=null;S.m.solemn=false;S.ui.gdSR=false;S.guidance.on=true;gdKindById("app").on=false;gdKindById("content").on=false;gdGroupById("play").on=false;S.ui.rowDemo=false;S.camCfg.wall="ribeira";S.camX=.5;S.camY=.5;S.camZoom=1;';
-  await R('window.WK=JSON.stringify(S.tourWord);window.FK=JSON.stringify(S.tourFind);window.QK=JSON.stringify(S.tourQ)');
-  const only = ids => `["quizpromise","quizfinale","guessyear","dontsay","findwall","water","cookie"].forEach(function(id){S.guidance.items[id].on=${JSON.stringify(ids)}.indexOf(id)>=0});`;
-  const fresh = async (ids, x) => { await R(base + 'S.tourWord=JSON.parse(window.WK);S.tourFind=JSON.parse(window.FK);S.tourQ=JSON.parse(window.QK);if(G.on)stopTour();gdBeatClose();gdTailEnd();gdWordOff();G.gd.owed=null;G.gd.plan=null;gdResetVisitor();var st=ph.querySelector(".stv");if(st)stateHide();' + only(ids) + 'S.view="card";S.stop="full";renderAll(false);' + (x || '')); };
+  const base = 'D.card.hints.on=false;LAB.previewBar=false;P.lang="en";P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;D.card.cardCfg.mode="light";D.guide.voice="device";D.guide.panel="dock";D.guide.dockStart="mini";D.guide.look="ink";D.guide.life="lively";D.guide.mascot=true;P.vis.aud="explorer";P.vis.len="";P.vis.speed=null;D.poi.solemn=false;LAB.gdSR=false;D.guidance.on=true;gdKindById("app").on=false;gdKindById("content").on=false;gdGroupById("play").on=false;LAB.rowDemo=false;LAB.wall="ribeira";ui.camX=.5;ui.camY=.5;ui.camZoom=1;';
+  await R('window.WK=JSON.stringify(D.tour.tourWord);window.FK=JSON.stringify(D.tour.tourFind);window.QK=JSON.stringify(D.tour.tourQ)');
+  const only = ids => `["quizpromise","quizfinale","guessyear","dontsay","findwall","water","cookie"].forEach(function(id){D.guidance.items[id].on=${JSON.stringify(ids)}.indexOf(id)>=0});`;
+  const fresh = async (ids, x) => { await R(base + 'D.tour.tourWord=JSON.parse(window.WK);D.tour.tourFind=JSON.parse(window.FK);D.tour.tourQ=JSON.parse(window.QK);if(G.on)stopTour();gdBeatClose();gdTailEnd();gdWordOff();G.gd.owed=null;G.gd.plan=null;gdResetVisitor();var st=ph.querySelector(".stv");if(st)stateHide();' + only(ids) + 'ui.view="card";ui.stop="full";renderAll(false);' + (x || '')); };
   const seam = id => R(`gd12Seam(${JSON.stringify(id)})`);
 
   // ---------- 1. the plan, pure ----------
@@ -52,25 +52,25 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('Its span holds its seams: no beat inside it or beside it (Guess the year before step 6 is first in the Editor\'s order: Don\'t say it! is not planned over it)', JSON.stringify(pl.inside[0]) === '["guessyear@4"]' && /never two seams in a row/.test(pl.inside[1]), pl.inside);
   ok('Its gates: a screen reader (not offered), Calm (Lively only), Expert (Family and Explorer), said once (no game), not reviewed, no word, a span not in the tour, a language without its word', /screen reader.*not offered/.test(pl.gates[0]) && /Calm/.test(pl.gates[1]) && /not for Expert/.test(pl.gates[2]) && /said once/.test(pl.gates[3]) && /not reviewed/.test(pl.gates[4]) && /no word in English/.test(pl.gates[5]) && /not all in this tour/.test(pl.gates[6]) && /no word in Portuguese/.test(pl.gates[7]), pl.gates);
   ok('Find it on the wall: Calm too, at the seam after its step; the wall only (its point not on the wall in view: no find); no point: no find', JSON.stringify(pl.find[0]) === '["findwall@7"]' && /the wall only/.test(pl.find[1]) && /no wall point/.test(pl.find[2]), pl.find);
-  const sg = await R('var e=gdWordSuggest("en"),p=gdWordSuggest("pt");[gdWordLine(e[0]),e[0].flags,gdWordLine(p[0]),p[0].flags,e.filter(function(c){return c.w==="palace"}).length,e.some(function(c){return c.w.length<4}),[gdWordHit("palace\'s","palace","en"),gdWordHit("Palaces,","palace","en"),gdWordHit("palácio.","palácio","pt"),gdWordHit("place","palace","en")],gdWordCount(S.tourWord.en,"en"),gdWordCount(S.tourWord.pt,"pt")]');
+  const sg = await R('var e=gdWordSuggest("en"),p=gdWordSuggest("pt");[gdWordLine(e[0]),e[0].flags,gdWordLine(p[0]),p[0].flags,e.filter(function(c){return c.w==="palace"}).length,e.some(function(c){return c.w.length<4}),[gdWordHit("palace\'s","palace","en"),gdWordHit("Palaces,","palace","en"),gdWordHit("palácio.","palácio","pt"),gdWordHit("place","palace","en")],gdWordCount(D.tour.tourWord.en,"en"),gdWordCount(D.tour.tourWord.pt,"pt")]');
   ok('The word suggestions from the tour\'s own text, best first, with count and span: EN "palace: 2 times in steps 4-5", PT "palácio: 2 times in steps 4-5"; each rule it bends named (the demo tour\'s short span)', /^palace: 2 times in steps 4-5 \(0:\d\d\)$/.test(sg[0]) && /^palácio: 2 times in steps 4-5 \(0:\d\d\)$/.test(sg[2]) && sg[1].length === 1 && /short span/.test(sg[1][0]) && sg[3].length === 1 && sg[4] >= 2 && !sg[5], sg);
   ok('The slips\' matcher: the word, its possessive and plural; never a near word ("place"); the demo\'s words said 2 times in their spans', JSON.stringify(sg[6]) === '[true,true,true,false]' && sg[7] === 2 && sg[8] === 2, sg.slice(6));
-  const wn = await R('var k=JSON.stringify(S.tourWord);S.tourWord.en.span=["g4"];var a=gdBeatNever(S.guidance.items.dontsay);S.tourWord.en={w:"the",span:["g3","g4"],rev:true};var b=gdBeatNever(S.guidance.items.dontsay);S.tourWord.pt.rev=false;var c=gdBeatNever(S.guidance.items.dontsay);S.tourWord=JSON.parse(k);[a,b,c,gdBeatNever(S.guidance.items.dontsay)]');
+  const wn = await R('var k=JSON.stringify(D.tour.tourWord);D.tour.tourWord.en.span=["g4"];var a=gdBeatNever(D.guidance.items.dontsay);D.tour.tourWord.en={w:"the",span:["g3","g4"],rev:true};var b=gdBeatNever(D.guidance.items.dontsay);D.tour.tourWord.pt.rev=false;var c=gdBeatNever(D.guidance.items.dontsay);D.tour.tourWord=JSON.parse(k);[a,b,c,gdBeatNever(D.guidance.items.dontsay)]');
   ok('The Editor\'s warnings: a count of 1 (no game), over 4 (too easy, too long), not reviewed; none for the demo\'s words', wn[0].some(x => /said once/.test(x)) && wn[1].some(x => /too easy, too long/.test(x)) && wn[2].some(x => /not reviewed/.test(x)) && wn[3].length === 0, wn);
   tsec('pure');
 
   // ---------- 2. 13.0 on the page: the quiz step skipped, the promise's chips over step 1 ----------
   await fresh(['quizpromise', 'quizfinale']); await R('startTour()');
-  const sk = await R('[S.guideSteps.map(function(s){return s.id}).indexOf("g9"),gdPlanBeat("quizfinale").after,/is skipped/.test(gdPlanWords(G.gd.plan)),!!scr.querySelector(\'[data-ref="b:b_quiz"]\')]');
+  const sk = await R('[D.tour.guideSteps.map(function(s){return s.id}).indexOf("g9"),gdPlanBeat("quizfinale").after,/is skipped/.test(gdPlanWords(G.gd.plan)),!!scr.querySelector(\'[data-ref="b:b_quiz"]\')]');
   ok('13.0: the tour skips the card\'s "Test yourself" step (g9) while the quiz is promised; the finale after g8; the block stays on the card', sk[0] < 0 && sk[1] === 'g8' && sk[2] && sk[3], sk);
   await until('gd12Kind("promise")', 20000); const t1 = Date.now(); await until('!!ph.querySelector(".gdstrip .bt-chip")', 15000);
-  const tl = await R('[G.i,S.guideSteps[G.i].id,gsSpeaking(),!G.gd.bt,G.gd.plan.quiz]');
-  const ov = {}; for (const h of ['mini', 'compact', 'peek']) ov[h] = await R(`S.dockH="${h}";renderGuide();var e=ph.querySelector(".gdstrip"),r=e&&gdPR(e);[!!e,Math.round(gdTailOver(e)),r&&r.l>=0&&r.r<=ph.offsetWidth&&r.t>=0&&r.b<=ph.offsetHeight,[].map.call(ph.querySelectorAll(".gdstrip .bt-chip"),function(x){var q=gdPR(x);return Math.round(q.b-q.t)})]`);
-  await R('S.dockH="mini";renderGuide()');
+  const tl = await R('[G.i,D.tour.guideSteps[G.i].id,gsSpeaking(),!G.gd.bt,G.gd.plan.quiz]');
+  const ov = {}; for (const h of ['mini', 'compact', 'peek']) ov[h] = await R(`ui.dockH="${h}";renderGuide();var e=ph.querySelector(".gdstrip"),r=e&&gdPR(e);[!!e,Math.round(gdTailOver(e)),r&&r.l>=0&&r.r<=ph.offsetWidth&&r.t>=0&&r.b<=ph.offsetHeight,[].map.call(ph.querySelectorAll(".gdstrip .bt-chip"),function(x){var q=gdPR(x);return Math.round(q.b-q.t)})]`);
+  await R('ui.dockH="mini";renderGuide()');
   ok('13.0: the promise\'s Deal / No quiz, thanks stay up while step 1 is told (the tour no longer waits): step 1 speaking, the quiz pending', tl[1] === 'g1' && tl[2] && tl[3] && tl[4] === 'pending', tl);
   ok('13.0: the chips 0 px over the words being told, inside the phone, 44 px, at Mini, Compact and Open', Object.values(ov).every(v => v[0] && v[1] === 0 && v[2] && v[3].length === 2 && v[3].every(h => h >= 44)), ov);
   await tap('.gdstrip [data-gdtl="noquiz"]'); await until('G.gd.plan.quiz==="off"', 3000);
-  const nq = await R('[S.guideSteps.map(function(s){return s.id}).indexOf("g9")>0,gdPlanBeat("quizfinale").state,/plays again/.test(gdPlanWords(G.gd.plan))]');
+  const nq = await R('[D.tour.guideSteps.map(function(s){return s.id}).indexOf("g9")>0,gdPlanBeat("quizfinale").state,/plays again/.test(gdPlanWords(G.gd.plan))]');
   ok('13.0: No quiz, thanks (a real tap): the quiz dropped, the card\'s "Test yourself" step plays again', nq[0] && nq[1] === 'dropped' && nq[2], nq);
   tsec('13.0');
 
@@ -95,7 +95,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const c1 = await R('[G.gd.ds.caught,G.gd.ds.falses,(ph.querySelector(".gdstrip .tl-pip")||{}).textContent,gsSpeaking(),window.POKES]');
   ok('A catch (a real click in the window): the pip “Caught 1”, the voice never stopped; a second tap in the same window is ignored (not counted, not a false alarm)', c1[0] === 1 && c1[1] === 1 && c1[2] === 'Caught 1' && c1[3] && c1[4] === 0, c1);
   // Previous: the sentence again; the slip relit, never counted twice
-  await R('S.dockH="peek";renderGuide()'); await until('!!ph.querySelector(\'.gdock [data-g="prev"]\')', 2000); await tap('.gdock [data-g="prev"]'); await R('S.dockH="mini";renderGuide()');
+  await R('ui.dockH="peek";renderGuide()'); await until('!!ph.querySelector(\'.gdock [data-g="prev"]\')', 2000); await tap('.gdock [data-g="prev"]'); await R('ui.dockH="mini";renderGuide()');
   await until('G.gd.ds&&G.gd.ds.wins.length>=2', 8000); await mascot(); await W(900);
   const pv = await R('[G.gd.ds.order.length,G.gd.ds.wins.length,G.gd.ds.caught,G.gd.ds.falses,G.gd.ds.slips[G.gd.ds.order[0]].said]');
   ok('Previous (a real tap): the sentence again lights the same slip; a tap in its new window never counts it twice', pv[0] === 1 && pv[1] >= 2 && pv[2] === 1 && pv[3] === 1 && pv[4] >= 2, pv);
@@ -109,7 +109,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const back = await R('[G.gd.clip&&(G.gd.clip.phrase||G.gd.clip.src),(ph.querySelector(".gdbeat .bt-slip .slipw")||{}).textContent,(ph.querySelector(".gdbeat .bt-slip")||{}).textContent]');
   ok('The result at the seam after the span: “I said it 2 times. You caught 1!”', /^I said it 2 times\. You caught 1!/.test(res[0]) && res[1].caught === 1 && res[1].n === 2, res);
   ok('…the missed slip played back (the device voice: its phrase said again), the word lit in the card', !!back[0] && /palace/.test(back[1]) && /palace/.test(back[2]), back);
-  await until('!G.gd.bt', 15000); ok('…then the tour goes on after the span', await R('S.guideSteps[G.i].id==="g5"&&!G.gd.ds'));
+  await until('!G.gd.bt', 15000); ok('…then the tour goes on after the span', await R('D.tour.guideSteps[G.i].id==="g5"&&!G.gd.ds'));
   // the developer's answer on round 13: the result waits until the last window has closed (a slip said just before the seam)
   const wt = await R('var b=gdPlanBeat("dontsay",G.gd.plan),d=gdWordStart(b),t=gdWordClock();d.slips.x={key:"x",step:"g4",k:0,caught:false,text:"",phrase:{words:["palace"],at:0,rec:null},said:1};d.order.push("x");d.wins.push({key:"x",s:t,e:t+1500});window.__wt=performance.now();gdWordEnd();[d.on,!!d.waitEnd,!!(G.gd.bt&&G.gd.bt.kind==="wordres")]');
   await W(800); const wm = await R('[!!(G.gd.ds&&G.gd.ds.on),!!(G.gd.bt&&G.gd.bt.kind==="wordres")]');
@@ -118,7 +118,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('gdBeatClose();gdWordOff()'); await until('!G.gd.bt', 5000);
   const lines = await R('[fmt(TXT("tour_word_all"),3),fmt(TXT("tour_word_none"),3),fmt(TXT("tour_word_false"),4),TXT("tour_word_dream"),fmt(TXT("tour_word_callback"),2,3).replace("{thing}","palace")]');
   ok('The result lines by score, never mocking; the score said again in the quiz\'s callback', lines[0] === '3 times, and you caught me every time. Sharp ears!' && /didn't tap once/.test(lines[1]) && /Nice try/.test(lines[2]) && /pastéis de nata/.test(lines[3]) && lines[4] === 'And you caught me saying “palace” 2 of 3 times.', lines);
-  const cb = await R('G.gd.plan.wordScore={word:"palace",caught:2,n:2,falses:0};G.gd.plan.quiz="on";var it=S.guidance.items.quizfinale;gdStart(it,"t",{owed:{qs:["g1","g4"],n:2}});var B=G.gd.bt;B.right=2;B.k=1;B.answered=0;gdQuizScore();var l=G.gd.bt.said||"";gdBeatClose();gdStop("t");l');
+  const cb = await R('G.gd.plan.wordScore={word:"palace",caught:2,n:2,falses:0};G.gd.plan.quiz="on";var it=D.guidance.items.quizfinale;gdStart(it,"t",{owed:{qs:["g1","g4"],n:2}});var B=G.gd.bt;B.right=2;B.k=1;B.answered=0;gdQuizScore();var l=G.gd.bt.said||"";gdBeatClose();gdStop("t");l');
   ok('The quiz\'s score says the game once more (“…caught me saying “palace” 2 of 2 times.”)', /caught me saying “palace” 2 of 2 times/.test(cb), cb);
   tsec('word');
 
@@ -129,21 +129,21 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await tap('.gdock [data-g="play"],.gdock [data-g="pause"]'); await until('!G.paused', 2000); await mascot(); await until('G.gd.ds&&G.gd.ds.caught===1', 1500);
   ok('[window] Pause (a real tap) freezes the windows with the voice: 3 s paused, then a tap after Play still catches the slip', Math.abs(c2 - c0) < 150 && await R('G.gd.ds&&G.gd.ds.caught===1'), [c0, c2]);
   // Heard it! at Compact and with Mascot Off
-  await R('S.dockH="compact";renderGuide()'); await until('!!ph.querySelector(".gdheard")', 2000);
+  await R('ui.dockH="compact";renderGuide()'); await until('!!ph.querySelector(".gdheard")', 2000);
   const hd = await R('var h=ph.querySelector(".gdheard"),g=ph.querySelector(".gbtn-wrap.intour"),r=gdPR(h),q=g&&gdStarBox(g);[Math.round(r.b-r.t),Math.round(r.r-r.l),!!q&&r.l-q.r>=0&&r.l-q.r<=24&&Math.abs((r.t+r.b)/2-(q.t+q.b)/2)<12,h.textContent]');
   ok('At Compact a Heard it! button by the ✦ (44 px)', hd[0] >= 44 && hd[1] >= 44 && hd[2] && hd[3] === 'Heard it!', hd);
-  await R('S.dockH="mini";S.guideCfg.mascot=false;renderGuide()'); const mo = await until('!!ph.querySelector(".gdstrip .tl-heard")', 2000);
+  await R('ui.dockH="mini";D.guide.mascot=false;renderGuide()'); const mo = await until('!!ph.querySelector(".gdstrip .tl-heard")', 2000);
   await until('!!G.gd.ds&&G.gd.ds.wins.some(function(w){var t=gdWordClock();return t>=w.s+150&&t<=w.e&&!G.gd.ds.slips[w.key].caught})', 30000);
   await tap('.gdstrip .tl-heard'); await W(200);
   ok('With Mascot Off, Heard it! too (at Mini); a real tap on it in a window catches the slip', mo && await R('(G.gd.ds?G.gd.ds.caught:G.gd.plan.wordScore.caught)===2'), await R('G.gd.ds?[G.gd.ds.caught,G.gd.ds.order.length]:G.gd.plan.wordScore'));
   // a screen reader: not offered; a language change ends it quietly
-  await fresh(['dontsay'], 'S.ui.gdSR=true');
+  await fresh(['dontsay'], 'LAB.gdSR=true');
   ok('A screen reader on: Don\'t say it! is not offered (the plan says why)', await R('/screen reader.*not offered/.test(gdPlanNow().why.dontsay)'));
   await fresh(['dontsay']); await R('startTour()'); await W(300); await seam('g2'); await until('G.gd.ds&&G.gd.ds.on&&G.i===3', 20000);
-  await R('S.lang="pt";renderAll(true)'); const lc = await until('!G.gd.ds', 2000);
+  await R('P.lang="pt";renderAll(true)'); const lc = await until('!G.gd.ds', 2000);
   ok('The language changed mid-span: the game ends quietly (“Let\'s play another time.” on the strip, never said)', lc && await R('/Jogamos noutra altura|Let\'s play another time/.test((ph.querySelector(".gdstrip .tl-msg")||{}).textContent||"")'));
   // Portuguese with its own word
-  await fresh(['dontsay'], 'S.lang="pt";renderAll(false)'); await R('startTour()'); await W(300); await seam('g2'); await until('gd12Kind("word")', 8000);
+  await fresh(['dontsay'], 'P.lang="pt";renderAll(false)'); await R('startTour()'); await W(300); await seam('g2'); await until('gd12Kind("word")', 8000);
   ok('Portuguese with its own word: the announce says “palácio”, its card shows it', await R('/não dizer “palácio”/.test(ph.querySelector(".gdbeat .bt-line").textContent)&&ph.querySelector(".gdbeat .bt-word b").textContent==="palácio"'));
   tsec('word edges');
 
@@ -151,7 +151,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await fresh(['findwall']); await R('startTour()'); await W(300);
   const fb = await R('gdPlanBeat("findwall")&&gdPlanBeat("findwall").after'); await seam(fb);
   await until('!!G.gd.find&&!!ph.querySelector(".gdseek")', 8000);
-  const f0 = await R('var F=G.gd.find,s=poiScreen(F.p),c=gdFindC();[S.stop,S.dockH,F.p.id,Math.round(s.x),Math.round(s.y),Math.round(c.x),Math.round(c.y),gdFindR(),gdFindDir(F.p),ph.querySelector(".gdbeat .bt-line").textContent]');
+  const f0 = await R('var F=G.gd.find,s=poiScreen(F.p),c=gdFindC();[ui.stop,ui.dockH,F.p.id,Math.round(s.x),Math.round(s.y),Math.round(c.x),Math.round(c.y),gdFindR(),gdFindDir(F.p),ph.querySelector(".gdbeat .bt-line").textContent]');
   ok('Find it on the wall at the seam after its step: the card lowered (the wall), the panel at Mini, a seek ring in the middle, its line', f0[0] === 'closed' && f0[1] === 'mini' && f0[2] === 'torreao' && /find the great corner tower on the real wall/.test(f0[9]), f0);
   // a real drag on the wall: the point into the ring
   const ph0 = await p.locator('#ph').boundingBox(), q = ph0.width / (await R('ph.offsetWidth'));
@@ -160,7 +160,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const inR = await R('gdFindIn(G.gd.find.p)'); await until('G.gd.find&&G.gd.find.state==="found"', 4000); const settle = (Date.now() - tUp) / 1000;
   const fd = await R('[ph.querySelector(".gdbeat .bt-line").textContent,!!ph.querySelector(".gdfound"),!!ph.querySelector(".gdseek.got")]');
   ok('A real drag on the wall brings the tower into the ring; held still, it is found after the 1.2 s settle, “That\'s it!” and a glint', inR && settle >= 1.1 && settle < 2.5 && fd[1] && fd[2], [inR, settle, fd]);
-  await until('!G.gd.bt&&S.stop==="full"', 8000); ok('…then back to the card, the tour goes on', await R('S.stop==="full"&&S.guideSteps[G.i].id!==' + JSON.stringify(fb)));
+  await until('!G.gd.bt&&ui.stop==="full"', 8000); ok('…then back to the card, the tour goes on', await R('ui.stop==="full"&&D.tour.guideSteps[G.i].id!==' + JSON.stringify(fb)));
   // the hint's direction; I give up at 20 s
   await fresh(['findwall']); await R('startTour()'); await W(300); await seam(fb); await until('!!G.gd.find', 8000);
   await R('G.gd.find.clock=9800'); await until('G.gd.find.hinted', 2000); await until('ph.querySelector(".gdbeat .bt-line").textContent===TXT("tour_find_"+gdFindDir(G.gd.find.p))', 3000);
@@ -177,36 +177,36 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('stateShow("lost")'); const lost = await until('G.gd.find&&G.gd.find.state==="lost"&&/another time/.test((ph.querySelector(".gdbeat .bt-line")||{}).textContent||"")', 2000); await until('!G.gd.find', 6000);
   ok('The wall lost while seeking (a system state wins): the find ends quietly, “We\'ll find it another time.”', lost && await R('!G.gd.find&&!ph.querySelector(".gdseek")'));
   await R('stateHide()'); await until('!G.gd.bt', 8000);
-  const wo = await R('var c=gdContext();c.state="wall not found";var P=G.gd.plan,it=gdItems().filter(function(x){return x.id==="findwall"})[0],b=gdPlanBeat("findwall"),k=b.state;b.state="planned";var r=gdBeatCheck(it,Object.assign(c,{moment:"between",speaking:false,tour:{step:3,stepId:b.after}}));b.state=k;S.camCfg.wall="belem";renderPhone(false);var w=gdPlanNow().why.findwall;S.camCfg.wall="ribeira";renderPhone(false);[r.no,w]');
+  const wo = await R('var c=gdContext();c.state="wall not found";var P=G.gd.plan,it=gdItems().filter(function(x){return x.id==="findwall"})[0],b=gdPlanBeat("findwall"),k=b.state;b.state="planned";var r=gdBeatCheck(it,Object.assign(c,{moment:"between",speaking:false,tour:{step:3,stepId:b.after}}));b.state=k;LAB.wall="belem";renderPhone(false);var w=gdPlanNow().why.findwall;LAB.wall="ribeira";renderPhone(false);[r.no,w]');
   ok('Never while tracking is lost (at its seam); the wall only: on another wall, no find', /tracking lost/.test(wo[0]) && /the wall only/.test(wo[1]), wo);
   tsec('find');
 
   // ---------- 5. the Editor: rows, demos, the Guide script ----------
   await fresh(['quizpromise', 'quizfinale', 'guessyear', 'dontsay', 'findwall', 'water', 'cookie']);
-  await R('S.tab="guide";S.op={gt4:true,"gd:fun":true,"gd:g:ontour":true,"gd:i:dontsay":true,"gd:i:findwall":true};Object.keys(S.op).forEach(function(k){var m=/^gd:i:(.+)$/.exec(k),it=m&&S.op[k]&&S.guidance.items[m[1]];if(it)gdFormOf(it).groups.forEach(function(g){if(g)S.op["gd:f:"+m[1]+":"+g.k]=true})});renderEditor()'); // round 14: the items' groups open
+  await R('ui.tab="guide";ui.op={gt4:true,"gd:fun":true,"gd:g:ontour":true,"gd:i:dontsay":true,"gd:i:findwall":true};Object.keys(ui.op).forEach(function(k){var m=/^gd:i:(.+)$/.exec(k),it=m&&ui.op[k]&&D.guidance.items[m[1]];if(it)gdFormOf(it).groups.forEach(function(g){if(g)ui.op["gd:f:"+m[1]+":"+g.k]=true})});renderEditor()'); // round 14: the items' groups open
   const ek = await R('var o=[];ed.querySelectorAll(\'[data-fo="gd:i:dontsay"] .row,[data-fo="gd:i:findwall"] .row\').forEach(function(r){var k=rowKey(r);if(k&&o.indexOf(k)<0)o.push(k)});var labs=[].map.call(ed.querySelectorAll(\'[data-fo="gd:i:dontsay"] .row > label,[data-fo="gd:i:findwall"] .row > label\'),function(l){return l.textContent});[o,o.filter(function(k){return!rowDemoOf(k)}),labs,ed.querySelector("#gdplan").textContent]');
-  ok('The new rows: The word (suggested) · The span · Tap window (2.5) · False taps · Play my slip back (On); The point · Says · Give up after (20) · Hint after (10); each with its demo', ['The word · EN', 'The word · PT', 'The span · EN', 'Tap window (s)', 'False taps', 'Play my slip back', 'The point', 'After step', 'Give up after (s)', 'Hint after (s)'].every(x => ek[2].indexOf(x) >= 0) && ek[1].length === 0 && await R('var d=S.guidance.items.dontsay,f=S.guidance.items.findwall;d.tapWin===2.5&&d.falseTaps==="nope"&&d.slipBack===true&&f.giveUp===20&&f.hintAfter===10'), [ek[1], ek[2].length]);
+  ok('The new rows: The word (suggested) · The span · Tap window (2.5) · False taps · Play my slip back (On); The point · Says · Give up after (20) · Hint after (10); each with its demo', ['The word · EN', 'The word · PT', 'The span · EN', 'Tap window (s)', 'False taps', 'Play my slip back', 'The point', 'After step', 'Give up after (s)', 'Hint after (s)'].every(x => ek[2].indexOf(x) >= 0) && ek[1].length === 0 && await R('var d=D.guidance.items.dontsay,f=D.guidance.items.findwall;d.tapWin===2.5&&d.falseTaps==="nope"&&d.slipBack===true&&f.giveUp===20&&f.hintAfter===10'), [ek[1], ek[2].length]);
   ok('The plan line names the pair as one and the skipped step', /the quiz's promise and the quiz count as one/.test(ek[3]) && /is skipped: the mascot's quiz replaces it/.test(ek[3]), ek[3]);
-  const sample = ['guidance.items.dontsay.tapWin', 'guidance.items.dontsay.falseTaps', 'guidance.items.dontsay.slipBack', 'tourWord.en.pick', 'guidance.items.findwall.giveUp', 'guidance.items.findwall.hintAfter', 'tourFind.point'];
+  const sample = ['D.guidance.items.dontsay.tapWin', 'D.guidance.items.dontsay.falseTaps', 'D.guidance.items.dontsay.slipBack', 'D.tour.tourWord.en.pick', 'D.guidance.items.findwall.giveUp', 'D.guidance.items.findwall.hintAfter', 'D.tour.tourFind.point'];
   const shown = [];
   for (const k of sample) {
-    await R('if(G.on)stopTour();gdBeatClose();gdTailEnd();document.body.dataset.rowdemo="";S.ui.rowDemo=true;renderEditor()');
+    await R('if(G.on)stopTour();gdBeatClose();gdTailEnd();document.body.dataset.rowdemo="";LAB.rowDemo=true;renderEditor()');
     const lb = p.locator(`.row:has([data-set="@${k}"],[data-sel="@${k}"],[data-num="@${k}"]) > label.rd`).first();
     if (await lb.count()) await lb.scrollIntoViewIfNeeded(); const bb = await lb.boundingBox(); if (!bb) { shown.push(k + ' (no ▸)'); continue; }
     await p.mouse.click(bb.x + bb.width - 12, bb.y + bb.height / 2);
-    const want = /findwall|tourFind/.test(k) ? '!!ph.querySelector(".gdseek")&&G.on' : k === 'guidance.items.dontsay.slipBack' ? 'G.gd.bt&&G.gd.bt.kind==="wordres"' : /tapWin|falseTaps/.test(k) ? '!!ph.querySelector(".gdstrip .tl-word")&&G.on' : '!!ph.querySelector(".gdbeat")&&G.on';
+    const want = /findwall|tourFind/.test(k) ? '!!ph.querySelector(".gdseek")&&G.on' : k === 'D.guidance.items.dontsay.slipBack' ? 'G.gd.bt&&G.gd.bt.kind==="wordres"' : /tapWin|falseTaps/.test(k) ? '!!ph.querySelector(".gdstrip .tl-word")&&G.on' : '!!ph.querySelector(".gdbeat")&&G.on';
     const got = await until(want, 9000); shown.push(k + (got ? '|shown' : '|none'));
   }
   ok('Each new row\'s ▸ pressed (a real click): its game on the phone, in a tour, now (the announce, the span with its word card, the result, the seek ring)', shown.every(s => /\|shown$/.test(s)), shown);
-  await R('if(G.on)stopTour();gdBeatClose();gdTailEnd();S.ui.rowDemo=false;S.tab="marker";S.op={m3:true};renderEditor()');
+  await R('if(G.on)stopTour();gdBeatClose();gdTailEnd();LAB.rowDemo=false;ui.tab="marker";ui.op={m3:true};renderEditor()');
   const gs = await R('var b=ed.querySelector(".gdwbox");[!!b,b&&b.textContent.indexOf("palace: 2 times in steps 4-5")>=0,b&&b.textContent.indexOf("palácio: 2 times in steps 4-5")>=0,b&&b.querySelectorAll(\'[data-gdwrev]\').length,b&&/the great corner tower/.test(b.textContent)]');
   ok('Specific Marker › Guide script: the word per language with its suggestions (count and span), a Reviewed tick each, the find\'s line', gs[0] && gs[1] && gs[2] && gs[3] === 2 && gs[4], gs);
   await p.locator('[data-gdwrev="pt"]').first().uncheck(); await W(200);
-  ok('Reviewed unticked (a real click): no game in Portuguese (the plan says why), English still plays', await R('S.tourWord.pt.rev===false&&(function(){var k=S.lang;S.lang="pt";var w=gdPlanNow().why.dontsay;S.lang=k;return/not reviewed/.test(w)})()&&S.tourWord.en.rev===true'));
-  await p.locator('select[data-sel="@tourWord.en.pick"]').first().selectOption({ index: 1 }); await W(300);
-  ok('Picking another suggestion (a real select): the word and its span change, and it needs Reviewed again', await R('var w=S.tourWord.en;w.rev===false&&w.src==="suggested"&&(w.w!=="palace"||w.span.join(",")!=="g3,g4")'));
-  await R('S.tourWord=JSON.parse(window.WK);S.tab="guide";renderEditor()');
-  ok('The new words and their owners (tour_word* on Don\'t say it!, tour_find* on Find it on the wall)', await R('TXOWN.tour_word==="gd:i:dontsay"&&TXOWN.tour_word_heard==="gd:i:dontsay"&&TXOWN.tour_letsplay==="gd:i:dontsay"&&TXOWN.tour_find==="gd:i:findwall"&&TXOWN.tour_find_giveup==="gd:i:findwall"&&/não dizer/.test(S.tx.tour_word.pt)&&/Baixe o cartão/.test(S.tx.tour_find.pt)'));
+  ok('Reviewed unticked (a real click): no game in Portuguese (the plan says why), English still plays', await R('D.tour.tourWord.pt.rev===false&&(function(){var k=P.lang;P.lang="pt";var w=gdPlanNow().why.dontsay;P.lang=k;return/not reviewed/.test(w)})()&&D.tour.tourWord.en.rev===true'));
+  await p.locator('select[data-sel="@D.tour.tourWord.en.pick"]').first().selectOption({ index: 1 }); await W(300);
+  ok('Picking another suggestion (a real select): the word and its span change, and it needs Reviewed again', await R('var w=D.tour.tourWord.en;w.rev===false&&w.src==="suggested"&&(w.w!=="palace"||w.span.join(",")!=="g3,g4")'));
+  await R('D.tour.tourWord=JSON.parse(window.WK);ui.tab="guide";renderEditor()');
+  ok('The new words and their owners (tour_word* on Don\'t say it!, tour_find* on Find it on the wall)', await R('TXOWN.tour_word==="gd:i:dontsay"&&TXOWN.tour_word_heard==="gd:i:dontsay"&&TXOWN.tour_letsplay==="gd:i:dontsay"&&TXOWN.tour_find==="gd:i:findwall"&&TXOWN.tour_find_giveup==="gd:i:findwall"&&/não dizer/.test(D.words.tx.tour_word.pt)&&/Baixe o cartão/.test(D.words.tx.tour_find.pt)'));
   tsec('editor');
 
   ok('no page errors', errs.length === 0, errs.slice(0, 3));

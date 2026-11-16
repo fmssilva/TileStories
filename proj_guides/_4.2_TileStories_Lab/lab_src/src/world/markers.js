@@ -12,14 +12,14 @@ function placeMarkers(){var w=document.getElementById("wall");if(!w)return;var m
   w.querySelectorAll("[data-mk]").forEach(function(b){var m=ms.filter(function(x){return x.id===b.dataset.mk})[0];if(!m)return;var s=poiScreen(m);b.style.left=s.x.toFixed(1)+"px";b.style.top=s.y.toFixed(1)+"px"})}
 on("camPaint.after",function(){placeMarkers()});
 /* the Ribeira wall shows its points too (named, as Names on the points says); the marker's own point gives way to the marker */
-on("camLayer.after",function(){var pins=ph.querySelector(".campins");if(!pins||S.camCfg.wall!=="ribeira")return;pins.hidden=false;
+on("camLayer.after",function(){var pins=ph.querySelector(".campins");if(!pins||LAB.wall!=="ribeira")return;pins.hidden=false;
   if(!G.cam.open)wallMarkers().forEach(function(m){var e=pins.querySelector('[data-cpin="'+m.id+'"]');if(e)e.remove()})});
 
 /* ----- the Wall switch on the preview bar: the card's wall or the Belém test wall, one tap from anywhere ----- */
-function setWall(w){if(G.on)stopTour();S.camCfg.wall=w;S.view="card";S.stop="closed";G.cam.open=false;G.cam.lit=[];G.cam.route=[];G.cam.hunt=null;
-  S.camX=w==="belem"?.35:.4;S.camY=.5;S.camZoom=1;renderAll(true)}
-on("ptool.html",function(h){var w=S.camCfg.wall==="belem"?"belem":"ribeira";return h+'<button type="button" data-pt="wall" aria-pressed="'+(w!=="ribeira")+'" title="'+TXH("pbar_tip_wall")+'">'+TXH("pbar_wall_"+w)+'</button>'});
-document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest('[data-pt="wall"]');if(!b)return;e.stopPropagation();e.preventDefault();setWall(S.camCfg.wall==="belem"?"ribeira":"belem")},true);
+function setWall(w){if(G.on)stopTour();LAB.wall=w;ui.view="card";ui.stop="closed";G.cam.open=false;G.cam.lit=[];G.cam.route=[];G.cam.hunt=null;
+  ui.camX=w==="belem"?.35:.4;ui.camY=.5;ui.camZoom=1;renderAll(true)}
+on("ptool.html",function(h){var w=LAB.wall==="belem"?"belem":"ribeira";return h+'<button type="button" data-pt="wall" aria-pressed="'+(w!=="ribeira")+'" title="'+TXH("pbar_tip_wall")+'">'+TXH("pbar_wall_"+w)+'</button>'});
+document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest('[data-pt="wall"]');if(!b)return;e.stopPropagation();e.preventDefault();setWall(LAB.wall==="belem"?"ribeira":"belem")},true);
 
 /* ----- the test scene: a finger drags the wall, the wheel zooms; each marker and pin must stay on its place in the picture ----- */
 function phPoint(e){var r=e.getBoundingClientRect(),p=ph.getBoundingClientRect(),q=p.width/ph.offsetWidth;return{x:(r.left+r.width/2-p.left)/q,y:(r.top+r.height/2-p.top)/q}}
@@ -27,7 +27,7 @@ function phPoint(e){var r=e.getBoundingClientRect(),p=ph.getBoundingClientRect()
 function wallGaps(){var c=document.getElementById("camera"),bp=c.style.backgroundPosition.split(" ").map(parseFloat),bs=c.style.backgroundSize.split(" ").map(parseFloat),out=[];
   var at=function(u,v){return{x:bp[0]+u*bs[0],y:bp[1]+v*bs[1]}};
   ph.querySelectorAll("#wall [data-mk]").forEach(function(b){var m=wallMarkers().filter(function(x){return x.id===b.dataset.mk})[0],e=at(m.u,m.v),s=phPoint(b.querySelector("span"));out.push({id:m.id,name:L(m.name),x:s.x,y:s.y,gap:Math.hypot(s.x-e.x,s.y-e.y)})});
-  ph.querySelectorAll(".campins .cpin").forEach(function(b){var p=S.wallPois.filter(function(x){return x.id===b.dataset.cpin})[0],e=at(p.u,p.v),x=parseFloat(b.style.left),y=parseFloat(b.style.top);out.push({id:"pin:"+p.id,name:L(p.name),x:x,y:y,gap:Math.hypot(x-e.x,y-e.y)})});
+  ph.querySelectorAll(".campins .cpin").forEach(function(b){var p=D.wall.wallPois.filter(function(x){return x.id===b.dataset.cpin})[0],e=at(p.u,p.v),x=parseFloat(b.style.left),y=parseFloat(b.style.top);out.push({id:"pin:"+p.id,name:L(p.name),x:x,y:y,gap:Math.hypot(x-e.x,y-e.y)})});
   return{pic:{x:bp[0],y:bp[1]},items:out}}
 /* a drag by a finger: the same pointer events a touch sends, on the camera */
 function fingerDrag(dx,dy){var cam=document.getElementById("camera"),p=ph.getBoundingClientRect(),q=p.width/ph.offsetWidth,x0=p.left+p.width*.5,y0=p.top+p.height*.4;
@@ -38,7 +38,7 @@ function markerScene(){var a=wallGaps(),r=function(n){return Math.round(n)};
   document.getElementById("camera").dispatchEvent(new WheelEvent("wheel",{deltaY:-100,bubbles:true,cancelable:true}));var c=wallGaps();
   var pic={x:b.pic.x-a.pic.x,y:b.pic.y-a.pic.y},mk=a.items.filter(function(i){return i.id.indexOf("pin:")<0}),moved=mk.map(function(m){var n=b.items.filter(function(i){return i.id===m.id})[0];return{name:m.name,x:n.x-m.x,y:n.y-m.y}});
   var worst=[a,b,c].reduce(function(w,s){return s.items.reduce(function(w2,i){return i.gap>w2.gap?i:w2},w)},{gap:0,name:"-"}),pins=b.items.length-mk.length;
-  var ans="The picture moved "+r(pic.x)+", "+r(pic.y)+" px; "+moved.map(function(m){return m.name+" "+r(m.x)+", "+r(m.y)}).join("; ")+". Then zoomed to "+S.camZoom.toFixed(2)+"×. "+pins+(pins===1?" point":" points")+" shown.";
+  var ans="The picture moved "+r(pic.x)+", "+r(pic.y)+" px; "+moved.map(function(m){return m.name+" "+r(m.x)+", "+r(m.y)}).join("; ")+". Then zoomed to "+ui.camZoom.toFixed(2)+"×. "+pins+(pins===1?" point":" points")+" shown.";
   if(Math.abs(pic.x)<20||Math.abs(pic.y)<20)return[false,"the drag did not move the picture",ans];
   if(!mk.length)return[false,"no marker on the wall",ans];
   if(!pins)return[false,"the wall's points are not shown",ans];
@@ -47,7 +47,7 @@ function markerScene(){var a=wallGaps(),r=function(n){return Math.round(n)};
 AGSCENES.push({id:"markers",label:"Ribeira wall · a drag moves the markers with the picture",where:"wall",act:markerScene,
   q:T("nothing: it drags the wall 120 px left and 80 up as a finger does, then zooms in with the wheel","nada: arrasta a parede 120 px para a esquerda e 80 para cima, como um dedo, e depois aproxima com a roda"),
   expect:T("Each marker and each point stays on its place in the picture (within 1.5 px) and moves as far as the picture.","Cada marcador e cada ponto fica no seu lugar na imagem (a menos de 1,5 px) e anda tanto como a imagem."),
-  setup:function(){setWall("ribeira");S.camX=.4;S.camY=.5;S.camZoom=1.3;renderPhone(false)}});
+  setup:function(){setWall("ribeira");ui.camX=.4;ui.camY=.5;ui.camZoom=1.3;renderPhone(false)}});
 on("agScene.after",function(sc){if(sc.act){AG.con.q="";agConPaint()}});
 on("agRunScene.answer",function(i){var sc=AGSCENES[i];if(!sc.act)return;agScene(i);
   return new Promise(function(res){setTimeout(function(){Promise.resolve(sc.act()).then(function(r){AG.sceneRes[sc.id]={ok:r[0],note:r[1],answer:r[2],st:null,view:[]};agConPaint();res(AG.sceneRes[sc.id])})},300)})});

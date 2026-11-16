@@ -8,11 +8,11 @@
 // the walkthrough's steps never the scheduler's. 2. A cue and a tip never at once [at once], and the cue room between them, either way
 // [room] (pure and on the page). 3. How to use the card pulled from Settings and from the ✦ (real clicks), no gate stopping it; a step seen
 // retires its cue. 4. How does this work? on the card and on the wall (its look, its chip). 5. Card Controls > Hints as a view: it reads
-// Edited in Guidance and its links open the group and the cue; the old names (S.hints.on, S.ctl.locate.label) are Guidance's values.
+// Edited in Guidance and its links open the group and the cue; the old names (D.card.hints.on, D.card.ctl.locate.label) are Guidance's values.
 // 6. Every new row's demo, the words and their owners, the old timers gone. 7. The two new scenes in Ask Azu's console.
 // MUTATE=1 node test9h.js runs it with the cues past the one-at-a-time gate: the checks named [at once] turn red.
-const { chromium } = require('./pw');
-const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
+const { chromium, labUrl } = require('./pw');
+const url = labUrl('#probe');
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
   const p = await b.newPage({ viewport: { width: 1400, height: 900 } });
@@ -23,11 +23,11 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   if (process.env.MUTATE) { await R('var __gp=gdPick;gdPick=function(items,v,ctx,now){if(ctx.showing){var r=__gp(items.filter(function(x){return x.form==="cue"}),v,Object.assign({},ctx,{showing:null}),now);if(r.item)return r}return __gp(items,v,ctx,now)}'); console.log('MUTATION: the cues skip the one-at-a-time gate'); }
   // the set-up: the cues On (and The ✦), the remarks resting, a first visit whose opening was said 30 s ago
-  const base = 'S.previewBar=false;S.guideMute=true;S.introSeen=true;S.reduce=false;S.dark=false;S.lang="en";S.ui.rowDemo=false;S.guideCfg.gbtn="both";S.guideCfg.mascot=true;S.guideCfg.life="lively";S.guideCfg.azuTap="play";S.m.solemn=false;' +
-    'S.guidance.on=true;S.guidance.breathing=15;S.guidance.cueRoom=5;S.hints.on=true;gdGroupById("card").items.forEach(function(id){var it=S.guidance.items[id];it.on=true;it.shows="visit"});var hw=gdGroupById("howto");hw.on=true;hw.inSettings=true;hw.inMenu=true;' +
-    '["opening","tapmarker","askview","gbhint","tourof"].forEach(function(id){S.guidance.items[id].on=true});gdGroupById("inview").on=false;G.gd.demo=false;gdChip(null);';
-  const opened = 'var o=gdVM("opening"),oe=gdEM("opening");o.shown=1;o.last=gdNow()-30000;o.end=gdNow()-21000;oe.shown=1;S.gdVisitor.visit.lastEnd=gdNow()-21000;var e=gdEM("tapmarker");e.done=true;e.by="card";';
-  const fresh = async (extra, manual) => { await R(base + 'if(G.on)stopTour();G.cam.open=false;S.settingsOpen=false;G.fab.menu=false;setWall("ribeira");S.view="card";S.stop="closed";renderPhone(false);' + `G.gd.manual=${!!manual};G.gd.rate=1;` + 'gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;G.gd.actAt=null;G.gd.scrollAt=null;' + opened + (extra || '')); await W(150);
+  const base = 'LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;P.lang="en";LAB.rowDemo=false;D.guide.gbtn="both";D.guide.mascot=true;D.guide.life="lively";D.guide.azuTap="play";D.poi.solemn=false;' +
+    'D.guidance.on=true;D.guidance.breathing=15;D.guidance.cueRoom=5;D.card.hints.on=true;gdGroupById("card").items.forEach(function(id){var it=D.guidance.items[id];it.on=true;it.shows="visit"});var hw=gdGroupById("howto");hw.on=true;hw.inSettings=true;hw.inMenu=true;' +
+    '["opening","tapmarker","askview","gbhint","tourof"].forEach(function(id){D.guidance.items[id].on=true});gdGroupById("inview").on=false;G.gd.demo=false;gdChip(null);';
+  const opened = 'var o=gdVM("opening"),oe=gdEM("opening");o.shown=1;o.last=gdNow()-30000;o.end=gdNow()-21000;oe.shown=1;P.gdVisitor.visit.lastEnd=gdNow()-21000;var e=gdEM("tapmarker");e.done=true;e.by="card";';
+  const fresh = async (extra, manual) => { await R(base + 'if(G.on)stopTour();G.cam.open=false;ui.settingsOpen=false;G.fab.menu=false;setWall("ribeira");ui.view="card";ui.stop="closed";renderPhone(false);' + `G.gd.manual=${!!manual};G.gd.rate=1;` + 'gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;G.gd.actAt=null;G.gd.scrollAt=null;' + opened + (extra || '')); await W(150);
     /* (round 11 review) the sheet may still be growing to its stop (184 px of 820 measured): wait until its height holds */
     await until('var h=Math.round(scr.getBoundingClientRect().height),o=window.__t9sh;window.__t9sh=h;o===h', 3000); };
   const CR = 'var px=function(c){var m=c.match(/[\\d.]+/g).map(Number);return{r:m[0],g:m[1],b:m[2]}},lum=function(c){return[c.r,c.g,c.b].map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce(function(a,v,i){return a+v*[.2126,.7152,.0722][i]},0)},cr=function(a,b){var x=lum(a),y=lum(b);return Math.round((Math.max(x,y)+.05)/(Math.min(x,y)+.05)*100)/100};';
@@ -75,11 +75,11 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
     P.r4[0] === 'ba' && P.r5[0] === 'strip' && /Before \/ After: skipped under Reduce Motion/.test(P.r1[2]) && /Swipe strips: skipped under Reduce Motion/.test(P.r2[2]) && P.r3[0] === 'term' && /no Before \/ After in view/.test(P.r6[2]), [P.r1[2], P.r2[2], P.r3[0], P.r6[2]]);
   P.w1 = await pk(NB + 'C.onCard=false;C.onWall=true;C.where=""', N, 'navbar');
   P.g1 = await pk(NB + 'items.forEach(function(x){if(x.group==="card")x.groupOn=false})', N, 'navbar');
-  ok('...never on the wall; the group\'s On (S.hints.on): Off, no cue', /Navigation Bar: not on a card \(the wall\)/.test(P.w1[2]) && /Navigation Bar: The card \(cues\) is Off/.test(P.g1[2]), [P.w1[2], P.g1[2]]);
+  ok('...never on the wall; the group\'s On (D.card.hints.on): Off, no cue', /Navigation Bar: not on a card \(the wall\)/.test(P.w1[2]) && /Navigation Bar: The card \(cues\) is Off/.test(P.g1[2]), [P.w1[2], P.g1[2]]);
   P.t1 = await pk(NB + 'C.limits.perVisit=1;vm("askview",{shown:1,last:100000,end:104000})', N, 'navbar');
   P.t2 = await pk('only("gbhint");star();C.limits.perVisit=1;vm("navbar",{shown:1,last:100000,end:101000});vm("ba",{shown:1,last:100000,end:101000})', N, 'gbhint');
   ok('A cue is not a tip: the tips\' limits do not hold it (at most 1 a visit, a tip shown: the cue still shows), and the cues shown do not count in them', P.t1[0] === 'navbar' && P.t2[0] === 'gbhint', [P.t1, P.t2[0]]);
-  const steps = await R('var d=gdDefs().filter(function(x){return x.form==="walk"}),V=JSON.parse(JSON.stringify(S.gdVisitor)),c=gdContext();[gdItems().filter(function(x){return x.form==="walk"}).length,d.map(function(x){return x.id}).join(),gdCheck(d[0],gdItems(),V,c,gdNow()).no]');
+  const steps = await R('var d=gdDefs().filter(function(x){return x.form==="walk"}),V=JSON.parse(JSON.stringify(P.gdVisitor)),c=gdContext();[gdItems().filter(function(x){return x.form==="walk"}).length,d.map(function(x){return x.id}).join(),gdCheck(d[0],gdItems(),V,c,gdNow()).no]');
   ok('The walkthrough\'s steps are never the scheduler\'s: not in its items, and pulled only if asked', steps[0] === 0 && steps[1] === 'wk_grab,wk_settings,wk_bar,wk_locate,wk_block' && /pulled only/.test(steps[2]), steps);
 
   // ---------- 2. a cue and a tip never at once; the cue room, either way ----------
@@ -95,11 +95,11 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('[room] ...and after a cue, a tip waits it too (not the 15 s breathing room: a cue is small motion); 5.1 s after, the tip', P.m3[0] === null && /The ✦: the cue room 5 s after a cue: 2 s left/.test(P.m3[2]) && P.m4[0] === 'gbhint', [P.m3[2], P.m4[0]]);
   ok('[room] ...none between two cues (one at a time only); Cue room 0: none; a tip the card\'s opening ended (the visitor did what it asked) does not hold the opening\'s cue', P.m5[0] === 'navbar' && P.m6[0] === 'navbar' && P.m7[0] === 'nudge', [P.m5[0], P.m6[0], P.m7]);
   // on the page, the visit's clock moved by hand: The ✦'s tip on the card; a Before / After scrolls into view while it shows; the sweep waits, then its room
-  await fresh('gdGroupById("card").items.forEach(function(id){S.guidance.items[id].on=id==="ba"});S.view="card";S.stop="full";renderPhone(false);var el=scr.querySelector("[data-ba]"),top=el.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop,h=scr.querySelector(".hero").offsetHeight;scr.scrollTop=Math.max(h+40,top-scr.clientHeight-60);fabLayer();S.gdVisitor.visit.pokes=4;', true);
+  await fresh('gdGroupById("card").items.forEach(function(id){D.guidance.items[id].on=id==="ba"});ui.view="card";ui.stop="full";renderPhone(false);var el=scr.querySelector("[data-ba]"),top=el.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop,h=scr.querySelector(".hero").offsetHeight;scr.scrollTop=Math.max(h+40,top-scr.clientHeight-60);fabLayer();P.gdVisitor.visit.pokes=4;', true);
   const pg = await R('var r={both:0,x:[]},t0=gdNow(),ba=null,x0=null;while(gdNow()-t0<60000){gdAdvance(250);var c=G.gd.cur;' +
     'if(c&&c.item.id==="gbhint"&&r.tip==null){r.tip=c.at;var el=scr.querySelector("[data-ba]");scr.scrollTop=el.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-140;ba=el;x0=el.style.getPropertyValue("--x")}' +
-    'if(c&&c.item.id==="gbhint"&&r.tip!=null&&gdNow()-r.tip>=2000&&!r.during)r.during=gdWhyNot(gdItems(),S.gdVisitor,gdContext(),gdNow(),"ba");' +
-    'if(r.tip!=null&&r.end==null&&!(c&&c.item.id==="gbhint")){r.end=gdVisitOf(S.gdVisitor,"gbhint").end;r.after=gdWhyNot(gdItems(),S.gdVisitor,gdContext(),gdNow(),"ba")}' +
+    'if(c&&c.item.id==="gbhint"&&r.tip!=null&&gdNow()-r.tip>=2000&&!r.during)r.during=gdWhyNot(gdItems(),P.gdVisitor,gdContext(),gdNow(),"ba");' +
+    'if(r.tip!=null&&r.end==null&&!(c&&c.item.id==="gbhint")){r.end=gdVisitOf(P.gdVisitor,"gbhint").end;r.after=gdWhyNot(gdItems(),P.gdVisitor,gdContext(),gdNow(),"ba")}' +
     'if(c&&c.cue&&ph.querySelector(".gdbub:not(.gd-out)"))r.both++;if(c&&c.item.id==="ba"){r.cue=c.at;r.moved=ba&&ba.style.getPropertyValue("--x")!==x0;break}}' +
     '[r.tip!=null,r.during,r.after,r.cue!=null&&r.end!=null?Math.round((r.cue-r.end)/100)/10:null,r.both]');
   const moved = await until('var e=scr.querySelector("[data-ba]");e&&e.style.getPropertyValue("--x")!==""&&Math.abs(parseFloat(e.style.getPropertyValue("--x"))-50)>2', 1500);
@@ -108,28 +108,28 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('G.gd.manual=false');
 
   // ---------- 3. How to use the card, pulled: from Settings and from the ✦, no gate stopping it; a step seen retires its cue ----------
-  await fresh('S.guidance.on=false;S.view="card";S.stop="half";S.settingsOpen=true;renderPhone(false);');
+  await fresh('D.guidance.on=false;ui.view="card";ui.stop="half";ui.settingsOpen=true;renderPhone(false);');
   await R('var v=ph.querySelector(".vset");v.scrollTop=v.scrollHeight'); await W(200);
   await p.locator('#ph .vset .vhow').click(); await W(400);
-  const s1 = await R('[G.on,S.guideSteps[G.i].id,S.guideSteps[G.i].gd,!!ph.querySelector("#grab.gfocus"),S.stop,!ph.querySelector(".vset"),S.guidance.on,G.gd.touchAt!=null&&gdNow()-G.gd.touchAt<800]');
+  const s1 = await R('[G.on,D.tour.guideSteps[G.i].id,D.tour.guideSteps[G.i].gd,!!ph.querySelector("#grab.gfocus"),ui.stop,!ph.querySelector(".vset"),D.guidance.on,G.gd.touchAt!=null&&gdNow()-G.gd.touchAt<800]');
   ok('From Settings (a real click), with Guidance Off and a touch just now: the walkthrough starts at once at its first step, the grabber marked, the card at Full', s1[0] && s1[1] === 'how0' && s1[2] === 'wk_grab' && s1[3] && s1[4] === 'full' && s1[5] && s1[6] === false && s1[7], s1);
-  const ret = await until('gdEverOf(S.gdVisitor,"nudge").done', 12000);
-  const rt = await R('[gdEverOf(S.gdVisitor,"nudge").by,gdEverOf(S.gdVisitor,"wk_grab").shown,gdWhyNot(gdItems(),S.gdVisitor,Object.assign(gdContext(),{on:true,showing:null,tour:null}),gdNow(),"nudge"),G.gd.log.filter(function(l){return l.what==="event"&&/The grabber/.test(l.why)}).map(function(l){return l.why}).join()]');
+  const ret = await until('gdEverOf(P.gdVisitor,"nudge").done', 12000);
+  const rt = await R('[gdEverOf(P.gdVisitor,"nudge").by,gdEverOf(P.gdVisitor,"wk_grab").shown,gdWhyNot(gdItems(),P.gdVisitor,Object.assign(gdContext(),{on:true,showing:null,tour:null}),gdNow(),"nudge"),G.gd.log.filter(function(l){return l.what==="event"&&/The grabber/.test(l.why)}).map(function(l){return l.why}).join()]');
   ok('A step seen retires its cue: the grabber\'s line heard, the Grabber nudge is done for good (by its step), the step\'s memory "seen"', ret && rt[0] === 'wk_grab' && rt[1] === 1 && /Grabber nudge: done for good \(the visitor saw How to use the card's step “The grabber”\)/.test(rt[2]) && /How to use the card's step “The grabber”/.test(rt[3]), rt);
   await R('stopTour()'); await W(200);
-  ok('...stopping it brings back the card\'s own guide steps', await R('!G.on&&S.guideSteps[0].id==="g0"'));
-  await fresh('S.guidance.on=false;S.view="card";S.stop="full";renderPhone(false);scr.scrollTop=scr.querySelector(".hero").offsetHeight+60;fabLayer();');
+  ok('...stopping it brings back the card\'s own guide steps', await R('!G.on&&D.tour.guideSteps[0].id==="g0"'));
+  await fresh('D.guidance.on=false;ui.view="card";ui.stop="full";renderPhone(false);scr.scrollTop=scr.querySelector(".hero").offsetHeight+60;fabLayer();');
   await until('!!ph.querySelector("#ph .gbtn")||!!ph.querySelector(".gbtn")', 2000);
   await p.locator('#ph .gbtn').click(); await W(250);
   const mi = await R('[].map.call(ph.querySelectorAll(".gbmenu [data-gbgo]"),function(b){return b.dataset.gbgo}).join()');
   await p.locator('#ph [data-gbgo="how"]').click(); await W(400);
-  const s2 = await R('[G.on,S.guideSteps[G.i].id,!!ph.querySelector("#grab.gfocus"),!ph.querySelector(".gbmenu")]');
+  const s2 = await R('[G.on,D.tour.guideSteps[G.i].id,!!ph.querySelector("#grab.gfocus"),!ph.querySelector(".gbmenu")]');
   ok('From the ✦ on the card (real clicks): its menu has How does this work?, which walks the card (Guidance Off: no gate stops a pull)', mi === 'tour,ask,how,try,settings' && s2.every(Boolean), [mi, s2]);
   await R('stopTour()');
 
   // ---------- 4. How does this work? on the wall: one bubble, beside the nearest marker, a chip that opens a card ----------
   for (const dark of [false, true]) {
-    await fresh(`S.dark=${dark};renderAll(true);`); await W(200);
+    await fresh(`P.dark=${dark};renderAll(true);`); await W(200);
     await p.locator('#ph .gbtn').click(); await W(250);
     const wi = await R('[].map.call(ph.querySelectorAll(".gbmenu [data-gbgo]"),function(b){return b.dataset.gbgo}).join()');
     await p.locator('#ph [data-gbgo="how"]').click(); await until('!!(G.gd.cur&&G.gd.cur.item.id==="howto:wall")', 2000); await W(450);
@@ -138,46 +138,46 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
     ok(`On the wall (${dark ? 'dark' : 'light'}): the ✦ menu has it; one bubble (the menu closed), beside the nearest marker, Azu pointing, its ring; 2 lines, 7:1, 0 px over words or the ✦; the chip Open a card, 44 px, 7:1`,
       wi === 'tour,ask,view,how,try,settings' && az.every(Boolean) && l[0] <= 2 && l[1] >= 7 && l[2] === 0 && l[3] === 0 && l[4] === await R('TXT("gd_how_wall")') && l[5] >= 44 && l[6] >= 7 && /^Open a card/.test(l[7]), [wi, az, l]);
   }
-  await R('S.dark=false;S.lang="pt";renderAll(true)'); await W(250); await until('var a=ph.querySelector(".azfab");!a||!a.getAnimations||!a.getAnimations().length', 2500); const lpt = await R(look);
-  ok('...in Portuguese: its words from Languages & Terms, 2 lines at most', lpt[4] === await R('S.tx.gd_how_wall.pt') && /^Abrir um cartão/.test(lpt[7]) && lpt[0] <= 2 && lpt[2] === 0, lpt);
-  await R('S.lang="en";renderAll(true)'); await W(150);
+  await R('P.dark=false;P.lang="pt";renderAll(true)'); await W(250); await until('var a=ph.querySelector(".azfab");!a||!a.getAnimations||!a.getAnimations().length', 2500); const lpt = await R(look);
+  ok('...in Portuguese: its words from Languages & Terms, 2 lines at most', lpt[4] === await R('D.words.tx.gd_how_wall.pt') && /^Abrir um cartão/.test(lpt[7]) && lpt[0] <= 2 && lpt[2] === 0, lpt);
+  await R('P.lang="en";renderAll(true)'); await W(150);
   await p.locator('#ph .gdbub [data-gdcta]').click(); await W(400);
-  const op = await R('[S.view,S.stop,!G.gd.cur||G.gd.cur.item.id!=="howto:wall",S.gdVisitor.used.card!=null,JSON.stringify(gdVisitOf(S.gdVisitor,"howto:wall"))]');
+  const op = await R('[ui.view,ui.stop,!G.gd.cur||G.gd.cur.item.id!=="howto:wall",P.gdVisitor.used.card!=null,JSON.stringify(gdVisitOf(P.gdVisitor,"howto:wall"))]');
   ok('...its chip opens the card of the marker Azu points at (a pull: no memory of its own)', op[0] === 'card' && op[1] !== 'closed' && op[2] && op[3] && /"shown":0/.test(op[4]), op);
   await fresh('var g=gdGroupById("howto");g.inMenu=false;'); const h1 = await R('gbItems().join()');
-  await R('var g=gdGroupById("howto");g.inMenu=true;g.inSettings=false;S.view="card";S.stop="half";S.settingsOpen=true;renderPhone(false)'); const h2 = await R('!ph.querySelector(".vhow")');
-  await R('var g=gdGroupById("howto");g.inSettings=true;g.on=false;S.settingsOpen=true;renderPhone(false)'); const h3 = await R('[!ph.querySelector(".vhow"),gbItems().indexOf("how")<0,gdWalk("test")===false]');
-  await R('gdGroupById("howto").on=true;S.settingsOpen=false;renderPhone(false)');
+  await R('var g=gdGroupById("howto");g.inMenu=true;g.inSettings=false;ui.view="card";ui.stop="half";ui.settingsOpen=true;renderPhone(false)'); const h2 = await R('!ph.querySelector(".vhow")');
+  await R('var g=gdGroupById("howto");g.inSettings=true;g.on=false;ui.settingsOpen=true;renderPhone(false)'); const h3 = await R('[!ph.querySelector(".vhow"),gbItems().indexOf("how")<0,gdWalk("test")===false]');
+  await R('gdGroupById("howto").on=true;ui.settingsOpen=false;renderPhone(false)');
   ok('Its entries follow the group: In the ✦ menu Hidden: no item; In Settings Hidden: no button; the group Off: neither, and nothing opens', h1 === 'tour,ask,view,try,settings' && h2 && h3.every(Boolean), [h1, h2, h3]);
 
   // ---------- 5. Card Controls > Hints: a view of the same data ----------
-  await fresh(); await R('S.tab="card";S.ui.level=1;S.op={s5:true,s5hints:true};renderEditor()'); await W(200);
+  await fresh(); await R('ui.tab="card";ui.level=1;ui.op={s5:true,s5hints:true};renderEditor()'); await W(200);
   const vw = await R('var f=ed.querySelector(\'[data-fo="s5hints"]\');[[].map.call(f.querySelectorAll("[data-goto]"),function(b){return b.dataset.goto+"|"+b.textContent.trim()}),f.querySelectorAll("[data-set],[data-sel],[data-num],[data-path]").length,[].map.call(f.querySelectorAll("tbody tr"),function(r){return r.children[0].textContent+"="+r.children[1].textContent}).join()]');
   ok('Card Controls > Hints: each row reads Edited in Azu speaks up and links to its cue (6), the group and How to use the card; no control of its own (it only reads)',
     vw[0].length === 8 && vw[0].filter(v => /^gd:i:/.test(v)).every(v => /\|Edited in The mascot speaks up ›$/.test(v)) && vw[0].indexOf('gd:g:card|Edited in Guide › The mascot speaks up › App › The card (cues) ›') >= 0 && vw[0].some(v => /^gd:g:howto\|Edited in Guide › The mascot speaks up › Sequences/.test(v)) && vw[1] === 0 &&
     /^Grabber nudge=Once a visit,Locate label=Once a visit,Navigation Bar=Once a visit/.test(vw[2]), vw);
-  await R('S.guidance.items.ba.shows="card";S.guidance.items.term.on=false;renderEditor()'); await W(150);
+  await R('D.guidance.items.ba.shows="card";D.guidance.items.term.on=false;renderEditor()'); await W(150);
   const vw2 = await R('[].map.call(ed.querySelectorAll(\'[data-fo="s5hints"] tbody tr\'),function(r){return r.children[1].textContent}).join()');
-  await R('S.guidance.items.ba.shows="visit";S.guidance.items.term.on=true;renderEditor()');
+  await R('D.guidance.items.ba.shows="visit";D.guidance.items.term.on=true;renderEditor()');
   ok('...it reads Guidance\'s values (Before / After set to Every card, Underlined words Off, in Guidance: the view says so)', vw2 === 'Once a visit,Once a visit,Once a visit,Every card,Once a visit,Off', vw2);
   await R('ed.querySelector(\'[data-fo="s5hints"] [data-goto="gd:g:card"]\').scrollIntoView({block:"center"})'); await W(150);
   await p.locator('[data-fo="s5hints"] [data-goto="gd:g:card"]').click(); await W(400);
-  const gone = await R('var g=ed.querySelector(\'[data-fo="gd:g:card"]\');[S.tab,!!g&&g.open,!!g&&g.getBoundingClientRect().top<window.innerHeight&&g.getBoundingClientRect().bottom>0]');
-  await R('S.tab="card";S.ui.level=1;S.op={s5:true,s5hints:true};renderEditor();ed.querySelector(\'[data-fo="s5hints"] [data-goto="gd:i:navbar"]\').scrollIntoView({block:"center"})'); await W(150);
+  const gone = await R('var g=ed.querySelector(\'[data-fo="gd:g:card"]\');[ui.tab,!!g&&g.open,!!g&&g.getBoundingClientRect().top<window.innerHeight&&g.getBoundingClientRect().bottom>0]');
+  await R('ui.tab="card";ui.level=1;ui.op={s5:true,s5hints:true};renderEditor();ed.querySelector(\'[data-fo="s5hints"] [data-goto="gd:i:navbar"]\').scrollIntoView({block:"center"})'); await W(150);
   await p.locator('[data-fo="s5hints"] [data-goto="gd:i:navbar"]').click(); await W(400);
-  const gone2 = await R('var g=ed.querySelector(\'[data-fo="gd:i:navbar"]\');[S.tab,!!g&&g.open,!!g&&g.getBoundingClientRect().top<window.innerHeight&&g.getBoundingClientRect().bottom>0]');
+  const gone2 = await R('var g=ed.querySelector(\'[data-fo="gd:i:navbar"]\');[ui.tab,!!g&&g.open,!!g&&g.getBoundingClientRect().top<window.innerHeight&&g.getBoundingClientRect().bottom>0]');
   ok('...its links open Guide › 4 · Azu speaks up › App › The card, and a cue\'s own row (Navigation Bar)', gone.every(x => x === true || x === 'guide') && gone2.every(x => x === true || x === 'guide'), [gone, gone2]);
-  const al = await R('var g=gdGroupById("card"),l=S.guidance.items.label,a=[];S.hints.on=false;a.push(g.on);S.hints.on=true;a.push(g.on);S.ctl.locate.label="open";a.push(l.shows);S.ctl.locate.label="off";a.push(l.on);S.ctl.locate.label="visit";a.push(l.on,l.shows,S.ctl.locate.label);g.on=false;a.push(S.hints.on);g.on=true;a');
-  ok('The old names are Guidance\'s values (no copy): S.hints.on is The card (cues)\'s On; S.ctl.locate.label the Locate label\'s Shows and On', JSON.stringify(al) === JSON.stringify([false, true, 'card', false, true, 'visit', 'visit', false]), al);
+  const al = await R('var g=gdGroupById("card"),l=D.guidance.items.label,a=[];D.card.hints.on=false;a.push(g.on);D.card.hints.on=true;a.push(g.on);D.card.ctl.locate.label="open";a.push(l.shows);D.card.ctl.locate.label="off";a.push(l.on);D.card.ctl.locate.label="visit";a.push(l.on,l.shows,D.card.ctl.locate.label);g.on=false;a.push(D.card.hints.on);g.on=true;a');
+  ok('The old names are Guidance\'s values (no copy): D.card.hints.on is The card (cues)\'s On; D.card.ctl.locate.label the Locate label\'s Shows and On', JSON.stringify(al) === JSON.stringify([false, true, 'card', false, true, 'visit', 'visit', false]), al);
 
   // ---------- 6. every new row's demo; the words and their owners; the old timers gone ----------
-  await fresh(); await R('S.tab="guide";S.ui.level=9;S.op={};renderEditor()'); await W(200);
-  const rows = await R('var o=[];ed.querySelectorAll(\'[data-fo="gd:g:card"] .row,[data-fo="gd:g:howto"] .row,[data-fo="gd:overall"] .row,[data-fo="gd:g:card"] summary [data-set],[data-fo="gd:g:howto"] summary [data-set]\').forEach(function(r){var k=r.matches(".row")?rowKey(r):r.dataset.set.slice(1);if(k&&o.indexOf(k)<0&&(/^guidance\\.(cueRoom|items\\.(nudge|label|navbar|ba|strip|term|wk_[a-z]+)\\.)/.test(k)||k.indexOf(gdGroupPath("card"))===0||k.indexOf(gdGroupPath("howto"))===0))o.push(k)});o');
+  await fresh(); await R('ui.tab="guide";ui.level=9;ui.op={};renderEditor()'); await W(200);
+  const rows = await R('var o=[];ed.querySelectorAll(\'[data-fo="gd:g:card"] .row,[data-fo="gd:g:howto"] .row,[data-fo="gd:overall"] .row,[data-fo="gd:g:card"] summary [data-set],[data-fo="gd:g:howto"] summary [data-set]\').forEach(function(r){var k=r.matches(".row")?rowKey(r):r.dataset.set.slice(1);if(k&&o.indexOf(k)<0&&(/^D\\.guidance\\.(cueRoom|items\\.(nudge|label|navbar|ba|strip|term|wk_[a-z]+)\\.)/.test(k)||k.indexOf(gdGroupPath("card"))===0||k.indexOf(gdGroupPath("howto"))===0))o.push(k)});o');
   ok(`every new row has its demo (${rows.length} rows: Overall's Cue room; The card's 4 group rows and its 6 cues' On, importance, Shows and Done when, round 6's Shows the gesture on Before / After and Swipe strips; How to use the card's On, In Settings, In the ✦ menu and its 5 steps' On and, round 6, Focus; round 9: In Things to try on the 4 cues that teach)`,
     rows.length === 1 + 4 + 24 + 2 + 3 + 5 + 5 + 4 && (await R(`${JSON.stringify(rows)}.filter(function(k){return!rowDemoOf(k)})`)).length === 0, rows.length);
-  const CHIP_RE = { 'guidance.cueRoom': /×10 · The cue room after a tip: \d+ s/, 'guidance.items.nudge.doneWhen': /Done when the visitor saw How to use the card's step “The grabber”/, 'guidance.items.navbar.importance': /Importance 3 of 5/,
-    'guidance.items.label.shows': /Once a visit: once it has shown/, [await R('gdGroupPath("howto")') + 'inMenu']: /In the ✦ menu: How does this work\?/, 'guidance.items.wk_bar.on': /How to use the card · from The Navigation Bar/ };
-  const RING_RE = { 'guidance.items.nudge.on': /\|(#grab|\.gdchip)$/, 'guidance.items.wk_grab.on': /\|\.gfocus$/, [await R('gdGroupPath("howto")') + 'inSettings']: /\|\.vhow$/, [await R('gdGroupPath("howto")') + 'inMenu']: /\|\[data-gbgo="how"\]$/ };
+  const CHIP_RE = { 'D.guidance.cueRoom': /×10 · The cue room after a tip: \d+ s/, 'D.guidance.items.nudge.doneWhen': /Done when the visitor saw How to use the card's step “The grabber”/, 'D.guidance.items.navbar.importance': /Importance 3 of 5/,
+    'D.guidance.items.label.shows': /Once a visit: once it has shown/, [await R('gdGroupPath("howto")') + 'inMenu']: /In the ✦ menu: How does this work\?/, 'D.guidance.items.wk_bar.on': /How to use the card · from The Navigation Bar/ };
+  const RING_RE = { 'D.guidance.items.nudge.on': /\|(#grab|\.gdchip)$/, 'D.guidance.items.wk_grab.on': /\|\.gfocus$/, [await R('gdGroupPath("howto")') + 'inSettings']: /\|\.vhow$/, [await R('gdGroupPath("howto")') + 'inMenu']: /\|\[data-gbgo="how"\]$/ };
   const missing = [], seen = {}, rings = {};
   for (const k of rows) {
     await R('document.body.dataset.rowdemo="";window.__chips=[];clearInterval(window.__chI);window.__chI=setInterval(function(){var c=ph.querySelector(".gdchip");if(c&&window.__chips.indexOf(c.textContent)<0)window.__chips.push(c.textContent)},50)');
@@ -192,17 +192,17 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('clearInterval(window.__chI);if(G.on)stopTour()');
   ok('...a press on each new row shows its demo on the phone, its part ringed (the cue\'s element or its chip, the step\'s mark, the Settings button, the menu item)', missing.length === 0 && Object.keys(RING_RE).every(k => RING_RE[k].test(rings[k] || '')), { missing, rings: Object.keys(RING_RE).map(k => [k, rings[k]]) });
   ok('...the Cue room on the ×10 clock with its countdown chip; Done when, importance and Shows in words; the walkthrough from a step; the ✦ menu\'s item', Object.keys(CHIP_RE).every(k => (seen[k] || []).some(c => CHIP_RE[k].test(c))), Object.keys(CHIP_RE).map(k => [k, seen[k]]));
-  const rb = await R('[gdReadBack(S.guidance.items.navbar),gdReadBack(S.guidance.items.nudge),gdReadBack(S.guidance.items.wk_grab),gdHowOften(S.guidance.items.label)]');
+  const rb = await R('[gdReadBack(D.guidance.items.navbar),gdReadBack(D.guidance.items.nudge),gdReadBack(D.guidance.items.wk_grab),gdHowOften(D.guidance.items.label)]');
   ok('...the read-backs in words: a cue, its moment, how often, Reduce Motion, the cue room; a step, pulled only, what seeing it retires',
     /Navigation Bar · App › The card \(cues\) · a cue \(motion on its element, no mascot, its own words over it\) · at a pause, when the Navigation Bar shows · once a visit, until the visitor has seen it in How to use the card · under Reduce Motion shown, with no travel · one at a time with every tip and cue; never within 5 s of a tip, either way \(the cue room\)/.test(rb[0]) &&
     /when the card opens at Half/.test(rb[1]) && /skipped \(a moving cue\)/.test(rb[1]) && /The grabber · App › How to use the card · step 1 of 5 · pulled only .* seen \(its line heard\): the Grabber nudge is done for good/.test(rb[2]) && rb[3] === 'once a visit, until the visitor has seen it in How to use the card', rb);
-  const words = await R('[TXOWN.gd_how,TXOWN.gd_how_wall,TXOWN.gd_how_open,TXOWN.hint_navbar,TXOWN.how_grab,TXOWN.how_block,["gd_how","gd_how_wall","gd_how_open","hint_navbar","how_grab","how_bar"].every(function(k){return S.tx[k].en.length>5&&S.tx[k].pt.length>5}),ownerName("gd:g:howto"),ownerName("gd:i:navbar")]');
+  const words = await R('[TXOWN.gd_how,TXOWN.gd_how_wall,TXOWN.gd_how_open,TXOWN.hint_navbar,TXOWN.how_grab,TXOWN.how_block,["gd_how","gd_how_wall","gd_how_open","hint_navbar","how_grab","how_bar"].every(function(k){return D.words.tx[k].en.length>5&&D.words.tx[k].pt.length>5}),ownerName("gd:g:howto"),ownerName("gd:i:navbar")]');
   ok('The words in Languages & Terms, en and pt: How does this work?\'s owned by the group\'s foldout; the bar\'s tip and each step\'s line by their item', words[0] === 'gd:g:howto' && words[1] === 'gd:g:howto' && words[2] === 'gd:g:howto' && words[3] === 'gd:i:navbar' && words[4] === 'gd:i:wk_grab' && words[5] === 'gd:i:wk_block' && words[6] && /How to use the card/.test(words[7]) && /Navigation Bar/.test(words[8]), words);
-  const old = await R('[typeof hintDue,typeof hintMark,typeof hintFree,typeof hintTry,typeof howTour,typeof nudgeOnce,typeof labelShowing,typeof HINTS,typeof HOW,S.hintDone===undefined&&S.hintCard===undefined&&S.hintBusy===undefined&&S.lastMove===undefined&&S.openedAt===undefined]');
-  ok('The old Hints code is gone: no 300 ms timer, no hintDue / hintMark / hintFree / hintTry, no howTour or nudgeOnce, no HINTS / HOW lists, no S.hintDone / hintCard / hintBusy', old.slice(0, 9).every(t => t === 'undefined') && old[9], old);
+  const old = await R('[typeof hintDue,typeof hintMark,typeof hintFree,typeof hintTry,typeof howTour,typeof nudgeOnce,typeof labelShowing,typeof HINTS,typeof HOW,ui.hintDone===undefined&&ui.hintCard===undefined&&ui.hintBusy===undefined&&ui.lastMove===undefined&&ui.openedAt===undefined]');
+  ok('The old Hints code is gone: no 300 ms timer, no hintDue / hintMark / hintFree / hintTry, no howTour or nudgeOnce, no HINTS / HOW lists, no ui.hintDone / hintCard / hintBusy', old.slice(0, 9).every(t => t === 'undefined') && old[9], old);
 
   // ---------- 7. the two new scenes in Ask Azu's console, pressed as the developer does ----------
-  await R(base + 'G.gd.manual=false;G.gd.rate=1;S.ui.level=1;S.tab="guide";S.op={gt3:true,s7agent:true};renderEditor();var f=ed.querySelector(\'[data-fo="s7agent"]\');if(f)f.open=true');
+  await R(base + 'G.gd.manual=false;G.gd.rate=1;ui.level=1;ui.tab="guide";ui.op={gt3:true,s7agent:true};renderEditor();var f=ed.querySelector(\'[data-fo="s7agent"]\');if(f)f.open=true');
   const scenes = await R('AGSCENES.map(function(s,i){return[i,s.id,s.label]}).filter(function(x){return/^gd4_/.test(x[1])})');
   ok('The console lists round 4\'s two guidance scenes (a hint and a tip never at once; How does this work?)', scenes.length === 2 && JSON.stringify(scenes.map(s => s[1])) === JSON.stringify(['gd4_once', 'gd4_how']), scenes.map(s => s[2]));
   for (const [i, id, label] of scenes) {
@@ -213,7 +213,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
     ok(`${id === 'gd4_once' ? '[room] ' : ''}Scene "${label}": Set up and ask runs it, ✓`, /Does: nothing:/.test(does) && r && r.ok === true, r && [r.note, r.answer]);
     await R('gdStop("test");G.gd.rate=1;G.gd.manual=false;if(G.on)stopTour()');
   }
-  const cs = await R('[S.hints.on,gdGroupById("card").items.every(function(id){return S.guidance.items[id].on}),S.guidance.on,S.guideMute]');
+  const cs = await R('[D.card.hints.on,gdGroupById("card").items.every(function(id){return D.guidance.items[id].on}),D.guidance.on,P.guideMute]');
   ok('...the scenes give back what they rested (the cues On, Guidance On)', cs[0] === true && cs[1] && cs[2] === true, cs);
   ok('no page errors', errs.length === 0, errs.slice(0, 3));
   console.log(fails ? `${fails} FAILED` : 'ALL PASS');

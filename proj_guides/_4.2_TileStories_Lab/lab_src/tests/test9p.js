@@ -7,8 +7,8 @@
 // never playing, Draft with AI with sampleFn stubbed); guess the year (a real drag on the slider, the pins, the bands); every new row's
 // demo; the eight scenes in Ask Azu's console (a stop then the ✦, a skipped step, too few questions, Expert's opt-in among them).
 // MUTATE=1 node test9p.js lets the plan ignore the tour's cap: the checks named [cap] turn red.
-const { chromium } = require('./pw');
-const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
+const { chromium, labUrl } = require('./pw');
+const url = labUrl('#probe');
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--autoplay-policy=no-user-gesture-required'] });
   const p = await b.newPage({ viewport: { width: 1400, height: 900 } });
@@ -22,13 +22,13 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const T0 = Date.now(), tsec = s => console.log('TIME ' + s + ' ' + Math.round((Date.now() - T0) / 1000) + ' s');
   if (process.env.MUTATE) { await R('var gdTourPlan0=gdTourPlan;gdTourPlan=function(i,v,c,T){return gdTourPlan0(i,v,c,Object.assign({},T,{perTour:99,perShort:99,perDeep:99,every:1}))}'); console.log('MUTATION: the plan ignores the tour\'s cap and rhythm'); }
   // the device voice, muted (its words go on by time); only Fun › On the tour speaks; no introduction; Ink glass at Mini
-  const base = 'S.hints.on=false;S.previewBar=false;S.lang="en";S.guideMute=true;S.introSeen=true;S.reduce=false;S.dark=false;S.cardCfg.mode="light";S.guideCfg.voice="device";S.guideCfg.panel="dock";S.guideCfg.dockStart="mini";S.guideCfg.look="ink";S.guideCfg.life="lively";S.vis.aud="explorer";S.vis.len="";S.m.solemn=false;S.ui.gdSR=false;S.guidance.on=true;gdKindById("app").on=false;gdKindById("content").on=false;gdGroupById("play").on=false;S.ui.rowDemo=false;';
-  await R('window.QK=JSON.stringify(S.tourQ);window.GK=JSON.stringify(S.tourGuess)');
-  const fresh = async (x) => { await R(base + 'S.tourQ=JSON.parse(window.QK);S.tourGuess=JSON.parse(window.GK);S.guidance.items.guessyear.on=true;S.guidance.items.water.answers="chips";if(G.on)stopTour();gdBeatClose();G.gd.owed=null;G.gd.plan=null;G.gd.askFirst=null;gdResetVisitor();S.view="card";S.stop="full";renderAll(false);' + (x || '')); };
+  const base = 'D.card.hints.on=false;LAB.previewBar=false;P.lang="en";P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;D.card.cardCfg.mode="light";D.guide.voice="device";D.guide.panel="dock";D.guide.dockStart="mini";D.guide.look="ink";D.guide.life="lively";P.vis.aud="explorer";P.vis.len="";D.poi.solemn=false;LAB.gdSR=false;D.guidance.on=true;gdKindById("app").on=false;gdKindById("content").on=false;gdGroupById("play").on=false;LAB.rowDemo=false;';
+  await R('window.QK=JSON.stringify(D.tour.tourQ);window.GK=JSON.stringify(D.tour.tourGuess)');
+  const fresh = async (x) => { await R(base + 'D.tour.tourQ=JSON.parse(window.QK);D.tour.tourGuess=JSON.parse(window.GK);D.guidance.items.guessyear.on=true;D.guidance.items.water.answers="chips";if(G.on)stopTour();gdBeatClose();G.gd.owed=null;G.gd.plan=null;G.gd.askFirst=null;gdResetVisitor();ui.view="card";ui.stop="full";renderAll(false);' + (x || '')); };
   // the tour moved to a step's seam (the steps up to it heard), then on: the beat planned there plays
   const seam = id => R(`gd12Seam(${JSON.stringify(id)})`);
-  await R('window.QK=JSON.stringify(S.tourQ);window.GK=JSON.stringify(S.tourGuess)');
-  const restoreQ = 'S.tourQ=JSON.parse(window.QK);S.tourGuess=JSON.parse(window.GK);';
+  await R('window.QK=JSON.stringify(D.tour.tourQ);window.GK=JSON.stringify(D.tour.tourGuess)');
+  const restoreQ = 'D.tour.tourQ=JSON.parse(window.QK);D.tour.tourGuess=JSON.parse(window.GK);';
 
   // ---------- 1. the plan, pure ----------
   const plan = await R(`var it=gdItems(),V=gdNewMemory(0),c={solemn:false,lively:true,sr:false,games:"on",notNow:0},mk=function(n,secs,o){var st=[{id:"t0",act:"teaser",secs:10}];for(var j=1;j<n;j++)st.push({id:"s"+j,act:"show",secs:secs,q:j%2===1,guess:j===4});st.push({id:"e",act:"end",secs:5});return Object.assign({steps:st,len:"standard",aud:"explorer",lang:"en",every:75,perTour:3,perShort:2,perDeep:5,auds:null},o||{})},
@@ -54,12 +54,12 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
     plan.games[0].every(x => /water|cookie/.test(x)) && /Games on the tour Off/.test(plan.games[1]) && /two Not nows/.test(plan.notnow), plan);
   const pq = await R(`var st=[{id:"a",at:10,q:true,heard:true,from:5},{id:"b",at:20,q:true,heard:true,from:5},{id:"c",at:40,q:true,heard:false,from:5},{id:"d",at:50,q:true,heard:true,from:5},{id:"e",at:80,q:true,heard:true,from:5},{id:"f",at:85,q:false,heard:true,from:5}];
     [gdQuizPick(st,3,95),gdQuizPick(st.map(function(x){return x.id==="d"||x.id==="e"?Object.assign({},x,{heard:false}):x}),3,95),gdQuizMatch("the second one",["About 7,000","About 70,000","About 700,000"],"en"),gdQuizMatch("I think 1755",["1700","1755"],"en"),gdQuizMatch("an earthquake",["A war","An earthquake, a fire and a tsunami","A great flood"],"en"),gdQuizMatch("a terceira",["x","y","z"],"pt"),gdQuizMatch("no idea",["A war","A flood"],"en"),
-     [1500,1510,1550,1700,1410].map(function(v){return gdGuessBand({n:1500,from:1400,to:1700},v)}),gdQOk(S.tourQ.g6,"en"),gdQOk(S.tourQ.g1,"en")]`);
+     [1500,1510,1550,1700,1410].map(function(v){return gdGuessBand({n:1500,from:1400,to:1700},v)}),gdQOk(D.tour.tourQ.g6,"en"),gdQOk(D.tour.tourQ.g1,"en")]`);
   ok('The questions: only from steps heard, one from each third, never two from a step; too few heard: fewer (the quiz saves itself)', JSON.stringify(pq[0]) === '["a","d","e"]' && JSON.stringify(pq[1]) === '["a","b"]', pq.slice(0, 2));
   ok('The speech path: the recogniser\'s text matched to a choice ("the second one", "1755", "an earthquake", "a terceira"); nothing matched: -1 (tap still)', JSON.stringify(pq.slice(2, 7)) === '[1,1,1,2,-1]', pq.slice(2, 7));
   ok('Guess the year\'s bands (3, by distance in the author\'s range): spot on, close, further', JSON.stringify(pq[7]) === '[1,1,2,3,3]', pq[7]);
   ok('An unreviewed question never plays (the AI draft of "Drag across"); a reviewed one does', pq[8] === false && pq[9] === true);
-  const props = await R('var w=S.guidance.items.water;[gdPropOf(w,"07-15",[]),gdPropOf(w,"01-10",[]),gdPropOf(w,"04-01",[]),gdPropOf(w,"07-15",["fan"]),gdPropOf(S.guidance.items.cookie,"07-15",[])]');
+  const props = await R('var w=D.guidance.items.water;[gdPropOf(w,"07-15",[]),gdPropOf(w,"01-10",[]),gdPropOf(w,"04-01",[]),gdPropOf(w,"07-15",["fan"]),gdPropOf(D.guidance.items.cookie,"07-15",[])]');
   ok('The breather\'s prop by date: a fan in summer, a scarf in winter, the glass else; never the same twice in a visit; the cookie its own', JSON.stringify(props) === '["fan","scarf","water","water","cookie"]', props);
   tsec('pure');
 
@@ -69,9 +69,9 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // round 13: the promise and its quiz count as one beat, so the demo tour gets the pair and one more (Guess the year); the quiz replaces the card's own quiz step (g9), so the finale is after g8
   ok('[cap] A tour plans once as it starts: the demo tour (no introduction) has room for 2 beats, the quiz\'s pair as one (after the welcome, before the end) and Guess the year', JSON.stringify(p0[1]) === '["quizpromise:g0","guessyear:g3","quizfinale:g8"]', p0);
   await until('gd12Kind("promise")', 30000);
-  const pr = await R('[G.i,S.guideSteps[G.i].id,TXT("tour_promise")===ph.querySelector(".gdbeat .bt-line").textContent,!!ph.querySelector(".gdock .gd-qstar.pend"),G.sayLine&&G.sayLine.text===TXT("tour_promise"),gdWhyNot(gdItems(),S.gdVisitor,gdContext(),gdNow(),"findwall")]');
+  const pr = await R('[G.i,D.tour.guideSteps[G.i].id,TXT("tour_promise")===ph.querySelector(".gdbeat .bt-line").textContent,!!ph.querySelector(".gdock .gd-qstar.pend"),G.sayLine&&G.sayLine.text===TXT("tour_promise"),gdWhyNot(gdItems(),P.gdVisitor,gdContext(),gdNow(),"findwall")]');
   ok('The promise after the welcome (the tour held at its seam): its line spoken, the star pending at the end of the progress line; Why not now? for another beat answers from the plan (round 13: Find it on the wall, beside Guess the year now planned with the pair)', pr[1] === 'g0' && pr[2] && pr[3] && pr[4] && /never two seams in a row: “Guess the year”/.test(pr[5]), pr);
-  const looks = await R('var o={};DLOOKS.forEach(function(L){S.guideCfg.look=L[0];["mini","peek"].forEach(function(h){S.dockH=h;renderGuide();var s=ph.querySelector(".gdock .gd-qstar"),pr=ph.getBoundingClientRect(),r=s&&s.getBoundingClientRect(),c=ph.querySelector(".gdbeat");o[L[0]+"|"+h]=!!s&&r.left>=pr.left&&r.right<=pr.right&&r.top>=pr.top&&r.bottom<=pr.bottom&&!!c&&c.classList.contains("bt-"+L[0])})});S.guideCfg.look="ink";S.dockH="mini";renderGuide();o');
+  const looks = await R('var o={};DLOOKS.forEach(function(L){D.guide.look=L[0];["mini","peek"].forEach(function(h){ui.dockH=h;renderGuide();var s=ph.querySelector(".gdock .gd-qstar"),pr=ph.getBoundingClientRect(),r=s&&s.getBoundingClientRect(),c=ph.querySelector(".gdbeat");o[L[0]+"|"+h]=!!s&&r.left>=pr.left&&r.right<=pr.right&&r.top>=pr.top&&r.bottom<=pr.bottom&&!!c&&c.classList.contains("bt-"+L[0])})});D.guide.look="ink";ui.dockH="mini";renderGuide();o');
   ok('The star and the card in every round-11 Look, at Mini and Open (inside the phone; the card in the Look\'s colours)', Object.values(looks).length === 8 && Object.values(looks).every(Boolean), looks);
   // round 13: the promise's chips stay up on the strip above the panel while step 1 starts
   await until('!!ph.querySelector(".gdstrip .bt-chip")', 15000);
@@ -85,7 +85,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const wt = await until('G.gd.plan.quiz==="on"', 20000);
   ok('4 s with no answer after the promise: a Deal (a game starts)', wt && await R('G.gd.plan.quiz==="on"'));
   await fresh(); await R('startTour()'); await until('!!ph.querySelector(\'.gdstrip [data-gdtl="noquiz"]\')', 30000); await tap('.gdstrip [data-gdtl="noquiz"]'); await until('G.gd.plan.quiz==="off"', 4000);
-  const nq = await R('var f=gdPlanBeat("quizfinale");[G.gd.plan.quiz,f.state,f.why,S.gdVisitor.visit.notNow,gdQuizStar(),gdWhyNot(gdItems(),S.gdVisitor,gdContext(),gdNow(),"quizfinale")]');
+  const nq = await R('var f=gdPlanBeat("quizfinale");[G.gd.plan.quiz,f.state,f.why,P.gdVisitor.visit.notNow,gdQuizStar(),gdWhyNot(gdItems(),P.gdVisitor,gdContext(),gdNow(),"quizfinale")]');
   ok('No quiz, thanks (a real tap): the quiz dropped from the plan, the star gone, one Not now; Why not now? says so', nq[0] === 'off' && nq[1] === 'dropped' && /No quiz/.test(nq[2]) && nq[3] === 1 && nq[4] === '' && /dropped/.test(nq[5]), nq);
   tsec('promise');
 
@@ -112,7 +112,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const sc = await R('[ph.querySelector(".gdbeat .bt-line").textContent,ph.querySelector(".gdbeat .bt-score b").textContent,JSON.stringify(gdQuizBest(G.gd.plan.point))]');
   ok('The score: "2 out of 3. Very good." and the best here kept on the phone', sc[0] === '2 out of 3. Very good.' && sc[1] === '2/3' && sc[2] === '{"right":2,"n":3}', sc);
   await until('!G.gd.bt', 8000);
-  ok('…then the tour goes on to its last step', await R('S.guideSteps[G.i].act==="end"'));
+  ok('…then the tour goes on to its last step', await R('D.tour.guideSteps[G.i].act==="end"'));
   const lines = await R('[[3,3],[2,3],[1,3],[0,3]].map(function(x){var r=x[0],n=x[1];return fmt(TXT(r===n?"tour_score_all":r===0?"tour_score_none":r*2>n?"tour_score_most":"tour_score_some"),r,n)})');
   ok('The score lines, never mocking (a zero still ends on what was learnt)', JSON.stringify(lines) === JSON.stringify(["3 out of 3! You'd make a fine guide.", '2 out of 3. Very good.', '1 out of 3. The tiles are tricky!', 'Zero… but now you know 3 new things!']), lines);
   // Not sure and Skip the quiz
@@ -121,9 +121,9 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const ns = await R('[ph.querySelector(".gdbeat .bt-verdict").textContent,!!ph.querySelector(".gdbeat .bt-choice.ok"),!ph.querySelector(".gdbeat .bt-choice.no")]');
   ok('Not sure (a real tap): the right one shows, "The answer: …" with its why', /^The answer: About 250 years\./.test(ns[0]) && ns[1] && ns[2], ns);
   await tap('.gdbeat [data-gdbt="skip"]'); await until('!G.gd.bt', 3000);
-  ok('Skip the quiz (a real tap): the quiz ends, the tour goes on to its plain end', await R('!ph.querySelector(".gdbeat")&&G.gd.plan.quizDone&&S.guideSteps[G.i].act==="end"'));
+  ok('Skip the quiz (a real tap): the quiz ends, the tour goes on to its plain end', await R('!ph.querySelector(".gdbeat")&&G.gd.plan.quizDone&&D.tour.guideSteps[G.i].act==="end"'));
   // too few from the steps heard: saved for next time, the promise kept honestly
-  await fresh(); await R('startTour();G.gd.plan.quiz="on";gdPlanBeat("quizpromise").state="played"'); await R('var j=S.guideSteps.findIndex(function(s){return s.id==="g8"});stopSpeech();G.i=j;G.gd.heard={g1:1};next()');
+  await fresh(); await R('startTour();G.gd.plan.quiz="on";gdPlanBeat("quizpromise").state="played"'); await R('var j=D.tour.guideSteps.findIndex(function(s){return s.id==="g8"});stopSpeech();G.i=j;G.gd.heard={g1:1};next()');
   await until('gd12Kind("finale")', 6000);
   ok('Fewer than 2 questions from the steps heard: "We went fast! I\'ll save the quiz for next time.", the star goes', await R('ph.querySelector(".gdbeat .bt-line").textContent===TXT("tour_quiz_few")&&G.gd.plan.quiz==="off"&&!gdQuizStar()'));
   tsec('quiz');
@@ -132,26 +132,26 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await fresh(); await R('startTour()'); await W(400); await R('stopSpeech();G.i=0;G.gd.heard={};next()');
   const sk = await R('var b=gdPlanBeat("quizpromise");[b.state,b.why,gdPlanBeat("quizfinale").state,!!G.gd.bt]');
   ok('A seam reached by Next on a step not heard: its beat drops (the promise, and its quiz with it)', sk[0] === 'dropped' && /skipped/.test(sk[1]) && sk[2] === 'dropped' && !sk[3], sk);
-  const sp = await R('var it=gdItems().filter(function(x){return x.id==="quizpromise"})[0],P=gdTourPlan(gdItems(),S.gdVisitor,gdPlanCtx(),gdTourIn(S.guideSteps)),c=Object.assign(gdContext(),{plan:P,moment:"between",speaking:false,tour:{step:0,stepId:"g0"}});[gdBeatCheck(it,Object.assign({},c,{speaking:true})).no,gdBeatCheck(it,c).ok,gdBeatCheck(it,Object.assign({},c,{moment:null})).no]');
+  const sp = await R('var it=gdItems().filter(function(x){return x.id==="quizpromise"})[0],Pl=gdTourPlan(gdItems(),P.gdVisitor,gdPlanCtx(),gdTourIn(D.tour.guideSteps)),c=Object.assign(gdContext(),{plan:Pl,moment:"between",speaking:false,tour:{step:0,stepId:"g0"}});[gdBeatCheck(it,Object.assign({},c,{speaking:true})).no,gdBeatCheck(it,c).ok,gdBeatCheck(it,Object.assign({},c,{moment:null})).no]');
   ok('Never over a sentence: at its seam a beat waits while the guide speaks; it plays only at its own seam', /never over a sentence/.test(sp[0]) && sp[1] === true && /planned for the seam after step 1/.test(sp[2]), sp);
   // Fun's hold does not hold a beat; Fun's visit cap does not count it
-  const hold = await R('gdGroupById("play").on=true;var items=gdItems(),c=Object.assign(gdContext(),{tour:{paused:false,between:true,step:3}});[gdCheck(items.filter(function(x){return x.id==="joke"})[0],items,S.gdVisitor,c,gdNow()).no,/held while a tour plays/.test(gdCheck(items.filter(function(x){return x.id==="water"})[0],items,S.gdVisitor,c,gdNow()).no||"")]');
+  const hold = await R('gdGroupById("play").on=true;var items=gdItems(),c=Object.assign(gdContext(),{tour:{paused:false,between:true,step:3}});[gdCheck(items.filter(function(x){return x.id==="joke"})[0],items,P.gdVisitor,c,gdNow()).no,/held while a tour plays/.test(gdCheck(items.filter(function(x){return x.id==="water"})[0],items,P.gdVisitor,c,gdNow()).no||"")]');
   ok('Fun\'s hold in a tour (round 11) still holds the rest of Fun, never a beat of the tour', /held while a tour plays/.test(hold[0]) && hold[1] === false, hold);
   tsec('gates');
 
   // ---------- 5. the breather ----------
-  await fresh(restoreQ + '["g1","g4","g5"].forEach(function(id){S.tourQ[id].rev.en=false});S.guidance.items.guessyear.on=false;S.introSeen=false');
+  await fresh(restoreQ + '["g1","g4","g5"].forEach(function(id){D.tour.tourQ[id].rev.en=false});D.guidance.items.guessyear.on=false;P.introSeen=false');
   await R('startTour()'); const wb = await R('var b=gdPlanBeat("water");b&&b.after'); await seam(wb);
   await until('!!ph.querySelector(".azmoment")', 12000);
   const pp = await R('[G.moment,gd12Over(),!!ph.querySelector(".gdbeat .bt-line"),(function(){var m=ph.querySelector(".mascot").getBoundingClientRect(),a=ph.querySelector(".azmoment").getBoundingClientRect();return Math.round(Math.hypot(m.left-a.left,m.top-a.top))})()]');
   ok('The breather: its line in the card, then Azu drinks, the glass beside Azu, 0 px over any words', pp[0] === 'water' && pp[1] === 0 && pp[2] && pp[3] < 160, pp);
   await until('!!ph.querySelector(\'.gdbeat [data-gdbt="goon"]\')', 8000);
   const t8 = Date.now(); const went = await until('!G.gd.bt', 14000); const secs = (Date.now() - t8) / 1000;
-  ok('Go on / A question first; 8 s with nothing: "Let\'s continue." and the next step', went && secs > 7.5 && await R('S.guideSteps[G.i-1]&&G.gd.plan.beats.some(function(b){return b.id==="water"&&b.state==="played"})'), secs);
-  await fresh(restoreQ + '["g1","g4","g5"].forEach(function(id){S.tourQ[id].rev.en=false});S.guidance.items.guessyear.on=false;S.introSeen=false;S.guidance.items.water.answers="chips"');
+  ok('Go on / A question first; 8 s with nothing: "Let\'s continue." and the next step', went && secs > 7.5 && await R('D.tour.guideSteps[G.i-1]&&G.gd.plan.beats.some(function(b){return b.id==="water"&&b.state==="played"})'), secs);
+  await fresh(restoreQ + '["g1","g4","g5"].forEach(function(id){D.tour.tourQ[id].rev.en=false});D.guidance.items.guessyear.on=false;P.introSeen=false;D.guidance.items.water.answers="chips"');
   await R('startTour()'); const wb2 = await R('gdPlanBeat("water").after'); await seam(wb2); await until('!!ph.querySelector(\'.gdbeat [data-gdbt="qfirst"]\')', 15000);
   const at0 = await R('G.i'); await tap('.gdbeat [data-gdbt="qfirst"]'); await W(300);
-  const qf = await R('[S.dockH,!!G.gd.askFirst,!!ph.querySelector(".gdock #gq"),G.i]');
+  const qf = await R('[ui.dockH,!!G.gd.askFirst,!!ph.querySelector(".gdock #gq"),G.i]');
   ok('A question first (a real tap): the panel opens (Peek) with the talk button listening, the tour waits', /peek|full/.test(qf[0]) && qf[1] && qf[2] && qf[3] === at0, qf);
   await p.locator('#ph .gdock #gq').fill('What happened in 1755?'); await p.keyboard.press('Enter');
   const back = await until('G.gd.bt&&G.gd.bt.kind==="back"', 25000); await until('!G.gd.bt&&G.i>' + at0, 8000);
@@ -159,69 +159,69 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   tsec('breather');
 
   // ---------- 6. guess the year: a real drag, the pins ----------
-  await fresh(restoreQ + '["g1","g4","g5"].forEach(function(id){S.tourQ[id].rev.en=false})'); await R('startTour()');
+  await fresh(restoreQ + '["g1","g4","g5"].forEach(function(id){D.tour.tourQ[id].rev.en=false})'); await R('startTour()');
   const gb = await R('gdPlanBeat("guessyear").after'); await seam(gb); await until('!!ph.querySelector(".gdbeat .bt-range")', 8000);
   const rb = await box('.gdbeat .bt-range'); const v0 = await R('+ph.querySelector(".gdbeat .bt-range").value');
   await p.mouse.move(rb.x + rb.width / 2, rb.y + rb.height / 2); await p.mouse.down(); await p.mouse.move(rb.x + rb.width * 0.72, rb.y + rb.height / 2, { steps: 8 }); await p.mouse.up();
   const v1 = await R('[+ph.querySelector(".gdbeat .bt-range").value,ph.querySelector(".gdbeat .bt-val").textContent,G.gd.bt.touched]');
   ok('Guess the year: the slider in the author\'s range (1400-1700, at the middle); a real drag moves it and its number', v0 === 1550 && v1[0] > 1600 && String(v1[0]) === v1[1] && v1[2], [v0, v1]);
   await tap('.gdbeat [data-gdbt="tell"]'); await until('!G.gd.bt', 5000);
-  const g4 = await R('[S.guideSteps[G.i].id,G.gd.guess&&G.gd.guess.v]');
+  const g4 = await R('[D.tour.guideSteps[G.i].id,G.gd.guess&&G.gd.guess.v]');
   ok('Tell me (a real tap): the step that holds the year plays (it says it)', g4[0] === 'g4' && g4[1] === v1[0], g4);
   await R('G.gd.heard.g4=1;stopSpeech();next()'); await until('!!ph.querySelector(".gdbeat .bt-pin.ans")', 5000);
   const pins = await R('var y=ph.querySelector(".bt-pin.you"),a=ph.querySelector(".bt-pin.ans");[y.textContent,a.textContent,parseFloat(y.style.left)>parseFloat(a.style.left),ph.querySelector(".gdbeat .bt-line").textContent,G.gd.bt.band]');
   ok('After it: the two pins (the guess, the answer) and Azu\'s reaction by its band, never mocking', /Your guess · \d+/.test(pins[0]) && /The answer · 1500/.test(pins[1]) && pins[2] && /older than you'd think/.test(pins[3]) && pins[4] === 3, pins);
   await until('!G.gd.bt', 9000);
   // a game's Not now (4 s): two this visit end the games for the visit, said once
-  await fresh(restoreQ + '["g1","g4","g5"].forEach(function(id){S.tourQ[id].rev.en=false})'); await R('startTour()');
+  await fresh(restoreQ + '["g1","g4","g5"].forEach(function(id){D.tour.tourQ[id].rev.en=false})'); await R('startTour()');
   await seam(await R('gdPlanBeat("guessyear").after')); await until('!!ph.querySelector(\'.gdbeat [data-gdbt="notnow"]\')', 8000);
   const nn = await R('var c=ph.querySelector(\'.gdbeat [data-gdbt="notnow"] .bt-bar\');c?getComputedStyle(c).animationDuration:""');
   await tap('.gdbeat [data-gdbt="notnow"]'); await until('!G.gd.bt', 4000);
-  const n1 = await R('S.gdVisitor.visit.notNow'), gone = true;
-  await R('if(G.on)stopTour();G.gd.plan=null;S.tourQ=JSON.parse(window.QK);startTour()'); await until('!!ph.querySelector(\'.gdstrip [data-gdtl="noquiz"]\')', 30000); await tap('.gdstrip [data-gdtl="noquiz"]');
+  const n1 = await R('P.gdVisitor.visit.notNow'), gone = true;
+  await R('if(G.on)stopTour();G.gd.plan=null;D.tour.tourQ=JSON.parse(window.QK);startTour()'); await until('!!ph.querySelector(\'.gdstrip [data-gdtl="noquiz"]\')', 30000); await tap('.gdstrip [data-gdtl="noquiz"]');
   await until('!!ph.querySelector(".gdstrip .tl-msg")', 4000);
-  const n2 = await R('[S.gdVisitor.visit.notNow,(ph.querySelector(".gdstrip .tl-msg")||{}).textContent,S.gdVisitor.visit.nomore]');
+  const n2 = await R('[P.gdVisitor.visit.notNow,(ph.querySelector(".gdstrip .tl-msg")||{}).textContent,P.gdVisitor.visit.nomore]');
   ok('A game\'s Not now chip (4 s) by a real tap; a second Not now this visit: "Got it: no more games today, just the story." once (on the strip: the step goes on), and no more games', nn === '4s' && n1 === 1 && n2[0] === 2 && n2[1] === "Got it: no more games today, just the story." && n2[2] && gone, [nn, n1, n2]);
   await until('!G.gd.bt', 9000);
   ok('…the next tour plans no game (two Not nows this visit), the breather still could', await R('if(G.on)stopTour();var P=gdPlanNow();!P.beats.some(function(b){return b.game})&&/two Not nows/.test(P.why.quizpromise)'));
   tsec('guess');
 
   // ---------- 7. Settings and the Editor ----------
-  await fresh('S.settingsOpen=true;renderPhone(true)');
+  await fresh('ui.settingsOpen=true;renderPhone(true)');
   await p.locator('#ph [data-gdpref="games|off"]').scrollIntoViewIfNeeded(); await p.locator('#ph [data-gdpref="games|off"]').click(); await W(150);
   ok('Settings › The guide › Games on the tour (a real tap Off): the visitor\'s switch, in its memory; the plan follows', await R('gdPrefs().games==="off"&&/Games on the tour Off/.test(gdPlanNow().why.quizpromise)'));
-  await R('gdPrefs().games="on";S.settingsOpen=false;renderPhone(true)');
+  await R('gdPrefs().games="on";ui.settingsOpen=false;renderPhone(true)');
   // round 14: On the tour is 3 · Games on the tour (gd:g:ontour, its id kept); the quiz's pair drawn as one (gd:pair:quizpromise); each item's groups open
-  const ed1 = await R('S.tab="guide";S.op={gt4:true,"gd:fun":true,"gd:g:ontour":true,"gd:pair:quizpromise":true,"gd:var:water":true};["quizpromise","quizfinale","guessyear","water","cookie"].forEach(function(id){S.op["gd:i:"+id]=true});Object.keys(S.op).forEach(function(k){var m=/^gd:i:(.+)$/.exec(k),it=m&&S.op[k]&&S.guidance.items[m[1]];if(it)gdFormOf(it).groups.forEach(function(g){if(g)S.op["gd:f:"+m[1]+":"+g.k]=true})});renderEditor();var f=ed.querySelector(\'[data-fo="gd:g:ontour"]\');[!!f,f&&f.querySelector("#gdplan").textContent,[].map.call(f.querySelectorAll(":scope > .inner > .row > label"),function(l){return l.textContent}),gdGroupById("ontour").every,gdGroupById("ontour").perTour,gdGroupById("ontour").perShort,gdGroupById("ontour").perDeep]');
+  const ed1 = await R('ui.tab="guide";ui.op={gt4:true,"gd:fun":true,"gd:g:ontour":true,"gd:pair:quizpromise":true,"gd:var:water":true};["quizpromise","quizfinale","guessyear","water","cookie"].forEach(function(id){ui.op["gd:i:"+id]=true});Object.keys(ui.op).forEach(function(k){var m=/^gd:i:(.+)$/.exec(k),it=m&&ui.op[k]&&D.guidance.items[m[1]];if(it)gdFormOf(it).groups.forEach(function(g){if(g)ui.op["gd:f:"+m[1]+":"+g.k]=true})});renderEditor();var f=ed.querySelector(\'[data-fo="gd:g:ontour"]\');[!!f,f&&f.querySelector("#gdplan").textContent,[].map.call(f.querySelectorAll(":scope > .inner > .row > label"),function(l){return l.textContent}),gdGroupById("ontour").every,gdGroupById("ontour").perTour,gdGroupById("ontour").perShort,gdGroupById("ontour").perDeep]');
   ok('Guide › 3 · Games on the tour: On, Liveliness, Audiences, One beat per (75), At most a tour (3; Short 2, Deep 5), and "This tour\'s plan: …"', ed1[0] && /This tour's plan/.test(ed1[1]) && ['On', 'Liveliness', 'Family', 'Explorer', 'Expert', 'One beat per (s)', 'At most a tour', 'At most on Short', 'At most on Deep'].every(x => ed1[2].indexOf(x) >= 0) && ed1[3] === 75 && ed1[4] === 3 && ed1[5] === 2 && ed1[6] === 5, ed1);
   const ed2 = await R('var labs=[].map.call(ed.querySelectorAll(\'[data-fo="gd:i:quizfinale"] .row > label,[data-fo="gd:i:water"] .row > label,[data-fo="gd:i:quizpromise"] .row > label\'),function(l){return l.textContent});labs');
   ok('A beat\'s fields: Place in the tour, The visitor answers by, Waits, Questions, Scores, Show me, Calm too, its Audiences, Tour length, After narration, Prop, For Expert', ['Place in the tour', 'The visitor answers by', 'Waits (s)', 'Questions', 'Scores', 'Show me after a wrong answer', 'Calm too', 'For Family', 'Tour length', 'After narration (s)', 'Prop', 'For Expert, it is'].every(x => ed2.indexOf(x) >= 0), ed2);
   // every new row's demo (a real click on its ▸)
   const keys = await R('var o=[];ed.querySelectorAll(\'[data-fo="gd:g:ontour"] .row\').forEach(function(r){var k=rowKey(r);if(k&&o.indexOf(k)<0)o.push(k)});var m=o.filter(function(k){return!rowDemoOf(k)});[o,m]');
   ok(`Every new row has its demo (${keys[0].length} rows of On the tour; none without)`, keys[0].length >= 50 && keys[1].length === 0, keys[1]);
-  const sample = ['guidance.kinds.2.groups.0.every', 'guidance.kinds.2.groups.0.auds.expert', 'guidance.items.quizpromise.waits', 'guidance.items.quizfinale.qn', 'guidance.items.guessyear.calm', 'guidance.items.water.props', 'guidance.items.cookie.place'];
+  const sample = ['D.guidance.kinds.2.groups.0.every', 'D.guidance.kinds.2.groups.0.auds.expert', 'D.guidance.items.quizpromise.waits', 'D.guidance.items.quizfinale.qn', 'D.guidance.items.guessyear.calm', 'D.guidance.items.water.props', 'D.guidance.items.cookie.place'];
   const shown = [];
   for (const k of sample) {
-    await R('if(G.on)stopTour();gdBeatClose();document.body.dataset.rowdemo="";S.ui.rowDemo=true;renderEditor()');
+    await R('if(G.on)stopTour();gdBeatClose();document.body.dataset.rowdemo="";LAB.rowDemo=true;renderEditor()');
     const lb = p.locator(`.row:has([data-set="@${k}"],[data-sel="@${k}"],[data-num="@${k}"]) > label.rd`).first();
     if (await lb.count()) await lb.scrollIntoViewIfNeeded(); const bb = await lb.boundingBox(); if (!bb) { shown.push(k + ' (no ▸)'); continue; }
     await p.mouse.click(bb.x + bb.width - 12, bb.y + bb.height / 2);
     const got = await until('!!ph.querySelector(".gdbeat")', 6000); shown.push(k + (got ? '|beat' : '|none'));
   }
   ok('Each kind of new row, its ▸ pressed (a real click): its beat on the phone, in a tour, now', shown.every(s => /\|beat$/.test(s)), shown);
-  await R('if(G.on)stopTour();gdBeatClose();S.ui.rowDemo=false');
+  await R('if(G.on)stopTour();gdBeatClose();LAB.rowDemo=false');
   // Specific Marker › 3 · Guide script: a step's question and guess; Draft with AI with sampleFn stubbed; Reviewed
-  await R('S.tab="marker";S.op.m3=true;S.sel.gstep="g3";renderEditor()');
+  await R('ui.tab="marker";ui.op.m3=true;ui.sel.gstep="g3";renderEditor()');
   await R('window.SF0=sampleFn;sampleFn=function(p){window.SFP=p;return Promise.resolve({text:\'{"q":"How long did the kings live by the river?","a":["About 250 years","About 25 years","About 2,500 years"],"ok":0,"why":"About 250 years, by the Tagus."}\'})}');
-  await p.locator('[data-tqai="g3|en"]').first().click(); await until('!!S.tourQ.g3&&S.tourQ.g3.q.en', 3000);
-  const dr = await R('var q=S.tourQ.g3;[q.q.en,q.a.length,q.src,q.rev.en,!!ed.querySelector(".tqlang .badge.gdwb"),/ONLY facts/.test(window.SFP),/Now the story/.test(window.SFP),gdQOk(q,"en")]');
+  await p.locator('[data-tqai="g3|en"]').first().click(); await until('!!D.tour.tourQ.g3&&D.tour.tourQ.g3.q.en', 3000);
+  const dr = await R('var q=D.tour.tourQ.g3;[q.q.en,q.a.length,q.src,q.rev.en,!!ed.querySelector(".tqlang .badge.gdwb"),/ONLY facts/.test(window.SFP),/Now the story/.test(window.SFP),gdQOk(q,"en")]');
   ok('Draft with AI (sampleFn stubbed, a real click): the draft from the step\'s own text, marked AI draft, not reviewed (it never plays)', dr[0] === 'How long did the kings live by the river?' && dr[1] === 3 && dr[2] === 'ai' && dr[3] === false && dr[4] && dr[5] && dr[6] && dr[7] === false, dr);
   await p.locator('[data-tqrev="g3|en"]').first().check(); await W(150);
-  ok('Reviewed (a real tick): the English question can play now', await R('S.tourQ.g3.rev.en===true&&gdQOk(S.tourQ.g3,"en")&&!gdQOk(S.tourQ.g3,"pt")'));
-  const mk = await R('sampleFn=window.SF0;[rowDemoOf("tourQ.g4.ok"),rowDemoOf("tourGuess.g4.unit"),BEHAVIOUR.test("@tourQ.g4.ok")].map(function(x){return!!x})');
+  ok('Reviewed (a real tick): the English question can play now', await R('D.tour.tourQ.g3.rev.en===true&&gdQOk(D.tour.tourQ.g3,"en")&&!gdQOk(D.tour.tourQ.g3,"pt")'));
+  const mk = await R('sampleFn=window.SF0;[rowDemoOf("D.tour.tourQ.g4.ok"),rowDemoOf("D.tour.tourGuess.g4.unit"),BEHAVIOUR.test("@D.tour.tourQ.g4.ok")].map(function(x){return!!x})');
   ok('The Guide script\'s question and guess rows have their demos (the quiz on that question; the guess before its step)', mk.every(Boolean), mk);
-  await R(restoreQ + 'S.tab="guide";renderEditor()');
-  ok('The new words and their owners (tour_* on the beats, Games on the tour on the group)', await R('TXOWN.tour_promise==="gd:i:quizpromise"&&TXOWN.tour_score_all==="gd:i:quizfinale"&&TXOWN.tour_tellme==="gd:i:guessyear"&&TXOWN.tour_goon==="gd:i:water"&&TXOWN.tour_cookie==="gd:i:cookie"&&TXOWN.tour_notnow==="gd:g:ontour"&&TXOWN.settings_games==="gd:g:ontour"&&["tour_promise","tour_wrong","tour_nomore"].every(function(k){return S.tx[k].pt&&S.tx[k].en})'));
+  await R(restoreQ + 'ui.tab="guide";renderEditor()');
+  ok('The new words and their owners (tour_* on the beats, Games on the tour on the group)', await R('TXOWN.tour_promise==="gd:i:quizpromise"&&TXOWN.tour_score_all==="gd:i:quizfinale"&&TXOWN.tour_tellme==="gd:i:guessyear"&&TXOWN.tour_goon==="gd:i:water"&&TXOWN.tour_cookie==="gd:i:cookie"&&TXOWN.tour_notnow==="gd:g:ontour"&&TXOWN.settings_games==="gd:g:ontour"&&["tour_promise","tour_wrong","tour_nomore"].every(function(k){return D.words.tx[k].pt&&D.words.tx[k].en})'));
   tsec('editor');
 
   // ---------- 8. the scenes in Ask Azu's console ----------

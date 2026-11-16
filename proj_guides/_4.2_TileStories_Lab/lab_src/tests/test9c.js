@@ -3,9 +3,9 @@
 // says which and why; pause, resume, stop and mute act on every source; an answer reaches the conversation once, whatever speaks it.
 // ElevenLabs is answered by a fake server (a real MP3 of the Azure set, the request's letters at even times); Azure by a fake Speech SDK.
 // MUTATE=1 node test9c.js runs it with the order broken (the device voice before the recorded one) to show which checks turn red.
-const { chromium } = require('./pw');
+const { chromium, labUrl } = require('./pw');
 const fs = require('fs'), path = require('path');
-const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
+const url = labUrl('#probe');
 const OUT = path.join(__dirname, '..', '..', 'voicebench', 'out', 'azure-sonia-raquel');
 const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.endsWith('.mp3')).sort((a, b) => fs.statSync(path.join(OUT, b)).size - fs.statSync(path.join(OUT, a)).size)[0]));
 const NEW = 'Uma frase nova, ainda sem áudio, que nenhum conjunto gravou.';
@@ -33,24 +33,24 @@ const NEW = 'Uma frase nova, ainda sem áudio, que nenhum conjunto gravou.';
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   if (process.env.MUTATE) { await R('sayOrder=function(text){return!!text&&text===G.answer?["live"]:[]}'); console.log('MUTATION: the device voice before the recorded one (tour lines skip the recorded and live voices)'); }
   // 1. the default: Recorded, then live, then this device; Speaking now in Narration, idle
-  const def = await R('S.tab="guide";renderEditor();[S.guideCfg.voice,(ed.querySelector(\'[data-set="@guideCfg.voice"][aria-pressed="true"]\')||{}).textContent,(ed.querySelector(".saynow")||{}).textContent]');
+  const def = await R('ui.tab="guide";renderEditor();[D.guide.voice,(ed.querySelector(\'[data-set="@D.guide.voice"][aria-pressed="true"]\')||{}).textContent,(ed.querySelector(".saynow")||{}).textContent]');
   ok('The default voice is the recorded one: Voice = Recorded, then live, then this device', def[0] === 'recorded' && def[1] === 'Recorded, then live, then this device', def);
   ok('...Narration has Speaking now (nothing at the moment)', def[2] === 'Nothing at the moment.', def[2]);
-  await R('S.hints.on=false;S.previewBar=false;S.guideMute=false;S.introSeen=true;S.lang="pt";S.guideCfg.voiceSet="azure-sonia-raquel";S.guideCfg.panel="classic";S.view="card";S.stop="full";renderAll(false);S.tab="guide";renderEditor();' +
+  await R('D.card.hints.on=false;LAB.previewBar=false;P.guideMute=false;P.introSeen=true;P.lang="pt";D.guide.voiceSet="azure-sonia-raquel";D.guide.panel="classic";ui.view="card";ui.stop="full";renderAll(false);ui.tab="guide";renderEditor();' +
     'window.SPK=0;var sp0=speechSynthesis.speak.bind(speechSynthesis);speechSynthesis.speak=function(u){SPK++;sp0(u)};window.NOW=function(){return(ed.querySelector(".saynow")||{}).textContent}');
-  const atStep = id => R(`stopSpeech();G.paused=false;G.i=S.guideSteps.findIndex(function(s){return s.id==="${id}"});runStep()`);
+  const atStep = id => R(`stopSpeech();G.paused=false;G.i=D.tour.guideSteps.findIndex(function(s){return s.id==="${id}"});runStep()`);
   // 2. a recorded line plays its file
   await R('startTour()'); await until('G.recAudio&&G.recAudio.currentTime>.3', 8000);
-  const r1 = await R('var a=G.recAudio,r=recFile(stepText(S.guideSteps[0]));[!!a,a&&r&&a.src===r.url,SPK,NOW()]');
+  const r1 = await R('var a=G.recAudio,r=recFile(stepText(D.tour.guideSteps[0]));[!!a,a&&r&&a.src===r.url,SPK,NOW()]');
   ok('A recorded line plays its own file (no device voice)', r1[0] && r1[1] && r1[2] === 0, r1);
   ok('...Speaking now: "Recorded · Sonia · Raquel (Azure)"', r1[3] === 'Recorded · Sonia · Raquel (Azure)', r1[3]);
   // 3. a line the set lacks, no live key on this page: the device voice, and why
-  await R('window.KEEP=byId(S.guideSteps,"g1").text.pt;byId(S.guideSteps,"g1").text.pt=' + JSON.stringify(NEW)); await atStep('g1'); await W(700);
+  await R('window.KEEP=byId(D.tour.guideSteps,"g1").text.pt;byId(D.tour.guideSteps,"g1").text.pt=' + JSON.stringify(NEW)); await atStep('g1'); await W(700);
   const d1 = await R('[!G.recAudio,!!G.utter||!!G.timer,NOW()]');
   ok('A line not recorded, no live key here: the device voice says it', d1[0] && d1[1], d1);
   ok('...Speaking now: "This device\'s voice (not recorded; no live key on this page)"', d1[2].indexOf("This device's voice (not recorded; no live key on this page)") === 0, d1[2]);
   // 4. the same line with a live key: the live voice (ElevenLabs, then Azure), with the read-along and the mouth of an answer
-  await R('window.LABKEYS={eleven:"k",elevenPT:"voice-pt",elevenEN:"voice-en",azure:"az",azureRegion:"westeurope"};S.agentCfg.liveVoice="eleven";renderEditor()');
+  await R('window.LABKEYS={eleven:"k",elevenPT:"voice-pt",elevenEN:"voice-en",azure:"az",azureRegion:"westeurope"};D.agent.liveVoice="eleven";renderEditor()');
   const n0 = el.n; await atStep('g1'); await until('G.recAudio&&G.utter&&G.utter.live&&G.recAudio.currentTime>.6', 8000);
   const l1 = await R('[!!(G.utter&&G.utter.live),G.hl.k,mouthNow().kind,NOW(),SPK]');
   ok('A line not recorded, with a key: the live voice says it (ElevenLabs asked for that line)', el.n === n0 + 1 && el.last === NEW && l1[0], [el.n - n0, el.last, l1]);
@@ -75,16 +75,16 @@ const NEW = 'Uma frase nova, ainda sem áudio, que nenhum conjunto gravou.';
   ok('...stopped while it is being made: it never plays', await R('!G.on&&!G.recAudio&&!G.utter'));
   el.delay = 0;
   // Azure live (the fake SDK)
-  await R('S.agentCfg.liveVoice="azure";startTour();pauseTour();resumeTour()'); await atStep('g1'); await until('G.recAudio&&G.utter&&G.utter.live', 8000);
+  await R('D.agent.liveVoice="azure";startTour();pauseTour();resumeTour()'); await atStep('g1'); await until('G.recAudio&&G.utter&&G.utter.live', 8000);
   ok('...with Azure chosen: "Live · Azure (this line is not recorded in Sonia · Raquel (Azure))"', await R('NOW()') === 'Live · Azure (this line is not recorded in Sonia · Raquel (Azure))', await R('NOW()'));
   // 6. the live voice refuses: the device voice, and why
-  await R('S.agentCfg.liveVoice="eleven"'); el.status = 401; await atStep('g1'); await until('!!G.utter&&!G.utter.live||!!G.timer', 6000);
+  await R('D.agent.liveVoice="eleven"'); el.status = 401; await atStep('g1'); await until('!!G.utter&&!G.utter.live||!!G.timer', 6000);
   const f1 = await R('[!G.recAudio,!!G.utter||!!G.timer,NOW()]');
   ok('The live voice refuses its key: the device voice says the line, and Speaking now says why', f1[0] && f1[1] && f1[2].indexOf("This device's voice (not recorded; ElevenLabs failed)") === 0, f1);
   el.status = 200;
-  await R('stopTour();byId(S.guideSteps,"g1").text.pt=KEEP');
+  await R('stopTour();byId(D.tour.guideSteps,"g1").text.pt=KEEP');
   // 7. a scroll-follow pause (the line's block scrolled away, none in view) pauses a recorded line where it is; Resume plays on; stop
-  const follow = async () => { await R('window.STEPS=S.guideSteps;S.guideSteps=S.guideSteps.filter(function(s){return s.id==="g1"||s.id==="g10"});S.guideCfg.onScroll="follow";startTour()');
+  const follow = async () => { await R('window.STEPS=D.tour.guideSteps;D.tour.guideSteps=D.tour.guideSteps.filter(function(s){return s.id==="g1"||s.id==="g10"});D.guide.onScroll="follow";startTour()');
     await W(900); await R('window.scrollTo(0,0)'); const box = await p.locator('#ph').boundingBox(); await p.mouse.move(box.x + box.width / 2, box.y + 300);
     for (let i = 0; i < 12; i++) { await p.mouse.wheel(0, 500); await W(60); } await until('G.paused', 6000); };
   await follow();
@@ -93,15 +93,15 @@ const NEW = 'Uma frase nova, ainda sem áudio, que nenhum conjunto gravou.';
   ok('A scroll-follow pause pauses a recorded line (its audio paused where it was); Resume plays it on', sp[0] && sp[1] && sp[2] === true && sp[3] > 0 && sp2 === sp[3] && !sp3[0] && sp3[1] && sp3[2] > sp[3], [sp, sp2, sp3]);
   await R('window.A0=G.recAudio'); await p.locator('#ph [data-g="stop"]').first().click({ timeout: 4000 }).catch(() => {}); await W(300);
   ok('Stop silences a recorded line', await R('!G.on&&!G.recAudio&&!!A0&&A0.paused&&!G.utter'));
-  await R('S.guideSteps=STEPS;byId(S.guideSteps,"g1").text.pt=' + JSON.stringify(NEW)); await R('S.guideSteps=S.guideSteps.filter(function(s){return s.id==="g1"||s.id==="g10"});startTour()');
+  await R('D.tour.guideSteps=STEPS;byId(D.tour.guideSteps,"g1").text.pt=' + JSON.stringify(NEW)); await R('D.tour.guideSteps=D.tour.guideSteps.filter(function(s){return s.id==="g1"||s.id==="g10"});startTour()');
   await until('G.recAudio&&G.utter&&G.utter.live&&G.recAudio.currentTime>.3', 8000);
   await R('window.scrollTo(0,0)'); { const box = await p.locator('#ph').boundingBox(); await p.mouse.move(box.x + box.width / 2, box.y + 300); for (let i = 0; i < 12; i++) { await p.mouse.wheel(0, 500); await W(60); } await until('G.paused', 6000); }
   const sl = await R('[G.paused,!!(G.utter&&G.utter.live),G.recAudio&&G.recAudio.paused,G.recAudio&&G.recAudio.currentTime]'); await W(500); const sl2 = await R('G.recAudio&&G.recAudio.currentTime');
   await p.locator('#ph [data-g="play"]').first().click({ timeout: 4000 }).catch(() => {}); await W(600); const sl3 = await R('[G.paused,G.recAudio&&!G.recAudio.paused,G.recAudio&&G.recAudio.currentTime]');
   ok('A scroll-follow pause pauses a live line too; Resume plays it on', sl[0] && sl[1] && sl[2] === true && sl2 === sl[3] && !sl3[0] && sl3[1] && sl3[2] > sl[3], [sl, sl2, sl3]);
-  await R('stopTour();S.guideSteps=STEPS;byId(S.guideSteps,"g1").text.pt=KEEP');
+  await R('stopTour();D.tour.guideSteps=STEPS;byId(D.tour.guideSteps,"g1").text.pt=KEEP');
   // 8. Voice = Device voice: as before (a recorded line is read by the device voice; no live voice for the tour); stop silences it
-  await R('window.LABKEYS={};S.guideCfg.voice="device";renderEditor();startTour()'); await W(900); const nd = el.n;
+  await R('window.LABKEYS={};D.guide.voice="device";renderEditor();startTour()'); await W(900); const nd = el.n;
   const dv = await R('[!G.recAudio,!!G.utter||!!G.timer,NOW()]');
   ok('Voice = Device voice: the device voice reads a recorded line', dv[0] && dv[1], dv);
   ok('...Speaking now: "This device\'s voice (Sources is Device voice)"', dv[2].indexOf("This device's voice (Sources is Device voice)") === 0, dv[2]);
@@ -109,10 +109,10 @@ const NEW = 'Uma frase nova, ainda sem áudio, que nenhum conjunto gravou.';
   ok('...and with a live key it still reads the tour (no live voice asked)', el.n === nd && await R('!G.recAudio&&(!!G.utter||!!G.timer)'), el.n - nd);
   await p.locator('#ph [data-g="stop"]').first().click({ timeout: 4000 }).catch(() => {}); await W(200);
   ok('Stop silences the device voice', await R('!G.on&&!G.utter&&!G.timer&&!speechSynthesis.speaking'));
-  await R('S.guideCfg.voice="recorded";renderEditor()');
+  await R('D.guide.voice="recorded";renderEditor()');
   // 9. an answer reaches the conversation once, whatever speaks it; Speaking now and the trace under it name the voice
-  const REC = await R('L(byId(S.guideSteps,"g8").text)');
-  const ask = async (text, keys) => { await R('window.LABKEYS=' + JSON.stringify(keys) + ';S.guideCfg.panel="dock";AG.mock={text:' + JSON.stringify(text) + '};S.agentCfg.provider="mock";applyProvider();S.agentCfg.voiceOut=true;agCardAsk();ask("Uma pergunta?")');
+  const REC = await R('L(byId(D.tour.guideSteps,"g8").text)');
+  const ask = async (text, keys) => { await R('window.LABKEYS=' + JSON.stringify(keys) + ';D.guide.panel="dock";AG.mock={text:' + JSON.stringify(text) + '};D.agent.provider="mock";applyProvider();D.agent.voiceOut=true;agCardAsk();ask("Uma pergunta?")');
     await W(1500); return R('[G.thread.filter(function(m){return m.text===' + JSON.stringify(text) + '}).length,G.thread.filter(function(m){return m.who==="me"}).length,NOW(),(ph.querySelector(".gd-thread .agvoice")||{}).textContent,G.sayNow&&G.sayNow.src]'); };
   const a1 = await ask('O palácio tinha uma ópera, inaugurada em março de 1755.', { eleven: 'k', elevenPT: 'voice-pt', elevenEN: 'voice-en' }); await R('stopTour()');
   ok('An answer spoken live: once in the conversation (and the question once)', a1[0] === 1 && a1[1] === 1 && a1[4] === 'live', a1);
@@ -121,7 +121,7 @@ const NEW = 'Uma frase nova, ainda sem áudio, que nenhum conjunto gravou.';
   ok('An answer the set has, no key: recorded, once in the conversation', a2[0] === 1 && a2[1] === 1 && a2[4] === 'recorded' && a2[2] === 'Recorded · Sonia · Raquel (Azure) (no ElevenLabs key on this page)' && a2[3] === 'Voice: ' + a2[2], a2);
   const a3 = await ask('Uma resposta que ninguém gravou.', {}); await R('stopTour()');
   ok('An answer by the device voice: once in the conversation; "This device\'s voice (no live key on this page; not recorded)"', a3[0] === 1 && a3[1] === 1 && a3[4] === 'device' && a3[2].indexOf("This device's voice (no live key on this page; not recorded)") === 0, a3);
-  await R('S.agentCfg.provider="offline";applyProvider();sampleFn=null;agCardAsk();ask("palácio")'); await W(1200);
+  await R('D.agent.provider="offline";applyProvider();sampleFn=null;agCardAsk();ask("palácio")'); await W(1200);
   ok('The offline search\'s answer: once in the conversation too', await R('G.thread.filter(function(m){return m.who==="azu"&&m.text===G.answer}).length===1&&G.thread.filter(function(m){return m.who==="me"}).length===1'));
   await R('stopTour()');
   ok('no page errors', errs.length === 0, errs.slice(0, 3));

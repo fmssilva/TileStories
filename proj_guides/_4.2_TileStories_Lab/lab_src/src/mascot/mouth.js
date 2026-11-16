@@ -9,7 +9,7 @@ function mouthOfBlend(b){var cl=function(v){return Math.max(0,Math.min(1,v))},cl
 function azMouthCurve(o,r,w){AzuGL.set("talk",Math.min(1,o*1.1));Azu3D.mouthTo(o,w,r);var m=ph.querySelector(".mascot");if(!m)return;
   var s=o<.1&&r<.2?"M":r>.4&&o>.06?"O":w>.4&&o<.5?"E":o>.62?"big":o>.28?"A":"chew";if(s!==G.m2d){G.m2d=s;azMouth2d(m,s)}}
 /* a paused line, Mouth = Still, or Reduce Motion (a still Azu): the mouth rests in its mood's shape, whatever the audio's clock says */
-function mouthHeld(a){return a.paused||S.reduce||!S.guideCfg.lips}
+function mouthHeld(a){return a.paused||P.reduce||!D.guide.lips}
 function mouthRest(){AzuGL.set("talk",0);Azu3D.mouthTo(0,0,0);var m=ph.querySelector(".mascot");if(m&&G.m2d!=="rest"){G.m2d="rest";azMouth2d(m,restShape(azMood()))}}
 
 /* ----- the player: the curves follow the audio's own clock; the letters' mouth stands down meanwhile ----- */
@@ -40,7 +40,7 @@ function ldShapeFromWords(){return function(){var k=G.hl&&G.hl.k,w=k>=0&&G.words
 function lvSsml(text,voice){var head='<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="http://www.w3.org/2001/mstts" xml:lang="'+voice.slice(0,5)+'"><voice name="'+voice+'"><mstts:viseme type="FacialExpression"/>',body="",back=[];
   for(var i=0;i<text.length;i++){var c=text[i],e=c==="&"?"&amp;":c==="<"?"&lt;":c===">"?"&gt;":c;body+=e;for(var j=0;j<e.length;j++)back.push(i)}return{ssml:head+body+"</voice></speak>",at:head.length,back:back}}
 function lvAzure(text){var k=window.LABKEYS;return lvSdk().then(function(SDK){return new Promise(function(res,rej){
-    var voice=azureVoice(S.lang),cfg=SDK.SpeechConfig.fromSubscription(k.azure,k.azureRegion);cfg.speechSynthesisVoiceName=voice;
+    var voice=azureVoice(P.lang),cfg=SDK.SpeechConfig.fromSubscription(k.azure,k.azureRegion);cfg.speechSynthesisVoiceName=voice;
     cfg.speechSynthesisOutputFormat=SDK.SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3;
     var syn=new SDK.SpeechSynthesizer(cfg,null),chunks=[],bounds=[],sm=lvSsml(text,voice),ids=0;
     syn.visemeReceived=function(s,e){ids++;if(e.animation)try{chunks.push(JSON.parse(e.animation))}catch(x){}};

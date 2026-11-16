@@ -1,6 +1,6 @@
 // v8v checks (Playwright + the installed Edge): node test8v.js -> PASS/FAIL per check
-const { chromium } = require('./pw');
-const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
+const { chromium, labUrl } = require('./pw');
+const url = labUrl('#probe');
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe' });
   const p = await b.newPage({ viewport: { width: 1400, height: 900 } });
@@ -13,7 +13,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const edClick = async (sel, o) => { await openAbove(sel); await p.locator(sel).first().click(o); };
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   const gaps = () => R('var g=wallGaps();[g.pic.x,g.pic.y,g.items.map(function(i){return[i.id,Math.round(i.x),Math.round(i.y),+i.gap.toFixed(2)]})]');
-  await R('S.hints.on=false;S.guideMute=true;S.introSeen=true;sampleFn=null;gdGroupById("inview").on=false;S.camCfg.wall="ribeira";S.view="card";S.stop="closed";S.camX=.4;S.camY=.5;S.camZoom=1.3;renderAll(false)');
+  await R('D.card.hints.on=false;P.guideMute=true;P.introSeen=true;sampleFn=null;gdGroupById("inview").on=false;LAB.wall="ribeira";ui.view="card";ui.stop="closed";ui.camX=.4;ui.camY=.5;ui.camZoom=1.3;renderAll(false)');
   await W(400);
   // 1. at rest: each marker on its point in the picture; the wall's points shown, the palace's own point is its marker
   const g0 = await gaps(); const mk0 = g0[2].filter(i => i[0].indexOf('pin:') < 0), pins0 = g0[2].filter(i => i[0].indexOf('pin:') === 0);
@@ -30,22 +30,22 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // 3. the wheel (nearer the wall)
   const cx = box.x + box.width / 2, cy = box.y + box.height * .4; await p.mouse.move(cx, cy); await p.mouse.wheel(0, -200); await W(200);
   const g2 = await gaps();
-  ok('A zoom keeps every marker and pin on the picture', await R('S.camZoom') > 1.31 && g2[2].every(i => i[3] <= 1.5), g2[2].filter(i => i[3] > 1.5));
+  ok('A zoom keeps every marker and pin on the picture', await R('ui.camZoom') > 1.31 && g2[2].every(i => i[3] <= 1.5), g2[2].filter(i => i[3] > 1.5));
   // 4. the cathedral: off the screen at first, a drag to the right side brings it in, on its place
-  await R('S.camX=.9;S.camZoom=1;camPaint();camLayer()'); await W(150);
+  await R('ui.camX=.9;ui.camZoom=1;camPaint();camLayer()'); await W(150);
   const cat = (await gaps())[2].find(i => i[0] === 'cathedral');
   ok('Lisbon Cathedral rides on the picture too', cat && cat[3] <= 1.5 && cat[1] > 0 && cat[1] < 360, cat);
-  ok('The markers\' names follow the language', await R('S.lang="pt";renderAll(true);var t=ph.querySelector("[data-mk=painting] b").textContent;S.lang="en";renderAll(true);t') === 'O Paço da Ribeira');
+  ok('The markers\' names follow the language', await R('P.lang="pt";renderAll(true);var t=ph.querySelector("[data-mk=painting] b").textContent;P.lang="en";renderAll(true);t') === 'O Paço da Ribeira');
   // 5. the Wall switch on the preview bar
-  await R('S.previewBar=true;S.view="demo";S.stop="closed";renderAll(false)'); await W(200);
+  await R('LAB.previewBar=true;ui.view="demo";ui.stop="closed";renderAll(false)'); await W(200);
   const w0 = await R('ph.querySelector(\'[data-pt="wall"]\').textContent');
   await p.locator('#ptool [data-pt="wall"]').click(); await W(300);
-  const w1 = await R('[S.camCfg.wall,S.view,S.stop,ph.querySelector(\'[data-pt="wall"]\').textContent,ph.querySelectorAll(".cpin").length,ph.querySelectorAll("#wall .mk").length]');
+  const w1 = await R('[LAB.wall,ui.view,ui.stop,ph.querySelector(\'[data-pt="wall"]\').textContent,ph.querySelectorAll(".cpin").length,ph.querySelectorAll("#wall .mk").length]');
   ok('The preview bar\'s Wall button: from any screen, one tap to the Belém test wall (its points, no card markers)', w0 === 'Ribeira wall' && w1[0] === 'belem' && w1[1] === 'card' && w1[2] === 'closed' && w1[3] === 'Belém wall' && w1[4] >= 2 && w1[5] === 0, [w0, w1]);
   await p.locator('#ptool [data-pt="wall"]').click(); await W(300);
-  ok('...and a tap back to the card\'s wall with its markers', await R('S.camCfg.wall==="ribeira"&&ph.querySelectorAll("#wall .mk").length===2'));
+  ok('...and a tap back to the card\'s wall with its markers', await R('LAB.wall==="ribeira"&&ph.querySelectorAll("#wall .mk").length===2'));
   // 6. the test scene, pressed in Ask Azu's console as the developer does
-  await R('S.previewBar=false;S.tab="guide";renderEditor();ed.querySelector(\'[data-fo="s7agent"]\').open=true');
+  await R('LAB.previewBar=false;ui.tab="guide";renderEditor();ed.querySelector(\'[data-fo="s7agent"]\').open=true');
   const idx = await R('AGSCENES.findIndex(function(s){return s.id==="markers"})'); // round 7: the guide's scenes follow it in the console
   await R(`var s=ed.querySelector(".agscsel");s.value="${idx}";s.dispatchEvent(new Event("change",{bubbles:true}))`); await W(200);
   const lbl = await R('ed.querySelector(".agscenes").textContent');

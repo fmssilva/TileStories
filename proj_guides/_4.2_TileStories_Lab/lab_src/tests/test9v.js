@@ -24,8 +24,8 @@
 // MUTATE=1: Ask through the ✦ menu's path (the tour restarted), the showcase forgets the quiz was played, the answered rule off, the wall's
 //   distances ignored, the Stop bar's What next? doing nothing: the checks named [ask], [showcase], [header], [questions], [nearby] and [stop
 //   bar] turn red.
-const { chromium } = require('./pw');
-const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
+const { chromium, labUrl } = require('./pw');
+const url = labUrl('#probe');
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--autoplay-policy=no-user-gesture-required'] });
   const ctx = await b.newContext({ viewport: { width: 1500, height: 1000 } }), p = await ctx.newPage();
@@ -34,18 +34,18 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const until = async (src, ms) => { const t0 = Date.now(); while (Date.now() - t0 < ms) { if (await R(src)) return true; await W(60); } return false; };
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info).slice(0, 900) : '')); };
   const T0 = Date.now(), tsec = s => console.log('TIME ' + s + ' ' + Math.round((Date.now() - T0) / 1000) + ' s');
-  const MUT = 'teAskEnter=function(){teClose(false);S.view="card";S.stop="full";startTour();pauseTour();G.askOpen=true;S.dockH="full";renderGuide()};tePlayed=function(){return false};teAnswered=function(){return false};teDist=function(){return 0};teOpenPaused=function(){};""';
+  const MUT = 'teAskEnter=function(){teClose(false);ui.view="card";ui.stop="full";startTour();pauseTour();G.askOpen=true;ui.dockH="full";renderGuide()};tePlayed=function(){return false};teAnswered=function(){return false};teDist=function(){return 0};teOpenPaused=function(){};""';
   const load = async () => { await p.goto('about:blank'); await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 150000 }); await W(400); if (process.env.MUTATE) await R(MUT); await R(require('./g15lib.js')); };
   if (process.env.MUTATE) console.log('MUTATION: Ask restarts the tour, the quiz never played, the answered rule off, no distances, the Stop bar\'s What next? does nothing');
-  const base = `SCREENS.phone=[390,844];if(G.on)stopTour();S.previewBar=false;S.hints.on=false;S.guidance.on=false;S.lang="en";S.guideMute=true;S.introSeen=true;S.reduce=false;S.dark=false;S.cardCfg.mode="light";
-    S.guideCfg.voice="device";S.guideCfg.look="ink";S.ui.rowDemo=false;S.guideCfg.music=false;S.vis.music=null;S.vis.speed=2;S.agentCfg.voiceOut=false;G.gd.manual=true;S.guideCfg.dockStart="mini";gdPrefs().games="off";
-    window.__calls=[];sampleFn=function(pr){window.__calls.push(String(pr));return Promise.resolve({text:"A stub answer."})};S.guideCfg.ask="ai";renderAll(true);""`;
-  const DEF = await (async () => { await load(); await R(base); return R('JSON.stringify({teOn:S.guideCfg.teOn,teWhere:S.guideCfg.teWhere,teBlock:S.guideCfg.teBlock,teStart:S.guideCfg.teStart,teSec:S.guideCfg.teSec,teOrder:S.guideCfg.teOrder,teQsN:S.guideCfg.teQsN,teQsSrc:S.guideCfg.teQsSrc,teQs:S.guideCfg.teQs,teNearN:S.guideCfg.teNearN,teNearRule:S.guideCfg.teNearRule,tePicks:S.guideCfg.tePicks})'); })();
-  const reset = () => R(`Object.assign(S.guideCfg,JSON.parse(${JSON.stringify(DEF)}));G.te.played={};""`);
+  const base = `SCREENS.phone=[390,844];if(G.on)stopTour();LAB.previewBar=false;D.card.hints.on=false;D.guidance.on=false;P.lang="en";P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;D.card.cardCfg.mode="light";
+    D.guide.voice="device";D.guide.look="ink";LAB.rowDemo=false;D.guide.music=false;P.vis.music=null;P.vis.speed=2;D.agent.voiceOut=false;G.gd.manual=true;D.guide.dockStart="mini";gdPrefs().games="off";
+    window.__calls=[];sampleFn=function(pr){window.__calls.push(String(pr));return Promise.resolve({text:"A stub answer."})};D.guide.ask="ai";renderAll(true);""`;
+  const DEF = await (async () => { await load(); await R(base); return R('JSON.stringify({teOn:D.guide.teOn,teWhere:D.guide.teWhere,teBlock:D.guide.teBlock,teStart:D.guide.teStart,teSec:D.guide.teSec,teOrder:D.guide.teOrder,teQsN:D.guide.teQsN,teQsSrc:D.guide.teQsSrc,teQs:D.guide.teQs,teNearN:D.guide.teNearN,teNearRule:D.guide.teNearRule,tePicks:D.guide.tePicks})'); })();
+  const reset = () => R(`Object.assign(D.guide,JSON.parse(${JSON.stringify(DEF)}));G.te.played={};""`);
   // the panel at rest: drawn, its entrance over, the scroll where the end put it
   const settled = () => until('!!ph.querySelector(".tepanel,.tepill")&&!document.getAnimations().some(function(a){var t=a.effect&&a.effect.target;return a.playState==="running"&&!!t&&!!t.closest&&!!t.closest(".tepanel,.tepill,.teazu")})&&(!G.te.sc||Math.abs(scr.scrollTop-G.te.scTop)<2||G.te.userScroll)', 6000);
-  const heroStart = async () => { await R('if(G.on)stopTour();G.te.open=false;S.view="card";S.stop="full";renderPhone(false);scr.scrollTop=0;""'); await W(150); await p.click('#ph .hero .gstart'); await until('G.on', 3000); };
-  const toEnd = async () => { await heroStart(); await R('stopSpeech();G.paused=false;G.i=S.guideSteps.length-1;runStep();""'); const got = await until('!G.on&&(!!ph.querySelector(".tepanel,.tepill")||G.te.open==="min")||G.askOpen', 25000); if (got) { await R('ph.scrollLeft=0;ph.scrollTop=0;var b=ph.querySelector(".tebub");window.__bub=b?b.textContent:"";""'); await settled(); } return got; };
+  const heroStart = async () => { await R('if(G.on)stopTour();G.te.open=false;ui.view="card";ui.stop="full";renderPhone(false);scr.scrollTop=0;""'); await W(150); await p.click('#ph .hero .gstart'); await until('G.on', 3000); };
+  const toEnd = async () => { await heroStart(); await R('stopSpeech();G.paused=false;G.i=D.tour.guideSteps.length-1;runStep();""'); const got = await until('!G.on&&(!!ph.querySelector(".tepanel,.tepill")||G.te.open==="min")||G.askOpen', 25000); if (got) { await R('ph.scrollLeft=0;ph.scrollTop=0;var b=ph.querySelector(".tebub");window.__bub=b?b.textContent:"";""'); await settled(); } return got; };
   const box = sel => R(`(function(){var e=${sel};if(!e)return null;var r=e.getBoundingClientRect(),P=ph.getBoundingClientRect(),q=P.height/ph.offsetHeight;return{t:(r.top-P.top)/q,b:(r.bottom-P.top)/q,l:(r.left-P.left)/q,r:(r.right-P.left)/q,h:r.height/q,w:r.width/q}})()`);
   const scEl = 'G.te.sc?(G.te.sc.ref==="hero"?scr.querySelector(".hero .w"):scr.querySelector(\'[data-ref="\'+G.te.sc.ref+\'"]\')):null';
   const whole = async () => { const s = await box(scEl), pn = await box('ph.querySelector(".tepanel,.tepill")'), ref = await R('G.te.sc&&G.te.sc.ref'); const top = 47;
@@ -56,8 +56,8 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const sc1 = (await toEnd()) && await whole();
   await R('scr.scrollTop=0;""'); const qb = '#ph [data-ref="b:b_quiz"] .kq button[data-ok]'; await R('G.te.open=false;teDraw();""'); await p.click(qb); const played = await R('tePlayed("painting","b_quiz")');
   const sc2 = (await toEnd()) && await whole(); const star = await R('var s=ph.querySelector(".te-star");s?s.textContent:""');
-  await R('S.guideCfg.teWhere="pick";S.guideCfg.teBlock={painting:"b_ba"};""'); const sc3 = (await toEnd()) && await whole();
-  await R('S.guideCfg.teWhere="hero";""'); const sc4 = (await toEnd()) && await whole();
+  await R('D.guide.teWhere="pick";D.guide.teBlock={painting:"b_ba"};""'); const sc3 = (await toEnd()) && await whole();
+  await R('D.guide.teWhere="hero";""'); const sc4 = (await toEnd()) && await whole();
   ok('[showcase] the quiz not played: the tour ends on it, whole between the top (47 px) and the panel', sc1 && sc1.ref === 'b:b_quiz' && sc1.ok, sc1);
   ok('[showcase] the quiz played (a real tap on its right answer): the gallery, whole above the panel', played && sc2 && sc2.ref === 'b:b_gal' && sc2.ok, { played, sc2 });
   ok('[showcase] a block picked (the Before and After) and the hero: each whole above the panel', sc3 && sc3.ref === 'b:b_ba' && sc3.ok && sc4 && sc4.ref === 'hero' && sc4.ok, { sc3, sc4 });
@@ -65,13 +65,13 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await reset(); tsec('showcase');
 
   // ---------- 2. [asks], [panel], [header] light and dark ----------
-  const LINES = JSON.parse(await R('var o={};langCodes().forEach(function(l){o[l]=(S.guideCfg.atIntro.after||[]).map(function(k){return wordIn(S.tx[k],l)})});JSON.stringify(o)'));
+  const LINES = JSON.parse(await R('var o={};langCodes().forEach(function(l){o[l]=(D.guide.atIntro.after||[]).map(function(k){return wordIn(D.words.tx[k],l)})});JSON.stringify(o)'));
   const NAME = { en: 'the Ribeira Palace', pt: 'o Paço da Ribeira' };
   const isLine = (t, l) => LINES[l].some(x => x.replace('{point}', NAME[l]).replace(/^./, c => c.toUpperCase()) === t);
   const warm = t => /\?$/.test(t) && !/^Now\b/.test(t) && t.split(/\s+/).length <= 20;
   const PANEL = [];
   for (const dark of [false, true]) {
-    await R(`S.dark=${dark};S.cardCfg.mode="${dark ? 'dark' : 'light'}";renderAll(true);""`);
+    await R(`P.dark=${dark};D.card.cardCfg.mode="${dark ? 'dark' : 'light'}";renderAll(true);""`);
     await toEnd();
     const m = JSON.parse(await R(`(function(){var pn=ph.querySelector(".tepanel"),nb=document.getElementById("navbar"),b=ph.querySelector(".tebub"),P=ph.getBoundingClientRect(),q=P.height/ph.offsetHeight,R0=function(e){var r=e.getBoundingClientRect();return{t:(r.top-P.top)/q,b:(r.bottom-P.top)/q,l:(r.left-P.left)/q,r:(r.right-P.left)/q,w:r.width/q,h:r.height/q}};
       var pr=R0(pn),nr=nb&&getComputedStyle(nb).display!=="none"?R0(nb):null,tg=[];
@@ -85,40 +85,40 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
       { h: m.h, bot: m.bot, nav: m.nav, l: m.l, r: m.r, sx: m.sx, px: m.px, n: m.tg.length, nt: m.nt, bad: m.tg.filter(x => !x.ok), low: m.low });
     if (!dark) {
       ok('[asks] Azu\'s bubble is a line of After the tour (EN), warm (a question, no "Now", 20 words at most), and spoken (the line said)', isLine(m.bub, 'en') && warm(m.bub) && m.said === m.bub, { bub: m.bub, said: m.said });
-      const heroLen = await R('S.guideCfg.teOn&&(function(){var h=document.createElement("div");h.innerHTML=cardScreen();var g=h.querySelector(".hero .gstart");return g?g.textContent:""})()');
+      const heroLen = await R('D.guide.teOn&&(function(){var h=document.createElement("div");h.innerHTML=cardScreen();var g=h.querySelector(".hero .gstart");return g?g.textContent:""})()');
       ok('[header] "Tour complete · " and the same length as the hero\'s button', /^Tour complete · /.test(m.head) && heroLen.indexOf(m.head.replace('Tour complete · ', '')) >= 0, { head: m.head, heroLen });
       const faded = await until('!ph.querySelector(".tebub")', 20000);
       ok('[asks] the bubble fades a few seconds after the line is said', faded);
     }
   }
   const b1 = PANEL[0].bub, b2 = PANEL[1].bub;
-  await R('S.dark=false;S.cardCfg.mode="light";S.lang="pt";renderAll(true);""'); await toEnd(); const bpt = await R('window.__bub||""');
-  await R('S.lang="en";renderAll(true);""');
+  await R('P.dark=false;D.card.cardCfg.mode="light";P.lang="pt";renderAll(true);""'); await toEnd(); const bpt = await R('window.__bub||""');
+  await R('P.lang="en";renderAll(true);""');
   ok('[asks] never the same line twice in a row (two ends here), and in Portuguese a line of the set', b1 !== b2 && isLine(b2, 'en') && isLine(bpt, 'pt') && warm(bpt), { b1, b2, bpt });
   tsec('panel');
 
   // ---------- 3. [questions] and [ask] ----------
   await toEnd();
-  const Q = JSON.parse(await R('JSON.stringify({qs:[].map.call(ph.querySelectorAll(".te-q"),function(x){return x.textContent}),said:S.guideSteps.map(function(s){return stepText(s)}).join(" ")})'));
+  const Q = JSON.parse(await R('JSON.stringify({qs:[].map.call(ph.querySelectorAll(".te-q"),function(x){return x.textContent}),said:D.tour.guideSteps.map(function(s){return stepText(s)}).join(" ")})'));
   const nrm = s => String(s).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
   const TPL = [/^Who lived in the palace\?$/, /^(What|Who|Why|How|When|Where|Which) .+ the Ribeira Palace\?$/, /^What happened in \d{4}\?$/, /^Who was [A-Z]\S* [IVX]+\?$/, /^Tell me about .+$/];
   const saidS = String(Q.said).split(/(?<=[.!?])\s+/).map(nrm);
   ok('[questions] 2-3 chips, each this point\'s own or a template\'s (the test\'s own patterns), none a sentence the tour said',
     Q.qs.length >= 2 && Q.qs.length <= 3 && Q.qs.every(q => TPL.some(re => re.test(q))) && Q.qs.every(q => saidS.indexOf(nrm(q)) < 0), Q.qs);
   // the tour tells the callout "What was inside" word for word: its question is no longer offered
-  const inside = await R('var r=byId(S.story,"r5");wordIn(r.slots[1].text,"en")');
-  await R(`var s=byId(S.guideSteps,"g5");window.__g5=s.text.en;s.text.en=${JSON.stringify(inside)};""`); await toEnd();
-  const Q2 = await R('JSON.stringify([].map.call(ph.querySelectorAll(".te-q"),function(x){return x.textContent}))'); await R('byId(S.guideSteps,"g5").text.en=window.__g5;""');
+  const inside = await R('var r=byId(D.poi.story,"r5");wordIn(r.slots[1].text,"en")');
+  await R(`var s=byId(D.tour.guideSteps,"g5");window.__g5=s.text.en;s.text.en=${JSON.stringify(inside)};""`); await toEnd();
+  const Q2 = await R('JSON.stringify([].map.call(ph.querySelectorAll(".te-q"),function(x){return x.textContent}))'); await R('byId(D.tour.guideSteps,"g5").text.en=window.__g5;""');
   ok('[questions] a heading the tour told word for word gives no chip: "What was inside the Ribeira Palace?" offered, then gone once the tour says its words', Q.qs.indexOf('What was inside the Ribeira Palace?') >= 0 && JSON.parse(Q2).indexOf('What was inside the Ribeira Palace?') < 0, { before: Q.qs, after: Q2 });
   await toEnd(); const chip = await R('ph.querySelector(".te-q").textContent'); await R('window.__calls=[];window.__rs=0;if(!window.__rsOn){window.__rsOn=1;on("runStep.before",function(){window.__rs++})}""'); const top0 = await R('scr.scrollTop'); await p.click('#ph .te-q');
-  const asked = await until('window.__calls.length>=1', 5000), aq = JSON.parse(await R('JSON.stringify({p:(window.__calls[0]||"").slice(-160),full:S.dockH==="full"&&G.askOpen,panel:!!ph.querySelector(".tepanel"),offer:G.te.offer})'));
+  const asked = await until('window.__calls.length>=1', 5000), aq = JSON.parse(await R('JSON.stringify({p:(window.__calls[0]||"").slice(-160),full:ui.dockH==="full"&&G.askOpen,panel:!!ph.querySelector(".tepanel"),offer:G.te.offer})'));
   ok('[questions] a real tap on a chip asks it at once through Ask Azu (its full view; the model stubbed); the panel closes, the ✦ menu keeps What next?', asked && aq.p.indexOf(chip) >= 0 && aq.full && !aq.panel && aq.offer, { chip, aq });
   const midA = JSON.parse(await R('JSON.stringify({top:scr.scrollTop,rs:window.__rs})'));
   await p.click('#ph .gdock [data-g="stop"]'); const backA = await until('!G.on&&G.te.open==="open"&&!!ph.querySelector(".tepanel")', 4000);
   const endA = JSON.parse(await R('JSON.stringify({top:scr.scrollTop,rs:window.__rs,toast:!!ph.querySelector(".gtoast")})'));
   ok('[ask] Ask from the panel leaves the card where it is: no tour restarted (no step run), the scroll the same during Ask and after it closes (a real tap on its Stop; within 2 px), the panel back open, no Stop toast',
     Math.abs(midA.top - top0) <= 2 && Math.abs(endA.top - top0) <= 2 && midA.rs === 0 && endA.rs === 0 && backA && !endA.toast, { top0, midA, endA, backA });
-  await R('S.guideCfg.teQsN="2";""'); await toEnd(); const n2 = await R('ph.querySelectorAll(".te-q").length'); await reset();
+  await R('D.guide.teQsN="2";""'); await toEnd(); const n2 = await R('ph.querySelectorAll(".te-q").length'); await reset();
   // [ask] the field by real keys, the microphone by a recogniser stand-in
   await toEnd(); await R('window.__calls=[];""'); await p.click('#ph #teq'); await p.keyboard.type('Who built the tower?'); await p.keyboard.press('Enter');
   const fa = await until('window.__calls.some(function(c){return c.indexOf("Who built the tower?")>=0})', 5000); await R('stopTour();""');
@@ -134,22 +134,22 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
     return all.filter(card).concat(all.filter(id => !card(id))).slice(0, n); };
   const cards = () => R('JSON.stringify([].map.call(ph.querySelectorAll(".te-card"),function(x){return{id:x.dataset.tenear,why:x.querySelector("small").textContent}}))').then(JSON.parse);
   await toEnd(); const N1 = await cards();
-  await R('S.guideCfg.tePicks={painting:{p1:"river"}};S.guideCfg.teNearN="5";""'); await toEnd(); const N2 = await cards(); await reset();
+  await R('D.guide.tePicks={painting:{p1:"river"}};D.guide.teNearN="5";""'); await toEnd(); const N2 = await cards(); await reset();
   ok('[nearby] 3 cards, most related first: the points with a card and a tour first (the same category, the Torreão: "Part of this palace"; then the nearest by the wall\'s coordinates), the places without one after',
     N1.length === 3 && JSON.stringify(N1.map(x => x.id)) === JSON.stringify(expect('painting', [], 3)) && N1[0].why === 'Part of this palace', { got: N1, want: expect('painting', [], 3) });
   ok('[nearby] a pick first ("Recommended · …"), How many 5: five cards, picks -> category -> distance among the points with a card, then the places without one (the city on the hill, the arcades) in the same order', JSON.stringify(N2.map(x => x.id)) === JSON.stringify(expect('painting', ['river'], 5)) && /^Recommended · /.test(N2[0].why), { got: N2, want: expect('painting', ['river'], 5) });
   await toEnd(); await p.click('#ph .te-card[data-tenear="torreao"]'); const minAt = await R('G.te.open');
-  const landed = await until('S.m.poi==="torreao"&&S.stop==="half"&&!!ph.querySelector(".teinv")', 6000);
-  const NV = JSON.parse(await R('var c=camView(),p=WALLS.ribeira.pois.filter(function(x){return x.id==="torreao"})[0],s=poiScreen(p),t=teFlyTarget(p);JSON.stringify({inv:ph.querySelector(".teinv").textContent.replace(/\\s*›\\s*$/,""),x:s.x,y:s.y,W:ph.offsetWidth,H:ph.offsetHeight,cam:[S.camX,S.camY],t:t,min:tourMinutes("torreao")})'));
+  const landed = await until('ui.m.poi==="torreao"&&ui.stop==="half"&&!!ph.querySelector(".teinv")', 6000);
+  const NV = JSON.parse(await R('var c=camView(),p=WALLS.ribeira.pois.filter(function(x){return x.id==="torreao"})[0],s=poiScreen(p),t=teFlyTarget(p);JSON.stringify({inv:ph.querySelector(".teinv").textContent.replace(/\\s*›\\s*$/,""),x:s.x,y:s.y,W:ph.offsetWidth,H:ph.offsetHeight,cam:[ui.camX,ui.camY],t:t,min:tourMinutes("torreao")})'));
   const wantInv = NV.min < 2 ? 'A short tour of the Torreão?' : `The Torreão has a story. A tour of ${NV.min} minutes?`;
   const flown = Math.abs(NV.cam[0] - NV.t.x) < 0.01 && Math.abs(NV.cam[1] - NV.t.y) < 0.01 && NV.x > 0 && NV.x < NV.W && NV.y > 47 && NV.y < NV.H * 0.45;
-  await p.click('#ph .teinv button'); const started = await until('G.on&&S.m.poi==="torreao"', 4000); await R('stopTour();""');
+  await p.click('#ph .teinv button'); const started = await until('G.on&&ui.m.poi==="torreao"', 4000); await R('stopTour();""');
   ok('[nearby] a real tap on the Torreão: the panel minimal at once, the wall flown to the point (in view above the card), its card at Half with its invitation; the invitation\'s tap starts its tour',
     minAt === 'min' && landed && flown && NV.inv === wantInv && started, { minAt, landed, NV, wantInv, started });
   tsec('nearby');
 
   // ---------- 5. [minimal] and [written] (the Torreão: a tour from its card) ----------
-  const back = async () => { await R('if(G.on)stopTour();pointOpen("painting");setWall("ribeira");S.view="card";S.stop="full";renderPhone(false);""'); };
+  const back = async () => { await R('if(G.on)stopTour();pointOpen("painting");setWall("ribeira");ui.view="card";ui.stop="full";renderPhone(false);""'); };
   await back(); await toEnd(); await p.click('#ph .te-chev'); const pill = await box('ph.querySelector(".tepill")'); const noPanel = await R('!ph.querySelector(".tepanel")');
   await p.click('#ph .te-po'); const reopened = await until('!!ph.querySelector(".tepanel")', 2000); await settled();
   const hd = await box('ph.querySelector(".tepanel .te-head")'); const P0 = await R('JSON.stringify((function(){var P=ph.getBoundingClientRect(),q=P.height/ph.offsetHeight;return{x:P.left,y:P.top,q:q}})())').then(JSON.parse);
@@ -163,46 +163,46 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('teClose(false);""'); const xs = await R('G.te.open="min";teDraw();!!ph.querySelector(".tepill .te-x")'); await p.click('#ph .tepill .te-x'); const xClosed = await until('!ph.querySelector(".tepill")&&!G.te.open&&G.te.offer', 2000);
   ok('[minimal] the pill\'s × closes it (the offer kept for the ✦ menu)', xs && xClosed);
   const wr = await R('atSrc("painting")'); await back(); const w1 = (await toEnd()) && await whole();
-  await R('if(G.on)stopTour();pointOpen("torreao");S.view="card";S.stop="full";renderPhone(false);""'); const cs = await R('atSrc("torreao")'); const w2 = (await toEnd()) && await whole(); const h2 = await R('(ph.querySelector(".te-hd")||{}).textContent||""');
+  await R('if(G.on)stopTour();pointOpen("torreao");ui.view="card";ui.stop="full";renderPhone(false);""'); const cs = await R('atSrc("torreao")'); const w2 = (await toEnd()) && await whole(); const h2 = await R('(ph.querySelector(".te-hd")||{}).textContent||""');
   ok('[written] the written tour (the Ribeira Palace) and a tour from the card (the Torreão) end the same way: the showcase whole above the What next? panel', wr === 'written' && cs === 'card' && w1 && w1.ok && w2 && w2.ok && w2.ref === 'b:t_quiz' && /our complete/.test(h2), { wr, cs, w1, w2, h2 });
   await back(); tsec('minimal');
 
   // ---------- 6. [stop bar] the Stop bar's three choices ----------
-  const stopAt = async () => { await heroStart(); for (let k = 0; k < 3; k++) { const i = await R('G.i'); await R('S.dockH="peek";renderGuide();""'); await p.click('#ph .gdock [data-g="next"]'); await until(`G.i!==${i}`, 3000); }
-    await R('S.dockH="peek";renderGuide();""'); await p.click('#ph .gdock [data-g="stop"]'); await until('!G.on&&!!ph.querySelector(".gtoast")', 3000); return R('JSON.stringify(G.resumeAt?{id:G.resumeAt.id}:{})').then(JSON.parse); };
+  const stopAt = async () => { await heroStart(); for (let k = 0; k < 3; k++) { const i = await R('G.i'); await R('ui.dockH="peek";renderGuide();""'); await p.click('#ph .gdock [data-g="next"]'); await until(`G.i!==${i}`, 3000); }
+    await R('ui.dockH="peek";renderGuide();""'); await p.click('#ph .gdock [data-g="stop"]'); await until('!G.on&&!!ph.querySelector(".gtoast")', 3000); return R('JSON.stringify(G.resumeAt?{id:G.resumeAt.id}:{})').then(JSON.parse); };
   const SB = [];
   for (const dark of [false, true]) {
-    await R(`S.dark=${dark};S.cardCfg.mode="${dark ? 'dark' : 'light'}";renderAll(true);""`); const at = await stopAt();
+    await R(`P.dark=${dark};D.card.cardCfg.mode="${dark ? 'dark' : 'light'}";renderAll(true);""`); const at = await stopAt();
     await until('!document.getAnimations().some(function(a){var t=a.effect&&a.effect.target;return a.playState==="running"&&!!t&&!!t.closest&&!!t.closest(".gtoast")})', 2000);
     const t = JSON.parse(await R('JSON.stringify([".gtcont",".gtagain",".gtnext"].map(function(s){var e=ph.querySelector(".gtoast "+s);if(!e)return null;var r=e.getBoundingClientRect(),q=ph.getBoundingClientRect().height/ph.offsetHeight,cx=r.left+r.width/2,cy=r.top+r.height/2,h=document.elementFromPoint(cx,cy);return{t:e.textContent.replace(/\\s+/g," "),h:r.height/q,w:r.width/q,hit:!!h&&(h===e||e.contains(h))}}))'));
     const low = await R('JSON.stringify(G15.text(".gtoast").filter(function(x){return x.cr<4.5}))');
     SB.push({ dark, at, t, low });
   }
-  await R('S.dark=false;S.cardCfg.mode="light";renderAll(true);""');
+  await R('P.dark=false;D.card.cardCfg.mode="light";renderAll(true);""');
   ok('[stop bar] three choices, each 44 px tall and hit at its centre, its words 4.5:1, light and dark: "Continue the tour (step N of M)", "Start again", "What next?"',
     SB.every(s => s.t.every(x => x && x.h >= 43.5 && x.w >= 43.5 && x.hit) && /^Continue the tour \(step \d+ of \d+\)$/.test(s.t[0].t) && s.t[1].t === 'Start again' && s.t[2].t === 'What next?' && s.low === '[]'), SB);
-  let at = await stopAt(); await p.click('#ph .gtoast .gtcont'); const c1 = await until(`G.on&&S.guideSteps[G.i].id==="${at.id}"`, 4000); await R('stopTour();""');
-  at = await stopAt(); await p.click('#ph .gtoast .gtagain'); const c2 = await until('G.on&&G.i===0&&S.guideSteps[0].act==="teaser"', 4000); await R('stopTour();""');
+  let at = await stopAt(); await p.click('#ph .gtoast .gtcont'); const c1 = await until(`G.on&&D.tour.guideSteps[G.i].id==="${at.id}"`, 4000); await R('stopTour();""');
+  at = await stopAt(); await p.click('#ph .gtoast .gtagain'); const c2 = await until('G.on&&G.i===0&&D.tour.guideSteps[0].act==="teaser"', 4000); await R('stopTour();""');
   at = await stopAt(); const lab = await R('svLabel(svOffer()).replace(/\\s+/g," ")'); await p.click('#ph .gtoast .gtnext'); const c3 = await until('!!ph.querySelector(".tepanel")', 3000);
   const PZ = JSON.parse(await R('JSON.stringify({hd:((ph.querySelector(".te-hd")||{}).textContent||"").replace(/\\s+/g," "),first:((ph.querySelector(".te-acts button")||{}).textContent||"").replace(/\\s+/g," ")})'));
   const nOf = /\(step (\d+) of (\d+)\)/.exec(lab) || [];
   if (c3) { await settled(); await p.click('#ph .te-acts .te-cont'); }
-  const c4 = c3 && await until(`G.on&&S.guideSteps[G.i].id==="${at.id}"`, 4000); await R('if(G.on)stopTour();""');
+  const c4 = c3 && await until(`G.on&&D.tour.guideSteps[G.i].id==="${at.id}"`, 4000); await R('if(G.on)stopTour();""');
   ok('[stop bar] each does its job by a real tap: Continue goes back to the step; Start again to the teaser; What next? opens the panel "Tour paused · step N of M" with Continue first of its actions, which goes back to the step',
     c1 && c2 && c3 && PZ.hd === `Tour paused · step ${nOf[1]} of ${nOf[2]}` && PZ.first === lab && c4, { c1, c2, c3, PZ, lab, c4, eq: [PZ.hd === `Tour paused · step ${nOf[1]} of ${nOf[2]}`, PZ.first === lab] });
   tsec('stop bar');
 
   // ---------- 7. [editor] each new row by a real click: what the visitor sees, and its demo ----------
-  await reset(); await R('S.ui.rowDemo=true;S.tab="guide";S.op={gt1:true,s7end:true};S.ui.level=9;renderEditor();""');
+  await reset(); await R('LAB.rowDemo=true;ui.tab="guide";ui.op={gt1:true,s7end:true};ui.level=9;renderEditor();""');
   const panelNow = () => R('JSON.stringify({open:G.te.open,panel:!!ph.querySelector(".tepanel"),pill:!!ph.querySelector(".tepill"),ask:!!G.askOpen,sc:G.te.sc&&G.te.sc.ref,qs:ph.querySelectorAll(".te-q").length,own:[].some.call(ph.querySelectorAll(".te-q"),function(x){return x.textContent==="Who lived in the palace?"}),chips:[].map.call(ph.querySelectorAll(".te-q"),function(x){return x.textContent}),secs:[].map.call(ph.querySelectorAll(".tepanel > div,.tepanel > form"),function(x){return x.className.split(" ")[0]}),near:[].map.call(ph.querySelectorAll(".te-card"),function(x){return x.dataset.tenear}),why0:(ph.querySelector(".te-card small")||{}).textContent||""})').then(JSON.parse);
   const demoEnd = () => until('(!G.on&&!!ph.querySelector(".tepanel,.tepill"))||G.askOpen', 25000).then(async g => { if (g) await settled().catch(() => 0); return g; });
   const ED = [];
   const edCase = async (name, act, check) => { await R('if(G.on)stopTour();G.te.open=false;teDraw();""'); await act(); const g = await demoEnd(); const v = await panelNow(); const good = g && check(v); ED.push({ name, good, g, v: good ? undefined : v }); await reset(); await R('renderAll(true);""'); };
-  const seg = (k, v) => () => p.click(`#ed [data-set="@guideCfg.${k}"][data-v="${v}"]`);
-  const sel = (k, v) => () => p.selectOption(`#ed select[data-sel="@guideCfg.${k}"]`, v);
+  const seg = (k, v) => () => p.click(`#ed [data-set="@D.guide.${k}"][data-v="${v}"]`);
+  const sel = (k, v) => () => p.selectOption(`#ed select[data-sel="@D.guide.${k}"]`, v);
   await edCase('What next? panel Off: Ask opens', seg('teOn', 'false'), v => v.ask && !v.panel);
   await edCase('Where the tour ends: The hero', sel('teWhere', 'hero'), v => v.sc === 'hero');
-  await edCase('Where the tour ends: A block I pick, then The block: the Gallery', async () => { await sel('teWhere', 'pick')(); await demoEnd(); await R('if(G.on)stopTour();G.te.open=false;teDraw();""'); await p.selectOption('#ed select[data-sel="@guideCfg.teBlock.painting"]', 'b_gal'); }, v => v.sc === 'b:b_gal');
+  await edCase('Where the tour ends: A block I pick, then The block: the Gallery', async () => { await sel('teWhere', 'pick')(); await demoEnd(); await R('if(G.on)stopTour();G.te.open=false;teDraw();""'); await p.selectOption('#ed select[data-sel="@D.guide.teBlock.painting"]', 'b_gal'); }, v => v.sc === 'b:b_gal');
   await edCase('Start as Minimal', seg('teStart', 'min'), v => v.pill && !v.panel);
   for (const s of ['qs', 'ask', 'near', 'act']) await edCase(`${s} Off`, seg('teSec.' + s, 'false'), v => v.panel && v.secs.indexOf({ qs: 'te-qs', ask: 'te-ask', near: 'te-near', act: 'te-acts' }[s]) < 0);
   await edCase('How many 2', seg('teQsN', '2'), v => v.qs === 2);
@@ -213,24 +213,24 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await edCase('▼ on Suggested questions: Ask right away first', () => p.click('#ed [data-teord="qs|1"]'), v => v.secs.indexOf('te-ask') >= 0 && v.secs.indexOf('te-ask') < v.secs.indexOf('te-qs'));
   await edCase('a point\'s own question typed', async () => { await p.click('#ed [data-teqadd]'); const i = await p.$$('#ed [data-teqin^="painting|1|en"]'); await i[0].click(); await p.keyboard.type('What did the king eat?'); await p.click('#ed [data-teqplay="1"]'); },
     v => v.chips.indexOf('What did the king eat?') >= 0);
-  await edCase('a template\'s words typed', async () => { await R('S.guideCfg.teQsSrc="tpl";renderEditor();""'); const i = await p.$('#ed [data-tx="te_tq_year|en"]'); await i.click({ clickCount: 3 }); await p.keyboard.type('Tell me what happened in {0}'); await p.keyboard.press('Tab'); await p.click('#ed [data-tetpl="te_tq_year"]'); },
+  await edCase('a template\'s words typed', async () => { await R('D.guide.teQsSrc="tpl";renderEditor();""'); const i = await p.$('#ed [data-tx="te_tq_year|en"]'); await i.click({ clickCount: 3 }); await p.keyboard.type('Tell me what happened in {0}'); await p.keyboard.press('Tab'); await p.click('#ed [data-tetpl="te_tq_year"]'); },
     v => v.chips.indexOf('Tell me what happened in 1755') >= 0);
-  await R('S.tx.te_tq_year=JSON.parse(TX0).te_tq_year;""');
+  await R('D.words.tx.te_tq_year=JSON.parse(TX0).te_tq_year;""');
   // the ▸ on each new row's label
   const keys = ['teOn', 'teWhere', 'teStart', 'teSec.qs', 'teSec.ask', 'teSec.near', 'teSec.act', 'teQsN', 'teQsSrc', 'teNearN', 'teNearRule', 'tePicks.painting.p1'], PL = [];
   await R('renderEditor();""');
-  for (const k of keys) { await R('if(G.on)stopTour();G.te.open=false;teDraw();document.body.dataset.rowdemo="";""'); const lb = await p.$(`#ed .row:has([data-set="@guideCfg.${k}"],[data-sel="@guideCfg.${k}"]) > label.rd`);
-    if (!lb) { PL.push({ k, lb: false }); continue; } await lb.click(); const g = await demoEnd(); const want = JSON.stringify('guideCfg.' + k + '|found|'); const rd = await until(`(function(){var d=document.body.dataset.rowdemo||"";return d.indexOf(${want})===0&&!/[|][.](gdock|gcap)$/.test(d)})()`, 3000); PL.push({ k, g, rd }); }
+  for (const k of keys) { await R('if(G.on)stopTour();G.te.open=false;teDraw();document.body.dataset.rowdemo="";""'); const lb = await p.$(`#ed .row:has([data-set="@D.guide.${k}"],[data-sel="@D.guide.${k}"]) > label.rd`);
+    if (!lb) { PL.push({ k, lb: false }); continue; } await lb.click(); const g = await demoEnd(); const want = JSON.stringify('D.guide.' + k + '|found|'); const rd = await until(`(function(){var d=document.body.dataset.rowdemo||"";return d.indexOf(${want})===0&&!/[|][.](gdock|gcap)$/.test(d)})()`, 3000); PL.push({ k, g, rd }); }
   ok('[editor] each new row changed by a real click changes what the visitor sees at the tour\'s end (its demo plays the end): ' + ED.map(x => x.name).join('; '), ED.every(x => x.good), { bad: ED.filter(x => !x.good) });
   ok('[editor] the ▸ on each new row\'s label plays the tour\'s end and rings the part it changes (' + keys.length + ' rows)', PL.every(x => x.g && x.rd), PL.filter(x => !(x.g && x.rd)));
   const nodemo = await R('JSON.stringify(rowsWithoutDemo(["s7end"]))');
   ok('[editor] no row of The tour\'s end without its demo (NO DEMO), the foldout in Guide › 2 · The tour after Ways in', nodemo === '[]' && await R('var a=ed.querySelector(\'[data-fo="gt:ways"]\'),b=ed.querySelector(\'[data-fo="s7end"]\');!!a&&!!b&&!!(a.compareDocumentPosition(b)&Node.DOCUMENT_POSITION_FOLLOWING)&&!!b.closest(\'[data-fo="gt1"]\')'), nodemo);
-  await R('S.ui.rowDemo=false;S.tab="card";renderEditor();""'); tsec('editor');
+  await R('LAB.rowDemo=false;ui.tab="card";renderEditor();""'); tsec('editor');
 
   // ---------- 8. [reduced motion] ----------
-  await R('S.reduce=true;renderAll(true);""'); await toEnd();
+  await R('P.reduce=true;renderAll(true);""'); await toEnd();
   const RM = JSON.parse(await R('JSON.stringify({p:getComputedStyle(ph.querySelector(".tepanel")).animationName,c:getComputedStyle(ph.querySelector(".te-card")).animationName,d:getComputedStyle(ph.querySelector(".te-card")).animationDelay,top:Math.abs(scr.scrollTop-G.te.scTop)<2})'));
-  await p.click('#ph .te-card[data-tenear="torreao"]'); const inst = await R('S.m.poi==="torreao"&&S.stop==="half"'); await R('if(G.on)stopTour();S.reduce=false;""');
+  await p.click('#ph .te-card[data-tenear="torreao"]'); const inst = await R('ui.m.poi==="torreao"&&ui.stop==="half"'); await R('if(G.on)stopTour();P.reduce=false;""');
   ok('[reduced motion] a fade only: the panel and its cards fade (no rise, no slide, no stagger), the showcase reached at once, the wall at the point at once', RM.p === 'teFade' && RM.c === 'teFade' && RM.d === '0s' && RM.top && inst, { RM, inst });
 
   ok('no page errors', !errs.length, errs.slice(0, 5));

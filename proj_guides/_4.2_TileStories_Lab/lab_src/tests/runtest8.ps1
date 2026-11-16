@@ -2,11 +2,13 @@
 # No -tabs: every tab, as three walks side by side (card / guide / marker,words,global), summed (each tab starts from the
 # same state, so the sum is the one walk's result; one walk of every tab, -single, is many times slower: each control costs
 # more the longer a walk runs). -tabs walks only those (the texts come with "words"), each tab list in its own Edge profile
-# and files (dom_<tabs>.txt, selftest_<tabs>.json). -hash opens another route instead.
+# and files (dom_<tabs>.txt, selftest_<tabs>.json). -hash opens another route instead. The page is opened over the Lab's local http
+# server (tools/serve.py, started first if it is not running).
 param([string]$hash = "selftest", [int]$minutes = 90, [string]$tabs = "", [switch]$single)
 $edge = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
 $d = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 if (-not $tabs -and -not $single -and $hash -eq "selftest") {
+  & python "$d\tools\serve.py" --ensure | Out-Null
   $me = $MyInvocation.MyCommand.Path; $t0 = Get-Date
   $js = @("card", "guide", "marker,words,global") | ForEach-Object { Start-Job -ScriptBlock { param($me, $t, $m) & powershell -ExecutionPolicy Bypass -File $me -tabs $t -minutes $m } -ArgumentList $me, $_, $minutes }
   $lines = $js | Wait-Job | Receive-Job; $js | Remove-Job
@@ -19,7 +21,9 @@ if (-not $tabs -and -not $single -and $hash -eq "selftest") {
 $sfx = ""
 if ($tabs -and $hash -eq "selftest") { $hash = "selftest=$tabs"; $sfx = "_" + ($tabs -replace "[^a-z]", "") }
 $prof = "edgeprof11$sfx"; $dom = "$d\dom$sfx.txt"; $err = "$d\err$sfx.txt"
-$url = "file:///$($d -replace '\\','/')/block-components-lab.html#$hash"
+& python "$d\tools\serve.py" --ensure | Out-Null
+if ($LASTEXITCODE) { "The Lab server did not start: python tools/serve.py"; exit 1 }
+$url = "http://localhost:8642/lab_src/block-components-lab.html#$hash"
 Remove-Item $dom, $err -ErrorAction SilentlyContinue
 $p = Start-Process -FilePath $edge -ArgumentList @('--headless=new', '--disable-gpu', '--window-size=1400,1500', '--virtual-time-budget=15000', '--enable-logging=stderr', '--v=0', "--user-data-dir=$d\$prof", '--dump-dom', $url) -PassThru -WindowStyle Hidden -RedirectStandardOutput $dom -RedirectStandardError $err
 if (-not $p.WaitForExit($minutes * 60000)) {

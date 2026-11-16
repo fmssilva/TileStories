@@ -20,8 +20,8 @@
 // [switches] the Detail Card tab has no Foldouts row; One section open at a time (real clicks) closes the open section.
 // MUTATE=1: the hand starts on its target, the scroll a linear jump, no opening zoom, no block in use, the bar never drawn and the rest dimmed,
 //   reduced motion ignored: the checks named [hand], [scroll], [opening], [blocks], [focus] and [reduced motion] turn red.
-const { chromium } = require('./pw');
-const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
+const { chromium, labUrl } = require('./pw');
+const url = labUrl('#probe');
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe' });
   const p = await b.newPage({ viewport: { width: 1400, height: 1000 } });
@@ -33,28 +33,28 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const T0 = Date.now(), tsec = s => console.log('TIME ' + s + ' ' + Math.round((Date.now() - T0) / 1000) + ' s');
   const MUT = !!process.env.MUTATE;
   if (MUT) {
-    await R('DH_FROM=0;tsMs=function(){return 16};tsEase=function(u){return u>0?1:0};PO_MS=0;dhUseOf=function(){return null};fcBar=function(){};S.guideCfg.cue="spotlight";' +
+    await R('DH_FROM=0;tsMs=function(){return 16};tsEase=function(u){return u>0?1:0};PO_MS=0;dhUseOf=function(){return null};fcBar=function(){};D.guide.cue="spotlight";' +
       'var __m=document.createElement("style");__m.textContent="#ph.touring.gspotting .scr{filter:brightness(.8)}";document.head.appendChild(__m);""');
     console.log('MUTATION: the hand starts on its target, the scroll jumps, no opening zoom, no block in use, no bar and the rest dimmed, reduced motion ignored');
   }
   const base = (o) => `SCREENS.phone=[390,844];if(G.on)stopTour();if(G.gd.pages)gdPagesEnd("test",false);gdBeatClose();gdStop("test");if(G.ga.on)gaEnd("test");if(G.ga.card)gaCardLeave();G.te.open=false;
-    S.hints.on=false;S.previewBar=false;S.lang="en";S.guideMute=true;S.introSeen=true;S.guideCfg.intro="off";S.reduce=${!!(o && o.reduce)};S.dark=${!!(o && o.dark)};S.cardCfg.mode="${o && o.dark ? 'dark' : 'light'}";
-    S.guideCfg.voice="device";S.guideCfg.panel="dock";S.guideCfg.dockStart="mini";S.guideCfg.speed=1;S.vis.speed=null;S.guideCfg.music=false;S.vis.music=null;S.ui.rowDemo=false;S.guideCfg.mascot=true;
-    S.guideCfg.tourWords="tele";S.guideCfg.hand="shown";S.guideCfg.inUse=true;S.guideCfg.scroll="natural";S.guideCfg.cue="${MUT ? 'spotlight' : 'bar'}";
-    S.guidance.on=true;S.guidance.kinds.forEach(function(k){k.on=false});G.gd.manual=true;G.gd.demo=false;gdChip(null);DH.log=[];DH.useLog=[];PO.log=[];S.view="card";S.stop="full";renderAll(false);""`;
+    D.card.hints.on=false;LAB.previewBar=false;P.lang="en";P.guideMute=true;P.introSeen=true;D.guide.intro="off";P.reduce=${!!(o && o.reduce)};P.dark=${!!(o && o.dark)};D.card.cardCfg.mode="${o && o.dark ? 'dark' : 'light'}";
+    D.guide.voice="device";D.guide.panel="dock";D.guide.dockStart="mini";D.guide.speed=1;P.vis.speed=null;D.guide.music=false;P.vis.music=null;LAB.rowDemo=false;D.guide.mascot=true;
+    D.guide.tourWords="tele";D.guide.hand="shown";D.guide.inUse=true;D.guide.scroll="natural";D.guide.cue="${MUT ? 'spotlight' : 'bar'}";
+    D.guidance.on=true;D.guidance.kinds.forEach(function(k){k.on=false});G.gd.manual=true;G.gd.demo=false;gdChip(null);DH.log=[];DH.useLog=[];PO.log=[];ui.view="card";ui.stop="full";renderAll(false);""`;
   // the recorder: every frame, the hand's tip and opacity, the ripples, the pill, the scroll, the screen's rectangle, the words' boxes
   await R(`window.T10={on:false,f:[],start:function(){T10.f=[];T10.on=true;var t0=performance.now();(function tick(){if(!T10.on)return;var h=ph.querySelector(".dhand"),rp=ph.querySelector(".dhripple"),c=ph.querySelector(".gscue"),p=ph.getBoundingClientRect(),s=scr.getBoundingClientRect(),
       fl=scr.querySelector("[data-flip]"),words=dhWords().filter(function(w){return w.r-w.l>1});
       T10.f.push({t:Math.round(performance.now()-t0),tip:h&&h.dataset.tip?h.dataset.tip.split(",").map(Number):null,op:h?+getComputedStyle(h).opacity:0,hb:h?(function(){var r=dhRectIn(h);return r})():null,
-        rip:rp?[parseFloat(rp.style.left),parseFloat(rp.style.top)]:null,cue:c&&c.classList.contains("on")?{dir:c.dataset.dir,top:parseFloat(c.style.top)}:null,y:scr.scrollTop,view:S.view,
+        rip:rp?[parseFloat(rp.style.left),parseFloat(rp.style.top)]:null,cue:c&&c.classList.contains("on")?{dir:c.dataset.dir,top:parseFloat(c.style.top)}:null,y:scr.scrollTop,view:ui.view,
         scr:[s.left-p.left,s.top-p.top,s.width,s.height].map(Math.round),flip:fl?fl.classList.contains("on"):null,words:words});requestAnimationFrame(tick)})()},stop:function(){T10.on=false;return T10.f}};
-    window.T10c=[];document.addEventListener("click",function(e){var g=e.target.closest&&e.target.closest('[data-go="story"]');if(g)T10c.push({trusted:e.isTrusted,view:S.view})},true);""`);
+    window.T10c=[];document.addEventListener("click",function(e){var g=e.target.closest&&e.target.closest('[data-go="story"]');if(g)T10c.push({trusted:e.isTrusted,view:ui.view})},true);""`);
   const inter = (a, b) => Math.max(0, Math.min(a.r, b.r) - Math.max(a.l, b.l)) * Math.max(0, Math.min(a.b, b.b) - Math.max(a.t, b.t));
 
   // ---------- [hand] + [opening]: from the flip card (g2) to the story (g3), the tour going on ----------
-  await R(base()); await R('S.guideCfg.inUse=false;startTour({id:"g2"});""'); await W(1500);
+  await R(base()); await R('D.guide.inUse=false;startTour({id:"g2"});""'); await W(1500);
   await R('T10c=[];T10.start();stopSpeech();G.paused=false;next();""');
-  const arrived = await until('S.view==="story"&&!G.trav&&G.i===3', 9000); await W(500);
+  const arrived = await until('ui.view==="story"&&!G.trav&&G.i===3', 9000); await W(500);
   let F = JSON.parse(await R('JSON.stringify(T10.stop())'));
   const log = JSON.parse(await R('JSON.stringify(DH.log)')), po = JSON.parse(await R('JSON.stringify(PO.log)'));
   const tapE = log.find(e => e.tap), glE = log.find(e => e.glide), rpE = log.find(e => e.ripple);
@@ -76,27 +76,27 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // a visitor's own tap on the preview: the same click and the same opening
   await R(base()); await W(900); await R('var e=scr.querySelector(\'[data-ref="b:b_story"]\');scr.scrollTop+=e.getBoundingClientRect().top-scr.getBoundingClientRect().top-90;T10c=[];PO.log=[];""'); await W(400);
   let bx = await p.locator('#ph [data-ref="b:b_story"] img').first().boundingBox(); await p.mouse.click(bx.x + bx.width / 2, bx.y + bx.height / 2); await W(700);
-  const vis = JSON.parse(await R('JSON.stringify([T10c,PO.log,S.view])'));
+  const vis = JSON.parse(await R('JSON.stringify([T10c,PO.log,ui.view])'));
   ok('[opening] ...the same as a visitor\'s real tap on the preview (one click, the same opening from the same preview)', vis[2] === 'story' && vis[0].length === 1 && vis[1].length === 1 && vis[1][0].dir === 'open' && vis[1][0].ref === 'b:b_story' && !vis[1][0].fade, vis);
   // back: the closing into the preview, the card where it was
   await R('scr.scrollTop=200;""'); await W(200); bx = await p.locator('#ph .topbar [data-go="card"]').first().boundingBox(); await p.mouse.click(bx.x + bx.width / 2, bx.y + bx.height / 2); await W(150);
-  const cl = JSON.parse(await R('JSON.stringify([PO.log.slice(-1)[0],!!ph.querySelector(".po-ghost"),S.view])')); await W(700);
+  const cl = JSON.parse(await R('JSON.stringify([PO.log.slice(-1)[0],!!ph.querySelector(".po-ghost"),ui.view])')); await W(700);
   const clAfter = JSON.parse(await R('(function(){var e=scr.querySelector(\'[data-ref="b:b_story"]\');return JSON.stringify([Math.round(e.getBoundingClientRect().top-scr.getBoundingClientRect().top),!!ph.querySelector(".po-ghost")])})()'));
   ok('[opening] back plays the closing: the page shrinks into the preview, the card where the visitor left it (the preview 90 px down, as before)', cl[0] && cl[0].dir === 'close' && cl[1] && cl[2] === 'card' && Math.abs(clAfter[0] - 90) <= 3 && !clAfter[1], { cl, clAfter });
   tsec('hand, opening');
 
   // a visitor's touch removes the hand (and pauses), Resume goes on
-  await R(base()); await R('S.guideCfg.inUse=false;startTour({id:"g2"});""'); await W(1500);
+  await R(base()); await R('D.guide.inUse=false;startTour({id:"g2"});""'); await W(1500);
   await R('stopSpeech();G.paused=false;next();""');
   const seen = await until('!!ph.querySelector(".dhand")&&+getComputedStyle(ph.querySelector(".dhand")).opacity>0.2', 5000);
   bx = await p.locator('#ph').boundingBox(); await p.mouse.move(bx.x + 8, bx.y + 300); await p.mouse.down(); await W(30);
-  const gone = JSON.parse(await R('JSON.stringify([!!ph.querySelector(".dhand"),G.paused,!!G.trav,S.view])')); await p.mouse.up(); await W(300);
-  await R('resumeTour();""'); const on2 = await until('S.view==="story"&&G.i===3&&!G.trav', 8000);
+  const gone = JSON.parse(await R('JSON.stringify([!!ph.querySelector(".dhand"),G.paused,!!G.trav,ui.view])')); await p.mouse.up(); await W(300);
+  await R('resumeTour();""'); const on2 = await until('ui.view==="story"&&G.i===3&&!G.trav', 8000);
   ok('[hand] a visitor\'s real touch on the card removes the hand at once and pauses the tour; Resume goes on to the story', seen && !gone[0] && gone[1] === true && !gone[2] && gone[3] === 'card' && on2, { seen, gone, on2 });
   tsec('touch');
 
   // ---------- [scroll]: the gallery (g8) to the quiz (g9), then back (Previous) ----------
-  await R(base()); await R('S.guideCfg.inUse=false;startTour({id:"g8"});""'); await W(2200);
+  await R(base()); await R('D.guide.inUse=false;startTour({id:"g8"});""'); await W(2200);
   await R('TS.log=[];T10.start();stopSpeech();G.paused=false;next();""'); await until('TS.log.length>3&&!TS.tw', 5000); await W(600);
   F = JSON.parse(await R('JSON.stringify(T10.stop())')); let sl = JSON.parse(await R('JSON.stringify(TS.log)'));
   const scrollCheck = (sl, dir) => { if (sl.length < 4) return { ok: false, n: sl.length }; const y0 = sl[0][1], y1 = sl[sl.length - 1][1], d = y1 - y0, ms = sl[sl.length - 1][0] - sl[0][0]; let mono = true, maxStep = 0;
@@ -128,12 +128,12 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   const gal = JSON.parse(await R('JSON.stringify([Math.max.apply(null,T10x),scr.querySelector(\'[data-ref="b:b_gal"] .el-car\').scrollLeft,DH.useLog[0]])'));
   ok('[blocks] the gallery\'s strip: swiped one picture on and back', gal[2] && gal[2].kind === 'swipe' && gal[0] > gal[2].l0 + 100 && Math.abs(gal[1] - gal[2].l0) <= 2, gal);
   // the 3D model: no point's tour has one; a 3D Model block on the card, the hand's own turn through its drag handler
-  await R(base()); await R('S.card.splice(2,0,{id:"b_3d",kind:"3D Model",grp:"inherit",enter:"inherit",tap:"inherit",orow:"inherit"});renderPhone(false);var e=scr.querySelector(\'[data-ref="b:b_3d"]\');scr.scrollTop+=e.getBoundingClientRect().top-scr.getBoundingClientRect().top-150;""'); await W(400);
+  await R(base()); await R('D.poi.card.splice(2,0,{id:"b_3d",kind:"3D Model",grp:"inherit",enter:"inherit",tap:"inherit",orow:"inherit"});renderPhone(false);var e=scr.querySelector(\'[data-ref="b:b_3d"]\');scr.scrollTop+=e.getBoundingClientRect().top-scr.getBoundingClientRect().top-150;""'); await W(400);
   await R('window.T10x=[];var w=dhUseOf(scr.querySelector(\'[data-ref="b:b_3d"]\'));if(w)dhUse(w,"b:b_3d");(function f(){var e=scr.querySelector("[data-turnt]");if(e)T10x.push(e.style.backgroundPositionX||"50%");if(T10x.length<300&&DH.job)requestAnimationFrame(f)})();""');
   await until('DH.useLog.length&&DH.useLog[0].end', 6000); await W(100);
   const md = JSON.parse(await R('JSON.stringify([T10x.filter(function(v){return v!=="50%"}).length,scr.querySelector("[data-turnt]").style.backgroundPositionX,DH.useLog[0]&&DH.useLog[0].kind])'));
   ok('[blocks] the 3D model: turned a little by its own drag and back (its picture at 50 % again)', md[0] > 3 && parseFloat(md[1]) === 50 && md[2] === 'turn', md);
-  await R('S.card.splice(2,1);renderPhone(false);""');
+  await R('D.poi.card.splice(2,1);renderPhone(false);""');
   // never while the visitor holds a finger on the screen
   await R(base()); bx = await p.locator('#ph').boundingBox(); await p.mouse.move(bx.x + 8, bx.y + 420); await p.mouse.down();
   await R('startTour({id:"g6"});""'); await W(2400); const held = await R('DH.useLog.length'); await p.mouse.up();
@@ -146,8 +146,8 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
       return rects.map(r => { const d = x.getImageData(r[0], r[1], r[2], r[3]).data; let s = 0; for (let i = 0; i < d.length; i += 4) s += 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]; return s / (d.length / 4) }) };
     return [await L(a[0]), await L(a[1])] }, [shots, rects]);
   const focusAt = async (o) => {
-    await R(base(o)); await R(`S.guideCfg.inUse=false;S.guideCfg.cue="${o.cue}";startTour({id:"g1"});""`); await W(2600);
-    const geo = JSON.parse(await R(`(function(){var el=stepEl(S.guideSteps[G.i]),bar=ph.querySelector(".gtold.on"),p=ph.getBoundingClientRect(),q=p.width/ph.offsetWidth,r=fcBarRect(el),t=Math.max(r.top,p.top+cardTopClear()*q),m=ph.querySelector(".mascot"),M=m?m.getBoundingClientRect():null,tl=ph.querySelector(".gtele:not(.tl-out)")||ph.querySelector(".gdock"),TL=tl.getBoundingClientRect(),eb=el.getBoundingClientRect();
+    await R(base(o)); await R(`D.guide.inUse=false;D.guide.cue="${o.cue}";startTour({id:"g1"});""`); await W(2600);
+    const geo = JSON.parse(await R(`(function(){var el=stepEl(D.tour.guideSteps[G.i]),bar=ph.querySelector(".gtold.on"),p=ph.getBoundingClientRect(),q=p.width/ph.offsetWidth,r=fcBarRect(el),t=Math.max(r.top,p.top+cardTopClear()*q),m=ph.querySelector(".mascot"),M=m?m.getBoundingClientRect():null,tl=ph.querySelector(".gtele:not(.tl-out)")||ph.querySelector(".gdock"),TL=tl.getBoundingClientRect(),eb=el.getBoundingClientRect();
       var B=bar?bar.getBoundingClientRect():null;return JSON.stringify({bar:B?[B.left-p.left,B.top-p.top,B.width,B.height]:null,blockL:r.left-p.left,blockT:t-p.top,blockB:r.bottom-p.top,elT:eb.top-p.top,elB:eb.bottom-p.top,mascot:M?[M.left-p.left,M.top-p.top,M.right-p.left,M.bottom-p.top]:null,panelT:TL.top-p.top,
         col:bar?getComputedStyle(bar).backgroundColor:null,paper:getComputedStyle(scr).backgroundColor,anim:bar?bar.getAnimations().length:-1,top:scr.scrollTop,clear:cardTopClear()})})()`));
     const during = (await p.locator('#ph').screenshot()).toString('base64');
@@ -172,22 +172,22 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   tsec('focus');
 
   // ---------- [reduced motion] ----------
-  await R(base({ reduce: true })); await R('S.guideCfg.inUse=false;startTour({id:"g1"});""'); await W(1800);
+  await R(base({ reduce: true })); await R('D.guide.inUse=false;startTour({id:"g1"});""'); await W(1800);
   const rmBar = JSON.parse(await R('(function(){var b=ph.querySelector(".gtold.on");return JSON.stringify(b?[b.getAnimations().length,getComputedStyle(b).animationName]:null)})()'));
   await R('stopSpeech();G.paused=false;next();""'); await W(1500); await R('DH.log=[];PO.log=[];T10.start();stopSpeech();G.paused=false;next();""');
-  const rmGo = await until('S.view==="story"&&G.i===3&&!G.trav', 8000); await W(300); F = JSON.parse(await R('JSON.stringify(T10.stop())'));
+  const rmGo = await until('ui.view==="story"&&G.i===3&&!G.trav', 8000); await W(300); F = JSON.parse(await R('JSON.stringify(T10.stop())'));
   const rl = JSON.parse(await R('JSON.stringify([DH.log,PO.log])'));
   ok('[reduced motion] no glide (no hand drawn on any frame), the ripple and the tap, the story opens with its fade; the bar does not pulse', rmGo && !F.some(f => f.tip) && rl[0].some(e => e.ripple) && !rl[0].some(e => e.glide) && rl[1][0] && rl[1][0].fade && rmBar && rmBar[0] === 0, { rmGo, hand: F.some(f => f.tip), log: rl[0].map(e => Object.keys(e)[0]), po: rl[1], rmBar });
   tsec('reduced motion');
 
   // ---------- [editor] ----------
-  await R(base()); await R('S.tab="guide";S.op={};S.op.gt1=true;S.op.s7focus=true;S.op.s7move=true;S.ui.rowDemo=false;renderEditor();""'); await W(500);
+  await R(base()); await R('ui.tab="guide";ui.op={};ui.op.gt1=true;ui.op.s7focus=true;ui.op.s7move=true;LAB.rowDemo=false;renderEditor();""'); await W(500);
   const rowEl = lab => p.locator('#ed [data-fo="' + (lab === 'Focus' ? 's7focus' : 's7move') + '"] .row', { has: p.locator(`label:text-is("${lab}")`) }).first();
   const pick = async (lab, txt) => { const r = rowEl(lab); await r.scrollIntoViewIfNeeded(); await r.locator('button', { hasText: txt }).first().click(); await W(250); };
   const demo = async lab => { const r = rowEl(lab); await r.scrollIntoViewIfNeeded(); await r.locator('label.rd').first().click(); };
   const E = {};
-  await pick('The visitor\'s hand', 'Off'); E.hand = await R('S.guideCfg.hand');
-  await R('S.guideCfg.inUse=false;startTour({id:"g2"});""'); await W(1200); await R('DH.log=[];T10.start();stopSpeech();G.paused=false;next();""'); E.offGo = await until('S.view==="story"&&G.i===3&&!G.trav', 8000);
+  await pick('The visitor\'s hand', 'Off'); E.hand = await R('D.guide.hand');
+  await R('D.guide.inUse=false;startTour({id:"g2"});""'); await W(1200); await R('DH.log=[];T10.start();stopSpeech();G.paused=false;next();""'); E.offGo = await until('ui.view==="story"&&G.i===3&&!G.trav', 8000);
   F = JSON.parse(await R('JSON.stringify(T10.stop())')); E.offHand = F.some(f => f.tip || f.rip); await R('if(G.on)stopTour();""');
   await pick('The visitor\'s hand', 'Shown'); await demo('The visitor\'s hand'); E.handDemo = await until('!!ph.querySelector(".dhand")', 6000);
   await R('if(G.on)stopTour();""'); await pick('Show blocks in use', 'Off');
@@ -202,19 +202,19 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('[editor] The visitor\'s hand Off: no hand and no ripple, the story still opens; its ▸ plays the hand', E.hand === 'off' && E.offGo && !E.offHand && E.handDemo, E);
   ok('[editor] Show blocks in use Off: no flip by the hand; its ▸ plays the flip', E.useOff === 0 && E.useDemo, { useOff: E.useOff, useDemo: E.useDemo });
   ok('[editor] The scroll Quick: no pill; its ▸ (Natural) plays the scroll with its pill', !E.quickCue && E.natCue, { quick: E.quickCue, nat: E.natCue });
-  ok('[editor] Focus by real clicks: Dim the rest (the spotlight, no bar), Off (neither), The left bar (the bar, no spotlight), each ▸ played', E.dim[0] && !E.dim[1] && !E.off[0] && !E.off[1] && !E.bar[0] && E.bar[1] && /guideCfg.cue\|found/.test(E.bar[2]), { dim: E.dim, off: E.off, bar: E.bar });
+  ok('[editor] Focus by real clicks: Dim the rest (the spotlight, no bar), Off (neither), The left bar (the bar, no spotlight), each ▸ played', E.dim[0] && !E.dim[1] && !E.off[0] && !E.off[1] && !E.bar[0] && E.bar[1] && /D.guide.cue\|found/.test(E.bar[2]), { dim: E.dim, off: E.off, bar: E.bar });
   await R('if(G.on)stopTour();""');
   tsec('editor');
 
   // ---------- [switches] ----------
-  await R('S.tab="card";S.op={};S.ui.accOne=false;renderEditor();""'); await W(400);
+  await R('ui.tab="card";ui.op={};ui.accOne=false;renderEditor();""'); await W(400);
   const sw = JSON.parse(await R('JSON.stringify([!!ed.querySelector(\'[data-set="ui.single"]\'),/Many open/.test(ed.textContent),!!ed.querySelector(\'.accbar [data-set="ui.accOne"]\'),/Open to level/.test(ed.textContent)])'));
   await p.locator('.accbar [data-set="ui.accOne"][data-v="true"]').first().click(); await W(300);
   await p.locator('#ed > details[data-fo="s1"] > summary').first().click(); await W(300);
   await p.locator('#ed > details[data-fo="s2"] > summary').first().click(); await W(300);
-  const one = JSON.parse(await R('JSON.stringify([S.ui.accOne,!!(ed.querySelector(\':scope > details[data-fo="s1"]\')||{}).open,!!(ed.querySelector(\':scope > details[data-fo="s2"]\')||{}).open])'));
+  const one = JSON.parse(await R('JSON.stringify([ui.accOne,!!(ed.querySelector(\':scope > details[data-fo="s1"]\')||{}).open,!!(ed.querySelector(\':scope > details[data-fo="s2"]\')||{}).open])'));
   ok('[switches] the Detail Card tab: the old Foldouts row gone, Open to level kept; One section open at a time (real clicks) closes the open section', !sw[0] && !sw[1] && sw[2] && sw[3] && one[0] === true && !one[1] && one[2], { sw, one });
-  await R('S.ui.accOne=false;S.op={};S.tab="guide";renderEditor();""');
+  await R('ui.accOne=false;ui.op={};ui.tab="guide";renderEditor();""');
   tsec('switches');
 
   ok('No page errors', errs.length === 0, errs.slice(0, 5));

@@ -19,8 +19,8 @@
 //   Languages & Terms' Go to into each tab lands under the pinned header.
 // MUTATE=1: the sections open by level as before, the headers not sticky, the moved Lab wall row back in Ask about the view and the glow
 //   option ignored (Off glows, a new card never glows again): the checks named [collapsed], [sticky], [review], [glow] and [card & global] turn red.
-const { chromium } = require('./pw');
-const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
+const { chromium, labUrl } = require('./pw');
+const url = labUrl('#probe');
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe' });
   const p = await b.newPage({ viewport: { width: 1400, height: 900 } });
@@ -36,7 +36,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
       'GUIDE_PLAN.gt0=[{fo:"s7vtest"}];hsGlowOn=function(){return true};["card.opened","point.opened"].forEach(function(n){var l=extPoint(n),i=l.indexOf(hsNewCard);if(i>=0)l.splice(i,1)});""');
     console.log('MUTATION: the sections open by level, the headers not sticky, the Lab wall row back in Ask about the view, the glow option ignored');
   }
-  await R('S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;S.ui.rowDemo=false;G.gd&&(G.gd.manual=true);""');
+  await R('D.card.hints.on=false;LAB.previewBar=false;P.guideMute=true;P.introSeen=true;LAB.rowDemo=false;G.gd&&(G.gd.manual=true);""');
   const SECS = ['s7mascot', 'gt1', 'gd:g:ontour', 'gt4', 'gt3', 'gt0'];
   const sum = id => `ed.querySelector('[data-fo="${id}"] > summary')`;
   const click = async id => { await p.locator(`[data-fo="${id}"] > summary`).first().click(CT).catch(NC); await W(200); };
@@ -64,17 +64,17 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('[open] ...4 · The mascot speaks up opens beside it (One section open at a time is Off)', JSON.stringify(o2) === JSON.stringify([false, true, false, true, false, false]), o2);
   await R('renderEditor();""'); const o3 = await openState();
   await p.locator('.utab[data-tab="card"]').click(CT).catch(NC); await W(300); await p.locator('.utab[data-tab="guide"]').click(CT).catch(NC); await W(400); const o4 = await openState();
-  ok('[open] ...remembered after a re-render and after a trip to Detail Card and back (S.op)', JSON.stringify(o3) === JSON.stringify(o2) && JSON.stringify(o4) === JSON.stringify(o2), [o3, o4]);
+  ok('[open] ...remembered after a re-render and after a trip to Detail Card and back (ui.op)', JSON.stringify(o3) === JSON.stringify(o2) && JSON.stringify(o4) === JSON.stringify(o2), [o3, o4]);
   await p.locator('.accbar [data-set="ui.accOne"][data-v="true"]').click(CT).catch(NC); await W(300);
   await click('gt3'); const o5 = await openState();
-  ok('[open] One section open at a time On (a real click): opening 5 · Ask the mascot closes the two that were open', JSON.stringify(o5) === JSON.stringify([false, false, false, false, true, false]) && await R('S.op.gt1===false&&S.op.gt4===false&&S.op.gt3===true'), o5);
+  ok('[open] One section open at a time On (a real click): opening 5 · Ask the mascot closes the two that were open', JSON.stringify(o5) === JSON.stringify([false, false, false, false, true, false]) && await R('ui.op.gt1===false&&ui.op.gt4===false&&ui.op.gt3===true'), o5);
   await p.locator('.accbar [data-set="ui.accOne"][data-v="false"]').click(CT).catch(NC); await W(300);
   await click('s7mascot'); await click('gt:voice'); const o6 = await openState();
   ok('[open] ...Off again: 1 · The mascot opens beside it', JSON.stringify(o6) === JSON.stringify([true, false, false, false, true, false]), o6);
   await p.evaluate(() => window.scrollTo(0, 600)); await W(100);
   await p.locator('.accbar [data-acc="collapse"]').click(CT).catch(NC); await W(400);
-  const o7 = await R('[ed.querySelectorAll("details[open]").length,[].filter.call(ed.querySelectorAll("details[data-fo]"),function(d){return S.op[d.dataset.fo]!==false}).length,document.querySelector(".ed").getBoundingClientRect().top>=-1]');
-  ok('[open] Collapse all (a real click, scrolled down): every section and foldout of the tab closed, each kept closed in S.op, the Editor\'s top in view', o7[0] === 0 && o7[1] === 0 && o7[2], o7);
+  const o7 = await R('[ed.querySelectorAll("details[open]").length,[].filter.call(ed.querySelectorAll("details[data-fo]"),function(d){return ui.op[d.dataset.fo]!==false}).length,document.querySelector(".ed").getBoundingClientRect().top>=-1]');
+  ok('[open] Collapse all (a real click, scrolled down): every section and foldout of the tab closed, each kept closed in ui.op, the Editor\'s top in view', o7[0] === 0 && o7[1] === 0 && o7[2], o7);
   tsec('open');
 
   // ---------- [links] a link to a deep place lands under the pinned headers ----------
@@ -84,7 +84,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
     [["gt4","gd:content","gd:g:inview"].every(function(id){return ed.querySelector('[data-fo="'+id+'"]').open}),a.top,a.bottom,c.top,c.bottom,r.top,innerHeight]`);
   ok(`[links] A real click on Ask about the view's link "Said by the guide: … What's in view" opens its path (4 · The mascot speaks up › Content › What's in view) and lands it under the two pinned headers (theirs at ${Math.round(l1[1])}-${Math.round(l1[2])} and ${Math.round(l1[3])}-${Math.round(l1[4])} px, it at ${Math.round(l1[5])} px)`,
     l1[0] && Math.abs(l1[1]) < 0.6 && Math.abs(l1[3] - l1[2]) < 0.6 && l1[5] >= l1[4] - 0.5 && l1[5] < l1[6] / 2, l1);
-  await R('S.op={};S.op.gt1=true;S.op.s7cap=true;renderEditor();""'); await W(100);
+  await R('ui.op={};ui.op.gt1=true;ui.op.s7cap=true;renderEditor();""'); await W(100);
   await p.locator('[data-fo="s7cap"] [data-goto="gt:speech"]').click(CT).catch(NC); await W(400);
   const l2 = await R(`var a=${sum('s7mascot')}.getBoundingClientRect(),c=${sum('gt:speech')}.getBoundingClientRect(),d=ed.querySelector('[data-fo="gt:speech"]');[d.open,a.top,a.bottom,c.top,d.getBoundingClientRect().top]`);
   ok('[links] ...Captions\' Highlight link (round 19, a real click): 1 · The mascot › Speech on screen open, its header just under its section\'s, its start not under either', l2[0] && Math.abs(l2[1]) < 0.6 && l2[3] >= l2[2] - 0.5 && l2[3] - l2[2] < 2 && l2[4] >= l2[2] - 0.5, l2);
@@ -121,7 +121,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   tsec('sticky');
 
   // ---------- [review] the moved and renamed rows, each with its ▸ and ? ----------
-  await R('S.ui.level=9;S.op={};renderEditor();""');
+  await R('ui.level=9;ui.op={};renderEditor();""');
   const rv = await R(`var lab=function(r){return r?r.querySelector("label").textContent:null},has=function(r){return!!r&&!!r.querySelector(".help")&&(r.querySelector("label").classList.contains("rd")||!!r.querySelector("[data-agctx]"))},
       w=rowEl(ed,"gt0","Wall (the Lab)"),h=w&&w.previousElementSibling;
     [!!rowEl(ed,"s7focus","When the visitor scrolls"),!rowEl(ed,"s7resume","When the visitor scrolls"),!!w,!rowEl(ed,"s7cam","Wall (the Lab)"),!!h&&/The Lab's wall/.test(h.textContent),!!rowEl(ed,"gt:know","What is sent"),!rowEl(ed,"gt:know",""),
@@ -130,33 +130,33 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('[review] When the visitor scrolls is in 2 · The tour › Focus (no longer in Continue the tour); Wall (the Lab) in 6 · Preview & Test under "The Lab\'s wall" (no longer in Ask about the view)', rv[0] && rv[1] && rv[2] && rv[3] && rv[4], rv.slice(0, 5));
   ok('[review] ...Knowledge\'s unnamed row is What is sent; Narration is Music, Hero button is Start the guide, with Start the guide glows', rv[5] && rv[6] && rv[7] && rv[8] && rv[9], rv.slice(5, 10));
   ok('[review] ...each with its ? help and its ▸ (a pressable label; What is sent: its own Show button)', rv[10].every(Boolean), rv[10]);
-  const demo = async (fo, label, key) => { if (!await R(`S.ui.level=9;S.op={};renderEditor();var r=rowEl(ed,"${fo}","${label}");if(r)r.scrollIntoView({block:"center"});document.body.dataset.rowdemo="";!!r`)) return false; await W(100);
+  const demo = async (fo, label, key) => { if (!await R(`ui.level=9;ui.op={};renderEditor();var r=rowEl(ed,"${fo}","${label}");if(r)r.scrollIntoView({block:"center"});document.body.dataset.rowdemo="";!!r`)) return false; await W(100);
     await p.locator(`[data-fo="${fo}"] > .inner > .row`).filter({ has: p.locator(`label:text-is("${label}")`) }).locator('label').click(CT).catch(NC);
     return until(`(document.body.dataset.rowdemo||"").indexOf("${key}|found")===0`, 4000); };
-  const dm = [await demo('s7focus', 'When the visitor scrolls', 'guideCfg.onScroll'), await demo('gt0', 'Wall (the Lab)', 'camCfg.wall')];
+  const dm = [await demo('s7focus', 'When the visitor scrolls', 'D.guide.onScroll'), await demo('gt0', 'Wall (the Lab)', 'LAB.wall')];
   ok('[review] ...a real press on each moved row\'s ▸ shows its demo on the phone, the part found and ringed (When the visitor scrolls, Wall (the Lab))', dm.every(Boolean), dm);
-  await R('if(G.on)stopTour();S.camCfg.wall="ribeira";""');
+  await R('if(G.on)stopTour();LAB.wall="ribeira";""');
   tsec('review');
 
   // ---------- [glow] the three choices, by real taps ----------
   const glowOn = () => R('!!ph.querySelector(".hero .gstart.hsglow")');
-  const wallTap = async id => { await R('if(G.on)stopTour();S.view="card";S.stop="closed";G.cam.open=false;renderPhone(false);""'); await W(300);
+  const wallTap = async id => { await R('if(G.on)stopTour();ui.view="card";ui.stop="closed";G.cam.open=false;renderPhone(false);""'); await W(300);
     /* the Ribeira Palace by its marker; the Torreão (no marker on this wall) by its pin in Ask about the view */
     if (id === 'torreao') { await R('G.cam.open=true;camLayer();""'); await p.locator('#ph [data-cpin="torreao"]').first().click(CT).catch(NC); }
     else await p.locator(`#ph [data-marker="${id}"]`).first().click(CT).catch(NC);
     await W(200); };
   const res = {};
   for (const [v, lab] of [['visit', 'Once per visit'], ['card', 'On every new card'], ['off', 'Off']]) {
-    await R('S.tab="guide";S.ui.level=1;S.op={gt1:true,"gt:ways":true,s7hero:true};renderEditor();rowEl(ed,"s7hero","Start the guide glows").scrollIntoView({block:"center"});""'); await W(150);
-    await p.locator(`[data-fo="s7hero"] [data-set="@guideCfg.heroGlow"][data-v="${v}"]`).click(CT).catch(NC); await W(200);
-    await R('if(G.on)stopTour();clearTimeout(G.hs.t);G.hs.glow=false;G.hs.tapped=false;S.reduce=false;setWall("ribeira");pointOpen("painting");""');
-    const r = { set: await R('S.guideCfg.heroGlow') };
+    await R('ui.tab="guide";ui.level=1;ui.op={gt1:true,"gt:ways":true,s7hero:true};renderEditor();rowEl(ed,"s7hero","Start the guide glows").scrollIntoView({block:"center"});""'); await W(150);
+    await p.locator(`[data-fo="s7hero"] [data-set="@D.guide.heroGlow"][data-v="${v}"]`).click(CT).catch(NC); await W(200);
+    await R('if(G.on)stopTour();clearTimeout(G.hs.t);G.hs.glow=false;G.hs.tapped=false;P.reduce=false;setWall("ribeira");pointOpen("painting");""');
+    const r = { set: await R('D.guide.heroGlow') };
     await wallTap('painting');
     r.first = await until('!!ph.querySelector(".hero .gstart.hsglow")', 2600);
     await p.locator('#ph .hero .gstart').click(CT).catch(NC); await W(250);
     r.afterTap = await glowOn(); r.tour = await R('!!G.on');
     await wallTap('torreao'); await W(1800);
-    r.second = await glowOn(); r.secondPoint = await R('S.m.poi');
+    r.second = await glowOn(); r.secondPoint = await R('ui.m.poi');
     await wallTap('painting'); await W(1800); r.third = await glowOn();
     res[v] = r;
   }
@@ -166,16 +166,16 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('[glow] Off: no card glows, ever (2.6 s and 1.8 s after each opens)', !res.off.first && !res.off.second && !res.off.third, res.off);
   const dmo = {};
   for (const v of ['card', 'visit']) {
-    await R(`if(G.on)stopTour();S.guideCfg.heroGlow="${v}";S.tab="guide";S.ui.level=1;S.op={gt1:true,"gt:ways":true,s7hero:true};renderEditor();rowEl(ed,"s7hero","Start the guide glows").scrollIntoView({block:"center"});document.body.dataset.rowdemo="";document.body.dataset.hsdemo="";""`); await W(150);
+    await R(`if(G.on)stopTour();D.guide.heroGlow="${v}";ui.tab="guide";ui.level=1;ui.op={gt1:true,"gt:ways":true,s7hero:true};renderEditor();rowEl(ed,"s7hero","Start the guide glows").scrollIntoView({block:"center"});document.body.dataset.rowdemo="";document.body.dataset.hsdemo="";""`); await W(150);
     await p.locator('[data-fo="s7hero"] .row label:text-is("Start the guide glows")').click(CT).catch(NC);
-    const g1 = await until('!!ph.querySelector(".hero .gstart.hsglow")&&S.m.poi==="painting"', 2400), rg = await until('(document.body.dataset.rowdemo||"").indexOf("guideCfg.heroGlow|found")===0', 2400);
+    const g1 = await until('!!ph.querySelector(".hero .gstart.hsglow")&&ui.m.poi==="painting"', 2400), rg = await until('(document.body.dataset.rowdemo||"").indexOf("D.guide.heroGlow|found")===0', 2400);
     const tp = await until('document.body.dataset.hsdemo==="tapped"&&!ph.querySelector(".hero .gstart.hsglow")', 3500);
-    const sc = await until('document.body.dataset.hsdemo==="second"&&S.m.poi==="torreao"', 3000); await W(1500);
+    const sc = await until('document.body.dataset.hsdemo==="second"&&ui.m.poi==="torreao"', 3000); await W(1500);
     dmo[v] = { glow: g1, ring: rg, tapped: tp, second: sc, glowAgain: await glowOn(), tour: await R('!!G.on') };
   }
   ok('[glow] Its ▸ (a real press) plays its demo: the Ribeira Palace\'s card glowing and ringed, a tap that takes the glow away (no tour), then the Torreão\'s card: glowing again On every new card, not Once per visit',
     dmo.card.glow && dmo.card.ring && dmo.card.tapped && dmo.card.second && dmo.card.glowAgain && !dmo.card.tour && dmo.visit.glow && dmo.visit.tapped && dmo.visit.second && !dmo.visit.glowAgain, dmo);
-  await R('S.guideCfg.heroGlow="visit";if(G.on)stopTour();""');
+  await R('D.guide.heroGlow="visit";if(G.on)stopTour();""');
   tsec('glow');
 
   // ---------- [card & global] round 21 (21.9, the developer): the Detail Card and Global tabs are accordions too ----------
@@ -183,7 +183,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
       body=!!d.querySelector(":scope > .inner > details[data-fo]")||!!d.querySelector(":scope > .inner > .row");return{id:d.dataset.fo,open:d.open,h:r.height,t:t&&t.textContent,sub:!!u&&u.textContent.length>10&&getComputedStyle(u).whiteSpace==="nowrap",n:n&&n.textContent,body:body}})`);
   const ct = {};
   for (const tab of ['card', 'global']) {
-    await R('S.op={};S.ui.level=1;S.tab="guide";renderEditor();scrollTo(0,0);""');
+    await R('ui.op={};ui.level=1;ui.tab="guide";renderEditor();scrollTo(0,0);""');
     await p.locator(`.utab[data-tab="${tab}"]`).click(CT).catch(NC); await W(400);
     const ss = await tabSecs(), bar = await R('[!!ed.querySelector(\':scope > .accbar [data-acc="collapse"]\'),!!ed.querySelector(\':scope > .accbar [data-set="ui.accOne"]\'),ed.querySelectorAll("details[open]").length,ed.classList.contains("acc")]');
     ct[tab] = { ss, bar };
@@ -192,7 +192,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
       { secs: ss.map(s => [s.id, s.open, Math.round(s.h), s.t, s.n]), bar });
   }
   /* Detail Card: a real click opens 5 · Card Controls alone, its foldouts collapsed; its Top bar opened; the wheel: two headers pinned */
-  await R('S.op={};S.ui.level=1;renderEditor();scrollTo(0,0);""'); await p.locator('.utab[data-tab="card"]').click(CT).catch(NC); await W(300);
+  await R('ui.op={};ui.level=1;renderEditor();scrollTo(0,0);""'); await p.locator('.utab[data-tab="card"]').click(CT).catch(NC); await W(300);
   await click('s5'); const co = await R('[[].filter.call(ed.querySelectorAll(":scope > details[data-fo]"),function(d){return d.open}).map(function(d){return d.dataset.fo}),[].filter.call(ed.querySelectorAll(\'[data-fo="s5"] details[data-fo]\'),function(d){return d.open}).length]');
   ok('[card & global] Detail Card: a real click opens 5 · Card Controls alone, its foldouts collapsed', JSON.stringify(co[0]) === '["s5"]' && co[1] === 0, co);
   /* the Navigation Bar's foldout (about 540 px open: a header stays pinned only while its foldout runs on under it) */
@@ -205,13 +205,13 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('[card & global] ...its Navigation Bar opened too (a real click), scrolled by the wheel: 5 · Card Controls pinned at the top (0 px) and the Navigation Bar\'s header just under it (its top = the section header\'s bottom), at every wheel step',
     cst.slice(1).every(s => Math.abs(s[0]) < 0.6 && Math.abs(s[2] - s[1]) < 0.6 && s[4] < s[2] - 1), cst.map(s => s.map(x => Math.round(x * 10) / 10)));
   /* the links into both tabs: Languages & Terms' Go to (real clicks) opens the path and lands under the pinned headers */
-  const land = async (owner, sec) => { await R('S.op={};S.ui.level=1;S.tab="words";renderEditor();scrollTo(0,0);""'); await W(200);
+  const land = async (owner, sec) => { await R('ui.op={};ui.level=1;ui.tab="words";renderEditor();scrollTo(0,0);""'); await W(200);
     await p.locator(`#ed [data-goloc="${owner}"]`).first().click(CT).catch(NC); await W(500);
-    return R(`var t=ed.querySelector('[data-fo="${owner}"]'),a=${sum(sec)}.getBoundingClientRect(),r=t?t.getBoundingClientRect():{top:-1};[S.tab,!!t&&t.open&&ed.querySelector('[data-fo="${sec}"]').open,a.top,a.bottom,r.top,innerHeight]`); };
+    return R(`var t=ed.querySelector('[data-fo="${owner}"]'),a=${sum(sec)}.getBoundingClientRect(),r=t?t.getBoundingClientRect():{top:-1};[ui.tab,!!t&&t.open&&ed.querySelector('[data-fo="${sec}"]').open,a.top,a.bottom,r.top,innerHeight]`); };
   const lc = await land('s5top', 's5'), lg = await land('g:10s', 'g:10');
   ok(`[card & global] Languages & Terms' Go to (real clicks) opens the path in Detail Card (5 · Card Controls › Top bar) and in Global (Select, Filter & Search › its search field), each landing under the pinned header (at ${Math.round(lc[4])} and ${Math.round(lg[4])} px, the headers' bottoms ${Math.round(lc[3])} and ${Math.round(lg[3])} px), in the upper half of the screen`,
     lc[0] === 'card' && lc[1] && lc[4] >= lc[3] - 0.5 && lc[4] < lc[5] / 2 && lg[0] === 'global' && lg[1] && lg[4] >= lg[3] - 0.5 && lg[4] < lg[5] / 2, { card: lc, global: lg });
-  await R('S.op={};S.ui.level=1;S.tab="guide";renderEditor();scrollTo(0,0);""');
+  await R('ui.op={};ui.level=1;ui.tab="guide";renderEditor();scrollTo(0,0);""');
   tsec('card & global');
 
   ok('no page errors', errs.length === 0, errs.slice(0, 5));

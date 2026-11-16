@@ -10,8 +10,8 @@
 // ends it for the visit; the old timers gone; 4. the Editor: the link row in Ask about the view, every new row's demo (the ×10 chip),
 // Why not now? and the Log naming them, the words and their owners; 5. the two new scenes in Ask Azu's console.
 // MUTATE=1 node test9g.js runs it with the breathing room ignored for the remarks: the checks named [breathing] turn red.
-const { chromium } = require('./pw');
-const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
+const { chromium, labUrl } = require('./pw');
+const url = labUrl('#probe');
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
   const p = await b.newPage({ viewport: { width: 1400, height: 900 } });
@@ -22,10 +22,10 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   if (process.env.MUTATE) { await R('var __gc=gdCheck;gdCheck=function(it,items,v,ctx,now){if(it.base==="inview"){var v2=JSON.parse(JSON.stringify(v));v2.visit.lastEnd=null;return __gc(it,items,v2,ctx,now)}return __gc(it,items,v,ctx,now)}'); console.log('MUTATION: the breathing room ignored for the remarks (What\'s in view)'); }
   // the set-up: the Ribeira wall, a first visit whose opening was said 30 s ago, the clock moved by hand; the round's items On
-  const base = 'S.hints.on=false;S.previewBar=false;S.guideMute=true;S.introSeen=true;S.reduce=false;S.dark=false;S.lang="en";S.ui.rowDemo=false;S.guideCfg.gbtn="both";S.guideCfg.mascot=true;S.guideCfg.life="lively";S.guideCfg.azuTap="play";S.m.solemn=false;' +
-    'S.guidance.on=true;S.guidance.breathing=15;S.guidance.perMinute=2;["opening","tapmarker","askview","gbhint","inview","tourof"].forEach(function(id){S.guidance.items[id].on=true});gdGroupById("inview").on=true;G.gd.demo=false;gdChip(null);';
-  const opened = 'var o=gdVM("opening"),oe=gdEM("opening");o.shown=1;o.last=gdNow()-30000;o.end=gdNow()-21000;oe.shown=1;S.gdVisitor.visit.lastEnd=gdNow()-21000;';
-  const fresh = async (extra, manual = true) => { await R(base + 'if(G.on)stopTour();G.cam.open=false;S.settingsOpen=false;G.fab.menu=false;setWall("ribeira");S.view="card";S.stop="closed";renderPhone(false);' + `G.gd.manual=${manual};G.gd.rate=1;` + 'gdStop("test");S.camX=.4;S.camY=.5;S.camZoom=1;renderPhone(false);gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;G.gd.actAt=null;G.gd.onWall=false;' + opened + (extra || '') + (manual ? 'gdAdvance(250)' : '')); await W(150); };
+  const base = 'D.card.hints.on=false;LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;P.lang="en";LAB.rowDemo=false;D.guide.gbtn="both";D.guide.mascot=true;D.guide.life="lively";D.guide.azuTap="play";D.poi.solemn=false;' +
+    'D.guidance.on=true;D.guidance.breathing=15;D.guidance.perMinute=2;["opening","tapmarker","askview","gbhint","inview","tourof"].forEach(function(id){D.guidance.items[id].on=true});gdGroupById("inview").on=true;G.gd.demo=false;gdChip(null);';
+  const opened = 'var o=gdVM("opening"),oe=gdEM("opening");o.shown=1;o.last=gdNow()-30000;o.end=gdNow()-21000;oe.shown=1;P.gdVisitor.visit.lastEnd=gdNow()-21000;';
+  const fresh = async (extra, manual = true) => { await R(base + 'if(G.on)stopTour();G.cam.open=false;ui.settingsOpen=false;G.fab.menu=false;setWall("ribeira");ui.view="card";ui.stop="closed";renderPhone(false);' + `G.gd.manual=${manual};G.gd.rate=1;` + 'gdStop("test");ui.camX=.4;ui.camY=.5;ui.camZoom=1;renderPhone(false);gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;G.gd.actAt=null;G.gd.onWall=false;' + opened + (extra || '') + (manual ? 'gdAdvance(250)' : '')); await W(150); };
   const CR = 'var px=function(c){var m=c.match(/[\\d.]+/g).map(Number);return{r:m[0],g:m[1],b:m[2],a:m.length>3?m[3]:1}},lum=function(c){return[c.r,c.g,c.b].map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce(function(a,v,i){return a+v*[.2126,.7152,.0722][i]},0)},cr=function(a,b){var x=lum(a),y=lum(b);return Math.round((Math.max(x,y)+.05)/(Math.min(x,y)+.05)*100)/100};';
   const look = CR + 'var b=ph.querySelector(".gdbub:not(.gd-out)"),bt=b.querySelector("button"),cs=getComputedStyle(bt),lh=parseFloat(cs.lineHeight),lines=Math.round((bt.offsetHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom))/lh),B=gdPR(b),g=ph.querySelector(".gbtn"),G1=g?gdPR(g):null,nb=document.getElementById("navbar"),N=nb&&gdSeen(nb)?gdPR(nb):null,tg=G.gd.cur&&gdTarget(G.gd.cur.item);' +
     '[lines,cr(px(cs.color),px(getComputedStyle(b).backgroundColor)),gdOverWords(),G1?gdOver(B,G1):0,N?gdOver(B,N):0,Math.round(bt.offsetHeight),bt.textContent,tg?gdOver(B,tg.rect||tg.box):-1]';
@@ -65,9 +65,9 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   ok('...at most 12 a visit, the group together (12 shown: quiet; 11: it shows)', P.cap12[0] === null && /at most 12 What's in view a visit: shown 12/.test(P.cap12[2]) && P.cap11[0] === RP, [P.cap12[2], P.cap11[0]]);
   P.gOff = await pk(ONLY_R + 'items.forEach(function(x){if(x.base==="inview")x.groupOn=false})', N, RP);
   ok('...the group\'s On: Off, none of its remarks', P.gOff[0] === null && /Ribeira Palace in the middle: What's in view is Off/.test(P.gOff[2]), P.gOff[2]);
-  const lines = await R('var d=S.guidance.items.inview,f=function(n,card){return gdLine(d,false,{point:"X",n:n,card:card})},k=d.cardLine;var a=[f(0),f(1),f(2),f(3),f(0,true)];d.cardLine=false;a.push(f(4,true));d.cardLine=k;a.push(TXT("fab_comment_1").replace("{point}","X"),TXT("fab_comment_2").replace("{point}","X"),TXT("fab_comment_3").replace("{point}","X"),TXT("fab_comment_card").replace("{point}","X"));a');
+  const lines = await R('var d=D.guidance.items.inview,f=function(n,card){return gdLine(d,false,{point:"X",n:n,card:card})},k=d.cardLine;var a=[f(0),f(1),f(2),f(3),f(0,true)];d.cardLine=false;a.push(f(4,true));d.cardLine=k;a.push(TXT("fab_comment_1").replace("{point}","X"),TXT("fab_comment_2").replace("{point}","X"),TXT("fab_comment_3").replace("{point}","X"),TXT("fab_comment_card").replace("{point}","X"));a');
   ok('...its lines: the 3 in turn (never the same twice in a row), a point with a card its own; Lines per point = the 3 for every point', lines[0] === lines[6] && lines[1] === lines[7] && lines[2] === lines[8] && lines[3] === lines[6] && lines[4] === lines[9] && lines[5] === lines[7], lines);
-  const spk = await R('var it=gdItems().filter(function(x){return x.id==="inview:painting"})[0],h=S.gdVisitor.visit.heard,a=gdSpoken(it);S.gdVisitor.visit.heard=true;var b2=gdSpoken(it);S.gdVisitor.visit.heard=h;[a,b2]');
+  const spk = await R('var it=gdItems().filter(function(x){return x.id==="inview:painting"})[0],h=P.gdVisitor.visit.heard,a=gdSpoken(it);P.gdVisitor.visit.heard=true;var b2=gdSpoken(it);P.gdVisitor.visit.heard=h;[a,b2]');
   ok('...spoken as the kind (Content): a bubble until the guide has been heard this visit, then spoken', spk[0] === false && spk[1] === true, spk);
 
   // The ✦
@@ -98,87 +98,87 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   P.yield = await pk('off("askview","gbhint","tourof")', N, RP);
   ok('The yield: Tap a marker and the remark both due as the point settles: the tip shows (it scores more), the remark says why it waits', P.yield[0] === 'tapmarker' && /Ribeira Palace in the middle: it could show, but the Tap a marker goes first \(score \d+\.\d+ against \d+\.\d+\)/.test(P.yield[2]), P.yield);
   // on the page, the visit's clock moved by hand: the tip first, the remark only after the breathing room from the tip's end, and the next tip after it
-  await fresh('S.guidance.items.askview.on=false;S.guidance.items.gbhint.on=false;S.guidance.items.tourof.on=false;');
-  const yl = await R('var r={},t0=gdNow();while(gdNow()-t0<120000){gdAdvance(250);var c=G.gd.cur;if(!c)continue;if(r.tip==null&&c.item.id==="tapmarker"){r.tip=c.at;r.during=gdWhyNot(gdItems(),S.gdVisitor,gdContext(),gdNow(),"inview:painting")}' +
-    'if(r.tip!=null&&r.rem==null&&c.item.base==="inview"){r.rem=c.at;r.tipEnd=gdVisitOf(S.gdVisitor,"tapmarker").end;r.id=c.item.id}if(r.rem!=null&&c.item.id==="tapmarker"&&c.at>r.rem){r.next=c.at;r.remEnd=gdVisitOf(S.gdVisitor,r.id).end;break}}' +
+  await fresh('D.guidance.items.askview.on=false;D.guidance.items.gbhint.on=false;D.guidance.items.tourof.on=false;');
+  const yl = await R('var r={},t0=gdNow();while(gdNow()-t0<120000){gdAdvance(250);var c=G.gd.cur;if(!c)continue;if(r.tip==null&&c.item.id==="tapmarker"){r.tip=c.at;r.during=gdWhyNot(gdItems(),P.gdVisitor,gdContext(),gdNow(),"inview:painting")}' +
+    'if(r.tip!=null&&r.rem==null&&c.item.base==="inview"){r.rem=c.at;r.tipEnd=gdVisitOf(P.gdVisitor,"tapmarker").end;r.id=c.item.id}if(r.rem!=null&&c.item.id==="tapmarker"&&c.at>r.rem){r.next=c.at;r.remEnd=gdVisitOf(P.gdVisitor,r.id).end;break}}' +
     '[r.tip!=null,r.during,r.rem!=null&&r.tipEnd!=null?Math.round((r.rem-r.tipEnd)/1000):null,r.next!=null&&r.remEnd!=null?Math.round((r.next-r.remEnd)/1000):null,r.id]');
   ok('[breathing] On the page: the tip first, the remark waits while it shows (one at a time) and comes 15 s or more after the tip ended; the next tip 15 s or more after the remark', yl[0] && /one at a time: the Tap a marker is showing/.test(yl[1]) && yl[2] >= 15 && yl[3] >= 15 && yl[4] === RP, yl);
 
   // ---------- 3. on the page: the remark's look and taps; the pokes and the idle; Tap on Azu; the ✦ menu; the old timers gone ----------
-  const toRem = 'var e=gdEM("tapmarker");e.done=true;e.by="card";S.guidance.items.askview.on=false;S.guidance.items.gbhint.on=false;';
+  const toRem = 'var e=gdEM("tapmarker");e.done=true;e.by="card";D.guidance.items.askview.on=false;D.guidance.items.gbhint.on=false;';
   for (const dark of [false, true]) {
-    await fresh(`S.dark=${dark};renderAll(true);` + toRem); await runTo('G.gd.cur.item.base==="inview"', 40000); await W(400);
+    await fresh(`P.dark=${dark};renderAll(true);` + toRem); await runTo('G.gd.cur.item.base==="inview"', 40000); await W(400);
     const l = await R(look);
     ok(`The remark (${dark ? 'dark' : 'light'}): beside Ribeira Palace, its card's own line, 2 lines at most, 7:1, 0 px over words, not over its point, the ✦ or the bar, 44 px, a › to say a tap does more`, l[0] <= 2 && l[1] >= 7 && l[2] === 0 && l[3] === 0 && l[4] === 0 && l[5] >= 44 && l[7] === 0 && l[6] === "In the middle: the Ribeira Palace. Tap and I'll show you around." && await R('ph.querySelector(".gdbub").classList.contains("gd-more")&&/›/.test(getComputedStyle(ph.querySelector(".gdbub button"),"::after").content)'), l);
   }
-  await R('S.dark=false;S.lang="pt";renderAll(true)'); await W(250); const lpt = await R(look);
-  ok('...in Portuguese: its words from Languages & Terms, 2 lines at most', lpt[6] === await R('nameIn(S.tx.fab_comment_card.pt,"{point}","O Paço da Ribeira","pt")') && lpt[0] <= 2 && lpt[2] === 0, lpt);
-  await R('S.lang="en";renderAll(true)'); await W(150);
+  await R('P.dark=false;P.lang="pt";renderAll(true)'); await W(250); const lpt = await R(look);
+  ok('...in Portuguese: its words from Languages & Terms, 2 lines at most', lpt[6] === await R('nameIn(D.words.tx.fab_comment_card.pt,"{point}","O Paço da Ribeira","pt")') && lpt[0] <= 2 && lpt[2] === 0, lpt);
+  await R('P.lang="en";renderAll(true)'); await W(150);
   await p.locator('#ph .gdbub button[data-gdbub]').click(); await W(400);
-  const tapC = await R('[G.on,S.stop,gdEverOf(S.gdVisitor,"inview:painting").acted,!G.gd.cur]');
+  const tapC = await R('[G.on,ui.stop,gdEverOf(P.gdVisitor,"inview:painting").acted,!G.gd.cur]');
   ok('...a tap on it: a point with a card starts its tour (at Full), acted', tapC[0] === true && tapC[1] === 'full' && tapC[2] === 1 && tapC[3], tapC);
   await R('stopTour()');
   // a point without a card on the Belém wall: the 3 lines in turn; a tap opens Ask about the view about it
-  await fresh(toRem + 'setWall("belem");S.camX=.35;S.camY=.45;S.camZoom=1.3;S.stop="closed";renderPhone(false);G.gd.movedAt=gdNow();');
+  await fresh(toRem + 'setWall("belem");ui.camX=.35;ui.camY=.45;ui.camZoom=1.3;ui.stop="closed";renderPhone(false);G.gd.movedAt=gdNow();');
   await runTo('G.gd.cur.item.base==="inview"', 40000); await W(300);
   const pl = await R('var c=G.gd.cur;[c.item.id,c.text,gdCentral().name,nameIn(TXT("fab_comment_1"),"{point}",gdCentral().name)]');
   await p.locator('#ph .gdbub button[data-gdbub]').click(); await W(400);
-  const tapP2 = await R(`[G.cam.open,!!ph.querySelector(".camask.open"),ph.querySelectorAll(".cpin.lit").length,gdEverOf(S.gdVisitor,"${pl[0]}").acted,S.gdVisitor.used.view!=null]`);
+  const tapP2 = await R(`[G.cam.open,!!ph.querySelector(".camask.open"),ph.querySelectorAll(".cpin.lit").length,gdEverOf(P.gdVisitor,"${pl[0]}").acted,P.gdVisitor.used.view!=null]`);
   ok('...on the Belém wall, a point with no card: the first of the 3 lines; a tap opens Ask about the view about it, the point lit, acted', pl[1] === pl[3] && tapP2[0] && tapP2[1] && tapP2[2] >= 1 && tapP2[3] === 1 && tapP2[4], [pl, tapP2]);
   await R('stopSpeech();G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};setWall("ribeira");renderPhone(false)');
   // spoken once the guide has been heard this visit, the word being said lit
-  await fresh(toRem + 'S.gdVisitor.visit.heard=true;'); await runTo('G.gd.cur.item.base==="inview"', 40000);
+  await fresh(toRem + 'P.gdVisitor.visit.heard=true;'); await runTo('G.gd.cur.item.base==="inview"', 40000);
   const sp = await R('var c=G.gd.cur;[c.spoken,!!(G.timer||G.utter),ph.querySelectorAll(".gdbub .gdw").length>5,G.gd.log.filter(function(l){return l.what==="shown"}).slice(-1)[0].why]');
   const lit = await until('!!ph.querySelector(".gdbub .gdw.hl-on")', 3000); // round 21: the one highlighter's class
   ok('...once the guide has been heard this visit: spoken (the one order of voices), the word being said lit', sp[0] === true && sp[1] && sp[2] && /· spoken$/.test(sp[3]) && lit, [sp, lit]);
   await R('gdStop("test");stopSpeech()');
 
   // the pokes: real clicks on Azu beside the ✦ (the clock at ×1); The ✦ waits for the finger and for Azu's joke, then shows
-  await fresh(toRem.replace('S.guidance.items.gbhint.on=false;', '') + 'gdGroupById("inview").on=false;G.pokes=0;', false);
+  await fresh(toRem.replace('D.guidance.items.gbhint.on=false;', '') + 'gdGroupById("inview").on=false;G.pokes=0;', false);
   await R('G.taps=[]'); await pokeAzu(3);
-  const p3 = await R('[S.gdVisitor.visit.pokes,gdVisitOf(S.gdVisitor,"gbhint").shown]');
+  const p3 = await R('[P.gdVisitor.visit.pokes,gdVisitOf(P.gdVisitor,"gbhint").shown]');
   await pokeAzu(1);
   const got = await until('gdIs("gbhint")', 8000); await W(400);
-  const st = await R(look); const arm = await R('[ph.querySelector(".azfab").classList.contains("point-gb"),G.gd.cur&&G.gd.cur.why,S.gdVisitor.visit.pokes]');
+  const st = await R(look); const arm = await R('[ph.querySelector(".azfab").classList.contains("point-gb"),G.gd.cur&&G.gd.cur.why,P.gdVisitor.visit.pokes]');
   ok('The ✦ after 4 pokes (real clicks on Azu): not after 3; after the 4th, Azu lifts its arm to the ✦ and says it beside it: 7:1, 0 px over the ✦, words or bar, 44 px', p3[0] === 3 && p3[1] === 0 && got && arm[0] && /4 pokes on the mascot/.test(arm[1]) && st[6] === 'Need anything? Tap ✦.' && st[1] >= 7 && st[2] === 0 && st[3] === 0 && st[4] === 0 && st[5] >= 44, [p3, got, arm, st]);
   await until('!G.gd.cur', 9000);
   await pokeAzu(4);
   const again = await until('gdIs("gbhint")', 2000);
-  ok('...once a visit: four more pokes, not again', !again && await R('/The ✦: shown once this visit/.test(gdWhyNot(gdItems(),S.gdVisitor,Object.assign(gdContext(),{touchAt:null,remark:null,showing:null}),gdNow(),"gbhint"))'), again);
+  ok('...once a visit: four more pokes, not again', !again && await R('/The ✦: shown once this visit/.test(gdWhyNot(gdItems(),P.gdVisitor,Object.assign(gdContext(),{touchAt:null,remark:null,showing:null}),gdNow(),"gbhint"))'), again);
   // the idle: the visit's clock moved by hand, no touch and the phone still
-  await fresh(toRem.replace('S.guidance.items.gbhint.on=false;', '') + 'gdGroupById("inview").on=false;G.gd.actAt=gdNow();');
+  await fresh(toRem.replace('D.guidance.items.gbhint.on=false;', '') + 'gdGroupById("inview").on=false;G.gd.actAt=gdNow();');
   const id1 = await R('gdAdvance(23500);[!!(G.gd.cur&&G.gd.cur.item.id==="gbhint")]');
   const id2 = await R('gdAdvance(1750);[!!(G.gd.cur&&G.gd.cur.item.id==="gbhint"),G.gd.cur&&G.gd.cur.why]');
   ok('...or after 25 s idle: nothing at 23.5 s, The ✦ at 25 s (the visit\'s clock)', !id1[0] && id2[0] && /idle 25 s/.test(id2[1]), [id1, id2]);
-  await fresh(toRem.replace('S.guidance.items.gbhint.on=false;', '') + 'gdGroupById("inview").on=false;G.gd.actAt=gdNow();');
+  await fresh(toRem.replace('D.guidance.items.gbhint.on=false;', '') + 'gdGroupById("inview").on=false;G.gd.actAt=gdNow();');
   const id3 = await R('gdAdvance(20000);ph.dispatchEvent(new PointerEvent("pointerdown",{bubbles:true}));ph.dispatchEvent(new PointerEvent("pointerup",{bubbles:true}));gdAdvance(15000);var a=!!(G.gd.cur&&G.gd.cur.item.id==="gbhint");emit("phone.moved");gdAdvance(15000);var b2=!!(G.gd.cur&&G.gd.cur.item.id==="gbhint");gdAdvance(11000);[a,b2,!!(G.gd.cur&&G.gd.cur.item.id==="gbhint")]');
   ok('...a touch or the phone moving starts the idle again (20 s, a touch, 15 s: no; moved, 15 s: no; 26 s still: yes)', !id3[0] && !id3[1] && id3[2], id3);
   // Tap on Azu = Points to the ✦: at once, a pull (no memory), even over a tip showing (one at a time: the tip gives way)
-  await fresh(toRem.replace('S.guidance.items.gbhint.on=false;', '') + 'gdGroupById("inview").on=false;S.guideCfg.azuTap="point";', false);
+  await fresh(toRem.replace('D.guidance.items.gbhint.on=false;', '') + 'gdGroupById("inview").on=false;D.guide.azuTap="point";', false);
   await R('gdStart(gdItems().filter(function(x){return x.id==="askview"})[0],"test")'); await W(200);
   await p.locator('#ph .azfab').click(); await W(300);
-  const pull = await R('var c=G.gd.cur;[c&&c.item.id,c&&c.pull,(ph.querySelector(".gdbub:not(.gd-out) button")||{}).textContent,ph.querySelector(".azfab").classList.contains("point-gb"),gdVisitOf(S.gdVisitor,"gbhint").shown,G.gd.log.filter(function(l){return l.what==="ended"}).slice(-1)[0].why,S.gdVisitor.visit.pokes]');
+  const pull = await R('var c=G.gd.cur;[c&&c.item.id,c&&c.pull,(ph.querySelector(".gdbub:not(.gd-out) button")||{}).textContent,ph.querySelector(".azfab").classList.contains("point-gb"),gdVisitOf(P.gdVisitor,"gbhint").shown,G.gd.log.filter(function(l){return l.what==="ended"}).slice(-1)[0].why,P.gdVisitor.visit.pokes]');
   ok('Tap on Azu = Points to the ✦: The ✦ at once (a pull: no memory, no poke), Azu pointing; the tip that was showing gives way (one at a time)', pull[0] === 'gbhint' && pull[1] === true && pull[2] === 'Need anything? Tap ✦.' && pull[3] && pull[4] === 0 && /Ask about the view: the visitor asked for The ✦/.test(pull[5]) && pull[6] === 0, pull);
-  await R('gdStop("test");S.guideCfg.azuTap="play"');
+  await R('gdStop("test");D.guide.azuTap="play"');
   // the ✦ menu ends it for the visit (and for good): a click on the ✦ while it shows; a tap on its bubble opens the menu
-  await fresh(toRem.replace('S.guidance.items.gbhint.on=false;', '') + 'gdGroupById("inview").on=false;S.gdVisitor.visit.pokes=4;');
+  await fresh(toRem.replace('D.guidance.items.gbhint.on=false;', '') + 'gdGroupById("inview").on=false;P.gdVisitor.visit.pokes=4;');
   await runTo('G.gd.cur.item.id==="gbhint"', 5000); await W(200);
   await p.locator('#ph .gbtn').click(); await W(250);
-  const mn = await R('[!!ph.querySelector(".gbmenu"),!G.gd.cur,gdVM("gbhint").how,gdEverOf(S.gdVisitor,"gbhint").done,gdEverOf(S.gdVisitor,"gbhint").by]');
-  await R('G.fab.menu=false;fabLayer();gdNewVisit();S.gdVisitor.visit.pokes=4;gdAdvance(30000)');
-  const mn2 = await R('[!!(G.gd.cur&&G.gd.cur.item.id==="gbhint"),gdWhyNot(gdItems(),S.gdVisitor,Object.assign(gdContext(),{showing:null}),gdNow(),"gbhint")]');
+  const mn = await R('[!!ph.querySelector(".gbmenu"),!G.gd.cur,gdVM("gbhint").how,gdEverOf(P.gdVisitor,"gbhint").done,gdEverOf(P.gdVisitor,"gbhint").by]');
+  await R('G.fab.menu=false;fabLayer();gdNewVisit();P.gdVisitor.visit.pokes=4;gdAdvance(30000)');
+  const mn2 = await R('[!!(G.gd.cur&&G.gd.cur.item.id==="gbhint"),gdWhyNot(gdItems(),P.gdVisitor,Object.assign(gdContext(),{showing:null}),gdNow(),"gbhint")]');
   ok('The ✦ menu opened ends it: the tip ends acted, done for good (not in the next visit either)', mn[0] && mn[1] && mn[2] === 'acted' && mn[3] && mn[4] === 'menu' && !mn2[0] && /done for good \(the visitor opened the ✦ menu\)/.test(mn2[1]), [mn, mn2]);
-  await fresh(toRem.replace('S.guidance.items.gbhint.on=false;', '') + 'gdGroupById("inview").on=false;S.gdVisitor.visit.pokes=4;');
+  await fresh(toRem.replace('D.guidance.items.gbhint.on=false;', '') + 'gdGroupById("inview").on=false;P.gdVisitor.visit.pokes=4;');
   await runTo('G.gd.cur.item.id==="gbhint"', 5000); await W(200);
   await p.locator('#ph .gdbub button[data-gdbub]').click(); await W(250);
-  const tb = await R('[!!ph.querySelector(".gbmenu"),gdEverOf(S.gdVisitor,"gbhint").acted,gdEverOf(S.gdVisitor,"gbhint").done]');
+  const tb = await R('[!!ph.querySelector(".gbmenu"),gdEverOf(P.gdVisitor,"gbhint").acted,gdEverOf(P.gdVisitor,"gbhint").done]');
   ok('...a tap on its bubble opens the ✦ menu: acted, and done', tb[0] && tb[1] === 1 && tb[2], tb);
   await R('G.fab.menu=false;fabLayer()');
-  const gone = await R('[typeof gbHint,typeof showFabBub,G.gb.hinted===undefined&&G.gb.lastAct===undefined,Object.keys(G.fab).join(),S.camCfg.comments===undefined&&S.camCfg.every===undefined,typeof firstAnswer==="function"?extPoint("fabRemark.quiet").length:0,document.querySelectorAll(".azfabbub").length]');
+  const gone = await R('[typeof gbHint,typeof showFabBub,G.gb.hinted===undefined&&G.gb.lastAct===undefined,Object.keys(G.fab).join(),D.wall.camCfg.comments===undefined&&D.wall.camCfg.every===undefined,typeof firstAnswer==="function"?extPoint("fabRemark.quiet").length:0,document.querySelectorAll(".azfabbub").length]');
   ok('The old timers are gone: no gbHint, no remark bubble or its 400 ms timer and G.fab counters, no G.gb.hinted, no camCfg.comments / every, no fabRemark.quiet', gone[0] === 'undefined' && gone[1] === 'undefined' && gone[2] && gone[3] === 'menu' && gone[4] && gone[5] === 0 && gone[6] === 0, gone);
 
   // ---------- 4. the Editor: the link row, the new rows' demos, Why not now? and the Log, the words ----------
-  await fresh(); await R('S.tab="guide";S.ui.level=1;S.op={gt3:true,s7ask:true,s7cam:true};renderEditor()'); await W(200);
+  await fresh(); await R('ui.tab="guide";ui.level=1;ui.op={gt3:true,s7ask:true,s7cam:true};renderEditor()'); await W(200);
   const gp = await R('gdGroupPath("inview")');
   const lr = await R(`var r=rowEl(ed,"s7cam","The mascot comments");[!!r,!!r&&!!r.querySelector('[data-set="@${gp}on"]'),!!r&&/Said by the guide: Guide › The mascot speaks up › Content › What's in view/.test((r.querySelector("[data-goto]")||{}).textContent||""),!rowEl(ed,"s7cam","Between comments")]`);
   await p.locator(`[data-fo="s7cam"] [data-set="@${gp}on"][data-v="false"]`).click(); await W(150);
@@ -186,16 +186,16 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await p.locator(`[data-fo="s7cam"] [data-set="@${gp}on"][data-v="true"]`).click(); await W(150);
   const on1 = await R('gdGroupById("inview").on');
   await p.locator('[data-fo="s7cam"] [data-goto="gd:g:inview"]').click(); await W(400);
-  const went = await R('var g=ed.querySelector(\'[data-fo="gd:g:inview"]\');[S.tab,!!g&&g.open,!!g&&g.getBoundingClientRect().top<window.innerHeight&&g.getBoundingClientRect().bottom>0]');
+  const went = await R('var g=ed.querySelector(\'[data-fo="gd:g:inview"]\');[ui.tab,!!g&&g.open,!!g&&g.getBoundingClientRect().top<window.innerHeight&&g.getBoundingClientRect().bottom>0]');
   ok('Ask Azu › Ask about the view › Azu comments: one link row; its On / Off is the group\'s On; its button opens Guide › 4 · Azu speaks up › Content › What\'s in view (Between comments is the group\'s Gap now)', lr.every(Boolean) && off1 === false && on1 === true && went[0] === 'guide' && went[1] && went[2], [lr, off1, on1, went]);
-  await R(base + 'G.gd.manual=false;G.gd.rate=1;gdResetVisitor();S.tab="guide";S.ui.level=9;S.op={};renderEditor()');
-  const defs = await R('var g=gdGroupById("inview"),d=S.guidance.items.inview,h=S.guidance.items.gbhint;[[g.on,g.cap,g.gap,g.weight,g.items.join()],[d.kind,d.group,d.shows,d.stillFor,d.cardLine,d.tap,d.importance,d.says.join(),d.saysCard],[h.kind,h.group,h.shows,h.pokes,h.idleFor,h.lively,h.notSolemn,h.doneWhen,h.says,h.screen],gdGroupById("wall").items.join(),S.guidance.kinds.map(function(k){return k.groups.filter(function(x){return x.id!=="card"&&x.id!=="howto"&&x.id!=="pages"&&x.id!=="guide"}).map(function(x){return x.id+":"+x.on+":"+x.cap+":"+x.gap}).join()}).join("|")]');
+  await R(base + 'G.gd.manual=false;G.gd.rate=1;gdResetVisitor();ui.tab="guide";ui.level=9;ui.op={};renderEditor()');
+  const defs = await R('var g=gdGroupById("inview"),d=D.guidance.items.inview,h=D.guidance.items.gbhint;[[g.on,g.cap,g.gap,g.weight,g.items.join()],[d.kind,d.group,d.shows,d.stillFor,d.cardLine,d.tap,d.importance,d.says.join(),d.saysCard],[h.kind,h.group,h.shows,h.pokes,h.idleFor,h.lively,h.notSolemn,h.doneWhen,h.says,h.screen],gdGroupById("wall").items.join(),D.guidance.kinds.map(function(k){return k.groups.filter(function(x){return x.id!=="card"&&x.id!=="howto"&&x.id!=="pages"&&x.id!=="guide"}).map(function(x){return x.id+":"+x.on+":"+x.cap+":"+x.gap}).join()}).join("|")]');
   ok('The new rows\' defaults: What\'s in view On, at most 12 a visit, gap 7 s; {point} in the middle once a visit for each point, still 1.2 s, a card its own line; The ✦ once a visit, 4 pokes or 25 s idle, Lively only, never Solemn, done when the ✦ menu opens; every other group On with no cap or gap of its own (round 7: Fun; round 12: On the tour where Moments were, its own rhythm and no cap or gap)',
     JSON.stringify(defs) === JSON.stringify([[true, 12, 7, 1, 'inview'], ['content', 'inview', 'visit', 1.2, true, 'remark', 2, 'fab_comment_1,fab_comment_2,fab_comment_3', 'fab_comment_card'], ['app', 'wall', 'visit', 4, 25, true, true, 'menu', 'gb_hint', 'any'], 'askview,gbhint', 'start:true:0:0,wall:true:0:0|inview:true:12:7,tours:true:0:0|ontour:true:0:0,play:true:0:0']), defs);
-  const newRows = await R('var o=[];ed.querySelectorAll(\'[data-fo="gt4"] .row,[data-fo="gd:g:ontour"] .row\').forEach(function(r){var k=rowKey(r);if(k&&o.indexOf(k)<0&&k.indexOf(gdGroupPath("card"))!==0&&k.indexOf(gdGroupPath("howto"))!==0&&k.indexOf(gdGroupPath("pages"))!==0&&/^guidance\\.(kinds\\.\\d+\\.groups\\.\\d+\\.(on|cap|gap)|items\\.(inview|gbhint)\\.)/.test(k))o.push(k)});o');
-  ok(`every new row has its demo (${newRows.length} rows: the 4 groups' On, At most a visit and Gap; {point} in the middle's and The ✦'s, Lines per point, After pokes and After idle among them; round 6's full item form gave each item 32 rows; round 7 adds Fun's 2 groups' 6 and The ✦'s Or a pause late; round 9 The ✦'s In Things to try; round 12: On the tour has no At most a visit or Gap rows of a group, its own rhythm instead)`, newRows.length === 82 && newRows.indexOf('guidance.items.inview.cardLine') >= 0 && newRows.indexOf('guidance.items.gbhint.pokes') >= 0 && newRows.indexOf('guidance.items.gbhint.idleFor') >= 0 && (await R(`${JSON.stringify(newRows)}.filter(function(k){return!rowDemoOf(k)})`)).length === 0, newRows.length);
+  const newRows = await R('var o=[];ed.querySelectorAll(\'[data-fo="gt4"] .row,[data-fo="gd:g:ontour"] .row\').forEach(function(r){var k=rowKey(r);if(k&&o.indexOf(k)<0&&k.indexOf(gdGroupPath("card"))!==0&&k.indexOf(gdGroupPath("howto"))!==0&&k.indexOf(gdGroupPath("pages"))!==0&&/^D\\.guidance\\.(kinds\\.\\d+\\.groups\\.\\d+\\.(on|cap|gap)|items\\.(inview|gbhint)\\.)/.test(k))o.push(k)});o');
+  ok(`every new row has its demo (${newRows.length} rows: the 4 groups' On, At most a visit and Gap; {point} in the middle's and The ✦'s, Lines per point, After pokes and After idle among them; round 6's full item form gave each item 32 rows; round 7 adds Fun's 2 groups' 6 and The ✦'s Or a pause late; round 9 The ✦'s In Things to try; round 12: On the tour has no At most a visit or Gap rows of a group, its own rhythm instead)`, newRows.length === 82 && newRows.indexOf('D.guidance.items.inview.cardLine') >= 0 && newRows.indexOf('D.guidance.items.gbhint.pokes') >= 0 && newRows.indexOf('D.guidance.items.gbhint.idleFor') >= 0 && (await R(`${JSON.stringify(newRows)}.filter(function(k){return!rowDemoOf(k)})`)).length === 0, newRows.length);
   const seen = {}, missing = [];
-  const CHIP_RE = { [gp + 'gap']: /×10 · What's in view's gap: \d+ s/, 'guidance.items.gbhint.pokes': /A poke on the mascot: 4 of 4/, 'guidance.items.gbhint.idleFor': /×10 · Idle: no touch, the phone still: \d+ s/, 'guidance.items.inview.cardLine': /Lines per point: a point with a card says its own line/, [gp + 'cap']: /What's in view: at most 12 a visit/ };
+  const CHIP_RE = { [gp + 'gap']: /×10 · What's in view's gap: \d+ s/, 'D.guidance.items.gbhint.pokes': /A poke on the mascot: 4 of 4/, 'D.guidance.items.gbhint.idleFor': /×10 · Idle: no touch, the phone still: \d+ s/, 'D.guidance.items.inview.cardLine': /Lines per point: a point with a card says its own line/, [gp + 'cap']: /What's in view: at most 12 a visit/ };
   for (const k of newRows) {
     await R('document.body.dataset.rowdemo="";window.__chips=[];clearInterval(window.__chI);window.__chI=setInterval(function(){var c=ph.querySelector(".gdchip");if(c&&window.__chips.indexOf(c.textContent)<0)window.__chips.push(c.textContent)},50)');
     const lb = await R(`var c=ed.querySelector('[data-fo="gt4"] .row [data-set="@${k}"],[data-fo="gt4"] .row [data-num="@${k}"],[data-fo="gd:g:ontour"] .row [data-set="@${k}"]'),l=c&&c.closest(".row").querySelector("label.rd");if(l){l.scrollIntoView({block:"center"});var r=l.getBoundingClientRect();[r.left+12,r.top+r.height/2]}else null`);
@@ -208,22 +208,22 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('clearInterval(window.__chI)');
   ok('...a press on each new row shows its demo on the phone: the tip (or its chip) ringed', missing.length === 0, { missing, shown: newRows.length - missing.length });
   ok('...the group\'s gap on the ×10 clock with its countdown chip; the cap; Lines per point; The ✦\'s pokes (Azu poked, then the tip) and idle (the countdown)', Object.keys(CHIP_RE).every(k => (seen[k] || []).some(c => CHIP_RE[k].test(c))), Object.keys(CHIP_RE).map(k => [k, seen[k]]));
-  const rb = await R('[gdReadBack(S.guidance.items.inview),gdReadBack(S.guidance.items.gbhint),ed.querySelector(\'[data-fo="gd:i:inview"] .gdpts\').textContent]');
+  const rb = await R('[gdReadBack(D.guidance.items.inview),gdReadBack(D.guidance.items.gbhint),ed.querySelector(\'[data-fo="gd:i:inview"] .gdpts\').textContent]');
   ok('...the read-backs in words: once a visit for each point, the group together at most 12 a visit and 7 s apart; after 4 pokes or 25 s idle, Lively only, never Solemn, until the ✦ menu; the points on the wall now', /when its point settles in the middle, the phone still 1\.2 s · once a visit for each point · What's in view together: at most 12 a visit, at least 7 s apart/.test(rb[0]) && /after 4 pokes on the mascot or after 25 s idle \(no touch, the phone still\), Lively only, never on a Solemn point · once a visit, until the visitor opens the ✦ menu/.test(rb[1]) && /6 points\): The Ribeira Palace \(a card: its own line\), The Torreão/.test(rb[2]) && !/later round/i.test(await R('ed.querySelector(\'[data-fo="gt4"]\').textContent')), rb);
   // Why not now? and the Log name them
-  await fresh(toRem); await R('S.tab="guide";S.ui.level=1;S.op={gt0:true};renderEditor()'); await W(150);
+  await fresh(toRem); await R('ui.tab="guide";ui.level=1;ui.op={gt0:true};renderEditor()'); await W(150);
   const opts = await R('[].map.call(ed.querySelectorAll("[data-gdwhysel] option"),function(o){return o.textContent})');
   await R('var s=ed.querySelector("[data-gdwhysel]");s.value="inview:torreao";s.dispatchEvent(new Event("change",{bubbles:true}))'); await W(100);
   await p.locator('[data-gdwhynot]').click(); await W(100);
-  const wn = await R('[ed.querySelector("#gdwhynot").textContent,gdWhyNot(gdItems(),S.gdVisitor,gdContext(),gdNow(),"inview:torreao")]');
+  const wn = await R('[ed.querySelector("#gdwhynot").textContent,gdWhyNot(gdItems(),P.gdVisitor,gdContext(),gdNow(),"inview:torreao")]');
   await runTo('G.gd.cur.item.base==="inview"', 40000); await R('gdAdvance(10000);gdReadouts()'); await W(150);
   const lg = await R('[].map.call(ed.querySelectorAll("#gdlog .gdl"),function(x){return x.textContent}).slice(0,8)');
   ok('Why not now? and the Log name them: each point\'s remark by its name ("The Torreão in the middle: not in the middle"), its pick and end in the Log', opts.indexOf('The Ribeira Palace in the middle') >= 0 && opts.indexOf('The Torreão in the middle') >= 0 && opts.indexOf('The ✦') >= 0 && wn[0] === wn[1] && /^The Torreão in the middle: not in the middle \(The Ribeira Palace is nearest\)/.test(wn[0]) && lg.some(x => /shownThe Ribeira Palace in the middle: .*Ribeira Palace in the middle/i.test(x)) && lg.some(x => /endedThe Ribeira Palace in the middle: its time is up/.test(x)), [opts, wn[0], lg.slice(0, 4)]);
-  const words = await R('[TXOWN.fab_comment_1,TXOWN.fab_comment_2,TXOWN.fab_comment_3,TXOWN.fab_comment_card,TXOWN.gb_hint,["fab_comment_1","fab_comment_2","fab_comment_3","fab_comment_card","gb_hint"].every(function(k){return S.tx[k].en.length>8&&S.tx[k].pt.length>8&&/\\{(point|button)\\}/.test(S.tx[k].pt)}),ownerName("gd:i:inview"),ownerName("gd:i:gbhint")]');
+  const words = await R('[TXOWN.fab_comment_1,TXOWN.fab_comment_2,TXOWN.fab_comment_3,TXOWN.fab_comment_card,TXOWN.gb_hint,["fab_comment_1","fab_comment_2","fab_comment_3","fab_comment_card","gb_hint"].every(function(k){return D.words.tx[k].en.length>8&&D.words.tx[k].pt.length>8&&/\\{(point|button)\\}/.test(D.words.tx[k].pt)}),ownerName("gd:i:inview"),ownerName("gd:i:gbhint")]');
   ok('The words in Languages & Terms, owned by their item\'s foldout, en and pt, with their slots ({point}, {button})', words.slice(0, 4).every(w => w === 'gd:i:inview') && words[4] === 'gd:i:gbhint' && words[5] && /What's in view › \{point\} in the middle/.test(words[6]) && /The wall › The ✦/.test(words[7]), words);
 
   // ---------- 5. the two new scenes in Ask Azu's console, pressed as the developer does ----------
-  await R(base + 'G.gd.manual=false;G.gd.rate=1;S.ui.level=1;S.tab="guide";S.op={gt3:true,s7agent:true};renderEditor();var f=ed.querySelector(\'[data-fo="s7agent"]\');if(f)f.open=true');
+  await R(base + 'G.gd.manual=false;G.gd.rate=1;ui.level=1;ui.tab="guide";ui.op={gt3:true,s7agent:true};renderEditor();var f=ed.querySelector(\'[data-fo="s7agent"]\');if(f)f.open=true');
   const scenes = await R('AGSCENES.map(function(s,i){return[i,s.id,s.label]}).filter(function(x){return/^gd3_/.test(x[1])})');
   ok('The console lists round 3\'s two guidance scenes (a remark yields, The ✦ after four pokes)', scenes.length === 2 && JSON.stringify(scenes.map(s => s[1])) === JSON.stringify(['gd3_yield', 'gd3_pokes']), scenes.map(s => s[2]));
   for (const [i, id, label] of scenes) {

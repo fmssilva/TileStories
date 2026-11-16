@@ -15,8 +15,8 @@ var AGTOOLS={search_library:{ro:true,label:"Search the library",what:"Searches t
   start_tour:{label:"Start the tour",what:"Plays the point's authored tour, in the mascot's recorded voice."},
   /* round 9 (_3.8 section 3.4): "how do I…?" about the app, answered from the guidance's own App items (their words) with a Show me card */
   show_how:{ro:true,label:"Show how",what:"Answers a “how do I…” about the app from its own tips (Guide › The mascot speaks up: the feature's words) and adds a Show me card under the answer that plays the gesture. Never for the history."}};
-function agTools(where,turn){var tg=agTargets(),ids=tg.map(function(t){return t.id}),pois=S.wallPois.map(function(p){return"poi:"+p.id}),fk=agFeatures().map(function(f){return f.kind}),out=[];
-  function add(name,desc,schema,check,run,label){var pol=S.agentCfg.pol[name]||"auto",d=AGTOOLS[name];if(pol==="off")return;if(!d.ro&&name!=="show_links"&&!S.agentCfg.actions)return;if(name==="show_links"&&!S.agentCfg.links)return;
+function agTools(where,turn){var tg=agTargets(),ids=tg.map(function(t){return t.id}),pois=D.wall.wallPois.map(function(p){return"poi:"+p.id}),fk=agFeatures().map(function(f){return f.kind}),out=[];
+  function add(name,desc,schema,check,run,label){var pol=D.agent.pol[name]||"auto",d=AGTOOLS[name];if(pol==="off")return;if(!d.ro&&name!=="show_links"&&!D.agent.actions)return;if(name==="show_links"&&!D.agent.links)return;
     out.push({name:name,description:desc,inputSchema:schema,execute:function(a){a=a||{};var bad=check(a),call={name:name,args:a,ok:!bad,policy:d.ro?"auto":pol};turn.calls.push(call);
       if(bad){call.err=bad;return"Error: "+bad}if(d.ro||pol==="auto")return run(a);
       turn.chips.push({name:name,label:label(a),confirm:pol==="confirm",run:function(){run(a)}});return"Offered to the visitor as a button; they decide. Mention it in one short phrase."}})}
@@ -37,7 +37,7 @@ function agTools(where,turn){var tg=agTargets(),ids=tg.map(function(t){return t.
     function(a){var f=agFeatures().filter(function(x){return x.kind===a.kind})[0];return agGo(f.ref)},function(a){var f=agFeatures().filter(function(x){return x.kind===a.kind})[0];return fmt(TXT("ag_chip_open"),f?L(f.name):a.kind)});
   add("navigate_to","Takes the visitor to a block, a story page or a point (on the wall the camera turns to it).",{type:"object",properties:{target_id:{type:"string",enum:ids}},required:["target_id"]},function(a){return only([a.target_id],ids)},
     function(a){return agGo(a.target_id)},function(a){return fmt(TXT("ag_chip_go"),agTitle(a.target_id))});
-  add("start_tour","Plays this point's tour (its written tour, else the one made from its card; its length as the hero's button says it), in the mascot's voice.",{type:"object",properties:{}},function(){return""},function(){G.cam.open=false;S.view="card";startTour();return"Started."},function(){return TXT("ag_chip_tour")});
+  add("start_tour","Plays this point's tour (its written tour, else the one made from its card; its length as the hero's button says it), in the mascot's voice.",{type:"object",properties:{}},function(){return""},function(){G.cam.open=false;ui.view="card";startTour();return"Started."},function(){return TXT("ag_chip_tour")});
   /* round 9: show_how, the features the App items teach (Guide › Azu speaks up, each item's Teaches): their answer, a Show me card, the item seen */
   var how=gdTeachers(),hf=how.map(function(x){return x.teaches});
   if(hf.length)add("show_how","For a question about how to use the app (\"how do I…\": open a card, ask about the view, drag the before and after, pause the guide…): give the feature. Returns the app's own words for it and puts a Show me card under your answer, which plays the gesture. Never for a question about the history or the place.",
@@ -46,4 +46,4 @@ function agTools(where,turn){var tg=agTargets(),ids=tg.map(function(t){return t.
   return out}
 /* the show_how policy's demo: a scripted "how do I…" answer in the dock's conversation, with its Show me card (no model asked) */
 var GD_HOW_DEMO_Q=T("How do I see the before and after?","Como vejo o antes e depois?");
-rowDemos({"agentCfg.pol.show_how":{tour:true,dock:"full",act:function(){if(S.agentCfg.pol.show_how==="off"){gdHowAsk(L(GD_HOW_DEMO_Q));gdChip("show_how Off: the live agent has no Show me; the offline answer still matches");return}gdHowAsk(L(GD_HOW_DEMO_Q));gdChip("show_how: a how do I… answer from the app's own tips, with its Show me card")},ringAfter:900,ring:".gdhowc|.gd-thread"}});
+rowDemos({"D.agent.pol.show_how":{tour:true,dock:"full",act:function(){if(D.agent.pol.show_how==="off"){gdHowAsk(L(GD_HOW_DEMO_Q));gdChip("show_how Off: the live agent has no Show me; the offline answer still matches");return}gdHowAsk(L(GD_HOW_DEMO_Q));gdChip("show_how: a how do I… answer from the app's own tips, with its Show me card")},ringAfter:900,ring:".gdhowc|.gd-thread"}});

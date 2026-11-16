@@ -1,9 +1,9 @@
 // v9b checks (Playwright + the installed Edge, WebGL by SwiftShader), no network for the voices: node test9b.js -> PASS/FAIL per check
 // The real mouth: a recorded Azure line moves the mouth by its facial curves on the audio's clock; a live ElevenLabs answer
 // (faked: a real MP3) opens it by the sound's loudness; a recorded set without curves, opened from a file, falls back to the letters.
-const { chromium } = require('./pw');
+const { chromium, labUrl } = require('./pw');
 const fs = require('fs'), path = require('path');
-const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
+const url = labUrl('#probe');
 const OUT = path.join(__dirname, '..', '..', 'voicebench', 'out');
 const MP3 = fs.readFileSync(path.join(OUT, 'azure-sonia-raquel', fs.readdirSync(path.join(OUT, 'azure-sonia-raquel')).filter(f => f.endsWith('.mp3')).sort((a, b) => fs.statSync(path.join(OUT, 'azure-sonia-raquel', b)).size - fs.statSync(path.join(OUT, 'azure-sonia-raquel', a)).size)[0]));
 const TEXT = 'O palácio tinha uma ópera, inaugurada em março de 1755.';
@@ -16,13 +16,13 @@ const TEXT = 'O palácio tinha uma ópera, inaugurada em março de 1755.';
   await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 90000 }); await p.waitForTimeout(500);
   const R = src => p.evaluate(s => LAB.run(s), src); const W = ms => p.waitForTimeout(ms);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
-  const setup = async (src, set) => R('stopSpeech();S.hints.on=false;S.previewBar=false;S.guideMute=false;S.introSeen=true;S.lang="pt";S.guideCfg.azuStyle="' + src + '";S.guideCfg.voice="recorded";S.guideCfg.voiceSet="' + set + '";S.view="card";S.stop="half";renderAll(false);if(!G.on)startTour();pauseTour()');
+  const setup = async (src, set) => R('stopSpeech();D.card.hints.on=false;LAB.previewBar=false;P.guideMute=false;P.introSeen=true;P.lang="pt";D.guide.azuStyle="' + src + '";D.guide.voice="recorded";D.guide.voiceSet="' + set + '";ui.view="card";ui.stop="half";renderAll(false);if(!G.on)startTour();pauseTour()');
   // watch a spoken line: the mouth's kind, the tile of light's opening, the 2D drawn mouth, and how close the opening is to the curve at the audio's time
   const watch = async (start, ms) => { await R(start); const t0 = Date.now(), kinds = new Set(), talks = new Set(), d2 = new Set(); let near = 0, n = 0, ended = false;
     while (Date.now() - t0 < ms) { const s = await R('var m=ph.querySelector(".mascot .mouth"),a=G.recAudio,tr=MT.track,e=null;if(a&&tr){var i=Math.min(tr.f.length-1,Math.floor(a.currentTime*tr.fps));e=Math.min(1,tr.f[i][0]*1.1)}[mouthNow().kind,AzuGL.get("talk"),m&&m.getAttribute("d"),e,window.__end]');
       kinds.add(s[0]); talks.add(Math.round(s[1] * 100)); if (s[2]) d2.add(s[2]); if (s[3] !== null) { n++; if (Math.abs(s[3] - s[1]) < .2) near++; } if (s[4]) { ended = true; break; } await W(40); }
     return { kinds: [...kinds], talks: talks.size, shapes2d: d2.size, near, n, ended }; };
-  await R('S.tab="guide";renderEditor();ed.querySelector(\'[data-fo="s7mascot"]\').open=true');
+  await R('ui.tab="guide";renderEditor();ed.querySelector(\'[data-fo="s7mascot"]\').open=true');
   // round 19 (21.10): How it moves is in 1 · The mascot › Manner
   ok('Editor: 1 · The mascot › Manner says how the mouth moves', /Azure's facial curves: 60 frames a second/.test(await R('(rowEl(ed,"gt:manner","How it moves")||{}).textContent||""')));
   // 1. a recorded Azure line: its curves, on the audio's clock, on the tile of light
@@ -41,7 +41,7 @@ const TEXT = 'O palácio tinha uma ópera, inaugurada em março de 1755.';
   ok('...on the 2D tile: the nearest drawn mouth, several shapes', r2.kinds.indexOf('curves') >= 0 && r2.shapes2d >= 4, r2);
   // 3. a live ElevenLabs answer (faked, a real MP3 as a blob): the loudness opens the mouth, the letters shape it
   await setup('light', 'azure-sonia-raquel');
-  await R('window.LABKEYS={eleven:"k",elevenPT:"v",elevenEN:"v"};S.agentCfg.liveVoice="eleven"');
+  await R('window.LABKEYS={eleven:"k",elevenPT:"v",elevenEN:"v"};D.agent.liveVoice="eleven"');
   const r3 = await watch('window.__end=0;G.answer=' + JSON.stringify(TEXT) + ';say(G.answer,function(k){G.hl.k=k},function(){window.__end=1})', 20000);
   ok('A live ElevenLabs answer: the sound\'s loudness opens the mouth (many heights)', r3.kinds.indexOf('loudness') >= 0 && r3.talks >= 6 && r3.ended, r3);
   // 4. a recorded set without curves, from a file: the page cannot read its sound, so the letters move the mouth again

@@ -1,23 +1,23 @@
 /* The tour's Stop and Previous: Stop with its Undo toast (or Ask first) and the resume point (the step and the sentence); Previous replays the sentence being said.
    Round 17b (the developer, 2026-11-12): the toast offers the one way back into a stopped tour (guide/saved-place.js's svOffer): "Continue the
    tour (step 5 of 13)", back to the step and the sentence, and "Start again", the same words as the ✦ menu, the hero and the invitation. */
-S.guideCfg.stopUndo="toast";G.resumeAt=null;
+D.guide.stopUndo="toast";G.resumeAt=null;
 /* ----- the resume point: where the visitor's Stop left the tour, the step and the first word of the sentence being said, for its point. It
    is kept after the toast is gone (the ✦ menu, the hero and the invitation offer Continue the tour) until the tour is continued, reaches
    its end or starts again from its start ----- */
-function keepResume(){var st=S.guideSteps[G.i];if(!G.on||!st||st.act==="end"){G.resumeAt=null;return null}var intro=st.act==="intro"||st.act==="recap",nx=intro?S.guideSteps[G.i+1]:st;
-  return G.resumeAt={id:(nx||st).id,k:intro||!(G.hl&&G.hl.k>=0)?0:sentenceStart(G.hl.k),title:stepTitle(nx||st),poi:S.m&&S.m.poi||"painting"}}
+function keepResume(){var st=D.tour.guideSteps[G.i];if(!G.on||!st||st.act==="end"){G.resumeAt=null;return null}var intro=st.act==="intro"||st.act==="recap",nx=intro?D.tour.guideSteps[G.i+1]:st;
+  return G.resumeAt={id:(nx||st).id,k:intro||!(G.hl&&G.hl.k>=0)?0:sentenceStart(G.hl.k),title:stepTitle(nx||st),poi:ui.m&&ui.m.poi||"painting"}}
 function resumeTourAt(pt){pt=pt||G.resumeAt;if(!pt)return;G.resumeAt=null;hideStopUi();if(G.on)stopTour();G.startWord=pt.k||0;startTour({id:pt.id})}
 /* the step's line, said again from the kept sentence (guide/voice.js's seekWord: an audio seeks, the device voice speaks from the word) */
 on("say.after",function(){if(!G.startWord)return;var k=G.startWord;G.startWord=0;seekWord(k)});
-on("runStep.after",function(){var st=S.guideSteps[G.i];if(st&&st.act==="end")G.resumeAt=null});
+on("runStep.after",function(){var st=D.tour.guideSteps[G.i];if(st&&st.act==="end")G.resumeAt=null});
 /* ----- Stop: no question by default; the tour stops and a toast offers Continue the tour (step N of M) and Start again for 5 s (round 17b:
    the one offer's words). Ask first: the tour pauses and asks ----- */
 function stopUiHtml(kind){if(kind==="ask")return'<b>'+TXH("guide_stop_ask")+'</b><div><button type="button" data-gstop="yes">'+TXH("guide_stop_yes")+'</button><button type="button" data-gstop="no">'+TXH("guide_stop_no")+'</button></div>';
   var of=svOffer()||{n:G.i+1,of:Math.max(1,svTour().length)};
   /* round 17c (the developer): under the gold Continue, one quiet line: Start again and What next? (the tour's end panel, paused: guide/tour-end.js) */
   return'<span>'+TXH("guide_stopped")+'</span><button type="button" class="gtcont" data-gstop="resume">'+esc(svLabel(of))+'</button><div class="gtquiet"><button type="button" class="gtagain" data-gstop="again">'+TXH("sv_again")+'</button>'+
-    (typeof teOpenPaused==="function"&&S.guideCfg.teOn?'<i class="gtdot" aria-hidden="true"></i><button type="button" class="gtnext" data-gstop="next">'+TXH("te_title")+'</button>':"")+'</div>'}
+    (typeof teOpenPaused==="function"&&D.guide.teOn?'<i class="gtdot" aria-hidden="true"></i><button type="button" class="gtnext" data-gstop="next">'+TXH("te_title")+'</button>':"")+'</div>'}
 function hideStopUi(){clearTimeout(G.toastT);ph.querySelectorAll(".gtoast,.gstopask").forEach(function(x){x.remove()})}
 /* above whatever is at the foot of the phone: the dock, the guide's button, the Navigation Bar */
 function placeStopUi(d){var pr=ph.getBoundingClientRect(),q=pr.height/ph.offsetHeight,top=ph.offsetHeight-12;
@@ -25,34 +25,34 @@ function placeStopUi(d){var pr=ph.getBoundingClientRect(),q=pr.height/ph.offsetH
   d.style.bottom=Math.round(ph.offsetHeight-top+10)+"px"}
 function stopUi(kind){hideStopUi();var d=document.createElement("div");d.className=kind==="ask"?"gstopask":"gtoast gtsv";d.setAttribute("role",kind==="ask"?"alertdialog":"status");d.setAttribute("aria-label",TXT(kind==="ask"?"guide_stop_ask":"guide_stopped"));
   d.innerHTML=stopUiHtml(kind);ph.appendChild(d);placeStopUi(d);if(kind!=="ask")G.toastT=setTimeout(hideStopUi,5000);return d}
-on("stopTap.answer",function(){if(!G.on)return;if(S.guideCfg.stopUndo==="ask"){G.explicitPause=true;pauseTour();G.explicitPause=false;stopUi("ask");return true}
+on("stopTap.answer",function(){if(!G.on)return;if(D.guide.stopUndo==="ask"){G.explicitPause=true;pauseTour();G.explicitPause=false;stopUi("ask");return true}
   keepResume();stopTour();stopUi("toast");return true});
 ph.addEventListener("click",function(e){var t=e.target.closest("[data-gstop]");if(!t)return;e.stopPropagation();var k=t.dataset.gstop;
   if(k==="resume"){svContinue();return}if(k==="again"){hideStopUi();startTour();return}if(k==="next"){hideStopUi();teOpenPaused();return}hideStopUi();if(k==="yes"){keepResume();stopTour()}else if(k==="no")resumeTour()},true);
 /* a start from the start (not a demo's tour) is Start again: this visit's place goes (round 17b; the next visit's: guide/saved-place.js) */
-on("startTour.before",function(from){hideStopUi();if(!from&&!(G.demoTour||G.atForce||S.howSaved))G.resumeAt=null});
+on("startTour.before",function(from){hideStopUi();if(!from&&!(G.demoTour||G.atForce||ui.howSaved))G.resumeAt=null});
 /* ----- Previous: mid-sentence it says the sentence again from its first word; a second tap within 2 s goes to the step before ----- */
 function replaySentence(k){var s=sentenceStart(k);G.paused=false;G.askOpen=false;var held=G.resumeVoice;G.resumeVoice=false;if(!seekWord(s)){G.resumeVoice=held;return false}
-  if(G.recAudio){G.recAudio.muted=!!S.guideMute;G.recAudio.play().catch(function(){})}renderGuide();return true}
+  if(G.recAudio){G.recAudio.muted=!!P.guideMute;G.recAudio.play().catch(function(){})}renderGuide();return true}
 on("prevTap.answer",function(){if(!G.on)return;var now=performance.now(),k=G.hl&&G.hl.k,speaking=G.utter||G.timer||G.recAudio||(G.paused&&G.resumeVoice);
   if(!speaking||!(k>=0)||!(G.words||[]).length||now-(G.prevAt||0)<2000){G.prevAt=0;return}
   G.prevAt=now;if(replaySentence(k))return true;G.prevAt=0});
 /* the stop's look reaches the phone's signature (the toast or the question) */
-on("modelSig.sig",function(h){return sigWant(/guideCfg\.stopUndo/)?h+"#stop:"+stopUiHtml(S.guideCfg.stopUndo):h});
+on("modelSig.sig",function(h){return sigWant(/D\.guide\.stopUndo/)?h+"#stop:"+stopUiHtml(D.guide.stopUndo):h});
 
 /* Editor: Guide tab > Guide panel gets Stop */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
-  addRows(d,"s7dock",row("Stop",pseg("guideCfg.stopUndo",["toast","ask"],["Undo toast","Ask first"]),"Undo toast: Stop ends the tour at once, with no question, and a toast says “Tour stopped” with “Continue the tour (step 5 of 13)” and “Start again” for 5 s; Continue goes back to the step and the sentence it stopped at. The place is kept after the toast is gone: the ✦ menu, the hero and the invitation offer the same (Ways in › Continue the tour). Ask first: the tour pauses and asks “Stop the tour?” (Stop / Keep listening). Previous, mid-sentence, says the sentence again; a second tap within 2 s goes to the step before."),"The mascot's own words");
+  addRows(d,"s7dock",row("Stop",pseg("D.guide.stopUndo",["toast","ask"],["Undo toast","Ask first"]),"Undo toast: Stop ends the tour at once, with no question, and a toast says “Tour stopped” with “Continue the tour (step 5 of 13)” and “Start again” for 5 s; Continue goes back to the step and the sentence it stopped at. The place is kept after the toast is gone: the ✦ menu, the hero and the invitation offer the same (Ways in › Continue the tour). Ask first: the tour pauses and asks “Stop the tour?” (Stop / Keep listening). Previous, mid-sentence, says the sentence again; a second tap within 2 s goes to the step before."),"The mascot's own words");
   return d.innerHTML});
 /* the row's demo: Stop pressed mid-sentence at Mini: the toast, or the question */
-rowDemos({"guideCfg.stopUndo":{tour:"g5",dock:"mini",act:function(){var b=ph.querySelector('.gd-mini [data-g="stop"]')||ph.querySelector('.gd-ctl [data-g="stop"]');if(b)b.click()},ring:".gtoast|.gstopask"}});
+rowDemos({"D.guide.stopUndo":{tour:"g5",dock:"mini",act:function(){var b=ph.querySelector('.gd-mini [data-g="stop"]')||ph.querySelector('.gd-ctl [data-g="stop"]');if(b)b.click()},ring:".gtoast|.gstopask"}});
 
 /* ----- round 11: the speed chip, the visitor's own: 0.5× · 0.75× · 1× · 1.25× · 1.5× · 1.75× · 2× in turn (its first value Narration ›
    Speed); the voice follows at once: an audio's playbackRate, the device voice spoken again from its word at the new rate. Unity:
    AudioSource.pitch with a pitch-shifter (the time stretch), or the TextToSpeech rate from the word ----- */
 var SPEEDS=[0.5,0.75,1,1.25,1.5,1.75,2];
 function speedNext(v){for(var i=0;i<SPEEDS.length;i++)if(SPEEDS[i]>v+1e-6)return SPEEDS[i];return SPEEDS[0]}
-function setGuideSpeed(v){S.vis.speed=v;G.rate=v;if(G.recAudio)G.recAudio.playbackRate=v;else if(G.on&&!G.paused&&(G.utter||G.timer)&&G.sayArgs)speakFrom(G.hl&&G.hl.k>=0?G.hl.k:0,false);
+function setGuideSpeed(v){P.vis.speed=v;G.rate=v;if(G.recAudio)G.recAudio.playbackRate=v;else if(G.on&&!G.paused&&(G.utter||G.timer)&&G.sayArgs)speakFrom(G.hl&&G.hl.k>=0?G.hl.k:0,false);
   ph.querySelectorAll(".gd-speed").forEach(function(b){b.textContent=spd(v)+"×";b.setAttribute("aria-label",fmt(TXT("dock_speed"),spd(v)))});dkTick()}
 ph.addEventListener("click",function(e){var b=e.target.closest('[data-g="speed"]');if(!b)return;e.stopPropagation();setGuideSpeed(speedNext(guideSpeed()))},true);
 /* ----- round 21 (the developer, 2026-11-13: "back 10 seconds and forward 10 seconds buttons, both in the minimal panel and in the big
@@ -64,14 +64,14 @@ ph.addEventListener("click",function(e){var b=e.target.closest('[data-g="speed"]
 var SKIP_S=10;
 /* the step and the word at a time of the tour (s from its start) */
 function seekLand(sec){var T=dkTimes(),t=Math.max(0,Math.min(T.tot-.05,sec)),j=0;for(var i=0;i<T.stops.length;i++)if(T.stops[i].at<=t+1e-6)j=i;
-  var c=T.stops[j],o=Math.max(0,t-c.at),text=stepText(S.guideSteps[j]),n=(text.match(/\S+/g)||[]).length,sp=guideSpeed(),r=typeof recFile==="function"?recFile(text):null,w=r&&r.file&&r.file.words,k=0;
+  var c=T.stops[j],o=Math.max(0,t-c.at),text=stepText(D.tour.guideSteps[j]),n=(text.match(/\S+/g)||[]).length,sp=guideSpeed(),r=typeof recFile==="function"?recFile(text):null,w=r&&r.file&&r.file.words,k=0;
   if(w&&w.length){for(var q=0;q<w.length;q++)if(w[q][0]/sp<=o)k=q}else k=Math.floor(o/(60/(170*sp)));
   return{j:j,k:Math.max(0,Math.min(Math.max(0,n-1),k)),t:t}}
-function seekBy(d){if(!G.on)return null;var T=dkTimes(),from=dkElapsed(T),L=seekLand(from+d),st=S.guideSteps[G.i];G.seekedTo={j:L.j,k:L.k,by:d,t:L.t,from:from};
+function seekBy(d){if(!G.on)return null;var T=dkTimes(),from=dkElapsed(T),L=seekLand(from+d),st=D.tour.guideSteps[G.i];G.seekedTo={j:L.j,k:L.k,by:d,t:L.t,from:from};
   var here=L.j===G.i&&st&&G.sayLine&&G.sayLine.text===stepText(st)&&!!(G.recAudio||G.utter||G.timer||G.resumeVoice||G.voiceWait||G.paused);
   if(here&&G.paused){if(G.recAudio&&G.recWords){var w=G.recWords[L.k];G.recAudio.currentTime=w?w[0]:0}else G.pausedAt=L.k;if(G.hl){G.hl.k=L.k;G.hl.p=L.k;G.hl.at=performance.now()}}
   else if(here){hideStopUi();if(!seekWord(L.k))here=false;else if(G.hl&&!G.recAudio){G.hl.k=L.k;G.hl.p=L.k}}
-  if(!here){hideStopUi();stopSpeech();G.paused=false;G.waiting=false;G.tryWait=false;G.askOpen=false;G.startWord=L.k;if(S.dockH==="full")S.dockH="peek";G.i=L.j;runStep()}
+  if(!here){hideStopUi();stopSpeech();G.paused=false;G.waiting=false;G.tryWait=false;G.askOpen=false;G.startWord=L.k;if(ui.dockH==="full")ui.dockH="peek";G.i=L.j;runStep()}
   dkTick();return L}
 ph.addEventListener("click",function(e){var b=e.target.closest('[data-g="back10"],[data-g="fwd10"]');if(!b||!G.on)return;e.stopPropagation();seekBy(b.dataset.g==="back10"?-SKIP_S:SKIP_S)},true);
 /* ----- round 11: the progress bar seeks. A drag (its hit area 44 px high) or a tap: the stop under the finger, and within it the sentence
@@ -82,11 +82,11 @@ function seekAt(sk,x){var best=null;sk.querySelectorAll("[data-gseg]").forEach(f
 function seekShow(d){var sk=d.sk.isConnected?d.sk:ph.querySelector(".gd-seek");if(!sk)return;d.sk=sk;dkKnob(sk,d.j,d.f);var T=dkTimes(),c=T.stops[d.j],el=c?c.at+d.f*(c.len-.7):0;
   ph.querySelectorAll(".gdock .gd-time").forEach(function(t){var k=t.dataset.t;t.textContent=k==="both"?mmss(el)+" / "+mmss(T.tot):k==="el"?mmss(el):k==="rem"?"-"+mmss(T.tot-el):mmss(T.tot)})}
 /* to stop j, at the first word of the sentence at share f of its words */
-function seekTo(j,f){var st=S.guideSteps[j];if(!st||!G.on)return;var ws=stepText(st).match(/\S+/g)||[],k=Math.min(ws.length-1,Math.floor(f*ws.length)),s=0;for(var i=0;i<k;i++)if(/[.!?…]["”»)]*$/.test(ws[i]))s=i+1;
-  G.seekedTo={j:j,k:s};hideStopUi();stopSpeech();G.paused=false;G.waiting=false;G.tryWait=false;G.askOpen=false;G.startWord=s;if(S.dockH==="full")S.dockH="peek";G.i=j;runStep()}
+function seekTo(j,f){var st=D.tour.guideSteps[j];if(!st||!G.on)return;var ws=stepText(st).match(/\S+/g)||[],k=Math.min(ws.length-1,Math.floor(f*ws.length)),s=0;for(var i=0;i<k;i++)if(/[.!?…]["”»)]*$/.test(ws[i]))s=i+1;
+  G.seekedTo={j:j,k:s};hideStopUi();stopSpeech();G.paused=false;G.waiting=false;G.tryWait=false;G.askOpen=false;G.startWord=s;if(ui.dockH==="full")ui.dockH="peek";G.i=j;runStep()}
 ph.addEventListener("pointerdown",function(e){var sk=e.target.closest(".gdock .gd-seek");if(!sk)return;e.preventDefault();e.stopPropagation();try{sk.setPointerCapture(e.pointerId)}catch(x){}
   G.seekDrag=Object.assign({id:e.pointerId,sk:sk},seekAt(sk,e.clientX));sk.classList.add("dragging");seekShow(G.seekDrag)},true);
 ph.addEventListener("pointermove",function(e){var d=G.seekDrag;if(!d||e.pointerId!==d.id)return;e.stopPropagation();if(!d.sk.isConnected)d.sk=ph.querySelector(".gd-seek")||d.sk;Object.assign(d,seekAt(d.sk,e.clientX));seekShow(d)},true);
 ["pointerup","pointercancel"].forEach(function(t){ph.addEventListener(t,function(e){var d=G.seekDrag;if(!d||e.pointerId!==d.id)return;G.seekDrag=null;e.stopPropagation();d.sk.classList.remove("dragging");if(t==="pointerup")seekTo(d.j,d.f)},true)});
-ph.addEventListener("keydown",function(e){var sk=e.target.closest&&e.target.closest(".gd-seek");if(!sk||!G.on)return;var j=e.key==="ArrowRight"?G.i+1:e.key==="ArrowLeft"?G.i-1:e.key==="Home"?0:e.key==="End"?S.guideSteps.length-1:null;
-  if(j==null||j<0||j>=S.guideSteps.length)return;e.preventDefault();seekTo(j,0);setTimeout(function(){var n=ph.querySelector(".gd-seek");if(n)n.focus({preventScroll:true})},0)},true);
+ph.addEventListener("keydown",function(e){var sk=e.target.closest&&e.target.closest(".gd-seek");if(!sk||!G.on)return;var j=e.key==="ArrowRight"?G.i+1:e.key==="ArrowLeft"?G.i-1:e.key==="Home"?0:e.key==="End"?D.tour.guideSteps.length-1:null;
+  if(j==null||j<0||j>=D.tour.guideSteps.length)return;e.preventDefault();seekTo(j,0);setTimeout(function(){var n=ph.querySelector(".gd-seek");if(n)n.focus({preventScroll:true})},0)},true);

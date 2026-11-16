@@ -4,9 +4,9 @@ var TX_EXPECT={reading_minutes:1,guide_duration:1,pbar_tip_theme:1,pbar_tip_moti
 var TX_DOM={peek_next_label:"shown at Peek",show_on_wall_button:"shown on the sticky button",audio_pause:"after a tap on Play",term_read_more:"shown in the glossary popup",pbar_dark:"the bar in dark mode",pbar_still:"the bar under Reduce Motion",pbar_wide:"the bar on a wide screen",pbar_tablet:"the bar on a tablet"};
 var STW_TABS=["card","guide","words","global"];
 /* the walk's steps: its start, a tab's fields (the tab drawn, the state it starts from), one field worked and judged, its end */
-function stwStart(){emitLatestFirst("selfTestWords.before");S.ui.level=9;S.op={};S.ui.single=false;S.ownAll=true;S.ui.txf="content"}
-function stwEnd(){noDraw=false;S.ownAll=false;S.ui.txf="all"}
-function stwTab(tab){S.tab=tab;renderEditor();var base=JSON.stringify(S);noDraw=true;
+function stwStart(){emitLatestFirst("selfTestWords.before");ui.level=9;ui.op={};ui.single=false;LAB.ownAll=true;ui.txf="content"}
+function stwEnd(){noDraw=false;LAB.ownAll=false;ui.txf="all"}
+function stwTab(tab){ui.tab=tab;renderEditor();var base=stateJson();noDraw=true;
   var acts=[];function lg(s){return langCodes().indexOf(s)>=0?s:null}
   ed.querySelectorAll("[data-tx]").forEach(function(x){var p=x.dataset.tx.split("|");acts.push({el:x,key:"tx:"+x.dataset.tx,tx:p[0],lang:p[1],v:"Zz"+p[0],kind:"input"})});
   ed.querySelectorAll("[data-loc]").forEach(function(x){var p=x.dataset.loc.split("|");acts.push({el:x,key:"loc:"+x.dataset.loc,lang:lg(p[1]),v:"Zz",kind:"input"})});
@@ -17,16 +17,16 @@ function stwTab(tab){S.tab=tab;renderEditor();var base=JSON.stringify(S);noDraw=
   return{tab:tab,base:base,acts:acts}}
 /* the phone before a field is worked: every field of a tab starts from the same state (its base, in the field's language), so its signature is
    drawn once per language and kept, after two fields in a row drew it the same (a tab whose signature ever differs draws it every time) */
-function stwBefore(T){var l=S.lang,c=T.sig||(T.sig={}),x=c[l];if(T.noCache)return modelSig();if(x&&x.n>=2)return x.s;var s=modelSig();
+function stwBefore(T){var l=P.lang,c=T.sig||(T.sig={}),x=c[l];if(T.noCache)return modelSig();if(x&&x.n>=2)return x.s;var s=modelSig();
   if(!x)c[l]={s:s,n:1};else if(x.s===s)x.n++;else{T.noCache=true;G.stwNoCache=(G.stwNoCache||0)+1}return s}
-function stwAct(T,a,res){var tab=T.tab,B=JSON.parse(T.base);Object.keys(B).forEach(function(k){S[k]=B[k]});if(a.lang)S.lang=a.lang;var before=stwBefore(T),state=JSON.stringify(S),lab=a.key;
+function stwAct(T,a,res){var tab=T.tab;stateRestore(T.base);if(a.lang)P.lang=a.lang;var before=stwBefore(T),state=stateJson(),lab=a.key;
   try{if(a.kind==="click")a.el.click();else{a.el.value=a.v;a.el.dispatchEvent(new Event("input",{bubbles:true}))}}catch(err){res.push({tab:tab,key:a.key,v:a.v,label:lab,result:"ERROR "+err.message});return}
-  var changed=modelSig()!==before,stateChanged=JSON.stringify(S)!==state,k=a.tx,r;
+  var changed=modelSig()!==before,stateChanged=stateJson()!==state,k=a.tx,r;
   if(changed)r="changes the phone";else if(!stateChanged)r="NOT WIRED (state unchanged)";
   else if(k&&/^s7/.test(TXOWN[k])&&!TX_EXPECT[k])r="behaviour (shown during the tour)";else if(k&&TX_DOM[k])r="behaviour ("+TX_DOM[k]+")";
   else if(k&&!TX_EXPECT[k])r="elsewhere (its part is not drawn on the Lab's card)";
   else if(/^loc:gstep:/.test(a.key))r="behaviour (shown during the tour)";
-  else if(/^(term:|loc:term:)/.test(a.key)&&!termUses(byId(S.terms,a.key.replace(/^loc:/,"").split(":")[1].split("|")[0])||{words:""}).n)r="elsewhere (no card text links this term)";
+  else if(/^(term:|loc:term:)/.test(a.key)&&!termUses(byId(D.wall.terms,a.key.replace(/^loc:/,"").split(":")[1].split("|")[0])||{words:""}).n)r="elsewhere (no card text links this term)";
   else r="NO EFFECT (state changes, phone does not)";
   res.push({tab:tab,key:a.key,v:a.v||"",label:lab,result:r})}
 /* in one go (the Editor's Run the self-test, the checks' probes) */

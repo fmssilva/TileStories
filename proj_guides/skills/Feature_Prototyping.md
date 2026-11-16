@@ -110,7 +110,7 @@
       - **Each Editor row names its demo:** the view, the part it changes, the state, and an action (play a sample, open the
         state). A change, or a press on the row's name, shows that demo at once, so its effect is seen. The self-test fails a
         row without one, and the tests press each row and check that its part is shown and changed.
-      - **The build only joins the modules and embeds the assets.** It never rewrites code. It refuses a wrapper, a second
+      - **The build only joins the modules, embeds the words and fonts, and copies the large assets beside the page** (served by a local server). It never rewrites code. It refuses a wrapper, a second
         declaration or a default set twice.
    6. **Audit against the code before the final round.** Walk every Editor row, config value and runtime UI element the code
       has today in the group's area, and give each one a verdict against the Lab: same, add, merge (two versions of one option

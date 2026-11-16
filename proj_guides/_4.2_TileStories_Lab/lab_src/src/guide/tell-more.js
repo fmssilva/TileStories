@@ -7,28 +7,28 @@
    tap on it lets that step go short); 3 Skip ahead in a row and the tour is lighter again (no deep part first). Start deep for: no one,
    Tour lovers (the guide's length Deep: Audiences, or the visitor's own Settings) or everyone. Ask Azu's "tell me more" (typed or spoken)
    does what the chip does. The tour's length is the short version's minutes (the deep parts are the visitor's choice); the Editor's step
-   list shows both. Not the games' Short / Deep (Guide › 3 · Games on the tour): its own keys (guideCfg.tm*).
+   list shows both. Not the games' Short / Deep (Guide › 3 · Games on the tour): its own keys (D.guide.tm*).
    Unity: GuideTourBuilder's deep units per step (plain C#, the same fact keys, EditMode-tested on the same cards); a written step's More
    (a LocalizedString in the GuideScript asset); GuideTourPlayer.Pace (short / deep) kept for the tour; the chip a UI Toolkit Button above
    the guide panel (the panel's own USS); the phrase in the Ask path's intent match before the model */
-S.guideCfg.tmOn=true;S.guideCfg.tmStart="none";
+D.guide.tmOn=true;D.guide.tmStart="none";
 var TM_ROW=3;
 COMP.s7more=["Guide","Tell me more"];FOCUS.s7more=["card",".hero","full"];
 G.tm={pace:"short",more:0,skip:0,want:-1,playing:false,done:{},keys:{},said:{},tok:0,heard:[],log:[]};
 function tmLog(t){G.tm.log.push(t);if(G.tm.log.length>40)G.tm.log.shift()}
 /* a tour lover: the guide's length is Deep (Audiences › Looks per audience, or the visitor's own Settings) */
 function tmLover(){return typeof lenNow==="function"&&lenNow()==="deep"}
-function tmStartPace(){var s=S.guideCfg.tmStart;return s==="all"||s==="lover"&&tmLover()?"deep":"short"}
+function tmStartPace(){var s=D.guide.tmStart;return s==="all"||s==="lover"&&tmLover()?"deep":"short"}
 /* a step's deep part in the visitor's language: a written step's own more words, else the tour from the card's; the units already heard in
    an earlier deep part of this tour left out (no fact twice, no sentence twice); null when there is none */
-function tmDeepOf(st,lang){if(!st||/^(teaser|end|intro|recap)$/.test(st.act))return null;lang=lang||S.lang;var d=null,mo=st.more&&String(wordIn(st.more,lang)||"").trim();
+function tmDeepOf(st,lang){if(!st||/^(teaser|end|intro|recap)$/.test(st.act))return null;lang=lang||P.lang;var d=null,mo=st.more&&String(wordIn(st.more,lang)||"").trim();
   if(mo)d={kind:"sents",units:atSentences(mo).map(function(t){return{t:t,k:atFactKeys(t,lang,{})}})};
   else if(st.at&&st.at.deeps&&st.at.deeps[lang])d=st.at.deeps[lang];
   if(!d||!d.units||!d.units.length)return null;
   var u=d.units.filter(function(x){var n=atNorm(x.t);return n&&!G.tm.said[n]&&!(x.k&&x.k.length&&x.k.every(function(k){return atKnown(G.tm.keys,k)}))});if(!u.length)return null;
-  return{kind:d.kind,units:u,lead:d.lead||null,text:u.length===d.units.length&&d.text?d.text:atDeepText({kind:d.kind,units:u,lead:d.lead},lang,function(k){return wordIn(S.tx[k],lang)})}}
-function tmDeep(st){return S.guideCfg.tmOn?tmDeepOf(st):null}
-function tmCur(){return G.on?S.guideSteps[G.i]:null}
+  return{kind:d.kind,units:u,lead:d.lead||null,text:u.length===d.units.length&&d.text?d.text:atDeepText({kind:d.kind,units:u,lead:d.lead},lang,function(k){return wordIn(D.words.tx[k],lang)})}}
+function tmDeep(st){return D.guide.tmOn?tmDeepOf(st):null}
+function tmCur(){return G.on?D.tour.guideSteps[G.i]:null}
 /* the step's line still being said (the device voice, a recorded or live audio) */
 function tmSpeaking(){return!!(G.utter||G.recAudio||G.timer&&!G.waiting)}
 /* Tell me more (the chip, or Ask Azu's phrase): the deep part comes after the step's line, at once when the line has ended; a tap on the chip
@@ -57,7 +57,7 @@ on("next.answer",function(how){if(!G.on)return;var i=G.i,st=tmCur();
   /* offered and let go: the streaks start again */
   G.tm.more=0;G.tm.skip=0});
 on("startTour.before",function(from){var keep=from&&G.tm;G.tm={pace:keep?G.tm.pace:tmStartPace(),more:0,skip:0,want:-1,playing:false,done:{},keys:keep?G.tm.keys:{},said:keep?G.tm.said:{},tok:(G.tm.tok||0)+1,heard:keep?G.tm.heard:[],log:keep?G.tm.log:[]};
-  if(!keep&&G.tm.pace==="deep")tmLog("the pace: deep from the start (Start deep for: "+(S.guideCfg.tmStart==="all"?"everyone":"a tour lover")+")")});
+  if(!keep&&G.tm.pace==="deep")tmLog("the pace: deep from the start (Start deep for: "+(D.guide.tmStart==="all"?"everyone":"a tour lover")+")")});
 on("runStep.after",function(){var i=G.i;if(G.tm.want!==i&&G.tm.want!==-1)G.tm.want=-1;
   /* the step told again (a pause with nothing to resume, Previous): its deep part again after it, when it was playing */
   if(G.tm.playing&&G.tm.at===i){G.tm.playing=false;G.tm.tok++;G.tm.done[i]=false;G.tm.want=i}else if(G.tm.playing){G.tm.playing=false;G.tm.tok++}tmChip()});
@@ -66,12 +66,12 @@ on("stopTour.after",function(){G.tm.playing=false;G.tm.tok++;G.tm.want=-1;tmChip
    changed or Compact, would show the step's line under the voice) */
 on("renderGuide.after",function(text){if(G.on&&G.tm.playing&&G.tm.at===G.i&&text==null&&G.tm.text&&G.tpText!==G.tm.text){renderGuide(G.tm.text);return}tmChip()});
 /* Ask Azu: "tell me more" during a step with a deep part, typed or spoken, does what the chip does (never the model) */
-function tmAsks(q){var t=atNorm(q);if(!t)return false;var ps=[S.lang,"en"].map(function(l){return wordIn(S.tx.tm_ask,l)}).join("|").split("|");return ps.some(function(p){p=atNorm(p);return p&&(t===p||t.indexOf(p+" ")===0)})}
+function tmAsks(q){var t=atNorm(q);if(!t)return false;var ps=[P.lang,"en"].map(function(l){return wordIn(D.words.tx.tm_ask,l)}).join("|").split("|");return ps.some(function(p){p=atNorm(p);return p&&(t===p||t.indexOf(p+" ")===0)})}
 on("ask.answer",function(q){if(!G.on||!q||!tmAsks(q))return;var st=tmCur();if(!tmDeep(st)||G.tm.done[G.i]||G.tm.playing)return;
-  if(G.thread)G.thread.push({who:"me",text:String(q).trim()});G.askOpen=false;G.typing=false;if(S.dockH==="peek"||S.dockH==="full")S.dockH="mini";
+  if(G.thread)G.thread.push({who:"me",text:String(q).trim()});G.askOpen=false;G.typing=false;if(ui.dockH==="peek"||ui.dockH==="full")ui.dockH="mini";
   var gq=ph.querySelector("#gq");if(gq)gq.value="";tmLog("Ask the mascot heard “"+String(q).trim()+"”");if(G.tm.want===G.i){if(G.paused)resumeTour();return true}tmMore("ask");renderGuide();return true});
 /* ----- the chip: above the guide panel (at Compact, beside the ✦ on its row), left; 44 px, 4.5:1; only while the step has more ----- */
-function tmChip(){var c=ph.querySelector(".gtmore"),st=tmCur(),d=G.on&&!G.tm.playing&&!G.askOpen&&S.dockH!=="full"&&!G.tm.done[G.i]?tmDeep(st):null;
+function tmChip(){var c=ph.querySelector(".gtmore"),st=tmCur(),d=G.on&&!G.tm.playing&&!G.askOpen&&ui.dockH!=="full"&&!G.tm.done[G.i]?tmDeep(st):null;
   if(!d){if(c)c.remove();return}var on=G.tm.want===G.i||G.tm.pace==="deep";
   if(!c){c=document.createElement("button");c.type="button";c.className="gtmore";c.dataset.tm="more";ph.appendChild(c)}
   c.classList.toggle("on",on);c.setAttribute("aria-pressed",String(on));
@@ -79,7 +79,7 @@ function tmChip(){var c=ph.querySelector(".gtmore"),st=tmCur(),d=G.on&&!G.tm.pla
 /* at Compact on the ✦'s row, beside the ✦ and its Pause (on the other side when the ✦ is on the right); else 10 px above the panel, its hide
    tab and Azu's bubble, whichever is highest */
 function tmPlace(c){var pr=ph.getBoundingClientRect(),q=pr.height/ph.offsetHeight||1,H=ph.offsetHeight,gb=ph.querySelector(".gbtn-wrap"),seen=function(e){return!!e&&e.getClientRects().length>0&&getComputedStyle(e).display!=="none"&&getComputedStyle(e).visibility!=="hidden"};
-  if(S.dockH==="compact"&&seen(gb)){var r=gb.getBoundingClientRect(),rr=r.right;[].forEach.call(gb.querySelectorAll("button"),function(x){if(!seen(x))return;var b=x.getBoundingClientRect();if(b.width&&b.right>rr)rr=b.right});
+  if(ui.dockH==="compact"&&seen(gb)){var r=gb.getBoundingClientRect(),rr=r.right;[].forEach.call(gb.querySelectorAll("button"),function(x){if(!seen(x))return;var b=x.getBoundingClientRect();if(b.width&&b.right>rr)rr=b.right});
     c.style.left=((r.left-pr.left)/q<ph.offsetWidth/2?Math.round((rr-pr.left)/q+12):16)+"px";c.style.bottom=Math.round(H-(r.bottom-pr.top)/q+Math.max(0,(r.height/q-44)/2))+"px";return}
   var top=H-16;[".gdock",".gd-hide",".gbubble"].forEach(function(s){var e=ph.querySelector(s);if(!seen(e))return;var b=e.getBoundingClientRect();if(b.height)top=Math.min(top,(b.top-pr.top)/q)});
   c.style.left="16px";c.style.bottom=Math.round(H-top+10)+"px"}
@@ -88,23 +88,23 @@ ph.addEventListener("click",function(e){var b=e.target.closest("[data-tm]");if(!
 
 /* ----- the Editor: Guide › 2 · The tour › Tell me more; a written step's Tell me more words in Specific Marker › 3 · Guide script ----- */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var at=d.querySelector('[data-fo="s7auto"]');if(!at)return d.innerHTML;
-  var body=row("Tell me more",pseg("guideCfg.tmOn",["true","false"],["On","Off"]),"On: while a step with more to tell plays, the guide panel shows Tell me more (only there); a tap says the step's deep part after its line, then the tour goes on. The panel's Next is Skip ahead. A step's deep part: from the card, the words its rule left out (a text's further sentences beyond the cap, the facts beyond three, the pictures' own captions), never a fact the tour says elsewhere; in a written tour, its Tell me more words (Specific Marker › 3 · Guide script). Ask the mascot's “tell me more” (typed or spoken) does the same. Off: no chip, no deep parts, Next is Skip ahead all the same.")+
-    row("Start deep for",psel("guideCfg.tmStart",[["none","No one: each visitor finds their pace"],["lover","Tour lovers (the guide's length Deep)"],["all","Everyone"]]),"The pace a tour starts at. Deep: each step's deep part follows its line by itself (the chip says More coming; a tap on it keeps that step short). Tour lovers: a visitor whose guide's length is Deep (Audiences › Looks per audience, the Expert's by default, or their own Settings › The guide). The visitor's own pace then takes over: 3 Tell me more in a row make it deep, 3 Skip ahead in a row make it lighter again.",true)+
+  var body=row("Tell me more",pseg("D.guide.tmOn",["true","false"],["On","Off"]),"On: while a step with more to tell plays, the guide panel shows Tell me more (only there); a tap says the step's deep part after its line, then the tour goes on. The panel's Next is Skip ahead. A step's deep part: from the card, the words its rule left out (a text's further sentences beyond the cap, the facts beyond three, the pictures' own captions), never a fact the tour says elsewhere; in a written tour, its Tell me more words (Specific Marker › 3 · Guide script). Ask the mascot's “tell me more” (typed or spoken) does the same. Off: no chip, no deep parts, Next is Skip ahead all the same.")+
+    row("Start deep for",psel("D.guide.tmStart",[["none","No one: each visitor finds their pace"],["lover","Tour lovers (the guide's length Deep)"],["all","Everyone"]]),"The pace a tour starts at. Deep: each step's deep part follows its line by itself (the chip says More coming; a tap on it keeps that step short). Tour lovers: a visitor whose guide's length is Deep (Audiences › Looks per audience, the Expert's by default, or their own Settings › The guide). The visitor's own pace then takes over: 3 Tell me more in a row make it deep, 3 Skip ahead in a row make it lighter again.",true)+
     '<div class="note fixed">Fixed rules: the chip only where a step has more to tell; the visitor\'s pace is kept for the tour (3 in a row either way); no fact twice, with every deep part heard (a deep part never tells a fact a later step says, nor one an earlier deep part said); the tour\'s length everywhere (the hero, the ✦ menu, the invitation, the teaser) is the short version\'s minutes, the step list shows both. Not the games\' Short / Deep (3 · Games on the tour): their rhythm, not the words.</div>'+
     '<div class="note">Unity: GuideTourBuilder adds each step\'s deep units (plain C#, the same fact keys); a written step\'s More is a LocalizedString in its GuideScript asset; GuideTourPlayer keeps the pace for the tour; the chip is a UI Toolkit Button above the guide panel.</div>';
   at.insertAdjacentHTML("afterend",comp("s7more","the visitor's own pace: a step's deeper words, when asked",body));var f=innerOf(d,"s7more");if(f)f.insertAdjacentHTML("beforeend",ownbar("s7more")+ownPanels("s7more"));return d.innerHTML});
-on("edMarker.html",function(h){var d=document.createElement("div");d.innerHTML=h;var m3=innerOf(d,"m3");if(!m3)return d.innerHTML;var all=S.fullSteps||S.guideSteps;
+on("edMarker.html",function(h){var d=document.createElement("div");d.innerHTML=h;var m3=innerOf(d,"m3");if(!m3)return d.innerHTML;var all=ui.fullSteps||D.tour.guideSteps;
   m3.querySelectorAll('tr.pick[data-pick="gstep"]').forEach(function(r){var s=byId(all,r.dataset.id),mo=s&&s.more&&String(L(s.more)||"").trim();if(!mo)return;var c=r.querySelector("td:last-child");if(c)c.insertAdjacentHTML("beforeend",'<div class="atmore"><small>Tell me more</small> '+esc(mo)+'</div>')});
-  var st=S.sel.gstep&&byId(all,S.sel.gstep),slot=st&&m3.querySelector('[data-pick="gstep"][data-id="'+cssq(st.id)+'"] + tr.slot td:last-child');
+  var st=ui.sel.gstep&&byId(all,ui.sel.gstep),slot=st&&m3.querySelector('[data-pick="gstep"][data-id="'+cssq(st.id)+'"] + tr.slot td:last-child');
   /* under the step's own words (its Says boxes, or the note that it reads the block's own words), before the games' fields */
   var anchor=slot?[].filter.call(slot.querySelectorAll(":scope > .row, :scope > .note"),function(x){var l=x.querySelector(":scope > label");return x.classList.contains("note")&&/^Reads the block/.test(x.textContent)||!!l&&/^(Says · |Order$)/.test(l.textContent)}).pop():null;
   if(slot&&!/^(teaser|end)$/.test(st.act))(anchor||slot).insertAdjacentHTML(anchor?"afterend":"beforeend",langCodes().map(function(lg,j){return row("Tell me more · "+lg.toUpperCase(),'<textarea class="u" rows="2" data-gmore="'+esc(st.id)+'|'+lg+'" placeholder="No deeper words: this step has no Tell me more">'+esc(st.more&&st.more[lg]||"")+'</textarea>',j?"":"This step's deep part: said after its line when the visitor taps Tell me more (or at their deep pace), then the tour goes on. Empty: no Tell me more at this step.")}).join(""));
   return d.innerHTML});
-ed.addEventListener("input",function(e){var t=e.target;if(!t.dataset||!t.dataset.gmore)return;e.stopImmediatePropagation();var q=t.dataset.gmore.split("|"),st=byId(S.fullSteps||S.guideSteps,q[0]);if(!st)return;st.more=st.more||{};st.more[q[1]]=t.value},true);
-BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(tmOn|tmStart|"));
+ed.addEventListener("input",function(e){var t=e.target;if(!t.dataset||!t.dataset.gmore)return;e.stopImmediatePropagation();var q=t.dataset.gmore.split("|"),st=byId(ui.fullSteps||D.tour.guideSteps,q[0]);if(!st)return;st.more=st.more||{};st.more[q[1]]=t.value},true);
+BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("D\\.guide\\.(","D\\.guide\\.(tmOn|tmStart|"));
 /* each row's demo: the tour at its first step with more to tell, at Mini: the chip (Tell me more); Start deep for: the deep part playing */
-function tmDemoAt(play){var gen=S.guideSteps.some(function(s){return!!tmDeepOf(s)})?null:atSteps(),list=gen||S.guideSteps,st=list.filter(function(s){return!!tmDeepOf(s)})[0];
-  if(!st){if(G.on)stopTour();S.view="card";S.stop="full";renderPhone(false);if(typeof gdChip==="function"){gdChip("No step of this tour has more to tell");clearTimeout(G.tmChipT);G.tmChipT=setTimeout(function(){gdChip(null)},3200)}return}
-  if(gen)atDemoAt(null,st.id);else{if(G.on)stopTour();S.view=st.view;S.stop="full";S.introSeen=true;G.demoTour=true;startTour({id:st.id});G.demoTour=false}
-  S.dockH="mini";renderGuide();if(play&&S.guideCfg.tmOn){stopSpeech();G.tm.want=G.i;next()}}
-rowDemos({"guideCfg.tmOn":{act:function(){tmDemoAt(false)},ringAfter:700,ring:".gtmore|.gdock"},"guideCfg.tmStart":{act:function(){tmDemoAt(true)},ringAfter:700,ring:".gdock|.gcap"}});
+function tmDemoAt(play){var gen=D.tour.guideSteps.some(function(s){return!!tmDeepOf(s)})?null:atSteps(),list=gen||D.tour.guideSteps,st=list.filter(function(s){return!!tmDeepOf(s)})[0];
+  if(!st){if(G.on)stopTour();ui.view="card";ui.stop="full";renderPhone(false);if(typeof gdChip==="function"){gdChip("No step of this tour has more to tell");clearTimeout(G.tmChipT);G.tmChipT=setTimeout(function(){gdChip(null)},3200)}return}
+  if(gen)atDemoAt(null,st.id);else{if(G.on)stopTour();ui.view=st.view;ui.stop="full";P.introSeen=true;G.demoTour=true;startTour({id:st.id});G.demoTour=false}
+  ui.dockH="mini";renderGuide();if(play&&D.guide.tmOn){stopSpeech();G.tm.want=G.i;next()}}
+rowDemos({"D.guide.tmOn":{act:function(){tmDemoAt(false)},ringAfter:700,ring:".gtmore|.gdock"},"D.guide.tmStart":{act:function(){tmDemoAt(true)},ringAfter:700,ring:".gdock|.gcap"}});

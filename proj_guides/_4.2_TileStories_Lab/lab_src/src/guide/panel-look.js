@@ -12,13 +12,13 @@
    Unity: the glass a pre-blurred backdrop (a URP blur of the camera into a RenderTexture, sampled under the panel; a frosted texture when
    blur is off), the light shapes gradient sprites moved by a slow DOTween loop, the rim a 9-slice border image, the inner light a
    gradient image; one USS class per look on the dock's and the teleprompter's root (sk-light, sk-aurora, sk-dark). */
-S.guideCfg.pSkin="theme";
+D.guide.pSkin="theme";
 var PSKINS=[["theme","Follows the theme"],["light","Light glass"],["aurora","Aurora"],["dark","Dark"]];
-function pSkin(){var v=S.guideCfg.pSkin;return v==="light"||v==="aurora"||v==="dark"?v:(S.dark?"aurora":"light")}
+function pSkin(){var v=D.guide.pSkin;return v==="light"||v==="aurora"||v==="dark"?v:(P.dark?"aurora":"light")}
 on("dock.cls",function(c){return c+" sk-"+pSkin()});
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
-  addRows(d,"s7cap",row("The panels' look",pseg("guideCfg.pSkin",PSKINS.map(function(x){return x[0]}),PSKINS.map(function(x){return x[1]})),"The surface of the Mini, the open panel and the teleprompter, together. Light glass: frosted white glass, soft pastel light (pink, blue, mint) drifting very slowly behind, a fine bright rim. Aurora: deep blue glass with coloured light drifting, a softly glowing mint rim, Play a dark pill with a green glow. Dark: the dark ink glass of before. Follows the theme: Light glass in light mode, Aurora in dark mode. The drift is one slow loop (26-28 s), still with Reduce Motion; every word stays 4.5:1 or more. It dresses the Ink glass Look (the default) and the teleprompter; Paper glass, Player sheet and the Teleprompter Look keep their own paper. Unity: a pre-blurred backdrop (URP blur into a RenderTexture) or a frosted texture, gradient sprites on a slow tween, a 9-slice rim."));
+  addRows(d,"s7cap",row("The panels' look",pseg("D.guide.pSkin",PSKINS.map(function(x){return x[0]}),PSKINS.map(function(x){return x[1]})),"The surface of the Mini, the open panel and the teleprompter, together. Light glass: frosted white glass, soft pastel light (pink, blue, mint) drifting very slowly behind, a fine bright rim. Aurora: deep blue glass with coloured light drifting, a softly glowing mint rim, Play a dark pill with a green glow. Dark: the dark ink glass of before. Follows the theme: Light glass in light mode, Aurora in dark mode. The drift is one slow loop (26-28 s), still with Reduce Motion; every word stays 4.5:1 or more. It dresses the Ink glass Look (the default) and the teleprompter; Paper glass, Player sheet and the Teleprompter Look keep their own paper. Unity: a pre-blurred backdrop (URP blur into a RenderTexture) or a frosted texture, gradient sprites on a slow tween, a 9-slice rim."));
   return d.innerHTML});
 /* the phone's signature (the self-test): the dock's surface as the visitor sees it */
-on("modelSig.sig",function(h){return sigWant(/guideCfg\.pSkin/)?h+'#skin:<div class="gdock lk-'+dkLook()+' sk-'+pSkin()+'"></div>':h});
-rowDemos({"guideCfg.pSkin":{tour:"g2",dock:"mini",ring:".gdock"}});
+on("modelSig.sig",function(h){return sigWant(/D\.guide\.pSkin/)?h+'#skin:<div class="gdock lk-'+dkLook()+' sk-'+pSkin()+'"></div>':h});
+rowDemos({"D.guide.pSkin":{tour:"g2",dock:"mini",ring:".gdock"}});

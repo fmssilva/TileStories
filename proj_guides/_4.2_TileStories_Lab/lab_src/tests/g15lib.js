@@ -57,7 +57,7 @@ var covered=[];function targets(){var out=[],seen=[];covered=[];roots(TEXTROOTS+
       out.push({el:name(e),in:name(rt),w:+r.w.toFixed(1),h:+r.h.toFixed(1),ok:hit.every(Boolean)&&r.w>=43.5&&r.h>=43.5,hit:hit.map(function(x){return x?1:0}).join("")})})});return out}
 /* the words being told: the told block's text in view, and the captions' current line */
 /* at a seam (a beat card showing) no step is being told; a game inside a step (the strip, the word card) is judged against it */
-function told(){var out=[],sv=R(scr);if(G.on&&!(G.gd&&G.gd.bt)&&typeof stepEl==="function"){var st=stepEl(S.guideSteps[G.i]);if(st){var w=document.createTreeWalker(st,NodeFilter.SHOW_TEXT),n,rg=document.createRange();
+function told(){var out=[],sv=R(scr);if(G.on&&!(G.gd&&G.gd.bt)&&typeof stepEl==="function"){var st=stepEl(D.tour.guideSteps[G.i]);if(st){var w=document.createTreeWalker(st,NodeFilter.SHOW_TEXT),n,rg=document.createRange();
     while((n=w.nextNode())){if(!/\S/.test(n.nodeValue))continue;if(!shown(n.parentElement))continue;rg.selectNodeContents(n);[].forEach.call(rg.getClientRects(),function(q){var a={l:Math.max(q.left,sv.l),t:Math.max(q.top,sv.t),r:Math.min(q.right,sv.r),b:Math.min(q.bottom,sv.b)};if(a.r-a.l>1&&a.b-a.t>1)out.push({k:"block",r:a})})}}}
   var cap=ph.querySelector(".gd-tp .tp-now");if(cap&&shown(cap)){[].forEach.call(cap.querySelectorAll(".tw"),function(t){if(shown(t))out.push({k:"captions",r:R(t)})})}return out}
 /* Azu's box has a transparent margin round its drawing (the tile, the 3D model's canvas): a contact of 2 px or less is its margin, not

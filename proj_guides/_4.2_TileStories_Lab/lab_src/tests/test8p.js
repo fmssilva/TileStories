@@ -1,6 +1,6 @@
 // v8p checks (Playwright + the installed Edge): node test8p.js -> PASS/FAIL per check
-const { chromium } = require('./pw');
-const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
+const { chromium, labUrl } = require('./pw');
+const url = labUrl('#probe');
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe' });
   const p = await b.newPage({ viewport: { width: 1400, height: 900 } });
@@ -8,7 +8,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 90000 }); await p.waitForTimeout(500);
   const R = src => p.evaluate(s => LAB.run(s), src);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
-  await R('S.hints.on=false;S.previewBar=false;S.lang="en";S.guideMute=true;sampleFn=null;S.camCfg.fab=false;S.camCfg.names="middle";S.view="card";S.stop="closed";S.camX=.4;renderAll(false)');
+  await R('D.card.hints.on=false;LAB.previewBar=false;P.lang="en";P.guideMute=true;sampleFn=null;D.wall.camCfg.fab=false;D.wall.camCfg.names="middle";ui.view="card";ui.stop="closed";ui.camX=.4;renderAll(false)');
   // 1. the way in names the point nearest the middle (round 7: the guide's button replaces the pill; its menu item names the point)
   await p.locator('#ph .gbtn').click(); await p.waitForTimeout(200);
   const pill = await R('var b=ph.querySelector("[data-gbgo=view]");[!!b,b&&b.textContent,camView().central&&camView().central.name]');
@@ -39,10 +39,10 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // 4. moving the phone (a drag on the wall) changes what is in view and the middle point
   const before = await R('camView().central.id');
   const box = await p.locator('#ph').boundingBox(); await p.mouse.move(box.x + 40, box.y + 260); await p.mouse.down(); await p.mouse.move(box.x + 330, box.y + 260, { steps: 8 }); await p.mouse.up(); await p.waitForTimeout(200);
-  const after = await R('[S.camX,camView().central&&camView().central.id,ph.querySelector(".ca-pill").textContent]');
-  ok('A drag on the wall (moving the phone): the view and the middle point change, and the pill follows', after[0] < 0.5 && after[1] !== before && after[2].indexOf(after[1] ? (await R(`nameMid(L(S.wallPois.filter(function(p){return p.id==="${after[1]}"})[0].name))`)) : '') > 0, [before, after]);
+  const after = await R('[ui.camX,camView().central&&camView().central.id,ph.querySelector(".ca-pill").textContent]');
+  ok('A drag on the wall (moving the phone): the view and the middle point change, and the pill follows', after[0] < 0.5 && after[1] !== before && after[2].indexOf(after[1] ? (await R(`nameMid(L(D.wall.wallPois.filter(function(p){return p.id==="${after[1]}"})[0].name))`)) : '') > 0, [before, after]);
   // 5. with the model: its tools light the points and draw the route (a stand-in model)
-  await R('S.camX=.4;camLayer()');
+  await R('ui.camX=.4;camLayer()');
   await R('window.SAMPLE=[];sampleFn=function(prompt,opts){SAMPLE.push(prompt);var t=opts.tools;t[0].execute({ids:[camView().pois[0].id]});t[1].execute({ids:camView().pois.map(function(p){return p.id}).slice(0,2)});return Promise.resolve({text:"Here you go."})}');
   await p.locator('#ph #caq').fill('Where should I start?'); await p.locator('#ph .ca-form button').click(); await p.waitForTimeout(500);
   const ai = await R('[ph.querySelector(".ca-ans").textContent,ph.querySelectorAll(".cpin.lit").length,[].map.call(ph.querySelectorAll(".cpin i"),function(i){return i.textContent}).filter(Boolean).length,/VIEW: \\{"in_view"/.test(SAMPLE[0])&&!/base64|image/.test(SAMPLE[0])]');
@@ -51,14 +51,14 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // 6. close; a point with a card opens it
   await p.locator('#ph [data-camclose]').click(); await p.waitForTimeout(200);
   ok('Close: the panel and the pins go, the wall\'s markers are back', await R('!ph.classList.contains("camopen")&&!ph.querySelector(".camask.open")'));
-  await R('S.camX=.4;renderAll(false);G.cam.open=true;camLayer()'); await p.locator('#ph [data-cpin="painting"]').click({ force: true }); await p.waitForTimeout(400);
-  ok('A tap on a point with a card opens its card', await R('S.stop') === 'half');
+  await R('ui.camX=.4;renderAll(false);G.cam.open=true;camLayer()'); await p.locator('#ph [data-cpin="painting"]').click({ force: true }); await p.waitForTimeout(400);
+  ok('A tap on a point with a card opens its card', await R('ui.stop') === 'half');
   // 7. the words' contrast (the panel, the pins' names)
-  await R('S.stop="closed";renderAll(false);G.cam.open=true;camSay("Test.")');
+  await R('ui.stop="closed";renderAll(false);G.cam.open=true;camSay("Test.")');
   const c = await R('var px=function(c){var m=c.match(/[\\d.]+/g).map(Number);return[m[0],m[1],m[2]]},lum=function(a){return a.map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce(function(s,v,i){return s+v*[.2126,.7152,.0722][i]},0)},cr=function(f,b){var x=lum(px(f)),y=lum(px(b));return Math.round((Math.max(x,y)+.05)/(Math.min(x,y)+.05)*100)/100};[cr(getComputedStyle(ph.querySelector(".ca-ans")).color,getComputedStyle(ph.querySelector(".camask")).backgroundColor),cr("rgb(255,255,255)","rgb(16,18,22)")]');
   ok('The panel\'s words and the pins\' names at 4.5:1 or more', c.every(v => v >= 4.5), c);
   // 8. the Editor
-  ok('Editor: Ask about the view in What the visitor sees, after Answers from (round 14), its rows, the wall\'s points and its words', await R('S.tab="guide";renderEditor();var f=ed.querySelector(\'[data-fo="s7cam"]\');!!f&&f.parentElement.closest("[data-fo]").dataset.fo==="s7ask"&&f.previousElementSibling===rowEl(ed,"s7ask","Answers from")&&/Suggestions/.test(f.textContent)&&f.querySelectorAll("tbody tr").length===S.wallPois.length&&(TXO.s7cam||[]).length===26'));
+  ok('Editor: Ask about the view in What the visitor sees, after Answers from (round 14), its rows, the wall\'s points and its words', await R('ui.tab="guide";renderEditor();var f=ed.querySelector(\'[data-fo="s7cam"]\');!!f&&f.parentElement.closest("[data-fo]").dataset.fo==="s7ask"&&f.previousElementSibling===rowEl(ed,"s7ask","Answers from")&&/Suggestions/.test(f.textContent)&&f.querySelectorAll("tbody tr").length===D.wall.wallPois.length&&(TXO.s7cam||[]).length===26'));
   ok('no page errors', errs.length === 0, errs.slice(0, 3));
   console.log(fails ? `${fails} FAILED` : 'ALL PASS');
   await b.close();

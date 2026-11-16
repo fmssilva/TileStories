@@ -1,6 +1,6 @@
 // v8q checks (Playwright + the installed Edge, WebGL by SwiftShader): node test8q.js -> PASS/FAIL per check
-const { chromium } = require('./pw');
-const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-lab.html#probe';
+const { chromium, labUrl } = require('./pw');
+const url = labUrl('#probe');
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
   const p = await b.newPage({ viewport: { width: 1400, height: 900 } });
@@ -8,7 +8,7 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 90000 }); await p.waitForTimeout(500);
   const R = src => p.evaluate(s => LAB.run(s), src);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
-  await R('S.hints.on=false;S.previewBar=false;S.lang="en";S.guideMute=true;S.introSeen=true;sampleFn=null;S.guideCfg.azuStyle="light";S.view="card";S.stop="full";renderAll(false)');
+  await R('D.card.hints.on=false;LAB.previewBar=false;P.lang="en";P.guideMute=true;P.introSeen=true;sampleFn=null;D.guide.azuStyle="light";ui.view="card";ui.stop="full";renderAll(false)');
   // 1. the tile of light draws in the guide's Azu
   await R('startTour()'); await p.waitForTimeout(900);
   const g1 = await R('var m=ph.querySelector(".mascot");[!!m.querySelector("canvas.azgl"),getComputedStyle(m.querySelector("svg")).display,AzuGL.pixel()]');
@@ -22,16 +22,16 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   // set and read in one call: the tour's own lip timer runs between two calls and would close the mouth again
   ok('The mouth opens with the words (the same shapes as the 2D Azu)', await R('azMouth(ph.querySelector(".mascot"),"A");AzuGL.get("talk")') === 1);
   // 3. peek: from behind the block's top edge
-  await R('stopTour();S.view="card";S.stop="full";renderPhone(false);var el=scr.querySelector(\'[data-ref="b:b_facts"]\');scr.scrollTop+=el.getBoundingClientRect().top-scr.getBoundingClientRect().top-200;azPeek(el)'); await p.waitForTimeout(900);
+  await R('stopTour();ui.view="card";ui.stop="full";renderPhone(false);var el=scr.querySelector(\'[data-ref="b:b_facts"]\');scr.scrollTop+=el.getBoundingClientRect().top-scr.getBoundingClientRect().top-200;azPeek(el)'); await p.waitForTimeout(900);
   const pk = await R('var x=ph.querySelector(".azpeek"),e=scr.querySelector(\'[data-ref="b:b_facts"]\');x?[Math.round(x.getBoundingClientRect().bottom-e.getBoundingClientRect().top),x.classList.contains("up"),getComputedStyle(x).overflow,!!x.querySelector("canvas")]:null');
   ok('Peek: Azu rises in a box whose bottom is the block\'s top edge (it clips), so it comes from behind the block', pk && Math.abs(pk[0]) <= 2 && pk[1] && pk[2] === 'hidden' && pk[3], pk);
   await p.waitForTimeout(3600);
   ok('...and sinks back after a moment', await R('!ph.querySelector(".azpeek")'));
   // 4. the walk: Azu leaves as light, travels to the point on the wall, becomes a tile there (smaller)
-  await R('S.stop="closed";S.camX=.4;renderPhone(false);G.cam.open=true;camLayer();azWalk("torreao")'); await p.waitForTimeout(500);
+  await R('ui.stop="closed";ui.camX=.4;renderPhone(false);G.cam.open=true;camLayer();azWalk("torreao")'); await p.waitForTimeout(500);
   const mid = await R('[G.azWalk,AzuGL.get("to")]');
   await p.waitForTimeout(1600);
-  const end = await R('var w=ph.querySelector(".azwalker"),m=w.style.transform.match(/translate\\(([-\\d.]+)px, ?([-\\d.]+)px\\) scale\\(([\\d.]+)\\)/),t=poiScreen(S.wallPois.filter(function(p){return p.id==="torreao"})[0]);[+m[1]+32-t.x,+m[2]+70-t.y,+m[3],w.classList.contains("arrived"),G.azWalk,AzuGL.get("to")]');
+  const end = await R('var w=ph.querySelector(".azwalker"),m=w.style.transform.match(/translate\\(([-\\d.]+)px, ?([-\\d.]+)px\\) scale\\(([\\d.]+)\\)/),t=poiScreen(D.wall.wallPois.filter(function(p){return p.id==="torreao"})[0]);[+m[1]+32-t.x,+m[2]+70-t.y,+m[3],w.classList.contains("arrived"),G.azWalk,AzuGL.get("to")]');
   ok('The walk: light while it travels', mid[0] === true && mid[1] === 1, mid);
   ok('...it arrives on the point (within 2 px), smaller, and becomes a tile', Math.abs(end[0]) < 2 && Math.abs(end[1]) < 2 && end[2] < 0.7 && end[3] && end[4] === false && end[5] === 0, end);
   // 5. in Ask about the view, an answer that lights a point sends Azu there
@@ -41,15 +41,15 @@ const url = 'file:///' + __dirname.replace(/\\/g, '/') + '/../block-components-l
   await R('G.cam.open=false;camLayer()');
   ok('Closing the panel sends Azu home (the walker goes)', await R('!ph.querySelector(".azwalker")'));
   // 6. Tile (2.5D): the drawing, no canvas
-  await R('S.guideCfg.azuStyle="tile";S.stop="full";renderPhone(false);startTour()'); await p.waitForTimeout(500);
+  await R('D.guide.azuStyle="tile";ui.stop="full";renderPhone(false);startTour()'); await p.waitForTimeout(500);
   ok('Style Tile: the 2.5D drawing, no canvas', await R('var m=ph.querySelector(".mascot");!m.querySelector("canvas")&&getComputedStyle(m.querySelector("svg")).display!=="none"'));
-  await R('stopTour();S.guideCfg.azuStyle="light"');
+  await R('stopTour();D.guide.azuStyle="light"');
   // 7. Reduce Motion: the walk is a cut, the shader still
-  await R('S.reduce=true;S.stop="closed";renderPhone(false);G.cam.open=true;camLayer();azWalk("painting")'); await p.waitForTimeout(150);
-  const rm = await R('var w=ph.querySelector(".azwalker");[w?w.className:null,S.stop,G.cam.open,S.guideCfg.azuStyle,G.on]'); ok('Reduce Motion: the walk is a cut (it is already there)', rm[0] && rm[0].indexOf('arrived') >= 0, rm);
-  await R('S.reduce=false;G.cam.open=false;camLayer()');
+  await R('P.reduce=true;ui.stop="closed";renderPhone(false);G.cam.open=true;camLayer();azWalk("painting")'); await p.waitForTimeout(150);
+  const rm = await R('var w=ph.querySelector(".azwalker");[w?w.className:null,ui.stop,G.cam.open,D.guide.azuStyle,G.on]'); ok('Reduce Motion: the walk is a cut (it is already there)', rm[0] && rm[0].indexOf('arrived') >= 0, rm);
+  await R('P.reduce=false;G.cam.open=false;camLayer()');
   // 8. the Editor
-  ok('Editor: Mascot has Style, Walks to the wall and three Try', await R('S.tab="guide";renderEditor();var f=ed.querySelector(\'[data-fo="s7mascot"]\');!!f&&/Tile of light/.test(f.textContent)&&/Walks to the wall/.test(f.textContent)&&f.querySelectorAll("[data-azqtry]").length===3'));
+  ok('Editor: Mascot has Style, Walks to the wall and three Try', await R('ui.tab="guide";renderEditor();var f=ed.querySelector(\'[data-fo="s7mascot"]\');!!f&&/Tile of light/.test(f.textContent)&&/Walks to the wall/.test(f.textContent)&&f.querySelectorAll("[data-azqtry]").length===3'));
   ok('no page errors', errs.length === 0, errs.slice(0, 3));
   console.log(fails ? `${fails} FAILED` : 'ALL PASS');
   await b.close();

@@ -4,11 +4,11 @@
    marker) and The wall (Ask about the view, The ✦); Content (spoken once the visitor has heard the guide this visit, else a bubble) with
    What's in view (one item a wall point: Azu's remarks, the 400 ms timer they had is gone) and Tours (A tour of {point}). Each kind has
    its On, its cap a visit and its gap; each group its On, its weight, its own cap a visit and its own gap (0: none of its own; a group's
-   gap stands in for its kind's for its items); the kinds' weights along the visit are data (round 5: S.guidance.mix, Overall › Mix along the visit, read by gdScore through
+   gap stands in for its kind's for its items); the kinds' weights along the visit are data (round 5: D.guidance.mix, Overall › Mix along the visit, read by gdScore through
    each item's kindMix). Round 5 also adds Talkativeness (one knob over the room, the limits and the kinds' caps: GD_TALK) and the presets
    (GD_PRESETS: each writes the Overall and kind values, never the items; Custom lists its changes). A per-point item
    (perPoint) is one item for each point of the wall in view (gdItems: "The Ribeira Palace in the middle"), each with its own memory, edited
-   once. An item's words are in Languages & Terms (S.tx), owned by the item's foldout (gd:i:<id>); the bubble's own words (Fewer like
+   once. An item's words are in Languages & Terms (D.words.tx), owned by the item's foldout (gd:i:<id>); the bubble's own words (Fewer like
    this?) by Overall (gd:overall). The events the items wait for or retire on are named in GD_EVENTS (the same names in Unity). Unity:
    GuidanceCatalog, a ScriptableObject (kinds, groups, items; a per-point item expanded from the wall's POI list at load; the words as
    CardStrings keys), read by GuidanceScheduler.
@@ -18,7 +18,7 @@
    of the wall, its lines the point's own Jokes in Specific Marker › Guide script, a point with none says none; Treasure hunt?: Family
    only, once a visit, after a card, a tap starts Ask about the view's hunt; Seasonal: one of its lines, the one whose window of dates
    holds today, a Solemn day's line (1 November, 1755) is a remembrance and rests every joke that day). */
-S.guidance={on:true,breathing:15,cueRoom:5,perMinute:2,perVisit:30,freshTau:120,learnIgnore:true,learnDismiss:true,fewer:true,remember:true,
+D.guidance={on:true,breathing:15,cueRoom:5,perMinute:2,perVisit:30,freshTau:120,learnIgnore:true,learnDismiss:true,fewer:true,remember:true,
   /* round 9: Things to try in the ✦ menu (Overall › The visitor's controls; Settings › The guide always links it) */
   tryMenu:true,
   /* round 5: Talkativeness (Quiet / Balanced / Chatty), the preset last chosen (First visit: these values), the Mix along the visit (each kind's
@@ -36,7 +36,7 @@ S.guidance={on:true,breathing:15,cueRoom:5,perMinute:2,perVisit:30,freshTau:120,
       {id:"pages",name:"First pages",mode:"order",launch:true,seq:true,on:true,items:["pg_hello","pg_aud","pg_camera","pg_wall"]},
       /* round 9: The guide (_3.8 section 3.1: Pause any time…), pulled only for now: its item is a row of Things to try and an answer of Ask
          Azu's how do I…, never on its own (its push, between two steps of a tour, waits for the developer's call). Last in the list: code that finds a
-         group by its place (guidance.kinds.0.groups.N) keeps its N */
+         group by its place (D.guidance.kinds.0.groups.N) keeps its N */
       {id:"guide",name:"The guide",mode:"all",pulled:true,on:true,items:["pause"]}]},
     {id:"content",name:"Content",spoken:"heard",on:true,cap:12,gap:60,groups:[
       {id:"inview",name:"What's in view",mode:"all",on:true,weight:1,cap:12,gap:7,items:["inview"]},
@@ -202,19 +202,19 @@ S.guidance={on:true,breathing:15,cueRoom:5,perMinute:2,perVisit:30,freshTau:120,
       about:"nothing",mustSee:false,goes:"stays",points:false,focus:"none",tap:"close",when:"pause",screen:"wall",notBefore:60,
       importance:2,essential:false,shows:"visit",max:1,again:0,doneWhen:"",teaches:"",onScreen:"auto",duringTour:"never",along:"kind"}}};
 /* each point's own Jokes (Specific Marker › Guide script › Jokes: 0-3 lines a point, each in every language; owner m3): the demo points' */
-S.ptJokes={painting:["ptj_painting_1"],torreao:["ptj_torreao_1"],river:["ptj_river_1"]};
+D.tour.ptJokes={painting:["ptj_painting_1"],torreao:["ptj_torreao_1"],river:["ptj_river_1"]};
 /* a point's jokes with words in the visitor's language (a point with none: none) */
-function gdPtJokes(id){return(S.ptJokes[id]||[]).filter(function(k){return gdHasWords(k)})}
+function gdPtJokes(id){return(D.tour.ptJokes[id]||[]).filter(function(k){return gdHasWords(k)})}
 /* today (Preview & Test › Today is, else the phone's date) as MM-DD; a window of dates holds it (From and To included; one that runs
    over the new year, 12-01 to 01-06, too); the seasonal line whose window holds today */
 function gdTodayISO(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}
-function gdTodayMD(){var t=S.ui&&S.ui.gdToday||gdTodayISO();return String(t).slice(5,10)}
+function gdTodayMD(){var t=LAB.gdToday||gdTodayISO();return String(t).slice(5,10)}
 function gdInWindow(md,a,b){if(!a||!b||!md)return false;return a<=b?md>=a&&md<=b:md>=a||md<=b}
 function gdSeasonOf(it,md){return(it.seasons||[]).filter(function(x){return gdInWindow(md,x.from,x.to)&&gdHasWords(x.says)})[0]||null}
 var GD_MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 function gdDayWords(md){var p=String(md||"").split("-");return(+p[1]||"?")+" "+(GD_MONTHS[(+p[0]||1)-1]||"?")}
 /* a Solemn day: a seasonal line marked Solemn holds today (no joke that day) */
-function gdSolemnDay(md){var sv=null;Object.keys(S.guidance.items).forEach(function(id){var it=S.guidance.items[id];if(it.seasons&&it.on&&!it.deleted)(it.seasons||[]).forEach(function(x){if(x.solemn&&gdInWindow(md,x.from,x.to))sv=x})});return sv}
+function gdSolemnDay(md){var sv=null;Object.keys(D.guidance.items).forEach(function(id){var it=D.guidance.items[id];if(it.seasons&&it.on&&!it.deleted)(it.seasons||[]).forEach(function(x){if(x.solemn&&gdInWindow(md,x.from,x.to))sv=x})});return sv}
 /* the events (study 3.2): their names in the Lab and in Unity, and the words the Editor reads them back with */
 /* the events as a condition in the read-back ("until the visitor opens a card") */
 var GD_UNTIL={card:"the visitor opens a card",view:"the visitor opens Ask about the view",tour:"the visitor hears a step of a tour",ask:"the visitor asks a question",menu:"the visitor opens the ✦ menu",hunt:"the visitor finds a treasure",
@@ -225,7 +225,7 @@ var GD_EVENTS={visit:"the visit started",marker:"a marker in view",moving:"the p
   menu:"the visitor opened the ✦ menu",poked:"the visitor poked the mascot",idle:"the visitor idle",opened:"the card opened",hunt:"the visitor found the treasure",
   navbar:"the visitor used the Navigation Bar",locate:"the visitor tapped the Locate Button",ba:"the visitor dragged a Before / After",strip:"the visitor swiped a strip",pause:"the visitor paused the guide"};
 /* How to use the card's steps as events: a step seen (its line heard) retires the cue whose Done when names it */
-["wk_grab","wk_settings","wk_bar","wk_locate","wk_block"].forEach(function(id){var n=S.guidance.items[id].label;GD_EVENTS[id]="the visitor saw How to use the card's step “"+n+"”";GD_UNTIL[id]="the visitor has seen it in How to use the card"});
+["wk_grab","wk_settings","wk_bar","wk_locate","wk_block"].forEach(function(id){var n=D.guidance.items[id].label;GD_EVENTS[id]="the visitor saw How to use the card's step “"+n+"”";GD_UNTIL[id]="the visitor has seen it in How to use the card"});
 /* the features used (study 3.2's events the Lab has): the milestones of the stage of the visit */
 var GD_FEATURES=[["card","card opened"],["tour","a tour step heard"],["ask","a question asked"],["view","Ask about the view opened"]];
 /* the values an item's fields take, in the Editor's words */
@@ -241,11 +241,11 @@ var GD_CUE_NO={grab:"the grabber nudges only as the card opens at Half",locate:"
   ba:"no Before / After in view",strip:"no strip with more to the side in view",term:"no underlined word in view"};
 var GD_TOUR=[["never","Never"],["between","Between steps"]];
 var GD_ALONG=[["kind","As the kind"],["steady","Steady"],["early","Early"],["late","Late"]];
-/* the stage of the visit, s from 0 to 1: the kinds' weights at s = 0 / 0.3 / 1 (the Mix along the visit: data, S.guidance.mix, Overall ›
+/* the stage of the visit, s from 0 to 1: the kinds' weights at s = 0 / 0.3 / 1 (the Mix along the visit: data, D.guidance.mix, Overall ›
    Mix along the visit), and the items' curves along the visit at the same three points (As the kind: the kind's weight alone; Early: it
    fades after a third; Late: it grows from a third); Steady holds the kind's weight at its middle (s = 0.3) all visit. Straight lines
    between the points. A kind with no row weighs nothing. */
-function gdMix(kind,g){var m=(g||S.guidance).mix,r=m&&m[kind];return r?r.map(Number):[0,0,0]}
+function gdMix(kind,g){var m=(g||D.guidance).mix,r=m&&m[kind];return r?r.map(Number):[0,0,0]}
 var GD_MIX_KINDS=[["app","App"],["content","Content"],["fun","Fun"]],GD_MIX_AT=["on arrival","a third in","at the end"];
 /* ----- Talkativeness (round 5, _3.8 section 3.3 point 6): one knob over the numbers. Balanced is the rows' own values; Quiet doubles the
    breathing room and halves the limits; Chatty shortens the room to 0.6 and gives the limits half again. The limits: At most a minute, At
@@ -255,8 +255,8 @@ var GD_MIX_KINDS=[["app","App"],["content","Content"],["fun","Fun"]],GD_MIX_AT=[
    caps bite (Content 12 → 5: 10 tips, at most 1 a minute). Chatty cannot add what there is not to say: the same tips, sooner (3 a minute).
    Unity: GuidanceCatalog.talkativeness, applied by GuidanceScheduler's state builder ----- */
 var GD_TALK={quiet:{name:"Quiet",room:2,limits:0.4},balanced:{name:"Balanced",room:1,limits:1},chatty:{name:"Chatty",room:0.6,limits:1.5}},GD_TALK_IDS=["quiet","balanced","chatty"];
-function gdTalk(g){return GD_TALK[(g||S.guidance).talk]||GD_TALK.balanced}
-function gdRoomNow(){return Math.round(+S.guidance.breathing*gdTalk().room)}
+function gdTalk(g){return GD_TALK[(g||D.guidance).talk]||GD_TALK.balanced}
+function gdRoomNow(){return Math.round(+D.guidance.breathing*gdTalk().room)}
 function gdLimitNow(v){v=+v||0;return v>0?Math.max(1,Math.round(v*gdTalk().limits)):0}
 /* the value in force in words, under its row: "In force: 15 s × 2 = 30 s (Quiet)" */
 function gdForceWords(v,unit,room){var t=gdTalk(),f=room?t.room:t.limits,n=room?Math.round(+v*f):gdLimitNow(v);return"In force: "+(f===1?v+unit:v+unit+" × "+f+" = "+n+unit)+" ("+t.name+")"}
@@ -270,8 +270,8 @@ function gdForceWords(v,unit,room){var t=gdTalk(),f=room?t.room:t.limits,n=room?
    Remember across visits is On in every preset (Off is for a kiosk or a demo: set by hand, which makes it Custom). The audiences choose
    one (Detail Card › 6 · Audiences › Looks per audience › Guidance preset). Unity: GuidancePreset assets (ScriptableObjects) ----- */
 var GD_PRESET_IDS=[["first","First visit"],["returning","Returning"],["family","Family"],["expert","Expert"],["quiet","Quiet"],["chatty","Chatty"]];
-/* the values a preset writes, read from a settings object (S.guidance, or a copy) */
-function gdPresetOf(g){g=g||S.guidance;var k={},m={};g.kinds.forEach(function(x){k[x.id]={cap:+x.cap,gap:+x.gap}});Object.keys(g.mix||{}).forEach(function(x){m[x]=g.mix[x].map(Number)});
+/* the values a preset writes, read from a settings object (D.guidance, or a copy) */
+function gdPresetOf(g){g=g||D.guidance;var k={},m={};g.kinds.forEach(function(x){k[x.id]={cap:+x.cap,gap:+x.gap}});Object.keys(g.mix||{}).forEach(function(x){m[x]=g.mix[x].map(Number)});
   return{talk:g.talk||"balanced",breathing:+g.breathing,perMinute:+g.perMinute,perVisit:+g.perVisit,remember:g.remember!==false,mix:m,kinds:k}}
 function gdPresetLike(p,o){var q=JSON.parse(JSON.stringify(p));Object.keys(o).forEach(function(x){q[x]=o[x]});return q}
 var GD_PRESETS=(function(){var first=gdPresetOf();return{first:first,
@@ -297,31 +297,31 @@ function gdPresetWords(a,b){var w=[],kn={app:"App",content:"Content",fun:"Fun"};
   if(a.remember!==b.remember)w.push("Remember across visits "+(b.remember?"On":"Off")+", was "+(a.remember?"On":"Off"));return w}
 /* the preset in force: the one last chosen while every value is still its own (or another whose values they all are: First visit with
    Talkativeness Quiet is Quiet), else Custom; and Custom's changes in words, from the one last chosen */
-function gdPresetDiff(id){var p=GD_PRESETS[id||S.guidance.preset];return p?gdPresetWords(p,gdPresetOf()):["no preset chosen"]}
-function gdPresetNow(){var id=S.guidance.preset;if(GD_PRESETS[id]&&!gdPresetDiff(id).length)return id;var m=GD_PRESET_IDS.filter(function(x){return!gdPresetDiff(x[0]).length})[0];return m?m[0]:"custom"}
+function gdPresetDiff(id){var p=GD_PRESETS[id||D.guidance.preset];return p?gdPresetWords(p,gdPresetOf()):["no preset chosen"]}
+function gdPresetNow(){var id=D.guidance.preset;if(GD_PRESETS[id]&&!gdPresetDiff(id).length)return id;var m=GD_PRESET_IDS.filter(function(x){return!gdPresetDiff(x[0]).length})[0];return m?m[0]:"custom"}
 /* a preset chosen (Overall › Preset, or an audience in Who's exploring): it writes its values, never the items */
-function gdPresetWrite(id){var p=GD_PRESETS[id],g=S.guidance;if(!p)return false;g.talk=p.talk;g.breathing=p.breathing;g.perMinute=p.perMinute;g.perVisit=p.perVisit;g.remember=p.remember;
+function gdPresetWrite(id){var p=GD_PRESETS[id],g=D.guidance;if(!p)return false;g.talk=p.talk;g.breathing=p.breathing;g.perMinute=p.perMinute;g.perVisit=p.perVisit;g.remember=p.remember;
   g.mix=JSON.parse(JSON.stringify(p.mix));g.kinds.forEach(function(k){var v=p.kinds[k.id];if(v){k.cap=v.cap;k.gap=v.gap}});g.preset=id;return true}
 var GD_CURVE={kind:[1,1,1],early:[1,1,0],late:[0,0,1]};
 function gdCurve(p,s){s=Math.max(0,Math.min(1,+s||0));return s<=0.3?p[0]+(p[1]-p[0])*s/0.3:p[1]+(p[2]-p[1])*(s-0.3)/0.7}
 /* the items in the Editor's order (kind, group, item), each a copy with its group's and kind's values (the scheduler reads only its
    arguments): the scheduler's input, its tie-break and an In order group's sequence */
-function gdItems(defs){var out=[];S.guidance.kinds.forEach(function(k){k.groups.forEach(function(g){if((g.pulled||g.launch)&&!defs)return;g.items.forEach(function(id){var it=S.guidance.items[id];if(!it)return;
+function gdItems(defs){var out=[];D.guidance.kinds.forEach(function(k){k.groups.forEach(function(g){if((g.pulled||g.launch)&&!defs)return;g.items.forEach(function(id){var it=D.guidance.items[id];if(!it)return;
   /* a pulled group (How to use the card) is never the scheduler's: only the Editor's list (defs) holds its steps */
   var o=Object.assign({},it,{groupMode:g.mode,groupName:g.name,groupOn:g.on!==false,groupPulled:!!g.pulled,groupWeight:g.weight==null?1:+g.weight,groupCap:+g.cap||0,groupGap:+g.gap||0,kindName:k.name,kindOn:k.on!==false,kindCap:gdLimitNow(k.cap),kindGap:+k.gap||0,kindSpoken:k.spoken,kindMix:gdMix(k.id),kindSolemnOff:k.solemnOff===true,onTour:!!g.tour,groupLife:g.life||""});
   /* a per-point item: one for each point of the wall in view, its id and label naming the point, each with its own memory */
-  if(it.perPoint&&!defs)(S.wallPois||[]).forEach(function(p){var n=L(p.name),x={id:it.id+":"+p.id,base:it.id,point:p.id,pointName:n,card:!!p.card,label:it.label.replace(/\{point\}/g,n)};if(it.ptJokes)x.jokes=gdPtJokes(p.id);out.push(Object.assign({},o,x))});
+  if(it.perPoint&&!defs)(D.wall.wallPois||[]).forEach(function(p){var n=L(p.name),x={id:it.id+":"+p.id,base:it.id,point:p.id,pointName:n,card:!!p.card,label:it.label.replace(/\{point\}/g,n)};if(it.ptJokes)x.jokes=gdPtJokes(p.id);out.push(Object.assign({},o,x))});
   else out.push(o)})})});return out}
 /* the items as the Editor lists them: one a definition (a per-point item once) */
 function gdDefs(){return gdItems(true)}
 /* a definition's instances (a per-point item's, one a point; any other: itself) */
 function gdInstances(id){return gdItems().filter(function(x){return x.id===id||x.base===id})}
-function gdGroupOf(it){var g=null,id=it.base||it.id;S.guidance.kinds.forEach(function(k){k.groups.forEach(function(x){if(x.items.indexOf(id)>=0)g=x})});return g}
+function gdGroupOf(it){var g=null,id=it.base||it.id;D.guidance.kinds.forEach(function(k){k.groups.forEach(function(x){if(x.items.indexOf(id)>=0)g=x})});return g}
 /* a group's index path in the state (the Editor's rows: guidance.kinds.<k>.groups.<g>.) */
-function gdGroupPath(gid){var p=null;S.guidance.kinds.forEach(function(k,ki){k.groups.forEach(function(g,gi){if(g.id===gid)p="guidance.kinds."+ki+".groups."+gi+"."})});return p}
-function gdKindOf(it){return S.guidance.kinds.filter(function(k){return k.id===it.kind})[0]||null}
-function gdKindById(id){return S.guidance.kinds.filter(function(k){return k.id===id})[0]||null}
-function gdGroupById(id){var g=null;S.guidance.kinds.forEach(function(k){k.groups.forEach(function(x){if(x.id===id)g=x})});return g}
+function gdGroupPath(gid){var p=null;D.guidance.kinds.forEach(function(k,ki){k.groups.forEach(function(g,gi){if(g.id===gid)p="D.guidance.kinds."+ki+".groups."+gi+"."})});return p}
+function gdKindOf(it){return D.guidance.kinds.filter(function(k){return k.id===it.kind})[0]||null}
+function gdKindById(id){return D.guidance.kinds.filter(function(k){return k.id===id})[0]||null}
+function gdGroupById(id){var g=null;D.guidance.kinds.forEach(function(k){k.groups.forEach(function(x){if(x.id===id)g=x})});return g}
 /* the line an item says now: its words in the visitor's language, the returning visitor's line when it has one; with several lines,
    the next in turn (slots.n: how many of its group have shown this visit, so never the same twice in a row) or, for a point with a card,
    its own (saysCard, when Lines per point says so); the slots filled ({point}: the point it is about; {min}: the minutes of that
@@ -340,9 +340,9 @@ function gdLineKey(it,returning,slots){slots=slots||{};var a=slots.aud!==undefin
 /* round 16b (the developer): a tour under 2 minutes is offered as a short one, with no minutes: a line with a {min} slot has its "_short"
    word (gd_tourof_short: "A short tour of {point}?"), used when the tour is under 2 minutes */
 function gdLine(it,returning,slots){slots=slots||{};var k=gdLineKey(it,returning,slots);if(!k)return"";if(slots.cont!=null&&gdHasWords(k+"_cont"))k=k+"_cont";else if(slots.min!=null&&+slots.min<2&&gdHasWords(k+"_short"))k=k+"_short";
-  return nameIn(nameIn(TXT(k),"{thing}",slots.thing||""),"{point}",slots.point||"").replace(/\{year\}/g,slots.year!=null?slots.year:"").replace(/\{min\}/g,slots.min!=null?slots.min:"").replace(/\{step\}/g,slots.cont!=null?slots.cont:"").replace(/\{of\}/g,slots.of!=null?slots.of:"").replace(/\{button\}/g,S.guideCfg.gbIcon==="star"?"✦":TXT("gb_label")).replace(/\b1 (minute|minuto)s\b/g,"1 $1")}
+  return nameIn(nameIn(TXT(k),"{thing}",slots.thing||""),"{point}",slots.point||"").replace(/\{year\}/g,slots.year!=null?slots.year:"").replace(/\{min\}/g,slots.min!=null?slots.min:"").replace(/\{step\}/g,slots.cont!=null?slots.cont:"").replace(/\{of\}/g,slots.of!=null?slots.of:"").replace(/\{button\}/g,D.guide.gbIcon==="star"?"✦":TXT("gb_label")).replace(/\b1 (minute|minuto)s\b/g,"1 $1")}
 /* a word key with words in the visitor's language (an empty line falls back to Says) */
-function gdHasWords(k){var o=S.tx[k];return!!(o&&String(L(o)||"").trim())}
+function gdHasWords(k){var o=D.words.tx[k];return!!(o&&String(L(o)||"").trim())}
 /* the read-back of an item, in words (study 3.2): "Tap a marker · App › The start · when a marker is in view and the phone is still ·
    at most about every 25 s, up to 3 times a visit, until the visitor opens a card." */
 function gdHowOften(it){var n=+it.max,ag=+it.again;if(it.form==="beat")return gdBeatHowOften(it);if(it.form==="walk")return"pulled only: never on its own";if(it.form==="page")return"at the app's start, a first run only";if(it.form==="try")return"pulled only: Things to try and Ask the mascot's how do I…";
@@ -370,11 +370,11 @@ function gdHowWall(){var g=gdGroupById("howto");return{id:"howto:wall",label:"Ho
   kindName:"App",kindOn:true,kindSpoken:"bubble",says:"gd_how_wall",cta:"gd_how_open",saysBack:"",spoken:"kind",about:"marker",mustSee:false,form:"invitation",goes:"beside",points:true,focus:"ring",tap:"close",
   screen:"wall",duringTour:"never",along:"kind",importance:3,essential:false,shows:"every",max:1,again:0,doneWhen:"",teaches:""}}
 /* a cue's read-back: what it is, its moment, how often, Reduce Motion, the room from a tip, Done when */
-function gdCueReadBack(it){var g=gdGroupOf(it),r=+S.guidance.cueRoom||0;
+function gdCueReadBack(it){var g=gdGroupOf(it),r=+D.guidance.cueRoom||0;
   return it.label+" · App › "+(g?g.name:"?")+" · a cue (motion on its element, no mascot"+(it.says?", its own words over it":", no words")+") · "+GD_CUE_WHEN[it.about]+" · "+gdHowOften(it)+
     " · under Reduce Motion "+(it.reduce==="skip"?"skipped (a moving cue)":"shown, with no travel")+" · one at a time with every tip and cue; "+(r>0?"never within "+r+" s of a tip, either way (the cue room)":"no room from a tip (the cue room is 0)")+" · during a tour never."}
 /* a step of How to use the card: its place, pulled only, what its line marks and what seeing it retires */
-function gdStepReadBack(it){var g=gdGroupOf(it),on=g?g.items.filter(function(id){return S.guidance.items[id].on}):[],i=on.indexOf(it.id),ret=gdDefs().filter(function(x){return x.form==="cue"&&x.doneWhen===it.id}).map(function(x){return x.label});
+function gdStepReadBack(it){var g=gdGroupOf(it),on=g?g.items.filter(function(id){return D.guidance.items[id].on}):[],i=on.indexOf(it.id),ret=gdDefs().filter(function(x){return x.form==="cue"&&x.doneWhen===it.id}).map(function(x){return x.label});
   return it.label+" · App › How to use the card · "+(it.on?"step "+(i+1)+" of "+on.length:"Off: skipped")+" · pulled only (Settings, the ✦ menu's How does this work?): never scheduled, never capped · "+(it.sel?"it marks "+it.label.replace(/^The /,"the "):"it opens a block's page")+
     " · seen (its line heard): "+(ret.length?"the "+ret.join(", the ")+" is done for good":"nothing to retire")+"."}
 function gdReadBack(it){if(it.form==="beat")return gdBeatReadBack(it);if(it.form==="cue")return gdCueReadBack(it)+gdGestureWords(it);if(it.form==="walk")return gdStepReadBack(it);if(it.form==="page")return gdPageReadBack(it);if(it.form==="try")return gdTryReadBack(it);var g=gdGroupOf(it),k=gdKindOf(it),w=[];
@@ -382,7 +382,7 @@ function gdReadBack(it){if(it.form==="beat")return gdBeatReadBack(it);if(it.form
   else if(it.when==="idle"&&!(+it.idleFor>0))w.push("after "+gdIdleOf(it)+" s idle");else if(it.when==="settle"&&it.about!=="point")w.push("when its target settles in the middle");else if(it.when!=="settle")w.push("at a pause");
   if(GD_ABOUT[it.about])w.push(GD_ABOUT[it.about]+(it.mustSee===false?" (or without it)":""));if(+it.stillFor>0)w.push("the phone still "+it.stillFor+" s");
   if(+it.notBefore>0)w.push("not before "+it.notBefore+" s of the visit");w=w.concat(gdWhenWords(it)).concat(gdOnlyWords(it));
-  if(g&&g.mode==="order"&&+it.afterPrev>0){var i=g.items.indexOf(it.id),pv=i>0?S.guidance.items[g.items[i-1]]:null;if(pv)w.push("at least "+it.afterPrev+" s after the "+pv.label)}
+  if(g&&g.mode==="order"&&+it.afterPrev>0){var i=g.items.indexOf(it.id),pv=i>0?D.guidance.items[g.items[i-1]]:null;if(pv)w.push("at least "+it.afterPrev+" s after the "+pv.label)}
   var gl=g&&(+g.cap>0||+g.gap>0)?" · "+g.name+" together: "+[+g.cap>0?"at most "+g.cap+" a visit":"",+g.gap>0?"at least "+g.gap+" s apart":""].filter(Boolean).join(", "):"";
   return it.label+" · "+(k?k.name:"?")+" › "+(g?g.name:"?")+(it.essential?" · Essential":"")+" · "+w.join(", ")+" · "+gdHowOften(it)+gl+" · along the visit "+gdAlongWords(it)+
     " · during a tour "+(it.duringTour==="between"?"only between steps":"never")+"."+gdLookWords(it)}
@@ -444,7 +444,7 @@ function gdFill(it){/* round 9: In Things to try (an App item): Yes when it Teac
      audiences, tour length), then the tip's */
   if(it.form==="beat")Object.keys(GD_BEAT_DEF).forEach(function(k){if(it[k]===undefined)it[k]=JSON.parse(JSON.stringify(GD_BEAT_DEF[k]))});
   Object.keys(GD_TIP_DEF).forEach(function(k){if(it[k]===undefined)it[k]=GD_TIP_DEF[k]});if(!it.saysAud)it.saysAud={};return it}
-Object.keys(S.guidance.items).forEach(function(id){gdFill(S.guidance.items[id])});
+Object.keys(D.guidance.items).forEach(function(id){gdFill(D.guidance.items[id])});
 /* Spotlight is kept for Essential items and walkthrough steps (or it loses its force), and needs a target to cut out */
 function gdSpotOk(it){return!!it&&(it.form==="walk"||!!it.essential&&it.about!=="nothing")}
 function gdSpotWhy(it){return!it||it.form==="walk"?"":!it.essential?"Spotlight is kept for Essential items and walkthrough steps: this item is not Essential":it.about==="nothing"?"Spotlight needs a target to cut out: this item is about Nothing":""}
@@ -461,7 +461,7 @@ function gdLookWords(it){var f=gdFocusNow(it),g=gdGestureOf(it),b=it.button&&it.
   return" Look: "+gdNameOf(GD_FORMS,it.form).toLowerCase()+", "+(it.goes==="walk"?"The mascot walks to it":it.goes==="beside"?"The mascot hops beside it":"The mascot stays")+(it.points?" and points":"")+", focus "+gdNameOf(GD_FOCUS,f)+
     (f!==it.focus?" (a Spotlight shows as a Ring: "+gdSpotWhy(it).replace(/^Spotlight /,"")+")":"")+(g?", the ghost finger shows "+GD_GESTURE_WORDS[g]:"")+(b?", its button “"+b+"”":"")+"."}
 /* every line an item can say (its variants, a point with a card's own, the returning visitor's, each audience's) */
-function gdLineKeys(it){var k=[].concat(it.says||[]);if(it.saysCard)k.push(it.saysCard);if(it.saysBack)k.push(it.saysBack);Object.keys(it.saysAud||{}).forEach(function(a){if(it.saysAud[a])k.push(it.saysAud[a])});return k.filter(function(x){return x&&S.tx[x]})}
+function gdLineKeys(it){var k=[].concat(it.says||[]);if(it.saysCard)k.push(it.saysCard);if(it.saysBack)k.push(it.saysBack);Object.keys(it.saysAud||{}).forEach(function(a){if(it.saysAud[a])k.push(it.saysAud[a])});return k.filter(function(x){return x&&D.words.tx[x]})}
 var GD_LANG_NAME={en:"English",pt:"Portuguese"};
 /* why an item can never show (the named warnings of the Editor), in words; none: it can */
 function gdNever(it){var r=[],k=gdKindOf(it),g=gdGroupOf(it),ab=gdNameOf(GD_ABOUT_OPTS,it.about).toLowerCase();if(!gdIsTip(it))return r;
@@ -479,7 +479,7 @@ function gdNever(it){var r=[],k=gdKindOf(it),g=gdGroupOf(it),ab=gdNameOf(GD_ABOU
   /* round 11: Fun is held while a tour plays, so a Fun item that comes only between tour steps cannot show (until its When changes) */
   if(it.kind==="fun"&&it.when==="between")r.push("Fun is held while a tour plays, and it comes only between two tour steps: it cannot show until its When changes");
   if(it.ptJokes)return r;
-  var says=[].concat(it.says||[]).filter(function(x){return S.tx[x]});langCodes().forEach(function(l){if(!says.some(function(x){return String(S.tx[x][l]||"").trim()}))r.push("it has no words in "+(GD_LANG_NAME[l]||l))});return r}
+  var says=[].concat(it.says||[]).filter(function(x){return D.words.tx[x]});langCodes().forEach(function(l){if(!says.some(function(x){return String(D.words.tx[x][l]||"").trim()}))r.push("it has no words in "+(GD_LANG_NAME[l]||l))});return r}
 /* + Add guidance's templates (_3.8 section 7): each a new item in the group it is added to, with its words (a Moment: form Moment, Azu's
    prop, between two tour steps; Fun › Moments is its home) */
 var GD_TEMPLATES=[
@@ -501,21 +501,21 @@ var GD_PAGE_ACTS=[["next","Next page"],["how","Next, and How to use the card on 
 var GD_PAGE_AZU=[["form","Forms from a tile and waves"],["appear","Appears"],["none","None"]];
 var GD_PAGE_RUN_MAX=30;
 /* the pages in the group's order (a deleted one out) */
-function gdPageDefs(){var g=gdGroupById("pages");return g?g.items.map(function(id){return S.guidance.items[id]}).filter(function(x){return x&&!x.deleted}):[]}
+function gdPageDefs(){var g=gdGroupById("pages");return g?g.items.map(function(id){return D.guidance.items[id]}).filter(function(x){return x&&!x.deleted}):[]}
 function gdPageOf(kind){return gdPageDefs().filter(function(x){return x.page===kind})[0]||null}
 /* the order's two fixed ends: Hello first, Straight to the wall last ("" when the order keeps them) */
-function gdPagesRule(ids){var k=ids.map(function(id){return(S.guidance.items[id]||{}).page}),h=k.indexOf("hello"),w=k.indexOf("wall");
+function gdPagesRule(ids){var k=ids.map(function(id){return(D.guidance.items[id]||{}).page}),h=k.indexOf("hello"),w=k.indexOf("wall");
   if(h>0)return"Hello stays first: the visitor's first screen is the guide's hello, before any question";
   if(w>=0&&w!==k.length-1)return"Straight to the wall stays last: the run ends on the wall, with the Opening message";return""}
 /* a page's words (in the visitor's language) and its time: its words read at 4 a second, and 1.5 s to act; Who's exploring 5 s (three
    choices); the camera's own request 3 s more; the wall none (it is the wall itself) */
-function gdPageWordsOf(it){return[it.title,it.says].concat((it.buttons||[]).map(function(b){return b.word})).filter(function(k){return k&&S.tx[k]}).map(function(k){return TXT(k)}).join(" ")}
+function gdPageWordsOf(it){return[it.title,it.says].concat((it.buttons||[]).map(function(b){return b.word})).filter(function(k){return k&&D.words.tx[k]}).map(function(k){return TXT(k)}).join(" ")}
 function gdPageSecs(it){if(it.page==="wall")return 0;if(it.page==="aud")return 5;var n=gdPageWordsOf(it).split(/\s+/).filter(Boolean).length;return Math.round((n/4+1.5+(it.page==="camera"?3:0))*10)/10}
 /* the screens of a first run now (its On pages, Who's exploring only when asked here; the camera, as on a new install), the wall aside */
-function gdPagesPlan(){var g=gdGroupById("pages");if(!g||g.on===false)return[];return gdPageDefs().filter(function(it){return it.on&&it.page!=="wall"&&(it.page!=="aud"||S.aud.where==="start")})}
+function gdPagesPlan(){var g=gdGroupById("pages");if(!g||g.on===false)return[];return gdPageDefs().filter(function(it){return it.on&&it.page!=="wall"&&(it.page!=="aud"||D.wall.aud.where==="start")})}
 function gdPagesSecs(list){return Math.round((list||gdPageDefs().filter(function(x){return x.on})).reduce(function(a,x){return a+gdPageSecs(x)},0))}
 /* when a page is in the run, in words */
-function gdPageWhen(it){return it.page==="hello"?"first":it.page==="aud"?"only when Detail Card › 6 · Audiences › Where to ask is At the app's start (now: "+gdNameOf(AUD_WHERE,S.aud.where)+")":
+function gdPageWhen(it){return it.page==="hello"?"first":it.page==="aud"?"only when Detail Card › 6 · Audiences › Where to ask is At the app's start (now: "+gdNameOf(AUD_WHERE,D.wall.aud.where)+")":
   it.page==="camera"?"only while the camera is not yet allowed (the phone's own permission)":it.page==="wall"?"last: the run ends on the wall":"in its place in the order"}
 function gdPageLook(it){if(it.page==="aud")return"The first card's own screen, reused (Family, Explorer, Expert; its Skip = Explorer): it sets the audience, and with it the guidance preset";
   if(it.page==="wall")return"No screen: the Opening message says this short line on the wall, then Tap a marker comes as The start's";
@@ -550,11 +550,11 @@ function gdTryDefs(){var seen={},out=[];gdDefs().forEach(function(it){if(!gdTryC
 function gdTeachers(){var seen={},out=[];gdDefs().forEach(function(it){if(!gdTryCan(it)||seen[it.teaches])return;seen[it.teaches]=1;out.push(it)});return out}
 function gdTryItem(id){return gdDefs().filter(function(x){return x.id===id&&gdTryCan(x)})[0]||null}
 /* done: the item done for good (its Done when) or the feature it teaches used; the count "3 of 8" */
-function gdTryDone(it,V){V=V||S.gdVisitor;return!!(gdEverOf(V,it.id).done||it.teaches&&V.used&&V.used[it.teaches]!=null)}
-function gdTryCount(V,rows){V=V||S.gdVisitor;rows=rows||gdTryDefs();return{done:rows.filter(function(it){return gdTryDone(it,V)}).length,n:rows.length}}
+function gdTryDone(it,V){V=V||P.gdVisitor;return!!(gdEverOf(V,it.id).done||it.teaches&&V.used&&V.used[it.teaches]!=null)}
+function gdTryCount(V,rows){V=V||P.gdVisitor;rows=rows||gdTryDefs();return{done:rows.filter(function(it){return gdTryDone(it,V)}).length,n:rows.length}}
 /* its words: the feature's row ("Open a card") and the answer to how do I… ({button}: the ✦, or its word) */
-function gdTryWord(it){var k="gd_try_"+it.teaches;return S.tx[k]?TXT(k):gdNameOf(GD_TEACH,it.teaches)}
-function gdTryHowLine(it){var k="gd_tryhow_"+it.teaches;return(S.tx[k]?TXT(k):gdTryWord(it)).replace(/\{button\}/g,S.guideCfg.gbIcon==="star"?"✦":TXT("gb_label"))}
+function gdTryWord(it){var k="gd_try_"+it.teaches;return D.words.tx[k]?TXT(k):gdNameOf(GD_TEACH,it.teaches)}
+function gdTryHowLine(it){var k="gd_tryhow_"+it.teaches;return(D.words.tx[k]?TXT(k):gdTryWord(it)).replace(/\{button\}/g,D.guide.gbIcon==="star"?"✦":TXT("gb_label"))}
 /* "how do I…?": a question about the app (how / where do I / can I; como / onde / posso), then the feature whose keywords (2 each) and row's
    words in both languages (1 each, 4 letters or more) the question has most; 2 or more to answer; ties: the Editor's order. A question about
    the history ("How old is the palace?", "Como era o palácio antes do terramoto?") matches none */
@@ -562,7 +562,7 @@ function gdHowNorm(t){return" "+String(t||"").toLowerCase().normalize("NFD").rep
 function gdHowAsks(n){return/ (how|can i|where do i|where can i|como|posso|onde posso|onde e que) /.test(n)}
 function gdHowWordHit(w,k){return w===k||k.length>=5&&w.length>=5&&w.slice(0,5)===k.slice(0,5)}
 function gdHowScore(n,it){var ws=n.trim().split(" "),s=0,f=it.teaches;(GD_TRY_KEYS[f]||[]).forEach(function(k){if(!/^[a-z]{4,}$/.test(k)?n.indexOf(" "+k+" ")>=0:ws.some(function(w){return gdHowWordHit(w,k)}))s+=2});
-  var k2="gd_try_"+f,o=S.tx[k2]||{},row=[];Object.keys(o).forEach(function(l){gdHowNorm(o[l]).trim().split(" ").forEach(function(x){if(x.length>=4&&!GD_HOW_STOP[x]&&row.indexOf(x)<0)row.push(x)})});
+  var k2="gd_try_"+f,o=D.words.tx[k2]||{},row=[];Object.keys(o).forEach(function(l){gdHowNorm(o[l]).trim().split(" ").forEach(function(x){if(x.length>=4&&!GD_HOW_STOP[x]&&row.indexOf(x)<0)row.push(x)})});
   row.forEach(function(x){if(ws.some(function(w){return gdHowWordHit(w,x)}))s+=1});return s}
 function gdHowFind(q){var n=gdHowNorm(q);if(!gdHowAsks(n))return null;var best=null,bs=1;gdTeachers().forEach(function(it){var sc=gdHowScore(n,it);if(sc>bs){bs=sc;best=it}});return best}
 /* a Try item's read-back (pulled only) */
@@ -575,7 +575,7 @@ function gdTryReadBack(it){var g=gdGroupOf(it);return it.label+" · App › "+(g
    Needs (what the point must hold: quiz questions, a year; a named warning when it lacks them), Pairs with (a promise and its payoff are
    one), Scores, Calm too (allowed when Azu › Liveliness is Calm), Audiences (Family / Explorer / Expert), Tour length (Every length
    / Not on Short / Deep only), a game (its 4 s Not now chip; two Not nows end games for the visit), a button path (a screen reader may
-   get it). The quiz's questions and the guesses are per step, in Specific Marker › Guide script (S.tourQ, S.tourGuess: words EN / PT,
+   get it). The quiz's questions and the guesses are per step, in Specific Marker › Guide script (D.tour.tourQ, D.tour.tourGuess: words EN / PT,
    Draft with AI, a Reviewed tick per language); unreviewed ones never play. Unity: GuidanceItem's beat fields (GuidanceCatalog); the
    questions a QuizQuestion list on each GuideStep (CardStrings keys), the Reviewed flags beside them ----- */
 var GD_PLACES=[["opening","Opening"],["between","Between steps"],["instep","In a step"],["finale","Finale"]];
@@ -598,7 +598,7 @@ function gdPropOf(it,md,used){if(it.props!=="date")return it.prop||"water";var w
   var alt=["water","fan","scarf"].filter(function(x){return used.indexOf(x)<0});return alt[0]||want}
 /* the quiz's questions and the guesses, per step of the demo point (the Guide script's; written from the tour's own text). Each language
    reviewed on its own; the AI's draft (src "ai") of the step "Drag across the picture" is not reviewed yet, so it never plays */
-S.tourQ={
+D.tour.tourQ={
   g1:{q:T("How long was the palace the royal home?","Durante quanto tempo foi o palácio casa real?"),a:[T("About 250 years","Cerca de 250 anos"),T("About 50 years","Cerca de 50 anos"),T("About 500 years","Cerca de 500 anos")],ok:0,
     why:T("Kings lived here about 250 years, until 1755.","Os reis viveram aqui cerca de 250 anos, até 1755."),src:"human",rev:{en:true,pt:true}},
   g4:{q:T("What filled the new palace?","O que encheu o novo palácio?"),a:[T("The wealth of the India voyages","A riqueza das viagens à Índia"),T("Gold from Brazil","Ouro do Brasil"),T("Spanish silver","Prata espanhola")],ok:0,
@@ -613,24 +613,24 @@ S.tourQ={
     why:T("All three struck on the morning of 1 November.","Os três chegaram na manhã de 1 de novembro."),src:"human",rev:{en:true,pt:true}},
   g8:{q:T("What does the gallery show?","O que mostra a galeria?"),a:[T("The king's portraits","Retratos do rei"),T("The square through three centuries","A praça ao longo de três séculos")],ok:1,
     why:T("Three centuries of the square, in pictures.","Três séculos da praça, em imagens."),src:"human",rev:{en:true,pt:true}}};
-S.tourGuess={g4:{q:T("When do you think the king moved the court down to the river?","Quando acha que o rei mudou a corte para junto do rio?"),n:1500,from:1400,to:1700,unit:"year",src:"human",rev:{en:true,pt:true}}};
+D.tour.tourGuess={g4:{q:T("When do you think the king moved the court down to the river?","Quando acha que o rei mudou a corte para junto do rio?"),n:1500,from:1400,to:1700,unit:"year",src:"human",rev:{en:true,pt:true}}};
 /* a step's question / guess that plays in a language: its words there, at least two answers, the right one among them, and reviewed */
 function gdQOk(q,l){if(!q||!q.rev||!q.rev[l])return false;var t=function(o){return!!(o&&String(o[l]||"").trim())};return t(q.q)&&(q.a||[]).filter(t).length>=2&&(q.a||[]).length<=3&&t((q.a||[])[+q.ok])}
 function gdGuessOk(g,l){return!!(g&&g.rev&&g.rev[l]&&g.q&&String(g.q[l]||"").trim()&&isFinite(+g.n)&&+g.from<+g.n&&+g.n<+g.to)}
 /* the why line: 12 words or fewer (the study's rule; the Editor warns) */
 function gdWhyWords(t){return String(t||"").split(/\s+/).filter(Boolean).length}
 /* the point's reviewed questions in a language: their steps (the quiz needs qMin from at least two steps) */
-function gdQSteps(l,steps){return(steps||S.fullSteps||S.guideSteps).filter(function(st){return gdQOk(S.tourQ[st.id],l)}).map(function(st){return st.id})}
+function gdQSteps(l,steps){return(steps||ui.fullSteps||D.tour.guideSteps).filter(function(st){return gdQOk(D.tour.tourQ[st.id],l)}).map(function(st){return st.id})}
 /* a beat's warnings (gdNever): what it needs and the point lacks, named; a pair whose other half is Off or gone */
 function gdBeatNever(it){var r=[],langs=langCodes();
   if(it.needs==="quiz"){langs.forEach(function(l){var q=gdQSteps(l),n=q.length;if(n<+it.qMin||n<2)r.push("the quiz needs "+it.qMin+" reviewed questions from 2 steps in "+(GD_LANG_NAME[l]||l)+"; this point has "+n)})}
-  if(it.needs==="year")langs.forEach(function(l){if(!(S.fullSteps||S.guideSteps).some(function(st){return gdGuessOk(S.tourGuess[st.id],l)}))r.push("a guess needs a step with a reviewed guess in "+(GD_LANG_NAME[l]||l)+"; this point has none")});
+  if(it.needs==="year")langs.forEach(function(l){if(!(ui.fullSteps||D.tour.guideSteps).some(function(st){return gdGuessOk(D.tour.tourGuess[st.id],l)}))r.push("a guess needs a step with a reviewed guess in "+(GD_LANG_NAME[l]||l)+"; this point has none")});
   if(it.needs==="word")langs.forEach(function(l){var w=gdWordOf(l);if(!w||!w.w)r.push("Don't say it! needs a word in "+(GD_LANG_NAME[l]||l)+"; this point has none: no game in "+(GD_LANG_NAME[l]||l));
     else if(!w.rev)r.push("the word “"+w.w+"” in "+(GD_LANG_NAME[l]||l)+" is not reviewed: no game in "+(GD_LANG_NAME[l]||l));
     else{var n=gdWordCount(w,l);if(n<2)r.push("“"+w.w+"” is said "+(n?"once":"never")+" in its span ("+gdSpanWords(w.span)+"): no game in "+(GD_LANG_NAME[l]||l));else if(n>4)r.push("“"+w.w+"” is said "+n+" times in its span: too easy, too long (2-4)")}});
-  if(it.needs==="wall"){var fd=S.tourFind;if(!fd||!fd.point)r.push("Find it on the wall needs a wall point (Guide script › Find it on the wall); this point has none");
-    else{var fp=(WALLS.ribeira.pois||[]).filter(function(p){return p.id===fd.point})[0];if(!fp)r.push("its wall point, "+fd.point+", is not on the card's wall");if(!byId(S.fullSteps||S.guideSteps,fd.after))r.push("its step, "+fd.after+", is not in the tour")}}
-  if(it.pairs){var o=S.guidance.items[it.pairs];if(!o||o.deleted)r.push("its pair, "+it.pairs+", is gone: a promise and its payoff are one");else if(!o.on)r.push("its pair, the “"+o.label+"”, is Off: a promise and its payoff are one")}
+  if(it.needs==="wall"){var fd=D.tour.tourFind;if(!fd||!fd.point)r.push("Find it on the wall needs a wall point (Guide script › Find it on the wall); this point has none");
+    else{var fp=(WALLS.ribeira.pois||[]).filter(function(p){return p.id===fd.point})[0];if(!fp)r.push("its wall point, "+fd.point+", is not on the card's wall");if(!byId(ui.fullSteps||D.tour.guideSteps,fd.after))r.push("its step, "+fd.after+", is not in the tour")}}
+  if(it.pairs){var o=D.guidance.items[it.pairs];if(!o||o.deleted)r.push("its pair, "+it.pairs+", is gone: a promise and its payoff are one");else if(!o.on)r.push("its pair, the “"+o.label+"”, is Off: a promise and its payoff are one")}
   var a=it.auds||{};if(!GD_AUDS.some(function(x){return a[x[0]]}))r.push("no audience gets it (Audiences)");
   var g=gdGroupOf(it);if(g&&g.auds&&!GD_AUDS.some(function(x){return g.auds[x[0]]&&a[x[0]]}))r.push("no audience of On the tour gets it");
   return r}
@@ -640,12 +640,12 @@ function gdBeatHowOften(it){return(it.shows==="visit"?"once a visit, ":"once a t
 function gdBeatReadBack(it){var g=gdGroupOf(it),a=it.auds||{},w=[];
   w.push(GD_BEAT_KIND[it.beat]||"a beat");w.push(GD_PLACE_WORDS[it.place]||"at a seam");
   if(+it.talkFor>0)w.push("after "+it.talkFor+" s of narration");if(it.beforeEnd)w.push("before the last step");if(+it.minNarr>0)w.push("only in a tour of "+it.minNarr+" s of narration or more");
-  if(it.variantOf){var vo=S.guidance.items[it.variantOf];if(vo)w.push("a variant of “"+vo.label+"” (never both in a tour)")}
+  if(it.variantOf){var vo=D.guidance.items[it.variantOf];if(vo)w.push("a variant of “"+vo.label+"” (never both in a tour)")}
   if(+it.minSteps>0)w.push("only in a tour of "+it.minSteps+" steps or more");
   if(it.beat==="word")w.push("a tap window from the word's start to its end + "+it.tapWin+" s, "+(it.falseTaps==="nope"?"a false tap a playful “Nope!”":"a false tap counted quietly")+(it.slipBack?", the first missed slip played back":""));
   if(it.beat==="find")w.push("a hint after "+it.hintAfter+" s, the mascot shows it after "+it.giveUp+" s (or I give up), never while the wall is lost");
   w.push("answers by "+gdNameOf(GD_ANSWERS,it.answers).toLowerCase());w.push(it.beat==="word"||it.beat==="find"?"its Not now "+it.waits+" s":+it.waits>0?"waits "+it.waits+" s, then carries on":"no timer");
-  if(it.needs)w.push("needs "+GD_NEEDS[it.needs]);if(it.pairs){var p=S.guidance.items[it.pairs];if(p)w.push("one pair with “"+p.label+"”")}
+  if(it.needs)w.push("needs "+GD_NEEDS[it.needs]);if(it.pairs){var p=D.guidance.items[it.pairs];if(p)w.push("one pair with “"+p.label+"”")}
   if(it.scores)w.push("scores");if(it.game)w.push("a game (its 4 s Not now chip)");w.push(it.calm?"Calm too":"Lively only");
   w.push("for "+GD_AUDS.filter(function(x){return a[x[0]]}).map(function(x){return x[1]+(x[0]==="expert"&&it.beat==="promise"&&it.expert==="optin"?" (an opt-in)":"")}).join(", ")||"nobody");
   if(it.tourLen!=="every")w.push(gdNameOf(GD_TOURLEN,it.tourLen).toLowerCase());
@@ -659,25 +659,25 @@ function gdBeatReadBack(it){var g=gdGroupOf(it),a=it.auds||{},w=[];
    steps or more; never a common word). The slips at run time are the same matches (gdWordHit): the word, its plural, its possessive.
    Unity: a ForbiddenWord {word, spanFrom, spanTo, reviewed} per language on the GuideTour asset; the suggester plain C# over the steps'
    text (EditMode-tested on the Lab's cases) ----- */
-S.tourWord={en:{w:"palace",span:["g3","g4"],src:"suggested",rev:true},pt:{w:"palácio",span:["g3","g4"],src:"suggested",rev:true}};
+D.tour.tourWord={en:{w:"palace",span:["g3","g4"],src:"suggested",rev:true},pt:{w:"palácio",span:["g3","g4"],src:"suggested",rev:true}};
 /* Find it on the wall (research 4.7): the point's one find, after the step that names it */
-S.tourFind={after:"g3",point:"torreao",thing:T("the great corner tower","o grande torreão")};
+D.tour.tourFind={after:"g3",point:"torreao",thing:T("the great corner tower","o grande torreão")};
 var GD_WORD_STOP={en:"about after again also around back before being came come could down each even every first from have here into just last later like little long made make many more most much must never next only other over right same some still such than that their them then there these they thing this those through under until very want were what when where which while will with would your years year hundred hundreds thousand fifty twenty three seven seventy half centuries century morning brand some people",
   pt:"agora ainda antes apenas aqui assim cada como desde depois deste desta este esta isso isto mais mesmo muito nada para pela pelo pelos pelas pode porque quando quem sobre seus suas também tinha toda todo todos todas uma umas uns vezes onde lado novo nova anos cerca duzentos cinquenta setenta seguintes poucas horas manhã acabada qual então foram durante entre sempre"};
 function gdWordNorm(t){return String(t||"").toLowerCase().replace(/[’']s$/,"").replace(/[^a-zà-ÿ]+/g,"")}
 /* a token of the narration is the word (or its plural, or its possessive) */
 function gdWordHit(tok,w,l){var t=gdWordNorm(tok),x=gdWordNorm(w);if(!t||!x)return false;return t===x||t===x+"s"||(l!=="pt"&&t===x+"es")||(l==="pt"&&/ão$/.test(x)&&t===x.replace(/ão$/,"ões"))}
-function gdWordOf(l){var w=S.tourWord&&S.tourWord[l];return w&&w.w?w:null}
-function gdSpanSteps(span){var all=S.fullSteps||S.guideSteps;return(span||[]).map(function(id){return byId(all,id)}).filter(Boolean)}
-function gdSpanWords(span){var all=S.fullSteps||S.guideSteps,ix=(span||[]).map(function(id){return all.findIndex(function(s){return s.id===id})+1}).filter(function(x){return x>0});return ix.length?"step"+(ix.length>1?"s ":" ")+ix.join("-"):"no steps"}
+function gdWordOf(l){var w=D.tour.tourWord&&D.tour.tourWord[l];return w&&w.w?w:null}
+function gdSpanSteps(span){var all=ui.fullSteps||D.tour.guideSteps;return(span||[]).map(function(id){return byId(all,id)}).filter(Boolean)}
+function gdSpanWords(span){var all=ui.fullSteps||D.tour.guideSteps,ix=(span||[]).map(function(id){return all.findIndex(function(s){return s.id===id})+1}).filter(function(x){return x>0});return ix.length?"step"+(ix.length>1?"s ":" ")+ix.join("-"):"no steps"}
 /* a step's words in a language (the tour's own text) and its seconds at the voice's pace (the recorded line's times in the visitor's
    language; else its words at 170 a minute) */
 function gdStepWords(st,l){return(stepTextIn(st,l).match(/\S+/g)||[])}
-function gdStepSecsIn(st,l){return l===(S.lang||"en")&&typeof stepSecs==="function"?stepSecs(st):gdStepWords(st,l).length*60/170+.7}
+function gdStepSecsIn(st,l){return l===(P.lang||"en")&&typeof stepSecs==="function"?stepSecs(st):gdStepWords(st,l).length*60/170+.7}
 function gdWordCount(w,l){if(!w)return 0;var n=0;gdSpanSteps(w.span).forEach(function(st){gdStepWords(st,l).forEach(function(t){if(gdWordHit(t,w.w,l))n++})});return n}
 /* the suggestions in a language, best first: each candidate {w, n, span, secs, flags: the research's rules it breaks} */
-function gdWordSuggest(l){var all=(S.fullSteps||S.guideSteps).filter(function(st){return!/^(intro|teaser|end)$/.test(st.act)}),stop={};(GD_WORD_STOP[l]||"").split(" ").forEach(function(x){stop[x]=1});
-  var names=[];(WALLS.ribeira.pois||[]).forEach(function(p){names.push(p.name&&p.name[l]||"")});S.story.forEach(function(r){if(r.kind==="heading"&&r.c&&r.c.text)names.push(r.c.text[l]||"")});
+function gdWordSuggest(l){var all=(ui.fullSteps||D.tour.guideSteps).filter(function(st){return!/^(intro|teaser|end)$/.test(st.act)}),stop={};(GD_WORD_STOP[l]||"").split(" ").forEach(function(x){stop[x]=1});
+  var names=[];(WALLS.ribeira.pois||[]).forEach(function(p){names.push(p.name&&p.name[l]||"")});D.poi.story.forEach(function(r){if(r.kind==="heading"&&r.c&&r.c.text)names.push(r.c.text[l]||"")});
   var nameW={};names.join(" ").split(/\s+/).forEach(function(x){var t=gdWordNorm(x);if(t)nameW[t]=1});
   var inSteps={};all.forEach(function(st){var seen={};gdStepWords(st,l).forEach(function(t){var x=gdWordNorm(t);if(x&&!seen[x]){seen[x]=1;inSteps[x]=(inSteps[x]||0)+1}})});
   var out=[],key={};

@@ -1,7 +1,7 @@
 /* Azu, the tile of light: the WebGL shader, its forms by state, the peek from behind a block, the walk to the wall. */
 /* Unity: the same shader as a Shader Graph Custom Function (HLSL) on a quad rendered by an "Azu camera" into a render texture,
    shown as an element inside the card (overflow: hidden makes the peek); the walk swaps it for a world-space Azu on the wall. */
-S.guideCfg.azuStyle="glb";
+D.guide.azuStyle="glb";
 /* the style: glaze colours, pattern, corner radius, the light's four colours (shader properties; mascot/tile-styles.js sets them from the Editor) */
 var AZU_UNI={uCream:[.96,.93,.87],uInk:[.12,.31,.61],uInk2:[.12,.31,.61],uMotif:0,uRound:.12,
   uP0:[.48,.86,1],uP1:[.66,.52,1],uP2:[1,.55,.84],uP3:[1,.8,.66]};
@@ -51,7 +51,7 @@ var AzuGL=(function(){var cv=null,gl=null,U={},raf=0,st={morph:0,to:0,blink:0,mo
   function paint(r,t,morph,blink,mood,talk){var g=r.gl,u=r.U;g.viewport(0,0,r.cv.width,r.cv.height);g.clear(g.COLOR_BUFFER_BIT);g.uniform2f(u.uRes,r.cv.width,r.cv.height);g.uniform1f(u.uT,t);g.uniform1f(u.uMorph,morph);g.uniform1f(u.uBlink,blink);g.uniform1f(u.uMood,mood);g.uniform1f(u.uTalk,talk);
     Object.keys(AZU_UNI).forEach(function(n){var v=AZU_UNI[n];if(v.length===3)g.uniform3fv(u[n],v);else g.uniform1f(u[n],v)});g.drawArrays(g.TRIANGLE_STRIP,0,4)}
   function init(){if(gl!==null)return!!gl;cv=document.createElement("canvas");cv.className="azgl";cv.width=192;cv.height=192;var r=make(cv);if(!r){gl=false;return false}gl=r.gl;U=r;return true}
-  function frame(now){raf=0;if(!cv||!cv.isConnected)return;var dt=Math.min(.05,(now-(st.last||now))/1000);st.last=now;var still=S.reduce;
+  function frame(now){raf=0;if(!cv||!cv.isConnected)return;var dt=Math.min(.05,(now-(st.last||now))/1000);st.last=now;var still=P.reduce;
     st.morph+=(st.to-st.morph)*Math.min(1,dt*(still?30:3.2));if(now>nextBlink){st.blinkT=now;nextBlink=now+2500+Math.random()*2500}st.blink=st.blinkT&&now-st.blinkT<140&&!still?1:0;
     /* a still Azu (Reduce Motion) stands at a moment where the face is not under the highlight (t = 1.5 blows the front out) */
     paint(U,still?4.5:(now-st.t0)/1000,st.morph,st.blink,st.mood,st.talk);raf=requestAnimationFrame(frame)}
@@ -61,47 +61,47 @@ var AzuGL=(function(){var cv=null,gl=null,U={},raf=0,st={morph:0,to:0,blink:0,mo
     still:function(morph,t){if(pv===null){var c=document.createElement("canvas");c.width=c.height=192;pv=make(c)||false}if(!pv)return null;paint(pv,t===undefined?4.5:t,morph,0,0,0);return pv.cv.toDataURL("image/png")},
     pixel:function(){if(!gl)return null;var px=new Uint8Array(4);gl.readPixels(96,96,1,1,gl.RGBA,gl.UNSIGNED_BYTE,px);return Array.from(px)}}})();
 /* Azu's state picks its form: listening, thinking and travelling turn it into light; moods tint it */
-function azuForm(){if(S.guideCfg.azuStyle!=="light")return;var m=ph.querySelector(".mascot"),ts=m&&m.dataset.state,md=m&&m.dataset.mood;
+function azuForm(){if(D.guide.azuStyle!=="light")return;var m=ph.querySelector(".mascot"),ts=m&&m.dataset.state,md=m&&m.dataset.mood;
   AzuGL.set("to",G.azWalk?1:ts==="listening"?.85:(ts==="thinking"||(G.azThinkTill||0)>performance.now())?.6:md==="surprised"?.25:0);AzuGL.set("mood",md==="serious"?-1:md==="big"?.6:0)}
 setInterval(azuForm,120);
 /* the mouth: the same shapes the 2D Azu uses, as an opening */
 on("azMouth.after",function(m,shape){AzuGL.set("talk",{A:1,E:.55,O:.8,M:0,big:.7,chew:.4,surprised:.6}[shape]||0)});
 /* the guide's Azu: with Tile of light, the canvas replaces the drawing (the reactions move the canvas as they moved the drawing) */
-on("renderGuide.after",function(){if(S.guideCfg.azuStyle!=="light")return;var m=ph.querySelector(".mascot"),c=AzuGL.canvas();if(!m||!c)return;
+on("renderGuide.after",function(){if(D.guide.azuStyle!=="light")return;var m=ph.querySelector(".mascot"),c=AzuGL.canvas();if(!m||!c)return;
   var sv=m.querySelector("svg");if(sv)sv.style.display="none";if(c.parentNode!==m)m.insertBefore(c,m.firstChild);m.classList.add("light");AzuGL.start()});
 /* ----- peek: Azu rises from behind the block being told (a box that clips at the block's top edge) ----- */
-function azPeek(el){var o=ph.querySelector(".azpeek");if(o)o.remove();el=el||stepEl(S.guideSteps[G.i])||scr.querySelector('[data-ref^="b:"]');if(!el)return;var c=AzuGL.canvas();
+function azPeek(el){var o=ph.querySelector(".azpeek");if(o)o.remove();el=el||stepEl(D.tour.guideSteps[G.i])||scr.querySelector('[data-ref^="b:"]');if(!el)return;var c=AzuGL.canvas();
   var box=document.createElement("div");box.className="azpeek";box.setAttribute("aria-hidden","true");var inner=document.createElement("div");inner.className="azpeek-in";
-  if(c&&S.guideCfg.azuStyle==="light"){inner.appendChild(c);AzuGL.start()}else inner.innerHTML=MASCOT;box.appendChild(inner);
+  if(c&&D.guide.azuStyle==="light"){inner.appendChild(c);AzuGL.start()}else inner.innerHTML=MASCOT;box.appendChild(inner);
   /* in the scroller's content, just above the block's top edge: the block hides Azu until it rises (blocks clip their own overflow) */
   /* over the card, just above the block's top edge, following the block on the screen each frame (a sheet that moves, a scroll,
      a sticky section): the box clips Azu at the block's edge, so Azu rises from behind it */
   var mm=ph.querySelector(".mascot");if(mm)mm.style.visibility="hidden";
   ph.appendChild(box);var follow=function(){if(!box.isConnected)return;var r=el.getBoundingClientRect(),pr=ph.getBoundingClientRect(),q=pr.height/ph.offsetHeight;
     box.style.top=((r.top-pr.top)/q-52)+"px";box.style.left=((r.right-pr.left)/q-92)+"px";requestAnimationFrame(follow)};follow();requestAnimationFrame(function(){box.classList.add("up")});
-  setTimeout(function(){box.classList.remove("up");setTimeout(function(){box.remove();var m=ph.querySelector(".mascot");if(m){m.style.visibility="";if(c&&S.guideCfg.azuStyle==="light")m.insertBefore(c,m.firstChild)}},700)},2600)}
+  setTimeout(function(){box.classList.remove("up");setTimeout(function(){box.remove();var m=ph.querySelector(".mascot");if(m){m.style.visibility="";if(c&&D.guide.azuStyle==="light")m.insertBefore(c,m.firstChild)}},700)},2600)}
 /* ----- walk into the wall: Azu leaves the panel as light, travels to the point on the wall, and becomes a tile there ----- */
-function azWalk(id,done){var poi=S.wallPois.filter(function(p){return p.id===id})[0];if(!poi){done&&done();return}if(S.stop!=="closed"){S.stop="closed";renderPhone(false)}
+function azWalk(id,done){var poi=D.wall.wallPois.filter(function(p){return p.id===id})[0];if(!poi){done&&done();return}if(ui.stop!=="closed"){ui.stop="closed";renderPhone(false)}
   var o=ph.querySelector(".azwalker");if(o)o.remove();var w=document.createElement("div");w.className="azwalker";w.setAttribute("aria-hidden","true");var c=AzuGL.canvas();if(c){w.appendChild(c);AzuGL.start()}else w.innerHTML=MASCOT;ph.appendChild(w);
-  var from={x:ph.offsetWidth-44,y:ph.offsetHeight-120},to=poiScreen(poi),t0=performance.now(),dur=S.reduce?1:1600;G.azWalk=true;AzuGL.set("to",1);
+  var from={x:ph.offsetWidth-44,y:ph.offsetHeight-120},to=poiScreen(poi),t0=performance.now(),dur=P.reduce?1:1600;G.azWalk=true;AzuGL.set("to",1);
   var step=function(now){var k=Math.min(1,(now-t0)/dur),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2,x=from.x+(to.x-from.x)*e,y=from.y+(to.y-from.y)*e-Math.sin(e*Math.PI)*70,s=1-.42*e;
     w.style.transform="translate("+(x-32).toFixed(1)+"px,"+(y-70).toFixed(1)+"px) scale("+s.toFixed(3)+")";if(k<1){requestAnimationFrame(step);return}
-    G.azWalk=false;AzuGL.set("to",0);w.classList.add("arrived");done&&done()};if(S.reduce)step(t0+dur);else requestAnimationFrame(step)}
+    G.azWalk=false;AzuGL.set("to",0);w.classList.add("arrived");done&&done()};if(P.reduce)step(t0+dur);else requestAnimationFrame(step)}
 /* in Ask about the view, Azu walks to the first point the answer lights */
-on("camLight.after",function(ids){if(S.guideCfg.azuStyle==="light"&&S.guideCfg.azuWalk&&ids&&ids.length&&G.cam.open){var w=ph.querySelector(".azwalker");if(!w||w.dataset.at!==ids[0])azWalk(ids[0],function(){var x=ph.querySelector(".azwalker");if(x)x.dataset.at=ids[0]})}});
-S.guideCfg.azuWalk=true;
+on("camLight.after",function(ids){if(D.guide.azuStyle==="light"&&D.guide.azuWalk&&ids&&ids.length&&G.cam.open){var w=ph.querySelector(".azwalker");if(!w||w.dataset.at!==ids[0])azWalk(ids[0],function(){var x=ph.querySelector(".azwalker");if(x)x.dataset.at=ids[0]})}});
+D.guide.azuWalk=true;
 on("camLayer.after",function(){if(!G.cam.open){var w=ph.querySelector(".azwalker");if(w)w.remove()}});
 
 /* Editor: Guide tab > Mascot gets Style, Walks to the wall, and a Try for the peek and the walk */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
-  addRows(d,"s7mascot",row("Style",pseg("guideCfg.azuStyle",["light","tile"],["Tile of light","Tile (2.5D)"]),"Tile of light: a glazed tile drawn by a shader. It turns into a holographic dot cube with colour clouds inside to listen, think and travel, then forms again; its moods tint it, its mouth opens with the words. Tile: the 2.5D drawing. Unity: the same shader as a Shader Graph Custom Function, rendered by an mascot camera into a render texture shown inside the card.")+
-    row("Walks to the wall",pseg("guideCfg.azuWalk",["true","false"],["On","Off"]),"In Ask about the view, the mascot leaves the panel as light, travels to the first point the answer lights, and becomes a tile there (smaller: farther away). Unity: its screen box is handed to a world-space the mascot on the wall’s plane, the size matched by depth.")+
+  addRows(d,"s7mascot",row("Style",pseg("D.guide.azuStyle",["light","tile"],["Tile of light","Tile (2.5D)"]),"Tile of light: a glazed tile drawn by a shader. It turns into a holographic dot cube with colour clouds inside to listen, think and travel, then forms again; its moods tint it, its mouth opens with the words. Tile: the 2.5D drawing. Unity: the same shader as a Shader Graph Custom Function, rendered by an mascot camera into a render texture shown inside the card.")+
+    row("Walks to the wall",pseg("D.guide.azuWalk",["true","false"],["On","Off"]),"In Ask about the view, the mascot leaves the panel as light, travels to the first point the answer lights, and becomes a tile there (smaller: farther away). Unity: its screen box is handed to a world-space the mascot on the wall’s plane, the size matched by depth.")+
     row("Try",'<div class="btnrow"><button class="del" type="button" data-azqtry="peek">Peek from behind a block</button><button class="del" type="button" data-azqtry="walk">Walk to the Torreão</button><button class="del" type="button" data-azqtry="think">Think</button></div>',"Peek: the mascot rises from behind the block’s top edge (a box that clips it).",true));
   return d.innerHTML});
 ed.addEventListener("click",function(e){var t=e.target.closest("[data-azqtry]");if(!t)return;e.stopPropagation();var k=t.dataset.azqtry;
-  if(k==="peek"){if(!G.on){S.view="card";if(S.stop==="closed"||S.stop==="peek")S.stop="half";renderPhone(false)}azPeek()}
-  else if(k==="walk"){if(G.on)stopTour();S.view="card";G.cam.open=true;S.stop="closed";renderPhone(false);azWalk("torreao")}
+  if(k==="peek"){if(!G.on){ui.view="card";if(ui.stop==="closed"||ui.stop==="peek")ui.stop="half";renderPhone(false)}azPeek()}
+  else if(k==="walk"){if(G.on)stopTour();ui.view="card";G.cam.open=true;ui.stop="closed";renderPhone(false);azWalk("torreao")}
   else{if(!G.on)startTour();G.azThinkTill=performance.now()+3200}},true);
-BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("guideCfg\\.(","guideCfg\\.(azuStyle|azuWalk|"));
+BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("D\\.guide\\.(","D\\.guide\\.(azuStyle|azuWalk|"));
 /* the row's demo: a question on the wall, Azu walking to the point it lights */
-rowDemos({"guideCfg.azuWalk":{wall:"open",act:function(){camAsk("","what")},ringAfter:900,ring:".azwalker|.camask"}});
+rowDemos({"D.guide.azuWalk":{wall:"open",act:function(){camAsk("","what")},ringAfter:900,ring:".azwalker|.camask"}});

@@ -57,11 +57,11 @@ var GUIDE_WAS={gt2:"s7mascot",s7tour:"s7dock"};
 var GUIDE_DRAW=["gt0"];
 /* the tab is an accordion (round 20): its sections collapsed on one line each, sticky headers (editor/accordion.js) */
 ACC_TABS.guide=true;
-function guideOpMap(){Object.keys(GUIDE_WAS).forEach(function(o){if(!S.op.hasOwnProperty(o))return;var n=GUIDE_WAS[o];if(!S.op.hasOwnProperty(n))S.op[n]=S.op[o];delete S.op[o]})}
+function guideOpMap(){Object.keys(GUIDE_WAS).forEach(function(o){if(!ui.op.hasOwnProperty(o))return;var n=GUIDE_WAS[o];if(!ui.op.hasOwnProperty(n))ui.op[n]=ui.op[o];delete ui.op[o]})}
 /* the Guide tab's button, after Detail Card */
 (function(){var tabs=document.querySelector(".utabs"),c=tabs&&tabs.querySelector('[data-tab="card"]');if(!c||tabs.querySelector('[data-tab="guide"]'))return;
   var b=document.createElement("button");b.className="utab gd";b.setAttribute("role","tab");b.type="button";b.dataset.tab="guide";b.setAttribute("aria-selected","false");b.textContent="Guide";c.after(b);
-  b.addEventListener("click",function(){S.tab="guide";renderEditor()})})();
+  b.addEventListener("click",function(){ui.tab="guide";renderEditor()})})();
 /* a row of a source by its label (the first not yet taken) */
 function gtRow(box,label){if(!box)return null;var rs=box.querySelectorAll(":scope > .row");for(var i=0;i<rs.length;i++){var lb=rs[i].querySelector("label");if(lb&&lb.firstChild?lb.firstChild.textContent===label:label===""&&lb&&!lb.textContent)return rs[i]}return null}
 /* an owner's words: its Aa bar and the panels after it */
@@ -95,16 +95,16 @@ function edGuide(){guideOpMap();var d=document.createElement("div");d.innerHTML=
   h=accBar();GUIDE_SECS.forEach(function(s){h+=fo(s.id,'<span class="acct">'+s.n+' · '+s.title+'</span> <span class="sub">· '+s.sub+'</span>',s.badge,body[s.id]||" ",1)});
   h=pipe("edGuide.html",h);var t=document.createElement("div");t.innerHTML=h;guideDepths(t);accCount(t);
   return t.innerHTML+jsonBox("config.json · guide",guideJson())}
-/* how deep each foldout opens (S.ui.level): its place in this tab, not where its module drew it. Level 1: the six sections; level 2 their
+/* how deep each foldout opens (ui.level): its place in this tab, not where its module drew it. Level 1: the six sections; level 2 their
    foldouts (an Editor or developer part one level later: The visitor's Details, Model tools, The engine); an item (gd:i:) from level 3;
    an item's groups (gd:f:) never by level alone (only the self-test's walk, level 9, opens them) */
 function guideDepths(t){t.querySelectorAll("details[data-fo]").forEach(function(x){var id=x.dataset.fo,n=1,p=x.parentElement&&x.parentElement.closest("details[data-fo]");
   while(p){n++;p=p.parentElement&&p.parentElement.closest("details[data-fo]")}
   var dp=/^gd:f:/.test(id)?9:/^gd:i:/.test(id)?Math.max(n,3):GUIDE_DEEP[id]?n+1:n;x.dataset.depth=dp;if(isOpen(id,dp))x.setAttribute("open","");else x.removeAttribute("open")})}
 var GUIDE_DEEP={"gd:visitor":1,"gt:tools":1,s7agent:1};
-function guideJson(){var a=JSON.parse(JSON.stringify(S.agentCfg||{}));Object.keys(a).forEach(function(k){if(/key/i.test(k))delete a[k]});return{guide:S.guideCfg,view:S.camCfg,agent:a,guidance:S.guidance}}
-on("renderEditor.tab",function(){if(S.tab==="guide")return edGuide()});
-on("refreshJsonV4.answer",function(){if(S.tab==="guide"){var pre=ed.querySelector(".json pre");if(pre)pre.textContent=JSON.stringify(guideJson(),null,2);return true}});
+function guideJson(){var a=JSON.parse(JSON.stringify(D.agent||{}));Object.keys(a).forEach(function(k){if(/key/i.test(k))delete a[k]});return{guide:D.guide,view:D.wall.camCfg,agent:a,guidance:D.guidance}}
+on("renderEditor.tab",function(){if(ui.tab==="guide")return edGuide()});
+on("refreshJsonV4.answer",function(){if(ui.tab==="guide"){var pre=ed.querySelector(".json pre");if(pre)pre.textContent=JSON.stringify(guideJson(),null,2);return true}});
 /* the Detail Card's tab: the Guide is in its own tab now */
 on("edCard.tab",function(h){var d=document.createElement("div");d.innerHTML=h;var g=d.querySelector('[data-fo="s7"]');if(g)g.remove();return d.innerHTML});
 /* the tab's sections, top level (the self-test's NO DEMO check walks them) */
@@ -113,10 +113,10 @@ function guideSecIds(){var d=document.createElement("div");d.innerHTML=edGuide()
    foldout taken apart by its new place, and the guidance's own (guidePath.answer) */
 function guideOwns(o){return /^s7/.test(o)||/^gd:/.test(o)||/^gt/.test(o)}
 var GUIDE_PATHS=null;
-function guidePaths(){if(GUIDE_PATHS)return GUIDE_PATHS;var P={},fos={},walk=function(parts,path){parts.forEach(function(p){if(!p||typeof p!=="object")return;
-    if(p.fo){var q=path.concat([p.fo]);fos[p.fo]=q;if(p.parts)walk(p.parts,q);if(p.add)walk(p.add,q)}else if(p.words)P[p.words]=path.slice()})};
+function guidePaths(){if(GUIDE_PATHS)return GUIDE_PATHS;var Pl={},fos={},walk=function(parts,path){parts.forEach(function(p){if(!p||typeof p!=="object")return;
+    if(p.fo){var q=path.concat([p.fo]);fos[p.fo]=q;if(p.parts)walk(p.parts,q);if(p.add)walk(p.add,q)}else if(p.words)Pl[p.words]=path.slice()})};
   GUIDE_SECS.forEach(function(s){fos[s.id]=[s.id];walk(GUIDE_PLAN[s.id]||[],[s.id])});
-  Object.keys(fos).forEach(function(o){if(!P[o])P[o]=fos[o]});Object.keys(GUIDE_WAS).forEach(function(o){if(!P[o]&&P[GUIDE_WAS[o]])P[o]=P[GUIDE_WAS[o]]});return GUIDE_PATHS=P}
-function guidePath(o){var P=guidePaths();if(P[o])return P[o].slice();var p=firstAnswer("guidePath.answer",o);return p||[o]}
+  Object.keys(fos).forEach(function(o){if(!Pl[o])Pl[o]=fos[o]});Object.keys(GUIDE_WAS).forEach(function(o){if(!Pl[o]&&Pl[GUIDE_WAS[o]])Pl[o]=Pl[GUIDE_WAS[o]]});return GUIDE_PATHS=Pl}
+function guidePath(o){var Pl=guidePaths();if(Pl[o])return Pl[o].slice();var p=firstAnswer("guidePath.answer",o);return p||[o]}
 /* the tab's sections have no FOCUS of their own (as the Detail Card's): they render open, and their toggle must never move the phone;
    each foldout inside keeps its own */
