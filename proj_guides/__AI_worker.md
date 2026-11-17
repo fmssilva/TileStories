@@ -96,6 +96,31 @@ OUT OF SCOPE:
 
 Stop when CORE is green, the new tests and mutations pass, the captures are judged and the publish list is ready. Final report: STEP 1's plan (short), the learning summaries, changes by area, test counts, capture paths with verdicts, the publish list and its size, anything open, and one commit message.
 
+## `And now (parallel, read only): Lab round -- prepare merge P1b (the theme map), proj_guides\_4.2_Lab_Merge_Plan.md`
+GATE: Lab, READ ONLY. It runs while the P1a.2 builder edits `src/`. If the Architect's prompt names this section, this is your brief; the section above is someone else's.
+- **Write one file only:** `proj_guides/_4.2_TileStories_Lab/lab_src/THEME_MAP.md` (a new doc, version 0), plus anything in your scratch folder. Never edit `src/`, tests, tools or other docs. No build, no tests, no git writes.
+- Note at its top the commit you audited (`git log -1`) and that P1a.2's uncommitted work was not included.
+
+Domain spec, read ALL lines: `proj_guides/_4.2_Lab_Merge_Plan.md` (§1-3, §5), then the "P1b" row of its table. Read also `lab_src/STATE_MAP.md` (the same kind of map, for state) and `.clinerules/00-process.md` "Framework Completeness".
+
+SOURCES:
+- **Unity's theme:** `TileStories/Assets/Framework/Runtime/UI/Theme/Generated/Theme.default.uss` (the 167 `--ts-*` tokens). Find what generates it (the ThemeAsset and its generator) and name the source of truth; P1b's test reads that.
+- **The merged Lab (B):** `lab_src/src/**` (CSS in the modules, `core/`, `card/block-looks.js`, `audiences/`, the dark modes, `editor/components.js` and `editor/shell.js`).
+- **The frozen World Lab (W), read only:** `proj_guides/_4.1.2_Prototype/lab_src` (`dsT` / `applyDS`, `ds.css`, the Premium / Playful looks, light / dark, the profiles, its Editor widgets, `tests/unity_lint.py`).
+
+WHAT THE MAP HOLDS (acceptance):
+1. **Tokens.** One row per `--ts-*` token: its name, kind (colour, size, radius, space, type, motion, shadow), light / dark values where they exist; the B literals or variables that mean it (with counts and files); W's equivalent. Then:
+   - B and W values with no `--ts-*` match, each with a verdict: map to an existing token, or a new token marked PROPOSED (with a name in the `--ts-*` scheme);
+   - `--ts-*` tokens neither Lab uses.
+2. **Looks and modes.** Which tokens change with Premium / Playful and with light / dark, from W. B's ten dark modes listed, what each changes, and how each becomes the one dark mode (merge every good choice, drop the bad with a one-line reason).
+3. **The profile model.** B's audiences and W's profiles as one model: Family → 7-11, Explorer / Expert → 12+, Expert forces the Deep time; text size; reduce motion. For each field: its root (`D` or `P`, as STATE_MAP), its Unity home, its default, and the one profile bar that sets it in the Lab.
+4. **The Editor kit.** Every Editor widget of B and of W (rows, foldouts, popups, tables, colour pickers, help): one inventory with a verdict per widget (same, merge, drop with reason) and the one kit P1b builds. Merge every good option, never either / or (memory: framework merges all good options).
+5. **What P1b's builder must decide**, each with a recommendation; and a rough size of P1b in files touched.
+
+Mark every guess "(guess)". WORKER MODEL: Opus. SUBAGENTS: read-only (Sonnet), for the big counts.
+
+Final report: the map's summary (token counts matched / PROPOSED / unused; the dark modes' verdicts; the profile fields; the kit verdicts), the open decisions with recommendations, and anything that blocks P1b.
+
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`
 Before you start executing and implementing things, perform a critical review of the project on disk, and prepare a granular blueprint for the given tasks to be done. For that do the following: 
