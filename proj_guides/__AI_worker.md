@@ -91,6 +91,39 @@ OUT OF SCOPE:
 
 Stop when CORE is green, the new tests and mutations pass, the captures are judged and the docs are updated. Final report: STEP 1's plan (short), the learning summaries, changes by area, test counts and ratchet numbers, capture paths with verdicts and the list of visible differences, anything open, and one commit message.
 
+## `And now (parallel, read only): Lab prep -- the component map (P3) and the voice map (P2), proj_guides\_4.2_Lab_Merge_Plan.md`
+GATE: Lab, READ ONLY. Two prep briefs, **A** and **B**, run beside the P1b.1 builder (the section above, which edits `src/`). The Architect's prompt names your letter; do only that one.
+- **Write one file only:** A writes `proj_guides/_4.2_TileStories_Lab/lab_src/COMPONENT_MAP.md`, B writes `.../lab_src/VOICE_MAP.md` (new docs, version 0). You may also write anything in your scratch folder.
+- Never edit `src/`, tests, tools, voicebench or other docs. Do not run the build, tests or voicebench renders, and make no git writes.
+- Read B's code from `git archive HEAD` into your scratch folder, not from the working tree, which the P1b.1 builder is changing. Note the commit at the top of your map.
+- Read first: `_4.2_Lab_Merge_Plan.md` §1-5 (§5 calls 6-7: Unity's values win; **W's App design wins**), `lab_src/STATE_MAP.md`, `lab_src/THEME_MAP.md`, and `.clinerules/00-process.md` "Framework Completeness".
+- Mark every guess "(guess)". WORKER MODEL: Opus. SUBAGENTS: read-only (Sonnet), for the big counts.
+- Final report: the map's summary, the open decisions (each with a recommendation), the size of the round it prepares, and anything that blocks it.
+
+### A · The component map (prepares P3)
+1. **Inventory.** List every visual component family the visitor sees.
+   - In B: the card's chrome, sheets, chips (about 18), buttons (about 7), bubbles (about 5), badges, toasts, the dock, the guide's panels, the beats, the tiles and the blocks' shared parts.
+   - In W (`proj_guides/_4.1.2_Prototype/lab_src`, frozen): its App components.
+   - For each family give its files, its variants and their counts.
+2. **Verdicts.** Each B variant maps to one W component with options (call 7: W's design wins). Merge every good option; drop the rest with a one-line reason.
+   - Where W has no component for a role, keep B's, marked "redrawn on the tokens".
+   - Missing options become PROPOSED.
+3. **Unity.** Give each component its UI Toolkit home: the existing USS classes and VisualElements under `TileStories/Assets/Framework/Runtime/UI/`, the 36 BlockViews (read only), or "new". Note what UI Toolkit cannot do (`Feature_Prototyping.md` 3.2: no blur, no gradients, one text-shadow, no z-index).
+4. **The reach test.** List every visible part the P3 reach test must cover, and the profile options each one must follow: look, mode, text size, audience and motion.
+5. **The order of work.** Propose P3's order (the components first, then the card's chrome, then the dock and panels) and a size in files.
+
+### B · The voice map (prepares P2)
+1. **Every speech path.** List every place the app speaks or plays a voice, with its file and line: lines, tour steps, tips, games, pages, Tell me more, answers, resume, speed, back-to-game and the fallbacks.
+   - For each, say how it picks the voice today and which of the plan's §4 causes it shows.
+2. **The one service.** Propose `guideVoiceFor(ctx)` and the voice service's API: its owner module, the D / P fields it reads (STATE_MAP), its events, and the order of fallbacks, each one shown in the Editor at that moment.
+   - Name the Unity home (the guide-config asset and the visitor's settings).
+3. **Coverage.** Compare each voice set in `voicebench/out` with every line the app can say: `voicebench/script.json`, plus the words the code composes.
+   - Give per set: lines covered of the total, and the missing lines with their owner and language.
+   - Give the composed lines and how each should speak: recorded parts, or live.
+   - Count the characters needed to render Sonia / Raquel in full, and estimate the share of Azure F0's 0.5 M a month.
+4. **Settings.** List every Editor and visitor control that touches the voice today, with its root. Map them onto plan §5.4: the Guide tab (`D`), App tab › Settings (which choices visitors see), and the visitor's Settings › The guide (`P`).
+5. **The order of work.** Propose P2's order and a size in files.
+
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`
 Before you start executing and implementing things, perform a critical review of the project on disk, and prepare a granular blueprint for the given tasks to be done. For that do the following: 
