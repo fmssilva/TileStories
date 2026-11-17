@@ -93,7 +93,7 @@ function gdContext(){var t=-Infinity,mv=G.gd.movedAt,wa=G.gd.wallAt,st=ph.queryS
     remark:ph.querySelector(".azbub")?"The mascot's bubble":null,
     pokes:P.gdVisitor.visit.pokes||0,idleSince:Math.max(G.gd.actAt==null?t:G.gd.actAt,mv==null?t:mv,P.gdVisitor.visit.at||0),
     speaking:speaking,state:sk?GD_STATES[sk]||sk:null,
-    panel:ui.settingsOpen?"Settings":G.cam&&G.cam.open?"Ask about the view":G.fab&&G.fab.menu?"the ✦ menu":ui.contentsOpen?"Contents":G.gd.tryOpen?"Things to try":null,
+    panel:overlayOn("settings")?"Settings":overlayOn("ask")?"Ask about the view":overlayOn("menu")?"the ✦ menu":overlayOn("contents")?"Contents":overlayOn("try")?"Things to try":null,
     dockFull:!!(G.on&&typeof dockOn==="function"&&dockOn()&&ui.dockH==="full"),solemn:gdSolemnNow(),
     /* the tour: between two steps (as it moves on, nothing is said), its narration so far (since it started or the last Moment) and its last step next */
     plan:G.gd.plan,games:gdPrefs().games||"on",notNow:+P.gdVisitor.visit.notNow||0,sr:!!(LAB.gdSR),lang:P.lang||"en",findOff:D.tour.tourFind&&!gdFindOnWall(D.tour.tourFind)?"the wall only: the card's point is not on the wall in view":null,
@@ -118,7 +118,7 @@ function gdSlots(it,V,c,items){V=V||P.gdVisitor;var o=gdSlotsOf(it,V,c,items);o.
   /* round 17: a place kept from an earlier visit of the point (guide/saved-place.js): the invitation offers to continue, at its step */
   if(it.tap==="tour"&&o.id&&typeof svOffer==="function"){var sv=svOffer(o.id);if(sv){o.cont=sv.n;o.of=sv.of}}return o}
 /* the points in view as Ask about the view sees them once it is open (its panel hides the foot of the wall) */
-function gdViewOpen(){var k=G.cam.open;G.cam.open=true;try{return camView().pois}finally{G.cam.open=k}}
+function gdViewOpen(){var k=overlayOn("ask");setOverlay("ask",true);try{return camView().pois}finally{setOverlay("ask",k)}}
 /* the hunt asks for a point in view (Ask about the view's own list), so the invitation names the same one; with no camera (the simulator) the wall's points */
 function gdHuntThing(){var Pl=ui.view==="card"&&typeof camView==="function"?gdViewOpen():(D.wall.wallPois||[]).map(function(p){return{id:p.id,name:L(p.name)}}),h=typeof camHuntPick==="function"&&Pl.length?camHuntPick(Pl):null;return h?h.name:""}
 function gdSlotsOf(it,V,c,items){if(it.ptJokes)return{id:it.point,point:it.pointName||"",n:gdEverOf(V,it.id).shown||0,jokes:it.jokes,year:gdYearOf(it.point)};
@@ -400,14 +400,14 @@ function gdPageName(id){var it=D.guidance.items[String(id).split(":")[0]];return
 function gdPageNow(){var Pl=G.gd.pages;if(!Pl)return null;var id=Pl.run[Pl.i]||"";return{id:id,it:D.guidance.items[id.split(":")[0]]||null,direct:/:direct$/.test(id)}}
 function gdLaunch(kind){if(noDraw)return false;var later=kind==="later";
   if(G.gd.pages)gdPagesEnd("the app started again",false);if(G.gd.cur)gdStop("the app started");gdChip(null);G.gd.demo=false;
-  if(G.on)stopTour();if(typeof hideStopUi==="function")hideStopUi();ui.settingsOpen=false;ui.contentsOpen=false;G.fab.menu=false;G.cam.open=false;ph.querySelectorAll(".azbub,.gdtoast,.onb").forEach(function(x){x.remove()});
+  if(G.on)stopTour();if(typeof hideStopUi==="function")hideStopUi();setOverlay("settings",false);setOverlay("contents",false);setOverlay("menu",false);setOverlay("ask",false);ph.querySelectorAll(".azbub,.gdtoast,.onb").forEach(function(x){x.remove()});
   /* a later launch of a visitor the Lab opened mid-visit: its first pages were seen at that earlier launch */
   if(later&&!P.gdVisitor.pages){P.gdVisitor.pages={at:gdNow(),visit:P.gdVisitor.visits,how:false,skipped:false,earlier:true}}
   gdVisitStart(later,later?"a later launch":"Start the app: a first run");
   var first=!P.gdVisitor.pages;if(!later)G.gd.camPerm="ask";
   /* a first run: the audience not yet asked (Who's exploring asks again where it is asked) */
   if(first){D.wall.aud.seen=false;P.vis.aud="explorer";P.vis.len=""}
-  ui.view="card";ui.stop="closed";renderPhone(false);
+  goScreen("card",{stop:"closed"});renderPhone(false);
   if(!first){gdLog("event","a later launch: no pages (seen at visit "+P.gdVisitor.pages.visit+"); the Opening message says Welcome back");return true}
   gdPagesStart(gdPagesRun());return true}
 function gdPagesStart(run,o){o=o||{};if(!run.length){gdPagesDone({how:false,skipped:false},"no page to show");return null}
@@ -416,7 +416,7 @@ function gdPagesStart(run,o){o=o||{};if(!run.length){gdPagesDone({how:false,skip
   if(!o.preview)gdLog("event","the first pages: "+run.map(gdPageName).join(" → ")+" → the wall (the scheduler is quiet while they run)");gdPagePaint(true);return G.gd.pages}
 /* an Editor's demo: one page shown, the run going on from it as the visitor would (no memory) */
 function gdPagesPreview(id,o){if(noDraw)return null;o=o||{};if(G.gd.pages)gdPagesEnd("another page shown",false);if(G.gd.cur)gdStop("a page shown");
-  if(G.on)stopTour();ui.settingsOpen=false;G.fab.menu=false;G.cam.open=false;ui.view="card";ui.stop="closed";renderPhone(false);
+  if(G.on)stopTour();setOverlay("settings",false);setOverlay("menu",false);setOverlay("ask",false);goScreen("card",{stop:"closed"});renderPhone(false);
   var run=gdPageDefs().filter(function(x){return x.page!=="wall"&&(x.on||x.id===id)}).map(function(x){return x.id}),i=run.indexOf(id);if(i<0){run=[id];i=0}
   return gdPagesStart(run,{i:i,cam:o.cam,preview:true})}
 function gdPagesNext(how){var Pl=G.gd.pages;if(!Pl)return;if(how)Pl.how=true;var n=gdPageNow();
@@ -461,17 +461,17 @@ setInterval(function(){var Pl=G.gd.pages;if(Pl&&Pl.seq!==G.demoSeq)gdPagesEnd("a
    The features the card's cues and The guide teach come from the visitor's own touch, here (the page's own events, so no other module
    changes): a Before / After dragged, a strip swiped, the Navigation Bar or the Locate Button tapped, the guide paused. Unity: the same
    GuidanceService, fed by the card's controls' events (BeforeAfter.Dragged, Strip.Swiped, NavBar.Jumped, Locate.Tapped, GuideTour.Paused) ----- */
-G.gd.tryOpen=false;G.gd.tryShow=null;G.gd.tryOwner=null;
+setOverlay("try",false);G.gd.tryShow=null;G.gd.tryOwner=null;
 function gdTryPlaying(){var s=G.gd.tryShow;return!!(s&&performance.now()<s.realUntil)}
 /* the gates a pull still meets (round 2's rule: the limits pass, the gates hold): a system state showing, the first pages running */
 function gdPullGate(){var st=ph.querySelector(".stv"),sk=st&&(st.className.match(/\bst-(\w+)/)||[])[1];if(sk)return"quiet while a system state shows ("+(GD_STATES[sk]||sk)+")";
   if(G.gd.pages)return"quiet while the first pages run";return null}
 /* Things to try opens (the ✦ menu, Settings › The guide, an Editor demo) and closes */
-function gdTryOpen(from,demo){G.fab.menu=false;ui.settingsOpen=false;ui.contentsOpen=false;if(G.gd.cur)gdStop("the visitor opened Things to try");G.gd.tryOpen=true;G.gd.tryOwner=demo?G.demoSeq:null;
+function gdTryOpen(from,demo){setOverlay("menu",false);setOverlay("settings",false);setOverlay("contents",false);if(G.gd.cur)gdStop("the visitor opened Things to try");setOverlay("try",true);G.gd.tryOwner=demo?G.demoSeq:null;
   var c=gdTryCount();if(!demo)gdLog("event","Things to try opened ("+from+"): "+c.done+" of "+c.n+" tried");renderPhone(true);return true}
-function gdTryClose(){if(!G.gd.tryOpen)return;G.gd.tryOpen=false;G.gd.tryOwner=null;renderPhone(true)}
+function gdTryClose(){if(!overlayOn("try"))return;setOverlay("try",false);G.gd.tryOwner=null;renderPhone(true)}
 /* a card opened under it (a marker tapped above the sheet): the sheet closes */
-on("card.opened",function(){G.gd.tryOpen=false;G.gd.tryOwner=null});
+on("card.opened",function(){setOverlay("try",false);G.gd.tryOwner=null});
 /* an answer to "how do I…" seen: its item shown this visit and ever (as a step of How to use the card is seen), never done */
 function gdTold(id,how){var now=gdNow(),vm=gdVM(id),em=gdEM(id);vm.shown++;vm.last=now;em.shown++;em.last=now;vm.told=(vm.told||0)+1;em.told=(em.told||0)+1;
   var it=D.guidance.items[id];gdLog("event","Ask the mascot answered how to "+(it?gdTryWord(it).toLowerCase():id)+" ("+how+"): the "+(it?it.label:id)+" seen, not done")}
@@ -482,7 +482,7 @@ function gdHowAsk(q,it){it=it||gdHowFind(q);if(!it)return false;emitLatestFirst(
 /* joined latest first, so before the live agent: with the live agent on, the agent answers (its tool show_how); without, the match */
 on("ask.answer",function(q){if(G.agTurn&&G.agTurn.how)G.agTurn=null;if(!q||!String(q).trim()||agLive())return;var it=gdHowFind(q);if(!it)return;return gdHowAsk(q,it)});
 on("camAsk.answer",function(q,kind){if(G.cam.turn&&G.cam.turn.how)G.cam.turn=null;if(kind||!q||!String(q).trim()||agLive())return;var it=gdHowFind(q);if(!it)return;
-  var t=gdTryHowLine(it);G.cam.open=true;G.cam.route=[];G.cam.lit=[];G.cam.hunt=null;G.cam.turn=gdHowTurn(q,it,t);gdTold(it.id,"Ask about the view, offline");camSay(t);return true});
+  var t=gdTryHowLine(it);setOverlay("ask",true);G.cam.route=[];G.cam.lit=[];G.cam.hunt=null;G.cam.turn=gdHowTurn(q,it,t);gdTold(it.id,"Ask about the view, offline");camSay(t);return true});
 /* the features used, from the visitor's own touch (registered on the document, so a module that stops a tap from going on never hides it) */
 document.addEventListener("pointerdown",function(e){var b=!G.handAct&&ph.contains(e.target)&&e.target.closest("[data-ba]");G.gd.baDrag=b?{x:e.clientX,id:e.pointerId,used:false}:null},{capture:true,passive:true});
 document.addEventListener("pointermove",function(e){var d=G.gd.baDrag;if(!d||d.used||e.pointerId!==d.id)return;if(Math.abs(e.clientX-d.x)>12){d.used=true;gdUsed("ba","dragged")}},{capture:true,passive:true});

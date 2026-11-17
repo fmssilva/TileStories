@@ -5,7 +5,7 @@ on("cardScreen.html",function(h){if(typeof inDemoCard!=="undefined"&&inDemoCard)
   /* the eyebrow and the line under the title: the point's own (guidance round 16: the wall's other points have their hero), else the demo's */
   var ey=D.poi.hero.eyebrow?L(D.poi.hero.eyebrow):L(UI.where),ln=D.poi.hero.line?L(D.poi.hero.line):L(UI.line);
   return h.replace("<small>"+esc(L(UI.where))+"</small><h2>","<small>"+esc(ey)+"</small><h2>").replace("</h2><p>"+esc(L(UI.line))+"</p>","</h2><p>"+esc(ln)+"</p>").replace(/<h2>The Ribeira Palace<\/h2>/,"<h2>"+esc(L(D.poi.hero.title))+"</h2>").replace(/(<div class="hero[^"]*" style="background-image:url\()[^)]*\)/,"$1"+IMG[D.poi.hero.pic]+");background-position:"+D.poi.hero.fx+"% "+D.poi.hero.fy+"%")});
-function heroH(){var H=SCREENS[LAB.screen][1];if(LAB.screen==="land")return 300;return Math.max(220,H-stopTop(ui.stop==="peek"||ui.stop==="closed"?"half":ui.stop))}
+function heroH(){var H=devH();if(devLand())return 300;return Math.max(220,H-stopTop(ui.stop==="peek"||ui.stop==="closed"?"half":ui.stop))}
 function barAfterHero(){var nb=document.getElementById("navbar"),c=D.card.ctl.bar;if(!nb||ui.view!=="card"||!c.on||c.showFrom!=="hero"||ui.stop==="peek"||ui.stop==="closed")return;
   var hero=scr.querySelector(".hero"),past=hero?scr.scrollTop>hero.offsetHeight-140:true;if(!past)nb.style.display="none";else if(D.poi.card.length>=c.minBlocks&&D.card.sections.filter(shownOnBar).length>=2)nb.style.display=""}
 on("renderPhone.after",function(keep){fitHero();heroPaint();barAfterHero();editorTools()});
@@ -28,7 +28,7 @@ function heroCropBox(c,W,H){var z=kopt("Header","look")==="spotlight"?Math.max(1
    (heroH: the phone may still be growing to its new size as it is drawn) */
 function heroPaint(h){h=h||scr.querySelector(".hero");if(!h||ui.view!=="card"&&ui.view!=="democard")return;var c=heroCropOf();h.classList.toggle("hcrop",!!c);
   if(h.style.backgroundImage!=="none")h.style.backgroundImage="url("+IMG[D.poi.hero.pic]+")";if(!c)return;
-  var W=(SCREENS[LAB.screen]||[h.offsetWidth])[0],H=ui.heroH||h.offsetHeight,b=heroCropBox(c,W,H),px=function(v){return v.toFixed(1)+"px"};
+  var W=devLand()?h.offsetWidth:devW(),H=ui.heroH||h.offsetHeight,b=heroCropBox(c,W,H),px=function(v){return v.toFixed(1)+"px"};
   h.style.backgroundSize=px(b.bw)+" "+px(b.bh);h.style.backgroundPosition=b.x+" "+px(b.y);h.style.setProperty("--hx0",b.x0);h.style.setProperty("--hx1",b.x1);h.style.setProperty("--hy",px(b.y))}
 /* the pictures the teaser shows one after another: the palace's four; a point drawn as a crop keeps its own */
 function heroPics(){return heroCropOf()||ui.m&&ui.m.poi&&ui.m.poi!=="painting"?[IMG[D.poi.hero.pic]]:[IMG[D.poi.hero.pic],IMG.g1,IMG.g3,IMG.g2]}

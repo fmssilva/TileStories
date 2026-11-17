@@ -9,12 +9,12 @@ const url = labUrl('#probe');
   const R = src => p.evaluate(s => LAB.run(s), src);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   await R('D.guide.voice="device";D.card.hints.on=false;LAB.previewBar=false;P.lang="en";D.guide.panel="classic";ui.view="card";ui.stop="full";renderAll(false);window.CAP=function(){var c=ph.querySelector(".gcap");if(!c)return"";c=c.cloneNode(true);c.querySelectorAll(".gnovoice,em").forEach(function(x){x.remove()});return c.textContent.trim()}');
-  // 1. the page: nothing above the phone; the phone takes the height there is
-  const pg = await R('var h=document.querySelector(".wrap > header"),r=ph.getBoundingClientRect();[h?getComputedStyle(h).display:"none",Math.round(r.top),Math.round(r.height),SCREENS.phone[1]]');
-  ok('The page: no title above the phone; the phone takes the window\'s height (900 - 48, at most 820)', pg[0] === 'none' && pg[1] < 40 && pg[3] === 820 && pg[2] === 820, pg);
+  // 1. the page: nothing above the phone; the phone is the device's own size (W's phone, 390 x 844), its frame scaled to the window's height
+  const pg = await R('var h=document.querySelector(".wrap > header"),r=ph.getBoundingClientRect();[h?getComputedStyle(h).display:"none",Math.round(r.top),Math.round(r.height),ph.offsetWidth,ph.offsetHeight]');
+  ok('The page: no title above the phone; the phone is 390 x 844 and its frame fits the window (900 - 48 >= 844: at its size)', pg[0] === 'none' && pg[1] < 40 && pg[3] === 390 && pg[4] === 844 && pg[2] === 844, pg);
   await p.setViewportSize({ width: 1400, height: 760 }); await p.waitForTimeout(900);
-  const sh = await R('[SCREENS.phone[1],Math.round(ph.getBoundingClientRect().height)]');
-  ok('...a shorter window: a shorter phone (760 - 48)', sh[0] === 712 && sh[1] === 712, sh);
+  const sh = await R('[ph.offsetHeight,Math.round(ph.getBoundingClientRect().height)]');
+  ok('...a shorter window: the same 844 px phone, its frame scaled to 760 - 48', sh[0] === 844 && sh[1] === 712, sh);
   await p.setViewportSize({ width: 1400, height: 900 }); await p.waitForTimeout(400);
   // 2. the introduction: first tour only, with the point's name; Azu walks in
   await R('P.guideMute=true;startTour()'); await p.waitForTimeout(150);

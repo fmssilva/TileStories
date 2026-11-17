@@ -22,7 +22,7 @@ const url = labUrl('#probe');
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   if (process.env.MUTATE) { await R('gdMix=function(kind){return(GD_PRESETS.first.mix[kind]||[0,0,0]).slice()};gdTalk=function(){return GD_TALK.balanced}'); console.log('MUTATION: the Mix table and Talkativeness ignored (always First visit\'s mix, always Balanced)'); }
   const base = 'LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;P.lang="en";LAB.rowDemo=false;D.guide.gbtn="both";D.guide.mascot=true;D.guide.life="lively";D.poi.solemn=false;D.card.hints.on=true;' +
-    'LAB.gdToday="2026-03-10";P.vis.aud="explorer";D.wall.aud.where="card";D.wall.aud.seen=true;gdPresetWrite("first");G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.demo=false;gdChip(null);if(G.on)stopTour();G.cam.open=false;ui.settingsOpen=false;G.fab.menu=false;setWall("ribeira");ui.view="card";ui.stop="closed";renderPhone(false);';
+    'LAB.gdToday="2026-03-10";P.vis.aud="explorer";D.wall.aud.where="card";D.wall.aud.seen=true;gdPresetWrite("first");G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.demo=false;gdChip(null);if(G.on)stopTour();setOverlay("ask",false);setOverlay("settings",false);setOverlay("menu",false);setWall("ribeira");ui.view="card";ui.stop="closed";renderPhone(false);';
   const edOpen = op => R(`ui.tab="guide";ui.level=1;ui.op=${op};renderEditor()`);
 
   // ---------- 1. the Mix along the visit: data, read by gdScore ----------
@@ -86,10 +86,10 @@ const url = labUrl('#probe');
   await R(base + 'D.wall.aud.seen=false;ui.view="card";ui.stop="half";renderPhone(false)'); await until('!!ph.querySelector(\'.onb [data-onb="family"]\')', 3000);
   await p.locator('.onb [data-onb="family"]').click(); await W(300);
   const af = await R('[aud(),gdPresetNow(),D.guidance.breathing,D.guidance.kinds[1].gap]');
-  await R('ui.settingsOpen=true;ui.stop="half";renderPhone(false)'); await until('!!ph.querySelector(\'[data-vis="aud|expert"]\')', 2000);
+  await R('setOverlay("settings",true);ui.stop="half";renderPhone(false)'); await until('!!ph.querySelector(\'[data-vis="aud|expert"]\')', 2000);
   await p.locator('[data-vis="aud|expert"]').first().click(); await W(300);
   const ae = await R('[aud(),gdPresetNow(),gdRoomNow(),D.guidance.talk]');
-  await R('ui.settingsOpen=false;P.vis.aud="explorer";renderAll(true)'); await W(200);
+  await R('setOverlay("settings",false);P.vis.aud="explorer";renderAll(true)'); await W(200);
   const ax = await R('[aud(),gdPresetNow(),D.guidance.breathing]');
   ok('[aud] Who\'s exploring sets the preset: Family tapped on the first card → the Family preset (12 s, Content\'s gap 45 s); Expert in Settings → Expert (Quiet: 30 s in force); Explorer → First visit', JSON.stringify(af) === '["family","family",12,45]' && JSON.stringify(ae) === '["expert","expert",30,"quiet"]' && JSON.stringify(ax) === '["explorer","first",15]', { af, ae, ax });
 

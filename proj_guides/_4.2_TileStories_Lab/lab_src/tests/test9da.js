@@ -29,9 +29,9 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   const size = async sel => { const r = await box(sel); return r ? [Math.round(r.width), Math.round(r.height)] : [0, 0]; };
   if (process.env.MUTATE) { await R('resumeTourAt=function(pt){pt=pt||G.resumeAt;if(!pt)return;G.resumeAt=null;hideStopUi();if(G.on)stopTour();startTour()}'); console.log('MUTATION: the toast\'s Resume starts the tour again from the start (no step, no sentence)'); }
   // the device voice, muted: its words go on by time (one every ~350 ms), the same on every run
-  const base = 'D.card.hints.on=false;LAB.previewBar=false;P.lang="en";P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;D.guide.voice="device";D.guide.panel="dock";D.guide.dockStart="mini";D.guide.miniCtl="pausestop";D.guide.swipeCompact=true;D.guide.stopUndo="toast";D.guide.gbtn="both";D.guide.gbIcon="star";D.guide.gbSide="left";D.guide.gbFold=true;D.guide.azuTap="play";D.guide.life="lively";D.poi.solemn=false;D.guide.captions=true;G.resumeAt=null;hideStopUi();LAB.wall="ribeira";G.cam.open=false;ui.settingsOpen=false;';
+  const base = 'D.card.hints.on=false;LAB.previewBar=false;P.lang="en";P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;D.guide.voice="device";D.guide.panel="dock";D.guide.dockStart="mini";D.guide.miniCtl="pausestop";D.guide.swipeCompact=true;D.guide.stopUndo="toast";D.guide.gbtn="both";D.guide.gbIcon="star";D.guide.gbSide="left";D.guide.gbFold=true;D.guide.azuTap="play";D.guide.life="lively";D.poi.solemn=false;D.guide.captions=true;G.resumeAt=null;hideStopUi();LAB.wall="ribeira";setOverlay("ask",false);setOverlay("settings",false);';
   const tourAt = async (id, h) => { await R(base + `if(G.on)stopTour();ui.view="card";ui.stop="full";renderAll(false);startTour();var j=D.tour.guideSteps.findIndex(function(s){return s.id==="${id}"});if(j>0){stopSpeech();G.i=j;runStep()}ui.dockH="${h || 'mini'}";renderGuide()`); await W(500); };
-  const past = async () => { await R(base + 'if(G.on)stopTour();G.fab.menu=false;ui.view="card";ui.stop="full";renderAll(false);scr.scrollTop=900;fabLayer()'); await W(400); };
+  const past = async () => { await R(base + 'if(G.on)stopTour();setOverlay("menu",false);ui.view="card";ui.stop="full";renderAll(false);scr.scrollTop=900;fabLayer()'); await W(400); };
 
   const T0 = Date.now(), tsec = s => console.log('TIME ' + s + ' ' + Math.round((Date.now() - T0) / 1000) + ' s');
   // ---------- the fixes ----------
@@ -56,13 +56,13 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   ok('b. ...under Reduce Motion, while it plays, the mouth does not move', still.size === 1 && await R('!!G.recAudio&&!G.recAudio.paused'), [...still]);
   await R('P.reduce=false;stopTour();P.guideMute=true;P.lang="en";D.guide.voice="device"');
   // c. the wall's answers: the one order (sayOrder), Speaking now says which; no camSay.source any more
-  await R(base + 'window.LABKEYS={};ui.view="card";ui.stop="closed";G.cam.open=true;renderPhone(false);ui.tab="guide";renderEditor()'); await R('camSay("Test answer on the wall.")'); await W(300);
+  await R(base + 'window.LABKEYS={};ui.view="card";ui.stop="closed";setOverlay("ask",true);renderPhone(false);ui.tab="guide";renderEditor()'); await R('camSay("Test answer on the wall.")'); await W(300);
   const c1 = await R('[extPoint("camSay.source").length,G.sayNow&&G.sayNow.src,G.sayNow&&G.sayNow.answer,(ed.querySelector(".saynow")||{}).textContent,ph.querySelector(".ca-ans").textContent]');
   ok('c. The wall\'s answer takes the one order: no live key here, so this device\'s voice, and Speaking now says why', c1[0] === 0 && c1[1] === 'device' && c1[2] === true && /This device.s voice \(no .* key/.test(c1[3]) && c1[4] === 'Test answer on the wall.', c1);
   await R('window.LABKEYS={eleven:"k",elevenPT:"v",elevenEN:"v"};D.agent.liveVoice="eleven";camSay("Another answer on the wall.")'); await until('!!G.recAudio', 4000);
   const c2 = await R('[G.sayNow&&G.sayNow.src,(ed.querySelector(".saynow")||{}).textContent,!!G.recAudio]');
   ok('c. ...with the live voice\'s key: the live voice first (an answer), as on the card; Speaking now says Live', c2[0] === 'live' && /^Live · ElevenLabs/.test(c2[1]) && c2[2] && el.n >= 1, c2);
-  await R('stopSpeech();window.LABKEYS={};D.agent.liveVoice="azure";G.cam.open=false;ui.stop="full";renderPhone(false)');
+  await R('stopSpeech();window.LABKEYS={};D.agent.liveVoice="azure";setOverlay("ask",false);ui.stop="full";renderPhone(false)');
 
   // ---------- Mini: Pause and Stop ----------
   await tourAt('g1', 'mini');
@@ -138,7 +138,7 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   const items = await R('[].map.call(ph.querySelectorAll(".gbmenu [data-gbgo]"),function(b){return b.dataset.gbgo})');
   const ih = await R('[].map.call(ph.querySelectorAll(".gbmenu [data-gbgo]"),function(b){return Math.round(b.getBoundingClientRect().height)})');
   ok('A tap on the ✦: its menu on the card: Start the tour, Ask (type or talk), How does this work?, Things to try (guidance round 9), Guide settings (44 px items)', items.join() === 'tour,ask,how,try,settings' && ih.every(h => h >= 44), [items, ih]);
-  await R('scr.dispatchEvent(new MouseEvent("click",{bubbles:true}))'); await W(200); ok('...a tap elsewhere closes it', await R('!ph.querySelector(".gbmenu")&&!G.fab.menu'));
+  await R('scr.dispatchEvent(new MouseEvent("click",{bubbles:true}))'); await W(200); ok('...a tap elsewhere closes it', await R('!ph.querySelector(".gbmenu")&&!overlayOn("menu")'));
   await past(); await tap('.gbtn'); await W(200); await tap('[data-gbgo="tour"]'); await W(400);
   ok('...Start the tour: the tour runs; the ✦ grew into the panel (hidden while it shows, round 11), Azu becomes the guide', await R('G.on&&!ph.querySelector(".gbtn-wrap")&&!!ph.querySelector(".gdock")&&!ph.querySelector(".azfab")&&!!ph.querySelector(".mascot")'));
   await W(400); await tap('.gd-hide'); await W(450); ok('...during the tour the hide chevron hides the dock, back into the ✦', await R('ui.dockH==="compact"&&!!ph.querySelector(".gbtn.tour")'));
@@ -149,7 +149,7 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   ok('...Guide settings: Settings opens at the guide\'s group (voice, speed, captions)', await R('var v=ph.querySelector(".vset"),g=v&&v.querySelector(".vguide");!!g&&g.querySelectorAll("[data-gset]").length===7&&g.getBoundingClientRect().top>=v.getBoundingClientRect().top-1'));
   await tap('[data-gset="speed|1.2"]'); await W(200); await tap('[data-gset="voice|recorded"]'); await W(200);
   ok('...its choices set the visitor\'s guide (P.guide: Faster, speed 1.2; Recorded voice; the author\'s D.guide untouched)', await R('P.guide.speed===1.2&&P.guide.voice==="recorded"&&guideSpeed()===1.2&&D.guide.speed===1&&ph.querySelector(\'[data-gset="speed|1.2"]\').getAttribute("aria-pressed")==="true"'));
-  await R('P.guide={};ui.settingsOpen=false;renderAll(true)');
+  await R('P.guide={};setOverlay("settings",false);renderAll(true)');
   // on the wall: in the corner; Ask about the view, named after the point in the middle
   await R(base + 'setWall("ribeira")'); await W(500);
   const wl = await R('var w=ph.querySelector(".gbtn-wrap");[!!w&&w.classList.contains("onwall"),Math.round(ph.getBoundingClientRect().bottom-w.getBoundingClientRect().bottom)]');
@@ -157,14 +157,14 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   const wi = await R('[[].map.call(ph.querySelectorAll(".gbmenu [data-gbgo]"),function(b){return b.dataset.gbgo}).join(),(ph.querySelector(\'[data-gbgo="view"]\')||{}).textContent,camView().central&&camView().central.name]');
   ok('On the wall: the ✦ in the corner; its menu adds Ask about the view, named after the point in the middle', wl[0] && wl[1] <= 30 && wi[0] === 'tour,ask,view,how,try,settings' && wi[1] === 'Ask about ' + String(wi[2]).replace(/^(The|An?)(?=\s)/, a => a.toLowerCase()), [wl, wi]);
   await tap('[data-gbgo="view"]'); await W(300);
-  ok('...Ask about the view: its panel opens on the wall', await R('G.cam.open&&!!ph.querySelector(".camask.open")'));
-  await R('G.cam.open=false;renderPhone(true)'); await tap('.gbtn'); await W(200); await tap('[data-gbgo="tour"]'); await W(500);
+  ok('...Ask about the view: its panel opens on the wall', await R('overlayOn("ask")&&!!ph.querySelector(".camask.open")'));
+  await R('setOverlay("ask",false);renderPhone(true)'); await tap('.gbtn'); await W(200); await tap('[data-gbgo="tour"]'); await W(500);
   ok('...Start the tour from the wall: the card opens at Full and the tour runs', await R('G.on&&ui.stop==="full"'));
   await R('stopTour()');
 
   // ---------- Azu: a tap plays; the menu only when asked; the hint ----------
   await past(); const pk0 = await R('G.pokes||0'); await tap('.azfab'); await W(150);
-  ok('A tap on Azu (Tap on Azu = Play): it plays (a poke), never the menu', await R('G.pokes||0') === pk0 + 1 && await R('!G.fab.menu&&!ph.querySelector(".gbmenu")'));
+  ok('A tap on Azu (Tap on Azu = Play): it plays (a poke), never the menu', await R('G.pokes||0') === pk0 + 1 && await R('!overlayOn("menu")&&!ph.querySelector(".gbmenu")'));
   await R('D.guide.azuTap="menu";G.taps=[]'); await W(1300); await tap('.azfab'); await W(200);
   ok('...Tap on Azu = Opens the menu: the ✦\'s menu opens', await R('!!ph.querySelector(".gbmenu")'));
   await past(); await R('D.guide.azuTap="point";G.taps=[]'); await tap('.azfab'); await W(300);
@@ -201,8 +201,8 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   // ---------- contrast: words 4.5:1, controls 3:1, light and dark ----------
   const CR = 'var px=function(c){var m=c.match(/[\\d.]+/g).map(Number),k=c.indexOf("color(")===0?255:1;return{r:m[0]*k,g:m[1]*k,b:m[2]*k,a:m.length>3?m[3]:1}},lum=function(c){return[c.r,c.g,c.b].map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce(function(a,v,i){return a+v*[.2126,.7152,.0722][i]},0)},over=function(f,b){return{r:f.r*f.a+b.r*(1-f.a),g:f.g*f.a+b.g*(1-f.a),b:f.b*f.a+b.b*(1-f.a),a:1}},cr=function(a,b){var x=lum(a),y=lum(b);return Math.round((Math.max(x,y)+.05)/(Math.min(x,y)+.05)*100)/100},cs=function(s){return getComputedStyle(ph.querySelector(s))},bgOf=function(s){var e=ph.querySelector(s);while(e){var c=px(getComputedStyle(e).backgroundColor);if(c.a>.5)return c;e=e.parentElement}return{r:255,g:255,b:255,a:1}};';
   for (const dark of [false, true]) {
-    await past(); await R(`G.resumeAt={id:"g3",k:3,title:"Story"};P.dark=${dark};renderAll(true);scr.scrollTop=900;fabLayer();G.fab.menu=true;fabLayer()`); await W(300);
-    for (let i = 0; i < 8 && !(await R('!!ph.querySelector(".gbtn .gb-ic svg")&&!!ph.querySelector(".gbmenu small")')); i++) { await R('ui.view="card";ui.stop="full";G.on&&stopTour();scr.scrollTop=900;G.fab.menu=true;fabLayer()'); await W(300); }
+    await past(); await R(`G.resumeAt={id:"g3",k:3,title:"Story"};P.dark=${dark};renderAll(true);scr.scrollTop=900;fabLayer();setOverlay("menu",true);fabLayer()`); await W(300);
+    for (let i = 0; i < 8 && !(await R('!!ph.querySelector(".gbtn .gb-ic svg")&&!!ph.querySelector(".gbmenu small")')); i++) { await R('ui.view="card";ui.stop="full";G.on&&stopTour();scr.scrollTop=900;setOverlay("menu",true);fabLayer()'); await W(300); }
     const a = await R(CR + 'var disc=px(cs(".gbtn").backgroundColor),card=bgOf("#scr .item")||px(getComputedStyle(scr).backgroundColor),rim=px(cs(".gbtn").borderTopColor),pg=bgOf("#scr");[cr(px(cs(".gb-ic svg").fill),disc),cr(px(cs(".gbtn").color),disc),Math.max(cr(disc,pg),cr(rim,pg)),cr(px(cs(".gbmenu button").color),px(cs(".gbmenu").backgroundColor)),cr(px(getComputedStyle(ph.querySelector(".gbmenu small")||ph.querySelector(".gbmenu button")).color),px(cs(".gbmenu").backgroundColor))]');
     await tourAt('g5', 'mini'); await R(`P.dark=${dark};renderAll(true)`); await W(300);
     const dk = { r: 22, g: 24, b: 28, a: 1 };
@@ -217,7 +217,7 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
     const words = ['label', 'menu words', 'menu small words', 'toast words', 'toast button'];
     ok(`Contrast, ${dark ? 'dark' : 'light'}: the words at 4.5:1 or more, the controls (✦, icons, ring, the button's edge) at 3:1 or more`, Object.keys(all).every(k => all[k] >= (words.indexOf(k) >= 0 ? 4.5 : 3)), all);
   }
-  await R('P.dark=false;G.fab.menu=false;renderAll(false)');
+  await R('P.dark=false;setOverlay("menu",false);renderAll(false)');
 
   tsec('contrast');
   // ---------- the scenes in Ask Azu's console, pressed as the developer does ----------
@@ -230,7 +230,7 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
     await p.locator('[data-agscrun]').click();
     await until(`!!AG.sceneRes["${id}"]`, 30000); const r = await R(`AG.sceneRes["${id}"]`);
     ok(`Scene "${label}": Set up and ask runs it, ✓`, /Does: nothing:/.test(does) && r && r.ok === true, r && [r.note, r.answer]);
-    await R('if(G.on)stopTour();hideStopUi();ui.settingsOpen=false;G.cam.open=false');
+    await R('if(G.on)stopTour();hideStopUi();setOverlay("settings",false);setOverlay("ask",false)');
   }
   tsec('scenes');
   ok('no page errors', errs.length === 0, errs.slice(0, 3));

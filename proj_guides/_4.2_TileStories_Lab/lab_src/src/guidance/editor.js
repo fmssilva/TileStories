@@ -324,7 +324,7 @@ function gdReadouts(){var v=ed.querySelector("#gdvisitor");if(v)v.textContent=gd
 on("gdLog.after",function(){if(!G.gd.roT)G.gd.roT=setTimeout(function(){G.gd.roT=0;gdReadouts()},60)});
 setInterval(function(){var n=ed.querySelector("#gdnow");if(n)n.textContent=gdNowLine();var vl=ed.querySelector("#gdvisitorline");if(vl)vl.textContent=gdVisitorShort();var v2=ed.querySelector("#gdvisitor2");if(v2)v2.textContent=gdVisitorMore()},1000);
 /* ----- the Editor's actions: Show next now, Why not now?, the visitor, ▸ Show now; a changed label redraws the rows ----- */
-function gdOnWallNow(){if(G.on)stopTour();if(typeof hideStopUi==="function")hideStopUi();ui.settingsOpen=false;ui.contentsOpen=false;G.fab.menu=false;G.cam.open=false;G.gd.tryOpen=false;ui.view="card";ui.stop="closed";renderPhone(false)}
+function gdOnWallNow(){if(G.on)stopTour();if(typeof hideStopUi==="function")hideStopUi();setOverlay("settings",false);setOverlay("contents",false);setOverlay("menu",false);setOverlay("ask",false);setOverlay("try",false);goScreen("card",{stop:"closed"});renderPhone(false)}
 function gdShowNext(){gdOnWallNow();gdStop("Show next now");var ctx=gdContext();ctx.onWall=true;ctx.where="";ctx.stillSince=-Infinity;ctx.movedAt=null;ctx.touchAt=null;ctx.cardAt=null;ctx.panel=null;ctx.dockFull=false;ctx.tour=null;ctx.state=null;ctx.remark=null;ctx.showing=null;ctx.speaking=false;ctx.demo=false;
   var r=gdPick(gdItems(),P.gdVisitor,ctx,gdNow());G.gd.next=r;if(r.item)gdStart(r.item,r.why);var w=ed.querySelector("#gdwhy");if(w)w.textContent=r.item?"Next: "+r.why:"Next: nothing. "+r.why;return r}
 /* Why not now?: the scheduler's words for one item at this moment (the phone as it is; its bubble measured, so a covered target says so) */
@@ -352,7 +352,7 @@ function gdDemoShow(it,ms,o){if(it.form==="cue"){cuePlace(it.id);return gdStart(
   if(it.ptJokes){var c0=gdCentral(),ins=gdInstances(it.base||it.id).filter(function(x){return x.jokes&&x.jokes.length}),pk=ins.filter(function(x){return o&&o.point?x.point===o.point:!!(c0&&x.point===c0.id)})[0]||ins[0];
     if(!pk)return null;if(typeof setWall==="function"&&LAB.wall!=="ribeira")setWall("ribeira");gdSimAim(pk.point);return gdStart(pk,"the Editor's demo",Object.assign({pull:true,ms:ms},o||{}))}
   if(it.seasons&&!(o&&o.text)&&!gdSeasonOf(it,gdTodayMD())){var f0=(it.seasons||[]).filter(function(x){return gdHasWords(x.says)})[0];if(f0)o=Object.assign({},o||{},{text:TXT(f0.says)})}var need=it.about==="marker"&&!gdMarker()||it.about==="middle"&&!(gdCentral()||{}).tour||it.about==="gbtn"&&!gdGbtn()||it.about==="point"&&!gdCentral();
-  if(need&&typeof setWall==="function"){setWall("ribeira");ui.stop="closed";renderPhone(false)}
+  if(need&&typeof setWall==="function"){setWall("ribeira");sheetTo("closed");renderPhone(false)}
   /* a per-point item: the one of the point in the middle now */
   if(it.base){var m=gdItemNow(it.base);if(m)it=m}
   return gdStart(it,"the Editor's demo",Object.assign({pull:true,ms:ms},o||{}))}
@@ -481,7 +481,7 @@ function gdDemoWalk(id){var my=gdDemoBegin(),d=D.guidance.items[id];if(!d.on){gd
 function gdDemoHow(f){var my=gdDemoBegin(),g=gdGroupById("howto");
   if(g.on===false){gdChip("How to use the card Off: no walkthrough, no entry in Settings or the ✦ menu");gdDemoEnd(my,3500);return}
   if(f==="on"){gdWalkCard();gdChip("How to use the card: the walkthrough, pulled");gdDemoEnd(my,3400);return}
-  if(f==="settings"){ui.settingsOpen=true;renderPhone(false);var v=ph.querySelector(".vset");if(v)v.scrollTop=v.scrollHeight;gdChip(g.inSettings?"In Settings: its button at the panel's foot":"In Settings: Hidden");gdDemoEnd(my,3500);return}
+  if(f==="settings"){setOverlay("settings",true);renderPhone(false);var v=ph.querySelector(".vset");if(v)v.scrollTop=v.scrollHeight;gdChip(g.inSettings?"In Settings: its button at the panel's foot":"In Settings: Hidden");gdDemoEnd(my,3500);return}
   gbMenu(true);gdChip(g.inMenu?"In the ✦ menu: How does this work?":"In the ✦ menu: Hidden");gdDemoEnd(my,3500)}
 /* (round 7) an item's, a group's and a kind's demo show their tip in the same frame: no wait before or after (the Fun rows doubled the
    Guide tab's rows; a second a row was 3 minutes of the tests) */
@@ -606,7 +606,7 @@ function gdSimDraw(){var w=ed.querySelector("#gdsimtl");if(!w)return;var res=gdS
 function gdSimPickHtml(res){var p=G.gd.sim.pick||[];return p.length>1?'<span>'+p.length+' here:</span>'+p.map(function(i){var d=res.dots[i];return d?'<button type="button" class="ubtn sm'+(G.gd.sim.shown===d?' on':'')+'" data-gdsimpick="'+i+'">'+gdClock(d.t)+" "+esc(d.label)+(d.cue?" (cue)":"")+'</button>':""}).join(""):""}
 /* a dot shown on the phone at its moment: the wall (or, for a cue, the card at its element), its line as it was said; a demo (pulled: no memory) */
 function gdSimShow(d,inDemo){var it=gdItems().filter(function(x){return x.id===d.id})[0];if(!it)return null;var my=inDemo?null:gdDemoBegin(),sc=gdSimScript(LAB.gdSim);
-  if(it.form==="cue")cuePlace(it.id);else{if(!(ui.view==="card"&&ui.stop==="closed"&&!G.on&&!ui.settingsOpen&&!G.cam.open))gdOnWallNow();else gdStop("the simulator");gdSimAim(it.about==="marker"?((D.wall.wallPois||[]).filter(function(x){return x.card})[0]||{}).id:d.at)}
+  if(it.form==="cue")cuePlace(it.id);else{if(!(ui.view==="card"&&ui.stop==="closed"&&!G.on&&!overlayOn("settings")&&!overlayOn("ask")))gdOnWallNow();else gdStop("the simulator");gdSimAim(it.about==="marker"?((D.wall.wallPois||[]).filter(function(x){return x.card})[0]||{}).id:d.at)}
   /* a Moment: in the tour, as the visitor had it (round 7) */
   var c=it.form==="moment"?gdDemoShow(it,6500,{text:d.text}):gdStart(it,"the simulator ("+sc.name+", "+gdClock(d.t)+")",{pull:true,ms:it.form==="cue"?4000:6500,text:it.form==="cue"?undefined:d.text,ret:!!sc.returning});
   gdChip("Simulated · "+sc.name+" · "+gdClock(d.t)+" · "+gdSimShort(d));G.gd.sim.shown=d;if(!inDemo)gdDemoEnd(my,7000);return c}
@@ -802,7 +802,7 @@ function gdDemoSay(id,k,who){var my=gdDemoBegin(),it=gdItemNow(id);if(!it)return
   if(!String(t).trim()){gdChip("No words yet: write them in the table above");gdDemoEnd(my,3000);return}
   var c=gdDemoShow(it,6500,{text:t});gdChip(who==="back"?"A returning visitor's line":who?gdNameOf(GD_AUD,who)+"'s line":"Says: this variant");gdDemoEnd(my,Math.max(4200,c?c.until-c.at+400:0))}
 /* the visitor's Tips and the screen reader: on the phone, the visitor's own Settings, or a tip announced and in the dock */
-function gdDemoPrefs(f){var my=gdDemoBegin(),Pl=gdPrefs();ui.settingsOpen=true;renderPhone(false);var v=ph.querySelector(".vset"),g=v&&v.querySelector(".vtips");if(v&&g)v.scrollTop=Math.max(0,g.offsetTop-40);
+function gdDemoPrefs(f){var my=gdDemoBegin(),Pl=gdPrefs();setOverlay("settings",true);renderPhone(false);var v=ph.querySelector(".vset"),g=v&&v.querySelector(".vtips");if(v&&g)v.scrollTop=Math.max(0,g.offsetTop-40);
   gdChip(f==="stay"?"Tips stay until I tap them: "+(Pl.stay?"On":"Off"):"Tips: "+(Pl.tips==="all"?"All":Pl.tips==="essentials"?"Essentials only":"Off (the ✦ still answers)"));gdDemoEnd(my,3600)}
 function gdDemoSR(){var my=gdDemoBegin(),it=gdItemNow("inview")||gdItemNow("opening");if(!it)return;var keep=P.gdVisitor.visit.heard;P.gdVisitor.visit.heard=true;var c=gdDemoShow(it,6000);P.gdVisitor.visit.heard=keep;
   gdChip(LAB.gdSR?"Screen reader on: announced politely, never spoken":"Screen reader off: "+(c&&c.spoken?"spoken, its word lit":"a bubble"));gdDemoEnd(my,4200)}
@@ -1007,7 +1007,7 @@ function gdPullFo(g){var items=g.items.map(function(id){return D.guidance.items[
     '<div class="note">Pulled only (round 9): each item is a row of Things to try and an answer of Ask the mascot\'s how do I…, never on its own (no bubble, never scheduled, never capped). Its push (a tip between two steps of a tour) is not built: it waits for the developer\'s call.</div>'+items.map(gdItemRow).join(""),3)}
 /* Overall › The visitor's controls › Things to try, and what it holds now */
 function gdTryNowWords(){var r=gdTryDefs();return"In the ✦ menu: "+(D.guidance.tryMenu!==false?"Shown":"Hidden")+" · Settings › The guide › Things to try ›: always · its "+r.length+" rows, in the Editor's order: "+r.map(function(it){return gdTryWord(it)+" ("+it.label+")"}).join(", ")+"."}
-function gdTrySeenWords(){var c=gdTryCount(),r=gdTryDefs().filter(function(it){return gdTryDone(it)});return"Things to try: "+c.done+" of "+c.n+" tried"+(r.length?" ("+r.map(gdTryWord).join(", ")+")":"")+(G.gd.tryOpen?" · the sheet is open":"")}
+function gdTrySeenWords(){var c=gdTryCount(),r=gdTryDefs().filter(function(it){return gdTryDone(it)});return"Things to try: "+c.done+" of "+c.n+" tried"+(r.length?" ("+r.map(gdTryWord).join(", ")+")":"")+(overlayOn("try")?" · the sheet is open":"")}
 on("edGuide.html",function(h){var d=document.createElement("div");d.innerHTML=h;var ov=d.querySelector('[data-fo="gd:overall"] > .inner');if(!ov)return h;
   var lp=[].filter.call(ov.querySelectorAll(":scope > .sub2"),function(x){return/The long press/.test(x.textContent)})[0];
   var w='<div class="sub2 gdvc">The visitor\'s controls <span class="sub">· what the visitor asks for: never scheduled, never capped</span></div>'+
@@ -1018,7 +1018,7 @@ on("edGuide.html",function(h){var d=document.createElement("div");d.innerHTML=h;
 on("gdLog.after",function(){var n=ed.querySelector("#gdtryseen");if(n)n.textContent=gdTrySeenWords()});
 /* the demos: the ✦ menu with or without it, then the sheet; the sheet with a row in or out; Show me on the phone */
 function gdDemoTryClose(my,ms){setTimeout(function(){if(G.gd.tryOwner===my)gdTryClose()},ms)}
-function gdDemoTryMenu(){var my=gdDemoBegin();G.fab.menu=true;fabLayer();var on=D.guidance.tryMenu!==false&&gdTryDefs().length>0;
+function gdDemoTryMenu(){var my=gdDemoBegin();setOverlay("menu",true);fabLayer();var on=D.guidance.tryMenu!==false&&gdTryDefs().length>0;
   if(!on){gdChip(D.guidance.tryMenu===false?"Hidden from the ✦ menu: Settings › The guide › Things to try › still opens it":"No row to try: no App item teaches a feature");gdDemoEnd(my,3600);return}
   gdChip("In the ✦ menu: Things to try");G.gd.demoT=setTimeout(function(){if(!gdDemoLive(my))return;gdTryOpen("the Editor's demo",true);var c=gdTryCount();gdChip("Things to try: "+c.done+" of "+c.n+" tried");gdDemoEnd(my,3400);gdDemoTryClose(my,3600)},1200)}
 function gdDemoTryRow(id){var my=gdDemoBegin(),d=D.guidance.items[id];if(!d)return;gdTryOpen("the Editor's demo",true);var rows=gdTryDefs(),i=gdTryAt(id),first=gdTeachers().filter(function(x){return x.teaches===d.teaches})[0];
@@ -1133,7 +1133,7 @@ function gdDemoSeamOf(id){var Pl=gdPlanNow(),b=Pl.beats.filter(function(x){retur
   if(!it)return null;if(it.place==="instep"){var w=gdWordOf(P.lang||"en"),j0=w?st.findIndex(function(s){return s.id===w.span[0]}):-1;if(j0>0)return st[j0-1].id}if(it.beat==="find"&&D.tour.tourFind)return D.tour.tourFind.after;if(it.place==="opening")return Pl.ids[k0];if(it.place==="finale"||it.beforeEnd)return Pl.ids[kf];if(it.beat==="guess"){for(var j=k0+2;j<=kf;j++)if(D.tour.tourGuess[st[j].id])return Pl.ids[j-1]}
   for(var s=k0+1;s<kf;s++)if(Pl.at[s]>=(+it.talkFor||20))return Pl.ids[s];return Pl.ids[Math.min(kf-1,k0+2)]}
 function gdDemoBeat(id,chip,o){o=o||{};var my=gdDemoBegin(),it=gdItems().filter(function(x){return x.id===id})[0]||D.guidance.items[id];if(!it)return;
-  if(!G.on){ui.view="card";ui.stop="full";startTour()}stopSpeech();G.paused=true;var after=o.after||gdDemoSeamOf(id),j=D.tour.guideSteps.findIndex(function(s){return s.id===after});if(j>=0)G.i=j;renderGuide();
+  if(!G.on){goScreen("card",{stop:"full"});startTour()}stopSpeech();G.paused=true;var after=o.after||gdDemoSeamOf(id),j=D.tour.guideSteps.findIndex(function(s){return s.id===after});if(j>=0)G.i=j;renderGuide();
   var b={id:id,after:after,place:it.place,label:it.label,seam:j},l=P.lang||"en",qs=null;
   if(it.place==="instep"){var w=gdWordOf(l);if(w){b.span=w.span.slice();b.endAfter=w.span[w.span.length-1]}}
   if(it.beat==="finale"){qs=o.qs||D.tour.guideSteps.filter(function(st){return gdQOk(D.tour.tourQ[st.id],l)}).map(function(st){return st.id}).slice(0,+it.qn||3);if(!qs.length)qs=[]}
@@ -1146,7 +1146,7 @@ function gdBeatChipWords(id,f){var it=D.guidance.items[id],v=it[f];if(/^auds\./.
     scores:"Scores: "+(v?"On":"Off"),showMe:"Show me after a wrong answer: "+(v?"On":"Off"),qn:"Questions: "+v,qMin:"Needs "+v+" reviewed questions",minSteps:"Only in tours of "+v+" steps or more",talkFor:"After "+v+" s of narration",
     beforeEnd:"Before the last step: "+(v?"Yes":"No"),minNarr:"Only in tours of "+v+" s or more",props:"Prop: "+(v==="date"?"by date ("+(GD_PROP_NAMES[gdPropOf(it,gdTodayMD(),[])]||"")+")":"its own"),shows:"Shows: "+(v==="visit"?"once a visit":"every tour"),
     expert:"For Expert: "+gdNameOf(GD_EXPERT,v),on:it.label+": "+(v?"On":"Off"),label:it.label};var Pl=gdPlanNow(),w=Pl.why[id]||"";return(nm[f]||it.label)+" · "+(/^planned/.test(w)?w:"not in a tour's plan now: "+w)}
-function gdDemoBeatField(id,f){var it=D.guidance.items[id];if(!it)return;if(!it.on&&f==="on"){var my=gdDemoBegin();if(!G.on){ui.view="card";ui.stop="full";startTour()}gdChip(it.label+": Off · no tour plans it");gdDemoEnd(my,3200);return}
+function gdDemoBeatField(id,f){var it=D.guidance.items[id];if(!it)return;if(!it.on&&f==="on"){var my=gdDemoBegin();if(!G.on){goScreen("card",{stop:"full"});startTour()}gdChip(it.label+": Off · no tour plans it");gdDemoEnd(my,3200);return}
   if(f==="answers"&&it.beat==="breather"&&it.answers==="nothing"){gdDemoBeat(id,gdBeatChipWords(id,f));return}
   if(it.beat==="promise"&&f==="expert"){var keep=P.vis.aud;P.vis.aud="expert";gdDemoBeat(id,gdBeatChipWords(id,f));P.vis.aud=keep;return}
   /* round 13: Don't say it!'s game rows: the span playing (a slip's window, a false tap's Nope!), the result with the slip played back */
@@ -1157,14 +1157,14 @@ function gdDemoBeatField(id,f){var it=D.guidance.items[id];if(!it)return;if(!it.
 on("rowDemo.spec",function(key){var m=/^D\.guidance\.items\.([^.]+)\.([\w.]+)$/.exec(key);if(!m)return;var d=D.guidance.items[m[1]];if(!d||d.form!=="beat")return;var id=m[1],f=m[2];
   return{tour:true,dock:"mini",wait:0,act:function(){gdDemoBeatField(id,f)},ringAfter:500,ring:".gdbeat|.gdchip"}});
 /* the group's rows: the plan a tour gets now (a chip), its first beat played */
-function gdDemoPlan(f){var my=gdDemoBegin(),Pl=gdPlanNow(),b=Pl.beats[0];if(!G.on){ui.view="card";ui.stop="full";startTour()}var w=gdPlanWords(Pl);
+function gdDemoPlan(f){var my=gdDemoBegin(),Pl=gdPlanNow(),b=Pl.beats[0];if(!G.on){goScreen("card",{stop:"full"});startTour()}var w=gdPlanWords(Pl);
   if(!b){gdChip("No beats: "+w.replace(/^.*?\)\. /,""));gdDemoEnd(my,4200);return}gdDemoBeat(b.id,w.slice(0,140)+(w.length>140?"…":""))}
 on("rowDemo.spec",function(key){var gp=gdGroupPath("ontour");if(!gp||key.indexOf(gp)!==0)return;var f=key.slice(gp.length);if(!/^(on|life|every|perTour|perShort|perDeep|auds\.\w+)$/.test(f))return;
   return{tour:true,dock:"mini",wait:0,act:function(){gdDemoPlan(f)},ringAfter:500,ring:".gdbeat|.gdchip"}});
 /* 6 · Preview & Test › The visitor: Games on the tour (the visitor's own switch, Settings › The guide) */
 on("edGuide.html",function(h){var d=document.createElement("div");d.innerHTML=h;var r=d.querySelector('[data-fo="gt0"] [data-set="@P.gdVisitor.prefs.stay"]'),row0=r&&r.closest(".row");if(!row0)return h;
   row0.insertAdjacentHTML("afterend",row("Games on the tour",pseg("P.gdVisitor.prefs.games",["on","off"],["On","Off"]),"The visitor's own switch (Settings › The guide › Games on the tour): Off, no game in a tour (the quiz, Guess the year); the breather still comes.",true));return d.innerHTML});
-rowDemos({"P.gdVisitor.prefs.games":{stop:"half",act:function(){var my=gdDemoBegin();ui.settingsOpen=true;renderPhone(false);var v=ph.querySelector(".vset"),g=v&&v.querySelector(".vgames");if(v&&g)v.scrollTop=Math.max(0,g.offsetTop-80);gdChip("Games on the tour: "+(gdPrefs().games==="off"?"Off: no game in a tour":"On"));gdDemoEnd(my,3200)},ringAfter:500,ring:".vgames|.gdchip"}});
+rowDemos({"P.gdVisitor.prefs.games":{stop:"half",act:function(){var my=gdDemoBegin();setOverlay("settings",true);renderPhone(false);var v=ph.querySelector(".vset"),g=v&&v.querySelector(".vgames");if(v&&g)v.scrollTop=Math.max(0,g.offsetTop-80);gdChip("Games on the tour: "+(gdPrefs().games==="off"?"Off: no game in a tour":"On"));gdDemoEnd(my,3200)},ringAfter:500,ring:".vgames|.gdchip"}});
 /* ----- Specific Marker › 3 · Guide script: a step's quiz question and its guess (round 12). Each language its own words and its own
    Reviewed tick; Draft with AI writes a draft from the step's own text in that language (marked "AI draft", new names, dates and numbers
    flagged as the audiences' drafts are); an unreviewed question never plays ----- */
@@ -1281,7 +1281,7 @@ BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(D\\.tour\\.tourWord\\.
 /* the demos: the announce at its seam (the word's rows), the game playing in its span, a false tap, the result with the slip played back;
    the find at its seam (its rows), the hint at once, I give up at once */
 function gdDemoWord(stage,chip){var my=gdDemoBegin(),it=gdItems().filter(function(x){return x.id==="dontsay"})[0]||D.guidance.items.dontsay,w=gdWordOf(P.lang||"en");if(!w){gdChip("Don't say it!: no word in this language");gdDemoEnd(my,3200);return}
-  if(!G.on){ui.view="card";ui.stop="full";startTour()}stopSpeech();gdBeatClose();gdTailEnd();var j=D.tour.guideSteps.findIndex(function(s){return s.id===w.span[0]});if(j<0){gdChip("Don't say it!: its span is not in this tour");gdDemoEnd(my,3200);return}
+  if(!G.on){goScreen("card",{stop:"full"});startTour()}stopSpeech();gdBeatClose();gdTailEnd();var j=D.tour.guideSteps.findIndex(function(s){return s.id===w.span[0]});if(j<0){gdChip("Don't say it!: its span is not in this tour");gdDemoEnd(my,3200);return}
   var b={id:"dontsay",span:w.span.slice(),endAfter:w.span[w.span.length-1]};
   if(stage==="result"){var d=gdWordStart(b);var k=0,st=D.tour.guideSteps[j];G.i=j;G.paused=true;renderGuide();G.words=(stepText(st).match(/\S+/g)||[]).map(function(x){return{w:x}});G.words.some(function(x,i){if(gdWordHit(x.w,w.w,P.lang)){k=i;return true}});
     d.slips[st.id+":"+k]={key:st.id+":"+k,step:st.id,k:k,caught:false,text:stepText(st),phrase:gdWordPhrase(k),said:1};d.order.push(st.id+":"+k);d.slips.x={key:"x",caught:true};d.order.push("x");d.caught=1;

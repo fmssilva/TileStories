@@ -13,8 +13,8 @@ const url = labUrl('#probe');
   await R('gdGroupById("inview").on=true;["tapmarker","askview","gbhint","tourof"].forEach(function(id){D.guidance.items[id].on=false});G.gd.manual=false;gdStop("t");gdResetVisitor();var o=gdVM("opening"),oe=gdEM("opening");o.shown=1;o.last=gdNow()-30000;o.end=gdNow()-21000;oe.shown=1;P.gdVisitor.visit.lastEnd=gdNow()-21000');
   await p.waitForTimeout(400);
   // 1. the test wall: its points are the markers, on the picture
-  const w1 = await R('[D.wall.wallPois.length,ph.querySelectorAll(".cpin").length,!ph.querySelector(".campins").hidden,getComputedStyle(document.getElementById("camera")).backgroundImage.length>1000]');
-  ok('The Belém test wall: 11 points, those in view shown as pins on the picture', w1[0] === 11 && w1[1] >= 2 && w1[2] && w1[3], w1);
+  const w1 = await R('[D.wall.wallPois.length,ph.querySelectorAll(".cpin").length,!ph.querySelector(".campins").hidden,getComputedStyle(document.getElementById("camera")).backgroundImage.indexOf(IMG.belem)>=0]');
+  ok('The Belém test wall: 11 points, those in view shown as pins on the picture (its file in assets/)', w1[0] === 11 && w1[1] >= 2 && w1[2] && w1[3], w1);
   const pinAt = await R('var e=ph.querySelector(".cpin.central"),p=D.wall.wallPois.filter(function(x){return x.id===e.dataset.cpin})[0],s=poiScreen(p);[Math.round(parseFloat(e.style.left)-s.x),Math.round(parseFloat(e.style.top)-s.y)]');
   ok('...each pin sits where its point is on the picture', Math.abs(pinAt[0]) <= 1 && Math.abs(pinAt[1]) <= 1, pinAt);
   // 2. drag pans both ways; the wheel zooms (nearer the wall)
@@ -31,12 +31,12 @@ const url = labUrl('#probe');
   const cm = await R('var b=ph.querySelector(".gdbub button[data-gdbub]");[!!ph.querySelector(".azfab.onwall"),b&&b.textContent,camView().central.name]');
   ok('On the wall: Azu in the corner says what is in the middle, by itself', cm[0] && cm[1] && cm[1].indexOf(cm[2]) >= 0, cm);
   await p.locator('#ph .gdbub button[data-gdbub]').click(); await p.waitForTimeout(700);
-  ok('...a tap on its remark opens Ask about the view, the point lit', await R('G.cam.open&&!!ph.querySelector(".camask.open")&&ph.querySelectorAll(".cpin.lit").length>=1&&ph.querySelector(".ca-ans").textContent.length>5'));
-  await R('G.cam.open=false;G.cam.lit=[];renderPhone(true)'); await p.waitForTimeout(200);
+  ok('...a tap on its remark opens Ask about the view, the point lit', await R('overlayOn("ask")&&!!ph.querySelector(".camask.open")&&ph.querySelectorAll(".cpin.lit").length>=1&&ph.querySelector(".ca-ans").textContent.length>5'));
+  await R('setOverlay("ask",false);G.cam.lit=[];renderPhone(true)'); await p.waitForTimeout(200);
   // round 7: the ✦ beside Azu is the visitor's way in; its menu has Ask about the view (a tap on Azu plays)
   await p.locator('#ph .gbtn').click(); await p.waitForTimeout(200); await p.locator('#ph [data-gbgo="view"]').click(); await p.waitForTimeout(200);
-  ok('On the wall, the ✦\'s Ask about the view opens it (no Ask pill any more)', await R('G.cam.open&&!!ph.querySelector(".camask.open")&&!ph.querySelector(".azfab")'));
-  await R('G.cam.open=false;renderPhone(true)');
+  ok('On the wall, the ✦\'s Ask about the view opens it (no Ask pill any more)', await R('overlayOn("ask")&&!!ph.querySelector(".camask.open")&&!ph.querySelector(".azfab")'));
+  await R('setOverlay("ask",false);renderPhone(true)');
   // 4. the card's wall: a remark on a point with a card opens it and starts its tour, at Full
   await R('LAB.wall="ribeira";ui.camX=.4;ui.camY=.5;ui.camZoom=1;P.gdVisitor.visit.lastEnd=null;P.gdVisitor.visit.starts=[];renderAll(false)');
   await p.waitForFunction(() => LAB.run('!!(G.gd.cur&&G.gd.cur.item.id==="inview:painting"&&ph.querySelector(".gdbub button[data-gdbub]"))'), null, { timeout: 15000 }).catch(() => {});

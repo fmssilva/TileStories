@@ -32,11 +32,11 @@ const CAP = process.env.CAP || '', REPS = +process.env.REPS || 6;
     console.log('MUTATION: Azu beside the ✦ whatever Mascot says, the bubble unsigned; every name as written in its slot; Azu never placed again after its step\'s start');
   }
   /* the state every check starts from (test9s.js's): a 390 px phone, the device voice muted, the guidance quiet */
-  const base = (o) => `SCREENS.phone=[390,844];if(G.on)stopTour();if(G.moment)azMomentEnd(false);ph.querySelectorAll(".azbub").forEach(function(x){x.remove()});gdBeatClose();gdStop("test");D.guidance=JSON.parse(window.__g0);
+  const base = (o) => `ui.device="phone_p";DEVICES.phone_p.h=844;if(G.on)stopTour();if(G.moment)azMomentEnd(false);ph.querySelectorAll(".azbub").forEach(function(x){x.remove()});gdBeatClose();gdStop("test");D.guidance=JSON.parse(window.__g0);
     D.card.hints.on=false;LAB.previewBar=false;P.lang="${o.lang || 'en'}";P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=${o.theme === 'dark'};D.card.cardCfg.mode="${o.theme === 'dark' ? 'dark' : 'light'}";
     D.guide.voice="device";D.guide.panel="dock";D.guide.dockStart="mini";D.guide.captions=true;D.guide.music=false;P.vis.music=null;LAB.rowDemo=false;LAB.gdSR=false;D.poi.solemn=false;P.vis.aud="explorer";D.guide.life="lively";
     D.guide.gbtn="${o.gbtn || 'both'}";D.guide.mascot=${o.mascot !== false};D.guide.look="ink";D.agent.voiceOut=false;
-    G.gd.demo=false;gdChip(null);G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};ui.settingsOpen=false;G.fab.menu=false;G.askOpen=false;
+    G.gd.demo=false;gdChip(null);G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};setOverlay("settings",false);setOverlay("menu",false);G.askOpen=false;
     D.guidance.on=true;D.guidance.kinds.forEach(function(k){k.on=false});G.gd.manual=true;gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;`;
   const wall = 'setWall("ribeira");ui.camZoom=1;ui.view="card";ui.stop="closed";renderAll(false);';
   const card = 'ui.view="card";ui.stop="full";renderAll(false);scr.scrollTop=900;scr.dispatchEvent(new Event("scroll"));';
@@ -105,7 +105,7 @@ const CAP = process.env.CAP || '', REPS = +process.env.REPS || 6;
     !/Torre/.test(az[0]) && !/Torre/.test(az[1]) && /: the Torreão\./.test(az[2]) && !/[^.] The /.test(az[2]) && /Find the Tagus and its ships/.test(az[3]) && /^The Torreão: /.test(az[4]), az);
   tsec('article');
 
-  await R('if(G.on)stopTour();gdStop("test");SCREENS.phone=[360,820];P.dark=false;D.card.cardCfg.mode="light";P.lang="en";D.guide.mascot=true;D.guide.gbtn="both";D.guidance=JSON.parse(window.__g0);renderAll(false)');
+  await R('if(G.on)stopTour();gdStop("test");ui.device="phone_p";DEVICES.phone_p.h=844;P.dark=false;D.card.cardCfg.mode="light";P.lang="en";D.guide.mascot=true;D.guide.gbtn="both";D.guidance=JSON.parse(window.__g0);renderAll(false)');
   ok('No page error', errs.length === 0, errs.slice(0, 5));
   tsec('end');
   console.log(fails ? `FAILED ${fails}` : 'ALL PASS');

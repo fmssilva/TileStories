@@ -18,6 +18,6 @@ function labUrl(hash) {
     }
     served = true;
   }
-  return 'http://localhost:' + PORT + '/lab_src/block-components-lab.html' + (hash || '');
+  return 'http://localhost:' + PORT + '/lab_src/tilestories-lab.html' + (hash || '');
 }
 module.exports = Object.assign(Object.create(pw), { labUrl });

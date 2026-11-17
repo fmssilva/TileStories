@@ -18,7 +18,7 @@ const shots = process.argv[2] || '';
   ok('Card: an answer in Portuguese, from the library', !c[0] && c[1] && c[1].length > 10, c);
   if (shots) await p.locator('#ph').screenshot({ path: shots + '/live_card.png' });
   // the wall
-  await R('stopTour();LAB.wall="belem";ui.view="card";ui.stop="closed";ui.camX=.3;ui.camY=.5;ui.camZoom=1;renderAll(false);G.cam.open=true;camLayer();camAsk("Qual é o mais antigo que estou a ver? Mostra-mo.")');
+  await R('stopTour();LAB.wall="belem";ui.view="card";ui.stop="closed";ui.camX=.3;ui.camY=.5;ui.camZoom=1;renderAll(false);setOverlay("ask",true);camLayer();camAsk("Qual é o mais antigo que estou a ver? Mostra-mo.")');
   await p.waitForFunction(() => !LAB.run('AG.con.busy'), null, { timeout: 30000 }).catch(() => {});
   await p.waitForTimeout(400);
   const w = await R('[AG.con.err||"",G.cam.answer,G.cam.lit,AG.con.calls.map(function(k){return k.name+(k.ok?"":"!")}),AG.last&&[AG.last.model,AG.last.first,AG.last.ms,AG.last.tin,AG.last.tout]]');

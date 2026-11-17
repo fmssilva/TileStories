@@ -23,9 +23,9 @@ const url = labUrl('#probe');
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   if (process.env.MUTATE) { await R('var __gi=gbItems;gbItems=function(){var o=__gi();return gdPrefs().tips==="off"?o.filter(function(k){return k!=="try"}):o};var __to=gdTryOpen;gdTryOpen=function(f,d){if(gdPrefs().tips==="off")return false;return __to(f,d)}'); console.log('MUTATION: Tips Off hides Things to try too'); }
   await R('window.__g0=JSON.stringify(D.guidance)');
-  const base = 'if(G.gd.pages)gdPagesEnd("test",false);D.guidance=JSON.parse(window.__g0);D.card.hints.on=false;LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;P.lang="en";LAB.rowDemo=false;LAB.gdSR=false;LAB.gdToday="2026-03-10";D.poi.solemn=false;P.vis.aud="explorer";D.wall.aud.where="card";D.wall.aud.seen=true;D.guide.life="lively";D.guide.gbtn="both";D.guide.mascot=true;D.guide.ask="search";D.agent.voiceOut=false;D.agent.pol.show_how="auto";G.gd.demo=false;G.gd.camPerm="allowed";gdChip(null);G.gd.tryOpen=false;G.gd.tryShow=null;';
+  const base = 'if(G.gd.pages)gdPagesEnd("test",false);D.guidance=JSON.parse(window.__g0);D.card.hints.on=false;LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;P.lang="en";LAB.rowDemo=false;LAB.gdSR=false;LAB.gdToday="2026-03-10";D.poi.solemn=false;P.vis.aud="explorer";D.wall.aud.where="card";D.wall.aud.seen=true;D.guide.life="lively";D.guide.gbtn="both";D.guide.mascot=true;D.guide.ask="search";D.agent.voiceOut=false;D.agent.pol.show_how="auto";G.gd.demo=false;G.gd.camPerm="allowed";gdChip(null);setOverlay("try",false);G.gd.tryShow=null;';
   /* the push rests (only The start speaks), a first visit on the wall, the clock by hand */
-  const fresh = async (extra) => { await R(base + 'gdGroupById("inview").on=false;D.guidance.items.gbhint.on=false;gdGroupById("card").on=false;gdKindById("fun").on=false;if(G.on)stopTour();stopSpeech();G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null,turn:null};G.agTurn=null;ui.settingsOpen=false;G.fab.menu=false;setWall("ribeira");ui.camZoom=1;ui.view="card";ui.stop="closed";renderPhone(false);G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;ph.querySelectorAll(".gdtoast").forEach(function(x){x.remove()});' + (extra || '')); await W(100); };
+  const fresh = async (extra) => { await R(base + 'gdGroupById("inview").on=false;D.guidance.items.gbhint.on=false;gdGroupById("card").on=false;gdKindById("fun").on=false;if(G.on)stopTour();stopSpeech();G.cam={answer:"",busy:false,lit:[],route:[],hunt:null,turn:null};setOverlay("ask",false);G.agTurn=null;setOverlay("settings",false);setOverlay("menu",false);setWall("ribeira");ui.camZoom=1;ui.view="card";ui.stop="closed";renderPhone(false);G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;ph.querySelectorAll(".gdtoast").forEach(function(x){x.remove()});' + (extra || '')); await W(100); };
   const past = 'ui.view="card";ui.stop="full";renderPhone(false);scr.scrollTop=900;fabLayer();';
   const menuItems = 'var m=ph.querySelectorAll(".gbmenu [data-gbgo]");[[].map.call(m,function(b){return b.dataset.gbgo}).join(),[].map.call(m,function(b){return Math.round(b.getBoundingClientRect().height*ph.offsetHeight/ph.getBoundingClientRect().height)})]';
   const rowsNow = '[].map.call(ph.querySelectorAll(".gdtry .gdtry-row"),function(r){return r.dataset.gdtryrow+(r.classList.contains("done")?"+":"")})';
@@ -61,10 +61,10 @@ const url = labUrl('#probe');
   const m2 = await R(menuItems);
   ok('The ✦ menu has Things to try (real clicks): on the card Start the tour, Ask, How does this work?, Things to try, Guide settings; on the wall Ask about the view too; 44 px items',
     m1[0] === 'tour,ask,how,try,settings' && m2[0] === 'tour,ask,view,how,try,settings' && m1[1].concat(m2[1]).every(h => h >= 44), [m1, m2]);
-  await R('D.guidance.tryMenu=false;G.fab.menu=false;fabLayer();G.fab.menu=true;fabLayer()');
+  await R('D.guidance.tryMenu=false;setOverlay("menu",false);fabLayer();setOverlay("menu",true);fabLayer()');
   const m3 = await R(menuItems);
-  await R('G.fab.menu=false;fabLayer();ui.settingsOpen=true;renderPhone(false)'); await p.locator('#ph .vset .vtry').click(); await W(200);
-  const m4 = await R(`[!!ph.querySelector(".gdtry"),!ui.settingsOpen,${rowsNow}.length]`);
+  await R('setOverlay("menu",false);fabLayer();setOverlay("settings",true);renderPhone(false)'); await p.locator('#ph .vset .vtry').click(); await W(200);
+  const m4 = await R(`[!!ph.querySelector(".gdtry"),!overlayOn("settings"),${rowsNow}.length]`);
   ok('Things to try Hidden: not in the ✦ menu; Settings › The guide › Things to try › still opens it (a real click), Settings closed', m3[0] === 'tour,ask,view,how,settings' && m4[0] && m4[1] && m4[2] === 8, [m3, m4]);
 
   lap('before 3');
@@ -83,7 +83,7 @@ const url = labUrl('#probe');
   const s2 = await R(`[(ph.querySelector(".gdtry-n")||{}).textContent,${rowsNow}.filter(function(x){return/\\+$/.test(x)}).length,(ph.querySelector('[data-gdtryrow="ba"] .gdtry-tick')||{getAttribute:function(){return""}}).getAttribute("aria-label")]`);
   await R('["view","menu","locate","navbar","strip"].forEach(function(f){P.gdVisitor.used[f]=gdNow()});renderPhone(true)');
   const s3 = await R(`[(ph.querySelector(".gdtry-n")||{}).textContent,${rowsNow}.length,${rowsNow}.every(function(x){return/\\+$/.test(x)}),!!ph.querySelector(".gdtry-n.all")]`);
-  await R('gdTryClose();G.fab.menu=true;fabLayer()'); const s4 = await R(menuItems); await p.locator('#ph [data-gbgo="try"]').click(); await W(200);
+  await R('gdTryClose();setOverlay("menu",true);fabLayer()'); const s4 = await R(menuItems); await p.locator('#ph [data-gbgo="try"]').click(); await W(200);
   const s5 = await R('[!!ph.querySelector(".gdtry"),(ph.querySelector(".gdtry-n")||{}).textContent]');
   ok('...the ticks follow the memory: 4 of 8 tried, a done row says Done; every row done: "You\'ve tried them all. Well done!", the rows stay ticked, the ✦ menu still opens it',
     s2[0] === '4 of 8 tried' && s2[1] === 4 && s2[2] === 'Done' && s3[0] === "You've tried them all. Well done!" && s3[1] === 8 && s3[2] && s3[3] && s4[0].indexOf('try') >= 0 && s5[0] && s5[1] === s3[0], [s2, s3, s4[0], s5]);
@@ -149,7 +149,7 @@ const url = labUrl('#probe');
   ok('...in Portuguese: "Como pauso o guia?": the Portuguese words and Mostre-me; its tap starts the tour at Mini and taps ⏸', a2[0] === 'Durante a visita, toque em ⏸ ao lado do botão de falar.' && a2[1] === 'Mostre-me' && a2[2] === 'Pausar o guia' && pp && po[3] && po[7] && po[8] === 'mini', [a2, po]);
   await fresh(past + 'gbGo("ask");ask("How old is the palace?")'); await W(300);
   const a3 = await R('[!ph.querySelector(".gdhowc"),!(G.agTurn&&G.agTurn.how),G.answer]');
-  await fresh('G.cam.open=true;renderPhone(true);camAsk("How do I open a card?")'); await until('!!ph.querySelector(".camask .gdhowc")', 2500);
+  await fresh('setOverlay("ask",true);renderPhone(true);camAsk("How do I open a card?")'); await until('!!ph.querySelector(".camask .gdhowc")', 2500);
   const a4 = await R('[(ph.querySelector(".ca-ans")||{}).textContent||"",!!ph.querySelector(".camask .gdhowc")]');
   await R('camAsk("What am I looking at?")'); await W(500); const a5 = await R('!ph.querySelector(".camask .gdhowc")');
   ok('...a history question ("How old is the palace?") gets the scripted search, no Show me card; on the wall Ask about the view answers "How do I open a card?" with its card, and the next question drops it', a3[0] && a3[1] && a4[0].indexOf('Point at the tiles and tap a glowing marker') === 0 && a4[1] && a5, [a3, a4, a5]);
@@ -170,7 +170,7 @@ const url = labUrl('#probe');
 
   lap('before 9');
   // ---------- 9. Settings › The guide's link; Fewer like this's toast; the rest as before ----------
-  await fresh('ui.view="card";ui.stop="half";renderPhone(false);ui.settingsOpen=true;renderPhone(false)');
+  await fresh('ui.view="card";ui.stop="half";renderPhone(false);setOverlay("settings",true);renderPhone(false)');
   const st = await R('var v=ph.querySelector(".vset"),t=v&&v.querySelector(".vtips .vtry"),a=v&&v.querySelector(".vtips .vagain");[!!t,t&&t.textContent.indexOf("Things to try")===0,!!(a&&t&&a.compareDocumentPosition(t)&4),Math.round(t.getBoundingClientRect().height*ph.offsetHeight/ph.getBoundingClientRect().height),v.querySelectorAll("[data-gdpref]").length]');
   await p.locator('#ph .vset [data-gdpref="tips|off"]').click(); await W(150); const st2 = await R('[gdPrefs().tips,!!ph.querySelector(".vset .vnote")]'); await R('gdPrefs().tips="all";renderPhone(true)');
   ok('Settings › The guide: Things to try › after Show the tips again (44 px); Tips, its other rows and Games on the tour (round 12) (Off by a real click, its note)', st[0] && st[1] && st[2] && st[3] >= 44 && st[4] === 7 && st2[0] === 'off' && st2[1], [st, st2]);

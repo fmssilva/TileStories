@@ -41,7 +41,7 @@ const url = labUrl('#probe');
   // 3. a remark about a point that has left the screen goes
   // (guidance round 3: Azu's remarks are the guidance's What's in view, one item a point of the wall in view)
   ok('Azu\'s remark about a point not on this wall is dropped', await R('gdItems().filter(function(x){return x.base==="inview"}).every(function(x){return D.wall.wallPois.some(function(p){return p.id===x.point})})&&!gdItems().some(function(x){return x.id==="inview:painting"})&&gdItems().some(function(x){return x.id==="inview:houses"})'));
-  await R('G.cam.open=false;camLayer();G.gd.manual=false;gdStop("t");var c=camView().central,it=gdItems().filter(function(x){return x.id==="inview:"+c.id})[0];gdStart(it,"test")'); await W(300);
+  await R('setOverlay("ask",false);camLayer();G.gd.manual=false;gdStop("t");var c=camView().central,it=gdItems().filter(function(x){return x.id==="inview:"+c.id})[0];gdStart(it,"test")'); await W(300);
   const bb = await R('!!ph.querySelector(".gdbub:not(.gd-out)")&&G.gd.cur&&G.gd.cur.item.base==="inview"');
   await R('ui.camX=.98;camPaint();camLayer()'); await W(700);
   ok('...one about a point in view stays, and goes when a pan takes the point off the screen', bb && await R('!G.gd.cur&&!ph.querySelector(".gdbub:not(.gd-out)")'), bb);
@@ -51,7 +51,7 @@ const url = labUrl('#probe');
   ok('Scenes: 8 in the console, the guide\'s 7 (round 7: its controls\' scenes) and the guidance\'s 55 (rounds g1 and g2: 5 each; g3: 2; g4: 2; g5: 3; g6: 4; g7: 5; g8: 4; g9: 4; g12: 8; g13: 13)', s0[0] === 70 && s0[1] === 70, s0);
   await R('var s=ed.querySelector(".agscsel");s.value="3";s.dispatchEvent(new Event("change",{bubbles:true}))');
   await edClick('[data-agsetup]'); await W(400);
-  const s1 = await R('[LAB.wall,ui.stop,G.cam.open,camView().pois.map(function(p){return p.id}).join(),/In view now: .*Jerónimos/.test(ed.querySelector(".agscenes").textContent),ed.querySelector("#agq").value]');
+  const s1 = await R('[LAB.wall,ui.stop,overlayOn("ask"),camView().pois.map(function(p){return p.id}).join(),/In view now: .*Jerónimos/.test(ed.querySelector(".agscenes").textContent),ed.querySelector("#agq").value]');
   ok('...Set up (the oldest here): the Belém wall, the card closed, Ask open, the monastery in view; the question filled in', s1[0] === 'belem' && s1[1] === 'closed' && s1[2] && /jeronimos/.test(s1[3]) && s1[4] && /oldest|antigo/.test(s1[5]), s1);
   // the checks: an answer that names a point off the screen fails; the right one passes
   await R('AG.mock={calls:[{name:"highlight_points",args:{poi_ids:["poi:jeronimos"]}}],text:"The oldest here is the Jerónimos Monastery, from 1501."};AG.sceneRes={}');

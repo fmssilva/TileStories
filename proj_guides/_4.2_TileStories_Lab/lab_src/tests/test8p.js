@@ -51,10 +51,10 @@ const url = labUrl('#probe');
   // 6. close; a point with a card opens it
   await p.locator('#ph [data-camclose]').click(); await p.waitForTimeout(200);
   ok('Close: the panel and the pins go, the wall\'s markers are back', await R('!ph.classList.contains("camopen")&&!ph.querySelector(".camask.open")'));
-  await R('ui.camX=.4;renderAll(false);G.cam.open=true;camLayer()'); await p.locator('#ph [data-cpin="painting"]').click({ force: true }); await p.waitForTimeout(400);
+  await R('ui.camX=.4;renderAll(false);setOverlay("ask",true);camLayer()'); await p.locator('#ph [data-cpin="painting"]').click({ force: true }); await p.waitForTimeout(400);
   ok('A tap on a point with a card opens its card', await R('ui.stop') === 'half');
   // 7. the words' contrast (the panel, the pins' names)
-  await R('ui.stop="closed";renderAll(false);G.cam.open=true;camSay("Test.")');
+  await R('ui.stop="closed";renderAll(false);setOverlay("ask",true);camSay("Test.")');
   const c = await R('var px=function(c){var m=c.match(/[\\d.]+/g).map(Number);return[m[0],m[1],m[2]]},lum=function(a){return a.map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce(function(s,v,i){return s+v*[.2126,.7152,.0722][i]},0)},cr=function(f,b){var x=lum(px(f)),y=lum(px(b));return Math.round((Math.max(x,y)+.05)/(Math.min(x,y)+.05)*100)/100};[cr(getComputedStyle(ph.querySelector(".ca-ans")).color,getComputedStyle(ph.querySelector(".camask")).backgroundColor),cr("rgb(255,255,255)","rgb(16,18,22)")]');
   ok('The panel\'s words and the pins\' names at 4.5:1 or more', c.every(v => v >= 4.5), c);
   // 8. the Editor

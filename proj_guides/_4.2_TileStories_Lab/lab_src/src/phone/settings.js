@@ -1,9 +1,9 @@
 /* The visitor's settings panel (P.vis, settingsPanel) and the motion level. */
-D.card.motionLevel="full";P.vis={lang:null,mode:"phone",motion:"phone",text:"default",feedback:true};ui.settingsOpen=false;
+D.card.motionLevel="full";P.vis={lang:null,mode:"phone",motion:"phone",text:"default",feedback:true};setOverlay("settings",false);
 ed.addEventListener("click",function(e){var t=e.target;
-  if(t.closest("[data-forget]")){e.stopPropagation();P.vis={lang:null,mode:"phone",motion:"phone",text:"default",feedback:true};P.kqDone={};P.guide={};t.textContent="Forgotten";setTimeout(function(){renderEditor()},900);return}
+  if(t.closest("[data-forget]")){e.stopPropagation();P.vis={lang:null,mode:"phone",motion:"phone",text:"default",feedback:true};P.kqDone={};P.guide={};emit("profileChanged","forget");t.textContent="Forgotten";setTimeout(function(){renderEditor()},900);return}
   if(t.closest("[data-secreset]")){e.stopPropagation();D.card.sections=JSON.parse(SECTIONS0);renderAll(true);show("card");return}
-  if(t.closest("[data-contents-try]")){e.stopPropagation();ui.view="card";ui.stop="full";ui.contentsOpen=true;renderPhone(false);return}},true);
+  if(t.closest("[data-contents-try]")){e.stopPropagation();goScreen("card",{stop:"full"});setOverlay("contents",true);renderPhone(false);return}},true);
 /* the Navigation Bar: shape, fill, the chosen item, labels, More */
 /* the visitor's settings panel and the Contents sheet */
 function settingsPanel(){var langs=(D.wall.langs&&D.wall.langs.list||[]).filter(function(l){return l.code});var opt=function(k,v,lab,cur){return'<button type="button" data-vis="'+k+'|'+v+'" aria-pressed="'+(cur===v)+'">'+esc(lab)+'</button>'};

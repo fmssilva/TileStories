@@ -46,7 +46,7 @@ const url = labUrl('#probe');
     console.log('MUTATION: the glide instant, ±10 s dead, the bubble and the tip never follow, no teleprompter, the theme always Dark, the words 30 px, the mascot on the panel\'s edge, every question "about" the quiz, the chip never moved');
   }
   /* the state every check starts from: a 390 x 844 phone, the device voice muted (its words go on by time, 353 ms a word), quiet guidance */
-  const base = (o) => `SCREENS.phone=[390,844];if(G.on)stopTour();if(G.gd.pages)gdPagesEnd("test",false);gdBeatClose();gdStop("test");if(G.ga.on)gaEnd("test");if(G.ga.card)gaCardLeave();G.te.open=false;
+  const base = (o) => `ui.device="phone_p";DEVICES.phone_p.h=844;if(G.on)stopTour();if(G.gd.pages)gdPagesEnd("test",false);gdBeatClose();gdStop("test");if(G.ga.on)gaEnd("test");if(G.ga.card)gaCardLeave();G.te.open=false;
     D.card.hints.on=false;LAB.previewBar=false;P.lang="${(o && o.lang) || 'en'}";P.guideMute=true;P.introSeen=true;P.reduce=${!!(o && o.reduce)};P.dark=${!!(o && o.dark)};D.card.cardCfg.mode="${o && o.dark ? 'dark' : 'light'}";
     D.guide.voice="device";D.guide.panel="dock";D.guide.dockStart="mini";D.guide.miniCtl="pause";D.guide.captions=true;D.guide.pWords="prompter";D.guide.look="ink";D.guide.speed=1;P.vis.speed=null;
     D.guide.music=false;P.vis.music=null;LAB.rowDemo=false;LAB.gdSR=false;D.guide.mascot=true;D.guide.hl="comet";D.guide.trail=6;D.guide.glide=true;D.guide.highlight=true;

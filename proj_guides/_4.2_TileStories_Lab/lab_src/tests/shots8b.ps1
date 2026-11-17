@@ -2,7 +2,7 @@ $d = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $edge = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
 & python "$d\tools\serve.py" --ensure | Out-Null
 $labPort = if ($env:LAB_PORT) { $env:LAB_PORT } else { "8642" }
-$base = "http://localhost:$labPort/lab_src/block-components-lab.html#dcshot="
+$base = "http://localhost:$labPort/lab_src/tilestories-lab.html#dcshot="
 $kinds = @("Quick Facts", "Status", "Actions", "Timeline", "Compare Points", "Dialogue", "Hotspot Image", "Video", "Knowledge Check", "Poll", "Collect", "Feedback", "Place In AR", "Wall Locator", "Today Map", "Related", "Sources", "Contents")
 New-Item -ItemType Directory -Force "$d\caps8b" | Out-Null
 $i = 0

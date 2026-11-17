@@ -23,7 +23,7 @@ const url = labUrl('#probe');
   if (process.env.MUTATE) { await R('gdSpotOk=function(){return true};gdUndoDel=function(){return false}'); console.log('MUTATION: the Spotlight offered on any item, and Delete with no Undo'); }
   await R('window.__g0=JSON.stringify(D.guidance);window.__tx0=JSON.stringify(D.words.tx)');
   const base = 'D.guidance=JSON.parse(window.__g0);D.card.hints.on=false;LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;P.lang="en";LAB.rowDemo=false;LAB.gdSR=false;D.guidance.items.gbhint.on=false;gdGroupById("inview").on=false;D.guide.gbtn="both";D.guide.mascot=true;G.gd.demo=false;gdChip(null);';
-  const fresh = async (extra) => { await R(base + 'if(G.on)stopTour();G.cam.open=false;ui.settingsOpen=false;G.fab.menu=false;setWall("ribeira");ui.view="card";ui.stop="closed";renderPhone(false);G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.onWall=false;gdAdvance(250);' + (extra || '')); await W(120); };
+  const fresh = async (extra) => { await R(base + 'if(G.on)stopTour();setOverlay("ask",false);setOverlay("settings",false);setOverlay("menu",false);setWall("ribeira");ui.view="card";ui.stop="closed";renderPhone(false);G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.onWall=false;gdAdvance(250);' + (extra || '')); await W(120); };
   const show = (id, o) => `gdStart(gdItemNow("${id}"),"test",${o || '{pull:true,ms:60000}'});`;
   // round 14: an item's groups are folded: an item opened here shows its groups open too (each by its id, as the author opens them)
   const editor = async (ops) => { await R(`ui.tab="guide";ui.level=1;ui.op=${JSON.stringify(ops)};Object.keys(ui.op).forEach(function(k){var m=/^gd:i:(.+)$/.exec(k),it=m&&ui.op[k]&&D.guidance.items[m[1]];if(it)gdFormOf(it).groups.forEach(function(g){if(g)ui.op["gd:f:"+m[1]+":"+g.k]=true})});renderEditor()`); await W(120); };
@@ -109,10 +109,10 @@ const url = labUrl('#probe');
     await fresh(`var it=D.guidance.items.askview;it.button="${a}";it.notBefore=0;G.gd.cur=null;` + show('askview', '{}')); await W(350);
     const word = await R('(ph.querySelector("#ph [data-gdcta]")||{}).textContent||""');
     await p.locator('#ph [data-gdcta]').click(); await W(450);
-    btn[a] = [word, await R('[!!G.gd.cur,gdVisitOf(P.gdVisitor,"askview").how,!!ph.querySelector(".gdfinger"),G.on,ui.stop,!!G.cam.open]')];
-    await R('if(G.on)stopTour();G.cam.open=false');
+    btn[a] = [word, await R('[!!G.gd.cur,gdVisitOf(P.gdVisitor,"askview").how,!!ph.querySelector(".gdfinger"),G.on,ui.stop,!!overlayOn("ask")]')];
+    await R('if(G.on)stopTour();setOverlay("ask",false');
   }
-  ok('Button Show me: the chip reads “Show me›”; a tap ends the tip (acted) and the ghost finger shows the gesture on the ✦', /^Show me/.test(btn.show[0]) && !btn.show[1][0] && btn.show[1][1] === 'acted' && btn.show[1][2], btn.show);
+  ok('Button Show me: the chip reads “Show me›”); a tap ends the tip (acted) and the ghost finger shows the gesture on the ✦', /^Show me/.test(btn.show[0]) && !btn.show[1][0] && btn.show[1][1] === 'acted' && btn.show[1][2], btn.show);
   ok('Button Start the tour: the tour starts (acted)', /^Start the tour/.test(btn.tour[0]) && btn.tour[1][1] === 'acted' && btn.tour[1][3], btn.tour);
   ok('Button Open the card: the card opens (acted)', /^Open the card/.test(btn.card[0]) && btn.card[1][1] === 'acted' && btn.card[1][4] !== 'closed', btn.card);
   ok('Button Ask about the view: it opens (acted)', /^Ask about the view/.test(btn.view[0]) && btn.view[1][1] === 'acted' && btn.view[1][5], btn.view);
@@ -161,7 +161,7 @@ const url = labUrl('#probe');
 
   lap('before 9');
   // ---------- 9. Settings › The guide › Tips; Show the tips again and its Undo (real clicks on the phone) ----------
-  await fresh('ui.stop="half";ui.settingsOpen=true;renderPhone(false);');
+  await fresh('ui.stop="half";setOverlay("settings",true);renderPhone(false);');
   const opt = async (k) => { const l = p.locator(`#ph [data-gdpref="${k}"]`); await l.scrollIntoViewIfNeeded(); await l.click(); await W(150); };
   await opt('tips|essentials'); const s1 = await R('[gdPrefs().tips,gdContext().tips]');
   await opt('tips|off'); const s2 = await R('[gdPrefs().tips,(ph.querySelector(".vtips .vnote")||{}).textContent,gdGate(gdContext(),gdNow())]');

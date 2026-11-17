@@ -20,14 +20,16 @@ on("galleryScreen.html",function(h){return h.replace('<div class="pg">',pageChip
 function viewerScreen(){var imgs=D.poi.galleryImgs||["g1","g2","g3","before"],i=ui.viewerAt%imgs.length,c=D.card.ctl.viewer.counter;
   return '<div class="viewer"><div class="vtop"><button type="button" data-go="gallery" aria-label="'+TXH("page_back")+'">&#8249;</button>'+(c==="chips"?'<div class="vchips">'+imgs.map(function(x,j){return'<button type="button" data-vat="'+j+'" aria-pressed="'+(j===i)+'">'+(j+1)+'</button>'}).join("")+'</div>':c==="count"?'<span>'+esc(fmt(TXT("viewer_position"),i+1,imgs.length))+'</span>':"<span></span>")+'</div>'+
    '<img alt="" src="'+IMG[imgs[i]]+'"><div class="vcapt">'+esc(L(DEMO.piccap))+' <small>Dirk Stoop</small><em>'+TXH("zoom_hint")+'</em></div></div>'}
-on("renderPhone.before",function(keep,cx){if(ui.view==="kpage"||ui.view==="viewer"){cx.page=ui.view;ui.view="card"}});
-on("renderPhone.after",function(keep,cx){if(cx.page){var v=cx.page;ui.view=v;scr.innerHTML=v==="kpage"?kpageScreen():viewerScreen();scr.style.top="0px";
+screenDef("kpage",{name:"A block's page",draw:kpageScreen,over:"card"});screenDef("viewer",{name:"The picture viewer",draw:viewerScreen,over:"card"});
+/* a page is drawn in the card screen's frame: the card's layers as for the card, then the page in the sheet and the card's own layers hidden */
+on("renderPhone.before",function(keep,cx){var s=SCREEN[ui.view];if(s&&s.over){cx.page=ui.view;cx.unview=viewAs(s.over)}});
+on("renderPhone.after",function(keep,cx){if(cx.page){cx.unview();scr.innerHTML=screenHtml();scr.style.top="0px";
     var nb=document.getElementById("navbar");if(nb)nb.style.display="none";["locpin","sticky","vset","csheet","peekrow","topband"].forEach(function(k){var o=ph.querySelector("."+k);if(o)o.style.display="none"});
     var w=document.getElementById("wall");if(w)w.style.display="none";var gb=document.getElementById("grab");if(gb)gb.style.display="none"}});
-document.addEventListener("click",function(e){var t=e.target;if(!ph.contains(t))return;var g=t.closest('[data-go="kpage"]');if(g&&!t.closest(".kq button")){e.stopPropagation();ui.pageKind=g.dataset.kind;ui.view="kpage";renderPhone(false);return}
-  var gp=t.closest('[data-go="story"][data-kind],[data-go="gallery"][data-kind]');if(gp&&ui.view!=="card"){e.stopPropagation();ui.view=gp.dataset.go;renderPhone(false);return}
-  var vi=t.closest(".blk .el-pic img, .blk .fr img");if(vi&&ui.view==="gallery"){e.stopPropagation();var all=Array.prototype.slice.call(scr.querySelectorAll(".blk img"));ui.viewerAt=Math.max(0,all.indexOf(vi));ui.view="viewer";renderPhone(false);return}
+document.addEventListener("click",function(e){var t=e.target;if(!ph.contains(t))return;var g=t.closest('[data-go="kpage"]');if(g&&!t.closest(".kq button")){e.stopPropagation();ui.pageKind=g.dataset.kind;goScreen("kpage");renderPhone(false);return}
+  var gp=t.closest('[data-go="story"][data-kind],[data-go="gallery"][data-kind]');if(gp&&ui.view!=="card"){e.stopPropagation();goScreen(gp.dataset.go);renderPhone(false);return}
+  var vi=t.closest(".blk .el-pic img, .blk .fr img");if(vi&&ui.view==="gallery"){e.stopPropagation();var all=Array.prototype.slice.call(scr.querySelectorAll(".blk img"));ui.viewerAt=Math.max(0,all.indexOf(vi));goScreen("viewer");renderPhone(false);return}
   var va=t.closest("[data-vat]");if(va){e.stopPropagation();ui.viewerAt=+va.dataset.vat;renderPhone(false);return}
   var vp=t.closest(".viewer img");if(vp){e.stopPropagation();vp.classList.toggle("z2");return}},true);
 /* a block kind's full page on the phone (a row's demo, the spec's page): the story, the gallery, or its own page */
-function pageOpen(kind){if(kind==="Story")ui.view="story";else if(kind==="Gallery")ui.view="gallery";else{ui.pageKind=kind;ui.view="kpage"}}
+function pageOpen(kind){if(kind==="Story")goScreen("story");else if(kind==="Gallery")goScreen("gallery");else{ui.pageKind=kind;goScreen("kpage")}}

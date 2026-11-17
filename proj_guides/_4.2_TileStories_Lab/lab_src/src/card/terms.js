@@ -22,8 +22,10 @@ function termScreen(){var t=byId(D.wall.terms,ui.termOpen)||D.wall.terms[0];if(!
 on("corpus.list",function(l){return l.map(function(c){return Object.assign({},c,{text:plainTerms(c.text)})})});
 on("searchAnswer.q",function(q){var extra=[];D.wall.terms.forEach(function(t){var ws=termWords(t);if(ws.some(function(w){return q.toLowerCase().indexOf(w.toLowerCase())>=0}))extra=extra.concat(ws)});return q+" "+extra.join(" ")});
 ph.addEventListener("click",function(e){var old=ph.querySelector(".gpop"),o=e.target.closest("[data-termopen]");
-  if(o){e.stopPropagation();if(old)old.remove();ui.termOpen=o.dataset.termopen;ui.view="term";renderPhone(false);return}
+  if(o){e.stopPropagation();if(old)old.remove();ui.termOpen=o.dataset.termopen;goScreen("term");renderPhone(false);return}
   var g=e.target.closest(".gterm");if(!g){if(old)old.remove();return}
   e.stopPropagation();if(old)old.remove();var t=byId(D.wall.terms,g.dataset.gterm),p=document.createElement("div");p.className="gpop";
   p.innerHTML='<b>'+esc(g.textContent)+'</b><p>'+esc(g.dataset.gdef)+'</p>'+(t&&t.page&&t.page.length?'<button type="button" data-termopen="'+t.id+'">'+TXH("term_read_more")+' &#8250;</button>':'');
   var r=g.getBoundingClientRect(),pr=ph.getBoundingClientRect(),sc=pr.width/ph.offsetWidth||1;p.style.top=Math.round((r.bottom-pr.top)/sc+6)+"px";ph.appendChild(p)},true);
+
+screenDef("term",{name:"A term's page",draw:termScreen});

@@ -1,0 +1,3676 @@
+{
+ "card": [
+  {
+   "id": "s0",
+   "title": "0 · Preview & Test · Editor tools, never in the app2 partsTEST",
+   "depth": 0,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "s0card",
+   "title": "Demo card · the tile on every card, Demo Components, and the full demo card",
+   "depth": 1,
+   "rows": 4,
+   "demo": true,
+   "key": "LAB.test.on"
+  },
+  {
+   "id": "s0bar",
+   "title": "Preview bar · floating on the phone: theme, motion, language, focus, screen",
+   "depth": 1,
+   "rows": 1,
+   "demo": true,
+   "key": "LAB.previewBar"
+  },
+  {
+   "id": "s1",
+   "title": "1 · Card · how the sheet opens, looks and sounds5 partsEXTENDED",
+   "depth": 0,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "s1a",
+   "title": "Sheet · how the card opens and where it stops",
+   "depth": 1,
+   "rows": 6,
+   "demo": true,
+   "key": "D.card.cardCfg.openAt"
+  },
+  {
+   "id": "s1b",
+   "title": "Look · light or dark, the layout of the sections, the band under the hero",
+   "depth": 1,
+   "rows": 7,
+   "demo": true,
+   "key": "D.card.cardCfg.mode"
+  },
+  {
+   "id": "s1c",
+   "title": "Sound · when the audio guide and a video meet",
+   "depth": 1,
+   "rows": 2,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "s1mini",
+   "title": "Mini player · keeps the audio playing on the wall after the card closes",
+   "depth": 1,
+   "rows": 3,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "s1m",
+   "title": "Media · where the card's media files live",
+   "depth": 1,
+   "rows": 2,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "s2",
+   "title": "2 · Sections · the card's chapters, one per Navigation Bar item11 partsEXTENDED",
+   "depth": 0,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "s2cfg",
+   "title": "All sections · their look on the card and their order",
+   "depth": 1,
+   "rows": 4,
+   "demo": true,
+   "key": "D.card.secCfg.look"
+  },
+  {
+   "id": "s2start",
+   "title": "Section start · the band where each section begins",
+   "depth": 1,
+   "rows": 2,
+   "demo": true,
+   "key": "D.card.secCfg.start"
+  },
+  {
+   "id": "s2div",
+   "title": "Divider · the line between two blocks of a section",
+   "depth": 1,
+   "rows": 2,
+   "demo": true,
+   "key": "D.card.secCfg.divSec"
+  },
+  {
+   "id": "s2tint",
+   "title": "Section tint · the colour at a section's top",
+   "depth": 1,
+   "rows": 3,
+   "demo": true,
+   "key": "D.card.secCfg.colour"
+  },
+  {
+   "id": "s2next",
+   "title": "Next Up · at a section's end: the next block, and a button to it",
+   "depth": 1,
+   "rows": 1,
+   "demo": true,
+   "key": "D.card.secCfg.nextUp"
+  },
+  {
+   "id": "sec:about",
+   "title": "About · 5 blocks",
+   "depth": 1,
+   "rows": 6,
+   "demo": true,
+   "key": "D.card.sections.0.start"
+  },
+  {
+   "id": "sec:stories",
+   "title": "Stories · 4 blocks",
+   "depth": 1,
+   "rows": 6,
+   "demo": true,
+   "key": "D.card.sections.1.start"
+  },
+  {
+   "id": "sec:media",
+   "title": "Media · 6 blocks",
+   "depth": 1,
+   "rows": 6,
+   "demo": true,
+   "key": "D.card.sections.2.start"
+  },
+  {
+   "id": "sec:listen",
+   "title": "Listen · 1 block",
+   "depth": 1,
+   "rows": 6,
+   "demo": true,
+   "key": "D.card.sections.3.start"
+  },
+  {
+   "id": "sec:play",
+   "title": "Play · 5 blocks",
+   "depth": 1,
+   "rows": 6,
+   "demo": true,
+   "key": "D.card.sections.4.start"
+  },
+  {
+   "id": "sec:visit",
+   "title": "Visit · 6 blocks",
+   "depth": 1,
+   "rows": 6,
+   "demo": true,
+   "key": "D.card.sections.5.start"
+  },
+  {
+   "id": "s3",
+   "title": "3 · Blocks & Components · the card's building blocks: its elements, the patterns",
+   "depth": 0,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "s3e",
+   "title": "Elements · the smallest parts, with named stylesNEW",
+   "depth": 1,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "eg:Text",
+   "title": "Text",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "el:title",
+   "title": "Two hundred and fifty years by the riverTiTitle · 2 styles",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "el:eyebrow",
+   "title": "Lisbon · c. 1500 to 1755EyEyebrow · 2 styles",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "el:heading",
+   "title": "Two centuries of additionsHeHeading · 2 styles",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "el:lede",
+   "title": "For about 250 years the kings of Portugal lived by the river, in a palace that o",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "el:paragraph",
+   "title": "When King Manuel I found the old castle on the hill too cramped, he moved the co",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "el:callout",
+   "title": "What was insideA library of some 70,000 books, the royal archive, a chapel and, ",
+   "depth": 3,
+   "rows": 6,
+   "demo": true,
+   "key": "o.tone"
+  },
+  {
+   "id": "el:pull_quote",
+   "title": "Where the palace had stood, an open square was laid out to the river.The Pombali",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "el:list",
+   "title": "The royal libraryThe chapelThe opera house, opened in 1755LiList · 3 styles",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "eg:Media",
+   "title": "Media",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "el:picture",
+   "title": "⤢The Terreiro do Paço in 1662.PiPicture · 5 styles",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "el:picture_pair",
+   "title": "⤢Before 1755 and today.PPPicture Pair · 1 style",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "el:carousel",
+   "title": "CrCarousel · 5 styles",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "el:video",
+   "title": "▶From the square to the castle · 0:55ViVideo · 2 styles",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "el:audio",
+   "title": "▶1xGuided tour · 3:11For about 250 years the kings lived by the river…AuAudio · ",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "el:animation",
+   "title": "AnAnimation · 2 styles",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "eg:Interactive",
+   "title": "Interactive",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "el:before_after",
+   "title": "Before 1755TodayBABefore / After · 1 style",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "el:hotspot",
+   "title": "12HsHotspot Picture · 1 style",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "el:model_3d",
+   "title": "Drag to rotate, pinch to zoom3D3D Model · 1 style",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "el:panorama",
+   "title": "Drag to look around, pinch to zoom36360 Panorama · 1 style",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "el:scrolly",
+   "title": "SSScroll Story · 1 style",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "eg:Data",
+   "title": "Data",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "el:map",
+   "title": "TagusMaMap · 1 style",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "el:timeline",
+   "title": "c. 1500The court moves to the river1580sThe Torreão rises1755Earthquake, fire an",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "el:swatches",
+   "title": "CobaltOchreTerracottaLime whiteRiver greenSwSwatch Row · 1 style",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "eg:Structure",
+   "title": "Structure",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "el:divider",
+   "title": "DiDivider · 5 styles",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "el:spacer",
+   "title": "SpSpacer · 2 styles",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "s3p",
+   "title": "Patterns · elements composedNEW",
+   "depth": 1,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "pt:pt1",
+   "title": "PtChapter Opener · Text · 4 elements · used 1",
+   "depth": 2,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "pt:pt2",
+   "title": "PtQuote Moment · Text · 3 elements · used 1",
+   "depth": 2,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "pt:pt3",
+   "title": "PtFact Box · Text · 2 elements · used 1",
+   "depth": 2,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "pt:pt6",
+   "title": "PtFun Fact · Interactive · 1 elements · used 1",
+   "depth": 2,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "pt:pt4",
+   "title": "PtPerson · Text · 4 elements · used 0",
+   "depth": 2,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "pt:pt5",
+   "title": "PtSteps · Text · 2 elements · used 0",
+   "depth": 2,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "pt:pt7",
+   "title": "PtThen and Now · Interactive · 3 elements · used 1",
+   "depth": 2,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "pt:pt8",
+   "title": "PtScrollytelling · Interactive · 1 elements · used 0",
+   "depth": 2,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "pt:pt9",
+   "title": "PtText · Text · 1 elements · used 0",
+   "depth": 2,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "pt:pt10",
+   "title": "PtText with headings · Text · 2 elements · used 0",
+   "depth": 2,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "s3b",
+   "title": "Blocks · the Block Library: preview + full page defaultsEXTENDED",
+   "depth": 1,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "bs:about",
+   "title": "About · 5 blocks",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "bd:Header",
+   "title": "The Terreiro do Paço in 1662.Header · on the card",
+   "depth": 3,
+   "rows": 5,
+   "demo": true,
+   "key": "D.card.blockDefs.Header.o.look"
+  },
+  {
+   "id": "bd:Quick Facts",
+   "title": "CobaltOchreTerracottaLime whiteRiver greenQuick Facts · on the card",
+   "depth": 3,
+   "rows": 6,
+   "demo": true,
+   "key": "D.card.blockDefs.Quick Facts.offered"
+  },
+  {
+   "id": "bd:Status",
+   "title": "Condition100%Lost100% damaged · 1755Status · on the card",
+   "depth": 3,
+   "rows": 5,
+   "demo": true,
+   "key": "D.card.blockDefs.Status.offered"
+  },
+  {
+   "id": "bd:Inline",
+   "title": "What was insideA library of some 70,000 books, the royal archive, a chapel and, ",
+   "depth": 3,
+   "rows": 4,
+   "demo": true,
+   "key": "D.card.blockDefs.Inline.offered"
+  },
+  {
+   "id": "bd:Actions",
+   "title": "Find it on the wallRead the storyShareActions · on the card",
+   "depth": 3,
+   "rows": 5,
+   "demo": true,
+   "key": "D.card.blockDefs.Actions.offered"
+  },
+  {
+   "id": "bs:stories",
+   "title": "Stories · 4 blocks",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "bd:Story",
+   "title": "Lisbon · c. 1500 to 1755Two hundred and fifty years by the riverFor about 250 ye",
+   "depth": 3,
+   "rows": 10,
+   "demo": true,
+   "key": "D.card.blockDefs.Story.offered"
+  },
+  {
+   "id": "bd:Timeline",
+   "title": "c. 1500The court moves to the river1580sThe Torreão rises1755Earthquake, fire an",
+   "depth": 3,
+   "rows": 9,
+   "demo": true,
+   "key": "D.card.blockDefs.Timeline.offered"
+  },
+  {
+   "id": "bd:Compare Points",
+   "title": "Side by side100%Ribeira Palace20%Lisbon CathedralCompare Points · on the card",
+   "depth": 3,
+   "rows": 4,
+   "demo": true,
+   "key": "D.card.blockDefs.Compare Points.offered"
+  },
+  {
+   "id": "bd:Dialogue",
+   "title": "Your Majesty, the river front is finished.YouAnd the tower?Ask about the operaCo",
+   "depth": 3,
+   "rows": 6,
+   "demo": true,
+   "key": "D.card.blockDefs.Dialogue.offered"
+  },
+  {
+   "id": "bs:media",
+   "title": "Media · 6 blocks",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "bd:Gallery",
+   "title": "4 pictures · The square through three centuries.Gallery · preview + page",
+   "depth": 3,
+   "rows": 8,
+   "demo": true,
+   "key": "D.card.blockDefs.Gallery.offered"
+  },
+  {
+   "id": "bd:Before and After",
+   "title": "Before 1755TodayBefore and After · on the card",
+   "depth": 3,
+   "rows": 5,
+   "demo": true,
+   "key": "D.card.blockDefs.Before and After.offered"
+  },
+  {
+   "id": "bd:Hotspot Image",
+   "title": "12Hotspot Image · preview + page",
+   "depth": 3,
+   "rows": 7,
+   "demo": true,
+   "key": "D.card.blockDefs.Hotspot Image.offered"
+  },
+  {
+   "id": "bd:Video",
+   "title": "▶From the square to the castle · 0:55Video · preview + page",
+   "depth": 3,
+   "rows": 8,
+   "demo": true,
+   "key": "D.card.blockDefs.Video.offered"
+  },
+  {
+   "id": "bd:3D Model",
+   "title": "Drag to rotate, pinch to zoom3D Model · preview + page",
+   "depth": 3,
+   "rows": 8,
+   "demo": true,
+   "key": "D.card.blockDefs.3D Model.offered"
+  },
+  {
+   "id": "bd:360 Panorama",
+   "title": "Drag to look around, pinch to zoom360 Panorama · preview + page",
+   "depth": 3,
+   "rows": 7,
+   "demo": true,
+   "key": "D.card.blockDefs.360 Panorama.offered"
+  },
+  {
+   "id": "bs:listen",
+   "title": "Listen · 1 blocks",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "bd:Audio Guide",
+   "title": "▶1xGuided tour · 3:11For about 250 years the kings lived by the river…Chapters0:",
+   "depth": 3,
+   "rows": 6,
+   "demo": true,
+   "key": "D.card.blockDefs.Audio Guide.offered"
+  },
+  {
+   "id": "bs:play",
+   "title": "Play · 5 blocks",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "bd:Knowledge Check",
+   "title": "Test yourself · Question 1 of 3Which king moved the court to the river?Manuel IP",
+   "depth": 3,
+   "rows": 10,
+   "demo": true,
+   "key": "D.card.blockDefs.Knowledge Check.offered"
+  },
+  {
+   "id": "bd:Poll",
+   "title": "Should the opera house be rebuilt?YesNoOnly as a museumPoll · on the card",
+   "depth": 3,
+   "rows": 4,
+   "demo": true,
+   "key": "D.card.blockDefs.Poll.offered"
+  },
+  {
+   "id": "bd:Collect",
+   "title": "Your story3 of 12 collectedAdd to my storyCollect · on the card",
+   "depth": 3,
+   "rows": 4,
+   "demo": true,
+   "key": "D.card.blockDefs.Collect.offered"
+  },
+  {
+   "id": "bd:Feedback",
+   "title": "Was this useful?👍 Helpful👎 Not helpfulFeedback · on the card",
+   "depth": 3,
+   "rows": 5,
+   "demo": true,
+   "key": "D.card.blockDefs.Feedback.offered"
+  },
+  {
+   "id": "bd:Place In AR",
+   "title": "See it here in 3DPoint the camera at the wall first, then place it.Place In AR ·",
+   "depth": 3,
+   "rows": 9,
+   "demo": true,
+   "key": "D.card.blockDefs.Place In AR.offered"
+  },
+  {
+   "id": "bs:visit",
+   "title": "Visit · 6 blocks",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "bd:Wall Locator",
+   "title": "On this wallYou are hereWall Locator · on the card",
+   "depth": 3,
+   "rows": 5,
+   "demo": true,
+   "key": "D.card.blockDefs.Wall Locator.offered"
+  },
+  {
+   "id": "bd:Today Map",
+   "title": "Where it is todayTagus38.7075, -9.1364Today Map · preview + page",
+   "depth": 3,
+   "rows": 7,
+   "demo": true,
+   "key": "D.card.blockDefs.Today Map.offered"
+  },
+  {
+   "id": "bd:Related",
+   "title": "RelatedLisbon CathedralSt George's CastleRelated · on the card",
+   "depth": 3,
+   "rows": 6,
+   "demo": true,
+   "key": "D.card.blockDefs.Related.offered"
+  },
+  {
+   "id": "bd:Practical Info",
+   "title": "The royal libraryThe chapelThe opera house, opened in 1755Practical Info · on th",
+   "depth": 3,
+   "rows": 4,
+   "demo": true,
+   "key": "D.card.blockDefs.Practical Info.offered"
+  },
+  {
+   "id": "bd:Sources",
+   "title": "SourcesAyres de Carvalho, D. João V e a arte do seu tempo, 1962Kubler, Portugues",
+   "depth": 3,
+   "rows": 5,
+   "demo": true,
+   "key": "D.card.blockDefs.Sources.offered"
+  },
+  {
+   "id": "bd:Contents",
+   "title": "ContentsAbout 1 of 2 readStories 0 of 1 readMedia 0 of 2 readListen 0 of 1 readP",
+   "depth": 3,
+   "rows": 6,
+   "demo": true,
+   "key": "D.card.blockDefs.Contents.offered"
+  },
+  {
+   "id": "s4",
+   "title": "4 · Motion & Effects · how parts move and shine: the motions and effects of elem",
+   "depth": 0,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "s4m",
+   "title": "Motion · entrances, transitions, scroll and emphasis, picked by elements and blo",
+   "depth": 1,
+   "rows": 3,
+   "demo": true,
+   "key": "family"
+  },
+  {
+   "id": "mt:entrance",
+   "title": "Entrance · 8",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "mo:rise",
+   "title": "Rise · Entrance · from below · 420 ms · used 1NATIVE",
+   "depth": 3,
+   "rows": 8,
+   "demo": true,
+   "key": "motion.from"
+  },
+  {
+   "id": "mo:slide",
+   "title": "Slide In · Entrance · from left · 450 ms · used 2NATIVE",
+   "depth": 3,
+   "rows": 8,
+   "demo": true,
+   "key": "motion.from"
+  },
+  {
+   "id": "mo:pop",
+   "title": "Pop · Entrance · scales up · 420 ms · used 6NATIVE",
+   "depth": 3,
+   "rows": 8,
+   "demo": true,
+   "key": "motion.from"
+  },
+  {
+   "id": "mo:fade",
+   "title": "Fade · Entrance · fades · 500 ms · used 10NATIVE",
+   "depth": 3,
+   "rows": 8,
+   "demo": true,
+   "key": "motion.from"
+  },
+  {
+   "id": "mo:tilt",
+   "title": "Tilt In · Entrance · from below · tilts -4° · 520 ms · used 3NATIVE",
+   "depth": 3,
+   "rows": 8,
+   "demo": true,
+   "key": "motion.from"
+  },
+  {
+   "id": "mo:wipe",
+   "title": "Wipe · Entrance · wipes in · 700 ms · used 4NATIVE",
+   "depth": 3,
+   "rows": 8,
+   "demo": true,
+   "key": "motion.from"
+  },
+  {
+   "id": "mo:words",
+   "title": "Build by Words · Entrance · from below · 380 ms · words one by one · used 3NATIV",
+   "depth": 3,
+   "rows": 8,
+   "demo": true,
+   "key": "motion.from"
+  },
+  {
+   "id": "mo:letters",
+   "title": "Build by Letters · Entrance · from below · 300 ms · letters one by one · used 1N",
+   "depth": 3,
+   "rows": 8,
+   "demo": true,
+   "key": "motion.from"
+  },
+  {
+   "id": "mt:transition",
+   "title": "Transition · 6",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "mo:t_slide",
+   "title": "Swipe · Transition · Swipe · 450 ms · used 0NATIVE",
+   "depth": 3,
+   "rows": 4,
+   "demo": true,
+   "key": "motion.style"
+  },
+  {
+   "id": "mo:t_cube",
+   "title": "Cube · Transition · Cube · 650 ms · used 1BUILD",
+   "depth": 3,
+   "rows": 4,
+   "demo": true,
+   "key": "motion.style"
+  },
+  {
+   "id": "mo:t_deck",
+   "title": "Card Deck · Transition · Card Deck · 600 ms · used 1NATIVE",
+   "depth": 3,
+   "rows": 4,
+   "demo": true,
+   "key": "motion.style"
+  },
+  {
+   "id": "mo:t_flip",
+   "title": "Flip · Transition · Flip · 650 ms · used 0BUILD",
+   "depth": 3,
+   "rows": 4,
+   "demo": true,
+   "key": "motion.style"
+  },
+  {
+   "id": "mo:t_fade",
+   "title": "Cross-fade · Transition · Cross-fade · 500 ms · used 0NATIVE",
+   "depth": 3,
+   "rows": 4,
+   "demo": true,
+   "key": "motion.style"
+  },
+  {
+   "id": "mo:t_zoom",
+   "title": "Zoom Through · Transition · Zoom · 550 ms · used 0NATIVE",
+   "depth": 3,
+   "rows": 4,
+   "demo": true,
+   "key": "motion.style"
+  },
+  {
+   "id": "mt:scroll",
+   "title": "With the scroll · 3",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "mo:parallax",
+   "title": "Parallax · With the scroll · 0.18 · used 1NATIVE",
+   "depth": 3,
+   "rows": 2,
+   "demo": true,
+   "key": "motion.factor"
+  },
+  {
+   "id": "mo:zoom",
+   "title": "Zoom with the scroll · With the scroll · 0.08 · used 1NATIVE",
+   "depth": 3,
+   "rows": 2,
+   "demo": true,
+   "key": "motion.factor"
+  },
+  {
+   "id": "mo:scalein",
+   "title": "Grow In · With the scroll · 0.12 · used 1NATIVE",
+   "depth": 3,
+   "rows": 2,
+   "demo": true,
+   "key": "motion.factor"
+  },
+  {
+   "id": "mt:emphasis",
+   "title": "Emphasis · 3",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "mo:shine",
+   "title": "Shine · Emphasis loop · 2400 ms · used 0NATIVE",
+   "depth": 3,
+   "rows": 2,
+   "demo": true,
+   "key": "motion.dur"
+  },
+  {
+   "id": "mo:pulse",
+   "title": "Pulse · Emphasis loop · 1800 ms · used 0NATIVE",
+   "depth": 3,
+   "rows": 2,
+   "demo": true,
+   "key": "motion.dur"
+  },
+  {
+   "id": "mo:float",
+   "title": "Float · Emphasis loop · 2600 ms · used 0NATIVE",
+   "depth": 3,
+   "rows": 2,
+   "demo": true,
+   "key": "motion.dur"
+  },
+  {
+   "id": "mt:imported",
+   "title": "Imported animation · 4",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "mo:im_tile",
+   "title": "Azulejo Draws Itself · Lottie · azulejo_draw.json · on view · used 0IMPORT",
+   "depth": 3,
+   "rows": 4,
+   "demo": true,
+   "key": "motion.source"
+  },
+  {
+   "id": "mo:im_ship",
+   "title": "Caravel Sails In · Rive · caravel.riv · with the scroll · used 0IMPORT",
+   "depth": 3,
+   "rows": 4,
+   "demo": true,
+   "key": "motion.source"
+  },
+  {
+   "id": "mo:im_dust",
+   "title": "Gold Dust · Video + alpha · gold_dust.webm · loops · used 0IMPORT",
+   "depth": 3,
+   "rows": 4,
+   "demo": true,
+   "key": "motion.source"
+  },
+  {
+   "id": "mo:im_door",
+   "title": "Palace Door Opens · Unity Animation · PalaceDoor.prefab · on tap · used 0NATIVE",
+   "depth": 3,
+   "rows": 4,
+   "demo": true,
+   "key": "motion.source"
+  },
+  {
+   "id": "mt:self",
+   "title": "By itself · 2",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "mo:self_zoom",
+   "title": "Slow Zoom · By itself · 1 to 1.06 and back · 28 s · used 0NATIVE",
+   "depth": 3,
+   "rows": 2,
+   "demo": true,
+   "key": "motion.dur"
+  },
+  {
+   "id": "mo:self_pan",
+   "title": "Pan · By itself · across its room and back · 26 s · used 0NATIVE",
+   "depth": 3,
+   "rows": 2,
+   "demo": true,
+   "key": "motion.dur"
+  },
+  {
+   "id": "s4i",
+   "title": "Interaction · flip, hold, compare, swipe, tilt, hotspotsNEW",
+   "depth": 1,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "in:flip",
+   "title": "Tap to FlipNATIVE",
+   "depth": 2,
+   "rows": 1,
+   "demo": true,
+   "key": "inter.dur"
+  },
+  {
+   "id": "in:hold",
+   "title": "Hold to RevealNATIVE",
+   "depth": 2,
+   "rows": 1,
+   "demo": true,
+   "key": "inter.hold"
+  },
+  {
+   "id": "in:compare",
+   "title": "Drag to CompareNATIVE",
+   "depth": 2,
+   "rows": 1,
+   "demo": true,
+   "key": "inter.start"
+  },
+  {
+   "id": "in:deck",
+   "title": "Swipe DeckNATIVE",
+   "depth": 2,
+   "rows": 1,
+   "demo": true,
+   "key": "inter.throwd"
+  },
+  {
+   "id": "in:scrub",
+   "title": "Scroll ScrubBUILD",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "in:tiltlook",
+   "title": "Tilt to LookNATIVE",
+   "depth": 2,
+   "rows": 1,
+   "demo": true,
+   "key": "inter.strength"
+  },
+  {
+   "id": "in:choice",
+   "title": "Choice PointNATIVE",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "in:hotspots",
+   "title": "Tap HotspotsNATIVE",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "s4f",
+   "title": "Effects · edges, dividers, light and moving effectsEXTENDED",
+   "depth": 1,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "fg:edge",
+   "title": "Edges",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "fx:e_wave",
+   "title": "Wave · used 0NATIVE",
+   "depth": 3,
+   "rows": 2,
+   "demo": true,
+   "key": "fx.h"
+  },
+  {
+   "id": "fx:e_multiwave",
+   "title": "Multi Wave · used 0NATIVE",
+   "depth": 3,
+   "rows": 2,
+   "demo": true,
+   "key": "fx.h"
+  },
+  {
+   "id": "fx:e_torn",
+   "title": "Torn Paper · used 0NATIVE",
+   "depth": 3,
+   "rows": 2,
+   "demo": true,
+   "key": "fx.h"
+  },
+  {
+   "id": "fx:e_arches",
+   "title": "Arcade Arches · used 1NATIVE",
+   "depth": 3,
+   "rows": 2,
+   "demo": true,
+   "key": "fx.h"
+  },
+  {
+   "id": "fx:e_skyline",
+   "title": "Lisbon Skyline · used 1NATIVE",
+   "depth": 3,
+   "rows": 2,
+   "demo": true,
+   "key": "fx.h"
+  },
+  {
+   "id": "fx:e_diamonds",
+   "title": "Diamond Frame · used 0NATIVE",
+   "depth": 3,
+   "rows": 2,
+   "demo": true,
+   "key": "fx.h"
+  },
+  {
+   "id": "fx:e_calcada",
+   "title": "Calçada Waves · used 0NATIVE",
+   "depth": 3,
+   "rows": 2,
+   "demo": true,
+   "key": "fx.h"
+  },
+  {
+   "id": "fx:e_tiles",
+   "title": "Tile Row · used 0NATIVE",
+   "depth": 3,
+   "rows": 2,
+   "demo": true,
+   "key": "fx.h"
+  },
+  {
+   "id": "fx:e_mosaic",
+   "title": "Mosaic Strip · used 0NATIVE",
+   "depth": 3,
+   "rows": 2,
+   "demo": true,
+   "key": "fx.h"
+  },
+  {
+   "id": "fx:e_own",
+   "title": "Own strip picture · used 0NATIVE",
+   "depth": 3,
+   "rows": 2,
+   "demo": true,
+   "key": "fx.h"
+  },
+  {
+   "id": "fg:line",
+   "title": "Line dividers",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "fx:l_hair",
+   "title": "Hairline · used 1NATIVE",
+   "depth": 3,
+   "rows": 1,
+   "demo": true,
+   "key": "fx.colour"
+  },
+  {
+   "id": "fx:l_tile",
+   "title": "Tile Ornament · used 1NATIVE",
+   "depth": 3,
+   "rows": 1,
+   "demo": true,
+   "key": "fx.colour"
+  },
+  {
+   "id": "fx:l_fleur",
+   "title": "Fleur · used 1NATIVE",
+   "depth": 3,
+   "rows": 1,
+   "demo": true,
+   "key": "fx.colour"
+  },
+  {
+   "id": "fx:l_diamond",
+   "title": "Diamond · used 0NATIVE",
+   "depth": 3,
+   "rows": 1,
+   "demo": true,
+   "key": "fx.colour"
+  },
+  {
+   "id": "fx:l_scroll",
+   "title": "Scroll Ends · used 0NATIVE",
+   "depth": 3,
+   "rows": 1,
+   "demo": true,
+   "key": "fx.colour"
+  },
+  {
+   "id": "fx:l_dots",
+   "title": "Dots and Star · used 0NATIVE",
+   "depth": 3,
+   "rows": 1,
+   "demo": true,
+   "key": "fx.colour"
+  },
+  {
+   "id": "fg:light",
+   "title": "Light",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "fx:x_fade",
+   "title": "Fade · used 0NATIVE",
+   "depth": 3,
+   "rows": 1,
+   "demo": true,
+   "key": "fx.h"
+  },
+  {
+   "id": "fx:x_tone",
+   "title": "Tone · used 0NATIVE",
+   "depth": 3,
+   "rows": 1,
+   "demo": true,
+   "key": "fx.spread"
+  },
+  {
+   "id": "fx:x_glass",
+   "title": "Living glass · used 0NATIVE",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "fx:x_rim",
+   "title": "Rim light · used 0NATIVE",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "fg:moving",
+   "title": "Moving",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "fx:x_reveal",
+   "title": "Reveal · used 0NATIVE",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "fx:x_drift",
+   "title": "Drift · used 0NATIVE",
+   "depth": 3,
+   "rows": 1,
+   "demo": true,
+   "key": "fx.speed"
+  },
+  {
+   "id": "s4h",
+   "title": "Feedback · haptics and soundNEW",
+   "depth": 1,
+   "rows": 4,
+   "demo": true,
+   "key": "D.card.fb.haptics"
+  },
+  {
+   "id": "s5",
+   "title": "5 · Card Controls · the parts around the content: bar, top bar, page chrome, loc",
+   "depth": 0,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "s5top",
+   "title": "Top Bar · the round buttons and the title at the card's top",
+   "depth": 1,
+   "rows": 1,
+   "demo": true,
+   "key": "D.card.ctl.top.title"
+  },
+  {
+   "id": "s5settings",
+   "title": "Settings panel · opened by the Top Bar's settings button: language and light / d",
+   "depth": 1,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "s5bar",
+   "title": "Navigation Bar · one item per section; a tap moves the card there",
+   "depth": 1,
+   "rows": 17,
+   "demo": true,
+   "key": "D.card.ctl.bar.on"
+  },
+  {
+   "id": "s5contents",
+   "title": "Contents sheet · every section and block in one list, with filter chips, opened ",
+   "depth": 1,
+   "rows": 4,
+   "demo": true,
+   "key": "D.card.ctl.contents.on"
+  },
+  {
+   "id": "s5pager",
+   "title": "Section pager · the counter and chevrons at the top, with Layout = Pages",
+   "depth": 1,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "s5openrow",
+   "title": "Open Row · the line on a preview that opens its page",
+   "depth": 1,
+   "rows": 1,
+   "demo": true,
+   "key": "D.card.ctl.openrow"
+  },
+  {
+   "id": "s5expand",
+   "title": "Expand Row · the line on a preview whose Tap is Expand here",
+   "depth": 1,
+   "rows": 1,
+   "demo": true,
+   "key": "D.card.cardCfg.openOne"
+  },
+  {
+   "id": "s5back",
+   "title": "Back button · the ‹ at a page's top",
+   "depth": 1,
+   "rows": 1,
+   "demo": true,
+   "key": "D.card.ctl.pageChips"
+  },
+  {
+   "id": "s5crumb",
+   "title": "Breadcrumb · point › section › page, at a page's top",
+   "depth": 1,
+   "rows": 1,
+   "demo": true,
+   "key": "D.card.ctl.crumb"
+  },
+  {
+   "id": "s5prevnext",
+   "title": "Previous / Next buttons · the neighbouring pages, at a page's foot",
+   "depth": 1,
+   "rows": 1,
+   "demo": true,
+   "key": "D.card.ctl.prevnext"
+  },
+  {
+   "id": "s5loc",
+   "title": "Locate Button · lowers the card and shows the point on the wall",
+   "depth": 1,
+   "rows": 5,
+   "demo": true,
+   "key": "D.card.ctl.locate.on"
+  },
+  {
+   "id": "s5hints",
+   "title": "Hints · a view of Guide › The mascot speaks up › The card (cues) and How to use ",
+   "depth": 1,
+   "rows": 2,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "s5states",
+   "title": "Loading & states · loading, the wall not found, nothing here, offline, done",
+   "depth": 1,
+   "rows": 1,
+   "demo": true,
+   "key": "D.card.states.after"
+  },
+  {
+   "id": "s5sticky",
+   "title": "Sticky Action · the button pinned at the card's foot",
+   "depth": 1,
+   "rows": 2,
+   "demo": true,
+   "key": "D.card.ctl.sticky"
+  },
+  {
+   "id": "s5viewer",
+   "title": "Picture viewer · the full-screen picture: swipe, pinch, double tap",
+   "depth": 1,
+   "rows": 1,
+   "demo": true,
+   "key": "D.card.ctl.viewer.counter"
+  },
+  {
+   "id": "s5player",
+   "title": "Video player · the video page and the full-screen player",
+   "depth": 1,
+   "rows": 1,
+   "demo": true,
+   "key": "D.card.ctl.player.captions"
+  },
+  {
+   "id": "s5chip",
+   "title": "Placed model chip · above the card while a model placed in the room stands",
+   "depth": 1,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "s5term",
+   "title": "Glossary popup · a term's definition, after a tap on an underlined word",
+   "depth": 1,
+   "rows": 2,
+   "demo": true,
+   "key": "D.card.ctl.term.opens"
+  },
+  {
+   "id": "s5termpage",
+   "title": "Term page · a term's own page, opened by Read more",
+   "depth": 1,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "s8",
+   "title": "6 · Audiences · who the card speaks to (Family, Explorer, Expert): their looks, ",
+   "depth": 0,
+   "rows": 1,
+   "demo": true,
+   "key": "P.vis.aud"
+  },
+  {
+   "id": "s8onb",
+   "title": "Who's exploring · asked once: Family, Explorer or Expert; Skip = Explorer",
+   "depth": 1,
+   "rows": 2,
+   "demo": true,
+   "key": "D.wall.aud.where"
+  },
+  {
+   "id": "s8set",
+   "title": "Audience in Settings · in the visitor's Settings: who's exploring, and Short / S",
+   "depth": 1,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "s8look",
+   "title": "Looks per audience · per audience: the mascot, the length, the type, the ornamen",
+   "depth": 1,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "s8lens",
+   "title": "Lenses · “See it as” chips: a topic of the point, chosen during the visit",
+   "depth": 1,
+   "rows": 3,
+   "demo": true,
+   "key": "D.card.lensCfg.on"
+  }
+ ],
+ "guide": [
+  {
+   "id": "s7mascot",
+   "title": "1 · The mascot · who it is, its look, voice, speech on screen, manner and moment",
+   "depth": 0,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "s7who",
+   "title": "Who · its name and its first words",
+   "depth": 1,
+   "rows": 3,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gt:look",
+   "title": "Look · what the mascot is: its character, its source, its tile or its model",
+   "depth": 1,
+   "rows": 3,
+   "demo": true,
+   "key": "D.guide.mascot"
+  },
+  {
+   "id": "gt:tools",
+   "title": "Model tools · the 3D model's clips, Import… and a model from a picture (Mascot s",
+   "depth": 2,
+   "rows": 4,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gt:voice",
+   "title": "Voice · its recorded voice, its speed, a line with no recording, the answers' vo",
+   "depth": 1,
+   "rows": 8,
+   "demo": true,
+   "key": "D.guide.voiceSet"
+  },
+  {
+   "id": "gt:speech",
+   "title": "Speech on screen · how its words show while it speaks: one highlighter, the tele",
+   "depth": 1,
+   "rows": 9,
+   "demo": true,
+   "key": "D.guide.highlight"
+  },
+  {
+   "id": "gt:manner",
+   "title": "Manner · how big, how lively, how it speaks and moves",
+   "depth": 1,
+   "rows": 7,
+   "demo": true,
+   "key": "D.guide.azuSize"
+  },
+  {
+   "id": "gt:moments",
+   "title": "Moments · when it introduces itself, and its walk to the wall",
+   "depth": 1,
+   "rows": 3,
+   "demo": true,
+   "key": "D.guide.intro"
+  },
+  {
+   "id": "gt1",
+   "title": "2 · The tour · the story told: what it says, its music, captions, focus, the pan",
+   "depth": 0,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "s7auto",
+   "title": "Tour from the card · the tour made from each point's card: the default with no w",
+   "depth": 1,
+   "rows": 5,
+   "demo": true,
+   "key": "D.guide.autoAI"
+  },
+  {
+   "id": "at:rules",
+   "title": "What each block says · one rule a kind of block, in the card's order; the blocks",
+   "depth": 2,
+   "rows": 44,
+   "demo": true,
+   "key": "D.guide.atHook"
+  },
+  {
+   "id": "s7more",
+   "title": "Tell me more · the visitor's own pace: a step's deeper words, when asked",
+   "depth": 1,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guide.tmOn"
+  },
+  {
+   "id": "s7voice",
+   "title": "Music · the music under the voice (the voice itself: 1 · The mascot › Voice)",
+   "depth": 1,
+   "rows": 7,
+   "demo": true,
+   "key": "D.guide.music"
+  },
+  {
+   "id": "s7cap",
+   "title": "Captions · the words being read, at the bottom",
+   "depth": 1,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guide.captions"
+  },
+  {
+   "id": "s7focus",
+   "title": "Focus · the left bar on what is told, the zoom to a spot in a picture, the masco",
+   "depth": 1,
+   "rows": 6,
+   "demo": true,
+   "key": "D.guide.cue"
+  },
+  {
+   "id": "s7move",
+   "title": "The tour's movement · the tour moves as a visitor would: the hand, the blocks in",
+   "depth": 1,
+   "rows": 3,
+   "demo": true,
+   "key": "D.guide.hand"
+  },
+  {
+   "id": "s7coach",
+   "title": "Invite to try · at a block to try, the guide waits for the gesture",
+   "depth": 1,
+   "rows": 3,
+   "demo": true,
+   "key": "D.guide.coach"
+  },
+  {
+   "id": "s7dock",
+   "title": "Guide panel · one panel for the tour's words, its controls and the conversation",
+   "depth": 1,
+   "rows": 14,
+   "demo": true,
+   "key": "D.guide.panel"
+  },
+  {
+   "id": "gt:ways",
+   "title": "Ways in · how a visitor starts the tour, or picks it up again",
+   "depth": 1,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "s7gbtn",
+   "title": "Guide button · the visitor's own way in, always in one place, and the mascot bes",
+   "depth": 2,
+   "rows": 4,
+   "demo": true,
+   "key": "D.guide.gbtn"
+  },
+  {
+   "id": "s7hero",
+   "title": "Start the guide · the hero's button that starts the tour, and its glow",
+   "depth": 2,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guide.heroButton"
+  },
+  {
+   "id": "s7block",
+   "title": "Guide block · the tile that starts the tour, first in About",
+   "depth": 2,
+   "rows": 1,
+   "demo": true,
+   "key": "D.guide.block"
+  },
+  {
+   "id": "s7resume",
+   "title": "Continue the tour · one way back into a stopped tour: this visit at its sentence",
+   "depth": 2,
+   "rows": 3,
+   "demo": true,
+   "key": "D.guide.svOn"
+  },
+  {
+   "id": "s7end",
+   "title": "The tour's end · where the tour leaves the visitor, and What next?",
+   "depth": 1,
+   "rows": 13,
+   "demo": true,
+   "key": "D.guide.teOn"
+  },
+  {
+   "id": "gd:g:ontour",
+   "title": "3 · Games on the tour · the quiz, Guess the year, Don't say it!, Find it on the ",
+   "depth": 0,
+   "rows": 9,
+   "demo": true,
+   "key": "D.guidance.kinds.2.groups.0.on"
+  },
+  {
+   "id": "gd:pair:quizpromise",
+   "title": "The quiz · “The quiz promise” and “The quiz”: one beat, planned together or not ",
+   "depth": 1,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:i:quizpromise",
+   "title": "⋮⋮OnOffThe quiz promiseOpening · the seam after step 2 (before “Quick facts”), a",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:quizpromise:identity",
+   "title": "Identity· The quiz promise · in Games on the tour",
+   "depth": 3,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:quizpromise:says",
+   "title": "Says· what the mascot says and the chips' words, EN | PT",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:quizpromise:place",
+   "title": "Place· Opening · now: the seam after step 2 (before “Quick facts”), at 0:19 of n",
+   "depth": 3,
+   "rows": 1,
+   "demo": true,
+   "key": "D.guidance.items.quizpromise.minSteps"
+  },
+  {
+   "id": "gd:f:quizpromise:visitor",
+   "title": "The visitor· answers by chips · waits 4 s · a game",
+   "depth": 3,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.quizpromise.answers"
+  },
+  {
+   "id": "gd:f:quizpromise:needs",
+   "title": "Needs and pairs· reviewed quiz questions · pairs with “The quiz”",
+   "depth": 3,
+   "rows": 1,
+   "demo": true,
+   "key": "D.guidance.items.quizpromise.qMin"
+  },
+  {
+   "id": "gd:f:quizpromise:who",
+   "title": "Who and when· Calm too · Family, Explorer, Expert · every length",
+   "depth": 3,
+   "rows": 6,
+   "demo": true,
+   "key": "D.guidance.items.quizpromise.calm"
+  },
+  {
+   "id": "gd:i:quizfinale",
+   "title": "⋮⋮OnOffThe quizFinale · the seam after step 10 (before “The Ribeira Palace”), at",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:quizfinale:identity",
+   "title": "Identity· The quiz · in Games on the tour",
+   "depth": 3,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:quizfinale:says",
+   "title": "Says· what the mascot says and the chips' words, EN | PT",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:quizfinale:visitor",
+   "title": "The visitor· answers by tap or say · no timer · a game",
+   "depth": 3,
+   "rows": 1,
+   "demo": true,
+   "key": "D.guidance.items.quizfinale.answers"
+  },
+  {
+   "id": "gd:f:quizfinale:needs",
+   "title": "Needs and pairs· reviewed quiz questions · pairs with “The quiz promise”",
+   "depth": 3,
+   "rows": 3,
+   "demo": true,
+   "key": "D.guidance.items.quizfinale.qn"
+  },
+  {
+   "id": "gd:f:quizfinale:who",
+   "title": "Who and when· Calm too · Family, Explorer, Expert · every length",
+   "depth": 3,
+   "rows": 5,
+   "demo": true,
+   "key": "D.guidance.items.quizfinale.calm"
+  },
+  {
+   "id": "gd:i:guessyear",
+   "title": "⋮⋮OnOffGuess the yearBetween steps · the seam after step 5 (before “When King Ma",
+   "depth": 1,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:guessyear:identity",
+   "title": "Identity· Guess the year · in Games on the tour",
+   "depth": 2,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:guessyear:says",
+   "title": "Says· what the mascot says and the chips' words, EN | PT",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:guessyear:visitor",
+   "title": "The visitor· answers by slider · waits 14 s (+4 s the first time) · a game",
+   "depth": 2,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.guessyear.waits"
+  },
+  {
+   "id": "gd:f:guessyear:who",
+   "title": "Who and when· Calm too · Family, Explorer, Expert · every length",
+   "depth": 2,
+   "rows": 5,
+   "demo": true,
+   "key": "D.guidance.items.guessyear.calm"
+  },
+  {
+   "id": "gd:i:dontsay",
+   "title": "⋮⋮OnOffDon't say it!In a step · not planned now▸ Show now",
+   "depth": 1,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:dontsay:identity",
+   "title": "Identity· Don't say it! · in Games on the tour",
+   "depth": 2,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:dontsay:says",
+   "title": "Says· what the mascot says and the chips' words, EN | PT",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:dontsay:visitor",
+   "title": "The visitor· answers by tap the mascot · waits 4 s · a game",
+   "depth": 2,
+   "rows": 1,
+   "demo": true,
+   "key": "D.guidance.items.dontsay.waits"
+  },
+  {
+   "id": "gd:f:dontsay:game",
+   "title": "The game· its word and span in each language · a tap window of 2.5 s · a playful",
+   "depth": 2,
+   "rows": 7,
+   "demo": true,
+   "key": "D.tour.tourWord.en.pick"
+  },
+  {
+   "id": "gd:f:dontsay:who",
+   "title": "Who and when· Lively only · Family, Explorer · every length",
+   "depth": 2,
+   "rows": 5,
+   "demo": true,
+   "key": "D.guidance.items.dontsay.calm"
+  },
+  {
+   "id": "gd:i:findwall",
+   "title": "⋮⋮OnOffFind it on the wallBetween steps · not planned now▸ Show now",
+   "depth": 1,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:findwall:identity",
+   "title": "Identity· Find it on the wall · in Games on the tour",
+   "depth": 2,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:findwall:says",
+   "title": "Says· what the mascot says and the chips' words, EN | PT",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:findwall:visitor",
+   "title": "The visitor· answers by aim at the wall · waits 4 s · a game",
+   "depth": 2,
+   "rows": 1,
+   "demo": true,
+   "key": "D.guidance.items.findwall.waits"
+  },
+  {
+   "id": "gd:f:findwall:point",
+   "title": "The point· The Torreão, after step 4 · give up after 20 s",
+   "depth": 2,
+   "rows": 6,
+   "demo": true,
+   "key": "D.tour.tourFind.point"
+  },
+  {
+   "id": "gd:f:findwall:who",
+   "title": "Who and when· Calm too · Family, Explorer, Expert · every length",
+   "depth": 2,
+   "rows": 5,
+   "demo": true,
+   "key": "D.guidance.items.findwall.calm"
+  },
+  {
+   "id": "gd:var:water",
+   "title": "The breather · with its variant “Cookie”: never both in a tour",
+   "depth": 1,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:i:water",
+   "title": "⋮⋮OnOffThe breatherBetween steps · not planned now▸ Show now",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:water:identity",
+   "title": "Identity· The breather · in Games on the tour",
+   "depth": 3,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:water:says",
+   "title": "Says· what the mascot says and the chips' words, EN | PT",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:water:place",
+   "title": "Place· Between steps · now: not planned",
+   "depth": 3,
+   "rows": 4,
+   "demo": true,
+   "key": "D.guidance.items.water.place"
+  },
+  {
+   "id": "gd:f:water:visitor",
+   "title": "The visitor· answers by chips · waits 8 s",
+   "depth": 3,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.water.answers"
+  },
+  {
+   "id": "gd:f:water:who",
+   "title": "Who and when· Lively only · Family, Explorer, Expert · every length",
+   "depth": 3,
+   "rows": 5,
+   "demo": true,
+   "key": "D.guidance.items.water.calm"
+  },
+  {
+   "id": "gd:f:water:look",
+   "title": "Its look· prop: by date (today a glass of water) · once a visit",
+   "depth": 3,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.water.props"
+  },
+  {
+   "id": "gd:i:cookie",
+   "title": "⋮⋮OnOffCookieVARIANTBetween steps · not planned now▸ Show now",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:cookie:identity",
+   "title": "Identity· Cookie · in Games on the tour, a variant of The breather",
+   "depth": 3,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:cookie:says",
+   "title": "Says· what the mascot says and the chips' words, EN | PT",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:cookie:place",
+   "title": "Place· Between steps · now: not planned",
+   "depth": 3,
+   "rows": 4,
+   "demo": true,
+   "key": "D.guidance.items.cookie.place"
+  },
+  {
+   "id": "gd:f:cookie:visitor",
+   "title": "The visitor· answers by chips · waits 8 s",
+   "depth": 3,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.cookie.answers"
+  },
+  {
+   "id": "gd:f:cookie:who",
+   "title": "Who and when· Lively only · Family, Explorer, Expert · every length",
+   "depth": 3,
+   "rows": 5,
+   "demo": true,
+   "key": "D.guidance.items.cookie.calm"
+  },
+  {
+   "id": "gd:f:cookie:look",
+   "title": "Its look· prop: a cookie · once a visit",
+   "depth": 3,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.cookie.props"
+  },
+  {
+   "id": "s7gask",
+   "title": "Asking during a game · the game pauses, the mascot answers or hints, the game go",
+   "depth": 1,
+   "rows": 9,
+   "demo": true,
+   "key": "D.guide.gaOn"
+  },
+  {
+   "id": "gt4",
+   "title": "4 · The mascot speaks up · tips, remarks, play, walkthroughs and the first pages",
+   "depth": 0,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:overall",
+   "title": "Overall · on, the breathing room, the limits, the learning and the memory",
+   "depth": 1,
+   "rows": 13,
+   "demo": true,
+   "key": "D.guidance.on"
+  },
+  {
+   "id": "gd:help",
+   "title": "Help · the presets and Talkativeness, in words",
+   "depth": 2,
+   "rows": 2,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:mix",
+   "title": "Mix along the visit · each kind's weight at s = 0 / 0.3 / 1, and its curve",
+   "depth": 2,
+   "rows": 1,
+   "demo": true,
+   "key": "D.guidance.mix.app.0"
+  },
+  {
+   "id": "gd:app",
+   "title": "App · how to use the app: a bubble, never spoken",
+   "depth": 1,
+   "rows": 3,
+   "demo": true,
+   "key": "D.guidance.kinds.0.on"
+  },
+  {
+   "id": "gd:g:start",
+   "title": "The start · In order: the visit's first words, then the first gesture",
+   "depth": 2,
+   "rows": 4,
+   "demo": true,
+   "key": "D.guidance.kinds.0.groups.0.on"
+  },
+  {
+   "id": "gd:i:opening",
+   "title": "⋮⋮OnOffOpening messageESSENTIALonce a visit▸ Show now",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:opening:identity",
+   "title": "Identity· Opening message · in App › The start",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.opening.group"
+  },
+  {
+   "id": "gd:f:opening:says",
+   "title": "Says· 1 line · a returning visitor's · a bubble",
+   "depth": 4,
+   "rows": 4,
+   "demo": true,
+   "key": "D.guidance.items.opening.spoken"
+  },
+  {
+   "id": "gd:f:opening:about",
+   "title": "About· Nothing · on the screen first",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.opening.about"
+  },
+  {
+   "id": "gd:f:opening:show",
+   "title": "Show· Tip · The mascot: stays · focus: none",
+   "depth": 4,
+   "rows": 5,
+   "demo": true,
+   "key": "D.guidance.items.opening.form"
+  },
+  {
+   "id": "gd:f:opening:when",
+   "title": "When· at the visit's start",
+   "depth": 4,
+   "rows": 3,
+   "demo": true,
+   "key": "D.guidance.items.opening.when"
+  },
+  {
+   "id": "gd:f:opening:only",
+   "title": "Only if· on the wall",
+   "depth": 4,
+   "rows": 9,
+   "demo": true,
+   "key": "D.guidance.items.opening.screen"
+  },
+  {
+   "id": "gd:f:opening:much",
+   "title": "How much· importance 5 · Essential · once a visit",
+   "depth": 4,
+   "rows": 10,
+   "demo": true,
+   "key": "D.guidance.items.opening.importance"
+  },
+  {
+   "id": "gd:i:tapmarker",
+   "title": "⋮⋮OnOffTap a markerat most about every 25 s, up to 3 times a visit, until the vi",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:tapmarker:identity",
+   "title": "Identity· Tap a marker · in App › The start",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.tapmarker.group"
+  },
+  {
+   "id": "gd:f:tapmarker:says",
+   "title": "Says· 1 line · a bubble",
+   "depth": 4,
+   "rows": 4,
+   "demo": true,
+   "key": "D.guidance.items.tapmarker.spoken"
+  },
+  {
+   "id": "gd:f:tapmarker:about",
+   "title": "About· The nearest marker · on the screen first",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.tapmarker.about"
+  },
+  {
+   "id": "gd:f:tapmarker:show",
+   "title": "Show· Tip · The mascot: beside it · focus: ring",
+   "depth": 4,
+   "rows": 6,
+   "demo": true,
+   "key": "D.guidance.items.tapmarker.form"
+  },
+  {
+   "id": "gd:f:tapmarker:when",
+   "title": "When· at a pause",
+   "depth": 4,
+   "rows": 3,
+   "demo": true,
+   "key": "D.guidance.items.tapmarker.when"
+  },
+  {
+   "id": "gd:f:tapmarker:only",
+   "title": "Only if· on the wall · the phone still 1.2 s",
+   "depth": 4,
+   "rows": 9,
+   "demo": true,
+   "key": "D.guidance.items.tapmarker.screen"
+  },
+  {
+   "id": "gd:f:tapmarker:much",
+   "title": "How much· importance 4 · until done, at most n a visit · done when the visitor o",
+   "depth": 4,
+   "rows": 12,
+   "demo": true,
+   "key": "D.guidance.items.tapmarker.importance"
+  },
+  {
+   "id": "gd:f:tapmarker:try",
+   "title": "Things to try· row 1 of 8: “Open a card”",
+   "depth": 4,
+   "rows": 1,
+   "demo": true,
+   "key": "D.guidance.items.tapmarker.inTry"
+  },
+  {
+   "id": "gd:g:wall",
+   "title": "The wall · each on its own",
+   "depth": 2,
+   "rows": 4,
+   "demo": true,
+   "key": "D.guidance.kinds.0.groups.1.on"
+  },
+  {
+   "id": "gd:i:askview",
+   "title": "⋮⋮OnOffAsk about the viewat most about every 90 s, up to 2 times a visit, until ",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:askview:identity",
+   "title": "Identity· Ask about the view · in App › The wall",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.askview.group"
+  },
+  {
+   "id": "gd:f:askview:says",
+   "title": "Says· 1 line · a bubble",
+   "depth": 4,
+   "rows": 4,
+   "demo": true,
+   "key": "D.guidance.items.askview.spoken"
+  },
+  {
+   "id": "gd:f:askview:about",
+   "title": "About· The ✦ · on the screen first",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.askview.about"
+  },
+  {
+   "id": "gd:f:askview:show",
+   "title": "Show· Tip · The mascot: stays · focus: ring",
+   "depth": 4,
+   "rows": 6,
+   "demo": true,
+   "key": "D.guidance.items.askview.form"
+  },
+  {
+   "id": "gd:f:askview:when",
+   "title": "When· at a pause",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.askview.when"
+  },
+  {
+   "id": "gd:f:askview:only",
+   "title": "Only if· on the wall · from 1:00",
+   "depth": 4,
+   "rows": 9,
+   "demo": true,
+   "key": "D.guidance.items.askview.screen"
+  },
+  {
+   "id": "gd:f:askview:much",
+   "title": "How much· importance 3 · up to n a visit · done when the visitor opened Ask abou",
+   "depth": 4,
+   "rows": 12,
+   "demo": true,
+   "key": "D.guidance.items.askview.importance"
+  },
+  {
+   "id": "gd:f:askview:try",
+   "title": "Things to try· row 2 of 8: “Ask about the view”",
+   "depth": 4,
+   "rows": 1,
+   "demo": true,
+   "key": "D.guidance.items.askview.inTry"
+  },
+  {
+   "id": "gd:i:gbhint",
+   "title": "⋮⋮OnOffThe ✦once a visit, until the visitor opens the ✦ menu▸ Show now",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:gbhint:identity",
+   "title": "Identity· The ✦ · in App › The wall",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.gbhint.group"
+  },
+  {
+   "id": "gd:f:gbhint:says",
+   "title": "Says· 1 line · a bubble",
+   "depth": 4,
+   "rows": 4,
+   "demo": true,
+   "key": "D.guidance.items.gbhint.spoken"
+  },
+  {
+   "id": "gd:f:gbhint:about",
+   "title": "About· The ✦ · on the screen first",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.gbhint.about"
+  },
+  {
+   "id": "gd:f:gbhint:show",
+   "title": "Show· Tip · The mascot: stays · focus: none",
+   "depth": 4,
+   "rows": 6,
+   "demo": true,
+   "key": "D.guidance.items.gbhint.form"
+  },
+  {
+   "id": "gd:f:gbhint:when",
+   "title": "When· after 4 pokes or after 25 s idle",
+   "depth": 4,
+   "rows": 5,
+   "demo": true,
+   "key": "D.guidance.items.gbhint.when"
+  },
+  {
+   "id": "gd:f:gbhint:only",
+   "title": "Only if· on the wall or a card · not on Solemn points · Lively only",
+   "depth": 4,
+   "rows": 9,
+   "demo": true,
+   "key": "D.guidance.items.gbhint.screen"
+  },
+  {
+   "id": "gd:f:gbhint:much",
+   "title": "How much· importance 3 · once a visit · done when the visitor opened the ✦ menu",
+   "depth": 4,
+   "rows": 10,
+   "demo": true,
+   "key": "D.guidance.items.gbhint.importance"
+  },
+  {
+   "id": "gd:f:gbhint:try",
+   "title": "Things to try· row 3 of 8: “Open the ✦ menu”",
+   "depth": 4,
+   "rows": 1,
+   "demo": true,
+   "key": "D.guidance.items.gbhint.inTry"
+  },
+  {
+   "id": "gd:g:card",
+   "title": "The card (cues) · the card's hints, one cue each: motion on the element, no masc",
+   "depth": 2,
+   "rows": 4,
+   "demo": true,
+   "key": "D.guidance.kinds.0.groups.2.on"
+  },
+  {
+   "id": "gd:i:nudge",
+   "title": "⋮⋮OnOffGrabber nudgeCUEonce a visit, until the visitor has seen it in How to use",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:nudge:identity",
+   "title": "Identity· Grabber nudge · a cue of The card (cues)",
+   "depth": 4,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:nudge:much",
+   "title": "How often· once a visit, until the visitor has seen it in How to use the card",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.nudge.shows"
+  },
+  {
+   "id": "gd:i:label",
+   "title": "⋮⋮OnOffLocate labelCUEonce a visit, until the visitor has seen it in How to use ",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:label:identity",
+   "title": "Identity· Locate label · a cue of The card (cues)",
+   "depth": 4,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:label:much",
+   "title": "How often· once a visit, until the visitor has seen it in How to use the card",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.label.shows"
+  },
+  {
+   "id": "gd:f:label:try",
+   "title": "Things to try· row 4 of 8: “Find it on the wall”",
+   "depth": 4,
+   "rows": 1,
+   "demo": true,
+   "key": "D.guidance.items.label.inTry"
+  },
+  {
+   "id": "gd:i:navbar",
+   "title": "⋮⋮OnOffNavigation BarCUEonce a visit, until the visitor has seen it in How to us",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:navbar:identity",
+   "title": "Identity· Navigation Bar · a cue of The card (cues)",
+   "depth": 4,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:navbar:says",
+   "title": "Says· its words over the bar",
+   "depth": 4,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:navbar:much",
+   "title": "How often· once a visit, until the visitor has seen it in How to use the card",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.navbar.shows"
+  },
+  {
+   "id": "gd:f:navbar:try",
+   "title": "Things to try· row 5 of 8: “Jump to a part”",
+   "depth": 4,
+   "rows": 1,
+   "demo": true,
+   "key": "D.guidance.items.navbar.inTry"
+  },
+  {
+   "id": "gd:i:ba",
+   "title": "⋮⋮OnOffBefore / AfterCUEonce a visit▸ Show now",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:ba:identity",
+   "title": "Identity· Before / After · a cue of The card (cues)",
+   "depth": 4,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:ba:much",
+   "title": "How often· once a visit",
+   "depth": 4,
+   "rows": 3,
+   "demo": true,
+   "key": "D.guidance.items.ba.shows"
+  },
+  {
+   "id": "gd:f:ba:try",
+   "title": "Things to try· row 6 of 8: “Drag Before / After”",
+   "depth": 4,
+   "rows": 1,
+   "demo": true,
+   "key": "D.guidance.items.ba.inTry"
+  },
+  {
+   "id": "gd:i:strip",
+   "title": "⋮⋮OnOffSwipe stripsCUEonce a visit▸ Show now",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:strip:identity",
+   "title": "Identity· Swipe strips · a cue of The card (cues)",
+   "depth": 4,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:strip:much",
+   "title": "How often· once a visit",
+   "depth": 4,
+   "rows": 3,
+   "demo": true,
+   "key": "D.guidance.items.strip.shows"
+  },
+  {
+   "id": "gd:f:strip:try",
+   "title": "Things to try· row 7 of 8: “Swipe the strips”",
+   "depth": 4,
+   "rows": 1,
+   "demo": true,
+   "key": "D.guidance.items.strip.inTry"
+  },
+  {
+   "id": "gd:i:term",
+   "title": "⋮⋮OnOffUnderlined wordsCUEonce a visit▸ Show now",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:term:identity",
+   "title": "Identity· Underlined words · a cue of The card (cues)",
+   "depth": 4,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:term:much",
+   "title": "How often· once a visit",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.term.shows"
+  },
+  {
+   "id": "gd:g:guide",
+   "title": "The guide · pulled only: Things to try and Ask the mascot's how do I…",
+   "depth": 2,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:i:pause",
+   "title": "⋮⋮Pause the guidePULLpulled only: Things to try and Ask the mascot's how do I…▸ ",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:pause:identity",
+   "title": "Identity· Pause the guide · pulled only",
+   "depth": 4,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:pause:says",
+   "title": "Says· its row in Things to try and Ask the mascot's answer",
+   "depth": 4,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:pause:try",
+   "title": "Things to try· row 8 of 8: “Pause the guide”",
+   "depth": 4,
+   "rows": 1,
+   "demo": true,
+   "key": "D.guidance.items.pause.inTry"
+  },
+  {
+   "id": "gd:content",
+   "title": "Content · what is here and what next: spoken once the guide has been heard",
+   "depth": 1,
+   "rows": 3,
+   "demo": true,
+   "key": "D.guidance.kinds.1.on"
+  },
+  {
+   "id": "gd:g:inview",
+   "title": "What's in view · one item a point of the wall: the mascot's remarks",
+   "depth": 2,
+   "rows": 4,
+   "demo": true,
+   "key": "D.guidance.kinds.1.groups.0.on"
+  },
+  {
+   "id": "gd:i:inview",
+   "title": "⋮⋮OnOff{point} in the middleonce a visit for each point▸ Show now",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:inview:identity",
+   "title": "Identity· {point} in the middle · in Content › What's in view",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.inview.group"
+  },
+  {
+   "id": "gd:f:inview:says",
+   "title": "Says· 3 lines, in turn · a card's own line · spoken once the guide is heard",
+   "depth": 4,
+   "rows": 5,
+   "demo": true,
+   "key": "D.guidance.items.inview.cardLine"
+  },
+  {
+   "id": "gd:f:inview:about",
+   "title": "About· its point, in the middle",
+   "depth": 4,
+   "rows": 1,
+   "demo": true,
+   "key": "D.guidance.items.inview.mustSee"
+  },
+  {
+   "id": "gd:f:inview:show",
+   "title": "Show· Remark · The mascot: beside it · focus: none",
+   "depth": 4,
+   "rows": 6,
+   "demo": true,
+   "key": "D.guidance.items.inview.form"
+  },
+  {
+   "id": "gd:f:inview:when",
+   "title": "When· when its target settles",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.inview.when"
+  },
+  {
+   "id": "gd:f:inview:only",
+   "title": "Only if· on the wall · the phone still 1.2 s",
+   "depth": 4,
+   "rows": 9,
+   "demo": true,
+   "key": "D.guidance.items.inview.screen"
+  },
+  {
+   "id": "gd:f:inview:much",
+   "title": "How much· importance 2 · once a visit",
+   "depth": 4,
+   "rows": 10,
+   "demo": true,
+   "key": "D.guidance.items.inview.importance"
+  },
+  {
+   "id": "gd:g:tours",
+   "title": "Tours · each on its own",
+   "depth": 2,
+   "rows": 4,
+   "demo": true,
+   "key": "D.guidance.kinds.1.groups.1.on"
+  },
+  {
+   "id": "gd:i:tourof",
+   "title": "⋮⋮OnOffA tour of {point}once a visit, until the visitor hears a step of a tour▸ ",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:tourof:identity",
+   "title": "Identity· A tour of {point} · in Content › Tours",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.tourof.group"
+  },
+  {
+   "id": "gd:f:tourof:says",
+   "title": "Says· 1 line · spoken once the guide is heard",
+   "depth": 4,
+   "rows": 4,
+   "demo": true,
+   "key": "D.guidance.items.tourof.spoken"
+  },
+  {
+   "id": "gd:f:tourof:about",
+   "title": "About· The point in the middle (with a tour) · on the screen first",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.tourof.about"
+  },
+  {
+   "id": "gd:f:tourof:show",
+   "title": "Show· Invitation · The mascot: beside it · focus: none",
+   "depth": 4,
+   "rows": 6,
+   "demo": true,
+   "key": "D.guidance.items.tourof.form"
+  },
+  {
+   "id": "gd:f:tourof:when",
+   "title": "When· at a pause",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.tourof.when"
+  },
+  {
+   "id": "gd:f:tourof:only",
+   "title": "Only if· on the wall · the phone still 1.2 s",
+   "depth": 4,
+   "rows": 9,
+   "demo": true,
+   "key": "D.guidance.items.tourof.screen"
+  },
+  {
+   "id": "gd:f:tourof:much",
+   "title": "How much· importance 3 · once a visit · done when a step of the tour was heard",
+   "depth": 4,
+   "rows": 10,
+   "demo": true,
+   "key": "D.guidance.items.tourof.importance"
+  },
+  {
+   "id": "gd:fun",
+   "title": "Fun · play: a joke, each point's joke, the treasure hunt, a seasonal line; never",
+   "depth": 1,
+   "rows": 3,
+   "demo": true,
+   "key": "D.guidance.kinds.2.on"
+  },
+  {
+   "id": "gd:g:play",
+   "title": "Play · a joke, each point's joke, the treasure hunt, a seasonal line",
+   "depth": 2,
+   "rows": 4,
+   "demo": true,
+   "key": "D.guidance.kinds.2.groups.1.on"
+  },
+  {
+   "id": "gd:i:joke",
+   "title": "⋮⋮OnOffA jokeevery 3 pokes on the mascot, or once at a pause late▸ Show now",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:joke:identity",
+   "title": "Identity· A joke · in Fun › Play",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.joke.group"
+  },
+  {
+   "id": "gd:f:joke:says",
+   "title": "Says· 3 lines, the least seen · a bubble",
+   "depth": 4,
+   "rows": 4,
+   "demo": true,
+   "key": "D.guidance.items.joke.spoken"
+  },
+  {
+   "id": "gd:f:joke:about",
+   "title": "About· Nothing",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.joke.about"
+  },
+  {
+   "id": "gd:f:joke:show",
+   "title": "Show· Tip · The mascot: stays · focus: none",
+   "depth": 4,
+   "rows": 5,
+   "demo": true,
+   "key": "D.guidance.items.joke.form"
+  },
+  {
+   "id": "gd:f:joke:when",
+   "title": "When· after 3 pokes or a late pause",
+   "depth": 4,
+   "rows": 5,
+   "demo": true,
+   "key": "D.guidance.items.joke.when"
+  },
+  {
+   "id": "gd:f:joke:only",
+   "title": "Only if· on the wall or a card · not on Solemn points (fixed for Fun) · Lively o",
+   "depth": 4,
+   "rows": 8,
+   "demo": true,
+   "key": "D.guidance.items.joke.screen"
+  },
+  {
+   "id": "gd:f:joke:much",
+   "title": "How much· importance 3 · every time (Again after only)",
+   "depth": 4,
+   "rows": 11,
+   "demo": true,
+   "key": "D.guidance.items.joke.importance"
+  },
+  {
+   "id": "gd:i:ptjoke",
+   "title": "⋮⋮OnOff{point}'s jokeonce a visit for each point▸ Show now",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:ptjoke:identity",
+   "title": "Identity· {point}'s joke · in Fun › Play",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.ptjoke.group"
+  },
+  {
+   "id": "gd:f:ptjoke:says",
+   "title": "Says· each point's own jokes · a card's own line · a bubble",
+   "depth": 4,
+   "rows": 3,
+   "demo": true,
+   "key": "D.guidance.items.ptjoke.cardLine"
+  },
+  {
+   "id": "gd:f:ptjoke:about",
+   "title": "About· its point, in the middle",
+   "depth": 4,
+   "rows": 1,
+   "demo": true,
+   "key": "D.guidance.items.ptjoke.mustSee"
+  },
+  {
+   "id": "gd:f:ptjoke:show",
+   "title": "Show· Tip · The mascot: beside it · focus: none",
+   "depth": 4,
+   "rows": 6,
+   "demo": true,
+   "key": "D.guidance.items.ptjoke.form"
+  },
+  {
+   "id": "gd:f:ptjoke:when",
+   "title": "When· when its target settles",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.ptjoke.when"
+  },
+  {
+   "id": "gd:f:ptjoke:only",
+   "title": "Only if· on the wall · the phone still 1.2 s · not on Solemn points (fixed for F",
+   "depth": 4,
+   "rows": 8,
+   "demo": true,
+   "key": "D.guidance.items.ptjoke.screen"
+  },
+  {
+   "id": "gd:f:ptjoke:much",
+   "title": "How much· importance 2 · once a visit",
+   "depth": 4,
+   "rows": 10,
+   "demo": true,
+   "key": "D.guidance.items.ptjoke.importance"
+  },
+  {
+   "id": "gd:i:hunt",
+   "title": "⋮⋮OnOffTreasure hunt?once a visit, until the visitor finds a treasure▸ Show now",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:hunt:identity",
+   "title": "Identity· Treasure hunt? · in Fun › Play",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.hunt.group"
+  },
+  {
+   "id": "gd:f:hunt:says",
+   "title": "Says· 1 line · a bubble",
+   "depth": 4,
+   "rows": 4,
+   "demo": true,
+   "key": "D.guidance.items.hunt.spoken"
+  },
+  {
+   "id": "gd:f:hunt:about",
+   "title": "About· Nothing",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.hunt.about"
+  },
+  {
+   "id": "gd:f:hunt:show",
+   "title": "Show· Invitation · The mascot: stays · focus: none · a chip: Start the hunt",
+   "depth": 4,
+   "rows": 5,
+   "demo": true,
+   "key": "D.guidance.items.hunt.form"
+  },
+  {
+   "id": "gd:f:hunt:when",
+   "title": "When· at a pause",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.hunt.when"
+  },
+  {
+   "id": "gd:f:hunt:only",
+   "title": "Only if· on the wall · the audience is Family · has used: a card opened · not on",
+   "depth": 4,
+   "rows": 8,
+   "demo": true,
+   "key": "D.guidance.items.hunt.screen"
+  },
+  {
+   "id": "gd:f:hunt:much",
+   "title": "How much· importance 3 · once a visit · done when the visitor found the treasure",
+   "depth": 4,
+   "rows": 10,
+   "demo": true,
+   "key": "D.guidance.items.hunt.importance"
+  },
+  {
+   "id": "gd:i:season",
+   "title": "⋮⋮OnOffSeasonalonce a visit▸ Show now",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:season:identity",
+   "title": "Identity· Seasonal · in Fun › Play",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.season.group"
+  },
+  {
+   "id": "gd:f:season:says",
+   "title": "Says· 3 lines by date · a bubble",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.season.seasons.0.from"
+  },
+  {
+   "id": "gd:f:season:about",
+   "title": "About· Nothing",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.season.about"
+  },
+  {
+   "id": "gd:f:season:show",
+   "title": "Show· Tip · The mascot: stays · focus: none",
+   "depth": 4,
+   "rows": 5,
+   "demo": true,
+   "key": "D.guidance.items.season.form"
+  },
+  {
+   "id": "gd:f:season:when",
+   "title": "When· at a pause",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.season.when"
+  },
+  {
+   "id": "gd:f:season:only",
+   "title": "Only if· on the wall · not on Solemn points (fixed for Fun) · in its window of d",
+   "depth": 4,
+   "rows": 8,
+   "demo": true,
+   "key": "D.guidance.items.season.screen"
+  },
+  {
+   "id": "gd:f:season:much",
+   "title": "How much· importance 2 · once a visit",
+   "depth": 4,
+   "rows": 10,
+   "demo": true,
+   "key": "D.guidance.items.season.importance"
+  },
+  {
+   "id": "gd:seq",
+   "title": "Sequences · in order: How to use the card, the first pages",
+   "depth": 1,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:g:howto",
+   "title": "How to use the card · a walkthrough, in order, pulled only",
+   "depth": 2,
+   "rows": 3,
+   "demo": true,
+   "key": "D.guidance.kinds.0.groups.3.on"
+  },
+  {
+   "id": "gd:i:wk_grab",
+   "title": "⋮⋮OnOffThe grabberpulled only: never on its own▸ Show now",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:wk_grab:identity",
+   "title": "Identity· The grabber · a step of How to use the card",
+   "depth": 4,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:wk_grab:says",
+   "title": "Says· its line in the walkthrough",
+   "depth": 4,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:wk_grab:show",
+   "title": "Show· focus: as the tour's Focus",
+   "depth": 4,
+   "rows": 1,
+   "demo": true,
+   "key": "D.guidance.items.wk_grab.focus"
+  },
+  {
+   "id": "gd:i:wk_settings",
+   "title": "⋮⋮OnOffThe settings markpulled only: never on its own▸ Show now",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:wk_settings:identity",
+   "title": "Identity· The settings mark · a step of How to use the card",
+   "depth": 4,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:wk_settings:says",
+   "title": "Says· its line in the walkthrough",
+   "depth": 4,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:wk_settings:show",
+   "title": "Show· focus: as the tour's Focus",
+   "depth": 4,
+   "rows": 1,
+   "demo": true,
+   "key": "D.guidance.items.wk_settings.focus"
+  },
+  {
+   "id": "gd:i:wk_bar",
+   "title": "⋮⋮OnOffThe Navigation Barpulled only: never on its own▸ Show now",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:wk_bar:identity",
+   "title": "Identity· The Navigation Bar · a step of How to use the card",
+   "depth": 4,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:wk_bar:says",
+   "title": "Says· its line in the walkthrough",
+   "depth": 4,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:wk_bar:show",
+   "title": "Show· focus: as the tour's Focus",
+   "depth": 4,
+   "rows": 1,
+   "demo": true,
+   "key": "D.guidance.items.wk_bar.focus"
+  },
+  {
+   "id": "gd:i:wk_locate",
+   "title": "⋮⋮OnOffThe Locate Buttonpulled only: never on its own▸ Show now",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:wk_locate:identity",
+   "title": "Identity· The Locate Button · a step of How to use the card",
+   "depth": 4,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:wk_locate:says",
+   "title": "Says· its line in the walkthrough",
+   "depth": 4,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:wk_locate:show",
+   "title": "Show· focus: as the tour's Focus",
+   "depth": 4,
+   "rows": 1,
+   "demo": true,
+   "key": "D.guidance.items.wk_locate.focus"
+  },
+  {
+   "id": "gd:i:wk_block",
+   "title": "⋮⋮OnOffA block and its pagepulled only: never on its own▸ Show now",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:wk_block:identity",
+   "title": "Identity· A block and its page · a step of How to use the card",
+   "depth": 4,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:wk_block:says",
+   "title": "Says· its line in the walkthrough",
+   "depth": 4,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:wk_block:show",
+   "title": "Show· focus: as the tour's Focus",
+   "depth": 4,
+   "rows": 1,
+   "demo": true,
+   "key": "D.guidance.items.wk_block.focus"
+  },
+  {
+   "id": "gd:g:pages",
+   "title": "First pages · the app's first run: Hello, Who's exploring, the camera, then the ",
+   "depth": 2,
+   "rows": 1,
+   "demo": true,
+   "key": "D.guidance.kinds.0.groups.4.on"
+  },
+  {
+   "id": "gd:i:pg_hello",
+   "title": "⋮⋮OnOffHelloPAGEpage 1 of 2 · about 5 s▸ Show now",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:pg_hello:identity",
+   "title": "Identity· Hello · first",
+   "depth": 4,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:pg_hello:says",
+   "title": "Says· its title, line and buttons, EN | PT",
+   "depth": 4,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:pg_hello:show",
+   "title": "Show· a page · The mascot: forms from a tile and waves · the language chip",
+   "depth": 4,
+   "rows": 2,
+   "demo": true,
+   "key": "D.guidance.items.pg_hello.azu"
+  },
+  {
+   "id": "gd:i:pg_aud",
+   "title": "⋮⋮OnOffWho's exploringPAGEnot asked here (Where to ask)▸ Show now",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:pg_aud:identity",
+   "title": "Identity· Who's exploring · between Hello and Straight to the wall",
+   "depth": 4,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:pg_aud:when",
+   "title": "When· at the app's start, a first run only",
+   "depth": 4,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:i:pg_camera",
+   "title": "⋮⋮OnOffThe cameraPAGEpage 2 of 2 · about 9.3 s▸ Show now",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:pg_camera:identity",
+   "title": "Identity· The camera · between Hello and Straight to the wall",
+   "depth": 4,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:pg_camera:says",
+   "title": "Says· its title, line and buttons, EN | PT",
+   "depth": 4,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:i:pg_wall",
+   "title": "⋮⋮OnOffStraight to the wallTHE WALLits short line opens the wall▸ Show now",
+   "depth": 3,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:pg_wall:identity",
+   "title": "Identity· Straight to the wall · last",
+   "depth": 4,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:f:pg_wall:says",
+   "title": "Says· its title, line and buttons, EN | PT",
+   "depth": 4,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gt3",
+   "title": "5 · Ask the mascot · the visitor's questions: what the visitor sees, what the ma",
+   "depth": 0,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "s7ask",
+   "title": "What the visitor sees · the question box, Ask about the view, the answers and ho",
+   "depth": 1,
+   "rows": 5,
+   "demo": true,
+   "key": "D.guide.ask"
+  },
+  {
+   "id": "s7cam",
+   "title": "Ask about the view · on the wall, with no card open: questions about the points ",
+   "depth": 2,
+   "rows": 5,
+   "demo": true,
+   "key": "D.wall.camCfg.on"
+  },
+  {
+   "id": "gt:know",
+   "title": "Knowledge · what the mascot answers from, and what it may do in the app",
+   "depth": 1,
+   "rows": 7,
+   "demo": true,
+   "key": "D.agent.ctx"
+  },
+  {
+   "id": "s7agent",
+   "title": "The engine · the model, its key, its limits and the test console (for the develo",
+   "depth": 1,
+   "rows": 13,
+   "demo": true,
+   "key": "D.agent.provider"
+  },
+  {
+   "id": "gt0",
+   "title": "6 · Preview & Test · Editor tools, never in the app: start the app, the visitor,",
+   "depth": 0,
+   "rows": 11,
+   "demo": true,
+   "key": "LAB.gdLaunch"
+  },
+  {
+   "id": "gd:visitor",
+   "title": "Details · the visits, the features used, the learning, each item's memory",
+   "depth": 1,
+   "rows": 2,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "gd:sim",
+   "title": "Simulate a visit · a scripted visitor, 0-20 min, the real schedulerNEW",
+   "depth": 1,
+   "rows": 2,
+   "demo": true,
+   "key": "ui.gdSim"
+  },
+  {
+   "id": "s7vtest",
+   "title": "Voice test · a blind test: the same line in each voice, unnamed, scored, then th",
+   "depth": 1,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  }
+ ],
+ "marker": [
+  {
+   "id": "m0",
+   "title": "0 · Sections on this cardNEW",
+   "depth": 0,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "mcard",
+   "title": "1 · The card · blocks and previewsNEW",
+   "depth": 0,
+   "rows": 10,
+   "demo": true,
+   "key": "m.starter"
+  },
+  {
+   "id": "mpages",
+   "title": "2 · Pages · each block's contentNEW",
+   "depth": 0,
+   "rows": 1,
+   "demo": true,
+   "key": "m.page"
+  },
+  {
+   "id": "pg:story",
+   "title": "Story · Two hundred and fifty years by the riverEXTENDED",
+   "depth": 1,
+   "rows": 10,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "m3",
+   "title": "3 · Guide scriptNEW",
+   "depth": 0,
+   "rows": 9,
+   "demo": true,
+   "key": "D.poi.solemn"
+  },
+  {
+   "id": "m4",
+   "title": "4 · AudiencesNEW",
+   "depth": 0,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "m5",
+   "title": "5 · LensesNEW",
+   "depth": 0,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  }
+ ],
+ "words": [
+  {
+   "id": "w1",
+   "title": "1 · Languages · the wall's languages, for every textEXTENDED",
+   "depth": 0,
+   "rows": 2,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "w2",
+   "title": "2 · Terms · the glossary and the search's synonyms, one listNEW",
+   "depth": 0,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "w3",
+   "title": "3 · Texts check · every text of the wall in one list, for translatorsNEW",
+   "depth": 0,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  }
+ ],
+ "global": [
+  {
+   "id": "g:0",
+   "title": "Labels, Text & Fonts · the marker labels' words, sizes and fontsEXISTING",
+   "depth": 0,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "g:1",
+   "title": "Marker · shape, icon and the category tableEXISTING",
+   "depth": 0,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "g:2",
+   "title": "Orientation · how markers, labels and badges face the cameraEXISTING",
+   "depth": 0,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "g:3",
+   "title": "Badge · the second sign on a marker, and its tableEXISTING",
+   "depth": 0,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "g:4",
+   "title": "Outline · the ring around a marker, and its levelsEXISTING",
+   "depth": 0,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "g:5",
+   "title": "Effects · glow, pulse and the other marker effects, with their Test gridEXISTING",
+   "depth": 0,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "g:6",
+   "title": "Hierarchy Levels · what shows at each level of the wallEXISTING",
+   "depth": 0,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "g:7",
+   "title": "LOD · how much detail shows with the distanceEXISTING",
+   "depth": 0,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "g:8",
+   "title": "Zoom · how far the visitor zooms, and its stepsEXISTING",
+   "depth": 0,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "g:9",
+   "title": "Displacement · how labels make room for each otherEXISTING",
+   "depth": 0,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "g:10",
+   "title": "Select, Filter & Search · selection, search, filters, results, minimap, voice, k",
+   "depth": 0,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "g:10s",
+   "title": "Search box · where the visitor types a search",
+   "depth": 1,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "g:10f",
+   "title": "Filters button · opens the filters, with how many are on",
+   "depth": 1,
+   "rows": 0,
+   "demo": false,
+   "key": null
+  },
+  {
+   "id": "g:11",
+   "title": "Onboarding hints · the first-use hints over the wall, now said by the guide1 row",
+   "depth": 0,
+   "rows": 1,
+   "demo": false,
+   "key": null
+  }
+ ]
+}

@@ -85,3 +85,5 @@ on("cardScreen.html",function(h){var lay=D.card.cardCfg.layout;if(lay==="scroll"
     var head=document.createElement("button");head.type="button";head.className="lt-acc";head.dataset.accsec=id;head.setAttribute("aria-expanded",String(open));head.innerHTML=ey?ey.outerHTML+'<em>'+(open?"&#8722;":"+")+'</em>':id;if(ey)ey.remove();
     x.insertBefore(head,x.firstChild);if(!open)Array.prototype.slice.call(x.children,1).forEach(function(c){c.style.display="none"})});
   return d.innerHTML});
+
+screenDef("card",{name:"The wall, with the card sheet over it",draw:cardScreen});

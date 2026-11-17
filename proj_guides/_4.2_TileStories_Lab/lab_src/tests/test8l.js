@@ -46,13 +46,13 @@ const url = labUrl('#probe');
   await R('stopTour()');
   ok('After the tour the script is whole again (for the Editor)', await R('D.tour.guideSteps.length') === 12);
   // 5. the visitor's Settings: Audience and Length
-  await R('P.vis.aud="explorer";P.vis.len="";ui.view="card";ui.settingsOpen=true;renderAll(false)'); await p.waitForTimeout(300);
+  await R('P.vis.aud="explorer";P.vis.len="";ui.view="card";setOverlay("settings",true);renderAll(false)'); await p.waitForTimeout(300);
   ok('Settings: Who\'s exploring and Length, with their words', await R('var v=ph.querySelector(".vset");!!v&&v.textContent.indexOf(TXT("settings_aud"))>=0&&v.textContent.indexOf(TXT("settings_len"))>=0&&!!v.querySelector(\'[data-vis="aud|family"]\')'));
   await p.locator('#ph [data-vis="aud|family"]').first().click(); await p.waitForTimeout(300);
   ok('...a tap on Family changes the card', await R('P.vis.aud==="family"&&ph.dataset.corners==="round"'));
   await p.locator('#ph [data-vis="len|deep"]').first().click(); await p.waitForTimeout(300);
   ok('...and Length can differ from the audience\'s own', await R('lenNow()') === 'deep');
-  await R('ui.settingsOpen=false;P.vis.aud="explorer";P.vis.len="";renderAll(false)');
+  await R('setOverlay("settings",false);P.vis.aud="explorer";P.vis.len="";renderAll(false)');
   // 6. the first card: one screen, three choices, Skip = Explorer
   await R('D.wall.aud.seen=false;ui.view="card";ui.stop="half";renderPhone(false)'); await p.waitForTimeout(500);
   ok('The first card asks: one screen, three choices and Skip', await R('var o=ph.querySelector(".onb");!!o&&o.querySelectorAll("[data-onb]").length===4&&o.textContent.indexOf(TXT("aud_title"))>=0'));

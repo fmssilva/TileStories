@@ -79,11 +79,11 @@ function agName(t){return AGNAME[t]?L(AGNAME[t]):String(t).replace(/^Story · /,
 function agTargets(){var t=corpus().map(function(c){return{id:c.ref,title:agName(c.title),kind:c.view==="story"?"story page":"block"}});
   D.wall.wallPois.forEach(function(p){t.push({id:"poi:"+p.id,title:L(p.name),kind:p.card?"point with a card":"point on the wall"})});return t}
 function agTitle(id){var t=agTargets().filter(function(x){return x.id===id})[0];return t?t.title:id}
-function agGo(id){if(id==="story"){ui.view="story";ui.stop="full";renderPhone(false);return"Shown: the story"}
+function agGo(id){if(id==="story"){goScreen("story",{stop:"full"});renderPhone(false);return"Shown: the story"}
   if(id.indexOf("poi:")===0){var p=D.wall.wallPois.filter(function(x){return x.id===id.slice(4)})[0];if(!p)throw new Error("unknown point "+id);
-    if(p.card&&agWhere()==="wall"){G.cam.open=false;ui.stop="half";renderPhone(false);return"Opened the card of "+L(p.name)}
-    if(agWhere()!=="wall"){ui.view="card";ui.stop="closed";renderPhone(false)}agCenter(p.id);if(G.cam.lit.indexOf(p.id)<0)camLight([p.id]);return"Centred on "+L(p.name)}
-  if(ui.view==="card"&&ui.stop==="closed"){G.cam.open=false;ui.stop="full";renderPhone(false)}return goTo(id)}
+    if(p.card&&agWhere()==="wall"){setOverlay("ask",false);sheetTo("half");renderPhone(false);return"Opened the card of "+L(p.name)}
+    if(agWhere()!=="wall"){goScreen("card",{stop:"closed"});renderPhone(false)}agCenter(p.id);if(G.cam.lit.indexOf(p.id)<0)camLight([p.id]);return"Centred on "+L(p.name)}
+  if(ui.view==="card"&&ui.stop==="closed"){setOverlay("ask",false);sheetTo("full");renderPhone(false)}return goTo(id)}
 /* the camera turns to a point: the pan that puts it in the middle (the phone moves in the app; the Lab pans the picture) */
 function agCenter(id){var p=D.wall.wallPois.filter(function(x){return x.id===id})[0];if(!p)return;var g=camGeom();
   if(g.dw>g.W)ui.camX=Math.max(0,Math.min(1,(g.W/2-p.u*g.dw)/(g.W-g.dw)));if(g.dh>g.H)ui.camY=Math.max(0,Math.min(1,(g.H*.45-p.v*g.dh)/(g.H-g.dh)));camPaint();camLayer()}
@@ -118,8 +118,8 @@ on("ask.answer",function(q){if(!q||!q.trim()||!agLive())return;
     done:function(t,turn){t=pipe("answer.text",t,q);G.busy=false;if(!t&&!turn.links.length&&!turn.chips.length){renderGuide();return}G.answer=t;G.agTurn=turn;emit("ask.after",t,turn);renderGuide();if(t&&D.agent.voiceOut)say(t,function(){},function(){})},
     fail:function(code,turn){G.busy=false;G.askFound="";var t=pipe("answer.text",agNote(code)+searchAnswer(q),q);G.answer=t;G.agTurn=null;emit("ask.after",t);renderGuide();if(D.agent.voiceOut)say(t,function(){},function(){})}});return true});
 /* the wall: Ask about the view, with the same manifest (scripted only answers from the view, without a model) */
-on("camAsk.answer",function(q,kind){if(kind||!sampleFn)return;if(D.guide.ask!=="ai"&&sampleFn===AG.fn){G.cam.open=true;camLayer();camSay(camOffline("what"));return true}if(!agLive())return;
-  G.cam.open=true;G.cam.busy=true;G.cam.route=[];G.cam.lit=[];G.cam.hunt=null;G.cam.turn=null;camLayer();
+on("camAsk.answer",function(q,kind){if(kind||!sampleFn)return;if(D.guide.ask!=="ai"&&sampleFn===AG.fn){setOverlay("ask",true);camLayer();camSay(camOffline("what"));return true}if(!agLive())return;
+  setOverlay("ask",true);G.cam.busy=true;G.cam.route=[];G.cam.lit=[];G.cam.hunt=null;G.cam.turn=null;camLayer();
   agentAsk(q,"wall",{start:function(){},text:function(t){G.cam.busy=false;G.cam.answer=t;var e=ph.querySelector(".ca-ans");if(e)e.textContent=t},
     done:function(t,turn){G.cam.turn=turn;if(D.agent.voiceOut)camSay(t);else{G.cam.busy=false;G.cam.answer=t;camLayer()}},
     fail:function(code){G.cam.turn=null;camSay(agNote(code)+camOffline("what"))}});return true});

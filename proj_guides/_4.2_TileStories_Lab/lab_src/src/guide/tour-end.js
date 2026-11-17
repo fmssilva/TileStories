@@ -141,7 +141,7 @@ function teSecHtml(id,poi){var c=teCfg();if(c.teSec&&c.teSec[id]===false)return"
 function tePanelHtml(poi){poi=poi||svPoi();return'<i class="te-grab" aria-hidden="true"></i>'+teHeadHtml(poi)+(teCfg().teOrder||[]).map(function(id){return teSecHtml(id,poi)}).join("")}
 function tePillHtml(){var face=D.guide.mascot!==false?'<span class="te-head-crop">'+mascotStill()+'</span>':GBSTAR;return'<button type="button" class="te-po" data-te="open" aria-label="'+TXH("te_title")+'"><span class="te-face">'+face+'</span><span class="te-pt">'+TXH("te_title")+'</span>'+TE_ICO.up+'</button><button type="button" class="te-x" data-te="done" aria-label="'+TXH("te_close")+'">'+TE_ICO.x+'</button>'}
 /* ----- drawing and placing ----- */
-function teShown(){return!!G.te.open&&!G.on&&(ui.view==="card"||ui.view==="story"&&G.te.mode==="paused")&&(ui.stop==="full"||ui.stop==="half")&&G.te.poi===svPoi()&&!ui.settingsOpen&&!ui.contentsOpen}
+function teShown(){return!!G.te.open&&!G.on&&(ui.view==="card"||ui.view==="story"&&G.te.mode==="paused")&&(ui.stop==="full"||ui.stop==="half")&&G.te.poi===svPoi()&&!overlayOn("settings")&&!overlayOn("contents")}
 function teDraw(){var want=teShown()?G.te.open:null,pn=ph.querySelector(".tepanel"),pl=ph.querySelector(".tepill");
   if(want!=="open"){if(pn)pn.remove();ph.querySelectorAll(".teazu,.tebub").forEach(function(x){x.remove()})}if(want!=="min"&&pl)pl.remove();
   if(!want){teInvDraw();if(G.te.pad){G.te.pad=false;scr.style.paddingBottom="";if(typeof fabLayer==="function")fabLayer()}return}
@@ -166,11 +166,11 @@ function tePlace(){var pn=ph.querySelector(".tepanel"),pl=ph.querySelector(".tep
 setInterval(function(){if(noDraw)return;if(G.te.open&&(ph.querySelector(".tepanel,.tepill")||teShown())){if(teShown()!==!!ph.querySelector(".tepanel,.tepill"))teDraw();else tePlace()}teInvPlace()},250);
 /* while the panel is open the ✦, Azu beside it and their band step aside (the panel has its own Azu; one focal point) */
 on("fabLayer.after",function(){/* the pill carries Azu's face: the Azu beside the ✦ steps aside (one Azu) */if(teShown()&&G.te.open==="min"){ph.querySelectorAll(".gbtn-wrap:not(.intour) .azfab").forEach(function(x){x.remove()});return}
-  if(!(teShown()&&G.te.open==="open"))return;ph.querySelectorAll(".gbtn-wrap:not(.intour),.gbband:not(.tour),.gbmenu").forEach(function(x){x.remove()});G.fab.menu=false;tePlace()});
+  if(!(teShown()&&G.te.open==="open"))return;ph.querySelectorAll(".gbtn-wrap:not(.intour),.gbband:not(.tour),.gbmenu").forEach(function(x){x.remove()});setOverlay("menu",false);tePlace()});
 on("renderPhone.after",function(){teDraw()});
 /* ----- opening, the two heights, closing ----- */
 function teSet(state){if(state&&!G.te.poi)return;var was=G.te.open;G.te.open=state||false;if(state&&!was)G.te.anim=true;if(state==="min"&&was==="open")G.te.anim=true;if(state==="open"&&was!=="open")G.te.anim=true;
-  if(state&&(ui.view!=="card"||ui.stop!=="full"&&ui.stop!=="half")){ui.view="card";ui.stop="full";renderPhone(false)}if(state!=="open")teBubFade();teDraw()}
+  if(state&&(ui.view!=="card"||ui.stop!=="full"&&ui.stop!=="half")){goScreen("card",{stop:"full"});renderPhone(false)}if(state!=="open")teBubFade();teDraw()}
 function teOffered(){return!!G.te.offer&&G.te.poi===svPoi()&&G.te.open!=="open"}
 function teClose(forget){G.te.open=false;if(forget)G.te.offer=false;teBubFade();teDraw()}
 /* round 17c (the developer): the Stop bar's What next? opens the same panel, paused: its header "Tour paused · step N of M" and "Continue the
@@ -178,7 +178,7 @@ function teClose(forget){G.te.open=false;if(forget)G.te.offer=false;teBubFade();
    from Azu (the visitor asked for it); the questions leave out only what the tour said so far */
 function tePausedOf(poi){return G.te.mode==="paused"&&G.te.poi===poi?(svOffer(poi)||G.te.pof):null}
 function teOpenPaused(){var poi=svPoi(),of=svOffer(poi);if(!of)return;G.te.mode="paused";G.te.pof=of;G.te.poi=poi;G.te.steps=svTour(poi).slice(0,of.n);G.te.len=tourMinutes(poi);G.te.quiz=teQuizNow(poi);
-  G.te.line=null;G.te.offer=true;G.te.open="open";G.te.anim=true;if(ui.view!=="story")ui.view="card";if(ui.stop!=="full"&&ui.stop!=="half")ui.stop="full";teDraw()}
+  G.te.line=null;G.te.offer=true;G.te.open="open";G.te.anim=true;if(ui.view!=="story")goScreen("card");if(ui.stop!=="full"&&ui.stop!=="half")sheetTo("full");teDraw()}
 /* the end: the line said, the tour stops, the card goes to its showcase, the panel rises and Azu asks (Off: Ask opens, as before) */
 on("tourEnd.answer",function(st){if(!teCfg().teOn)return;var poi=svPoi(),dk=G.te.demoKey;G.te.demoKey=null;
   G.te.steps=(D.tour.guideSteps||[]).slice();G.te.poi=poi;G.te.len=tourMinutes(poi);G.te.quiz=teQuizNow(poi);G.te.k=(G.te.ends[poi]=(G.te.ends[poi]||0)+1)-1;
@@ -212,7 +212,7 @@ function teAskEnter(){var poi=svPoi(),st=G.te.mode==="paused"?(svOffer(poi)||G.t
 /* Ask closed: the guide off (no step, no toast), the card where it was, the panel back */
 function teAskDrop(){G.te.askMode=false;G.keepScroll=false}
 function teAskLeave(){var b=G.te.askBack;teAskDrop();G.te.askBack=null;stopSpeech();G.on=false;G.paused=false;G.askOpen=false;G.typing=false;clearGuideMarks();renderGuide();if(typeof fabLayer==="function")fabLayer();
-  if(!b)return;if(ui.view!==b.view||ui.stop!==b.stop){ui.view=b.view;ui.stop=b.stop;renderPhone(false)}G.te.mode=b.mode;G.te.open=b.open;G.te.anim=false;teDraw();G.te.userScroll=false;
+  if(!b)return;if(ui.view!==b.view||ui.stop!==b.stop){goScreen(b.view,{stop:b.stop});renderPhone(false)}G.te.mode=b.mode;G.te.open=b.open;G.te.anim=false;teDraw();G.te.userScroll=false;
   /* the card back at its scroll, again once the guide's panel has gone and the page settled (unless the visitor scrolls meanwhile) */
   var put=function(){if(!G.te.userScroll&&!G.on)scr.scrollTop=b.top};put();requestAnimationFrame(put);setTimeout(put,250);setTimeout(put,600)}
 /* what closes it: the panel lowered to Mini or hidden; Stop; Play; Next; Previous (each would play the tour) */
@@ -234,9 +234,9 @@ function teFlyTarget(p){var wl=teWall(),z=Math.max(ui.camZoom,1.35),W=ph.offsetW
 function teFly(p,done){var a={x:ui.camX,y:ui.camY,z:ui.camZoom},b=teFlyTarget(p),tok=G.te.flyTok=(G.te.flyTok||0)+1;emit("phone.moved");
   var put=function(e){ui.camX=a.x+(b.x-a.x)*e;ui.camY=a.y+(b.y-a.y)*e;ui.camZoom=a.z+(b.z-a.z)*e;camPaint();camLayer()};
   if(P.reduce){put(1);done();return}var t0=performance.now();(function f(){if(G.te.flyTok!==tok)return;var u=Math.min(1,(performance.now()-t0)/TE_FLY_MS),e=u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2;put(e);if(u<1)requestAnimationFrame(f);else{emit("phone.moved");done()}})()}
-function teNearGo(id){var p=byId(teWall().pois||[],id);if(!p)return;teSet("min");G.te.inv=null;ui.view="card";ui.stop="closed";G.cam.open=false;G.fab.menu=false;if(LAB.wall!=="ribeira"){LAB.wall="ribeira";G.cam.lit=[];G.cam.route=[]}renderPhone(false);G.te.flying=id;
-  teFly(p,function(){G.te.flying=null;if(POINTS[id]){pointOpen(id);ui.view="card";ui.stop="half";renderPhone(false);emit("card.opened","What next? › Explore nearby");teInvite(id)}
-    else{G.cam.open=true;renderPhone(true);emit("view.opened","What next? › Explore nearby");camAsk("","what");camLight([id])}})}
+function teNearGo(id){var p=byId(teWall().pois||[],id);if(!p)return;teSet("min");G.te.inv=null;goScreen("card",{stop:"closed"});setOverlay("ask",false);setOverlay("menu",false);if(LAB.wall!=="ribeira"){LAB.wall="ribeira";G.cam.lit=[];G.cam.route=[]}renderPhone(false);G.te.flying=id;
+  teFly(p,function(){G.te.flying=null;if(POINTS[id]){pointOpen(id);goScreen("card",{stop:"half"});renderPhone(false);emit("card.opened","What next? › Explore nearby");teInvite(id)}
+    else{setOverlay("ask",true);renderPhone(true);emit("view.opened","What next? › Explore nearby");camAsk("","what");camLight([id])}})}
 /* its invitation: the words of Guide › Azu speaks up › Tours › A tour of {point} ("A short tour of the Torreão?"; a place kept: Continue the
    tour of …?), Azu beside it above the card, spoken; a tap starts (or continues) that tour */
 function teInvite(id){var it=typeof gdItems==="function"?gdItems().filter(function(x){return x.id==="tourof"})[0]:null;it=it||D.guidance&&D.guidance.items&&D.guidance.items.tourof;
@@ -248,7 +248,7 @@ function teInvDraw(){var o=ph.querySelector(".teinv");if(!teInvShown()){if(o)o.r
     '<button type="button" data-teinv="1">'+esc(G.te.inv.text)+'<span aria-hidden="true"> &#8250;</span></button>';o._t=G.te.inv.text;ph.appendChild(o)}teInvPlace()}
 function teInvPlace(){var o=ph.querySelector(".teinv");if(!o)return;if(!teInvShown()){teInvDraw();return}var s=tePR(scr);o.style.bottom=Math.round(ph.offsetHeight-s.t+10)+"px"}
 on("renderPhone.after",function(){teInvDraw()});
-function teInvGo(){var v=G.te.inv;if(!v)return;G.te.inv=null;teInvDraw();ui.view="card";if(v.cont&&typeof svContinue==="function")svContinue(v.id);else startTour()}
+function teInvGo(){var v=G.te.inv;if(!v)return;G.te.inv=null;teInvDraw();goScreen("card");if(v.cont&&typeof svContinue==="function")svContinue(v.id);else startTour()}
 
 /* ----- the Editor: Guide › 2 · The tour › The tour's end (after Ways in) ----- */
 function teRingSel(key){key=String(key||"");if(/teWhere|teBlock/.test(key)){var sc=G.te.sc||teShowcase();return sc.ref==="hero"?".hero":'[data-ref="'+sc.ref+'"]'}
@@ -256,7 +256,7 @@ function teRingSel(key){key=String(key||"");if(/teWhere|teBlock/.test(key)){var 
   if(/teSec\.act/.test(key))return".te-acts|.tepanel|.tepill";if(key==="asks")return".tebub|.teazu|.tepanel";if(/teStart/.test(key))return".tepill|.tepanel";return".tepanel|.tepill|.gdock|.gask"}
 /* each row's demo: the tour's last step played (its line said), then the end as configured, the part the row changes ringed */
 function teEndStep(){return(D.tour.guideSteps||[]).filter(function(s){return s.act==="end"&&!s.skip}).pop()||null}
-function teDemo(key,o){o=o||{};if(G.on)stopTour();var st=teEndStep();ui.view="card";ui.stop="full";ui.settingsOpen=false;P.introSeen=true;G.te.demoKey=key;G.te.lineForce=o.line||null;
+function teDemo(key,o){o=o||{};if(G.on)stopTour();var st=teEndStep();goScreen("card",{stop:"full"});setOverlay("settings",false);P.introSeen=true;G.te.demoKey=key;G.te.lineForce=o.line||null;
   if(!st){renderPhone(false);G.te.demoKey=null;if(typeof gdChip==="function"){gdChip("This tour has no end step (Specific Marker › 3 · Guide script: Does = The end)");clearTimeout(G.teChipT);G.teChipT=setTimeout(function(){gdChip(null)},3200)}return}
   renderPhone(false);G.demoTour=true;try{startTour({id:st.id})}finally{G.demoTour=false}}
 rowDemos(function(key){if(!/^D\.guide\.te[A-Z]/.test(key))return;return{act:function(){teDemo(key)},ringAfter:400,ring:function(){return G.te.open?teRingSel(key):".gdock|.gcap|.hero"}}});

@@ -23,7 +23,7 @@ const url = labUrl('#probe');
   // the set-up: the Ribeira wall, a first visit, the clock moved by hand (deterministic), the remarks and the ✦ hint resting
   const base = 'D.card.hints.on=false;LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;P.lang="en";LAB.rowDemo=false;D.guidance.items.gbhint.on=false;gdGroupById("inview").on=false;D.guide.gbtn="both";D.guide.mascot=true;' +
     'D.guidance.on=true;D.guidance.breathing=15;D.guidance.perMinute=2;D.guidance.perVisit=30;D.guidance.freshTau=120;D.guidance.learnIgnore=true;D.guidance.learnDismiss=true;D.guidance.fewer=true;D.guidance.remember=true;G.gd.demo=false;gdChip(null);';
-  const fresh = async (extra) => { await R(base + 'if(G.on)stopTour();G.cam.open=false;ui.settingsOpen=false;G.fab.menu=false;setWall("ribeira");ui.view="card";ui.stop="closed";renderPhone(false);G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;G.gd.onWall=false;' + (extra || '') + 'gdAdvance(250)'); await W(150); };
+  const fresh = async (extra) => { await R(base + 'if(G.on)stopTour();setOverlay("ask",false);setOverlay("settings",false);setOverlay("menu",false);setWall("ribeira");ui.view="card";ui.stop="closed";renderPhone(false);G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;G.gd.onWall=false;' + (extra || '') + 'gdAdvance(250)'); await W(150); };
   const cur = () => R('G.gd.cur?[G.gd.cur.item.id,Math.round(G.gd.cur.at),G.gd.cur.text,G.gd.cur.pull]:null');
   const runTill = async (id, ms, step) => R(`var t0=gdNow(),r=null;while(gdNow()-t0<${ms}){gdAdvance(${step || 250});if(G.gd.cur&&G.gd.cur.item.id==="${id}"&&!G.gd.cur.pull){r=Math.round(G.gd.cur.at);break}}r`);
   const CR = 'var px=function(c){var m=c.match(/[\\d.]+/g).map(Number);return{r:m[0],g:m[1],b:m[2],a:m.length>3?m[3]:1}},lum=function(c){return[c.r,c.g,c.b].map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce(function(a,v,i){return a+v*[.2126,.7152,.0722][i]},0)},cr=function(a,b){var x=lum(a),y=lum(b);return Math.round((Math.max(x,y)+.05)/(Math.min(x,y)+.05)*100)/100};';
@@ -138,9 +138,9 @@ const url = labUrl('#probe');
   ok('...in Portuguese: its words from Languages & Terms, 2 lines at most', lpt[7] === await R('D.words.tx.gd_askview.pt') && lpt[0] <= 2 && lpt[2] === 0, lpt);
   await R('P.lang="en";renderAll(true)');
   await R('var b=ph.querySelector(".gdbub button[data-gdbub]");gsTouch(b)'); await W(300);
-  const tapA = await R('[G.cam.open,gdEverOf(P.gdVisitor,"askview").done,gdEverOf(P.gdVisitor,"askview").acted,P.gdVisitor.used.view!=null,!G.gd.cur]');
+  const tapA = await R('[overlayOn("ask"),gdEverOf(P.gdVisitor,"askview").done,gdEverOf(P.gdVisitor,"askview").acted,P.gdVisitor.used.view!=null,!G.gd.cur]');
   ok('...a tap on it opens Ask about the view: acted, and it is done (Done when Ask about the view opened)', tapA.every(Boolean), tapA);
-  await R('G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};renderPhone(false)');
+  await R('G.cam={answer:"",busy:false,lit:[],route:[],hunt:null};setOverlay("ask",false);renderPhone(false)');
   // A tour of {point}: late in the visit (two milestones: s 0.5), the App tips done; first a bubble only, then spoken once the guide has been heard
   const toTour = 'gdResetVisitor();G.gd.movedAt=null;P.gdVisitor.used.card=0;P.gdVisitor.used.view=0;["tapmarker","askview"].forEach(function(id){var e=gdEM(id);e.done=true;e.by="card"});gdAdvance(1000);var t0=gdNow();while(gdNow()-t0<60000){gdAdvance(250);if(G.gd.cur&&G.gd.cur.item.id==="tourof")break}';
   await fresh(); await R(toTour); await W(500);
@@ -194,7 +194,7 @@ const url = labUrl('#probe');
   // ---------- 7. the 15-minute script: a first visit at ×30, App first, then Content ----------
   await fresh();
   const script = await R(`var v0=P.gdVisitor.visit.at,stages={},over=0;for(var t=1000;t<=900000;t+=1000){gdAdvance(1000);var c=G.gd.cur;if(c&&!c.pull&&stages[c.at]==null){stages[c.at]=gdStage(P.gdVisitor,c.at).s;if(G.utter||G.timer||G.recAudio)over++}
-      if(t===130000){gsTouch(ph.querySelector("[data-marker]"))}if(t===160000){ui.stop="closed";renderPhone(false)}if(t===200000){if(G.gd.cur&&G.gd.cur.item.id==="askview")gdTap();else gbGo("view")}if(t===220000){G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};renderPhone(false)}}
+      if(t===130000){gsTouch(ph.querySelector("[data-marker]"))}if(t===160000){ui.stop="closed";renderPhone(false)}if(t===200000){if(G.gd.cur&&G.gd.cur.item.id==="askview")gdTap();else gbGo("view")}if(t===220000){G.cam={answer:"",busy:false,lit:[],route:[],hunt:null};setOverlay("ask",false);renderPhone(false)}}
     var sh=gdScShows(v0);[sh.map(function(s){return[s.t-v0,s.id,s.kind,Math.round((stages[s.t]||0)*100)/100,/score \\d/.test(s.why)]}),over]`);
   const sh = script[0], app = sh.filter(s => s[2] === 'app'), con = sh.filter(s => s[2] === 'content'), firstC = con[0];
   const perMin = sh.reduce((m, s) => Math.max(m, sh.filter(x => x[0] > s[0] - 60000 && x[0] <= s[0]).length), 0);
@@ -212,7 +212,7 @@ const url = labUrl('#probe');
     wn.push(await R(`var shown=ed.querySelector("#gdwhynot").textContent,r=gdPick(gdItems(),P.gdVisitor,gdContext(),gdNow());[shown,r.why,r.why.split(" · ").indexOf(shown)>=0]`));
   }
   ok('Why not now? (the Editor): each item\'s reason, word for word one of the scheduler\'s', wn.every(w => w[2]) && /Opening message: shown once this visit/.test(wn[0][0]) && /Tap a marker: 20 s after the Opening message: \d+ s left/.test(wn[1][0]) && /Ask about the view: not before 60 s of the visit: \d+ s left/.test(wn[2][0]) && /A tour of \{point\}: (breathing room 15 s|along the visit Late: nothing before a third)/.test(wn[3][0]), wn.map(w => w[0]));
-  const wg = await R('ui.settingsOpen=true;var a=gdWhyNow("tapmarker"),r=gdPick(gdItems(),P.gdVisitor,gdContext(),gdNow());ui.settingsOpen=false;[a,r.why]');
+  const wg = await R('setOverlay("settings",true);var a=gdWhyNow("tapmarker"),r=gdPick(gdItems(),P.gdVisitor,gdContext(),gdNow());setOverlay("settings",false);[a,r.why]');
   ok('...a gate: its words for every item (Settings open)', wg[0] === 'Tap a marker: ' + wg[1] && /quiet while Settings is open/.test(wg[1]), wg);
   const wf = await R('G.gd.manual=true;var r=null;for(var k=0;k<200&&!(r&&r.item);k++){G.gd.t+=250;r=gdPick(gdItems(),P.gdVisitor,gdContext(),gdNow())}var n=gdWhyNow(r.item.id),o=gdItems().filter(function(x){return x.id!==r.item.id}).map(function(x){return gdWhyNow(x.id)});[r.item.id,r.why,n,o]');
   ok('...the one that shows next: "it shows next" and its why, the scheduler\'s own', wf[2] === wf[1].replace(/^([^:]+): /, '$1: it shows next: '), wf);

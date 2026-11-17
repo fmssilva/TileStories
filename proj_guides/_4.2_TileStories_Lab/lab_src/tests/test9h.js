@@ -27,7 +27,7 @@ const url = labUrl('#probe');
     'D.guidance.on=true;D.guidance.breathing=15;D.guidance.cueRoom=5;D.card.hints.on=true;gdGroupById("card").items.forEach(function(id){var it=D.guidance.items[id];it.on=true;it.shows="visit"});var hw=gdGroupById("howto");hw.on=true;hw.inSettings=true;hw.inMenu=true;' +
     '["opening","tapmarker","askview","gbhint","tourof"].forEach(function(id){D.guidance.items[id].on=true});gdGroupById("inview").on=false;G.gd.demo=false;gdChip(null);';
   const opened = 'var o=gdVM("opening"),oe=gdEM("opening");o.shown=1;o.last=gdNow()-30000;o.end=gdNow()-21000;oe.shown=1;P.gdVisitor.visit.lastEnd=gdNow()-21000;var e=gdEM("tapmarker");e.done=true;e.by="card";';
-  const fresh = async (extra, manual) => { await R(base + 'if(G.on)stopTour();G.cam.open=false;ui.settingsOpen=false;G.fab.menu=false;setWall("ribeira");ui.view="card";ui.stop="closed";renderPhone(false);' + `G.gd.manual=${!!manual};G.gd.rate=1;` + 'gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;G.gd.actAt=null;G.gd.scrollAt=null;' + opened + (extra || '')); await W(150);
+  const fresh = async (extra, manual) => { await R(base + 'if(G.on)stopTour();setOverlay("ask",false);setOverlay("settings",false);setOverlay("menu",false);setWall("ribeira");ui.view="card";ui.stop="closed";renderPhone(false);' + `G.gd.manual=${!!manual};G.gd.rate=1;` + 'gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;G.gd.actAt=null;G.gd.scrollAt=null;' + opened + (extra || '')); await W(150);
     /* (round 11 review) the sheet may still be growing to its stop (184 px of 820 measured): wait until its height holds */
     await until('var h=Math.round(scr.getBoundingClientRect().height),o=window.__t9sh;window.__t9sh=h;o===h', 3000); };
   const CR = 'var px=function(c){var m=c.match(/[\\d.]+/g).map(Number);return{r:m[0],g:m[1],b:m[2]}},lum=function(c){return[c.r,c.g,c.b].map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce(function(a,v,i){return a+v*[.2126,.7152,.0722][i]},0)},cr=function(a,b){var x=lum(a),y=lum(b);return Math.round((Math.max(x,y)+.05)/(Math.min(x,y)+.05)*100)/100};';
@@ -108,7 +108,7 @@ const url = labUrl('#probe');
   await R('G.gd.manual=false');
 
   // ---------- 3. How to use the card, pulled: from Settings and from the ✦, no gate stopping it; a step seen retires its cue ----------
-  await fresh('D.guidance.on=false;ui.view="card";ui.stop="half";ui.settingsOpen=true;renderPhone(false);');
+  await fresh('D.guidance.on=false;ui.view="card";ui.stop="half";setOverlay("settings",true);renderPhone(false);');
   await R('var v=ph.querySelector(".vset");v.scrollTop=v.scrollHeight'); await W(200);
   await p.locator('#ph .vset .vhow').click(); await W(400);
   const s1 = await R('[G.on,D.tour.guideSteps[G.i].id,D.tour.guideSteps[G.i].gd,!!ph.querySelector("#grab.gfocus"),ui.stop,!ph.querySelector(".vset"),D.guidance.on,G.gd.touchAt!=null&&gdNow()-G.gd.touchAt<800]');
@@ -145,9 +145,9 @@ const url = labUrl('#probe');
   const op = await R('[ui.view,ui.stop,!G.gd.cur||G.gd.cur.item.id!=="howto:wall",P.gdVisitor.used.card!=null,JSON.stringify(gdVisitOf(P.gdVisitor,"howto:wall"))]');
   ok('...its chip opens the card of the marker Azu points at (a pull: no memory of its own)', op[0] === 'card' && op[1] !== 'closed' && op[2] && op[3] && /"shown":0/.test(op[4]), op);
   await fresh('var g=gdGroupById("howto");g.inMenu=false;'); const h1 = await R('gbItems().join()');
-  await R('var g=gdGroupById("howto");g.inMenu=true;g.inSettings=false;ui.view="card";ui.stop="half";ui.settingsOpen=true;renderPhone(false)'); const h2 = await R('!ph.querySelector(".vhow")');
-  await R('var g=gdGroupById("howto");g.inSettings=true;g.on=false;ui.settingsOpen=true;renderPhone(false)'); const h3 = await R('[!ph.querySelector(".vhow"),gbItems().indexOf("how")<0,gdWalk("test")===false]');
-  await R('gdGroupById("howto").on=true;ui.settingsOpen=false;renderPhone(false)');
+  await R('var g=gdGroupById("howto");g.inMenu=true;g.inSettings=false;ui.view="card";ui.stop="half";setOverlay("settings",true);renderPhone(false)'); const h2 = await R('!ph.querySelector(".vhow")');
+  await R('var g=gdGroupById("howto");g.inSettings=true;g.on=false;setOverlay("settings",true);renderPhone(false)'); const h3 = await R('[!ph.querySelector(".vhow"),gbItems().indexOf("how")<0,gdWalk("test")===false]');
+  await R('gdGroupById("howto").on=true;setOverlay("settings",false);renderPhone(false)');
   ok('Its entries follow the group: In the ✦ menu Hidden: no item; In Settings Hidden: no button; the group Off: neither, and nothing opens', h1 === 'tour,ask,view,try,settings' && h2 && h3.every(Boolean), [h1, h2, h3]);
 
   // ---------- 5. Card Controls > Hints: a view of the same data ----------

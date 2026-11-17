@@ -1,5 +1,5 @@
-"""Builds the TileStories Lab: joins the modules in MODULES and the styles in STYLES, embeds the words and the faces, and puts the
-3D mascot's files in assets/ beside the page. It never rewrites code. python build.py -> block-components-lab.html (not committed)
+"""Builds the TileStories Lab (tilestories-lab.html): joins the modules in MODULES and the styles in STYLES, embeds the words and the faces, and puts the
+3D mascot's files in assets/ beside the page. It never rewrites code. python build.py -> tilestories-lab.html (not committed)
 and assets/mascot/ (copied, not committed), then the structure check (check_structure.js) and the Unity lint (tools/unity_lint.py):
 either one failing fails the build. The page with its assets/ is served by tools/serve.py and published as page + files (README.md).
 PROTOTYPE_STRUCTURE.md says what each module owns."""
@@ -9,9 +9,9 @@ M3 = os.path.join(D, '..', '..', 'mascote', '3d')
 
 # the order is the load order: a module may use what an earlier one sets up at load, and the points are joined in this order
 MODULES = ['src/core/open.js', 'src/core/assets.js', 'src/core/catalogues.js', 'src/core/state.js', 'src/core/words.js',
-           'src/core/content.js', 'src/core/util.js', 'src/core/ext.js', 'src/core/undo.js', 'src/editor/components.js', 'src/editor/shell.js',
+           'src/core/content.js', 'src/core/util.js', 'src/core/ext.js', 'src/core/undo.js', 'src/screen/router.js', 'src/editor/components.js', 'src/editor/shell.js',
            'src/editor/json.js', 'src/editor/card-tab.js', 'src/editor/demo.js', 'src/editor/global-tab.js',
-           'src/editor/selftest-texts.js', 'src/phone/shell.js', 'src/card/motion.js', 'src/card/interactions.js',
+           'src/editor/selftest-texts.js', 'src/phone/shell.js', 'src/screen/device.js', 'src/card/motion.js', 'src/card/interactions.js',
            'src/card/sections.js', 'src/phone/sheet.js', 'src/phone/feedback.js', 'src/editor/selftest.js',
            'src/editor/words-tab.js', 'src/editor/focus.js', 'src/editor/accordion.js', 'src/editor/guide-tab.js',
            'src/card/chrome.js', 'src/card/gallery.js',
@@ -28,7 +28,7 @@ MODULES = ['src/core/open.js', 'src/core/assets.js', 'src/core/catalogues.js', '
            'src/agent/scenes.js', 'src/mascot/azu3d.js', 'src/mascot/models.js', 'src/mascot/tile-styles.js',
            'src/mascot/size.js', 'src/world/markers.js', 'src/guide/guide-scenes.js', 'src/agent/live-voice.js', 'src/mascot/mouth.js',
            'src/guidance/catalog.js', 'src/guidance/scheduler.js', 'src/guidance/service.js', 'src/guidance/present.js',
-           'src/guidance/editor.js', 'src/guidance/scenes.js', 'src/guide/tell-more.js', 'src/guide/saved-place.js', 'src/guide/tour-end.js', 'src/guide/game-ask.js', 'src/guide/voice-script.js', 'src/guide/mascot-profile.js', 'src/guide/hero-start.js', 'src/guide/teleprompter.js', 'src/guide/panel-look.js', 'src/guide/demo-hand.js', 'src/guide/tour-scroll.js', 'src/core/boot.js']
+           'src/guidance/editor.js', 'src/guidance/scenes.js', 'src/guide/tell-more.js', 'src/guide/saved-place.js', 'src/guide/tour-end.js', 'src/guide/game-ask.js', 'src/guide/voice-script.js', 'src/guide/mascot-profile.js', 'src/guide/hero-start.js', 'src/guide/teleprompter.js', 'src/guide/panel-look.js', 'src/guide/demo-hand.js', 'src/guide/tour-scroll.js', 'src/screen/explore.js', 'src/core/boot.js']
 # the cascade depends on this order: a new style goes at the end, or beside the rule it overrides
 STYLES = ['src/core/fonts.css', 'src/core/base.css', 'src/card/card-base.css', 'src/phone/sheet.css', 'src/guide/tour.css', 'src/editor/texts.css', 'src/editor/accordion.css',
           'src/card/controls.css', 'src/card/blocks.css', 'src/card/elements.css', 'src/editor/marker-tab.css', 'src/card/hero.css',
@@ -38,7 +38,7 @@ STYLES = ['src/core/fonts.css', 'src/core/base.css', 'src/card/card-base.css', '
           'src/world/guide-button.css', 'src/agent/agent.css', 'src/agent/scenes.css', 'src/world/markers.css',
           'src/mascot/azu3d.css', 'src/mascot/models.css', 'src/mascot/tile-styles.css', 'src/mascot/size.css', 'src/editor/demo.css',
           'src/guidance/present.css', 'src/guidance/editor.css', 'src/guide/autotour.css', 'src/guide/tell-more.css',
-          'src/guide/saved-place.css', 'src/guide/tour-end.css', 'src/guide/game-ask.css', 'src/guide/mascot-profile.css', 'src/guide/hero-start.css', 'src/guide/highlight.css', 'src/guide/teleprompter.css', 'src/guide/panel-look.css', 'src/card/page-open.css', 'src/guide/demo-hand.css', 'src/guide/tour-scroll.css']
+          'src/guide/saved-place.css', 'src/guide/tour-end.css', 'src/guide/game-ask.css', 'src/guide/mascot-profile.css', 'src/guide/hero-start.css', 'src/guide/highlight.css', 'src/guide/teleprompter.css', 'src/guide/panel-look.css', 'src/card/page-open.css', 'src/guide/demo-hand.css', 'src/guide/tour-scroll.css', 'src/screen/screen.css']
 
 
 def rd(*p):
@@ -80,7 +80,7 @@ def build():
     missing = [a for a in named if not os.path.isfile(os.path.join(D, a))]
     assert not missing, 'the page names files that assets/ lacks: ' + ', '.join(missing)
     html = rd('src', 'page', 'head.html') + '<style>' + css + '</style>\n' + rd('src', 'page', 'page.html') + '\n<script>\n' + js + '\n</script>\n'
-    io.open(os.path.join(D, 'block-components-lab.html'), 'w', encoding='utf-8').write(html)
+    io.open(os.path.join(D, 'tilestories-lab.html'), 'w', encoding='utf-8').write(html)
     size = sum(os.path.getsize(os.path.join(D, a)) for a in named)
     print('built', len(html), '+ assets/: %d files, %.1f MB' % (len(named), size / 1e6))
 

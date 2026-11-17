@@ -11,7 +11,7 @@ function corpus(){var out=[];
     t=t.trim();if(t)out.push({ref:"r:"+r.id,view:"story",title:"Story · "+(r.pattern?(patternById(r.pattern)||{}).name:KIND[r.kind].n),text:t})});
   return pipe("corpus.list",out)}
 /* a feature may answer for the scroll to a block (round 18: during a paused game the block is offered as Show me, guide/game-ask.js) */
-function goTo(ref){var a=firstAnswer("goTo.answer",ref);if(a!==undefined)return a;var c=corpus().filter(function(x){return x.ref===ref})[0];if(!c)throw new Error("unknown block "+ref);if(ui.view!==c.view){ui.view=c.view;renderPhone(false)}
+function goTo(ref){var a=firstAnswer("goTo.answer",ref);if(a!==undefined)return a;var c=corpus().filter(function(x){return x.ref===ref})[0];if(!c)throw new Error("unknown block "+ref);if(ui.view!==c.view){goScreen(c.view);renderPhone(false)}
   clearGuideMarks();var el=scr.querySelector('[data-ref="'+ref+'"]');if(el){el.classList.add("gfocus");scr.scrollTo({top:Math.max(0,el.offsetTop-80),behavior:P.reduce?"auto":"smooth"});moveMascot(el)}return "Shown: "+c.title}
 function searchAnswer(q){q=pipe("searchAnswer.q",q);var words=q.toLowerCase().replace(/[^a-zà-ú0-9 ]/g," ").split(/\s+/).filter(function(w){return w.length>3});
   var syn={earthquake:["1755","destroyed","tsunami","lost"],terramoto:["1755","destruíram","maremoto","perder"],look:["picture","before","today"],library:["books","library"],opera:["opera"],king:["king","manuel","philip"],rei:["rei","manuel","filipe"]};

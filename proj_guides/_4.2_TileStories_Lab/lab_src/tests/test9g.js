@@ -25,7 +25,7 @@ const url = labUrl('#probe');
   const base = 'D.card.hints.on=false;LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;P.lang="en";LAB.rowDemo=false;D.guide.gbtn="both";D.guide.mascot=true;D.guide.life="lively";D.guide.azuTap="play";D.poi.solemn=false;' +
     'D.guidance.on=true;D.guidance.breathing=15;D.guidance.perMinute=2;["opening","tapmarker","askview","gbhint","inview","tourof"].forEach(function(id){D.guidance.items[id].on=true});gdGroupById("inview").on=true;G.gd.demo=false;gdChip(null);';
   const opened = 'var o=gdVM("opening"),oe=gdEM("opening");o.shown=1;o.last=gdNow()-30000;o.end=gdNow()-21000;oe.shown=1;P.gdVisitor.visit.lastEnd=gdNow()-21000;';
-  const fresh = async (extra, manual = true) => { await R(base + 'if(G.on)stopTour();G.cam.open=false;ui.settingsOpen=false;G.fab.menu=false;setWall("ribeira");ui.view="card";ui.stop="closed";renderPhone(false);' + `G.gd.manual=${manual};G.gd.rate=1;` + 'gdStop("test");ui.camX=.4;ui.camY=.5;ui.camZoom=1;renderPhone(false);gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;G.gd.actAt=null;G.gd.onWall=false;' + opened + (extra || '') + (manual ? 'gdAdvance(250)' : '')); await W(150); };
+  const fresh = async (extra, manual = true) => { await R(base + 'if(G.on)stopTour();setOverlay("ask",false);setOverlay("settings",false);setOverlay("menu",false);setWall("ribeira");ui.view="card";ui.stop="closed";renderPhone(false);' + `G.gd.manual=${manual};G.gd.rate=1;` + 'gdStop("test");ui.camX=.4;ui.camY=.5;ui.camZoom=1;renderPhone(false);gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;G.gd.actAt=null;G.gd.onWall=false;' + opened + (extra || '') + (manual ? 'gdAdvance(250)' : '')); await W(150); };
   const CR = 'var px=function(c){var m=c.match(/[\\d.]+/g).map(Number);return{r:m[0],g:m[1],b:m[2],a:m.length>3?m[3]:1}},lum=function(c){return[c.r,c.g,c.b].map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce(function(a,v,i){return a+v*[.2126,.7152,.0722][i]},0)},cr=function(a,b){var x=lum(a),y=lum(b);return Math.round((Math.max(x,y)+.05)/(Math.min(x,y)+.05)*100)/100};';
   const look = CR + 'var b=ph.querySelector(".gdbub:not(.gd-out)"),bt=b.querySelector("button"),cs=getComputedStyle(bt),lh=parseFloat(cs.lineHeight),lines=Math.round((bt.offsetHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom))/lh),B=gdPR(b),g=ph.querySelector(".gbtn"),G1=g?gdPR(g):null,nb=document.getElementById("navbar"),N=nb&&gdSeen(nb)?gdPR(nb):null,tg=G.gd.cur&&gdTarget(G.gd.cur.item);' +
     '[lines,cr(px(cs.color),px(getComputedStyle(b).backgroundColor)),gdOverWords(),G1?gdOver(B,G1):0,N?gdOver(B,N):0,Math.round(bt.offsetHeight),bt.textContent,tg?gdOver(B,tg.rect||tg.box):-1]';
@@ -123,9 +123,9 @@ const url = labUrl('#probe');
   await runTo('G.gd.cur.item.base==="inview"', 40000); await W(300);
   const pl = await R('var c=G.gd.cur;[c.item.id,c.text,gdCentral().name,nameIn(TXT("fab_comment_1"),"{point}",gdCentral().name)]');
   await p.locator('#ph .gdbub button[data-gdbub]').click(); await W(400);
-  const tapP2 = await R(`[G.cam.open,!!ph.querySelector(".camask.open"),ph.querySelectorAll(".cpin.lit").length,gdEverOf(P.gdVisitor,"${pl[0]}").acted,P.gdVisitor.used.view!=null]`);
+  const tapP2 = await R(`[overlayOn("ask"),!!ph.querySelector(".camask.open"),ph.querySelectorAll(".cpin.lit").length,gdEverOf(P.gdVisitor,"${pl[0]}").acted,P.gdVisitor.used.view!=null]`);
   ok('...on the Belém wall, a point with no card: the first of the 3 lines; a tap opens Ask about the view about it, the point lit, acted', pl[1] === pl[3] && tapP2[0] && tapP2[1] && tapP2[2] >= 1 && tapP2[3] === 1 && tapP2[4], [pl, tapP2]);
-  await R('stopSpeech();G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};setWall("ribeira");renderPhone(false)');
+  await R('stopSpeech();G.cam={answer:"",busy:false,lit:[],route:[],hunt:null};setOverlay("ask",false);setWall("ribeira");renderPhone(false)');
   // spoken once the guide has been heard this visit, the word being said lit
   await fresh(toRem + 'P.gdVisitor.visit.heard=true;'); await runTo('G.gd.cur.item.base==="inview"', 40000);
   const sp = await R('var c=G.gd.cur;[c.spoken,!!(G.timer||G.utter),ph.querySelectorAll(".gdbub .gdw").length>5,G.gd.log.filter(function(l){return l.what==="shown"}).slice(-1)[0].why]');
@@ -165,7 +165,7 @@ const url = labUrl('#probe');
   await runTo('G.gd.cur.item.id==="gbhint"', 5000); await W(200);
   await p.locator('#ph .gbtn').click(); await W(250);
   const mn = await R('[!!ph.querySelector(".gbmenu"),!G.gd.cur,gdVM("gbhint").how,gdEverOf(P.gdVisitor,"gbhint").done,gdEverOf(P.gdVisitor,"gbhint").by]');
-  await R('G.fab.menu=false;fabLayer();gdNewVisit();P.gdVisitor.visit.pokes=4;gdAdvance(30000)');
+  await R('setOverlay("menu",false);fabLayer();gdNewVisit();P.gdVisitor.visit.pokes=4;gdAdvance(30000)');
   const mn2 = await R('[!!(G.gd.cur&&G.gd.cur.item.id==="gbhint"),gdWhyNot(gdItems(),P.gdVisitor,Object.assign(gdContext(),{showing:null}),gdNow(),"gbhint")]');
   ok('The ✦ menu opened ends it: the tip ends acted, done for good (not in the next visit either)', mn[0] && mn[1] && mn[2] === 'acted' && mn[3] && mn[4] === 'menu' && !mn2[0] && /done for good \(the visitor opened the ✦ menu\)/.test(mn2[1]), [mn, mn2]);
   await fresh(toRem.replace('D.guidance.items.gbhint.on=false;', '') + 'gdGroupById("inview").on=false;P.gdVisitor.visit.pokes=4;');
@@ -173,9 +173,9 @@ const url = labUrl('#probe');
   await p.locator('#ph .gdbub button[data-gdbub]').click(); await W(250);
   const tb = await R('[!!ph.querySelector(".gbmenu"),gdEverOf(P.gdVisitor,"gbhint").acted,gdEverOf(P.gdVisitor,"gbhint").done]');
   ok('...a tap on its bubble opens the ✦ menu: acted, and done', tb[0] && tb[1] === 1 && tb[2], tb);
-  await R('G.fab.menu=false;fabLayer()');
-  const gone = await R('[typeof gbHint,typeof showFabBub,G.gb.hinted===undefined&&G.gb.lastAct===undefined,Object.keys(G.fab).join(),D.wall.camCfg.comments===undefined&&D.wall.camCfg.every===undefined,typeof firstAnswer==="function"?extPoint("fabRemark.quiet").length:0,document.querySelectorAll(".azfabbub").length]');
-  ok('The old timers are gone: no gbHint, no remark bubble or its 400 ms timer and G.fab counters, no G.gb.hinted, no camCfg.comments / every, no fabRemark.quiet', gone[0] === 'undefined' && gone[1] === 'undefined' && gone[2] && gone[3] === 'menu' && gone[4] && gone[5] === 0 && gone[6] === 0, gone);
+  await R('setOverlay("menu",false);fabLayer()');
+  const gone = await R('[typeof gbHint,typeof showFabBub,G.gb.hinted===undefined&&G.gb.lastAct===undefined,typeof G.fab,D.wall.camCfg.comments===undefined&&D.wall.camCfg.every===undefined,typeof firstAnswer==="function"?extPoint("fabRemark.quiet").length:0,document.querySelectorAll(".azfabbub").length]');
+  ok('The old timers are gone: no gbHint, no remark bubble or its 400 ms timer, no G.fab (its menu is an overlay of the router), no G.gb.hinted, no camCfg.comments / every, no fabRemark.quiet', gone[0] === 'undefined' && gone[1] === 'undefined' && gone[2] && gone[3] === 'undefined' && gone[4] && gone[5] === 0 && gone[6] === 0, gone);
 
   // ---------- 4. the Editor: the link row, the new rows' demos, Why not now? and the Log, the words ----------
   await fresh(); await R('ui.tab="guide";ui.level=1;ui.op={gt3:true,s7ask:true,s7cam:true};renderEditor()'); await W(200);

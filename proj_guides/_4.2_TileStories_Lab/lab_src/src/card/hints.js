@@ -36,10 +36,10 @@ function cueStart(c){var it=c.item,el=cueEl(it.about);if(!el)return null;if(it.r
 function cueStop(c){if(c.item.about==="locate"){var lb=locLabel();if(lb)lb.classList.add("fold")}}
 /* the phone brought to where a cue shows (the Editor's demos, the scenes, the tests): the card opened at Half for the nudge and the label,
    at Full scrolled to its element for the others (the story page when the card has none) */
-function cuePlace(id){ui.settingsOpen=false;if(G.on)stopTour();
-  if(id==="nudge"||id==="label"){ui.view="card";ui.stop="closed";renderPhone(false);ui.stop="half";renderPhone(false);if(id==="label")scr.scrollTop=260;return}
-  ui.view="card";ui.stop="full";renderPhone(false);var sel={navbar:null,ba:"[data-ba]",strip:".el-car,.hstrip",term:".gterm"}[id],el=sel&&scr.querySelector(sel);
-  if(sel&&!el){ui.view="story";renderPhone(false);el=scr.querySelector(sel)}
+function cuePlace(id){setOverlay("settings",false);if(G.on)stopTour();
+  if(id==="nudge"||id==="label"){goScreen("card",{stop:"closed"});renderPhone(false);sheetTo("half");renderPhone(false);if(id==="label")scr.scrollTop=260;return}
+  goScreen("card",{stop:"full"});renderPhone(false);var sel={navbar:null,ba:"[data-ba]",strip:".el-car,.hstrip",term:".gterm"}[id],el=sel&&scr.querySelector(sel);
+  if(sel&&!el){goScreen("story");renderPhone(false);el=scr.querySelector(sel)}
   var go=function(){var e=sel&&scr.querySelector(sel);scr.scrollTop=e?e.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-140:scr.querySelector(".hero").offsetHeight+60};
   /* and once the sheet and the hero have settled at their stop (650 ms), again if it moved out of view */
   go();clearTimeout(G.cuePlaceT);G.cuePlaceT=setTimeout(function(){var e=sel&&scr.querySelector(sel);if(e&&!inView(e))go()},700)}

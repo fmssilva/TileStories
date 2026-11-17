@@ -1,6 +1,6 @@
 /* The guide's button (✦) and Azu beside it (fabLayer): the ✦ is the visitor's own way in, always in one place, its menu (the tour, Ask, Ask about the view, the guide's settings; opening it is menu.opened), its label folding once seen, during a tour the progress ring and the dock shown or hidden; Azu beside it takes the initiative through the guidance (Guide › Guidance: its remarks on what the camera sees, Content › What's in view; the hint that points at the ✦, App › The wall › The ✦). */
 D.guide.gbtn="both";D.guide.gbIcon="star";D.guide.gbSide="left";D.guide.gbFold=true;
-G.fab={menu:false};G.gb={shown:0,folded:false};
+G.gb={shown:0,folded:false};
 COMP.s7gbtn=["Guide","Guide button"];
 var GBSTAR='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 3.2c.65 4.9 3.55 7.8 8.4 8.4-4.85.65-7.75 3.55-8.4 8.4-.65-4.85-3.55-7.75-8.4-8.4 4.85-.6 7.75-3.5 8.4-8.4Z"/><path d="M19 2.2c.25 1.45.95 2.15 2.4 2.4-1.45.25-2.15.95-2.4 2.4-.25-1.45-.95-2.15-2.4-2.4 1.45-.25 2.15-.95 2.4-2.4Z"/></svg>',
   GBFACE='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.2" y="3.2" width="17.6" height="17.6" rx="4.6" fill="#F4EEE3" stroke="#1F4E9C" stroke-width="1.8"/><circle cx="9.2" cy="11" r="1.7" fill="#1A1814"/><circle cx="14.8" cy="11" r="1.7" fill="#1A1814"/><path d="M9.3 15q2.7 2.1 5.4 0" stroke="#1A1814" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>',
@@ -21,16 +21,16 @@ function heroStartSeen(){var g=scr.querySelector(".hero .gstart");if(!g)return f
 function gbProgress(){var n=D.tour.guideSteps.length||1,w=(G.words||[]).length,k=G.hl&&G.hl.k>=0?G.hl.k+1:0;return Math.min(1,(G.i+(w?Math.min(1,k/w):0))/n)}
 var GBC=2*Math.PI*22.5;
 function gbHtml(tour){var c=D.guide,ic=c.gbIcon,word=ic==="word",p=tour?gbProgress():0,fold=!word&&(tour||c.gbFold&&G.gb.folded);
-  return'<button type="button" class="gbtn ic-'+ic+(tour?" tour":"")+'" data-gbtn="1" aria-label="'+TXH(tour?"gb_toggle":"gb_name")+'"'+(tour?' aria-pressed="'+(ui.dockH!=="compact")+'"':' aria-haspopup="menu" aria-expanded="'+!!G.fab.menu+'"')+'>'+
+  return'<button type="button" class="gbtn ic-'+ic+(tour?" tour":"")+'" data-gbtn="1" aria-label="'+TXH(tour?"gb_toggle":"gb_name")+'"'+(tour?' aria-pressed="'+(ui.dockH!=="compact")+'"':' aria-haspopup="menu" aria-expanded="'+!!overlayOn("menu")+'"')+'>'+
     (tour&&!word?'<svg class="gb-ring" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="22.5" class="tr"/><circle cx="26" cy="26" r="22.5" class="pg" style="stroke-dasharray:'+(GBC*p).toFixed(1)+' '+GBC.toFixed(1)+'"/></svg>':"")+
     (word?"":'<span class="gb-ic">'+(ic==="face"?GBFACE:GBSTAR)+'</span>')+'<span class="gb-lab'+(fold?" fold":"")+'">'+TXH("gb_label")+'</span>'+(tour&&word?'<i class="gb-bar" style="width:'+(p*100).toFixed(1)+'%"></i>':"")+'</button>'}
 function gbWrapHtml(tour){var wall=ui.stop==="closed"&&!tour,az=gbAzu()&&!tour?'<button type="button" class="azfab'+(wall?" onwall":"")+'" aria-label="'+TXH("fab_label")+'">'+mascotStill()+(mascotIsModel()?"":'<i class="marm"></i>')+'</button>':"",
     pz=tour&&ui.dockH==="compact"?'<button type="button" class="gb-pause" data-g="'+(G.paused?"play":"pause")+'" aria-label="'+(G.paused?TXH("guide_ctrl_play"):TXH("guide_ctrl_pause"))+'">'+ico(G.paused?"play":"pause")+'</button>':"";
   return'<div class="gbtn-wrap side-'+D.guide.gbSide+(wall?" onwall":"")+(tour?" intour":"")+'">'+(gbOn()?gbHtml(tour):"")+pz+az+'</div>'}
 function fabLayer(){emitLatestFirst("fabLayer.before");ph.querySelectorAll(".gbtn-wrap:not(.intour),.gbmenu").forEach(function(x){x.remove()});
-  if(ui.view!=="card"||G.on||G.gb.tour||ui.stop==="peek"||(G.cam.open&&ui.stop==="closed")||(ui.stop!=="closed"&&heroStartSeen())){G.fab.menu=false;gbBand();return}
+  if(ui.view!=="card"||G.on||G.gb.tour||ui.stop==="peek"||(overlayOn("ask")&&ui.stop==="closed")||(ui.stop!=="closed"&&heroStartSeen())){setOverlay("menu",false);gbBand();return}
   ph.insertAdjacentHTML("beforeend",gbWrapHtml(false));
-  if(G.fab.menu){ph.insertAdjacentHTML("beforeend",gbMenuHtml());placeNear(ph.querySelector(".gbmenu"))}
+  if(overlayOn("menu")){ph.insertAdjacentHTML("beforeend",gbMenuHtml());placeNear(ph.querySelector(".gbmenu"))}
   gbClear();gbBand();emit("fabLayer.after")}
 /* the ✦ and Azu keep clear of what shares the foot of the screen: on the card, on the Locate Button's side, they rise above its pin */
 function gbClear(){var w=ph.querySelector(".gbtn-wrap:not(.intour)");
@@ -70,8 +70,8 @@ function gbItems(){var wall=ui.stop==="closed",out=[],hw=gdGroupById("howto");if
 function gbMenuHtml(){var c=camView().central;return'<div class="gbmenu" role="menu" aria-label="'+TXH("gb_name")+'">'+gbItems().map(function(k){
     var sv=k==="tour"&&!G.on?svOffer():null,t=k==="again"?TXH("sv_again"):k==="tour"?(sv?esc(svLabel(sv))+(sv.title?'<small>'+esc(sv.title)+'</small>':""):TXH("gb_start")+' · '+esc(tourLength(tourMinutes()))):k==="view"?esc(c?nameIn(TXT("gb_view_about"),"{0}",c.name):TXT("gb_view")):k==="how"?TXH("gd_how"):k==="try"?TXH("gd_try"):k==="quiz"?esc(fmt(TXT("tour_menu_quiz"),gdQuizOwed())):k==="next"?TXH("te_title"):TXH("gb_"+k);
     return'<button type="button" role="menuitem" data-gbgo="'+k+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+GBICO[k]+'</svg><span>'+t+'</span></button>'}).join("")+'</div>'}
-function gbMenu(open){var was=G.fab.menu;G.fab.menu=open==null?!G.fab.menu:open;fabLayer();if(G.fab.menu&&!was)emit("menu.opened","the ✦")}
-function gbGo(k){G.fab.menu=false;
+function gbMenu(open){var was=overlayOn("menu");setOverlay("menu",open==null?!overlayOn("menu"):open);fabLayer();if(overlayOn("menu")&&!was)emit("menu.opened","the ✦")}
+function gbGo(k){setOverlay("menu",false);
   if(k==="tour"){if(!G.on&&svOffer())svContinue();else startTour();return}
   if(k==="again"){startTour();return}
   if(k==="next"){teSet("open");return}
@@ -79,12 +79,12 @@ function gbGo(k){G.fab.menu=false;
   if(k==="how"){fabLayer();gdWalk("the ✦ menu");return}
   if(k==="try"){fabLayer();gdTryOpen("the ✦ menu");return}
   if(k==="quiz"){fabLayer();gdQuizPull();return}
-  if(k==="view"){G.cam.open=true;renderPhone(true);emit("view.opened","the ✦ menu");var q=ph.querySelector("#caq");if(q)q.focus({preventScroll:true});return}
-  if(k==="settings"){ui.settingsOpen=true;renderPhone(true);var v=ph.querySelector(".vset"),g=v&&v.querySelector(".vguide");if(g){v.scrollTop=Math.max(0,g.offsetTop-12);g.classList.remove("pfocus");void g.offsetWidth;g.classList.add("pfocus");setTimeout(function(){g.classList.remove("pfocus")},1800)}}}
+  if(k==="view"){setOverlay("ask",true);renderPhone(true);emit("view.opened","the ✦ menu");var q=ph.querySelector("#caq");if(q)q.focus({preventScroll:true});return}
+  if(k==="settings"){setOverlay("settings",true);renderPhone(true);var v=ph.querySelector(".vset"),g=v&&v.querySelector(".vguide");if(g){v.scrollTop=Math.max(0,g.offsetTop-12);g.classList.remove("pfocus");void g.offsetWidth;g.classList.add("pfocus");setTimeout(function(){g.classList.remove("pfocus")},1800)}}}
 /* a tour from a card at Half: the card rises to Full first (lowered again by the visitor, the tour goes on there) */
 /* a tour starting: the card's ✦, its Azu and their band go (the tour has its own ✦ above the dock); the redraw that puts the card at Full
    runs before G.on is set, so it is marked as the tour's (G.gb.tour): fabLayer draws no second ✦ and Azu behind the tour's (guidance round 7's look fix) */
-on("startTour.before",function(){var b=ph.querySelector(".gbtn-wrap .gbtn");G.morphFrom=b&&b.getClientRects().length?phRect(b):null;G.fab.menu=false;ph.querySelectorAll(".gbtn-wrap,.gbmenu,.gbband").forEach(function(x){x.remove()});scr.style.paddingBottom="";if(ui.view==="card"&&ui.stop!=="full"){ui.stop="full";G.gb.tour=true;try{renderPhone(true)}finally{G.gb.tour=false}}});
+on("startTour.before",function(){var b=ph.querySelector(".gbtn-wrap .gbtn");G.morphFrom=b&&b.getClientRects().length?phRect(b):null;setOverlay("menu",false);ph.querySelectorAll(".gbtn-wrap,.gbmenu,.gbband").forEach(function(x){x.remove()});scr.style.paddingBottom="";if(ui.view==="card"&&ui.stop!=="full"){sheetTo("full");G.gb.tour=true;try{renderPhone(true)}finally{G.gb.tour=false}}});
 on("stopTour.after",function(){ph.querySelectorAll(".gbtn-wrap.intour,.gbband.tour").forEach(function(x){x.remove()});fabLayer()});
 /* ----- during a tour: the ✦ where the dock was (Compact), with the progress ring and a pause; a tap shows the dock again, the ✦ growing
    into it. Round 11: while the panel shows (Mini, Peek, Full) the ✦ is hidden: it became the panel (guide/dock.js's dkMorph) ----- */
@@ -96,7 +96,7 @@ setInterval(function(){if(!G.on)return;var c=ph.querySelector(".gbtn.tour .pg"),
 setInterval(function(){var b=ph.querySelector(".gbubble"),w=ph.querySelector(".gbtn-wrap.intour");if(!b)return;b.style.left=w&&ph.querySelector(".gdock")&&D.guide.gbSide==="left"?(w.offsetLeft+w.offsetWidth+8)+"px":"";b.style.right=w&&ph.querySelector(".gdock")&&D.guide.gbSide==="right"?(ph.offsetWidth-w.offsetLeft+8)+"px":""},150);
 /* ----- the taps: the ✦ (its menu, or during a tour the dock), a menu item; a tap elsewhere closes the menu ----- */
 ph.addEventListener("click",function(e){var t=e.target.closest("[data-gbtn],[data-gbgo]");
-  if(!t){if(G.fab.menu&&!e.target.closest(".gbmenu,.azfab")){G.fab.menu=false;fabLayer()}return}e.stopPropagation();
+  if(!t){if(overlayOn("menu")&&!e.target.closest(".gbmenu,.azfab")){setOverlay("menu",false);fabLayer()}return}e.stopPropagation();
   if(t.dataset.gbtn){if(G.on){if(ui.dockH==="compact")G.morphFrom=phRect(t);ui.dockH=ui.dockH==="compact"?"mini":"compact";G.askOpen=false;renderGuide()}else gbMenu();return}
   if(t.dataset.gbgo){gbGo(t.dataset.gbgo);return}},true);
 /* what a tap on Azu does (mascot/azu2d.js asks): with the ✦ beside it, Mascot > Tap on Azu; as the button itself (Azu only), the ✦'s part.
@@ -115,13 +115,13 @@ on("settingsPanel.html",function(h){var c=D.guide,o=function(k,v,lab){return'<bu
   var g='<div class="vguide"><small>'+TXH("settings_guide")+'</small><div class="vo">'+o("voice","recorded",TXT("settings_voice_rec"))+o("voice","device",TXT("settings_voice_dev"))+'</div>'+
     '<div class="vo">'+o("speed","0.85",TXT("settings_slower"))+o("speed","1",TXT("settings_normal"))+o("speed","1.2",TXT("settings_faster"))+'</div><div class="vo">'+o("captions","true",TXT("settings_cc_on"))+o("captions","false",TXT("settings_cc_off"))+'</div>'+music+'</div>';
   var i=h.indexOf("<small>"+TXH("settings_appearance"));if(i<0)i=h.indexOf("<small>");return i<0?h:h.slice(0,i)+g+h.slice(i)});
-ph.addEventListener("click",function(e){var t=e.target.closest("[data-gset]");if(!t)return;e.stopPropagation();var q=t.dataset.gset.split("|");P.guide[q[0]]=q[0]==="speed"?parseFloat(q[1]):pval(q[1]);if(q[0]==="speed")P.vis.speed=null;renderAll(true)},true);
+ph.addEventListener("click",function(e){var t=e.target.closest("[data-gset]");if(!t)return;e.stopPropagation();var q=t.dataset.gset.split("|");P.guide[q[0]]=q[0]==="speed"?parseFloat(q[1]):pval(q[1]);if(q[0]==="speed")P.vis.speed=null;emit("profileChanged","guide."+q[0]);renderAll(true)},true);
 /* round 11: the visitor's music (Settings › The guide › Music): Off or a track's feeling, and its volume; it plays at once in a tour */
 ph.addEventListener("click",function(e){var t=e.target.closest("[data-gmus]");if(!t)return;e.stopPropagation();P.vis.music=t.dataset.gmus;musicApply();ph.querySelectorAll("[data-gmus]").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.gmus===P.vis.music))});
   var c=ph.querySelector(".vmusic .vcredit"),w=musicCredit(P.vis.music);if(c&&!w)c.remove();else if(w){if(!c){c=document.createElement("small");c.className="vcredit";ph.querySelector(".vmus").after(c)}c.textContent=w}},true);
 ph.addEventListener("input",function(e){var t=e.target;if(!t.dataset||!t.dataset.gmusvol)return;e.stopPropagation();P.vis.musicVol=+t.value;musicSet(false)},true);
 /* the ✦ and Azu as the card shows them reach the phone's signature */
-on("modelSig.sig",function(h){if(!sigWant(/D\.guide\.(gb|azuTap)/))return h;var m=G.fab.menu;G.fab.menu=false;var x="#gb:"+gbWrapHtml(false);G.fab.menu=m;return h+x});
+on("modelSig.sig",function(h){if(!sigWant(/D\.guide\.(gb|azuTap)/))return h;var m=overlayOn("menu");setOverlay("menu",false);var x="#gb:"+gbWrapHtml(false);setOverlay("menu",m);return h+x});
 
 /* Editor: Guide tab > Guide button, after Guide panel */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var dk=d.querySelector('[data-fo="s7dock"]');if(!dk)return d.innerHTML;

@@ -96,7 +96,7 @@ on("edMarker.html",function(h){var d=document.createElement("div");d.innerHTML=h
 var STARTS_NAME={magazine:"Story -- magazine",short:"Story -- short",empty:"Empty"};
 D.poi.previewRows=[{link:"r1"},{link:"r7"},{kind:"paragraph"},{link:"r99"}];
 document.addEventListener("change",function(e){var t=e.target;if(!ed.contains(t))return;
-  if(t.dataset.sel==="m.page"&&t.value==="header"){e.stopPropagation();ui.sel.page="header";renderEditor();ui.view="card";ui.stop="full";renderPhone(false);return}
+  if(t.dataset.sel==="m.page"&&t.value==="header"){e.stopPropagation();ui.sel.page="header";renderEditor();goScreen("card",{stop:"full"});renderPhone(false);return}
   if(t.dataset.sel==="m.starter"){e.stopPropagation();if(t.value!=="custom"){ui.pendingStarter=t.value;renderEditor()}return}
   if(t.dataset.scheck){e.stopPropagation();var r=byId(D.poi.story,t.dataset.scheck);if(r){r.checked=t.checked;renderEditor()}}},true);
 ed.addEventListener("click",function(e){var t=e.target;
@@ -107,10 +107,10 @@ ed.addEventListener("click",function(e){var t=e.target;
   var dp=t.closest("[data-sdup]");if(dp){e.stopPropagation();var i=D.poi.story.findIndex(function(r){return r.id===dp.dataset.sdup}),cp=JSON.parse(JSON.stringify(D.poi.story[i]));cp.id=nid("r");cp.checked=false;D.poi.story.splice(i+1,0,cp);renderAll(true);show("story");return}
   var tp=t.closest("[data-tmpl]");if(tp){e.stopPropagation();tp.textContent=tp.dataset.tmpl==="reapply"?"Nothing missing":"Named · saved";return}
   var pv=t.closest("[data-prv]");if(pv){e.stopPropagation();var q=pv.dataset.prv.split("|");if(q[0]==="del")D.poi.previewRows.splice(+q[1],1);else if(q[0]==="unlink")D.poi.previewRows[+q[1]]={kind:"pull_quote"};else if(q[0]==="link")D.poi.previewRows.push({link:"r9"});else D.poi.previewRows.push({kind:"paragraph"});renderAll(true);show("card");return}
-  var hp=t.closest("[data-heropic]");if(hp){e.stopPropagation();var q2=hp.dataset.heropic.split("|");D.poi.hero[q2[0]]=q2[1];renderAll(true);ui.view="card";ui.stop="full";renderPhone(false);return}},true);
+  var hp=t.closest("[data-heropic]");if(hp){e.stopPropagation();var q2=hp.dataset.heropic.split("|");D.poi.hero[q2[0]]=q2[1];renderAll(true);goScreen("card",{stop:"full"});renderPhone(false);return}},true);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(m\.starter|"));
 /* Marker: the card of that point opens (core/content.js's pointOpen), at Half on the wall's view */
-ed.addEventListener("change",function(e){var t=e.target;if(!t.dataset||t.dataset.sel!=="m.poi")return;if(G.on)stopTour();pointOpen(t.value);ui.view="card";renderAll(false)},true);
+ed.addEventListener("change",function(e){var t=e.target;if(!t.dataset||t.dataset.sel!=="m.poi")return;if(G.on)stopTour();pointOpen(t.value);goScreen("card");renderAll(false)},true);
 /* ----- the demos of the Specific Marker's rows: its card; a placed block's rows (its options on this card) that block in view, ringed
    (Entrance plays it once); Page of: that page; the Header page's focus point: the hero ----- */
 function mBlockSel(){var b=byId(D.poi.card,ui.sel.cblock);return b?'[data-ref="b:'+b.id+'"]':".gsec"}

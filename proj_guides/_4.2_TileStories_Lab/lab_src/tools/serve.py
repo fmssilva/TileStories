@@ -1,6 +1,6 @@
 """The Lab's local http server, on this computer only:
 
-    python tools/serve.py           serves until Ctrl+C:  http://localhost:<LAB_PORT>/lab_src/block-components-lab.html
+    python tools/serve.py           serves until Ctrl+C:  http://localhost:<LAB_PORT>/lab_src/tilestories-lab.html
     python tools/serve.py --ensure  starts it in the background unless it already answers, waits until it does, then exits
     LAB_PORT=8643 python tools/serve.py   another port (default 8642): one per copy of the Lab (a git worktree), set the same in the tests
 
@@ -15,7 +15,7 @@ import functools, http.server, os, socket, subprocess, sys, time, urllib.request
 
 PORT = int(os.environ.get('LAB_PORT') or 8642)
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # the Lab's folder, lab_src's parent
-PAGE = 'lab_src/block-components-lab.html'
+PAGE = 'lab_src/tilestories-lab.html'
 URL = 'http://localhost:%d/%s' % (PORT, PAGE)
 
 

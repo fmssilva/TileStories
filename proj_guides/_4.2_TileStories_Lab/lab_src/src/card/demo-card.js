@@ -11,8 +11,10 @@ LAB.demoCard=[];(function(){var n=0;D.card.sections.forEach(function(sec){sec.ki
 D.poi.card.concat(LAB.demoCard).forEach(function(b){if(b.kind==="Story")b.preview="inherit"});
 var DEMOCARD0=JSON.stringify(LAB.demoCard);
 /* captures: #dcshot=<kind> opens the demo card at that block, still */
-if(location.hash.indexOf("#dcshot=")===0)setTimeout(function(){var dk=decodeURIComponent(location.hash.slice(8)),pv=dk.split("|");P.reduce=true;LAB.previewBar=false;if(pv[1])P.lang=pv[1];ui.view="democard";ui.stop="full";renderAll(false);setTimeout(function(){var b=LAB.demoCard.filter(function(x){return x.kind===pv[0]})[0],el=b&&scr.querySelector('[data-ref="b:'+b.id+'"]');if(el)scr.scrollTop=Math.max(0,el.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-70)},200)},50);
+if(location.hash.indexOf("#dcshot=")===0)setTimeout(function(){var dk=decodeURIComponent(location.hash.slice(8)),pv=dk.split("|");P.reduce=true;LAB.previewBar=false;if(pv[1])P.lang=pv[1];goScreen("democard",{stop:"full"});renderAll(false);setTimeout(function(){var b=LAB.demoCard.filter(function(x){return x.kind===pv[0]})[0],el=b&&scr.querySelector('[data-ref="b:'+b.id+'"]');if(el)scr.scrollTop=Math.max(0,el.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-70)},200)},50);
 /* ----- the demo: a tile first on every marker's card opens Demo Components; its top button opens the demo card ----- */
 delete FOCUS.s0tile;FOCUS.s0card=["card",".testtile","full"];
 function testTile(){return inDemoCard?"":'<button class="testtile" type="button" data-go="demo"><div><b>'+TXH("test_tile_tag")+'</b><strong>'+TXH("test_tile_title")+'</strong><span>'+TXH("test_tile_line")+'</span></div><em>&#8250;</em></button>'}
 on("demoScreen.html",function(h){return h.replace('<b>'+esc(L(UI.demo))+'</b>','<b>'+TXH("test_tile_title")+'</b>').replace('<div class="pg">','<div class="pg"><button class="testtile demoopen" type="button" data-go="democard"><div><b>'+TXH("test_tile_tag")+'</b><strong>'+TXH("test_demo_title")+'</strong><span>'+TXH("test_demo_line")+'</span></div><em>&#8250;</em></button>')});
+
+screenDef("democard",{name:"The demo card (Lab only)",draw:demoCardScreen});

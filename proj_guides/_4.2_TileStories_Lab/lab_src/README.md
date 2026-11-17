@@ -1,4 +1,4 @@
-# Block Components Lab: sources
+# TileStories Lab: sources
 
 The Lab is one HTML page joined from its modules. Where each feature lives, the rules that keep it that way and the order of
 the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests and the keys.
@@ -8,12 +8,12 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
   `P` the visitor's, `ui` what is happening, `LAB` the Lab's) and its Unity home, in `STATE_MAP.md`.
 - **Words:** `src/core/realstrings.json` (the framework's real words, with their owner part; `python strings.py` re-imports them
   from Unity's `CardStrings.asset`); the Lab's own words are in `src/core/words.js`'s `LABSTR`.
-- **Build:** `npm install` once here (acorn, for `check_structure.js`; playwright-core, for the tests: `tests/pw.js`, `PW=<path>` names another copy). `python build.py` writes `block-components-lab.html` here
+- **Build:** `npm install` once here (acorn, for `check_structure.js`; playwright-core, for the tests: `tests/pw.js`, `PW=<path>` names another copy). `python build.py` writes `tilestories-lab.html` here
   (about 2.7 MB, its words and faces embedded) and copies the 3D mascot's models and thumbnails from `proj_guides/mascote/3d` to
   `assets/mascot/` (neither is committed; the pictures are in `assets/`), then runs the structure check (wrappers, re-assignments,
   second declarations, defaults set twice, references to the old root `S`: all 0) and the Unity lint (`tools/unity_lint.py`, a
   ratchet per CSS file in `tools/unity_lint_ratchet.json`); either one failing fails the build (`PROTOTYPE_STRUCTURE.md`, "Rules").
-- **Serve:** `python tools/serve.py` serves the Lab's folder on this computer: open http://localhost:8642/lab_src/block-components-lab.html
+- **Serve:** `python tools/serve.py` serves the Lab's folder on this computer: open http://localhost:8642/lab_src/tilestories-lab.html
   (`LAB_PORT=8643` picks another port: one per copy of the Lab, e.g. a `git worktree` running the full tier beside the next round; the tests,
   `run_tests.js` and the .ps1 scripts read the same variable. `--ensure` accepts a server only if it serves this folder, else it says which and exits 1.)
   (Ctrl+C stops it). Over http the page loads its `assets/` (the 3D mascot) and reads a picture back from a canvas (Photo of the view, the
@@ -23,18 +23,32 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
   (`python tools/serve.py --ensure`) when it is not running.
 - **Undo / Redo:** every Editor change is one step (the top bar's Undo / Redo, Ctrl+Z / Ctrl+Y outside a text field; at most 300);
   what the visitor does on the phone never enters the history (`PROTOTYPE_STRUCTURE.md`, "Rules").
-- **Publish** (a page plus its files; the merged Lab's first publish is P1a.2):
-  1. `python build.py`, green (the structure check 0, `S.` 0, the lint holding).
-  2. The record copy: copy `block-components-lab.html` to `../Block Components Lab.html` and the whole `assets/` folder (the
-     pictures and `assets/mascot/`) to `../assets/`, so the record copy opens beside its files (over `python tools/serve.py`:
-     http://localhost:8642/Block%20Components%20Lab.html).
-  3. The voice sets' packs, as `../voicebench/README.md`, "Publishing" says (`python ../voicebench/pack.py azure-ryan-duarte`).
-  4. The Artifact tool, to the Lab's one artifact: `file_path` the page (`block-components-lab.html`), and `files` every file of
-     `assets/` at its own path (`"assets/paco_hero.jpg": "lab_src/assets/paco_hero.jpg"`, … `"assets/mascot/explorer.glb":
-     "lab_src/assets/mascot/explorer.glb"`, `"assets/mascot/thumbs/explorer.png": …`: 16 files, about 9.3 MB, which `build.py`
-     prints) plus `voicebench/out/voicesets.js`, `packs.js` and the packs (`voicebench/out/<set>/pack-N.js`). A publish holds at
-     most 255 files and 64 MB; more go in a second publish to the same `url`.
-  5. Open the published link: the 3D mascot shows, Ask about the view sends its photo, and no "Open with tools/serve.py" line shows.
+- **The phone, its devices and its screens:** W's four devices on the preview bar (a click picks the phone or the tablet, a
+  second click turns it: 390 x 844, 844 x 390, 820 x 1180, 1180 x 820; the frame is scaled to the window, never resized). Landscape
+  shows the card as a full-height side sheet; the tablet's portrait is the phone's layout, wider (neither is designed yet: P3 / P4).
+  Every screen change goes through the router (`PROTOTYPE_STRUCTURE.md`, "The screen router"). **Explore** (the non-AR path): the
+  wall's Explore button, or the preview bar's **No camera** (a phone without the camera: Explore is home), lists the points with a
+  card; a tap opens the card at Full, and its tour plays there.
+- **Look** (the profile matrix, `tools/review/`, Python Playwright with the installed Edge, over the local server): rows light / dark x
+  text default / larger, columns the four devices.
+  - `python tools/review/state_shots.py <outdir> [states|all] [devices|all]`: the wall, Explore, the card at Peek / Half / Full,
+    Settings and the dock in a tour; one sheet per state (`<outdir>/sheets/<state>.png`), each cell in `<outdir>/raw/`.
+  - `python tools/review/inventory.py` lists every Editor fold of every tab into `tools/review/inventory.json` (its rows, whether one has
+    a demo); then `python tools/review/section_shots.py <outdir> [tab] [ids|all] [devices|all]`: one sheet per fold with a demo, its
+    first demo row's demo (`showRowDemo`) in every cell.
+- **Publish** (a page plus its files, to the Lab's one artifact; the Architect publishes):
+  1. `python build.py`, green (the structure check 0, the lint holding); `python ../voicebench/pack.py azure-ryan-duarte` when its
+     lines changed (`../voicebench/README.md`, "Publishing").
+  2. `python tools/publish.py --json <file>`: the publish list, at the paths the page asks for: `tilestories-lab.html`, `assets/...`
+     (the pictures, the mascot's models and thumbnails), `voicebench/out/voicesets.js`, `packs.js`, a packed set's `pack-N.js` (its
+     MP3s never), a set not packed one file each, `music/tracks.js` and its tracks; never `out-private`. It prints each publish's files
+     and size: the Artifact tool takes 16 MB a file and 64 MB / 255 files a publish, so the list comes in batches (about 155 files,
+     71 MB: two publishes to the same `url`). The json holds each publish's `files` map (`{"assets/paco_hero.jpg": "<absolute path>"}`).
+  3. The Artifact tool: the first publish `file_path` the page and `files` the first map, then each further map to the same `url`.
+  4. Open the published link: the 3D mascot shows, a recorded line plays, the music plays, Ask about the view sends its photo, and no
+     "Open with tools/serve.py" line shows. `python tools/publish.py --stage <dir>` builds the layout in a folder; `tests/test10f.js`
+     opens it as the published page.
+  The old record copy (`../Block Components Lab.html`) stays as it is, a frozen reference.
 - **Prove it:** (`LAB_PORT` as under Serve: a second copy uses its own port.) `powershell -ExecutionPolicy Bypass -File tests/runtest8.ps1` opens the page headless over the local server with `#selftest`: every option,
   text and demo field must change the phone or be classed behaviour, and every row of every tab has its demo but the named
   exemptions (`ROW_DEMO_EXEMPT`, each with its reason; guidance round 10) (it prints `bad=0` when all is well). It walks the tabs as three walks side by side and sums them (about 14 minutes at round 17b); the texts' walk goes in slices of 20 fields, each its own task, and draws the signature before a field once per tab and language (round 21: it had passed 40 min; `-tabs words` now about 4 min), its JSON pending (INCOMPLETE) until done;
@@ -83,6 +97,8 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
       offer in each place, Continue within a visit and on the next, the deep parts, the pace, expiry, a changed tour, blocked storage.
     - `test10b` (20 s) and `test10c` (14 s): the state's roots and Undo / Redo (`core/state`, `core/undo`, `editor/shell`'s one write
       point), the local server and the assets beside the page (`tools/serve.py`, `build.py`): every module reads the roots and loads its files.
+    - `test10d`, `test10e` and `test10f`: the screen router and the non-AR path (`screen/router`, `screen/explore`), the four devices
+      with the card's stops and the guide (`screen/device`), the publish layout (`tools/publish.py`): every screen and frame sits in them.
     <!-- /core set -->
   - **Full tests, every 12-15 rounds and before a hand-off to Unity:** `tests/runtest8.ps1`, then `node run_tests.js` (every file,
     about 2 h at round 17's timings), then every mutation the tests name (`MUTATE=1`); the results replace `tests_baseline.json`
@@ -414,6 +430,21 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
     [local] this computer (labLocal); [file] opened from disk the page running, the 3D mascot not loading and the Editor's one line
     "Open with tools/serve.py for the 3D mascot and photos", a photo asked for not sent and the line back. `MUTATE=1 node tests/test10c.js`
     makes the line never show: the last [file] check turns red.
+  - *The screen router, the devices and the first publish, merge round P1a.2* (`screen/router`, `screen/device`, `screen/explore`,
+    `tools/publish.py`): `tests/test10d.js` checks [order] a marker opening the card (the sheet, no screen change), a page and its back
+    arrow (a screen returned to leaves the history), Explore from the wall's button and back; [back] the top overlay first, then the
+    sheet, then the screen before, then nothing; [overlays] Settings by the card's chrome, the ✦ menu and its Ask about the view by real
+    taps, in `ui.overlays` in order, their old flags gone; [event] one `screenChanged` per change, none for the same state; [routed] the
+    check's count 0; [explore] the non-AR path by real taps: No camera, Explore (no wall, every point with a card in the wall's order), the
+    Torreão's card at Full, its tour from the hero's Start until the guide speaks a line, back and the card's close to Explore, Camera
+    back to the wall. `MUTATE=1` makes back ignore the overlays, tells every change twice and never turns the camera off: [back], [event]
+    and [explore] turn red. `tests/test10e.js` checks [buttons] W's device buttons by real clicks (a click picks, a second turns), [size]
+    each device's size and its frame scaled to fit, [stops] the card's stops in portrait by the test's own arithmetic (Peek H - 64, Half
+    H x (1 - Half max), Full 0, closed below), [land] landscape's full-height side sheet at the right, hidden when closed, [guide] the tour
+    from the hero's Start with its dock and the card inside the phone, in every device; `MUTATE=1` never recognises landscape: [land] turns
+    red. `tests/test10f.js` stages the publish list in a temp folder and opens it at a host that is not this computer: [list] its files,
+    never out-private, a packed set by its packs, within the limits; [page], [glb], [voice] a recorded line from its pack plays, [music];
+    `MUTATE=1` leaves the packs out: [voice] turns red.
   - *Every Editor row's demo, guidance round 10* (`editor/demo`, the rows' modules: `editor/card-tab`, `card/controls`, `card/blocks`,
     `card/pages`, `card/states`, `card/hints`, `editor/texts`, `editor/components`, `editor/marker-tab`, `mascot/azu2d`, `guidance/editor`):
     `tests/test9n.js` checks that the self-test's NO DEMO check walks every tab and finds no row without a demo but its named exemptions

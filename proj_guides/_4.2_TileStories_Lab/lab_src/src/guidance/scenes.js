@@ -14,7 +14,7 @@ function gdOverWords(){var b=ph.querySelector(".gdbub:not(.gd-out)"),az=G.gd.az&
 function gdScWait(f,ms){var t0=performance.now();return new Promise(function(res){(function w(){var v=false;try{v=f()}catch(e){}if(v||performance.now()-t0>ms){res(!!v);return}setTimeout(w,50)})()})}
 /* a scene's start: the Ribeira wall, a first visit (or one whose opening was said 30 s ago), the clock at its rate, the remarks resting */
 /* a scene starts clean: an Editor demo still pending is cancelled (a newer demo sequence), so its end never stops the scene's tip */
-function gdScSetup(rate,opened,keep){G.demoSeq=(G.demoSeq||0)+1;clearTimeout(G.gd.demoT);clearInterval(G.gd.demoI);if(G.on)stopTour();G.gd.tryOpen=false;G.gd.tryOwner=null;G.gd.tryShow=null;setWall("ribeira");gdStop("a scene");G.gd.demo=false;gdChip(null);var iv=gdGroupById("inview");
+function gdScSetup(rate,opened,keep){G.demoSeq=(G.demoSeq||0)+1;clearTimeout(G.gd.demoT);clearInterval(G.gd.demoI);if(G.on)stopTour();setOverlay("try",false);G.gd.tryOwner=null;G.gd.tryShow=null;setWall("ribeira");gdStop("a scene");G.gd.demo=false;gdChip(null);var iv=gdGroupById("inview");
   var cg=gdGroupById("card"),cues={};cg.items.forEach(function(id){cues[id]=D.guidance.items[id].on});
   var fk=gdKindById("fun");G.gd.sc={rate:G.gd.rate,inview:iv.on,hint:D.guidance.items.gbhint.on,gbtn:D.guide.gbtn,azuTap:D.guide.azuTap,life:D.guide.life,cueOn:cg.on,cues:cues,fun:fk?fk.on:null};
   /* round 7: Fun rests too, unless the scene is about it (keep = "fun") */
@@ -47,7 +47,7 @@ var GDSCENES=[
     q:T("nothing: taps the marker the mascot points at, closes the card, comes back (a new visit), then resets the visitor","nada: toca no marcador para onde a mascote aponta, fecha o cartão, volta (uma nova visita) e depois reinicia o visitante"),
     expect:T("The card opens and Tap a marker is done: not in the new visit (the opening says Welcome back); after Reset the visitor it comes again.","O cartão abre e o Toque num marcador fica feito: não aparece na nova visita (a abertura diz Bem-vindo de volta); depois de reiniciar o visitante volta a aparecer."),
     act:function(){var r={};return gdScWait(function(){return gdIs("tapmarker")},6000).then(function(a){r.shown=a;gsTouch(ph.querySelector("[data-marker]"));r.open=ui.stop!=="closed";r.done=gdEverOf(P.gdVisitor,"tapmarker").done;
-      ui.stop="closed";renderPhone(false);gdNewVisit();var t0=gdNow();return gdScWait(function(){if(gdIs("opening"))r.back=G.gd.cur.text;if(gdIs("tapmarker"))r.again=true;return gdNow()-t0>70000},12000)}).then(function(){
+      sheetTo("closed");renderPhone(false);gdNewVisit();var t0=gdNow();return gdScWait(function(){if(gdIs("opening"))r.back=G.gd.cur.text;if(gdIs("tapmarker"))r.again=true;return gdNow()-t0>70000},12000)}).then(function(){
       gdResetVisitor();return gdScWait(function(){return gdIs("tapmarker")},8000)}).then(function(c){r.reset=c;
       var ans="Tap a marker "+(r.shown?"shown":"not shown")+"; the tap "+(r.open?"opened the card":"did not open it")+(r.done?", done":"")+"; the new visit: "+(r.back?"“"+r.back+"”":"no opening")+", Tap a marker "+(r.again?"shown again":"not shown")+"; after Reset the visitor: "+(c?"shown":"not shown")+".";
       return gdScDone(r.shown&&r.open&&r.done&&r.back===TXT("gd_opening_back")&&!r.again&&c?[true,"a card opened retires Tap a marker, also next visit; Reset the visitor brings it back",ans]:[false,"Done when did not hold",ans])})}},
@@ -81,9 +81,9 @@ var GDSCENES2=[
     act:function(){var v0=P.gdVisitor.visit.at,t0=v0,over=0,stages={};
       return gdScRun(900000,function(t){var c=G.gd.cur;if(c&&!c.pull&&!stages[c.at]){stages[c.at]=gdStage(P.gdVisitor,c.at).s;if(G.utter||G.timer||G.recAudio)over++}
         if(t===130000){var m=ph.querySelector("[data-marker]");if(m)gsTouch(m)}
-        if(t===160000){ui.stop="closed";renderPhone(false)}
+        if(t===160000){sheetTo("closed");renderPhone(false)}
         if(t===200000){if(G.gd.cur&&G.gd.cur.item.id==="askview"&&!G.gd.cur.pull)gdTap();else gbGo("view")}
-        if(t===220000){G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};renderPhone(false)}}).then(function(){
+        if(t===220000){G.cam={answer:"",busy:false,lit:[],route:[],hunt:null};setOverlay("ask",false);renderPhone(false)}}).then(function(){
         var sh=gdScShows(t0),app=sh.filter(function(s){return s.kind==="app"}),con=sh.filter(function(s){return s.kind==="content"});
         var firstC=con[0],appBefore=firstC?app.filter(function(s){return s.t<firstC.t}).length:app.length,sC=firstC?stages[firstC.t]:null;
         var perMin=sh.reduce(function(m,s){return Math.max(m,sh.filter(function(x){return x.t>s.t-60000&&x.t<=s.t}).length)},0),scored=sh.every(function(s){return/score \d/.test(s.why)});
@@ -151,7 +151,7 @@ var GDSCENES3=[
         r.shown=a;r.text=a?G.gd.cur.text:"";r.arm=!!ph.querySelector(".azfab.point-gb");r.over=b&&g?Math.round(gdOver(gdPR(b),gdPR(g))):-1;r.words=gdOverWords();r.why=a?G.gd.cur.why:"";
         return gdScWait(function(){return!G.gd.cur},9000)}).then(function(){return poke(4)}).then(function(){return gdScWait(function(){return gdIs("gbhint")},1500)}).then(function(again){r.again=again;
         r.whyAgain=gdWhyNot(gdItems(),P.gdVisitor,Object.assign(gdContext(),{showing:null,touchAt:null,remark:null}),gdNow(),"gbhint");gsTouch(ph.querySelector(".gbtn"));r.menu=!!ph.querySelector(".gbmenu");r.done=gdEverOf(P.gdVisitor,"gbhint").done;
-        r.whyDone=gdWhyNot(gdItems(),P.gdVisitor,Object.assign(gdContext(),{showing:null,panel:null,remark:null,touchAt:null}),gdNow(),"gbhint");G.fab.menu=false;fabLayer();
+        r.whyDone=gdWhyNot(gdItems(),P.gdVisitor,Object.assign(gdContext(),{showing:null,panel:null,remark:null,touchAt:null}),gdNow(),"gbhint");setOverlay("menu",false);fabLayer();
         var ans=r.pokes+" pokes: The ✦ "+(r.shown?"“"+r.text+"”, the mascot's arm "+(r.arm?"to the ✦":"down")+", "+r.over+" px² over the ✦, "+r.words+" px² over words ("+r.why+")":"not shown")+"; 4 more: "+(r.again?"again":"not again")+" (“"+r.whyAgain+"”); the ✦ tapped: the menu "+(r.menu?"open":"closed")+", “"+r.whyDone+"”.";
         return gdScDone(r.pokes===4&&r.shown&&r.text===gdLine(D.guidance.items.gbhint)&&r.arm&&r.over===0&&r.words===0&&/4 pokes on the mascot/.test(r.why)&&!r.again&&/shown once this visit/.test(r.whyAgain)&&r.menu&&r.done&&/done for good \(the visitor opened the ✦ menu\)/.test(r.whyDone)?[true,"four pokes bring The ✦ once a visit, beside the ✦, pointing; the menu retires it",ans]:[false,"The ✦ did not come after four pokes, came twice, or the menu did not retire it",ans])})}}];
 GDSCENES3.forEach(function(s){s.where="wall";AGSCENES.push(s)});
@@ -161,7 +161,7 @@ function gdScCues(keep){var g=gdGroupById("card");g.items.forEach(function(id){D
 /* the card at Full scrolled past the hero (the ✦ shows) with the Before / After still below the screen; then brought into view */
 function gdScBaTop(){var el=scr.querySelector("[data-ba]");return el?el.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop:null}
 /* (placed again when the act starts: Ask Azu's console redraws the Editor after the set-up, and the card with it) */
-function gdScOnCard(){if(ui.view!=="card"||ui.stop!=="full"){ui.view="card";ui.stop="full";renderPhone(false)}var top=gdScBaTop(),h=scr.querySelector(".hero").offsetHeight;scr.scrollTop=Math.max(h+40,Math.min(h+120,(top||2000)-scr.clientHeight-40));fabLayer()}
+function gdScOnCard(){if(ui.view!=="card"||ui.stop!=="full"){goScreen("card",{stop:"full"});renderPhone(false)}var top=gdScBaTop(),h=scr.querySelector(".hero").offsetHeight;scr.scrollTop=Math.max(h+40,Math.min(h+120,(top||2000)-scr.clientHeight-40));fabLayer()}
 var GDSCENES4=[
   {id:"gd4_once",label:"Guidance · a hint and a tip never at once: the cue waits its room",setup:function(){gdScSetup(1,true,true);gdGroupById("inview").on=false;D.guide.life="lively";D.guide.azuTap="play";gdScCues(["ba"]);
       var e=gdEM("tapmarker");e.done=true;e.by="card";gdScOnCard()},
@@ -177,12 +177,12 @@ var GDSCENES4=[
         var ans="The ✦ "+(r.tip!=null?"shown":"not shown")+"; while it showed, the Before / After: “"+(r.during||"")+"”; after it: “"+(r.after||"")+"”; the sweep "+(gap!=null?gap+" s after the tip ended":"never")+"; "+r.both+" moments with both.";
         return gdScDone(r.tip!=null&&/one at a time: The ✦ is showing/.test(r.during||"")&&/the cue room \d+ s after a tip/.test(r.after||"")&&gap>=room&&r.both===0?[true,"the cue waits while the tip shows, then its room ("+gap+" s); never both at once",ans]:[false,"the cue came with the tip, or within its room",ans])})}},
   {id:"gd4_how",label:"Guidance · How does this work?: from the ✦ menu, on the card and on the wall",setup:function(){gdScSetup(1,true);G.gd.sc.how={on:D.guidance.on,mute:P.guideMute,intro:P.introSeen};D.guidance.on=false;P.guideMute=true;P.introSeen=true;
-      ui.view="card";ui.stop="full";renderPhone(false);scr.scrollTop=scr.querySelector(".hero").offsetHeight+60;fabLayer()},
+      goScreen("card",{stop:"full"});renderPhone(false);scr.scrollTop=scr.querySelector(".hero").offsetHeight+60;fabLayer()},
     q:T("nothing: Guidance set Off for the scene; on a card it taps the ✦, then How does this work?; then on the wall the same, and the bubble's Open a card","nada: a Orientação desligada para a cena; num cartão toca no ✦ e depois em Como funciona?; depois na parede o mesmo, e no Abrir um cartão da bolha"),
     expect:T("A pull, so no gate stops it (Guidance Off): on the card the walkthrough starts at the grabber (marked), and once its line is heard the Grabber nudge is done for good; on the wall one bubble says how the wall works, beside the nearest marker, 0 px over words, with Open a card, which opens the card.","Um pedido, por isso nenhuma regra o trava (Orientação desligada): no cartão a explicação começa pela pega (marcada) e, ouvida a sua frase, o Toque na pega fica feito; na parede uma bolha diz como a parede funciona, junto ao marcador mais próximo, 0 px sobre palavras, com Abrir um cartão, que abre o cartão."),
-    act:function(){var r={},k=G.gd.sc.how;if(ui.view!=="card"||ui.stop!=="full"){ui.view="card";ui.stop="full";renderPhone(false)}scr.scrollTop=scr.querySelector(".hero").offsetHeight+60;fabLayer();gsTouch(ph.querySelector(".gbtn"));r.item=!!ph.querySelector('[data-gbgo="how"]');var it=ph.querySelector('[data-gbgo="how"]');if(it)gsTouch(it);
+    act:function(){var r={},k=G.gd.sc.how;if(ui.view!=="card"||ui.stop!=="full"){goScreen("card",{stop:"full"});renderPhone(false)}scr.scrollTop=scr.querySelector(".hero").offsetHeight+60;fabLayer();gsTouch(ph.querySelector(".gbtn"));r.item=!!ph.querySelector('[data-gbgo="how"]');var it=ph.querySelector('[data-gbgo="how"]');if(it)gsTouch(it);
       r.walk=G.on&&D.tour.guideSteps[G.i]&&D.tour.guideSteps[G.i].id==="how0";r.mark=!!ph.querySelector("#grab.gfocus");
-      return gdScWait(function(){return gdEverOf(P.gdVisitor,"nudge").done},12000).then(function(d){r.done=d&&gdEverOf(P.gdVisitor,"nudge").by==="wk_grab";stopTour();ui.stop="closed";renderPhone(false);
+      return gdScWait(function(){return gdEverOf(P.gdVisitor,"nudge").done},12000).then(function(d){r.done=d&&gdEverOf(P.gdVisitor,"nudge").by==="wk_grab";stopTour();sheetTo("closed");renderPhone(false);
         return gdScWait(function(){return!!ph.querySelector(".gbtn")},2000)}).then(function(){gsTouch(ph.querySelector(".gbtn"));var w=ph.querySelector('[data-gbgo="how"]');if(w)gsTouch(w);
         return gdScWait(function(){return gdIs("howto:wall")||!!(G.gd.cur&&G.gd.cur.item.id==="howto:wall")},2000)}).then(function(a){/* round 21: the bubble goes with the mascot's hop (21.4), so its place is read once the hop has ended */return gdScWait(function(){return false},Math.max(500,(G.gd.hopMs||0)+250)).then(function(){var b=ph.querySelector(".gdbub:not(.gd-out)"),g=ph.querySelector(".gbtn");
         r.wall=a;r.text=a?G.gd.cur.text:"";r.cta=!!(b&&b.querySelector("[data-gdcta]"));r.words=gdOverWords();r.overStar=b&&g?Math.round(gdOver(gdPR(b),gdPR(g))):-1;r.ring=!!ph.querySelector(".gdring");
@@ -205,10 +205,10 @@ var GDSCENES5=[
       var now=gdPresetNow(),roomQ=gdRoomNow(),q=gdSimulate("first"),s=gdSimSum(q,15),d=q.dots.filter(function(x){return!x.cue})[1];if(d)gdSimShow(d);
       return gdScWait(function(){return!!ph.querySelector(".gdbub:not(.gd-out)")},2500).then(function(shown){var ans="Preset now "+gdPresetName(now)+"; the room "+roomB+" s → "+roomQ+" s ("+gdForceWords(D.guidance.breathing," s",true).replace("In force: ","")+"); First visit: "+b.words+"; Quiet: "+s.words+"; the phone "+(shown?"shows its tip at "+gdClock(d.t):"shows nothing")+".";
         return gd5Done(now==="quiet"&&roomQ>roomB&&s.tips<b.tips&&s.perMin<=1&&shown?[true,"Quiet: "+s.tips+" tips in 15 min against "+b.tips+", the room "+roomQ+" s",ans]:[false,"Quiet did not make it quieter",ans])})}},
-  {id:"gd5_family",label:"Guidance · the Family audience: Who's exploring sets the Family preset",setup:function(){gd5Keep();gdPresetWrite("first");P.vis.aud="explorer";P.vis.len="";D.wall.aud.where="card";D.wall.aud.seen=false;ui.view="card";ui.stop="closed";renderPhone(false)},
+  {id:"gd5_family",label:"Guidance · the Family audience: Who's exploring sets the Family preset",setup:function(){gd5Keep();gdPresetWrite("first");P.vis.aud="explorer";P.vis.len="";D.wall.aud.where="card";D.wall.aud.seen=false;goScreen("card",{stop:"closed"});renderPhone(false)},
     q:T("nothing: it opens the card, and on the first card's Who's exploring it taps Family","nada: abre o cartão e, no Quem está a explorar do primeiro cartão, toca em Família"),
     expect:T("Family chosen: the Family preset is in force (12 s between two tips, Content's gap 45 s, the Mix 60 / 35 / 15 and 25 / 40 / 45), and the Editor's Preset reads Family.","Família escolhida: a predefinição Família fica em vigor (12 s entre duas dicas, o intervalo do Conteúdo 45 s, a Mistura 60 / 35 / 15 e 25 / 40 / 45), e a Predefinição do Editor diz Família."),
-    act:function(){ui.stop="half";renderPhone(false);return gdScWait(function(){return!!ph.querySelector('.onb [data-onb="family"]')},2500).then(function(ok){var b=ph.querySelector('.onb [data-onb="family"]');if(b)gsTouch(b);
+    act:function(){sheetTo("half");renderPhone(false);return gdScWait(function(){return!!ph.querySelector('.onb [data-onb="family"]')},2500).then(function(ok){var b=ph.querySelector('.onb [data-onb="family"]');if(b)gsTouch(b);
       return gdScWait(function(){return gdPresetNow()==="family"},2500).then(function(){var g=D.guidance,p=GD_PRESETS.family,now=gdPresetNow();
         var ans="Who's exploring "+(ok?"asked":"did not show")+"; the audience "+(AUDN[aud()]||aud())+"; the preset "+gdPresetName(now)+": the room "+g.breathing+" s, Content's gap "+g.kinds[1].gap+" s, the Mix App "+g.mix.app.join(" / ")+", Content "+g.mix.content.join(" / ")+".";
         return gd5Done(ok&&aud()==="family"&&now==="family"&&g.breathing===p.breathing&&JSON.stringify(g.mix)===JSON.stringify(p.mix)?[true,"Family in Who's exploring set the Family preset",ans]:[false,"the audience did not set its preset",ans])})})}},
@@ -222,7 +222,7 @@ GDSCENES5.forEach(function(s){s.where="wall";AGSCENES.push(s)});
 /* ----- round 6: four more scenes (ids gd6_*): the Spotlight on an Essential, the ghost finger on Before / After, Tips stay until tapped,
    and a screen reader on (nothing spoken, the tip in the dock). Each keeps what it changes (the guidance, the visitor's Tips settings, the
    screen reader, Reduce Motion) and gives it back after ----- */
-function gd6Keep(){G.gd.sc6={g:JSON.parse(JSON.stringify(D.guidance)),sr:LAB.gdSR,reduce:P.reduce};if(G.on)stopTour();G.cam.open=false;ui.settingsOpen=false;G.fab.menu=false;ui.view="card";ui.stop="closed";renderPhone(false)}
+function gd6Keep(){G.gd.sc6={g:JSON.parse(JSON.stringify(D.guidance)),sr:LAB.gdSR,reduce:P.reduce};if(G.on)stopTour();setOverlay("ask",false);setOverlay("settings",false);setOverlay("menu",false);goScreen("card",{stop:"closed"});renderPhone(false)}
 function gd6Done(r){var k=G.gd.sc6;if(k){gdStop("the scene ended");D.guidance=k.g;LAB.gdSR=k.sr;P.reduce=k.reduce;gdPrefs().stay=false;if(G.on)stopTour();G.gd.sc6=null}return gdScDone(r)}
 /* why nothing showed, in the scheduler's words (a failed scene says it) */
 function gd6Why(){var l=G.gd.last;return l?String(l.why).slice(0,220):"nothing asked yet"}
@@ -255,7 +255,7 @@ var GDSCENES6=[
     q:T("nothing: a screen reader is on (Preview & Test › The visitor); the visitor has heard the guide, so the mascot's remark would be spoken; then it opens the dock (✦ › Ask)","nada: um leitor de ecrã está ligado (Pré-visualizar e testar › O visitante); o visitante já ouviu o guia, por isso o comentário da mascote seria falado; depois abre a doca (✦ › Perguntar)"),
     expect:T("The mascot's remark shows as a bubble announced politely (aria-live), never spoken; in the dock's conversation it is under Tips.","O comentário da mascote aparece num balão anunciado com cortesia (aria-live), nunca falado; na conversa da doca está em Dicas."),
     act:function(){var c=null;this.arrange();return gdScWait(function(){return!!(G.gd.cur&&G.gd.cur.item.base==="inview"&&!G.gd.cur.pull)},10000).then(function(ok){c=G.gd.cur;var b=ph.querySelector(".gdbub:not(.gd-out)"),live=b&&b.getAttribute("aria-live"),spoken=!!(c&&c.spoken),said=!!(c&&G.gd.voiced&&G.gd.voiced.at===c.at),text=c&&c.text;
-      gdStop("the scene opens the dock");G.cam.open=false;gbGo("ask");return gdScWait(function(){return!!ph.querySelector(".gdock .gm-tips")},2500).then(function(){var tp=ph.querySelector(".gdock .gm-tips"),inDock=!!(tp&&text&&tp.textContent.indexOf(text)>=0);
+      gdStop("the scene opens the dock");setOverlay("ask",false);gbGo("ask");return gdScWait(function(){return!!ph.querySelector(".gdock .gm-tips")},2500).then(function(){var tp=ph.querySelector(".gdock .gm-tips"),inDock=!!(tp&&text&&tp.textContent.indexOf(text)>=0);
         var ans="The mascot's remark "+(ok?"“"+text+"”":"not shown ("+gd6Why()+")")+"; announced: aria-live "+live+"; spoken: "+(spoken||said?"yes":"no")+"; the dock's Tips "+(inDock?"hold it":"do not hold it")+".";
         return gd6Done(ok&&live==="polite"&&!spoken&&!said&&inDock?[true,"announced, not spoken, and in the dock under Tips",ans]:[false,"spoken over the screen reader, or missing from the dock",ans])})})}}];
 GDSCENES6.forEach(function(s){s.where=s.id==="gd6_finger"?"card":"wall";AGSCENES.push(s)});
@@ -263,8 +263,8 @@ GDSCENES6.forEach(function(s){s.where=s.id==="gd6_finger"?"card":"wall";AGSCENES
    a Solemn point (no fun), Christmas on the wall (Today is in December). Each keeps what it changes (the guidance, Today is, Solemn, the
    audience, the points' jokes, Liveliness) and gives it back after; only Fun (and the part of it the scene is about) is On ----- */
 function gd7Keep(){G.gd.sc7={g:JSON.parse(JSON.stringify(D.guidance)),today:LAB.gdToday,solemn:D.poi.solemn,aud:P.vis.aud,life:D.guide.life,tap:D.guide.azuTap,jk:JSON.parse(JSON.stringify(D.tour.ptJokes))};
-  if(G.on)stopTour();G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};ui.settingsOpen=false;G.fab.menu=false;ui.view="card";ui.stop="closed";renderPhone(false)}
-function gd7Done(r){var k=G.gd.sc7;if(k){gdStop("the scene ended");if(G.on)stopTour();D.guidance=k.g;LAB.gdToday=k.today;D.poi.solemn=k.solemn;P.vis.aud=k.aud;D.guide.life=k.life;D.guide.azuTap=k.tap;D.tour.ptJokes=k.jk;G.cam.open=false;G.gd.sc7=null;renderPhone(false)}return gdScDone(r)}
+  if(G.on)stopTour();G.cam={answer:"",busy:false,lit:[],route:[],hunt:null};setOverlay("ask",false);setOverlay("settings",false);setOverlay("menu",false);goScreen("card",{stop:"closed"});renderPhone(false)}
+function gd7Done(r){var k=G.gd.sc7;if(k){gdStop("the scene ended");if(G.on)stopTour();D.guidance=k.g;LAB.gdToday=k.today;D.poi.solemn=k.solemn;P.vis.aud=k.aud;D.guide.life=k.life;D.guide.azuTap=k.tap;D.tour.ptJokes=k.jk;setOverlay("ask",false);G.gd.sc7=null;renderPhone(false)}return gdScDone(r)}
 /* the scene's start: a first visit whose opening was said 30 s ago, every kind but Fun resting, only the Fun items named On */
 function gd7Only(ids){gdScSetup(10,true,"fun");D.guidance.kinds.forEach(function(k){k.on=k.id==="fun"});["ontour","play"].forEach(function(g){gdGroupById(g).on=true});
   ["quizpromise","quizfinale","guessyear","water","cookie","joke","ptjoke","hunt","season"].forEach(function(id){D.guidance.items[id].on=ids.indexOf(id)>=0});D.guide.life="lively";D.poi.solemn=false;D.guide.azuTap="play"}
@@ -289,7 +289,7 @@ var GDSCENES7=[
     q:T("nothing: a Family visitor who has opened a card is on the wall (×10); it taps the invitation's chip, then the point the hunt names","nada: um visitante Família que já abriu um cartão está na parede (×10); toca no botão do convite, depois no ponto que a caça nomeia"),
     expect:T("“Want a treasure hunt? Find the Tagus and its ships on the wall.” with Let's play; a tap opens Ask about the view with the hunt; a tap on the Tagus finds it, and the invitation is done for good.","“Uma caça ao tesouro? Encontre o Tejo e os seus navios na parede.” com Vamos jogar; um toque abre o Pergunte sobre a vista com a caça; um toque no Tejo encontra-o, e o convite fica feito de vez."),
     act:function(){var txt="";this.arrange();return gdScWait(function(){var c=gd7Fun();return!!(c&&c.item.id==="hunt")},9000).then(function(ok){txt=G.gd.cur&&G.gd.cur.text||"";var ch=ph.querySelector(".gdbub:not(.gd-out) [data-gdcta]"),cs=ch?[ch.offsetWidth,ch.offsetHeight]:null;if(ch)gsTouch(ch);
-      return gdScWait(function(){return G.cam.open&&!!G.cam.hunt&&!!ph.querySelector('[data-cpin="'+G.cam.hunt+'"]')},4000).then(function(hunting){var id=G.cam.hunt,pin=id&&ph.querySelector('[data-cpin="'+id+'"]');if(pin)gsTouch(pin);
+      return gdScWait(function(){return overlayOn("ask")&&!!G.cam.hunt&&!!ph.querySelector('[data-cpin="'+G.cam.hunt+'"]')},4000).then(function(hunting){var id=G.cam.hunt,pin=id&&ph.querySelector('[data-cpin="'+id+'"]');if(pin)gsTouch(pin);
         return gdScWait(function(){return!G.cam.hunt&&gdEverOf(P.gdVisitor,"hunt").done},3000).then(function(found){var em=gdEverOf(P.gdVisitor,"hunt");var ans="the invitation "+(ok?"“"+txt+"”, its chip "+(cs?cs.join(" × ")+" px":"missing"):"not shown ("+gd6Why()+")")+"; the hunt "+(hunting?"started for "+id:"did not start")+"; found: "+(found?"yes, the invitation done ("+(GD_EVENTS[em.by]||em.by)+")":"no")+".";
           return gd7Done(ok&&/treasure hunt/i.test(txt)&&cs&&cs[1]>=44&&hunting&&found?[true,"the family got the invitation; its tap started the real hunt, and finding it retired the invitation",ans]:[false,"the hunt's invitation, its tap or its end did not work",ans])})})})}},
   {id:"gd7_solemn",label:"Guidance · a Solemn point: no fun (no joke after pokes, Why not now? says why)",setup:function(){gd7Keep()},arrange:function(){gd7Only(["joke","ptjoke","season","hunt"]);D.poi.solemn=true;P.vis.aud="family";P.gdVisitor.used.card=gdNow()-60000;gdSimAim("painting");G.gd.movedAt=gdNow()-2000},
@@ -334,7 +334,7 @@ var GDSCENES8=[
     expect:T("Skip skips the rest of the intro: no Who's exploring (Explorer), straight to the phone's camera request (never the wall without it), then the wall with the Opening message; the first card asks nothing.","Saltar salta o resto da introdução: sem Quem explora (Explorador), logo o pedido da câmara do telemóvel (nunca a parede sem ela), depois a parede com a mensagem de abertura; o primeiro cartão não pergunta nada."),
     act:function(){var seen=[];gdLaunch("first");
       return gd8Wait("hello").then(function(){seen.push(gd8Page());gd8Tap('[data-gdpg="skip"]');return gd8Wait("camera:prompt")}).then(function(ok){seen.push(gd8Page());gd8Tap('[data-gdpg="sys:allow"]');return gdScWait(function(){return gdIs("opening")},4000)})
-        .then(function(op){var pg=P.gdVisitor.pages||{};ui.view="card";ui.stop="half";renderPhone(false);var asks=!!ph.querySelector(".onb");ui.stop="closed";renderPhone(false);
+        .then(function(op){var pg=P.gdVisitor.pages||{};goScreen("card",{stop:"half"});renderPhone(false);var asks=!!ph.querySelector(".onb");sheetTo("closed");renderPhone(false);
           var ans="the pages: "+seen.join(" → ")+"; skipped: "+(pg.skipped?"yes":"no")+"; the audience "+P.vis.aud+" (answered: "+(D.wall.aud.seen?"yes":"no")+"); "+(op?"the Opening message: “"+G.gd.cur.text+"”":"no Opening message")+"; the first card asks: "+(asks?"yes":"no")+".";
           return gd8Done(seen.join(",")==="hello,camera:prompt"&&pg.skipped&&P.vis.aud==="explorer"&&D.wall.aud.seen&&op&&!asks?[true,"one Skip skipped the intro; the camera was still asked; the wall came after it",ans]:[false,"Skip did not skip the intro as it should",ans])})}},
   {id:"gd8_camera",label:"Guidance · the camera refused, then allowed: never the wall without it",setup:function(){gd8Keep("card")},
@@ -362,13 +362,13 @@ GDSCENES8.forEach(function(s){s.where="wall";AGSCENES.push(s)});
    taps as a finger does (gsTouch) and checks the phone: where the visitor was taken, the finger's gesture and where it ends ----- */
 /* the sheet's rows now, and a tap on one of its controls */
 function gd9Rows(){return[].map.call(ph.querySelectorAll(".gdtry .gdtry-row"),function(r){return r.dataset.gdtryrow})}
-function gd9Open(){var g=ph.querySelector(".gbtn");if(!g)return false;gsTouch(g);var t=ph.querySelector('.gbmenu [data-gbgo="try"]');if(!t){G.fab.menu=false;fabLayer();return false}gsTouch(t);return!!ph.querySelector(".gdtry")}
+function gd9Open(){var g=ph.querySelector(".gbtn");if(!g)return false;gsTouch(g);var t=ph.querySelector('.gbmenu [data-gbgo="try"]');if(!t){setOverlay("menu",false);fabLayer();return false}gsTouch(t);return!!ph.querySelector(".gdtry")}
 function gd9Show(id){return gsTouch(ph.querySelector('.gdtry [data-gdtryshow="'+id+'"]'))}
 /* the finger's end inside the target's box (a little room: the tip rests at its edge) */
 function gd9OnTarget(){var s=G.gd.tryShow;if(!s||!s.played||!s.end||!s.box)return false;var b=s.box,m=24;return s.end[0]>=b.l-m&&s.end[0]<=b.r+m&&s.end[1]>=b.t-m&&s.end[1]<=b.b+m}
 function gd9Played(id){return gdScWait(function(){var s=G.gd.tryShow;return!!(s&&s.id===id&&s.played)},3500)}
 function gd9Keep(){G.gd.sc9={prefs:JSON.stringify(gdPrefs()),ask:D.guide.ask,menu:D.guidance.tryMenu};D.guidance.tryMenu=true}
-function gd9Done(r){var k=G.gd.sc9;if(k){var Pl=JSON.parse(k.prefs),V=gdPrefs();V.tips=Pl.tips;V.stay=Pl.stay;D.guide.ask=k.ask;D.guidance.tryMenu=k.menu;G.gd.sc9=null}G.gd.tryOpen=false;G.fab.menu=false;if(G.on)stopTour();renderPhone(false);return gdScDone(r)}
+function gd9Done(r){var k=G.gd.sc9;if(k){var Pl=JSON.parse(k.prefs),V=gdPrefs();V.tips=Pl.tips;V.stay=Pl.stay;D.guide.ask=k.ask;D.guidance.tryMenu=k.menu;G.gd.sc9=null}setOverlay("try",false);setOverlay("menu",false);if(G.on)stopTour();renderPhone(false);return gdScDone(r)}
 var GDSCENES9=[
   {id:"gd9_tryba",label:"Guidance · Things to try: Show me on Before / After",setup:function(){gdScSetup(10,true);gd9Keep()},
     q:T("nothing: on the wall it taps ✦, Things to try, then Show me on Drag Before / After","nada: na parede toca em ✦, Coisas a experimentar, depois Mostre-me em Arrastar o antes e depois"),
@@ -384,7 +384,7 @@ var GDSCENES9=[
       return gd9Played("tapmarker").then(function(ok){var s=G.gd.tryShow||{},on=gd9OnTarget();
         var ans="30 s with Tips Off: "+(none?"no tip ("+why.slice(0,90)+")":"a tip showed ("+(G.gd.cur&&G.gd.cur.item.label)+")")+"; Things to try "+(open?"opened, "+rows.length+" rows":"missing")+"; Show me "+(ok?"the "+s.gesture+" on "+s.where+", the finger "+(on?"on":"off")+" the marker":"did not play")+".";
         return gd9Done(none&&/Tips Off/.test(why)&&open&&rows.length>0&&ok&&s.gesture==="tap"&&on?[true,"Tips Off silenced the pushed tips; the pull still answered",ans]:[false,"Tips Off hid the pull, or a tip still came",ans])})})}},
-  {id:"gd9_howpause",label:"Guidance · How do I pause the guide? (Show me)",setup:function(){gdScSetup(10,true);gd9Keep();D.guide.ask="search";ui.view="card";ui.stop="full";renderPhone(false);scr.scrollTop=900;fabLayer()},
+  {id:"gd9_howpause",label:"Guidance · How do I pause the guide? (Show me)",setup:function(){gdScSetup(10,true);gd9Keep();D.guide.ask="search";goScreen("card",{stop:"full"});renderPhone(false);scr.scrollTop=900;fabLayer()},
     q:T("How do I pause the guide?","Como pauso o guia?"),
     expect:T("Offline (no key): the mascot answers from the app's own tip (“During the tour, tap ⏸ beside the talk button.”) with a Show me card; its tap starts the tour at Mini and the finger taps ⏸; the item is seen, not done.","Offline (sem chave): a mascote responde com a dica da própria app (“Durante a visita, toque em ⏸ ao lado do botão de falar.”) e um cartão Mostre-me; o toque começa a visita no Mini e o dedo toca em ⏸; o item fica visto, não feito."),
     act:function(){var g=ph.querySelector(".gbtn");if(g)gsTouch(g);var a=ph.querySelector('.gbmenu [data-gbgo="ask"]');if(a)gsTouch(a);var i=ph.querySelector("#gq"),fm=ph.querySelector(".gd-form");if(i&&fm){i.value=L(GDSCENES9[2].q);fm.dispatchEvent(new Event("submit",{bubbles:true,cancelable:true}))}
@@ -408,11 +408,11 @@ GDSCENES9[0].where="wall";GDSCENES9[1].where="wall";GDSCENES9[2].where="card";GD
    introduction, Liveliness) and gives it back after; the tour runs with its own voice, and where a scene needs a later seam it moves the
    tour there (the steps between counted as heard, said in its question). Only Fun › On the tour is On ----- */
 function gd12Keep(){G.gd.sc12={g:JSON.parse(JSON.stringify(D.guidance)),q:JSON.parse(JSON.stringify(D.tour.tourQ)),gs:JSON.parse(JSON.stringify(D.tour.tourGuess)),aud:P.vis.aud,len:P.vis.len,intro:P.introSeen,life:D.guide.life,solemn:D.poi.solemn,look:D.guide.look};
-  if(G.on)stopTour();gdBeatClose();G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};ui.settingsOpen=false;G.fab.menu=false;ui.view="card";ui.stop="full";renderPhone(false)}
-function gd12Done(r){var k=G.gd.sc12;if(k){gdStop("the scene ended");if(G.on)stopTour();gdBeatClose();G.gd.owed=null;D.guidance=k.g;D.tour.tourQ=k.q;D.tour.tourGuess=k.gs;P.vis.aud=k.aud;P.vis.len=k.len;P.introSeen=k.intro;D.guide.life=k.life;D.poi.solemn=k.solemn;G.gd.sc12=null;ui.view="card";ui.stop="full";renderPhone(false)}return gdScDone(r)}
+  if(G.on)stopTour();gdBeatClose();G.cam={answer:"",busy:false,lit:[],route:[],hunt:null};setOverlay("ask",false);setOverlay("settings",false);setOverlay("menu",false);goScreen("card",{stop:"full"});renderPhone(false)}
+function gd12Done(r){var k=G.gd.sc12;if(k){gdStop("the scene ended");if(G.on)stopTour();gdBeatClose();G.gd.owed=null;D.guidance=k.g;D.tour.tourQ=k.q;D.tour.tourGuess=k.gs;P.vis.aud=k.aud;P.vis.len=k.len;P.introSeen=k.intro;D.guide.life=k.life;D.poi.solemn=k.solemn;G.gd.sc12=null;goScreen("card",{stop:"full"});renderPhone(false)}return gdScDone(r)}
 /* the scene's start: a first visit, only Fun › On the tour On, Lively, no introduction (the tour starts at its welcome) */
 function gd12Only(ids){gdScSetup(10,true,"fun");D.guidance.kinds.forEach(function(k){k.on=k.id==="fun"});gdGroupById("play").on=false;gdGroupById("ontour").on=true;
-  ["quizpromise","quizfinale","guessyear","water","cookie"].forEach(function(id){D.guidance.items[id].on=ids.indexOf(id)>=0});D.guide.life="lively";D.poi.solemn=false;P.introSeen=true;P.vis.aud="explorer";P.vis.len="";ui.view="card";ui.stop="full";renderPhone(false)}
+  ["quizpromise","quizfinale","guessyear","water","cookie"].forEach(function(id){D.guidance.items[id].on=ids.indexOf(id)>=0});D.guide.life="lively";D.poi.solemn=false;P.introSeen=true;P.vis.aud="explorer";P.vis.len="";goScreen("card",{stop:"full"});renderPhone(false)}
 /* the tour moved to a step's seam (the steps up to it heard), and on: the beat planned there plays */
 function gd12Seam(id){var j=D.tour.guideSteps.findIndex(function(s){return s.id===id});if(j<0||!G.on)return false;stopSpeech();clearTimeout(G.timer);G.timer=null;G.waiting=false;G.paused=false;G.i=j;
   D.tour.guideSteps.slice(0,j+1).forEach(function(s){G.gd.heard[s.id]=1});renderGuide();next();return true}
@@ -452,7 +452,7 @@ var GDSCENES12=[
     expect:T("Stopped before its quiz: the ✦ menu offers “Your 3 questions” (from the steps heard) for the rest of the visit; a tap plays the quiz on the card, and its score.","Parada antes das perguntas: o menu ✦ oferece “As suas 3 perguntas” (dos passos ouvidos) pelo resto da visita; um toque mostra as perguntas no cartão, e a pontuação."),
     act:function(){this.arrange();startTour();return gdScWait(function(){return!!G.gd.plan},3000).then(function(){G.gd.plan.quiz="on";var pb=gdPlanBeat("quizpromise");if(pb)pb.state="played";
       var j=D.tour.guideSteps.findIndex(function(s){return s.id==="g5"});D.tour.guideSteps.slice(0,j+1).forEach(function(s){G.gd.heard[s.id]=1});stopSpeech();G.i=j+1;runStep();
-      ui.dockH="peek";renderGuide();return gdScWait(function(){return!!ph.querySelector('.gdock [data-g="stop"]')},4000).then(function(){gd12Tap('.gdock [data-g="stop"]');return gdScWait(function(){return!G.on},3000).then(function(){var owed=gdQuizOwed();ui.view="card";ui.stop="full";renderPhone(false);scr.scrollTop=900;
+      ui.dockH="peek";renderGuide();return gdScWait(function(){return!!ph.querySelector('.gdock [data-g="stop"]')},4000).then(function(){gd12Tap('.gdock [data-g="stop"]');return gdScWait(function(){return!G.on},3000).then(function(){var owed=gdQuizOwed();goScreen("card",{stop:"full"});renderPhone(false);scr.scrollTop=900;
         /* past the hero the ✦ shows (its menu's Your 3 questions) */
         return gdScWait(function(){fabLayer();return!!ph.querySelector(".gbtn-wrap .gbtn")},3000)}).then(function(){var owed=gdQuizOwed();gbMenu(true);
         var item=ph.querySelector('.gbmenu [data-gbgo="quiz"]'),label=item?item.textContent:"";if(item)gsTouch(item);

@@ -107,7 +107,7 @@ function dhArrive(tr){if(G.trav!==tr)return;tr.done=true;if(DH.job&&DH.job.kind=
 /* the card's own top bar (its close and settings, the title band) over the scroll: the preview is put under it */
 function dhTopClear(){return Math.max(64,Math.min(140,cardTopClear()+10))}
 function dhTravel(tr,way){var j=dhJob("travel");clearGuideMarks();
-  var tap=function(){if(j.dead||G.trav!==tr)return;if(!way.el.isConnected){tr.done=true;ui.view=D.tour.guideSteps[tr.i].view;renderPhone(false);dhArrive(tr);return}
+  var tap=function(){if(j.dead||G.trav!==tr)return;if(!way.el.isConnected){tr.done=true;goScreen(D.tour.guideSteps[tr.i].view);renderPhone(false);dhArrive(tr);return}
     var r=dhRectIn(way.el),img=way.el.querySelector("img"),ri=img?dhRectIn(img):null,pt=ri&&ri.b-ri.t>40?{x:(ri.l+ri.r)/2,y:(ri.t+ri.b)/2}:{x:(r.l+r.r)/2,y:(r.t+r.b)/2};
     dhTapIn(j,way.el,pt,function(){dhWait(j,(way.kind==="open story"?PO_MS:PO_BACK_MS)+60,function(){dhArrive(tr)})})};
   if(way.item){var o=dhQ(),ir=way.item.getBoundingClientRect(),want=o.p.top+dhTopClear()*o.q,dy=(ir.top-want)/o.q;if(Math.abs(dy)>8){tourScroll(scr.scrollTop+dy,function(){dhWait(j,140,tap)});return}}

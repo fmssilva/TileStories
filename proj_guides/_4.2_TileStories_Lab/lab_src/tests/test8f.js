@@ -8,7 +8,7 @@ const url = labUrl('#probe');
   await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 20000 }); await p.waitForTimeout(400);
   const R = src => p.evaluate(s => LAB.run(s), src);
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
-  const open = async (stop, y) => { await R(`ui.view="card";ui.stop="${stop}";ui.settingsOpen=false;renderAll(false)`); await p.waitForTimeout(700); if (y) { await R(`scr.scrollTop=${y}`); await p.waitForTimeout(300); } };
+  const open = async (stop, y) => { await R(`ui.view="card";ui.stop="${stop}";setOverlay("settings",false);renderAll(false)`); await p.waitForTimeout(700); if (y) { await R(`scr.scrollTop=${y}`); await p.waitForTimeout(300); } };
   const stop = () => R('ui.stop'), view = () => R('ui.view');
   const box = async sel => p.locator(sel).first().boundingBox();
 
@@ -28,7 +28,7 @@ const url = labUrl('#probe');
   ok('a tap leaves no focus ring on the grabber', await R('document.activeElement!==document.getElementById("grab")'));
 
   // 0c. the Locate Button rests at the foot; the Navigation Bar lifts it
-  const pin = () => R('var lp=ph.querySelector(".locpin"),nb=document.getElementById("navbar"),pr=ph.getBoundingClientRect(),k=fit.getBoundingClientRect().height/SCREENS[LAB.screen][1];[Math.round((pr.bottom-lp.getBoundingClientRect().bottom)/k),getComputedStyle(nb).display!=="none",Math.round(lp.getBoundingClientRect().bottom-nb.getBoundingClientRect().top)]');
+  const pin = () => R('var lp=ph.querySelector(".locpin"),nb=document.getElementById("navbar"),pr=ph.getBoundingClientRect(),k=fit.getBoundingClientRect().height/devH();[Math.round((pr.bottom-lp.getBoundingClientRect().bottom)/k),getComputedStyle(nb).display!=="none",Math.round(lp.getBoundingClientRect().bottom-nb.getBoundingClientRect().top)]');
   await R('ui.view="card";ui.stop="half";D.card.ctl.sticky="off";renderPhone(false);scr.scrollTop=0'); await p.waitForTimeout(500);
   const pa = await pin();
   ok('no bar shown: the pin sits at the foot (22 px)', !pa[1] && pa[0] >= 18 && pa[0] <= 26, pa);

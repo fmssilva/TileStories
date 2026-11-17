@@ -137,8 +137,8 @@ BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("D\\.card\\.ctl\\.jump\\.","D\\.ca
    First pages); On the first card: the card's screen; Never: no question, a chip says so */
 function audWhereShow(){var w=D.wall.aud.where;D.wall.aud.seen=false;
   if(w==="start"){gdPagesPreview("pg_aud");return}
-  if(w==="never"){D.wall.aud.seen=true;ui.view="card";ui.stop="half";renderPhone(false);gdChip("Where to ask · Never: no question, every visitor is an Explorer");setTimeout(function(){gdChip(null)},3200);return}
-  ui.view="card";if(ui.stop==="closed"||ui.stop==="peek")ui.stop="half";renderPhone(false)}
+  if(w==="never"){D.wall.aud.seen=true;goScreen("card",{stop:"half"});renderPhone(false);gdChip("Where to ask · Never: no question, every visitor is an Explorer");setTimeout(function(){gdChip(null)},3200);return}
+  goScreen("card");if(ui.stop==="closed"||ui.stop==="peek")sheetTo("half");renderPhone(false)}
 rowDemos({"P.vis.aud":{stop:"full",ring:".hero"},"D.wall.aud.where":{stop:"half",act:function(){audWhereShow()},ring:".onb|.gdchip"}});
 /* an audience's Guidance preset: that preset simulated (Guide › 6 · Preview & Test › Simulate a visit), two visit-minutes ×10 on the wall */
 rowDemos(AUDS.reduce(function(m,a){m["D.wall.aud.looks."+a+".gdPreset"]={wall:true,act:function(){gdDemoAudPreset(a)},ringAfter:600,ring:".gdchip|.gdbub"};return m},{}));

@@ -63,7 +63,7 @@ on("runStep.after",function(){if(!G.on||!D.guide.svOn||G.svNoSave)return;var st=
 on("cardScreen.html",function(h){if(!D.guide.heroButton||G.on||typeof inDemoCard!=="undefined"&&inDemoCard)return h;var of=svOffer();if(!of)return h;
   var d=document.createElement("div");d.innerHTML=h;var gs=d.querySelector(".hero .gstart");if(!gs)return h;gs.classList.add("gagain");gs.textContent=TXT("sv_again");
   var c=document.createElement("button");c.type="button";c.className="gcont";c.dataset.sv="cont";c.innerHTML='&#9654; '+esc(svLabel(of));gs.parentNode.insertBefore(c,gs);gs.parentNode.classList.add("svoff");return d.innerHTML});
-ph.addEventListener("click",function(e){var b=e.target.closest('[data-sv="cont"]');if(!b)return;e.stopPropagation();if(ui.view!=="card")ui.view="card";svContinue()},true);
+ph.addEventListener("click",function(e){var b=e.target.closest('[data-sv="cont"]');if(!b)return;e.stopPropagation();if(ui.view!=="card")goScreen("card");svContinue()},true);
 
 /* ----- the Editor: Guide › 2 · The tour › Ways in › Continue the tour (round 17b: one foldout for the one offer; its rows' keys kept) ----- */
 function svAgo(ms){var m=Math.round(ms/60000);return m<1?"just now":m<60?m+" min ago":m<1440?Math.round(m/60)+" h ago":Math.round(m/1440)+" days ago"}
@@ -85,5 +85,5 @@ ed.addEventListener("click",function(e){var b=e.target.closest("[data-svforget]"
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("D\\.guide\\.(","D\\.guide\\.(svOn|svForget|"));
 /* each row's demo: a place kept at step 5 of the open point's tour, the card at its hero with the offer (Off: the plain Start, a chip says why) */
 function svDemo(){var poi=svPoi(),st=svTour(poi);if(G.on)stopTour();var s=st[Math.min(4,st.length-2)];if(D.guide.svOn&&s)svWrite(poi,{id:s.id,src:svSrc(poi),t:svNow(),v:1,visit:"an earlier visit"});
-  ui.view="card";ui.stop="full";renderPhone(false);scr.scrollTop=0;if(typeof gdChip==="function"){var of=svOffer(poi);gdChip(of?svLabel(of)+" · "+(D.guide.svForget==="never"?"kept until the tour ends":"offered for "+D.guide.svForget+" day"+(D.guide.svForget==="1"?"":"s")):"Remember where the visitor stopped: Off");clearTimeout(G.svChipT);G.svChipT=setTimeout(function(){gdChip(null)},3200)}}
+  goScreen("card",{stop:"full"});renderPhone(false);scr.scrollTop=0;if(typeof gdChip==="function"){var of=svOffer(poi);gdChip(of?svLabel(of)+" · "+(D.guide.svForget==="never"?"kept until the tour ends":"offered for "+D.guide.svForget+" day"+(D.guide.svForget==="1"?"":"s")):"Remember where the visitor stopped: Off");clearTimeout(G.svChipT);G.svChipT=setTimeout(function(){gdChip(null)},3200)}}
 rowDemos({"D.guide.svOn":{act:function(){svDemo()},ring:".hero .gcont|.hero .gstart|.hero"},"D.guide.svForget":{act:function(){svDemo()},ring:".hero .gcont|.hero"}});

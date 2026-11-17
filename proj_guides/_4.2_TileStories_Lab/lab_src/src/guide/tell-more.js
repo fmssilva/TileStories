@@ -104,7 +104,7 @@ ed.addEventListener("input",function(e){var t=e.target;if(!t.dataset||!t.dataset
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("D\\.guide\\.(","D\\.guide\\.(tmOn|tmStart|"));
 /* each row's demo: the tour at its first step with more to tell, at Mini: the chip (Tell me more); Start deep for: the deep part playing */
 function tmDemoAt(play){var gen=D.tour.guideSteps.some(function(s){return!!tmDeepOf(s)})?null:atSteps(),list=gen||D.tour.guideSteps,st=list.filter(function(s){return!!tmDeepOf(s)})[0];
-  if(!st){if(G.on)stopTour();ui.view="card";ui.stop="full";renderPhone(false);if(typeof gdChip==="function"){gdChip("No step of this tour has more to tell");clearTimeout(G.tmChipT);G.tmChipT=setTimeout(function(){gdChip(null)},3200)}return}
-  if(gen)atDemoAt(null,st.id);else{if(G.on)stopTour();ui.view=st.view;ui.stop="full";P.introSeen=true;G.demoTour=true;startTour({id:st.id});G.demoTour=false}
+  if(!st){if(G.on)stopTour();goScreen("card",{stop:"full"});renderPhone(false);if(typeof gdChip==="function"){gdChip("No step of this tour has more to tell");clearTimeout(G.tmChipT);G.tmChipT=setTimeout(function(){gdChip(null)},3200)}return}
+  if(gen)atDemoAt(null,st.id);else{if(G.on)stopTour();goScreen(st.view,{stop:"full"});P.introSeen=true;G.demoTour=true;startTour({id:st.id});G.demoTour=false}
   ui.dockH="mini";renderGuide();if(play&&D.guide.tmOn){stopSpeech();G.tm.want=G.i;next()}}
 rowDemos({"D.guide.tmOn":{act:function(){tmDemoAt(false)},ringAfter:700,ring:".gtmore|.gdock"},"D.guide.tmStart":{act:function(){tmDemoAt(true)},ringAfter:700,ring:".gdock|.gcap"}});

@@ -89,7 +89,7 @@ const url = labUrl('#probe');
   ok('[undo] at most 300 steps are kept', await R('var b=JSON.stringify(D);for(var i=0;i<310;i++)undoSnap(b.replace("\\"svForget\\":\\"7\\"","\\"svForget\\":\\""+i+"\\""));var n=undoPast.length;undoPast.length=0;undoFuture.length=0;emit("undo.changed");n===300'));
 
   // ---------- [never] the visitor's choices, a tap on the phone, the self-test's walk ----------
-  await R('ui.view="card";ui.stop="half";ui.settingsOpen=true;renderAll(false);""'); await W(500);
+  await R('ui.view="card";ui.stop="half";setOverlay("settings",true);renderAll(false);""'); await W(500);
   const d0 = await R('JSON.stringify(D)');
   await p.locator('#ph [data-gset="speed|1.2"]').first().click(); await W(200); await p.locator('#ph [data-gset="voice|device"]').first().click(); await W(200);
   await p.locator('#ph [data-vis="mode|dark"]').first().click(); await W(200);
@@ -97,7 +97,7 @@ const url = labUrl('#probe');
   ok('[never] a visitor\'s choices on the phone (Settings › The guide: Faster, Device voice; Dark; real taps) write P, never D, and take no step',
     vis.steps === 0 && vis.same && vis.pg.speed === 1.2 && vis.pg.voice === 'device' && vis.dg[0] === 1 && vis.dg[1] === 'recorded' && vis.dark === true && vis.pressed === 'true', vis);
   ok('[visitor] the guide speaks at the visitor\'s speed and voice (guideSetting: P.guide over D.guide)', vis.speed === 1.2 && vis.voice === 'device', vis);
-  await R('P.dark=false;ui.settingsOpen=false;ui.stop="half";renderAll(false);""'); await W(500);
+  await R('P.dark=false;setOverlay("settings",false);ui.stop="half";renderAll(false);""'); await W(500);
   const g = await p.locator('#grab').boundingBox(); await p.mouse.click(g.x + g.width / 2, g.y + g.height / 2); await W(600);
   const tap = JSON.parse(await R('JSON.stringify([ui.stop,undoPast.length])'));
   ok('[never] a tap on the phone (the grabber: the card\'s stop, ui) takes no step', tap[0] !== 'half' && tap[1] === 0, tap);

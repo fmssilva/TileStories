@@ -6,3 +6,5 @@ function storyScreen(){emitLatestFirst("storyScreen.before");var h=topbar(esc(L(
     else h+='<div class="item" data-ref="r:'+r.id+'">'+renderEl(r.kind,(r.style&&styleById(r.style))||defStyle(r.kind),r.c,0)+'</div>'});
   return pipe("storyScreen.html",h+'</div></div>');}
 D.poi.story.forEach(function(r){if(r.checked==null)r.checked=r.id!=="r10"&&r.id!=="r11"});
+
+screenDef("story",{name:"The story page",draw:storyScreen});

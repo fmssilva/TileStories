@@ -1,6 +1,6 @@
 /* The Locate Button: it rides with the bar, its label folds after it is seen (pinLift, locFit); the rule of a label seen 4 s (seenLabel). */
 /* ----- the Locate Button rests at the foot of the screen; the Navigation Bar (or the Sticky Action) lifts it when it comes ----- */
-function pinLift(anim){var lp=ph.querySelector(".locpin");if(!lp)return;var k=fit.getBoundingClientRect().height/SCREENS[LAB.screen][1],pr=ph.getBoundingClientRect(),b=22;
+function pinLift(anim){var lp=ph.querySelector(".locpin");if(!lp)return;var k=fit.getBoundingClientRect().height/devH(),pr=ph.getBoundingClientRect(),b=22;
   [document.getElementById("navbar"),ph.querySelector(".sticky")].forEach(function(el){if(!el||getComputedStyle(el).display==="none"||el.classList.contains("away"))return;
     var r=el.getBoundingClientRect();if(r.height&&r.top>pr.top+pr.height/2)b=Math.max(b,Math.round((pr.bottom-r.top)/k)+12)});
   if(anim&&!P.reduce){lp.style.bottom=b+"px";return}lp.style.transition="none";lp.style.bottom=b+"px";void lp.offsetHeight;lp.style.transition=""}

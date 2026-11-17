@@ -187,10 +187,10 @@ const url = labUrl('#probe');
   tsec('guess');
 
   // ---------- 7. Settings and the Editor ----------
-  await fresh('ui.settingsOpen=true;renderPhone(true)');
+  await fresh('setOverlay("settings",true);renderPhone(true)');
   await p.locator('#ph [data-gdpref="games|off"]').scrollIntoViewIfNeeded(); await p.locator('#ph [data-gdpref="games|off"]').click(); await W(150);
   ok('Settings › The guide › Games on the tour (a real tap Off): the visitor\'s switch, in its memory; the plan follows', await R('gdPrefs().games==="off"&&/Games on the tour Off/.test(gdPlanNow().why.quizpromise)'));
-  await R('gdPrefs().games="on";ui.settingsOpen=false;renderPhone(true)');
+  await R('gdPrefs().games="on";setOverlay("settings",false);renderPhone(true)');
   // round 14: On the tour is 3 · Games on the tour (gd:g:ontour, its id kept); the quiz's pair drawn as one (gd:pair:quizpromise); each item's groups open
   const ed1 = await R('ui.tab="guide";ui.op={gt4:true,"gd:fun":true,"gd:g:ontour":true,"gd:pair:quizpromise":true,"gd:var:water":true};["quizpromise","quizfinale","guessyear","water","cookie"].forEach(function(id){ui.op["gd:i:"+id]=true});Object.keys(ui.op).forEach(function(k){var m=/^gd:i:(.+)$/.exec(k),it=m&&ui.op[k]&&D.guidance.items[m[1]];if(it)gdFormOf(it).groups.forEach(function(g){if(g)ui.op["gd:f:"+m[1]+":"+g.k]=true})});renderEditor();var f=ed.querySelector(\'[data-fo="gd:g:ontour"]\');[!!f,f&&f.querySelector("#gdplan").textContent,[].map.call(f.querySelectorAll(":scope > .inner > .row > label"),function(l){return l.textContent}),gdGroupById("ontour").every,gdGroupById("ontour").perTour,gdGroupById("ontour").perShort,gdGroupById("ontour").perDeep]');
   ok('Guide › 3 · Games on the tour: On, Liveliness, Audiences, One beat per (75), At most a tour (3; Short 2, Deep 5), and "This tour\'s plan: …"', ed1[0] && /This tour's plan/.test(ed1[1]) && ['On', 'Liveliness', 'Family', 'Explorer', 'Expert', 'One beat per (s)', 'At most a tour', 'At most on Short', 'At most on Deep'].every(x => ed1[2].indexOf(x) >= 0) && ed1[3] === 75 && ed1[4] === 3 && ed1[5] === 2 && ed1[6] === 5, ed1);

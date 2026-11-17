@@ -13,7 +13,7 @@ function curOf(key){var p=key.split("."),st=styleById(ui.sel.style);
 /* ----- self-test: every Editor control must change what the phone shows ----- */
 var BEHAVIOUR=/^@?(inter\.|m\.page|D\.card\.blockDefs\.[^.]+\.chrome|D\.card\.cardCfg\.(tapOutside|keepAudio|audioOverlap|peekNext|enabled)|D\.card\.fb\.|D\.card\.ctl\.jump\.|D\.card\.ctl\.bar\.hide|ui\.|test\.poi|focusOn|previewLang)/;
 /* the phone's signature for the self-test: each feature's piece is made before the older ones (latest first) and appended after them */
-function modelSig(){var cx={};emitLatestFirst("modelSig.before",cx);var keep=ui.view,out="";["card","demo","story","gallery"].forEach(function(v){ui.view=v;out+=(v==="card"?cardScreen()+navbar():v==="demo"?demoScreen():v==="story"?storyScreen():galleryScreen())+"#"});ui.view=keep;
+function modelSig(){var cx={};emitLatestFirst("modelSig.before",cx);var keep=ui.view,out="";["card","demo","story","gallery"].forEach(function(v){viewAs(v);out+=(v==="card"?cardScreen()+navbar():v==="demo"?demoScreen():v==="story"?storyScreen():galleryScreen())+"#"});viewAs(keep);
   return pipe("modelSig.sig",out+JSON.stringify({loc:D.card.ctl.locate,sticky:D.card.ctl.sticky,bar:[D.card.ctl.bar.on,D.card.ctl.bar.pos],openAt:stopTop(D.card.cardCfg.openAt),half:D.card.cardCfg.halfMax,band:D.card.cardCfg.topBand,top:D.card.ctl.top,dark:P.dark,lang:P.lang,peek:D.card.cardCfg.peekNext,on:D.card.cardCfg.enabled}),cx)}
 /* the page opened as the self-test (#selftest, #selftest=<tab>,<tab>), and the tabs it walks (null: all) */
 function isSelfTest(){return location.hash==="#selftest"||location.hash.indexOf("#selftest=")===0}
@@ -42,8 +42,8 @@ function showSelfTest(res){var works={};res.forEach(function(r){if(r.result==="c
    (bad.length?'<table><tr><th>Tab</th><th>Row</th><th>Key</th><th>Value</th><th>Result</th></tr>'+bad.map(function(r){return'<tr><td>'+r.tab+'</td><td>'+esc(r.label)+'</td><td><code>'+esc(r.key)+'</code></td><td>'+esc(r.v)+'</td><td>'+r.result+'</td></tr>'}).join("")+'</table>':"<p>Every option shows on the phone.</p>");
   box.dataset.json=JSON.stringify({ok:ok,behaviour:beh,bad:bad});emit("showSelfTest.after",res)}
 document.getElementById("runtest").addEventListener("click",function(){var b=this;b.disabled=true;b.textContent="Running…";setTimeout(function(){var snap=stateJson();var r=selfTest();showSelfTest(r);b.disabled=false;b.textContent="Run the self-test again";
-  stateRestore(snap);ui.tab="card";ui.view="card";renderAll(false)},30)});
-on("modelSig.before",function(cx){var keep=ui.view;ui.view="term";var x=termScreen()+"#"+demoCardScreen()+"#"+(LAB.previewBar?ptool():"");ui.view=keep;cx.term=x});on("modelSig.sig",function(s,cx){return s+cx.term});
+  stateRestore(snap);ui.tab="card";goScreen("card");renderAll(false)},30)});
+on("modelSig.before",function(cx){var keep=ui.view;viewAs("term");var x=termScreen()+"#"+demoCardScreen()+"#"+(LAB.previewBar?ptool():"");viewAs(keep);cx.term=x});on("modelSig.sig",function(s,cx){return s+cx.term});
 /* ----- the self-test: what draws outside the card's HTML, and what is behaviour ----- */
 /* the option the self-test is trying: extra views are drawn only for the options that can change them */
 LAB._stKey=null;function sigWant(re){return LAB._stKey==null||re.test(LAB._stKey)}

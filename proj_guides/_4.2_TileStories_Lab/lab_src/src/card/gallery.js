@@ -5,4 +5,6 @@ on("edMarker.html",function(h){if(ui.sel.page!=="gallery")return h;var d=documen
     fo("pg:gallery","Gallery · its pictures",["ext","EXTENDED"],row("Pictures",'<div class="assets">'+ASSETS.map(function(a){return'<button type="button" data-gal="'+a+'" aria-pressed="'+(imgs.indexOf(a)>=0)+'" style="background-image:url('+IMG[a]+')" aria-label="'+a+'"></button>'}).join("")+'</div>',"Tap to add or remove; the order is the tap order."),2)}
   return d.innerHTML});
 ed.addEventListener("change",function(e){var t=e.target;if(t.dataset.sel==="m.page"){e.stopImmediatePropagation();ui.sel.page=t.value;renderEditor();show(t.value==="gallery"?"gallery":"story")}},true);
-ed.addEventListener("click",function(e){var g=e.target.closest("[data-gal]");if(!g)return;e.stopPropagation();var a=D.poi.galleryImgs||["g1","g2","g3","before"],i=a.indexOf(g.dataset.gal);if(i>=0)a.splice(i,1);else a.push(g.dataset.gal);D.poi.galleryImgs=a;renderEditor();ui.view="gallery";renderPhone(false)},true);
+ed.addEventListener("click",function(e){var g=e.target.closest("[data-gal]");if(!g)return;e.stopPropagation();var a=D.poi.galleryImgs||["g1","g2","g3","before"],i=a.indexOf(g.dataset.gal);if(i>=0)a.splice(i,1);else a.push(g.dataset.gal);D.poi.galleryImgs=a;renderEditor();goScreen("gallery");renderPhone(false)},true);
+
+screenDef("gallery",{name:"The gallery page",draw:galleryScreen});

@@ -34,7 +34,7 @@ function stepText(st){if(st.text)return L(st.text);var r=byId(D.poi.story,st.ref
 D.guide.musicVol=15;D.guide.musicDuck=30;D.guide.musicTrack="exploration";D.guide.musicVis=true;
 var MUSIC_FULL=1/3;
 window.MUSICTRACKS=window.MUSICTRACKS||[];
-(function(){["music/tracks.js","../music/tracks.js"].forEach(function(s){var e=document.createElement("script");e.src=s;e.onload=function(){try{renderEditor()}catch(x){}};e.onerror=function(){};document.head.appendChild(e)})})();
+scriptFirst(["music/tracks.js","../music/tracks.js"],renderEditor);
 function musicTracks(){var seen={};return(window.MUSICTRACKS||[]).filter(function(t){if(!t||!t.id||seen[t.id])return false;seen[t.id]=1;return true})}
 /* a track whose licence asks for it (CC BY-SA) carries its credit line {en, pt}: shown under its choice and in Settings' Music credits */
 function musicCredit(id){var t=musicTrackById(id);return t&&t.credit?L(t.credit):""}
@@ -75,13 +75,13 @@ ed.addEventListener("change",function(e){var t=e.target;if(t.dataset&&t.dataset.
 
 /* ----- the tour ----- */
 /* startTour(from): from the start, or from a step kept by a stop (from = {id: the step}; the features before it know which) */
-function startTour(from){emitLatestFirst("startTour.before",from);G.on=true;G.i=0;G.paused=false;ui.stop="full";if(from){var j=D.tour.guideSteps.findIndex(function(s){return s.id===from.id});G.i=Math.max(0,j)}if(musicPick()!=="off")musicOn(true);feedback("open");runStep();emit("startTour.after",from)}
+function startTour(from){emitLatestFirst("startTour.before",from);G.on=true;G.i=0;G.paused=false;sheetTo("full");if(from){var j=D.tour.guideSteps.findIndex(function(s){return s.id===from.id});G.i=Math.max(0,j)}if(musicPick()!=="off")musicOn(true);feedback("open");runStep();emit("startTour.after",from)}
 function stopTour(){emitLatestFirst("stopTour.before");G.on=false;G.waiting=false;stopSpeech();musicOn(false);clearGuideMarks();renderGuide();emit("stopTour.after")}
 /* round 22 (22.3): a step in another view is first reached as a visitor would (runStep.travel: guide/demo-hand.js taps the story's
    preview or the page's back, the app's own opening plays, then it runs this step again); the scroll is the tour's natural scroll
    (guide/tour-scroll.js's tourScroll) */
 function runStep(){if(G.on&&firstAnswer("runStep.travel",D.tour.guideSteps[G.i])===true)return;emitLatestFirst("runStep.before");var st=G.on&&D.tour.guideSteps[G.i];if(G.on&&!st)stopTour();else if(st){G.waiting=false;
-  if(ui.view!==st.view){ui.view=st.view;renderPhone(false)}
+  if(ui.view!==st.view){goScreen(st.view);renderPhone(false)}
   clearGuideMarks();var el=st.ref==="hero"?scr.querySelector(".hero"):scr.querySelector('[data-ref="'+st.ref+'"]');
   if(el){el.classList.add("gfocus");var y=el.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-80;tourScroll(Math.max(0,st.ref==="hero"?0:y))}
   if(st.act==="teaser")teaser(true);
@@ -106,7 +106,7 @@ function coach(el,kind){var c=document.createElement("div");c.className="gcoach"
    a point drawn as a crop of the wall keeps its crop, round 16b); after it, the point's own picture again (heroPaint) */
 function teaser(on){var h=scr.querySelector(".hero");if(!h)return;h.classList.toggle("teasing",on&&!P.reduce);clearInterval(G.tz);
   var imgs=heroPics();if(on&&!P.reduce&&imgs.length>1){var i=0;G.tz=setInterval(function(){if(!G.on||G.paused)return;i=(i+1)%imgs.length;if(i)h.style.backgroundImage="url("+imgs[i]+")";else heroPaint(h)},2600)}else if(!on)heroPaint(h)}
-function renderGuide(text){["gbar","gcap","mascot","gask","gresume"].forEach(function(c){var o=ph.querySelector("."+c);if(o)o.remove()});var pt=document.getElementById("ptool");if(pt)pt.style.display=G.on?"none":"";
+function renderGuide(text){var typing=document.activeElement&&document.activeElement.id==="gq"?{v:document.activeElement.value,at:document.activeElement.selectionStart}:null;["gbar","gcap","mascot","gask","gresume"].forEach(function(c){var o=ph.querySelector("."+c);if(o)o.remove()});var pt=document.getElementById("ptool");if(pt)pt.style.display=G.on?"none":"";
   if(!G.on){var nb0=document.getElementById("navbar");if(nb0&&ui.view==="card")nb0.style.display=D.card.ctl.bar.on&&ui.stop!=="peek"&&ui.stop!=="closed"?"":"none"}else{
   var nb=document.getElementById("navbar");if(nb)nb.style.display="none";var lp=ph.querySelector(".locpin");if(lp)lp.remove();
   var st=D.tour.guideSteps[G.i],t=text!=null?text:stepText(st);
@@ -122,7 +122,9 @@ function renderGuide(text){["gbar","gcap","mascot","gask","gresume"].forEach(fun
   if(G.askOpen){var a=document.createElement("div");a.className="gask";var ai=D.guide.ask==="ai";
     a.innerHTML='<div class="gaskh"><b>'+(TXH("guide_ask_title"))+'</b><span>'+(ai?TXH("guide_ask_mode_ai"):TXH("guide_ask_mode_search"))+'</span><button type="button" data-g="askclose" aria-label="'+TXH("guide_ask_close")+'">&#10005;</button></div>'+
      '<div class="gans" aria-live="polite">'+(G.answer?esc(G.answer):'<span class="hintq">'+(TXH("guide_ask_example"))+'</span>')+'</div>'+
-     '<form class="gform"><input id="gq" class="gin" type="text" autocomplete="off" placeholder="'+(TXH("guide_ask_placeholder"))+'"><button type="button" data-g="mic" aria-label="'+TXH("guide_ask_mic")+'">&#127908;</button><button type="submit" '+(G.busy?"disabled":"")+'>'+(G.busy?"…":(TXH("guide_ask_send")))+'</button>'+(G.busy?'<button type="button" data-g="stopask">'+TXH("guide_ask_stop")+'</button>':"")+'</form>';ph.appendChild(a)}}emit("renderGuide.after",text)}
+     '<form class="gform"><input id="gq" class="gin" type="text" autocomplete="off" placeholder="'+(TXH("guide_ask_placeholder"))+'"><button type="button" data-g="mic" aria-label="'+TXH("guide_ask_mic")+'">&#127908;</button><button type="submit" '+(G.busy?"disabled":"")+'>'+(G.busy?"…":(TXH("guide_ask_send")))+'</button>'+(G.busy?'<button type="button" data-g="stopask">'+TXH("guide_ask_stop")+'</button>':"")+'</form>';ph.appendChild(a)}}emit("renderGuide.after",text);
+  /* a redraw while the visitor types in Ask keeps the field, its words and the caret (the panel is rebuilt, the typing is not lost) */
+  var q=typing&&document.getElementById("gq");if(q&&document.activeElement!==q){if(!q.value)q.value=typing.v;q.focus({preventScroll:true});try{q.setSelectionRange(typing.at,typing.at)}catch(x){}}}
 /* ----- hooks into the card: hero button, Guide block, gestures, take-over ----- */
 on("cardScreen.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   if(D.guide.heroButton){var w=d.querySelector(".hero .w");if(w)w.insertAdjacentHTML("beforeend",'<button type="button" class="gstart" data-g="start">&#9654; '+TXH("guide_start")+' · '+esc(tourLength(tourMinutes()))+'</button>')}
@@ -131,8 +133,8 @@ on("cardScreen.html",function(h){var d=document.createElement("div");d.innerHTML
 ph.addEventListener("click",function(e){var t=e.target,g=t.closest("[data-g]");
   if(t.closest("[data-flip]"))gesture("flip");if(t.closest(".kq button"))gesture("answer");
   if(!g)return;e.stopPropagation();var k=g.dataset.g;
-  if(k==="start"){if(ui.view!=="card"){ui.view="card"}startTour()}else if(k==="pause")pauseTour();else if(k==="play"){G.askOpen=false;resumeTour()}else if(k==="next"){stopSpeech();G.paused=false;next("skip")}else if(k==="prev"){if(firstAnswer("prevTap.answer")===undefined){stopSpeech();G.paused=false;prev()}}
-  else if(k==="stop"){if(firstAnswer("stopTap.answer")===undefined)stopTour()}else if(k==="mute"){P.guideMute=!P.guideMute;if(firstAnswer("mute.voice")===undefined&&P.guideMute)stopSpeech();renderGuide()}else if(k==="cc"){P.guide.captions=!guideSetting("captions");renderGuide()}
+  if(k==="start"){if(ui.view!=="card"){goScreen("card")}startTour()}else if(k==="pause")pauseTour();else if(k==="play"){G.askOpen=false;resumeTour()}else if(k==="next"){stopSpeech();G.paused=false;next("skip")}else if(k==="prev"){if(firstAnswer("prevTap.answer")===undefined){stopSpeech();G.paused=false;prev()}}
+  else if(k==="stop"){if(firstAnswer("stopTap.answer")===undefined)stopTour()}else if(k==="mute"){P.guideMute=!P.guideMute;emit("profileChanged","guideMute");if(firstAnswer("mute.voice")===undefined&&P.guideMute)stopSpeech();renderGuide()}else if(k==="cc"){P.guide.captions=!guideSetting("captions");emit("profileChanged","guide.captions");renderGuide()}
   else if(k==="ask"){pauseTour();G.askOpen=true;renderGuide();var i=ph.querySelector("#gq");if(i)i.focus()}else if(k==="askclose"){G.askOpen=false;renderGuide()}
   else if(k==="stopask"&&G.ctl)G.ctl.abort();
   else if(k==="mic"){var R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R){G.answer=TXT("guide_no_mic");renderGuide();return}
@@ -181,7 +183,7 @@ ed.addEventListener("input",function(e){var t=e.target;if(!t.dataset.gtext)retur
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(D\\.guide\\.(voice|speed|music|captions|highlight|coach|ask)|"));
 /* each row's demo (editor/demo.js): the tour at a step, the part the row changes ringed */
 rowDemos({"D.guide.voice":{tour:"g1",ring:".gbubble|.gdock|.gcap"},"D.guide.speed":{tour:"g1",act:function(){P.vis.speed=null;dkTick()},ring:".gd-speed|.gbubble|.gdock|.gcap"},"D.guide.music":{tour:"g1",act:function(){musicDemo()},ring:".gdock|.gbar"},"D.guide.musicVol":{tour:"g1",act:function(){musicDemo()},ring:".gdock|.gbar"},"D.guide.musicDuck":{tour:"g1",act:function(){musicDemo()},ring:".gdock|.gbar"},
-  "D.guide.musicTrack":{tour:"g1",act:function(){musicDemo()},ring:".gdock|.gbar"},"D.guide.musicVis":{act:function(){ui.settingsOpen=true;renderPhone(true);var v=ph.querySelector(".vset"),g=v&&v.querySelector(".vmusic");if(v&&g)v.scrollTop=Math.max(0,g.offsetTop-60)},ring:".vmusic|.vguide"},
+  "D.guide.musicTrack":{tour:"g1",act:function(){musicDemo()},ring:".gdock|.gbar"},"D.guide.musicVis":{act:function(){setOverlay("settings",true);renderPhone(true);var v=ph.querySelector(".vset"),g=v&&v.querySelector(".vmusic");if(v&&g)v.scrollTop=Math.max(0,g.offsetTop-60)},ring:".vmusic|.vguide"},
   "D.guide.heroButton":{stop:"full",ring:".hero .gstart|.hero"},"D.guide.block":{stop:"full",scroll:'[data-ref="b:b_guide"]',ring:".gblock|[data-ref=\"sec:about\"]"},
   "D.guide.captions":{tour:"g1",ring:".gbubble|.gdock|.gbar"},"D.guide.highlight":{tour:"g4",ring:".gfocus"},"D.guide.coach":{tour:"g2",ring:".gcoach|.gfocus"},
   "D.guide.mascot":{tour:"g1",ring:".mascot|.gfocus"},"D.guide.ask":{tour:true,dock:"full",act:function(){ask(L(D.tour.guideAsks[0]))},ringAfter:1400,ring:".gd-thread|.gask"}});

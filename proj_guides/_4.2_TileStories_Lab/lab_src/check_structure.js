@@ -5,8 +5,10 @@
 //   redeclared - a function declared in more than one module
 //   defaults  - a value of a state root (D, P, ui, LAB: STATE_MAP.md) set at the top level of more than one module
 //   sRefs     - references to the old one root S (S.x, S[k], S itself): the state lives in its four roots, none left
+//   screenWrites - writes of the router's state (ui.view, ui.stop, ui.history, ui.overlays, ui.device) outside src/screen/: every
+//              change of what the phone shows goes through the router (go, sheetTo, setOverlay, back; screen/router.js)
 // and one rule: no module or style is named after a version (v3.js, v8b.css...), so the layers cannot come back.
-// structure_baseline.json holds the allowed counts: a count may only go down (all five are 0).
+// structure_baseline.json holds the allowed counts: a count may only go down (all are 0).
 const fs = require('fs'), path = require('path');
 // acorn: package.json's devDependency (npm install, once, in this folder); ACORN=<path> names another copy
 let acorn; try { acorn = require(process.env.ACORN || 'acorn') } catch (e) { console.log('check_structure.js needs acorn: run "npm install" in ' + __dirname + ' (package.json), or set ACORN to a copy of it. ' + e.message); process.exit(2) }
@@ -26,7 +28,8 @@ const owner = pos => { let o = starts[0][1]; for (const [s, m] of starts) { if (
 let ast; try { ast = acorn.parse(joined, { ecmaVersion: 'latest', sourceType: 'script', allowReturnOutsideFunction: true }) } catch (e) { console.log('PARSE ERROR', e.message, 'in', owner(e.pos)); process.exit(2) }
 let body = ast.body; const iife = body.find(s => s.type === 'ExpressionStatement' && s.expression.type === 'CallExpression' && isFn(s.expression.callee));
 if (iife) body = iife.expression.callee.body.body;
-const saved = {};
+const saved = {}, screenWrites = [];
+const ROUTED = /^ui\.(view|stop|history|overlays|device)$/;
 const visit = list => list.forEach(s => {
   const m = owner(s.start);
   if (s.type === 'FunctionDeclaration') { F(s.id.name).def.push(m); return }
@@ -47,6 +50,13 @@ const sRefs = [];
   if (n.type === 'Identifier' && n.name === 'S' && !(parent && ((parent.type === 'MemberExpression' && key === 'property' && !parent.computed) || (parent.type === 'Property' && key === 'key' && !parent.computed && !parent.shorthand)))) sRefs.push(owner(n.start));
   for (const k in n) { const v = n[k]; if (Array.isArray(v)) v.forEach(x => walk(x, n, k)); else if (v && typeof v.type === 'string') walk(v, n, k) }
 })(ast, null, null);
+// the router's state written outside src/screen/ (any assignment or ++/--, at any depth)
+(function walk(n) {
+  if (!n || typeof n.type !== 'string') return;
+  const t = n.type === 'AssignmentExpression' ? n.left : n.type === 'UpdateExpression' ? n.argument : null;
+  if (t) { const p = mpath(t); if (p && ROUTED.test(p) && !/^src\/screen\//.test(owner(n.start))) screenWrites.push(owner(n.start)) }
+  for (const k in n) { const v = n[k]; if (Array.isArray(v)) v.forEach(walk); else if (v && typeof v.type === 'string') walk(v) }
+})(ast);
 const list = k => Object.keys(fn).filter(n => k(fn[n]));
 const now = {
   wraps: list(f => f.wrap.length).reduce((a, n) => a + fn[n].wrap.length, 0),
@@ -54,17 +64,19 @@ const now = {
   redeclared: list(f => f.def.length > 1).length,
   defaults: Object.keys(st).filter(p => st[p].size > 1).length,
   sRefs: sRefs.length,
+  screenWrites: screenWrites.length,
 };
 if (process.argv.includes('--write-baseline')) { fs.writeFileSync(BASE, JSON.stringify(now, null, 1) + '\n'); console.log('baseline written', JSON.stringify(now)); process.exit(0) }
-const base = Object.assign({ wraps: 0, replaces: 0, redeclared: 0, defaults: 0, sRefs: 0 }, fs.existsSync(BASE) ? JSON.parse(fs.readFileSync(BASE, 'utf8')) : {});
+const base = Object.assign({ wraps: 0, replaces: 0, redeclared: 0, defaults: 0, sRefs: 0, screenWrites: 0 }, fs.existsSync(BASE) ? JSON.parse(fs.readFileSync(BASE, 'utf8')) : {});
 let bad = 0;
 console.log((versioned.length ? 'FAIL ' : 'ok   ') + 'named after a version: ' + (versioned.join(' ') || 'none')); if (versioned.length) bad++;
-const NAME = { sRefs: 'references to S.' };
+const NAME = { sRefs: 'references to S.', screenWrites: 'screen writes outside the router' };
 for (const k in now) { const up = now[k] > base[k]; if (up) bad++; console.log((up ? 'FAIL ' : 'ok   ') + (NAME[k] || k).padEnd(11) + ' ' + now[k] + ' (allowed ' + base[k] + ')') }
 if (process.argv.includes('--list')) {
   list(f => f.def.length + f.wrap.length + f.replace.length > 1).forEach(n => console.log('  ' + n + ': def[' + fn[n].def + '] wrap[' + fn[n].wrap + '] replace[' + fn[n].replace + ']'));
   Object.keys(st).filter(p => st[p].size > 1).forEach(p => console.log('  ' + p + ' set in ' + [...st[p]].join(' ')));
   [...new Set(sRefs)].forEach(m => console.log('  S referenced in ' + m + ' (' + sRefs.filter(x => x === m).length + ')'));
+  [...new Set(screenWrites)].forEach(m => console.log('  the router state written in ' + m + ' (' + screenWrites.filter(x => x === m).length + ')'));
 }
-if (bad) console.log('The structure got worse: a wrapper, a re-assignment, a second declaration, a default set twice or a reference to the old root S was added, or a file is named after a version. See PROTOTYPE_STRUCTURE.md, "Rules", and STATE_MAP.md.');
+if (bad) console.log('The structure got worse: a wrapper, a re-assignment, a second declaration, a default set twice, a reference to the old root S or a screen write outside the router was added, or a file is named after a version. See PROTOTYPE_STRUCTURE.md, "Rules", and STATE_MAP.md.');
 process.exit(bad ? 1 : 0);

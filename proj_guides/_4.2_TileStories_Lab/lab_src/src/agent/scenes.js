@@ -19,8 +19,8 @@ on("agentAsk.before",function(q,where,uiN){var d=uiN.done,f=uiN.fail;
 on("camLayer.after",function(){ph.classList.toggle("pinnames",D.wall.camCfg.names==="all")});
 
 /* ----- the test scenes: each puts the prototype where a visitor would be (as by hand: close the card, pick the wall, drag, tap Azu), asks, and checks the answer ----- */
-function agCardAsk(){ui.view="card";ui.stop="full";LAB.wall="ribeira";G.cam.open=false;renderPhone(false);startTour();pauseTour();G.askOpen=true;ui.dockH="full";renderGuide()}
-function agWall(x,y,z){if(G.on)stopTour();LAB.wall="belem";ui.view="card";ui.stop="closed";ui.camX=x;ui.camY=y;ui.camZoom=z;G.cam={open:true,answer:"",busy:false,lit:[],route:[],hunt:null};renderPhone(false)}
+function agCardAsk(){goScreen("card",{stop:"full"});LAB.wall="ribeira";setOverlay("ask",false);renderPhone(false);startTour();pauseTour();G.askOpen=true;ui.dockH="full";renderGuide()}
+function agWall(x,y,z){if(G.on)stopTour();LAB.wall="belem";goScreen("card",{stop:"closed"});ui.camX=x;ui.camY=y;ui.camZoom=z;G.cam={answer:"",busy:false,lit:[],route:[],hunt:null};setOverlay("ask",true);renderPhone(false)}
 function agNamed(t){return D.wall.wallPois.filter(function(p){var n=L(p.name).toLowerCase();return n.length>4&&String(t).toLowerCase().indexOf(n)>=0}).map(function(p){return p.id})}
 /* on the wall: the points it names must be in view (a point named off the screen is one it cannot see) */
 function agSeen(turn,ctx){var inv=(ctx.in_view||[]).map(function(v){return v.id.slice(4)}),named=agNamed(turn.text),out=named.filter(function(id){return inv.indexOf(id)<0}),lit=turn.calls.filter(function(k){return k.ok&&k.name==="highlight_points"}).reduce(function(a,k){return a.concat(k.args.poi_ids.map(function(x){return x.slice(4)}))},[]).filter(function(id){return inv.indexOf(id)<0});

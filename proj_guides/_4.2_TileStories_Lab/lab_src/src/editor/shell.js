@@ -95,7 +95,7 @@ ed.addEventListener("click",function(e){var t=e.target;
   var pk=t.closest("[data-pick]");if(pk&&!t.closest("select,input,textarea,button")){if(pk.dataset.pick==="row"){ui.sel.row=pk.dataset.id;ui.sel.picker=null;renderEditor();show("story","r:"+ui.sel.row)}else{ui.sel.cblock=pk.dataset.id;renderEditor();show("card","b:"+ui.sel.cblock)}}});
 function swap(a,i,j){var x=a[i];a[i]=a[j];a[j]=x}
 function setOpt(key,v){if(firstAnswer("setOpt.answer",key,v)!==undefined)return;
-  if(key==="test.on"){LAB.test.on=v==="true";renderEditor();ui.view="card";renderPhone(false);return}
+  if(key==="test.on"){LAB.test.on=v==="true";renderEditor();goScreen("card");renderPhone(false);return}
   if(key==="focusOn"){LAB.focusOn=v==="true";renderAll(true);return}
   if(key==="replay"){D.blocks.replay=v;renderAll(true);return}
   if(key==="ui.single"){ui.single=v==="true";renderEditor();return}
@@ -110,7 +110,7 @@ function setOpt(key,v){if(firstAnswer("setOpt.answer",key,v)!==undefined)return;
 var replayT={};function replayRef(ref){if(noDraw)return;clearTimeout(replayT[ref]);replayT[ref]=setTimeout(function(){var it=scr.querySelector('[data-ref="'+ref+'"]');if(it)replayIn(it)},420)}
 var playRefT={};function playRef(ref){if(noDraw)return;clearTimeout(playRefT[ref]);playRefT[ref]=setTimeout(function(){var b=scr.querySelector('[data-ref="'+ref+'"] [data-play]');if(b)b.click()},380)}
 ed.addEventListener("change",function(e){var t=e.target,k=t.dataset.sel;if(t.dataset.num){numChange(t,true);return}if(!k)return;
-  if(k==="test.poi"){LAB.test.poi=t.value;ui.view="card";renderAll(false);return}
+  if(k==="test.poi"){LAB.test.poi=t.value;goScreen("card");renderAll(false);return}
   if(k==="family"){D.blocks.family=t.value;renderAll(true);return}
   if(k.indexOf("cb.")===0){var b=byId(D.poi.card,ui.sel.cblock);b[k.slice(3)]=t.value;renderAll(true);show("card","b:"+b.id);return}
   var st=styleById(ui.sel.style);
@@ -134,8 +134,8 @@ document.querySelectorAll("[data-step]").forEach(function(b){b.addEventListener(
   if(n===1){ui.tab="card";ui.sel.layer="motion";renderEditor();show("demo","m:"+ui.sel.motion)}
   if(n===2){ui.tab="card";ui.sel.layer="pattern";ui.op["pt:"+ui.sel.pattern]=true;renderEditor();show("demo","p:"+ui.sel.pattern)}
   if(n===3){ui.tab="card";renderEditor();show("demo")}
-  if(n===4){ui.tab="marker";renderEditor();ui.view="card";renderPhone(false)}
-  if(n===5){ui.tab="marker";renderEditor();ui.view="story";renderPhone(false)}
+  if(n===4){ui.tab="marker";renderEditor();goScreen("card");renderPhone(false)}
+  if(n===5){ui.tab="marker";renderEditor();goScreen("story");renderPhone(false)}
   if(window.innerWidth<1000)document.querySelector(".ed").scrollIntoView({behavior:"smooth"})})});
 function pval(v){return v==="true"?true:v==="false"?false:v}
 function pseg(path,vals,labels){return seg("@"+path,vals,labels,String(getPath(path)))}

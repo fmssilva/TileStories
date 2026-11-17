@@ -5,10 +5,7 @@ D.guide.intro="first";D.guide.insist=2;D.guide.insistAfter=5;D.guide.onScroll="f
   D.tour.guideSteps.forEach(function(s){if(a[s.id])s.after=a[s.id]})})();
 function pointName(){var h=document.querySelector("#scr .hero h2");return h?h.textContent:""}
 
-/* ----- the page: nothing above or below the phone; the phone takes the height there is ----- */
-function fitPhoneHeight(){var h=Math.round(Math.max(640,Math.min(820,window.innerHeight-48)));if(SCREENS.phone[1]!==h){SCREENS.phone[1]=h;return true}return false}
-fitPhoneHeight();
-var resizeT=0;window.addEventListener("resize",function(){clearTimeout(resizeT);resizeT=setTimeout(function(){if(fitPhoneHeight()&&LAB.screen==="phone")renderPhone(true)},120)});
+/* ----- the page: nothing above or below the phone (its frame is scaled to the window: screen/device.js) ----- */
 
 /* ----- the voice survives a pause: pausing stops it and keeps the word; going on speaks again from that word (as the app seeks
    its recorded audio). A voice that fails, or goes quiet without a pause, starts again from its word once, then the words go on by time ----- */

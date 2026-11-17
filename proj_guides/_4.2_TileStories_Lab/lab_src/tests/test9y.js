@@ -140,9 +140,9 @@ const url = labUrl('#probe');
 
   // ---------- [glow] the three choices, by real taps ----------
   const glowOn = () => R('!!ph.querySelector(".hero .gstart.hsglow")');
-  const wallTap = async id => { await R('if(G.on)stopTour();ui.view="card";ui.stop="closed";G.cam.open=false;renderPhone(false);""'); await W(300);
+  const wallTap = async id => { await R('if(G.on)stopTour();ui.view="card";ui.stop="closed";setOverlay("ask",false);renderPhone(false);""'); await W(300);
     /* the Ribeira Palace by its marker; the Torreão (no marker on this wall) by its pin in Ask about the view */
-    if (id === 'torreao') { await R('G.cam.open=true;camLayer();""'); await p.locator('#ph [data-cpin="torreao"]').first().click(CT).catch(NC); }
+    if (id === 'torreao') { await R('setOverlay("ask",true);camLayer();""'); await p.locator('#ph [data-cpin="torreao"]').first().click(CT).catch(NC); }
     else await p.locator(`#ph [data-marker="${id}"]`).first().click(CT).catch(NC);
     await W(200); };
   const res = {};

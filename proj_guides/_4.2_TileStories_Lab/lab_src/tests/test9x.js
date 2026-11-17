@@ -37,7 +37,7 @@ const url = labUrl('#probe');
   if (process.env.MUTATE) { await R(MUT); console.log('MUTATION: the set by its count, the old introduction, no room under a beat card, no mascot at the hero, the tail off the head, the guess at 8 s'); }
   /* the audio stubbed: a recorded line "plays" at once and ends 300 ms later (no sound, no file read) */
   await R('HTMLMediaElement.prototype.play=function(){var a=this;clearTimeout(a._stubT);a._stubT=setTimeout(function(){try{a.dispatchEvent(new Event("ended"))}catch(e){}},window.__stubMs||300);return Promise.resolve()};""');
-  const base = (o) => `SCREENS.phone=[390,844];if(G.on)stopTour();gdBeatClose();if(G.gd.sc12)gd12Done([true,"",""]);gdStop("test");D.card.hints.on=false;LAB.previewBar=false;P.lang="${o && o.lang || 'en'}";P.guideMute=true;P.introSeen=true;P.reduce=${!!(o && o.reduce)};P.dark=false;D.card.cardCfg.mode="light";LAB.rowDemo=false;LAB.gdSR=false;P.vis.speed=null;P.vis.aud="explorer";D.guide.voice="recorded";D.guide.panel="dock";D.guide.look="ink";D.guide.dockStart="mini";D.guide.mascot=true;D.guide.gbtn="both";D.guidance.on=false;`;
+  const base = (o) => `ui.device="phone_p";DEVICES.phone_p.h=844;if(G.on)stopTour();gdBeatClose();if(G.gd.sc12)gd12Done([true,"",""]);gdStop("test");D.card.hints.on=false;LAB.previewBar=false;P.lang="${o && o.lang || 'en'}";P.guideMute=true;P.introSeen=true;P.reduce=${!!(o && o.reduce)};P.dark=false;D.card.cardCfg.mode="light";LAB.rowDemo=false;LAB.gdSR=false;P.vis.speed=null;P.vis.aud="explorer";D.guide.voice="recorded";D.guide.panel="dock";D.guide.look="ink";D.guide.dockStart="mini";D.guide.mascot=true;D.guide.gbtn="both";D.guidance.on=false;`;
   const box = async sel => p.locator('#ph ' + sel).first().boundingBox({ timeout: 2500 }).catch(() => null);
   const tapEl = async sel => { const r = await box(sel); if (!r) return false; await p.mouse.click(r.x + r.width / 2, r.y + r.height / 2); return true; };
 
@@ -156,7 +156,7 @@ const url = labUrl('#probe');
 
   // ---------- [tap here] the tail on the head ----------
   const tapHere = async (reduce) => {
-    await R(base({ reduce }) + 'D.guidance.on=true;D.guidance.items.gbhint.on=false;gdGroupById("inview").on=false;D.guidance.breathing=5;G.gd.demo=false;gdChip(null);G.cam.open=false;G.fab.menu=false;setWall("ribeira");ui.view="card";ui.stop="closed";renderPhone(false);G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.onWall=false;gdAdvance(250);""');
+    await R(base({ reduce }) + 'D.guidance.on=true;D.guidance.items.gbhint.on=false;gdGroupById("inview").on=false;D.guidance.breathing=5;G.gd.demo=false;gdChip(null);setOverlay("ask",false);setOverlay("menu",false);setWall("ribeira");ui.view="card";ui.stop="closed";renderPhone(false);G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.onWall=false;gdAdvance(250);""');
     await W(300); await R('var t0=gdNow();while(gdNow()-t0<40000){gdAdvance(250);if(G.gd.cur&&G.gd.cur.item.id==="tapmarker")break}""'); await W(1300);
     /* the test's own figure: the still picture's opaque pixels, as drawn (object-fit: contain); the head its top 40 %, middle 60 % */
     return R('var az=ph.querySelector(".azfab"),i=az.querySelector(".azstill"),r=i.getBoundingClientRect(),c=document.createElement("canvas");c.width=i.naturalWidth;c.height=i.naturalHeight;var x=c.getContext("2d");x.drawImage(i,0,0);var d=x.getImageData(0,0,c.width,c.height).data,L=1e9,T=1e9,Rr=-1,B=-1;' +

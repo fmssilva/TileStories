@@ -106,9 +106,9 @@ const url = labUrl('#probe');
   const moved = await until('var t=ph.querySelector(".gd-tp");+t.dataset.line>' + (w0[0] || 0) + '&&t.classList.contains("tp-up")', 15000);
   const w1 = await R('var t=ph.querySelector(".gd-tp"),n=t.querySelector(".tp-now"),pv=t.querySelector(".tp-prev"),nx=t.querySelector(".tp-next");[+t.dataset.line,!!n.querySelector(".tw.on"),pv.textContent.length>0,nx?getComputedStyle(nx).color:"",getComputedStyle(n).fontSize,getComputedStyle(pv).fontSize,pv.getBoundingClientRect().bottom<=n.getBoundingClientRect().top+1]');
   ok('The words like a teleprompter: the line said now (its word marked), the line before faded above it, the next below; a new line moves up (no fixed bubble)', moved && w1[1] && w1[2] && parseFloat(w1[4]) > parseFloat(w1[5]) && w1[6] && !await R('!!ph.querySelector(".gbubble")'), [w0, w1]);
-  await tap('.gd-aa'); await W(200); const aa = await R('[D.guide.captions,!!ph.querySelector(".gd-tp .tw"),ph.querySelector(".gd-aa").getAttribute("aria-pressed")]');
+  await tap('.gd-aa'); await W(200); const aa = await R('[guideSetting("captions"),!!ph.querySelector(".gd-tp .tw"),ph.querySelector(".gd-aa").getAttribute("aria-pressed"),D.guide.captions]');
   await tap('.gd-aa'); await W(200);
-  ok('Aa hides the words and shows them again', aa[0] === false && !aa[1] && aa[2] === 'false' && await R('D.guide.captions&&!!ph.querySelector(".gd-tp .tw")'), aa);
+  ok('Aa hides the words and shows them again (the visitor choice in P over D: the author Captions row stays on)', aa[0] === false && !aa[1] && aa[2] === 'false' && aa[3] === true && await R('guideSetting("captions")&&!!ph.querySelector(".gd-tp .tw")'), aa);
   await tap('.gd-all'); await W(250); const ra = await R('[ui.dockH,!!ph.querySelector(".gd-thread .gm-now"),ph.querySelectorAll(".gd-thread .gm-azu").length,ph.querySelector(".gd-thread .gm-now")&&ph.querySelector(".gd-thread .gm-now").textContent===stepText(D.tour.guideSteps[G.i])]');
   ok('Read all shows the whole text (Full): the tour\'s lines so far, the line said now marked whole', ra[0] === 'full' && ra[1] && ra[2] >= 1 && ra[3], ra);
   await tap('.gd-all'); await W(200); ok('...and back to the line said now (Peek)', await R('ui.dockH==="peek"&&!!ph.querySelector(".gd-tp")'));
@@ -126,7 +126,7 @@ const url = labUrl('#probe');
   tsec('controls');
 
   // ---------- 8. the ✦ grows into the panel and back ----------
-  await R(base + 'D.guide.look="ink";if(G.on)stopTour();G.fab.menu=false;ui.view="card";ui.stop="full";renderAll(false);scr.scrollTop=900;fabLayer()'); await W(500);
+  await R(base + 'D.guide.look="ink";if(G.on)stopTour();setOverlay("menu",false);ui.view="card";ui.stop="full";renderAll(false);scr.scrollTop=900;fabLayer()'); await W(500);
   const star = await R('var b=ph.querySelector(".gbtn-wrap .gbtn").getBoundingClientRect();[b.left,b.top,b.width]');
   const g0 = await R('gbGo("tour");var s=ph.querySelector(".gd-morph"),r=s&&s.getBoundingClientRect();[!!s,r&&Math.round(r.left),r&&Math.round(r.width),!!ph.querySelector(".gbtn-wrap")]');
   await W(160); const g1 = await R('var s=ph.querySelector(".gd-morph"),r=s&&s.getBoundingClientRect();[!!s,r&&Math.round(r.width)]');
@@ -180,7 +180,7 @@ const url = labUrl('#probe');
   ok('The visitor\'s own music (Settings: Calm, 60 %) plays even with the Music bed Off', await R('G.music&&G.music.id==="harvest-season"&&Math.abs(musicVol()-.6)<1e-6'));
   await R('stopTour();P.vis.music=null;P.vis.musicVol=null');
   // Settings › The guide › Music, and the credits
-  await R(base + 'D.guide.musicVis=true;ui.view="card";ui.stop="full";ui.settingsOpen=true;renderPhone(true)'); await W(300);
+  await R(base + 'D.guide.musicVis=true;ui.view="card";ui.stop="full";setOverlay("settings",true);renderPhone(true)'); await W(300);
   const s1 = await R('var v=ph.querySelector(".vmusic");[!!v,[].map.call(ph.querySelectorAll("[data-gmus]"),function(b){return b.textContent}).join(","),!!ph.querySelector(".vmusic [data-gmusvol]"),!!ph.querySelector(".vmusic .vcredit"),(ph.querySelector(".vcredits")||{}).textContent||""]');
   ok('Settings › The guide › Music: Off and each track\'s feeling, a volume; Music credits lists every track that asks for one', s1[0] && /^Off,Exploration,Storyteller,Calm,Cinematic/.test(s1[1]) && s1[2] && !s1[3] && /Cabezón/.test(s1[4]) && !/RandomMind/.test(s1[4]), s1);
   await R('var v=ph.querySelector(".vset"),g=v.querySelector(".vmusic");v.scrollTop=g.offsetTop-60'); await W(200);
@@ -188,7 +188,7 @@ const url = labUrl('#probe');
   await tap('[data-gmus="exploration"]'); await W(200); const c2 = await R('[P.vis.music,!!ph.querySelector(".vmusic .vcredit")]');
   ok('The credited track chosen (a real tap): its credit line under the choice; a CC0 track: none', c1[0] === 'cabezon-duuiensela' && /Joan Benson/.test(c1[1]) && c2[0] === 'exploration' && !c2[1], [c1, c2]);
   await R('D.guide.musicVis=false;renderPhone(true)'); ok('Visitor can choose the music Hidden: no Music in Settings', await R('!ph.querySelector(".vmusic")'));
-  await R('D.guide.musicVis=true;P.vis.music=null;ui.settingsOpen=false;renderPhone(true)');
+  await R('D.guide.musicVis=true;P.vis.music=null;setOverlay("settings",false);renderPhone(true)');
   await R('ui.tab="guide";D.guide.musicTrack="cabezon-duuiensela";renderEditor()'); const e1 = await R('[].map.call(ed.querySelectorAll(\'[data-fo="s7voice"] .row\'),function(r){return r.querySelector("label").textContent}).join("|")+"#"+((ed.querySelector(".mcredit")||{}).textContent||"")');
   await R('D.guide.musicTrack="exploration";renderEditor()'); const e2 = await R('!!ed.querySelector(".mcredit")');
   ok('The Editor: Music volume, Under the voice, Track (the manifest\'s, the Soft drone, Add your own…), its Credit for a credited track only, Playing now, Visitor can choose the music', /Music volume\|Under the voice\|Track\|Credit\|Playing now\|Visitor can choose the music/.test(e1) && /Joan Benson/.test(e1) && !e2 && await R('var o=[].map.call(ed.querySelectorAll(\'[data-sel="@D.guide.musicTrack"] option\'),function(x){return x.value});o[0]==="exploration"&&o.slice(-2).join()==="drone,own"&&o.indexOf("cabezon-duuiensela")>0'), e1);

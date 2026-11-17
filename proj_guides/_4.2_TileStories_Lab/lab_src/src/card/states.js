@@ -34,7 +34,7 @@ function stateShow(kind,ms){stateHide();var look=D.card.states[kind],el=document
 function stateHide(){clearTimeout(ui.stTimer);clearTimeout(ui.stSlow);ph.querySelectorAll(".stv").forEach(function(x){x.remove()})}
 ph.addEventListener("click",function(e){if(e.target.closest(".stv")){e.stopPropagation();if(e.target.closest("[data-stclose]")||!e.target.closest(".st-morph"))stateHide()}},true);
 /* Try: the phone where the state belongs (the wall for the camera's states, the card for the rest) */
-function stateTry(kind){stateHide();ui.settingsOpen=false;ui.view="card";ui.stop=kind==="lost"||kind==="loading"&&D.card.states.loading==="scan"?"closed":kind==="done"?"full":"half";renderPhone(false);
+function stateTry(kind){stateHide();setOverlay("settings",false);goScreen("card",{stop:kind==="lost"||kind==="loading"&&D.card.states.loading==="scan"?"closed":kind==="done"?"full":"half"});renderPhone(false);
   if(kind==="done")scr.scrollTop=scr.querySelector(".hero").offsetHeight+200;setTimeout(function(){stateShow(kind)},kind==="done"?500:400)}
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;var hn=d.querySelector('[data-fo="s5hints"]');if(!hn)return d.innerHTML;
   var body='<table class="tbl"><thead><tr><th style="width:22%">State</th><th>Look</th><th style="width:44px"></th><th style="width:30px"></th></tr></thead><tbody>'+

@@ -60,8 +60,7 @@ var VOICE_DEFAULT="azure-ryan-duarte";D.guide.voiceSet=VOICE_DEFAULT;D.guide.noR
 COMP.s7vtest=["Guide","Voice test"];FOCUS.s7vtest=["card",".gblock","full"];
 /* the voice sets (voicebench/out: rendered with a provider's key; out-private: Edge, on this computer only, never published) */
 window.VOICESETS=window.VOICESETS||[];
-(function(){var srcs=["voicebench/out/voicesets.js","../voicebench/out/voicesets.js"];if(labLocal())srcs.push("voicebench/out-private/voicesets.js","../voicebench/out-private/voicesets.js");
-  srcs.forEach(function(s){var e=document.createElement("script");e.src=s;e.onload=function(){try{renderEditor()}catch(x){}};e.onerror=function(){};document.head.appendChild(e)})
+(function(){scriptFirst(["voicebench/out/voicesets.js","../voicebench/out/voicesets.js"],renderEditor);if(labLocal())scriptFirst(["voicebench/out-private/voicesets.js","../voicebench/out-private/voicesets.js"],renderEditor);
   /* the published Lab (one artifact, at most 511 files): a set's lines come packed, a few scripts of data URIs (voicebench/pack.py,
      out/packs.js lists them); from this computer's disk the MP3s beside the manifest are read directly. Unity: the VoiceSet asset's clips */
   if(!labLocal()){var l=document.createElement("script");l.src="voicebench/out/packs.js";l.onerror=function(){};

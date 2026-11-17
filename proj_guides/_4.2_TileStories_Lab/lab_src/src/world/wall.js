@@ -17,12 +17,12 @@ var WALLS={ribeira:{img:function(){return IMG.g1},w:720,h:414,pois:D.wall.wallPo
 function curWall(){return WALLS[LAB.wall]||WALLS.ribeira}
 /* the camera: the wall's picture as the phone sees it, panned (camX, camY) and zoomed (camZoom: nearer the wall) */
 function camGeom(){var wl=curWall(),W=ph.offsetWidth,H=ph.offsetHeight,k=Math.max(W/wl.w,H/wl.h)*ui.camZoom,dw=wl.w*k,dh=wl.h*k;return{W:W,H:H,dw:dw,dh:dh,ox:(W-dw)*ui.camX,oy:(H-dh)*ui.camY}}
-function camPaint(){var c=document.getElementById("camera");if(c&&ui.view==="card"){var g=camGeom();c.style.backgroundImage="url("+curWall().img()+")";c.style.backgroundSize=g.dw.toFixed(0)+"px "+g.dh.toFixed(0)+"px";c.style.backgroundPosition=g.ox.toFixed(0)+"px "+g.oy.toFixed(0)+"px"}emit("camPaint.after")}
+function camPaint(){var c=document.getElementById("camera");if(c&&ui.view==="card"&&cameraOn()){var g=camGeom();c.style.backgroundImage="url("+curWall().img()+")";c.style.backgroundSize=g.dw.toFixed(0)+"px "+g.dh.toFixed(0)+"px";c.style.backgroundPosition=g.ox.toFixed(0)+"px "+g.oy.toFixed(0)+"px"}emit("camPaint.after")}
 on("renderPhone.before",function(keep){D.wall.wallPois=curWall().pois});on("renderPhone.after",function(keep){camPaint();ph.classList.toggle("testwall",LAB.wall!=="ribeira");camLayer();fabLayer()});
 /* the test wall's points are its markers, always shown (the card's wall keeps its own marker) */
 on("camLayer.after",function(){var pins=ph.querySelector(".campins");if(pins&&LAB.wall!=="ribeira"&&ui.stop==="closed"&&ui.view==="card")pins.hidden=false;
   /* the guide's button opens Ask about the view (its menu names the middle point): no pill while the panel is closed */
-  var a=ph.querySelector(".camask");if(a&&!G.cam.open)a.remove()});
+  var a=ph.querySelector(".camask");if(a&&!overlayOn("ask"))a.remove()});
 /* drag (both ways) and zoom (the wheel, or two fingers) stand in for moving the phone; each move emits phone.moved (the guidance waits for the phone to be still) */
 var camPan=null,pinch=null,ptrs={};
 ph.addEventListener("pointerdown",function(e){if(ui.stop!=="closed"||ui.view!=="card"||e.target.closest(".camask,.cpin,.mk,#ptool,button,.gbtn-wrap,.gbmenu,.gdbub,.gdock,.gdbeat,.gdstrip"))return;ptrs[e.pointerId]={x:e.clientX,y:e.clientY};

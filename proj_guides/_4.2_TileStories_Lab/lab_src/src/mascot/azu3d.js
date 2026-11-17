@@ -86,7 +86,7 @@ function az3dReport(r){if(r.err)return esc(r.name+": not a GLB the loader can re
   p.push(i.missClips.length?"missing clips: "+i.missClips.join(", "):"all seven clips");p.push(i.missMorphs.length?"missing morphs: "+i.missMorphs.join(", "):"all four morphs");
   p.push(i.front?"the front arm is its own mesh":"no front-arm mesh (name one Azu_ArmFront) so the arm cannot be drawn in front of the card");p.push("size "+i.size.map(function(v){return v.toFixed(2)}).join(" × ")+" (1 = one tile; Unity scales it to 0.15 m on the wall)");
   return esc(r.name+": "+p.join(" · ")+".")}
-ed.addEventListener("click",function(e){var t=e.target.closest("[data-az3d]");if(!t)return;e.stopPropagation();if(!G.on){ui.view="card";if(ui.stop==="closed")ui.stop="half";renderPhone(false);startTour();pauseTour()}Azu3D.force(t.dataset.az3d,3000)},true);
+ed.addEventListener("click",function(e){var t=e.target.closest("[data-az3d]");if(!t)return;e.stopPropagation();if(!G.on){goScreen("card");if(ui.stop==="closed")sheetTo("half");renderPhone(false);startTour();pauseTour()}Azu3D.force(t.dataset.az3d,3000)},true);
 ed.addEventListener("change",function(e){var t=e.target;if(!t.dataset||!t.dataset.az3dimport||!t.files||!t.files[0])return;e.stopPropagation();Azu3D.importFile(t.files[0]).then(function(){renderEditor()})},true);
 /* choosing the source loads the model (once) */
 on("renderEditor.after",function(){if(az3dOn())Azu3D.load()});

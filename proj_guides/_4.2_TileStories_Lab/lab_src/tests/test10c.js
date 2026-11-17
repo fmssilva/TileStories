@@ -11,12 +11,12 @@
 const { chromium, labUrl } = require('./pw');
 const path = require('path');
 const url = labUrl('#probe');
-const fileUrl = 'file:///' + path.join(__dirname, '..', 'block-components-lab.html').replace(/\\/g, '/') + '#probe';
+const fileUrl = 'file:///' + path.join(__dirname, '..', 'tilestories-lab.html').replace(/\\/g, '/') + '#probe';
 (async () => {
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe' });
   const p = await b.newPage({ viewport: { width: 1400, height: 900 } });
   const errs = []; p.on('pageerror', e => errs.push(e.message));
-  let pageBytes = 0; p.on('response', async r => { if (/block-components-lab\.html$/.test(r.url().split('#')[0])) { try { pageBytes = (await r.body()).length } catch (e) {} } });
+  let pageBytes = 0; p.on('response', async r => { if (/tilestories-lab\.html$/.test(r.url().split('#')[0])) { try { pageBytes = (await r.body()).length } catch (e) {} } });
   const go = async (pg, u) => { await pg.goto(u); await pg.waitForFunction(() => window.LAB && window.LAB.run, null, { timeout: 30000 }); await pg.waitForTimeout(600) };
   await go(p, url);
   const R = src => p.evaluate(s => LAB.run(s), src), W = ms => p.waitForTimeout(ms), T0 = Date.now();
@@ -24,7 +24,7 @@ const fileUrl = 'file:///' + path.join(__dirname, '..', 'block-components-lab.ht
 
   // ---------- [http] ----------
   const loc = await p.evaluate(() => location.href.split('#')[0]);
-  ok('[http] the page comes from the local server and is under 5 MB', loc === 'http://localhost:' + (Number(process.env.LAB_PORT) || 8642) + '/lab_src/block-components-lab.html' && pageBytes > 1e6 && pageBytes < 5e6, { loc, MB: +(pageBytes / 1e6).toFixed(2) });
+  ok('[http] the page comes from the local server and is under 5 MB', loc === 'http://localhost:' + (Number(process.env.LAB_PORT) || 8642) + '/lab_src/tilestories-lab.html' && pageBytes > 1e6 && pageBytes < 5e6, { loc, MB: +(pageBytes / 1e6).toFixed(2) });
   const named = await p.evaluate(async () => { const html = document.documentElement.outerHTML, list = [...new Set(html.match(/assets\/[\w./-]+\.(?:jpg|png|glb)/g) || [])];
     const st = await Promise.all(list.map(a => fetch(a, { method: 'HEAD' }).then(r => r.status).catch(() => 0))); return list.map((a, i) => [a, st[i]]) });
   ok(`[http] every assets/ file the page names answers (${named.length}: the pictures, the 5 models, their thumbnails)`, named.length >= 16 && named.every(x => x[1] === 200) && named.filter(x => /\.glb$/.test(x[0])).length === 5, named.filter(x => x[1] !== 200));

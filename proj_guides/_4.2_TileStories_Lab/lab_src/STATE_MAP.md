@@ -23,6 +23,9 @@ This is the code of this prototype, not the Unity project. The Lab's state lives
   root the path names.
 - "(guess)" marks a home or a root that is a judgement; the open ones are listed at the end.
 - `check_structure.js` counts the references to the old root (`S.`): 0 allowed.
+- **The router's state** (`ui.view`, `ui.stop`, `ui.history`, `ui.overlays`, `ui.device`) is written only in `src/screen/`: every
+  change of what the phone shows goes through `screen/router.js` (`goScreen`, `sheetTo`, `setOverlay`, `back`) and emits `screenChanged`;
+  `check_structure.js` counts a write anywhere else (0 allowed).
 
 ## The map
 
@@ -88,15 +91,15 @@ One row per key of the old root `S`, and a row for each field split off. Writers
 | `guideMute` | the visitor muted the guide's voice | `P.guideMute` | -- (the visitor's profile on the phone: PlayerPrefs; guess) | guidance/scenes, guide/person, guide/tour |
 | `kqDone` | the knowledge checks answered (cleared by Forget) | `P.kqDone` | -- (the visitor's profile on the phone: PlayerPrefs; guess) | phone/settings |
 | `lens` | the See it as chip chosen | `P.lens` | -- (the visitor's profile on the phone: PlayerPrefs; guess) | audiences/lenses |
-| `view` | the phone view now (card, story, a page, the demo) | `ui.view` | -- (runtime) | agent/agent, agent/scenes, agent/tools, audiences/audiences, card/block-looks, card/blocks, card/chrome-pinned, card/controls, card/demo-card, card/gallery, card/hints, card/pages, card/states, card/terms, core/boot, core/state, editor/demo, editor/focus, editor/marker-tab, editor/selftest, editor/shell, guidance/editor, guidance/present, guidance/scenes, guidance/service, guide/ask, guide/autotour, guide/demo-hand, guide/game-ask, guide/guide-scenes, guide/hero-start, guide/saved-place, guide/tell-more, guide/tour, guide/tour-end, mascot/azu-gl, mascot/azu3d, phone/settings, phone/sheet, phone/shell, world/camera-ask, world/markers |
-| `stop` | the card's stop now (closed, peek, half, full) | `ui.stop` | -- (runtime) | agent/agent, agent/scenes, audiences/audiences, card/chrome-pinned, card/contents, card/demo-card, card/hints, card/states, core/boot, editor/demo, editor/focus, editor/marker-tab, guidance/editor, guidance/present, guidance/scenes, guidance/service, guide/autotour, guide/game-ask, guide/guide-scenes, guide/hero-start, guide/saved-place, guide/tell-more, guide/tour, guide/tour-end, mascot/azu-gl, mascot/azu3d, phone/grabber, phone/settings, phone/sheet, world/camera-ask, world/guide-button, world/markers |
+| `view` | the screen now (card: the wall with the card sheet over it, story, gallery, kpage, viewer, term, explore, demo, democard) | `ui.view` | -- (runtime: the UI Toolkit screen stack's top) | screen/router (go, back; every module asks it) |
+| `stop` | the card sheet's stop now (closed, peek, half, full): the wall screen's base overlay | `ui.stop` | -- (runtime) | screen/router (go, sheetTo; every module asks it) |
 | `dockH` | the Guide Dock's height now | `ui.dockH` | -- (runtime) | agent/scenes, editor/demo, guidance/present, guidance/scenes, guide/autotour, guide/controls, guide/dock, guide/game-ask, guide/guide-scenes, guide/teleprompter, guide/tell-more, guide/tour-end, world/guide-button |
 | `tab` | the Editor's open tab | `ui.tab` | -- (runtime) | core/boot, core/state, editor/demo, editor/guide-tab, editor/selftest, editor/selftest-texts, editor/shell, editor/texts, editor/words-tab, guidance/editor |
 | `step` | the page's flow step (1-5) | `ui.step` | -- (runtime) | core/state, editor/shell |
 | `sel` | the Editor's selection (layer, kind, style, block, row, step, term...) | `ui.sel` | -- (runtime) | audiences/audiences, card/blocks, card/gallery, card/sections, card/terms, core/boot, core/content, core/state, editor/card-tab, editor/marker-tab, editor/selftest, editor/shell, editor/texts, editor/words-tab, guidance/editor, guide/autotour, guide/tour |
 | `op` | the Editor's foldouts open or closed | `ui.op` | -- (runtime) | card/sections, core/boot, core/state, editor/accordion, editor/card-tab, editor/demo, editor/guide-tab, editor/selftest, editor/selftest-texts, editor/shell, editor/texts, editor/words-tab, guidance/editor |
-| `settingsOpen` | the Settings panel is open | `ui.settingsOpen` | -- (runtime) | card/chrome-pinned, card/controls, card/hints, card/states, editor/demo, guidance/editor, guidance/present, guidance/scenes, guidance/service, guide/guide-scenes, guide/tour, guide/tour-end, phone/settings, world/guide-button |
-| `contentsOpen` | the Contents sheet is open | `ui.contentsOpen` | -- (runtime) | card/contents, card/controls, editor/demo, guidance/editor, guidance/present, guidance/service, phone/settings |
+| `settingsOpen` | gone: the Settings panel is the overlay "settings" | `ui.overlays` | -- (runtime) | screen/router (setOverlay) |
+| `contentsOpen` | gone: the Contents sheet is the overlay "contents" | `ui.overlays` | -- (runtime) | screen/router (setOverlay) |
 | `activeSec` | the section in view | `ui.activeSec` | -- (runtime) | card/contents, card/controls, card/sections, phone/sheet |
 | `openSecs` | the accordion sections open | `ui.openSecs` | -- (runtime) | card/contents, card/controls, card/sections, phone/sheet |
 | `pageKind` | the kind of the page open | `ui.pageKind` | -- (runtime) | card/blocks, card/pages |
@@ -162,7 +165,10 @@ One row per key of the old root `S`, and a row for each field split off. Writers
 | `test` | Preview & Test: the demo card on or off, its marker | `LAB.test` | Lab-only | card/demo-card, core/state, editor/shell |
 | `previewBar` | the preview bar shown | `LAB.previewBar` | Lab-only | card/demo-card, phone/preview-bar |
 | `ptoolPos` | the preview bar's place | `LAB.ptoolPos` | Lab-only | phone/preview-tools |
-| `screen` | the phone frame (phone, wide, tablet, landscape) | `LAB.screen` | Lab-only | core/state, phone/shell |
+| -- | the screens to go back to (back(): the top overlay, the sheet, then the screen before) | `ui.history` | -- (runtime: the screen stack) | screen/router |
+| -- | the overlays open, bottom first: settings, contents, menu (the guide's ✦ menu), ask (Ask about the view), try (Things to try) | `ui.overlays` | -- (runtime: the panels over the screen) | screen/router (setOverlay, closeOverlays, back) |
+| -- | the preview bar's Camera / No camera: a phone without the camera (Explore is home) | `LAB.noCamera` | Lab-only (in the app: the AR session's availability and the camera permission, cameraOn()) | screen/explore |
+| `screen` | gone: the device (W's four) | `ui.device` | -- (runtime: Screen.width / height, Screen.orientation; the Device Simulator in the Editor) | screen/device |
 | `focusOn` | Focus on what I edit | `LAB.focusOn` | Lab-only | core/state, editor/shell |
 | `focusRef` | the part Focus rings | `LAB.focusRef` | Lab-only | core/state, editor/components, phone/shell |
 | `vt` | the blind Voice test: its line, order, ratings | `LAB.vt` | Lab-only | guide/voice, guide/voice-test |

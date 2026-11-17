@@ -514,7 +514,7 @@ function atIntroAdd(set){var ks=D.guide.atIntro[set]=(D.guide.atIntro[set]||[]).
 function atIntroReset(set){D.guide.atIntro[set]=AT_INTRO_DEF[set].slice();AT_INTRO_DEF[set].forEach(function(k){var d=atTxDef(k);if(d)D.words.tx[k]=JSON.parse(JSON.stringify(d))});renderAll(true)}
 /* the demo of a line: the tour made from the open point's card, at the first step of that set, the line said there; none on this card: a chip says so */
 function atIntroDemo(set,key){var poi=ui.m&&ui.m.poi||"painting";/* round 17c: After the tour plays the tour's end with that line (guide/tour-end.js) */if(set==="after"){teDemo("asks",{line:key});return}G.atIntroForce={set:set,key:key};var gen=atSteps(poi),st=set==="morepics"?gen.filter(function(x){var d=x.at&&x.at.deeps&&x.at.deeps[P.lang];return d&&d.kind==="pics"})[0]:gen.filter(function(x){return x.at&&x.at.lk===set})[0]||(set==="teaser"?gen[0]:null);G.atIntroForce=null;
-  if(!st){if(G.on)stopTour();ui.view="card";ui.stop="full";renderPhone(false);if(typeof gdChip==="function"){gdChip("No step of "+nameMid(L(pointOf(poi).hero.title))+"'s tour opens with "+atIntroLabel(set).toLowerCase()+": its lines apply where one does");clearTimeout(G.atChipT);G.atChipT=setTimeout(function(){gdChip(null)},3200)}return}
+  if(!st){if(G.on)stopTour();goScreen("card",{stop:"full"});renderPhone(false);if(typeof gdChip==="function"){gdChip("No step of "+nameMid(L(pointOf(poi).hero.title))+"'s tour opens with "+atIntroLabel(set).toLowerCase()+": its lines apply where one does");clearTimeout(G.atChipT);G.atChipT=setTimeout(function(){gdChip(null)},3200)}return}
   atDemoAt(null,st.id,{set:set,key:key});if(set==="morepics"&&G.on&&D.guide.tmOn){ui.dockH="mini";renderGuide();stopSpeech();G.tm.want=G.i;next()}}
 ed.addEventListener("click",function(e){var b=e.target.closest("[data-atin]");if(!b)return;e.stopPropagation();var q=b.dataset.atin.split("|");
   if(q[0]==="add"){atIntroAdd(q[1]);return}if(q[0]==="reset"){atIntroReset(q[1]);return}if(q[0]==="say"){atIntroDemo(q[1],q[2]);return}
@@ -547,13 +547,13 @@ BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(D\\.guide\\.autoAI|"))
    point's); a kind not on this card or skipped: the card, and a chip saying why */
 function atRing(){var st=G.on&&D.tour.guideSteps[G.i];return st?(st.ref==="hero"?".hero":'[data-ref="'+st.ref+'"]'):".hero"}
 function atDemoAt(kind,id,force){if(G.on)stopTour();G.atIntroForce=force||null;var gen=atSteps(),j=id?gen.findIndex(function(s){return s.id===id}):!kind||kind==="Header"?0:gen.findIndex(function(s){return s.at&&s.at.kind===kind});
-  if(j<0){var b=D.poi.card.filter(function(x){return x.kind===kind})[0];ui.view="card";ui.stop="full";renderPhone(false);if(b){var e=scr.querySelector('[data-ref="b:'+b.id+'"]');if(e)scr.scrollTop=Math.max(0,e.offsetTop-160)}
+  if(j<0){var b=D.poi.card.filter(function(x){return x.kind===kind})[0];goScreen("card",{stop:"full"});renderPhone(false);if(b){var e=scr.querySelector('[data-ref="b:'+b.id+'"]');if(e)scr.scrollTop=Math.max(0,e.offsetTop-160)}
     if(typeof gdChip==="function"){gdChip(b?kind+": skipped by its rule (nothing to tell)":"No "+kind+" on this card: its rule applies where one is");clearTimeout(G.atChipT);G.atChipT=setTimeout(function(){gdChip(null)},3200)}return}
-  G.atForce=true;ui.view="card";ui.stop="full";P.introSeen=true;if(force&&atIsGen(D.tour.guideSteps))D.tour.guideSteps=gen;startTour();var want=gen[j].id,k=D.tour.guideSteps.findIndex(function(s){return s.id===want});if(k>0){stopSpeech();G.i=k;runStep()}}
+  G.atForce=true;goScreen("card",{stop:"full"});P.introSeen=true;if(force&&atIsGen(D.tour.guideSteps))D.tour.guideSteps=gen;startTour();var want=gen[j].id,k=D.tour.guideSteps.findIndex(function(s){return s.id===want});if(k>0){stopSpeech();G.i=k;runStep()}}
 rowDemos(function(key){var m=/^D\.guide\.atRule\.(.+)$/.exec(key);if(m)return{act:function(){atDemoAt(m[1])},ringAfter:400,ring:function(){return G.on?atRing():'[data-ref^="b:"]'}};
   if(key==="D.guide.atHook")return{act:function(){atDemoAt("Header")},ring:".hero"};
   if(key==="D.guide.atTeaserCap")return{act:function(){atDemoAt("Header")},ring:".gdock|.gcap|.hero"};
   if(key==="D.guide.atStoryMax")return{act:function(){atDemoAt("Story")},ringAfter:400,ring:function(){return atRing()}};
   if(key==="D.guide.atCap"){return{act:function(){var g=atSteps(),best=g.slice(1).sort(function(a,b){return atWords(L(b.text))-atWords(L(a.text))})[0];atDemoAt(null,best&&best.id)},ringAfter:400,ring:function(){return atRing()}}}
   if(key==="D.guide.autoAI")return{act:function(){atDemoAt("Header")},ring:".gdock|.gcap"};
-  if(/^D\.tour\.tours\.[^.]+\.src$/.test(key))return{act:function(){if(G.on)stopTour();ui.view="card";ui.stop="full";P.introSeen=true;startTour()},ring:".gdock|.gcap"}});
+  if(/^D\.tour\.tours\.[^.]+\.src$/.test(key))return{act:function(){if(G.on)stopTour();goScreen("card",{stop:"full"});P.introSeen=true;startTour()},ring:".gdock|.gcap"}});

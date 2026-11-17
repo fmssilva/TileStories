@@ -1,7 +1,6 @@
 /* The phone: renderPhone, the screens' top bar, the demo screen, show and the phone's own taps. */
 /* ---------- phone ---------- */
 var scr=document.getElementById("scr"),ph=document.getElementById("ph"),hint=document.getElementById("hint"),fit=document.getElementById("fit");
-var SCREENS={phone:[360,740],land:[740,360],tablet:[640,860]};
 function topbar(crumb){var ans=firstAnswer("topbar.answer",crumb);if(ans!==undefined)return ans;return '<div class="topbar"><button type="button" data-go="card" aria-label="'+TXH("page_back")+'">&#8249;</button><span>'+esc(L(D.poi.hero.title))+' &#8250; '+crumb+'</span></div>';}
 function layerHead(t,s){return '<div class="layerhead">'+t+'<small>'+s+'</small></div>'}
 function demoScreen(){var h=topbar("<b>"+esc(L(UI.demo))+"</b>")+'<div class="pg">';
@@ -14,13 +13,11 @@ function demoScreen(){var h=topbar("<b>"+esc(L(UI.demo))+"</b>")+'<div class="pg
   h+=layerHead("Patterns","Groups of elements with their styles; a marker fills the content.");
   D.blocks.patterns.forEach(function(p){h+='<div class="item" data-ref="p:'+p.id+'"><span class="tag">Pattern · <b>'+esc(p.name)+'</b></span><div class="blk">'+p.rows.map(function(r,i){return renderEl(r.kind,styleById(r.style)||defStyle(r.kind),{},i)}).join("")+'</div></div>'});
   return pipe("demoScreen.html",h+'</div>');}
+screenDef("demo",{name:"The demo (Blocks & Components)",draw:demoScreen});
 /* the phone: the features before (latest first) and after (in module order), sharing the call's notes cx */
-function renderPhone(keep){if(noDraw)return;var cx={};emitLatestFirst("renderPhone.before",keep,cx);var top=keep?scr.scrollTop:0,sz=SCREENS[LAB.screen];
-  ph.style.width=sz[0]+"px";ph.style.height=sz[1]+"px";ph.classList.toggle("land",LAB.screen==="land");
-  var k=Math.min(1,390/sz[0]);fit.style.transform="scale("+k+")";fit.style.height=(sz[1]*k)+"px";fit.style.width=(sz[0]*k)+"px";fit.style.transformOrigin="top left";
-  document.getElementById("camera").style.backgroundImage=LAB.screen==="land"?"url("+IMG.hero+")":"none";
+function renderPhone(keep){if(noDraw)return;var cx={};emitLatestFirst("renderPhone.before",keep,cx);var top=keep?scr.scrollTop:0;deviceFrame();
   ph.classList.toggle("dark",P.dark);ph.classList.toggle("reduce",P.reduce);
-  scr.innerHTML=ui.view==="card"?cardScreen():ui.view==="demo"?demoScreen():ui.view==="story"?storyScreen():ui.view==="term"?termScreen():ui.view==="democard"?demoCardScreen():galleryScreen();
+  scr.innerHTML=screenHtml();
   document.getElementById("ptool").innerHTML=ptool();
   var nb=document.getElementById("navbar");nb.innerHTML=navbar();nb.style.display=ui.view==="card"?"":"none";
   hint.style.display=ui.view==="card"?"":"none";hint.firstChild.textContent="The card · "+L(D.poi.hero.title);
@@ -30,13 +27,13 @@ function applyFocus(){var on=LAB.focusOn&&ui.view==="demo"&&LAB.focusRef;scr.cla
   scr.querySelectorAll(".item.focus").forEach(function(x){x.classList.remove("focus")});if(on){var el=scr.querySelector('[data-ref="'+LAB.focusRef+'"]');if(el)el.classList.add("focus")}}
 function flashRef(ref){if(noDraw)return;var el=scr.querySelector('[data-ref="'+ref+'"]');if(!el)return;var y=el.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-70;
   scr.scrollTo({top:Math.max(0,y),behavior:P.reduce?"auto":"smooth"});if(ui.view!=="demo"){el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash")}}
-function show(view,ref){if(noDraw){ui.view=view;return}if(ref&&view==="demo")LAB.focusRef=ref;if(ui.view!==view){ui.view=view;renderPhone(false)}else applyFocus();if(ref)setTimeout(function(){flashRef(ref)},40)}
+function show(view,ref){if(noDraw){goScreen(view);return}if(ref&&view==="demo")LAB.focusRef=ref;if(ui.view!==view)goScreen(view,{draw:true});else applyFocus();if(ref)setTimeout(function(){flashRef(ref)},40)}
 /* replay: jump back without a transition, then play forward */
 function replayIn(root){var els=root.querySelectorAll(".mv");els.forEach(function(el){el.style.transition="none";el.classList.remove("in")});void root.offsetWidth;
   requestAnimationFrame(function(){els.forEach(function(el){el.style.transition=""});requestAnimationFrame(function(){els.forEach(function(el){el.classList.add("in")})})})}
 ph.addEventListener("click",function(e){var t=e.target;
-  var pt=t.closest("[data-pt]");if(pt){var k=pt.dataset.pt;if(k==="screen")LAB.screen=pt.dataset.v;else if(k==="lang")P.lang=P.lang==="en"?"pt":"en";else if(k==="focusOn")LAB.focusOn=!LAB.focusOn;else P[k]=!P[k];renderAll(true);return}
-  var g=t.closest("[data-go]");if(g&&!t.closest(".kq")){ui.view=g.dataset.go;renderPhone(false);return}
+  var pt=t.closest("[data-pt]");if(pt){var k=pt.dataset.pt;if(k==="lang")P.lang=P.lang==="en"?"pt":"en";else if(k==="focusOn")LAB.focusOn=!LAB.focusOn;else P[k]=!P[k];if(k!=="focusOn")emit("profileChanged",k);renderAll(true);return}
+  var g=t.closest("[data-go]");if(g&&!t.closest(".kq")){goScreen(g.dataset.go,{draw:true});return}
   var ex=t.closest("[data-expand]");if(ex){ex.classList.toggle("opened");return}
   var kq=t.closest(".kq button");if(kq){kq.classList.add(kq.dataset.ok?"ok":"no");return}
   var fl=t.closest("[data-flip]");if(fl){fl.classList.toggle("on");return}

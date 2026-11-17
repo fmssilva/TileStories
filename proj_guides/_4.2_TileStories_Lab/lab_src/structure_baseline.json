@@ -3,5 +3,6 @@
  "replaces": 0,
  "redeclared": 0,
  "defaults": 0,
- "sRefs": 0
+ "sRefs": 0,
+ "screenWrites": 0
 }

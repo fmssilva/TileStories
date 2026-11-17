@@ -23,7 +23,7 @@ const url = labUrl('#probe');
   const base = 'D.guidance=JSON.parse(window.__g0);D.tour.ptJokes=JSON.parse(window.__jk0);D.card.hints.on=false;LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;P.lang="en";LAB.rowDemo=false;LAB.gdSR=false;LAB.gdToday="2026-03-10";D.poi.solemn=false;P.vis.aud="explorer";D.guide.life="lively";D.guide.azuTap="play";D.guide.gbtn="both";D.guide.mascot=true;G.gd.demo=false;gdChip(null);';
   /* only Fun On (the other kinds rest), a first visit on the wall, the clock by hand */
   const FUN = 'D.guidance.kinds.forEach(function(k){k.on=k.id==="fun"});';
-  const fresh = async (extra) => { await R(base + 'if(G.on)stopTour();stopSpeech();G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};ui.settingsOpen=false;G.fab.menu=false;setWall("ribeira");ui.camZoom=1;ui.view="card";ui.stop="closed";renderPhone(false);G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;G.gd.onWall=false;' + (extra || '') + 'gdAdvance(250);'); await W(120); };
+  const fresh = async (extra) => { await R(base + 'if(G.on)stopTour();stopSpeech();G.cam={answer:"",busy:false,lit:[],route:[],hunt:null};setOverlay("ask",false);setOverlay("settings",false);setOverlay("menu",false);setWall("ribeira");ui.camZoom=1;ui.view="card";ui.stop="closed";renderPhone(false);G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;G.gd.onWall=false;' + (extra || '') + 'gdAdvance(250);'); await W(120); };
   // round 14: an item's groups are folded: an item opened here shows its groups open too (each by its id, as the author opens them)
   const editor = async (tab, ops) => { await R(`ui.tab="${tab}";ui.level=1;ui.op=${JSON.stringify(ops)};Object.keys(ui.op).forEach(function(k){var m=/^gd:i:(.+)$/.exec(k),it=m&&ui.op[k]&&D.guidance.items[m[1]];if(it)gdFormOf(it).groups.forEach(function(g){if(g)ui.op["gd:f:"+m[1]+":"+g.k]=true})});renderEditor()`); await W(120); };
 
@@ -137,7 +137,7 @@ const url = labUrl('#probe');
   const hi = await R('var c=G.gd.cur,ch=ph.querySelector(".gdbub:not(.gd-out) [data-gdcta]");[c&&c.item.id,c&&c.text,ch?[ch.offsetWidth,ch.offsetHeight]:null,gdOverWords(),nameMid(gdHuntThing())]');
   ok('The treasure hunt invitation: not for an Explorer, not before a card, then for a Family: "Want a treasure hunt? Find {thing} on the wall." with its 44 px chip, 0 px over words', /only for Family/.test(hEx[1]) && /only once a card opened/.test(hNo[1]) && hi[0] === 'hunt' && hi[1] === 'Want a treasure hunt? Find ' + hi[4] + ' on the wall.' && hi[2] && hi[2][1] >= 44 && hi[3] === 0, [hEx[1], hNo[1], hi]);
   await p.locator('#ph .gdbub:not(.gd-out) [data-gdcta]').click();
-  const hs = await until('G.cam.open&&!!G.cam.hunt&&!!ph.querySelector(\'[data-cpin="\'+G.cam.hunt+\'"]\')', 4000);
+  const hs = await until('overlayOn("ask")&&!!G.cam.hunt&&!!ph.querySelector(\'[data-cpin="\'+G.cam.hunt+\'"]\')', 4000);
   const hid = await R('[G.cam.hunt,(ph.querySelector(".ca-ans")||{}).textContent,gdVisitOf(P.gdVisitor,"hunt").how]');
   ok('...its chip (a real click) opens Ask about the view and starts its own hunt (G.cam.hunt), for the point the invitation named', hs && hid[1] && hid[1].indexOf(hi[4]) >= 0 && hid[2] === 'acted', hid);
   await p.locator(`#ph [data-cpin="${hid[0]}"]`).click();

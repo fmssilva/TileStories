@@ -32,10 +32,10 @@ function rowDemoOf(key){return firstAnswer("rowDemo.spec",String(key||"").replac
 function rowKey(r){var c=r.querySelector('[data-set^="@"],[data-sel^="@"],[data-num^="@"]')||r.querySelector("[data-set],[data-sel],[data-num]");return c?(c.dataset.set||c.dataset.sel||c.dataset.num).replace(/^@/,""):null}
 function rdv(x){return typeof x==="function"?x():x}
 function showRowDemo(key){var sp=rowDemoOf(key);if(!sp||noDraw)return false;var my=G.demoSeq=(G.demoSeq||0)+1;clearTimeout(G.demoT);G.demoStart=performance.now();
-  if(G.on)stopTour();if(typeof hideStopUi==="function")hideStopUi();ui.settingsOpen=false;ui.contentsOpen=false;G.fab.menu=false;G.cam.open=false;var o=ph.querySelector(".onb");if(o)o.remove();
+  if(G.on)stopTour();if(typeof hideStopUi==="function")hideStopUi();setOverlay("settings",false);setOverlay("contents",false);setOverlay("menu",false);setOverlay("ask",false);var o=ph.querySelector(".onb");if(o)o.remove();
   var bk=rdv(sp.block),pk=rdv(sp.page),bv=bk?blockAt(bk):null,ring=sp.ring!=null?sp.ring:bv?bv.sel:null,scroll=sp.scroll!=null?sp.scroll:bv?bv.sel:null,past=rdv(sp.past);
-  if(sp.wall){ui.view="card";ui.stop="closed";G.cam.open=sp.wall==="open";renderPhone(false)}
-  else{if(pk)pageOpen(pk);else ui.view=bv?bv.view:rdv(sp.view)||"card";ui.stop=rdv(sp.stop)||"full";renderPhone(false);if(past)scr.scrollTop=typeof past==="number"?past:900}
+  if(sp.wall){goScreen("card",{stop:"closed"});setOverlay("ask",sp.wall==="open");renderPhone(false)}
+  else{if(pk)pageOpen(pk);else goScreen(bv?bv.view:rdv(sp.view)||"card",{stop:rdv(sp.stop)||"full"});renderPhone(false);if(past)scr.scrollTop=typeof past==="number"?past:900}
   if(sp.tour){P.introSeen=!sp.intro;G.demoTour=true;startTour();G.demoTour=false;var j=typeof sp.tour==="string"?D.tour.guideSteps.findIndex(function(s){return s.id===sp.tour}):-1;if(j>0){stopSpeech();G.i=j;runStep()}if(sp.dock){ui.dockH=sp.dock;renderGuide()}}
   var go=function(){if(G.demoSeq!==my)return;var sc=rdv(scroll);if(sc){var e=phFind(sc),put=function(){if(G.demoSeq===my&&e&&scr.contains(e))scr.scrollTop=Math.max(0,e.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-(ph.clientHeight-(parseFloat(scr.style.top)||0))/3)};
       put();setTimeout(put,380)}

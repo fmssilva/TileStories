@@ -81,16 +81,16 @@ function azPeek(el){var o=ph.querySelector(".azpeek");if(o)o.remove();el=el||ste
     box.style.top=((r.top-pr.top)/q-52)+"px";box.style.left=((r.right-pr.left)/q-92)+"px";requestAnimationFrame(follow)};follow();requestAnimationFrame(function(){box.classList.add("up")});
   setTimeout(function(){box.classList.remove("up");setTimeout(function(){box.remove();var m=ph.querySelector(".mascot");if(m){m.style.visibility="";if(c&&D.guide.azuStyle==="light")m.insertBefore(c,m.firstChild)}},700)},2600)}
 /* ----- walk into the wall: Azu leaves the panel as light, travels to the point on the wall, and becomes a tile there ----- */
-function azWalk(id,done){var poi=D.wall.wallPois.filter(function(p){return p.id===id})[0];if(!poi){done&&done();return}if(ui.stop!=="closed"){ui.stop="closed";renderPhone(false)}
+function azWalk(id,done){var poi=D.wall.wallPois.filter(function(p){return p.id===id})[0];if(!poi){done&&done();return}if(ui.stop!=="closed"){sheetTo("closed");renderPhone(false)}
   var o=ph.querySelector(".azwalker");if(o)o.remove();var w=document.createElement("div");w.className="azwalker";w.setAttribute("aria-hidden","true");var c=AzuGL.canvas();if(c){w.appendChild(c);AzuGL.start()}else w.innerHTML=MASCOT;ph.appendChild(w);
   var from={x:ph.offsetWidth-44,y:ph.offsetHeight-120},to=poiScreen(poi),t0=performance.now(),dur=P.reduce?1:1600;G.azWalk=true;AzuGL.set("to",1);
   var step=function(now){var k=Math.min(1,(now-t0)/dur),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2,x=from.x+(to.x-from.x)*e,y=from.y+(to.y-from.y)*e-Math.sin(e*Math.PI)*70,s=1-.42*e;
     w.style.transform="translate("+(x-32).toFixed(1)+"px,"+(y-70).toFixed(1)+"px) scale("+s.toFixed(3)+")";if(k<1){requestAnimationFrame(step);return}
     G.azWalk=false;AzuGL.set("to",0);w.classList.add("arrived");done&&done()};if(P.reduce)step(t0+dur);else requestAnimationFrame(step)}
 /* in Ask about the view, Azu walks to the first point the answer lights */
-on("camLight.after",function(ids){if(D.guide.azuStyle==="light"&&D.guide.azuWalk&&ids&&ids.length&&G.cam.open){var w=ph.querySelector(".azwalker");if(!w||w.dataset.at!==ids[0])azWalk(ids[0],function(){var x=ph.querySelector(".azwalker");if(x)x.dataset.at=ids[0]})}});
+on("camLight.after",function(ids){if(D.guide.azuStyle==="light"&&D.guide.azuWalk&&ids&&ids.length&&overlayOn("ask")){var w=ph.querySelector(".azwalker");if(!w||w.dataset.at!==ids[0])azWalk(ids[0],function(){var x=ph.querySelector(".azwalker");if(x)x.dataset.at=ids[0]})}});
 D.guide.azuWalk=true;
-on("camLayer.after",function(){if(!G.cam.open){var w=ph.querySelector(".azwalker");if(w)w.remove()}});
+on("camLayer.after",function(){if(!overlayOn("ask")){var w=ph.querySelector(".azwalker");if(w)w.remove()}});
 
 /* Editor: Guide tab > Mascot gets Style, Walks to the wall, and a Try for the peek and the walk */
 on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
@@ -99,8 +99,8 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
     row("Try",'<div class="btnrow"><button class="del" type="button" data-azqtry="peek">Peek from behind a block</button><button class="del" type="button" data-azqtry="walk">Walk to the Torreão</button><button class="del" type="button" data-azqtry="think">Think</button></div>',"Peek: the mascot rises from behind the block’s top edge (a box that clips it).",true));
   return d.innerHTML});
 ed.addEventListener("click",function(e){var t=e.target.closest("[data-azqtry]");if(!t)return;e.stopPropagation();var k=t.dataset.azqtry;
-  if(k==="peek"){if(!G.on){ui.view="card";if(ui.stop==="closed"||ui.stop==="peek")ui.stop="half";renderPhone(false)}azPeek()}
-  else if(k==="walk"){if(G.on)stopTour();ui.view="card";G.cam.open=true;ui.stop="closed";renderPhone(false);azWalk("torreao")}
+  if(k==="peek"){if(!G.on){goScreen("card");if(ui.stop==="closed"||ui.stop==="peek")sheetTo("half");renderPhone(false)}azPeek()}
+  else if(k==="walk"){if(G.on)stopTour();goScreen("card");setOverlay("ask",true);sheetTo("closed");renderPhone(false);azWalk("torreao")}
   else{if(!G.on)startTour();G.azThinkTill=performance.now()+3200}},true);
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("D\\.guide\\.(","D\\.guide\\.(azuStyle|azuWalk|"));
 /* the row's demo: a question on the wall, Azu walking to the point it lights */

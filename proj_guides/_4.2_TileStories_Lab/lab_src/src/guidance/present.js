@@ -190,14 +190,14 @@ on("renderPhone.after",function(){var c=G.gd.cur;if(!c)return;
   var bo=gdBtnOf(c.item),ct=bo&&ph.querySelector(".gdbub:not(.gd-out) [data-gdcta]");if(ct)ct.innerHTML=TXH(bo.word)+'<span aria-hidden="true">&#8250;</span>';gdPlace(c,false)});
 /* ----- the bubble's controls: a tap does its action; a swipe away dismisses; a long press asks Fewer like this? ----- */
 function gdTap(){var c=G.gd.cur;if(!c)return;var it=c.item;if(c.pull&&G.gd.demo){gdStop("tapped (a demo)");return}
-  if(it.tap==="view"){gdStop("tapped: Ask about the view opens","acted");G.fab.menu=false;G.cam.open=true;renderPhone(true);emit("view.opened","the tip");return}
+  if(it.tap==="view"){gdStop("tapped: Ask about the view opens","acted");setOverlay("menu",false);setOverlay("ask",true);renderPhone(true);emit("view.opened","the tip");return}
   /* Azu's remark: a point with a card opens it and starts its tour; any other opens Ask about the view about it, the point lit */
   if(it.tap==="remark"){var pid=c.slots.id,p=(D.wall.wallPois||[]).filter(function(x){return x.id===pid})[0];gdStop("tapped: "+(p&&p.card?"the tour of "+(c.slots.point||"the point")+" starts":"Ask about the view opens about "+(c.slots.point||"the point")),"acted");
-    if(p&&p.card){pointOpen(p.id);ui.view="card";ui.stop="half";renderPhone(false);emit("card.opened","The mascot's remark");startTour();return}
-    G.fab.menu=false;G.cam.open=true;renderPhone(true);emit("view.opened","The mascot's remark");camAsk("",p&&p.year?"oldest":"what");camLight([pid]);return}
+    if(p&&p.card){pointOpen(p.id);goScreen("card",{stop:"half"});renderPhone(false);emit("card.opened","The mascot's remark");startTour();return}
+    setOverlay("menu",false);setOverlay("ask",true);renderPhone(true);emit("view.opened","The mascot's remark");camAsk("",p&&p.year?"oldest":"what");camLight([pid]);return}
   if(it.tap==="menu"){gdStop("tapped: the ✦ menu opens","acted");gbMenu(true);return}
   if(it.tap==="hunt"){gdStop("tapped: the treasure hunt starts","acted");gdHuntGo("the hunt invitation");return}
-  if(it.tap==="tour"){var cont=c.slots.cont!=null;gdStop("tapped: the tour of "+(c.slots.point||"the point")+(cont?" continues at step "+c.slots.cont:" starts"),"acted");if(c.slots.id)pointOpen(c.slots.id);ui.view="card";ui.stop="half";renderPhone(false);emit("card.opened","the tour invitation");if(cont&&typeof svContinue==="function")svContinue(c.slots.id);else startTour();return}
+  if(it.tap==="tour"){var cont=c.slots.cont!=null;gdStop("tapped: the tour of "+(c.slots.point||"the point")+(cont?" continues at step "+c.slots.cont:" starts"),"acted");if(c.slots.id)pointOpen(c.slots.id);goScreen("card",{stop:"half"});renderPhone(false);emit("card.opened","the tour invitation");if(cont&&typeof svContinue==="function")svContinue(c.slots.id);else startTour();return}
   gdStop("tapped","acted")}
 function gdSwipe(dx){var c=G.gd.cur;if(!c)return;var b=ph.querySelector(".gdbub:not(.gd-out)");if(b){b.style.opacity="";if(!P.reduce)b.style.translate=(dx>0?1:-1)*Math.round(ph.offsetWidth*.7)+"px 0px"}
   if(c.pull){gdStop("swiped away (a demo)");return}gdStop("swiped away","dismissed")}
@@ -219,20 +219,20 @@ ph.addEventListener("pointermove",function(e){var p=G.gd.press;if(!p||e.pointerI
   if(t==="pointerup"&&Math.abs(p.dx)>=GD_SWIPE){gdSwipe(p.dx);return}var b=ph.querySelector(".gdbub:not(.gd-out)");if(b){b.style.translate="";b.style.opacity=""}},true)});
 /* an invitation's chip (How does this work? on the wall: Open a card): the card of the marker Azu points at opens, at its stop */
 function gdCta(act){var c=G.gd.cur;if(!c)return;var it=c.item,bt=gdBtnOf(it),w=bt?TXT(bt.word):"",M=gdTarget(it);act=act||bt&&bt.act||"card";
-  if(act==="tour"){gdStop("tapped its button: "+w,"acted");ui.stop="half";renderPhone(false);emit("card.opened","the tip's button");startTour();return}
+  if(act==="tour"){gdStop("tapped its button: "+w,"acted");sheetTo("half");renderPhone(false);emit("card.opened","the tip's button");startTour();return}
   /* round 17: Start again, beside the invitation to continue a kept place: that point's tour from its start */
-  if(act==="again"){gdStop("tapped: Start again (the tour of "+(c.slots.point||"the point")+" from its start)","acted");if(c.slots.id)pointOpen(c.slots.id);ui.view="card";ui.stop="half";renderPhone(false);emit("card.opened","the tour invitation");startTour();return}
-  if(act==="view"){gdStop("tapped its button: "+w,"acted");G.fab.menu=false;G.cam.open=true;renderPhone(true);emit("view.opened","the tip's button");return}
+  if(act==="again"){gdStop("tapped: Start again (the tour of "+(c.slots.point||"the point")+" from its start)","acted");if(c.slots.id)pointOpen(c.slots.id);goScreen("card",{stop:"half"});renderPhone(false);emit("card.opened","the tour invitation");startTour();return}
+  if(act==="view"){gdStop("tapped its button: "+w,"acted");setOverlay("menu",false);setOverlay("ask",true);renderPhone(true);emit("view.opened","the tip's button");return}
   if(act==="hunt"){gdStop("tapped its button: "+w,"acted");gdHuntGo("the tip's button");return}
   /* Show me: the gesture on its target (the ghost finger, the ring), or How does this work? when it has no target */
   if(act==="show"){gdStop("tapped its button: "+w,"acted");if(M)setTimeout(function(){gdShowMe(it,M)},P.reduce?0:180);else gdWalk("Show me");return}
-  gdStop("tapped: "+w,"acted");ui.view="card";ui.stop=D.card.cardCfg.openAt;feedback("open");renderPhone(false);emit("card.opened",it.cta?"How does this work?":"the tip's button")}
+  gdStop("tapped: "+w,"acted");goScreen("card",{stop:D.card.cardCfg.openAt});feedback("open");renderPhone(false);emit("card.opened",it.cta?"How does this work?":"the tip's button")}
 ph.addEventListener("click",function(e){var f=e.target.closest("[data-gdfewer]");if(f){e.stopPropagation();if(f.dataset.gdfewer==="yes")gdFewer();else gdKeep();return}
   var ct=e.target.closest("[data-gdcta]");if(ct){e.stopPropagation();if(performance.now()<(G.gd.noClickUntil||0))return;gdCta(ct.dataset.gdcta);return}
   if(e.target.closest("[data-gdx]")){e.stopPropagation();gdStop("dismissed (its close button)","dismissed");return}
   var t=e.target.closest("[data-gdbub]");if(!t)return;e.stopPropagation();if(performance.now()<(G.gd.noClickUntil||0))return;gdTap()},true);
 /* round 7: the treasure hunt from its invitation: Ask about the view opens and its own hunt starts (the Kids' treasure hunt chip's call) */
-function gdHuntGo(how){G.fab.menu=false;G.cam.open=true;renderPhone(true);emit("view.opened",how);camAsk(TXT("cam_chip_kids"),"kids")}
+function gdHuntGo(how){setOverlay("menu",false);setOverlay("ask",true);renderPhone(true);emit("view.opened",how);camAsk(TXT("cam_chip_kids"),"kids")}
 /* the Editor's demos: a chip on the phone with the ×10 clock (Editor only, never in the app; Unity: a Play-mode preview label) */
 function gdChip(text){var c=ph.querySelector(".gdchip");if(!text){if(c)c.remove();return}if(!c){c=document.createElement("div");c.className="gdchip";c.setAttribute("aria-hidden","true");ph.appendChild(c)}c.textContent=text}
 
@@ -240,9 +240,9 @@ function gdChip(text){var c=ph.querySelector(".gdchip");if(!text){if(c)c.remove(
    marks its control; its line is the step's words); the card's own guide steps come back when it ends. It opens from Settings (its
    entry at the panel's foot, In Settings) and from the ✦ menu's How does this work? (In the ✦ menu): guidance/service.js's gdWalk.
    Unity: the same GuideTour runner with the walkthrough's steps (GuidanceCatalog), each step's control marked by the guide's focus ----- */
-function gdWalkCard(fromId){if(G.on)stopTour();ui.settingsOpen=false;G.fab.menu=false;var g=gdGroupById("howto"),steps=g.items.map(function(id){return D.guidance.items[id]}).filter(function(x){return x&&x.on});
+function gdWalkCard(fromId){if(G.on)stopTour();setOverlay("settings",false);setOverlay("menu",false);var g=gdGroupById("howto"),steps=g.items.map(function(id){return D.guidance.items[id]}).filter(function(x){return x&&x.on});
   if(!steps.length)return false;if(!ui.howSaved)ui.howSaved=D.tour.guideSteps;
-  D.tour.guideSteps=steps.map(function(it,i){return{id:"how"+i,gd:it.id,view:"card",ref:it.ref,sel:it.sel,act:"show",text:D.words.tx[it.says],cue:it.focus&&it.focus!=="tour"?it.focus:undefined}});ui.view="card";ui.stop="full";renderPhone(false);
+  D.tour.guideSteps=steps.map(function(it,i){return{id:"how"+i,gd:it.id,view:"card",ref:it.ref,sel:it.sel,act:"show",text:D.words.tx[it.says],cue:it.focus&&it.focus!=="tour"?it.focus:undefined}});goScreen("card",{stop:"full"});renderPhone(false);
   var j=fromId?steps.map(function(x){return x.id}).indexOf(fromId):-1;startTour();if(j>0){stopSpeech();G.i=j;runStep()}return true}
 on("stopTour.after",function(){if(ui.howSaved){D.tour.guideSteps=ui.howSaved;ui.howSaved=null}});
 on("runStep.after",function(){var st=D.tour.guideSteps[G.i];if(G.on&&st&&st.sel){var el=ph.querySelector(st.sel);if(el){el.classList.add("gfocus");moveMascot(el)}}});
@@ -411,23 +411,23 @@ function gdTryHtml(){var V=P.gdVisitor,rows=gdTryDefs(),c=gdTryCount(V,rows),all
     '<ul class="gdtry-list">'+rows.map(function(it){var d=gdTryDone(it,V);return'<li class="gdtry-row'+(d?" done":"")+'" data-gdtryrow="'+it.id+'"><span class="gdtry-tick" role="img" aria-label="'+(d?TXH("gd_try_done"):TXH("gd_try_todo"))+'">'+(d?"&#10003;":"")+'</span>'+
       '<span class="gdtry-w">'+esc(gdTryWord(it))+'</span><button type="button" class="gdtry-show" data-gdtryshow="'+it.id+'">'+TXH("gd_btn_show")+'<span aria-hidden="true">&#8250;</span></button></li>'}).join("")+'</ul></div>'}
 /* drawn with the phone (a redraw keeps it); a newer Editor demo closes the one an older demo opened */
-on("renderPhone.after",function(){var o=ph.querySelector(".gdtry");if(o)o.remove();if(G.gd.tryOpen&&G.gd.tryOwner!=null&&G.gd.tryOwner!==G.demoSeq){G.gd.tryOpen=false;G.gd.tryOwner=null}
-  if(!G.gd.tryOpen||ui.view!=="card"||noDraw)return;ph.insertAdjacentHTML("beforeend",gdTryHtml())});
+on("renderPhone.after",function(){var o=ph.querySelector(".gdtry");if(o)o.remove();if(overlayOn("try")&&G.gd.tryOwner!=null&&G.gd.tryOwner!==G.demoSeq){setOverlay("try",false);G.gd.tryOwner=null}
+  if(!overlayOn("try")||ui.view!=="card"||noDraw)return;ph.insertAdjacentHTML("beforeend",gdTryHtml())});
 /* Settings › The guide: Things to try › (the same sheet), after Show the tips again */
 on("settingsPanel.html",function(h){var d=document.createElement("div");d.innerHTML=h;var g=d.querySelector(".vtips");if(!g||!gdTryDefs().length)return h;
   g.insertAdjacentHTML("beforeend",'<button type="button" class="vtry" data-gdtry="settings"><span>'+TXH("gd_try")+'</span><span aria-hidden="true">&#8250;</span></button>');return d.innerHTML});
 /* Show me: the visitor taken to the target (a marker: the wall; a cue: the card at its element; the guide's Pause: a tour at Mini; the ✦:
    where it shows, else the wall), then the gesture once; while it plays the scheduler is quiet (context.showing) */
 function gdTryShow(id,from){var it=gdTryItem(id);if(!it)return false;var why=gdPullGate();if(why){gdLog("skipped","Show me ("+it.label+"): "+why);return false}
-  G.gd.tryOpen=false;G.gd.tryOwner=null;ui.settingsOpen=false;ui.contentsOpen=false;G.fab.menu=false;if(G.gd.cur)gdStop("the visitor asked: Show me");gdFingerStop();
+  setOverlay("try",false);G.gd.tryOwner=null;setOverlay("settings",false);setOverlay("contents",false);setOverlay("menu",false);if(G.gd.cur)gdStop("the visitor asked: Show me");gdFingerStop();
   var n=G.gd.tryN=(G.gd.tryN||0)+1,w=gdTryPlace(it);G.gd.tryShow={id:it.id,from:from,n:n,where:w.where,played:false,realUntil:performance.now()+w.ms+3400};
   gdLog("shown","(pulled) Show me: "+gdTryWord(it)+" ("+from+"), on "+w.where);clearTimeout(G.gd.tryT);G.gd.tryT=setTimeout(function(){gdTryPlay(it,n)},w.ms);return true}
 function gdTryPlace(it){
   if(it.form==="cue"){cuePlace(it.id);return{where:"the card, at its element",ms:820}}
-  if(it.about==="pause"){ui.view="card";if(!G.on){ui.stop="full";renderPhone(false);P.introSeen=true;startTour()}G.askOpen=false;ui.dockH="mini";if(G.paused)resumeTour();renderGuide();return{where:"a tour, at its Pause",ms:900}}
+  if(it.about==="pause"){goScreen("card");if(!G.on){sheetTo("full");renderPhone(false);P.introSeen=true;startTour()}G.askOpen=false;ui.dockH="mini";if(G.paused)resumeTour();renderGuide();return{where:"a tour, at its Pause",ms:900}}
   var wall=/^(marker|middle|point)$/.test(it.about);
   if(!wall&&gdTarget(it)){if(ui.view==="card")renderPhone(true);return{where:"the screen as it is",ms:160}}
-  if(G.on)stopTour();G.cam.open=false;ui.view="card";ui.stop="closed";renderPhone(false);
+  if(G.on)stopTour();setOverlay("ask",false);goScreen("card",{stop:"closed"});renderPhone(false);
   /* no marker in view: the camera turns to the point with a card (the phone moves in the app; the Lab pans the picture) */
   if(wall&&!gdMarker()){var pc=(D.wall.wallPois||[]).filter(function(p){return p.card})[0];if(pc&&typeof agCenter==="function")agCenter(pc.id)}return{where:"the wall",ms:520}}
 function gdTryPlay(it,n){var s=G.gd.tryShow;if(!s||s.n!==n)return;G.gd.hopMs=0;var f=null,M=null,el=null;
@@ -616,7 +616,7 @@ function gdQuizScore(){var B=G.gd.bt,n=B.qs.length,r=B.right,demo=B.c&&B.c.pull&
 /* Show me: the block the question came from, in view and ringed (the card waits below the fold), then back to the quiz */
 function gdQuizShow(){var B=G.gd.bt;if(!B||B.kind!=="finale")return;gdBTClr(B,"waitT");var st=byId(ui.fullSteps||D.tour.guideSteps,B.qs[B.k])||byId(D.tour.guideSteps,B.qs[B.k]),el=st&&stepEl(st);B.away=true;
   var c=ph.querySelector(".gdbeat");if(c)c.classList.add("bt-away");var m=ph.querySelector(".mascot");if(m)m.classList.remove("gd-onbeat");
-  if(st){if(st.view&&ui.view!==st.view){ui.view=st.view;renderPhone(false)}
+  if(st){if(st.view&&ui.view!==st.view){goScreen(st.view);renderPhone(false)}
     /* the block found once the screen is drawn (a view just changed redraws), scrolled into view and ringed */
     var tries=0;(function ring(){var e=stepEl(st);if(!e&&tries++<8){setTimeout(ring,60);return}if(!e)return;var y=e.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-90;scr.scrollTo({top:Math.max(0,y),behavior:P.reduce?"auto":"smooth"});e.classList.add("gdshowme");setTimeout(function(){e.classList.remove("gdshowme")},4200)})()}
   gdLog("event","Show me: the block of "+B.qs[B.k]);ph.insertAdjacentHTML("beforeend",'<button type="button" class="gdshowback bt-chip pri" data-gdbt="back">'+TXH("tour_back_quiz")+'</button>');
@@ -747,7 +747,7 @@ function gdFind(B){var it=B.item,fd=D.tour.tourFind,p=gdFindPoint();if(!fd||!p){
   gdBeatBody('<div class="bt-chips">'+gdBeatChip("giveup",TXT("tour_find_giveup"),"",0)+gdBeatChip("notnow",TXT("tour_notnow"),"",4)+'</div>',"");
   gdBT(B,"notNowT",function(){var n=ph.querySelector('.gdbeat [data-gdbt="notnow"]');if(n&&G.gd.bt===B){n.classList.add("bt-gone");setTimeout(function(){if(n.isConnected)n.remove();gdBeatPlace()},300)}},4000);
   /* the card lowers: the wall's view comes back, the panel stays at Mini */
-  ui.stop="closed";ui.view="card";renderPhone(false);if(ui.dockH!=="mini"&&ui.dockH!=="compact"){ui.dockH="mini";renderGuide()}
+  goScreen("card",{stop:"closed"});renderPhone(false);if(ui.dockH!=="mini"&&ui.dockH!=="compact"){ui.dockH="mini";renderGuide()}
   var F=G.gd.find={B:B,p:p,clock:0,tick:performance.now(),movedAt:performance.now(),hinted:false,state:"seek"};gdFindRing();gdLog("event","Find it on the wall: "+L(p.name));
   gdBeatSay(B.said);F.iv=setInterval(function(){gdFindLoop(F)},120)}
 function gdFindRing(){var r=ph.querySelector(".gdseek");if(!r){r=document.createElement("div");r.className="gdseek"+(P.reduce?" still":"");r.setAttribute("aria-hidden","true");r.innerHTML="<i></i>";ph.appendChild(r)}
@@ -777,9 +777,9 @@ function gdFindGiveUp(F,why){if(F.state!=="seek")return;F.state="shown";var B=F.
 function gdFindLost(F){F.state="lost";var B=F.B;gdLog("event","Find it on the wall: the wall is lost (a system state wins): it ends");gdBeatBody("","");gdBeatSay(TXT("tour_find_lost"),function(){gdFindBack(F,"the wall was lost","")})}
 function gdFindEnd(F){clearInterval(F.iv);if(G.gd.find===F)G.gd.find=null;ph.querySelectorAll(".gdseek,.gdfound").forEach(function(x){x.remove()});var m=ph.querySelector(".mascot");if(m){m.classList.remove("gd-findto");m.style.right=""}}
 /* back to the card: the sheet up, the tour goes on */
-function gdFindBack(F,why,how){gdFindEnd(F);ui.stop="full";ui.view="card";renderPhone(false);gdBeatFinish("Find it on the wall: "+why,how)}
+function gdFindBack(F,why,how){gdFindEnd(F);goScreen("card",{stop:"full"});renderPhone(false);gdBeatFinish("Find it on the wall: "+why,how)}
 ph.addEventListener("click",function(e){var t=e.target.closest(".gdbeat [data-gdbt]");if(!t)return;var B=G.gd.bt,F=G.gd.find;if(!B||B.kind!=="find"||!F)return;e.stopPropagation();e.preventDefault();var a=t.dataset.gdbt;
-  if(a==="giveup")gdFindGiveUp(F,"I give up");else if(a==="notnow"&&F.state==="seek"){gdBTClr(B,"notNowT");F.state="no";gdFindEnd(F);var tx=gdNotNow(B.item);ui.stop="full";renderPhone(false);if(tx){gdBeatBody("","");gdBeatSay(tx,function(){gdBeatFinish("Not now: no more games this visit","dismissed")})}else gdBeatFinish("Not now","dismissed")}},true);
+  if(a==="giveup")gdFindGiveUp(F,"I give up");else if(a==="notnow"&&F.state==="seek"){gdBTClr(B,"notNowT");F.state="no";gdFindEnd(F);var tx=gdNotNow(B.item);sheetTo("full");renderPhone(false);if(tx){gdBeatBody("","");gdBeatSay(tx,function(){gdBeatFinish("Not now: no more games this visit","dismissed")})}else gdBeatFinish("Not now","dismissed")}},true);
 on("stopTour.before",function(){var F=G.gd.find;if(F)gdFindEnd(F)});
 on("renderPhone.after",function(){if(G.gd.find){gdFindRing();var F=G.gd.find;if(F.state==="found"||F.state==="shown")gdFindGlint(F.p)}});
 on("camPaint.after",function(){var F=G.gd.find;if(F&&(F.state==="found"||F.state==="shown"))gdFindGlint(F.p)});

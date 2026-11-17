@@ -1,12 +1,12 @@
 /* The grabber: a tap or a drag moves the sheet between its stops (initGrab, stepStop); the peek row and the hero's tap. */
 /* ----- the sheet: a tap on the grabber moves it one stop (peek > half > full > half); a short drag goes one stop its way ----- */
-function stepStop(){ui.stop=ui.stop==="full"?"half":ui.stop==="half"?"full":"half";feedback("tap");renderPhone(true)}
+function stepStop(){sheetTo(ui.stop==="full"?"half":ui.stop==="half"?"full":"half");feedback("tap");renderPhone(true)}
 var DOWN={full:"half",half:"peek",peek:"closed"},UP={peek:"half",half:"full",full:"full"};
 function initGrab(gb){gb.setAttribute("role","button");gb.tabIndex=0;
-  gb.addEventListener("pointerdown",function(e){gb.setPointerCapture(e.pointerId);var y0=e.clientY,t0=parseFloat(scr.style.top)||0,k=fit.getBoundingClientRect().height/SCREENS[LAB.screen][1],moved=false;
+  gb.addEventListener("pointerdown",function(e){gb.setPointerCapture(e.pointerId);var y0=e.clientY,t0=parseFloat(scr.style.top)||0,k=fit.getBoundingClientRect().height/devH(),moved=false;
     function mv(ev){if(!moved&&Math.abs(ev.clientY-y0)<6)return;if(!moved){moved=true;scr.style.transition="none"}var t=Math.max(0,t0+(ev.clientY-y0)/k);scr.style.top=t+"px";gb.style.top=(t+2)+"px"}
     function up(ev){gb.removeEventListener("pointermove",mv);gb.removeEventListener("pointerup",up);gb.blur();if(!moved){stepStop();return}
-      var dy=(ev.clientY-y0)/k;ui.stop=dy<-40?UP[ui.stop]:dy>40?DOWN[ui.stop]:ui.stop;renderPhone(true)}
+      var dy=(ev.clientY-y0)/k;sheetTo(dy<-40?UP[ui.stop]:dy>40?DOWN[ui.stop]:ui.stop);renderPhone(true)}
     gb.addEventListener("pointermove",mv);gb.addEventListener("pointerup",up)});
   gb.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();stepStop()}})};
 /* the Grabber nudge's look (a cue: Guide › Guidance › App › The card, which decides when): the card opened at Half rises 8 px and

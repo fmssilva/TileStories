@@ -145,12 +145,12 @@ function gaEnd(why){var A=G.ga;if(!A.on)return;var g=A.g;gaCancelBack();if(A.awa
   if(g&&g.B&&G.gd.bt===g.B)gdBeatFreeze(g.B,false);if(typeof gdLog==="function")gdLog("event","Ask during a game: the pause ends ("+why+")");gaDraw()}
 
 /* ----- the card's own Ask (the ✦ menu's, Tap on Azu's) while its quiz is on screen: over the card where it is, as round 17c's What next? ----- */
-function gaCardEnter(){ph.scrollLeft=0;var A=G.ga,g=gaGame(),el=g&&g.bid?scr.querySelector('[data-ref="b:'+g.bid+'"]'):null;A.card={top:scr.scrollTop,view:ui.view,stop:ui.stop,ref:el?el.dataset.ref:null,off:el?el.getBoundingClientRect().top-scr.getBoundingClientRect().top:0};G.fab.menu=false;ph.querySelectorAll(".gbtn-wrap,.gbmenu,.gbband").forEach(function(x){x.remove()});G.keepScroll=true;G.on=true;G.paused=true;G.waiting=false;G.askOpen=true;ui.dockH="full";renderGuide();scr.scrollTop=A.card.top;
+function gaCardEnter(){ph.scrollLeft=0;var A=G.ga,g=gaGame(),el=g&&g.bid?scr.querySelector('[data-ref="b:'+g.bid+'"]'):null;A.card={top:scr.scrollTop,view:ui.view,stop:ui.stop,ref:el?el.dataset.ref:null,off:el?el.getBoundingClientRect().top-scr.getBoundingClientRect().top:0};setOverlay("menu",false);ph.querySelectorAll(".gbtn-wrap,.gbmenu,.gbband").forEach(function(x){x.remove()});G.keepScroll=true;G.on=true;G.paused=true;G.waiting=false;G.askOpen=true;ui.dockH="full";renderGuide();scr.scrollTop=A.card.top;
   var i=ph.querySelector("#gq");if(i)i.focus({preventScroll:true})}
 function gaCardLeave(){var A=G.ga,b=A.card;A.card=null;G.keepScroll=false;stopSpeech();G.on=false;G.paused=false;G.askOpen=false;G.typing=false;clearGuideMarks();renderGuide();if(typeof fabLayer==="function")fabLayer();if(!b)return;
-  if(ui.view!==b.view||ui.stop!==b.stop){ui.view=b.view;ui.stop=b.stop;renderPhone(false)}/* the card back where it was: its quiz at the same place on the screen (a scroll offset alone drifts while the page's layout settles) */
+  if(ui.view!==b.view||ui.stop!==b.stop){goScreen(b.view,{stop:b.stop});renderPhone(false)}/* the card back where it was: its quiz at the same place on the screen (a scroll offset alone drifts while the page's layout settles) */
   var put=function(){if(G.on)return;scr.scrollTop=b.top;var e=b.ref&&scr.querySelector('[data-ref="'+b.ref+'"]');if(e)scr.scrollTop+=e.getBoundingClientRect().top-scr.getBoundingClientRect().top-b.off};put();requestAnimationFrame(put);setTimeout(put,250);setTimeout(put,600)}
-on("gbAsk.answer",function(){var g=G.on?null:gaGame({any:true});if(!g)return;if(!D.guide.gaOn&&!g.idle){G.fab.menu=false;fabLayer();gaNote(g,TXT("ga_off"));return true}gaCardEnter();return true});
+on("gbAsk.answer",function(){var g=G.on?null:gaGame({any:true});if(!g)return;if(!D.guide.gaOn&&!g.idle){setOverlay("menu",false);fabLayer();gaNote(g,TXT("ga_off"));return true}gaCardEnter();return true});
 
 /* ----- the ways in: the panel raised, the microphone, the keyboard (renderGuide.after); a question (ask.answer, ask.before) ----- */
 on("renderGuide.after",function(){var A=G.ga;
@@ -209,11 +209,11 @@ function gaTell(){var A=G.ga,g=A.on?A.g:A.idle;if(!g)return;A.choice=false;A.idl
 on("goTo.answer",function(ref){var A=G.ga;if(!A.on)return;var c=corpus().filter(function(x){return x.ref===ref})[0];if(!c)return;if(!A.where)A.where={ref:ref,view:c.view,title:c.title};return"Offered as Show me: "+c.title+" (a game is paused)"});
 function gaShow(){var A=G.ga,w=A.where;if(!A.on||!w)return;gaCancelBack();A.away={view:ui.view,top:scr.scrollTop,stop:ui.stop};var bt=ph.querySelector(".gdbeat");if(bt)bt.classList.add("bt-away");
   A.lowering=true;try{G.askOpen=false;G.typing=false;if(G.on){ui.dockH="mini";renderGuide()}}finally{A.lowering=false}
-  if(ui.view!==w.view){ui.view=w.view;renderPhone(false)}var tries=0;(function ring(){var e=scr.querySelector('[data-ref="'+w.ref+'"]');if(!e&&tries++<8){setTimeout(ring,60);return}if(!e)return;
+  if(ui.view!==w.view){goScreen(w.view);renderPhone(false)}var tries=0;(function ring(){var e=scr.querySelector('[data-ref="'+w.ref+'"]');if(!e&&tries++<8){setTimeout(ring,60);return}if(!e)return;
     var y=e.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-90;scr.scrollTo({top:Math.max(0,y),behavior:P.reduce?"auto":"smooth"});e.classList.add("gdshowme");setTimeout(function(){e.classList.remove("gdshowme")},4200)})();
   if(typeof gdLog==="function")gdLog("event","Ask during a game: Show me “"+w.title+"”, the game still paused");gaDraw()}
 function gaShowBack(quiet){var A=G.ga,a=A.away;if(!a)return;A.away=null;ph.querySelectorAll(".ga-showback").forEach(function(x){x.remove()});var bt=ph.querySelector(".gdbeat");if(bt)bt.classList.remove("bt-away");
-  if(ui.view!==a.view||ui.stop!==a.stop){ui.view=a.view;ui.stop=a.stop;renderPhone(false)}scr.scrollTop=a.top;requestAnimationFrame(function(){scr.scrollTop=a.top});if(typeof gdBeatPlace==="function")gdBeatPlace()}
+  if(ui.view!==a.view||ui.stop!==a.stop){goScreen(a.view,{stop:a.stop});renderPhone(false)}scr.scrollTop=a.top;requestAnimationFrame(function(){scr.scrollTop=a.top});if(typeof gdBeatPlace==="function")gdBeatPlace()}
 
 /* ----- Off: the line on the game, never spoken over it (the game goes on); a voice the microphone paused goes on ----- */
 on("pauseTour.answer",function(){if(!D.guide.gaOn&&!G.explicitPause&&!G.ga.on&&G.on&&gaGame())return true});
@@ -262,7 +262,7 @@ ph.addEventListener("click",function(e){var t=e.target.closest&&e.target.closest
   if(!G.ga.on&&G.ga.idle){var g=G.ga.idle;if(k==="tell"){gaTell();return}var w=G.ga.where;G.ga.idle=null;G.ga.choice=false;gaCloseAsk();if(k==="show"&&w)gaShowIdle(w);gaDraw();return}
   if(k==="back"||k==="try"){gaBack(k==="try"?"I'll try":"Back to the game");return}if(k==="tell"){gaTell();return}if(k==="show"){gaShow();return}},true);
 /* Show me with nothing paused (the card's quiz not started): Ask closes and the card goes to the block, ringed */
-function gaShowIdle(w){if(ui.view!==w.view){ui.view=w.view;renderPhone(false)}var e=scr.querySelector('[data-ref="'+w.ref+'"]');if(!e)return;var y=e.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-90;
+function gaShowIdle(w){if(ui.view!==w.view){goScreen(w.view);renderPhone(false)}var e=scr.querySelector('[data-ref="'+w.ref+'"]');if(!e)return;var y=e.getBoundingClientRect().top-scr.getBoundingClientRect().top+scr.scrollTop-90;
   scr.scrollTo({top:Math.max(0,y),behavior:P.reduce?"auto":"smooth"});e.classList.add("gdshowme");setTimeout(function(){e.classList.remove("gdshowme")},4200)}
 
 /* ----- the model's context: the game on screen, its question and its rule ----- */

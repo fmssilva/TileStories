@@ -69,7 +69,7 @@ const url = labUrl('#probe');
   ok('one at a time: the bar\'s tip waits while the label shows, then comes', w1[0] && !w1[1] && w1[2] && !w2[0] && w2[1], { during: w1, after: w2 });
 
   // 3. How to use the card: from the settings panel only; the Guide's tour on the card's own controls
-  await R('ui.view="card";ui.stop="half";ui.settingsOpen=true;renderPhone(false)'); await p.waitForTimeout(400);
+  await R('ui.view="card";ui.stop="half";setOverlay("settings",true);renderPhone(false)'); await p.waitForTimeout(400);
   ok('the settings panel ends with How to use the card', await R('var b=ph.querySelector(".vset .vhow");b?b.textContent.indexOf("How to use the card")===0:false'));
   // round 7: Settings has the guide's group (voice, speed, captions), so the panel scrolls to its last button
   await R('ph.querySelector(".vset .vhow").scrollIntoView({block:"nearest"})'); await click('.vset .vhow'); await p.waitForTimeout(400);
@@ -79,8 +79,8 @@ const url = labUrl('#probe');
   ok('step 2 marks the settings mark', await R('!!ph.querySelector(".chrome i:last-child.gfocus")&&!ph.querySelector("#grab.gfocus")'));
   await R('stopTour()'); await p.waitForTimeout(200);
   ok('stopping restores the card\'s own guide steps', await R('!G.on&&D.tour.guideSteps[0].id==="g0"'));
-  await R('gdGroupById("howto").inSettings=false;ui.settingsOpen=true;renderPhone(true)');
-  ok('How to use Hidden -> no button', await R('!ph.querySelector(".vhow")')); await R('gdGroupById("howto").inSettings=true;ui.settingsOpen=false;renderPhone(true)');
+  await R('gdGroupById("howto").inSettings=false;setOverlay("settings",true);renderPhone(true)');
+  ok('How to use Hidden -> no button', await R('!ph.querySelector(".vhow")')); await R('gdGroupById("howto").inSettings=true;setOverlay("settings",false);renderPhone(true)');
 
   ok('no page errors', errs.length === 0, errs.slice(0, 3));
   console.log(fails ? `${fails} FAILED` : 'ALL PASS');

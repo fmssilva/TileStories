@@ -33,7 +33,7 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("D\\.guide\\.(","D\\.guide\\.(heroGlow|"));
 /* its demo: a fresh visit, the Ribeira Palace's card opened (its Start glows once the card settles, or not when Off), a tap on Start
    (the glow goes; the tour does not start), then a second card, the Torreão's: it glows again On every new card, not Once per visit */
-function hsDemo(){var my=G.demoSeq,alive=function(){return G.demoSeq===my},open=function(id){ui.movedAt=performance.now();pointOpen(id);ui.view="card";ui.stop="half";renderPhone(false)};
+function hsDemo(){var my=G.demoSeq,alive=function(){return G.demoSeq===my},open=function(id){ui.movedAt=performance.now();pointOpen(id);goScreen("card",{stop:"half"});renderPhone(false)};
   clearTimeout(G.hs.t);G.hs.glow=false;G.hs.tapped=false;open("painting");
   setTimeout(function(){if(!alive())return;var b=scr.querySelector(".hero .gstart");G.hs.tapped=true;G.hs.glow=false;clearTimeout(G.hs.t);if(b){b.classList.remove("hsglow");b.classList.remove("hstap");void b.offsetWidth;b.classList.add("hstap")}document.body.dataset.hsdemo="tapped"},2600);
   setTimeout(function(){if(!alive())return;open("torreao");if(D.guide.heroGlow==="card")hsNewCard();document.body.dataset.hsdemo="second"},3800)}

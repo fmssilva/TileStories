@@ -60,7 +60,7 @@ const url = labUrl('#probe');
   ok('Scripted + offline search: no model call', await R('AG.mockSeen===null'));
   await R('D.guide.ask="ai";stopTour()');
   // 10. the wall: points lit, the camera turns to a point; Off leaves a tool out; Confirm asks first
-  await R('LAB.wall="belem";ui.view="card";ui.stop="closed";ui.camX=.2;ui.camY=.5;ui.camZoom=1.4;D.agent.pol.make_route="off";renderAll(false);G.cam.open=true;camLayer();' +
+  await R('LAB.wall="belem";ui.view="card";ui.stop="closed";ui.camX=.2;ui.camY=.5;ui.camZoom=1.4;D.agent.pol.make_route="off";renderAll(false);setOverlay("ask",true);camLayer();' +
     'AG.mock={calls:[{name:"highlight_points",args:{poi_ids:["poi:belem","poi:jeronimos"]}},{name:"navigate_to",args:{target_id:"poi:jeronimos"}},{name:"start_tour",args:{}}],text:"The oldest is the Jerónimos Monastery; Belém Tower is in front of you."};camAsk("What is oldest?")');
   await W(500);
   const w1 = await R('[G.cam.lit.join(),camView().central&&camView().central.id,AG.mockSeen.tools.indexOf("make_route"),AG.mockSeen.tools.indexOf("highlight_points")>=0,(ph.querySelector(".camask .agchip.confirm")||{}).textContent||"",/"in_view"/.test(AG.mockSeen.prompt)]');

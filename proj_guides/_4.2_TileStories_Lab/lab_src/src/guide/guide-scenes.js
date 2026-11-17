@@ -9,8 +9,8 @@ function gsWait(ms){return new Promise(function(r){setTimeout(r,ms)})}
 function gsSize(sel){var e=ph.querySelector(sel);if(!e)return[0,0];var q=ph.getBoundingClientRect().height/ph.offsetHeight,r=e.getBoundingClientRect();return[Math.round(r.width/q),Math.round(r.height/q)]}
 function gsSpeaking(){return!!(G.utter||G.timer||G.recAudio)}
 /* the set-ups: the card at Full, the tour at a step (the dock at a height), or the card scrolled past the hero */
-function gsTour(id,h){setWall("ribeira");ui.view="card";ui.stop="full";P.introSeen=true;renderPhone(false);startTour();var j=D.tour.guideSteps.findIndex(function(s){return s.id===id});if(j>0){stopSpeech();G.i=j;runStep()}ui.dockH=h||"mini";renderGuide()}
-function gsPast(){setWall("ribeira");ui.view="card";ui.stop="full";renderPhone(false);scr.scrollTop=900;fabLayer()}
+function gsTour(id,h){setWall("ribeira");goScreen("card",{stop:"full"});P.introSeen=true;renderPhone(false);startTour();var j=D.tour.guideSteps.findIndex(function(s){return s.id===id});if(j>0){stopSpeech();G.i=j;runStep()}ui.dockH=h||"mini";renderGuide()}
+function gsPast(){setWall("ribeira");goScreen("card",{stop:"full"});renderPhone(false);scr.scrollTop=900;fabLayer()}
 /* the ✦ past the hero, once the card has settled (it may still be rising): set up again until it shows, at most 2 s */
 function gsGbtn(){var t0=performance.now();return new Promise(function(res){(function w(){if(ph.querySelector(".gbtn")||performance.now()-t0>2000){res(!!ph.querySelector(".gbtn"));return}if(!G.on){scr.scrollTop=900;fabLayer()}setTimeout(w,150)})()})}
 /* waits until the voice reaches word k of the line (or ms pass) */
@@ -47,7 +47,7 @@ var GSCENES=[
     q:T("nothing: scrolls past the hero, taps the ✦, then each item","nada: passa o topo, toca no ✦ e depois em cada opção"),
     expect:T("The ✦ (and the mascot beside it) above the bar; its menu: Start the tour, Ask, How does this work?, Things to try, Guide settings; each item does what it says.","O ✦ (e a mascote ao lado) acima da barra; o seu menu: Começar a visita, Perguntar, Como funciona?, Coisas a experimentar, Definições do guia; cada opção faz o que diz."),
     act:function(){return gsGbtn().then(function(there){if(!there)return[false,"no ✦ past the hero","the hero's Start in sight: "+heroStartSeen()+"; the card at "+ui.stop+"; scrolled "+Math.round(scr.scrollTop)+" px"];gsTap(".gbtn");var items=[].map.call(ph.querySelectorAll(".gbmenu [data-gbgo]"),function(b){return b.dataset.gbgo}),res=[];
-      gsTap('[data-gbgo="settings"]');res.push(!!ph.querySelector(".vset .vguide"));ui.settingsOpen=false;renderPhone(true);scr.scrollTop=900;fabLayer();
+      gsTap('[data-gbgo="settings"]');res.push(!!ph.querySelector(".vset .vguide"));setOverlay("settings",false);renderPhone(true);scr.scrollTop=900;fabLayer();
       gsTap(".gbtn");gsTap('[data-gbgo="ask"]');res.push(G.on&&ui.dockH==="full"&&!!ph.querySelector(".gd-form"));stopTour();scr.scrollTop=900;fabLayer();
       gsTap(".gbtn");gsTap('[data-gbgo="tour"]');res.push(G.on&&!G.paused);var ans="Menu: "+items.join(", ")+"; settings "+(res[0]?"open at the guide's group":"not open")+"; ask "+(res[1]?"opens the conversation":"no")+"; tour "+(res[2]?"starts":"no")+".";
       return items.join()==="tour,ask,how,try,settings"&&res.every(Boolean)?[true,"the ✦'s menu has its five items and each acts",ans]:[false,"an item is missing or does not act",ans]})}},
@@ -55,7 +55,7 @@ var GSCENES=[
     q:T("nothing: taps the mascot beside the ✦ once","nada: toca uma vez na mascote ao lado do ✦"),
     expect:T("The mascot reacts (a poke); the ✦'s menu stays closed.","A mascote reage (um toque); o menu do ✦ fica fechado."),
     act:function(){return gsGbtn().then(function(){var a=ph.querySelector(".azfab");if(!a)return[false,"no mascot beside the ✦",""];var n=G.pokes||0;gsTouch(a);
-      return gsWait(120).then(function(){var r=(ph.querySelector(".azfab").className.match(/r-\w+/)||[""])[0],ans="Pokes "+n+" → "+(G.pokes||0)+(r?", "+r:"")+"; the menu "+(G.fab.menu?"opened":"closed")+".";return(G.pokes||0)===n+1&&!G.fab.menu&&!ph.querySelector(".gbmenu")?[true,"The mascot plays and the menu stays closed",ans]:[false,"the tap did not play, or opened the menu",ans]})})}},
+      return gsWait(120).then(function(){var r=(ph.querySelector(".azfab").className.match(/r-\w+/)||[""])[0],ans="Pokes "+n+" → "+(G.pokes||0)+(r?", "+r:"")+"; the menu "+(overlayOn("menu")?"opened":"closed")+".";return(G.pokes||0)===n+1&&!overlayOn("menu")&&!ph.querySelector(".gbmenu")?[true,"The mascot plays and the menu stays closed",ans]:[false,"the tap did not play, or opened the menu",ans]})})}},
   {id:"g_hint",label:"Guide · The mascot points at the ✦, once a visit",setup:function(){D.guide.azuTap="play";D.guide.life="lively";G.pokes=0;gsPast();gdResetVisitor()},
     q:T("nothing: pokes the mascot four times, then four more","nada: toca na mascote quatro vezes e depois mais quatro"),
     expect:T("After a few pokes the mascot points at the ✦ and says “Need anything? Tap ✦.”; it does not say it again in this visit.","Após alguns toques a mascote aponta para o ✦ e diz “Precisa de alguma coisa? Toque em ✦.”; não volta a dizê-lo nesta visita."),

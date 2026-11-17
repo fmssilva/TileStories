@@ -7,4 +7,4 @@ on("blockPreviewHtml.html",function(h,b){if(b.frame&&b.frame!=="inherit"&&D.card
   if(b.minsMode==="hand")h=h.replace(/(<div class="open[^"]*"[^>]*>[^<]*?)\d+ min/,"$1"+b.mins+" min");
   var ow=b.orw&&L(b.orw);if(ow)h=h.replace(/(<div class="open[^"]*"[^>]*>)[^<]*/,"$1"+esc(ow)+" ");
   return h});
-on("modelSig.before",function(cx){var x="";if(sigWant(/frame/)){var look=D.card.secCfg.look,keep=ui.view;D.card.secCfg.look="cards";ui.view="card";x="#cardsR#"+cardScreen();D.card.secCfg.look=look;ui.view=keep}cx.frame=x});on("modelSig.sig",function(s,cx){return s+cx.frame});
+on("modelSig.before",function(cx){var x="";if(sigWant(/frame/)){var look=D.card.secCfg.look,keep=ui.view;D.card.secCfg.look="cards";viewAs("card");x="#cardsR#"+cardScreen();D.card.secCfg.look=look;viewAs(keep)}cx.frame=x});on("modelSig.sig",function(s,cx){return s+cx.frame});

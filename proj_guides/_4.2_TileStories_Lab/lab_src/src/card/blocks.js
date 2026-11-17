@@ -197,11 +197,11 @@ on("cardScreen.html",function(h){var d=document.createElement("div");d.innerHTML
       if(listen)row1.insertAdjacentHTML("beforeend",'<button type="button" class="hlisten">'+sicon("headphones",15)+esc(fmt(TXT("hero_listen"),"3:11"))+'</button>');w.appendChild(row1)}}}
   return d.innerHTML});
 on("modelSig.before",function(cx){var keep=ui.view,pk=ui.pageKind,look=D.card.secCfg.look,x="";
-  if(sigWant(/blockDefs|D\.card\.ctl\.(player|pageChips)|^o\.|^style\.|D\.poi\.card\.\d+\./)){ui.view="kpage";PAGE_KINDS.forEach(function(k){if(k!=="Story"&&k!=="Gallery"){ui.pageKind=k;x+=kpageScreen()}})}
-  if(sigWant(/D\.card\.ctl\.viewer/)){ui.view="viewer";x+=viewerScreen()}
-  if(sigWant(/D\.card\.secCfg\.(glass|rim)|frame/)){D.card.secCfg.look="cards";ui.view="card";x+="#cards#"+demoCardScreen();D.card.secCfg.look=look}
-  if(sigWant(/D\.card\.secCfg\.divSec/)){var st=D.card.secCfg.start;ui.view="card";D.card.secCfg.start="fade";x+="#fade#"+cardScreen();D.card.secCfg.start=st}
-  if(sigWant(/D\.card\.ctl\.term/)){x+="#gloss#"+gloss("[[Torreão]] [[Torreão]]");ui._gseen={}}ui.view=keep;ui.pageKind=pk;cx.pages=x});on("modelSig.sig",function(s,cx){return s+cx.pages});
+  if(sigWant(/blockDefs|D\.card\.ctl\.(player|pageChips)|^o\.|^style\.|D\.poi\.card\.\d+\./)){viewAs("kpage");PAGE_KINDS.forEach(function(k){if(k!=="Story"&&k!=="Gallery"){ui.pageKind=k;x+=kpageScreen()}})}
+  if(sigWant(/D\.card\.ctl\.viewer/)){viewAs("viewer");x+=viewerScreen()}
+  if(sigWant(/D\.card\.secCfg\.(glass|rim)|frame/)){D.card.secCfg.look="cards";viewAs("card");x+="#cards#"+demoCardScreen();D.card.secCfg.look=look}
+  if(sigWant(/D\.card\.secCfg\.divSec/)){var st=D.card.secCfg.start;viewAs("card");D.card.secCfg.start="fade";x+="#fade#"+cardScreen();D.card.secCfg.start=st}
+  if(sigWant(/D\.card\.ctl\.term/)){x+="#gloss#"+gloss("[[Torreão]] [[Torreão]]");ui._gseen={}}viewAs(keep);ui.pageKind=pk;cx.pages=x});on("modelSig.sig",function(s,cx){return s+cx.pages});
 var FOCUS8={s5viewer:["viewer",".viewer .vtop"],s5player:["kpage",".vplayer"],s5chip:["card",".hero"]};Object.keys(FOCUS8).forEach(function(k){FOCUS[k]=FOCUS8[k]});
 ed.addEventListener("toggle",function(e){var d=e.target;if(!d.dataset||d.dataset.fo!=="s5player"||!d.open)return;ui.pageKind="Video"},true);
 /* block thumbnails: the kind's own preview, where it has one */

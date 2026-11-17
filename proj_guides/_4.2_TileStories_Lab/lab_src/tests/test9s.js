@@ -29,12 +29,12 @@ const CAP = process.env.CAP || '';
   if (process.env.MUTATE) { await R('var __m=document.createElement("style");__m.textContent="#ph .gdock .gd-chips [data-chip]{height:36px!important;min-height:0!important;max-height:36px!important}#ph .mascot{translate:-170px 24px!important}";document.head.appendChild(__m)'); console.log('MUTATION: the panel question chips 36 px tall; Azu drawn 170 px to the left, over the told block words'); }
 
   /* the state every surface starts from: a 390 px phone, the device voice muted (its words go on by time), the guidance quiet */
-  const base = (o) => `SCREENS.phone=[390,${o.H || 844}];if(G.gd.pages)gdPagesEnd("test",false);if(G.on)stopTour();if(G.moment)azMomentEnd(false);ph.querySelectorAll(".azbub").forEach(function(x){x.remove()});gdBeatClose();gdStop("test");D.guidance=JSON.parse(window.__g0);
+  const base = (o) => `ui.device="phone_p";DEVICES.phone_p.h=${o.H || 844};if(G.gd.pages)gdPagesEnd("test",false);if(G.on)stopTour();if(G.moment)azMomentEnd(false);ph.querySelectorAll(".azbub").forEach(function(x){x.remove()});gdBeatClose();gdStop("test");D.guidance=JSON.parse(window.__g0);
     D.card.hints.on=false;LAB.previewBar=false;P.lang="en";P.guideMute=true;P.introSeen=true;P.reduce=${!!o.reduce};P.dark=${o.theme === 'dark'};D.card.cardCfg.mode="${o.theme === 'dark' ? 'dark' : 'light'}";
     D.guide.voice="device";D.guide.panel="dock";D.guide.dockStart="mini";D.guide.miniCtl="pausestop";D.guide.captions=true;D.guide.pWords="prompter";D.guide.pBars=true;D.guide.pSpeed=true;D.guide.chips=true;
     D.guide.speed=1;P.vis.speed=null;D.guide.music=false;P.vis.music=null;LAB.rowDemo=false;LAB.gdSR=false;D.poi.solemn=false;P.vis.aud="explorer";P.vis.len="";D.guide.life="lively";
     D.guide.gbtn="both";D.guide.mascot=true;D.guide.look="${o.look || 'ink'}";D.guide.cue="spotlight";D.guide.zoom="zoom";D.agent.trace=false;D.agent.voiceOut=false;
-    G.gd.demo=false;gdChip(null);G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};ui.settingsOpen=false;G.fab.menu=false;G.askOpen=false;G.talk="idle";G.busy=false;
+    G.gd.demo=false;gdChip(null);G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};setOverlay("settings",false);setOverlay("menu",false);G.askOpen=false;G.talk="idle";G.busy=false;
     D.guidance.on=true;D.guidance.kinds.forEach(function(k){k.on=false});G.gd.manual=true;gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;`;
   const wall = 'setWall("ribeira");ui.camZoom=1;ui.view="card";ui.stop="closed";renderAll(false);';
   const card = 'ui.view="card";ui.stop="full";renderAll(false);';
@@ -138,7 +138,7 @@ const CAP = process.env.CAP || '';
     rm.push([s.name, await R('var t=G15.text();[ph.classList.contains("reduce"),t.length,t.filter(function(x){return x.cr<4.5}).length,[].filter.call(ph.querySelectorAll(".gdbub,.gdock,.gbtn,.azbub,.mascot"),function(e){var a=getComputedStyle(e);return a.animationName!=="none"&&parseFloat(a.animationDuration)>0&&a.animationIterationCount==="infinite"}).length]')]);
     if (CAP) { const r = await p.locator('#ph').boundingBox(); await p.screenshot({ path: path.join(CAP, `${nn}_${s.name}_${v.look}_${v.h}_light-reduce.png`), clip: { x: r.x, y: r.y, width: r.width, height: r.height } }); } }
   if (rm.length) ok(`[reduce] Reduce Motion: ${rm.map(x => x[0]).join(', ')} still read (their words there at 4.5:1, nothing looping)`, rm.every(x => x[1][0] && x[1][1] > 0 && x[1][2] === 0 && x[1][3] === 0), rm);
-  await R('if(G.on)stopTour();gdStop("test");SCREENS.phone=[360,820];P.dark=false;D.card.cardCfg.mode="light";D.guidance=JSON.parse(window.__g0);renderAll(false)');
+  await R('if(G.on)stopTour();gdStop("test");ui.device="phone_p";DEVICES.phone_p.h=844;P.dark=false;D.card.cardCfg.mode="light";D.guidance=JSON.parse(window.__g0);renderAll(false)');
   ok('No page error', errs.length === 0, errs.slice(0, 5));
   tsec('end');
   console.log(fails ? `FAILED ${fails}` : 'ALL PASS');
