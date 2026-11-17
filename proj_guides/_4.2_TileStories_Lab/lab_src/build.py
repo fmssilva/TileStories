@@ -1,9 +1,9 @@
 """Builds the TileStories Lab (tilestories-lab.html): joins the modules in MODULES and the styles in STYLES, embeds the words and the faces, and puts the
 3D mascot's files in assets/ beside the page. It never rewrites code. python build.py -> tilestories-lab.html (not committed)
-and assets/mascot/ (copied, not committed), then the structure check (check_structure.js) and the Unity lint (tools/unity_lint.py):
+and assets/mascot/ (copied, each model also as <id>.glb.js, the script the page loads it by; not committed), then the structure check (check_structure.js) and the Unity lint (tools/unity_lint.py):
 either one failing fails the build. The page with its assets/ is served by tools/serve.py and published as page + files (README.md).
 PROTOTYPE_STRUCTURE.md says what each module owns."""
-import io, os, re, shutil, subprocess, sys
+import base64, io, os, re, shutil, subprocess, sys
 D = os.path.dirname(os.path.abspath(__file__))
 M3 = os.path.join(D, '..', '..', 'mascote', '3d')
 
@@ -66,6 +66,20 @@ def copy_assets():
         if not os.path.exists(dst) or os.path.getmtime(dst) < os.path.getmtime(src) or os.path.getsize(dst) != os.path.getsize(src):
             os.makedirs(os.path.dirname(dst), exist_ok=True)
             shutil.copy2(src, dst)
+    glb_scripts()
+
+
+# each model also as a script, assets/mascot/<id>.glb.js: it registers the model's bytes (base64) in one global registry keyed by the
+# model id (window.AZ3D_GLB), nothing else. mascot/azu3d.js loads the chosen model by <script> from it: the published artifact serves
+# no .glb, and a script loads from disk (file://) too. The .glb files stay for the local server and for Import.
+def glb_scripts():
+    for m in MASCOT:
+        glb = os.path.join(D, 'assets', 'mascot', m + '.glb')
+        js = glb + '.js'
+        if os.path.exists(js) and os.path.getmtime(js) >= os.path.getmtime(glb):
+            continue
+        data = base64.b64encode(open(glb, 'rb').read()).decode('ascii')
+        io.open(js, 'w', encoding='ascii', newline='\n').write('(window.AZ3D_GLB=window.AZ3D_GLB||{})["%s"]="%s";\n' % (m, data))
 
 
 def build():

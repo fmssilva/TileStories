@@ -7,18 +7,24 @@
 The published layout (the page's relative URLs work from it and from tools/serve.py's folder, which has lab_src/ beside
 voicebench/ and music/: the page tries "voicebench/..." and "music/..." first, then "../"):
     tilestories-lab.html                      lab_src/tilestories-lab.html (python build.py)
-    assets/...                                lab_src/assets/ (the pictures; the mascot's models and thumbnails, copied by build.py)
+    assets/...                                lab_src/assets/ (the pictures; the mascot's thumbnails and its models as their
+                                              <id>.glb.js scripts, build.py: the host serves no .glb, so the .glb files stay out)
     voicebench/out/voicesets.js, packs.js     the public voice sets (never out-private: Edge, this computer only)
     voicebench/out/<set>/pack-N.js            a set packed by voicebench/pack.py (its MP3s are not published: too many files)
     voicebench/out/<set>/<line>.mp3           a set not packed: its files one by one
     music/tracks.js and its tracks            ../music
 The Artifact tool's limits: 16 MB a file, 64 MB and 255 files a publish; more go in another publish to the same url, so the list
-is split into batches in this order (the page and its pictures first). A file over 16 MB, or a page not built, fails the list."""
+is split into batches in this order (the page and its pictures first). A file over 16 MB, one with an extension the host does not
+serve (SERVED), or a page not built, fails the list."""
 import json, os, shutil, sys
 
 LAB = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # lab_src
 ROOT = os.path.dirname(LAB)                                         # the Lab's folder: lab_src, voicebench, music
 FILE_MAX, PUB_MAX, PUB_FILES = 16 * 10 ** 6, 64 * 10 ** 6, 255   # decimal MB: the safer reading of the limits
+# the extensions the artifact host serves (no .glb under any type: the models go as their .glb.js scripts); any other fails the list
+SERVED = {'.html', '.css', '.js', '.mjs', '.wasm', '.json', '.map', '.txt', '.md', '.csv', '.xml',
+          '.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.avif', '.ico', '.woff', '.woff2', '.ttf', '.otf',
+          '.mp3', '.wav', '.ogg', '.mp4', '.webm', '.pdf'}
 
 
 def files():
@@ -30,6 +36,8 @@ def files():
     out.append(('tilestories-lab.html', page))
     for base, _, fs in sorted(os.walk(os.path.join(LAB, 'assets'))):
         for f in sorted(fs):
+            if f.endswith('.glb'):   # the host serves no .glb: its <id>.glb.js goes instead (build.py)
+                continue
             src = os.path.join(base, f)
             out.append(('assets/' + os.path.relpath(src, os.path.join(LAB, 'assets')).replace('\\', '/'), src))
     vo = os.path.join(ROOT, 'voicebench', 'out')
@@ -54,6 +62,8 @@ def batches(fl):
     out, cur, size = [], [], 0
     for pub, src in fl:
         n = os.path.getsize(src)
+        if os.path.splitext(pub)[1].lower() not in SERVED:
+            sys.exit('%s: the artifact host does not serve %s files (it serves %s)' % (pub, os.path.splitext(pub)[1] or 'extensionless', ' '.join(sorted(SERVED))))
         if n > FILE_MAX:
             sys.exit('%s is %.1f MB: over the 16 MB a file' % (pub, n / 1e6))
         if cur and (size + n > PUB_MAX or len(cur) >= PUB_FILES):

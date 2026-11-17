@@ -30,7 +30,7 @@ function renderAll(keep){if(noDraw)return;renderEditor();renderPhone(keep)}
 /* it runs, but cannot load the 3D mascot's models nor read a picture back (Photo of the view, the mascot's measured figure): the
    moment one is asked for, one line above every tab says so (no silent fallback). Over http (tools/serve.py, the published Lab) never */
 function fileOnlyNotice(){if(location.protocol!=="file:"||LAB.fileNote)return;LAB.fileNote=true;renderEditor()}
-on("renderEditor.after",function(){if(LAB.fileNote&&!ed.querySelector("[data-filenote]"))ed.insertAdjacentHTML("afterbegin",'<div class="note warn" data-filenote="1">Open with tools/serve.py for the 3D mascot and photos</div>')});
+on("renderEditor.after",function(){if(LAB.fileNote&&!ed.querySelector("[data-filenote]"))ed.insertAdjacentHTML("afterbegin",'<div class="note warn" data-filenote="1">Open with tools/serve.py for Photo of the view and the measured mascot</div>')});
 /* ---------- Undo / Redo (core/undo.js): one step per Editor change ---------- */
 /* the Editor's one write point: every change of a row, a field, a table or a button passes through the Editor's own events. D as it
    was before the change is kept (a click or a select: that change; typing and sliders: the field's whole edit, closed by its change

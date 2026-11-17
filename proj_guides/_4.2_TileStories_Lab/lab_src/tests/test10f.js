@@ -4,9 +4,10 @@
 // server, no labLocal (the voice sets come packed).
 // [list] the list: the page, assets/, the public voice sets (never out-private: a packed set by its packs only) and the music, in
 //   batches within the limits (16 MB a file, 64 MB and 255 files a publish); [page] the page from the layout, every file it asks
-//   for answered; [glb] the 3D mascot's model loads; [voice] a recorded line from its pack (a data URL) plays its audio;
-//   [music] a track of music/tracks.js loads.
-// MUTATE=1: the packs left out of the staged folder: the checks named [voice] turn red.
+//   for answered; [served] every file has an extension the artifact host serves (no .glb: the models go as their .glb.js
+//   scripts); [glb] the chosen 3D model loads from its .glb.js (no .glb in the layout), and only that one; [voice] a recorded line
+//   from its pack (a data URL) plays its audio; [music] a track of music/tracks.js loads.
+// MUTATE=1: the packs and the models' scripts left out of the staged folder: the checks named [voice] and [glb] turn red.
 const { chromium } = require('./pw');
 const { execFileSync } = require('child_process'), fs = require('fs'), os = require('os'), path = require('path');
 // the page from python build.py; the local server is not used here
@@ -22,8 +23,10 @@ const LAB = path.join(__dirname, '..'), TMP = fs.mkdtempSync(path.join(os.tmpdir
   ok('[list] the page, assets/ (16 files), voicesets.js and packs.js, the music and its tracks.js', all.includes('tilestories-lab.html') && all.filter(f => f.startsWith('assets/')).length === 16 && all.includes('voicebench/out/voicesets.js') && all.includes('voicebench/out/packs.js') && all.includes('music/tracks.js') && all.filter(f => /^music\/.*\.(mp3|ogg)$/.test(f)).length >= 5, all.length);
   ok('[list] never out-private; a packed set by its packs only (Ryan · Duarte: its pack-N.js, no MP3)', !all.some(f => /out-private/.test(f)) && all.filter(f => /azure-ryan-duarte\/pack-\d+\.js$/.test(f)).length >= 1 && !all.some(f => /azure-ryan-duarte\/.*\.mp3$/.test(f)), all.filter(f => /ryan/.test(f)));
   ok('[list] within the limits: no file over 16 MB, each publish at most 64 MB and 255 files', !big.length && sizes.every(s => s <= 64e6) && maps.every(m => Object.keys(m).length <= 255), { publishes: maps.length, MB: sizes.map(s => +(s / 1e6).toFixed(1)), big });
+  const SERVED = /\.(html|css|js|mjs|wasm|json|map|txt|md|csv|xml|png|jpe?g|gif|webp|svg|avif|ico|woff2?|ttf|otf|mp3|wav|ogg|mp4|webm|pdf)$/i;
+  ok('[served] every published file has an extension the host serves; the five models as assets/mascot/<id>.glb.js, no .glb', all.every(f => SERVED.test(f)) && !all.some(f => /\.glb$/.test(f)) && all.filter(f => /^assets\/mascot\/[a-z]+\.glb\.js$/.test(f)).length === 5, all.filter(f => !SERVED.test(f) || /glb/.test(f)));
   console.log(out.trim().split('\n').slice(-2).join(' | '));
-  if (process.env.MUTATE) { const d = path.join(TMP, 'voicebench', 'out', 'azure-ryan-duarte'); fs.readdirSync(d).filter(f => /^pack-/.test(f)).forEach(f => fs.unlinkSync(path.join(d, f))); console.log('MUTATION: the packs left out'); }
+  if (process.env.MUTATE) { const d = path.join(TMP, 'voicebench', 'out', 'azure-ryan-duarte'); fs.readdirSync(d).filter(f => /^pack-/.test(f)).forEach(f => fs.unlinkSync(path.join(d, f))); const md = path.join(TMP, 'assets', 'mascot'); fs.readdirSync(md).filter(f => /\.glb\.js$/.test(f)).forEach(f => fs.unlinkSync(path.join(md, f))); console.log('MUTATION: the packs and the models\' scripts left out'); }
 
   // ---------- the page from the published layout ----------
   const b = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe' });
@@ -53,7 +56,8 @@ const LAB = path.join(__dirname, '..'), TMP = fs.mkdtempSync(path.join(os.tmpdir
   await R('P.guideMute=true;P.introSeen=true;D.guidance.on=false;D.guide.azuStyle="glb";goScreen("card",{stop:"half"});renderAll(false);Azu3D.load();""');
   await p.waitForFunction(() => LAB.run('Azu3D.state().ready||Azu3D.state().failed'), null, { timeout: 30000 }).catch(() => {});
   const g = JSON.parse(await R('var s=Azu3D.state();JSON.stringify({ready:s.ready,failed:s.failed,err:s.err,model:s.model})'));
-  ok('[glb] the 3D mascot\'s model from assets/mascot/ in the layout (fetched, parsed, drawn)', g.ready && !g.failed && asked.some(u => /^assets\/mascot\/.*\.glb$/.test(u)), g);
+  const glbAsked = asked.filter(u => /^assets\/mascot\/[^/]+\.glb/.test(u));
+  ok('[glb] the chosen 3D model (the explorer) loads from assets/mascot/explorer.glb.js in the layout (no .glb there): decoded, parsed, drawn; no other model asked for', g.ready && !g.failed && g.model === 'explorer' && JSON.stringify(glbAsked) === '["assets/mascot/explorer.glb.js"]' && !fs.readdirSync(path.join(TMP, 'assets', 'mascot')).some(f => /\.glb$/.test(f)), [g, glbAsked]);
   // [voice]: the packs load (packs.js names them), a recorded line's URL is its data URL, and the audio plays it
   await p.waitForFunction(() => LAB.run('Object.keys(window.VOICEPACK||{}).length>400'), null, { timeout: 30000 }).catch(() => {});
   const v = JSON.parse(await p.evaluate(() => LAB.run('var s=voiceSets().filter(function(x){return x.id==="azure-ryan-duarte"})[0],k=Object.keys(s.files)[0],f=s.files[k];P.lang=f.lang;var r=recFile(f.text,s);' +

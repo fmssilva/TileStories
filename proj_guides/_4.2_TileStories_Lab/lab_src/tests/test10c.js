@@ -2,11 +2,12 @@
 // (tools/serve.py) and the assets out of the page (build.py: the page, its pictures in assets/, the 3D mascot's models and thumbnails in
 // assets/mascot/).
 // [http] the page comes over http://localhost:$LAB_PORT/lab_src/ (default 8642) and is under 5 MB; every assets/ file it names answers.
-// [glb] the 3D mascot's model loads over http (fetched, parsed, drawn); [photo] Photo of the view reads its canvas back (a JPEG);
+// [glb] the 3D mascot's model loads over http (its script assets/mascot/<id>.glb.js, decoded, parsed, drawn); [photo] Photo of the view reads its canvas back (a JPEG);
 // [figure] guidance/present.js measures the mascot's picture (its thumbnail's pixels, not the whole box); [local] over the local
 //   server the page is on this computer (labLocal: the keys, the private voice sets and the MP3s as from disk).
-// [file] opened from disk (file://) the page runs (the card, the Editor); the 3D mascot (the default mascot) cannot load there, so the
-//   Editor says so on one line: "Open with tools/serve.py for the 3D mascot and photos"; a photo asked for is not sent, the line stays.
+// [file] opened from disk (file://) the page runs (the card, the Editor) and the 3D mascot (the default) loads from its script too,
+//   with no line; a photo asked for is not sent, and the Editor says so on one line: "Open with tools/serve.py for Photo of the view
+//   and the measured mascot".
 // MUTATE=1: the notice never shows (fileOnlyNotice does nothing): the [file] check turns red.
 const { chromium, labUrl } = require('./pw');
 const path = require('path');
@@ -51,12 +52,14 @@ const fileUrl = 'file:///' + path.join(__dirname, '..', 'tilestories-lab.html').
   await q.waitForFunction(() => LAB.run('Azu3D.state().ready||Azu3D.state().failed'), null, { timeout: 30000 }).catch(() => {});
   await q.waitForTimeout(400);
   const f1 = JSON.parse(await Q('var n=document.querySelector("[data-filenote]");JSON.stringify([location.protocol,!!scr.querySelector(".hero"),ed.querySelectorAll(".row").length,labLocal(),D.guide.azuStyle,Azu3D.state().failed,n?n.textContent:null,ed.querySelectorAll("[data-filenote]").length])'));
-  ok('[file] opened from disk the page runs (the card, the Editor); its mascot is the 3D model (the default), which cannot load there, so the Editor says so on one line: "Open with tools/serve.py for the 3D mascot and photos"',
-    f1[0] === 'file:' && f1[1] && f1[2] > 50 && f1[3] && f1[4] === 'glb' && f1[5] === true && f1[6] === 'Open with tools/serve.py for the 3D mascot and photos' && f1[7] === 1, f1);
+  const f1r = await Q('Azu3D.state().ready');
+  ok('[file] opened from disk the page runs (the card, the Editor); its mascot, the 3D model (the default), loads from its script (assets/mascot/<id>.glb.js), with no line',
+    f1[0] === 'file:' && f1[1] && f1[2] > 50 && f1[3] && f1[4] === 'glb' && f1[5] === false && f1r === true && f1[6] === null && f1[7] === 0, f1.concat([f1r]));
   // the line taken away, then a photo asked for: the line comes back with it (MUTATE=1: fileOnlyNotice does nothing from here)
   if (process.env.MUTATE) { await Q('fileOnlyNotice=function(){}'); console.log('MUTATION: the notice never shows'); }
   const f2 = JSON.parse(await q.evaluate(() => LAB.run('LAB.fileNote=false;ui.tab="guide";renderEditor();var gone=!ed.querySelector("[data-filenote]");D.agent.photo=true;agPhoto().then(function(x){return JSON.stringify([gone,x,ed.querySelectorAll("[data-filenote]").length])})')));
-  ok('[file] a photo asked for from disk: none is sent (null), and the line says so (on the Guide tab too)', f2[0] === true && f2[1] === null && f2[2] === 1, f2);
+  const f3 = await Q('(document.querySelector("[data-filenote]")||{}).textContent||null');
+  ok('[file] a photo asked for from disk: none is sent (null), and the line says so (on the Guide tab too): "Open with tools/serve.py for Photo of the view and the measured mascot"', f2[0] === true && f2[1] === null && f2[2] === 1 && f3 === 'Open with tools/serve.py for Photo of the view and the measured mascot', [f2, f3]);
   await q.close();
 
   ok('No page errors', errs.length === 0 && qerrs.length === 0, errs.concat(qerrs).slice(0, 5));

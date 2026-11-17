@@ -1,5 +1,14 @@
 /* Azu as a 3D model: the GLB drawn by three.js; the source, a clip, Import, Generate from a picture. */
 
+/* a model's bytes, the one way a model is loaded: its script assets/mascot/<id>.glb.js (build.py) registers them, base64, in
+   window.AZ3D_GLB under the model's id; loaded by <script> on demand, the chosen model only, so it works from the local server, from
+   disk (file://) and from the published artifact (which serves no .glb). The registry's copy is dropped once decoded (the parsed
+   model is cached). Unity: the mascot is an imported asset. */
+function az3dBytes(m){return new Promise(function(res,rej){var R=window.AZ3D_GLB||(window.AZ3D_GLB={});
+  function take(){var b64=R[m.id];if(!b64)return rej(new Error(m.glb+".js registered no model "+m.id));delete R[m.id];
+    var bin=atob(b64),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);res(u.buffer)}
+  if(R[m.id])return take();
+  var e=document.createElement("script");e.src=m.glb+".js";e.onload=function(){e.remove();take()};e.onerror=function(){e.remove();rej(new Error(m.glb+".js: not found"))};document.head.appendChild(e)})}
 /* what a mascot GLB must hold (the contract of _3.7 section 1): the clips, the morphs, the front arm as its own mesh */
 var AZ3D_CLIPS=["idle","talk","listen","think","point","walk","wave"],AZ3D_MORPHS=["Blink","Open","Wide","Round"];
 var AZ3D_THREE="https://cdn.jsdelivr.net/npm/three@0.160.0/+esm",AZ3D_LOADER="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js/+esm";
@@ -15,8 +24,7 @@ var Azu3D=(function(){var T=null,GL=null,cv=null,R=null,scene=null,cam=null,mode
   /* each model is decoded and parsed once; a switch back reuses it */
   var cache={};
   function get(m){if(cache[m.id])return Promise.resolve(cache[m.id]);
-    return fetch(m.glb).then(function(r){if(!r.ok)throw new Error(m.glb+": "+r.status);return r.arrayBuffer()})
-      .catch(function(e){fileOnlyNotice();throw e}).then(function(buf){st.parses=(st.parses||0)+1;return parse(buf)}).then(function(g){cache[m.id]=g;return g})}
+    return az3dBytes(m).then(function(buf){st.parses=(st.parses||0)+1;return parse(buf)}).then(function(g){cache[m.id]=g;return g})}
   /* what a GLB holds, against the contract: each missing part is named */
   function check(g){var clips=g.animations.map(function(a){return a.name}),morphs=[],meshes=[],front=false;
     g.scene.traverse(function(o){if(o.isMesh){meshes.push(o.name);if(/armfront|front_?arm/i.test(o.name))front=true;Object.keys(o.morphTargetDictionary||{}).forEach(function(k){if(morphs.indexOf(k)<0)morphs.push(k)})}});

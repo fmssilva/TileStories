@@ -10,7 +10,7 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
   from Unity's `CardStrings.asset`); the Lab's own words are in `src/core/words.js`'s `LABSTR`.
 - **Build:** `npm install` once here (acorn, for `check_structure.js`; playwright-core, for the tests: `tests/pw.js`, `PW=<path>` names another copy). `python build.py` writes `tilestories-lab.html` here
   (about 2.7 MB, its words and faces embedded) and copies the 3D mascot's models and thumbnails from `proj_guides/mascote/3d` to
-  `assets/mascot/` (neither is committed; the pictures are in `assets/`), then runs the structure check (wrappers, re-assignments,
+  `assets/mascot/`, each model also as `<id>.glb.js` (a script registering its bytes: the one way the page loads a model; neither is committed; the pictures are in `assets/`), then runs the structure check (wrappers, re-assignments,
   second declarations, defaults set twice, references to the old root `S`: all 0) and the Unity lint (`tools/unity_lint.py`, a
   ratchet per CSS file in `tools/unity_lint_ratchet.json`); either one failing fails the build (`PROTOTYPE_STRUCTURE.md`, "Rules").
 - **Serve:** `python tools/serve.py` serves the Lab's folder on this computer: open http://localhost:8642/lab_src/tilestories-lab.html
@@ -26,6 +26,11 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
 - **The phone, its devices and its screens:** W's four devices on the preview bar (a click picks the phone or the tablet, a
   second click turns it: 390 x 844, 844 x 390, 820 x 1180, 1180 x 820; the frame is scaled to the window, never resized). Landscape
   shows the card as a full-height side sheet; the tablet's portrait is the phone's layout, wider (neither is designed yet: P3 / P4).
+  Listed for that design (seen in `tools/review/state_shots.py`'s sheets, not fixed now): in landscape the peek's top band and the
+  guide's dock span the whole width over the camera, Settings spans it over the side sheet, the side sheet has one stop, the wall's
+  framing is the portrait one, and the green Locate pin sits over the "See it as" chips and over the "1 November 1755" fact (phone
+  landscape at Half, tablet landscape); the tablet's portrait stretches the phone's card; Explore's own look and its words at the larger
+  text sizes.
   Every screen change goes through the router (`PROTOTYPE_STRUCTURE.md`, "The screen router"). **Explore** (the non-AR path): the
   wall's Explore button, or the preview bar's **No camera** (a phone without the camera: Explore is home), lists the points with a
   card; a tap opens the card at Full, and its tour plays there.
@@ -40,8 +45,9 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
   1. `python build.py`, green (the structure check 0, the lint holding); `python ../voicebench/pack.py azure-ryan-duarte` when its
      lines changed (`../voicebench/README.md`, "Publishing").
   2. `python tools/publish.py --json <file>`: the publish list, at the paths the page asks for: `tilestories-lab.html`, `assets/...`
-     (the pictures, the mascot's models and thumbnails), `voicebench/out/voicesets.js`, `packs.js`, a packed set's `pack-N.js` (its
-     MP3s never), a set not packed one file each, `music/tracks.js` and its tracks; never `out-private`. It prints each publish's files
+     (the pictures, the mascot's thumbnails and its models as `<id>.glb.js`: the host serves no `.glb`), `voicebench/out/voicesets.js`, `packs.js`, a packed set's `pack-N.js` (its
+     MP3s never), a set not packed one file each, `music/tracks.js` and its tracks; never `out-private`. A file whose extension the host
+     does not serve (`SERVED`: no `.glb`) fails the list. It prints each publish's files
      and size: the Artifact tool takes 16 MB a file and 64 MB / 255 files a publish, so the list comes in batches (about 155 files,
      71 MB: two publishes to the same `url`). The json holds each publish's `files` map (`{"assets/paco_hero.jpg": "<absolute path>"}`).
   3. The Artifact tool: the first publish `file_path` the page and `files` the first map, then each further map to the same `url`.
@@ -425,10 +431,10 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
     step: the [undo] checks turn red.
   - *The local server and the assets out of the page, merge round P1a.1* (`tools/serve.py`, `build.py`, `core/assets`, `mascot/azu3d`,
     `mascot/models`, `agent/agent`'s photo, `guidance/present`'s figure, `editor/shell`'s line): `tests/test10c.js` checks [http] the page
-    from http://localhost:8642/lab_src/ under 5 MB, every `assets/` file it names answering; [glb] the 3D mascot's model fetched, parsed
+    from http://localhost:8642/lab_src/ under 5 MB, every `assets/` file it names answering; [glb] the 3D mascot's model loaded from its script (`.glb.js`), parsed
     and drawn; [photo] Photo of the view reading its canvas back (a JPEG); [figure] the mascot's picture measured from its pixels;
-    [local] this computer (labLocal); [file] opened from disk the page running, the 3D mascot not loading and the Editor's one line
-    "Open with tools/serve.py for the 3D mascot and photos", a photo asked for not sent and the line back. `MUTATE=1 node tests/test10c.js`
+    [local] this computer (labLocal); [file] opened from disk the page running with its 3D mascot (from its script) and no line, then a photo
+    asked for not sent and the Editor's one line "Open with tools/serve.py for Photo of the view and the measured mascot". `MUTATE=1 node tests/test10c.js`
     makes the line never show: the last [file] check turns red.
   - *The screen router, the devices and the first publish, merge round P1a.2* (`screen/router`, `screen/device`, `screen/explore`,
     `tools/publish.py`): `tests/test10d.js` checks [order] a marker opening the card (the sheet, no screen change), a page and its back
@@ -443,8 +449,9 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
     H x (1 - Half max), Full 0, closed below), [land] landscape's full-height side sheet at the right, hidden when closed, [guide] the tour
     from the hero's Start with its dock and the card inside the phone, in every device; `MUTATE=1` never recognises landscape: [land] turns
     red. `tests/test10f.js` stages the publish list in a temp folder and opens it at a host that is not this computer: [list] its files,
-    never out-private, a packed set by its packs, within the limits; [page], [glb], [voice] a recorded line from its pack plays, [music];
-    `MUTATE=1` leaves the packs out: [voice] turns red.
+    never out-private, a packed set by its packs, within the limits; [page], [voice] a recorded line from its pack plays, [music];
+    [served] every file an extension the host serves (the models as `.glb.js`), [glb] the chosen model from its `.glb.js` with no `.glb` in the layout and
+    no other model asked for; `MUTATE=1` leaves the packs and the models' scripts out: [voice] and [glb] turn red.
   - *Every Editor row's demo, guidance round 10* (`editor/demo`, the rows' modules: `editor/card-tab`, `card/controls`, `card/blocks`,
     `card/pages`, `card/states`, `card/hints`, `editor/texts`, `editor/components`, `editor/marker-tab`, `mascot/azu2d`, `guidance/editor`):
     `tests/test9n.js` checks that the self-test's NO DEMO check walks every tab and finds no row without a demo but its named exemptions
