@@ -44,6 +44,7 @@ python render.py gemini --en Kore --pt Kore               # needs: pip install l
   line the guide can say (511 lines); the 459 missing ones were rendered in Ryan · Duarte only (30,747 characters, Azure F0), the
   guide's default voice. The partial Gemini set left the
   manifest (its `set.json` was never kept, and its one listed line had no audio); its MP3s stay in `out/gemini-kore-kore/`.
+- **2026-11-17:** the 461 missing lines were rendered in Sonia · Raquel (30,912 characters, Azure F0), so both Azure sets cover the whole script (513 of 513). Pack both before a publish: `python pack.py azure-ryan-duarte azure-sonia-raquel` (one call: `packs.js` lists only the sets named in it).
 - **Install:** `python -m pip install azure-cognitiveservices-speech` (plain `pip` on this computer installs into a conda
   environment, not the Python that runs `render.py`).
 - **The mouth's curves (Azure):** each Azure line keeps `mouth`: Azure's facial blend shapes as open / round / wide, 30
