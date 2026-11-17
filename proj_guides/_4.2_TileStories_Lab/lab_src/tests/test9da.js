@@ -29,7 +29,7 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   const size = async sel => { const r = await box(sel); return r ? [Math.round(r.width), Math.round(r.height)] : [0, 0]; };
   if (process.env.MUTATE) { await R('resumeTourAt=function(pt){pt=pt||G.resumeAt;if(!pt)return;G.resumeAt=null;hideStopUi();if(G.on)stopTour();startTour()}'); console.log('MUTATION: the toast\'s Resume starts the tour again from the start (no step, no sentence)'); }
   // the device voice, muted: its words go on by time (one every ~350 ms), the same on every run
-  const base = 'D.card.hints.on=false;LAB.previewBar=false;P.lang="en";P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;D.guide.voice="device";D.guide.panel="dock";D.guide.dockStart="mini";D.guide.miniCtl="pausestop";D.guide.swipeCompact=true;D.guide.stopUndo="toast";D.guide.gbtn="both";D.guide.gbIcon="star";D.guide.gbSide="left";D.guide.gbFold=true;D.guide.azuTap="play";D.guide.life="lively";D.poi.solemn=false;D.guide.captions=true;G.resumeAt=null;hideStopUi();LAB.wall="ribeira";setOverlay("ask",false);setOverlay("settings",false);';
+  const base = 'D.card.hints.on=false;LAB.previewBar=false;P.lang="en";P.guideMute=true;P.introSeen=true;P.reduce=false;P.vis.mode="phone";D.guide.voice="device";D.guide.panel="dock";D.guide.dockStart="mini";D.guide.miniCtl="pausestop";D.guide.swipeCompact=true;D.guide.stopUndo="toast";D.guide.gbtn="both";D.guide.gbIcon="star";D.guide.gbSide="left";D.guide.gbFold=true;D.guide.azuTap="play";D.guide.life="lively";D.poi.solemn=false;D.guide.captions=true;G.resumeAt=null;hideStopUi();LAB.wall="ribeira";setOverlay("ask",false);setOverlay("settings",false);';
   const tourAt = async (id, h) => { await R(base + `if(G.on)stopTour();ui.view="card";ui.stop="full";renderAll(false);startTour();var j=D.tour.guideSteps.findIndex(function(s){return s.id==="${id}"});if(j>0){stopSpeech();G.i=j;runStep()}ui.dockH="${h || 'mini'}";renderGuide()`); await W(500); };
   const past = async () => { await R(base + 'if(G.on)stopTour();setOverlay("menu",false);ui.view="card";ui.stop="full";renderAll(false);scr.scrollTop=900;fabLayer()'); await W(400); };
 
@@ -38,12 +38,12 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   // a. Azu points from beside the block, never over words (Quick facts, the story's inside, the 1662 drawing), light and dark
   const inkOver = 'var m=ph.querySelector(".mascot").getBoundingClientRect(),a=0,w=document.createTreeWalker(scr,NodeFilter.SHOW_TEXT),n,rg=document.createRange();while((n=w.nextNode())){if(!/\\S/.test(n.nodeValue))continue;var cs=getComputedStyle(n.parentElement);if(cs.visibility==="hidden"||cs.display==="none"||cs.opacity==="0")continue;rg.selectNodeContents(n);[].forEach.call(rg.getClientRects(),function(r){var x=Math.min(r.right,m.right)-Math.max(r.left,m.left),y=Math.min(r.bottom,m.bottom)-Math.max(r.top,m.top);if(x>1&&y>1)a+=x*y})}Math.round(a)';
   for (const dark of [false, true]) for (const id of ['g1', 'g5', 'g7']) {
-    await tourAt(id); await R(`P.dark=${dark};renderAll(true)`);
+    await tourAt(id); await R(`P.vis.mode="${(dark) ? 'dark' : 'phone'}";renderAll(true)`);
     let last = null, same = 0; const t0 = Date.now(); while (Date.now() - t0 < 10000 && same < 3) { const y = await R('JSON.stringify([Math.round(ph.querySelector(".mascot").getBoundingClientRect().top),Math.round(scr.scrollTop)])'); same = y === last ? same + 1 : 0; last = y; await W(150); }
     const o = await R(inkOver);
     ok(`a. ${dark ? 'dark' : 'light'}, step ${id}: Azu points from beside the block, 0 px over any words`, o === 0 && await R('ph.querySelector(".mascot").classList.contains("pointing")'), o);
   }
-  await R('stopTour();P.dark=false;renderAll(false)');
+  await R('stopTour();P.vis.mode="phone";renderAll(false)');
   // b. the mouth on a recorded line: at a pause it rests (the curves do not hold it open); under Reduce Motion it does not move
   await R(base + 'P.guideMute=false;P.lang="pt";D.guide.azuStyle="tile";D.guide.voice="recorded";D.guide.voiceSet="azure-sonia-raquel";ui.view="card";ui.stop="full";renderAll(false);startTour();G.i=D.tour.guideSteps.findIndex(function(s){return s.id==="g1"});stopSpeech();runStep()');
   const curves = await until('mouthNow().kind==="curves"&&G.recAudio&&G.recAudio.currentTime>.6', 8000);
@@ -201,10 +201,10 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
   // ---------- contrast: words 4.5:1, controls 3:1, light and dark ----------
   const CR = 'var px=function(c){var m=c.match(/[\\d.]+/g).map(Number),k=c.indexOf("color(")===0?255:1;return{r:m[0]*k,g:m[1]*k,b:m[2]*k,a:m.length>3?m[3]:1}},lum=function(c){return[c.r,c.g,c.b].map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce(function(a,v,i){return a+v*[.2126,.7152,.0722][i]},0)},over=function(f,b){return{r:f.r*f.a+b.r*(1-f.a),g:f.g*f.a+b.g*(1-f.a),b:f.b*f.a+b.b*(1-f.a),a:1}},cr=function(a,b){var x=lum(a),y=lum(b);return Math.round((Math.max(x,y)+.05)/(Math.min(x,y)+.05)*100)/100},cs=function(s){return getComputedStyle(ph.querySelector(s))},bgOf=function(s){var e=ph.querySelector(s);while(e){var c=px(getComputedStyle(e).backgroundColor);if(c.a>.5)return c;e=e.parentElement}return{r:255,g:255,b:255,a:1}};';
   for (const dark of [false, true]) {
-    await past(); await R(`G.resumeAt={id:"g3",k:3,title:"Story"};P.dark=${dark};renderAll(true);scr.scrollTop=900;fabLayer();setOverlay("menu",true);fabLayer()`); await W(300);
+    await past(); await R(`G.resumeAt={id:"g3",k:3,title:"Story"};P.vis.mode="${(dark) ? 'dark' : 'phone'}";renderAll(true);scr.scrollTop=900;fabLayer();setOverlay("menu",true);fabLayer()`); await W(300);
     for (let i = 0; i < 8 && !(await R('!!ph.querySelector(".gbtn .gb-ic svg")&&!!ph.querySelector(".gbmenu small")')); i++) { await R('ui.view="card";ui.stop="full";G.on&&stopTour();scr.scrollTop=900;setOverlay("menu",true);fabLayer()'); await W(300); }
     const a = await R(CR + 'var disc=px(cs(".gbtn").backgroundColor),card=bgOf("#scr .item")||px(getComputedStyle(scr).backgroundColor),rim=px(cs(".gbtn").borderTopColor),pg=bgOf("#scr");[cr(px(cs(".gb-ic svg").fill),disc),cr(px(cs(".gbtn").color),disc),Math.max(cr(disc,pg),cr(rim,pg)),cr(px(cs(".gbmenu button").color),px(cs(".gbmenu").backgroundColor)),cr(px(getComputedStyle(ph.querySelector(".gbmenu small")||ph.querySelector(".gbmenu button")).color),px(cs(".gbmenu").backgroundColor))]');
-    await tourAt('g5', 'mini'); await R(`P.dark=${dark};renderAll(true)`); await W(300);
+    await tourAt('g5', 'mini'); await R(`P.vis.mode="${(dark) ? 'dark' : 'phone'}";renderAll(true)`); await W(300);
     const dk = { r: 22, g: 24, b: 28, a: 1 };
     // round 21 (21.6): the Mini is no longer always dark (The panels' look follows the theme): its icons are measured on its own glass over
     // the worst backdrop (black and white), the hide chevron on its own tab
@@ -217,7 +217,7 @@ const MP3 = fs.readFileSync(path.join(OUT, fs.readdirSync(OUT).filter(f => f.end
     const words = ['label', 'menu words', 'menu small words', 'toast words', 'toast button'];
     ok(`Contrast, ${dark ? 'dark' : 'light'}: the words at 4.5:1 or more, the controls (✦, icons, ring, the button's edge) at 3:1 or more`, Object.keys(all).every(k => all[k] >= (words.indexOf(k) >= 0 ? 4.5 : 3)), all);
   }
-  await R('P.dark=false;setOverlay("menu",false);renderAll(false)');
+  await R('P.vis.mode="phone";setOverlay("menu",false);renderAll(false)');
 
   tsec('contrast');
   // ---------- the scenes in Ask Azu's console, pressed as the developer does ----------

@@ -21,7 +21,7 @@ const url = labUrl('#probe');
   const until = async (src, ms) => { const t0 = Date.now(); while (Date.now() - t0 < ms) { if (await R(src)) return true; await W(60); } return false; };
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   if (process.env.MUTATE) { await R('gdMix=function(kind){return(GD_PRESETS.first.mix[kind]||[0,0,0]).slice()};gdTalk=function(){return GD_TALK.balanced}'); console.log('MUTATION: the Mix table and Talkativeness ignored (always First visit\'s mix, always Balanced)'); }
-  const base = 'LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;P.lang="en";LAB.rowDemo=false;D.guide.gbtn="both";D.guide.mascot=true;D.guide.life="lively";D.poi.solemn=false;D.card.hints.on=true;' +
+  const base = 'LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.vis.mode="phone";P.lang="en";LAB.rowDemo=false;D.guide.gbtn="both";D.guide.mascot=true;D.guide.life="lively";D.poi.solemn=false;D.card.hints.on=true;' +
     'LAB.gdToday="2026-03-10";P.vis.aud="explorer";D.wall.aud.where="card";D.wall.aud.seen=true;gdPresetWrite("first");G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.demo=false;gdChip(null);if(G.on)stopTour();setOverlay("ask",false);setOverlay("settings",false);setOverlay("menu",false);setWall("ribeira");ui.view="card";ui.stop="closed";renderPhone(false);';
   const edOpen = op => R(`ui.tab="guide";ui.level=1;ui.op=${op};renderEditor()`);
 

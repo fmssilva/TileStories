@@ -122,17 +122,17 @@ const url = labUrl('#probe');
   // 5. a change redraws in place: scroll, hero and what is shown stay
   for (const [name, sel] of [['light/dark', '#ptool [data-pt="dark"]'], ['language', '#ptool [data-pt="lang"]'], ['motion', '#ptool [data-pt="reduce"]']]) {
     await open('full', 700);
-    const s0 = await R('[scr.scrollTop,scr.querySelector(".hero").offsetHeight,scr.querySelectorAll(".mv.in").length,P.dark,P.lang,P.reduce]');
+    const s0 = await R('[scr.scrollTop,scr.querySelector(".hero").offsetHeight,scr.querySelectorAll(".mv.in").length,themeMode(),P.lang,P.reduce]');
     await R('window.__s=[];var t0=performance.now();(function f(){window.__s.push([scr.scrollTop,scr.querySelector(".hero").offsetHeight]);if(performance.now()-t0<900)requestAnimationFrame(f)})()');
     await p.click(sel); await p.waitForTimeout(1000);
-    const s = await p.evaluate(() => window.__s), s1 = await R('[scr.scrollTop,scr.querySelector(".hero").offsetHeight,scr.querySelectorAll(".mv.in").length,P.dark,P.lang,P.reduce]');
+    const s = await p.evaluate(() => window.__s), s1 = await R('[scr.scrollTop,scr.querySelector(".hero").offsetHeight,scr.querySelectorAll(".mv.in").length,themeMode(),P.lang,P.reduce]');
     const moved = s.filter(r => r[0] !== s0[0] || r[1] !== s0[1]).length;
     ok(`${name}: the setting changed and nothing moved`, s0.slice(3).join() !== s1.slice(3).join() && moved === 0 && s1[2] >= s0[2], { before: s0, after: s1, framesMoved: moved });
   }
   await open('full', 0);
   const darkMs = await R('var a=performance.now();document.querySelector(\'#ptool [data-pt="dark"]\').click();Math.round(performance.now()-a)');
   ok('light/dark repaints without rebuilding the editor (< 150 ms)', darkMs < 150, { ms: darkMs });
-  ok('editor previews follow dark', await R('P.dark===ed.querySelector(".cv").classList.contains("dark")'));
+  ok('editor previews follow dark (the one mode class on every marked root)', await R('(themeMode()==="dark")===ed.querySelector(".cv").classList.contains("ts-mode-dark")'));
 
   ok('no page errors', errs.length === 0, errs.slice(0, 3));
   console.log(fails ? `${fails} FAILED` : 'ALL PASS');

@@ -12,8 +12,9 @@
 //   bubble on the wall goes with the mascot's hop (their offset kept within 4 px).
 // [teleprompter] during a tour at Mini the words in the strip and in no bubble; the told block's words above its top (the arithmetic);
 //   the line before fading up and out on a new line; Full script (a real tap) opens the whole text.
-// [looks] Light glass, Aurora and Dark: every word of the Mini, the open panel and the teleprompter 4.5:1 or more over the glass composed on
-//   the worst backdrop and its brightest light shape; Follows the theme: Light glass in light, Aurora in dark.
+// [looks] Light glass (light mode), Aurora and Ink glass (dark mode, The panels in dark mode): every word of the Mini, the open panel and the
+//   teleprompter 4.5:1 or more over the glass composed on the worst backdrop and its brightest light shape; the mode decides: Light glass in
+//   light, the dark choice (Aurora by default) in dark.
 // [what next] the mascot at What next? covers nothing of the card (inside the panel).
 // [quiz ask] during the quiz, a question about something else is answered (the stubbed answer's safe sentences) and, only when the answer
 //   would give the quiz away, the warm after-the-quiz line; a question about the quiz keeps its hint; EN and PT; a real typed question.
@@ -47,10 +48,10 @@ const url = labUrl('#probe');
   }
   /* the state every check starts from: a 390 x 844 phone, the device voice muted (its words go on by time, 353 ms a word), quiet guidance */
   const base = (o) => `ui.device="phone_p";DEVICES.phone_p.h=844;if(G.on)stopTour();if(G.gd.pages)gdPagesEnd("test",false);gdBeatClose();gdStop("test");if(G.ga.on)gaEnd("test");if(G.ga.card)gaCardLeave();G.te.open=false;
-    D.card.hints.on=false;LAB.previewBar=false;P.lang="${(o && o.lang) || 'en'}";P.guideMute=true;P.introSeen=true;P.reduce=${!!(o && o.reduce)};P.dark=${!!(o && o.dark)};D.card.cardCfg.mode="${o && o.dark ? 'dark' : 'light'}";
+    D.card.hints.on=false;LAB.previewBar=false;P.lang="${(o && o.lang) || 'en'}";P.guideMute=true;P.introSeen=true;P.reduce=${!!(o && o.reduce)};P.vis.mode="${(!!(o && o.dark)) ? 'dark' : 'phone'}";D.wall.theme.mode="${o && o.dark ? 'dark' : 'light'}";
     D.guide.voice="device";D.guide.panel="dock";D.guide.dockStart="mini";D.guide.miniCtl="pause";D.guide.captions=true;D.guide.pWords="prompter";D.guide.look="ink";D.guide.speed=1;P.vis.speed=null;
     D.guide.music=false;P.vis.music=null;LAB.rowDemo=false;LAB.gdSR=false;D.guide.mascot=true;D.guide.hl="comet";D.guide.trail=6;D.guide.glide=true;D.guide.highlight=true;
-    D.guide.tourWords="${(o && o.words) || 'tele'}";D.guide.teleH=184;D.guide.pSkin="${(o && o.skin) || 'theme'}";D.guide.bubbleOut="beside";D.guide.ask="search";sampleFn=null;D.agent.voiceOut=false;
+    D.guide.tourWords="${(o && o.words) || 'tele'}";D.guide.teleH=184;D.guide.darkPanels="${(o && o.skin) === 'dark' ? 'dark' : 'aurora'}";D.guide.bubbleOut="beside";D.guide.ask="search";sampleFn=null;D.agent.voiceOut=false;
     D.guidance.on=true;D.guidance.kinds.forEach(function(k){k.on=false});G.gd.manual=true;G.gd.demo=false;gdChip(null);ui.view="card";ui.stop="full";renderAll(false);""`;
   const tourAt = (id, h) => R(`startTour({id:"${id}"});ui.dockH="${h}";renderGuide();""`);
   const HLP = '(function(){var o={};ph.querySelectorAll("[data-hlp]").forEach(function(e){o[e.dataset.hlp]=(o[e.dataset.hlp]||0)+1});return JSON.stringify(o)})()';
@@ -154,7 +155,7 @@ const url = labUrl('#probe');
 
   // ---------- [looks] ----------
   const looks = [];
-  for (const skin of ['light', 'aurora', 'dark']) for (const dark of [false, true]) for (const h of ['mini', 'peek']) {
+  for (const [skin, dark] of [['light', false], ['aurora', true], ['dark', true]]) for (const h of ['mini', 'peek']) {
     await R(base({ skin, dark })); await tourAt('g4', h); await W(700);
     looks.push(Object.assign({ skin, dark, h }, JSON.parse(await R(`(function(){var C=G15.col,ov=Z9.over,cr=G15.cr,res=[];
       [[".gdock",".gdock .tp-now .tw,.gdock .tp-prev .tw,.gdock .gd-eye,.gdock .gd-time,.gdock .gd-chips [data-chip],.gdock .gd-aa,.gdock .gd-speed,.gdock .gin"],[".gtele",".gtele .tl-now .tw,.gtele .tl-who,.gtele .tl-full"]].forEach(function(g){var host=ph.querySelector(g[0]);if(!host)return;var cs=getComputedStyle(host),sf=C(cs.getPropertyValue("--sksurf"))||C(cs.backgroundColor),gl=C(cs.getPropertyValue("--skglow"))||{r:0,g:0,b:0,a:0};
@@ -163,7 +164,7 @@ const url = labUrl('#probe');
       var low=res.slice().sort(function(a,b){return a.c-b.c})[0];return JSON.stringify({n:res.length,low:low,cls:(ph.querySelector(".gdock")||{}).className})})()`)))); }
   const bad = looks.filter(x => !x.n || !x.low || x.low.c < 4.5);
   ok('[looks] Light glass, Aurora and Dark, light and dark, Mini and Open with the teleprompter: every word 4.5:1 or more over the glass on the worst backdrop and its brightest light shape',
-    looks.length === 12 && !bad.length, { worst: looks.map(x => [x.skin, x.dark ? 'd' : 'l', x.h, x.low && x.low.c, x.low && x.low.s]).sort((a, b) => a[3] - b[3]).slice(0, 4), bad: bad.slice(0, 3) });
+    looks.length === 6 && !bad.length, { worst: looks.map(x => [x.skin, x.dark ? 'd' : 'l', x.h, x.low && x.low.c, x.low && x.low.s]).sort((a, b) => a[3] - b[3]).slice(0, 4), bad: bad.slice(0, 3) });
   await R(base({ skin: 'theme' })); await tourAt('g4', 'mini'); await W(400); const th1 = await R('(ph.querySelector(".gdock")||{}).className+" | "+(ph.querySelector(".gtele")||{}).className');
   await R(base({ skin: 'theme', dark: true })); await tourAt('g4', 'mini'); await W(400); const th2 = await R('(ph.querySelector(".gdock")||{}).className+" | "+(ph.querySelector(".gtele")||{}).className');
   ok('[looks] Follows the theme (the default): Light glass in light, Aurora in dark, the Mini and the teleprompter together', /sk-light/.test(th1) && (th1.match(/sk-light/g) || []).length === 2 && (th2.match(/sk-aurora/g) || []).length === 2 && await R('D.guide.pSkin==="theme"||true'), { th1, th2 });
@@ -223,7 +224,7 @@ const url = labUrl('#probe');
   await pick('A tip\'s bubble', 'Above the mascot'); ed.boDemo = await demo('A tip\'s bubble'); ed.boSeen = await R('var b=ph.querySelector(".gdbub");b?b.dataset.tail:""');
   ok('[editor] Speech on screen holds the highlighter\'s rows and the new ones; each changes what the visitor sees (the bubble instead of the strip, the strip again, its height 150 px, the Aurora panel, the tip\'s bubble above the mascot) and its ▸ plays it',
     ed.rows.every(Boolean) && ed.bub === 'bubble' && /found/.test(ed.bubDemo) && ed.bubSeen[1] === false && /found/.test(ed.teleDemo) && ed.teleSeen && /found/.test(ed.hDemo) && Math.abs(ed.hSeen - 150) <= 1 && /found/.test(ed.skDemo) && /sk-aurora/.test(ed.skSeen) && /found/.test(ed.boDemo) && ed.boSeen === 'down', ed);
-  await R('D.guide.teleH=184;D.guide.pSkin="theme";D.guide.bubbleOut="beside";D.guide.tourWords="tele";if(G.on)stopTour();gdStop("test");""');
+  await R('D.guide.teleH=184;D.guide.darkPanels="aurora";D.guide.bubbleOut="beside";D.guide.tourWords="tele";if(G.on)stopTour();gdStop("test");""');
   tsec('editor');
 
   ok('No page errors', errs.length === 0, errs.slice(0, 5));

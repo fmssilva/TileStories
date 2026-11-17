@@ -26,8 +26,8 @@ const url = labUrl('#probe');
 
   // ---------- [roots] ----------
   const roots = JSON.parse(await R('JSON.stringify({S:typeof S,D:Object.keys(D),P:typeof P,ui:typeof ui,LAB:typeof LAB,run:typeof LAB.run})'));
-  ok('[roots] no S left; D\'s parts are its Unity homes (guide, agent, tour, guidance, card, poi, wall, words, blocks); P, ui and LAB are there',
-    roots.S === 'undefined' && roots.D.join() === 'guide,agent,tour,guidance,card,poi,wall,words,blocks' && roots.P === 'object' && roots.ui === 'object' && roots.LAB === 'object', roots);
+  ok('[roots] no S left; D\'s parts are its Unity homes (guide, agent, tour, guidance, card, poi, wall, words, blocks, theme); P, ui and LAB are there',
+    roots.S === 'undefined' && roots.D.join() === 'guide,agent,tour,guidance,card,poi,wall,words,blocks,theme' && roots.P === 'object' && roots.ui === 'object' && roots.LAB === 'object', roots);
   ok('[roots] a path names its root: setPath / getPath ("D.card.secCfg.look", "LAB.test.on", "ui.level")',
     await R('var a=getPath("D.card.secCfg.look")===D.card.secCfg.look&&getPath("LAB.test.on")===LAB.test.on&&getPath("ui.level")===ui.level;var k=D.card.secCfg.tint;setPath("D.card.secCfg.tint",77);var c=D.card.secCfg.tint===77;setPath("D.card.secCfg.tint",k);a&&c'));
 
@@ -70,17 +70,17 @@ const url = labUrl('#probe');
   ok('[undo] Ctrl+Y: the new title again, on the phone', phoneRe[0] === typed && / Undo tes/.test(typed) && phoneRe[1].indexOf(typed) >= 0, { typed, phoneRe });
   await R('undo();""'); await W(200);
 
-  // ---------- [undo] the card's mode: its Editor change also darkens the phone; undone, the phone is light again ----------
-  await R('undoPast.length=0;undoFuture.length=0;emit("undo.changed");P.dark=false;D.card.cardCfg.mode="light";ui.tab="card";ui.level=9;ui.op={};ui.view="card";ui.stop="half";renderAll(false);""'); await W(300);
-  const dk = p.locator('[data-set="@D.card.cardCfg.mode"][data-v="dark"]').first();
+  // ---------- [undo] the wall's Default Mode (App tab): its Editor change also darkens the phone; undone, the phone is light again ----------
+  await R('undoPast.length=0;undoFuture.length=0;emit("undo.changed");P.vis.mode="phone";D.wall.theme.mode="light";ui.tab="app";ui.level=9;ui.op={};ui.view="card";ui.stop="half";renderAll(false);""'); await W(300);
+  const dk = p.locator('[data-set="@D.wall.theme.mode"][data-v="dark"]').first();
   await dk.scrollIntoViewIfNeeded(); await dk.click(); await W(300);
-  const m1 = await R('[D.card.cardCfg.mode,P.dark,ph.classList.contains("dark")].join()');
+  const m1 = await R('[D.wall.theme.mode,themeMode(),ph.classList.contains("ts-mode-dark")].join()');
   await p.locator('#undo').click({ timeout: 3000 }).catch(() => {}); await W(300);
-  const m2 = await R('[D.card.cardCfg.mode,P.dark,ph.classList.contains("dark")].join()');
+  const m2 = await R('[D.wall.theme.mode,themeMode(),ph.classList.contains("ts-mode-dark")].join()');
   await p.locator('#redo').click({ timeout: 3000 }).catch(() => {}); await W(300);
-  const m3 = await R('[D.card.cardCfg.mode,P.dark,ph.classList.contains("dark")].join()');
-  ok('[undo] the card\'s mode set to Dark darkens the phone; Undo: the phone light again; Redo: dark', m1 === 'dark,true,true' && m2 === 'light,false,false' && m3 === 'dark,true,true', { m1, m2, m3 });
-  await R('undo();P.dark=false;renderAll(true);""'); await W(200);
+  const m3 = await R('[D.wall.theme.mode,themeMode(),ph.classList.contains("ts-mode-dark")].join()');
+  ok('[undo] the wall\'s Default Mode (App tab) set to Dark darkens the phone; Undo: the phone light again; Redo: dark', m1 === 'dark,dark,true' && m2 === 'light,light,false' && m3 === 'dark,dark,true', { m1, m2, m3 });
+  await R('undo();P.vis.mode="phone";renderAll(true);""'); await W(200);
 
   // ---------- [undo] one tour after an undo; at most 300 steps ----------
   const shared = await R('var a=D.tour.guideSteps===D.tour.tours.painting.written;undoSnap(JSON.stringify(D).replace("\\"svForget\\":\\"7\\"","\\"svForget\\":\\"30\\""));undo();[a,D.tour.guideSteps===D.tour.tours.painting.written,D.guide.svForget]');
@@ -93,11 +93,11 @@ const url = labUrl('#probe');
   const d0 = await R('JSON.stringify(D)');
   await p.locator('#ph [data-gset="speed|1.2"]').first().click(); await W(200); await p.locator('#ph [data-gset="voice|device"]').first().click(); await W(200);
   await p.locator('#ph [data-vis="mode|dark"]').first().click(); await W(200);
-  const vis = JSON.parse(await R(`JSON.stringify({steps:undoPast.length,same:JSON.stringify(D)===${JSON.stringify(d0)},pg:P.guide,dg:[D.guide.speed,D.guide.voice],speed:guideSpeed(),voice:guideSetting("voice"),dark:P.dark,pressed:ph.querySelector('[data-gset="speed|1.2"]').getAttribute("aria-pressed")})`));
+  const vis = JSON.parse(await R(`JSON.stringify({steps:undoPast.length,same:JSON.stringify(D)===${JSON.stringify(d0)},pg:P.guide,dg:[D.guide.speed,D.guide.voice],speed:guideSpeed(),voice:guideSetting("voice"),dark:themeMode()==="dark"&&P.vis.mode==="dark",pressed:ph.querySelector('[data-gset="speed|1.2"]').getAttribute("aria-pressed")})`));
   ok('[never] a visitor\'s choices on the phone (Settings › The guide: Faster, Device voice; Dark; real taps) write P, never D, and take no step',
     vis.steps === 0 && vis.same && vis.pg.speed === 1.2 && vis.pg.voice === 'device' && vis.dg[0] === 1 && vis.dg[1] === 'recorded' && vis.dark === true && vis.pressed === 'true', vis);
   ok('[visitor] the guide speaks at the visitor\'s speed and voice (guideSetting: P.guide over D.guide)', vis.speed === 1.2 && vis.voice === 'device', vis);
-  await R('P.dark=false;setOverlay("settings",false);ui.stop="half";renderAll(false);""'); await W(500);
+  await R('P.vis.mode="phone";setOverlay("settings",false);ui.stop="half";renderAll(false);""'); await W(500);
   const g = await p.locator('#grab').boundingBox(); await p.mouse.click(g.x + g.width / 2, g.y + g.height / 2); await W(600);
   const tap = JSON.parse(await R('JSON.stringify([ui.stop,undoPast.length])'));
   ok('[never] a tap on the phone (the grabber: the card\'s stop, ui) takes no step', tap[0] !== 'half' && tap[1] === 0, tap);

@@ -88,11 +88,11 @@ const url = labUrl('#probe');
   await R('P.reduce=false');
   // 12. the bubble's words: 4.5:1 or more, light and dark
   for (const dark of [false, true]) {
-    await start(`P.dark=${dark};renderAll(false)`); await R('azBubble("Test words",4000)'); await p.waitForTimeout(300);
+    await start(`P.vis.mode="${(dark) ? 'dark' : 'phone'}";renderAll(false)`); await R('azBubble("Test words",4000)'); await p.waitForTimeout(300);
     const c = await R('var b=ph.querySelector(".azbub"),px=function(c){var m=c.match(/[\\d.]+/g).map(Number),k=c.indexOf("color(")===0?255:1;return[m[0]*k,m[1]*k,m[2]*k]},lum=function(a){return a.map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce(function(s,v,i){return s+v*[.2126,.7152,.0722][i]},0)},x=lum(px(getComputedStyle(b).color)),y=lum(px(getComputedStyle(b).backgroundColor));Math.round((Math.max(x,y)+.05)/(Math.min(x,y)+.05)*100)/100');
     ok(`${dark ? 'dark' : 'light'}: Azu's words at 4.5:1 or more`, c >= 4.5, c);
   }
-  await R('P.dark=false;renderAll(false);stopTour()');
+  await R('P.vis.mode="phone";renderAll(false);stopTour()');
   // 13. the Editor
   // round 14: Mascot is 1 · Azu (s7mascot, its id kept); Moments and Water break after (link rows) went to 3 · Games on the tour
   // round 19 (21.10): 1 · The mascot's rows went into its foldouts: Liveliness, Mouth and Moods (with the five Try) in Manner

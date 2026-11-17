@@ -62,12 +62,12 @@ const url = labUrl('#probe');
   await R('stopTour()');
   // 6. the words' contrast: the bubble (light and dark) and the dock
   for (const dark of [false, true]) {
-    await R(`P.dark=${dark};renderAll(false);startTour()`); await p.waitForTimeout(1500);
+    await R(`P.vis.mode="${(dark) ? 'dark' : 'phone'}";renderAll(false);startTour()`); await p.waitForTimeout(1500);
     const c = await R('var px=function(c){var m=c.match(/[\\d.]+/g).map(Number),k=c.indexOf("color(")===0?255:1;return{r:m[0]*k,g:m[1]*k,b:m[2]*k,a:m.length>3?m[3]:1}},lum=function(c){return[c.r,c.g,c.b].map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce(function(a,v,i){return a+v*[.2126,.7152,.0722][i]},0)},over=function(f,b){return{r:f.r*f.a+b.r*(1-f.a),g:f.g*f.a+b.g*(1-f.a),b:f.b*f.a+b.b*(1-f.a),a:1}},cr=function(a,b){var x=lum(a),y=lum(b);return Math.round((Math.max(x,y)+.05)/(Math.min(x,y)+.05)*100)/100};var bb=px(getComputedStyle(ph.querySelector(".gbubble")).backgroundColor),cs=getComputedStyle(document.querySelector(".cv")||ph),ink2=px(getComputedStyle(ph).getPropertyValue("--ink2")?getComputedStyle(ph.querySelector(".gbubble")).color:"rgb(0,0,0)"),db={r:22,g:24,b:28,a:1};[cr(px(getComputedStyle(ph.querySelector(".gbubble")).color),bb),cr(over({r:244,g:241,b:234,a:.66},db),db),cr(over({r:244,g:241,b:234,a:.72},db),db)]');
     ok(`${dark ? 'dark' : 'light'}: the bubble's words and the dock's labels at 4.5:1 or more`, c.every(v => v >= 4.5), c);
     await R('stopTour()');
   }
-  await R('P.dark=false;renderAll(false)');
+  await R('P.vis.mode="phone";renderAll(false)');
   // 7. Classic, as before
   await R('D.guide.panel="classic";startTour()'); await p.waitForTimeout(600);
   ok('Panel: Classic: the captions box and the bar, no dock', await R('!ph.querySelector(".gdock")&&!!ph.querySelector(".gbar")'));

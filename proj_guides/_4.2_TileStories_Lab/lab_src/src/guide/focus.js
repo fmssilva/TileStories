@@ -2,7 +2,7 @@
 /* round 22 (22.5; the developer, 2026-11-13: "Remove the focus that highlights the block and darkens the rest of the app: it damages the
    sense of navigation. Have only a little bar that appears smoothly on the left side, pulsing a bit, to show we are talking about that
    block. Nothing else gets darker: everything stays the same."): Focus = The left bar (the default): a slim bar (4 px, the block's
-   seen height, the card's accent --accent2: 8.6:1 on the paper, 7.8:1 on the dark card) in the card's left margin, its right edge 6 px
+   seen height, the card's accent --ts-accent, 7:1 and more on the sheet in light and dark) in the card's left margin, its right edge 6 px
    from the block's left edge (it never touches the block or moves its layout); it fades in (0.35 s), breathes very softly (opacity 1 to
    0.78, 2.6 s) while the block is told and fades out when the tour moves on; nothing else changes colour. Dim the rest (today's
    spotlight), Soft ring and Off (nothing marks the block) stay as options. Reduce Motion: no breath. Unity: an Image anchored to the

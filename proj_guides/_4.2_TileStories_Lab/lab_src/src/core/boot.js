@@ -1,4 +1,6 @@
 /* Starts the page (the #hash routes) and closes the shared scope. */
+/* the theme's class rules first: every draw marks its roots with them (core/theme.js) */
+applyTokens();
 /* #selftest walks every tab; #selftest=guide,words only those (the texts come with "words") */
 /* round 21 (21.8): the texts' walk after the controls, in slices (editor/selftest-texts.js's selfTestWordsAsync); its JSON pending until done */
 if(isSelfTest()){G.stwAsync=true;var r0=selfTest(selfTestTabs());if(stWalks("words")){G.stwPending=true;showSelfTest(r0);selfTestWordsAsync(function(r1){G.stwPending=false;showSelfTest(r0.concat(r1))})}else showSelfTest(r0)}

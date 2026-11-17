@@ -8,7 +8,7 @@ function blockPreviewHtml(b,i){emitLatestFirst("blockPreviewHtml.before",b,i);va
   if(b.kind==="Inline"&&b.c&&b.c.text&&!b.pattern){var iw=kindWords(b);h=(iw.title?'<div class="bt">'+esc(L(iw.title))+'</div>':"")+renderEl("paragraph",defStyle("paragraph"),{text:iw.text},0,true)}
   else if(b.kind==="Inline"){var p=patternById(b.pattern),fw=kindWords(b);h=p?p.rows.map(function(r,j){return renderEl(r.kind,styleById(r.style)||defStyle(r.kind),{},j,true).replace('class="el-callout','class="el-callout')}).join(""):"";
     if(p&&p.rows[0].kind==="callout"&&(styleById(p.rows[0].style)||{o:{}}).o.calltap==="flip")h=renderEl("callout",styleById(p.rows[0].style),{text:fw.text,back:fw.back},0,false).replace(/^<div class="mv[^>]*>|<\/div>$/g,"")}
-  if(b.kind==="Story")h='<img alt="" src="'+IMG.g3+'" style="width:100%;height:170px;object-fit:cover;border-radius:12px;display:block"><div class="bt" style="color:var(--stories);margin-top:12px">'+esc(L(UI.where))+'</div><h3>'+esc(L(DEMO.title))+'</h3><p>'+esc(L(DEMO.lede))+'</p>';
+  if(b.kind==="Story")h='<img alt="" src="'+IMG.g3+'" style="width:100%;height:170px;object-fit:cover;border-radius:12px;display:block"><div class="bt" style="color:var(--ts-family-stories);margin-top:12px">'+esc(L(UI.where))+'</div><h3>'+esc(L(DEMO.title))+'</h3><p>'+esc(L(DEMO.lede))+'</p>';
   if(b.kind==="Before and After")h=renderEl("before_after",defStyle("before_after"),{},0,true);
   if(b.kind==="Gallery")h=renderEl("carousel",defStyle("carousel"),{},0,true);
   if(b.kind==="Audio Guide")h=renderEl("audio",defStyle("audio"),{},0,true);
@@ -92,7 +92,7 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(D\\.card\\.blockDefs\\.Place In AR\\.o\\.|D\\.card\\.blockDefs\\.Knowledge Check\\.o\\.appears|"));
 /* ----- previews: one per kind, drawn from its options ----- */
 function hstrip(items){return '<div class="hstrip">'+items.join("")+'</div>'}
-function ring(p,col,label){var r=26,c=2*Math.PI*r;return '<svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true"><circle cx="32" cy="32" r="'+r+'" fill="none" stroke="var(--hair)" stroke-width="7"/><circle cx="32" cy="32" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="7" stroke-dasharray="'+(c*p/100).toFixed(1)+' '+c.toFixed(1)+'" transform="rotate(-90 32 32)" stroke-linecap="round"/><text x="32" y="37" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink1)">'+p+'%</text></svg>'}
+function ring(p,col,label){var r=26,c=2*Math.PI*r;return '<svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true"><circle cx="32" cy="32" r="'+r+'" fill="none" stroke="var(--ts-hair)" stroke-width="7"/><circle cx="32" cy="32" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="7" stroke-dasharray="'+(c*p/100).toFixed(1)+' '+c.toFixed(1)+'" transform="rotate(-90 32 32)" stroke-linecap="round"/><text x="32" y="37" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ts-ink)">'+p+'%</text></svg>'}
 /* a block's words: its own (b.c: the wall's other points) or its kind's on the demo point's card (KWORDS, core/content.js), field by field
    (round 17b: a block's own words with no lines, facts, events… keep their kind's for that field; before, a Dialogue whose own words had no
    lines, or a page drawing its kind with no block, read lines of nothing and the page stopped). kind: the renderer's own kind, for a call
@@ -126,7 +126,7 @@ function blockSays(b,lang){var w=kindWords(b),x=function(o){return wordIn(o,lang
 var KPREV={
  "Status":function(b){var sw=kindWords(b,"Status"),lv=[T("Intact","Intacto"),T("Altered","Alterado"),T("Damaged","Danificado"),T("Ruin","Ruína"),T("Lost","Perdido")];
    if(kopt("Status","look")==="scale")return '<div class="bt">'+TXH("status_heading")+'</div><div class="scale5">'+lv.map(function(l,i){return'<span class="'+(i===4?"on":"")+'">'+esc(L(l))+'</span>'}).join("")+'</div>';
-   return '<div class="bt">'+TXH("status_heading")+'</div><div class="ringrow">'+ring(100,"var(--play)")+'<div><b>'+esc(L(sw.state))+'</b><span>'+esc(fmt(TXT("status_percent"),100))+' · '+esc(sw.year)+'</span></div></div>'},
+   return '<div class="bt">'+TXH("status_heading")+'</div><div class="ringrow">'+ring(100,"var(--ts-family-play)")+'<div><b>'+esc(L(sw.state))+'</b><span>'+esc(fmt(TXT("status_percent"),100))+' · '+esc(sw.year)+'</span></div></div>'},
  "Quick Facts":function(b){var lk=kopt("Quick Facts","look"),cat=kopt("Quick Facts","cat"),qw=kindWords(b,"Quick Facts"),f=(qw.facts||[]).map(function(x){return[L(x[0]),L(x[1])]});
    if(cat!=="no"&&qw.cat)f.unshift([TXT("facts_category"),L(qw.cat)+(cat==="catlevel"?" · "+L(T("Level 1","Nível 1")):"")]);
    if(lk==="chips")return '<div class="qchips">'+f.map(function(x){return'<span><small>'+esc(x[0])+'</small>'+esc(x[1])+'</span>'}).join("")+'</div>';
@@ -137,14 +137,14 @@ var KPREV={
    if(lk==="sticky")return '<div class="asticky"><button type="button">'+TXH("show_on_wall_button")+'</button><small>'+esc(L(T("Pinned at the card's foot (Card Controls › Sticky Action).","Fixo no fundo do cartão (Card Controls › Sticky Action).")))+'</small></div>';
    return '<div class="apills">'+a.map(function(x,i){return'<button type="button" class="'+(i===0?"focal":"")+'">'+sicon(x[0],16)+esc(x[1])+'</button>'}).join("")+'</div>'},
  "Story":function(b){var custom=(b.preview&&b.preview!=="inherit"?b.preview:kopt("Story","preview"))==="custom",res=kopt("Story","resume")==="true";
-   var h=custom?'<div class="bt" style="color:var(--stories)">'+esc(L(UI.where))+'</div><h3>'+esc(L(DEMO.title))+'</h3>'+renderEl("pull_quote",defStyle("pull_quote"),{},0,true):
-     '<img alt="" src="'+IMG.g3+'" style="width:100%;height:170px;object-fit:cover;border-radius:12px;display:block"><div class="bt" style="color:var(--stories);margin-top:12px">'+esc(L(UI.where))+'</div><h3>'+esc(L(DEMO.title))+'</h3><p class="capfade">'+esc(L(DEMO.lede))+'</p>';
+   var h=custom?'<div class="bt" style="color:var(--ts-family-stories)">'+esc(L(UI.where))+'</div><h3>'+esc(L(DEMO.title))+'</h3>'+renderEl("pull_quote",defStyle("pull_quote"),{},0,true):
+     '<img alt="" src="'+IMG.g3+'" style="width:100%;height:170px;object-fit:cover;border-radius:12px;display:block"><div class="bt" style="color:var(--ts-family-stories);margin-top:12px">'+esc(L(UI.where))+'</div><h3>'+esc(L(DEMO.title))+'</h3><p class="capfade">'+esc(L(DEMO.lede))+'</p>';
    return h+(res?'<div class="resume"><button type="button" data-go="story">'+TXH("story_resume")+' &#8250;</button><small>'+esc(L(T("You stopped at Two centuries of additions","Parou em Dois séculos de acrescentos")))+'</small></div>':"")},
  "Timeline":function(b){var tw=kindWords(b,"Timeline"),ev=(tw.events||[]).slice(),now=kopt("Timeline","now")==="true",pics=kopt("Timeline","pics")==="true";
    if(now&&tw.now)ev.push([TXT("timeline_now"),tw.now,"g2"]);
    if(kopt("Timeline","look")==="vertical")return '<div class="tl">'+ev.map(function(e){return'<div><b>'+esc(e[0])+'</b><span>'+esc(L(e[1]))+'</span></div>'}).join("")+'</div>';
    return hstrip(ev.map(function(e){return'<div class="tcard">'+(pics?'<img alt="" src="'+IMG[e[2]||"g1"]+'">':"")+'<b>'+esc(e[0])+'</b><span>'+esc(L(e[1]))+'</span></div>'}))},
- "Compare Points":function(b){var cp=kindWords(b,"Compare Points").points||[];return '<div class="bt">'+TXH("compare_heading")+'</div><div class="cmp"><div>'+ring(100,"var(--play)")+'<b>'+esc(L(cp[0]||""))+'</b></div><div>'+ring(20,"var(--media)")+'<b>'+esc(L(cp[1]||""))+'</b></div></div>'},
+ "Compare Points":function(b){var cp=kindWords(b,"Compare Points").points||[];return '<div class="bt">'+TXH("compare_heading")+'</div><div class="cmp"><div>'+ring(100,"var(--ts-family-play)")+'<b>'+esc(L(cp[0]||""))+'</b></div><div>'+ring(20,"var(--ts-family-media)")+'<b>'+esc(L(cp[1]||""))+'</b></div></div>'},
  "Dialogue":function(b){var dw=kindWords(b,"Dialogue").lines||[];return '<div class="dlg"><p class="them">'+esc(L(dw[0]||""))+'</p><p class="you"><small>'+TXH("dialogue_you")+'</small>'+esc(L(dw[1]||""))+'</p><div class="dopts"><button type="button">'+esc(L(T("Ask about the opera","Perguntar pela ópera")))+'</button><button type="button">'+TXH("dialogue_continue")+'</button></div></div>'},
  "Gallery":function(b){var all=kopt("Gallery","from")==="all",gw=kindWords(b,"Gallery");return renderEl("carousel",kstyle("Gallery","carousel"),gw.imgs?{imgs:gw.imgs}:{},0,true)+'<div class="fmt">'+esc(fmt(TXT("gallery_count"),all?9:gw.n||4))+(gw.cap?" · "+esc(L(gw.cap)):"")+(all?" · "+esc(L(T("every picture on the card","todas as imagens do cartão"))):"")+'</div>'},
  "Before and After":function(){return renderEl("before_after",kstyle("Before and After","before_after"),{},0,true)},
@@ -205,7 +205,7 @@ on("modelSig.before",function(cx){var keep=ui.view,pk=ui.pageKind,look=D.card.se
 var FOCUS8={s5viewer:["viewer",".viewer .vtop"],s5player:["kpage",".vplayer"],s5chip:["card",".hero"]};Object.keys(FOCUS8).forEach(function(k){FOCUS[k]=FOCUS8[k]});
 ed.addEventListener("toggle",function(e){var d=e.target;if(!d.dataset||d.dataset.fo!=="s5player"||!d.open)return;ui.pageKind="Video"},true);
 /* block thumbnails: the kind's own preview, where it has one */
-on("libThumb.answer",function(name){var f=KPREV[name];if(!f||name==="Quick Facts")return;var h;try{h=f({kind:name,id:"thumb"})}catch(e){return}return noBtn('<div class="thumb cv'+(P.dark?" dark":"")+'"><div class="tin"><div class="bprev">'+h+'</div></div></div>')});
+on("libThumb.answer",function(name){var f=KPREV[name];if(!f||name==="Quick Facts")return;var h;try{h=f({kind:name,id:"thumb"})}catch(e){return}return noBtn('<div class="thumb cv '+themeClasses()+'"><div class="tin"><div class="bprev">'+h+'</div></div></div>')});
 /* ----- the hero keeps one action: the guide button (the Listen pill left; the Audio Guide block plays the audio) ----- */
 KOPT.Header=KOPT.Header.filter(function(o){return o[0]!=="listen"});delete D.card.blockDefs.Header.o.listen;
 /* ----- each block row's demo (Blocks & Components › Blocks › a block): that block in view, the marker's card when it holds it, else

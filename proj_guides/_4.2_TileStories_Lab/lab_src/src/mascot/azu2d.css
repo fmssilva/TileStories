@@ -30,12 +30,12 @@
 /* a moment: Azu walks to the middle; the prop pulses three times, then waits */
 .mascot.center{right:calc(50% - 28px);top:42%!important}
 .azmoment{position:absolute;left:calc(50% + 34px);top:calc(42% + 8px);z-index:12}
-.azprop{appearance:none;border:0;background:var(--paper);border-radius:16px;width:54px;height:54px;display:grid;place-items:center;box-shadow:0 8px 22px rgba(0,0,0,.3);cursor:pointer;animation:propin .4s cubic-bezier(.3,1.5,.5,1),proppulse 1.4s ease-in-out .4s 3}
+.azprop{appearance:none;border:0;background:var(--ts-sheet-open);border-radius:16px;width:54px;height:54px;display:grid;place-items:center;box-shadow:0 8px 22px rgba(0,0,0,.3);cursor:pointer;animation:propin .4s cubic-bezier(.3,1.5,.5,1),proppulse 1.4s ease-in-out .4s 3}
 .azprop svg{width:30px;height:34px}
 @keyframes propin{from{transform:scale(.3);opacity:0}}@keyframes proppulse{50%{transform:scale(1.1)}}
 .azmoment.using .azprop{animation:propuse 1.5s ease-in forwards}.azmoment.using .az-water{transform-box:fill-box;transform-origin:50% 100%;transform:scaleY(0);transition:transform 1.3s}
 @keyframes propuse{60%{transform:translateX(-30px) rotate(-30deg)}100%{transform:translateX(-36px) scale(.5);opacity:0}}
-/* Azu's speech bubble: words in --ink1 on --paper */
-.azbub{position:absolute;right:72px;z-index:13;max-width:210px;background:var(--paper);color:var(--ink1);font:600 13px/1.35 var(--body);padding:8px 11px;border-radius:14px 14px 4px 14px;box-shadow:0 8px 20px rgba(0,0,0,.28);animation:drop .25s ease;pointer-events:none}
+/* Azu's speech bubble: words in --ts-ink on --ts-sheet-open */
+.azbub{position:absolute;right:72px;z-index:13;max-width:210px;background:var(--ts-sheet-open);color:var(--ts-ink);font:600 13px/1.35 var(--body);padding:8px 11px;border-radius:14px 14px 4px 14px;box-shadow:0 8px 20px rgba(0,0,0,.28);animation:drop .25s ease;pointer-events:none}
 .azbub.mid{right:auto;left:50%;transform:translateX(-50%);border-radius:14px;text-align:center}
 .reduce :is(.mascot,.azfab) svg,.reduce .azprop,.reduce .azbub,.mascot.still svg{animation:none!important}

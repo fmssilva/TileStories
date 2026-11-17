@@ -47,13 +47,13 @@ One row per key of the old root `S`, and a row for each field split off. Writers
 | `ptJokes` | each point's jokes (string keys) | `D.tour.ptJokes` | new: the tour asset per marker (GuideTour; guess) | guidance/catalog, guidance/editor, guidance/scenes |
 | `guideAsks` | Ask's suggested questions (the dock's chips) | `D.tour.guideAsks` | new: the tour asset per marker (GuideTour; guess) | guide/dock |
 | `guidance` | the guidance catalogue: every tip, remark, walkthrough and page, its group, gaps and presets | `D.guidance` | new: GuidanceCatalog asset (guess) | guidance/catalog, guidance/editor, guidance/scenes, guidance/service |
-| `cardCfg` | the card's container: on, the opening stop, heights, mode, layout, the top band, audio rules | `D.card.cardCfg` | config.json card_settings (CardConfigData.CardSettings) | card/controls, card/sections |
+| `cardCfg` | the card's container: on, the opening stop, heights, layout, the top band, audio rules | `D.card.cardCfg` | config.json card_settings (CardConfigData.CardSettings) | card/controls, card/sections |
 | `secCfg` | the sections' look: open or cards, the start, dividers, colour, glass and rim | `D.card.secCfg` | config.json card_settings.sections (CardSectionSettings) | card/block-looks, card/blocks, card/sections |
 | `sections` | the sections: name, icon, colour, shown on the bar, start, their block kinds | `D.card.sections` | config.json card_settings.sections (CardSectionSettings) | card/sections, phone/settings |
 | `ctl` | the card controls: the Navigation Bar, jump, Open Row, breadcrumb, Previous / Next, Locate, sticky action, contents, terms, viewer, player | `D.card.ctl` | config.json card_settings.components (CardComponentSettings) and .locate (CardLocateSettings) | card/controls, card/sections |
 | `blockDefs` | each block kind's defaults (entrance, tap, open row, page, chrome, options) | `D.card.blockDefs` | config.json card_settings: the Block Library (guess) | card/blocks |
 | `states` | Loading & states: the look of each state, the loader delay | `D.card.states` | config.json card_settings (CardConfigData.CardSettings) (guess) | card/states |
-| `motionLevel` | the card's motion level (full / reduced) | `D.card.motionLevel` | config.json card_settings (CardConfigData.CardSettings) (guess) | card/controls, phone/settings |
+| `motionLevel` | the card's motion level (follow / reduced): now the theme's motion knob | `D.wall.theme.motion` | ThemeAsset knob `motion` (proposed) picked in the wall's config.json (guess) | editor/app-tab |
 | `hints` | the card's cues group On (The card (cues)) | `D.card.hints` | config.json card_settings (CardConfigData.CardSettings) (guess) | card/hints |
 | `fb` | haptics and sounds: on, strength, volume, per event | `D.card.fb` | config.json card_settings (CardConfigData.CardSettings) (guess) | phone/feedback (Settings' Feedback writes P.vis.feedback only) |
 | `lensCfg` | the See it as chips: on, on the story page, shown from | `D.card.lensCfg` | config.json card_settings (CardConfigData.CardSettings) (guess) | audiences/lenses |
@@ -85,8 +85,11 @@ One row per key of the old root `S`, and a row for each field split off. Writers
 | `vis` | the visitor's Settings: language, mode, motion, text size, feedback; audience, length, speed, music | `P.vis` | -- (the visitor's profile on the phone: PlayerPrefs; guess) | audiences/audiences, card/controls, guidance/editor, guidance/scenes, guidance/service, guide/controls, guide/tour, guide/voice-script, guide/voice-test, phone/redraw, phone/settings, world/guide-button |
 | `gdVisitor` | the guidance's memory of the visitor: this visit, every visit, what was used and seen, the prefs | `P.gdVisitor` | -- (the visitor's profile on the phone: PlayerPrefs; guess) | guidance/editor, guidance/scenes, guidance/service |
 | `lang` | the language shown (Settings; the preview language) | `P.lang` | -- (the visitor's profile on the phone: PlayerPrefs; guess) | card/controls, card/demo-card, core/state, editor/card-tab, editor/selftest-texts, editor/texts, guidance/editor, guidance/present, guidance/scenes, guide/voice-script, guide/voice-test, phone/shell |
-| `reduce` | Reduce motion, as resolved (Settings, the preview bar) | `P.reduce` | -- (the visitor's profile on the phone: PlayerPrefs; guess) | card/controls, card/demo-card, core/state, guidance/scenes, phone/sheet |
-| `dark` | dark mode, as resolved (Settings, the card mode, the preview bar) | `P.dark` | -- (the visitor's profile on the phone: PlayerPrefs; guess) | card/controls, core/state, editor/card-tab, phone/redraw |
+| `reduce` | Reduce motion, as resolved (Settings, the preview bar, the wall's motion level) | `P.reduce` | -- (the visitor's profile on the phone: PlayerPrefs; guess) | card/controls, card/demo-card, core/state, guidance/scenes, phone/sheet |
+| `dark` | dark mode, as resolved: gone, computed by `themeMode()` (the visitor's `P.vis.mode` › the wall's `D.wall.theme.mode` › `D.theme.defaultMode`), never stored | -- | `ThemeModeRule.Shown` | -- |
+| (new) `theme` | the theme: Unity's ThemeAsset as data (`key`, `defaultMode`, `shared`, `modes`, `knobs`, `type`; proposed tokens and options flagged `proposed: true`) | `D.theme` | `Theme.default.asset` (`ThemeAsset`; the additions for the ThemeAsset: THEME_MAP.md §1.2) | core/theme (the Editor's free colours: editor/app-tab, developer-only) |
+| (new) the wall's theme picks | the wall's Default Mode (light / follow / dark) and its option of each knob (look, accent, roundness, density, glass, motion) | `D.wall.theme` | config.json, the wall's theme picks (WallConfigData; guess) | editor/app-tab |
+| `guideCfg.pSkin` | the panels' look (Follows the theme / Light / Aurora / Dark): its light / dark choice gone, the mode decides | `D.guide.darkPanels` (aurora / dark: the panels in dark mode) | guide-config asset (GuideConfig) | guide/panel-look |
 | `introSeen` | the mascot's introduction was heard | `P.introSeen` | -- (the visitor's profile on the phone: PlayerPrefs; guess) | editor/demo, guidance/editor, guidance/present, guidance/scenes, guide/autotour, guide/guide-scenes, guide/person, guide/tell-more, guide/tour-end |
 | `guideMute` | the visitor muted the guide's voice | `P.guideMute` | -- (the visitor's profile on the phone: PlayerPrefs; guess) | guidance/scenes, guide/person, guide/tour |
 | `kqDone` | the knowledge checks answered (cleared by Forget) | `P.kqDone` | -- (the visitor's profile on the phone: PlayerPrefs; guess) | phone/settings |
@@ -188,6 +191,7 @@ One row per key of the old root `S`, and a row for each field split off. Writers
 - **`D.tour.guideSteps`** is the open point's tour as the Guide script edits it; a playing tour swaps in a filtered copy (the
   audience, How does this work) and the saved place inserts its recap step into it. P2 separates the tour that plays (`ui`) from
   the script (`D`).
-- **`P.dark`** is dark mode as resolved from Settings, the card's mode and the preview bar.
+- **`D.wall.theme`** (the wall's theme picks) is taken as a config.json field of the wall; the ThemeAsset keeps its own `defaultMode`
+  (ThemeModeRule's third layer).
 - **`D.guide.life`** is also written when the audience changes (`audiences/audiences.js`: the audience's look sets the mascot's
   liveliness). P1b's profile model replaces that write.

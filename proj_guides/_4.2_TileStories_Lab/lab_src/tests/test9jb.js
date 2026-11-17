@@ -17,7 +17,7 @@ const url = labUrl('#probe');
   const lap = n => { if (process.env.TIMING) console.log('TIME ' + n + ' ' + Math.round((Date.now() - t00) / 1000) + ' s'); };
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   await R('window.__g0=JSON.stringify(D.guidance);window.__tx0=JSON.stringify(D.words.tx)');
-  const base = 'D.guidance=JSON.parse(window.__g0);D.card.hints.on=false;LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;P.lang="en";LAB.rowDemo=false;LAB.gdSR=false;D.guidance.items.gbhint.on=false;gdGroupById("inview").on=false;D.guide.gbtn="both";D.guide.mascot=true;G.gd.demo=false;gdChip(null);';
+  const base = 'D.guidance=JSON.parse(window.__g0);D.card.hints.on=false;LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.vis.mode="phone";P.lang="en";LAB.rowDemo=false;LAB.gdSR=false;D.guidance.items.gbhint.on=false;gdGroupById("inview").on=false;D.guide.gbtn="both";D.guide.mascot=true;G.gd.demo=false;gdChip(null);';
   const fresh = async (extra) => { await R(base + 'if(G.on)stopTour();setOverlay("ask",false);setOverlay("settings",false);setOverlay("menu",false);setWall("ribeira");ui.view="card";ui.stop="closed";renderPhone(false);G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.onWall=false;gdAdvance(250);' + (extra || '')); await W(120); };
   const show = (id, o) => `gdStart(gdItemNow("${id}"),"test",${o || '{pull:true,ms:60000}'});`;
   // round 14: an item's groups are folded: an item opened here shows its groups open too (each by its id, as the author opens them)

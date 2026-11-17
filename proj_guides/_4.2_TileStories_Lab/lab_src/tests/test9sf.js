@@ -27,7 +27,7 @@ const CAP = process.env.CAP || '', REPS = +process.env.REPS || 3, REP0 = +proces
   }
   /* the state every check starts from (test9s.js's): a 390 px phone, the device voice muted, the guidance quiet */
   const base = (o) => `ui.device="phone_p";DEVICES.phone_p.h=844;if(G.on)stopTour();if(G.moment)azMomentEnd(false);ph.querySelectorAll(".azbub").forEach(function(x){x.remove()});gdBeatClose();gdStop("test");D.guidance=JSON.parse(window.__g0);
-    D.card.hints.on=false;LAB.previewBar=false;P.lang="${o.lang || 'en'}";P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=${o.theme === 'dark'};D.card.cardCfg.mode="${o.theme === 'dark' ? 'dark' : 'light'}";
+    D.card.hints.on=false;LAB.previewBar=false;P.lang="${o.lang || 'en'}";P.guideMute=true;P.introSeen=true;P.reduce=false;P.vis.mode="${(o.theme === 'dark') ? 'dark' : 'phone'}";D.wall.theme.mode="${o.theme === 'dark' ? 'dark' : 'light'}";
     D.guide.voice="device";D.guide.panel="dock";D.guide.dockStart="mini";D.guide.captions=true;D.guide.music=false;P.vis.music=null;LAB.rowDemo=false;LAB.gdSR=false;D.poi.solemn=false;P.vis.aud="explorer";D.guide.life="lively";
     D.guide.gbtn="${o.gbtn || 'both'}";D.guide.mascot=${o.mascot !== false};D.guide.look="ink";D.agent.voiceOut=false;
     G.gd.demo=false;gdChip(null);G.cam={open:false,answer:"",busy:false,lit:[],route:[],hunt:null};setOverlay("settings",false);setOverlay("menu",false);G.askOpen=false;
@@ -41,7 +41,7 @@ const CAP = process.env.CAP || '', REPS = +process.env.REPS || 3, REP0 = +proces
   const rows = [];
   for (let rep = REP0; rep < REP0 + REPS; rep++) for (const dark of [false, true]) for (const id of ['g1', 'g5', 'g7']) {
     await R(base({}) + `ui.view="card";ui.stop="full";renderAll(false);startTour();var j=D.tour.guideSteps.findIndex(function(s){return s.id==="${id}"});if(j>0){stopSpeech();G.i=j;runStep()}ui.dockH="mini";renderGuide()`); await W(500);
-    await R(`P.dark=${dark};D.card.cardCfg.mode="${dark ? 'dark' : 'light'}";renderAll(true)`);
+    await R(`P.vis.mode="${(dark) ? 'dark' : 'phone'}";D.wall.theme.mode="${dark ? 'dark' : 'light'}";renderAll(true)`);
     /* Azu standing still: its place and the scroll unchanged for three samples (at most 10 s) */
     let last = null, same = 0; const t0 = Date.now(); while (Date.now() - t0 < 10000 && same < 3) { const y = await R('JSON.stringify([Math.round(ph.querySelector(".mascot").getBoundingClientRect().top),Math.round(scr.scrollTop)])'); same = y === last ? same + 1 : 0; last = y; await W(150); }
     const o1 = await R('G15.azuInk()'); await W(1500); const o2 = await R('G15.azuInk()');
@@ -55,7 +55,7 @@ const CAP = process.env.CAP || '', REPS = +process.env.REPS || 3, REP0 = +proces
   ok(`[azu] Azu 0 px over the words after a quick step jump: ${REPS} repeats at g1, g5, g7, light and dark (${rows.length} cases), once it stands still and 1.5 s later`, rows.length === REPS * 6 && !bad.length, { bad, sample: rows.slice(0, 6).map(r => r.id + ' ' + r.theme + ' ' + r.still + '/' + r.later) });
   tsec('azu');
 
-  await R('if(G.on)stopTour();gdStop("test");ui.device="phone_p";DEVICES.phone_p.h=844;P.dark=false;D.card.cardCfg.mode="light";P.lang="en";D.guide.mascot=true;D.guide.gbtn="both";D.guidance=JSON.parse(window.__g0);renderAll(false)');
+  await R('if(G.on)stopTour();gdStop("test");ui.device="phone_p";DEVICES.phone_p.h=844;P.vis.mode="phone";D.wall.theme.mode="light";P.lang="en";D.guide.mascot=true;D.guide.gbtn="both";D.guidance=JSON.parse(window.__g0);renderAll(false)');
   ok('No page error', errs.length === 0, errs.slice(0, 5));
   tsec('end');
   console.log(fails ? `FAILED ${fails}` : 'ALL PASS');

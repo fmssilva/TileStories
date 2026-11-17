@@ -5,19 +5,25 @@
 .ptool .devbtns button svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.6}
 .ptool .devbtns button[aria-pressed="true"]{background:#3C78B5;color:#fff}
 .ptool .devbtns button.land svg{rotate:90deg}
-.xp{min-height:100%;box-sizing:border-box;padding:56px 16px 24px;background:var(--paper);color:var(--ink1)}
-.xp-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:0 4px 16px}
-.xp-h b{display:block;font:700 28px/1.15 var(--title,var(--body))}
-.xp-h small{display:block;margin-top:6px;font:500 14px/1.35 var(--body);color:var(--ink2)}
-.xp-wall{flex:none;appearance:none;width:44px;height:44px;border-radius:22px;border:1px solid var(--hair);background:var(--box);color:var(--ink1);font:600 16px/1 var(--body);cursor:pointer}
-.xp-list{display:flex;flex-direction:column;gap:10px}
-.xp .xp-row{width:100%;height:72px;padding:10px 14px 10px 10px;cursor:pointer}
-.xp .xp-row .te-th{width:52px;height:52px}
-.xp .xp-row .te-ct b{font-size:15.5px}
-.xp .xp-row .te-ct small{font-size:13px}
-.xp-open{position:absolute;right:16px;bottom:24px;z-index:6;display:flex;align-items:center;gap:8px;height:44px;padding:0 16px 0 14px;border-radius:22px;border:0;background:rgba(20,22,28,.72);color:#fff;font:700 14px/1 var(--body);cursor:pointer}
-.xp-open span{font-size:15px}
+/* Explore and the wall's way into it, on the theme's tokens (W's design: the app's page ground, the display face, the space and radius
+   scales the density and roundness knobs set; the button over the camera on the app glass the glass knob sets) */
+.xp{min-height:100%;box-sizing:border-box;padding:56px var(--ts-space-4) var(--ts-space-5);background:var(--ts-bg);color:var(--ts-ink)}
+.xp-h{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--ts-space-3);margin:0 var(--ts-space-1) var(--ts-space-4)}
+.xp-h b{display:block;font:600 var(--ts-size-display)/1.15 var(--ts-font-display)}
+.xp-h small{display:block;margin-top:var(--ts-space-2);font:500 var(--ts-size-caption)/1.35 var(--ts-font-body);color:var(--ts-ink-2)}
+.xp-wall{flex:none;appearance:none;width:var(--ts-space-7);height:var(--ts-space-7);border-radius:var(--ts-radius-round);border:var(--ts-line-width) solid var(--ts-hair);background:var(--ts-surface);color:var(--ts-ink);font:600 var(--ts-size-body)/1 var(--ts-font-body);cursor:pointer}
+.xp-list{display:flex;flex-direction:column;gap:var(--ts-space-3)}
+.xp .xp-row{width:100%;height:72px;padding:var(--ts-space-3) var(--ts-space-4) var(--ts-space-3) var(--ts-space-3);cursor:pointer;background:var(--ts-surface);border-radius:var(--ts-radius-l)}
+.xp .xp-row .te-th{width:52px;height:52px;border-radius:var(--ts-radius-m)}
+.xp .xp-row .te-ct b{font-size:var(--ts-size-body)}
+.xp .xp-row .te-ct small{font-size:var(--ts-size-eyebrow)}
+.xp-open{position:absolute;right:var(--ts-space-4);bottom:var(--ts-space-5);z-index:6;display:flex;align-items:center;gap:var(--ts-space-2);height:var(--ts-space-7);padding:0 var(--ts-space-4) 0 var(--ts-space-3);border-radius:var(--ts-radius-pill);
+  border:var(--ts-line-width) solid var(--ts-app-glass-edge);background:var(--ts-app-glass);color:var(--ts-ink);font:700 var(--ts-size-chip)/1 var(--ts-font-body);cursor:pointer;
+  box-shadow:0 6px 18px var(--ts-elevation-1);-webkit-backdrop-filter:blur(calc(var(--ts-app-glass-blur) * 1px));backdrop-filter:blur(calc(var(--ts-app-glass-blur) * 1px));
+  /* unity: camera-glass (the camera-blur shader, its radius --ts-app-glass-blur); unity: sprite (the soft shadow, a 9-slice sprite) */}
+.xp-open span{font-size:var(--ts-size-body)}
 /* Explore is a screen of its own, the whole screen in landscape too (the card's side sheet is the card's) */
+.ph.on-explore,.ph.on-explore .scr{background:var(--ts-bg)}
 .ph.land.on-explore .scr{left:0;width:auto;border-radius:0}
 .ph.land.on-explore .xp{padding-top:24px}
 /* the phone's screen never scrolls the Lab's page behind it (a real phone has none): a scroll that reaches its end stays in it */

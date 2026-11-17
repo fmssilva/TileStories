@@ -5,7 +5,7 @@
 .reduce .hinttip{animation:hintfade 3.2s linear forwards}
 @keyframes hintfade{0%,100%{opacity:0}10%,88%{opacity:1}}
 #navbar.hintring{animation:hintring 1.3s ease-out 1}
-@keyframes hintring{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent2,#1F4E9C) 55%,transparent)}100%{box-shadow:0 0 0 14px transparent}}
+@keyframes hintring{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--ts-accent,#1F4E9C) 55%,transparent)}100%{box-shadow:0 0 0 14px transparent}}
 .gterm.hintglow{animation:hintglow 2s ease 1;border-radius:3px}
-@keyframes hintglow{0%,100%{background:transparent}30%,60%{background:color-mix(in srgb,var(--accent2,#1F4E9C) 22%,transparent)}}
-.vset .vhow{display:block;width:100%;margin-top:14px;appearance:none;border:1px solid var(--hair,rgba(0,0,0,.15));background:transparent;color:inherit;font:700 14px/1 var(--body);padding:12px;border-radius:12px;text-align:left;cursor:pointer}
+@keyframes hintglow{0%,100%{background:transparent}30%,60%{background:color-mix(in srgb,var(--ts-accent,#1F4E9C) 22%,transparent)}}
+.vset .vhow{display:block;width:100%;margin-top:14px;appearance:none;border:1px solid var(--ts-hair,rgba(0,0,0,.15));background:transparent;color:inherit;font:700 14px/1 var(--body);padding:12px;border-radius:12px;text-align:left;cursor:pointer}

@@ -21,7 +21,7 @@ const url = labUrl('#probe');
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   if (process.env.MUTATE) { await R('var __ca=gdCamAnswer;gdCamAnswer=function(ok){if(!ok&&G.gd.pages){G.gd.camPerm="denied";gdPagesNext();return}return __ca(ok)}'); console.log('MUTATION: a refused camera goes on to the wall'); }
   await R('window.__g0=JSON.stringify(D.guidance)');
-  const base = 'if(G.gd.pages)gdPagesEnd("test",false);D.guidance=JSON.parse(window.__g0);D.card.hints.on=false;LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;P.lang="en";LAB.rowDemo=false;LAB.gdSR=false;LAB.gdToday="2026-03-10";D.poi.solemn=false;P.vis.aud="explorer";P.vis.len="";D.wall.aud.where="card";D.wall.aud.seen=true;D.guide.life="lively";D.guide.gbtn="both";D.guide.mascot=true;G.gd.demo=false;G.gd.camPerm="allowed";gdChip(null);';
+  const base = 'if(G.gd.pages)gdPagesEnd("test",false);D.guidance=JSON.parse(window.__g0);D.card.hints.on=false;LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.vis.mode="phone";P.lang="en";LAB.rowDemo=false;LAB.gdSR=false;LAB.gdToday="2026-03-10";D.poi.solemn=false;P.vis.aud="explorer";P.vis.len="";D.wall.aud.where="card";D.wall.aud.seen=true;D.guide.life="lively";D.guide.gbtn="both";D.guide.mascot=true;G.gd.demo=false;G.gd.camPerm="allowed";gdChip(null);';
   /* the guidance's other kinds rest (only The start speaks), a first visit on the wall, the clock by hand */
   const fresh = async (extra) => { await R(base + 'gdGroupById("inview").on=false;D.guidance.items.gbhint.on=false;gdGroupById("card").on=false;gdKindById("fun").on=false;if(G.on)stopTour();stopSpeech();G.cam={answer:"",busy:false,lit:[],route:[],hunt:null};setOverlay("ask",false);setOverlay("settings",false);setOverlay("menu",false);setWall("ribeira");ui.camZoom=1;ui.view="card";ui.stop="closed";renderPhone(false);G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;' + (extra || '')); await W(100); };
   // round 14: an item's groups are folded: an item opened here shows its groups open too (each by its id, as the author opens them)
@@ -135,7 +135,7 @@ const url = labUrl('#probe');
   const looks = [];
   for (const dark of [false, true]) {
     for (const st of ['hello', 'camera', 'prompt', 'refused', 'settings']) {
-      await fresh(`P.dark=${dark};renderAll(true);`); await R('gdLaunch("first")'); await at('hello');
+      await fresh(`P.vis.mode="${(dark) ? 'dark' : 'phone'}";renderAll(true);`); await R('gdLaunch("first")'); await at('hello');
       if (st !== 'hello') { await R('gdPagesNext()'); await at('camera'); }
       if (st === 'prompt' || st === 'refused' || st === 'settings') { await R('gdCamAsk()'); }
       if (st === 'refused' || st === 'settings') { await R('gdCamAnswer(false)'); }

@@ -78,7 +78,7 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   return d.innerHTML});
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("D\\.guide\\.(","D\\.guide\\.(bubbleOut|"));
 /* the phone's signature (the self-test): the strip as the visitor sees it, for the tour's first line, or none */
-on("modelSig.sig",function(h){if(!sigWant(/D\.guide\.(tourWords|teleH|pSkin)/))return h;var t=TXT("tour_promise");return h+"#tele:"+D.guide.tourWords+"|"+(D.guide.tourWords==="tele"?'<div class="'+teleCls()+'" style="--tlh:'+Math.round(+D.guide.teleH||184)+'px">'+teleHtml(t)+'</div>':"")});
+on("modelSig.sig",function(h){if(!sigWant(/D\.guide\.(tourWords|teleH|darkPanels)/))return h;var t=TXT("tour_promise");return h+"#tele:"+D.guide.tourWords+"|"+(D.guide.tourWords==="tele"?'<div class="'+teleCls()+'" style="--tlh:'+Math.round(+D.guide.teleH||184)+'px">'+teleHtml(t)+'</div>':"")});
 /* each row's demo: the tour at Mini, a step whose words the mascot says while it moves; the tip on the wall */
 rowDemos({"D.guide.tourWords":{tour:"g2",dock:"mini",ring:function(){return D.guide.tourWords==="tele"?".gtele":D.guide.tourWords==="bubble"?".gbubble|.mascot":".gdock"}},
   "D.guide.teleH":{tour:"g2",dock:"mini",ring:".gtele|.gdock"},

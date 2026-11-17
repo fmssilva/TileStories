@@ -6,13 +6,27 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
 - **The code:** `src/<area>/<module>.js` with its `.css`, in the order of `build.py`'s `MODULES` and `STYLES`; the page in `src/page/`,
   the pictures in `assets/`. Each module is described in `PROTOTYPE_STRUCTURE.md`; where each piece of state lives (`D` the author's,
   `P` the visitor's, `ui` what is happening, `LAB` the Lab's) and its Unity home, in `STATE_MAP.md`.
+- **The themes:** `src/core/theme.js` holds Unity's theme as data (`D.theme`: `Theme.default.asset`'s shape and its 167 `--ts-*`
+  tokens, Unity's values; `THEME_MAP.md` maps every Lab colour to them). Two looks, Premium (the theme as Unity has it) and Playful
+  (W's: Fredoka titles, text one step larger, an outline, hard shadows, its own colours; it picks the Cobalt accent, Round corners and
+  Solid glass), and the other knobs (accent: heritage, azulejo, terracotta, garden + cobalt; roundness, density, glass, motion level) are
+  ThemeKnobOptions; the wall picks one of each and its Default Mode in the Editor's **App** tab (`D.wall.theme`). New tokens, knobs and
+  options are flagged PROPOSED (the additions for the ThemeAsset). One mode for the whole app: the visitor's pick (Settings, the preview
+  bar's ☾) › the wall's Default Mode › the theme's. **Colour is blended in sRGB by the Lab (CSS cannot do otherwise) and in linear light
+  by Unity**: a see-through colour (glass, a scrim) looks lighter here than on the phone, so the contrast is measured in linear light
+  (`themeContrast`, the token test), never read off a Lab capture. **The token test** `tests/test10g.js` (Node, no browser) reads the Unity
+  project's `Theme.default.uss` and the asset's knobs: every non-proposed token equal to Unity's in light and dark, the four accents,
+  every proposed token absent from Unity (it says when Unity adds one), and every text pair of both looks, both modes and every accent
+  7:1 (body) or 4.5:1 (other text) in linear light.
 - **Words:** `src/core/realstrings.json` (the framework's real words, with their owner part; `python strings.py` re-imports them
   from Unity's `CardStrings.asset`); the Lab's own words are in `src/core/words.js`'s `LABSTR`.
 - **Build:** `npm install` once here (acorn, for `check_structure.js`; playwright-core, for the tests: `tests/pw.js`, `PW=<path>` names another copy). `python build.py` writes `tilestories-lab.html` here
   (about 2.7 MB, its words and faces embedded) and copies the 3D mascot's models and thumbnails from `proj_guides/mascote/3d` to
   `assets/mascot/`, each model also as `<id>.glb.js` (a script registering its bytes: the one way the page loads a model; neither is committed; the pictures are in `assets/`), then runs the structure check (wrappers, re-assignments,
   second declarations, defaults set twice, references to the old root `S`: all 0) and the Unity lint (`tools/unity_lint.py`, a
-  ratchet per CSS file in `tools/unity_lint_ratchet.json`); either one failing fails the build (`PROTOTYPE_STRUCTURE.md`, "Rules").
+  ratchet per CSS file in `tools/unity_lint_ratchet.json`) and the theme's ratchet (`tools/theme_ratchet.py`: colour literals outside
+  the theme and phone sizes under 13 px, per file in `tools/theme_ratchet.json`; `--lower` after a port); any one failing fails the build
+  (`PROTOTYPE_STRUCTURE.md`, "Rules").
 - **Serve:** `python tools/serve.py` serves the Lab's folder on this computer: open http://localhost:8642/lab_src/tilestories-lab.html
   (`LAB_PORT=8643` picks another port: one per copy of the Lab, e.g. a `git worktree` running the full tier beside the next round; the tests,
   `run_tests.js` and the .ps1 scripts read the same variable. `--ensure` accepts a server only if it serves this folder, else it says which and exits 1.)
@@ -105,6 +119,8 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
       point), the local server and the assets beside the page (`tools/serve.py`, `build.py`): every module reads the roots and loads its files.
     - `test10d`, `test10e` and `test10f`: the screen router and the non-AR path (`screen/router`, `screen/explore`), the four devices
       with the card's stops and the guide (`screen/device`), the publish layout (`tools/publish.py`): every screen and frame sits in them.
+    - `test10g` (1 s, Node) and `test10h`: the theme (`core/theme`, `editor/app-tab`): every token Unity's, the contrast in linear light,
+      the one mode and the wall's picks by real clicks, with Undo: every screen draws with them.
     <!-- /core set -->
   - **Full tests, every 12-15 rounds and before a hand-off to Unity:** `tests/runtest8.ps1`, then `node run_tests.js` (every file,
     about 2 h at round 17's timings), then every mutation the tests name (`MUTATE=1`); the results replace `tests_baseline.json`
@@ -452,6 +468,20 @@ the modules: `PROTOTYPE_STRUCTURE.md`. Below: the words, the build, the tests an
     never out-private, a packed set by its packs, within the limits; [page], [voice] a recorded line from its pack plays, [music];
     [served] every file an extension the host serves (the models as `.glb.js`), [glb] the chosen model from its `.glb.js` with no `.glb` in the layout and
     no other model asked for; `MUTATE=1` leaves the packs and the models' scripts out: [voice] and [glb] turn red.
+  - *The theme on Unity's tokens, merge P1b.1* (`core/theme`, `editor/app-tab`, `phone/redraw`, `phone/settings`, `guide/panel-look`):
+    `tests/test10g.js` (Node, no browser) checks [unity] every token of `D.theme` not flagged proposed equal to `Theme.default.uss` in light
+    and dark, the four font tokens and the Default Mode; [count] none missing, none extra without the flag; [accents] the four accent
+    options equal the asset's knobs; [proposed] every proposed token absent from the `.uss` and every proposed option from the asset;
+    [contrast] Premium and Playful x light and dark x five accents, 1,160 pairs composed in linear light (body 7:1, other text 4.5:1, the
+    hero's words over its scrim over white 7:1, the app glass's words over white and black 4.5:1); [resolve] the look's picks over the
+    wall's. `MUTATE=1` puts heritage's dark accent back to the old blue, greys ink-2, flags a Unity token proposed and drops one: [unity],
+    [count], [accents], [proposed] and [contrast] turn red. `tests/test10h.js` checks by real clicks [mode] Settings › Dark and the preview
+    bar's ☾ swap the phone's one mode class (Unity's dark ground and ink, no Undo step), the App tab's Default mode = Dark darkens a visitor
+    on Follow the phone (one step, undone); [one] no `dark` class or `.dark` rule left, no `P.dark`, no card mode, accent or roundness, no
+    style but the theme's setting a token, every Editor preview marked in the phone's mode; [look] App › Look = Playful: its class, its
+    picks, Fredoka titles and the cobalt accent on the phone, Undo and Redo; [accent] App › Accent = Garden on the Story block's Open Row,
+    undone; [knobs] Roundness, Density and Glass on the card's pictures, Explore's gaps and the wall's Explore button. `MUTATE=1` keeps the
+    mode light, ignores the wall's picks and adds a module's own `.dark` rule: every check group turns red.
   - *Every Editor row's demo, guidance round 10* (`editor/demo`, the rows' modules: `editor/card-tab`, `card/controls`, `card/blocks`,
     `card/pages`, `card/states`, `card/hints`, `editor/texts`, `editor/components`, `editor/marker-tab`, `mascot/azu2d`, `guidance/editor`):
     `tests/test9n.js` checks that the self-test's NO DEMO check walks every tab and finds no row without a demo but its named exemptions

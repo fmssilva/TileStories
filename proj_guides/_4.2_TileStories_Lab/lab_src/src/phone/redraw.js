@@ -1,4 +1,4 @@
-/* A change redraws the phone in place: the scroll stays, no entrance plays again; dark mode in place. */
+/* A change redraws the phone in place: the scroll stays, no entrance plays again; the mode in place. */
 function shownInPlace(){var r=scr.getBoundingClientRect();scr.classList.add("still");
   scr.querySelectorAll(".mv:not(.in)").forEach(function(el){var b=el.getBoundingClientRect();if(b.bottom>r.top&&b.top<r.bottom)el.classList.add("in")});
   void scr.offsetHeight;scr.classList.remove("still")}
@@ -8,8 +8,8 @@ on("renderPhone.after",function(keep,cx){var top=cx.top,view=cx.view,was=cx.was;
   if(ui.view!=="democard")ui.beforeDemo={view:ui.view,stop:ui.stop};
   if(ui.view==="democard"&&overlayOn("settings")&&!ph.querySelector(".vset"))ph.insertAdjacentHTML("beforeend",settingsPanel());
   var gb=document.getElementById("grab");if(gb)gb.setAttribute("aria-label",TXT(ui.stop==="full"?"sheet_collapse":"sheet_expand"))});
-/* light / dark only repaints: the editor's previews change colour in place, the editor is not rebuilt */
-function darkInPlace(){ed.querySelectorAll(".cv").forEach(function(c){c.classList.toggle("dark",P.dark)});renderPhone(true)}
+/* light / dark only repaints: every marked root (the phone, the Editor's previews) swaps its mode class, nothing is rebuilt */
+function modeInPlace(){themeSwap();renderPhone(true)}
 document.addEventListener("click",function(e){var t=e.target;if(!t.closest)return;
-  if(t.closest('#ptool [data-pt="dark"]')){e.stopPropagation();P.dark=!P.dark;emit("profileChanged","dark");darkInPlace();return}
-  var vo=t.closest('[data-vis^="mode|"]');if(vo){e.stopPropagation();var m=vo.dataset.vis.split("|")[1];P.vis.mode=m;P.dark=m==="dark"||(m==="phone"&&D.card.cardCfg.mode==="dark");emit("profileChanged","mode");darkInPlace()}},true);
+  if(t.closest('#ptool [data-pt="dark"]')){e.stopPropagation();P.vis.mode=themeMode()==="dark"?"light":"dark";emit("profileChanged","mode");modeInPlace();return}
+  var vo=t.closest('[data-vis^="mode|"]');if(vo){e.stopPropagation();var m=vo.dataset.vis.split("|")[1];P.vis.mode=m;emit("profileChanged","mode");modeInPlace()}},true);

@@ -9,17 +9,17 @@
 .ph[data-orn=off] .dropcap::first-letter{float:none;font:inherit;padding:0;color:inherit}
 .ph[data-orn=off] .secdiv{display:none}
 /* the first card: one screen over the card, three large choices, Skip */
-.onb{position:absolute;inset:0;z-index:30;background:color-mix(in srgb,var(--paper) 94%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:24px;animation:onbin .4s cubic-bezier(.2,.8,.2,1)}
+.onb{position:absolute;inset:0;z-index:30;background:color-mix(in srgb,var(--ts-sheet-open) 94%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:24px;animation:onbin .4s cubic-bezier(.2,.8,.2,1)}
 @keyframes onbin{from{opacity:0;transform:translateY(18px)}}
 .onb:focus{outline:none}.onb-in{width:100%;display:flex;flex-direction:column;gap:12px}
-.onb-t{font:600 26px/1.15 var(--display);color:var(--ink1);margin:0 0 8px;text-align:center}
-.onb-c{appearance:none;display:flex;align-items:center;gap:14px;text-align:left;border:1.5px solid var(--hair);background:var(--box);color:var(--ink1);border-radius:20px;padding:14px 16px;min-height:76px;cursor:pointer;transition:border-color .2s,transform .2s}
-.onb-c:active{transform:scale(.98)}.onb-c[aria-pressed=true]{border-color:var(--accent2)}
-.onb-ic{flex:0 0 44px;height:44px;border-radius:14px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent2) 12%,var(--paper))}
-.onb-ic svg{width:28px;height:28px;fill:none;stroke:var(--accent2);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
-.onb-tx strong{display:block;font:700 17px/1.2 var(--body);color:var(--ink1)}.onb-tx small{display:block;font:400 14px/1.35 var(--body);color:var(--ink2);margin-top:3px}
-.onb-skip{appearance:none;border:0;background:none;color:var(--ink1);font:600 15px/1 var(--body);padding:14px;min-height:44px;margin-top:4px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
-.onb-note{text-align:center;color:var(--ink2);font:400 13px/1.3 var(--body)}
+.onb-t{font:600 26px/1.15 var(--ts-font-display);color:var(--ts-ink);margin:0 0 8px;text-align:center}
+.onb-c{appearance:none;display:flex;align-items:center;gap:14px;text-align:left;border:1.5px solid var(--ts-hair);background:var(--ts-surface-2);color:var(--ts-ink);border-radius:20px;padding:14px 16px;min-height:76px;cursor:pointer;transition:border-color .2s,transform .2s}
+.onb-c:active{transform:scale(.98)}.onb-c[aria-pressed=true]{border-color:var(--ts-accent)}
+.onb-ic{flex:0 0 44px;height:44px;border-radius:14px;display:grid;place-items:center;background:color-mix(in srgb,var(--ts-accent) 12%,var(--ts-sheet-open))}
+.onb-ic svg{width:28px;height:28px;fill:none;stroke:var(--ts-accent);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.onb-tx strong{display:block;font:700 17px/1.2 var(--body);color:var(--ts-ink)}.onb-tx small{display:block;font:400 14px/1.35 var(--body);color:var(--ts-ink-2);margin-top:3px}
+.onb-skip{appearance:none;border:0;background:none;color:var(--ts-ink);font:600 15px/1 var(--body);padding:14px;min-height:44px;margin-top:4px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.onb-note{text-align:center;color:var(--ts-ink-2);font:400 13px/1.3 var(--body)}
 .reduce .onb{animation:none}
 /* Specific Marker > 4 · Audiences: the coverage cells */
 .cov .covc{appearance:none;border:1px solid transparent;border-radius:8px;padding:5px 8px;font:600 11px/1.2 var(--ui,inherit);cursor:pointer;width:100%;text-align:left;background:rgba(127,127,127,.12);color:inherit}

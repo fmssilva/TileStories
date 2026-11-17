@@ -44,11 +44,11 @@ const url = labUrl('#probe');
   await R('D.wall.tags=JSON.parse(KEEPT);D.card.lensCfg.min=2;renderAll(false)');
   // 7. the chips' words: 4.5:1 or more, light and dark (pressed and not)
   for (const dark of [false, true]) {
-    await R(`P.dark=${dark};P.lens="politics";renderAll(false)`);
+    await R(`P.vis.mode="${(dark) ? 'dark' : 'phone'}";P.lens="politics";renderAll(false)`);
     const c = await R('var px=function(c){var m=c.match(/[\\d.]+/g).map(Number),k=c.indexOf("color(")===0?255:1;return[m[0]*k,m[1]*k,m[2]*k]},lum=function(a){return a.map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce(function(s,v,i){return s+v*[.2126,.7152,.0722][i]},0)},min=99;scr.querySelectorAll(".lensbar button,.lensbadge").forEach(function(e){var a=lum(px(getComputedStyle(e).color)),b=lum(px(getComputedStyle(e).backgroundColor)),r=(Math.max(a,b)+.05)/(Math.min(a,b)+.05);if(r<min)min=r});Math.round(min*100)/100');
     ok(`${dark ? 'dark' : 'light'}: the chips and badges at 4.5:1 or more`, c >= 4.5, c);
   }
-  await R('P.dark=false;P.lens="";renderAll(false)');
+  await R('P.vis.mode="phone";P.lens="";renderAll(false)');
   // 8. the Editor: Lenses (with its words); Specific Marker > 5 · Lenses: names, tags, a new topic
   ok('Editor: Lenses after Looks per audience, three rows, its words', await R('var l=ed.querySelector(\'[data-fo="s8lens"]\');!!l&&ed.querySelector(\'[data-fo="s8look"]\').nextElementSibling===l&&/On the story page too/.test(l.textContent)&&/Shown from/.test(l.textContent)&&(TXO.s8lens||[]).length===2'));
   await R('ui.tab="marker";renderEditor()');

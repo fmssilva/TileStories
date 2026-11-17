@@ -18,7 +18,7 @@ const url = labUrl('#probe');
   const R = src => p.evaluate(s => LAB.run(s), src); const W = ms => p.waitForTimeout(ms);
   const until = async (src, ms) => { const t0 = Date.now(); while (Date.now() - t0 < ms) { const v = await R(src); if (v) return v; await W(60); } return false; };
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
-  await R('D.card.hints.on=false;LAB.previewBar=true;P.lang="en";P.guideMute=true;P.reduce=false;P.dark=false;LAB.rowDemo=true;ui.level=9;ui.op={};G.gd&&(G.gd.manual=true)');
+  await R('D.card.hints.on=false;LAB.previewBar=true;P.lang="en";P.guideMute=true;P.reduce=false;P.vis.mode="phone";LAB.rowDemo=true;ui.level=9;ui.op={};G.gd&&(G.gd.manual=true)');
   if (process.env.MUTATE) {
     await R('rowsWithoutDemoAll=function(){var keep=[ui.tab,ui.level,JSON.stringify(ui.op)],out=[];ui.level=9;ui.op={};ST_TABS.filter(stWalks).filter(function(t){return t!=="marker"}).forEach(function(tab){ui.tab=tab;renderEditor();rowsWithoutDemo().forEach(function(r){r.tab=tab;out.push(r)})});ui.tab=keep[0];ui.level=keep[1];ui.op=JSON.parse(keep[2]);return out}');
     console.log('MUTATION: the Specific Marker tab is dropped from the NO DEMO check');
@@ -67,7 +67,7 @@ const url = labUrl('#probe');
   t('Preview & Test › Preview bar Shown = Hidden (change): the card, its top ringed where the bar was', await change('card', 'LAB.previewBar', 'false'), /^card\//, /chrome/); await R('LAB.previewBar=true;renderPhone(true)');
   // 1 · Card
   t('Card › Sheet › Opens at = Peek (change): the card at Peek, the sheet\'s top ringed', await change('card', 'D.card.cardCfg.openAt', 'peek'), /^card\/peek$/, /#grab/); await R('D.card.cardCfg.openAt="half"');
-  t('Card › Look › Accent ▸ (a colour row): the Open Row it colours, ringed', await label('card', 'D.card.cardCfg.accent'), /^card\/full$/, /b_story"\] \.open/);
+  t('App › Look and mode › Accent ▸ (a swatch row): the Open Row it colours, ringed', await label('app', 'D.wall.theme.accent'), /^card\/full$/, /b_story"\] \.open/);
   await W(450); const acc = await inView(); S_.push(['...the ringed Open Row is in view on the sheet', acc, acc]);
   t('Card › Sheet › Tap outside closes ▸: a tap on the camera closes the card, the wall ringed', await label('card', 'D.card.cardCfg.tapOutside'), /^card\/closed$/, /#wall/);
   // 2 · Sections
@@ -88,7 +88,7 @@ const url = labUrl('#probe');
   S_.push(['...the motion plays once (the change and its demo ask one play)', plays === 1, plays]); await R('motionById("rise").ease="out"');
   t('Motion › Rise › Comes in ▸: Rise ringed and played', await label('card', 'motion.from', '[data-fo="mo:rise"]', 'ui.sel.motion="rise";ui.op["mo:rise"]=true;ui.op["mt:entrance"]=true'), /^demo\//, /m:rise/);
   t('Feedback › Haptics ▸: a tap buzzes, the ring where the phone vibrates', await label('card', 'D.card.fb.haptics'), /^card\/full$/, /hapring/);
-  t('Motion › Motion level = Reduced (change): the section start ringed', await change('card', 'D.card.motionLevel', 'reduced'), /^card\/full$/, /sec:stories/); await R('D.card.motionLevel="full";P.reduce=false');
+  t('App › Depth and motion › Motion level = Reduced (change): the section start ringed', await change('app', 'D.wall.theme.motion', 'reduced'), /^card\/full$/, /sec:stories/); await R('D.wall.theme.motion="follow";P.reduce=false');
   // 5 · Card Controls
   t('Card Controls › Navigation Bar › Indicator = Pill (change): the bar ringed', await change('card', 'D.card.ctl.bar.indicator', 'pill'), /^card\/full$/, /#navbar/); await R('D.card.ctl.bar.indicator="raised"');
   t('Card Controls › Contents sheet › Rows ▸: the sheet open, ringed', await label('card', 'D.card.ctl.contents.rows'), /^card\/full$/, /csheet/);

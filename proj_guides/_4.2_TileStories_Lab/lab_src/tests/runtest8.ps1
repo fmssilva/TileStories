@@ -1,5 +1,5 @@
 # The self-test, headless: powershell -ExecutionPolicy Bypass -File tests/runtest8.ps1 [-tabs guide,words] [-single] [-minutes 90]
-# No -tabs: every tab, as three walks side by side (card / guide / marker,words,global), summed (each tab starts from the
+# No -tabs: every tab, as three walks side by side (card / guide / marker,words,global,app), summed (each tab starts from the
 # same state, so the sum is the one walk's result; one walk of every tab, -single, is many times slower: each control costs
 # more the longer a walk runs). -tabs walks only those (the texts come with "words"), each tab list in its own Edge profile
 # and files (dom_<tabs>.txt, selftest_<tabs>.json). -hash opens another route instead. The page is opened over the Lab's local http
@@ -10,7 +10,7 @@ $d = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 if (-not $tabs -and -not $single -and $hash -eq "selftest") {
   & python "$d\tools\serve.py" --ensure | Out-Null
   $me = $MyInvocation.MyCommand.Path; $t0 = Get-Date
-  $js = @("card", "guide", "marker,words,global") | ForEach-Object { Start-Job -ScriptBlock { param($me, $t, $m) & powershell -ExecutionPolicy Bypass -File $me -tabs $t -minutes $m } -ArgumentList $me, $_, $minutes }
+  $js = @("card", "guide", "marker,words,global,app") | ForEach-Object { Start-Job -ScriptBlock { param($me, $t, $m) & powershell -ExecutionPolicy Bypass -File $me -tabs $t -minutes $m } -ArgumentList $me, $_, $minutes }
   $lines = $js | Wait-Job | Receive-Job; $js | Remove-Job
   $sum = $lines | Where-Object { $_ -match '^ok=(\d+) behaviour=(\d+) bad=(\d+)' } | ForEach-Object { , [int[]]@($Matches[1], $Matches[2], $Matches[3]) }
   if (@($sum).Count -ne 3 -or ($lines -match '^TIMEOUT|^no json')) { $lines; "INCOMPLETE: a walk did not finish"; exit 1 }

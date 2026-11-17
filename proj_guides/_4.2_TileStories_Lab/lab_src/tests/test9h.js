@@ -23,7 +23,7 @@ const url = labUrl('#probe');
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   if (process.env.MUTATE) { await R('var __gp=gdPick;gdPick=function(items,v,ctx,now){if(ctx.showing){var r=__gp(items.filter(function(x){return x.form==="cue"}),v,Object.assign({},ctx,{showing:null}),now);if(r.item)return r}return __gp(items,v,ctx,now)}'); console.log('MUTATION: the cues skip the one-at-a-time gate'); }
   // the set-up: the cues On (and The ✦), the remarks resting, a first visit whose opening was said 30 s ago
-  const base = 'LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;P.lang="en";LAB.rowDemo=false;D.guide.gbtn="both";D.guide.mascot=true;D.guide.life="lively";D.guide.azuTap="play";D.poi.solemn=false;' +
+  const base = 'LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.vis.mode="phone";P.lang="en";LAB.rowDemo=false;D.guide.gbtn="both";D.guide.mascot=true;D.guide.life="lively";D.guide.azuTap="play";D.poi.solemn=false;' +
     'D.guidance.on=true;D.guidance.breathing=15;D.guidance.cueRoom=5;D.card.hints.on=true;gdGroupById("card").items.forEach(function(id){var it=D.guidance.items[id];it.on=true;it.shows="visit"});var hw=gdGroupById("howto");hw.on=true;hw.inSettings=true;hw.inMenu=true;' +
     '["opening","tapmarker","askview","gbhint","tourof"].forEach(function(id){D.guidance.items[id].on=true});gdGroupById("inview").on=false;G.gd.demo=false;gdChip(null);';
   const opened = 'var o=gdVM("opening"),oe=gdEM("opening");o.shown=1;o.last=gdNow()-30000;o.end=gdNow()-21000;oe.shown=1;P.gdVisitor.visit.lastEnd=gdNow()-21000;var e=gdEM("tapmarker");e.done=true;e.by="card";';
@@ -129,7 +129,7 @@ const url = labUrl('#probe');
 
   // ---------- 4. How does this work? on the wall: one bubble, beside the nearest marker, a chip that opens a card ----------
   for (const dark of [false, true]) {
-    await fresh(`P.dark=${dark};renderAll(true);`); await W(200);
+    await fresh(`P.vis.mode="${(dark) ? 'dark' : 'phone'}";renderAll(true);`); await W(200);
     await p.locator('#ph .gbtn').click(); await W(250);
     const wi = await R('[].map.call(ph.querySelectorAll(".gbmenu [data-gbgo]"),function(b){return b.dataset.gbgo}).join()');
     await p.locator('#ph [data-gbgo="how"]').click(); await until('!!(G.gd.cur&&G.gd.cur.item.id==="howto:wall")', 2000); await W(450);
@@ -138,7 +138,7 @@ const url = labUrl('#probe');
     ok(`On the wall (${dark ? 'dark' : 'light'}): the ✦ menu has it; one bubble (the menu closed), beside the nearest marker, Azu pointing, its ring; 2 lines, 7:1, 0 px over words or the ✦; the chip Open a card, 44 px, 7:1`,
       wi === 'tour,ask,view,how,try,settings' && az.every(Boolean) && l[0] <= 2 && l[1] >= 7 && l[2] === 0 && l[3] === 0 && l[4] === await R('TXT("gd_how_wall")') && l[5] >= 44 && l[6] >= 7 && /^Open a card/.test(l[7]), [wi, az, l]);
   }
-  await R('P.dark=false;P.lang="pt";renderAll(true)'); await W(250); await until('var a=ph.querySelector(".azfab");!a||!a.getAnimations||!a.getAnimations().length', 2500); const lpt = await R(look);
+  await R('P.vis.mode="phone";P.lang="pt";renderAll(true)'); await W(250); await until('var a=ph.querySelector(".azfab");!a||!a.getAnimations||!a.getAnimations().length', 2500); const lpt = await R(look);
   ok('...in Portuguese: its words from Languages & Terms, 2 lines at most', lpt[4] === await R('D.words.tx.gd_how_wall.pt') && /^Abrir um cartão/.test(lpt[7]) && lpt[0] <= 2 && lpt[2] === 0, lpt);
   await R('P.lang="en";renderAll(true)'); await W(150);
   await p.locator('#ph .gdbub [data-gdcta]').click(); await W(400);

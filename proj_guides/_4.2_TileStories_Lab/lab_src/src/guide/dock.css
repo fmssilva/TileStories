@@ -35,7 +35,7 @@
 /* the words like a teleprompter */
 .gd-tp{display:flex;flex-direction:column;gap:6px;min-width:0}
 .gd-tp .tp-prev,.gd-tp .tp-next{font:400 15px/21px var(--body);color:var(--faded);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.gd-tp .tp-now{font:500 21px/29px var(--display);color:var(--ink);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.gd-tp .tp-now{font:500 21px/29px var(--ts-font-display);color:var(--ink);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 .gd-tp .tp-now .tw{color:var(--tpun)}.gd-tp .tp-now .tw.said,.gd-tp .tp-now .tw.on{color:var(--ink)}
 .gd-tp .tw.on,.gm-now .tw.on{background:var(--hl);color:var(--hltx)!important;border-radius:6px;padding:0 4px;margin:0 -2px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
 .gd-tp .tp-empty{visibility:hidden}
@@ -101,7 +101,7 @@
 .gd-thread>div{max-width:88%;font:400 15px/1.45 var(--body);padding:9px 12px;border-radius:16px}
 .gdock .gm-azu{align-self:flex-start;background:var(--chip);color:var(--ink);border-bottom-left-radius:5px}
 .gdock .gm-me{align-self:flex-end;background:var(--acc);color:var(--onacc);border-bottom-right-radius:5px}
-.gdock .gm-now{font:500 18px/1.45 var(--display)!important;background:transparent;padding:4px 2px;max-width:100%}
+.gdock .gm-now{font:500 18px/1.45 var(--ts-font-display)!important;background:transparent;padding:4px 2px;max-width:100%}
 .gdock .gm-now .tw{color:var(--tpun)}.gdock .gm-now .tw.said{color:var(--ink)}
 .gdock .gm-note{align-self:center;max-width:94%!important;background:rgba(242,181,68,.16);color:var(--ink);font-size:13px!important;text-align:center}
 .gm-azu.typing{display:flex;gap:4px;padding:12px 14px}.gm-azu.typing i{width:6px;height:6px;border-radius:50%;background:var(--ink2);animation:tkdot 1s infinite}.gm-azu.typing i:nth-child(2){animation-delay:.15s}.gm-azu.typing i:nth-child(3){animation-delay:.3s}
@@ -115,7 +115,7 @@
 /* ===== A · Paper glass: the card's paper as glass ===== */
 .gdock.lk-paper{--surf:rgba(251,250,247,.90);--surfsolid:#FBFAF7;--edge:rgba(255,255,255,.85);--ink:#1A1814;--ink2:#4F4A42;--faded:#5F5950;--acc:#A63F1C;--onacc:#FFFFFF;--acctx:#9E3B1A;--hl:#F6DCC9;--hltx:#1A1814;--trk:rgba(26,24,20,.14);--chip:#EFEBE3;--line:rgba(26,24,20,.18);--field:rgba(26,24,20,.06);--fieldedge:transparent;--grab:rgba(26,24,20,.2);--tpun:#1A1814;
   background:var(--surf);border:1px solid var(--edge);box-shadow:0 14px 34px rgba(26,24,20,.22),inset 0 1px 0 rgba(255,255,255,.9)}
-.cv.dark .gdock.lk-paper{--surf:rgba(31,29,26,.90);--surfsolid:#1F1D1A;--edge:rgba(255,255,255,.12);--ink:#F4F1EA;--ink2:#C9C2B6;--faded:#A39C90;--acctx:#F0A27E;--hl:#7A3A1E;--hltx:#FFFFFF;--trk:rgba(255,255,255,.16);--chip:#34302B;--line:rgba(255,255,255,.2);--field:rgba(255,255,255,.08);--grab:rgba(255,255,255,.28);--tpun:#F4F1EA;box-shadow:0 14px 34px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08)}
+.ts-app.ts-mode-dark .gdock.lk-paper{--surf:rgba(31,29,26,.90);--surfsolid:#1F1D1A;--edge:rgba(255,255,255,.12);--ink:#F4F1EA;--ink2:#C9C2B6;--faded:#A39C90;--acctx:#F0A27E;--hl:#7A3A1E;--hltx:#FFFFFF;--trk:rgba(255,255,255,.16);--chip:#34302B;--line:rgba(255,255,255,.2);--field:rgba(255,255,255,.08);--grab:rgba(255,255,255,.28);--tpun:#F4F1EA;box-shadow:0 14px 34px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08)}
 .gdock.lk-paper.h-mini{left:12px;right:12px;bottom:16px;height:72px;border-radius:36px;padding:0 10px 0 12px;justify-content:center}
 .lk-paper .gd-line{display:flex;flex-direction:column;gap:2px}
 .lk-paper .gd-line .gd-stop{display:flex;align-items:center;gap:8px;font:600 12px/16px var(--body);color:var(--ink2)}
@@ -128,7 +128,7 @@
    Listening: 0 px over the words told) and its handle's 44 px hit area took the top 6 px of Aa and the speaker button (44 px): its rows
    6 px closer (12 to 6 px), its top 4 px lower (24 to 28 px) and the handle's hit area 7 px higher (its bar 7 px nearer the edge) give
    the block 32 px and Aa its whole 44. Unity: the USS padding-top, the rows' margin and the handle's top */
-.cv.dark .gdock.lk-paper:not(.h-mini){--surf:rgba(31,29,26,.97)}
+.ts-app.ts-mode-dark .gdock.lk-paper:not(.h-mini){--surf:rgba(31,29,26,.97)}
 .lk-paper .gd-head{display:flex;align-items:center;gap:10px;height:44px}
 .lk-paper .gd-head .gd-av{width:44px;height:44px}
 .lk-paper .gd-who{display:flex;flex-direction:column;min-width:0;white-space:nowrap}.lk-paper .gd-who b{display:flex;align-items:center;gap:8px;font:700 15px/18px var(--body)}.lk-paper .gd-who small{font:400 13px/16px var(--body);color:var(--ink2);overflow:hidden;text-overflow:ellipsis}
@@ -140,11 +140,11 @@
 .lk-paper .gd-askf>svg{width:20px;height:20px;flex:none;fill:none;stroke:var(--ink2);stroke-width:2;stroke-linecap:round}
 .lk-paper .gd-askf .gd-form{background:none;border:0;padding:0;height:44px}
 .lk-paper .gd-talk{width:48px;height:48px;background:#1A1814;color:#fff}
-.cv.dark .lk-paper .gd-talk{background:#F4F1EA;color:#1A1814}
+.ts-app.ts-mode-dark .lk-paper .gd-talk{background:#F4F1EA;color:#1A1814}
 
 /* ===== B · Ink glass: dark ink glass, saffron accents (the Architect's pick) ===== */
 .gdock.lk-ink{--surfsolid:#1C1A21;background-color:rgba(28,26,33,.92);background-image:linear-gradient(180deg,rgba(44,40,52,.92),rgba(22,21,26,.92) 55%);border:1px solid rgba(255,255,255,.14);box-shadow:0 16px 36px rgba(10,9,12,.38)}
-.cv.dark .gdock.lk-ink{border-color:rgba(255,255,255,.22);box-shadow:0 16px 36px rgba(0,0,0,.6)}
+.ts-app.ts-mode-dark .gdock.lk-ink{border-color:rgba(255,255,255,.22);box-shadow:0 16px 36px rgba(0,0,0,.6)}
 .gdock.lk-ink.h-mini{left:50%;bottom:18px;transform:translateX(-50%);height:64px;border-radius:32px;padding:0 8px;justify-content:center;width:max-content}
 .lk-ink .gd-mrow{gap:6px}
 .gd-ring{position:relative;width:52px;height:52px;flex:none}
@@ -179,7 +179,7 @@
 /* ===== C · Player sheet: a music player's mini bar and its sheet ===== */
 .gdock.lk-player{--surfsolid:#FFFFFF;--ink:#1A1814;--ink2:#4F4A42;--faded:#6B655C;--acc:#1A1814;--onacc:#FFFFFF;--acctx:#9E3B1A;--hl:#F6DCC9;--hltx:#1A1814;--trk:rgba(26,24,20,.12);--chip:#FFFFFF;--line:rgba(26,24,20,.14);--field:transparent;--fieldedge:transparent;--grab:rgba(26,24,20,.2);--tpun:#1A1814;--card:#F6F2EA;--sq:#F2EEE6;--bar:#1A1814;
   background:#FFFFFF;box-shadow:0 -10px 30px rgba(26,24,20,.10)}
-.cv.dark .gdock.lk-player{--surfsolid:#1C1B19;--ink:#F4F1EA;--ink2:#C9C2B6;--faded:#A39C90;--acc:#F4F1EA;--onacc:#1A1814;--acctx:#F0A27E;--hl:#7A3A1E;--hltx:#FFFFFF;--trk:rgba(255,255,255,.16);--chip:#1C1B19;--line:rgba(255,255,255,.18);--grab:rgba(255,255,255,.28);--tpun:#F4F1EA;--card:#2A2724;--sq:#2A2724;--bar:#2A2724;background:#1C1B19;box-shadow:0 -10px 30px rgba(0,0,0,.5)}
+.ts-app.ts-mode-dark .gdock.lk-player{--surfsolid:#1C1B19;--ink:#F4F1EA;--ink2:#C9C2B6;--faded:#A39C90;--acc:#F4F1EA;--onacc:#1A1814;--acctx:#F0A27E;--hl:#7A3A1E;--hltx:#FFFFFF;--trk:rgba(255,255,255,.16);--chip:#1C1B19;--line:rgba(255,255,255,.18);--grab:rgba(255,255,255,.28);--tpun:#F4F1EA;--card:#2A2724;--sq:#2A2724;--bar:#2A2724;background:#1C1B19;box-shadow:0 -10px 30px rgba(0,0,0,.5)}
 .gdock.lk-player.h-mini{left:0;right:0;bottom:0;height:96px;padding:14px 14px 22px;border-top:1px solid var(--line);justify-content:center}
 .gd-mprog.top{left:0;right:0;top:0;bottom:auto;border-radius:0}
 .lk-player .gd-avb{width:52px;height:52px;border-radius:14px;overflow:hidden}
@@ -216,10 +216,10 @@
 /* ===== D · Teleprompter: no box, the words over the paper's fade ===== */
 .gdock.lk-prompter{--fade:rgba(251,250,247,.97);--fade0:rgba(251,250,247,0);--surfsolid:#FBFAF7;--ink:#1A1814;--ink2:#4F4A42;--faded:#6B655C;--acc:#A63F1C;--onacc:#FFFFFF;--acctx:#9E3B1A;--hl:#F6DCC9;--hltx:#1A1814;--trk:rgba(26,24,20,.16);--chip:#FBFAF7;--line:rgba(26,24,20,.16);--field:rgba(26,24,20,.06);--fieldedge:transparent;--grab:rgba(26,24,20,.2);--tpun:#1A1814;--cap:#1A1814;--capink:#FFFFFF;
   left:0;right:0;bottom:0;background:linear-gradient(180deg,var(--fade0) 0px,var(--fade) 56px,var(--fade) 100%)}
-.cv.dark .gdock.lk-prompter{--fade:rgba(20,19,18,.97);--fade0:rgba(20,19,18,0);--surfsolid:#141312;--ink:#F1EEE8;--ink2:#C9C3B8;--faded:#A39C90;--acctx:#F0A27E;--hl:#7A3A1E;--hltx:#FFFFFF;--trk:rgba(255,255,255,.18);--chip:#1F1D1A;--line:rgba(255,255,255,.18);--field:rgba(255,255,255,.08);--grab:rgba(255,255,255,.28);--tpun:#F1EEE8;--cap:#2E2B27}
+.ts-app.ts-mode-dark .gdock.lk-prompter{--fade:rgba(20,19,18,.97);--fade0:rgba(20,19,18,0);--surfsolid:#141312;--ink:#F1EEE8;--ink2:#C9C3B8;--faded:#A39C90;--acctx:#F0A27E;--hl:#7A3A1E;--hltx:#FFFFFF;--trk:rgba(255,255,255,.18);--chip:#1F1D1A;--line:rgba(255,255,255,.18);--field:rgba(255,255,255,.08);--grab:rgba(255,255,255,.28);--tpun:#F1EEE8;--cap:#2E2B27}
 .gdock.lk-prompter.h-mini{padding:56px 24px 22px;align-items:center;gap:12px}
 .lk-prompter .gd-pline{align-self:stretch}
-.lk-prompter .gd-tp.tp-mini .tp-now{font:500 18px/26px var(--display);white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.lk-prompter .gd-tp.tp-mini .tp-now{font:500 18px/26px var(--ts-font-display);white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .gd-capsule{background:var(--cap);color:var(--capink);border-radius:32px}
 .lk-prompter .gd-mrow.gd-capsule{height:60px;border-radius:30px;padding:0 8px 0 14px;gap:4px;width:max-content;align-self:center}
 .lk-prompter .gd-mrow .gd-line{flex:none;display:flex;align-items:center;height:44px;padding:0 4px}
@@ -235,8 +235,8 @@
 .lk-prompter .gd-head .gd-eye{font-size:13px;letter-spacing:.06em;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .lk-prompter .gd-head .gd-aa{border:1px solid var(--line)!important}
 .lk-prompter .gd-tp{gap:4px}
-.lk-prompter .gd-tp .tp-prev,.lk-prompter .gd-tp .tp-next{font:400 18px/26px var(--display)}
-.lk-prompter .gd-tp .tp-now{font:600 24px/32px var(--display)}
+.lk-prompter .gd-tp .tp-prev,.lk-prompter .gd-tp .tp-next{font:400 18px/26px var(--ts-font-display)}
+.lk-prompter .gd-tp .tp-now{font:600 24px/32px var(--ts-font-display)}
 .lk-prompter .gd-hrow{flex-direction:row;align-items:center;gap:10px;font:400 13px/18px var(--body);color:var(--ink2)}
 .lk-prompter .gd-hrow .gd-seek{flex:1;margin:-11px 0}
 .lk-prompter .sk-track{gap:0}.lk-prompter .sk-track i{height:2px;border-radius:0}.lk-prompter .sk-track i+i{box-shadow:inset 2px 0 0 var(--surfsolid)}
@@ -266,14 +266,14 @@
 .gdock.gd-in0>*{opacity:0;transition:none}
 .gdock>:nth-child(2){transition-delay:.03s}.gdock>:nth-child(3){transition-delay:.06s}.gdock>:nth-child(4){transition-delay:.09s}.gdock>:nth-child(5){transition-delay:.12s}.gdock>:nth-child(n+6){transition-delay:.15s}
 .gbtn-wrap.gd-arriving{opacity:0}
-/* the bubble: Azu's own words, above the Mini, a tail towards Azu; its words in --ink1 on --paper, the word said in the accent */
-.gbubble{position:absolute;left:14px;right:78px;z-index:15;background:var(--paper);color:var(--ink1);border-radius:18px;padding:11px 14px;box-shadow:0 8px 24px rgba(0,0,0,.28),0 0 0 1px var(--hair);animation:gbin .22s ease}
-.gbubble::after{content:"";position:absolute;right:-7px;bottom:14px;width:16px;height:16px;background:var(--paper);transform:rotate(45deg);border-radius:3px;box-shadow:3px -3px 0 0 transparent}
+/* the bubble: Azu's own words, above the Mini, a tail towards Azu; its words in --ts-ink on --ts-sheet-open, the word said in the accent */
+.gbubble{position:absolute;left:14px;right:78px;z-index:15;background:var(--ts-sheet-open);color:var(--ts-ink);border-radius:18px;padding:11px 14px;box-shadow:0 8px 24px rgba(0,0,0,.28),0 0 0 1px var(--ts-hair);animation:gbin .22s ease}
+.gbubble::after{content:"";position:absolute;right:-7px;bottom:14px;width:16px;height:16px;background:var(--ts-sheet-open);transform:rotate(45deg);border-radius:3px;box-shadow:3px -3px 0 0 transparent}
 .gbubble.tail-up::after{bottom:auto;top:12px}
 @keyframes gbin{from{opacity:0;transform:translateY(6px) scale(.98)}}
-.gbubble .gcap{position:static;inset:auto;background:none;box-shadow:none;padding:0;border-radius:0;max-height:none;color:var(--ink1);font:500 15px/1.45 var(--body)}
+.gbubble .gcap{position:static;inset:auto;background:none;box-shadow:none;padding:0;border-radius:0;max-height:none;color:var(--ts-ink);font:500 15px/1.45 var(--body)}
 .gbubble .gw.gb-off{display:none}
-.gbubble .gnovoice{color:var(--ink2)}.gbubble .gcap em{color:var(--accent2)}
+.gbubble .gnovoice{color:var(--ink2)}.gbubble .gcap em{color:var(--ts-accent)}
 .reduce .gbubble,.reduce .gd-talk,.reduce .gd-talk .ring,.reduce .gd-tp.tp-up{animation:none!important}.reduce .sk-knob,.reduce .gd-mprog b,.reduce .gd-ring .pg{transition:none}
 .reduce .gdock>*{transition:none}
 /* Azu's state follows the talk: it leans in to listen, looks up to think */
@@ -303,7 +303,7 @@
 .gd-qstar.m-ring{position:absolute;right:-6px;top:-6px;width:20px;height:20px;background:#16151A;border-radius:50%}.gd-qstar.m-ring svg{width:15px;height:15px}
 .gd-capsule{position:relative}
 .gd-qstar.m-cap{position:absolute;right:10px;top:-11px;background:var(--cap);color:var(--capink);border-radius:50%}
-.lk-player .gd-qstar.sk,.lk-player .gd-qstar.m-player{color:#9E3B1A}.cv.dark .lk-player .gd-qstar.sk,.cv.dark .lk-player .gd-qstar.m-player{color:#F0A27E}
+.lk-player .gd-qstar.sk,.lk-player .gd-qstar.m-player{color:#9E3B1A}.ts-app.ts-mode-dark .lk-player .gd-qstar.sk,.ts-app.ts-mode-dark .lk-player .gd-qstar.m-player{color:#F0A27E}
 /* ===== round 21 (21.1, 21.3; the developer, 2026-11-13: "the panel ... is too big, with too big elements: the speech has too big words"):
    Open smaller and calmer, the words at 18 px (they were 22), the controls in one row with back 10 s and forward 10 s beside Play, every
    target 44 px; the Mini gets back 10 s before Pause. Ink glass's Open is 374 px (it was about 460): under half of an 844 phone,

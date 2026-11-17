@@ -18,7 +18,7 @@ function modelSig(){var cx={};emitLatestFirst("modelSig.before",cx);var keep=ui.
 /* the page opened as the self-test (#selftest, #selftest=<tab>,<tab>), and the tabs it walks (null: all) */
 function isSelfTest(){return location.hash==="#selftest"||location.hash.indexOf("#selftest=")===0}
 function selfTestTabs(){var m=location.hash.match(/^#selftest=(.+)$/);return m?decodeURIComponent(m[1]).split(","):null}
-var ST_TABS=["card","guide","marker","words","global"],stWalk=null;
+var ST_TABS=["card","guide","marker","words","global","app"],stWalk=null;
 /* a tab the self-test walks this run (every tab when none was named) */
 function stWalks(tab){return!stWalk||stWalk.indexOf(tab)>=0}
 function selfTest(tabs){var res=[],seen={};stWalk=tabs||null;
@@ -33,7 +33,8 @@ function selfTest(tabs){var res=[],seen={};stWalk=tabs||null;
       catch(err){res.push({tab:tab,key:c.key,v:c.v,label:lab,result:"ERROR "+err.message});return}
       var stateChanged=stateJson()!==state,after=modelSig();
       var offCard=/^@D\.card\.blockDefs\./.test(c.key)&&!D.poi.card.some(function(b){return b.kind===c.key.split(".")[3]});res.push({tab:tab,key:c.key,v:c.v,label:lab,result:after!==before?"changes the phone":!stateChanged?"NOT WIRED (state unchanged)":BEHAVIOUR.test(c.key)?"behaviour (no picture)":offCard?"behaviour (block not on this card)":"NO EFFECT (state changes, phone does not)"})});
-    noDraw=false});
+    /* each tab leaves the state as it found it: the next tab, and the texts' walk after the last, start from the same state */
+    stateRestore(base);noDraw=false});
   return pipe("selfTest.res",res)}
 function cssq(s){return String(s).replace(/"/g,'\\"')}
 function labelOf(el){emit("labelOf.before",el);var r=el.closest(".row");return r?(r.querySelector("label")||{}).textContent||"":""}

@@ -88,7 +88,7 @@ var D={
   {id:"pt7",name:"Then and Now",cat:"Interactive",rows:[{kind:"heading",style:"st6"},{kind:"before_after",style:"st35"},{kind:"paragraph",style:"st8"}]},
   {id:"pt8",name:"Scrollytelling",cat:"Interactive",rows:[{kind:"scrolly",style:"st39"}]}]
  }};
-var P={lang:"en",dark:false,reduce:false,guide:{}};
+var P={lang:"en",reduce:false,guide:{}};
 var ui={tab:"card",step:1,view:"demo",single:false,level:1,q:"",cat:"All",op:{},
  sel:{layer:"motion",kind:"callout",style:"st10",motion:"rise",inter:"flip",effect:"e_arches",pattern:"pt1",block:"Story",row:"r1",cblock:"b_story",picker:null}};
 var LAB={screen:"phone",focusOn:true,focusRef:null,test:{on:true,poi:"painting"}};

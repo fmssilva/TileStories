@@ -63,11 +63,11 @@ const url = labUrl('#probe');
   ok('Skip: Explorer', await R('P.vis.aud==="explorer"&&D.wall.aud.seen'));
   // the first card's words: 4.5:1 or more, light and dark
   for (const dark of [false, true]) {
-    await R(`P.dark=${dark};D.wall.aud.seen=false;renderAll(false)`); await p.waitForTimeout(500);
+    await R(`P.vis.mode="${(dark) ? 'dark' : 'phone'}";D.wall.aud.seen=false;renderAll(false)`); await p.waitForTimeout(500);
     const c = await R('var px=function(c){var m=c.match(/[\\d.]+/g).map(Number),k=c.indexOf("color(")===0?255:1;return{r:m[0]*k,g:m[1]*k,b:m[2]*k,a:m.length>3?m[3]:1}},lum=function(c){return[c.r,c.g,c.b].map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce(function(a,v,i){return a+v*[.2126,.7152,.0722][i]},0)},over=function(f,b){return{r:f.r*f.a+b.r*(1-f.a),g:f.g*f.a+b.g*(1-f.a),b:f.b*f.a+b.b*(1-f.a),a:1}},bg=function(el){var st=[];while(el){var c=px(getComputedStyle(el).backgroundColor);if(c.a>0)st.push(c);if(c.a>=1)break;el=el.parentElement}var b={r:255,g:255,b:255,a:1};for(var i=st.length-1;i>=0;i--)b=over(st[i],b);return b},min=99;ph.querySelectorAll(".onb b,.onb strong,.onb small,.onb-skip").forEach(function(e){var a=lum(px(getComputedStyle(e).color)),z=lum(bg(e)),r=(Math.max(a,z)+.05)/(Math.min(a,z)+.05);if(r<min)min=r});Math.round(min*100)/100');
     ok(`${dark ? 'dark' : 'light'}: the first card's words at 4.5:1 or more`, c >= 4.5, c);
   }
-  await R('P.dark=false;D.wall.aud.seen=true;renderAll(false)');
+  await R('P.vis.mode="phone";D.wall.aud.seen=true;renderAll(false)');
   // 7. the preview bar: Preview as
   await p.locator('#ptool [data-pt="aud"]').click(); await p.waitForTimeout(300);
   ok('Preview bar: one tap previews as the next audience', await R('P.vis.aud') === 'family');

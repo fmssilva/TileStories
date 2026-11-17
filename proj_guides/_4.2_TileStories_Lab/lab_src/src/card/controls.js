@@ -1,12 +1,11 @@
 /* Card, Sections and Card Controls as in Unity, merged with the Lab's: the accents, the corners, the strips, the section starts, the bar's shape and fill, the term popups. */
 /* ----- state: the merged options and their defaults ----- */
-Object.assign(D.card.cardCfg,{fullHeight:"top",backBtn:"step",accent:"heritage",round:"soft",strips:"edge",openOne:false,earbuds:"pause",lockScreen:"pause",resume:true});
+Object.assign(D.card.cardCfg,{fullHeight:"top",backBtn:"step",strips:"edge",openOne:false,earbuds:"pause",lockScreen:"pause",resume:true});
 if(D.card.cardCfg.topBand==="clear")D.card.cardCfg.topBand="fade";
 Object.assign(D.card.secCfg,{glass:true,rim:true,motion:"reveal",divSec:"none",nextUp:true});
 Object.assign(D.card.ctl.bar,{shape:"floating",fill:"solid",chosenIcon:"filled",chosenColour:"section",minBlocks:8,showAt:"both",showFrom:"hero",more:6});
 Object.assign(D.card.ctl,{stickySlide:true,contents:{on:true,rows:"sections",ticks:true,chips:true},term:{opens:"popup",underline:"first"},pageChips:true,viewer:{counter:"chips"},player:{captions:true}});
 D.card.sections.forEach(function(s){if(s.shown===false)s.shown=false;else s.shown=true});
-var ACCENTS={heritage:["#1B4691","#8FB0EC","Heritage"],azulejo:["#13507E","#7DB8E8","Azulejo"],terracotta:["#823114","#F0A07A","Terracotta"],garden:["#24532F","#8CC99B","Garden"]};
 /* the section icons: Unity's set (CardIcons.All) + the Lab's star and ar */
 Object.assign(SICON,{home:'<path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-5h4v5"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',map:'<path d="M3.5 6.5l5.5-2 6 2 5.5-2v13l-5.5 2-6-2-5.5 2z"/><path d="M9 4.5v13M15 6.5v13"/>',
  camera:'<rect x="3.5" y="7" width="17" height="12" rx="2"/><circle cx="12" cy="13" r="3.5"/><path d="M9 7l1.5-2.5h3L15 7"/>',music:'<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>',
@@ -31,8 +30,6 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
   addRows(d,"s1a",row("Full height",pseg("D.card.cardCfg.fullHeight",["top","strip"],["To the top","Leave a camera strip"]),"How high the card rises at Full: to the top of the screen, or 48 pt short so a strip of the live camera stays above it."),"Tap outside closes");
   setRow(d,"s1a","Tap outside closes",row("Tap outside closes",pseg("D.card.cardCfg.tapOutside",["true","false"],["On","Off"]),"A tap on the camera closes the card. A tap on a marker still selects it; a drag never closes; the X and a swipe down always close."));
   addRows(d,"s1a",row("Phone's Back button",pseg("D.card.cardCfg.backBtn",["step","app"],["Steps the card down","Left to the app"]),"Android. Each press undoes the innermost thing: a full view, a list, the row opened last, then one height down, then close."));
-  addRows(d,"s1b",row("Accent",pseg("D.card.cardCfg.accent",Object.keys(ACCENTS),Object.keys(ACCENTS).map(function(k){return ACCENTS[k][2]})),"The one accent colour: links, the focal action, the Open Row. A closed list, each measured at 7:1 or more in light and dark.")+
-    prow("Roundness",pseg("D.card.cardCfg.round",["sharp","soft","round"],["Sharp","Soft","Round"]),"The corners of blocks, pictures and buttons: three radius sets of the theme."),"Layout");
   addRows(d,"s1b",row("Open one at a time",pseg("D.card.cardCfg.openOne",["false","true"],["Off","On"]),"With the Accordion layout, and for every Expand Row: opening one folds the open one; the tapped row keeps its place.",true),"Top band");
   setRow(d,"s1b","Top band",row("Top band",pseg("D.card.cardCfg.topBand",["fade","glass"],["Fade","Glass"]),"What sits under the title row after the hero. Fade: the sheet's own colour, solid under the row, then nothing. Glass: frosted. (Clear is gone: the title would sit on scrolling text.)"));
   addRows(d,"s1b",row("Swipe strips",pseg("D.card.cardCfg.strips",["edge","whole"],["Show the next item's edge","Whole items only"]),"Every horizontal strip (a peek Carousel, the Timeline strip, Related): a slice of the next item shows at the edge, and a swipe ends on a whole item."));
@@ -61,7 +58,6 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
     var html='<div class="btnrow"><button class="ubtn sm" type="button" data-secreset="1">Reset to the framework\'s sections</button></div>'+(busy>D.card.ctl.bar.more?'<div class="note warn">'+esc(L(D.poi.hero.title))+' shows '+busy+' sections and the bar holds '+D.card.ctl.bar.more+': the rest go under More.</div>':"");
     if(br)br.insertAdjacentHTML("afterend",html);else s2i.insertAdjacentHTML("beforeend",html)}
   /* ----- Motion: the wall's level ----- */
-  addRows(d,"s4m",row("Motion level",pseg("D.card.motionLevel",["full","reduced"],["Full","Reduced"]),"Reduced gives every visitor whole, still parts: no reveals, no parallax, no loops. A phone set to Reduce Motion, or a visitor who picks Reduced, always gets Reduced."));
   /* ----- Card Controls ----- */
   dropRow(d,"s5top","Settings button");
   addRows(d,"s5top",'<div class="note">The settings button is always shown: it holds the visitor\'s language, light / dark, motion and text size.</div>');
@@ -103,16 +99,12 @@ on("edCard.html",function(h){var d=document.createElement("div");d.innerHTML=h;
 
 /* ----- writes that need more than the state ----- */
 /* the card's mode and motion level, undone or redone: shown as their Editor change showed them (the dark and still phone, P as resolved) */
-on("undo.applied",function(kind,was){var w=JSON.parse(was).card||{},c=w.cardCfg||{},m=c.mode!==D.card.cardCfg.mode,r=w.motionLevel!==D.card.motionLevel;if(m)P.dark=D.card.cardCfg.mode==="dark";if(r)P.reduce=D.card.motionLevel==="reduced";if(m||r)renderAll(true)});
-on("setOpt.answer",function(key,v){if(key==="@D.card.motionLevel"){D.card.motionLevel=v;P.reduce=v==="reduced";renderAll(true);show("card");return true}
-  if(key==="@D.card.cardCfg.mode"){D.card.cardCfg.mode=v;P.dark=v==="dark"||(v==="system"&&!!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches));renderAll(true);show("card");return true}
+on("setOpt.answer",function(key,v){
   if(key==="@D.card.ctl.bar.more"){D.card.ctl.bar.more=+v;renderAll(true);show("card");return true}});
 var SECTIONS0=JSON.stringify(D.card.sections);
 
 /* ----- the phone: stops, accent, roundness, strips ----- */
 on("stopTop.answer",function(st){var H=devH();if(st==="closed")return;if(devLand())return 0;if(st==="peek")return H-64;if(st==="full")return D.card.cardCfg.fullHeight==="strip"?42:0});
-function v8vars(){var st=document.getElementById("v8vars");if(!st){st=document.createElement("style");st.id="v8vars";document.head.appendChild(st)}var a=ACCENTS[D.card.cardCfg.accent]||ACCENTS.heritage;
-  st.textContent=".cv{--accent2:"+a[0]+"}.cv.dark,#ph.dark,.dark .cv{--accent2:"+a[1]+"}"}
 /* sections on the card: the merged starts, the dividers between sections, Next Up, the order with Sources last */
 function startOf(sec){return sec.start==="inherit"?D.card.secCfg.start:sec.start}
 function ownStrip(){return '<div class="ownstrip" style="height:24px;background:repeating-linear-gradient(90deg,var(--fam) 0 12px,color-mix(in srgb,var(--fam) 35%,transparent) 12px 24px)"></div>'}
@@ -135,7 +127,7 @@ on("cardScreen.html",function(h){var d=document.createElement("div");d.innerHTML
     tb.insertAdjacentHTML("afterend",'<div class="lt-pages"><button type="button" data-pagesec="'+ids2[(k2-1+ids2.length)%ids2.length]+'" aria-label="'+TXH("nav_pager_previous")+'">&#8249;</button><span><i style="color:'+colVar(cs.colour)+'">'+sicon(cs.icon,14)+'</i> <b>'+esc(L(cs.name))+'</b> '+esc(fmt(TXT("nav_pager_position"),k2+1,ids2.length))+'</span><button type="button" data-pagesec="'+ids2[(k2+1)%ids2.length]+'" aria-label="'+TXH("nav_pager_next")+'">&#8250;</button></div>')}}
   if(D.card.cardCfg.openOne&&D.card.cardCfg.layout==="accordion")d.querySelectorAll(".lt-acc").forEach(function(a){a.dataset.one="1"});
   return d.innerHTML});
-on("renderPhone.before",function(keep){v8vars();ph.classList.toggle("rd-sharp",D.card.cardCfg.round==="sharp");ph.classList.toggle("rd-round",D.card.cardCfg.round==="round");ph.classList.toggle("strips-whole",D.card.cardCfg.strips==="whole");
+on("renderPhone.before",function(keep){ph.classList.toggle("strips-whole",D.card.cardCfg.strips==="whole");
   ph.classList.toggle("tx-large",P.vis.text==="large");ph.classList.toggle("tx-larger",P.vis.text==="larger");});
 on("renderPhone.after",function(keep){var inCard=ui.view==="card",nb=document.getElementById("navbar"),c=D.card.ctl.bar;
   if(nb&&inCard){nb.innerHTML=navbar();var vis=D.card.sections.filter(shownOnBar);
@@ -151,7 +143,7 @@ scr.addEventListener("scroll",function(){if(ui.view!=="card")return;var nb=docum
 ph.addEventListener("click",function(e){var t=e.target;
   var ch=t.closest(".chrome i, .topband i");if(ch&&ui.view==="card"&&ch.querySelector("svg")&&ch.innerHTML.indexOf("M4 7h9")>=0){e.stopPropagation();setOverlay("settings",!overlayOn("settings"));renderPhone(true);return}
   if(t.closest("[data-vset-close]")){e.stopPropagation();setOverlay("settings",false);renderPhone(true);return}
-  var vo=t.closest("[data-vis]");if(vo){e.stopPropagation();var p=vo.dataset.vis.split("|");if(p[0]==="lang"){P.lang=p[1]}else if(p[0]==="mode"){P.vis.mode=p[1];P.dark=p[1]==="dark"||(p[1]==="phone"&&D.card.cardCfg.mode==="dark")}else if(p[0]==="motion"){P.vis.motion=p[1];P.reduce=p[1]==="reduced"||D.card.motionLevel==="reduced"}else if(p[0]==="feedback"){P.vis.feedback=p[1]==="true"}else P.vis[p[0]]=p[1];emit("profileChanged",p[0]);renderAll(true);return}
+  var vo=t.closest("[data-vis]");if(vo){e.stopPropagation();var p=vo.dataset.vis.split("|");if(p[0]==="lang"){P.lang=p[1]}else if(p[0]==="motion"){P.vis.motion=p[1];P.reduce=p[1]==="reduced"||D.wall.theme.motion==="reduced"}else if(p[0]==="feedback"){P.vis.feedback=p[1]==="true"}else P.vis[p[0]]=p[1];emit("profileChanged",p[0]);renderAll(true);return}
   if(t.closest("[data-navmore]")){e.stopPropagation();setOverlay("contents",true);renderPhone(true);return}
   if(t.closest("[data-csheet-close]")){e.stopPropagation();setOverlay("contents",false);renderPhone(true);return}
   var cr=t.closest(".csheet .crow.sec");if(cr){e.stopPropagation();setOverlay("contents",false);renderPhone(true);return}
@@ -163,7 +155,7 @@ on("gloss.html",function(h){if(D.card.ctl.term.underline!=="first")return h;ui._
 on("storyScreen.before",function(){ui._gseen={}});
 ph.addEventListener("click",function(e){var g=e.target.closest(".gterm");if(!g||D.card.ctl.term.opens!=="under")return;setTimeout(function(){var p=ph.querySelector(".gpop");if(!p)return;var par=g.closest("p,.el-par,.el-lede")||g.parentNode;p.classList.add("under");par.insertAdjacentElement("afterend",p)},0)});
 on("modelSig.before",function(cx){var keep=ui.view;viewAs("card");var x=(sigWant(/langs|vis/)?settingsPanel():"")+(sigWant(/D\.card\.ctl\.contents|mins/)?contentsSheet():"");viewAs(keep);cx.panels=x});
-on("modelSig.sig",function(s,cx){return s+cx.panels+JSON.stringify({full:stopTop("full"),peek:stopTop("peek"),acc:D.card.cardCfg.accent,round:D.card.cardCfg.round,strips:D.card.cardCfg.strips,ml:D.card.motionLevel,
+on("modelSig.sig",function(s,cx){return s+cx.panels+JSON.stringify({full:stopTop("full"),peek:stopTop("peek"),theme:themeClasses(),strips:D.card.cardCfg.strips,
     bar:[D.card.ctl.bar.shape,D.card.ctl.bar.fill,D.card.ctl.bar.minBlocks<=D.poi.card.length,D.card.ctl.bar.showAt,D.card.ctl.bar.showFrom,D.card.ctl.bar.pos]})});
 BEHAVIOUR=new RegExp(BEHAVIOUR.source.replace("^@?(","^@?(D\\.card\\.cardCfg\\.(backBtn|openOne|earbuds|lockScreen|resume|audioOverlap)|D\\.card\\.ctl\\.(stickySlide|term\\.opens)|"));
 delete D.card.cardCfg.peekNext;
@@ -174,9 +166,6 @@ var CTL_DEMOS={
   "D.card.cardCfg.halfMax":{stop:"half",wait:0,ring:"#grab|.hero"},
   "D.card.cardCfg.fullHeight":{stop:"full",wait:0,ring:".chrome|.hero"},
   "D.card.cardCfg.tapOutside":{stop:"half",wait:0,act:function(){var c=ph.querySelector("#camera");if(c)c.dispatchEvent(new MouseEvent("click",{bubbles:true}))},ringAfter:300,ring:function(){return ui.stop==="closed"?"#wall":".hero"}},
-  "D.card.cardCfg.mode":{stop:"full",wait:0,scroll:".gsec",ring:".gsec"},
-  "D.card.cardCfg.accent":{block:"Story",wait:0,scroll:function(){return blockAt("Story").sel.split("|")[0]+" .open"},ring:function(){return blockAt("Story").sel.split("|")[0]+" .open"}},
-  "D.card.cardCfg.round":{block:"Story",wait:0},
   "D.card.cardCfg.openOne":{block:"Practical Info",wait:0,act:function(){var e=phFind(blockAt("Practical Info").sel),x=e&&e.querySelector("[data-expand]");if(x)x.click()}},
   "D.card.cardCfg.topBand":{stop:"full",past:true,wait:0,ring:".topband"},
   "D.card.cardCfg.strips":{block:"Gallery",wait:0},
@@ -188,7 +177,6 @@ var CTL_DEMOS={
   "D.card.secCfg.divider":{stop:"full",wait:0,scroll:secSel("about"),ring:secSel("about")+" .el-div|"+secSel("about")},
   "D.card.secCfg.colour":{stop:"full",wait:0,scroll:secSel("stories"),ring:secSel("stories")},"D.card.secCfg.intensity":{stop:"full",wait:0,scroll:secSel("stories"),ring:secSel("stories")},
   "D.card.secCfg.nextUp":{stop:"full",wait:0,scroll:".nextup|"+secSel("about"),ring:".nextup|"+secSel("about")},
-  "D.card.motionLevel":{stop:"full",wait:0,scroll:secSel("stories"),ring:secSel("stories")+" .sstart|"+secSel("stories")},
   "D.card.ctl.bar.minBlocks":{stop:"full",past:true,wait:0,ring:barRing},"D.card.ctl.bar.showAt":{stop:"half",past:true,wait:0,ring:barRing},
   "D.card.ctl.bar.showFrom":{stop:"full",wait:0,ring:function(){return barRing()==="#navbar"?"#navbar":".hero"}},
   "D.card.ctl.bar.more":{stop:"full",past:true,wait:0,ring:"#navbar [data-navmore]|#navbar"},

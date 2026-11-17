@@ -8,8 +8,9 @@
 .gbtn-wrap.onwall{bottom:22px}
 .gbtn-wrap.intour{z-index:15;align-items:center}
 /* the ✦: the dock's dark, a light rim (it stands out on a dark card or a busy wall), the ✦ in the dock's gold */
-.gbtn{position:relative;appearance:none;display:flex;align-items:center;height:48px;min-width:48px;padding:0 12px;border-radius:24px;border:2px solid #F4F1EA;background:#16181C;color:#F4F1EA;font:700 15px/1 var(--body);cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.32);box-sizing:border-box}
-.gb-ic{display:grid;place-items:center;width:20px;height:20px;flex:none}.gb-ic svg{width:22px;height:22px;fill:#FFD98A}
+.gbtn{position:relative;appearance:none;display:flex;align-items:center;height:48px;min-width:48px;padding:0 12px;border-radius:var(--ts-radius-pill);border:var(--ts-line-width) solid var(--ts-line);background:var(--ts-action-button);color:var(--ts-ink);font:700 var(--ts-size-chip)/1 var(--ts-font-body);cursor:pointer;box-shadow:0 6px 16px var(--ts-elevation-1);box-sizing:border-box;
+  /* W's action button (its ground, the ink, the accent's mark), with Unity's meaningful border (--ts-line, 4.5:1): it sits on the card's paper as well as on the camera; unity: sprite (its soft shadow) */}
+.gb-ic{display:grid;place-items:center;width:20px;height:20px;flex:none}.gb-ic svg{width:22px;height:22px;fill:var(--ts-accent)}
 .gbtn.ic-face .gb-ic svg{width:24px;height:24px}
 .gb-lab{display:inline-block;max-width:90px;margin-left:8px;white-space:nowrap;overflow:hidden;transition:max-width .35s ease,opacity .25s ease,margin .35s ease}
 .gb-lab.fold{max-width:0;opacity:0;margin-left:0}
@@ -19,7 +20,7 @@
 .gbtn.tour .gb-lab{display:none}.gbtn.tour .gb-ic svg{width:24px;height:24px}
 .gbtn.ic-word.tour{width:auto;padding:0 16px;border-radius:28px;overflow:hidden}.gbtn.ic-word.tour .gb-lab{display:inline-block}
 .gb-ring{position:absolute;left:-2px;top:-2px;width:56px;height:56px;transform:rotate(-90deg);pointer-events:none}
-.gb-ring circle{fill:none;stroke-width:3.5}.gb-ring .tr{stroke:rgba(244,241,234,.24)}.gb-ring .pg{stroke:#FFD98A;stroke-linecap:round;transition:stroke-dasharray .3s linear}
+.gb-ring circle{fill:none;stroke-width:3.5}.gb-ring .tr{stroke:var(--ts-hair)}.gb-ring .pg{stroke:var(--ts-accent);stroke-linecap:round;transition:stroke-dasharray .3s linear}
 .gb-bar{position:absolute;left:0;bottom:0;height:4px;background:#FFD98A;transition:width .3s linear}
 .gb-pause{appearance:none;width:48px;height:48px;border-radius:50%;border:2px solid #F4F1EA;background:#16181C;color:#F4F1EA;display:grid;place-items:center;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.32);box-sizing:border-box}
 .gb-pause svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
@@ -40,11 +41,11 @@
 
 /* (guidance round 7) the band of the card's paper behind the ✦ and Azu on the card: the words scroll away under it, never under the ✦ (Unity: a
    VisualElement with the card's colour and a ramp texture on its top edge; the Lab's gradient stands in for that texture) */
-.gbband{position:absolute;left:0;right:0;bottom:0;z-index:5;pointer-events:none;background:linear-gradient(to bottom,rgba(0,0,0,0),var(--paper) 20px)}
-.gbband.tour{background:linear-gradient(to bottom,rgba(0,0,0,0),var(--gbband,var(--paper)) 20px)}
+.gbband{position:absolute;left:0;right:0;bottom:0;z-index:5;pointer-events:none;background:linear-gradient(to bottom,rgba(0,0,0,0),var(--ts-sheet-open) 20px)}
+.gbband.tour{background:linear-gradient(to bottom,rgba(0,0,0,0),var(--gbband,var(--ts-sheet-open)) 20px)}
 /* round 11: the visitor's music in Settings › The guide: its feelings, its volume, a credit line where a licence asks for one */
-.vmusic{margin-top:10px}.vmusic>small,.vcredits>small{display:block;font:700 12px/1.3 var(--body);color:var(--ink2);margin:0 0 6px}
-.vmusic .vcredit{display:block;text-transform:none;letter-spacing:0;font:400 12px/1.4 var(--body);color:var(--ink2);margin-top:6px}
-.vmusic .vvol{display:flex;align-items:center;gap:10px;margin-top:8px;font:600 13px/1.2 var(--body);color:var(--ink1);min-height:44px}
+.vmusic{margin-top:10px}.vmusic>small,.vcredits>small{display:block;font:700 12px/1.3 var(--body);color:var(--ts-ink-2);margin:0 0 6px}
+.vmusic .vcredit{display:block;text-transform:none;letter-spacing:0;font:400 12px/1.4 var(--body);color:var(--ts-ink-2);margin-top:6px}
+.vmusic .vvol{display:flex;align-items:center;gap:10px;margin-top:8px;font:600 13px/1.2 var(--body);color:var(--ts-ink);min-height:44px}
 .vmusic .vvol input{flex:1;accent-color:#A63F1C;height:44px}
-.vcredits{margin-top:10px}.vcredits p{margin:0 0 4px;font:400 12px/1.4 var(--body);color:var(--ink2)}
+.vcredits{margin-top:10px}.vcredits p{margin:0 0 4px;font:400 12px/1.4 var(--body);color:var(--ts-ink-2)}

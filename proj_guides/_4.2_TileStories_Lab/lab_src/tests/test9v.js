@@ -37,7 +37,7 @@ const url = labUrl('#probe');
   const MUT = 'teAskEnter=function(){teClose(false);ui.view="card";ui.stop="full";startTour();pauseTour();G.askOpen=true;ui.dockH="full";renderGuide()};tePlayed=function(){return false};teAnswered=function(){return false};teDist=function(){return 0};teOpenPaused=function(){};""';
   const load = async () => { await p.goto('about:blank'); await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 150000 }); await W(400); if (process.env.MUTATE) await R(MUT); await R(require('./g15lib.js')); };
   if (process.env.MUTATE) console.log('MUTATION: Ask restarts the tour, the quiz never played, the answered rule off, no distances, the Stop bar\'s What next? does nothing');
-  const base = `ui.device="phone_p";DEVICES.phone_p.h=844;if(G.on)stopTour();LAB.previewBar=false;D.card.hints.on=false;D.guidance.on=false;P.lang="en";P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;D.card.cardCfg.mode="light";
+  const base = `ui.device="phone_p";DEVICES.phone_p.h=844;if(G.on)stopTour();LAB.previewBar=false;D.card.hints.on=false;D.guidance.on=false;P.lang="en";P.guideMute=true;P.introSeen=true;P.reduce=false;P.vis.mode="phone";D.wall.theme.mode="light";
     D.guide.voice="device";D.guide.look="ink";LAB.rowDemo=false;D.guide.music=false;P.vis.music=null;P.vis.speed=2;D.agent.voiceOut=false;G.gd.manual=true;D.guide.dockStart="mini";gdPrefs().games="off";
     window.__calls=[];sampleFn=function(pr){window.__calls.push(String(pr));return Promise.resolve({text:"A stub answer."})};D.guide.ask="ai";renderAll(true);""`;
   const DEF = await (async () => { await load(); await R(base); return R('JSON.stringify({teOn:D.guide.teOn,teWhere:D.guide.teWhere,teBlock:D.guide.teBlock,teStart:D.guide.teStart,teSec:D.guide.teSec,teOrder:D.guide.teOrder,teQsN:D.guide.teQsN,teQsSrc:D.guide.teQsSrc,teQs:D.guide.teQs,teNearN:D.guide.teNearN,teNearRule:D.guide.teNearRule,tePicks:D.guide.tePicks})'); })();
@@ -71,7 +71,7 @@ const url = labUrl('#probe');
   const warm = t => /\?$/.test(t) && !/^Now\b/.test(t) && t.split(/\s+/).length <= 20;
   const PANEL = [];
   for (const dark of [false, true]) {
-    await R(`P.dark=${dark};D.card.cardCfg.mode="${dark ? 'dark' : 'light'}";renderAll(true);""`);
+    await R(`P.vis.mode="${(dark) ? 'dark' : 'phone'}";D.wall.theme.mode="${dark ? 'dark' : 'light'}";renderAll(true);""`);
     await toEnd();
     const m = JSON.parse(await R(`(function(){var pn=ph.querySelector(".tepanel"),nb=document.getElementById("navbar"),b=ph.querySelector(".tebub"),P=ph.getBoundingClientRect(),q=P.height/ph.offsetHeight,R0=function(e){var r=e.getBoundingClientRect();return{t:(r.top-P.top)/q,b:(r.bottom-P.top)/q,l:(r.left-P.left)/q,r:(r.right-P.left)/q,w:r.width/q,h:r.height/q}};
       var pr=R0(pn),nr=nb&&getComputedStyle(nb).display!=="none"?R0(nb):null,tg=[];
@@ -92,7 +92,7 @@ const url = labUrl('#probe');
     }
   }
   const b1 = PANEL[0].bub, b2 = PANEL[1].bub;
-  await R('P.dark=false;D.card.cardCfg.mode="light";P.lang="pt";renderAll(true);""'); await toEnd(); const bpt = await R('window.__bub||""');
+  await R('P.vis.mode="phone";D.wall.theme.mode="light";P.lang="pt";renderAll(true);""'); await toEnd(); const bpt = await R('window.__bub||""');
   await R('P.lang="en";renderAll(true);""');
   ok('[asks] never the same line twice in a row (two ends here), and in Portuguese a line of the set', b1 !== b2 && isLine(b2, 'en') && isLine(bpt, 'pt') && warm(bpt), { b1, b2, bpt });
   tsec('panel');
@@ -172,13 +172,13 @@ const url = labUrl('#probe');
     await R('ui.dockH="peek";renderGuide();""'); await p.click('#ph .gdock [data-g="stop"]'); await until('!G.on&&!!ph.querySelector(".gtoast")', 3000); return R('JSON.stringify(G.resumeAt?{id:G.resumeAt.id}:{})').then(JSON.parse); };
   const SB = [];
   for (const dark of [false, true]) {
-    await R(`P.dark=${dark};D.card.cardCfg.mode="${dark ? 'dark' : 'light'}";renderAll(true);""`); const at = await stopAt();
+    await R(`P.vis.mode="${(dark) ? 'dark' : 'phone'}";D.wall.theme.mode="${dark ? 'dark' : 'light'}";renderAll(true);""`); const at = await stopAt();
     await until('!document.getAnimations().some(function(a){var t=a.effect&&a.effect.target;return a.playState==="running"&&!!t&&!!t.closest&&!!t.closest(".gtoast")})', 2000);
     const t = JSON.parse(await R('JSON.stringify([".gtcont",".gtagain",".gtnext"].map(function(s){var e=ph.querySelector(".gtoast "+s);if(!e)return null;var r=e.getBoundingClientRect(),q=ph.getBoundingClientRect().height/ph.offsetHeight,cx=r.left+r.width/2,cy=r.top+r.height/2,h=document.elementFromPoint(cx,cy);return{t:e.textContent.replace(/\\s+/g," "),h:r.height/q,w:r.width/q,hit:!!h&&(h===e||e.contains(h))}}))'));
     const low = await R('JSON.stringify(G15.text(".gtoast").filter(function(x){return x.cr<4.5}))');
     SB.push({ dark, at, t, low });
   }
-  await R('P.dark=false;D.card.cardCfg.mode="light";renderAll(true);""');
+  await R('P.vis.mode="phone";D.wall.theme.mode="light";renderAll(true);""');
   ok('[stop bar] three choices, each 44 px tall and hit at its centre, its words 4.5:1, light and dark: "Continue the tour (step N of M)", "Start again", "What next?"',
     SB.every(s => s.t.every(x => x && x.h >= 43.5 && x.w >= 43.5 && x.hit) && /^Continue the tour \(step \d+ of \d+\)$/.test(s.t[0].t) && s.t[1].t === 'Start again' && s.t[2].t === 'What next?' && s.low === '[]'), SB);
   let at = await stopAt(); await p.click('#ph .gtoast .gtcont'); const c1 = await until(`G.on&&D.tour.guideSteps[G.i].id==="${at.id}"`, 4000); await R('stopTour();""');

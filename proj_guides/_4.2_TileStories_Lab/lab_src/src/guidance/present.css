@@ -1,9 +1,9 @@
-/* Guidance, the look: the tip's bubble (the dock's paper, --ink1 on --paper: 7:1 and more, light and dark), its tail, the ring on the
+/* Guidance, the look: the tip's bubble (the dock's paper, --ts-ink on --ts-sheet-open, 7:1 and more, light and dark), its tail, the ring on the
    marker, Azu's pointer, the Editor's ×10 chip. Unity: the bubble a 9-slice VisualElement (USS transitions on scale and opacity), the
    tail a child rotated 45° (USS rotate), the ring a VisualElement with border-radius and two borders, the pulse a USS transition on
    scale; Azu's move a translate tween; the drop shadows are depth only (a 9-slice shadow sprite). */
-.gdbub{position:absolute;z-index:14;width:max-content;max-width:calc(100% - 24px);box-sizing:border-box;background:var(--paper);color:var(--ink1);border-radius:16px;
-  box-shadow:0 8px 22px rgba(0,0,0,.3),0 0 0 1px var(--hair)}
+.gdbub{position:absolute;z-index:14;width:max-content;max-width:calc(100% - 24px);box-sizing:border-box;background:var(--ts-sheet-open);color:var(--ts-ink);border-radius:16px;
+  box-shadow:0 8px 22px rgba(0,0,0,.3),0 0 0 1px var(--ts-hair)}
 .gdbub button{appearance:none;display:block;width:100%;min-height:44px;border:0;background:none;color:inherit;font:600 14px/1.38 var(--body);text-align:left;padding:11px 14px;cursor:pointer;border-radius:16px}
 /* round 15b: the signed bubble (no Azu beside it: Mascot Off, or Guide button = ✦ only): the ✦ button's own look at 20 px (its dark disc, light rim and gold ✦: seen on the light and the
    dark paper), inside the top-left corner, level with the first line; the words start 8 px after it. Unity: the child VisualElement's USS
@@ -11,14 +11,14 @@
 .gdbub .gdsign{position:absolute;left:11px;top:11px;z-index:1;width:20px;height:20px;box-sizing:border-box;display:grid;place-items:center;border-radius:50%;background:#16181C;border:1.5px solid #F4F1EA;pointer-events:none}
 .gdbub .gdsign svg{width:12px;height:12px;fill:#FFD98A}
 .gdbub .gdsign+button[data-gdbub]{padding-left:39px}
-/* Azu's remark: a › after its words says a tap does more (Unity: a second Label, the glyph in --accent2); narrower, so its two lines
+/* Azu's remark: a › after its words says a tap does more (Unity: a second Label, the glyph in --ts-accent); narrower, so its two lines
    share the words (no word left alone on the second; Unity: the same max-width in USS) */
 .gdbub.gd-more{max-width:min(296px,calc(100% - 24px))}
-.gdbub.gd-more button::after{content:"\00a0\203A";color:var(--accent2);font-weight:800}
+.gdbub.gd-more button::after{content:"\00a0\203A";color:var(--ts-accent);font-weight:800}
 .gdbub.gd-in{animation:gdin .22s cubic-bezier(.2,.8,.2,1)}
 .gdbub.gd-out{opacity:0;transform:scale(.97);transition:opacity .16s ease,transform .16s ease,translate .16s ease}
 @keyframes gdin{from{opacity:0;transform:scale(.94)}}
-.gdtail{position:absolute;width:14px;height:14px;background:var(--paper);rotate:45deg;border-radius:2px;pointer-events:none}
+.gdtail{position:absolute;width:14px;height:14px;background:var(--ts-sheet-open);rotate:45deg;border-radius:2px;pointer-events:none}
 .gdbub[data-tail="down"] .gdtail{bottom:-6px;box-shadow:3px 3px 4px -2px rgba(0,0,0,.18)}
 .gdbub[data-tail="up"] .gdtail{top:-6px}
 .gdbub[data-tail="left"] .gdtail{left:-6px}
@@ -38,18 +38,18 @@
    reversed, 7:1 and more, a 44 px target. Unity: a second Button in the bubble, its USS the chips' */
 .gdbub.gd-cta{max-width:min(300px,calc(100% - 24px))}
 .gdbub.gd-cta button[data-gdbub]{padding-bottom:4px}
-.gdbub button.gdcta{display:inline-flex;align-items:center;gap:6px;width:auto;min-height:44px;margin:4px 12px 12px;padding:0 16px 0 18px;border-radius:999px;background:var(--ink1);color:var(--paper);font:700 14px/1 var(--body)}
+.gdbub button.gdcta{display:inline-flex;align-items:center;gap:6px;width:auto;min-height:44px;margin:4px 12px 12px;padding:0 16px 0 18px;border-radius:999px;background:var(--ts-ink);color:var(--ts-sheet-open);font:700 14px/1 var(--body)}
 .gdbub button.gdcta span{font-size:17px;line-height:1;margin-top:-2px}
 /* a spoken tip: the word being said is lit (a highlighter behind it, the words still 7:1 on it) */
 .gdbub .gdw{border-radius:4px}
 .gdbub .gdw.on{background:#F2DFA6;box-shadow:0 0 0 2px #F2DFA6}
-.dark .gdbub .gdw.on{background:#4A3D18;box-shadow:0 0 0 2px #4A3D18}
+.ts-mode-dark .gdbub .gdw.on{background:#4A3D18;box-shadow:0 0 0 2px #4A3D18}
 /* a long press: Fewer like this? with its two answers, each a 44 px target */
 .gdfewer{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;padding:8px 8px 8px 14px}
-.gdfewer .gdfq{font:600 14px/1.3 var(--body);color:var(--ink1)}
+.gdfewer .gdfq{font:600 14px/1.3 var(--body);color:var(--ts-ink)}
 .gdfewer .gdfb{display:flex;gap:6px;margin-left:auto}
-.gdbub .gdfewer button{display:inline-block;width:auto;min-width:64px;min-height:44px;padding:0 14px;border-radius:999px;text-align:center;font:700 14px/1 var(--body);border:1px solid var(--hair);background:var(--box);color:var(--ink1)}
-.gdbub .gdfewer button[data-gdfewer="yes"]{background:var(--ink1);color:var(--paper);border-color:var(--ink1)}
+.gdbub .gdfewer button{display:inline-block;width:auto;min-width:64px;min-height:44px;padding:0 14px;border-radius:999px;text-align:center;font:700 14px/1 var(--body);border:1px solid var(--ts-hair);background:var(--ts-surface-2);color:var(--ts-ink)}
+.gdbub .gdfewer button[data-gdfewer="yes"]{background:var(--ts-ink);color:var(--ts-sheet-open);border-color:var(--ts-ink)}
 
 /* Azu pointing: the still picture leans towards the marker and a small pointer sits at the ring (the 3D model plays its point clip) */
 .gdpoint{position:absolute;z-index:12;width:16px;height:16px;margin:-8px 0 0 -8px;pointer-events:none}
@@ -79,12 +79,12 @@
 .gdripple{position:absolute;z-index:11;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;border:3px solid rgba(255,255,255,.95);box-shadow:0 0 0 2px rgba(22,24,28,.55);pointer-events:none;opacity:0}
 /* a tip that stays until tapped: its close button (44 px), the words keep their room */
 .gdbub.gd-stay button[data-gdbub]{padding-right:46px}
-.gdbub button.gdx{position:absolute;top:0;right:0;width:44px;min-height:44px;height:44px;padding:0;display:flex;align-items:center;justify-content:center;font:700 15px/1 var(--body);color:var(--ink2,var(--ink1));border-radius:0 16px 0 12px}
+.gdbub button.gdx{position:absolute;top:0;right:0;width:44px;min-height:44px;height:44px;padding:0;display:flex;align-items:center;justify-content:center;font:700 15px/1 var(--body);color:var(--ink2,var(--ts-ink));border-radius:0 16px 0 12px}
 /* the toast after Show the tips again (the Stop toast's look), above the Settings panel */
 .gtoast.gdtoast{z-index:30;top:56px;bottom:auto}
 /* Settings › The guide › Tips */
 .vset .vtips{margin-top:4px}
-.vset .vagain{display:block;width:100%;margin-top:14px;appearance:none;border:1px solid var(--hair,rgba(0,0,0,.15));background:transparent;color:inherit;font:700 14px/1 var(--body);padding:12px;border-radius:12px;text-align:left;cursor:pointer}
+.vset .vagain{display:block;width:100%;margin-top:14px;appearance:none;border:1px solid var(--ts-hair,rgba(0,0,0,.15));background:transparent;color:inherit;font:700 14px/1 var(--body);padding:12px;border-radius:12px;text-align:left;cursor:pointer}
 .vset .vnote{margin:6px 2px 0;font:500 13px/1.35 var(--body);color:var(--ink2,inherit)}
 /* the dock's conversation: the tips shown this visit, under Tips */
 .gm-tips{flex:none;align-self:stretch;padding:10px 12px;border-radius:14px;background:rgba(255,217,138,.08);border:1px solid rgba(255,217,138,.32);color:#F4F1EA}
@@ -96,40 +96,40 @@
    the top; one focal point in the middle (Azu, the camera's mark); the buttons and Skip at the foot, in the thumb's reach. Colours are
    the card's tokens, set light and dark (no runtime mixing): Unity USS variables in the two theme style sheets. The phone's request and
    its Settings are stand-ins drawn as the system's (Unity: the platform's own UI, never drawn by the app) */
-.gdpages{position:absolute;inset:0;z-index:19;display:flex;flex-direction:column;background:var(--paper);color:var(--ink1);--pgtint:#E5ECF6;--pgedge:rgba(26,24,20,.34);--pgdot:rgba(26,24,20,.16)}
-.cv.dark .gdpages{--pgtint:#1C2433;--pgedge:rgba(241,238,232,.4);--pgdot:rgba(241,238,232,.2)}
+.gdpages{position:absolute;inset:0;z-index:19;display:flex;flex-direction:column;background:var(--ts-sheet-open);color:var(--ts-ink);--pgtint:#E5ECF6;--pgedge:rgba(26,24,20,.34);--pgdot:rgba(26,24,20,.16)}
+.ts-app.ts-mode-dark .gdpages{--pgtint:#1C2433;--pgedge:rgba(241,238,232,.4);--pgdot:rgba(241,238,232,.2)}
 .gdpages:focus,.gdpg-alert:focus,.gdpg-set:focus{outline:none}
 .gdpages.gd-out{opacity:0;transition:opacity .2s ease;pointer-events:none}
 .gdpg-top{position:relative;z-index:32;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;margin:50px 20px 0}
 .gdpg-dots{display:flex;gap:6px;align-items:center}
 .gdpg-dots i{display:block;width:16px;height:4px;border-radius:2px;background:var(--pgdot)}
-.gdpg-dots i.done{background:var(--ink2)}
-.gdpg-dots i.on{width:28px;background:var(--accent2)}
+.gdpg-dots i.done{background:var(--ts-ink-2)}
+.gdpg-dots i.on{width:28px;background:var(--ts-accent)}
 .gdpg-lang{display:flex;border:1.5px solid var(--pgedge);border-radius:999px;padding:2px}
-.gdpg-lang button{appearance:none;border:0;background:none;color:var(--ink1);font:700 14px/1 var(--body);letter-spacing:.04em;min-width:52px;min-height:44px;border-radius:999px;cursor:pointer}
-.gdpg-lang button[aria-pressed="true"]{background:var(--ink1);color:var(--paper)}
+.gdpg-lang button{appearance:none;border:0;background:none;color:var(--ts-ink);font:700 14px/1 var(--body);letter-spacing:.04em;min-width:52px;min-height:44px;border-radius:999px;cursor:pointer}
+.gdpg-lang button[aria-pressed="true"]{background:var(--ts-ink);color:var(--ts-sheet-open)}
 .gdpg-body{flex:1;min-height:0;display:flex;flex-direction:column;padding:0 24px 30px}
 .gdpg-mid{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding-bottom:12px}
-.gdpg-t{font:600 40px/1.06 var(--display);letter-spacing:-.01em;margin:0 0 12px;color:var(--ink1);text-wrap:balance}
-.gdpg-l{font:400 19px/1.42 var(--body);color:var(--ink2);margin:0;max-width:310px;text-wrap:balance}
+.gdpg-t{font:600 40px/1.06 var(--ts-font-display);letter-spacing:-.01em;margin:0 0 12px;color:var(--ts-ink);text-wrap:balance}
+.gdpg-l{font:400 19px/1.42 var(--body);color:var(--ts-ink-2);margin:0;max-width:310px;text-wrap:balance}
 .gdpages[data-page="camera"] .gdpg-t{font-size:32px}
 .gdpg-foot{display:flex;flex-direction:column;gap:10px}
 .gdpg-b{appearance:none;width:100%;min-height:54px;border-radius:16px;font:700 17px/1.2 var(--body);padding:12px 18px;cursor:pointer;border:1.5px solid transparent}
-.gdpg-pri{background:var(--accent2);color:var(--paper)}
-.gdpg-sec{background:transparent;color:var(--ink1);border-color:var(--pgedge)}
+.gdpg-pri{background:var(--ts-accent);color:var(--ts-sheet-open)}
+.gdpg-sec{background:transparent;color:var(--ts-ink);border-color:var(--pgedge)}
 .gdpg-b:active{transform:scale(.985)}
-.gdpg-skip{appearance:none;align-self:center;border:0;background:none;color:var(--ink1);font:600 15px/1 var(--body);min-height:44px;min-width:88px;padding:0 16px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.gdpg-skip{appearance:none;align-self:center;border:0;background:none;color:var(--ts-ink);font:600 15px/1 var(--body);min-height:44px;min-width:88px;padding:0 16px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 /* Hello's Azu: the tile it forms from, and Azu (still: no tile) */
 .gdpg-art{position:relative;width:150px;height:150px;margin-bottom:22px}
-.gdpg-tile{position:absolute;inset:18px;color:var(--accent2);border-radius:20px;overflow:hidden;background:var(--paper);box-shadow:0 0 0 1.5px var(--pgedge)}
+.gdpg-tile{position:absolute;inset:18px;color:var(--ts-accent);border-radius:20px;overflow:hidden;background:var(--ts-sheet-open);box-shadow:0 0 0 1.5px var(--pgedge)}
 .gdpg-tile svg{display:block;width:100%;height:100%}
 .gdpg-art.gd-formed .gdpg-tile,.gdpg-art[data-azu="still"] .gdpg-tile,.gdpg-art[data-azu="appear"] .gdpg-tile{opacity:0}
 .gdpg-azu{position:absolute;inset:0;display:grid;place-items:center;transform-origin:50% 90%}
 .gdpg-azu img,.gdpg-azu svg{display:block;width:142px;height:142px;object-fit:contain}
 /* the camera's mark: the camera in a soft tile of the accent; refused: crossed, in the second ink */
 .gdpg-cam{width:116px;height:116px;border-radius:30px;background:var(--pgtint);display:grid;place-items:center;margin-bottom:28px}
-.gdpg-cam svg{width:58px;height:58px;fill:none;stroke:var(--accent2);stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round}
-.gdpg-cam.off{background:var(--box)}.gdpg-cam.off svg{stroke:var(--ink2)}
+.gdpg-cam svg{width:58px;height:58px;fill:none;stroke:var(--ts-accent);stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round}
+.gdpg-cam.off{background:var(--ts-surface-2)}.gdpg-cam.off svg{stroke:var(--ts-ink-2)}
 /* the Who's exploring page: the audiences' own screen in the layer, under the progress */
 .gdpg-stage{position:absolute;inset:0}
 .gdpg-stage .onb{animation:none}
@@ -144,18 +144,18 @@
 .gdpg-abtn{display:flex;border-top:1px solid rgba(60,60,67,.29)}
 .gdpg-abtn button{flex:1;min-height:44px;appearance:none;border:0;background:none;color:#0A58C2;font:400 17px/1.2 system-ui,-apple-system,"Segoe UI",sans-serif;cursor:pointer}
 .gdpg-abtn button+button{border-left:1px solid rgba(60,60,67,.29);font-weight:600}
-.cv.dark .gdpg-alert{background:#2C2C2E;color:#fff}.cv.dark .gdpg-abtn{border-color:rgba(84,84,88,.65)}.cv.dark .gdpg-abtn button{color:#5AA9FF}.cv.dark .gdpg-abtn button+button{border-color:rgba(84,84,88,.65)}
+.ts-app.ts-mode-dark .gdpg-alert{background:#2C2C2E;color:#fff}.ts-app.ts-mode-dark .gdpg-abtn{border-color:rgba(84,84,88,.65)}.ts-app.ts-mode-dark .gdpg-abtn button{color:#5AA9FF}.ts-app.ts-mode-dark .gdpg-abtn button+button{border-color:rgba(84,84,88,.65)}
 .gdpg-standin{position:relative;background:#16181C;color:#F4F1EA;font:700 12px/1.2 var(--body);padding:8px 12px;border-radius:999px;max-width:300px;text-align:center}
 .gdpg-set{position:absolute;inset:0;z-index:40;display:flex;flex-direction:column;background:#F2F2F7;color:#000;padding:50px 16px 0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
-.cv.dark .gdpg-set{background:#000;color:#fff}
+.ts-app.ts-mode-dark .gdpg-set{background:#000;color:#fff}
 .gdpg-setback{appearance:none;align-self:flex-start;border:0;background:none;color:#0A58C2;font:400 17px/1 system-ui,-apple-system,"Segoe UI",sans-serif;min-height:44px;padding:0 8px 0 0;cursor:pointer}
-.cv.dark .gdpg-setback{color:#5AA9FF}
+.ts-app.ts-mode-dark .gdpg-setback{color:#5AA9FF}
 .gdpg-setback span{font-size:28px;line-height:0;vertical-align:-3px;margin-right:2px}
 .gdpg-set h3{font-size:32px;line-height:1.1;font-weight:700;margin:6px 0 22px}
 .gdpg-set small{font-size:13px;text-transform:uppercase;letter-spacing:.02em;color:#56565C;margin:0 0 6px 16px}
-.cv.dark .gdpg-set small{color:#A1A1A8}
+.ts-app.ts-mode-dark .gdpg-set small{color:#A1A1A8}
 .gdpg-setrow{display:flex;align-items:center;justify-content:space-between;min-height:52px;padding:0 6px 0 16px;border-radius:12px;background:#fff;font-size:17px}
-.cv.dark .gdpg-setrow{background:#1C1C1E}
+.ts-app.ts-mode-dark .gdpg-setrow{background:#1C1C1E}
 .gdpg-sw{appearance:none;border:0;background:none;width:64px;height:44px;display:grid;place-items:center;cursor:pointer;padding:0}
 .gdpg-sw i{position:relative;display:block;width:51px;height:31px;border-radius:999px;background:#787880;transition:background .2s}
 .gdpg-sw i::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;transition:translate .2s}
@@ -165,25 +165,25 @@
 /* ----- round 9: Things to try, in the card's own look (Settings' and the Contents sheet's paper, hairlines and radius; the Contents
    sheet's tick). Unity: a UI Toolkit panel with the card's USS (background-color, border, border-radius 20px), a ListView of rows; the
    bar a VisualElement (width: the share done). The ✕ and Show me 44 px. ----- */
-.gdtry{position:absolute;left:10px;right:10px;bottom:10px;z-index:20;background:var(--paper);color:var(--ink1);border:1px solid var(--hair);border-radius:20px;padding:8px 8px 10px 18px;box-shadow:0 14px 34px rgba(0,0,0,.32);max-height:80%;overflow:auto;animation:gdtryin .22s cubic-bezier(.2,.8,.2,1)}
+.gdtry{position:absolute;left:10px;right:10px;bottom:10px;z-index:20;background:var(--ts-sheet-open);color:var(--ts-ink);border:1px solid var(--ts-hair);border-radius:20px;padding:8px 8px 10px 18px;box-shadow:0 14px 34px rgba(0,0,0,.32);max-height:80%;overflow:auto;animation:gdtryin .22s cubic-bezier(.2,.8,.2,1)}
 @keyframes gdtryin{from{opacity:0;translate:0 14px}}
-.gdtry-h{display:flex;align-items:center;justify-content:space-between}.gdtry-h b{font:600 18px/1.2 var(--display)}
-.gdtry-x{appearance:none;border:0;background:none;color:var(--ink1);width:44px;height:44px;border-radius:50%;font-size:15px;cursor:pointer;display:grid;place-items:center}
-.gdtry-x::before{content:"";position:absolute;width:34px;height:34px;border-radius:50%;background:var(--box);z-index:-1}.gdtry-x{position:relative;z-index:0}
-.gdtry-n{margin:2px 10px 0 0;font:600 14px/1.35 var(--body);color:var(--ink2)}.gdtry-n.all{color:var(--ink1)}
-.gdtry-bar{height:3px;margin:9px 10px 6px 0;border-radius:3px;background:var(--hair);overflow:hidden}.gdtry-bar i{display:block;height:100%;background:var(--ink1);border-radius:3px}
+.gdtry-h{display:flex;align-items:center;justify-content:space-between}.gdtry-h b{font:600 18px/1.2 var(--ts-font-display)}
+.gdtry-x{appearance:none;border:0;background:none;color:var(--ts-ink);width:44px;height:44px;border-radius:50%;font-size:15px;cursor:pointer;display:grid;place-items:center}
+.gdtry-x::before{content:"";position:absolute;width:34px;height:34px;border-radius:50%;background:var(--ts-surface-2);z-index:-1}.gdtry-x{position:relative;z-index:0}
+.gdtry-n{margin:2px 10px 0 0;font:600 14px/1.35 var(--body);color:var(--ts-ink-2)}.gdtry-n.all{color:var(--ts-ink)}
+.gdtry-bar{height:3px;margin:9px 10px 6px 0;border-radius:3px;background:var(--ts-hair);overflow:hidden}.gdtry-bar i{display:block;height:100%;background:var(--ts-ink);border-radius:3px}
 .gdtry-list{list-style:none;margin:0;padding:0}
-.gdtry-row{display:flex;align-items:center;gap:12px;min-height:52px;border-top:1px solid var(--hair)}.gdtry-row:first-child{border-top:0}
-.gdtry-tick{flex:none;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--hair);box-sizing:border-box;display:grid;place-items:center;font:700 12px/1 var(--body)}
-.gdtry-row.done .gdtry-tick{background:var(--ink1);border-color:var(--ink1);color:var(--paper)}
+.gdtry-row{display:flex;align-items:center;gap:12px;min-height:52px;border-top:1px solid var(--ts-hair)}.gdtry-row:first-child{border-top:0}
+.gdtry-tick{flex:none;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--ts-hair);box-sizing:border-box;display:grid;place-items:center;font:700 12px/1 var(--body)}
+.gdtry-row.done .gdtry-tick{background:var(--ts-ink);border-color:var(--ts-ink);color:var(--ts-sheet-open)}
 .gdtry-w{flex:1;min-width:0;font:500 15px/1.3 var(--body)}
-.gdtry-show{flex:none;appearance:none;border:0;background:transparent;color:var(--accent2);border-radius:12px;min-height:44px;padding:0 6px 0 14px;font:700 14px/1 var(--body);cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.gdtry-show{flex:none;appearance:none;border:0;background:transparent;color:var(--ts-accent);border-radius:12px;min-height:44px;padding:0 6px 0 14px;font:700 14px/1 var(--body);cursor:pointer;display:inline-flex;align-items:center;gap:5px}
 .gdtry-show span{font-size:19px;line-height:0}
-.gdtry-row.done .gdtry-show{color:var(--ink2);font-weight:600}
+.gdtry-row.done .gdtry-show{color:var(--ts-ink-2);font-weight:600}
 .reduce .gdtry{animation:none}
 /* Settings › The guide › Things to try › (the link: Show the tips again's look, a › at its end) */
-.vset .vtry{display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:8px;appearance:none;border:1px solid var(--hair,rgba(0,0,0,.15));background:transparent;color:inherit;font:700 14px/1 var(--body);padding:12px;min-height:44px;border-radius:12px;text-align:left;cursor:pointer}
-.vset .vtry span:last-child{font-size:18px;line-height:0;color:var(--ink2)}
+.vset .vtry{display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:8px;appearance:none;border:1px solid var(--ts-hair,rgba(0,0,0,.15));background:transparent;color:inherit;font:700 14px/1 var(--body);padding:12px;min-height:44px;border-radius:12px;text-align:left;cursor:pointer}
+.vset .vtry span:last-child{font-size:18px;line-height:0;color:var(--ts-ink-2)}
 /* Fewer like this's toast: its second line (on an App group: Things to try) */
 .gdtoast .gdtoast-try{display:block;margin-top:3px;font:500 13.5px/1.35 var(--body);color:rgba(244,241,234,.86)}
 .gtoast.gdtoast-2{padding:10px 12px 10px 16px}
@@ -210,18 +210,18 @@
 /* Ink glass (the default): the dock's dark glass, gold */
 :is(.gdbeat,.gdstrip).bt-ink{--bt-bg:#1C1A21;--bt-ink:#F4F1EA;--bt-ink2:#C9C2B6;--bt-acc:#F2B544;--bt-onacc:#16151A;--bt-acctx:#F2B544;--bt-hl:#F2B544;--bt-hltx:#16151A;--bt-chip:rgba(255,255,255,.08);--bt-line:rgba(255,255,255,.2);--bt-ok:#86DCA5;--bt-okbg:rgba(134,220,165,.14);--bt-no:#FFA494;--bt-nobg:rgba(255,164,148,.12);
   background-image:linear-gradient(180deg,#2C2834,#18171C 70%);border:1px solid rgba(255,255,255,.14);border-radius:30px;left:10px;right:10px}
-.cv.dark :is(.gdbeat,.gdstrip).bt-ink{border-color:rgba(255,255,255,.22);box-shadow:0 16px 36px rgba(0,0,0,.6)}
+.ts-app.ts-mode-dark :is(.gdbeat,.gdstrip).bt-ink{border-color:rgba(255,255,255,.22);box-shadow:0 16px 36px rgba(0,0,0,.6)}
 /* Paper glass: the card's paper */
 :is(.gdbeat,.gdstrip).bt-paper{border-radius:30px;box-shadow:0 14px 34px rgba(26,24,20,.18),inset 0 1px 0 rgba(255,255,255,.9)}
-.cv.dark :is(.gdbeat,.gdstrip).bt-paper{--bt-bg:#1F1D1A;--bt-ink:#F4F1EA;--bt-ink2:#C9C2B6;--bt-acctx:#F0A27E;--bt-hl:#7A3A1E;--bt-hltx:#FFFFFF;--bt-chip:#34302B;--bt-line:rgba(255,255,255,.2);--bt-ok:#86DCA5;--bt-okbg:rgba(134,220,165,.14);--bt-no:#FFA494;--bt-nobg:rgba(255,164,148,.12);box-shadow:0 14px 34px rgba(0,0,0,.5)}
+.ts-app.ts-mode-dark :is(.gdbeat,.gdstrip).bt-paper{--bt-bg:#1F1D1A;--bt-ink:#F4F1EA;--bt-ink2:#C9C2B6;--bt-acctx:#F0A27E;--bt-hl:#7A3A1E;--bt-hltx:#FFFFFF;--bt-chip:#34302B;--bt-line:rgba(255,255,255,.2);--bt-ok:#86DCA5;--bt-okbg:rgba(134,220,165,.14);--bt-no:#FFA494;--bt-nobg:rgba(255,164,148,.12);box-shadow:0 14px 34px rgba(0,0,0,.5)}
 /* Player sheet: white, a card's corners */
 :is(.gdbeat,.gdstrip).bt-player{--bt-bg:#FFFFFF;--bt-acc:#1A1814;--bt-chip:#F2EEE6;--bt-line:rgba(26,24,20,.14);border-radius:24px;border:1px solid rgba(26,24,20,.1)}
-.cv.dark :is(.gdbeat,.gdstrip).bt-player{--bt-bg:#1C1B19;--bt-ink:#F4F1EA;--bt-ink2:#C9C2B6;--bt-acc:#F4F1EA;--bt-onacc:#1A1814;--bt-acctx:#F0A27E;--bt-hl:#7A3A1E;--bt-hltx:#FFFFFF;--bt-chip:#2A2724;--bt-line:rgba(255,255,255,.18);--bt-ok:#86DCA5;--bt-okbg:rgba(134,220,165,.14);--bt-no:#FFA494;--bt-nobg:rgba(255,164,148,.12);border-color:rgba(255,255,255,.12);box-shadow:0 12px 32px rgba(0,0,0,.5)}
+.ts-app.ts-mode-dark :is(.gdbeat,.gdstrip).bt-player{--bt-bg:#1C1B19;--bt-ink:#F4F1EA;--bt-ink2:#C9C2B6;--bt-acc:#F4F1EA;--bt-onacc:#1A1814;--bt-acctx:#F0A27E;--bt-hl:#7A3A1E;--bt-hltx:#FFFFFF;--bt-chip:#2A2724;--bt-line:rgba(255,255,255,.18);--bt-ok:#86DCA5;--bt-okbg:rgba(134,220,165,.14);--bt-no:#FFA494;--bt-nobg:rgba(255,164,148,.12);border-color:rgba(255,255,255,.12);box-shadow:0 12px 32px rgba(0,0,0,.5)}
 /* Teleprompter: the paper, a dark capsule's chips */
 :is(.gdbeat,.gdstrip).bt-prompter{border-radius:22px}
 :is(.gdbeat,.gdstrip).bt-prompter .bt-chip.pri{--bt-acc:#1A1814}
-.cv.dark :is(.gdbeat,.gdstrip).bt-prompter{--bt-bg:#141312;--bt-ink:#F1EEE8;--bt-ink2:#C9C3B8;--bt-acctx:#F0A27E;--bt-hl:#7A3A1E;--bt-hltx:#FFFFFF;--bt-chip:#1F1D1A;--bt-line:rgba(255,255,255,.18);--bt-ok:#86DCA5;--bt-okbg:rgba(134,220,165,.14);--bt-no:#FFA494;--bt-nobg:rgba(255,164,148,.12);box-shadow:0 12px 32px rgba(0,0,0,.55)}
-.cv.dark :is(.gdbeat,.gdstrip).bt-prompter .bt-chip.pri{--bt-acc:#F1EEE8;--bt-onacc:#141312}
+.ts-app.ts-mode-dark :is(.gdbeat,.gdstrip).bt-prompter{--bt-bg:#141312;--bt-ink:#F1EEE8;--bt-ink2:#C9C3B8;--bt-acctx:#F0A27E;--bt-hl:#7A3A1E;--bt-hltx:#FFFFFF;--bt-chip:#1F1D1A;--bt-line:rgba(255,255,255,.18);--bt-ok:#86DCA5;--bt-okbg:rgba(134,220,165,.14);--bt-no:#FFA494;--bt-nobg:rgba(255,164,148,.12);box-shadow:0 12px 32px rgba(0,0,0,.55)}
+.ts-app.ts-mode-dark :is(.gdbeat,.gdstrip).bt-prompter .bt-chip.pri{--bt-acc:#F1EEE8;--bt-onacc:#141312}
 :is(.gdbeat,.gdstrip) :where(button){appearance:none;border:0;background:none;padding:0;margin:0;font:inherit;color:inherit;cursor:pointer;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 .gdbeat p{margin:0}
 .bt-eye{font:700 12px/16px var(--body);letter-spacing:.1em;color:var(--bt-acctx)}
@@ -284,7 +284,7 @@
 /* Show me: the block ringed, the card below the fold, the way back */
 .gdshowme{outline:3px solid #F2B544;outline-offset:4px;border-radius:12px;transition:outline-color .3s ease}
 .gdshowback{position:absolute;z-index:16;left:50%;bottom:24px;translate:-50% 0;box-shadow:0 10px 24px rgba(0,0,0,.3);--bt-acc:#1A1814;--bt-onacc:#FFFFFF;appearance:none;border:0;cursor:pointer}
-.cv.dark .gdshowback{--bt-acc:#F4F1EA;--bt-onacc:#1A1814}
+.ts-app.ts-mode-dark .gdshowback{--bt-acc:#F4F1EA;--bt-onacc:#1A1814}
 /* while a beat shows: the dock's hide tab rests (the card sits on the dock), Azu stands on the card's edge */
 .gd-beating .gdock .gd-hide,.gd-beating .gbubble{visibility:hidden}
 .mascot.gd-onbeat{z-index:16;top:var(--gd-bt-top)!important;transition:top .3s cubic-bezier(.2,.8,.3,1)}

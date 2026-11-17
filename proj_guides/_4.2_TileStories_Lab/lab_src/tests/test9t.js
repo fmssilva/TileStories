@@ -87,7 +87,7 @@ const url = labUrl('#probe');
   const load = async () => { await p.goto('about:blank'); await p.goto(url); await p.waitForFunction(() => window.LAB, null, { timeout: 150000 }); await W(600); await R('window.__tf=tourFromCard;""'); if (process.env.MUTATE) { await R(MUT); await R(MUT17B); }; };
   await load();
   if (process.env.MUTATE) console.log('MUTATION: the teaser dropped, the Gallery\'s step left out, the second intro said as the first; the fact rule off, no short-tour words, the hero left at the top with its Start button, no crop; a Quick Facts step with nothing new, the PT names without their article, the Guide block\'s fixed 3 min, the intro lines from their defaults');
-  const base = `ui.device="phone_p";DEVICES.phone_p.h=844;if(G.on)stopTour();LAB.previewBar=false;D.card.hints.on=false;P.lang="en";P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;D.card.cardCfg.mode="light";
+  const base = `ui.device="phone_p";DEVICES.phone_p.h=844;if(G.on)stopTour();LAB.previewBar=false;D.card.hints.on=false;P.lang="en";P.guideMute=true;P.introSeen=true;P.reduce=false;P.vis.mode="phone";D.wall.theme.mode="light";
     D.guide.voice="device";D.guide.look="ink";LAB.rowDemo=false;D.guide.music=false;P.vis.music=null;D.agent.voiceOut=false;G.gd.manual=true;D.guide.svOn=false;""`;
   await R(base);
 

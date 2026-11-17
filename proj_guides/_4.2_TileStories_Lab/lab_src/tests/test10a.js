@@ -38,7 +38,7 @@ const url = labUrl('#probe');
     console.log('MUTATION: the hand starts on its target, the scroll jumps, no opening zoom, no block in use, no bar and the rest dimmed, reduced motion ignored');
   }
   const base = (o) => `ui.device="phone_p";DEVICES.phone_p.h=844;if(G.on)stopTour();if(G.gd.pages)gdPagesEnd("test",false);gdBeatClose();gdStop("test");if(G.ga.on)gaEnd("test");if(G.ga.card)gaCardLeave();G.te.open=false;
-    D.card.hints.on=false;LAB.previewBar=false;P.lang="en";P.guideMute=true;P.introSeen=true;D.guide.intro="off";P.reduce=${!!(o && o.reduce)};P.dark=${!!(o && o.dark)};D.card.cardCfg.mode="${o && o.dark ? 'dark' : 'light'}";
+    D.card.hints.on=false;LAB.previewBar=false;P.lang="en";P.guideMute=true;P.introSeen=true;D.guide.intro="off";P.reduce=${!!(o && o.reduce)};P.vis.mode="${(!!(o && o.dark)) ? 'dark' : 'phone'}";D.wall.theme.mode="${o && o.dark ? 'dark' : 'light'}";
     D.guide.voice="device";D.guide.panel="dock";D.guide.dockStart="mini";D.guide.speed=1;P.vis.speed=null;D.guide.music=false;P.vis.music=null;LAB.rowDemo=false;D.guide.mascot=true;
     D.guide.tourWords="tele";D.guide.hand="shown";D.guide.inUse=true;D.guide.scroll="natural";D.guide.cue="${MUT ? 'spotlight' : 'bar'}";
     D.guidance.on=true;D.guidance.kinds.forEach(function(k){k.on=false});G.gd.manual=true;G.gd.demo=false;gdChip(null);DH.log=[];DH.useLog=[];PO.log=[];ui.view="card";ui.stop="full";renderAll(false);""`;

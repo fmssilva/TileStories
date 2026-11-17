@@ -16,7 +16,7 @@ function demoScreen(){var h=topbar("<b>"+esc(L(UI.demo))+"</b>")+'<div class="pg
 screenDef("demo",{name:"The demo (Blocks & Components)",draw:demoScreen});
 /* the phone: the features before (latest first) and after (in module order), sharing the call's notes cx */
 function renderPhone(keep){if(noDraw)return;var cx={};emitLatestFirst("renderPhone.before",keep,cx);var top=keep?scr.scrollTop:0;deviceFrame();
-  ph.classList.toggle("dark",P.dark);ph.classList.toggle("reduce",P.reduce);
+  themeMark(ph);ph.classList.toggle("reduce",P.reduce);
   scr.innerHTML=screenHtml();
   document.getElementById("ptool").innerHTML=ptool();
   var nb=document.getElementById("navbar");nb.innerHTML=navbar();nb.style.display=ui.view==="card"?"":"none";

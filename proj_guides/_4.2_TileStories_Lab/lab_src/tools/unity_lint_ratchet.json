@@ -246,7 +246,7 @@
  "src/world/guide-button.css": {
   "filter drop-shadow/brightness/saturate": 1,
   "gradient untagged": 2,
-  "soft box-shadow untagged": 3
+  "soft box-shadow untagged": 2
  },
  "src/world/markers.css": {
   "transform: translate (use the translate property)": 2

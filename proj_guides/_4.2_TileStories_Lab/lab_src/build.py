@@ -1,7 +1,7 @@
 """Builds the TileStories Lab (tilestories-lab.html): joins the modules in MODULES and the styles in STYLES, embeds the words and the faces, and puts the
 3D mascot's files in assets/ beside the page. It never rewrites code. python build.py -> tilestories-lab.html (not committed)
-and assets/mascot/ (copied, each model also as <id>.glb.js, the script the page loads it by; not committed), then the structure check (check_structure.js) and the Unity lint (tools/unity_lint.py):
-either one failing fails the build. The page with its assets/ is served by tools/serve.py and published as page + files (README.md).
+and assets/mascot/ (copied, each model also as <id>.glb.js, the script the page loads it by; not committed), then the structure check (check_structure.js), the Unity lint (tools/unity_lint.py) and the theme's ratchet
+(tools/theme_ratchet.py): any one failing fails the build. The page with its assets/ is served by tools/serve.py and published as page + files (README.md).
 PROTOTYPE_STRUCTURE.md says what each module owns."""
 import base64, io, os, re, shutil, subprocess, sys
 D = os.path.dirname(os.path.abspath(__file__))
@@ -9,11 +9,11 @@ M3 = os.path.join(D, '..', '..', 'mascote', '3d')
 
 # the order is the load order: a module may use what an earlier one sets up at load, and the points are joined in this order
 MODULES = ['src/core/open.js', 'src/core/assets.js', 'src/core/catalogues.js', 'src/core/state.js', 'src/core/words.js',
-           'src/core/content.js', 'src/core/util.js', 'src/core/ext.js', 'src/core/undo.js', 'src/screen/router.js', 'src/editor/components.js', 'src/editor/shell.js',
+           'src/core/content.js', 'src/core/util.js', 'src/core/ext.js', 'src/core/undo.js', 'src/core/theme.js', 'src/screen/router.js', 'src/editor/components.js', 'src/editor/shell.js',
            'src/editor/json.js', 'src/editor/card-tab.js', 'src/editor/demo.js', 'src/editor/global-tab.js',
            'src/editor/selftest-texts.js', 'src/phone/shell.js', 'src/screen/device.js', 'src/card/motion.js', 'src/card/interactions.js',
            'src/card/sections.js', 'src/phone/sheet.js', 'src/phone/feedback.js', 'src/editor/selftest.js',
-           'src/editor/words-tab.js', 'src/editor/focus.js', 'src/editor/accordion.js', 'src/editor/guide-tab.js',
+           'src/editor/words-tab.js', 'src/editor/focus.js', 'src/editor/accordion.js', 'src/editor/guide-tab.js', 'src/editor/app-tab.js',
            'src/card/chrome.js', 'src/card/gallery.js',
            'src/card/contents.js', 'src/card/effects.js', 'src/guide/tour.js', 'src/editor/texts.js',
            'src/phone/preview-bar.js', 'src/phone/settings.js', 'src/card/terms.js', 'src/card/controls.js',
@@ -38,7 +38,7 @@ STYLES = ['src/core/fonts.css', 'src/core/base.css', 'src/card/card-base.css', '
           'src/world/guide-button.css', 'src/agent/agent.css', 'src/agent/scenes.css', 'src/world/markers.css',
           'src/mascot/azu3d.css', 'src/mascot/models.css', 'src/mascot/tile-styles.css', 'src/mascot/size.css', 'src/editor/demo.css',
           'src/guidance/present.css', 'src/guidance/editor.css', 'src/guide/autotour.css', 'src/guide/tell-more.css',
-          'src/guide/saved-place.css', 'src/guide/tour-end.css', 'src/guide/game-ask.css', 'src/guide/mascot-profile.css', 'src/guide/hero-start.css', 'src/guide/highlight.css', 'src/guide/teleprompter.css', 'src/guide/panel-look.css', 'src/card/page-open.css', 'src/guide/demo-hand.css', 'src/guide/tour-scroll.css', 'src/screen/screen.css']
+          'src/guide/saved-place.css', 'src/guide/tour-end.css', 'src/guide/game-ask.css', 'src/guide/mascot-profile.css', 'src/guide/hero-start.css', 'src/guide/highlight.css', 'src/guide/teleprompter.css', 'src/guide/panel-look.css', 'src/card/page-open.css', 'src/guide/demo-hand.css', 'src/guide/tour-scroll.css', 'src/screen/screen.css', 'src/editor/app-tab.css']
 
 
 def rd(*p):
@@ -49,7 +49,7 @@ def rd(*p):
 # media/FONT_*.txt, each a data: URL), so the page has its words and its faces even opened from disk
 EMBED = [('__REALSTR__', os.path.join(D, 'src', 'core', 'realstrings.json'))]
 EMBED += [('__FONT_' + k + '__', os.path.join(D, 'media', 'FONT_' + k + '.txt')) for k in
-          ('FRAUNCES', 'ATK400', 'ATK600', 'ATK700', 'MONO400', 'MONO500')]
+          ('FRAUNCES', 'ATK400', 'ATK600', 'ATK700', 'MONO400', 'MONO500', 'FREDOKA')]
 # beside the page, in assets/: the pictures live there (committed); the 3D mascot's models and thumbnails are copied there from
 # proj_guides/mascote/3d (assets/mascot/, not committed). The code names each file by its path ("assets/..."); a path it names that
 # assets/ lacks fails the build. Over http (tools/serve.py, the published Lab) they load; opened from disk the models cannot be
@@ -104,4 +104,5 @@ if __name__ == '__main__':
     if '--no-check' not in sys.argv:
         rc = subprocess.call(['node', os.path.join(D, 'check_structure.js')])
         rc = subprocess.call([sys.executable, os.path.join(D, 'tools', 'unity_lint.py')]) or rc
+        rc = subprocess.call([sys.executable, os.path.join(D, 'tools', 'theme_ratchet.py')]) or rc
         sys.exit(rc)

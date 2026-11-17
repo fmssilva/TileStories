@@ -65,12 +65,12 @@ const url = labUrl('#probe');
     var cap=ph.querySelector(".gcap"),cb=bgOf(cap);
     return{head:cr(px(getComputedStyle(head).color),hb),tail:cr(px(getComputedStyle(tail).color),tb),unread:cr(px(getComputedStyle(un).color),paper),capDim:cr(over({r:244,g:241,b:234,a:.62},cb),cb),capHead:cr({r:244,g:241,b:234,a:1},over({r:255,g:217,b:138,a:.22},cb))}})()`;
   for (const dark of [false, true]) {
-    await run('comet', `P.dark=${dark};renderAll(false);D.guide.glide=false`, 2000);
+    await run('comet', `P.vis.mode="${(dark) ? 'dark' : 'phone'}";renderAll(false);D.guide.glide=false`, 2000);
     const c = await R(C);
     ok(`${dark ? 'dark' : 'light'}: the head, the trail, the unread words and the captions at 4.5:1 or more`, Object.values(c).every(v => v >= 4.5), c);
     await R('stopTour()');
   }
-  await R('P.dark=false;D.guide.glide=true;P.guideMute=false;renderAll(false)');
+  await R('P.vis.mode="phone";D.guide.glide=true;P.guideMute=false;renderAll(false)');
   // the text goes back to normal when the guide moves on or stops
   await run('comet', '', 1500); await R('stopTour()');
   ok('after the tour, the block text is plain again', await R('!document.querySelector(".gread")&&!document.querySelector("#ph .hl-on,#ph .hl-said,#ph .hl-un")&&![].some.call(document.querySelectorAll("#ph .gw"),function(w){return w.getAttribute("style")})'));

@@ -24,7 +24,7 @@ const BEFORE = { rows: ["Fixed rules|", "Voice|D.guide.voice", "Speaking now|", 
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   if (process.env.MUTATE) { await R('var __gc=gdCheck;gdCheck=function(it,items,v,ctx,now){var e=gdEverOf(v,it.id);if(e.done){var v2=JSON.parse(JSON.stringify(v));v2.ever.items[it.id].done=false;return __gc(it,items,v2,ctx,now)}return __gc(it,items,v,ctx,now)}'); console.log('MUTATION: the scheduler ignores Done when (a card opened no longer retires Tap a marker)'); }
   // the set-up: the Ribeira wall, a first visit, the clock moved by hand (deterministic), the remarks and the ✦ hint resting
-  const base = 'D.card.hints.on=false;LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;P.lang="en";LAB.rowDemo=false;D.guidance.items.gbhint.on=false;gdGroupById("inview").on=false;D.guide.gbtn="both";D.guide.mascot=true;D.guidance.on=true;D.guidance.breathing=15;G.gd.demo=false;gdChip(null);';
+  const base = 'D.card.hints.on=false;LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.vis.mode="phone";P.lang="en";LAB.rowDemo=false;D.guidance.items.gbhint.on=false;gdGroupById("inview").on=false;D.guide.gbtn="both";D.guide.mascot=true;D.guidance.on=true;D.guidance.breathing=15;G.gd.demo=false;gdChip(null);';
   const fresh = async (extra) => { await R(base + 'if(G.on)stopTour();setOverlay("ask",false);setOverlay("settings",false);setOverlay("menu",false);setWall("ribeira");ui.view="card";ui.stop="closed";renderPhone(false);G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.onWall=false;' + (extra || '') + 'gdAdvance(250)'); await W(150); };
   const cur = () => R('G.gd.cur?[G.gd.cur.item.id,Math.round(G.gd.cur.at),G.gd.cur.text]:null');
   const adv = async ms => { await R('gdAdvance(' + ms + ')'); };
@@ -83,11 +83,11 @@ const BEFORE = { rows: ["Fixed rules|", "Voice|D.guide.voice", "Speaking now|", 
   const look = 'var b=ph.querySelector(".gdbub"),bt=b.querySelector("button"),cs=getComputedStyle(bt),lh=parseFloat(cs.lineHeight),lines=Math.round((bt.offsetHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom))/lh),B=gdPR(b),g=ph.querySelector(".gbtn"),G1=g?gdPR(g):null,nb=document.getElementById("navbar"),N=nb&&gdSeen(nb)?gdPR(nb):null;' +
     '[lines,cr(px(cs.color),px(getComputedStyle(b).backgroundColor)),gdOverWords(),G1?gdOver(B,G1):0,N?gdOver(B,N):0,Math.round(bt.offsetHeight),b.dataset.tail]';
   for (const dark of [false, true]) {
-    await R(`P.dark=${dark};renderAll(true)`); await W(200);
+    await R(`P.vis.mode="${(dark) ? 'dark' : 'phone'}";renderAll(true)`); await W(200);
     const l = await R(CR + look);
     ok(`...its look, ${dark ? 'dark' : 'light'}: at most 2 lines, the words at 7:1 or more, 0 px over words, not under the ✦ or the bar, 44 px to tap, its tail to Azu`, l[0] <= 2 && l[1] >= 7 && l[2] === 0 && l[3] === 0 && l[4] === 0 && l[5] >= 44 && l[6] === 'down', l);
   }
-  await R('P.dark=false;P.lang="pt";renderAll(true)'); await W(200);
+  await R('P.vis.mode="phone";P.lang="pt";renderAll(true)'); await W(200);
   const lpt = await R(CR + look);
   ok('...in Portuguese too: at most 2 lines', lpt[0] <= 2 && lpt[2] === 0, lpt);
   await R('P.lang="en";renderAll(true)');
@@ -207,7 +207,7 @@ const BEFORE = { rows: ["Fixed rules|", "Voice|D.guide.voice", "Speaking now|", 
   // round 20 (the review): Wall (the Lab) moved to 6 · Preview & Test (a Lab stand-in), Knowledge's unnamed row is What is sent, Start the guide glows is new
   BEFORE.rows = BEFORE.rows.filter(r => r !== 'Wall (the Lab)|LAB.wall').map(r => r === '|' ? 'What is sent|' : r).concat(['Start the guide glows|D.guide.heroGlow']);
   // round 21: Speech on screen's new rows (where the words go during a tour, the teleprompter's height, a tip's bubble, the panels' look)
-  BEFORE.rows = BEFORE.rows.concat(['Words during a tour|D.guide.tourWords', 'Its height|D.guide.teleH', "A tip's bubble|D.guide.bubbleOut", "The panels' look|D.guide.pSkin"]);
+  BEFORE.rows = BEFORE.rows.concat(['Words during a tour|D.guide.tourWords', 'Its height|D.guide.teleH', "A tip's bubble|D.guide.bubbleOut", "The panels in dark mode|D.guide.darkPanels"]);
   // round 22: the dimming is now an option of Focus (Dim the rest became How dark); the tour's movement rows are new
   BEFORE.rows = BEFORE.rows.map(r => r === 'Dim the rest|D.guide.scrim' ? 'How dark|D.guide.scrim' : r).concat(["The visitor's hand|D.guide.hand", 'Show blocks in use|D.guide.inUse', 'The scroll|D.guide.scroll']);
   const fosIn = await R(`${JSON.stringify(BEFORE.fos)}.filter(function(id){return!ed.querySelector('[data-fo="'+id+'"]')})`);

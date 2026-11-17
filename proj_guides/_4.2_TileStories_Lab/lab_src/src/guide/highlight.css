@@ -16,13 +16,13 @@
 .hl-box :is(.gw,.tw,.gdw,.btw):is(.hl-on,.hl-said){color:var(--hlink,inherit)!important}
 .reduce .hl-box>.hl-quad{transition:none}
 /* the block's own text (the read-along), on the card's paper; dark: a quieter light */
-.cv .hl-box{--hlc:#FFD98A;--hla:.62;--hlln:#C98A12;--hlt:.5;--hlun:var(--ink2);--hlink:var(--ink1)}
-.cv.dark .hl-box{--hla:.24;--hlln:#FFD98A;--hlt:.26}
+.cv .hl-box{--hlc:#FFD98A;--hla:.62;--hlln:#C98A12;--hlt:.5;--hlun:var(--ts-ink-2);--hlink:var(--ts-ink)}
+.ts-app.ts-mode-dark .hl-box{--hla:.24;--hlln:#FFD98A;--hlt:.26}
 /* the classic captions (the dark bar) */
 .gcap.hl-box{--hlc:#FFD98A;--hla:.22;--hlln:#FFD98A;--hlt:.2;--hlun:rgba(244,241,234,.62);--hlink:#F4F1EA}
 /* the bubbles (the dock's, the tips'): the paper's words, the accent's light */
-.gbubble .gcap.hl-box,.gdbub .hl-box{--hlc:#F2B544;--hla:.34;--hlln:var(--accent2,#B5651D);--hlt:.24;--hlun:var(--ink2);--hlink:var(--ink1)}
-.dark .gbubble .gcap.hl-box,.dark .gdbub .hl-box{--hla:.26;--hlln:#F2B544;--hlt:.2}
+.gbubble .gcap.hl-box,.gdbub .hl-box{--hlc:#F2B544;--hla:.34;--hlln:var(--ts-accent,#B5651D);--hlt:.24;--hlun:var(--ink2);--hlink:var(--ts-ink)}
+.ts-mode-dark .gbubble .gcap.hl-box,.ts-mode-dark .gdbub .hl-box{--hla:.26;--hlln:#F2B544;--hlt:.2}
 /* the panel (its lines, the whole text, the Mini's line): the Look's accent */
 .gdock .hl-box{--hlc:var(--acc);--hla:.26;--hlln:var(--acc);--hlt:.12;--hlun:var(--tpun);--hlink:var(--ink)}
 .gdock.lk-paper .hl-box,.gdock.lk-player .hl-box,.gdock.lk-prompter .hl-box{--hla:.16;--hlt:.12}

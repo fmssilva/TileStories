@@ -22,7 +22,7 @@ const CAP = process.env.CAP || '';
   const T0 = Date.now(), tsec = s => console.log('TIME ' + s + ' ' + Math.round((Date.now() - T0) / 1000) + ' s');
   await R(require('./g15lib.js'));
   if (process.env.MUTATE) { await R('var __m=document.createElement("style");__m.textContent="#ph .gdbeat .bt-chip,#ph .gdstrip .bt-chip{height:36px!important;min-height:0!important;max-height:36px!important}";document.head.appendChild(__m)'); console.log('MUTATION: a beat card\'s chips 36 px tall'); }
-  const base = o => `ui.device="phone_p";DEVICES.phone_p.h=${o.H};D.card.hints.on=false;LAB.previewBar=false;P.lang="en";P.guideMute=true;P.reduce=false;P.dark=${o.theme === 'dark'};D.card.cardCfg.mode="${o.theme === 'dark' ? 'dark' : 'light'}";
+  const base = o => `ui.device="phone_p";DEVICES.phone_p.h=${o.H};D.card.hints.on=false;LAB.previewBar=false;P.lang="en";P.guideMute=true;P.reduce=false;P.vis.mode="${(o.theme === 'dark') ? 'dark' : 'phone'}";D.wall.theme.mode="${o.theme === 'dark' ? 'dark' : 'light'}";
     D.guide.voice="device";D.guide.panel="dock";D.guide.dockStart="${o.h}";D.guide.look="${o.look}";D.guide.captions=true;D.guide.pWords="prompter";LAB.rowDemo=false;LAB.gdSR=false;D.guide.gbtn="both";D.guide.mascot=true;P.vis.speed=null;`;
   const keep = async o => { await R('if(G.gd.sc12){gd12Done([true,"",""])}'); await R(base(o) + 'gd12Keep();'); };
   const dockTo = h => `if(ui.dockH!=="${h}"){ui.dockH="${h}";renderGuide();gdBeatPlace()}`;
@@ -93,7 +93,7 @@ const CAP = process.env.CAP || '';
   }
   await R('if(G.gd.sc12){gd12Done([true,"",""])}');
   if (CAP) fs.writeFileSync(path.join(CAP, 'g15_9sb.json'), JSON.stringify(results.map(x => ({ nn: x.g.nn, name: x.g.name, rows: x.rows })), null, 1));
-  await R('if(G.on)stopTour();ui.device="phone_p";DEVICES.phone_p.h=844;P.dark=false;D.card.cardCfg.mode="light";P.vis.speed=null;renderAll(false)');
+  await R('if(G.on)stopTour();ui.device="phone_p";DEVICES.phone_p.h=844;P.vis.mode="phone";D.wall.theme.mode="light";P.vis.speed=null;renderAll(false)');
   ok('No page error', errs.length === 0, errs.slice(0, 5));
   tsec('end');
   console.log(fails ? `FAILED ${fails}` : 'ALL PASS');

@@ -1,0 +1,10 @@
+/* The App tab (editor/app-tab.js): the accent's swatches (each option's light and dark accent, drawn from the table) and the free
+   colours' rows. The Editor's own skin (--u-*): never themed. */
+.seg.swatches{flex-wrap:wrap}
+.seg.swatches button{display:inline-flex;align-items:center;gap:4px;flex:0 0 auto;padding:0 8px}
+.seg.swatches i{width:12px;height:12px;border-radius:3px;box-shadow:0 0 0 1px var(--u-edge)}
+.seg.swatches i+i{margin-right:4px}
+.tscol{display:flex;align-items:center;gap:6px}
+.tscol input[type=color]{width:34px;height:22px;padding:0;border:1px solid var(--u-edge);background:var(--u-field)}
+.tscol input[type=text]{width:84px;flex:none}
+.badge.warn{background:var(--u-warn);color:var(--u-dark)}

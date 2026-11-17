@@ -1,6 +1,7 @@
 """The review tools' shared part (ported from the World Lab's tools/review): the page over the Lab's local server, the profile
 matrix and the contact sheets. Python Playwright with the installed Edge (as the Node tests: no browser is downloaded).
-  PROFILES  rows: light / dark x text default / larger (P.vis.mode, P.vis.text: the visitor's Settings). Looks join at P1b.
+  PROFILES  rows: the look (Premium / Playful: the wall's look, D.wall.theme.look) x light / dark x text default / larger (P.vis.mode,
+            P.vis.text: the visitor's Settings).
   DEVICES   columns: screen/device.js's four (phone_p, phone_l, tablet_p, tablet_l).
 A cell: the state's code run in the page (#probe: LAB.run, the page's scope), then the phone's frame captured (#ph)."""
 import os, subprocess, sys
@@ -11,13 +12,13 @@ LAB = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))
 EDGE = os.environ.get('EDGE', r'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe')
 PORT = int(os.environ.get('LAB_PORT') or 8642)
 URL = 'http://localhost:%d/lab_src/tilestories-lab.html#probe' % PORT
-PROFILES = [('light', 'default'), ('dark', 'default'), ('light', 'larger'), ('dark', 'larger')]
+PROFILES = [(lk, md, tx) for lk in ('premium', 'playful') for tx in ('default', 'larger') for md in ('light', 'dark')]
 DEVICES = ['phone_p', 'phone_l', 'tablet_p', 'tablet_l']
 # every cell starts here: no tour, no overlay, no tip or hint, the preview bar hidden, the Ribeira Palace's card, the device and
 # the profile set as the visitor's Settings sets them
 BASE = ('if(G.on)stopTour();if(G.gd.pages)gdPagesEnd("review",false);gdStop("review");closeOverlays();D.guidance.on=false;D.card.hints.on=false;'
         'LAB.previewBar=false;LAB.noCamera=false;LAB.wall="ribeira";ui.camX=.4;ui.camY=.5;ui.camZoom=1;P.guideMute=true;P.introSeen=true;P.reduce=true;P.lang="en";pointOpen("painting");'
-        'ui.device="{dev}";P.vis.mode="{mode}";P.dark={dark};P.vis.text="{text}";goScreen("card",{{stop:"closed",reset:true}});')
+        'ui.device="{dev}";D.wall.theme.look="{look}";P.vis.mode="{mode}";P.vis.text="{text}";goScreen("card",{{stop:"closed",reset:true}});')
 
 
 def ensure_server():
@@ -41,8 +42,14 @@ async def run(pg, src):
     return await pg.evaluate('s => LAB.run(s)', src)
 
 
-def base(dev, mode, text):
-    return BASE.format(dev=dev, mode=mode, dark='true' if mode == 'dark' else 'false', text=text)
+def base(dev, prof):
+    look, mode, text = prof
+    return BASE.format(dev=dev, look=look, mode=mode, text=text)
+
+
+def parse_profiles(arg):
+    """'all' or look:mode:text,... (premium:light:default,playful:dark:larger)"""
+    return PROFILES if not arg or arg == 'all' else [tuple(x.split(':')) for x in arg.split(',')]
 
 
 async def shot(pg, path):

@@ -21,7 +21,7 @@ const url = labUrl('#probe');
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   if (process.env.MUTATE) { await R('var __gs=gdScore;gdScore=function(it,items,v,ctx,now,st){var f=__gs(it,items,v,ctx,now,st);f.kind=1;f.along=1;f.score=f.imp*f.group*f.fresh*f.fit;return f}'); console.log('MUTATION: the score ignores the stage of the visit (the kinds\' weights and Along the visit held at ×1)'); }
   // the set-up: the Ribeira wall, a first visit, the clock moved by hand (deterministic), the remarks and the ✦ hint resting
-  const base = 'D.card.hints.on=false;LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;P.lang="en";LAB.rowDemo=false;D.guidance.items.gbhint.on=false;gdGroupById("inview").on=false;D.guide.gbtn="both";D.guide.mascot=true;' +
+  const base = 'D.card.hints.on=false;LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.vis.mode="phone";P.lang="en";LAB.rowDemo=false;D.guidance.items.gbhint.on=false;gdGroupById("inview").on=false;D.guide.gbtn="both";D.guide.mascot=true;' +
     'D.guidance.on=true;D.guidance.breathing=15;D.guidance.perMinute=2;D.guidance.perVisit=30;D.guidance.freshTau=120;D.guidance.learnIgnore=true;D.guidance.learnDismiss=true;D.guidance.fewer=true;D.guidance.remember=true;G.gd.demo=false;gdChip(null);';
   const fresh = async (extra) => { await R(base + 'if(G.on)stopTour();setOverlay("ask",false);setOverlay("settings",false);setOverlay("menu",false);setWall("ribeira");ui.view="card";ui.stop="closed";renderPhone(false);G.gd.manual=true;gdStop("test");gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;G.gd.onWall=false;' + (extra || '') + 'gdAdvance(250)'); await W(150); };
   const cur = () => R('G.gd.cur?[G.gd.cur.item.id,Math.round(G.gd.cur.at),G.gd.cur.text,G.gd.cur.pull]:null');
@@ -129,12 +129,12 @@ const url = labUrl('#probe');
   // Ask about the view: 60 s into the visit, Tap a marker resting
   const toAsk = 'gdResetVisitor();G.gd.movedAt=null;var vm=gdVM("tapmarker");vm.shown=3;vm.last=gdNow();vm.end=gdNow();gdAdvance(1000);var t0=gdNow();while(gdNow()-t0<90000){gdAdvance(250);if(G.gd.cur&&G.gd.cur.item.id==="askview")break}';
   for (const dark of [false, true]) {
-    await fresh(`P.dark=${dark};renderAll(true);`); await R(toAsk); await W(400);
+    await fresh(`P.vis.mode="${(dark) ? 'dark' : 'phone'}";renderAll(true);`); await R(toAsk); await W(400);
     const l = await R(look());
     const tg = await R('var g=ph.querySelector(".gbtn"),G1=gdPR(g),rg=ph.querySelector(".gdring.gd-rect"),RG=rg&&gdPR(rg),az=ph.querySelector(".azfab");[G.gd.cur&&G.gd.cur.item.id,!!RG&&RG.l<G1.l&&RG.r>G1.r&&RG.t<G1.t&&RG.b>G1.b,az.classList.contains("point-gb"),gdOver(gdPR(ph.querySelector(".gdbub")),G1),Math.round(gdNow()-P.gdVisitor.visit.at)]');
     ok(`Ask about the view (${dark ? 'dark' : 'light'}): at 60 s or later, beside the ✦ (the way into Ask about the view): the ring round it, Azu pointing at it; 2 lines at most, 7:1, 0 px over words, not over the ✦ or the bar, 44 px`, tg[0] === 'askview' && tg[1] && tg[2] && tg[3] === 0 && tg[4] >= 60000 && l[0] <= 2 && l[1] >= 7 && l[2] === 0 && l[3] === 0 && l[4] === 0 && l[5] >= 44 && l[7] === 'Ask me about anything you see.', [tg, l]);
   }
-  await R('P.dark=false;P.lang="pt";renderAll(true)'); await W(200); const lpt = await R(look());
+  await R('P.vis.mode="phone";P.lang="pt";renderAll(true)'); await W(200); const lpt = await R(look());
   ok('...in Portuguese: its words from Languages & Terms, 2 lines at most', lpt[7] === await R('D.words.tx.gd_askview.pt') && lpt[0] <= 2 && lpt[2] === 0, lpt);
   await R('P.lang="en";renderAll(true)');
   await R('var b=ph.querySelector(".gdbub button[data-gdbub]");gsTouch(b)'); await W(300);

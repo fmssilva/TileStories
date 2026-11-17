@@ -22,7 +22,7 @@ const url = labUrl('#probe');
   let fails = 0; const ok = (name, cond, info) => { if (!cond) fails++; console.log((cond ? 'PASS ' : 'FAIL ') + name + (info !== undefined ? '  ' + JSON.stringify(info) : '')); };
   if (process.env.MUTATE) { await R('var __gc=gdCheck;gdCheck=function(it,items,v,ctx,now){if(it.base==="inview"){var v2=JSON.parse(JSON.stringify(v));v2.visit.lastEnd=null;return __gc(it,items,v2,ctx,now)}return __gc(it,items,v,ctx,now)}'); console.log('MUTATION: the breathing room ignored for the remarks (What\'s in view)'); }
   // the set-up: the Ribeira wall, a first visit whose opening was said 30 s ago, the clock moved by hand; the round's items On
-  const base = 'D.card.hints.on=false;LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.dark=false;P.lang="en";LAB.rowDemo=false;D.guide.gbtn="both";D.guide.mascot=true;D.guide.life="lively";D.guide.azuTap="play";D.poi.solemn=false;' +
+  const base = 'D.card.hints.on=false;LAB.previewBar=false;P.guideMute=true;P.introSeen=true;P.reduce=false;P.vis.mode="phone";P.lang="en";LAB.rowDemo=false;D.guide.gbtn="both";D.guide.mascot=true;D.guide.life="lively";D.guide.azuTap="play";D.poi.solemn=false;' +
     'D.guidance.on=true;D.guidance.breathing=15;D.guidance.perMinute=2;["opening","tapmarker","askview","gbhint","inview","tourof"].forEach(function(id){D.guidance.items[id].on=true});gdGroupById("inview").on=true;G.gd.demo=false;gdChip(null);';
   const opened = 'var o=gdVM("opening"),oe=gdEM("opening");o.shown=1;o.last=gdNow()-30000;o.end=gdNow()-21000;oe.shown=1;P.gdVisitor.visit.lastEnd=gdNow()-21000;';
   const fresh = async (extra, manual = true) => { await R(base + 'if(G.on)stopTour();setOverlay("ask",false);setOverlay("settings",false);setOverlay("menu",false);setWall("ribeira");ui.view="card";ui.stop="closed";renderPhone(false);' + `G.gd.manual=${manual};G.gd.rate=1;` + 'gdStop("test");ui.camX=.4;ui.camY=.5;ui.camZoom=1;renderPhone(false);gdResetVisitor();G.gd.movedAt=null;G.gd.touchAt=null;G.gd.actAt=null;G.gd.onWall=false;' + opened + (extra || '') + (manual ? 'gdAdvance(250)' : '')); await W(150); };
@@ -107,11 +107,11 @@ const url = labUrl('#probe');
   // ---------- 3. on the page: the remark's look and taps; the pokes and the idle; Tap on Azu; the ✦ menu; the old timers gone ----------
   const toRem = 'var e=gdEM("tapmarker");e.done=true;e.by="card";D.guidance.items.askview.on=false;D.guidance.items.gbhint.on=false;';
   for (const dark of [false, true]) {
-    await fresh(`P.dark=${dark};renderAll(true);` + toRem); await runTo('G.gd.cur.item.base==="inview"', 40000); await W(400);
+    await fresh(`P.vis.mode="${(dark) ? 'dark' : 'phone'}";renderAll(true);` + toRem); await runTo('G.gd.cur.item.base==="inview"', 40000); await W(400);
     const l = await R(look);
     ok(`The remark (${dark ? 'dark' : 'light'}): beside Ribeira Palace, its card's own line, 2 lines at most, 7:1, 0 px over words, not over its point, the ✦ or the bar, 44 px, a › to say a tap does more`, l[0] <= 2 && l[1] >= 7 && l[2] === 0 && l[3] === 0 && l[4] === 0 && l[5] >= 44 && l[7] === 0 && l[6] === "In the middle: the Ribeira Palace. Tap and I'll show you around." && await R('ph.querySelector(".gdbub").classList.contains("gd-more")&&/›/.test(getComputedStyle(ph.querySelector(".gdbub button"),"::after").content)'), l);
   }
-  await R('P.dark=false;P.lang="pt";renderAll(true)'); await W(250); const lpt = await R(look);
+  await R('P.vis.mode="phone";P.lang="pt";renderAll(true)'); await W(250); const lpt = await R(look);
   ok('...in Portuguese: its words from Languages & Terms, 2 lines at most', lpt[6] === await R('nameIn(D.words.tx.fab_comment_card.pt,"{point}","O Paço da Ribeira","pt")') && lpt[0] <= 2 && lpt[2] === 0, lpt);
   await R('P.lang="en";renderAll(true)'); await W(150);
   await p.locator('#ph .gdbub button[data-gdbub]').click(); await W(400);

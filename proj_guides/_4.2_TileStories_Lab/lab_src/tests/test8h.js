@@ -16,13 +16,13 @@ const LOOKS = { loading: ['skeleton', 'spinner', 'mascot', 'tiles', 'scan'], los
     var min=99,worst="";ph.querySelectorAll(".stv b,.stv span:not(.st-mascot),.stv .st-pill,.stv .st-toast,.stv button,.stv .st-slow").forEach(function(el){if(!el.textContent.trim()||!el.getClientRects().length||getComputedStyle(el).opacity==="0")return;
       var a=lum(getComputedStyle(el).color),c=lum(bgOf(el)),r=(Math.max(a,c)+.05)/(Math.min(a,c)+.05);if(r<min){min=r;worst=el.className||el.tagName}});return [Math.round(min*100)/100,worst]}`);
   for (const dark of [false, true]) for (const k of Object.keys(LOOKS)) for (const l of LOOKS[k]) {
-    await R(`P.dark=${dark};D.card.states.${k}="${l}";stateTry("${k}")`); await p.waitForTimeout(k === 'done' ? 1700 : 1000);
+    await R(`P.vis.mode="${(dark) ? 'dark' : 'phone'}";D.card.states.${k}="${l}";stateTry("${k}")`); await p.waitForTimeout(k === 'done' ? 1700 : 1000);
     if (k === 'loading') { await R('var s=ph.querySelector(".stv");s&&s.classList.add("slow")'); await p.waitForTimeout(450); }
     const c = await R('var s=ph.querySelector(".stv");s?[s.className].concat(stContrast()):null');
     ok(`${dark ? 'dark' : 'light'} ${k} / ${l}: shown, words at 4.5:1 or more`, c && c[0].indexOf('look-' + l) >= 0 && c[1] >= 4.5, c);
   }
   // the words are the state's own (Languages & Terms), the done button turns into Saved
-  await R('P.dark=false;D.card.states.done="button";stateTry("done")'); await p.waitForTimeout(1700);
+  await R('P.vis.mode="phone";D.card.states.done="button";stateTry("done")'); await p.waitForTimeout(1700);
   ok('On the button: the action turns into \u2713 Saved', await R('var m=ph.querySelector(".st-morph");m&&m.classList.contains("done")&&getComputedStyle(m.querySelector(".b")).opacity==="1"&&m.querySelector(".b").textContent.indexOf("Saved")>0'));
   await R('D.words.tx.state_lost_title={en:"Wall?",pt:"Parede?"};D.card.states.lost="frame";stateTry("lost")'); await p.waitForTimeout(900);
   ok('the words come from Languages & Terms', await R('ph.querySelector(".st-lost b").textContent') === 'Wall?');

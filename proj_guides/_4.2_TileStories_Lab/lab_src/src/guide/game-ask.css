@@ -6,10 +6,10 @@
   box-shadow:0 6px 16px rgba(10,9,12,.16);animation:ga-in .2s ease-out;-webkit-tap-highlight-color:transparent}
 #ph .ga-chip svg{width:16px;height:16px;fill:currentColor;flex:none}
 #ph .gdbeat>.ga-chip,#ph .gdstrip>.ga-chip{background:var(--bt-bg);color:var(--bt-ink2);border-color:var(--bt-line)}
-#ph.dark .ga-chip:not(.gdbeat>.ga-chip):not(.gdstrip>.ga-chip){background:#26231F;color:#E4DED3;border-color:rgba(255,255,255,.18)}
+#ph.ts-mode-dark .ga-chip:not(.gdbeat>.ga-chip):not(.gdstrip>.ga-chip){background:#26231F;color:#E4DED3;border-color:rgba(255,255,255,.18)}
 /* the back line on the chip, said as the game goes on */
 #ph .ga-chip.ga-line{height:auto;min-height:44px;max-width:calc(100% - 32px);padding:10px 16px;font:600 14px/19px var(--body);color:var(--bt-ink,#1A1814);text-align:left}
-#ph.dark .ga-chip.ga-line:not(.gdbeat>.ga-chip){color:#F4F1EA}
+#ph.ts-mode-dark .ga-chip.ga-line:not(.gdbeat>.ga-chip){color:#F4F1EA}
 @keyframes ga-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 #ph.reduce .ga-chip,#ph.reduce .ga-note{animation:none}
 /* the game still: its answers wait, its own hints and foot step aside while the panel is up */
@@ -35,12 +35,12 @@
 /* Show me: the card at the block, the game waiting; the way back */
 .ga-showback{position:absolute;z-index:16;left:50%;bottom:24px;translate:-50% 0;min-height:48px;padding:0 22px;border:0;border-radius:24px;cursor:pointer;
   background:#1A1814;color:#FFFFFF;font:700 15px/1 var(--body);box-shadow:0 10px 24px rgba(0,0,0,.3);white-space:nowrap}
-.dark .ga-showback{background:#F4F1EA;color:#1A1814}
+.ts-mode-dark .ga-showback{background:#F4F1EA;color:#1A1814}
 /* Off: the line on the game, shown (the game's voice goes on) */
 .ga-note{position:absolute;z-index:3;top:-26px;left:16px;right:16px;box-sizing:border-box;min-height:44px;padding:11px 16px;border-radius:22px;text-align:center;
   background:var(--bt-ink,#1A1814);color:var(--bt-bg,#FFFFFF);font:600 14px/20px var(--body);box-shadow:0 8px 20px rgba(10,9,12,.24);animation:ga-in .2s ease-out}
 .kq>.ga-note,.poll>.ga-note{background:#1A1814;color:#FFFFFF}
-.dark .kq>.ga-note,.dark .poll>.ga-note{background:#F4F1EA;color:#1A1814}
+.ts-mode-dark .kq>.ga-note,.ts-mode-dark .poll>.ga-note{background:#F4F1EA;color:#1A1814}
 /* round 21 (G.2): the chip clear of the block's eyebrow: its pause sign alone (44 px), or inside the quiz's top corner */
 #ph .ga-chip.ga-icon{width:44px;padding:0;justify-content:center}#ph .ga-chip.ga-icon>span{display:none}
 #ph .kq>.ga-chip.ga-inside,#ph .poll>.ga-chip.ga-inside{top:8px;bottom:auto;right:8px}

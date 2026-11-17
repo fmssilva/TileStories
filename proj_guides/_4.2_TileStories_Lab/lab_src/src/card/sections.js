@@ -5,7 +5,7 @@ var SICON={info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',
  star:'<path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8-4.3-4.1 5.9-.8z"/>',chat:'<path d="M4 5h16v10H9l-5 4z"/>',ar:'<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/>'};
 function sicon(k,sz){return '<svg viewBox="0 0 24 24" width="'+(sz||18)+'" height="'+(sz||18)+'" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(SICON[k]||SICON.info)+'</svg>'}
 var SCOLOURS=[["about","Terracotta"],["stories","Wine"],["media","Azulejo Blue"],["listen","River Green"],["play","Brick Red"],["visit","Indigo"],["accent2","Accent"]];
-D.card.cardCfg={enabled:true,openAt:"half",halfMax:0.40,peekNext:false,tapOutside:true,mode:"light",layout:"scroll",topBand:"fade",audioOverlap:"fade",keepAudio:true};
+D.card.cardCfg={enabled:true,openAt:"half",halfMax:0.40,peekNext:false,tapOutside:true,layout:"scroll",topBand:"fade",audioOverlap:"fade",keepAudio:true};
 D.card.secCfg={look:"open",start:"tiles",divider:"none",colour:"section",intensity:0.12,tint:120,order:"sections"};
 D.card.sections=[
  {id:"about",name:T("About","Sobre"),icon:"info",colour:"about",shown:true,start:"inherit",kinds:["Header","Quick Facts","Status","Inline","Actions"]},
@@ -23,7 +23,9 @@ function secById(id){return byId(D.card.sections,id)}
 function secOfKind(kind){for(var i=0;i<D.card.sections.length;i++)if(D.card.sections[i].kinds.indexOf(kind)>=0)return D.card.sections[i].id;return D.card.sections[0].id}
 function grpOf(b){return b.grp&&b.grp!=="inherit"?b.grp:secOfKind(b.kind)}
 function eff(b,k){var v=b[k];if(v&&v!=="inherit")return v;var d=(D.card.blockDefs[b.kind]||{})[k];if(k==="orow"&&(!d||d==="inherit"))return D.card.ctl.openrow;return d}
-function colVar(c){return "var(--"+c+")"}
+/* a section's colour key -> its token: a family of Unity's ten (listen is the guides, teal the AR family), or the accent */
+var SEC_TOKEN={listen:"family-guides",teal:"family-ar",accent2:"accent"};
+function colVar(c){return "var(--ts-"+(SEC_TOKEN[c]||"family-"+c)+")"}
 function sectionStart(sec){var st=startOf(sec);if(D.card.secCfg.look!=="open"||st==="plain"||st==="fade")return "";
   var id=st==="tiles"?"e_tiles":st==="wave"?"e_wave":st==="arches"?"e_arches":st==="skyline"?"e_skyline":st,f=effectById(id),rv=D.card.secCfg.motion==="reveal"&&!P.reduce?" rv":"";
   if(st==="own")return '<div class="sstart'+rv+'" style="margin:0 -20px 10px">'+ownStrip()+'</div>';
@@ -34,20 +36,20 @@ function cardRuns(){var vis=function(id){return shownOnCard(secById(id))};
   return pipe("cardRuns.runs",D.card.sections.filter(function(s){return vis(s.id)}).map(function(s){return{sec:s,blocks:D.poi.card.filter(function(b){return grpOf(b)===s.id})}}))}
 function cardScreen(){emitLatestFirst("cardScreen.before");var t=LAB.test.on&&LAB.test.poi==="painting",h='<div class="chrome"><i title="'+TXH("close")+'">&#10005;</i><i title="'+TXH("visitor_settings")+'">&#9776;</i></div><div class="hero" style="background-image:url('+IMG.hero+')"><div class="w"><small>'+esc(L(UI.where))+'</small><h2>The Ribeira Palace</h2><p>'+esc(L(UI.line))+'</p></div></div>';
   cardRuns().forEach(function(run,si){var sec=run.sec,bl=run.blocks;if(!bl.length&&!(si===0&&t))return;
-    var col=colVar(sec.colour),tint=D.card.secCfg.look==="open"&&D.card.secCfg.colour!=="neutral"?"linear-gradient(to bottom, color-mix(in srgb,"+(D.card.secCfg.colour==="accent"?"var(--accent2)":col)+" "+Math.round(D.card.secCfg.intensity*100)+"%, transparent) 0, transparent "+D.card.secCfg.tint+"px)":"none";
-    h+='<div class="gsec item" data-ref="sec:'+sec.id+'" style="--fam:'+col+';--famtint:color-mix(in srgb,'+col+' 8%,transparent);background:'+tint+(D.card.secCfg.look==="cards"?";margin:12px;border-radius:18px;background:var(--box)":"")+'">'+sectionStart(sec)+'<div class="ey" style="color:'+(D.card.secCfg.colour==="neutral"?"var(--ink2)":D.card.secCfg.colour==="accent"?"var(--accent2)":col)+'">'+esc(L(sec.name))+'</div>';
+    var col=colVar(sec.colour),tint=D.card.secCfg.look==="open"&&D.card.secCfg.colour!=="neutral"?"linear-gradient(to bottom, color-mix(in srgb,"+(D.card.secCfg.colour==="accent"?"var(--ts-accent)":col)+" "+Math.round(D.card.secCfg.intensity*100)+"%, transparent) 0, transparent "+D.card.secCfg.tint+"px)":"none";
+    h+='<div class="gsec item" data-ref="sec:'+sec.id+'" style="--fam:'+col+';--famtint:color-mix(in srgb,'+col+' 8%,transparent);background:'+tint+(D.card.secCfg.look==="cards"?";margin:12px;border-radius:18px;background:var(--ts-surface-2)":"")+'">'+sectionStart(sec)+'<div class="ey" style="color:'+(D.card.secCfg.colour==="neutral"?"var(--ts-ink-2)":D.card.secCfg.colour==="accent"?"var(--ts-accent)":col)+'">'+esc(L(sec.name))+'</div>';
     if(si===0&&t)h+=testTile();
     bl.forEach(function(b,i){if(i>0&&D.card.secCfg.divider!=="none"){var dv=effectById(D.card.secCfg.divider);if(dv)h+=lineSvg(dv)}h+=blockPreview(b,i)});h+='</div>'});
   return pipe("cardScreen.html",h+'<div style="height:60px"></div>');}
 function navbar(){var c=D.card.ctl.bar,vis=D.card.sections.filter(shownOnBar),n=+c.more,act=vis.some(function(s){return s.id===ui.activeSec})?ui.activeSec:vis[0]&&vis[0].id,items=vis,more=false;
   if(vis.length>n){items=vis.slice(0,n-1);more=true}
-  var h=items.map(function(s){var chosen=s.id===act,sc=colVar(s.colour),cc=c.chosenColour==="accent"?"var(--accent2)":c.chosenColour==="ink"?"var(--ink1)":sc,col=c.iconColour==="section"?sc:c.iconColour==="accent"?"var(--accent2)":"var(--ink2)";
+  var h=items.map(function(s){var chosen=s.id===act,sc=colVar(s.colour),cc=c.chosenColour==="accent"?"var(--ts-accent)":c.chosenColour==="ink"?"var(--ts-ink)":sc,col=c.iconColour==="section"?sc:c.iconColour==="accent"?"var(--ts-accent)":"var(--ts-ink-2)";
     var icon=sicon(s.icon,18);if(chosen)icon=icon.replace('stroke-width="1.8"','stroke-width="2.5"');
     var disc=chosen&&c.indicator==="raised"&&c.chosenIcon==="filled"?'<em style="display:grid;place-items:center;width:'+(30+10*c.depth)+'px;height:'+(30+10*c.depth)+'px;border-radius:50%;background:'+cc+';color:#fff;margin-top:-'+(14*c.depth)+'px;box-shadow:0 4px 10px rgba(0,0,0,.2)">'+icon+'</em>':
       chosen&&c.indicator==="raised"?'<em style="display:grid;place-items:center;margin-top:-'+(14*c.depth)+'px;color:'+cc+'">'+icon+'</em>':chosen&&c.chosenIcon==="filled"&&c.indicator!=="none"?'<em style="display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:'+cc+';color:#fff">'+icon+'</em>':icon;
     var lab=c.labels==="icon"||(c.labels==="chosen"&&!chosen)?"":'<b style="font-weight:'+(chosen?800:600)+'">'+esc(L(s.name))+'</b>';
     return '<span data-navsec="'+s.id+'" aria-label="'+esc(L(s.name))+'" style="color:'+(chosen?cc:col)+';'+(chosen&&c.indicator==="underline"?"border-bottom:2px solid "+cc+";padding-bottom:3px":"")+(chosen&&c.indicator==="pill"?"background:color-mix(in srgb,"+cc+" 14%,transparent);border-radius:999px;padding:4px 8px":"")+'">'+(c.labels!=="text"?disc:"")+lab+'</span>'}).join("");
-  if(more)h+='<span data-navmore="1" aria-label="More" style="color:var(--ink2)">'+(c.labels!=="text"?DOTS:"")+(c.labels==="both"||c.labels==="text"?"<b>"+TXH("nav_more")+"</b>":"")+'</span>';
+  if(more)h+='<span data-navmore="1" aria-label="More" style="color:var(--ts-ink-2)">'+(c.labels!=="text"?DOTS:"")+(c.labels==="both"||c.labels==="text"?"<b>"+TXH("nav_more")+"</b>":"")+'</span>';
   return h}
 on("renderPhone.after",function(keep){var nb=document.getElementById("navbar"),c=D.card.ctl.bar;
   nb.style.display=ui.view==="card"&&c.on?"":"none";nb.style.top=c.pos==="top"?"58px":"";nb.style.bottom=c.pos==="top"?"auto":"";nb.style.alignItems="center";nb.style.paddingBottom="0";

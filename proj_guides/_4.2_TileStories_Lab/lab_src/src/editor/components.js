@@ -1,7 +1,7 @@
 /* The Editor's Blocks & Components part: element styles, motions, interactions, effects, patterns and the library, with their thumbnails, demos and fields (edCardV3). */
 function noBtn(h){return h.replace(/<button/g,"<span").replace(/<\/button>/g,"</span>")}
-function thumb(kind,style,cls){return noBtn('<div class="thumb'+(cls?" "+cls:"")+' cv'+(P.dark?" dark":"")+'"><div class="tin">'+renderEl(kind,style,{},0,true)+'</div></div>')}
-function patThumb(p,cls){return noBtn('<div class="thumb tall'+(cls?" "+cls:"")+' cv'+(P.dark?" dark":"")+'"><div class="tin">'+p.rows.map(function(r){return renderEl(r.kind,styleById(r.style)||defStyle(r.kind),{},0,true)}).join("")+'</div></div>')}
+function thumb(kind,style,cls){return noBtn('<div class="thumb'+(cls?" "+cls:"")+' cv '+themeClasses()+'"><div class="tin">'+renderEl(kind,style,{},0,true)+'</div></div>')}
+function patThumb(p,cls){return noBtn('<div class="thumb tall'+(cls?" "+cls:"")+' cv '+themeClasses()+'"><div class="tin">'+p.rows.map(function(r){return renderEl(r.kind,styleById(r.style)||defStyle(r.kind),{},0,true)}).join("")+'</div></div>')}
 
 /* ---------- motion, interaction demos ---------- */
 function pathBadge(id){var p=PATH[id]||"bld";return '<span class="mpath">'+({nat:"NATIVE",bld:"BUILD",imp:"IMPORT"}[p])+'</span>'}
@@ -79,7 +79,7 @@ function edCardV3(){var h='';
   b+=fo("interaction","Interaction",["new","NEW"],ib,2);
   /* Effects */
   var eb='<div class="note">The Look Kit. Edges shape the start of a section or a divider; line dividers sit between parts. A Divider element picks one of these.</div>';
-  [["edge","Edges"],["line","Line dividers"],["light","Light"],["moving","Moving"]].forEach(function(gp){var inner="";D.blocks.effects.filter(function(f){return f.grp===gp[0]&&matchQ(f.name)}).forEach(function(f){var o=f.o,fb='<div class="thumb cv'+(P.dark?" dark":"")+'" style="height:auto;padding:4px 0">'+(f.grp==="edge"?edgeSvg(f):f.grp==="line"?lineSvg(f):"")+'</div>';
+  [["edge","Edges"],["line","Line dividers"],["light","Light"],["moving","Moving"]].forEach(function(gp){var inner="";D.blocks.effects.filter(function(f){return f.grp===gp[0]&&matchQ(f.name)}).forEach(function(f){var o=f.o,fb='<div class="thumb cv '+themeClasses()+'" style="height:auto;padding:4px 0">'+(f.grp==="edge"?edgeSvg(f):f.grp==="line"?lineSvg(f):"")+'</div>';
      if(o.h!=null&&f.grp==="edge")fb+=row("Height (pt)",slider("fx.h",12,80,1,o.h),"",true);
      if(o.colour)fb+=row("Colour",seg("fx.colour",["family","accent","neutral"],["Family colour","Accent","Neutral"],o.colour),"",true);
      if(f.id==="x_fade")fb+=row("Height (pt)",slider("fx.h",20,160,1,o.h),"",true);if(f.id==="x_tone")fb+=row("Spread",slider("fx.spread",0.4,1.5,0.05,o.spread),"Its strength stays automatic.",true);if(f.id==="x_drift")fb+=row("Speed (pt/s)",slider("fx.speed",2,40,1,o.speed),"",true);
@@ -99,7 +99,7 @@ function edCardV3(){var h='';
       if(K.k==="carousel"&&st.o.layout==="one")sb+=row("Transition",sel("style.turn",motionOpts("transition",false).filter(function(x){return x[0]!=="none"}),st.turn||"t_slide"),"How one picture gives way to the next.",true);
       if(MEDIA[K.k]&&K.k!=="carousel")sb+=row("With the scroll",sel("style.scroll",motionOpts("scroll",false),st.scroll||"none"),"Parallax, a slow zoom or growing in.",true);
       var u2=styleUses(st.id);sb+='<div class="btnrow"><button class="ubtn sm" type="button" data-def="'+st.id+'"'+(st.def?" disabled":"")+'>&#9733; Make default</button><button class="ubtn sm" type="button" data-add="style">+ Add style (copy)</button><button class="del" type="button" data-del="style" data-id="'+st.id+'" '+(u2||st.def?"disabled":"")+'>Delete</button></div>';}
-    inner+=fo("el:"+K.k,'<span class="foth cv'+(P.dark?" dark":"")+'"><span class="tin" style="display:block">'+renderEl(K.k,d,{},0,true)+'</span></span><span class="kicon'+(cat==="Media"?" m":cat==="Structure"?" s":cat==="Interactive"?" p":"")+'">'+K.ab+'</span>'+esc(K.n)+' <span class="sub">· '+sts.length+' style'+(sts.length>1?"s":"")+'</span>',null,cards+sb,9,ui.sel.layer==="style"&&ui.sel.kind===K.k)});
+    inner+=fo("el:"+K.k,'<span class="foth cv '+themeClasses()+'"><span class="tin" style="display:block">'+renderEl(K.k,d,{},0,true)+'</span></span><span class="kicon'+(cat==="Media"?" m":cat==="Structure"?" s":cat==="Interactive"?" p":"")+'">'+K.ab+'</span>'+esc(K.n)+' <span class="sub">· '+sts.length+' style'+(sts.length>1?"s":"")+'</span>',null,cards+sb,9,ui.sel.layer==="style"&&ui.sel.kind===K.k)});
     if(inner)elb+=fo("eg:"+cat,cat,null,inner,3)});
   b+=fo("elements","Elements",["new","NEW"],elb,2);
   /* Patterns */
@@ -121,7 +121,7 @@ function edCardV3(){var h='';
 function libThumb(name){var ans=firstAnswer("libThumb.answer",name);if(ans!==undefined)return ans;var k={"Header":["picture","st17"],"Inline":["callout","st28"],"Story":["picture","st16"],"Quick Facts":["swatches","st42"],"Timeline":["timeline","st41"],"Gallery":["carousel","st20"],"Before and After":["before_after","st35"],"Hotspot Image":["hotspot","st36"],"Video":["video","st21"],"3D Model":["model_3d","st37"],"360 Panorama":["panorama","st38"],"Audio Guide":["audio","st32"],"Wall Locator":["map","st40"],"Today Map":["map","st40"],"Compare Points":["picture_pair","st19"],"Related":["picture_pair","st19"],"Sources":["list","st14"],"Contents":["list","st15"],"Practical Info":["list","st14"]}[name]||["callout","st11"];
   return thumb(k[0],styleById(k[1]))}
 function mv2(kind,i){return'<button class="del" type="button" data-'+kind+'="'+i+'" data-dir="-1">^</button> <button class="del" type="button" data-'+kind+'="'+i+'" data-dir="1">v</button> <button class="del" type="button" data-'+kind+'="'+i+'" data-dir="0">&#128465;</button>'}
-function cardThumb(b){var h=noBtn(blockPreview(b,0)).replace(/class="mv pre[^"]*"/g,'class=""').replace(/data-go="[^"]*"/g,"");return '<div class="thumb sm cv'+(P.dark?" dark":"")+'" style="width:72px;height:44px"><div class="tin" style="transform:scale(.21)">'+h+'</div></div>'}
+function cardThumb(b){var h=noBtn(blockPreview(b,0)).replace(/class="mv pre[^"]*"/g,'class=""').replace(/data-go="[^"]*"/g,"");return '<div class="thumb sm cv '+themeClasses()+'" style="width:72px;height:44px"><div class="tin" style="transform:scale(.21)">'+h+'</div></div>'}
 function fieldsFor(kind,c,path){var f=FIELDS[kind]||[],h='<div class="fields">';if(!f.length)return '<span class="uses">No content: the element draws from its style (and the wall\'s data).</span>';
   f.forEach(function(x){var key=x[0],type=x[1],lab=x[2],v=c[key];
    if(type==="ltext"){v=v||{en:"",pt:""};langCodes().forEach(function(lg){h+=row(lab+" · "+lg.toUpperCase(),'<textarea class="u" rows="2" data-field="'+path+'|'+key+'|'+lg+'">'+esc(v[lg]||"")+'</textarea>',lg==="en"?"One per language; empty in PT falls back to EN.":"")})}

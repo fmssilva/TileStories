@@ -1,0 +1,210 @@
+{
+ "agent/agent.css": {
+  "colours": 17,
+  "small_type": 7
+ },
+ "agent/scenes.css": {
+  "colours": 5,
+  "small_type": 2
+ },
+ "audiences/audiences.css": {
+  "colours": 13,
+  "small_type": 4
+ },
+ "audiences/lenses.css": {
+  "colours": 0,
+  "small_type": 2
+ },
+ "card/blocks.css": {
+  "colours": 37,
+  "small_type": 26
+ },
+ "card/blocks.js": {
+  "colours": 1,
+  "small_type": 0
+ },
+ "card/card-base.css": {
+  "colours": 43,
+  "small_type": 15
+ },
+ "card/controls.css": {
+  "colours": 4,
+  "small_type": 7
+ },
+ "card/controls.js": {
+  "colours": 1,
+  "small_type": 0
+ },
+ "card/effects.js": {
+  "colours": 3,
+  "small_type": 1
+ },
+ "card/elements.css": {
+  "colours": 9,
+  "small_type": 3
+ },
+ "card/elements.js": {
+  "colours": 7,
+  "small_type": 0
+ },
+ "card/hero.css": {
+  "colours": 14,
+  "small_type": 2
+ },
+ "card/hints.css": {
+  "colours": 6,
+  "small_type": 0
+ },
+ "card/sections.js": {
+  "colours": 20,
+  "small_type": 1
+ },
+ "card/states.css": {
+  "colours": 21,
+  "small_type": 1
+ },
+ "core/assets.js": {
+  "colours": 5,
+  "small_type": 0
+ },
+ "core/base.css": {
+  "colours": 162,
+  "small_type": 33
+ },
+ "guidance/editor.css": {
+  "colours": 135,
+  "small_type": 32
+ },
+ "guidance/editor.js": {
+  "colours": 3,
+  "small_type": 0
+ },
+ "guidance/present.css": {
+  "colours": 201,
+  "small_type": 9
+ },
+ "guidance/present.js": {
+  "colours": 4,
+  "small_type": 0
+ },
+ "guide/autotour.css": {
+  "colours": 12,
+  "small_type": 7
+ },
+ "guide/controls.css": {
+  "colours": 14,
+  "small_type": 0
+ },
+ "guide/demo-hand.css": {
+  "colours": 9,
+  "small_type": 0
+ },
+ "guide/dock.css": {
+  "colours": 209,
+  "small_type": 8
+ },
+ "guide/dock.js": {
+  "colours": 4,
+  "small_type": 0
+ },
+ "guide/focus.css": {
+  "colours": 11,
+  "small_type": 1
+ },
+ "guide/game-ask.css": {
+  "colours": 21,
+  "small_type": 0
+ },
+ "guide/hero-start.css": {
+  "colours": 14,
+  "small_type": 0
+ },
+ "guide/highlight.css": {
+  "colours": 15,
+  "small_type": 0
+ },
+ "guide/mascot-profile.css": {
+  "colours": 0,
+  "small_type": 1
+ },
+ "guide/panel-look.css": {
+  "colours": 143,
+  "small_type": 0
+ },
+ "guide/readalong.css": {
+  "colours": 2,
+  "small_type": 1
+ },
+ "guide/saved-place.css": {
+  "colours": 6,
+  "small_type": 0
+ },
+ "guide/teleprompter.css": {
+  "colours": 8,
+  "small_type": 2
+ },
+ "guide/tell-more.css": {
+  "colours": 24,
+  "small_type": 3
+ },
+ "guide/tour-end.css": {
+  "colours": 39,
+  "small_type": 3
+ },
+ "guide/tour-scroll.css": {
+  "colours": 8,
+  "small_type": 0
+ },
+ "guide/tour.css": {
+  "colours": 28,
+  "small_type": 2
+ },
+ "guide/voice-test.css": {
+  "colours": 2,
+  "small_type": 0
+ },
+ "mascot/azu2d.css": {
+  "colours": 3,
+  "small_type": 0
+ },
+ "mascot/azu2d.js": {
+  "colours": 49,
+  "small_type": 0
+ },
+ "mascot/azu3d.css": {
+  "colours": 0,
+  "small_type": 1
+ },
+ "mascot/models.css": {
+  "colours": 1,
+  "small_type": 0
+ },
+ "mascot/tile-styles.css": {
+  "colours": 1,
+  "small_type": 1
+ },
+ "phone/grabber.css": {
+  "colours": 1,
+  "small_type": 0
+ },
+ "phone/sheet.css": {
+  "colours": 18,
+  "small_type": 5
+ },
+ "screen/screen.css": {
+  "colours": 4,
+  "small_type": 0
+ },
+ "world/camera-ask.css": {
+  "colours": 25,
+  "small_type": 2
+ },
+ "world/guide-button.css": {
+  "colours": 16,
+  "small_type": 4
+ },
+ "world/guide-button.js": {
+  "colours": 5,
+  "small_type": 0
+ }
+}

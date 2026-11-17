@@ -27,7 +27,7 @@ const url = labUrl('#probe');
   if (process.env.MUTATE) { await R('var gdCheck0=gdCheck;gdCheck=function(it,items,v,ctx,now){if(it.kind==="fun"&&ctx.tour)ctx=Object.assign({},ctx,{tour:Object.assign({},ctx.tour,{paused:true})});return gdCheck0(it,items,v,ctx,now)}'); console.log('MUTATION: Fun is let through during a tour (the hold removed)'); }
   // the device voice, muted: its words go on by time, the same on every run; the guidance quiet unless a check asks for it
   const base = 'D.card.hints.on=false;LAB.previewBar=false;P.lang="en";P.guideMute=true;P.introSeen=true;P.reduce=false;D.guide.voice="device";D.guide.panel="dock";D.guide.dockStart="mini";D.guide.miniCtl="pausestop";D.guide.captions=true;D.guide.pWords="prompter";D.guide.pBars=true;D.guide.pSpeed=true;D.guide.chips=true;D.guide.speed=1;P.vis.speed=null;D.guidance.on=false;D.guide.music=false;P.vis.music=null;P.vis.musicVol=null;';
-  const tourAt = async (look, id, h, dark) => { await R(base + `P.dark=${!!dark};D.card.cardCfg.mode=${dark ? '"dark"' : '"light"'};D.guide.look="${look}";if(G.on)stopTour();ui.view="card";ui.stop="full";renderAll(false);startTour();var j=D.tour.guideSteps.findIndex(function(s){return s.id==="${id}"});if(j>0){stopSpeech();G.i=j;runStep()}ui.dockH="${h || 'mini'}";renderGuide()`); await W(300);
+  const tourAt = async (look, id, h, dark) => { await R(base + `P.vis.mode="${(!!dark) ? 'dark' : 'phone'}";D.wall.theme.mode=${dark ? '"dark"' : '"light"'};D.guide.look="${look}";if(G.on)stopTour();ui.view="card";ui.stop="full";renderAll(false);startTour();var j=D.tour.guideSteps.findIndex(function(s){return s.id==="${id}"});if(j>0){stopSpeech();G.i=j;runStep()}ui.dockH="${h || 'mini'}";renderGuide()`); await W(300);
     // round 22: the tour reaches its block as a visitor would (an eased scroll, the hand's travel): the panel is measured once it has landed
     await until('!tsBusy()&&!G.trav&&!DH.job&&performance.now()>=(G.autoScrollTill||0)', 6000); await W(400); };
 
@@ -50,7 +50,7 @@ const url = labUrl('#probe');
     await tourAt(L, 'g5', 'peek', dark); const op = await audit('open');
     ok(`${L} ${dark ? 'dark' : 'light'} · Open: speed, previous, play, next, stop, the bar, the time, the words, Aa, Read all, the questions, ask (typed and by voice), inside, 0 px over the words told and its own words, 44 px, 4.5:1`, op.inside && !op.parts.length && op.form && op.over === 0 && op.self === 0 && !op.small.length && op.cr.every(v => v >= 4.5), op);
   }
-  await R('if(G.on)stopTour();P.dark=false;D.card.cardCfg.mode="light";renderAll(false)');
+  await R('if(G.on)stopTour();P.vis.mode="phone";D.wall.theme.mode="light";renderAll(false)');
   tsec('looks');
 
   // ---------- 2. the speed chip: seven steps, the voice's rate follows ----------
