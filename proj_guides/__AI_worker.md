@@ -123,6 +123,55 @@ Final report:
 - anything open;
 - one commit message.
 
+## `And now (parallel, read only): Lab prep -- the design review, best of both Labs (prepares P3-P6), proj_guides\_4.2_Lab_Merge_Plan.md`
+GATE: Lab, READ ONLY. It runs beside the P1b.2 builder (the section above, which edits `src/`). If the Architect's prompt names this section, it is your brief.
+
+**The developer's goal:** the merged app's design is **premium, minimalist, immersive, 3D, "wow" and modern**, combining the best of the two prototypes. This review says how, screen by screen and part by part, with captures as proof. Nothing is built here: it feeds P3 (components), P4 (screens), P5 (media) and P6 (blocks), and the developer sees it before anything is built.
+
+**Files:**
+- Write `proj_guides/_4.2_TileStories_Lab/lab_src/DESIGN_REVIEW.md` (a new doc, version 0) and its images in `proj_guides/_4.2_TileStories_Lab/design_review/`, both new.
+- Scratch goes in your folder.
+- Never edit `src/`, tests, tools or other docs. Make no git writes.
+
+**What to read first:**
+- `_4.2_Lab_Merge_Plan.md` §1-5, above all calls 6, 7, 9 and 10. In short: W's App design wins; the dark is W's warm dark and navy; the rule decides sizes.
+- `lab_src/THEME_MAP.md`, `lab_src/COMPONENT_MAP.md`.
+- `proj_guides/skills/Feature_Prototyping.md` 3.2: the production paths and the UI Toolkit limits.
+- The memory rule "Lab features must be Unity-buildable": no CSS-only effect; name each effect's Unity path.
+
+**Captures, both Labs, real pixels.** Do not judge from code.
+- **The App prototype (W, frozen):** `proj_guides/_4.1.2_Prototype/World_Editor_Lab.html`, through its `lab_src/tools/review/state_shots.py`. Usage is in its docstring; profiles are `prem:d:m` style. Take every state: onboarding, main, the filter, settings, you, the tapped card layouts, soon.
+- **The TileStories Lab (B):**
+  - Build a copy of `git archive HEAD` in your scratch folder (`npm install`, `python build.py`).
+  - Capture it with its `tools/review/state_shots.py` / `section_shots.py` at `LAB_PORT=8644`. Ports 8642 and 8643 are in use.
+  - Take the wall, Explore, the card at peek / half / full and scrolled through its sections and blocks, Settings, the dock in a tour, Who's exploring, and the guide's pages.
+- **The profiles:** Premium / Playful × light / dark, text M and L, phone portrait. Add one tablet cell per screen.
+- Make **side-by-side sheets** (W | B) for each pair of matching screens and parts.
+
+WHAT THE REVIEW HOLDS (acceptance):
+1. **Per screen and per part, a verdict with its image:** W better / B better / both have something.
+   - Each verdict says what exactly is better, in design terms: hierarchy, one focal point, spacing, type, colour, depth, motion, density, touch targets and contrast.
+   - The result is "the best of both" for that part. Never either / or: merge every good choice (memory: framework merges all good options).
+2. **The "wow" layer:** concrete proposals for premium, minimal, immersive, 3D and modern.
+   - The areas to cover: depth and layers, glass and light over the camera, Azu in 3D and where he lives, motion and transitions, the hero photo, the wall's 3D objects and the card's 3D block, sound and haptics cues.
+   - Each proposal names where it appears and its production path:
+     - Native;
+     - Build, with its rough mobile cost;
+     - Import;
+     - Browser-only, which is rejected.
+   - Respect the UI Toolkit limits: no blur, no gradients, one text-shadow, no 3D transforms, no z-index. The world content may use 3D, glow and gradients.
+3. **The issues found:** every clipped, overlapping, low-contrast, off-token or inconsistent spot, each with its image and the round that should fix it (P3 / P4 / P5 / P6).
+4. **The priorities:** the 10 changes with the most effect on "premium wow", each sized and placed in a round.
+5. **Questions for the developer:** each with what it changes, in plain words, and a recommendation.
+
+WORKER MODEL: Opus. SUBAGENTS: read-only (Sonnet) for the captures if useful.
+
+**Final report:**
+- the review's summary: the verdict counts and the top 10;
+- the paths of the 6-8 most telling side-by-side sheets;
+- the questions;
+- anything that blocks.
+
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`
 Before you start executing and implementing things, perform a critical review of the project on disk, and prepare a granular blueprint for the given tasks to be done. For that do the following: 
