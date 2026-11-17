@@ -19,107 +19,77 @@
 So start by reading them all. 
 
 
-## `And now: Lab round -- merge P1a.2 (router, devices, shot tools, first publish), proj_guides\_4.2_Lab_Merge_Plan.md`
+## `And now: Lab round -- merge P1b.1 (the theme on Unity's tokens: the table, its test, the looks, one dark mode), proj_guides\_4.2_Lab_Merge_Plan.md`
 GATE: Lab.
-- The Lab: `proj_guides/_4.2_TileStories_Lab/lab_src`. Read `PROTOTYPE_STRUCTURE.md`, `README.md` and `STATE_MAP.md` in full.
+- The Lab: `proj_guides/_4.2_TileStories_Lab/lab_src`. Read `PROTOTYPE_STRUCTURE.md`, `README.md`, `STATE_MAP.md` and **`THEME_MAP.md` in full**: the map is this round's spec. Its §5 recommendations are accepted as written; §1.1 (Unity's values win) is the developer's call (plan §5, call 6).
 - `npm install` is done; `python build.py` must show every check at 0.
 - No git writes: the Architect reviews and commits.
 
-Domain spec, read ALL lines: `proj_guides/_4.2_Lab_Merge_Plan.md` (§1-3, §5), then the "P1a.2" row of its table.
+Domain spec, read ALL lines: `proj_guides/_4.2_Lab_Merge_Plan.md` (§1-3, §5), then the "P1b" row of its table. P1b is split in two rounds: this one (P1b.1) and P1b.2 (the profile model, the one bar, the Editor kit).
 
 REQUIRED READING:
-- `proj_guides/skills/Feature_Prototyping.md` step 3 (the round's cycle and the test tiers);
-- `.clinerules/00-process.md` Shared Core Rules (no shims);
-- `.clinerules/30-ui-content.md` ("every core feature must work without the camera").
+- `proj_guides/skills/Feature_Prototyping.md` step 3 (the round's cycle and the test tiers), step 5 (one home per feature, no wrappers);
+- `.clinerules/00-process.md` Shared Core Rules (no shims, no aliases);
+- `.clinerules/30-ui-content.md` (sizes, contrast, the 13 pt minimum);
+- Unity: `TileStories/Assets/Framework/Runtime/UI/Theme/` (`ThemeAsset.cs`, `ThemeController`, `Generated/Theme.default.uss`), `Framework/Runtime/Resources/TileStories/Themes/Theme.default.asset`, `Framework/Editor/Theme/ThemeUssGenerator.cs`, and the theme tests in `Framework/Tests/Editor/UI/Theme/` (read only).
 
-Port FROM the frozen World Lab (`proj_guides/_4.1.2_Prototype/lab_src`, read only):
-- `js/12_device.js`;
-- its device buttons;
-- `tools/review/state_shots.py`, `section_shots.py`, `inventory.py`.
-
-WORKER MODEL: Opus + effort High. This round brings a new shared owner (the router) and rewires the phone shell.
+WORKER MODEL: Opus + effort High. Shared ground: every module's colours.
 
 SUBAGENTS: read-only audits only (Sonnet).
 
 TEST PLAN:
-- No opening baseline: P1a.1 closed green on CORE.
-- The Architect runs the FULL tier on a `git worktree` at `LAB_PORT=8643`. **While the flag file `C:\Users\franc\AppData\Local\Temp\claude\40339de5183b80ad\2bab6f8c-33fb-4cd2-9e78-7d5d95377279\scratchpad\FULL_RUNNING` exists, run no test, self-test or shot tool**; `build.py` is fine. Do the code, look and docs first.
-- The round closes on CORE (self-test every walk `bad=0`, then `node run_tests.js --core`). Its new test files join the core set.
+- No opening baseline: P1a.2 closed green on CORE (`4bd31ba`), and the FULL at `78ea86f` is reviewed.
+- Shared ground, so the round closes on **CORE**: the self-test over every walk `bad=0`, then `node run_tests.js --core`. The round's new test files join the core set.
+- One test file at a time; each has a 10-minute limit.
 
 WHAT (acceptance):
-1. **Events.** `configChanged` (D), `profileChanged` (P) and `screenChanged`, emitted once each where they happen, through `core/ext.js`. Existing listeners convert only when touched.
-2. **The router** (`src/screen/`, Unity: the UI Toolkit screen stack):
-   - a screen registry, `go` / `back`, an overlay stack, and action views registered by key;
-   - every screen change goes through it;
-   - the wall, the card sheet, Settings and the guide's overlays become its screens and overlays, looking exactly as today.
-3. **The non-AR path.** An **Explore** screen without the camera: a list of the points that have a card → their card → a tour from the card works there.
-   - It is reached from the wall and from a "No camera" preview switch.
-   - It is built from the existing parts, not designed now.
-4. **Devices.** W's four devices replace `SCREENS`:
+1. **The token table.**
+   - `D.theme` in the ThemeAsset's shape (`defaultMode`, `shared`, `modes`, `knobs`, `type`). Its Unity home is in STATE_MAP. PROPOSED tokens are flagged `proposed: true`.
+   - One owner, `core/theme.js`. `applyTokens` writes the resolved table as class rules in one style element. It is regenerated on `configChanged`, so a mode or look switch swaps one class, as `ThemeController.SetMode` does.
+2. **The token test** (Node, no browser; it joins core):
+   - every non-proposed token equals Unity's, in light and dark;
+   - the 4 accents equal the asset's `knobs:`;
+   - every PROPOSED token is absent from the `.uss`, so the test says when Unity adds one;
+   - contrast is composed in linear light: body 7:1, other text 4.5:1.
+3. **The looks** are knob options on the table. Premium is the base; Playful is a `ThemeKnobOption` (map §5.3), with its own accent as a fifth measured accent option. The other knobs the looks change are knob options too: roundness, density, glass and motion level. The text step is P1b.2.
+4. **One dark mode.**
+   - There is one resolver and one class. The per-module dark settings go.
+   - The card's table (`--paper`, `--ink1`, `--ink2`, `--hair`, `--box`, `--accent2`, the section colours, `--bar`) is renamed straight to `var(--ts-…)`, with no alias layer.
+   - B's ten dark modes follow the map's verdicts (§2).
+   - The dock, beat, skin and chip colours keep their values for now under a **ratchet** in `build.py` that counts colour literals outside the theme; it only goes down (ported in P3).
+   - The phone font sizes this round touches come from the type tokens. A ratchet counts the phone sizes still under 13 pt.
+5. **The Editor:** every theme choice the author makes has its row with a demo, in the section the map names:
+   - the wall's default mode;
+   - its accent (swatch rows, a closed list);
+   - its look;
+   - the knobs.
 
-   | Device | Size |
-   |---|---|
-   | phone portrait | 390 × 844 |
-   | phone landscape | 844 × 390 |
-   | tablet portrait | 820 × 1180 |
-   | tablet landscape | 1180 × 820 |
-
-   - W's device buttons; B's preview-bar extras kept; `ui.device` in STATE_MAP.
-   - The card and the guide stay correct in all four. Layouts never designed for landscape or tablet are listed, not designed.
-5. **Profile-matrix shot tools in this Lab.**
-   - Rows: light / dark × text default / larger; looks join at P1b.
-   - Columns: the 4 devices.
-   - States: the wall, Explore, the card at peek / half / full, Settings, the dock in a tour.
-   - Sections: every Editor fold with a demo.
-6. **The first publish, prepared.**
-   - The page becomes "TileStories Lab" (`tilestories-lab.html` + `assets/`); the old record copy stays as a frozen reference.
-   - A publish list gives the files map and the total size: the page, `assets/`, the public voice packs (never `out-private`) and the music. Limits: 16 MB a file, 64 MB / 255 files a publish.
-   - The page's relative URLs work both from the server and from the published layout, proven from a temp folder. The Architect publishes.
+   Undo works on them. Free colours stay developer-only rows with a live contrast badge (map §4).
 
 LOOK:
-- Before and after captures of the wall, the card and the dock on phone portrait must be identical.
-- Judge the new device cells and Explore, light and dark. Fix anything broken (clipped, overlapping, unreadable); list what only needs design (P3 / P4).
+- The matrix is now Premium / Playful × light / dark × text default / L, over the 4 devices.
+- The states are the wall, Explore, the card at peek / half / full, Settings and the dock in a tour, plus the Editor's theme section.
+- Before / after: this round changes what the visitor sees (Unity's values, sizes up to 13 pt). List each visible difference with its reason; anything else that differs is a bug.
+- Fix what is broken (clipped, overlapping, unreadable, under contrast). List what only needs design for P3.
 
 TESTS (real input, each with `MUTATE=1`):
-- the router: order, back, overlays, one `screenChanged` per change;
-- the non-AR path, end to end, until the guide speaks a line;
-- each device's size and orientation, with the card's stops;
-- the publish layout: the page, a GLB, a voice line and a music track load.
+- the token test;
+- switching mode and look by real clicks changes the phone through one class, and no module keeps a colour of its own for it;
+- an Editor accent or look change reaches the phone, and Undo returns it.
 
-DOCS: PROTOTYPE_STRUCTURE (router rule, new modules), README (devices, Explore / No camera, shot tools, publish), STATE_MAP.
+DOCS:
+- PROTOTYPE_STRUCTURE: the theme rule (no literal colour, size, radius or duration in changed code; a missing token goes to the table, flagged PROPOSED) and the new module rows.
+- README: the themes, the token test, and that the Lab blends in sRGB while the test measures in linear light.
+- STATE_MAP: `D.theme`.
+- THEME_MAP: mark each row done or left for P3.
 
 OUT OF SCOPE:
-- tokens and looks (P1b);
+- the profile model, the one bar and the Editor kit (P1b.2);
 - the voice service (P2);
-- W's app screens (P4);
-- designing landscape or tablet.
+- components and the ratcheted colours (P3);
+- landscape and tablet design (P4).
 
-Stop when CORE is green, the new tests and mutations pass, the captures are judged and the publish list is ready. Final report: STEP 1's plan (short), the learning summaries, changes by area, test counts, capture paths with verdicts, the publish list and its size, anything open, and one commit message.
-
-## `And now (parallel, read only): Lab round -- prepare merge P1b (the theme map), proj_guides\_4.2_Lab_Merge_Plan.md`
-GATE: Lab, READ ONLY. It runs while the P1a.2 builder edits `src/`. If the Architect's prompt names this section, this is your brief; the section above is someone else's.
-- **Write one file only:** `proj_guides/_4.2_TileStories_Lab/lab_src/THEME_MAP.md` (a new doc, version 0), plus anything in your scratch folder. Never edit `src/`, tests, tools or other docs. No build, no tests, no git writes.
-- Note at its top the commit you audited (`git log -1`) and that P1a.2's uncommitted work was not included.
-
-Domain spec, read ALL lines: `proj_guides/_4.2_Lab_Merge_Plan.md` (§1-3, §5), then the "P1b" row of its table. Read also `lab_src/STATE_MAP.md` (the same kind of map, for state) and `.clinerules/00-process.md` "Framework Completeness".
-
-SOURCES:
-- **Unity's theme:** `TileStories/Assets/Framework/Runtime/UI/Theme/Generated/Theme.default.uss` (the 167 `--ts-*` tokens). Find what generates it (the ThemeAsset and its generator) and name the source of truth; P1b's test reads that.
-- **The merged Lab (B):** `lab_src/src/**` (CSS in the modules, `core/`, `card/block-looks.js`, `audiences/`, the dark modes, `editor/components.js` and `editor/shell.js`).
-- **The frozen World Lab (W), read only:** `proj_guides/_4.1.2_Prototype/lab_src` (`dsT` / `applyDS`, `ds.css`, the Premium / Playful looks, light / dark, the profiles, its Editor widgets, `tests/unity_lint.py`).
-
-WHAT THE MAP HOLDS (acceptance):
-1. **Tokens.** One row per `--ts-*` token: its name, kind (colour, size, radius, space, type, motion, shadow), light / dark values where they exist; the B literals or variables that mean it (with counts and files); W's equivalent. Then:
-   - B and W values with no `--ts-*` match, each with a verdict: map to an existing token, or a new token marked PROPOSED (with a name in the `--ts-*` scheme);
-   - `--ts-*` tokens neither Lab uses.
-2. **Looks and modes.** Which tokens change with Premium / Playful and with light / dark, from W. B's ten dark modes listed, what each changes, and how each becomes the one dark mode (merge every good choice, drop the bad with a one-line reason).
-3. **The profile model.** B's audiences and W's profiles as one model: Family → 7-11, Explorer / Expert → 12+, Expert forces the Deep time; text size; reduce motion. For each field: its root (`D` or `P`, as STATE_MAP), its Unity home, its default, and the one profile bar that sets it in the Lab.
-4. **The Editor kit.** Every Editor widget of B and of W (rows, foldouts, popups, tables, colour pickers, help): one inventory with a verdict per widget (same, merge, drop with reason) and the one kit P1b builds. Merge every good option, never either / or (memory: framework merges all good options).
-5. **What P1b's builder must decide**, each with a recommendation; and a rough size of P1b in files touched.
-
-Mark every guess "(guess)". WORKER MODEL: Opus. SUBAGENTS: read-only (Sonnet), for the big counts.
-
-Final report: the map's summary (token counts matched / PROPOSED / unused; the dark modes' verdicts; the profile fields; the kit verdicts), the open decisions with recommendations, and anything that blocks P1b.
+Stop when CORE is green, the new tests and mutations pass, the captures are judged and the docs are updated. Final report: STEP 1's plan (short), the learning summaries, changes by area, test counts and ratchet numbers, capture paths with verdicts and the list of visible differences, anything open, and one commit message.
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`
